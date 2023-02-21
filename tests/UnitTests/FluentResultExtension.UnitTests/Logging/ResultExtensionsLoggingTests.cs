@@ -5,7 +5,10 @@ namespace FluentResultExtensionTests.Logging;
 
 public class ResultExtensionsLoggingTests : BaseUnitTest
 {
-    public ResultExtensionsLoggingTests(ITestOutputHelper output) : base(output, LogEventLevel.Verbose) { }
+    public ResultExtensionsLoggingTests(ITestOutputHelper output) : base(output, LogEventLevel.Verbose)
+    {
+        ResultExtensions.SetLogger(_log);
+    }
 
     #region Result
 

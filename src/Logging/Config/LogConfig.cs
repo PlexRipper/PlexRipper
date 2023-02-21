@@ -58,7 +58,7 @@ public static class LogConfig
 
     public static Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
+        if (_testOutput is null)
         {
             return GetBaseConfiguration()
                 .WriteTo.File(

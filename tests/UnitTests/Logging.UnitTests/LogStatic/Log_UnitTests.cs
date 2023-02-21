@@ -1,10 +1,17 @@
-﻿using Serilog.Events;
+﻿using Autofac;
+using Logging.Interface;
+using Serilog.Events;
 
 namespace Logging.UnitTests;
 
-public class LogUnitTests : BaseUnitTest
+public class LogUnitTests : BaseUnitTest<LogUnitTests>
 {
-    public LogUnitTests(ITestOutputHelper output) : base(output, LogEventLevel.Verbose) { }
+    private ILog<LogUnitTests> log;
+
+    public LogUnitTests(ITestOutputHelper output) : base(output, LogEventLevel.Verbose)
+    {
+        log = LogManager.CreateLogInstance<LogUnitTests>(output, LogEventLevel.Verbose);
+    }
 
     [Fact]
     public void ShouldLogTheSetLogLevel_WhenLogLevelSetIsVerbose()
@@ -24,15 +31,15 @@ public class LogUnitTests : BaseUnitTest
     {
         var position = new { Latitude = 25, Longitude = 134 };
 
-        var verboseLogEvent = _log.Verbose("This is a verbose string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999,
+        var verboseLogEvent = log.Verbose("This is a verbose string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999,
             true);
-        var debugLogEvent = _log.Debug("This is a debug string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999, true);
-        var warningLogEvent = _log.Warning("This is a warning string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999,
+        var debugLogEvent = log.Debug("This is a debug string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999, true);
+        var warningLogEvent = log.Warning("This is a warning string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999,
             true);
-        var informationLogEvent = _log.Information("This is an information string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
+        var informationLogEvent = log.Information("This is an information string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
             position, 9999, true);
-        var errorLogEvent = _log.Error("This is an error string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999, true);
-        var fatalLogEvent = _log.Fatal("This is a fatal string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999, true);
+        var errorLogEvent = log.Error("This is an error string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999, true);
+        var fatalLogEvent = log.Fatal("This is a fatal string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999, true);
 
         verboseLogEvent.Level.ShouldBe(LogEventLevel.Verbose);
         debugLogEvent.Level.ShouldBe(LogEventLevel.Debug);
@@ -47,15 +54,15 @@ public class LogUnitTests : BaseUnitTest
     {
         var position = new { Latitude = 25, Longitude = 134 };
 
-        var verboseLogEvent = _log.Verbose("This is a verbose string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999,
+        var verboseLogEvent = log.Verbose("This is a verbose string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999,
             true);
-        var debugLogEvent = _log.Debug("This is a debug string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999, true);
-        var warningLogEvent = _log.Warning("This is a warning string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999,
+        var debugLogEvent = log.Debug("This is a debug string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999, true);
+        var warningLogEvent = log.Warning("This is a warning string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999,
             true);
-        var informationLogEvent = _log.Information("This is an information string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
+        var informationLogEvent = log.Information("This is an information string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
             position, 9999, true);
-        var errorLogEvent = _log.Error("This is an error string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999, true);
-        var fatalLogEvent = _log.Fatal("This is a fatal string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999, true);
+        var errorLogEvent = log.Error("This is an error string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999, true);
+        var fatalLogEvent = log.Fatal("This is a fatal string with a json object: {Position}, a number {Count}, a bool: {Boolean}", position, 9999, true);
 
         verboseLogEvent.GetClassName().ShouldBe(nameof(LogUnitTests));
         debugLogEvent.GetClassName().ShouldBe(nameof(LogUnitTests));

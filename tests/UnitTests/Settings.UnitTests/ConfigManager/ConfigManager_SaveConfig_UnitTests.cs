@@ -2,6 +2,7 @@
 using Autofac;
 using Environment;
 using FileSystem.Contracts;
+using Logging.Interface;
 using PlexRipper.Application;
 using PlexRipper.Settings;
 using Settings.Contracts;
@@ -26,6 +27,7 @@ public class ConfigManager_SaveConfig_UnitTests : BaseUnitTest<ConfigManager>
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
+            mock.Container.Resolve<ILog>(),
             mock.Container.Resolve<IFileSystem>(),
             mock.Container.Resolve<IDirectorySystem>(),
             mock.Container.Resolve<IPathProvider>(),

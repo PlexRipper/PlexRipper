@@ -3,7 +3,9 @@ using AutoMapper;
 using Logging.Interface;
 using PlexRipper.Data;
 using PlexRipper.WebAPI;
+using Serilog;
 using Serilog.Events;
+using Log = Logging.Log;
 
 namespace PlexRipper.BaseTests;
 
@@ -30,7 +32,7 @@ public class BaseUnitTest : IDisposable
         LogConfig.SetTestOutputHelper(output);
         LogManager.SetupLogging(logEventLevel);
         BogusExtensions.Setup();
-        _log = LogManager.CreateLogInstance(typeof(BaseUnitTest), logEventLevel);
+        _log = LogManager.CreateLogInstance(output, typeof(BaseUnitTest), logEventLevel);
     }
 
     #endregion
@@ -105,13 +107,20 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest where TUnitTestClass : 
 
     #region Constructors
 
-    protected BaseUnitTest(ITestOutputHelper output) : base(output)
+    protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Debug) : base(output, logEventLevel)
     {
         mock = AutoMock.GetStrict(builder =>
         {
             builder.RegisterInstance(MapperSetup.CreateMapper())
                 .As<IMapper>()
                 .SingleInstance();
+            builder.Register<ILogger>((_, _) =>
+            {
+                LogConfig.SetTestOutputHelper(output);
+                return LogConfig.GetLogger(logEventLevel);
+            }).SingleInstance();
+            builder.RegisterType<Log>().As<ILog>().SingleInstance();
+            builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();
         });
     }
 

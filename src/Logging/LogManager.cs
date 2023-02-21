@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using Logging.Interface;
 using Serilog.Core;
 using Serilog.Events;
+using Xunit.Abstractions;
 
 namespace Logging;
 
@@ -48,12 +49,26 @@ public static class LogManager
         return new Log<T>(LogConfig.GetLogger(logLevel));
     }
 
+    public static ILog<T> CreateLogInstance<T>(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug) where T : class
+    {
+        LogConfig.SetTestOutputHelper(output);
+        return new Log<T>(LogConfig.GetLogger(logLevel));
+    }
+
+
+
     /// <summary>
     /// Returns a new typed <see cref="ILog"/> instance.
     /// </summary>
     /// <returns></returns>
     public static ILog CreateLogInstance(Type classType, LogEventLevel logLevel = LogEventLevel.Debug)
     {
+        return new Log<Type>(LogConfig.GetLogger(logLevel), classType);
+    }
+
+    public static ILog CreateLogInstance(ITestOutputHelper output, Type classType, LogEventLevel logLevel = LogEventLevel.Debug)
+    {
+        LogConfig.SetTestOutputHelper(output);
         return new Log<Type>(LogConfig.GetLogger(logLevel), classType);
     }
 

@@ -1,10 +1,10 @@
 using Environment;
 using Logging.Enricher;
-using Logging.Theme;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting.Display;
+using Serilog.Sinks.Console.LogThemes;
 using Xunit.Abstractions;
 
 namespace Logging;
@@ -38,7 +38,7 @@ public static class LogConfig
             .Enrich.FromLogContext()
             .Enrich.With<ExternalFrameworkEnricher>()
             .WriteTo.Debug(outputTemplate: Template)
-            .WriteTo.Console(theme: CustomLogThemes.ColoredDarkAnsi, outputTemplate: Template);
+            .WriteTo.Console(theme: LogThemes.SystemColored, outputTemplate: Template);
     }
 
     #endregion

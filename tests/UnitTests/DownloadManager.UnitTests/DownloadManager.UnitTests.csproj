@@ -8,8 +8,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1"/>
-		<PackageReference Include="xunit" Version="2.4.2"/>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+		<PackageReference Include="xunit" Version="2.4.2" />
 		<PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
@@ -21,12 +21,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\src\DownloadManager\DownloadManager.csproj"/>
-		<ProjectReference Include="..\..\BaseTests\BaseTests.csproj"/>
+		<ProjectReference Include="..\..\..\src\DownloadManager\DownloadManager.csproj" />
+		<ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<Compile Include="..\..\..\src\Domain\GlobalUsings.cs"/>
-		<Compile Include="..\..\BaseTests\GlobalTestsUsings.cs"/>
+		<Compile Include="..\..\..\src\Domain\GlobalUsings.cs" />
+		<Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
 	</ItemGroup>
 
 </Project>

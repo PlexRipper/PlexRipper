@@ -9,8 +9,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1"/>
-		<PackageReference Include="xunit" Version="2.4.2"/>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+		<PackageReference Include="xunit" Version="2.4.2" />
 		<PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -18,17 +18,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\src\Settings\Settings.csproj"/>
-		<ProjectReference Include="..\..\BaseTests\BaseTests.csproj"/>
+		<ProjectReference Include="..\..\..\src\Settings\Settings.csproj" />
+		<ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Remove="MockData\ValidJsonSettings.json"/>
+		<None Remove="MockData\ValidJsonSettings.json" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Include="..\..\..\src\Domain\GlobalUsings.cs"/>
-		<Compile Include="..\..\BaseTests\GlobalTestsUsings.cs"/>
+		<Compile Include="..\..\..\src\Domain\GlobalUsings.cs" />
+		<Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
 	</ItemGroup>
 
 </Project>

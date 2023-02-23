@@ -15,15 +15,14 @@ namespace PlexRipper.BaseTests;
 /// </summary>
 public class PlexMockServer : IDisposable
 {
-    private readonly ILog _log;
+    private readonly ILog _log = LogManager.CreateLogInstance<PlexMockServer>();
     private readonly PlexMockServerConfig _config;
     private readonly Action<PlexApiDataConfig> _fakeDataConfig;
 
     #region Constructor
 
-    public PlexMockServer(ILog log, Action<PlexMockServerConfig> options = null) : this(PlexMockServerConfig.FromOptions(options))
+    public PlexMockServer(Action<PlexMockServerConfig> options = null) : this(PlexMockServerConfig.FromOptions(options))
     {
-        _log = log;
     }
 
     public PlexMockServer(PlexMockServerConfig options = null)

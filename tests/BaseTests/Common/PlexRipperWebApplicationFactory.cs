@@ -56,11 +56,6 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
                 //  autoFacBuilder.RegisterGeneric(typeof(Logger<>)).As(typeof(ILogger<>)).SingleInstance();
             });
 
-        // Source: https://www.strathweb.com/2021/05/the-curious-case-of-asp-net-core-integration-test-deadlock/
-        // var host = builder.Build();
-        // Task.Run(() => host.StartAsync()).GetAwaiter().GetResult();
-        // return host;
-
         try
         {
             return base.CreateHost(builder);

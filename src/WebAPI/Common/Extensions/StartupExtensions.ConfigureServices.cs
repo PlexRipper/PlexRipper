@@ -73,8 +73,9 @@ public static partial class StartupExtensions
     {
         // Controllers and Json options
         services
-            .AddControllers()
-            .AddJsonOptions(JsonSerializerOptionsWebApi.Config);
+            .AddControllers();
+            // TODO This breaks WebApplication factory by receiving empty JSON body in API integration testing
+           // .AddJsonOptions(JsonSerializerOptionsWebApi.Config);
 
         // Customise default API behaviour
         services.AddHttpContextAccessor();
@@ -111,8 +112,8 @@ public static partial class StartupExtensions
             configure.Title = "PlexRipper Swagger API";
 
             // This disables Newtonsoft and enables System.Text.Json
-            configure.SerializerSettings = null;
-            configure.SerializerOptions = DefaultJsonSerializerOptions.ConfigBase;
+            // configure.SerializerSettings = null;
+            // configure.SerializerOptions = DefaultJsonSerializerOptions.ConfigBase;
 
             // Automatic makes each property required, this avoids unnecessary nullable types for Typescript classes
             configure.SchemaType = SchemaType.Swagger2;

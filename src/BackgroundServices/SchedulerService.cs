@@ -9,7 +9,7 @@ public class SchedulerService : ISchedulerService
 {
     #region Fields
 
-    private readonly ILog _log;
+    private readonly ILog<SchedulerService> _log;
     private readonly IScheduler _scheduler;
     private readonly IAllJobListener _allJobListener;
 
@@ -17,7 +17,7 @@ public class SchedulerService : ISchedulerService
 
     #region Constructors
 
-    public SchedulerService(ILog log, IScheduler scheduler, IAllJobListener allJobListener)
+    public SchedulerService(ILog<SchedulerService> log, IScheduler scheduler, IAllJobListener allJobListener)
     {
         _log = log;
         _scheduler = scheduler;

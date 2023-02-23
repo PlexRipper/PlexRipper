@@ -1,3 +1,4 @@
+using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 using PlexRipper.WebAPI.Common;
@@ -22,10 +23,14 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
 
         var plexAccount = FakeData.GetPlexAccount(4347564).Generate();
         var plexAccountDTO = Container.Mapper.Map<PlexAccountDTO>(plexAccount);
+       // var plexAccountDTOJson = JsonSerializer.Serialize(plexAccountDTO);
 
-        // Act
+
+
+       // Act
         var response = await Container.ApiClient.PostAsJsonAsync(ApiRoutes.Account.PostCreateAccount, plexAccountDTO);
         var resultDTO = await response.Deserialize<PlexAccountDTO>();
+        resultDTO.IsSuccess.ShouldBeTrue();
         var result = Container.Mapper.Map<Result<PlexAccountDTO>>(resultDTO);
         await Container.SchedulerService.AwaitScheduler();
 

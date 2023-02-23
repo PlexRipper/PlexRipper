@@ -43,7 +43,7 @@ public partial class BaseContainer : IDisposable
     private BaseContainer(string memoryDbName, Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
     {
         _factory = new PlexRipperWebApplicationFactory<Startup>(memoryDbName, options, mockPlexApi);
-        ApiClient = _factory.CreateClient();
+        ApiClient = _factory.CreateDefaultClient();
 
         // Create a separate scope as not to interfere with tests running in parallel
         _services = _factory.Services;

@@ -96,7 +96,7 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected Uri SpinUpPlexServer(Action<PlexMockServerConfig> options = null)
     {
-        var mockServer = new PlexMockServer(_log, options);
+        var mockServer = new PlexMockServer(options);
         _plexMockServers.Add(mockServer);
         return mockServer.ServerUri;
     }

@@ -2,7 +2,7 @@
 	<!-- The "Are you sure" dialog -->
 	<v-col cols="12">
 		<v-dialog v-model="showDialog" :max-width="500" scrollable>
-			<v-card v-if="isConfirmationEnabled && progress === null">
+			<v-card v-if="isConfirmationEnabled">
 				<v-card-title> {{ $t('components.download-confirmation.header') }}</v-card-title>
 				<v-card-subtitle class="py-2">
 					<span>{{ $t('components.download-confirmation.description') }}</span> <br />

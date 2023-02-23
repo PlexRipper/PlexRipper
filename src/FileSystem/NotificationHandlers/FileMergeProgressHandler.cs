@@ -13,6 +13,6 @@ public class FileMergeProgressHandler : INotificationHandler<FileMergeProgressNo
 
     public async Task Handle(FileMergeProgressNotification notification, CancellationToken cancellationToken)
     {
-        await _signalRService.SendFileMergeProgressUpdate(notification.Progress);
+        await _signalRService.SendFileMergeProgressUpdateAsync(notification.Progress);
     }
 }

@@ -43,10 +43,6 @@
 			<HintPath>C:\Users\JasonL\.nuget\packages\shouldly\4.0.3\lib\netstandard2.0\Shouldly.dll</HintPath>
 		</Reference>
 	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="DownloadScheduler" />
-	</ItemGroup>
 	<ItemGroup>
 		<Compile Include="..\..\..\src\Domain\GlobalUsings.cs" />
 		<Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />

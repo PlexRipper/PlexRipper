@@ -31,7 +31,7 @@ public class AllJobListener : IAllJobListener
             PrimaryKey = data.Key ?? string.Empty,
             PrimaryKeyValue = Convert.ToInt32(data.Value ?? 0),
         };
-        await _signalRService.SendJobStatusUpdate(update);
+        await _signalRService.SendJobStatusUpdateAsync(update);
     }
 
     public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = new())
@@ -52,6 +52,6 @@ public class AllJobListener : IAllJobListener
             Status = JobStatus.Completed,
         };
 
-        await _signalRService.SendJobStatusUpdate(update);
+        await _signalRService.SendJobStatusUpdateAsync(update);
     }
 }

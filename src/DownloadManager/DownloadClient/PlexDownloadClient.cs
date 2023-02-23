@@ -27,6 +27,8 @@ public class PlexDownloadClient : IDisposable
     private readonly IServerSettingsModule _serverSettings;
 
     private IDisposable _downloadSpeedLimitSubscription;
+    private IDisposable _downloadWorkerTaskUpdate;
+    private IDisposable _downloadWorkerLog;
 
     #endregion
 
@@ -67,11 +69,6 @@ public class PlexDownloadClient : IDisposable
     }
 
     public DownloadTask DownloadTask { get; internal set; }
-
-    /// <summary>
-    /// The ClientId/DownloadTaskId is always the same id that is assigned to the <see cref="DownloadTask"/>.
-    /// </summary>
-    public int DownloadTaskId => DownloadTask.Id;
 
     #endregion
 
@@ -168,6 +165,8 @@ public class PlexDownloadClient : IDisposable
         _timeThreadContext.Dispose();
         ClearDownloadWorkers();
         _downloadSpeedLimitSubscription?.Dispose();
+        _downloadWorkerTaskUpdate?.Dispose();
+        _downloadWorkerLog?.Dispose();
     }
 
     #endregion
@@ -228,6 +227,10 @@ public class PlexDownloadClient : IDisposable
 
         await _mediator.Send(new UpdateDownloadTasksByIdCommand(new List<DownloadTask> { DownloadTask }));
 
+        await _mediator.Publish(new DownloadTaskUpdated(DownloadTask));
+
+        _log.Debug("{@DownloadTask}", DownloadTask.ToString());
+
         if (statusIsChanged)
         {
             await _mediator.Publish(new DownloadStatusChanged(
@@ -260,13 +263,14 @@ public class PlexDownloadClient : IDisposable
         }
 
         // On download worker update
-        _downloadWorkers
+        _downloadWorkerTaskUpdate = _downloadWorkers
             .Select(x => x.DownloadWorkerTaskUpdate)
-            .CombineLatest()
+            .Merge()
+            .Buffer(TimeSpan.FromSeconds(1))
             .SubscribeAsync(OnDownloadWorkerTaskUpdate);
 
         // Download Worker Log subscription
-        _downloadWorkers
+        _downloadWorkerLog = _downloadWorkers
             .Select(x => x.DownloadWorkerLog)
             .Merge()
             .Buffer(TimeSpan.FromSeconds(1))

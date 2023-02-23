@@ -95,7 +95,7 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
         {
             var checkStatusProgress = _mapper.Map<ServerConnectionCheckStatusProgress>(progress);
             checkStatusProgress.PlexServerConnection = plexServerConnection;
-            await _signalRService.SendServerConnectionCheckStatusProgress(checkStatusProgress);
+            await _signalRService.SendServerConnectionCheckStatusProgressAsync(checkStatusProgress);
         }
 
         // Request status
@@ -125,6 +125,6 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
     /// <param name="progress"></param>
     private async Task SendServerProgress(InspectServerProgress progress)
     {
-        await _signalRService.SendServerInspectStatusProgress(progress);
+        await _signalRService.SendServerInspectStatusProgressAsync(progress);
     }
 }

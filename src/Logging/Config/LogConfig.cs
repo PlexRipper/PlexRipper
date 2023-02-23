@@ -31,7 +31,6 @@ public static class LogConfig
     public static LoggerConfiguration GetBaseConfiguration()
     {
         return new LoggerConfiguration()
-            .MinimumLevel.Verbose()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
             .MinimumLevel.Override("Quartz", LogEventLevel.Information)
@@ -74,9 +73,9 @@ public static class LogConfig
 
         // Test Logger
         return GetBaseConfiguration()
-            .MinimumLevel.Is(minimumLogLevel)
             .WriteTo.TestOutput(_testOutput, TemplateTextFormatter, minimumLogLevel)
             .WriteTo.TestCorrelator(minimumLogLevel)
+            .MinimumLevel.Is(minimumLogLevel)
             .CreateLogger();
     }
 }

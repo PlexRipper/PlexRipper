@@ -1,13 +1,24 @@
-﻿using BackgroundServices.Contracts;
+﻿using System.Collections.Concurrent;
+using AutoMapper;
+using BackgroundServices.Contracts;
+using PlexRipper.WebAPI.Common.DTO;
 using WebAPI.Contracts;
 
 namespace PlexRipper.BaseTests;
 
 public class MockSignalRService : ISignalRService
 {
+    private readonly IMapper _mapper;
+    public BlockingCollection<DownloadTaskDTO> DownloadTaskUpdate { get; } = new();
+
+    public MockSignalRService(IMapper mapper)
+    {
+        _mapper = mapper;
+    }
+
     public void SendLibraryProgressUpdate(LibraryProgress libraryProgress) { }
 
-    public Task SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true)
+    public Task SendLibraryProgressUpdateAsync(int id, int received, int total, bool isRefreshing = true)
     {
         return Task.CompletedTask;
     }
@@ -17,39 +28,45 @@ public class MockSignalRService : ISignalRService
         return Task.CompletedTask;
     }
 
-    public void SendDownloadTaskUpdate(DownloadTask downloadTask) { }
+    public Task SendDownloadTaskUpdateAsync(DownloadTask downloadTask, CancellationToken cancellationToken = default)
+    {
+        var downloadTaskDTO = _mapper.Map<DownloadTaskDTO>(downloadTask);
+        DownloadTaskUpdate.Add(downloadTaskDTO, cancellationToken);
 
-    public Task SendFileMergeProgressUpdate(FileMergeProgress fileMergeProgress)
+        return Task.CompletedTask;
+    }
+
+    public Task SendFileMergeProgressUpdateAsync(FileMergeProgress fileMergeProgress)
     {
         return Task.CompletedTask;
     }
 
-    public Task SendNotification(Notification notification)
+    public Task SendNotificationAsync(Notification notification)
     {
         return Task.CompletedTask;
     }
 
-    public Task SendServerInspectStatusProgress(InspectServerProgress progress)
+    public Task SendServerInspectStatusProgressAsync(InspectServerProgress progress)
     {
         return Task.CompletedTask;
     }
 
-    public Task SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress)
+    public Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress)
     {
         return Task.CompletedTask;
     }
 
-    public Task SendDownloadProgressUpdate(int plexServerId, List<DownloadTask> downloadTasks)
+    public Task SendDownloadProgressUpdateAsync(int plexServerId, List<DownloadTask> downloadTasks)
     {
         return Task.CompletedTask;
     }
 
-    public Task SendServerConnectionCheckStatusProgress(ServerConnectionCheckStatusProgress progress)
+    public Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress)
     {
         return Task.CompletedTask;
     }
 
-    public Task SendJobStatusUpdate(JobStatusUpdate jobStatusUpdate)
+    public Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate)
     {
         return Task.CompletedTask;
     }

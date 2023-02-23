@@ -69,7 +69,7 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
 
     private void SetMockedDependencies(ContainerBuilder builder)
     {
-        builder.RegisterType<MockSignalRService>().As<ISignalRService>();
+        builder.RegisterType<MockSignalRService>().As<ISignalRService>().SingleInstance();
 
         if (_mockPlexApi is not null)
         {

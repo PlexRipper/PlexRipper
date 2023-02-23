@@ -28,6 +28,8 @@ public static partial class StartupExtensions
             services.SetupOpenApiDocumentation();
 
         services.AddOptions();
+
+        services.AddHttpClient();
     }
 
     public static void SetupTestConfigureServices(IServiceCollection services, IWebHostEnvironment env)
@@ -35,6 +37,7 @@ public static partial class StartupExtensions
         services.SetupCors();
         services.SetupControllers();
         services.AddOptions();
+        services.AddHttpClient();
     }
 
     public static void SetupCors(this IServiceCollection services)

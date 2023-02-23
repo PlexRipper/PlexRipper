@@ -23,7 +23,8 @@ public class DownloadWorker : IDisposable
 
     private readonly Subject<DownloadWorkerTask> _downloadWorkerUpdate = new();
 
-    private readonly ILog _log;
+    private readonly ILog<DownloadWorker> _log;
+
     private readonly IDownloadFileStream _downloadFileSystem;
 
     private readonly RestClient _httpClient;
@@ -46,14 +47,16 @@ public class DownloadWorker : IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="DownloadWorker"/> class.
     /// </summary>
+    /// <param name="log"></param>
     /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
     /// <param name="downloadFileSystem">The filesystem used to store the downloaded data.</param>
-    /// <param name="httpClient"></param>
+    /// <param name="httpClientFactory"></param>
     public DownloadWorker(
-        ILog log,
+        ILog<DownloadWorker> log,
         DownloadWorkerTask downloadWorkerTask,
         IDownloadFileStream downloadFileSystem,
-        System.Net.Http.HttpClient httpClient)
+        IHttpClientFactory httpClientFactory
+    )
     {
         _log = log;
         _downloadFileSystem = downloadFileSystem;
@@ -64,7 +67,8 @@ public class DownloadWorker : IDisposable
             MaxTimeout = 10000,
             ThrowOnAnyError = false,
         };
-        _httpClient = new RestClient(httpClient, options);
+
+        _httpClient = new RestClient(httpClientFactory.CreateClient(), options);
 
         _timer.Elapsed += (_, _) => { DownloadWorkerTask.ElapsedTime += (long)_timer.Interval; };
     }

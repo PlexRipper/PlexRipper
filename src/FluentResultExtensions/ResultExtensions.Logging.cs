@@ -136,6 +136,9 @@ public static partial class ResultExtensions
 
         if (e != null)
             LogByType(logLevel, string.Empty, e, memberName, sourceFilePath);
+
+        if (!result.Errors.Any())
+            LogByType(logLevel, "Something failed but no errors were available in the result", null, memberName, sourceFilePath);
     }
 
     #endregion

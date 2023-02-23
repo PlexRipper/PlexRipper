@@ -38,7 +38,7 @@ public partial class Log : ILog
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogEvent Debug<T>(
         string messageTemplate,
-        T propertyValue = default!,
+        T propertyValue,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!)

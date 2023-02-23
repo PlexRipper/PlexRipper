@@ -65,7 +65,7 @@ public class PlexLibraryService : IPlexLibraryService
         void SendProgress(int index, int count)
         {
             progressAction?.Invoke(new LibraryProgress(plexLibrary.Id, index, count));
-            _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, index, count);
+            _signalRService.SendLibraryProgressUpdateAsync(plexLibrary.Id, index, count);
         }
 
         // Request seasons and episodes for every tv show
@@ -154,7 +154,7 @@ public class PlexLibraryService : IPlexLibraryService
         void SendProgress(int index, int count)
         {
             progressAction?.Invoke(new LibraryProgress(plexLibrary.Id, index, count));
-            _signalRService.SendLibraryProgressUpdate(plexLibrary.Id, index, count);
+            _signalRService.SendLibraryProgressUpdateAsync(plexLibrary.Id, index, count);
         }
 
         SendProgress(0, 3);

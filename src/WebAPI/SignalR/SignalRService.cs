@@ -38,22 +38,22 @@ public class SignalRService : ISignalRService
 
     #region ProgressHub
 
-    public async Task SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true)
+    public async Task SendLibraryProgressUpdateAsync(int id, int received, int total, bool isRefreshing = true)
     {
         var libraryProgress = new LibraryProgress(id, received, total, isRefreshing);
         await _progressHub.Clients.All.LibraryProgress(libraryProgress);
     }
 
     /// <inheritdoc/>
-    public void SendDownloadTaskUpdate(DownloadTask downloadTask)
+    public async Task SendDownloadTaskUpdateAsync(DownloadTask downloadTask, CancellationToken cancellationToken = default)
     {
         var downloadTaskDTO = _mapper.Map<DownloadTaskDTO>(downloadTask);
-        _progressHub.Clients.All.DownloadTaskUpdate(downloadTaskDTO);
+        await _progressHub.Clients.All.DownloadTaskUpdate(downloadTaskDTO, cancellationToken);
     }
 
     #region DownloadProgress
 
-    public async Task SendDownloadProgressUpdate(int plexServerId, List<DownloadTask> downloadTasks)
+    public async Task SendDownloadProgressUpdateAsync(int plexServerId, List<DownloadTask> downloadTasks)
     {
         var downloadTasksDTO = _mapper.Map<List<DownloadProgressDTO>>(downloadTasks);
         var update = new ServerDownloadProgressDTO
@@ -67,25 +67,25 @@ public class SignalRService : ISignalRService
 
     #endregion
 
-    public async Task SendServerInspectStatusProgress(InspectServerProgress progress)
+    public async Task SendServerInspectStatusProgressAsync(InspectServerProgress progress)
     {
         var progressDTO = _mapper.Map<InspectServerProgressDTO>(progress);
         await _progressHub.Clients.All.InspectServerProgress(progressDTO);
     }
 
-    public async Task SendServerConnectionCheckStatusProgress(ServerConnectionCheckStatusProgress progress)
+    public async Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress)
     {
         var progressDTO = _mapper.Map<ServerConnectionCheckStatusProgressDTO>(progress);
         await _progressHub.Clients.All.ServerConnectionCheckStatusProgress(progressDTO);
     }
 
     /// <inheritdoc/>
-    public async Task SendFileMergeProgressUpdate(FileMergeProgress fileMergeProgress)
+    public async Task SendFileMergeProgressUpdateAsync(FileMergeProgress fileMergeProgress)
     {
         await _progressHub.Clients.All.FileMergeProgress(fileMergeProgress);
     }
 
-    public async Task SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress)
+    public async Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress)
     {
         await _progressHub.Clients.All.SyncServerProgress(syncServerProgress);
     }
@@ -94,11 +94,9 @@ public class SignalRService : ISignalRService
 
     #region NotificationHub
 
-    public async Task SendNotification(Notification notification)
+    public async Task SendNotificationAsync(Notification notification)
     {
         var notificationDto = _mapper.Map<NotificationDTO>(notification);
-
-        // _log.Debug("Sending notification: {MessageTypesNotification} => {@NotificationDto}", MessageTypes.Notification, notificationDto);
         await _notificationHub.Clients.All.Notification(notificationDto);
     }
 
@@ -106,7 +104,7 @@ public class SignalRService : ISignalRService
 
     #region JobStateNotification
 
-    public async Task SendJobStatusUpdate(JobStatusUpdate jobStatusUpdate)
+    public async Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate)
     {
         var jobStatusUpdateDto = _mapper.Map<JobStatusUpdateDTO>(jobStatusUpdate);
         await _progressHub.Clients.All.JobStatusUpdate(jobStatusUpdateDto);

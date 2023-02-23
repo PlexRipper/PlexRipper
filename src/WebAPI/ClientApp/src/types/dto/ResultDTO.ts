@@ -1,10 +1,10 @@
-import { Error, IReason, ISuccess } from '@dto/mainApi';
+import { Error, ReasonDTO, SuccessDTO } from '@dto/mainApi';
 
 export default interface ResultDTO<T = void> {
 	isFailed?: boolean;
 	isSuccess?: boolean;
-	reasons?: IReason[] | null;
+	reasons?: ReasonDTO[] | null;
 	errors?: Error[] | null;
-	successes?: ISuccess[] | null;
+	successes?: SuccessDTO[] | null;
 	value?: T;
 }

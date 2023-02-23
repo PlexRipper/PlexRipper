@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ByteSizeLib;
 using HttpClient.Contracts;
+using Logging.Interface;
 using RestSharp;
 using Timer = System.Timers.Timer;
 
@@ -22,6 +23,7 @@ public class DownloadWorker
 
     private readonly Subject<DownloadWorkerTask> _downloadWorkerUpdate = new();
 
+    private readonly ILog _log;
     private readonly IDownloadFileStream _downloadFileSystem;
 
     private readonly IPlexRipperHttpClient _httpClient;
@@ -48,11 +50,13 @@ public class DownloadWorker
     /// <param name="downloadFileSystem">The filesystem used to store the downloaded data.</param>
     /// <param name="httpClient"></param>
     public DownloadWorker(
+        ILog log,
         DownloadWorkerTask downloadWorkerTask,
         IDownloadFileStream downloadFileSystem,
         IPlexRipperHttpClient httpClient)
     {
         DownloadWorkerTask = downloadWorkerTask;
+        _log = log;
         _downloadFileSystem = downloadFileSystem;
         _httpClient = httpClient;
 
@@ -89,7 +93,7 @@ public class DownloadWorker
 
     public Result Start()
     {
-        Log.Debug($"Download worker {Id} start for {FileName}");
+        _log.Debug("Download worker with id: {Id} start for filename: {FileName}", Id, FileName, 0);
 
         // Create and check Filestream to which to download.
         var _fileStreamResult =
@@ -233,7 +237,7 @@ public class DownloadWorker
         if (errorResult.Errors.Any() && !errorResult.Errors[0].Metadata.ContainsKey(nameof(DownloadWorker) + "Id"))
             errorResult.Errors[0].Metadata.Add(nameof(DownloadWorker) + "Id", Id);
 
-        Log.Error($"Download worker {Id} with {FileName} had an error!");
+        _log.Error("Download worker {Id} with {FileName} had an error!", Id, FileName, 0);
         DownloadWorkerTask.DownloadStatus = DownloadStatus.Error;
 
         SendDownloadWorkerLog(NotificationLevel.Error, errorResult.ToString());
@@ -261,10 +265,10 @@ public class DownloadWorker
         if (DownloadWorkerTask.DownloadStatus == status)
             return;
 
-        var log = $"Download worker {Id} with {FileName} changed status to {status}";
-        Log.Debug(log);
+        _log.Debug("Download worker with id: {Id} and with filename: {FileName} changed status to {Status}", Id, FileName, status);
         DownloadWorkerTask.DownloadStatus = status;
-        SendDownloadWorkerLog(NotificationLevel.Information, log);
+        SendDownloadWorkerLog(NotificationLevel.Information,
+            $"Download worker with id: {Id} and with filename: {FileName} changed status to {status}");
         SendDownloadWorkerUpdate();
     }
 

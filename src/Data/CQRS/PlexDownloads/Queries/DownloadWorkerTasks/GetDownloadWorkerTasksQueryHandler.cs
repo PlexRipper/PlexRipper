@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -16,7 +17,7 @@ public class GetDownloadWorkerTasksByDownloadTaskIdQueryValidator : AbstractVali
 public class GetDownloadWorkerTasksByDownloadTaskIdQueryHandler : BaseHandler,
     IRequestHandler<GetAllDownloadWorkerTasksByDownloadTaskIdQuery, Result<List<DownloadWorkerTask>>>
 {
-    public GetDownloadWorkerTasksByDownloadTaskIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public GetDownloadWorkerTasksByDownloadTaskIdQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<List<DownloadWorkerTask>>> Handle(GetAllDownloadWorkerTasksByDownloadTaskIdQuery request, CancellationToken cancellationToken)
     {

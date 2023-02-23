@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -18,7 +19,7 @@ public class UpdatePlexLibraryByIdCommandValidator : AbstractValidator<UpdatePle
 
 public class UpdatePlexLibraryByIdCommandHandler : BaseHandler, IRequestHandler<UpdatePlexLibraryByIdCommand, Result<bool>>
 {
-    public UpdatePlexLibraryByIdCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public UpdatePlexLibraryByIdCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<bool>> Handle(UpdatePlexLibraryByIdCommand command, CancellationToken cancellationToken)
     {
@@ -33,7 +34,7 @@ public class UpdatePlexLibraryByIdCommandHandler : BaseHandler, IRequestHandler<
         }
         catch (Exception e)
         {
-            Log.Error(e.Message);
+            _log.Error(e);
             return Result.Fail(new ExceptionalError(e));
         }
     }

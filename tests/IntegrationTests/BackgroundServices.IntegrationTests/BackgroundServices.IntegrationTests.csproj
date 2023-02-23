@@ -1,14 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net7.0</TargetFramework>
+		<LangVersion>11</LangVersion>
 		<Nullable>enable</Nullable>
 
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
 		<PackageReference Include="xunit" Version="2.4.2" />
 		<PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -21,16 +22,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
+		<ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Include="..\..\..\src\Domain\GlobalUsings.cs">
-	    <Link>GlobalUsings.cs</Link>
-	  </Compile>
-	  <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs">
-	    <Link>GlobalTestsUsings.cs</Link>
-	  </Compile>
+		<Compile Include="..\..\..\src\Domain\GlobalUsings.cs">
+			<Link>GlobalUsings.cs</Link>
+		</Compile>
+		<Compile Include="..\..\BaseTests\GlobalTestsUsings.cs">
+			<Link>GlobalTestsUsings.cs</Link>
+		</Compile>
 	</ItemGroup>
 
 </Project>

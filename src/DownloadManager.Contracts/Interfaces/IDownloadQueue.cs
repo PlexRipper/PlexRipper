@@ -12,7 +12,6 @@ public interface IDownloadQueue : ISetup, IBusy
 
     Task<Result<DownloadTask>> CheckDownloadQueueServer(int plexServerId);
 
-
     /// <summary>
     ///  Determines the next downloadable <see cref="DownloadTask"/>.
     /// Will only return a successful result if a queued task can be found

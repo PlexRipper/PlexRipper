@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.PlexServers;
@@ -19,17 +20,18 @@ public class CreatePlexServerStatusCommandValidator : AbstractValidator<CreatePl
 
 public class CreatePlexServerStatusCommandHandler : BaseHandler, IRequestHandler<CreatePlexServerStatusCommand, Result<int>>
 {
-    public CreatePlexServerStatusCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public CreatePlexServerStatusCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<int>> Handle(CreatePlexServerStatusCommand command, CancellationToken cancellationToken)
     {
-        Log.Debug("Creating a new PlexServerStatus in the DB }");
+        _log.Debug("Creating a new PlexServerStatus {@Status} in the database for {ServerId} ", command.PlexServerStatus,
+            command.PlexServerStatus.PlexServerId);
 
         command.PlexServerStatus.PlexServer = null;
         command.PlexServerStatus.PlexServerConnection = null;
         await _dbContext.PlexServerStatuses.AddAsync(command.PlexServerStatus, cancellationToken);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await SaveChangesAsync(cancellationToken);
         await _dbContext.Entry(command.PlexServerStatus).GetDatabaseValuesAsync(cancellationToken);
 
         return Result.Ok(command.PlexServerStatus.Id);

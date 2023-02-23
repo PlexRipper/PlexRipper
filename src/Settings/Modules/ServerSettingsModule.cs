@@ -32,7 +32,7 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
         var settings = GetPlexServerSettings(plexServerSettings.MachineIdentifier);
         if (settings is not null)
         {
-            Log.Information($"A Server setting with {plexServerSettings.MachineIdentifier} already exists, will update now.");
+            _log.Information("A Server setting with {MachineIdentifier} already exists, will update now", plexServerSettings.MachineIdentifier);
             SetServerSettings(plexServerSettings);
         }
         else
@@ -118,7 +118,7 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
     {
         if (sourceSettings?.Data is null)
         {
-            Log.Warning($"Can not update settings module {Name} with source settings null");
+            _log.Warning("Can not update settings module {Name} with source settings null", Name);
             return GetValues();
         }
 

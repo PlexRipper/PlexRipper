@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -15,14 +16,14 @@ public class DeleteDownloadTaskByIdCommandValidator : AbstractValidator<DeleteDo
 
 public class DeleteDownloadTaskByIDHandler : BaseHandler, IRequestHandler<DeleteDownloadTasksByIdCommand, Result<bool>>
 {
-    public DeleteDownloadTaskByIDHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public DeleteDownloadTaskByIDHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<bool>> Handle(DeleteDownloadTasksByIdCommand command, CancellationToken cancellationToken)
     {
         var entities = await _dbContext.DownloadTasks.AsTracking().Where(x => command.DownloadTaskIds.Contains(x.Id)).ToListAsync(cancellationToken);
-        if (entities == null)
+        if (!entities.Any())
         {
-            Log.Warning($"No downloadTasks could be found with ids from [{command.DownloadTaskIds}]");
+            _log.Warning("No downloadTasks could be found with ids from [{@DownloadTaskIds}]", command.DownloadTaskIds);
             return Result.Ok(false);
         }
 

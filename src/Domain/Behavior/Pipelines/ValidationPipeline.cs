@@ -3,6 +3,7 @@
 namespace PlexRipper.Domain.Behavior.Pipelines;
 
 public class ValidationPipeline<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : IRequest<TResponse>
     where TResponse : ResultBase, new()
 {
     private readonly IValidator<TRequest> _compositeValidator;
@@ -17,7 +18,7 @@ public class ValidationPipeline<TRequest, TResponse> : IPipelineBehavior<TReques
         _compositeValidator = compositeValidator;
     }
 
-    public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         var fluentValidationResult = await _compositeValidator.ValidateAsync(request, cancellationToken);
 

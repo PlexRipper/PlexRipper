@@ -1,6 +1,7 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 
 namespace PlexRipper.DownloadManager;
 
@@ -8,6 +9,7 @@ public class DownloadTaskValidator : IDownloadTaskValidator
 {
     #region Fields
 
+    private readonly ILog _log;
     private readonly IMediator _mediator;
 
     private readonly INotificationsService _notificationsService;
@@ -16,8 +18,9 @@ public class DownloadTaskValidator : IDownloadTaskValidator
 
     #region Constructor
 
-    public DownloadTaskValidator(IMediator mediator, INotificationsService notificationsService)
+    public DownloadTaskValidator(ILog log, IMediator mediator, INotificationsService notificationsService)
     {
+        _log = log;
         _mediator = mediator;
         _notificationsService = notificationsService;
     }
@@ -78,7 +81,9 @@ public class DownloadTaskValidator : IDownloadTaskValidator
             var downloadTask = downloadTasks[i];
 
             // Check validity
-            Log.Debug($"Validating DownloadTask {i + 1} of {downloadTasks.Count} with title {downloadTask.FullTitle}");
+            _log.Debug("Validating DownloadTask {Index} of {DownloadTasksCount} with title {DownloadTaskFullTitle}", i + 1, downloadTasks.Count.ToString(),
+                downloadTask.FullTitle, 0);
+
             var validationResult = validator.Validate(downloadTask).ToFluentResult();
             if (validationResult.IsFailed)
             {
@@ -88,7 +93,8 @@ public class DownloadTaskValidator : IDownloadTaskValidator
                 result.AddNestedErrors(validationResult.Errors);
             }
             else
-                Log.Information($"DownloadTask {i + 1} of {downloadTasks.Count} with title {downloadTask.FullTitle} was valid");
+                _log.Debug("DownloadTask {Index} of {DownloadTasksCount} with title {DownloadTaskFullTitle} was valid", i + 1, downloadTasks.Count.ToString(),
+                    downloadTask.FullTitle, 0);
         }
 
         // All download tasks failed validation
@@ -119,14 +125,14 @@ public class DownloadTaskValidator : IDownloadTaskValidator
         var validateResult = ValidateDownloadTasks(downloadTasks);
         if (validateResult.IsFailed)
         {
-            Log.Debug($"All {downloadTasks.Count} download tasks failed validation");
+            _log.Debug("All {DownloadTasksCount} download tasks failed validation", downloadTasks.Count);
             return validateResult.ToResult();
         }
 
         var existResult = await CheckIfDownloadTasksExist(validateResult.Value);
         if (existResult.IsFailed)
         {
-            Log.Debug($"All {downloadTasks.Count} download tasks are already added to the download list");
+            _log.Debug("All {DownloadTasksCount} download tasks are already added to the download list", downloadTasks.Count);
             return existResult.ToResult();
         }
 

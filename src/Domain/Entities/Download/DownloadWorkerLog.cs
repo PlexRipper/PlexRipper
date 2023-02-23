@@ -24,40 +24,4 @@ public class DownloadWorkerLog : BaseEntity
     public int DownloadWorkerTaskId { get; set; }
 
     #endregion
-
-    #region Helpers
-
-    public void Log()
-    {
-        switch (LogLevel)
-        {
-            case NotificationLevel.Verbose:
-                Logging.Log.Verbose(Message);
-                break;
-            case NotificationLevel.Debug:
-                Logging.Log.Debug(Message);
-                break;
-            case NotificationLevel.Information:
-                Logging.Log.Information(Message);
-                break;
-            case NotificationLevel.Warning:
-                Logging.Log.Warning(Message);
-                break;
-            case NotificationLevel.Error:
-                Logging.Log.Error(Message);
-                break;
-            case NotificationLevel.Fatal:
-                Logging.Log.Fatal(Message);
-                break;
-            case NotificationLevel.None:
-                break;
-            case NotificationLevel.Success:
-                break;
-            default:
-                Logging.Log.Information(Message);
-                break;
-        }
-    }
-
-    #endregion
 }

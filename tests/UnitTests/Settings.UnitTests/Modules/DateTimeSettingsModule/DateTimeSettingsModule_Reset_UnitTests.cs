@@ -4,10 +4,7 @@ namespace Settings.UnitTests.Modules;
 
 public class DateTimeSettingsModule_Reset_UnitTests : BaseUnitTest<DateTimeSettingsModule>
 {
-    public DateTimeSettingsModule_Reset_UnitTests(ITestOutputHelper output) : base(output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public DateTimeSettingsModule_Reset_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public void ShouldUpdateAndThenResetSettingsModule_WhenCallingResetAfterUpdate()

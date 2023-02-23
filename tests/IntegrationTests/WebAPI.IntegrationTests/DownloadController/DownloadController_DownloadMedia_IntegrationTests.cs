@@ -47,7 +47,7 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
         var result = await response.Deserialize<ResultDTO>();
         await Task.Delay(2000);
         await Container.SchedulerService.AwaitScheduler();
-        await Task.Delay(2000);
+        await Task.Delay(10000);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

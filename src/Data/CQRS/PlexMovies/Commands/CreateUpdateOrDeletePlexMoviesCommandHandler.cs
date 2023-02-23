@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -21,14 +22,14 @@ public class CreateUpdateOrDeletePlexMoviesValidator : AbstractValidator<CreateU
 
 public class CreateUpdateOrDeletePlexMoviesHandler : BaseHandler, IRequestHandler<CreateUpdateOrDeletePlexMoviesCommand, Result>
 {
-    public CreateUpdateOrDeletePlexMoviesHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public CreateUpdateOrDeletePlexMoviesHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result> Handle(CreateUpdateOrDeletePlexMoviesCommand command, CancellationToken cancellationToken)
     {
         var plexLibrary = command.PlexLibrary;
         var apiPlexMovies = plexLibrary.Movies;
 
-        Log.Debug($"Starting adding or updating movies in library: {plexLibrary.Title}");
+        _log.Debug("Starting adding or updating movies in library: {PlexLibraryTitle}", plexLibrary.Title);
         var stopWatch = new Stopwatch();
         stopWatch.Start();
 
@@ -75,14 +76,16 @@ public class CreateUpdateOrDeletePlexMoviesHandler : BaseHandler, IRequestHandle
 
         if (addCount == 0 && updateCount == 0 && deleteMovies.Count == 0)
         {
-            Log.Information($"No changes for library \"{plexLibrary.Title}\"");
+            _log.Information("No changes for library \"{PlexLibraryTitle}\"", plexLibrary.Title);
             return Result.Ok();
         }
 
         await SaveChangesAsync(cancellationToken);
 
-        Log.Debug($"Finished syncing plexLibrary: {plexLibrary.Title} with id: {plexLibrary.Id} in {stopWatch.Elapsed.TotalSeconds} seconds.");
-        Log.Debug($"Add count: {addCount}, Update count: {updateCount}, Delete count: {deleteMovies.Count}");
+        _log.Debug("Finished syncing plexLibrary: {PlexLibraryTitle} with id: {PlexLibraryId} in {TotalSeconds} seconds", plexLibrary.Title,
+            plexLibrary.Id, stopWatch.Elapsed.TotalSeconds);
+        _log.Debug("Add count: {AddCount}, Update count: {UpdateCount}, Delete count: {DeleteMoviesCount}", addCount, updateCount, deleteMovies.Count);
+
         return Result.Ok();
     }
 }

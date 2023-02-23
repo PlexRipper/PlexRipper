@@ -1,14 +1,34 @@
 using FluentResults;
+using Logging.Interface;
 using Quartz;
 
 namespace BackgroundServices.Contracts;
 
 public abstract class BaseScheduler
 {
+    #region Fields
+
+    protected readonly ILog _log;
+
     private readonly IScheduler _scheduler;
+
+    #endregion
+
+    #region Constructors
+
+    protected BaseScheduler(ILog log, IScheduler scheduler)
+    {
+        _log = log;
+        _scheduler = scheduler;
+    }
+
+    #endregion
+
+    #region Properties
 
     protected abstract JobKey DefaultJobKey { get; }
 
+    #endregion
 
     protected JobKey GetJobKey(int id)
     {
@@ -42,12 +62,6 @@ public abstract class BaseScheduler
     protected async Task<bool> StopJob(JobKey key)
     {
         return await _scheduler.Interrupt(key);
-    }
-
-
-    protected BaseScheduler(IScheduler scheduler)
-    {
-        _scheduler = scheduler;
     }
 
     protected async Task<Result> ScheduleJob(IJobDetail jobDetail, ITrigger trigger, CancellationToken cancellationToken = default)

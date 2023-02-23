@@ -1,12 +1,12 @@
 using System.Reflection;
-using System.Text.Json.Serialization;
+using Environment;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
-using NSwag;
+using NJsonSchema;
 using NSwag.Generation.Processors.Security;
 using PlexRipper.Application;
-using PlexRipper.WebAPI.Config;
+using PlexRipper.Domain.Config;
 
 namespace PlexRipper.WebAPI.Common.Extensions;
 
@@ -24,7 +24,9 @@ public static partial class StartupExtensions
 
         services.SetupSignalR();
 
-        services.SetupOpenApiDocumentation();
+        if (!EnvironmentExtensions.IsIntegrationTestMode())
+            services.SetupOpenApiDocumentation();
+
         services.AddOptions();
     }
 
@@ -71,8 +73,9 @@ public static partial class StartupExtensions
     {
         // Controllers and Json options
         services
-            .AddControllers()
-            .AddJsonOptions(JsonSerializerOptionsWebApi.Config);
+            .AddControllers();
+            // TODO This breaks WebApplication factory by receiving empty JSON body in API integration testing
+           // .AddJsonOptions(JsonSerializerOptionsWebApi.Config);
 
         // Customise default API behaviour
         services.AddHttpContextAccessor();
@@ -96,23 +99,29 @@ public static partial class StartupExtensions
     public static void SetupSignalR(this IServiceCollection services)
     {
         // SignalR
-        services.AddSignalR().AddJsonProtocol(options => { options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+        services
+            .AddSignalR()
+            .AddJsonProtocol(options => options.PayloadSerializerOptions = DefaultJsonSerializerOptions.ConfigBase);
     }
 
     public static void SetupOpenApiDocumentation(this IServiceCollection services)
     {
-        services.AddOpenApiDocument(configure =>
+        services.AddSwaggerDocument(configure =>
         {
             configure.GenerateEnumMappingDescription = true;
-            configure.Title = "PlexRipper API";
-            configure.AddSecurity("JWT", Enumerable.Empty<string>(), new OpenApiSecurityScheme
-            {
-                Type = OpenApiSecuritySchemeType.ApiKey,
-                Name = "Authorization",
-                In = OpenApiSecurityApiKeyLocation.Header,
-                Description = "Type into the text box: Bearer {your JWT token}.",
-            });
+            configure.Title = "PlexRipper Swagger API";
+
+            // This disables Newtonsoft and enables System.Text.Json
+            // configure.SerializerSettings = null;
+            // configure.SerializerOptions = DefaultJsonSerializerOptions.ConfigBase;
+
+            // Automatic makes each property required, this avoids unnecessary nullable types for Typescript classes
+            configure.SchemaType = SchemaType.Swagger2;
+
             configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
+
+            // Unreferenced DTO's in the API can be added here such that the front-end can generate Typescript class from it.
+            // Useful for SignalR types
             configure.DocumentProcessors.Add(new NSwagAddExtraTypes());
         });
     }

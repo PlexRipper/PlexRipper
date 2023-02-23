@@ -1,3 +1,4 @@
+using Environment;
 using PlexRipper.WebAPI.SignalR.Hubs;
 
 namespace PlexRipper.WebAPI.Common.Extensions;
@@ -11,9 +12,13 @@ public static partial class StartupExtensions
         app.UseCors(CORSConfiguration);
 
         app.UseAuthorization();
+        if (!EnvironmentExtensions.IsIntegrationTestMode())
+        {
+            app.UseOpenApi(); // serve OpenAPI/Swagger documents
+            app.UseSwaggerUi3(); // serve Swagger UI
+            app.UseReDoc(configure => configure.Path = "/redoc");
+        }
 
-        app.UseOpenApi(); // serve OpenAPI/Swagger documents
-        app.UseSwaggerUi3(); // serve Swagger UI
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();

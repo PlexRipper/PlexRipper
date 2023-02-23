@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;
@@ -18,11 +19,11 @@ public class CreatePlexAccountCommandValidator : AbstractValidator<CreatePlexAcc
 
 public class CreateAccountHandler : BaseHandler, IRequestHandler<CreatePlexAccountCommand, Result<int>>
 {
-    public CreateAccountHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public CreateAccountHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<int>> Handle(CreatePlexAccountCommand command, CancellationToken cancellationToken)
     {
-        Log.Debug("Creating a new Account in DB");
+        _log.Debug("Creating a new Account in DB", 0);
 
         await _dbContext.PlexAccounts.AddAsync(command.PlexAccount, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);

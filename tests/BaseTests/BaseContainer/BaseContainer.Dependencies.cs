@@ -8,13 +8,12 @@ using DownloadManager.Contracts;
 using Environment;
 using FileSystem.Contracts;
 using HttpClient.Contracts;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using PlexApi.Contracts;
-using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.DownloadManager;
-using PlexRipper.HttpClient;
 using PlexRipper.WebAPI;
 using Settings.Contracts;
 
@@ -32,6 +31,8 @@ public partial class BaseContainer : IDisposable
 
     private readonly IServiceProvider _services;
 
+    private static ILog _log;
+
     #endregion
 
     #region Constructor
@@ -42,18 +43,24 @@ public partial class BaseContainer : IDisposable
     private BaseContainer(string memoryDbName, Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
     {
         _factory = new PlexRipperWebApplicationFactory<Startup>(memoryDbName, options, mockPlexApi);
-        ApiClient = _factory.CreateClient();
+        ApiClient = _factory.CreateDefaultClient();
 
         // Create a separate scope as not to interfere with tests running in parallel
         _services = _factory.Services;
         _serviceScope = _factory.Services.CreateScope();
     }
 
-    public static async Task<BaseContainer> Create(string memoryDbName, int seed = 0, Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
+    public static async Task<BaseContainer> Create(
+        ILog log,
+        string memoryDbName,
+        int seed = 0,
+        Action<UnitTestDataConfig> options = null,
+        MockPlexApi mockPlexApi = null)
     {
+        _log = log;
         var config = UnitTestDataConfig.FromOptions(options);
 
-        Log.Information($"Setting up BaseContainer with database: {memoryDbName}");
+        _log.Information("Setting up BaseContainer with database: {MemoryDbName}", memoryDbName);
 
         EnvironmentExtensions.SetIntegrationTestMode(true);
 
@@ -109,6 +116,8 @@ public partial class BaseContainer : IDisposable
 
     public IDownloadTaskScheduler DownloadTaskScheduler => Resolve<IDownloadTaskScheduler>();
 
+    public TestLoggingClass TestLoggingClass => Resolve<TestLoggingClass>();
+
     public IMapper Mapper => Resolve<IMapper>();
 
     public IBoot Boot => Resolve<IBoot>();
@@ -136,7 +145,7 @@ public partial class BaseContainer : IDisposable
 
     public void Dispose()
     {
-        Log.Warning("Disposing Container");
+        _log.WarningLine("Disposing Container");
         PlexRipperDbContext.Database.EnsureDeleted();
         _services.GetAutofacRoot().Dispose();
         _factory?.Dispose();

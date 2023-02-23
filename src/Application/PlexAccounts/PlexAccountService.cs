@@ -1,29 +1,30 @@
 using Application.Contracts;
 using BackgroundServices.Contracts;
 using Data.Contracts;
+using Logging.Interface;
 using PlexApi.Contracts;
 
 namespace PlexRipper.Application.PlexAccounts;
 
 public class PlexAccountService : IPlexAccountService
 {
+    private readonly ILog _log;
     private readonly IMediator _mediator;
 
     private readonly IPlexApiService _plexApiService;
 
     private readonly IInspectServerScheduler _inspectServerScheduler;
-    private readonly IPlexServerService _plexServerService;
 
     public PlexAccountService(
+        ILog log,
         IMediator mediator,
-        IPlexServerService plexServerService,
         IPlexApiService plexApiService,
         IInspectServerScheduler inspectServerScheduler)
     {
+        _log = log;
         _mediator = mediator;
         _plexApiService = plexApiService;
         _inspectServerScheduler = inspectServerScheduler;
-        _plexServerService = plexServerService;
     }
 
     public virtual async Task<Result<PlexAccount>> ValidatePlexAccountAsync(PlexAccount plexAccount)
@@ -51,10 +52,9 @@ public class PlexAccountService : IPlexAccountService
             return plexSignInResult;
         }
 
-        Log.Debug($"The PlexAccount with displayName {plexAccount.DisplayName} has been validated");
+        _log.Debug("The PlexAccount with displayName {DisplayName} has been validated", plexAccount.DisplayName);
         return plexSignInResult;
     }
-
 
     /// <inheritdoc/>
     public async Task<Result> RefreshPlexAccount(int plexAccountId = 0)
@@ -78,7 +78,6 @@ public class PlexAccountService : IPlexAccountService
         return Result.Ok();
     }
 
-
     /// <summary>
     /// Checks if an <see cref="PlexAccount"/> with the same username already exists.
     /// </summary>
@@ -96,14 +95,13 @@ public class PlexAccountService : IPlexAccountService
 
         if (result.Value != null)
         {
-            Log.Warning($"An Account with the username: {username} already exists.");
+            _log.Warning("An Account with the username: {Username} already exists", username);
             return Result.Ok(false);
         }
 
-        Log.Debug($"The username: {username} is available.");
+        _log.Debug("The username: {UserName} is available", username);
         return Result.Ok(true);
     }
-
 
     #region Authentication
 
@@ -129,7 +127,6 @@ public class PlexAccountService : IPlexAccountService
 
     #endregion
 
-
     #region CRUD
 
     /// <summary>
@@ -146,11 +143,11 @@ public class PlexAccountService : IPlexAccountService
 
         if (result.Value != null)
         {
-            Log.Debug($"Found an Account with the id: {accountId}");
+            _log.Debug("Found an Account with the id: {AccountId}", accountId);
             return result;
         }
 
-        Log.Warning($"Could not find an Account with id: {accountId}");
+        _log.Warning("Could not find an Account with id: {AccountId}", accountId);
         return result;
     }
 
@@ -161,7 +158,8 @@ public class PlexAccountService : IPlexAccountService
     /// <returns>A list of all <see cref="PlexAccount"/>s.</returns>
     public Task<Result<List<PlexAccount>>> GetAllPlexAccountsAsync(bool onlyEnabled = false)
     {
-        Log.Debug(onlyEnabled ? "Returning only enabled account" : "Returning all accounts");
+        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+        _log.Debug(onlyEnabled ? "Returning only enabled account" : "Returning all accounts", 0);
         return _mediator.Send(new GetAllPlexAccountsQuery(true, true, onlyEnabled));
     }
 
@@ -172,7 +170,7 @@ public class PlexAccountService : IPlexAccountService
     /// <returns>Returns the added account after setup.</returns>
     public async Task<Result<PlexAccount>> CreatePlexAccountAsync(PlexAccount plexAccount)
     {
-        Log.Debug($"Creating account with username {plexAccount.Username}");
+        _log.Debug("Creating account with username {UserName}", plexAccount.Username);
         var result = await CheckIfUsernameIsAvailableAsync(plexAccount.Username);
 
         // Fail on validation errors

@@ -1,7 +1,7 @@
 ﻿using Application.Contracts;
 using AutoMapper;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.FluentResult;
 using PlexRipper.WebAPI.SignalR.Common;
 
@@ -11,7 +11,7 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class NotificationController : BaseController
 {
-    public NotificationController(INotificationsService notificationsService, IMapper mapper) : base(mapper, notificationsService) { }
+    public NotificationController(ILog log, INotificationsService notificationsService, IMapper mapper) : base(log, mapper, notificationsService) { }
 
     // GET api/<NotificationController>/
     [HttpGet]

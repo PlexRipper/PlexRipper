@@ -84,7 +84,6 @@ public class PlexServerConnection : BaseEntity
 
     #endregion
 
-
     #region Equality
 
     /// <inheritdoc/>
@@ -92,7 +91,6 @@ public class PlexServerConnection : BaseEntity
     {
         return HashCode.Combine(Protocol, Address, Port, Local, Relay, IPv6, PlexServerId);
     }
-
 
     /// <inheritdoc/>
     public override bool Equals(object obj)

@@ -1,4 +1,5 @@
 using Application.Contracts;
+using Logging.Interface;
 using PlexApi.Contracts;
 using PlexRipper.PlexApi.Api.Users.SignIn;
 using PlexRipper.PlexApi.Helpers;
@@ -10,8 +11,11 @@ namespace PlexRipper.PlexApi.Api;
 
 public class PlexApi
 {
-    public PlexApi(PlexApiClient client)
+    private readonly ILog _log;
+
+    public PlexApi(ILog log, PlexApiClient client)
     {
+        _log = log;
         _client = client;
     }
 
@@ -26,7 +30,7 @@ public class PlexApi
     /// <returns></returns>
     public async Task<Result<SignInResponse>> PlexSignInAsync(PlexAccount plexAccount)
     {
-        Log.Debug($"Requesting PlexToken for account {plexAccount.Username}");
+        _log.Debug("Requesting PlexToken for account {Username}", plexAccount.Username);
         var credentials = new CredentialsDTO
         {
             Login = plexAccount.Username,
@@ -49,7 +53,7 @@ public class PlexApi
         var result = await PlexSignInAsync(plexAccount);
         if (result.IsSuccess)
         {
-            Log.Debug($"Returned token was: {result.Value.AuthToken}");
+            _log.Debug("Returned token was: {AuthToken}", result.Value.AuthToken);
             return result.Value.AuthToken;
         }
 
@@ -60,7 +64,7 @@ public class PlexApi
     {
         var request = new RestRequest(PlexApiPaths.ServerIdentity(serverBaseUrl));
 
-        Log.Debug($"Requesting PlexServerStatus for {serverBaseUrl}");
+        _log.Debug("Requesting PlexServerStatus for {ServerBaseUrl}", serverBaseUrl);
         var response = await _client.SendRequestAsync<ServerIdentityResponse>(request, 2, action);
 
         var statusCodeReason = response.GetStatusCodeReason();
@@ -114,7 +118,7 @@ public class PlexApi
 
         request.AddToken(plexAuthToken);
 
-        Log.Debug($"GetLibrarySectionsAsync => {request.Resource}");
+        _log.Debug("GetLibrarySectionsAsync => {RequestResource}", request.Resource);
         return await _client.SendRequestAsync<LibrariesResponse>(request);
     }
 

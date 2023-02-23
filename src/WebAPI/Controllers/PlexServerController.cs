@@ -1,8 +1,8 @@
 ﻿using Application.Contracts;
 using AutoMapper;
 using BackgroundServices.Contracts;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -16,10 +16,11 @@ public class PlexServerController : BaseController
     private readonly ISyncServerScheduler _syncServerScheduler;
 
     public PlexServerController(
+        ILog log,
         IMapper mapper,
         IPlexServerService plexServerService,
         ISyncServerScheduler syncServerScheduler,
-        INotificationsService notificationsService) : base(mapper, notificationsService)
+        INotificationsService notificationsService) : base(log, mapper, notificationsService)
     {
         _plexServerService = plexServerService;
         _syncServerScheduler = syncServerScheduler;

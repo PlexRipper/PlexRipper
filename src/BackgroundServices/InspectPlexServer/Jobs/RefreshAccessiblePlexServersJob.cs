@@ -1,16 +1,19 @@
 ﻿using Application.Contracts;
+using Logging.Interface;
 using Quartz;
 
 namespace BackgroundServices.InspectPlexServer;
 
 public class RefreshAccessiblePlexServersJob : IJob
 {
+    private readonly ILog _log;
     private readonly IPlexServerService _plexServerService;
 
     public static string PlexAccountIdParameter => "plexAccountId";
 
-    public RefreshAccessiblePlexServersJob(IPlexServerService plexServerService)
+    public RefreshAccessiblePlexServersJob(ILog log, IPlexServerService plexServerService)
     {
+        _log = log;
         _plexServerService = plexServerService;
     }
 
@@ -18,7 +21,10 @@ public class RefreshAccessiblePlexServersJob : IJob
     {
         var dataMap = context.JobDetail.JobDataMap;
         var plexAccountId = dataMap.GetIntValue(PlexAccountIdParameter);
-        Log.Debug($"Executing job: {nameof(RefreshAccessiblePlexServersJob)} for {nameof(plexAccountId)}: {plexAccountId}");
+        _log.Debug("Executing job: {NameOfRefreshAccessiblePlexServersJob)} for {NameOfPlexAccountId)} with id: {PlexAccountId}",
+            nameof(RefreshAccessiblePlexServersJob),
+            nameof(plexAccountId), plexAccountId);
+
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         try
@@ -27,7 +33,7 @@ public class RefreshAccessiblePlexServersJob : IJob
         }
         catch (Exception e)
         {
-            Log.Error(e);
+            _log.Error(e);
         }
     }
 

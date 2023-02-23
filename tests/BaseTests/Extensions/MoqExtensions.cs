@@ -1,7 +1,7 @@
 ﻿using Autofac;
 using AutoMapper;
 using Moq.Language.Flow;
-using PlexRipper.WebAPI.Config;
+using PlexRipper.WebAPI;
 
 namespace PlexRipper.BaseTests;
 
@@ -23,13 +23,12 @@ public static class MoqExtensions
         return AutoMock.GetStrict(builder => builder.RegisterInstance(MapperSetup.CreateMapper()).As<IMapper>().SingleInstance());
     }
 
-
     public static IReturnsResult<T> ReturnOk<T>(this ISetup<T, Task<Result>> mock) where T : class
     {
         return mock.ReturnsAsync(Result.Ok());
     }
 
-    public static IReturnsResult<IMediator> ReturnOk(this IReturnsThrows<IMediator, Task<Result>>  mock)
+    public static IReturnsResult<IMediator> ReturnOk(this IReturnsThrows<IMediator, Task<Result>> mock)
     {
         return mock.ReturnsAsync(Result.Ok());
     }

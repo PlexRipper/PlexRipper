@@ -1,10 +1,12 @@
 ﻿using System.Globalization;
+using Logging.Interface;
 
 namespace PlexRipper.Domain;
 
 public static class DataFormat
 {
     private static readonly NumberFormatInfo NumberFormat = NumberFormatInfo.InvariantInfo;
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(DataFormat));
 
     /// <summary>
     /// Format file size or downloaded size string.
@@ -75,7 +77,7 @@ public static class DataFormat
         }
         catch (Exception e)
         {
-            Log.Error(e);
+            _log.Error(e);
             throw;
         }
     }
@@ -91,7 +93,7 @@ public static class DataFormat
         }
         catch (Exception e)
         {
-            Log.Error(e);
+            _log.Error(e);
             throw;
         }
     }

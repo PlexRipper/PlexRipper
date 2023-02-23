@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.BaseTests.Asserts;
 using PlexRipper.Data.Common;
 using PlexRipper.DownloadManager;
-using PlexRipper.WebAPI.Config;
+using PlexRipper.WebAPI;
 
 namespace DownloadManager.UnitTests;
 

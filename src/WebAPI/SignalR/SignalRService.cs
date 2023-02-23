@@ -1,8 +1,7 @@
-using Application.Contracts;
 using AutoMapper;
 using BackgroundServices.Contracts;
+using Logging.Interface;
 using Microsoft.AspNetCore.SignalR;
-using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.SignalR.Common;
@@ -16,6 +15,7 @@ namespace PlexRipper.WebAPI.SignalR;
 /// </summary>
 public class SignalRService : ISignalRService
 {
+    private readonly ILog _log;
     private readonly IHubContext<ProgressHub> _progressHub;
 
     private readonly IHubContext<NotificationHub> _notificationHub;
@@ -28,8 +28,9 @@ public class SignalRService : ISignalRService
     /// <param name="progressHub">The <see cref="ProgressHub"/>.</param>
     /// <param name="notificationHub">The <see cref="NotificationHub"/>.</param>
     /// <param name="mapper"></param>
-    public SignalRService(IHubContext<ProgressHub> progressHub, IHubContext<NotificationHub> notificationHub, IMapper mapper)
+    public SignalRService(ILog log, IHubContext<ProgressHub> progressHub, IHubContext<NotificationHub> notificationHub, IMapper mapper)
     {
+        _log = log;
         _progressHub = progressHub;
         _notificationHub = notificationHub;
         _mapper = mapper;
@@ -41,7 +42,7 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
@@ -52,7 +53,7 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
@@ -63,7 +64,7 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
@@ -83,7 +84,7 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
@@ -97,7 +98,7 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
@@ -117,11 +118,11 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
-        Log.Debug($"{MessageTypes.InspectServerProgress.ToString()} => {progress}");
+        _log.Debug("{MessageTypesInspectServerProgress} => {@Progress}", MessageTypes.InspectServerProgress, progress);
         var progressDTO = _mapper.Map<InspectServerProgressDTO>(progress);
         await _progressHub.Clients.All.SendAsync(MessageTypes.InspectServerProgress.ToString(), progressDTO);
     }
@@ -130,11 +131,13 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
-        Log.Debug($"Sending progress: {MessageTypes.ServerConnectionCheckStatusProgress.ToString()} => {progress}");
+        _log.Debug("Sending progress: {MessageTypesServerConnectionCheckStatusProgress} => {Progress}", MessageTypes.ServerConnectionCheckStatusProgress,
+            progress);
+
         var progressDTO = _mapper.Map<ServerConnectionCheckStatusProgressDTO>(progress);
         await _progressHub.Clients.All.SendAsync(MessageTypes.ServerConnectionCheckStatusProgress.ToString(), progressDTO);
     }
@@ -144,7 +147,7 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
@@ -155,7 +158,7 @@ public class SignalRService : ISignalRService
     {
         if (_progressHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.WarningLine("No Clients connected to ProgressHub");
             return;
         }
 
@@ -170,12 +173,12 @@ public class SignalRService : ISignalRService
     {
         if (_notificationHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to NotificationHub");
+            _log.WarningLine("No Clients connected to NotificationHub");
             return;
         }
 
         var notificationDto = _mapper.Map<NotificationDTO>(notification);
-        Log.Debug($"Sending notification: {MessageTypes.Notification.ToString()} => {notificationDto}");
+        _log.Debug("Sending notification: {MessageTypesNotification} => {@NotificationDto}", MessageTypes.Notification, notificationDto);
         await _notificationHub.Clients.All.SendAsync(MessageTypes.Notification.ToString(), notificationDto);
     }
 
@@ -187,12 +190,12 @@ public class SignalRService : ISignalRService
     {
         if (_notificationHub?.Clients?.All == null)
         {
-            Log.Warning("No Clients connected to NotificationHub");
+            _log.WarningLine("No Clients connected to NotificationHub");
             return;
         }
 
         var jobStatusUpdateDto = _mapper.Map<JobStatusUpdateDTO>(jobStatusUpdate);
-        Log.Debug($"Sending update: {MessageTypes.JobStatusUpdate.ToString()} => {jobStatusUpdateDto}");
+        _log.Debug("Sending update: {MessageTypesJobStatusUpdate} => {@JobStatusUpdateDto}", MessageTypes.JobStatusUpdate, jobStatusUpdateDto);
         await _progressHub.Clients.All.SendAsync(MessageTypes.JobStatusUpdate.ToString(), jobStatusUpdateDto);
     }
 

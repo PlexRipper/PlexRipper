@@ -1,9 +1,7 @@
 ﻿using Application.Contracts;
 using AutoMapper;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application;
-using PlexRipper.Settings.Models;
-using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 using Settings.Contracts;
 
@@ -16,9 +14,10 @@ public class SettingsController : BaseController
     private readonly IUserSettings _userSettings;
 
     public SettingsController(
+        ILog log,
         IMapper mapper,
         IUserSettings userSettings,
-        INotificationsService notificationsService) : base(mapper, notificationsService)
+        INotificationsService notificationsService) : base(log, mapper, notificationsService)
     {
         _userSettings = userSettings;
     }
@@ -40,11 +39,19 @@ public class SettingsController : BaseController
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
     public IActionResult UpdateSettings([FromBody] SettingsModelDTO settingsModelDto)
     {
-        var settings = _mapper.Map<SettingsModel>(settingsModelDto);
-        var updateResult = _userSettings.UpdateSettings(settings);
-        if (updateResult.IsFailed)
-            return ToActionResult(updateResult.ToResult());
+        try
+        {
+            var settings = _mapper.Map<ISettingsModel>(settingsModelDto);
+            var updateResult = _userSettings.UpdateSettings(settings);
+            if (updateResult.IsFailed)
+                return ToActionResult(updateResult.ToResult());
 
-        return ToActionResult<ISettingsModel, SettingsModelDTO>(Result.Ok(_userSettings.GetSettingsModel()));
+            return ToActionResult<ISettingsModel, SettingsModelDTO>(Result.Ok(_userSettings.GetSettingsModel()));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 }

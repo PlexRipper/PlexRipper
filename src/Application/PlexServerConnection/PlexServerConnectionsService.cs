@@ -119,7 +119,6 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
         return serverStatusResult.Value;
     }
 
-
     /// <summary>
     /// Send server inspect status to front-end
     /// </summary>

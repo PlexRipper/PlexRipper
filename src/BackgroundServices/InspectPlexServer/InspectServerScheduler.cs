@@ -1,5 +1,6 @@
 using Application.Contracts;
 using BackgroundServices.Contracts;
+using Logging.Interface;
 using Quartz;
 
 namespace BackgroundServices.InspectPlexServer;
@@ -9,7 +10,7 @@ public class InspectServerScheduler : BaseScheduler, IInspectServerScheduler
     private readonly IPlexServerService _plexServerService;
     protected override JobKey DefaultJobKey => new($"PlexServerId_", nameof(InspectServerScheduler));
 
-    public InspectServerScheduler(IScheduler scheduler, IPlexServerService plexServerService) : base(scheduler)
+    public InspectServerScheduler(ILog log, IScheduler scheduler, IPlexServerService plexServerService) : base(log, scheduler)
     {
         _plexServerService = plexServerService;
     }

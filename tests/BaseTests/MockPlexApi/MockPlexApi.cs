@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using JustEat.HttpClientInterception;
+using Logging.Interface;
 using PlexRipper.PlexApi;
 
 namespace PlexRipper.BaseTests;
@@ -15,6 +16,7 @@ public class MockPlexApi
     private readonly HttpClientInterceptorOptions _clientOptions;
     private readonly MockPlexApiConfig _config;
     private readonly PlexApiDataConfig _fakeDataConfig;
+    private readonly ILog _log;
     private readonly List<Uri> _serverUris = new();
     private readonly System.Net.Http.HttpClient _client = new();
 
@@ -22,8 +24,9 @@ public class MockPlexApi
 
     #region Constructors
 
-    public MockPlexApi(Action<MockPlexApiConfig> options = null, List<Uri> serverUris = null)
+    public MockPlexApi(ILog log,Action<MockPlexApiConfig> options = null, List<Uri> serverUris = null)
     {
+        _log = log;
         _serverUris = serverUris;
         _config = MockPlexApiConfig.FromOptions(options);
         _fakeDataConfig = _config.FakeDataConfig;
@@ -53,13 +56,13 @@ public class MockPlexApi
                     });
                 }
 
-                Log.Error($"OnMissingRegistration was triggered on uri: {message.RequestUri} and not handled");
+                _log.Error("OnMissingRegistration was triggered on uri: {RequestUri} and not handled", message.RequestUri);
                 return null;
             },
         };
 
         Setup();
-        Log.Debug($"{nameof(MockPlexApi)} was set-up");
+        _log.Debug("{NameOfMockPlexApi} was set-up", nameof(MockPlexApi));
     }
 
     #endregion

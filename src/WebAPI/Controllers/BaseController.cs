@@ -1,10 +1,10 @@
 ﻿using System.Net.Mime;
 using Application.Contracts;
 using AutoMapper;
+using Logging.Interface;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers;
@@ -15,12 +15,15 @@ namespace PlexRipper.WebAPI.Controllers;
 [EnableCors("CORS_Configuration")]
 public abstract class BaseController : ControllerBase
 {
+    protected readonly ILog _log;
+
     protected readonly IMapper _mapper;
 
     protected readonly INotificationsService _notificationsService;
 
-    protected BaseController(IMapper mapper, INotificationsService notificationsService)
+    protected BaseController(ILog log, IMapper mapper, INotificationsService notificationsService)
     {
+        _log = log;
         _mapper = mapper;
         _notificationsService = notificationsService;
     }
@@ -28,16 +31,15 @@ public abstract class BaseController : ControllerBase
     [NonAction]
     protected IActionResult InternalServerError(Exception e)
     {
-        var msg = $"Internal server error: {e.Message}";
-        Log.Error(e);
-        var resultDTO = _mapper.Map<ResultDTO>(Result.Fail(msg));
+        _log.Error(e);
+        var resultDTO = _mapper.Map<ResultDTO>(Result.Fail($"Internal server error: {e.Message}"));
         return StatusCode(StatusCodes.Status500InternalServerError, resultDTO);
     }
 
     [NonAction]
     protected IActionResult InternalServerError(Result result)
     {
-        Log.Error("Internal server error:");
+        _log.ErrorLine("Internal server error:");
         result.LogError();
         _notificationsService.SendResult(result);
         var resultDTO = _mapper.Map<ResultDTO>(result);
@@ -92,7 +94,7 @@ public abstract class BaseController : ControllerBase
             return new OkObjectResult(resultDTO);
 
         // No Status Code found
-        Log.Warning($"Invalid ResultDTO had no status code assigned, defaulting to 500 error: {resultDTO}");
+        _log.Warning("Invalid ResultDTO had no status code assigned, defaulting to 500 error: {@ResultDto}", resultDTO);
         return new ObjectResult(resultDTO)
         {
             StatusCode = StatusCodes.Status500InternalServerError,

@@ -1,4 +1,5 @@
 ﻿using BackgroundServices.Contracts;
+using Logging.Interface;
 using Quartz;
 using Quartz.Impl.Matchers;
 
@@ -8,6 +9,7 @@ public class SchedulerService : ISchedulerService
 {
     #region Fields
 
+    private readonly ILog<SchedulerService> _log;
     private readonly IScheduler _scheduler;
     private readonly IAllJobListener _allJobListener;
 
@@ -15,8 +17,9 @@ public class SchedulerService : ISchedulerService
 
     #region Constructors
 
-    public SchedulerService(IScheduler scheduler, IAllJobListener allJobListener)
+    public SchedulerService(ILog<SchedulerService> log, IScheduler scheduler, IAllJobListener allJobListener)
     {
+        _log = log;
         _scheduler = scheduler;
         _allJobListener = allJobListener;
     }
@@ -36,7 +39,7 @@ public class SchedulerService : ISchedulerService
         SetupListeners();
         if (!_scheduler.IsStarted)
         {
-            Log.Information("Starting Quartz Scheduler");
+            _log.Information("Starting Quartz Scheduler", 0);
             await _scheduler.Start();
         }
 
@@ -55,7 +58,7 @@ public class SchedulerService : ISchedulerService
 
     private Result SetupListeners()
     {
-        Log.Debug("Setting up Quartz listeners");
+        _log.Debug("Setting up Quartz listeners", 0);
         _scheduler.ListenerManager.AddJobListener(_allJobListener, GroupMatcher<JobKey>.AnyGroup());
         return Result.Ok();
     }
@@ -69,7 +72,7 @@ public class SchedulerService : ISchedulerService
             await Task.Delay(1000, cancellationToken);
             var executingJobs = await _scheduler.GetCurrentlyExecutingJobs(cancellationToken);
             isExecutingJobs = executingJobs.Count > 0;
-            Log.Verbose($"Currently number of executing jobs: {executingJobs.Count}");
+            _log.Verbose("Currently number of executing jobs: {ExecutingJobsCount}", executingJobs.Count);
         }
 
         await Task.Delay(1000, cancellationToken);

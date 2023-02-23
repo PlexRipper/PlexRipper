@@ -1,4 +1,5 @@
 using BackgroundServices.Contracts;
+using Logging.Interface;
 using PlexRipper.DownloadManager.Jobs;
 using Quartz;
 
@@ -14,7 +15,7 @@ public class DownloadTaskScheduler : BaseScheduler, IDownloadTaskScheduler
 
     #region Constructor
 
-    public DownloadTaskScheduler(IScheduler scheduler) : base(scheduler) { }
+    public DownloadTaskScheduler(ILog log, IScheduler scheduler) : base(log, scheduler) { }
 
     #endregion
 
@@ -45,13 +46,12 @@ public class DownloadTaskScheduler : BaseScheduler, IDownloadTaskScheduler
         return Result.Ok();
     }
 
-
     public async Task<Result> StopDownloadTaskJob(int downloadTaskId)
     {
         if (downloadTaskId <= 0)
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
 
-        Log.Information($"Stopping DownloadClient for DownloadTaskId {downloadTaskId}");
+        _log.Information("Stopping DownloadClient for DownloadTaskId {DownloadTaskId}", downloadTaskId);
 
         var jobKey = DownloadJob.GetJobKey(downloadTaskId);
         if (!await IsJobRunning(jobKey))
@@ -59,7 +59,6 @@ public class DownloadTaskScheduler : BaseScheduler, IDownloadTaskScheduler
 
         return Result.OkIf(await StopJob(jobKey), $"Failed to stop {nameof(DownloadTask)} with id {downloadTaskId}");
     }
-
 
     public async Task<bool> IsDownloading(int downloadTaskId)
     {

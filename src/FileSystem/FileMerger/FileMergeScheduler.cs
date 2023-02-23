@@ -1,16 +1,19 @@
 using BackgroundServices.Contracts;
 using Data.Contracts;
 using FileSystem.Contracts;
+using Logging.Interface;
 using Quartz;
 
 namespace PlexRipper.FileSystem;
 
 public class FileMergeScheduler : BaseScheduler, IFileMergeScheduler
 {
+    private readonly ILog _log;
     private readonly IMediator _mediator;
 
-    public FileMergeScheduler(IScheduler scheduler, IMediator mediator) : base(scheduler)
+    public FileMergeScheduler(ILog log, IScheduler scheduler, IMediator mediator) : base(log, scheduler)
     {
+        _log = log;
         _mediator = mediator;
     }
 
@@ -29,7 +32,7 @@ public class FileMergeScheduler : BaseScheduler, IFileMergeScheduler
         if (downloadTask.IsFailed)
             return downloadTask.ToResult().LogError();
 
-        Log.Debug($"Adding DownloadTask {downloadTask.Value.Title} to a FileTask to be merged");
+        _log.Debug("Adding DownloadTask {DownloadTaskTitle} to a FileTask to be merged", downloadTask.Value.Title);
         var result = await _mediator.Send(new AddFileTaskFromDownloadTaskCommand(downloadTask.Value));
         if (result.IsFailed)
             return result.ToResult().LogError();
@@ -61,13 +64,12 @@ public class FileMergeScheduler : BaseScheduler, IFileMergeScheduler
         return Result.Ok();
     }
 
-
     public async Task<Result> StopFileMergeJob(int fileTaskId)
     {
         if (fileTaskId <= 0)
             return ResultExtensions.IsInvalidId(nameof(fileTaskId), fileTaskId).LogWarning();
 
-        Log.Information($"Stopping FileMergeJob for {nameof(DownloadFileTask)}: {fileTaskId}");
+        _log.Information("Stopping FileMergeJob for {NameOfDownloadFileTask)} with id: {FileTaskId}", nameof(DownloadFileTask), fileTaskId);
 
         var jobKey = FileMergeJob.GetJobKey(fileTaskId);
         if (!await IsJobRunning(jobKey))

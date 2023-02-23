@@ -1,11 +1,13 @@
 ﻿using System.Reactive.Subjects;
 using Application.Contracts;
 using FileSystem.Contracts;
+using Logging.Interface;
 
 namespace PlexRipper.FileSystem.Common;
 
 public class FileMergeStreamProvider : IFileMergeStreamProvider
 {
+    private readonly ILog _log;
     private readonly IFileSystem _fileSystem;
 
     private readonly INotificationsService _notificationsService;
@@ -14,8 +16,9 @@ public class FileMergeStreamProvider : IFileMergeStreamProvider
 
     private const int _bufferSize = 524288;
 
-    public FileMergeStreamProvider(IFileSystem fileSystem, INotificationsService notificationsService, IDirectorySystem directorySystem)
+    public FileMergeStreamProvider(ILog log, IFileSystem fileSystem, INotificationsService notificationsService, IDirectorySystem directorySystem)
     {
+        _log = log;
         _fileSystem = fileSystem;
         _notificationsService = notificationsService;
         _directorySystem = directorySystem;
@@ -59,13 +62,13 @@ public class FileMergeStreamProvider : IFileMergeStreamProvider
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("Exception during downloading of ", ex);
+                    _log.Error(ex);
                     throw;
                 }
             }
 
-            Log.Debug($"The file at {filePath} has been combined into");
-            Log.Debug($"Deleting file {filePath} since it has been merged already");
+            _log.Debug("The file at {FilePath} has been merged into the single media file", filePath);
+            _log.Debug("Deleting file {FilePath} since it has been merged already", filePath);
             _fileSystem.DeleteFile(filePath);
         }
 

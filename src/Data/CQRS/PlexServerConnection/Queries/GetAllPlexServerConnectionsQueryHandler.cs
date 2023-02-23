@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -9,7 +10,7 @@ public class GetAllPlexServerConnectionsQueryValidator : AbstractValidator<GetAl
 
 public class GetAllPlexServerConnectionsQueryHandlerHandler : BaseHandler, IRequestHandler<GetAllPlexServerConnectionsQuery, Result<List<PlexServerConnection>>>
 {
-    public GetAllPlexServerConnectionsQueryHandlerHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public GetAllPlexServerConnectionsQueryHandlerHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<List<PlexServerConnection>>> Handle(GetAllPlexServerConnectionsQuery request, CancellationToken cancellationToken)
     {
@@ -29,9 +30,7 @@ public class GetAllPlexServerConnectionsQueryHandlerHandler : BaseHandler, IRequ
         if (request.IncludeStatus)
         {
             foreach (var plexServerConnection in plexServerConnections)
-            {
                 plexServerConnection.PlexServerStatus.Sort((x, y) => DateTime.Compare(x.LastChecked, y.LastChecked));
-            }
         }
 
         return Result.Ok(plexServerConnections);

@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Logging.Interface;
 using PlexRipper.PlexApi;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
@@ -14,12 +15,15 @@ namespace PlexRipper.BaseTests;
 /// </summary>
 public class PlexMockServer : IDisposable
 {
+    private readonly ILog _log = LogManager.CreateLogInstance<PlexMockServer>();
     private readonly PlexMockServerConfig _config;
     private readonly Action<PlexApiDataConfig> _fakeDataConfig;
 
     #region Constructor
 
-    public PlexMockServer(Action<PlexMockServerConfig> options = null) : this(PlexMockServerConfig.FromOptions(options)) { }
+    public PlexMockServer(Action<PlexMockServerConfig> options = null) : this(PlexMockServerConfig.FromOptions(options))
+    {
+    }
 
     public PlexMockServer(PlexMockServerConfig options = null)
     {
@@ -35,7 +39,7 @@ public class PlexMockServer : IDisposable
         ServerUri = new Uri(Server.Urls[0]);
         DownloadUri = new Uri($"{Server.Urls[0]}{PlexMockServerConfig.FileUrl}");
         Setup();
-        Log.Debug($"Created {nameof(PlexMockServer)} with url: {ServerUri}");
+        _log.Debug("Created {NameOfPlexMockServer} with url: {ServerUri}", nameof(PlexMockServer), ServerUri);
     }
 
     #endregion
@@ -75,7 +79,7 @@ public class PlexMockServer : IDisposable
         {
             var libraryData = FakePlexApiData.GetPlexLibrarySectionAllResponse(librarySection, _fakeDataConfig);
             var url = PlexApiPaths.GetLibrariesSectionsPath(librarySection.Key);
-            Log.Debug($"Url registered: {url}");
+            _log.Debug("Url registered: {Url}", url);
             Server
                 .Given(Request.Create().WithPath(url).WithParam("X-Plex-Token").UsingGet())
                 .RespondWith(Response.Create()
@@ -103,7 +107,7 @@ public class PlexMockServer : IDisposable
         {
             var downloadFile = FakeData.GetDownloadFile(_config.DownloadFileSizeInMb);
 
-            Log.Debug($"Created file to be downloaded with length: {downloadFile.LongLength.ToString()}");
+            _log.Debug("Created file to be downloaded with length: {DownloadFileSize}", downloadFile.LongLength);
             Server
                 .Given(Request.Create().WithPath(PlexMockServerConfig.FileUrl).WithParam("X-Plex-Token").UsingGet())
                 .RespondWith(

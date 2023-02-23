@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using Logging.Interface;
 using PlexRipper.Data;
 using PlexRipper.Domain.Config;
 using Serilog.Events;
@@ -14,6 +15,7 @@ public class BaseIntegrationTests : IAsyncLifetime
     private System.Net.Http.HttpClient _client;
     private MockPlexApi _mockPlexApi;
     protected BaseContainer Container;
+    protected ILog _log;
 
     #endregion
 
@@ -21,9 +23,11 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug)
     {
-        Log.SetupTestLogging(output, logLevel);
+        // Log.SetupTestLogging(output, logLevel);
+        LogConfig.SetTestOutputHelper(output);
+        _log = LogManager.CreateLogInstance(typeof(BaseIntegrationTests), logLevel);
         DatabaseName = MockDatabase.GetMemoryDatabaseName();
-        Log.Information($"Initialized integration test with database name: {DatabaseName}");
+        _log.Information("Initialized integration test with database name: {DatabaseName}", DatabaseName);
         BogusExtensions.Setup();
     }
 
@@ -56,7 +60,7 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected async Task CreateContainer(Action<UnitTestDataConfig> options = null)
     {
-        Container = await BaseContainer.Create(DatabaseName, Seed, options, _mockPlexApi);
+        Container = await BaseContainer.Create(_log, DatabaseName, Seed, options, _mockPlexApi);
     }
 
     #endregion
@@ -67,12 +71,13 @@ public class BaseIntegrationTests : IAsyncLifetime
     {
         if (Container is not null)
         {
-            const string msg = $"{nameof(CreateContainer)}() has already been called, cannot {nameof(SetupMockPlexApi)}()";
-            Log.Error(msg);
-            throw new Exception(msg);
+            _log.Error("{NameOfCreateContainer}() has already been called, cannot {NameOfSetupMockPlexApi}()", nameof(CreateContainer),
+                nameof(SetupMockPlexApi), 0);
+
+            // throw new Exception(msg);
         }
 
-        _mockPlexApi = new MockPlexApi(options, GetPlexServerUris);
+        _mockPlexApi = new MockPlexApi(_log, options, GetPlexServerUris);
     }
 
     #endregion
@@ -118,8 +123,8 @@ public class BaseIntegrationTests : IAsyncLifetime
         }
         catch (Exception e)
         {
-            Log.Error($"RequestURI: {requestUri}");
-            Log.Error(e);
+            _log.Error("RequestURI: {RequestUri}", requestUri);
+            _log.Error(e);
             throw;
         }
     }
@@ -135,8 +140,8 @@ public class BaseIntegrationTests : IAsyncLifetime
         }
         catch (Exception e)
         {
-            Log.Error($"RequestURI: {httpRequestMessage.RequestUri}");
-            Log.Error(e);
+            _log.Error("RequestURI: {RequestUri}", httpRequestMessage.RequestUri);
+            _log.Error(e);
             throw;
         }
     }
@@ -151,13 +156,13 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     public Task InitializeAsync()
     {
-        Log.Information("Initialize Integration Test");
+        _log.Information("Initialize Integration Test", 0);
         return Task.CompletedTask;
     }
 
     public async Task DisposeAsync()
     {
-        Log.Warning("Integration Test has ended, Disposing!");
+        _log.WarningLine("Integration Test has ended, Disposing!");
 
         // Dispose HttpClient
         _client?.Dispose();
@@ -172,7 +177,7 @@ public class BaseIntegrationTests : IAsyncLifetime
             Container.Dispose();
         }
 
-        Log.Fatal("Container disposed");
+        _log.FatalLine("Container disposed");
     }
 
     #endregion

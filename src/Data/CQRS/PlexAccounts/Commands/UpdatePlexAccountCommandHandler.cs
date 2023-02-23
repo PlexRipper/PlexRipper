@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -24,7 +25,7 @@ public class UpdatePlexAccountValidator : AbstractValidator<UpdatePlexAccountCom
 
 public class UpdatePlexAccountHandler : BaseHandler, IRequestHandler<UpdatePlexAccountCommand, Result>
 {
-    public UpdatePlexAccountHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public UpdatePlexAccountHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result> Handle(UpdatePlexAccountCommand command, CancellationToken cancellationToken)
     {

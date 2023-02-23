@@ -1,12 +1,14 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
 using DownloadManager.Contracts;
+using Logging.Interface;
 using Quartz;
 
 namespace PlexRipper.DownloadManager.Jobs;
 
 public class DownloadJob : IJob, IDisposable
 {
+    private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IDownloadTaskFactory _downloadTaskFactory;
     private readonly INotificationsService _notificationsService;
@@ -20,11 +22,13 @@ public class DownloadJob : IJob, IDisposable
     #region Constructors
 
     public DownloadJob(
+        ILog log,
         IMediator mediator,
         IDownloadTaskFactory downloadTaskFactory,
         INotificationsService notificationsService,
         Func<PlexDownloadClient> plexDownloadClientFactory)
     {
+        _log = log;
         _mediator = mediator;
         _downloadTaskFactory = downloadTaskFactory;
         _notificationsService = notificationsService;
@@ -56,7 +60,9 @@ public class DownloadJob : IJob, IDisposable
         var dataMap = context.JobDetail.JobDataMap;
         var downloadTaskId = dataMap.GetIntValue(DownloadTaskIdParameter);
         var plexServerId = dataMap.GetIntValue(PlexServerIdParameter);
-        Log.Debug($"Executing job: {nameof(DownloadJob)} for {nameof(DownloadTask)}: {downloadTaskId}");
+        _log.Debug("Executing job: {DownloadJobName)} for {DownloadTaskIdName)} with id: {DownloadTaskId}", nameof(DownloadJob), nameof(downloadTaskId),
+                downloadTaskId)
+            ;
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
@@ -72,7 +78,7 @@ public class DownloadJob : IJob, IDisposable
             // Create the multiple download worker tasks which will split up the work
             var downloadTask = downloadTaskResult.Value;
 
-            Log.Debug($"Creating Download client for {downloadTask.FullTitle}");
+            _log.Debug("Creating Download client for {DownloadTaskFullTitle}", downloadTask.FullTitle);
 
             if (!downloadTask.DownloadWorkerTasks.Any())
             {
@@ -100,7 +106,7 @@ public class DownloadJob : IJob, IDisposable
                 }
 
                 downloadTask.DownloadWorkerTasks = getResult.Value;
-                Log.Debug($"Generated DownloadWorkerTasks for {downloadTask.FullTitle}");
+                _log.Debug("Generated DownloadWorkerTasks for {DownloadTaskFullTitle}", downloadTask.FullTitle);
             }
 
             var downloadClientResult = _plexDownloadClientFactory().Setup(downloadTask);
@@ -120,7 +126,9 @@ public class DownloadJob : IJob, IDisposable
             {
                 if (token.IsCancellationRequested)
                 {
-                    Log.Information($"{nameof(DownloadJob)} with {nameof(downloadTaskId)}: {downloadTaskId} has been requested to be stopped.");
+                    _log.Information("{DownloadJobName)} with {DownloadTaskIdName)}: {DownloadTaskId} has been requested to be stopped", nameof(DownloadJob),
+                        nameof(downloadTaskId), downloadTaskId);
+
                     await _downloadClient.StopAsync();
 
                     // ReSharper disable once MethodSupportsCancellation
@@ -134,11 +142,12 @@ public class DownloadJob : IJob, IDisposable
             }
 
             await _mediator.Publish(new DownloadTaskFinished(downloadTaskId, plexServerId), token);
-            Log.Debug($"Exiting {nameof(DownloadJob)} for {nameof(DownloadTask)} with id: {downloadTaskId}");
+            _log.Debug("Exiting job: {DownloadJobName)} for {DownloadTaskName)} with id: {DownloadTaskId}", nameof(DownloadJob), nameof(DownloadTask),
+                downloadTaskId);
         }
         catch (Exception e)
         {
-            Log.Error(e);
+            _log.Error(e);
         }
     }
 

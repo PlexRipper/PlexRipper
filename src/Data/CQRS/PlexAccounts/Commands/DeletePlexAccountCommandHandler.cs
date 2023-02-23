@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -15,7 +16,7 @@ public class DeletePlexAccountValidator : AbstractValidator<DeletePlexAccountCom
 
 public class DeletePlexAccountHandler : BaseHandler, IRequestHandler<DeletePlexAccountCommand, Result>
 {
-    public DeletePlexAccountHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public DeletePlexAccountHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result> Handle(DeletePlexAccountCommand command, CancellationToken cancellationToken)
     {
@@ -26,7 +27,7 @@ public class DeletePlexAccountHandler : BaseHandler, IRequestHandler<DeletePlexA
 
         _dbContext.PlexAccounts.Remove(plexAccount);
         await _dbContext.SaveChangesAsync(cancellationToken);
-        Log.Debug($"Deleted PlexAccount with Id: {command.Id} from the database");
+        _log.Debug("Deleted {PlexAccount} with Id: {CommandId} from the database", nameof(PlexAccount), command.Id);
 
         return Result.Ok();
     }

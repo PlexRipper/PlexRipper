@@ -2,7 +2,7 @@
 using PlexRipper.Domain.Config;
 using PlexRipper.Settings.Models;
 using PlexRipper.WebAPI.Common;
-using PlexRipper.WebAPI.Common.DTO;
+using Settings.Contracts;
 
 namespace WebAPI.IntegrationTests.SettingsController;
 

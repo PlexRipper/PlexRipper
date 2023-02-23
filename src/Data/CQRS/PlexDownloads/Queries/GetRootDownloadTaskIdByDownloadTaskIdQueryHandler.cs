@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -16,7 +17,7 @@ public class GetRootDownloadTaskIdByDownloadTaskIdQueryValidator : AbstractValid
 public class GetRootDownloadTaskIdByDownloadTaskIdQueryHandler : BaseHandler,
     IRequestHandler<GetRootDownloadTaskIdByDownloadTaskIdQuery, Result<int>>
 {
-    public GetRootDownloadTaskIdByDownloadTaskIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public GetRootDownloadTaskIdByDownloadTaskIdQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<int>> Handle(GetRootDownloadTaskIdByDownloadTaskIdQuery request, CancellationToken cancellationToken)
     {

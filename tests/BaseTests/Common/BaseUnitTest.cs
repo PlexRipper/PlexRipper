@@ -1,7 +1,11 @@
 using Autofac;
 using AutoMapper;
+using Logging.Interface;
 using PlexRipper.Data;
-using PlexRipper.WebAPI.Config;
+using PlexRipper.WebAPI;
+using Serilog;
+using Serilog.Events;
+using Log = Logging.Log;
 
 namespace PlexRipper.BaseTests;
 
@@ -11,7 +15,8 @@ public class BaseUnitTest : IDisposable
 
     private string _databaseName;
     protected PlexRipperDbContext DbContext;
-    private bool isDatabaseSetup = false;
+    private bool isDatabaseSetup;
+    protected ILog _log;
 
     #endregion
 
@@ -21,10 +26,13 @@ public class BaseUnitTest : IDisposable
     /// This constructor is run before every test
     /// </summary>
     /// <param name="output">Sets up the logging system for logging during testing.</param>
-    protected BaseUnitTest(ITestOutputHelper output)
+    /// <param name="logEventLevel"></param>
+    protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Debug)
     {
-        Log.SetupTestLogging(output);
+        LogConfig.SetTestOutputHelper(output);
+        LogManager.SetupLogging(logEventLevel);
         BogusExtensions.Setup();
+        _log = LogManager.CreateLogInstance(output, typeof(BaseUnitTest), logEventLevel);
     }
 
     #endregion
@@ -61,9 +69,8 @@ public class BaseUnitTest : IDisposable
     {
         if (!isDatabaseSetup)
         {
-            var msg = $"The test database has not been setup yet, run \"{nameof(SetupDatabase)}()\" in the test first!";
-            Log.Error(msg);
-            throw new Exception(msg);
+            var logEvent = _log.ErrorLine("The test database has not been setup yet, run SetupDatabase() in the test first!");
+            throw new Exception(logEvent.ToLogString());
         }
 
         return MockDatabase.GetMemoryDbContext(_databaseName);
@@ -100,13 +107,20 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest where TUnitTestClass : 
 
     #region Constructors
 
-    protected BaseUnitTest(ITestOutputHelper output) : base(output)
+    protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Debug) : base(output, logEventLevel)
     {
         mock = AutoMock.GetStrict(builder =>
         {
             builder.RegisterInstance(MapperSetup.CreateMapper())
                 .As<IMapper>()
                 .SingleInstance();
+            builder.Register<ILogger>((_, _) =>
+            {
+                LogConfig.SetTestOutputHelper(output);
+                return LogConfig.GetLogger(logEventLevel);
+            }).SingleInstance();
+            builder.RegisterType<Log>().As<ILog>().SingleInstance();
+            builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();
         });
     }
 

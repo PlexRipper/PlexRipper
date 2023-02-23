@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -12,7 +13,7 @@ public class ClearAllNotificationsValidator : AbstractValidator<ClearAllNotifica
 
 public class ClearAllNotificationsHandler : BaseHandler, IRequestHandler<ClearAllNotificationsCommand, Result<int>>
 {
-    public ClearAllNotificationsHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public ClearAllNotificationsHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<int>> Handle(ClearAllNotificationsCommand command, CancellationToken cancellationToken)
     {

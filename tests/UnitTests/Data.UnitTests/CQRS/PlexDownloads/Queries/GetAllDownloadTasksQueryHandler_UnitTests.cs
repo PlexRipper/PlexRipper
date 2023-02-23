@@ -12,7 +12,7 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest
     {
         // Arrange
         await using var context = await MockDatabase.GetMemoryDbContext().Setup(2867);
-        var handle = new GetAllDownloadTasksQueryHandler(context);
+        var handle = new GetAllDownloadTasksQueryHandler(_log, context);
 
         var request = new GetAllDownloadTasksQuery();
 
@@ -37,7 +37,7 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest
             config.MovieDownloadTasksCount = 10;
         });
 
-        var handle = new GetAllDownloadTasksQueryHandler(GetDbContext());
+        var handle = new GetAllDownloadTasksQueryHandler(_log, GetDbContext());
         var request = new GetAllDownloadTasksQuery();
 
         // Act
@@ -71,7 +71,7 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest
             config.TvShowEpisodeDownloadTasksCount = 5;
         });
 
-        var handle = new GetAllDownloadTasksQueryHandler(GetDbContext());
+        var handle = new GetAllDownloadTasksQueryHandler(_log, GetDbContext());
         var request = new GetAllDownloadTasksQuery();
 
         // Act

@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.FileManager;
@@ -18,7 +19,7 @@ public class AddFileTaskFromDownloadTaskCommandValidator : AbstractValidator<Add
 
 public class AddFileTaskFromDownloadTaskCommandHandler : BaseHandler, IRequestHandler<AddFileTaskFromDownloadTaskCommand, Result<int>>
 {
-    public AddFileTaskFromDownloadTaskCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public AddFileTaskFromDownloadTaskCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<int>> Handle(AddFileTaskFromDownloadTaskCommand command, CancellationToken cancellationToken)
     {

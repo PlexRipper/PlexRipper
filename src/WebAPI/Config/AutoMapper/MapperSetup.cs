@@ -5,7 +5,7 @@ using PlexRipper.DownloadManager.AutoMapper;
 using PlexRipper.PlexApi.Mappings;
 using PlexRipper.Settings.Config;
 
-namespace PlexRipper.WebAPI.Config;
+namespace PlexRipper.WebAPI;
 
 public static class MapperSetup
 {

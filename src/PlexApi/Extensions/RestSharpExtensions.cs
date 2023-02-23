@@ -1,3 +1,4 @@
+using Logging.Interface;
 using PlexApi.Contracts;
 using Polly;
 using RestSharp;
@@ -6,6 +7,8 @@ namespace PlexRipper.PlexApi.Extensions;
 
 public static class RestSharpExtensions
 {
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(RestSharpExtensions));
+
     /// <summary>
     /// Sends a <see cref="RestRequest"/> with a <see cref="Policy"/>
     /// </summary>
@@ -28,14 +31,14 @@ public static class RestSharpExtensions
             .WaitAndRetryAsync(retryCount, retryAttempt =>
             {
                 var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
-                var msg =
-                    $"Request: {request.Resource} failed, waiting {timeToWait.TotalSeconds} seconds before retrying again ({retryAttempt} of {retryCount}).";
-                Log.Warning(msg);
+                var msg = _log.Warning(
+                    "Request: {RequestResource} failed, waiting {TotalSeconds} seconds before retrying again ({RetryAttempt} of {RetryCount})",
+                    request.Resource, timeToWait.TotalSeconds, retryAttempt, retryCount);
 
                 if (response != null && response.ErrorMessage != string.Empty)
                 {
-                    Log.Error(response.ErrorException);
-                    Log.Error(response.ErrorMessage);
+                    _log.ErrorLine(response.ErrorMessage);
+                    _log.Error(response.ErrorException);
                 }
 
                 retryIndex = retryAttempt;
@@ -44,7 +47,7 @@ public static class RestSharpExtensions
                     action(new PlexApiClientProgress
                     {
                         StatusCode = (int)response.StatusCode,
-                        Message = msg,
+                        Message = msg.ToLogString(),
                         RetryAttemptIndex = retryAttempt,
                         RetryAttemptCount = retryCount,
                         TimeToNextRetry = (int)timeToWait.TotalSeconds,
@@ -78,13 +81,16 @@ public static class RestSharpExtensions
         return ToResponse<T>(policyResult);
     }
 
-
     private static RestResponse<T> ToResponse<T>(PolicyResult<RestResponse> response)
     {
         var isSuccessful = response.Outcome == OutcomeType.Successful;
         if (isSuccessful)
         {
-            Log.Verbose("Response Content: " + response.Result.Content != string.Empty ? response.Result.Content : "Response was empty.");
+            if (response.Result.Content != string.Empty)
+                _log.Verbose("Response Content: {Content}", response.Result.Content);
+            else
+                _log.VerboseLine("Response was empty");
+
             return response.Result as RestResponse<T>;
         }
 

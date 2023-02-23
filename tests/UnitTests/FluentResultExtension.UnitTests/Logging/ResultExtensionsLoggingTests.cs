@@ -3,11 +3,11 @@ using Serilog.Sinks.TestCorrelator;
 
 namespace FluentResultExtensionTests.Logging;
 
-public class ResultExtensionsLoggingTests
+public class ResultExtensionsLoggingTests : BaseUnitTest
 {
-    public ResultExtensionsLoggingTests(ITestOutputHelper output)
+    public ResultExtensionsLoggingTests(ITestOutputHelper output) : base(output, LogEventLevel.Verbose)
     {
-        Log.SetupTestLogging(output, LogEventLevel.Verbose);
+        ResultExtensions.SetLogger(_log);
     }
 
     #region Result

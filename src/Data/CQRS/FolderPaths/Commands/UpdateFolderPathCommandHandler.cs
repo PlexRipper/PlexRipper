@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -19,7 +20,7 @@ public class UpdateFolderPathCommandValidator : AbstractValidator<UpdateFolderPa
 
 public class UpdateFolderPathCommandHandler : BaseHandler, IRequestHandler<UpdateFolderPathCommand, Result<FolderPath>>
 {
-    public UpdateFolderPathCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public UpdateFolderPathCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<FolderPath>> Handle(UpdateFolderPathCommand command, CancellationToken cancellationToken)
     {

@@ -9,25 +9,6 @@
  * ---------------------------------------------------------------
  */
 
-export interface ResultDTO {
-	isFailed: boolean;
-	isSuccess: boolean;
-	reasons: IReason[];
-	errors: IError[];
-	successes: ISuccess[];
-}
-
-export interface IReason {
-	message?: string | null;
-	metadata?: Record<string, any>;
-}
-
-export interface IError {
-	reasons?: IError[] | null;
-}
-
-export type ISuccess = object;
-
 export type ResultDTOOfListOfServerDownloadProgressDTO = ResultDTO & {
 	value: ServerDownloadProgressDTO[];
 };
@@ -71,6 +52,30 @@ export enum PlexMediaType {
 	OtherVideos = 'OtherVideos',
 	Games = 'Games',
 	Unknown = 'Unknown',
+}
+
+export interface ResultDTO {
+	isFailed: boolean;
+	isSuccess: boolean;
+	reasons: ReasonDTO[];
+	errors: ErrorDTO[];
+	successes: SuccessDTO[];
+}
+
+export interface ReasonDTO {
+	message: string;
+	metadata: Record<string, any>;
+}
+
+export interface ErrorDTO {
+	reasons?: ErrorDTO[];
+	message: string;
+	metadata: Record<string, any>;
+}
+
+export interface SuccessDTO {
+	message: string;
+	metadata: Record<string, any>;
 }
 
 export interface DownloadMediaDTO {
@@ -124,7 +129,7 @@ export interface FileSystemModelDTO {
 	/** @format int64 */
 	size: number;
 	/** @format date-time */
-	lastModified: string | null;
+	lastModified: string;
 }
 
 export enum FileSystemEntityType {
@@ -163,6 +168,11 @@ export enum NotificationLevel {
 	Fatal = 'Fatal',
 }
 
+export type ResultDTOOfInteger = ResultDTO & {
+	/** @format int32 */
+	value: number;
+};
+
 export type ResultDTOOfListOfPlexAccountDTO = ResultDTO & {
 	value: PlexAccountDTO[];
 };
@@ -181,7 +191,7 @@ export interface PlexAccountDTO {
 	uuid: string;
 	/** @format int64 */
 	plexId: number;
-	email: string | null;
+	email: string;
 	title: string;
 	hasPassword: boolean;
 	authenticationToken: string;
@@ -235,9 +245,13 @@ export type PlexError = Error & {
 };
 
 export interface Error {
-	message?: string | null;
+	message?: string;
 	metadata?: Record<string, any>;
-	reasons?: IError[] | null;
+	reasons?: IError[];
+}
+
+export interface IError {
+	reasons?: IError[];
 }
 
 export interface AuthPinLocation {
@@ -335,7 +349,7 @@ export interface PlexMediaDTO {
 	/** @format int32 */
 	plexServerId: number;
 	type: PlexMediaType;
-	mediaData: PlexMediaDataDTO[] | null;
+	mediaData: PlexMediaDataDTO[];
 	children: PlexMediaDTO[];
 }
 
@@ -407,7 +421,7 @@ export interface DownloadTaskDTO {
 	timeRemaining: number;
 	downloadUrl: string;
 	quality: string;
-	children?: DownloadTaskDTO[] | null;
+	children?: DownloadTaskDTO[];
 	actions: string[];
 }
 
@@ -428,13 +442,13 @@ export enum DownloadStatus {
 export enum DownloadTaskType {
 	None = 'None',
 	Movie = 'Movie',
+	MovieData = 'MovieData',
 	MoviePart = 'MoviePart',
 	TvShow = 'TvShow',
 	Season = 'Season',
 	Episode = 'Episode',
-	EpisodePart = 'EpisodePart',
-	MovieData = 'MovieData',
 	EpisodeData = 'EpisodeData',
+	EpisodePart = 'EpisodePart',
 }
 
 export type ResultDTOOfPlexLibraryDTO = ResultDTO & {
@@ -495,7 +509,7 @@ export interface PlexServerConnectionDTO {
 	plexServerId: number;
 	url: string;
 	latestConnectionStatus: PlexServerStatusDTO;
-	progress: ServerConnectionCheckStatusProgressDTO | null;
+	progress: ServerConnectionCheckStatusProgressDTO;
 }
 
 export interface PlexServerStatusDTO {
@@ -531,9 +545,9 @@ export interface ServerConnectionCheckStatusProgressDTO {
 
 export interface RefreshPlexLibraryDTO {
 	/** @format int32 */
-	plexAccountId?: number;
+	plexAccountId: number;
 	/** @format int32 */
-	plexLibraryId?: number;
+	plexLibraryId: number;
 }
 
 export interface UpdateDefaultDestinationDTO {
@@ -581,6 +595,8 @@ export interface GeneralSettingsDTO {
 	firstTimeSetup: boolean;
 	/** @format int32 */
 	activeAccountId: number;
+	/** @format int32 */
+	test?: number;
 }
 
 export interface ConfirmationSettingsDTO {
@@ -624,16 +640,11 @@ export interface ServerSettingsDTO {
 }
 
 export interface PlexServerSettingsModel {
-	plexServerName?: string | null;
-	machineIdentifier?: string | null;
+	plexServerName?: string;
+	machineIdentifier?: string;
 	/** @format int32 */
-	downloadSpeedLimit?: number;
+	downloadSpeedLimit: number;
 }
-
-export type ResultDTOOfInteger = ResultDTO & {
-	/** @format int32 */
-	value: number;
-};
 
 export type ResultDTOOfDownloadTaskDTO = ResultDTO & {
 	value: DownloadTaskDTO;
@@ -659,6 +670,7 @@ export enum JobTypes {
 	DownloadProgressJob = 'DownloadProgressJob',
 	SyncServerJob = 'SyncServerJob',
 	RefreshAccessiblePlexServersJob = 'RefreshAccessiblePlexServersJob',
+	DownloadProgressJobs = 'DownloadProgressJobs',
 }
 
 export enum JobStatus {

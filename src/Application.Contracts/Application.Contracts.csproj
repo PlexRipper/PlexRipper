@@ -1,18 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net7.0</TargetFramework>
+		<LangVersion>11</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Domain\Domain.csproj" />
-	  <ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj" />
+		<ProjectReference Include="..\Domain\Domain.csproj"/>
+		<ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj"/>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="DTO\WebApi" />
+		<Folder Include="DTO\WebApi"/>
 	</ItemGroup>
 
 </Project>

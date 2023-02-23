@@ -1,6 +1,7 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
 using DownloadManager.Contracts;
+using Logging.Interface;
 
 namespace PlexRipper.Application;
 
@@ -12,6 +13,7 @@ public class PlexDownloadService : IPlexDownloadService
 
     private readonly IDownloadCommands _downloadCommands;
 
+    private readonly ILog _log;
     private readonly IMediator _mediator;
 
     #endregion
@@ -25,10 +27,12 @@ public class PlexDownloadService : IPlexDownloadService
     /// <param name="downloadTaskFactory"></param>
     /// <param name="downloadCommands"></param>
     public PlexDownloadService(
+        ILog log,
         IMediator mediator,
         IDownloadTaskFactory downloadTaskFactory,
         IDownloadCommands downloadCommands)
     {
+        _log = log;
         _mediator = mediator;
         _downloadTaskFactory = downloadTaskFactory;
         _downloadCommands = downloadCommands;
@@ -54,9 +58,9 @@ public class PlexDownloadService : IPlexDownloadService
 
     public async Task<Result> DownloadMedia(List<DownloadMediaDTO> downloadTaskOrders)
     {
-        Log.Debug($"Attempting to add download task orders: ");
+        _log.DebugLine("Attempting to add download task orders: ");
         foreach (var downloadMediaDto in downloadTaskOrders)
-            Log.Debug($"{downloadMediaDto} ");
+            _log.Debug("DownloadMediaDTO: {@DownloadMediaDto} ", downloadMediaDto);
 
         var downloadTasks = await _downloadTaskFactory.GenerateAsync(downloadTaskOrders);
         if (downloadTasks.IsFailed)

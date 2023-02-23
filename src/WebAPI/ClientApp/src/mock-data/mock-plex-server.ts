@@ -88,9 +88,7 @@ export function generatePlexServerConnection(plexServerId: number, config: Parti
 			latestConnectionStatus: generatePlexServerStatus(validConfig),
 			iPv4: true,
 			portFix: false,
-			progress: validConfig.connectionHasProgress
-				? generateServerConnectionCheckStatusProgress(plexServerId, connectionId, config)
-				: null,
+			progress: generateServerConnectionCheckStatusProgress(plexServerId, connectionId, config),
 		});
 	}
 

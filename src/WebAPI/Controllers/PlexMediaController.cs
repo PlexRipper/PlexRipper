@@ -1,7 +1,7 @@
 ﻿using Application.Contracts;
 using AutoMapper;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -18,12 +18,12 @@ public class PlexMediaController : BaseController
     private readonly IPlexMediaService _plexMediaService;
 
     public PlexMediaController(
+        ILog log,
         IMapper mapper,
         INotificationsService notificationsService,
         IPlexTvShowService plexTvShowService,
         IPlexMovieService plexMovieService,
-        IPlexMediaService plexMediaService) : base(
-        mapper, notificationsService)
+        IPlexMediaService plexMediaService) : base(log, mapper, notificationsService)
     {
         _plexTvShowService = plexTvShowService;
         _plexMovieService = plexMovieService;

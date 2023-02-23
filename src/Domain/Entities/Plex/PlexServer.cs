@@ -140,7 +140,7 @@ public class PlexServer : BaseEntity
     /// Gets the library section url derived from the BaseUrl, e.g: http://112.202.10.213:32400/library/sections.
     /// </summary>
     [NotMapped]
-    public string LibraryUrl => $"{GetServerUrl()}library/sections";
+    public string LibraryUrl => $"{this.GetServerUrl()}library/sections";
 
     /// <summary>
     /// Gets a value indicating whether this <see cref="PlexServer"/> has any DownloadTasks in any nested <see cref="PlexLibrary"/>.
@@ -193,45 +193,6 @@ public class PlexServer : BaseEntity
     }
 
     #endregion
-
-    /// <summary>
-    /// Gets the server url based on the available connections, e.g: http://112.202.10.213:32400.
-    /// </summary>
-    /// <param name="plexServerConnectionId">The optional <see cref="PlexServerConnections"/> to use.</param>
-    /// <returns>The connection url based on preference or on fallback.</returns>
-    public string GetServerUrl(int plexServerConnectionId = 0)
-    {
-        if (!PlexServerConnections.Any())
-            throw new Exception($"PlexServer with id {Id} and name {Name} has no connections available!");
-
-        if (plexServerConnectionId > 0)
-        {
-            var connection = PlexServerConnections.Find(x => x.Id == plexServerConnectionId);
-            if (connection is not null)
-                return connection.Url;
-
-            Log.Warning($"Could not find parameter {nameof(plexServerConnectionId)} with id {plexServerConnectionId} for server {Name}");
-        }
-
-        if (PreferredConnectionId > 0)
-        {
-            var connection = PlexServerConnections.Find(x => x.Id == PreferredConnectionId);
-            if (connection is not null)
-                return connection.Url;
-
-            Log.Warning($"Could not find preferred connection with id {PreferredConnectionId} for server {Name}");
-        }
-        else
-        {
-            var connection = PlexServerConnections.Find(x => x.Address == PublicAddress);
-            if (connection is not null)
-                return connection.Url;
-        }
-
-        Log.Warning($"Could not find connection based on public address: {PublicAddress} for server {Name}");
-        Log.Warning($"Trying the first connection: {PlexServerConnections.First().Url}");
-        return PlexServerConnections.First().Url;
-    }
 
     #region Equality
 

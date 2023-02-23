@@ -26,6 +26,5 @@ public class DownloadManagerModule : Module
 
         builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
         builder.RegisterMediatR(assembly);
-
     }
 }

@@ -2,9 +2,9 @@ using System.Collections.Specialized;
 using Autofac;
 using Autofac.Extras.Quartz;
 using FileSystem.Contracts;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
-using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.Domain.Autofac;
 using PlexRipper.WebAPI.Common;
@@ -17,6 +17,7 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
 {
     private readonly string _memoryDbName;
     private readonly MockPlexApi _mockPlexApi;
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(PlexRipperWebApplicationFactory<>));
 
     private readonly UnitTestDataConfig _config;
 
@@ -55,18 +56,13 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
                 //  autoFacBuilder.RegisterGeneric(typeof(Logger<>)).As(typeof(ILogger<>)).SingleInstance();
             });
 
-        // Source: https://www.strathweb.com/2021/05/the-curious-case-of-asp-net-core-integration-test-deadlock/
-        // var host = builder.Build();
-        // Task.Run(() => host.StartAsync()).GetAwaiter().GetResult();
-        // return host;
-
         try
         {
             return base.CreateHost(builder);
         }
         catch (Exception e)
         {
-            Log.Fatal(e);
+            _log.Fatal(e);
             throw;
         }
     }

@@ -1,6 +1,7 @@
 ﻿using Application.Contracts;
 using AutoMapper;
 using Data.Contracts;
+using Logging.Interface;
 using PlexApi.Contracts;
 
 namespace PlexRipper.PlexApi.Services;
@@ -16,14 +17,16 @@ public class PlexApiService : IPlexApiService
     private readonly IMapper _mapper;
     private readonly IMediator _mediator;
 
+    private readonly ILog _log;
     private readonly Api.PlexApi _plexApi;
 
     #endregion
 
     #region Constructors
 
-    public PlexApiService(Api.PlexApi plexApi, IMapper mapper, IMediator mediator)
+    public PlexApiService(ILog log, Api.PlexApi plexApi, IMapper mapper, IMediator mediator)
     {
+        _log = log;
         _plexApi = plexApi;
         _mapper = mapper;
         _mediator = mediator;
@@ -153,13 +156,13 @@ public class PlexApiService : IPlexApiService
         var result = await _plexApi.GetLibrarySectionsAsync(tokenResult.Value, plexServerResult.Value.GetServerUrl());
         if (result.IsFailed)
         {
-            Log.Warning($"Plex server: {plexServerResult.Value.Name} returned no libraries");
+            _log.Warning("Plex server with name: {PlexServerName} returned no libraries", plexServerResult.Value.Name);
             return result.ToResult();
         }
 
         if (result.Value?.MediaContainer?.Directory is null)
         {
-            Log.Error($"Plex server: {plexServerResult.Value.Name} returned an empty response when libraries were requested.");
+            _log.Error("Plex server: {PlexServerResultName} returned an empty response when libraries were requested", plexServerResult.Value.Name);
             return result.ToResult();
         }
 
@@ -226,7 +229,7 @@ public class PlexApiService : IPlexApiService
         var result = await _plexApi.GetServerAsync(plexAccountToken.Value);
         if (result.IsFailed)
         {
-            Log.Warning("Failed to retrieve PlexServers");
+            _log.Warning("Failed to retrieve PlexServers for PlexAccount: {PlexAccountName}", plexAccountResult.Value.DisplayName);
             return (result.ToResult(), result.ToResult());
         }
 
@@ -258,7 +261,6 @@ public class PlexApiService : IPlexApiService
 
     #endregion
 
-
     #region Authentication
 
     #region PlexSignIn
@@ -280,7 +282,7 @@ public class PlexApiService : IPlexApiService
             mapResult.ValidatedAt = DateTime.UtcNow;
             mapResult.VerificationCode = "";
 
-            Log.Information($"Successfully retrieved the PlexAccount data for user {plexAccount.DisplayName} from the PlexApi");
+            _log.Information("Successfully retrieved the PlexAccount data for user {PlexAccountDisplayName} from the PlexApi", plexAccount.DisplayName);
             return Result.Ok(mapResult);
         }
 
@@ -299,7 +301,6 @@ public class PlexApiService : IPlexApiService
 
     #endregion
 
-
     private async Task<Result<string>> GetPlexApiTokenAsync(PlexAccount plexAccount)
     {
         if (plexAccount == null)
@@ -310,11 +311,11 @@ public class PlexApiService : IPlexApiService
             // TODO Make the token refresh limit configurable
             if ((plexAccount.ValidatedAt - DateTime.UtcNow).TotalDays < 30)
             {
-                Log.Information("Plex AuthToken was still valid, using from local DB.");
+                _log.Information("Plex AuthToken was still valid, using from local DB", 0);
                 return plexAccount.AuthenticationToken;
             }
 
-            Log.Information("Plex AuthToken has expired, refreshing Plex AuthToken now.");
+            _log.Information("Plex AuthToken has expired, refreshing Plex AuthToken now", 0);
 
             // TODO Account for 2FA
             return await _plexApi.RefreshPlexAuthTokenAsync(plexAccount);

@@ -1,6 +1,7 @@
 ﻿using Application.Contracts;
 using BackgroundServices.Contracts;
 using Data.Contracts;
+using Logging.Interface;
 using Quartz;
 
 namespace BackgroundServices.InspectPlexServer;
@@ -11,29 +12,33 @@ public class InspectPlexServerByPlexAccountIdJob : IJob
 {
     public static string PlexAccountIdParameter => "plexAccountId";
 
+    private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IPlexLibraryService _plexLibraryService;
     private readonly IPlexServerConnectionsService _plexServerConnectionsService;
     private readonly ISyncServerScheduler _syncServerScheduler;
 
     public InspectPlexServerByPlexAccountIdJob(
+        ILog log,
         IMediator mediator,
         IPlexLibraryService plexLibraryService,
         IPlexServerConnectionsService plexServerConnectionsService,
         ISyncServerScheduler syncServerScheduler)
     {
+        _log = log;
         _mediator = mediator;
         _plexLibraryService = plexLibraryService;
         _plexServerConnectionsService = plexServerConnectionsService;
         _syncServerScheduler = syncServerScheduler;
     }
 
-
     public async Task Execute(IJobExecutionContext context)
     {
         var dataMap = context.JobDetail.JobDataMap;
         var plexAccountId = dataMap.GetIntValue(PlexAccountIdParameter);
-        Log.Debug($"Executing job: {nameof(InspectPlexServerByPlexAccountIdJob)} for {nameof(plexAccountId)}: {plexAccountId}");
+        _log.Debug("Executing job: {InspectPlexServerByPlexAccountIdJob} for {PlexAccountIdName} with id: {PlexAccountId}",
+            nameof(InspectPlexServerByPlexAccountIdJob),
+            nameof(plexAccountId), plexAccountId);
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
@@ -46,9 +51,11 @@ public class InspectPlexServerByPlexAccountIdJob : IJob
                 return;
             }
 
-            var plexServers = plexAccountResult.Value.PlexServers;
+            var plexAccount = plexAccountResult.Value;
+            var plexServers = plexAccount.PlexServers;
 
-            Log.Information($"Inspecting {plexServers.Count} PlexServers for PlexAccount: {plexAccountResult.Value.DisplayName}");
+            _log.Information("Inspecting {PlexServersCount} PlexServers for PlexAccount: {PlexAccountDisplayName}", plexServers.Count, plexAccount.DisplayName,
+                0);
 
             // Check all connections of all Plex servers that this account has access to
             var checkResult = await _plexServerConnectionsService.CheckAllConnectionsOfPlexServersByAccountIdAsync(plexAccountId);
@@ -67,11 +74,13 @@ public class InspectPlexServerByPlexAccountIdJob : IJob
             foreach (var plexServer in plexServers)
                 await _syncServerScheduler.QueueSyncPlexServerJob(plexServer.Id, true);
 
-            Log.Information($"Successfully finished the inspection of all plexServers related to {nameof(PlexAccount)} {plexAccountId}");
+            _log.Information(
+                "Successfully finished the inspection of all plexServers related to {NameOfPlexAccount}: {PlexAccountDisplayName} with id: {PlexAccountId}",
+                nameof(PlexAccount), plexAccount.DisplayName, plexAccountId);
         }
         catch (Exception e)
         {
-            Log.Error(e);
+            _log.Error(e);
         }
     }
 

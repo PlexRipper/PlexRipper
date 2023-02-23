@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;
 
@@ -16,14 +17,15 @@ public class SetPreferredPlexServerConnectionCommandValidator : AbstractValidato
 
 public class SetPreferredPlexServerConnectionCommandHandler : BaseHandler, IRequestHandler<SetPreferredPlexServerConnectionCommand, Result>
 {
-    public SetPreferredPlexServerConnectionCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public SetPreferredPlexServerConnectionCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result> Handle(SetPreferredPlexServerConnectionCommand command, CancellationToken cancellationToken)
     {
         var plexServerConnectionId = command.PlexServerConnectionId;
         var plexServerId = command.PlexServerId;
 
-        Log.Debug($"Setting the preferred PlexServerConnection for {plexServerId}");
+        _log.Debug("Setting the preferred {PlexServerConnectionName} for {PlexServerIdName}: {PlexServerId}", nameof(PlexServerConnection),
+            nameof(plexServerId), plexServerId);
 
         var plexServer = await _dbContext.PlexServers
             .Include(x => x.PlexServerConnections)

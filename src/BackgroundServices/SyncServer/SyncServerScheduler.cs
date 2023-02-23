@@ -1,4 +1,5 @@
 using BackgroundServices.Contracts;
+using Logging.Interface;
 using Quartz;
 
 namespace BackgroundServices.SyncServer;
@@ -6,7 +7,8 @@ namespace BackgroundServices.SyncServer;
 public class SyncServerScheduler : BaseScheduler, ISyncServerScheduler
 {
     protected override JobKey DefaultJobKey => new($"PlexServerId_", nameof(SyncServerScheduler));
-    public SyncServerScheduler(IScheduler scheduler) : base(scheduler) { }
+
+    public SyncServerScheduler(ILog log, IScheduler scheduler) : base(log, scheduler) { }
 
     /// <inheritdoc/>
     public async Task<Result> QueueSyncPlexServerJob(int plexServerId, bool forceSync = false)

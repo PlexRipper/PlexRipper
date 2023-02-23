@@ -1,36 +1,35 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
-        <LangVersion>10</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>PlexRipper.Domain</RootNamespace>
-        <AssemblyName>PlexRipper.Domain</AssemblyName>
-    </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<LangVersion>11</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>PlexRipper.Domain</RootNamespace>
+		<AssemblyName>PlexRipper.Domain</AssemblyName>
+	</PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="AutoMapper" Version="10.1.1" />
-        <PackageReference Include="ByteSize" Version="2.1.1" />
-        <PackageReference Include="FluentValidation" Version="9.3.0" />
-        <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
-        <PackageReference Include="MediatR" Version="9.0.0" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-        <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.312">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-        <PackageReference Include="System.Reactive" Version="5.0.0" />
-        <PackageReference Include="System.Reactive.Interfaces" Version="5.0.0" />
-        <PackageReference Include="System.Reactive.Linq" Version="5.0.0" />
-    </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="12.0.1" />
+		<PackageReference Include="ByteSize" Version="2.1.1" />
+		<PackageReference Include="FluentValidation" Version="9.3.0" />
+		<PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
+		<PackageReference Include="MediatR" Version="11.1.0" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.312">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+		<PackageReference Include="System.Reactive" Version="5.0.0" />
+		<PackageReference Include="System.Reactive.Interfaces" Version="5.0.0" />
+		<PackageReference Include="System.Reactive.Linq" Version="5.0.0" />
+	</ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\FluentResultExtensions\FluentResultExtensions.csproj" />
-    </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\FluentResultExtensions\FluentResultExtensions.csproj" />
+	</ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Common\AutoMapper" />
-    </ItemGroup>
+	<ItemGroup>
+		<Folder Include="Common\AutoMapper" />
+	</ItemGroup>
 
 </Project>

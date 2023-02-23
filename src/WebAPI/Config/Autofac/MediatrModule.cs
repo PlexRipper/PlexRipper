@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using FluentValidation;
 using MediatR.Extensions.Autofac.DependencyInjection;
+using MediatR.Extensions.Autofac.DependencyInjection.Builder;
 using PlexRipper.Data;
 using PlexRipper.Domain.Behavior.Pipelines;
 
@@ -13,7 +14,12 @@ public class MediatrModule : Module
         var assembly = typeof(PlexRipperDbContext).Assembly;
 
         // MediatR
-        builder.RegisterMediatR(assembly);
+        var configuration = MediatRConfigurationBuilder
+            .Create(assembly)
+            .WithAllOpenGenericHandlerTypesRegistered()
+            .WithRegistrationScope(RegistrationScope.Transient)
+            .Build();
+        builder.RegisterMediatR(configuration);
 
         // Register the Command's Validators (Validators based on FluentValidation library)
         builder.RegisterAssemblyTypes(assembly)

@@ -13,7 +13,7 @@
 	<ItemGroup>
 		<PackageReference Include="Autofac" Version="6.5.0" />
 		<PackageReference Include="Autofac.Extras.Quartz" Version="8.0.0" />
-		<PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="9.2.0" />
+		<PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="10.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.3" />

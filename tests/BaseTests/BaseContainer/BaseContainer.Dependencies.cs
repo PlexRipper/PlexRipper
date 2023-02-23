@@ -7,7 +7,6 @@ using BackgroundServices.Contracts;
 using DownloadManager.Contracts;
 using Environment;
 using FileSystem.Contracts;
-using HttpClient.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;

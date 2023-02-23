@@ -1,6 +1,6 @@
 ﻿using Autofac;
 
-namespace PlexRipper.HttpClient;
+namespace PlexRipper.WebAPI;
 
 public class HttpClientModule : Module
 {

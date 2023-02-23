@@ -2,7 +2,6 @@ using System.Net.Http.Headers;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ByteSizeLib;
-using HttpClient.Contracts;
 using Logging.Interface;
 using RestSharp;
 using Timer = System.Timers.Timer;
@@ -195,7 +194,8 @@ public class DownloadWorker : IDisposable
             {
                 CompletionOption = HttpCompletionOption.ResponseHeadersRead,
             };
-            request.AddRangeHeader(new RangeHeaderValue(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte));
+
+            request.AddHeader("Range", new RangeHeaderValue(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte).ToString());
 
             await using var responseStream = await _httpClient.DownloadStreamAsync(request);
 

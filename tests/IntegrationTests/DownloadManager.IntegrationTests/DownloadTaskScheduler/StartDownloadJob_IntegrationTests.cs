@@ -1,6 +1,6 @@
 using PlexRipper.Data.Common;
 
-namespace BackgroundServices.IntegrationTests.DownloadTaskScheduler;
+namespace DownloadManager.IntegrationTests.DownloadTaskScheduler;
 
 [Collection("Sequential")]
 public class StartDownloadJob_IntegrationTests : BaseIntegrationTests

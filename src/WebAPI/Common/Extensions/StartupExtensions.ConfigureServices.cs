@@ -1,10 +1,10 @@
 using System.Reflection;
+using System.Text.Json.Serialization;
 using Environment;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
-using NJsonSchema;
-using NSwag.Generation.Processors.Security;
+using Microsoft.OpenApi.Models;
 using PlexRipper.Application;
 using PlexRipper.Domain.Config;
 
@@ -73,9 +73,15 @@ public static partial class StartupExtensions
     {
         // Controllers and Json options
         services
-            .AddControllers();
-            // TODO This breaks WebApplication factory by receiving empty JSON body in API integration testing
-           // .AddJsonOptions(JsonSerializerOptionsWebApi.Config);
+            .AddControllers()
+            .AddJsonOptions(options =>
+            {
+                var config = DefaultJsonSerializerOptions.ConfigBase;
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = config.PropertyNameCaseInsensitive;
+                options.JsonSerializerOptions.PropertyNamingPolicy = config.PropertyNamingPolicy;
+                options.JsonSerializerOptions.DefaultIgnoreCondition = config.DefaultIgnoreCondition;
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
 
         // Customise default API behaviour
         services.AddHttpContextAccessor();
@@ -106,23 +112,17 @@ public static partial class StartupExtensions
 
     public static void SetupOpenApiDocumentation(this IServiceCollection services)
     {
-        services.AddSwaggerDocument(configure =>
+        services.AddSwaggerGen(options =>
         {
-            configure.GenerateEnumMappingDescription = true;
-            configure.Title = "PlexRipper Swagger API";
-
-            // This disables Newtonsoft and enables System.Text.Json
-            // configure.SerializerSettings = null;
-            // configure.SerializerOptions = DefaultJsonSerializerOptions.ConfigBase;
-
-            // Automatic makes each property required, this avoids unnecessary nullable types for Typescript classes
-            configure.SchemaType = SchemaType.Swagger2;
-
-            configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
-
-            // Unreferenced DTO's in the API can be added here such that the front-end can generate Typescript class from it.
-            // Useful for SignalR types
-            configure.DocumentProcessors.Add(new NSwagAddExtraTypes());
+            options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Version = "v1",
+                Title = "PlexRipper Swagger Internal API",
+            });
+            options.SchemaGeneratorOptions.SupportNonNullableReferenceTypes = true;
+            options.SchemaFilter<RequiredMemberFilter>();
+            options.SchemaFilter<RequiredNotNullableSchemaFilter>();
+            options.AddSignalRSwaggerGen();
         });
     }
 }

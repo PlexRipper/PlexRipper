@@ -5,11 +5,7 @@ namespace WebAPI.Contracts;
 
 public interface ISignalRService
 {
-    void SendLibraryProgressUpdate(LibraryProgress libraryProgress);
-
-    void SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true);
-
-    Task SendDownloadTaskCreationProgressUpdate(int current, int total);
+    Task SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true);
 
     void SendDownloadTaskUpdate(DownloadTask downloadTask);
 
@@ -23,7 +19,7 @@ public interface ISignalRService
 
     Task SendServerInspectStatusProgress(InspectServerProgress progress);
 
-    void SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress);
+    Task SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress);
 
     Task SendDownloadProgressUpdate(int plexServerId, List<DownloadTask> downloadTasks);
 

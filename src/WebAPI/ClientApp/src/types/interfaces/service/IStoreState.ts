@@ -1,5 +1,4 @@
 import {
-	DownloadTaskCreationProgress,
 	DownloadTaskDTO,
 	FileMergeProgress,
 	FolderPathDTO,
@@ -40,6 +39,5 @@ export default interface IStoreState extends SettingsModelDTO {
 	inspectServerProgress: InspectServerProgressDTO[];
 	serverConnectionCheckStatusProgress: ServerConnectionCheckStatusProgressDTO[];
 	syncServerProgress: SyncServerProgress[];
-	downloadTaskCreationProgress: DownloadTaskCreationProgress;
 	jobStatus: JobStatusUpdateDTO[];
 }

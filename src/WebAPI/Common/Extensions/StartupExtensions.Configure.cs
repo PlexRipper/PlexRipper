@@ -14,14 +14,17 @@ public static partial class StartupExtensions
         app.UseAuthorization();
         if (!EnvironmentExtensions.IsIntegrationTestMode())
         {
-            app.UseOpenApi(); // serve OpenAPI/Swagger documents
-            app.UseSwaggerUi3(); // serve Swagger UI
-            app.UseReDoc(configure => configure.Path = "/redoc");
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("v1/swagger.json", "PlexRipper Swagger API V1");
+                options.EnableFilter();
+            });
         }
 
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
+            endpoints.MapSwagger();
 
             // SignalR configuration
             endpoints.MapHub<ProgressHub>("/progress");

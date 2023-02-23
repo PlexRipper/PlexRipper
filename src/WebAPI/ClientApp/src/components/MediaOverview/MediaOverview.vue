@@ -85,22 +85,16 @@
 			<h1>{{ $t('components.media-overview.no-data') }}</h1>
 		</template>
 		<!--	Download confirmation dialog	-->
-		<download-confirmation
-			ref="downloadConfirmationRef"
-			:items="items"
-			:progress="downloadTaskCreationProgress"
-			@download="sendDownloadCommand"
-		/>
+		<download-confirmation ref="downloadConfirmationRef" :items="items" @download="sendDownloadCommand" />
 	</page-container>
 </template>
 
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
-import { finalize, tap } from 'rxjs/operators';
 import { useSubscription } from '@vueuse/rxjs';
 import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
-import { DownloadTaskCreationProgress, LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
+import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, SettingsService, SignalrService } from '@service';
 import { DetailsOverview, DownloadConfirmation, MediaTable } from '@mediaOverview';
 import { getTvShow } from '@api/mediaApi';
@@ -127,7 +121,6 @@ export default class MediaOverview extends Vue {
 	server: PlexServerDTO | null = null;
 	library: PlexLibraryDTO | null = null;
 	libraryProgress: LibraryProgress | null = null;
-	downloadTaskCreationProgress: DownloadTaskCreationProgress | null = null;
 	downloadPreviewType: PlexMediaType = PlexMediaType.None;
 	items: PlexMediaDTO[] = [];
 	detailItem: PlexMediaDTO | null = null;
@@ -353,24 +346,6 @@ export default class MediaOverview extends Vue {
 					}
 				}
 			}),
-		);
-
-		// Show DownloadTask creation progress window
-		useSubscription(
-			SignalrService.getDownloadTaskCreationProgress()
-				.pipe(
-					tap((data) => {
-						// TODO This needs to work with id's
-						this.downloadTaskCreationProgress = data;
-					}),
-					finalize(() => {
-						setTimeout(() => {
-							this.downloadConfirmationRef?.closeDialog();
-							this.downloadTaskCreationProgress = null;
-						}, 2000);
-					}),
-				)
-				.subscribe(() => {}),
 		);
 
 		// Retrieve server data

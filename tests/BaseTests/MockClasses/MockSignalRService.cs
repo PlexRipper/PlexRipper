@@ -1,6 +1,4 @@
-﻿using Application.Contracts;
-using BackgroundServices.Contracts;
-using PlexRipper.Application;
+﻿using BackgroundServices.Contracts;
 using WebAPI.Contracts;
 
 namespace PlexRipper.BaseTests;
@@ -9,7 +7,10 @@ public class MockSignalRService : ISignalRService
 {
     public void SendLibraryProgressUpdate(LibraryProgress libraryProgress) { }
 
-    public void SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true) { }
+    public Task SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true)
+    {
+        return Task.CompletedTask;
+    }
 
     public Task SendDownloadTaskCreationProgressUpdate(int current, int total)
     {
@@ -33,7 +34,10 @@ public class MockSignalRService : ISignalRService
         return Task.CompletedTask;
     }
 
-    public void SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress) { }
+    public Task SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress)
+    {
+        return Task.CompletedTask;
+    }
 
     public Task SendDownloadProgressUpdate(int plexServerId, List<DownloadTask> downloadTasks)
     {

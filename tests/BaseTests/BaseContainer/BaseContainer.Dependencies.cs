@@ -100,8 +100,6 @@ public partial class BaseContainer : IDisposable
 
     public IPlexLibraryService GetPlexLibraryService => Resolve<IPlexLibraryService>();
 
-    public IPlexRipperHttpClient GetPlexRipperHttpClient => Resolve<IPlexRipperHttpClient>();
-
     public IPlexServerService GetPlexServerService => Resolve<IPlexServerService>();
 
     public IMediator Mediator => Resolve<IMediator>();

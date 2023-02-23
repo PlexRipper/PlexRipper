@@ -13,7 +13,7 @@ namespace PlexRipper.DownloadManager;
 /// The <see cref="DownloadWorker"/> is part of the multi-threaded <see cref="PlexDownloadClient"/>
 /// and will download a part of the <see cref="DownloadTask"/>.
 /// </summary>
-public class DownloadWorker
+public class DownloadWorker : IDisposable
 {
     #region Fields
 
@@ -26,7 +26,7 @@ public class DownloadWorker
     private readonly ILog _log;
     private readonly IDownloadFileStream _downloadFileSystem;
 
-    private readonly IPlexRipperHttpClient _httpClient;
+    private readonly RestClient _httpClient;
 
     private readonly Timer _timer = new(100)
     {
@@ -53,12 +53,18 @@ public class DownloadWorker
         ILog log,
         DownloadWorkerTask downloadWorkerTask,
         IDownloadFileStream downloadFileSystem,
-        IPlexRipperHttpClient httpClient)
+        System.Net.Http.HttpClient httpClient)
     {
-        DownloadWorkerTask = downloadWorkerTask;
         _log = log;
         _downloadFileSystem = downloadFileSystem;
-        _httpClient = httpClient;
+        DownloadWorkerTask = downloadWorkerTask;
+
+        var options = new RestClientOptions()
+        {
+            MaxTimeout = 10000,
+            ThrowOnAnyError = false,
+        };
+        _httpClient = new RestClient(httpClient, options);
 
         _timer.Elapsed += (_, _) => { DownloadWorkerTask.ElapsedTime += (long)_timer.Interval; };
     }
@@ -161,6 +167,7 @@ public class DownloadWorker
     public void Dispose()
     {
         _destinationStream?.Close();
+        _httpClient.Dispose();
     }
 
     #endregion
@@ -186,7 +193,7 @@ public class DownloadWorker
             };
             request.AddRangeHeader(new RangeHeaderValue(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte));
 
-            await using var responseStream = await _httpClient.DownloadStream(request);
+            await using var responseStream = await _httpClient.DownloadStreamAsync(request);
 
             // Throttle the stream to enable download speed limiting
             var throttledStream = new ThrottledStream(responseStream, _downloadSpeedLimit);

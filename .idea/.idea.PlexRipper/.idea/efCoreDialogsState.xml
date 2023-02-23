@@ -3,6 +3,7 @@
   <component name="EfCoreDialogsState">
     <option name="keyValueStorage">
       <map>
+        <entry key="Common:92810180-c144-4d76-bb6b-b02134ca2c39:dbContext" value="PlexRipper.Data.PlexRipperDbContext" />
         <entry key="Common:buildConfiguration" value="Debug" />
         <entry key="Common:dbContext" value="PlexRipper.Data.PlexRipperDbContext" />
         <entry key="Common:noBuild" value="false" />

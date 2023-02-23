@@ -2,8 +2,8 @@
 using FluentValidation;
 using MediatR.Extensions.Autofac.DependencyInjection;
 using MediatR.Extensions.Autofac.DependencyInjection.Builder;
+using MediatR.Pipeline;
 using PlexRipper.Data;
-using PlexRipper.Domain.Behavior.Pipelines;
 
 namespace PlexRipper.WebAPI;
 
@@ -17,7 +17,6 @@ public class MediatrModule : Module
         var configuration = MediatRConfigurationBuilder
             .Create(assembly)
             .WithAllOpenGenericHandlerTypesRegistered()
-            .WithRegistrationScope(RegistrationScope.Transient)
             .Build();
         builder.RegisterMediatR(configuration);
 
@@ -32,5 +31,6 @@ public class MediatrModule : Module
 
         // Register Behavior Pipeline
         builder.RegisterGeneric(typeof(ValidationPipeline<,>)).As(typeof(IPipelineBehavior<,>));
+        builder.RegisterGeneric(typeof(ExceptionLoggingHandler<,,>)).As(typeof(IRequestExceptionHandler<,,>));
     }
 }

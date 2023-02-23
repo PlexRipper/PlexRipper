@@ -31,7 +31,6 @@ public class DownloadManagerModule : Module
         var configuration = MediatRConfigurationBuilder
             .Create(assembly)
             .WithAllOpenGenericHandlerTypesRegistered()
-            .WithRegistrationScope(RegistrationScope.Transient)
             .Build();
         builder.RegisterMediatR(configuration);
     }

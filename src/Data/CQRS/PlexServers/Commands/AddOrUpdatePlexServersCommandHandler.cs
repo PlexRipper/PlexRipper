@@ -61,7 +61,7 @@ public class AddOrUpdatePlexServersCommandHandler : BaseHandler, IRequestHandler
                 _dbContext.PlexServers.Add(plexServer);
                 foreach (var plexServerConnection in plexServer.PlexServerConnections)
                 {
-                    _log.Here().Debug("Creating connection {@PlexServerConnection} from {PlexServerName} in the database", plexServerConnection, plexServer.Name);
+                    _log.Here().Debug("Creating connection {PlexServerConnection} from {PlexServerName} in the database", plexServerConnection.ToString(), plexServer.Name);
                     plexServerConnection.PlexServerId = plexServer.Id;
                 }
 

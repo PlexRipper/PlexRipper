@@ -6,6 +6,7 @@ namespace FileSystem.Contracts;
 public interface IFileMergeScheduler
 {
     Task<Result> StartFileMergeJob(int fileTaskId);
+
     Task<Result> StopFileMergeJob(int fileTaskId);
 
     /// <summary>

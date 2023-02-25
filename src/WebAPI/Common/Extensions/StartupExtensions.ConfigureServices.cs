@@ -22,27 +22,20 @@ public static partial class StartupExtensions
 
         services.SetupControllers();
 
-        services.SetupFrontEnd(env);
-
-        services.SetupSignalR();
-
         if (!EnvironmentExtensions.IsIntegrationTestMode())
+        {
+            services.SetupFrontEnd(env);
+            services.SetupSignalR();
             services.SetupOpenApiDocumentation();
+        }
 
         services.AddOptions();
 
         services.AddHttpClient();
+
         // This will disable all the build-in HttpClient logging
         // Source: https://stackoverflow.com/a/52970073/8205497
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
-    }
-
-    public static void SetupTestConfigureServices(IServiceCollection services, IWebHostEnvironment env)
-    {
-        services.SetupCors();
-        services.SetupControllers();
-        services.AddOptions();
-        services.AddHttpClient();
     }
 
     public static void SetupCors(this IServiceCollection services)

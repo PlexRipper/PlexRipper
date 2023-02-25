@@ -24,29 +24,21 @@ public static partial class StartupExtensions
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
-            endpoints.MapSwagger();
+            if (!EnvironmentExtensions.IsIntegrationTestMode())
+            {
+                endpoints.MapSwagger();
 
-            // SignalR configuration
-            endpoints.MapHub<ProgressHub>("/progress");
-            endpoints.MapHub<NotificationHub>("/notifications");
+                // SignalR configuration
+                endpoints.MapHub<ProgressHub>("/progress");
+                endpoints.MapHub<NotificationHub>("/notifications");
+            }
         });
 
-        // Used to deploy the front-end Nuxt client
-        if (env.IsProduction())
+        if (!EnvironmentExtensions.IsIntegrationTestMode() && env.IsProduction())
         {
+            // Used to deploy the front-end Nuxt client
             app.UseSpaStaticFiles();
             app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
         }
-    }
-
-    public static void SetupTestConfigure(IApplicationBuilder app, IWebHostEnvironment env)
-    {
-        app.UseRouting();
-
-        app.UseCors(CORSConfiguration);
-
-        app.UseAuthorization();
-
-        app.UseEndpoints(endpoints => endpoints.MapControllers());
     }
 }

@@ -1,4 +1,3 @@
-using Environment;
 using Logging.Interface;
 using PlexRipper.WebAPI.Common.Extensions;
 
@@ -29,10 +28,7 @@ public sealed class Startup
     /// <param name="services"></param>
     public void ConfigureServices(IServiceCollection services)
     {
-        if (EnvironmentExtensions.IsIntegrationTestMode())
-            StartupExtensions.SetupTestConfigureServices(services, CurrentEnvironment);
-        else
-            StartupExtensions.SetupConfigureServices(services, CurrentEnvironment);
+        StartupExtensions.SetupConfigureServices(services, CurrentEnvironment);
     }
 
     /// <summary>
@@ -41,9 +37,6 @@ public sealed class Startup
     /// <param name="app">The <see cref="IApplicationBuilder"/> instance to configure.</param>
     public void Configure(IApplicationBuilder app)
     {
-        if (EnvironmentExtensions.IsIntegrationTestMode())
-            StartupExtensions.SetupTestConfigure(app, CurrentEnvironment);
-        else
-            StartupExtensions.SetupConfigure(app, CurrentEnvironment);
+        StartupExtensions.SetupConfigure(app, CurrentEnvironment);
     }
 }

@@ -82,7 +82,7 @@ public class UserSettings : IUserSettings
 
     public void Reset()
     {
-        _log.Information("Resetting UserSettings", 0);
+        _log.InformationLine("Resetting UserSettings");
 
         _confirmationSettingsModule.Reset();
         _dateTimeSettingsModule.Reset();

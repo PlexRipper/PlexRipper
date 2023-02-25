@@ -2,7 +2,6 @@ using System.Net.Http.Headers;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ByteSizeLib;
-using HttpClient.Contracts;
 using Logging.Interface;
 using RestSharp;
 using Timer = System.Timers.Timer;
@@ -13,7 +12,7 @@ namespace PlexRipper.DownloadManager;
 /// The <see cref="DownloadWorker"/> is part of the multi-threaded <see cref="PlexDownloadClient"/>
 /// and will download a part of the <see cref="DownloadTask"/>.
 /// </summary>
-public class DownloadWorker
+public class DownloadWorker : IDisposable
 {
     #region Fields
 
@@ -23,10 +22,11 @@ public class DownloadWorker
 
     private readonly Subject<DownloadWorkerTask> _downloadWorkerUpdate = new();
 
-    private readonly ILog _log;
+    private readonly ILog<DownloadWorker> _log;
+
     private readonly IDownloadFileStream _downloadFileSystem;
 
-    private readonly IPlexRipperHttpClient _httpClient;
+    private readonly RestClient _httpClient;
 
     private readonly Timer _timer = new(100)
     {
@@ -46,19 +46,28 @@ public class DownloadWorker
     /// <summary>
     /// Initializes a new instance of the <see cref="DownloadWorker"/> class.
     /// </summary>
+    /// <param name="log"></param>
     /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
     /// <param name="downloadFileSystem">The filesystem used to store the downloaded data.</param>
-    /// <param name="httpClient"></param>
+    /// <param name="httpClientFactory"></param>
     public DownloadWorker(
-        ILog log,
+        ILog<DownloadWorker> log,
         DownloadWorkerTask downloadWorkerTask,
         IDownloadFileStream downloadFileSystem,
-        IPlexRipperHttpClient httpClient)
+        IHttpClientFactory httpClientFactory
+    )
     {
-        DownloadWorkerTask = downloadWorkerTask;
         _log = log;
         _downloadFileSystem = downloadFileSystem;
-        _httpClient = httpClient;
+        DownloadWorkerTask = downloadWorkerTask;
+
+        var options = new RestClientOptions()
+        {
+            MaxTimeout = 10000,
+            ThrowOnAnyError = false,
+        };
+
+        _httpClient = new RestClient(httpClientFactory.CreateClient(), options);
 
         _timer.Elapsed += (_, _) => { DownloadWorkerTask.ElapsedTime += (long)_timer.Interval; };
     }
@@ -93,7 +102,7 @@ public class DownloadWorker
 
     public Result Start()
     {
-        _log.Debug("Download worker with id: {Id} start for filename: {FileName}", Id, FileName, 0);
+        _log.Here().Debug("Download worker with id: {Id} start for filename: {FileName}", Id, FileName);
 
         // Create and check Filestream to which to download.
         var _fileStreamResult =
@@ -161,6 +170,7 @@ public class DownloadWorker
     public void Dispose()
     {
         _destinationStream?.Close();
+        _httpClient.Dispose();
     }
 
     #endregion
@@ -184,9 +194,10 @@ public class DownloadWorker
             {
                 CompletionOption = HttpCompletionOption.ResponseHeadersRead,
             };
-            request.AddRangeHeader(new RangeHeaderValue(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte));
 
-            await using var responseStream = await _httpClient.DownloadStream(request);
+            request.AddHeader("Range", new RangeHeaderValue(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte).ToString());
+
+            await using var responseStream = await _httpClient.DownloadStreamAsync(request);
 
             // Throttle the stream to enable download speed limiting
             var throttledStream = new ThrottledStream(responseStream, _downloadSpeedLimit);
@@ -237,7 +248,7 @@ public class DownloadWorker
         if (errorResult.Errors.Any() && !errorResult.Errors[0].Metadata.ContainsKey(nameof(DownloadWorker) + "Id"))
             errorResult.Errors[0].Metadata.Add(nameof(DownloadWorker) + "Id", Id);
 
-        _log.Error("Download worker {Id} with {FileName} had an error!", Id, FileName, 0);
+        _log.Here().Error("Download worker {Id} with {FileName} had an error!", Id, FileName);
         DownloadWorkerTask.DownloadStatus = DownloadStatus.Error;
 
         SendDownloadWorkerLog(NotificationLevel.Error, errorResult.ToString());

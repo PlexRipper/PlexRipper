@@ -14,36 +14,31 @@ public static partial class StartupExtensions
         app.UseAuthorization();
         if (!EnvironmentExtensions.IsIntegrationTestMode())
         {
-            app.UseOpenApi(); // serve OpenAPI/Swagger documents
-            app.UseSwaggerUi3(); // serve Swagger UI
-            app.UseReDoc(configure => configure.Path = "/redoc");
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("v1/swagger.json", "PlexRipper Swagger API V1");
+                options.EnableFilter();
+            });
         }
 
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
+            if (!EnvironmentExtensions.IsIntegrationTestMode())
+            {
+                endpoints.MapSwagger();
 
-            // SignalR configuration
-            endpoints.MapHub<ProgressHub>("/progress");
-            endpoints.MapHub<NotificationHub>("/notifications");
+                // SignalR configuration
+                endpoints.MapHub<ProgressHub>("/progress");
+                endpoints.MapHub<NotificationHub>("/notifications");
+            }
         });
 
-        // Used to deploy the front-end Nuxt client
-        if (env.IsProduction())
+        if (!EnvironmentExtensions.IsIntegrationTestMode() && env.IsProduction())
         {
+            // Used to deploy the front-end Nuxt client
             app.UseSpaStaticFiles();
             app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
         }
-    }
-
-    public static void SetupTestConfigure(IApplicationBuilder app, IWebHostEnvironment env)
-    {
-        app.UseRouting();
-
-        app.UseCors(CORSConfiguration);
-
-        app.UseAuthorization();
-
-        app.UseEndpoints(endpoints => endpoints.MapControllers());
     }
 }

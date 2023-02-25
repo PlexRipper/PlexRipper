@@ -1,8 +1,6 @@
-using System.Linq;
-using System.Threading.Tasks;
 using PlexRipper.Data.Common;
 
-namespace BackgroundServices.IntegrationTests.DownloadTaskScheduler;
+namespace DownloadManager.IntegrationTests.DownloadTaskScheduler;
 
 [Collection("Sequential")]
 public class StartDownloadJob_IntegrationTests : BaseIntegrationTests
@@ -47,5 +45,41 @@ public class StartDownloadJob_IntegrationTests : BaseIntegrationTests
             .FirstOrDefault(x => x.Id == childDownloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
+    }
+
+    [Fact]
+    public async Task ShouldSendOutDownloadTaskUpdates_WhenDownloadTaskIsInProgress()
+    {
+        // Arrange
+        Seed = 4564;
+        var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
+        await SetupDatabase(config =>
+        {
+            config.MockServerUris.Add(serverUri);
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 3;
+            config.MovieCount = 1;
+            config.MovieDownloadTasksCount = 1;
+            config.DownloadFileSizeInMb = 50;
+        });
+
+        SetupMockPlexApi();
+
+        await CreateContainer(config => { config.DownloadSpeedLimitInKib = 5000; });
+
+        var downloadTask = DbContext
+            .DownloadTasks
+            .IncludeDownloadTasks()
+            .FirstOrDefault();
+        downloadTask.ShouldNotBeNull();
+        var childDownloadTask = downloadTask.Children[0];
+
+        // Act
+        var startResult = await Container.DownloadTaskScheduler.StartDownloadTaskJob(childDownloadTask.Id, childDownloadTask.PlexServerId);
+        await Container.SchedulerService.AwaitScheduler();
+
+        // Assert
+        startResult.IsSuccess.ShouldBeTrue();
+        Container.MockSignalRService.DownloadTaskUpdate.Count.ShouldBeGreaterThan(10);
     }
 }

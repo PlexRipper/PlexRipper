@@ -23,7 +23,7 @@ public class CreateAccountHandler : BaseHandler, IRequestHandler<CreatePlexAccou
 
     public async Task<Result<int>> Handle(CreatePlexAccountCommand command, CancellationToken cancellationToken)
     {
-        _log.Debug("Creating a new Account in DB", 0);
+        _log.DebugLine("Creating a new Account in DB");
 
         await _dbContext.PlexAccounts.AddAsync(command.PlexAccount, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);

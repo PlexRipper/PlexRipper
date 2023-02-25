@@ -46,13 +46,13 @@ public class Boot : IBoot
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        _log.Information("Shutting down the container", 0);
+        _log.InformationLine("Shutting down the container");
         await _schedulerService.StopAsync();
     }
 
     public async Task WaitForStartAsync(CancellationToken cancellationToken)
     {
-        _log.Information("Initiating boot process", 0);
+        _log.InformationLine("Initiating boot process");
         ServicePointManager.DefaultConnectionLimit = 1000;
 
         _configManager.Setup();
@@ -63,7 +63,7 @@ public class Boot : IBoot
         _appLifetime.ApplicationStopping.Register(OnStopping);
         _appLifetime.ApplicationStopped.Register(OnStopped);
 
-        _log.Information("Finished Initiating boot process", 0);
+        _log.InformationLine("Finished Initiating boot process");
     }
 
     #endregion
@@ -72,21 +72,21 @@ public class Boot : IBoot
 
     private void OnStarted()
     {
-        _log.Information("Boot.OnStarted has been called", 0);
+        _log.InformationLine("Boot.OnStarted has been called");
 
         // Perform post-startup activities here
     }
 
     private void OnStopped()
     {
-        _log.Information("Boot.OnStopped has been called", 0);
+        _log.InformationLine("Boot.OnStopped has been called");
 
         // Perform post-stopped activities here
     }
 
     private void OnStopping()
     {
-        _log.Information("Boot.OnStopping has been called", 0);
+        _log.InformationLine("Boot.OnStopping has been called");
 
         // Perform on-stopping activities here
     }

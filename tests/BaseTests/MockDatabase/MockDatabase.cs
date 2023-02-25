@@ -46,8 +46,8 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        _log.Debug("Added {PlexServerCount} {NameOfPlexServer}s to {NameOfPlexRipperDbContext}: {DatabaseName}", config.PlexServerCount,
-            nameof(PlexServer), nameof(PlexRipperDbContext), context.DatabaseName, 0);
+        _log.Here().Debug("Added {PlexServerCount} {NameOfPlexServer}s to {NameOfPlexRipperDbContext}: {DatabaseName}", config.PlexServerCount,
+            nameof(PlexServer), nameof(PlexRipperDbContext), context.DatabaseName);
         return context;
     }
 
@@ -100,8 +100,8 @@ public static class MockDatabase
         await context.PlexAccounts.AddAsync(plexAccount);
         await context.SaveChangesAsync();
 
-        _log.Debug("Added 1 {NameOfPlexAccount}: {PlexAccountTitle} to PlexRipperDbContext: {DatabaseName}", nameof(PlexAccount), plexAccount.Title,
-            context.DatabaseName, 0);
+        _log.Here().Debug("Added 1 {NameOfPlexAccount}: {PlexAccountTitle} to PlexRipperDbContext: {DatabaseName}", nameof(PlexAccount), plexAccount.Title,
+            context.DatabaseName);
 
         var plexAccountServer = plexServers.Select(x => new PlexAccountServer
         {
@@ -233,7 +233,7 @@ public static class MockDatabase
         context.HasBeenSetup = true;
 
         // PlexServers and Libraries added
-        _log.Debug("Setting up {NameOfPlexRipperDbContext} for {DatabaseName}", nameof(PlexRipperDbContext), context.DatabaseName, 0);
+        _log.Here().Debug("Setting up {NameOfPlexRipperDbContext} for {DatabaseName}", nameof(PlexRipperDbContext), context.DatabaseName);
 
         if (config.PlexServerCount > 0)
             context = await context.AddPlexServers(options);
@@ -296,8 +296,7 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        _log.Debug("Added {MovieDownloadTasksCount} Movie {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}", config.MovieDownloadTasksCount,
-            nameof(DownloadTask), context.DatabaseName, 0);
+        _log.Here().Debug("Added {MovieDownloadTasksCount} Movie {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}", config.MovieDownloadTasksCount, nameof(DownloadTask), context.DatabaseName);
 
         return context;
     }
@@ -330,8 +329,7 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        _log.Debug("Added {TvShowDownloadTasksCount} TvShow {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}", config.TvShowDownloadTasksCount,
-            nameof(DownloadTask), context.DatabaseName, 0);
+        _log.Here().Debug("Added {TvShowDownloadTasksCount} TvShow {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}", config.TvShowDownloadTasksCount, nameof(DownloadTask), context.DatabaseName);
 
         return context;
     }
@@ -362,8 +360,7 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        _log.Debug("Added {MovieCount} {NameOfPlexMovie}s to PlexRipperDbContext: {DatabaseName}", config.MovieCount, nameof(PlexMovie),
-            context.DatabaseName, 0);
+        _log.Here().Debug("Added {MovieCount} {NameOfPlexMovie}s to PlexRipperDbContext: {DatabaseName}", config.MovieCount, nameof(PlexMovie), context.DatabaseName);
 
         return context;
     }
@@ -405,8 +402,7 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        _log.Debug("Added {TvShowCount} {NameOfPlexTvShow}s to PlexRipperDbContext: {DatabaseName}", config.TvShowCount, nameof(PlexTvShow),
-            context.DatabaseName, 0);
+        _log.Here().Debug("Added {TvShowCount} {NameOfPlexTvShow}s to PlexRipperDbContext: {DatabaseName}", config.TvShowCount, nameof(PlexTvShow), context.DatabaseName);
 
         return context;
     }

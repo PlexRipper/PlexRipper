@@ -15,7 +15,7 @@
 <script lang="ts">
 import Log from 'consola';
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
+import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ITreeViewTableHeader from '@components/General/VTreeViewTable/ITreeViewTableHeader';
 import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
 import ITreeDownloadItem from '@mediaOverview/MediaTable/types/ITreeDownloadItem';
@@ -40,8 +40,6 @@ export default class MediaTable extends Vue {
 	expanded: string[] = [];
 
 	openDownloadPreviews: number[] = [];
-
-	progress: DownloadTaskCreationProgress | null = null;
 
 	visible: boolean[] = [];
 	loadingButtons: string[] = [];

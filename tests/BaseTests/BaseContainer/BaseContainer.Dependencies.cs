@@ -7,7 +7,6 @@ using BackgroundServices.Contracts;
 using DownloadManager.Contracts;
 using Environment;
 using FileSystem.Contracts;
-using HttpClient.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +15,7 @@ using PlexRipper.Data;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI;
 using Settings.Contracts;
+using WebAPI.Contracts;
 
 #endregion
 
@@ -100,8 +100,6 @@ public partial class BaseContainer : IDisposable
 
     public IPlexLibraryService GetPlexLibraryService => Resolve<IPlexLibraryService>();
 
-    public IPlexRipperHttpClient GetPlexRipperHttpClient => Resolve<IPlexRipperHttpClient>();
-
     public IPlexServerService GetPlexServerService => Resolve<IPlexServerService>();
 
     public IMediator Mediator => Resolve<IMediator>();
@@ -115,6 +113,7 @@ public partial class BaseContainer : IDisposable
     public ISchedulerService SchedulerService => Resolve<ISchedulerService>();
 
     public IDownloadTaskScheduler DownloadTaskScheduler => Resolve<IDownloadTaskScheduler>();
+    public MockSignalRService MockSignalRService => (MockSignalRService) Resolve<ISignalRService>();
 
     public TestLoggingClass TestLoggingClass => Resolve<TestLoggingClass>();
 

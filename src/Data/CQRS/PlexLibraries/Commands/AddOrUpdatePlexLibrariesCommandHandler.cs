@@ -53,7 +53,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
 
             if (plexLibraryDB == null)
             {
-                _log.Debug("Adding {PlexLibraryName} {PlexLibraryTitle} to the database", nameof(plexLibrary), plexLibrary.Title, 0);
+                _log.Here().Debug("Adding {PlexLibraryName} {PlexLibraryTitle} to the database", nameof(plexLibrary), plexLibrary.Title);
                 await _dbContext.PlexLibraries.AddAsync(plexLibrary, cancellationToken);
             }
             else
@@ -85,9 +85,9 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
             if (plexAccountLibrary == null)
             {
                 // Add entry
-                _log.Debug(
+                _log.Here().Debug(
                     "PlexAccount: {PlexAccountDisplayName} does not have an association with PlexLibrary: {PlexLibraryName} of PlexServer: {PlexServerName} creating one now with the authentication token now",
-                    plexAccount.DisplayName, plexLibrary.Name, plexServer.Name, 0);
+                    plexAccount.DisplayName, plexLibrary.Name, plexServer.Name);
 
                 await _dbContext.PlexAccountLibraries.AddAsync(new PlexAccountLibrary
                 {
@@ -99,9 +99,9 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
             else
             {
                 // Update entry
-                _log.Debug(
+                _log.Here().Debug(
                     "PlexAccount: {PlexAccountDisplayName} already has an association with PlexLibrary: {PlexLibraryName} of PlexServer: {PlexServerName} skipping for now",
-                    plexAccount.DisplayName, plexLibrary.Name, plexServer.Name, 0);
+                    plexAccount.DisplayName, plexLibrary.Name, plexServer.Name);
             }
         }
 

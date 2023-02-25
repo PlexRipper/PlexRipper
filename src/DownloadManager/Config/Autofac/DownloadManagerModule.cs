@@ -4,6 +4,7 @@ using Autofac.Extras.Quartz;
 using BackgroundServices.Contracts;
 using DownloadManager.Contracts;
 using MediatR.Extensions.Autofac.DependencyInjection;
+using MediatR.Extensions.Autofac.DependencyInjection.Builder;
 using Module = Autofac.Module;
 
 namespace PlexRipper.DownloadManager;
@@ -25,6 +26,12 @@ public class DownloadManagerModule : Module
         builder.RegisterType<PlexDownloadClient>().InstancePerDependency();
 
         builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
-        builder.RegisterMediatR(assembly);
+
+        // MediatR
+        var configuration = MediatRConfigurationBuilder
+            .Create(assembly)
+            .WithAllOpenGenericHandlerTypesRegistered()
+            .Build();
+        builder.RegisterMediatR(configuration);
     }
 }

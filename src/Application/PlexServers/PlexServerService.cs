@@ -55,8 +55,7 @@ public class PlexServerService : IPlexServerService
         var plexAccount = plexAccountResult.Value;
         var plexServers = plexAccountResult.Value.PlexServers;
 
-        _log.Information("Inspecting {PlexServersCount} PlexServers for PlexAccount: {PlexAccountDisplayName}", plexServers.Count,
-            plexAccountResult.Value.DisplayName, 0);
+        _log.Here().Information("Inspecting {PlexServersCount} PlexServers for PlexAccount: {PlexAccountDisplayName}", plexServers.Count, plexAccountResult.Value.DisplayName);
         if (!skipRefreshAccessibleServers)
         {
             var refreshResult = await RefreshAccessiblePlexServersAsync(plexAccount.Id);
@@ -67,8 +66,10 @@ public class PlexServerService : IPlexServerService
             // await _plexLibraryService.RetrieveAccessibleLibrariesAsync(plexAccountId,)
         }
         else
-            _log.Warning("Skipping {NameOfRefreshAccessiblePlexServersAsync} in {NameOfInspectAllPlexServersByAccountId}",
-                nameof(RefreshAccessiblePlexServersAsync), nameof(InspectAllPlexServersByAccountId), 0);
+        {
+            _log.Here().Warning("Skipping {NameOfRefreshAccessiblePlexServersAsync} in {NameOfInspectAllPlexServersByAccountId}",
+                nameof(RefreshAccessiblePlexServersAsync), nameof(InspectAllPlexServersByAccountId));
+        }
 
         // Create connection check tasks for all connections
         var checkResult = await _plexServerConnectionsService.CheckAllConnectionsOfPlexServersByAccountIdAsync(plexAccount.Id);

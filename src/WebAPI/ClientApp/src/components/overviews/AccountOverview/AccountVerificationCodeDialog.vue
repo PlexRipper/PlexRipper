@@ -44,15 +44,15 @@
 import Log from 'consola';
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import CodeInput from 'vue-verification-code-input';
-import { Error } from '@dto/mainApi';
+import { IError } from '@dto/mainApi';
 
 @Component<AccountVerificationCodeDialog>({ components: { CodeInput } })
 export default class AccountVerificationCodeDialog extends Vue {
 	@Prop({ required: false, type: Boolean, default: false })
 	readonly dialog!: boolean;
 
-	@Prop({ required: true, type: Array as () => Error[] })
-	readonly errors!: Error[];
+	@Prop({ required: true, type: Array as () => IError[] })
+	readonly errors!: IError[];
 
 	@Watch('errors')
 	onChildChanged(val: string) {

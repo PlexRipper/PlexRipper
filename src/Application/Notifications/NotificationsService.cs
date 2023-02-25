@@ -58,7 +58,7 @@ public class NotificationsService : INotificationsService
                     return notificationId.ToResult();
 
                 notification.Id = notificationId.Value;
-                await _signalRService.SendNotification(notification);
+                await _signalRService.SendNotificationAsync(notification);
             }
         }
 

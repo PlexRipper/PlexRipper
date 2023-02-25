@@ -8,7 +8,6 @@ import { isEqual } from 'lodash-es';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService } from '@service';
 import {
-	DownloadTaskCreationProgress,
 	DownloadTaskDTO,
 	FileMergeProgress,
 	InspectServerProgressDTO,
@@ -91,10 +90,6 @@ export class SignalrService extends BaseService {
 		this._progressHubConnection?.on(MessageTypes.ServerDownloadProgress, (data: ServerDownloadProgressDTO) => {
 			// TODO Each subscription should work like this, every subscription here should pass its values to the designated services for that type
 			this._serverDownloadProgress.next(data);
-		});
-
-		this._progressHubConnection?.on(MessageTypes.DownloadTaskCreationProgress, (data: DownloadTaskCreationProgress) => {
-			this.updateStore('downloadTaskCreationProgress', data);
 		});
 
 		this._progressHubConnection?.on(MessageTypes.FileMergeProgress, (data: FileMergeProgress) => {
@@ -286,14 +281,6 @@ export class SignalrService extends BaseService {
 		return this.getAllLibraryProgress().pipe(
 			map((x) => x?.find((x) => x.id === libraryId) ?? null),
 			// @ts-ignore
-			filter((progress) => !!progress),
-			distinctUntilChanged(isEqual),
-		);
-	}
-
-	public getDownloadTaskCreationProgress(): Observable<DownloadTaskCreationProgress> {
-		return this.stateChanged.pipe(
-			map((x) => x?.downloadTaskCreationProgress ?? null),
 			filter((progress) => !!progress),
 			distinctUntilChanged(isEqual),
 		);

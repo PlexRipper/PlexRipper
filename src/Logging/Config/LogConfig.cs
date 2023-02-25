@@ -1,4 +1,5 @@
 using Environment;
+using Logging.Common;
 using Logging.Enricher;
 using Serilog;
 using Serilog.Core;
@@ -14,13 +15,9 @@ public static class LogConfig
     #region Properties
 
     public static readonly string Template =
-        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{ClassNamePropertyName}}}.{{{MemberNamePropertyName}}}:{{{LineNumberPropertyName}}}] => {{Message}}{{NewLine}}{{Exception}}";
+        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(LogMetaData.ClassName)}}}.{{{nameof(LogMetaData.MethodName)}}}:{{{nameof(LogMetaData.LineNumber)}}}] => {{Message}}{{NewLine}}{{Exception}}";
 
     public static MessageTemplateTextFormatter TemplateTextFormatter => new(Template);
-
-    public static string ClassNamePropertyName => "ClassName";
-    public static string MemberNamePropertyName => "MemberName";
-    public static string LineNumberPropertyName => "LineNumber";
 
     #endregion
 
@@ -31,7 +28,6 @@ public static class LogConfig
     public static LoggerConfiguration GetBaseConfiguration()
     {
         return new LoggerConfiguration()
-            .MinimumLevel.Verbose()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
             .MinimumLevel.Override("Quartz", LogEventLevel.Information)
@@ -74,9 +70,9 @@ public static class LogConfig
 
         // Test Logger
         return GetBaseConfiguration()
-            .MinimumLevel.Is(minimumLogLevel)
             .WriteTo.TestOutput(_testOutput, TemplateTextFormatter, minimumLogLevel)
             .WriteTo.TestCorrelator(minimumLogLevel)
+            .MinimumLevel.Is(minimumLogLevel)
             .CreateLogger();
     }
 }

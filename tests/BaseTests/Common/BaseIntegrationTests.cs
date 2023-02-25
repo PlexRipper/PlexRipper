@@ -71,8 +71,7 @@ public class BaseIntegrationTests : IAsyncLifetime
     {
         if (Container is not null)
         {
-            _log.Error("{NameOfCreateContainer}() has already been called, cannot {NameOfSetupMockPlexApi}()", nameof(CreateContainer),
-                nameof(SetupMockPlexApi), 0);
+            _log.Here().Error("{NameOfCreateContainer}() has already been called, cannot {NameOfSetupMockPlexApi}()", nameof(CreateContainer), nameof(SetupMockPlexApi));
 
             // throw new Exception(msg);
         }
@@ -156,7 +155,7 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     public Task InitializeAsync()
     {
-        _log.Information("Initialize Integration Test", 0);
+        _log.InformationLine("Initialize Integration Test");
         return Task.CompletedTask;
     }
 

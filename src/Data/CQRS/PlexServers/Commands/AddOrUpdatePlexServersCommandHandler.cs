@@ -61,7 +61,7 @@ public class AddOrUpdatePlexServersCommandHandler : BaseHandler, IRequestHandler
                 _dbContext.PlexServers.Add(plexServer);
                 foreach (var plexServerConnection in plexServer.PlexServerConnections)
                 {
-                    _log.Debug("Creating connection {@PlexServerConnection} from {PlexServerName} in the database", plexServerConnection, plexServer.Name, 0);
+                    _log.Here().Debug("Creating connection {@PlexServerConnection} from {PlexServerName} in the database", plexServerConnection, plexServer.Name);
                     plexServerConnection.PlexServerId = plexServer.Id;
                 }
 
@@ -85,13 +85,13 @@ public class AddOrUpdatePlexServersCommandHandler : BaseHandler, IRequestHandler
             if (connectionDb is null)
             {
                 // Creating Connection
-                _log.Debug("Creating connection {@PlexServerConnection} from {PlexServerName} in the database", plexServerConnection, plexServerDB.Name, 0);
+                _log.Here().Debug("Creating connection {PlexServerConnection} from {PlexServerName} in the database", plexServerConnection.ToString(), plexServerDB.Name);
                 _dbContext.PlexServerConnections.Add(plexServerConnection);
             }
             else
             {
                 // Updating Connection
-                _log.Debug("Updating connection {@PlexServerConnection} from {PlexServerName} in the database", plexServerConnection, plexServerDB.Name, 0);
+                _log.Here().Debug("Updating connection {PlexServerConnection} from {PlexServerName} in the database", plexServerConnection.ToString(), plexServerDB.Name);
                 plexServerConnection.Id = connectionDb.Id;
                 _dbContext.Entry(connectionDb).CurrentValues.SetValues(plexServerConnection);
             }
@@ -104,7 +104,7 @@ public class AddOrUpdatePlexServersCommandHandler : BaseHandler, IRequestHandler
             var connection = plexServer.PlexServerConnections.Find(x => x.Address == plexServerConnectionDB.Address);
             if (connection is null)
             {
-                _log.Debug("Removing connection {@PlexServerConnection} from {PlexServerName} in the database", plexServerConnectionDB, plexServerDB.Name, 0);
+                _log.Here().Debug("Removing connection {PlexServerConnection} from {PlexServerName} in the database", plexServerConnectionDB.ToString(), plexServerDB.Name);
 
                 _dbContext.Entry(plexServerConnectionDB).State = EntityState.Deleted;
             }

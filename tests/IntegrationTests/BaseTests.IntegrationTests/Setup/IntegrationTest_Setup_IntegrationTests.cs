@@ -26,7 +26,6 @@ public class IntegrationTest_Setup : BaseIntegrationTests
         Container.GetPlexApiService.ShouldNotBeNull();
         Container.GetPlexDownloadService.ShouldNotBeNull();
         Container.GetPlexLibraryService.ShouldNotBeNull();
-        Container.GetPlexRipperHttpClient.ShouldNotBeNull();
         Container.GetPlexServerService.ShouldNotBeNull();
         Container.Mediator.ShouldNotBeNull();
         Container.PathProvider.ShouldNotBeNull();

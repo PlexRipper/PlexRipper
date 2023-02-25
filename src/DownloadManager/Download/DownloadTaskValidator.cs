@@ -81,8 +81,8 @@ public class DownloadTaskValidator : IDownloadTaskValidator
             var downloadTask = downloadTasks[i];
 
             // Check validity
-            _log.Debug("Validating DownloadTask {Index} of {DownloadTasksCount} with title {DownloadTaskFullTitle}", i + 1, downloadTasks.Count.ToString(),
-                downloadTask.FullTitle, 0);
+            _log.Here().Debug("Validating DownloadTask {Index} of {DownloadTasksCount} with title {DownloadTaskFullTitle}", i + 1, downloadTasks.Count.ToString(),
+                downloadTask.FullTitle);
 
             var validationResult = validator.Validate(downloadTask).ToFluentResult();
             if (validationResult.IsFailed)
@@ -93,8 +93,10 @@ public class DownloadTaskValidator : IDownloadTaskValidator
                 result.AddNestedErrors(validationResult.Errors);
             }
             else
-                _log.Debug("DownloadTask {Index} of {DownloadTasksCount} with title {DownloadTaskFullTitle} was valid", i + 1, downloadTasks.Count.ToString(),
-                    downloadTask.FullTitle, 0);
+            {
+                _log.Here().Debug("DownloadTask {Index} of {DownloadTasksCount} with title {DownloadTaskFullTitle} was valid", i + 1, downloadTasks.Count.ToString(),
+                    downloadTask.FullTitle);
+            }
         }
 
         // All download tasks failed validation
@@ -108,6 +110,7 @@ public class DownloadTaskValidator : IDownloadTaskValidator
             return Result.Ok(downloadTasks.Except(failedList).ToList());
         }
 
+        _log.Information("All {DownloadTasksCount} downloadTasks passed validation!", downloadTasks.Count);
         return Result.Ok(downloadTasks);
     }
 

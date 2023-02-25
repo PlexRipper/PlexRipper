@@ -70,7 +70,7 @@
 import Log from 'consola';
 import { Component, Ref, Vue } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
-import { Error, PlexAccountDTO } from '@dto/mainApi';
+import { IError, PlexAccountDTO } from '@dto/mainApi';
 import { validateAccount } from '@api/accountApi';
 import { AccountService } from '@service';
 import AccountVerificationCodeDialog from '@overviews/AccountOverview/AccountVerificationCodeDialog.vue';
@@ -101,7 +101,7 @@ export default class AccountDialog extends Vue {
 
 	private saving: boolean = false;
 
-	private validateErrors: Error[] = [];
+	private validateErrors: IError[] = [];
 
 	private confirmationDialogState: Boolean = false;
 	private verificationCodeDialogState: Boolean = false;

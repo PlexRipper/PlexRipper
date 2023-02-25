@@ -26,7 +26,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler : BaseHandler, IRequest
         var serverAccessTokens = command.ServerAccessTokens;
 
         // Add or update the PlexAccount and PlexServer relationships
-        _log.Information("Adding or updating the PlexAccount association with PlexServers now", 0);
+        _log.InformationLine("Adding or updating the PlexAccount association with PlexServers now");
         var accessiblePlexServers = new List<int>();
         foreach (var serverAccessToken in serverAccessTokens)
         {
@@ -48,9 +48,9 @@ public class AddOrUpdatePlexAccountServersCommandHandler : BaseHandler, IRequest
             if (plexAccountServer is null)
             {
                 // Create entry
-                _log.Debug(
+                _log.Here().Debug(
                     "PlexAccount {PlexAccountDisplayName} does not have an association with PlexServer: {PlexServerName}, creating one now with the authentication token",
-                    plexAccount.DisplayName, plexServer.Name, 0);
+                    plexAccount.DisplayName, plexServer.Name);
                 var accountServerEntry = new PlexAccountServer
                 {
                     PlexAccountId = plexAccount.Id,
@@ -63,15 +63,14 @@ public class AddOrUpdatePlexAccountServersCommandHandler : BaseHandler, IRequest
             else
             {
                 // Update entry
-                _log.Debug(
-                    "PlexAccount {PlexAccountDisplayName}  already has an association with PlexServer: {PlexServerName}, updating authentication token now",
-                    plexAccount.DisplayName, plexServer.Name, 0);
+                _log.Here().Debug(
+                    "PlexAccount {PlexAccountDisplayName} already has an association with PlexServer: {PlexServerName}, updating authentication token now", plexAccount.DisplayName, plexServer.Name);
                 plexAccountServer.AuthToken = serverAccessToken.AccessToken;
                 plexAccountServer.AuthTokenCreationDate = DateTime.UtcNow;
             }
         }
 
-        _log.Information("Checking if there are any PlexServers this PlexAccount has no access to anymore", 0);
+        _log.InformationLine("Checking if there are any PlexServers this PlexAccount has no access to anymore");
 
         // The list of all past and current serverId's the plexAccount has access too
         var removalList = await _dbContext.PlexAccountServers
@@ -84,8 +83,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler : BaseHandler, IRequest
         {
             foreach (var plexAccountServer in removalList)
             {
-                _log.Warning("PlexAccount {DisplayName} has lost access to {PlexServerName}!", plexAccountServer.PlexAccount.DisplayName,
-                    plexAccountServer.PlexServer.Name, 0);
+                _log.Here().Warning("PlexAccount {DisplayName} has lost access to {PlexServerName}!", plexAccountServer.PlexAccount.DisplayName, plexAccountServer.PlexServer.Name);
                 _dbContext.Entry(plexAccountServer).State = EntityState.Deleted;
             }
         }

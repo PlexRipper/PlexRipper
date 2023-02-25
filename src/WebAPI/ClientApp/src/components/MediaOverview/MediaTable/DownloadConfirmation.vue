@@ -2,7 +2,7 @@
 	<!-- The "Are you sure" dialog -->
 	<v-col cols="12">
 		<v-dialog v-model="showDialog" :max-width="500" scrollable>
-			<v-card v-if="isConfirmationEnabled && progress === null">
+			<v-card v-if="isConfirmationEnabled">
 				<v-card-title> {{ $t('components.download-confirmation.header') }}</v-card-title>
 				<v-card-subtitle class="py-2">
 					<span>{{ $t('components.download-confirmation.description') }}</span> <br />
@@ -17,7 +17,11 @@
 								<template #prepend="{ item }">
 									<media-type-icon :media-type="item.type" />
 								</template>
-								<template #append="{ item }"> (<file-size :size="item.mediaSize" />) </template>
+								<template #append="{ item }">
+									(
+									<file-size :size="item.mediaSize" />
+									)
+								</template>
 							</v-treeview>
 						</v-col>
 					</vue-scroll>
@@ -30,21 +34,6 @@
 					<ConfirmButton @click="confirmDownload()" />
 				</v-card-actions>
 			</v-card>
-
-			<!-- Download Task Creation Progressbar -->
-			<v-card v-if="progress">
-				<v-card-title class="justify-center">
-					{{
-						$t('components.download-confirmation.creating-tasks', {
-							current: progress.current,
-							total: progress.total,
-						})
-					}}
-				</v-card-title>
-				<v-card-text>
-					<progress-component :percentage="progress.percentage" text="" />
-				</v-card-text>
-			</v-card>
 		</v-dialog>
 	</v-col>
 </template>
@@ -53,16 +42,13 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
-import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
+import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import { SettingsService } from '@service';
 
 @Component
 export default class DownloadConfirmation extends Vue {
 	@Prop({ required: true, type: Array as () => PlexMediaDTO[] })
 	readonly items!: PlexMediaDTO[];
-
-	@Prop({ required: true })
-	readonly progress!: DownloadTaskCreationProgress | null;
 
 	askDownloadMovieConfirmation: boolean = false;
 	askDownloadTvShowConfirmation: boolean = false;

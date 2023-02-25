@@ -15,7 +15,7 @@ namespace PlexRipper.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.6");
+            modelBuilder.HasAnnotation("ProductVersion", "7.0.3");
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
                 {
@@ -581,7 +581,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(15);
 
-                    b.Property<int?>("RootDownloadTaskId")
+                    b.Property<int>("RootDownloadTaskId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ServerMachineIdentifier")
@@ -607,8 +607,6 @@ namespace PlexRipper.Data.Migrations
                     b.HasIndex("PlexLibraryId");
 
                     b.HasIndex("PlexServerId");
-
-                    b.HasIndex("RootDownloadTaskId");
 
                     b.ToTable("DownloadTasks");
                 });
@@ -1909,10 +1907,6 @@ namespace PlexRipper.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.DownloadTask", "RootDownloadTask")
-                        .WithMany()
-                        .HasForeignKey("RootDownloadTaskId");
-
                     b.Navigation("DestinationFolder");
 
                     b.Navigation("DownloadFolder");
@@ -1922,8 +1916,6 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexLibrary");
 
                     b.Navigation("PlexServer");
-
-                    b.Navigation("RootDownloadTask");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerLog", b =>

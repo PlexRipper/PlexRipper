@@ -79,7 +79,7 @@ public class SyncServerJob : IJob
                 else
                     progressList.Add(libraryProgress);
 
-                _signalRService.SendServerSyncProgressUpdate(new SyncServerProgress(plexServerId, progressList));
+                _signalRService.SendServerSyncProgressUpdateAsync(new SyncServerProgress(plexServerId, progressList));
             });
 
             // Sync movie type libraries first because it is a lot quicker than TvShows.

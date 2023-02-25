@@ -1,4 +1,5 @@
 #nullable enable
+using Logging.Common;
 using Logging.Interface;
 using Serilog;
 using Serilog.Events;
@@ -16,51 +17,58 @@ public partial class Log : ILog
         _logger = logger;
     }
 
+    public ILogger GetLogger()
+    {
+        return _logger;
+    }
+
     public bool IsLogLevelEnabled(LogEventLevel logLevel = LogEventLevel.Debug)
     {
         return _logger.IsEnabled(logLevel);
     }
 
-    private string GetClassName(string sourceFilePath)
+    private LogMetaData Write(
+        LogEventLevel logLevel,
+        string messageTemplate,
+        string sourceFilePath = "",
+        string memberName = "",
+        int sourceLineNumber = 0,
+        params object?[]? propertyValues)
     {
-        if (ClassType?.FullName != null)
+        var logMetaData = new LogMetaData(this, GetClassName(sourceFilePath), memberName, sourceLineNumber)
         {
-            var parts = ClassType.FullName.Split('.').Select(x => x.Trim('\"')).ToList();
-            if (parts.Any())
-                return parts.Last();
-        }
+            LogLevel = logLevel,
+            MessageTemplate = messageTemplate,
+            PropertyValues = propertyValues,
+        };
 
+        logMetaData.Write();
+        return logMetaData;
+    }
+
+    private LogMetaData Write(
+        LogEventLevel logLevel,
+        Exception exception,
+        string messageTemplate,
+        string sourceFilePath = "",
+        string memberName = "",
+        int sourceLineNumber = 0,
+        params object?[]? propertyValues)
+    {
+        var logMetaData = new LogMetaData(this, GetClassName(sourceFilePath), memberName, sourceLineNumber)
+        {
+            Exception = exception,
+            LogLevel = logLevel,
+            MessageTemplate = messageTemplate,
+            PropertyValues = propertyValues,
+        };
+
+        logMetaData.Write();
+        return logMetaData;
+    }
+
+    private static string GetClassName(string sourceFilePath)
+    {
         return Path.GetFileNameWithoutExtension(sourceFilePath);
-    }
-
-    private LogEvent Write(
-        LogEventLevel logLevel,
-        string messageTemplate,
-        string memberName = "",
-        string sourceFilePath = "",
-        int sourceLineNumber = 0,
-        params object?[]? propertyValues)
-    {
-        var logEvent = _logger.ToLogEvent(logLevel, messageTemplate, null, GetClassName(sourceFilePath), memberName, sourceLineNumber, propertyValues);
-
-        _logger.Write(logEvent);
-
-        return logEvent;
-    }
-
-    private LogEvent Write(
-        LogEventLevel logLevel,
-        string messageTemplate,
-        Exception? exception = default,
-        string memberName = "",
-        string sourceFilePath = "",
-        int sourceLineNumber = 0,
-        params object?[]? propertyValues)
-    {
-        var logEvent = _logger.ToLogEvent(logLevel, messageTemplate, exception, GetClassName(sourceFilePath), memberName, sourceLineNumber, propertyValues);
-
-        _logger.Write(logEvent);
-
-        return logEvent;
     }
 }

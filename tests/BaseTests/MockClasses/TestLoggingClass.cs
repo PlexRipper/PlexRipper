@@ -30,7 +30,7 @@ public class TestLoggingClass
 
         //_log.Debug("[DEBUG] - Processed {@Position} in {Elapsed:000} ms.", position, elapsedMs);
 
-        //_log.Debug(string.Format("[DEBUG LOL] - Processed {@Position} in {Elapsed:000} ms.", position, elapsedMs), 0);
+        //_log.Debug(string.Format("[DEBUG LOL] - Processed {@Position} in {Elapsed:000} ms.", position, elapsedMs));
         // _log.Debug("[DEBUG] - Processed {String1} in {String2} ms.", string1, string2);
         _log.Debug("[DEBUG LINE] - LogDebug message: {Position}", position);
 

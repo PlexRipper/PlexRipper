@@ -11,7 +11,7 @@
 			<!--	Close action	-->
 			<v-card-actions>
 				<v-spacer></v-spacer>
-				<v-btn color="green darken-1" text @click="close"> {{ $t('general.commands.close') }} </v-btn>
+				<v-btn color="green darken-1" text @click="close"> {{ $t('general.commands.close') }}</v-btn>
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
@@ -20,7 +20,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import type IAlert from '@interfaces/IAlert';
-import { Error } from '@dto/mainApi';
+import { IError } from '@dto/mainApi';
 
 @Component
 export default class AlertDialog extends Vue {
@@ -29,7 +29,7 @@ export default class AlertDialog extends Vue {
 	@Prop({ required: true, type: Object as () => IAlert })
 	readonly alert!: IAlert;
 
-	get errors(): Error[] {
+	get errors(): IError[] {
 		if (this.alert?.result?.errors) {
 			return this.alert.result.errors;
 		}

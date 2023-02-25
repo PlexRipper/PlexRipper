@@ -16,7 +16,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Domain\Domain.csproj" />
-		<ProjectReference Include="..\HttpClient.Contracts\HttpClient.Contracts.csproj" />
 		<ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
 	</ItemGroup>
 
@@ -26,6 +25,7 @@
 
 	<ItemGroup>
 		<Folder Include="Common" />
+		<Folder Include="Config\Autofac" />
 	</ItemGroup>
 
 </Project>

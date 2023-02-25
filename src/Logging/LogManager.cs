@@ -49,13 +49,21 @@ public static class LogManager
         return new Log<T>(LogConfig.GetLogger(logLevel));
     }
 
+    /// <summary>
+    /// Returns a new typed <see cref="ILog"/> instance.
+    /// </summary>
+    /// <returns></returns>
+    public static ILog CreateLogInstance(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug)
+    {
+        LogConfig.SetTestOutputHelper(output);
+        return new Log(LogConfig.GetLogger(logLevel));
+    }
+
     public static ILog<T> CreateLogInstance<T>(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug) where T : class
     {
         LogConfig.SetTestOutputHelper(output);
         return new Log<T>(LogConfig.GetLogger(logLevel));
     }
-
-
 
     /// <summary>
     /// Returns a new typed <see cref="ILog"/> instance.

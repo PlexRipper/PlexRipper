@@ -1,4 +1,5 @@
 using Environment;
+using Logging.Common;
 using Logging.Enricher;
 using Serilog;
 using Serilog.Core;
@@ -14,13 +15,9 @@ public static class LogConfig
     #region Properties
 
     public static readonly string Template =
-        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{ClassNamePropertyName}}}.{{{MemberNamePropertyName}}}:{{{LineNumberPropertyName}}}] => {{Message}}{{NewLine}}{{Exception}}";
+        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(LogMetaData.ClassName)}}}.{{{nameof(LogMetaData.MethodName)}}}:{{{nameof(LogMetaData.LineNumber)}}}] => {{Message}}{{NewLine}}{{Exception}}";
 
     public static MessageTemplateTextFormatter TemplateTextFormatter => new(Template);
-
-    public static string ClassNamePropertyName => "ClassName";
-    public static string MemberNamePropertyName => "MemberName";
-    public static string LineNumberPropertyName => "LineNumber";
 
     #endregion
 

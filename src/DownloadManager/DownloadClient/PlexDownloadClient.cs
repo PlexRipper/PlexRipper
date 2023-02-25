@@ -1,9 +1,9 @@
 ﻿using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using Logging.Interface;
-using PlexRipper.Domain.RxNet;
 using Settings.Contracts;
 
 namespace PlexRipper.DownloadManager;
@@ -225,19 +225,11 @@ public class PlexDownloadClient : IDisposable
         var statusIsChanged = DownloadStatus != newDownloadStatus;
         DownloadStatus = newDownloadStatus;
 
-        await _mediator.Send(new UpdateDownloadTasksByIdCommand(new List<DownloadTask> { DownloadTask }));
+        await _mediator.Send(new UpdateDownloadTasksByIdCommand(DownloadTask));
 
         await _mediator.Publish(new DownloadTaskUpdated(DownloadTask));
 
         _log.Debug("{@DownloadTask}", DownloadTask.ToString());
-
-        if (statusIsChanged)
-        {
-            await _mediator.Publish(new DownloadStatusChanged(
-                DownloadTask.Id,
-                DownloadTask.RootDownloadTaskId,
-                DownloadStatus));
-        }
     }
 
     private void SetupDownloadLimitWatcher(DownloadTask downloadTask)
@@ -267,14 +259,16 @@ public class PlexDownloadClient : IDisposable
             .Select(x => x.DownloadWorkerTaskUpdate)
             .Merge()
             .Buffer(TimeSpan.FromSeconds(1))
-            .SubscribeAsync(OnDownloadWorkerTaskUpdate);
+            .SelectMany(async (value) => await OnDownloadWorkerTaskUpdate(value).ToObservable())
+            .Subscribe();
 
         // Download Worker Log subscription
         _downloadWorkerLog = _downloadWorkers
             .Select(x => x.DownloadWorkerLog)
             .Merge()
             .Buffer(TimeSpan.FromSeconds(1))
-            .SubscribeAsync(async logs => await _mediator.Send(new AddDownloadWorkerLogsCommand(logs)));
+            .SelectMany(async logs => await _mediator.Send(new AddDownloadWorkerLogsCommand(logs)).ToObservable())
+            .Subscribe();
     }
 
     #endregion

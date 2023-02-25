@@ -153,10 +153,7 @@ public class DownloadTask : BaseEntity
     public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);
 
     [NotMapped]
-    public long TimeRemaining => DataFormat.GetTimeRemaining(BytesRemaining, DownloadSpeed);
-
-    [NotMapped]
-    public long BytesRemaining => DataTotal - DataReceived;
+    public long TimeRemaining => DataFormat.GetTimeRemaining(DataTotal - DataReceived, DownloadSpeed);
 
     /// <summary>
     /// Gets a joined string of temp file paths of the <see cref="DownloadWorkerTasks"/> delimited by ";".

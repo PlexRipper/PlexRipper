@@ -3,7 +3,6 @@ using System.Reactive.Subjects;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 using Settings.Contracts;
 
@@ -61,7 +60,6 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
                 downloadTaskUpdates.AddRange(((UpdateDownloadTasksByIdCommand)request).DownloadTasks);
             })
             .ReturnOk();
-        mock.PublishMediator(It.IsAny<DownloadStatusChanged>).Returns(Task.CompletedTask);
         mock.PublishMediator(It.IsAny<DownloadTaskUpdated>).Returns(Task.CompletedTask);
         mock.SetupMediator(It.IsAny<AddDownloadWorkerLogsCommand>).ReturnOk();
         mock.Mock<IDownloadManagerSettingsModule>().SetupGet(x => x.DownloadSegments).Returns(4);

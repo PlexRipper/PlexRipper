@@ -1,7 +1,4 @@
 using Data.Contracts;
-using Xunit;
-using Xunit.Abstractions;
-using PlexRipper.BaseTests;
 
 namespace FileSystem.IntegrationTests.FileMerger;
 
@@ -15,20 +12,16 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
     {
         // Arrange
         Seed = 4564;
-        var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
         await SetupDatabase(config =>
         {
-            config.MockServerUris.Add(serverUri);
             config.PlexServerCount = 1;
             config.PlexLibraryCount = 3;
             config.MovieCount = 1;
             config.MovieDownloadTasksCount = 1;
-            config.DownloadFileSizeInMb = 50;
+            config.DownloadFileSizeInMb = 10;
         });
 
-        SetupMockPlexApi();
-
-        await CreateContainer(config => { config.DownloadSpeedLimitInKib = 5000; });
+        await CreateContainer();
 
         var downloadTask = DbContext
             .DownloadTasks
@@ -36,10 +29,10 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
         downloadTask.ShouldNotBeNull();
 
         // Act
-       var downloadWorkerTasks = Container.GetDownloadTaskFactory.GenerateDownloadWorkerTasks(downloadTask);
+        var downloadWorkerTasks = Container.GetDownloadTaskFactory.GenerateDownloadWorkerTasks(downloadTask);
         var addWorkersResult = await Container.Mediator.Send(new AddDownloadWorkerTasksCommand(downloadWorkerTasks.Value));
         addWorkersResult.IsSuccess.ShouldBeTrue();
-        var createResult =  await Container.FileMergeScheduler.CreateFileTaskFromDownloadTask(downloadTask.Id);
+        var createResult = await Container.FileMergeScheduler.CreateFileTaskFromDownloadTask(downloadTask.Id);
         createResult.IsSuccess.ShouldBeTrue();
         var startResult = await Container.FileMergeScheduler.StartFileMergeJob(createResult.Value.Id);
         await Container.SchedulerService.AwaitScheduler();
@@ -52,10 +45,7 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
         foreach (var childDownloadTask in downloadTaskDb.Children)
-        {
             childDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Completed);
-        }
         Container.MockSignalRService.FileMergeProgressList.Count.ShouldBeGreaterThan(10);
-
     }
 }

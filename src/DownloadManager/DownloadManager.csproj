@@ -30,9 +30,11 @@
 		<ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
 		<ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
 		<ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
+		
 	</ItemGroup>
 
 	<ItemGroup>
 		<Compile Include="..\Domain\GlobalUsings.cs" />
+		<InternalsVisibleTo Include="DownloadManager.UnitTests" />
 	</ItemGroup>
 </Project>

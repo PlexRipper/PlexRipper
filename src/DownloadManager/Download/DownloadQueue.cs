@@ -1,6 +1,4 @@
-﻿using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Threading.Channels;
+﻿using System.Threading.Channels;
 using BackgroundServices.Contracts;
 using Data.Contracts;
 using DownloadManager.Contracts;
@@ -20,8 +18,6 @@ public class DownloadQueue : IDownloadQueue
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     private readonly Channel<int> _plexServersToCheckChannel = Channel.CreateUnbounded<int>();
-
-    private readonly Subject<int> _serverCompletedDownloading = new();
 
     private readonly CancellationToken _token = new();
 
@@ -44,11 +40,6 @@ public class DownloadQueue : IDownloadQueue
 
     public bool IsBusy => _plexServersToCheckChannel.Reader.Count > 0;
 
-    /// <summary>
-    /// Emits the id of a <see cref="PlexServer"/> which has no more <see cref="DownloadTask">DownloadTasks</see> to process.
-    /// </summary>
-    public IObservable<int> ServerCompletedDownloading => _serverCompletedDownloading.AsObservable();
-
     #endregion
 
     #region Public Methods
@@ -67,34 +58,34 @@ public class DownloadQueue : IDownloadQueue
         if (!plexServerIds.Any())
             return ResultExtensions.IsEmpty(nameof(plexServerIds)).LogWarning();
 
-        _log.Here().Information("Adding {PlexServerIdsCount} {NameOfPlexServer}s to the DownloadQueue to check for the next download", plexServerIds.Count,
-            nameof(PlexServer));
+        _log.Here()
+            .Information("Adding {PlexServerIdsCount} {NameOfPlexServer}s to the DownloadQueue to check for the next download", plexServerIds.Count,
+                nameof(PlexServer));
         foreach (var plexServerId in plexServerIds)
             await _plexServersToCheckChannel.Writer.WriteAsync(plexServerId, _token);
 
         return Result.Ok();
     }
 
-    public async Task<Result<DownloadTask>> CheckDownloadQueueServer(int plexServerId)
+    internal async Task<Result<DownloadTask>> CheckDownloadQueueServer(int plexServerId)
     {
         if (plexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId).LogWarning();
 
-        var downloadTasksResult = await _mediator.Send(new GetDownloadTasksByPlexServerIdQuery(plexServerId));
+        var downloadTasksResult = await _mediator.Send(new GetDownloadTasksByPlexServerIdQuery(plexServerId), _token);
         if (downloadTasksResult.IsFailed)
             return downloadTasksResult.LogError();
 
-        var plexServerName = await _mediator.Send(new GetPlexServerNameByIdQuery(plexServerId));
+        var plexServerName = await _mediator.Send(new GetPlexServerNameByIdQuery(plexServerId), _token);
         if (plexServerName.IsFailed)
             return plexServerName.LogError();
 
-        _log.Here().Debug("Checking {NameOfPlexServer)}: {PlexServerName} for the next download to start", nameof(PlexServer), plexServerName.Value);
+        _log.Here().Debug("Checking {NameOfPlexServer}: {PlexServerName} for the next download to start", nameof(PlexServer), plexServerName.Value);
 
         var nextDownloadTaskResult = GetNextDownloadTask(downloadTasksResult.Value);
         if (nextDownloadTaskResult.IsFailed)
         {
             _log.Information("There are no available downloadTasks remaining for PlexServer with Id: {PlexServerName}", plexServerName.Value);
-            _serverCompletedDownloading.OnNext(plexServerId);
             return Result.Ok();
         }
 
@@ -113,7 +104,7 @@ public class DownloadQueue : IDownloadQueue
     /// </summary>
     /// <param name="downloadTasks"></param>
     /// <returns></returns>
-    public Result<DownloadTask> GetNextDownloadTask(List<DownloadTask> downloadTasks)
+    internal Result<DownloadTask> GetNextDownloadTask(List<DownloadTask> downloadTasks)
     {
         // Check if there is anything downloading already
         var nextDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.Downloading);

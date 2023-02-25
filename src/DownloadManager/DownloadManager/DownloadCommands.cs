@@ -91,7 +91,7 @@ public class DownloadCommands : IDownloadCommands
         await _mediator.Send(new UpdateDownloadTasksByIdCommand(regeneratedDownloadTasks.Value));
 
         var uniquePlexServers = regeneratedDownloadTasks.Value.Select(x => x.PlexServerId).Distinct().ToList();
-        await _downloadQueue.CheckDownloadQueue(uniquePlexServers);
+        await _mediator.Publish(new CheckDownloadQueue(uniquePlexServers));
 
         return Result.Ok();
     }
@@ -112,11 +112,9 @@ public class DownloadCommands : IDownloadCommands
             return Result.Ok();
         }
 
-        var nextTask = _downloadQueue.GetNextDownloadTask(new List<DownloadTask> { downloadTasksResult.Value });
-        if (nextTask.IsFailed)
-            return nextTask.ToResult();
+        await _mediator.Publish(new CheckDownloadQueue(downloadTasksResult.Value.PlexServerId));
 
-        return await StartDownloadTask(nextTask.Value);
+        return Result.Ok();
     }
 
     #region Start
@@ -128,6 +126,8 @@ public class DownloadCommands : IDownloadCommands
 
         if (downloadTask.IsDownloadable)
             return await _downloadTaskScheduler.StartDownloadTaskJob(downloadTask.Id, downloadTask.PlexServerId);
+
+        await _mediator.Publish(new CheckDownloadQueue(downloadTask.PlexServerId));
 
         return Result.Fail($"Failed to start downloadTask {downloadTask.FullTitle}, it's not directly downloadable.");
     }

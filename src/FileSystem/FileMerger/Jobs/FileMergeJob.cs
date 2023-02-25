@@ -1,6 +1,7 @@
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using Application.Contracts;
 using Data.Contracts;
 using DownloadManager.Contracts;
@@ -45,7 +46,8 @@ public class FileMergeJob : IJob
         var dataMap = context.JobDetail.JobDataMap;
         var fileTaskId = dataMap.GetIntValue(FileTaskId);
         var token = context.CancellationToken;
-        _log.Here().Debug("Executing job: {NameOfFileMergeJob} for {NameOfFileTaskId} with id: {FileTaskId}", nameof(FileMergeJob), nameof(fileTaskId), fileTaskId);
+        _log.Here()
+            .Debug("Executing job: {NameOfFileMergeJob} for {NameOfFileTaskId} with id: {FileTaskId}", nameof(FileMergeJob), nameof(fileTaskId), fileTaskId);
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
@@ -61,7 +63,7 @@ public class FileMergeJob : IJob
             var fileTask = fileTaskResult.Value;
             var downloadTask = fileTask.DownloadTask;
 
-            _log.Information("Executing {NameOfFileMergeJob)} with name {FileTaskFileName} and id {FileTaskId}", nameof(FileMergeJob), fileTask.FileName,
+            _log.Information("Executing {NameOfFileMergeJob} with name {FileTaskFileName} and id {FileTaskId}", nameof(FileMergeJob), fileTask.FileName,
                 fileTaskId);
 
             if (!fileTask.FilePaths.Any())
@@ -77,7 +79,8 @@ public class FileMergeJob : IJob
             downloadTask.DownloadStatus = newDownloadStatus;
             downloadTask.DownloadWorkerTasks.ForEach(x => x.DownloadStatus = newDownloadStatus);
 
-            await _mediator.Publish(new DownloadStatusChanged(downloadTask.Id, downloadTask.RootDownloadTaskId, newDownloadStatus), token);
+            await _mediator.Send(new UpdateDownloadTasksByIdCommand(downloadTask), token);
+            await _mediator.Publish(new DownloadTaskUpdated(downloadTask), token);
 
             // Verify all file paths exists
             foreach (var path in fileTask.FilePaths)
@@ -91,29 +94,29 @@ public class FileMergeJob : IJob
             var transferStarted = DateTime.UtcNow;
             var _timeContext = new EventLoopScheduler();
             var _bytesReceivedProgress = new Subject<long>();
-
-            // Create FileMergeProgress from bytes received progress
-            _bytesReceivedProgress
-                .TakeUntil(x => x == fileTask.FileSize)
-                .Sample(TimeSpan.FromSeconds(1), _timeContext)
-                .Select(dataTransferred =>
-                {
-                    var ElapsedTime = DateTime.UtcNow.Subtract(transferStarted);
-                    return new FileMergeProgress
-                    {
-                        Id = fileTask.Id,
-                        DataTransferred = dataTransferred,
-                        DataTotal = fileTask.FileSize,
-                        DownloadTaskId = fileTask.DownloadTaskId,
-                        PlexLibraryId = fileTask.DownloadTask.PlexLibraryId,
-                        PlexServerId = fileTask.DownloadTask.PlexServerId,
-                        TransferSpeed = DataFormat.GetTransferSpeed(dataTransferred, ElapsedTime.TotalSeconds),
-                    };
-                })
-                .Subscribe(data => _mediator.Publish(new FileMergeProgressNotification(data), token), () => { _timeContext.Dispose(); });
-
             try
             {
+                // Create FileMergeProgress from bytes received progress
+                _bytesReceivedProgress
+                    .TakeUntil(x => x == fileTask.FileSize)
+                    .Sample(TimeSpan.FromSeconds(1), _timeContext)
+                    .Select(dataTransferred =>
+                    {
+                        var elapsedTime = DateTime.UtcNow.Subtract(transferStarted);
+                        return new FileMergeProgress
+                        {
+                            Id = fileTask.Id,
+                            DataTransferred = dataTransferred,
+                            DataTotal = fileTask.FileSize,
+                            DownloadTaskId = fileTask.DownloadTaskId,
+                            PlexLibraryId = fileTask.DownloadTask.PlexLibraryId,
+                            PlexServerId = fileTask.DownloadTask.PlexServerId,
+                            TransferSpeed = DataFormat.GetTransferSpeed(dataTransferred, elapsedTime.TotalSeconds),
+                        };
+                    })
+                    .SelectMany(async data => await _mediator.Publish(new FileMergeProgressNotification(data), token).ToObservable())
+                    .Subscribe();
+
                 var streamResult = await _fileMergeStreamProvider.OpenOrCreateMergeStream(fileTask.DestinationFilePath);
                 if (streamResult.IsFailed)
                 {
@@ -125,13 +128,12 @@ public class FileMergeJob : IJob
                 var outputStream = streamResult.Value;
 
                 if (EnvironmentExtensions.IsIntegrationTestMode())
-                    outputStream = new ThrottledStream(streamResult.Value, 10000);
+                    outputStream = new ThrottledStream(streamResult.Value, 5000);
 
                 _log.Debug("Combining {FilePathsCount} into a single file", fileTask.FilePaths.Count);
 
                 await _fileMergeStreamProvider.MergeFiles(fileTask.FilePaths, outputStream, _bytesReceivedProgress, token);
 
-                _fileMergeSystem.DeleteDirectoryFromFilePath(fileTask.FilePaths.First());
                 await outputStream.DisposeAsync();
             }
             catch (Exception e)
@@ -139,12 +141,16 @@ public class FileMergeJob : IJob
                 await _notificationsService.SendResult(Result.Fail(new ExceptionalError(e)).LogError());
             }
 
+            // Ensure the progress subscription has finished
+            await Task.Delay(1000, token);
+
             // Clean-up
             _bytesReceivedProgress.OnCompleted();
+            _timeContext.Dispose();
             _bytesReceivedProgress.Dispose();
-            await _mediator.Send(new DeleteFileTaskByIdCommand(fileTask.Id), token);
-            await _mediator.Publish(new DownloadStatusChanged(downloadTask.Id, downloadTask.RootDownloadTaskId, DownloadStatus.Completed), token);
             _log.Here().Information("Finished combining {FilePathsCount} files into {FileTaskFileName}", fileTask.FilePaths.Count, fileTask.FileName);
+
+            await _mediator.Publish(new FileMergeFinishedNotification(fileTaskId), token);
         }
         catch (Exception e)
         {

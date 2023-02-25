@@ -9,17 +9,26 @@ jobs:
   tests-back-end:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup .NET
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 7.0.x
+          dotnet-version: 7.x.x
+      - uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          # Look to see if there is a cache hit for the corresponding requirements file
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget
       - name: Restore dependencies
         run: dotnet restore PlexRipper.sln
       - name: Build
         run: dotnet build PlexRipper.sln --no-restore
-      - name: Test
+      - name: Unit Tests
         run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal
+      - name: Integration Tests
+        run: dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal
   tests-front-end:
     defaults:
       run:

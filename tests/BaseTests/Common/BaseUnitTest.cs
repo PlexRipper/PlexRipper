@@ -122,6 +122,8 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest where TUnitTestClass : 
             builder.RegisterType<Log>().As<ILog>().SingleInstance();
             builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();
         });
+        mock.Mock<IHttpClientFactory>().Setup(x => x.CreateClient(It.IsAny<string>()))
+            .Returns(new HttpClient());
     }
 
     #endregion

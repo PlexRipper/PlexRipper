@@ -4,6 +4,8 @@ using Environment;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Http;
 using Microsoft.OpenApi.Models;
 using PlexRipper.Application;
 using PlexRipper.Domain.Config;
@@ -30,6 +32,9 @@ public static partial class StartupExtensions
         services.AddOptions();
 
         services.AddHttpClient();
+        // This will disable all the build-in HttpClient logging
+        // Source: https://stackoverflow.com/a/52970073/8205497
+        services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
     }
 
     public static void SetupTestConfigureServices(IServiceCollection services, IWebHostEnvironment env)

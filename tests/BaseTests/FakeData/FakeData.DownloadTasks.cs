@@ -28,7 +28,7 @@ public static partial class FakeData
             .RuleFor(x => x.DownloadWorkerTasks, _ => new List<DownloadWorkerTask>())
             .RuleFor(x => x.FileName, _ => "file.mp4")
             .RuleFor(x => x.FileLocationUrl, _ => PlexMockServerConfig.FileUrl)
-            .RuleFor(x => x.DownloadUrl, f => "")
+            .RuleFor(x => x.DownloadUrl, f => "http://localhost:80/")
             .RuleFor(x => x.DownloadDirectory, f => f.System.FilePath())
             .RuleFor(x => x.DestinationDirectory, f => f.System.FilePath())
             .RuleFor(x => x.ParentId, _ => null)

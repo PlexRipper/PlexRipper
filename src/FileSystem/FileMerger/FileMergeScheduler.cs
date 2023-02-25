@@ -32,7 +32,7 @@ public class FileMergeScheduler : BaseScheduler, IFileMergeScheduler
         if (downloadTask.IsFailed)
             return downloadTask.ToResult().LogError();
 
-        _log.Debug("Adding DownloadTask {DownloadTaskTitle} to a FileTask to be merged", downloadTask.Value.Title);
+        _log.Here().Debug("Adding DownloadTask {DownloadTaskTitle} with id {Id} to a FileTask to be merged", downloadTask.Value.Title, downloadTask.Value.Id);
         var result = await _mediator.Send(new AddFileTaskFromDownloadTaskCommand(downloadTask.Value));
         if (result.IsFailed)
             return result.ToResult().LogError();

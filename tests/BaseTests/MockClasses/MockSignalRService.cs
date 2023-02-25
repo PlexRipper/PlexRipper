@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using AutoMapper;
 using BackgroundServices.Contracts;
+using Logging.Interface;
 using PlexRipper.WebAPI.Common.DTO;
 using WebAPI.Contracts;
 
@@ -8,11 +9,14 @@ namespace PlexRipper.BaseTests;
 
 public class MockSignalRService : ISignalRService
 {
+    private readonly ILog<MockSignalRService> _log;
     private readonly IMapper _mapper;
     public BlockingCollection<DownloadTaskDTO> DownloadTaskUpdate { get; } = new();
+    public BlockingCollection<FileMergeProgress> FileMergeProgressList { get; } = new();
 
-    public MockSignalRService(IMapper mapper)
+    public MockSignalRService(ILog<MockSignalRService> log, IMapper mapper)
     {
+        _log = log;
         _mapper = mapper;
     }
 
@@ -32,12 +36,15 @@ public class MockSignalRService : ISignalRService
     {
         var downloadTaskDTO = _mapper.Map<DownloadTaskDTO>(downloadTask);
         DownloadTaskUpdate.Add(downloadTaskDTO, cancellationToken);
+        _log.Debug("{ClassName} => {@DownloadTaskDto}", nameof(MockSignalRService), downloadTaskDTO);
 
         return Task.CompletedTask;
     }
 
-    public Task SendFileMergeProgressUpdateAsync(FileMergeProgress fileMergeProgress)
+    public Task SendFileMergeProgressUpdateAsync(FileMergeProgress fileMergeProgress, CancellationToken cancellationToken = default)
     {
+        FileMergeProgressList.Add(fileMergeProgress, cancellationToken);
+        _log.Debug("{ClassName} => {@FileMergeProgress}", nameof(MockSignalRService), fileMergeProgress);
         return Task.CompletedTask;
     }
 

@@ -113,6 +113,8 @@ public partial class BaseContainer : IDisposable
     public ISchedulerService SchedulerService => Resolve<ISchedulerService>();
 
     public IDownloadTaskScheduler DownloadTaskScheduler => Resolve<IDownloadTaskScheduler>();
+
+    public IFileMergeScheduler FileMergeScheduler => Resolve<IFileMergeScheduler>();
     public MockSignalRService MockSignalRService => (MockSignalRService) Resolve<ISignalRService>();
 
     public TestLoggingClass TestLoggingClass => Resolve<TestLoggingClass>();

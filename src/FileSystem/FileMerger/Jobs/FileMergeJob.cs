@@ -45,7 +45,7 @@ public class FileMergeJob : IJob
         var dataMap = context.JobDetail.JobDataMap;
         var fileTaskId = dataMap.GetIntValue(FileTaskId);
         var token = context.CancellationToken;
-        _log.Debug("Executing job: {NameOfFileMergeJob)} for {NameOfFileTaskId)} with id: {FileTaskId}", nameof(FileMergeJob), nameof(fileTaskId), fileTaskId);
+        _log.Here().Debug("Executing job: {NameOfFileMergeJob} for {NameOfFileTaskId} with id: {FileTaskId}", nameof(FileMergeJob), nameof(fileTaskId), fileTaskId);
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
@@ -79,6 +79,7 @@ public class FileMergeJob : IJob
 
             await _mediator.Publish(new DownloadStatusChanged(downloadTask.Id, downloadTask.RootDownloadTaskId, newDownloadStatus), token);
 
+            // Verify all file paths exists
             foreach (var path in fileTask.FilePaths)
                 if (!_fileMergeSystem.FileExists(path))
                 {
@@ -124,11 +125,10 @@ public class FileMergeJob : IJob
                 var outputStream = streamResult.Value;
 
                 if (EnvironmentExtensions.IsIntegrationTestMode())
-                    outputStream = new ThrottledStream(streamResult.Value, 5000);
+                    outputStream = new ThrottledStream(streamResult.Value, 10000);
 
                 _log.Debug("Combining {FilePathsCount} into a single file", fileTask.FilePaths.Count);
 
-                // TODO Make merge able to be canceled with token
                 await _fileMergeStreamProvider.MergeFiles(fileTask.FilePaths, outputStream, _bytesReceivedProgress, token);
 
                 _fileMergeSystem.DeleteDirectoryFromFilePath(fileTask.FilePaths.First());

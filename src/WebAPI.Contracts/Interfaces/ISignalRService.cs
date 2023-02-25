@@ -13,7 +13,8 @@ public interface ISignalRService
     /// Sends a <see cref="FileMergeProgress"/> object to the SignalR client in the front-end.
     /// </summary>
     /// <param name="fileMergeProgress">The <see cref="FileMergeProgress"/> object to send.</param>
-    Task SendFileMergeProgressUpdateAsync(FileMergeProgress fileMergeProgress);
+    /// <param name="cancellationToken"></param>
+    Task SendFileMergeProgressUpdateAsync(FileMergeProgress fileMergeProgress, CancellationToken cancellationToken = default);
 
     Task SendNotificationAsync(Notification notification);
 

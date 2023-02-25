@@ -4,6 +4,8 @@ using Autofac;
 using Autofac.Extras.Quartz;
 using Environment;
 using FileSystem.Contracts;
+using MediatR.Extensions.Autofac.DependencyInjection;
+using MediatR.Extensions.Autofac.DependencyInjection.Builder;
 using PlexRipper.FileSystem.Common;
 using IFileSystem = FileSystem.Contracts.IFileSystem;
 using Module = Autofac.Module;
@@ -36,5 +38,12 @@ public class FileSystemModule : Module
         // System.IO.Abstractions
         builder.RegisterType<System.IO.Abstractions.FileSystem>().As<System.IO.Abstractions.IFileSystem>().SingleInstance();
         builder.RegisterType<PathWrapper>().As<IPath>().SingleInstance();
+
+        // MediatR
+        var configuration = MediatRConfigurationBuilder
+            .Create(assembly)
+            .WithAllOpenGenericHandlerTypesRegistered()
+            .Build();
+        builder.RegisterMediatR(configuration);
     }
 }

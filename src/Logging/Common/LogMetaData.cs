@@ -40,7 +40,7 @@ public record LogMetaData
         return this;
     }
 
-    public LogEvent ToEvent()
+    private LogEvent ToEvent()
     {
         var dateTimeOffset = DateTimeOffset.Now;
 
@@ -62,11 +62,7 @@ public record LogMetaData
             new(nameof(LineNumber), new ScalarValue(LineNumber)),
         });
 
-        var logEvent = new LogEvent(dateTimeOffset, LogLevel, Exception, parsedTemplate, properties);
-
-        _logger.Write(logEvent);
-
-        return logEvent;
+        return new LogEvent(dateTimeOffset, LogLevel, Exception, parsedTemplate, properties);
     }
 
     public void Write()

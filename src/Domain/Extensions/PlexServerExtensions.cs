@@ -22,8 +22,7 @@ public static class PlexServerExtensions
             if (connection is not null)
                 return connection.Url;
 
-            _log.Warning("Could not find parameter {nameof(plexServerConnectionId)} with id {PlexServerConnectionId} for server {Name}",
-                nameof(plexServerConnectionId), plexServerConnectionId, plexServer.Name, 0);
+            _log.Here().Warning("Could not find parameter {nameof(plexServerConnectionId)} with id {PlexServerConnectionId} for server {Name}", nameof(plexServerConnectionId), plexServerConnectionId, plexServer.Name);
         }
 
         if (plexServer.PreferredConnectionId > 0)
@@ -32,8 +31,7 @@ public static class PlexServerExtensions
             if (connection is not null)
                 return connection.Url;
 
-            _log.Warning("Could not find preferred connection with id {PreferredConnectionId} for server {Name}", plexServer.PreferredConnectionId,
-                plexServer.Name, 0);
+            _log.Here().Warning("Could not find preferred connection with id {PreferredConnectionId} for server {Name}", plexServer.PreferredConnectionId, plexServer.Name);
         }
         else
         {
@@ -42,7 +40,7 @@ public static class PlexServerExtensions
                 return connection.Url;
         }
 
-        _log.Warning("Could not find connection based on public address: {PublicAddress} for server {Name}", plexServer.PublicAddress, plexServer.Name, 0);
+        _log.Here().Warning("Could not find connection based on public address: {PublicAddress} for server {Name}", plexServer.PublicAddress, plexServer.Name);
         _log.Warning("Trying the first connection: {PUrl}", plexServer.PlexServerConnections.First().Url);
         return plexServer.PlexServerConnections.First().Url;
     }

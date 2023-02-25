@@ -159,7 +159,7 @@ public class PlexAccountService : IPlexAccountService
     public Task<Result<List<PlexAccount>>> GetAllPlexAccountsAsync(bool onlyEnabled = false)
     {
         // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
-        _log.Debug(onlyEnabled ? "Returning only enabled account" : "Returning all accounts", 0);
+        _log.DebugLine(onlyEnabled ? "Returning only enabled account" : "Returning all accounts");
         return _mediator.Send(new GetAllPlexAccountsQuery(true, true, onlyEnabled));
     }
 

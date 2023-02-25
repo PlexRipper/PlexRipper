@@ -167,7 +167,7 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
             // "Relational-specific methods can only be used when the context is using a relational database provider."
             if (!Database.IsInMemory() && !EnvironmentExtensions.IsIntegrationTestMode())
             {
-                _log.Information("Attempting to migrate database", 0);
+                _log.InformationLine("Attempting to migrate database");
                 Database.Migrate();
             }
         }
@@ -239,12 +239,12 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
                     try
                     {
                         File.Copy(databaseFilePath, destinationPath);
-                        _log.Information("Successfully copied \"{DatabaseFilePath}\" to back-up location\"{DestinationPath}\"", databaseFilePath,
-                            destinationPath, 0);
+                        _log.Here().Information("Successfully copied \"{DatabaseFilePath}\" to back-up location\"{DestinationPath}\"", databaseFilePath,
+                            destinationPath);
                     }
                     catch (Exception e)
                     {
-                        _log.Error("Failed to copy {DatabaseFilePath} to back-up location {DestinationPath}", databaseFilePath, destinationPath, 0);
+                        _log.Here().Error("Failed to copy {DatabaseFilePath} to back-up location {DestinationPath}", databaseFilePath, destinationPath);
                         _log.Error(e);
                     }
 

@@ -144,7 +144,7 @@ public class FileMergeJob : IJob
             _bytesReceivedProgress.Dispose();
             await _mediator.Send(new DeleteFileTaskByIdCommand(fileTask.Id), token);
             await _mediator.Publish(new DownloadStatusChanged(downloadTask.Id, downloadTask.RootDownloadTaskId, DownloadStatus.Completed), token);
-            _log.Information("Finished combining {FilePathsCount} files into {FileTaskFileName}", fileTask.FilePaths.Count, fileTask.FileName, 0);
+            _log.Here().Information("Finished combining {FilePathsCount} files into {FileTaskFileName}", fileTask.FilePaths.Count, fileTask.FileName);
         }
         catch (Exception e)
         {

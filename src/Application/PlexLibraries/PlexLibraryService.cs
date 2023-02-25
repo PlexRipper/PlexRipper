@@ -115,7 +115,7 @@ public class PlexLibraryService : IPlexLibraryService
 
         // Phase 3 of 4: PlexLibrary media data was parsed successfully.
         SendProgress(3, 4);
-        _log.Debug("Finished retrieving all media for library {Title} in {Elapsed:000} seconds", plexLibrary.Title, timer.Elapsed.TotalSeconds, 0);
+        _log.Debug("Finished retrieving all media for library {Title} in {Elapsed:000} seconds", plexLibrary.Title, timer.Elapsed.TotalSeconds);
         timer.Restart();
 
         // Update the MetaData of this library
@@ -132,7 +132,7 @@ public class PlexLibraryService : IPlexLibraryService
             return createResult.ToResult();
 
         _log.Debug("Finished updating all media in the database for library {Title} in {Elapsed:000} seconds", plexLibrary.Title,
-            timer.Elapsed.TotalSeconds, 0);
+            timer.Elapsed.TotalSeconds);
 
         // Phase 4 of 4: Database has been successfully updated with new library data.
         SendProgress(4, 4);

@@ -102,7 +102,7 @@ public class DownloadWorker : IDisposable
 
     public Result Start()
     {
-        _log.Debug("Download worker with id: {Id} start for filename: {FileName}", Id, FileName, 0);
+        _log.Here().Debug("Download worker with id: {Id} start for filename: {FileName}", Id, FileName);
 
         // Create and check Filestream to which to download.
         var _fileStreamResult =
@@ -248,7 +248,7 @@ public class DownloadWorker : IDisposable
         if (errorResult.Errors.Any() && !errorResult.Errors[0].Metadata.ContainsKey(nameof(DownloadWorker) + "Id"))
             errorResult.Errors[0].Metadata.Add(nameof(DownloadWorker) + "Id", Id);
 
-        _log.Error("Download worker {Id} with {FileName} had an error!", Id, FileName, 0);
+        _log.Here().Error("Download worker {Id} with {FileName} had an error!", Id, FileName);
         DownloadWorkerTask.DownloadStatus = DownloadStatus.Error;
 
         SendDownloadWorkerLog(NotificationLevel.Error, errorResult.ToString());

@@ -39,7 +39,7 @@ public class SchedulerService : ISchedulerService
         SetupListeners();
         if (!_scheduler.IsStarted)
         {
-            _log.Information("Starting Quartz Scheduler", 0);
+            _log.InformationLine("Starting Quartz Scheduler");
             await _scheduler.Start();
         }
 
@@ -58,7 +58,7 @@ public class SchedulerService : ISchedulerService
 
     private Result SetupListeners()
     {
-        _log.Debug("Setting up Quartz listeners", 0);
+        _log.DebugLine("Setting up Quartz listeners");
         _scheduler.ListenerManager.AddJobListener(_allJobListener, GroupMatcher<JobKey>.AnyGroup());
         return Result.Ok();
     }

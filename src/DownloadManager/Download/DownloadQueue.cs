@@ -67,8 +67,8 @@ public class DownloadQueue : IDownloadQueue
         if (!plexServerIds.Any())
             return ResultExtensions.IsEmpty(nameof(plexServerIds)).LogWarning();
 
-        _log.Information("Adding {PlexServerIdsCount} {NameOfPlexServer}s to the DownloadQueue to check for the next download", plexServerIds.Count,
-            nameof(PlexServer), 0);
+        _log.Here().Information("Adding {PlexServerIdsCount} {NameOfPlexServer}s to the DownloadQueue to check for the next download", plexServerIds.Count,
+            nameof(PlexServer));
         foreach (var plexServerId in plexServerIds)
             await _plexServersToCheckChannel.Writer.WriteAsync(plexServerId, _token);
 
@@ -88,7 +88,7 @@ public class DownloadQueue : IDownloadQueue
         if (plexServerName.IsFailed)
             return plexServerName.LogError();
 
-        _log.Debug("Checking {NameOfPlexServer)}: {PlexServerName} for the next download to start", nameof(PlexServer), plexServerName.Value, 0);
+        _log.Here().Debug("Checking {NameOfPlexServer)}: {PlexServerName} for the next download to start", nameof(PlexServer), plexServerName.Value);
 
         var nextDownloadTaskResult = GetNextDownloadTask(downloadTasksResult.Value);
         if (nextDownloadTaskResult.IsFailed)

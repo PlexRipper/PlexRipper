@@ -311,11 +311,11 @@ public class PlexApiService : IPlexApiService
             // TODO Make the token refresh limit configurable
             if ((plexAccount.ValidatedAt - DateTime.UtcNow).TotalDays < 30)
             {
-                _log.Information("Plex AuthToken was still valid, using from local DB", 0);
+                _log.InformationLine("Plex AuthToken was still valid, using from local DB");
                 return plexAccount.AuthenticationToken;
             }
 
-            _log.Information("Plex AuthToken has expired, refreshing Plex AuthToken now", 0);
+            _log.InformationLine("Plex AuthToken has expired, refreshing Plex AuthToken now");
 
             // TODO Account for 2FA
             return await _plexApi.RefreshPlexAuthTokenAsync(plexAccount);

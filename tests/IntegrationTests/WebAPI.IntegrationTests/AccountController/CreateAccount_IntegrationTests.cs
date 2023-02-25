@@ -23,9 +23,6 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
 
         var plexAccount = FakeData.GetPlexAccount(4347564).Generate();
         var plexAccountDTO = Container.Mapper.Map<PlexAccountDTO>(plexAccount);
-       // var plexAccountDTOJson = JsonSerializer.Serialize(plexAccountDTO);
-
-
 
        // Act
         var response = await Container.ApiClient.PostAsJsonAsync(ApiRoutes.Account.PostCreateAccount, plexAccountDTO);

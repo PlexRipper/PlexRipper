@@ -148,7 +148,7 @@ public class PlexDownloadClient : IDisposable
 
     public async Task<Result<DownloadTask>> StopAsync()
     {
-        _log.Information("Stop downloading {DownloadTaskFileName} from {DownloadTaskDownloadUrl}", DownloadTask.FileName, DownloadTask.DownloadUrl, 0);
+        _log.Here().Information("Stop downloading {DownloadTaskFileName} from {DownloadTaskDownloadUrl}", DownloadTask.FileName, DownloadTask.DownloadUrl);
 
         await Task.WhenAll(_downloadWorkers.Select(x => x.StopAsync()));
 

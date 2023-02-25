@@ -41,7 +41,7 @@ public class ConfigManager : IConfigManager
     {
         _userSettings.SettingsUpdated.Subscribe(_ => SaveConfig());
 
-        _log.Information("Checking if {ConfigFileName} exists at {ConfigDirectory}", _pathProvider.ConfigFileName, _pathProvider.ConfigDirectory, 0);
+        _log.Here().Information("Checking if {ConfigFileName} exists at {ConfigDirectory}", _pathProvider.ConfigFileName, _pathProvider.ConfigDirectory);
 
         var configDirectoryExistsResult = _directorySystem.Exists(_pathProvider.ConfigDirectory);
         if (configDirectoryExistsResult.IsFailed)
@@ -64,8 +64,7 @@ public class ConfigManager : IConfigManager
 
         if (!ConfigFileExists())
         {
-            _log.Information("{ConfigFileName} doesn't exist, will create new one now in {ConfigDirectory}", _pathProvider.ConfigFileName,
-                _pathProvider.ConfigDirectory, 0);
+            _log.Here().Information("{ConfigFileName} doesn't exist, will create new one now in {ConfigDirectory}", _pathProvider.ConfigFileName, _pathProvider.ConfigDirectory);
             return SaveConfig();
         }
 
@@ -75,7 +74,7 @@ public class ConfigManager : IConfigManager
 
     public virtual Result LoadConfig()
     {
-        _log.Information("Loading user config settings now", 0);
+        _log.InformationLine("Loading user config settings now");
         var readResult = ReadFromConfigFile();
         if (readResult.IsFailed)
         {
@@ -118,7 +117,7 @@ public class ConfigManager : IConfigManager
 
     public virtual Result SaveConfig()
     {
-        _log.Information("Saving user config settings now", 0);
+        _log.InformationLine("Saving user config settings now");
 
         var jsonSettings = GetJsonSettingsObject();
         if (jsonSettings.IsFailed)
@@ -151,7 +150,7 @@ public class ConfigManager : IConfigManager
         var readResult = _fileSystem.FileReadAllText(_pathProvider.ConfigFileLocation);
         if (readResult.IsFailed)
         {
-            _log.Error("Failed to read {ConfigFileName} from {ConfigDirectory}", _pathProvider.ConfigFileName, _pathProvider.ConfigDirectory, 0);
+            _log.Here().Error("Failed to read {ConfigFileName} from {ConfigDirectory}", _pathProvider.ConfigFileName, _pathProvider.ConfigDirectory);
             readResult.LogError();
         }
 

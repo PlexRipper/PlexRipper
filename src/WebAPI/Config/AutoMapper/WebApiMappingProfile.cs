@@ -171,6 +171,11 @@ public class WebApiMappingProfile : Profile
 
         // JobStatusUpdate -> JobStatusUpdateDTO
         CreateMap<JobStatusUpdate, JobStatusUpdateDTO>(MemberList.Destination)
-            .ForMember(dto => dto.JobType, entity => entity.MapFrom(x => Enum.Parse<JobTypes>(x.JobGroup)));
+            .ForMember(dto => dto.JobType, entity => entity.MapFrom(x => ToJobType(x.JobGroup)));
+    }
+
+    private static JobTypes ToJobType(string jobGroup)
+    {
+        return Enum.TryParse<JobTypes>(jobGroup, out var jobType) ? jobType : JobTypes.Unknown;
     }
 }

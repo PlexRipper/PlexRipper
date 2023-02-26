@@ -63,13 +63,6 @@ public class DownloadTask : BaseEntity
     public string FileLocationUrl { get; set; }
 
     /// <summary>
-    /// Gets or sets the full download url including the <see cref="PlexServer"/> token of the media to be downloaded.
-    /// This is only set if <see cref="DownloadTask"/> is downloadable.
-    /// </summary>
-    [Column(Order = 13)]
-    public string DownloadUrl { get; set; }
-
-    /// <summary>
     /// Gets or sets the full formatted media title, based on the <see cref="PlexMediaType"/>.
     /// E.g. "TvShow/Season/Episode".
     /// </summary>
@@ -145,9 +138,6 @@ public class DownloadTask : BaseEntity
 
     [NotMapped]
     public int MediaParts => DownloadWorkerTasks?.Count ?? 0;
-
-    [NotMapped]
-    public Uri DownloadUri => !string.IsNullOrWhiteSpace(DownloadUrl) ? new Uri(DownloadUrl, UriKind.Absolute) : null;
 
     [NotMapped]
     public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);

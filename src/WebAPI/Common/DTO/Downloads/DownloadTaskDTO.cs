@@ -70,8 +70,6 @@ public class DownloadTaskDTO
 
     public long TimeRemaining { get; set; }
 
-    public string DownloadUrl { get; set; }
-
     public string Quality { get; set; }
 
     /// <summary>

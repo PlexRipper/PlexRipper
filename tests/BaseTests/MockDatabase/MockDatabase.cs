@@ -281,8 +281,6 @@ public static class MockDatabase
 
         downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
 
-        // The first connection is valid if mock servers have been used
-        downloadTasks.SetDownloadUrl(plexServer.PlexServerConnections[0], PlexMockServerConfig.FileUrl);
 
         context.DownloadTasks.AddRange(downloadTasks);
         await context.SaveChangesAsync();
@@ -313,9 +311,7 @@ public static class MockDatabase
 
         downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
 
-        // The first connection is valid if mock servers have been used
         plexServer.PlexServerConnections.ShouldNotBeEmpty();
-        downloadTasks.SetDownloadUrl(plexServer.PlexServerConnections[0], PlexMockServerConfig.FileUrl);
 
         context.DownloadTasks.AddRange(downloadTasks);
         await context.SaveChangesAsync();

@@ -181,15 +181,7 @@ public class DownloadTaskValidator : IDownloadTaskValidator
                 RuleFor(y => y.FileName).NotEmpty();
 
                 RuleFor(y => y.FileLocationUrl).NotEmpty();
-                RuleFor(y => y.DownloadUrl).NotEmpty();
-                RuleFor(y => y.DownloadUri).NotNull();
-                RuleFor(y => y.DownloadUri.IsAbsoluteUri)
-                    .NotNull()
-                    .When(y => y.DownloadUri != null);
 
-                RuleFor(x => Uri.IsWellFormedUriString(x.DownloadUri.AbsoluteUri, UriKind.Absolute))
-                    .NotEqual(false)
-                    .When(y => y.DownloadUri != null);
                 RuleFor(y => y.Created).NotEqual(DateTime.MinValue);
             });
         }

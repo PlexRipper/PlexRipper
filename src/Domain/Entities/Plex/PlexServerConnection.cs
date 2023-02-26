@@ -73,9 +73,9 @@ public class PlexServerConnection : BaseEntity
         return Url + thumbPath;
     }
 
-    public string GetDownloadUrl(string fileLocationUrl)
+    public string GetDownloadUrl(string fileLocationUrl, string token)
     {
-        return Url + fileLocationUrl;
+        return $"{Url}{fileLocationUrl}?X-Plex-Token={token}";
     }
 
     #endregion

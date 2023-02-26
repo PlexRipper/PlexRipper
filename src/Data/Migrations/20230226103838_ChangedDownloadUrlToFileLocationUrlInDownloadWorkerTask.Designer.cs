@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Data;
 
@@ -10,9 +11,11 @@ using PlexRipper.Data;
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    partial class PlexRipperDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230226103838_ChangedDownloadUrlToFileLocationUrlInDownloadWorkerTask")]
+    partial class ChangedDownloadUrlToFileLocationUrlInDownloadWorkerTask
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.3");
@@ -533,6 +536,10 @@ namespace PlexRipper.Data.Migrations
                         .IsUnicode(false)
                         .HasColumnType("TEXT")
                         .HasColumnOrder(9);
+
+                    b.Property<string>("DownloadUrl")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(13);
 
                     b.Property<string>("FileLocationUrl")
                         .HasColumnType("TEXT")

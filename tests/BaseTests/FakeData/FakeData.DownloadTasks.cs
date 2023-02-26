@@ -28,7 +28,6 @@ public static partial class FakeData
             .RuleFor(x => x.DownloadWorkerTasks, _ => new List<DownloadWorkerTask>())
             .RuleFor(x => x.FileName, _ => "file.mp4")
             .RuleFor(x => x.FileLocationUrl, _ => PlexMockServerConfig.FileUrl)
-            .RuleFor(x => x.DownloadUrl, f => "http://localhost:80/")
             .RuleFor(x => x.DownloadDirectory, f => f.System.FilePath())
             .RuleFor(x => x.DestinationDirectory, f => f.System.FilePath())
             .RuleFor(x => x.ParentId, _ => null)
@@ -114,7 +113,6 @@ public static partial class FakeData
             .UseSeed(seed)
             .RuleFor(x => x.MediaType, PlexMediaType.TvShow)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.TvShow)
-            .RuleFor(x => x.DownloadUrl, _ => "")
             .RuleFor(x => x.Children, _ =>
             {
                 var f = GetTvShowSeasonDownloadTask(seed, options);
@@ -134,7 +132,6 @@ public static partial class FakeData
             .UseSeed(seed)
             .RuleFor(x => x.MediaType, PlexMediaType.Season)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Season)
-            .RuleFor(x => x.DownloadUrl, _ => "")
             .RuleFor(x => x.Children, _ =>
             {
                 var f = GetTvShowEpisodeDownloadTask(seed, options);
@@ -154,7 +151,6 @@ public static partial class FakeData
             .UseSeed(seed)
             .RuleFor(x => x.MediaType, PlexMediaType.Episode)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Episode)
-            .RuleFor(x => x.DownloadUrl, _ => "")
             .RuleFor(x => x.Children, _ => GetTvShowEpisodeDataDownloadTask(seed, options).Generate(1));
     }
 
@@ -189,7 +185,7 @@ public static partial class FakeData
             .RuleFor(x => x.PartIndex, _ => partIndex++)
             .RuleFor(x => x.TempDirectory, f => f.System.FilePath())
             .RuleFor(x => x.ElapsedTime, 0)
-            .RuleFor(x => x.DownloadUrl, f => f.Internet.Url())
+            .RuleFor(x => x.FileLocationUrl, f => f.Internet.UrlRootedPath())
             .RuleFor(x => x.DownloadStatus, DownloadStatus.Queued)
             .RuleFor(x => x.DownloadTaskId, _ => 0)
             .RuleFor(x => x.DownloadTask, _ => null)

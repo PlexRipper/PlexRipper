@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ByteSizeLib;
+using Data.Contracts;
 using Logging.Interface;
 using RestSharp;
 using Timer = System.Timers.Timer;
@@ -23,6 +24,7 @@ public class DownloadWorker : IDisposable
     private readonly Subject<DownloadWorkerTask> _downloadWorkerUpdate = new();
 
     private readonly ILog<DownloadWorker> _log;
+    private readonly IMediator _mediator;
 
     private readonly IDownloadFileStream _downloadFileSystem;
 
@@ -47,17 +49,20 @@ public class DownloadWorker : IDisposable
     /// Initializes a new instance of the <see cref="DownloadWorker"/> class.
     /// </summary>
     /// <param name="log"></param>
+    /// <param name="mediator"></param>
     /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
     /// <param name="downloadFileSystem">The filesystem used to store the downloaded data.</param>
     /// <param name="httpClientFactory"></param>
     public DownloadWorker(
         ILog<DownloadWorker> log,
+        IMediator mediator,
         DownloadWorkerTask downloadWorkerTask,
         IDownloadFileStream downloadFileSystem,
         IHttpClientFactory httpClientFactory
     )
     {
         _log = log;
+        _mediator = mediator;
         _downloadFileSystem = downloadFileSystem;
         DownloadWorkerTask = downloadWorkerTask;
 
@@ -184,13 +189,32 @@ public class DownloadWorker : IDisposable
 
         try
         {
+            var plexServerConnectionResult = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(DownloadWorkerTask.PlexServerId));
+            if (plexServerConnectionResult.IsFailed)
+            {
+                _log.Error("Could not find a valid connection to use for DownloadWorker with id {ID}", DownloadWorkerTask.Id);
+                return plexServerConnectionResult.ToResult().LogError();
+            }
+
+            var plexServerConnection = plexServerConnectionResult.Value;
+            var plexServer = plexServerConnection.PlexServer;
+
+            var tokenResult = await _mediator.Send(new GetPlexServerTokenQuery(DownloadWorkerTask.PlexServerId));
+            if (tokenResult.IsFailed)
+            {
+                _log.Error("Could not find a valid token for server {ServerName} to use for DownloadWorker with id {ID}", plexServer.Name, DownloadWorkerTask.Id);
+                return tokenResult.ToResult().LogError();
+            }
+
+            var downloadUrl = plexServerConnection.GetDownloadUrl(DownloadWorkerTask.FileLocationUrl, tokenResult.Value);
+
             _destinationStream = destinationStream;
 
             // Is 0 when starting new and > 0 when resuming.
             _destinationStream.Position = DownloadWorkerTask.BytesReceived;
 
             // Create download client
-            var request = new RestRequest(DownloadWorkerTask.Uri)
+            var request = new RestRequest(downloadUrl)
             {
                 CompletionOption = HttpCompletionOption.ResponseHeadersRead,
             };

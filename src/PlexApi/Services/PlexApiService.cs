@@ -40,18 +40,19 @@ public class PlexApiService : IPlexApiService
 
     public async Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(PlexLibrary plexLibrary)
     {
-        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexLibrary.PlexServerId, true));
-        if (plexServerResult.IsFailed)
-            return plexServerResult.ToResult();
-
-        var tokenResult = await GetPlexServerTokenAsync(plexServerResult.Value.Id);
+        var tokenResult = await GetPlexServerTokenAsync(plexLibrary.PlexServerId);
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
         var stepSize = 5000;
         var authToken = tokenResult.Value;
         var plexLibraryKey = plexLibrary.Key;
-        var serverUrl = plexServerResult.Value.GetServerUrl();
+
+        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexLibrary.PlexServerId));
+        if (plexServerConnection.IsFailed)
+            return plexServerConnection.ToResult();
+
+        var serverUrl = plexServerConnection.Value.Url;
 
         var result = await _plexApi.GetAllEpisodesAsync(authToken, serverUrl, plexLibraryKey, 0, stepSize);
         if (result != null)
@@ -81,15 +82,17 @@ public class PlexApiService : IPlexApiService
     /// <inheritdoc/>
     public async Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(PlexLibrary plexLibrary)
     {
-        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexLibrary.PlexServerId, true));
-        if (plexServerResult.IsFailed)
-            return plexServerResult.ToResult();
-
-        var tokenResult = await GetPlexServerTokenAsync(plexServerResult.Value.Id);
+        var tokenResult = await GetPlexServerTokenAsync(plexLibrary.PlexServerId);
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var result = await _plexApi.GetAllSeasonsAsync(tokenResult.Value, plexServerResult.Value.GetServerUrl(), plexLibrary.Key);
+        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexLibrary.PlexServerId));
+        if (plexServerConnection.IsFailed)
+            return plexServerConnection.ToResult();
+
+        var serverUrl = plexServerConnection.Value.Url;
+
+        var result = await _plexApi.GetAllSeasonsAsync(tokenResult.Value, serverUrl, plexLibrary.Key);
         if (result != null)
             return Result.Ok(_mapper.Map<List<PlexTvShowSeason>>(result.MediaContainer.Metadata));
 
@@ -99,18 +102,18 @@ public class PlexApiService : IPlexApiService
     /// <inheritdoc/>
     public async Task<Result<PlexLibrary>> GetLibraryMediaAsync(PlexLibrary plexLibrary, PlexAccount plexAccount = null)
     {
-        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexLibrary.PlexServerId, true));
-        if (plexServerResult.IsFailed)
-            return plexServerResult.ToResult();
-
         var tokenResult = await GetPlexServerTokenAsync(plexLibrary.PlexServerId, plexAccount?.Id ?? 0);
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var serverUrl = plexServerResult.Value.GetServerUrl();
+        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexLibrary.PlexServerId));
+        if (plexServerConnection.IsFailed)
+            return plexServerConnection.ToResult();
+
+        var serverUrl = plexServerConnection.Value.Url;
 
         // Retrieve updated version of the PlexLibrary
-        var plexLibraries = await GetLibrarySectionsAsync(plexServerResult.Value.Id);
+        var plexLibraries = await GetLibrarySectionsAsync(plexLibrary.PlexServerId);
 
         if (plexLibraries.IsFailed)
             return plexLibraries.ToResult();
@@ -145,24 +148,27 @@ public class PlexApiService : IPlexApiService
     /// <inheritdoc/>
     public async Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(int plexServerId, int plexAccountId = 0)
     {
-        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId, true));
-        if (plexServerResult.IsFailed)
-            return plexServerResult.ToResult();
-
         var tokenResult = await GetPlexServerTokenAsync(plexServerId, plexAccountId);
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var result = await _plexApi.GetLibrarySectionsAsync(tokenResult.Value, plexServerResult.Value.GetServerUrl());
+        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexServerId));
+        if (plexServerConnection.IsFailed)
+            return plexServerConnection.ToResult();
+
+        var serverUrl = plexServerConnection.Value.Url;
+        var plexServer = plexServerConnection.Value.PlexServer;
+
+        var result = await _plexApi.GetLibrarySectionsAsync(tokenResult.Value, serverUrl);
         if (result.IsFailed)
         {
-            _log.Warning("Plex server with name: {PlexServerName} returned no libraries", plexServerResult.Value.Name);
+            _log.Warning("Plex server with name: {PlexServerName} returned no libraries", plexServer.Name);
             return result.ToResult();
         }
 
         if (result.Value?.MediaContainer?.Directory is null)
         {
-            _log.Error("Plex server: {PlexServerResultName} returned an empty response when libraries were requested", plexServerResult.Value.Name);
+            _log.Error("Plex server: {PlexServerResultName} returned an empty response when libraries were requested", plexServer.Name);
             return result.ToResult();
         }
 
@@ -256,7 +262,11 @@ public class PlexApiService : IPlexApiService
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        return await _plexApi.GetPlexMediaImageAsync(plexServer.GetServerUrl() + thumbPath, tokenResult.Value, width, height);
+        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexServer.Id));
+        if (plexServerConnection.IsFailed)
+            return plexServerConnection.ToResult();
+
+        return await _plexApi.GetPlexMediaImageAsync(plexServerConnection.Value.GetThumbPath(thumbPath), tokenResult.Value, width, height);
     }
 
     #endregion

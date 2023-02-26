@@ -137,12 +137,6 @@ public class PlexServer : BaseEntity
     #region Helpers
 
     /// <summary>
-    /// Gets the library section url derived from the BaseUrl, e.g: http://112.202.10.213:32400/library/sections.
-    /// </summary>
-    [NotMapped]
-    public string LibraryUrl => $"{this.GetServerUrl()}library/sections";
-
-    /// <summary>
     /// Gets a value indicating whether this <see cref="PlexServer"/> has any DownloadTasks in any nested <see cref="PlexLibrary"/>.
     /// </summary>
     [NotMapped]

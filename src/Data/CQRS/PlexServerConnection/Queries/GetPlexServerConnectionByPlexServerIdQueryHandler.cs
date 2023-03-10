@@ -39,18 +39,18 @@ public class GetPlexServerConnectionByPlexServerIdQueryHandler : BaseHandler,
                 return Result.Ok(connection);
 
             _log.Here()
-                .Warning("Could not find preferred connection with id {PlexServerConnectionId} for server {Name}", plexServer.PreferredConnectionId,
+                .Verbose("Could not find preferred connection with id {PlexServerConnectionId} for server {Name}", plexServer.PreferredConnectionId,
                     plexServer.Name);
         }
 
         // Find based on public address
-        _log.Here().Debug("Attempting to find PlexServerConnection that matches the PlexServer public address: {PublicAddress}", plexServer.PublicAddress);
+        _log.Here().Verbose("Attempting to find PlexServerConnection that matches the PlexServer public address: {PublicAddress}", plexServer.PublicAddress);
 
         var publicConnection = plexServerConnections.Find(x => x.Address == plexServer.PublicAddress);
         if (publicConnection is not null)
             return Result.Ok(publicConnection);
 
-        _log.Here().Warning("Could not find connection based on public address: {PublicAddress} for server {Name}", plexServer.PublicAddress, plexServer.Name);
+        _log.Here().Verbose("Could not find connection based on public address: {PublicAddress} for server {Name}", plexServer.PublicAddress, plexServer.Name);
 
         // Find based on what's successful
         var successPlexServerConnections = plexServerConnections
@@ -60,7 +60,7 @@ public class GetPlexServerConnectionByPlexServerIdQueryHandler : BaseHandler,
             return Result.Ok(successPlexServerConnections.First());
 
         // Find anything...
-        _log.Warning("Could not find a recent successful connection. We're just gonna YOLO this and pick the first connection: {PlexServerConnectionUrl}",
+        _log.Verbose("Could not find a recent successful connection. We're just gonna YOLO this and pick the first connection: {PlexServerConnectionUrl}",
             plexServerConnections.First());
         return Result.Ok(plexServerConnections.First());
     }

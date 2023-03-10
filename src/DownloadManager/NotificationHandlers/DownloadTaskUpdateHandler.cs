@@ -31,7 +31,7 @@ public class DownloadTaskUpdateHandler : IRequestHandler<DownloadTaskUpdated>
             return;
         }
 
-        await _signalRService.SendDownloadProgressUpdateAsync(plexServerId, downloadTasksResult.Value);
+        await _signalRService.SendDownloadProgressUpdateAsync(plexServerId, downloadTasksResult.Value, cancellationToken);
 
         // if (true)
         // {

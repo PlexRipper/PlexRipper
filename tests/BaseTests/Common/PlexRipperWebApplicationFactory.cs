@@ -49,10 +49,6 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
 
                 SetMockedDependencies(autoFacBuilder);
                 RegisterBackgroundScheduler(autoFacBuilder);
-
-                //  SignalR requires the default ILogger
-                //  autoFacBuilder.RegisterInstance(new LoggerFactory()).As<ILoggerFactory>();
-                //  autoFacBuilder.RegisterGeneric(typeof(Logger<>)).As(typeof(ILogger<>)).SingleInstance();
             });
 
         try

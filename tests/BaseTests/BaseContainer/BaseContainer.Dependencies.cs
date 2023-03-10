@@ -53,7 +53,6 @@ public partial class BaseContainer : IDisposable
     public static async Task<BaseContainer> Create(
         ILog log,
         string memoryDbName,
-        int seed = 0,
         Action<UnitTestDataConfig> options = null,
         MockPlexApi mockPlexApi = null)
     {

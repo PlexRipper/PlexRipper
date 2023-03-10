@@ -60,7 +60,7 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected async Task CreateContainer(Action<UnitTestDataConfig> options = null)
     {
-        Container = await BaseContainer.Create(_log, DatabaseName, Seed, options, _mockPlexApi);
+        Container = await BaseContainer.Create(_log, DatabaseName, options, _mockPlexApi);
     }
 
     #endregion

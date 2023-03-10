@@ -28,5 +28,10 @@
 		<Compile Include="..\..\..\src\Domain\GlobalUsings.cs" />
 		<Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
 	</ItemGroup>
+	<ItemGroup>
+	  <None Update="xunit.runner.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
 
 </Project>

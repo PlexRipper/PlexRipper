@@ -6,6 +6,7 @@ using Settings.Contracts;
 
 namespace WebAPI.IntegrationTests.SettingsController;
 
+[Collection("Sequential")]
 public class SettingsController_Get_Settings_IntegrationTests : BaseIntegrationTests
 {
     public SettingsController_Get_Settings_IntegrationTests(ITestOutputHelper output) : base(output) { }

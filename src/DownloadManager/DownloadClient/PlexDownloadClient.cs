@@ -1,6 +1,4 @@
-﻿using System.Reactive.Concurrency;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
+using System.Threading.Channels;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using Logging.Interface;
@@ -22,13 +20,11 @@ public class PlexDownloadClient : IDisposable
 
     private readonly List<DownloadWorker> _downloadWorkers = new();
 
-    private readonly EventLoopScheduler _timeThreadContext = new();
-
     private readonly IServerSettingsModule _serverSettings;
 
+    private readonly CancellationTokenSource _cancellationToken = new();
+
     private IDisposable _downloadSpeedLimitSubscription;
-    private IDisposable _downloadWorkerTaskUpdate;
-    private IDisposable _downloadWorkerLog;
 
     #endregion
 
@@ -60,7 +56,15 @@ public class PlexDownloadClient : IDisposable
     /// <summary>
     /// Gets the Task that completes when all download workers have finished.
     /// </summary>
-    public Task DownloadProcessTask => Task.WhenAll(_downloadWorkers.Select(x => x.DownloadProcessTask ?? Task.CompletedTask));
+    public Task DownloadProcessTask
+    {
+        get
+        {
+            var tasks = _downloadWorkers.Select(x => x.DownloadProcessTask ?? Task.CompletedTask).ToList();
+            tasks.Add(ExecuteDownloadWorkerUpdates(_cancellationToken.Token));
+            return Task.WhenAll(tasks);
+        }
+    }
 
     public DownloadStatus DownloadStatus
     {
@@ -97,8 +101,8 @@ public class PlexDownloadClient : IDisposable
             return createResult.ToResult().LogError();
 
         SetupDownloadLimitWatcher(downloadTask);
-        SetupSubscriptions();
 
+        // SetupSubscriptions();
         DownloadTask = downloadTask;
         return Result.Ok(this);
     }
@@ -120,7 +124,7 @@ public class PlexDownloadClient : IDisposable
     /// Starts the download workers for the <see cref="DownloadTask"/> given during setup.
     /// </summary>
     /// <returns>Is successful.</returns>
-    public Result Start()
+    public async Task<Result> Start()
     {
         if (_downloadWorkers.Any(x => x.DownloadWorkerTask.DownloadStatus == DownloadStatus.Downloading))
             return Result.Fail("The PlexDownloadClient is already downloading and can not be started.").LogWarning();
@@ -131,7 +135,7 @@ public class PlexDownloadClient : IDisposable
             var results = new List<Result>();
             foreach (var downloadWorker in _downloadWorkers)
             {
-                var startResult = downloadWorker.Start();
+                var startResult = await downloadWorker.Start();
                 if (startResult.IsFailed)
                     startResult.LogError();
 
@@ -152,8 +156,6 @@ public class PlexDownloadClient : IDisposable
 
         await Task.WhenAll(_downloadWorkers.Select(x => x.StopAsync()));
 
-        DownloadTask.DownloadWorkerTasks = _downloadWorkers.Select(x => x.DownloadWorkerTask).ToList();
-        DownloadTask.DownloadStatus = DownloadStatus.Stopped;
         return Result.Ok(DownloadTask);
     }
 
@@ -162,32 +164,14 @@ public class PlexDownloadClient : IDisposable
     /// </summary>
     public void Dispose()
     {
-        _timeThreadContext.Dispose();
-        ClearDownloadWorkers();
+        if (!_cancellationToken.IsCancellationRequested)
+            _cancellationToken.Cancel();
         _downloadSpeedLimitSubscription?.Dispose();
-        _downloadWorkerTaskUpdate?.Dispose();
-        _downloadWorkerLog?.Dispose();
     }
 
     #endregion
 
     #region Private Methods
-
-    /// <summary>
-    /// Calls Dispose on all DownloadWorkers and clears the downloadWorkersList.
-    /// </summary>
-    /// <returns>Is successful.</returns>
-    private void ClearDownloadWorkers()
-    {
-        if (_downloadWorkers.Any())
-        {
-            _downloadWorkers.ForEach(x => x.Dispose());
-            _downloadWorkers.Clear();
-        }
-
-        if (DownloadTask is not null)
-            _log.Debug("DownloadWorkers have been disposed for {DownloadTaskFullTitle}", DownloadTask.FullTitle);
-    }
 
     private Result<List<DownloadWorkerTask>> CreateDownloadWorkers(DownloadTask downloadTask)
     {
@@ -203,7 +187,7 @@ public class PlexDownloadClient : IDisposable
         return Result.Ok();
     }
 
-    private async Task OnDownloadWorkerTaskUpdate(IList<DownloadWorkerTask> downloadWorkerUpdates)
+    private async Task OnDownloadWorkerTaskUpdate(IList<DownloadWorkerTask> downloadWorkerUpdates, CancellationToken cancellationToken = default)
     {
         if (!downloadWorkerUpdates.Any())
             return;
@@ -216,18 +200,18 @@ public class PlexDownloadClient : IDisposable
                 DownloadTask.DownloadWorkerTasks[i] = downloadWorkerTask;
         }
 
-        DownloadTask.DataReceived = DownloadTask.DownloadWorkerTasks.Sum(x => x.BytesReceived);
-        DownloadTask.Percentage = DownloadTask.DownloadWorkerTasks.Average(x => x.Percentage);
-        DownloadTask.DownloadSpeed = DownloadTask.DownloadWorkerTasks.Sum(x => x.DownloadSpeed);
+        DownloadTask.DataReceived = downloadWorkerUpdates.Sum(x => x.BytesReceived);
+        DownloadTask.Percentage = downloadWorkerUpdates.Average(x => x.Percentage);
+        DownloadTask.DownloadSpeed = downloadWorkerUpdates.Sum(x => x.DownloadSpeed);
 
         var newDownloadStatus = DownloadTaskActions.Aggregate(downloadWorkerUpdates.Select(x => x.DownloadStatus).ToList());
 
         var statusIsChanged = DownloadStatus != newDownloadStatus;
         DownloadStatus = newDownloadStatus;
 
-        await _mediator.Send(new UpdateDownloadTasksByIdCommand(DownloadTask));
+        await _mediator.Send(new UpdateDownloadTasksByIdCommand(DownloadTask), cancellationToken);
 
-        await _mediator.Publish(new DownloadTaskUpdated(DownloadTask));
+        await _mediator.Send(new DownloadTaskUpdated(DownloadTask), cancellationToken);
 
         _log.Debug("{@DownloadTask}", DownloadTask.ToString());
     }
@@ -246,29 +230,29 @@ public class PlexDownloadClient : IDisposable
             .Subscribe(SetDownloadSpeedLimit);
     }
 
-    private void SetupSubscriptions()
+    private async Task ExecuteDownloadWorkerUpdates(CancellationToken cancellationToken = default)
     {
-        if (!_downloadWorkers.Any())
-        {
-            _log.WarningLine("No download workers have been made yet, cannot setup subscriptions");
-            return;
-        }
+        while (!cancellationToken.IsCancellationRequested)
+            try
+            {
+                var list = _downloadWorkers.Select(x => x.DownloadWorkerTask).ToList();
+                if (list.Any())
+                {
+                    await OnDownloadWorkerTaskUpdate(list, cancellationToken);
 
-        // On download worker update
-        _downloadWorkerTaskUpdate = _downloadWorkers
-            .Select(x => x.DownloadWorkerTaskUpdate)
-            .Merge()
-            .Buffer(TimeSpan.FromSeconds(1))
-            .SelectMany(async (value) => await OnDownloadWorkerTaskUpdate(value).ToObservable())
-            .Subscribe();
+                    if (list.All(x => x.DownloadStatus == DownloadStatus.DownloadFinished))
+                    {
+                        await _mediator.Publish(new DownloadTaskFinished(DownloadTask.Id, DownloadTask.PlexServerId), cancellationToken);
+                        break;
+                    }
+                }
 
-        // Download Worker Log subscription
-        _downloadWorkerLog = _downloadWorkers
-            .Select(x => x.DownloadWorkerLog)
-            .Merge()
-            .Buffer(TimeSpan.FromSeconds(1))
-            .SelectMany(async logs => await _mediator.Send(new AddDownloadWorkerLogsCommand(logs)).ToObservable())
-            .Subscribe();
+                await Task.Delay(1000, cancellationToken);
+            }
+            catch (Exception)
+            {
+                break;
+            }
     }
 
     #endregion

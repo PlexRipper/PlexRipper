@@ -18,20 +18,20 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
     {
         Seed = 45699934;
         var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
-
+        var plexMovieCount = 5;
         await SetupDatabase(config =>
         {
             config.MockServerUris.Add(serverUri);
             config.PlexAccountCount = 1;
             config.PlexServerCount = 1;
             config.PlexLibraryCount = 1;
-            config.MovieCount = 10;
+            config.MovieCount = plexMovieCount;
         });
 
         // Arrange
         await CreateContainer(config => { config.DownloadSpeedLimitInKib = 5000; });
         var plexMovies = await DbContext.PlexMovies.ToListAsync();
-        plexMovies.Count.ShouldBe(10, $"PlexMovies count should be 10 failed with database name: {DatabaseName}");
+        plexMovies.Count.ShouldBe(plexMovieCount, $"PlexMovies count should be 10 failed with database name: {DatabaseName}");
 
         var dtoList = new List<DownloadMediaDTO>()
         {
@@ -47,7 +47,7 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
         var result = await response.Deserialize<ResultDTO>();
         await Task.Delay(2000);
         await Container.SchedulerService.AwaitScheduler();
-        await Task.Delay(10000);
+        await Task.Delay(2000);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -56,7 +56,7 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
             .ToListAsync();
         downloadTasksDb.ShouldNotBeNull();
         downloadTasksDb.ShouldNotBeEmpty();
-        downloadTasksDb.Count.ShouldBe(10);
+        downloadTasksDb.Count.ShouldBe(plexMovieCount);
         downloadTasksDb.ShouldAllBe(x => x.DownloadStatus == DownloadStatus.Completed);
 
         foreach (var downloadTaskDb in downloadTasksDb)

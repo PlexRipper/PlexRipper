@@ -41,7 +41,7 @@ public class ReCalculateRootDownloadTaskCommandHandler : BaseHandler,
 
         SetDownloadStatus(downloadTaskDb);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await SaveChangesAsync(cancellationToken);
         return Result.Ok();
     }
 }

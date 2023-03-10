@@ -6,13 +6,11 @@ namespace PlexRipper.DownloadManager;
 public class DownloadTaskFinishedHandler : INotificationHandler<DownloadTaskFinished>
 {
     private readonly IMediator _mediator;
-    private readonly IDownloadQueue _downloadQueue;
     private readonly IFileMergeScheduler _fileMergeScheduler;
 
-    public DownloadTaskFinishedHandler(IMediator mediator, IDownloadQueue downloadQueue, IFileMergeScheduler fileMergeScheduler)
+    public DownloadTaskFinishedHandler(IMediator mediator, IFileMergeScheduler fileMergeScheduler)
     {
         _mediator = mediator;
-        _downloadQueue = downloadQueue;
         _fileMergeScheduler = fileMergeScheduler;
     }
 

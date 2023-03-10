@@ -4,7 +4,7 @@ using WebAPI.Contracts;
 
 namespace PlexRipper.DownloadManager;
 
-public class DownloadTaskUpdateHandler : INotificationHandler<DownloadTaskUpdated>
+public class DownloadTaskUpdateHandler : IRequestHandler<DownloadTaskUpdated>
 {
     private readonly IMediator _mediator;
     private readonly ISignalRService _signalRService;
@@ -25,6 +25,11 @@ public class DownloadTaskUpdateHandler : INotificationHandler<DownloadTaskUpdate
 
         // Send away the new result
         var downloadTasksResult = await _mediator.Send(new GetDownloadTasksByPlexServerIdQuery(plexServerId), cancellationToken);
+        if (downloadTasksResult.IsFailed)
+        {
+            downloadTasksResult.LogError();
+            return;
+        }
 
         await _signalRService.SendDownloadProgressUpdateAsync(plexServerId, downloadTasksResult.Value);
 

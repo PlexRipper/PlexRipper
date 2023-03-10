@@ -13,6 +13,11 @@ public static class MoqExtensions
         return mock.Mock<IMediator>().Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
     }
 
+    public static ISetup<IMediator, Task> SetupMediator(this AutoMock mock, Func<IRequest> request)
+    {
+        return mock.Mock<IMediator>().Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
+    }
+
     public static ISetup<IMediator, Task> PublishMediator(this AutoMock mock, Func<INotification> request)
     {
         return mock.Mock<IMediator>().Setup(x => x.Publish(request.Invoke(), It.IsAny<CancellationToken>()));

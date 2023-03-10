@@ -80,7 +80,7 @@ public class FileMergeJob : IJob
             downloadTask.DownloadWorkerTasks.ForEach(x => x.DownloadStatus = newDownloadStatus);
 
             await _mediator.Send(new UpdateDownloadTasksByIdCommand(downloadTask), token);
-            await _mediator.Publish(new DownloadTaskUpdated(downloadTask), token);
+            await _mediator.Send(new DownloadTaskUpdated(downloadTask), token);
 
             // Verify all file paths exists
             foreach (var path in fileTask.FilePaths)

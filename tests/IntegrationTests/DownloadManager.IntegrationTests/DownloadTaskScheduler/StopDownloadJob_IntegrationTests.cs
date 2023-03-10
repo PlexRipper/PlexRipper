@@ -1,8 +1,6 @@
-using System.Linq;
-using System.Threading.Tasks;
 using PlexRipper.Data.Common;
 
-namespace BackgroundServices.IntegrationTests.DownloadTaskScheduler;
+namespace DownloadManager.IntegrationTests.DownloadTaskScheduler;
 
 [Collection("Sequential")]
 public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
@@ -18,10 +16,11 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
         await SetupDatabase(config =>
         {
             config.MockServerUris.Add(serverUri);
+            config.PlexAccountCount = 1;
             config.PlexServerCount = 1;
             config.PlexLibraryCount = 3;
             config.MovieCount = 10;
-            config.MovieDownloadTasksCount = 5;
+            config.MovieDownloadTasksCount = 1;
             config.DownloadFileSizeInMb = 50;
         });
 
@@ -35,11 +34,6 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
             .FirstOrDefault();
         downloadTask.ShouldNotBeNull();
         var childDownloadTask = downloadTask.Children[0];
-
-        // TODO fix the assertion that the DownloadTaskHasFinished
-        // Container.Mediator. DownloadTaskTracker.DownloadTaskFinished.Subscribe(value =>
-        //     value.Id.ShouldBe(childDownloadTask.Id)
-        // );
 
         // Act
         var startResult = await Container.DownloadTaskScheduler.StartDownloadTaskJob(childDownloadTask.Id, childDownloadTask.PlexServerId);

@@ -33,6 +33,6 @@ public class FileMergeFinishedHandler : INotificationHandler<FileMergeFinishedNo
 
         await _mediator.Send(new DeleteFileTaskByIdCommand(notification.FileTaskId), cancellationToken);
 
-        await _mediator.Publish(new DownloadTaskUpdated(fileTask.DownloadTask), cancellationToken);
+        await _mediator.Send(new DownloadTaskUpdated(fileTask.DownloadTask), cancellationToken);
     }
 }

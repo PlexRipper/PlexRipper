@@ -46,8 +46,8 @@ public partial class BaseContainer : IDisposable
         ApiClient = _factory.CreateDefaultClient();
 
         // Create a separate scope as not to interfere with tests running in parallel
-        _services = _factory.Services;
         _serviceScope = _factory.Services.CreateScope();
+        _services = _serviceScope.ServiceProvider;
     }
 
     public static async Task<BaseContainer> Create(
@@ -76,7 +76,7 @@ public partial class BaseContainer : IDisposable
 
     #region Properties
 
-    public System.Net.Http.HttpClient ApiClient { get; }
+    public HttpClient ApiClient { get; }
 
     #region Autofac Resolve
 
@@ -115,7 +115,7 @@ public partial class BaseContainer : IDisposable
     public IDownloadTaskScheduler DownloadTaskScheduler => Resolve<IDownloadTaskScheduler>();
 
     public IFileMergeScheduler FileMergeScheduler => Resolve<IFileMergeScheduler>();
-    public MockSignalRService MockSignalRService => (MockSignalRService) Resolve<ISignalRService>();
+    public MockSignalRService MockSignalRService => (MockSignalRService)Resolve<ISignalRService>();
 
     public TestLoggingClass TestLoggingClass => Resolve<TestLoggingClass>();
 

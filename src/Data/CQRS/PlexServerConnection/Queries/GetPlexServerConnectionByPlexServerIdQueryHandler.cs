@@ -29,10 +29,7 @@ public class GetPlexServerConnectionByPlexServerIdQueryHandler : BaseHandler,
 
         var plexServerConnections = plexServer.PlexServerConnections;
         if (!plexServerConnections.Any())
-        {
             return Result.Fail($"PlexServer with id {plexServer.Id} and name {plexServer.Name} has no connections available!").LogError();
-        }
-
 
         // Find based on preference
         if (plexServer.PreferredConnectionId > 0)
@@ -41,7 +38,9 @@ public class GetPlexServerConnectionByPlexServerIdQueryHandler : BaseHandler,
             if (connection is not null)
                 return Result.Ok(connection);
 
-            _log.Here().Warning("Could not find preferred connection with id {PlexServerConnectionId} for server {Name}", plexServer.PreferredConnectionId, plexServer.Name);
+            _log.Here()
+                .Warning("Could not find preferred connection with id {PlexServerConnectionId} for server {Name}", plexServer.PreferredConnectionId,
+                    plexServer.Name);
         }
 
         // Find based on public address
@@ -49,19 +48,20 @@ public class GetPlexServerConnectionByPlexServerIdQueryHandler : BaseHandler,
 
         var publicConnection = plexServerConnections.Find(x => x.Address == plexServer.PublicAddress);
         if (publicConnection is not null)
-              return Result.Ok(publicConnection);
+            return Result.Ok(publicConnection);
 
         _log.Here().Warning("Could not find connection based on public address: {PublicAddress} for server {Name}", plexServer.PublicAddress, plexServer.Name);
 
         // Find based on what's successful
-        var successPlexServerConnections = plexServerConnections.FindAll(x => x.PlexServerStatus.Last()?.IsSuccessful ?? false);
+        var successPlexServerConnections = plexServerConnections
+            .Where(x => x.PlexServerStatus.Any(y => y.IsSuccessful))
+            .ToList();
         if (successPlexServerConnections.Any())
-        {
             return Result.Ok(successPlexServerConnections.First());
-        }
 
         // Find anything...
-        _log.Warning("Could not find a recent successful connection. We're just gonna YOLO this and pick the first connection: {PlexServerConnectionUrl}", plexServerConnections.First());
+        _log.Warning("Could not find a recent successful connection. We're just gonna YOLO this and pick the first connection: {PlexServerConnectionUrl}",
+            plexServerConnections.First());
         return Result.Ok(plexServerConnections.First());
     }
 }

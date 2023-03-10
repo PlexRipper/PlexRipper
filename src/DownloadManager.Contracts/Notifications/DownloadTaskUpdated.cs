@@ -3,7 +3,7 @@ using PlexRipper.Domain;
 
 namespace DownloadManager.Contracts;
 
-public class DownloadTaskUpdated : INotification
+public class DownloadTaskUpdated : IRequest
 {
     #region Constructors
 

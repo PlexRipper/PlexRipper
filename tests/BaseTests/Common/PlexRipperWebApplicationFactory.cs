@@ -9,7 +9,6 @@ using PlexRipper.Data;
 using PlexRipper.Domain.Autofac;
 using PlexRipper.WebAPI.Common;
 using Settings.Contracts;
-using WebAPI.Contracts;
 
 namespace PlexRipper.BaseTests;
 
@@ -69,13 +68,11 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
 
     private void SetMockedDependencies(ContainerBuilder builder)
     {
-        builder.RegisterType<MockSignalRService>().As<ISignalRService>().SingleInstance();
-
         if (_mockPlexApi is not null)
         {
             builder
                 .RegisterInstance(_mockPlexApi.CreateClient())
-                .As<System.Net.Http.HttpClient>()
+                .As<HttpClient>()
                 .SingleInstance();
         }
 

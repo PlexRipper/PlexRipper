@@ -2,6 +2,7 @@
 using PlexRipper.DownloadManager;
 using PlexRipper.FileSystem.Common;
 using Settings.Contracts;
+using WebAPI.Contracts;
 
 namespace PlexRipper.BaseTests;
 
@@ -19,5 +20,7 @@ public class TestModule : Module
         builder.RegisterType<MockConfigManager>().As<IConfigManager>().SingleInstance();
 
         builder.RegisterType<TestLoggingClass>().SingleInstance();
+
+        builder.RegisterType<MockSignalRService>().As<ISignalRService>().SingleInstance();
     }
 }

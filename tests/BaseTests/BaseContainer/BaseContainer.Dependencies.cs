@@ -1,6 +1,7 @@
 ﻿#region
 
 using Application.Contracts;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using BackgroundServices.Contracts;
@@ -27,11 +28,9 @@ public partial class BaseContainer : IDisposable
 
     private readonly WebApplicationFactory<Startup> _factory;
 
-    private readonly IServiceScope _serviceScope;
-
-    private readonly IServiceProvider _services;
-
     private static ILog _log;
+
+    private readonly ILifetimeScope _lifeTimeScope;
 
     #endregion
 
@@ -46,8 +45,7 @@ public partial class BaseContainer : IDisposable
         ApiClient = _factory.CreateDefaultClient();
 
         // Create a separate scope as not to interfere with tests running in parallel
-        _serviceScope = _factory.Services.CreateScope();
-        _services = _serviceScope.ServiceProvider;
+        _lifeTimeScope = _factory.Services.GetAutofacRoot().BeginLifetimeScope(memoryDbName);
     }
 
     public static async Task<BaseContainer> Create(
@@ -138,7 +136,7 @@ public partial class BaseContainer : IDisposable
 
     private T Resolve<T>()
     {
-        return _services.GetRequiredService<T>();
+        return _lifeTimeScope.Resolve<T>();
     }
 
     #endregion
@@ -147,7 +145,7 @@ public partial class BaseContainer : IDisposable
     {
         _log.WarningLine("Disposing Container");
         PlexRipperDbContext.Database.EnsureDeleted();
-        _services.GetAutofacRoot().Dispose();
+        _lifeTimeScope.Dispose();
         _factory?.Dispose();
         ApiClient?.Dispose();
     }

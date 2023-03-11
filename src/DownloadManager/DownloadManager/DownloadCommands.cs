@@ -88,7 +88,17 @@ public class DownloadCommands : IDownloadCommands
         if (regeneratedDownloadTasks.IsFailed)
             return regeneratedDownloadTasks.LogError();
 
-        await _mediator.Send(new UpdateDownloadTasksByIdCommand(regeneratedDownloadTasks.Value));
+        var downloadTasks = regeneratedDownloadTasks.Value;
+        var restartedDownloadTask = downloadTasks.Flatten(x => x.Children).FirstOrDefault(x => x.Id == downloadTaskId);
+        if (restartedDownloadTask == null)
+            return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogError();
+
+        var rootDownloadTaskId = restartedDownloadTask.RootDownloadTaskId;
+
+        await _mediator.Send(new UpdateDownloadTasksByIdCommand(downloadTasks));
+
+        await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(downloadTaskId, DownloadStatus.Queued));
+        await _mediator.Send(new ReCalculateRootDownloadTaskCommand(rootDownloadTaskId));
 
         var uniquePlexServers = regeneratedDownloadTasks.Value.Select(x => x.PlexServerId).Distinct().ToList();
         await _mediator.Publish(new CheckDownloadQueue(uniquePlexServers));
@@ -142,8 +152,6 @@ public class DownloadCommands : IDownloadCommands
         if (downloadTaskId <= 0)
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
 
-        var stoppedDownloadTaskIds = new List<int>();
-
         var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId));
         if (downloadTask.IsFailed)
         {
@@ -162,7 +170,10 @@ public class DownloadCommands : IDownloadCommands
         if (removeTempResult.IsFailed)
             await _notificationsService.SendResult(removeTempResult);
 
-        stoppedDownloadTaskIds.Add(downloadTask.Value.Id);
+        var stoppedDownloadTaskIds = new List<int>
+        {
+            downloadTask.Value.Id,
+        };
 
         var updateResult = await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(stoppedDownloadTaskIds, DownloadStatus.Stopped));
         if (updateResult.IsFailed)

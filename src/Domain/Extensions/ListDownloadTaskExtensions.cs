@@ -36,6 +36,18 @@ public static class ListDownloadTaskExtensions
         return downloadTasks;
     }
 
+    public static List<DownloadTask> SetToDownloadFinished(this List<DownloadTask> downloadTasks)
+    {
+        foreach (var downloadTask in downloadTasks)
+        {
+            downloadTask.DownloadStatus = DownloadStatus.DownloadFinished;
+            if (downloadTask.Children is not null && downloadTask.Children.Any())
+                downloadTask.Children = SetToDownloadFinished(downloadTask.Children);
+        }
+
+        return downloadTasks;
+    }
+
     public static List<DownloadTask> SetToDownloading(this List<DownloadTask> downloadTasks)
     {
         foreach (var downloadTask in downloadTasks)

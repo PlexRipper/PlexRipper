@@ -45,6 +45,11 @@ public class PlexApiClient
         return GenerateResponseResult(response);
     }
 
+    /// <summary>
+    /// This method is used to send a request to the Plex API and download the image.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     public async Task<Result<byte[]>> SendImageRequestAsync(RestRequest request)
     {
         try
@@ -62,7 +67,7 @@ public class PlexApiClient
                 {
                     try
                     {
-                        return await Task.Run(() => _client.DownloadData(request));
+                        return await _client.DownloadDataAsync(request);
                     }
                     catch (Exception e)
                     {
@@ -88,6 +93,12 @@ public class PlexApiClient
         }
     }
 
+    /// <summary>
+    /// Generates a <see cref="Result{T}"/> from the <see cref="RestResponse{T}"/>
+    /// </summary>
+    /// <param name="response"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
     private static Result<T> GenerateResponseResult<T>(RestResponse<T> response) where T : class
     {
         var isSuccessful = response.IsSuccessful;
@@ -103,6 +114,11 @@ public class PlexApiClient
         return ParsePlexErrors(response);
     }
 
+    /// <summary>
+    /// Parses the Plex errors and returns a <see cref="Result{T}"/>
+    /// </summary>
+    /// <param name="response"></param>
+    /// <returns></returns>
     private static Result ParsePlexErrors(RestResponse response)
     {
         var requestUrl = response.Request.Resource;

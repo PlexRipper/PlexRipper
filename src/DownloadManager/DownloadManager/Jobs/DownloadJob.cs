@@ -12,8 +12,7 @@ public class DownloadJob : IJob, IDisposable
     private readonly IMediator _mediator;
     private readonly IDownloadTaskFactory _downloadTaskFactory;
     private readonly INotificationsService _notificationsService;
-    private readonly Func<PlexDownloadClient> _plexDownloadClientFactory;
-    private PlexDownloadClient _downloadClient;
+    private readonly PlexDownloadClient _plexDownloadClient;
 
     #region Fields
 
@@ -26,13 +25,13 @@ public class DownloadJob : IJob, IDisposable
         IMediator mediator,
         IDownloadTaskFactory downloadTaskFactory,
         INotificationsService notificationsService,
-        Func<PlexDownloadClient> plexDownloadClientFactory)
+        PlexDownloadClient plexDownloadClient)
     {
         _log = log;
         _mediator = mediator;
         _downloadTaskFactory = downloadTaskFactory;
         _notificationsService = notificationsService;
-        _plexDownloadClientFactory = plexDownloadClientFactory;
+        _plexDownloadClient = plexDownloadClient;
     }
 
     #endregion
@@ -59,6 +58,7 @@ public class DownloadJob : IJob, IDisposable
         var dataMap = context.JobDetail.JobDataMap;
         var downloadTaskId = dataMap.GetIntValue(DownloadTaskIdParameter);
         var plexServerId = dataMap.GetIntValue(PlexServerIdParameter);
+        var token = context.CancellationToken;
         _log.Debug("Executing job: {DownloadJobName} for {DownloadTaskIdName} with id: {DownloadTaskId}", nameof(DownloadJob), nameof(downloadTaskId),
             downloadTaskId);
 
@@ -66,7 +66,7 @@ public class DownloadJob : IJob, IDisposable
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         try
         {
-            var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true));
+            var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true), token);
             if (downloadTaskResult.IsFailed)
             {
                 downloadTaskResult.LogError();
@@ -89,14 +89,14 @@ public class DownloadJob : IJob, IDisposable
 
                 downloadTask.DownloadWorkerTasks = downloadWorkerTasksResult.Value;
 
-                var addResult = await _mediator.Send(new AddDownloadWorkerTasksCommand(downloadWorkerTasksResult.Value));
+                var addResult = await _mediator.Send(new AddDownloadWorkerTasksCommand(downloadWorkerTasksResult.Value), token);
                 if (addResult.IsFailed)
                 {
                     addResult.LogError();
                     return;
                 }
 
-                var getResult = await _mediator.Send(new GetAllDownloadWorkerTasksByDownloadTaskIdQuery(downloadTask.Id));
+                var getResult = await _mediator.Send(new GetAllDownloadWorkerTasksByDownloadTaskIdQuery(downloadTask.Id), token);
                 if (getResult.IsFailed)
                 {
                     getResult.LogError();
@@ -107,46 +107,40 @@ public class DownloadJob : IJob, IDisposable
                 _log.Debug("Generated DownloadWorkerTasks for {DownloadTaskFullTitle}", downloadTask.FullTitle);
             }
 
-            var downloadClientResult = _plexDownloadClientFactory().Setup(downloadTask);
+            var downloadClientResult = _plexDownloadClient.Setup(downloadTask);
             if (downloadClientResult.IsFailed)
             {
                 downloadClientResult.LogError();
                 return;
             }
 
-            _downloadClient = downloadClientResult.Value;
-
-            var startResult = await _downloadClient.Start();
+            var startResult = await _plexDownloadClient.Start();
             if (startResult.IsFailed)
                 await _notificationsService.SendResult(startResult);
 
-            while (!_downloadClient.DownloadProcessTask.IsCompleted)
+            try
             {
-                if (context.CancellationToken.IsCancellationRequested)
-                {
-                    _log.Information("{DownloadJobName} with {DownloadTaskIdName}: {DownloadTaskId} has been requested to be stopped", nameof(DownloadJob),
-                        nameof(downloadTaskId), downloadTaskId);
-
-                    await _downloadClient.StopAsync();
-
-                    // ReSharper disable once MethodSupportsCancellation
-                    await Task.Delay(2000);
-                    return;
-                }
-
-                // Don't pass token as it will prevent a graceful stop of the downloadProcess
-                // ReSharper disable once MethodSupportsCancellation
-                await Task.Delay(1000);
+                await _plexDownloadClient.DownloadProcessTask.WaitAsync(token);
             }
+            catch (TaskCanceledException)
+            {
+                _log.Information("{DownloadJobName} with {DownloadTaskIdName}: {DownloadTaskId} has been requested to be stopped", nameof(DownloadJob),
+                    nameof(downloadTaskId), downloadTaskId);
 
-            _log.Debug("Exiting job: {DownloadJobName} for {DownloadTaskName} with id: {DownloadTaskId}", nameof(DownloadJob), nameof(DownloadTask),
-                downloadTaskId);
+                await _plexDownloadClient.StopAsync();
+            }
 
 
         }
+        catch (TaskCanceledException) { }
         catch (Exception e)
         {
             _log.Error(e);
+        }
+        finally
+        {
+            _log.Debug("Exiting job: {DownloadJobName} for {DownloadTaskName} with id: {DownloadTaskId}", nameof(DownloadJob), nameof(DownloadTask),
+                downloadTaskId);
         }
     }
 
@@ -157,7 +151,5 @@ public class DownloadJob : IJob, IDisposable
     public void Dispose()
     {
         _log.Here().Warning("Disposing job: {DownloadJobName} for {DownloadTaskName}", nameof(DownloadJob), nameof(DownloadTask));
-
-      //  _downloadClient.Dispose();
     }
 }

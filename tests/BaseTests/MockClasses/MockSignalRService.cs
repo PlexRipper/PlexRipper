@@ -40,7 +40,7 @@ public class MockSignalRService : ISignalRService
     {
         var downloadTaskDTO = _mapper.Map<DownloadTaskDTO>(downloadTask);
         DownloadTaskUpdate.Add(downloadTaskDTO, cancellationToken);
-        _log.Debug("{ClassName} => {@DownloadTaskDto}", nameof(MockSignalRService), downloadTaskDTO);
+        _log.Verbose("{ClassName} => {@DownloadTaskDto}", nameof(MockSignalRService), downloadTaskDTO);
 
         return Task.CompletedTask;
     }
@@ -48,7 +48,7 @@ public class MockSignalRService : ISignalRService
     public Task SendFileMergeProgressUpdateAsync(FileMergeProgress fileMergeProgress, CancellationToken cancellationToken = default)
     {
         FileMergeProgressList.Add(fileMergeProgress, cancellationToken);
-        _log.Debug("{ClassName} => {@FileMergeProgress}", nameof(MockSignalRService), fileMergeProgress);
+        _log.Verbose("{ClassName} => {@FileMergeProgress}", nameof(MockSignalRService), fileMergeProgress);
         return Task.CompletedTask;
     }
 
@@ -77,7 +77,7 @@ public class MockSignalRService : ISignalRService
         };
 
         ServerDownloadProgressList.Add(update, cancellationToken);
-        // _log.Debug("{ClassName} => {@DownloadTaskDto}", nameof(MockSignalRService), update);
+        _log.Verbose("{ClassName} => {@DownloadTaskDto}", nameof(MockSignalRService), update);
 
         return Task.CompletedTask;
 

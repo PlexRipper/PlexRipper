@@ -16,7 +16,6 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
     [Fact]
     public async Task ShouldDownloadMultipleMovieDownloadTasks_WhenDownloadTasksAreCreated()
     {
-        Seed = 45699934;
         var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
         var plexMovieCount = 5;
         await SetupDatabase(config =>

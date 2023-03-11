@@ -12,7 +12,6 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
     public async Task ShouldValidatePlexAccount_WhenGivenValidCredentials()
     {
         // Arrange
-        Seed = 4564;
         SetupMockPlexApi(apiConfig => { apiConfig.SignInResponseIsValid = true; });
 
         await CreateContainer();

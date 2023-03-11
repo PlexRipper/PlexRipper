@@ -11,7 +11,7 @@ public class StartDownloadJob_IntegrationTests : BaseIntegrationTests
     public async Task ShouldSendOutDownloadTaskUpdates_WhenDownloadTaskIsInProgress()
     {
         // Arrange
-        Seed = 4564;
+
         var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
         await SetupDatabase(config =>
         {

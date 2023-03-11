@@ -15,7 +15,6 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
     public async Task ShouldCreateAndInspectAccessibleServers_WhenPlexAccountIsValid()
     {
         // Arrange
-        Seed = 4564;
         var libraryCount = 3;
         SpinUpPlexServer(config => { config.FakeDataConfig = dataConfig => { dataConfig.LibraryCount = libraryCount; }; });
         SetupMockPlexApi(config => config.AccessiblePlexServers = 1);

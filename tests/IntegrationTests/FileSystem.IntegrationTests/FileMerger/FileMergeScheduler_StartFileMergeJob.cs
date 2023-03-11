@@ -11,7 +11,7 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
     public async Task ShouldFinishMergingDownloadTaskAsFileTaskJobAndSetToCompleted_WhenDownloadTaskHasFinishedDownloading()
     {
         // Arrange
-        Seed = 4564;
+
         await SetupDatabase(config =>
         {
             config.PlexServerCount = 1;

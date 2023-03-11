@@ -15,7 +15,7 @@ public class BaseIntegrationTests : IAsyncLifetime
     private System.Net.Http.HttpClient _client;
     private MockPlexApi _mockPlexApi;
     protected BaseContainer Container;
-    protected ILog _log;
+    protected readonly ILog _log;
 
     #endregion
 
@@ -43,7 +43,7 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected string DatabaseName { get; }
 
-    protected int Seed { get; set; } = 0;
+    protected int Seed { get; set; } = DateTime.Now.Ticks.GetHashCode();
 
     #endregion
 

@@ -3,7 +3,7 @@ using PlexRipper.PlexApi.Api;
 
 namespace IntegrationTests.BaseTests.Setup;
 
-[Collection("Sequential")]
+
 public class SetupMockPlexApi_IntegrationTests : BaseIntegrationTests
 {
     public SetupMockPlexApi_IntegrationTests(ITestOutputHelper output) : base(output) { }

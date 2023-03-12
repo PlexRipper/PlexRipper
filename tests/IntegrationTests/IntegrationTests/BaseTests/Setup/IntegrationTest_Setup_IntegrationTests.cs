@@ -1,6 +1,6 @@
 ﻿namespace IntegrationTests.BaseTests.Setup;
 
-[Collection("Sequential")]
+
 public class IntegrationTest_Setup : BaseIntegrationTests
 {
     public IntegrationTest_Setup(ITestOutputHelper output) : base(output) { }

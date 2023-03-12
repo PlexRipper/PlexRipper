@@ -3,7 +3,7 @@ using Serilog.Events;
 
 namespace IntegrationTests.DownloadManager.DownloadCommands;
 
-[Collection("Sequential")]
+
 public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTests
 {
     public DownloadCommands_PauseDownload_IntegrationTests(ITestOutputHelper output) : base(output, LogEventLevel.Verbose) { }

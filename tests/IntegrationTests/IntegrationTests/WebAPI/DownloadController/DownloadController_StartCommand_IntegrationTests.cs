@@ -5,7 +5,7 @@ using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace IntegrationTests.WebAPI.DownloadController;
 
-[Collection("Sequential")]
+
 public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationTests
 {
     public DownloadController_StartCommand_IntegrationTests(ITestOutputHelper output) : base(output) { }

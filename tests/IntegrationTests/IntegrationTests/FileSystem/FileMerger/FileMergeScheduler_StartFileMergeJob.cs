@@ -2,7 +2,7 @@ using Data.Contracts;
 
 namespace IntegrationTests.FileSystem.FileMerger;
 
-[Collection("Sequential")]
+
 public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegrationTests
 {
     public FileMergeScheduler_StartFileMergeJob_IntegrationTests(ITestOutputHelper output) : base(output) { }

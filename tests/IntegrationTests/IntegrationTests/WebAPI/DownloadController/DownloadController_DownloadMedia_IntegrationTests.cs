@@ -6,7 +6,7 @@ using Serilog.Events;
 
 namespace IntegrationTests.WebAPI.DownloadController;
 
-[Collection("Sequential")]
+
 public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegrationTests
 {
     public DownloadController_DownloadMedia_IntegrationTests(ITestOutputHelper output) : base(output, LogEventLevel.Verbose) { }

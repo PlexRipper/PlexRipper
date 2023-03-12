@@ -2,7 +2,7 @@ using Humanizer.Bytes;
 
 namespace IntegrationTests.BaseTests.Setup;
 
-[Collection("Sequential")]
+
 public class SpinUpPlexServer_IntegrationTests : BaseIntegrationTests
 {
     public SpinUpPlexServer_IntegrationTests(ITestOutputHelper output) : base(output) { }

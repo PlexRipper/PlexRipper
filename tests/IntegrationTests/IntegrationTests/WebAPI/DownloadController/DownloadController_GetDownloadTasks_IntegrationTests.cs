@@ -3,7 +3,7 @@ using PlexRipper.WebAPI.SignalR.Common;
 
 namespace IntegrationTests.WebAPI.DownloadController;
 
-[Collection("Sequential")]
+
 public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrationTests
 {
     public DownloadController_GetDownloadTasks_IntegrationTests(ITestOutputHelper output) : base(output) { }

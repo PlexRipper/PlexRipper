@@ -1,6 +1,6 @@
 namespace IntegrationTests.Logging;
 
-[Collection("Sequential")]
+
 public class Logging_Setup_IntegrationTests : BaseIntegrationTests
 {
     public Logging_Setup_IntegrationTests(ITestOutputHelper output) : base(output) { }

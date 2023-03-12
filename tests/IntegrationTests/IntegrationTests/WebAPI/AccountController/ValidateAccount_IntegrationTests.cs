@@ -3,7 +3,7 @@ using PlexRipper.WebAPI.Common.DTO;
 
 namespace IntegrationTests.WebAPI.AccountController;
 
-[Collection("Sequential")]
+
 public class ValidateAccount_IntegrationTests : BaseIntegrationTests
 {
     public ValidateAccount_IntegrationTests(ITestOutputHelper output) : base(output) { }

@@ -609,7 +609,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                 path = Path.Join(_pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1]));
                 break;
             case PlexMediaType.Episode:
-                path = Path.Join(_pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1]), _pathSystem.SanitizePath(titles[2]));
+                path = Path.Join(_pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1]));
                 break;
             default:
                 path = Path.Join(downloadTaskTitle);

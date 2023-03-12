@@ -9,7 +9,6 @@ using PlexRipper.Data;
 using PlexRipper.Domain.Autofac;
 using PlexRipper.WebAPI.Common;
 using Settings.Contracts;
-using WebAPI.Contracts;
 
 namespace PlexRipper.BaseTests;
 
@@ -50,10 +49,6 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
 
                 SetMockedDependencies(autoFacBuilder);
                 RegisterBackgroundScheduler(autoFacBuilder);
-
-                //  SignalR requires the default ILogger
-                //  autoFacBuilder.RegisterInstance(new LoggerFactory()).As<ILoggerFactory>();
-                //  autoFacBuilder.RegisterGeneric(typeof(Logger<>)).As(typeof(ILogger<>)).SingleInstance();
             });
 
         try
@@ -69,13 +64,11 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
 
     private void SetMockedDependencies(ContainerBuilder builder)
     {
-        builder.RegisterType<MockSignalRService>().As<ISignalRService>().SingleInstance();
-
         if (_mockPlexApi is not null)
         {
             builder
                 .RegisterInstance(_mockPlexApi.CreateClient())
-                .As<System.Net.Http.HttpClient>()
+                .As<HttpClient>()
                 .SingleInstance();
         }
 
@@ -90,7 +83,7 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
     {
         var testQuartzProps = new NameValueCollection
         {
-            { "quartz.scheduler.instanceName", "PlexRipper Scheduler" },
+            { "quartz.scheduler.instanceName", "TestPlexRipper Scheduler" },
             { "quartz.serializer.type", "json" },
             { "quartz.threadPool.type", "Quartz.Simpl.SimpleThreadPool, Quartz" },
             { "quartz.threadPool.threadCount", "10" },
@@ -100,13 +93,13 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
         // Register Quartz dependencies
         builder.RegisterModule(new QuartzAutofacFactoryModule
         {
-            JobScopeConfigurator = (cb, tag) =>
-            {
-                // override dependency for job scope
-                cb.Register(_ => new ScopedDependency("job-local " + DateTime.UtcNow.ToLongTimeString()))
-                    .AsImplementedInterfaces()
-                    .InstancePerMatchingLifetimeScope(tag);
-            },
+            // JobScopeConfigurator = (cb, tag) =>
+            // {
+            //     // override dependency for job scope
+            //     cb.Register(_ => new ScopedDependency("job-local " + DateTime.UtcNow.ToLongTimeString()))
+            //         .AsImplementedInterfaces()
+            //         .InstancePerMatchingLifetimeScope(tag);
+            // },
 
             // During integration testing, we cannot use a real JobStore so we revert to default
             ConfigurationProvider = _ => testQuartzProps,

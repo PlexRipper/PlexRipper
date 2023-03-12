@@ -22,16 +22,9 @@ public class UpdateDownloadStatusOfDownloadTaskCommandHandler : BaseHandler,
 
     public async Task<Result> Handle(UpdateDownloadStatusOfDownloadTaskCommand command, CancellationToken cancellationToken)
     {
-        // TODO With EF7, this can be ExecuteUpdateAsync
-        var downloadTasks = await DownloadTasksQueryable
-            .AsTracking()
+        await _dbContext.DownloadTasks
             .Where(x => command.DownloadTaskIds.Contains(x.Id))
-            .ToListAsync(cancellationToken);
-
-        foreach (var downloadTask in downloadTasks)
-            downloadTask.DownloadStatus = command.DownloadStatus;
-
-        await SaveChangesAsync(cancellationToken);
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, x => command.DownloadStatus), cancellationToken);
 
         return Result.Ok();
     }

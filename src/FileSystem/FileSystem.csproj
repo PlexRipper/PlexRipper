@@ -19,6 +19,7 @@
 	<ItemGroup>
 		<PackageReference Include="Autofac" Version="6.5.0" />
 		<PackageReference Include="Autofac.Extras.Quartz" Version="8.0.0" />
+		<PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="10.0.0" />
 		<PackageReference Include="System.IO.Abstractions" Version="17.0.18" />
 	</ItemGroup>
 

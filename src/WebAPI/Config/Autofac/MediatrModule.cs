@@ -23,11 +23,8 @@ public class MediatrModule : Module
         // Register the Command's Validators (Validators based on FluentValidation library)
         builder.RegisterAssemblyTypes(assembly)
             .Where(t => t.IsClosedTypeOf(typeof(IValidator<>)))
-            .AsImplementedInterfaces();
-
-        // Register all the Command classes (they implement IRequestHandler) in assembly holding the Commands
-        builder.RegisterAssemblyTypes(assembly)
-            .AsClosedTypesOf(typeof(IRequestHandler<,>));
+            .AsImplementedInterfaces()
+            .InstancePerDependency();
 
         // Register Behavior Pipeline
         builder.RegisterGeneric(typeof(ValidationPipeline<,>)).As(typeof(IPipelineBehavior<,>));

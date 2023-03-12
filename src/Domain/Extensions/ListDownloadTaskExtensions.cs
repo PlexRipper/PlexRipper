@@ -36,6 +36,18 @@ public static class ListDownloadTaskExtensions
         return downloadTasks;
     }
 
+    public static List<DownloadTask> SetToDownloadFinished(this List<DownloadTask> downloadTasks)
+    {
+        foreach (var downloadTask in downloadTasks)
+        {
+            downloadTask.DownloadStatus = DownloadStatus.DownloadFinished;
+            if (downloadTask.Children is not null && downloadTask.Children.Any())
+                downloadTask.Children = SetToDownloadFinished(downloadTask.Children);
+        }
+
+        return downloadTasks;
+    }
+
     public static List<DownloadTask> SetToDownloading(this List<DownloadTask> downloadTasks)
     {
         foreach (var downloadTask in downloadTasks)
@@ -43,33 +55,6 @@ public static class ListDownloadTaskExtensions
             downloadTask.DownloadStatus = DownloadStatus.Completed;
             if (downloadTask.Children is not null && downloadTask.Children.Any())
                 downloadTask.Children = SetToDownloading(downloadTask.Children);
-        }
-
-        return downloadTasks;
-    }
-
-    public static List<DownloadTask> SetDownloadUrl(this List<DownloadTask> downloadTasks, PlexServerConnection plexServerConnection, string fileUrl)
-    {
-        foreach (var downloadTask in downloadTasks)
-        {
-            if (downloadTask.DownloadTaskType
-                is DownloadTaskType.EpisodeData
-                or DownloadTaskType.EpisodePart
-                or DownloadTaskType.MovieData
-                or DownloadTaskType.MoviePart)
-            {
-                downloadTask.DownloadUrl = new UriBuilder()
-                {
-                    Scheme = plexServerConnection.Protocol,
-                    Host = plexServerConnection.Address,
-                    Port = plexServerConnection.Port,
-                    Path = fileUrl,
-                    Query = "X-Plex-Token=SomeRandomToken",
-                }.ToString();
-            }
-
-            if (downloadTask.Children is not null && downloadTask.Children.Any())
-                downloadTask.Children = SetDownloadUrl(downloadTask.Children, plexServerConnection, fileUrl);
         }
 
         return downloadTasks;

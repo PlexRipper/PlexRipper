@@ -80,14 +80,12 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
         var episodeIds = new List<int> { tvShowDb.Seasons.First().Episodes.Last().Id };
 
         mock.AddMapper();
-        mock.SetupMediator(It.IsAny<GetPlexTvShowByIdQuery>)
-            .ReturnsAsync((GetPlexTvShowByIdQuery query, CancellationToken _) => Result.Ok(tvShows.Find(x => x.Id == query.Id)));
 
-        mock.SetupMediator(It.IsAny<GetPlexTvShowEpisodeByIdQuery>)
+        mock.SetupMediator(It.IsAny<GetPlexTvShowEpisodeByIdQuery>, true)
             .ReturnsAsync((GetPlexTvShowEpisodeByIdQuery query, CancellationToken _) =>
                 Result.Ok(DbContext.PlexTvShowEpisodes.IncludeAll().FirstOrDefault(x => x.Id == query.Id)));
 
-        mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>)
+        mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>, true)
             .ReturnsAsync((GetDownloadTaskByMediaKeyQuery query, CancellationToken _) =>
             {
                 // We create the downloadTask tvShow to pretend the parent already exists and the episode and season need to be created.
@@ -108,6 +106,9 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
         result.IsSuccess.ShouldBeTrue();
         var tvShowDownloadTask = result.Value.First();
         tvShowDownloadTask.Id.ShouldBe(999);
+
+        mock.VerifyMediator(It.IsAny<GetPlexTvShowEpisodeByIdQuery>, Times.Once);
+        mock.VerifyMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>, Times.Exactly(3));
 
         tvShowDownloadTask.Children.ShouldAllBe(x => x.Id == 0);
         tvShowDownloadTask.Children.SelectMany(x => x.Children).ToList().ShouldAllBe(x => x.Id == 0);

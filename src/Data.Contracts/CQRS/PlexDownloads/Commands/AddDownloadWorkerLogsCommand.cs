@@ -12,4 +12,12 @@ public class AddDownloadWorkerLogsCommand : IRequest<Result>
     {
         DownloadWorkerLogs = downloadWorkerLogs;
     }
+
+    public AddDownloadWorkerLogsCommand(DownloadWorkerLog downloadWorkerLog)
+    {
+        DownloadWorkerLogs = new List<DownloadWorkerLog>()
+        {
+            downloadWorkerLog,
+        };
+    }
 }

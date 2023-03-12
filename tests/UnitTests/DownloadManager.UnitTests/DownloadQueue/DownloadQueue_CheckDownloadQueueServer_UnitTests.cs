@@ -1,7 +1,6 @@
 using BackgroundServices.Contracts;
 using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.DownloadManager;
 
@@ -15,8 +14,6 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
     public async Task ShouldHaveNoUpdates_WhenGivenAnEmptyList()
     {
         // Arrange
-        mock.SetupMediator(It.IsAny<GetAllDownloadTasksInPlexServersQuery>)
-            .ReturnsAsync(Result.Ok(new List<PlexServer>()));
 
         // Act
         _sut.Setup();
@@ -24,6 +21,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
 
         // Assert
         result.IsFailed.ShouldBeTrue();
+        result.Errors.Count.ShouldBeGreaterThan(0);
     }
 
     [Fact]
@@ -169,5 +167,43 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.Id.ShouldBe(downloadTasks[1].Children[0].Children[0].Children[0].Id);
+    }
+
+    [Fact]
+    public async Task ShouldHaveNextQueuedDownloadTask_WhenNestedInsideATvShowsDownloadTasksWithDownloadFinished()
+    {
+        // Arrange
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 1;
+            config.TvShowCount = 10;
+            config.TvShowDownloadTasksCount = 2;
+            config.TvShowSeasonDownloadTasksCount = 2;
+            config.TvShowEpisodeDownloadTasksCount = 5;
+        });
+
+        var downloadTasks = await DbContext.DownloadTasks.AsTracking().IncludeDownloadTasks().IncludeByRoot().ToListAsync();
+        downloadTasks.SetToDownloadFinished();
+
+        foreach (var tvShowDownloadTask in downloadTasks)
+            tvShowDownloadTask.Children[0].Children[1].DownloadStatus = DownloadStatus.Queued;
+
+        await DbContext.SaveChangesAsync();
+
+        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<int>(), It.IsAny<int>())).ReturnOk();
+        mock.SetupMediator(It.IsAny<GetDownloadTasksByPlexServerIdQuery>)
+            .ReturnsAsync((GetDownloadTasksByPlexServerIdQuery query, CancellationToken _) =>
+                Result.Ok(downloadTasks.Where(x => x.PlexServerId == query.PlexServerId).ToList()));
+        mock.SetupMediator(It.IsAny<GetPlexServerNameByIdQuery>)
+            .ReturnsAsync((GetPlexServerNameByIdQuery query, CancellationToken _) =>
+                Result.Ok(downloadTasks.FirstOrDefault(x => x.PlexServerId == query.Id).Title));
+
+        // Act
+        var result = await _sut.CheckDownloadQueueServer(1);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Id.ShouldBe(downloadTasks[0].Children[0].Children[1].Children[0].Id);
     }
 }

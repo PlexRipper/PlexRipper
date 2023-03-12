@@ -29,10 +29,10 @@ public class MockFileMergeStreamProvider : IFileMergeStreamProvider
     {
         var bytesDone = 1000 * 1024;
         foreach (var _ in filePaths)
-            for (var i = 0; i < 2; i++)
+            for (var i = 0; i < 10; i++)
             {
                 bytesReceivedProgress.OnNext(bytesDone += 1000 * 1024);
-                await Task.Delay(1000);
+                await Task.Delay(500, cancellationToken);
             }
     }
 }

@@ -20,7 +20,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\src\Application\Application.csproj" />
-		<ProjectReference Include="..\..\IntegrationTests\Applicaton.IntegrationTests\Application.IntegrationTests.csproj" />
 		<ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
 	</ItemGroup>
 	<ItemGroup>

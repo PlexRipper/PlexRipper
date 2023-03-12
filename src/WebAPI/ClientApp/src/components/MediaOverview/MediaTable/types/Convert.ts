@@ -23,6 +23,8 @@ export default abstract class Convert {
 				return 'mdi-notification-clear-all';
 			case ButtonType.Details:
 				return 'mdi-chart-box-outline';
+			case ButtonType.Delete:
+				return 'mdi-delete';
 			default:
 				return '';
 		}

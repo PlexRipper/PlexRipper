@@ -1,4 +1,4 @@
-﻿using Data.Contracts;
+using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +21,7 @@ public class GetDownloadTasksByPlexServerIdQueryHandler : BaseHandler,
 
     public async Task<Result<List<DownloadTask>>> Handle(GetDownloadTasksByPlexServerIdQuery request, CancellationToken cancellationToken)
     {
-        var downloadTasks = await PlexServerQueryable
+        var downloadTasks = await _dbContext.PlexServers
             .AsTracking()
             .IncludeDownloadTasks()
             .FirstOrDefaultAsync(x => x.Id == request.PlexServerId, cancellationToken);

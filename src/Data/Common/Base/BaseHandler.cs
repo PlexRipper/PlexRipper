@@ -3,7 +3,7 @@ using Logging.Interface;
 
 namespace PlexRipper.Data.Common;
 
-public abstract class BaseHandler : IDisposable
+public abstract class BaseHandler
 {
     #region Fields
 
@@ -119,8 +119,8 @@ public abstract class BaseHandler : IDisposable
 
     #endregion
 
-    public void Dispose()
-    {
-        // This is here as a reminder that the dbContext will be disposed by the dependency injection container
-    }
+    // public void Dispose()
+    // {
+    //     // This is here as a reminder that the dbContext will be disposed by the dependency injection container
+    // }
 }

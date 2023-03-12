@@ -60,10 +60,16 @@ public class DownloadTaskScheduler : BaseScheduler, IDownloadTaskScheduler
         return Result.OkIf(await StopJob(jobKey), $"Failed to stop {nameof(DownloadTask)} with id {downloadTaskId}");
     }
 
-    public async Task<bool> IsDownloading(int downloadTaskId)
+    public Task AwaitDownloadTaskJob(int downloadTaskId, CancellationToken cancellationToken = default)
     {
         var jobKey = DownloadJob.GetJobKey(downloadTaskId);
-        return await IsJobRunning(jobKey);
+        return AwaitJobRunning(jobKey, cancellationToken);
+    }
+
+    public Task<bool> IsDownloading(int downloadTaskId)
+    {
+        var jobKey = DownloadJob.GetJobKey(downloadTaskId);
+        return IsJobRunning(jobKey);
     }
 
     public async Task<bool> IsServerDownloading(int plexServerId)

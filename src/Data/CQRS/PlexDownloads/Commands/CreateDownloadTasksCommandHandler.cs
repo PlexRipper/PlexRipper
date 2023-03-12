@@ -33,13 +33,7 @@ public class CreateDownloadTasksCommandValidator : AbstractValidator<CreateDownl
                     x.RuleFor(y => y.FileName).NotEmpty();
 
                     x.RuleFor(y => y.FileLocationUrl).NotEmpty();
-                    x.RuleFor(y => y.DownloadUrl).NotEmpty();
-                    x.RuleFor(y => y.DownloadUri).NotNull();
-                    x.RuleFor(y => y.DownloadUri.IsAbsoluteUri).NotNull().When(y => y.DownloadUri != null);
 
-                    x.RuleFor(y => Uri.IsWellFormedUriString(y.DownloadUri.AbsoluteUri, UriKind.Absolute))
-                        .NotEqual(false)
-                        .When(y => y.DownloadUri != null);
                     x.RuleFor(y => y.Created).NotEqual(DateTime.MinValue);
                 });
             });

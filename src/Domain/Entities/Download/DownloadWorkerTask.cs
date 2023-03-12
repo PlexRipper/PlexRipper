@@ -19,7 +19,7 @@ public class DownloadWorkerTask : BaseEntity
     public DownloadWorkerTask(DownloadTask downloadTask, int partIndex, long startPosition, long endPosition)
     {
         TempDirectory = downloadTask.DownloadDirectory;
-        DownloadUrl = downloadTask.DownloadUrl;
+        FileLocationUrl = downloadTask.FileLocationUrl;
         DownloadTaskId = downloadTask.Id;
         PartIndex = partIndex;
         StartByte = startPosition;
@@ -71,7 +71,7 @@ public class DownloadWorkerTask : BaseEntity
     public long ElapsedTime { get; set; }
 
     [Column(Order = 10)]
-    public string DownloadUrl { get; set; }
+    public string FileLocationUrl { get; set; }
 
     #endregion
 
@@ -93,9 +93,6 @@ public class DownloadWorkerTask : BaseEntity
 
     [NotMapped]
     public string TempFilePath => Path.Combine(TempDirectory, FileName);
-
-    [NotMapped]
-    public Uri Uri => new(DownloadUrl);
 
     [NotMapped]
     public long DataTotal => EndByte - StartByte;

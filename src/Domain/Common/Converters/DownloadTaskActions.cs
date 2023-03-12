@@ -24,14 +24,14 @@ public static class DownloadTaskActions
         DownloadStatus.Completed,
         DownloadStatus.Deleted,
         DownloadStatus.Unknown,
+        DownloadStatus.Merging,
+        DownloadStatus.Moving,
     };
 
     private static readonly List<DownloadStatus> AnyStatuses = new()
     {
-        DownloadStatus.Merging,
         DownloadStatus.Error,
         DownloadStatus.Downloading,
-        DownloadStatus.Moving,
         DownloadStatus.Paused,
         DownloadStatus.Stopped,
     };
@@ -90,13 +90,15 @@ public static class DownloadTaskActions
     /// <returns>The aggregated <see cref="DownloadStatus"/>.</returns>
     public static DownloadStatus Aggregate(List<DownloadStatus> downloadStatusList)
     {
-        foreach (var status in AnyStatuses)
-            if (downloadStatusList.Any(x => x == status))
-                return status;
+        foreach (var status in AnyStatuses.Where(status => downloadStatusList.Any(x => x == status)))
+        {
+            return status;
+        }
 
-        foreach (var status in AllStatuses)
-            if (downloadStatusList.All(x => x == status))
-                return status;
+        foreach (var status in AllStatuses.Where(status => downloadStatusList.All(x => x == status)))
+        {
+            return status;
+        }
 
         if (downloadStatusList.Any(x => x == DownloadStatus.DownloadFinished) &&
             downloadStatusList.Any(x => x == DownloadStatus.Queued))

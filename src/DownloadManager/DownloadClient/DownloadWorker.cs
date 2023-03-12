@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ByteSizeLib;
+using Data.Contracts;
 using Logging.Interface;
 using RestSharp;
 using Timer = System.Timers.Timer;
@@ -12,17 +13,16 @@ namespace PlexRipper.DownloadManager;
 /// The <see cref="DownloadWorker"/> is part of the multi-threaded <see cref="PlexDownloadClient"/>
 /// and will download a part of the <see cref="DownloadTask"/>.
 /// </summary>
-public class DownloadWorker : IDisposable
+public class DownloadWorker : IAsyncDisposable
 {
     #region Fields
-
-    private readonly CancellationTokenSource _cancellationToken = new();
 
     private readonly Subject<DownloadWorkerLog> _downloadWorkerLog = new();
 
     private readonly Subject<DownloadWorkerTask> _downloadWorkerUpdate = new();
 
     private readonly ILog<DownloadWorker> _log;
+    private readonly IMediator _mediator;
 
     private readonly IDownloadFileStream _downloadFileSystem;
 
@@ -47,17 +47,20 @@ public class DownloadWorker : IDisposable
     /// Initializes a new instance of the <see cref="DownloadWorker"/> class.
     /// </summary>
     /// <param name="log"></param>
+    /// <param name="mediator"></param>
     /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
     /// <param name="downloadFileSystem">The filesystem used to store the downloaded data.</param>
     /// <param name="httpClientFactory"></param>
     public DownloadWorker(
         ILog<DownloadWorker> log,
+        IMediator mediator,
         DownloadWorkerTask downloadWorkerTask,
         IDownloadFileStream downloadFileSystem,
         IHttpClientFactory httpClientFactory
     )
     {
         _log = log;
+        _mediator = mediator;
         _downloadFileSystem = downloadFileSystem;
         DownloadWorkerTask = downloadWorkerTask;
 
@@ -80,14 +83,12 @@ public class DownloadWorker : IDisposable
 
     public IObservable<DownloadWorkerLog> DownloadWorkerLog => _downloadWorkerLog.AsObservable();
 
+    public IObservable<DownloadWorkerTask> DownloadWorkerTaskUpdate => _downloadWorkerUpdate.AsObservable();
+
     /// <summary>
     /// Gets the current <see cref="DownloadWorkerTask"/> being executed.
     /// </summary>
     public DownloadWorkerTask DownloadWorkerTask { get; }
-
-    public IObservable<DownloadWorkerTask> DownloadWorkerTaskUpdate => _downloadWorkerUpdate
-        .Sample(TimeSpan.FromMilliseconds(100))
-        .AsObservable();
 
     public string FileName => DownloadWorkerTask.FileName;
 
@@ -116,7 +117,7 @@ public class DownloadWorker : IDisposable
         try
         {
             SetDownloadWorkerTaskChanged(DownloadStatus.Downloading);
-            DownloadProcessTask = Task.Run(() => DownloadProcessAsync(_fileStreamResult.Value), _cancellationToken.Token);
+            DownloadProcessTask = DownloadProcessAsync(_fileStreamResult.Value);
         }
         catch (TaskCanceledException)
         {
@@ -140,25 +141,8 @@ public class DownloadWorker : IDisposable
 
         _timer.Stop();
         SetDownloadWorkerTaskChanged(DownloadStatus.Stopped);
-
-        return Result.Ok(DownloadWorkerTask);
-    }
-
-    /// <summary>
-    /// Stops the downloading.
-    /// </summary>
-    /// <returns>Is successful.</returns>
-    public async Task<Result<DownloadWorkerTask>> PauseAsync()
-    {
-        _isDownloading = false;
-
-        // Wait for it to gracefully end.
-        if (DownloadProcessTask is not null)
-            await DownloadProcessTask;
-
-        _timer.Stop();
-        SetDownloadWorkerTaskChanged(DownloadStatus.Paused);
-
+        _downloadWorkerLog.OnCompleted();
+        _downloadWorkerUpdate.OnCompleted();
         return Result.Ok(DownloadWorkerTask);
     }
 
@@ -167,37 +151,64 @@ public class DownloadWorker : IDisposable
         _downloadSpeedLimit = speedInKb;
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        _destinationStream?.Close();
-        _httpClient.Dispose();
+        _timer.Dispose();
+        if (_destinationStream is not null)
+            await _destinationStream.DisposeAsync();
+        _httpClient?.Dispose();
+        _downloadWorkerUpdate.Dispose();
+        _downloadWorkerLog.Dispose();
     }
 
     #endregion
 
     #region Private Methods
 
-    private async Task<Result> DownloadProcessAsync(Stream destinationStream)
+    private async Task<Result> DownloadProcessAsync(Stream destinationStream, CancellationToken cancellationToken = default)
     {
         if (destinationStream is null)
             return ResultExtensions.IsNull(nameof(destinationStream)).LogWarning();
 
         try
         {
+            var plexServerConnectionResult =
+                await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(DownloadWorkerTask.PlexServerId), cancellationToken);
+            if (plexServerConnectionResult.IsFailed)
+            {
+                _log.Error("Could not find a valid connection to use for DownloadWorker with id {ID}", DownloadWorkerTask.Id);
+                return plexServerConnectionResult.ToResult().LogError();
+            }
+
+            var plexServerConnection = plexServerConnectionResult.Value;
+            var plexServer = plexServerConnection.PlexServer;
+
+            var tokenResult = await _mediator.Send(new GetPlexServerTokenQuery(DownloadWorkerTask.PlexServerId), cancellationToken);
+            if (tokenResult.IsFailed)
+            {
+                _log.Error("Could not find a valid token for server {ServerName} to use for DownloadWorker with id {ID}", plexServer.Name,
+                    DownloadWorkerTask.Id);
+
+                SendDownloadWorkerError(tokenResult.ToResult().LogError());
+                return tokenResult.ToResult();
+            }
+
+            var downloadUrl = plexServerConnection.GetDownloadUrl(DownloadWorkerTask.FileLocationUrl, tokenResult.Value);
+
             _destinationStream = destinationStream;
 
             // Is 0 when starting new and > 0 when resuming.
             _destinationStream.Position = DownloadWorkerTask.BytesReceived;
 
             // Create download client
-            var request = new RestRequest(DownloadWorkerTask.Uri)
+            var request = new RestRequest(downloadUrl)
             {
                 CompletionOption = HttpCompletionOption.ResponseHeadersRead,
             };
 
             request.AddHeader("Range", new RangeHeaderValue(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte).ToString());
 
-            await using var responseStream = await _httpClient.DownloadStreamAsync(request);
+            await using var responseStream = await _httpClient.DownloadStreamAsync(request, cancellationToken);
 
             // Throttle the stream to enable download speed limiting
             var throttledStream = new ThrottledStream(responseStream, _downloadSpeedLimit);
@@ -210,19 +221,18 @@ public class DownloadWorker : IDisposable
             while (_isDownloading)
             {
                 throttledStream.SetThrottleSpeed(_downloadSpeedLimit);
-                var bytesRead = await throttledStream.ReadAsync(buffer, 0, buffer.Length, _cancellationToken.Token);
+                var bytesRead = await throttledStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
                 if (bytesRead > 0)
                     bytesRead = (int)Math.Min(DownloadWorkerTask.DataRemaining, bytesRead);
 
                 if (bytesRead <= 0)
                 {
-                    SendDownloadWorkerUpdate();
-                    SetDownloadWorkerTaskChanged(DownloadStatus.DownloadFinished);
+                    SendDownloadFinished();
                     break;
                 }
 
-                await _destinationStream.WriteAsync(buffer.AsMemory(0, bytesRead), _cancellationToken.Token);
-                await _destinationStream.FlushAsync(_cancellationToken.Token);
+                await _destinationStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
+                await _destinationStream.FlushAsync(cancellationToken);
 
                 DownloadWorkerTask.BytesReceived += bytesRead;
                 SendDownloadWorkerUpdate();
@@ -231,13 +241,6 @@ public class DownloadWorker : IDisposable
         catch (Exception e)
         {
             SendDownloadWorkerError(Result.Fail(new ExceptionalError(e)).LogError());
-        }
-        finally
-        {
-            _timer.Dispose();
-            await _destinationStream.DisposeAsync();
-            _downloadWorkerUpdate.OnCompleted();
-            _downloadWorkerLog.OnCompleted();
         }
 
         return Result.Ok();
@@ -250,9 +253,17 @@ public class DownloadWorker : IDisposable
 
         _log.Here().Error("Download worker {Id} with {FileName} had an error!", Id, FileName);
         DownloadWorkerTask.DownloadStatus = DownloadStatus.Error;
-
-        SendDownloadWorkerLog(NotificationLevel.Error, errorResult.ToString());
         SendDownloadWorkerUpdate();
+        SendDownloadWorkerLog(NotificationLevel.Error, errorResult.ToString());
+    }
+
+    private void SendDownloadFinished()
+    {
+        _timer.Stop();
+        SetDownloadWorkerTaskChanged(DownloadStatus.DownloadFinished);
+        _downloadWorkerLog.OnCompleted();
+        _downloadWorkerUpdate.OnCompleted();
+        _log.Here().Information("Download worker {Id} with {FileName} finished!", Id, FileName);
     }
 
     private void SendDownloadWorkerLog(NotificationLevel logLevel, string message)

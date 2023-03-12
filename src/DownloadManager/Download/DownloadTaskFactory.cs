@@ -540,19 +540,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                     }
                 }
 
-                // Create Download URL
-                var downloadUrl = $"{downloadTask.PlexServer.GetServerUrl()}{downloadTask.FileLocationUrl}";
-
-                // TODO Might remove this and not make the token part of the DownloadTask but retrieved on demand to make it more resilient to changes
-                var serverTokenWithUrl = await _plexApiService.GetPlexServerTokenWithUrl(downloadTask.PlexServerId, downloadUrl);
-                if (serverTokenWithUrl.IsFailed)
-                {
-                    _log.Error("Failed to retrieve server token to create DownloadUrl for PlexServer {PlexServerName}", downloadTask.PlexServer.Name);
-                    return serverTokenWithUrl.ToResult();
-                }
-
-                downloadTask.DownloadUrl = serverTokenWithUrl.Value;
-
                 // Determine download directory
                 var downloadDir = GetDownloadDirectory(downloadTask);
                 if (downloadDir.IsFailed)

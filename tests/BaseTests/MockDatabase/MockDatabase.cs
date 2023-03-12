@@ -13,7 +13,6 @@ namespace PlexRipper.BaseTests;
 
 public static class MockDatabase
 {
-    private static readonly Random Rnd = new();
     private static int _seed;
     private static readonly ILog _log = LogManager.CreateLogInstance(typeof(MockDatabase));
 
@@ -182,7 +181,7 @@ public static class MockDatabase
 
     public static string GetMemoryDatabaseName()
     {
-        return $"memory_database_{Rnd.Next(1, int.MaxValue)}_{Rnd.Next(1, int.MaxValue)}";
+        return $"memory_database_{Random.Shared.Next(1, int.MaxValue)}_{Random.Shared.Next(int.MaxValue)}";
     }
 
     /// <summary>
@@ -214,7 +213,8 @@ public static class MockDatabase
         // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
         return new SqliteConnectionStringBuilder
         {
-            Mode = SqliteOpenMode.Memory,
+            // Real file is used for testing due to otherwise flaky tests when doing in memory
+            Mode = SqliteOpenMode.ReadWriteCreate,
             ForeignKeys = !disableForeignKeyCheck,
 
             // Database name
@@ -281,8 +281,6 @@ public static class MockDatabase
 
         downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
 
-        // The first connection is valid if mock servers have been used
-        downloadTasks.SetDownloadUrl(plexServer.PlexServerConnections[0], PlexMockServerConfig.FileUrl);
 
         context.DownloadTasks.AddRange(downloadTasks);
         await context.SaveChangesAsync();
@@ -313,9 +311,7 @@ public static class MockDatabase
 
         downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
 
-        // The first connection is valid if mock servers have been used
         plexServer.PlexServerConnections.ShouldNotBeEmpty();
-        downloadTasks.SetDownloadUrl(plexServer.PlexServerConnections[0], PlexMockServerConfig.FileUrl);
 
         context.DownloadTasks.AddRange(downloadTasks);
         await context.SaveChangesAsync();

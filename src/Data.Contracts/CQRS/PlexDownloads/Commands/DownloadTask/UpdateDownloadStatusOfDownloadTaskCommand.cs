@@ -12,6 +12,12 @@ public class UpdateDownloadStatusOfDownloadTaskCommand : IRequest<Result>
         DownloadStatus = downloadStatus;
     }
 
+    public UpdateDownloadStatusOfDownloadTaskCommand(int downloadTaskId, DownloadStatus downloadStatus)
+    {
+        DownloadTaskIds = new List<int> { downloadTaskId };
+        DownloadStatus = downloadStatus;
+    }
+
     public List<int> DownloadTaskIds { get; }
 
     public DownloadStatus DownloadStatus { get; }

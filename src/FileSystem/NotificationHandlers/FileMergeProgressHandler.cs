@@ -1,18 +1,26 @@
+using Data.Contracts;
+using DownloadManager.Contracts;
 using WebAPI.Contracts;
 
 namespace PlexRipper.FileSystem;
 
 public class FileMergeProgressHandler : INotificationHandler<FileMergeProgressNotification>
 {
+    private readonly IMediator _mediator;
     private readonly ISignalRService _signalRService;
 
-    public FileMergeProgressHandler(ISignalRService signalRService)
+    public FileMergeProgressHandler(IMediator mediator, ISignalRService signalRService)
     {
+        _mediator = mediator;
         _signalRService = signalRService;
     }
 
     public async Task Handle(FileMergeProgressNotification notification, CancellationToken cancellationToken)
     {
-        await _signalRService.SendFileMergeProgressUpdateAsync(notification.Progress);
+        var downloadTaskResult = await _mediator.Send(new UpdateDownloadTaskWithFileMergeProgressByIdCommand(notification.Progress), cancellationToken);
+
+        await _mediator.Send(new DownloadTaskUpdated(downloadTaskResult.Value), cancellationToken);
+
+        await _signalRService.SendFileMergeProgressUpdateAsync(notification.Progress, cancellationToken);
     }
 }

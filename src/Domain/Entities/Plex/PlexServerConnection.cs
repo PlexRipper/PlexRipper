@@ -68,6 +68,16 @@ public class PlexServerConnection : BaseEntity
     [NotMapped]
     public string Name => $"Connection: ({Url})";
 
+    public string GetThumbPath(string thumbPath)
+    {
+        return Url + thumbPath;
+    }
+
+    public string GetDownloadUrl(string fileLocationUrl, string token)
+    {
+        return $"{Url}{fileLocationUrl}?X-Plex-Token={token}";
+    }
+
     #endregion
 
     #region Operators

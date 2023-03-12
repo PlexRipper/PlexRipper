@@ -534,10 +534,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(9);
 
-                    b.Property<string>("DownloadUrl")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(13);
-
                     b.Property<string>("FileLocationUrl")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(12);
@@ -664,10 +660,6 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int>("DownloadTaskId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("DownloadUrl")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(10);
-
                     b.Property<long>("ElapsedTime")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(9);
@@ -675,6 +667,10 @@ namespace PlexRipper.Data.Migrations
                     b.Property<long>("EndByte")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(4);
+
+                    b.Property<string>("FileLocationUrl")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(10);
 
                     b.Property<string>("FileName")
                         .HasColumnType("TEXT")

@@ -15,7 +15,7 @@ public class AddDownloadWorkerTasksCommandValidator : AbstractValidator<AddDownl
                 task.RuleFor(x => x.Id).Equal(0);
                 task.RuleFor(x => x.DownloadTaskId).GreaterThan(0);
                 task.RuleFor(x => x.FileName).NotEmpty();
-                task.RuleFor(x => x.DownloadUrl).NotEmpty();
+                task.RuleFor(x => x.FileLocationUrl).NotEmpty();
                 task.RuleFor(x => x.TempDirectory).NotEmpty();
             });
     }

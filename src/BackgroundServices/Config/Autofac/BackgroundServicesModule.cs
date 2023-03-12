@@ -43,38 +43,38 @@ public class BackgroundServicesModule : Module
             // Register Quartz dependencies
             builder.RegisterModule(new QuartzAutofacFactoryModule
             {
-                JobScopeConfigurator = (cb, tag) =>
-                {
-                    // override dependency for job scope
-                    cb.Register(_ => new ScopedDependency("job-local " + DateTime.UtcNow.ToLongTimeString()))
-                        .AsImplementedInterfaces()
-                        .InstancePerMatchingLifetimeScope(tag);
-                },
+                // JobScopeConfigurator = (cb, tag) =>
+                // {
+                //     // override dependency for job scope
+                //     cb.Register(_ => new ScopedDependency("job-local " + DateTime.UtcNow.ToLongTimeString()))
+                //         .AsImplementedInterfaces()
+                //         .InstancePerMatchingLifetimeScope(tag);
+                // },
 
                 // During integration testing, we cannot use a real JobStore so we revert to default
                 ConfigurationProvider = _ => quartzProps,
             });
-        }
 
-        // Source: https://github.com/alphacloud/Autofac.Extras.Quartz/blob/develop/src/Samples/Shared/Bootstrap.cs
-        builder.Register(_ => new ScopedDependency("global"))
-            .AsImplementedInterfaces()
-            .SingleInstance();
+            // Source: https://github.com/alphacloud/Autofac.Extras.Quartz/blob/develop/src/Samples/Shared/Bootstrap.cs
+            builder.Register(_ => new ScopedDependency("global"))
+                .AsImplementedInterfaces()
+                .SingleInstance();
+        }
 
         builder.RegisterModule(new QuartzAutofacJobsModule(typeof(SyncServerJob).Assembly));
 
-        builder.RegisterType<SchedulerService>().As<ISchedulerService>().SingleInstance();
+        builder.RegisterType<SchedulerService>().As<ISchedulerService>().InstancePerDependency();
 
         // register all I*Scheduler
         builder.RegisterAssemblyTypes(assembly)
             .Where(t => t.Name.EndsWith("Scheduler"))
             .AsImplementedInterfaces()
-            .SingleInstance();
+            .InstancePerDependency();
 
-        // register all I*Scheduler
+        // register all I*Listener
         builder.RegisterAssemblyTypes(assembly)
             .Where(t => t.Name.EndsWith("Listener"))
             .AsImplementedInterfaces()
-            .SingleInstance();
+            .InstancePerDependency();
     }
 }

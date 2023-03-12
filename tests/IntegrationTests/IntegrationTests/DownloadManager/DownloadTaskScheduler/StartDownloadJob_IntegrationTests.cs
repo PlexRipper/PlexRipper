@@ -28,7 +28,7 @@ public class StartDownloadJob_IntegrationTests : BaseIntegrationTests
 
         await CreateContainer(config => { config.DownloadSpeedLimitInKib = 5000; });
 
-        var downloadTask = DbContext
+        var downloadTask = Container.PlexRipperDbContext
             .DownloadTasks
             .IncludeDownloadTasks()
             .FirstOrDefault();

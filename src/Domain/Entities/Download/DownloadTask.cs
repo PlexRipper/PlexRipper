@@ -88,10 +88,10 @@ public class DownloadTask : BaseEntity
     public string DestinationDirectory { get; set; }
 
     [Column(Order = 18)]
-    public int DownloadSpeed { get; set; }
+    public long DownloadSpeed { get; set; }
 
     [Column(Order = 19)]
-    public int FileTransferSpeed { get; set; }
+    public long FileTransferSpeed { get; set; }
 
     [Column(Order = 20)]
     public string ServerMachineIdentifier { get; set; }

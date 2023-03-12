@@ -213,7 +213,8 @@ public static class MockDatabase
         // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
         return new SqliteConnectionStringBuilder
         {
-            Mode = SqliteOpenMode.Memory,
+            // Real file is used for testing due to otherwise flaky tests when doing in memory
+            Mode = SqliteOpenMode.ReadWriteCreate,
             ForeignKeys = !disableForeignKeyCheck,
 
             // Database name

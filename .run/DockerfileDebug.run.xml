@@ -1,0 +1,41 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="DockerfileDebug" type="docker-deploy" factoryName="dockerfile" server-name="Docker">
+    <deployment type="dockerfile">
+      <settings>
+        <option name="imageTag" value="plexripper/plexripper:dev" />
+        <option name="containerName" value="PlexRipperDev" />
+        <option name="portBindings">
+          <list>
+            <DockerPortBindingImpl>
+              <option name="containerPort" value="7000" />
+              <option name="hostPort" value="7000" />
+            </DockerPortBindingImpl>
+          </list>
+        </option>
+        <option name="sourceFilePath" value="Dockerfile" />
+        <option name="volumeBindings">
+          <list>
+            <DockerVolumeBindingImpl>
+              <option name="containerPath" value="/Downloads" />
+              <option name="hostPath" value="$PROJECT_DIR$/../PlexRipperDockerCache/Downloads/" />
+            </DockerVolumeBindingImpl>
+            <DockerVolumeBindingImpl>
+              <option name="containerPath" value="/Movies" />
+              <option name="hostPath" value="$PROJECT_DIR$/../PlexRipperDockerCache/Movies/" />
+            </DockerVolumeBindingImpl>
+            <DockerVolumeBindingImpl>
+              <option name="containerPath" value="/Config" />
+              <option name="hostPath" value="$PROJECT_DIR$/../PlexRipperDockerCache/Config/" />
+            </DockerVolumeBindingImpl>
+            <DockerVolumeBindingImpl>
+              <option name="containerPath" value="/TvShows" />
+              <option name="hostPath" value="$PROJECT_DIR$/../PlexRipperDockerCache/TvShows/" />
+            </DockerVolumeBindingImpl>
+          </list>
+        </option>
+      </settings>
+    </deployment>
+    <EXTENSION ID="com.jetbrains.rider.docker.debug" isFastModeEnabled="true" isPublishEnabled="true" />
+    <method v="2" />
+  </configuration>
+</component>

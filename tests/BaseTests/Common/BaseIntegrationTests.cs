@@ -23,10 +23,8 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug)
     {
-        // Log.SetupTestLogging(output, logLevel);
         LogConfig.SetTestOutputHelper(output);
         _log = LogManager.CreateLogInstance(typeof(BaseIntegrationTests), logLevel);
-        DatabaseName = MockDatabase.GetMemoryDatabaseName();
         _log.Information("Initialized integration test with database name: {DatabaseName}", DatabaseName);
         BogusExtensions.Setup();
     }
@@ -41,9 +39,9 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected List<Uri> GetPlexServerUris => _plexMockServers.Select(x => x.ServerUri).ToList();
 
-    protected string DatabaseName { get; }
+    protected string DatabaseName { get; } = MockDatabase.GetMemoryDatabaseName();
 
-    protected int Seed { get; set; } = DateTime.Now.Ticks.GetHashCode();
+    protected int Seed { get; set; } = Random.Shared.Next(int.MaxValue);
 
     #endregion
 

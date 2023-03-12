@@ -13,6 +13,7 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
     [Fact]
     public async Task ShouldStartQueuedMovieDownloadTaskOnStartCommand_WhenNoTasksAreDownloading()
     {
+        // Arrange
         Seed = 5594564;
         var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
 
@@ -26,7 +27,6 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
             config.MovieDownloadTasksCount = 5;
         });
 
-        // Arrange
         await CreateContainer();
         var downloadTasks = await Container.PlexRipperDbContext.DownloadTasks.ToListAsync();
         downloadTasks.Count.ShouldBe(10);

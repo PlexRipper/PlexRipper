@@ -16,6 +16,7 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
     [Fact]
     public async Task ShouldDownloadMultipleMovieDownloadTasks_WhenDownloadTasksAreCreated()
     {
+        // Arrange
         var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
         var plexMovieCount = 5;
         await SetupDatabase(config =>
@@ -27,8 +28,7 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
             config.MovieCount = plexMovieCount;
         });
 
-        // Arrange
-        await CreateContainer(config => { config.DownloadSpeedLimitInKib = 5000; });
+        await CreateContainer(config => config.DownloadSpeedLimitInKib = 5000);
         var plexMovies = await DbContext.PlexMovies.ToListAsync();
         plexMovies.Count.ShouldBe(plexMovieCount, $"PlexMovies count should be 10 failed with database name: {DatabaseName}");
 

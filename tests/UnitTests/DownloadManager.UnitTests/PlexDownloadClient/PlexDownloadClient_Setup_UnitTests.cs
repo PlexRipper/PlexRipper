@@ -82,7 +82,7 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
 
         // Act
         _sut.Setup(downloadTask);
-        await _sut.Start();
+        _sut.Start();
 
         await Task.Delay(1000);
 

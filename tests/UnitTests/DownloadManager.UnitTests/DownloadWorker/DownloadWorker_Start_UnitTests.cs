@@ -24,7 +24,7 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
         // sut.DownloadWorkerTaskUpdate.Subscribe(task => downloadWorkerTaskResult = task);
 
         // Act
-        var result = await sut.Start();
+        var result = sut.Start();
         await Task.Delay(300);
 
         // Assert

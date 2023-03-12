@@ -34,4 +34,6 @@ public class FakeDataConfig : BaseConfig<FakeDataConfig>
 
     public List<Uri> MockServerUris { get; set; } = new();
     public int DownloadFileSizeInMb { get; set; }
+
+    public bool DisableForeignKeyCheck { get; set; }
 }

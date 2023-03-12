@@ -15,6 +15,7 @@ public class BaseUnitTest : IDisposable
 
     private string _databaseName;
     protected PlexRipperDbContext DbContext;
+    private bool disableForeignKeyCheck;
     private bool isDatabaseSetup;
     protected ILog _log;
 
@@ -73,7 +74,7 @@ public class BaseUnitTest : IDisposable
             throw new Exception(logEvent.ToLogString());
         }
 
-        return MockDatabase.GetMemoryDbContext(_databaseName);
+        return MockDatabase.GetMemoryDbContext(_databaseName, disableForeignKeyCheck);
     }
 
     /// <summary>
@@ -83,6 +84,9 @@ public class BaseUnitTest : IDisposable
     protected async Task SetupDatabase(Action<FakeDataConfig> options = null)
     {
         isDatabaseSetup = true;
+
+        var config = FakeDataConfig.FromOptions(options);
+        disableForeignKeyCheck = config.DisableForeignKeyCheck;
 
         // Database context can be setup once and then retrieved by its DB name.
         DbContext = await GetDbContext().Setup(Seed, options);

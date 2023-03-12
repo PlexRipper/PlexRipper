@@ -14,10 +14,10 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest
     public async Task ShouldCreateAllDownloadTasks_WhenAllAreNew()
     {
         // Arrange
+        await SetupDatabase(config => config.DisableForeignKeyCheck = true);
         var downloadTasks = FakeData.GetTvShowDownloadTask().Generate(1);
-        await using var context = MockDatabase.GetMemoryDbContext(disableForeignKeyCheck: true);
         var request = new CreateDownloadTasksCommand(downloadTasks);
-        var handler = new CreateDownloadTasksCommandHandler(_log, context);
+        var handler = new CreateDownloadTasksCommandHandler(_log, GetDbContext());
 
         // Act
         var result = await handler.Handle(request, CancellationToken.None);
@@ -25,20 +25,19 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest
         // Assert
         result.IsSuccess.ShouldBeTrue();
         var flattenDownloadTasks = downloadTasks.Flatten(x => x.Children).ToList();
-        context.DownloadTasks.Count().ShouldBe(flattenDownloadTasks.Count);
+        DbContext.DownloadTasks.Count().ShouldBe(flattenDownloadTasks.Count);
     }
 
     [Fact]
     public async Task ShouldCreateOnlyChildDownloadTasks_WhenParentAlreadyExists()
     {
         // Arrange
+        await SetupDatabase(config => config.DisableForeignKeyCheck = true);
         var downloadTasks = FakeData.GetTvShowDownloadTask().Generate(1);
-        await using var context = MockDatabase.GetMemoryDbContext(disableForeignKeyCheck: true);
-
-        await context.BulkInsertAsync(new List<DownloadTask> { downloadTasks.First() });
+        await DbContext.BulkInsertAsync(new List<DownloadTask> { downloadTasks.First() });
         downloadTasks[0].Id = 1;
         var request = new CreateDownloadTasksCommand(downloadTasks);
-        var handler = new CreateDownloadTasksCommandHandler(_log, context);
+        var handler = new CreateDownloadTasksCommandHandler(_log, GetDbContext());
 
         // Act
         var result = await handler.Handle(request, CancellationToken.None);
@@ -46,24 +45,24 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest
         // Assert
         result.IsSuccess.ShouldBeTrue();
         var flattenDownloadTasks = downloadTasks.Flatten(x => x.Children).ToList();
-        context.DownloadTasks.Count().ShouldBe(flattenDownloadTasks.Count);
+        DbContext.DownloadTasks.Count().ShouldBe(flattenDownloadTasks.Count);
     }
 
     [Fact]
     public async Task ShouldAllHaveARootDownloadTaskId_WhenDownloadTasksAreChildren()
     {
         // Arrange
+        await SetupDatabase(config => config.DisableForeignKeyCheck = true);
         var downloadTasksTest = FakeData.GetTvShowDownloadTask().Generate(1);
-        await using var context = MockDatabase.GetMemoryDbContext(disableForeignKeyCheck: true);
         var request = new CreateDownloadTasksCommand(downloadTasksTest);
-        var handler = new CreateDownloadTasksCommandHandler(_log, context);
+        var handler = new CreateDownloadTasksCommandHandler(_log, GetDbContext());
 
         // Act
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var downloadTasksDb = await context.DownloadTasks.IncludeDownloadTasks().IncludeByRoot().ToListAsync();
+        var downloadTasksDb = await DbContext.DownloadTasks.IncludeDownloadTasks().IncludeByRoot().ToListAsync();
 
         void HasRootDownloadTaskId(List<DownloadTask> downloadTasks)
         {

@@ -11,8 +11,7 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest
     public async Task ShouldReturnNoDownloadTasks_WhenNoDownloadTasksAreInDb()
     {
         // Arrange
-        await using var context = await MockDatabase.GetMemoryDbContext().Setup(2867);
-        var handle = new GetAllDownloadTasksQueryHandler(_log, context);
+        var handle = new GetAllDownloadTasksQueryHandler(_log, GetDbContext());
 
         var request = new GetAllDownloadTasksQuery();
 

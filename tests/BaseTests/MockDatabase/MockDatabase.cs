@@ -13,7 +13,6 @@ namespace PlexRipper.BaseTests;
 
 public static class MockDatabase
 {
-    private static readonly Random Rnd = new();
     private static int _seed;
     private static readonly ILog _log = LogManager.CreateLogInstance(typeof(MockDatabase));
 
@@ -182,7 +181,7 @@ public static class MockDatabase
 
     public static string GetMemoryDatabaseName()
     {
-        return $"memory_database_{Rnd.Next(1, int.MaxValue)}_{Rnd.Next(1, int.MaxValue)}";
+        return $"memory_database_{Random.Shared.Next(1, int.MaxValue)}_{Random.Shared.Next(int.MaxValue)}";
     }
 
     /// <summary>

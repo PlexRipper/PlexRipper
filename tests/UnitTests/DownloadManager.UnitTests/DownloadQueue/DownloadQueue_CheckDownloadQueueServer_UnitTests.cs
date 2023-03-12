@@ -14,8 +14,6 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
     public async Task ShouldHaveNoUpdates_WhenGivenAnEmptyList()
     {
         // Arrange
-        mock.SetupMediator(It.IsAny<GetAllDownloadTasksInPlexServersQuery>)
-            .ReturnsAsync(Result.Ok(new List<PlexServer>()));
 
         // Act
         _sut.Setup();
@@ -23,6 +21,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
 
         // Assert
         result.IsFailed.ShouldBeTrue();
+        result.Errors.Count.ShouldBeGreaterThan(0);
     }
 
     [Fact]

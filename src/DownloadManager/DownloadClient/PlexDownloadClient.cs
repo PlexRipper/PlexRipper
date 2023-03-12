@@ -160,15 +160,14 @@ public class PlexDownloadClient : IAsyncDisposable
     /// </summary>
     public async ValueTask DisposeAsync()
     {
-        await DownloadProcessTask;
-
-        await _downloadWorkerTaskUpdateCompletionSource.Task;
-        await _downloadWorkerLogCompletionSource.Task;
+        if (DownloadProcessTask is not null)
+            await DownloadProcessTask;
 
         _downloadSpeedLimitSubscription?.Dispose();
         _downloadWorkerTaskUpdate?.Dispose();
         _downloadWorkerLog?.Dispose();
-        _log.Here().Warning("PlexDownloadClient for DownloadTask with Id: {DownloadTaskId} was disposed", DownloadTask.Id);
+        if (DownloadTask is not null)
+            _log.Here().Warning("PlexDownloadClient for DownloadTask with Id: {DownloadTaskId} was disposed", DownloadTask.Id);
     }
 
     #endregion

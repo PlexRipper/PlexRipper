@@ -253,7 +253,7 @@ public class DownloadWorker : IAsyncDisposable
 
         _log.Here().Error("Download worker {Id} with {FileName} had an error!", Id, FileName);
         DownloadWorkerTask.DownloadStatus = DownloadStatus.Error;
-
+        SendDownloadWorkerUpdate();
         SendDownloadWorkerLog(NotificationLevel.Error, errorResult.ToString());
     }
 

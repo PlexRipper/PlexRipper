@@ -11,6 +11,7 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest
     public async Task ShouldReturnNoDownloadTasks_WhenNoDownloadTasksAreInDb()
     {
         // Arrange
+        await SetupDatabase();
         var handle = new GetAllDownloadTasksQueryHandler(_log, GetDbContext());
 
         var request = new GetAllDownloadTasksQuery();

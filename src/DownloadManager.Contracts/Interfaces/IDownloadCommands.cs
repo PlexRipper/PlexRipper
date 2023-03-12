@@ -35,7 +35,7 @@ public interface IDownloadCommands
     /// </summary>
     /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to stop.</param>
     /// <returns>If successful a list of the DownloadTasks that were stopped.</returns>
-    Task<Result<List<int>>> StopDownloadTasks(int downloadTaskId);
+    Task<Result> StopDownloadTasks(int downloadTaskId);
 
     /// <summary>
     /// Will clear any completed <see cref="DownloadTask"/> from the database.

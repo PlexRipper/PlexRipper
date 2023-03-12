@@ -1,9 +1,9 @@
 ﻿using Application.Contracts;
 using BackgroundServices.Contracts;
 using Data.Contracts;
+using DownloadManager.Contracts;
 using FileSystem.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 
 namespace DownloadManager.UnitTests;
@@ -59,12 +59,11 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<Do
 
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StopDownloadTaskJob(It.IsAny<int>())).ReturnOk();
         mock.SetupMediator(It.IsAny<GetDownloadTaskByIdQuery>).ReturnsAsync(Result.Ok(downloadTasks.First()));
-        mock.SetupMediator(It.IsAny<UpdateDownloadStatusOfDownloadTaskCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupMediator(It.IsAny<DownloadTaskUpdated>).Returns(Task.CompletedTask);
         mock.SetupMediator(It.IsAny<GetDownloadTaskByIdQuery>)
             .ReturnsAsync((GetDownloadTaskByIdQuery x, CancellationToken _) =>
                 Result.Ok(downloadTasks.FirstOrDefault(y => y.Id == x.Id)));
-
-        mock.Mock<INotificationsService>().Setup(x => x.SendResult(It.IsAny<Result>())).ReturnsAsync(Result.Ok());
+        mock.PublishMediator(It.IsAny<CheckDownloadQueue>).Returns(Task.CompletedTask);
         mock.Mock<IDirectorySystem>().Setup(x => x.DeleteAllFilesFromDirectory(It.IsAny<string>())).Returns(Result.Ok());
 
         // Act
@@ -72,12 +71,9 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<Do
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBeSubsetOf(downloadTaskIds);
-
-        mock.Mock<IMediator>()
-            .Verify(
-                x => x.Send(
-                    It.IsAny<UpdateDownloadStatusOfDownloadTaskCommand>(),
-                    It.IsAny<CancellationToken>()), Times.Once);
+        mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StopDownloadTaskJob(It.IsAny<int>()), Times.Once);
+        mock.VerifyMediator(It.IsAny<DownloadTaskUpdated>, Times.Once);
+        mock.VerifyNotification(It.IsAny<CheckDownloadQueue>, Times.Once);
     }
 }

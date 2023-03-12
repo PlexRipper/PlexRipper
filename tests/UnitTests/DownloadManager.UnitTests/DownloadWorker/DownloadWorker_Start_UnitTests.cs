@@ -20,8 +20,7 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
             Id = 999,
         }));
         DownloadWorkerTask downloadWorkerTaskResult = null;
-
-        // sut.DownloadWorkerTaskUpdate.Subscribe(task => downloadWorkerTaskResult = task);
+        sut.DownloadWorkerTaskUpdate.Subscribe(task => downloadWorkerTaskResult = task);
 
         // Act
         var result = sut.Start();

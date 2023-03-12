@@ -80,7 +80,7 @@ public class DownloadCommands : IDownloadCommands
         if (stopDownloadTasksResult.IsFailed)
             return stopDownloadTasksResult.ToResult().LogError();
 
-        var regeneratedDownloadTasks = await _downloadTaskFactory.RegenerateDownloadTask(stopDownloadTasksResult.Value);
+        var regeneratedDownloadTasks = await _downloadTaskFactory.RegenerateDownloadTask(new List<int>() { downloadTaskId });
         if (regeneratedDownloadTasks.IsFailed)
             return regeneratedDownloadTasks.LogError();
 
@@ -150,7 +150,7 @@ public class DownloadCommands : IDownloadCommands
     #region Stop
 
     /// <inheritdoc/>
-    public async Task<Result<List<int>>> StopDownloadTasks(int downloadTaskId)
+    public async Task<Result> StopDownloadTasks(int downloadTaskId)
     {
         if (downloadTaskId <= 0)
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();

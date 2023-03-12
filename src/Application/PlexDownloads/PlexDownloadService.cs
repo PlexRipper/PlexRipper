@@ -79,10 +79,9 @@ public class PlexDownloadService : IPlexDownloadService
         return _downloadCommands.RestartDownloadTask(downloadTaskId);
     }
 
-    public async Task<Result> StopDownloadTask(int downloadTaskId)
+    public Task<Result> StopDownloadTask(int downloadTaskId)
     {
-        var result = await _downloadCommands.StopDownloadTasks(downloadTaskId);
-        return result.IsSuccess ? Result.Ok() : result.ToResult();
+        return _downloadCommands.StopDownloadTasks(downloadTaskId);
     }
 
     public Task<Result> StartDownloadTask(int downloadTaskId)

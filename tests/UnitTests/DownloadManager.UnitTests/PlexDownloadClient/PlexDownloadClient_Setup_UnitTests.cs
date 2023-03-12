@@ -87,7 +87,7 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
         await Task.Delay(1000);
 
         // Assert
-        mock.Mock<IMediator>().Verify(x => x.Send(It.IsAny<UpdateDownloadTasksByIdCommand>(), It.IsAny<CancellationToken>()));
+        mock.VerifyMediator(It.IsAny<UpdateDownloadTasksByIdCommand>, Times.Once);
 
         downloadTaskUpdates.Count.ShouldBe(1);
         downloadTaskUpdates[0].DownloadStatus.ShouldBe(DownloadStatus.Error);

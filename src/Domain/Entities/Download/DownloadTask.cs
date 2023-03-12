@@ -93,7 +93,7 @@ public class DownloadTask : BaseEntity
     [Column(Order = 19)]
     public int FileTransferSpeed { get; set; }
 
-    [Column(Order = 19)]
+    [Column(Order = 20)]
     public string ServerMachineIdentifier { get; set; }
 
     /// <summary>

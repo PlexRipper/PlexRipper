@@ -14,11 +14,10 @@ public class DownloadTaskUpdated : IRequest
         RootDownloadTaskId = downloadTask.RootDownloadTaskId;
     }
 
-    public DownloadTaskUpdated(int downloadTaskId, int plexServerId, int rootDownloadTaskId)
+    public DownloadTaskUpdated(int downloadTaskId)
     {
         DownloadTaskId = downloadTaskId;
-        PlexServerId = plexServerId;
-        RootDownloadTaskId = rootDownloadTaskId;
+        GetFromDb = true;
     }
 
     #endregion
@@ -28,6 +27,8 @@ public class DownloadTaskUpdated : IRequest
     public int DownloadTaskId { get; }
     public int PlexServerId { get; }
     public int RootDownloadTaskId { get; }
+
+    public bool GetFromDb { get; }
 
     #endregion
 }

@@ -21,6 +21,13 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdated>
         var plexServerId = notification.PlexServerId;
         var rootDownloadTaskId = notification.RootDownloadTaskId;
 
+        if (notification.GetFromDb)
+        {
+            var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId), cancellationToken);
+            plexServerId = downloadTaskResult.Value.PlexServerId;
+            rootDownloadTaskId = downloadTaskResult.Value.RootDownloadTaskId;
+        }
+
         await _mediator.Send(new ReCalculateRootDownloadTaskCommand(rootDownloadTaskId), cancellationToken);
 
         // Send away the new result
@@ -32,12 +39,5 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdated>
         }
 
         await _signalRService.SendDownloadProgressUpdateAsync(plexServerId, downloadTasksResult.Value, cancellationToken);
-
-        // if (true)
-        // {
-        //     // TODO SignalR endpoint can maybe be removed
-        //     var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true), cancellationToken);
-        //     await _signalRService.SendDownloadTaskUpdateAsync(downloadTaskResult.Value, cancellationToken);
-        // }
     }
 }

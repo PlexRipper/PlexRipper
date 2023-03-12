@@ -91,6 +91,9 @@ public class DownloadTask : BaseEntity
     public int DownloadSpeed { get; set; }
 
     [Column(Order = 19)]
+    public int FileTransferSpeed { get; set; }
+
+    [Column(Order = 19)]
     public string ServerMachineIdentifier { get; set; }
 
     /// <summary>

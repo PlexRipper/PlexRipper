@@ -23,20 +23,12 @@ public class FileMergeProgress
     /// <summary>
     /// The transfer speed in bytes per second.
     /// </summary>
-
     public int TransferSpeed { get; set; }
-
-    public string TransferSpeedFormatted => DataFormat.FormatSpeedString(TransferSpeed);
 
     /// <summary>
     /// The time remaining in seconds the <see cref="DownloadFileTask"/> to finish.
     /// </summary>
-
     public long TimeRemaining => DataFormat.GetTimeRemaining(BytesRemaining, TransferSpeed);
 
     public long BytesRemaining => DataTotal - DataTransferred;
-
-    public int PlexServerId { get; set; }
-
-    public int PlexLibraryId { get; set; }
 }

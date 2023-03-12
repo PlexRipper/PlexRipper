@@ -18,9 +18,14 @@ public class FileMergeProgressHandler : INotificationHandler<FileMergeProgressNo
     public async Task Handle(FileMergeProgressNotification notification, CancellationToken cancellationToken)
     {
         var downloadTaskResult = await _mediator.Send(new UpdateDownloadTaskWithFileMergeProgressByIdCommand(notification.Progress), cancellationToken);
-
-        await _mediator.Send(new DownloadTaskUpdated(downloadTaskResult.Value), cancellationToken);
+        if (downloadTaskResult.IsFailed)
+        {
+            downloadTaskResult.LogError();
+            return;
+        }
 
         await _signalRService.SendFileMergeProgressUpdateAsync(notification.Progress, cancellationToken);
+
+        await _mediator.Send(new DownloadTaskUpdated(notification.Progress.DownloadTaskId), cancellationToken);
     }
 }

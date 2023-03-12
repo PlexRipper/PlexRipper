@@ -92,7 +92,7 @@ public class PlexDownloadService : IPlexDownloadService
 
     public Task<Result> PauseDownloadTask(int downloadTaskId)
     {
-        return _downloadCommands.PauseDownload(downloadTaskId);
+        return _downloadCommands.PauseDownloadTask(downloadTaskId);
     }
 
     public Task<Result> ClearCompleted(List<int> downloadTaskIds)

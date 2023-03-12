@@ -184,7 +184,7 @@ public class DownloadTask : BaseEntity
     {
         var orderedList = DownloadWorkerTasks?.OrderBy(x => x.Id).ToList();
         var builder = new StringBuilder();
-        builder.Append($"[File: {FileName}] - ");
+        builder.Append($"[File: {FileName} - ");
         builder.Append($"Status: {DownloadStatus}] - ");
         foreach (var progress in orderedList)
             builder.Append($"({progress.Id} - {progress.Percentage} {progress.DownloadSpeedFormatted}) + ");

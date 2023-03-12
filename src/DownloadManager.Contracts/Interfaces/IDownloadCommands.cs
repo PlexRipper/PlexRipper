@@ -24,7 +24,9 @@ public interface IDownloadCommands
     /// </summary>
     /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to pause.</param>
     /// <returns>Is successful.</returns>
-    Task<Result> PauseDownload(int downloadTaskId);
+    Task<Result> PauseDownloadTask(int downloadTaskId);
+
+    Task<Result> StartDownloadTask(int downloadTaskId);
 
     Task<Result> StartDownloadTask(DownloadTask downloadTask);
 

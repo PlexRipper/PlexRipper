@@ -4,12 +4,12 @@ using WebAPI.Contracts;
 
 namespace PlexRipper.DownloadManager;
 
-public class DownloadTaskUpdateHandler : IRequestHandler<DownloadTaskUpdated>
+public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdated>
 {
     private readonly IMediator _mediator;
     private readonly ISignalRService _signalRService;
 
-    public DownloadTaskUpdateHandler(IMediator mediator, ISignalRService signalRService)
+    public DownloadTaskUpdatedHandler(IMediator mediator, ISignalRService signalRService)
     {
         _mediator = mediator;
         _signalRService = signalRService;

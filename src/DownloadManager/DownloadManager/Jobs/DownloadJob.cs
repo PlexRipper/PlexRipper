@@ -58,6 +58,7 @@ public class DownloadJob : IJob, IDisposable
         var dataMap = context.JobDetail.JobDataMap;
         var downloadTaskId = dataMap.GetIntValue(DownloadTaskIdParameter);
         var plexServerId = dataMap.GetIntValue(PlexServerIdParameter);
+
         var token = context.CancellationToken;
         _log.Debug("Executing job: {DownloadJobName} for {DownloadTaskIdName} with id: {DownloadTaskId}", nameof(DownloadJob), nameof(downloadTaskId),
             downloadTaskId);
@@ -114,7 +115,7 @@ public class DownloadJob : IJob, IDisposable
                 return;
             }
 
-            var startResult = await _plexDownloadClient.Start();
+            var startResult = _plexDownloadClient.Start();
             if (startResult.IsFailed)
                 await _notificationsService.SendResult(startResult);
 
@@ -129,8 +130,6 @@ public class DownloadJob : IJob, IDisposable
 
                 await _plexDownloadClient.StopAsync();
             }
-
-
         }
         catch (TaskCanceledException) { }
         catch (Exception e)

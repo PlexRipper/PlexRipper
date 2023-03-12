@@ -40,6 +40,18 @@ public abstract class BaseScheduler
         return _scheduler.CheckExists(key);
     }
 
+    protected async Task AwaitJobRunning(JobKey key, CancellationToken cancellationToken = default)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            var jobs = await _scheduler.GetCurrentlyExecutingJobs(cancellationToken);
+            if (!jobs.Any(x => Equals(x.JobDetail.Key, key)))
+                break;
+
+            await Task.Delay(500, cancellationToken);
+        }
+    }
+
     protected async Task<List<JobDataMap>> GetRunningJobDataMaps(Type jobType)
     {
         var jobs = await _scheduler.GetCurrentlyExecutingJobs();

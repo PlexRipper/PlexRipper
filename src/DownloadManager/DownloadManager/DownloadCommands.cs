@@ -11,8 +11,6 @@ public class DownloadCommands : IDownloadCommands
 {
     #region Fields
 
-    private readonly IDownloadQueue _downloadQueue;
-
     private readonly IDirectorySystem _directorySystem;
     private readonly IDownloadTaskValidator _downloadTaskValidator;
 
@@ -31,7 +29,6 @@ public class DownloadCommands : IDownloadCommands
     public DownloadCommands(
         ILog log,
         IMediator mediator,
-        IDownloadQueue downloadQueue,
         IDirectorySystem directorySystem,
         IDownloadTaskValidator downloadTaskValidator,
         INotificationsService notificationsService,
@@ -40,7 +37,6 @@ public class DownloadCommands : IDownloadCommands
     {
         _log = log;
         _mediator = mediator;
-        _downloadQueue = downloadQueue;
         _directorySystem = directorySystem;
         _downloadTaskValidator = downloadTaskValidator;
         _notificationsService = notificationsService;
@@ -93,17 +89,11 @@ public class DownloadCommands : IDownloadCommands
         if (restartedDownloadTask == null)
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogError();
 
-        var rootDownloadTaskId = restartedDownloadTask.RootDownloadTaskId;
-
         await _mediator.Send(new UpdateDownloadTasksByIdCommand(downloadTasks));
 
         await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(downloadTaskId, DownloadStatus.Queued));
-        await _mediator.Send(new ReCalculateRootDownloadTaskCommand(rootDownloadTaskId));
 
-        var uniquePlexServers = regeneratedDownloadTasks.Value.Select(x => x.PlexServerId).Distinct().ToList();
-        await _mediator.Publish(new CheckDownloadQueue(uniquePlexServers));
-
-        return Result.Ok();
+        return await SetDownloadTaskUpdated(downloadTaskId);
     }
 
     public async Task<Result> ResumeDownloadTask(int downloadTaskId)
@@ -142,6 +132,19 @@ public class DownloadCommands : IDownloadCommands
         return Result.Fail($"Failed to start downloadTask {downloadTask.FullTitle}, it's not directly downloadable.");
     }
 
+    public async Task<Result> StartDownloadTask(int downloadTaskId)
+    {
+        if (downloadTaskId <= 0)
+            return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
+
+        var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId));
+
+        if (downloadTaskResult.IsFailed)
+            return downloadTaskResult.ToResult();
+
+        return await StartDownloadTask(downloadTaskResult.Value);
+    }
+
     #endregion
 
     #region Stop
@@ -161,25 +164,17 @@ public class DownloadCommands : IDownloadCommands
 
         _log.Information("Stopping {DownloadTaskFullTitle} from downloading", downloadTask.Value.FullTitle);
 
-        // Check if currently downloading
         var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskId);
         if (stopResult.IsFailed)
             await _notificationsService.SendResult(stopResult);
+
+        _log.Debug("Deleting partially downloaded files of {DownloadTaskFullTitle}", downloadTask.Value.FullTitle);
 
         var removeTempResult = _directorySystem.DeleteAllFilesFromDirectory(downloadTask.Value.DownloadDirectory);
         if (removeTempResult.IsFailed)
             await _notificationsService.SendResult(removeTempResult);
 
-        var stoppedDownloadTaskIds = new List<int>
-        {
-            downloadTask.Value.Id,
-        };
-
-        var updateResult = await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(stoppedDownloadTaskIds, DownloadStatus.Stopped));
-        if (updateResult.IsFailed)
-            return updateResult;
-
-        return Result.Ok(stoppedDownloadTaskIds);
+        return await SetDownloadTaskUpdated(downloadTaskId);
     }
 
     #endregion
@@ -187,32 +182,34 @@ public class DownloadCommands : IDownloadCommands
     #region Pause
 
     /// <inheritdoc/>
-    public async Task<Result> PauseDownload(int downloadTaskId)
+    public async Task<Result> PauseDownloadTask(int downloadTaskId)
     {
         if (downloadTaskId <= 0)
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
 
-        var failedTasks = new List<int>();
-        var errors = new List<IError>();
+        _log.Information("Pausing DownloadTask with id {DownloadTaskFullTitle} from downloading", downloadTaskId);
 
-        var pauseResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskId);
-        if (pauseResult.IsFailed)
-        {
-            failedTasks.Add(downloadTaskId);
-            errors.AddRange(pauseResult.Errors);
-        }
+        var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskId);
+        if (stopResult.IsFailed)
+            await _notificationsService.SendResult(stopResult);
 
-        return errors.Any()
-            ? Result.Ok()
-            : Result.Fail($"Failed to Pause {failedTasks.Count} DownloadTasks, Id's: {failedTasks}").WithErrors(errors);
+        await _downloadTaskScheduler.AwaitDownloadTaskJob(downloadTaskId);
+
+        _log.Debug("DownloadTask {DownloadTaskId} has been Paused, meaning no downloaded files have been deleted", downloadTaskId);
+
+        var updateResult = await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(downloadTaskId, DownloadStatus.Paused));
+        if (updateResult.IsFailed)
+            return updateResult.LogError();
+
+        return await SetDownloadTaskUpdated(downloadTaskId);
     }
 
     #endregion
 
     /// <inheritdoc/>
-    public async Task<Result> ClearCompleted(List<int> downloadTaskIds)
+    public Task<Result> ClearCompleted(List<int> downloadTaskIds)
     {
-        return await _mediator.Send(new ClearCompletedDownloadTasksCommand(downloadTaskIds));
+        return _mediator.Send(new ClearCompletedDownloadTasksCommand(downloadTaskIds));
     }
 
     /// <inheritdoc/>
@@ -226,6 +223,22 @@ public class DownloadCommands : IDownloadCommands
                 await StopDownloadTasks(downloadTaskId);
 
         return await _mediator.Send(new DeleteDownloadTasksByIdCommand(downloadTaskIds));
+    }
+
+    private async Task<Result> SetDownloadTaskUpdated(int downloadTaskId)
+    {
+        var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId));
+        if (downloadTask.IsFailed)
+        {
+            await _notificationsService.SendResult(downloadTask);
+            return downloadTask.ToResult();
+        }
+
+        await _mediator.Send(new DownloadTaskUpdated(downloadTask.Value));
+
+        await _mediator.Publish(new CheckDownloadQueue(downloadTask.Value.PlexServerId));
+
+        return Result.Ok();
     }
 
     #endregion

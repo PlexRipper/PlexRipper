@@ -35,7 +35,6 @@
 		<Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="BaseTests" />
 	  <Folder Include="DownloadManager" />
 	  <Folder Include="FileSystem" />
 	  <Folder Include="Settings" />

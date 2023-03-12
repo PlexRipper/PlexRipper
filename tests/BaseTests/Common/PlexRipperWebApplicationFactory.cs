@@ -83,7 +83,7 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
     {
         var testQuartzProps = new NameValueCollection
         {
-            { "quartz.scheduler.instanceName", "PlexRipper Scheduler" },
+            { "quartz.scheduler.instanceName", "TestPlexRipper Scheduler" },
             { "quartz.serializer.type", "json" },
             { "quartz.threadPool.type", "Quartz.Simpl.SimpleThreadPool, Quartz" },
             { "quartz.threadPool.threadCount", "10" },
@@ -93,13 +93,13 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
         // Register Quartz dependencies
         builder.RegisterModule(new QuartzAutofacFactoryModule
         {
-            JobScopeConfigurator = (cb, tag) =>
-            {
-                // override dependency for job scope
-                cb.Register(_ => new ScopedDependency("job-local " + DateTime.UtcNow.ToLongTimeString()))
-                    .AsImplementedInterfaces()
-                    .InstancePerMatchingLifetimeScope(tag);
-            },
+            // JobScopeConfigurator = (cb, tag) =>
+            // {
+            //     // override dependency for job scope
+            //     cb.Register(_ => new ScopedDependency("job-local " + DateTime.UtcNow.ToLongTimeString()))
+            //         .AsImplementedInterfaces()
+            //         .InstancePerMatchingLifetimeScope(tag);
+            // },
 
             // During integration testing, we cannot use a real JobStore so we revert to default
             ConfigurationProvider = _ => testQuartzProps,

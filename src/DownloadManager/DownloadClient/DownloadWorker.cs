@@ -13,7 +13,7 @@ namespace PlexRipper.DownloadManager;
 /// The <see cref="DownloadWorker"/> is part of the multi-threaded <see cref="PlexDownloadClient"/>
 /// and will download a part of the <see cref="DownloadTask"/>.
 /// </summary>
-public class DownloadWorker : IAsyncDisposable
+public class DownloadWorker : IDisposable
 {
     #region Fields
 
@@ -32,8 +32,6 @@ public class DownloadWorker : IAsyncDisposable
     {
         AutoReset = true,
     };
-
-    private Stream _destinationStream;
 
     private int _downloadSpeedLimit;
 
@@ -105,24 +103,7 @@ public class DownloadWorker : IAsyncDisposable
     {
         _log.Here().Debug("Download worker with id: {Id} start for filename: {FileName}", Id, FileName);
 
-        // Create and check Filestream to which to download.
-        var _fileStreamResult =
-            _downloadFileSystem.CreateDownloadFileStream(DownloadWorkerTask.TempDirectory, FileName, DownloadWorkerTask.DataTotal);
-        if (_fileStreamResult.IsFailed)
-        {
-            SendDownloadWorkerError(_fileStreamResult.ToResult());
-            return _fileStreamResult.ToResult();
-        }
-
-        try
-        {
-            SetDownloadWorkerTaskChanged(DownloadStatus.Downloading);
-            DownloadProcessTask = DownloadProcessAsync(_fileStreamResult.Value);
-        }
-        catch (TaskCanceledException)
-        {
-            // Ignore cancellation exceptions
-        }
+        DownloadProcessTask = DownloadProcessAsync();
 
         return Result.Ok();
     }
@@ -151,11 +132,9 @@ public class DownloadWorker : IAsyncDisposable
         _downloadSpeedLimit = speedInKb;
     }
 
-    public async ValueTask DisposeAsync()
+    public void Dispose()
     {
         _timer.Dispose();
-        if (_destinationStream is not null)
-            await _destinationStream.DisposeAsync();
         _httpClient?.Dispose();
         _downloadWorkerUpdate.Dispose();
         _downloadWorkerLog.Dispose();
@@ -165,13 +144,23 @@ public class DownloadWorker : IAsyncDisposable
 
     #region Private Methods
 
-    private async Task<Result> DownloadProcessAsync(Stream destinationStream, CancellationToken cancellationToken = default)
+    private async Task<Result> DownloadProcessAsync(CancellationToken cancellationToken = default)
     {
-        if (destinationStream is null)
-            return ResultExtensions.IsNull(nameof(destinationStream)).LogWarning();
-
+        ThrottledStream throttledStream = null;
+        Stream destinationStream = null;
+        Stream responseStream = null;
         try
         {
+            var _fileStreamResult =
+                _downloadFileSystem.CreateDownloadFileStream(DownloadWorkerTask.TempDirectory, FileName, DownloadWorkerTask.DataTotal);
+            if (_fileStreamResult.IsFailed)
+            {
+                SendDownloadWorkerError(_fileStreamResult.ToResult());
+                return _fileStreamResult.ToResult();
+            }
+
+            destinationStream = _fileStreamResult.Value;
+
             var plexServerConnectionResult =
                 await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(DownloadWorkerTask.PlexServerId), cancellationToken);
             if (plexServerConnectionResult.IsFailed)
@@ -195,10 +184,8 @@ public class DownloadWorker : IAsyncDisposable
 
             var downloadUrl = plexServerConnection.GetDownloadUrl(DownloadWorkerTask.FileLocationUrl, tokenResult.Value);
 
-            _destinationStream = destinationStream;
-
             // Is 0 when starting new and > 0 when resuming.
-            _destinationStream.Position = DownloadWorkerTask.BytesReceived;
+            destinationStream.Position = DownloadWorkerTask.BytesReceived;
 
             // Create download client
             var request = new RestRequest(downloadUrl)
@@ -208,15 +195,17 @@ public class DownloadWorker : IAsyncDisposable
 
             request.AddHeader("Range", new RangeHeaderValue(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte).ToString());
 
-            await using var responseStream = await _httpClient.DownloadStreamAsync(request, cancellationToken);
+            responseStream = await _httpClient.DownloadStreamAsync(request, cancellationToken);
 
             // Throttle the stream to enable download speed limiting
-            var throttledStream = new ThrottledStream(responseStream, _downloadSpeedLimit);
+            throttledStream = new ThrottledStream(responseStream, _downloadSpeedLimit);
 
             // Buffer is based on: https://stackoverflow.com/a/39355385/8205497
             var buffer = new byte[(long)ByteSize.FromMebiBytes(4).Bytes];
 
             _timer.Start();
+
+            SetDownloadWorkerTaskChanged(DownloadStatus.Downloading);
 
             while (_isDownloading)
             {
@@ -227,12 +216,13 @@ public class DownloadWorker : IAsyncDisposable
 
                 if (bytesRead <= 0)
                 {
+                    await DisposeResources();
                     SendDownloadFinished();
                     break;
                 }
 
-                await _destinationStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
-                await _destinationStream.FlushAsync(cancellationToken);
+                await destinationStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
+                await destinationStream.FlushAsync(cancellationToken);
 
                 DownloadWorkerTask.BytesReceived += bytesRead;
                 SendDownloadWorkerUpdate();
@@ -240,10 +230,29 @@ public class DownloadWorker : IAsyncDisposable
         }
         catch (Exception e)
         {
-            SendDownloadWorkerError(Result.Fail(new ExceptionalError(e)).LogError());
+            var result = Result.Fail(new ExceptionalError(e)).LogError();
+            SendDownloadWorkerError(result);
+            return result;
+        }
+        finally
+        {
+            await DisposeResources();
         }
 
         return Result.Ok();
+
+        // Dispose all streams
+        async Task DisposeResources()
+        {
+            if (responseStream != null)
+                await responseStream.DisposeAsync();
+
+            if (throttledStream != null)
+                await throttledStream.DisposeAsync();
+
+            if (destinationStream != null)
+                await destinationStream.DisposeAsync();
+        }
     }
 
     private void SendDownloadWorkerError(Result errorResult)
@@ -260,6 +269,7 @@ public class DownloadWorker : IAsyncDisposable
     private void SendDownloadFinished()
     {
         _timer.Stop();
+
         SetDownloadWorkerTaskChanged(DownloadStatus.DownloadFinished);
         _downloadWorkerLog.OnCompleted();
         _downloadWorkerUpdate.OnCompleted();

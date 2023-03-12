@@ -1,4 +1,4 @@
-﻿namespace BaseTests.IntegrationTests.Setup;
+﻿namespace IntegrationTests.BaseTests.Setup;
 
 [Collection("Sequential")]
 public class IntegrationTest_Setup : BaseIntegrationTests

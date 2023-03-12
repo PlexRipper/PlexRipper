@@ -1,7 +1,7 @@
 using PlexRipper.Settings;
 using PlexRipper.Settings.Modules;
 
-namespace Settings.IntegrationProject;
+namespace IntegrationTests.Settings.ConfigManager;
 
 [Collection("Sequential")]
 public class ConfigManager_Setup_IntegrationTests : BaseIntegrationTests

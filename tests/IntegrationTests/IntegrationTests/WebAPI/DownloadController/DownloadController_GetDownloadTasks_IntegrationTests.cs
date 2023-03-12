@@ -1,7 +1,7 @@
 ﻿using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.SignalR.Common;
 
-namespace WebAPI.IntegrationTests.DownloadController;
+namespace IntegrationTests.WebAPI.DownloadController;
 
 [Collection("Sequential")]
 public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrationTests

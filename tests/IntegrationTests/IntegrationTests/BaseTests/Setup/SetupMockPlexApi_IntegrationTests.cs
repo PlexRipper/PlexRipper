@@ -1,7 +1,7 @@
 using PlexRipper.PlexApi;
 using PlexRipper.PlexApi.Api;
 
-namespace BaseTests.IntegrationTests.Setup;
+namespace IntegrationTests.BaseTests.Setup;
 
 [Collection("Sequential")]
 public class SetupMockPlexApi_IntegrationTests : BaseIntegrationTests

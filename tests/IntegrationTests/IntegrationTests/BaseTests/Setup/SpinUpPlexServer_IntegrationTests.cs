@@ -1,6 +1,6 @@
 using Humanizer.Bytes;
 
-namespace BaseTests.IntegrationTests.Setup;
+namespace IntegrationTests.BaseTests.Setup;
 
 [Collection("Sequential")]
 public class SpinUpPlexServer_IntegrationTests : BaseIntegrationTests

@@ -5,8 +5,7 @@
 		<LangVersion>11</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<IsPackable>false</IsPackable>
-		<AssemblyName>WebAPI.IntegrationTests</AssemblyName>
-		<RootNamespace>WebAPI.IntegrationTests</RootNamespace>
+		<PackageId>IntegrationTests</PackageId>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -36,11 +35,11 @@
 		<Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="BaseTests.IntegrationTests" />
-	  <Folder Include="DownloadManager.IntegrationTests" />
-	  <Folder Include="FileSystem.IntegrationTests" />
-	  <Folder Include="Settings.IntegrationProject" />
-	  <Folder Include="WebAPI.IntegrationTests" />
+	  <Folder Include="BaseTests" />
+	  <Folder Include="DownloadManager" />
+	  <Folder Include="FileSystem" />
+	  <Folder Include="Settings" />
+	  <Folder Include="WebAPI" />
 	</ItemGroup>
 
 </Project>

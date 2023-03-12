@@ -1,7 +1,7 @@
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
 
-namespace WebAPI.IntegrationTests.AccountController;
+namespace IntegrationTests.WebAPI.AccountController;
 
 [Collection("Sequential")]
 public class ValidateAccount_IntegrationTests : BaseIntegrationTests

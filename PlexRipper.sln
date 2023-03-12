@@ -74,7 +74,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.UnitTests", "tests\U
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BaseTests.UnitTests", "tests\UnitTests\BaseTests.UnitTests\BaseTests.UnitTests.csproj", "{6BF4B50B-7B9F-4C19-80A8-FA37A740EFB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.IntegrationTests", "tests\IntegrationTests\WebAPI.IntegrationTests\WebAPI.IntegrationTests.csproj", "{921A6274-E2E0-4362-8550-3ABD73696A1D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "tests\IntegrationTests\IntegrationTests\IntegrationTests.csproj", "{921A6274-E2E0-4362-8550-3ABD73696A1D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSystem.UnitTests", "tests\UnitTests\FileSystem.UnitTests\FileSystem.UnitTests.csproj", "{050C8B14-CCC7-4F96-8095-B58352133BF9}"
 EndProject

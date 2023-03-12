@@ -4,7 +4,7 @@ using PlexRipper.Settings.Models;
 using PlexRipper.WebAPI.Common;
 using Settings.Contracts;
 
-namespace WebAPI.IntegrationTests.SettingsController;
+namespace IntegrationTests.WebAPI.SettingsController;
 
 [Collection("Sequential")]
 public class SettingsController_Get_Settings_IntegrationTests : BaseIntegrationTests

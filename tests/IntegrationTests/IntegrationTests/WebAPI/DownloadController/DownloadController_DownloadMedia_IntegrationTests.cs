@@ -1,12 +1,10 @@
-using Application.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.FluentResult;
 using Serilog.Events;
 
-namespace WebAPI.IntegrationTests.DownloadController;
+namespace IntegrationTests.WebAPI.DownloadController;
 
 [Collection("Sequential")]
 public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegrationTests

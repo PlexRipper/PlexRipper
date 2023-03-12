@@ -3,7 +3,7 @@ using PlexRipper.Data.Common;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.FluentResult;
 
-namespace WebAPI.IntegrationTests.DownloadController;
+namespace IntegrationTests.WebAPI.DownloadController;
 
 [Collection("Sequential")]
 public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationTests

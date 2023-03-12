@@ -1,6 +1,6 @@
 using Data.Contracts;
 
-namespace FileSystem.IntegrationTests.FileMerger;
+namespace IntegrationTests.FileSystem.FileMerger;
 
 [Collection("Sequential")]
 public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegrationTests

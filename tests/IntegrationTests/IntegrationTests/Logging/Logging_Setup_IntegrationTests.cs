@@ -1,9 +1,4 @@
-using PlexRipper.BaseTests;
-using Shouldly;
-using Xunit;
-using Xunit.Abstractions;
-
-namespace Logging.IntegrationTests;
+namespace IntegrationTests.Logging;
 
 [Collection("Sequential")]
 public class Logging_Setup_IntegrationTests : BaseIntegrationTests

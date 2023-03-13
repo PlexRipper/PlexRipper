@@ -120,10 +120,8 @@ public class DownloadWorker : IDisposable
         if (DownloadProcessTask is not null)
             await DownloadProcessTask;
 
-        _timer.Stop();
         SetDownloadWorkerTaskChanged(DownloadStatus.Stopped);
-        _downloadWorkerLog.OnCompleted();
-        _downloadWorkerUpdate.OnCompleted();
+        Shutdown();
         return Result.Ok(DownloadWorkerTask);
     }
 
@@ -155,8 +153,10 @@ public class DownloadWorker : IDisposable
                 _downloadFileSystem.CreateDownloadFileStream(DownloadWorkerTask.TempDirectory, FileName, DownloadWorkerTask.DataTotal);
             if (_fileStreamResult.IsFailed)
             {
-                SendDownloadWorkerError(_fileStreamResult.ToResult());
-                return _fileStreamResult.ToResult();
+                var result = Result.Fail(new Error($"Could not create a download destination filestream for DownloadWorker with id {DownloadWorkerTask.Id}"));
+                result.Errors.AddRange(_fileStreamResult.Errors);
+                SendDownloadWorkerError(result);
+                return result;
             }
 
             destinationStream = _fileStreamResult.Value;
@@ -261,19 +261,19 @@ public class DownloadWorker : IDisposable
             errorResult.Errors[0].Metadata.Add(nameof(DownloadWorker) + "Id", Id);
 
         _log.Here().Error("Download worker {Id} with {FileName} had an error!", Id, FileName);
+        errorResult.LogError();
         DownloadWorkerTask.DownloadStatus = DownloadStatus.Error;
         SendDownloadWorkerUpdate();
         SendDownloadWorkerLog(NotificationLevel.Error, errorResult.ToString());
+        Shutdown();
     }
 
     private void SendDownloadFinished()
     {
-        _timer.Stop();
 
         SetDownloadWorkerTaskChanged(DownloadStatus.DownloadFinished);
-        _downloadWorkerLog.OnCompleted();
-        _downloadWorkerUpdate.OnCompleted();
         _log.Here().Information("Download worker {Id} with {FileName} finished!", Id, FileName);
+        Shutdown();
     }
 
     private void SendDownloadWorkerLog(NotificationLevel logLevel, string message)
@@ -302,6 +302,14 @@ public class DownloadWorker : IDisposable
         SendDownloadWorkerLog(NotificationLevel.Information,
             $"Download worker with id: {Id} and with filename: {FileName} changed status to {status}");
         SendDownloadWorkerUpdate();
+    }
+
+    private void Shutdown()
+    {
+        _isDownloading = false;
+        _timer.Stop();
+        _downloadWorkerLog.OnCompleted();
+        _downloadWorkerUpdate.OnCompleted();
     }
 
     #endregion

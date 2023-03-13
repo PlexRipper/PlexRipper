@@ -104,6 +104,8 @@ export interface DownloadProgressDTO {
 	/** @format int64 */
 	downloadSpeed: number;
 	/** @format int64 */
+	fileTransferSpeed: number;
+	/** @format int64 */
 	timeRemaining: number;
 	actions: string[];
 	children: DownloadProgressDTO[];
@@ -137,6 +139,8 @@ export interface DownloadTaskDTO {
 	key: number;
 	/** @format int32 */
 	downloadSpeed: number;
+	/** @format int32 */
+	fileTransferSpeed: number;
 	/** @format int64 */
 	dataReceived: number;
 	/** @format int64 */
@@ -155,7 +159,6 @@ export interface DownloadTaskDTO {
 	parentId: number;
 	/** @format int64 */
 	timeRemaining: number;
-	downloadUrl: string;
 	quality: string;
 	children: DownloadTaskDTO[];
 	actions: string[];
@@ -201,7 +204,6 @@ export interface FileMergeProgress {
 	percentage: number;
 	/** @format int32 */
 	transferSpeed: number;
-	transferSpeedFormatted: string;
 	/** @format int64 */
 	timeRemaining: number;
 	/** @format int64 */
@@ -345,13 +347,14 @@ export interface JobStatusUpdateDTO {
 }
 
 export enum JobTypes {
-	InspectPlexServerByPlexAccountIdJob = 'InspectPlexServerByPlexAccountIdJob',
+	Unknown = 'Unknown',
 	InspectPlexServerJob = 'InspectPlexServerJob',
 	DownloadJob = 'DownloadJob',
 	DownloadProgressJob = 'DownloadProgressJob',
 	SyncServerJob = 'SyncServerJob',
 	RefreshAccessiblePlexServersJob = 'RefreshAccessiblePlexServersJob',
 	DownloadProgressJobs = 'DownloadProgressJobs',
+	InspectPlexServerByPlexAccountIdJob = 'InspectPlexServerByPlexAccountIdJob',
 }
 
 export interface LanguageSettingsDTO {
@@ -419,7 +422,6 @@ export enum NotificationLevel {
 export interface PlexAccountDTO {
 	/** @format int32 */
 	id: number;
-	/** @minLength 1 */
 	displayName: string;
 	username: string;
 	password: string;

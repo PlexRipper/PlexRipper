@@ -65,7 +65,8 @@ public class FileMergeJob : IJob
             var fileTask = fileTaskResult.Value;
             var downloadTask = fileTask.DownloadTask;
 
-            _log.Information("Executing {NameOfFileMergeJob} with name {FileTaskFileName} and id {FileTaskId}", nameof(FileMergeJob), fileTask.FileName, fileTaskId);
+            _log.Information("Executing {NameOfFileMergeJob} with name {FileTaskFileName} and id {FileTaskId}", nameof(FileMergeJob), fileTask.FileName,
+                fileTaskId);
 
             if (!fileTask.FilePaths.Any())
             {
@@ -92,7 +93,6 @@ public class FileMergeJob : IJob
                     return;
                 }
 
-
             Stream outputStream = null;
 
             try
@@ -115,7 +115,6 @@ public class FileMergeJob : IJob
                 _log.Here().Debug("Starting file merge process for {FilePathsCount} parts into a file {FileName}", fileTask.FilePaths.Count, fileTask.FileName);
 
                 await _fileMergeStreamProvider.MergeFiles(fileTask.FilePaths, outputStream, _bytesReceivedProgress, token);
-
             }
             catch (Exception e)
             {
@@ -157,6 +156,8 @@ public class FileMergeJob : IJob
                     DataTransferred = dataTransferred,
                     DataTotal = fileTask.FileSize,
                     DownloadTaskId = fileTask.DownloadTaskId,
+                    PlexLibraryId = fileTask.DownloadTask.PlexLibraryId,
+                    PlexServerId = fileTask.DownloadTask.PlexServerId,
                     TransferSpeed = DataFormat.GetTransferSpeed(dataTransferred, elapsedTime.TotalSeconds),
                 };
             })

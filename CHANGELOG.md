@@ -17,6 +17,8 @@ This is most, not all, of the many changes that have been made in this version.
 ### Fixed
  - Fixed the two-factor authentication not working due to the Plex error not being passed on from the http client
  - Fixed the front-end page data not refreshing when deleting an PlexAccount
+ - Fixed download process not working when the PlexServer is behind a proxy
+ - Fixed the timeout issue when communicating with a big PlexServer, it's currently 60 seconds before it times out.
 
 ### Optimizations
  - Optimized the token retrieval process for Downloads, this should make downloads more resilient to token refreshes.

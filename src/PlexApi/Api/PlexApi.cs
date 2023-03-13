@@ -44,6 +44,7 @@ public class PlexApi
         var request = new RestRequest(new Uri(PlexApiPaths.SignInUrl), Method.Post)
             .AddPlexHeaders(plexAccount.ClientId)
             .AddJsonBody(credentials);
+        request.Timeout = 15000;
 
         return await _client.SendRequestAsync<SignInResponse>(request, 0);
     }
@@ -63,6 +64,7 @@ public class PlexApi
     public async Task<Result<PlexServerStatus>> GetServerStatusAsync(string serverBaseUrl, string authToken, Action<PlexApiClientProgress> action = null)
     {
         var request = new RestRequest(PlexApiPaths.ServerIdentity(serverBaseUrl));
+        request.Timeout = 10000;
 
         _log.Debug("Requesting PlexServerStatus for {ServerBaseUrl}", serverBaseUrl);
         var response = await _client.SendRequestAsync<ServerIdentityResponse>(request, 2, action);
@@ -100,6 +102,7 @@ public class PlexApi
         var request = new RestRequest(PlexApiPaths.ServerResourcesUrl);
         request.AddToken(authToken);
         request.AddPlexClientIdentifier();
+        request.Timeout = 15000;
 
         var result = await _client.SendRequestAsync<List<ServerResource>>(request);
         return result.IsFailed ? result.ToResult() : Result.Ok(result.Value);
@@ -117,6 +120,7 @@ public class PlexApi
         var request = new RestRequest(PlexApiPaths.GetLibraries(plexFullHost));
 
         request.AddToken(plexAuthToken);
+        request.Timeout = 15000;
 
         _log.Debug("GetLibrarySectionsAsync => {RequestResource}", request.Resource);
         return await _client.SendRequestAsync<LibrariesResponse>(request);
@@ -135,7 +139,6 @@ public class PlexApi
         var request = new RestRequest(PlexApiPaths.GetLibrariesMetadata(plexServerBaseUrl, libraryKey));
 
         request.AddToken(authToken);
-
         request.AddQueryParameter("includeMeta", "1");
 
         return await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
@@ -183,7 +186,6 @@ public class PlexApi
         var request = new RestRequest(new Uri($"{plexServerUrl}/library/sections/{plexLibraryKey}/all"));
 
         request.AddToken(authToken);
-
         request.AddQueryParameter("type", "3");
 
         var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
@@ -204,7 +206,6 @@ public class PlexApi
         var request = new RestRequest(new Uri($"{plexServerUrl}/library/sections/{plexLibraryKey}/all"));
 
         request.AddToken(authToken).AddLimitHeaders(from, to);
-
         request.AddQueryParameter("type", "4");
 
         var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
@@ -241,6 +242,8 @@ public class PlexApi
 
         var request = new RestRequest(new Uri(imageUrl));
         request.AddToken(authToken);
+        request.Timeout = 15000;
+
         return await _client.SendImageRequestAsync(request);
     }
 

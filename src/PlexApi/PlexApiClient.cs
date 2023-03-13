@@ -29,7 +29,7 @@ public class PlexApiClient
         _log = log;
         var options = new RestClientOptions()
         {
-            MaxTimeout = 10000,
+            MaxTimeout = 60000,
             ThrowOnAnyError = false,
         };
         _client = new RestClient(httpClient, options);

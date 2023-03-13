@@ -24,6 +24,8 @@ public class DownloadProgressDTO
 
     public long DownloadSpeed { get; set; }
 
+    public long FileTransferSpeed { get; set; }
+
     public long TimeRemaining { get; set; }
 
     public List<string> Actions { get; set; }

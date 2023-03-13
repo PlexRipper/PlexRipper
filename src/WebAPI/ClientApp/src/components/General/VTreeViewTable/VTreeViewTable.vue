@@ -95,7 +95,12 @@
 												</template>
 												<!-- File speed -->
 												<template v-else-if="header.type === 'file-speed'">
-													<file-size :size="item[header.value]" speed />
+													<file-size
+														v-if="isFileStatus(item['status'])"
+														:size="item['fileTransferSpeed']"
+														speed
+													/>
+													<file-size v-else :size="item[header.value]" speed />
 												</template>
 												<!-- Percentage -->
 												<template v-else-if="header.type === 'percentage'">
@@ -121,7 +126,7 @@
 															icon
 															@click="buttonAction(action, item)"
 														>
-															<v-icon>{{ buttonIcon(action) }} </v-icon>
+															<v-icon>{{ buttonIcon(action) }}</v-icon>
 														</v-btn>
 													</template>
 
@@ -132,7 +137,7 @@
 														icon
 														@click="buttonAction(action, item)"
 													>
-														<v-icon>{{ buttonIcon(action) }} </v-icon>
+														<v-icon>{{ buttonIcon(action) }}</v-icon>
 													</v-btn>
 												</template>
 												<!-- default -->
@@ -160,6 +165,7 @@ import ITreeViewTableRow from '@vTreeViewTable/ITreeViewTableRow';
 import Convert from '@mediaOverview/MediaTable/types/Convert';
 import ButtonType from '@enums/buttonType';
 import ISelection from '@interfaces/ISelection';
+import { DownloadStatus } from '@dto/mainApi';
 
 @Component<VTreeViewTable>({})
 export default class VTreeViewTable extends Vue {
@@ -210,6 +216,10 @@ export default class VTreeViewTable extends Vue {
 
 	findSelected(i: number): string[] {
 		return this.selected.find((x) => x.indexKey === i)?.keys ?? [];
+	}
+
+	isFileStatus(status: DownloadStatus) {
+		return status === DownloadStatus.Merging || status === DownloadStatus.Moving;
 	}
 
 	get isIndeterminate(): boolean {

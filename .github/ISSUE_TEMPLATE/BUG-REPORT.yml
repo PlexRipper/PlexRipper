@@ -1,5 +1,5 @@
 name: "🐛 Bug Report"
-description: Create a new issue for a bug!
+description: Report a bug you found in PlexRipper!
 title: "[BUG] - <title>"
 labels: [
   "bug"
@@ -8,12 +8,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        When upgrading from an older version, make sure to first clear the /Config directory of any files.
-        This will ensure that the new version will generate new files with the correct settings.
+        **When upgrading from an older version, make sure to first clear the `/Config` directory of any files.
+        This will ensure that the new version will generate new files with the correct settings.**
   - type: checkboxes
     attributes:
-      label: Is there an existing issue for this?
-      description: Please search to see if an issue already exists for the bug you encountered.
+      label: Checks
       options:
         - label: I have searched the existing issues for a similar bug and it does not exist!
           required: true
@@ -38,8 +37,8 @@ body:
         - Mac
         - Synology
         - Custom (Specify in description)
-    validations:
-      required: true
+      validations:
+        required: true
   - type: dropdown
     id: browsers
     attributes:

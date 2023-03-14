@@ -1,4 +1,4 @@
-name: "🐛 Bug Report"
+name: "Bug Report 🐛"
 description: Report a bug you found in PlexRipper!
 title: "[BUG] - <title>"
 labels: [
@@ -44,13 +44,18 @@ body:
       description: What browsers are you seeing the problem on?
       multiple: true
       options:
+        - Google Chrome
         - Firefox
-        - Chrome
+        - Brave
+        - Vivaldi
+        - Ungoogled Chromium
+        - Chromium
+        - Opera
         - Safari (Yeah good luck with that...)
         - Microsoft Edge (LOL)
-        - Opera
+        - Other (Specify in description)
     validations:
-      required: false
+      required: true
   - type: textarea
     id: description
     attributes:

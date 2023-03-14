@@ -1,63 +1,35 @@
-name: "💡 Feature Request"
-description: Create a new ticket for a new feature request
+name: "🚀 Feature request"
+description: Suggest a feature that will improve PlexRipper!
 title: "💡 [REQUEST] - <title>"
 labels: [
-  "question"
+  "enhancement"
 ]
 body:
-  - type: input
-    id: start_date
+  - type: markdown
     attributes:
-      label: "Start Date"
-      description: Start of development
-      placeholder: "month/day/year"
-    validations:
-      required: false
+      value: |
+          Thank you for taking the time to fill out this feature request!
+  - type: checkboxes
+    attributes:
+      label: Is there an existing feature request for this?
+      description: Please search to see if a similar issue already exists for the feature request.
+      options:
+        - label: I have searched the existing issue and my feature request does not exist!
+        - label: I have tried out the latest development build and can confirm my feature request is not yet implemented!
+          required: true
   - type: textarea
-    id: implementation_pr
+    id: feature-description
     attributes:
-      label: "Implementation PR"
-      description: Pull request used
-      placeholder: "#Pull Request ID"
-    validations:
-      required: false
-  - type: textarea
-    id: reference_issues
-    attributes:
-      label: "Reference Issues"
-      description: Common issues
-      placeholder: "#Issues IDs"
-    validations:
-      required: false
-  - type: textarea
-    id: summary
-    attributes:
-      label: "Summary"
-      description: Provide a brief explanation of the feature
-      placeholder: Describe in a few lines your feature request
+      label: Describe the feature
+      description: A clear and concise description of what you think would be a helpful addition to Nuxt, including the possible use cases and alternatives you have considered. If you have a working prototype or module that implements it, please include a link.
+      placeholder: Feature description
     validations:
       required: true
-  - type: textarea
-    id: basic_example
+  - type: checkboxes
+    id: additional-info
     attributes:
-      label: "Basic Example"
-      description: Indicate here some basic examples of your feature.
-      placeholder: A few specific words about your feature request.
-    validations:
-      required: true
-  - type: textarea
-    id: drawbacks
-    attributes:
-      label: "Drawbacks"
-      description: What are the drawbacks/impacts of your feature request ?
-      placeholder: Identify the drawbacks and impacts while being neutral on your feature request
-    validations:
-      required: true
-  - type: textarea
-    id: unresolved_question
-    attributes:
-      label: "Unresolved questions"
-      description: What questions still remain unresolved ?
-      placeholder: Identify any unresolved issues.
-    validations:
-      required: false
+      label: Additional information
+      description: Additional information that helps us decide how to proceed.
+      options:
+        - label: Would you be willing to help implement this feature?
+        - label: Does this feature have a potential to break existing features?

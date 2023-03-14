@@ -1,10 +1,22 @@
 name: "🐛 Bug Report"
-description: Create a new issue for a bug.
+description: Create a new issue for a bug!
 title: "[BUG] - <title>"
 labels: [
   "bug"
 ]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        When upgrading from an older version, make sure to first clear the /Config directory of any files.
+        This will ensure that the new version will generate new files with the correct settings.
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered.
+      options:
+        - label: I have searched the existing issues for a similar bug and it does not exist!
+          required: true
   - type: input
     id: version
     attributes:
@@ -16,15 +28,18 @@ body:
   - type: dropdown
     id: os
     attributes:
-      label: "On what platform is PlexRipper running?"
-      description: What is the impacted environment ?
-      multiple: true
+      label: "Platform"
+      description: "On what server/platform operating system is PlexRipper running?"
+      multiple: false
       options:
-        - Windows
+        - Unraid
         - Linux
+        - Windows
         - Mac
+        - Synology
+        - Custom (Specify in description)
     validations:
-      required: false
+      required: true
   - type: dropdown
     id: browsers
     attributes:
@@ -34,8 +49,8 @@ body:
       options:
         - Firefox
         - Chrome
-        - Safari
-        - Microsoft Edge
+        - Safari (Yeah good luck with that...)
+        - Microsoft Edge (LOL)
         - Opera
     validations:
       required: false
@@ -48,7 +63,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: reprod
+    id: reproduce-steps
     attributes:
       label: "Reproduction steps"
       description: Please enter the steps needed to reproduce the bug
@@ -77,4 +92,4 @@ body:
       description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks. Make sure to hide any credentials, tokens and other identifying information.
       render: bash
     validations:
-      required: false
+      required: true

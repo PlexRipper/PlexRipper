@@ -10,7 +10,7 @@ jobs:
   CreateDockerDevRelease:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@dev
+      - uses: actions/checkout@v3
       - name: Publish to Registry with dev tag
         uses: elgohr/Publish-Docker-Github-Action@v4
         with:

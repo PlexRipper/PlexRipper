@@ -7,9 +7,7 @@ labels: [
 body:
   - type: markdown
     attributes:
-      value: |
-        **When upgrading from an older version, make sure to first clear the `/Config` directory of any files.
-        This will ensure that the new version will generate new files with the correct settings.**
+      value: "**When upgrading from an older version, make sure to first clear the `/Config` directory of any files. This will ensure that the new version will generate new files with the correct settings.**"
   - type: checkboxes
     attributes:
       label: Checks

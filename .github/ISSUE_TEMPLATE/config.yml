@@ -2,12 +2,12 @@ blank_issues_enabled: false
 contact_links:
   - name: Getting Started Guide 🏃
     url: https://www.plexripper.rocks/guides/getting-started
-    about: Documentation - information about all of our containers.
+    about: Getting started with PlexRipper
 
   - name: Frequently Asked Questions 🤔
     url: https://www.plexripper.rocks/faq/
-    about: Frequently Asked Questions
+    about: Frequently Asked Questions about PlexRipper
 
   - name: Ask your own question ❓
     url: https://github.com/PlexRipper/PlexRipper/discussions
-    about: Ask a question or request support for using the template
+    about: Ask a question or request support for using PlexRipper

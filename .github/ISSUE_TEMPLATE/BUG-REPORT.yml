@@ -34,7 +34,7 @@ body:
         - Windows
         - Mac
         - Synology
-        - Custom (Specify in description)
+        - Other (Specify in description)
     validations:
       required: true
   - type: dropdown

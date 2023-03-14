@@ -12,21 +12,20 @@ public class UpdateDownloadTaskWithFileMergeProgressByIdCommandValidator : Abstr
 }
 
 public class UpdateDownloadTaskWithFileMergeProgressByIdCommandHandler : BaseHandler,
-    IRequestHandler<UpdateDownloadTaskWithFileMergeProgressByIdCommand, Result<DownloadTask>>
+    IRequestHandler<UpdateDownloadTaskWithFileMergeProgressByIdCommand, Result>
 {
     public UpdateDownloadTaskWithFileMergeProgressByIdCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
-    public async Task<Result<DownloadTask>> Handle(UpdateDownloadTaskWithFileMergeProgressByIdCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateDownloadTaskWithFileMergeProgressByIdCommand command, CancellationToken cancellationToken)
     {
         var fileMergeProgress = command.FileMergeProgress;
-        var downloadTaskDb = await _dbContext.DownloadTasks.AsTracking().FirstOrDefaultAsync(x => x.Id == fileMergeProgress.DownloadTaskId, cancellationToken);
 
-        downloadTaskDb.Percentage = fileMergeProgress.Percentage;
-        downloadTaskDb.DownloadSpeed = fileMergeProgress.TransferSpeed;
-        downloadTaskDb.DataTotal = fileMergeProgress.DataTotal;
+        await _dbContext.DownloadTasks.Where(x => x.Id == fileMergeProgress.DownloadTaskId)
+            .ExecuteUpdateAsync(p => p
+                .SetProperty(x => x.Percentage, fileMergeProgress.Percentage)
+                .SetProperty(x => x.FileTransferSpeed, fileMergeProgress.TransferSpeed)
+                .SetProperty(x => x.DataTotal, fileMergeProgress.DataTotal), cancellationToken);
 
-        await SaveChangesAsync(cancellationToken);
-
-        return Result.Ok(downloadTaskDb);
+        return Result.Ok();
     }
 }

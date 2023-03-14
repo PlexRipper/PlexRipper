@@ -25,6 +25,7 @@ public static partial class FakeData
                 : f.Random.Long(1, 10000000))
             .RuleFor(x => x.Percentage, _ => 0)
             .RuleFor(x => x.DownloadSpeed, _ => 0)
+            .RuleFor(x => x.FileTransferSpeed, _ => 0)
             .RuleFor(x => x.DownloadWorkerTasks, _ => new List<DownloadWorkerTask>())
             .RuleFor(x => x.FileName, _ => "file.mp4")
             .RuleFor(x => x.FileLocationUrl, _ => PlexMockServerConfig.FileUrl)

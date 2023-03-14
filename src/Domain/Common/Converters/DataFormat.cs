@@ -33,7 +33,7 @@ public static class DataFormat
     /// </summary>
     /// <param name="speed"></param>
     /// <returns></returns>
-    public static string FormatSpeedString(int speed)
+    public static string FormatSpeedString(long speed)
     {
         var kbSpeed = speed / 1024F;
         var mbSpeed = kbSpeed / 1024F;

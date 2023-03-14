@@ -19,6 +19,8 @@ public class FileMergeJob : IJob
     private readonly IFileMergeSystem _fileMergeSystem;
     private readonly INotificationsService _notificationsService;
     private readonly IFileMergeStreamProvider _fileMergeStreamProvider;
+    private readonly Subject<long> _bytesReceivedProgress = new();
+    private readonly TaskCompletionSource<object> _progressCompletionSource = new();
 
     public FileMergeJob(
         ILog log,
@@ -91,31 +93,12 @@ public class FileMergeJob : IJob
                     return;
                 }
 
-            var transferStarted = DateTime.UtcNow;
-            var _timeContext = new EventLoopScheduler();
-            var _bytesReceivedProgress = new Subject<long>();
+            Stream outputStream = null;
+
             try
             {
                 // Create FileMergeProgress from bytes received progress
-                _bytesReceivedProgress
-                    .TakeUntil(x => x == fileTask.FileSize)
-                    .Sample(TimeSpan.FromSeconds(1), _timeContext)
-                    .Select(dataTransferred =>
-                    {
-                        var elapsedTime = DateTime.UtcNow.Subtract(transferStarted);
-                        return new FileMergeProgress
-                        {
-                            Id = fileTask.Id,
-                            DataTransferred = dataTransferred,
-                            DataTotal = fileTask.FileSize,
-                            DownloadTaskId = fileTask.DownloadTaskId,
-                            PlexLibraryId = fileTask.DownloadTask.PlexLibraryId,
-                            PlexServerId = fileTask.DownloadTask.PlexServerId,
-                            TransferSpeed = DataFormat.GetTransferSpeed(dataTransferred, elapsedTime.TotalSeconds),
-                        };
-                    })
-                    .SelectMany(async data => await _mediator.Publish(new FileMergeProgressNotification(data), token).ToObservable())
-                    .Subscribe();
+                SetupSubscription(fileTask, token);
 
                 var streamResult = await _fileMergeStreamProvider.OpenOrCreateMergeStream(fileTask.DestinationFilePath);
                 if (streamResult.IsFailed)
@@ -124,29 +107,28 @@ public class FileMergeJob : IJob
                     return;
                 }
 
-                // Merge files
-                var outputStream = streamResult.Value;
+                outputStream = streamResult.Value;
 
                 if (EnvironmentExtensions.IsIntegrationTestMode())
                     outputStream = new ThrottledStream(streamResult.Value, 5000);
 
-                _log.Debug("Combining {FilePathsCount} into a single file", fileTask.FilePaths.Count);
+                _log.Here().Debug("Starting file merge process for {FilePathsCount} parts into a file {FileName}", fileTask.FilePaths.Count, fileTask.FileName);
 
                 await _fileMergeStreamProvider.MergeFiles(fileTask.FilePaths, outputStream, _bytesReceivedProgress, token);
-
-                await outputStream.DisposeAsync();
             }
             catch (Exception e)
             {
                 await _notificationsService.SendResult(Result.Fail(new ExceptionalError(e)).LogError());
             }
-
-            // Ensure the progress subscription has finished
-            await Task.Delay(1000, token);
+            finally
+            {
+                if (outputStream != null)
+                    await outputStream.DisposeAsync();
+            }
 
             // Clean-up
             _bytesReceivedProgress.OnCompleted();
-            _timeContext.Dispose();
+            await _progressCompletionSource.Task;
             _bytesReceivedProgress.Dispose();
             _log.Here().Information("Finished combining {FilePathsCount} files into {FileTaskFileName}", fileTask.FilePaths.Count, fileTask.FileName);
 
@@ -156,5 +138,41 @@ public class FileMergeJob : IJob
         {
             _log.Error(e);
         }
+    }
+
+    private void SetupSubscription(DownloadFileTask fileTask, CancellationToken token)
+    {
+        var timeContext = new EventLoopScheduler();
+        var transferStarted = DateTime.UtcNow;
+
+        _bytesReceivedProgress
+            .Sample(TimeSpan.FromSeconds(1), timeContext)
+            .Select(dataTransferred =>
+            {
+                var elapsedTime = DateTime.UtcNow.Subtract(transferStarted);
+                return new FileMergeProgress
+                {
+                    Id = fileTask.Id,
+                    DataTransferred = dataTransferred,
+                    DataTotal = fileTask.FileSize,
+                    DownloadTaskId = fileTask.DownloadTaskId,
+                    PlexLibraryId = fileTask.DownloadTask.PlexLibraryId,
+                    PlexServerId = fileTask.DownloadTask.PlexServerId,
+                    TransferSpeed = DataFormat.GetTransferSpeed(dataTransferred, elapsedTime.TotalSeconds),
+                };
+            })
+            .SelectMany(async data => await _mediator.Publish(new FileMergeProgressNotification(data), token).ToObservable())
+            .Subscribe(
+                _ => { },
+                ex =>
+                {
+                    _log.Error(ex);
+                    _progressCompletionSource.SetException(ex);
+                },
+                () =>
+                {
+                    _progressCompletionSource.SetResult(true);
+                    timeContext.Dispose();
+                });
     }
 }

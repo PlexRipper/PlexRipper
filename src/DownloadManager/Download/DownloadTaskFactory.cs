@@ -503,9 +503,12 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             return downloadFolder.ToResult();
 
         // Get Plex libraries
-        var plexLibraries = await _mediator.Send(new GetAllPlexLibrariesQuery(true));
-        if (plexLibraries.IsFailed)
-            return plexLibraries.ToResult();
+        var plexLibrariesResult = await _mediator.Send(new GetAllPlexLibrariesQuery(true));
+        if (plexLibrariesResult.IsFailed)
+            return plexLibrariesResult.ToResult();
+
+        var plexLibraries = plexLibrariesResult.Value;
+        var plexServers = plexLibraries.Select(x => x.PlexServer).DistinctBy(x => x.Id).ToList();
 
         // Get Plex libraries
         var folderPaths = await _mediator.Send(new GetAllFolderPathsQuery());
@@ -523,8 +526,9 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             {
                 downloadTask.DownloadFolderId = downloadFolder.Value.Id;
                 downloadTask.DownloadFolder = downloadFolder.Value;
+                downloadTask.PlexServer = plexServers.Find(x => x.Id == downloadTask.PlexServerId);
                 downloadTask.ServerMachineIdentifier = downloadTask.PlexServer.MachineIdentifier;
-                var plexLibrary = plexLibraries.Value.Find(x => x.Id == downloadTask.PlexLibraryId);
+                var plexLibrary = plexLibraries.Find(x => x.Id == downloadTask.PlexLibraryId);
                 if (plexLibrary is not null)
                 {
                     if (plexLibrary.DefaultDestinationId is not null)
@@ -609,7 +613,8 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                 path = Path.Join(_pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1]));
                 break;
             case PlexMediaType.Episode:
-                path = Path.Join(_pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1]), _pathSystem.SanitizePath(titles[2]));
+                // Since the episode can be multiple parts, we need put that in a separate folder
+                path = Path.Join(_pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1]),  forDownloadFolder ? _pathSystem.SanitizePath(titles[2]) : "");
                 break;
             default:
                 path = Path.Join(downloadTaskTitle);

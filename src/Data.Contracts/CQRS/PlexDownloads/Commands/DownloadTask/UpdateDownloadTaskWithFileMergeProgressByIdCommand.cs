@@ -4,7 +4,7 @@ using PlexRipper.Domain;
 
 namespace Data.Contracts;
 
-public class UpdateDownloadTaskWithFileMergeProgressByIdCommand : IRequest<Result<DownloadTask>>
+public class UpdateDownloadTaskWithFileMergeProgressByIdCommand : IRequest<Result>
 {
     public FileMergeProgress FileMergeProgress { get; }
 

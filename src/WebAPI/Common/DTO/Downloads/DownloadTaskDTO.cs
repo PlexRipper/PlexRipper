@@ -42,6 +42,8 @@ public class DownloadTaskDTO
 
     public int DownloadSpeed { get; set; }
 
+    public int FileTransferSpeed { get; set; }
+
     public long DataReceived { get; set; }
 
     public long DataTotal { get; set; }
@@ -76,13 +78,11 @@ public class DownloadTaskDTO
     /// The nested <see cref="DownloadTask"/> used for seasons and episodes.
     /// "Required = Required.Default" is used for ensuring it's optional in the Typescript generating.
     /// </summary>
-
     public List<DownloadTaskDTO> Children { get; set; }
 
     /// <summary>
     /// The actions that can be taken on this <see cref="DownloadTask"/>.
     /// This is filled by the front-end and depends on the DownloadStatus
     /// </summary>
-
     public string[] Actions { get; set; }
 }

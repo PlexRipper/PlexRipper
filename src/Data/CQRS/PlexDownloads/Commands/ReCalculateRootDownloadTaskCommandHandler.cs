@@ -34,9 +34,10 @@ public class ReCalculateRootDownloadTaskCommandHandler : BaseHandler,
                 SetDownloadStatus(downloadTaskChild);
 
             downloadTask.DownloadStatus = DownloadTaskActions.Aggregate(downloadTask.Children.Select(x => x.DownloadStatus).ToList());
-            downloadTask.DownloadSpeed = (int)downloadTask.Children.Average(x => x.DownloadSpeed);
+            downloadTask.DownloadSpeed = downloadTask.Children.Sum(x => x.DownloadSpeed);
+            downloadTask.FileTransferSpeed = downloadTask.Children.Sum(x => x.FileTransferSpeed);
             downloadTask.Percentage = (int)downloadTask.Children.Average(x => x.Percentage);
-            downloadTask.DataReceived = (int)downloadTask.Children.Sum(x => x.DataReceived);
+            downloadTask.DataReceived = downloadTask.Children.Sum(x => x.DataReceived);
         }
 
         SetDownloadStatus(downloadTaskDb);

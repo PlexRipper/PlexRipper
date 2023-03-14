@@ -2,18 +2,30 @@
 
 WORK IN PROGRESS
 
+This is most, not all, of the many changes that have been made in this version.
+
 ### Added
  - Cypress Front-end testing
 
 ### Changed
- - Each PlexServer now has multiple connections available which can be chosen individually, this should solve any proxy and connection issues with servers.
- - Each PlexServer can now have a preferred connection that can be set in the server settings 
- - Changed the infrastructure for the download and fileMerge process to be hosted in the Quartz Background services
- - Big re-organization of the PlexAccount setup process
+ - Each PlexServer now has multiple connections available which can be chosen individually, this should solve proxy and connection issues with servers.
+ - Each PlexServer can now have a preferred connection that can be set in the server settings.
+ - Changed the infrastructure for the download and fileMerge process to be hosted in the Quartz Background services.
+ - Big re-organization of the PlexAccount setup process.
+ - Upgraded to .NET 7.0 and Entity Framework 7.0, as well as many other dependencies.
 
 ### Fixed
  - Fixed the two-factor authentication not working due to the Plex error not being passed on from the http client
  - Fixed the front-end page data not refreshing when deleting an PlexAccount
+ - Fixed download process not working when the PlexServer is behind a proxy
+ - Fixed the timeout issue when communicating with a big PlexServer, it's currently 60 seconds before it times out.
+ - Fixed "cannot access the file" exceptions which were due to resources not being disposed correctly.
+
+### Optimizations
+ - Optimized the token retrieval process for Downloads, this should make downloads more resilient to token refreshes.
+ - Optimized the download progress to the front-end, this should make the download progress more accurate and less laggy.
+ - Optimized all the project to a vertical slice architecture, this should make the project more maintainable and easier to extend.
+ - Optimized the logging to be more consistent and easier to read.
 
 ## [0.9.1]
 
@@ -46,7 +58,7 @@ Note: This, by a long shot, doesn't encompasses all the changes and fixes that h
  - Added a loading icon to the button when checking the server status in the server configuration
  - The server command "Re-sync Library media" now displays a loading animation.
  - Replaced every button with a more performant and consistent button construction
- - Thumbnails displayed for movies and tvShows on the library pages in poster mode are now displayed from cache when navigating around PlexRipper. 
+ - Thumbnails displayed for movies and tvShows on the library pages in poster mode are now displayed from cache when navigating around PlexRipper.
  - Rewrote the code for the entire download process to be more stable and allow for future features
  - Rewrote the user settings modules (PlexRipperConfig.json) which is now easy to extend and more resilient.
  - Many performance improvements!

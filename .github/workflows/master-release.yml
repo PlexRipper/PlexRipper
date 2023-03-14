@@ -2,7 +2,7 @@ name: Publish Docker image on push 'master' branch
 
 on:
   release:
-    types: [released]
+    types: [released] # Should only trigger on published releases, and non pre-releases/drafts
 
 jobs:
   # Build Docker Image
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Debug tag_name
+      - name: Stable tag_name
         run: echo ${{ github.event.release.tag_name }}
       - name: Publish to Docker with latest and version tag
         uses: elgohr/Publish-Docker-Github-Action@v4

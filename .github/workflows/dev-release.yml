@@ -4,7 +4,11 @@ on:
   push:
     branches:
         - dev
-
+    paths-ignore:
+      - '.github/**'
+      - '.idea/**'
+      - '.run/**'
+      - '.vscode/**'
 jobs:
   # Build Docker Image
   CreateDockerDevRelease:

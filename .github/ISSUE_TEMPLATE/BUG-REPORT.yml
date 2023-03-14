@@ -35,8 +35,8 @@ body:
         - Mac
         - Synology
         - Custom (Specify in description)
-      validations:
-        required: true
+    validations:
+      required: true
   - type: dropdown
     id: browsers
     attributes:

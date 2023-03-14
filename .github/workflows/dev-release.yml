@@ -2,15 +2,15 @@ name: Create PlexRipper Dev Container Release
 
 on:
   push:
-    tags:
-      - "*-dev"
+    branches:
+        - dev
 
 jobs:
   # Build Docker Image
   CreateDockerDevRelease:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@dev
       - name: Publish to Registry with dev tag
         uses: elgohr/Publish-Docker-Github-Action@v4
         with:

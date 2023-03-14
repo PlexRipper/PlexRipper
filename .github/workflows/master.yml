@@ -2,7 +2,7 @@ name: Publish Docker image on push 'master' branch
 
 on:
   release:
-    types: [published]
+    types: [released]
 
 jobs:
   # Build Docker Image

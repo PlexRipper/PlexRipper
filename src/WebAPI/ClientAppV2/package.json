@@ -22,6 +22,8 @@
     "rxjs": "^7.5.5"
   },
   "devDependencies": {
+    "@nuxt/devtools": "^0.2.5",
+    "@quasar/extras": "^1.15.11",
     "@types/node": "^18.15.3",
     "@vueuse/core": "^9.13.0",
     "@vueuse/nuxt": "^9.13.0",

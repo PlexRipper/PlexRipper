@@ -1,4 +1,3 @@
-import {resolve} from 'path';
 import {fileURLToPath} from "url";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
@@ -21,6 +20,7 @@ export default defineNuxtConfig({
     },
     modules: [
         '@vueuse/nuxt',
+        '@nuxt/devtools',
         'nuxt-quasar-ui',
     ],
     quasar: {
@@ -33,7 +33,7 @@ export default defineNuxtConfig({
             // string | null: Auto-import roboto font. https://quasar.dev/style/typography#default-font
             font: null,
             // string[]: Auto-import webfont icons. Usage: https://quasar.dev/vue-components/icon#webfont-usage
-            fontIcons: [],
+            fontIcons: ['material-icons'],
             // string[]: Auto-import svg icon collections. Usage: https://quasar.dev/vue-components/icon#svg-usage
             svgIcons: [],
             // string[]: Auto-import animations from 'animate.css'. Usage: https://quasar.dev/options/animations#usage

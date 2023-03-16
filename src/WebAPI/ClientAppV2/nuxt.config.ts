@@ -1,10 +1,27 @@
+import {resolve} from 'path';
+import {fileURLToPath} from "url";
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+    ssr: false,
+    srcDir: 'src',
     devServer: {
         port: 3001,
     },
+    runtimeConfig: {
+        // Private config that is only available on the server
+        apiSecret: '123',
+        // Config within public will be also exposed to the client
+        public: {
+            nodeEnv: process.env.NODE_ENV || 'development',
+            version: process.env.npm_package_version || '?',
+            baseURL: process.env.BASE_URL || 'http://localhost:5000',
+            baseApiPath: '/api'
+        }
+    },
     modules: [
-        'nuxt-quasar-ui'
+        '@vueuse/nuxt',
+        'nuxt-quasar-ui',
     ],
     quasar: {
         // Plugins: https://quasar.dev/quasar-plugins
@@ -27,5 +44,36 @@ export default defineNuxtConfig({
         // Doc: https://typescript.nuxtjs.org/guide/setup.html#configuration
         // Packages,  @types/node, vue-tsc and typescript are required
         typeCheck: true,
-    }
+        strict: true,
+    },
+    alias: {
+        // Doc: https://nuxt.com/docs/api/configuration/nuxt-config#alias
+        "@class": fileURLToPath(new URL('./src/types/class/', import.meta.url)),
+        "@dto": fileURLToPath(new URL('./src/types/dto/', import.meta.url)),
+        "@api": fileURLToPath(new URL('./src/types/api/', import.meta.url)),
+        '@const': fileURLToPath(new URL('./src/types/const/', import.meta.url)),
+        "@buttons": fileURLToPath(new URL('./src/components/Buttons/', import.meta.url)),
+        "@api-urls": fileURLToPath(new URL('./src/types/const/api-urls.ts', import.meta.url)),
+        "@fixtures": fileURLToPath(new URL('../cypress/fixtures/', import.meta.url)),
+        "@services-test-base": fileURLToPath(new URL('./src/tests/services/_base/base.ts', import.meta.url)),
+        "@lib": fileURLToPath(new URL('./src/types/lib/', import.meta.url)),
+        '@service': fileURLToPath(new URL('./src/service/', import.meta.url)),
+        "@img": fileURLToPath(new URL('./src/assets/img/', import.meta.url)),
+        "@enums": fileURLToPath(new URL('./src/types/enums/', import.meta.url)),
+        "@mock": fileURLToPath(new URL('./src/mock-data/', import.meta.url)),
+        "@interfaces": fileURLToPath(new URL('./src/types/interfaces/', import.meta.url)),
+        "@components": fileURLToPath(new URL('./src/components/', import.meta.url)),
+        "@overviews": fileURLToPath(new URL('./src/components/overviews/', import.meta.url)),
+        "@mediaOverview": fileURLToPath(new URL('./src/components/MediaOverview/', import.meta.url)),
+        "@vTreeViewTable": fileURLToPath(new URL('./src/components/General/VTreeViewTable/', import.meta.url)),
+
+    },
+    /*
+	 ** Doc: https://nuxtjs.org/docs/configuration-glossary/configuration-telemetry
+	 */
+    telemetry: false,
+    /*
+     ** Customize the progress-bar color
+     */
+    // loading: false, // TODO Maybe better to re-enable based on how it looks
 })

@@ -1,0 +1,234 @@
+@import 'variables';
+
+/*
+v-app
+*/
+.v-application {
+  background-color: transparent !important;
+}
+
+/*
+grid
+*/
+.container {
+  .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+/**
+ * Temporary fix for breaking change in Vuetify v-grid
+ * (see : https://github.com/vuetifyjs/vuetify/issues/11408)
+ * TODO - remove this after migration
+ */
+.row:not([class*='my-']):not([class*='ma-']):not([class*='mt-']):not([class*='mb-']) {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/*
+v-sheet
+*/
+
+.v-sheet--outlined {
+  &.theme--dark {
+    @extend .default-border;
+  }
+
+  &.theme--light {
+    @extend .default-border;
+  }
+
+  &.v-toolbar {
+    &.theme--dark {
+      background: $dark-dialog-background-color;
+    }
+
+    &.theme--light {
+      background: $light-dialog-background-color;
+    }
+  }
+
+  &.v-card--hover:hover {
+    box-shadow: $box-shadow-hover;
+  }
+}
+
+/*
+v-data-table
+*/
+.v-data-table {
+  .v-data-table--fixed-header {
+    thead {
+      th {
+        background: transparent;
+      }
+    }
+  }
+
+  &.theme--dark,
+  tbody tr.v-data-table__selected {
+    @extend .no-background;
+  }
+
+  &.theme--light,
+  tbody tr.v-data-table__selected {
+    @extend .no-background;
+  }
+}
+
+/*
+v-dialog
+*/
+
+.v-dialog {
+  border-radius: 15px;
+  transition: 0.1s cubic-bezier(0.25, 0.8, 0.25, 1);
+  @extend .default-border;
+  @extend .default-shadow;
+
+  .v-card {
+    @extend .blur;
+    border-radius: 15px;
+
+    &.theme--dark {
+      background: $dark-dialog-background-color;
+    }
+
+    &.theme--light {
+      background: $light-dialog-background-color;
+    }
+  }
+}
+
+/*
+v-menu
+*/
+.v-menu__content {
+  @extend .blur;
+
+  .v-list {
+    &.theme--dark {
+      background: $dark-dialog-background-color;
+    }
+
+    &.theme--light {
+      background: $light-dialog-background-color;
+    }
+  }
+}
+
+/*
+v-expansion-panels
+*/
+.v-expansion-panels {
+  &.theme--dark {
+    .v-expansion-panel {
+      background: $dark-dialog-background-color;
+
+      .v-data-table,
+      .v-data-table--fixed-header thead th {
+        @extend .no-background;
+      }
+    }
+  }
+
+  &.theme--light {
+    .v-expansion-panel {
+      background: $light-dialog-background-color;
+
+      .v-data-table,
+      .v-data-table--fixed-header thead th {
+        @extend .no-background;
+      }
+    }
+  }
+}
+
+.v-text-field--solo {
+  &.theme--dark {
+    .v-input__control > .v-input__slot {
+      background: $dark-theme-glass-background;
+    }
+  }
+}
+
+/*
+v-list
+ */
+.v-list {
+  &.theme--dark {
+    @extend .no-background;
+  }
+
+  &.theme--light {
+    @extend .no-background;
+  }
+
+  .v-list-item .v-list-item__title, .v-list-item .v-list-item__subtitle {
+    line-height: 2.0;
+  }
+}
+
+/*
+v-btn
+*/
+
+.v-btn:not(.v-btn--round).v-size--default {
+  min-width: 0;
+}
+
+.theme--dark.v-btn:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+  background-color: transparent;
+}
+
+.theme--light.v-btn:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+  background-color: transparent;
+}
+
+// Remove background color on button disabled
+.theme--dark.v-btn.v-btn--disabled:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+  background-color: transparent !important;
+}
+
+// Remove background color on button disabled
+.theme--light.v-btn.v-btn--disabled:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+  background-color: transparent !important;
+}
+
+/*
+v-card
+*/
+.theme--dark.v-card {
+  background-color: $dark-theme-glass-background;
+}
+
+.theme--light.v-card {
+  background-color: $light-theme-glass-background;
+}
+
+/*
+v-tabs
+*/
+.v-tabs--vertical {
+  .v-tab {
+    justify-content: left;
+  }
+}
+
+/*
+Transparent Background
+*/
+
+.theme--dark {
+  &.v-tabs > .v-tabs-bar {
+    @extend .no-background;
+  }
+
+  &.v-tabs-items {
+    @extend .no-background;
+  }
+}
+
+

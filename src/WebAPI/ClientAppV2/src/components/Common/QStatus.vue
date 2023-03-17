@@ -1,17 +1,18 @@
 <template>
-	<status-indicator class="mx-2" :status="value ? 'positive' : 'negative'" :pulse="pulse" />
+	<span class="status-indicator" v-if="pulse" :[status]="true" pulse/>
+	<span class="status-indicator" v-else :[status]="true"/>
 </template>
 
-<script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+<script setup lang="ts">
+// Stolen from: https://www.npmjs.com/package/vue-status-indicator
+const props = defineProps<{ value: boolean }>();
 
-@Component
-export default class Status extends Vue {
-	@Prop({ required: true, type: Boolean })
-	readonly value!: boolean;
+const status = computed(() => {
+	return props.value ? 'positive' : 'negative';
+});
 
-	get pulse(): boolean {
-		return this.value;
-	}
-}
+const pulse = computed(() => {
+	return props.value;
+});
+
 </script>

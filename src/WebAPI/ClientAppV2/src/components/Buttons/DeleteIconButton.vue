@@ -1,37 +1,28 @@
-<script lang="ts">
-import Vue, { CreateElement, VNode } from 'vue';
-import { RenderContext } from 'vue/types/options';
-import BaseButton, { IBaseButtonProps } from './BaseButton.vue';
+<template>
+    <BaseButton v-bind="props"/>
+</template>
 
-export default Vue.extend({
-	name: 'DeleteIconButton',
-	functional: true,
-	props: {
-		disabled: {
-			type: Boolean,
-		},
-		cy: {
-			type: String,
-			default: '',
-		},
-		iconOnly: {
-			type: Boolean,
-		},
-	},
-	render(h: CreateElement, context: RenderContext): VNode {
-		return h(BaseButton, {
-			...context.data,
-			props: {
-				...context.props,
-				outlined: true,
-				textId: 'delete',
-				icon: 'mdi-delete',
-				color: 'red',
-				iconOnly: true,
-				iconSize: 32,
-				height: 50,
-			} as Partial<IBaseButtonProps>,
-		});
-	},
-});
+<script setup lang="ts">
+import {withDefaults, defineProps} from 'vue';
+import BaseButton from "@buttons/BaseButton.vue";
+
+interface ConfirmBtnProps {
+    disabled?: boolean;
+    loading?: boolean;
+    icon?: string;
+    cy?: string;
+    label?: string;
+}
+
+const props = withDefaults(defineProps<ConfirmBtnProps>(), {
+    cy: '',
+    outlined: true,
+    textId: 'delete',
+    icon: 'mdi-delete',
+    color: 'red',
+    iconOnly: true,
+    iconSize: 32,
+    height: 50,
+})
+
 </script>

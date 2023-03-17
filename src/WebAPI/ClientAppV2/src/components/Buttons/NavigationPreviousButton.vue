@@ -1,31 +1,26 @@
-<script lang="ts">
-import Vue, { CreateElement, VNode } from 'vue';
-import { RenderContext } from 'vue/types/options';
-import BaseButton, { IBaseButtonProps } from './BaseButton.vue';
+<template>
+    <BaseButton v-bind="props"/>
+</template>
 
-export default Vue.extend({
-	name: 'NavigationPreviousButton',
-	functional: true,
-	props: {
-		disabled: {
-			type: Boolean,
-		},
-		cy: {
-			type: String,
-			default: '',
-		},
-	},
-	render(h: CreateElement, context: RenderContext): VNode {
-		return h(BaseButton, {
-			...context.data,
-			props: {
-				...context.props,
-				block: true,
-				outlined: true,
-				textId: 'back',
-				icon: 'mdi-arrow-left',
-			} as Partial<IBaseButtonProps>,
-		});
-	},
-});
+<script setup lang="ts">
+import {withDefaults, defineProps} from 'vue';
+import BaseButton from "@buttons/BaseButton.vue";
+
+interface CheckConnectionBtnProps {
+    disabled?: boolean;
+    loading?: boolean;
+    icon?: string;
+    cy?: string;
+    label?: string;
+}
+
+const props = withDefaults(defineProps<CheckConnectionBtnProps>(), {
+    width: 130,
+    cy: '',
+    block: true,
+    outlined: true,
+    textId: 'back',
+    icon: 'mdi-arrow-left',
+})
+
 </script>

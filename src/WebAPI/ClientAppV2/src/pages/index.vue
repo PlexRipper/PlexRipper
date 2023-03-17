@@ -12,7 +12,7 @@
             <q-btn color="black" label="Black"/>
         </div>
         <div>
-            <WarningButton/>
+            <WarningButton :width="500"/>
         </div>
     </div>
 </template>

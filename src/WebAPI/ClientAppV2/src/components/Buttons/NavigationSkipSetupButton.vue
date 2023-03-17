@@ -1,39 +1,25 @@
-<script lang="ts">
-import Vue, { CreateElement, VNode } from 'vue';
-import { RenderContext } from 'vue/types/options';
-import BaseButton, { IBaseButtonProps } from './BaseButton.vue';
+<template>
+    <BaseButton v-bind="props"/>
+</template>
 
-export default Vue.extend({
-	name: 'NavigationSkipSetupButton',
-	functional: true,
-	props: {
-		disabled: {
-			type: Boolean,
-		},
-		cy: {
-			type: String,
-			default: '',
-		},
-		width: {
-			type: Number,
-			default: 36,
-		},
-		block: {
-			type: Boolean,
-			default: true,
-		},
-	},
-	render(h: CreateElement, context: RenderContext): VNode {
-		return h(BaseButton, {
-			...context.data,
-			props: {
-				...context.props,
-				outlined: true,
-				textId: 'skip-setup',
-				icon: 'mdi-debug-step-over',
-				iconAlign: 'Right',
-			} as Partial<IBaseButtonProps>,
-		});
-	},
-});
+<script setup lang="ts">
+import {withDefaults, defineProps} from 'vue';
+import BaseButton from "@buttons/BaseButton.vue";
+
+interface CheckConnectionBtnProps {
+    disabled?: boolean;
+    loading?: boolean;
+    icon?: string;
+    cy?: string;
+    label?: string;
+}
+
+const props = withDefaults(defineProps<CheckConnectionBtnProps>(), {
+    width: 130,
+    cy: '',
+    textId: 'skip-setup',
+    icon: 'mdi-debug-step-over',
+    iconAlign: 'Right',
+})
+
 </script>

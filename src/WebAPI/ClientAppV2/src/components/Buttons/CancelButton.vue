@@ -1,31 +1,23 @@
-<script setup lang="ts">
-import Vue, {CreateElement, VNode} from 'vue';
-import {RenderContext} from 'vue/types/options';
-import BaseButton, {IBaseButtonProps} from './BaseButton.vue';
+<template>
+    <BaseButton v-bind="props"/>
+</template>
 
-export default Vue.extend({
-    name: 'CancelButton',
-    functional: true,
-    props: {
-        cy: {
-            type: String,
-            default: '',
-        },
-        width: {
-            type: Number,
-            default: 130,
-        },
-    },
-    render(h: CreateElement, context: RenderContext): VNode {
-        return h(BaseButton, {
-            ...context.data,
-            props: {
-                ...context.props,
-                outlined: true,
-                textId: 'cancel',
-                icon: 'mdi-cancel',
-            } as Partial<IBaseButtonProps>,
-        });
-    },
-});
+<script setup lang="ts">
+import {defineProps, withDefaults} from 'vue';
+
+
+interface CancelBtnProps {
+    width?: number;
+    icon?: string;
+    cy?: string;
+    label?: string;
+}
+
+const props = withDefaults(defineProps<CancelBtnProps>(), {
+    width: 130,
+    icon: 'mdi-alert',
+    cy: '',
+    label: 'Warning',
+    textId: 'cancel',
+})
 </script>

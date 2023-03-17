@@ -1,30 +1,24 @@
-<script lang="ts">
-import Vue, { CreateElement, VNode } from 'vue';
-import { RenderContext } from 'vue/types/options';
-import BaseButton, { IBaseButtonProps } from './BaseButton.vue';
+<template>
+    <BaseButton v-bind="props"/>
+</template>
 
-export default Vue.extend({
-	name: 'DebugButton',
-	functional: true,
-	props: {
-		cy: {
-			type: String,
-			default: '',
-		},
-		textId: {
-			type: String,
-			default: '',
-		},
-	},
-	render(h: CreateElement, context: RenderContext): VNode {
-		return h(BaseButton, {
-			...context.data,
-			props: {
-				...context.props,
-				outlined: true,
-				icon: 'mdi-bug-outline',
-			} as Partial<IBaseButtonProps>,
-		});
-	},
-});
+<script setup lang="ts">
+import {withDefaults, defineProps} from 'vue';
+import BaseButton from "@buttons/BaseButton.vue";
+
+interface ConfirmBtnProps {
+    disabled?: boolean;
+    loading?: boolean;
+    icon?: string;
+    cy?: string;
+    label?: string;
+}
+
+const props = withDefaults(defineProps<ConfirmBtnProps>(), {
+    width: 130,
+    cy: '',
+    outlined: true,
+    icon: 'mdi-bug-outline',
+})
+
 </script>

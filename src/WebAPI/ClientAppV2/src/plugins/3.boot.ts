@@ -1,8 +1,8 @@
 import Log from 'consola';
-import {GlobalService} from "@service";
+import { GlobalService } from '@service';
 
 export default defineNuxtPlugin(() => {
-    Log.info('Setup script ran')
+	Log.info('Setup script ran');
 
-    GlobalService.setupServices();
-})
+	GlobalService.setupServices();
+});

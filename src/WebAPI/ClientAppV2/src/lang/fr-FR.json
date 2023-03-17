@@ -1,460 +1,460 @@
 {
-    "components": {
-        "account-card": {
-            "clear-notifications": "Effacer tout les notifications",
-            "no-account-name": "Ajouter un surnom à ce compte",
-            "no-notifications": "Pas de notification disponible"
-        },
-        "account-dialog": {
-            "add-account-title": "",
-            "edit-account-title": "Modifier le compte Plex"
-        },
-        "account-setup-progress": {
-            "no-server-warning": "Le compte {displayName} n'a pas accès à ce serveur.",
-            "retry-connection": "Tentative de nouvelle tentative de connexion, { attemptIndex } dans { attemptCount } tentative.",
-            "server-connectable": "Serveur inaccessible!",
-            "server-un-connectable": "Impossible de joindre le serveur."
-        },
-        "account-verification-code-dialog": {
-            "error": "",
-            "sub-title": "",
-            "title": ""
-        },
-        "app-bar": {
-            "no-accounts": "Pas de compte disponible"
-        },
-        "details-overview": {
-            "database-id": "identifiant de la base de donnée:",
-            "duration": "Durée:"
-        },
-        "directory-browser": {
-            "path": "Chemin d'accès",
-            "select-path": "Sélectionner {pathName}",
-            "type": "Type"
-        },
-        "download-confirmation": {
-            "creating-tasks": "Création de tâches de téléchargement {current} de {total}",
-            "description": "Plex Ripper va commencera à télécharger ce qui suit:",
-            "header": "Êtes vous sûr?",
-            "total-size": "Taille Total:"
-        },
-        "download-details-dialog": {
-            "overview": {
-                "destination-path": "Dossier de destination",
-                "download-path": "Dossier de téléchargement",
-                "download-url": "URL de téléchargement",
-                "file-name": "Nom du fichier",
-                "status": "Statut"
-            }
-        },
-        "media-overview": {
-            "is-refreshing": "Rafraîchir la bibliothèque \"{library}\" de donnée depuis le {server}",
-            "no-data": "Impossible de trouver une bibliothèque disponible.",
-            "retrieving-library": "Récupérer la bibliothèque de la base de données PlexRipper!"
-        },
-        "navigation-drawer": {
-            "accounts": "Comptes",
-            "advanced": "Avancée",
-            "debug": "Déboguer",
-            "downloads": "Téléchargements",
-            "paths": "Chemins",
-            "settings": "Paramètres",
-            "ui": "Interface utilisateur"
-        },
-        "notifications-drawer": {
-            "clear-notifications": "Effacer tout les notifications",
-            "no-notifications": "Pas de notification disponible"
-        },
-        "paths-custom-overview": {
-            "no-paths": "Chemin d'accès invalide"
-        },
-        "server-dialog": {
-            "header": "{serverName} configuration",
-            "tabs": {
-                "download-destinations": {
-                    "header": "Destination de téléchargement"
-                },
-                "server-commands": {
-                    "header": "Commands du serveur",
-                    "inspect-server": "",
-                    "re-sync-server": "Resyncroniser les bibliothèques"
-                },
-                "server-config": {
-                    "download-speed-limit": "Télécharger la limite de vitesse",
-                    "header": ""
-                },
-                "server-connections": {
-                    "download-speed-limit": "",
-                    "header": "",
-                    "section-header": "Sélectionnez la connexion serveur préférée :"
-                },
-                "server-data": {
-                    "created-on": "Créer le",
-                    "current-status": "Statut actuel",
-                    "header": "Donnée Serveur",
-                    "last-checked-on": "Dermière vérification le",
-                    "last-updated-on": "Dernière mis à jour le",
-                    "machine-id": "Identifiant Machine",
-                    "plex-version": "Plex Version",
-                    "device": "Dispositif",
-                    "platform": "Plate-forme",
-                    "platform-version": "Version de la plate-forme"
-                }
-            },
-            "no-servers-error": ""
-        },
-        "server-drawer": {
-            "no-libraries": "Pas de bibliothèques disponible",
-            "no-servers": {
-                "description": "Vérifier que vous avez un compte Plex enregistré dans les paramètres et que ce compte a bien accès au serveur Plex en haut à droit dans le selecteur de compte.",
-                "header": "Il n'y a pas de serveur disponible!"
-            }
-        },
-        "check-server-connections-progress": {
-            "checking": "",
-            "completed": "Inspection terminée de {length}  serveurs Plex!"
-        }
-    },
-    "confirmation": {
-        "delete-account": {
-            "text": "Cela supprimera ce compte Plex de Plex Ripper !\n\nCela supprimera également tous les serveurs partagés Plex inaccessibles, les bibliothèques Plex et tous les médias qu'ils contiennent. Tous les téléchargements actifs démarrés ou mis en file d'attente avec ce compte seront annulés et supprimés. Les téléchargements terminés resteront intacts.",
-            "title": "Êtes vous sûr ?",
-            "warning": "Cela peut prendre environ 5 minutes ou plus, puis cette fenêtre se fermera d'elle-même!"
-        },
-        "reset-db": {
-            "text": "Ca va backuper votre base de donnée vers \"config/Database Backup/\" et en créer une nouvelle, après vous serrez redirigé vers la page de configuration. Ca ne réinitialisera pas les paramètres qui sont stocké dans \"config/PlexRipperSettings.json\"",
-            "title": "Êtes vous sûr ?"
-        },
-        "skip-setup": {
-            "text": "Ca ignorera le processus de configuration et vous devrez configurer PlexRipper manuellement.",
-            "title": "Êtes vous sûr ?"
-        }
-    },
-    "general": {
-        "alerts": {
-            "disabled-paths": "Modifier les chemins est impossible pendant un téléchargement. Vérifier que tout vos téléchargement sont arrété !",
-            "invalid-directory": "Dossier n'est pas un chemin d'accès valide !"
-        },
-        "commands": {
-            "add-alert": "Ajouter une Alert",
-            "back": "Retour",
-            "cancel": "Annuler",
-            "check-server-status": "Vérifier le statut du serveur",
-            "close": "Fermé",
-            "confirm": "Confirmer",
-            "create": "Créer",
-            "delete": "Supprimer",
-            "disabled": "Désactiver",
-            "enabled": "Activer",
-            "error": "Erreur",
-            "finish-setup": "Terminer le configuration",
-            "go-to-setup-page": "Aller à la page de configuration",
-            "hide": "Cacher",
-            "check-connection": "Vérifier la connexion",
-            "next": "Suivant",
-            "not-validated": "Pas validaté",
-            "reset": "Réinitialiser",
-            "reset-db": "Réinitialiser la base de donnée",
-            "save": "Sauvegarder",
-            "skip-setup": "Ignorer le configuration",
-            "sync-server-libraries": "Synchroniser les bibliothèques du serveur",
-            "unknown": "Inconnu",
-            "update": "Mettre à jour",
-            "validate": "Valider",
-            "validated": "Validaté",
-            "missing-text": "",
-            "inspect-server": "Inspecter le serveur"
-        },
-        "name": "PlexRipper",
-        "name-version": "PlexRipper - V{version}",
-        "units": {
-            "per-second": "/s"
-        },
-        "tooltip": {
-            "local-connection": "Connexion locale",
-            "public-connection": "Connexion publique"
-        }
-    },
-    "help": {
-        "account-form": {
-            "display-name": {
-                "label": "Nom affiché",
-                "text": "Le nom utilisé pour afficher ce compte sur l'interface.",
-                "title": "Nom affiché"
-            },
-            "is-enabled": {
-                "label": "est Activé",
-                "text": "Ce compte doit-il être utilisé pour télécharger et récupérer des données à partir des serveurs de Plex ?",
-                "title": "est Activé"
-            },
-            "is-main": {
-                "label": "Est principal",
-                "text": "Un compte principal est un compte qui va posséder vos bibliothèques Plex. S'il existe un compte normal, qui a accès à la même bibliothèque Plex d'un serveur Plex partagé qu'un compte principal, il sera utilisé en premier pour protéger le compte principal.",
-                "title": "Est principal"
-            },
-            "password": {
-                "label": "Mot de passe",
-                "text": "Le mot de passe de l'utilisateur Plex",
-                "title": "Mot de passe"
-            },
-            "username": {
-                "label": "Nom",
-                "text": "Le nom de l'utilisateur Plex",
-                "title": "Nom"
-            }
-        },
-        "default": {
-            "label": "Label inconnu",
-            "text": "Le dossier langue où ce texte est stocké est incorrecte !",
-            "title": "Unknown help"
-        },
-        "server-dialog": {
-            "server-config": {
-                "download-speed-limit": {
-                    "label": "",
-                    "text": "",
-                    "title": ""
-                }
-            },
-            "server-commands": {
-                "inspect-server": {
-                    "text": "L'inspection du serveur vérifiera toutes les connexions et vérifiera si toutes les bibliothèques sont toujours accessibles.",
-                    "title": "Inspection du serveur Plex",
-                    "label": "Inspecter le serveur"
-                },
-                "sync-server-libraries": {
-                    "text": "",
-                    "title": "",
-                    "label": "Resyncroniser les bibliothèques"
-                }
-            }
-        },
-        "settings": {
-            "advanced": {
-                "download-manager-section": {
-                    "download-segments": {
-                        "label": "Télécharger par Segments",
-                        "text": "PlexRipper supporte le téléchargement multi-threaded et vous pouvez diviser le media qui va-t-être téléchargé en different parties individuelle. Cela a tendance à augmenter la vitesse de téléchargement globale, mais l'inconvénient est qu'il faudra plus de temps pour fusionner les différentes parties en un seul fichier multimédia complet.\n\nLa définition de cette valeur sur 1 désactivera le téléchargement multithread et téléchargera le fichier multimédia en tant que un dossier complet. Le nombre de segments de téléchargement n'a aucune influence sur la vitesse de fusion du fichier multimédia.",
-                        "title": "Télécharger par Segments"
-                    }
-                },
-                "reset-db": {
-                    "label": "Réinitialiser la base de donnée",
-                    "text": "Réinitialiser la base de donnée et créer une backup de l'ancienne.",
-                    "title": "Réinitialiser la base de donnée"
-                },
-                "setup-section": {
-                    "go-to-setup-page": {
-                        "label": "Aller à la page de configuration",
-                        "text": "Vous fera à la page de configuration.",
-                        "title": "Aller à la page de configuration"
-                    }
-                }
-            },
-            "paths": {
-                "download-folder": {
-                    "label": "Dossier de téléchargement",
-                    "text": "Le dossier où tout les fichiers vont être téléchargé en plusieurs parties avant d'être réassemblé en un seul dans le dossier de destination.",
-                    "title": "Dossier de téléchargement"
-                },
-                "movie-folder": {
-                    "label": "Dossier des film",
-                    "text": "Le dossier par défaut des films quant aucun dossier personnalisé n'a été sélectionné.",
-                    "title": "Dossier des film"
-                },
-                "tv-show-folder": {
-                    "label": "Dossier des série",
-                    "text": "Le dossier par défaut des séries quant aucun dossier personnalisé n'a été sélectionné.",
-                    "title": "Dossier des série"
-                }
-            },
-            "ui": {
-                "confirmation-settings": {
-                    "download-episode-confirmation": {
-                        "label": "Demander confirmation du téléchargement de l'épisode",
-                        "text": "",
-                        "title": "Demander confirmation du téléchargement de l'épisode"
-                    },
-                    "download-movie-confirmation": {
-                        "label": "Demander confirmation du téléchargement du film",
-                        "text": "",
-                        "title": "Demander confirmation du téléchargement du film"
-                    },
-                    "download-season-confirmation": {
-                        "label": "Demander confirmation du téléchargement de la saison",
-                        "text": "",
-                        "title": "Demander confirmation du téléchargement de la saison"
-                    },
-                    "download-tvshow-confirmation": {
-                        "label": "Demander confirmation du téléchargement de la séries",
-                        "text": "",
-                        "title": "Demander confirmation du téléchargement de la séries"
-                    }
-                },
-                "date-and-time": {
-                    "long-date-format": {
-                        "label": "Date au format long",
-                        "text": "",
-                        "title": ""
-                    },
-                    "short-date-format": {
-                        "label": "Date au format court",
-                        "text": "",
-                        "title": ""
-                    },
-                    "show-relative-dates": {
-                        "label": "Afficher les dates relatives",
-                        "text": "",
-                        "title": ""
-                    },
-                    "time-format": {
-                        "label": "Format de la date",
-                        "text": "",
-                        "title": ""
-                    },
-                    "time-zone": {
-                        "label": "Time Zone",
-                        "text": "",
-                        "title": ""
-                    }
-                },
-                "language": {
-                    "language-selection": {
-                        "label": "Language",
-                        "text": "",
-                        "title": ""
-                    }
-                }
-            }
-        }
-    },
-    "pages": {
-        "downloads": {
-            "no-downloads": "Il n'y a actuellement aucun téléchargement en progréssion"
-        },
-        "error": {
-            "header": "Erreur!",
-            "return-link": "Retourner à la page d'accueil"
-        },
-        "home": {
-            "header": "CA MARCHE !",
-            "setup-question": ""
-        },
-        "movies": {
-            "index": {
-                "header": "Aperçu des films",
-                "sub-header": "Sélectionnez une bibliothèque sur le côté droit"
-            }
-        },
-        "music": {
-            "_musicId": {
-                "header": "La bibliothèque Musique n'est malheureusement pas encore supporté :("
-            },
-            "index": {
-                "header": "La bibliothèque Musique n'est malheureusement pas encore supporté :("
-            }
-        },
-        "settings": {
-            "accounts": {
-                "header": "Compte Plex"
-            },
-            "advanced": {
-                "database": {
-                    "header": "Base de donnée"
-                },
-                "download-manager": {
-                    "header": "Gestionnaire de téléchargement"
-                },
-                "setup": {
-                    "header": "PlexRipper Configuration"
-                }
-            },
-            "debug": {
-                "header": "Debug"
-            },
-            "paths": {
-                "main": {
-                    "header": "Chemin d'accès par défaut"
-                },
-                "movie": {
-                    "header": "Dossier films"
-                },
-                "tv-show": {
-                    "header": "Dossier séries"
-                }
-            },
-            "ui": {
-                "confirmation-settings": {
-                    "header": "Confirmation des Paramètres"
-                },
-                "date-and-time": {
-                    "header": "Date et temps"
-                },
-                "language": {
-                    "header": "Language"
-                }
-            }
-        },
-        "setup": {
-            "accounts": {
-                "header": "Compte Plex",
-                "title": "Ajouter un compte Plex!"
-            },
-            "finished": {
-                "header": "Terminé!",
-                "list": {
-                    "item-1": "Mettre une étoile sur la page Github du projet!",
-                    "item-2": "Demander une fonctionnalitée ou signalez un bug!",
-                    "item-3": "Traduire PlexRipper dans votre langue!",
-                    "item-4": "Alle voir le code et donner des retour ou des suggestions pour l'améliorer!"
-                },
-                "text": {
-                    "p-1": "Si vous aimez ce projet and que vous voullez montrez votre appréciation vous pouvez suivre:"
-                },
-                "title": "Vous êtes maintenant prêt à utiliser PlexRipper!"
-            },
-            "future-plans": {
-                "header": "Plan Avenir!",
-                "list": {
-                    "item-1": "Radarr et Sonarr integration",
-                    "item-1-1": "Toute recherche de média peut être redirigée vers Plex Ripper, et Plex Ripper recherchera tous les serveurs disponibles, téléchargera le média et informera Radarr/Sonarr du téléchargement terminé.",
-                    "item-2": "Supporter le téléchargement de musique et de photos !",
-                    "item-3": "Supporter le téléchargement des sous-titre !",
-                    "item-4": "Supporter les notifications télégram !",
-                    "item-5": "Supporter plusieurs langue",
-                    "item-6": "Une meilleur intégration de plex!",
-                    "item-6-1": "Téléchargez des collections, ajoutez-les à votre propre serveur Plex et copiez automatiquement tous les paramètres et configurations liés à Plex."
-                },
-                "text": {
-                    "p-1": "Fonctionnalité prévue:",
-                    "p-2": "Tus les idées sont vraiment les bienvenues!"
-                },
-                "title": "Ici sont toutes les fonctionnalitées déjà prévue !"
-            },
-            "intro": {
-                "header": "C'est se qu'on appelle être génial !",
-                "list": {
-                    "item-1": "Plex Ripper est en phase de développement, donc il peut y'avoir des bugs ici et là. S'il vous plait si vous rencontrez n'importe quel bug faîtes une issues sur notre page Github.",
-                    "item-2": "Les retours ou les demandes de fonctionnalitées sont vraiment très apprécié ! Surtout sur le code source car il s'agit d'un projet personnel destiné à améliorer mes compétences en codage.",
-                    "item-3": "Plex Ripper peut télécharger des films et des séries, d'autres types tels que la musique ne sont actuellement pas pris en charge, mais le seront à l'avenir!",
-                    "item-4": "Plex Ripper ne collecte pas et ne collectera aucune donnée sur vous ou sur l'une de vos activités. Les seules données envoyées à Plex sont votre nom d'utilisateur et votre mot de passe pour authentifier votre compte Plex. Après quoi, toutes les communications se font directement avec les serveurs partagés auxquels vous avez accès.",
-                    "item-5": "Un mot d'avertissement : Plex, et peut-être les propriétaires de serveurs Plex, n'aiment pas que vous téléchargiez toutes \"leurs\" copies de médias 100% acquises légalement. C'est pourquoi il y a des garde-fous en place pour protéger les utilisateurs de Plex Ripper contre l'interdiction de Plex. Cependant, soyez respectueux envers les propriétaires de serveurs Plex en n'utilisant pas toute leur précieuse bande passante et ne vous plaignez pas d'être expulsé d'un serveur. À l'avenir, j'aimerais également protéger les propriétaires de serveurs Plex contre les abus de Plex Ripper, toutes les idées ou contributions sont les bienvenues."
-                },
-                "text": {
-                    "p-1": "Here is some useful info:"
-                },
-                "title": "Vous êtes incroyable pour essayer avoir Plex Ripper!"
-            },
-            "paths": {
-                "header": "Vérifiez les chemins d'accés",
-                "title": "Assurez-vous que tout les chemins d'accés sont valide !"
-            }
-        },
-        "tvshows": {
-            "index": {
-                "header": "Aperçu des Séries",
-                "sub-header": "Sélectionnez une bibliothèque sur le côté gauche"
-            }
-        }
-    }
+	"components": {
+		"account-card": {
+			"clear-notifications": "Effacer tout les notifications",
+			"no-account-name": "Ajouter un surnom à ce compte",
+			"no-notifications": "Pas de notification disponible"
+		},
+		"account-dialog": {
+			"add-account-title": "",
+			"edit-account-title": "Modifier le compte Plex"
+		},
+		"account-setup-progress": {
+			"no-server-warning": "Le compte {displayName} n'a pas accès à ce serveur.",
+			"retry-connection": "Tentative de nouvelle tentative de connexion, { attemptIndex } dans { attemptCount } tentative.",
+			"server-connectable": "Serveur inaccessible!",
+			"server-un-connectable": "Impossible de joindre le serveur."
+		},
+		"account-verification-code-dialog": {
+			"error": "",
+			"sub-title": "",
+			"title": ""
+		},
+		"app-bar": {
+			"no-accounts": "Pas de compte disponible"
+		},
+		"details-overview": {
+			"database-id": "identifiant de la base de donnée:",
+			"duration": "Durée:"
+		},
+		"directory-browser": {
+			"path": "Chemin d'accès",
+			"select-path": "Sélectionner {pathName}",
+			"type": "Type"
+		},
+		"download-confirmation": {
+			"creating-tasks": "Création de tâches de téléchargement {current} de {total}",
+			"description": "Plex Ripper va commencera à télécharger ce qui suit:",
+			"header": "Êtes vous sûr?",
+			"total-size": "Taille Total:"
+		},
+		"download-details-dialog": {
+			"overview": {
+				"destination-path": "Dossier de destination",
+				"download-path": "Dossier de téléchargement",
+				"download-url": "URL de téléchargement",
+				"file-name": "Nom du fichier",
+				"status": "Statut"
+			}
+		},
+		"media-overview": {
+			"is-refreshing": "Rafraîchir la bibliothèque \"{library}\" de donnée depuis le {server}",
+			"no-data": "Impossible de trouver une bibliothèque disponible.",
+			"retrieving-library": "Récupérer la bibliothèque de la base de données PlexRipper!"
+		},
+		"navigation-drawer": {
+			"accounts": "Comptes",
+			"advanced": "Avancée",
+			"debug": "Déboguer",
+			"downloads": "Téléchargements",
+			"paths": "Chemins",
+			"settings": "Paramètres",
+			"ui": "Interface utilisateur"
+		},
+		"notifications-drawer": {
+			"clear-notifications": "Effacer tout les notifications",
+			"no-notifications": "Pas de notification disponible"
+		},
+		"paths-custom-overview": {
+			"no-paths": "Chemin d'accès invalide"
+		},
+		"server-dialog": {
+			"header": "{serverName} configuration",
+			"tabs": {
+				"download-destinations": {
+					"header": "Destination de téléchargement"
+				},
+				"server-commands": {
+					"header": "Commands du serveur",
+					"inspect-server": "",
+					"re-sync-server": "Resyncroniser les bibliothèques"
+				},
+				"server-config": {
+					"download-speed-limit": "Télécharger la limite de vitesse",
+					"header": ""
+				},
+				"server-connections": {
+					"download-speed-limit": "",
+					"header": "",
+					"section-header": "Sélectionnez la connexion serveur préférée :"
+				},
+				"server-data": {
+					"created-on": "Créer le",
+					"current-status": "Statut actuel",
+					"header": "Donnée Serveur",
+					"last-checked-on": "Dermière vérification le",
+					"last-updated-on": "Dernière mis à jour le",
+					"machine-id": "Identifiant Machine",
+					"plex-version": "Plex Version",
+					"device": "Dispositif",
+					"platform": "Plate-forme",
+					"platform-version": "Version de la plate-forme"
+				}
+			},
+			"no-servers-error": ""
+		},
+		"server-drawer": {
+			"no-libraries": "Pas de bibliothèques disponible",
+			"no-servers": {
+				"description": "Vérifier que vous avez un compte Plex enregistré dans les paramètres et que ce compte a bien accès au serveur Plex en haut à droit dans le selecteur de compte.",
+				"header": "Il n'y a pas de serveur disponible!"
+			}
+		},
+		"check-server-connections-progress": {
+			"checking": "",
+			"completed": "Inspection terminée de {length}  serveurs Plex!"
+		}
+	},
+	"confirmation": {
+		"delete-account": {
+			"text": "Cela supprimera ce compte Plex de Plex Ripper !\n\nCela supprimera également tous les serveurs partagés Plex inaccessibles, les bibliothèques Plex et tous les médias qu'ils contiennent. Tous les téléchargements actifs démarrés ou mis en file d'attente avec ce compte seront annulés et supprimés. Les téléchargements terminés resteront intacts.",
+			"title": "Êtes vous sûr ?",
+			"warning": "Cela peut prendre environ 5 minutes ou plus, puis cette fenêtre se fermera d'elle-même!"
+		},
+		"reset-db": {
+			"text": "Ca va backuper votre base de donnée vers \"config/Database Backup/\" et en créer une nouvelle, après vous serrez redirigé vers la page de configuration. Ca ne réinitialisera pas les paramètres qui sont stocké dans \"config/PlexRipperSettings.json\"",
+			"title": "Êtes vous sûr ?"
+		},
+		"skip-setup": {
+			"text": "Ca ignorera le processus de configuration et vous devrez configurer PlexRipper manuellement.",
+			"title": "Êtes vous sûr ?"
+		}
+	},
+	"general": {
+		"alerts": {
+			"disabled-paths": "Modifier les chemins est impossible pendant un téléchargement. Vérifier que tout vos téléchargement sont arrété !",
+			"invalid-directory": "Dossier n'est pas un chemin d'accès valide !"
+		},
+		"commands": {
+			"add-alert": "Ajouter une Alert",
+			"back": "Retour",
+			"cancel": "Annuler",
+			"check-server-status": "Vérifier le statut du serveur",
+			"close": "Fermé",
+			"confirm": "Confirmer",
+			"create": "Créer",
+			"delete": "Supprimer",
+			"disabled": "Désactiver",
+			"enabled": "Activer",
+			"error": "Erreur",
+			"finish-setup": "Terminer le configuration",
+			"go-to-setup-page": "Aller à la page de configuration",
+			"hide": "Cacher",
+			"check-connection": "Vérifier la connexion",
+			"next": "Suivant",
+			"not-validated": "Pas validaté",
+			"reset": "Réinitialiser",
+			"reset-db": "Réinitialiser la base de donnée",
+			"save": "Sauvegarder",
+			"skip-setup": "Ignorer le configuration",
+			"sync-server-libraries": "Synchroniser les bibliothèques du serveur",
+			"unknown": "Inconnu",
+			"update": "Mettre à jour",
+			"validate": "Valider",
+			"validated": "Validaté",
+			"missing-text": "",
+			"inspect-server": "Inspecter le serveur"
+		},
+		"name": "PlexRipper",
+		"name-version": "PlexRipper - V{version}",
+		"units": {
+			"per-second": "/s"
+		},
+		"tooltip": {
+			"local-connection": "Connexion locale",
+			"public-connection": "Connexion publique"
+		}
+	},
+	"help": {
+		"account-form": {
+			"display-name": {
+				"label": "Nom affiché",
+				"text": "Le nom utilisé pour afficher ce compte sur l'interface.",
+				"title": "Nom affiché"
+			},
+			"is-enabled": {
+				"label": "est Activé",
+				"text": "Ce compte doit-il être utilisé pour télécharger et récupérer des données à partir des serveurs de Plex ?",
+				"title": "est Activé"
+			},
+			"is-main": {
+				"label": "Est principal",
+				"text": "Un compte principal est un compte qui va posséder vos bibliothèques Plex. S'il existe un compte normal, qui a accès à la même bibliothèque Plex d'un serveur Plex partagé qu'un compte principal, il sera utilisé en premier pour protéger le compte principal.",
+				"title": "Est principal"
+			},
+			"password": {
+				"label": "Mot de passe",
+				"text": "Le mot de passe de l'utilisateur Plex",
+				"title": "Mot de passe"
+			},
+			"username": {
+				"label": "Nom",
+				"text": "Le nom de l'utilisateur Plex",
+				"title": "Nom"
+			}
+		},
+		"default": {
+			"label": "Label inconnu",
+			"text": "Le dossier langue où ce texte est stocké est incorrecte !",
+			"title": "Unknown help"
+		},
+		"server-dialog": {
+			"server-config": {
+				"download-speed-limit": {
+					"label": "",
+					"text": "",
+					"title": ""
+				}
+			},
+			"server-commands": {
+				"inspect-server": {
+					"text": "L'inspection du serveur vérifiera toutes les connexions et vérifiera si toutes les bibliothèques sont toujours accessibles.",
+					"title": "Inspection du serveur Plex",
+					"label": "Inspecter le serveur"
+				},
+				"sync-server-libraries": {
+					"text": "",
+					"title": "",
+					"label": "Resyncroniser les bibliothèques"
+				}
+			}
+		},
+		"settings": {
+			"advanced": {
+				"download-manager-section": {
+					"download-segments": {
+						"label": "Télécharger par Segments",
+						"text": "PlexRipper supporte le téléchargement multi-threaded et vous pouvez diviser le media qui va-t-être téléchargé en different parties individuelle. Cela a tendance à augmenter la vitesse de téléchargement globale, mais l'inconvénient est qu'il faudra plus de temps pour fusionner les différentes parties en un seul fichier multimédia complet.\n\nLa définition de cette valeur sur 1 désactivera le téléchargement multithread et téléchargera le fichier multimédia en tant que un dossier complet. Le nombre de segments de téléchargement n'a aucune influence sur la vitesse de fusion du fichier multimédia.",
+						"title": "Télécharger par Segments"
+					}
+				},
+				"reset-db": {
+					"label": "Réinitialiser la base de donnée",
+					"text": "Réinitialiser la base de donnée et créer une backup de l'ancienne.",
+					"title": "Réinitialiser la base de donnée"
+				},
+				"setup-section": {
+					"go-to-setup-page": {
+						"label": "Aller à la page de configuration",
+						"text": "Vous fera à la page de configuration.",
+						"title": "Aller à la page de configuration"
+					}
+				}
+			},
+			"paths": {
+				"download-folder": {
+					"label": "Dossier de téléchargement",
+					"text": "Le dossier où tout les fichiers vont être téléchargé en plusieurs parties avant d'être réassemblé en un seul dans le dossier de destination.",
+					"title": "Dossier de téléchargement"
+				},
+				"movie-folder": {
+					"label": "Dossier des film",
+					"text": "Le dossier par défaut des films quant aucun dossier personnalisé n'a été sélectionné.",
+					"title": "Dossier des film"
+				},
+				"tv-show-folder": {
+					"label": "Dossier des série",
+					"text": "Le dossier par défaut des séries quant aucun dossier personnalisé n'a été sélectionné.",
+					"title": "Dossier des série"
+				}
+			},
+			"ui": {
+				"confirmation-settings": {
+					"download-episode-confirmation": {
+						"label": "Demander confirmation du téléchargement de l'épisode",
+						"text": "",
+						"title": "Demander confirmation du téléchargement de l'épisode"
+					},
+					"download-movie-confirmation": {
+						"label": "Demander confirmation du téléchargement du film",
+						"text": "",
+						"title": "Demander confirmation du téléchargement du film"
+					},
+					"download-season-confirmation": {
+						"label": "Demander confirmation du téléchargement de la saison",
+						"text": "",
+						"title": "Demander confirmation du téléchargement de la saison"
+					},
+					"download-tvshow-confirmation": {
+						"label": "Demander confirmation du téléchargement de la séries",
+						"text": "",
+						"title": "Demander confirmation du téléchargement de la séries"
+					}
+				},
+				"date-and-time": {
+					"long-date-format": {
+						"label": "Date au format long",
+						"text": "",
+						"title": ""
+					},
+					"short-date-format": {
+						"label": "Date au format court",
+						"text": "",
+						"title": ""
+					},
+					"show-relative-dates": {
+						"label": "Afficher les dates relatives",
+						"text": "",
+						"title": ""
+					},
+					"time-format": {
+						"label": "Format de la date",
+						"text": "",
+						"title": ""
+					},
+					"time-zone": {
+						"label": "Time Zone",
+						"text": "",
+						"title": ""
+					}
+				},
+				"language": {
+					"language-selection": {
+						"label": "Language",
+						"text": "",
+						"title": ""
+					}
+				}
+			}
+		}
+	},
+	"pages": {
+		"downloads": {
+			"no-downloads": "Il n'y a actuellement aucun téléchargement en progréssion"
+		},
+		"error": {
+			"header": "Erreur!",
+			"return-link": "Retourner à la page d'accueil"
+		},
+		"home": {
+			"header": "CA MARCHE !",
+			"setup-question": ""
+		},
+		"movies": {
+			"index": {
+				"header": "Aperçu des films",
+				"sub-header": "Sélectionnez une bibliothèque sur le côté droit"
+			}
+		},
+		"music": {
+			"_musicId": {
+				"header": "La bibliothèque Musique n'est malheureusement pas encore supporté :("
+			},
+			"index": {
+				"header": "La bibliothèque Musique n'est malheureusement pas encore supporté :("
+			}
+		},
+		"settings": {
+			"accounts": {
+				"header": "Compte Plex"
+			},
+			"advanced": {
+				"database": {
+					"header": "Base de donnée"
+				},
+				"download-manager": {
+					"header": "Gestionnaire de téléchargement"
+				},
+				"setup": {
+					"header": "PlexRipper Configuration"
+				}
+			},
+			"debug": {
+				"header": "Debug"
+			},
+			"paths": {
+				"main": {
+					"header": "Chemin d'accès par défaut"
+				},
+				"movie": {
+					"header": "Dossier films"
+				},
+				"tv-show": {
+					"header": "Dossier séries"
+				}
+			},
+			"ui": {
+				"confirmation-settings": {
+					"header": "Confirmation des Paramètres"
+				},
+				"date-and-time": {
+					"header": "Date et temps"
+				},
+				"language": {
+					"header": "Language"
+				}
+			}
+		},
+		"setup": {
+			"accounts": {
+				"header": "Compte Plex",
+				"title": "Ajouter un compte Plex!"
+			},
+			"finished": {
+				"header": "Terminé!",
+				"list": {
+					"item-1": "Mettre une étoile sur la page Github du projet!",
+					"item-2": "Demander une fonctionnalitée ou signalez un bug!",
+					"item-3": "Traduire PlexRipper dans votre langue!",
+					"item-4": "Alle voir le code et donner des retour ou des suggestions pour l'améliorer!"
+				},
+				"text": {
+					"p-1": "Si vous aimez ce projet and que vous voullez montrez votre appréciation vous pouvez suivre:"
+				},
+				"title": "Vous êtes maintenant prêt à utiliser PlexRipper!"
+			},
+			"future-plans": {
+				"header": "Plan Avenir!",
+				"list": {
+					"item-1": "Radarr et Sonarr integration",
+					"item-1-1": "Toute recherche de média peut être redirigée vers Plex Ripper, et Plex Ripper recherchera tous les serveurs disponibles, téléchargera le média et informera Radarr/Sonarr du téléchargement terminé.",
+					"item-2": "Supporter le téléchargement de musique et de photos !",
+					"item-3": "Supporter le téléchargement des sous-titre !",
+					"item-4": "Supporter les notifications télégram !",
+					"item-5": "Supporter plusieurs langue",
+					"item-6": "Une meilleur intégration de plex!",
+					"item-6-1": "Téléchargez des collections, ajoutez-les à votre propre serveur Plex et copiez automatiquement tous les paramètres et configurations liés à Plex."
+				},
+				"text": {
+					"p-1": "Fonctionnalité prévue:",
+					"p-2": "Tus les idées sont vraiment les bienvenues!"
+				},
+				"title": "Ici sont toutes les fonctionnalitées déjà prévue !"
+			},
+			"intro": {
+				"header": "C'est se qu'on appelle être génial !",
+				"list": {
+					"item-1": "Plex Ripper est en phase de développement, donc il peut y'avoir des bugs ici et là. S'il vous plait si vous rencontrez n'importe quel bug faîtes une issues sur notre page Github.",
+					"item-2": "Les retours ou les demandes de fonctionnalitées sont vraiment très apprécié ! Surtout sur le code source car il s'agit d'un projet personnel destiné à améliorer mes compétences en codage.",
+					"item-3": "Plex Ripper peut télécharger des films et des séries, d'autres types tels que la musique ne sont actuellement pas pris en charge, mais le seront à l'avenir!",
+					"item-4": "Plex Ripper ne collecte pas et ne collectera aucune donnée sur vous ou sur l'une de vos activités. Les seules données envoyées à Plex sont votre nom d'utilisateur et votre mot de passe pour authentifier votre compte Plex. Après quoi, toutes les communications se font directement avec les serveurs partagés auxquels vous avez accès.",
+					"item-5": "Un mot d'avertissement : Plex, et peut-être les propriétaires de serveurs Plex, n'aiment pas que vous téléchargiez toutes \"leurs\" copies de médias 100% acquises légalement. C'est pourquoi il y a des garde-fous en place pour protéger les utilisateurs de Plex Ripper contre l'interdiction de Plex. Cependant, soyez respectueux envers les propriétaires de serveurs Plex en n'utilisant pas toute leur précieuse bande passante et ne vous plaignez pas d'être expulsé d'un serveur. À l'avenir, j'aimerais également protéger les propriétaires de serveurs Plex contre les abus de Plex Ripper, toutes les idées ou contributions sont les bienvenues."
+				},
+				"text": {
+					"p-1": "Here is some useful info:"
+				},
+				"title": "Vous êtes incroyable pour essayer avoir Plex Ripper!"
+			},
+			"paths": {
+				"header": "Vérifiez les chemins d'accés",
+				"title": "Assurez-vous que tout les chemins d'accés sont valide !"
+			}
+		},
+		"tvshows": {
+			"index": {
+				"header": "Aperçu des Séries",
+				"sub-header": "Sélectionnez une bibliothèque sur le côté gauche"
+			}
+		}
+	}
 }

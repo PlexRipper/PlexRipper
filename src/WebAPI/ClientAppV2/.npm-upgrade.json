@@ -1,8 +1,8 @@
 {
-  "ignore": {
-    "three": {
-      "versions": ">0.143.0",
-      "reason": "Incompatible with Vanta"
-    }
-  }
+	"ignore": {
+		"three": {
+			"versions": ">0.143.0",
+			"reason": "Incompatible with Vanta"
+		}
+	}
 }

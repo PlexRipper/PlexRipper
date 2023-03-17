@@ -1,15 +1,15 @@
 <template>
-    <q-btn class="mx-2" flat :icon="icon" @click="toggleDarkMode"/>
+	<q-btn class="mx-2" flat :icon="icon" @click="toggleDarkMode" />
 </template>
 
 <script setup lang="ts">
-const $q = useQuasar()
+const $q = useQuasar();
 
 const icon = computed((): string => {
-    return $q.dark.isActive ? 'mdi-white-balance-sunny' : 'mdi-moon-waxing-crescent'
-})
+	return $q.dark.isActive ? 'mdi-white-balance-sunny' : 'mdi-moon-waxing-crescent';
+});
 
 function toggleDarkMode(): void {
-    $q.dark.toggle()
+	$q.dark.toggle();
 }
 </script>

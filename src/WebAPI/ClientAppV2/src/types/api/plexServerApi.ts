@@ -30,7 +30,7 @@ export function checkPlexServer(serverId: number): Observable<ResultDTO<PlexServ
 	});
 }
 
-export function syncPlexServer(serverId: number, forceSync: boolean = false): Observable<ResultDTO> {
+export function syncPlexServer(serverId: number, forceSync = false): Observable<ResultDTO> {
 	return PlexRipperAxios.get<void>({
 		url: `${PLEX_SERVER_RELATIVE_PATH}/${serverId}/sync?forceSync=${forceSync}`,
 		apiCategory: logText,

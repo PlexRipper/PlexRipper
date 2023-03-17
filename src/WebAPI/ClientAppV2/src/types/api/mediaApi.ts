@@ -12,12 +12,7 @@ export function getTvShow(id: number): Observable<ResultDTO<PlexMediaDTO>> {
 	});
 }
 
-export function getThumbnail(
-	plexMediaId: number,
-	plexMediaType: PlexMediaType,
-	width: number = 0,
-	height: number = 0,
-): Observable<any> {
+export function getThumbnail(plexMediaId: number, plexMediaType: PlexMediaType, width = 0, height = 0): Observable<any> {
 	return PlexRipperAxios.getImage<Blob>({
 		url: `${PLEX_MEDIA_RELATIVE_PATH}/thumb`,
 		params: {

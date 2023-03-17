@@ -4,32 +4,13 @@ module.exports = {
 		browser: true,
 		node: true,
 	},
-	extends: [
-		'plugin:@intlify/vue-i18n/recommended',
-		'@nuxtjs/eslint-config-typescript',
-		'plugin:nuxt/recommended',
-		'prettier',
-		'plugin:prettier/recommended',
-	],
-	plugins: ['prettier'],
-	// add your custom rules here
-	rules: {
-		// 'vue/html-quotes': ['error', 'double', { avoidEscape: false }],
-		'vue/valid-v-slot': 0,
-		'vue/no-v-html': 'off',
-		'no-use-before-define': 'off',
-		'no-extend-native': 'off',
-		'import/no-named-as-default': 'off',
-		'no-prototype-builtins': 'off',
-		'@intlify/vue-i18n/no-raw-text': [
-			'warn',
-			{
-				ignoreNodes: ['md-icon', 'v-icon'],
-				ignorePattern: '^[-#:()&]+$',
-				ignoreText: ['EUR', 'HKD', 'USD', '%', '?', ''],
-			},
-		],
+	parser: 'vue-eslint-parser',
+	parserOptions: {
+		parser: '@typescript-eslint/parser',
 	},
+	extends: ['@nuxtjs/eslint-config-typescript', 'plugin:prettier/recommended'],
+	plugins: [],
+	rules: {},
 	settings: {
 		'vue-i18n': {
 			localeDir: './src/lang/*.{json,json5,yaml,yml}', // extension is glob formatting!

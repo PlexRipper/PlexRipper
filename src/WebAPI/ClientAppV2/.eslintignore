@@ -1,11 +1,9 @@
 .nuxt/
-build/
 dist/
-bin/
 obj/
 node_modules/
 static/
-.vscode
 /package-lock.json
+/package-why.json
 !/src/lang/
 !/web-types-config.json

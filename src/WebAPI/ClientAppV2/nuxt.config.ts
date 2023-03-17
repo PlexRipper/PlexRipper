@@ -1,4 +1,5 @@
 import {fileURLToPath} from "url";
+import {defineNuxtConfig} from 'nuxt/config'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -30,11 +31,12 @@ export default defineNuxtConfig({
         // Plugins: https://quasar.dev/quasar-plugins
         plugins: ['Loading'],
         // Truthy values requires `sass@1.32.12`.
-        sassVariables: false,
+        sassVariables: 'src/assets/scss/_variables.scss',
+
         // Requires `@quasar/extras` package
         extras: {
             // string | null: Auto-import roboto font. https://quasar.dev/style/typography#default-font
-            font: null,
+            font: 'roboto-font',
             // string[]: Auto-import webfont icons. Usage: https://quasar.dev/vue-components/icon#webfont-usage
             fontIcons: ['mdi-v6'],
             // string[]: Auto-import svg icon collections. Usage: https://quasar.dev/vue-components/icon#svg-usage
@@ -110,9 +112,23 @@ export default defineNuxtConfig({
             },
         ],
     },
+    vite: {
+        css: {
+            preprocessorOptions: {
+                scss: {
+                    // Make variables available everywhere
+                    // Doc: https://nuxt.com/docs/getting-started/assets#global-styles-imports
+                    additionalData: '@use "@/assets/scss/_variables.scss" as *;',
+                    sassOptions: {
+                        quietDeps: true,
+                    },
+                },
+            },
+        },
+    },
     /*
-	 ** Doc: https://nuxtjs.org/docs/configuration-glossary/configuration-telemetry
-	 */
+      ** Doc: https://nuxtjs.org/docs/configuration-glossary/configuration-telemetry
+      */
     telemetry: false,
     /*
      ** Customize the progress-bar color

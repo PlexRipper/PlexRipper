@@ -30,10 +30,9 @@
     </v-app>
 </template>
 
-<script lang="ts">
-import {Component, Vue} from 'vue-property-decorator';
-import {useSubscription} from '@vueuse/rxjs';
+<script setup lang="ts">
 import Log from 'consola';
+import {useSubscription} from '@vueuse/rxjs';
 import {AlertService, HelpService} from '@service';
 import IAlert from '@interfaces/IAlert';
 import NotificationsDrawer from '@overviews/NotificationsDrawer.vue';
@@ -41,65 +40,64 @@ import PageLoadOverlay from '@components/General/PageLoadOverlay.vue';
 import globalService from '@service/globalService';
 import CheckServerConnectionsProgress from '@components/Progress/CheckServerConnectionsProgress.vue';
 
-@Component<Default>({
-    components: {InspectServerProgress: CheckServerConnectionsProgress, NotificationsDrawer, PageLoadOverlay},
-    loading: false,
-})
-export default class Default extends Vue {
-    isLoading: boolean = true;
-    helpDialogState: boolean = false;
-    helpId: string = '';
-    alerts: IAlert[] = [];
-    showNavigationDrawerState: Boolean = true;
-    showNotificationsDrawerState: Boolean = false;
+const route = useRoute();
 
-    get isSetupPage(): boolean {
-        return this.$route.fullPath.includes('setup');
+const isLoading = ref(true);
+const helpDialogState = ref(false);
+const helpId = ref('');
+const alerts = ref<IAlert[]>([]);
+const showNavigationDrawerState = ref(true);
+const showNotificationsDrawerState = ref(false);
+
+
+const isSetupPage = computed(() => {
+    return route.fullPath.includes('setup');
+});
+
+const isNoBackground = computed(() => {
+    if (isLoading) {
+        return true;
     }
+    return isSetupPage;
+});
 
-    get isNoBackground(): boolean {
-        if (this.isLoading) {
-            return true;
-        }
-        return this.isSetupPage;
-    }
 
-    closeAlert(alert: IAlert): void {
-        AlertService.removeAlert(alert.id);
-    }
-
-    toggleNavigationsDrawer() {
-        this.showNavigationDrawerState = !this.showNavigationDrawerState;
-    }
-
-    toggleNotificationsDrawer() {
-        this.showNotificationsDrawerState = !this.showNotificationsDrawerState;
-    }
-
-    mounted(): void {
-        useSubscription(
-            globalService.getPageSetupReady().subscribe(() => {
-                Log.debug('Loading has finished, displaying page now');
-                this.isLoading = false;
-            }),
-        );
-
-        useSubscription(
-            HelpService.getHelpDialog().subscribe((helpId) => {
-                if (helpId) {
-                    this.helpId = helpId;
-                    this.helpDialogState = true;
-                }
-            }),
-        );
-
-        useSubscription(
-            AlertService.getAlerts().subscribe((alerts) => {
-                if (alerts) {
-                    this.alerts = alerts;
-                }
-            }),
-        );
-    }
+function closeAlert(alert: IAlert): void {
+    AlertService.removeAlert(alert.id);
 }
+
+function toggleNavigationsDrawer() {
+    showNavigationDrawerState.value = !showNavigationDrawerState.value;
+}
+
+function toggleNotificationsDrawer() {
+    showNotificationsDrawerState.value = !showNotificationsDrawerState.value;
+}
+
+onMounted(() => {
+    useSubscription(
+        globalService.getPageSetupReady().subscribe(() => {
+            Log.debug('Loading has finished, displaying page now');
+            isLoading.value = false;
+        }),
+    );
+
+    useSubscription(
+        HelpService.getHelpDialog().subscribe((newHelpId) => {
+            if (newHelpId) {
+                helpId.value = newHelpId;
+                helpDialogState.value = true;
+            }
+        }),
+    );
+
+    useSubscription(
+        AlertService.getAlerts().subscribe((newAlerts) => {
+            if (newAlerts) {
+                alerts.value = newAlerts;
+            }
+        }),
+    );
+});
+
 </script>

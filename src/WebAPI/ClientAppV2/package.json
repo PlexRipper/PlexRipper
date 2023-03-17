@@ -19,7 +19,9 @@
     "axios-observable": "^2.0.0",
     "consola": "^2.15.3",
     "lodash-es": "^4.17.21",
-    "rxjs": "^7.5.5"
+    "rxjs": "^7.5.5",
+    "three": "^0.123.0",
+    "vanta": "^0.5.22"
   },
   "devDependencies": {
     "@nuxt/devtools": "^0.2.5",

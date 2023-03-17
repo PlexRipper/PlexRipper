@@ -25,7 +25,7 @@ export default defineNuxtConfig({
     ],
     quasar: {
         // Plugins: https://quasar.dev/quasar-plugins
-        plugins: [],
+        plugins: ['Loading'],
         // Truthy values requires `sass@1.32.12`.
         sassVariables: false,
         // Requires `@quasar/extras` package
@@ -71,6 +71,27 @@ export default defineNuxtConfig({
         "@mediaOverview": fileURLToPath(new URL('./src/components/MediaOverview/', import.meta.url)),
         "@vTreeViewTable": fileURLToPath(new URL('./src/components/General/VTreeViewTable/', import.meta.url)),
 
+    },
+    /*
+     ** Auto-import components
+     *  Doc: https://github.com/nuxt/components
+     */
+    components: {
+        loader: true,
+        dirs: [
+            // Components directory
+            {
+                path: './components',
+                pathPrefix: false,
+                extensions: ['vue'],
+            },
+            // Pages directory
+            {
+                path: './pages',
+                pathPrefix: false,
+                extensions: ['vue'],
+            },
+        ],
     },
     /*
 	 ** Doc: https://nuxtjs.org/docs/configuration-glossary/configuration-telemetry

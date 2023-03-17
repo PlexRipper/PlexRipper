@@ -1,33 +1,32 @@
 <template>
     <!--	Instead of multiple layouts we merge into one default layout to prevent full
         page change (flashing white background) during transitions.	-->
-    <v-app>
-        <page-load-overlay v-if="isLoading" :value="isLoading"/>
-        <template v-else>
-            <help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false"/>
-            <alert-dialog v-for="(alertItem, i) in alerts" :key="i" :alert="alertItem" @close="closeAlert"/>
-            <CheckServerConnectionsProgress/>
+    <q-layout view="hHh lpR fFf">
+        <template v-if="!isLoading">
+            <!--            <help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false"/>-->
+            <!--            <alert-dialog v-for="(alertItem, i) in alerts" :key="i" :alert="alertItem" @close="closeAlert"/>-->
+            <!--            <CheckServerConnectionsProgress/>-->
             <!--	Use for setup-layout	-->
             <template v-if="isSetupPage">
-                <vue-scroll>
-                    <v-main class="no-background">
-                        <nuxt/>
-                    </v-main>
-                </vue-scroll>
+                <!--                <vue-scroll>-->
+                <q-page-container>
+                    <nuxt/>
+                </q-page-container>
+                <!--                </vue-scroll>-->
             </template>
             <!--	Use for everything else	-->
             <template v-else>
-                <app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer"/>
-                <navigation-drawer :show-drawer="showNavigationDrawerState"/>
-                <notifications-drawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer"/>
-                <v-main>
+                <!--                <app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer"/>-->
+                <!--                <navigation-drawer :show-drawer="showNavigationDrawerState"/>-->
+                <!--                <notifications-drawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer"/>-->
+                <q-page-container>
                     <nuxt/>
-                </v-main>
+                </q-page-container>
                 <footer/>
             </template>
         </template>
         <Background :hide-background="isNoBackground"/>
-    </v-app>
+    </q-layout>
 </template>
 
 <script setup lang="ts">
@@ -38,9 +37,11 @@ import IAlert from '@interfaces/IAlert';
 import NotificationsDrawer from '@overviews/NotificationsDrawer.vue';
 import PageLoadOverlay from '@components/General/PageLoadOverlay.vue';
 import globalService from '@service/globalService';
-import CheckServerConnectionsProgress from '@components/Progress/CheckServerConnectionsProgress.vue';
 
+const $q = useQuasar()
 const route = useRoute();
+
+Log.info('Default layout loaded', $q)
 
 const isLoading = ref(true);
 const helpDialogState = ref(false);
@@ -50,15 +51,15 @@ const showNavigationDrawerState = ref(true);
 const showNotificationsDrawerState = ref(false);
 
 
-const isSetupPage = computed(() => {
+const isSetupPage = computed((): boolean => {
     return route.fullPath.includes('setup');
 });
 
-const isNoBackground = computed(() => {
+const isNoBackground = computed((): boolean => {
     if (isLoading) {
         return true;
     }
-    return isSetupPage;
+    return isSetupPage.value;
 });
 
 
@@ -75,10 +76,15 @@ function toggleNotificationsDrawer() {
 }
 
 onMounted(() => {
+    $q.loading.show({
+        spinner: PageLoadOverlay,
+    })
+
     useSubscription(
         globalService.getPageSetupReady().subscribe(() => {
             Log.debug('Loading has finished, displaying page now');
             isLoading.value = false;
+            $q.loading.hide()
         }),
     );
 

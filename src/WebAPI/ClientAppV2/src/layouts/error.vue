@@ -1,5 +1,5 @@
 <template>
-    <v-app dark class="no-background">
+    <q-layout view="hHh lpR fFf" dark class="no-background">
         <v-container>
             <v-row justify="center">
                 <v-col cols="auto">
@@ -17,7 +17,7 @@
                 </v-col>
             </v-row>
         </v-container>
-    </v-app>
+    </q-layout>
 </template>
 
 <script setup lang="ts">

@@ -16,7 +16,7 @@
             </template>
             <!--	Use for everything else	-->
             <template v-else>
-                <!--                <app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer"/>-->
+                <app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer"/>
                 <!--                <navigation-drawer :show-drawer="showNavigationDrawerState"/>-->
                 <!--                <notifications-drawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer"/>-->
                 <q-page-container>

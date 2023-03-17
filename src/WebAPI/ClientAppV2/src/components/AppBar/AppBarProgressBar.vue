@@ -1,48 +1,58 @@
 <template>
-	<v-fade-transition v-if="showProgressBar">
-		<v-row>
-			<v-col>
-				<v-tooltip bottom :nudge-bottom="-20">
-					<template #activator="{ on, attrs }">
-						<progress-component :percentage="getPercentage" v-bind="attrs" v-on="on" />
-					</template>
-					<span>{{ getText }}</span>
-				</v-tooltip>
-			</v-col>
-		</v-row>
-	</v-fade-transition>
+    <Transition>
+        <div v-if="showProgressBar">
+            <q-linear-progress dark stripe rounded size="20px" :value="getPercentage" color="red" class="q-mt-sm">
+                <q-tooltip anchor="bottom middle" self="top middle" :offset="[10, 10]">
+                    <span>{{ getText }}</span>
+                </q-tooltip>
+            </q-linear-progress>
+        </div>
+    </Transition>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import { useSubscription } from '@vueuse/rxjs';
-import { SignalrService } from '@service';
-import { SyncServerProgress } from '@dto/mainApi';
+<script setup lang="ts">
+import {useSubscription} from '@vueuse/rxjs';
+import {SignalrService} from '@service';
+import {SyncServerProgress} from '@dto/mainApi';
 
-@Component
-export default class AppBarProgressBar extends Vue {
-	progressList: SyncServerProgress[] = [];
-	show: boolean = false;
+const progressList = ref<SyncServerProgress[]>([]);
+const show = ref(false);
 
-	get getPercentage(): number {
-		return this.progressList.map((x) => x.percentage).sum() / this.progressList.length;
-	}
+const getPercentage = computed(() => {
+    return progressList.value.map((x) => x.percentage).sum() / progressList.value.length;
+});
 
-	get showProgressBar(): boolean {
-		return this.progressList.length > 0 && this.getPercentage <= 100;
-	}
+const showProgressBar = computed(() => {
+    return progressList.value.length > 0 && getPercentage.value <= 100;
+});
 
-	get getText(): string {
-		const finishedCount = this.progressList.filter((x) => x.percentage >= 100).length;
-		return `Syncing PlexServer ${finishedCount} of ${this.progressList.length}`;
-	}
+const getText = computed(() => {
+    const finishedCount = progressList.value.filter((x) => x.percentage >= 100).length;
+    return `Syncing PlexServer ${finishedCount} of ${progressList.value.length}`;
+});
 
-	mounted(): void {
-		useSubscription(
-			SignalrService.getAllSyncServerProgress().subscribe((progress) => {
-				this.progressList = progress;
-			}),
-		);
-	}
-}
+
+onMounted(() => {
+    useSubscription(
+        SignalrService.getAllSyncServerProgress().subscribe((progress) => {
+            progressList.value = progress;
+        }),
+    );
+
+    // useSubscription(SignalrService.getPlexAccountRefreshProgress(), (data) => {
+    // 	if (data) {
+    // 		const index = this.accountRefreshProgress.findIndex((x) => x.plexAccountId === data.plexAccountId);
+    // 		if (index > -1) {
+    // 			if (!data.isComplete) {
+    // 				this.accountRefreshProgress.splice(index, 1, data);
+    // 			} else {
+    // 				this.accountRefreshProgress.splice(index, 1);
+    // 			}
+    // 		} else {
+    // 			this.accountRefreshProgress.push(data);
+    // 		}
+    // 	}
+    // });
+});
+
 </script>

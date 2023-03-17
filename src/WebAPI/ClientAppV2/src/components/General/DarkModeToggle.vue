@@ -1,17 +1,15 @@
 <template>
-	<v-btn class="mx-2" icon @click="setDarkMode">
-		<v-icon v-if="$vuetify.theme.dark">mdi-white-balance-sunny</v-icon>
-		<v-icon v-else>mdi-moon-waxing-crescent</v-icon>
-	</v-btn>
+    <q-btn class="mx-2" :icon="icon" @click="toggleDarkMode"/>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
+const $q = useQuasar()
 
-@Component
-export default class DarkModeToggle extends Vue {
-	setDarkMode(): void {
-		this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
-	}
+const icon = computed((): string => {
+    return $q.dark.isActive ? 'mdi-white-balance-sunny' : 'mdi-moon-waxing-crescent'
+})
+
+function toggleDarkMode(): void {
+    $q.dark.toggle()
 }
 </script>

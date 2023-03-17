@@ -3,7 +3,6 @@ import { map, take } from 'rxjs/operators';
 
 import { BaseService } from '@service';
 import IStoreState from '@interfaces/service/IStoreState';
-import ISetupResult from '@interfaces/service/ISetupResult';
 import { JobStatusUpdateDTO, JobTypes } from '@dto/mainApi';
 
 export class BackgroundJobsService extends BaseService {

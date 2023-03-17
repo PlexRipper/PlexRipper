@@ -5,8 +5,6 @@
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
-
 interface QRowProps {
 	justify?: 'start' | 'center' | 'end' | 'around' | 'between';
 	align?: 'start' | 'center' | 'end' | 'stretch';

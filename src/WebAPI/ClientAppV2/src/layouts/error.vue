@@ -21,15 +21,11 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, defineProps } from 'vue';
+import {defineProps} from 'vue';
 
 const props = defineProps<{ error: any }>();
 
 const errorFormatted = computed(() => {
 	return JSON.stringify(props.error, null, 4);
 });
-
-function layout(): string {
-	return 'error';
-}
 </script>

@@ -33,7 +33,7 @@ export default defineNuxtConfig({
             // string | null: Auto-import roboto font. https://quasar.dev/style/typography#default-font
             font: null,
             // string[]: Auto-import webfont icons. Usage: https://quasar.dev/vue-components/icon#webfont-usage
-            fontIcons: ['material-icons'],
+            fontIcons: ['mdi-v6'],
             // string[]: Auto-import svg icon collections. Usage: https://quasar.dev/vue-components/icon#svg-usage
             svgIcons: [],
             // string[]: Auto-import animations from 'animate.css'. Usage: https://quasar.dev/options/animations#usage
@@ -46,6 +46,10 @@ export default defineNuxtConfig({
         typeCheck: true,
         strict: true,
     },
+    /*
+     ** Global CSS: https://go.nuxtjs.dev/config-css
+     */
+    css: ['@/assets/scss/style.scss'],
     alias: {
         // Doc: https://nuxt.com/docs/api/configuration/nuxt-config#alias
         "@class": fileURLToPath(new URL('./src/types/class/', import.meta.url)),

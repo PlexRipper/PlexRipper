@@ -8,7 +8,7 @@ module.exports = {
 	parserOptions: {
 		parser: '@typescript-eslint/parser',
 	},
-	extends: ['@nuxtjs/eslint-config-typescript', 'plugin:prettier/recommended'],
+	extends: ['@nuxtjs/eslint-config-typescript', 'plugin:prettier/recommended', 'plugin:vue/vue3-recommended'],
 	plugins: [],
 	rules: {
 		// Reason: This allows for defining interfaces in any order
@@ -17,6 +17,16 @@ module.exports = {
 		'import/no-named-as-default': 'off',
 		// Reason: This allows nested index.ts to pass through exports without naming them
 		'import/export': 'off',
+		'vue/html-indent': ['error', 'tab'], // enforce tabs in template
+		indent: ['error', 'tab'], // enforce tabs in script and js files
+		'vue/component-name-in-template-casing': [
+			'error',
+			'PascalCase',
+			{
+				registeredComponentsOnly: false,
+				ignores: [],
+			},
+		],
 	},
 	settings: {
 		'vue-i18n': {

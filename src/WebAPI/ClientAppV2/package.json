@@ -14,7 +14,8 @@
 		"lint:js": "eslint --ext \".ts,.vue\" --ignore-path .gitignore .",
 		"lint:prettier": "prettier --check .",
 		"lint": "yarn lint:js && yarn lint:prettier",
-		"lintfix": "prettier --write --list-different . && yarn lint:js --fix"
+		"lintfix": "prettier --write --list-different . && yarn lint:js --fix",
+		"lint-fix": "eslint . --ext .ts,.js,.vue --max-warnings=0 --fix & prettier --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{ts,vue,json,js,jsx}\""
 	},
 	"dependencies": {
 		"@codewithdan/observable-store": "^2.2.15",
@@ -40,6 +41,7 @@
 		"eslint": "^8.36.0",
 		"eslint-config-prettier": "^8.7.0",
 		"eslint-plugin-prettier": "^4.2.1",
+		"eslint-plugin-vue": "^9.9.0",
 		"nuxt": "^3.3.1",
 		"nuxt-quasar-ui": "^1.0.5",
 		"object-path": "^0.11.8",

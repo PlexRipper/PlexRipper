@@ -3,14 +3,6 @@
     "three": {
       "versions": ">0.143.0",
       "reason": "Incompatible with Vanta"
-    },
-    "vue": {
-      "versions": ">3.0.0",
-      "reason": "Incompatible with NuxtV2"
-    },
-    "@vue/test-utils": {
-      "versions": ">2.0.0",
-      "reason": "V2 has a hard dependency on Vue3"
     }
   }
 }

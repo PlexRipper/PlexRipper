@@ -21,6 +21,9 @@ export default defineNuxtConfig({
     modules: [
         '@vueuse/nuxt',
         '@nuxt/devtools',
+        // Doc: https://i18n.nuxtjs.org/
+        '@nuxtjs/i18n',
+        // Doc: https://github.com/Maiquu/nuxt-quasar
         'nuxt-quasar-ui',
     ],
     quasar: {
@@ -45,6 +48,20 @@ export default defineNuxtConfig({
         // Packages,  @types/node, vue-tsc and typescript are required
         typeCheck: true,
         strict: true,
+    },
+    i18n: {
+        lazy: true,
+        langDir: './lang/',
+        defaultLocale: 'en-US',
+        locales: [
+            {text: 'English', code: 'en-US', iso: 'en-US', file: 'en-US.json'},
+            {text: 'Français', code: 'fr-FR', iso: 'fr-FR', file: 'fr-FR.json'},
+            {text: 'Deutsch', code: 'de-DE', iso: 'de-DE', file: 'de-DE.json'},
+        ],
+        vueI18n: {
+            fallbackLocale: 'en-US',
+        },
+        strategy: 'no_prefix',
     },
     /*
      ** Global CSS: https://go.nuxtjs.dev/config-css

@@ -12,20 +12,6 @@ PageContainer.vue
     z-index: 0;
 }
 
-/*
-AppBar.vue
-*/
-.app-bar {
-    height: $app-bar-height;
-
-    &.theme--dark {
-        background: rgba(255, 0, 0, 0.2) !important;
-    }
-
-    &.theme--light {
-        background: rgba(255, 0, 0, 1) !important;
-    }
-}
 
 /*
 NavigationDrawer.vue
@@ -33,11 +19,11 @@ NavigationDrawer.vue
 .navigation-drawer {
     background: transparent;
 
-    &.theme--dark {
+    &.--dark {
         background: rgba(0, 0, 0, 0.8);
     }
 
-    &.theme--light {
+    &.--light {
         background: rgba(255, 255, 255, 0.8);
     }
 }

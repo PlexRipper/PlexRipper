@@ -1,5 +1,5 @@
 <template>
-    <q-btn-dropdown stretch flat icon="mdi-account">
+    <q-btn-dropdown stretch flat icon="mdi-account" dropdown-icon="mdi-arrow-down">
         <q-list v-if="accounts.length > 0">
 
             <q-item-label header>ACTIVE ACCOUNT</q-item-label>
@@ -9,10 +9,11 @@
                     @click="updateActiveAccountId(account.id)" clickable v-close-popup tabindex="0">
                 <q-item-section>
                     <q-item-label>{{ account.displayName }}</q-item-label>
-                    <q-item-label caption>{{ account.u }}</q-item-label>
+                    <q-item-label caption>{{ account.username }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
                     <q-btn
+                        flat
                         icon="mdi-refresh"
                         :loading="loading[0] || loading[index]"
                         :disabled="isLoading"

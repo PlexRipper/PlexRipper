@@ -1,30 +1,29 @@
 <template>
-    <q-header elevated>
-        <q-toolbar class="glossy">
-            <q-toolbar-title>
-                <q-btn flat round dense icon="menu" class="q-mr-sm" @click.stop="showNavigationDrawer"/>
-                <q-btn to="/" outlined nuxt>
-                    <logo :size="24" class="mr-3"/>
-                    {{ $t('general.name-version', {version}) }}
-                </q-btn>
-            </q-toolbar-title>
-        </q-toolbar>
-        <q-toolbar class="glossy">
-            <AppBarProgressBar/>
-        </q-toolbar>
-        <q-toolbar class="glossy">
-            <q-btn icon="mdi-github" href="https://github.com/PlexRipper/PlexRipper" target="_blank"/>
+    <q-header class="app-bar">
+        <q-row no-wrap>
+            <q-toolbar class="app-bar">
+                <q-toolbar-title>
+                    <q-btn flat round dense icon="mdi-menu" class="q-mr-sm" @click.stop="showNavigationDrawer"/>
+                    <q-btn to="/" flat>
+                        <logo :size="24" class="mr-3"/>
+                        {{ $t('general.name-version', {version}) }}
+                    </q-btn>
+                </q-toolbar-title>
 
-            <!-- DarkMode toggle -->
-            <DarkModeToggle/>
+                <AppBarProgressBar/>
 
-            <!-- Account Selector -->
-            <AccountSelector/>
+                <q-btn icon="mdi-github" flat href="https://github.com/PlexRipper/PlexRipper" target="_blank"/>
 
+                <!-- DarkMode toggle -->
+                <DarkModeToggle/>
 
-            <!-- Notifications Selector -->
-            <NotificationButton @toggle="showNotificationsDrawer"/>
-        </q-toolbar>
+                <!-- Account Selector -->
+                <AccountSelector/>
+
+                <!-- Notifications Selector -->
+                <NotificationButton @toggle="showNotificationsDrawer"/>
+            </q-toolbar>
+        </q-row>
     </q-header>
 </template>
 
@@ -59,3 +58,29 @@ onMounted(() => {
 
 
 </script>
+
+<style lang="scss">
+// @import "./quasar/src/css/index.sass";
+
+
+.app-bar {
+    // @extend .glossy;
+    height: $app-bar-height;
+
+}
+
+body {
+    &.body--dark {
+        .app-bar {
+            background: rgba(255, 0, 0, 0.2) !important;
+        }
+    }
+
+    &.body--light {
+        .app-bar {
+            background: rgba(255, 0, 0, 1) !important;
+        }
+    }
+}
+
+</style>

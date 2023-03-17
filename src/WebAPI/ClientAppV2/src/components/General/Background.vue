@@ -77,13 +77,14 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss">
-@import 'assets/scss/_variables.scss';
+
 
 .background-effect,
 .background-overlay {
     position: fixed;
     width: 100%;
     height: 100%;
+    top: 0;
 }
 
 .background-effect {
@@ -94,7 +95,7 @@ onBeforeUnmount(() => {
     }
 
     &.still-background-effect {
-        background-image: url('~assets/../../public/img/background/background.png');
+        background-image: url('/img/background/background.png');
     }
 }
 

@@ -10,7 +10,7 @@
             <template v-if="isSetupPage">
                 <!--                <vue-scroll>-->
                 <q-page-container>
-                    <nuxt/>
+                    <router-view/>
                 </q-page-container>
                 <!--                </vue-scroll>-->
             </template>
@@ -19,8 +19,8 @@
                 <app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer"/>
                 <!--                <navigation-drawer :show-drawer="showNavigationDrawerState"/>-->
                 <!--                <notifications-drawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer"/>-->
-                <q-page-container>
-                    <nuxt/>
+                <q-page-container class="page-container">
+                    <router-view/>
                 </q-page-container>
                 <footer/>
             </template>
@@ -50,13 +50,14 @@ const alerts = ref<IAlert[]>([]);
 const showNavigationDrawerState = ref(true);
 const showNotificationsDrawerState = ref(false);
 
+$q.dark.set(true);
 
 const isSetupPage = computed((): boolean => {
     return route.fullPath.includes('setup');
 });
 
 const isNoBackground = computed((): boolean => {
-    if (isLoading) {
+    if (isLoading.value) {
         return true;
     }
     return isSetupPage.value;
@@ -107,3 +108,22 @@ onMounted(() => {
 });
 
 </script>
+
+<style lang="scss">
+
+
+body {
+    &.body--dark {
+        .page-container {
+            background: $dark-theme-glass-background;
+        }
+    }
+
+    &.body--light {
+        .page-container {
+            background: $light-background-color;
+        }
+    }
+}
+
+</style>

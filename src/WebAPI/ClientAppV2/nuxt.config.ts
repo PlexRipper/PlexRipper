@@ -26,6 +26,7 @@ export default defineNuxtConfig({
 		'@nuxtjs/i18n',
 		// Doc: https://github.com/Maiquu/nuxt-quasar
 		'nuxt-quasar-ui',
+		'@vue-macros/nuxt',
 	],
 	quasar: {
 		// Plugins: https://quasar.dev/quasar-plugins

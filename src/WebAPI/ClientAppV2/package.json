@@ -36,6 +36,7 @@
 		"@quasar/extras": "^1.15.11",
 		"@types/node": "^18.15.3",
 		"@typescript-eslint/parser": "^5.55.0",
+		"@vue-macros/nuxt": "^1.2.3",
 		"@vueuse/core": "^9.13.0",
 		"@vueuse/nuxt": "^9.13.0",
 		"eslint": "^8.36.0",

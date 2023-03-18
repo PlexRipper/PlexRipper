@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import Log, { LogLevel } from 'consola';
 
 export default defineNuxtPlugin(() => {

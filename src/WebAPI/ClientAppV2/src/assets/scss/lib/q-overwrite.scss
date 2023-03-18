@@ -1,0 +1,37 @@
+@import '../variables';
+@import "../mixins";
+
+.q-dark {
+	background-color: transparent
+}
+
+.q-card {
+	@extend .glass-background-light;
+
+	&.q-card--dark {
+		@extend .glass-background-dark;
+	}
+}
+
+.custom-class-test {
+	color: pink;
+	font-weight: bold;
+}
+
+
+.q-dialog {
+	.q-card {
+		@extend .default-border;
+		@extend .default-shadow;
+		@extend .blur;
+
+		background-color: $light-dialog-background-color;
+		border-radius: 15px;
+		transition: 0.1s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+		&.q-card--dark {
+			background-color: $dark-dialog-background-color;
+		}
+
+	}
+}

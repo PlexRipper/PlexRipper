@@ -1,0 +1,35 @@
+@import 'variables';
+
+/*
+Background
+*/
+.glass-background-light {
+	background: $light-background-color;
+}
+
+.glass-background-dark {
+	background: $dark-theme-glass-background;
+}
+
+.blur {
+	backdrop-filter: blur(30px);
+}
+
+.no-background {
+	background-color: transparent !important;
+}
+
+
+/*
+Borders
+*/
+.default-border {
+	border: 2px solid red;
+}
+
+.default-shadow {
+	box-shadow: $box-shadow;
+}
+
+
+

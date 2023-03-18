@@ -1,4 +1,4 @@
-import IPart from '@mediaOverview/MediaTable/types/IPart';
+import IPart from '@class/IPart';
 
 export default interface IMediaData {
 	id: number;

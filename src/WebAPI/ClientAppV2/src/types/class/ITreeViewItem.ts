@@ -1,6 +1,6 @@
 import { PlexMediaType } from '@dto/mainApi';
-import ITreeViewTableRow from '@components/General/VTreeViewTable/ITreeViewTableRow';
-import IMediaData from '@mediaOverview/MediaTable/types/IMediaData';
+import IMediaData from '@class/IMediaData';
+import ITreeViewTableRow from '@interfaces/components/VTreeViewTable/ITreeViewTableRow';
 
 export default interface ITreeViewItem extends ITreeViewTableRow {
 	year: number;

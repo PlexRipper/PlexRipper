@@ -7,7 +7,7 @@
 import Convert from "@class/Convert";
 import {PlexMediaType} from "@dto/mainApi";
 
-const props = withDefaults(defineProps<{ mediaType: string, size: number }>(), {
+const props = withDefaults(defineProps<{ mediaType: string, size?: number }>(), {
 	mediaType: '',
 	size: 24,
 });

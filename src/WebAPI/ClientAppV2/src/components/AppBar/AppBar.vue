@@ -60,7 +60,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-// @import "./quasar/src/css/index.sass";
 
 .app-bar {
 	// @extend .glossy;

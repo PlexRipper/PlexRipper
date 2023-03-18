@@ -1,20 +1,20 @@
 <template>
-	<v-row class="flex-nowrap" no-gutters>
-		<v-col cols="3">
-			<v-subheader class="form-label text-no-wrap">{{ getLabel }}</v-subheader>
-		</v-col>
-		<v-col cols="1">
-			<HelpButton v-if="hasHelpPage" @click="openDialog" />
-		</v-col>
-		<v-col cols="8" align-self="end">
-			<slot />
-		</v-col>
-	</v-row>
+	<q-row class="flex-nowrap" no-gutters>
+		<q-col cols="3">
+			<q-sub-header class="form-label text-no-wrap">{{ getLabel }}</q-sub-header>
+		</q-col>
+		<q-col cols="1">
+			<HelpButton v-if="hasHelpPage" @click="openDialog"/>
+		</q-col>
+		<q-col cols="8" align-self="end">
+			<slot/>
+		</q-col>
+	</q-row>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import { HelpService } from '@service';
+<script setup lang="ts">
+import {HelpService} from '@service';
+import {useI18n} from "#imports";
 
 interface IHelp {
 	label: string;
@@ -22,28 +22,30 @@ interface IHelp {
 	text: string;
 }
 
-@Component
-export default class FormRow extends Vue {
-	@Prop({ required: true, type: String, default: '' })
-	readonly formId!: string;
+const {$getMessage} = useNuxtApp()
 
-	get getLabel(): string {
-		return this.$ts(`${this.formId}.label`);
-	}
+const props = defineProps<{
+	formId: string;
+}>();
 
-	get hasHelpPage(): boolean {
-		if (this.formId) {
-			const msgObject = this.$getMessage(this.formId) as IHelp;
-			// Complains about returning string if I return directly, instead of an if statement returning true
-			if (msgObject && msgObject.title && msgObject.text) {
-				return true;
-			}
+const getLabel = computed(() => {
+	return props.formId ? useI18n().t(`${props.formId}.label`) : '';
+});
+
+const hasHelpPage = computed(() => {
+	if (props.formId) {
+		const msgObject = $getMessage(props.formId) as IHelp;
+		// Complains about returning string if I return directly, instead of an if statement returning true
+		if (msgObject && msgObject.title && msgObject.text) {
+			return true;
 		}
-		return false;
 	}
+	return false;
+});
 
-	openDialog(): void {
-		HelpService.openHelpDialog(this.formId);
-	}
+
+function openDialog(): void {
+	HelpService.openHelpDialog(props.formId);
 }
+
 </script>

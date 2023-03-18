@@ -91,58 +91,6 @@ const getNavItems = computed(() => {
 	];
 });
 
-
-// function setBorderWidth(): void {
-// 	const i = this.drawer.$el.querySelector<HTMLElement>('.v-navigation-drawer__border');
-// 	if (i) {
-// 		i.style.width = this.borderSize + 'px';
-// 		i.style.cursor = 'ew-resize';
-// 	}
-// }
-//
-//
-// function setEvents() {
-// 	// https://codepen.io/oze4/pen/mojrZM
-// 	const minSize = borderSize.value;
-// 	const el = this.drawer.$el;
-// 	const drawerBorder = el.querySelector<HTMLElement>('.v-navigation-drawer__border');
-// 	const vm = this;
-//
-// 	function resize(e) {
-// 		document.body.style.cursor = 'ew-resize';
-// 		if (e.clientX > 300) {
-// 			el.style.width = e.clientX + 'px';
-// 		}
-// 	}
-//
-// 	if (drawerBorder) {
-// 		drawerBorder.addEventListener(
-// 			'mousedown',
-// 			function (e) {
-// 				if (e.offsetX < minSize) {
-// 					// m_pos = e.x;
-// 					el.style.transition = 'initial';
-// 					document.addEventListener('mousemove', resize, false);
-// 				}
-// 			},
-// 			false,
-// 		);
-// 	}
-//
-// 	document.addEventListener(
-// 		'mouseup',
-// 		() => {
-// 			if (drawerBorder) {
-// 				el.style.transition = '';
-// 				vm.width = +el.style.width;
-// 			}
-// 			document.body.style.cursor = '';
-// 			document.removeEventListener('mousemove', resize, false);
-// 		},
-// 		false,
-// 	);
-// }
-
 onMounted(() => {
 	items.value = getNavItems.value;
 	// this.setBorderWidth();

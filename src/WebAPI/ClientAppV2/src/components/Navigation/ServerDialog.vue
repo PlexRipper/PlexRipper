@@ -1,132 +1,150 @@
 <template>
-	<v-dialog :max-width="1200" :value="isVisible" :width="1200" @click:outside="close">
-		<v-card v-if="plexServer">
-			<v-card-title class="headline"
-				>{{ $t('components.server-dialog.header', { serverName: plexServer.name }) }}
-			</v-card-title>
+	<q-dialog v-model="show" full-width @click:outside="close">
+		<q-card v-if="plexServer">
+			<q-card-section>
+				<div class="text-h6">
+					{{ $t('components.server-dialog.header', {serverName: plexServer.name}) }}
+				</div>
+			</q-card-section>
 
-			<v-card-text>
-				<v-tabs v-model="tabIndex" vertical>
-					<!--	Server Data	Tab Header-->
-					<v-tab>
-						<v-icon left> mdi-server</v-icon>
-						{{ $t('components.server-dialog.tabs.server-data.header') }}
-					</v-tab>
+			<q-separator/>
 
-					<!--	Server Connections Tab Header	-->
-					<v-tab>
-						<v-icon left> mdi-connection</v-icon>
-						{{ $t('components.server-dialog.tabs.server-connections.header') }}
-					</v-tab>
+			<q-splitter v-model="splitterModel">
+				<!-- Tab Index -->
+				<template v-slot:before>
+					<q-tabs v-model="tabIndex" vertical>
+						<!--	Server Data	Tab Header-->
+						<q-tab name="server-data" icon="mdi-server" :label="$t('components.server-dialog.tabs.server-data.header')"/>
+						<!--	Server Connections Tab Header	-->
+						<q-tab name="server-connection" icon="mdi-connection"
+									 :label="$t('components.server-dialog.tabs.server-connections.header')"/>
+						<!--	Server Configuration Tab Header	-->
+						<q-tab name="server-config" icon="mdi-cog-box" :label="$t('components.server-dialog.tabs.server-config.header')"/>
+						<!--	Library Destinations Tab Header	-->
+						<q-tab name="download-destinations" icon="mdi-folder-edit-outline"
+									 :label="$t('components.server-dialog.tabs.download-destinations.header')"/>
+						<!--	Server Commands Tab Header	-->
+						<q-tab name="server-commands" icon="mdi-console" :label="$t('components.server-dialog.tabs.server-commands.header')"/>
+					</q-tabs>
+				</template>
+				<!-- Tab Content -->
+				<template v-slot:after>
+					<q-tab-panels
+						v-model="tabIndex"
+						animated
+						swipeable
+						vertical
+						transition-prev="jump-up"
+						transition-next="jump-up"
+					>
+						<!-- Server Data Tab Content -->
+						<q-tab-panel name="server-data">
+							<ServerDataTabContent ref="serverDataTabContent" :plex-server="plexServer" :is-visible="isVisible"/>
+						</q-tab-panel>
 
-					<!--	Server Configuration Tab Header	-->
-					<v-tab>
-						<v-icon left> mdi-cog-box</v-icon>
-						{{ $t('components.server-dialog.tabs.server-config.header') }}
-					</v-tab>
+						<!-- Server Connections Tab Content	-->
+						<q-tab-panel name="server-connection">
+							<ServerConnectionsTabContent
+								ref="serverConnectionsTabContent"
+								:plex-server="plexServer"
+								:plex-server-settings="plexServerSettings"
+								:is-visible="isVisible"
+							/>
+						</q-tab-panel>
 
-					<!--	Library Destinations Tab Header	-->
-					<v-tab>
-						<v-icon left> mdi-folder-edit-outline</v-icon>
-						{{ $t('components.server-dialog.tabs.download-destinations.header') }}
-					</v-tab>
+						<!--	Server Configuration Tab Content	-->
+						<q-tab-panel name="server-config">
+							<server-config-tab-content :plex-server="plexServer" :plex-server-settings="plexServerSettings"/>
+						</q-tab-panel>
 
-					<!--	Server Commands Tab Header	-->
-					<v-tab>
-						<v-icon left> mdi-console</v-icon>
-						{{ $t('components.server-dialog.tabs.server-commands.header') }}
-					</v-tab>
+						<!--	Library Download Destinations	Tab Content -->
+						<q-tab-panel name="download-destinations">
+							<server-library-destinations-tab-content :folder-paths="folderPaths" :plex-libraries="plexLibraries"/>
+						</q-tab-panel>
 
-					<!--	Server Data Tab Content	-->
-					<v-tab-item>
-						<server-data-tab-content :plex-server="plexServer" :is-visible="isVisible" />
-					</v-tab-item>
+						<!--	Server Commands -->
+						<q-tab-panel name="server-commands">
+							<server-commands-tab-content :plex-server="plexServer" :is-visible="isVisible"/>
+						</q-tab-panel>
 
-					<!--	Server Connections Tab Content	-->
-					<v-tab-item>
-						<ServerConnectionsTabContent
-							:plex-server="plexServer"
-							:plex-server-settings="plexServerSettings"
-							:is-visible="isVisible"
-						/>
-					</v-tab-item>
+					</q-tab-panels>
+				</template>
 
-					<!--	Server Configuration Tab Content	-->
-					<v-tab-item>
-						<server-config-tab-content :plex-server="plexServer" :plex-server-settings="plexServerSettings" />
-					</v-tab-item>
+			</q-splitter>
 
-					<!--	Library Download Destinations	Tab Content -->
-					<v-tab-item>
-						<server-library-destinations-tab-content :folder-paths="folderPaths" :plex-libraries="plexLibraries" />
-					</v-tab-item>
+			<q-separator/>
 
-					<!--	Server Commands -->
-					<v-tab-item>
-						<server-commands-tab-content :plex-server="plexServer" :is-visible="isVisible" />
-					</v-tab-item>
-				</v-tabs>
-			</v-card-text>
-		</v-card>
-		<v-card v-else>
+			<q-card-actions align="right">
+				<q-btn flat label="Decline" color="primary" v-close-popup/>
+				<q-btn flat label="Accept" color="primary" v-close-popup/>
+			</q-card-actions>
+		</q-card>
+		<q-card v-else>
 			<h1>{{ $t('components.server-dialog.no-servers-error') }}</h1>
-		</v-card>
-	</v-dialog>
+		</q-card>
+	</q-dialog>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import { useSubscription } from '@vueuse/rxjs';
-import { switchMap, tap } from 'rxjs/operators';
-import { FolderPathDTO, PlexLibraryDTO, PlexServerDTO, PlexServerSettingsModel } from '@dto/mainApi';
-import { FolderPathService, LibraryService, ServerService, SettingsService } from '@service';
+<script setup lang="ts">
+import {ref, computed} from '#imports'
+import {useSubscription} from '@vueuse/rxjs';
+import {switchMap, tap} from 'rxjs/operators';
+import type {FolderPathDTO, PlexLibraryDTO, PlexServerDTO, PlexServerSettingsModel} from '@dto/mainApi';
+import {FolderPathService, LibraryService, ServerService, SettingsService} from '@service';
+import Log from "consola";
+import {ServerDataTabContent, ServerConnectionsTabContent} from "#components";
 
-@Component
-export default class ServerDialog extends Vue {
-	show: boolean = false;
-	tabIndex: number | null = null;
-	plexServer: PlexServerDTO | null = null;
-	folderPaths: FolderPathDTO[] = [];
-	plexLibraries: PlexLibraryDTO[] = [];
-	plexServerSettings: PlexServerSettingsModel | null = null;
-	plexServerId: number = 0;
+const show = ref(false);
+const tabIndex = ref<string>('server-data');
+const plexServer = ref<PlexServerDTO | null>(null);
+const folderPaths = ref<FolderPathDTO[]>([]);
+const plexLibraries = ref<PlexLibraryDTO[]>([]);
+const plexServerSettings = ref<PlexServerSettingsModel | null>(null);
+const plexServerId = ref(0);
+const splitterModel = ref(20);
 
-	get isVisible(): boolean {
-		return this.plexServerId > 0;
-	}
+const isVisible = computed((): boolean => plexServerId.value > 0);
 
-	open(plexServerId: number): void {
-		this.plexServerId = plexServerId;
-		this.show = true;
 
-		useSubscription(
-			ServerService.getServer(plexServerId)
-				.pipe(
-					tap((plexServer) => {
-						this.plexServer = plexServer;
-					}),
-					switchMap((plexServer) => SettingsService.getServerSettings(plexServer?.machineIdentifier ?? '')),
-				)
-				.subscribe((plexServerSettings) => {
-					this.plexServerSettings = plexServerSettings;
+const open = (newPlexServerId: number): void => {
+	plexServerId.value = newPlexServerId;
+	Log.info('Opening server dialog for server with id: ' + newPlexServerId);
+	show.value = true;
+
+	useSubscription(
+		ServerService.getServer(newPlexServerId)
+			.pipe(
+				tap((plexServerData) => {
+					plexServer.value = plexServerData;
 				}),
-		);
-		useSubscription(
-			LibraryService.getLibrariesByServerId(plexServerId).subscribe((plexLibraries) => {
-				this.plexLibraries = plexLibraries;
+				switchMap((plexServer) => SettingsService.getServerSettings(plexServer?.machineIdentifier ?? '')),
+			)
+			.subscribe((plexServerSettingsData) => {
+				plexServerSettings.value = plexServerSettingsData;
 			}),
-		);
-		useSubscription(
-			FolderPathService.getFolderPaths().subscribe((folderPaths) => {
-				this.folderPaths = folderPaths;
-			}),
-		);
-	}
+	);
+	useSubscription(
+		LibraryService.getLibrariesByServerId(newPlexServerId).subscribe((plexLibrariesData) => {
+			plexLibraries.value = plexLibrariesData;
+		}),
+	);
+	useSubscription(
+		FolderPathService.getFolderPaths().subscribe((folderPathsData) => {
+			folderPaths.value = folderPathsData;
+		}),
+	);
 
-	close(): void {
-		this.show = false;
-		this.plexServerId = 0;
-		this.tabIndex = null;
-	}
 }
+
+const close = (): void => {
+	show.value = false;
+	plexServerId.value = 0;
+	tabIndex.value = 'server-data';
+}
+
+defineExpose({
+	open,
+	close,
+})
+
 </script>

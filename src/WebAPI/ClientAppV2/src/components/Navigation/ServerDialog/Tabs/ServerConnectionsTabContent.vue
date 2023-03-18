@@ -1,133 +1,113 @@
 <template>
-	<v-radio-group
-		:value="plexServer.preferredConnectionId"
-		dense
-		class="mt-0 pt-0"
-		@change="setPreferredPlexServerConnection($event)"
+	<q-option-group
+		v-model="preferredConnectionId"
+		:options="serverConnections"
 	>
-		<v-simple-table class="section-table">
-			<thead>
-				<tr>
+		<!--		@change="setPreferredPlexServerConnection($event)"-->
+		<template v-slot:label="connection">
+			<q-row>
+				<q-col>
+					<q-radio color="red" :value="connection.id">
+
+						<q-icon :name="getConnectionIcon(connection.local)">
+							<q-tooltip anchor="top middle" self="center middle">
+						<span>{{
+								connection.local
+									? $t('general.tooltip.local-connection')
+									: $t('general.tooltip.public-connection')
+							}}</span>
+							</q-tooltip>
+						</q-icon>
+						<!-- Connection Url -->
+						<span class="ml-2">{{ connection.url }}</span>
+					</q-radio>
+				</q-col>
+				<!-- Connection Status -->
+				<q-col>
+					<q-item-label>
+						<q-status :value="connection.latestConnectionStatus.isSuccessful ?? false"/>
+					</q-item-label>
+				</q-col>
+				<q-col>
+					<CheckConnectionButton
+						:loading="isLoading(connection.id)"
+						@click="checkPlexConnection(connection.id)"
+					/>
+				</q-col>
+				<q-col v-if="getProgress(connection.id)">
 					<td colspan="3">
-						<h3>{{ $t('components.server-dialog.tabs.server-connections.section-header') }}</h3>
+						<!--						<CheckServerStatusProgressDisplay :plex-server="plexServer" :progress="getProgress(connection.id)"/>-->
 					</td>
-				</tr>
-			</thead>
-			<tbody>
-				<template v-for="(connection, index) in serverConnections">
-					<tr :key="`connection-${index}`">
-						<td>
-							<v-radio color="red" :value="connection.id">
-								<template #label>
-									<!-- Connection Icon Local or Public -->
-									<v-tooltip top>
-										<template #activator="{ on, attrs }">
-											<v-icon v-bind="attrs" v-on="on">
-												{{ getConnectionIcon(connection.local) }}
-											</v-icon>
-										</template>
-										<span>{{
-											connection.local
-												? $t('general.tooltip.local-connection')
-												: $t('general.tooltip.public-connection')
-										}}</span>
-									</v-tooltip>
-									<!-- Connection Url -->
-									<span class="ml-2">{{ connection.url }}</span>
-								</template>
-							</v-radio>
-						</td>
-						<td style="width: 25%">
-							<!-- Connection Status -->
-							<status :value="connection.latestConnectionStatus.isSuccessful ?? false" />
-						</td>
-						<td>
-							<CheckConnectionButton
-								:loading="isLoading(connection.id)"
-								@click="checkPlexConnection(connection.id)"
-							/>
-						</td>
-					</tr>
-					<tr v-if="getProgress(connection.id)" :key="`progress-${index}`">
-						<td colspan="3">
-							<CheckServerStatusProgressDisplay :plex-server="plexServer" :progress="getProgress(connection.id)" />
-						</td>
-					</tr>
-				</template>
-			</tbody>
-		</v-simple-table>
-	</v-radio-group>
+				</q-col>
+			</q-row>
+		</template>
+	</q-option-group>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import { useSubscription } from '@vueuse/rxjs';
-import type { PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
-import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
-import { ServerConnectionService, ServerService, SignalrService } from '@service';
+<script setup lang="ts">
+import {useSubscription} from '@vueuse/rxjs';
+import type {PlexServerConnectionDTO, PlexServerDTO} from '@dto/mainApi';
+import {ServerConnectionCheckStatusProgressDTO} from '@dto/mainApi';
+import {ServerConnectionService, ServerService, SignalrService} from '@service';
+import Log from "consola";
 
-@Component
-export default class ServerConnectionsTabContent extends Vue {
-	@Prop({ required: true, type: Object as () => PlexServerDTO })
-	readonly plexServer!: PlexServerDTO;
+const serverConnections = ref<PlexServerConnectionDTO[]>([])
+const loading = ref<number[]>([])
+const progress = ref<ServerConnectionCheckStatusProgressDTO[]>([])
+const preferredConnectionId = ref<number>(0)
 
-	@Prop({ required: true, type: Boolean })
-	readonly isVisible!: boolean;
+const props = defineProps<{
+	plexServer: PlexServerDTO;
+	isVisible: boolean;
+}>();
 
-	serverConnections: PlexServerConnectionDTO[] = [];
-
-	loading: number[] = [];
-	progress: ServerConnectionCheckStatusProgressDTO[] = [];
-
-	getProgress(plexServerConnectionId: number): ServerConnectionCheckStatusProgressDTO | null {
-		return this.progress.find((x) => x.plexServerConnectionId === plexServerConnectionId) ?? null;
-	}
-
-	getConnectionIcon(local: boolean): string {
-		return local ? 'mdi-lan-connect' : 'mdi-earth';
-	}
-
-	@Watch('isVisible')
-	onIsVisible(isVisible): void {
-		if (isVisible) {
-			this.setup();
-		} else {
-			this.progress = [];
-		}
-	}
-
-	isLoading(plexServerConnectionId: number): boolean {
-		return this.loading.includes(plexServerConnectionId);
-	}
-
-	checkPlexConnection(plexServerConnectionId: number) {
-		this.loading.push(plexServerConnectionId);
-		useSubscription(
-			ServerConnectionService.checkServerConnection(plexServerConnectionId).subscribe(() => {
-				this.loading = this.loading.filter((x) => x !== plexServerConnectionId);
-			}),
-		);
-	}
-
-	setPreferredPlexServerConnection(value) {
-		useSubscription(ServerService.setPreferredPlexServerConnection(this.plexServer.id, value).subscribe());
-	}
-
-	setup() {
-		useSubscription(
-			ServerConnectionService.getServerConnectionsByServerId(this.plexServer.id).subscribe((connections) => {
-				this.serverConnections = connections;
-			}),
-		);
-		useSubscription(
-			SignalrService.getServerConnectionProgressByPlexServerId(this.plexServer.id).subscribe((progress) => {
-				this.progress = progress;
-			}),
-		);
-	}
-
-	mounted() {
-		this.setup();
-	}
+const getConnectionIcon = (local: boolean): string => {
+	return local ? 'mdi-lan-connect' : 'mdi-earth';
 }
+
+const getProgress = (plexServerConnectionId: number): ServerConnectionCheckStatusProgressDTO | null => {
+	return progress.value.find((x) => x.plexServerConnectionId === plexServerConnectionId) ?? null;
+}
+
+const isLoading = (plexServerConnectionId: number): boolean => {
+	return loading.value.includes(plexServerConnectionId);
+}
+
+const checkPlexConnection = (plexServerConnectionId: number) => {
+	loading.value.push(plexServerConnectionId)
+	useSubscription(
+		ServerConnectionService.checkServerConnection(plexServerConnectionId).subscribe(() => {
+			loading.value = loading.value.filter((x) => x !== plexServerConnectionId);
+		}),
+	);
+}
+
+const setPreferredPlexServerConnection = (value: number) => {
+	preferredConnectionId.value = value;
+	useSubscription(ServerService.setPreferredPlexServerConnection(props.plexServer.id, value).subscribe());
+}
+
+const setup = () => {
+	useSubscription(
+		ServerConnectionService.getServerConnectionsByServerId(props.plexServer.id).subscribe((connections) => {
+			serverConnections.value = connections;
+		}),
+	);
+	useSubscription(
+		SignalrService.getServerConnectionProgressByPlexServerId(props.plexServer.id).subscribe((progressData) => {
+			progress.value = progressData;
+		}),
+	);
+}
+
+onMounted(() => {
+	Log.info('ServerConnectionsTabContent', 'onMounted');
+	setup();
+})
+
+onUnmounted(() => {
+	Log.info('ServerConnectionsTabContent', 'onUnmounted');
+	progress.value = [];
+})
+
 </script>

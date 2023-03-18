@@ -1,68 +1,62 @@
 <template>
-	<v-row class="no-wrap">
-		<v-col :cols="8">
-			<v-slider
-				:value="value"
+	<q-row class="no-wrap">
+		<q-col :cols="8">
+			<q-slider
+				:model-value="sliderValue"
+				@change="updateDownloadLimit"
 				:min="0"
 				:step="500"
 				:max="10000"
+				snap
+				label
 				style="margin-top: 8px"
-				@input="sliderValue = $event"
-				@change="updateDownloadLimit"
-				@mousedown="mouseEvent = true"
-				@mouseup="mouseEvent = false"
+
 			/>
-		</v-col>
-		<v-col>
-			<p-text-field
-				:value="value"
-				full-width
-				hide-details
-				single-line
+		</q-col>
+		<q-col>
+			<q-input
+				:model-value="sliderValue"
 				type="number"
 				suffix="kB/s"
-				hide-spin-buttons
-				@click.prevent
-				@change="updateDownloadLimit"
+				@update="updateDownloadLimit"
 			/>
-		</v-col>
-	</v-row>
+		</q-col>
+	</q-row>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
 
-@Component<DownloadLimitInput>({})
-export default class DownloadLimitInput extends Vue {
-	@Prop({ required: true, type: Number })
-	readonly plexServerId!: number;
+const props = defineProps<{
+	plexServerId: number;
+	downloadSpeedLimit: number;
+}>();
 
-	@Prop({ required: true, type: Number })
-	readonly downloadSpeedLimit!: number;
+const emit = defineEmits<{
+	(e: 'change', value: number): void;
+}>()
 
-	mouseEvent: boolean = false;
-	sliderValue: number = 0;
+const mouseEvent = ref(false);
+const sliderValue = ref(0);
 
-	get value(): number {
-		if (this.mouseEvent) {
-			return this.sliderValue;
-		}
-		return this.downloadSpeedLimit;
+
+const downloadSpeedLimit = computed(() => {
+	return props.downloadSpeedLimit ?? 0;
+});
+
+const value = computed(() => {
+	if (mouseEvent.value) {
+		return sliderValue.value;
 	}
+	return downloadSpeedLimit.value;
+});
 
-	updateDownloadLimit(value) {
-		value = Number(value);
-		if (value < 0) {
-			value = 0;
-		}
-		this.$emit('change', value);
+function updateDownloadLimit(value: number): void {
+	value = Number(value);
+	if (value < 0) {
+		value = 0;
 	}
+	emit('change', value);
 }
+
 </script>
-<!--suppress CssUnusedSymbol -->
-<style>
-/* This is to make the v-slider less high and help vertical center the label in front. */
-.v-messages {
-	display: none !important;
-}
-</style>
+

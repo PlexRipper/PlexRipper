@@ -1,7 +1,7 @@
 <template>
 	<template v-if="plexServers.length > 0">
 
-		<q-expansion-item v-for="(server, i) in plexServers" :icon="server.icon"
+		<q-expansion-item v-for="server in plexServers" :icon="server.icon"
 											:label="server.name"
 											expand-icon="mdi-chevron-down">
 			<!-- Server header	-->
@@ -37,7 +37,7 @@
 			</template>
 		</q-expansion-item>
 
-		<!--		<server-dialog ref="serverDialog"/>-->
+		<ServerDialog ref="serverDialog"/>
 	</template>
 	<!-- With valid server available -->
 
@@ -59,7 +59,7 @@ import Log from 'consola';
 import {useSubscription} from '@vueuse/rxjs';
 import {LibraryService, ServerService} from '@service';
 import {PlexLibraryDTO, PlexMediaType, PlexServerConnectionDTO, PlexServerDTO, SyncServerProgress} from '@dto/mainApi';
-import ServerDialog from '@components/Navigation/ServerDialog.vue';
+import type ServerDialog from '@components/Navigation/ServerDialog.vue';
 import serverConnectionService from '~/service/serverConnectionService';
 
 const router = useRouter();
@@ -69,9 +69,7 @@ const plexServers = ref<PlexServerDTO[]>([]);
 const plexLibraries = ref<PlexLibraryDTO[]>([]);
 const connections = ref<PlexServerConnectionDTO[]>([]);
 
-
-// @Ref('serverDialog')
-// readonly serverDialogRef!: ServerDialog;
+const serverDialog = ref<InstanceType<typeof ServerDialog> | null>(null)
 
 
 function filterLibraries(plexServerId: number): PlexLibraryDTO[] {
@@ -79,7 +77,11 @@ function filterLibraries(plexServerId: number): PlexLibraryDTO[] {
 }
 
 function openServerSettings(serverId: number): void {
-	this.serverDialogRef.open(serverId);
+	if (serverDialog.value == null) {
+		Log.error('ServerDialog is null');
+		return;
+	}
+	serverDialog.value.open(serverId);
 }
 
 function openMediaPage(library: PlexLibraryDTO): void {

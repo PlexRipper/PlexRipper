@@ -1,65 +1,28 @@
 <template>
-	<v-navigation-drawer
-		ref="drawer"
-		:value="showDrawer"
-		:permanent="showDrawer"
-		:width="width"
-		app
-		clipped
-		class="navigation-drawer no-background"
+	<q-drawer
+		class="navigation-drawer"
+		:modelValue="showDrawer"
+		:width="400"
+		bordered
+		style="overflow-x: hidden;"
 	>
-		<!-- Server drawer -->
-		<server-drawer />
-		<!-- Menu items -->
-		<template #append>
-			<v-list>
-				<template v-for="(item, i) in getNavItems">
-					<!-- Grouped nav items -->
-					<v-list-group v-if="item.children && item.children.length > 0" :key="item.title" color="">
-						<template #activator>
-							<v-list-item-icon>
-								<v-icon>{{ item.icon }}</v-icon>
-							</v-list-item-icon>
-							<v-list-item-title>{{ $t(item.title) }}</v-list-item-title>
-						</template>
-						<v-list-item v-for="(child, j) in item.children" :key="j" link nuxt :to="child.link">
-							<v-list-item-icon>
-								<v-icon>{{ child.icon }}</v-icon>
-							</v-list-item-icon>
-
-							<v-list-item-content>
-								<v-list-item-title>{{ $t(child.title) }}</v-list-item-title>
-							</v-list-item-content>
-						</v-list-item>
-					</v-list-group>
-					<!-- Single nav item  -->
-					<v-list-item v-else :key="i" link nuxt :to="item.link">
-						<v-list-item-icon>
-							<v-icon>{{ item.icon }}</v-icon>
-						</v-list-item-icon>
-
-						<v-list-item-content>
-							<v-list-item-title>
-								{{ $t(item.title) }}
-							</v-list-item-title>
-						</v-list-item-content>
-						<v-list-item-action v-if="item.title.includes('downloads')">
-							<v-avatar v-if="downloadTaskCount > 0" class="red" size="32">
-								<b>{{ downloadTaskCount }}</b>
-							</v-avatar>
-						</v-list-item-action>
-					</v-list-item>
-				</template>
-			</v-list>
-		</template>
-	</v-navigation-drawer>
+		<q-col class="server-drawer-container">
+			<q-scroll>
+				<!-- Server drawer -->
+				<server-drawer/>
+			</q-scroll>
+		</q-col>
+		<q-col class="menu-items">
+			<q-separator/>
+			<!-- Menu items -->
+			<q-expansion-list :items="getNavItems"/>
+		</q-col>
+	</q-drawer>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
-import VNavigationDrawer from 'vuetify/lib/components/VNavigationDrawer/VNavigationDrawer.js';
-import { useSubscription } from '@vueuse/rxjs';
-import { DownloadService } from '@service';
+<script setup lang="ts">
+import {useSubscription} from '@vueuse/rxjs';
+import {DownloadService} from '@service';
 
 interface INavItem {
 	title: string;
@@ -68,119 +31,156 @@ interface INavItem {
 	children?: INavItem[];
 }
 
-@Component<NavigationDrawer>({})
-export default class NavigationDrawer extends Vue {
-	items: object[] = [];
-	downloadTaskCount = 0;
-	width: Number = 350;
-	borderSize: Number = 3;
 
-	@Prop({ required: true, type: Boolean })
-	readonly showDrawer!: boolean;
+const items = ref<object[]>([]);
 
-	@Ref('drawer')
-	readonly drawer!: VNavigationDrawer;
+const downloadTaskCount = ref(0);
 
-	get getNavItems(): INavItem[] {
-		return [
-			{
-				title: 'components.navigation-drawer.downloads',
-				icon: 'mdi-download',
-				link: '/downloads',
-			},
-			{
-				title: 'components.navigation-drawer.settings',
-				icon: 'mdi-cog',
-				link: '/settings',
-				children: [
-					{
-						title: 'components.navigation-drawer.accounts',
-						icon: 'mdi-account',
-						link: '/settings/accounts',
-					},
-					{
-						title: 'components.navigation-drawer.paths',
-						icon: 'mdi-folder',
-						link: '/settings/paths',
-					},
-					{
-						title: 'components.navigation-drawer.ui',
-						icon: 'mdi-television-guide',
-						link: '/settings/ui',
-					},
-					{
-						title: 'components.navigation-drawer.advanced',
-						icon: 'mdi-wrench',
-						link: '/settings/advanced',
-					},
-					{
-						title: 'components.navigation-drawer.debug',
-						icon: 'mdi-bug-outline',
-						link: '/settings/debug',
-					},
-				],
-			},
-		];
-	}
+const width = ref(350);
 
-	setBorderWidth(): void {
-		const i = this.drawer.$el.querySelector<HTMLElement>('.v-navigation-drawer__border');
-		if (i) {
-			i.style.width = this.borderSize + 'px';
-			i.style.cursor = 'ew-resize';
-		}
-	}
+const borderSize = ref(3);
 
-	setEvents() {
-		// https://codepen.io/oze4/pen/mojrZM
-		const minSize = this.borderSize;
-		const el = this.drawer.$el;
-		const drawerBorder = el.querySelector<HTMLElement>('.v-navigation-drawer__border');
-		const vm = this;
+const props = withDefaults(defineProps<{ showDrawer: boolean }>(), {
+	showDrawer: false,
+});
 
-		function resize(e) {
-			document.body.style.cursor = 'ew-resize';
-			if (e.clientX > 300) {
-				el.style.width = e.clientX + 'px';
-			}
-		}
+// @Ref('drawer')
+// readonly drawer!: VNavigationDrawer;
 
-		if (drawerBorder) {
-			drawerBorder.addEventListener(
-				'mousedown',
-				function (e) {
-					if (e.offsetX < minSize) {
-						// m_pos = e.x;
-						el.style.transition = 'initial';
-						document.addEventListener('mousemove', resize, false);
-					}
+const getNavItems = computed(() => {
+	return [
+		{
+			title: 'components.navigation-drawer.downloads',
+			icon: 'mdi-download',
+			link: '/downloads',
+			type: 'badge',
+			count: downloadTaskCount.value,
+		},
+		{
+			title: 'components.navigation-drawer.settings',
+			icon: 'mdi-cog',
+			link: '/settings',
+			children: [
+				{
+					title: 'components.navigation-drawer.accounts',
+					icon: 'mdi-account',
+					link: '/settings/accounts',
 				},
-				false,
-			);
-		}
+				{
+					title: 'components.navigation-drawer.paths',
+					icon: 'mdi-folder',
+					link: '/settings/paths',
+				},
+				{
+					title: 'components.navigation-drawer.ui',
+					icon: 'mdi-television-guide',
+					link: '/settings/ui',
+				},
+				{
+					title: 'components.navigation-drawer.advanced',
+					icon: 'mdi-wrench',
+					link: '/settings/advanced',
+				},
+				{
+					title: 'components.navigation-drawer.debug',
+					icon: 'mdi-bug-outline',
+					link: '/settings/debug',
+				},
+			],
+		},
+	];
+});
 
-		document.addEventListener(
-			'mouseup',
-			() => {
-				if (drawerBorder) {
-					el.style.transition = '';
-					vm.width = +el.style.width;
-				}
-				document.body.style.cursor = '';
-				document.removeEventListener('mousemove', resize, false);
-			},
-			false,
-		);
-	}
 
-	mounted(): void {
-		// this.setBorderWidth();
-		// this.setEvents();
-		useSubscription(
-			DownloadService.getDownloadList().subscribe((downloadTasks) => {
-				this.downloadTaskCount = downloadTasks?.length ?? -1;
-			}),
-		);
-	}
-}
+// function setBorderWidth(): void {
+// 	const i = this.drawer.$el.querySelector<HTMLElement>('.v-navigation-drawer__border');
+// 	if (i) {
+// 		i.style.width = this.borderSize + 'px';
+// 		i.style.cursor = 'ew-resize';
+// 	}
+// }
+//
+//
+// function setEvents() {
+// 	// https://codepen.io/oze4/pen/mojrZM
+// 	const minSize = borderSize.value;
+// 	const el = this.drawer.$el;
+// 	const drawerBorder = el.querySelector<HTMLElement>('.v-navigation-drawer__border');
+// 	const vm = this;
+//
+// 	function resize(e) {
+// 		document.body.style.cursor = 'ew-resize';
+// 		if (e.clientX > 300) {
+// 			el.style.width = e.clientX + 'px';
+// 		}
+// 	}
+//
+// 	if (drawerBorder) {
+// 		drawerBorder.addEventListener(
+// 			'mousedown',
+// 			function (e) {
+// 				if (e.offsetX < minSize) {
+// 					// m_pos = e.x;
+// 					el.style.transition = 'initial';
+// 					document.addEventListener('mousemove', resize, false);
+// 				}
+// 			},
+// 			false,
+// 		);
+// 	}
+//
+// 	document.addEventListener(
+// 		'mouseup',
+// 		() => {
+// 			if (drawerBorder) {
+// 				el.style.transition = '';
+// 				vm.width = +el.style.width;
+// 			}
+// 			document.body.style.cursor = '';
+// 			document.removeEventListener('mousemove', resize, false);
+// 		},
+// 		false,
+// 	);
+// }
+
+onMounted(() => {
+	items.value = getNavItems.value;
+	// this.setBorderWidth();
+	// this.setEvents();
+	useSubscription(
+		DownloadService.getDownloadList().subscribe((downloadTasks) => {
+			downloadTaskCount.value = downloadTasks.flat(4)?.length ?? -1;
+		}),
+	);
+});
+
+
 </script>
+
+<style lang="scss">
+@import "./src/assets/scss/_variables.scss";
+
+.navigation-drawer {
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+
+	.server-drawer-container {
+		overflow-y: auto;
+		overflow-x: hidden;
+
+		flex-grow: 3;
+	}
+
+	.menu-items {
+		flex-grow: 0;
+	}
+
+}
+
+.q-drawer {
+	background-color: transparent;
+}
+
+</style>

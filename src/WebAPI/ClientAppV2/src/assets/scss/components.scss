@@ -11,20 +11,6 @@ PageContainer.vue
 	z-index: 0;
 }
 
-/*
-NavigationDrawer.vue
-*/
-.navigation-drawer {
-	background: transparent;
-
-	&.--dark {
-		background: rgba(0, 0, 0, 0.8);
-	}
-
-	&.--light {
-		background: rgba(255, 255, 255, 0.8);
-	}
-}
 
 /*
 MediaPoster.vue

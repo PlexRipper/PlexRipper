@@ -1,157 +1,122 @@
 <template>
-	<vue-scroll>
-		<v-expansion-panels class="server-panels">
-			<!-- With valid server available -->
-			<template v-if="plexServers.length > 0">
-				<v-expansion-panel v-for="(server, i) in plexServers" :key="i">
-					<v-expansion-panel-header>
-						<v-row align="center" no-gutters class="flex-nowrap">
-							<v-col cols="auto">
-								<div class="server-name">
-									<status :value="isConnected(server)" />
-									{{ server.name }}
-								</div>
-							</v-col>
-							<v-spacer></v-spacer>
-							<!--	Open Server Settings	-->
-							<v-col cols="auto">
-								<v-btn icon @click.native.stop="openServerSettings(server.id)">
-									<v-icon>mdi-cog</v-icon>
-								</v-btn>
-							</v-col>
-						</v-row>
-					</v-expansion-panel-header>
-					<v-expansion-panel-content>
-						<v-list nav dense>
-							<v-list-item-group color="primary">
-								<!-- Render libraries -->
-								<template v-if="filterLibraries(server.id).length > 0">
-									<v-list-item
-										v-for="(library, y) in filterLibraries(server.id)"
-										:key="y"
-										@click="openMediaPage(library)"
-									>
-										<v-list-item-icon>
-											<media-type-icon :media-type="library.type" />
-										</v-list-item-icon>
-										<v-list-item-content>
-											<v-list-item-title> {{ library.title }}</v-list-item-title>
-										</v-list-item-content>
-									</v-list-item>
-								</template>
-								<!-- No libraries available -->
-								<template v-else>
-									<v-list-item>
-										<v-list-item-icon>
-											<media-type-icon media-type="" />
-										</v-list-item-icon>
-										<v-list-item-content>
-											<v-list-item-title>
-												{{ $t('components.server-drawer.no-libraries') }}
-											</v-list-item-title>
-										</v-list-item-content>
-									</v-list-item>
-								</template>
-							</v-list-item-group>
-						</v-list>
-					</v-expansion-panel-content>
-				</v-expansion-panel>
+	<template v-if="plexServers.length > 0">
+
+		<q-expansion-item v-for="(server, i) in plexServers" :icon="server.icon"
+											:label="server.name"
+											expand-icon="mdi-chevron-down">
+			<!-- Server header	-->
+			<template v-slot:header>
+				<q-item-section avatar>
+					<q-status :value="isConnected(server)"/>
+				</q-item-section>
+
+				<q-item-section>
+					<div class="server-name">
+						{{ server.name }}
+					</div>
+				</q-item-section>
+				<q-item-section side>
+					<q-btn icon="mdi-cog" flat @click.native.stop="openServerSettings(server.id)"/>
+				</q-item-section>
 			</template>
-			<!-- No servers available -->
+			<!-- Render libraries -->
+			<q-list v-if="filterLibraries(server.id).length > 0">
+				<q-item v-for="(library, y) in filterLibraries(server.id)" clickable v-ripple @click="openMediaPage(library)"
+								active-class="text-orange">
+					<q-item-section avatar>
+						<q-media-type-icon :media-type="library.type"/>
+					</q-item-section>
+					<q-item-section>{{ library.title }}</q-item-section>
+				</q-item>
+			</q-list>
+			<!-- No libraries available -->
 			<template v-else>
-				<v-expansion-panel>
-					<v-expansion-panel-header>{{ $t('components.server-drawer.no-servers.header') }}</v-expansion-panel-header>
-					<v-expansion-panel-content>
-						{{ $t('components.server-drawer.no-servers.description') }}
-					</v-expansion-panel-content>
-				</v-expansion-panel>
+				<q-item>
+					<q-item-section>{{ $t('components.server-drawer.no-libraries') }}</q-item-section>
+				</q-item>
 			</template>
-		</v-expansion-panels>
-		<server-dialog ref="serverDialog" />
-	</vue-scroll>
+		</q-expansion-item>
+
+		<!--		<server-dialog ref="serverDialog"/>-->
+	</template>
+	<!-- With valid server available -->
+
+	<!-- No servers available -->
+	<template v-else>
+		<q-item>
+			<q-item-section>{{ $t('components.server-drawer.no-servers.header') }}</q-item-section>
+		</q-item>
+		<q-item>
+			<q-item-section>{{ $t('components.server-drawer.no-servers.description') }}</q-item-section>
+		</q-item>
+	</template>
+
+
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Log from 'consola';
-import { Component, Ref, Vue } from 'vue-property-decorator';
-import { useSubscription } from '@vueuse/rxjs';
-import { LibraryService, ServerService } from '@service';
-import { PlexLibraryDTO, PlexMediaType, PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
+import {useSubscription} from '@vueuse/rxjs';
+import {LibraryService, ServerService} from '@service';
+import {PlexLibraryDTO, PlexMediaType, PlexServerConnectionDTO, PlexServerDTO, SyncServerProgress} from '@dto/mainApi';
 import ServerDialog from '@components/Navigation/ServerDialog.vue';
 import serverConnectionService from '~/service/serverConnectionService';
 
-interface INavItem {
-	title: string;
-	icon: string;
-	link: string;
+const router = useRouter();
+
+
+const plexServers = ref<PlexServerDTO[]>([]);
+const plexLibraries = ref<PlexLibraryDTO[]>([]);
+const connections = ref<PlexServerConnectionDTO[]>([]);
+
+
+// @Ref('serverDialog')
+// readonly serverDialogRef!: ServerDialog;
+
+
+function filterLibraries(plexServerId: number): PlexLibraryDTO[] {
+	return plexLibraries.value.filter((x) => x.plexServerId === plexServerId);
 }
 
-@Component
-export default class ServerDrawer extends Vue {
-	items: object[] = [];
-	plexServers: PlexServerDTO[] = [];
-	plexLibraries: PlexLibraryDTO[] = [];
-	connections: PlexServerConnectionDTO[] = [];
+function openServerSettings(serverId: number): void {
+	this.serverDialogRef.open(serverId);
+}
 
-	get getNavItems(): INavItem[] {
-		return [
-			{
-				title: 'Settings',
-				icon: 'mdi-settings',
-				link: '/settings',
-			},
-		];
-	}
-
-	@Ref('serverDialog')
-	readonly serverDialogRef!: ServerDialog;
-
-	filterLibraries(plexServerId: number): PlexLibraryDTO[] {
-		return this.plexLibraries.filter((x) => x.plexServerId === plexServerId);
-	}
-
-	openServerSettings(serverId: number): void {
-		this.serverDialogRef.open(serverId);
-	}
-
-	openMediaPage(library: PlexLibraryDTO): void {
-		switch (library.type) {
-			case PlexMediaType.Movie:
-				this.$router.push(`/movies/${library.id}`);
-				break;
-			case PlexMediaType.TvShow:
-				this.$router.push(`/tvshows/${library.id}`);
-				break;
-			case PlexMediaType.Music:
-				this.$router.push(`/music/${library.id}`);
-				break;
-			default:
-				Log.error(library.type + ' was neither a movie, tvshow or music library');
-		}
-	}
-
-	isConnected(server: PlexServerDTO) {
-		return this.connections.filter((x) => x.plexServerId === server.id).some((x) => x.latestConnectionStatus.isSuccessful);
-	}
-
-	mounted(): void {
-		useSubscription(
-			ServerService.getServers().subscribe((data: PlexServerDTO[]) => {
-				this.plexServers = data;
-			}),
-		);
-
-		useSubscription(
-			serverConnectionService.getServerConnections().subscribe((connections) => {
-				this.connections = connections;
-			}),
-		);
-
-		useSubscription(
-			LibraryService.getLibraries().subscribe((data: PlexLibraryDTO[]) => {
-				this.plexLibraries = data;
-			}),
-		);
+function openMediaPage(library: PlexLibraryDTO): void {
+	switch (library.type) {
+		case PlexMediaType.Movie:
+			router.push(`/movies/${library.id}`);
+			break;
+		case PlexMediaType.TvShow:
+			router.push(`/tvshows/${library.id}`);
+			break;
+		case PlexMediaType.Music:
+			router.push(`/music/${library.id}`);
+			break;
+		default:
+			Log.error(library.type + ' was neither a movie, tvshow or music library');
 	}
 }
+
+function isConnected(server: PlexServerDTO) {
+	return connections.value.filter((x) => x.plexServerId === server.id).some((x) => x.latestConnectionStatus.isSuccessful);
+}
+
+onMounted(() => {
+	useSubscription(
+		ServerService.getServers().subscribe((data: PlexServerDTO[]) => {
+			plexServers.value = data;
+		}));
+
+	useSubscription(
+		serverConnectionService.getServerConnections().subscribe((data) => {
+			connections.value = data;
+		}));
+
+	useSubscription(
+		LibraryService.getLibraries().subscribe((data: PlexLibraryDTO[]) => {
+			plexLibraries.value = data;
+		}));
+});
+
 </script>

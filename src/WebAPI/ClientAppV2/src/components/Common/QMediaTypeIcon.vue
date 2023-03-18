@@ -1,34 +1,18 @@
-<script lang="ts">
-// eslint-disable-next-line import/named
-import Vue, { VNode, CreateElement } from 'vue';
-import { RenderContext } from 'vue/types/options';
-import Convert from '@mediaOverview/MediaTable/types/Convert';
+<template>
+	<q-icon :name="icon" :size="size + 'px'"/>
+</template>
 
-export default Vue.extend({
-	functional: true,
-	props: {
-		mediaType: {
-			type: String,
-			default: '',
-		},
-		size: {
-			type: Number,
-			default: 24,
-		},
-	},
-	render(h: CreateElement, context: RenderContext): VNode {
-		return h(
-			'v-icon',
-			{
-				class: {
-					...(context.data.staticClass && {
-						[context.data.staticClass]: true,
-					}),
-				},
-				props: { size: context.props.size },
-			},
-			Convert.mediaTypeToIcon(context.props.mediaType),
-		);
-	},
+<script setup lang="ts">
+
+import Convert from "@class/Convert";
+import {PlexMediaType} from "@dto/mainApi";
+
+const props = withDefaults(defineProps<{ mediaType: string, size: number }>(), {
+	mediaType: '',
+	size: 24,
+});
+
+const icon = computed((): string => {
+	return Convert.mediaTypeToIcon(props.mediaType as PlexMediaType);
 });
 </script>

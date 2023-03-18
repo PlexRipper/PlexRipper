@@ -1,5 +1,5 @@
 <template>
-	<q-row justify="space-between" class="flex-nowrap" no-gutters>
+	<q-row justify="between" class="flex-nowrap" no-gutters>
 		<q-col cols="9">
 			<q-sub-header v-if="!editMode" class="form-label text-no-wrap">{{ newValue }}</q-sub-header>
 			<q-input v-else v-model="newValue"/>

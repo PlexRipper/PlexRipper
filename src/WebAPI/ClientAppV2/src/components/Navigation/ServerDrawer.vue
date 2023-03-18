@@ -1,9 +1,7 @@
 <template>
 	<template v-if="plexServers.length > 0">
 
-		<q-expansion-item v-for="server in plexServers" :icon="server.icon"
-											:label="server.name"
-											expand-icon="mdi-chevron-down">
+		<q-expansion-item v-for="server in plexServers" :label="server.name" expand-icon="mdi-chevron-down">
 			<!-- Server header	-->
 			<template v-slot:header>
 				<q-item-section avatar>

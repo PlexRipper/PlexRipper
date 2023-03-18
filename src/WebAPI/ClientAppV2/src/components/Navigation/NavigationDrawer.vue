@@ -23,6 +23,8 @@
 <script setup lang="ts">
 import {useSubscription} from '@vueuse/rxjs';
 import {DownloadService} from '@service';
+import {QExpansionListProps} from "@interfaces/components/QExpansionListProps";
+import {computed} from "#imports";
 
 interface INavItem {
 	title: string;
@@ -47,7 +49,7 @@ const props = withDefaults(defineProps<{ showDrawer: boolean }>(), {
 // @Ref('drawer')
 // readonly drawer!: VNavigationDrawer;
 
-const getNavItems = computed(() => {
+const getNavItems = computed((): QExpansionListProps[] => {
 	return [
 		{
 			title: 'components.navigation-drawer.downloads',

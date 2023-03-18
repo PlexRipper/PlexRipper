@@ -2,73 +2,66 @@
 	<span> {{ dateTimeString }}</span>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import { format } from 'date-fns';
-import { useSubscription } from '@vueuse/rxjs';
-import { SettingsService } from '@service';
+<script setup lang="ts">
+import {format} from 'date-fns';
+import {useSubscription} from '@vueuse/rxjs';
+import {SettingsService} from '@service';
 
-@Component
-export default class DateTime extends Vue {
-	@Prop({ required: true, type: String, default: '' })
-	readonly text!: string;
+const shortDateFormat = ref('dd/MM/yyyy');
+const longDateFormat = ref('EEEE, dd MMMM yyyy');
+const timeFormat = ref('HH:mm:ss');
 
-	@Prop({ required: false, type: Boolean, default: false })
-	readonly shortDate!: boolean;
+const props = withDefaults(defineProps<{ text: string, shortDate?: boolean, longDate?: boolean, time?: boolean }>(), {
+	text: '',
+	shortDate: false,
+	longDate: false,
+	time: true,
+});
 
-	@Prop({ required: false, type: Boolean, default: false })
-	readonly longDate!: boolean;
+const date = computed(() => {
+	return new Date(props.text);
+});
 
-	@Prop({ required: false, type: Boolean, default: true })
-	readonly time!: boolean;
-
-	shortDateFormat: string = 'dd/MM/yyyy';
-	longDateFormat: string = 'EEEE, dd MMMM yyyy';
-	timeFormat: string = 'HH:mm:ss';
-
-	get date(): Date {
-		return new Date(this.text);
+const dateTimeString = computed(() => {
+	if (!props.text) {
+		return '';
+	}
+	let string = '';
+	if (props.time) {
+		string += format(date.value, timeFormat.value);
+	}
+	if (props.time && (props.shortDate || props.longDate)) {
+		string += ' - ';
 	}
 
-	get dateTimeString(): string {
-		if (!this.text) {
-			return '';
-		}
-		let string = '';
-		if (this.time) {
-			string += format(this.date, this.timeFormat);
-		}
-		if (this.time && (this.shortDate || this.longDate)) {
-			string += ' - ';
-		}
-
-		if (this.shortDate && this.shortDateFormat) {
-			string += format(this.date, this.shortDateFormat);
-		}
-
-		if (this.longDate && this.longDateFormat) {
-			string += format(this.date, this.longDateFormat);
-		}
-
-		return string;
+	if (props.shortDate && shortDateFormat.value) {
+		string += format(date.value, shortDateFormat.value);
 	}
 
-	mounted(): void {
-		useSubscription(
-			SettingsService.getShortDateFormat().subscribe((value) => {
-				this.shortDateFormat = value;
-			}),
-		);
-		useSubscription(
-			SettingsService.getLongDateFormat().subscribe((value) => {
-				this.longDateFormat = value;
-			}),
-		);
-		useSubscription(
-			SettingsService.getTimeFormat().subscribe((value) => {
-				this.timeFormat = value;
-			}),
-		);
+	if (props.longDate && longDateFormat.value) {
+		string += format(date.value, longDateFormat.value);
 	}
-}
+
+	return string;
+});
+
+
+onMounted(() => {
+	useSubscription(
+		SettingsService.getShortDateFormat().subscribe((value) => {
+			shortDateFormat.value = value;
+		}),
+	);
+	useSubscription(
+		SettingsService.getLongDateFormat().subscribe((value) => {
+			longDateFormat.value = value;
+		}),
+	);
+	useSubscription(
+		SettingsService.getTimeFormat().subscribe((value) => {
+			timeFormat.value = value;
+		}),
+	);
+});
+
 </script>

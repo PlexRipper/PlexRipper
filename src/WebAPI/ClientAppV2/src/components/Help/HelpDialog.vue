@@ -1,51 +1,64 @@
 <template>
-	<v-dialog :value="show" max-width="500" @click:outside="close">
-		<v-card>
-			<v-card-title class="headline i18n-formatting">{{ $t(getHelpText.title) }}</v-card-title>
+	<q-dialog :value="show" max-width="500" @click:outside="close">
+		<q-card>
+			<q-card-section>
+				<div class="headline i18n-formatting">{{ $t(getHelpText.title) }}</div>
+			</q-card-section>
 
-			<v-card-text class="i18n-formatting">{{ $t(getHelpText.text) }} </v-card-text>
+
+			<!--	Help text	-->
+			<q-card-section>
+				<div class="i18n-formatting">{{ $t(getHelpText.text) }}</div>
+			</q-card-section>
+
+			<q-separator/>
 
 			<!--	Close action	-->
-			<v-card-actions>
-				<v-spacer></v-spacer>
-				<v-btn color="green darken-1" text @click="close"> {{ $t('general.commands.close') }} </v-btn>
-			</v-card-actions>
-		</v-card>
-	</v-dialog>
+			<q-card-actions>
+				<q-space/>
+				<q-btn flat :label="$t('general.commands.close')" @click="close">Action 2</q-btn>
+			</q-card-actions>
+
+		</q-card>
+	</q-dialog>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
 import IText from '@interfaces/IText';
 
-@Component
-export default class HelpDialog extends Vue {
-	@Prop({ required: true, type: Boolean })
-	readonly show!: boolean;
 
-	@Prop({ required: true, type: String })
-	readonly id!: string;
+const props = defineProps<{
+	show: boolean;
+	id: string;
+}>();
 
-	helpText: IText[] = [];
 
-	close(): void {
-		this.$emit('close');
-	}
+const emit = defineEmits<{
+	(e: 'close'): void;
+}>();
 
-	get getHelpText(): IText {
-		if (this.id === '') {
-			return {
-				id: 'help.default',
-				title: 'help.default.title',
-				text: 'help.default.text',
-			};
-		}
 
+const helpText = ref<IText[]>([]);
+
+const getHelpText = computed(() => {
+	if (props.id === '') {
 		return {
-			id: this.id,
-			title: `${this.id}.title`,
-			text: `${this.id}.text`,
+			id: 'help.default',
+			title: 'help.default.title',
+			text: 'help.default.text',
 		};
 	}
-}
+
+
+	return {
+		id: props.id,
+		title: `${props.id}.title`,
+		text: `${props.id}.text`,
+	};
+
+});
+
+const close = () => {
+	emit('close');
+};
 </script>

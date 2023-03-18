@@ -105,9 +105,15 @@ onMounted(() => {
 		}),
 	);
 });
+
+// TODO: Temp solution for this issue: https://github.com/Maiquu/nuxt-quasar/pull/7.
+// see styles => @import 'assets/scss/style.scss';
+// and re-enable in nuxt.config.ts
 </script>
 
 <style lang="scss">
+@import 'assets/scss/style.scss';
+
 body {
 	&.body--dark {
 		.page-container {

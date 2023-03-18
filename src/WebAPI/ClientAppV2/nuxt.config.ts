@@ -20,12 +20,12 @@ export default defineNuxtConfig({
 		},
 	},
 	modules: [
+		// Doc: https://github.com/Maiquu/nuxt-quasar
+		'nuxt-quasar-ui',
 		'@vueuse/nuxt',
 		'@nuxt/devtools',
 		// Doc: https://i18n.nuxtjs.org/
 		'@nuxtjs/i18n',
-		// Doc: https://github.com/Maiquu/nuxt-quasar
-		'nuxt-quasar-ui',
 		'@vue-macros/nuxt',
 	],
 	quasar: {
@@ -67,9 +67,9 @@ export default defineNuxtConfig({
 		strategy: 'no_prefix',
 	},
 	/*
-	 ** Global CSS: https://go.nuxtjs.dev/config-css
+	 ** Global CSS: https://nuxt.com/docs/api/configuration/nuxt-config#css
 	 */
-	css: ['@/assets/scss/style.scss'],
+	// css: ['quasar/src/css/index.sass', '@/assets/scss/style.scss'],
 	alias: {
 		// Doc: https://nuxt.com/docs/api/configuration/nuxt-config#alias
 		'@class': fileURLToPath(new URL('./src/types/class/', import.meta.url)),

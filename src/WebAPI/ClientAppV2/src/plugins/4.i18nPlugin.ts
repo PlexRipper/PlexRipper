@@ -14,7 +14,6 @@ export default defineNuxtPlugin((nuxtApp) => {
 	return {
 		provide: {
 			messages: (): LocaleMessageObject => messages(ctx),
-			// 'ts': (path: string, values?: MessageType[]): string => ctx.app.i18n.t(path, values).toString(),
 			getMessage: (path: string): any => objectPath.get(messages(ctx), path),
 		},
 	};

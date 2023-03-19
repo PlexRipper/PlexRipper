@@ -1,0 +1,39 @@
+
+body {
+	&.body--dark {
+		h1, h2, h3, h4, h5, h6, p, ul, li {
+			color: white;
+		}
+	}
+
+	&.body--light {
+		h1, h2, h3, h4, h5, h6, p, ul, li {
+			color: black;
+		}
+	}
+}
+
+h1 {
+	text-align: center;
+	padding: 10px 0;
+}
+
+h2 {
+	text-align: center;
+	padding: 10px 0;
+}
+
+h4 {
+	margin: 8px 0;
+	font-size: 17px;
+	font-weight: bold;
+}
+
+p {
+	font-size: 16px;
+}
+
+ul li {
+	font-size: 16px;
+	margin: 10px 0;
+}

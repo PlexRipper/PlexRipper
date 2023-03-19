@@ -1,7 +1,7 @@
 @import 'variables';
 @import "lib/q-status";
 @import "lib/q-overwrite";
-
+@import "typography";
 //@import './components.scss';
 //@import './overwriting.scss';
 //@import './pages.scss';
@@ -11,49 +11,6 @@ default
 */
 html {
 	overflow-y: hidden;
-}
-
-h1 {
-	&.theme--dark {
-		color: white;
-	}
-
-	&.theme--light {
-		color: black;
-	}
-
-	text-align: center;
-	padding: 10px 0;
-}
-
-h2 {
-	&.theme--dark {
-		color: white;
-	}
-
-	&.theme--light {
-		color: black;
-	}
-
-	text-align: center;
-	padding: 10px 0;
-}
-
-p {
-	&.theme--dark {
-		color: white;
-	}
-
-	&.theme--light {
-		color: black;
-	}
-
-	font-size: 16px;
-}
-
-ul li {
-	font-size: 16px;
-	margin: 10px 0;
 }
 
 

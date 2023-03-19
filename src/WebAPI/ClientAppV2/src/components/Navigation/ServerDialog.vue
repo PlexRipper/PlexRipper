@@ -1,6 +1,6 @@
 <template>
-	<q-dialog v-model="show" full-width @click:outside="close">
-		<q-card v-if="plexServer">
+	<q-dialog v-model="show" @click:outside="close">
+		<q-card v-if="plexServer" class="server-dialog-content">
 			<q-card-section>
 				<div class="text-h6">
 					{{ $t('components.server-dialog.header', {serverName: plexServer.name}) }}
@@ -75,11 +75,10 @@
 			<q-separator/>
 
 			<q-card-actions align="right">
-				<q-btn flat label="Decline" color="primary" v-close-popup/>
-				<q-btn flat label="Accept" color="primary" v-close-popup/>
+				<q-btn flat :label="$t('general.commands.close')" color="primary" v-close-popup/>
 			</q-card-actions>
 		</q-card>
-		<q-card v-else>
+		<q-card v-else class="server-dialog-content">
 			<h1>{{ $t('components.server-dialog.no-servers-error') }}</h1>
 		</q-card>
 	</q-dialog>
@@ -148,3 +147,12 @@ defineExpose({
 })
 
 </script>
+
+<style lang="scss">
+
+.server-dialog-content {
+	max-width: 80vw !important;
+	min-width: 70vw !important;
+}
+
+</style>

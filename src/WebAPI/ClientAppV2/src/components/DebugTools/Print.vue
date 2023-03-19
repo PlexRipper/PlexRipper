@@ -1,28 +1,28 @@
 <template>
-	<v-expansion-panels>
-		<v-expansion-panel>
-			<v-expansion-panel-header> {{ title }} </v-expansion-panel-header>
-			<v-expansion-panel-content :style="{ height: object ? height + 'px' : '0px' }">
-				<vue-scroll>
-					<pre>{{ object }}</pre>
-				</vue-scroll>
-			</v-expansion-panel-content>
-		</v-expansion-panel>
-	</v-expansion-panels>
+	<q-expansion-item
+		switch-toggle-side
+		expand-separator
+		:label="title"
+	>
+		<q-card :style="{ height: object ? height + 'px' : '0px' }">
+			<q-card-section>
+				<pre>{{ object }}</pre>
+			</q-card-section>
+		</q-card>
+	</q-expansion-item>
 </template>
 
-<script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+<script setup lang="ts">
 
-@Component
-export default class Print extends Vue {
-	@Prop({ required: false, type: String, default: 'Print' })
-	readonly title!: string;
+import {withDefaults, defineProps} from 'vue';
 
-	@Prop({ required: true })
-	readonly object!: any;
+const props = withDefaults(defineProps<{
+	title?: string;
+	object: any;
+	height?: number;
+}>(), {
+	title: 'Print',
+	height: 500,
+});
 
-	@Prop({ required: false, type: Number, default: 500 })
-	readonly height!: number;
-}
 </script>

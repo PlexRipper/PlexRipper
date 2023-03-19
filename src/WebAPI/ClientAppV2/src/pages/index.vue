@@ -1,6 +1,10 @@
 <template>
 	<div>
-		<h1>Text</h1>
+		<q-card>
+			<q-card-section>
+				<h1 class="custom-class-test">Text</h1>
+			</q-card-section>
+		</q-card>
 		<div class="q-pa-md q-gutter-sm">
 			<q-btn color="white" text-color="black" label="Standard" />
 			<q-btn color="primary" label="Primary" />
@@ -11,12 +15,10 @@
 			<q-btn color="purple" label="Purple" />
 			<q-btn color="black" label="Black" />
 		</div>
-		<div>
-			<WarningButton :width="500" />
+		<div style="padding: 100px">
+			<ButtonsDebug />
 		</div>
 	</div>
 </template>
 
-<script setup lang="ts">
-import WarningButton from '@components/Buttons/WarningButton.vue';
-</script>
+<script setup lang="ts"></script>

@@ -1,11 +1,11 @@
 <template>
-	<v-row justify="center">
-		<v-col cols="11">
+	<q-row justify="center">
+		<q-col cols="11">
 			<!-- Circular Mode progress -->
 			<template v-if="circularMode">
-				<v-row justify="center" no-gutters class="my-3">
-					<v-col cols="auto">
-						<v-progress-circular
+				<q-row justify="center" no-gutters class="my-3">
+					<q-col cols="auto">
+						<q-circular-progress
 							:size="100"
 							:rotate="-90"
 							:width="15"
@@ -17,30 +17,30 @@
 								<span v-if="percentage < 100">
 									<b>{{ getPercentage }}%</b>
 								</span>
-								<v-icon v-else large>mdi-check</v-icon>
+								<q-icon v-else large>mdi-check</q-icon>
 							</template>
-						</v-progress-circular>
-					</v-col>
-				</v-row>
+						</q-circular-progress>
+					</q-col>
+				</q-row>
 				<!-- Progress text -->
-				<v-row v-if="text" justify="center" no-gutters>
-					<v-col cols="auto">
+				<q-row v-if="text" justify="center" no-gutters>
+					<q-col cols="auto">
 						<h3>{{ text }}</h3>
-					</v-col>
-				</v-row>
+					</q-col>
+				</q-row>
 			</template>
 			<!-- Linear Mode Progress -->
 			<template v-else>
 				<!-- Progress text -->
-				<v-row v-if="text" justify="center" no-gutters>
-					<v-col cols="auto">
+				<q-row v-if="text" justify="center" no-gutters>
+					<q-col cols="auto">
 						<h2>{{ text }}</h2>
-					</v-col>
-				</v-row>
+					</q-col>
+				</q-row>
 				<!-- Progress bar -->
-				<v-row justify="center" class="my-3" no-gutters>
-					<v-col>
-						<v-progress-linear
+				<q-row justify="center" class="my-3" no-gutters>
+					<q-col>
+						<q-linear-progress
 							:value="Math.min(getPercentage, 100)"
 							height="20"
 							class="mx-1"
@@ -48,41 +48,32 @@
 							stream
 							color="red"
 							v-bind="$attrs"
-							v-on="$listeners"
 						>
 							<template #default="{}">
 								<strong>{{ getPercentage }}%</strong>
 							</template>
-						</v-progress-linear>
-					</v-col>
-				</v-row>
+						</q-linear-progress>
+					</q-col>
+				</q-row>
 			</template>
-		</v-col>
-	</v-row>
+		</q-col>
+	</q-row>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
+import {defineProps, computed} from 'vue';
 
-@Component<ProgressComponent>({})
-export default class ProgressComponent extends Vue {
-	@Prop({ required: false, type: String, default: '' })
-	readonly text!: string;
+const props = defineProps<{
+	text?: string;
+	percentage: number;
+	circularMode?: boolean;
+	completed?: boolean;
+	indeterminate?: boolean;
+}>();
 
-	@Prop({ required: true, type: Number })
-	readonly percentage!: number;
 
-	@Prop({ required: false, type: Boolean, default: false })
-	readonly circularMode!: boolean;
+const getPercentage = computed((): number => {
+	return Math.round(props.percentage * 100) / 100;
+});
 
-	@Prop({ required: false, type: Boolean, default: false })
-	readonly completed!: boolean;
-
-	@Prop({ required: false, type: Boolean, default: false })
-	readonly indeterminate!: boolean;
-
-	get getPercentage(): number {
-		return Math.round(this.percentage * 100) / 100;
-	}
-}
 </script>

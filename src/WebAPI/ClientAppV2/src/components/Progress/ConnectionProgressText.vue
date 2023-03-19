@@ -22,13 +22,11 @@
 	</div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
+<script setup lang="ts">
+import {ServerConnectionCheckStatusProgressDTO} from '@dto/mainApi';
 
-@Component
-export default class ConnectionProgressText extends Vue {
-	@Prop({ required: true, type: Object as () => ServerConnectionCheckStatusProgressDTO })
-	progress!: ServerConnectionCheckStatusProgressDTO;
-}
+const props = defineProps<{
+	progress?: ServerConnectionCheckStatusProgressDTO;
+}>();
+
 </script>

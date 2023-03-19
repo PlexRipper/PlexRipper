@@ -1,7 +1,7 @@
 <template>
-	<v-dialog v-model="visible" width="800" scrollable>
-		<v-card class="account-setup-progress">
-			<v-card-title>
+	<q-dialog v-model="visible" width="800" scrollable>
+		<q-card class="account-setup-progress">
+			<q-card-section>
 				<!-- The total progress -->
 				<progress-component
 					:percentage="getTotalPercentage"
@@ -10,249 +10,235 @@
 					circular-mode
 					:indeterminate="getMergedPlexServers.length === 0"
 				/>
-			</v-card-title>
-			<v-divider></v-divider>
-			<vue-scroll>
-				<v-card-text>
-					<v-list v-if="getMergedPlexServers.length > 0" expand class="server-progress-list">
-						<template v-for="(server, index) in getMergedPlexServers">
-							<!--	Plex Server -->
-							<v-list-group :key="`server-${index}`" :value="false">
-								<template #activator>
-									<v-list-item-content>
-										<!--	Plex Server Title -->
-										<v-list-item-title>
-											<v-row>
-												<v-col cols="auto">
-													<!--	Plex Server Progress Icon -->
-													<boolean-progress
-														v-if="!serverProgress(server).completed"
-														:loading="!serverProgress(server).completed"
-														:success="serverProgress(server).connectionSuccessful"
-													/>
-													<status v-else :value="serverStatus(server)" />
-												</v-col>
-												<v-col cols="4">
+			</q-card-section>
+
+			<q-separator/>
+
+			<q-card-section>
+				<q-list v-if="getMergedPlexServers.length > 0" expand class="server-progress-list">
+					<template v-for="server in getMergedPlexServers">
+						<!--	Plex Server -->
+						<q-expansion-item
+							expand-separator
+							:model-value="false"
+						>
+							<!--	Plex Server Title -->
+							<template v-slot:header>
+								<q-item-section avatar>
+									<!--	Plex Server Progress Icon -->
+									<boolean-progress
+										v-if="!getServerProgress(server).completed"
+										:loading="!getServerProgress(server).completed"
+										:success="getServerProgress(server).connectionSuccessful"
+									/>
+									<q-status v-else :value="serverStatus(server)"/>
+								</q-item-section>
+
+								<q-item-section>
 													<span class="server-title">
 														{{ server.name }}
 													</span>
-													<v-col cols="4">
-														<ConnectionProgressText :progress="serverProgress(server)" />
-													</v-col>
-												</v-col>
-											</v-row>
-										</v-list-item-title>
-									</v-list-item-content>
-								</template>
+								</q-item-section>
 
-								<!-- Plex Server Connection Details	-->
-								<template v-if="server.plexServerConnections.length > 0">
-									<v-list-item
-										v-for="(connection, index2) in server.plexServerConnections"
-										:key="index2"
-										class="ml-4"
-									>
-										<v-list-item-content>
-											<!--	Plex Server Connection Status Icon -->
-											<v-list-item-title>
-												<v-row>
-													<v-col cols="auto">
-														<status
-															:value="
+								<q-item-section side>
+									<ConnectionProgressText :progress="getServerProgress(server)"/>
+								</q-item-section>
+							</template>
+							<template v-slot:default>
+								<q-list>
+									<q-item v-if="server.plexServerConnections.length > 0"
+													v-for="connection in server.plexServerConnections">
+										<!--	Plex Server Connection Status Icon -->
+										<q-item-section avatar>
+											<q-status
+												:value="
 																connection.progress
 																	? connection.progress.connectionSuccessful &&
 																	  connection.progress.completed
 																	: false
 															"
-														/>
-													</v-col>
-													<v-col cols="4">
-														{{ connection.url }}
-													</v-col>
-													<v-col cols="4">
-														<ConnectionProgressText :progress="connection.progress" />
-													</v-col>
-												</v-row>
-											</v-list-item-title>
-										</v-list-item-content>
+											/>
+										</q-item-section>
+										<!-- Plex Server Connection Url	-->
+										<q-item-section>
+											{{ connection.url }}
+										</q-item-section>
+										<!-- Plex Server Connection Progress	-->
+										<q-item-section>
+											<ConnectionProgressText :progress="connection.progress"/>
+										</q-item-section>
 										<!--	Plex Server Progress Status Icon -->
-										<v-list-item-icon>
+										<q-item-section>
 											<boolean-progress
 												:loading="!connection.progress.completed"
 												:success="connection.progress.connectionSuccessful"
 											/>
-										</v-list-item-icon>
-									</v-list-item>
-								</template>
+										</q-item-section>
+									</q-item>
+									<!-- No Plex Server Connection -->
+									<q-item v-else>
+										<q-item-section>
+											<q-item-label>No Connections found for this Plex server!</q-item-label>
+										</q-item-section>
+									</q-item>
+								</q-list>
+							</template>
+						</q-expansion-item>
+					</template>
+				</q-list>
 
-								<v-list-item v-else>
-									<v-list-item-title> No Connections found for this Plex server!</v-list-item-title>
-								</v-list-item>
-							</v-list-group>
-							<v-divider :key="`hr-${index}`" />
-						</template>
-					</v-list>
+				<!-- No Server Warning	-->
+				<q-row v-else justify="center">
+					<q-col cols="auto">
+						<h2>
+							{{ noServerWarning }}
+						</h2>
+					</q-col>
+				</q-row>
+			</q-card-section>
 
-					<!-- No Server Warning	-->
-					<v-row v-else justify="center">
-						<v-col cols="auto">
-							<h2>
-								{{ noServerWarning }}
-							</h2>
-						</v-col>
-					</v-row>
-				</v-card-text>
-			</vue-scroll>
-			<v-card-actions>
-				<v-row justify="end">
-					<v-col cols="auto">
-						<HideButton @click="visible = false" />
-					</v-col>
-				</v-row>
-			</v-card-actions>
-		</v-card>
-	</v-dialog>
+			<q-card-actions align="right">
+				<q-row justify="end">
+					<q-col cols="auto">
+						<HideButton @click="visible = false"/>
+					</q-col>
+				</q-row>
+			</q-card-actions>
+		</q-card>
+	</q-dialog>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Log from 'consola';
-import { Component, Vue } from 'vue-property-decorator';
-import { clamp } from 'lodash-es';
-import { useSubscription } from '@vueuse/rxjs';
-import { filter, switchMap, tap } from 'rxjs/operators';
-import type { JobStatusUpdateDTO, PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
-import { JobStatus, JobTypes, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
-import { generatePlexServers, MockConfig } from '@mock';
-import { AccountService, BackgroundJobsService, ServerService, SignalrService } from '@service';
+import {computed, ref} from 'vue';
+import {clamp} from 'lodash-es';
+import {useSubscription} from '@vueuse/rxjs';
+import {filter, switchMap, tap} from 'rxjs/operators';
+import type {JobStatusUpdateDTO, PlexAccountDTO, PlexServerDTO} from '@dto/mainApi';
+import {JobStatus, JobTypes, ServerConnectionCheckStatusProgressDTO} from '@dto/mainApi';
+import {AccountService, BackgroundJobsService, ServerService, SignalrService} from '@service';
+import {useI18n} from "#imports";
 
-@Component
-export default class CheckServerConnectionsProgress extends Vue {
-	visible: boolean = false;
+const visible = ref(false);
+const plexServers = ref<PlexServerDTO[]>([]);
+const connectionProgress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
+const account = ref<PlexAccountDTO | null>(null);
+const t = useI18n().t;
 
-	plexServers: PlexServerDTO[] = [];
+const getCompletedCount = computed(() => {
+	return connectionProgress.value.filter((progress) => progress.completed).length;
+});
 
-	connectionProgress: ServerConnectionCheckStatusProgressDTO[] = [];
+const getTotalPercentage = computed(() => {
+	if (connectionProgress.value.length === 0) {
+		return 0;
+	}
+	return clamp(
+		Math.round((getCompletedCount.value / connectionProgress.value.length) * 100),
+		0,
+		100
+	);
+});
 
-	account: PlexAccountDTO | null = null;
 
-	get getProgressText(): string {
-		if (this.plexServers.length === 0) {
-			return `Retrieving accessible servers for account ${this.account?.displayName ?? ''}.`;
-		}
-		if (this.getTotalPercentage === 100) {
-			return this.$ts('components.check-server-connections-progress.completed', {
-				length: this.plexServers.length,
-			});
-		}
-		return this.$ts('components.check-server-connections-progress.checking', {
-			completed: this.getCompletedCount,
-			total: this.getMergedPlexServers.length,
+const noServerWarning = computed(() => {
+	if (account.value) {
+		return t('components.check-server-connections-progress.no-servers', {
+			displayName: account.value.displayName,
 		});
 	}
+	return t('components.check-server-connections-progress.no-servers-no-account');
+});
 
-	get getCompletedCount(): number {
-		return this.getMergedPlexServers.filter((x) => x.plexServerConnections.every((y) => y.progress?.completed ?? false))
-			.length;
+const getProgressText = computed(() => {
+	if (plexServers.value.length === 0) {
+		return `Retrieving accessible servers for account ${account.value?.displayName ?? ''}.`;
 	}
-
-	get getTotalPercentage(): number {
-		return clamp((this.getCompletedCount / this.plexServers.length) * 100, 0, 100);
+	if (getTotalPercentage.value === 100) {
+		return t('components.check-server-connections-progress.completed', {
+			length: plexServers.value.length,
+		});
 	}
+	return t('components.check-server-connections-progress.checking', {
+		completed: getCompletedCount.value,
+		total: getMergedPlexServers.value.length,
+	});
+});
 
-	get noServerWarning(): string {
-		return this.$t('components.account-setup-progress.no-server-warning', {
-			displayName: this.account ? this.account.displayName : this.$t('general.commands.unknown'),
-		}).toString();
-	}
 
-	serverStatus(plexServer: PlexServerDTO): boolean {
-		return plexServer.plexServerConnections.some(
-			(x) => (x.progress?.connectionSuccessful ?? false) && (x.progress?.completed ?? false),
-		);
-	}
+const serverStatus = (plexServer: PlexServerDTO): boolean => {
+	return plexServer.plexServerConnections.some(
+		(x) => (x.progress?.connectionSuccessful ?? false) && (x.progress?.completed ?? false)
+	);
+};
 
-	serverProgress(plexServer: PlexServerDTO): ServerConnectionCheckStatusProgressDTO {
+
+function getServerProgress(plexServer: PlexServerDTO): ServerConnectionCheckStatusProgressDTO {
+	return {
+		completed: plexServer.plexServerConnections.every((x) => x.progress?.completed ?? false),
+		connectionSuccessful: serverStatus(plexServer),
+		plexServerId: plexServer.id,
+		statusCode: 0,
+		message: '',
+		retryAttemptCount: 0,
+		retryAttemptIndex: 0,
+		timeToNextRetry: 0,
+		plexServerConnectionId: 0,
+	};
+};
+
+const getMergedPlexServers = computed(() => {
+	return plexServers.value.map((server) => {
 		return {
-			completed: plexServer.plexServerConnections.every((x) => x.progress?.completed ?? false),
-			connectionSuccessful: this.serverStatus(plexServer),
-			plexServerId: plexServer.id,
-			statusCode: 0,
-			message: '',
-			retryAttemptCount: 0,
-			retryAttemptIndex: 0,
-			timeToNextRetry: 0,
-			plexServerConnectionId: 0,
+			...server,
+			plexServerConnections: server.plexServerConnections.map((connection) => {
+				return {
+					...connection,
+					progress: connectionProgress.value.find((x) => x.plexServerConnectionId === connection.id) ?? {
+						// Add default progress object
+						plexServerConnectionId: connection.id,
+						plexServerId: connection.plexServerId,
+						connectionSuccessful: false,
+						completed: false,
+						message: 'No progress yet',
+						retryAttemptCount: 0,
+						retryAttemptIndex: 0,
+						statusCode: 0,
+						timeToNextRetry: 0,
+					},
+				};
+			}),
 		};
-	}
+	});
+});
 
-	get getMergedPlexServers(): PlexServerDTO[] {
-		return this.plexServers.map((server) => {
-			return {
-				...server,
-				plexServerConnections: server.plexServerConnections.map((connection) => {
-					return {
-						...connection,
-						progress: this.connectionProgress.find((x) => x.plexServerConnectionId === connection.id) ?? {
-							// Add default progress object
-							plexServerConnectionId: connection.id,
-							plexServerId: connection.plexServerId,
-							connectionSuccessful: false,
-							completed: false,
-							message: 'No progress yet',
-							retryAttemptCount: 0,
-							retryAttemptIndex: 0,
-							statusCode: 0,
-							timeToNextRetry: 0,
-						},
-					};
-				}),
-			};
-		});
-	}
 
-	mounted(): void {
-		const xxx = false;
-		if (xxx) {
-			const config: Partial<MockConfig> = {
-				seed: 267398,
-				plexAccountCount: 2,
-				plexServerCount: 5,
-				connectionHasProgress: true,
-			};
-			this.plexServers = generatePlexServers(config);
+onMounted(() => {
 
-			for (const plexServer of this.plexServers) {
-				for (const connection of plexServer.plexServerConnections) {
-					if (connection.progress) {
-						this.connectionProgress.push(connection.progress);
-					}
-				}
-			}
-		} else {
-			useSubscription(
-				BackgroundJobsService.getJobs(JobTypes.InspectPlexServerByPlexAccountIdJob)
-					.pipe(
-						tap((value) => Log.info('Background jobs fired', value)),
-						filter((update) => update.status === JobStatus.Running),
-						tap(() => (this.visible = true)),
-						switchMap((update: JobStatusUpdateDTO) => AccountService.getAccount(update.primaryKeyValue)),
-						tap((account) => (this.account = account)),
-						switchMap(() => ServerService.refreshPlexServers()),
-						switchMap(() => ServerService.getServersByPlexAccountId(this.account?.id ?? 0)),
-					)
-					.subscribe((servers) => {
-						this.plexServers = servers;
-					}),
-			);
+	useSubscription(
+		BackgroundJobsService.getJobs(JobTypes.InspectPlexServerByPlexAccountIdJob)
+			.pipe(
+				tap((value) => Log.info('Background jobs fired', value)),
+				filter((update) => update.status === JobStatus.Running),
+				tap(() => (visible.value = true)),
+				switchMap((update: JobStatusUpdateDTO) => AccountService.getAccount(update.primaryKeyValue)),
+				tap((newAccount) => (account.value = newAccount)),
+				switchMap(() => ServerService.refreshPlexServers()),
+				switchMap(() => ServerService.getServersByPlexAccountId(account.value?.id ?? 0)),
+			)
+			.subscribe((servers) => {
+				plexServers.value = servers;
+			}),
+	);
 
-			useSubscription(
-				SignalrService.getAllServerConnectionProgress().subscribe((connections) => {
-					this.connectionProgress = connections;
-				}),
-			);
-		}
-	}
-}
+	useSubscription(
+		SignalrService.getAllServerConnectionProgress().subscribe((connections) => {
+			connectionProgress.value = connections;
+		}),
+	);
+});
+
+
 </script>
 
 <style lang="scss">

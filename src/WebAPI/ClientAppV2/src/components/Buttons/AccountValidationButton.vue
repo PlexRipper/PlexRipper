@@ -1,9 +1,8 @@
 <template>
-	<q-btn v-bind="props" :style="{ width: props.width + 'px' }" outline glossy />
+	<BaseButton v-bind="props"/>
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
 
 interface AccountValidationBtnProps {
 	width?: number;
@@ -12,7 +11,15 @@ interface AccountValidationBtnProps {
 	textId?: string;
 	disabled?: boolean;
 	loading?: boolean;
+	outline?: boolean | undefined;
+	glossy?: boolean | undefined;
+
+	color?: string;
 }
 
-const props = defineProps<AccountValidationBtnProps>();
+const props = withDefaults(defineProps<AccountValidationBtnProps>(), {
+	width: 50,
+	outline: true,
+	glossy: true,
+});
 </script>

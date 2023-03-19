@@ -1,9 +1,9 @@
 <template>
-	<BaseButton v-bind="props" class="warning-btn" label="Standard" />
+	<BaseButton v-bind="props"/>
 </template>
 
 <script setup lang="ts">
-import { withDefaults, defineProps } from 'vue';
+import {withDefaults, defineProps} from 'vue';
 import BaseButton from '@buttons/BaseButton.vue';
 
 interface WarningBtnProps {
@@ -14,10 +14,11 @@ interface WarningBtnProps {
 }
 
 const props = withDefaults(defineProps<WarningBtnProps>(), {
-	width: 1360,
+	width: 50,
 	icon: 'mdi-alert',
 	cy: '',
 	label: 'Warning',
+	color: 'amber-10',
 });
 </script>
 

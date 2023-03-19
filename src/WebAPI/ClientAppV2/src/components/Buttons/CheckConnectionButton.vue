@@ -1,27 +1,14 @@
 <template>
-	<BaseButton v-bind="props" />
+	<BaseButton v-bind="props"/>
 </template>
 
 <script setup lang="ts">
-import { withDefaults, defineProps } from 'vue';
+import {withDefaults, defineProps} from 'vue';
 import BaseButton from '@buttons/BaseButton.vue';
+import {IBaseButtonProps} from "~/types/props/base-button/IBaseButtonProps";
 
-interface CheckConnectionBtnProps {
-	disabled?: boolean;
-	loading?: boolean;
-	icon?: string;
-	cy?: string;
-	label?: string;
-}
-
-const props = withDefaults(defineProps<CheckConnectionBtnProps>(), {
-	width: 130,
-	cy: '',
-	label: 'Warning',
-	textId: 'cancel',
-	iconAlign: 'Right',
-	iconOnly: true,
-	outlined: false,
+const props = withDefaults(defineProps<IBaseButtonProps>(), {
+	outline: false,
 	icon: 'mdi-cloud-search-outline',
 	tooltipId: 'general.commands.check-connection',
 });

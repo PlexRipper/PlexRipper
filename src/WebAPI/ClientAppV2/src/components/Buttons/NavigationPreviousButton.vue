@@ -1,9 +1,9 @@
 <template>
-	<BaseButton v-bind="props" />
+	<BaseButton v-bind="props"/>
 </template>
 
 <script setup lang="ts">
-import { withDefaults, defineProps } from 'vue';
+import {withDefaults, defineProps} from 'vue';
 import BaseButton from '@buttons/BaseButton.vue';
 
 interface CheckConnectionBtnProps {
@@ -18,7 +18,7 @@ const props = withDefaults(defineProps<CheckConnectionBtnProps>(), {
 	width: 130,
 	cy: '',
 	block: true,
-	outlined: true,
+	outline: true,
 	textId: 'back',
 	icon: 'mdi-arrow-left',
 });

@@ -1,6 +1,6 @@
 <template>
 	<q-circular-progress
-		v-if="!loading"
+		v-if="loading"
 		indeterminate
 		rounded
 		size="32px"

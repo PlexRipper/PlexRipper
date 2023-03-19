@@ -52,6 +52,9 @@ export default defineNuxtConfig({
 		typeCheck: true,
 		strict: true,
 	},
+	macros: {
+		betterDefine: true,
+	},
 	i18n: {
 		lazy: true,
 		langDir: './lang/',

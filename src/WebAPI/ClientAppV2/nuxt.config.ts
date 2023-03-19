@@ -53,6 +53,7 @@ export default defineNuxtConfig({
 		strict: true,
 	},
 	macros: {
+		// Enabled betterDefine to allow importing interfaces into defineProps
 		betterDefine: true,
 	},
 	i18n: {

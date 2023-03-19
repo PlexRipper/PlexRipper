@@ -18,12 +18,14 @@ module.exports = {
 		// Reason: This allows nested index.ts to pass through exports without naming them
 		'import/export': 'off',
 		'vue/html-indent': ['error', 'tab'], // enforce tabs in template
+		// Reason: Opinionated not to have useless empty lines with just a closing tag
+		'vue/html-closing-bracket-newline': ['error', { multiline: 'never' }],
 		indent: ['error', 'tab'], // enforce tabs in script and js files
 		'vue/component-name-in-template-casing': [
 			'error',
 			'PascalCase',
 			{
-				registeredComponentsOnly: false,
+				registeredComponentsOnly: true,
 				ignores: [],
 			},
 		],

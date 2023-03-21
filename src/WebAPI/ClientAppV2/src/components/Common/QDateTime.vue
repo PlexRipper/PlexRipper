@@ -3,15 +3,15 @@
 </template>
 
 <script setup lang="ts">
-import {format} from 'date-fns';
-import {useSubscription} from '@vueuse/rxjs';
-import {SettingsService} from '@service';
+import { format } from 'date-fns';
+import { useSubscription } from '@vueuse/rxjs';
+import { SettingsService } from '@service';
 
 const shortDateFormat = ref('dd/MM/yyyy');
 const longDateFormat = ref('EEEE, dd MMMM yyyy');
 const timeFormat = ref('HH:mm:ss');
 
-const props = withDefaults(defineProps<{ text: string, shortDate?: boolean, longDate?: boolean, time?: boolean }>(), {
+const props = withDefaults(defineProps<{ text: string; shortDate?: boolean; longDate?: boolean; time?: boolean }>(), {
 	text: '',
 	shortDate: false,
 	longDate: false,
@@ -45,7 +45,6 @@ const dateTimeString = computed(() => {
 	return string;
 });
 
-
 onMounted(() => {
 	useSubscription(
 		SettingsService.getShortDateFormat().subscribe((value) => {
@@ -63,5 +62,4 @@ onMounted(() => {
 		}),
 	);
 });
-
 </script>

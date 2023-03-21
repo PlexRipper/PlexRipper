@@ -1,11 +1,10 @@
 <template>
 	<template v-if="plexServers.length > 0">
-
 		<q-expansion-item v-for="server in plexServers" :label="server.name" expand-icon="mdi-chevron-down">
 			<!-- Server header	-->
-			<template v-slot:header>
+			<template #header>
 				<q-item-section avatar>
-					<q-status :value="isConnected(server)"/>
+					<q-status :value="isConnected(server)" />
 				</q-item-section>
 
 				<q-item-section>
@@ -14,15 +13,19 @@
 					</div>
 				</q-item-section>
 				<q-item-section side>
-					<q-btn icon="mdi-cog" flat @click.native.stop="openServerSettings(server.id)"/>
+					<q-btn icon="mdi-cog" flat @click.native.stop="openServerSettings(server.id)" />
 				</q-item-section>
 			</template>
 			<!-- Render libraries -->
 			<q-list v-if="filterLibraries(server.id).length > 0">
-				<q-item v-for="(library, y) in filterLibraries(server.id)" clickable v-ripple @click="openMediaPage(library)"
-								active-class="text-orange">
+				<q-item
+					v-for="(library, y) in filterLibraries(server.id)"
+					v-ripple
+					clickable
+					active-class="text-orange"
+					@click="openMediaPage(library)">
 					<q-item-section avatar>
-						<q-media-type-icon :media-type="library.type"/>
+						<q-media-type-icon :media-type="library.type" />
 					</q-item-section>
 					<q-item-section>{{ library.title }}</q-item-section>
 				</q-item>
@@ -35,7 +38,7 @@
 			</template>
 		</q-expansion-item>
 
-		<ServerDialog ref="serverDialog"/>
+		<ServerDialog ref="serverDialog" />
 	</template>
 	<!-- With valid server available -->
 
@@ -48,27 +51,23 @@
 			<q-item-section>{{ $t('components.server-drawer.no-servers.description') }}</q-item-section>
 		</q-item>
 	</template>
-
-
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
-import {useSubscription} from '@vueuse/rxjs';
-import {LibraryService, ServerService} from '@service';
-import {PlexLibraryDTO, PlexMediaType, PlexServerConnectionDTO, PlexServerDTO, SyncServerProgress} from '@dto/mainApi';
+import { useSubscription } from '@vueuse/rxjs';
+import { LibraryService, ServerService } from '@service';
+import { PlexLibraryDTO, PlexMediaType, PlexServerConnectionDTO, PlexServerDTO, SyncServerProgress } from '@dto/mainApi';
 import type ServerDialog from '@components/Navigation/ServerDialog.vue';
 import serverConnectionService from '~/service/serverConnectionService';
 
 const router = useRouter();
 
-
 const plexServers = ref<PlexServerDTO[]>([]);
 const plexLibraries = ref<PlexLibraryDTO[]>([]);
 const connections = ref<PlexServerConnectionDTO[]>([]);
 
-const serverDialog = ref<InstanceType<typeof ServerDialog> | null>(null)
-
+const serverDialog = ref<InstanceType<typeof ServerDialog> | null>(null);
 
 function filterLibraries(plexServerId: number): PlexLibraryDTO[] {
 	return plexLibraries.value.filter((x) => x.plexServerId === plexServerId);
@@ -106,17 +105,19 @@ onMounted(() => {
 	useSubscription(
 		ServerService.getServers().subscribe((data: PlexServerDTO[]) => {
 			plexServers.value = data;
-		}));
+		}),
+	);
 
 	useSubscription(
 		serverConnectionService.getServerConnections().subscribe((data) => {
 			connections.value = data;
-		}));
+		}),
+	);
 
 	useSubscription(
 		LibraryService.getLibraries().subscribe((data: PlexLibraryDTO[]) => {
 			plexLibraries.value = data;
-		}));
+		}),
+	);
 });
-
 </script>

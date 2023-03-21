@@ -1,21 +1,14 @@
 <template>
 	<q-col cols="auto" class="d-flex flex-column pt-2">
-		<q-btn
-			v-for="letter in alphabet"
-			:key="letter"
-			:width="20"
-			class="navigation-btn filled"
-			flat
-			@click="scrollTo(letter)"
-		>
+		<q-btn v-for="letter in alphabet" :key="letter"
+:width="20" class="navigation-btn filled" flat @click="scrollTo(letter)">
 			<span>{{ letter }}</span>
 		</q-btn>
 	</q-col>
 </template>
 
 <script setup lang="ts">
-
-import ITreeViewItem from "@class/ITreeViewItem";
+import ITreeViewItem from '@class/ITreeViewItem';
 
 const props = withDefaults(defineProps<{ items: ITreeViewItem[] }>(), {
 	items: () => [],
@@ -24,8 +17,8 @@ const props = withDefaults(defineProps<{ items: ITreeViewItem[] }>(), {
 const emit = defineEmits<{ (e: 'scroll-to', letter: string): void }>();
 
 const alphabet = computed((): string[] => {
-	const numeric: string = '!@0123456789';
-	const alphabet: string = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	const numeric = '!@0123456789';
+	const alphabet = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	const availableNavigation: string[] = [];
 
 	// Check for occurrence of title with numeric/special character
@@ -42,12 +35,9 @@ const alphabet = computed((): string[] => {
 		}
 	}
 	return availableNavigation;
-
 });
 
 function scrollTo(letter: string): void {
 	emit('scroll-to', letter);
 }
-
-
 </script>

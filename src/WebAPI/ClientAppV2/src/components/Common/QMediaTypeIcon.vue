@@ -1,13 +1,12 @@
 <template>
-	<q-icon :name="icon" :size="size + 'px'"/>
+	<q-icon :name="icon" :size="size + 'px'" />
 </template>
 
 <script setup lang="ts">
+import Convert from '@class/Convert';
+import { PlexMediaType } from '@dto/mainApi';
 
-import Convert from "@class/Convert";
-import {PlexMediaType} from "@dto/mainApi";
-
-const props = withDefaults(defineProps<{ mediaType: string, size?: number }>(), {
+const props = withDefaults(defineProps<{ mediaType: string; size?: number }>(), {
 	mediaType: '',
 	size: 24,
 });

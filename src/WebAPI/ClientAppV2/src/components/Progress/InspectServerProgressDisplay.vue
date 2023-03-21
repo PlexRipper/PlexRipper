@@ -2,17 +2,17 @@
 	<tr>
 		<!--	Server name and status	-->
 		<td style="width: 30%">
-			<q-status :value="progress ? progress.connectionSuccessful && progress.completed : false"/>
+			<q-status :value="progress ? progress.connectionSuccessful && progress.completed : false" />
 			{{ plexServerName }}
 		</td>
 		<!--	Status icon	-->
 		<td style="width: 10%">
 			<!--	Plex Connection Status Progress Icon -->
-			<BooleanProgress :loading="!progress || !progress.completed" :success="progress.connectionSuccessful"/>
+			<BooleanProgress :loading="!progress || !progress.completed" :success="progress.connectionSuccessful" />
 		</td>
 		<!--	Current Action	-->
 		<td style="width: 30%">
-			<ConnectionProgressText :progress="progress"/>
+			<ConnectionProgressText :progress="progress" />
 		</td>
 		<!--	Error message	-->
 		<td style="width: 30%">
@@ -26,12 +26,11 @@
 </template>
 
 <script setup lang="ts">
-import {ref, defineProps, defineEmits, onMounted} from 'vue';
-import {useSubscription} from '@vueuse/rxjs';
-import {SignalrService} from '@service';
-import {InspectServerProgressDTO} from '@dto/mainApi';
+import { ref, defineProps, defineEmits, onMounted } from 'vue';
+import { useSubscription } from '@vueuse/rxjs';
+import { SignalrService } from '@service';
+import { InspectServerProgressDTO } from '@dto/mainApi';
 import ConnectionProgressText from '@components/Progress/ConnectionProgressText.vue';
-
 
 const props = defineProps<{
 	plexServerId: number;
@@ -54,5 +53,4 @@ onMounted(() => {
 		}),
 	);
 });
-
 </script>

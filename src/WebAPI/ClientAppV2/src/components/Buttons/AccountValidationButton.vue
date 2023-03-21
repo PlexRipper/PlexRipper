@@ -1,9 +1,8 @@
 <template>
-	<BaseButton v-bind="props"/>
+	<BaseButton v-bind="props" />
 </template>
 
 <script setup lang="ts">
-
 interface AccountValidationBtnProps {
 	width?: number;
 	icon?: string;

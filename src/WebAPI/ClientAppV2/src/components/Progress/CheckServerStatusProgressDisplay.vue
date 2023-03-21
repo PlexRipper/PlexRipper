@@ -2,11 +2,11 @@
 	<q-item>
 		<!--	Status icon	-->
 		<q-item-section avatar>
-			<BooleanProgress :loading="!progress || !progress.completed" :success="progress && progress.connectionSuccessful"/>
+			<BooleanProgress :loading="!progress || !progress.completed" :success="progress && progress.connectionSuccessful" />
 		</q-item-section>
 		<!--	Current Action	-->
 		<q-item-section>
-			<ConnectionProgressText :progress="progress"/>
+			<ConnectionProgressText :progress="progress" />
 		</q-item-section>
 		<!--	Error message	-->
 		<q-item-section>
@@ -20,11 +20,10 @@
 </template>
 
 <script setup lang="ts">
-import type {PlexServerDTO, ServerConnectionCheckStatusProgressDTO} from '@dto/mainApi';
+import type { PlexServerDTO, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 
 const props = defineProps<{
 	plexServer: PlexServerDTO;
 	progress?: ServerConnectionCheckStatusProgressDTO;
 }>();
-
 </script>

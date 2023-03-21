@@ -10,30 +10,30 @@
 			<template v-if="isSetupPage">
 				<!--                <vue-scroll>-->
 				<q-page-container>
-					<router-view/>
+					<router-view />
 				</q-page-container>
 				<!--                </vue-scroll>-->
 			</template>
 			<!--	Use for everything else	-->
 			<template v-else>
-				<app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer"/>
-				<NavigationDrawer :show-drawer="showNavigationDrawerState"/>
+				<app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer" />
+				<NavigationDrawer :show-drawer="showNavigationDrawerState" />
 				<!--                <notifications-drawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer"/>-->
 				<q-page-container class="page-container">
-					<router-view/>
+					<router-view />
 				</q-page-container>
-				<footer/>
+				<footer />
 			</template>
 		</template>
-		<Background :hide-background="isNoBackground"/>
+		<Background :hide-background="isNoBackground" />
 	</q-layout>
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
-import {useSubscription} from '@vueuse/rxjs';
+import { useSubscription } from '@vueuse/rxjs';
 import NotificationsDrawer from '@overviews/NotificationsDrawer.vue';
-import {AlertService, HelpService} from '@service';
+import { AlertService, HelpService } from '@service';
 import IAlert from '@interfaces/IAlert';
 import PageLoadOverlay from '@components/General/PageLoadOverlay.vue';
 import globalService from '@service/globalService';

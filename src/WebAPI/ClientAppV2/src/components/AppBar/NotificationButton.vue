@@ -5,8 +5,7 @@
 			color="green"
 			floating
 			transparent
-			:label="getVisibleNotifications.length"
-		/>
+			:label="getVisibleNotifications.length" />
 	</q-btn>
 </template>
 

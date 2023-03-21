@@ -12,7 +12,9 @@
 			<v-row justify="center">
 				<v-col cols="auto">
 					<h1>
-						<NuxtLink to="/">{{ $t('pages.error.return-link') }}</NuxtLink>
+						<NuxtLink to="/">
+							{{ $t('pages.error.return-link') }}
+						</NuxtLink>
 					</h1>
 				</v-col>
 			</v-row>
@@ -21,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import {defineProps} from 'vue';
+import { defineProps } from 'vue';
 
 const props = defineProps<{ error: any }>();
 

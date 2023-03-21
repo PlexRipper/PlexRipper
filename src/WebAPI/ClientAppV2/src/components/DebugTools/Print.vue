@@ -1,9 +1,5 @@
 <template>
-	<q-expansion-item
-		switch-toggle-side
-		expand-separator
-		:label="title"
-	>
+	<q-expansion-item switch-toggle-side expand-separator :label="title">
 		<q-card :style="{ height: object ? height + 'px' : '0px' }">
 			<q-card-section>
 				<pre>{{ object }}</pre>
@@ -13,16 +9,17 @@
 </template>
 
 <script setup lang="ts">
+import { withDefaults, defineProps } from 'vue';
 
-import {withDefaults, defineProps} from 'vue';
-
-const props = withDefaults(defineProps<{
-	title?: string;
-	object: any;
-	height?: number;
-}>(), {
-	title: 'Print',
-	height: 500,
-});
-
+withDefaults(
+	defineProps<{
+		title?: string;
+		object: any;
+		height?: number;
+	}>(),
+	{
+		title: 'Print',
+		height: 500,
+	},
+);
 </script>

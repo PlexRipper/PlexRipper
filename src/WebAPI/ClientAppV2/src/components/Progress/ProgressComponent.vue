@@ -11,13 +11,12 @@
 							:width="15"
 							:value="getPercentage"
 							:indeterminate="indeterminate"
-							color="red"
-						>
+							color="red">
 							<template v-if="!indeterminate">
 								<span v-if="percentage < 100">
 									<b>{{ getPercentage }}%</b>
 								</span>
-								<q-icon v-else large>mdi-check</q-icon>
+								<q-icon v-else large> mdi-check </q-icon>
 							</template>
 						</q-circular-progress>
 					</q-col>
@@ -47,8 +46,7 @@
 							striped
 							stream
 							color="red"
-							v-bind="$attrs"
-						>
+							v-bind="$attrs">
 							<template #default="{}">
 								<strong>{{ getPercentage }}%</strong>
 							</template>
@@ -61,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import {defineProps, computed} from 'vue';
+import { defineProps, computed } from 'vue';
 
 const props = defineProps<{
 	text?: string;
@@ -71,9 +69,7 @@ const props = defineProps<{
 	indeterminate?: boolean;
 }>();
 
-
 const getPercentage = computed((): number => {
 	return Math.round(props.percentage * 100) / 100;
 });
-
 </script>

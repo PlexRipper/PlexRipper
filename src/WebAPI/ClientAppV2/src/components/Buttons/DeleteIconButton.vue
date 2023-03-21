@@ -1,9 +1,9 @@
 <template>
-	<BaseButton v-bind="props"/>
+	<BaseButton v-bind="props" />
 </template>
 
 <script setup lang="ts">
-import {withDefaults, defineProps} from 'vue';
+import { withDefaults, defineProps } from 'vue';
 import BaseButton from '@buttons/BaseButton.vue';
 
 interface ConfirmBtnProps {

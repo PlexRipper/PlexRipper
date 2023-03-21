@@ -19,5 +19,6 @@ const props = withDefaults(defineProps<CheckConnectionBtnProps>(), {
 	cy: '',
 	textId: 'hide',
 	icon: 'mdi-eye-off-outline',
+	label: '',
 });
 </script>

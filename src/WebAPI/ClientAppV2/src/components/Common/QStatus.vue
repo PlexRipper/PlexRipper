@@ -1,6 +1,6 @@
 <template>
-	<span class="status-indicator" v-if="pulse" :[status]="true" pulse/>
-	<span class="status-indicator" v-else :[status]="true"/>
+	<span v-if="pulse" class="status-indicator" :[status]="true" pulse />
+	<span v-else class="status-indicator" :[status]="true" />
 </template>
 
 <script setup lang="ts">
@@ -14,5 +14,4 @@ const status = computed(() => {
 const pulse = computed(() => {
 	return props.value;
 });
-
 </script>

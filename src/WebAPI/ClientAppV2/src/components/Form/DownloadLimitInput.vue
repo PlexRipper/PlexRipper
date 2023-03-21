@@ -3,29 +3,21 @@
 		<q-col :cols="8">
 			<q-slider
 				:model-value="sliderValue"
-				@change="updateDownloadLimit"
 				:min="0"
 				:step="500"
 				:max="10000"
 				snap
 				label
 				style="margin-top: 8px"
-
-			/>
+				@change="updateDownloadLimit" />
 		</q-col>
 		<q-col>
-			<q-input
-				:model-value="sliderValue"
-				type="number"
-				suffix="kB/s"
-				@update="updateDownloadLimit"
-			/>
+			<q-input :model-value="sliderValue" type="number" suffix="kB/s" @update="updateDownloadLimit" />
 		</q-col>
 	</q-row>
 </template>
 
 <script setup lang="ts">
-
 const props = defineProps<{
 	plexServerId: number;
 	downloadSpeedLimit: number;
@@ -33,11 +25,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{
 	(e: 'change', value: number): void;
-}>()
+}>();
 
 const mouseEvent = ref(false);
 const sliderValue = ref(0);
-
 
 const downloadSpeedLimit = computed(() => {
 	return props.downloadSpeedLimit ?? 0;
@@ -57,6 +48,4 @@ function updateDownloadLimit(value: number): void {
 	}
 	emit('change', value);
 }
-
 </script>
-

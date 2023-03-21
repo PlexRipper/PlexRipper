@@ -4,14 +4,14 @@
 			<span class="form-label text-no-wrap">{{ getLabel }}</span>
 		</q-col>
 		<q-col v-if="hasHelpPage" cols="auto">
-			<q-btn icon="mdi-help-circle-outline" @click="openDialog" style="margin: 6px"/>
+			<q-btn icon="mdi-help-circle-outline" style="margin: 6px" @click="openDialog" />
 		</q-col>
 	</q-row>
 </template>
 
 <script setup lang="ts">
-import {useI18n} from '#imports'
-import {HelpService} from '@service';
+import { useI18n } from '#imports';
+import { HelpService } from '@service';
 
 interface IHelp {
 	label: string;
@@ -19,7 +19,7 @@ interface IHelp {
 	text: string;
 }
 
-const {$getMessage} = useNuxtApp()
+const { $getMessage } = useNuxtApp();
 
 const props = defineProps<{
 	labelId?: string;
@@ -41,9 +41,7 @@ const hasHelpPage = computed(() => {
 	return false;
 });
 
-
 function openDialog(): void {
 	HelpService.openHelpDialog(props.helpId);
 }
-
 </script>

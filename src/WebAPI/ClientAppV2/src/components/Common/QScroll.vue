@@ -1,17 +1,16 @@
 <template>
 	<q-scroll-area class="fit" :thumb-style="thumbStyle" :bar-style="barStyle">
-		<slot/>
+		<slot />
 	</q-scroll-area>
 </template>
 
 <script setup lang="ts">
-
 const thumbStyle = {
 	right: '4px',
 	borderRadius: '5px',
 	backgroundColor: '#d20000',
 	width: '5px',
-	opacity: 0.75
+	opacity: 0.75,
 };
 
 const barStyle = {
@@ -19,6 +18,6 @@ const barStyle = {
 	borderRadius: '9px',
 	backgroundColor: 'rgba(0,0,0,0)',
 	width: '9px',
-	opacity: 0.2
+	opacity: 0.2,
 };
 </script>

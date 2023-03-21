@@ -1,24 +1,23 @@
 <template>
 	<div>
 		<FormRow form-id="help.server-dialog.server-commands.inspect-server">
-			<BaseButton :disabled="syncLoading" :loading="inspectLoading" text-id="inspect-server" @click="inspectServer"/>
+			<BaseButton :disabled="syncLoading" :loading="inspectLoading" text-id="inspect-server" @click="inspectServer" />
 		</FormRow>
 		<FormRow form-id="help.server-dialog.server-commands.sync-server-libraries">
 			<BaseButton
 				:disabled="inspectLoading"
 				:loading="syncLoading"
 				text-id="sync-server-libraries"
-				@click="syncServerLibraries"
-			/>
+				@click="syncServerLibraries" />
 		</FormRow>
 	</div>
 </template>
 
 <script setup lang="ts">
-import {ref, onUnmounted} from '#imports'
-import {useSubscription} from '@vueuse/rxjs';
-import {inspectPlexServer, syncPlexServer} from '@api/plexServerApi';
-import type {PlexServerDTO} from '@dto/mainApi';
+import { useSubscription } from '@vueuse/rxjs';
+import { ref, onUnmounted } from '#imports';
+import { inspectPlexServer, syncPlexServer } from '@api/plexServerApi';
+import type { PlexServerDTO } from '@dto/mainApi';
 
 const props = defineProps<{
 	plexServer: PlexServerDTO;
@@ -27,7 +26,6 @@ const props = defineProps<{
 
 const syncLoading = ref(false);
 const inspectLoading = ref(false);
-
 
 function syncServerLibraries(): void {
 	syncLoading.value = true;
@@ -50,6 +48,5 @@ function inspectServer(): void {
 onUnmounted(() => {
 	syncLoading.value = false;
 	inspectLoading.value = false;
-})
-
+});
 </script>

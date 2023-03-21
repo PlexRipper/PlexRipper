@@ -8,56 +8,51 @@
 					:completed="getTotalPercentage === 100"
 					:text="getProgressText"
 					circular-mode
-					:indeterminate="getMergedPlexServers.length === 0"
-				/>
+					:indeterminate="getMergedPlexServers.length === 0" />
 			</q-card-section>
 
-			<q-separator/>
+			<q-separator />
 
 			<q-card-section>
 				<q-list v-if="getMergedPlexServers.length > 0" expand class="server-progress-list">
 					<template v-for="server in getMergedPlexServers">
 						<!--	Plex Server -->
-						<q-expansion-item
-							expand-separator
-							:model-value="false"
-						>
+						<q-expansion-item expand-separator :model-value="false">
 							<!--	Plex Server Title -->
-							<template v-slot:header>
+							<template #header>
 								<q-item-section avatar>
 									<!--	Plex Server Progress Icon -->
 									<boolean-progress
 										v-if="!getServerProgress(server).completed"
 										:loading="!getServerProgress(server).completed"
-										:success="getServerProgress(server).connectionSuccessful"
-									/>
-									<q-status v-else :value="serverStatus(server)"/>
+										:success="getServerProgress(server).connectionSuccessful" />
+									<q-status v-else :value="serverStatus(server)" />
 								</q-item-section>
 
 								<q-item-section>
-													<span class="server-title">
-														{{ server.name }}
-													</span>
+									<span class="server-title">
+										{{ server.name }}
+									</span>
 								</q-item-section>
 
 								<q-item-section side>
-									<ConnectionProgressText :progress="getServerProgress(server)"/>
+									<ConnectionProgressText :progress="getServerProgress(server)" />
 								</q-item-section>
 							</template>
-							<template v-slot:default>
+							<template #default>
 								<q-list>
-									<q-item v-if="server.plexServerConnections.length > 0"
-													v-for="connection in server.plexServerConnections">
+									<q-item
+										v-for="connection in server.plexServerConnections"
+										v-if="server.plexServerConnections.length > 0">
 										<!--	Plex Server Connection Status Icon -->
 										<q-item-section avatar>
 											<q-status
 												:value="
-																connection.progress
-																	? connection.progress.connectionSuccessful &&
-																	  connection.progress.completed
-																	: false
-															"
-											/>
+													connection.progress
+														? connection.progress.connectionSuccessful &&
+														  connection.progress.completed
+														: false
+												" />
 										</q-item-section>
 										<!-- Plex Server Connection Url	-->
 										<q-item-section>
@@ -65,14 +60,13 @@
 										</q-item-section>
 										<!-- Plex Server Connection Progress	-->
 										<q-item-section>
-											<ConnectionProgressText :progress="connection.progress"/>
+											<ConnectionProgressText :progress="connection.progress" />
 										</q-item-section>
 										<!--	Plex Server Progress Status Icon -->
 										<q-item-section>
 											<boolean-progress
 												:loading="!connection.progress.completed"
-												:success="connection.progress.connectionSuccessful"
-											/>
+												:success="connection.progress.connectionSuccessful" />
 										</q-item-section>
 									</q-item>
 									<!-- No Plex Server Connection -->
@@ -100,7 +94,7 @@
 			<q-card-actions align="right">
 				<q-row justify="end">
 					<q-col cols="auto">
-						<HideButton @click="visible = false"/>
+						<HideButton @click="visible = false" />
 					</q-col>
 				</q-row>
 			</q-card-actions>
@@ -110,14 +104,14 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import {computed, ref} from 'vue';
-import {clamp} from 'lodash-es';
-import {useSubscription} from '@vueuse/rxjs';
-import {filter, switchMap, tap} from 'rxjs/operators';
-import type {JobStatusUpdateDTO, PlexAccountDTO, PlexServerDTO} from '@dto/mainApi';
-import {JobStatus, JobTypes, ServerConnectionCheckStatusProgressDTO} from '@dto/mainApi';
-import {AccountService, BackgroundJobsService, ServerService, SignalrService} from '@service';
-import {useI18n} from "#imports";
+import { computed, ref } from 'vue';
+import { clamp } from 'lodash-es';
+import { useSubscription } from '@vueuse/rxjs';
+import { filter, switchMap, tap } from 'rxjs/operators';
+import type { JobStatusUpdateDTO, PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
+import { JobStatus, JobTypes, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
+import { AccountService, BackgroundJobsService, ServerService, SignalrService } from '@service';
+import { useI18n } from '#imports';
 
 const visible = ref(false);
 const plexServers = ref<PlexServerDTO[]>([]);
@@ -133,13 +127,8 @@ const getTotalPercentage = computed(() => {
 	if (connectionProgress.value.length === 0) {
 		return 0;
 	}
-	return clamp(
-		Math.round((getCompletedCount.value / connectionProgress.value.length) * 100),
-		0,
-		100
-	);
+	return clamp(Math.round((getCompletedCount.value / connectionProgress.value.length) * 100), 0, 100);
 });
-
 
 const noServerWarning = computed(() => {
 	if (account.value) {
@@ -165,13 +154,11 @@ const getProgressText = computed(() => {
 	});
 });
 
-
 const serverStatus = (plexServer: PlexServerDTO): boolean => {
 	return plexServer.plexServerConnections.some(
-		(x) => (x.progress?.connectionSuccessful ?? false) && (x.progress?.completed ?? false)
+		(x) => (x.progress?.connectionSuccessful ?? false) && (x.progress?.completed ?? false),
 	);
 };
-
 
 function getServerProgress(plexServer: PlexServerDTO): ServerConnectionCheckStatusProgressDTO {
 	return {
@@ -185,7 +172,7 @@ function getServerProgress(plexServer: PlexServerDTO): ServerConnectionCheckStat
 		timeToNextRetry: 0,
 		plexServerConnectionId: 0,
 	};
-};
+}
 
 const getMergedPlexServers = computed(() => {
 	return plexServers.value.map((server) => {
@@ -212,9 +199,7 @@ const getMergedPlexServers = computed(() => {
 	});
 });
 
-
 onMounted(() => {
-
 	useSubscription(
 		BackgroundJobsService.getJobs(JobTypes.InspectPlexServerByPlexAccountIdJob)
 			.pipe(
@@ -237,8 +222,6 @@ onMounted(() => {
 		}),
 	);
 });
-
-
 </script>
 
 <style lang="scss">

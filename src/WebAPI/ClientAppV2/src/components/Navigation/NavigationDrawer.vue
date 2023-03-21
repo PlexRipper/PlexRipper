@@ -1,30 +1,24 @@
 <template>
-	<q-drawer
-		class="navigation-drawer"
-		:modelValue="showDrawer"
-		:width="400"
-		bordered
-		style="overflow-x: hidden;"
-	>
+	<q-drawer class="navigation-drawer" :model-value="showDrawer" :width="400" bordered style="overflow-x: hidden">
 		<q-col class="server-drawer-container">
 			<q-scroll>
 				<!-- Server drawer -->
-				<server-drawer/>
+				<server-drawer />
 			</q-scroll>
 		</q-col>
 		<q-col class="menu-items">
-			<q-separator/>
+			<q-separator />
 			<!-- Menu items -->
-			<q-expansion-list :items="getNavItems"/>
+			<q-expansion-list :items="getNavItems" />
 		</q-col>
 	</q-drawer>
 </template>
 
 <script setup lang="ts">
-import {useSubscription} from '@vueuse/rxjs';
-import {DownloadService} from '@service';
-import {QExpansionListProps} from "@interfaces/components/QExpansionListProps";
-import {computed} from "#imports";
+import { useSubscription } from '@vueuse/rxjs';
+import { DownloadService } from '@service';
+import { QExpansionListProps } from '@interfaces/components/QExpansionListProps';
+import { computed } from '#imports';
 
 interface INavItem {
 	title: string;
@@ -32,7 +26,6 @@ interface INavItem {
 	link: string;
 	children?: INavItem[];
 }
-
 
 const items = ref<object[]>([]);
 
@@ -103,12 +96,10 @@ onMounted(() => {
 		}),
 	);
 });
-
-
 </script>
 
 <style lang="scss">
-@import "./src/assets/scss/_variables.scss";
+@import './src/assets/scss/_variables.scss';
 
 .navigation-drawer {
 	height: 100vh;
@@ -126,11 +117,9 @@ onMounted(() => {
 	.menu-items {
 		flex-grow: 0;
 	}
-
 }
 
 .q-drawer {
 	background-color: transparent;
 }
-
 </style>

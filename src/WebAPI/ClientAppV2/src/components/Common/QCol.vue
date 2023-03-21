@@ -1,11 +1,10 @@
 <template>
 	<div :class="classConfig">
-		<slot/>
+		<slot />
 	</div>
 </template>
 
 <script setup lang="ts">
-
 interface QColProps {
 	cols?: string | number;
 	offset?: string | number;
@@ -28,5 +27,4 @@ const classConfig = computed(() => {
 		[`align-${props.align}`]: true,
 	};
 });
-
 </script>

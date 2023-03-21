@@ -1,8 +1,8 @@
 @import '../variables';
-@import "../mixins";
+@import '../mixins';
 
 .q-dark {
-	background-color: transparent
+	background-color: transparent;
 }
 
 .q-card {
@@ -18,7 +18,6 @@
 	font-weight: bold;
 }
 
-
 .q-dialog {
 	.q-card {
 		@extend .default-border;
@@ -32,6 +31,5 @@
 		&.q-card--dark {
 			background-color: $dark-dialog-background-color;
 		}
-
 	}
 }

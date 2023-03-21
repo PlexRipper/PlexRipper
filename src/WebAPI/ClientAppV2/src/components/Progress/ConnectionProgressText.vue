@@ -23,10 +23,9 @@
 </template>
 
 <script setup lang="ts">
-import {ServerConnectionCheckStatusProgressDTO} from '@dto/mainApi';
+import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 
 const props = defineProps<{
 	progress?: ServerConnectionCheckStatusProgressDTO;
 }>();
-
 </script>

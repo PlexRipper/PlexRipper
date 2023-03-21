@@ -1,80 +1,78 @@
 <template>
 	<q-row align="center" justify="around">
 		<q-col cols="6">
-			<AccountValidationButton/>
+			<AccountValidationButton />
 		</q-col>
 		<q-col cols="6">
-			<AddIconButton/>
+			<AddIconButton />
 		</q-col>
 		<q-col cols="6">
-			<BaseButton/>
+			<BaseButton />
 		</q-col>
 		<q-col cols="6">
-			<CancelButton/>
+			<CancelButton />
 		</q-col>
 		<q-col cols="6">
-			<CheckConnectionButton :loading="checkConnectionButton" @click="checkConnectionButton = !checkConnectionButton"/>
+			<CheckConnectionButton :loading="checkConnectionButton" @click="checkConnectionButton = !checkConnectionButton" />
 			{{ checkConnectionButton }}
 		</q-col>
 		<q-col cols="6">
-			<ConfirmButton/>
+			<ConfirmButton />
 		</q-col>
 		<q-col cols="6">
-			<DebugButton/>
+			<DebugButton />
 		</q-col>
 		<q-col cols="6">
-			<DeleteButton/>
+			<DeleteButton />
 		</q-col>
 		<q-col cols="6">
-			<DeleteIconButton/>
+			<DeleteIconButton />
 		</q-col>
 		<q-col cols="6">
-			<EditIconButton/>
+			<EditIconButton />
 		</q-col>
 		<q-col cols="6">
-			<ExternalLinkButton/>
+			<ExternalLinkButton />
 		</q-col>
 		<q-col cols="6">
-			<GoToButton/>
+			<GoToButton />
 		</q-col>
 		<q-col cols="6">
-			<HelpButton/>
+			<HelpButton />
 		</q-col>
 		<q-col cols="6">
-			<HideButton/>
+			<HideButton />
 		</q-col>
 		<q-col cols="6">
-			<NavigationFinishSetupButton/>
+			<NavigationFinishSetupButton />
 		</q-col>
 		<q-col cols="6">
-			<NavigationNextButton/>
+			<NavigationNextButton />
 		</q-col>
 		<q-col cols="6">
-			<NavigationPreviousButton/>
+			<NavigationPreviousButton />
 		</q-col>
 		<q-col cols="6">
-			<NavigationSkipSetupButton/>
+			<NavigationSkipSetupButton />
 		</q-col>
 		<q-col cols="6">
-			<ResetButton/>
+			<ResetButton />
 		</q-col>
 		<q-col cols="6">
-			<SaveButton/>
+			<SaveButton />
 		</q-col>
 		<q-col cols="6">
-			<SaveIconButton/>
+			<SaveIconButton />
 		</q-col>
 		<q-col cols="6">
-			<WarningButton/>
+			<WarningButton />
 		</q-col>
 	</q-row>
-
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
-import {ref} from 'vue';
+import { ref } from 'vue';
 
 const checkConnectionButton = ref<boolean>(false);
-
 </script>

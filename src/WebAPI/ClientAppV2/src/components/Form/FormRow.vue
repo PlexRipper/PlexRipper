@@ -1,20 +1,22 @@
 <template>
 	<q-row class="flex-nowrap" no-gutters>
 		<q-col cols="3">
-			<q-sub-header class="form-label text-no-wrap">{{ getLabel }}</q-sub-header>
+			<q-sub-header class="form-label text-no-wrap">
+				{{ getLabel }}
+			</q-sub-header>
 		</q-col>
 		<q-col cols="1">
-			<HelpButton v-if="hasHelpPage" @click="openDialog"/>
+			<HelpButton v-if="hasHelpPage" @click="openDialog" />
 		</q-col>
 		<q-col cols="8" align-self="end">
-			<slot/>
+			<slot />
 		</q-col>
 	</q-row>
 </template>
 
 <script setup lang="ts">
-import {HelpService} from '@service';
-import {useI18n} from "#imports";
+import { HelpService } from '@service';
+import { useI18n } from '#imports';
 
 interface IHelp {
 	label: string;
@@ -22,7 +24,7 @@ interface IHelp {
 	text: string;
 }
 
-const {$getMessage} = useNuxtApp()
+const { $getMessage } = useNuxtApp();
 
 const props = defineProps<{
 	formId: string;
@@ -43,9 +45,7 @@ const hasHelpPage = computed(() => {
 	return false;
 });
 
-
 function openDialog(): void {
 	HelpService.openHelpDialog(props.formId);
 }
-
 </script>

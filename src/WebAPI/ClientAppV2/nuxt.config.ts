@@ -1,6 +1,38 @@
 import { fileURLToPath } from 'url';
 import { defineNuxtConfig } from 'nuxt/config';
 
+const silenceSomeSassDeprecationWarnings = {
+	verbose: true,
+	logger: {
+		warn(message, options) {
+			const { stderr } = process;
+			const span = options.span ?? undefined;
+			const stack = (options.stack === 'null' ? undefined : options.stack) ?? undefined;
+
+			if (options.deprecation) {
+				if (message.startsWith('Using / for division outside of calc() is deprecated')) {
+					// silences above deprecation warning
+					return;
+				}
+				stderr.write('DEPRECATION ');
+			}
+			stderr.write(`WARNING: ${message}\n`);
+
+			if (span !== undefined) {
+				// output the snippet that is causing this warning
+				stderr.write(`\n"${span.text}"\n`);
+			}
+
+			if (stack !== undefined) {
+				// indent each line of the stack
+				stderr.write(`    ${stack.toString().trimEnd().replace(/\n/gm, '\n    ')}\n`);
+			}
+
+			stderr.write('\n');
+		},
+	},
+};
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
 	ssr: false,
@@ -120,12 +152,14 @@ export default defineNuxtConfig({
 		css: {
 			preprocessorOptions: {
 				scss: {
+					...silenceSomeSassDeprecationWarnings,
+
 					// Make variables available everywhere
 					// Doc: https://nuxt.com/docs/getting-started/assets#global-styles-imports
 					additionalData: '@use "@/assets/scss/_variables.scss" as *;',
-					sassOptions: {
-						quietDeps: true,
-					},
+				},
+				sass: {
+					...silenceSomeSassDeprecationWarnings,
 				},
 			},
 		},

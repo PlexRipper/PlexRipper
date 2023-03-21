@@ -105,7 +105,7 @@ export default defineNuxtConfig({
 	/*
 	 ** Global CSS: https://nuxt.com/docs/api/configuration/nuxt-config#css
 	 */
-	// css: ['quasar/src/css/index.sass', '@/assets/scss/style.scss'],
+	css: ['@/assets/scss/style.scss'],
 	alias: {
 		// Doc: https://nuxt.com/docs/api/configuration/nuxt-config#alias
 		'@class': fileURLToPath(new URL('./src/types/class/', import.meta.url)),

@@ -112,8 +112,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-@import 'assets/scss/style.scss';
-
 body {
 	&.body--dark {
 		.page-container {

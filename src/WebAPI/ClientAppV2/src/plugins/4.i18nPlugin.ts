@@ -1,6 +1,7 @@
 import { defineNuxtPlugin } from '#app';
 import { Composer, LocaleMessageObject, VueI18n } from 'vue-i18n';
-import objectPath from 'object-path';
+import { get as objGet } from 'object-path';
+import Log, { LogLevel } from 'consola';
 
 export default defineNuxtPlugin((nuxtApp) => {
 	// Doc: https://i18n.nuxtjs.org/
@@ -8,13 +9,14 @@ export default defineNuxtPlugin((nuxtApp) => {
 	const ctx = nuxtApp.$i18n as VueI18n | Composer;
 
 	function messages(ctx: VueI18n | Composer) {
-		return ctx.messages[ctx.locale.toString()];
+		// @ts-ignore
+		return ctx.messages.value[ctx.locale.value];
 	}
 
 	return {
 		provide: {
 			messages: (): LocaleMessageObject => messages(ctx),
-			getMessage: (path: string): any => objectPath.get(messages(ctx), path),
+			getMessage: (path: string): any => objGet(messages(ctx), path),
 		},
 	};
 });

@@ -34,14 +34,11 @@ const props = defineProps<{
 const folderPaths = ref<FolderPathDTO[]>([]);
 
 function getFolderPathOptions(type: PlexMediaType): FolderPathDTO[] {
-	switch (type) {
-		case PlexMediaType.Movie:
-			return folderPaths.value.filter((x) => x.folderType === FolderType.MovieFolder);
-		case PlexMediaType.TvShow:
-			return folderPaths.value.filter((x) => x.folderType === FolderType.TvShowFolder);
-		default:
-			return folderPaths.value;
+	if (type === PlexMediaType.Movie || type === PlexMediaType.TvShow) {
+		return folderPaths.value.filter((x) => x.mediaType === type);
 	}
+
+	return folderPaths.value;
 }
 
 function getDefaultDestination(libraryId: number): { id: number; displayName: string } {

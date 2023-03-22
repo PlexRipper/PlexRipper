@@ -4,11 +4,11 @@
 		:style="styleConfig"
 		:flat="true"
 		:rounded="false"
-		:glossy="true"
+		:glossy="props.glossy"
 		:label="getButtonText()"
 		:outline="props.outline"
 		:color="getColor()"
-		:icon="props.icon"
+		:icon="props.icon ? props.icon : void 0"
 		:disable="props.disabled"
 		:loading="props.loading"
 		:data-cy="props.cy">
@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, withDefaults, reactive, toRef } from 'vue';
+import { defineProps, withDefaults } from 'vue';
 import { useI18n } from '#imports';
 
 import ButtonType from '@enums/buttonType';

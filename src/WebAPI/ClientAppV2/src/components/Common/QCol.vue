@@ -21,6 +21,7 @@ const props = withDefaults(defineProps<QColProps>(), {
 
 const classConfig = computed(() => {
 	return {
+		col: true,
 		[`col-${props.cols}`]: props.cols > 0,
 		[`offset-${props.offset}`]: true,
 		[`order-${props.order}`]: true,

@@ -12,7 +12,7 @@
 			<q-splitter v-model="splitterModel">
 				<!-- Tab Index -->
 				<template #before>
-					<q-tabs v-model="tabIndex" vertical>
+					<q-tabs v-model="tabIndex" vertical active-color="red">
 						<!--	Server Data	Tab Header-->
 						<q-tab
 							name="server-data"
@@ -42,13 +42,7 @@
 				</template>
 				<!-- Tab Content -->
 				<template #after>
-					<q-tab-panels
-						v-model="tabIndex"
-						animated
-						swipeable
-						vertical
-						transition-prev="jump-up"
-						transition-next="jump-up">
+					<q-tab-panels v-model="tabIndex" animated vertical transition-prev="slide-down" transition-next="slide-up">
 						<!-- Server Data Tab Content -->
 						<q-tab-panel name="server-data">
 							<ServerDataTabContent ref="serverDataTabContent" :plex-server="plexServer" :is-visible="isVisible" />

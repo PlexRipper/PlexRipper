@@ -1,14 +1,9 @@
 <template>
 	<q-row class="flex-nowrap" no-gutters>
-		<q-col cols="3">
-			<q-sub-header class="form-label text-no-wrap">
-				{{ getLabel }}
-			</q-sub-header>
+		<q-col cols="6">
+			<HelpIcon :label-id="props.labelId" :help-id="props.formId" />
 		</q-col>
-		<q-col cols="1">
-			<HelpButton v-if="hasHelpPage" @click="openDialog" />
-		</q-col>
-		<q-col cols="8" align-self="end">
+		<q-col cols="6" align-self="end">
 			<slot />
 		</q-col>
 	</q-row>
@@ -28,6 +23,7 @@ const { $getMessage } = useNuxtApp();
 
 const props = defineProps<{
 	formId: string;
+	labelId: string;
 }>();
 
 const getLabel = computed(() => {

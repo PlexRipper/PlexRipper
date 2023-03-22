@@ -33,3 +33,25 @@
 		}
 	}
 }
+
+body {
+	&.body--dark {
+		.q-field {
+			color: white;
+		}
+
+		.q-menu {
+			@extend .blur;
+			background-color: $dark-dialog-background-color;
+		}
+	}
+
+	&.body--light {
+		.q-menu {
+			@extend .blur;
+			background-color: $light-dialog-background-color;
+		}
+	}
+}
+
+

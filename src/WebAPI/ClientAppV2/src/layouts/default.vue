@@ -3,7 +3,7 @@
         page change (flashing white background) during transitions.	-->
 	<q-layout view="hHh lpR fFf">
 		<template v-if="!isLoading">
-			<!--            <help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false"/>-->
+			<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
 			<!--            <alert-dialog v-for="(alertItem, i) in alerts" :key="i" :alert="alertItem" @close="closeAlert"/>-->
 			<!--            <CheckServerConnectionsProgress/>-->
 			<!--	Use for setup-layout	-->
@@ -31,6 +31,7 @@
 
 <script setup lang="ts">
 import Log from 'consola';
+import { ref, computed, onMounted } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import NotificationsDrawer from '@overviews/NotificationsDrawer.vue';
 import { AlertService, HelpService } from '@service';
@@ -40,8 +41,6 @@ import globalService from '@service/globalService';
 
 const $q = useQuasar();
 const route = useRoute();
-
-Log.info('Default layout loaded', $q);
 
 const isLoading = ref(true);
 const helpDialogState = ref(false);

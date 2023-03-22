@@ -1,16 +1,20 @@
 <template>
-	<q-row justify="between" no-wrap>
-		<q-col>
-			<span class="form-label text-no-wrap">{{ getLabel }}</span>
+	<q-row no-wrap class="no-gutters">
+		<q-col cols="auto">
+			<q-sub-header>
+				{{ getLabel }}
+			</q-sub-header>
 		</q-col>
 		<q-col v-if="hasHelpPage" cols="auto">
-			<q-btn icon="mdi-help-circle-outline" style="margin: 6px" @click="openDialog" />
+			<q-btn icon="mdi-help-circle-outline" style="margin: 6px" flat @click="openDialog()" />
 		</q-col>
 	</q-row>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '#imports';
+import Log from 'consola';
+import { withDefaults, defineProps, computed } from 'vue';
+import { useNuxtApp, useI18n } from '#imports';
 import { HelpService } from '@service';
 
 interface IHelp {
@@ -21,13 +25,19 @@ interface IHelp {
 
 const { $getMessage } = useNuxtApp();
 
-const props = defineProps<{
-	labelId?: string;
-	helpId: string;
-}>();
+const props = withDefaults(
+	defineProps<{
+		labelId?: string;
+		helpId: string;
+	}>(),
+	{
+		labelId: '',
+		helpId: '',
+	},
+);
 
 const getLabel = computed(() => {
-	return useI18n().t(`${props.labelId}.label`);
+	return useI18n().t(`${props.helpId}.label`);
 });
 
 const hasHelpPage = computed(() => {

@@ -1,5 +1,5 @@
 <template>
-	<q-dialog :value="show" max-width="500" @click:outside="close">
+	<q-dialog :model-value="show" max-width="500" @click:outside="close">
 		<q-card>
 			<q-card-section>
 				<div class="headline i18n-formatting">
@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import IText from '@interfaces/IText';
+import { computed, defineProps, defineEmits } from 'vue';
 
 const props = defineProps<{
 	show: boolean;
@@ -36,8 +36,6 @@ const props = defineProps<{
 const emit = defineEmits<{
 	(e: 'close'): void;
 }>();
-
-const helpText = ref<IText[]>([]);
 
 const getHelpText = computed(() => {
 	if (props.id === '') {

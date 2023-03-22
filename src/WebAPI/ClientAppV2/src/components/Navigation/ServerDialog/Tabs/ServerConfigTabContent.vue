@@ -1,22 +1,17 @@
 <template>
-	<table class="section-table">
-		<tbody>
-			<tr>
-				<td style="width: 25%">
-					<help-icon help-id="help.server-dialog.server-config.download-speed-limit" />
-				</td>
-				<td v-if="plexServer">
-					<download-limit-input
-						:plex-server-id="plexServer.id"
-						:download-speed-limit="downloadSpeedLimit"
-						@change="updateDownloadLimit" />
-				</td>
-				<td>
-					<span> Plex Server was null </span>
-				</td>
-			</tr>
-		</tbody>
-	</table>
+	<q-row>
+		<q-col cols="4" align="center">
+			<help-icon help-id="help.server-dialog.server-config.download-speed-limit" style="margin-top: 8px" />
+		</q-col>
+		<q-col cols="8">
+			<download-limit-input
+				v-if="plexServer"
+				:plex-server-id="plexServer.id"
+				:download-speed-limit="downloadSpeedLimit"
+				@change="updateDownloadLimit" />
+			<span v-else> Plex Server was null </span>
+		</q-col>
+	</q-row>
 </template>
 
 <script setup lang="ts">

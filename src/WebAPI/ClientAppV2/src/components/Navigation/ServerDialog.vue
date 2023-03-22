@@ -70,9 +70,7 @@
 
 						<!--	Library Download Destinations	Tab Content -->
 						<q-tab-panel name="download-destinations">
-							<server-library-destinations-tab-content
-								:folder-paths="folderPaths"
-								:plex-libraries="plexLibraries" />
+							<server-library-destinations-tab-content :plex-server="plexServer" :plex-libraries="plexLibraries" />
 						</q-tab-panel>
 
 						<!--	Server Commands -->
@@ -107,7 +105,6 @@ import { ServerDataTabContent, ServerConnectionsTabContent } from '#components';
 const show = ref(false);
 const tabIndex = ref<string>('server-data');
 const plexServer = ref<PlexServerDTO | null>(null);
-const folderPaths = ref<FolderPathDTO[]>([]);
 const plexLibraries = ref<PlexLibraryDTO[]>([]);
 const plexServerSettings = ref<PlexServerSettingsModel | null>(null);
 const plexServerId = ref(0);
@@ -135,11 +132,6 @@ const open = (newPlexServerId: number): void => {
 	useSubscription(
 		LibraryService.getLibrariesByServerId(newPlexServerId).subscribe((plexLibrariesData) => {
 			plexLibraries.value = plexLibrariesData;
-		}),
-	);
-	useSubscription(
-		FolderPathService.getFolderPaths().subscribe((folderPathsData) => {
-			folderPaths.value = folderPathsData;
 		}),
 	);
 };

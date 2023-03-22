@@ -1,19 +1,22 @@
-<script lang="ts">
-import { Component, Prop } from 'vue-property-decorator';
-import { VTextField } from 'vuetify/lib';
+<template>
+	<q-input v-bind="props" />
+</template>
 
-@Component<PTextField>({})
-export default class PTextField extends VTextField {
-	@Prop({ required: false, type: Number, default: 50 })
-	readonly height!: number;
+<script setup lang="ts">
+import { withDefaults, defineProps } from 'vue';
 
-	@Prop({ required: false, type: Boolean, default: true })
-	readonly dense!: boolean;
-
-	@Prop({ required: false, type: Boolean, default: true })
-	readonly outlined!: boolean;
-
-	@Prop({ required: false, type: Boolean, default: true })
-	readonly solo!: boolean;
-}
+const props = withDefaults(
+	defineProps<{
+		height: number;
+		dense: boolean;
+		outlined: boolean;
+		solo: boolean;
+	}>(),
+	{
+		height: 50,
+		dense: true,
+		outlined: true,
+		solo: true,
+	},
+);
 </script>

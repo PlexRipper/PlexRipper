@@ -18,7 +18,7 @@
 			<template v-else>
 				<app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer" />
 				<NavigationDrawer :show-drawer="showNavigationDrawerState" />
-				<!--                <notifications-drawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer"/>-->
+				<NotificationsDrawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer" />
 				<q-page-container class="page-container">
 					<router-view />
 				</q-page-container>
@@ -33,7 +33,6 @@
 import Log from 'consola';
 import { ref, computed, onMounted } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
-import NotificationsDrawer from '@overviews/NotificationsDrawer.vue';
 import { AlertService, HelpService } from '@service';
 import IAlert from '@interfaces/IAlert';
 import PageLoadOverlay from '@components/General/PageLoadOverlay.vue';
@@ -71,6 +70,7 @@ function toggleNavigationsDrawer() {
 }
 
 function toggleNotificationsDrawer() {
+	Log.info('toggleNotificationsDrawer');
 	showNotificationsDrawerState.value = !showNotificationsDrawerState.value;
 }
 
@@ -109,19 +109,3 @@ onMounted(() => {
 // see styles => @import 'assets/scss/style.scss';
 // and re-enable in nuxt.config.ts
 </script>
-
-<style lang="scss">
-body {
-	&.body--dark {
-		.page-container {
-			background: $dark-theme-glass-background;
-		}
-	}
-
-	&.body--light {
-		.page-container {
-			background: $light-background-color;
-		}
-	}
-}
-</style>

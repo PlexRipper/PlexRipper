@@ -1,95 +1,115 @@
 <template>
-	<v-navigation-drawer :value="showDrawer" :width="450" right app clipped class="no-background">
-		<vue-scroll>
-			<!-- Render All Notifications	-->
-			<template v-if="notifications.length > 0">
-				<v-alert
-					v-for="notification in getVisibleNotifications"
-					:key="notification.id"
-					:min-width="200"
-					:max-width="450"
-					:type="notification.level.toLowerCase()"
-					dense
-					dismissible
-					outlined
-					elevation="10"
-					@click="hideNotification(notification.id)"
-				>
-					<span class="text-wrap" style="overflow-wrap: anywhere">
-						{{ notification.message }}
-					</span>
-				</v-alert>
-			</template>
-			<!-- No Notifications	-->
-			<template v-else>
-				<v-list>
-					<v-list-item>
-						<v-list-item-icon>
-							<v-icon>mdi-check-circle-outline</v-icon>
-						</v-list-item-icon>
-						<v-list-item-content>
-							<v-list-item-title> {{ $t('components.notifications-drawer.no-notifications') }}</v-list-item-title>
-						</v-list-item-content>
-					</v-list-item>
-				</v-list>
-			</template>
-		</vue-scroll>
+	<q-drawer :model-value="showDrawer" :width="450" side="right" overlay class="no-background notification-drawer">
+		<q-col class="notification-container">
+			<q-scroll>
+				<!-- Render All Notifications	-->
+				<template v-if="notifications.length > 0">
+					<q-alert
+						v-for="notification in getVisibleNotifications"
+						:key="notification.id"
+						:min-width="200"
+						:max-width="450"
+						:type="notification.level.toLowerCase()"
+						dense
+						dismissible
+						outlined
+						elevation="10"
+						@click="hideNotification(notification.id)">
+						<span class="text-wrap" style="overflow-wrap: anywhere">
+							{{ notification.message }}
+						</span>
+					</q-alert>
+				</template>
+				<!-- No Notifications	-->
+				<template v-else>
+					<q-list>
+						<q-item @click="clearAllNotifications">
+							<q-item-section avatar>
+								<q-icon name="mdi-check-circle-outline" />
+							</q-item-section>
+							<q-item-section>
+								{{ $t('components.notifications-drawer.no-notifications') }}
+							</q-item-section>
+						</q-item>
+					</q-list>
+				</template>
+			</q-scroll>
+		</q-col>
 		<!-- Menu items -->
-		<template v-if="notifications.length > 0" #append>
-			<v-list>
-				<v-list-item @click="clearAllNotifications">
-					<v-list-item-icon>
-						<v-icon>mdi-close-circle</v-icon>
-					</v-list-item-icon>
-					<v-list-item-content>
-						<v-list-item-title>
-							{{ $t('components.notifications-drawer.clear-notifications') }}
-						</v-list-item-title>
-					</v-list-item-content>
-				</v-list-item>
-			</v-list>
-		</template>
-	</v-navigation-drawer>
+		<q-col v-if="notifications.length > 0" class="clear-notifications-container">
+			<q-list>
+				<q-item clickable @click="clearAllNotifications">
+					<q-item-section avatar>
+						<q-icon name="mdi-close-circle" />
+					</q-item-section>
+					<q-item-section>
+						{{ $t('components.notifications-drawer.clear-notifications') }}
+					</q-item-section>
+				</q-item>
+			</q-list>
+		</q-col>
+	</q-drawer>
 </template>
 
-<script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+<script setup lang="ts">
+import { ref, computed, onMounted, defineEmits, defineProps } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { NotificationService } from '@service';
 import { NotificationDTO } from '@dto/mainApi';
 import notificationService from '~/service/notificationService';
 
-@Component<NotificationsDrawer>({})
-export default class NotificationsDrawer extends Vue {
-	private notifications: NotificationDTO[] = [];
+const notifications = ref<NotificationDTO[]>([]);
 
-	@Prop({ required: true, type: Boolean })
-	readonly showDrawer!: boolean;
+defineProps<{
+	showDrawer: boolean;
+}>();
 
-	get getVisibleNotifications(): NotificationDTO[] {
-		return this.notifications?.filter((x) => !x.hidden) ?? [];
+const emit = defineEmits<{
+	(cleared: 'cleared'): void;
+}>();
+
+const getVisibleNotifications = computed(() => notifications.value?.filter((x) => !x.hidden) ?? []);
+
+function hideNotification(id: number): void {
+	NotificationService.hideNotification(id);
+}
+
+function clearAllNotifications() {
+	NotificationService.clearAllNotifications();
+	emit('cleared');
+}
+
+onMounted(() => {
+	useSubscription(
+		notificationService.getNotifications().subscribe((value) => {
+			notifications.value = value;
+		}),
+	);
+});
+</script>
+
+<style lang="scss">
+@import './src/assets/scss/_variables.scss';
+
+.notification-drawer {
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+
+	.notification-container {
+		overflow-y: auto;
+		overflow-x: hidden;
+
+		flex-grow: 3;
 	}
 
-	hideNotification(id: number): void {
-		NotificationService.hideNotification(id);
-	}
-
-	clearAllNotifications() {
-		NotificationService.clearAllNotifications();
-		this.$emit('cleared');
-	}
-
-	mounted(): void {
-		useSubscription(
-			notificationService.getNotifications().subscribe((value) => {
-				this.notifications = value;
-			}),
-		);
+	.clear-notifications-container {
+		flex-grow: 0;
 	}
 }
-</script>
-<style scoped lang="scss">
-.v-alert:hover {
-	cursor: pointer;
+
+.q-drawer {
+	background-color: transparent;
 }
 </style>

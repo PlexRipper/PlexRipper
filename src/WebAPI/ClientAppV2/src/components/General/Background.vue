@@ -95,14 +95,4 @@ onBeforeUnmount(() => {
 		background-image: url('/img/background/background.png');
 	}
 }
-
-.background-overlay {
-	&.dark-background {
-		background-color: $dark-background-color;
-	}
-
-	&.light-background {
-		background-color: $light-background-color;
-	}
-}
 </style>

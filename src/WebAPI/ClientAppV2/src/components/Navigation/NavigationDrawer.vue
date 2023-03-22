@@ -118,8 +118,4 @@ onMounted(() => {
 		flex-grow: 0;
 	}
 }
-
-.q-drawer {
-	background-color: transparent;
-}
 </style>

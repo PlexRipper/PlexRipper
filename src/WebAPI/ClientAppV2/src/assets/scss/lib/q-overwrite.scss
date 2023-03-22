@@ -13,11 +13,6 @@
 	}
 }
 
-.custom-class-test {
-	color: pink;
-	font-weight: bold;
-}
-
 .q-dialog {
 	.q-card {
 		@extend .default-border;
@@ -42,16 +37,48 @@ body {
 
 		.q-menu {
 			@extend .blur;
-			background-color: $dark-dialog-background-color;
+			background-color: $dark-background-color;
 		}
 	}
 
 	&.body--light {
 		.q-menu {
 			@extend .blur;
-			background-color: $light-dialog-background-color;
+			background-color: $light-background-color;
 		}
 	}
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * QDrawer
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+body {
+	&.body--dark, &.body--light {
+		.q-drawer {
+			background-color: transparent;
+
+			&--left {
+				// border-right: 1px solid red;
+			}
+
+			&--right {
+				border-left: 1px solid red;
+			}
+		}
+	}
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * QAlert
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+.q-alert {
+	display: block;
+	font-size: 16px;
+	margin: 16px;
+	padding: 16px;
+	position: relative;
+	transition: 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+	border: 1px solid;
+	border-radius: 4px;
+}

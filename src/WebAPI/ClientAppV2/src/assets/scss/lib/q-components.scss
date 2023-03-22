@@ -1,0 +1,41 @@
+@import '../variables';
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * Notification Drawer
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+body {
+	&.body--dark {
+		.notification-drawer {
+			@extend .blur;
+			background-color: $dark-dialog-background-color;
+		}
+
+	}
+
+	&.body--light {
+		.notification-drawer {
+			@extend .blur;
+			background-color: $light-dialog-background-color;
+		}
+	}
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * Background
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+body {
+	&.body--dark {
+		.background-overlay {
+			background-color: $dark-background-color;
+		}
+
+	}
+
+	&.body--light {
+		.background-overlay {
+			background-color: $light-background-color;
+		}
+	}
+}

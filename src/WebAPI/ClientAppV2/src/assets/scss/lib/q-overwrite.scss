@@ -82,3 +82,19 @@ body {
 	border: 1px solid;
 	border-radius: 4px;
 }
+
+
+.q-field--readonly {
+	//	border: 1px solid;
+}
+
+
+.q-field {
+	&--outlined {
+		&.q-field--readonly {
+			.q-field__control:before {
+				border-style: solid;
+			}
+		}
+	}
+}

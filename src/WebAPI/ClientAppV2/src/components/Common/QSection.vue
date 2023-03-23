@@ -1,22 +1,19 @@
 <template>
-	<v-row no-gutters style="width: 100%">
-		<v-col cols="12">
+	<q-row no-gutters style="width: 100%">
+		<q-col cols="12">
 			<!-- Header	-->
-			<v-row no-gutters>
-				<v-col>
-					<h1><slot name="header"></slot></h1>
-					<v-divider />
-				</v-col>
-			</v-row>
+			<q-row no-gutters>
+				<q-col>
+					<h2>
+						<slot name="header" />
+					</h2>
+					<q-separator />
+				</q-col>
+			</q-row>
 			<!--	Section Content	-->
-			<slot></slot>
-		</v-col>
-	</v-row>
+			<slot />
+		</q-col>
+	</q-row>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-
-@Component
-export default class PSection extends Vue {}
-</script>
+<script setup lang="ts"></script>

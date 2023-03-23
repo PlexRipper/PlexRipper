@@ -1,0 +1,78 @@
+<template>
+	<q-item v-ripple clickable :class="classConfig">
+		<div class="q-alert-wrapper">
+			<q-icon :name="alertIcon" size="24px" />
+			<div class="q-alert-content">
+				<slot />
+			</div>
+			<div class="q-alert-dismissible">
+				<q-icon name="mdi-close-circle" size="24px" />
+			</div>
+		</div>
+	</q-item>
+</template>
+
+<script setup lang="ts">
+import { defineProps, computed } from 'vue';
+
+const props = defineProps<{
+	message: string;
+	type: 'error' | 'warning' | 'info';
+}>();
+
+const classConfig = computed(() => {
+	return {
+		'q-alert': true,
+		[`q-alert--${props.type}`]: true,
+	};
+});
+
+const alertIcon = computed(() => {
+	switch (props.type) {
+		case 'error':
+			return 'mdi-alert-circle-outline';
+		case 'warning':
+			return 'mdi-warning-amber';
+		case 'info':
+			return 'mdi-information-outline';
+	}
+});
+</script>
+
+<style lang="scss">
+@import './src/assets/scss/_variables.scss';
+
+.q-alert {
+	&--error {
+		border-color: $error-color;
+		color: $error-color;
+	}
+
+	&--warning {
+		border-color: #fff8e1;
+		color: #ff6f00;
+	}
+
+	&--info {
+		border-color: #e8f5e9;
+		color: #1b5e20;
+	}
+
+	.q-alert-wrapper {
+		align-items: center;
+		display: flex;
+
+		.q-alert-content {
+			flex: 1 1 auto;
+		}
+
+		.q-alert-dismissible {
+			margin: -16px -8px -16px 8px;
+		}
+	}
+
+	&:hover {
+		cursor: pointer;
+	}
+}
+</style>

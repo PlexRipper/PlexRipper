@@ -1,13 +1,16 @@
 <template>
-	<v-progress-circular indeterminate color="red" :size="size" />
+	<q-circular-progress size="xl" color="red" indeterminate />
 </template>
 
-<script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+<script setup lang="ts">
+import { defineProps, withDefaults } from 'vue';
 
-@Component<LoadingSpinner>({})
-export default class LoadingSpinner extends Vue {
-	@Prop({ required: false, type: Number, default: 32 })
-	readonly size!: number;
-}
+withDefaults(
+	defineProps<{
+		size?: number;
+	}>(),
+	{
+		size: 32,
+	},
+);
 </script>

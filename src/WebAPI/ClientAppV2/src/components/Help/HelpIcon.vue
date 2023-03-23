@@ -1,6 +1,6 @@
 <template>
 	<q-row no-wrap class="no-gutters">
-		<q-col cols="auto">
+		<q-col>
 			<q-sub-header>
 				{{ getLabel }}
 			</q-sub-header>

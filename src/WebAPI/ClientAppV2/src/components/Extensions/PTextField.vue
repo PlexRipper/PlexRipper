@@ -1,22 +1,24 @@
 <template>
-	<q-input v-bind="props" />
+	<q-input :outlined="props.outlined">
+		<template v-if="props.appendIcon" #append>
+			<q-btn :icon="appendIcon" flat @click="$emit('click:append')" />
+		</template>
+	</q-input>
 </template>
 
 <script setup lang="ts">
-import { withDefaults, defineProps } from 'vue';
+import { withDefaults, defineProps, defineEmits } from 'vue';
 
 const props = withDefaults(
 	defineProps<{
-		height: number;
-		dense: boolean;
-		outlined: boolean;
-		solo: boolean;
+		outlined?: boolean;
+		appendIcon?: string;
 	}>(),
 	{
-		height: 50,
-		dense: true,
 		outlined: true,
-		solo: true,
+		appendIcon: '',
 	},
 );
+
+defineEmits<{ (e: 'click:append'): void }>();
 </script>

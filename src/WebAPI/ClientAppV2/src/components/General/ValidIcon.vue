@@ -1,30 +1,22 @@
 <template>
-	<v-tooltip top :disabled="valid">
-		<template #activator="{ on }">
-			<v-icon class="valid-icon" :size="size" :color="valid ? 'green' : 'red'" dark v-on="on">
-				{{ getIcon }}
-			</v-icon>
-		</template>
-		<span>{{ text }}</span>
-	</v-tooltip>
+	<q-icon class="valid-icon" size="30px" :color="valid ? 'green' : 'red'" :name="getIcon" style="margin: 10px">
+		<q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]" :disabled="valid">
+			<span>{{ valid ? validText : invalidText }}</span>
+		</q-tooltip>
+	</q-icon>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
+import { computed, defineProps, withDefaults } from 'vue';
 
-@Component
-export default class ValidIcon extends Vue {
-	@Prop({ required: true, type: Boolean })
-	readonly valid!: boolean;
+const props = withDefaults(
+	defineProps<{
+		valid: boolean;
+		validText: string;
+		invalidText: string;
+	}>(),
+	{},
+);
 
-	@Prop({ required: true, type: String })
-	readonly text!: string;
-
-	@Prop({ required: false, type: Number, default: 30 })
-	readonly size!: number;
-
-	get getIcon(): string {
-		return this.valid ? 'mdi-check-circle-outline' : 'mdi-alert-circle';
-	}
-}
+const getIcon = computed((): string => (props.valid ? 'mdi-check-circle-outline' : 'mdi-alert-circle'));
 </script>

@@ -1,19 +1,21 @@
 <template>
-	<q-row justify="between" class="flex-nowrap" no-gutters>
-		<q-col cols="9">
-			<q-sub-header v-if="!editMode" class="form-label text-no-wrap">
-				{{ newValue }}
-			</q-sub-header>
-			<q-input v-else v-model="newValue" />
-		</q-col>
-		<q-col justify="right">
-			<EditIconButton v-if="!editMode" :disabled="disabled" :height="50" @click="edit" />
-			<SaveIconButton v-else :disabled="disabled" :height="50" @click="save" />
+	<q-row>
+		<q-col>
+			<div class="cursor-pointer">
+				<q-sub-header>
+					{{ newValue }}
+				</q-sub-header>
+				<QPopupEdit ref="popup" v-slot="scope" :model-value="newValue" auto-save @save="save">
+					<q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set" />
+				</QPopupEdit>
+			</div>
 		</q-col>
 	</q-row>
 </template>
 
 <script setup lang="ts">
+import { QPopupEdit } from 'quasar';
+
 const props = defineProps<{
 	label: string;
 	value?: string;
@@ -24,15 +26,11 @@ const emit = defineEmits<{
 	(e: 'save', save: string): void;
 }>();
 
-const editMode = ref(false);
+const popup = ref<QPopupEdit>(null);
+
 const newValue = ref(props.value);
 
-function edit(): void {
-	editMode.value = true;
-}
-
-function save(): void {
-	editMode.value = false;
-	emit('save', newValue?.value ?? '');
+function save(event: string): void {
+	emit('save', event);
 }
 </script>

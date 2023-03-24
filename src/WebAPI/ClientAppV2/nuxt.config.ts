@@ -39,7 +39,8 @@ export default defineNuxtConfig({
 			// string | null: Auto-import roboto font. https://quasar.dev/style/typography#default-font
 			font: 'roboto-font',
 			// string[]: Auto-import webfont icons. Usage: https://quasar.dev/vue-components/icon#webfont-usage
-			fontIcons: ['mdi-v6'],
+			// 'material-icons' is added because it is used by default in Quasar components, needs to be changed with a 'iconSet' option to 'mdi-v6'
+			fontIcons: ['material-icons', 'mdi-v6'],
 			// string[]: Auto-import svg icon collections. Usage: https://quasar.dev/vue-components/icon#svg-usage
 			svgIcons: [],
 			// string[]: Auto-import animations from 'animate.css'. Usage: https://quasar.dev/options/animations#usage

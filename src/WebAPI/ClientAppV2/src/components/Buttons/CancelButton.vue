@@ -4,17 +4,11 @@
 
 <script setup lang="ts">
 import { defineProps, withDefaults } from 'vue';
+import { IBaseButtonProps } from '~/types/props/base-button/IBaseButtonProps';
 
-interface CancelBtnProps {
-	width?: number;
-	icon?: string;
-	cy?: string;
-	label?: string;
-}
-
-const props = withDefaults(defineProps<CancelBtnProps>(), {
-	width: 130,
+const props = withDefaults(defineProps<IBaseButtonProps>(), {
 	icon: 'mdi-alert',
+	outline: true,
 	cy: '',
 	label: 'Warning',
 	textId: 'cancel',

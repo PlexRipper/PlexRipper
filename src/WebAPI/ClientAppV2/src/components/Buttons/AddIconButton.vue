@@ -4,20 +4,10 @@
 
 <script setup lang="ts">
 import { withDefaults, defineProps } from 'vue';
-import BaseButton from '@buttons/BaseButton.vue';
+import { IBaseButtonProps } from '~/types/props/base-button/IBaseButtonProps';
 
-interface AddIconBtnProps {
-	width?: number;
-	icon?: string;
-	cy?: string;
-	disabled?: boolean;
-}
-
-const props = withDefaults(defineProps<AddIconBtnProps>(), {
-	height: 50,
-	width: 50,
+const props = withDefaults(defineProps<IBaseButtonProps>(), {
 	icon: 'mdi-plus-box-outline',
-	cy: '',
-	label: 'Warning',
+	size: 'xl',
 });
 </script>

@@ -3,6 +3,8 @@
 </template>
 
 <script setup lang="ts">
+import { withDefaults, defineProps } from 'vue';
+
 interface AccountValidationBtnProps {
 	width?: number;
 	icon?: string;

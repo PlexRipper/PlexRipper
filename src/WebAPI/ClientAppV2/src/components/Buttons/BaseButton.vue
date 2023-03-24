@@ -10,6 +10,7 @@
 		:color="getColor()"
 		:icon="props.icon ? props.icon : void 0"
 		:disable="props.disabled"
+		:size="props.size"
 		:loading="props.loading"
 		:data-cy="props.cy">
 		<q-tooltip v-if="getTooltip()" anchor="top middle" self="bottom middle" :offset="[10, 10]">

@@ -5,23 +5,11 @@
 <script setup lang="ts">
 import { withDefaults, defineProps } from 'vue';
 import BaseButton from '@buttons/BaseButton.vue';
+import { IBaseButtonProps } from '~/types/props/base-button/IBaseButtonProps';
 
-interface ConfirmBtnProps {
-	disabled?: boolean;
-	loading?: boolean;
-	icon?: string;
-	cy?: string;
-	label?: string;
-}
-
-const props = withDefaults(defineProps<ConfirmBtnProps>(), {
-	cy: '',
-	outline: true,
-	textId: 'delete',
+const props = withDefaults(defineProps<IBaseButtonProps>(), {
+	outline: false,
 	icon: 'mdi-delete',
-	color: 'red',
-	iconOnly: true,
-	iconSize: 32,
-	height: 50,
+	size: 'lg',
 });
 </script>

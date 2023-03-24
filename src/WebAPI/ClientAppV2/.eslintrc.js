@@ -8,7 +8,7 @@ module.exports = {
 	parserOptions: {
 		parser: '@typescript-eslint/parser',
 	},
-	extends: ['@nuxtjs/eslint-config-typescript', 'plugin:prettier/recommended', 'plugin:vue/vue3-recommended'],
+	extends: ['@nuxtjs/eslint-config-typescript', 'plugin:vue/vue3-recommended', 'plugin:prettier/recommended'],
 	plugins: [],
 	rules: {
 		// Reason: This allows for defining interfaces in any order
@@ -20,7 +20,6 @@ module.exports = {
 		'vue/html-indent': ['error', 'tab'], // enforce tabs in template
 		// Reason: Opinionated not to have useless empty lines with just a closing tag
 		'vue/html-closing-bracket-newline': ['error', { multiline: 'never' }],
-		indent: ['error', 'tab'], // enforce tabs in script and js files
 		'vue/component-name-in-template-casing': [
 			'error',
 			'PascalCase',

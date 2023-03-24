@@ -2,6 +2,7 @@ import { Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, take, tap } from 'rxjs/operators';
 
 import { isEqual } from 'lodash-es';
+import Log from 'consola';
 import {
 	ConfirmationSettingsDTO,
 	DateTimeSettingsDTO,
@@ -122,7 +123,6 @@ export class SettingsService extends BaseService {
 	public getFirstTimeSetup(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.generalSettings.firstTimeSetup ?? null),
-			filter((x) => x !== null),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -183,7 +183,6 @@ export class SettingsService extends BaseService {
 	public getAskDownloadMovieConfirmation(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.confirmationSettings.askDownloadMovieConfirmation),
-			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -191,7 +190,6 @@ export class SettingsService extends BaseService {
 	public getAskDownloadTvShowConfirmation(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.confirmationSettings.askDownloadTvShowConfirmation),
-			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -199,7 +197,6 @@ export class SettingsService extends BaseService {
 	public getAskDownloadSeasonConfirmation(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.confirmationSettings.askDownloadSeasonConfirmation),
-			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -207,7 +204,6 @@ export class SettingsService extends BaseService {
 	public getAskDownloadEpisodeConfirmation(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.confirmationSettings.askDownloadEpisodeConfirmation),
-			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -266,7 +262,6 @@ export class SettingsService extends BaseService {
 	public getShowRelativeDates(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.dateTimeSettings.showRelativeDates),
-			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}

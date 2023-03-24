@@ -1,12 +1,5 @@
 <template>
-	<page-container>
+	<q-page>
 		<debug-section />
-	</page-container>
+	</q-page>
 </template>
-
-<script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
-
-@Component
-export default class DebugSettings extends Vue {}
-</script>

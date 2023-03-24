@@ -1,46 +1,44 @@
 <template>
-	<p-section>
+	<q-section>
 		<template #header> {{ $t('pages.settings.advanced.database.header') }}</template>
 		<!--	Reset Database	-->
-		<v-row>
-			<v-col cols="4" align-self="center">
+		<q-row>
+			<q-col cols="4" align-self="center">
 				<help-icon help-id="help.settings.advanced.reset-db" />
-			</v-col>
+			</q-col>
 			<!--	Reset Database button	-->
-			<v-col cols="8" align-self="center">
+			<q-col cols="8" align-self="center">
 				<WarningButton :width="400" text-id="reset-db" @click="confirmationDialog = true" />
 				<confirmation-dialog
 					text-id="reset-db"
 					:dialog="confirmationDialog"
 					@confirm="resetDatabaseCommand"
-					@cancel="confirmationDialog = false"
-				/>
-			</v-col>
-		</v-row>
-	</p-section>
+					@cancel="confirmationDialog = false" />
+			</q-col>
+		</q-row>
+	</q-section>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
 import Log from 'consola';
+import { ref } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { resetDatabase } from '@api/settingsApi';
 import { GlobalService } from '@service';
 
-@Component
-export default class DatabaseSection extends Vue {
-	confirmationDialog: boolean = false;
+const confirmationDialog = ref(false);
 
-	resetDatabaseCommand(): void {
-		useSubscription(
-			resetDatabase().subscribe((value) => {
-				GlobalService.resetStore();
-				Log.debug('reset db', value);
-				if (value.isSuccess) {
-					this.$router.push('/setup');
-				}
-			}),
-		);
-	}
-}
+const router = useRouter();
+
+const resetDatabaseCommand = (): void => {
+	useSubscription(
+		resetDatabase().subscribe((value) => {
+			GlobalService.resetStore();
+			Log.debug('reset db', value);
+			if (value.isSuccess) {
+				router.push('/setup');
+			}
+		}),
+	);
+};
 </script>

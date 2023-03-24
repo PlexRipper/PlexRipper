@@ -28,9 +28,9 @@
             "duration": "Dauer:"
         },
         "directory-browser": {
-            "path": "Pfad",
+            "path": "Pfad:",
             "select-path": "Wähle {pathName}",
-            "type": "typ"
+            "type": "typ:"
         },
         "download-confirmation": {
             "creating-tasks": "Erstelle download Aufgabe {current} von {total}",

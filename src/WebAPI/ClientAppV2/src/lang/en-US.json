@@ -28,9 +28,9 @@
             "duration": "Duration:"
         },
         "directory-browser": {
-            "path": "Path",
+            "path": "Path:",
             "select-path": "Select {pathName}",
-            "type": "Type"
+            "type": "Type:"
         },
         "download-confirmation": {
             "creating-tasks": "Creating download tasks {current} of {total}",

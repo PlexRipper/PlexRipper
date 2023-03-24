@@ -23,9 +23,15 @@
 </template>
 
 <script setup lang="ts">
+import { withDefaults, defineProps } from 'vue';
 import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 
-const props = defineProps<{
-	progress?: ServerConnectionCheckStatusProgressDTO;
-}>();
+withDefaults(
+	defineProps<{
+		progress: ServerConnectionCheckStatusProgressDTO | null;
+	}>(),
+	{
+		progress: null,
+	},
+);
 </script>

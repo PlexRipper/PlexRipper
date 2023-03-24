@@ -94,7 +94,7 @@ const getIcon = (type: FileSystemEntityType): string => {
 };
 
 const emit = defineEmits<{
-	(e: 'confirm', path: FolderPathDTO | null): void;
+	(e: 'confirm', path: FolderPathDTO): void;
 	(e: 'cancel'): void;
 }>();
 
@@ -110,6 +110,10 @@ const open = (selectedPath: FolderPathDTO): void => {
 };
 
 function confirm(): void {
+	if (!path.value) {
+		Log.error('path was null when confirming DirectoryBrowser');
+		return;
+	}
 	emit('confirm', path.value);
 	showDialog.value = false;
 }

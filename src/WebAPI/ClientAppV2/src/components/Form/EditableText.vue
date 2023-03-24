@@ -17,8 +17,7 @@
 import { defineProps, defineEmits } from 'vue';
 
 defineProps<{
-	label: string;
-	value?: string;
+	value: string;
 	disabled?: boolean;
 }>();
 

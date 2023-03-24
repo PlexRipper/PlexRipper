@@ -16,8 +16,7 @@
 import { defineProps, computed } from 'vue';
 
 const props = defineProps<{
-	message: string;
-	type: 'error' | 'warning' | 'info';
+	type: 'error' | 'warning' | 'info' | string;
 }>();
 
 const classConfig = computed(() => {

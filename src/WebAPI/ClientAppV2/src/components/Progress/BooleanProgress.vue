@@ -5,8 +5,10 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{
-	loading?: boolean;
-	success?: boolean;
+import { defineProps } from 'vue';
+
+defineProps<{
+	loading?: boolean | null;
+	success?: boolean | null;
 }>();
 </script>

@@ -1,7 +1,7 @@
 <template>
 	<q-row class="flex-nowrap" no-gutters>
 		<q-col cols="6">
-			<HelpIcon :label-id="props.labelId" :help-id="props.formId" />
+			<HelpIcon :label-id="labelId" :help-id="formId" />
 		</q-col>
 		<q-col cols="6" align-self="end">
 			<slot />
@@ -10,38 +10,10 @@
 </template>
 
 <script setup lang="ts">
-import { HelpService } from '@service';
-import { useI18n } from '#imports';
+import { defineProps } from 'vue';
 
-interface IHelp {
-	label: string;
-	title: string;
-	text: string;
-}
-
-const { $getMessage } = useNuxtApp();
-
-const props = defineProps<{
-	formId: string;
-	labelId: string;
+defineProps<{
+	formId?: string;
+	labelId?: string;
 }>();
-
-const getLabel = computed(() => {
-	return props.formId ? useI18n().t(`${props.formId}.label`) : '';
-});
-
-const hasHelpPage = computed(() => {
-	if (props.formId) {
-		const msgObject = $getMessage(props.formId) as IHelp;
-		// Complains about returning string if I return directly, instead of an if statement returning true
-		if (msgObject && msgObject.title && msgObject.text) {
-			return true;
-		}
-	}
-	return false;
-});
-
-function openDialog(): void {
-	HelpService.openHelpDialog(props.formId);
-}
 </script>

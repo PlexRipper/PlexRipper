@@ -41,6 +41,9 @@ public class SettingsController : BaseController
     {
         try
         {
+            if (settingsModelDto == null)
+                return BadRequest();
+
             var settings = _mapper.Map<ISettingsModel>(settingsModelDto);
             var updateResult = _userSettings.UpdateSettings(settings);
             if (updateResult.IsFailed)

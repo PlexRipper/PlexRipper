@@ -5,19 +5,11 @@
 <script setup lang="ts">
 import { withDefaults, defineProps } from 'vue';
 import BaseButton from '@buttons/BaseButton.vue';
+import { IBaseButtonProps } from '~/types/props/base-button/IBaseButtonProps';
 
-interface WarningBtnProps {
-	width?: number;
-	icon?: string;
-	cy?: string;
-	label?: string;
-}
-
-const props = withDefaults(defineProps<WarningBtnProps>(), {
-	width: 50,
+const props = withDefaults(defineProps<IBaseButtonProps>(), {
 	icon: 'mdi-alert',
-	cy: '',
-	label: 'Warning',
+	textId: 'warning',
 	color: 'amber-10',
 });
 </script>

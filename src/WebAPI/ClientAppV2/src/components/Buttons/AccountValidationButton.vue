@@ -4,23 +4,11 @@
 
 <script setup lang="ts">
 import { withDefaults, defineProps } from 'vue';
+import { IBaseButtonProps } from '~/types/props/base-button/IBaseButtonProps';
 
-interface AccountValidationBtnProps {
-	width?: number;
-	icon?: string;
-	cy?: string;
-	textId?: string;
-	disabled?: boolean;
-	loading?: boolean;
-	outline?: boolean | undefined;
-	glossy?: boolean | undefined;
-
-	color?: string;
-}
-
-const props = withDefaults(defineProps<AccountValidationBtnProps>(), {
+const props = withDefaults(defineProps<IBaseButtonProps>(), {
 	width: 50,
 	outline: true,
-	glossy: true,
+	textId: 'validate',
 });
 </script>

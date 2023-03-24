@@ -1,5 +1,5 @@
 <template>
-	<BaseButton v-bind="props" class="warning-btn" label="Standard" />
+	<BaseButton v-bind="props" />
 </template>
 
 <script setup lang="ts">

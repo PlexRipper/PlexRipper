@@ -1,83 +1,82 @@
 <template>
-	<v-form ref="accountForm" v-model="valid">
+	<QForm
+		ref="accountForm"
+		v-model="valid"
+		@reset="onReset"
+		@validation-success="$emit('is-valid', true)"
+		@validation-error="$emit('is-valid', true)">
 		<!-- Is account enabled -->
-		<v-row no-gutters>
-			<v-col :cols="labelCol">
+		<q-row no-gutters align="center">
+			<q-col :cols="labelCol">
 				<help-icon help-id="help.account-form.is-enabled" />
-			</v-col>
-			<v-col>
-				<v-checkbox
-					:input-value="value.isEnabled"
+			</q-col>
+			<q-col>
+				<q-toggle
+					class="q-ma-sm pt-0"
+					:model-value="value.isEnabled"
 					color="red"
-					class="ma-3 pt-0"
-					hide-details
 					data-cy="account-form-is-enabled"
-					@change="inputChanged({ prop: 'isEnabled', value: $event })"
-				/>
-			</v-col>
-		</v-row>
+					@update:model-value="inputChanged({ prop: 'isEnabled', value: $event })" />
+			</q-col>
+		</q-row>
 		<!-- Is main account -->
-		<v-row no-gutters>
-			<v-col :cols="labelCol">
+		<q-row no-gutters align="center">
+			<q-col :cols="labelCol">
 				<help-icon help-id="help.account-form.is-main" />
-			</v-col>
-			<v-col>
-				<v-checkbox
-					:input-value="value.isMain"
+			</q-col>
+			<q-col>
+				<q-toggle
+					class="q-ma-sm pt-0"
+					:model-value="value.isMain"
 					color="red"
-					class="ma-3 pt-0"
-					hide-details
 					data-cy="account-form-is-main"
-					@change="inputChanged({ prop: 'isMain', value: $event })"
-				/>
-			</v-col>
-		</v-row>
+					@update:model-value="inputChanged({ prop: 'isMain', value: $event })" />
+			</q-col>
+		</q-row>
 		<!-- Display Name -->
-		<v-row no-gutters>
-			<v-col :cols="labelCol">
+		<q-row no-gutters align="center">
+			<q-col :cols="labelCol" class="q-mb-md">
 				<help-icon help-id="help.account-form.display-name" />
-			</v-col>
-			<v-col>
-				<v-text-field
-					:value="value.displayName"
+			</q-col>
+			<q-col>
+				<q-input
+					:model-value="value.displayName"
 					:rules="getDisplayNameRules"
 					color="red"
 					full-width
 					outlined
 					required
 					data-cy="account-form-display-name-input"
-					@input="inputChanged({ prop: 'displayName', value: $event })"
-				/>
-			</v-col>
-		</v-row>
+					@update:model-value="inputChanged({ prop: 'displayName', value: $event })" />
+			</q-col>
+		</q-row>
 
 		<!-- Username -->
-		<v-row no-gutters>
-			<v-col :cols="labelCol">
+		<q-row no-gutters align="center" class="q-mt-md">
+			<q-col :cols="labelCol" class="q-mb-md">
 				<help-icon help-id="help.account-form.username" />
-			</v-col>
-			<v-col>
-				<v-text-field
-					:value="value.username"
+			</q-col>
+			<q-col>
+				<q-input
+					:model-value="value.username"
 					:rules="getUsernameRules"
 					color="red"
 					full-width
 					outlined
 					required
 					data-cy="account-form-username-input"
-					@input="inputChanged({ prop: 'username', value: $event })"
-				/>
-			</v-col>
-		</v-row>
+					@update:model-value="inputChanged({ prop: 'username', value: $event })" />
+			</q-col>
+		</q-row>
 
 		<!-- Password -->
-		<v-row no-gutters>
-			<v-col :cols="labelCol">
+		<q-row no-gutters align="center" class="q-mt-md">
+			<q-col :cols="labelCol" class="q-mb-md">
 				<help-icon help-id="help.account-form.password" />
-			</v-col>
-			<v-col>
-				<v-text-field
-					:value="value.password"
+			</q-col>
+			<q-col>
+				<q-input
+					:model-value="value.password"
 					:rules="getPasswordRules"
 					color="red"
 					full-width
@@ -87,63 +86,65 @@
 					:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
 					:type="showPassword ? 'text' : 'password'"
 					@click:append="showPassword = !showPassword"
-					@input="inputChanged({ prop: 'password', value: $event })"
-				/>
-			</v-col>
-		</v-row>
-	</v-form>
+					@update:model-value="inputChanged({ prop: 'password', value: $event })">
+					<template #append>
+						<q-btn flat :icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'" @click="showPassword = !showPassword" />
+					</template>
+				</q-input>
+			</q-col>
+		</q-row>
+	</QForm>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
-import VForm from 'vuetify/lib/components/VForm/VForm.js';
+<script setup lang="ts">
+import { defineProps, defineEmits, ref, computed } from 'vue';
 import { PlexAccountDTO } from '@dto/mainApi';
+import { QForm } from '#components';
 
-@Component<AccountForm>({})
-export default class AccountForm extends Vue {
-	labelCol: number = 3;
-	valid: boolean = true;
-	isValidated: string = '';
-	showPassword: boolean = false;
+const labelCol = ref(3);
+const valid = ref(true);
+const isValidated = ref('');
+const showPassword = ref(false);
 
-	@Prop({ required: false, type: Object as () => PlexAccountDTO })
-	readonly value!: PlexAccountDTO | null;
+defineProps<{
+	value?: PlexAccountDTO | null;
+}>();
 
-	@Ref('accountForm')
-	readonly accountForm!: VForm;
+const accountForm = ref<InstanceType<typeof QForm> | null>(null);
 
-	// region Validation Rules
+// region Validation Rules
 
-	get getDisplayNameRules(): unknown {
-		return [
-			(v: string): boolean | string => !!v || 'Display name is required',
-			(v: string): boolean | string => (v && v.length >= 4) || 'Display name must be at least 4 characters',
-		];
-	}
+const getDisplayNameRules = computed(() => [
+	(v: string): boolean | string => !!v || 'Display name is required',
+	(v: string): boolean | string => (v && v.length >= 4) || 'Display name must be at least 4 characters',
+]);
 
-	get getUsernameRules(): unknown {
-		return [(v: string): boolean | string => !!v || 'Username is required'];
-	}
+const getUsernameRules = computed(() => [(v: string): boolean | string => !!v || 'Username is required']);
 
-	get getPasswordRules(): unknown {
-		return [
-			(v: string): boolean | string => !!v || 'Password is required',
-			(v: string): boolean | string => (v && v.length >= 8) || 'Password must be at least 8 characters',
-		];
-	}
+const getPasswordRules = computed(() => [
+	(v: string): boolean | string => !!v || 'Password is required',
+	(v: string): boolean | string => (v && v.length >= 8) || 'Password must be at least 8 characters',
+]);
 
-	// endregion
+const emit = defineEmits<{
+	(event: 'input', value: { prop: string; value: string | boolean }): void;
+	(event: 'is-valid', valid: boolean): void;
+}>();
 
-	inputChanged({ prop, value }: { prop: string; value: string | boolean }): void {
-		this.$emit('input', { prop, value });
-		this.$emit('is-valid', this.valid);
-	}
+// endregion
 
-	reset(): void {
-		this.isValidated = '';
-		this.valid = true;
-		this.showPassword = false;
-		this.accountForm.resetValidation();
-	}
+function inputChanged({ prop, value }: { prop: string; value: string | boolean }): void {
+	emit('input', { prop, value });
 }
+
+const onReset = (): void => {
+	isValidated.value = '';
+	valid.value = true;
+	showPassword.value = false;
+	accountForm.value?.resetValidation();
+};
+
+defineExpose({
+	onReset,
+});
 </script>

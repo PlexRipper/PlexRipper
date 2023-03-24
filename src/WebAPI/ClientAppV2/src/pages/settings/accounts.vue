@@ -1,15 +1,10 @@
 <template>
-	<page-container>
-		<p-section>
-			<template #header> {{ $t('pages.settings.accounts.header') }} </template>
+	<q-page>
+		<q-section>
+			<template #header>
+				{{ $t('pages.settings.accounts.header') }}
+			</template>
 			<account-overview />
-		</p-section>
-	</page-container>
+		</q-section>
+	</q-page>
 </template>
-
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-
-@Component
-export default class Accounts extends Vue {}
-</script>

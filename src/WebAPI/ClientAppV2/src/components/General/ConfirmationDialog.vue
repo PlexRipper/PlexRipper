@@ -1,78 +1,75 @@
 <template>
-	<v-dialog :value="dialog" width="500" persistent @click:outside="cancel">
-		<v-card>
-			<v-card-title class="headline i18n-formatting">{{ getText.title }}</v-card-title>
-
-			<v-card-text class="i18n-formatting">
+	<q-dialog :model-value="dialog" persistent @click:outside="cancel">
+		<q-card>
+			<q-card-section class="row items-center">
+				{{ getText.title }}
+			</q-card-section>
+			<q-card-section>
 				<p>{{ getText.text }}</p>
 				<p v-if="getText.warning" class="text-center">
 					<b>{{ getText.warning }}</b>
 				</p>
-			</v-card-text>
-
-			<v-divider></v-divider>
-
-			<v-card-actions>
+			</q-card-section>
+			<q-separator />
+			<q-card-actions align="right">
 				<CancelButton @click="cancel" />
-				<v-spacer></v-spacer>
+				<q-space />
 				<ConfirmButton :loading="loading" @click="confirm" />
-			</v-card-actions>
-		</v-card>
-	</v-dialog>
+			</q-card-actions>
+		</q-card>
+	</q-dialog>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import IText from '@interfaces/IText';
+<script setup lang="ts">
+import { defineProps, defineEmits, ref, computed } from 'vue';
+import { useNuxtApp } from '#imports';
 
-@Component
-export default class ConfirmationDialog extends Vue {
+const { $getMessage } = useNuxtApp();
+
+const loading = ref(false);
+
+const props = defineProps<{
 	/**
 	 * The Vue-i18n text id used for the confirmation window that pops-up.
 	 * @type {string}
 	 */
-	@Prop({ required: true, type: String, default: '' })
-	readonly textId!: string;
+	textId: string;
+	dialog: boolean;
+	confirmLoading?: boolean;
+}>();
 
-	@Prop({ required: true, type: Boolean })
-	readonly dialog!: boolean;
+const emit = defineEmits<{
+	(e: 'confirm'): void;
+	(e: 'cancel'): void;
+}>();
 
-	@Prop({ required: false, type: Boolean, default: false })
-	readonly confirmLoading!: boolean;
-
-	loading: boolean = false;
-
-	get getText(): IText {
-		if (this.textId === '') {
-			return {
-				id: 'null',
-				title: 'Could not find the correct confirmation text..',
-				text: 'Could not find the correct confirmation text..',
-			};
-		}
-		const msg: any = this.$getMessage(`confirmation.${this.textId}`);
+const getText = computed(() => {
+	if (props.textId === '') {
 		return {
-			id: this.textId,
-			title: msg?.title ?? '',
-			text: msg?.text ?? '',
-			warning: msg?.warning ?? '',
+			id: 'null',
+			title: 'Could not find the correct confirmation text..',
+			text: 'Could not find the correct confirmation text..',
+			warning: '',
 		};
 	}
+	const msg: any = $getMessage(`confirmation.${props.textId}`);
+	return {
+		id: props.textId,
+		title: msg?.title ?? '',
+		text: msg?.text ?? '',
+		warning: msg?.warning ?? '',
+	};
+});
 
-	@Watch('dialog')
-	onDialogChanged() {
-		this.loading = false;
-	}
+const cancel = () => {
+	emit('cancel');
+	loading.value = false;
+};
 
-	cancel(): void {
-		this.$emit('cancel');
+const confirm = () => {
+	emit('confirm');
+	if (props.confirmLoading) {
+		loading.value = true;
 	}
-
-	confirm(): void {
-		this.$emit('confirm');
-		if (this.confirmLoading) {
-			this.loading = true;
-		}
-	}
-}
+};
 </script>

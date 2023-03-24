@@ -1,89 +1,95 @@
 <template>
-	<v-dialog :value="dialog" persistent :max-width="500">
-		<v-card :max-width="600">
-			<v-card-title>{{ $t('components.account-verification-code-dialog.title') }}</v-card-title>
-			<v-card-subtitle>{{ $t('components.account-verification-code-dialog.sub-title') }}</v-card-subtitle>
-			<v-card-text>
+	<q-dialog :model-value="dialog" persistent>
+		<q-card :max-width="500">
+			<q-card-section>
+				<h3>{{ $t('components.account-verification-code-dialog.title') }}</h3>
+				<q-sub-header>{{ $t('components.account-verification-code-dialog.sub-title') }}</q-sub-header>
+			</q-card-section>
+			<q-card-section>
 				<!--	Verification Code input	-->
-				<v-row justify="center">
-					<v-col cols="auto">
-						<CodeInput
-							:loading="false"
-							class="input"
-							@change="onChange"
-							@complete="onComplete"
-							@keyup.enter="onEnter"
-						/>
-					</v-col>
-				</v-row>
-				<v-row v-if="errors.length > 0" justify="center">
-					<v-col cols="auto">
+				<q-row justify="center">
+					<q-col cols="auto">
+						<!--						<QVerificationCodeInput-->
+						<!--							:loading="false"-->
+						<!--							@change="onChange"-->
+						<!--							@complete="onComplete"-->
+						<!--							@keyup.enter="onEnter" />-->
+					</q-col>
+				</q-row>
+				<q-row v-if="errors.length > 0" justify="center">
+					<q-col cols="auto">
 						<span style="color: red; font-weight: bold">{{
 							$t('components.account-verification-code-dialog.error')
 						}}</span>
-					</v-col>
-				</v-row>
-			</v-card-text>
-			<v-card-actions>
+					</q-col>
+				</q-row>
+			</q-card-section>
+			<q-card-actions>
 				<!--	Submit button	-->
-				<v-row justify="center">
-					<v-col cols="auto">
+				<q-row justify="center">
+					<q-col cols="auto">
 						<CancelButton @click="closeDialog" />
-					</v-col>
-					<v-spacer />
-					<v-col cols="auto">
+					</q-col>
+					<q-space />
+					<q-col cols="auto">
 						<ConfirmButton :disabled="code.length < 6" @click="submitCode" />
-					</v-col>
-				</v-row>
-			</v-card-actions>
-		</v-card>
-	</v-dialog>
+					</q-col>
+				</q-row>
+			</q-card-actions>
+		</q-card>
+	</q-dialog>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Log from 'consola';
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import CodeInput from 'vue-verification-code-input';
-import { IError } from '@dto/mainApi';
+import { withDefaults, defineProps } from 'vue';
+import type { IError } from '@dto/mainApi';
 
-@Component<AccountVerificationCodeDialog>({ components: { CodeInput } })
-export default class AccountVerificationCodeDialog extends Vue {
-	@Prop({ required: false, type: Boolean, default: false })
-	readonly dialog!: boolean;
+withDefaults(
+	defineProps<{
+		dialog: boolean;
+		errors: IError[];
+	}>(),
+	{
+		dialog: false,
+		errors: () => [],
+	},
+);
 
-	@Prop({ required: true, type: Array as () => IError[] })
-	readonly errors!: IError[];
+const code = ref('0');
 
-	@Watch('errors')
-	onChildChanged(val: string) {
-		// If an error appears, then clear the code
-		if (val.length > 0) {
-			this.code = '0';
-		}
-	}
+const emit = defineEmits<{
+	(e: 'close'): void;
+	(e: 'submit', code: string): void;
+}>();
 
-	code: string = '0';
+// @Watch('errors')
+// onChildChanged(val: string) {
+// 	// If an error appears, then clear the code
+// 	if (val.length > 0) {
+// 		this.code = '0';
+// 	}
+// }
 
-	onChange(v) {
-		this.code = v;
-	}
+const onChange = (v: string) => {
+	code.value = v;
+};
 
-	onComplete(v) {
-		Log.info('onComplete ', v);
-	}
+const onComplete = (v: string) => {
+	Log.info('onComplete ', v);
+};
 
-	closeDialog() {
-		this.$emit('close');
-	}
+const onEnter = () => {
+	Log.info('Enter pressed');
+};
 
-	submitCode() {
-		this.$emit('submit', this.code);
-	}
+const closeDialog = () => {
+	emit('close');
+};
 
-	onEnter() {
-		Log.info('Enter pressed');
-	}
-}
+const submitCode = () => {
+	emit('submit', code.value);
+};
 </script>
 
 <style>

@@ -1,53 +1,56 @@
 <template>
-	<v-card hover outlined max-height="130" class="glass-background" data-cy="account-card" @click="openDialog()">
-		<v-card-title v-if="!isNew"
-			>{{ account ? account.displayName : $t('components.account-card.no-account-name') }}
-		</v-card-title>
+	<q-card class="account-card glass-background" data-cy="account-card" @click="$emit('open-dialog', props.account)">
+		<q-card-section v-if="!isNew">
+			{{ account ? account.displayName : $t('components.account-card.no-account-name') }}
+		</q-card-section>
+
 		<!-- Add new account -->
-		<v-card-text v-if="isNew" class="text-center" data-cy="account-overview-add-account">
-			<v-icon style="font-size: 100px">mdi-plus-box-outline</v-icon>
-		</v-card-text>
+		<q-card-section v-if="isNew" class="text-center" data-cy="account-overview-add-account">
+			<q-icon name="mdi-plus-box-outline" style="font-size: 90px" />
+		</q-card-section>
+
 		<!-- Edit Account -->
-		<v-card-text v-else>
+		<q-card-section v-else>
 			<!-- Validation Chip -->
-			<v-chip v-if="account.isValidated" class="ma-2" color="green" text-color="white">
+			<q-chip v-if="account.isValidated" class="ma-2" color="green" text-color="white">
 				{{ $t('general.commands.validated') }}
-			</v-chip>
-			<v-chip v-else class="ma-2" color="red" text-color="white">
+			</q-chip>
+			<q-chip v-else class="ma-2" color="red" text-color="white">
 				{{ $t('general.commands.not-validated') }}
-			</v-chip>
+			</q-chip>
 			<!-- IsEnabled Chip -->
-			<v-chip v-if="account.isEnabled" class="ma-2" color="green" text-color="white">
+			<q-chip v-if="account.isEnabled" class="ma-2" color="green" text-color="white">
 				{{ $t('general.commands.enabled') }}
-			</v-chip>
-			<v-chip v-else class="ma-2" color="red" text-color="white">
+			</q-chip>
+			<q-chip v-else class="ma-2" color="red" text-color="white">
 				{{ $t('general.commands.disabled') }}
-			</v-chip>
-		</v-card-text>
-	</v-card>
+			</q-chip>
+		</q-card-section>
+	</q-card>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
+import { defineProps, defineEmits, computed } from 'vue';
 import type { PlexAccountDTO } from '@dto/mainApi';
 
-@Component
-export default class AccountCard extends Vue {
-	@Prop({ type: Object as () => PlexAccountDTO })
-	readonly account!: PlexAccountDTO;
+const props = defineProps<{
+	account: PlexAccountDTO;
+}>();
 
-	valid: boolean = false;
+defineEmits<{ (e: 'open-dialog', account: PlexAccountDTO): void }>();
 
-	displayName: string = '';
+const isNew = computed(() => !props.account);
+</script>
 
-	isEnabled: boolean = true;
+<style lang="scss">
+.account-card {
+	border: 2px solid red;
+	max-height: 124px;
 
-	get isNew(): boolean {
-		return !this.account;
-	}
-
-	openDialog(): void {
-		this.$emit('open-dialog', this.account);
+	&:hover {
+		box-shadow: 0 0 20px 3px red;
+		cursor: pointer;
+		transition: box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 	}
 }
-</script>
+</style>

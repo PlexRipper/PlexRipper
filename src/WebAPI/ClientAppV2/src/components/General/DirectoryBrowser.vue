@@ -1,68 +1,60 @@
 <template>
-	<q-row justify="start">
-		<q-col>
-			<q-dialog :model-value="showDialog" max-width="900px">
-				<q-card>
-					<q-card-section v-if="path">
-						<q-sub-header>
-							{{ $t('components.directory-browser.select-path', { pathName: path.displayName }) }}
-						</q-sub-header>
-						<div>
-							<p-text-field
-								v-model="path.directory"
-								outlined
-								color="red"
-								placeholder="Start typing or select a path below" />
-						</div>
-					</q-card-section>
-					<q-separator inset />
+	<q-dialog :model-value="showDialog">
+		<q-card class="directory-browser-content">
+			<q-card-section v-if="path" style="padding-bottom: 0 !important">
+				<h2>
+					{{ $t('components.directory-browser.select-path', { pathName: path.displayName }) }}
+				</h2>
+				<div>
+					<p-text-field
+						v-model="path.directory"
+						outlined
+						color="red"
+						placeholder="Start typing or select a path below" />
+				</div>
+				<q-markup-table>
+					<thead>
+						<tr>
+							<th class="text-left" style="width: 100px">Type:</th>
+							<th class="text-left">Path:</th>
+						</tr>
+					</thead>
+				</q-markup-table>
+			</q-card-section>
+			<q-card-section style="height: 50vh; padding: 0 16px !important">
+				<q-scroll-area class="fit">
+					<!--	Loading screen	-->
+					<template v-if="isLoading">
+						<q-row style="height: 50vh; width: 100%" justify="center" align="center">
+							<q-col cols="auto">
+								<loading-spinner />
+							</q-col>
+						</q-row>
+					</template>
+					<!--	Directory Browser	-->
+					<template v-else>
+						<q-markup-table>
+							<tbody class="scroll">
+								<tr v-for="row in items" @click="directoryNavigate($event, row)">
+									<td class="text-left" style="width: 100px">
+										<q-icon size="md" :name="getIcon(row.type)" />
+									</td>
+									<td class="text-left">
+										{{ row.path }}
+									</td>
+								</tr>
+							</tbody>
+						</q-markup-table>
+					</template>
+				</q-scroll-area>
+			</q-card-section>
 
-					<q-card-section style="height: 100%; overflow-y: hidden">
-						<!--	Loading screen	-->
-						<template v-if="isLoading">
-							<q-row style="height: 50vh; width: 100%" justify="center" align="center">
-								<q-col cols="auto">
-									<loading-spinner />
-								</q-col>
-							</q-row>
-						</template>
-						<!--	Directory Browser	-->
-						<template v-else>
-							<q-markup-table>
-								<!--	Directory browser table header -->
-								<q-tr>
-									<q-th> {{ $t('components.directory-browser.type') }}:</q-th>
-									<q-th> {{ $t('components.directory-browser.path') }}:</q-th>
-								</q-tr>
-							</q-markup-table>
-							<div style="height: 50vh; width: 100%">
-								<!--	Directory browser table content -->
-								<q-markup-table>
-									<q-tr
-										v-for="(item, i) in items"
-										:key="i"
-										style="cursor: pointer"
-										@click="directoryNavigate(item)">
-										<q-td>
-											<q-icon :name="getIcon(item.type)" />
-										</q-td>
-										<q-td>
-											{{ item.name }}
-										</q-td>
-									</q-tr>
-								</q-markup-table>
-							</div>
-						</template>
-					</q-card-section>
-
-					<q-card-actions class="justify-end" style="height: 60px">
-						<CancelButton @click="cancel()" />
-						<ConfirmButton @click="confirm()" />
-					</q-card-actions>
-				</q-card>
-			</q-dialog>
-		</q-col>
-	</q-row>
+			<q-card-actions class="justify-end" style="height: 60px">
+				<CancelButton @click="cancel()" />
+				<ConfirmButton @click="confirm()" />
+			</q-card-actions>
+		</q-card>
+	</q-dialog>
 </template>
 
 <script setup lang="ts">
@@ -101,7 +93,7 @@ const getIcon = (type: FileSystemEntityType): string => {
 };
 
 const emit = defineEmits<{
-	(e: 'confirm', path: FolderPathDTO): void;
+	(e: 'confirm', path: FolderPathDTO | null): void;
 	(e: 'cancel'): void;
 }>();
 
@@ -110,13 +102,19 @@ const emit = defineEmits<{
 // 	this.debouncedWatch(val, oldVal);
 // }
 
-const open = (path: FolderPathDTO): void => {
-	if (!path) {
+const columns = [
+	{ name: 'type', align: 'left', label: 'Type', field: 'type', sortable: true },
+	{ name: 'path', align: 'left', label: 'Path', field: 'path', sortable: true },
+];
+
+const open = (selectedPath: FolderPathDTO): void => {
+	if (!selectedPath) {
 		Log.error('parameter was null when opening DirectoryBrowser');
 		return;
 	}
-	path = cloneDeep(path);
-	requestDirectories(path.directory);
+	selectedPath = cloneDeep(selectedPath);
+	requestDirectories(selectedPath.directory);
+	path.value = selectedPath;
 	showDialog.value = true;
 };
 
@@ -158,7 +156,7 @@ function requestDirectories(path: string): void {
 	);
 }
 
-function directoryNavigate(dataRow: FileSystemModelDTO): void {
+function directoryNavigate(evt, dataRow: FileSystemModelDTO, index): void {
 	if (dataRow.path === '..') {
 		requestDirectories(parentPath.value);
 	} else {
@@ -182,3 +180,12 @@ defineExpose({
 	open,
 });
 </script>
+<style lang="scss">
+@import './src/assets/scss/_variables.scss';
+@import './src/assets/scss/_mixins.scss';
+
+.directory-browser-content {
+	max-width: 80vw !important;
+	min-width: 70vw !important;
+}
+</style>

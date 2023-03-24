@@ -7,16 +7,22 @@
 				</h2>
 				<div>
 					<p-text-field
-						v-model="path.directory"
+						:model-value="path.directory"
 						outlined
 						color="red"
-						placeholder="Start typing or select a path below" />
+						debounce="500"
+						placeholder="Start typing or select a path below"
+						@update:model-value="requestDirectories" />
 				</div>
 				<q-markup-table>
 					<thead>
 						<tr>
-							<th class="text-left" style="width: 100px">Type:</th>
-							<th class="text-left">Path:</th>
+							<th class="text-left" style="width: 100px">
+								{{ $t('components.directory-browser.type') }}
+							</th>
+							<th class="text-left">
+								{{ $t('components.directory-browser.path') }}
+							</th>
 						</tr>
 					</thead>
 				</q-markup-table>
@@ -61,7 +67,7 @@
 import Log from 'consola';
 import { ref, defineProps, defineEmits } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
-import { cloneDeep, debounce, DebouncedFunc } from 'lodash-es';
+import { cloneDeep } from 'lodash-es';
 import { getDirectoryPath } from '@api/pathApi';
 import type { FileSystemModelDTO, FolderPathDTO } from '@dto/mainApi';
 import { FileSystemEntityType } from '@dto/mainApi';
@@ -71,11 +77,6 @@ const showDialog = ref(false);
 const parentPath = ref('');
 const isLoading = ref(true);
 const items = ref<FileSystemModelDTO[]>([]);
-let debouncedWatch = debounce((newValue: any, oldValue: any) => {
-	if (newValue !== oldValue) {
-		path.value!.directory = newValue;
-	}
-}, 500);
 
 const getIcon = (type: FileSystemEntityType): string => {
 	switch (type) {
@@ -96,16 +97,6 @@ const emit = defineEmits<{
 	(e: 'confirm', path: FolderPathDTO | null): void;
 	(e: 'cancel'): void;
 }>();
-
-// @Watch('newDirectory')
-// onNewDirectory(val: string, oldVal: string) {
-// 	this.debouncedWatch(val, oldVal);
-// }
-
-const columns = [
-	{ name: 'type', align: 'left', label: 'Type', field: 'type', sortable: true },
-	{ name: 'path', align: 'left', label: 'Path', field: 'path', sortable: true },
-];
 
 const open = (selectedPath: FolderPathDTO): void => {
 	if (!selectedPath) {
@@ -128,18 +119,21 @@ function cancel(): void {
 	showDialog.value = false;
 }
 
-function requestDirectories(path: string): void {
-	if (path === '' || path === '/') {
+function requestDirectories(newPath: string): void {
+	if (newPath === '' || newPath === '/') {
 		isLoading.value = true;
+	}
+	if (path.value) {
+		path.value.directory = newPath;
 	}
 
 	useSubscription(
-		getDirectoryPath(path).subscribe((data) => {
+		getDirectoryPath(newPath).subscribe((data) => {
 			if (data.isSuccess && data.value) {
 				items.value = data.value?.directories;
 
 				// Don't add return row if in the root folder
-				if (path !== '') {
+				if (newPath !== '') {
 					items.value.unshift({
 						name: '...',
 						path: '..',
@@ -156,25 +150,13 @@ function requestDirectories(path: string): void {
 	);
 }
 
-function directoryNavigate(evt, dataRow: FileSystemModelDTO, index): void {
+function directoryNavigate(evt, dataRow: FileSystemModelDTO): void {
 	if (dataRow.path === '..') {
 		requestDirectories(parentPath.value);
 	} else {
 		requestDirectories(dataRow.path);
 	}
 }
-
-onMounted(() => {
-	debouncedWatch = debounce((newValue: any, oldValue: any) => {
-		if (newValue !== oldValue) {
-			path.value!.directory = newValue;
-		}
-	}, 1000);
-});
-
-onUnmounted(() => {
-	debouncedWatch.cancel();
-});
 
 defineExpose({
 	open,

@@ -52,7 +52,6 @@ const folderPaths = ref<FolderPathDTO[]>([]);
 const allowEditing = ref(true);
 const selectedFolderPath = ref<FolderPathDTO | null>(null);
 
-// @Ref('directoryBrowser')
 const directoryBrowser = ref<InstanceType<typeof DirectoryBrowser> | null>(null);
 
 const getFolderPaths = computed(() => {

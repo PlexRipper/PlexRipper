@@ -1,36 +1,28 @@
 <template>
-	<q-row>
-		<q-col>
-			<div class="cursor-pointer">
+	<q-list>
+		<q-item v-ripple clickable>
+			<q-item-section>
 				<q-sub-header>
-					{{ newValue }}
+					{{ value }}
 				</q-sub-header>
-				<QPopupEdit ref="popup" v-slot="scope" :model-value="newValue" auto-save @save="save">
-					<q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set" />
-				</QPopupEdit>
-			</div>
-		</q-col>
-	</q-row>
+			</q-item-section>
+			<QPopupEdit v-slot="scope" :model-value="value" auto-save @save="$emit('save', $event)">
+				<q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set" />
+			</QPopupEdit>
+		</q-item>
+	</q-list>
 </template>
 
 <script setup lang="ts">
-import { QPopupEdit } from 'quasar';
+import { defineProps, defineEmits } from 'vue';
 
-const props = defineProps<{
+defineProps<{
 	label: string;
 	value?: string;
 	disabled?: boolean;
 }>();
 
-const emit = defineEmits<{
+defineEmits<{
 	(e: 'save', save: string): void;
 }>();
-
-const popup = ref<QPopupEdit>(null);
-
-const newValue = ref(props.value);
-
-function save(event: string): void {
-	emit('save', event);
-}
 </script>

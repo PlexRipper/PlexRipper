@@ -1,7 +1,7 @@
 <template>
 	<!--	Custom FolderPaths	-->
 	<template v-if="getFolderPaths.length > 0">
-		<q-row v-for="folderPath in getFolderPaths" :key="folderPath.id" no-gutters class="q-my-sm">
+		<q-row v-for="folderPath in getFolderPaths" :key="folderPath.id" no-gutters class="q-my-sm" align="center">
 			<q-col cols="3">
 				<editable-text
 					:value="folderPath.displayName"
@@ -16,7 +16,7 @@
 					:disabled="!allowEditing"
 					@click:append="openDirectoryBrowser(folderPath)" />
 			</q-col>
-			<q-col cols="2" align-self="center">
+			<q-col cols="2">
 				<!--	Is Valid Icon -->
 				<valid-icon
 					:valid="folderPath.isValid"
@@ -44,7 +44,7 @@
 	<!--	Directory Browser	-->
 	<q-row>
 		<q-col>
-			<DirectoryBrowser :show="showDirectoryBrowser" :path="selectedFolderPath" @confirm="confirmDirectoryBrowser" />
+			<DirectoryBrowser ref="directoryBrowser" @confirm="confirmDirectoryBrowser" />
 		</q-col>
 	</q-row>
 </template>
@@ -55,6 +55,7 @@ import { withDefaults, defineProps, computed, ref } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
 import { DownloadService, FolderPathService } from '@service';
+import DirectoryBrowser from '@components/General/DirectoryBrowser.vue';
 
 const props = withDefaults(
 	defineProps<{
@@ -67,13 +68,10 @@ const props = withDefaults(
 
 const folderPaths = ref<FolderPathDTO[]>([]);
 const allowEditing = ref(true);
-const selectedFolderPath = ref<FolderPathDTO | null>(null);
-const showDirectoryBrowser = ref(false);
-
-// @Ref('directoryBrowser')
-// readonly directoryBrowserRef!: DirectoryBrowser;
+const directoryBrowser = ref<InstanceType<typeof DirectoryBrowser> | null>(null);
 
 const getFolderPaths = computed((): FolderPathDTO[] => {
+	// x.id >= 4 is to filter out the default paths.
 	return folderPaths.value.filter((x) => x.folderType === props.folderType && x.id >= 4);
 });
 
@@ -100,8 +98,7 @@ const getMediaType = computed((): PlexMediaType => {
 });
 
 const openDirectoryBrowser = (path: FolderPathDTO): void => {
-	selectedFolderPath.value = path;
-	showDirectoryBrowser.value = true;
+	directoryBrowser.value?.open(path);
 };
 
 const confirmDirectoryBrowser = (path: FolderPathDTO): void => {

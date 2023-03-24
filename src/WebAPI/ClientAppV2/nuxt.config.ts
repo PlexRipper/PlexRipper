@@ -92,7 +92,7 @@ export default defineNuxtConfig({
 		'@mock': fileURLToPath(new URL('./src/mock-data/', import.meta.url)),
 		'@interfaces': fileURLToPath(new URL('./src/types/interfaces/', import.meta.url)),
 		'@components': fileURLToPath(new URL('./src/components/', import.meta.url)),
-		'@overviews': fileURLToPath(new URL('./src/components/overviews/', import.meta.url)),
+		'@overviews': fileURLToPath(new URL('./src/components/Overviews/', import.meta.url)),
 		'@mediaOverview': fileURLToPath(new URL('./src/components/MediaOverview/', import.meta.url)),
 		'@vTreeViewTable': fileURLToPath(new URL('./src/components/General/VTreeViewTable/', import.meta.url)),
 	},

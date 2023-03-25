@@ -33,14 +33,13 @@ export default defineNuxtConfig({
 		plugins: ['Loading'],
 		// Truthy values requires `sass@1.32.12`.
 		sassVariables: 'src/assets/scss/_variables.scss',
-		iconSet: 'mdi-v6',
+		iconSet: 'mdi-v7',
 		// Requires `@quasar/extras` package
 		extras: {
 			// string | null: Auto-import roboto font. https://quasar.dev/style/typography#default-font
 			font: 'roboto-font',
 			// string[]: Auto-import webfont icons. Usage: https://quasar.dev/vue-components/icon#webfont-usage
-			// 'material-icons' is added because it is used by default in Quasar components, needs to be changed with a 'iconSet' option to 'mdi-v6'
-			fontIcons: ['mdi-v6'],
+			fontIcons: ['mdi-v7'],
 			// string[]: Auto-import svg icon collections. Usage: https://quasar.dev/vue-components/icon#svg-usage
 			svgIcons: [],
 			// string[]: Auto-import animations from 'animate.css'. Usage: https://quasar.dev/options/animations#usage

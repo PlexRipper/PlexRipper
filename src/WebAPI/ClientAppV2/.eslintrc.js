@@ -18,6 +18,8 @@ module.exports = {
 		// Reason: This allows nested index.ts to pass through exports without naming them
 		'import/export': 'off',
 		'vue/html-indent': ['error', 'tab'], // enforce tabs in template
+		// Reason: Triggers on page names like [id].vue
+		'vue/multi-word-component-names': 'off',
 		// Reason: Opinionated not to have useless empty lines with just a closing tag
 		'vue/html-closing-bracket-newline': ['error', { multiline: 'never' }],
 		'vue/component-name-in-template-casing': [

@@ -104,13 +104,7 @@ export default defineNuxtConfig({
 		dirs: [
 			// Components directory
 			{
-				path: './components',
-				pathPrefix: false,
-				extensions: ['vue'],
-			},
-			// Pages directory
-			{
-				path: './pages',
+				path: '~/components',
 				pathPrefix: false,
 				extensions: ['vue'],
 			},
@@ -134,5 +128,5 @@ export default defineNuxtConfig({
 	/*
 	 ** Customize the progress-bar color
 	 */
-	// loading: false, // TODO Maybe better to re-enable based on how it looks
+	// loading: true, // TODO Maybe better to re-enable based on how it looks
 });

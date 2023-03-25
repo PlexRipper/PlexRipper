@@ -1,9 +1,3 @@
 <template>
-	<media-overview :library-id="libraryId" />
+	<media-overview :library-id="+$route.params.id" />
 </template>
-
-<script setup lang="ts">
-const route = useRoute();
-
-const libraryId = computed(() => +route.params.moviesId);
-</script>

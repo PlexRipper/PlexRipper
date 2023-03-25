@@ -11,28 +11,6 @@ PageContainer.vue
 	z-index: 0;
 }
 
-/*
-MediaPoster.vue
-*/
-.poster-overlay {
-	align-items: center;
-	justify-content: center;
-	position: absolute;
-	height: 100%;
-	width: 100%;
-	background-color: rgba(0, 0, 0, 0);
-	opacity: 0;
-	transition: opacity 0.2s ease-in-out;
-
-	&.on-hover {
-		background-color: rgba(0, 0, 0, 0.8);
-		opacity: 0.8;
-
-		.v-btn {
-			opacity: 1;
-		}
-	}
-}
 
 /*
 HelpIcon.vue
@@ -184,33 +162,6 @@ ServerDrawer.vue
 	width: 100%;
 }
 
-/*
-VerticalButton.vue
-*/
-
-.vertical-button {
-	.vertical-button-content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-
-		.vertical-button-label {
-			transition-duration: 0.28s;
-			height: 24px;
-		}
-	}
-}
-
-/*
-AlphabetNavigation.vue
-*/
-.navigation-btn {
-	height: 32px;
-	background: transparent !important;
-	flex: 1 1 20px;
-	text-align: center;
-	font-weight: bold;
-}
 
 /*
 ValidIcon.vue

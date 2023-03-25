@@ -2,21 +2,19 @@
 	<span> {{ duration }}</span>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
+import { defineProps, computed } from 'vue';
 import { formatDuration } from 'date-fns';
 
-@Component
-export default class Duration extends Vue {
-	@Prop({ required: true, type: Number })
-	readonly value!: number;
+const props = defineProps<{
+	value: number;
+}>();
 
-	get duration(): string {
-		const date = new Date(this.value * 1000);
-		return formatDuration(
-			{ hours: date.getUTCHours(), minutes: date.getUTCMinutes(), seconds: date.getSeconds() },
-			{ delimiter: ' ', format: ['hours', 'minutes', 'seconds'] },
-		);
-	}
-}
+const duration = computed(() => {
+	const date = new Date(props.value * 1000);
+	return formatDuration(
+		{ hours: date.getUTCHours(), minutes: date.getUTCMinutes(), seconds: date.getSeconds() },
+		{ delimiter: ' ', format: ['hours', 'minutes', 'seconds'] },
+	);
+});
 </script>

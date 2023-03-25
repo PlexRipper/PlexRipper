@@ -1,9 +1,6 @@
 <template>
-	<q-col cols="auto" class="d-flex flex-column pt-2">
-		<q-btn v-for="letter in alphabet" :key="letter"
-:width="20" class="navigation-btn filled" flat @click="scrollTo(letter)">
-			<span>{{ letter }}</span>
-		</q-btn>
+	<q-col cols="auto" class="alphabet-navigation column wrap">
+		<q-btn v-for="letter in alphabet" :key="letter" class="navigation-btn" :label="letter" flat @click="scrollTo(letter)" />
 	</q-col>
 </template>
 
@@ -41,3 +38,35 @@ function scrollTo(letter: string): void {
 	emit('scroll-to', letter);
 }
 </script>
+<style lang="scss">
+.navigation-btn {
+	height: 32px;
+	width: 24px;
+	background: transparent !important;
+	flex: 1 1 24px !important;
+	text-align: center;
+	font-weight: bold;
+
+	&.filled {
+		background-color: currentColor;
+	}
+
+	&.outlined {
+		border: 2px solid currentColor;
+	}
+
+	&.theme--dark {
+		color: red;
+	}
+
+	&.theme--light {
+		color: darkred;
+	}
+
+	&:hover {
+		&::before {
+			opacity: 0.2 !important;
+		}
+	}
+}
+</style>

@@ -1,30 +1,34 @@
 <template>
-	<v-btn class="vertical-button" text tile :height="height" :disabled="disabled" :width="width" @click="$emit('click', $event)">
+	<q-btn push flat class="vertical-button">
 		<div class="vertical-button-content">
-			<v-icon x-large>{{ icon }}</v-icon>
-			<span class="vertical-button-label">{{ label }}</span>
+			<q-icon :size="props.size" :name="props.icon" />
+			<div class="text-center vertical-button-label">
+				{{ props.label }}
+			</div>
 		</div>
-	</v-btn>
+		<slot />
+	</q-btn>
 </template>
 
-<script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+<script setup lang="ts">
+import { defineProps, withDefaults } from 'vue';
+import { IBaseButtonProps } from '~/types/props/base-button/IBaseButtonProps';
 
-@Component
-export default class VerticalButton extends Vue {
-	@Prop({ required: true, type: String })
-	readonly icon!: string;
-
-	@Prop({ required: true, type: String })
-	readonly label!: string;
-
-	@Prop({ required: true, type: Number })
-	readonly height!: number;
-
-	@Prop({ required: false, type: Number })
-	readonly width!: number;
-
-	@Prop({ required: false, type: Boolean, default: false })
-	readonly disabled!: boolean;
-}
+const props = withDefaults(defineProps<IBaseButtonProps>(), {
+	size: 'xl',
+});
 </script>
+<style lang="scss">
+.vertical-button {
+	.vertical-button-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+
+		.vertical-button-label {
+			transition-duration: 0.28s;
+			height: 24px;
+		}
+	}
+}
+</style>

@@ -1,8 +1,8 @@
 <template>
-	<page-container v-show="isOpen">
+	<q-page v-show="isOpen">
 		<template v-if="mediaItem">
 			<!--	Details Overview Bar	-->
-			<v-row class="mx-0">
+			<q-row class="mx-0">
 				<media-overview-bar
 					detail-mode
 					:library="library"
@@ -10,168 +10,165 @@
 					:media-item="mediaItem"
 					:has-selected="selected.length > 0"
 					@download="downloadSelectedMedia"
-					@back="close"
-				/>
-			</v-row>
+					@back="close" />
+			</q-row>
 
 			<!--	Header	-->
-			<v-row style="max-height: 250px; height: 250px">
+			<q-row style="max-height: 250px; height: 250px">
 				<!--	Poster	-->
-				<v-col cols="auto">
-					<v-card :max-width="thumbWidth" :width="thumbWidth">
-						<v-img :src="imageUrl" :width="thumbWidth" :height="thumbHeight">
+				<q-col cols="auto">
+					<q-card :max-width="thumbWidth" :width="thumbWidth">
+						<q-img :src="imageUrl" :width="thumbWidth" :height="thumbHeight">
 							<!--	Placeholder	-->
 							<template #placeholder>
 								<!--	Show fallback image	-->
 								<template v-if="defaultImage">
-									<v-row align="center" justify="center" class="fill-height">
-										<v-col cols="auto">
-											<media-type-icon :size="100" class="mx-3" media-type="mediaType" />
-										</v-col>
-										<v-col cols="12">
+									<q-row align="center" justify="center" class="fill-height">
+										<q-col cols="auto">
+											<q-media-type-icon :size="100" class="mx-3" media-type="mediaType" />
+										</q-col>
+										<q-col cols="12">
 											<h4 class="text-center">{{ mediaItem.title }}</h4>
-										</v-col>
-									</v-row>
+										</q-col>
+									</q-row>
 								</template>
 								<!--	Show  image	-->
 								<template v-else>
-									<v-row class="fill-height ma-0" align="center" justify="center">
-										<v-col cols="12">
+									<q-row class="fill-height ma-0" align="center" justify="center">
+										<q-col cols="12">
 											<h4 class="text-center">{{ mediaItem.title }}</h4>
-										</v-col>
-										<v-col cols="auto">
-											<v-progress-circular indeterminate color="grey lighten-5" />
-										</v-col>
-									</v-row>
+										</q-col>
+										<q-col cols="auto">
+											<loading-spinner color="grey lighten-5" />
+										</q-col>
+									</q-row>
 								</template>
 							</template>
-						</v-img>
-					</v-card>
-				</v-col>
+						</q-img>
+					</q-card>
+				</q-col>
 
-				<v-col>
-					<v-card>
-						<v-card-title>
-							<h1>{{ mediaItem.title }}</h1>
-						</v-card-title>
-						<v-card-text>
-							<v-row no-gutters>
-								<v-col cols="12">
-									<span
-										>{{ $t('components.details-overview.duration') }} <duration :value="mediaItem.duration" />
+				<q-col>
+					<q-card>
+						<q-card-title>
+							{{ mediaItem.title }}
+						</q-card-title>
+						<q-card-section>
+							<q-row no-gutters>
+								<q-col cols="12">
+									<span>
+										{{ $t('components.details-overview.duration') }}
+										<q-duration :value="mediaItem.duration" />
 									</span>
-								</v-col>
-								<v-col cols="12">
+								</q-col>
+								<q-col cols="12">
 									<span>{{ $t('components.details-overview.database-id') }} {{ mediaItem.id }}</span>
-								</v-col>
-							</v-row>
-						</v-card-text>
-					</v-card>
-				</v-col>
-			</v-row>
+								</q-col>
+							</q-row>
+						</q-card-section>
+					</q-card>
+				</q-col>
+			</q-row>
 
 			<!--	Media Table	-->
-			<v-row no-gutters>
-				<v-col>
-					<media-table
-						ref="detail-media-table"
-						:items="[mediaItem]"
-						:media-type="mediaType"
-						:library-id="library.id"
-						hide-navigation
-						detail-mode
-						@download="downloadMedia"
-						@selected="selected = $event"
-					/>
-				</v-col>
-			</v-row>
+			<q-row no-gutters>
+				<q-col>
+					<!--					<MediaTable-->
+					<!--						ref="detailMediaTableRef"-->
+					<!--						:items="[mediaItem]"-->
+					<!--						:media-type="mediaType"-->
+					<!--						:library-id="library.id"-->
+					<!--						hide-navigation-->
+					<!--						detail-mode-->
+					<!--						@download="downloadMedia"-->
+					<!--						@selected="selected = $event" />-->
+				</q-col>
+			</q-row>
 		</template>
 		<!--	Loading	-->
 		<template v-else>
-			<v-row justify="center">
-				<v-col cols="auto">
+			<q-row justify="center">
+				<q-col cols="auto">
 					<loading-spinner :size="60" />
-				</v-col>
-			</v-row>
+				</q-col>
+			</q-row>
 		</template>
-	</page-container>
+	</q-page>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
-import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
-import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
+<script setup lang="ts">
+import { defineProps, defineEmits, ref, watch } from 'vue';
+// import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
 import { DownloadMediaDTO, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import { MediaService } from '@service';
+import ITreeViewItem from '@class/ITreeViewItem';
 
-@Component
-export default class DetailsOverview extends Vue {
-	@Prop({ required: true, type: String })
-	readonly mediaType!: PlexMediaType;
+const props = defineProps<{
+	mediaType: PlexMediaType;
+	mediaItem: ITreeViewItem | null;
+	library: PlexLibraryDTO | null;
+	server: PlexServerDTO | null;
+	activeAccountId: number;
+}>();
 
-	@Prop({ type: Object as () => ITreeViewItem })
-	readonly mediaItem!: ITreeViewItem | null;
+// const detailMediaTableRef = ref<InstanceType<typeof MediaTable> | null>(null);
 
-	@Prop({ required: false, type: Object as () => PlexLibraryDTO | null })
-	readonly library!: PlexLibraryDTO | null;
+const emit = defineEmits<{
+	(e: 'download', download: DownloadMediaDTO[] | DownloadMediaDTO): void;
+	(e: 'close'): void;
+}>();
 
-	@Prop({ required: false, type: Object as () => PlexServerDTO | null })
-	readonly server!: PlexServerDTO | null;
+const thumbWidth = ref(150);
+const thumbHeight = ref(200);
+const isOpen = ref(false);
+const mediaId = ref(0);
+const defaultImage = ref(false);
+const imageUrl = ref('');
+const selected = ref<string[]>([]);
+const downloadMediaCommand = ref<DownloadMediaDTO[]>([]);
 
-	@Prop({ required: true, type: Number })
-	readonly activeAccountId!: number;
+const close = () => {
+	isOpen.value = false;
+	emit('close');
+};
 
-	@Ref('detail-media-table')
-	readonly detailMediaTable!: MediaTable;
-
-	private thumbWidth: number = 150;
-	private thumbHeight: number = 200;
-	isOpen: boolean = false;
-	mediaId: number = 0;
-	defaultImage: boolean = false;
-	imageUrl: string = '';
-	selected: string[] = [];
-	downloadMediaCommand: DownloadMediaDTO[] = [];
-	close(): void {
-		this.isOpen = false;
-		this.$emit('close');
-	}
-
-	@Watch('mediaItem')
-	mediaItemIsDone(newMediaItem: ITreeViewItem | null): void {
+watch(
+	() => props.mediaItem,
+	(newMediaItem: ITreeViewItem | null) => {
 		if (newMediaItem) {
-			MediaService.getThumbnail(newMediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe(
-				(imageUrl) => {
-					if (!imageUrl) {
-						this.defaultImage = true;
-						return;
-					}
-					this.imageUrl = imageUrl;
-				},
-			);
+			MediaService.getThumbnail(newMediaItem.id, props.mediaType, thumbWidth.value, thumbHeight.value).subscribe((data) => {
+				if (!data) {
+					defaultImage.value = true;
+					return;
+				}
+				imageUrl.value = data;
+			});
 		}
-	}
+	},
+);
 
-	openDetails(): void {
-		this.isOpen = true;
-	}
+const openDetails = () => {
+	isOpen.value = true;
+};
 
-	downloadSelectedMedia(): void {
-		if (this.mediaType === PlexMediaType.TvShow) {
-			this.$emit('download', this.detailMediaTable.createDownloadCommands());
-		}
-		if (this.mediaType === PlexMediaType.Movie) {
-			this.$emit('download', {
-				mediaIds: [this.mediaItem?.id],
-				plexAccountId: this.activeAccountId,
-				type: PlexMediaType.Movie,
-				libraryId: this.library?.id,
-			} as DownloadMediaDTO);
-		}
+const downloadSelectedMedia = () => {
+	if (props.mediaType === PlexMediaType.TvShow) {
+		// emit('download', detailMediaTableRef.value?.createDownloadCommands());
 	}
+	if (props.mediaType === PlexMediaType.Movie) {
+		emit('download', {
+			mediaIds: [props.mediaItem?.id ?? 0],
+			type: props.mediaType,
+			plexAccountId: props.activeAccountId,
+		});
+	}
+};
 
-	downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): void {
-		this.$emit('download', downloadMediaCommand);
-	}
-}
+const downloadMedia = (download: DownloadMediaDTO[] | DownloadMediaDTO) => {
+	emit('download', download);
+};
+
+defineExpose({
+	openDetails,
+});
 </script>

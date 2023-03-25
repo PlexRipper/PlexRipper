@@ -1,79 +1,77 @@
 <template>
-	<v-row no-gutters>
-		<!-- Poster display-->
-		<v-col>
-			<vue-scroll ref="scrollbarposters">
-				<v-row class="poster-overview" justify="center">
-					<template v-for="item in items">
+	<q-row>
+		<q-col class="poster-overview">
+			<!-- Poster display-->
+			<QScrollArea ref="scrollbarposters" class="fit">
+				<q-row justify="center">
+					<template v-for="item in items" :key="item.id">
 						<media-poster
-							:key="item.id"
 							:media-item="item"
 							:media-type="mediaType"
 							@download="downloadMedia"
-							@open-details="openDetails"
-						/>
+							@open-details="$emit('open-details', $event)" />
 					</template>
-				</v-row>
-			</vue-scroll>
-		</v-col>
+				</q-row>
+			</QScrollArea>
+		</q-col>
 		<!-- Alphabet Navigation-->
 		<alphabet-navigation :items="items" @scroll-to="scrollToIndex" />
-	</v-row>
+	</q-row>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Log from 'consola';
-import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
-import VueScroll from 'vuescroll';
+import { defineProps, defineEmits, ref } from 'vue';
 import { DownloadMediaDTO, PlexMediaType } from '@dto/mainApi';
-import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
+import ITreeViewItem from '@class/ITreeViewItem';
+import { QScrollArea } from '#components';
 
-@Component
-export default class PosterTable extends Vue {
-	@Prop({ required: true, type: Array as () => ITreeViewItem[] })
-	readonly items!: ITreeViewItem[];
+const props = defineProps<{
+	items: ITreeViewItem[];
+	mediaType: PlexMediaType;
+	activeAccountId: number;
+}>();
 
-	@Prop({ required: true, type: String })
-	readonly mediaType!: PlexMediaType;
+const emit = defineEmits<{
+	(e: 'open-details', mediaId: number): void;
+	(e: 'download', downloadMediaCommands: DownloadMediaDTO[]): void;
+}>();
 
-	@Prop({ required: false, type: Number })
-	readonly libraryId!: number;
+const scrollbarposters = ref<InstanceType<typeof QScrollArea> | null>(null);
 
-	@Prop({ required: true, type: Number })
-	readonly activeAccountId!: number;
+const downloadMedia = (downloadMediaCommands: DownloadMediaDTO[]): void => {
+	downloadMediaCommands.forEach((x) => {
+		x.plexAccountId = props.activeAccountId;
+	});
+	emit('download', downloadMediaCommands);
+};
 
-	@Ref('scrollbarposters')
-	readonly scrollBar!: VueScroll;
-
-	downloadMedia(downloadMediaCommands: DownloadMediaDTO[]): void {
-		downloadMediaCommands.forEach((x) => {
-			x.plexAccountId = this.activeAccountId;
-		});
-		this.$emit('download', downloadMediaCommands);
+const scrollToIndex = (letter: string) => {
+	if (!scrollbarposters.value) {
+		Log.error('Could not find container with reference: ' + scrollbarposters.value);
+		return;
 	}
 
-	openDetails(mediaId: number): void {
-		this.$emit('open-details', mediaId);
-	}
-
-	scrollToIndex(letter: string) {
-		if (!this.scrollBar) {
-			Log.error('Could not find container with reference: ' + this.scrollBar);
-			return;
+	let scrollHeight = 0;
+	if (letter !== '#') {
+		const children = scrollbarposters.value.$children[0].$children;
+		const index = children.findIndex((x) => (x.$el as HTMLElement)?.getAttribute('data-title')?.startsWith(letter)) ?? -1;
+		if (index > -1 && children[index]) {
+			scrollHeight = (children[index].$el as HTMLElement).offsetTop;
+		} else {
+			Log.error('Could not find an index with letter ' + letter);
 		}
-
-		let scrollHeight = 0;
-		if (letter !== '#') {
-			const children = this.scrollBar.$children[0].$children;
-			const index = children.findIndex((x) => (x.$el as HTMLElement)?.getAttribute('data-title')?.startsWith(letter)) ?? -1;
-			if (index > -1 && children[index]) {
-				scrollHeight = (children[index].$el as HTMLElement).offsetTop;
-			} else {
-				Log.error('Could not find an index with letter ' + letter);
-			}
-		}
-
-		this.scrollBar.scrollTo({ y: scrollHeight }, 0);
 	}
-}
+
+	scrollbarposters.value.scrollTo({ y: scrollHeight }, 500);
+};
 </script>
+<style lang="scss">
+.poster-overview,
+.alphabet-navigation {
+	height: calc(100vh - 85px - 48px);
+	width: 100%;
+	// 8% reserved for the media-overview-bar
+	// height: 92%;
+}
+</style>

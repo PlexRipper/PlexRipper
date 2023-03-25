@@ -36,6 +36,7 @@
 
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, toRef, onBeforeUpdate } from 'vue';
+import { AccountForm } from '#components';
 
 const props = defineProps({
 	className: String,
@@ -75,7 +76,7 @@ const KEY_CODE = {
 
 const values = ref([]);
 const iRefs = ref([]);
-const inputs = ref([]);
+const inputs = ref<InstanceType<typeof HTMLInputElement>[]>([]);
 const fields = toRef(props, 'fields');
 const autoFocusIndex = ref(0);
 const autoFocus = true;
@@ -196,8 +197,8 @@ const onKeyDown = (e) => {
 	}
 };
 
-const triggerChange = (values = values.value) => {
-	const val = values.join('');
+const triggerChange = (newValue = values.value) => {
+	const val = newValue.join('');
 	emit('change', val);
 	emit('complete', val.length >= fields.value);
 };

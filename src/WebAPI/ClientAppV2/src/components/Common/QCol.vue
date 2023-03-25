@@ -25,7 +25,7 @@ interface IOffset {
 
 interface QColProps extends IBreakPoints, IOffset {
 	cols?: 'auto' | 'grow' | 'shrink' | string | number | boolean;
-	offset?: string | number;
+	offset?: string | number | boolean;
 
 	alignSelf?: 'auto' | 'start' | 'end' | 'center' | 'baseline' | 'stretch' | 'none';
 }
@@ -40,7 +40,7 @@ const breakPoints: IBreakPoints = {
 
 const props = withDefaults(defineProps<QColProps>(), {
 	cols: 0,
-	offset: '0',
+	offset: false,
 	alignSelf: 'none',
 	xs: false,
 	sm: false,

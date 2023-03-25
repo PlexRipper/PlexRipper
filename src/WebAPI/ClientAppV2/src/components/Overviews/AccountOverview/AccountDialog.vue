@@ -65,11 +65,11 @@
 import Log from 'consola';
 import { defineEmits, ref, computed } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
-import AccountForm from '@overviews/AccountOverview/AccountForm.vue';
 import { IError, PlexAccountDTO } from '@dto/mainApi';
 import { validateAccount } from '@api/accountApi';
 import { AccountService } from '@service';
 import { useI18n } from '#imports';
+import type { AccountForm } from '#components';
 
 const showDialog = ref(false);
 const isNewAccount = ref(false);
@@ -231,7 +231,7 @@ const validateAfterVerificationCode = (verificationCode: string) => {
 
 const reset = () => {
 	changedPlexAccount.value = getDefaultAccount();
-	accountForm.value?.reset();
+	accountForm.value?.onReset();
 };
 
 const cancel = () => {
@@ -300,7 +300,7 @@ const closeDialog = (refreshAccounts = false) => {
 
 // endregion
 
-defineExpose({ openDialog, closeDialog });
+defineExpose({ openDialog, closeDialog, reset });
 </script>
 
 <style lang="scss">

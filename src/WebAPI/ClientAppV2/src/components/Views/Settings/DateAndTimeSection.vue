@@ -13,7 +13,7 @@
 								<help-icon help-id="help.settings.ui.date-and-time.short-date-format" />
 							</td>
 							<td>
-								<p-select
+								<q-select
 									:model-value="shortDateFormat"
 									:options="shortDateOptions"
 									@update:model-value="updateSettings('shortDateFormat', $event.value)" />
@@ -25,7 +25,7 @@
 								<help-icon help-id="help.settings.ui.date-and-time.long-date-format" />
 							</td>
 							<td>
-								<p-select
+								<q-select
 									:model-value="longDateFormat"
 									:options="longDateOptions"
 									@update:model-value="updateSettings('longDateFormat', $event.value)" />
@@ -37,7 +37,7 @@
 								<help-icon help-id="help.settings.ui.date-and-time.time-format" />
 							</td>
 							<td>
-								<p-select
+								<q-select
 									:model-value="timeFormat"
 									:options="timeFormatOptions"
 									@update:model-value="updateSettings('timeFormat', $event.value)" />
@@ -74,8 +74,6 @@
 									:model-value="showRelativeDates"
 									size="lg"
 									color="red"
-									checked-icon="check"
-									unchecked-icon="clear"
 									@update:model-value="updateSettings('showRelativeDates', $event)" />
 							</td>
 						</tr>

@@ -14,9 +14,6 @@
 								<q-toggle
 									:model-value="askDownloadMovieConfirmation"
 									size="lg"
-									color="red"
-									checked-icon="check"
-									unchecked-icon="clear"
 									@update:model-value="updateSettings('askDownloadMovieConfirmation', $event)" />
 							</td>
 						</tr>
@@ -29,9 +26,6 @@
 								<q-toggle
 									:model-value="askDownloadTvShowConfirmation"
 									size="lg"
-									color="red"
-									checked-icon="check"
-									unchecked-icon="clear"
 									@update:model-value="updateSettings('askDownloadTvShowConfirmation', $event)" />
 							</td>
 						</tr>
@@ -44,9 +38,6 @@
 								<q-toggle
 									:model-value="askDownloadSeasonConfirmation"
 									size="lg"
-									color="red"
-									checked-icon="check"
-									unchecked-icon="clear"
 									@update:model-value="updateSettings('askDownloadSeasonConfirmation', $event)" />
 							</td>
 						</tr>
@@ -59,9 +50,6 @@
 								<q-toggle
 									:model-value="askDownloadEpisodeConfirmation"
 									size="lg"
-									color="red"
-									checked-icon="check"
-									unchecked-icon="clear"
 									@update:model-value="updateSettings('askDownloadEpisodeConfirmation', $event)" />
 							</td>
 						</tr>

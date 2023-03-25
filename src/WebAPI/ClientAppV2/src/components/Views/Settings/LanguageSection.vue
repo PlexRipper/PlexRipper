@@ -15,9 +15,8 @@
 							<td>
 								<q-select
 									:model-value="language"
+									:dense="false"
 									:options="languageOptions"
-									outlined
-									dropdown-icon="mdi-chevron-down"
 									@update:model-value="updateSettings">
 									<template #selected-item="scope">
 										<q-item>

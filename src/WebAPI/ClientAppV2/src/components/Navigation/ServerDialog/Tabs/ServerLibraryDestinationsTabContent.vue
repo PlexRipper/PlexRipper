@@ -7,11 +7,10 @@
 				{{ library.title }}
 			</q-td>
 			<q-td>
-				<p-select
+				<q-select
 					:model-value="getDefaultDestination(library.id)"
 					option-label="displayName"
 					option-value="id"
-					dense
 					:options="getFolderPathOptions(library.type)"
 					@update:model-value="updateDefaultDestination(library.id, $event.id)" />
 			</q-td>

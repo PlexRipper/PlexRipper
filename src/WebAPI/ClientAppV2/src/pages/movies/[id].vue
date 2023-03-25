@@ -1,5 +1,7 @@
 <template>
-	<media-overview :library-id="libraryId" />
+	<q-page>
+		<media-overview :library-id="libraryId" />
+	</q-page>
 </template>
 
 <script setup lang="ts">

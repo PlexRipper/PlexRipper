@@ -1,16 +1,9 @@
 <template>
-	<page-container>
-		<v-row>
-			<v-col>
+	<q-page>
+		<q-row>
+			<q-col>
 				<h1>{{ $t('pages.music._musicId.header') }}</h1>
-			</v-col>
-		</v-row>
-	</page-container>
+			</q-col>
+		</q-row>
+	</q-page>
 </template>
-
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-
-@Component
-export default class Music extends Vue {}
-</script>

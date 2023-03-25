@@ -2,11 +2,8 @@
 	<media-overview :library-id="libraryId" />
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
+const route = useRoute();
 
-@Component
-export default class MoviesDetail extends Vue {
-	libraryId: number = +this.$route.params.moviesId;
-}
+const libraryId = computed(() => +route.params.moviesId);
 </script>

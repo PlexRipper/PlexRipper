@@ -4,12 +4,15 @@
 </template>
 
 <script setup lang="ts">
+import { defineProps, computed } from 'vue';
+
 const props = defineProps<{
 	size: number;
 	speed?: boolean;
 }>();
 
 const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB', 'BB'];
+
 /*
  * Filesize filters
  * Source: https://github.com/sainf/vue-filter-pretty-bytes

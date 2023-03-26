@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, defineProps, onMounted } from 'vue';
+import { withDefaults, ref, computed, defineProps, onMounted } from 'vue';
 import { format } from 'date-fns';
 import { useSubscription } from '@vueuse/rxjs';
 import { SettingsService } from '@service';
@@ -16,7 +16,7 @@ const props = withDefaults(defineProps<{ text: string; shortDate?: boolean; long
 	text: '',
 	shortDate: false,
 	longDate: false,
-	time: true,
+	time: false,
 });
 
 const date = computed(() => {

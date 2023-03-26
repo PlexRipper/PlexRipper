@@ -8,15 +8,15 @@
 interface QRowProps {
 	justify?: 'start' | 'center' | 'end' | 'around' | 'between' | boolean;
 	align?: 'start' | 'center' | 'end' | boolean;
-	gutter?: string;
+	gutter?: string | boolean;
 	noWrap?: boolean;
 	reverse?: boolean;
 }
 
 const props = withDefaults(defineProps<QRowProps>(), {
 	justify: false,
-	align: 'start',
-	gutter: '0',
+	align: false,
+	gutter: false,
 	noWrap: false,
 	reverse: false,
 });

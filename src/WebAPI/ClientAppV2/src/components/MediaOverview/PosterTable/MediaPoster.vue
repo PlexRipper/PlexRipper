@@ -76,14 +76,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, defineProps, defineEmits, watch } from 'vue';
+import { ref, computed, defineProps, defineEmits } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
-import { DownloadMediaDTO, PlexMediaType } from '@dto/mainApi';
+import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import { MediaService } from '@service';
-import ITreeViewItem from '@class/ITreeViewItem';
 
 const props = defineProps<{
-	mediaItem: ITreeViewItem;
+	mediaItem: PlexMediaDTO;
 	mediaType: PlexMediaType;
 }>();
 

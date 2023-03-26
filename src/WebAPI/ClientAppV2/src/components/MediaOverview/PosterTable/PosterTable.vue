@@ -1,35 +1,27 @@
 <template>
-	<q-row>
-		<q-col class="poster-overview">
-			<!-- Poster display-->
-			<QScrollArea ref="scrollbarposters" class="fit">
-				<q-row justify="center">
-					<template v-for="item in items" :key="item.id">
-						<media-poster
-							:media-item="item"
-							:media-type="mediaType"
-							@download="downloadMedia"
-							@open-details="$emit('open-details', $event)" />
-					</template>
-				</q-row>
-			</QScrollArea>
-		</q-col>
-		<!-- Alphabet Navigation-->
-		<alphabet-navigation :items="items" @scroll-to="scrollToIndex" />
+	<!-- Poster display-->
+	<q-row justify="center">
+		<template v-for="item in posters" :key="item.id">
+			<media-poster
+				:media-item="item"
+				:media-type="mediaType"
+				@download="downloadMedia"
+				@open-details="$emit('open-details', $event)" />
+		</template>
 	</q-row>
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
 import { defineProps, defineEmits, ref } from 'vue';
-import { DownloadMediaDTO, PlexMediaType } from '@dto/mainApi';
-import ITreeViewItem from '@class/ITreeViewItem';
+import { useSubscription } from '@vueuse/rxjs';
+import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import { QScrollArea } from '#components';
+import { MediaService } from '@service';
 
 const props = defineProps<{
-	items: ITreeViewItem[];
 	mediaType: PlexMediaType;
-	activeAccountId: number;
+	libraryId: number;
 }>();
 
 const emit = defineEmits<{
@@ -37,11 +29,14 @@ const emit = defineEmits<{
 	(e: 'download', downloadMediaCommands: DownloadMediaDTO[]): void;
 }>();
 
+const posters = ref<PlexMediaDTO[]>([]);
+const loading = ref(true);
+
 const scrollbarposters = ref<InstanceType<typeof QScrollArea> | null>(null);
 
 const downloadMedia = (downloadMediaCommands: DownloadMediaDTO[]): void => {
 	downloadMediaCommands.forEach((x) => {
-		x.plexAccountId = props.activeAccountId;
+		// x.plexAccountId = props.activeAccountId ?? 0;
 	});
 	emit('download', downloadMediaCommands);
 };
@@ -65,13 +60,22 @@ const scrollToIndex = (letter: string) => {
 
 	scrollbarposters.value.scrollTo({ y: scrollHeight }, 500);
 };
+
+onMounted(() => {
+	useSubscription(
+		MediaService.getMediaData(props.libraryId).subscribe((data) => {
+			posters.value = data;
+			loading.value = false;
+		}),
+	);
+});
 </script>
 <style lang="scss">
-.poster-overview,
-.alphabet-navigation {
-	height: calc(100vh - 85px - 48px);
-	width: 100%;
-	// 8% reserved for the media-overview-bar
-	// height: 92%;
-}
+//.poster-overview,
+//.alphabet-navigation {
+//	height: calc(100vh - 85px - 48px);
+//	width: 100%;
+//	// 8% reserved for the media-overview-bar
+//	// height: 92%;
+//}
 </style>

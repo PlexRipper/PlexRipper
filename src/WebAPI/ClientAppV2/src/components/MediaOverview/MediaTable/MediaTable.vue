@@ -1,251 +1,155 @@
+<!--suppress VueUnrecognizedSlot -->
 <template>
-	<v-tree-view-table
-		:items="items"
-		:headers="getHeaders"
-		:navigation="!hideNavigation"
-		:open-all="detailMode"
-		item-key="treeKeyId"
-		load-children
-		@selected="updateSelected"
-		@download="downloadMedia"
-		@load-children="getMedia"
-	/>
+	<q-table
+		v-model:selected="selected"
+		selection="multiple"
+		row-key="title"
+		:rows="rows"
+		:loading="loading"
+		:columns="getHeaders"
+		virtual-scroll
+		:rows-per-page-options="[0]">
+		<!-- Title -->
+		<template #body-cell-title="{ row }">
+			<q-td class="row-title" @click="onRowClick(row)">
+				<q-hover>
+					<template #default>
+						{{ row.title }}
+					</template>
+				</q-hover>
+			</q-td>
+		</template>
+		<!-- Media size -->
+		<template #body-cell-size="{ row }">
+			<q-td>
+				<QFileSize :size="row.mediaSize" />
+			</q-td>
+		</template>
+		<!-- Added At Date format -->
+		<template #body-cell-addedAt="{ row }">
+			<q-td>
+				<QDateTime :text="row.addedAt" short-date />
+			</q-td>
+		</template>
+		<!-- Updated At Date format -->
+		<template #body-cell-updatedAt="{ row }">
+			<q-td>
+				<QDateTime :text="row.updatedAt" short-date />
+			</q-td>
+		</template>
+		<!-- Actions -->
+		<template #body-cell-actions="{ row }">
+			<q-td>
+				<q-btn flat :icon="Convert.buttonTypeToIcon(ButtonType.Download)" @click="downloadMedia(row)" />
+			</q-td>
+		</template>
+		<template #loading>
+			<q-inner-loading showing color="red" />
+		</template>
+	</q-table>
 </template>
 
-<script lang="ts">
-import Log from 'consola';
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
-import ITreeViewTableHeader from '@components/General/VTreeViewTable/ITreeViewTableHeader';
-import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
-import ITreeDownloadItem from '@mediaOverview/MediaTable/types/ITreeDownloadItem';
+<script setup lang="ts">
+import { defineProps, ref, computed, defineEmits } from 'vue';
+import { QTableColumnProps } from '@props';
+import { useSubscription } from '@vueuse/rxjs';
+import type { PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
+import ButtonType from '@enums/buttonType';
+import Convert from '@class/Convert';
+import { MediaService } from '@service';
 
-@Component
-export default class MediaTable extends Vue {
-	@Prop({ required: true, type: Array as () => PlexMediaDTO[] })
-	readonly items!: PlexMediaDTO[];
+defineOptions({
+	inheritAttrs: false,
+});
 
-	@Prop({ required: true, type: String })
-	readonly mediaType!: PlexMediaType;
+const props = defineProps<{
+	libraryId: number;
+	mediaType: PlexMediaType;
+}>();
 
-	@Prop({ required: false, type: Boolean })
-	readonly hideNavigation!: boolean;
+const loading = ref(true);
+const selected = ref<string[]>([]);
 
-	@Prop({ type: Boolean })
-	readonly detailMode!: boolean;
+const rows = ref<PlexMediaDTO[]>([]);
+const onRowClick = (row) => alert(`${row.title} clicked`);
 
-	@Prop({ required: true, type: Number })
-	readonly libraryId!: number;
+defineEmits<{
+	(e: 'download', visible: boolean[]): void;
+	(e: 'selected', visible: boolean[]): void;
+	(e: 'request-media', visible: boolean[]): void;
+}>();
 
-	expanded: string[] = [];
+const getHeaders = computed<QTableColumnProps[]>(() => {
+	return [
+		{
+			label: 'Title',
+			field: 'title',
+			name: 'title',
+			align: 'left',
+			sortable: true,
+			required: true,
+		},
+		{
+			label: 'Year',
+			name: 'year',
+			field: 'year',
+			align: 'left',
+			sortable: true,
+		},
+		{
+			label: 'Size',
+			field: 'mediaSize',
+			name: 'size',
+			align: 'left',
+			sortable: true,
+		},
+		{
+			label: 'Added At',
+			name: 'addedAt',
+			field: 'addedAt',
+			align: 'left',
+			sortable: true,
+		},
+		{
+			label: 'Updated At',
+			name: 'updatedAt',
+			field: 'updatedAt',
+			align: 'left',
+			sortable: true,
+		},
+		{
+			label: 'Actions',
+			name: 'actions',
+			field: 'actions',
+			align: 'left',
+			required: true,
+		},
+	];
+});
 
-	openDownloadPreviews: number[] = [];
+const downloadMedia = (row: PlexMediaDTO) => {
+	alert('download');
+};
 
-	visible: boolean[] = [];
-	loadingButtons: string[] = [];
+onMounted(() => {
+	useSubscription(
+		MediaService.getMediaData(props.libraryId).subscribe((data) => {
+			rows.value = data;
+			loading.value = false;
+		}),
+	);
+});
+</script>
 
-	selected: string[] = [];
+<style lang="scss">
+@import './src/assets/scss/_variables.scss';
 
-	@Watch('items')
-	updateVisible(): void {
-		this.items.forEach(() => this.visible.push(false));
-	}
+.row-title {
+	cursor: pointer;
+	font-weight: bold;
 
-	get containerRef(): any {
-		return this.$refs.scrollbar;
-	}
-
-	isLoading(key: string): boolean {
-		return this.loadingButtons.includes(key);
-	}
-
-	get getHeaders(): ITreeViewTableHeader[] {
-		return [
-			{
-				text: 'Title',
-				value: 'title',
-				maxWidth: 250,
-			},
-			{
-				text: 'Year',
-				value: 'year',
-				width: 50,
-			},
-			{
-				text: 'Size',
-				value: 'mediaSize',
-				type: TreeViewTableHeaderEnum.FileSize,
-				width: 100,
-			},
-			{
-				text: 'Added At',
-				value: 'addedAt',
-				type: TreeViewTableHeaderEnum.Date,
-				width: 100,
-			},
-			{
-				text: 'Updated At',
-				value: 'updatedAt',
-				type: TreeViewTableHeaderEnum.Date,
-				width: 100,
-			},
-			{
-				text: 'Actions',
-				value: 'actions',
-				type: TreeViewTableHeaderEnum.Actions,
-				width: 100,
-				sortable: false,
-				defaultActions: ['download'],
-			},
-		];
-	}
-
-	createDownloadCommands(): DownloadMediaDTO[] {
-		const downloads: DownloadMediaDTO[] = [];
-
-		if (this.mediaType === PlexMediaType.TvShow) {
-			const treeTvShows: ITreeDownloadItem[] = [];
-			const episodesKeys: string[] = this.selected.filter((x) => x?.split('-')?.length === 3 ?? false);
-
-			// Create a hierarchical tree of all selected media, TvShow -> Season -> Episode
-			episodesKeys.forEach((x) => {
-				const tvShowId = +x.split('-')[0];
-				const seasonId = +x.split('-')[1];
-				const episodeId = +x.split('-')[2];
-
-				// Add tvShow to tree
-				if (!treeTvShows.some((tvShow) => tvShow.id === tvShowId)) {
-					treeTvShows.push({ id: tvShowId, children: [] });
-				}
-
-				// Add season to tree
-				if (!treeTvShows.some((tvShow) => tvShow.children?.some((season) => season.id === seasonId))) {
-					treeTvShows.find((x) => x.id === tvShowId)?.children?.push({ id: seasonId, children: [] });
-				}
-
-				// Add episode to tree
-				treeTvShows
-					.find((x) => x.id === tvShowId)
-					?.children?.find((x) => x.id === seasonId)
-					?.children?.push({ id: episodeId });
-			});
-
-			// Use the hierarchical tree and create downloadCommands.
-			// The objective is to only return a seasonDownloadCommand, if all episodes have been selected
-			// Instead of 10 episodeIds, we get 1 seasonId if all episodes in that season have been selected.
-			// Same thing for a tvShowId, instead of multiple seasonIds, we get a single tvShowId if all seasons have been selected.
-			const tvShowIds: number[] = [];
-			let seasonIds: number[] = [];
-			const episodesIds: number[] = [];
-			treeTvShows.forEach((treeTvShow) => {
-				// Find tvShow
-				const tvShow = this.items.find((tvShow) => tvShow.id === treeTvShow.id);
-				if (tvShow) {
-					const tmpSeasonIds: number[] = [];
-					treeTvShow.children?.forEach((treeSeason) => {
-						// Find season
-						const season = tvShow?.children?.find((x) => x.id === treeSeason.id);
-						if (treeSeason?.children?.length === season?.children?.length) {
-							tmpSeasonIds.push(treeSeason.id);
-						} else {
-							treeSeason.children?.forEach((x) => episodesIds.push(x.id));
-						}
-					});
-
-					// Check if all seasons are checked, if so then add the TvShowId
-					if (tvShow?.children?.length === tmpSeasonIds.length) {
-						tvShowIds.push(treeTvShow.id);
-						// If not then add the remaining to the seasonIds
-					} else if (tmpSeasonIds.length > 0) {
-						seasonIds = seasonIds.concat(tmpSeasonIds);
-					}
-				}
-			});
-
-			if (tvShowIds.length > 0) {
-				downloads.push({
-					mediaIds: tvShowIds,
-					type: PlexMediaType.TvShow,
-					plexAccountId: 0,
-				});
-			}
-
-			if (seasonIds.length > 0) {
-				downloads.push({
-					mediaIds: seasonIds,
-					type: PlexMediaType.Season,
-					plexAccountId: 0,
-				});
-			}
-
-			if (episodesIds.length > 0) {
-				downloads.push({
-					mediaIds: episodesIds,
-					type: PlexMediaType.Episode,
-					plexAccountId: 0,
-				});
-			}
-		}
-
-		if (this.mediaType === PlexMediaType.Movie) {
-			downloads.push({
-				mediaIds: this.selected?.map((x) => +x),
-				type: PlexMediaType.Movie,
-				plexAccountId: 0,
-			});
-		}
-
-		return downloads;
-	}
-
-	updateSelected(selected: string[]): void {
-		this.selected = selected;
-		this.$emit('selected', selected);
-	}
-
-	async downloadMedia(item: PlexMediaDTO): Promise<void> {
-		// Set as currently loading.
-		this.loadingButtons.push(item.key.toString());
-		const downloadCommand: DownloadMediaDTO = {
-			type: item.type,
-			mediaIds: [],
-			plexAccountId: 0,
-		};
-		switch (item.type) {
-			case PlexMediaType.Movie:
-				downloadCommand.mediaIds.push(item.id);
-				break;
-			case PlexMediaType.TvShow:
-				if (item.children?.length === 0) {
-					await new Promise((resolve) => this.getMedia({ item, resolve }));
-				}
-				downloadCommand.mediaIds.push(item.id);
-				break;
-			case PlexMediaType.Season:
-				downloadCommand.mediaIds.push(item.id);
-				break;
-			case PlexMediaType.Episode:
-				downloadCommand.mediaIds.push(item.id);
-				break;
-			default:
-				return;
-		}
-		// Set finished loading
-		const i = this.loadingButtons.findIndex((x) => x === item.key.toString());
-		if (i > -1) {
-			this.loadingButtons.splice(i, 1);
-		} else {
-			this.loadingButtons = [];
-		}
-		Log.info('download', downloadCommand);
-		this.$emit('download', [downloadCommand]);
-	}
-
-	/*
-A promise is send to the parent, which will resolve once the data is available. After which the node expands.
- */
-	getMedia(payload: { item: any; resolve: Function }): void {
-		this.$emit('request-media', payload);
+	:hover {
+		color: $primary;
 	}
 }
-</script>
+</style>

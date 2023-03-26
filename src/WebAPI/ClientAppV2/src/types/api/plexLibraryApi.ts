@@ -14,9 +14,13 @@ export function getAllPlexLibraries(): Observable<ResultDTO<PlexLibraryDTO[]>> {
 	});
 }
 
-export function getPlexLibrary(libraryId: number, plexAccountId: number): Observable<ResultDTO<PlexLibraryDTO>> {
+export function getPlexLibrary(
+	libraryId: number,
+	plexAccountId: number,
+	allMedia = false,
+): Observable<ResultDTO<PlexLibraryDTO>> {
 	return PlexRipperAxios.get<PlexLibraryDTO>({
-		url: `${PLEX_LIBRARY_RELATIVE_PATH}/${libraryId}?plexAccountId=${plexAccountId}`,
+		url: `${PLEX_LIBRARY_RELATIVE_PATH}/${libraryId}?plexAccountId=${plexAccountId}&allMedia=${allMedia}`,
 		apiCategory: logText,
 		apiName: getPlexLibrary.name,
 	});

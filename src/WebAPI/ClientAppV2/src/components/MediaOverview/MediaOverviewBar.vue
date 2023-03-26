@@ -53,7 +53,7 @@
 
 		<!--	View mode	-->
 		<vertical-button icon="mdi-eye" label="View" :height="barHeight" :width="verticalButtonWidth">
-			<q-menu anchor="bottom left" self="top left">
+			<q-menu anchor="bottom left" self="top left" auto-close>
 				<q-item
 					v-for="(viewOption, i) in viewOptions"
 					:key="i"

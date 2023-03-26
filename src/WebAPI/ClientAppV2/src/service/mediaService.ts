@@ -2,8 +2,8 @@ import { map, mergeMap, take } from 'rxjs/operators';
 
 import { Observable, Observer, of } from 'rxjs';
 import IStoreState from '@interfaces/service/IStoreState';
-import { BaseService } from '@service';
-import { PlexMediaType } from '@dto/mainApi';
+import { BaseService, LibraryService } from '@service';
+import { PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import { getThumbnail } from '@api/mediaApi';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
@@ -52,6 +52,21 @@ export class MediaService extends BaseService {
 					  ),
 			),
 			take(1),
+		);
+	}
+
+	public getMediaData(plexLibraryId: number): Observable<PlexMediaDTO[]> {
+		return LibraryService.getLibrary(plexLibraryId).pipe(
+			map((library) => {
+				switch (library?.type) {
+					case PlexMediaType.Movie:
+						return library.movies ?? [];
+					case PlexMediaType.TvShow:
+						return library.tvShows ?? [];
+					default:
+						return [];
+				}
+			}),
 		);
 	}
 }

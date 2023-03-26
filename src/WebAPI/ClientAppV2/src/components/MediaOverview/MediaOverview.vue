@@ -30,34 +30,41 @@
 				<media-overview-bar
 					:server="server"
 					:library="library"
-					:view-mode="viewMode"
+					:view-mode="mediaViewMode"
 					:has-selected="selected.length > 0"
-					:hide-download-button="!isTableView"
+					:hide-download-button="!mediaViewMode === ViewMode.Table"
 					@view-change="changeView"
 					@refresh-library="refreshLibrary"
 					@download="processDownloadCommand([])" />
 				<!--	Data table display	-->
-				<template v-if="isTableView">
-					<!--					<MediaTable-->
-					<!--						ref="overviewMediaTable"-->
-					<!--						:items="items"-->
-					<!--						:active-account-id="activeAccountId"-->
-					<!--						:library-id="libraryId"-->
-					<!--						:media-type="mediaType"-->
-					<!--						@download="processDownloadCommand"-->
-					<!--						@selected="selected = $event"-->
-					<!--						@request-media="requestMedia" />-->
-				</template>
+				<div class="media-container">
+					<q-row>
+						<q-col cols="grow media-table-container">
+							<QScrollArea ref="scrollbarposters" class="fit">
+								<template v-if="mediaViewMode === ViewMode.Table">
+									<MediaTable
+										ref="overviewMediaTable"
+										:library-id="libraryId"
+										:media-type="mediaType"
+										@download="processDownloadCommand"
+										@selected="selected = $event"
+										@request-media="requestMedia" />
+								</template>
 
-				<!-- Poster display-->
-				<template v-if="isPosterView">
-					<poster-table
-						:items="items"
-						:active-account-id="activeAccountId"
-						:media-type="mediaType"
-						@download="processDownloadCommand"
-						@open-details="openDetails" />
-				</template>
+								<!-- Poster display-->
+								<template v-else>
+									<poster-table
+										:library-id="libraryId"
+										:media-type="mediaType"
+										@download="processDownloadCommand"
+										@open-details="openDetails" />
+								</template>
+							</QScrollArea>
+						</q-col>
+						<!-- Alphabet Navigation-->
+						<alphabet-navigation :items="items" @scroll-to="scrollToIndex" />
+					</q-row>
+				</div>
 			</q-col>
 		</q-row>
 		<!--	Overlay with details of the media	-->
@@ -91,8 +98,6 @@ import { getTvShow } from '@api/mediaApi';
 import { DetailsOverview } from '#components';
 
 const activeAccountId = ref(0);
-const movieViewMode = ref(ViewMode.Poster);
-const tvShowViewMode = ref(ViewMode.Poster);
 const selected = ref<string[]>([]);
 const isRefreshing = ref(false);
 
@@ -110,46 +115,36 @@ const detailsOverview = ref<InstanceType<typeof DetailsOverview> | null>(null);
 
 const props = defineProps<{
 	libraryId: number;
+	mediaType: PlexMediaType;
 }>();
 
 const router = useRouter();
 const route = useRoute();
-const mediaType = computed(() => library.value?.type ?? PlexMediaType.Unknown);
 const getPercentage = computed(() => libraryProgress.value?.percentage ?? -1);
 const isLoading = computed(() => isRefreshing.value || !(server.value && library.value));
-const viewMode = computed(() => {
-	switch (mediaType.value) {
-		case PlexMediaType.Movie:
-			return movieViewMode.value;
-		case PlexMediaType.TvShow:
-			return tvShowViewMode.value;
-		default:
-			return ViewMode.Poster;
-	}
-});
-
+const mediaViewMode = ref<ViewMode>(ViewMode.Poster);
 const showMediaOverview = computed(() => !(detailItem.value ?? false));
-const isPosterView = computed(() => viewMode.value === ViewMode.Poster);
-const isTableView = computed(() => viewMode.value === ViewMode.Table);
 
 const changeView = (viewMode: ViewMode) => {
 	let type: keyof DisplaySettingsDTO | null = null;
 
-	switch (mediaType.value) {
+	switch (props.mediaType) {
 		case PlexMediaType.Movie:
-			movieViewMode.value = viewMode;
 			type = 'movieViewMode';
 			break;
 		case PlexMediaType.TvShow:
-			tvShowViewMode.value = viewMode;
 			type = 'tvShowViewMode';
 			break;
 		default:
-			Log.error('Could not set view mode for type' + mediaType.value);
+			Log.error('Could not set view mode for type' + props.mediaType);
 	}
 	if (type) {
 		useSubscription(SettingsService.updateDisplaySettings(type, viewMode).subscribe());
 	}
+};
+
+const scrollToIndex = (letter: string) => {
+	alert(`scrollToIndex - ${letter}`);
 };
 
 const resetProgress = (isRefreshingValue: boolean) => {
@@ -226,7 +221,7 @@ const refreshLibrary = () => {
 const setLibrary = (data: PlexLibraryDTO | null) => {
 	if (data) {
 		library.value = data;
-		switch (mediaType.value) {
+		switch (props.mediaType) {
 			case PlexMediaType.Movie:
 				items.value = library.value?.movies ?? [];
 				break;
@@ -238,7 +233,7 @@ const setLibrary = (data: PlexLibraryDTO | null) => {
 };
 
 const requestMedia = (numberPromise: { item: PlexMediaDTO; resolve?: Function }) => {
-	if (mediaType.value === PlexMediaType.TvShow) {
+	if (props.mediaType === PlexMediaType.TvShow) {
 		getTvShow(numberPromise.item.id).subscribe((response) => {
 			if (response.isSuccess) {
 				const itemsIndex = items.value.findIndex((x) => x.id === numberPromise.item.id);
@@ -256,7 +251,7 @@ const requestMedia = (numberPromise: { item: PlexMediaDTO; resolve?: Function })
 			}
 		});
 	} else {
-		Log.error('Request media could not be executed for ' + mediaType.value);
+		Log.error('Request media could not be executed for ' + props.mediaType);
 	}
 };
 
@@ -293,17 +288,19 @@ onMounted(() => {
 	useSubscription(SettingsService.getActiveAccountId().subscribe((id) => (activeAccountId.value = id)));
 
 	// Get display settings
-	useSubscription(
-		SettingsService.getMovieViewMode().subscribe((value) => {
-			movieViewMode.value = value;
-		}),
-	);
-
-	useSubscription(
-		SettingsService.getTvShowViewMode().subscribe((value) => {
-			tvShowViewMode.value = value;
-		}),
-	);
+	if (props.mediaType === PlexMediaType.Movie) {
+		useSubscription(
+			SettingsService.getMovieViewMode().subscribe((value) => {
+				mediaViewMode.value = value;
+			}),
+		);
+	} else if (props.mediaType === PlexMediaType.TvShow) {
+		useSubscription(
+			SettingsService.getTvShowViewMode().subscribe((value) => {
+				mediaViewMode.value = value;
+			}),
+		);
+	}
 
 	// Setup progress bar
 	useSubscription(
@@ -333,3 +330,11 @@ onMounted(() => {
 	useSubscription(LibraryService.getLibrary(props.libraryId).subscribe((data) => setLibrary(data)));
 });
 </script>
+
+<style lang="scss">
+.media-container,
+.media-table-container {
+	height: calc(100vh - 85px - 48px);
+	width: 100%;
+}
+</style>

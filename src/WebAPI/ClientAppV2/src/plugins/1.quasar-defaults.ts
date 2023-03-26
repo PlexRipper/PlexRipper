@@ -1,5 +1,5 @@
 import { defineNuxtPlugin } from '#app';
-import { ComponentConstructor, QSelect, QToggle } from 'quasar';
+import { ComponentConstructor, QCircularProgress, QLinearProgress, QSelect, QToggle } from 'quasar';
 
 export default defineNuxtPlugin(() => {
 	setQuasarComponentDefaultPropValues(QSelect, {
@@ -13,6 +13,16 @@ export default defineNuxtPlugin(() => {
 		color: 'red',
 		checkedIcon: 'mdi-check',
 		uncheckedIcon: 'mdi-close',
+	});
+
+	setQuasarComponentDefaultPropValues(QCircularProgress, {
+		color: 'red',
+		indeterminate: true,
+	});
+
+	setQuasarComponentDefaultPropValues(QLinearProgress, {
+		color: 'red',
+		stripe: true,
 	});
 });
 

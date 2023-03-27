@@ -1,8 +1,8 @@
 <template>
 	<q-expansion-item switch-toggle-side expand-separator :label="title">
-		<q-card :style="{ height: object ? height + 'px' : '0px' }">
+		<q-card :style="{ height: height + 'px' }">
 			<q-card-section>
-				<pre>{{ object }}</pre>
+				<pre><slot/></pre>
 			</q-card-section>
 		</q-card>
 	</q-expansion-item>
@@ -14,7 +14,6 @@ import { withDefaults, defineProps } from 'vue';
 withDefaults(
 	defineProps<{
 		title?: string;
-		object: any;
 		height?: number;
 	}>(),
 	{

@@ -1,6 +1,6 @@
 <template>
 	<!--	Loading screen	-->
-	<template v-if="isLoading">
+	<template v-if="loading">
 		<q-row justify="center" class="mx-0">
 			<q-col cols="auto" align-self="center">
 				<q-circular-progress size="70px" indeterminate />
@@ -24,7 +24,7 @@
 	</template>
 	<!-- Header -->
 	<template v-else-if="server && library">
-		<q-row v-show="showMediaOverview" no-gutters>
+		<q-row no-gutters>
 			<q-col>
 				<!--	Overview bar	-->
 				<media-overview-bar
@@ -32,13 +32,16 @@
 					:library="library"
 					:view-mode="mediaViewMode"
 					:has-selected="selected.length > 0"
+					:detail-mode="!showMediaOverview"
+					:media-item="mediaItem"
 					:hide-download-button="!mediaViewMode === ViewMode.Table"
+					@back="closeDetailsOverview"
 					@view-change="changeView"
 					@refresh-library="refreshLibrary"
 					@download="processDownloadCommand([])" />
 				<!--	Data table display	-->
 				<div class="media-container">
-					<q-row>
+					<q-row v-show="showMediaOverview">
 						<q-col cols="grow media-table-container">
 							<QScrollArea ref="scrollbarposters" class="fit">
 								<template v-if="mediaViewMode === ViewMode.Table">
@@ -64,23 +67,29 @@
 						<!-- Alphabet Navigation-->
 						<alphabet-navigation :items="items" @scroll-to="scrollToIndex" />
 					</q-row>
+					<!--	Overlay with details of the media	-->
+					<q-row v-show="!showMediaOverview">
+						<q-col cols="grow detail-view-container">
+							<DetailsOverview
+								ref="detailsOverviewRef"
+								:media-type="mediaType"
+								:library="library"
+								:server="server"
+								:media-item="mediaItem"
+								@close="closeDetailsOverview"
+								@download="processDownloadCommand" />
+						</q-col>
+					</q-row>
 				</div>
 			</q-col>
 		</q-row>
-		<!--	Overlay with details of the media	-->
-		<DetailsOverview
-			v-show="!showMediaOverview"
-			ref="detailsOverview"
-			:media-type="mediaType"
-			:media-item="detailItem"
-			:library="library"
-			:server="server"
-			:active-account-id="activeAccountId"
-			@close="closeDetailsOverview"
-			@download="processDownloadCommand" />
 	</template>
 	<template v-else>
-		<h1>{{ $t('components.media-overview.no-data') }}</h1>
+		<q-row justify="center">
+			<q-col cols="auto">
+				<h1>{{ $t('components.media-overview.no-data') }}</h1>
+			</q-col>
+		</q-row>
 	</template>
 	<!--	Download confirmation dialog	-->
 	<!--	<DownloadConfirmation ref="downloadConfirmationRef" :items="items" @download="sendDownloadCommand" />-->
@@ -91,11 +100,15 @@ import Log from 'consola';
 import { ref, defineProps, computed, watch } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRoute, useRouter } from 'vue-router';
+import { forkJoin, zip } from 'rxjs';
+import { take } from 'rxjs/operators';
 import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
-import { DownloadService, LibraryService, SettingsService, SignalrService } from '@service';
-import { getTvShow } from '@api/mediaApi';
+import { DownloadService, LibraryService, MediaService, SettingsService, SignalrService } from '@service';
 import { DetailsOverview } from '#components';
+
+const router = useRouter();
+const route = useRoute();
 
 const activeAccountId = ref(0);
 const selected = ref<string[]>([]);
@@ -107,10 +120,14 @@ const library = ref<PlexLibraryDTO | null>(null);
 const libraryProgress = ref<LibraryProgress | null>(null);
 const downloadPreviewType = ref(PlexMediaType.None);
 const items = ref<PlexMediaDTO[]>([]);
-const detailItem = ref<PlexMediaDTO | null>(null);
+
+const loading = ref(true);
+const showMediaOverview = ref(true);
+const mediaItem = ref<PlexMediaDTO | null>(null);
+const mediaViewMode = ref<ViewMode>(ViewMode.Poster);
 
 // const downloadConfirmationRef = ref<InstanceType<typeof DownloadConfirmation> | null>(null);
-const detailsOverview = ref<InstanceType<typeof DetailsOverview> | null>(null);
+const detailsOverviewRef = ref<InstanceType<typeof DetailsOverview> | null>(null);
 // const overviewMediaTableRef = ref<InstanceType<typeof MediaTable> | null>(null);
 
 const props = defineProps<{
@@ -118,12 +135,7 @@ const props = defineProps<{
 	mediaType: PlexMediaType;
 }>();
 
-const router = useRouter();
-const route = useRoute();
 const getPercentage = computed(() => libraryProgress.value?.percentage ?? -1);
-const isLoading = computed(() => isRefreshing.value || !(server.value && library.value));
-const mediaViewMode = ref<ViewMode>(ViewMode.Poster);
-const showMediaOverview = computed(() => !(detailItem.value ?? false));
 
 const changeView = (viewMode: ViewMode) => {
 	let type: keyof DisplaySettingsDTO | null = null;
@@ -179,34 +191,33 @@ const sendDownloadCommand = (downloadMediaCommand: DownloadMediaDTO[]) => {
 };
 
 const openDetails = (mediaId: number) => {
-	if (!router.currentRoute.value.path.includes('details')) {
-		router.push({
-			path: props.libraryId + '/details/' + mediaId,
-		});
-	}
-	detailsOverview.value?.openDetails();
+	// if (!router.currentRoute.value.path.includes('details')) {
+	// 	router.push({
+	// 		path: props.libraryId + '/details/' + mediaId,
+	// 	});
+	// }
+	useSubscription(
+		MediaService.getMediaDataById(props.libraryId, mediaId, props.mediaType).subscribe((data) => {
+			mediaItem.value = data;
+		}),
+	);
 
-	const item = items.value.find((x) => x.id === mediaId);
-	if (item?.children?.length === 0) {
-		requestMedia({
-			item,
-			resolve: () => {
-				detailItem.value = items.value.find((x) => x.id === mediaId) ?? null;
-			},
-		});
+	if (detailsOverviewRef.value) {
+		detailsOverviewRef.value.openDetails(mediaId);
+	} else {
+		Log.error('detailsOverview was invalid', detailsOverviewRef.value);
+		return;
 	}
+
+	showMediaOverview.value = false;
 };
 
 const closeDetailsOverview = () => {
-	Log.debug('Close Details Overview');
-	router.push({
-		path: '/tvshows/' + props.libraryId,
-	});
-	resetDetailsOverview();
-};
+	showMediaOverview.value = true;
 
-const resetDetailsOverview = () => {
-	detailItem.value = null;
+	// router.push({
+	// 	path: '/tvshows/' + props.libraryId,
+	// });
 };
 
 const refreshLibrary = () => {
@@ -232,57 +243,41 @@ const setLibrary = (data: PlexLibraryDTO | null) => {
 	}
 };
 
-const requestMedia = (numberPromise: { item: PlexMediaDTO; resolve?: Function }) => {
-	if (props.mediaType === PlexMediaType.TvShow) {
-		getTvShow(numberPromise.item.id).subscribe((response) => {
-			if (response.isSuccess) {
-				const itemsIndex = items.value.findIndex((x) => x.id === numberPromise.item.id);
-				// This is a fix to prevent episodes from acting like it has additional children and that it can be requested
-				response.value?.children?.forEach((season) => {
-					season.children?.forEach((episode) => {
-						// @ts-ignore:
-						episode.children = undefined;
-					});
-				});
-				items.value[itemsIndex] = response.value ?? numberPromise.item;
-				if (numberPromise.resolve) {
-					numberPromise.resolve();
-				}
-			}
-		});
-	} else {
-		Log.error('Request media could not be executed for ' + props.mediaType);
-	}
-};
+// watch(
+// 	() => route.path,
+// 	(newPath: string, oldPath: string) => {
+// 		if (oldPath.includes('details') && !newPath.includes('details')) {
+// 			resetDetailsOverview();
+// 		}
+// 	},
+// );
 
-watch(
-	() => route.path,
-	(newPath: string, oldPath: string) => {
-		if (oldPath.includes('details') && !newPath.includes('details')) {
-			resetDetailsOverview();
-		}
-	},
-);
-
-watch(isLoading, (val: boolean) => {
-	if (!val) {
-		if (detailsOverview.value) {
-			if (+route.params.mediaid) {
-				openDetails(+route.params.mediaid);
-			}
-		} else {
-			nextTick(() => {
-				if (+route.params.mediaid) {
-					openDetails(+route.params.mediaid);
-				}
-			});
-		}
-	}
-});
+// watch(loading, (val: boolean) => {
+// 	debugger;
+//
+// 	if (!val) {
+// 		if (detailsOverviewRef.value) {
+// 			if (+route.params.mediaid) {
+// 				openDetails(+route.params.mediaid);
+// 			}
+// 		} else {
+// 			nextTick(() => {
+// 				if (+route.params.mediaid) {
+// 					openDetails(+route.params.mediaid);
+// 				}
+// 			});
+// 		}
+// 	}
+// });
 
 onMounted(() => {
 	resetProgress(false);
 	isRefreshing.value = false;
+
+	if (!props.libraryId) {
+		Log.error('Library id was not provided');
+		return;
+	}
 
 	// Get Active account id
 	useSubscription(SettingsService.getActiveAccountId().subscribe((id) => (activeAccountId.value = id)));
@@ -315,25 +310,46 @@ onMounted(() => {
 		}),
 	);
 
-	// Get server
+	// Get server and media data
 	useSubscription(
-		LibraryService.getServerByLibraryId(props.libraryId).subscribe((data) => {
-			if (data) {
-				server.value = data;
-				return;
-			}
-			Log.error(`MediaOverview => Server was invalid for library id ${props.libraryId}:`, data);
-		}),
-	);
+		zip([
+			LibraryService.getServerByLibraryId(props.libraryId),
+			LibraryService.getLibrary(props.libraryId),
+			MediaService.getMediaData(props.libraryId),
+		])
+			.pipe(take(1))
+			.subscribe({
+				next: ([serverData, libraryData, mediaData]) => {
+					if (!serverData) {
+						Log.error(`MediaOverview => Server for library id ${props.libraryId} was not found`);
+					}
+					server.value = serverData;
 
-	// Retrieve library data
-	useSubscription(LibraryService.getLibrary(props.libraryId).subscribe((data) => setLibrary(data)));
+					if (!libraryData) {
+						Log.error(`MediaOverview => Library for library id ${props.libraryId} was not found`);
+					}
+					library.value = libraryData;
+
+					if (!mediaData) {
+						Log.error(`MediaOverview => No media data for library id ${props.libraryId} was found`);
+					}
+					items.value = mediaData;
+				},
+				error: (error) => {
+					Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
+				},
+				complete: () => {
+					loading.value = false;
+				},
+			}),
+	);
 });
 </script>
 
 <style lang="scss">
 .media-container,
-.media-table-container {
+.media-table-container,
+.detail-view-container {
 	height: calc(100vh - 85px - 48px);
 	width: 100%;
 }

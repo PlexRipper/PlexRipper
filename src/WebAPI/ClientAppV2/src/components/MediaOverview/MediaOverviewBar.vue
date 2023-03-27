@@ -77,9 +77,8 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, computed } from 'vue';
 import { sum } from 'lodash-es';
-import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import type { PlexLibraryDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { PlexMediaType, ViewMode } from '@dto/mainApi';
-import ITreeViewItem from '@class/ITreeViewItem';
 
 interface IViewOptions {
 	label: string;
@@ -90,7 +89,7 @@ const props = defineProps<{
 	server: PlexServerDTO | null;
 	library: PlexLibraryDTO | null;
 	viewMode: ViewMode;
-	mediaItem?: ITreeViewItem | null;
+	mediaItem?: PlexMediaDTO | null;
 	hasSelected: boolean;
 	detailMode?: boolean;
 	hideDownloadButton: boolean;

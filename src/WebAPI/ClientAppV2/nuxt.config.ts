@@ -1,5 +1,9 @@
 import { fileURLToPath } from 'url';
+import { resolve } from 'path';
 import { defineNuxtConfig } from 'nuxt/config';
+import { createCommonJS } from 'mlly';
+
+const { __dirname } = createCommonJS(import.meta.url);
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -121,6 +125,22 @@ export default defineNuxtConfig({
 					additionalData: '@use "@/assets/scss/_variables.scss" as *;',
 				},
 			},
+		},
+	},
+	hooks: {
+		'pages:extend'(pages) {
+			pages.push({
+				name: 'details-overview',
+				path: '/tvshows/:libraryId',
+				file: resolve(__dirname, 'src/pages/tvshows/[libraryId].vue'),
+				children: [
+					{
+						name: 'details-overview2',
+						path: 'details/:tvShowId',
+						file: resolve(__dirname, 'src/pages/tvshows/[libraryId].vue'),
+					},
+				],
+			});
 		},
 	},
 	/*

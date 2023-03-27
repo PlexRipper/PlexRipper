@@ -6,7 +6,7 @@
 		row-key="title"
 		:rows="rows"
 		:loading="loading"
-		:columns="getHeaders"
+		:columns="mediaTableColumns"
 		virtual-scroll
 		:rows-per-page-options="[0]">
 		<!-- Title -->
@@ -51,12 +51,13 @@
 
 <script setup lang="ts">
 import { defineProps, ref, computed, defineEmits } from 'vue';
-import { QTableColumnProps } from '@props';
 import { useSubscription } from '@vueuse/rxjs';
+import { QTableColumnProps } from '@props';
 import type { PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
 import Convert from '@class/Convert';
 import { MediaService } from '@service';
+import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 
 defineOptions({
 	inheritAttrs: false,
@@ -67,6 +68,7 @@ const props = defineProps<{
 	mediaType: PlexMediaType;
 }>();
 
+const mediaTableColumns = getMediaTableColumns();
 const loading = ref(true);
 const selected = ref<string[]>([]);
 
@@ -78,54 +80,6 @@ defineEmits<{
 	(e: 'selected', visible: boolean[]): void;
 	(e: 'request-media', visible: boolean[]): void;
 }>();
-
-const getHeaders = computed<QTableColumnProps[]>(() => {
-	return [
-		{
-			label: 'Title',
-			field: 'title',
-			name: 'title',
-			align: 'left',
-			sortable: true,
-			required: true,
-		},
-		{
-			label: 'Year',
-			name: 'year',
-			field: 'year',
-			align: 'left',
-			sortable: true,
-		},
-		{
-			label: 'Size',
-			field: 'mediaSize',
-			name: 'size',
-			align: 'left',
-			sortable: true,
-		},
-		{
-			label: 'Added At',
-			name: 'addedAt',
-			field: 'addedAt',
-			align: 'left',
-			sortable: true,
-		},
-		{
-			label: 'Updated At',
-			name: 'updatedAt',
-			field: 'updatedAt',
-			align: 'left',
-			sortable: true,
-		},
-		{
-			label: 'Actions',
-			name: 'actions',
-			field: 'actions',
-			align: 'left',
-			required: true,
-		},
-	];
-});
 
 const downloadMedia = (row: PlexMediaDTO) => {
 	alert('download');

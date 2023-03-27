@@ -1,5 +1,5 @@
 import { defineConfig } from 'cypress';
-import viteConfig from './vite.config.cypress.component.js';
+import { getViteConfig } from './vite.config.cypress.component';
 
 export default defineConfig({
 	component: {
@@ -8,7 +8,19 @@ export default defineConfig({
 		devServer: {
 			framework: 'vue',
 			bundler: 'vite',
-			viteConfig,
+			viteConfig: async () => {
+				// Source: https://github.com/nuxt/nuxt/discussions/19304
+				const config = await getViteConfig();
+
+				config.plugins = config.plugins.filter((item) => !['replace', 'vite-plugin-eslint'].includes(item.name));
+
+				// @ts-ignore
+				config.server.middlewareMode = false;
+
+				// eslint-disable-next-line no-console
+				console.log('log:entering viteconfig', config);
+				return config;
+			},
 		},
 	},
 });

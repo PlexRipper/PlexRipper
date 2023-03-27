@@ -1,6 +1,5 @@
 import { map, mergeMap, take } from 'rxjs/operators';
-
-import { Observable, Observer, of } from 'rxjs';
+import { Observable, Observer, of, switchMap, throwError } from 'rxjs';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService, LibraryService } from '@service';
 import { PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
@@ -67,6 +66,21 @@ export class MediaService extends BaseService {
 						return [];
 				}
 			}),
+		);
+	}
+
+	public getMediaDataById(plexLibraryId: number, mediaId: number, mediaType: PlexMediaType): Observable<PlexMediaDTO | null> {
+		return this.getMediaData(plexLibraryId).pipe(
+			switchMap((mediaData) => {
+				const value = mediaData.find((x) => x.id === mediaId) ?? null;
+				if (value) {
+					return of(value);
+				}
+				return throwError(() => {
+					return new Error(`Media with id ${mediaId} and in library with id ${plexLibraryId} was not found`);
+				});
+			}),
+			take(1),
 		);
 	}
 }

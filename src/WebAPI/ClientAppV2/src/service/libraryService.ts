@@ -1,4 +1,4 @@
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 import { BaseService, ServerService } from '@service';
 import IStoreState from '@interfaces/service/IStoreState';
@@ -70,11 +70,15 @@ export class LibraryService extends BaseService {
 	public getServerByLibraryId(libraryId: number): Observable<PlexServerDTO | null> {
 		const libraries = this.getStoreSlice<PlexLibraryDTO[]>('libraries');
 		if (libraries.length === 0) {
-			return of(null);
+			return throwError(() => {
+				return new Error('No libraries found');
+			});
 		}
 		const library = libraries.find((x) => x.id === libraryId);
 		if (!library) {
-			return of(null);
+			return throwError(() => {
+				return new Error(`Library with id ${libraryId} not found`);
+			});
 		}
 
 		return ServerService.getServer(library.plexServerId);

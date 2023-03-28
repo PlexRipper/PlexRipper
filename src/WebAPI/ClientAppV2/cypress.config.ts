@@ -12,7 +12,7 @@ export default defineConfig({
 				// Source: https://github.com/nuxt/nuxt/discussions/19304
 				const config = await getViteConfig();
 
-				config.plugins = config.plugins.filter((item) => !['replace', 'vite-plugin-eslint'].includes(item.name));
+				config.plugins = config.plugins?.filter((item) => !['replace', 'vite-plugin-eslint'].includes(item.name));
 
 				// @ts-ignore
 				config.server.middlewareMode = false;

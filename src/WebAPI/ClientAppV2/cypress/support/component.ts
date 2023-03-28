@@ -17,7 +17,10 @@ import './commands';
 import { mount } from 'cypress/vue';
 import { h, Suspense } from 'vue';
 import { getContext } from 'unctx';
+import 'quasar/dist/quasar.css';
 import '../../src/assets/scss/style.scss';
+
+import ComponentTestContainer from '@components/DebugTools/ComponentTestContainer.vue';
 
 type MountParams = Parameters<typeof mount>;
 type OptionsParam = MountParams[1];
@@ -37,8 +40,8 @@ declare global {
 
 Cypress.Commands.add('mount', (component, ...args) => {
 	return mount(() => {
-		return h(Suspense, {}, h(component));
-	}, ...args);
+		return h(Suspense, {}, [h(ComponentTestContainer, [h(component, ...args)])]);
+	});
 });
 
 const nuxtAppCtx = getContext('nuxt-app');

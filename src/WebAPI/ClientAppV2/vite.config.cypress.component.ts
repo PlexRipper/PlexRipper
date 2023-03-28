@@ -1,29 +1,38 @@
 import vue from '@vitejs/plugin-vue';
 import { loadNuxt, buildNuxt } from '@nuxt/kit';
 import type { InlineConfig } from 'vite';
+import AutoImport from 'unplugin-auto-import/vite';
+import { defineConfig as defineVite, mergeConfig } from 'vite';
 
 // Workaround to get Cypress Component Testing working with Nuxt 3
-const viteConfig = {
+
+const viteConfig = defineVite({
 	optimizeDeps: {
 		disabled: true,
+		include: ['cypress/vue', 'consola'],
 	},
 	plugins: [
-		vue({
-			template: {
-				// preprocessOptions: {
-				// 	scss: {
-				// 		// Make variables available everywhere
-				// 		// Doc: https://nuxt.com/docs/getting-started/assets#global-styles-imports
-				// 		additionalData: '@use "@/assets/scss/_variables.scss" as *;',
-				// 	},
-				// },
-				compilerOptions: {
-					isCustomElement: (tag) => tag.includes('-'),
-				},
-			},
-		}),
+		// vue({
+		// 	reactivityTransform: true,
+		// 	template: {
+		// 		compilerOptions: {
+		// 			ssr: false,
+		// 			isCustomElement: (tag) => true,
+		// 		},
+		// 	},
+		// }),
+		// AutoImport({
+		// 	imports: [
+		// 		'quasar',
+		// 		'vue/macros',
+		// 		{
+		// 			consola: ['default', 'consola'],
+		// 		},
+		// 	],
+		// 	vueTemplate: true,
+		// }),
 	],
-};
+});
 
 // https://github.com/nuxt/framework/issues/6496
 async function nuxtViteConfig() {
@@ -46,9 +55,6 @@ async function nuxtViteConfig() {
 	}).finally(() => nuxt.close());
 }
 
-export async function getViteConfig() {
-	return {
-		...Object.assign({}, await nuxtViteConfig()),
-		...viteConfig,
-	};
+export async function getViteConfig(): Promise<InlineConfig> {
+	return mergeConfig(viteConfig, await nuxtViteConfig());
 }

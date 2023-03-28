@@ -1,7 +1,6 @@
-// import QStatus from '../../src/components/Common/QStatus.vue';
-import QStatus from '@components/Common/QStatus.vue';
+import Background from '@components/General/Background.vue';
 
-describe('<QStatus />', () => {
+describe('<Background />', () => {
 	beforeEach(() => {
 		cy.resetNuxt();
 	});
@@ -11,7 +10,7 @@ describe('<QStatus />', () => {
 		cy.stubNuxtInject('policyApi', () => Promise.resolve({ body: 'body' }));
 
 		// Act
-		cy.mount(QStatus, {
+		cy.mount(Background, {
 			attrs: {
 				props: {
 					value: true,

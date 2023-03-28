@@ -17,7 +17,7 @@ import 'quasar/dist/quasar.css';
 import '../../src/assets/scss/style.scss';
 
 import { mount } from 'cypress/vue';
-import { h, Suspense, getCurrentInstance } from 'vue';
+import { h, Suspense } from 'vue';
 import { getContext } from 'unctx';
 import { Quasar } from 'quasar';
 import ComponentTestContainer from '@components/DebugTools/ComponentTestContainer.vue';
@@ -30,7 +30,7 @@ export type Class = new (...args: any) => any;
 declare global {
 	namespace Cypress {
 		interface Chainable {
-			mount: typeof mount;
+			mount(component: any, options?: OptionsParam): Chainable<any>;
 
 			stubNuxtInject(key: string, value: any): void;
 
@@ -39,7 +39,6 @@ declare global {
 	}
 }
 const $q = Quasar;
-window.$q = $q;
 
 Cypress.Commands.add('mount', (component, options = {}) => {
 	options.global = options.global || {};
@@ -47,12 +46,10 @@ Cypress.Commands.add('mount', (component, options = {}) => {
 		$q,
 	};
 	options.global.plugins = [Quasar];
-	const props = options?.attrs?.props;
+	// const props = options?.attrs?.props;
 
-	console.log('currentInstance', getCurrentInstance());
-	console.log('log:entering mount', component, options);
 	return mount(() => {
-		return h(Suspense, {}, [h(ComponentTestContainer, [h(component, props)])]);
+		return h(Suspense, {}, [h(ComponentTestContainer, [h(component)])]);
 	});
 });
 

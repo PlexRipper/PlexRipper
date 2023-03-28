@@ -5,6 +5,8 @@
 </template>
 
 <script setup lang="ts">
+import { computed, defineProps } from 'vue';
+
 interface QRowProps {
 	justify?: 'start' | 'center' | 'end' | 'around' | 'between' | boolean;
 	align?: 'start' | 'center' | 'end' | boolean;

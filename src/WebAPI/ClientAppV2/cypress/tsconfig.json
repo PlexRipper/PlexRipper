@@ -4,5 +4,5 @@
 		"types": ["cypress", "node"],
 		"baseUrl": "../",
 	},
-	"include": ["**/*.ts"]
+	"include": ["**/*.ts", "cypress.d.ts"]
 }

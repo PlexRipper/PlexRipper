@@ -13,22 +13,24 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-import { mount } from 'cypress/vue';
-import { h, Suspense } from 'vue';
-import { getContext } from 'unctx';
 import 'quasar/dist/quasar.css';
 import '../../src/assets/scss/style.scss';
 
+import { mount } from 'cypress/vue';
+import { h, Suspense, getCurrentInstance } from 'vue';
+import { getContext } from 'unctx';
+import { Quasar } from 'quasar';
 import ComponentTestContainer from '@components/DebugTools/ComponentTestContainer.vue';
 
 type MountParams = Parameters<typeof mount>;
 type OptionsParam = MountParams[1];
+
 export type Class = new (...args: any) => any;
 
 declare global {
 	namespace Cypress {
 		interface Chainable {
-			mount(component: any, options?: OptionsParam): Chainable<any>;
+			mount: typeof mount;
 
 			stubNuxtInject(key: string, value: any): void;
 
@@ -36,22 +38,41 @@ declare global {
 		}
 	}
 }
+const $q = Quasar;
+window.$q = $q;
 
-Cypress.Commands.add('mount', (component, ...args) => {
+Cypress.Commands.add('mount', (component, options = {}) => {
+	options.global = options.global || {};
+	options.global.provide = {
+		$q,
+	};
+	options.global.plugins = [Quasar];
+	const props = options?.attrs?.props;
+
+	console.log('currentInstance', getCurrentInstance());
+	console.log('log:entering mount', component, options);
 	return mount(() => {
-		return h(Suspense, {}, [h(ComponentTestContainer, [h(component, ...args)])]);
+		return h(Suspense, {}, [h(ComponentTestContainer, [h(component, props)])]);
 	});
 });
 
 const nuxtAppCtx = getContext('nuxt-app');
-const nuxtCTX = <Record<string, any>>{
+
+const generateNuxtCTX = (): Record<string, any> => ({
 	static: { data: {} },
 	payload: { data: {}, _errors: {} },
 	hook: () => () => ({}),
+	hooks: {
+		callHook: () => Promise.resolve(),
+	},
 	_asyncData: {},
 	_asyncDataPromises: {},
 	_useHead: () => ({}),
-};
+	$q,
+});
+
+let nuxtCTX = generateNuxtCTX();
+
 nuxtAppCtx.set(nuxtCTX);
 
 Cypress.Commands.add('stubNuxtInject', (key, value) => {
@@ -59,13 +80,8 @@ Cypress.Commands.add('stubNuxtInject', (key, value) => {
 });
 
 Cypress.Commands.add('resetNuxt', () => {
-	for (const f in nuxtCTX) {
-		if (f.startsWith('$')) {
-			nuxtCTX[f] = undefined;
-		}
-	}
-	nuxtCTX.static = { data: {} };
-	nuxtCTX.payload = { data: {}, _errors: {} };
-	nuxtCTX._asyncData = {};
-	nuxtCTX._asyncDataPromises = {};
+	nuxtCTX = generateNuxtCTX();
+	nuxtAppCtx.unset();
+	nuxtAppCtx.set(nuxtCTX);
+	console.log('nuxtCTX', nuxtCTX);
 });

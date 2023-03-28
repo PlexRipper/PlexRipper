@@ -11,12 +11,15 @@
 		"preview": "nuxi preview",
 		"postinstall": "nuxi prepare",
 		"npm-upgrade-packages": "npm-upgrade",
+		"cypress:open": "npx cypress open --component --browser chromium",
+		"cypress:run": "npx cypress run",
 		"lint:js": "eslint --ext \".ts,.vue\" --ignore-path .gitignore .",
 		"lint:prettier": "prettier --check .",
 		"lint": "yarn lint:js && yarn lint:prettier",
 		"lintfix": "prettier --write --list-different . && yarn lint:js --fix",
 		"lint-fix": "eslint . --ext .ts,.js,.vue --max-warnings=0 --fix & prettier --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{ts,vue,json,js,jsx}\""
 	},
+	"type": "module",
 	"dependencies": {
 		"@codewithdan/observable-store": "^2.2.15",
 		"@microsoft/signalr": "^7.0.4",
@@ -34,6 +37,7 @@
 		"@nuxt/devtools": "^0.2.5",
 		"@nuxtjs/eslint-config-typescript": "^12.0.0",
 		"@nuxtjs/i18n": "^8.0.0-beta.10",
+		"@originjs/vite-plugin-commonjs": "^1.0.3",
 		"@quasar/extras": "^1.15.11",
 		"@types/node": "^18.15.3",
 		"@typescript-eslint/parser": "^5.55.0",

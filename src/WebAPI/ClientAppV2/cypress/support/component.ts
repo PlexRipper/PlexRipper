@@ -13,7 +13,6 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-import './commands';
 import { mount } from 'cypress/vue';
 import { h, Suspense } from 'vue';
 import { getContext } from 'unctx';

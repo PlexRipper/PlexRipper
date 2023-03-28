@@ -1,5 +1,7 @@
 import { defineConfig } from 'cypress';
-import { getViteConfig } from './vite.config.cypress.component';
+import { defineConfig as defineVite, InlineConfig, mergeConfig } from 'vite';
+import { esbuildCommonjs, viteCommonjs } from '@originjs/vite-plugin-commonjs';
+import { buildNuxt, loadNuxt } from '@nuxt/kit';
 
 export default defineConfig({
 	component: {
@@ -10,8 +12,9 @@ export default defineConfig({
 			bundler: 'vite',
 			viteConfig: async () => {
 				// Source: https://github.com/nuxt/nuxt/discussions/19304
-				const config = await getViteConfig();
+				const config = await mergeConfig(viteConfig, await nuxtViteConfig());
 
+				// @ts-ignore
 				config.plugins = config.plugins?.filter((item) => !['replace', 'vite-plugin-eslint'].includes(item.name));
 
 				// @ts-ignore
@@ -24,3 +27,35 @@ export default defineConfig({
 		},
 	},
 });
+
+const viteConfig = defineVite({
+	optimizeDeps: {
+		disabled: true,
+		esbuildOptions: {
+			plugins: [esbuildCommonjs(['consola', 'date-fns'])],
+		},
+	},
+	plugins: [viteCommonjs()],
+});
+
+// https://github.com/nuxt/framework/issues/6496
+async function nuxtViteConfig() {
+	const nuxt = await loadNuxt({
+		dev: false,
+		overrides: {
+			srcDir: 'src',
+			ssr: false,
+		},
+	});
+	return new Promise<InlineConfig>((resolve, reject) => {
+		nuxt.hook('vite:extendConfig', (config) => {
+			resolve(config);
+			throw new Error('_stop_');
+		});
+		buildNuxt(nuxt).catch((err) => {
+			if (!err.toString().includes('_stop_')) {
+				reject(err);
+			}
+		});
+	}).finally(() => nuxt.close());
+}

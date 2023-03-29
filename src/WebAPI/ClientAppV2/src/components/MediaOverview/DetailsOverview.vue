@@ -58,38 +58,31 @@
 		</q-row>
 
 		<!--	Media Table	-->
-		<Print>{{ mediaItem }}</Print>
-		<q-row no-gutters>
+		<q-row v-if="mediaItem" no-gutters>
 			<q-col>
-				<q-tree-view-table :columns="mediaTableColumns" :nodes="[mediaItem]" />
+				<MediaList :media-item="mediaItem" />
 			</q-col>
 		</q-row>
 	</template>
+
 	<!--	Loading	-->
-	<template v-else>
-		<q-row justify="center">
-			<q-col cols="auto">
-				<loading-spinner :size="60" />
-			</q-col>
-		</q-row>
-	</template>
+	<q-row v-else justify="center">
+		<q-col cols="auto">
+			<loading-spinner :size="60" />
+		</q-col>
+	</q-row>
 </template>
 
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, watch } from 'vue';
-import { useSubscription } from '@vueuse/rxjs';
-import { DownloadMediaDTO, PlexLibraryDTO, PlexMediaDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
-import { MediaService } from '@service';
+import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
+import { MediaList } from '#components';
 
 const props = defineProps<{
 	mediaType: PlexMediaType;
-	library: PlexLibraryDTO;
-	server: PlexServerDTO;
 	mediaItem: PlexMediaDTO | null;
 }>();
-
-// const detailMediaTableRef = ref<InstanceType<typeof MediaTable> | null>(null);
 
 const emit = defineEmits<{
 	(e: 'download', download: DownloadMediaDTO[] | DownloadMediaDTO): void;

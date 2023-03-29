@@ -1,9 +1,10 @@
 import { map, mergeMap, take } from 'rxjs/operators';
 import { Observable, Observer, of, switchMap, throwError } from 'rxjs';
+import Log from 'consola';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService, LibraryService } from '@service';
 import { PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
-import { getThumbnail } from '@api/mediaApi';
+import { getThumbnail, getTvShow } from '@api/mediaApi';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class MediaService extends BaseService {
@@ -69,18 +70,32 @@ export class MediaService extends BaseService {
 		);
 	}
 
-	public getMediaDataById(plexLibraryId: number, mediaId: number, mediaType: PlexMediaType): Observable<PlexMediaDTO | null> {
-		return this.getMediaData(plexLibraryId).pipe(
-			switchMap((mediaData) => {
-				const value = mediaData.find((x) => x.id === mediaId) ?? null;
-				if (value) {
-					return of(value);
-				}
+	public getMediaDataById(mediaId: number, mediaType: PlexMediaType): Observable<PlexMediaDTO | null> {
+		switch (mediaType) {
+			case PlexMediaType.TvShow:
+				return this.getTvShowMediaData(mediaId);
+			default:
 				return throwError(() => {
-					return new Error(`Media with id ${mediaId} and in library with id ${plexLibraryId} was not found`);
+					return new Error(`MediaType with ${mediaType} is not supported in getMediaDataById`);
+				});
+		}
+	}
+
+	public getTvShowMediaData(mediaId: number): Observable<PlexMediaDTO | null> {
+		return getTvShow(mediaId).pipe(
+			switchMap((response) => {
+				if (response.isSuccess) {
+					return of(response.value ?? null);
+				}
+
+				return throwError(() => {
+					const error = new Error(`TvShow with id ${mediaId} was not found`);
+					response.errors?.forEach((err) => {
+						Log.error(err);
+					});
+					return error;
 				});
 			}),
-			take(1),
 		);
 	}
 }

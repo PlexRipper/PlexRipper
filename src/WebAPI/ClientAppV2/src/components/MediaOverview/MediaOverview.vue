@@ -40,45 +40,37 @@
 					@refresh-library="refreshLibrary"
 					@download="processDownloadCommand([])" />
 				<!--	Data table display	-->
-				<div class="media-container">
+				<div ref="mediaContainerRef" class="media-container">
 					<q-row v-show="showMediaOverview">
 						<q-col cols="grow media-table-container">
-							<QScrollArea ref="scrollbarposters" class="fit">
-								<template v-if="mediaViewMode === ViewMode.Table">
-									<MediaTable
-										ref="overviewMediaTable"
-										:library-id="libraryId"
-										:media-type="mediaType"
-										@download="processDownloadCommand"
-										@selected="selected = $event"
-										@request-media="requestMedia" />
-								</template>
+							<QScrollArea ref="mediaContainerScrollbarRef" class="fit" @scroll="setScrollPosition($event)">
+								<div>
+									<template v-if="mediaViewMode === ViewMode.Table">
+										<MediaTable
+											ref="overviewMediaTable"
+											:media-type="mediaType"
+											:rows="items"
+											:loading="loading"
+											@download="processDownloadCommand"
+											@selected="selected = $event"
+											@request-media="requestMedia" />
+									</template>
 
-								<!-- Poster display-->
-								<template v-else>
-									<poster-table
-										:library-id="libraryId"
-										:media-type="mediaType"
-										@download="processDownloadCommand"
-										@open-details="openDetails" />
-								</template>
+									<!-- Poster display-->
+									<template v-else>
+										<poster-table
+											:library-id="libraryId"
+											:media-type="mediaType"
+											@download="processDownloadCommand"
+											@open-details="openDetails" />
+									</template>
+								</div>
+
+								<!--	Overlay with details of the media	-->
 							</QScrollArea>
 						</q-col>
 						<!-- Alphabet Navigation-->
 						<alphabet-navigation :items="items" @scroll-to="scrollToIndex" />
-					</q-row>
-					<!--	Overlay with details of the media	-->
-					<q-row v-show="!showMediaOverview">
-						<q-col cols="grow detail-view-container">
-							<DetailsOverview
-								ref="detailsOverviewRef"
-								:media-type="mediaType"
-								:library="library"
-								:server="server"
-								:media-item="mediaItem"
-								@close="closeDetailsOverview"
-								@download="processDownloadCommand" />
-						</q-col>
 					</q-row>
 				</div>
 			</q-col>
@@ -91,6 +83,25 @@
 			</q-col>
 		</q-row>
 	</template>
+
+	<q-dialog
+		v-model="fixed"
+		seamless
+		maximized
+		class="media-details-dialog"
+		transition-show="slide-up"
+		transition-hide="slide-down">
+		<div :style="getDetailsStyle">
+			<DetailsOverview
+				v-if="fixed"
+				ref="detailsOverviewRef"
+				:media-type="mediaType"
+				:media-item="mediaItem"
+				@close="closeDetailsOverview"
+				@download="processDownloadCommand" />
+		</div>
+	</q-dialog>
+
 	<!--	Download confirmation dialog	-->
 	<!--	<DownloadConfirmation ref="downloadConfirmationRef" :items="items" @download="sendDownloadCommand" />-->
 </template>
@@ -98,10 +109,12 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { ref, defineProps, computed, watch } from 'vue';
+import { useElementBounding } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRoute, useRouter } from 'vue-router';
 import { forkJoin, zip } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { QScrollArea } from 'quasar';
 import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, MediaService, SettingsService, SignalrService } from '@service';
@@ -109,6 +122,10 @@ import { DetailsOverview } from '#components';
 
 const router = useRouter();
 const route = useRoute();
+const mediaContainerRef = ref(null);
+const mediaContainerSize = useElementBounding(mediaContainerRef);
+
+const fixed = ref(false);
 
 const activeAccountId = ref(0);
 const selected = ref<string[]>([]);
@@ -128,7 +145,9 @@ const mediaViewMode = ref<ViewMode>(ViewMode.Poster);
 
 // const downloadConfirmationRef = ref<InstanceType<typeof DownloadConfirmation> | null>(null);
 const detailsOverviewRef = ref<InstanceType<typeof DetailsOverview> | null>(null);
-// const overviewMediaTableRef = ref<InstanceType<typeof MediaTable> | null>(null);
+const mediaContainerScrollbarRef = ref<InstanceType<typeof QScrollArea> | null>(null);
+
+const scrollPosition = ref(0);
 
 const props = defineProps<{
 	libraryId: number;
@@ -136,6 +155,24 @@ const props = defineProps<{
 }>();
 
 const getPercentage = computed(() => libraryProgress.value?.percentage ?? -1);
+
+const getDetailsStyle = computed(() => {
+	// if (mediaContainerRef.value === null) {
+	// 	Log.error('mediaContainerRef is null');
+	// }
+
+	const width = mediaContainerSize.width.value;
+	const height = mediaContainerSize.height.value;
+
+	return {
+		width: width + 'px !important',
+		minWidth: width + 'px !important',
+		maxWidth: width + 'px !important',
+		height: height + 'px !important',
+		minHeight: height + 'px !important',
+		maxHeight: height + 'px !important',
+	};
+});
 
 const changeView = (viewMode: ViewMode) => {
 	let type: keyof DisplaySettingsDTO | null = null;
@@ -157,6 +194,12 @@ const changeView = (viewMode: ViewMode) => {
 
 const scrollToIndex = (letter: string) => {
 	alert(`scrollToIndex - ${letter}`);
+};
+
+const setScrollPosition = (info: any) => {
+	if (showMediaOverview.value) {
+		scrollPosition.value = info.verticalPosition;
+	}
 };
 
 const resetProgress = (isRefreshingValue: boolean) => {
@@ -196,24 +239,24 @@ const openDetails = (mediaId: number) => {
 	// 		path: props.libraryId + '/details/' + mediaId,
 	// 	});
 	// }
+
 	useSubscription(
-		MediaService.getMediaDataById(props.libraryId, mediaId, props.mediaType).subscribe((data) => {
+		MediaService.getMediaDataById(mediaId, props.mediaType).subscribe((data) => {
 			mediaItem.value = data;
+			if (detailsOverviewRef.value) {
+				detailsOverviewRef.value.openDetails(mediaId);
+			} else {
+				Log.error('detailsOverview was invalid', detailsOverviewRef.value);
+			}
+			fixed.value = true;
+			showMediaOverview.value = false;
 		}),
 	);
-
-	if (detailsOverviewRef.value) {
-		detailsOverviewRef.value.openDetails(mediaId);
-	} else {
-		Log.error('detailsOverview was invalid', detailsOverviewRef.value);
-		return;
-	}
-
-	showMediaOverview.value = false;
 };
 
 const closeDetailsOverview = () => {
 	showMediaOverview.value = true;
+	fixed.value = false;
 
 	// router.push({
 	// 	path: '/tvshows/' + props.libraryId,
@@ -352,5 +395,14 @@ onMounted(() => {
 .detail-view-container {
 	height: calc(100vh - 85px - 48px);
 	width: 100%;
+}
+
+.media-details-dialog {
+	.q-dialog__inner {
+		top: auto !important;
+		left: auto !important;
+		bottom: 0 !important;
+		right: 0 !important;
+	}
 }
 </style>

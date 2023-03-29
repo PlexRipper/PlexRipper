@@ -5,9 +5,9 @@
 </template>
 
 <script setup lang="ts">
-import ITreeViewItem from '@class/ITreeViewItem';
+import { PlexMediaDTO } from '@dto/mainApi';
 
-const props = withDefaults(defineProps<{ items: ITreeViewItem[] }>(), {
+const props = withDefaults(defineProps<{ items: PlexMediaDTO[] }>(), {
 	items: () => [],
 });
 

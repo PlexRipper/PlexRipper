@@ -1,14 +1,15 @@
 <!--suppress VueUnrecognizedSlot -->
 <template>
 	<q-table
-		v-model:selected="selected"
+		:selected="getSelected"
 		selection="multiple"
-		row-key="title"
+		:row-key="rowKey"
 		:rows="rows"
 		:loading="loading"
 		:columns="mediaTableColumns"
 		virtual-scroll
-		:rows-per-page-options="[0]">
+		:rows-per-page-options="[0]"
+		@update:selected="updateSelected($event)">
 		<!-- Title -->
 		<template #body-cell-title="{ row }">
 			<q-td class="row-title" @click="onRowClick(row)">
@@ -50,34 +51,37 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, computed, defineEmits } from 'vue';
-import { useSubscription } from '@vueuse/rxjs';
-import { QTableColumnProps } from '@props';
-import type { PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
+import { defineProps, ref, withDefaults, defineEmits } from 'vue';
+import Log from 'consola';
+import type { PlexMediaDTO } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
 import Convert from '@class/Convert';
-import { MediaService } from '@service';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 
 defineOptions({
 	inheritAttrs: false,
 });
 
-const props = defineProps<{
-	libraryId: number;
-	mediaType: PlexMediaType;
-}>();
+const props = withDefaults(
+	defineProps<{
+		rows: PlexMediaDTO[];
+		loading: boolean;
+		rowKey: string;
+		selected?: string[] | number[];
+	}>(),
+	{
+		loading: true,
+		selected: () => [],
+	},
+);
 
 const mediaTableColumns = getMediaTableColumns();
-const loading = ref(true);
-const selected = ref<string[]>([]);
 
-const rows = ref<PlexMediaDTO[]>([]);
 const onRowClick = (row) => alert(`${row.title} clicked`);
 
-defineEmits<{
+const emit = defineEmits<{
 	(e: 'download', visible: boolean[]): void;
-	(e: 'selected', visible: boolean[]): void;
+	(e: 'selection', payload: { allSelected: boolean | null; selection: string[] }): void;
 	(e: 'request-media', visible: boolean[]): void;
 }>();
 
@@ -85,14 +89,20 @@ const downloadMedia = (row: PlexMediaDTO) => {
 	alert('download');
 };
 
-onMounted(() => {
-	useSubscription(
-		MediaService.getMediaData(props.libraryId).subscribe((data) => {
-			rows.value = data;
-			loading.value = false;
-		}),
-	);
+const getSelected = computed((): PlexMediaDTO[] => {
+	if (!props.selected) {
+		return [];
+	}
+	return props.rows.filter((row) => props.selected.includes(row[props.rowKey]));
 });
+
+const updateSelected = (selected: PlexMediaDTO[]) => {
+	Log.info('updateSelected', selected);
+	emit('selection', {
+		selection: selected.map((row) => row[props.rowKey]),
+		allSelected: selected.length === props.rows.length ? true : selected.length === 0 ? false : null,
+	});
+};
 </script>
 
 <style lang="scss">

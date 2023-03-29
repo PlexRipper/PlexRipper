@@ -49,3 +49,9 @@ const classes = computed(() => {
 	return classList;
 });
 </script>
+
+<style lang="scss">
+.row {
+	width: 100%;
+}
+</style>

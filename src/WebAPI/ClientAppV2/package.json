@@ -19,10 +19,10 @@
 		"lintfix": "prettier --write --list-different . && yarn lint:js --fix",
 		"lint-fix": "eslint . --ext .ts,.js,.vue --max-warnings=0 --fix & prettier --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{ts,vue,json,js,jsx}\""
 	},
-	"type": "module",
 	"dependencies": {
 		"@codewithdan/observable-store": "^2.2.15",
 		"@microsoft/signalr": "^7.0.4",
+		"@vueuse/components": "^9.13.0",
 		"@vueuse/rxjs": "^9.13.0",
 		"axios": "^1.3.4",
 		"axios-observable": "^2.0.0",

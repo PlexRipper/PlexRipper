@@ -1,65 +1,76 @@
 <template>
-	<div>
-		{{ selected }}
-		{{ itemExpanded }}
-		<q-list v-if="mediaItem?.children?.length > 0" bordered class="rounded-borders">
-			<q-item>
-				<q-item-section avatar>
+	<q-list v-if="mediaItem?.children?.length > 0">
+		<!--	Root item	-->
+		<q-item>
+			<q-row align="center">
+				<q-col cols="auto">
 					<q-checkbox :model-value="rootSelected" @update:model-value="rootSetSelected($event)" />
-				</q-item-section>
-				<q-item-section avatar>
-					<q-sub-header class="q-pl-none">
+				</q-col>
+				<q-col class="q-ml-md">
+					<q-sub-header bold>
 						{{ mediaItem.title }}
 					</q-sub-header>
-				</q-item-section>
-			</q-item>
-
-			<q-expansion-item
-				v-for="(child, index) in mediaItem.children"
-				:key="child.id"
-				:model-value="itemExpanded[index]"
-				expand-separator
-				icon="perm_identity"
-				hide-expand-icon
-				:default-opened="defaultOpened"
-				:group="defaultOpened ? undefined : 'media-list'"
-				:label="child.title"
-				@update:model-value="itemExpanded[index] = $event">
-				<!-- Header	-->
-				<template #header="{ expanded }">
-					<q-row align="center">
-						<q-col cols="auto">
-							<q-checkbox
-								:model-value="isSelected(child.id)"
-								@update:model-value="setSelected(child.id, child.children, $event)" />
-						</q-col>
-						<q-col class="q-ml-md">
-							<q-sub-header>
-								{{ child.title }}
-							</q-sub-header>
-						</q-col>
-						<q-col cols="auto">
-							<q-icon size="lg" :name="expanded ? 'mdi-chevron-up' : 'mdi-chevron-down'" />
-						</q-col>
-					</q-row>
-				</template>
-				<!-- Body	-->
-				<template #default>
-					<MediaTable
-						:loading="loading"
-						:rows="child.children"
-						:selected="getSelected(child.id)"
-						row-key="id"
-						@selection="onSelection(child.id, $event)" />
-				</template>
-			</q-expansion-item>
-		</q-list>
-		<q-list v-else>
-			<q-item>
-				<q-item-section><h2>No media found</h2></q-item-section>
-			</q-item>
-		</q-list>
-	</div>
+				</q-col>
+				<!--	Total selected count	-->
+				<q-col v-if="selectedCount" cols="auto">
+					<span class="text-weight-bold">
+						{{ $t('components.media-list.selected-count', { selectedCount }) }}
+					</span>
+				</q-col>
+			</q-row>
+		</q-item>
+		<!-- Season display -->
+		<q-expansion-item
+			v-for="(child, index) in mediaItem.children"
+			:key="child.id"
+			:model-value="itemExpanded[index]"
+			expand-separator
+			hide-expand-icon
+			:default-opened="defaultOpened"
+			:group="defaultOpened ? undefined : 'media-list'"
+			:label="child.title"
+			@update:model-value="itemExpanded[index] = $event">
+			<!-- Header	-->
+			<template #header="{ expanded }">
+				<q-row align="center">
+					<q-col cols="auto">
+						<q-checkbox
+							:model-value="isSelected(child.id)"
+							@update:model-value="setSelected(child.id, child.children, $event)" />
+					</q-col>
+					<q-col class="q-ml-md">
+						<q-sub-header>
+							{{ child.title }}
+						</q-sub-header>
+					</q-col>
+					<q-col v-if="getSelected(child.id).length" cols="auto">
+						<span class="text-weight-bold">
+							{{ $t('components.media-list.selected-count', { selectedCount: getSelected(child.id).length }) }}
+						</span>
+					</q-col>
+					<q-col cols="auto">
+						<q-icon size="lg" :name="expanded ? 'mdi-chevron-up' : 'mdi-chevron-down'" />
+					</q-col>
+				</q-row>
+			</template>
+			<!-- Body	-->
+			<template #default>
+				<MediaTable
+					:loading="loading"
+					:rows="child.children"
+					:selected="getSelected(child.id)"
+					row-key="id"
+					@selection="onSelection(child.id, $event)" />
+			</template>
+		</q-expansion-item>
+	</q-list>
+	<q-list v-else>
+		<q-item>
+			<q-item-section>
+				<h2>{{ $t('components.media-list.no-media-found') }}</h2>
+			</q-item-section>
+		</q-item>
+	</q-list>
 </template>
 
 <script setup lang="ts">
@@ -95,6 +106,10 @@ const rootSelected = computed((): boolean | null => {
 	}
 
 	return null;
+});
+
+const selectedCount = computed((): number => {
+	return selected.value.reduce((acc, x) => acc + x.keys.length, 0);
 });
 
 const rootSetSelected = (value: boolean) => {

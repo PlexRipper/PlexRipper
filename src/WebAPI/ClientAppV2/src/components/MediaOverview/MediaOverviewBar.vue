@@ -6,7 +6,7 @@
 				<q-col v-if="detailMode" cols="auto">
 					<q-list two-line class="no-background">
 						<q-item>
-							<BaseButton icon-only icon="mdi-arrow-left" size="x-large" @click="$emit('back')" />
+							<q-btn flat icon="mdi-arrow-left" size="xl" @click="$emit('back')" />
 						</q-item>
 					</q-list>
 				</q-col>

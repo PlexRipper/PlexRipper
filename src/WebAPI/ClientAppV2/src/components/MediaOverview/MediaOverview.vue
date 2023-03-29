@@ -90,14 +90,15 @@
 		maximized
 		class="media-details-dialog"
 		transition-show="slide-up"
-		transition-hide="slide-down">
+		transition-hide="slide-down"
+		@show="onOpenDetails">
 		<div :style="getDetailsStyle">
 			<DetailsOverview
-				v-if="fixed"
 				ref="detailsOverviewRef"
 				:media-type="mediaType"
 				:media-item="mediaItem"
 				@close="closeDetailsOverview"
+				@media-item="mediaItem = $event"
 				@download="processDownloadCommand" />
 		</div>
 	</q-dialog>
@@ -142,6 +143,7 @@ const loading = ref(true);
 const showMediaOverview = ref(true);
 const mediaItem = ref<PlexMediaDTO | null>(null);
 const mediaViewMode = ref<ViewMode>(ViewMode.Poster);
+const currentMediaItemId = ref<number | null>(null);
 
 // const downloadConfirmationRef = ref<InstanceType<typeof DownloadConfirmation> | null>(null);
 const detailsOverviewRef = ref<InstanceType<typeof DetailsOverview> | null>(null);
@@ -239,19 +241,17 @@ const openDetails = (mediaId: number) => {
 	// 		path: props.libraryId + '/details/' + mediaId,
 	// 	});
 	// }
+	currentMediaItemId.value = mediaId;
+	fixed.value = true;
+};
 
-	useSubscription(
-		MediaService.getMediaDataById(mediaId, props.mediaType).subscribe((data) => {
-			mediaItem.value = data;
-			if (detailsOverviewRef.value) {
-				detailsOverviewRef.value.openDetails(mediaId);
-			} else {
-				Log.error('detailsOverview was invalid', detailsOverviewRef.value);
-			}
-			fixed.value = true;
-			showMediaOverview.value = false;
-		}),
-	);
+const onOpenDetails = () => {
+	if (detailsOverviewRef.value) {
+		detailsOverviewRef.value.openDetails(currentMediaItemId.value ?? 0);
+	} else {
+		Log.error('detailsOverview was invalid', detailsOverviewRef.value);
+	}
+	showMediaOverview.value = false;
 };
 
 const closeDetailsOverview = () => {

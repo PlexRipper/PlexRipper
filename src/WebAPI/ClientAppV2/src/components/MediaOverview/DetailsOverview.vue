@@ -1,61 +1,57 @@
 <template>
 	<template v-if="mediaItem">
 		<!--	Header	-->
-		<q-row style="max-height: 250px; height: 250px">
-			<!--	Poster	-->
-			<q-col cols="auto">
-				<q-card :max-width="thumbWidth" :width="thumbWidth">
-					<q-img :src="imageUrl" :width="`${thumbWidth}px`" :height="`${thumbHeight}px`">
-						<!--	Placeholder	-->
-						<template #loading>
-							<!--	Show fallback image	-->
-							<template v-if="defaultImage">
-								<q-row align="center" justify="center" class="fill-height">
-									<q-col cols="auto">
-										<q-media-type-icon :size="100" class="mx-3" media-type="mediaType" />
-									</q-col>
-									<q-col cols="12">
-										<h4 class="text-center">{{ mediaItem.title }}</h4>
-									</q-col>
-								</q-row>
-							</template>
-							<!--	Show  image	-->
-							<template v-else>
-								<q-row class="fill-height ma-0" align="center" justify="center">
-									<q-col cols="12">
-										<h4 class="text-center">{{ mediaItem.title }}</h4>
-									</q-col>
-									<q-col cols="auto">
-										<loading-spinner color="grey lighten-5" />
-									</q-col>
-								</q-row>
-							</template>
-						</template>
-					</q-img>
-				</q-card>
-			</q-col>
 
-			<q-col>
-				<q-card>
+		<q-card square flat>
+			<q-card-section horizontal>
+				<!--	Poster	-->
+				<q-img :src="imageUrl" :width="`${thumbWidth}px`" :height="`${thumbHeight}px`">
+					<!--	Placeholder	-->
+					<template #loading>
+						<!--	Show fallback image	-->
+						<template v-if="defaultImage">
+							<q-row align="center" justify="center" class="fill-height">
+								<q-col cols="auto">
+									<q-media-type-icon :size="100" class="mx-3" media-type="mediaType" />
+								</q-col>
+								<q-col cols="12">
+									<h4 class="text-center">{{ mediaItem.title }}</h4>
+								</q-col>
+							</q-row>
+						</template>
+						<!--	Show  image	-->
+						<template v-else>
+							<q-row class="fill-height ma-0" align="center" justify="center">
+								<q-col cols="12">
+									<h4 class="text-center">{{ mediaItem.title }}</h4>
+								</q-col>
+								<q-col cols="auto">
+									<loading-spinner color="grey lighten-5" />
+								</q-col>
+							</q-row>
+						</template>
+					</template>
+				</q-img>
+				<!-- Media info-->
+				<q-card-section>
 					<q-card-title>
 						{{ mediaItem.title }}
 					</q-card-title>
-					<q-card-section>
-						<q-row no-gutters>
-							<q-col cols="12">
-								<span>
-									{{ $t('components.details-overview.duration') }}
-									<q-duration :value="mediaItem.duration" />
-								</span>
-							</q-col>
-							<q-col cols="12">
-								<span>{{ $t('components.details-overview.database-id') }} {{ mediaItem.id }}</span>
-							</q-col>
-						</q-row>
-					</q-card-section>
-				</q-card>
-			</q-col>
-		</q-row>
+					<q-markup-table>
+						<q-tr>
+							<q-td>{{ $t('components.details-overview.duration') }}</q-td>
+							<q-td>
+								<q-duration :value="mediaItem.duration" />
+							</q-td>
+						</q-tr>
+						<q-tr>
+							<q-td>{{ $t('components.details-overview.database-id') }}</q-td>
+							<q-td>{{ mediaItem.id }}</q-td>
+						</q-tr>
+					</q-markup-table>
+				</q-card-section>
+			</q-card-section>
+		</q-card>
 
 		<!--	Media Table	-->
 		<q-row v-if="mediaItem" no-gutters>
@@ -66,29 +62,29 @@
 	</template>
 
 	<!--	Loading	-->
-	<q-row v-else justify="center">
-		<q-col cols="auto">
-			<loading-spinner :size="60" />
-		</q-col>
-	</q-row>
+	<q-loading-overlay :loading="!mediaItem" />
 </template>
 
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, watch } from 'vue';
+import { useSubscription } from '@vueuse/rxjs';
+import Log from 'consola';
 import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 import { MediaList } from '#components';
+import { MediaService } from '@service';
 
 const props = defineProps<{
 	mediaType: PlexMediaType;
-	mediaItem: PlexMediaDTO | null;
 }>();
 
 const emit = defineEmits<{
 	(e: 'download', download: DownloadMediaDTO[] | DownloadMediaDTO): void;
+	(e: 'media-item', mediaItem: PlexMediaDTO | null): void;
 	(e: 'close'): void;
 }>();
 
+const mediaItem = ref<PlexMediaDTO | null>(null);
 const thumbWidth = ref(150);
 const thumbHeight = ref(200);
 const defaultImage = ref(false);
@@ -112,7 +108,35 @@ const mediaTableColumns = getMediaTableColumns();
 // 	},
 // );
 
-const openDetails = (mediaId: number) => {};
+const openDetails = (mediaId: number) => {
+	useSubscription(
+		MediaService.getMediaDataById(mediaId, props.mediaType).subscribe((data) => {
+			mediaItem.value = data;
+			emit('media-item', data);
+		}),
+	);
+
+	useSubscription(
+		MediaService.getThumbnail(mediaId, props.mediaType, thumbWidth.value, thumbHeight.value).subscribe({
+			next: (data) => {
+				Log.info('data', data);
+				if (!data) {
+					defaultImage.value = true;
+					return;
+				}
+				imageUrl.value = data;
+			},
+			error: () => {
+				defaultImage.value = true;
+			},
+		}),
+	);
+};
+
+const closeDetails = () => {
+	mediaItem.value = null;
+	emit('media-item', null);
+};
 
 // const downloadSelectedMedia = () => {
 // 	if (props.mediaType === PlexMediaType.TvShow) {
@@ -129,5 +153,6 @@ const openDetails = (mediaId: number) => {};
 
 defineExpose({
 	openDetails,
+	closeDetails,
 });
 </script>

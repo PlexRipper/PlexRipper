@@ -8,6 +8,7 @@
 		:loading="loading"
 		:columns="mediaTableColumns"
 		virtual-scroll
+		hide-bottom
 		:rows-per-page-options="[0]"
 		@update:selected="updateSelected($event)">
 		<!-- Title -->

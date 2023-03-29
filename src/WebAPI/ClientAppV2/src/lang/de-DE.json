@@ -25,7 +25,10 @@
         },
         "details-overview": {
             "database-id": "Datenbank ID:",
-            "duration": "Dauer:"
+            "total-duration": "Gesamtdauer:",
+            "media-count": "{seasonCount} Staffel - {episodeCount} Folgen",
+            "media-count-label": "Medienanzahl:",
+            "summary": "Zusammenfassung:"
         },
         "directory-browser": {
             "path": "Pfad:",
@@ -113,6 +116,10 @@
         "check-server-connections-progress": {
             "checking": "",
             "completed": "Inspektion von {length} Plex-Servern abgeschlossen!"
+        },
+        "media-list": {
+            "no-media-found": "",
+            "selected-count": ""
         }
     },
     "confirmation": {

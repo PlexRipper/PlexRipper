@@ -25,7 +25,10 @@
         },
         "details-overview": {
             "database-id": "Database ID:",
-            "duration": "Duration:"
+            "total-duration": "Total duration:",
+            "media-count": "{seasonCount} Season - {episodeCount} Episodes",
+            "media-count-label": "Media count:",
+            "summary": "Summary:"
         },
         "directory-browser": {
             "path": "Path:",
@@ -113,6 +116,10 @@
         "check-server-connections-progress": {
             "checking": "Checking Plex servers connections",
             "completed": "Completed inspection of {length} Plex servers!"
+        },
+        "media-list": {
+            "no-media-found": "No media found.",
+            "selected-count": "{selectedCount}  selected"
         }
     },
     "confirmation": {

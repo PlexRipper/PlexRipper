@@ -1,57 +1,55 @@
 <template>
 	<template v-if="mediaItem">
 		<!--	Header	-->
-
-		<q-card square flat>
-			<q-card-section horizontal>
-				<!--	Poster	-->
-				<q-img :src="imageUrl" :width="`${thumbWidth}px`" :height="`${thumbHeight}px`">
-					<!--	Placeholder	-->
-					<template #loading>
-						<!--	Show fallback image	-->
-						<template v-if="defaultImage">
+		<q-row>
+			<q-col cols="auto">
+				<q-card class="q-ma-md media-info-container">
+					<!--	Poster	-->
+					<q-img :src="imageUrl" fit="fill" :width="`${thumbWidth}px`" :height="`${thumbHeight}px`" ratio="2/3">
+						<!--	Placeholder	-->
+						<template #loading>
+							<!--	Show fallback image	-->
 							<q-row align="center" justify="center" class="fill-height">
 								<q-col cols="auto">
-									<q-media-type-icon :size="100" class="mx-3" media-type="mediaType" />
+									<q-media-type-icon :size="100" class="mx-3" :media-type="mediaItem.type" />
 								</q-col>
 								<q-col cols="12">
 									<h4 class="text-center">{{ mediaItem.title }}</h4>
 								</q-col>
 							</q-row>
 						</template>
-						<!--	Show  image	-->
-						<template v-else>
-							<q-row class="fill-height ma-0" align="center" justify="center">
-								<q-col cols="12">
-									<h4 class="text-center">{{ mediaItem.title }}</h4>
-								</q-col>
-								<q-col cols="auto">
-									<loading-spinner color="grey lighten-5" />
-								</q-col>
-							</q-row>
-						</template>
-					</template>
-				</q-img>
-				<!-- Media info-->
-				<q-card-section>
-					<q-card-title>
-						{{ mediaItem.title }}
-					</q-card-title>
-					<q-markup-table>
-						<q-tr>
-							<q-td>{{ $t('components.details-overview.duration') }}</q-td>
-							<q-td>
-								<q-duration :value="mediaItem.duration" />
-							</q-td>
-						</q-tr>
-						<q-tr>
-							<q-td>{{ $t('components.details-overview.database-id') }}</q-td>
-							<q-td>{{ mediaItem.id }}</q-td>
-						</q-tr>
-					</q-markup-table>
-				</q-card-section>
-			</q-card-section>
-		</q-card>
+					</q-img>
+				</q-card>
+			</q-col>
+			<q-col>
+				<q-card class="q-ma-md media-info-container" :style="{ height: thumbHeight + 'px' }">
+					<!-- Media info-->
+					<q-card-section>
+						<span class="media-title">
+							{{ mediaItem.title }}
+						</span>
+						<q-markup-table>
+							<tbody>
+								<tr>
+									<td class="media-info-column">{{ $t('components.details-overview.total-duration') }}</td>
+									<td class="media-info-column">
+										<q-duration :value="mediaItem.duration" />
+									</td>
+								</tr>
+								<tr>
+									<td class="media-info-column">{{ $t('components.details-overview.media-count-label') }}</td>
+									<td class="media-info-column">{{ mediaCountFormatted }}</td>
+								</tr>
+								<tr>
+									<td class="media-info-column">{{ $t('components.details-overview.summary') }}</td>
+									<td class="media-info-column">{{ mediaItem.summary }}</td>
+								</tr>
+							</tbody>
+						</q-markup-table>
+					</q-card-section>
+				</q-card>
+			</q-col>
+		</q-row>
 
 		<!--	Media Table	-->
 		<q-row v-if="mediaItem" no-gutters>
@@ -66,17 +64,13 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, watch } from 'vue';
+import { computed, defineEmits, ref } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import Log from 'consola';
+import sum from 'lodash-es/sum';
 import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
-import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 import { MediaList } from '#components';
 import { MediaService } from '@service';
-
-const props = defineProps<{
-	mediaType: PlexMediaType;
-}>();
 
 const emit = defineEmits<{
 	(e: 'download', download: DownloadMediaDTO[] | DownloadMediaDTO): void;
@@ -84,14 +78,14 @@ const emit = defineEmits<{
 	(e: 'close'): void;
 }>();
 
+const t = useI18n().t;
 const mediaItem = ref<PlexMediaDTO | null>(null);
-const thumbWidth = ref(150);
-const thumbHeight = ref(200);
+const thumbWidth = ref(180);
+const thumbHeight = ref(270);
 const defaultImage = ref(false);
 const imageUrl = ref('');
 const selected = ref<string[]>([]);
 const downloadMediaCommand = ref<DownloadMediaDTO[]>([]);
-const mediaTableColumns = getMediaTableColumns();
 
 // watch(
 // 	() => props.mediaItem,
@@ -108,16 +102,16 @@ const mediaTableColumns = getMediaTableColumns();
 // 	},
 // );
 
-const openDetails = (mediaId: number) => {
+const openDetails = (mediaId: number, mediaType: PlexMediaType) => {
 	useSubscription(
-		MediaService.getMediaDataById(mediaId, props.mediaType).subscribe((data) => {
+		MediaService.getMediaDataById(mediaId, mediaType).subscribe((data) => {
 			mediaItem.value = data;
 			emit('media-item', data);
 		}),
 	);
 
 	useSubscription(
-		MediaService.getThumbnail(mediaId, props.mediaType, thumbWidth.value, thumbHeight.value).subscribe({
+		MediaService.getThumbnail(mediaId, mediaType, thumbWidth.value, thumbHeight.value).subscribe({
 			next: (data) => {
 				Log.info('data', data);
 				if (!data) {
@@ -150,6 +144,25 @@ const closeDetails = () => {
 // 		});
 // 	}
 // };
+
+const mediaCountFormatted = computed(() => {
+	if (mediaItem.value) {
+		const item = mediaItem.value;
+		switch (item.type) {
+			case PlexMediaType.Movie:
+				return `1 Movie`;
+			case PlexMediaType.TvShow:
+				return t('components.details-overview.media-count', {
+					seasonCount: item.childCount,
+					episodeCount: sum(item.children?.map((x) => x.childCount)),
+				});
+			default:
+				return `Library type ${item.type} is not supported in the media count`;
+		}
+	}
+
+	return 'unknown media count';
+});
 
 defineExpose({
 	openDetails,

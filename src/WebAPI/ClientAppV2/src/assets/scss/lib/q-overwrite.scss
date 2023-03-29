@@ -5,19 +5,17 @@
 	background-color: transparent;
 }
 
-.q-card {
-	@extend .glass-background-light;
-
-	&.q-card--dark {
-		@extend .glass-background-dark;
-	}
-}
+//.q-card {
+//	@extend .glass-background-light;
+//
+//	&.q-card--dark {
+//		@extend .glass-background-dark;
+//	}
+//}
 
 .q-dialog {
 	.q-card {
-		@extend .default-border;
 		@extend .default-shadow;
-		@extend .blur;
 
 		background-color: $light-dialog-background-color;
 		border-radius: 15px;
@@ -25,6 +23,10 @@
 
 		&.q-card--dark {
 			background-color: $dark-dialog-background-color;
+		}
+
+		&--bordered {
+			@extend .default-border;
 		}
 	}
 }

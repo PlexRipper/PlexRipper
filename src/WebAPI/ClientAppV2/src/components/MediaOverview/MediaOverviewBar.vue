@@ -2,14 +2,12 @@
 	<q-toolbar class="media-overview-bar" outlined :height="barHeight">
 		<!--	Title	-->
 		<q-toolbar-title>
-			<q-row justify="start" no-gutters>
-				<q-col v-if="detailMode" cols="auto">
-					<q-list two-line class="no-background">
-						<q-item>
-							<q-btn flat icon="mdi-arrow-left" size="xl" @click="$emit('back')" />
-						</q-item>
-					</q-list>
-				</q-col>
+			<q-row justify="start" align="center">
+				<Transition appear enter-active-class="animated fadeInLeft" leave-active-class="animated fadeOutLeft">
+					<q-col v-if="detailMode" cols="auto">
+						<q-btn flat icon="mdi-arrow-left" size="xl" @click="$emit('back')" />
+					</q-col>
+				</Transition>
 				<q-col cols="auto">
 					<q-list class="no-background">
 						<q-item>
@@ -20,8 +18,8 @@
 								<q-item-label>
 									{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}
 								</q-item-label>
-								<q-item-label v-if="library" caption>
-									{{ detailMode ? mediaCountFormatted : libraryCountFormatted }} -
+								<q-item-label v-if="library && !detailMode" caption>
+									{{ libraryCountFormatted }} -
 									<q-file-size :size="mediaSize" />
 								</q-item-label>
 							</q-item-section>
@@ -52,7 +50,7 @@
 			@click="refreshLibrary" />
 
 		<!--	View mode	-->
-		<vertical-button icon="mdi-eye" label="View" :height="barHeight" :width="verticalButtonWidth">
+		<vertical-button v-if="!detailMode" icon="mdi-eye" label="View" :height="barHeight" :width="verticalButtonWidth">
 			<q-menu anchor="bottom left" self="top left" auto-close>
 				<q-item
 					v-for="(viewOption, i) in viewOptions"
@@ -136,23 +134,6 @@ const libraryCountFormatted = computed(() => {
 				return `Library type ${props.library?.type} is not supported in the media count`;
 		}
 	}
-	return 'unknown media count';
-});
-
-const mediaCountFormatted = computed(() => {
-	if (props.mediaItem) {
-		switch (props.library?.type) {
-			case PlexMediaType.Movie:
-				return `1 Movie`;
-			case PlexMediaType.TvShow:
-				return `1 TvShow - ${props.mediaItem.children?.length} Seasons - ${sum(
-					props.mediaItem.children?.map((x) => x.childCount),
-				)} Episodes`;
-			default:
-				return `Library type ${props.library?.type} is not supported in the media count`;
-		}
-	}
-
 	return 'unknown media count';
 });
 

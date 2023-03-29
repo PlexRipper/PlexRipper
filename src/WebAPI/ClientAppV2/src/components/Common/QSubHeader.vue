@@ -1,19 +1,29 @@
 <template>
-	<div class="q-sub-header">
+	<div :class="classes">
 		<slot />
 	</div>
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
+import { defineProps, ref, watch } from 'vue';
+
+const props = defineProps<{
+	bold?: boolean;
+}>();
+
+const classes = computed(() => {
+	return {
+		'q-sub-header': true,
+		'text-weight-bold': props.bold,
+	};
+});
 </script>
-<style>
+<style lang="scss">
 .q-sub-header {
 	align-items: center;
 	display: flex;
 	height: 48px;
 	font-size: 0.875rem;
-	font-weight: 400;
 	padding: 0 16px 0 16px;
 }
 </style>

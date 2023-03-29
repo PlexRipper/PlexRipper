@@ -96,7 +96,6 @@
 			<DetailsOverview
 				ref="detailsOverviewRef"
 				:media-type="mediaType"
-				:media-item="mediaItem"
 				@close="closeDetailsOverview"
 				@media-item="mediaItem = $event"
 				@download="processDownloadCommand" />
@@ -236,18 +235,18 @@ const sendDownloadCommand = (downloadMediaCommand: DownloadMediaDTO[]) => {
 };
 
 const openDetails = (mediaId: number) => {
-	// if (!router.currentRoute.value.path.includes('details')) {
-	// 	router.push({
-	// 		path: props.libraryId + '/details/' + mediaId,
-	// 	});
-	// }
+	if (!router.currentRoute.value.path.includes('details')) {
+		router.push({
+			path: props.libraryId + '/details/' + mediaId,
+		});
+	}
 	currentMediaItemId.value = mediaId;
 	fixed.value = true;
 };
 
 const onOpenDetails = () => {
 	if (detailsOverviewRef.value) {
-		detailsOverviewRef.value.openDetails(currentMediaItemId.value ?? 0);
+		detailsOverviewRef.value.openDetails(currentMediaItemId.value ?? 0, props.mediaType);
 	} else {
 		Log.error('detailsOverview was invalid', detailsOverviewRef.value);
 	}
@@ -255,12 +254,11 @@ const onOpenDetails = () => {
 };
 
 const closeDetailsOverview = () => {
+	router.push({
+		path: '/tvshows/' + props.libraryId,
+	});
 	showMediaOverview.value = true;
 	fixed.value = false;
-
-	// router.push({
-	// 	path: '/tvshows/' + props.libraryId,
-	// });
 };
 
 const refreshLibrary = () => {
@@ -286,32 +284,12 @@ const setLibrary = (data: PlexLibraryDTO | null) => {
 	}
 };
 
-// watch(
-// 	() => route.path,
-// 	(newPath: string, oldPath: string) => {
-// 		if (oldPath.includes('details') && !newPath.includes('details')) {
-// 			resetDetailsOverview();
-// 		}
-// 	},
-// );
-
-// watch(loading, (val: boolean) => {
-// 	debugger;
-//
-// 	if (!val) {
-// 		if (detailsOverviewRef.value) {
-// 			if (+route.params.mediaid) {
-// 				openDetails(+route.params.mediaid);
-// 			}
-// 		} else {
-// 			nextTick(() => {
-// 				if (+route.params.mediaid) {
-// 					openDetails(+route.params.mediaid);
-// 				}
-// 			});
-// 		}
-// 	}
-// });
+onBeforeMount(() => {
+	const mediaId = +route.params.tvShowId;
+	if (mediaId) {
+		openDetails(mediaId);
+	}
+});
 
 onMounted(() => {
 	resetProgress(false);

@@ -12,7 +12,7 @@
 						loading="eager"
 						:no-transition="!imageUrl"
 						:src="imageUrl"
-						fit="contain"
+						fit="fill"
 						no-spinner
 						class="poster-image"
 						:alt="mediaItem.title">

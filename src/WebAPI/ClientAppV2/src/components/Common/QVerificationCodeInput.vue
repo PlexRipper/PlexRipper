@@ -36,7 +36,6 @@
 
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, toRef, onBeforeUpdate } from 'vue';
-import { AccountForm } from '#components';
 
 const props = defineProps({
 	className: String,
@@ -94,6 +93,7 @@ const initVals = () => {
 	}
 	iRefs.value = [];
 	for (let i = 0; i < fields.value; i++) {
+		// @ts-ignore
 		iRefs.value.push(i + 1);
 	}
 	values.value = vals;
@@ -123,11 +123,13 @@ const onValueChange = (e) => {
 		split.forEach((item, i) => {
 			const cursor = index + i;
 			if (cursor < fields.value) {
+				// @ts-ignore
 				values.value[cursor] = item;
 			}
 		});
 	} else {
 		next = iRefs.value[index + 1];
+		// @ts-ignore
 		values.value[index] = value;
 	}
 	if (next) {
@@ -149,10 +151,12 @@ const onKeyDown = (e) => {
 			e.preventDefault();
 			const vals = [...values.value];
 			if (values.value[index]) {
+				// @ts-ignore
 				vals[index] = '';
 				values.value = vals;
 				triggerChange(vals);
 			} else if (prev) {
+				// @ts-ignore
 				vals[prevIndex] = '';
 				inputs.value[prev].focus();
 				values.value = vals;
@@ -164,10 +168,12 @@ const onKeyDown = (e) => {
 			e.preventDefault();
 			const vals = [...values.value];
 			if (values.value[index]) {
+				// @ts-ignore
 				vals[index] = '';
 				values.value = vals;
 				triggerChange(vals);
 			} else if (next) {
+				// @ts-ignore
 				vals[nextIndex] = '';
 				inputs.value[next].focus();
 				values.value = vals;

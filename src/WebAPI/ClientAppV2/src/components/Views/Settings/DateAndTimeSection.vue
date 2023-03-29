@@ -85,7 +85,6 @@
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
 import { ref, computed } from 'vue';
 // eslint-disable-next-line import/no-duplicates
 import { format } from 'date-fns';
@@ -112,15 +111,8 @@ const showRelativeDates = ref(false);
 
 // endregion
 
-const getMenuProps = computed(() => {
-	return {
-		offsetY: true,
-		contentClass: 'menu-background',
-	};
-});
-
 const getLocale = computed(() => {
-	switch (i18n.locale) {
+	switch (i18n.locale.value) {
 		case 'en-US':
 			return { locale: enUS };
 		case 'fr-FR':

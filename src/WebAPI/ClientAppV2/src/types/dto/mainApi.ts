@@ -1,3 +1,4 @@
+/* eslint-disable */
 /* tslint:disable */
 /*
  * ---------------------------------------------------------------
@@ -85,7 +86,9 @@ export interface DownloadMediaDTO {
 	mediaIds: number[];
 	type: PlexMediaType;
 	/** @format int32 */
-	plexAccountId: number;
+	plexServerId: number;
+	/** @format int32 */
+	plexLibraryId: number;
 }
 
 export interface DownloadProgressDTO {

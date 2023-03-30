@@ -7,6 +7,7 @@ using Logging.Interface;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NaturalSort.Extension;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;
@@ -92,6 +93,9 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
     /// </summary>
     public bool HasBeenSetup { get; set; }
 
+    private static readonly NaturalSortComparer NaturalComparer = new(StringComparison.InvariantCultureIgnoreCase);
+
+
     #endregion Properties
 
     #region Constructors
@@ -121,21 +125,26 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
     {
         if (!optionsBuilder.IsConfigured)
         {
+            // Source: https://github.com/tompazourek/NaturalSort.Extension
+            SqliteConnection databaseConnection = new(PathProvider.DatabaseConnectionString);
+            databaseConnection.CreateCollation("NATURALSORT", (x, y) => NaturalComparer.Compare(x, y));
+
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             optionsBuilder.LogTo(text => LogManager.DbContextLogger(text), LogLevel.Error);
             optionsBuilder.EnableDetailedErrors();
-            optionsBuilder
-                .UseSqlite(PathProvider.DatabaseConnectionString,
-                    b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
+            optionsBuilder.UseSqlite(databaseConnection, b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
         }
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
+        builder.UseCollation("NATURALSORT");
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         builder.AddQuartz(x => x.UseSqlite());
 
+        // NOTE: This has been added to PlexRipperDbContext.OnModelCreating
+        // Based on: https://stackoverflow.com/a/63992731/8205497
         builder.Entity<PlexMovie>()
             .Property(x => x.MediaData)
             .HasJsonValueConversion();
@@ -239,8 +248,9 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
                     try
                     {
                         File.Copy(databaseFilePath, destinationPath);
-                        _log.Here().Information("Successfully copied \"{DatabaseFilePath}\" to back-up location\"{DestinationPath}\"", databaseFilePath,
-                            destinationPath);
+                        _log.Here()
+                            .Information("Successfully copied \"{DatabaseFilePath}\" to back-up location\"{DestinationPath}\"", databaseFilePath,
+                                destinationPath);
                     }
                     catch (Exception e)
                     {

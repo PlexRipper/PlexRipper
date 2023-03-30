@@ -2,6 +2,7 @@
 
 namespace PlexRipper.Domain;
 
+// TODO Remove this in favor of NaturalSort nuget package
 public static class OrderByNaturalExtensions
 {
     // From: https://github.com/postworthy/OrderByNatural/blob/master/OrderByNatural/OrderByNaturalExtensions.cs

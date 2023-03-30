@@ -6,5 +6,7 @@ public class DownloadMediaDTO
 
     public PlexMediaType Type { get; set; }
 
-    public int PlexAccountId { get; set; }
+    public int PlexServerId { get; set; }
+
+    public int PlexLibraryId { get; set; }
 }

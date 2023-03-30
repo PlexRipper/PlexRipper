@@ -6,6 +6,8 @@ public class PlexMediaSlimDTO
 
     public string Title { get; set; }
 
+    public string SortTitle { get; set; }
+
     public int Year { get; set; }
 
     public int Duration { get; set; }

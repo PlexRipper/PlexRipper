@@ -10,7 +10,7 @@ public class GetPlexMediaDataByLibraryIdQuery : IRequest<Result<List<PlexMediaSl
     public int Page { get; }
     public int PageSize { get; }
 
-    public GetPlexMediaDataByLibraryIdQuery(int libraryId, int page = 0, int pageSize = 100)
+    public GetPlexMediaDataByLibraryIdQuery(int libraryId, int page = 0, int pageSize = 0)
     {
         LibraryId = libraryId;
         Page = page;

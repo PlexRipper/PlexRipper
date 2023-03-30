@@ -13,7 +13,6 @@ public class GetPlexMediaDataByLibraryIdQueryValidator : AbstractValidator<GetPl
     public GetPlexMediaDataByLibraryIdQueryValidator()
     {
         RuleFor(x => x.LibraryId).GreaterThan(0);
-        RuleFor(x => x.PageSize).GreaterThan(0);
     }
 }
 
@@ -29,7 +28,7 @@ public class GetPlexMediaDataByLibraryIdQueryHandler : BaseHandler, IRequestHand
     public async Task<Result<List<PlexMediaSlim>>> Handle(GetPlexMediaDataByLibraryIdQuery request, CancellationToken cancellationToken)
     {
         var plexLibrary = await _dbContext.PlexLibraries.AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.LibraryId, cancellationToken);
-        var take = request.PageSize;
+        var take = request.PageSize == 0 ? -1 : request.PageSize;
         var skip = request.Page * request.PageSize;
 
         List<PlexMediaSlim> entities;

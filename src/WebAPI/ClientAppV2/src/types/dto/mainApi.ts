@@ -533,6 +533,7 @@ export interface PlexMediaDTO {
 	/** @format int32 */
 	id: number;
 	title: string;
+	sortTitle: string;
 	/** @format int32 */
 	year: number;
 	/** @format int32 */
@@ -620,6 +621,7 @@ export interface PlexMediaSlimDTO {
 	/** @format int32 */
 	id: number;
 	title: string;
+	sortTitle: string;
 	/** @format int32 */
 	year: number;
 	/** @format int32 */

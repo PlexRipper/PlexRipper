@@ -60,9 +60,6 @@ public class PlexMediaController : BaseController
         if (id <= 0)
             return BadRequest(id, nameof(id));
 
-        if (size <= 0)
-            return BadRequest(id, nameof(size));
-
         var result = await _mediator.Send(new GetPlexMediaDataByLibraryIdQuery(id, page, size));
 
         return ToActionResult<List<PlexMediaSlim>, List<PlexMediaSlimDTO>>(result);

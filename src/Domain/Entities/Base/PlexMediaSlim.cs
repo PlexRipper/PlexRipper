@@ -10,6 +10,9 @@ public class PlexMediaSlim : BaseEntity
     [Column(Order = 3)]
     public int Year { get; set; }
 
+    /// <summary>
+    /// This can be empty, in that case it gets the value of <see cref="Title"/>.
+    /// </summary>
     [Column(Order = 4)]
     public string SortTitle { get; set; }
 

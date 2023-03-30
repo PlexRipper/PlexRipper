@@ -47,7 +47,7 @@ export default defineNuxtConfig({
 			// string[]: Auto-import svg icon collections. Usage: https://quasar.dev/vue-components/icon#svg-usage
 			svgIcons: [],
 			// string[]: Auto-import animations from 'animate.css'. Usage: https://quasar.dev/options/animations#usage
-			animations: [],
+			animations: ['fadeInLeft', 'fadeInRight', 'fadeInUp', 'fadeInDown', 'fadeOutLeft'],
 		},
 	},
 	typescript: {

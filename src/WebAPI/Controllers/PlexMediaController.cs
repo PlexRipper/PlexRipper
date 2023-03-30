@@ -1,5 +1,6 @@
 ﻿using Application.Contracts;
 using AutoMapper;
+using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.WebAPI.Common.DTO;
@@ -11,6 +12,7 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class PlexMediaController : BaseController
 {
+    private readonly IMediator _mediator;
     private readonly IPlexTvShowService _plexTvShowService;
 
     private readonly IPlexMovieService _plexMovieService;
@@ -19,12 +21,14 @@ public class PlexMediaController : BaseController
 
     public PlexMediaController(
         ILog log,
+        IMediator mediator,
         IMapper mapper,
         INotificationsService notificationsService,
         IPlexTvShowService plexTvShowService,
         IPlexMovieService plexMovieService,
         IPlexMediaService plexMediaService) : base(log, mapper, notificationsService)
     {
+        _mediator = mediator;
         _plexTvShowService = plexTvShowService;
         _plexMovieService = plexMovieService;
         _plexMediaService = plexMediaService;
@@ -43,6 +47,25 @@ public class PlexMediaController : BaseController
 
         var data = await _plexTvShowService.GetTvShow(id);
         return ToActionResult<PlexTvShow, PlexMediaDTO>(data);
+    }
+
+    // GET api/<PlexMedia>/library/5
+    [HttpGet("library/{id:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexMediaDTO>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
+    public async Task<IActionResult> GetLibraryMedia(int id, [FromQuery] int page, [FromQuery] int size)
+    {
+        if (id <= 0)
+            return BadRequest(id, nameof(id));
+
+        if (size <= 0)
+            return BadRequest(id, nameof(size));
+
+        var result = await _mediator.Send(new GetPlexMediaDataByLibraryIdQuery(id, page, size));
+
+        return ToActionResult<List<PlexMediaSlim>, List<PlexMediaSlimDTO>>(result);
     }
 
     // GET api/<PlexMedia>/5

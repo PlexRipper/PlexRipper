@@ -6,7 +6,7 @@ namespace PlexRipper.Domain;
 ///     Plex stores media in 1 generic type but PlexRipper stores it by type, this is the base entity for common
 ///     properties.
 /// </summary>
-public class PlexMedia : BaseEntity
+public class PlexMedia : PlexMediaSlim
 {
     #region Properties
 
@@ -16,27 +16,6 @@ public class PlexMedia : BaseEntity
     /// </summary>
     [Column(Order = 1)]
     public int Key { get; set; }
-
-    [Column(Order = 2)]
-    public string Title { get; set; }
-
-    [Column(Order = 3)]
-    public int Year { get; set; }
-
-    [Column(Order = 4)]
-    public string SortTitle { get; set; }
-
-    /// <summary>
-    /// Gets or sets the duration in seconds of the (nested) media.
-    /// </summary>
-    [Column(Order = 5)]
-    public int Duration { get; set; }
-
-    /// <summary>
-    /// Gets or sets the total filesize of the nested media.
-    /// </summary>
-    [Column(Order = 6)]
-    public long MediaSize { get; set; }
 
     /// <summary>
     /// Gets or sets the key used to retrieve thumbnails, art or banners.
@@ -56,25 +35,6 @@ public class PlexMedia : BaseEntity
 
     [Column(Order = 11)]
     public double Rating { get; set; }
-
-    /// <summary>
-    /// Gets or sets the number of direct children
-    /// E.G. if the type is tvShow, then this number would be the season count, if season then this would be the episode count.
-    /// </summary>
-    [Column(Order = 12)]
-    public int ChildCount { get; set; }
-
-    /// <summary>
-    /// Gets or sets when this media was added to the Plex library.
-    /// </summary>
-    [Column(Order = 13)]
-    public DateTime AddedAt { get; set; }
-
-    /// <summary>
-    /// Gets or sets when this media was last updated in the Plex library.
-    /// </summary>
-    [Column(Order = 14)]
-    public DateTime UpdatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets when this media was released/aired to the public.
@@ -126,18 +86,11 @@ public class PlexMedia : BaseEntity
 
     public PlexLibrary PlexLibrary { get; set; }
 
-    public int PlexLibraryId { get; set; }
-
     public PlexServer PlexServer { get; set; }
-
-    public int PlexServerId { get; set; }
 
     #endregion
 
     #region Helpers
-
-    [NotMapped]
-    public virtual PlexMediaType Type => PlexMediaType.None;
 
     [NotMapped]
     public string MetaDataUrl => $"/library/metadata/{Key}";

@@ -1,15 +1,20 @@
 <!--suppress VueUnrecognizedSlot -->
 <template>
-	<q-table
+	{{ pagination }}
+	<QTable
+		v-model:pagination="pagination"
 		:selected="getSelected"
+		style="height: 400px"
 		selection="multiple"
 		:row-key="rowKey"
 		:rows="rows"
 		:loading="loading"
 		:columns="mediaTableColumns"
-		virtual-scroll
 		hide-bottom
+		virtual-scroll
 		:rows-per-page-options="[0]"
+		:virtual-scroll-item-size="48"
+		@virtual-scroll="onVirtualScroll"
 		@update:selected="updateSelected($event)">
 		<!-- Title -->
 		<template #body-cell-title="{ row }">
@@ -48,18 +53,19 @@
 		<template #loading>
 			<q-inner-loading showing color="red" />
 		</template>
-	</q-table>
+	</QTable>
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
 import { defineProps, ref, withDefaults, defineEmits } from 'vue';
+import Log from 'consola';
+import { QTable } from 'quasar';
 import { toDownloadMedia } from '#imports';
-import type { PlexMediaDTO } from '@dto/mainApi';
+import type { PlexLibraryDTO, PlexMediaDTO } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
 import Convert from '@class/Convert';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
-import { DownloadMediaDTO } from '@dto/mainApi';
+import { DownloadMediaDTO, PlexMediaSlimDTO } from '@dto/mainApi';
 
 defineOptions({
 	inheritAttrs: false,
@@ -69,9 +75,10 @@ const mediaTableColumns = getMediaTableColumns();
 
 const props = withDefaults(
 	defineProps<{
-		rows: PlexMediaDTO[];
+		rows: PlexMediaSlimDTO[];
+		library: PlexLibraryDTO | null;
 		loading: boolean;
-		rowKey: string;
+		rowKey: keyof PlexMediaSlimDTO;
 		selected?: string[] | number[];
 	}>(),
 	{
@@ -80,19 +87,55 @@ const props = withDefaults(
 	},
 );
 
+const pageSize = 20;
+const totalRows = computed(() => props.library?.count ?? pageSize);
+const lastPage = computed(() => Math.ceil(totalRows.value / pageSize));
+const loading = ref(false);
+const nextPage = ref(1);
+const pagination = ref({
+	rowsPerPage: 0,
+});
+
 const onRowClick = (row) => alert(`${row.title} clicked`);
 
 const emit = defineEmits<{
 	(e: 'download', downloadMedia: DownloadMediaDTO[]): void;
 	(e: 'selection', payload: { allSelected: boolean | null; selection: string[] }): void;
-	(e: 'request-media', visible: boolean[]): void;
+	(e: 'request-media', request: { page: number; size: number; refresh: () => void }): void;
 }>();
 
 const downloadMedia = (row: PlexMediaDTO) => {
 	emit('download', toDownloadMedia(row));
 };
 
-const getSelected = computed((): PlexMediaDTO[] => {
+const onVirtualScroll = (payload: { index: number; from: number; to: number; direction: string; ref: QTable }) => {
+	const size = pageSize;
+	//	const page = ((payload.to + 1) % size) + (direction === 'increase' ? 1 : -1);
+
+	const next = nextPage.value;
+	const last = lastPage.value;
+	const currentPage = pageSize * (next - 1);
+	const lastIndex = currentPage - 1;
+
+	if (loading.value !== true && next < last && payload.to === lastIndex) {
+		loading.value = true;
+
+		emit('request-media', {
+			page: nextPage.value,
+			size,
+			refresh: () => {
+				nextPage.value++;
+				nextTick(() => {
+					// @ts-ignore
+					payload.ref?.refresh();
+					loading.value = false;
+				});
+			},
+		});
+	}
+};
+
+const getSelected = computed((): PlexMediaSlimDTO[] => {
 	if (!props.selected) {
 		return [];
 	}
@@ -118,4 +161,40 @@ const updateSelected = (selected: PlexMediaDTO[]) => {
 		color: $primary;
 	}
 }
+
+//.my-sticky-dynamic {
+//	/* height or max-height is important */
+//	height: 410px;
+//
+//	.q-table__top,
+//	.q-table__bottom,
+//	thead tr:first-child th {
+//		/* bg color is important for th; just specify one */
+//		background-color: transparent;
+//		backdrop-filter: blur(50px);
+//	}
+//
+//	thead tr th {
+//		position: sticky;
+//		z-index: 1;
+//	}
+//
+//	/* this will be the loading indicator */
+//
+//	thead tr:last-child th {
+//		/* height of all previous header rows */
+//		top: 48px;
+//	}
+//
+//	thead tr:first-child th {
+//		top: 0;
+//	}
+//
+//	/* prevent scrolling behind sticky top row on focus */
+//
+//	tbody {
+//		/* height of all previous header rows */
+//		scroll-margin-top: 48px;
+//	}
+//}
 </style>

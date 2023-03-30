@@ -532,9 +532,6 @@ export interface PlexLibraryDTOResultDTO {
 export interface PlexMediaDTO {
 	/** @format int32 */
 	id: number;
-	/** @format int32 */
-	key: number;
-	treeKeyId: string;
 	title: string;
 	/** @format int32 */
 	year: number;
@@ -542,6 +539,19 @@ export interface PlexMediaDTO {
 	duration: number;
 	/** @format int64 */
 	mediaSize: number;
+	/** @format int32 */
+	childCount: number;
+	/** @format date-time */
+	addedAt: string;
+	/** @format date-time */
+	updatedAt: string;
+	/** @format int32 */
+	plexLibraryId: number;
+	/** @format int32 */
+	plexServerId: number;
+	type: PlexMediaType;
+	/** @format int32 */
+	key: number;
 	hasThumb: boolean;
 	hasArt: boolean;
 	hasBanner: boolean;
@@ -553,23 +563,12 @@ export interface PlexMediaDTO {
 	contentRating: string;
 	/** @format double */
 	rating: number;
-	/** @format int32 */
-	childCount: number;
-	/** @format date-time */
-	addedAt: string;
-	/** @format date-time */
-	updatedAt: string;
 	/** @format date-time */
 	originallyAvailableAt: string;
 	/** @format int32 */
 	tvShowId: number;
 	/** @format int32 */
 	tvShowSeasonId: number;
-	/** @format int32 */
-	plexLibraryId: number;
-	/** @format int32 */
-	plexServerId: number;
-	type: PlexMediaType;
 	mediaData: PlexMediaDataDTO[];
 	children: PlexMediaDTO[];
 }
@@ -615,6 +614,38 @@ export interface PlexMediaDataPartDTO {
 	size: number;
 	container: string;
 	videoProfile: string;
+}
+
+export interface PlexMediaSlimDTO {
+	/** @format int32 */
+	id: number;
+	title: string;
+	/** @format int32 */
+	year: number;
+	/** @format int32 */
+	duration: number;
+	/** @format int64 */
+	mediaSize: number;
+	/** @format int32 */
+	childCount: number;
+	/** @format date-time */
+	addedAt: string;
+	/** @format date-time */
+	updatedAt: string;
+	/** @format int32 */
+	plexLibraryId: number;
+	/** @format int32 */
+	plexServerId: number;
+	type: PlexMediaType;
+}
+
+export interface PlexMediaSlimDTOListResultDTO {
+	isFailed: boolean;
+	isSuccess: boolean;
+	reasons: ReasonDTO[];
+	errors: ErrorDTO[];
+	successes: SuccessDTO[];
+	value: PlexMediaSlimDTO[];
 }
 
 export enum PlexMediaType {

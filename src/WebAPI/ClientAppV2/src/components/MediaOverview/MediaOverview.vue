@@ -39,6 +39,7 @@
 					@view-change="changeView"
 					@refresh-library="refreshLibrary"
 					@download="processDownloadCommand([])" />
+				{{ 'Rows: ' + items.length }}
 				<!--	Data table display	-->
 				<div ref="mediaContainerRef" class="media-container">
 					<q-row v-show="showMediaOverview">
@@ -51,9 +52,11 @@
 											:media-type="mediaType"
 											:rows="items"
 											:loading="loading"
+											:library="library"
+											row-key="id"
 											@download="processDownloadCommand"
 											@selected="selected = $event"
-											@request-media="requestMedia" />
+											@request-media="onRequestMedia($event)" />
 									</template>
 
 									<!-- Poster display-->
@@ -61,6 +64,7 @@
 										<poster-table
 											:library-id="libraryId"
 											:media-type="mediaType"
+											:items="items"
 											@download="processDownloadCommand"
 											@open-details="openDetails" />
 									</template>
@@ -106,14 +110,13 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { ref, defineProps, computed, watch } from 'vue';
+import { ref, defineProps, computed } from 'vue';
 import { useElementBounding, useEventBus } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRoute, useRouter } from 'vue-router';
-import { combineLatest, forkJoin, zip } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { QScrollArea } from 'quasar';
-import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
+import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaDTO, PlexMediaSlimDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, MediaService, SettingsService, SignalrService } from '@service';
 import { DetailsOverview, DownloadConfirmation } from '#components';
@@ -138,9 +141,9 @@ const server = ref<PlexServerDTO | null>(null);
 const library = ref<PlexLibraryDTO | null>(null);
 
 const libraryProgress = ref<LibraryProgress | null>(null);
-const items = ref<PlexMediaDTO[]>([]);
+const items = ref<PlexMediaSlimDTO[]>([]);
 
-const loading = ref(true);
+const loading = ref(false);
 const showMediaOverview = ref(true);
 const mediaItem = ref<PlexMediaDTO | null>(null);
 const mediaViewMode = ref<ViewMode>(ViewMode.Poster);
@@ -282,6 +285,29 @@ const setLibrary = (data: PlexLibraryDTO | null) => {
 	}
 };
 
+const onRequestMedia = ({ page, size, refresh }: { page: number; size: number; refresh: () => void }) => {
+	Log.info('onRequestMedia', page, size);
+	useSubscription(
+		MediaService.getMediaData(props.libraryId, page, size)
+			.pipe(take(1))
+			.subscribe({
+				next: (mediaData) => {
+					if (!mediaData) {
+						Log.error(`MediaOverview => No media data for library id ${props.libraryId} was found`);
+					}
+					items.value.push(...mediaData);
+				},
+				error: (error) => {
+					Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
+				},
+				complete: () => {
+					refresh();
+					loading.value = false;
+				},
+			}),
+	);
+};
+
 onBeforeMount(() => {
 	const mediaId = +route.params.tvShowId;
 	if (mediaId) {
@@ -331,35 +357,21 @@ onMounted(() => {
 		}),
 	);
 
-	// Get server and media data
 	useSubscription(
-		forkJoin([
-			LibraryService.getServerByLibraryId(props.libraryId).pipe(take(1)),
-			LibraryService.getLibrary(props.libraryId).pipe(take(1)),
-			MediaService.getMediaData(props.libraryId).pipe(take(1)),
-		]).subscribe({
-			next: ([serverData, libraryData, mediaData]) => {
-				if (!serverData) {
-					Log.error(`MediaOverview => Server for library id ${props.libraryId} was not found`);
-				}
-				server.value = serverData;
+		LibraryService.getServerByLibraryId(props.libraryId).subscribe((serverData) => {
+			if (!serverData) {
+				Log.error(`MediaOverview => Server for library id ${props.libraryId} was not found`);
+			}
+			server.value = serverData;
+		}),
+	);
 
-				if (!libraryData) {
-					Log.error(`MediaOverview => Library for library id ${props.libraryId} was not found`);
-				}
-				library.value = libraryData;
-
-				if (!mediaData) {
-					Log.error(`MediaOverview => No media data for library id ${props.libraryId} was found`);
-				}
-				items.value = mediaData;
-			},
-			error: (error) => {
-				Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
-			},
-			complete: () => {
-				loading.value = false;
-			},
+	useSubscription(
+		LibraryService.getLibrary(props.libraryId).subscribe((libraryData) => {
+			if (!libraryData) {
+				Log.error(`MediaOverview => Library for library id ${props.libraryId} was not found`);
+			}
+			library.value = libraryData;
 		}),
 	);
 });

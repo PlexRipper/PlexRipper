@@ -5,7 +5,7 @@
 			<media-poster
 				:media-item="item"
 				:media-type="mediaType"
-				@download="downloadMedia"
+				@download="downloadMedia($event)"
 				@open-details="$emit('open-details', $event)" />
 		</template>
 	</q-row>
@@ -15,13 +15,14 @@
 import Log from 'consola';
 import { defineProps, defineEmits, ref } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
-import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
+import { DownloadMediaDTO, PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import { QScrollArea } from '#components';
 import { MediaService } from '@service';
 
 const props = defineProps<{
 	mediaType: PlexMediaType;
 	libraryId: number;
+	items: PlexMediaSlimDTO[];
 }>();
 
 const emit = defineEmits<{
@@ -60,15 +61,6 @@ const scrollToIndex = (letter: string) => {
 
 	scrollbarposters.value.scrollTo({ y: scrollHeight }, 500);
 };
-
-onMounted(() => {
-	useSubscription(
-		MediaService.getMediaData(props.libraryId).subscribe((data) => {
-			posters.value = data;
-			loading.value = false;
-		}),
-	);
-});
 </script>
 <style lang="scss">
 //.poster-overview,

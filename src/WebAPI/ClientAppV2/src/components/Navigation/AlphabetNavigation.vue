@@ -5,9 +5,10 @@
 </template>
 
 <script setup lang="ts">
-import { PlexMediaDTO } from '@dto/mainApi';
+import { defineProps, defineEmits, withDefaults, computed } from 'vue';
+import { PlexMediaSlimDTO } from '@dto/mainApi';
 
-const props = withDefaults(defineProps<{ items: PlexMediaDTO[] }>(), {
+const props = withDefaults(defineProps<{ items: PlexMediaSlimDTO[] }>(), {
 	items: () => [],
 });
 

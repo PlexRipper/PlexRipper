@@ -3,8 +3,8 @@ import { Observable, Observer, of, switchMap, throwError } from 'rxjs';
 import Log from 'consola';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService, LibraryService } from '@service';
-import { PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
-import { getThumbnail, getTvShow } from '@api/mediaApi';
+import { PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import { getLibraryMediaData, getThumbnail, getTvShow } from '@api/mediaApi';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class MediaService extends BaseService {
@@ -55,17 +55,13 @@ export class MediaService extends BaseService {
 		);
 	}
 
-	public getMediaData(plexLibraryId: number): Observable<PlexMediaDTO[]> {
-		return LibraryService.getLibrary(plexLibraryId).pipe(
-			map((library) => {
-				switch (library?.type) {
-					case PlexMediaType.Movie:
-						return library.movies ?? [];
-					case PlexMediaType.TvShow:
-						return library.tvShows ?? [];
-					default:
-						return [];
+	public getMediaData(plexLibraryId: number, page: number, size: number): Observable<PlexMediaSlimDTO[]> {
+		return getLibraryMediaData(plexLibraryId, page, size).pipe(
+			map((response) => {
+				if (response && response.isSuccess) {
+					return response.value ?? [];
 				}
+				return [];
 			}),
 		);
 	}

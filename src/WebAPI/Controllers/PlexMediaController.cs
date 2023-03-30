@@ -51,7 +51,7 @@ public class PlexMediaController : BaseController
 
     // GET api/<PlexMedia>/library/5
     [HttpGet("library/{id:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexMediaDTO>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexMediaSlimDTO>>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]

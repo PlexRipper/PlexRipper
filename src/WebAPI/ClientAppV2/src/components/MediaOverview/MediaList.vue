@@ -39,7 +39,7 @@
 							@update:model-value="setSelected(child.id, child.children, $event)" />
 					</q-col>
 					<q-col class="q-ml-md">
-						<q-sub-header>
+						<q-sub-header bold>
 							{{ child.title }}
 						</q-sub-header>
 					</q-col>
@@ -60,6 +60,7 @@
 					:rows="child.children"
 					:selected="getSelected(child.id)"
 					row-key="id"
+					@download="onDownload"
 					@selection="onSelection(child.id, $event)" />
 			</template>
 		</q-expansion-item>
@@ -74,12 +75,65 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, withDefaults } from 'vue';
-import { watchOnce } from '@vueuse/core';
-import { PlexMediaDTO } from '@dto/mainApi';
+import { defineProps, ref, withDefaults } from 'vue';
+import { useEventBus } from '@vueuse/core';
+import Log from 'consola';
+import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
+import { toDownloadMedia } from '~/composables/conversion';
 
 const defaultOpened = ref(false);
+
+// region EventBus
+const processDownloadCommandBus = useEventBus<DownloadMediaDTO[]>('processDownloadCommand');
+const downloadCommandBus = useEventBus<string>('downloadCommand');
+downloadCommandBus.on(() => {
+	if (!props.mediaItem) {
+		Log.error('No media item selected');
+		return;
+	}
+
+	const mediaItem = props.mediaItem;
+
+	// All selected thus entire TvShow
+	if (rootSelected.value) {
+		processDownloadCommandBus.emit(toDownloadMedia(mediaItem));
+		return;
+	}
+
+	const downloadMedia: DownloadMediaDTO[] = [];
+	const seasonIds: number[] = [];
+	const episodesIds: number[] = [];
+
+	for (const selection of selected.value) {
+		if (selection.allSelected) {
+			seasonIds.push(selection.indexKey);
+		} else {
+			episodesIds.push(...selection.keys.map((x) => +x));
+		}
+	}
+
+	if (seasonIds.length > 0) {
+		downloadMedia.push({
+			type: PlexMediaType.Season,
+			mediaIds: seasonIds,
+			plexLibraryId: mediaItem.plexLibraryId,
+			plexServerId: mediaItem.plexServerId,
+		});
+	}
+
+	if (episodesIds.length > 0) {
+		downloadMedia.push({
+			type: PlexMediaType.Episode,
+			mediaIds: episodesIds,
+			plexLibraryId: mediaItem.plexLibraryId,
+			plexServerId: mediaItem.plexServerId,
+		});
+	}
+
+	processDownloadCommandBus.emit(downloadMedia);
+});
+// endregion
 
 const props = withDefaults(
 	defineProps<{
@@ -107,6 +161,8 @@ const rootSelected = computed((): boolean | null => {
 
 	return null;
 });
+
+// region Selection
 
 const selectedCount = computed((): number => {
 	return selected.value.reduce((acc, x) => acc + x.keys.length, 0);
@@ -162,6 +218,11 @@ const onSelection = (id: number, { allSelected, selection }: { allSelected: bool
 
 	selected.value[i].allSelected = allSelected;
 	selected.value[i].keys = selection;
+};
+// endregion
+
+const onDownload = (downloadCommand: DownloadMediaDTO[]) => {
+	processDownloadCommandBus.emit(downloadCommand);
 };
 
 const expandAll = () => {

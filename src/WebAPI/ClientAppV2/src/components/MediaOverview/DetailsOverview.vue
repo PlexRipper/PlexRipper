@@ -25,11 +25,11 @@
 				<q-card class="q-ma-md media-info-container" :style="{ height: thumbHeight + 'px' }">
 					<!-- Media info-->
 					<q-card-section>
-						<span class="media-title">
-							{{ mediaItem.title }}
-						</span>
-						<q-markup-table>
+						<q-markup-table wrap-cells>
 							<tbody>
+								<tr class="q-tr--no-hover">
+									<td colspan="2" class="media-info-column media-title">{{ mediaItem.title }}</td>
+								</tr>
 								<tr>
 									<td class="media-info-column">{{ $t('components.details-overview.total-duration') }}</td>
 									<td class="media-info-column">
@@ -52,7 +52,7 @@
 		</q-row>
 
 		<!--	Media Table	-->
-		<q-row v-if="mediaItem" no-gutters>
+		<q-row no-gutters>
 			<q-col>
 				<MediaList :media-item="mediaItem" />
 			</q-col>
@@ -68,12 +68,12 @@ import { computed, defineEmits, ref } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import Log from 'consola';
 import sum from 'lodash-es/sum';
+import { useEventBus } from '@vueuse/core';
 import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import { MediaList } from '#components';
 import { MediaService } from '@service';
 
 const emit = defineEmits<{
-	(e: 'download', download: DownloadMediaDTO[] | DownloadMediaDTO): void;
 	(e: 'media-item', mediaItem: PlexMediaDTO | null): void;
 	(e: 'close'): void;
 }>();
@@ -86,21 +86,6 @@ const defaultImage = ref(false);
 const imageUrl = ref('');
 const selected = ref<string[]>([]);
 const downloadMediaCommand = ref<DownloadMediaDTO[]>([]);
-
-// watch(
-// 	() => props.mediaItem,
-// 	(newMediaItem: ITreeViewItem | null) => {
-// 		if (newMediaItem) {
-// 			MediaService.getThumbnail(newMediaItem.id, props.mediaType, thumbWidth.value, thumbHeight.value).subscribe((data) => {
-// 				if (!data) {
-// 					defaultImage.value = true;
-// 					return;
-// 				}
-// 				imageUrl.value = data;
-// 			});
-// 		}
-// 	},
-// );
 
 const openDetails = (mediaId: number, mediaType: PlexMediaType) => {
 	useSubscription(

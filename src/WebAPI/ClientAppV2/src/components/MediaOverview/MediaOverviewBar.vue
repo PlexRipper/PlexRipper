@@ -74,9 +74,11 @@
 
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, computed } from 'vue';
-import { sum } from 'lodash-es';
+import { useEventBus } from '@vueuse/core';
 import type { PlexLibraryDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { PlexMediaType, ViewMode } from '@dto/mainApi';
+
+const downloadCommandBus = useEventBus<string>('downloadCommand');
 
 interface IViewOptions {
 	label: string;
@@ -108,7 +110,7 @@ const refreshLibrary = () => {
 };
 
 const download = () => {
-	emit('download');
+	downloadCommandBus.emit('download');
 };
 
 const changeView = (viewMode: ViewMode) => {

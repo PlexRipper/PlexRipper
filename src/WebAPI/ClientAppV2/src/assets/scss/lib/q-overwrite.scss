@@ -16,6 +16,7 @@
 .q-dialog {
 	.q-card {
 		@extend .default-shadow;
+		@extend .blur;
 
 		background-color: $light-dialog-background-color;
 		border-radius: 15px;

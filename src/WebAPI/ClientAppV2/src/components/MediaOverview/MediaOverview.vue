@@ -84,6 +84,7 @@
 		</q-row>
 	</template>
 
+	<!-- Media detail view	-->
 	<q-dialog
 		v-model="fixed"
 		seamless
@@ -93,37 +94,39 @@
 		transition-hide="slide-down"
 		@show="onOpenDetails">
 		<div :style="getDetailsStyle">
-			<DetailsOverview
-				ref="detailsOverviewRef"
-				:media-type="mediaType"
-				@close="closeDetailsOverview"
-				@media-item="mediaItem = $event"
-				@download="processDownloadCommand" />
+			<QScrollArea class="fit">
+				<DetailsOverview ref="detailsOverviewRef" @close="closeDetailsOverview" @media-item="mediaItem = $event" />
+			</QScrollArea>
 		</div>
 	</q-dialog>
 
-	<!--	Download confirmation dialog	-->
-	<!--	<DownloadConfirmation ref="downloadConfirmationRef" :items="items" @download="sendDownloadCommand" />-->
+	<!--		Download confirmation dialog	-->
+	<DownloadConfirmation ref="downloadConfirmationRef" :items="items" @download="sendDownloadCommand" />
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
 import { ref, defineProps, computed, watch } from 'vue';
-import { useElementBounding } from '@vueuse/core';
+import { useElementBounding, useEventBus } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRoute, useRouter } from 'vue-router';
-import { forkJoin, zip } from 'rxjs';
+import { combineLatest, forkJoin, zip } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { QScrollArea } from 'quasar';
 import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, MediaService, SettingsService, SignalrService } from '@service';
-import { DetailsOverview } from '#components';
+import { DetailsOverview, DownloadConfirmation } from '#components';
+
+// region Setup Fields
 
 const router = useRouter();
 const route = useRoute();
 const mediaContainerRef = ref(null);
 const mediaContainerSize = useElementBounding(mediaContainerRef);
+const processDownloadCommandBus = useEventBus<DownloadMediaDTO[]>('processDownloadCommand');
+
+// endregion
 
 const fixed = ref(false);
 
@@ -135,7 +138,6 @@ const server = ref<PlexServerDTO | null>(null);
 const library = ref<PlexLibraryDTO | null>(null);
 
 const libraryProgress = ref<LibraryProgress | null>(null);
-const downloadPreviewType = ref(PlexMediaType.None);
 const items = ref<PlexMediaDTO[]>([]);
 
 const loading = ref(true);
@@ -144,7 +146,7 @@ const mediaItem = ref<PlexMediaDTO | null>(null);
 const mediaViewMode = ref<ViewMode>(ViewMode.Poster);
 const currentMediaItemId = ref<number | null>(null);
 
-// const downloadConfirmationRef = ref<InstanceType<typeof DownloadConfirmation> | null>(null);
+const downloadConfirmationRef = ref<InstanceType<typeof DownloadConfirmation> | null>(null);
 const detailsOverviewRef = ref<InstanceType<typeof DetailsOverview> | null>(null);
 const mediaContainerScrollbarRef = ref<InstanceType<typeof QScrollArea> | null>(null);
 
@@ -158,10 +160,6 @@ const props = defineProps<{
 const getPercentage = computed(() => libraryProgress.value?.percentage ?? -1);
 
 const getDetailsStyle = computed(() => {
-	// if (mediaContainerRef.value === null) {
-	// 	Log.error('mediaContainerRef is null');
-	// }
-
 	const width = mediaContainerSize.width.value;
 	const height = mediaContainerSize.height.value;
 
@@ -218,11 +216,11 @@ const resetProgress = (isRefreshingValue: boolean) => {
 };
 
 const processDownloadCommand = (downloadMediaCommand: DownloadMediaDTO[]) => {
-	// TODO: Fix this
-	// if (downloadMediaCommand.length > 0) {
-	// 	downloadConfirmationRef.value?.openDialog(downloadMediaCommand);
-	// 	return;
-	// }
+	Log.info('processDownloadCommand', downloadMediaCommand);
+
+	if (downloadMediaCommand.length > 0) {
+		downloadConfirmationRef.value.openDialog(downloadMediaCommand, items.value);
+	}
 	// if (overviewMediaTableRef.value) {
 	// 	downloadConfirmationRef.value?.openDialog(overviewMediaTableRef.value.createDownloadCommands());
 	// } else {
@@ -300,6 +298,8 @@ onMounted(() => {
 		return;
 	}
 
+	processDownloadCommandBus.on((event) => processDownloadCommand(event));
+
 	// Get Active account id
 	useSubscription(SettingsService.getActiveAccountId().subscribe((id) => (activeAccountId.value = id)));
 
@@ -333,36 +333,34 @@ onMounted(() => {
 
 	// Get server and media data
 	useSubscription(
-		zip([
-			LibraryService.getServerByLibraryId(props.libraryId),
-			LibraryService.getLibrary(props.libraryId),
-			MediaService.getMediaData(props.libraryId),
-		])
-			.pipe(take(1))
-			.subscribe({
-				next: ([serverData, libraryData, mediaData]) => {
-					if (!serverData) {
-						Log.error(`MediaOverview => Server for library id ${props.libraryId} was not found`);
-					}
-					server.value = serverData;
+		forkJoin([
+			LibraryService.getServerByLibraryId(props.libraryId).pipe(take(1)),
+			LibraryService.getLibrary(props.libraryId).pipe(take(1)),
+			MediaService.getMediaData(props.libraryId).pipe(take(1)),
+		]).subscribe({
+			next: ([serverData, libraryData, mediaData]) => {
+				if (!serverData) {
+					Log.error(`MediaOverview => Server for library id ${props.libraryId} was not found`);
+				}
+				server.value = serverData;
 
-					if (!libraryData) {
-						Log.error(`MediaOverview => Library for library id ${props.libraryId} was not found`);
-					}
-					library.value = libraryData;
+				if (!libraryData) {
+					Log.error(`MediaOverview => Library for library id ${props.libraryId} was not found`);
+				}
+				library.value = libraryData;
 
-					if (!mediaData) {
-						Log.error(`MediaOverview => No media data for library id ${props.libraryId} was found`);
-					}
-					items.value = mediaData;
-				},
-				error: (error) => {
-					Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
-				},
-				complete: () => {
-					loading.value = false;
-				},
-			}),
+				if (!mediaData) {
+					Log.error(`MediaOverview => No media data for library id ${props.libraryId} was found`);
+				}
+				items.value = mediaData;
+			},
+			error: (error) => {
+				Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
+			},
+			complete: () => {
+				loading.value = false;
+			},
+		}),
 	);
 });
 </script>

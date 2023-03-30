@@ -52,16 +52,20 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, withDefaults, defineEmits } from 'vue';
 import Log from 'consola';
+import { defineProps, ref, withDefaults, defineEmits } from 'vue';
+import { toDownloadMedia } from '#imports';
 import type { PlexMediaDTO } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
 import Convert from '@class/Convert';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
+import { DownloadMediaDTO } from '@dto/mainApi';
 
 defineOptions({
 	inheritAttrs: false,
 });
+
+const mediaTableColumns = getMediaTableColumns();
 
 const props = withDefaults(
 	defineProps<{
@@ -76,18 +80,16 @@ const props = withDefaults(
 	},
 );
 
-const mediaTableColumns = getMediaTableColumns();
-
 const onRowClick = (row) => alert(`${row.title} clicked`);
 
 const emit = defineEmits<{
-	(e: 'download', visible: boolean[]): void;
+	(e: 'download', downloadMedia: DownloadMediaDTO[]): void;
 	(e: 'selection', payload: { allSelected: boolean | null; selection: string[] }): void;
 	(e: 'request-media', visible: boolean[]): void;
 }>();
 
 const downloadMedia = (row: PlexMediaDTO) => {
-	alert('download');
+	emit('download', toDownloadMedia(row));
 };
 
 const getSelected = computed((): PlexMediaDTO[] => {
@@ -98,7 +100,6 @@ const getSelected = computed((): PlexMediaDTO[] => {
 });
 
 const updateSelected = (selected: PlexMediaDTO[]) => {
-	Log.info('updateSelected', selected);
 	emit('selection', {
 		selection: selected.map((row) => row[props.rowKey]),
 		allSelected: selected.length === props.rows.length ? true : selected.length === 0 ? false : null,

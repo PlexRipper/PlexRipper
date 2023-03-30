@@ -1,5 +1,14 @@
 import { defineNuxtPlugin } from '#app';
-import { ComponentConstructor, QCircularProgress, QLinearProgress, QSelect, QToggle, QExpansionItem, QMarkupTable } from 'quasar';
+import {
+	ComponentConstructor,
+	QCircularProgress,
+	QLinearProgress,
+	QSelect,
+	QToggle,
+	QExpansionItem,
+	QMarkupTable,
+	QTable,
+} from 'quasar';
 
 export default defineNuxtPlugin(() => {
 	setQuasarComponentDefaultPropValues(QSelect, {
@@ -17,6 +26,10 @@ export default defineNuxtPlugin(() => {
 
 	setQuasarComponentDefaultPropValues(QMarkupTable, {
 		flat: true,
+	});
+
+	setQuasarComponentDefaultPropValues(QTable, {
+		color: 'red',
 	});
 
 	setQuasarComponentDefaultPropValues(QExpansionItem, {

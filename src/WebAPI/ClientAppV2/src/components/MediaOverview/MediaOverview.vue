@@ -1,29 +1,29 @@
 <template>
 	<!--	Loading screen	-->
-	<template v-if="loading">
-		<q-row justify="center" class="mx-0">
-			<q-col cols="auto" align-self="center">
-				<q-circular-progress size="70px" indeterminate />
-				<h1 v-if="isRefreshing">
-					{{
-						$t('components.media-overview.is-refreshing', {
-							library: library.value ? library.value.title : $t('general.commands.unknown'),
-							server: server.value ? server.value.name : $t('general.commands.unknown'),
-						})
-					}}
-				</h1>
-				<h1 v-else>{{ $t('components.media-overview.retrieving-library') }}</h1>
-				<!-- Library progress bar -->
-				<q-linear-progress :value="getPercentage" height="20" stripe color="deep-orange">
-					<div class="absolute-full flex flex-center">
-						<q-badge color="white" text-color="accent" :label="`${getPercentage}%`" />
-					</div>
-				</q-linear-progress>
-			</q-col>
-		</q-row>
-	</template>
+	<!--	<template v-if="loading">-->
+	<!--		<q-row justify="center" class="mx-0">-->
+	<!--			<q-col cols="auto" align-self="center">-->
+	<!--				<q-circular-progress size="70px" indeterminate />-->
+	<!--				<h1 v-if="isRefreshing">-->
+	<!--					{{-->
+	<!--						$t('components.media-overview.is-refreshing', {-->
+	<!--							library: library.value ? library.value.title : $t('general.commands.unknown'),-->
+	<!--							server: server.value ? server.value.name : $t('general.commands.unknown'),-->
+	<!--						})-->
+	<!--					}}-->
+	<!--				</h1>-->
+	<!--				<h1 v-else>{{ $t('components.media-overview.retrieving-library') }}</h1>-->
+	<!--				&lt;!&ndash; Library progress bar &ndash;&gt;-->
+	<!--				<q-linear-progress :value="getPercentage" height="20" stripe color="deep-orange">-->
+	<!--					<div class="absolute-full flex flex-center">-->
+	<!--						<q-badge color="white" text-color="accent" :label="`${getPercentage}%`" />-->
+	<!--					</div>-->
+	<!--				</q-linear-progress>-->
+	<!--			</q-col>-->
+	<!--		</q-row>-->
+	<!--	</template>-->
 	<!-- Header -->
-	<template v-else-if="server && library">
+	<template v-if="!loading">
 		<q-row no-gutters>
 			<q-col>
 				<!--	Overview bar	-->
@@ -31,7 +31,7 @@
 					:server="server"
 					:library="library"
 					:view-mode="mediaViewMode"
-					:has-selected="selected.length > 0"
+					:has-selected="selected.keys.length > 0"
 					:detail-mode="!showMediaOverview"
 					:media-item="mediaItem"
 					:hide-download-button="!mediaViewMode === ViewMode.Table"
@@ -39,42 +39,43 @@
 					@view-change="changeView"
 					@refresh-library="refreshLibrary"
 					@download="processDownloadCommand([])" />
-				{{ 'Rows: ' + items.length }}
 				<!--	Data table display	-->
 				<div ref="mediaContainerRef" class="media-container">
-					<q-row v-show="showMediaOverview">
+					<q-row>
 						<q-col cols="grow media-table-container">
-							<QScrollArea ref="mediaContainerScrollbarRef" class="fit" @scroll="setScrollPosition($event)">
-								<div>
-									<template v-if="mediaViewMode === ViewMode.Table">
-										<MediaTable
-											ref="overviewMediaTable"
-											:media-type="mediaType"
-											:rows="items"
-											:loading="loading"
-											:library="library"
-											row-key="id"
-											@download="processDownloadCommand"
-											@selected="selected = $event"
-											@request-media="onRequestMedia($event)" />
-									</template>
+							<div>
+								<template v-if="mediaViewMode === ViewMode.Table">
+									<MediaTable
+										ref="overviewMediaTableRef"
+										row-key="id"
+										:selection="selected"
+										:media-type="mediaType"
+										:rows="items"
+										:library="library"
+										:scroll-dict="scrollDict"
+										:style="getHeightStyle"
+										@download="processDownloadCommand"
+										@selection="selected = $event"
+										@request-media="onRequestMedia($event)" />
+								</template>
 
-									<!-- Poster display-->
-									<template v-else>
+								<!-- Poster display-->
+								<template v-else>
+									<QScrollArea ref="mediaContainerScrollbarRef" class="fit" @scroll="setScrollPosition($event)">
 										<poster-table
 											:library-id="libraryId"
 											:media-type="mediaType"
 											:items="items"
 											@download="processDownloadCommand"
 											@open-details="openDetails" />
-									</template>
-								</div>
+									</QScrollArea>
+								</template>
+							</div>
 
-								<!--	Overlay with details of the media	-->
-							</QScrollArea>
+							<!--	Overlay with details of the media	-->
 						</q-col>
 						<!-- Alphabet Navigation-->
-						<alphabet-navigation :items="items" @scroll-to="scrollToIndex" />
+						<alphabet-navigation :items="items" :scroll-dict="scrollDict" @scroll-to="scrollToIndex($event)" />
 					</q-row>
 				</div>
 			</q-col>
@@ -119,22 +120,24 @@ import { QScrollArea } from 'quasar';
 import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaDTO, PlexMediaSlimDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, MediaService, SettingsService, SignalrService } from '@service';
-import { DetailsOverview, DownloadConfirmation } from '#components';
+import { DetailsOverview, DownloadConfirmation, MediaTable } from '#components';
+import ISelection from '@interfaces/ISelection';
 
-// region Setup Fields
+// region SetupFields
 
 const router = useRouter();
 const route = useRoute();
 const mediaContainerRef = ref(null);
 const mediaContainerSize = useElementBounding(mediaContainerRef);
 const processDownloadCommandBus = useEventBus<DownloadMediaDTO[]>('processDownloadCommand');
+const scrollDict = ref<Record<string, number>>({});
+const selected = ref<ISelection>({ keys: [], allSelected: false, indexKey: 0 });
 
 // endregion
 
 const fixed = ref(false);
 
 const activeAccountId = ref(0);
-const selected = ref<string[]>([]);
 const isRefreshing = ref(false);
 
 const server = ref<PlexServerDTO | null>(null);
@@ -143,7 +146,7 @@ const library = ref<PlexLibraryDTO | null>(null);
 const libraryProgress = ref<LibraryProgress | null>(null);
 const items = ref<PlexMediaSlimDTO[]>([]);
 
-const loading = ref(false);
+const loading = ref(true);
 const showMediaOverview = ref(true);
 const mediaItem = ref<PlexMediaDTO | null>(null);
 const mediaViewMode = ref<ViewMode>(ViewMode.Poster);
@@ -152,6 +155,7 @@ const currentMediaItemId = ref<number | null>(null);
 const downloadConfirmationRef = ref<InstanceType<typeof DownloadConfirmation> | null>(null);
 const detailsOverviewRef = ref<InstanceType<typeof DetailsOverview> | null>(null);
 const mediaContainerScrollbarRef = ref<InstanceType<typeof QScrollArea> | null>(null);
+const overviewMediaTableRef = ref<InstanceType<typeof MediaTable> | null>(null);
 
 const scrollPosition = ref(0);
 
@@ -161,6 +165,14 @@ const props = defineProps<{
 }>();
 
 const getPercentage = computed(() => libraryProgress.value?.percentage ?? -1);
+const getHeightStyle = computed(() => {
+	const height = mediaContainerSize.height.value;
+	return {
+		height: height + 'px !important',
+		minHeight: height + 'px !important',
+		maxHeight: height + 'px !important',
+	};
+});
 
 const getDetailsStyle = computed(() => {
 	const width = mediaContainerSize.width.value;
@@ -195,7 +207,11 @@ const changeView = (viewMode: ViewMode) => {
 };
 
 const scrollToIndex = (letter: string) => {
-	alert(`scrollToIndex - ${letter}`);
+	if (overviewMediaTableRef.value) {
+		overviewMediaTableRef.value.scrollToIndex(letter);
+		return;
+	}
+	Log.error('overviewMediaTableRef.value is null');
 };
 
 const setScrollPosition = (info: any) => {
@@ -295,17 +311,31 @@ const onRequestMedia = ({ page, size, refresh }: { page: number; size: number; r
 					if (!mediaData) {
 						Log.error(`MediaOverview => No media data for library id ${props.libraryId} was found`);
 					}
-					items.value.push(...mediaData);
+					items.value = mediaData;
 				},
 				error: (error) => {
 					Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
 				},
 				complete: () => {
-					refresh();
-					loading.value = false;
+					if (refresh) {
+						refresh();
+					}
+					setScrollIndexes(items.value);
 				},
 			}),
 	);
+};
+
+const setScrollIndexes = (items: PlexMediaSlimDTO[]) => {
+	scrollDict.value['#'] = 0;
+	// Check for occurrence of title with alphabetic character
+	for (const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') {
+		const index = items.findIndex((x) => x.sortTitle.startsWith(letter));
+		if (index > -1) {
+			scrollDict.value[letter] = index;
+		}
+	}
+	Log.info('setScrollIndexes', scrollDict.value);
 };
 
 onBeforeMount(() => {
@@ -323,6 +353,15 @@ onMounted(() => {
 		Log.error('Library id was not provided');
 		return;
 	}
+
+	// Initial data load
+	onRequestMedia({
+		page: 0,
+		size: 0,
+		refresh: () => {
+			loading.value = false;
+		},
+	});
 
 	processDownloadCommandBus.on((event) => processDownloadCommand(event));
 

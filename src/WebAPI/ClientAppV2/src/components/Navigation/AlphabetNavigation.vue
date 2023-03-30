@@ -6,33 +6,18 @@
 
 <script setup lang="ts">
 import { defineProps, defineEmits, withDefaults, computed } from 'vue';
-import { PlexMediaSlimDTO } from '@dto/mainApi';
 
-const props = withDefaults(defineProps<{ items: PlexMediaSlimDTO[] }>(), {
-	items: () => [],
-});
+const props = withDefaults(
+	defineProps<{
+		scrollDict: Record<string, number>;
+	}>(),
+	{},
+);
 
 const emit = defineEmits<{ (e: 'scroll-to', letter: string): void }>();
 
 const alphabet = computed((): string[] => {
-	const numeric = '!@0123456789';
-	const alphabet = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-	const availableNavigation: string[] = [];
-
-	// Check for occurrence of title with numeric/special character
-	for (let i = 1; i < numeric.length; i++) {
-		if (props.items.some((x) => x.title.startsWith(numeric[i]))) {
-			availableNavigation.push('#');
-			break;
-		}
-	}
-	// Check for occurrence of title with alphabetic character
-	for (let i = 1; i < alphabet.length; i++) {
-		if (props.items.some((x) => x.title.startsWith(alphabet[i]))) {
-			availableNavigation.push(alphabet[i]);
-		}
-	}
-	return availableNavigation;
+	return Object.keys(props.scrollDict);
 });
 
 function scrollTo(letter: string): void {

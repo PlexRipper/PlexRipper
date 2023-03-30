@@ -1,6 +1,52 @@
 @import '../variables';
 @import '../mixins';
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * Scrollbars
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// Source: https://codepen.io/Hawkeye64/pen/bGRXBOY?editors=1100
+:root {
+	--scrollbar-width-height: 10px;
+
+	--scrollbar-track: $primary;
+	--scrollbar-thumb: rgb(204, 231, 255);
+	--scrollbar-thumb-hover: rgb(33, 118, 210);
+
+	// Background color of the scrollbar
+	--scrollbar-track-dark: $dark-shadow-color;
+	--scrollbar-thumb-dark: rgb(140, 4, 4);
+	--scrollbar-thumb-hover-dark: red;
+}
+
+::-webkit-scrollbar {
+	width: var(--scrollbar-width-height);
+	height: var(--scrollbar-width-height);
+	transition: all 1s;
+}
+
+// the track (progress bar) of the scrollbar
+::-webkit-scrollbar-track {
+	// border-top: var(--markdown-border)
+	background: var(--scrollbar-track-dark);
+	box-shadow: inset 0 0 4px var(--scrollbar-track-dark);
+}
+
+// the bottom corner of the scrollbar, where both horizontal and vertical scrollbars meet
+::-webkit-scrollbar-corner {
+	background: var(--scrollbar-track-dark);
+}
+
+// the draggable scrolling handle
+::-webkit-scrollbar-thumb {
+	background: var(--scrollbar-thumb-dark);
+	border-radius: 5px;
+
+	&:hover {
+		background: var(--scrollbar-thumb-hover-dark);
+	}
+}
+
+
 .q-dark {
 	background-color: transparent;
 }

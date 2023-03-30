@@ -21,7 +21,7 @@
 		</q-item>
 		<!-- Season display -->
 		<q-expansion-item
-			v-for="(child, index) in mediaItem.children"
+			v-for="(child, index) in mediaItem?.children ?? []"
 			:key="child.id"
 			:model-value="itemExpanded[index]"
 			expand-separator
@@ -58,7 +58,7 @@
 				<MediaTable
 					:loading="loading"
 					:rows="child.children"
-					:selected="getSelected(child.id)"
+					:selection="getSelected(child.id)"
 					row-key="id"
 					@download="onDownload"
 					@selection="onSelection(child.id, $event)" />

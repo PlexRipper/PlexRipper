@@ -119,7 +119,8 @@
         },
         "media-list": {
             "no-media-found": "No media found.",
-            "selected-count": "{selectedCount}  selected"
+            "selected-count": "{selectedCount}  selected",
+            "episode-count": "{episodeCount} Episodes"
         }
     },
     "confirmation": {

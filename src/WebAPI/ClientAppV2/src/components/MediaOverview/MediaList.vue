@@ -1,4 +1,5 @@
 <template>
+	{{ selected }}
 	<q-list v-if="mediaItem?.children?.length > 0">
 		<!--	Root item	-->
 		<q-item>
@@ -63,6 +64,7 @@
 					:rows="child.children"
 					:selection="getSelected(child.id)"
 					row-key="id"
+					disable-hover-click
 					@download="onDownload"
 					@selection="onSelection(child.id, $event)" />
 			</template>
@@ -79,7 +81,7 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { defineProps, ref, withDefaults } from 'vue';
+import { defineProps, ref, withDefaults, computed } from 'vue';
 import { DownloadMediaDTO, PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
 import { useMediaOverviewCommandBus, toDownloadMedia, useProcessDownloadCommandBus } from '#imports';
@@ -116,7 +118,7 @@ const rootSelected = computed((): boolean | null => {
 // region Selection
 
 const selectedCount = computed((): number => {
-	return selected.value.reduce((acc, x) => acc + x.keys.length, 0);
+	return selected.value?.reduce((acc, x) => acc + x.keys?.length ?? 0, 0) ?? 0;
 });
 
 const rootSetSelected = (value: boolean) => {
@@ -160,15 +162,15 @@ const setSelected = (id: number, children: PlexMediaDTO[], value: boolean) => {
 	}
 };
 
-const onSelection = (id: number, { allSelected, selection }: { allSelected: boolean | null; selection: number[] }) => {
+const onSelection = (id: number, payload: ISelection) => {
 	const i = selected.value.findIndex((x) => x.indexKey === id);
 	if (i === -1) {
-		selected.value.push({ indexKey: id, keys: selection, allSelected });
+		selected.value.push({ indexKey: id, keys: payload.keys, allSelected: payload.allSelected });
 		return;
 	}
 
-	selected.value[i].allSelected = allSelected;
-	selected.value[i].keys = selection;
+	selected.value[i].allSelected = payload.allSelected;
+	selected.value[i].keys = payload.keys;
 };
 // endregion
 

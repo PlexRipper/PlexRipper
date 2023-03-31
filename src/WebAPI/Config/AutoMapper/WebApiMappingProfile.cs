@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BackgroundServices.Contracts;
+using DownloadManager.Contracts;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
@@ -100,6 +101,8 @@ public class WebApiMappingProfile : Profile
 
         CreateMap<List<DownloadTask>, List<ServerDownloadProgressDTO>>(MemberList.Destination)
             .ConvertUsing<ListDownloadTaskToListServerDownloadProgressDTOConverter>();
+
+        CreateMap<DownloadPreview, DownloadPreviewDTO>(MemberList.Destination);
     }
 
     private void PlexMediaMappings()

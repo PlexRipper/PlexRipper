@@ -157,7 +157,7 @@ public class DownloadController : BaseController
     public async Task<IActionResult> DownloadPreview([FromBody] List<DownloadMediaDTO> downloadMedias, CancellationToken token)
     {
         var result = await _mediator.Send(new GetDownloadPreviewQuery(downloadMedias), token);
-        return ToActionResult<List<DownloadPreviewDTO>, List<DownloadPreviewDTO>>(result);
+        return ToActionResult<List<DownloadPreview>, List<DownloadPreviewDTO>>(result);
     }
 
     #endregion

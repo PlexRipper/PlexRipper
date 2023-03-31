@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Data.Contracts;
 
-public class GetDownloadPreviewQuery : IRequest<Result<List<DownloadPreviewDTO>>>
+public class GetDownloadPreviewQuery : IRequest<Result<List<DownloadPreview>>>
 {
     public List<DownloadMediaDTO> DownloadMedias { get; }
 

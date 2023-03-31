@@ -6,4 +6,5 @@ export interface QTreeViewTableHeader {
 	required?: boolean;
 	sortOrder?: 'ad' | 'da';
 	align: 'left' | 'center' | 'right';
+	headerStyle?: string;
 }

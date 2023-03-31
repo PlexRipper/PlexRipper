@@ -19,6 +19,12 @@ Background
 	background-color: transparent !important;
 }
 
+.text-eclipse {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 /*
 Borders
 */

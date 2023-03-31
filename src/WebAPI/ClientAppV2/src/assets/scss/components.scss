@@ -58,19 +58,6 @@ P-btn.vue
 	}
 }
 
-/*
-MediaOverviewBar.vue
-*/
-.media-overview-bar {
-	position: relative;
-	@extend .default-border;
-	@extend .pa-0;
-	@extend .no-background;
-
-	.v-toolbar__content {
-		@extend .pa-0;
-	}
-}
 
 .poster-overview {
 	height: calc(100vh - 85px - 48px - 24px);

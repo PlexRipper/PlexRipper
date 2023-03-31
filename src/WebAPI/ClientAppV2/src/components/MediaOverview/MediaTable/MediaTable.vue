@@ -14,35 +14,52 @@
 		@update:selected="updateSelected($event)">
 		<!-- Title -->
 		<template #body-cell-title="{ row }">
-			<q-td class="row-title" @click="onRowClick(row)">
+			<q-td v-if="!disableHoverClick" class="row-title--hover text-eclipse" @click="$emit('row-click', row)">
 				<q-hover>
 					<template #default>
 						{{ row.title }}
 					</template>
 				</q-hover>
 			</q-td>
+			<q-td v-else class="row-title text-eclipse">
+				{{ row.title }}
+			</q-td>
+		</template>
+		<!-- Media size -->
+		<template #body-cell-year="{ row }">
+			<q-td class="text-center">
+				<span class="q-mr-md">
+					{{ row.year }}
+				</span>
+			</q-td>
 		</template>
 		<!-- Media size -->
 		<template #body-cell-size="{ row }">
-			<q-td>
-				<QFileSize :size="row.mediaSize" />
+			<q-td class="text-center">
+				<span class="q-mr-md">
+					<QFileSize :size="row.mediaSize" />
+				</span>
 			</q-td>
 		</template>
 		<!-- Added At Date format -->
 		<template #body-cell-addedAt="{ row }">
-			<q-td>
-				<QDateTime :text="row.addedAt" short-date />
+			<q-td class="text-center">
+				<span class="q-mr-md">
+					<QDateTime :text="row.addedAt" short-date />
+				</span>
 			</q-td>
 		</template>
 		<!-- Updated At Date format -->
 		<template #body-cell-updatedAt="{ row }">
-			<q-td>
-				<QDateTime :text="row.updatedAt" short-date />
+			<q-td class="text-center">
+				<span class="q-mr-md">
+					<QDateTime :text="row.updatedAt" short-date />
+				</span>
 			</q-td>
 		</template>
 		<!-- Actions -->
 		<template #body-cell-actions="{ row }">
-			<q-td>
+			<q-td class="text-center">
 				<q-btn flat :icon="Convert.buttonTypeToIcon(ButtonType.Download)" @click="downloadMedia(row)" />
 			</q-td>
 		</template>
@@ -54,10 +71,9 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { defineProps, ref, withDefaults, defineEmits } from 'vue';
+import { defineProps, ref, withDefaults, defineEmits, computed } from 'vue';
 import { QTable } from 'quasar';
-import { toDownloadMedia } from '#imports';
-import type { PlexLibraryDTO, PlexMediaDTO } from '@dto/mainApi';
+import { toDownloadMedia, useProcessDownloadCommandBus } from '#imports';
 import ButtonType from '@enums/buttonType';
 import Convert from '@class/Convert';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
@@ -70,32 +86,29 @@ const qTableRef = ref<QTable | null>(null);
 const props = withDefaults(
 	defineProps<{
 		rows: PlexMediaSlimDTO[];
-		library: PlexLibraryDTO | null;
-		selection: ISelection;
-		scrollDict: Record<string, number>;
+		selection: ISelection | null;
+		scrollDict?: Record<string, number>;
+		disableHoverClick?: boolean;
 	}>(),
-	{},
+	{
+		scrollDict: { '#': 0 } as any,
+	},
 );
 
 const loading = ref(false);
 
-const onRowClick = (row) => alert(`${row.title} clicked`);
-
 const emit = defineEmits<{
 	(e: 'download', downloadMedia: DownloadMediaDTO[]): void;
 	(e: 'selection', payload: ISelection): void;
+	(e: 'row-click', payload: PlexMediaSlimDTO): void;
 	(e: 'request-media', request: { page: number; size: number; refresh: () => void }): void;
 }>();
-
-const downloadMedia = (row: PlexMediaDTO) => {
-	emit('download', toDownloadMedia(row));
-};
 
 /**
  * The selected rows cannot be returned as just keys, they need to be the same object as the rows.
  */
 const getSelected = computed((): PlexMediaSlimDTO[] => {
-	return props.rows.filter((row) => props.selection.keys.includes(row.id));
+	return props.rows.filter((row) => (props.selection?.keys ?? []).includes(row.id));
 });
 
 const updateSelected = (selected: PlexMediaSlimDTO[]) => {
@@ -111,10 +124,23 @@ const scrollToIndex = (letter: string) => {
 		Log.error('qTableRef is null');
 		return;
 	}
+	// This functions as a reset of table sorting
+	qTableRef.value?.setPagination({ page: 1, sortBy: mediaTableColumns[0].field, descending: false, rowsPerPage: 0 });
 
 	const value = props.scrollDict[letter];
-	qTableRef.value?.scrollTo(value, 'start-force');
+	qTableRef.value?.scrollTo(value, 'start');
 };
+
+// region EventBus
+
+const processDownloadCommandBus = useProcessDownloadCommandBus();
+const downloadMedia = (row: PlexMediaSlimDTO) => {
+	processDownloadCommandBus.emit({
+		items: [row],
+		command: toDownloadMedia(row),
+	});
+};
+// endregion
 
 defineExpose({
 	scrollToIndex,
@@ -125,11 +151,16 @@ defineExpose({
 @import '@/assets/scss/variables.scss';
 
 .row-title {
-	cursor: pointer;
 	font-weight: bold;
+	min-width: 300px;
+	max-width: 300px;
 
-	:hover {
-		color: $primary;
+	&--hover {
+		cursor: pointer;
+
+		:hover {
+			color: $primary;
+		}
 	}
 }
 

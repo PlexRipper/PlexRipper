@@ -13,6 +13,7 @@
 				<q-card-section>
 					<div style="min-height: 60vh; max-height: 60vh">
 						{{ downloadPreview }}
+						<q-tree :nodes="downloadPreview" label-key="title" node-key="id" />
 					</div>
 				</q-card-section>
 
@@ -30,9 +31,9 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { computed, defineEmits, ref, defineProps, defineExpose } from 'vue';
+import { computed, defineEmits, ref, defineExpose } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
-import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
+import { DownloadMediaDTO, PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import { SettingsService } from '@service';
 import { toDownloadPreview } from '#imports';
 import IDownloadPreview from '@interfaces/components/IDownloadPreview';
@@ -76,7 +77,7 @@ const totalSize = computed(() => {
 	return size;
 });
 
-const openDialog = (data: DownloadMediaDTO[], mediaItems: PlexMediaDTO[]): void => {
+const openDialog = (data: DownloadMediaDTO[], mediaItems: PlexMediaSlimDTO[]): void => {
 	showDialog.value = true;
 	downloadMediaCommand.value = data;
 	downloadPreview.value = toDownloadPreview(data, mediaItems);

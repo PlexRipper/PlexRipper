@@ -41,7 +41,7 @@
 					@download="processDownloadCommand([])" />
 				<!--	Data table display	-->
 				<div ref="mediaContainerRef" class="media-container">
-					<q-row>
+					<q-row v-show="showMediaOverview">
 						<q-col cols="grow media-table-container">
 							<div>
 								<template v-if="mediaViewMode === ViewMode.Table">
@@ -51,11 +51,13 @@
 										:selection="selected"
 										:media-type="mediaType"
 										:rows="items"
+										:disable-hover-click="mediaType !== PlexMediaType.TvShow"
 										:library="library"
 										:scroll-dict="scrollDict"
 										:style="getHeightStyle"
 										@download="processDownloadCommand"
 										@selection="selected = $event"
+										@row-click="openDetails($event.id)"
 										@request-media="onRequestMedia($event)" />
 								</template>
 
@@ -91,7 +93,7 @@
 
 	<!-- Media detail view	-->
 	<q-dialog
-		v-model="fixed"
+		v-model="showDetails"
 		seamless
 		maximized
 		class="media-details-dialog"
@@ -112,7 +114,7 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { ref, defineProps, computed } from 'vue';
-import { useElementBounding, useEventBus } from '@vueuse/core';
+import { useElementBounding } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRoute, useRouter } from 'vue-router';
 import { take } from 'rxjs/operators';
@@ -122,6 +124,7 @@ import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/m
 import { DownloadService, LibraryService, MediaService, SettingsService, SignalrService } from '@service';
 import { DetailsOverview, DownloadConfirmation, MediaTable } from '#components';
 import ISelection from '@interfaces/ISelection';
+import { useProcessDownloadCommandBus } from '#imports';
 
 // region SetupFields
 
@@ -129,13 +132,12 @@ const router = useRouter();
 const route = useRoute();
 const mediaContainerRef = ref(null);
 const mediaContainerSize = useElementBounding(mediaContainerRef);
-const processDownloadCommandBus = useEventBus<DownloadMediaDTO[]>('processDownloadCommand');
 const scrollDict = ref<Record<string, number>>({});
 const selected = ref<ISelection>({ keys: [], allSelected: false, indexKey: 0 });
 
 // endregion
 
-const fixed = ref(false);
+const showDetails = ref(false);
 
 const activeAccountId = ref(0);
 const isRefreshing = ref(false);
@@ -234,17 +236,13 @@ const resetProgress = (isRefreshingValue: boolean) => {
 	};
 };
 
-const processDownloadCommand = (downloadMediaCommand: DownloadMediaDTO[]) => {
-	Log.info('processDownloadCommand', downloadMediaCommand);
+const processDownloadCommand = (command: DownloadMediaDTO[], options: PlexMediaSlimDTO[] = []) => {
+	Log.info('processDownloadCommand', command);
 
-	if (downloadMediaCommand.length > 0) {
-		downloadConfirmationRef.value.openDialog(downloadMediaCommand, items.value);
+	// Only show if there is more than 1 selection
+	if (command.length > 0 && command.some((x) => x.mediaIds.length > 0)) {
+		downloadConfirmationRef.value.openDialog(command, options.length > 0 ? options : items.value);
 	}
-	// if (overviewMediaTableRef.value) {
-	// 	downloadConfirmationRef.value?.openDialog(overviewMediaTableRef.value.createDownloadCommands());
-	// } else {
-	// 	Log.error('overviewMediaTableRef was invalid', overviewMediaTableRef.value);
-	// }
 };
 
 const sendDownloadCommand = (downloadMediaCommand: DownloadMediaDTO[]) => {
@@ -252,13 +250,18 @@ const sendDownloadCommand = (downloadMediaCommand: DownloadMediaDTO[]) => {
 };
 
 const openDetails = (mediaId: number) => {
+	if (!mediaId) {
+		Log.error('mediaId was invalid, could not open details', mediaId);
+		return;
+	}
+
 	if (!router.currentRoute.value.path.includes('details')) {
 		router.push({
 			path: props.libraryId + '/details/' + mediaId,
 		});
 	}
 	currentMediaItemId.value = mediaId;
-	fixed.value = true;
+	showDetails.value = true;
 };
 
 const onOpenDetails = () => {
@@ -275,7 +278,7 @@ const closeDetailsOverview = () => {
 		path: '/tvshows/' + props.libraryId,
 	});
 	showMediaOverview.value = true;
-	fixed.value = false;
+	showDetails.value = false;
 };
 
 const refreshLibrary = () => {
@@ -345,6 +348,19 @@ onBeforeMount(() => {
 	}
 });
 
+// region Eventbus
+
+const processDownloadCommandBus = useProcessDownloadCommandBus();
+
+const setupEventbus = () => {
+	// Listen for process download command
+	processDownloadCommandBus.on((event) => processDownloadCommand(event.command, event.items));
+};
+
+setupEventbus();
+
+// endregion
+
 onMounted(() => {
 	resetProgress(false);
 	isRefreshing.value = false;
@@ -362,8 +378,6 @@ onMounted(() => {
 			loading.value = false;
 		},
 	});
-
-	processDownloadCommandBus.on((event) => processDownloadCommand(event));
 
 	// Get Active account id
 	useSubscription(SettingsService.getActiveAccountId().subscribe((id) => (activeAccountId.value = id)));

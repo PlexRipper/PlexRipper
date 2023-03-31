@@ -1,5 +1,5 @@
 <template>
-	<q-toolbar class="media-overview-bar" outlined :height="barHeight">
+	<q-toolbar class="media-overview-bar">
 		<!--	Title	-->
 		<q-toolbar-title>
 			<q-row justify="start" align="center">
@@ -32,7 +32,7 @@
 		<q-space />
 		<!--	Download button	-->
 		<vertical-button
-			v-if="!hideDownloadButton"
+			v-if="config.downloadButtonVisible"
 			icon="mdi-download"
 			label="Download"
 			:height="barHeight"
@@ -74,11 +74,11 @@
 
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, computed } from 'vue';
-import { useEventBus } from '@vueuse/core';
 import type { PlexLibraryDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { PlexMediaType, ViewMode } from '@dto/mainApi';
+import { IMediaOverviewBarBus, mediaOverviewBarBus, useMediaOverviewCommandBus } from '#imports';
 
-const downloadCommandBus = useEventBus<string>('downloadCommand');
+const downloadCommandBus = useMediaOverviewCommandBus();
 
 interface IViewOptions {
 	label: string;
@@ -104,6 +104,9 @@ const emit = defineEmits<{
 
 const barHeight = ref(85);
 const verticalButtonWidth = ref(120);
+const config = ref<IMediaOverviewBarBus>({
+	downloadButtonVisible: true,
+});
 
 const refreshLibrary = () => {
 	emit('refresh-library', props.library?.id ?? -1);
@@ -155,9 +158,17 @@ const viewOptions = computed((): IViewOptions[] => {
 		// },
 	];
 });
+
+const mediaOverViewBarBus = mediaOverviewBarBus();
+mediaOverViewBarBus.on((data) => {
+	config.value = { ...config.value, ...data };
+});
 </script>
 <style lang="scss">
+@import '@/assets/scss/style.scss';
+
 .media-overview-bar {
-	border: 2px solid red;
+	@extend .default-border;
+	min-height: 85px;
 }
 </style>

@@ -68,10 +68,10 @@ import { computed, defineEmits, ref } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import Log from 'consola';
 import sum from 'lodash-es/sum';
-import { useEventBus } from '@vueuse/core';
-import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
+import { PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import { MediaList } from '#components';
 import { MediaService } from '@service';
+import { mediaOverviewBarBus } from '#imports';
 
 const emit = defineEmits<{
 	(e: 'media-item', mediaItem: PlexMediaDTO | null): void;
@@ -84,10 +84,11 @@ const thumbWidth = ref(180);
 const thumbHeight = ref(270);
 const defaultImage = ref(false);
 const imageUrl = ref('');
-const selected = ref<string[]>([]);
-const downloadMediaCommand = ref<DownloadMediaDTO[]>([]);
+
+const mediaOverViewBarBus = mediaOverviewBarBus();
 
 const openDetails = (mediaId: number, mediaType: PlexMediaType) => {
+	mediaOverViewBarBus.emit({ downloadButtonVisible: false });
 	useSubscription(
 		MediaService.getMediaDataById(mediaId, mediaType).subscribe((data) => {
 			mediaItem.value = data;
@@ -116,19 +117,6 @@ const closeDetails = () => {
 	mediaItem.value = null;
 	emit('media-item', null);
 };
-
-// const downloadSelectedMedia = () => {
-// 	if (props.mediaType === PlexMediaType.TvShow) {
-// 		// emit('download', detailMediaTableRef.value?.createDownloadCommands());
-// 	}
-// 	if (props.mediaType === PlexMediaType.Movie) {
-// 		emit('download', {
-// 			mediaIds: [props.mediaItem?.id ?? 0],
-// 			type: props.mediaType,
-// 			plexAccountId: props.activeAccountId,
-// 		});
-// 	}
-// };
 
 const mediaCountFormatted = computed(() => {
 	if (mediaItem.value) {

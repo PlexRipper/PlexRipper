@@ -1,8 +1,8 @@
 import Log from 'consola';
-import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
+import { DownloadMediaDTO, PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import IDownloadPreview from '@interfaces/components/IDownloadPreview';
 
-export function toDownloadMedia(mediaItem: PlexMediaDTO): DownloadMediaDTO[] {
+export function toDownloadMedia(mediaItem: PlexMediaDTO | PlexMediaSlimDTO): DownloadMediaDTO[] {
 	return [
 		{
 			mediaIds: [mediaItem.id],

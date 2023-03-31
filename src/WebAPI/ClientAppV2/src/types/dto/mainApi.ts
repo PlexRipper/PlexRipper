@@ -91,6 +91,27 @@ export interface DownloadMediaDTO {
 	plexLibraryId: number;
 }
 
+export interface DownloadPreviewDTO {
+	/** @format int32 */
+	id: number;
+	title: string;
+	/** @format int64 */
+	size: number;
+	/** @format int32 */
+	childCount: number;
+	type: PlexMediaType;
+	children: DownloadPreviewDTO[];
+}
+
+export interface DownloadPreviewDTOListResultDTO {
+	isFailed: boolean;
+	isSuccess: boolean;
+	reasons: ReasonDTO[];
+	errors: ErrorDTO[];
+	successes: SuccessDTO[];
+	value: DownloadPreviewDTO[];
+}
+
 export interface DownloadProgressDTO {
 	/** @format int32 */
 	id: number;

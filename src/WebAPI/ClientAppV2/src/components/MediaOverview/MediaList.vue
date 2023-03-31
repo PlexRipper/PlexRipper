@@ -82,9 +82,14 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { defineProps, ref, withDefaults, computed } from 'vue';
-import { DownloadMediaDTO, PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
-import { useMediaOverviewCommandBus, toDownloadMedia, useProcessDownloadCommandBus } from '#imports';
+import {
+	useMediaOverviewBarBus,
+	useMediaOverviewBarDownloadCommandBus,
+	toDownloadMedia,
+	useProcessDownloadCommandBus,
+} from '#imports';
 
 const defaultOpened = ref(false);
 
@@ -174,11 +179,8 @@ const onSelection = (id: number, payload: ISelection) => {
 };
 // endregion
 
-const onDownload = (downloadCommand: DownloadMediaDTO[], items: PlexMediaSlimDTO[]) => {
-	processDownloadCommandBus.emit({
-		command: downloadCommand,
-		items,
-	});
+const onDownload = (downloadCommand: DownloadMediaDTO[]) => {
+	processDownloadCommandBus.emit(downloadCommand);
 };
 
 const expandAll = () => {
@@ -186,7 +188,7 @@ const expandAll = () => {
 };
 
 // region EventBus
-const mediaOverViewBarBus = mediaOverviewBarBus();
+const mediaOverViewBarBus = useMediaOverviewBarBus();
 
 const sendBusConfig = () => {
 	mediaOverViewBarBus.emit({
@@ -202,8 +204,7 @@ watch(
 );
 
 const processDownloadCommandBus = useProcessDownloadCommandBus();
-const downloadCommandBus = useMediaOverviewCommandBus();
-downloadCommandBus.on(() => {
+useMediaOverviewBarDownloadCommandBus().on(() => {
 	if (!props.mediaItem) {
 		Log.error('No media item selected');
 		return;
@@ -213,10 +214,7 @@ downloadCommandBus.on(() => {
 
 	// All selected thus entire TvShow
 	if (rootSelected.value) {
-		processDownloadCommandBus.emit({
-			command: toDownloadMedia(mediaItem),
-			items: [mediaItem],
-		});
+		processDownloadCommandBus.emit(toDownloadMedia(mediaItem));
 		return;
 	}
 
@@ -250,15 +248,10 @@ downloadCommandBus.on(() => {
 		});
 	}
 
-	processDownloadCommandBus.emit({
-		command: downloadMedia,
-		items: [mediaItem],
-	});
+	processDownloadCommandBus.emit(downloadMedia);
 });
 // endregion
 onMounted(() => {
-	sendBusConfig();
-
 	const children = props.mediaItem?.children ?? [];
 	if (children.length === 0) {
 		return;

@@ -71,7 +71,7 @@ import sum from 'lodash-es/sum';
 import { PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import { MediaList } from '#components';
 import { MediaService } from '@service';
-import { mediaOverviewBarBus } from '#imports';
+import { useMediaOverviewBarBus } from '#imports';
 
 const emit = defineEmits<{
 	(e: 'media-item', mediaItem: PlexMediaDTO | null): void;
@@ -85,7 +85,7 @@ const thumbHeight = ref(270);
 const defaultImage = ref(false);
 const imageUrl = ref('');
 
-const mediaOverViewBarBus = mediaOverviewBarBus();
+const mediaOverViewBarBus = useMediaOverviewBarBus();
 
 const openDetails = (mediaId: number, mediaType: PlexMediaType) => {
 	mediaOverViewBarBus.emit({ downloadButtonVisible: false });

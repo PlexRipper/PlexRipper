@@ -1,23 +1,21 @@
 import { useEventBus, UseEventBusReturn } from '@vueuse/core';
-import { DownloadMediaDTO, PlexMediaSlimDTO } from '@dto/mainApi';
+import { DownloadMediaDTO } from '@dto/mainApi';
 
 export interface IMediaOverviewBarBus {
 	downloadButtonVisible: boolean;
 }
 
-export interface IProcessDownloadCommandBus {
-	command: DownloadMediaDTO[];
-	items: PlexMediaSlimDTO[];
-}
-
-export function mediaOverviewBarBus(): UseEventBusReturn<IMediaOverviewBarBus, any> {
+export function useMediaOverviewBarBus(): UseEventBusReturn<IMediaOverviewBarBus, any> {
 	return useEventBus<IMediaOverviewBarBus>('mediaOverViewBarBus');
 }
 
-export function useMediaOverviewCommandBus(): UseEventBusReturn<string, any> {
+/**
+ * This is used to send a command to from the MediaOverviewBar to trigger a download command.
+ */
+export function useMediaOverviewBarDownloadCommandBus(): UseEventBusReturn<string, any> {
 	return useEventBus<string>('downloadCommand');
 }
 
-export function useProcessDownloadCommandBus(): UseEventBusReturn<IProcessDownloadCommandBus, any> {
-	return useEventBus<IProcessDownloadCommandBus>('processDownloadCommand');
+export function useProcessDownloadCommandBus(): UseEventBusReturn<DownloadMediaDTO[], any> {
+	return useEventBus<DownloadMediaDTO[]>('processDownloadCommand');
 }

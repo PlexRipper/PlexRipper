@@ -37,8 +37,7 @@
 					:hide-download-button="!mediaViewMode === ViewMode.Table"
 					@back="closeDetailsOverview"
 					@view-change="changeView"
-					@refresh-library="refreshLibrary"
-					@download="processDownloadCommand([])" />
+					@refresh-library="refreshLibrary" />
 				<!--	Data table display	-->
 				<div ref="mediaContainerRef" class="media-container">
 					<q-row v-show="showMediaOverview">
@@ -55,20 +54,17 @@
 										:library="library"
 										:scroll-dict="scrollDict"
 										:style="getHeightStyle"
-										@download="processDownloadCommand"
 										@selection="selected = $event"
-										@row-click="openDetails($event.id)"
-										@request-media="onRequestMedia($event)" />
+										@row-click="openDetails($event.id)" />
 								</template>
 
 								<!-- Poster display-->
 								<template v-else>
-									<QScrollArea ref="mediaContainerScrollbarRef" class="fit" @scroll="setScrollPosition($event)">
+									<QScrollArea ref="mediaContainerScrollbarRef" class="fit">
 										<poster-table
 											:library-id="libraryId"
 											:media-type="mediaType"
 											:items="items"
-											@download="processDownloadCommand"
 											@open-details="openDetails" />
 									</QScrollArea>
 								</template>
@@ -113,7 +109,7 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { ref, defineProps, computed } from 'vue';
+import { ref, defineProps, computed, onMounted, onBeforeMount } from 'vue';
 import { useElementBounding } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRoute, useRouter } from 'vue-router';
@@ -124,7 +120,7 @@ import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/m
 import { DownloadService, LibraryService, MediaService, SettingsService, SignalrService } from '@service';
 import { DetailsOverview, DownloadConfirmation, MediaTable } from '#components';
 import ISelection from '@interfaces/ISelection';
-import { useProcessDownloadCommandBus } from '#imports';
+import { useMediaOverviewBarBus, useMediaOverviewBarDownloadCommandBus, useProcessDownloadCommandBus } from '#imports';
 
 // region SetupFields
 
@@ -154,12 +150,15 @@ const mediaItem = ref<PlexMediaDTO | null>(null);
 const mediaViewMode = ref<ViewMode>(ViewMode.Poster);
 const currentMediaItemId = ref<number | null>(null);
 
+const askDownloadMovieConfirmation = ref(false);
+const askDownloadTvShowConfirmation = ref(false);
+const askDownloadSeasonConfirmation = ref(false);
+const askDownloadEpisodeConfirmation = ref(false);
+
 const downloadConfirmationRef = ref<InstanceType<typeof DownloadConfirmation> | null>(null);
 const detailsOverviewRef = ref<InstanceType<typeof DetailsOverview> | null>(null);
 const mediaContainerScrollbarRef = ref<InstanceType<typeof QScrollArea> | null>(null);
 const overviewMediaTableRef = ref<InstanceType<typeof MediaTable> | null>(null);
-
-const scrollPosition = ref(0);
 
 const props = defineProps<{
 	libraryId: number;
@@ -190,6 +189,21 @@ const getDetailsStyle = computed(() => {
 	};
 });
 
+const isConfirmationEnabled = computed(() => {
+	switch (props.mediaType) {
+		case PlexMediaType.Movie:
+			return askDownloadMovieConfirmation.value;
+		case PlexMediaType.TvShow:
+			return askDownloadTvShowConfirmation.value;
+		case PlexMediaType.Season:
+			return askDownloadSeasonConfirmation.value;
+		case PlexMediaType.Episode:
+			return askDownloadEpisodeConfirmation.value;
+		default:
+			return true;
+	}
+});
+
 const changeView = (viewMode: ViewMode) => {
 	let type: keyof DisplaySettingsDTO | null = null;
 
@@ -216,12 +230,6 @@ const scrollToIndex = (letter: string) => {
 	Log.error('overviewMediaTableRef.value is null');
 };
 
-const setScrollPosition = (info: any) => {
-	if (showMediaOverview.value) {
-		scrollPosition.value = info.verticalPosition;
-	}
-};
-
 const resetProgress = (isRefreshingValue: boolean) => {
 	isRefreshing.value = isRefreshingValue;
 
@@ -236,12 +244,14 @@ const resetProgress = (isRefreshingValue: boolean) => {
 	};
 };
 
-const processDownloadCommand = (command: DownloadMediaDTO[], options: PlexMediaSlimDTO[] = []) => {
-	Log.info('processDownloadCommand', command);
-
+const processDownloadCommand = (command: DownloadMediaDTO[]) => {
 	// Only show if there is more than 1 selection
 	if (command.length > 0 && command.some((x) => x.mediaIds.length > 0)) {
-		downloadConfirmationRef.value.openDialog(command, options.length > 0 ? options : items.value);
+		if (isConfirmationEnabled.value) {
+			downloadConfirmationRef.value.openDialog(command);
+		} else {
+			// sendDownloadCommand(command);
+		}
 	}
 };
 
@@ -285,23 +295,8 @@ const refreshLibrary = () => {
 	isRefreshing.value = true;
 	resetProgress(true);
 	LibraryService.refreshLibrary(props.libraryId).subscribe((data) => {
-		setLibrary(data);
 		isRefreshing.value = false;
 	});
-};
-
-const setLibrary = (data: PlexLibraryDTO | null) => {
-	if (data) {
-		library.value = data;
-		switch (props.mediaType) {
-			case PlexMediaType.Movie:
-				items.value = library.value?.movies ?? [];
-				break;
-			case PlexMediaType.TvShow:
-				items.value = library.value?.tvShows ?? [];
-				break;
-		}
-	}
 };
 
 const onRequestMedia = ({ page, size, refresh }: { page: number; size: number; refresh: () => void }) => {
@@ -341,25 +336,41 @@ const setScrollIndexes = (items: PlexMediaSlimDTO[]) => {
 	Log.info('setScrollIndexes', scrollDict.value);
 };
 
+// region Eventbus
+
+useMediaOverviewBarDownloadCommandBus().on(() => {
+	Log.info('useMediaOverviewBarBus');
+	if (showMediaOverview.value) {
+		const downloadCommand: DownloadMediaDTO = {
+			plexServerId: server.value?.id ?? 0,
+			plexLibraryId: props.libraryId,
+			mediaIds: selected.value.keys,
+			type: props.mediaType,
+		};
+		processDownloadCommand([downloadCommand]);
+	}
+});
+
+useProcessDownloadCommandBus().on((event) => {
+	// Listen for process download command
+	processDownloadCommand(event);
+});
+
+const mediaOverViewBarBus = useMediaOverviewBarBus();
+watch(selected, () => {
+	mediaOverViewBarBus.emit({
+		downloadButtonVisible: selected.value.keys.length > 0,
+	});
+});
+
+// endregion
+
 onBeforeMount(() => {
 	const mediaId = +route.params.tvShowId;
 	if (mediaId) {
 		openDetails(mediaId);
 	}
 });
-
-// region Eventbus
-
-const processDownloadCommandBus = useProcessDownloadCommandBus();
-
-const setupEventbus = () => {
-	// Listen for process download command
-	processDownloadCommandBus.on((event) => processDownloadCommand(event.command, event.items));
-};
-
-setupEventbus();
-
-// endregion
 
 onMounted(() => {
 	resetProgress(false);
@@ -396,6 +407,27 @@ onMounted(() => {
 			}),
 		);
 	}
+
+	useSubscription(
+		SettingsService.getAskDownloadMovieConfirmation().subscribe((value) => {
+			askDownloadMovieConfirmation.value = value;
+		}),
+	);
+	useSubscription(
+		SettingsService.getAskDownloadTvShowConfirmation().subscribe((value) => {
+			askDownloadTvShowConfirmation.value = value;
+		}),
+	);
+	useSubscription(
+		SettingsService.getAskDownloadSeasonConfirmation().subscribe((value) => {
+			askDownloadSeasonConfirmation.value = value;
+		}),
+	);
+	useSubscription(
+		SettingsService.getAskDownloadEpisodeConfirmation().subscribe((value) => {
+			askDownloadEpisodeConfirmation.value = value;
+		}),
+	);
 
 	// Setup progress bar
 	useSubscription(

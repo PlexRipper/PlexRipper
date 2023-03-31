@@ -77,7 +77,7 @@ import { toDownloadMedia, useProcessDownloadCommandBus } from '#imports';
 import ButtonType from '@enums/buttonType';
 import Convert from '@class/Convert';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
-import { DownloadMediaDTO, PlexMediaSlimDTO } from '@dto/mainApi';
+import { PlexMediaSlimDTO } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
 
 const mediaTableColumns = getMediaTableColumns();
@@ -98,10 +98,8 @@ const props = withDefaults(
 const loading = ref(false);
 
 const emit = defineEmits<{
-	(e: 'download', downloadMedia: DownloadMediaDTO[]): void;
 	(e: 'selection', payload: ISelection): void;
 	(e: 'row-click', payload: PlexMediaSlimDTO): void;
-	(e: 'request-media', request: { page: number; size: number; refresh: () => void }): void;
 }>();
 
 /**
@@ -135,10 +133,7 @@ const scrollToIndex = (letter: string) => {
 
 const processDownloadCommandBus = useProcessDownloadCommandBus();
 const downloadMedia = (row: PlexMediaSlimDTO) => {
-	processDownloadCommandBus.emit({
-		items: [row],
-		command: toDownloadMedia(row),
-	});
+	processDownloadCommandBus.emit(toDownloadMedia(row));
 };
 // endregion
 
@@ -163,40 +158,4 @@ defineExpose({
 		}
 	}
 }
-
-//.my-sticky-dynamic {
-//	/* height or max-height is important */
-//	height: 410px;
-//
-//	.q-table__top,
-//	.q-table__bottom,
-//	thead tr:first-child th {
-//		/* bg color is important for th; just specify one */
-//		background-color: transparent;
-//		backdrop-filter: blur(50px);
-//	}
-//
-//	thead tr th {
-//		position: sticky;
-//		z-index: 1;
-//	}
-//
-//	/* this will be the loading indicator */
-//
-//	thead tr:last-child th {
-//		/* height of all previous header rows */
-//		top: 48px;
-//	}
-//
-//	thead tr:first-child th {
-//		top: 0;
-//	}
-//
-//	/* prevent scrolling behind sticky top row on focus */
-//
-//	tbody {
-//		/* height of all previous header rows */
-//		scroll-margin-top: 48px;
-//	}
-//}
 </style>

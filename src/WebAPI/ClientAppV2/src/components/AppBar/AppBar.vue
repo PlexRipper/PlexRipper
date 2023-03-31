@@ -3,8 +3,7 @@
 		<q-row no-wrap>
 			<q-toolbar class="app-bar">
 				<q-toolbar-title>
-					<q-btn flat round
-dense icon="mdi-menu" class="q-mr-sm" @click.stop="showNavigationDrawer" />
+					<q-btn flat round dense icon="mdi-menu" class="q-mr-sm" @click.stop="showNavigationDrawer" />
 					<q-btn to="/" flat>
 						<logo :size="24" class="mr-3" />
 						{{ $t('general.name-version', { version }) }}
@@ -61,6 +60,8 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
+@import '@/assets/scss/variables.scss';
+
 .app-bar {
 	// @extend .glossy;
 	height: $app-bar-height;

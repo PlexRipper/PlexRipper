@@ -76,9 +76,9 @@
 import { defineProps, defineEmits, ref, computed } from 'vue';
 import type { PlexLibraryDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { PlexMediaType, ViewMode } from '@dto/mainApi';
-import { IMediaOverviewBarBus, mediaOverviewBarBus, useMediaOverviewCommandBus } from '#imports';
+import { IMediaOverviewBarBus, useMediaOverviewBarBus, useMediaOverviewBarDownloadCommandBus } from '#imports';
 
-const downloadCommandBus = useMediaOverviewCommandBus();
+const downloadCommandBus = useMediaOverviewBarDownloadCommandBus();
 
 interface IViewOptions {
 	label: string;
@@ -92,12 +92,10 @@ const props = defineProps<{
 	mediaItem?: PlexMediaDTO | null;
 	hasSelected: boolean;
 	detailMode?: boolean;
-	hideDownloadButton: boolean;
 }>();
 
 const emit = defineEmits<{
 	(e: 'back'): void;
-	(e: 'download'): void;
 	(e: 'refresh-library', libraryId: number): void;
 	(e: 'view-change', viewMode: ViewMode): void;
 }>();
@@ -105,7 +103,7 @@ const emit = defineEmits<{
 const barHeight = ref(85);
 const verticalButtonWidth = ref(120);
 const config = ref<IMediaOverviewBarBus>({
-	downloadButtonVisible: true,
+	downloadButtonVisible: false,
 });
 
 const refreshLibrary = () => {
@@ -158,11 +156,14 @@ const viewOptions = computed((): IViewOptions[] => {
 		// },
 	];
 });
+// region EventBus
 
-const mediaOverViewBarBus = mediaOverviewBarBus();
+const mediaOverViewBarBus = useMediaOverviewBarBus();
 mediaOverViewBarBus.on((data) => {
 	config.value = { ...config.value, ...data };
 });
+
+// endregion
 </script>
 <style lang="scss">
 @import '@/assets/scss/style.scss';

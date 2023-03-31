@@ -7,11 +7,19 @@ import {
 	downloadMedia,
 	getAllDownloads,
 	pauseDownloadTask,
+	postPreviewDownload,
 	restartDownloadTasks,
 	startDownloadTask,
 	stopDownloadTasks,
 } from '@api/plexDownloadApi';
-import { DownloadMediaDTO, DownloadProgressDTO, DownloadStatus, PlexMediaType, ServerDownloadProgressDTO } from '@dto/mainApi';
+import {
+	DownloadMediaDTO,
+	DownloadPreviewDTO,
+	DownloadProgressDTO,
+	DownloadStatus,
+	PlexMediaType,
+	ServerDownloadProgressDTO,
+} from '@dto/mainApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService, SignalrService } from '@service';
 import ISetupResult from '@interfaces/service/ISetupResult';
@@ -84,6 +92,17 @@ export class DownloadService extends BaseService {
 		downloadMedia(downloadMediaCommand)
 			.pipe(switchMap(() => this.fetchDownloadList()))
 			.subscribe();
+	}
+
+	public previewDownload(downloadMediaCommand: DownloadMediaDTO[]): Observable<DownloadPreviewDTO[]> {
+		return postPreviewDownload(downloadMediaCommand).pipe(
+			map((response) => {
+				if (response && response.isSuccess) {
+					return response.value ?? [];
+				}
+				return [];
+			}),
+		);
 	}
 
 	// region Commands

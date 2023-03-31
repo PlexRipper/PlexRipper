@@ -1,4 +1,6 @@
-﻿namespace PlexRipper.Domain;
+﻿using PlexRipper.Domain;
+
+namespace DownloadManager.Contracts;
 
 public class DownloadMediaDTO
 {

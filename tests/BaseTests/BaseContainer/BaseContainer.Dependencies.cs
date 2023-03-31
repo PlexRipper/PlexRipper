@@ -10,7 +10,6 @@ using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
 using PlexApi.Contracts;
 using PlexRipper.Data;
 using PlexRipper.DownloadManager;
@@ -92,8 +91,6 @@ public partial class BaseContainer : IDisposable
     public IPlexAccountService GetPlexAccountService => Resolve<IPlexAccountService>();
 
     public IPlexApiService GetPlexApiService => Resolve<IPlexApiService>();
-
-    public IPlexDownloadService GetPlexDownloadService => Resolve<IPlexDownloadService>();
 
     public IPlexLibraryService GetPlexLibraryService => Resolve<IPlexLibraryService>();
 

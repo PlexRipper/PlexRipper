@@ -9,6 +9,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Domain\Domain.csproj" />
+		<ProjectReference Include="..\DownloadManager.Contracts\DownloadManager.Contracts.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

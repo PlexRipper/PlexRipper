@@ -1,6 +1,5 @@
 ﻿namespace IntegrationTests.BaseTests.Setup;
 
-
 public class IntegrationTest_Setup : BaseIntegrationTests
 {
     public IntegrationTest_Setup(ITestOutputHelper output) : base(output) { }
@@ -24,7 +23,6 @@ public class IntegrationTest_Setup : BaseIntegrationTests
         Container.GetFolderPathService.ShouldNotBeNull();
         Container.GetPlexAccountService.ShouldNotBeNull();
         Container.GetPlexApiService.ShouldNotBeNull();
-        Container.GetPlexDownloadService.ShouldNotBeNull();
         Container.GetPlexLibraryService.ShouldNotBeNull();
         Container.GetPlexServerService.ShouldNotBeNull();
         Container.Mediator.ShouldNotBeNull();

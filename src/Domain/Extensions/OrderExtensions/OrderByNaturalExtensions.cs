@@ -1,22 +1,13 @@
 ﻿using System.Text.RegularExpressions;
+using NaturalSort.Extension;
 
 namespace PlexRipper.Domain;
 
-// TODO Remove this in favor of NaturalSort nuget package
 public static class OrderByNaturalExtensions
 {
-    // From: https://github.com/postworthy/OrderByNatural/blob/master/OrderByNatural/OrderByNaturalExtensions.cs
     public static IEnumerable<T> OrderByNatural<T>(this IEnumerable<T> objects, Func<T, string> func)
     {
-        object Convert(string str)
-        {
-            var x = 0;
-            if (int.TryParse(str, out x)) return x;
-
-            return str;
-        }
-
-        return objects.OrderBy(x => Regex.Split(func(x), "([0-9]+)").Select((Func<string, object>)Convert), new EnumerableComparer<object>());
+        return objects.OrderBy(func, StringComparison.OrdinalIgnoreCase.WithNaturalSort());
     }
 
     public static IEnumerable<T> OrderByNaturalDesc<T>(this IEnumerable<T> objects, Func<T, string> func)

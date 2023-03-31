@@ -13,7 +13,6 @@ namespace PlexRipper.WebAPI.Controllers;
 public class PlexMediaController : BaseController
 {
     private readonly IMediator _mediator;
-    private readonly IPlexTvShowService _plexTvShowService;
 
     private readonly IPlexMovieService _plexMovieService;
 
@@ -24,12 +23,10 @@ public class PlexMediaController : BaseController
         IMediator mediator,
         IMapper mapper,
         INotificationsService notificationsService,
-        IPlexTvShowService plexTvShowService,
         IPlexMovieService plexMovieService,
         IPlexMediaService plexMediaService) : base(log, mapper, notificationsService)
     {
         _mediator = mediator;
-        _plexTvShowService = plexTvShowService;
         _plexMovieService = plexMovieService;
         _plexMediaService = plexMediaService;
     }
@@ -45,8 +42,9 @@ public class PlexMediaController : BaseController
         if (id <= 0)
             return BadRequest(id, nameof(id));
 
-        var data = await _plexTvShowService.GetTvShow(id);
-        return ToActionResult<PlexTvShow, PlexMediaDTO>(data);
+        var result = await _mediator.Send(new GetPlexTvShowByIdWithEpisodesQuery(id));
+
+        return ToActionResult<PlexTvShow, PlexMediaDTO>(result);
     }
 
     // GET api/<PlexMedia>/library/5

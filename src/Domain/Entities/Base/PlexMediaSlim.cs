@@ -48,8 +48,9 @@ public class PlexMediaSlim : BaseEntity
     public DateTime UpdatedAt { get; set; }
 
     public int PlexLibraryId { get; set; }
+
     public int PlexServerId { get; set; }
 
     [NotMapped]
-    public virtual PlexMediaType Type => PlexMediaType.None;
+    public virtual PlexMediaType Type { get; set; }
 }

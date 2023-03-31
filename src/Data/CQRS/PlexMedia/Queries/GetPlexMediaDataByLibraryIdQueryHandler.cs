@@ -28,7 +28,9 @@ public class GetPlexMediaDataByLibraryIdQueryHandler : BaseHandler, IRequestHand
     public async Task<Result<List<PlexMediaSlim>>> Handle(GetPlexMediaDataByLibraryIdQuery request, CancellationToken cancellationToken)
     {
         var plexLibrary = await _dbContext.PlexLibraries.AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.LibraryId, cancellationToken);
-        var take = request.PageSize == 0 ? -1 : request.PageSize;
+
+        // When 0, just take everything
+        var take = request.PageSize <= 0 ? -1 : request.PageSize;
         var skip = request.Page * request.PageSize;
 
         List<PlexMediaSlim> entities;

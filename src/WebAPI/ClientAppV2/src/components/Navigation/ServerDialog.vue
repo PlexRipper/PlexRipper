@@ -1,6 +1,6 @@
 <template>
 	<q-dialog v-model="show" @click:outside="close">
-		<q-card v-if="plexServer" class="server-dialog-content">
+		<q-card v-if="plexServer" bordered class="server-dialog-content">
 			<q-card-section>
 				<div class="text-h6">
 					{{ $t('components.server-dialog.header', { serverName: plexServer.name }) }}

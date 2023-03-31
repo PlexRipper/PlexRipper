@@ -1,5 +1,4 @@
 <template>
-	{{ selected }}
 	<q-list v-if="mediaItem?.children?.length > 0">
 		<!--	Root item	-->
 		<q-item>

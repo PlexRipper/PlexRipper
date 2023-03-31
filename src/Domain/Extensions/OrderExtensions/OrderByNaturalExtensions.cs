@@ -1,8 +1,8 @@
-﻿using System.Text.RegularExpressions;
 using NaturalSort.Extension;
 
 namespace PlexRipper.Domain;
 
+// Source: https://github.com/tompazourek/NaturalSort.Extension
 public static class OrderByNaturalExtensions
 {
     public static IEnumerable<T> OrderByNatural<T>(this IEnumerable<T> objects, Func<T, string> func)

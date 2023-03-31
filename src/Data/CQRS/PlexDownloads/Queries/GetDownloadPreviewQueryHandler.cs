@@ -29,12 +29,18 @@ public class GetDownloadPreviewQueryHandler : BaseHandler, IRequestHandler<GetDo
 
     public async Task<Result<List<DownloadPreviewDTO>>> Handle(GetDownloadPreviewQuery request, CancellationToken cancellationToken)
     {
+        var downloadPreviews = new List<DownloadPreviewDTO>();
+        if (!request.DownloadMedias.Any())
+        {
+            return Result.Ok(downloadPreviews);
+        }
+
+
         var moviesPreview = request.DownloadMedias.Merge(PlexMediaType.Movie);
         var tvShowPreview = request.DownloadMedias.Merge(PlexMediaType.TvShow);
         var seasonPreview = request.DownloadMedias.Merge(PlexMediaType.Season);
         var episodePreview = request.DownloadMedias.Merge(PlexMediaType.Episode);
 
-        var downloadPreviews = new List<DownloadPreviewDTO>();
 
         if (moviesPreview.Any() && moviesPreview.Any(x => x.MediaIds.Count > 0))
         {
@@ -43,41 +49,110 @@ public class GetDownloadPreviewQueryHandler : BaseHandler, IRequestHandler<GetDo
                 .Where(x => movieIds.Contains(x.Id))
                 .ProjectTo<DownloadPreviewDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
-            downloadPreviews.AddRange(result);
+            downloadPreviews.AddRange(result.OrderByNatural(x => x.Title));
         }
 
-        if (tvShowPreview.Any() && tvShowPreview.Any(x => x.MediaIds.Count > 0))
+        // Get all the episode ids from the tv shows
+        var tvShowEpisodeKeys = new List<TvShowEpisodeKeyDTO>();
+        if (!tvShowPreview.Any() || tvShowPreview.Any(x => x.MediaIds.Count > 0))
         {
-            var tvShowIds = tvShowPreview.SelectMany(x => x.MediaIds).ToList();
-            var result = await _dbContext.PlexTvShows.AsNoTracking()
+            var tvShowPreviewIds = tvShowPreview.SelectMany(x => x.MediaIds).ToList();
+            tvShowEpisodeKeys = await _dbContext.PlexTvShows
+                .AsNoTracking()
                 .Include(x => x.Seasons)
                 .ThenInclude(x => x.Episodes)
-                .Where(x => tvShowIds.Contains(x.Id))
-                .ProjectTo<DownloadPreviewDTO>(_mapper.ConfigurationProvider)
+                .Where(x => tvShowPreviewIds.Contains(x.Id))
+                .SelectMany(x => x.Seasons.SelectMany(y => y.Episodes.Select(z => new TvShowEpisodeKeyDTO
+                {
+                    TvShowId = z.TvShowId,
+                    SeasonId = z.TvShowSeasonId,
+                    EpisodeId = z.Id,
+                })))
                 .ToListAsync(cancellationToken);
-            downloadPreviews.AddRange(result);
         }
 
-        if (seasonPreview.Any() && seasonPreview.Any(x => x.MediaIds.Count > 0))
+        // Get all the episode ids from the seasons
+        var seasonEpisodeKeys = new List<TvShowEpisodeKeyDTO>();
+        if (!seasonPreview.Any() || seasonPreview.Any(x => x.MediaIds.Count > 0))
         {
-            var seasonIds = seasonPreview.SelectMany(x => x.MediaIds).ToList();
-            var result = await _dbContext.PlexTvShowSeason.AsNoTracking()
+            var seasonPreviewIds = seasonPreview.SelectMany(x => x.MediaIds).ToList();
+            seasonEpisodeKeys = await _dbContext.PlexTvShowSeason
+                .AsNoTracking()
                 .Include(x => x.Episodes)
-                .Where(x => seasonIds.Contains(x.Id))
-                .ProjectTo<DownloadPreviewDTO>(_mapper.ConfigurationProvider)
+                .Where(x => seasonPreviewIds.Contains(x.Id))
+                .SelectMany(x => x.Episodes.Select(y => new TvShowEpisodeKeyDTO
+                {
+                    TvShowId = y.TvShowId,
+                    SeasonId = y.TvShowSeasonId,
+                    EpisodeId = y.Id,
+                }))
                 .ToListAsync(cancellationToken);
-            downloadPreviews.AddRange(result);
         }
 
-        if (episodePreview.Any() && episodePreview.Any(x => x.MediaIds.Count > 0))
+        // Get all the episode ids from the episodes
+        var episodesKeys = new List<TvShowEpisodeKeyDTO>();
+        if (!episodePreview.Any() || episodePreview.Any(x => x.MediaIds.Count > 0))
         {
-            var episodeIds = episodePreview.SelectMany(x => x.MediaIds).ToList();
-            var result = await _dbContext.PlexTvShowEpisodes.AsNoTracking()
-                .Where(x => episodeIds.Contains(x.Id))
-                .ProjectTo<DownloadPreviewDTO>(_mapper.ConfigurationProvider)
+            var episodePreviewIds = episodePreview.SelectMany(x => x.MediaIds).ToList();
+            episodesKeys = await _dbContext.PlexTvShowEpisodes
+                .AsNoTracking()
+                .Where(x => episodePreviewIds.Contains(x.Id))
+                .Select(x => new TvShowEpisodeKeyDTO
+                {
+                    TvShowId = x.TvShowId,
+                    SeasonId = x.TvShowSeasonId,
+                    EpisodeId = x.Id,
+                })
                 .ToListAsync(cancellationToken);
-            downloadPreviews.AddRange(result);
         }
+
+        if (!episodesKeys.Any() && !seasonEpisodeKeys.Any() && !tvShowEpisodeKeys.Any())
+        {
+            return Result.Ok(downloadPreviews);
+        }
+
+        // Merge all composite keys together and remove duplicates
+        var allKeys = episodesKeys
+            .Concat(seasonEpisodeKeys)
+            .Concat(tvShowEpisodeKeys)
+            .DistinctBy(x => x.EpisodeId).ToList();
+
+        var tvShowIds = allKeys.Select(x => x.TvShowId).Distinct().ToList();
+        var seasonIds = allKeys.Select(x => x.SeasonId).Distinct().ToList();
+        var episodeIds = allKeys.Select(x => x.EpisodeId).Distinct().ToList();
+
+        // Retrieve all the tv shows, seasons and episodes
+        var tvShows = await _dbContext.PlexTvShows.AsNoTracking()
+            .Where(x => tvShowIds.Contains(x.Id))
+            .ProjectTo<DownloadPreviewDTO>(_mapper.ConfigurationProvider)
+            .ToListAsync(cancellationToken);
+
+        var seasons = await _dbContext.PlexTvShowSeason.AsNoTracking()
+            .Where(x => seasonIds.Contains(x.Id))
+            .ProjectTo<DownloadPreviewDTO>(_mapper.ConfigurationProvider)
+            .ToListAsync(cancellationToken);
+
+        var episodes = await _dbContext.PlexTvShowEpisodes.AsNoTracking()
+            .Where(x => episodeIds.Contains(x.Id))
+            .ProjectTo<DownloadPreviewDTO>(_mapper.ConfigurationProvider)
+            .ToListAsync(cancellationToken);
+
+        // Build hierarchy
+        foreach (var season in seasons)
+        {
+            var result = episodes.Where(x => x.SeasonId == season.Id).ToList().OrderByNatural(x => x.Title);
+            season.Children.Clear();
+            season.Children.AddRange(result);
+        }
+
+        foreach (var tvShow in tvShows)
+        {
+            var result = seasons.Where(x => x.TvShowId == tvShow.Id).ToList().OrderByNatural(x => x.Title);
+            tvShow.Children.Clear();
+            tvShow.Children.AddRange(result);
+        }
+
+        downloadPreviews.AddRange(tvShows);
 
         return Result.Ok(downloadPreviews);
     }

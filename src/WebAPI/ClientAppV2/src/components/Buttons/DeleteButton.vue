@@ -5,16 +5,9 @@
 <script setup lang="ts">
 import { withDefaults, defineProps } from 'vue';
 import BaseButton from '@buttons/BaseButton.vue';
+import { IBaseButtonProps } from '@props';
 
-interface ConfirmBtnProps {
-	disabled?: boolean;
-	loading?: boolean;
-	icon?: string;
-	cy?: string;
-	label?: string;
-}
-
-const props = withDefaults(defineProps<ConfirmBtnProps>(), {
+const props = withDefaults(defineProps<IBaseButtonProps>(), {
 	width: 130,
 	cy: '',
 	outline: true,

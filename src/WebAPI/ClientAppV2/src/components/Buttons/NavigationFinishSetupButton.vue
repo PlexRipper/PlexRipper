@@ -5,16 +5,9 @@
 <script setup lang="ts">
 import { withDefaults, defineProps } from 'vue';
 import BaseButton from '@buttons/BaseButton.vue';
+import { IBaseButtonProps } from '@props';
 
-interface CheckConnectionBtnProps {
-	disabled?: boolean;
-	loading?: boolean;
-	icon?: string;
-	cy?: string;
-	label?: string;
-}
-
-const props = withDefaults(defineProps<CheckConnectionBtnProps>(), {
+const props = withDefaults(defineProps<IBaseButtonProps>(), {
 	width: 130,
 	textId: 'finish-setup',
 	icon: 'mdi-check-circle-outline',

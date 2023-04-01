@@ -11,14 +11,16 @@
 </template>
 
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
-import { SignalrService } from '@service';
-import { SyncServerProgress } from '@dto/mainApi';
+import { ref, computed, onMounted } from "vue";
+import { useSubscription } from "@vueuse/rxjs";
+import { SignalrService } from "@service";
+import { SyncServerProgress } from "@dto/mainApi";
+import sum from "lodash-es/sum";
 
 const progressList = ref<SyncServerProgress[]>([]);
 
 const getPercentage = computed(() => {
-	return progressList.value.map((x) => x.percentage).sum() / progressList.value.length;
+	return sum(progressList.value.map((x) => x.percentage)) / progressList.value.length;
 });
 
 const showProgressBar = computed(() => {
@@ -34,7 +36,7 @@ onMounted(() => {
 	useSubscription(
 		SignalrService.getAllSyncServerProgress().subscribe((progress) => {
 			progressList.value = progress;
-		}),
+		})
 	);
 
 	// useSubscription(SignalrService.getPlexAccountRefreshProgress(), (data) => {

@@ -4,7 +4,7 @@ import { PlexServerConnectionDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService } from '@service';
 import ISetupResult from '@interfaces/service/ISetupResult';
-import { checkPlexServerConnection, getPlexServerConnections } from '@api/plexServerConnectionApi';
+import { checkAllPlexServerConnections, checkPlexServerConnection, getPlexServerConnections } from '@api/plexServerConnectionApi';
 
 export class ServerConnectionService extends BaseService {
 	// region Constructor and Setup
@@ -33,9 +33,9 @@ export class ServerConnectionService extends BaseService {
 
 	public refreshPlexServerConnections(): Observable<PlexServerConnectionDTO[]> {
 		return getPlexServerConnections().pipe(
-			tap((plexServers) => {
-				if (plexServers.isSuccess) {
-					this.setStoreProperty('serverConnections', plexServers.value);
+			tap((serverConnections) => {
+				if (serverConnections.isSuccess) {
+					this.setStoreProperty('serverConnections', serverConnections.value);
 				}
 			}),
 			map(() => this.getStoreSlice<PlexServerConnectionDTO[]>('serverConnections')),
@@ -65,6 +65,10 @@ export class ServerConnectionService extends BaseService {
 		);
 	}
 
+	public reCheckAllServerConnections(serverId: number): Observable<PlexServerConnectionDTO[]> {
+		return checkAllPlexServerConnections(serverId).pipe(switchMap(() => this.refreshPlexServerConnections()));
+	}
+
 	public checkServerConnection(plexServerConnectionId: number): Observable<PlexServerStatusDTO | null> {
 		return checkPlexServerConnection(plexServerConnectionId).pipe(
 			map((serverStatus) => {
@@ -74,6 +78,7 @@ export class ServerConnectionService extends BaseService {
 					if (index === -1) {
 						return serverStatus.value;
 					}
+					serverConnections[index].serverStatusList.unshift(serverStatus.value);
 					serverConnections[index].latestConnectionStatus = serverStatus.value;
 					this.setState({ serverConnections }, 'Update server status for connection ' + plexServerConnectionId);
 				}

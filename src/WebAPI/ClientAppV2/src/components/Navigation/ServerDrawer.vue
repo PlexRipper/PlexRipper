@@ -4,7 +4,7 @@
 			<!-- Server header	-->
 			<template #header>
 				<q-item-section avatar>
-					<q-status :value="isConnected(server)" />
+					<q-status :value="isConnected(server)"/>
 				</q-item-section>
 
 				<q-item-section>
@@ -13,7 +13,7 @@
 					</div>
 				</q-item-section>
 				<q-item-section side>
-					<q-btn icon="mdi-cog" flat @click.native.stop="openServerSettings(server.id)" />
+					<q-btn icon="mdi-cog" flat @click.native.stop="openServerSettings(server.id)"/>
 				</q-item-section>
 			</template>
 			<!-- Render libraries -->
@@ -25,7 +25,7 @@
 					active-class="text-orange"
 					@click="openMediaPage(library)">
 					<q-item-section avatar>
-						<q-media-type-icon :media-type="library.type" />
+						<q-media-type-icon :media-type="library.type"/>
 					</q-item-section>
 					<q-item-section>{{ library.title }}</q-item-section>
 				</q-item>
@@ -38,7 +38,7 @@
 			</template>
 		</q-expansion-item>
 
-		<ServerDialog ref="serverDialog" />
+		<ServerDialog ref="serverDialog"/>
 	</template>
 	<!-- With valid server available -->
 
@@ -54,12 +54,12 @@
 </template>
 
 <script setup lang="ts">
+import {ref, onMounted} from 'vue';
 import Log from 'consola';
-import { useSubscription } from '@vueuse/rxjs';
-import { LibraryService, ServerService } from '@service';
-import { PlexLibraryDTO, PlexMediaType, PlexServerConnectionDTO, PlexServerDTO, SyncServerProgress } from '@dto/mainApi';
+import {useSubscription} from '@vueuse/rxjs';
+import {LibraryService, ServerService, ServerConnectionService} from '@service';
+import {PlexLibraryDTO, PlexMediaType, PlexServerConnectionDTO, PlexServerDTO, SyncServerProgress} from '@dto/mainApi';
 import type ServerDialog from '@components/Navigation/ServerDialog.vue';
-import serverConnectionService from '~/service/serverConnectionService';
 
 const router = useRouter();
 
@@ -98,7 +98,10 @@ function openMediaPage(library: PlexLibraryDTO): void {
 }
 
 function isConnected(server: PlexServerDTO) {
-	return connections.value.filter((x) => x.plexServerId === server.id).some((x) => x.latestConnectionStatus.isSuccessful);
+	if (connections.value.length === 0) {
+		return false;
+	}
+	return connections.value.filter((x) => x.plexServerId === server.id).some((x) => x.latestConnectionStatus?.isSuccessful ?? false);
 }
 
 onMounted(() => {
@@ -109,7 +112,7 @@ onMounted(() => {
 	);
 
 	useSubscription(
-		serverConnectionService.getServerConnections().subscribe((data) => {
+		ServerConnectionService.getServerConnections().subscribe((data) => {
 			connections.value = data;
 		}),
 	);

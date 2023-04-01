@@ -22,14 +22,6 @@ export function getPlexServers(): Observable<ResultDTO<PlexServerDTO[]>> {
 	});
 }
 
-export function checkPlexServer(serverId: number): Observable<ResultDTO<PlexServerStatusDTO | null>> {
-	return PlexRipperAxios.get<PlexServerStatusDTO>({
-		url: `${PLEX_SERVER_RELATIVE_PATH}/${serverId}/check`,
-		apiCategory: logText,
-		apiName: checkPlexServer.name,
-	});
-}
-
 export function syncPlexServer(serverId: number, forceSync = false): Observable<ResultDTO> {
 	return PlexRipperAxios.get<void>({
 		url: `${PLEX_SERVER_RELATIVE_PATH}/${serverId}/sync?forceSync=${forceSync}`,

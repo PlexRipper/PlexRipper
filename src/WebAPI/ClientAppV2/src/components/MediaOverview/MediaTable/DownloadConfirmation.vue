@@ -12,16 +12,16 @@
 			<!-- Show Download Task Preview -->
 			<q-card-section class="download-confirmation-container scroll">
 				<q-tree :nodes="downloadPreview" label-key="title" node-key="id" default-expand-all>
-					<template #default-header="{ node }">
+					<template #default-header="row">
 						<q-row align="center">
 							<q-col cols="auto">
-								<QMediaTypeIcon :media-type="node.type" :size="28" class="q-mr-sm" />
+								<QMediaTypeIcon :media-type="row.node.type" :size="28" class="q-mr-sm" />
 							</q-col>
 							<q-col>
-								<div class="text-weight-bold">{{ node.title }}</div>
+								<div class="text-weight-bold">{{ row.node.title }}</div>
 							</q-col>
 							<q-col cols="auto">
-								<q-file-size :size="node.size" />
+								<q-file-size :size="row.node.size" />
 							</q-col>
 						</q-row>
 					</template>

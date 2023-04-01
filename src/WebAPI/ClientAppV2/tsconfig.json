@@ -3,7 +3,11 @@
 	"extends": "./.nuxt/tsconfig.json",
 	"compilerOptions": {
 		"sourceMap": true,
-		"noImplicitAny": false, // TODO This might be better to disable
-		"types": ["unplugin-vue-define-options/macros-global"]
-	},
+		"noImplicitAny": false,
+		// TODO This might be better to enable
+		"types": [
+			"unplugin-vue-define-options/macros-global",
+			"@nuxtjs/i18n"
+		]
+	}
 }

@@ -11,17 +11,17 @@
 						:model-value="preferredConnectionId"
 						:val="connection.id"
 						color="red"
-						@update:model-value="setPreferredPlexServerConnection"/>
+						@update:model-value="setPreferredPlexServerConnection" />
 				</q-item-section>
 				<!-- Connection Icon -->
 				<q-item-section avatar tag="label">
 					<q-icon :name="getConnectionIcon(connection.local)" style="font-size: 2em">
 						<q-tooltip anchor="top middle" self="center middle">
 							<span>{{
-									connection.local
-										? $t('general.tooltip.local-connection')
-										: $t('general.tooltip.public-connection')
-								}}</span>
+								connection.local
+									? $t('general.tooltip.local-connection')
+									: $t('general.tooltip.public-connection')
+							}}</span>
 						</q-tooltip>
 					</q-icon>
 				</q-item-section>
@@ -29,34 +29,34 @@
 				<q-item-section tag="label">
 					<span class="ml-2">{{ connection.url }}</span>
 				</q-item-section>
-				<q-space/>
+				<q-space />
 				<!-- Connection Status -->
 				<q-item-section side>
-					<q-status :value="connection.latestConnectionStatus?.isSuccessful ?? false"/>
+					<q-status :value="connection.latestConnectionStatus?.isSuccessful ?? false" />
 				</q-item-section>
 				<q-item-section side>
 					<CheckConnectionButton
 						:loading="isLoading(connection.id)"
 						:cy="`check-connection-btn-${index}`"
-						@click="checkPlexConnection(connection.id)"/>
+						@click="checkPlexConnection(connection.id)" />
 				</q-item-section>
 			</q-item>
 			<CheckServerStatusProgressDisplay
 				v-if="isLoading(connection.id)"
 				:key="`progress-${index}`"
 				:plex-server="plexServer"
-				:progress="getProgress(connection.id)"/>
+				:progress="getProgress(connection.id)" />
 		</template>
 	</q-list>
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
-import {defineProps, onMounted, ref} from 'vue';
-import {useSubscription} from '@vueuse/rxjs';
-import type {PlexServerConnectionDTO, PlexServerDTO} from '@dto/mainApi';
-import {ServerConnectionCheckStatusProgressDTO} from '@dto/mainApi';
-import {ServerConnectionService, ServerService, SignalrService} from '@service';
+import { defineProps, onMounted, ref } from 'vue';
+import { useSubscription } from '@vueuse/rxjs';
+import type { PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
+import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
+import { ServerConnectionService, ServerService, SignalrService } from '@service';
 
 const serverConnections = ref<PlexServerConnectionDTO[]>([]);
 const loading = ref<number[]>([]);

@@ -11,11 +11,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
-import { useSubscription } from "@vueuse/rxjs";
-import { SignalrService } from "@service";
-import { SyncServerProgress } from "@dto/mainApi";
-import sum from "lodash-es/sum";
+import { ref, computed, onMounted } from 'vue';
+import { useSubscription } from '@vueuse/rxjs';
+import sum from 'lodash-es/sum';
+import { SignalrService } from '@service';
+import { SyncServerProgress } from '@dto/mainApi';
 
 const progressList = ref<SyncServerProgress[]>([]);
 
@@ -36,7 +36,7 @@ onMounted(() => {
 	useSubscription(
 		SignalrService.getAllSyncServerProgress().subscribe((progress) => {
 			progressList.value = progress;
-		})
+		}),
 	);
 
 	// useSubscription(SignalrService.getPlexAccountRefreshProgress(), (data) => {

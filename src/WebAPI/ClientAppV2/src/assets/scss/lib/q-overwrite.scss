@@ -46,7 +46,6 @@
 	}
 }
 
-
 .q-dark {
 	background-color: transparent;
 }
@@ -98,12 +97,12 @@ body {
 	}
 }
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // * QDrawer
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 body {
-	&.body--dark, &.body--light {
+	&.body--dark,
+	&.body--light {
 		.q-drawer {
 			background-color: transparent;
 
@@ -132,11 +131,9 @@ body {
 	border-radius: 4px;
 }
 
-
 .q-field--readonly {
 	//	border: 1px solid;
 }
-
 
 .q-field {
 	&--outlined {

@@ -89,7 +89,7 @@ public class PlexServerService : IPlexServerService
 
         var checkResult = await _plexServerConnectionsService.CheckAllConnectionsOfPlexServerAsync(plexServerId);
         if (checkResult.IsFailed)
-            return checkResult;
+            return checkResult.ToResult();
 
         await _plexLibraryService.RetrieveAccessibleLibrariesForAllAccountsAsync(plexServerId);
 

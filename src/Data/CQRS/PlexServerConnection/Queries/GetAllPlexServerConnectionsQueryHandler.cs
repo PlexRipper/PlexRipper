@@ -22,7 +22,7 @@ public class GetAllPlexServerConnectionsQueryHandlerHandler : BaseHandler, IRequ
             query = query.Include(x => x.PlexServer);
 
         if (request.IncludeStatus)
-            query = query.Include(x => x.PlexServerStatus);
+            query = query.Include(x => x.PlexServerStatus.Take(10));
 
         var plexServerConnections = await query
             .ToListAsync(cancellationToken);

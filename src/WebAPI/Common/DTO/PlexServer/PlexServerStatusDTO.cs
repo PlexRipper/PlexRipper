@@ -13,4 +13,7 @@ public class PlexServerStatusDTO
     public DateTime LastChecked { get; set; }
 
     public int PlexServerId { get; set; }
+
+    public int PlexServerConnectionId { get; set; }
+
 }

@@ -23,7 +23,7 @@ public interface IPlexServerConnectionsService
     /// </summary>
     /// <param name="plexServerId">The id of the <see cref="PlexServer"/> to check the connections for.</param>
     /// <returns>Returns successful result if any connection connected.</returns>
-    Task<Result> CheckAllConnectionsOfPlexServerAsync(int plexServerId);
+    Task<Result<List<PlexServerStatus>>> CheckAllConnectionsOfPlexServerAsync(int plexServerId);
 
     Task<Result<PlexServerConnection>> GetPlexServerConnectionAsync(int plexServerConnectionId);
 

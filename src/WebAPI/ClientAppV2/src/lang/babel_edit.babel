@@ -1392,27 +1392,7 @@
 														</translations>
 													</concept_node>
 													<concept_node>
-														<name>last-checked-on</name>
-														<description/>
-														<comment/>
-														<default_text/>
-														<translations>
-															<translation>
-																<language>de-DE</language>
-																<approved>false</approved>
-															</translation>
-															<translation>
-																<language>en-US</language>
-																<approved>false</approved>
-															</translation>
-															<translation>
-																<language>fr-FR</language>
-																<approved>false</approved>
-															</translation>
-														</translations>
-													</concept_node>
-													<concept_node>
-														<name>last-updated-on</name>
+														<name>last-seen-at</name>
 														<description/>
 														<comment/>
 														<default_text/>

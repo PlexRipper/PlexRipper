@@ -707,6 +707,7 @@ export interface PlexServerConnectionDTO {
 	/** @format int32 */
 	plexServerId: number;
 	url: string;
+	serverStatusList: PlexServerStatusDTO[];
 	latestConnectionStatus: PlexServerStatusDTO;
 	progress: ServerConnectionCheckStatusProgressDTO;
 }
@@ -799,6 +800,17 @@ export interface PlexServerStatusDTO {
 	lastChecked: string;
 	/** @format int32 */
 	plexServerId: number;
+	/** @format int32 */
+	plexServerConnectionId: number;
+}
+
+export interface PlexServerStatusDTOListResultDTO {
+	isFailed: boolean;
+	isSuccess: boolean;
+	reasons: ReasonDTO[];
+	errors: ErrorDTO[];
+	successes: SuccessDTO[];
+	value: PlexServerStatusDTO[];
 }
 
 export interface PlexServerStatusDTOResultDTO {

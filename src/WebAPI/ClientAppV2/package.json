@@ -14,11 +14,11 @@
 		"cypress:open": "npx cypress open --component --browser chromium",
 		"cypress:run": "npx cypress run",
 		"generate-ts": "npx swagger-typescript-api -p http://localhost:5000/swagger/v1/swagger.json --no-client -o ./src/types/dto/ -n mainApi.ts",
-		"lint:js": "eslint --ext \".ts,.vue\" --ignore-path .gitignore .",
-		"lint:prettier": "prettier --check .",
-		"lint": "yarn lint:js && yarn lint:prettier",
-		"lintfix": "prettier --write --list-different . && yarn lint:js --fix",
-		"lint-fix": "eslint . --ext .ts,.js,.vue --max-warnings=0 --fix & prettier --ignore-path ./.eslintignore --write \"{,!(node_modules)/**/}*.{ts,vue,json,js,jsx}\""
+		"lint": "npx eslint . --ext .ts,.js,.vue --max-warnings=0",
+		"lint:fix": "npm run lint --fix",
+		"prettier": "npx prettier . --ignore-path ./.prettierignore --check ",
+		"prettier:fix": "npm run prettier --write",
+		"format": "npm run prettier:fix && npm run lint:fix"
 	},
 	"dependencies": {
 		"@codewithdan/observable-store": "^2.2.15",

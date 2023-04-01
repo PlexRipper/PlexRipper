@@ -8,3 +8,6 @@ node_modules
 dist
 build
 .DS_Store
+src/lang
+src/types/dto/mainApi.ts
+.npm-upgrade.json

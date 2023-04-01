@@ -9,5 +9,5 @@ dist
 build
 .DS_Store
 src/lang
-src/types/dto/mainApi.ts
+src/types/dto/*.ts
 .npm-upgrade.json

@@ -15,9 +15,9 @@
 		"cypress:run": "npx cypress run",
 		"generate-ts": "npx swagger-typescript-api -p http://localhost:5000/swagger/v1/swagger.json --no-client -o ./src/types/dto/ -n mainApi.ts",
 		"lint": "npx eslint . --ext .ts,.js,.vue --max-warnings=0",
-		"lint:fix": "npm run lint --fix",
+		"lint:fix": "npm run lint -- --fix",
 		"prettier": "npx prettier . --ignore-path ./.prettierignore --check ",
-		"prettier:fix": "npm run prettier --write",
+		"prettier:fix": "npm run prettier -- --write",
 		"format": "npm run prettier:fix && npm run lint:fix"
 	},
 	"dependencies": {

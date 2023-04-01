@@ -20,6 +20,7 @@ import { mount } from 'cypress/vue';
 import { h, Suspense } from 'vue';
 import { getContext } from 'unctx';
 import { Quasar } from 'quasar';
+// @ts-ignore
 import ComponentTestContainer from '@components/DebugTools/ComponentTestContainer.vue';
 
 type MountParams = Parameters<typeof mount>;
@@ -80,5 +81,4 @@ Cypress.Commands.add('resetNuxt', () => {
 	nuxtCTX = generateNuxtCTX();
 	nuxtAppCtx.unset();
 	nuxtAppCtx.set(nuxtCTX);
-	console.log('nuxtCTX', nuxtCTX);
 });

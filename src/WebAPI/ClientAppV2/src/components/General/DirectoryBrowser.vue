@@ -167,7 +167,7 @@ defineExpose({
 });
 </script>
 <style lang="scss">
-@import './src/assets/scss/_variables.scss';
+@import '@/assets/scss/variables.scss';
 @import './src/assets/scss/_mixins.scss';
 
 .directory-browser-content {

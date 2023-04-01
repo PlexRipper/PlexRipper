@@ -26,7 +26,7 @@ const classConfig = computed(() => {
 	};
 });
 
-const alertIcon = computed(() => {
+const alertIcon = computed((): string => {
 	switch (props.type) {
 		case 'error':
 			return 'mdi-alert-circle-outline';
@@ -34,12 +34,14 @@ const alertIcon = computed(() => {
 			return 'mdi-warning-amber';
 		case 'info':
 			return 'mdi-information-outline';
+		default:
+			return 'mdi-close';
 	}
 });
 </script>
 
 <style lang="scss">
-@import './src/assets/scss/_variables.scss';
+@import '@/assets/scss/variables.scss';
 
 .q-alert {
 	&--error {

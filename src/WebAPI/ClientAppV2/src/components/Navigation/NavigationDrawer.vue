@@ -99,7 +99,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-@import './src/assets/scss/_variables.scss';
+@import '@/assets/scss/variables.scss';
 
 .navigation-drawer {
 	height: 100vh;

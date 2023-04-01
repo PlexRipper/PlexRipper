@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, watch } from 'vue';
+import { defineProps, computed } from 'vue';
 
 const props = defineProps<{
 	bold?: boolean;

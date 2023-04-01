@@ -47,7 +47,9 @@ public class PlexServerConnection : BaseEntity
 
     public int PlexServerId { get; set; }
 
-    public List<PlexServerStatus> PlexServerStatus { get; set; }
+    public List<PlexServerStatus> PlexServerStatus { get; set; } = new();
+
+
 
     #endregion
 
@@ -67,6 +69,9 @@ public class PlexServerConnection : BaseEntity
 
     [NotMapped]
     public string Name => $"Connection: ({Url})";
+
+    [NotMapped]
+    public PlexServerStatus LatestConnectionStatus => PlexServerStatus.FirstOrDefault();
 
     public string GetThumbPath(string thumbPath)
     {

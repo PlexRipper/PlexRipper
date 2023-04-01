@@ -24,7 +24,7 @@ public class GetPlexServerConnectionByPlexServerIdQueryHandler : BaseHandler,
         var plexServer = await _dbContext
             .PlexServers
             .Include(x => x.PlexServerConnections)
-            .ThenInclude(x => x.PlexServerStatus)
+            .ThenInclude(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(5))
             .FirstOrDefaultAsync(x => x.Id == request.PlexServerId, cancellationToken);
 
         var plexServerConnections = plexServer.PlexServerConnections;
@@ -54,7 +54,7 @@ public class GetPlexServerConnectionByPlexServerIdQueryHandler : BaseHandler,
 
         // Find based on what's successful
         var successPlexServerConnections = plexServerConnections
-            .Where(x => x.PlexServerStatus.Any(y => y.IsSuccessful))
+            .Where(x => x.LatestConnectionStatus?.IsSuccessful ?? false)
             .ToList();
         if (successPlexServerConnections.Any())
             return Result.Ok(successPlexServerConnections.First());

@@ -25,12 +25,12 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
 
     public Task<Result<PlexServerConnection>> GetPlexServerConnectionAsync(int plexServerConnectionId)
     {
-        return _mediator.Send(new GetPlexServerConnectionByIdQuery(plexServerConnectionId, includeStatus: true));
+        return _mediator.Send(new GetPlexServerConnectionByIdQuery(plexServerConnectionId));
     }
 
     public async Task<Result<List<PlexServerConnection>>> GetAllPlexServerConnectionsAsync()
     {
-        return await _mediator.Send(new GetAllPlexServerConnectionsQuery(includeStatus: true));
+        return await _mediator.Send(new GetAllPlexServerConnectionsQuery());
     }
 
     #endregion

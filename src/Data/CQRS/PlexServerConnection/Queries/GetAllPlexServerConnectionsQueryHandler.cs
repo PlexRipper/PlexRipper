@@ -21,17 +21,9 @@ public class GetAllPlexServerConnectionsQueryHandlerHandler : BaseHandler, IRequ
         if (request.IncludeServer)
             query = query.Include(x => x.PlexServer);
 
-        if (request.IncludeStatus)
-            query = query.Include(x => x.PlexServerStatus.Take(10));
-
         var plexServerConnections = await query
+            .Include(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(5))
             .ToListAsync(cancellationToken);
-
-        if (request.IncludeStatus)
-        {
-            foreach (var plexServerConnection in plexServerConnections)
-                plexServerConnection.PlexServerStatus.Sort((x, y) => DateTime.Compare(x.LastChecked, y.LastChecked));
-        }
 
         return Result.Ok(plexServerConnections);
     }

@@ -82,7 +82,8 @@ public class WebApiMappingProfile : Profile
         // PlexServerConnection -> PlexServerConnectionDTO
         CreateMap<PlexServerConnection, PlexServerConnectionDTO>(MemberList.Destination)
             .ForMember(x => x.Progress, opt => opt.Ignore())
-            .ForMember(dto => dto.LatestConnectionStatus, entity => entity.MapFrom(x => x.PlexServerStatus))
+            .ForMember(dto => dto.ServerStatusList, entity => entity.MapFrom(x => x.PlexServerStatus))
+            .ForMember(dto => dto.LatestConnectionStatus, entity => entity.MapFrom(x => x.LatestConnectionStatus))
             .ForMember(dto => dto.Url, entity => entity.MapFrom(x => x.Url));
 
         // PlexServerStatus -> PlexServerStatusDTO

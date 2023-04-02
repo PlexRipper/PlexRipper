@@ -10,7 +10,7 @@ $dark-theme-glass-background: rgba(255, 255, 255, 0.08);
 $light-theme-glass-background: rgba(0, 0, 0, 0.08);
 
 $box-shadow: 0px 11px 15px -7px rgba(255, 0, 0, 0.2), 0px 24px 38px 3px rgba(255, 0, 0, 0.14),
-	0px 9px 46px 8px rgba(255, 0, 0, 0.12);
+0px 9px 46px 8px rgba(255, 0, 0, 0.12);
 $box-shadow-hover: 0px 0px 20px 3px rgba(255, 0, 0, 1);
 
 $app-bar-height: 48px;
@@ -25,3 +25,8 @@ $error-color: #ff0000;
 $dark-shadow-color: rgba(0, 0, 0, 0.8);
 $primary: #ff0000;
 $q-dark: #ff0000;
+
+$default-btn-color: #FFF;
+$warning-btn-color: #ffd300;
+$positive-btn-color: #4caf50;
+$negative-btn-color: #ff0000;

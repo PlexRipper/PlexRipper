@@ -12,8 +12,8 @@ export default defineComponent({
 			...mergeProps(this.$props, {
 				icon: 'mdi-text-box-search-outline',
 				textId: 'validate',
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

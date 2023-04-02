@@ -12,8 +12,8 @@ export default defineComponent({
 			...mergeProps(this.$props, {
 				textId: 'reset',
 				icon: 'mdi-restore',
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

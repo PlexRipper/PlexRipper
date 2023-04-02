@@ -12,8 +12,8 @@ export default defineComponent({
 			...mergeProps(this.$props, {
 				textId: 'hide',
 				icon: 'mdi-eye-off-outline',
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

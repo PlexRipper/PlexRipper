@@ -13,8 +13,8 @@ export default defineComponent({
 				icon: 'mdi-help-circle-outline',
 				iconOnly: true,
 				size: 'md',
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

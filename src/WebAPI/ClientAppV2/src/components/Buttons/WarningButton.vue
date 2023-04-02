@@ -12,8 +12,8 @@ export default defineComponent({
 			...mergeProps(this.$props, {
 				icon: 'mdi-alert',
 				color: 'warning',
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

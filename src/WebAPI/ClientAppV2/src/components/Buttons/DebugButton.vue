@@ -11,8 +11,8 @@ export default defineComponent({
 		return h(BaseButton, {
 			...mergeProps(this.$props, {
 				icon: 'mdi-bug-outline',
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

@@ -13,8 +13,8 @@ export default defineComponent({
 				color: 'negative',
 				textId: 'delete',
 				icon: 'mdi-delete',
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

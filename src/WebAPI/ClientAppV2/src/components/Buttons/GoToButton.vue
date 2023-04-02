@@ -9,8 +9,8 @@ export default defineComponent({
 	props: baseBtnPropsDefault(),
 	render() {
 		return h(BaseButton, {
-			...mergeProps(this.$props, {}),
-		} as Partial<IBaseButtonProps>);
+			...mergeProps(this.$props, {} as IBaseButtonProps),
+		});
 	},
 });
 </script>

@@ -13,8 +13,8 @@ export default defineComponent({
 				iconOnly: true,
 				size: 'lg',
 				icon: 'mdi-delete',
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

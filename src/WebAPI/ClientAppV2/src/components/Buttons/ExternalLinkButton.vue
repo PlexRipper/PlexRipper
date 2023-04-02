@@ -13,8 +13,8 @@ export default defineComponent({
 				iconOnly: true,
 				size: 'md',
 				icon: 'mdi-open-in-new',
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

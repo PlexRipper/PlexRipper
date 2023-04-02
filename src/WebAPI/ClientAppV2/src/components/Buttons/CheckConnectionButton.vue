@@ -13,8 +13,8 @@ export default defineComponent({
 				tooltipId: 'general.commands.check-connection',
 				icon: 'mdi-cloud-search-outline',
 				iconOnly: true,
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

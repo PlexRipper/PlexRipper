@@ -12,8 +12,8 @@ export default defineComponent({
 			...mergeProps(this.$props, {
 				icon: 'mdi-content-save',
 				color: 'positive',
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

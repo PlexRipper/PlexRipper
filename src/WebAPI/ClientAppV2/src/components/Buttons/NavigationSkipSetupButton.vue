@@ -13,8 +13,8 @@ export default defineComponent({
 				textId: 'skip-setup',
 				icon: 'mdi-debug-step-over',
 				iconAlign: 'right',
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

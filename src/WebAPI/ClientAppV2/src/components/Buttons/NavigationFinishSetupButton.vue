@@ -14,8 +14,8 @@ export default defineComponent({
 				icon: 'mdi-check-circle-outline',
 				iconAlign: 'right',
 				color: 'positive',
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

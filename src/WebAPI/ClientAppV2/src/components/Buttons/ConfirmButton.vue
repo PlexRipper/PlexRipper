@@ -13,8 +13,8 @@ export default defineComponent({
 				color: 'positive',
 				textId: 'confirm',
 				icon: 'mdi-check',
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

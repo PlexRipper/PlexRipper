@@ -13,8 +13,8 @@ export default defineComponent({
 				block: true,
 				textId: 'back',
 				icon: 'mdi-arrow-left',
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

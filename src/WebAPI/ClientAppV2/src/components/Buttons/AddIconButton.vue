@@ -12,8 +12,8 @@ export default defineComponent({
 			...mergeProps(this.$props, {
 				icon: 'mdi-plus-box-outline',
 				size: 'xl',
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

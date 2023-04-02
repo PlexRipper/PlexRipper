@@ -14,8 +14,8 @@ export default defineComponent({
 				textId: 'next',
 				iconAlign: 'right',
 				icon: 'mdi-arrow-right',
-			}),
-		} as Partial<IBaseButtonProps>);
+			} as IBaseButtonProps),
+		});
 	},
 });
 </script>

@@ -1,13 +1,19 @@
-<template>
-	<BaseButton v-bind="props" />
-</template>
+<script lang="ts">
+import { h, defineComponent, mergeProps } from 'vue';
+import BaseButton from './BaseButton.vue';
+import { IBaseButtonProps } from '@props';
+import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
-<script setup lang="ts">
-import { withDefaults, defineProps } from 'vue';
-import { IBaseButtonProps } from '~/types/props/base-button/IBaseButtonProps';
-
-const props = withDefaults(defineProps<IBaseButtonProps>(), {
-	icon: 'mdi-plus-box-outline',
-	size: 'xl',
+export default defineComponent({
+	name: 'AddIconButton',
+	props: baseBtnPropsDefault(),
+	render() {
+		return h(BaseButton, {
+			...mergeProps(this.$props, {
+				icon: 'mdi-plus-box-outline',
+				size: 'xl',
+			}),
+		} as Partial<IBaseButtonProps>);
+	},
 });
 </script>

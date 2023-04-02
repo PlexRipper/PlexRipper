@@ -1,17 +1,21 @@
-<template>
-	<BaseButton v-bind="props" />
-</template>
-
-<script setup lang="ts">
-import { withDefaults, defineProps } from 'vue';
-import BaseButton from '@buttons/BaseButton.vue';
+<script lang="ts">
+import { h, defineComponent, mergeProps } from 'vue';
+import BaseButton from './BaseButton.vue';
 import { IBaseButtonProps } from '@props';
+import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
-const props = withDefaults(defineProps<IBaseButtonProps>(), {
-	textId: 'finish-setup',
-	icon: 'mdi-check-circle-outline',
-	iconAlign: 'right',
-	color: 'positive',
-	outline: true,
+export default defineComponent({
+	name: 'NavigationFinishSetupButton',
+	props: baseBtnPropsDefault(),
+	render() {
+		return h(BaseButton, {
+			...mergeProps(this.$props, {
+				textId: 'finish-setup',
+				icon: 'mdi-check-circle-outline',
+				iconAlign: 'right',
+				color: 'positive',
+			}),
+		} as Partial<IBaseButtonProps>);
+	},
 });
 </script>

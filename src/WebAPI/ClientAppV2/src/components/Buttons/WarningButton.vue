@@ -1,3 +1,19 @@
-<template>
-	<BaseButton icon="mdi-alert" text-id="warning" color="warning" />
-</template>
+<script lang="ts">
+import { h, defineComponent, mergeProps } from 'vue';
+import BaseButton from './BaseButton.vue';
+import { IBaseButtonProps } from '@props';
+import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
+
+export default defineComponent({
+	name: 'WarningButton',
+	props: baseBtnPropsDefault(),
+	render() {
+		return h(BaseButton, {
+			...mergeProps(this.$props, {
+				icon: 'mdi-alert',
+				color: 'warning',
+			}),
+		} as Partial<IBaseButtonProps>);
+	},
+});
+</script>

@@ -1,17 +1,19 @@
-<template>
-	<BaseButton v-bind="props" />
-</template>
+<script lang="ts">
+import { h, defineComponent, mergeProps } from 'vue';
+import BaseButton from './BaseButton.vue';
+import { IBaseButtonProps } from '@props';
+import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
-<script setup lang="ts">
-import { withDefaults, defineProps } from 'vue';
-import BaseButton from '@buttons/BaseButton.vue';
-import { IBaseButtonProps } from '~/types/props/base-button/IBaseButtonProps';
-
-const props = withDefaults(defineProps<IBaseButtonProps>(), {
-	width: 130,
-	cy: '',
-	textId: 'reset',
-	icon: 'mdi-restore',
-	outline: true,
+export default defineComponent({
+	name: 'ResetButton',
+	props: baseBtnPropsDefault(),
+	render() {
+		return h(BaseButton, {
+			...mergeProps(this.$props, {
+				textId: 'reset',
+				icon: 'mdi-restore',
+			}),
+		} as Partial<IBaseButtonProps>);
+	},
 });
 </script>

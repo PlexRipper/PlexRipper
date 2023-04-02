@@ -1,23 +1,21 @@
-<template>
-	<BaseButton v-bind="props" />
-</template>
-
-<script setup lang="ts">
-import { withDefaults, defineProps } from 'vue';
-import BaseButton from '@buttons/BaseButton.vue';
+<script lang="ts">
+import { h, defineComponent, mergeProps } from 'vue';
+import BaseButton from './BaseButton.vue';
 import { IBaseButtonProps } from '@props';
+import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
-defineOptions({
-	inheritAttrs: false,
-});
-
-const props = withDefaults(defineProps<IBaseButtonProps>(), {
-	width: 130,
-	cy: '',
-	block: true,
-	outline: true,
-	textId: 'next',
-	iconAlign: 'right',
-	icon: 'mdi-arrow-right',
+export default defineComponent({
+	name: 'NavigationNextButton',
+	props: baseBtnPropsDefault(),
+	render() {
+		return h(BaseButton, {
+			...mergeProps(this.$props, {
+				block: true,
+				textId: 'next',
+				iconAlign: 'right',
+				icon: 'mdi-arrow-right',
+			}),
+		} as Partial<IBaseButtonProps>);
+	},
 });
 </script>

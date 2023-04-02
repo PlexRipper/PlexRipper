@@ -1,16 +1,19 @@
-<template>
-	<BaseButton v-bind="props" />
-</template>
-
-<script setup lang="ts">
-import { withDefaults, defineProps } from 'vue';
-import BaseButton from '@buttons/BaseButton.vue';
+<script lang="ts">
+import { h, defineComponent, mergeProps } from 'vue';
+import BaseButton from './BaseButton.vue';
 import { IBaseButtonProps } from '@props';
+import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
-const props = withDefaults(defineProps<IBaseButtonProps>(), {
-	width: 130,
-	textId: 'hide',
-	icon: 'mdi-eye-off-outline',
-	iconOnly: true,
+export default defineComponent({
+	name: 'HideButton',
+	props: baseBtnPropsDefault(),
+	render() {
+		return h(BaseButton, {
+			...mergeProps(this.$props, {
+				textId: 'hide',
+				icon: 'mdi-eye-off-outline',
+			}),
+		} as Partial<IBaseButtonProps>);
+	},
 });
 </script>

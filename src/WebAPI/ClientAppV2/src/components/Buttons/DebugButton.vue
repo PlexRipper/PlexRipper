@@ -1,15 +1,18 @@
-<template>
-	<BaseButton v-bind="props" />
-</template>
-
-<script setup lang="ts">
-import { withDefaults, defineProps } from 'vue';
-import BaseButton from '@buttons/BaseButton.vue';
+<script lang="ts">
+import { h, defineComponent, mergeProps } from 'vue';
+import BaseButton from './BaseButton.vue';
 import { IBaseButtonProps } from '@props';
+import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
-const props = withDefaults(defineProps<IBaseButtonProps>(), {
-	width: 130,
-	outline: true,
-	icon: 'mdi-bug-outline',
+export default defineComponent({
+	name: 'DebugButton',
+	props: baseBtnPropsDefault(),
+	render() {
+		return h(BaseButton, {
+			...mergeProps(this.$props, {
+				icon: 'mdi-bug-outline',
+			}),
+		} as Partial<IBaseButtonProps>);
+	},
 });
 </script>

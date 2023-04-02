@@ -1,17 +1,20 @@
-<template>
-	<BaseButton v-bind="props" />
-</template>
+<script lang="ts">
+import { h, defineComponent, mergeProps } from 'vue';
+import BaseButton from './BaseButton.vue';
+import { IBaseButtonProps } from '@props';
+import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
-<script setup lang="ts">
-import { withDefaults, defineProps } from 'vue';
-import BaseButton from '@buttons/BaseButton.vue';
-import { IBaseButtonProps } from '~/types/props/base-button/IBaseButtonProps';
-
-const props = withDefaults(defineProps<IBaseButtonProps>(), {
-	cy: '',
-	outline: true,
-	color: 'positive',
-	textId: 'confirm',
-	icon: 'mdi-check',
+export default defineComponent({
+	name: 'ConfirmButton',
+	props: baseBtnPropsDefault(),
+	render() {
+		return h(BaseButton, {
+			...mergeProps(this.$props, {
+				color: 'positive',
+				textId: 'confirm',
+				icon: 'mdi-check',
+			}),
+		} as Partial<IBaseButtonProps>);
+	},
 });
 </script>

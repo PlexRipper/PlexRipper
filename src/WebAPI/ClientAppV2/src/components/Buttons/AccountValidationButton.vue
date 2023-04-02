@@ -1,14 +1,19 @@
-<template>
-	<BaseButton v-bind="props" />
-</template>
+<script lang="ts">
+import { h, defineComponent, mergeProps } from 'vue';
+import BaseButton from './BaseButton.vue';
+import { IBaseButtonProps } from '@props';
+import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
-<script setup lang="ts">
-import { withDefaults, defineProps } from 'vue';
-import { IBaseButtonProps } from '~/types/props/base-button/IBaseButtonProps';
-
-const props = withDefaults(defineProps<IBaseButtonProps>(), {
-	width: 50,
-	outline: true,
-	textId: 'validate',
+export default defineComponent({
+	name: 'AccountValidationButton',
+	props: baseBtnPropsDefault(),
+	render() {
+		return h(BaseButton, {
+			...mergeProps(this.$props, {
+				icon: 'mdi-text-box-search-outline',
+				textId: 'validate',
+			}),
+		} as Partial<IBaseButtonProps>);
+	},
 });
 </script>

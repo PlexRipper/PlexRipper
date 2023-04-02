@@ -1,15 +1,3 @@
 <template>
-	<BaseButton v-bind="props" />
+	<BaseButton icon="mdi-delete" icon-only size="lg" />
 </template>
-
-<script setup lang="ts">
-import { withDefaults, defineProps } from 'vue';
-import BaseButton from '@buttons/BaseButton.vue';
-import { IBaseButtonProps } from '~/types/props/base-button/IBaseButtonProps';
-
-const props = withDefaults(defineProps<IBaseButtonProps>(), {
-	outline: false,
-	icon: 'mdi-delete',
-	size: 'lg',
-});
-</script>

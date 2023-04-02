@@ -10,7 +10,7 @@ import { IBaseButtonProps } from '~/types/props/base-button/IBaseButtonProps';
 const props = withDefaults(defineProps<IBaseButtonProps>(), {
 	cy: '',
 	outline: true,
-	color: 'green',
+	color: 'positive',
 	textId: 'confirm',
 	icon: 'mdi-check',
 });

@@ -7,8 +7,11 @@ import { withDefaults, defineProps } from 'vue';
 import BaseButton from '@buttons/BaseButton.vue';
 import { IBaseButtonProps } from '@props';
 
+defineOptions({
+	inheritAttrs: false,
+});
+
 const props = withDefaults(defineProps<IBaseButtonProps>(), {
 	width: 130,
-	cy: '',
 });
 </script>

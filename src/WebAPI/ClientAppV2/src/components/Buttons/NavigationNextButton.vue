@@ -7,13 +7,17 @@ import { withDefaults, defineProps } from 'vue';
 import BaseButton from '@buttons/BaseButton.vue';
 import { IBaseButtonProps } from '@props';
 
+defineOptions({
+	inheritAttrs: false,
+});
+
 const props = withDefaults(defineProps<IBaseButtonProps>(), {
 	width: 130,
 	cy: '',
 	block: true,
 	outline: true,
 	textId: 'next',
-	iconAlign: 'Right',
+	iconAlign: 'right',
 	icon: 'mdi-arrow-right',
 });
 </script>

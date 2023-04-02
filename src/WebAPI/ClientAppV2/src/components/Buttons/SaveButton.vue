@@ -11,6 +11,6 @@ const props = withDefaults(defineProps<IBaseButtonProps>(), {
 	width: 130,
 	cy: '',
 	icon: 'mdi-content-save',
-	color: 'green',
+	color: 'positive',
 });
 </script>

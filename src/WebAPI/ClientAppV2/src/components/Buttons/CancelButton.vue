@@ -10,7 +10,6 @@ const props = withDefaults(defineProps<IBaseButtonProps>(), {
 	icon: 'mdi-alert',
 	outline: true,
 	cy: '',
-	label: 'Warning',
 	textId: 'cancel',
 });
 </script>

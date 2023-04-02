@@ -8,9 +8,10 @@ import BaseButton from '@buttons/BaseButton.vue';
 import { IBaseButtonProps } from '@props';
 
 const props = withDefaults(defineProps<IBaseButtonProps>(), {
-	width: 130,
 	textId: 'finish-setup',
 	icon: 'mdi-check-circle-outline',
-	iconAlign: 'Right',
+	iconAlign: 'right',
+	color: 'positive',
+	outline: true,
 });
 </script>

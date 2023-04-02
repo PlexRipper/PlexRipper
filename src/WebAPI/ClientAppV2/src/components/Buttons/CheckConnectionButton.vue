@@ -1,15 +1,3 @@
 <template>
-	<BaseButton v-bind="props" />
+	<BaseButton tooltip-id="general.commands.check-connection" icon-only icon="mdi-cloud-search-outline" />
 </template>
-
-<script setup lang="ts">
-import { withDefaults, defineProps } from 'vue';
-import BaseButton from '@buttons/BaseButton.vue';
-import { IBaseButtonProps } from '~/types/props/base-button/IBaseButtonProps';
-
-const props = withDefaults(defineProps<IBaseButtonProps>(), {
-	outline: false,
-	icon: 'mdi-cloud-search-outline',
-	tooltipId: 'general.commands.check-connection',
-});
-</script>

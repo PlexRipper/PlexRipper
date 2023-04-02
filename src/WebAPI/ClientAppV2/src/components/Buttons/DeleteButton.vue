@@ -9,9 +9,8 @@ import { IBaseButtonProps } from '@props';
 
 const props = withDefaults(defineProps<IBaseButtonProps>(), {
 	width: 130,
-	cy: '',
 	outline: true,
-	color: 'red',
+	color: 'negative',
 	textId: 'delete',
 	icon: 'mdi-delete',
 });

@@ -1,85 +1,194 @@
-<template>
-	<q-btn
-		:class="classConfig"
-		:style="styleConfig"
-		:flat="true"
-		:rounded="false"
-		:glossy="props.glossy"
-		:label="getButtonText()"
-		:outline="props.outline"
-		:color="getColor()"
-		:icon="props.icon ? props.icon : void 0"
-		:disable="props.disabled"
-		:size="props.size"
-		:loading="props.loading"
-		:data-cy="props.cy">
-		<q-tooltip v-if="getTooltip()" anchor="top middle" self="bottom middle" :offset="[10, 10]">
-			<span>{{ getTooltip() }}</span>
-		</q-tooltip>
-	</q-btn>
-</template>
-
-<script setup lang="ts">
-import { defineProps, withDefaults } from 'vue';
-import { useI18n } from '#imports';
-
+<script lang="ts">
+import { h, resolveComponent, defineComponent } from 'vue';
+import type { PropType } from 'vue';
+import { useI18n, useRouter } from '#imports';
+import { IBaseButtonProps } from '@props';
 import ButtonType from '@enums/buttonType';
-import type { IBaseButtonProps } from '~/types/props/base-button/IBaseButtonProps';
 
-const props = withDefaults(defineProps<IBaseButtonProps>(), {
-	// Base
-	cy: '',
-	lightColor: 'black',
-	darkColor: 'white',
+const router = useRouter();
+export default defineComponent({
+	name: 'BaseButton',
+	inheritAttrs: false,
+	props: {
+		// region PlexRipper
+		cy: {
+			type: String,
+			default: '',
+		},
+		type: {
+			type: String as PropType<ButtonType>,
+			default: ButtonType.None,
+		},
+		textId: {
+			type: String,
+			default: 'missing-text',
+		},
+		tooltipId: {
+			type: String,
+			default: '',
+		},
+		width: {
+			type: Number,
+			default: 0,
+		},
+		height: {
+			type: Number,
+			default: 0,
+		},
+		iconAlign: {
+			type: String as PropType<'left' | 'right'>,
+			default: 'left',
+		},
+		// endregion
+		// region Quasar native
 
-	// Style
-	width: 0,
-	height: 0,
-	// Quasar
-	icon: '',
-	label: '',
-	disabled: false,
-	loading: false,
-	outline: true,
-	// Vuetify
-	block: false,
-	textId: 'missing-text',
-	tooltipId: '',
-	iconSize: undefined,
-	iconOnly: false,
-	href: '',
-	to: '',
-	type: ButtonType.None,
-	size: 'normal',
+		label: {
+			type: String,
+			default: '',
+		},
+		icon: {
+			type: String,
+			default: '',
+		},
+		size: {
+			type: String,
+			default: 'normal',
+		},
+		flat: {
+			type: Boolean,
+			default: true,
+		},
+		glossy: {
+			type: Boolean,
+			default: false,
+		},
+		round: {
+			type: Boolean,
+			default: false,
+		},
+		rounded: {
+			type: Boolean,
+			default: false,
+		},
+		outline: {
+			type: Boolean,
+			default: true,
+		},
+		loading: {
+			type: Boolean,
+			default: false,
+		},
+		disabled: {
+			type: Boolean,
+			default: false,
+		},
+
+		// endregion
+		// region Vuetify native
+		block: {
+			type: Boolean,
+			default: false,
+		},
+		iconOnly: {
+			type: Boolean,
+			default: false,
+		},
+
+		// endregion
+		iconSize: {
+			type: Number,
+			default: 16,
+		},
+		color: {
+			type: String as PropType<'default' | 'positive' | 'warning' | 'negative'>,
+			default: 'default',
+		},
+		href: {
+			type: String,
+			default: '',
+		},
+		to: {
+			type: String,
+			default: '',
+		},
+	},
+
+	emits: ['click'],
+	render() {
+		const QBtn = resolveComponent('QBtn');
+		const QTooltip = resolveComponent('QTooltip');
+		const props = this.$props;
+		const emit = this.$emit;
+		const style = {
+			flat: props.flat,
+			round: props.round,
+			rounded: props.rounded,
+			outline: props.outline,
+		};
+		if (props.iconOnly) {
+			style.flat = false;
+			style.round = true;
+			style.rounded = true;
+			style.outline = false;
+		}
+		const classes = {
+			'base-btn': true,
+			'base-btn-outline': style.outline,
+			[`base-btn-${props.color}`]: true,
+			'i18n-formatting': true,
+		};
+		return h(
+			QBtn,
+			{
+				class: classes,
+				label: getButtonText(props),
+				icon: props.iconAlign === 'left' ? props.icon : undefined,
+				iconRight: props.iconAlign === 'right' ? props.icon : undefined,
+				glossy: props.glossy,
+				size: props.size,
+				loading: props.loading,
+				disabled: props.disabled,
+				dataCy: props.cy,
+				flat: style.flat,
+				round: style.round,
+				rounded: style.rounded,
+				onClick(event: MouseEvent) {
+					if (props.to) {
+						router.push(props.to);
+					} else {
+						emit('click', event);
+					}
+				},
+			},
+			() => {
+				if (props.tooltipId) {
+					return [
+						h(
+							QTooltip,
+							{
+								anchor: 'top middle',
+								self: 'bottom middle',
+								offset: [10, 10],
+							},
+							{
+								default: () => getTooltipText(props),
+							},
+						),
+					];
+				}
+				return [];
+			},
+		);
+	},
 });
 
-const classConfig = {
-	'p-btn': false,
-	'i18n-formatting': true,
-};
-
-const styleConfig = {
-	height: props.height > 0 ? props.height + 'px' : 'auto',
-	width: props.width > 0 ? props.width + 'px' : 'auto',
-	color: getColor(),
-	border: props.outline ? '2px solid ' + getColor() : 'none',
-};
-
-function getButtonText(): string | number {
+function getButtonText(props: IBaseButtonProps): string | number {
 	return props.textId ? useI18n().t(`general.commands.${props.textId}`) : props.label;
 }
 
-function getColor(): string {
-	if (props.color) {
-		return props.color;
-	}
-
-	return (isDark() ? props.darkColor : props.lightColor) ?? '';
-}
-
-function getTooltip() {
+function getTooltipText(props: IBaseButtonProps): string {
 	if (!props.tooltipId) {
-		return null;
+		return '';
 	}
 	return useI18n().t(props.tooltipId);
 }

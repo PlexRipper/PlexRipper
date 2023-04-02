@@ -9,7 +9,6 @@ import { IBaseButtonProps } from '@props';
 
 const props = withDefaults(defineProps<IBaseButtonProps>(), {
 	width: 130,
-	cy: '',
 	outline: true,
 	icon: 'mdi-bug-outline',
 });

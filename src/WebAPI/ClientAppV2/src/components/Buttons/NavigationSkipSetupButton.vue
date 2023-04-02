@@ -8,10 +8,9 @@ import BaseButton from '@buttons/BaseButton.vue';
 import { IBaseButtonProps } from '@props';
 
 const props = withDefaults(defineProps<IBaseButtonProps>(), {
-	width: 130,
-	cy: '',
 	textId: 'skip-setup',
 	icon: 'mdi-debug-step-over',
-	iconAlign: 'Right',
+	iconAlign: 'right',
+	outline: true,
 });
 </script>

@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps } from 'vue';
+import { computed, defineProps, withDefaults } from 'vue';
 
 interface QRowProps {
 	justify?: 'start' | 'center' | 'end' | 'around' | 'between' | boolean;
@@ -13,6 +13,7 @@ interface QRowProps {
 	gutter?: string | boolean;
 	noWrap?: boolean;
 	reverse?: boolean;
+	column?: boolean;
 }
 
 const props = withDefaults(defineProps<QRowProps>(), {
@@ -21,10 +22,15 @@ const props = withDefaults(defineProps<QRowProps>(), {
 	gutter: false,
 	noWrap: false,
 	reverse: false,
+	column: false,
 });
 
 const classes = computed(() => {
 	const classList: string[] = ['row'];
+
+	if (props.column) {
+		classList.push('column');
+	}
 
 	if (props.justify) {
 		classList.push(`justify-${props.justify}`);

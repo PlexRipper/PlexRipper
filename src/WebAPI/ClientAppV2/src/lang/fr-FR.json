@@ -429,7 +429,6 @@
                     "item-2": "Supporter le téléchargement de musique et de photos !",
                     "item-3": "Supporter le téléchargement des sous-titre !",
                     "item-4": "Supporter les notifications télégram !",
-                    "item-5": "Supporter plusieurs langue",
                     "item-6": "Une meilleur intégration de plex!",
                     "item-6-1": "Téléchargez des collections, ajoutez-les à votre propre serveur Plex et copiez automatiquement tous les paramètres et configurations liés à Plex."
                 },
@@ -442,16 +441,16 @@
             "intro": {
                 "header": "C'est se qu'on appelle être génial !",
                 "list": {
-                    "item-1": "Plex Ripper est en phase de développement, donc il peut y'avoir des bugs ici et là. S'il vous plait si vous rencontrez n'importe quel bug faîtes une issues sur notre page Github.",
+                    "item-1": "PlexRipper est en phase de développement, donc il peut y'avoir des bugs ici et là. S'il vous plait si vous rencontrez n'importe quel bug faîtes une issues sur notre page Github.",
                     "item-2": "Les retours ou les demandes de fonctionnalitées sont vraiment très apprécié ! Surtout sur le code source car il s'agit d'un projet personnel destiné à améliorer mes compétences en codage.",
-                    "item-3": "Plex Ripper peut télécharger des films et des séries, d'autres types tels que la musique ne sont actuellement pas pris en charge, mais le seront à l'avenir!",
-                    "item-4": "Plex Ripper ne collecte pas et ne collectera aucune donnée sur vous ou sur l'une de vos activités. Les seules données envoyées à Plex sont votre nom d'utilisateur et votre mot de passe pour authentifier votre compte Plex. Après quoi, toutes les communications se font directement avec les serveurs partagés auxquels vous avez accès.",
+                    "item-3": "PlexRipper peut télécharger des films et des séries, d'autres types tels que la musique ne sont actuellement pas pris en charge, mais le seront à l'avenir!",
+                    "item-4": "PlexRipper ne collecte pas et ne collectera aucune donnée sur vous ou sur l'une de vos activités. Les seules données envoyées à Plex sont votre nom d'utilisateur et votre mot de passe pour authentifier votre compte Plex. Après quoi, toutes les communications se font directement avec les serveurs partagés auxquels vous avez accès.",
                     "item-5": "Un mot d'avertissement : Plex, et peut-être les propriétaires de serveurs Plex, n'aiment pas que vous téléchargiez toutes \"leurs\" copies de médias 100% acquises légalement. C'est pourquoi il y a des garde-fous en place pour protéger les utilisateurs de Plex Ripper contre l'interdiction de Plex. Cependant, soyez respectueux envers les propriétaires de serveurs Plex en n'utilisant pas toute leur précieuse bande passante et ne vous plaignez pas d'être expulsé d'un serveur. À l'avenir, j'aimerais également protéger les propriétaires de serveurs Plex contre les abus de Plex Ripper, toutes les idées ou contributions sont les bienvenues."
                 },
                 "text": {
                     "p-1": "Here is some useful info:"
                 },
-                "title": "Vous êtes incroyable pour essayer avoir Plex Ripper!"
+                "title": "Vous êtes incroyable pour essayer avoir PlexRipper!"
             },
             "paths": {
                 "header": "Vérifiez les chemins d'accés",

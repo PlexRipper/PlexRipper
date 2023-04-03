@@ -5017,26 +5017,6 @@
 														</translations>
 													</concept_node>
 													<concept_node>
-														<name>item-5</name>
-														<description/>
-														<comment/>
-														<default_text/>
-														<translations>
-															<translation>
-																<language>de-DE</language>
-																<approved>false</approved>
-															</translation>
-															<translation>
-																<language>en-US</language>
-																<approved>false</approved>
-															</translation>
-															<translation>
-																<language>fr-FR</language>
-																<approved>false</approved>
-															</translation>
-														</translations>
-													</concept_node>
-													<concept_node>
 														<name>item-6</name>
 														<description/>
 														<comment/>

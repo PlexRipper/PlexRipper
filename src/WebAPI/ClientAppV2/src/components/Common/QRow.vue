@@ -58,6 +58,7 @@ const classes = computed(() => {
 
 <style lang="scss">
 .row {
-	width: 100%;
+	// Also used internally in Quasar components such as QInput and messes up the layout
+	// width: 100%;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-	<q-input :outlined="props.outlined">
+	<q-input :model-value="modelValue" :outlined="props.outlined">
 		<template v-if="props.appendIcon" #append>
 			<q-btn :icon="appendIcon" flat @click="$emit('click:append')" />
 		</template>
@@ -11,10 +11,12 @@ import { withDefaults, defineProps, defineEmits } from 'vue';
 
 const props = withDefaults(
 	defineProps<{
+		modelValue: string;
 		outlined?: boolean;
 		appendIcon?: string;
 	}>(),
 	{
+		modelValue: '',
 		outlined: true,
 		appendIcon: '',
 	},

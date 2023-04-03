@@ -19,3 +19,26 @@ export function useMediaOverviewBarDownloadCommandBus(): UseEventBusReturn<strin
 export function useProcessDownloadCommandBus(): UseEventBusReturn<DownloadMediaDTO[], any> {
 	return useEventBus<DownloadMediaDTO[]>('processDownloadCommand');
 }
+
+export function useControlDialog() {
+	return useEventBus<{
+		name: string;
+		state: boolean;
+		value?: any;
+	}>('controlDialog');
+}
+
+export function useOpenControlDialog(name: string, value?: any) {
+	useControlDialog().emit({
+		name,
+		state: true,
+		value,
+	});
+}
+
+export function useCloseControlDialog(name: string) {
+	useControlDialog().emit({
+		name,
+		state: false,
+	});
+}

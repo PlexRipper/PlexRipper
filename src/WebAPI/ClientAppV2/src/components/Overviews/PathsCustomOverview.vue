@@ -9,12 +9,9 @@
 					@save="saveDisplayName(folderPath.id, $event)" />
 			</q-col>
 			<q-col cols="7">
-				<p-text-field
-					append-icon="mdi-folder-open-outline"
-					:model-value="folderPath.directory"
-					readonly
-					:disabled="!allowEditing"
-					@click:append="openDirectoryBrowser(folderPath)" />
+				<q-input :model-value="folderPath.directory" readonly>
+					<BaseButton icon="mdi-folder-open-outline" icon-only square @click="openDirectoryBrowser(folderPath)" />
+				</q-input>
 			</q-col>
 			<q-col cols="2">
 				<!--	Is Valid Icon -->
@@ -44,7 +41,7 @@
 	<!--	Directory Browser	-->
 	<q-row>
 		<q-col>
-			<DirectoryBrowser ref="directoryBrowser" @confirm="confirmDirectoryBrowser" />
+			<DirectoryBrowser :name="directoryBrowserName" @confirm="confirmDirectoryBrowser" />
 		</q-col>
 	</q-row>
 </template>
@@ -56,6 +53,7 @@ import { useSubscription } from '@vueuse/rxjs';
 import { FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
 import { DownloadService, FolderPathService } from '@service';
 import DirectoryBrowser from '@components/General/DirectoryBrowser.vue';
+import { useOpenControlDialog } from '#imports';
 
 const props = withDefaults(
 	defineProps<{
@@ -66,9 +64,9 @@ const props = withDefaults(
 	},
 );
 
+const directoryBrowserName = 'customDirectoryBrowser';
 const folderPaths = ref<FolderPathDTO[]>([]);
 const allowEditing = ref(true);
-const directoryBrowser = ref<InstanceType<typeof DirectoryBrowser> | null>(null);
 
 const getFolderPaths = computed((): FolderPathDTO[] => {
 	// x.id >= 4 is to filter out the default paths.
@@ -98,7 +96,7 @@ const getMediaType = computed((): PlexMediaType => {
 });
 
 const openDirectoryBrowser = (path: FolderPathDTO): void => {
-	directoryBrowser.value?.open(path);
+	useOpenControlDialog(directoryBrowserName, path);
 };
 
 const confirmDirectoryBrowser = (path: FolderPathDTO): void => {

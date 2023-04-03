@@ -8,9 +8,14 @@ import {
 	QExpansionItem,
 	QMarkupTable,
 	QTable,
+	QInput,
 } from 'quasar';
 
 export default defineNuxtPlugin(() => {
+	setQuasarComponentDefaultPropValues(QInput, {
+		outlined: true,
+	});
+
 	setQuasarComponentDefaultPropValues(QSelect, {
 		outlined: true,
 		dense: true,

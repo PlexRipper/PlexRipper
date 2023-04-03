@@ -10,17 +10,14 @@
 		</q-row>
 	</template>
 	<!--	Default FolderPaths	-->
-	<q-row v-for="folderPath in getFolderPaths" :key="folderPath.id" no-gutters class="q-my-sm">
+	<q-row v-for="folderPath in getFolderPaths" :key="folderPath.id" class="q-my-sm">
 		<q-col cols="3">
 			<help-icon :help-id="toTranslation(folderPath.folderType)" />
 		</q-col>
 		<q-col cols="7">
-			<p-text-field
-				append-icon="mdi-folder-open-outline"
-				:model-value="folderPath.directory"
-				readonly
-				:disable="!allowEditing"
-				@click:append="openDirectoryBrowser(folderPath)" />
+			<q-input :model-value="folderPath.directory" readonly>
+				<BaseButton icon="mdi-folder-open-outline" icon-only square @click="openDirectoryBrowser(folderPath)" />
+			</q-input>
 		</q-col>
 		<!--	Is Valid Icon -->
 		<q-col cols="auto" align-self="center">
@@ -33,7 +30,7 @@
 	<!--	Directory Browser	-->
 	<q-row>
 		<q-col>
-			<DirectoryBrowser ref="directoryBrowser" @confirm="confirmDirectoryBrowser" />
+			<DirectoryBrowser :name="directoryBrowserName" @confirm="confirmDirectoryBrowser" />
 		</q-col>
 	</q-row>
 </template>
@@ -47,12 +44,13 @@ import { FolderPathDTO } from '@dto/mainApi';
 import { updateFolderPath } from '@api/pathApi';
 import { DownloadService, FolderPathService } from '@service';
 import DirectoryBrowser from '@components/General/DirectoryBrowser.vue';
+import { useOpenControlDialog } from '#imports';
+
+const directoryBrowserName = 'defaultDirectoryBrowser';
 
 const folderPaths = ref<FolderPathDTO[]>([]);
 const allowEditing = ref(true);
 const selectedFolderPath = ref<FolderPathDTO | null>(null);
-
-const directoryBrowser = ref<InstanceType<typeof DirectoryBrowser> | null>(null);
 
 const getFolderPaths = computed(() => {
 	// The first 3 folderPaths are always the default ones.
@@ -61,7 +59,7 @@ const getFolderPaths = computed(() => {
 
 function openDirectoryBrowser(path: FolderPathDTO): void {
 	selectedFolderPath.value = path;
-	directoryBrowser.value?.open(path);
+	useOpenControlDialog(directoryBrowserName, path);
 }
 
 function confirmDirectoryBrowser(path: FolderPathDTO): void {

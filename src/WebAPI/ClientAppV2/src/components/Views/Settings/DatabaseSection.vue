@@ -8,7 +8,7 @@
 			</q-col>
 			<!--	Reset Database button	-->
 			<q-col cols="8" align-self="center">
-				<WarningButton :width="400" text-id="reset-db" @click="confirmationDialog = true" />
+				<WarningButton :width="400" text-id="reset-db" block @click="confirmationDialog = true" />
 				<confirmation-dialog
 					text-id="reset-db"
 					:dialog="confirmationDialog"

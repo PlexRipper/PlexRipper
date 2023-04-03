@@ -34,7 +34,7 @@ import { defineProps, defineEmits, computed } from 'vue';
 import type { PlexAccountDTO } from '@dto/mainApi';
 
 const props = defineProps<{
-	account: PlexAccountDTO;
+	account?: PlexAccountDTO;
 }>();
 
 defineEmits<{ (e: 'open-dialog', account: PlexAccountDTO): void }>();

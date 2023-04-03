@@ -33,25 +33,23 @@ function scrollTo(letter: string): void {
 	text-align: center;
 	font-weight: bold;
 
-	&.filled {
-		background-color: currentColor;
-	}
-
-	&.outlined {
-		border: 2px solid currentColor;
-	}
-
-	&.theme--dark {
-		color: red;
-	}
-
-	&.theme--light {
-		color: darkred;
-	}
-
 	&:hover {
 		&::before {
 			opacity: 0.2 !important;
+		}
+	}
+}
+
+body {
+	&.body--dark {
+		.navigation-btn {
+			color: red;
+		}
+	}
+
+	&.body--light {
+		.navigation-btn {
+			color: darkred;
 		}
 	}
 }

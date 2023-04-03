@@ -1,5 +1,5 @@
 <template>
-	<q-btn class="mx-2" flat :icon="icon" @click="toggleDarkMode" />
+	<BaseButton :icon="icon" icon-only @click="toggleDarkMode" />
 </template>
 
 <script setup lang="ts">

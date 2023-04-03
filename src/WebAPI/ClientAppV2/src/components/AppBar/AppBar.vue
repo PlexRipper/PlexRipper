@@ -19,7 +19,7 @@
 				<q-btn icon="mdi-github" flat href="https://github.com/PlexRipper/PlexRipper" target="_blank" />
 
 				<!-- DarkMode toggle -->
-				<DarkModeToggle />
+				<DarkModeToggleButton />
 
 				<!-- Account Selector -->
 				<AccountSelector />

@@ -53,7 +53,7 @@ export function baseBtnPropsDefault() {
 		},
 		flat: {
 			type: Boolean,
-			default: true,
+			default: false,
 		},
 		glossy: {
 			type: Boolean,

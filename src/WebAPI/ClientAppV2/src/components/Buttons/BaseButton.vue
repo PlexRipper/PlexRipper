@@ -4,10 +4,8 @@ import { useI18n, useRouter } from '#imports';
 import { IBaseButtonProps } from '@props';
 import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
-const router = useRouter();
 export default defineComponent({
 	name: 'BaseButton',
-	inheritAttrs: false,
 	props: baseBtnPropsDefault(),
 	emits: ['click'],
 	render() {
@@ -30,8 +28,10 @@ export default defineComponent({
 		const classes = {
 			'base-btn': true,
 			'base-btn-outline': style.outline,
+			'base-btn-block': props.block,
 			[`base-btn-${props.color}`]: true,
 			'i18n-formatting': true,
+			...this.$attrs.class,
 		};
 		return h(
 			QBtn,
@@ -43,14 +43,18 @@ export default defineComponent({
 				glossy: props.glossy,
 				size: props.size,
 				loading: props.loading,
-				disabled: props.disabled,
+				disable: props.disabled,
 				dataCy: props.cy,
 				flat: style.flat,
 				round: style.round,
 				rounded: style.rounded,
+				href: props.href ? props.href : undefined,
+				target: props.href ? '_blank' : '_self',
 				onClick(event: MouseEvent) {
 					if (props.to) {
-						router.push(props.to);
+						useRouter().push({
+							path: props.to,
+						});
 					} else {
 						emit('click', event);
 					}
@@ -67,7 +71,12 @@ export default defineComponent({
 								offset: [10, 10],
 							},
 							{
-								default: () => getTooltipText(props),
+								default: () => {
+									if (!props.tooltipId) {
+										return '';
+									}
+									return useI18n().t(props.tooltipId);
+								},
 							},
 						),
 					];
@@ -80,12 +89,5 @@ export default defineComponent({
 
 function getButtonText(props: IBaseButtonProps): string | number {
 	return props.textId ? useI18n().t(`general.commands.${props.textId}`) : props.label;
-}
-
-function getTooltipText(props: IBaseButtonProps): string {
-	if (!props.tooltipId) {
-		return '';
-	}
-	return useI18n().t(props.tooltipId);
 }
 </script>

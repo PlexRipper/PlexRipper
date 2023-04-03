@@ -1,18 +1,17 @@
 <template>
-	<q-row no-wrap class="no-gutters">
+	<q-row no-wrap align="center">
 		<q-col>
 			<q-sub-header>
 				{{ getLabel }}
 			</q-sub-header>
 		</q-col>
 		<q-col v-if="hasHelpPage" cols="auto">
-			<q-btn icon="mdi-help-circle-outline" style="margin: 6px" flat @click="openDialog()" />
+			<BaseButton icon="mdi-help-circle-outline" class="q-ma-sm" icon-only @click="openDialog" />
 		</q-col>
 	</q-row>
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
 import { withDefaults, defineProps, computed } from 'vue';
 import { useNuxtApp, useI18n } from '#imports';
 import { HelpService } from '@service';

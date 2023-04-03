@@ -88,28 +88,33 @@ body {
 		&-outline {
 			border: 2px solid;
 		}
+
+		&-block {
+			width: 100%;
+			max-width: 400px;
+		}
 	}
 
 	&.body--dark {
 		.base-btn {
 			&-positive {
-				color: $positive-btn-color;
-				border-color: $positive-btn-color;
+				color: $positive-dark-btn-color;
+				border-color: $positive-dark-btn-color;
 			}
 
 			&-default {
-				color: $default-btn-color;
-				border-color: $default-btn-color;
+				color: $default-dark-btn-color;
+				border-color: $default-dark-btn-color;
 			}
 
 			&-warning {
-				color: $warning-btn-color;
-				border-color: $warning-btn-color
+				color: $warning-dark-btn-color;
+				border-color: $warning-dark-btn-color
 			}
 
 			&-negative {
-				color: $negative-btn-color;
-				border-color: $negative-btn-color;
+				color: $negative-dark-btn-color;
+				border-color: $negative-dark-btn-color;
 			}
 		}
 	}
@@ -117,23 +122,23 @@ body {
 	&.body--light {
 		.base-btn {
 			&-positive {
-				color: $positive-btn-color;
-				border-color: $positive-btn-color;
+				color: $positive-light-btn-color;
+				border-color: $positive-light-btn-color;
 			}
 
 			&-default {
-				color: $default-btn-color;
-				border-color: $default-btn-color;
+				color: $default-light-btn-color;
+				border-color: $default-light-btn-color;
 			}
 
 			&-warning {
-				color: $warning-btn-color;
-				border-color: $warning-btn-color
+				color: $warning-light-btn-color;
+				border-color: $warning-light-btn-color
 			}
 
 			&-negative {
-				color: $negative-btn-color;
-				border-color: $negative-btn-color;
+				color: $negative-light-btn-color;
+				border-color: $negative-light-btn-color;
 			}
 		}
 	}

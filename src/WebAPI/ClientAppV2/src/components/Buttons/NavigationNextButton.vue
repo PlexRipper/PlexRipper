@@ -9,6 +9,7 @@ export default defineComponent({
 	props: baseBtnPropsDefault(),
 	render() {
 		return h(BaseButton, {
+			...this.$attrs,
 			...mergeProps(this.$props, {
 				block: true,
 				textId: 'next',

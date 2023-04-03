@@ -1,4 +1,4 @@
-// @import 'quasar/src/css/variables.sass';
+@import 'quasar/src/css/variables.sass';
 
 $dark-background-color: rgba(0, 0, 0, 0.8);
 $light-background-color: rgba(255, 255, 255, 0.8);
@@ -26,7 +26,15 @@ $dark-shadow-color: rgba(0, 0, 0, 0.8);
 $primary: #ff0000;
 $q-dark: #ff0000;
 
-$default-btn-color: #FFF;
-$warning-btn-color: #ffd300;
-$positive-btn-color: #4caf50;
-$negative-btn-color: #ff0000;
+$default-dark-btn-color: #ffffff;
+$warning-dark-btn-color: #ffd300;
+$positive-dark-btn-color: #4caf50;
+$negative-dark-btn-color: #ff0000;
+
+$default-light-btn-color: #000000;
+$warning-light-btn-color: #ffd300;
+$positive-light-btn-color: #4caf50;
+$negative-light-btn-color: #ff0000;
+
+$button-light-shadow-active: $shadow-5;
+$button-dark-shadow-active: $dark-shadow-5;

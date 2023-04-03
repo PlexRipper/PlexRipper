@@ -6,24 +6,16 @@
 			<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
 			<!--            <alert-dialog v-for="(alertItem, i) in alerts" :key="i" :alert="alertItem" @close="closeAlert"/>-->
 			<!--            <CheckServerConnectionsProgress/>-->
-			<!--	Use for setup-layout	-->
-			<template v-if="isSetupPage">
-				<!--                <vue-scroll>-->
-				<q-page-container>
-					<router-view />
-				</q-page-container>
-				<!--                </vue-scroll>-->
-			</template>
+
 			<!--	Use for everything else	-->
-			<template v-else>
+			<template v-if="!isEmptyLayout">
 				<app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer" />
 				<NavigationDrawer :show-drawer="showNavigationDrawerState" />
 				<NotificationsDrawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer" />
-				<q-page-container class="page-container">
-					<router-view />
-				</q-page-container>
-				<footer />
 			</template>
+			<q-page-container class="page-container">
+				<slot />
+			</q-page-container>
 		</template>
 		<Background :hide-background="isNoBackground" />
 	</q-layout>
@@ -50,7 +42,7 @@ const showNotificationsDrawerState = ref(false);
 
 $q.dark.set(true);
 
-const isSetupPage = computed((): boolean => {
+const isEmptyLayout = computed((): boolean => {
 	return route.fullPath.includes('setup');
 });
 
@@ -58,7 +50,7 @@ const isNoBackground = computed((): boolean => {
 	if (isLoading.value) {
 		return true;
 	}
-	return isSetupPage.value;
+	return isEmptyLayout.value;
 });
 
 function closeAlert(alert: IAlert): void {
@@ -104,8 +96,4 @@ onMounted(() => {
 		}),
 	);
 });
-
-// TODO: Temp solution for this issue: https://github.com/Maiquu/nuxt-quasar/pull/7.
-// see styles => @import 'assets/scss/style.scss';
-// and re-enable in nuxt.config.ts
 </script>

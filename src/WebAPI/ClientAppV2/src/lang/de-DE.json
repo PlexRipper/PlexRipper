@@ -135,6 +135,10 @@
         "skip-setup": {
             "text": "Das überspringt das Setup und Sie müssen PlexRipper manuell einrichten.",
             "title": "Sind Sie sicher?"
+        },
+        "not-found": {
+            "text": "Konnte den richtigen Bestätigungstext nicht finden..",
+            "title": "Konnte den richtigen Bestätigungstext nicht finden.."
         }
     },
     "general": {

@@ -12,6 +12,7 @@ interface QRowProps {
 	align?: 'start' | 'center' | 'end' | boolean;
 	gutter?: string | boolean;
 	noWrap?: boolean;
+	wrap?: boolean;
 	reverse?: boolean;
 	column?: boolean;
 }
@@ -44,7 +45,9 @@ const classes = computed(() => {
 		classList.push(`gutter-${props.gutter}`);
 	}
 
-	if (props.noWrap) {
+	if (props.wrap) {
+		classList.push('wrap');
+	} else if (props.noWrap) {
 		classList.push('no-wrap');
 	}
 

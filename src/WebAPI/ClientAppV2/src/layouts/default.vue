@@ -40,8 +40,6 @@ const alerts = ref<IAlert[]>([]);
 const showNavigationDrawerState = ref(true);
 const showNotificationsDrawerState = ref(false);
 
-$q.dark.set(true);
-
 const isEmptyLayout = computed((): boolean => {
 	return route.fullPath.includes('setup');
 });

@@ -38,6 +38,9 @@ export default defineNuxtConfig({
 		// Truthy values requires `sass@1.32.12`.
 		sassVariables: 'src/assets/scss/_variables.scss',
 		iconSet: 'mdi-v7',
+		config: {
+			dark: true, // or 'auto'
+		},
 		// Requires `@quasar/extras` package
 		extras: {
 			// string | null: Auto-import roboto font. https://quasar.dev/style/typography#default-font

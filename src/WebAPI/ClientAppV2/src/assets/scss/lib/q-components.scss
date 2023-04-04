@@ -57,6 +57,42 @@ body {
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * QCardDialog
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+body {
+	.q-card-dialog-background {
+		@extend .default-border;
+		@extend .default-border-radius;
+		@extend .default-shadow;
+		max-width: none;
+		max-height: none;
+	}
+
+	.q-card-dialog {
+
+		.content-default {
+			flex-grow: 1;
+		}
+	}
+
+	&.body--dark {
+		.q-card-dialog-background {
+			@extend .blur;
+			background-color: $dark-dialog-background-color;
+		}
+	}
+
+	&.body--light {
+		.q-card-dialog-background {
+			@extend .blur;
+			background-color: $light-dialog-background-color;
+		}
+	}
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // * DetailsOverview
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 .q-dialog {

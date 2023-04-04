@@ -10,7 +10,7 @@
 			</q-col>
 			<q-col cols="7">
 				<q-input :model-value="folderPath.directory" readonly>
-					<BaseButton icon="mdi-folder-open-outline" icon-only square @click="openDirectoryBrowser(folderPath)" />
+					<BaseButton icon="mdi-folder-open-outline" icon-only square flat @click="openDirectoryBrowser(folderPath)" />
 				</q-input>
 			</q-col>
 			<q-col cols="2">

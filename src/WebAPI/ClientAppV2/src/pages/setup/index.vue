@@ -6,10 +6,12 @@
 				<logo :size="128" />
 			</q-col>
 		</q-row>
+		<!--	Horizontal Container	-->
 		<q-row justify="center">
-			<q-col cols="auto" align-self="stretch">
+			<q-col cols="12" lg="8">
+				<!--	Vertical Container	-->
 				<q-row class="setup-card" column>
-					<q-col align-self="stretch" cols="12">
+					<q-col cols="12" lg="6">
 						<!-- Tabs -->
 						<q-row>
 							<q-col cols="auto">
@@ -40,7 +42,7 @@
 									<q-tab-panel :name="1">
 										<q-row no-gutters>
 											<q-col>
-												<h2 class="mt-2">{{ $t('pages.setup.intro.title') }}</h2>
+												<h2>{{ $t('pages.setup.intro.title') }}</h2>
 												<p>{{ $t('pages.setup.intro.text.p-1') }}</p>
 												<ul>
 													<li>
@@ -158,10 +160,12 @@
 							</q-col>
 							<!--	Skip button	-->
 							<q-col v-if="!isNextDisabled" cols="auto" align-self="end" class="q-mx-md">
-								<NavigationSkipSetupButton :disabled="isNextDisabled" @click="skipDialogOpen = true" />
+								<NavigationSkipSetupButton
+									:disabled="isNextDisabled"
+									@click="useOpenControlDialog(confirmationDialogName)" />
 								<confirmation-dialog
+									:name="confirmationDialogName"
 									text-id="skip-setup"
-									:dialog="skipDialogOpen"
 									@confirm="finishSetup"
 									@cancel="skipDialogOpen = false" />
 							</q-col>
@@ -178,7 +182,7 @@ import { ref, computed } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import Log from 'consola';
 import { SettingsService } from '@service';
-import { useRouter } from '#imports';
+import { useRouter, useOpenControlDialog } from '#imports';
 
 const router = useRouter();
 
@@ -186,6 +190,7 @@ const stepIndex = ref(1);
 const stepPagesCount = ref(5);
 const skipDialogOpen = ref(false);
 
+const confirmationDialogName = 'skip-setup-confirmation';
 const headers = ref(['intro', 'future-plans', 'paths', 'accounts', 'finished']);
 
 const links = ref([
@@ -231,10 +236,8 @@ const finishSetup = () => {
 @import '@/assets/scss/mixins.scss';
 
 .setup-card {
-	// min-height: 80vh;
-	width: 60vw;
-	border-radius: 15px;
 	@extend .default-border;
+	@extend .default-border-radius;
 }
 
 .setup-tab {

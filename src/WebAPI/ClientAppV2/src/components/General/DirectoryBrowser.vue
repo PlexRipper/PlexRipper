@@ -1,5 +1,13 @@
 <template>
-	<QCardDialog :name="name" :value="path" width="80vw" :loading="isLoading" @opened="open">
+	<QCardDialog
+		:name="name"
+		:value="path"
+		min-width="70vw"
+		max-width="70vw"
+		min-height="60vh"
+		max-height="60vh"
+		:loading="isLoading"
+		@opened="open">
 		<template #title>
 			{{ $t('components.directory-browser.select-path', { pathName: path?.displayName ?? '' }) }}
 		</template>
@@ -155,8 +163,4 @@ function directoryNavigate(dataRow: FileSystemModelDTO): void {
 		requestDirectories(dataRow.path);
 	}
 }
-
-defineExpose({
-	open,
-});
 </script>

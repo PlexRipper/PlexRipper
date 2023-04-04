@@ -25,6 +25,9 @@ export default defineComponent({
 			style.rounded = true;
 			style.outline = false;
 		}
+		if (props.iconOnly && props.flat) {
+			style.flat = true;
+		}
 		const classes = {
 			'base-btn': true,
 			'base-btn-outline': style.outline,

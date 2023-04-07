@@ -1,4 +1,5 @@
-import { DownloadMediaDTO, PlexMediaDTO, PlexMediaSlimDTO } from '@dto/mainApi';
+import { kebabCase } from 'lodash-es/string';
+import { DownloadMediaDTO, FolderPathDTO, FolderType, PlexMediaDTO, PlexMediaSlimDTO } from '@dto/mainApi';
 
 export function toDownloadMedia(mediaItem: PlexMediaDTO | PlexMediaSlimDTO): DownloadMediaDTO[] {
 	return [
@@ -9,4 +10,8 @@ export function toDownloadMedia(mediaItem: PlexMediaDTO | PlexMediaSlimDTO): Dow
 			plexLibraryId: mediaItem.plexLibraryId,
 		},
 	];
+}
+
+export function toFolderPathStringId(folderType: FolderType) {
+	return kebabCase(folderType.toString().replace('Folder', ''));
 }

@@ -1,5 +1,5 @@
 <template>
-	<page-container>
+	<q-page>
 		<!-- Download Toolbar -->
 		<download-bar
 			:has-selected="hasSelected"
@@ -8,53 +8,50 @@
 			@restart="restartDownloadTasks(getSelected)"
 			@start="startDownloadTasks(getSelected)"
 			@clear="clearDownloadTasks(getSelected)"
-			@delete="deleteDownloadTasks(getSelected)"
-		/>
+			@delete="deleteDownloadTasks(getSelected)" />
 		<!--	The Download Table	-->
-		<vue-scroll class="download-page-tables">
-			<v-row v-if="getServersWithDownloads.length > 0">
-				<v-col>
-					<v-expansion-panels v-model="openExpansions" multiple>
-						<v-expansion-panel v-for="plexServer in getServersWithDownloads" :key="plexServer.id">
-							<v-expansion-panel-header>
-								<v-row no-gutters>
-									<!-- Download Server Settings -->
-									<v-col>
-										<server-download-status />
-									</v-col>
-									<!-- Download Server Title -->
-									<v-col cols="auto">
-										<h2>{{ plexServer.name }}</h2>
-									</v-col>
-									<v-col class="py-0"></v-col>
-								</v-row>
-							</v-expansion-panel-header>
-							<v-expansion-panel-content>
-								<downloads-table
-									v-model="selected"
-									:download-rows="plexServer.downloadTasks"
-									:server-id="plexServer.id"
-									@action="commandSwitch"
-									@selected="updateSelected(plexServer.id, $event)"
-								/>
-							</v-expansion-panel-content>
-						</v-expansion-panel>
-					</v-expansion-panels>
-				</v-col>
-			</v-row>
-			<v-row v-else justify="center">
-				<v-col cols="auto">
-					<h2>{{ $t('pages.downloads.no-downloads') }}</h2>
-				</v-col>
-			</v-row>
-		</vue-scroll>
+		<q-row v-if="getServersWithDownloads.length > 0">
+			<q-col>
+				<q-list>
+					<q-expansion-item v-for="plexServer in getServersWithDownloads" :key="plexServer.id">
+						<template #header>
+							<q-row no-gutters>
+								<!-- Download Server Settings -->
+								<q-col>
+									<server-download-status />
+								</q-col>
+								<!-- Download Server Title -->
+								<q-col cols="auto">
+									<h2>{{ plexServer.name }}</h2>
+								</q-col>
+								<q-col class="py-0"></q-col>
+							</q-row>
+						</template>
+						<template #body>
+							<downloads-table
+								v-model="selected"
+								:download-rows="plexServer.downloadTasks"
+								:server-id="plexServer.id"
+								@action="commandSwitch"
+								@selected="updateSelected(plexServer.id, $event)" />
+						</template>
+					</q-expansion-item>
+				</q-list>
+			</q-col>
+		</q-row>
+		<q-row v-else justify="center">
+			<q-col cols="auto">
+				<h2>{{ $t('pages.downloads.no-downloads') }}</h2>
+			</q-col>
+		</q-row>
 		<download-details-dialog :download-task="downloadTaskDetail" :dialog="dialog" @close="closeDetailsDialog" />
-	</page-container>
+	</q-page>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Log from 'consola';
-import { Component, Vue } from 'vue-property-decorator';
+import { ref, computed } from 'vue';
+import { get } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { DownloadService, ServerService } from '@service';
 import { DownloadTaskDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
@@ -65,141 +62,132 @@ declare interface ISelection {
 	downloadTaskIds: number[];
 }
 
-@Component({
-	components: {},
-})
-export default class Downloads extends Vue {
-	plexServers: PlexServerDTO[] = [];
-	serverDownloads: ServerDownloadProgressDTO[] = [];
-	openExpansions: number[] = [];
-	downloadTaskDetail: DownloadTaskDTO | null = null;
-	selected: ISelection[] = [];
+const plexServers = ref<Readonly<PlexServerDTO[]>>([]);
+const serverDownloads = ref<Readonly<ServerDownloadProgressDTO[]>>([]);
+const openExpansions = ref<Readonly<number[]>>([]);
+const downloadTaskDetail = ref<DownloadTaskDTO | null>(null);
+const selected = ref<ISelection[]>([]);
+const dialog = ref<boolean>(false);
 
-	private dialog: boolean = false;
+const getSelected = computed(() => selected.value.map((x) => x.downloadTaskIds).flat(1));
 
-	get getSelected(): number[] {
-		return this.selected.map((x) => x.downloadTaskIds).flat(1);
+const getServersWithDownloads = computed(() => {
+	const serverIds = get(serverDownloads).map((x) => x.id);
+	const plexServersWithDownloads = get(plexServers).filter((x) => serverIds.includes(x.id));
+	for (const plexServer of plexServersWithDownloads) {
+		plexServer.downloadTasks = get(serverDownloads).find((x) => x.id === plexServer.id)?.downloads ?? [];
 	}
+	return plexServersWithDownloads;
+});
 
-	get getServersWithDownloads(): PlexServerDTO[] {
-		const serverIds = this.serverDownloads.map((x) => x.id);
-		const plexServers = this.plexServers.filter((x) => serverIds.includes(x.id));
-		for (const plexServer of plexServers) {
-			plexServer.downloadTasks = this.serverDownloads.find((x) => x.id === plexServer.id)?.downloads ?? [];
+const hasSelected = computed(() => getSelected.value.length > 0);
+
+// region single commands
+
+const commandSwitch = ({ action, item }: { action: string; item: DownloadTaskDTO }) => {
+	const ids = [item.id];
+	switch (action) {
+		case 'pause':
+			pauseDownloadTasks(item.id);
+			break;
+		case 'clear':
+			clearDownloadTasks(ids);
+			break;
+		case 'delete':
+			deleteDownloadTasks(ids);
+			break;
+		case 'stop':
+			stopDownloadTasks(item.id);
+			break;
+		case 'restart':
+			restartDownloadTasks(item.id);
+			break;
+		case 'start':
+			startDownloadTasks(item.id);
+			break;
+		case 'details':
+			detailsDownloadTask(item);
+			break;
+		default:
+			Log.error(`Action: ${action} does not have a assigned command with payload: ${item}`, { action, item });
+	}
+};
+
+function detailsDownloadTask(downloadTask: DownloadTaskDTO): void {
+	dialog.value = true;
+	detailDownloadTask(downloadTask.id).subscribe((data) => {
+		if (data.isSuccess && data.value) {
+			downloadTaskDetail.value = data.value;
 		}
-		return plexServers;
-	}
+	});
+}
 
-	get hasSelected(): boolean {
-		return this.getSelected.length > 0;
-	}
-
-	// region single commands
-
-	commandSwitch({ action, item }: { action: string; item: DownloadTaskDTO }) {
-		const ids = [item.id];
-		switch (action) {
-			case 'pause':
-				this.pauseDownloadTasks(item.id);
-				break;
-			case 'clear':
-				this.clearDownloadTasks(ids);
-				break;
-			case 'delete':
-				this.deleteDownloadTasks(ids);
-				break;
-			case 'stop':
-				this.stopDownloadTasks(item.id);
-				break;
-			case 'restart':
-				this.restartDownloadTasks(item.id);
-				break;
-			case 'start':
-				this.startDownloadTasks(item.id);
-				break;
-			case 'details':
-				this.detailsDownloadTask(item);
-				break;
-			default:
-				Log.error(`Action: ${action} does not have a assigned command with payload: ${item}`, { action, item });
-		}
-	}
-
-	detailsDownloadTask(downloadTask: DownloadTaskDTO): void {
-		this.dialog = true;
-		detailDownloadTask(downloadTask.id).subscribe((downloadTaskDetail) => {
-			if (downloadTaskDetail.isSuccess && downloadTaskDetail.value) {
-				this.downloadTaskDetail = downloadTaskDetail.value;
-			}
-		});
-	}
-
-	updateSelected(plexServerId: number, downloadTaskIds: number[]) {
-		const index = this.selected.findIndex((x) => x.plexServerId === plexServerId);
-		if (index === -1) {
-			this.selected.push({ plexServerId, downloadTaskIds });
-		} else {
-			this.selected.splice(index, 1, { plexServerId, downloadTaskIds });
-		}
-	}
-
-	// endregion
-
-	// region batch commands
-	clearDownloadTasks(downloadTaskIds: number[]): void {
-		if (downloadTaskIds && downloadTaskIds.length > 0) {
-			DownloadService.clearDownloadTasks(downloadTaskIds);
-			return;
-		}
-
-		if (this.hasSelected) {
-			DownloadService.clearDownloadTasks(this.getSelected);
-			this.selected = [];
-		} else {
-			DownloadService.clearDownloadTasks();
-		}
-	}
-
-	startDownloadTasks(downloadTaskId: number): void {
-		DownloadService.startDownloadTasks(downloadTaskId);
-	}
-
-	pauseDownloadTasks(downloadTaskId: number): void {
-		DownloadService.pauseDownloadTasks(downloadTaskId);
-	}
-
-	stopDownloadTasks(downloadTaskId: number): void {
-		DownloadService.stopDownloadTasks(downloadTaskId);
-	}
-
-	restartDownloadTasks(downloadTaskId: number): void {
-		DownloadService.restartDownloadTasks(downloadTaskId);
-	}
-
-	deleteDownloadTasks(downloadTaskIds: number[]): void {
-		DownloadService.deleteDownloadTasks(downloadTaskIds);
-	}
-
-	// endregion
-
-	closeDetailsDialog(): void {
-		this.downloadTaskDetail = null;
-		this.dialog = false;
-	}
-
-	mounted(): void {
-		useSubscription(
-			ServerService.getServers().subscribe((servers) => {
-				this.plexServers = servers;
-				this.openExpansions = [...Array(servers?.length).keys()] ?? [];
-			}),
-		);
-
-		useSubscription(
-			DownloadService.getServerDownloadList().subscribe((downloads) => {
-				this.serverDownloads = downloads;
-			}),
-		);
+function updateSelected(plexServerId: number, downloadTaskIds: number[]): void {
+	const index = selected.value.findIndex((x) => x.plexServerId === plexServerId);
+	if (index === -1) {
+		selected.value.push({ plexServerId, downloadTaskIds });
+	} else {
+		selected.value.splice(index, 1, { plexServerId, downloadTaskIds });
 	}
 }
+
+function clearDownloadTasks(downloadTaskIds: number[]): void {
+	if (downloadTaskIds && downloadTaskIds.length > 0) {
+		DownloadService.clearDownloadTasks(downloadTaskIds);
+		return;
+	}
+
+	if (hasSelected.value) {
+		DownloadService.clearDownloadTasks(getSelected.value);
+		selected.value = [];
+	} else {
+		DownloadService.clearDownloadTasks();
+	}
+}
+
+// endregion
+
+// region batch commands
+
+function startDownloadTasks(downloadTaskId: number): void {
+	DownloadService.startDownloadTasks(downloadTaskId);
+}
+
+function pauseDownloadTasks(downloadTaskId: number): void {
+	DownloadService.pauseDownloadTasks(downloadTaskId);
+}
+
+function stopDownloadTasks(downloadTaskId: number): void {
+	DownloadService.stopDownloadTasks(downloadTaskId);
+}
+
+function restartDownloadTasks(downloadTaskId: number): void {
+	DownloadService.restartDownloadTasks(downloadTaskId);
+}
+
+function deleteDownloadTasks(downloadTaskIds: number[]): void {
+	DownloadService.deleteDownloadTasks(downloadTaskIds);
+}
+
+// endregion
+
+function closeDetailsDialog(): void {
+	downloadTaskDetail.value = null;
+	dialog.value = false;
+}
+
+onMounted(() => {
+	useSubscription(
+		ServerService.getServers().subscribe((servers) => {
+			plexServers.value = servers;
+			openExpansions.value = [...Array(servers?.length).keys()] ?? [];
+		}),
+	);
+
+	useSubscription(
+		DownloadService.getServerDownloadList().subscribe((downloads) => {
+			serverDownloads.value = downloads;
+		}),
+	);
+});
 </script>

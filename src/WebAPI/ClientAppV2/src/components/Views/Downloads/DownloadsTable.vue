@@ -1,116 +1,108 @@
 <template>
 	<div>
-		<v-tree-view-table
-			:items="downloadRows"
-			:headers="getHeaders"
-			height-auto
-			media-icons
-			load-children
-			item-key="id"
-			@action="tableAction"
-			@selected="selectedAction"
-		/>
+		<h1>Downloads Table</h1>
+		<!--		<v-tree-view-table-->
+		<!--			:items="downloadRows"-->
+		<!--			:headers="getHeaders"-->
+		<!--			height-auto-->
+		<!--			media-icons-->
+		<!--			load-children-->
+		<!--			item-key="id"-->
+		<!--			@action="tableAction"-->
+		<!--			@selected="selectedAction"-->
+		<!--		/>-->
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Log from 'consola';
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { computed, defineEmits, defineProps, ref } from 'vue';
 import { DownloadProgressDTO, DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
-import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
-import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
+import { QTreeViewTableHeader } from '@props';
 
-@Component
-export default class DownloadsTable extends Vue {
-	@Prop({ type: Boolean })
-	readonly loading: Boolean = false;
+const props = defineProps<{
+	loading?: boolean;
+	value: DownloadTaskDTO[];
+	serverId: number;
+	downloadRows: DownloadProgressDTO[];
+}>();
 
-	@Prop({ required: true, type: Array as () => DownloadTaskDTO[] })
-	readonly value!: DownloadTaskDTO[];
+const emit = defineEmits<{
+	(e: 'action', payload: { action: string; item: DownloadTaskDTO }): void;
+	(e: 'selected', payload: number[]): void;
+}>();
 
-	@Prop({ required: true, type: Number })
-	readonly serverId!: number;
+const fileMergeProgressList = ref<FileMergeProgress[]>([]);
 
-	fileMergeProgressList: FileMergeProgress[] = [];
+const getHeaders = computed((): QTreeViewTableHeader[] => {
+	return [
+		// {
+		// 	text: 'Id',
+		// 	value: 'id',
+		// 	maxWidth: 50,
+		// },
+		{
+			label: 'Title',
+			name: 'title',
+			field: 'title',
+		},
+		{
+			label: 'Status',
+			name: 'status',
+			field: 'status',
+		},
+		{
+			label: 'Received',
+			name: 'dataReceived',
+			field: 'dataReceived',
+		},
+		{
+			label: 'Size',
+			name: 'dataTotal',
+			field: 'dataTotal',
+		},
+		{
+			label: 'Speed',
+			name: 'downloadSpeed',
+			field: 'downloadSpeed',
+		},
+		{
+			label: 'ETA',
+			name: 'timeRemaining',
+			field: 'timeRemaining',
+		},
+		{
+			label: 'Percentage',
+			name: 'percentage',
+			field: 'percentage',
+		},
+		{
+			label: 'Actions',
+			name: 'actions',
+			field: 'actions',
+			sortable: false,
+		},
+	];
+});
 
-	@Prop({ required: true, type: Array as () => DownloadProgressDTO[] })
-	readonly downloadRows!: DownloadProgressDTO[];
+const flatDownloadRows = computed((): DownloadProgressDTO[] => {
+	return [
+		props.downloadRows,
+		props.downloadRows.map((x) => x.children),
+		props.downloadRows.map((x) => x.children?.map((y) => y.children)),
+		props.downloadRows.map((x) => x.children?.map((y) => y.children?.map((z) => z.children))),
+	]
+		.flat(3)
+		.filter((x) => !!x) as DownloadProgressDTO[];
+});
 
-	get getHeaders(): ITreeViewTableHeader[] {
-		return [
-			// {
-			// 	text: 'Id',
-			// 	value: 'id',
-			// 	maxWidth: 50,
-			// },
-			{
-				text: 'Title',
-				value: 'title',
-				maxWidth: 250,
-			},
-			{
-				text: 'Status',
-				value: 'status',
-				width: 120,
-			},
-			{
-				text: 'Received',
-				value: 'dataReceived',
-				type: TreeViewTableHeaderEnum.FileSize,
-				width: 120,
-			},
-			{
-				text: 'Size',
-				value: 'dataTotal',
-				type: TreeViewTableHeaderEnum.FileSize,
-				width: 120,
-			},
-			{
-				text: 'Speed',
-				value: 'downloadSpeed',
-				type: TreeViewTableHeaderEnum.FileSpeed,
-				width: 120,
-			},
-			{
-				text: 'ETA',
-				value: 'timeRemaining',
-				type: TreeViewTableHeaderEnum.Duration,
-				width: 120,
-			},
-			{
-				text: 'Percentage',
-				value: 'percentage',
-				type: TreeViewTableHeaderEnum.Percentage,
-				width: 120,
-			},
-			{
-				text: 'Actions',
-				value: 'actions',
-				type: TreeViewTableHeaderEnum.Actions,
-				width: 160,
-				sortable: false,
-			},
-		];
-	}
+function tableAction(payload: { action: string; item: DownloadTaskDTO }) {
+	Log.info('command', payload);
+	emit('action', payload);
+}
 
-	get flatDownloadRows(): DownloadProgressDTO[] {
-		return [
-			this.downloadRows,
-			this.downloadRows.map((x) => x.children),
-			this.downloadRows.map((x) => x.children?.map((y) => y.children)),
-			this.downloadRows.map((x) => x.children?.map((y) => y.children?.map((z) => z.children))),
-		]
-			.flat(3)
-			.filter((x) => !!x) as DownloadProgressDTO[];
-	}
-
-	tableAction(payload: { action: string; item: DownloadTaskDTO }) {
-		Log.info('command', payload);
-		this.$emit('action', payload);
-	}
-
-	selectedAction(selected: number[]) {
-		this.$emit('selected', selected);
-	}
+function selectedAction(selected: number[]) {
+	Log.info('selected', selected);
+	emit('selected', selected);
 }
 </script>

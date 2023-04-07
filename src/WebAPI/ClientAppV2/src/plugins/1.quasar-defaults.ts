@@ -54,6 +54,7 @@ export default defineNuxtPlugin(() => {
 });
 
 // Source: https://github.com/quasarframework/quasar/discussions/8761#discussioncomment-1042529
+type ExtractComponentProps<T> = T extends ComponentConstructor<infer X> ? X['$props'] : never;
 export const setQuasarComponentDefaultPropValues = <T extends ComponentConstructor>(
 	component: T,
 	propDefaults: {
@@ -77,29 +78,5 @@ export const setQuasarComponentDefaultPropValues = <T extends ComponentConstruct
 			default:
 				throw new Error('unhandled type: ' + typeof prop);
 		}
-	}
-};
-
-type ExtractComponentProps<T> = T extends ComponentConstructor<infer X> ? X['$props'] : never;
-const setDefault = <T extends ComponentConstructor, K extends keyof ExtractComponentProps<T>>(
-	component: T,
-	key: K & string,
-	value: ExtractComponentProps<T>[K],
-) => {
-	const prop = component.props[key];
-	switch (typeof prop) {
-		case 'object':
-			prop.default = value;
-			break;
-		case 'function':
-			component.props[key] = {
-				type: prop,
-				default: value,
-			};
-			break;
-		case 'undefined':
-			throw new Error('unknown prop: ' + key);
-		default:
-			throw new Error('unhandled type: ' + typeof prop);
 	}
 };

@@ -1,8 +1,8 @@
 <template>
 	<q-page>
 		<!-- Logo	-->
-		<q-row justify="center" no-gutters class="q-my-md" no-wrap>
-			<q-col cols="auto">
+		<q-row justify="center" no-gutters no-wrap>
+			<q-col cols="auto" class="q-my-md">
 				<logo :size="128" />
 			</q-col>
 		</q-row>
@@ -91,8 +91,10 @@
 									</q-tab-panel>
 									<!-- Checking paths	-->
 									<q-tab-panel :name="3">
-										<h2 class="mt-2">{{ $t('pages.setup.paths.title') }}</h2>
-										<paths-default-overview />
+										<h2>
+											{{ $t('pages.setup.paths.title') }}
+										</h2>
+										<folder-paths-overview only-defaults />
 									</q-tab-panel>
 									<!-- Plex Accounts	-->
 									<q-tab-panel :name="4">
@@ -141,33 +143,29 @@
 							</q-col>
 							<q-col>
 								<q-row justify="center">
-									<q-col v-if="!isNextDisabled" align-self="center" class="q-mx-md" cols="2">
+									<q-col v-if="!isNextDisabled" class="q-mx-md" cols="2">
 										<NavigationPreviousButton
 											:disabled="isBackDisabled"
 											cy="setup-page-previous-button"
 											@click="back" />
 									</q-col>
-									<q-col v-if="!isNextDisabled" align-self="center" class="q-mx-md" cols="2">
+									<q-col v-if="!isNextDisabled" class="q-mx-md" cols="2">
 										<NavigationNextButton
 											:disabled="isNextDisabled"
 											cy="setup-page-next-button"
 											@click="next" />
 									</q-col>
-									<q-col v-else align-self="center" cols="3">
+									<q-col v-else class="q-mx-md q-mb-md" cols="auto">
 										<NavigationFinishSetupButton cy="setup-page-skip-setup-button" @click="finishSetup" />
 									</q-col>
 								</q-row>
 							</q-col>
 							<!--	Skip button	-->
-							<q-col v-if="!isNextDisabled" cols="auto" align-self="end" class="q-mx-md">
+							<q-col v-if="!isNextDisabled" cols="auto" class="q-mx-md">
 								<NavigationSkipSetupButton
 									:disabled="isNextDisabled"
 									@click="useOpenControlDialog(confirmationDialogName)" />
-								<confirmation-dialog
-									:name="confirmationDialogName"
-									text-id="skip-setup"
-									@confirm="finishSetup"
-									@cancel="skipDialogOpen = false" />
+								<confirmation-dialog :name="confirmationDialogName" text-id="skip-setup" @confirm="finishSetup" />
 							</q-col>
 						</q-row>
 					</q-col>
@@ -188,7 +186,6 @@ const router = useRouter();
 
 const stepIndex = ref(1);
 const stepPagesCount = ref(5);
-const skipDialogOpen = ref(false);
 
 const confirmationDialogName = 'skip-setup-confirmation';
 const headers = ref(['intro', 'future-plans', 'paths', 'accounts', 'finished']);

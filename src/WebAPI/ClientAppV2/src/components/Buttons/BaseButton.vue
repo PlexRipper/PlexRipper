@@ -1,7 +1,6 @@
 <script lang="ts">
 import { h, resolveComponent, defineComponent } from 'vue';
 import { useI18n, useRouter } from '#imports';
-import { IBaseButtonProps } from '@props';
 import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
 export default defineComponent({
@@ -28,6 +27,12 @@ export default defineComponent({
 		if (props.iconOnly && props.flat) {
 			style.flat = true;
 		}
+
+		let buttonText = props.label;
+		if (props.textId) {
+			buttonText = useI18n().t(`general.commands.${props.textId}`);
+		}
+
 		const classes = {
 			'base-btn': true,
 			'base-btn-outline': style.outline,
@@ -40,7 +45,7 @@ export default defineComponent({
 			QBtn,
 			{
 				class: classes,
-				label: getButtonText(props),
+				label: buttonText,
 				icon: props.iconAlign === 'left' ? props.icon : undefined,
 				iconRight: props.iconAlign === 'right' ? props.icon : undefined,
 				glossy: props.glossy,
@@ -89,8 +94,4 @@ export default defineComponent({
 		);
 	},
 });
-
-function getButtonText(props: IBaseButtonProps): string | number {
-	return props.textId ? useI18n().t(`general.commands.${props.textId}`) : props.label;
-}
 </script>

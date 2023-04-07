@@ -73,6 +73,7 @@ const onOpen = () => {
 
 const cancel = () => {
 	emit('cancel');
+	useCloseControlDialog(props.name);
 	loading.value = false;
 };
 

@@ -68,8 +68,19 @@
             "clear-notifications": "Alle Benachrichtigungen löschen",
             "no-notifications": "keine Benachrichtigungen verfügbar"
         },
-        "paths-custom-overview": {
-            "no-paths": "Keine Pfade festgelegt"
+        "folder-paths-overview": {
+            "no-paths": "Keine Pfade festgelegt",
+            "main": {
+                "header": "Standart Pfad"
+            },
+            "movie": {
+                "header": "Filme Pfad",
+                "default-name": "Filmordnerpfad"
+            },
+            "tv-show": {
+                "header": "Serien Pfad",
+                "default-name": ""
+            }
         },
         "server-dialog": {
             "header": "{serverName} Einstellung",
@@ -383,17 +394,6 @@
             },
             "debug": {
                 "header": "Fehlersuche"
-            },
-            "paths": {
-                "main": {
-                    "header": "Standart Pfad"
-                },
-                "movie": {
-                    "header": "Filme Pfad"
-                },
-                "tv-show": {
-                    "header": "Serien Pfad"
-                }
             },
             "ui": {
                 "confirmation-settings": {

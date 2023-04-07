@@ -68,8 +68,19 @@
             "clear-notifications": "Clear All Notifications",
             "no-notifications": "No notifications available"
         },
-        "paths-custom-overview": {
-            "no-paths": "No paths are set"
+        "folder-paths-overview": {
+            "no-paths": "No paths are set",
+            "main": {
+                "header": "Default Paths"
+            },
+            "movie": {
+                "header": "Movie Paths",
+                "default-name": "Movie Folder Path"
+            },
+            "tv-show": {
+                "header": "TV-Show Paths",
+                "default-name": "Tv-show Folder Path"
+            }
         },
         "server-dialog": {
             "header": "{serverName} configuration",
@@ -383,17 +394,6 @@
             },
             "debug": {
                 "header": "Debug"
-            },
-            "paths": {
-                "main": {
-                    "header": "Default Paths"
-                },
-                "movie": {
-                    "header": "Movie Paths"
-                },
-                "tv-show": {
-                    "header": "TV-Show Paths"
-                }
             },
             "ui": {
                 "confirmation-settings": {

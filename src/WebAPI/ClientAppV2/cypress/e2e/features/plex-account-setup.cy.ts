@@ -1,9 +1,9 @@
 import { basePageSetup } from '@fixtures/baseE2E';
 import { cy, describe, it } from 'local-cypress';
+import { generatePlexAccountServerAndLibraries } from '@mock/mock-combination';
 import { PLEX_ACCOUNT_API_URL, PLEX_SERVER_API_URL } from '@api-urls';
 import { generateResultDTO } from '@mock';
 import { SignalrService } from '@service';
-import { generatePlexAccountServerAndLibraries } from '@mock/mock-combination';
 import { PlexServerConnectionDTO } from '@dto/mainApi';
 
 describe('empty spec', () => {

@@ -1,17 +1,24 @@
-// ***********************************************************
-// This example support/e2e.ts is processed and
-// loaded automatically before your test files.
-//
-// This is a great place to put global configuration and
-// behavior that modifies Cypress.
-//
-// You can change the location of this file or turn off
-// automatically serving support files with the
-// 'supportFile' configuration option.
-//
-// You can read more here:
-// https://on.cypress.io/configuration
-// ***********************************************************
-
-// Import commands.js using ES2015 syntax:
+import { cy, beforeEach, afterEach } from 'local-cypress';
 import './commands';
+
+beforeEach(() => {
+	const notMockedRequests = cy.stub().as('notMockedRequests');
+	cy.intercept('http://localhost:5000/api/**', notMockedRequests);
+});
+
+/**
+ * This is a custom command to check if there are any requests that were not mocked.
+ */
+afterEach(() => {
+	cy.get('@notMockedRequests')
+		.then((stub) =>
+			cy.wrap(
+				stub
+					// @ts-ignore
+					.getCalls()
+					.map((call) => call.args[0].url)
+					.join(', '),
+			),
+		)
+		.should('be.empty');
+});

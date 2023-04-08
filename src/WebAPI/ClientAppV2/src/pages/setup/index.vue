@@ -26,6 +26,7 @@
 											"
 											:complete="index + 1 === stepPagesCount ? stepIndex > index : stepIndex > index + 1"
 											:label="$t(`pages.setup.${header}.header`)"
+											:data-cy="`setup-header-tab-${index + 1}`"
 											edit-icon="$complete" />
 										<q-separator v-if="index < stepPagesCount - 1" :key="index + 100" />
 									</template>

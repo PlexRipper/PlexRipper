@@ -52,7 +52,7 @@ export default defineComponent({
 				size: props.size,
 				loading: props.loading,
 				disable: props.disabled,
-				dataCy: props.cy,
+				'data-cy': props.cy,
 				flat: style.flat,
 				round: style.round,
 				rounded: style.rounded,

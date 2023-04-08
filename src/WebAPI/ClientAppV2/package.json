@@ -35,6 +35,7 @@
 		"vanta": "^0.5.22"
 	},
 	"devDependencies": {
+		"@faker-js/faker": "^7.6.0",
 		"@nuxt/devtools": "^0.3.1",
 		"@nuxtjs/eslint-config-typescript": "^12.0.0",
 		"@nuxtjs/i18n": "^8.0.0-beta.10",
@@ -50,6 +51,7 @@
 		"eslint-config-prettier": "^8.8.0",
 		"eslint-plugin-prettier": "^4.2.1",
 		"eslint-plugin-vue": "^9.10.0",
+		"local-cypress": "^1.2.6",
 		"nuxt": "^3.3.3",
 		"nuxt-quasar-ui": "^1.4.0",
 		"object-path": "^0.11.8",

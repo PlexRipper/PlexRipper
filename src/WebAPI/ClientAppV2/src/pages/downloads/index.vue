@@ -10,12 +10,16 @@
 			@clear="clearDownloadTasks(getSelected)"
 			@delete="deleteDownloadTasks(getSelected)" />
 		<!--	The Download Table	-->
-		<q-row v-if="getServersWithDownloads.length > 0">
-			<q-col>
+		<q-row v-if="getServersWithDownloads.length > 0" justify="center">
+			<q-col cols="12">
 				<q-list>
-					<q-expansion-item v-for="plexServer in getServersWithDownloads" :key="plexServer.id">
+					<q-expansion-item
+						v-for="plexServer in getServersWithDownloads"
+						:key="plexServer.id"
+						default-opened
+						class="extra-background q-ma-md">
 						<template #header>
-							<q-row no-gutters>
+							<q-row align="center">
 								<!-- Download Server Settings -->
 								<q-col>
 									<server-download-status />
@@ -27,12 +31,12 @@
 								<q-col class="py-0"></q-col>
 							</q-row>
 						</template>
-						<template #body>
+						<template #default>
 							<downloads-table
 								v-model="selected"
 								:download-rows="plexServer.downloadTasks"
 								:server-id="plexServer.id"
-								@action="commandSwitch"
+								@action="commandSwitch($event)"
 								@selected="updateSelected(plexServer.id, $event)" />
 						</template>
 					</q-expansion-item>
@@ -54,7 +58,7 @@ import { ref, computed } from 'vue';
 import { get } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { DownloadService, ServerService } from '@service';
-import { DownloadTaskDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
+import { DownloadProgressDTO, DownloadTaskDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
 import { detailDownloadTask } from '@api/plexDownloadApi';
 
 declare interface ISelection {
@@ -62,9 +66,9 @@ declare interface ISelection {
 	downloadTaskIds: number[];
 }
 
-const plexServers = ref<Readonly<PlexServerDTO[]>>([]);
-const serverDownloads = ref<Readonly<ServerDownloadProgressDTO[]>>([]);
-const openExpansions = ref<Readonly<number[]>>([]);
+const plexServers = ref<PlexServerDTO[]>([]);
+const serverDownloads = ref<ServerDownloadProgressDTO[]>([]);
+const openExpansions = ref<number[]>([]);
 const downloadTaskDetail = ref<DownloadTaskDTO | null>(null);
 const selected = ref<ISelection[]>([]);
 const dialog = ref<boolean>(false);
@@ -84,7 +88,7 @@ const hasSelected = computed(() => getSelected.value.length > 0);
 
 // region single commands
 
-const commandSwitch = ({ action, item }: { action: string; item: DownloadTaskDTO }) => {
+const commandSwitch = ({ action, item }: { action: string; item: DownloadProgressDTO }) => {
 	const ids = [item.id];
 	switch (action) {
 		case 'pause':

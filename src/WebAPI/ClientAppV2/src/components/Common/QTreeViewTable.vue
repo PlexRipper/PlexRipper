@@ -1,15 +1,15 @@
 <template>
 	{{ selected }}
-	<QTreeViewTableRow v-model:model-value="selected" is-header :node="headerNode" :columns="columns" />
+	<QTreeViewTableRow v-model:model-value="selected" class="q-ma-sm" is-header :node="headerNode" :columns="columns" />
 	<q-separator />
 	<q-tree
 		v-model:ticked="ticked"
-		class="q-tree-view-table"
+		class="q-tree-view-table q-ma-sm"
 		tick-strategy="leaf"
 		:nodes="nodes"
 		node-key="id"
 		no-connectors
-		accordion
+		:accordion="false"
 		:default-expand-all="defaultExpandAll"
 		:label-key="labelKey">
 		<template #default-header="{ node }">
@@ -95,18 +95,5 @@ const headerNode = computed((): QTreeViewTableItem => {
 			border-bottom-color: $separator-color;
 		}
 	}
-}
-
-.header-column {
-	//min-width: 100px;
-	//max-width: 400px;
-	display: inline-block;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	overflow: hidden;
-}
-
-.table-column {
-	//min-width: 150px;
 }
 </style>

@@ -1,12 +1,11 @@
 <template>
 	<q-col class="q-py-sm">
-		<q-btn tile class="no-background" :icon="getButtonIcon" @click.stop="changeStatus">
-			<span>{{ getButtonText }}</span>
-		</q-btn>
+		<BaseButton flat :icon="getButtonIcon" :label="$t(getButtonText)" @click.stop="changeStatus" />
 	</q-col>
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue';
 import { DownloadStatus } from '@dto/mainApi';
 
 const serverStatus = ref<DownloadStatus>(DownloadStatus.Paused);
@@ -25,13 +24,13 @@ const getButtonIcon = computed(() => {
 
 const getButtonText = computed(() => {
 	if (serverStatus.value === DownloadStatus.Paused) {
-		return 'Start';
+		return 'components.server-download-status.start';
 	}
 
 	if (serverStatus.value === DownloadStatus.Downloading) {
-		return 'Pause';
+		return 'components.server-download-status.pause';
 	}
-	return 'mdi-question';
+	return '';
 });
 
 function changeStatus(): void {

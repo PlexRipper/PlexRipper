@@ -2,14 +2,15 @@
 	<q-row
 		justify="between"
 		align="center"
+		no-wrap
 		:class="{ 'q-tree-view-table-row': true, 'q-tree-view-table-row--header': isHeader }"
 		class="q-mb-xs">
-		<q-col v-if="isHeader" cols="auto" class="q-ml-md q-pl-sm">
-			<q-checkbox dense :model-value="modelValue" @update:model-value="$emit('update:model-value', $event)" />
-		</q-col>
 		<!--	Title Column	-->
 		<q-col class="q-ml-sm">
-			<q-row align="center">
+			<q-row align="center" justify="start">
+				<q-col v-if="isHeader" cols="auto" class="q-ml-md q-pl-sm">
+					<q-checkbox dense :model-value="modelValue" @update:model-value="$emit('update:model-value', $event)" />
+				</q-col>
 				<q-col align-self="start" cols="auto" class="header-column">
 					<q-media-type-icon v-if="node['mediaType']" :media-type="node['mediaType']" />
 					{{ node[columns[0].field] }}
@@ -17,20 +18,24 @@
 			</q-row>
 		</q-col>
 		<!--	Rest of the Columns	-->
-		<q-col cols="9" :style="{ 'max-width': `${getContainerWidth}px !important` }">
-			<q-row align="center" justify="between">
+		<q-col cols="auto" :style="{ 'max-width': `${getContainerWidth}px !important` }">
+			<q-row align="center" justify="end" no-wrap>
 				<template v-for="(column, i) in columns.slice(1)" :key="column.field">
-					<q-col cols="grow" class="table-column">
-						<template v-if="isHeader">
+					<!--	Table Header Row	-->
+					<q-col v-if="isHeader" cols="auto" :text-align="'center'" :width="column?.width ?? 0">
+						<span>
 							{{ node[column.field] }}
-						</template>
+						</span>
+					</q-col>
+					<!--	Rest of the Columns	-->
+					<q-col v-else cols="auto" class="table-column" :width="column?.width ?? 0" :text-align="column.align">
 						<!-- Duration format -->
-						<template v-else-if="column['type'] === 'duration'">
-							<QDuration :value="node[column.field]" />
+						<template v-if="column['type'] === 'duration'">
+							<QDuration short :value="node[column.field]" />
 						</template>
 						<!-- Date format -->
 						<template v-else-if="column['type'] === 'date'">
-							<QDateTime :text="node[column.field]" />
+							<QDateTime short-date :text="node[column.field]" />
 						</template>
 						<!-- Filesize format -->
 						<template v-else-if="column['type'] === 'file-size'">
@@ -46,21 +51,25 @@
 						</template>
 						<!-- Actions -->
 						<template v-else-if="column['type'] === 'actions'">
-							<!-- Item Actions -->
-							<BaseButton
-								v-for="(action, y) in node[column.field]"
-								:key="`${i}-${y}`"
-								icon-only
-								dense
-								flat
-								square
-								:icon="Convert.buttonTypeToIcon(action)"
-								@click.stop="
-									$emit('action', {
-										action: action,
-										data: node,
-									})
-								" />
+							<q-row justify="start" no-wrap>
+								<q-col cols="auto">
+									<!-- Item Actions -->
+									<BaseButton
+										v-for="(action, y) in node[column.field]"
+										:key="`${i}-${y}`"
+										icon-only
+										dense
+										flat
+										square
+										:icon="Convert.buttonTypeToIcon(action)"
+										@click.stop="
+											$emit('action', {
+												action: action,
+												data: node,
+											})
+										" />
+								</q-col>
+							</q-row>
 						</template>
 						<!-- Default format -->
 						<template v-else>
@@ -95,19 +104,35 @@ defineEmits<{
 }>();
 
 const getContainerWidth = computed(() => {
-	return props.columns.reduce((acc, column) => {
-		return acc + (column?.width ?? 100);
+	return props.columns.slice(1).reduce((acc, column) => {
+		return acc + (column?.width ?? 120);
 	}, 0);
 });
 </script>
 <style lang="scss">
 .q-tree-view-table-row {
 	height: 30px;
-	text-align: center;
+
+	.header-column {
+		display: inline-block;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		overflow: hidden;
+	}
+
+	.table-column {
+		padding: 0 8px;
+	}
 
 	&--header {
 		font-weight: bold;
 		height: 40px;
+
+		.header-column {
+			margin-left: 8px;
+			font-weight: bold;
+			text-align: center;
+		}
 	}
 }
 </style>

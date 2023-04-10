@@ -1,17 +1,15 @@
 <template>
-	<div>
-		<q-tree-view-table :nodes="getData" :columns="getHeaders" @action="tableAction" />
-		<!--		<v-tree-view-table-->
-		<!--			:items="downloadRows"-->
-		<!--			:headers="getHeaders"-->
-		<!--			height-auto-->
-		<!--			media-icons-->
-		<!--			load-children-->
-		<!--			item-key="id"-->
-		<!--		-->
-		<!--			@selected="selectedAction"-->
-		<!--		/>-->
-	</div>
+	<q-tree-view-table :nodes="getData" :columns="getHeaders" @action="tableAction" />
+	<!--		<v-tree-view-table-->
+	<!--			:items="downloadRows"-->
+	<!--			:headers="getHeaders"-->
+	<!--			height-auto-->
+	<!--			media-icons-->
+	<!--			load-children-->
+	<!--			item-key="id"-->
+	<!--		-->
+	<!--			@selected="selectedAction"-->
+	<!--		/>-->
 </template>
 
 <script setup lang="ts">
@@ -27,7 +25,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-	(e: 'action', payload: { action: string; item: DownloadTaskDTO }): void;
+	(e: 'action', payload: { action: string; item: DownloadProgressDTO }): void;
 	(e: 'selected', payload: number[]): void;
 }>();
 
@@ -53,43 +51,56 @@ const getHeaders = computed((): QTreeViewTableHeader[] => {
 			label: 'Status',
 			name: 'status',
 			field: 'status',
+			align: 'right',
+			width: 120,
 		},
 		{
 			label: 'Received',
 			name: 'dataReceived',
 			field: 'dataReceived',
 			type: 'file-size',
+			align: 'right',
+			width: 120,
 		},
 		{
 			label: 'Size',
 			name: 'dataTotal',
 			field: 'dataTotal',
 			type: 'file-size',
+			width: 120,
+			align: 'right',
 		},
 		{
 			label: 'Speed',
 			name: 'downloadSpeed',
 			field: 'downloadSpeed',
 			type: 'file-speed',
+			align: 'right',
+			width: 120,
 		},
 		{
 			label: 'ETA',
 			name: 'timeRemaining',
 			field: 'timeRemaining',
 			type: 'duration',
+			align: 'right',
+			width: 120,
 		},
 		{
 			label: 'Percentage',
 			name: 'percentage',
 			field: 'percentage',
 			type: 'percentage',
-			width: 150,
+			align: 'center',
+			width: 120,
 		},
 		{
 			label: 'Actions',
 			name: 'actions',
 			field: 'actions',
 			type: 'actions',
+			width: 160,
+			align: 'center',
 			sortable: false,
 		},
 	];
@@ -106,9 +117,12 @@ const flatDownloadRows = computed((): DownloadProgressDTO[] => {
 		.filter((x) => !!x) as DownloadProgressDTO[];
 });
 
-function tableAction(payload: { action: string; data: DownloadTaskDTO | QTreeViewTableItem }) {
+function tableAction(payload: { action: string; data: QTreeViewTableItem }) {
 	Log.info('command', payload);
-	emit('action', payload);
+	emit('action', {
+		action: payload.action,
+		item: payload.data as DownloadProgressDTO,
+	});
 }
 
 function selectedAction(selected: number[]) {

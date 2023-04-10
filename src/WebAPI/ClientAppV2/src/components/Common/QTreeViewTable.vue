@@ -1,21 +1,10 @@
 <template>
-	<!--	<q-row justify="end">-->
-	<!--		<q-col cols="auto" class="q-mx-md">-->
-	<!--			<q-checkbox />-->
-	<!--		</q-col>-->
-	<!--		<q-col-->
-	<!--			v-for="(column, i) in columns"-->
-	<!--			:key="column.field"-->
-	<!--			:align-self="i === 0 ? 'start' : 'none'"-->
-	<!--			:cols="i === 0 ? 'auto' : '1'">-->
-	<!--			{{ column.label }}-->
-	<!--			<q-icon v-if="column.sortable" :name="column.sortDirection === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down'" />-->
-	<!--		</q-col>-->
-	<!--	</q-row>-->
 	{{ selected }}
 	<QTreeViewTableRow v-model:model-value="selected" is-header :node="headerNode" :columns="columns" />
+	<q-separator />
 	<q-tree
 		v-model:ticked="ticked"
+		class="q-tree-view-table"
 		tick-strategy="leaf"
 		:nodes="nodes"
 		node-key="id"
@@ -24,14 +13,13 @@
 		:default-expand-all="defaultExpandAll"
 		:label-key="labelKey">
 		<template #default-header="{ node }">
-			<QTreeViewTableRow :columns="columns" :node="node" />
+			<QTreeViewTableRow :columns="columns" :node="node" @action="$emit('action', $event)" />
 		</template>
 	</q-tree>
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
-import { defineProps, withDefaults, ref } from 'vue';
+import { defineProps, withDefaults, ref, defineEmits } from 'vue';
 import { QTreeViewTableHeader, QTreeViewTableItem } from '@props';
 
 defineOptions({
@@ -51,6 +39,11 @@ const props = withDefaults(
 	},
 );
 
+defineEmits<{
+	(e: 'update:model-value', payload: boolean): void;
+	(e: 'action', payload: { action: string; data: QTreeViewTableItem }): void;
+}>();
+
 const selected = ref<boolean>(false);
 const ticked = ref([]);
 const expanded = ref([]);
@@ -66,6 +59,44 @@ const headerNode = computed((): QTreeViewTableItem => {
 });
 </script>
 <style lang="scss">
+@import '@/assets/scss/variables.scss';
+
+.q-tree-view-table {
+	.q-tree {
+		&__node {
+			border-bottom-style: solid;
+			border-bottom-width: 1px;
+			padding-bottom: 0;
+
+			.q-tree__node-header,
+			.q-tree__children .q-tree__node-header {
+				margin-top: 0;
+				border-radius: 0;
+			}
+
+			&:last-child {
+				border-bottom: none;
+			}
+		}
+	}
+}
+
+.body--dark {
+	.q-tree-view-table {
+		.q-tree__node {
+			border-bottom-color: $separator-dark-color;
+		}
+	}
+}
+
+.body--light {
+	.q-tree-view-table {
+		.q-tree__node {
+			border-bottom-color: $separator-color;
+		}
+	}
+}
+
 .header-column {
 	//min-width: 100px;
 	//max-width: 400px;

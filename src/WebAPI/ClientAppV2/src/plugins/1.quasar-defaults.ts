@@ -49,7 +49,9 @@ export default defineNuxtPlugin(() => {
 
 	setQuasarComponentDefaultPropValues(QLinearProgress, {
 		color: 'red',
+		trackColor: 'red',
 		stripe: true,
+		size: '20px',
 	});
 });
 

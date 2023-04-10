@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<q-tree-view-table :nodes="downloadRows" :columns="getHeaders" />
+		<q-tree-view-table :nodes="getData" :columns="getHeaders" @action="tableAction" />
 		<!--		<v-tree-view-table-->
 		<!--			:items="downloadRows"-->
 		<!--			:headers="getHeaders"-->
@@ -8,7 +8,7 @@
 		<!--			media-icons-->
 		<!--			load-children-->
 		<!--			item-key="id"-->
-		<!--			@action="tableAction"-->
+		<!--		-->
 		<!--			@selected="selectedAction"-->
 		<!--		/>-->
 	</div>
@@ -18,7 +18,7 @@
 import Log from 'consola';
 import { computed, defineEmits, defineProps, ref } from 'vue';
 import { DownloadProgressDTO, DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
-import { QTreeViewTableHeader } from '@props';
+import { QTreeViewTableHeader, QTreeViewTableItem } from '@props';
 
 const props = defineProps<{
 	loading?: boolean;
@@ -32,6 +32,10 @@ const emit = defineEmits<{
 }>();
 
 const fileMergeProgressList = ref<FileMergeProgress[]>([]);
+
+const getData = computed((): QTreeViewTableItem[] => {
+	return props.downloadRows as QTreeViewTableItem[];
+});
 
 const getHeaders = computed((): QTreeViewTableHeader[] => {
 	return [
@@ -54,31 +58,38 @@ const getHeaders = computed((): QTreeViewTableHeader[] => {
 			label: 'Received',
 			name: 'dataReceived',
 			field: 'dataReceived',
+			type: 'file-size',
 		},
 		{
 			label: 'Size',
 			name: 'dataTotal',
 			field: 'dataTotal',
+			type: 'file-size',
 		},
 		{
 			label: 'Speed',
 			name: 'downloadSpeed',
 			field: 'downloadSpeed',
+			type: 'file-speed',
 		},
 		{
 			label: 'ETA',
 			name: 'timeRemaining',
 			field: 'timeRemaining',
+			type: 'duration',
 		},
 		{
 			label: 'Percentage',
 			name: 'percentage',
 			field: 'percentage',
+			type: 'percentage',
+			width: 150,
 		},
 		{
 			label: 'Actions',
 			name: 'actions',
 			field: 'actions',
+			type: 'actions',
 			sortable: false,
 		},
 	];
@@ -95,7 +106,7 @@ const flatDownloadRows = computed((): DownloadProgressDTO[] => {
 		.filter((x) => !!x) as DownloadProgressDTO[];
 });
 
-function tableAction(payload: { action: string; item: DownloadTaskDTO }) {
+function tableAction(payload: { action: string; data: DownloadTaskDTO | QTreeViewTableItem }) {
 	Log.info('command', payload);
 	emit('action', payload);
 }

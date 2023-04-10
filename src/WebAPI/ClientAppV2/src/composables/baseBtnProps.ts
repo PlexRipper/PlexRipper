@@ -18,7 +18,7 @@ export function baseBtnPropsDefault() {
 		},
 		textId: {
 			type: String,
-			default: 'missing-text',
+			default: '',
 		},
 		tooltipId: {
 			type: String,

@@ -32,6 +32,10 @@ export default defineComponent({
 		if (props.textId) {
 			buttonText = useI18n().t(`general.commands.${props.textId}`);
 		}
+		// Fallback text
+		if (!props.iconOnly && !buttonText) {
+			buttonText = useI18n().t(`general.commands.missing-text`);
+		}
 
 		const classes = {
 			'base-btn': true,

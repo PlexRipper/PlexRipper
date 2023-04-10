@@ -89,6 +89,7 @@ export default defineNuxtConfig({
 		'@api': fileURLToPath(new URL('./src/types/api/', import.meta.url)),
 		'@const': fileURLToPath(new URL('./src/types/const/', import.meta.url)),
 		'@buttons': fileURLToPath(new URL('./src/components/Buttons/', import.meta.url)),
+		'@composables': fileURLToPath(new URL('./src/composables/', import.meta.url)),
 		'@api-urls': fileURLToPath(new URL('./src/types/const/api-urls.ts', import.meta.url)),
 		'@props': fileURLToPath(new URL('./src/types/props/', import.meta.url)),
 		'@fixtures': fileURLToPath(new URL('./cypress/fixtures/', import.meta.url)),

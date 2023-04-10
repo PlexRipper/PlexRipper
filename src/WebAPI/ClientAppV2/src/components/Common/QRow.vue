@@ -27,7 +27,7 @@ const props = withDefaults(defineProps<QRowProps>(), {
 });
 
 const classes = computed(() => {
-	const classList: string[] = ['row'];
+	const classList: string[] = ['row full-width'];
 
 	if (props.column) {
 		classList.push('column');

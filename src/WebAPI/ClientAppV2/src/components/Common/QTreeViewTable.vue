@@ -1,36 +1,32 @@
 <template>
-	<q-markup-table>
-		<thead>
-			<tr>
-				<th v-for="column in columns" :key="column.field">
-					{{ column.label }}
-					<q-icon v-if="column.sortable" :name="column.sortDirection === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down'" />
-				</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr v-for="(row, rowIndex) in nodes" :key="rowIndex">
-				<td>
-					<q-tree
-						v-model:ticked="ticked"
-						tick-strategy="leaf"
-						:nodes="[row]"
-						node-key="id"
-						no-connectors
-						:default-expand-all="props.defaultExpandAll"
-						:label-key="labelKey">
-						<template #default-header="{ node }">
-							<q-tr>
-								<q-td v-for="(column, index) in columns" :key="column.field">
-									{{ node[column.field] }}
-								</q-td>
-							</q-tr>
-						</template>
-					</q-tree>
-				</td>
-			</tr>
-		</tbody>
-	</q-markup-table>
+	<!--	<q-row justify="end">-->
+	<!--		<q-col cols="auto" class="q-mx-md">-->
+	<!--			<q-checkbox />-->
+	<!--		</q-col>-->
+	<!--		<q-col-->
+	<!--			v-for="(column, i) in columns"-->
+	<!--			:key="column.field"-->
+	<!--			:align-self="i === 0 ? 'start' : 'none'"-->
+	<!--			:cols="i === 0 ? 'auto' : '1'">-->
+	<!--			{{ column.label }}-->
+	<!--			<q-icon v-if="column.sortable" :name="column.sortDirection === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down'" />-->
+	<!--		</q-col>-->
+	<!--	</q-row>-->
+	{{ selected }}
+	<QTreeViewTableRow v-model:model-value="selected" is-header :node="headerNode" :columns="columns" />
+	<q-tree
+		v-model:ticked="ticked"
+		tick-strategy="leaf"
+		:nodes="nodes"
+		node-key="id"
+		no-connectors
+		accordion
+		:default-expand-all="defaultExpandAll"
+		:label-key="labelKey">
+		<template #default-header="{ node }">
+			<QTreeViewTableRow :columns="columns" :node="node" />
+		</template>
+	</q-tree>
 </template>
 
 <script setup lang="ts">
@@ -47,7 +43,7 @@ const props = withDefaults(
 		nodes: QTreeViewTableItem[];
 		columns: QTreeViewTableHeader[];
 		labelKey?: string;
-		defaultExpandAll: boolean;
+		defaultExpandAll?: boolean;
 	}>(),
 	{
 		nodes: () => [],
@@ -55,7 +51,31 @@ const props = withDefaults(
 	},
 );
 
-const selected = ref('');
+const selected = ref<boolean>(false);
 const ticked = ref([]);
 const expanded = ref([]);
+
+const headerNode = computed((): QTreeViewTableItem => {
+	const node = {} as QTreeViewTableItem;
+
+	props.columns.forEach((column) => {
+		node[column.field] = column.label;
+	});
+
+	return node;
+});
 </script>
+<style lang="scss">
+.header-column {
+	//min-width: 100px;
+	//max-width: 400px;
+	display: inline-block;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.table-column {
+	//min-width: 150px;
+}
+</style>

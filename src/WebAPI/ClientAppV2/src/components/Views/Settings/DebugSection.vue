@@ -8,11 +8,11 @@
 			</q-col>
 			<q-col cols="8" align-self="center" />
 		</q-row>
-		<div :style="{ width: '100px', height: '100px', backgroundColor: color }"></div>
 		<q-row>
 			<q-col style="height: 1000px">
 				<q-scroll-area class="fit">
-					<DownloadConfirmation ref="downloadConfirmationRef" />
+					<DownloadsTable :download-rows="downloadRows.downloads" :server-id="downloadRows.id" />
+					<DownloadConfirmation />
 				</q-scroll-area>
 			</q-col>
 		</q-row>
@@ -27,11 +27,13 @@ import { AlertService, MediaService } from '@service';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 import { PlexMediaDTO } from '@dto/mainApi';
 import { DownloadConfirmation } from '#components';
+import { generateDownloadTasks } from '@mock/mock-download-task';
 
 const router = useRouter();
 const mediaItem = ref<PlexMediaDTO | null>();
 const mediaTableColumns = getMediaTableColumns();
 const mediaTableRows = ref<PlexMediaDTO[]>([]);
+const downloadRows = generateDownloadTasks(1, { tvShowDownloadTask: 10 });
 
 const color = ref('red');
 const addAlert = (): void => {
@@ -50,20 +52,7 @@ const resetDatabaseCommand = (): void => {
 	);
 };
 
-const openDownloadConfirmation = (): void => {
-	const testData = [
-		{
-			mediaIds: [25],
-			type: 'TvShow',
-			plexServerId: 1,
-			plexLibraryId: 9,
-		},
-	];
-	downloadConfirmationRef.value.openDialog(testData);
-};
-
 onMounted(() => {
-	openDownloadConfirmation();
 	useSubscription(
 		MediaService.getTvShowMediaData(32).subscribe((data) => {
 			if (data) {

@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<h1>Downloads Table</h1>
+		<q-tree-view-table :nodes="downloadRows" :columns="getHeaders" />
 		<!--		<v-tree-view-table-->
 		<!--			:items="downloadRows"-->
 		<!--			:headers="getHeaders"-->
@@ -22,7 +22,6 @@ import { QTreeViewTableHeader } from '@props';
 
 const props = defineProps<{
 	loading?: boolean;
-	value: DownloadTaskDTO[];
 	serverId: number;
 	downloadRows: DownloadProgressDTO[];
 }>();

@@ -1,5 +1,5 @@
 <template>
-	<div :class="classes">
+	<div :class="classes" :style="styles">
 		<slot />
 	</div>
 </template>
@@ -26,7 +26,8 @@ interface IOffset {
 interface QColProps extends IBreakPoints, IOffset {
 	cols?: 'auto' | 'grow' | 'shrink' | string | number | boolean;
 	offset?: string | number | boolean;
-
+	width?: number;
+	textAlign?: 'left' | 'center' | 'right' | 'justify';
 	alignSelf?: 'auto' | 'start' | 'end' | 'center' | 'baseline' | 'stretch' | 'none';
 }
 
@@ -42,6 +43,7 @@ const props = withDefaults(defineProps<QColProps>(), {
 	cols: 0,
 	offset: false,
 	alignSelf: 'none',
+	width: 0,
 	xs: false,
 	sm: false,
 	md: false,
@@ -78,6 +80,21 @@ const classes = computed(() => {
 		classList.push(`offset-${props.offset}`);
 	}
 
+	switch (props.textAlign) {
+		case 'left':
+			classList.push('text-left');
+			break;
+		case 'center':
+			classList.push('text-center');
+			break;
+		case 'right':
+			classList.push('text-right');
+			break;
+		case 'justify':
+			classList.push('text-justify');
+			break;
+	}
+
 	for (const key in breakPoints) {
 		const offsetKey = `offset${key.charAt(0).toUpperCase()}${key.slice(1)}` as keyof IOffset;
 		if (props[offsetKey]) {
@@ -86,5 +103,16 @@ const classes = computed(() => {
 	}
 
 	return classList;
+});
+
+const styles = computed(() => {
+	const styleList: Record<string, string> = {};
+
+	if (props.width) {
+		styleList.minWidth = `${props.width}px`;
+		styleList.maxWidth = `${props.width}px`;
+	}
+
+	return styleList;
 });
 </script>

@@ -8,8 +8,8 @@
 import { computed, defineProps, withDefaults } from 'vue';
 
 interface QRowProps {
-	justify?: 'start' | 'center' | 'end' | 'around' | 'between' | boolean;
-	align?: 'start' | 'center' | 'end' | boolean;
+	justify?: 'start' | 'center' | 'end' | 'around' | 'between';
+	align?: 'start' | 'center' | 'end';
 	gutter?: string | boolean;
 	noWrap?: boolean;
 	wrap?: boolean;
@@ -18,8 +18,8 @@ interface QRowProps {
 }
 
 const props = withDefaults(defineProps<QRowProps>(), {
-	justify: false,
-	align: false,
+	justify: 'start',
+	align: 'center',
 	gutter: false,
 	noWrap: false,
 	reverse: false,

@@ -6,14 +6,13 @@
 @import 'mixins';
 //@import './components.scss';
 //@import './overwriting.scss';
-//@import './pages.scss';
 
 /*
 default
 */
-// Prevents vertical scroll bar on body/page niveau
+// Prevents unneeded vertical scroll bar on body/page niveau
 html {
-	overflow-y: hidden;
+	// overflow-y: hidden;
 }
 
 

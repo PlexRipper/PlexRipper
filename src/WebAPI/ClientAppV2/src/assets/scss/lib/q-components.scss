@@ -96,6 +96,23 @@ body {
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * MediaOverviewBar
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+.media-overview-bar {
+	@extend .default-border;
+	min-height: 85px;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * DownloadOverviewBar
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+.download-overview-bar {
+	@extend .default-border;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // * QCardDialog
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -183,7 +200,7 @@ body {
 				span {
 					transition-duration: 0.28s;
 					height: 30px;
-					font-size: 0.8em;
+					font-size: 1.0rem;
 				}
 			}
 		}

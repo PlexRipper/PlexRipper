@@ -165,11 +165,3 @@ mediaOverViewBarBus.on((data) => {
 
 // endregion
 </script>
-<style lang="scss">
-@import '@/assets/scss/style.scss';
-
-.media-overview-bar {
-	@extend .default-border;
-	min-height: 85px;
-}
-</style>

@@ -1,6 +1,7 @@
 ﻿using Application.Contracts;
 using AutoMapper;
 using BackgroundServices.Contracts;
+using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.WebAPI.Common.DTO;
@@ -12,16 +13,19 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class PlexServerController : BaseController
 {
+    private readonly IMediator _mediator;
     private readonly IPlexServerService _plexServerService;
     private readonly ISyncServerScheduler _syncServerScheduler;
 
     public PlexServerController(
         ILog log,
         IMapper mapper,
+        IMediator mediator,
         IPlexServerService plexServerService,
         ISyncServerScheduler syncServerScheduler,
         INotificationsService notificationsService) : base(log, mapper, notificationsService)
     {
+        _mediator = mediator;
         _plexServerService = plexServerService;
         _syncServerScheduler = syncServerScheduler;
     }
@@ -31,7 +35,8 @@ public class PlexServerController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexServerDTO>>))]
     public async Task<IActionResult> GetAll()
     {
-        return ToActionResult<List<PlexServer>, List<PlexServerDTO>>(await _plexServerService.GetAllPlexServersAsync(false));
+        var plexServersResult = await _mediator.Send(new GetAllPlexServersQuery(true, false));
+        return ToActionResult<List<PlexServer>, List<PlexServerDTO>>(plexServersResult);
     }
 
     // GET api/<PlexServerController>/5
@@ -44,7 +49,8 @@ public class PlexServerController : BaseController
         if (id <= 0)
             return BadRequestInvalidId();
 
-        return ToActionResult<PlexServer, PlexServerDTO>(await _plexServerService.GetServerAsync(id));
+        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(id, true, false));
+        return ToActionResult<PlexServer, PlexServerDTO>(plexServerResult);
     }
 
     // GET api/<PlexServerController>/5/inspect

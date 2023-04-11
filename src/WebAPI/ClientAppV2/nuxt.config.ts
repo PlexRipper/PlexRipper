@@ -99,6 +99,7 @@ export default defineNuxtConfig({
 		'@img': fileURLToPath(new URL('./src/assets/img/', import.meta.url)),
 		'@enums': fileURLToPath(new URL('./src/types/enums/', import.meta.url)),
 		'@mock': fileURLToPath(new URL('./src/mock-data/', import.meta.url)),
+		'@factories': fileURLToPath(new URL('./src/mock-data/factories/', import.meta.url)),
 		'@interfaces': fileURLToPath(new URL('./src/types/interfaces/', import.meta.url)),
 		'@components': fileURLToPath(new URL('./src/components/', import.meta.url)),
 		'@overviews': fileURLToPath(new URL('./src/components/Overviews/', import.meta.url)),

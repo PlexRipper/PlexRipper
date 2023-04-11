@@ -131,6 +131,10 @@
             "no-media-found": "No media found.",
             "selected-count": "{selectedCount}  selected",
             "episode-count": "{episodeCount} Episodes"
+        },
+        "server-download-status": {
+            "pause": "Pause",
+            "start": "Start"
         }
     },
     "confirmation": {
@@ -185,7 +189,7 @@
             "update": "Update",
             "validate": "Validate",
             "validated": "Validated",
-            "missing-text": "",
+            "missing-text": "Missing Text",
             "inspect-server": "Inspect Server"
         },
         "name": "PlexRipper",

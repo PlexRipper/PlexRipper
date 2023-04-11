@@ -5,7 +5,6 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 		{
 			label: 'Title',
 			field: 'title',
-			name: 'title',
 			align: 'left',
 			sortOrder: 'ad',
 			sortable: true,
@@ -13,7 +12,6 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 		},
 		{
 			label: 'Year',
-			name: 'year',
 			field: 'year',
 			align: 'center',
 			sortable: true,
@@ -21,30 +19,82 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 		{
 			label: 'Size',
 			field: 'mediaSize',
-			name: 'size',
 			align: 'center',
 			sortable: true,
 		},
 		{
 			label: 'Added At',
-			name: 'addedAt',
 			field: 'addedAt',
 			align: 'center',
 			sortable: true,
 		},
 		{
 			label: 'Updated At',
-			name: 'updatedAt',
 			field: 'updatedAt',
 			align: 'center',
 			sortable: true,
 		},
 		{
 			label: 'Actions',
-			name: 'actions',
 			field: 'actions',
 			align: 'center',
 			required: true,
 		},
 	];
 };
+
+export const getDownloadTableColumns: QTreeViewTableHeader[] = [
+	{
+		label: 'Title',
+		field: 'title',
+	},
+	{
+		label: 'Status',
+		field: 'status',
+		align: 'right',
+		width: 120,
+	},
+	{
+		label: 'Received',
+		field: 'dataReceived',
+		type: 'file-size',
+		align: 'right',
+		width: 120,
+	},
+	{
+		label: 'Size',
+		field: 'dataTotal',
+		type: 'file-size',
+		width: 120,
+		align: 'right',
+	},
+	{
+		label: 'Speed',
+		field: 'downloadSpeed',
+		type: 'file-speed',
+		align: 'right',
+		width: 120,
+	},
+	{
+		label: 'ETA',
+		field: 'timeRemaining',
+		type: 'duration',
+		align: 'right',
+		width: 120,
+	},
+	{
+		label: 'Percentage',
+		field: 'percentage',
+		type: 'percentage',
+		align: 'center',
+		width: 120,
+	},
+	{
+		label: 'Actions',
+		field: 'actions',
+		type: 'actions',
+		width: 160,
+		align: 'center',
+		sortable: false,
+	},
+];

@@ -155,6 +155,7 @@ export interface DownloadTaskDTO {
 	fullTitle: string;
 	status: DownloadStatus;
 	fileLocationUrl: string;
+	downloadUrl: string;
 	fileName: string;
 	mediaType: PlexMediaType;
 	downloadTaskType: DownloadTaskType;
@@ -162,7 +163,7 @@ export interface DownloadTaskDTO {
 	key: number;
 	/** @format int32 */
 	downloadSpeed: number;
-	/** @format int32 */
+	/** @format int64 */
 	fileTransferSpeed: number;
 	/** @format int64 */
 	dataReceived: number;

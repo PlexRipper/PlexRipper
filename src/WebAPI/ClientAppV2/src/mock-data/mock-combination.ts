@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker';
+import { generatePlexServers, generatePlexLibraries } from '@factories';
 import { MockConfig } from '@mock/interfaces';
-import { generatePlexServers } from '@mock/mock-plex-server';
-import { generatePlexLibraries } from '@mock/mock-plex-library';
 import { PlexAccountDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
 import { generatePlexAccounts } from '@mock/mock-plex-account';
@@ -11,7 +10,7 @@ export function generatePlexServersAndLibraries(config: Partial<MockConfig> = {}
 	libraries: PlexLibraryDTO[];
 } {
 	const servers = generatePlexServers(config);
-	const libraries = generatePlexLibraries(config);
+	const libraries = generatePlexLibraries(-1, config);
 
 	for (let i = 0; i < libraries.length; i++) {
 		incrementSeed(i);

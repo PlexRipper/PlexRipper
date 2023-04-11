@@ -1,16 +1,8 @@
-import { faker } from '@faker-js/faker';
 import { randMovie } from '@ngneat/falso';
 import { toPlexMediaType } from '@composables/conversion';
 import { MockConfig } from '@mock/interfaces';
-import {
-	DownloadProgressDTO,
-	DownloadStatus,
-	DownloadTaskDTO,
-	DownloadTaskType,
-	PlexMediaType,
-	ServerDownloadProgressDTO,
-} from '@dto/mainApi';
-import { checkConfig, getId, incrementSeed } from '@mock/mock-base';
+import { DownloadProgressDTO, DownloadStatus, DownloadTaskType, ServerDownloadProgressDTO } from '@dto/mainApi';
+import { checkConfig, getId } from '@mock/mock-base';
 
 export function generateDownloadTasks(plexServerId: number, config: Partial<MockConfig> = {}): ServerDownloadProgressDTO {
 	const validConfig = checkConfig(config);

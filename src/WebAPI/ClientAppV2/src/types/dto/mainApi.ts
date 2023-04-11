@@ -762,7 +762,6 @@ export interface PlexServerDTO {
 	dnsRebindingProtection: boolean;
 	natLoopbackSupported: boolean;
 	plexServerConnections: PlexServerConnectionDTO[];
-	downloadTasks: DownloadProgressDTO[];
 }
 
 export interface PlexServerDTOListResultDTO {

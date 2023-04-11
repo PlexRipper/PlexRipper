@@ -1,29 +1,24 @@
 <template>
-	<!-- Download Toolbar -->
-	<q-row no-gutters>
-		<q-col>
-			<q-toolbar outlined :height="64">
-				<!--Command buttons-->
-				<q-btn
-					v-for="(button, i) in buttons"
-					:key="i"
+	<q-toolbar class="download-overview-bar">
+		<!-- Download Toolbar -->
+		<q-row no-gutters justify="end">
+			<!--Command buttons-->
+			<q-col v-for="(button, i) in buttons" :key="i" cols="auto">
+				<vertical-button
 					:icon="button.icon"
-					depressed
-					tile
-					:disable="button.disableOnNoSelected && !hasSelected"
-					class="no-background"
-					@click="$emit(button.value)">
-					<span class="hidden-sm-and-down">{{ button.name }}</span>
-				</q-btn>
-			</q-toolbar>
-		</q-col>
-	</q-row>
+					:label="button.name"
+					:disabled="button.disableOnNoSelected && !hasSelected"
+					:width="verticalButtonWidth"
+					@click="$emit('action', button.value)" />
+			</q-col>
+		</q-row>
+	</q-toolbar>
 </template>
 
 <script setup lang="ts">
-import { defineProps, computed } from 'vue';
+import { defineProps, defineEmits, computed, ref } from 'vue';
 
-interface buttons {
+interface IButton {
 	name: string;
 	value: string;
 	icon: string;
@@ -34,7 +29,11 @@ defineProps<{
 	hasSelected: boolean;
 }>();
 
-const buttons = computed<buttons[]>(() => {
+defineEmits<{ (e: 'action', action: string): void }>();
+
+const verticalButtonWidth = ref(120);
+
+const buttons = computed<IButton[]>(() => {
 	return [
 		{
 			name: 'Clear Completed',

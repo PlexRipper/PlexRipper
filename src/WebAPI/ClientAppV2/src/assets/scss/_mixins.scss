@@ -25,6 +25,20 @@ Background
 	white-space: nowrap;
 }
 
+body {
+	&.body--dark {
+		.extra-background {
+			background-color: $dark-dialog-background-color;
+		}
+	}
+
+	&.body--light {
+		.extra-background {
+			background-color: $light-dialog-background-color;
+		}
+	}
+}
+
 /*
 Borders
 */

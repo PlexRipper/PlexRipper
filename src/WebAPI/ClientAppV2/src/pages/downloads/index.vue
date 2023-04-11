@@ -1,14 +1,9 @@
 <template>
 	<q-page>
 		<!-- Download Toolbar -->
-		<download-bar
-			:has-selected="hasSelected"
-			@pause="pauseDownloadTasks(getSelected)"
-			@stop="stopDownloadTasks(getSelected)"
-			@restart="restartDownloadTasks(getSelected)"
-			@start="startDownloadTasks(getSelected)"
-			@clear="clearDownloadTasks(getSelected)"
-			@delete="deleteDownloadTasks(getSelected)" />
+		<download-bar :has-selected="hasSelected" @action="commandSwitch({ action: $event, item: null })" />
+		{{ aggregateSelected }}
+
 		<!--	The Download Table	-->
 		<q-row v-if="getServersWithDownloads.length > 0" justify="center">
 			<q-col cols="12">
@@ -34,10 +29,12 @@
 						<template #default>
 							<downloads-table
 								v-model="selected"
+								:selected="getSelected(plexServer.id)"
 								:download-rows="plexServer.downloadTasks"
 								:server-id="plexServer.id"
 								@action="commandSwitch($event)"
-								@selected="updateSelected(plexServer.id, $event)" />
+								@selected="updateSelected(plexServer.id, $event)"
+								@aggregate-selected="updateAggregateSelected(plexServer.id, $event)" />
 						</template>
 					</q-expansion-item>
 				</q-list>
@@ -55,25 +52,20 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { ref, computed } from 'vue';
-import { get } from '@vueuse/core';
+import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { DownloadService, ServerService } from '@service';
 import { DownloadProgressDTO, DownloadTaskDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
 import { detailDownloadTask } from '@api/plexDownloadApi';
-
-declare interface ISelection {
-	plexServerId: number;
-	downloadTaskIds: number[];
-}
+import ISelection from '@interfaces/ISelection';
 
 const plexServers = ref<PlexServerDTO[]>([]);
 const serverDownloads = ref<ServerDownloadProgressDTO[]>([]);
 const openExpansions = ref<number[]>([]);
 const downloadTaskDetail = ref<DownloadTaskDTO | null>(null);
 const selected = ref<ISelection[]>([]);
+const aggregateSelected = ref<ISelection[]>([]);
 const dialog = ref<boolean>(false);
-
-const getSelected = computed(() => selected.value.map((x) => x.downloadTaskIds).flat(1));
 
 const getServersWithDownloads = computed(() => {
 	const serverIds = get(serverDownloads).map((x) => x.id);
@@ -84,12 +76,21 @@ const getServersWithDownloads = computed(() => {
 	return plexServersWithDownloads;
 });
 
-const hasSelected = computed(() => getSelected.value.length > 0);
+const hasSelected = computed(() => {
+	return get(selected).some((x) => x.keys.length > 0);
+});
 
 // region single commands
 
-const commandSwitch = ({ action, item }: { action: string; item: DownloadProgressDTO }) => {
-	const ids = [item.id];
+const commandSwitch = ({ action, item }: { action: string; item: DownloadProgressDTO | null }) => {
+	const ids: number[] = [];
+	if (item) {
+		ids.push(item.id);
+	} else if (hasSelected.value) {
+		ids.push(...getSelected());
+	} else {
+		return;
+	}
 	switch (action) {
 		case 'pause':
 			pauseDownloadTasks(item.id);
@@ -124,15 +125,6 @@ function detailsDownloadTask(downloadTask: DownloadTaskDTO): void {
 			downloadTaskDetail.value = data.value;
 		}
 	});
-}
-
-function updateSelected(plexServerId: number, downloadTaskIds: number[]): void {
-	const index = selected.value.findIndex((x) => x.plexServerId === plexServerId);
-	if (index === -1) {
-		selected.value.push({ plexServerId, downloadTaskIds });
-	} else {
-		selected.value.splice(index, 1, { plexServerId, downloadTaskIds });
-	}
 }
 
 function clearDownloadTasks(downloadTaskIds: number[]): void {
@@ -180,6 +172,48 @@ function closeDetailsDialog(): void {
 	dialog.value = false;
 }
 
+// region Selection
+const getSelected = (id: number): ISelection => {
+	const result = get(selected).find((x) => x.indexKey === id);
+	return result as ISelection;
+};
+
+function updateSelected(id: number, payload: ISelection): void {
+	const i = selected.value.findIndex((x) => x.indexKey === id);
+	if (i === -1) {
+		selected.value.push({ indexKey: id, keys: payload.keys, allSelected: payload.allSelected });
+		return;
+	}
+
+	selected.value[i].allSelected = payload.allSelected;
+	selected.value[i].keys = payload.keys;
+}
+
+function updateAggregateSelected(id: number, payload: ISelection): void {
+	const i = get(aggregateSelected).findIndex((x) => x.indexKey === id);
+	if (i === -1) {
+		get(aggregateSelected).push({ indexKey: id, keys: payload.keys, allSelected: payload.allSelected });
+		return;
+	}
+
+	get(aggregateSelected)[i].allSelected = payload.allSelected;
+	get(aggregateSelected)[i].keys = payload.keys;
+}
+
+function createSelections() {
+	for (const server of get(serverDownloads)) {
+		if (get(selected).some((x) => x.indexKey === server.id)) {
+			continue;
+		}
+		get(selected).push({
+			keys: [],
+			indexKey: server.id,
+			allSelected: false,
+		});
+	}
+}
+
+// endregion
 onMounted(() => {
 	useSubscription(
 		ServerService.getServers().subscribe((servers) => {
@@ -189,8 +223,9 @@ onMounted(() => {
 	);
 
 	useSubscription(
-		DownloadService.getServerDownloadList().subscribe((downloads) => {
-			serverDownloads.value = downloads;
+		DownloadService.getServerDownloadList().subscribe((data) => {
+			set(serverDownloads, data);
+			createSelections();
 		}),
 	);
 });

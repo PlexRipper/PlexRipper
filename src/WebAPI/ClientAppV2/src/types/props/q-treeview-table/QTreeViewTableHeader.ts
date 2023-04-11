@@ -1,5 +1,4 @@
 export interface QTreeViewTableHeader {
-	name: string;
 	label: string;
 	field: string;
 	width?: number;

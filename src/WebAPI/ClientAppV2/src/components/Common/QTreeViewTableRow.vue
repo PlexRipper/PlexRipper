@@ -9,7 +9,7 @@
 		<q-col class="q-ml-sm">
 			<q-row align="center" justify="start">
 				<q-col v-if="isHeader" cols="auto" class="q-ml-md q-pl-sm">
-					<q-checkbox dense :model-value="modelValue" @update:model-value="$emit('update:model-value', $event)" />
+					<q-checkbox dense :model-value="selected" @update:model-value="$emit('selected', $event)" />
 				</q-col>
 				<q-col align-self="start" cols="auto" class="header-column">
 					<q-media-type-icon v-if="node['mediaType']" :media-type="node['mediaType']" />
@@ -92,14 +92,14 @@ defineOptions({
 });
 
 const props = defineProps<{
-	modelValue?: boolean;
+	selected?: boolean | null;
 	isHeader?: boolean;
 	node: QTreeViewTableItem;
 	columns: QTreeViewTableHeader[];
 }>();
 
 defineEmits<{
-	(e: 'update:model-value', payload: boolean): void;
+	(e: 'selected', payload: boolean): void;
 	(e: 'action', payload: { action: string; data: QTreeViewTableItem }): void;
 }>();
 

@@ -56,6 +56,46 @@ body {
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * QTreeViewTable
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+.q-tree-view-table {
+	.q-tree {
+		&__node {
+			border-bottom-style: solid;
+			border-bottom-width: 1px;
+			padding-bottom: 0;
+
+			.q-tree__node-header,
+			.q-tree__children .q-tree__node-header {
+				margin-top: 0;
+				border-radius: 0;
+			}
+
+			&:last-child {
+				border-bottom: none;
+			}
+		}
+	}
+}
+
+.body--dark {
+	.q-tree-view-table {
+		.q-tree__node {
+			border-bottom-color: $separator-dark-color;
+		}
+	}
+}
+
+.body--light {
+	.q-tree-view-table {
+		.q-tree__node {
+			border-bottom-color: $separator-color;
+		}
+	}
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // * QCardDialog
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 

@@ -51,14 +51,13 @@ export function generatePlexServers(config: Partial<MockConfig> = {}): PlexServe
 }
 
 export function generatePlexServerStatus(config: Partial<MockConfig> = {}): PlexServerStatusDTO {
-	const validConfig = checkConfig(config);
-
 	return {
 		id: 1,
 		plexServerId: 0,
 		statusCode: 200,
 		statusMessage: 'The Plex server is online!',
 		isSuccessful: true,
+		plexServerConnectionId: 0,
 		lastChecked: faker.date.recent().toUTCString(),
 	};
 }
@@ -84,6 +83,7 @@ export function generatePlexServerConnection(plexServerId: number, config: Parti
 			relay: false,
 			plexServerId,
 			port,
+			serverStatusList: [],
 			protocol: scheme,
 			latestConnectionStatus: generatePlexServerStatus(validConfig),
 			iPv4: true,

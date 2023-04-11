@@ -8,13 +8,13 @@ export interface MockConfig {
 	plexAccountCount: number;
 	plexServerAccessCount: number;
 	firstTimeSetup: boolean;
+	// region DownloadTasks
 	movieDownloadTask: number;
 	tvShowDownloadTask: number;
-	// region DownloadTasks
 	seasonDownloadTask: number;
-	// endregion
 	episodeDownloadTask: number;
-	// region DownloadTasks
+	// endregion
+	// region Server
 	connectionHasProgress: boolean;
 	// endregion
 	maxServerConnections: number;

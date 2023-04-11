@@ -1,4 +1,4 @@
-import { cy } from 'local-cypress';
+import { cy, Cypress } from 'local-cypress';
 import {
 	DOWNLOAD_API_URL,
 	FOLDER_PATH_API_URL,
@@ -12,6 +12,7 @@ import {
 	SETTINGS_API_URL,
 } from '@api-urls';
 import { checkConfig, generatePlexServers, generateResultDTO, generateSettings, MockConfig } from '@mock';
+import { generateDownloadTasks } from '@mock/mock-download-task';
 
 export function basePageSetup(config: Partial<MockConfig> = {}) {
 	const configValid = checkConfig(config);
@@ -21,12 +22,13 @@ export function basePageSetup(config: Partial<MockConfig> = {}) {
 
 	cy.intercept('GET', PLEX_SERVER_API_URL, {
 		statusCode: 200,
-		body: generateResultDTO([]),
+		body: generateResultDTO(plexServers),
 	});
 
+	const downloadTasks = plexServers.map((x) => generateDownloadTasks(x.id, config)).flat();
 	cy.intercept('GET', DOWNLOAD_API_URL, {
 		statusCode: 200,
-		body: generateResultDTO([]),
+		body: generateResultDTO(downloadTasks),
 	});
 
 	cy.intercept('GET', FOLDER_PATH_API_URL, {
@@ -68,4 +70,8 @@ export function basePageSetup(config: Partial<MockConfig> = {}) {
 		statusCode: 200,
 		body: {},
 	});
+}
+
+export default function route(path: string) {
+	return Cypress.env('BASE_URL') + path;
 }

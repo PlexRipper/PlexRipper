@@ -12,6 +12,7 @@ export default defineComponent({
 		const QTooltip = resolveComponent('QTooltip');
 		const props = this.$props;
 		const emit = this.$emit;
+		const slots = this.$slots;
 		const style = {
 			flat: props.flat,
 			round: props.round,
@@ -32,15 +33,12 @@ export default defineComponent({
 		if (props.textId) {
 			buttonText = useI18n().t(`general.commands.${props.textId}`);
 		}
-		// Fallback text
-		if (!props.iconOnly && !buttonText) {
-			buttonText = useI18n().t(`general.commands.missing-text`);
-		}
 
 		const classes = {
 			'base-btn': true,
 			'base-btn-outline': style.outline,
 			'base-btn-block': props.block,
+			'base-btn-vertical': props.vertical,
 			[`base-btn-${props.color}`]: true,
 			'i18n-formatting': true,
 			...this.$attrs.class,
@@ -62,6 +60,7 @@ export default defineComponent({
 				rounded: style.rounded,
 				href: props.href ? props.href : undefined,
 				target: props.href ? '_blank' : '_self',
+				push: props.push,
 				onClick(event: MouseEvent) {
 					if (props.to) {
 						useRouter().push({

@@ -9,6 +9,7 @@ export interface IBaseButtonProps {
 	width: number;
 	height: number;
 	iconAlign: 'left' | 'right';
+	vertical: boolean;
 	// Quasar native
 	label: string;
 	icon: string;
@@ -20,6 +21,7 @@ export interface IBaseButtonProps {
 	outline: boolean;
 	loading: boolean;
 	disabled: boolean;
+	push: boolean;
 	// Vuetify Legacy
 	block: boolean;
 	iconOnly: boolean;

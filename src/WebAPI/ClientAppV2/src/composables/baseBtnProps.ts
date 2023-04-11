@@ -36,6 +36,10 @@ export function baseBtnPropsDefault() {
 			type: String as PropType<'left' | 'right'>,
 			default: 'left',
 		},
+		vertical: {
+			type: Boolean,
+			default: false,
+		},
 		// endregion
 		// region Quasar native
 
@@ -79,7 +83,10 @@ export function baseBtnPropsDefault() {
 			type: Boolean,
 			default: false,
 		},
-
+		push: {
+			type: Boolean,
+			default: false,
+		},
 		// endregion
 		// region Vuetify native
 		block: {

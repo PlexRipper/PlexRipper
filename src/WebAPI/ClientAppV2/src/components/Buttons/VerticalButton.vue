@@ -14,7 +14,7 @@ export default defineComponent({
 				outline: false,
 				iconSize: 36,
 				flat: true,
-				size: 'lg',
+				size: 'md',
 			} as IBaseButtonProps),
 		});
 	},

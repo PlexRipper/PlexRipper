@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { computed, defineEmits, defineProps, ref } from 'vue';
+import { computed, defineEmits, defineProps } from 'vue';
 import { DownloadProgressDTO } from '@dto/mainApi';
 import { QTreeViewTableItem } from '@props';
 import { getDownloadTableColumns } from '#imports';

@@ -1,19 +1,17 @@
 <template>
-	<q-card-dialog>
-		<template #title>
+	<q-card-dialog :name="name" :loading="loading" @opened="onOpen">
+		<template v-if="downloadTask" #title>
 			<q-media-type-icon :size="36" :media-type="downloadTask.mediaType" />
-			<span class="mt-2">
-				{{ downloadTask.fullTitle }}
-			</span>
+			{{ downloadTask.fullTitle }}
 		</template>
-		<template>
-			<q-markup-table v-if="downloadTask" class="section-table">
+		<template v-if="downloadTask" #default>
+			<q-markup-table class="section-table">
 				<tbody>
 					<tr>
 						<td style="width: 25%">{{ $t('components.download-details-dialog.overview.status') }}:</td>
 						<td>{{ downloadTask.status }}</td>
 					</tr>
-					<tr>
+					<tr v-if="downloadTask.fileName">
 						<td>{{ $t('components.download-details-dialog.overview.file-name') }}:</td>
 						<td>{{ downloadTask.fileName }}</td>
 					</tr>
@@ -25,14 +23,14 @@
 						<td>{{ $t('components.download-details-dialog.overview.destination-path') }} :</td>
 						<td>{{ downloadTask.destinationDirectory }}</td>
 					</tr>
-					<tr>
+					<tr v-if="downloadTask.downloadUrl">
 						<td>{{ $t('components.download-details-dialog.overview.download-url') }} :</td>
 						<td>
 							<q-row no-gutters class="no-wrap">
 								<q-col>
 									{{ downloadTask.downloadUrl }}
 								</q-col>
-								<q-col v-if="downloadTask.downloadUrl" cols="auto">
+								<q-col cols="auto">
 									<ExternalLinkButton :href="downloadTask.downloadUrl" />
 								</q-col>
 							</q-row>
@@ -45,10 +43,24 @@
 </template>
 
 <script setup lang="ts">
+import { defineProps, ref } from 'vue';
+import { set } from '@vueuse/core';
 import { DownloadTaskDTO } from '@dto/mainApi';
+import { detailDownloadTask } from '@api/plexDownloadApi';
 
-const props = defineProps<{
-	downloadTask?: DownloadTaskDTO | null;
-	dialog: boolean;
+defineProps<{
+	name: string;
 }>();
+const loading = ref(true);
+const downloadTask = ref<DownloadTaskDTO>();
+
+function onOpen(downloadTaskId: number) {
+	set(loading, true);
+	detailDownloadTask(downloadTaskId).subscribe((data) => {
+		if (data.isSuccess && data.value) {
+			downloadTask.value = data.value;
+		}
+		set(loading, false);
+	});
+}
 </script>

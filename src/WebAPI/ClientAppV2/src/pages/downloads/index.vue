@@ -1,8 +1,7 @@
 <template>
 	<q-page>
 		<!-- Download Toolbar -->
-		<download-bar :has-selected="hasSelected" @action="commandSwitch({ action: $event, item: null })" />
-		{{ aggregateSelected }}
+		<download-bar :has-selected="hasSelected" @action="batchCommandSwitch($event)" />
 
 		<!--	The Download Table	-->
 		<q-row v-if="getServersWithDownloads.length > 0" justify="center">
@@ -12,7 +11,7 @@
 						v-for="plexServer in getServersWithDownloads"
 						:key="plexServer.id"
 						default-opened
-						class="extra-background q-ma-md">
+						class="extra-background default-border-radius q-ma-md">
 						<template #header>
 							<q-row align="center">
 								<!-- Download Server Settings -->
@@ -21,20 +20,22 @@
 								</q-col>
 								<!-- Download Server Title -->
 								<q-col cols="auto">
-									<h2>{{ plexServer.name }}</h2>
+									<span class="title">{{ plexServer.name }}</span>
 								</q-col>
-								<q-col class="py-0"></q-col>
+								<q-col class="q-py-none"></q-col>
 							</q-row>
 						</template>
 						<template #default>
-							<downloads-table
-								v-model="selected"
-								:selected="getSelected(plexServer.id)"
-								:download-rows="plexServer.downloadTasks"
-								:server-id="plexServer.id"
-								@action="commandSwitch($event)"
-								@selected="updateSelected(plexServer.id, $event)"
-								@aggregate-selected="updateAggregateSelected(plexServer.id, $event)" />
+							<div class="q-py-lg">
+								<downloads-table
+									v-model="selected"
+									:selected="getSelected(plexServer.id)"
+									:download-rows="plexServer.downloadTasks"
+									:server-id="plexServer.id"
+									@action="commandSwitch($event)"
+									@selected="updateSelected(plexServer.id, $event)"
+									@aggregate-selected="updateAggregateSelected(plexServer.id, $event)" />
+							</div>
 						</template>
 					</q-expansion-item>
 				</q-list>
@@ -45,27 +46,26 @@
 				<h2>{{ $t('pages.downloads.no-downloads') }}</h2>
 			</q-col>
 		</q-row>
-		<download-details-dialog :download-task="downloadTaskDetail" :dialog="dialog" @close="closeDetailsDialog" />
+		<download-details-dialog :name="dialogName" />
 	</q-page>
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { DownloadService, ServerService } from '@service';
-import { DownloadProgressDTO, DownloadTaskDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
-import { detailDownloadTask } from '@api/plexDownloadApi';
+import { DownloadProgressDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
+import { useOpenControlDialog } from '#imports';
 
 const plexServers = ref<PlexServerDTO[]>([]);
 const serverDownloads = ref<ServerDownloadProgressDTO[]>([]);
 const openExpansions = ref<number[]>([]);
-const downloadTaskDetail = ref<DownloadTaskDTO | null>(null);
 const selected = ref<ISelection[]>([]);
 const aggregateSelected = ref<ISelection[]>([]);
-const dialog = ref<boolean>(false);
+const dialogName = 'download-details-dialog';
 
 const getServersWithDownloads = computed(() => {
 	const serverIds = get(serverDownloads).map((x) => x.id);
@@ -82,15 +82,23 @@ const hasSelected = computed(() => {
 
 // region single commands
 
-const commandSwitch = ({ action, item }: { action: string; item: DownloadProgressDTO | null }) => {
-	const ids: number[] = [];
-	if (item) {
-		ids.push(item.id);
-	} else if (hasSelected.value) {
-		ids.push(...getSelected());
-	} else {
-		return;
+function batchCommandSwitch(action: string) {
+	const ids = get(aggregateSelected).flatMap((x) => x.keys);
+	switch (action) {
+		case 'clear':
+			clearDownloadTasks(ids);
+			break;
+		case 'delete':
+			deleteDownloadTasks(ids);
+			break;
+		default:
+			Log.error(`Action: ${action} does not have a assigned batch command`);
 	}
+}
+
+const commandSwitch = ({ action, item }: { action: string; item: DownloadProgressDTO }) => {
+	const ids: number[] = [item.id];
+
 	switch (action) {
 		case 'pause':
 			pauseDownloadTasks(item.id);
@@ -111,21 +119,12 @@ const commandSwitch = ({ action, item }: { action: string; item: DownloadProgres
 			startDownloadTasks(item.id);
 			break;
 		case 'details':
-			detailsDownloadTask(item);
+			detailsDownloadTask(item.id);
 			break;
 		default:
 			Log.error(`Action: ${action} does not have a assigned command with payload: ${item}`, { action, item });
 	}
 };
-
-function detailsDownloadTask(downloadTask: DownloadTaskDTO): void {
-	dialog.value = true;
-	detailDownloadTask(downloadTask.id).subscribe((data) => {
-		if (data.isSuccess && data.value) {
-			downloadTaskDetail.value = data.value;
-		}
-	});
-}
 
 function clearDownloadTasks(downloadTaskIds: number[]): void {
 	if (downloadTaskIds && downloadTaskIds.length > 0) {
@@ -133,17 +132,12 @@ function clearDownloadTasks(downloadTaskIds: number[]): void {
 		return;
 	}
 
-	if (hasSelected.value) {
-		DownloadService.clearDownloadTasks(getSelected.value);
-		selected.value = [];
-	} else {
-		DownloadService.clearDownloadTasks();
-	}
+	DownloadService.clearDownloadTasks();
 }
 
 // endregion
 
-// region batch commands
+// region Single commands
 
 function startDownloadTasks(downloadTaskId: number): void {
 	DownloadService.startDownloadTasks(downloadTaskId);
@@ -165,17 +159,15 @@ function deleteDownloadTasks(downloadTaskIds: number[]): void {
 	DownloadService.deleteDownloadTasks(downloadTaskIds);
 }
 
-// endregion
-
-function closeDetailsDialog(): void {
-	downloadTaskDetail.value = null;
-	dialog.value = false;
+function detailsDownloadTask(downloadTaskId: number): void {
+	useOpenControlDialog(dialogName, downloadTaskId);
 }
+
+// endregion
 
 // region Selection
 const getSelected = (id: number): ISelection => {
-	const result = get(selected).find((x) => x.indexKey === id);
-	return result as ISelection;
+	return get(selected).find((x) => x.indexKey === id) as ISelection;
 };
 
 function updateSelected(id: number, payload: ISelection): void {

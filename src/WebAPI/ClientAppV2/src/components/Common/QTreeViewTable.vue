@@ -1,5 +1,4 @@
 <template>
-	{{ selected }}
 	<QTreeViewTableRow
 		:selected="isRootSelected"
 		class="q-ma-sm"

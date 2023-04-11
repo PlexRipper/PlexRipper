@@ -81,7 +81,7 @@ public class WebApiMappingProfile : Profile
 
         // PlexServerConnection -> PlexServerConnectionDTO
         CreateMap<PlexServerConnection, PlexServerConnectionDTO>(MemberList.Destination)
-            .ForMember(x => x.Progress, opt => opt.Ignore())
+            .ForMember(dto => dto.Progress, opt => opt.Ignore())
             .ForMember(dto => dto.ServerStatusList, entity => entity.MapFrom(x => x.PlexServerStatus))
             .ForMember(dto => dto.LatestConnectionStatus, entity => entity.MapFrom(x => x.LatestConnectionStatus))
             .ForMember(dto => dto.Url, entity => entity.MapFrom(x => x.Url));
@@ -92,17 +92,23 @@ public class WebApiMappingProfile : Profile
 
     private void DownloadTaskMappings()
     {
+        // DownloadTask -> DownloadTaskDTO
         CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)
+            .ForMember(dto => dto.DownloadUrl, opt => opt.Ignore())
             .ForMember(dto => dto.Status, opt => opt.MapFrom(entity => entity.DownloadStatus))
+            .ForMember(dto => dto.FileTransferSpeed, opt => opt.MapFrom(entity => entity.FileTransferSpeed))
             .ForMember(dto => dto.Actions, opt => opt.MapFrom(entity => DownloadTaskActions.Convert(entity.DownloadStatus)));
 
+        // DownloadTask -> DownloadProgressDTO
         CreateMap<DownloadTask, DownloadProgressDTO>(MemberList.Destination)
             .ForMember(dto => dto.Status, opt => opt.MapFrom(entity => entity.DownloadStatus))
             .ForMember(dto => dto.Actions, opt => opt.MapFrom(entity => DownloadTaskActions.Convert(entity.DownloadStatus)));
 
+        // List<DownloadTask> -> List<ServerDownloadProgressDTO>
         CreateMap<List<DownloadTask>, List<ServerDownloadProgressDTO>>(MemberList.Destination)
             .ConvertUsing<ListDownloadTaskToListServerDownloadProgressDTOConverter>();
 
+        // DownloadPreview -> DownloadPreviewDTO
         CreateMap<DownloadPreview, DownloadPreviewDTO>(MemberList.Destination);
     }
 

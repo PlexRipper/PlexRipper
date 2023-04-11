@@ -17,12 +17,14 @@ public class DownloadController : BaseController
     private readonly IMediator _mediator;
     private readonly IDownloadCommands _downloadCommands;
     private readonly IDownloadTaskFactory _downloadTaskFactory;
+    private readonly IDownloadUrlGenerator _downloadUrlGenerator;
 
     public DownloadController(
         ILog log,
         IMediator mediator,
         IDownloadCommands downloadCommands,
         IDownloadTaskFactory downloadTaskFactory,
+        IDownloadUrlGenerator downloadUrlGenerator,
         IMapper mapper,
         INotificationsService notificationsService) : base(log,
         mapper,
@@ -31,6 +33,7 @@ public class DownloadController : BaseController
         _mediator = mediator;
         _downloadCommands = downloadCommands;
         _downloadTaskFactory = downloadTaskFactory;
+        _downloadUrlGenerator = downloadUrlGenerator;
     }
 
     // GET: api/<DownloadController>
@@ -134,21 +137,39 @@ public class DownloadController : BaseController
             return BadRequest(Result.Fail("No list of download task Id's was given in the request body"));
 
         var result = await _downloadCommands.DeleteDownloadTaskClients(downloadTaskIds);
-        ;
+
         return ToActionResult(result.ToResult());
     }
 
     // GET: api/(DownloadController)/detail/{id:int}
     [HttpGet("detail/{id:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<DownloadTaskDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
     public async Task<IActionResult> GetDetail(int id, CancellationToken token)
     {
         if (id <= 0)
             return BadRequestInvalidId();
 
         var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(id, true), token);
-        return ToActionResult<DownloadTask, DownloadTaskDTO>(downloadTaskResult);
+
+        if (downloadTaskResult.IsFailed)
+            return ToActionResult(downloadTaskResult.ToResult());
+
+        if (!downloadTaskResult.Value.IsDownloadable)
+            return ToActionResult<DownloadTask, DownloadTaskDTO>(downloadTaskResult);
+
+        // Add DownloadUrl to DownloadTaskDTO
+        var downloadTaskDto = _mapper.Map<DownloadTaskDTO>(downloadTaskResult.Value);
+
+        var downloadUrl = await _downloadUrlGenerator.GetDownloadUrl(downloadTaskResult.Value, token);
+        if (downloadUrl.IsFailed)
+            return ToActionResult<DownloadTask, DownloadTaskDTO>(downloadTaskResult);
+
+        if (downloadTaskResult.Value.IsDownloadable)
+            downloadTaskDto.DownloadUrl = downloadUrl.Value;
+
+        return Ok(Result.Ok(downloadTaskDto));
     }
 
     [HttpPost("preview")]

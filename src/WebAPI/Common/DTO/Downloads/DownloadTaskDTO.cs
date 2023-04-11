@@ -21,8 +21,9 @@ public class DownloadTaskDTO
     /// <summary>
     /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv.
     /// </summary>
-
     public string FileLocationUrl { get; set; }
+
+    public string DownloadUrl { get; set; }
 
     public string FileName { get; set; }
 
@@ -42,7 +43,7 @@ public class DownloadTaskDTO
 
     public int DownloadSpeed { get; set; }
 
-    public int FileTransferSpeed { get; set; }
+    public long FileTransferSpeed { get; set; }
 
     public long DataReceived { get; set; }
 

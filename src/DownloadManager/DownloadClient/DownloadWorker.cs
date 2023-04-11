@@ -2,7 +2,7 @@ using System.Net.Http.Headers;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ByteSizeLib;
-using Data.Contracts;
+using DownloadManager.Contracts;
 using Logging.Interface;
 using RestSharp;
 using Timer = System.Timers.Timer;
@@ -23,6 +23,7 @@ public class DownloadWorker : IDisposable
 
     private readonly ILog<DownloadWorker> _log;
     private readonly IMediator _mediator;
+    private readonly IDownloadUrlGenerator _downloadUrlGenerator;
 
     private readonly IDownloadFileStream _downloadFileSystem;
 
@@ -53,12 +54,14 @@ public class DownloadWorker : IDisposable
         ILog<DownloadWorker> log,
         IMediator mediator,
         DownloadWorkerTask downloadWorkerTask,
+        IDownloadUrlGenerator downloadUrlGenerator,
         IDownloadFileStream downloadFileSystem,
         IHttpClientFactory httpClientFactory
     )
     {
         _log = log;
         _mediator = mediator;
+        _downloadUrlGenerator = downloadUrlGenerator;
         _downloadFileSystem = downloadFileSystem;
         DownloadWorkerTask = downloadWorkerTask;
 
@@ -149,6 +152,17 @@ public class DownloadWorker : IDisposable
         Stream responseStream = null;
         try
         {
+            // Retrieve Download URL
+            var downloadUrlResult = await _downloadUrlGenerator.GetDownloadUrl(
+                DownloadWorkerTask.PlexServerId,
+                DownloadWorkerTask.FileLocationUrl, cancellationToken);
+
+            if (downloadUrlResult.IsFailed)
+                return downloadUrlResult.LogError();
+
+            var downloadUrl = downloadUrlResult.Value;
+
+            // Prepare destination stream
             var _fileStreamResult =
                 _downloadFileSystem.CreateDownloadFileStream(DownloadWorkerTask.TempDirectory, FileName, DownloadWorkerTask.DataTotal);
             if (_fileStreamResult.IsFailed)
@@ -160,29 +174,6 @@ public class DownloadWorker : IDisposable
             }
 
             destinationStream = _fileStreamResult.Value;
-
-            var plexServerConnectionResult =
-                await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(DownloadWorkerTask.PlexServerId), cancellationToken);
-            if (plexServerConnectionResult.IsFailed)
-            {
-                _log.Error("Could not find a valid connection to use for DownloadWorker with id {ID}", DownloadWorkerTask.Id);
-                return plexServerConnectionResult.ToResult().LogError();
-            }
-
-            var plexServerConnection = plexServerConnectionResult.Value;
-            var plexServer = plexServerConnection.PlexServer;
-
-            var tokenResult = await _mediator.Send(new GetPlexServerTokenQuery(DownloadWorkerTask.PlexServerId), cancellationToken);
-            if (tokenResult.IsFailed)
-            {
-                _log.Error("Could not find a valid token for server {ServerName} to use for DownloadWorker with id {ID}", plexServer.Name,
-                    DownloadWorkerTask.Id);
-
-                SendDownloadWorkerError(tokenResult.ToResult().LogError());
-                return tokenResult.ToResult();
-            }
-
-            var downloadUrl = plexServerConnection.GetDownloadUrl(DownloadWorkerTask.FileLocationUrl, tokenResult.Value);
 
             // Is 0 when starting new and > 0 when resuming.
             destinationStream.Position = DownloadWorkerTask.BytesReceived;
@@ -270,7 +261,6 @@ public class DownloadWorker : IDisposable
 
     private void SendDownloadFinished()
     {
-
         SetDownloadWorkerTaskChanged(DownloadStatus.DownloadFinished);
         _log.Here().Information("Download worker {Id} with {FileName} finished!", Id, FileName);
         Shutdown();

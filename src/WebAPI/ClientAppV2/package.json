@@ -43,6 +43,7 @@
 		"@nuxtjs/i18n": "^8.0.0-beta.10",
 		"@originjs/vite-plugin-commonjs": "^1.0.3",
 		"@quasar/extras": "^1.16.2",
+		"@types/lodash-es": "^4.17.7",
 		"@types/node": "^18.15.11",
 		"@typescript-eslint/parser": "^5.57.0",
 		"@vue-macros/nuxt": "^1.2.7",

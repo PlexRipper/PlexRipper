@@ -1,6 +1,30 @@
-## [0.10.0-RC1]
+## [0.11.0]
 
-WORK IN PROGRESS
+**Major migration of the front-end from Vue 2 / Nuxt 2 and Vuetify v2 to Vue 3 / Nuxt 3 and Quasar v2. Basically a complete rewrite of the front-end.**
+
+### Added
+- Added sorting to the library media page with the ability to sort by title, date added, date updated, and size.
+
+### Changed
+ - Major front-end migration to Vue 3 / Nuxt 3 and Quasar v2
+ - Added a selection count to the library media page and media detail page.
+ - Viewing a huge library media collection should be much smoother due to paginated loading and virtual scrolling.
+ - Re-designed the PlexRipper setup wizard to flow better and be more intuitive.
+ - The estimated time shown when downloading a media item is now shown in a shorter notation, 06:45:09.
+
+### Optimizations
+ - Optimized the media viewing to be more performant and use less memory.
+ - Calculating the download preview, which is shown when a pop-up opens that asks if you're sure that you want to download the selected media, is now done in the background and not on the fly.
+ -
+
+### Fixed
+ - Fixed the laggyness when scrolling on the media pages when selecting a plex library.
+ - Fixed the checkbox selection not working in the media pages when selecting a plex library.
+ - Fixed the seasons when viewing a tvShow not being sorted correctly.
+ - Fixed the logging spam "Something failed but no errors were available in the result"
+ - Fixed the DownloadDetail dialog not containing the DownloadUrl when a task can be downloaded.
+
+## [0.10.0-RC1]
 
 This is most, not all, of the many changes that have been made in this version.
 

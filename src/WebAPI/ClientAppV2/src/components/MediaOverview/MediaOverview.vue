@@ -104,7 +104,7 @@
 	</q-dialog>
 
 	<!--		Download confirmation dialog	-->
-	<DownloadConfirmation ref="downloadConfirmationRef" :items="items" @download="sendDownloadCommand" />
+	<DownloadConfirmation :name="downloadConfirmationName" :items="items" @download="sendDownloadCommand" />
 </template>
 
 <script setup lang="ts">
@@ -120,7 +120,12 @@ import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/m
 import { DownloadService, LibraryService, MediaService, SettingsService, SignalrService } from '@service';
 import { DetailsOverview, DownloadConfirmation, MediaTable } from '#components';
 import ISelection from '@interfaces/ISelection';
-import { useMediaOverviewBarBus, useMediaOverviewBarDownloadCommandBus, useProcessDownloadCommandBus } from '#imports';
+import {
+	useMediaOverviewBarBus,
+	useMediaOverviewBarDownloadCommandBus,
+	useOpenControlDialog,
+	useProcessDownloadCommandBus,
+} from '#imports';
 
 // region SetupFields
 
@@ -134,6 +139,7 @@ const selected = ref<ISelection>({ keys: [], allSelected: false, indexKey: 0 });
 // endregion
 
 const showDetails = ref(false);
+const downloadConfirmationName = 'mediaDownloadConfirmation';
 
 const activeAccountId = ref(0);
 const isRefreshing = ref(false);
@@ -155,7 +161,6 @@ const askDownloadTvShowConfirmation = ref(false);
 const askDownloadSeasonConfirmation = ref(false);
 const askDownloadEpisodeConfirmation = ref(false);
 
-const downloadConfirmationRef = ref<InstanceType<typeof DownloadConfirmation> | null>(null);
 const detailsOverviewRef = ref<InstanceType<typeof DetailsOverview> | null>(null);
 const mediaContainerScrollbarRef = ref<InstanceType<typeof QScrollArea> | null>(null);
 const overviewMediaTableRef = ref<InstanceType<typeof MediaTable> | null>(null);
@@ -248,7 +253,7 @@ const processDownloadCommand = (command: DownloadMediaDTO[]) => {
 	// Only show if there is more than 1 selection
 	if (command.length > 0 && command.some((x) => x.mediaIds.length > 0)) {
 		if (isConfirmationEnabled.value) {
-			downloadConfirmationRef.value.openDialog(command);
+			useOpenControlDialog(downloadConfirmationName, command);
 		} else {
 			// sendDownloadCommand(command);
 		}
@@ -294,7 +299,7 @@ const closeDetailsOverview = () => {
 const refreshLibrary = () => {
 	isRefreshing.value = true;
 	resetProgress(true);
-	LibraryService.refreshLibrary(props.libraryId).subscribe((data) => {
+	LibraryService.refreshLibrary(props.libraryId).subscribe(() => {
 		isRefreshing.value = false;
 	});
 };

@@ -1,8 +1,8 @@
 <template>
-	<q-dialog v-model:model-value="showDialog">
-		<div class="q-card-dialog q-card-dialog-background">
+	<q-dialog v-model:model-value="showDialog" full-height full-width>
+		<q-row column class="q-card-dialog q-card-dialog-background">
 			<!-- Dialog Title	-->
-			<q-col cols="12" class="q-card-dialog-title">
+			<q-col cols="auto" class="q-card-dialog-title">
 				<QCardTitle>
 					<slot name="title" :value="parentValue" />
 				</QCardTitle>
@@ -17,22 +17,23 @@
 			<q-col v-if="$slots['actions']" cols="auto" align-self="stretch" class="q-card-dialog-actions q-pa-md">
 				<!--	Dialog Buttons		-->
 				<q-card-actions :align="buttonAlign">
-					<slot name="actions" :value="parentValue" />
+					<slot name="actions" :close="closeDialog" :open="openDialog" :value="parentValue" />
 				</q-card-actions>
 			</q-col>
 			<QLoadingOverlay :loading="loading" />
-		</div>
+		</q-row>
 	</q-dialog>
 </template>
 
 <script setup lang="ts">
 import { defineEmits, defineProps, ref } from 'vue';
+import { get, set } from '@vueuse/core';
 import { useControlDialog } from '#imports';
 
 const controlDialog = useControlDialog();
 
 const showDialog = ref(false);
-const value = ref<any | null>(null);
+const dataValue = ref<any | null>(null);
 const props = withDefaults(
 	defineProps<{
 		name: string;
@@ -47,7 +48,7 @@ const props = withDefaults(
 		viewHeight?: string;
 		value?: any;
 		loading: boolean;
-		scroll: boolean;
+		scroll?: boolean;
 		persistent?: boolean;
 		buttonAlign?: 'left' | 'center' | 'right' | 'between' | 'around' | 'evenly' | 'stretch';
 	}>(),
@@ -79,8 +80,19 @@ const parentValue = computed(() => {
 	if (props.value) {
 		return props.value;
 	}
-	return value.value;
+	return get(dataValue);
 });
+
+function openDialog(value: any) {
+	set(showDialog, true);
+	set(dataValue, value);
+	emit('opened', value);
+}
+
+function closeDialog() {
+	set(showDialog, false);
+	emit('closed');
+}
 
 const styles = computed(() => {
 	if (props.allWidth && props.allHeight) {
@@ -130,14 +142,13 @@ const styles = computed(() => {
 	);
 });
 
+// Dialog control listener
 controlDialog.on((data) => {
 	if (data.name === props.name) {
-		showDialog.value = data.state;
-		value.value = data.value;
-		if (showDialog.value) {
-			emit('opened', data.value);
+		if (data.state) {
+			openDialog(data.value ?? null);
 		} else {
-			emit('closed');
+			closeDialog();
 		}
 	}
 });

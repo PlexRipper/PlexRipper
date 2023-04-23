@@ -1,13 +1,21 @@
 <template>
 	<q-list>
-		<template v-for="item in items">
+		<template v-for="(item, index) in items">
 			<!-- Grouped items -->
 			<q-expansion-item
 				v-if="item.children && item.children.length > 0"
+				:key="`true-${index}`"
+				group="expansion"
 				:icon="item.icon"
 				:label="item.noTranslate ? item.title : $t(item.title ?? '')"
 				expand-icon="mdi-chevron-down">
-				<q-item v-for="(child, j) in item.children" v-ripple clickable :to="child.link" active-class="text-orange">
+				<q-item
+					v-for="(child, j) in item.children"
+					:key="j"
+					v-ripple
+					clickable
+					:to="child.link"
+					active-class="text-orange">
 					<q-item-section avatar>
 						<q-icon :name="child.icon" />
 					</q-item-section>
@@ -15,7 +23,7 @@
 				</q-item>
 			</q-expansion-item>
 			<!-- Single item  -->
-			<q-item v-else v-ripple clickable :to="item.link" active-class="text-orange">
+			<q-item v-else :key="`false-${index}`" v-ripple clickable :to="item.link" active-class="text-orange">
 				<q-item-section avatar>
 					<q-icon :name="item.icon" />
 				</q-item-section>
@@ -30,9 +38,10 @@
 </template>
 
 <script setup lang="ts">
+import { withDefaults, defineProps } from 'vue';
 import { QExpansionListProps } from '@interfaces/components/QExpansionListProps';
 
-const props = withDefaults(defineProps<{ items: QExpansionListProps[] }>(), {
+withDefaults(defineProps<{ items: QExpansionListProps[] }>(), {
 	items: () => [],
 });
 </script>

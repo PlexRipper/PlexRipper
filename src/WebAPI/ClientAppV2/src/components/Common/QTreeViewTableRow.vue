@@ -1,5 +1,6 @@
 <template>
 	<q-row
+		v-if="node"
 		justify="between"
 		align="center"
 		no-wrap
@@ -8,12 +9,12 @@
 		<!--	Title Column	-->
 		<q-col class="q-ml-sm">
 			<q-row align="center" justify="start">
-				<q-col v-if="isHeader" cols="auto" class="q-ml-md q-pl-sm">
+				<q-col v-if="isHeader && selectable" cols="auto" class="q-ml-md q-pl-sm">
 					<q-checkbox dense :model-value="selected" @update:model-value="$emit('selected', $event)" />
 				</q-col>
-				<q-col align-self="start" cols="auto" class="header-column">
+				<q-col v-if="columns[0]?.field" align-self="start" cols="auto" class="header-column">
 					<q-media-type-icon v-if="node['mediaType']" :media-type="node['mediaType']" />
-					{{ node[columns[0].field] }}
+					{{ node[columns[0].field ?? ''] ?? 'unknown' }}
 				</q-col>
 			</q-row>
 		</q-col>
@@ -80,6 +81,9 @@
 			</q-row>
 		</q-col>
 	</q-row>
+	<q-row v-else>
+		<q-col>{{ $t('components.q-tree-view-table-row.invalid-node') }}</q-col>
+	</q-row>
 </template>
 
 <script setup lang="ts">
@@ -94,6 +98,7 @@ defineOptions({
 const props = defineProps<{
 	selected?: boolean | null;
 	isHeader?: boolean;
+	selectable?: boolean;
 	node: QTreeViewTableItem;
 	columns: QTreeViewTableHeader[];
 }>();

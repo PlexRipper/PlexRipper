@@ -98,3 +98,21 @@ export const getDownloadTableColumns: QTreeViewTableHeader[] = [
 		sortable: false,
 	},
 ];
+
+export const getDownloadPreviewTableColumns: QTreeViewTableHeader[] = [
+	{
+		label: 'Title',
+		field: 'title',
+		align: 'left',
+		sortOrder: 'ad',
+		sortable: true,
+		required: true,
+	},
+	{
+		label: 'Size',
+		field: 'size',
+		type: 'file-size',
+		width: 120,
+		align: 'right',
+	},
+];

@@ -1,5 +1,5 @@
 @import '../mixins';
-
+@import "quasar/src/css/core/size.sass";
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // * Notification Drawer
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -117,18 +117,33 @@ body {
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 body {
-	.q-card-dialog-background {
-		@extend .default-border;
-		@extend .default-border-radius;
-		@extend .default-shadow;
-		max-width: none;
-		max-height: none;
-	}
-
 	.q-card-dialog {
+		overflow-y: hidden;
 
-		.content-default {
-			flex-grow: 1;
+		&-background {
+			@extend .default-border;
+			@extend .default-border-radius;
+			@extend .default-shadow;
+			max-width: none;
+			max-height: none;
+		}
+
+		&-top-row {
+			@extend .q-pt-none;
+			@extend .q-px-md;
+		}
+
+		&-content {
+			@extend .q-pt-none;
+			@extend .q-px-md;
+			width: 1200px;
+			height: auto;
+			min-height: 50vh;
+			max-height: 50vh;
+		}
+
+		&-title, &-actions {
+			height: auto;
 		}
 	}
 

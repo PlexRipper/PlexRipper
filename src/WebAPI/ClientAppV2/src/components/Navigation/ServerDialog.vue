@@ -1,57 +1,63 @@
 <template>
-	<q-dialog v-model="show" @click:outside="close">
-		<q-card v-if="plexServer" bordered class="server-dialog-content">
-			<q-card-section>
-				<div class="text-h6">
-					{{ $t('components.server-dialog.header', { serverName: plexServer.name }) }}
-				</div>
-			</q-card-section>
-
-			<q-separator />
-
-			<q-splitter v-model="splitterModel">
-				<!-- Tab Index -->
-				<template #before>
+	<q-card-dialog
+		:name="name"
+		all-width="60vw"
+		all-height="60vh"
+		:scroll="false"
+		:loading="loading"
+		@opened="open"
+		@closed="close">
+		<template #title>
+			{{ $t('components.server-dialog.header', { serverName: plexServer.name }) }}
+		</template>
+		<template #default>
+			<q-row align="start" class="inherit-all-height">
+				<q-col cols="auto" align-self="stretch">
+					<!-- Tab Index -->
 					<q-tabs v-model="tabIndex" vertical active-color="red">
 						<!--	Server Data	Tab Header-->
 						<q-tab
 							name="server-data"
 							icon="mdi-server"
+							data-cy="server-dialog-tab-1"
 							:label="$t('components.server-dialog.tabs.server-data.header')" />
 						<!--	Server Connections Tab Header	-->
 						<q-tab
 							name="server-connection"
 							icon="mdi-connection"
+							data-cy="server-dialog-tab-2"
 							:label="$t('components.server-dialog.tabs.server-connections.header')" />
 						<!--	Server Configuration Tab Header	-->
 						<q-tab
 							name="server-config"
 							icon="mdi-cog-box"
+							data-cy="server-dialog-tab-3"
 							:label="$t('components.server-dialog.tabs.server-config.header')" />
 						<!--	Library Destinations Tab Header	-->
 						<q-tab
 							name="download-destinations"
 							icon="mdi-folder-edit-outline"
+							data-cy="server-dialog-tab-4"
 							:label="$t('components.server-dialog.tabs.download-destinations.header')" />
 						<!--	Server Commands Tab Header	-->
 						<q-tab
 							name="server-commands"
 							icon="mdi-console"
+							data-cy="server-dialog-tab-5"
 							:label="$t('components.server-dialog.tabs.server-commands.header')" />
 					</q-tabs>
-				</template>
-				<!-- Tab Content -->
-				<template #after>
+				</q-col>
+				<q-col align-self="stretch" class="inherit-all-height scroll">
+					<!-- Tab Content -->
 					<q-tab-panels v-model="tabIndex" animated vertical transition-prev="slide-down" transition-next="slide-up">
 						<!-- Server Data Tab Content -->
 						<q-tab-panel name="server-data">
-							<ServerDataTabContent ref="serverDataTabContent" :plex-server="plexServer" :is-visible="isVisible" />
+							<ServerDataTabContent :plex-server="plexServer" :is-visible="isVisible" />
 						</q-tab-panel>
 
 						<!-- Server Connections Tab Content	-->
 						<q-tab-panel name="server-connection">
 							<ServerConnectionsTabContent
-								ref="serverConnectionsTabContent"
 								:plex-server="plexServer"
 								:plex-server-settings="plexServerSettings"
 								:is-visible="isVisible" />
@@ -63,7 +69,7 @@
 						</q-tab-panel>
 
 						<!--	Library Download Destinations	Tab Content -->
-						<q-tab-panel name="download-destinations">
+						<q-tab-panel name="download-destinations" class="scroll">
 							<server-library-destinations-tab-content :plex-server="plexServer" :plex-libraries="plexLibraries" />
 						</q-tab-panel>
 
@@ -72,31 +78,32 @@
 							<server-commands-tab-content :plex-server="plexServer" :is-visible="isVisible" />
 						</q-tab-panel>
 					</q-tab-panels>
-				</template>
-			</q-splitter>
+				</q-col>
+			</q-row>
 
-			<q-separator />
-
-			<q-card-actions align="right">
-				<q-btn v-close-popup flat :label="$t('general.commands.close')" color="primary" />
-			</q-card-actions>
-		</q-card>
-		<q-card v-else class="server-dialog-content">
-			<h1>{{ $t('components.server-dialog.no-servers-error') }}</h1>
-		</q-card>
-	</q-dialog>
+			<!--			<q-card v-else class="server-dialog-content">-->
+			<!--				<h1>{{ $t('components.server-dialog.no-servers-error') }}</h1>-->
+			<!--			</q-card>-->
+		</template>
+		<template #actions>
+			<q-btn flat :label="$t('general.commands.close')" color="primary" @click="useCloseControlDialog(name)" />
+		</template>
+	</q-card-dialog>
 </template>
 
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
-import { switchMap, tap } from 'rxjs/operators';
+import { switchMap, take, tap } from 'rxjs/operators';
 import Log from 'consola';
-import { ref, computed } from '#imports';
-import type { FolderPathDTO, PlexLibraryDTO, PlexServerDTO, PlexServerSettingsModel } from '@dto/mainApi';
-import { FolderPathService, LibraryService, ServerService, SettingsService } from '@service';
+import { get, set } from '@vueuse/core';
+import { ref, computed, useCloseControlDialog } from '#imports';
+import type { PlexLibraryDTO, PlexServerDTO, PlexServerSettingsModel } from '@dto/mainApi';
+import { LibraryService, ServerService, SettingsService } from '@service';
 import { ServerDataTabContent, ServerConnectionsTabContent } from '#components';
 
-const show = ref(false);
+defineProps<{ name: string }>();
+
+const loading = ref(true);
 const tabIndex = ref<string>('server-data');
 const plexServer = ref<PlexServerDTO | null>(null);
 const plexLibraries = ref<PlexLibraryDTO[]>([]);
@@ -108,8 +115,8 @@ const isVisible = computed((): boolean => plexServerId.value > 0);
 
 const open = (newPlexServerId: number): void => {
 	plexServerId.value = newPlexServerId;
-	Log.info('Opening server dialog for server with id: ' + newPlexServerId);
-	show.value = true;
+	Log.debug('Opening server dialog for server with id: ' + newPlexServerId);
+	set(loading, true);
 
 	useSubscription(
 		ServerService.getServer(newPlexServerId)
@@ -118,9 +125,15 @@ const open = (newPlexServerId: number): void => {
 					plexServer.value = plexServerData;
 				}),
 				switchMap((plexServer) => SettingsService.getServerSettings(plexServer?.machineIdentifier ?? '')),
+				take(1),
 			)
-			.subscribe((plexServerSettingsData) => {
-				plexServerSettings.value = plexServerSettingsData;
+			.subscribe({
+				next: (plexServerSettingsData) => {
+					plexServerSettings.value = plexServerSettingsData;
+				},
+				complete: () => {
+					set(loading, false);
+				},
 			}),
 	);
 	useSubscription(
@@ -131,20 +144,8 @@ const open = (newPlexServerId: number): void => {
 };
 
 const close = (): void => {
-	show.value = false;
-	plexServerId.value = 0;
-	tabIndex.value = 'server-data';
+	Log.debug('Opening server dialog for server with id: ' + get(plexServerId));
+	set(plexServerId, 0);
+	set(tabIndex, 'server-data');
 };
-
-defineExpose({
-	open,
-	close,
-});
 </script>
-
-<style lang="scss">
-.server-dialog-content {
-	max-width: 80vw !important;
-	min-width: 70vw !important;
-}
-</style>

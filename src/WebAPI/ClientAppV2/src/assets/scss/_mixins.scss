@@ -54,3 +54,14 @@ Borders
 .default-shadow {
 	box-shadow: $box-shadow;
 }
+
+
+/*
+Seizing
+*/
+
+.inherit-all-height {
+	min-height: inherit;
+	max-height: inherit;
+	height: inherit;
+}

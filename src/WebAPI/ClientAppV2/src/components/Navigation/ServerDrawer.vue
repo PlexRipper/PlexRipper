@@ -1,6 +1,6 @@
 <template>
 	<template v-if="plexServers.length > 0">
-		<q-expansion-item v-for="server in plexServers" :label="server.name" expand-icon="mdi-chevron-down">
+		<q-expansion-item v-for="(server, index) in plexServers" :label="server.name" expand-icon="mdi-chevron-down">
 			<!-- Server header	-->
 			<template #header>
 				<q-item-section avatar>
@@ -13,13 +13,14 @@
 					</div>
 				</q-item-section>
 				<q-item-section side>
-					<q-btn icon="mdi-cog" flat @click.native.stop="openServerSettings(server.id)" />
+					<q-btn icon="mdi-cog" flat :data-cy="`server-dialog-${index}`" @click.stop="openServerSettings(server.id)" />
 				</q-item-section>
 			</template>
 			<!-- Render libraries -->
 			<q-list v-if="filterLibraries(server.id).length > 0">
 				<q-item
 					v-for="(library, y) in filterLibraries(server.id)"
+					:key="y"
 					v-ripple
 					clickable
 					active-class="text-orange"
@@ -38,7 +39,7 @@
 			</template>
 		</q-expansion-item>
 
-		<ServerDialog ref="serverDialog" />
+		<ServerDialog :name="serverDialogName" />
 	</template>
 	<!-- With valid server available -->
 
@@ -60,25 +61,21 @@ import { useSubscription } from '@vueuse/rxjs';
 import { LibraryService, ServerService, ServerConnectionService } from '@service';
 import { PlexLibraryDTO, PlexMediaType, PlexServerConnectionDTO, PlexServerDTO, SyncServerProgress } from '@dto/mainApi';
 import type ServerDialog from '@components/Navigation/ServerDialog.vue';
+import { useOpenControlDialog } from '#imports';
 
 const router = useRouter();
 
 const plexServers = ref<PlexServerDTO[]>([]);
 const plexLibraries = ref<PlexLibraryDTO[]>([]);
 const connections = ref<PlexServerConnectionDTO[]>([]);
-
-const serverDialog = ref<InstanceType<typeof ServerDialog> | null>(null);
+const serverDialogName = 'serverDialog';
 
 function filterLibraries(plexServerId: number): PlexLibraryDTO[] {
 	return plexLibraries.value.filter((x) => x.plexServerId === plexServerId);
 }
 
 function openServerSettings(serverId: number): void {
-	if (serverDialog.value == null) {
-		Log.error('ServerDialog is null');
-		return;
-	}
-	serverDialog.value.open(serverId);
+	useOpenControlDialog(serverDialogName, serverId);
 }
 
 function openMediaPage(library: PlexLibraryDTO): void {

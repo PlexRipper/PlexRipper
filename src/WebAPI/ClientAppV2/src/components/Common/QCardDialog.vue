@@ -1,28 +1,26 @@
 <template>
 	<q-dialog v-model:model-value="showDialog">
-		<div class="q-card-dialog-background">
-			<q-row column class="q-card-dialog" no-wrap :style="styles">
-				<!-- Dialog Title	-->
-				<q-col cols="12">
-					<QCardTitle>
-						<slot name="title" :value="parentValue" />
-					</QCardTitle>
-				</q-col>
-				<!--	Dialog Top Row		-->
-				<q-col v-if="$slots['top-row']" cols="auto" class="q-pb-none q-px-md">
-					<slot name="top-row" />
-				</q-col>
-				<q-col v-if="$slots['default']" class="content-default scroll q-pt-none q-px-md" align-self="stretch">
-					<slot :value="parentValue" />
-				</q-col>
-				<q-col v-if="$slots['actions']" cols="auto" align-self="stretch" class="q-pa-md">
-					<!--	Dialog Buttons		-->
-					<q-card-actions :align="buttonAlign">
-						<slot name="actions" :value="parentValue" />
-					</q-card-actions>
-				</q-col>
-				<QLoadingOverlay :loading="loading" />
-			</q-row>
+		<div class="q-card-dialog q-card-dialog-background">
+			<!-- Dialog Title	-->
+			<q-col cols="12" class="q-card-dialog-title">
+				<QCardTitle>
+					<slot name="title" :value="parentValue" />
+				</QCardTitle>
+			</q-col>
+			<!--	Dialog Top Row		-->
+			<q-col v-if="$slots['top-row']" cols="auto" class="q-card-dialog-top-row">
+				<slot name="top-row" />
+			</q-col>
+			<q-col v-if="$slots['default']" class="q-card-dialog-content" :class="{ scroll: scroll }" align-self="stretch">
+				<slot :value="parentValue" />
+			</q-col>
+			<q-col v-if="$slots['actions']" cols="auto" align-self="stretch" class="q-card-dialog-actions q-pa-md">
+				<!--	Dialog Buttons		-->
+				<q-card-actions :align="buttonAlign">
+					<slot name="actions" :value="parentValue" />
+				</q-card-actions>
+			</q-col>
+			<QLoadingOverlay :loading="loading" />
 		</div>
 	</q-dialog>
 </template>
@@ -49,6 +47,7 @@ const props = withDefaults(
 		viewHeight?: string;
 		value?: any;
 		loading: boolean;
+		scroll: boolean;
 		persistent?: boolean;
 		buttonAlign?: 'left' | 'center' | 'right' | 'between' | 'around' | 'evenly' | 'stretch';
 	}>(),
@@ -65,6 +64,7 @@ const props = withDefaults(
 		viewHeight: '50vh',
 		value: null,
 		loading: false,
+		scroll: true,
 		persistent: false,
 		buttonAlign: 'right',
 	},
@@ -72,7 +72,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
 	(e: 'opened', value: any): void;
-	(e: 'closed', value: boolean): void;
+	(e: 'closed'): void;
 }>();
 
 const parentValue = computed(() => {
@@ -137,7 +137,7 @@ controlDialog.on((data) => {
 		if (showDialog.value) {
 			emit('opened', data.value);
 		} else {
-			emit('closed', showDialog.value);
+			emit('closed');
 		}
 	}
 });

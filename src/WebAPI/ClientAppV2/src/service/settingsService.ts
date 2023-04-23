@@ -354,12 +354,9 @@ export class SettingsService extends BaseService {
 		);
 	}
 
-	public getServerSettings(machineIdentifier: string): Observable<PlexServerSettingsModel> {
+	public getServerSettings(machineIdentifier: string): Observable<PlexServerSettingsModel | null> {
 		return this.stateChanged.pipe(
-			map((x) => x?.serverSettings.data.find((y) => y.machineIdentifier === machineIdentifier)),
-			// @ts-ignore
-			filter((x) => !!x),
-			distinctUntilChanged(isEqual),
+			map((x) => x?.serverSettings.data.find((y) => y.machineIdentifier === machineIdentifier) ?? null),
 		);
 	}
 

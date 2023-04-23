@@ -48,14 +48,14 @@ body {
 
 		.q-menu {
 			@extend .blur;
-			background-color: $dark-background-color;
+			background-color: $dark-dialog-background-color;
 		}
 	}
 
 	&.body--light {
 		.q-menu {
 			@extend .blur;
-			background-color: $light-background-color;
+			background-color: $light-dialog-background-color;
 		}
 	}
 }

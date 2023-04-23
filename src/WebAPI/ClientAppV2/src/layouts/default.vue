@@ -4,7 +4,7 @@
 	<q-layout view="hHh LpR lFf">
 		<template v-if="!isLoading">
 			<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
-			<!--            <alert-dialog v-for="(alertItem, i) in alerts" :key="i" :alert="alertItem" @close="closeAlert"/>-->
+			<alert-dialog v-for="(alertItem, i) in alerts" :key="i" :name="`alert-dialog-${alertItem.id}`" :alert="alertItem" />
 			<!--            <CheckServerConnectionsProgress/>-->
 
 			<!--	Use for everything else	-->
@@ -23,12 +23,14 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
+import { get, set } from '@vueuse/core';
 import { AlertService, HelpService } from '@service';
 import IAlert from '@interfaces/IAlert';
 import PageLoadOverlay from '@components/General/PageLoadOverlay.vue';
 import globalService from '@service/globalService';
+import { useOpenControlDialog } from '#imports';
 
 const $q = useQuasar();
 const route = useRoute();
@@ -51,17 +53,12 @@ const isNoBackground = computed((): boolean => {
 	return isEmptyLayout.value;
 });
 
-function closeAlert(alert: IAlert): void {
-	AlertService.removeAlert(alert.id);
-}
-
 function toggleNavigationsDrawer() {
-	showNavigationDrawerState.value = !showNavigationDrawerState.value;
+	set(showNavigationDrawerState, !get(showNavigationDrawerState));
 }
 
 function toggleNotificationsDrawer() {
-	Log.info('toggleNotificationsDrawer');
-	showNotificationsDrawerState.value = !showNotificationsDrawerState.value;
+	set(showNotificationsDrawerState, !get(showNotificationsDrawerState));
 }
 
 onMounted(() => {
@@ -73,7 +70,7 @@ onMounted(() => {
 		globalService.getPageSetupReady().subscribe({
 			next: () => {
 				Log.debug('Loading has finished, displaying page now');
-				isLoading.value = false;
+				set(isLoading, false);
 				$q.loading.hide();
 			},
 			error: (err) => {
@@ -86,8 +83,8 @@ onMounted(() => {
 	useSubscription(
 		HelpService.getHelpDialog().subscribe((newHelpId) => {
 			if (newHelpId) {
-				helpId.value = newHelpId;
-				helpDialogState.value = true;
+				set(helpId, newHelpId);
+				set(helpDialogState, true);
 			}
 		}),
 	);
@@ -95,7 +92,13 @@ onMounted(() => {
 	useSubscription(
 		AlertService.getAlerts().subscribe((newAlerts) => {
 			if (newAlerts) {
-				alerts.value = newAlerts;
+				set(alerts, newAlerts);
+				// Allow the alert dialog to render first before opening it
+				nextTick(() => {
+					for (const newAlert of get(alerts)) {
+						useOpenControlDialog(`alert-dialog-${newAlert.id}`);
+					}
+				});
 			}
 		}),
 	);

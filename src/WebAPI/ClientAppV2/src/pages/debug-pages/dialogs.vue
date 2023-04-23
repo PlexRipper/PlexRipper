@@ -5,18 +5,12 @@
 			<q-markup-table>
 				<q-tr>
 					<q-td>
-						<q-btn
-							color="green"
-							outline
-							:label="$t('pages.debug.dialogs.buttons.server-dialog')"
-							@click="openServerDialog" />
+						<DebugButton :label="$t('pages.debug.dialogs.buttons.server-dialog')" @click="openServerDialog" />
 					</q-td>
 				</q-tr>
 				<q-tr>
 					<q-td>
-						<q-btn
-							color="green"
-							outline
+						<DebugButton
 							:label="$t('pages.debug.dialogs.buttons.download-confirmation')"
 							@click="openDownloadConfirmationDialog" />
 					</q-td>
@@ -24,12 +18,6 @@
 				<q-tr>
 					<q-td>
 						<DebugButton text-id="add-alert" @click="addAlert" />
-
-						<q-btn
-							color="green"
-							outline
-							:label="$t('pages.debug.dialogs.buttons.download-confirmation')"
-							@click="openDownloadConfirmationDialog" />
 					</q-td>
 				</q-tr>
 			</q-markup-table>
@@ -46,19 +34,29 @@ import { useOpenControlDialog } from '@composables/event-bus';
 import { DownloadConfirmation } from '#components';
 import { AlertService, MediaService } from '@service';
 import { PlexMediaDTO } from '@dto/mainApi';
+import { generateDownloadTasks } from '@mock/mock-download-task';
 
 const serverDialogName = 'debugServerDialog';
 const downloadConfirmationName = 'debugDownloadConfirmation';
 
 const mediaItem = ref<PlexMediaDTO | null>();
 const mediaTableRows = ref<PlexMediaDTO[]>([]);
+const downloadRows = generateDownloadTasks(1, { tvShowDownloadTask: 10 });
 
 function openServerDialog(): void {
 	useOpenControlDialog(serverDialogName, 1);
 }
 
 function openDownloadConfirmationDialog(): void {
-	useOpenControlDialog(serverDialogName, 1);
+	const demo = [
+		{
+			plexServerId: 1,
+			plexLibraryId: 9,
+			mediaIds: [24, 25, 26, 27, 28],
+			type: 'TvShow',
+		},
+	];
+	useOpenControlDialog(downloadConfirmationName, demo);
 }
 
 function addAlert(): void {

@@ -99,7 +99,7 @@ export interface DownloadPreviewDTO {
 	size: number;
 	/** @format int32 */
 	childCount: number;
-	type: PlexMediaType;
+	mediaType: PlexMediaType;
 	children: DownloadPreviewDTO[];
 }
 

@@ -9,6 +9,8 @@ import {
 	QMarkupTable,
 	QTable,
 	QInput,
+	QChip,
+	QAvatar,
 } from 'quasar';
 
 export default defineNuxtPlugin(() => {
@@ -35,6 +37,16 @@ export default defineNuxtPlugin(() => {
 
 	setQuasarComponentDefaultPropValues(QTable, {
 		color: 'red',
+	});
+
+	setQuasarComponentDefaultPropValues(QChip, {
+		color: 'red',
+		textColor: 'white',
+	});
+
+	setQuasarComponentDefaultPropValues(QAvatar, {
+		color: 'red',
+		textColor: 'white',
 	});
 
 	setQuasarComponentDefaultPropValues(QExpansionItem, {

@@ -14,13 +14,15 @@
 </template>
 
 <script setup lang="ts">
+import { defineProps } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
+import { set } from '@vueuse/core';
 import { ref, onUnmounted } from '#imports';
 import { inspectPlexServer, syncPlexServer } from '@api/plexServerApi';
 import type { PlexServerDTO } from '@dto/mainApi';
 
 const props = defineProps<{
-	plexServer: PlexServerDTO;
+	plexServer: PlexServerDTO | null;
 	isVisible: boolean;
 }>();
 
@@ -28,25 +30,31 @@ const syncLoading = ref(false);
 const inspectLoading = ref(false);
 
 function syncServerLibraries(): void {
-	syncLoading.value = true;
+	if (!props.plexServer) {
+		return;
+	}
+	set(syncLoading, true);
 	useSubscription(
 		syncPlexServer(props.plexServer.id, true).subscribe(() => {
-			syncLoading.value = false;
+			set(syncLoading, false);
 		}),
 	);
 }
 
 function inspectServer(): void {
-	inspectLoading.value = true;
+	if (!props.plexServer) {
+		return;
+	}
+	set(inspectLoading, true);
 	useSubscription(
 		inspectPlexServer(props.plexServer.id).subscribe(() => {
-			inspectLoading.value = false;
+			set(inspectLoading, false);
 		}),
 	);
 }
 
 onUnmounted(() => {
-	syncLoading.value = false;
-	inspectLoading.value = false;
+	set(syncLoading, false);
+	set(inspectLoading, false);
 });
 </script>

@@ -9,7 +9,7 @@ import { defineProps } from 'vue';
 
 withDefaults(
 	defineProps<{
-		loading: boolean;
+		loading?: boolean;
 		size?: number;
 	}>(),
 	{

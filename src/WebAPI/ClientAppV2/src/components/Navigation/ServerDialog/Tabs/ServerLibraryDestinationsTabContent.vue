@@ -21,12 +21,13 @@
 <script setup lang="ts">
 import { defineProps } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
-import { FolderPathDTO, FolderType, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
+import { get, set } from '@vueuse/core';
+import { FolderPathDTO, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
 import { FolderPathService, LibraryService } from '@service';
 import { ref } from '#imports';
 
 const props = defineProps<{
-	plexServer: PlexServerDTO;
+	plexServer: PlexServerDTO | null;
 	plexLibraries: PlexLibraryDTO[];
 }>();
 
@@ -34,10 +35,10 @@ const folderPaths = ref<FolderPathDTO[]>([]);
 
 function getFolderPathOptions(type: PlexMediaType): FolderPathDTO[] {
 	if (type === PlexMediaType.Movie || type === PlexMediaType.TvShow) {
-		return folderPaths.value.filter((x) => x.mediaType === type);
+		return get(folderPaths).filter((x) => x.mediaType === type);
 	}
 
-	return folderPaths.value;
+	return get(folderPaths);
 }
 
 function getDefaultDestination(libraryId: number): { id: number; displayName: string } {
@@ -51,7 +52,7 @@ function getDefaultDestination(libraryId: number): { id: number; displayName: st
 
 	return {
 		id: library.defaultDestinationId,
-		displayName: folderPaths.value.find((x) => x.id === library.defaultDestinationId)?.displayName ?? 'Not set',
+		displayName: get(folderPaths).find((x) => x.id === library.defaultDestinationId)?.displayName ?? 'Not set',
 	};
 }
 
@@ -62,7 +63,7 @@ function updateDefaultDestination(libraryId: number, folderPathId: number): void
 onMounted(() => {
 	useSubscription(
 		FolderPathService.getFolderPaths().subscribe((folderPathsData) => {
-			folderPaths.value = folderPathsData;
+			set(folderPaths, folderPathsData);
 		}),
 	);
 });

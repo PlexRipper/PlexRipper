@@ -15,32 +15,19 @@
 </template>
 
 <script setup lang="ts">
+import { defineProps, ref, computed, withDefaults, onMounted } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
+import { set } from '@vueuse/core';
 import { DownloadService } from '@service';
 import { QExpansionListProps } from '@interfaces/components/QExpansionListProps';
-import { computed } from '#imports';
 
-interface INavItem {
-	title: string;
-	icon: string;
-	link: string;
-	children?: INavItem[];
-}
+withDefaults(defineProps<{ showDrawer: boolean }>(), {
+	showDrawer: false,
+});
 
 const items = ref<object[]>([]);
 
 const downloadTaskCount = ref(0);
-
-const width = ref(350);
-
-const borderSize = ref(3);
-
-const props = withDefaults(defineProps<{ showDrawer: boolean }>(), {
-	showDrawer: false,
-});
-
-// @Ref('drawer')
-// readonly drawer!: VNavigationDrawer;
 
 const getNavItems = computed((): QExpansionListProps[] => {
 	return [
@@ -83,16 +70,30 @@ const getNavItems = computed((): QExpansionListProps[] => {
 				},
 			],
 		},
+		{
+			title: 'components.navigation-drawer.debug',
+			icon: 'mdi-bug-outline',
+			children: [
+				{
+					title: 'Dialogs',
+					icon: 'mdi-dock-window',
+					link: '/debug-pages/dialogs',
+				},
+				{
+					title: 'Buttons',
+					icon: 'mdi-button-pointer',
+					link: '/debug-pages/buttons',
+				},
+			],
+		},
 	];
 });
 
 onMounted(() => {
 	items.value = getNavItems.value;
-	// this.setBorderWidth();
-	// this.setEvents();
 	useSubscription(
-		DownloadService.getDownloadList().subscribe((downloadTasks) => {
-			downloadTaskCount.value = downloadTasks.flat(4)?.length ?? -1;
+		DownloadService.getTotalDownloadsCount().subscribe((count) => {
+			set(downloadTaskCount, count);
 		}),
 	);
 });

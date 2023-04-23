@@ -1,12 +1,5 @@
 <template>
-	<q-card-dialog
-		:name="name"
-		all-width="60vw"
-		all-height="60vh"
-		:scroll="false"
-		:loading="loading"
-		@opened="open"
-		@closed="close">
+	<q-card-dialog :name="name" :scroll="false" :loading="loading" @opened="open" @closed="close">
 		<template #title>
 			{{ $t('components.server-dialog.header', { serverName: plexServer.name }) }}
 		</template>
@@ -92,6 +85,7 @@
 </template>
 
 <script setup lang="ts">
+import { defineProps } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { switchMap, take, tap } from 'rxjs/operators';
 import Log from 'consola';
@@ -109,27 +103,26 @@ const plexServer = ref<PlexServerDTO | null>(null);
 const plexLibraries = ref<PlexLibraryDTO[]>([]);
 const plexServerSettings = ref<PlexServerSettingsModel | null>(null);
 const plexServerId = ref(0);
-const splitterModel = ref(20);
 
 const isVisible = computed((): boolean => plexServerId.value > 0);
 
 const open = (newPlexServerId: number): void => {
-	plexServerId.value = newPlexServerId;
 	Log.debug('Opening server dialog for server with id: ' + newPlexServerId);
+	set(plexServerId, newPlexServerId);
 	set(loading, true);
 
 	useSubscription(
 		ServerService.getServer(newPlexServerId)
 			.pipe(
 				tap((plexServerData) => {
-					plexServer.value = plexServerData;
+					set(plexServer, plexServerData);
 				}),
 				switchMap((plexServer) => SettingsService.getServerSettings(plexServer?.machineIdentifier ?? '')),
 				take(1),
 			)
 			.subscribe({
 				next: (plexServerSettingsData) => {
-					plexServerSettings.value = plexServerSettingsData;
+					set(plexServerSettings, plexServerSettingsData);
 				},
 				complete: () => {
 					set(loading, false);
@@ -138,7 +131,7 @@ const open = (newPlexServerId: number): void => {
 	);
 	useSubscription(
 		LibraryService.getLibrariesByServerId(newPlexServerId).subscribe((plexLibrariesData) => {
-			plexLibraries.value = plexLibrariesData;
+			set(plexLibraries, plexLibrariesData);
 		}),
 	);
 };

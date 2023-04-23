@@ -1,14 +1,14 @@
 <template>
-	<q-row>
-		<q-col cols="4" align="center">
-			<help-icon help-id="help.server-dialog.server-config.download-speed-limit" style="margin-top: 8px" />
+	<q-row align="center">
+		<q-col cols="4">
+			<help-icon help-id="help.server-dialog.server-config.download-speed-limit" class="q-mt-sm" />
 		</q-col>
 		<q-col cols="8">
 			<download-limit-input
 				v-if="plexServer"
 				:plex-server-id="plexServer.id"
 				:download-speed-limit="downloadSpeedLimit"
-				@change="updateDownloadLimit" />
+				@change="updateDownloadLimit($event)" />
 			<span v-else> Plex Server was null </span>
 		</q-col>
 	</q-row>
@@ -16,14 +16,14 @@
 
 <script setup lang="ts">
 import Log from 'consola';
+import { defineProps, computed } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
-import { computed } from '#imports';
-
+import { clone } from 'lodash-es';
 import type { PlexServerDTO, PlexServerSettingsModel } from '@dto/mainApi';
 import { SettingsService } from '@service';
 
 const props = defineProps<{
-	plexServer: PlexServerDTO;
+	plexServer: PlexServerDTO | null;
 	plexServerSettings: PlexServerSettingsModel | null;
 }>();
 
@@ -36,10 +36,11 @@ function updateDownloadLimit(value) {
 		value = 0;
 	}
 	if (props.plexServerSettings) {
-		Log.info(value);
-		props.plexServerSettings.downloadSpeedLimit = value;
+		Log.debug('downloadSpeedLimit', value);
+		const settings = clone(props.plexServerSettings);
+		settings.downloadSpeedLimit = value;
 		// Its copied due to the object containing Vue getters and setters which messes up the store
-		useSubscription(SettingsService.updateServerSettings(JSON.parse(JSON.stringify(props.plexServerSettings))).subscribe());
+		useSubscription(SettingsService.updateServerSettings(settings).subscribe());
 	}
 }
 </script>

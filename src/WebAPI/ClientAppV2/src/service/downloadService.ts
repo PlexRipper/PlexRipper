@@ -1,6 +1,7 @@
 import { Observable, of } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 
+import { sum } from 'lodash-es';
 import {
 	clearDownloadTasks,
 	deleteDownloadTasks,
@@ -86,6 +87,16 @@ export class DownloadService extends BaseService {
 			return this.getServerDownloadList().pipe(map((x) => x.find((y) => y.id === serverId)?.downloads ?? []));
 		}
 		return this.getServerDownloadList().pipe(map((x) => x.map((y) => y.downloads).flat() ?? []));
+	}
+
+	/**
+	 * Get the total number of download tasks that are downloadable in the download list.
+	 */
+	public getTotalDownloadsCount(): Observable<number> {
+		return this.getServerDownloadList().pipe(
+			map((x) => x.map((y) => y.downloadableTasksCount).flat()),
+			map((x) => sum(x)),
+		);
 	}
 
 	public downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): void {

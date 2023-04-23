@@ -23,6 +23,8 @@
  - Fixed the seasons when viewing a tvShow not being sorted correctly.
  - Fixed the logging spam "Something failed but no errors were available in the result"
  - Fixed the DownloadDetail dialog not containing the DownloadUrl when a task can be downloaded.
+ - Fixed the Downloads count that is displayed in the menu to the left displaying an incorrect number, this number is now based on the amount of downloadable media entries
+
 
 ## [0.10.0-RC1]
 

@@ -23,14 +23,16 @@
 				</q-item>
 			</q-expansion-item>
 			<!-- Single item  -->
-			<q-item v-else :key="`false-${index}`" v-ripple clickable :to="item.link" active-class="text-orange">
+			<q-item v-else :key="`false-${index}`" v-ripple clickable :to="item.link">
 				<q-item-section avatar>
 					<q-icon :name="item.icon" />
 				</q-item-section>
 				<q-item-section>{{ $t(item.title ?? '') }}</q-item-section>
 				<!-- Badge -->
 				<q-item-section v-if="item && item.type === 'badge'" side>
-					<q-badge v-if="item.count && item.count > 0" color="red" floating :label="item.count" />
+					<q-chip v-if="item.count && item.count > 0" color="red" text-color="white" size="md">
+						{{ item.count }}
+					</q-chip>
 				</q-item-section>
 			</q-item>
 		</template>

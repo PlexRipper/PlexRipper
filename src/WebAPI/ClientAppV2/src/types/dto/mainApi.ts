@@ -863,6 +863,8 @@ export interface ServerConnectionCheckStatusProgressDTO {
 export interface ServerDownloadProgressDTO {
 	/** @format int32 */
 	id: number;
+	/** @format int32 */
+	downloadableTasksCount: number;
 	downloads: DownloadProgressDTO[];
 }
 

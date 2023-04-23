@@ -1,7 +1,7 @@
 <template>
 	<!--	Instead of multiple layouts we merge into one default layout to prevent full
         page change (flashing white background) during transitions.	-->
-	<q-layout view="hHh lpR fFf">
+	<q-layout view="hHh LpR lFf">
 		<template v-if="!isLoading">
 			<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
 			<!--            <alert-dialog v-for="(alertItem, i) in alerts" :key="i" :alert="alertItem" @close="closeAlert"/>-->
@@ -70,10 +70,16 @@ onMounted(() => {
 	});
 
 	useSubscription(
-		globalService.getPageSetupReady().subscribe(() => {
-			Log.debug('Loading has finished, displaying page now');
-			isLoading.value = false;
-			$q.loading.hide();
+		globalService.getPageSetupReady().subscribe({
+			next: () => {
+				Log.debug('Loading has finished, displaying page now');
+				isLoading.value = false;
+				$q.loading.hide();
+			},
+			error: (err) => {
+				Log.error('Error while loading page', err);
+				$q.loading.hide();
+			},
 		}),
 	);
 

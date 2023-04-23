@@ -6,11 +6,6 @@
 	</div>
 </template>
 
-<script setup lang="ts">
-import { defineProps } from 'vue';
-
-const props = defineProps<{ value: boolean }>();
-</script>
 <style>
 .logo-square {
 	width: 256px;

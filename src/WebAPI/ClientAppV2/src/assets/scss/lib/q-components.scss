@@ -118,6 +118,7 @@ body {
 
 body {
 	.q-card-dialog {
+		// Scrollbar is hidden because otherwise the header and footer are also scrolling
 		overflow-y: hidden;
 
 		&-background {
@@ -136,10 +137,6 @@ body {
 		&-content {
 			@extend .q-pt-none;
 			@extend .q-px-md;
-			width: 1200px;
-			height: auto;
-			min-height: 50vh;
-			max-height: 50vh;
 		}
 
 		&-title, &-actions {

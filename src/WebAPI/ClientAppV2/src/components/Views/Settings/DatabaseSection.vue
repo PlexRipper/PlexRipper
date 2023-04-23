@@ -36,7 +36,12 @@ const resetDatabaseCommand = (): void => {
 			GlobalService.resetStore();
 			Log.debug('reset db', value);
 			if (value.isSuccess) {
-				router.push('/setup');
+				router.push('/setup').then(() => {
+					// Refresh the page when we go to the home page to make sure we get all new data.
+					location.reload();
+				});
+			} else {
+				Log.error('reset db', value);
 			}
 		}),
 	);

@@ -10,7 +10,7 @@ public class DownloadPreviewDTO
 
     public int ChildCount { get; set; }
 
-    public PlexMediaType Type { get; set; }
+    public PlexMediaType MediaType { get; set; }
 
     public List<DownloadPreviewDTO> Children { get; set; } = new();
 }

@@ -8,7 +8,7 @@
 			<q-col cols="12">
 				<q-list>
 					<q-expansion-item
-						v-for="plexServer in getServersWithDownloads"
+						v-for="{ plexServer, downloads } in getServersWithDownloads"
 						:key="plexServer.id"
 						default-opened
 						class="extra-background default-border-radius q-ma-md">
@@ -30,7 +30,7 @@
 								<downloads-table
 									v-model="selected"
 									:selected="getSelected(plexServer.id)"
-									:download-rows="plexServer.downloadTasks"
+									:download-rows="downloads"
 									:server-id="plexServer.id"
 									@action="commandSwitch($event)"
 									@selected="updateSelected(plexServer.id, $event)"
@@ -67,13 +67,16 @@ const selected = ref<ISelection[]>([]);
 const aggregateSelected = ref<ISelection[]>([]);
 const dialogName = 'download-details-dialog';
 
-const getServersWithDownloads = computed(() => {
+const getServersWithDownloads = computed((): { plexServer: PlexServerDTO; downloads: DownloadProgressDTO[] }[] => {
 	const serverIds = get(serverDownloads).map((x) => x.id);
 	const plexServersWithDownloads = get(plexServers).filter((x) => serverIds.includes(x.id));
-	for (const plexServer of plexServersWithDownloads) {
-		plexServer.downloadTasks = get(serverDownloads).find((x) => x.id === plexServer.id)?.downloads ?? [];
-	}
-	return plexServersWithDownloads;
+
+	return plexServersWithDownloads.map((x) => {
+		return {
+			plexServer: x,
+			downloads: get(serverDownloads).find((y) => y.id === x.id)?.downloads ?? [],
+		};
+	});
 });
 
 const hasSelected = computed(() => {

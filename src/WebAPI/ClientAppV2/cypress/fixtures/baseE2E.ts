@@ -13,12 +13,11 @@ import {
 	SETTINGS_API_URL,
 } from '@api-urls';
 import { generateDownloadTasks } from '@mock/mock-download-task';
+import { generateSettingsModel } from '@factories/settings-factory';
 
 export function basePageSetup(config: Partial<MockConfig> = {}) {
-	const configValid = checkConfig(config);
-
 	// PlexServers call
-	const plexServers = generatePlexServers(configValid);
+	const plexServers = generatePlexServers(config);
 	cy.intercept('GET', PLEX_SERVER_API_URL, {
 		statusCode: 200,
 		body: generateResultDTO(plexServers),
@@ -32,7 +31,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}) {
 	});
 
 	// PlexLibraries call
-	const plexLibraries = plexServers.map((x) => generatePlexLibraries(x.id, configValid)).flat();
+	const plexLibraries = plexServers.map((x) => generatePlexLibraries(x.id, config)).flat();
 	cy.intercept('GET', PLEX_LIBRARY_API_URL, {
 		statusCode: 200,
 		body: generateResultDTO(plexLibraries),
@@ -54,9 +53,10 @@ export function basePageSetup(config: Partial<MockConfig> = {}) {
 		body: generateResultDTO([]),
 	});
 
+	const settings = generateSettingsModel(plexServers, config);
 	cy.intercept('GET', SETTINGS_API_URL, {
 		statusCode: 200,
-		body: generateResultDTO(generateSettings(configValid)),
+		body: generateResultDTO(settings),
 	});
 
 	cy.intercept('GET', NOTIFICATION_API_URL, {

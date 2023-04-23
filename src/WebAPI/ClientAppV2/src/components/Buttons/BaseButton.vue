@@ -5,6 +5,7 @@ import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
 export default defineComponent({
 	name: 'BaseButton',
+	inheritAttrs: false,
 	props: baseBtnPropsDefault(),
 	emits: ['click'],
 	render() {

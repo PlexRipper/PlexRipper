@@ -49,7 +49,7 @@ export function baseBtnPropsDefault() {
 		},
 		icon: {
 			type: String,
-			default: '',
+			default: undefined,
 		},
 		size: {
 			type: String,
@@ -109,7 +109,7 @@ export function baseBtnPropsDefault() {
 		},
 		href: {
 			type: String,
-			default: '',
+			default: undefined,
 		},
 		to: {
 			type: String,

@@ -135,6 +135,9 @@
         "server-download-status": {
             "pause": "Pause",
             "start": "Début"
+        },
+        "q-tree-view-table-row": {
+            "invalid-node": "Le nœud était indéfini ou nul"
         }
     },
     "confirmation": {
@@ -469,6 +472,15 @@
             "index": {
                 "header": "Aperçu des Séries",
                 "sub-header": "Sélectionnez une bibliothèque sur le côté gauche"
+            }
+        },
+        "debug": {
+            "dialogs": {
+                "buttons": {
+                    "download-confirmation": "Télécharger la confirmation",
+                    "server-dialog": "Boîte de dialogue du serveur"
+                },
+                "header": "Modaux de dialogue de débogage"
             }
         }
     }

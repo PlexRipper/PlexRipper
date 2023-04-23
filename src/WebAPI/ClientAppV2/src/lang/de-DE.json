@@ -135,6 +135,9 @@
         "server-download-status": {
             "pause": "Pause",
             "start": "Start"
+        },
+        "q-tree-view-table-row": {
+            "invalid-node": "Der Knoten war nicht definiert oder null"
         }
     },
     "confirmation": {
@@ -469,6 +472,15 @@
             "index": {
                 "header": "Serien Übersicht",
                 "sub-header": "Wählen Sie eine Serien-Mediathek auf der linken Seite"
+            }
+        },
+        "debug": {
+            "dialogs": {
+                "buttons": {
+                    "download-confirmation": "Bestätigung herunterladen",
+                    "server-dialog": "Serverdialog"
+                },
+                "header": "Debug-Dialogmodalitäten"
             }
         }
     }

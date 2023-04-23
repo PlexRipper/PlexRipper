@@ -135,6 +135,9 @@
         "server-download-status": {
             "pause": "Pause",
             "start": "Start"
+        },
+        "q-tree-view-table-row": {
+            "invalid-node": "The node was undefined or null"
         }
     },
     "confirmation": {
@@ -469,6 +472,15 @@
             "index": {
                 "header": "TvShow Overview",
                 "sub-header": "Select a library from the left-hand side"
+            }
+        },
+        "debug": {
+            "dialogs": {
+                "buttons": {
+                    "download-confirmation": "Download Confirmation",
+                    "server-dialog": "Server Dialog"
+                },
+                "header": "Debug Dialog Modals"
             }
         }
     }

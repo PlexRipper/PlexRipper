@@ -59,10 +59,12 @@
             "accounts": "Accounts",
             "advanced": "Advanced",
             "debug": "Debug",
+            "dialogs": "Dialogs",
             "downloads": "Downloads",
             "paths": "Paths",
             "settings": "Settings",
-            "ui": "UI"
+            "ui": "UI",
+            "buttons": "Buttons"
         },
         "notifications-drawer": {
             "clear-notifications": "Clear All Notifications",
@@ -351,8 +353,8 @@
                 "language": {
                     "language-selection": {
                         "label": "Language",
-                        "text": "",
-                        "title": ""
+                        "text": "This will change the language to almost everything. Text such as errors are unlikely to be translated. Any translation fixes or new languages are greatly appreciated, check www.plexripper.rocks for information on how you can add new languages.",
+                        "title": "Pick your preferred language"
                     }
                 }
             }
@@ -478,6 +480,7 @@
             "dialogs": {
                 "buttons": {
                     "download-confirmation": "Download Confirmation",
+                    "help-dialog": "Help Dialog",
                     "server-dialog": "Server Dialog"
                 },
                 "header": "Debug Dialog Modals"

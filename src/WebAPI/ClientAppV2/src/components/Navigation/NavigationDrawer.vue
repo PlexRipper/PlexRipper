@@ -63,11 +63,6 @@ const getNavItems = computed((): QExpansionListProps[] => {
 					icon: 'mdi-wrench',
 					link: '/settings/advanced',
 				},
-				{
-					title: 'components.navigation-drawer.debug',
-					icon: 'mdi-bug-outline',
-					link: '/settings/debug',
-				},
 			],
 		},
 		{
@@ -75,12 +70,12 @@ const getNavItems = computed((): QExpansionListProps[] => {
 			icon: 'mdi-bug-outline',
 			children: [
 				{
-					title: 'Dialogs',
+					title: 'components.navigation-drawer.dialogs',
 					icon: 'mdi-dock-window',
 					link: '/debug-pages/dialogs',
 				},
 				{
-					title: 'Buttons',
+					title: 'components.navigation-drawer.buttons',
 					icon: 'mdi-button-pointer',
 					link: '/debug-pages/buttons',
 				},

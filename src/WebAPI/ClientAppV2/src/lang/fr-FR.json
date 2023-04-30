@@ -59,10 +59,12 @@
             "accounts": "Comptes",
             "advanced": "Avancée",
             "debug": "Déboguer",
+            "dialogs": "Dialogues",
             "downloads": "Téléchargements",
             "paths": "Chemins",
             "settings": "Paramètres",
-            "ui": "Interface utilisateur"
+            "ui": "Interface utilisateur",
+            "buttons": "Boutons"
         },
         "notifications-drawer": {
             "clear-notifications": "Effacer tout les notifications",
@@ -351,8 +353,8 @@
                 "language": {
                     "language-selection": {
                         "label": "Language",
-                        "text": "",
-                        "title": ""
+                        "text": "Cela changera la langue de presque tout. Il est peu probable que des textes tels que des erreurs soient traduits. Toutes les corrections de traduction ou de nouvelles langues sont grandement appréciées, consultez www.plexripper.rocks pour plus d'informations sur la façon dont vous pouvez ajouter de nouvelles langues.",
+                        "title": "Choisissez votre langue préférée"
                     }
                 }
             }
@@ -478,6 +480,7 @@
             "dialogs": {
                 "buttons": {
                     "download-confirmation": "Télécharger la confirmation",
+                    "help-dialog": "Boîte de dialogue d'aide",
                     "server-dialog": "Boîte de dialogue du serveur"
                 },
                 "header": "Modaux de dialogue de débogage"

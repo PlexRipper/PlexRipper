@@ -59,10 +59,12 @@
             "accounts": "Konten",
             "advanced": "Erweitert",
             "debug": "Fehlersuche",
+            "dialogs": "Dialoge",
             "downloads": "Downloads",
             "paths": "Pfade",
             "settings": "Einstellungen",
-            "ui": "UI"
+            "ui": "UI",
+            "buttons": "Tasten"
         },
         "notifications-drawer": {
             "clear-notifications": "Alle Benachrichtigungen löschen",
@@ -351,8 +353,8 @@
                 "language": {
                     "language-selection": {
                         "label": "Sprache",
-                        "text": "",
-                        "title": ""
+                        "text": "Dies wird die Sprache für fast alles ändern. Text wie Fehler werden wahrscheinlich nicht übersetzt. Übersetzungskorrekturen oder neue Sprachen sind sehr willkommen, besuchen Sie www.plexripper.rocks für Informationen darüber, wie Sie neue Sprachen hinzufügen können.",
+                        "title": "Wählen Sie Ihre bevorzugte Sprache"
                     }
                 }
             }
@@ -478,6 +480,7 @@
             "dialogs": {
                 "buttons": {
                     "download-confirmation": "Bestätigung herunterladen",
+                    "help-dialog": "Hilfedialog",
                     "server-dialog": "Serverdialog"
                 },
                 "header": "Debug-Dialogmodalitäten"

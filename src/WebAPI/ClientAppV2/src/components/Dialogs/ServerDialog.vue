@@ -57,10 +57,7 @@
 
 						<!-- Server Connections Tab Content	-->
 						<q-tab-panel name="server-connection">
-							<ServerConnectionsTabContent
-								:plex-server="plexServer"
-								:plex-server-settings="plexServerSettings"
-								:is-visible="isVisible" />
+							<ServerConnectionsTabContent :plex-server="plexServer" :is-visible="isVisible" />
 						</q-tab-panel>
 
 						<!--	Server Configuration Tab Content	-->

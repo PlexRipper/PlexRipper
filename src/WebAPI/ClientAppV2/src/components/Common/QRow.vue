@@ -10,7 +10,7 @@ import { computed, defineProps, withDefaults } from 'vue';
 interface QRowProps {
 	justify?: 'start' | 'center' | 'end' | 'around' | 'between';
 	align?: 'start' | 'center' | 'end';
-	gutter?: string | boolean;
+	gutter?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'none';
 	noWrap?: boolean;
 	wrap?: boolean;
 	reverse?: boolean;
@@ -21,7 +21,7 @@ interface QRowProps {
 const props = withDefaults(defineProps<QRowProps>(), {
 	justify: 'start',
 	align: 'center',
-	gutter: false,
+	gutter: 'none',
 	noWrap: false,
 	reverse: false,
 	column: false,
@@ -42,8 +42,8 @@ const classes = computed(() => {
 		classList.push(`items-${props.align}`);
 	}
 
-	if (props.gutter) {
-		classList.push(`gutter-${props.gutter}`);
+	if (props.gutter !== 'none') {
+		classList.push(`q-gutter-${props.gutter}`);
 	}
 
 	if (props.wrap) {

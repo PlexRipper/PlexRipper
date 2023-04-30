@@ -21,7 +21,7 @@
 									<template #selected-item="scope">
 										<q-item>
 											<q-item-section avatar>
-												<q-img :src="scope.opt.img" :height="50" :max-width="80" :alt="scope.opt.text" />
+												<q-img :src="scope.opt.img" height="50" :max-width="80" :alt="scope.opt.text" />
 											</q-item-section>
 											<q-item-section>
 												<q-item-label> {{ scope.opt.text }}</q-item-label>
@@ -31,7 +31,7 @@
 									<template #option="scope">
 										<q-item v-bind="scope.itemProps">
 											<q-item-section avatar>
-												<q-img :src="scope.opt.img" :height="50" :max-width="80" :alt="scope.opt.text" />
+												<q-img :src="scope.opt.img" height="50" :max-width="80" :alt="scope.opt.text" />
 											</q-item-section>
 											<q-item-section>
 												<q-item-label> {{ scope.opt.text }}</q-item-label>

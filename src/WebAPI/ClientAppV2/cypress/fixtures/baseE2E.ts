@@ -1,5 +1,5 @@
 import { cy, Cypress } from 'local-cypress';
-import { generatePlexServers, generatePlexLibraries, checkConfig, generateResultDTO, generateSettings, MockConfig } from '@mock';
+import { generatePlexServers, generatePlexLibraries, generateResultDTO, MockConfig } from '@mock';
 import {
 	DOWNLOAD_API_URL,
 	FOLDER_PATH_API_URL,

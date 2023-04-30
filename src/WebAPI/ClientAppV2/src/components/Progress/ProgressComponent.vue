@@ -6,7 +6,7 @@
 				<q-row justify="center" no-gutters class="my-3">
 					<q-col cols="auto">
 						<q-circular-progress
-							:size="100"
+							size="100"
 							:rotate="-90"
 							:width="15"
 							:value="getPercentage"
@@ -16,7 +16,7 @@
 								<span v-if="percentage < 100">
 									<b>{{ getPercentage }}%</b>
 								</span>
-								<q-icon v-else large> mdi-check </q-icon>
+								<q-icon v-else large> mdi-check</q-icon>
 							</template>
 						</q-circular-progress>
 					</q-col>

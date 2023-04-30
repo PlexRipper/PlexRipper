@@ -1,7 +1,6 @@
 import { defineNuxtPlugin } from '#app';
 import { Composer, LocaleMessageObject, VueI18n } from 'vue-i18n';
 import { get as objGet } from 'object-path';
-import Log, { LogLevel } from 'consola';
 
 export default defineNuxtPlugin((nuxtApp) => {
 	// Doc: https://i18n.nuxtjs.org/

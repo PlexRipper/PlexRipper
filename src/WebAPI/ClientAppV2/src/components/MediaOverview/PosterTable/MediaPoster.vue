@@ -173,7 +173,8 @@ const downloadMedia = () => {
 	const downloadCommand: DownloadMediaDTO = {
 		type: props.mediaType,
 		mediaIds: [props.mediaItem.id],
-		plexAccountId: 0,
+		plexLibraryId: props.mediaItem.plexLibraryId,
+		plexServerId: props.mediaItem.plexServerId,
 	};
 
 	emit('download', [downloadCommand]);

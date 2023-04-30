@@ -15,7 +15,7 @@
 			<q-row>
 				<q-col>
 					<p-text-field
-						:model-value="path?.directory"
+						:model-value="path?.directory ?? ''"
 						outlined
 						color="red"
 						debounce="500"
@@ -67,6 +67,7 @@ import Log from 'consola';
 import { ref, defineProps, defineEmits } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { cloneDeep } from 'lodash-es';
+import { get } from '@vueuse/core';
 import { getDirectoryPath } from '@api/pathApi';
 import type { FileSystemModelDTO, FolderPathDTO } from '@dto/mainApi';
 import { FileSystemEntityType } from '@dto/mainApi';
@@ -116,7 +117,7 @@ function confirm(): void {
 		Log.error('path was null when confirming DirectoryBrowser');
 		return;
 	}
-	emit('confirm', path.value);
+	emit('confirm', get(path));
 	useCloseControlDialog(props.name);
 }
 

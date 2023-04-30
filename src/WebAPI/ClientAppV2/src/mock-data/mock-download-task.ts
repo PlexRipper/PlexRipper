@@ -5,14 +5,13 @@ import { DownloadProgressDTO, DownloadStatus, DownloadTaskType, ServerDownloadPr
 import { checkConfig, getId } from '@mock/mock-base';
 
 export function generateDownloadTasks(plexServerId: number, config: Partial<MockConfig> = {}): ServerDownloadProgressDTO {
-	const validConfig = checkConfig(config);
-
 	const downloadTasks: DownloadProgressDTO[] = [];
 
 	downloadTasks.push(...generateDownloadTasksByType(plexServerId, DownloadTaskType.TvShow, config));
 
 	return {
 		id: plexServerId,
+		downloadableTasksCount: 10,
 		downloads: downloadTasks,
 	};
 }
@@ -26,7 +25,7 @@ export function generateDownloadTasksByType(
 
 	const downloadTasks: DownloadProgressDTO[] = [];
 	for (let i = 0; i < validConfig.tvShowDownloadTask; i++) {
-		const downloadTask = {
+		const downloadTask: DownloadProgressDTO = {
 			id: getId(),
 			dataReceived: 0,
 			dataTotal: 0,

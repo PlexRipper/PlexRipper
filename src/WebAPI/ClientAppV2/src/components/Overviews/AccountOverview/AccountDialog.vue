@@ -148,11 +148,11 @@ const validationIcon = computed(() => {
 const validationColor = computed(() => {
 	switch (isValidated.value) {
 		case 'OK':
-			return 'success';
+			return 'positive';
 		case 'ERROR':
-			return 'error';
+			return 'negative';
 		default:
-			return 'primary';
+			return 'default';
 	}
 });
 

@@ -3,8 +3,8 @@
 		v-model:model-value="showDialog"
 		:no-route-dismiss="noRouteDismiss"
 		:no-backdrop-dismiss="noBackdropDismiss"
-		@show="$emit('opened', dataValue)"
-		@hide="$emit('closed')">
+		@before-show="$emit('opened', dataValue)"
+		@before-hide="$emit('closed')">
 		<q-row column class="q-card-dialog q-card-dialog-background" :style="styles">
 			<!-- Dialog Title	-->
 			<q-col cols="auto" class="q-card-dialog-title">

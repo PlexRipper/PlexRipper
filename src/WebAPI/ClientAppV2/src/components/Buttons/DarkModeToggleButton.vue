@@ -1,8 +1,10 @@
 <template>
-	<BaseButton :icon="icon" icon-only @click="toggleDarkMode" />
+	<BaseButton :icon="icon" flat icon-only @click="toggleDarkMode" />
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+
 const $q = useQuasar();
 
 const icon = computed((): string => {

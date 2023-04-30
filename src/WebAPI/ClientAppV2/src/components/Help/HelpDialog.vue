@@ -1,5 +1,5 @@
 <template>
-	<q-card-dialog max-width="500" :name="name" :loading="false" @opened="onOpen($event)" @closed="onClose">
+	<q-card-dialog max-width="500px" :name="name" :loading="false" @opened="onOpen($event)" @closed="onClose">
 		<template #title>
 			{{ helpTitle ? helpTitle : missingHelpTitle }}
 		</template>

@@ -1,13 +1,18 @@
 <template>
-	<q-dialog v-model:model-value="showDialog" full-height full-width>
-		<q-row column class="q-card-dialog q-card-dialog-background">
+	<q-dialog
+		v-model:model-value="showDialog"
+		:no-route-dismiss="noRouteDismiss"
+		:no-backdrop-dismiss="noBackdropDismiss"
+		@show="$emit('opened', dataValue)"
+		@hide="$emit('closed')">
+		<q-row column class="q-card-dialog q-card-dialog-background" :style="styles">
 			<!-- Dialog Title	-->
 			<q-col cols="auto" class="q-card-dialog-title">
 				<QCardTitle>
 					<slot name="title" :value="parentValue" />
 				</QCardTitle>
 			</q-col>
-			<!--	Dialog Top Row		-->
+			<!--	Dialog Top Row -->
 			<q-col v-if="$slots['top-row']" cols="auto" class="q-card-dialog-top-row">
 				<slot name="top-row" />
 			</q-col>
@@ -26,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, defineProps, ref } from 'vue';
+import { withDefaults, defineEmits, defineProps, ref } from 'vue';
 import { get, set } from '@vueuse/core';
 import { useControlDialog } from '#imports';
 
@@ -47,9 +52,11 @@ const props = withDefaults(
 		allHeight?: string;
 		viewHeight?: string;
 		value?: any;
-		loading: boolean;
+		loading?: boolean;
 		scroll?: boolean;
 		persistent?: boolean;
+		noBackdropDismiss?: boolean;
+		noRouteDismiss?: boolean;
 		buttonAlign?: 'left' | 'center' | 'right' | 'between' | 'around' | 'evenly' | 'stretch';
 	}>(),
 	{
@@ -67,11 +74,13 @@ const props = withDefaults(
 		loading: false,
 		scroll: true,
 		persistent: false,
+		noBackdropDismiss: false,
+		noRouteDismiss: false,
 		buttonAlign: 'right',
 	},
 );
 
-const emit = defineEmits<{
+defineEmits<{
 	(e: 'opened', value: any): void;
 	(e: 'closed'): void;
 }>();
@@ -84,14 +93,13 @@ const parentValue = computed(() => {
 });
 
 function openDialog(value: any) {
-	set(showDialog, true);
+	// Data value should always be set first before opening, since that value is emitted on open
 	set(dataValue, value);
-	emit('opened', value);
+	set(showDialog, true);
 }
 
 function closeDialog() {
 	set(showDialog, false);
-	emit('closed');
 }
 
 const styles = computed(() => {
@@ -144,12 +152,13 @@ const styles = computed(() => {
 
 // Dialog control listener
 controlDialog.on((data) => {
-	if (data.name === props.name) {
-		if (data.state) {
-			openDialog(data.value ?? null);
-		} else {
-			closeDialog();
-		}
+	if (data.name !== props.name) {
+		return;
+	}
+	if (data.state) {
+		openDialog(data.value ?? null);
+	} else {
+		closeDialog();
 	}
 });
 </script>

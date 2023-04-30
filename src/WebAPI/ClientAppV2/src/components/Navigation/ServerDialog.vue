@@ -1,10 +1,17 @@
 <template>
-	<q-card-dialog :name="name" :scroll="false" :loading="loading" @opened="open" @closed="close">
+	<q-card-dialog
+		:name="name"
+		max-width="1200px"
+		height="800px"
+		:scroll="false"
+		:loading="loading"
+		@opened="open"
+		@closed="close">
 		<template #title>
 			{{ $t('components.server-dialog.header', { serverName: plexServer.name }) }}
 		</template>
 		<template #default>
-			<q-row align="start" class="inherit-all-height">
+			<q-row align="start" full-height>
 				<q-col cols="auto" align-self="stretch">
 					<!-- Tab Index -->
 					<q-tabs v-model="tabIndex" vertical active-color="red">

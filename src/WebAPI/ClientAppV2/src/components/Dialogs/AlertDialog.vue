@@ -1,5 +1,5 @@
 <template>
-	<q-card-dialog :name="name" @closed="onClose">
+	<q-card-dialog max-width="1000px" :name="name" @closed="onClose">
 		<template #title>
 			{{ alert.title }}
 		</template>

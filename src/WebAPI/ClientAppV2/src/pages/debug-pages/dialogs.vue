@@ -17,6 +17,11 @@
 				</q-tr>
 				<q-tr>
 					<q-td>
+						<DebugButton :label="$t('pages.debug.dialogs.buttons.help-dialog')" @click="openHelpDialog" />
+					</q-td>
+				</q-tr>
+				<q-tr>
+					<q-td>
 						<DebugButton text-id="add-alert" @click="addAlert" />
 					</q-td>
 				</q-tr>
@@ -32,7 +37,7 @@ import { onMounted, ref } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { useOpenControlDialog } from '@composables/event-bus';
 import { DownloadConfirmation } from '#components';
-import { AlertService, MediaService } from '@service';
+import { AlertService, HelpService, MediaService } from '@service';
 import { PlexMediaDTO } from '@dto/mainApi';
 import { generateDownloadTasks } from '@mock/mock-download-task';
 
@@ -57,6 +62,10 @@ function openDownloadConfirmationDialog(): void {
 		},
 	];
 	useOpenControlDialog(downloadConfirmationName, demo);
+}
+
+function openHelpDialog(): void {
+	HelpService.openHelpDialog('help.settings.ui.language.language-selection');
 }
 
 function addAlert(): void {

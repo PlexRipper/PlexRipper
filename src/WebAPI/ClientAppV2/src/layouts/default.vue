@@ -3,7 +3,7 @@
         page change (flashing white background) during transitions.	-->
 	<q-layout view="hHh LpR lFf">
 		<template v-if="!isLoading">
-			<help-dialog :id="helpId" :show="helpDialogState" @close="helpDialogState = false" />
+			<help-dialog :name="helpDialogName" />
 			<alert-dialog v-for="(alertItem, i) in alerts" :key="i" :name="`alert-dialog-${alertItem.id}`" :alert="alertItem" />
 			<!--            <CheckServerConnectionsProgress/>-->
 
@@ -36,11 +36,12 @@ const $q = useQuasar();
 const route = useRoute();
 
 const isLoading = ref(true);
-const helpDialogState = ref(false);
-const helpId = ref('');
+
 const alerts = ref<IAlert[]>([]);
 const showNavigationDrawerState = ref(true);
 const showNotificationsDrawerState = ref(false);
+
+const helpDialogName = 'helpDialog';
 
 const isEmptyLayout = computed((): boolean => {
 	return route.fullPath.includes('setup');
@@ -83,8 +84,8 @@ onMounted(() => {
 	useSubscription(
 		HelpService.getHelpDialog().subscribe((newHelpId) => {
 			if (newHelpId) {
-				set(helpId, newHelpId);
-				set(helpDialogState, true);
+				console.log(newHelpId);
+				useOpenControlDialog(helpDialogName, newHelpId);
 			}
 		}),
 	);

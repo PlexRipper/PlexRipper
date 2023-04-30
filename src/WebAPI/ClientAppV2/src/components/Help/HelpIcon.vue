@@ -27,7 +27,7 @@ const { $getMessage } = useNuxtApp();
 const props = withDefaults(
 	defineProps<{
 		labelId?: string;
-		helpId: string;
+		helpId?: string;
 	}>(),
 	{
 		labelId: '',

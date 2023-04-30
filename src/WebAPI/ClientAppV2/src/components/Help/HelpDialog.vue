@@ -1,59 +1,50 @@
 <template>
-	<q-dialog :model-value="show" max-width="500" @click:outside="close">
-		<q-card>
-			<q-card-section>
-				<div class="headline i18n-formatting">
-					{{ $t(getHelpText.title) }}
-				</div>
-			</q-card-section>
-
-			<!--	Help text	-->
-			<q-card-section>
-				<div class="i18n-formatting">
-					{{ $t(getHelpText.text) }}
-				</div>
-			</q-card-section>
-
-			<q-separator />
-
-			<!--	Close action	-->
-			<q-card-actions>
-				<q-space />
-				<q-btn flat :label="$t('general.commands.close')" @click="close" />
-			</q-card-actions>
-		</q-card>
-	</q-dialog>
+	<q-card-dialog max-width="500" :name="name" :loading="false" @opened="onOpen($event)" @closed="onClose">
+		<template #title>
+			{{ helpTitle ? helpTitle : missingHelpTitle }}
+		</template>
+		<!--	Help text	-->
+		<template #default>
+			<div class="i18n-formatting">
+				{{ helpText ? helpText : missingHelpText }}
+			</div>
+		</template>
+		<!--	Close action	-->
+		<template #actions="{ close }">
+			<q-space />
+			<q-btn flat :label="$t('general.commands.close')" @click="close" />
+		</template>
+	</q-card-dialog>
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps, defineEmits } from 'vue';
+import { ref, defineProps } from 'vue';
+import { get, set } from '@vueuse/core';
+import { useI18n } from '#imports';
 
-const props = defineProps<{
-	show: boolean;
-	id: string;
-}>();
+defineProps<{ name: string }>();
 
-const emit = defineEmits<{
-	(e: 'close'): void;
-}>();
+const { t } = useI18n();
+const helpId = ref('');
+const helpTitle = ref('');
+const helpText = ref('');
 
-const getHelpText = computed(() => {
-	if (props.id === '') {
-		return {
-			id: 'help.default',
-			title: 'help.default.title',
-			text: 'help.default.text',
-		};
+const missingHelpTitle = ref(t('help.default.title'));
+const missingHelpText = ref(t('help.default.text'));
+
+function onOpen(value: string): void {
+	set(helpId, value);
+	if (get(helpId) === '') {
+		set(helpTitle, t('help.default.title'));
+		set(helpText, t('help.default.text'));
+	} else {
+		set(helpTitle, t(`${get(helpId)}.title`));
+		set(helpText, t(`${get(helpId)}.text`));
 	}
+}
 
-	return {
-		id: props.id,
-		title: `${props.id}.title`,
-		text: `${props.id}.text`,
-	};
-});
-
-const close = () => {
-	emit('close');
-};
+function onClose() {
+	set(helpTitle, '');
+	set(helpText, '');
+}
 </script>

@@ -15,6 +15,7 @@ interface QRowProps {
 	wrap?: boolean;
 	reverse?: boolean;
 	column?: boolean;
+	fullHeight?: boolean;
 }
 
 const props = withDefaults(defineProps<QRowProps>(), {
@@ -53,6 +54,10 @@ const classes = computed(() => {
 
 	if (props.reverse) {
 		classList.push('reverse');
+	}
+
+	if (props.fullHeight) {
+		classList.push('full-height');
 	}
 
 	return classList;

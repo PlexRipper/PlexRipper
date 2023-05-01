@@ -23,6 +23,7 @@ interface IHelp {
 }
 
 const { $getMessage } = useNuxtApp();
+const { t } = useI18n();
 
 const props = withDefaults(
 	defineProps<{
@@ -36,7 +37,7 @@ const props = withDefaults(
 );
 
 const getLabel = computed(() => {
-	return useI18n().t(`${props.helpId}.label`);
+	return t(`${props.helpId}.label`);
 });
 
 const hasHelpPage = computed(() => {

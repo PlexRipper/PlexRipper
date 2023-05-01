@@ -36,7 +36,6 @@ const props = defineProps<{
 	 */
 	textId: string;
 	name: string;
-	dialog: boolean;
 	confirmLoading?: boolean;
 }>();
 

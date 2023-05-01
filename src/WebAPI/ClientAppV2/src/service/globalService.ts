@@ -99,5 +99,4 @@ export class GlobalService extends BaseService {
 	}
 }
 
-const globalService = new GlobalService();
-export default globalService;
+export default new GlobalService();

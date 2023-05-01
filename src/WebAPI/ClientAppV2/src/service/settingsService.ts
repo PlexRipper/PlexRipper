@@ -363,5 +363,4 @@ export class SettingsService extends BaseService {
 	// endregion
 }
 
-const settingsService = new SettingsService();
-export default settingsService;
+export default new SettingsService();

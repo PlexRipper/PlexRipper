@@ -63,5 +63,4 @@ export class ProgressService extends BaseService {
 	}
 }
 
-const progressService = new ProgressService();
-export default progressService;
+export default new ProgressService();

@@ -116,5 +116,4 @@ export class LibraryService extends BaseService {
 	}
 }
 
-const libraryService = new LibraryService();
-export default libraryService;
+export default new LibraryService();

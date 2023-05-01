@@ -96,5 +96,4 @@ export class MediaService extends BaseService {
 	}
 }
 
-const mediaService = new MediaService();
-export default mediaService;
+export default new MediaService();

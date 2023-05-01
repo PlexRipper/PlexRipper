@@ -1,5 +1,5 @@
 import { Observable, of } from 'rxjs';
-import { switchMap, take } from 'rxjs/operators';
+import { map, switchMap, take } from 'rxjs/operators';
 
 import IStoreState from '@interfaces/service/IStoreState';
 import { BaseService } from '@service';
@@ -23,7 +23,7 @@ export class HelpService extends BaseService {
 	}
 
 	public getHelpDialog(): Observable<string> {
-		return this.stateChanged.pipe(switchMap((x) => of(x?.helpIdDialog ?? '')));
+		return this.stateChanged.pipe(map((x) => x?.helpIdDialog ?? ''));
 	}
 
 	public openHelpDialog(helpId: string): void {
@@ -31,5 +31,4 @@ export class HelpService extends BaseService {
 	}
 }
 
-const helpService = new HelpService();
-export default helpService;
+export default new HelpService();

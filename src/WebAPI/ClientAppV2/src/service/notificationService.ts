@@ -61,5 +61,4 @@ export class NotificationService extends BaseService {
 	// endregion
 }
 
-const notificationService = new NotificationService();
-export default notificationService;
+export default new NotificationService();

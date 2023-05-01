@@ -298,5 +298,4 @@ export class SignalrService extends BaseService {
 	// endregion
 }
 
-const signalrService = new SignalrService();
-export default signalrService;
+export default new SignalrService();

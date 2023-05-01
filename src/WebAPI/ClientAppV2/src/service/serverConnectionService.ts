@@ -88,5 +88,4 @@ export class ServerConnectionService extends BaseService {
 	}
 }
 
-const serverConnectionService = new ServerConnectionService();
-export default serverConnectionService;
+export default new ServerConnectionService();

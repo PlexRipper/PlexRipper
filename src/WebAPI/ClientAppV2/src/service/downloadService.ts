@@ -193,5 +193,4 @@ export class DownloadService extends BaseService {
 	}
 }
 
-const downloadService = new DownloadService();
-export default downloadService;
+export default new DownloadService();

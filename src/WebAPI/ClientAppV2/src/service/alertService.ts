@@ -42,5 +42,4 @@ export class AlertService extends BaseService {
 	// endregion
 }
 
-const alertService = new AlertService();
-export default alertService;
+export default new AlertService();

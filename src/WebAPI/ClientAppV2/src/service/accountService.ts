@@ -99,5 +99,4 @@ export class AccountService extends BaseService {
 	}
 }
 
-const accountService = new AccountService();
-export default accountService;
+export default new AccountService();

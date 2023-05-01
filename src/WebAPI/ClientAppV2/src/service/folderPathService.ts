@@ -69,5 +69,4 @@ export class FolderPathService extends BaseService {
 	}
 }
 
-const folderPathService = new FolderPathService();
-export default folderPathService;
+export default new FolderPathService();

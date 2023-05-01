@@ -121,5 +121,4 @@ export class ServerService extends BaseService {
 	}
 }
 
-const serverService = new ServerService();
-export default serverService;
+export default new ServerService();

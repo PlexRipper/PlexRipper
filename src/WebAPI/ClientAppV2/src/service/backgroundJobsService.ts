@@ -46,5 +46,4 @@ export class BackgroundJobsService extends BaseService {
 	}
 }
 
-const backgroundJobsService = new BackgroundJobsService();
-export default backgroundJobsService;
+export default new BackgroundJobsService();

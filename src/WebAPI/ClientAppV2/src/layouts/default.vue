@@ -3,10 +3,6 @@
         page change (flashing white background) during transitions.	-->
 	<q-layout view="hHh LpR lFf">
 		<template v-if="!isLoading">
-			<help-dialog :name="helpDialogName" />
-			<alert-dialog v-for="(alertItem, i) in alerts" :key="i" :name="`alert-dialog-${alertItem.id}`" :alert="alertItem" />
-			<!--            <CheckServerConnectionsProgress/>-->
-
 			<!--	Use for everything else	-->
 			<template v-if="!isEmptyLayout">
 				<app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer" />
@@ -17,6 +13,11 @@
 				<slot />
 			</q-page-container>
 		</template>
+		<!--	Dialogs	-->
+		<help-dialog :name="helpDialogName" />
+		<alert-dialog v-for="(alertItem, i) in alerts" :key="i" :name="`alert-dialog-${alertItem.id}`" :alert="alertItem" />
+		<CheckServerConnectionsDialog />
+		<!--	Background	-->
 		<Background :hide-background="isNoBackground" />
 	</q-layout>
 </template>

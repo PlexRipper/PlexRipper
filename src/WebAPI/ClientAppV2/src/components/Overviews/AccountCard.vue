@@ -1,5 +1,5 @@
 <template>
-	<q-card v-if="account" class="account-card glass-background" data-cy="account-card" @click="$emit('open-dialog', account)">
+	<q-card class="account-card glass-background" data-cy="account-card" @click="$emit('open-dialog', account)">
 		<q-card-section v-if="!isNew">
 			{{ account ? account.displayName : $t('components.account-card.no-account-name') }}
 		</q-card-section>
@@ -12,17 +12,17 @@
 		<!-- Edit Account -->
 		<q-card-section v-else>
 			<!-- Validation Chip -->
-			<q-chip v-if="account.isValidated" class="ma-2" color="green" text-color="white">
+			<q-chip v-if="account?.isValidated" color="green" text-color="white">
 				{{ $t('general.commands.validated') }}
 			</q-chip>
-			<q-chip v-else class="ma-2" color="red" text-color="white">
+			<q-chip v-else color="red" text-color="white">
 				{{ $t('general.commands.not-validated') }}
 			</q-chip>
 			<!-- IsEnabled Chip -->
-			<q-chip v-if="account.isEnabled" class="ma-2" color="green" text-color="white">
+			<q-chip v-if="account?.isEnabled" color="green" text-color="white">
 				{{ $t('general.commands.enabled') }}
 			</q-chip>
-			<q-chip v-else class="ma-2" color="red" text-color="white">
+			<q-chip v-else color="red" text-color="white">
 				{{ $t('general.commands.disabled') }}
 			</q-chip>
 		</q-card-section>

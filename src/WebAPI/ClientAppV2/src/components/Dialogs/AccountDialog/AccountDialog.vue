@@ -1,77 +1,94 @@
 <template>
-	<q-dialog id="account-dialog" :max-width="900" :model-value="showDialog" persistent>
-		<!-- The account pop-up -->
-		<q-card data-cy="account-dialog-form" class="account-dialog-content">
-			<!-- Dialog Header -->
-			<q-card-title>
-				{{ getDisplayName }}
-			</q-card-title>
-			<q-separator />
-			<q-card-section>
-				<AccountForm ref="accountForm" :value="changedPlexAccount" @input="formChanged" @is-valid="isValid = $event" />
-			</q-card-section>
-			<!-- Dialog Actions	-->
-			<q-card-actions>
+	<q-card-dialog
+		max-width="900px"
+		:name="name"
+		persistent
+		data-cy="account-dialog-form"
+		@opened="openDialog"
+		@closed="closeDialog">
+		<!-- Dialog Header -->
+		<template #title>
+			{{ getDisplayName }}
+		</template>
+		<template #default>
+			<AccountForm ref="accountForm" :value="changedPlexAccount" @input="formChanged" @is-valid="isValid = $event" />
+		</template>
+		<!-- Dialog Actions	-->
+		<template #actions="{ close }">
+			<q-row justify="between" gutter="md">
 				<!-- Delete account -->
-				<DeleteButton v-if="!isNewAccount" class="mx-2" :width="130" @click="confirmationDialogState = true" />
-
-				<!-- Reset Form -->
-				<ResetButton :width="130" class="mx-2" cy="account-dialog-reset-button" @click="reset" />
-				<q-space />
-
+				<q-col v-if="!isNewAccount">
+					<DeleteButton class="mx-2" block :width="130" @click="openConfirmationDialog" />
+				</q-col>
 				<!-- Cancel button -->
-				<CancelButton :width="130" class="mx-2" cy="account-dialog-cancel-button" @click="cancel" />
-
+				<q-col>
+					<CancelButton :width="130" class="mx-2" block cy="account-dialog-cancel-button" @click="close" />
+				</q-col>
+				<!-- Reset Form -->
+				<q-col>
+					<ResetButton :width="130" class="mx-2" block cy="account-dialog-reset-button" @click="reset" />
+				</q-col>
 				<!-- Validation button -->
-				<AccountValidationButton
-					:color="validationColor"
-					:disabled="!isValid || validateLoading"
-					:icon="validationIcon"
-					:loading="validateLoading"
-					:width="130"
-					cy="account-dialog-validate-button"
-					class="mx-2"
-					@click="validate" />
-
+				<q-col>
+					<AccountValidationButton
+						:color="validationColor"
+						:disabled="!isValid || validateLoading"
+						:icon="validationIcon"
+						:loading="validateLoading"
+						:width="130"
+						block
+						cy="account-dialog-validate-button"
+						class="q-mx-md"
+						@click="validate" />
+				</q-col>
 				<!-- Save account -->
-				<SaveButton
-					:disabled="!isAllowedToSave"
-					:text-id="isNewAccount ? 'save' : 'update'"
-					:cy="`account-dialog-${isNewAccount ? 'save' : 'update'}-button`"
-					:width="130"
-					class="mx-2"
-					@click="saveAccount" />
-			</q-card-actions>
-		</q-card>
+				<q-col>
+					<SaveButton
+						:disabled="!isAllowedToSave"
+						:text-id="isNewAccount ? 'save' : 'update'"
+						:cy="`account-dialog-${isNewAccount ? 'save' : 'update'}-button`"
+						:width="130"
+						block
+						class="q-mx-md"
+						@click="saveAccount(close)" />
+				</q-col>
+			</q-row>
+		</template>
+	</q-card-dialog>
 
-		<!--	Account Verification Code Dialog	-->
-		<AccountVerificationCodeDialog
-			:dialog="verificationCodeDialogState"
-			:errors="validateErrors"
-			@close="closeVerificationDialog"
-			@submit="validateAfterVerificationCode" />
-		<!--	Delete Confirmation Dialog	-->
-		<confirmation-dialog
-			:confirm-loading="true"
-			:dialog="confirmationDialogState"
-			class="mr-4"
-			text-id="delete-account"
-			@cancel="confirmationDialogState = false"
-			@confirm="deleteAccount" />
-	</q-dialog>
+	<!--	Account Verification Code Dialog	-->
+	<AccountVerificationCodeDialog
+		:dialog="verificationCodeDialogState"
+		:errors="validateErrors"
+		@close="closeVerificationDialog"
+		@submit="validateAfterVerificationCode" />
+	<!--	Delete Confirmation Dialog	-->
+	<confirmation-dialog
+		:confirm-loading="true"
+		:name="confirmationDialogName"
+		class="q-mr-md"
+		text-id="delete-account"
+		@confirm="deleteAccount" />
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
-import { defineEmits, ref, computed } from 'vue';
+import { ref, computed, defineProps } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
+import { get, set } from '@vueuse/core';
+import { cloneDeep } from 'lodash-es';
+import { merge } from 'rxjs';
 import { IError, PlexAccountDTO } from '@dto/mainApi';
 import { validateAccount } from '@api/accountApi';
-import { AccountService } from '@service';
-import { useI18n } from '#imports';
+import { AccountService, LibraryService, ServerService } from '@service';
+import { useI18n, useOpenControlDialog } from '#imports';
 import type { AccountForm } from '#components';
 
-const showDialog = ref(false);
+const { t } = useI18n();
+
+defineProps<{ name: string }>();
+
+const confirmationDialogName = 'confirmationAccountDialogName';
 const isNewAccount = ref(false);
 
 const accountForm = ref<InstanceType<typeof AccountForm> | null>(null);
@@ -92,11 +109,8 @@ const isValid = ref(true);
 
 const saving = ref(false);
 const validateErrors = ref<IError[]>([]);
-const confirmationDialogState = ref(false);
 const verificationCodeDialogState = ref(false);
 const inputHasChanged = ref(false);
-
-const emit = defineEmits<{ (e: 'dialog-closed', refreshAccounts: boolean): void }>();
 
 function getDefaultAccount(): PlexAccountDTO {
 	return {
@@ -157,54 +171,56 @@ const validationColor = computed(() => {
 });
 
 const getDisplayName = computed(() => {
-	const title = useI18n()
-		.t(`components.account-dialog.${isNewAccount.value ? 'add-account-title' : 'edit-account-title'}`)
-		.toString();
+	const title = t(`components.account-dialog.${isNewAccount.value ? 'add-account-title' : 'edit-account-title'}`).toString();
 	return changedPlexAccount.value?.displayName !== '' ? `${title}: ${changedPlexAccount.value?.displayName}` : title;
 });
 
 const formChanged = ({ prop, value }: { prop: string; value: string | boolean }) => {
-	inputHasChanged.value = true;
+	set(inputHasChanged, true);
 	changedPlexAccount.value[prop] = value;
 };
 
+function openConfirmationDialog() {
+	useOpenControlDialog(confirmationDialogName);
+}
+
 const validate = () => {
-	validateLoading.value = true;
+	set(validateLoading, true);
 
 	useSubscription(
 		validateAccount(changedPlexAccount.value).subscribe((data) => {
 			// Account has no 2FA and was valid
 			if (data.isSuccess && data.value) {
-				changedPlexAccount.value = data.value;
+				set(changedPlexAccount, data.value);
 
-				isValidated.value = 'OK';
-				isValid.value = true;
-				validateErrors.value = [];
+				set(isValidated, 'OK');
+				set(isValid, true);
+				set(validateErrors, []);
 			} else if (data.isSuccess && !data.value) {
 				// Account has no 2FA and was invalid
-				isValidated.value = 'ERROR';
-				isValid.value = false;
-				validateErrors.value = [];
+				set(isValidated, 'ERROR');
+				set(isValid, false);
+				set(validateErrors, []);
 			} else if (!data.isSuccess && data.value) {
 				// Account has 2FA
-				isValidated.value = 'ERROR';
-				isValid.value = false;
-				validateErrors.value = data.errors ?? [];
-				verificationCodeDialogState.value = true;
+				set(isValidated, 'ERROR');
+				set(isValid, false);
+				set(validateErrors, data.errors ?? []);
+				set(verificationCodeDialogState, true);
 			} else {
 				// Account has 2FA and was invalid
-				isValidated.value = 'ERROR';
-				isValid.value = false;
-				validateErrors.value = [];
+				set(isValidated, 'ERROR');
+				set(isValid, false);
+				set(validateErrors, []);
 			}
-			validateLoading.value = false;
+			set(validateLoading, false);
 		}),
 	);
 };
 
 function closeVerificationDialog() {
-	verificationCodeDialogState.value = false;
-	validateLoading.value = false;
+	set(verificationCodeDialogState, false);
+	set(validateLoading, false);
 }
 
 const validateAfterVerificationCode = (verificationCode: string) => {
@@ -213,14 +229,14 @@ const validateAfterVerificationCode = (verificationCode: string) => {
 		validateAccount(changedPlexAccount.value).subscribe((data) => {
 			if (data && data.isSuccess && data.value) {
 				// Take over the authToken
-				changedPlexAccount.value = data.value;
+				set(changedPlexAccount, data.value);
 
-				validateLoading.value = false;
-				verificationCodeDialogState.value = false;
-				isValidated.value = 'OK';
+				set(validateLoading, false);
+				set(verificationCodeDialogState, false);
+				set(isValidated, 'OK');
 			} else {
-				validateErrors.value = data.errors ?? [];
-				isValidated.value = 'ERROR';
+				set(validateErrors, data.errors ?? []);
+				set(isValidated, 'ERROR');
 				Log.error('Validate Error', data);
 			}
 		}),
@@ -230,82 +246,76 @@ const validateAfterVerificationCode = (verificationCode: string) => {
 // region Button Commands
 
 const reset = () => {
-	changedPlexAccount.value = getDefaultAccount();
+	set(changedPlexAccount, getDefaultAccount());
 	accountForm.value?.onReset();
 };
 
-const cancel = () => {
-	closeDialog();
-};
+function saveAccount(close: any) {
+	set(saving, true);
 
-const saveAccount = () => {
-	saving.value = true;
-
-	if (isNewAccount.value) {
+	if (get(isNewAccount)) {
 		useSubscription(
 			AccountService.createPlexAccount(changedPlexAccount.value).subscribe((account) => {
 				if (account) {
-					changedPlexAccount.value = account;
-					closeDialog();
+					set(changedPlexAccount, account);
+					close();
 				} else {
 					Log.error('Result was invalid when saving a created account', account);
-					saving.value = false;
+					set(saving, false);
 				}
 			}),
 		);
-	} else {
-		useSubscription(
-			AccountService.updatePlexAccount(changedPlexAccount.value, hasCredentialsChanged.value).subscribe((data) => {
-				if (data) {
-					changedPlexAccount.value = data;
-					if (!hasCredentialsChanged.value) {
-						closeDialog(true);
-					}
-				} else {
-					Log.error('Result was invalid when saving an updated account', data);
-					saving.value = false;
-				}
-			}),
-		);
+		return;
 	}
-};
+	useSubscription(
+		AccountService.updatePlexAccount(changedPlexAccount.value, hasCredentialsChanged.value).subscribe((data) => {
+			if (data) {
+				set(changedPlexAccount, data);
+				if (!hasCredentialsChanged.value) {
+					close();
+					refreshAccounts();
+				}
+			} else {
+				Log.error('Result was invalid when saving an updated account', data);
+				set(saving, false);
+			}
+		}),
+	);
+}
 
-const deleteAccount = () => {
-	AccountService.deleteAccount(changedPlexAccount.value.id).subscribe(() => {
-		closeDialog(true);
+function deleteAccount() {
+	AccountService.deleteAccount(get(changedPlexAccount).id).subscribe(() => {
+		closeDialog();
+		refreshAccounts();
 	});
-};
+}
 
-const openDialog = (newAccount: boolean, account: PlexAccountDTO | null = null) => {
-	isNewAccount.value = newAccount;
+function openDialog({ isNewAccountValue, account = null }: { isNewAccountValue: boolean; account: PlexAccountDTO | null }) {
+	set(isNewAccount, isNewAccountValue);
 	// Setup values
 	if (account) {
-		changedPlexAccount.value = { ...account };
-		isValidated.value = changedPlexAccount.value.isValidated ? 'OK' : 'ERROR';
+		set(changedPlexAccount, cloneDeep(account));
+		set(isValidated, get(changedPlexAccount).isValidated ? 'OK' : 'ERROR');
 	}
+}
 
-	showDialog.value = true;
-};
-
-const closeDialog = (refreshAccounts = false) => {
-	showDialog.value = false;
-	confirmationDialogState.value = false;
-	saving.value = false;
-	verificationCodeDialogState.value = false;
-	inputHasChanged.value = false;
-	isValidated.value = '';
+function closeDialog() {
+	set(saving, false);
+	set(verificationCodeDialogState, false);
+	set(inputHasChanged, false);
+	set(isValidated, '');
 	reset();
-	emit('dialog-closed', refreshAccounts);
-};
+}
+
+function refreshAccounts(): void {
+	useSubscription(
+		merge([
+			AccountService.refreshAccounts(),
+			ServerService.refreshPlexServers(),
+			LibraryService.refreshLibraries(),
+		]).subscribe(),
+	);
+}
 
 // endregion
-
-defineExpose({ openDialog, closeDialog, reset });
 </script>
-
-<style lang="scss">
-.account-dialog-content {
-	max-width: 60vw !important;
-	min-width: 60vw !important;
-}
-</style>

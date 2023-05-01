@@ -10,50 +10,45 @@
 		</q-col>
 	</q-row>
 	<!-- Account Dialog -->
-	<q-row>
-		<q-col>
-			<AccountDialog ref="accountDialog" @dialog-closed="closeDialog" />
-		</q-col>
-	</q-row>
+	<AccountDialog :name="accountDialogName" @dialog-closed="closeDialog" />
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { merge } from 'rxjs';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { set } from '@vueuse/core';
 import { AccountService, LibraryService, ServerService } from '@service';
 import { PlexAccountDTO } from '@dto/mainApi';
-import { AccountDialog } from '#components';
+import { useOpenControlDialog } from '@composables/event-bus';
 
 const accounts = ref<PlexAccountDTO[]>([]);
-const selectedAccount = ref<PlexAccountDTO | null>(null);
-const isNewAccount = ref(false);
-const accountDialog = ref<InstanceType<typeof AccountDialog> | null>(null);
+const accountDialogName = 'accountDialogName';
 
-const openDialog = (newAccount: boolean, account: PlexAccountDTO | null = null): void => {
-	Log.info('Opening account dialog', accountDialog.value);
-	isNewAccount.value = newAccount;
-	selectedAccount.value = account;
-	accountDialog.value?.openDialog(newAccount, account);
-};
+function openDialog(isNewAccount: boolean, account: PlexAccountDTO | null = null): void {
+	useOpenControlDialog(accountDialogName, {
+		isNewAccountValue: isNewAccount,
+		account,
+	});
+}
 
-const closeDialog = (refreshAccounts = false): void => {
-	if (refreshAccounts) {
-		useSubscription(
-			merge([
-				AccountService.refreshAccounts(),
-				ServerService.refreshPlexServers(),
-				LibraryService.refreshLibraries(),
-			]).subscribe(),
-		);
+function closeDialog(refreshAccounts = false): void {
+	if (!refreshAccounts) {
+		return;
 	}
-};
+	useSubscription(
+		merge([
+			AccountService.refreshAccounts(),
+			ServerService.refreshPlexServers(),
+			LibraryService.refreshLibraries(),
+		]).subscribe(),
+	);
+}
 
 onMounted(() => {
 	useSubscription(
 		AccountService.getAccounts().subscribe((data) => {
-			accounts.value = data ?? [];
+			set(accounts, data ?? []);
 		}),
 	);
 });

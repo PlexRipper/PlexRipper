@@ -4,8 +4,10 @@
 			{{ alert.title }}
 		</template>
 		<template #default>
-			<p>{{ alert.text }}</p>
-			<pre style="white-space: break-spaces">{{ errors }}</pre>
+			<pre style="white-space: break-spaces">{{ alert.text }}</pre>
+			<span>Request data sent:</span>
+			<pre v-if="alert.result" style="white-space: break-spaces">{{ alert.result }}</pre>
+			<pre v-if="errors" style="white-space: break-spaces">{{ errors }}</pre>
 		</template>
 		<template #actions="{ close }">
 			<q-space />
@@ -26,7 +28,7 @@ const errors = computed(() => {
 	if (props.alert?.result?.errors) {
 		return props.alert.result.errors;
 	}
-	return [];
+	return null;
 });
 
 function onClose(): void {

@@ -15,7 +15,13 @@ export function checkForError<T = any>(
 			catchError((error: AxiosError | any) => {
 				Log.error('FATAL NETWORK ERROR: ', error);
 
-				AlertService.showAlert({ id: 0, title: 'Network Error', text: error, result: error });
+				const url = new URL(error.config.url, error.config.baseURL);
+				AlertService.showAlert({
+					id: 0,
+					title: error.message,
+					text: `Failed a request to url: ${url}`,
+					result: JSON.parse(error.config.data),
+				});
 
 				// TODO Check wat the error contains in-case, of network failure and continue based on that
 				return of({

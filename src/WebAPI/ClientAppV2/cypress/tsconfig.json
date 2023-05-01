@@ -1,8 +1,11 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
 		"types": ["cypress", "node"],
-		"baseUrl": "../"
+		"baseUrl": "../",
+		"sourceMap": false,
 	},
 	"include": ["**/*.ts", "cypress.d.ts"]
 }

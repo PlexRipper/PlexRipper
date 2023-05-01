@@ -8,7 +8,6 @@ import IAppConfig from '@class/IAppConfig';
 import IStoreState from '@interfaces/service/IStoreState';
 import * as Service from '@service';
 import { BaseService } from '@service';
-import { getBaseURL } from '@api-urls';
 
 export class GlobalService extends BaseService {
 	public constructor() {
@@ -23,17 +22,10 @@ export class GlobalService extends BaseService {
 		});
 	}
 
-	public setup(): Observable<any> {
-		const publicConfig = useRuntimeConfig().public;
-		const baseUrl = getBaseURL(publicConfig.nodeEnv === 'production');
-		const appConfig: IAppConfig = {
-			version: publicConfig.version,
-			nodeEnv: publicConfig.nodeEnv,
-			isProduction: publicConfig.nodeEnv === 'production',
-			baseURL: baseUrl,
-			baseApiUrl: `${baseUrl}/api`,
-		};
-		super.setup(appConfig);
+	public setup(config: IAppConfig): Observable<any> {
+		Log.info('Starting Setup Process', window);
+
+		super.setup(config);
 
 		return of(this._appConfig).pipe(
 			tap((config) => this.setConfigReady(config)),
@@ -70,8 +62,8 @@ export class GlobalService extends BaseService {
 		);
 	}
 
-	public setupServices(): void {
-		this.setup().subscribe();
+	public setupServices(config: IAppConfig): void {
+		this.setup(config).subscribe();
 	}
 
 	public resetStore(): void {

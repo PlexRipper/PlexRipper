@@ -1,12 +1,27 @@
-import { basePageSetup } from '@fixtures/baseE2E';
-import { cy, describe, it } from 'local-cypress';
-import { generatePlexAccountServerAndLibraries } from '@mock/mock-combination';
-import { PLEX_ACCOUNT_API_URL, PLEX_SERVER_API_URL } from '@api-urls';
+import { beforeEach, cy, describe, it } from 'local-cypress';
+import { route, basePageSetup } from '@fixtures/baseE2E';
+import { PLEX_ACCOUNT_RELATIVE_PATH, PLEX_SERVER_RELATIVE_PATH, SETTINGS_RELATIVE_PATH } from '@api-urls';
 import { generateResultDTO } from '@mock';
 import { SignalrService } from '@service';
 import { PlexServerConnectionDTO } from '@dto/mainApi';
 
 describe('empty spec', () => {
+	beforeEach(() => {
+		const config = {
+			plexAccountCount: 2,
+			plexServerCount: 5,
+		};
+
+		basePageSetup(config);
+
+		// Once the setup has been completed the settings are saved
+		cy.intercept('PUT', SETTINGS_RELATIVE_PATH, {
+			statusCode: 200,
+		});
+
+		cy.visit(route('/setup')).as('setupPage');
+	});
+
 	it('passes', () => {
 		const config = {
 			seed: 26398,
@@ -15,29 +30,27 @@ describe('empty spec', () => {
 		};
 		basePageSetup(config);
 
-		const { servers, account } = generatePlexAccountServerAndLibraries(config);
-
-		cy.intercept('POST', PLEX_ACCOUNT_API_URL + '/validate', {
+		cy.intercept('POST', PLEX_ACCOUNT_RELATIVE_PATH + '/validate', {
 			statusCode: 200,
 			body: generateResultDTO(account),
 		});
 
-		cy.intercept('GET', PLEX_ACCOUNT_API_URL + '/clientid', {
+		cy.intercept('GET', PLEX_ACCOUNT_RELATIVE_PATH + '/clientid', {
 			statusCode: 200,
 			body: generateResultDTO('RandomClientId'),
 		});
 
-		cy.intercept('GET', PLEX_ACCOUNT_API_URL + '/1', {
+		cy.intercept('GET', PLEX_ACCOUNT_RELATIVE_PATH + '/1', {
 			statusCode: 200,
 			body: generateResultDTO(account),
 		});
 
-		cy.intercept('POST', PLEX_ACCOUNT_API_URL, {
+		cy.intercept('POST', PLEX_ACCOUNT_RELATIVE_PATH, {
 			statusCode: 200,
 			body: generateResultDTO(account),
 		});
 
-		cy.intercept('GET', PLEX_SERVER_API_URL, {
+		cy.intercept('GET', PLEX_SERVER_RELATIVE_PATH, {
 			statusCode: 200,
 			body: generateResultDTO(servers),
 		});

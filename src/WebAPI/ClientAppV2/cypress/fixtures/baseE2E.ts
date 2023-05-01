@@ -90,6 +90,6 @@ export function route(path: string) {
 	return Cypress.env('BASE_URL') + path;
 }
 
-export function apiRoute(path: string) {
-	return '/api' + path;
+export function apiRoute(path: string, query = '') {
+	return '/api' + path + query;
 }

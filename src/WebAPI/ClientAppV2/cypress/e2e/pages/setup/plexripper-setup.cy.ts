@@ -1,6 +1,6 @@
 import { cy, describe, it, before, beforeEach, after } from 'local-cypress';
-import route, { basePageSetup } from '@fixtures/baseE2E';
-import { SETTINGS_API_URL } from '@api-urls';
+import { route, basePageSetup, apiRoute } from '@fixtures/baseE2E';
+import { SETTINGS_RELATIVE_PATH } from '@api-urls';
 
 describe('PlexRipper new setup process', () => {
 	beforeEach(() => {
@@ -12,7 +12,7 @@ describe('PlexRipper new setup process', () => {
 		basePageSetup(config);
 
 		// Once the setup has been completed the settings are saved
-		cy.intercept('PUT', SETTINGS_API_URL, {
+		cy.intercept('PUT', apiRoute(SETTINGS_RELATIVE_PATH), {
 			statusCode: 200,
 		});
 

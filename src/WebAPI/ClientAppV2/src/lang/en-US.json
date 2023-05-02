@@ -481,7 +481,8 @@
                 "buttons": {
                     "download-confirmation": "Download Confirmation",
                     "help-dialog": "Help Dialog",
-                    "server-dialog": "Server Dialog"
+                    "server-dialog": "Server Dialog",
+                    "check-server-connections-dialog": "Check Server Connections Dialog"
                 },
                 "header": "Debug Dialog Modals"
             }

@@ -481,7 +481,8 @@
                 "buttons": {
                     "download-confirmation": "Télécharger la confirmation",
                     "help-dialog": "Boîte de dialogue d'aide",
-                    "server-dialog": "Boîte de dialogue du serveur"
+                    "server-dialog": "Boîte de dialogue du serveur",
+                    "check-server-connections-dialog": "Boîte de dialogue Vérifier les connexions au serveur"
                 },
                 "header": "Modaux de dialogue de débogage"
             }

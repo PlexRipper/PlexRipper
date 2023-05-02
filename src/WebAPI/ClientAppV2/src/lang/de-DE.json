@@ -481,7 +481,8 @@
                 "buttons": {
                     "download-confirmation": "Bestätigung herunterladen",
                     "help-dialog": "Hilfedialog",
-                    "server-dialog": "Serverdialog"
+                    "server-dialog": "Serverdialog",
+                    "check-server-connections-dialog": "Dialogfeld \"Serververbindungen prüfen\"."
                 },
                 "header": "Debug-Dialogmodalitäten"
             }

@@ -25,6 +25,14 @@
 						<DebugButton text-id="add-alert" @click="addAlert" />
 					</q-td>
 				</q-tr>
+				<q-tr>
+					<q-td>
+						<DebugButton
+							data-cy="check-server-connections-dialog-button"
+							:label="$t('pages.debug.dialogs.buttons.check-server-connections-dialog')"
+							@click="openCheckServerConnectionsDialog" />
+					</q-td>
+				</q-tr>
 			</q-markup-table>
 			<ServerDialog :name="serverDialogName" />
 			<DownloadConfirmation :name="downloadConfirmationName" />
@@ -66,6 +74,10 @@ function openDownloadConfirmationDialog(): void {
 
 function openHelpDialog(): void {
 	HelpService.openHelpDialog('help.settings.ui.language.language-selection');
+}
+
+function openCheckServerConnectionsDialog(): void {
+	useOpenControlDialog('checkServerConnectionDialogName');
 }
 
 function addAlert(): void {

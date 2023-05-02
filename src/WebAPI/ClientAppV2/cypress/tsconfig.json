@@ -1,11 +1,10 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
-		"target": "ESNext",
-		"module": "ESNext",
 		"types": ["cypress", "node"],
 		"baseUrl": "../",
 		"sourceMap": false,
+		"target": "ES2019" // Needs to have this target otherwise nullish coalescing operator (??) will not work
 	},
 	"include": ["**/*.ts", "cypress.d.ts"]
 }

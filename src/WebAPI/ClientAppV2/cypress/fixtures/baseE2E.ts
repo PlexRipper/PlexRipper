@@ -15,8 +15,18 @@ import { generatePlexServers, generatePlexLibraries, generateResultDTO, MockConf
 import { generateDownloadTasks } from '@mock/mock-download-task';
 import { generateSettingsModel } from '@factories/settings-factory';
 import { generatePlexAccounts } from '@factories/plex-account-factory';
+import { PlexAccountDTO, PlexLibraryDTO, PlexServerConnectionDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
+import Chainable = Cypress.Chainable;
 
-export function basePageSetup(config: Partial<MockConfig> = {}) {
+export interface IBasePageSetupResult {
+	plexServers: PlexServerDTO[];
+	plexServerConnections: PlexServerConnectionDTO[];
+	plexLibraries: PlexLibraryDTO[];
+	plexAccounts: PlexAccountDTO[];
+	downloadTasks: ServerDownloadProgressDTO[];
+}
+
+export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBasePageSetupResult> {
 	// PlexServers call
 	const plexServers = generatePlexServers(config);
 	cy.intercept('GET', apiRoute(PLEX_SERVER_RELATIVE_PATH), {
@@ -77,13 +87,13 @@ export function basePageSetup(config: Partial<MockConfig> = {}) {
 		body: {},
 	});
 
-	return {
+	return cy.wrap({
 		plexServers,
 		plexServerConnections,
 		plexLibraries,
 		plexAccounts,
 		downloadTasks,
-	};
+	});
 }
 
 export function route(path: string) {

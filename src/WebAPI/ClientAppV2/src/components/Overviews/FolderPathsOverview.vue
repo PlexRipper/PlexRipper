@@ -71,10 +71,9 @@
 import { computed, defineProps, ref, withDefaults } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { get } from '@vueuse/core';
-import { kebabCase } from 'lodash-es/string';
+import { kebabCase } from 'lodash-es';
 import { FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
 import { DownloadService, FolderPathService } from '@service';
-import DirectoryBrowser from '@components/General/DirectoryBrowser.vue';
 import { useI18n, useOpenControlDialog, toFolderPathStringId } from '#imports';
 
 const { t } = useI18n();

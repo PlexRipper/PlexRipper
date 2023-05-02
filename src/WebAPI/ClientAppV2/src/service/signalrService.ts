@@ -2,7 +2,7 @@ import Log from 'consola';
 
 import { HubConnection, HubConnectionBuilder, HubConnectionState, IHttpConnectionOptions, LogLevel } from '@microsoft/signalr';
 import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
-
+import { createCypressSignalrMock } from 'cypress-signalr-mock';
 import { Observable, of, Subject } from 'rxjs';
 import { isEqual } from 'lodash-es';
 import IStoreState from '@interfaces/service/IStoreState';
@@ -57,7 +57,7 @@ export class SignalrService extends BaseService {
 		// Ensure we don't run any SignalR functionality due to it being tricky to setup. Might revisit later
 		// TODO Re-enable when trying to test SignalR functionality
 		// @ts-ignore
-		if (window.jest || window.Cypress) {
+		if (window.jest) {
 			return Promise.resolve();
 		}
 		Log.debug('Setting up SignalR Service');
@@ -66,14 +66,12 @@ export class SignalrService extends BaseService {
 		};
 		// Setup Connections
 		const baseUrl = this._appConfig.baseURL;
-		this._progressHubConnection = new HubConnectionBuilder()
-			.withUrl(`${baseUrl}/progress`, options)
-			.withAutomaticReconnect()
-			.build();
-		this._notificationHubConnection = new HubConnectionBuilder()
-			.withUrl(`${baseUrl}/notifications`, options)
-			.withAutomaticReconnect()
-			.build();
+		this._progressHubConnection =
+			createCypressSignalrMock() ??
+			new HubConnectionBuilder().withUrl(`${baseUrl}/progress`, options).withAutomaticReconnect().build();
+		this._notificationHubConnection =
+			createCypressSignalrMock() ??
+			new HubConnectionBuilder().withUrl(`${baseUrl}/notifications`, options).withAutomaticReconnect().build();
 
 		await this.setupSubscriptions();
 		await this.startProgressHubConnection();

@@ -1,10 +1,10 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
-		"types": ["cypress", "node"],
+		"types": ["cypress-signalr-mock", "cypress", "node"],
 		"baseUrl": "../",
 		"sourceMap": false,
 		"target": "ES2019" // Needs to have this target otherwise nullish coalescing operator (??) will not work
 	},
-	"include": ["**/*.ts", "cypress.d.ts"]
+	"include": ["**/*.ts"]
 }

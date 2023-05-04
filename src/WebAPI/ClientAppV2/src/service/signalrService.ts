@@ -2,7 +2,7 @@ import Log from 'consola';
 
 import { HubConnection, HubConnectionBuilder, HubConnectionState, IHttpConnectionOptions, LogLevel } from '@microsoft/signalr';
 import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
-import { createCypressSignalrMock } from 'cypress-signalr-mock';
+import { useCypressSignalRMock } from 'cypress-signalr-mock';
 import { Observable, of, Subject } from 'rxjs';
 import { isEqual } from 'lodash-es';
 import IStoreState from '@interfaces/service/IStoreState';
@@ -67,10 +67,10 @@ export class SignalrService extends BaseService {
 		// Setup Connections
 		const baseUrl = this._appConfig.baseURL;
 		this._progressHubConnection =
-			createCypressSignalrMock() ??
+			useCypressSignalRMock('progress') ??
 			new HubConnectionBuilder().withUrl(`${baseUrl}/progress`, options).withAutomaticReconnect().build();
 		this._notificationHubConnection =
-			createCypressSignalrMock() ??
+			useCypressSignalRMock('notifications') ??
 			new HubConnectionBuilder().withUrl(`${baseUrl}/notifications`, options).withAutomaticReconnect().build();
 
 		await this.setupSubscriptions();

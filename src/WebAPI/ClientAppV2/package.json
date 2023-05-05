@@ -54,6 +54,7 @@
 		"cypress-vite": "^1.4.0",
 		"eslint": "^8.39.0",
 		"eslint-config-prettier": "^8.8.0",
+		"eslint-plugin-cypress": "^2.13.3",
 		"eslint-plugin-prettier": "^4.2.1",
 		"eslint-plugin-vue": "^9.11.0",
 		"factory.ts": "^1.4.0",

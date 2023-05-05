@@ -1,4 +1,3 @@
-import { cy, describe, it, before, beforeEach, after } from 'local-cypress';
 import { route, basePageSetup, apiRoute } from '@fixtures/baseE2E';
 import { SETTINGS_RELATIVE_PATH } from '@api-urls';
 

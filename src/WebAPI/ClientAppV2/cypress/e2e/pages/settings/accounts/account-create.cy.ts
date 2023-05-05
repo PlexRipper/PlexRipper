@@ -1,4 +1,3 @@
-import { cy, describe, it, beforeEach } from 'local-cypress';
 import { randEmail, randFullName, randPassword } from '@ngneat/falso';
 import { route, basePageSetup, apiRoute } from '@fixtures/baseE2E';
 import { PLEX_ACCOUNT_RELATIVE_PATH } from '@api-urls';

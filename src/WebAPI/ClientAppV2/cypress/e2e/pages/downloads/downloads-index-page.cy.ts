@@ -1,4 +1,4 @@
-import { cy, describe, it, before, beforeEach, after } from 'local-cypress';
+import { beforeEach, describe } from 'mocha';
 import { route, basePageSetup } from '@fixtures/baseE2E';
 
 describe('PlexRipper new setup process', () => {

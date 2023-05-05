@@ -1,4 +1,3 @@
-import { cy, beforeEach, afterEach, Cypress } from 'local-cypress';
 import './commands';
 import { basePageSetup } from '@fixtures/baseE2E';
 import { MockConfig } from '@mock';

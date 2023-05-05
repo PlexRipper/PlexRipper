@@ -1,4 +1,3 @@
-import { beforeEach, cy, describe, it } from 'local-cypress';
 import { route, basePageSetup } from '@fixtures/baseE2E';
 import { PLEX_ACCOUNT_RELATIVE_PATH, PLEX_SERVER_RELATIVE_PATH, SETTINGS_RELATIVE_PATH } from '@api-urls';
 import { generateResultDTO } from '@mock';

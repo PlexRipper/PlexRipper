@@ -56,7 +56,6 @@
 		"eslint-plugin-prettier": "^4.2.1",
 		"eslint-plugin-vue": "^9.11.0",
 		"factory.ts": "^1.4.0",
-		"local-cypress": "^1.2.6",
 		"nuxt": "^3.4.3",
 		"nuxt-quasar-ui": "^1.7.3",
 		"object-path": "^0.11.8",

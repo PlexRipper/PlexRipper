@@ -1,4 +1,3 @@
-import { cy, Cypress } from 'local-cypress';
 import {
 	DOWNLOAD_RELATIVE_PATH,
 	FOLDER_PATH_RELATIVE_PATH,

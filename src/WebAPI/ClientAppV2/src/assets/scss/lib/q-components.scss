@@ -132,6 +132,7 @@ body {
 		&-top-row {
 			@extend .q-pt-none;
 			@extend .q-px-md;
+			width: 100% !important;
 		}
 
 		&-content {
@@ -141,6 +142,7 @@ body {
 
 		&-title, &-actions {
 			height: auto;
+			width: 100% !important;
 		}
 	}
 

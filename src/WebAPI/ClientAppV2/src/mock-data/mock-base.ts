@@ -17,6 +17,10 @@ export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 		newConfig.seed = 1234;
 	}
 
+	if (!hasConfigProperty(config, 'debugDisplayData')) {
+		newConfig.debugDisplayData = false;
+	}
+
 	if (!hasConfigProperty(config, 'plexAccountCount')) {
 		newConfig.plexAccountCount = 2;
 	}
@@ -54,7 +58,7 @@ export function setSeed(seed: number) {
 	faker.seed(seed);
 }
 
-export function incrementSeed(increment: number = 1) {
+export function incrementSeed(increment = 1) {
 	if (increment === 0) {
 		return;
 	}

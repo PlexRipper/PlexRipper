@@ -1,13 +1,14 @@
 <template>
 	<q-dialog
 		v-model:model-value="showDialog"
+		:full-height="fullHeight"
 		:no-route-dismiss="noRouteDismiss"
 		:no-backdrop-dismiss="noBackdropDismiss"
 		@before-show="$emit('opened', dataValue)"
 		@before-hide="$emit('closed')">
 		<q-row column class="q-card-dialog q-card-dialog-background" :style="styles">
 			<!-- Dialog Title	-->
-			<q-col cols="auto" class="q-card-dialog-title">
+			<q-col v-if="$slots['title']" cols="auto" class="q-card-dialog-title">
 				<QCardTitle>
 					<slot name="title" :value="parentValue" />
 				</QCardTitle>
@@ -53,6 +54,7 @@ const props = withDefaults(
 		viewHeight?: string;
 		value?: any;
 		loading?: boolean;
+		fullHeight?: boolean;
 		scroll?: boolean;
 		persistent?: boolean;
 		noBackdropDismiss?: boolean;
@@ -72,6 +74,7 @@ const props = withDefaults(
 		viewHeight: '50vh',
 		value: null,
 		loading: false,
+		fullHeight: false,
 		scroll: true,
 		persistent: false,
 		noBackdropDismiss: false,

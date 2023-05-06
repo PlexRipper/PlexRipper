@@ -1,3 +1,4 @@
+import Log from 'consola';
 import {
 	DOWNLOAD_RELATIVE_PATH,
 	FOLDER_PATH_RELATIVE_PATH,
@@ -10,7 +11,7 @@ import {
 	PROGRESS_HUB_RELATIVE_PATH,
 	SETTINGS_RELATIVE_PATH,
 } from '@api-urls';
-import { generatePlexServers, generatePlexLibraries, generateResultDTO, MockConfig } from '@mock';
+import { generatePlexServers, generatePlexLibraries, generateResultDTO, MockConfig, checkConfig } from '@mock';
 import { generateDownloadTasks } from '@mock/mock-download-task';
 import { generateSettingsModel } from '@factories/settings-factory';
 import { generatePlexAccounts } from '@factories/plex-account-factory';
@@ -26,11 +27,17 @@ export interface IBasePageSetupResult {
 }
 
 export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBasePageSetupResult> {
+	const validConfig = checkConfig(config);
+
 	// PlexServers call
 	const plexServers = generatePlexServers(config);
 	cy.intercept('GET', apiRoute(PLEX_SERVER_RELATIVE_PATH), {
 		statusCode: 200,
 		body: generateResultDTO(plexServers),
+	}).then(() => {
+		if (validConfig.debugDisplayData) {
+			cy.log('BasePageSetup -> plexServers', plexServers);
+		}
 	});
 
 	// PlexServerConnections call
@@ -38,6 +45,10 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 	cy.intercept('GET', apiRoute(PLEX_SERVER_CONNECTION_RELATIVE_PATH), {
 		statusCode: 200,
 		body: generateResultDTO(plexServerConnections),
+	}).then(() => {
+		if (validConfig.debugDisplayData) {
+			cy.log('BasePageSetup -> plexServerConnections', plexServerConnections);
+		}
 	});
 
 	// PlexLibraries call
@@ -45,6 +56,10 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 	cy.intercept('GET', apiRoute(PLEX_LIBRARY_RELATIVE_PATH), {
 		statusCode: 200,
 		body: generateResultDTO(plexLibraries),
+	}).then(() => {
+		if (validConfig.debugDisplayData) {
+			cy.log('BasePageSetup -> plexLibraries', plexLibraries);
+		}
 	});
 
 	// PlexAccount call
@@ -52,23 +67,37 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 	cy.intercept('GET', apiRoute(PLEX_ACCOUNT_RELATIVE_PATH), {
 		statusCode: 200,
 		body: generateResultDTO(plexAccounts),
+	}).then(() => {
+		if (validConfig.debugDisplayData) {
+			cy.log('BasePageSetup -> plexAccounts', plexAccounts);
+		}
 	});
 
+	// DownloadTasks call
 	const downloadTasks = plexServers.map((x) => generateDownloadTasks(x.id, config)).flat();
 	cy.intercept('GET', apiRoute(DOWNLOAD_RELATIVE_PATH), {
 		statusCode: 200,
 		body: generateResultDTO(downloadTasks),
+	}).then(() => {
+		if (validConfig.debugDisplayData) {
+			cy.log('BasePageSetup -> downloadTasks', downloadTasks);
+		}
+	});
+
+	// Settings call
+	const settings = generateSettingsModel(plexServers, config);
+	cy.intercept('GET', apiRoute(SETTINGS_RELATIVE_PATH), {
+		statusCode: 200,
+		body: generateResultDTO(settings),
+	}).then(() => {
+		if (validConfig.debugDisplayData) {
+			cy.log('BasePageSetup -> settings', settings);
+		}
 	});
 
 	cy.intercept('GET', apiRoute(FOLDER_PATH_RELATIVE_PATH), {
 		statusCode: 200,
 		body: generateResultDTO([]),
-	});
-
-	const settings = generateSettingsModel(plexServers, config);
-	cy.intercept('GET', apiRoute(SETTINGS_RELATIVE_PATH), {
-		statusCode: 200,
-		body: generateResultDTO(settings),
 	});
 
 	cy.intercept('GET', apiRoute(NOTIFICATION_RELATIVE_PATH), {

@@ -2,6 +2,7 @@ import { PlexMediaType } from '@dto/mainApi';
 
 export interface MockConfig {
 	seed: number;
+	debugDisplayData: boolean;
 	plexServerCount: number;
 	plexLibraryCount: number;
 	plexLibraryTypes: PlexMediaType[];

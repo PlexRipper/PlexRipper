@@ -6,24 +6,23 @@
 				<q-row justify="center" no-gutters class="my-3">
 					<q-col cols="auto">
 						<q-circular-progress
-							size="100"
+							show-value
+							size="100px"
 							:rotate="-90"
 							:width="15"
 							:value="getPercentage"
 							:indeterminate="indeterminate"
 							color="red">
 							<template v-if="!indeterminate">
-								<span v-if="percentage < 100">
-									<b>{{ getPercentage }}%</b>
-								</span>
-								<q-icon v-else large> mdi-check</q-icon>
+								<span v-if="getPercentage < 100" class="text-bold"> {{ getPercentage }}% </span>
+								<q-icon v-else large name="mdi-check" />
 							</template>
 						</q-circular-progress>
 					</q-col>
 				</q-row>
 				<!-- Progress text -->
 				<q-row v-if="text" justify="center" no-gutters>
-					<q-col cols="auto">
+					<q-col>
 						<h3>{{ text }}</h3>
 					</q-col>
 				</q-row>
@@ -33,7 +32,7 @@
 				<!-- Progress text -->
 				<q-row v-if="text" justify="center" no-gutters>
 					<q-col cols="auto">
-						<h2>{{ text }}</h2>
+						<h3>{{ text }}</h3>
 					</q-col>
 				</q-row>
 				<!-- Progress bar -->
@@ -41,15 +40,13 @@
 					<q-col>
 						<q-linear-progress
 							:value="Math.min(getPercentage, 100)"
-							height="20"
-							class="mx-1"
+							show-value
+							height="20px"
+							class="q-mx-sm"
 							striped
 							stream
-							color="red"
-							v-bind="$attrs">
-							<template #default="{}">
-								<strong>{{ getPercentage }}%</strong>
-							</template>
+							color="red">
+							<strong>{{ getPercentage }}%</strong>
 						</q-linear-progress>
 					</q-col>
 				</q-row>

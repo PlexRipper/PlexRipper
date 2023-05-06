@@ -3,7 +3,7 @@
 		<template v-if="!progress.completed">
 			<span v-if="progress && progress.retryAttemptIndex > 0">
 				{{
-					$t('components.account-setup-progress.retry-connection', {
+					$t('components.connection-progress-text.retry-connection', {
 						attemptIndex: progress.retryAttemptIndex,
 						attemptCount: progress.retryAttemptCount,
 					})
@@ -13,10 +13,10 @@
 		<!--	Completed -->
 		<template v-else>
 			<span v-if="progress.connectionSuccessful">
-				{{ $t('components.account-setup-progress.server-connectable') }}
+				{{ $t('components.connection-progress-text.connection-connectable') }}
 			</span>
 			<span v-else>
-				{{ $t('components.account-setup-progress.server-un-connectable') }}
+				{{ $t('components.connection-progress-text.connection-un-connectable') }}
 			</span>
 		</template>
 	</div>

@@ -15,15 +15,7 @@
 				</q-item-section>
 				<!-- Connection Icon -->
 				<q-item-section avatar tag="label">
-					<q-icon :name="getConnectionIcon(connection.local)" style="font-size: 2em">
-						<q-tooltip anchor="top middle" self="center middle">
-							<span>{{
-								connection.local
-									? $t('general.tooltip.local-connection')
-									: $t('general.tooltip.public-connection')
-							}}</span>
-						</q-tooltip>
-					</q-icon>
+					<QConnectionIcon :local="connection.local" />
 				</q-item-section>
 				<!-- Connection Url -->
 				<q-item-section tag="label">
@@ -67,10 +59,6 @@ const props = defineProps<{
 	plexServer: PlexServerDTO;
 	isVisible: boolean;
 }>();
-
-const getConnectionIcon = (local: boolean): string => {
-	return local ? 'mdi-lan-connect' : 'mdi-earth';
-};
 
 function getProgress(plexServerConnectionId: number): ServerConnectionCheckStatusProgressDTO | null {
 	return progress.value.find((x) => x.plexServerConnectionId === plexServerConnectionId) ?? null;

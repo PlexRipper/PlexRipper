@@ -9,11 +9,19 @@
             "add-account-title": "",
             "edit-account-title": "Modifier le compte Plex"
         },
-        "account-setup-progress": {
-            "no-server-warning": "Le compte {displayName} n'a pas accès à ce serveur.",
+        "connection-progress-text": {
             "retry-connection": "Tentative de nouvelle tentative de connexion, { attemptIndex } dans { attemptCount } tentative.",
+            "connection-connectable": "La connexion est bonne !",
+            "connection-un-connectable": "La connexion a échoué!"
+        },
+        "check-server-connections-dialog": {
             "server-connectable": "Serveur inaccessible!",
-            "server-un-connectable": "Impossible de joindre le serveur."
+            "server-un-connectable": "Impossible de joindre le serveur.",
+            "checking-progress": "Vérification de {count}  des {total}  connexions aux serveurs Plex",
+            "completed": "Inspection terminée de {length}  serveurs Plex!",
+            "no-servers": "Le compte {displayName} n'a aucun serveur auquel il peut accéder.",
+            "fetching-servers": "Récupération des serveurs accessibles pour le compte Plex {displayName}",
+            "no-connections": "Aucune connexion n'a été trouvée pour ce serveur Plex !"
         },
         "account-verification-code-dialog": {
             "error": "",
@@ -125,10 +133,6 @@
                 "header": "Il n'y a pas de serveur disponible!"
             }
         },
-        "check-server-connections-progress": {
-            "checking": "",
-            "completed": "Inspection terminée de {length}  serveurs Plex!"
-        },
         "media-list": {
             "no-media-found": "",
             "selected-count": "",
@@ -205,6 +209,9 @@
         "tooltip": {
             "local-connection": "Connexion locale",
             "public-connection": "Connexion publique"
+        },
+        "error": {
+            "unknown": "\"Inconnu\""
         }
     },
     "help": {

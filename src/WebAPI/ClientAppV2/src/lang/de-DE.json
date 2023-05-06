@@ -9,11 +9,19 @@
             "add-account-title": "Plex Konto hinzufügen",
             "edit-account-title": "Plex Konto bearbeiten"
         },
-        "account-setup-progress": {
-            "no-server-warning": "Konto {displayName} hat keine verfügbaren Server.",
+        "connection-progress-text": {
             "retry-connection": "Versuche Verbindung wieder aufzubauen, { attemptIndex } von { attemptCount } Versuch.",
+            "connection-connectable": "Verbindung ist gut!",
+            "connection-un-connectable": "Verbindung fehlgeschlagen!"
+        },
+        "check-server-connections-dialog": {
             "server-connectable": "Server ist erreichbar!",
-            "server-un-connectable": "Server ist nicht erreichbar."
+            "server-un-connectable": "Server ist nicht erreichbar.",
+            "checking-progress": "Überprüfe {count} von {total} Plex-Serververbindungen",
+            "completed": "Inspektion von {length} Plex-Servern abgeschlossen!",
+            "no-servers": "Konto {displayName} hat keine Server, auf die es zugreifen kann.",
+            "fetching-servers": "Abrufen zugänglicher Server für das Plex-Konto {displayName}",
+            "no-connections": "Für diesen Plex-Server wurden keine Verbindungen gefunden!"
         },
         "account-verification-code-dialog": {
             "error": "Der eingegebene Code ist ungültig, bitte versuchen Sie es erneut.",
@@ -125,10 +133,6 @@
                 "header": "Keine Server verfügbar!"
             }
         },
-        "check-server-connections-progress": {
-            "checking": "",
-            "completed": "Inspektion von {length} Plex-Servern abgeschlossen!"
-        },
         "media-list": {
             "no-media-found": "",
             "selected-count": "",
@@ -205,6 +209,9 @@
         "tooltip": {
             "local-connection": "Lokale Verbindung",
             "public-connection": "Öffentliche Verbindung"
+        },
+        "error": {
+            "unknown": "\"Unbekannt\""
         }
     },
     "help": {

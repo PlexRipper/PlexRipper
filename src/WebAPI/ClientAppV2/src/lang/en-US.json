@@ -9,11 +9,19 @@
             "add-account-title": "Add Plex Account",
             "edit-account-title": "Edit Plex Account"
         },
-        "account-setup-progress": {
-            "no-server-warning": "Account {displayName} has no servers which it can access.",
+        "connection-progress-text": {
             "retry-connection": "Attempting to retry connection, { attemptIndex } of { attemptCount } attempt.",
+            "connection-connectable": "Connection is good!",
+            "connection-un-connectable": "Connection failed!"
+        },
+        "check-server-connections-dialog": {
             "server-connectable": "Server is connectable!",
-            "server-un-connectable": "Could not connect to server, it's most likely offline."
+            "server-un-connectable": "Could not connect to server, it's most likely offline.",
+            "checking-progress": "Checking {count} of {total} Plex servers connections",
+            "completed": "Completed inspection of {length} Plex servers!",
+            "no-servers": "Account {displayName} has no servers which it can access.",
+            "fetching-servers": "Retrieving accessible servers for Plex account {displayName}",
+            "no-connections": "No Connections were found for this Plex server!"
         },
         "account-verification-code-dialog": {
             "error": "The verification code was invalid, please try again.",
@@ -125,10 +133,6 @@
                 "header": "There are no servers available!"
             }
         },
-        "check-server-connections-progress": {
-            "checking": "Checking Plex servers connections",
-            "completed": "Completed inspection of {length} Plex servers!"
-        },
         "media-list": {
             "no-media-found": "No media found.",
             "selected-count": "{selectedCount}  selected",
@@ -205,6 +209,9 @@
         "tooltip": {
             "local-connection": "Local Connection",
             "public-connection": "Public Connection"
+        },
+        "error": {
+            "unknown": "\"Unknown\""
         }
     },
     "help": {

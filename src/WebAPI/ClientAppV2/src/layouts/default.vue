@@ -85,7 +85,6 @@ onMounted(() => {
 	useSubscription(
 		HelpService.getHelpDialog().subscribe((newHelpId) => {
 			if (newHelpId) {
-				console.log(newHelpId);
 				useOpenControlDialog(helpDialogName, newHelpId);
 			}
 		}),

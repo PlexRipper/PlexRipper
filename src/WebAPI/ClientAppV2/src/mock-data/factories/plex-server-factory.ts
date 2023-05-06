@@ -1,78 +1,54 @@
 import * as Factory from 'factory.ts';
-import { randSemver, randNumber, randRecentDate, randPort, randIp, randBrand, randBoolean, randUuid } from '@ngneat/falso';
+import { randBoolean, randBrand, randIp, randNumber, randRecentDate, randSemver, randUuid } from '@ngneat/falso';
 import { resetSeed } from './utils';
-import {
-	PlexServerConnectionDTO,
-	PlexServerDTO,
-	PlexServerStatusDTO,
-	ServerConnectionCheckStatusProgressDTO,
-} from '@dto/mainApi';
+import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { checkConfig, MockConfig } from '@mock';
+import { generatePlexServerConnections } from '@factories/plex-server-connection-factory';
+
+let plexServerIdIndex = 1;
+
+export function generatePlexServer(
+	id: number,
+	config: Partial<MockConfig> = {},
+	partialData?: Partial<PlexServerDTO>,
+): PlexServerDTO {
+	const validConfig = checkConfig(config);
+
+	return {
+		id,
+		name: randBrand() + ' Server',
+		ownerId: randNumber({ max: 999999 }),
+		device: 'PC',
+		dnsRebindingProtection: randBoolean(),
+		home: randBoolean(),
+		httpsRequired: randBoolean(),
+		lastSeenAt: randRecentDate({ days: 10 }).toUTCString(),
+		natLoopbackSupported: randBoolean(),
+		owned: randBoolean(),
+		platform: 'Linux',
+		platformVersion: randSemver({ prefix: 'v' }),
+		plexServerOwnerUsername: '',
+		preferredConnectionId: 0,
+		presence: randBoolean(),
+		product: '',
+		productVersion: randSemver({ prefix: 'v' }),
+		provides: '',
+		publicAddress: randIp(),
+		publicAddressMatches: randBoolean(),
+		relay: randBoolean(),
+		synced: randBoolean(),
+		machineIdentifier: randUuid(),
+		createdAt: randRecentDate({ days: 30 }).toUTCString(),
+		plexServerConnections: generatePlexServerConnections({ plexServerId: id, config }),
+		...partialData,
+	};
+}
 
 export function generatePlexServers(config: Partial<MockConfig> = {}): PlexServerDTO[] {
 	const validConfig = checkConfig(config);
-	const plexServerDTOFactory = Factory.Sync.makeFactory<PlexServerDTO>(() => {
-		resetSeed();
-		return {
-			id: Factory.each((i) => i),
-			name: randBrand() + ' Server',
-			ownerId: randNumber({ max: 999999 }),
-			device: 'PC',
-			dnsRebindingProtection: randBoolean(),
-			home: randBoolean(),
-			httpsRequired: randBoolean(),
-			lastSeenAt: randRecentDate({ days: 10 }).toUTCString(),
-			natLoopbackSupported: randBoolean(),
-			owned: randBoolean(),
-			platform: 'Linux',
-			platformVersion: randSemver({ prefix: 'v' }),
-			plexServerOwnerUsername: '',
-			preferredConnectionId: 0,
-			presence: randBoolean(),
-			product: '',
-			productVersion: randSemver({ prefix: 'v' }),
-			provides: '',
-			publicAddress: randIp(),
-			publicAddressMatches: randBoolean(),
-			relay: randBoolean(),
-			synced: randBoolean(),
-			machineIdentifier: randUuid(),
-			createdAt: randRecentDate({ days: 30 }).toUTCString(),
-			plexServerConnections: Factory.each((i) => generatePlexServerConnection(i, validConfig)),
-		};
-	});
-
-	return plexServerDTOFactory.buildList(validConfig.plexServerCount);
-}
-
-export function generatePlexServerConnection(plexServerId: number, config: Partial<MockConfig> = {}): PlexServerConnectionDTO[] {
-	const validConfig = checkConfig(config);
-
-	const plexServerConnectionDTOFactory = Factory.Sync.makeFactory<PlexServerConnectionDTO>(() => {
-		resetSeed();
-		const scheme = 'http';
-		const host = randIp();
-		const port = randPort();
-
-		return {
-			id: Factory.each((i) => i),
-			protocol: scheme,
-			address: host,
-			port,
-			url: `${scheme}://${host}:${port}`,
-			iPv4: true,
-			iPv6: false,
-			local: false,
-			relay: false,
-			portFix: false,
-			progress: {} as ServerConnectionCheckStatusProgressDTO,
-			serverStatusList: [],
-			latestConnectionStatus: {} as PlexServerStatusDTO,
-			plexServerId: -1,
-		};
-	});
-
-	return plexServerConnectionDTOFactory.buildList(validConfig.maxServerConnections, { plexServerId });
+	return Array(validConfig.plexServerCount)
+		.fill(null)
+		.map(() => generatePlexServer(plexServerIdIndex++, config));
 }
 
 export function generatePlexServerStatusDTO(plexServerId: number, plexServerConnectionId: number): PlexServerStatusDTO[] {

@@ -117,7 +117,7 @@ export interface DownloadProgressDTO {
 	id: number;
 	title: string;
 	mediaType: PlexMediaType;
-	status: string;
+	status: DownloadStatus;
 	/** @format double */
 	percentage: number;
 	/** @format int64 */

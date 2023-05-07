@@ -14,7 +14,7 @@ public class DownloadProgressDTO
     /// </summary>
     public PlexMediaType MediaType { get; set; }
 
-    public string Status { get; set; }
+    public DownloadStatus Status { get; set; }
 
     public decimal Percentage { get; set; }
 

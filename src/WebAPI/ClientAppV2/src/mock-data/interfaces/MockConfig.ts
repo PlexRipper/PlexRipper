@@ -8,6 +8,7 @@ export interface MockConfig {
 	plexLibraryTypes: PlexMediaType[];
 	plexAccountCount: number;
 	plexServerAccessCount: number;
+	plexServerStatusCount: number;
 	firstTimeSetup: boolean;
 	// region DownloadTasks
 	movieDownloadTask: number;

@@ -11,8 +11,15 @@ import {
 	PROGRESS_HUB_RELATIVE_PATH,
 	SETTINGS_RELATIVE_PATH,
 } from '@api-urls';
-import { generatePlexServers, generatePlexLibraries, generateResultDTO, MockConfig, checkConfig } from '@mock';
-import { generateDownloadTasks } from '@mock/mock-download-task';
+import {
+	generatePlexServers,
+	generatePlexLibraries,
+	generateResultDTO,
+	MockConfig,
+	checkConfig,
+	generateServerDownloadTasks,
+} from '@mock';
+import { generateDownloadTasks } from '@factories/download-task-factory';
 import { generateSettingsModel } from '@factories/settings-factory';
 import { generatePlexAccounts } from '@factories/plex-account-factory';
 import { PlexAccountDTO, PlexLibraryDTO, PlexServerConnectionDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
@@ -30,7 +37,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 	const validConfig = checkConfig(config);
 
 	// PlexServers call
-	const plexServers = generatePlexServers(config);
+	const plexServers = generatePlexServers({ config });
 	cy.intercept('GET', apiRoute(PLEX_SERVER_RELATIVE_PATH), {
 		statusCode: 200,
 		body: generateResultDTO(plexServers),
@@ -52,7 +59,14 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 	});
 
 	// PlexLibraries call
-	const plexLibraries = plexServers.map((x) => generatePlexLibraries(x.id, config)).flat();
+	const plexLibraries = plexServers
+		.map((x) =>
+			generatePlexLibraries({
+				config,
+				plexServerId: x.id,
+			}),
+		)
+		.flat();
 	cy.intercept('GET', apiRoute(PLEX_LIBRARY_RELATIVE_PATH), {
 		statusCode: 200,
 		body: generateResultDTO(plexLibraries),
@@ -74,7 +88,15 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 	});
 
 	// DownloadTasks call
-	const downloadTasks = plexServers.map((x) => generateDownloadTasks(x.id, config)).flat();
+	const downloadTasks = plexServers
+		.map((x) =>
+			generateServerDownloadTasks({
+				plexServerId: x.id,
+				plexLibraryId: -1,
+				config,
+			}),
+		)
+		.flat();
 	cy.intercept('GET', apiRoute(DOWNLOAD_RELATIVE_PATH), {
 		statusCode: 200,
 		body: generateResultDTO(downloadTasks),

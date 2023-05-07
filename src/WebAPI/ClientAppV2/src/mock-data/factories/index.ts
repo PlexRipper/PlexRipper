@@ -1,4 +1,5 @@
 export * from './utils';
+export * from './plex-account-factory';
 export * from './plex-server-factory';
 export * from './plex-server-status-factory';
 export * from './plex-server-connection-factory';

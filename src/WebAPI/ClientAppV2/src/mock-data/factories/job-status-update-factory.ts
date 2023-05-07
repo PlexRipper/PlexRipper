@@ -1,5 +1,6 @@
-import * as Factory from 'factory.ts';
 import { JobStatus, JobStatusUpdateDTO, JobTypes, TimeSpan } from '@dto/mainApi';
+
+let jobStatusIdIndex = 1;
 
 export function generateJobStatusUpdate({
 	jobType,
@@ -12,21 +13,17 @@ export function generateJobStatusUpdate({
 	primaryKey: string;
 	primaryKeyValue: number;
 }): JobStatusUpdateDTO {
-	const jobStatusUpdateDTOFactory = Factory.Sync.makeFactory<JobStatusUpdateDTO>(() => {
-		return {
-			id: Factory.each((i) => i) + '',
-			jobName: 'asdasd',
-			jobGroup: jobType,
-			jobRuntime: defaultTimeSpan,
-			jobStartTime: Date.now().toString(),
-			jobType,
-			primaryKey,
-			primaryKeyValue,
-			status: jobStatus,
-		};
-	});
-
-	return jobStatusUpdateDTOFactory.build();
+	return {
+		id: '' + jobStatusIdIndex++,
+		jobName: 'asdasd',
+		jobGroup: jobType,
+		jobRuntime: defaultTimeSpan,
+		jobStartTime: Date.now().toString(),
+		jobType,
+		primaryKey,
+		primaryKeyValue,
+		status: jobStatus,
+	};
 }
 
 const defaultTimeSpan: TimeSpan = {

@@ -1,4 +1,3 @@
-import { faker } from '@faker-js/faker';
 import { seed as falsoSeed } from '@ngneat/falso';
 import { MockConfig } from '@mock/interfaces';
 import { PlexMediaType } from '@dto/mainApi';
@@ -36,13 +35,5 @@ export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 }
 
 export function setSeed(seed: number) {
-	faker.seed(seed);
 	falsoSeed('' + seed);
-}
-
-export function incrementSeed(increment = 1) {
-	if (increment === 0) {
-		return;
-	}
-	setSeed(faker.seed() + increment);
 }

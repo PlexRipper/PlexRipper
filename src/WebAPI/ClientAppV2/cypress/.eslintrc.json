@@ -7,5 +7,9 @@
 	},
 	"extends": [
 		"plugin:cypress/recommended"
-	]
+	],
+	"rules": {
+		// This is needed for SignalR simulation to work
+		"cypress/no-unnecessary-waiting": "off"
+	}
 }

@@ -5,6 +5,7 @@
 		height="800px"
 		:scroll="false"
 		:loading="loading"
+		cy="server-dialog-cy"
 		@opened="open"
 		@closed="close">
 		<template #title>
@@ -51,27 +52,27 @@
 					<!-- Tab Content -->
 					<q-tab-panels v-model="tabIndex" animated vertical transition-prev="slide-down" transition-next="slide-up">
 						<!-- Server Data Tab Content -->
-						<q-tab-panel name="server-data">
+						<q-tab-panel name="server-data" data-cy="server-dialog-tab-content-1">
 							<ServerDataTabContent :plex-server="plexServer" :is-visible="isVisible" />
 						</q-tab-panel>
 
 						<!-- Server Connections Tab Content	-->
-						<q-tab-panel name="server-connection">
+						<q-tab-panel name="server-connection" data-cy="server-dialog-tab-content-2">
 							<ServerConnectionsTabContent :plex-server="plexServer" :is-visible="isVisible" />
 						</q-tab-panel>
 
 						<!--	Server Configuration Tab Content	-->
-						<q-tab-panel name="server-config">
+						<q-tab-panel name="server-config" data-cy="server-dialog-tab-content-3">
 							<server-config-tab-content :plex-server="plexServer" :plex-server-settings="plexServerSettings" />
 						</q-tab-panel>
 
 						<!--	Library Download Destinations	Tab Content -->
-						<q-tab-panel name="download-destinations" class="scroll">
+						<q-tab-panel name="download-destinations" class="scroll" data-cy="server-dialog-tab-content-4">
 							<server-library-destinations-tab-content :plex-server="plexServer" :plex-libraries="plexLibraries" />
 						</q-tab-panel>
 
 						<!--	Server Commands -->
-						<q-tab-panel name="server-commands">
+						<q-tab-panel name="server-commands" data-cy="server-dialog-tab-content-5">
 							<server-commands-tab-content :plex-server="plexServer" :is-visible="isVisible" />
 						</q-tab-panel>
 					</q-tab-panels>
@@ -83,7 +84,12 @@
 			<!--			</q-card>-->
 		</template>
 		<template #actions>
-			<q-btn flat :label="$t('general.commands.close')" color="primary" @click="useCloseControlDialog(name)" />
+			<BaseButton
+				cy="server-dialog-close-btn"
+				flat
+				:label="$t('general.commands.close')"
+				color="primary"
+				@click="useCloseControlDialog(name)" />
 		</template>
 	</q-card-dialog>
 </template>
@@ -92,8 +98,8 @@
 import { defineProps } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { switchMap, take, tap } from 'rxjs/operators';
+import { set } from '@vueuse/core';
 import Log from 'consola';
-import { get, set } from '@vueuse/core';
 import { ref, computed, useCloseControlDialog } from '#imports';
 import type { PlexLibraryDTO, PlexServerDTO, PlexServerSettingsModel } from '@dto/mainApi';
 import { LibraryService, ServerService, SettingsService } from '@service';
@@ -101,7 +107,7 @@ import { ServerDataTabContent, ServerConnectionsTabContent } from '#components';
 
 defineProps<{ name: string }>();
 
-const loading = ref(true);
+const loading = ref(false);
 const tabIndex = ref<string>('server-data');
 const plexServer = ref<PlexServerDTO | null>(null);
 const plexLibraries = ref<PlexLibraryDTO[]>([]);
@@ -110,8 +116,7 @@ const plexServerId = ref(0);
 
 const isVisible = computed((): boolean => plexServerId.value > 0);
 
-const open = (newPlexServerId: number): void => {
-	Log.debug('Opening server dialog for server with id: ' + newPlexServerId);
+function open(newPlexServerId: number): void {
 	set(plexServerId, newPlexServerId);
 	set(loading, true);
 
@@ -138,11 +143,10 @@ const open = (newPlexServerId: number): void => {
 			set(plexLibraries, plexLibrariesData);
 		}),
 	);
-};
+}
 
-const close = (): void => {
-	Log.debug('Opening server dialog for server with id: ' + get(plexServerId));
+function close(): void {
 	set(plexServerId, 0);
 	set(tabIndex, 'server-data');
-};
+}
 </script>

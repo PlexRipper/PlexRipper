@@ -1,5 +1,5 @@
 <template>
-	<q-card-dialog max-width="1000px" full-height :name="name">
+	<q-card-dialog max-width="1000px" full-height :name="name" cy="check-server-connection-dialog">
 		<template #top-row>
 			<!-- The total progress -->
 			<progress-component
@@ -15,12 +15,23 @@
 				<template #default-header="{ node }: { node: IPlexServerNode }">
 					<q-row justify="between" align="center">
 						<q-col cols="4">
-							<div :class="{ 'text-weight-bold': node.type === 'server' }">
+							<div :class="{ 'text-weight-bold': isServer(node) }">
 								<!--	Plex Server Connection Icon -->
 								<q-icon v-if="isServer(node)" name="mdi-server" size="28px" class="q-mr-sm" />
 								<QConnectionIcon v-else :local="node?.local ?? false" />
 								<!-- Plex Server Connection Url	-->
-								<span class="q-ml-sm">
+								<span
+									:class="[
+										isServer(node)
+											? 'check-server-connections-dialog-server-title'
+											: 'check-server-connections-dialog-connection-title',
+										'q-ml-sm',
+									]"
+									:data-cy="
+										isServer(node)
+											? 'check-server-connections-dialog-server-title'
+											: 'check-server-connections-dialog-connection-title'
+									">
 									{{ node.title }}
 								</span>
 							</div>
@@ -36,13 +47,15 @@
 								<q-col cols="9">
 									<template v-if="isServer(node) && node.completed">
 										<!-- No Plex Server Connection -->
-										<span v-if="node.noConnections">
+										<span v-if="node.noConnections" :class="{ 'text-weight-bold': node.type === 'server' }">
 											{{ $t('components.check-server-connections-dialog.no-connections') }}
 										</span>
-										<span v-else-if="node.connectionSuccessful">
+										<span
+											v-else-if="node.connectionSuccessful"
+											:class="{ 'text-weight-bold': node.type === 'server' }">
 											{{ $t('components.check-server-connections-dialog.server-connectable') }}
 										</span>
-										<span v-else>
+										<span v-else :class="{ 'text-weight-bold': node.type === 'server' }">
 											{{ $t('components.check-server-connections-dialog.server-un-connectable') }}
 										</span>
 									</template>
@@ -71,7 +84,7 @@
 		<template #actions="{ close }">
 			<q-row justify="end">
 				<q-col cols="auto">
-					<HideButton @click="close" />
+					<HideButton cy="check-server-connection-dialog-hide-btn" @click="close" />
 				</q-col>
 			</q-row>
 		</template>

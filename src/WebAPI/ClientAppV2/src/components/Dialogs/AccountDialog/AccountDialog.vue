@@ -1,11 +1,5 @@
 <template>
-	<q-card-dialog
-		max-width="900px"
-		:name="name"
-		persistent
-		data-cy="account-dialog-form"
-		@opened="openDialog"
-		@closed="closeDialog">
+	<q-card-dialog max-width="900px" :name="name" persistent cy="account-dialog-form" @opened="openDialog" @closed="closeDialog">
 		<!-- Dialog Header -->
 		<template #title>
 			{{ getDisplayName }}

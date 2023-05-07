@@ -1,19 +1,17 @@
-import { describe, beforeAll, expect, test } from '@jest/globals';
 import { subscribeSpyTo, baseSetup, baseVars } from '@services-test-base';
-import { HelpService, GlobalService } from '@service';
+import HelpService from '@service/helpService';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 describe('HelpService.setup()', () => {
-	let { ctx } = baseVars();
+	baseVars();
 
 	beforeAll(() => {
-		const result = baseSetup();
-		ctx = result.ctx;
+		baseSetup();
 	});
 
 	test('Should return success and complete when setup is run', async () => {
 		// Arrange
-		const setup$ = HelpService.setup(ctx);
+		const setup$ = HelpService.setup();
 		const setupResult: ISetupResult = {
 			isSuccess: true,
 			name: HelpService.name,
@@ -25,6 +23,6 @@ describe('HelpService.setup()', () => {
 
 		// Assert
 		expect(result.getFirstValue()).toEqual(setupResult);
-		expect(result.receivedComplete()).toBe(true);
+		expect(result.receivedComplete()).toEqual(true);
 	});
 });

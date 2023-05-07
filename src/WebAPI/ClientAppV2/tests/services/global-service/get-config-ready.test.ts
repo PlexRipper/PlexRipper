@@ -1,6 +1,5 @@
-import { beforeAll, describe, expect, test } from '@jest/globals';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
-import { GlobalService } from '@service';
+import GlobalService from '@service/globalService';
 import {
 	DOWNLOAD_RELATIVE_PATH,
 	FOLDER_PATH_RELATIVE_PATH,
@@ -11,13 +10,13 @@ import {
 	PLEX_SERVER_RELATIVE_PATH,
 	SETTINGS_RELATIVE_PATH,
 } from '@api-urls';
-import { generatePlexServers, generateResultDTO, generateSettings } from '@mock';
+import { generatePlexServers, generateResultDTO, generateSettingsModel } from '@mock';
 
 describe('GlobalService.getConfigReady()', () => {
-	let { ctx, mock, config } = baseVars();
+	let { appConfig, mock, config } = baseVars();
 	beforeAll(() => {
 		const result = baseSetup();
-		ctx = result.ctx;
+		appConfig = result.appConfig;
 	});
 
 	beforeEach(() => {
@@ -34,11 +33,11 @@ describe('GlobalService.getConfigReady()', () => {
 		mock.onGet(FOLDER_PATH_RELATIVE_PATH).reply(200, generateResultDTO([]));
 		mock.onGet(PLEX_LIBRARY_RELATIVE_PATH).reply(200, generateResultDTO([]));
 		mock.onGet(NOTIFICATION_RELATIVE_PATH).reply(200, generateResultDTO([]));
-		mock.onGet(PLEX_SERVER_RELATIVE_PATH).reply(200, generateResultDTO(generatePlexServers(config)));
-		mock.onGet(SETTINGS_RELATIVE_PATH).reply(200, generateResultDTO(generateSettings(config)));
+		mock.onGet(PLEX_SERVER_RELATIVE_PATH).reply(200, generateResultDTO(generatePlexServers({ config })));
+		mock.onGet(SETTINGS_RELATIVE_PATH).reply(200, generateResultDTO(generateSettingsModel({ config })));
 		mock.onGet(PLEX_SERVER_CONNECTION_RELATIVE_PATH).reply(200, generateResultDTO([]));
 
-		const setup$ = GlobalService.setup(ctx);
+		const setup$ = GlobalService.setup(appConfig);
 		const configReady$ = GlobalService.getConfigReady();
 
 		// Act
@@ -46,7 +45,7 @@ describe('GlobalService.getConfigReady()', () => {
 		const configResult = subscribeSpyTo(configReady$);
 		await setupResult.onComplete();
 		// Assert
-		expect(setupResult.receivedComplete()).toBe(true);
+		expect(setupResult.receivedComplete()).toEqual(true);
 		expect(configResult.getFirstValue()).not.toBeNaN();
 		expect(configResult.getFirstValue().version).not.toBeFalsy();
 	});

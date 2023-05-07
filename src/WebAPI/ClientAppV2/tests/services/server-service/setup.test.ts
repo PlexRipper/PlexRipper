@@ -1,16 +1,15 @@
-import { describe, beforeAll, expect, test } from '@jest/globals';
+import { describe, beforeAll, beforeEach, expect, test } from 'vitest';
+import ServerService from '@service/serverService';
+import { subscribeSpyTo, baseSetup, baseVars, getAxiosMock } from '@services-test-base';
 import { PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
-import { subscribeSpyTo, baseSetup, baseVars, getAxiosMock } from '~/tests/services/_base/base';
-import { ServerService } from '@service';
 import { generatePlexServers, generateResultDTO } from '@mock';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 describe('ServerService.setup()', () => {
-	let { ctx, mock, config } = baseVars();
+	let { mock, config } = baseVars();
 
 	beforeAll(() => {
-		const result = baseSetup();
-		ctx = result.ctx;
+		baseSetup();
 	});
 
 	beforeEach(() => {
@@ -22,8 +21,8 @@ describe('ServerService.setup()', () => {
 		config = {
 			plexServerCount: 3,
 		};
-		mock.onGet(PLEX_SERVER_RELATIVE_PATH).reply(200, generateResultDTO(generatePlexServers(config)));
-		const setup$ = ServerService.setup(ctx);
+		mock.onGet(PLEX_SERVER_RELATIVE_PATH).reply(200, generateResultDTO(generatePlexServers({ config })));
+		const setup$ = ServerService.setup();
 		const setupResult: ISetupResult = {
 			isSuccess: true,
 			name: ServerService.name,
@@ -35,6 +34,6 @@ describe('ServerService.setup()', () => {
 
 		// Assert
 		expect(result.getFirstValue()).toEqual(setupResult);
-		expect(result.receivedComplete()).toBe(true);
+		expect(result.receivedComplete()).toEqual(true);
 	});
 });

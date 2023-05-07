@@ -1,6 +1,5 @@
-import { describe, beforeAll, expect, test } from '@jest/globals';
 import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
-import { GlobalService, LibraryService } from '@service';
+import LibraryService from '@service/libraryService';
 import { generateResultDTO } from '@mock';
 import { PLEX_LIBRARY_RELATIVE_PATH } from '@api-urls';
 import ISetupResult from '@interfaces/service/ISetupResult';
@@ -32,6 +31,6 @@ describe('LibraryService.setup()', () => {
 
 		// Assert
 		expect(result.getFirstValue()).toEqual(setupResult);
-		expect(result.receivedComplete()).toBe(true);
+		expect(result.receivedComplete()).toEqual(true);
 	});
 });

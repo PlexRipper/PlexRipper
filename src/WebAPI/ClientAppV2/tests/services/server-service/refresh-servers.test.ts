@@ -1,16 +1,13 @@
-import { beforeAll, expect, test } from '@jest/globals';
 import { baseVars, subscribeSpyTo, baseSetup, getAxiosMock } from '@services-test-base';
 import { generatePlexServers, generateResultDTO } from '@mock';
 import { PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
-import { GlobalService, ServerService } from '@service';
+import ServerService from '@service/serverService';
 
 describe('ServerService.refresh-servers()', () => {
-	let { ctx, mock, config } = baseVars();
+	let { mock } = baseVars();
 
 	beforeAll(() => {
-		const result = baseSetup();
-		ctx = result.ctx;
-		mock = getAxiosMock();
+		baseSetup();
 	});
 
 	beforeEach(() => {
@@ -19,15 +16,16 @@ describe('ServerService.refresh-servers()', () => {
 
 	test('Should update the plexServers when refreshPlexServers is called', async () => {
 		// Arrange
-		config = {
-			plexServerCount: 3,
-		};
-		const servers = generatePlexServers(config);
+		const servers = generatePlexServers({
+			config: {
+				plexServerCount: 3,
+			},
+		});
 		mock.onGet(PLEX_SERVER_RELATIVE_PATH)
 			.replyOnce(200, [])
 			.onGet(PLEX_SERVER_RELATIVE_PATH)
 			.reply(200, generateResultDTO(servers));
-		const setup$ = ServerService.setup(ctx);
+		const setup$ = ServerService.setup();
 		const refresh$ = ServerService.refreshPlexServers();
 		const getServers$ = ServerService.getServers();
 

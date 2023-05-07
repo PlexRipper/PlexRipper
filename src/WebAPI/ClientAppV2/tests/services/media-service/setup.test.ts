@@ -1,7 +1,5 @@
-import { describe, beforeAll, expect, test } from '@jest/globals';
-import { subscribeSpyTo } from '@services-test-base';
-import { MediaService } from '@service';
-import { baseSetup, baseVars } from '~/tests/services/_base/base';
+import { subscribeSpyTo, baseSetup, baseVars } from '@services-test-base';
+import MediaService from '@service/mediaService';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 describe('MediaService.setup()', () => {
@@ -25,6 +23,6 @@ describe('MediaService.setup()', () => {
 
 		// Assert
 		expect(result.getFirstValue()).toEqual(setupResult);
-		expect(result.receivedComplete()).toBe(true);
+		expect(result.receivedComplete()).toEqual(true);
 	});
 });

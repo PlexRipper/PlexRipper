@@ -1,16 +1,14 @@
-import { describe, beforeAll, expect, test } from '@jest/globals';
 import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
-import { AccountService } from '@service';
+import AccountService from '@service/accountService';
 import { generateResultDTO } from '@mock';
 import { PLEX_ACCOUNT_RELATIVE_PATH } from '@api-urls';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 describe('AccountService.setup()', () => {
-	let { ctx, mock } = baseVars();
+	let { mock } = baseVars();
 
 	beforeAll(() => {
-		const result = baseSetup();
-		ctx = result.ctx;
+		baseSetup();
 	});
 
 	beforeEach(() => {
@@ -20,7 +18,7 @@ describe('AccountService.setup()', () => {
 	test('Should return success and complete when setup is run', async () => {
 		// Arrange
 		mock.onGet(PLEX_ACCOUNT_RELATIVE_PATH).reply(200, generateResultDTO([]));
-		const setup$ = AccountService.setup(ctx);
+		const setup$ = AccountService.setup();
 		const setupResult: ISetupResult = {
 			isSuccess: true,
 			name: AccountService.name,
@@ -32,6 +30,6 @@ describe('AccountService.setup()', () => {
 
 		// Assert
 		expect(result.getFirstValue()).toEqual(setupResult);
-		expect(result.receivedComplete()).toBe(true);
+		expect(result.receivedComplete()).toEqual(true);
 	});
 });

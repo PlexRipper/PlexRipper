@@ -1,7 +1,7 @@
-import { expect, test } from '@jest/globals';
+import { expect, test } from 'vitest';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
-import { GlobalService } from '@service';
-import { generatePlexServers, generateResultDTO, generateSettings } from '@mock';
+import GlobalService from '@service/globalService';
+import { generatePlexServers, generateResultDTO, generateSettingsModel } from '@mock';
 import {
 	DOWNLOAD_RELATIVE_PATH,
 	FOLDER_PATH_RELATIVE_PATH,
@@ -14,11 +14,11 @@ import {
 } from '@api-urls';
 
 describe('GlobalService.setup()', () => {
-	let { ctx, mock, config } = baseVars();
+	let { appConfig, mock, config } = baseVars();
 
 	beforeAll(() => {
 		const result = baseSetup();
-		ctx = result.ctx;
+		appConfig = result.appConfig;
 	});
 
 	beforeEach(() => {
@@ -35,17 +35,17 @@ describe('GlobalService.setup()', () => {
 		mock.onGet(FOLDER_PATH_RELATIVE_PATH).reply(200, generateResultDTO([]));
 		mock.onGet(PLEX_LIBRARY_RELATIVE_PATH).reply(200, generateResultDTO([]));
 		mock.onGet(NOTIFICATION_RELATIVE_PATH).reply(200, generateResultDTO([]));
-		mock.onGet(PLEX_SERVER_RELATIVE_PATH).reply(200, generateResultDTO(generatePlexServers(config)));
-		mock.onGet(SETTINGS_RELATIVE_PATH).reply(200, generateResultDTO(generateSettings(config)));
+		mock.onGet(PLEX_SERVER_RELATIVE_PATH).reply(200, generateResultDTO(generatePlexServers({ config })));
+		mock.onGet(SETTINGS_RELATIVE_PATH).reply(200, generateResultDTO(generateSettingsModel({ config })));
 		mock.onGet(PLEX_SERVER_CONNECTION_RELATIVE_PATH).reply(200, generateResultDTO([]));
 
-		const setup$ = GlobalService.setup(ctx);
+		const setup$ = GlobalService.setup(appConfig);
 
 		// Act
 		const result = subscribeSpyTo(setup$);
 		await result.onComplete();
 
 		// Assert
-		expect(result.receivedComplete()).toBe(true);
+		expect(result.receivedComplete()).toEqual(true);
 	});
 });

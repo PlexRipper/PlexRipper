@@ -1,17 +1,15 @@
-import { beforeAll, describe, expect, test } from '@jest/globals';
 import { take } from 'rxjs/operators';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
-import { LibraryService, ServerService } from '@service';
-import { generateResultDTO } from '@mock';
+import LibraryService from '@service/libraryService';
+import ServerService from '@service/serverService';
+import { generatePlexLibraries, generatePlexServers, generateResultDTO } from '@mock';
 import { PLEX_LIBRARY_RELATIVE_PATH, PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
-import { generatePlexServersAndLibraries } from '@mock/mock-combination';
 
 describe('LibraryService.getServerByLibraryId()', () => {
-	let { ctx, mock, config } = baseVars();
+	let { mock, config } = baseVars();
 
 	beforeAll(() => {
-		const result = baseSetup();
-		ctx = result.ctx;
+		baseSetup();
 	});
 
 	beforeEach(() => {
@@ -26,12 +24,13 @@ describe('LibraryService.getServerByLibraryId()', () => {
 			plexLibraryCount: 20,
 		};
 
-		const { servers, libraries } = generatePlexServersAndLibraries(config);
+		const servers = generatePlexServers({ config });
+		const libraries = servers.map((x) => generatePlexLibraries({ plexServerId: x.id, config })).flat();
 
 		mock.onGet(PLEX_SERVER_RELATIVE_PATH).reply(200, generateResultDTO(servers));
 		mock.onGet(PLEX_LIBRARY_RELATIVE_PATH).reply(200, generateResultDTO(libraries));
-		const serverSetup$ = ServerService.setup(ctx);
-		const librarySetup$ = LibraryService.setup(ctx);
+		const serverSetup$ = ServerService.setup();
+		const librarySetup$ = LibraryService.setup();
 		const testLibrary = libraries[5];
 		// Act
 		const serverSetupResult = subscribeSpyTo(serverSetup$);
@@ -43,8 +42,8 @@ describe('LibraryService.getServerByLibraryId()', () => {
 		await serverByLibraryIdResult.onComplete();
 
 		// Assert
-		expect(serverSetupResult.receivedComplete()).toBe(true);
-		expect(librarySetupResult.receivedComplete()).toBe(true);
+		expect(serverSetupResult.receivedComplete()).toEqual(true);
+		expect(librarySetupResult.receivedComplete()).toEqual(true);
 		const values = serverByLibraryIdResult.getValues();
 		expect(values).toHaveLength(1);
 		expect(serverByLibraryIdResult.getFirstValue()?.id).toEqual(testLibrary.plexServerId);

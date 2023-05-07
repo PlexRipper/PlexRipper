@@ -1,6 +1,5 @@
-import { describe, beforeAll, expect, test } from '@jest/globals';
 import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
-import { DownloadService, GlobalService } from '@service';
+import DownloadService from '@service/downloadService';
 import { generateResultDTO } from '@mock';
 import { DOWNLOAD_RELATIVE_PATH } from '@api-urls';
 import ISetupResult from '@interfaces/service/ISetupResult';
@@ -32,6 +31,6 @@ describe('DownloadService.setup()', () => {
 
 		// Assert
 		expect(result.getFirstValue()).toEqual(setupResult);
-		expect(result.receivedComplete()).toBe(true);
+		expect(result.receivedComplete()).toEqual(true);
 	});
 });

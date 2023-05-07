@@ -1,19 +1,16 @@
-import { describe, beforeAll, expect, test } from '@jest/globals';
-import { subscribeSpyTo } from '@services-test-base';
-import { ProgressService } from '@service';
-import { baseSetup, baseVars } from '~/tests/services/_base/base';
+import { subscribeSpyTo, baseSetup, baseVars } from '@services-test-base';
+import ProgressService from '@service/progressService';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 describe('ProgressService.setup()', () => {
-	let { ctx } = baseVars();
+	baseVars();
 	beforeAll(() => {
-		const result = baseSetup();
-		ctx = result.ctx;
+		baseSetup();
 	});
 
 	test('Should return success and complete when setup is run', async () => {
 		// Arrange
-		const setup$ = ProgressService.setup(ctx);
+		const setup$ = ProgressService.setup();
 		const setupResult: ISetupResult = {
 			isSuccess: true,
 			name: ProgressService.name,
@@ -25,6 +22,6 @@ describe('ProgressService.setup()', () => {
 
 		// Assert
 		expect(result.getFirstValue()).toEqual(setupResult);
-		expect(result.receivedComplete()).toBe(true);
+		expect(result.receivedComplete()).toEqual(true);
 	});
 });

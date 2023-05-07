@@ -1,4 +1,4 @@
-import { describe, expect, test } from '@jest/globals';
+import { describe, expect, test } from 'vitest';
 
 describe('Dummy Tests', () => {
 	test('Should pass when Jest is setup correctly', () => {

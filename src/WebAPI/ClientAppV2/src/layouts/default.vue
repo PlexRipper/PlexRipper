@@ -9,7 +9,8 @@
 				<NavigationDrawer :show-drawer="showNavigationDrawerState" />
 				<NotificationsDrawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer" />
 			</template>
-			<q-page-container class="page-container">
+			<!--	page-load-completed is only visible once the page is done loading. This is used for Cypress E2E	-->
+			<q-page-container data-cy="page-load-completed">
 				<slot />
 			</q-page-container>
 		</template>

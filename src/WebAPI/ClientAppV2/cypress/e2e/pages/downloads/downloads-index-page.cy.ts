@@ -1,13 +1,14 @@
-import { beforeEach, describe } from 'mocha';
-import { route, basePageSetup } from '@fixtures/baseE2E';
+import { route } from '@fixtures/baseE2E';
 
 describe('PlexRipper new setup process', () => {
 	beforeEach(() => {
-		basePageSetup({
+		cy.basePageSetup({
 			plexAccountCount: 2,
 			plexServerCount: 5,
 			plexLibraryCount: 5,
 			tvShowDownloadTask: 5,
+			seasonDownloadTask: 5,
+			episodeDownloadTask: 5,
 		});
 
 		cy.visit(route('/downloads')).as('downloadsPage');

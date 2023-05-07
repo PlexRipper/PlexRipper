@@ -1,14 +1,12 @@
-import { route, basePageSetup, apiRoute } from '@fixtures/baseE2E';
+import { route, apiRoute } from '@fixtures/baseE2E';
 import { SETTINGS_RELATIVE_PATH } from '@api-urls';
 
 describe('PlexRipper new setup process', () => {
 	beforeEach(() => {
-		const config = {
+		cy.basePageSetup({
 			plexAccountCount: 2,
 			plexServerCount: 5,
-		};
-
-		basePageSetup(config);
+		});
 
 		// Once the setup has been completed the settings are saved
 		cy.intercept('PUT', apiRoute(SETTINGS_RELATIVE_PATH), {

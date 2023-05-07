@@ -31,6 +31,7 @@ export default defineNuxtConfig({
 		// Doc: https://i18n.nuxtjs.org/
 		'@nuxtjs/i18n',
 		'@vue-macros/nuxt',
+		'nuxt-vitest',
 	],
 	quasar: {
 		// Plugins: https://quasar.dev/quasar-plugins
@@ -91,7 +92,7 @@ export default defineNuxtConfig({
 		'@api-urls': fileURLToPath(new URL('./src/types/const/api-urls.ts', import.meta.url)),
 		'@props': fileURLToPath(new URL('./src/types/props/', import.meta.url)),
 		'@fixtures': fileURLToPath(new URL('./cypress/fixtures/', import.meta.url)),
-		'@services-test-base': fileURLToPath(new URL('./src/tests/services/_base/base.ts', import.meta.url)),
+		'@services-test-base': fileURLToPath(new URL('./tests/services/_base/base.ts', import.meta.url)),
 		'@lib': fileURLToPath(new URL('./src/types/lib/', import.meta.url)),
 		'@service': fileURLToPath(new URL('./src/service/', import.meta.url)),
 		'@img': fileURLToPath(new URL('./src/assets/img/', import.meta.url)),

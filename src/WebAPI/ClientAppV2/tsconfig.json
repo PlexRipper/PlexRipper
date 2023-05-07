@@ -5,6 +5,6 @@
 		"sourceMap": true,
 		"noImplicitAny": false,
 		// TODO This might be better to enable
-		"types": ["unplugin-vue-define-options/macros-global", "@nuxtjs/i18n"]
+		"types": ["unplugin-vue-define-options/macros-global", "@nuxtjs/i18n", "vitest/importMeta", "vitest/globals"]
 	}
 }

@@ -1,17 +1,20 @@
-import * as Factory from 'factory.ts';
 import { randBoolean, randBrand, randIp, randNumber, randRecentDate, randSemver, randUuid } from '@ngneat/falso';
-import { resetSeed } from './utils';
-import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
+import { PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
 import { checkConfig, MockConfig } from '@mock';
 import { generatePlexServerConnections } from '@factories/plex-server-connection-factory';
 
 let plexServerIdIndex = 1;
 
-export function generatePlexServer(
-	id: number,
-	config: Partial<MockConfig> = {},
-	partialData?: Partial<PlexServerDTO>,
-): PlexServerDTO {
+export function generatePlexServer({
+	id,
+	config = {},
+	partialData = {},
+}: {
+	id: number;
+	config: Partial<MockConfig>;
+	partialData?: Partial<PlexServerConnectionDTO>;
+}): PlexServerDTO {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const validConfig = checkConfig(config);
 
 	return {
@@ -44,25 +47,15 @@ export function generatePlexServer(
 	};
 }
 
-export function generatePlexServers(config: Partial<MockConfig> = {}): PlexServerDTO[] {
+export function generatePlexServers({
+	config = {},
+	partialData = {},
+}: {
+	config: Partial<MockConfig>;
+	partialData?: Partial<PlexServerConnectionDTO>;
+}): PlexServerDTO[] {
 	const validConfig = checkConfig(config);
 	return Array(validConfig.plexServerCount)
 		.fill(null)
-		.map(() => generatePlexServer(plexServerIdIndex++, config));
-}
-
-export function generatePlexServerStatusDTO(plexServerId: number, plexServerConnectionId: number): PlexServerStatusDTO[] {
-	const plexServerStatusDTOFactory = Factory.Sync.makeFactory<PlexServerStatusDTO>(() => {
-		resetSeed();
-		return {
-			id: Factory.each((i) => i),
-			isSuccessful: true,
-			lastChecked: randRecentDate({ days: 10 }).toUTCString(),
-			plexServerConnectionId: -1,
-			plexServerId: -1,
-			statusCode: 200,
-			statusMessage: 'Completed',
-		};
-	});
-	return plexServerStatusDTOFactory.buildList(3, { plexServerId, plexServerConnectionId });
+		.map(() => generatePlexServer({ id: plexServerIdIndex++, config, partialData }));
 }

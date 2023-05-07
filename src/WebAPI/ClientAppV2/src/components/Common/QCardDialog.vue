@@ -6,26 +6,35 @@
 		:no-backdrop-dismiss="noBackdropDismiss"
 		@before-show="$emit('opened', dataValue)"
 		@before-hide="$emit('closed')">
-		<q-row column class="q-card-dialog q-card-dialog-background" :style="styles">
+		<q-row column :data-cy="cy" class="q-card-dialog q-card-dialog-background" :style="styles">
 			<!-- Dialog Title	-->
 			<q-col v-if="$slots['title']" cols="auto" class="q-card-dialog-title">
-				<QCardTitle>
-					<slot name="title" :value="parentValue" />
-				</QCardTitle>
+				<div v-show="!loading">
+					<QCardTitle>
+						<slot name="title" :value="parentValue" />
+					</QCardTitle>
+				</div>
 			</q-col>
 			<!--	Dialog Top Row -->
 			<q-col v-if="$slots['top-row']" cols="auto" class="q-card-dialog-top-row">
-				<slot name="top-row" />
+				<div v-show="!loading">
+					<slot name="top-row" />
+				</div>
 			</q-col>
 			<q-col v-if="$slots['default']" class="q-card-dialog-content" :class="{ scroll: scroll }" align-self="stretch">
-				<slot :value="parentValue" />
+				<div v-show="!loading">
+					<slot :value="parentValue" />
+				</div>
 			</q-col>
 			<q-col v-if="$slots['actions']" cols="auto" align-self="stretch" class="q-card-dialog-actions q-pa-md">
-				<!--	Dialog Buttons		-->
-				<q-card-actions :align="buttonAlign">
-					<slot name="actions" :close="closeDialog" :open="openDialog" :value="parentValue" />
-				</q-card-actions>
+				<div v-show="!loading">
+					<!--	Dialog Buttons		-->
+					<q-card-actions :align="buttonAlign">
+						<slot name="actions" :close="closeDialog" :open="openDialog" :value="parentValue" />
+					</q-card-actions>
+				</div>
 			</q-col>
+			<!--	Loading overlay	-->
 			<QLoadingOverlay :loading="loading" />
 		</q-row>
 	</q-dialog>
@@ -60,6 +69,7 @@ const props = withDefaults(
 		noBackdropDismiss?: boolean;
 		noRouteDismiss?: boolean;
 		buttonAlign?: 'left' | 'center' | 'right' | 'between' | 'around' | 'evenly' | 'stretch';
+		cy?: string;
 	}>(),
 	{
 		name: '',
@@ -79,6 +89,7 @@ const props = withDefaults(
 		persistent: false,
 		noBackdropDismiss: false,
 		noRouteDismiss: false,
+		cy: 'q-card-dialog-cy',
 		buttonAlign: 'right',
 	},
 );

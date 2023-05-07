@@ -3,7 +3,13 @@ import { randBoolean } from '@ngneat/falso';
 import { checkConfig, MockConfig, resetSeed } from '@mock';
 import { PlexServerDTO, SettingsModelDTO, ViewMode } from '@dto/mainApi';
 
-export function generateSettingsModel(plexServers: PlexServerDTO[], config: Partial<MockConfig> = {}): SettingsModelDTO {
+export function generateSettingsModel({
+	plexServers = [],
+	config = {},
+}: {
+	plexServers?: PlexServerDTO[];
+	config?: Partial<MockConfig>;
+}): SettingsModelDTO {
 	const validConfig = checkConfig(config);
 
 	const settingsModelDTOFactory = Factory.Sync.makeFactory<SettingsModelDTO>(() => {

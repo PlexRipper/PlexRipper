@@ -11,7 +11,7 @@
 			<q-col cols="12" lg="8">
 				<!--	Vertical Container	-->
 				<q-row class="setup-card" column>
-					<q-col cols="12" lg="6">
+					<q-col align-self="stretch">
 						<!-- Tabs -->
 						<q-row>
 							<q-col cols="auto">
@@ -63,7 +63,11 @@
 									<q-tab-panel :name="2">
 										<q-row no-gutters>
 											<q-col>
-												<h2>{{ $t('pages.setup.future-plans.title') }}</h2>
+												<h2 class="mt-2">{{ $t('pages.setup.future-plans.title') }}</h2>
+											</q-col>
+										</q-row>
+										<q-row no-gutters>
+											<q-col>
 												<p>{{ $t('pages.setup.future-plans.text.p-1') }}</p>
 												<ul>
 													<li>
@@ -95,7 +99,11 @@
 										<h2>
 											{{ $t('pages.setup.paths.title') }}
 										</h2>
-										<folder-paths-overview only-defaults />
+										<q-row no-gutters>
+											<q-col>
+												<folder-paths-overview only-defaults />
+											</q-col>
+										</q-row>
 									</q-tab-panel>
 									<!-- Plex Accounts	-->
 									<q-tab-panel :name="4">

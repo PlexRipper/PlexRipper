@@ -3,7 +3,7 @@ import { switchMap, take, tap } from 'rxjs/operators';
 import { catchError, Observable, of } from 'rxjs';
 import { AxiosObservable } from 'axios-observable';
 import { AxiosError, AxiosResponse } from 'axios';
-import { AlertService } from '@service';
+import AlertService from '@service/alertService';
 import ResultDTO from '@dto/ResultDTO';
 
 export function checkForError<T = any>(

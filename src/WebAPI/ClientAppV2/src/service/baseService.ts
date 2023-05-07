@@ -28,6 +28,10 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		Log.info(`Current state of ${this._name}`, this.getState(true));
 	}
 
+	protected isInTestMode(): boolean {
+		return process.env.VITEST === 'true';
+	}
+
 	protected setup(appConfig: IAppConfig | null = null): Observable<ISetupResult> {
 		if (!ObservableStore.isStoreInitialized) {
 			ObservableStore.initializeState(DefaultState);

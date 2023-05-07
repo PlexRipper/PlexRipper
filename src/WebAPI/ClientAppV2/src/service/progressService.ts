@@ -1,7 +1,9 @@
 import { combineLatest, Observable, of } from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
+import BaseService from './baseService';
+import SignalrService from '@service/signalrService';
 import { DownloadStatus, DownloadTaskDTO } from '@dto/mainApi';
-import { BaseService, SignalrService } from '@service';
+
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class ProgressService extends BaseService {

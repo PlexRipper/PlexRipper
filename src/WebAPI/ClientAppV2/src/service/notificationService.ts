@@ -1,8 +1,8 @@
 import { Observable, of } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 
+import BaseService from './baseService';
 import { NotificationDTO } from '@dto/mainApi';
-import { BaseService } from '@service';
 import { clearAllNotifications, getNotifications, hideNotification } from '@api/notificationApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import ISetupResult from '@interfaces/service/ISetupResult';

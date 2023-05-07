@@ -1,8 +1,8 @@
 import { Observable, of } from 'rxjs';
 import { finalize, map, switchMap, take, tap } from 'rxjs/operators';
 
+import BaseService from './baseService';
 import { FolderPathDTO } from '@dto/mainApi';
-import { BaseService } from '@service';
 import { getFolderPaths, createFolderPath, updateFolderPath, deleteFolderPath } from '@api/pathApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import ISetupResult from '@interfaces/service/ISetupResult';

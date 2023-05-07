@@ -2,6 +2,7 @@ import { Observable, of } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 
 import { sum } from 'lodash-es';
+import BaseService from './baseService';
 import {
 	clearDownloadTasks,
 	deleteDownloadTasks,
@@ -22,7 +23,7 @@ import {
 	ServerDownloadProgressDTO,
 } from '@dto/mainApi';
 import IStoreState from '@interfaces/service/IStoreState';
-import { BaseService, SignalrService } from '@service';
+import SignalrService from '@service/signalrService';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class DownloadService extends BaseService {

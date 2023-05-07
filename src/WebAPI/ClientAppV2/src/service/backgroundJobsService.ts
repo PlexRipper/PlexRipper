@@ -1,7 +1,7 @@
 import { Observable, of } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 
-import { BaseService } from '@service';
+import BaseService from './baseService';
 import IStoreState from '@interfaces/service/IStoreState';
 import { JobStatusUpdateDTO, JobTypes } from '@dto/mainApi';
 

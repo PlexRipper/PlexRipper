@@ -3,6 +3,7 @@ import { distinctUntilChanged, filter, map, switchMap, take, tap } from 'rxjs/op
 
 import { isEqual } from 'lodash-es';
 import Log from 'consola';
+import BaseService from './baseService';
 import {
 	ConfirmationSettingsDTO,
 	DateTimeSettingsDTO,
@@ -14,7 +15,6 @@ import {
 	SettingsModelDTO,
 	ViewMode,
 } from '@dto/mainApi';
-import { BaseService } from '@service';
 import { getSettings, updateSettings } from '@api/settingsApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import ISetupResult from '@interfaces/service/ISetupResult';

@@ -1,6 +1,8 @@
 import { Observable, of, throwError } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
-import { BaseService, ServerService } from '@service';
+import BaseService from './baseService';
+
+import ServerService from '@service/serverService';
 import IStoreState from '@interfaces/service/IStoreState';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getAllPlexLibraries, getPlexLibrary, refreshPlexLibrary, updateDefaultDestination } from '@api/plexLibraryApi';

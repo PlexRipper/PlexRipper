@@ -5,8 +5,11 @@ import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operato
 import { useCypressSignalRMock } from 'cypress-signalr-mock';
 import { Observable, of, Subject } from 'rxjs';
 import { isEqual } from 'lodash-es';
+import BackgroundJobsService from './backgroundJobsService';
+import NotificationService from './notificationService';
+import BaseService from './baseService';
 import IStoreState from '@interfaces/service/IStoreState';
-import { BaseService, NotificationService, BackgroundJobsService } from '@service';
+
 import {
 	DownloadTaskDTO,
 	FileMergeProgress,
@@ -54,10 +57,8 @@ export class SignalrService extends BaseService {
 	}
 
 	private async initializeHubs(): Promise<void> {
-		// Ensure we don't run any SignalR functionality due to it being tricky to setup. Might revisit later
-		// TODO Re-enable when trying to test SignalR functionality
-		// @ts-ignore
-		if (window.jest) {
+		// Disable SignalR initialization in test mode
+		if (this.isInTestMode()) {
 			return Promise.resolve();
 		}
 		Log.debug('Setting up SignalR Service');

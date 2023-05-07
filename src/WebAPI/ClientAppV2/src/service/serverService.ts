@@ -1,10 +1,12 @@
 import { combineLatest, EMPTY, Observable, of } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 import Log from 'consola';
+import AccountService from './accountService';
+import BaseService from './baseService';
+import ServerConnectionService from './serverConnectionService';
 import { PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
 import { getPlexServers, setPreferredPlexServerConnection } from '@api/plexServerApi';
 import IStoreState from '@interfaces/service/IStoreState';
-import { AccountService, BaseService, ServerConnectionService } from '@service';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import ResultDTO from '@dto/ResultDTO';
 
@@ -56,7 +58,7 @@ export class ServerService extends BaseService {
 
 	public getServers(ids: number[] = []): Observable<PlexServerDTO[]> {
 		return this.stateChanged.pipe(
-			map((state: IStoreState) => state.servers ?? []),
+			map((state: IStoreState) => state?.servers ?? []),
 			map((serverList) => serverList.filter((server) => !ids.length || ids.includes(server.id))),
 		);
 	}

@@ -1,8 +1,8 @@
 import { Observable, of } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
+import BaseService from './baseService';
 import { PlexServerConnectionDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import IStoreState from '@interfaces/service/IStoreState';
-import { BaseService } from '@service';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import { checkAllPlexServerConnections, checkPlexServerConnection, getPlexServerConnections } from '@api/plexServerConnectionApi';
 

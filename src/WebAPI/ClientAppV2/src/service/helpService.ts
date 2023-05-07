@@ -1,8 +1,8 @@
 import { Observable, of } from 'rxjs';
 import { map, switchMap, take } from 'rxjs/operators';
 
+import BaseService from './baseService';
 import IStoreState from '@interfaces/service/IStoreState';
-import { BaseService } from '@service';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class HelpService extends BaseService {

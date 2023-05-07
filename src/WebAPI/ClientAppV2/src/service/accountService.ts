@@ -1,8 +1,11 @@
 import { Observable, of } from 'rxjs';
 import { map, mergeMap, switchMap, take, tap } from 'rxjs/operators';
-import { createAccount, deleteAccount, getAccount, getAllAccounts, updateAccount } from '@api/accountApi';
+import BaseService from './baseService';
+import ServerService from './serverService';
+import LibraryService from './libraryService';
 import { PlexAccountDTO } from '@dto/mainApi';
-import { BaseService, ServerService, LibraryService } from '@service';
+import { createAccount, deleteAccount, getAccount, getAllAccounts, updateAccount } from '@api/accountApi';
+
 import IStoreState from '@interfaces/service/IStoreState';
 import ISetupResult from '@interfaces/service/ISetupResult';
 

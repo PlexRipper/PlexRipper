@@ -6,8 +6,23 @@ import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 import DefaultState from '@const/default-state';
 import IAppConfig from '@class/IAppConfig';
 import IStoreState from '@interfaces/service/IStoreState';
-import * as Service from '@service';
-import { BaseService } from '@service';
+import {
+	AccountService,
+	AlertService,
+	BackgroundJobsService,
+	BaseService,
+	DownloadService,
+	FolderPathService,
+	HelpService,
+	LibraryService,
+	MediaService,
+	NotificationService,
+	ProgressService,
+	ServerConnectionService,
+	ServerService,
+	SettingsService,
+	SignalrService,
+} from '@service';
 
 export class GlobalService extends BaseService {
 	public constructor() {
@@ -31,20 +46,20 @@ export class GlobalService extends BaseService {
 			tap((config) => this.setConfigReady(config)),
 			switchMap((config) =>
 				forkJoin([
-					Service.ProgressService.setup(),
-					Service.DownloadService.setup(),
-					Service.ServerService.setup(),
-					Service.ServerConnectionService.setup(),
-					Service.BackgroundJobsService.setup(),
-					Service.MediaService.setup(),
-					Service.SettingsService.setup(),
-					Service.NotificationService.setup(),
-					Service.FolderPathService.setup(),
-					Service.LibraryService.setup(),
-					Service.AccountService.setup(),
-					Service.SignalrService.setup(config),
-					Service.HelpService.setup(),
-					Service.AlertService.setup(),
+					ProgressService.setup(),
+					DownloadService.setup(),
+					ServerService.setup(),
+					ServerConnectionService.setup(),
+					BackgroundJobsService.setup(),
+					MediaService.setup(),
+					SettingsService.setup(),
+					NotificationService.setup(),
+					FolderPathService.setup(),
+					LibraryService.setup(),
+					AccountService.setup(),
+					SignalrService.setup(config),
+					HelpService.setup(),
+					AlertService.setup(),
 				]),
 			),
 			tap((results) => {

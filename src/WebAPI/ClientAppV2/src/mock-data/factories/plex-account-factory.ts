@@ -10,7 +10,7 @@ import {
 } from '@ngneat/falso';
 import { MockConfig } from '@mock/interfaces/MockConfig';
 import { PlexAccountDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
-import { checkConfig } from '@mock/mock-base';
+import { checkConfig, incrementSeed } from '@mock/mock-base';
 
 let plexAccountIdIndex = 1;
 
@@ -22,12 +22,13 @@ export function generatePlexAccount({
 	config = {},
 }: {
 	id: number;
-	plexServers: PlexServerDTO[];
-	plexLibraries: PlexLibraryDTO[];
+	plexServers?: PlexServerDTO[];
+	plexLibraries?: PlexLibraryDTO[];
 	partialData?: Partial<PlexAccountDTO>;
 	config?: Partial<MockConfig>;
 }): PlexAccountDTO {
-	const validConfig = checkConfig(config);
+	checkConfig(config);
+	incrementSeed(id);
 
 	return {
 		id,

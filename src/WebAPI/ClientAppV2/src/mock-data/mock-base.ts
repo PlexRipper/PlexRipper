@@ -2,11 +2,12 @@ import { seed as falsoSeed } from '@ngneat/falso';
 import { MockConfig } from '@mock/interfaces';
 import { PlexMediaType } from '@dto/mainApi';
 
+let currentSeed = 0;
+
 export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 	if (config === null || config === undefined) {
 		return checkConfig({});
 	}
-
 	const defaultConfig: MockConfig = {
 		plexServerCount: 5,
 		seed: 1234,
@@ -31,9 +32,16 @@ export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 		}
 	}
 
+	setSeed(config?.seed ?? defaultConfig.seed);
+
 	return config as MockConfig;
 }
 
 export function setSeed(seed: number) {
+	currentSeed = seed;
 	falsoSeed('' + seed);
+}
+
+export function incrementSeed(value = 1): void {
+	falsoSeed('' + currentSeed + value);
 }

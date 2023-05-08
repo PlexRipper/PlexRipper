@@ -2,7 +2,7 @@ import { randMovie } from '@ngneat/falso';
 import { toPlexMediaType } from '@composables/conversion';
 import { MockConfig } from '@mock/interfaces';
 import { DownloadProgressDTO, DownloadStatus, DownloadTaskType, ServerDownloadProgressDTO } from '@dto/mainApi';
-import { checkConfig } from '@mock/mock-base';
+import { checkConfig, incrementSeed } from '@mock/mock-base';
 
 let downloadTaskIdIndex = 1;
 
@@ -62,8 +62,8 @@ export function generateDownloadTask({
 	type: DownloadTaskType;
 	config: Partial<MockConfig>;
 }): DownloadProgressDTO {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const validConfig = checkConfig(config);
+	checkConfig(config);
+	incrementSeed(id);
 
 	return {
 		id,
@@ -181,6 +181,8 @@ export function generateDownloadTaskTvShowSeason({
 	plexLibraryId: number;
 	config?: Partial<MockConfig>;
 }): DownloadProgressDTO {
+	incrementSeed(id);
+
 	return {
 		...generateDownloadTask({
 			id,

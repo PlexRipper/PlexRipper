@@ -1,5 +1,5 @@
 import { randIp, randPort } from '@ngneat/falso';
-import { checkConfig, MockConfig, resetSeed } from '~/mock-data';
+import { checkConfig, incrementSeed, MockConfig } from '~/mock-data';
 import {
 	PlexServerConnectionDTO,
 	PlexServerDTO,
@@ -18,7 +18,7 @@ export function generatePlexServerConnection({
 	plexServerId: number;
 	partialData?: Partial<PlexServerConnectionDTO>;
 }): PlexServerConnectionDTO {
-	resetSeed();
+	incrementSeed(id);
 	const scheme = 'http';
 	const host = randIp();
 	const port = randPort();

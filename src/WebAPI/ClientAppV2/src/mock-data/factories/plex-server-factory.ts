@@ -1,6 +1,6 @@
 import { randBoolean, randBrand, randIp, randNumber, randRecentDate, randSemver, randUuid } from '@ngneat/falso';
 import { PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
-import { checkConfig, MockConfig } from '@mock';
+import { checkConfig, incrementSeed, MockConfig } from '@mock';
 import { generatePlexServerConnections } from '@factories/plex-server-connection-factory';
 
 let plexServerIdIndex = 1;
@@ -14,8 +14,8 @@ export function generatePlexServer({
 	config: Partial<MockConfig>;
 	partialData?: Partial<PlexServerConnectionDTO>;
 }): PlexServerDTO {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const validConfig = checkConfig(config);
+	checkConfig(config);
+	incrementSeed(id);
 
 	return {
 		id,

@@ -1,6 +1,6 @@
 import { randCompanyName, randDirectoryPath, randNumber, randRecentDate, randUuid } from '@ngneat/falso';
 import { randPlexMediaType } from './';
-import { checkConfig, MockConfig } from '@mock';
+import { checkConfig, incrementSeed, MockConfig } from '@mock';
 import { FolderPathDTO, PlexLibraryDTO } from '@dto/mainApi';
 
 let plexLibraryIdIndex = 1;
@@ -16,6 +16,7 @@ export function generatePlexLibrary({
 	partialData?: Partial<PlexLibraryDTO>;
 	config?: Partial<MockConfig>;
 }): PlexLibraryDTO {
+	incrementSeed(id);
 	const libraryType = randPlexMediaType();
 	return {
 		id,

@@ -1,4 +1,5 @@
 import { JobStatus, JobStatusUpdateDTO, JobTypes, TimeSpan } from '@dto/mainApi';
+import { incrementSeed } from '~/mock-data';
 
 let jobStatusIdIndex = 1;
 
@@ -13,8 +14,11 @@ export function generateJobStatusUpdate({
 	primaryKey: string;
 	primaryKeyValue: number;
 }): JobStatusUpdateDTO {
+	const id = jobStatusIdIndex++;
+	incrementSeed(id);
+
 	return {
-		id: '' + jobStatusIdIndex++,
+		id: '' + id,
 		jobName: 'asdasd',
 		jobGroup: jobType,
 		jobRuntime: defaultTimeSpan,

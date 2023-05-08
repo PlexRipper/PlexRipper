@@ -277,6 +277,11 @@
                         "title": "Télécharger par Segments"
                     }
                 },
+                "debug-section": {
+                    "text": "L'activation du mode de débogage affichera plus d'informations que d'habitude dans diverses zones de l'interface utilisateur.",
+                    "title": "Mode débogage",
+                    "label": "Mode débogage"
+                },
                 "reset-db": {
                     "label": "Réinitialiser la base de donnée",
                     "text": "Réinitialiser la base de donnée et créer une backup de l'ancienne.",
@@ -403,6 +408,9 @@
                 },
                 "download-manager": {
                     "header": "Gestionnaire de téléchargement"
+                },
+                "debug": {
+                    "header": "Paramètres de débogage"
                 },
                 "setup": {
                     "header": "PlexRipper Configuration"

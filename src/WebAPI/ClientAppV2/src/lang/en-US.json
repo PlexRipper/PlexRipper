@@ -277,6 +277,11 @@
                         "title": "Download Segments"
                     }
                 },
+                "debug-section": {
+                    "text": "Enabling debug mode will display more information than usual in various area of the user interface.",
+                    "title": "Debug Mode",
+                    "label": "Debug Mode"
+                },
                 "reset-db": {
                     "label": "Reset Database",
                     "text": "Resets the database and creates a back-up of the old one.",
@@ -403,6 +408,9 @@
                 },
                 "download-manager": {
                     "header": "Download Manager"
+                },
+                "debug": {
+                    "header": "Debug Settings"
                 },
                 "setup": {
                     "header": "PlexRipper Setup"

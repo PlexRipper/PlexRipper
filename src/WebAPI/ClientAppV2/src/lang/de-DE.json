@@ -277,6 +277,11 @@
                         "title": "Download Teile"
                     }
                 },
+                "debug-section": {
+                    "text": "Wenn Sie den Debug-Modus aktivieren, werden in verschiedenen Bereichen der Benutzeroberfläche mehr Informationen als gewöhnlich angezeigt.",
+                    "title": "Debug-Modus",
+                    "label": "Debug-Modus"
+                },
                 "reset-db": {
                     "label": "Datenbank zurück setzen",
                     "text": "Setzt die Datenbank zurück und erstellt eine Sicherung der alten Datenbank.",
@@ -403,6 +408,9 @@
                 },
                 "download-manager": {
                     "header": "Download Manager"
+                },
+                "debug": {
+                    "header": "Debug-Einstellungen"
                 },
                 "setup": {
                     "header": "PlexRipper Setup"

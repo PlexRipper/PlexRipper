@@ -29,6 +29,9 @@ public class PlexAccountService : IPlexAccountService
 
     public virtual async Task<Result<PlexAccount>> ValidatePlexAccountAsync(PlexAccount plexAccount)
     {
+        if (plexAccount is null)
+            return ResultExtensions.IsNull(nameof(plexAccount));
+
         if (plexAccount.Username == string.Empty || plexAccount.Password == string.Empty)
             return Result.Fail("Either the username or password were empty").LogWarning();
 

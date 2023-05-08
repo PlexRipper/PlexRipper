@@ -1,7 +1,10 @@
 <template>
 	<QForm
 		ref="accountForm"
-		v-model="valid"
+		greedy
+		autofocus
+		autocapitalize="off"
+		spellcheck="false"
 		@reset="onReset"
 		@validation-success="$emit('is-valid', true)"
 		@validation-error="$emit('is-valid', false)">
@@ -103,15 +106,17 @@ import { PlexAccountDTO } from '@dto/mainApi';
 import { QForm } from '#components';
 
 const labelCol = ref(3);
-const valid = ref(true);
-const isValidated = ref('');
 const showPassword = ref(false);
+const accountForm = ref<InstanceType<typeof QForm> | null>(null);
 
 defineProps<{
 	value: PlexAccountDTO;
 }>();
 
-const accountForm = ref<InstanceType<typeof QForm> | null>(null);
+const emit = defineEmits<{
+	(event: 'input', value: { prop: string; value: string | boolean }): void;
+	(event: 'is-valid', valid: boolean): void;
+}>();
 
 // region Validation Rules
 
@@ -127,11 +132,6 @@ const getPasswordRules = computed(() => [
 	(v: string): boolean | string => (v && v.length >= 8) || 'Password must be at least 8 characters',
 ]);
 
-const emit = defineEmits<{
-	(event: 'input', value: { prop: string; value: string | boolean }): void;
-	(event: 'is-valid', valid: boolean): void;
-}>();
-
 // endregion
 
 function inputChanged({ prop, value }: { prop: string; value: string | boolean }): void {
@@ -139,8 +139,6 @@ function inputChanged({ prop, value }: { prop: string; value: string | boolean }
 }
 
 function onReset(): void {
-	set(isValidated, '');
-	set(valid, true);
 	set(showPassword, false);
 	get(accountForm)?.resetValidation();
 }

@@ -1,7 +1,7 @@
-import { randEmail, randFullName, randPassword } from '@ngneat/falso';
 import { route, apiRoute } from '@fixtures/baseE2E';
 import { PLEX_ACCOUNT_RELATIVE_PATH } from '@api-urls';
-import { generateResultDTO } from '@mock';
+import { generatePlexAccount, generateResultDTO } from '@mock';
+import { PlexAccountDTO } from '@dto/mainApi';
 
 describe('Add Plex account to PlexRipper', () => {
 	beforeEach(() => {
@@ -14,14 +14,12 @@ describe('Add Plex account to PlexRipper', () => {
 	});
 
 	it('Should create an Account when input is valid and close on save', () => {
-		const account = {
-			id: 100,
-			isEnabled: true,
-			isMain: true,
-			displayName: randFullName(),
-			username: randEmail(),
-			password: randPassword(),
-		};
+		const account: PlexAccountDTO = generatePlexAccount({
+			id: 99,
+			partialData: {
+				isValidated: false,
+			},
+		});
 
 		cy.getCy('account-overview-add-account').click();
 
@@ -33,7 +31,7 @@ describe('Add Plex account to PlexRipper', () => {
 		// Validate Action
 		cy.intercept('POST', apiRoute(PLEX_ACCOUNT_RELATIVE_PATH, '/validate'), {
 			statusCode: 200,
-			body: generateResultDTO(account),
+			body: generateResultDTO({ ...account, isValidated: true, is2Fa: false }),
 		});
 		cy.getCy('account-dialog-validate-button').click();
 
@@ -50,6 +48,45 @@ describe('Add Plex account to PlexRipper', () => {
 		});
 		cy.getCy('account-dialog-save-button').click();
 
+		cy.getCy('account-dialog-form').should('not.exist');
+	});
+
+	it('Should request a verification code when 2Fa is enabled for an Plex account', function () {
+		const account: PlexAccountDTO = generatePlexAccount({ id: 99 });
+
+		cy.getCy('account-overview-add-account').click();
+
+		// Fill in credentials
+		cy.getCy('account-form-display-name-input').type(account.displayName);
+		cy.getCy('account-form-username-input').type(account.username);
+		cy.getCy('account-form-password-input').type(account.password);
+
+		// Validate Action
+		cy.intercept('POST', apiRoute(PLEX_ACCOUNT_RELATIVE_PATH, '/validate'), {
+			statusCode: 200,
+			body: generateResultDTO({
+				...account,
+				isValidated: true,
+				is2Fa: true,
+			}),
+		});
+		cy.getCy('account-dialog-validate-button').click();
+		cy.getCy('2fa-code-verification-dialog').should('exist');
+		// Insert verification code
+		cy.get(':nth-child(1) > [data-test="single-input"]').type('123456');
+
+		// Create Action
+		cy.intercept('POST', apiRoute(PLEX_ACCOUNT_RELATIVE_PATH), {
+			statusCode: 200,
+			body: generateResultDTO(account),
+		});
+
+		cy.intercept('GET', apiRoute(PLEX_ACCOUNT_RELATIVE_PATH, '/' + account.id), {
+			statusCode: 200,
+			body: generateResultDTO(account),
+		});
+
+		cy.getCy('account-dialog-save-button').click();
 		cy.getCy('account-dialog-form').should('not.exist');
 	});
 });

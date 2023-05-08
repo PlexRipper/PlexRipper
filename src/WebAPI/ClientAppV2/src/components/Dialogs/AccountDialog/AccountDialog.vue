@@ -5,31 +5,31 @@
 			{{ getDisplayName }}
 		</template>
 		<template #default>
-			<AccountForm ref="accountForm" :value="changedPlexAccount" @input="formChanged" @is-valid="isValid = $event" />
+			<AccountForm ref="accountForm" :value="changedPlexAccount" @input="formChanged" @is-valid="isInputValid" />
 		</template>
 		<!-- Dialog Actions	-->
 		<template #actions="{ close }">
 			<q-row justify="between" gutter="md">
 				<!-- Delete account -->
 				<q-col v-if="!isNewAccount">
-					<DeleteButton class="mx-2" block :width="130" @click="openConfirmationDialog" />
+					<DeleteButton class="mx-2" block @click="openConfirmationDialog" />
 				</q-col>
 				<!-- Cancel button -->
 				<q-col>
-					<CancelButton :width="130" class="mx-2" block cy="account-dialog-cancel-button" @click="close" />
+					<CancelButton class="mx-2" block cy="account-dialog-cancel-button" @click="close" />
 				</q-col>
 				<!-- Reset Form -->
 				<q-col>
-					<ResetButton :width="130" class="mx-2" block cy="account-dialog-reset-button" @click="reset" />
+					<ResetButton class="mx-2" block cy="account-dialog-reset-button" @click="reset" />
 				</q-col>
 				<!-- Validation button -->
 				<q-col>
 					<AccountValidationButton
-						:color="validationColor"
-						:disabled="!isValid || validateLoading"
-						:icon="validationIcon"
+						:color="validationStyle.color"
+						:disabled="validateLoading"
+						:icon="validationStyle.icon"
+						:text-id="validationStyle.text"
 						:loading="validateLoading"
-						:width="130"
 						block
 						cy="account-dialog-validate-button"
 						class="q-mx-md"
@@ -41,8 +41,8 @@
 						:disabled="!isAllowedToSave"
 						:text-id="isNewAccount ? 'save' : 'update'"
 						:cy="`account-dialog-${isNewAccount ? 'save' : 'update'}-button`"
-						:width="130"
 						block
+						:loading="savingLoading"
 						class="q-mx-md"
 						@click="saveAccount(close)" />
 				</q-col>
@@ -52,10 +52,10 @@
 
 	<!--	Account Verification Code Dialog	-->
 	<AccountVerificationCodeDialog
-		:dialog="verificationCodeDialogState"
-		:errors="validateErrors"
+		:name="verificationCodeDialogName"
+		:account="changedPlexAccount"
 		@close="closeVerificationDialog"
-		@submit="validateAfterVerificationCode" />
+		@confirm="validateAfterVerificationCode" />
 	<!--	Delete Confirmation Dialog	-->
 	<confirmation-dialog
 		:confirm-loading="true"
@@ -72,21 +72,28 @@ import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import { cloneDeep } from 'lodash-es';
 import { merge } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { IError, PlexAccountDTO } from '@dto/mainApi';
 import { validateAccount } from '@api/accountApi';
 import { AccountService, LibraryService, ServerService } from '@service';
-import { useI18n, useOpenControlDialog } from '#imports';
+import { useI18n, useOpenControlDialog, useCloseControlDialog } from '#imports';
 import type { AccountForm } from '#components';
 
 const { t } = useI18n();
 
+interface IPlexAccount extends PlexAccountDTO {
+	isInputValid: boolean;
+	hasValidationErrors: boolean;
+	validationErrors: IError[];
+}
+
 defineProps<{ name: string }>();
 
-const confirmationDialogName = 'confirmationAccountDialogName';
 const isNewAccount = ref(false);
 
 const accountForm = ref<InstanceType<typeof AccountForm> | null>(null);
-
+const confirmationDialogName = 'confirmationAccountDialogName';
+const verificationCodeDialogName = 'verificationCodeDialogName';
 /**
  * The plexAccount as it is currently saved
  */
@@ -95,18 +102,12 @@ const originalPlexAccount = ref<PlexAccountDTO | null>(null);
 /**
  * The plexAccount as it is currently changed in this dialog
  */
-const changedPlexAccount = ref<PlexAccountDTO>(getDefaultAccount());
+const changedPlexAccount = ref<IPlexAccount>(getDefaultAccount());
 
 const validateLoading = ref(false);
-const isValidated = ref('');
-const isValid = ref(true);
+const savingLoading = ref(false);
 
-const saving = ref(false);
-const validateErrors = ref<IError[]>([]);
-const verificationCodeDialogState = ref(false);
-const inputHasChanged = ref(false);
-
-function getDefaultAccount(): PlexAccountDTO {
+function getDefaultAccount(): IPlexAccount {
 	return {
 		id: 0,
 		isEnabled: true,
@@ -122,120 +123,126 @@ function getDefaultAccount(): PlexAccountDTO {
 		is2Fa: false,
 		title: '',
 		plexId: 0,
-		isValidated: false,
 		authenticationToken: '',
 		email: '',
 		plexServerAccess: [],
+		// Dialog properties
+
+		isValidated: false,
+		hasValidationErrors: false,
+		isInputValid: false,
+		validationErrors: [],
 	};
 }
 
 const isAllowedToSave = computed(() => {
-	return !saving.value && isValidated.value === 'OK' && isValid.value;
+	return !savingLoading.value && get(changedPlexAccount).isValidated;
 });
 
 const hasCredentialsChanged = computed(() => {
 	if (!isNewAccount.value) {
 		return (
-			originalPlexAccount.value?.username !== changedPlexAccount.value.username ||
-			originalPlexAccount.value?.password !== changedPlexAccount.value.password
+			originalPlexAccount.value?.username !== get(changedPlexAccount).username ||
+			originalPlexAccount.value?.password !== get(changedPlexAccount).password
 		);
 	}
 	return false;
 });
 
-const validationIcon = computed(() => {
-	if (isValidated.value === 'OK') {
-		return 'mdi-check-bold';
-	} else if (isValidated.value === 'ERROR') {
-		return 'mdi-alert-circle-outline';
-	} else {
-		return 'mdi-text-box-search-outline';
+const validationStyle = computed((): { color: 'default' | 'positive' | 'warning' | 'negative'; icon: string; text: string } => {
+	if (get(changedPlexAccount).hasValidationErrors) {
+		return {
+			color: 'negative',
+			icon: 'mdi-alert-circle-outline',
+			text: 'validate',
+		};
 	}
-});
-
-const validationColor = computed(() => {
-	switch (isValidated.value) {
-		case 'OK':
-			return 'positive';
-		case 'ERROR':
-			return 'negative';
-		default:
-			return 'default';
+	if (get(changedPlexAccount).isValidated && !get(changedPlexAccount).hasValidationErrors) {
+		return {
+			color: 'positive',
+			icon: 'mdi-check-bold',
+			text: '',
+		};
 	}
+	return {
+		color: 'default',
+		icon: 'mdi-text-box-search-outline',
+		text: 'validate',
+	};
 });
 
 const getDisplayName = computed(() => {
 	const title = t(`components.account-dialog.${isNewAccount.value ? 'add-account-title' : 'edit-account-title'}`).toString();
-	return changedPlexAccount.value?.displayName !== '' ? `${title}: ${changedPlexAccount.value?.displayName}` : title;
+	return get(changedPlexAccount)?.displayName !== '' ? `${title}: ${get(changedPlexAccount)?.displayName}` : title;
 });
 
-const formChanged = ({ prop, value }: { prop: string; value: string | boolean }) => {
-	set(inputHasChanged, true);
-	changedPlexAccount.value[prop] = value;
-};
+function isInputValid(value: boolean) {
+	get(changedPlexAccount).isInputValid = value;
+}
+
+function formChanged({ prop, value }: { prop: string; value: string | boolean }) {
+	get(changedPlexAccount)[prop] = value;
+}
 
 function openConfirmationDialog() {
 	useOpenControlDialog(confirmationDialogName);
 }
 
-const validate = () => {
+function validate() {
 	set(validateLoading, true);
 
 	useSubscription(
-		validateAccount(changedPlexAccount.value).subscribe((data) => {
-			// Account has no 2FA and was valid
-			if (data.isSuccess && data.value) {
-				set(changedPlexAccount, data.value);
+		validateAccount(get(changedPlexAccount))
+			.pipe(take(1))
+			.subscribe({
+				next: (data) => {
+					const account = data.isSuccess ? data?.value : null;
+					// Account has no 2FA and was valid
+					if (account?.isValidated && !account?.is2Fa) {
+						Log.info('Account has no 2FA and was valid');
+						set(changedPlexAccount, { ...get(changedPlexAccount), ...account });
 
-				set(isValidated, 'OK');
-				set(isValid, true);
-				set(validateErrors, []);
-			} else if (data.isSuccess && !data.value) {
-				// Account has no 2FA and was invalid
-				set(isValidated, 'ERROR');
-				set(isValid, false);
-				set(validateErrors, []);
-			} else if (!data.isSuccess && data.value) {
-				// Account has 2FA
-				set(isValidated, 'ERROR');
-				set(isValid, false);
-				set(validateErrors, data.errors ?? []);
-				set(verificationCodeDialogState, true);
-			} else {
-				// Account has 2FA and was invalid
-				set(isValidated, 'ERROR');
-				set(isValid, false);
-				set(validateErrors, []);
-			}
-			set(validateLoading, false);
-		}),
+						return;
+					}
+
+					// Account has no 2FA and was invalid
+					if (!account?.isValidated && !account?.is2Fa) {
+						Log.info('Account has no 2FA and was invalid');
+						set(changedPlexAccount, { ...get(changedPlexAccount), ...account });
+						return;
+					}
+
+					// Account has 2FA
+					if (account?.isValidated && account?.is2Fa) {
+						Log.info('Account has 2FA enabled');
+						set(changedPlexAccount, { ...get(changedPlexAccount), ...account });
+						useOpenControlDialog(verificationCodeDialogName);
+						return;
+					}
+
+					if (!account?.isValidated && account?.is2Fa) {
+						// Account has 2FA and was invalid
+						Log.info('Account has 2FA and was invalid');
+						set(changedPlexAccount, { ...get(changedPlexAccount), ...account });
+					}
+				},
+				complete: () => {
+					set(validateLoading, false);
+				},
+			}),
 	);
-};
+}
 
 function closeVerificationDialog() {
-	set(verificationCodeDialogState, false);
+	useCloseControlDialog(verificationCodeDialogName);
 	set(validateLoading, false);
 }
 
-const validateAfterVerificationCode = (verificationCode: string) => {
-	changedPlexAccount.value.verificationCode = verificationCode;
-	useSubscription(
-		validateAccount(changedPlexAccount.value).subscribe((data) => {
-			if (data && data.isSuccess && data.value) {
-				// Take over the authToken
-				set(changedPlexAccount, data.value);
-
-				set(validateLoading, false);
-				set(verificationCodeDialogState, false);
-				set(isValidated, 'OK');
-			} else {
-				set(validateErrors, data.errors ?? []);
-				set(isValidated, 'ERROR');
-				Log.error('Validate Error', data);
-			}
-		}),
-	);
-};
+function validateAfterVerificationCode(account: PlexAccountDTO) {
+	if (account) {
+		set(changedPlexAccount, { ...get(changedPlexAccount), ...account });
+	}
+}
 
 // region Button Commands
 
@@ -245,33 +252,39 @@ const reset = () => {
 };
 
 function saveAccount(close: any) {
-	set(saving, true);
+	set(savingLoading, true);
 
 	if (get(isNewAccount)) {
 		useSubscription(
-			AccountService.createPlexAccount(changedPlexAccount.value).subscribe((account) => {
+			AccountService.createPlexAccount(get(changedPlexAccount)).subscribe((account) => {
 				if (account) {
-					set(changedPlexAccount, account);
+					set(changedPlexAccount, {
+						...get(changedPlexAccount),
+						...account,
+					});
 					close();
 				} else {
 					Log.error('Result was invalid when saving a created account', account);
-					set(saving, false);
+					set(savingLoading, false);
 				}
 			}),
 		);
 		return;
 	}
 	useSubscription(
-		AccountService.updatePlexAccount(changedPlexAccount.value, hasCredentialsChanged.value).subscribe((data) => {
-			if (data) {
-				set(changedPlexAccount, data);
+		AccountService.updatePlexAccount(get(changedPlexAccount), get(hasCredentialsChanged)).subscribe((account) => {
+			if (account) {
+				set(changedPlexAccount, {
+					...get(changedPlexAccount),
+					...account,
+				});
 				if (!hasCredentialsChanged.value) {
 					close();
 					refreshAccounts();
 				}
 			} else {
-				Log.error('Result was invalid when saving an updated account', data);
-				set(saving, false);
+				Log.error('Result was invalid when saving an updated account', account);
+				set(savingLoading, false);
 			}
 		}),
 	);
@@ -288,16 +301,13 @@ function openDialog({ isNewAccountValue, account = null }: { isNewAccountValue: 
 	set(isNewAccount, isNewAccountValue);
 	// Setup values
 	if (account) {
-		set(changedPlexAccount, cloneDeep(account));
-		set(isValidated, get(changedPlexAccount).isValidated ? 'OK' : 'ERROR');
+		set(changedPlexAccount, { ...get(changedPlexAccount), ...cloneDeep(account) });
 	}
 }
 
 function closeDialog() {
-	set(saving, false);
-	set(verificationCodeDialogState, false);
-	set(inputHasChanged, false);
-	set(isValidated, '');
+	set(savingLoading, false);
+	closeVerificationDialog();
 	reset();
 }
 

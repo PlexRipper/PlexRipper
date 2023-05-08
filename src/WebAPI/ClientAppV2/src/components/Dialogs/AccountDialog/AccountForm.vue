@@ -4,7 +4,7 @@
 		v-model="valid"
 		@reset="onReset"
 		@validation-success="$emit('is-valid', true)"
-		@validation-error="$emit('is-valid', true)">
+		@validation-error="$emit('is-valid', false)">
 		<!-- Is account enabled -->
 		<q-row no-gutters align="center">
 			<q-col :cols="labelCol">
@@ -98,6 +98,7 @@
 
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, computed } from 'vue';
+import { get, set } from '@vueuse/core';
 import { PlexAccountDTO } from '@dto/mainApi';
 import { QForm } from '#components';
 
@@ -107,7 +108,7 @@ const isValidated = ref('');
 const showPassword = ref(false);
 
 defineProps<{
-	value?: PlexAccountDTO | null;
+	value: PlexAccountDTO;
 }>();
 
 const accountForm = ref<InstanceType<typeof QForm> | null>(null);
@@ -137,12 +138,12 @@ function inputChanged({ prop, value }: { prop: string; value: string | boolean }
 	emit('input', { prop, value });
 }
 
-const onReset = (): void => {
-	isValidated.value = '';
-	valid.value = true;
-	showPassword.value = false;
-	accountForm.value?.resetValidation();
-};
+function onReset(): void {
+	set(isValidated, '');
+	set(valid, true);
+	set(showPassword, false);
+	get(accountForm)?.resetValidation();
+}
 
 defineExpose({
 	onReset,

@@ -9,10 +9,7 @@ export default defineComponent({
 	props: baseBtnPropsDefault(),
 	render() {
 		return h(BaseButton, {
-			...mergeProps(this.$props, {
-				icon: 'mdi-text-box-search-outline',
-				textId: 'validate',
-			} as IBaseButtonProps),
+			...mergeProps(this.$props, {} as IBaseButtonProps),
 		});
 	},
 });

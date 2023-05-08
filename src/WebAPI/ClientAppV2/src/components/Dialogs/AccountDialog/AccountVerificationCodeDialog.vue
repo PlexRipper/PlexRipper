@@ -1,100 +1,128 @@
 <template>
-	<q-dialog :model-value="dialog" persistent>
-		<q-card :max-width="500">
-			<q-card-section>
-				<h3>{{ $t('components.account-verification-code-dialog.title') }}</h3>
-				<q-sub-header>{{ $t('components.account-verification-code-dialog.sub-title') }}</q-sub-header>
-			</q-card-section>
-			<q-card-section>
-				<!--	Verification Code input	-->
-				<q-row justify="center">
-					<q-col cols="auto">
-						<!--						<QVerificationCodeInput-->
-						<!--							:loading="false"-->
-						<!--							@change="onChange"-->
-						<!--							@complete="onComplete"-->
-						<!--							@keyup.enter="onEnter" />-->
-					</q-col>
-				</q-row>
-				<q-row v-if="errors.length > 0" justify="center">
-					<q-col cols="auto">
-						<span style="color: red; font-weight: bold">{{
-							$t('components.account-verification-code-dialog.error')
-						}}</span>
-					</q-col>
-				</q-row>
-			</q-card-section>
-			<q-card-actions>
-				<!--	Submit button	-->
-				<q-row justify="center">
-					<q-col cols="auto">
-						<CancelButton @click="closeDialog" />
-					</q-col>
-					<q-space />
-					<q-col cols="auto">
-						<ConfirmButton :disabled="code.length < 6" @click="submitCode" />
-					</q-col>
-				</q-row>
-			</q-card-actions>
-		</q-card>
-	</q-dialog>
+	<q-card-dialog :name="name" persistent max-width="700px" cy="2fa-code-verification-dialog">
+		<template #title>
+			{{ $t('components.account-verification-code-dialog.title') }}
+		</template>
+		<template #top-row>
+			<q-sub-header>{{ $t('components.account-verification-code-dialog.sub-title') }}</q-sub-header>
+		</template>
+		<template #default>
+			<!--	Verification Code input	-->
+			<q-row justify="center">
+				<q-col cols="auto">
+					<VOtpInput
+						v-model:value="codeValue"
+						input-classes="otp-input"
+						separator=""
+						:num-inputs="6"
+						:should-auto-focus="true"
+						input-type="number"
+						inputmode="numeric"
+						data-cy="2fa-code-verification-input"
+						:conditional-class="['one', 'two', 'three', 'four', 'five', 'six']"
+						@on-complete="onComplete" />
+				</q-col>
+			</q-row>
+			<q-row v-if="errors.length > 0" justify="center">
+				<q-col cols="auto">
+					<span style="color: red; font-weight: bold">{{
+						$t('components.account-verification-code-dialog.error')
+					}}</span>
+				</q-col>
+			</q-row>
+		</template>
+		<template #actions="{ close }">
+			<q-row justify="between">
+				<!-- Close	-->
+				<q-col cols="auto">
+					<CancelButton @click="close" />
+				</q-col>
+				<!--	Confirm	-->
+				<q-col cols="auto">
+					<ConfirmButton :loading="loading" :disabled="codeValue.length < 6" @click="onComplete" />
+				</q-col>
+			</q-row>
+		</template>
+	</q-card-dialog>
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
-import { withDefaults, defineProps } from 'vue';
-import type { IError } from '@dto/mainApi';
+import { ref, defineEmits, defineProps } from 'vue';
+import VOtpInput from 'vue3-otp-input';
+import { get, set } from '@vueuse/core';
+import { useSubscription } from '@vueuse/rxjs';
+import type { IError, PlexAccountDTO } from '@dto/mainApi';
+import { validateAccount } from '@api/accountApi';
+import { useCloseControlDialog } from '#imports';
 
-withDefaults(
-	defineProps<{
-		dialog: boolean;
-		errors: IError[];
-	}>(),
-	{
-		dialog: false,
-		errors: () => [],
-	},
-);
-
-const code = ref('0');
-
-const emit = defineEmits<{
-	(e: 'close'): void;
-	(e: 'submit', code: string): void;
+const props = defineProps<{
+	name: string;
+	account: PlexAccountDTO;
 }>();
 
-// @Watch('errors')
-// onChildChanged(val: string) {
-// 	// If an error appears, then clear the code
-// 	if (val.length > 0) {
-// 		this.code = '0';
-// 	}
-// }
+const codeValue = ref('0');
+const loading = ref(false);
+const errors = ref<IError[]>([]);
+const emit = defineEmits<{
+	(e: 'close'): void;
+	(e: 'confirm', account: PlexAccountDTO): void;
+}>();
 
-const onChange = (v: string) => {
-	code.value = v;
-};
+function onComplete() {
+	set(loading, true);
+	const accountWithCode: PlexAccountDTO = {
+		...props.account,
+		verificationCode: get(codeValue),
+	};
 
-const onComplete = (v: string) => {
-	Log.info('onComplete ', v);
-};
-
-const onEnter = () => {
-	Log.info('Enter pressed');
-};
-
-const closeDialog = () => {
-	emit('close');
-};
-
-const submitCode = () => {
-	emit('submit', code.value);
-};
+	useSubscription(
+		validateAccount(accountWithCode).subscribe({
+			next: (data) => {
+				if (data && data.isSuccess && data.value) {
+					emit('confirm', get(data.value));
+					useCloseControlDialog(props.name);
+				} else {
+					Log.error('Validate Error', data);
+				}
+			},
+			complete: () => {
+				set(loading, false);
+			},
+		}),
+	);
+}
 </script>
 
-<style>
-.react-code-input > input[data-v-e1087700]:focus {
-	border: 1px solid #f00 !important;
-	caret-color: #f00 !important;
+<style lang="scss">
+@import '@/assets/scss/mixins.scss';
+
+.otp-input {
+	@extend .default-border;
+	@extend .glass-background;
+	width: 80px;
+	height: 80px;
+	padding: 5px;
+	margin: 10px;
+	font-size: 40px;
+	border-radius: 4px;
+	text-align: center;
+	/* Background colour of an input field with value */
+	&.is-complete {
+		@extend .success-border;
+		background-color: #ff0000;
+	}
+}
+
+.otp-input::-webkit-inner-spin-button,
+.otp-input::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+input::placeholder {
+	font-size: 35px;
+	text-align: center;
+	font-weight: 600;
 }
 </style>

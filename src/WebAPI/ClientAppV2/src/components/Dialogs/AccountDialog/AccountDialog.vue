@@ -6,6 +6,7 @@
 		</template>
 		<template #default>
 			<AccountForm ref="accountForm" :value="changedPlexAccount" @input="formChanged" @is-valid="isInputValid" />
+			<Print>{{ changedPlexAccount }}</Print>
 		</template>
 		<!-- Dialog Actions	-->
 		<template #actions="{ close }">
@@ -130,7 +131,7 @@ function getDefaultAccount(): IPlexAccount {
 
 		isValidated: false,
 		hasValidationErrors: false,
-		isInputValid: false,
+		isInputValid: true,
 		validationErrors: [],
 	};
 }

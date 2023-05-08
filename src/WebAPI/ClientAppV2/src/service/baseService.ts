@@ -29,7 +29,8 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 	}
 
 	protected isInTestMode(): boolean {
-		return process.env.VITEST === 'true';
+		// eslint-disable-next-line no-prototype-builtins
+		return process?.env?.hasOwnProperty('VITEST') && process.env.VITEST === 'true';
 	}
 
 	protected setup(appConfig: IAppConfig | null = null): Observable<ISetupResult> {

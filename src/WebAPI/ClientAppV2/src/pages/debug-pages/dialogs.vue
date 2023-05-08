@@ -47,14 +47,12 @@ import { useOpenControlDialog } from '@composables/event-bus';
 import { DownloadConfirmation } from '#components';
 import { AlertService, HelpService, MediaService } from '@service';
 import { PlexMediaDTO } from '@dto/mainApi';
-import { generateDownloadTasks } from '@mock/mock-download-task';
 
 const serverDialogName = 'debugServerDialog';
 const downloadConfirmationName = 'debugDownloadConfirmation';
 
 const mediaItem = ref<PlexMediaDTO | null>();
 const mediaTableRows = ref<PlexMediaDTO[]>([]);
-const downloadRows = generateDownloadTasks(1, { tvShowDownloadTask: 10 });
 
 function openServerDialog(): void {
 	useOpenControlDialog(serverDialogName, 1);

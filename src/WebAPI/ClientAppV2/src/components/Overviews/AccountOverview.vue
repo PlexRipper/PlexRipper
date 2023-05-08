@@ -10,15 +10,14 @@
 		</q-col>
 	</q-row>
 	<!-- Account Dialog -->
-	<AccountDialog :name="accountDialogName" @dialog-closed="closeDialog" />
+	<AccountDialog :name="accountDialogName" />
 </template>
 
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
-import { merge } from 'rxjs';
 import { ref, onMounted } from 'vue';
 import { set } from '@vueuse/core';
-import { AccountService, LibraryService, ServerService } from '@service';
+import { AccountService } from '@service';
 import { PlexAccountDTO } from '@dto/mainApi';
 import { useOpenControlDialog } from '@composables/event-bus';
 
@@ -30,19 +29,6 @@ function openDialog(isNewAccount: boolean, account: PlexAccountDTO | null = null
 		isNewAccountValue: isNewAccount,
 		account,
 	});
-}
-
-function closeDialog(refreshAccounts = false): void {
-	if (!refreshAccounts) {
-		return;
-	}
-	useSubscription(
-		merge([
-			AccountService.refreshAccounts(),
-			ServerService.refreshPlexServers(),
-			LibraryService.refreshLibraries(),
-		]).subscribe(),
-	);
 }
 
 onMounted(() => {

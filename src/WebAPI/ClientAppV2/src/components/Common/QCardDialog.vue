@@ -4,6 +4,7 @@
 		:full-height="fullHeight"
 		:no-route-dismiss="noRouteDismiss"
 		:no-backdrop-dismiss="noBackdropDismiss"
+		:persistent="persistent"
 		@before-show="$emit('opened', dataValue)"
 		@before-hide="$emit('closed')">
 		<q-row column :data-cy="cy" class="q-card-dialog q-card-dialog-background" :style="styles">

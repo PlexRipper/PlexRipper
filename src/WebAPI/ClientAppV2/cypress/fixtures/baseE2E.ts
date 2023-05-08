@@ -1,4 +1,3 @@
-import Log from 'consola';
 import {
 	DOWNLOAD_RELATIVE_PATH,
 	FOLDER_PATH_RELATIVE_PATH,
@@ -19,7 +18,6 @@ import {
 	checkConfig,
 	generateServerDownloadTasks,
 } from '@mock';
-import { generateDownloadTasks } from '@factories/download-task-factory';
 import { generateSettingsModel } from '@factories/settings-factory';
 import { generatePlexAccounts } from '@factories/plex-account-factory';
 import { PlexAccountDTO, PlexLibraryDTO, PlexServerConnectionDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
@@ -107,7 +105,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 	});
 
 	// Settings call
-	const settings = generateSettingsModel(plexServers, config);
+	const settings = generateSettingsModel({ plexServers, config });
 	cy.intercept('GET', apiRoute(SETTINGS_RELATIVE_PATH), {
 		statusCode: 200,
 		body: generateResultDTO(settings),

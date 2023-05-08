@@ -3,7 +3,6 @@ import { Observable, Observer, of, switchMap, throwError } from 'rxjs';
 import Log from 'consola';
 import BaseService from './baseService';
 import IStoreState from '@interfaces/service/IStoreState';
-import LibraryService from '@service/libraryService';
 
 import { PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import { getLibraryMediaData, getThumbnail, getTvShow } from '@api/mediaApi';

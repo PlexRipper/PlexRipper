@@ -1,4 +1,3 @@
-import Log from 'consola';
 import { route } from '@fixtures/baseE2E';
 import { JobStatus, JobTypes, MessageTypes, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 import { generateJobStatusUpdate } from '@factories';

@@ -1,5 +1,5 @@
 import { Context } from 'vm';
-import Log, { LogLevel } from 'consola';
+import Log from 'consola';
 import MockAdapter from 'axios-mock-adapter';
 import Axios from 'axios-observable';
 import { MockConfig } from '@mock';

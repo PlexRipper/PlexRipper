@@ -44,7 +44,7 @@
 			<!--	Directory Browser	-->
 			<q-markup-table>
 				<tbody class="scroll">
-					<tr v-for="row in items" @click="directoryNavigate(row)">
+					<tr v-for="(row, index) in items" :key="index" @click="directoryNavigate(row)">
 						<td class="text-left" style="width: 100px">
 							<q-icon size="md" :name="getIcon(row.type)" />
 						</td>

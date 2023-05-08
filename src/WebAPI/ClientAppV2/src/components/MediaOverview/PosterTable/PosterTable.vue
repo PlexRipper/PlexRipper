@@ -14,12 +14,10 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { defineProps, defineEmits, ref } from 'vue';
-import { useSubscription } from '@vueuse/rxjs';
 import { DownloadMediaDTO, PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import { QScrollArea } from '#components';
-import { MediaService } from '@service';
 
-const props = defineProps<{
+defineProps<{
 	mediaType: PlexMediaType;
 	libraryId: number;
 	items: PlexMediaSlimDTO[];

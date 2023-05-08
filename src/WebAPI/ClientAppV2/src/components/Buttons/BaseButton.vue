@@ -13,7 +13,6 @@ export default defineComponent({
 		const QTooltip = resolveComponent('QTooltip');
 		const props = this.$props;
 		const emit = this.$emit;
-		const slots = this.$slots;
 		const style = {
 			flat: props.flat,
 			round: props.round,

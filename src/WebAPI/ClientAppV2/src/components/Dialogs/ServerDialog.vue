@@ -99,7 +99,6 @@ import { defineProps } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { switchMap, take, tap } from 'rxjs/operators';
 import { set } from '@vueuse/core';
-import Log from 'consola';
 import { ref, computed, useCloseControlDialog } from '#imports';
 import type { PlexLibraryDTO, PlexServerDTO, PlexServerSettingsModel } from '@dto/mainApi';
 import { LibraryService, ServerService, SettingsService } from '@service';

@@ -1,6 +1,6 @@
 <template>
 	<template v-if="plexServers.length > 0">
-		<q-expansion-item v-for="(server, index) in plexServers" :label="server.name" expand-icon="mdi-chevron-down">
+		<q-expansion-item v-for="(server, index) in plexServers" :key="index" :label="server.name" expand-icon="mdi-chevron-down">
 			<!-- Server header	-->
 			<template #header>
 				<q-item-section avatar>
@@ -58,9 +58,9 @@
 import { ref, onMounted } from 'vue';
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
-import { LibraryService, ServerService, ServerConnectionService } from '@service';
-import { PlexLibraryDTO, PlexMediaType, PlexServerConnectionDTO, PlexServerDTO, SyncServerProgress } from '@dto/mainApi';
 import type ServerDialog from '@components/Navigation/ServerDialog.vue';
+import { LibraryService, ServerService, ServerConnectionService } from '@service';
+import { PlexLibraryDTO, PlexMediaType, PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
 import { useOpenControlDialog } from '#imports';
 
 const router = useRouter();

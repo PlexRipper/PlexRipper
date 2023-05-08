@@ -5,11 +5,10 @@ import { FOLDER_PATH_RELATIVE_PATH } from '@api-urls';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 describe('FolderPathService.setup()', () => {
-	let { ctx, mock } = baseVars();
+	let { mock } = baseVars();
 
 	beforeAll(() => {
-		const result = baseSetup();
-		ctx = result.ctx;
+		baseSetup();
 	});
 
 	beforeEach(() => {
@@ -30,7 +29,7 @@ describe('FolderPathService.setup()', () => {
 		await result.onComplete();
 
 		// Assert
-		expect(result.getFirstValue()).toEqual(setupResult);
-		expect(result.receivedComplete()).toEqual(true);
+		expect(result.getFirstValue()).to.equal(setupResult);
+		expect(result.receivedComplete()).to.equal(true);
 	});
 });

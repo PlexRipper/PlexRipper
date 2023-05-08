@@ -49,7 +49,7 @@ const props = withDefaults(defineProps<QColProps>(), {
 	md: false,
 	lg: false,
 	xl: false,
-
+	textAlign: 'left',
 	offsetXs: false,
 	offsetSm: false,
 	offsetMd: false,

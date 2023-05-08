@@ -1,17 +1,17 @@
 // @vitest-environment node
 // We need node due to the use of Object.createURL()
 
+import { expect } from 'vitest';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
 import MediaService from '@service/mediaService';
 import { PlexMediaType } from '@dto/mainApi';
 import { PLEX_MEDIA_RELATIVE_PATH } from '@api-urls';
 
 describe('MediaService.getThumbnail()', () => {
-	let { ctx, mock } = baseVars();
+	let { mock } = baseVars();
 
 	beforeAll(() => {
-		const result = baseSetup();
-		ctx = result.ctx;
+		baseSetup();
 	});
 
 	beforeEach(() => {
@@ -32,7 +32,7 @@ describe('MediaService.getThumbnail()', () => {
 		await getThumbnailResult.onComplete();
 
 		// Assert
-		expect(getThumbnailResult.receivedComplete()).toEqual(true);
-		expect(getThumbnailResult.getFirstValue()).not.toBeFalsy();
+		expect(getThumbnailResult.receivedComplete()).to.equal(true);
+		expect(getThumbnailResult.getFirstValue()).toBeTruthy();
 	});
 });

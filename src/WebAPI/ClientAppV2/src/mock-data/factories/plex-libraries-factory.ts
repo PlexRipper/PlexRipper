@@ -16,6 +16,7 @@ export function generatePlexLibrary({
 	partialData?: Partial<PlexLibraryDTO>;
 	config?: Partial<MockConfig>;
 }): PlexLibraryDTO {
+	checkConfig(config);
 	incrementSeed(id);
 	const libraryType = randPlexMediaType();
 	return {

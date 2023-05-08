@@ -2,7 +2,6 @@ import { Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, take, tap } from 'rxjs/operators';
 
 import { isEqual } from 'lodash-es';
-import Log from 'consola';
 import BaseService from './baseService';
 import {
 	ConfirmationSettingsDTO,

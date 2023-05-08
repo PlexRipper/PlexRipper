@@ -170,7 +170,6 @@ const props = defineProps<{
 	mediaType: PlexMediaType;
 }>();
 
-const getPercentage = computed(() => libraryProgress.value?.percentage ?? -1);
 const getHeightStyle = computed(() => {
 	const height = mediaContainerSize.height.value;
 	return {

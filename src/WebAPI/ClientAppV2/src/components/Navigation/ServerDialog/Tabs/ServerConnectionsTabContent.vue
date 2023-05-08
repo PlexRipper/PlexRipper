@@ -3,8 +3,8 @@
 		<h4>{{ $t('components.server-dialog.tabs.server-connections.section-header') }}</h4>
 	</div>
 	<q-list>
-		<template v-for="(connection, index) in serverConnections">
-			<q-item v-ripple>
+		<template v-for="(connection, index) in serverConnections" :key="index">
+			<q-item>
 				<!-- Radio Button -->
 				<q-item-section avatar tag="label">
 					<q-radio

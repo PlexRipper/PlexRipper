@@ -3,13 +3,20 @@
 /*
 Background
 */
-.glass-background-light {
-	background: $light-background-color;
+body {
+	&.body--dark {
+		.glass-background {
+			background: $dark-theme-glass-background;
+		}
+	}
+
+	&.body--light {
+		.glass-background {
+			background: $light-background-color;
+		}
+	}
 }
 
-.glass-background-dark {
-	background: $dark-theme-glass-background;
-}
 
 .blur {
 	backdrop-filter: blur(30px);
@@ -46,6 +53,10 @@ Borders
 	border: 2px solid red;
 }
 
+.success-border {
+	border: 2px solid limegreen;
+}
+
 .default-border-radius {
 	border-radius: 15px;
 }
@@ -57,7 +68,7 @@ Borders
 
 
 /*
-Seizing
+Sizing
 */
 
 .inherit-all-height {

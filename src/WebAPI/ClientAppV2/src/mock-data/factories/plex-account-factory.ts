@@ -16,8 +16,8 @@ let plexAccountIdIndex = 1;
 
 export function generatePlexAccount({
 	id,
-	plexServers,
-	plexLibraries,
+	plexServers = [],
+	plexLibraries = [],
 	partialData = {},
 	config = {},
 }: {
@@ -25,7 +25,7 @@ export function generatePlexAccount({
 	plexServers: PlexServerDTO[];
 	plexLibraries: PlexLibraryDTO[];
 	partialData?: Partial<PlexAccountDTO>;
-	config: Partial<MockConfig>;
+	config?: Partial<MockConfig>;
 }): PlexAccountDTO {
 	const validConfig = checkConfig(config);
 
@@ -58,14 +58,14 @@ export function generatePlexAccount({
 }
 
 export function generatePlexAccounts({
-	plexServers,
-	plexLibraries,
+	plexServers = [],
+	plexLibraries = [],
 	config = {},
 	partialData = {},
 }: {
 	plexServers: PlexServerDTO[];
 	plexLibraries: PlexLibraryDTO[];
-	config: Partial<MockConfig>;
+	config?: Partial<MockConfig>;
 	partialData?: Partial<PlexAccountDTO>;
 }): PlexAccountDTO[] {
 	const validConfig = checkConfig(config);

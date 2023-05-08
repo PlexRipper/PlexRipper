@@ -33,9 +33,18 @@
 							@click="openCheckServerConnectionsDialog" />
 					</q-td>
 				</q-tr>
+				<q-tr>
+					<q-td>
+						<DebugButton
+							data-cy="open-verification-dialog-button"
+							:label="$t('pages.debug.dialogs.buttons.verification-dialog')"
+							@click="openVerificationDialog" />
+					</q-td>
+				</q-tr>
 			</q-markup-table>
 			<ServerDialog :name="serverDialogName" />
 			<DownloadConfirmation :name="downloadConfirmationName" />
+			<AccountVerificationCodeDialog :name="verificationCodeDialogName" :account="account" />
 		</q-section>
 	</q-page>
 </template>
@@ -46,13 +55,23 @@ import { useSubscription } from '@vueuse/rxjs';
 import { useOpenControlDialog } from '@composables/event-bus';
 import { DownloadConfirmation } from '#components';
 import { AlertService, HelpService, MediaService } from '@service';
-import { PlexMediaDTO } from '@dto/mainApi';
+import { PlexAccountDTO, PlexMediaDTO } from '@dto/mainApi';
+import { generatePlexAccount } from '@factories';
 
 const serverDialogName = 'debugServerDialog';
 const downloadConfirmationName = 'debugDownloadConfirmation';
+const checkServerConnectionDialogName = 'checkServerConnectionDialogName';
+const verificationCodeDialogName = 'verificationCodeDialogName';
 
 const mediaItem = ref<PlexMediaDTO | null>();
 const mediaTableRows = ref<PlexMediaDTO[]>([]);
+const account = ref<PlexAccountDTO>(
+	generatePlexAccount({
+		id: 1,
+		plexLibraries: [],
+		plexServers: [],
+	}),
+);
 
 function openServerDialog(): void {
 	useOpenControlDialog(serverDialogName, 1);
@@ -75,7 +94,11 @@ function openHelpDialog(): void {
 }
 
 function openCheckServerConnectionsDialog(): void {
-	useOpenControlDialog('checkServerConnectionDialogName');
+	useOpenControlDialog(checkServerConnectionDialogName);
+}
+
+function openVerificationDialog(): void {
+	useOpenControlDialog(verificationCodeDialogName);
 }
 
 function addAlert(): void {
@@ -84,6 +107,7 @@ function addAlert(): void {
 }
 
 onMounted(() => {
+	openVerificationDialog();
 	useSubscription(
 		MediaService.getTvShowMediaData(32).subscribe((data) => {
 			if (data) {

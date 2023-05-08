@@ -1,5 +1,5 @@
 <template>
-	<QCardDialog persistent :name="name" button-align="between" @opened="onOpen">
+	<QCardDialog persistent :name="name" max-width="800px" button-align="between" @opened="onOpen">
 		<template #title>
 			{{ confirmationText.title }}
 		</template>

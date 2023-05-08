@@ -93,7 +93,7 @@ export const getDownloadTableColumns: QTreeViewTableHeader[] = [
 		label: 'Actions',
 		field: 'actions',
 		type: 'actions',
-		width: 160,
+		width: 200,
 		align: 'center',
 		sortable: false,
 	},

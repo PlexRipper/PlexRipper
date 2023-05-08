@@ -17,20 +17,21 @@
 <script setup lang="ts">
 import { defineProps, ref, computed, withDefaults, onMounted } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
-import { set } from '@vueuse/core';
-import { DownloadService } from '@service';
+import { get, set } from '@vueuse/core';
+import { DownloadService, SettingsService } from '@service';
 import { QExpansionListProps } from '@interfaces/components/QExpansionListProps';
 
 withDefaults(defineProps<{ showDrawer: boolean }>(), {
 	showDrawer: false,
 });
+const debugMode = ref(false);
 
 const items = ref<object[]>([]);
 
 const downloadTaskCount = ref(0);
 
 const getNavItems = computed((): QExpansionListProps[] => {
-	return [
+	const mainItems: QExpansionListProps[] = [
 		{
 			title: 'components.navigation-drawer.downloads',
 			icon: 'mdi-download',
@@ -65,7 +66,10 @@ const getNavItems = computed((): QExpansionListProps[] => {
 				},
 			],
 		},
-		{
+	];
+
+	if (get(debugMode)) {
+		mainItems.push({
 			title: 'components.navigation-drawer.debug',
 			icon: 'mdi-bug-outline',
 			children: [
@@ -80,8 +84,9 @@ const getNavItems = computed((): QExpansionListProps[] => {
 					link: '/debug-pages/buttons',
 				},
 			],
-		},
-	];
+		});
+	}
+	return mainItems;
 });
 
 onMounted(() => {
@@ -89,6 +94,12 @@ onMounted(() => {
 	useSubscription(
 		DownloadService.getTotalDownloadsCount().subscribe((count) => {
 			set(downloadTaskCount, count);
+		}),
+	);
+
+	useSubscription(
+		SettingsService.getDebugMode().subscribe((value) => {
+			set(debugMode, value);
 		}),
 	);
 });

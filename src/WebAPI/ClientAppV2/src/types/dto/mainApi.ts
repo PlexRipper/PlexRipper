@@ -151,15 +151,21 @@ export enum DownloadStatus {
 export interface DownloadTaskDTO {
 	/** @format int32 */
 	id: number;
+	/** The formatted media title as shown in Plex. */
 	title: string;
+	/** The full media title including the [TvShow]/[Season]/[Episode] as shown in Plex. */
 	fullTitle: string;
 	status: DownloadStatus;
+	/** The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv. */
 	fileLocationUrl: string;
 	downloadUrl: string;
 	fileName: string;
 	mediaType: PlexMediaType;
 	downloadTaskType: DownloadTaskType;
-	/** @format int32 */
+	/**
+	 * The identifier used by Plex to keep track of media.
+	 * @format int32
+	 */
 	key: number;
 	/** @format int32 */
 	downloadSpeed: number;
@@ -173,7 +179,10 @@ export interface DownloadTaskDTO {
 	percentage: number;
 	downloadDirectory: string;
 	destinationDirectory: string;
-	/** @format int32 */
+	/**
+	 * The download priority, the higher the more important.
+	 * @format int32
+	 */
 	priority: number;
 	/** @format int32 */
 	plexServerId: number;
@@ -184,7 +193,15 @@ export interface DownloadTaskDTO {
 	/** @format int64 */
 	timeRemaining: number;
 	quality: string;
+	/**
+	 * The nested PlexRipper.Domain.DownloadTask used for seasons and episodes.
+	 * "Required = Required.Default" is used for ensuring it's optional in the Typescript generating.
+	 */
 	children: DownloadTaskDTO[];
+	/**
+	 * The actions that can be taken on this PlexRipper.Domain.DownloadTask.
+	 * This is filled by the front-end and depends on the DownloadStatus
+	 */
 	actions: string[];
 }
 
@@ -315,6 +332,7 @@ export interface GeneralSettingsDTO {
 	firstTimeSetup: boolean;
 	/** @format int32 */
 	activeAccountId: number;
+	debugMode: boolean;
 }
 
 export interface IError {
@@ -861,7 +879,10 @@ export interface ServerConnectionCheckStatusProgressDTO {
 }
 
 export interface ServerDownloadProgressDTO {
-	/** @format int32 */
+	/**
+	 * Gets or sets the PlexRipper.Domain.PlexServer Id.
+	 * @format int32
+	 */
 	id: number;
 	/** @format int32 */
 	downloadableTasksCount: number;

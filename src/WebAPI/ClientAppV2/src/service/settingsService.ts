@@ -127,6 +127,13 @@ export class SettingsService extends BaseService {
 		);
 	}
 
+	public getDebugMode(): Observable<boolean> {
+		return this.stateChanged.pipe(
+			map((x) => x?.generalSettings.debugMode ?? null),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
 	public getActiveAccountId(): Observable<number> {
 		return this.stateChanged.pipe(
 			map((x) => x?.generalSettings.activeAccountId),

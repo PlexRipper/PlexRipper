@@ -113,17 +113,20 @@ public static partial class StartupExtensions
 
     public static void SetupOpenApiDocumentation(this IServiceCollection services)
     {
-        services.AddSwaggerGen(options =>
+        services.AddSwaggerGen(c =>
         {
-            options.SwaggerDoc("v1", new OpenApiInfo
+            c.SwaggerDoc("v1", new OpenApiInfo
             {
                 Version = "v1",
                 Title = "PlexRipper Swagger Internal API",
             });
-            options.SchemaGeneratorOptions.SupportNonNullableReferenceTypes = true;
-            options.SchemaFilter<RequiredMemberFilter>();
-            options.SchemaFilter<RequiredNotNullableSchemaFilter>();
-            options.AddSignalRSwaggerGen();
+            c.SchemaGeneratorOptions.SupportNonNullableReferenceTypes = true;
+            c.SchemaFilter<RequiredMemberFilter>();
+            c.SchemaFilter<RequiredNotNullableSchemaFilter>();
+            c.AddSignalRSwaggerGen();
+            // Enables the XML-documentation for the Swagger UI
+            c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,
+                $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
         });
     }
 }

@@ -61,13 +61,11 @@
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
 import { ref } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
+import { set } from '@vueuse/core';
 import { SettingsService } from '@service';
 import { ConfirmationSettingsDTO } from '@dto/mainApi';
-
-const value = ref(true);
 
 const askDownloadMovieConfirmation = ref(false);
 const askDownloadTvShowConfirmation = ref(false);
@@ -75,30 +73,28 @@ const askDownloadSeasonConfirmation = ref(false);
 const askDownloadEpisodeConfirmation = ref(false);
 
 const updateSettings = (key: keyof ConfirmationSettingsDTO, state: boolean): void => {
-	Log.info(`Updating settings with key ${key} and value ${state}`);
 	useSubscription(SettingsService.updateConfirmationSetting(key, state).subscribe());
 };
 
 onMounted(() => {
 	useSubscription(
 		SettingsService.getAskDownloadMovieConfirmation().subscribe((data) => {
-			Log.info(`getAskDownloadMovieConfirmation with value ${data}`);
-			askDownloadMovieConfirmation.value = data;
+			set(askDownloadMovieConfirmation, data);
 		}),
 	);
 	useSubscription(
 		SettingsService.getAskDownloadTvShowConfirmation().subscribe((data) => {
-			askDownloadTvShowConfirmation.value = data;
+			set(askDownloadTvShowConfirmation, data);
 		}),
 	);
 	useSubscription(
 		SettingsService.getAskDownloadSeasonConfirmation().subscribe((data) => {
-			askDownloadSeasonConfirmation.value = data;
+			set(askDownloadSeasonConfirmation, data);
 		}),
 	);
 	useSubscription(
 		SettingsService.getAskDownloadEpisodeConfirmation().subscribe((data) => {
-			askDownloadEpisodeConfirmation.value = data;
+			set(askDownloadEpisodeConfirmation, data);
 		}),
 	);
 });

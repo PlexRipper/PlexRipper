@@ -92,6 +92,7 @@ import { format } from 'date-fns';
 import { enUS, fr } from 'date-fns/locale';
 
 import { useSubscription } from '@vueuse/rxjs';
+import { get, set } from '@vueuse/core';
 import { SettingsService } from '@service';
 import { DateTimeSettingsDTO } from '@dto/mainApi';
 
@@ -170,27 +171,27 @@ const updateSettings = (key: keyof DateTimeSettingsDTO, state: any): void => {
 onMounted(() => {
 	useSubscription(
 		SettingsService.getShortDateFormat().subscribe((data) => {
-			shortDateFormat.value = shortDateOptions.value.find((x) => x.value === data) ?? shortDateOptions.value[0];
+			set(shortDateFormat, get(shortDateOptions).find((x) => x.value === data) ?? get(shortDateOptions)[0]);
 		}),
 	);
 	useSubscription(
 		SettingsService.getLongDateFormat().subscribe((data) => {
-			longDateFormat.value = longDateOptions.value.find((x) => x.value === data) ?? longDateOptions.value[0];
+			set(longDateFormat, get(longDateOptions).find((x) => x.value === data) ?? get(longDateOptions)[0]);
 		}),
 	);
 	useSubscription(
 		SettingsService.getTimeFormat().subscribe((data) => {
-			timeFormat.value = timeFormatOptions.value.find((x) => x.value === data) ?? timeFormatOptions.value[0];
+			set(timeFormat, get(timeFormatOptions).find((x) => x.value === data) ?? get(timeFormatOptions)[0]);
 		}),
 	);
 	useSubscription(
 		SettingsService.getTimeZone().subscribe((data) => {
-			timeZone.value = timeZoneOptions.value.find((x) => x.value === data) ?? timeZoneOptions.value[0];
+			set(timeZone, get(timeZoneOptions).find((x) => x.value === data) ?? get(timeZoneOptions)[0]);
 		}),
 	);
 	useSubscription(
 		SettingsService.getShowRelativeDates().subscribe((data) => {
-			showRelativeDates.value = data;
+			set(showRelativeDates, data);
 		}),
 	);
 });

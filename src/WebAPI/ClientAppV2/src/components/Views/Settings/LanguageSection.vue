@@ -51,7 +51,9 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { ref, onMounted } from 'vue';
+import { set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
+import { useI18n } from 'vue-i18n';
 import { SettingsService } from '@service';
 
 interface ILanguageOption {
@@ -74,13 +76,17 @@ const updateSettings = (languageOption: ILanguageOption): void => {
 };
 
 onMounted(() => {
-	languageOptions.value = i18n.locales.value.map((x) => {
-		return {
-			...x,
-			value: x.code,
-			img: `/img/flags/${x.code}.svg`,
-		};
-	}) as ILanguageOption[];
+	// @ts-ignore
+	set(
+		languageOptions,
+		i18n.locales.value.map((x) => {
+			return {
+				...x,
+				value: x.code,
+				img: `/img/flags/${x.code}.svg`,
+			};
+		}) as ILanguageOption[],
+	);
 
 	useSubscription(
 		SettingsService.getLanguage().subscribe((data) => {

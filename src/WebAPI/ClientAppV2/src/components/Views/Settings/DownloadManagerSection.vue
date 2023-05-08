@@ -24,6 +24,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
+import { set } from '@vueuse/core';
 import { SettingsService } from '@service';
 import { DownloadManagerSettingsDTO } from '@dto/mainApi';
 
@@ -35,8 +36,8 @@ const updateSettings = (setting: keyof DownloadManagerSettingsDTO, value: any): 
 
 onMounted(() => {
 	useSubscription(
-		SettingsService.getDownloadSegments().subscribe((data) => {
-			downloadSegments.value = data;
+		SettingsService.getDownloadSegments().subscribe((value) => {
+			set(downloadSegments, value);
 		}),
 	);
 });

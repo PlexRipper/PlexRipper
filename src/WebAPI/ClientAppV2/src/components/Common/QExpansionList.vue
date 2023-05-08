@@ -9,13 +9,7 @@
 				:icon="item.icon"
 				:label="item.noTranslate ? item.title : $t(item.title ?? '')"
 				expand-icon="mdi-chevron-down">
-				<q-item
-					v-for="(child, j) in item.children"
-					:key="j"
-					v-ripple
-					clickable
-					:to="child.link"
-					active-class="text-orange">
+				<q-item v-for="(child, j) in item.children" :key="j" v-ripple clickable :to="child.link" active-class="text-red">
 					<q-item-section avatar>
 						<q-icon :name="child.icon" />
 					</q-item-section>

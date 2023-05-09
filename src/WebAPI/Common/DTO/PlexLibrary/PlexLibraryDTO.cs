@@ -39,12 +39,5 @@ public sealed class PlexLibraryDTO
     public int Count { get; set; }
 
     public int SeasonCount { get; set; }
-
     public int EpisodeCount { get; set; }
-
-    public List<PlexMediaDTO> Movies { get; set; }
-
-    public List<PlexMediaDTO> TvShows { get; set; }
-
-    public List<DownloadTaskDTO> DownloadTasks { get; set; }
 }

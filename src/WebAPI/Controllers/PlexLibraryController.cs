@@ -32,12 +32,12 @@ public class PlexLibraryController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexLibraryDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetPlexLibrary(int id, [FromQuery] bool allMedia = false)
+    public async Task<IActionResult> GetPlexLibrary(int id)
     {
         if (id <= 0)
             return BadRequest(id, nameof(id));
 
-        return ToActionResult<PlexLibrary, PlexLibraryDTO>(await _plexLibraryService.GetPlexLibraryAsync(id, !allMedia));
+        return ToActionResult<PlexLibrary, PlexLibraryDTO>(await _plexLibraryService.GetPlexLibraryAsync(id));
     }
 
     // GET api/<PlexLibrary>/5

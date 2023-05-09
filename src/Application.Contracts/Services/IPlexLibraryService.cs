@@ -24,13 +24,11 @@ public interface IPlexLibraryService
 
     /// <summary>
     /// Returns the PlexLibrary by the Id, will refresh if the library has no media assigned.
+    /// Note: this will not include the media.
     /// </summary>
     /// <param name="libraryId">The id of the <see cref="PlexLibrary"/> to retrieve.</param>
-    /// <param name="topLevelMediaOnly"></param>
     /// <returns>Valid result if found.</returns>
-    Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, bool topLevelMediaOnly = false);
-
-    Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, bool topLevelMediaOnly = false);
+    Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId);
 
     Task<Result<List<PlexLibrary>>> GetAllPlexLibrariesAsync();
 

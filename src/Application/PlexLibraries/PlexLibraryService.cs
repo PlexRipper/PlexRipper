@@ -185,7 +185,7 @@ public class PlexLibraryService : IPlexLibraryService
     #region Public
 
     /// <inheritdoc/>
-    public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, bool topLevelMediaOnly = false)
+    public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId)
     {
         var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
 
@@ -201,7 +201,7 @@ public class PlexLibraryService : IPlexLibraryService
                 return refreshResult.ToResult();
         }
 
-        return await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId, true, true, topLevelMediaOnly));
+        return await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
     }
 
     public async Task<Result<List<PlexLibrary>>> GetAllPlexLibrariesAsync()

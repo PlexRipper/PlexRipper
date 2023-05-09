@@ -26,14 +26,6 @@ export function getPlexLibrary(
 	});
 }
 
-export function getPlexLibraryInServer(libraryId: number, plexAccountId: number): Observable<ResultDTO<PlexServerDTO | null>> {
-	return PlexRipperAxios.get<PlexServerDTO | null>({
-		url: `${PLEX_LIBRARY_RELATIVE_PATH}/inserver/${libraryId}?plexAccountId=${plexAccountId}`,
-		apiCategory: logText,
-		apiName: getPlexLibraryInServer.name,
-	});
-}
-
 export function refreshPlexLibrary(libraryId: number): Observable<ResultDTO<PlexLibraryDTO | null>> {
 	return PlexRipperAxios.post({
 		url: `${PLEX_LIBRARY_RELATIVE_PATH}/refresh/`,

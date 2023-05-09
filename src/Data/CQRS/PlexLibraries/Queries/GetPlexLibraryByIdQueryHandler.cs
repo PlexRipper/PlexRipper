@@ -22,7 +22,7 @@ public class GetPlexLibraryByIdWithMediaHandler : BaseHandler, IRequestHandler<G
     {
         var query = PlexLibraryQueryable;
 
-        var result = await query.FirstOrDefaultAsync(x => x.Id == request.Id);
+        var result = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
         if (result == null)
             return ResultExtensions.EntityNotFound(nameof(PlexLibrary), request.Id);
 

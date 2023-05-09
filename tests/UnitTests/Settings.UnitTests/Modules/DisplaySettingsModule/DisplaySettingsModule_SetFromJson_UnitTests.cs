@@ -17,8 +17,8 @@ public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest<DisplayS
         {
             DisplaySettings = new DisplaySettings
             {
-                MovieViewMode = ViewMode.Overview,
-                TvShowViewMode = ViewMode.Overview,
+                MovieViewMode = ViewMode.Table,
+                TvShowViewMode = ViewMode.Poster,
             },
         };
         var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
@@ -29,8 +29,8 @@ public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest<DisplayS
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        _sut.MovieViewMode.ShouldBe(ViewMode.Overview);
-        _sut.TvShowViewMode.ShouldBe(ViewMode.Overview);
+        _sut.MovieViewMode.ShouldBe(ViewMode.Table);
+        _sut.TvShowViewMode.ShouldBe(ViewMode.Poster);
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest<DisplayS
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        _sut.MovieViewMode.ShouldBe(ViewMode.Overview);
+        _sut.MovieViewMode.ShouldBe(ViewMode.Table);
         _sut.TvShowViewMode.ShouldBe(_sut.DefaultValues().TvShowViewMode);
     }
 }

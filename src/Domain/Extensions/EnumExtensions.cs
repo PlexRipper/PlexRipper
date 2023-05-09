@@ -78,8 +78,6 @@ public static class EnumExtensions
     {
         return value switch
         {
-            "None" => ViewMode.None,
-            "Overview" => ViewMode.Overview,
             "Poster" => ViewMode.Poster,
             "Table" => ViewMode.Table,
             _ => DefaultException(),
@@ -102,8 +100,6 @@ public static class EnumExtensions
     {
         return value switch
         {
-            ViewMode.None => "None",
-            ViewMode.Overview => "Overview",
             ViewMode.Poster => "Poster",
             ViewMode.Table => "Table",
             _ => DefaultException(),

@@ -11,7 +11,7 @@ export function generateSettingsModel({
 }): SettingsModelDTO {
 	const validConfig = checkConfig(config);
 
-	return {
+	return <SettingsModelDTO>{
 		dateTimeSettings: {
 			shortDateFormat: 'dd/MM/yyyy',
 			longDateFormat: 'EEEE, dd MMMM yyyy',
@@ -20,8 +20,8 @@ export function generateSettingsModel({
 			showRelativeDates: randBoolean(),
 		},
 		displaySettings: {
-			tvShowViewMode: ViewMode.Overview,
-			movieViewMode: ViewMode.Overview,
+			tvShowViewMode: ViewMode.Table,
+			movieViewMode: ViewMode.Table,
 		},
 		downloadManagerSettings: {
 			downloadSegments: 5,
@@ -32,6 +32,7 @@ export function generateSettingsModel({
 
 		generalSettings: {
 			firstTimeSetup: validConfig.firstTimeSetup,
+			debugMode: false,
 			activeAccountId: 0,
 		},
 		confirmationSettings: {

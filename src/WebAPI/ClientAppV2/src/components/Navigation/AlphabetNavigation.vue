@@ -1,7 +1,16 @@
 <template>
-	<q-col cols="auto" class="alphabet-navigation column wrap">
-		<q-btn v-for="letter in alphabet" :key="letter" class="navigation-btn" :label="letter" flat @click="scrollTo(letter)" />
-	</q-col>
+	<div class="alphabet-navigation-container">
+		<div class="alphabet-navigation">
+			<q-btn
+				v-for="letter in alphabet"
+				:key="letter"
+				class="navigation-btn"
+				:label="letter"
+				flat
+				square
+				@click="scrollTo(letter)" />
+		</div>
+	</div>
 </template>
 
 <script setup lang="ts">
@@ -25,17 +34,35 @@ function scrollTo(letter: string): void {
 }
 </script>
 <style lang="scss">
-.navigation-btn {
-	height: 32px;
-	width: 24px;
-	background: transparent !important;
-	flex: 1 1 24px !important;
-	text-align: center;
-	font-weight: bold;
+@import '@/assets/scss/_mixins.scss';
 
-	&:hover {
-		&::before {
-			opacity: 0.2 !important;
+.alphabet-navigation-container {
+	display: flex;
+	align-content: stretch;
+	align-items: stretch;
+	align-self: stretch;
+	justify-content: center;
+	flex: 0 0 30px;
+
+	.alphabet-navigation {
+		display: flex;
+		justify-content: space-around;
+		flex: 0 0 100%;
+		flex-direction: column;
+		overflow: hidden;
+
+		.navigation-btn {
+			@extend .fade-out-border;
+			flex: 1 1 25px;
+			text-align: center;
+			font-weight: bold;
+			background: transparent !important;
+
+			&:hover {
+				&::before {
+					opacity: 0.2 !important;
+				}
+			}
 		}
 	}
 }

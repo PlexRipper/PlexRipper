@@ -109,13 +109,14 @@ import { useSubscription } from '@vueuse/rxjs';
 import { useRoute, useRouter } from 'vue-router';
 import { take } from 'rxjs/operators';
 import { QScrollArea } from 'quasar';
-import { orderBy } from 'lodash-es';
+import { isEqual, orderBy } from 'lodash-es';
 import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaDTO, PlexMediaSlimDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, MediaService, SettingsService, SignalrService } from '@service';
 import { DetailsOverview, DownloadConfirmation, MediaTable } from '#components';
 import ISelection from '@interfaces/ISelection';
 import {
+	setMediaOverviewSort,
 	useMediaOverviewBarBus,
 	useMediaOverviewBarDownloadCommandBus,
 	useMediaOverviewSortBus,
@@ -326,6 +327,7 @@ const onRequestMedia = ({ page, size, refresh }: { page: number; size: number; r
 };
 
 function setScrollIndexes() {
+	setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
 	scrollDict.value['#'] = 0;
 	// Check for occurrence of title with alphabetic character
 	for (const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') {
@@ -334,7 +336,6 @@ function setScrollIndexes() {
 			scrollDict.value[letter] = index;
 		}
 	}
-	Log.info('setScrollIndexes', scrollDict.value);
 }
 
 // region Eventbus
@@ -356,22 +357,29 @@ useProcessDownloadCommandBus().on((event) => {
 	processDownloadCommand(event);
 });
 
-const sortedState: IMediaOverviewSort[] = [];
+let sortedState: IMediaOverviewSort[] = [];
 useMediaOverviewSortBus().on((event) => {
-	const index = sortedState.findIndex((x) => x.field === event.field);
+	const newSortedState = [...sortedState];
+	const index = newSortedState.findIndex((x) => x.field === event.field);
 	if (index > -1) {
-		sortedState.splice(index, 1);
+		newSortedState.splice(index, 1);
 	}
 	if (event.sort !== 'none') {
-		sortedState.push(event);
+		newSortedState.unshift(event);
 	}
 
-	const fields = sortedState.map((x) => x.field);
-	const orders = sortedState.map((x) => x.sort);
-	Log.debug('fields', fields);
-	Log.debug('orders', orders);
+	// Prevent unnecessary sorting
+	if (isEqual(sortedState, newSortedState)) {
+		return;
+	}
+	sortedState = newSortedState;
+	Log.debug('new sorted state', sortedState);
+	const sortedItems = orderBy(
+		get(items),
+		sortedState.map((x) => x.field),
+		sortedState.map((x) => x.sort),
+	);
 
-	const sortedItems = orderBy(get(items), fields, orders);
 	set(items, sortedItems);
 });
 
@@ -393,7 +401,7 @@ onBeforeMount(() => {
 
 onMounted(() => {
 	resetProgress(false);
-	isRefreshing.value = false;
+	set(isRefreshing, false);
 
 	if (!props.libraryId) {
 		Log.error('Library id was not provided');

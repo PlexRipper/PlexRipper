@@ -5,7 +5,6 @@
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
 import { defineEmits, defineProps, ref } from 'vue';
 import { get, set } from '@vueuse/core';
 import { setMediaOverviewSort } from '@composables/event-bus';
@@ -39,14 +38,19 @@ function onClick() {
 		set(sorted, 'none');
 	}
 	setMediaOverviewSort({
-		sort: get(sorted),
+		sort: get(sorted) === 'none' ? 'asc' : get(sorted),
 		field: props.column.sortField ?? props.column.field,
 	});
 }
+
+onBeforeMount(() => {
+	set(sorted, props.column?.sortOrder ?? 'none');
+});
 </script>
 <style lang="scss">
 .media-table-header-column {
 	white-space: nowrap;
+	font-weight: bold;
 
 	.header-sort-icon {
 		opacity: 0;

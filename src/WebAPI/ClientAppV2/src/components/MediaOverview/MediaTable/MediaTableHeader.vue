@@ -6,7 +6,7 @@
 		<template v-for="(column, i) in columns" :key="i">
 			<!-- Index -->
 			<template v-if="column['type'] === 'index'">
-				<q-col cols="auto" class="media-table-header--column">
+				<q-col cols="auto" style="min-width: 45px" class="media-table-header--column">
 					<MediaTableHeaderColumn :column="column" />
 				</q-col>
 			</template>

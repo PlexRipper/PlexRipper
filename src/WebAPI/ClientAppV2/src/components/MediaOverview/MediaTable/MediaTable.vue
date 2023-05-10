@@ -2,100 +2,32 @@
 	<div class="media-table" data-cy="media-table">
 		<MediaTableHeader :columns="mediaTableColumns" selectable class="media-table--header" />
 		<div ref="qTableRef" class="media-table--content scroll" data-cy="media-table-scroll">
-			<q-intersection v-for="(row, index) in rows" :key="index" class="media-table--intersection">
-				<MediaTableRow :index="index" :columns="mediaTableColumns" :row="row" selectable />
+			<q-intersection
+				v-for="(row, index) in rows"
+				:key="index"
+				class="media-table--intersection highlight-border-box"
+				:data-scroll-index="index">
+				<MediaTableRow :index="index" :columns="mediaTableColumns" :row="row" selectable @action="onRowAction" />
 			</q-intersection>
 		</div>
-	</div>
-	<div v-if="false">
-		<QTable
-			v-model:pagination="pagination"
-			style="height: 800px"
-			:selected="getSelected"
-			selection="multiple"
-			row-key="id"
-			:rows="rows"
-			:columns="mediaTableColumns"
-			hide-bottom
-			class="table-class"
-			@update:selected="updateSelected($event)"
-			@virtual-scroll="onScroll">
-			<!-- Title -->
-			<template #body-cell-title="{ row }">
-				<q-td v-if="!disableHoverClick" class="row-title--hover text-eclipse" @click="$emit('row-click', row)">
-					<q-hover>
-						<template #default>
-							{{ row.title }}
-						</template>
-					</q-hover>
-				</q-td>
-				<q-td v-else class="row-title text-eclipse">
-					{{ row.title }}
-				</q-td>
-			</template>
-			<!-- Media size -->
-			<template #body-cell-year="{ row }">
-				<q-td class="text-center">
-					<span class="q-mr-md">
-						{{ row.year }}
-					</span>
-				</q-td>
-			</template>
-			<!-- Media size -->
-			<template #body-cell-size="{ row }">
-				<q-td class="text-center">
-					<span class="q-mr-md">
-						<QFileSize :size="row.mediaSize" />
-					</span>
-				</q-td>
-			</template>
-			<!-- Added At Date format -->
-			<template #body-cell-addedAt="{ row }">
-				<q-td class="text-center">
-					<span class="q-mr-md">
-						<QDateTime :text="row.addedAt" short-date />
-					</span>
-				</q-td>
-			</template>
-			<!-- Updated At Date format -->
-			<template #body-cell-updatedAt="{ row }">
-				<q-td class="text-center">
-					<span class="q-mr-md">
-						<QDateTime :text="row.updatedAt" short-date />
-					</span>
-				</q-td>
-			</template>
-			<!-- Actions -->
-			<template #body-cell-actions="{ row }">
-				<q-td class="text-center">
-					<q-btn flat :icon="Convert.buttonTypeToIcon(ButtonType.Download)" @click="downloadMedia(row)" />
-				</q-td>
-			</template>
-			<template #loading>
-				<q-inner-loading showing color="red" />
-			</template>
-		</QTable>
 	</div>
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
 import { computed, defineEmits, defineProps, ref, withDefaults } from 'vue';
-import { QTable } from 'quasar';
 import { get, set, useScroll } from '@vueuse/core';
-import { toDownloadMedia, useProcessDownloadCommandBus } from '#imports';
-import ButtonType from '@enums/buttonType';
-import Convert from '@class/Convert';
+import { setMediaOverviewSort, toDownloadMedia, useProcessDownloadCommandBus } from '#imports';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 import { PlexMediaSlimDTO } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
 
 const mediaTableColumns = getMediaTableColumns();
 const qTableRef = ref<HTMLElement | null>(null);
+const scrollTargetElement = ref<HTMLElement | null>(null);
+const autoScrollEnabled = ref(false);
+const highlightActiveClass = 'highlight-border-box-active';
 
-const pagination = ref({
-	rowsPerPage: 0,
-});
 const props = withDefaults(
 	defineProps<{
 		rows: PlexMediaSlimDTO[];
@@ -107,8 +39,6 @@ const props = withDefaults(
 		scrollDict: { '#': 0 } as any,
 	},
 );
-
-const loading = ref(false);
 
 const emit = defineEmits<{
 	(e: 'selection', payload: ISelection): void;
@@ -130,31 +60,79 @@ const updateSelected = (selected: PlexMediaSlimDTO[]) => {
 	});
 };
 
-const scrollToIndex = (letter: string) => {
-	if (!qTableRef.value) {
+function onRowAction({ action, data }: { action: 'download'; data: PlexMediaSlimDTO }) {
+	if (action === 'download') {
+		const processDownloadCommandBus = useProcessDownloadCommandBus();
+		processDownloadCommandBus.emit(toDownloadMedia(data));
+	}
+}
+
+function scrollToIndex(letter: string) {
+	if (!get(qTableRef)) {
 		Log.error('qTableRef is null');
 		return;
 	}
-	const { y } = useScroll(get(qTableRef), {
-		behavior: 'auto',
-		offset: {
-			bottom: 184,
-		},
-	});
 
-	// This functions as a reset of table sorting
-	// qTableRef.value?.setPagination({ page: 1, sortBy: mediaTableColumns[0].field, descending: false, rowsPerPage: 0 });
-	set(y, props.scrollDict[letter] * (42 + 1));
-	// qTableRef.value?.scrollTo(value, 'start');
-};
+	// We have to revert to normal title sort otherwise the index will be wrong
+	setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
+
+	const index = props.scrollDict[letter];
+	// noinspection TypeScriptValidateTypes
+	const element: HTMLElement = get(qTableRef)?.querySelector(`[data-scroll-index="${index}"]`);
+	if (!element) {
+		Log.error(`Could not find scroll target element for letter ${letter}`, `[data-scroll-index="${index}"]`);
+		return;
+	}
+
+	set(scrollTargetElement, element);
+	set(autoScrollEnabled, true);
+
+	const elementRect = get(scrollTargetElement)?.getBoundingClientRect();
+	// Scroll if not visible
+	if (elementRect?.bottom >= 0 && elementRect?.top <= window.innerHeight) {
+		triggerRowHighlight();
+	} else {
+		get(scrollTargetElement)?.scrollIntoView({
+			block: 'start',
+			behavior: 'smooth',
+		});
+	}
+}
 
 // region EventBus
 
-const processDownloadCommandBus = useProcessDownloadCommandBus();
-const downloadMedia = (row: PlexMediaSlimDTO) => {
-	processDownloadCommandBus.emit(toDownloadMedia(row));
-};
+function triggerRowHighlight() {
+	// Don't highlight if the user scrolls manually
+	if (!get(autoScrollEnabled)) {
+		return;
+	}
+	set(autoScrollEnabled, false);
+	// Needs to keep a copy because the scrollTargetElement can be changed before the timeout
+	const element = get(scrollTargetElement);
+	if (!element) {
+		Log.error('scrollTargetElement is null, could not display highlight');
+		return;
+	}
+
+	// Check if already highlighted
+	if (element.classList.contains(highlightActiveClass)) {
+		return;
+	}
+	element?.classList.add(highlightActiveClass);
+	setTimeout(() => {
+		element?.classList.remove(highlightActiveClass);
+	}, 1250);
+}
+
 // endregion
+
+onMounted(() => {
+	useScroll(get(qTableRef), {
+		onStop() {
+			triggerRowHighlight();
+		},
+	});
+});
 
 defineExpose({
 	scrollToIndex,
@@ -175,6 +153,7 @@ defineExpose({
 
 	&--content {
 		max-height: calc(100vh - $app-bar-height - $media-overview-bar-height - $media-table-row-height);
+		overflow-x: hidden;
 	}
 }
 

@@ -8,13 +8,13 @@
 			<template v-for="(column, i) in columns" :key="i">
 				<!-- Index -->
 				<template v-if="column['type'] === 'index'">
-					<q-col cols="auto" class="media-table-row--column">
+					<q-col cols="auto" style="min-width: 50px" class="media-table-row--column">
 						<span> #{{ index + 1 }} </span>
 					</q-col>
 				</template>
 				<!-- Title -->
 				<template v-else-if="column['type'] === 'title'">
-					<q-col class="media-table-row--title media-table-row--column">
+					<q-col class="media-table-row--column media-table-row--title">
 						<span>{{ row[column.field] }} </span>
 					</q-col>
 				</template>
@@ -30,7 +30,7 @@
 						<QDateTime short-date :text="row[column.field]" />
 					</q-col>
 				</template>
-				<!-- Filesize format -->
+				<!-- Media size -->
 				<template v-else-if="column['type'] === 'file-size'">
 					<q-col cols="1" class="media-table-row--column">
 						<QFileSize :size="row[column.field]" />
@@ -49,12 +49,19 @@
 		</template>
 		<!-- No row -->
 		<q-col v-else>{{ $t('components.q-tree-view-table-row.invalid-node') }}</q-col>
+		<!--	Highlight animation effect	-->
+		<svg class="glow-container">
+			<!--suppress HtmlUnknownAttribute -->
+			<rect pathLength="100" height="5" width="5" stroke-linecap="round" class="glow-blur" />
+			<!--suppress HtmlUnknownAttribute -->
+			<rect pathLength="100" height="5" width="5" stroke-linecap="round" class="glow-line" />
+		</svg>
 	</q-row>
 </template>
 
 <script setup lang="ts">
 import { defineEmits, defineProps } from 'vue';
-import { QTreeViewTableHeader, QTreeViewTableItem } from '@props';
+import { QTreeViewTableHeader } from '@props';
 import { PlexMediaSlimDTO } from '@dto/mainApi';
 import Convert from '@class/Convert';
 import ButtonType from '@enums/buttonType';
@@ -70,7 +77,7 @@ defineProps<{
 
 defineEmits<{
 	(e: 'selected', payload: boolean): void;
-	(e: 'action', payload: { action: string; data: QTreeViewTableItem }): void;
+	(e: 'action', payload: { action: string | 'download'; data: PlexMediaSlimDTO }): void;
 }>();
 </script>
 
@@ -85,8 +92,13 @@ defineEmits<{
 .media-table-row {
 	border-bottom: 1px solid;
 
+	&--highlight {
+		border: 2px solid greenyellow;
+	}
+
 	&--column {
 		text-align: center;
+		white-space: nowrap;
 		margin: auto 8px;
 	}
 

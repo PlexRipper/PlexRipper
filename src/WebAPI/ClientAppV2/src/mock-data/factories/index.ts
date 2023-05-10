@@ -7,3 +7,4 @@ export * from './plex-libraries-factory';
 export * from './settings-factory';
 export * from './job-status-update-factory';
 export * from './download-task-factory';
+export * from './plex-media-factory';

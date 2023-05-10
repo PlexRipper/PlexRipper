@@ -19,5 +19,11 @@ export interface MockConfig {
 	seasonDownloadTask: number;
 	episodeDownloadTask: number;
 	// endregion
+	// region PlexMedia
+	movieCount: number;
+	tvShowCount: number;
+	seasonCount: number;
+	episodeCount: number;
+	// endregion
 	maxServerConnections: number;
 }

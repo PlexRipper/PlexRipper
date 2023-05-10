@@ -1,5 +1,5 @@
 <script lang="ts">
-import { h, resolveComponent, defineComponent } from 'vue';
+import { defineComponent, h, resolveComponent } from 'vue';
 import { useI18n, useRouter } from '#imports';
 import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
@@ -13,6 +13,7 @@ export default defineComponent({
 		const QTooltip = resolveComponent('QTooltip');
 		const props = this.$props;
 		const emit = this.$emit;
+		const slots = this.$slots;
 		const style = {
 			flat: props.flat,
 			round: props.round,
@@ -71,28 +72,30 @@ export default defineComponent({
 					}
 				},
 			},
-			() => {
-				if (props.tooltipId) {
-					return [
-						h(
-							QTooltip,
-							{
-								anchor: 'top middle',
-								self: 'bottom middle',
-								offset: [10, 10],
-							},
-							{
-								default: () => {
-									if (!props.tooltipId) {
-										return '';
-									}
-									return useI18n().t(props.tooltipId);
-								},
-							},
-						),
-					];
-				}
-				return [];
+			{
+				default: () => [
+					...(slots?.default?.() ?? []),
+					...[
+						props.tooltipId
+							? h(
+									QTooltip,
+									{
+										anchor: 'top middle',
+										self: 'bottom middle',
+										offset: [10, 10],
+									},
+									{
+										default: () => {
+											if (!props.tooltipId) {
+												return '';
+											}
+											return useI18n().t(props.tooltipId);
+										},
+									},
+							  )
+							: null,
+					],
+				],
 			},
 		);
 	},

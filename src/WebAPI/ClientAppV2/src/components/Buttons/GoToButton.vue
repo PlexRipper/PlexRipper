@@ -1,5 +1,5 @@
 <script lang="ts">
-import { h, defineComponent, mergeProps } from 'vue';
+import { defineComponent, h, mergeProps } from 'vue';
 import BaseButton from './BaseButton.vue';
 import { IBaseButtonProps } from '@props';
 import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
@@ -8,9 +8,13 @@ export default defineComponent({
 	name: 'GoToButton',
 	props: baseBtnPropsDefault(),
 	render() {
-		return h(BaseButton, {
-			...mergeProps(this.$props, {} as IBaseButtonProps),
-		});
+		return h(
+			BaseButton,
+			{
+				...mergeProps(this.$props, {} as IBaseButtonProps),
+			},
+			this.$slots.default,
+		);
 	},
 });
 </script>

@@ -8,15 +8,19 @@ export default defineComponent({
 	name: 'VerticalButton',
 	props: baseBtnPropsDefault(),
 	render() {
-		return h(BaseButton, {
-			...mergeProps(this.$props, {
-				vertical: true,
-				outline: false,
-				iconSize: 36,
-				flat: true,
-				size: 'md',
-			} as IBaseButtonProps),
-		});
+		return h(
+			BaseButton,
+			{
+				...mergeProps(this.$props, {
+					vertical: true,
+					outline: false,
+					iconSize: 36,
+					flat: true,
+					size: 'md',
+				} as IBaseButtonProps),
+			},
+			this.$slots.default,
+		);
 	},
 });
 </script>

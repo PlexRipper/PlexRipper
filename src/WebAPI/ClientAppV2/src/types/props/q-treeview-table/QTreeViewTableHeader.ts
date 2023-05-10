@@ -6,7 +6,7 @@ export interface QTreeViewTableHeader {
 	type?: 'title' | 'duration' | 'file-size' | 'file-speed' | 'date' | 'actions' | 'datetime' | 'percentage' | 'index';
 	sortable?: boolean;
 	required?: boolean;
-	sortOrder?: 'ad' | 'da';
+	sortOrder?: 'asc' | 'desc' | 'ad' | 'da';
 	align?: 'left' | 'center' | 'right';
 	headerStyle?: string;
 }

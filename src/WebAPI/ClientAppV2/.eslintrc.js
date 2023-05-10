@@ -11,6 +11,13 @@ module.exports = {
 	extends: ['@nuxtjs/eslint-config-typescript', 'plugin:vue/vue3-recommended', 'plugin:prettier/recommended'],
 	plugins: [],
 	rules: {
+		// Reason: This ensures that the order of components is always the same
+		'vue/component-tags-order': [
+			'error',
+			{
+				order: ['template', 'script', 'style'],
+			},
+		],
 		// Reason: This allows for defining interfaces in any order
 		'no-use-before-define': 'off',
 		// Reason: This allows services to be exported as their name from index.ts

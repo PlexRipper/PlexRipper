@@ -7,7 +7,7 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 			field: 'index',
 			align: 'left',
 			type: 'index',
-			sortOrder: 'ad',
+			sortOrder: 'asc',
 			sortable: true,
 		},
 		{
@@ -16,13 +16,20 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 			sortField: 'sortTitle',
 			type: 'title',
 			align: 'left',
-			sortOrder: 'ad',
+			sortOrder: 'asc',
 			sortable: true,
 			required: true,
 		},
 		{
 			label: 'Year',
 			field: 'year',
+			align: 'center',
+			sortable: true,
+		},
+		{
+			label: 'Duration',
+			field: 'duration',
+			type: 'duration',
 			align: 'center',
 			sortable: true,
 		},
@@ -51,6 +58,7 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 			label: 'Actions',
 			field: 'actions',
 			align: 'center',
+			type: 'actions',
 			required: true,
 		},
 	];

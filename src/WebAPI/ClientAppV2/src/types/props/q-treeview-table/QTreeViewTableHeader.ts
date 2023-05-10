@@ -1,8 +1,9 @@
 export interface QTreeViewTableHeader {
 	label: string;
 	field: string;
+	sortField?: string;
 	width?: number;
-	type?: 'duration' | 'file-size' | 'file-speed' | 'date' | 'actions' | 'datetime' | 'percentage';
+	type?: 'title' | 'duration' | 'file-size' | 'file-speed' | 'date' | 'actions' | 'datetime' | 'percentage' | 'index';
 	sortable?: boolean;
 	required?: boolean;
 	sortOrder?: 'ad' | 'da';

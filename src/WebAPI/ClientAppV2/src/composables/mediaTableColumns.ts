@@ -3,8 +3,18 @@ import { QTreeViewTableHeader } from '@props';
 export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 	return [
 		{
+			label: '#',
+			field: 'index',
+			align: 'left',
+			type: 'index',
+			sortOrder: 'ad',
+			sortable: true,
+		},
+		{
 			label: 'Title',
 			field: 'title',
+			sortField: 'sortTitle',
+			type: 'title',
 			align: 'left',
 			sortOrder: 'ad',
 			sortable: true,
@@ -19,18 +29,21 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 		{
 			label: 'Size',
 			field: 'mediaSize',
+			type: 'file-size',
 			align: 'center',
 			sortable: true,
 		},
 		{
 			label: 'Added At',
 			field: 'addedAt',
+			type: 'date',
 			align: 'center',
 			sortable: true,
 		},
 		{
 			label: 'Updated At',
 			field: 'updatedAt',
+			type: 'date',
 			align: 'center',
 			sortable: true,
 		},

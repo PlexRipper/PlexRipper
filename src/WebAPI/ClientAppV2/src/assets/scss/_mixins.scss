@@ -66,11 +66,23 @@ Borders
 	box-shadow: $box-shadow;
 }
 
+// Used for low opacity borders in tables
+.body--dark {
+	.fade-out-border {
+		border-bottom: 1px solid $separator-dark-color;
+	}
+}
+
+.body--light {
+	.fade-out-border {
+		border-bottom: 1px solid $separator-color;
+	}
+}
+
 
 /*
 Sizing
 */
-
 .inherit-all-height {
 	min-height: inherit;
 	max-height: inherit;

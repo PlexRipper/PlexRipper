@@ -40,40 +40,34 @@
 					@refresh-library="refreshLibrary" />
 				<!--	Data table display	-->
 				<div ref="mediaContainerRef" class="media-container">
-					<q-row v-show="showMediaOverview">
-						<q-col cols="grow media-table-container">
-							<div>
-								<template v-if="mediaViewMode === ViewMode.Table">
-									<MediaTable
-										ref="overviewMediaTableRef"
-										row-key="id"
-										:selection="selected"
-										:media-type="mediaType"
-										:rows="items"
-										:disable-hover-click="mediaType !== PlexMediaType.TvShow"
-										:library="library"
-										:scroll-dict="scrollDict"
-										:style="getHeightStyle"
-										@selection="selected = $event"
-										@row-click="openDetails($event.id)" />
-								</template>
+					<q-row v-show="showMediaOverview" align="start">
+						<q-col cols="grow">
+							<template v-if="mediaViewMode === ViewMode.Table">
+								<MediaTable
+									ref="overviewMediaTableRef"
+									:rows="items"
+									:selection="selected"
+									:disable-hover-click="mediaType !== PlexMediaType.TvShow"
+									:scroll-dict="scrollDict"
+									@selection="selected = $event"
+									@row-click="openDetails($event.id)" />
+							</template>
 
-								<!-- Poster display-->
-								<template v-else>
-									<QScrollArea ref="mediaContainerScrollbarRef" class="fit">
-										<poster-table
-											:library-id="libraryId"
-											:media-type="mediaType"
-											:items="items"
-											@open-details="openDetails" />
-									</QScrollArea>
-								</template>
-							</div>
+							<!-- Poster display-->
+							<template v-else>
+								<QScrollArea ref="mediaContainerScrollbarRef" class="fit">
+									<poster-table
+										:library-id="libraryId"
+										:media-type="mediaType"
+										:items="items"
+										@open-details="openDetails" />
+								</QScrollArea>
+							</template>
 
 							<!--	Overlay with details of the media	-->
 						</q-col>
 						<!-- Alphabet Navigation-->
-						<alphabet-navigation :items="items" :scroll-dict="scrollDict" @scroll-to="scrollToIndex($event)" />
+						<alphabet-navigation :scroll-dict="scrollDict" @scroll-to="scrollToIndex($event)" />
 					</q-row>
 				</div>
 			</q-col>
@@ -110,11 +104,12 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { ref, defineProps, computed, onMounted, onBeforeMount } from 'vue';
-import { useElementBounding } from '@vueuse/core';
+import { get, set, useElementBounding } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRoute, useRouter } from 'vue-router';
 import { take } from 'rxjs/operators';
 import { QScrollArea } from 'quasar';
+import { orderBy } from 'lodash-es';
 import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaDTO, PlexMediaSlimDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, MediaService, SettingsService, SignalrService } from '@service';
@@ -123,9 +118,11 @@ import ISelection from '@interfaces/ISelection';
 import {
 	useMediaOverviewBarBus,
 	useMediaOverviewBarDownloadCommandBus,
+	useMediaOverviewSortBus,
 	useOpenControlDialog,
 	useProcessDownloadCommandBus,
 } from '#imports';
+import { IMediaOverviewSort } from '@composables/event-bus';
 
 // region SetupFields
 
@@ -304,7 +301,6 @@ const refreshLibrary = () => {
 };
 
 const onRequestMedia = ({ page, size, refresh }: { page: number; size: number; refresh: () => void }) => {
-	Log.info('onRequestMedia', page, size);
 	useSubscription(
 		MediaService.getMediaData(props.libraryId, page, size)
 			.pipe(take(1))
@@ -313,7 +309,8 @@ const onRequestMedia = ({ page, size, refresh }: { page: number; size: number; r
 					if (!mediaData) {
 						Log.error(`MediaOverview => No media data for library id ${props.libraryId} was found`);
 					}
-					items.value = mediaData;
+
+					set(items, mediaData);
 				},
 				error: (error) => {
 					Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
@@ -322,28 +319,27 @@ const onRequestMedia = ({ page, size, refresh }: { page: number; size: number; r
 					if (refresh) {
 						refresh();
 					}
-					setScrollIndexes(items.value);
+					setScrollIndexes();
 				},
 			}),
 	);
 };
 
-const setScrollIndexes = (items: PlexMediaSlimDTO[]) => {
+function setScrollIndexes() {
 	scrollDict.value['#'] = 0;
 	// Check for occurrence of title with alphabetic character
 	for (const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') {
-		const index = items.findIndex((x) => x.sortTitle.startsWith(letter));
+		const index = get(items).findIndex((x) => x.sortTitle.startsWith(letter));
 		if (index > -1) {
 			scrollDict.value[letter] = index;
 		}
 	}
 	Log.info('setScrollIndexes', scrollDict.value);
-};
+}
 
 // region Eventbus
 
 useMediaOverviewBarDownloadCommandBus().on(() => {
-	Log.info('useMediaOverviewBarBus');
 	if (showMediaOverview.value) {
 		const downloadCommand: DownloadMediaDTO = {
 			plexServerId: server.value?.id ?? 0,
@@ -358,6 +354,25 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 useProcessDownloadCommandBus().on((event) => {
 	// Listen for process download command
 	processDownloadCommand(event);
+});
+
+const sortedState: IMediaOverviewSort[] = [];
+useMediaOverviewSortBus().on((event) => {
+	const index = sortedState.findIndex((x) => x.field === event.field);
+	if (index > -1) {
+		sortedState.splice(index, 1);
+	}
+	if (event.sort !== 'none') {
+		sortedState.push(event);
+	}
+
+	const fields = sortedState.map((x) => x.field);
+	const orders = sortedState.map((x) => x.sort);
+	Log.debug('fields', fields);
+	Log.debug('orders', orders);
+
+	const sortedItems = orderBy(get(items), fields, orders);
+	set(items, sortedItems);
 });
 
 const mediaOverViewBarBus = useMediaOverviewBarBus();
@@ -390,7 +405,7 @@ onMounted(() => {
 		page: 0,
 		size: 0,
 		refresh: () => {
-			loading.value = false;
+			set(loading, false);
 		},
 	});
 
@@ -467,11 +482,15 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
+@import '@/assets/scss/variables.scss';
+
 .media-container,
 .media-table-container,
 .detail-view-container {
-	height: calc(100vh - 85px - 48px);
+	// We need a set height so we calculate the remaining content space by subtracting other component heights
+	height: calc(100vh - $app-bar-height - $media-overview-bar-height);
 	width: 100%;
+	overflow: hidden;
 }
 
 .media-details-dialog {

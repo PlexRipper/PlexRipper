@@ -546,9 +546,6 @@ export interface PlexLibraryDTO {
 	seasonCount: number;
 	/** @format int32 */
 	episodeCount: number;
-	movies: PlexMediaDTO[];
-	tvShows: PlexMediaDTO[];
-	downloadTasks: DownloadTaskDTO[];
 }
 
 export interface PlexLibraryDTOListResultDTO {
@@ -975,8 +972,6 @@ export interface UpdateDefaultDestinationDTO {
 }
 
 export enum ViewMode {
-	None = 'None',
 	Table = 'Table',
 	Poster = 'Poster',
-	Overview = 'Overview',
 }

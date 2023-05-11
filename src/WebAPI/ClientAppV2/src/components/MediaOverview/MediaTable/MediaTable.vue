@@ -7,7 +7,13 @@
 				:key="index"
 				class="media-table--intersection highlight-border-box"
 				:data-scroll-index="index">
-				<MediaTableRow :index="index" :columns="mediaTableColumns" :row="row" selectable @action="onRowAction" />
+				<MediaTableRow
+					:index="index"
+					:data-cy="`media-table-row-${index}`"
+					:columns="mediaTableColumns"
+					:row="row"
+					selectable
+					@action="onRowAction" />
 			</q-intersection>
 		</div>
 	</div>

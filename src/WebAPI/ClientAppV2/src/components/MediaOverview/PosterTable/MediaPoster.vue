@@ -1,77 +1,81 @@
 <template>
-	<q-intersection
-		:data-title="mediaItem.title"
-		transition="fade"
-		class="q-ma-md media-poster"
-		:threshold="0.1"
-		@visibility="isVisibleChanged">
-		<q-hover>
-			<template #default="{ hover }">
-				<q-card>
-					<q-img
-						loading="eager"
-						:no-transition="!imageUrl"
-						:src="imageUrl"
-						fit="fill"
-						no-spinner
-						class="poster-image"
-						:alt="mediaItem.title">
-						<!--	Placeholder	-->
-						<!--						<template #loading>-->
-						<!--							&lt;!&ndash;	Show fallback image	&ndash;&gt;-->
-						<!--							<template v-if="defaultImage">-->
-						<!--								<q-row align="center" justify="center" class="fill-height">-->
-						<!--									<q-col cols="auto">-->
-						<!--										<q-media-type-icon class="mx-3" :size="100" :media-type="mediaType" />-->
-						<!--									</q-col>-->
-						<!--									<q-col cols="12">-->
-						<!--										<h4 class="text-center">{{ mediaItem.title }}</h4>-->
-						<!--									</q-col>-->
-						<!--								</q-row>-->
-						<!--							</template>-->
-						<!--							&lt;!&ndash;	Show  image	&ndash;&gt;-->
-						<!--							<template v-else>-->
-						<!--								<q-row class="fill-height ma-0" align="center" justify="center">-->
-						<!--									<q-col cols="12">-->
-						<!--										<h4 class="text-center">{{ mediaItem.title }}</h4>-->
-						<!--									</q-col>-->
-						<!--									<q-col cols="auto">-->
-						<!--										<q-circular-progress color="grey lighten-5" />-->
-						<!--									</q-col>-->
-						<!--								</q-row>-->
-						<!--							</template>-->
-						<!--						</template>-->
-						<!--	Overlay	-->
-						<div :class="['poster-overlay', hover ? 'on-hover' : '', 'white--text']">
-							<q-row justify="center" align="end" style="height: 100%">
-								<q-col cols="12" class="text-center">
-									<span class="poster-overlay-title">
-										{{ mediaItem.title }}
-									</span>
-								</q-col>
-								<q-col cols="auto">
-									<q-btn v-if="isMovieType" icon="mdi-download" size="xl" @click="downloadMedia()" />
-									<q-btn v-if="isTvShowType" icon="mdi-magnify" size="xl" @click="openDetails()" />
-								</q-col>
-							</q-row>
-						</div>
-					</q-img>
-					<!--	Poster bar	-->
-					<q-row justify="center" no-gutters>
-						<q-col cols="auto">
-							<q-chip
-								v-for="item in mediaItem.mediaData"
-								:key="item.id"
-								class="my-2"
-								:color="getQualityColor(item.videoResolution)"
-								size="md">
-								{{ getQualityString(item.videoResolution) }}
-							</q-chip>
-						</q-col>
-					</q-row>
-				</q-card>
-			</template>
-		</q-hover>
+	<q-intersection transition="fade" class="q-ma-md media-poster" :threshold="0.1" @visibility="isVisibleChanged">
+		<div class="highlight-border-box">
+			<q-hover>
+				<template #default="{ hover }">
+					<q-card>
+						<q-img
+							loading="eager"
+							:no-transition="!imageUrl"
+							:src="imageUrl"
+							fit="fill"
+							no-spinner
+							class="poster-image"
+							:alt="mediaItem.title">
+							<!--	Placeholder	-->
+							<!--						<template #loading>-->
+							<!--							&lt;!&ndash;	Show fallback image	&ndash;&gt;-->
+							<!--							<template v-if="defaultImage">-->
+							<!--								<q-row align="center" justify="center" class="fill-height">-->
+							<!--									<q-col cols="auto">-->
+							<!--										<q-media-type-icon class="mx-3" :size="100" :media-type="mediaType" />-->
+							<!--									</q-col>-->
+							<!--									<q-col cols="12">-->
+							<!--										<h4 class="text-center">{{ mediaItem.title }}</h4>-->
+							<!--									</q-col>-->
+							<!--								</q-row>-->
+							<!--							</template>-->
+							<!--							&lt;!&ndash;	Show  image	&ndash;&gt;-->
+							<!--							<template v-else>-->
+							<!--								<q-row class="fill-height ma-0" align="center" justify="center">-->
+							<!--									<q-col cols="12">-->
+							<!--										<h4 class="text-center">{{ mediaItem.title }}</h4>-->
+							<!--									</q-col>-->
+							<!--									<q-col cols="auto">-->
+							<!--										<q-circular-progress color="grey lighten-5" />-->
+							<!--									</q-col>-->
+							<!--								</q-row>-->
+							<!--							</template>-->
+							<!--						</template>-->
+							<!--	Overlay	-->
+							<div :class="['poster-overlay', hover ? 'on-hover' : '', 'white--text']">
+								<q-row justify="center" align="end" style="height: 100%">
+									<q-col cols="12" class="text-center">
+										<span class="poster-overlay-title">
+											{{ mediaItem.title }}
+										</span>
+									</q-col>
+									<q-col cols="auto">
+										<q-btn v-if="isMovieType" icon="mdi-download" size="xl" @click="downloadMedia()" />
+										<q-btn v-if="isTvShowType" icon="mdi-magnify" size="xl" @click="openDetails()" />
+									</q-col>
+								</q-row>
+							</div>
+						</q-img>
+						<!--	Poster bar	-->
+						<q-row justify="center" no-gutters>
+							<q-col cols="auto">
+								<q-chip
+									v-for="item in mediaItem.mediaData"
+									:key="item.id"
+									class="my-2"
+									:color="getQualityColor(item.videoResolution)"
+									size="md">
+									{{ getQualityString(item.videoResolution) }}
+								</q-chip>
+							</q-col>
+						</q-row>
+					</q-card>
+				</template>
+			</q-hover>
+			<!--	Highlight animation effect	-->
+			<svg class="glow-container">
+				<!--suppress HtmlUnknownAttribute -->
+				<rect pathLength="100" height="5" width="5" stroke-linecap="round" class="glow-blur" />
+				<!--suppress HtmlUnknownAttribute -->
+				<rect pathLength="100" height="5" width="5" stroke-linecap="round" class="glow-line" />
+			</svg>
+		</div>
 	</q-intersection>
 </template>
 

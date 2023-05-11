@@ -109,11 +109,17 @@ onMounted(() => {
 });
 </script>
 <style lang="scss">
-//.poster-overview,
-//.alphabet-navigation {
-//	height: calc(100vh - 85px - 48px);
-//	width: 100%;
-//	// 8% reserved for the media-overview-bar
-//	// height: 92%;
-//}
+@import '@/assets/scss/variables.scss';
+
+#poster-table {
+	overflow-y: auto;
+	overflow-x: hidden;
+
+	max-height: calc(100vh - $app-bar-height - $media-overview-bar-height - $media-table-row-height);
+
+	&--scroll-container {
+		height: 100%;
+		width: 100%;
+	}
+}
 </style>

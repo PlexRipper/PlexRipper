@@ -81,19 +81,19 @@ onMounted(() => {
 			return;
 		}
 
-	// We have to revert to normal title sort otherwise the index will be wrong
-	setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
+		// We have to revert to normal title sort otherwise the index will be wrong
+		setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
 
-	const index = props.scrollDict[letter];
-	// noinspection TypeScriptValidateTypes
-	const element: HTMLElement = get(qTableRef)?.querySelector(`[data-scroll-index="${index}"]`);
-	if (!element) {
-		Log.error(`Could not find scroll target element for letter ${letter}`, `[data-scroll-index="${index}"]`);
-		return;
-	}
+		const index = props.scrollDict[letter];
+		// noinspection TypeScriptValidateTypes
+		const element: HTMLElement = get(qTableRef)?.querySelector(`[data-scroll-index="${index}"]`);
+		if (!element) {
+			Log.error(`Could not find scroll target element for letter ${letter}`, `[data-scroll-index="${index}"]`);
+			return;
+		}
 
-	set(scrollTargetElement, element);
-	set(autoScrollEnabled, true);
+		set(scrollTargetElement, element);
+		set(autoScrollEnabled, true);
 
 		const elementRect = get(scrollTargetElement)?.getBoundingClientRect();
 		// Scroll if not visible

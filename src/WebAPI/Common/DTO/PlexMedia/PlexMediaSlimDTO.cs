@@ -25,4 +25,6 @@ public class PlexMediaSlimDTO
     public int PlexServerId { get; set; }
 
     public PlexMediaType Type { get; set; }
+
+    public bool HasThumb { get; set; }
 }

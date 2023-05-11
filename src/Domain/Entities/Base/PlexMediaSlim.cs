@@ -47,6 +47,12 @@ public class PlexMediaSlim : BaseEntity
     [Column(Order = 14)]
     public DateTime UpdatedAt { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether this <see cref="PlexMedia"/> has a thumbnail.
+    /// </summary>
+    [Column(Order = 17)]
+    public bool HasThumb { get; set; }
+
     public int PlexLibraryId { get; set; }
 
     public int PlexServerId { get; set; }

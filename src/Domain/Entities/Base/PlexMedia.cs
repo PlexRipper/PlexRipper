@@ -46,12 +46,6 @@ public class PlexMedia : PlexMediaSlim
     public int Index { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether this <see cref="PlexMedia"/> has a thumbnail.
-    /// </summary>
-    [Column(Order = 17)]
-    public bool HasThumb { get; set; }
-
-    /// <summary>
     /// Gets or sets whether this <see cref="PlexMedia"/> has art.
     /// </summary>
     [Column(Order = 18)]

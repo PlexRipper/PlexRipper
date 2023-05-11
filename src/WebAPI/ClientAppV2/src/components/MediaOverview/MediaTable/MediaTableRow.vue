@@ -92,10 +92,6 @@ defineEmits<{
 .media-table-row {
 	border-bottom: 1px solid;
 
-	&--highlight {
-		border: 2px solid greenyellow;
-	}
-
 	&--column {
 		text-align: center;
 		white-space: nowrap;

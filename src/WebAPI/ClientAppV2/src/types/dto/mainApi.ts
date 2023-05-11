@@ -676,6 +676,7 @@ export interface PlexMediaSlimDTO {
 	/** @format int32 */
 	plexServerId: number;
 	type: PlexMediaType;
+	hasThumb: boolean;
 }
 
 export interface PlexMediaSlimDTOListResultDTO {

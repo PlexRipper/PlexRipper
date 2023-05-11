@@ -1,13 +1,11 @@
 import { useEventBus, UseEventBusReturn } from '@vueuse/core';
 import { DownloadMediaDTO } from '@dto/mainApi';
 
-export interface IMediaOverviewBarBus {
-	downloadButtonVisible: boolean;
-}
-
 export function useProcessDownloadCommandBus(): UseEventBusReturn<DownloadMediaDTO[], any> {
 	return useEventBus<DownloadMediaDTO[]>('processDownloadCommand');
 }
+
+// region Dialog Controls
 
 export function useControlDialog() {
 	return useEventBus<{
@@ -32,7 +30,14 @@ export function useCloseControlDialog(name: string) {
 	});
 }
 
+// endregion
+
 // region MediaOverview
+
+export interface IMediaOverviewBarBus {
+	downloadButtonVisible: boolean;
+}
+
 export function useMediaOverviewBarBus(): UseEventBusReturn<IMediaOverviewBarBus, any> {
 	return useEventBus<IMediaOverviewBarBus>('mediaOverViewBarBus');
 }
@@ -55,6 +60,30 @@ export function useMediaOverviewSortBus(): UseEventBusReturn<IMediaOverviewSort,
 
 export function setMediaOverviewSort(action: IMediaOverviewSort) {
 	useMediaOverviewSortBus().emit(action);
+}
+
+export interface IMediaOverviewCommands {
+	command: 'scrollTo';
+	scrollToLetter?: string;
+}
+
+export function useMediaOverviewCommandsBus(): UseEventBusReturn<IMediaOverviewCommands, any> {
+	return useEventBus<IMediaOverviewCommands>('mediaOverViewCommands');
+}
+
+export function sendMediaOverviewScrollToCommand(letter: string): void {
+	useMediaOverviewCommandsBus().emit({
+		command: 'scrollTo',
+		scrollToLetter: letter,
+	});
+}
+
+export function listenMediaOverviewScrollToCommand(action: (letter: string) => void): void {
+	useMediaOverviewCommandsBus().on(({ command, scrollToLetter }) => {
+		if (command === 'scrollTo') {
+			action(scrollToLetter ?? '');
+		}
+	});
 }
 
 // endregion

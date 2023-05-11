@@ -15,18 +15,18 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { computed, defineEmits, defineProps, ref, withDefaults } from 'vue';
+import { computed, defineEmits, defineProps, ref, withDefaults, onMounted } from 'vue';
 import { get, set, useScroll } from '@vueuse/core';
-import { setMediaOverviewSort, toDownloadMedia, useProcessDownloadCommandBus } from '#imports';
+import { setMediaOverviewSort, toDownloadMedia, triggerBoxHighlight, useProcessDownloadCommandBus } from '#imports';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 import { PlexMediaSlimDTO } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
+import { listenMediaOverviewScrollToCommand } from '@composables/event-bus';
 
 const mediaTableColumns = getMediaTableColumns();
 const qTableRef = ref<HTMLElement | null>(null);
 const scrollTargetElement = ref<HTMLElement | null>(null);
 const autoScrollEnabled = ref(false);
-const highlightActiveClass = 'highlight-border-box-active';
 
 const props = withDefaults(
 	defineProps<{
@@ -67,11 +67,13 @@ function onRowAction({ action, data }: { action: 'download'; data: PlexMediaSlim
 	}
 }
 
-function scrollToIndex(letter: string) {
-	if (!get(qTableRef)) {
-		Log.error('qTableRef is null');
-		return;
-	}
+onMounted(() => {
+	// Listen for scroll to letter command
+	listenMediaOverviewScrollToCommand((letter) => {
+		if (!get(qTableRef)) {
+			Log.error('qTableRef is null');
+			return;
+		}
 
 	// We have to revert to normal title sort otherwise the index will be wrong
 	setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
@@ -87,55 +89,28 @@ function scrollToIndex(letter: string) {
 	set(scrollTargetElement, element);
 	set(autoScrollEnabled, true);
 
-	const elementRect = get(scrollTargetElement)?.getBoundingClientRect();
-	// Scroll if not visible
-	if (elementRect?.bottom >= 0 && elementRect?.top <= window.innerHeight) {
-		triggerRowHighlight();
-	} else {
-		get(scrollTargetElement)?.scrollIntoView({
-			block: 'start',
-			behavior: 'smooth',
-		});
-	}
-}
-
-// region EventBus
-
-function triggerRowHighlight() {
-	// Don't highlight if the user scrolls manually
-	if (!get(autoScrollEnabled)) {
-		return;
-	}
-	set(autoScrollEnabled, false);
-	// Needs to keep a copy because the scrollTargetElement can be changed before the timeout
-	const element = get(scrollTargetElement);
-	if (!element) {
-		Log.error('scrollTargetElement is null, could not display highlight');
-		return;
-	}
-
-	// Check if already highlighted
-	if (element.classList.contains(highlightActiveClass)) {
-		return;
-	}
-	element?.classList.add(highlightActiveClass);
-	setTimeout(() => {
-		element?.classList.remove(highlightActiveClass);
-	}, 1250);
-}
-
-// endregion
-
-onMounted(() => {
+		const elementRect = get(scrollTargetElement)?.getBoundingClientRect();
+		// Scroll if not visible
+		if (elementRect?.bottom >= 0 && elementRect?.top <= window.innerHeight) {
+			triggerBoxHighlight(element);
+		} else {
+			get(scrollTargetElement)?.scrollIntoView({
+				block: 'start',
+				behavior: 'smooth',
+			});
+		}
+	});
+	// Setup stopped scrolling event listener
 	useScroll(get(qTableRef), {
 		onStop() {
-			triggerRowHighlight();
+			// Don't highlight if the user scrolls manually
+			if (!get(autoScrollEnabled)) {
+				return;
+			}
+			set(autoScrollEnabled, false);
+			triggerBoxHighlight(get(scrollTargetElement));
 		},
 	});
-});
-
-defineExpose({
-	scrollToIndex,
 });
 </script>
 

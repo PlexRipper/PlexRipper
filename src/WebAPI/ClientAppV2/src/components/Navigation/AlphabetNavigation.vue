@@ -8,30 +8,23 @@
 				:label="letter"
 				flat
 				square
-				@click="scrollTo(letter)" />
+				:data-cy="`letter-${letter}-alphabet-navigation-btn`"
+				@click="sendMediaOverviewScrollToCommand(letter)" />
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, withDefaults, computed } from 'vue';
+import { defineProps, computed } from 'vue';
+import { sendMediaOverviewScrollToCommand } from '@composables/event-bus';
 
-const props = withDefaults(
-	defineProps<{
-		scrollDict: Record<string, number>;
-	}>(),
-	{},
-);
-
-const emit = defineEmits<{ (e: 'scroll-to', letter: string): void }>();
+const props = defineProps<{
+	scrollDict: Record<string, number>;
+}>();
 
 const alphabet = computed((): string[] => {
 	return Object.keys(props.scrollDict);
 });
-
-function scrollTo(letter: string): void {
-	emit('scroll-to', letter);
-}
 </script>
 <style lang="scss">
 @import '@/assets/scss/_mixins.scss';

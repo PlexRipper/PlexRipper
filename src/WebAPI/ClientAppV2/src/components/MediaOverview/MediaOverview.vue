@@ -39,37 +39,33 @@
 					@view-change="changeView"
 					@refresh-library="refreshLibrary" />
 				<!--	Data table display	-->
-				<div ref="mediaContainerRef" class="media-container">
-					<q-row v-show="showMediaOverview" align="start">
-						<q-col cols="grow">
-							<template v-if="mediaViewMode === ViewMode.Table">
-								<MediaTable
-									ref="overviewMediaTableRef"
-									:rows="items"
-									:selection="selected"
-									:disable-hover-click="mediaType !== PlexMediaType.TvShow"
-									:scroll-dict="scrollDict"
-									@selection="selected = $event"
-									@row-click="openDetails($event.id)" />
-							</template>
+				<q-row v-show="showMediaOverview" ref="mediaContainerRef" class="media-container" align="start">
+					<q-col>
+						<template v-if="mediaViewMode === ViewMode.Table">
+							<MediaTable
+								:rows="items"
+								:selection="selected"
+								:disable-hover-click="mediaType !== PlexMediaType.TvShow"
+								:scroll-dict="scrollDict"
+								@selection="selected = $event"
+								@row-click="openDetails($event.id)" />
+						</template>
 
-							<!-- Poster display-->
-							<template v-else>
-								<QScrollArea ref="mediaContainerScrollbarRef" class="fit">
-									<poster-table
-										:library-id="libraryId"
-										:media-type="mediaType"
-										:items="items"
-										@open-details="openDetails" />
-								</QScrollArea>
-							</template>
+						<!-- Poster display-->
+						<template v-else>
+							<poster-table
+								:library-id="libraryId"
+								:media-type="mediaType"
+								:items="items"
+								:scroll-dict="scrollDict"
+								@open-details="openDetails" />
+						</template>
 
-							<!--	Overlay with details of the media	-->
-						</q-col>
-						<!-- Alphabet Navigation-->
-						<alphabet-navigation :scroll-dict="scrollDict" @scroll-to="scrollToIndex($event)" />
-					</q-row>
-				</div>
+						<!--	Overlay with details of the media	-->
+					</q-col>
+					<!-- Alphabet Navigation-->
+					<alphabet-navigation :scroll-dict="scrollDict" />
+				</q-row>
 			</q-col>
 		</q-row>
 	</template>
@@ -160,22 +156,11 @@ const askDownloadSeasonConfirmation = ref(false);
 const askDownloadEpisodeConfirmation = ref(false);
 
 const detailsOverviewRef = ref<InstanceType<typeof DetailsOverview> | null>(null);
-const mediaContainerScrollbarRef = ref<InstanceType<typeof QScrollArea> | null>(null);
-const overviewMediaTableRef = ref<InstanceType<typeof MediaTable> | null>(null);
 
 const props = defineProps<{
 	libraryId: number;
 	mediaType: PlexMediaType;
 }>();
-
-const getHeightStyle = computed(() => {
-	const height = mediaContainerSize.height.value;
-	return {
-		height: height + 'px !important',
-		minHeight: height + 'px !important',
-		maxHeight: height + 'px !important',
-	};
-});
 
 const getDetailsStyle = computed(() => {
 	const width = mediaContainerSize.width.value;
@@ -222,14 +207,6 @@ const changeView = (viewMode: ViewMode) => {
 	if (type) {
 		useSubscription(SettingsService.updateDisplaySettings(type, viewMode).subscribe());
 	}
-};
-
-const scrollToIndex = (letter: string) => {
-	if (overviewMediaTableRef.value) {
-		overviewMediaTableRef.value.scrollToIndex(letter);
-		return;
-	}
-	Log.error('overviewMediaTableRef.value is null');
 };
 
 const resetProgress = (isRefreshingValue: boolean) => {

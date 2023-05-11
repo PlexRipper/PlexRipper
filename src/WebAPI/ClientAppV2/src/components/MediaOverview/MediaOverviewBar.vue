@@ -12,7 +12,7 @@
 					<q-list class="no-background">
 						<q-item>
 							<q-item-section avatar>
-								<q-media-type-icon class="mx-3" :size="36" :media-type="library.type" />
+								<q-media-type-icon class="mx-3" :size="36" :media-type="library?.type ?? PlexMediaType.None" />
 							</q-item-section>
 							<q-item-section>
 								<q-item-label>
@@ -29,7 +29,6 @@
 			</q-row>
 		</q-toolbar-title>
 
-		<q-space />
 		<!--	Download button	-->
 		<vertical-button
 			v-if="config.downloadButtonVisible"
@@ -52,28 +51,30 @@
 		<!--	View mode	-->
 		<vertical-button v-if="!detailMode" icon="mdi-eye" label="View" :height="barHeight" :width="verticalButtonWidth">
 			<q-menu anchor="bottom left" self="top left" auto-close>
-				<q-item
-					v-for="(viewOption, i) in viewOptions"
-					:key="i"
-					clickable
-					style="min-width: 200px"
-					@click="changeView(viewOption.viewMode)">
-					<!-- View mode options -->
-					<q-item-section avatar>
-						<q-avatar>
-							<q-icon v-if="isSelected(viewOption.viewMode)" :name="'mdi-check'" />
-						</q-avatar>
-					</q-item-section>
-					<!--	Is selected icon	-->
-					<q-item-section> {{ viewOption.label }}</q-item-section>
-				</q-item>
+				<q-list>
+					<q-item
+						v-for="(viewOption, i) in viewOptions"
+						:key="i"
+						clickable
+						style="min-width: 200px"
+						@click="changeView(viewOption.viewMode)">
+						<!-- View mode options -->
+						<q-item-section avatar>
+							<q-avatar>
+								<q-icon v-if="isSelected(viewOption.viewMode)" name="mdi-check" />
+							</q-avatar>
+						</q-item-section>
+						<!--	Is selected icon	-->
+						<q-item-section> {{ viewOption.label }}</q-item-section>
+					</q-item>
+				</q-list>
 			</q-menu>
 		</vertical-button>
 	</q-toolbar>
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, computed } from 'vue';
+import { computed, defineEmits, defineProps, ref } from 'vue';
 import type { PlexLibraryDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { PlexMediaType, ViewMode } from '@dto/mainApi';
 import { IMediaOverviewBarBus, useMediaOverviewBarBus, useMediaOverviewBarDownloadCommandBus } from '#imports';
@@ -150,10 +151,6 @@ const viewOptions = computed((): IViewOptions[] => {
 			label: 'Table View',
 			viewMode: ViewMode.Table,
 		},
-		// {
-		// 	label: 'Overview',
-		// 	viewMode: ViewMode.Overview,
-		// },
 	];
 });
 // region EventBus

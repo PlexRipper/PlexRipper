@@ -1,27 +1,27 @@
 import { randCompanyName, randDirectoryPath, randNumber, randRecentDate, randUuid } from '@ngneat/falso';
-import { randPlexMediaType } from './';
 import { checkConfig, incrementSeed, MockConfig } from '@mock';
-import { FolderPathDTO, PlexLibraryDTO } from '@dto/mainApi';
+import { FolderPathDTO, PlexLibraryDTO, PlexMediaType } from '@dto/mainApi';
 
 let plexLibraryIdIndex = 1;
 
 export function generatePlexLibrary({
 	id,
 	plexServerId,
+	type,
 	config = {},
 	partialData = {},
 }: {
 	id: number;
 	plexServerId: number;
+	type: PlexMediaType;
 	partialData?: Partial<PlexLibraryDTO>;
 	config?: Partial<MockConfig>;
 }): PlexLibraryDTO {
 	checkConfig(config);
 	incrementSeed(id);
-	const libraryType = randPlexMediaType();
 	return {
 		id,
-		type: libraryType,
+		type,
 		title: randCompanyName(),
 		key: '' + randNumber({ max: 999999 }),
 		libraryLocationPath: randDirectoryPath(),
@@ -34,29 +34,40 @@ export function generatePlexLibrary({
 		count: 0,
 		libraryLocationId: 0,
 		defaultDestinationId: 0,
-		downloadTasks: [],
 		episodeCount: 0,
 		mediaSize: 0,
-		movies: [],
 		outdated: false,
 		plexServerId,
 		seasonCount: 0,
-		tvShows: [],
 		...partialData,
 	};
 }
 
 export function generatePlexLibraries({
 	plexServerId,
+	type,
 	config = {},
 	partialData = {},
 }: {
 	plexServerId: number;
+	type: PlexMediaType;
 	partialData?: Partial<PlexLibraryDTO>;
 	config?: Partial<MockConfig>;
 }): PlexLibraryDTO[] {
 	const validConfig = checkConfig(config);
-	return Array(validConfig.plexLibraryCount)
+	let count = 0;
+	switch (type) {
+		case PlexMediaType.Movie:
+			count = validConfig.plexMovieLibraryCount;
+			break;
+
+		case PlexMediaType.TvShow:
+			count = validConfig.plexTvShowLibraryCount;
+			break;
+		default:
+			throw new Error(`Invalid Plex media type: ${type}`);
+	}
+	return Array(count)
 		.fill(null)
-		.map(() => generatePlexLibrary({ id: plexLibraryIdIndex++, plexServerId, partialData }));
+		.map(() => generatePlexLibrary({ id: plexLibraryIdIndex++, type, plexServerId, partialData }));
 }

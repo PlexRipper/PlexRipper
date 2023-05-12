@@ -5,6 +5,7 @@ import {
 	NOTIFICATIONS_RELATIVE_PATH,
 	PLEX_ACCOUNT_RELATIVE_PATH,
 	PLEX_LIBRARY_RELATIVE_PATH,
+	PLEX_MEDIA_RELATIVE_PATH,
 	PLEX_SERVER_CONNECTION_RELATIVE_PATH,
 	PLEX_SERVER_RELATIVE_PATH,
 	PROGRESS_HUB_RELATIVE_PATH,
@@ -17,10 +18,19 @@ import {
 	MockConfig,
 	checkConfig,
 	generateServerDownloadTasks,
+	generatePlexMedias,
 } from '@mock';
 import { generateSettingsModel } from '@factories/settings-factory';
 import { generatePlexAccounts } from '@factories/plex-account-factory';
-import { PlexAccountDTO, PlexLibraryDTO, PlexServerConnectionDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
+import {
+	PlexAccountDTO,
+	PlexLibraryDTO,
+	PlexMediaSlimDTO,
+	PlexMediaType,
+	PlexServerConnectionDTO,
+	PlexServerDTO,
+	ServerDownloadProgressDTO,
+} from '@dto/mainApi';
 import Chainable = Cypress.Chainable;
 
 export interface IBasePageSetupResult {
@@ -29,6 +39,11 @@ export interface IBasePageSetupResult {
 	plexLibraries: PlexLibraryDTO[];
 	plexAccounts: PlexAccountDTO[];
 	downloadTasks: ServerDownloadProgressDTO[];
+	mediaData: {
+		libraryId: number;
+		media: PlexMediaSlimDTO[];
+	}[];
+	config: MockConfig;
 }
 
 export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBasePageSetupResult> {
@@ -58,12 +73,20 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 
 	// PlexLibraries call
 	const plexLibraries = plexServers
-		.map((x) =>
-			generatePlexLibraries({
-				config,
-				plexServerId: x.id,
-			}),
-		)
+		.map((x) => {
+			return [
+				...generatePlexLibraries({
+					type: PlexMediaType.Movie,
+					config,
+					plexServerId: x.id,
+				}),
+				...generatePlexLibraries({
+					type: PlexMediaType.TvShow,
+					config,
+					plexServerId: x.id,
+				}),
+			];
+		})
 		.flat();
 	cy.intercept('GET', apiRoute(PLEX_LIBRARY_RELATIVE_PATH), {
 		statusCode: 200,
@@ -73,6 +96,14 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 			cy.log('BasePageSetup -> plexLibraries', plexLibraries);
 		}
 	});
+
+	// Detail call for every library
+	for (const library of plexLibraries) {
+		cy.intercept('GET', apiRoute(PLEX_LIBRARY_RELATIVE_PATH + `/${library.id}`), {
+			statusCode: 200,
+			body: generateResultDTO(library),
+		});
+	}
 
 	// PlexAccount call
 	const plexAccounts = generatePlexAccounts({ config, plexServers, plexLibraries });
@@ -115,6 +146,34 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 		}
 	});
 
+	// Generate library media page data
+	const mediaData: {
+		libraryId: number;
+		media: PlexMediaSlimDTO[];
+	}[] = [];
+	for (const library of plexLibraries) {
+		if (library.type !== PlexMediaType.Movie) {
+			continue;
+		}
+		const mediaList = generatePlexMedias({
+			plexLibraryId: library.id,
+			plexServerId: library.plexServerId,
+			type: library.type,
+			config,
+		});
+
+		mediaData.push({
+			libraryId: library.id,
+			media: mediaList,
+		});
+
+		// Intercept the Library media call
+		cy.intercept('GET', apiRoute(PLEX_MEDIA_RELATIVE_PATH + `/library/${library.id}`, '?page=*&size=*'), {
+			statusCode: 200,
+			body: generateResultDTO(mediaList),
+		});
+	}
+
 	cy.intercept('GET', apiRoute(FOLDER_PATH_RELATIVE_PATH), {
 		statusCode: 200,
 		body: generateResultDTO([]),
@@ -135,12 +194,23 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 		body: {},
 	});
 
+	// Correct library data
+	for (const library of plexLibraries) {
+		const mediaList = mediaData.find((x) => x.libraryId === library.id)?.media ?? [];
+		if (mediaList.length) {
+			library.mediaSize = mediaList.reduce((acc, x) => acc + x.mediaSize, 0);
+			library.count = mediaList.length;
+		}
+	}
+
 	return cy.wrap({
+		config: validConfig,
 		plexServers,
 		plexServerConnections,
 		plexLibraries,
 		plexAccounts,
 		downloadTasks,
+		mediaData,
 	});
 }
 
@@ -149,5 +219,5 @@ export function route(path: string) {
 }
 
 export function apiRoute(path: string, query = '') {
-	return '/api' + path + query;
+	return '/api' + path + (query !== '' ? query : '*');
 }

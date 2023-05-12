@@ -32,6 +32,7 @@ export function generatePlexMedia({
 		year: randNumber({ min: 1900, max: 2023 }),
 		type,
 		plexServerId,
+		hasThumb: false,
 		mediaSize: randNumber({ min: 10000, max: 1000000 }),
 		addedAt: randRecentDate({ days: 120 }).toUTCString(),
 		updatedAt: randRecentDate({ days: 60 }).toUTCString(),

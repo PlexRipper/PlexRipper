@@ -49,7 +49,13 @@
 			@click="refreshLibrary" />
 
 		<!--	View mode	-->
-		<vertical-button v-if="!detailMode" icon="mdi-eye" label="View" :height="barHeight" :width="verticalButtonWidth">
+		<vertical-button
+			v-if="!detailMode"
+			icon="mdi-eye"
+			label="View"
+			:height="barHeight"
+			:width="verticalButtonWidth"
+			cy="change-view-mode-btn">
 			<q-menu anchor="bottom left" self="top left" auto-close>
 				<q-list>
 					<q-item
@@ -57,6 +63,7 @@
 						:key="i"
 						clickable
 						style="min-width: 200px"
+						:data-cy="`view-mode-${viewOption.viewMode.toLowerCase()}-btn`"
 						@click="changeView(viewOption.viewMode)">
 						<!-- View mode options -->
 						<q-item-section avatar>

@@ -23,11 +23,16 @@
 import Log from 'consola';
 import { computed, defineEmits, defineProps, ref, withDefaults, onMounted } from 'vue';
 import { get, set, useScroll } from '@vueuse/core';
-import { setMediaOverviewSort, toDownloadMedia, triggerBoxHighlight, useProcessDownloadCommandBus } from '#imports';
+import {
+	setMediaOverviewSort,
+	toDownloadMedia,
+	triggerBoxHighlight,
+	sendMediaOverviewBarDownloadCommand,
+	listenMediaOverviewScrollToCommand,
+} from '#imports';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 import { PlexMediaSlimDTO } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
-import { listenMediaOverviewScrollToCommand } from '@composables/event-bus';
 
 const mediaTableColumns = getMediaTableColumns();
 const qTableRef = ref<HTMLElement | null>(null);
@@ -68,8 +73,7 @@ const updateSelected = (selected: PlexMediaSlimDTO[]) => {
 
 function onRowAction({ action, data }: { action: 'download'; data: PlexMediaSlimDTO }) {
 	if (action === 'download') {
-		const processDownloadCommandBus = useProcessDownloadCommandBus();
-		processDownloadCommandBus.emit(toDownloadMedia(data));
+		sendMediaOverviewBarDownloadCommand(toDownloadMedia(data));
 	}
 }
 

@@ -1,6 +1,6 @@
 <template>
 	<!-- Poster display-->
-	<q-row id="poster-table" justify="center" data-cy="poster-table">
+	<q-row id="poster-table" full-height justify="center" data-cy="poster-table">
 		<media-poster
 			v-for="(item, index) in items"
 			:key="item.id"
@@ -8,7 +8,7 @@
 			:media-item="item"
 			:media-type="mediaType"
 			:data-scroll-index="index"
-			@download="downloadMedia($event)"
+			@download="sendMediaOverviewBarDownloadCommand($event)"
 			@open-details="$emit('open-details', $event)" />
 	</q-row>
 </template>
@@ -17,8 +17,12 @@
 import Log from 'consola';
 import { defineProps, defineEmits, ref, withDefaults, onMounted } from 'vue';
 import { get, set, useScroll } from '@vueuse/core';
-import { DownloadMediaDTO, PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
-import { listenMediaOverviewScrollToCommand, setMediaOverviewSort } from '@composables/event-bus';
+import { PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import {
+	listenMediaOverviewScrollToCommand,
+	sendMediaOverviewBarDownloadCommand,
+	setMediaOverviewSort,
+} from '@composables/event-bus';
 import { triggerBoxHighlight } from '@composables/animations';
 
 const autoScrollEnabled = ref(false);
@@ -36,41 +40,20 @@ const props = withDefaults(
 	},
 );
 
-const emit = defineEmits<{
+defineEmits<{
 	(e: 'open-details', mediaId: number): void;
-	(e: 'download', downloadMediaCommands: DownloadMediaDTO[]): void;
 }>();
 
 const posterTableRef = computed(() => document.getElementById('poster-table'));
 
-const downloadMedia = (downloadMediaCommands: DownloadMediaDTO[]): void => {
-	downloadMediaCommands.forEach((x) => {
-		// x.plexAccountId = props.activeAccountId ?? 0;
-	});
-	emit('download', downloadMediaCommands);
-};
-
 onMounted(() => {
-	(function setGlowEffectRx() {
-		const glowEffects = document.querySelectorAll('.highlight-border-box');
-
-		glowEffects.forEach((glowEffect) => {
-			const glowLines = glowEffect.querySelectorAll('rect');
-			const rx = getComputedStyle(glowEffect).borderRadius;
-
-			glowLines.forEach((line) => {
-				line.setAttribute('rx', rx);
-			});
-		});
-	})();
-
 	// Listen for scroll to letter command
 	listenMediaOverviewScrollToCommand((letter) => {
 		if (!get(posterTableRef)) {
 			Log.error('Could not find container with reference: ', get(posterTableRef));
 			return;
 		}
-		Log.debug('posterTableRef', get(posterTableRef));
+
 		// We have to revert to normal title sort otherwise the index will be wrong
 		setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
 		const index = props.scrollDict[letter];
@@ -115,7 +98,7 @@ onMounted(() => {
 	overflow-y: auto;
 	overflow-x: hidden;
 
-	max-height: calc(100vh - $app-bar-height - $media-overview-bar-height - $media-table-row-height);
+	max-height: calc(100vh - $app-bar-height - $media-overview-bar-height);
 
 	&--scroll-container {
 		height: 100%;

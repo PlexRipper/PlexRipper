@@ -1,10 +1,6 @@
 import { useEventBus, UseEventBusReturn } from '@vueuse/core';
 import { DownloadMediaDTO } from '@dto/mainApi';
 
-export function useProcessDownloadCommandBus(): UseEventBusReturn<DownloadMediaDTO[], any> {
-	return useEventBus<DownloadMediaDTO[]>('processDownloadCommand');
-}
-
 // region Dialog Controls
 
 export function useControlDialog() {
@@ -42,13 +38,6 @@ export function useMediaOverviewBarBus(): UseEventBusReturn<IMediaOverviewBarBus
 	return useEventBus<IMediaOverviewBarBus>('mediaOverViewBarBus');
 }
 
-/**
- * This is used to send a command to from the MediaOverviewBar to trigger a download command.
- */
-export function useMediaOverviewBarDownloadCommandBus(): UseEventBusReturn<string, any> {
-	return useEventBus<string>('downloadCommand');
-}
-
 export interface IMediaOverviewSort {
 	field: string;
 	sort: 'asc' | 'none' | 'desc';
@@ -63,8 +52,9 @@ export function setMediaOverviewSort(action: IMediaOverviewSort) {
 }
 
 export interface IMediaOverviewCommands {
-	command: 'scrollTo';
+	command: 'scrollTo' | 'download';
 	scrollToLetter?: string;
+	downloadMediaCommands?: DownloadMediaDTO[];
 }
 
 export function useMediaOverviewCommandsBus(): UseEventBusReturn<IMediaOverviewCommands, any> {
@@ -82,6 +72,28 @@ export function listenMediaOverviewScrollToCommand(action: (letter: string) => v
 	useMediaOverviewCommandsBus().on(({ command, scrollToLetter }) => {
 		if (command === 'scrollTo') {
 			action(scrollToLetter ?? '');
+		}
+	});
+}
+
+/**
+ * This is used to send a command to from the MediaOverviewBar to trigger a download command.
+ */
+export function useMediaOverviewBarDownloadCommandBus(): UseEventBusReturn<string, any> {
+	return useEventBus<string>('downloadCommand');
+}
+
+export function sendMediaOverviewBarDownloadCommand(downloadMediaCommands: DownloadMediaDTO[]): void {
+	useMediaOverviewCommandsBus().emit({
+		command: 'download',
+		downloadMediaCommands,
+	});
+}
+
+export function listenMediaOverviewDownloadCommand(action: (downloadMediaCommands: DownloadMediaDTO[]) => void): void {
+	useMediaOverviewCommandsBus().on(({ command, downloadMediaCommands }) => {
+		if (command === 'download') {
+			action(downloadMediaCommands ?? []);
 		}
 	});
 }

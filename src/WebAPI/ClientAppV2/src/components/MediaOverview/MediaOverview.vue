@@ -94,7 +94,7 @@
 	</q-dialog>
 
 	<!--		Download confirmation dialog	-->
-	<DownloadConfirmation :name="downloadConfirmationName" :items="items" @download="sendDownloadCommand" />
+	<DownloadConfirmation :name="downloadConfirmationName" :items="items" @download="DownloadService.downloadMedia($event)" />
 </template>
 
 <script setup lang="ts">
@@ -117,7 +117,8 @@ import {
 	useMediaOverviewBarDownloadCommandBus,
 	useMediaOverviewSortBus,
 	useOpenControlDialog,
-	useProcessDownloadCommandBus,
+	listenMediaOverviewDownloadCommand,
+	sendMediaOverviewBarDownloadCommand,
 } from '#imports';
 import { IMediaOverviewSort } from '@composables/event-bus';
 
@@ -223,21 +224,6 @@ const resetProgress = (isRefreshingValue: boolean) => {
 	};
 };
 
-const processDownloadCommand = (command: DownloadMediaDTO[]) => {
-	// Only show if there is more than 1 selection
-	if (command.length > 0 && command.some((x) => x.mediaIds.length > 0)) {
-		if (isConfirmationEnabled.value) {
-			useOpenControlDialog(downloadConfirmationName, command);
-		} else {
-			// sendDownloadCommand(command);
-		}
-	}
-};
-
-const sendDownloadCommand = (downloadMediaCommand: DownloadMediaDTO[]) => {
-	DownloadService.downloadMedia(downloadMediaCommand);
-};
-
 const openDetails = (mediaId: number) => {
 	if (!mediaId) {
 		Log.error('mediaId was invalid, could not open details', mediaId);
@@ -249,8 +235,8 @@ const openDetails = (mediaId: number) => {
 			path: props.libraryId + '/details/' + mediaId,
 		});
 	}
-	currentMediaItemId.value = mediaId;
-	showDetails.value = true;
+	set(currentMediaItemId, mediaId);
+	set(showDetails, true);
 };
 
 const onOpenDetails = () => {
@@ -319,7 +305,17 @@ function setScrollIndexes() {
 }
 
 // region Eventbus
-
+// Listen for process download command
+listenMediaOverviewDownloadCommand((command) => {
+	// Only show if there is more than 1 selection
+	if (command.length > 0 && command.some((x) => x.mediaIds.length > 0)) {
+		if (isConfirmationEnabled.value) {
+			useOpenControlDialog(downloadConfirmationName, command);
+		} else {
+			// sendDownloadCommand(command);
+		}
+	}
+});
 useMediaOverviewBarDownloadCommandBus().on(() => {
 	if (showMediaOverview.value) {
 		const downloadCommand: DownloadMediaDTO = {
@@ -328,13 +324,8 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 			mediaIds: selected.value.keys,
 			type: props.mediaType,
 		};
-		processDownloadCommand([downloadCommand]);
+		sendMediaOverviewBarDownloadCommand([downloadCommand]);
 	}
-});
-
-useProcessDownloadCommandBus().on((event) => {
-	// Listen for process download command
-	processDownloadCommand(event);
 });
 
 let sortedState: IMediaOverviewSort[] = [];

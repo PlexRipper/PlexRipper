@@ -87,7 +87,7 @@ import {
 	useMediaOverviewBarBus,
 	useMediaOverviewBarDownloadCommandBus,
 	toDownloadMedia,
-	useProcessDownloadCommandBus,
+	sendMediaOverviewBarDownloadCommand,
 } from '#imports';
 
 const defaultOpened = ref(false);
@@ -202,7 +202,6 @@ watch(
 	},
 );
 
-const processDownloadCommandBus = useProcessDownloadCommandBus();
 useMediaOverviewBarDownloadCommandBus().on(() => {
 	if (!props.mediaItem) {
 		Log.error('No media item selected');
@@ -213,7 +212,7 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 
 	// All selected thus entire TvShow
 	if (rootSelected.value) {
-		processDownloadCommandBus.emit(toDownloadMedia(mediaItem));
+		sendMediaOverviewBarDownloadCommand(toDownloadMedia(mediaItem));
 		return;
 	}
 
@@ -247,7 +246,7 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 		});
 	}
 
-	processDownloadCommandBus.emit(downloadMedia);
+	sendMediaOverviewBarDownloadCommand(downloadMedia);
 });
 // endregion
 onMounted(() => {

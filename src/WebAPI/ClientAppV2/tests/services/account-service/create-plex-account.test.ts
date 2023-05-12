@@ -1,9 +1,10 @@
 import { take } from 'rxjs/operators';
-import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
+import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
 import AccountService from '@service/accountService';
 import ServerService from '@service/serverService';
 import { generatePlexAccounts, generatePlexLibraries, generatePlexServers, generateResultDTO } from '@mock';
 import { PLEX_ACCOUNT_RELATIVE_PATH, PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
+import { PlexMediaType } from '@dto/mainApi';
 
 describe('AccountService.createPlexAccount()', () => {
 	let { mock, config } = baseVars();
@@ -23,7 +24,9 @@ describe('AccountService.createPlexAccount()', () => {
 			plexServerCount: 3,
 		};
 		const plexServers = generatePlexServers({ config });
-		const plexLibraries = plexServers.flatMap((x) => generatePlexLibraries({ plexServerId: x.id, config }));
+		const plexLibraries = plexServers.flatMap((x) =>
+			generatePlexLibraries({ plexServerId: x.id, type: PlexMediaType.Movie, config }),
+		);
 		const plexAccount = generatePlexAccounts({ plexServers, plexLibraries, config })[0];
 
 		mock.onGet(PLEX_SERVER_RELATIVE_PATH)
@@ -48,10 +51,10 @@ describe('AccountService.createPlexAccount()', () => {
 		await getServersResult.onComplete();
 
 		// Assert
-		expect(getServersResult.receivedComplete()).toEqual(true);
-		expect(createAccountResult.receivedComplete()).toEqual(true);
-		expect(getServersResult.getFirstValue()).toEqual([]);
-		expect(getServersResult.getLastValue()).toEqual(plexServers);
-		expect(createAccountResult.getLastValue()).toEqual(plexAccount);
+		expect(getServersResult.receivedComplete()).equal(true);
+		expect(createAccountResult.receivedComplete()).equal(true);
+		expect(getServersResult.getFirstValue()).equal([]);
+		expect(getServersResult.getLastValue()).equal(plexServers);
+		expect(createAccountResult.getLastValue()).equal(plexAccount);
 	});
 });

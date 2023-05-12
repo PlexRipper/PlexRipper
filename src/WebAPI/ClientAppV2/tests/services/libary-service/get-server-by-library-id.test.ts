@@ -4,6 +4,7 @@ import LibraryService from '@service/libraryService';
 import ServerService from '@service/serverService';
 import { generatePlexLibraries, generatePlexServers, generateResultDTO } from '@mock';
 import { PLEX_LIBRARY_RELATIVE_PATH, PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
+import { PlexMediaType } from '@dto/mainApi';
 
 describe('LibraryService.getServerByLibraryId()', () => {
 	let { mock, config } = baseVars();
@@ -25,7 +26,9 @@ describe('LibraryService.getServerByLibraryId()', () => {
 		};
 
 		const servers = generatePlexServers({ config });
-		const libraries = servers.map((x) => generatePlexLibraries({ plexServerId: x.id, config })).flat();
+		const libraries = servers
+			.map((x) => generatePlexLibraries({ plexServerId: x.id, type: PlexMediaType.Movie, config }))
+			.flat();
 
 		mock.onGet(PLEX_SERVER_RELATIVE_PATH).reply(200, generateResultDTO(servers));
 		mock.onGet(PLEX_LIBRARY_RELATIVE_PATH).reply(200, generateResultDTO(libraries));
@@ -42,10 +45,10 @@ describe('LibraryService.getServerByLibraryId()', () => {
 		await serverByLibraryIdResult.onComplete();
 
 		// Assert
-		expect(serverSetupResult.receivedComplete()).toEqual(true);
-		expect(librarySetupResult.receivedComplete()).toEqual(true);
+		expect(serverSetupResult.receivedComplete()).equals(true);
+		expect(librarySetupResult.receivedComplete()).equals(true);
 		const values = serverByLibraryIdResult.getValues();
-		expect(values).toHaveLength(1);
-		expect(serverByLibraryIdResult.getFirstValue()?.id).toEqual(testLibrary.plexServerId);
+		expect(values).lengthOf(1);
+		expect(serverByLibraryIdResult.getFirstValue()?.id).equals(testLibrary.plexServerId);
 	});
 });

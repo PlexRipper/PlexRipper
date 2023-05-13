@@ -588,6 +588,7 @@ export interface PlexMediaDTO {
 	/** @format int32 */
 	plexServerId: number;
 	type: PlexMediaType;
+	qualities: PlexMediaQuality[];
 	/** @format int32 */
 	key: number;
 	hasThumb: boolean;
@@ -654,6 +655,12 @@ export interface PlexMediaDataPartDTO {
 	videoProfile: string;
 }
 
+export interface PlexMediaQuality {
+	quality: string;
+	displayQuality: string;
+	hashId: string;
+}
+
 export interface PlexMediaSlimDTO {
 	/** @format int32 */
 	id: number;
@@ -677,6 +684,7 @@ export interface PlexMediaSlimDTO {
 	plexServerId: number;
 	type: PlexMediaType;
 	hasThumb: boolean;
+	qualities: PlexMediaQuality[];
 }
 
 export interface PlexMediaSlimDTOListResultDTO {

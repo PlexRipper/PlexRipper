@@ -32,11 +32,11 @@ v-sheet
 
 	&.v-toolbar {
 		&.theme--dark {
-			background: $dark-dialog-background-color;
+			background: $dark-sm-background-color;
 		}
 
 		&.theme--light {
-			background: $light-dialog-background-color;
+			background: $light-sm-background-color;
 		}
 	}
 
@@ -83,11 +83,11 @@ v-dialog
 		border-radius: 15px;
 
 		&.theme--dark {
-			background: $dark-dialog-background-color;
+			background: $dark-sm-background-color;
 		}
 
 		&.theme--light {
-			background: $light-dialog-background-color;
+			background: $light-sm-background-color;
 		}
 	}
 }
@@ -100,11 +100,11 @@ v-menu
 
 	.v-list {
 		&.theme--dark {
-			background: $dark-dialog-background-color;
+			background: $dark-sm-background-color;
 		}
 
 		&.theme--light {
-			background: $light-dialog-background-color;
+			background: $light-sm-background-color;
 		}
 	}
 }
@@ -115,7 +115,7 @@ v-expansion-panels
 .v-expansion-panels {
 	&.theme--dark {
 		.v-expansion-panel {
-			background: $dark-dialog-background-color;
+			background: $dark-sm-background-color;
 
 			.v-data-table,
 			.v-data-table--fixed-header thead th {
@@ -126,7 +126,7 @@ v-expansion-panels
 
 	&.theme--light {
 		.v-expansion-panel {
-			background: $light-dialog-background-color;
+			background: $light-sm-background-color;
 
 			.v-data-table,
 			.v-data-table--fixed-header thead th {

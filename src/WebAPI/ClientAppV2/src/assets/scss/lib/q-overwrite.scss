@@ -19,11 +19,11 @@
 		@extend .default-border-radius;
 		@extend .blur;
 
-		background-color: $light-dialog-background-color;
+		background-color: $light-sm-background-color;
 		transition: 0.1s cubic-bezier(0.25, 0.8, 0.25, 1);
 
 		&.q-card--dark {
-			background-color: $dark-dialog-background-color;
+			background-color: $dark-sm-background-color;
 		}
 
 		&--bordered {
@@ -40,14 +40,14 @@ body {
 
 		.q-menu {
 			@extend .blur;
-			background-color: $dark-dialog-background-color;
+			background-color: $dark-sm-background-color;
 		}
 	}
 
 	&.body--light {
 		.q-menu {
 			@extend .blur;
-			background-color: $light-dialog-background-color;
+			background-color: $light-sm-background-color;
 		}
 	}
 }

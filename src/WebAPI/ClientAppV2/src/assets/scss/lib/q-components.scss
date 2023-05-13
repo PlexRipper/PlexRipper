@@ -8,14 +8,14 @@ body {
 	&.body--dark {
 		.notification-drawer {
 			@extend .blur;
-			background-color: $dark-dialog-background-color;
+			background-color: $dark-sm-background-color;
 		}
 	}
 
 	&.body--light {
 		.notification-drawer {
 			@extend .blur;
-			background-color: $light-dialog-background-color;
+			background-color: $light-sm-background-color;
 		}
 	}
 }
@@ -27,13 +27,13 @@ body {
 body {
 	&.body--dark {
 		.background-overlay {
-			background-color: $dark-background-color;
+			background-color: $dark-xl-background-color;
 		}
 	}
 
 	&.body--light {
 		.background-overlay {
-			background-color: $light-background-color;
+			background-color: $light-xl-background-color;
 		}
 	}
 }
@@ -149,14 +149,14 @@ body {
 	&.body--dark {
 		.q-card-dialog-background {
 			@extend .blur;
-			background-color: $dark-dialog-background-color;
+			background-color: $dark-sm-background-color;
 		}
 	}
 
 	&.body--light {
 		.q-card-dialog-background {
 			@extend .blur;
-			background-color: $light-dialog-background-color;
+			background-color: $light-sm-background-color;
 		}
 	}
 }
@@ -168,7 +168,7 @@ body {
 .q-dialog {
 	.q-card {
 		&.media-info-container {
-			@extend .glass-background;
+			@extend .background-sm;
 			box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
 			0px 1px 5px 0px rgba(0, 0, 0, 0.12);
 

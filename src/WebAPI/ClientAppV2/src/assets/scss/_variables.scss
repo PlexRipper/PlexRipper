@@ -1,10 +1,17 @@
 @import 'quasar/src/css/variables.sass';
 
-$dark-background-color: rgba(0, 0, 0, 0.8);
-$light-background-color: rgba(255, 255, 255, 0.8);
 
-$dark-dialog-background-color: rgba(0, 0, 0, 0.4);
-$light-dialog-background-color: rgba(255, 255, 255, 0.4);
+$dark-sm-background-color: rgba(0, 0, 0, 0.4);
+$light-sm-background-color: rgba(255, 255, 255, 0.4);
+
+$dark-md-background-color: rgba(0, 0, 0, 0.5);
+$light-md-background-color: rgba(255, 255, 255, 0.5);
+
+$dark-lg-background-color: rgba(0, 0, 0, 0.6);
+$light-lg-background-color: rgba(255, 255, 255, 0.6);
+
+$dark-xl-background-color: rgba(0, 0, 0, 0.8);
+$light-xl-background-color: rgba(255, 255, 255, 0.8);
 
 $dark-theme-glass-background: rgba(255, 255, 255, 0.08);
 $light-theme-glass-background: rgba(0, 0, 0, 0.08);

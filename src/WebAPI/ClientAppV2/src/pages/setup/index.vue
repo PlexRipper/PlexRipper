@@ -253,13 +253,13 @@ const finishSetup = () => {
 body {
 	&.body--dark {
 		.setup-card {
-			background-color: $dark-background-color;
+			background-color: $dark-xl-background-color;
 		}
 	}
 
 	&.body--light {
 		.setup-card {
-			background-color: $light-background-color;
+			background-color: $light-xl-background-color;
 		}
 	}
 }

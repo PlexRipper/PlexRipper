@@ -99,7 +99,7 @@ function onComplete() {
 
 .otp-input {
 	@extend .default-border;
-	@extend .glass-background;
+	@extend .background-sm;
 	width: 80px;
 	height: 80px;
 	padding: 5px;

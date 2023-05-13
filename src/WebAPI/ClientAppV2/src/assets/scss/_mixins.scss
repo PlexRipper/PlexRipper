@@ -1,22 +1,18 @@
 @import 'variables';
 
-/*
-Background
-*/
-body {
-	&.body--dark {
-		.glass-background {
-			background: $dark-theme-glass-background;
-		}
-	}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * Text
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-	&.body--light {
-		.glass-background {
-			background: $light-background-color;
-		}
-	}
+.text-eclipse {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * Background
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 .blur {
 	backdrop-filter: blur(30px);
@@ -26,29 +22,67 @@ body {
 	background-color: transparent !important;
 }
 
-.text-eclipse {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
 
 body {
 	&.body--dark {
-		.extra-background {
-			background-color: $dark-dialog-background-color;
+		.background-sm {
+			background: $dark-sm-background-color;
 		}
 	}
 
 	&.body--light {
-		.extra-background {
-			background-color: $light-dialog-background-color;
+		.background-sm {
+			background: $light-sm-background-color;
 		}
 	}
 }
 
-/*
-Borders
-*/
+body {
+	&.body--dark {
+		.background-md {
+			background: $dark-md-background-color;
+		}
+	}
+
+	&.body--light {
+		.background-md {
+			background: $light-md-background-color;
+		}
+	}
+}
+
+body {
+	&.body--dark {
+		.background-lg {
+			background: $dark-lg-background-color;
+		}
+	}
+
+	&.body--light {
+		.background-lg {
+			background: $light-lg-background-color;
+		}
+	}
+}
+
+body {
+	&.body--dark {
+		.background-xl {
+			background: $dark-xl-background-color;
+		}
+	}
+
+	&.body--light {
+		.background-xl {
+			background: $light-xl-background-color;
+		}
+	}
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * Borders
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 .default-border {
 	border: 2px solid red;
 }
@@ -59,11 +93,6 @@ Borders
 
 .default-border-radius {
 	border-radius: 15px;
-}
-
-
-.default-shadow {
-	box-shadow: $box-shadow;
 }
 
 // Used for low opacity borders in tables
@@ -79,10 +108,17 @@ Borders
 	}
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * Shadows
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-/*
-Sizing
-*/
+.default-shadow {
+	box-shadow: $box-shadow;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * Size
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 .inherit-all-height {
 	min-height: inherit;
 	max-height: inherit;

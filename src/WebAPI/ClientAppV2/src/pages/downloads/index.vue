@@ -11,7 +11,7 @@
 						v-for="{ plexServer, downloads } in getServersWithDownloads"
 						:key="plexServer.id"
 						default-opened
-						class="extra-background default-border-radius q-ma-md">
+						class="background-sm default-border-radius q-ma-md">
 						<template #header>
 							<q-row align="center">
 								<!-- Download Server Settings -->

@@ -115,7 +115,8 @@ public class WebApiMappingProfile : Profile
     private void PlexMediaMappings()
     {
         // PlexMediaSlim -> PlexMediaSlimDTO
-        CreateMap<PlexMediaSlim, PlexMediaSlimDTO>(MemberList.Destination);
+        CreateMap<PlexMediaSlim, PlexMediaSlimDTO>(MemberList.Destination)
+            .ForMember(dto => dto.Qualities, opt => opt.MapFrom(x => x.Qualities));
 
         // PlexMediaData -> PlexMediaDataDTO
         CreateMap<PlexMedia, PlexMediaDTO>(MemberList.Destination)
@@ -127,6 +128,9 @@ public class WebApiMappingProfile : Profile
 
         // PlexMediaData -> PlexMediaDataDTO
         CreateMap<PlexMediaData, PlexMediaDataDTO>(MemberList.Destination);
+
+        // PlexMediaQuality -> PlexMediaQualityDTO
+        CreateMap<PlexMediaQuality, PlexMediaQualityDTO>(MemberList.Destination);
 
         // PlexMediaDataPart -> PlexMediaDataPartDTO
         CreateMap<PlexMediaDataPart, PlexMediaDataPartDTO>(MemberList.Destination);

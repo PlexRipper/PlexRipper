@@ -53,10 +53,29 @@ public class PlexMediaSlim : BaseEntity
     [Column(Order = 17)]
     public bool HasThumb { get; set; }
 
+    [Column(Order = 22)]
+    public PlexMediaContainer MediaData { get; set; } = new();
+
     public int PlexLibraryId { get; set; }
 
     public int PlexServerId { get; set; }
 
     [NotMapped]
     public virtual PlexMediaType Type { get; set; }
+
+    [NotMapped]
+    public List<PlexMediaQuality> Qualities
+    {
+        get
+        {
+            return MediaData.MediaData.Select(x => new PlexMediaQuality()
+                {
+                    Quality = x.VideoResolution,
+                    HashId = "NotImplementedYet",
+                })
+                .Reverse() // This sorts from lowest to highest quality
+                .TakeLast(1) // TODO remove this when quality selector for downloading is implemented
+                .ToList();
+        }
+    }
 }

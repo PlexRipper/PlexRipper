@@ -27,4 +27,6 @@ public class PlexMediaSlimDTO
     public PlexMediaType Type { get; set; }
 
     public bool HasThumb { get; set; }
+
+    public List<PlexMediaQuality> Qualities { get; set; }
 }

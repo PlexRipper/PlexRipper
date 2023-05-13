@@ -71,9 +71,6 @@ public class PlexMedia : PlexMediaSlim
     [Column(Order = 21)]
     public string FullTitle { get; set; }
 
-    [Column(Order = 22)]
-    public PlexMediaContainer MediaData { get; set; } = new();
-
     #endregion
 
     #region Relationships

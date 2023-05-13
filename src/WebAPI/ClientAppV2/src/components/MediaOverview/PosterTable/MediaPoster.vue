@@ -1,73 +1,84 @@
 <template>
 	<q-intersection transition="fade" class="q-ma-md media-poster" :threshold="0.1" @visibility="isVisibleChanged">
-		<div class="highlight-border-box">
-			<q-hover>
-				<template #default="{ hover }">
-					<q-card>
+		<q-card flat class="media-poster--card highlight-border-box">
+			<div>
+				<q-hover>
+					<template #default="{ hover }">
 						<q-img
+							v-if="!defaultImage"
 							loading="eager"
-							:no-transition="!imageUrl"
 							:src="imageUrl"
 							fit="fill"
 							no-spinner
-							class="poster-image"
+							class="media-poster--image"
 							:alt="mediaItem.title">
-							<!--	Placeholder	-->
-							<!--						<template #loading>-->
-							<!--							&lt;!&ndash;	Show fallback image	&ndash;&gt;-->
-							<!--							<template v-if="defaultImage">-->
-							<!--								<q-row align="center" justify="center" class="fill-height">-->
-							<!--									<q-col cols="auto">-->
-							<!--										<q-media-type-icon class="mx-3" :size="100" :media-type="mediaType" />-->
-							<!--									</q-col>-->
-							<!--									<q-col cols="12">-->
-							<!--										<h4 class="text-center">{{ mediaItem.title }}</h4>-->
-							<!--									</q-col>-->
-							<!--								</q-row>-->
-							<!--							</template>-->
-							<!--							&lt;!&ndash;	Show  image	&ndash;&gt;-->
-							<!--							<template v-else>-->
-							<!--								<q-row class="fill-height ma-0" align="center" justify="center">-->
-							<!--									<q-col cols="12">-->
-							<!--										<h4 class="text-center">{{ mediaItem.title }}</h4>-->
-							<!--									</q-col>-->
-							<!--									<q-col cols="auto">-->
-							<!--										<q-circular-progress color="grey lighten-5" />-->
-							<!--									</q-col>-->
-							<!--								</q-row>-->
-							<!--							</template>-->
-							<!--						</template>-->
 							<!--	Overlay	-->
-							<div :class="['poster-overlay', hover ? 'on-hover' : '', 'white--text']">
+							<div :class="['media-poster--overlay', hover ? 'on-hover' : '', 'white--text']">
 								<q-row justify="center" align="end" style="height: 100%">
-									<q-col cols="12" class="text-center">
-										<span class="poster-overlay-title">
+									<q-col cols="12" text-align="center">
+										<span class="media-poster--title">
 											{{ mediaItem.title }}
 										</span>
 									</q-col>
 									<q-col cols="auto">
-										<q-btn v-if="isMovieType" icon="mdi-download" size="xl" @click="downloadMedia()" />
-										<q-btn v-if="isTvShowType" icon="mdi-magnify" size="xl" @click="openDetails()" />
+										<BaseButton
+											v-if="mediaType === PlexMediaType.Movie"
+											icon="mdi-download"
+											size="xl"
+											flat
+											:outline="false"
+											@click="downloadMedia()" />
+										<BaseButton
+											v-if="mediaType === PlexMediaType.TvShow"
+											icon="mdi-magnify"
+											:outline="false"
+											size="xl"
+											flat
+											@click="openDetails()" />
 									</q-col>
 								</q-row>
 							</div>
 						</q-img>
-						<!--	Poster bar	-->
-						<q-row justify="center" no-gutters>
-							<q-col cols="auto">
-								<q-chip
-									v-for="item in mediaItem.mediaData"
-									:key="item.id"
-									class="my-2"
-									:color="getQualityColor(item.videoResolution)"
-									size="md">
-									{{ getQualityString(item.videoResolution) }}
-								</q-chip>
-							</q-col>
-						</q-row>
-					</q-card>
-				</template>
-			</q-hover>
+						<!--	Show fallback image	-->
+						<template v-else>
+							<q-row column align="center" justify="between" class="media-poster--fallback">
+								<q-col>
+									<q-media-type-icon class="mx-3" :size="90" :media-type="mediaType" />
+								</q-col>
+								<q-col text-align="center">
+									<span class="media-poster--title">
+										{{ mediaItem.title }}
+									</span>
+								</q-col>
+
+								<q-col cols="auto">
+									<BaseButton
+										v-if="mediaType === PlexMediaType.Movie"
+										icon="mdi-download"
+										:outline="false"
+										size="xl"
+										flat
+										@click="downloadMedia()" />
+									<BaseButton
+										v-if="mediaType === PlexMediaType.TvShow"
+										icon="mdi-magnify"
+										:outline="false"
+										size="xl"
+										flat
+										@click="openDetails()" />
+								</q-col>
+							</q-row>
+						</template>
+					</template>
+				</q-hover>
+			</div>
+			<!--	Poster bar	-->
+			<div v-if="qualities.length" class="media-poster--quality-bar">
+				<q-chip v-for="(quality, j) in qualities" :key="j" :color="getQualityColor(quality.quality)" size="md">
+					{{ quality.displayQuality }}
+				</q-chip>
+			</div>
+			<QLoadingOverlay :loading="loading" />
 			<!--	Highlight animation effect	-->
 			<svg class="glow-container">
 				<!--suppress HtmlUnknownAttribute -->
@@ -75,19 +86,20 @@
 				<!--suppress HtmlUnknownAttribute -->
 				<rect pathLength="100" height="5" width="5" stroke-linecap="round" class="glow-line" />
 			</svg>
-		</div>
+		</q-card>
 	</q-intersection>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, defineProps, defineEmits } from 'vue';
+import { computed, defineEmits, defineProps, ref } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
-import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
+import { get, set } from '@vueuse/core';
+import { DownloadMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import { MediaService } from '@service';
 
 const props = defineProps<{
-	mediaItem: PlexMediaDTO;
-	mediaType: PlexMediaType;
+	mediaItem: PlexMediaSlimDTO;
+	index: number;
 }>();
 
 const emit = defineEmits<{
@@ -101,9 +113,9 @@ const thumbHeight = ref(300);
 const isVisible = ref(false);
 const imageUrl = ref('');
 const defaultImage = ref(false);
-
-const isMovieType = computed(() => props.mediaType === PlexMediaType.Movie);
-const isTvShowType = computed(() => props.mediaType === PlexMediaType.TvShow);
+const loading = ref(false);
+const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown);
+const qualities = computed(() => props.mediaItem?.qualities ?? []);
 
 const openDetails = () => {
 	emit('open-details', props.mediaItem.id);
@@ -128,95 +140,102 @@ const getQualityColor = (quality: string): string => {
 	}
 };
 
-const getQualityString = (quality: string): string => {
-	switch (quality) {
-		case '480':
-			return '480p';
-		case '576':
-			return '576p';
-		case '720':
-			return '720p';
-		case '1080':
-			return '1080p';
-		case '1440':
-			return '1440p';
-		case '2160':
-			return '4k';
-		default:
-			return quality;
-	}
-};
-
-const isVisibleChanged = (visibilty: boolean) => {
-	isVisible.value = visibilty;
+function isVisibleChanged(visibility: boolean) {
+	set(isVisible, visibility);
+	// set(defaultImage, true);
+	// return;
 
 	if (!props.mediaItem.hasThumb) {
-		defaultImage.value = true;
+		set(defaultImage, true);
 		return;
 	}
 
-	if (isVisible.value && !imageUrl.value) {
+	if (get(isVisible) && !get(imageUrl)) {
 		useSubscription(
-			MediaService.getThumbnail(props.mediaItem.id, props.mediaType, thumbWidth.value, thumbHeight.value).subscribe({
+			MediaService.getThumbnail(props.mediaItem.id, get(mediaType), get(thumbWidth), get(thumbHeight)).subscribe({
 				next: (data) => {
 					if (!data) {
-						defaultImage.value = true;
+						set(defaultImage, true);
 						return;
 					}
-					imageUrl.value = data;
+					set(imageUrl, data);
 				},
 				error: () => {
-					defaultImage.value = true;
+					set(defaultImage, true);
+				},
+				complete: () => {
+					set(loading, false);
 				},
 			}),
 		);
 	}
-};
+}
 
-const downloadMedia = () => {
+function downloadMedia() {
 	const downloadCommand: DownloadMediaDTO = {
-		type: props.mediaType,
+		type: get(mediaType),
 		mediaIds: [props.mediaItem.id],
 		plexLibraryId: props.mediaItem.plexLibraryId,
 		plexServerId: props.mediaItem.plexServerId,
 	};
 
 	emit('download', [downloadCommand]);
-};
+}
 </script>
 
 <style lang="scss">
+@import '@/assets/scss/_mixins.scss';
+
 .media-poster {
+	@extend .background-sm;
+
 	width: 200px;
 	height: 340px;
 
-	.poster-image {
+	&--card {
+		width: 200px;
+		height: 340px;
+	}
+
+	&--image,
+	&--fallback {
+		width: 200px;
 		height: 300px;
 	}
-}
 
-.poster-overlay {
-	align-items: center;
-	justify-content: center;
-	position: absolute;
-	height: 100%;
-	width: 100%;
-	background-color: rgba(0, 0, 0, 0);
-	opacity: 0;
-	transition: opacity 0.2s ease-in-out;
-
-	.poster-overlay-title {
-		font-size: 1.5em;
-		font-weight: bold;
+	&--fallback {
+		& > div {
+			margin: 16px 0;
+		}
 	}
 
-	&.on-hover {
-		background-color: rgba(0, 0, 0, 0.8);
-		opacity: 0.8;
+	&--title {
+		font-size: 1.5em;
+		font-weight: bold;
+		text-align: center;
+	}
 
-		.q-btn {
-			opacity: 1;
+	&--overlay {
+		@extend .background-xl;
+		width: 100%;
+		height: 100%;
+		opacity: 0;
+		transition: opacity 0.2s ease-in-out;
+
+		&.on-hover {
+			opacity: 0.8;
+
+			.q-btn {
+				opacity: 1;
+			}
 		}
+	}
+
+	&--quality-bar {
+		height: 40px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 }
 </style>

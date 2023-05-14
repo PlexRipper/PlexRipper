@@ -58,13 +58,19 @@
 			</template>
 			<!-- Body	-->
 			<template #default>
+				<MediaQTable
+					v-if="useQTable"
+					:rows="child.children"
+					:selection="getSelected(child.id)"
+					@selection="onSelection(child.id, $event)" />
 				<MediaTable
-					:loading="loading"
+					v-else
 					:rows="child.children"
 					:selection="getSelected(child.id)"
 					row-key="id"
 					disable-hover-click
-					@download="onDownload"
+					:disable-highlight="disableHighlight"
+					:disable-intersection="disableIntersection"
 					@selection="onSelection(child.id, $event)" />
 			</template>
 		</q-expansion-item>
@@ -81,6 +87,7 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { defineProps, ref, withDefaults, computed } from 'vue';
+import { get } from '@vueuse/core';
 import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
 import {
@@ -96,6 +103,9 @@ const props = withDefaults(
 	defineProps<{
 		mediaItem: PlexMediaDTO | null;
 		loading?: boolean;
+		disableIntersection: boolean;
+		disableHighlight: boolean;
+		useQTable: boolean;
 	}>(),
 	{
 		mediaItem: null,
@@ -153,8 +163,8 @@ const getSelected = (id: number): ISelection | null => {
 	return result;
 };
 
-const setSelected = (id: number, children: PlexMediaDTO[], value: boolean) => {
-	const selection = selected.value.find((x) => x.indexKey === id);
+function setSelected(id: number, children: PlexMediaDTO[], value: boolean) {
+	const selection = get(selected).find((x) => x.indexKey === id);
 	if (selection) {
 		if (value) {
 			selection.allSelected = true;
@@ -164,7 +174,7 @@ const setSelected = (id: number, children: PlexMediaDTO[], value: boolean) => {
 			selection.keys = [];
 		}
 	}
-};
+}
 
 const onSelection = (id: number, payload: ISelection) => {
 	const i = selected.value.findIndex((x) => x.indexKey === id);
@@ -177,10 +187,6 @@ const onSelection = (id: number, payload: ISelection) => {
 	selected.value[i].keys = payload.keys;
 };
 // endregion
-
-const onDownload = (downloadCommand: DownloadMediaDTO[]) => {
-	processDownloadCommandBus.emit(downloadCommand);
-};
 
 const expandAll = () => {
 	defaultOpened.value = true;
@@ -220,7 +226,7 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 	const seasonIds: number[] = [];
 	const episodesIds: number[] = [];
 
-	for (const selection of selected.value) {
+	for (const selection of get(selected)) {
 		if (selection.allSelected) {
 			seasonIds.push(selection.indexKey);
 		} else {

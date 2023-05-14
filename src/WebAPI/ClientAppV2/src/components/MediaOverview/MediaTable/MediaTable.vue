@@ -2,19 +2,35 @@
 	<div class="media-table" data-cy="media-table">
 		<MediaTableHeader :columns="mediaTableColumns" selectable class="media-table--header" @selected="updateSelected" />
 		<div ref="qTableRef" :class="['media-table--content', isScrollable ? 'scroll' : '']" data-cy="media-table-scroll">
-			<q-intersection
-				v-for="(row, index) in rows"
-				:key="index"
-				class="media-table--intersection highlight-border-box"
-				:data-scroll-index="index">
+			<template v-if="disableIntersection">
 				<MediaTableRow
+					v-for="(row, index) in rows"
+					:key="index"
 					:index="index"
 					:data-cy="`media-table-row-${index}`"
 					:columns="mediaTableColumns"
 					:row="row"
 					selectable
+					:disable-highlight="disableHighlight"
 					:disable-hover-click="disableHoverClick" />
-			</q-intersection>
+			</template>
+			<template v-else>
+				<q-intersection
+					v-for="(row, index) in rows"
+					:key="index"
+					:once="disableIntersection"
+					class="media-table--intersection highlight-border-box"
+					:data-scroll-index="index">
+					<MediaTableRow
+						:index="index"
+						:data-cy="`media-table-row-${index}`"
+						:columns="mediaTableColumns"
+						:row="row"
+						selectable
+						:disable-highlight="disableHighlight"
+						:disable-hover-click="disableHoverClick" />
+				</q-intersection>
+			</template>
 		</div>
 	</div>
 </template>
@@ -40,6 +56,7 @@ const props = withDefaults(
 		scrollDict?: Record<string, number>;
 		disableHoverClick: boolean;
 		disableHighlight: boolean;
+		disableIntersection: boolean;
 		isScrollable: boolean;
 	}>(),
 	{

@@ -1,5 +1,13 @@
 <template>
-	<q-card-dialog :name="name" class="media-details-dialog" maximized seamless @opened="openDetails" @closed="closeDetails">
+	<q-card-dialog
+		:name="name"
+		no-background
+		class="media-details-dialog"
+		maximized
+		seamless
+		:loading="loading"
+		@opened="openDetails"
+		@closed="closeDetails">
 		<template #default>
 			<q-col>
 				<!--	Header	-->
@@ -52,7 +60,9 @@
 											<td class="media-info-column">{{ mediaCountFormatted }}</td>
 										</tr>
 										<tr>
-											<td class="media-info-column">{{ $t('components.details-overview.summary') }}</td>
+											<td class="media-info-column">
+												{{ $t('components.details-overview.summary') }}
+											</td>
 											<td class="media-info-column">{{ mediaItem?.summary ?? '' }}</td>
 										</tr>
 									</tbody>
@@ -65,7 +75,7 @@
 				<!--	Media Table	-->
 				<q-row no-gutters>
 					<q-col>
-						<MediaList :media-item="mediaItem" />
+						<MediaList use-q-table :media-item="mediaItem" disable-intersection disable-highlight />
 					</q-col>
 				</q-row>
 				<!--	Loading overlay	-->
@@ -76,20 +86,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineEmits, defineProps, ref } from 'vue';
-import { useSubscription } from '@vueuse/rxjs';
-import Log from 'consola';
-import sum from 'lodash-es/sum';
+import { computed, defineProps, ref } from 'vue';
 import { get, set } from '@vueuse/core';
+import { useSubscription } from '@vueuse/rxjs';
+import sum from 'lodash-es/sum';
 import { PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import { MediaList } from '#components';
 import { MediaService } from '@service';
 import { useI18n, useMediaOverviewBarBus } from '#imports';
-
-const emit = defineEmits<{
-	(e: 'media-item', mediaItem: PlexMediaDTO | null): void;
-	(e: 'close'): void;
-}>();
 
 defineProps<{
 	name: string;
@@ -128,24 +132,23 @@ function openDetails({ mediaId, type }: { mediaId: number; type: PlexMediaType }
 	useMediaOverviewBarBus().emit({ downloadButtonVisible: false });
 	useSubscription(
 		MediaService.getMediaDataById(mediaId, type).subscribe((data) => {
-			mediaItem.value = data;
-			emit('media-item', data);
+			Object.freeze(data);
+			set(mediaItem, data);
 			set(loading, false);
 		}),
 	);
 
 	useSubscription(
-		MediaService.getThumbnail(mediaId, type, thumbWidth.value, thumbHeight.value).subscribe({
+		MediaService.getThumbnail(mediaId, type, get(thumbWidth), get(thumbHeight)).subscribe({
 			next: (data) => {
-				Log.info('data', data);
 				if (!data) {
-					defaultImage.value = true;
+					set(defaultImage, true);
 					return;
 				}
-				imageUrl.value = data;
+				set(imageUrl, data);
 			},
 			error: () => {
-				defaultImage.value = true;
+				set(defaultImage, true);
 			},
 		}),
 	);

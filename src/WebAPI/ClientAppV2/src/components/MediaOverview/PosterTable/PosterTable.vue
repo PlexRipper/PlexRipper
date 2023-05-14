@@ -7,18 +7,18 @@
 			:index="index"
 			:media-item="item"
 			:data-scroll-index="index"
-			@download="sendMediaOverviewBarDownloadCommand($event)" />
+			@download="sendMediaOverviewDownloadCommand($event)" />
 	</q-row>
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
-import { defineProps, defineEmits, ref, withDefaults, onMounted } from 'vue';
+import { defineProps, ref, withDefaults, onMounted } from 'vue';
 import { get, set, useScroll } from '@vueuse/core';
 import { PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import {
 	listenMediaOverviewScrollToCommand,
-	sendMediaOverviewBarDownloadCommand,
+	sendMediaOverviewDownloadCommand,
 	setMediaOverviewSort,
 } from '@composables/event-bus';
 import { triggerBoxHighlight } from '@composables/animations';

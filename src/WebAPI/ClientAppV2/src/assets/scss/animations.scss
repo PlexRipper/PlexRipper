@@ -3,15 +3,14 @@
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 .highlight-border-box {
-	--glow-line-color: #fdfdfd;
-	--glow-line-thickness: 2px;
+	--glow-line-thickness: 4px;
 	--glow-line-length: 20px;
+	--glow-line-color: #ffffff;
 	--glow-blur-color: #ff0000;
-	--glow-blur-size: 5px;
+	--glow-blur-size: 10px;
 	--glow-offset: 0px;
-	--animation-speed: 1200ms;
-	/* do not change, used for calculations */
-	--container-offset: 100px;
+	--animation-speed: 1600ms;
+	--container-offset: 0px; // The extra space around the box to make sure the glow doesn't get clipped
 	position: relative;
 }
 

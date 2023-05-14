@@ -16,5 +16,6 @@ export function triggerBoxHighlight(element: HTMLElement | null) {
 	element.classList.add(highlightActiveClass);
 	setTimeout(() => {
 		element.classList.remove(highlightActiveClass);
-	}, 1250);
+		// This is the same number in animations.scss => .highlight-border-box --animation-speed:
+	}, 1600);
 }

@@ -4,6 +4,8 @@ public class PlexMediaSlimDTO
 {
     public int Id { get; set; }
 
+    public int Index { get; set; }
+
     public string Title { get; set; }
 
     public string SortTitle { get; set; }

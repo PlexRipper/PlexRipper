@@ -4,6 +4,7 @@ using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.WebAPI.Common.DTO;
+using PlexRipper.WebAPI.Common.Extensions;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers;
@@ -44,7 +45,12 @@ public class PlexMediaController : BaseController
 
         var result = await _mediator.Send(new GetPlexTvShowByIdWithEpisodesQuery(id));
 
-        return ToActionResult<PlexTvShow, PlexMediaSlimDTO>(result);
+        if (result.IsFailed)
+            return ToActionResult(result.ToResult());
+
+        var dto = _mapper.Map<PlexMediaSlimDTO>(result.Value).SetIndex();
+
+        return Ok(Result.Ok(dto));
     }
 
     // GET api/<PlexMedia>/library/5
@@ -59,8 +65,12 @@ public class PlexMediaController : BaseController
             return BadRequest(id, nameof(id));
 
         var result = await _mediator.Send(new GetPlexMediaDataByLibraryIdQuery(id, page, size));
+        if (result.IsFailed)
+            return ToActionResult(result.ToResult());
 
-        return ToActionResult<List<PlexMediaSlim>, List<PlexMediaSlimDTO>>(result);
+        var dto = _mapper.Map<List<PlexMediaSlimDTO>>(result.Value).SetIndex();
+
+        return Ok(Result.Ok(dto));
     }
 
     // GET api/<PlexMedia>/5

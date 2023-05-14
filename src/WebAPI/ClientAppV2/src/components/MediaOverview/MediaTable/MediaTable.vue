@@ -13,7 +13,7 @@
 					:columns="mediaTableColumns"
 					:row="row"
 					selectable
-					@action="onRowAction" />
+					:disable-hover-click="disableHoverClick" />
 			</q-intersection>
 		</div>
 	</div>

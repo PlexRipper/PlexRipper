@@ -14,8 +14,16 @@
 				</template>
 				<!-- Title -->
 				<template v-else-if="column['type'] === 'title'">
-					<q-col class="media-table-row--column media-table-row--title">
-						<span>{{ row[column.field] }} </span>
+					<q-col
+						:class="[
+							'media-table-row--column',
+							'media-table-row--title',
+							!disableHoverClick ? 'media-table-row--title--hover' : '',
+						]"
+						@click.stop="!disableHoverClick ? onRowAction({ command: 'open-details' }) : () => {}">
+						<span>
+							{{ row[column.field] }}
+						</span>
 					</q-col>
 				</template>
 				<!-- Duration format -->
@@ -73,6 +81,7 @@ defineProps<{
 	row: PlexMediaSlimDTO;
 	columns: QTreeViewTableHeader[];
 	index: number;
+	disableHoverClick?: boolean;
 }>();
 
 defineEmits<{
@@ -105,6 +114,14 @@ defineEmits<{
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		overflow: hidden;
+
+		&--hover {
+			cursor: pointer;
+
+			&:hover {
+				color: $primary;
+			}
+		}
 	}
 }
 

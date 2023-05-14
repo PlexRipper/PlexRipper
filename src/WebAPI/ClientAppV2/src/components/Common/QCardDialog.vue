@@ -7,6 +7,8 @@
 		:persistent="persistent"
 		:seamless="seamless"
 		:maximized="maximized"
+		:transition-show="transitionShow"
+		:transition-hide="transitionHide"
 		@before-show="$emit('opened', dataValue)"
 		@before-hide="$emit('closed')">
 		<q-row
@@ -16,7 +18,7 @@
 			:style="styles">
 			<!-- Dialog Title	-->
 			<q-col v-if="$slots['title']" cols="auto" class="q-card-dialog-title">
-				<div v-show="!loading">
+				<div v-if="!loading">
 					<QCardTitle>
 						<slot name="title" :value="parentValue" />
 					</QCardTitle>
@@ -29,12 +31,12 @@
 				</div>
 			</q-col>
 			<q-col v-if="$slots['default']" class="q-card-dialog-content" :class="{ scroll: scroll }" align-self="stretch">
-				<div v-show="!loading">
+				<div v-if="!loading">
 					<slot :value="parentValue" />
 				</div>
 			</q-col>
 			<q-col v-if="$slots['actions']" cols="auto" align-self="stretch" class="q-card-dialog-actions q-pa-md">
-				<div v-show="!loading">
+				<div v-if="!loading">
 					<!--	Dialog Buttons		-->
 					<q-card-actions :align="buttonAlign">
 						<slot name="actions" :close="closeDialog" :open="openDialog" :value="parentValue" />
@@ -78,6 +80,8 @@ const props = withDefaults(
 		noBackdropDismiss?: boolean;
 		noBackground?: boolean;
 		noRouteDismiss?: boolean;
+		transitionShow?: string;
+		transitionHide?: string;
 		buttonAlign?: 'left' | 'center' | 'right' | 'between' | 'around' | 'evenly' | 'stretch';
 		cy?: string;
 	}>(),
@@ -104,6 +108,8 @@ const props = withDefaults(
 		noRouteDismiss: false,
 		cy: 'q-card-dialog-cy',
 		buttonAlign: 'right',
+		transitionShow: 'fade',
+		transitionHide: 'fade',
 	},
 );
 

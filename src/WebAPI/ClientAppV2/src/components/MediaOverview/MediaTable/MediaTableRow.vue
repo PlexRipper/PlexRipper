@@ -3,7 +3,7 @@
 		<template v-if="row">
 			<!-- Checkbox -->
 			<q-col v-if="selectable" cols="auto" class="q-ml-md q-pl-sm">
-				<q-checkbox dense :model-value="selected" @update:model-value="$emit('selected', $event)" />
+				<q-checkbox dense :model-value="selected" @update:model-value="$emit('selected', row)" />
 			</q-col>
 			<template v-for="(column, i) in columns" :key="i">
 				<!-- Index -->
@@ -50,7 +50,7 @@
 						<q-btn
 							flat
 							:icon="Convert.buttonTypeToIcon(ButtonType.Download)"
-							@click="$emit('action', { action: 'download', data: row })" />
+							@click.stop="onRowAction({ command: 'download' })" />
 					</q-col>
 				</template>
 			</template>
@@ -73,8 +73,14 @@ import { QTreeViewTableHeader } from '@props';
 import { PlexMediaSlimDTO } from '@dto/mainApi';
 import Convert from '@class/Convert';
 import ButtonType from '@enums/buttonType';
+import {
+	IMediaOverviewCommands,
+	sendMediaOverviewBarDownloadCommand,
+	sendMediaOverviewOpenDetailsCommand,
+} from '@composables/event-bus';
+import { toDownloadMedia } from '@composables/conversion';
 
-defineProps<{
+const props = defineProps<{
 	selected?: boolean | null;
 	isHeader?: boolean;
 	selectable?: boolean;
@@ -85,9 +91,21 @@ defineProps<{
 }>();
 
 defineEmits<{
-	(e: 'selected', payload: boolean): void;
-	(e: 'action', payload: { action: string | 'download'; data: PlexMediaSlimDTO }): void;
+	(e: 'selected', payload: PlexMediaSlimDTO): void;
 }>();
+
+function onRowAction(action: IMediaOverviewCommands) {
+	switch (action.command) {
+		case 'download':
+			sendMediaOverviewBarDownloadCommand(toDownloadMedia[props.row]);
+			break;
+		case 'open-details':
+			sendMediaOverviewOpenDetailsCommand(props.row.id);
+			break;
+		default:
+			throw new Error(`Unknown action: ${action.command} in MediaTableRow.vue`);
+	}
+}
 </script>
 
 <style lang="scss">

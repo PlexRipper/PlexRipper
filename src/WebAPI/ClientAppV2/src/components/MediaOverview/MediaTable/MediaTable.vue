@@ -1,6 +1,6 @@
 <template>
 	<div class="media-table" data-cy="media-table">
-		<MediaTableHeader :columns="mediaTableColumns" selectable class="media-table--header" />
+		<MediaTableHeader :columns="mediaTableColumns" selectable class="media-table--header" @selected="updateSelected" />
 		<div ref="qTableRef" class="media-table--content scroll" data-cy="media-table-scroll">
 			<q-intersection
 				v-for="(row, index) in rows"
@@ -23,13 +23,7 @@
 import Log from 'consola';
 import { computed, defineEmits, defineProps, ref, withDefaults, onMounted } from 'vue';
 import { get, set, useScroll } from '@vueuse/core';
-import {
-	setMediaOverviewSort,
-	toDownloadMedia,
-	triggerBoxHighlight,
-	sendMediaOverviewBarDownloadCommand,
-	listenMediaOverviewScrollToCommand,
-} from '#imports';
+import { setMediaOverviewSort, triggerBoxHighlight, listenMediaOverviewScrollToCommand } from '#imports';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 import { PlexMediaSlimDTO } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
@@ -44,7 +38,7 @@ const props = withDefaults(
 		rows: PlexMediaSlimDTO[];
 		selection: ISelection | null;
 		scrollDict?: Record<string, number>;
-		disableHoverClick?: boolean;
+		disableHoverClick: boolean;
 	}>(),
 	{
 		scrollDict: { '#': 0 } as any,
@@ -63,18 +57,12 @@ const getSelected = computed((): PlexMediaSlimDTO[] => {
 	return props.rows.filter((row) => (props.selection?.keys ?? []).includes(row.id));
 });
 
-const updateSelected = (selected: PlexMediaSlimDTO[]) => {
+function updateSelected(selected: PlexMediaSlimDTO[], allSelected?: boolean) {
 	emit('selection', {
 		keys: selected.map((x) => x.id) as number[],
 		allSelected: selected.length === props.rows.length ? true : selected.length === 0 ? false : null,
 		indexKey: 0,
 	});
-};
-
-function onRowAction({ action, data }: { action: 'download'; data: PlexMediaSlimDTO }) {
-	if (action === 'download') {
-		sendMediaOverviewBarDownloadCommand(toDownloadMedia(data));
-	}
 }
 
 onMounted(() => {

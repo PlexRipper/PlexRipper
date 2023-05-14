@@ -34,7 +34,7 @@
 											:outline="false"
 											size="xl"
 											flat
-											@click="openDetails()" />
+											@click="sendMediaOverviewOpenDetailsCommand(mediaItem.id)" />
 									</q-col>
 								</q-row>
 							</div>
@@ -65,7 +65,7 @@
 										:outline="false"
 										size="xl"
 										flat
-										@click="openDetails()" />
+										@click="sendMediaOverviewOpenDetailsCommand(mediaItem.id)" />
 								</q-col>
 							</q-row>
 						</template>
@@ -96,6 +96,7 @@ import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import { DownloadMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import { MediaService } from '@service';
+import { sendMediaOverviewOpenDetailsCommand } from '@composables/event-bus';
 
 const props = defineProps<{
 	mediaItem: PlexMediaSlimDTO;
@@ -103,7 +104,6 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-	(e: 'open-details', mediaId: number): void;
 	(e: 'download', downloadMediaCommands: DownloadMediaDTO[]): void;
 }>();
 
@@ -116,10 +116,6 @@ const defaultImage = ref(false);
 const loading = ref(false);
 const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown);
 const qualities = computed(() => props.mediaItem?.qualities ?? []);
-
-const openDetails = () => {
-	emit('open-details', props.mediaItem.id);
-};
 
 const getQualityColor = (quality: string): string => {
 	switch (quality) {

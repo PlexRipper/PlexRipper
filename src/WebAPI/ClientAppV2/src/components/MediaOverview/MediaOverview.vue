@@ -23,7 +23,7 @@
 	<!--		</q-row>-->
 	<!--	</template>-->
 	<!-- Header -->
-	<template v-if="!loading">
+	<template v-if="!loading && items.length">
 		<q-row no-gutters>
 			<q-col>
 				<!--	Overview bar	-->
@@ -39,16 +39,15 @@
 					@view-change="changeView"
 					@refresh-library="refreshLibrary" />
 				<!--	Data table display	-->
-				<q-row v-show="showMediaOverview" ref="mediaContainerRef" class="media-container" align="start">
-					<q-col>
+				<q-row id="media-container" align="start">
+					<q-col v-show="showMediaOverview">
 						<template v-if="mediaViewMode === ViewMode.Table">
 							<MediaTable
 								:rows="items"
 								:selection="selected"
 								:disable-hover-click="mediaType !== PlexMediaType.TvShow"
 								:scroll-dict="scrollDict"
-								@selection="selected = $event"
-								@row-click="openDetails($event.id)" />
+								@selection="selected = $event" />
 						</template>
 
 						<!-- Poster display-->
@@ -57,54 +56,37 @@
 								:library-id="libraryId"
 								:media-type="mediaType"
 								:items="items"
-								:scroll-dict="scrollDict"
-								@open-details="openDetails" />
+								:scroll-dict="scrollDict" />
 						</template>
-
-						<!--	Overlay with details of the media	-->
 					</q-col>
 					<!-- Alphabet Navigation-->
-					<alphabet-navigation :scroll-dict="scrollDict" />
+					<alphabet-navigation v-show="showMediaOverview" :scroll-dict="scrollDict" />
 				</q-row>
 			</q-col>
 		</q-row>
 	</template>
-	<template v-else>
+	<template v-else-if="!loading && items.length === 0">
 		<q-row justify="center">
 			<q-col cols="auto">
 				<h1>{{ $t('components.media-overview.no-data') }}</h1>
 			</q-col>
 		</q-row>
 	</template>
-
-	<!-- Media detail view	-->
-	<q-dialog
-		v-model="showDetails"
-		seamless
-		maximized
-		class="media-details-dialog"
-		transition-show="slide-up"
-		transition-hide="slide-down"
-		@show="onOpenDetails">
-		<div :style="getDetailsStyle">
-			<QScrollArea class="fit">
-				<DetailsOverview ref="detailsOverviewRef" @close="closeDetailsOverview" @media-item="mediaItem = $event" />
-			</QScrollArea>
-		</div>
-	</q-dialog>
-
+	<!-- Media Details Display-->
+	<DetailsOverview :name="mediaDetailsDialogName" />
+	<!--	Loading overlay	-->
+	<QLoadingOverlay :loading="loading" />
 	<!--		Download confirmation dialog	-->
 	<DownloadConfirmation :name="downloadConfirmationName" :items="items" @download="DownloadService.downloadMedia($event)" />
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
-import { ref, defineProps, computed, onMounted, onBeforeMount } from 'vue';
-import { get, set, useElementBounding } from '@vueuse/core';
+import { ref, defineProps, computed, onMounted, nextTick } from 'vue';
+import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { take } from 'rxjs/operators';
-import { QScrollArea } from 'quasar';
 import { isEqual, orderBy } from 'lodash-es';
 import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaDTO, PlexMediaSlimDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
@@ -119,24 +101,24 @@ import {
 	useOpenControlDialog,
 	listenMediaOverviewDownloadCommand,
 	sendMediaOverviewBarDownloadCommand,
+	useCloseControlDialog,
 } from '#imports';
-import { IMediaOverviewSort } from '@composables/event-bus';
+import {
+	IMediaOverviewSort,
+	listenMediaOverviewOpenDetailsCommand,
+	sendMediaOverviewOpenDetailsCommand,
+} from '@composables/event-bus';
 
 // region SetupFields
 
 const router = useRouter();
-const route = useRoute();
-const mediaContainerRef = ref(null);
-const mediaContainerSize = useElementBounding(mediaContainerRef);
 const scrollDict = ref<Record<string, number>>({});
 const selected = ref<ISelection>({ keys: [], allSelected: false, indexKey: 0 });
 
 // endregion
 
-const showDetails = ref(false);
 const downloadConfirmationName = 'mediaDownloadConfirmation';
-
-const activeAccountId = ref(0);
+const mediaDetailsDialogName = 'mediaDetailsDialogName';
 const isRefreshing = ref(false);
 
 const server = ref<PlexServerDTO | null>(null);
@@ -149,34 +131,17 @@ const loading = ref(true);
 const showMediaOverview = ref(true);
 const mediaItem = ref<PlexMediaDTO | null>(null);
 const mediaViewMode = ref<ViewMode>(ViewMode.Poster);
-const currentMediaItemId = ref<number | null>(null);
 
 const askDownloadMovieConfirmation = ref(false);
 const askDownloadTvShowConfirmation = ref(false);
 const askDownloadSeasonConfirmation = ref(false);
 const askDownloadEpisodeConfirmation = ref(false);
 
-const detailsOverviewRef = ref<InstanceType<typeof DetailsOverview> | null>(null);
-
 const props = defineProps<{
 	libraryId: number;
 	mediaId: number;
 	mediaType: PlexMediaType;
 }>();
-
-const getDetailsStyle = computed(() => {
-	const width = mediaContainerSize.width.value;
-	const height = mediaContainerSize.height.value;
-
-	return {
-		width: width + 'px !important',
-		minWidth: width + 'px !important',
-		maxWidth: width + 'px !important',
-		height: height + 'px !important',
-		minHeight: height + 'px !important',
-		maxHeight: height + 'px !important',
-	};
-});
 
 const isConfirmationEnabled = computed(() => {
 	switch (props.mediaType) {
@@ -211,10 +176,10 @@ const changeView = (viewMode: ViewMode) => {
 	}
 };
 
-const resetProgress = (isRefreshingValue: boolean) => {
-	isRefreshing.value = isRefreshingValue;
+function resetProgress(isRefreshingValue: boolean) {
+	set(isRefreshing, isRefreshingValue);
 
-	libraryProgress.value = {
+	set(libraryProgress, {
 		id: props.libraryId,
 		percentage: 0,
 		received: 0,
@@ -222,50 +187,18 @@ const resetProgress = (isRefreshingValue: boolean) => {
 		isRefreshing: isRefreshingValue,
 		isComplete: false,
 		timeStamp: '',
-	};
-};
-
-const openDetails = (mediaId: number) => {
-	if (!mediaId) {
-		Log.error('mediaId was invalid, could not open details', mediaId);
-		return;
-	}
-
-	if (!router.currentRoute.value.path.includes('details')) {
-		router.push({
-			path: props.libraryId + '/details/' + mediaId,
-		});
-	}
-	set(currentMediaItemId, mediaId);
-	set(showDetails, true);
-};
-
-const onOpenDetails = () => {
-	if (detailsOverviewRef.value) {
-		detailsOverviewRef.value.openDetails(currentMediaItemId.value ?? 0, props.mediaType);
-	} else {
-		Log.error('detailsOverview was invalid', detailsOverviewRef.value);
-	}
-	showMediaOverview.value = false;
-};
-
-const closeDetailsOverview = () => {
-	router.push({
-		path: '/tvshows/' + props.libraryId,
 	});
-	showMediaOverview.value = true;
-	showDetails.value = false;
-};
+}
 
-const refreshLibrary = () => {
-	isRefreshing.value = true;
+function refreshLibrary() {
+	set(isRefreshing, true);
 	resetProgress(true);
 	LibraryService.refreshLibrary(props.libraryId).subscribe(() => {
-		isRefreshing.value = false;
+		set(isRefreshing, false);
 	});
-};
+}
 
-const onRequestMedia = ({ page, size, refresh }: { page: number; size: number; refresh: () => void }) => {
+function onRequestMedia({ page, size, refresh }: { page: number; size: number; refresh: () => void }) {
 	useSubscription(
 		MediaService.getMediaData(props.libraryId, page, size)
 			.pipe(take(1))
@@ -288,7 +221,7 @@ const onRequestMedia = ({ page, size, refresh }: { page: number; size: number; r
 				},
 			}),
 	);
-};
+}
 
 function setScrollIndexes() {
 	setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
@@ -306,7 +239,10 @@ function setScrollIndexes() {
 }
 
 // region Eventbus
-// Listen for process download command
+
+/**
+ * Listen for process download command
+ */
 listenMediaOverviewDownloadCommand((command) => {
 	// Only show if there is more than 1 selection
 	if (command.length > 0 && command.some((x) => x.mediaIds.length > 0)) {
@@ -317,6 +253,37 @@ listenMediaOverviewDownloadCommand((command) => {
 		}
 	}
 });
+
+listenMediaOverviewOpenDetailsCommand((mediaId: number) => {
+	Log.debug('Received open details command', mediaId);
+	if (!mediaId) {
+		Log.error('mediaId was invalid, could not open details', mediaId);
+		return;
+	}
+	// if (!get(mediaDetailsDialogRef)) {
+	// 	Log.error('mediaDetailsDialogRef was invalid, could not open details', mediaDetailsDialogRef);
+	// 	return;
+	// }
+	if (!router.currentRoute.value.path.includes('details')) {
+		router.push({
+			path: props.libraryId + '/details/' + mediaId,
+		});
+	}
+
+	set(showMediaOverview, false);
+	const type = props.mediaType;
+	useOpenControlDialog(mediaDetailsDialogName, { mediaId, type });
+});
+
+function closeDetailsOverview() {
+	router.push({
+		path: '/tvshows/' + props.libraryId,
+	});
+	useCloseControlDialog(mediaDetailsDialogName);
+
+	set(showMediaOverview, true);
+}
+
 useMediaOverviewBarDownloadCommandBus().on(() => {
 	if (showMediaOverview.value) {
 		const downloadCommand: DownloadMediaDTO = {
@@ -364,13 +331,6 @@ watch(selected, () => {
 
 // endregion
 
-onBeforeMount(() => {
-	const mediaId = +route.params.tvShowId;
-	if (mediaId) {
-		openDetails(mediaId);
-	}
-});
-
 onMounted(() => {
 	resetProgress(false);
 	set(isRefreshing, false);
@@ -389,42 +349,39 @@ onMounted(() => {
 		},
 	});
 
-	// Get Active account id
-	useSubscription(SettingsService.getActiveAccountId().subscribe((id) => (activeAccountId.value = id)));
-
 	// Get display settings
 	if (props.mediaType === PlexMediaType.Movie) {
 		useSubscription(
 			SettingsService.getMovieViewMode().subscribe((value) => {
-				mediaViewMode.value = value;
+				set(mediaViewMode, value);
 			}),
 		);
 	} else if (props.mediaType === PlexMediaType.TvShow) {
 		useSubscription(
 			SettingsService.getTvShowViewMode().subscribe((value) => {
-				mediaViewMode.value = value;
+				set(mediaViewMode, value);
 			}),
 		);
 	}
 
 	useSubscription(
 		SettingsService.getAskDownloadMovieConfirmation().subscribe((value) => {
-			askDownloadMovieConfirmation.value = value;
+			set(askDownloadMovieConfirmation, value);
 		}),
 	);
 	useSubscription(
 		SettingsService.getAskDownloadTvShowConfirmation().subscribe((value) => {
-			askDownloadTvShowConfirmation.value = value;
+			set(askDownloadTvShowConfirmation, value);
 		}),
 	);
 	useSubscription(
 		SettingsService.getAskDownloadSeasonConfirmation().subscribe((value) => {
-			askDownloadSeasonConfirmation.value = value;
+			set(askDownloadSeasonConfirmation, value);
 		}),
 	);
 	useSubscription(
 		SettingsService.getAskDownloadEpisodeConfirmation().subscribe((value) => {
-			askDownloadEpisodeConfirmation.value = value;
+			set(askDownloadEpisodeConfirmation, value);
 		}),
 	);
 
@@ -432,8 +389,8 @@ onMounted(() => {
 	useSubscription(
 		SignalrService.getLibraryProgress(props.libraryId).subscribe((data) => {
 			if (data) {
-				libraryProgress.value = data;
-				isRefreshing.value = data.isRefreshing;
+				set(libraryProgress, data);
+				set(isRefreshing, data.isRefreshing);
 				if (data.isComplete) {
 					refreshLibrary();
 				}
@@ -446,7 +403,7 @@ onMounted(() => {
 			if (!serverData) {
 				Log.error(`MediaOverview => Server for library id ${props.libraryId} was not found`);
 			}
-			server.value = serverData;
+			set(server, serverData);
 		}),
 	);
 
@@ -455,30 +412,26 @@ onMounted(() => {
 			if (!libraryData) {
 				Log.error(`MediaOverview => Library for library id ${props.libraryId} was not found`);
 			}
-			library.value = libraryData;
+			set(library, libraryData);
 		}),
 	);
+	if (props.mediaId) {
+		nextTick(() => {
+			sendMediaOverviewOpenDetailsCommand(props.mediaId);
+		});
+	}
 });
 </script>
 
 <style lang="scss">
 @import '@/assets/scss/variables.scss';
 
-.media-container,
+#media-container,
 .media-table-container,
 .detail-view-container {
 	// We need a set height so we calculate the remaining content space by subtracting other component heights
 	height: calc(100vh - $app-bar-height - $media-overview-bar-height);
 	width: 100%;
 	overflow: hidden;
-}
-
-.media-details-dialog {
-	.q-dialog__inner {
-		top: auto !important;
-		left: auto !important;
-		bottom: 0 !important;
-		right: 0 !important;
-	}
 }
 </style>

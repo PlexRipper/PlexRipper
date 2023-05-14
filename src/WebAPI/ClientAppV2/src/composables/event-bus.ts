@@ -51,15 +51,26 @@ export function setMediaOverviewSort(action: IMediaOverviewSort) {
 	useMediaOverviewSortBus().emit(action);
 }
 
+// region General
 export interface IMediaOverviewCommands {
-	command: 'scrollTo' | 'download';
+	command: 'scrollTo' | 'download' | 'open-details';
 	scrollToLetter?: string;
 	downloadMediaCommands?: DownloadMediaDTO[];
+	mediaId?: number;
+}
+
+export function resetMediaOverviewCommandsBus(): void {
+	return useMediaOverviewCommandsBus().reset();
 }
 
 export function useMediaOverviewCommandsBus(): UseEventBusReturn<IMediaOverviewCommands, any> {
+	// Do not set this to a constant, it will cause issues with the event bus.
 	return useEventBus<IMediaOverviewCommands>('mediaOverViewCommands');
 }
+
+// endregion
+
+// region  ScrollTo command
 
 export function sendMediaOverviewScrollToCommand(letter: string): void {
 	useMediaOverviewCommandsBus().emit({
@@ -76,12 +87,16 @@ export function listenMediaOverviewScrollToCommand(action: (letter: string) => v
 	});
 }
 
+// endregion
+
 /**
  * This is used to send a command to from the MediaOverviewBar to trigger a download command.
  */
 export function useMediaOverviewBarDownloadCommandBus(): UseEventBusReturn<string, any> {
 	return useEventBus<string>('downloadCommand');
 }
+
+// region Download command
 
 export function sendMediaOverviewBarDownloadCommand(downloadMediaCommands: DownloadMediaDTO[]): void {
 	useMediaOverviewCommandsBus().emit({
@@ -97,5 +112,26 @@ export function listenMediaOverviewDownloadCommand(action: (downloadMediaCommand
 		}
 	});
 }
+
+// endregion
+
+// region Open Details
+
+export function sendMediaOverviewOpenDetailsCommand(mediaId: number): void {
+	useMediaOverviewCommandsBus().emit({
+		command: 'open-details',
+		mediaId,
+	});
+}
+
+export function listenMediaOverviewOpenDetailsCommand(action: (mediaId: number) => void): void {
+	useMediaOverviewCommandsBus().on(({ command, mediaId }) => {
+		if (command === 'open-details') {
+			action(mediaId ?? -1);
+		}
+	});
+}
+
+// endregion
 
 // endregion

@@ -6,10 +6,8 @@
 			:key="item.id"
 			:index="index"
 			:media-item="item"
-			:media-type="mediaType"
 			:data-scroll-index="index"
-			@download="sendMediaOverviewBarDownloadCommand($event)"
-			@open-details="$emit('open-details', $event)" />
+			@download="sendMediaOverviewBarDownloadCommand($event)" />
 	</q-row>
 </template>
 
@@ -39,10 +37,6 @@ const props = withDefaults(
 		scrollDict: { '#': 0 } as any,
 	},
 );
-
-defineEmits<{
-	(e: 'open-details', mediaId: number): void;
-}>();
 
 const posterTableRef = computed(() => document.getElementById('poster-table'));
 

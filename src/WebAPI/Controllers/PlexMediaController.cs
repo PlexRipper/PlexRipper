@@ -32,7 +32,11 @@ public class PlexMediaController : BaseController
         _plexMediaService = plexMediaService;
     }
 
-    // GET api/<PlexMedia>/tvshow/5
+    /// <summary>
+    /// Get the <see cref="PlexTvShow"/> with the <see cref="PlexTvShowSeason"/> and <see cref="PlexTvShowEpisode"/> in a minimal format.
+    /// </summary>
+    /// <param name="id">The id of the <see cref="PlexTvShow"/></param>
+    /// <returns></returns>
     [HttpGet("tvshow/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexMediaSlimDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
@@ -52,6 +56,29 @@ public class PlexMediaController : BaseController
 
         return Ok(Result.Ok(dto));
     }
+
+    /// <summary>
+    /// Get the <see cref="PlexTvShow"/> without the <see cref="PlexTvShowSeason"/> and <see cref="PlexTvShowEpisode"/>
+    /// </summary>
+    /// <param name="id">The id of the <see cref="PlexTvShow"/></param>
+    /// <returns></returns>
+    [HttpGet("tvshow/detail/{id:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexMediaDTO>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
+    public async Task<IActionResult> GetTvShowDetail(int id)
+    {
+        if (id <= 0)
+            return BadRequest(id, nameof(id));
+
+        var result = await _mediator.Send(new GetPlexTvShowByIdQuery(id));
+
+        return ToActionResult<PlexTvShow, PlexMediaDTO>(result);
+    }
+
+
+
 
     // GET api/<PlexMedia>/library/5
     [HttpGet("library/{id:int}")]

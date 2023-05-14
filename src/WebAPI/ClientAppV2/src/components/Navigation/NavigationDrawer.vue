@@ -1,5 +1,12 @@
 <template>
-	<q-drawer class="navigation-drawer" :model-value="showDrawer" :width="400" bordered style="overflow-x: hidden">
+	<q-drawer
+		class="navigation-drawer"
+		:model-value="showDrawer"
+		:width="400"
+		bordered
+		style="overflow-x: hidden"
+		@before-show="onShow"
+		@before-hide="onHide">
 		<q-col class="server-drawer-container">
 			<q-scroll>
 				<!-- Server drawer -->
@@ -89,8 +96,20 @@ const getNavItems = computed((): QExpansionListProps[] => {
 	return mainItems;
 });
 
+function onShow() {
+	document.body.classList.remove('navigation-drawer-closed');
+	document.body.classList.add('navigation-drawer-opened');
+}
+
+function onHide() {
+	document.body.classList.remove('navigation-drawer-opened');
+	document.body.classList.add('navigation-drawer-closed');
+}
+
 onMounted(() => {
 	items.value = getNavItems.value;
+	document.body.classList.add('navigation-drawer-opened');
+
 	useSubscription(
 		DownloadService.getTotalDownloadsCount().subscribe((count) => {
 			set(downloadTaskCount, count);

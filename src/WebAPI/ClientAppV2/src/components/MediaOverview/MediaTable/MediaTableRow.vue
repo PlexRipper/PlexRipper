@@ -75,8 +75,8 @@ import Convert from '@class/Convert';
 import ButtonType from '@enums/buttonType';
 import {
 	IMediaOverviewCommands,
-	sendMediaOverviewBarDownloadCommand,
-	sendMediaOverviewOpenDetailsCommand,
+	sendMediaOverviewDownloadCommand,
+	sendMediaOverviewOpenDetailsCommand
 } from '@composables/event-bus';
 import { toDownloadMedia } from '@composables/conversion';
 
@@ -98,7 +98,7 @@ defineEmits<{
 function onRowAction(action: IMediaOverviewCommands) {
 	switch (action.command) {
 		case 'download':
-			sendMediaOverviewBarDownloadCommand(toDownloadMedia[props.row]);
+			sendMediaOverviewDownloadCommand(toDownloadMedia[props.row]);
 			break;
 		case 'open-details':
 			sendMediaOverviewOpenDetailsCommand(props.row.id);

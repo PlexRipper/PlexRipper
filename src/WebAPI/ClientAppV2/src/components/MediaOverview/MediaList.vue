@@ -87,7 +87,7 @@ import {
 	useMediaOverviewBarBus,
 	useMediaOverviewBarDownloadCommandBus,
 	toDownloadMedia,
-	sendMediaOverviewBarDownloadCommand,
+	sendMediaOverviewDownloadCommand,
 } from '#imports';
 
 const defaultOpened = ref(false);
@@ -212,7 +212,7 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 
 	// All selected thus entire TvShow
 	if (rootSelected.value) {
-		sendMediaOverviewBarDownloadCommand(toDownloadMedia(mediaItem));
+		sendMediaOverviewDownloadCommand(toDownloadMedia(mediaItem));
 		return;
 	}
 
@@ -246,7 +246,7 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 		});
 	}
 
-	sendMediaOverviewBarDownloadCommand(downloadMedia);
+	sendMediaOverviewDownloadCommand(downloadMedia);
 });
 // endregion
 onMounted(() => {

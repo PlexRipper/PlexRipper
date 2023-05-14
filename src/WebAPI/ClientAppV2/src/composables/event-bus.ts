@@ -98,7 +98,7 @@ export function useMediaOverviewBarDownloadCommandBus(): UseEventBusReturn<strin
 
 // region Download command
 
-export function sendMediaOverviewBarDownloadCommand(downloadMediaCommands: DownloadMediaDTO[]): void {
+export function sendMediaOverviewDownloadCommand(downloadMediaCommands: DownloadMediaDTO[]): void {
 	useMediaOverviewCommandsBus().emit({
 		command: 'download',
 		downloadMediaCommands,

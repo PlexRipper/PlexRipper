@@ -101,7 +101,6 @@ import {
 	useMediaOverviewSortBus,
 	useOpenControlDialog,
 	listenMediaOverviewDownloadCommand,
-	sendMediaOverviewBarDownloadCommand,
 	useCloseControlDialog,
 } from '#imports';
 import {
@@ -293,7 +292,7 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 			mediaIds: selected.value.keys,
 			type: props.mediaType,
 		};
-		sendMediaOverviewBarDownloadCommand([downloadCommand]);
+		sendMediaOverviewDownloadCommand([downloadCommand]);
 	}
 });
 

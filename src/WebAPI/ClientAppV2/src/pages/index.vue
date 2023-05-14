@@ -8,7 +8,7 @@
 						<NavigationSkipSetupButton block @click="skipSetup()" />
 					</q-col>
 					<q-col cols="3">
-						<GoToButton text-id="go-to-setup-page" block to="/setup" color="green" />
+						<GoToButton text-id="go-to-setup-page" block to="/setup" color="positive" />
 					</q-col>
 				</q-row>
 			</q-col>

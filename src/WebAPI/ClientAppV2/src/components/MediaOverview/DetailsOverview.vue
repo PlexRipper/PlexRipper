@@ -42,7 +42,7 @@
 									<tbody>
 										<tr class="q-tr--no-hover">
 											<td colspan="2" class="media-info-column media-title">
-												{{ mediaItem?.title ?? 'unknown' }}
+												{{ mediaItemDetail?.title ?? 'unknown' }}
 											</td>
 										</tr>
 										<tr>
@@ -50,7 +50,7 @@
 												{{ $t('components.details-overview.total-duration') }}
 											</td>
 											<td class="media-info-column">
-												<q-duration :value="mediaItem?.duration ?? -1" />
+												<q-duration :value="mediaItemDetail?.duration ?? -1" />
 											</td>
 										</tr>
 										<tr>
@@ -63,7 +63,7 @@
 											<td class="media-info-column">
 												{{ $t('components.details-overview.summary') }}
 											</td>
-											<td class="media-info-column">{{ mediaItem?.summary ?? '' }}</td>
+											<td class="media-info-column">{{ mediaItemDetail?.summary ?? '' }}</td>
 										</tr>
 									</tbody>
 								</q-markup-table>
@@ -90,7 +90,7 @@ import { computed, defineProps, ref } from 'vue';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import sum from 'lodash-es/sum';
-import { PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
+import { PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import { MediaList } from '#components';
 import { MediaService } from '@service';
 import { useI18n, useMediaOverviewBarBus } from '#imports';
@@ -101,7 +101,8 @@ defineProps<{
 
 const t = useI18n().t;
 const loading = ref(false);
-const mediaItem = ref<PlexMediaDTO | null>(null);
+const mediaItemDetail = ref<PlexMediaDTO | null>(null);
+const mediaItem = ref<PlexMediaSlimDTO | null>(null);
 const thumbWidth = ref(180);
 const thumbHeight = ref(270);
 const defaultImage = ref(false);
@@ -130,6 +131,14 @@ function openDetails({ mediaId, type }: { mediaId: number; type: PlexMediaType }
 	set(loading, true);
 
 	useMediaOverviewBarBus().emit({ downloadButtonVisible: false });
+	useSubscription(
+		MediaService.getMediaDataDetailById(mediaId, type).subscribe((data) => {
+			Object.freeze(data);
+			set(mediaItemDetail, data);
+			set(loading, false);
+		}),
+	);
+
 	useSubscription(
 		MediaService.getMediaDataById(mediaId, type).subscribe((data) => {
 			Object.freeze(data);

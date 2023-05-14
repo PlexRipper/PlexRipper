@@ -589,6 +589,7 @@ export interface PlexMediaDTO {
 	plexServerId: number;
 	type: PlexMediaType;
 	qualities: PlexMediaQuality[];
+	children: PlexMediaDTO[];
 	/** @format int32 */
 	key: number;
 	hasThumb: boolean;
@@ -609,7 +610,6 @@ export interface PlexMediaDTO {
 	/** @format int32 */
 	tvShowSeasonId: number;
 	mediaData: PlexMediaDataDTO[];
-	children: PlexMediaDTO[];
 }
 
 export interface PlexMediaDTOResultDTO {
@@ -664,6 +664,8 @@ export interface PlexMediaQuality {
 export interface PlexMediaSlimDTO {
 	/** @format int32 */
 	id: number;
+	/** @format int32 */
+	index: number;
 	title: string;
 	sortTitle: string;
 	/** @format int32 */
@@ -685,6 +687,7 @@ export interface PlexMediaSlimDTO {
 	type: PlexMediaType;
 	hasThumb: boolean;
 	qualities: PlexMediaQuality[];
+	children: PlexMediaSlimDTO[];
 }
 
 export interface PlexMediaSlimDTOListResultDTO {
@@ -694,6 +697,15 @@ export interface PlexMediaSlimDTOListResultDTO {
 	errors: ErrorDTO[];
 	successes: SuccessDTO[];
 	value: PlexMediaSlimDTO[];
+}
+
+export interface PlexMediaSlimDTOResultDTO {
+	isFailed: boolean;
+	isSuccess: boolean;
+	reasons: ReasonDTO[];
+	errors: ErrorDTO[];
+	successes: SuccessDTO[];
+	value: PlexMediaSlimDTO;
 }
 
 export enum PlexMediaType {

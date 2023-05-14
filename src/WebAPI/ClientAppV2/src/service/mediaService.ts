@@ -5,7 +5,7 @@ import BaseService from './baseService';
 import IStoreState from '@interfaces/service/IStoreState';
 
 import { PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
-import { getLibraryMediaData, getThumbnail, getTvShow } from '@api/mediaApi';
+import { getLibraryMediaData, getThumbnail, getTvShow, getTvShowDetail } from '@api/mediaApi';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class MediaService extends BaseService {
@@ -67,7 +67,7 @@ export class MediaService extends BaseService {
 		);
 	}
 
-	public getMediaDataById(mediaId: number, mediaType: PlexMediaType): Observable<PlexMediaDTO | null> {
+	public getMediaDataById(mediaId: number, mediaType: PlexMediaType): Observable<PlexMediaSlimDTO | null> {
 		switch (mediaType) {
 			case PlexMediaType.TvShow:
 				return this.getTvShowMediaData(mediaId);
@@ -78,8 +78,37 @@ export class MediaService extends BaseService {
 		}
 	}
 
-	public getTvShowMediaData(mediaId: number): Observable<PlexMediaDTO | null> {
+	public getMediaDataDetailById(mediaId: number, mediaType: PlexMediaType): Observable<PlexMediaDTO | null> {
+		switch (mediaType) {
+			case PlexMediaType.TvShow:
+				return this.getTvShowMediaDataDetail(mediaId);
+			default:
+				return throwError(() => {
+					return new Error(`MediaType with ${mediaType} is not supported in getMediaDataDetailById`);
+				});
+		}
+	}
+
+	public getTvShowMediaData(mediaId: number): Observable<PlexMediaSlimDTO | null> {
 		return getTvShow(mediaId).pipe(
+			switchMap((response) => {
+				if (response.isSuccess) {
+					return of(response.value ?? null);
+				}
+
+				return throwError(() => {
+					const error = new Error(`TvShow with id ${mediaId} was not found`);
+					response.errors?.forEach((err) => {
+						Log.error(err);
+					});
+					return error;
+				});
+			}),
+		);
+	}
+
+	public getTvShowMediaDataDetail(mediaId: number): Observable<PlexMediaDTO | null> {
+		return getTvShowDetail(mediaId).pipe(
 			switchMap((response) => {
 				if (response.isSuccess) {
 					return of(response.value ?? null);

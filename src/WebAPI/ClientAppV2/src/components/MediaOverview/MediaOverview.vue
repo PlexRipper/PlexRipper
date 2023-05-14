@@ -160,6 +160,7 @@ const detailsOverviewRef = ref<InstanceType<typeof DetailsOverview> | null>(null
 
 const props = defineProps<{
 	libraryId: number;
+	mediaId: number;
 	mediaType: PlexMediaType;
 }>();
 

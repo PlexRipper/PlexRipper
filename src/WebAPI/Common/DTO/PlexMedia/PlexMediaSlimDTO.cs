@@ -29,4 +29,6 @@ public class PlexMediaSlimDTO
     public bool HasThumb { get; set; }
 
     public List<PlexMediaQuality> Qualities { get; set; }
+
+    public List<PlexMediaSlimDTO> Children { get; set; } = new();
 }

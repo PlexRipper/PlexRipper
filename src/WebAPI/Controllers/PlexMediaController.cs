@@ -33,7 +33,7 @@ public class PlexMediaController : BaseController
 
     // GET api/<PlexMedia>/tvshow/5
     [HttpGet("tvshow/{id:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexMediaDTO>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexMediaSlimDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
@@ -44,7 +44,7 @@ public class PlexMediaController : BaseController
 
         var result = await _mediator.Send(new GetPlexTvShowByIdWithEpisodesQuery(id));
 
-        return ToActionResult<PlexTvShow, PlexMediaDTO>(result);
+        return ToActionResult<PlexTvShow, PlexMediaSlimDTO>(result);
     }
 
     // GET api/<PlexMedia>/library/5

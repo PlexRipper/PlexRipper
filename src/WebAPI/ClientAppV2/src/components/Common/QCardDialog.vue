@@ -5,6 +5,8 @@
 		:no-route-dismiss="noRouteDismiss"
 		:no-backdrop-dismiss="noBackdropDismiss"
 		:persistent="persistent"
+		:seamless="seamless"
+		:maximized="maximized"
 		@before-show="$emit('opened', dataValue)"
 		@before-hide="$emit('closed')">
 		<q-row column :data-cy="cy" class="q-card-dialog q-card-dialog-background" :style="styles">
@@ -67,6 +69,8 @@ const props = withDefaults(
 		fullHeight?: boolean;
 		scroll?: boolean;
 		persistent?: boolean;
+		seamless?: boolean;
+		maximized?: boolean;
 		noBackdropDismiss?: boolean;
 		noRouteDismiss?: boolean;
 		buttonAlign?: 'left' | 'center' | 'right' | 'between' | 'around' | 'evenly' | 'stretch';
@@ -88,6 +92,8 @@ const props = withDefaults(
 		fullHeight: false,
 		scroll: true,
 		persistent: false,
+		seamless: false,
+		maximized: false,
 		noBackdropDismiss: false,
 		noRouteDismiss: false,
 		cy: 'q-card-dialog-cy',

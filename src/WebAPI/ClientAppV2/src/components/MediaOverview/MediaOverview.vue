@@ -47,6 +47,7 @@
 								:selection="selected"
 								:disable-hover-click="mediaType !== PlexMediaType.TvShow"
 								:scroll-dict="scrollDict"
+								is-scrollable
 								@selection="selected = $event" />
 						</template>
 

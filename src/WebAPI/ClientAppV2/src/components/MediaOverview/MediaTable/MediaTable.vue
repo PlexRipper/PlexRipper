@@ -1,7 +1,7 @@
 <template>
 	<div class="media-table" data-cy="media-table">
 		<MediaTableHeader :columns="mediaTableColumns" selectable class="media-table--header" @selected="updateSelected" />
-		<div ref="qTableRef" class="media-table--content scroll" data-cy="media-table-scroll">
+		<div ref="qTableRef" :class="['media-table--content', isScrollable ? 'scroll' : '']" data-cy="media-table-scroll">
 			<q-intersection
 				v-for="(row, index) in rows"
 				:key="index"
@@ -39,6 +39,8 @@ const props = withDefaults(
 		selection: ISelection | null;
 		scrollDict?: Record<string, number>;
 		disableHoverClick: boolean;
+		disableHighlight: boolean;
+		isScrollable: boolean;
 	}>(),
 	{
 		scrollDict: { '#': 0 } as any,
@@ -116,7 +118,7 @@ onMounted(() => {
 @import '@/assets/scss/variables.scss';
 
 .media-table {
-	overflow-y: auto;
+	// overflow-y: auto;
 
 	&--header,
 	&--intersection,
@@ -126,7 +128,6 @@ onMounted(() => {
 
 	&--content {
 		max-height: calc(100vh - $app-bar-height - $media-overview-bar-height - $media-table-row-height);
-		overflow-x: hidden;
 	}
 }
 

@@ -58,7 +58,7 @@
 		<!-- No row -->
 		<q-col v-else>{{ $t('components.q-tree-view-table-row.invalid-node') }}</q-col>
 		<!--	Highlight animation effect	-->
-		<svg class="glow-container">
+		<svg v-if="!disableHighlight" class="glow-container">
 			<!--suppress HtmlUnknownAttribute -->
 			<rect pathLength="100" height="5" width="5" stroke-linecap="round" class="glow-blur" />
 			<!--suppress HtmlUnknownAttribute -->
@@ -88,6 +88,7 @@ const props = defineProps<{
 	columns: QTreeViewTableHeader[];
 	index: number;
 	disableHoverClick?: boolean;
+	disableHighlight: boolean;
 }>();
 
 defineEmits<{

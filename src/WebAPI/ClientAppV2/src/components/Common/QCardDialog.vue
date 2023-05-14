@@ -9,7 +9,11 @@
 		:maximized="maximized"
 		@before-show="$emit('opened', dataValue)"
 		@before-hide="$emit('closed')">
-		<q-row column :data-cy="cy" class="q-card-dialog q-card-dialog-background" :style="styles">
+		<q-row
+			column
+			:data-cy="cy"
+			:class="['q-card-dialog', 'q-card-dialog-background', noBackground ? 'no-background' : '']"
+			:style="styles">
 			<!-- Dialog Title	-->
 			<q-col v-if="$slots['title']" cols="auto" class="q-card-dialog-title">
 				<div v-show="!loading">
@@ -72,6 +76,7 @@ const props = withDefaults(
 		seamless?: boolean;
 		maximized?: boolean;
 		noBackdropDismiss?: boolean;
+		noBackground?: boolean;
 		noRouteDismiss?: boolean;
 		buttonAlign?: 'left' | 'center' | 'right' | 'between' | 'around' | 'evenly' | 'stretch';
 		cy?: string;
@@ -94,6 +99,7 @@ const props = withDefaults(
 		persistent: false,
 		seamless: false,
 		maximized: false,
+		noBackground: false,
 		noBackdropDismiss: false,
 		noRouteDismiss: false,
 		cy: 'q-card-dialog-cy',
@@ -183,3 +189,54 @@ controlDialog.on((data) => {
 	}
 });
 </script>
+<style lang="scss">
+@import '@/assets/scss/variables.scss';
+@import '@/assets/scss/_mixins.scss';
+@import 'quasar/src/css/core/size.sass';
+
+body {
+	.q-card-dialog {
+		// Scrollbar is hidden because otherwise the header and footer are also scrolling
+		overflow-y: hidden;
+
+		&-background {
+			@extend .default-border;
+			@extend .default-border-radius;
+			@extend .default-shadow;
+			max-width: none;
+			max-height: none;
+		}
+
+		&-top-row {
+			@extend .q-pt-none;
+			@extend .q-px-md;
+			width: 100% !important;
+		}
+
+		&-content {
+			@extend .q-pt-none;
+			@extend .q-px-md;
+		}
+
+		&-title,
+		&-actions {
+			height: auto;
+			width: 100% !important;
+		}
+	}
+
+	&.body--dark {
+		.q-card-dialog-background {
+			@extend .blur;
+			background-color: $dark-sm-background-color;
+		}
+	}
+
+	&.body--light {
+		.q-card-dialog-background {
+			@extend .blur;
+			background-color: $light-sm-background-color;
+		}
+	}
+}
+</style>

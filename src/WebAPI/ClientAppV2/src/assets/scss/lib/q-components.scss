@@ -112,55 +112,6 @@ body {
 	@extend .default-border;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-// * QCardDialog
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-body {
-	.q-card-dialog {
-		// Scrollbar is hidden because otherwise the header and footer are also scrolling
-		overflow-y: hidden;
-
-		&-background {
-			@extend .default-border;
-			@extend .default-border-radius;
-			@extend .default-shadow;
-			max-width: none;
-			max-height: none;
-		}
-
-		&-top-row {
-			@extend .q-pt-none;
-			@extend .q-px-md;
-			width: 100% !important;
-		}
-
-		&-content {
-			@extend .q-pt-none;
-			@extend .q-px-md;
-		}
-
-		&-title, &-actions {
-			height: auto;
-			width: 100% !important;
-		}
-	}
-
-	&.body--dark {
-		.q-card-dialog-background {
-			@extend .blur;
-			background-color: $dark-sm-background-color;
-		}
-	}
-
-	&.body--light {
-		.q-card-dialog-background {
-			@extend .blur;
-			background-color: $light-sm-background-color;
-		}
-	}
-}
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // * DetailsOverview

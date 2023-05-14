@@ -42,7 +42,6 @@ const isLoading = ref(true);
 const alerts = ref<IAlert[]>([]);
 const showNavigationDrawerState = ref(true);
 const showNotificationsDrawerState = ref(false);
-
 const helpDialogName = 'helpDialog';
 
 const isEmptyLayout = computed((): boolean => {
@@ -68,7 +67,6 @@ onMounted(() => {
 	$q.loading.show({
 		spinner: PageLoadOverlay,
 	});
-
 	useSubscription(
 		globalService.getPageSetupReady().subscribe({
 			next: () => {
@@ -104,5 +102,16 @@ onMounted(() => {
 			}
 		}),
 	);
+
+	window.addEventListener('resize', () => {
+		if (document.body.classList.contains('window-resizing')) {
+			return;
+		}
+		document.body.classList.add('window-resizing');
+
+		setTimeout(() => {
+			document.body.classList.remove('window-resizing');
+		}, 100);
+	});
 });
 </script>

@@ -78,8 +78,6 @@
 						<MediaList use-q-table :media-item="mediaItem" disable-intersection disable-highlight />
 					</q-col>
 				</q-row>
-				<!--	Loading overlay	-->
-				<QLoadingOverlay :loading="loading" />
 			</q-col>
 		</template>
 	</q-card-dialog>
@@ -90,6 +88,9 @@ import { computed, defineProps, ref } from 'vue';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import sum from 'lodash-es/sum';
+import { forkJoin } from 'rxjs';
+import { take } from 'rxjs/operators';
+import Log from 'consola';
 import { PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import { MediaList } from '#components';
 import { MediaService } from '@service';
@@ -129,42 +130,43 @@ const mediaCountFormatted = computed(() => {
 
 function openDetails({ mediaId, type }: { mediaId: number; type: PlexMediaType }) {
 	set(loading, true);
-
+	Log.debug('MediaDetailsDialog', 'openDetails', { mediaId, type });
 	useMediaOverviewBarBus().emit({ downloadButtonVisible: false });
-	useSubscription(
-		MediaService.getMediaDataDetailById(mediaId, type).subscribe((data) => {
-			Object.freeze(data);
-			set(mediaItemDetail, data);
-			set(loading, false);
-		}),
-	);
 
 	useSubscription(
-		MediaService.getMediaDataById(mediaId, type).subscribe((data) => {
-			Object.freeze(data);
-			set(mediaItem, data);
-			set(loading, false);
-		}),
-	);
-
-	useSubscription(
-		MediaService.getThumbnail(mediaId, type, get(thumbWidth), get(thumbHeight)).subscribe({
-			next: (data) => {
-				if (!data) {
+		forkJoin({
+			mediaDetail: MediaService.getMediaDataDetailById(mediaId, type),
+			mediaItemData: MediaService.getMediaDataById(mediaId, type),
+			thumbnail: MediaService.getThumbnail(mediaId, type, get(thumbWidth), get(thumbHeight)),
+		})
+			.pipe(take(1))
+			.subscribe({
+				next: ({ mediaDetail, mediaItemData, thumbnail }) => {
+					// Media detail
+					set(mediaItemDetail, mediaDetail);
+					// Media item
+					set(mediaItem, mediaItemData);
+					// Thumbnail
+					if (!thumbnail) {
+						set(defaultImage, true);
+					} else {
+						set(imageUrl, thumbnail);
+					}
+				},
+				error: () => {
 					set(defaultImage, true);
-					return;
-				}
-				set(imageUrl, data);
-			},
-			error: () => {
-				set(defaultImage, true);
-			},
-		}),
+				},
+				complete: () => {
+					set(loading, false);
+				},
+			}),
 	);
 }
 
 function closeDetails() {
 	set(mediaItem, null);
+	set(mediaItemDetail, null);
+	set(loading, true);
 }
 </script>
 <style lang="scss">

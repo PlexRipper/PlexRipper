@@ -86,8 +86,8 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { defineProps, ref, withDefaults, computed } from 'vue';
-import { get } from '@vueuse/core';
+import { get, set } from '@vueuse/core';
+import { defineProps, ref, withDefaults, computed, onMounted } from 'vue';
 import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
 import {
@@ -261,8 +261,8 @@ onMounted(() => {
 		return;
 	}
 
-	selected.value = children.map((x) => ({ indexKey: x.id, keys: [], allSelected: false })) ?? [];
-	itemExpanded.value.fill(false, 0, children.length - 1);
+	set(selected, children.map((x) => ({ indexKey: x.id, keys: [], allSelected: false })) ?? []);
+	get(itemExpanded).fill(false, 0, children.length - 1);
 });
 
 defineExpose({

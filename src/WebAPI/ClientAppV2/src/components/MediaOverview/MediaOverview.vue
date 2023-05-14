@@ -33,7 +33,6 @@
 					:view-mode="mediaViewMode"
 					:has-selected="selected.keys.length > 0"
 					:detail-mode="!showMediaOverview"
-					:media-item="mediaItem"
 					:hide-download-button="!mediaViewMode === ViewMode.Table"
 					@back="closeDetailsOverview"
 					@view-change="changeView"
@@ -60,6 +59,7 @@
 								:scroll-dict="scrollDict" />
 						</template>
 					</q-col>
+
 					<!-- Alphabet Navigation-->
 					<alphabet-navigation v-show="showMediaOverview" :scroll-dict="scrollDict" />
 				</q-row>
@@ -75,8 +75,8 @@
 	</template>
 	<!-- Media Details Display-->
 	<DetailsOverview :name="mediaDetailsDialogName" />
-	<!--	Loading overlay	-->
-	<QLoadingOverlay :loading="loading" />
+	<!--	&lt;!&ndash;	Loading overlay	&ndash;&gt;-->
+	<!--	<QLoadingOverlay :loading="loading" />-->
 	<!--		Download confirmation dialog	-->
 	<DownloadConfirmation :name="downloadConfirmationName" :items="items" @download="DownloadService.downloadMedia($event)" />
 </template>
@@ -89,7 +89,7 @@ import { useSubscription } from '@vueuse/rxjs';
 import { useRouter } from 'vue-router';
 import { take } from 'rxjs/operators';
 import { isEqual, orderBy } from 'lodash-es';
-import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaDTO, PlexMediaSlimDTO, PlexServerDTO } from '@dto/mainApi';
+import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaSlimDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, MediaService, SettingsService, SignalrService } from '@service';
 import { DetailsOverview, DownloadConfirmation, MediaTable } from '#components';
@@ -102,6 +102,7 @@ import {
 	useOpenControlDialog,
 	listenMediaOverviewDownloadCommand,
 	useCloseControlDialog,
+	sendMediaOverviewDownloadCommand,
 } from '#imports';
 import {
 	IMediaOverviewSort,
@@ -111,7 +112,6 @@ import {
 
 // region SetupFields
 
-const router = useRouter();
 const scrollDict = ref<Record<string, number>>({});
 const selected = ref<ISelection>({ keys: [], allSelected: false, indexKey: 0 });
 
@@ -129,7 +129,6 @@ const items = ref<PlexMediaSlimDTO[]>([]);
 
 const loading = ref(true);
 const showMediaOverview = ref(true);
-const mediaItem = ref<PlexMediaDTO | null>(null);
 const mediaViewMode = ref<ViewMode>(ViewMode.Poster);
 
 const askDownloadMovieConfirmation = ref(false);
@@ -255,30 +254,22 @@ listenMediaOverviewDownloadCommand((command) => {
 });
 
 listenMediaOverviewOpenDetailsCommand((mediaId: number) => {
-	Log.debug('Received open details command', mediaId);
 	if (!mediaId) {
 		Log.error('mediaId was invalid, could not open details', mediaId);
 		return;
 	}
-	// if (!get(mediaDetailsDialogRef)) {
-	// 	Log.error('mediaDetailsDialogRef was invalid, could not open details', mediaDetailsDialogRef);
-	// 	return;
-	// }
-	if (!router.currentRoute.value.path.includes('details')) {
-		router.push({
-			path: props.libraryId + '/details/' + mediaId,
-		});
-	}
 
+	// Replace the url with the library id and media id
+	window.history.replaceState(null, document.title, `/tvshows/${props.libraryId}/details/${mediaId}`);
+
+	useOpenControlDialog(mediaDetailsDialogName, { mediaId, type: props.mediaType });
 	set(showMediaOverview, false);
-	const type = props.mediaType;
-	useOpenControlDialog(mediaDetailsDialogName, { mediaId, type });
 });
 
 function closeDetailsOverview() {
-	router.push({
-		path: '/tvshows/' + props.libraryId,
-	});
+	// Replace the url with the library id
+	window.history.replaceState(null, document.title, `/tvshows/${props.libraryId}`);
+
 	useCloseControlDialog(mediaDetailsDialogName);
 
 	set(showMediaOverview, true);

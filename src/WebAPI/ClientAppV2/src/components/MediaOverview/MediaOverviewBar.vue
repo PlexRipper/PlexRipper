@@ -20,7 +20,7 @@
 								</q-item-label>
 								<q-item-label v-if="library && !detailMode" caption>
 									{{ libraryCountFormatted }} -
-									<q-file-size :size="mediaSize" />
+									<q-file-size :size="library.mediaSize" />
 								</q-item-label>
 							</q-item-section>
 						</q-item>
@@ -82,7 +82,7 @@
 
 <script setup lang="ts">
 import { computed, defineEmits, defineProps, ref } from 'vue';
-import type { PlexLibraryDTO, PlexMediaDTO, PlexServerDTO } from '@dto/mainApi';
+import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { PlexMediaType, ViewMode } from '@dto/mainApi';
 import { IMediaOverviewBarBus, useMediaOverviewBarBus, useMediaOverviewBarDownloadCommandBus } from '#imports';
 
@@ -97,7 +97,6 @@ const props = defineProps<{
 	server: PlexServerDTO | null;
 	library: PlexLibraryDTO | null;
 	viewMode: ViewMode;
-	mediaItem?: PlexMediaDTO | null;
 	hasSelected: boolean;
 	detailMode?: boolean;
 }>();
@@ -129,10 +128,6 @@ const changeView = (viewMode: ViewMode) => {
 const isSelected = (viewMode: ViewMode) => {
 	return props.viewMode === viewMode;
 };
-
-const mediaSize = computed(() => {
-	return props.detailMode ? props.mediaItem?.mediaSize ?? 0 : props.library?.mediaSize ?? 0;
-});
 
 const libraryCountFormatted = computed(() => {
 	if (props.library) {

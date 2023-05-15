@@ -1,5 +1,5 @@
 <template>
-	<div :class="classes">
+	<div :class="classes" :data-cy="cy">
 		<slot />
 	</div>
 </template>
@@ -11,6 +11,7 @@ interface QRowProps {
 	justify?: 'start' | 'center' | 'end' | 'around' | 'between';
 	align?: 'start' | 'center' | 'end';
 	gutter?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'none';
+	cy?: string;
 	noWrap?: boolean;
 	wrap?: boolean;
 	reverse?: boolean;
@@ -20,6 +21,7 @@ interface QRowProps {
 
 const props = withDefaults(defineProps<QRowProps>(), {
 	justify: 'start',
+	cy: '',
 	align: 'center',
 	gutter: 'none',
 	noWrap: false,

@@ -3,7 +3,7 @@
 		<template v-if="row">
 			<!-- Checkbox -->
 			<q-col v-if="selectable" cols="auto" class="q-ml-md q-pl-sm">
-				<q-checkbox dense :model-value="selected" @update:model-value="$emit('selected', row)" />
+				<q-checkbox dense :model-value="selected" @update:model-value="$emit('selected', $event)" />
 			</q-col>
 			<template v-for="(column, i) in columns" :key="i">
 				<!-- Index -->
@@ -76,7 +76,7 @@ import ButtonType from '@enums/buttonType';
 import {
 	IMediaOverviewCommands,
 	sendMediaOverviewDownloadCommand,
-	sendMediaOverviewOpenDetailsCommand
+	sendMediaOverviewOpenDetailsCommand,
 } from '@composables/event-bus';
 import { toDownloadMedia } from '@composables/conversion';
 
@@ -92,13 +92,13 @@ const props = defineProps<{
 }>();
 
 defineEmits<{
-	(e: 'selected', payload: PlexMediaSlimDTO): void;
+	(e: 'selected', state: boolean): void;
 }>();
 
 function onRowAction(action: IMediaOverviewCommands) {
 	switch (action.command) {
 		case 'download':
-			sendMediaOverviewDownloadCommand(toDownloadMedia[props.row]);
+			sendMediaOverviewDownloadCommand(toDownloadMedia(props.row));
 			break;
 		case 'open-details':
 			sendMediaOverviewOpenDetailsCommand(props.row.id);

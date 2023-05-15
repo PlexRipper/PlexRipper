@@ -117,7 +117,7 @@ const qTableProps = computed((): QTableProps => {
 function onRowAction(row: PlexMediaSlimDTO, action: IMediaOverviewCommands) {
 	switch (action.command) {
 		case 'download':
-			sendMediaOverviewDownloadCommand(toDownloadMedia[row]);
+			sendMediaOverviewDownloadCommand(toDownloadMedia(row));
 			break;
 		case 'open-details':
 			sendMediaOverviewOpenDetailsCommand(row.id);

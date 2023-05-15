@@ -87,7 +87,7 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { get, set } from '@vueuse/core';
-import { defineProps, ref, withDefaults, computed, onMounted } from 'vue';
+import { defineProps, ref, withDefaults, computed, onMounted, watch } from 'vue';
 import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
 import {
@@ -197,16 +197,14 @@ const mediaOverViewBarBus = useMediaOverviewBarBus();
 
 const sendBusConfig = () => {
 	mediaOverViewBarBus.emit({
-		downloadButtonVisible: selectedCount.value > 0,
+		downloadButtonVisible: get(selectedCount) > 0,
+		hasSelected: get(selectedCount) > 0,
 	});
 };
 
-watch(
-	() => selectedCount.value,
-	() => {
-		sendBusConfig();
-	},
-);
+watch(selectedCount, () => {
+	sendBusConfig();
+});
 
 useMediaOverviewBarDownloadCommandBus().on(() => {
 	if (!props.mediaItem) {

@@ -1,6 +1,11 @@
 <template>
 	<div class="media-table" data-cy="media-table">
-		<MediaTableHeader :columns="mediaTableColumns" selectable class="media-table--header" @selected="updateSelected" />
+		<MediaTableHeader
+			:columns="mediaTableColumns"
+			selectable
+			:selected="rootSelected"
+			class="media-table--header"
+			@selected="rootSetSelected($event)" />
 		<div
 			id="media-table-scroll"
 			ref="qTableRef"
@@ -15,8 +20,10 @@
 					:columns="mediaTableColumns"
 					:row="row"
 					selectable
+					:selected="isSelected(row.id)"
 					:disable-highlight="disableHighlight"
-					:disable-hover-click="disableHoverClick" />
+					:disable-hover-click="disableHoverClick"
+					@selected="updateSelectedRow(row.id, $event)" />
 			</template>
 			<template v-else>
 				<q-intersection
@@ -31,8 +38,10 @@
 						:columns="mediaTableColumns"
 						:row="row"
 						selectable
+						:selected="isSelected(row.id)"
 						:disable-highlight="disableHighlight"
-						:disable-hover-click="disableHoverClick" />
+						:disable-hover-click="disableHoverClick"
+						@selected="updateSelectedRow(row.id, $event)" />
 				</q-intersection>
 			</template>
 		</div>
@@ -73,19 +82,36 @@ const emit = defineEmits<{
 	(e: 'row-click', payload: PlexMediaSlimDTO): void;
 }>();
 
-/**
- * The selected rows cannot be returned as just keys, they need to be the same object as the rows.
- */
-const getSelected = computed((): PlexMediaSlimDTO[] => {
-	return props.rows.filter((row) => (props.selection?.keys ?? []).includes(row.id));
+function isSelected(mediaId: number) {
+	return (props.selection?.keys ?? []).includes(mediaId);
+}
+
+const rootSelected = computed((): boolean | null => {
+	if (props.selection?.keys.length === props.rows.length) {
+		return true;
+	}
+
+	if (props.selection?.keys.length === 0) {
+		return false;
+	}
+
+	return null;
 });
 
-function updateSelected(selected: PlexMediaSlimDTO[], allSelected?: boolean) {
+function rootSetSelected(value: boolean) {
 	emit('selection', {
-		keys: selected.map((x) => x.id) as number[],
-		allSelected: selected.length === props.rows.length ? true : selected.length === 0 ? false : null,
-		indexKey: 0,
-	});
+		indexKey: props.selection?.indexKey ?? 0,
+		keys: value ? props.rows.map((x) => x.id) : [],
+		allSelected: value,
+	} as ISelection);
+}
+
+function updateSelectedRow(mediaId: number, state: boolean) {
+	emit('selection', {
+		...props.selection,
+		keys: state ? [...(props.selection?.keys ?? []), mediaId] : (props.selection?.keys ?? []).filter((x) => x !== mediaId),
+		allSelected: false,
+	} as ISelection);
 }
 
 onMounted(() => {

@@ -36,7 +36,7 @@
 			label="Download"
 			:height="barHeight"
 			:width="verticalButtonWidth"
-			:disabled="!hasSelected"
+			:disabled="!config.hasSelected"
 			@click="download" />
 
 		<!--	Refresh library button	-->
@@ -97,7 +97,6 @@ const props = defineProps<{
 	server: PlexServerDTO | null;
 	library: PlexLibraryDTO | null;
 	viewMode: ViewMode;
-	hasSelected: boolean;
 	detailMode?: boolean;
 }>();
 
@@ -111,6 +110,7 @@ const barHeight = ref(85);
 const verticalButtonWidth = ref(120);
 const config = ref<IMediaOverviewBarBus>({
 	downloadButtonVisible: false,
+	hasSelected: false,
 });
 
 const refreshLibrary = () => {

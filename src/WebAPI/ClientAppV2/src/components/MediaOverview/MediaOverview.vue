@@ -31,7 +31,6 @@
 					:server="server"
 					:library="library"
 					:view-mode="mediaViewMode"
-					:has-selected="selected.keys.length > 0"
 					:detail-mode="!showMediaOverview"
 					:hide-download-button="!mediaViewMode === ViewMode.Table"
 					@back="closeDetailsOverview"
@@ -244,6 +243,7 @@ function setScrollIndexes() {
  * Listen for process download command
  */
 listenMediaOverviewDownloadCommand((command) => {
+	Log.info('MediaOverview => Received download command', command);
 	// Only show if there is more than 1 selection
 	if (command.length > 0 && command.some((x) => x.mediaIds.length > 0)) {
 		if (isConfirmationEnabled.value) {
@@ -327,7 +327,8 @@ useMediaOverviewSortBus().on((event) => {
 const mediaOverViewBarBus = useMediaOverviewBarBus();
 watch(selected, () => {
 	mediaOverViewBarBus.emit({
-		downloadButtonVisible: selected.value.keys.length > 0,
+		downloadButtonVisible: get(selected).keys.length > 0,
+		hasSelected: get(selected).keys.length > 0,
 	});
 });
 

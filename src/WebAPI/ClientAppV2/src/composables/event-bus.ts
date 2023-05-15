@@ -32,6 +32,7 @@ export function useCloseControlDialog(name: string) {
 
 export interface IMediaOverviewBarBus {
 	downloadButtonVisible: boolean;
+	hasSelected: boolean;
 }
 
 export function useMediaOverviewBarBus(): UseEventBusReturn<IMediaOverviewBarBus, any> {

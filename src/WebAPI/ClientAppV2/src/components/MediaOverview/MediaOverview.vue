@@ -83,12 +83,13 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { ref, defineProps, computed, onMounted, nextTick } from 'vue';
+import { ref, defineProps, computed, onMounted, nextTick, watch } from 'vue';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
-import { useRouter } from 'vue-router';
+import { useRouter, RouteLocationNormalized, RouteLocationNormalizedLoaded } from 'vue-router';
 import { take } from 'rxjs/operators';
 import { isEqual, orderBy } from 'lodash-es';
+import { combineLatest } from 'rxjs';
 import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaSlimDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, MediaService, SettingsService, SignalrService } from '@service';
@@ -111,7 +112,7 @@ import {
 } from '@composables/event-bus';
 
 // region SetupFields
-
+const router = useRouter();
 const scrollDict = ref<Record<string, number>>({});
 const selected = ref<ISelection>({ keys: [], allSelected: false, indexKey: 0 });
 
@@ -157,7 +158,7 @@ const isConfirmationEnabled = computed(() => {
 	}
 });
 
-const changeView = (viewMode: ViewMode) => {
+function changeView(viewMode: ViewMode) {
 	let type: keyof DisplaySettingsDTO | null = null;
 
 	switch (props.mediaType) {
@@ -173,7 +174,7 @@ const changeView = (viewMode: ViewMode) => {
 	if (type) {
 		useSubscription(SettingsService.updateDisplaySettings(type, viewMode).subscribe());
 	}
-};
+}
 
 function resetProgress(isRefreshingValue: boolean) {
 	set(isRefreshing, isRefreshingValue);
@@ -260,19 +261,29 @@ listenMediaOverviewOpenDetailsCommand((mediaId: number) => {
 	}
 
 	// Replace the url with the library id and media id
-	window.history.replaceState(null, document.title, `/tvshows/${props.libraryId}/details/${mediaId}`);
-
-	useOpenControlDialog(mediaDetailsDialogName, { mediaId, type: props.mediaType });
-	set(showMediaOverview, false);
+	router
+		.push({
+			name: 'details-overview',
+			params: { libraryId: props.libraryId, tvShowId: mediaId },
+		})
+		.then(() => {
+			useOpenControlDialog(mediaDetailsDialogName, { mediaId, type: props.mediaType });
+			set(showMediaOverview, false);
+		});
 });
 
 function closeDetailsOverview() {
+	Log.info('closeDetailsOverview');
 	// Replace the url with the library id
-	window.history.replaceState(null, document.title, `/tvshows/${props.libraryId}`);
-
-	useCloseControlDialog(mediaDetailsDialogName);
-
-	set(showMediaOverview, true);
+	router
+		.push({
+			name: 'media-overview',
+			params: { libraryId: props.libraryId },
+		})
+		.then(() => {
+			useCloseControlDialog(mediaDetailsDialogName);
+			set(showMediaOverview, true);
+		});
 }
 
 useMediaOverviewBarDownloadCommandBus().on(() => {
@@ -320,9 +331,74 @@ watch(selected, () => {
 	});
 });
 
+function setupRouter() {
+	router.beforeEach((to, from, next) => {
+		// From MediaOverview => DetailsOverview
+		if (!from.path.includes('details') && to.path.includes('details')) {
+			let tableRef: HTMLElement | null = null;
+			if (mediaViewMode.value === ViewMode.Table) {
+				tableRef = document.getElementById('media-table-scroll');
+			}
+			if (mediaViewMode.value === ViewMode.Poster) {
+				tableRef = document.getElementById('poster-table');
+			}
+
+			if (!tableRef) {
+				Log.error('tableRef was null for type', get(mediaViewMode));
+				return next();
+			}
+			// Save the current scroll position to be restored when navigating back
+			to.meta?.scrollPos && (to.meta.scrollPos.top = tableRef.scrollTop);
+		}
+
+		return next();
+	});
+
+	router.options.scrollBehavior = (to: RouteLocationNormalized, from: RouteLocationNormalizedLoaded) => {
+		// From DetailsOverview => MediaOverview
+		if (from.path.includes('details') && !to.path.includes('details')) {
+			return new Promise((resolve) => {
+				setTimeout(() => {
+					let tableRef: HTMLElement | null = null;
+					switch (get(mediaViewMode)) {
+						case ViewMode.Table:
+							tableRef = document.getElementById('media-table-scroll');
+							break;
+						case ViewMode.Poster:
+							tableRef = document.getElementById('poster-table');
+							break;
+						default:
+							Log.error('Unknown mediaViewMode', get(mediaViewMode));
+							return;
+					}
+
+					if (!tableRef) {
+						Log.error('tableRef was null for type', get(mediaViewMode));
+						return;
+					}
+
+					tableRef.scrollTo({
+						behavior: 'smooth',
+						top: from.meta.scrollPos?.top ?? -1,
+						left: 0,
+					});
+
+					return resolve({
+						behavior: 'smooth',
+						top: from.meta.scrollPos?.top ?? -1,
+						left: 0,
+					});
+				}, 100);
+			});
+		}
+		return Promise.resolve();
+	};
+}
+
 // endregion
 
 onMounted(() => {
+	Log.info('MediaOverview => onMounted');
 	resetProgress(false);
 	set(isRefreshing, false);
 
@@ -341,38 +417,29 @@ onMounted(() => {
 	});
 
 	// Get display settings
-	if (props.mediaType === PlexMediaType.Movie) {
-		useSubscription(
-			SettingsService.getMovieViewMode().subscribe((value) => {
-				set(mediaViewMode, value);
-			}),
-		);
-	} else if (props.mediaType === PlexMediaType.TvShow) {
-		useSubscription(
-			SettingsService.getTvShowViewMode().subscribe((value) => {
-				set(mediaViewMode, value);
-			}),
-		);
-	}
-
 	useSubscription(
-		SettingsService.getAskDownloadMovieConfirmation().subscribe((value) => {
-			set(askDownloadMovieConfirmation, value);
-		}),
-	);
-	useSubscription(
-		SettingsService.getAskDownloadTvShowConfirmation().subscribe((value) => {
-			set(askDownloadTvShowConfirmation, value);
-		}),
-	);
-	useSubscription(
-		SettingsService.getAskDownloadSeasonConfirmation().subscribe((value) => {
-			set(askDownloadSeasonConfirmation, value);
-		}),
-	);
-	useSubscription(
-		SettingsService.getAskDownloadEpisodeConfirmation().subscribe((value) => {
-			set(askDownloadEpisodeConfirmation, value);
+		combineLatest({
+			movieViewMode: SettingsService.getMovieViewMode(),
+			tvShowViewMode: SettingsService.getTvShowViewMode(),
+			askMovieConfirmation: SettingsService.getAskDownloadMovieConfirmation(),
+			askTvShowConfirmation: SettingsService.getAskDownloadTvShowConfirmation(),
+			askSeasonConfirmation: SettingsService.getAskDownloadSeasonConfirmation(),
+			askEpisodeConfirmation: SettingsService.getAskDownloadEpisodeConfirmation(),
+		}).subscribe((data) => {
+			Log.info('Display settings', data);
+			set(askDownloadMovieConfirmation, data.askMovieConfirmation);
+			set(askDownloadTvShowConfirmation, data.askTvShowConfirmation);
+			set(askDownloadSeasonConfirmation, data.askSeasonConfirmation);
+			set(askDownloadEpisodeConfirmation, data.askEpisodeConfirmation);
+			switch (props.mediaType) {
+				case PlexMediaType.Movie:
+					set(mediaViewMode, data.movieViewMode);
+					break;
+				case PlexMediaType.TvShow:
+					set(mediaViewMode, data.tvShowViewMode);
+					break;
+			}
+			setupRouter();
 		}),
 	);
 

@@ -1,7 +1,11 @@
 <template>
 	<div class="media-table" data-cy="media-table">
 		<MediaTableHeader :columns="mediaTableColumns" selectable class="media-table--header" @selected="updateSelected" />
-		<div ref="qTableRef" :class="['media-table--content', isScrollable ? 'scroll' : '']" data-cy="media-table-scroll">
+		<div
+			id="media-table-scroll"
+			ref="qTableRef"
+			:class="['media-table--content', isScrollable ? 'scroll' : '']"
+			data-cy="media-table-scroll">
 			<template v-if="disableIntersection">
 				<MediaTableRow
 					v-for="(row, index) in rows"

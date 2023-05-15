@@ -134,14 +134,26 @@ export default defineNuxtConfig({
 	hooks: {
 		'pages:extend'(pages) {
 			pages.push({
-				name: 'details-overview',
+				name: 'media-overview',
 				path: '/tvshows/:libraryId',
 				file: resolve(__dirname, 'src/pages/tvshows/[libraryId].vue'),
+				meta: {
+					scrollPos: {
+						top: 0,
+						left: 0,
+					},
+				},
 				children: [
 					{
-						name: 'details-overview2',
+						name: 'details-overview',
 						path: 'details/:tvShowId',
 						file: resolve(__dirname, 'src/pages/tvshows/[libraryId].vue'),
+						meta: {
+							scrollPos: {
+								top: 0,
+								left: 0,
+							},
+						},
 					},
 				],
 			});

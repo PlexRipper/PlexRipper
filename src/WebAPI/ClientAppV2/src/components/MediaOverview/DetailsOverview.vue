@@ -187,20 +187,26 @@ function closeDetails() {
 body {
 	// Disable transitions animation when manually resizing the window
 	&.window-resizing {
-		.q-dialog__inner {
-			transition: none !important;
+		.media-details-dialog {
+			.q-dialog__inner {
+				transition: none !important;
+			}
 		}
 	}
 
 	&.navigation-drawer-closed {
-		.q-dialog__inner {
-			width: 100vw !important;
+		.media-details-dialog {
+			.q-dialog__inner {
+				width: 100vw !important;
+			}
 		}
 	}
 
 	&.navigation-drawer-opened {
 		.q-dialog__inner {
-			width: calc(100vw - $navigation-drawer-width);
+			.media-details-dialog {
+				width: calc(100vw - $navigation-drawer-width);
+			}
 		}
 	}
 }

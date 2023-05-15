@@ -1,29 +1,13 @@
 <template>
-	<!--	Loading screen	-->
-	<!--	<template v-if="loading">-->
-	<!--		<q-row justify="center" class="mx-0">-->
-	<!--			<q-col cols="auto" align-self="center">-->
-	<!--				<q-circular-progress size="70px" indeterminate />-->
-	<!--				<h1 v-if="isRefreshing">-->
-	<!--					{{-->
-	<!--						$t('components.media-overview.is-refreshing', {-->
-	<!--							library: library.value ? library.value.title : $t('general.commands.unknown'),-->
-	<!--							server: server.value ? server.value.name : $t('general.commands.unknown'),-->
-	<!--						})-->
-	<!--					}}-->
-	<!--				</h1>-->
-	<!--				<h1 v-else>{{ $t('components.media-overview.retrieving-library') }}</h1>-->
-	<!--				&lt;!&ndash; Library progress bar &ndash;&gt;-->
-	<!--				<q-linear-progress :value="getPercentage" height="20" stripe color="deep-orange">-->
-	<!--					<div class="absolute-full flex flex-center">-->
-	<!--						<q-badge color="white" text-color="accent" :label="`${getPercentage}%`" />-->
-	<!--					</div>-->
-	<!--				</q-linear-progress>-->
-	<!--			</q-col>-->
-	<!--		</q-row>-->
-	<!--	</template>-->
-	<!-- Header -->
-	<template v-if="!loading && items.length">
+	<!--	Refresh Library Screen	-->
+	<q-row v-if="isRefreshing" justify="center" align="center" class="refresh-library-container" cy="refresh-library-container">
+		<q-col cols="8" align-self="center">
+			<progress-component circular-mode :percentage="libraryProgress?.percentage ?? -1" :text="refreshingText" />
+			<!--				<h1 v-else>{{ $t('components.media-overview.retrieving-library') }}</h1>-->
+		</q-col>
+	</q-row>
+	<!-- Media Overview -->
+	<template v-else-if="!loading && items.length">
 		<q-row no-gutters>
 			<q-col>
 				<!--	Overview bar	-->
@@ -65,6 +49,7 @@
 			</q-col>
 		</q-row>
 	</template>
+	<!-- No Media Overview -->
 	<template v-else-if="!loading && items.length === 0">
 		<q-row justify="center">
 			<q-col cols="auto">
@@ -88,7 +73,7 @@ import { useSubscription } from '@vueuse/rxjs';
 import { useRouter, RouteLocationNormalized, RouteLocationNormalizedLoaded } from 'vue-router';
 import { take } from 'rxjs/operators';
 import { isEqual, orderBy } from 'lodash-es';
-import { combineLatest } from 'rxjs';
+import { combineLatest, forkJoin } from 'rxjs';
 import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaSlimDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, MediaService, SettingsService, SignalrService } from '@service';
@@ -111,6 +96,7 @@ import {
 } from '@composables/event-bus';
 
 // region SetupFields
+const { t } = useI18n();
 const router = useRouter();
 const scrollDict = ref<Record<string, number>>({});
 const selected = ref<ISelection>({ keys: [], allSelected: false, indexKey: 0 });
@@ -157,6 +143,13 @@ const isConfirmationEnabled = computed(() => {
 	}
 });
 
+const refreshingText = computed(() => {
+	return t('components.media-overview.is-refreshing', {
+		library: get(library) ? get(library)?.title : t('general.commands.unknown'),
+		server: get(server) ? get(server)?.name : t('general.commands.unknown'),
+	});
+});
+
 function changeView(viewMode: ViewMode) {
 	let type: keyof DisplaySettingsDTO | null = null;
 
@@ -199,26 +192,24 @@ function refreshLibrary() {
 
 function onRequestMedia({ page, size, refresh }: { page: number; size: number; refresh: () => void }) {
 	useSubscription(
-		MediaService.getMediaData(props.libraryId, page, size)
-			.pipe(take(1))
-			.subscribe({
-				next: (mediaData) => {
-					if (!mediaData) {
-						Log.error(`MediaOverview => No media data for library id ${props.libraryId} was found`);
-					}
+		MediaService.getMediaData(props.libraryId, page, size).subscribe({
+			next: (mediaData) => {
+				if (!mediaData) {
+					Log.error(`MediaOverview => No media data for library id ${props.libraryId} was found`);
+				}
 
-					set(items, mediaData);
-				},
-				error: (error) => {
-					Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
-				},
-				complete: () => {
-					if (refresh) {
-						refresh();
-					}
-					setScrollIndexes();
-				},
-			}),
+				set(items, mediaData);
+			},
+			error: (error) => {
+				Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
+			},
+			complete: () => {
+				if (refresh) {
+					refresh();
+				}
+				setScrollIndexes();
+			},
+		}),
 	);
 }
 
@@ -417,6 +408,24 @@ onMounted(() => {
 		},
 	});
 
+	// Get the server and library
+	useSubscription(
+		combineLatest({
+			library: LibraryService.getLibrary(props.libraryId),
+			server: LibraryService.getServerByLibraryId(props.libraryId),
+		}).subscribe((data) => {
+			if (!data.library) {
+				Log.error(`MediaOverview => Library for library id ${props.libraryId} was not found`);
+			} else {
+				set(library, data.library);
+			}
+			if (!data.server) {
+				Log.error(`MediaOverview => Server for library id ${props.libraryId} was not found`);
+			} else {
+				set(server, data.server);
+			}
+		}),
+	);
 	// Get display settings
 	useSubscription(
 		combineLatest({
@@ -443,8 +452,6 @@ onMounted(() => {
 			setupRouter();
 		}),
 	);
-
-	// Setup progress bar
 	useSubscription(
 		SignalrService.getLibraryProgress(props.libraryId).subscribe((data) => {
 			if (data) {
@@ -457,23 +464,6 @@ onMounted(() => {
 		}),
 	);
 
-	useSubscription(
-		LibraryService.getServerByLibraryId(props.libraryId).subscribe((serverData) => {
-			if (!serverData) {
-				Log.error(`MediaOverview => Server for library id ${props.libraryId} was not found`);
-			}
-			set(server, serverData);
-		}),
-	);
-
-	useSubscription(
-		LibraryService.getLibrary(props.libraryId).subscribe((libraryData) => {
-			if (!libraryData) {
-				Log.error(`MediaOverview => Library for library id ${props.libraryId} was not found`);
-			}
-			set(library, libraryData);
-		}),
-	);
 	if (props.mediaId) {
 		nextTick(() => {
 			sendMediaOverviewOpenDetailsCommand(props.mediaId);
@@ -484,6 +474,10 @@ onMounted(() => {
 
 <style lang="scss">
 @import '@/assets/scss/variables.scss';
+
+.refresh-library-container {
+	height: calc(100vh - $app-bar-height);
+}
 
 #media-container,
 .media-table-container,

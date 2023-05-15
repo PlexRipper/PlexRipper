@@ -45,6 +45,7 @@
 			icon="mdi-refresh"
 			label="Refresh"
 			:height="barHeight"
+			cy="media-overview-refresh-library-btn"
 			:width="verticalButtonWidth"
 			@click="refreshLibrary" />
 

@@ -5,6 +5,7 @@ export default defineConfig({
 	env: {
 		BASE_URL: 'http://localhost:3030',
 	},
+	video: false,
 	e2e: {
 		viewportHeight: 1080,
 		viewportWidth: 1920,

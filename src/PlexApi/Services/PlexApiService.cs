@@ -73,7 +73,7 @@ public class PlexApiService : IPlexApiService
                 var success = metaData.Count == totalSize;
             }
 
-            return Result.Ok(_mapper.Map<List<PlexTvShowEpisode>>(metaData));
+            return Result.Ok(metaData.ToPlexTvShowEpisodes());
         }
 
         return Result.Fail($"Failed to retrieve episodes for library with key {plexLibraryKey}");
@@ -94,7 +94,7 @@ public class PlexApiService : IPlexApiService
 
         var result = await _plexApi.GetAllSeasonsAsync(tokenResult.Value, serverUrl, plexLibrary.Key);
         if (result != null)
-            return Result.Ok(_mapper.Map<List<PlexTvShowSeason>>(result.MediaContainer.Metadata));
+            return Result.Ok(result.MediaContainer.Metadata.ToPlexTvShowSeasons());
 
         return Result.Fail($"Failed to retrieve seasons for library with key {plexLibrary.Key}");
     }
@@ -135,10 +135,10 @@ public class PlexApiService : IPlexApiService
         switch (result.Value.MediaContainer.ViewGroup)
         {
             case "movie":
-                updatedPlexLibrary.Movies = _mapper.Map<List<PlexMovie>>(mediaList);
+                updatedPlexLibrary.Movies = mediaList.ToPlexMovies();
                 break;
             case "show":
-                updatedPlexLibrary.TvShows = _mapper.Map<List<PlexTvShow>>(mediaList);
+                updatedPlexLibrary.TvShows = mediaList.ToPlexTvShows();
                 break;
         }
 
@@ -218,7 +218,7 @@ public class PlexApiService : IPlexApiService
     public async Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow)
     {
         var result = await _plexApi.GetSeasonsAsync(serverAuthToken, plexFullHost, plexTvShow.Key);
-        return result != null ? _mapper.Map<List<PlexTvShowSeason>>(result.MediaContainer.Metadata) : new List<PlexTvShowSeason>();
+        return result?.MediaContainer?.Metadata.ToPlexTvShowSeasons() ?? new List<PlexTvShowSeason>();
     }
 
     /// <inheritdoc/>

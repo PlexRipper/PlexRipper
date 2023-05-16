@@ -84,23 +84,23 @@ public class Metadata
         }
     }
 
-    public List<Medium> Media { get; set; }
+    public List<Medium> Media { get; set; } = new();
 
-    public Genre[] Genres { get; set; }
+    public List<Genre> Genres { get; set; } = new();
 
-    public Director[] Directors { get; set; }
+    public List<Director> Directors { get; set; } = new();
 
-    public Writer[] Writers { get; set; }
+    public List<Writer> Writers { get; set; } = new();
 
-    public List<Producer> Producer { get; set; }
+    public List<Producer> Producer { get; set; } = new();
 
-    public Country[] Countries { get; set; }
+    public List<Country> Countries { get; set; } = new();
 
-    public List<MediaRole> Roles { get; set; }
+    public List<MediaRole> Roles { get; set; } = new();
 
-    public List<Similar> Similar { get; set; }
+    public List<Similar> Similar { get; set; } = new();
 
-    public List<Field> Field { get; set; }
+    public List<Field> Field { get; set; } = new();
 
     #region Library Sections
 

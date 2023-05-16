@@ -22,7 +22,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, computed, withDefaults, onMounted } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import { DownloadService, SettingsService } from '@service';

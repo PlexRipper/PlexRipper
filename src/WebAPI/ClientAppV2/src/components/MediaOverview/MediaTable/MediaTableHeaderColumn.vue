@@ -5,7 +5,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, defineProps, ref } from 'vue';
 import { get, set } from '@vueuse/core';
 import { setMediaOverviewSort } from '@composables/event-bus';
 import { QTreeViewTableHeader } from '@props';
@@ -17,7 +16,7 @@ const props = defineProps<{
 }>();
 
 defineEmits<{
-	sort: void;
+	(e: 'sort'): void;
 }>();
 const icon = computed(() => {
 	if (get(sorted) === 'asc') {

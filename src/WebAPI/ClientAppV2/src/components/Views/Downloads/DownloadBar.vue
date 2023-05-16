@@ -16,8 +16,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, computed, ref } from 'vue';
-
 interface IButton {
 	name: string;
 	value: string;

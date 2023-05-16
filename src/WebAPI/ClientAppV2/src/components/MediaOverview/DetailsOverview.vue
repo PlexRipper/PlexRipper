@@ -84,7 +84,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps, ref } from 'vue';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import sum from 'lodash-es/sum';

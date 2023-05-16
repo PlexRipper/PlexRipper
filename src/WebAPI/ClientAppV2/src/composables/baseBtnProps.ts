@@ -1,4 +1,4 @@
-import { PropType, defineProps } from 'vue';
+import { PropType } from 'vue';
 import ButtonType from '@enums/buttonType';
 
 export function baseBtnProps() {

@@ -45,7 +45,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, defineProps } from 'vue';
 import { QTreeViewTableHeader, QTreeViewTableItem } from '@props';
 
 defineProps<{

@@ -12,7 +12,6 @@
 </template>
 
 <script setup lang="ts">
-import { withDefaults, defineProps, computed } from 'vue';
 import { useNuxtApp, useI18n } from '#imports';
 import { HelpService } from '@service';
 

@@ -92,7 +92,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue';
 import { clamp } from 'lodash-es';
 import { useSubscription } from '@vueuse/rxjs';
 import { filter, switchMap, tap } from 'rxjs/operators';

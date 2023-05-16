@@ -48,7 +48,6 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { ref, defineEmits, defineProps } from 'vue';
 import VOtpInput from 'vue3-otp-input';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';

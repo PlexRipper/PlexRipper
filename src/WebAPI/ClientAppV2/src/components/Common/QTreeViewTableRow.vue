@@ -87,7 +87,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
 import { QTreeViewTableHeader, QTreeViewTableItem } from '@props';
 import Convert from '@class/Convert';
 

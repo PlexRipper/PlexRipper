@@ -66,7 +66,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps, defineEmits } from 'vue';
 import { QTableProps } from 'quasar';
 import Convert from '@class/Convert';
 import ButtonType from '@enums/buttonType';

@@ -22,7 +22,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
 import { SettingsService } from '@service';

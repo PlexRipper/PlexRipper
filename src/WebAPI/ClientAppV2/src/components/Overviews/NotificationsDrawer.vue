@@ -52,7 +52,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, defineEmits, defineProps } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { NotificationService } from '@service';
 import { NotificationDTO } from '@dto/mainApi';

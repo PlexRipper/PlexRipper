@@ -30,7 +30,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, ref, defineProps } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import sum from 'lodash-es/sum';
 import { set } from '@vueuse/core';

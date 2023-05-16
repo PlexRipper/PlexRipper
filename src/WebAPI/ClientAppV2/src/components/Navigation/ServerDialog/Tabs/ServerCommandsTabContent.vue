@@ -14,7 +14,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
 import { ref, onUnmounted } from '#imports';

@@ -8,7 +8,6 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { defineProps, computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import * as THREE from 'three';
 import WAVES from 'vanta/dist/vanta.waves.min';
 import WebGL from '@class/WebGL';

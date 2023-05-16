@@ -67,11 +67,9 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { ref, defineProps, computed, onMounted, nextTick, watch } from 'vue';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRouter, RouteLocationNormalized, RouteLocationNormalizedLoaded } from 'vue-router';
-import { take } from 'rxjs/operators';
 import { isEqual, orderBy } from 'lodash-es';
 import { combineLatest, forkJoin } from 'rxjs';
 import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaSlimDTO, PlexServerDTO } from '@dto/mainApi';

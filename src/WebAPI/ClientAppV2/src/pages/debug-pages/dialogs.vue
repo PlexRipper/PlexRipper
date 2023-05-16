@@ -50,12 +50,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
+import { set } from '@vueuse/core';
 import { useOpenControlDialog } from '@composables/event-bus';
 import { DownloadConfirmation } from '#components';
 import { AlertService, HelpService, MediaService } from '@service';
-import { PlexAccountDTO, PlexMediaDTO } from '@dto/mainApi';
+import { PlexAccountDTO, PlexMediaSlimDTO } from '@dto/mainApi';
 import { generatePlexAccount } from '@factories';
 
 const serverDialogName = 'debugServerDialog';
@@ -63,8 +63,8 @@ const downloadConfirmationName = 'debugDownloadConfirmation';
 const checkServerConnectionDialogName = 'checkServerConnectionDialogName';
 const verificationCodeDialogName = 'verificationCodeDialogName';
 
-const mediaItem = ref<PlexMediaDTO | null>();
-const mediaTableRows = ref<PlexMediaDTO[]>([]);
+const mediaItem = ref<PlexMediaSlimDTO | null>();
+const mediaTableRows = ref<PlexMediaSlimDTO[]>([]);
 const account = ref<PlexAccountDTO>(
 	generatePlexAccount({
 		id: 1,
@@ -111,8 +111,8 @@ onMounted(() => {
 	useSubscription(
 		MediaService.getTvShowMediaData(32).subscribe((data) => {
 			if (data) {
-				mediaTableRows.value = [data];
-				mediaItem.value = data;
+				set(mediaTableRows, [data]);
+				set(mediaItem, data);
 			}
 		}),
 	);

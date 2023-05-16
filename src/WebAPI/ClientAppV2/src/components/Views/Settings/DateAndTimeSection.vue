@@ -85,7 +85,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 // eslint-disable-next-line import/no-duplicates
 import { format } from 'date-fns';
 // eslint-disable-next-line import/no-duplicates

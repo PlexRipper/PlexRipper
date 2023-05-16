@@ -25,8 +25,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
-
 const props = defineProps<{ error: any }>();
 
 const errorFormatted = computed(() => {

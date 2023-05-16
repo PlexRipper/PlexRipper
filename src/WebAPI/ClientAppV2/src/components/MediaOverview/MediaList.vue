@@ -87,7 +87,6 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { get, set } from '@vueuse/core';
-import { defineProps, ref, withDefaults, computed, onMounted, watch } from 'vue';
 import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
 import {

@@ -4,7 +4,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps } from 'vue';
 // Stolen from: https://www.npmjs.com/package/vue-status-indicator
 const props = defineProps<{ value: boolean }>();
 

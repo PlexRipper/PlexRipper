@@ -30,7 +30,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, computed } from 'vue';
 import type { PlexAccountDTO } from '@dto/mainApi';
 
 const props = defineProps<{

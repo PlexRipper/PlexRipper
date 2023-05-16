@@ -44,7 +44,6 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { defineProps, onMounted, ref } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import type { PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
 import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';

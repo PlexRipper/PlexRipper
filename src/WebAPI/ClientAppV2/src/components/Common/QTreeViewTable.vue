@@ -26,7 +26,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, withDefaults, defineEmits } from 'vue';
 import { flatMapDeep } from 'lodash-es';
 import { QTree } from 'quasar';
 import { get } from '@vueuse/core';

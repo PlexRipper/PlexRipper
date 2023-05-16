@@ -43,7 +43,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref } from 'vue';
 import { set } from '@vueuse/core';
 import { DownloadTaskDTO } from '@dto/mainApi';
 import { detailDownloadTask } from '@api/plexDownloadApi';

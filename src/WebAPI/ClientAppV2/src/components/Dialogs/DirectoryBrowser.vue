@@ -64,7 +64,6 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { ref, defineProps, defineEmits } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { cloneDeep } from 'lodash-es';
 import { get } from '@vueuse/core';

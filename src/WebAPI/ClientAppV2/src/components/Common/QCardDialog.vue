@@ -50,7 +50,6 @@
 </template>
 
 <script setup lang="ts">
-import { withDefaults, defineEmits, defineProps, ref } from 'vue';
 import { get, set } from '@vueuse/core';
 import { useControlDialog } from '#imports';
 

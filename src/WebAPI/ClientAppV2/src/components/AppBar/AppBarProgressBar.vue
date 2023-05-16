@@ -11,7 +11,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import sum from 'lodash-es/sum';
 import { SignalrService } from '@service';

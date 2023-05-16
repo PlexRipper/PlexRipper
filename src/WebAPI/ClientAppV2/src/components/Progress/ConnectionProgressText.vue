@@ -23,7 +23,6 @@
 </template>
 
 <script setup lang="ts">
-import { withDefaults, defineProps } from 'vue';
 import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 
 withDefaults(

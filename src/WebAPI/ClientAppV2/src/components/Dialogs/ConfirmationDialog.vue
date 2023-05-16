@@ -17,7 +17,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref } from 'vue';
 import { useI18n } from '#imports';
 
 const { t, te } = useI18n();

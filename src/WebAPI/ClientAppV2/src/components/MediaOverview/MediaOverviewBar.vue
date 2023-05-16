@@ -82,7 +82,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineEmits, defineProps, ref } from 'vue';
 import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { PlexMediaType, ViewMode } from '@dto/mainApi';
 import { IMediaOverviewBarBus, useMediaOverviewBarBus, useMediaOverviewBarDownloadCommandBus } from '#imports';

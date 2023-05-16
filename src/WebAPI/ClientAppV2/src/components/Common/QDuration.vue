@@ -3,7 +3,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, computed } from 'vue';
 import { formatDuration, intervalToDuration } from 'date-fns';
 
 const props = defineProps<{

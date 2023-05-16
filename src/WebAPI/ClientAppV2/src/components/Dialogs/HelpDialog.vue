@@ -18,7 +18,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps } from 'vue';
 import { get, set } from '@vueuse/core';
 import { useI18n } from '#imports';
 

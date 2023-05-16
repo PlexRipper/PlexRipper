@@ -50,7 +50,6 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { computed, defineEmits, defineProps, ref, withDefaults, onMounted } from 'vue';
 import { get, set, useScroll } from '@vueuse/core';
 import { setMediaOverviewSort, triggerBoxHighlight, listenMediaOverviewScrollToCommand } from '#imports';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';

@@ -120,7 +120,5 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-
 const checkConnectionButton = ref<boolean>(false);
 </script>

@@ -3,7 +3,6 @@
 </template>
 
 <script setup lang="ts">
-import { withDefaults, ref, computed, defineProps, onMounted } from 'vue';
 import { format } from 'date-fns';
 import { useSubscription } from '@vueuse/rxjs';
 import { SettingsService } from '@service';

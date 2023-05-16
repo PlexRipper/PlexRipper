@@ -50,7 +50,7 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { ref, onMounted } from 'vue';
+
 import { set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useI18n } from 'vue-i18n';

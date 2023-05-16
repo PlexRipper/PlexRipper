@@ -100,7 +100,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, computed } from 'vue';
 import { get, set } from '@vueuse/core';
 import { PlexAccountDTO } from '@dto/mainApi';
 import { QForm } from '#components';

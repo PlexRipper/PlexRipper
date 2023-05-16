@@ -19,7 +19,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import { FolderPathDTO, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';

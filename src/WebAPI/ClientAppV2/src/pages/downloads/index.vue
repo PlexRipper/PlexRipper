@@ -52,7 +52,6 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { ref, computed, onMounted } from 'vue';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { DownloadService, ServerService } from '@service';

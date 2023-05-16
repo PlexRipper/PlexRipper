@@ -68,7 +68,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps, ref, withDefaults } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { get } from '@vueuse/core';
 import { kebabCase } from 'lodash-es';

@@ -95,7 +95,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { switchMap, take, tap } from 'rxjs/operators';
 import { set } from '@vueuse/core';

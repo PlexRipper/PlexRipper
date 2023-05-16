@@ -34,7 +34,6 @@
 </template>
 
 <script setup lang="ts">
-import { withDefaults, defineProps } from 'vue';
 import { QExpansionListProps } from '@interfaces/components/QExpansionListProps';
 
 withDefaults(defineProps<{ items: QExpansionListProps[] }>(), {

@@ -6,8 +6,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, withDefaults } from 'vue';
-
 const props = withDefaults(defineProps<{ size: number }>(), {
 	size: 128,
 });

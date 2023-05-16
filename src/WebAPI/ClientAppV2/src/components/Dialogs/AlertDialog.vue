@@ -18,7 +18,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, computed } from 'vue';
 import type IAlert from '@interfaces/IAlert';
 import { AlertService } from '@service';
 

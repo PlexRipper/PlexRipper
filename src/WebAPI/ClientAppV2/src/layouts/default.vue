@@ -25,7 +25,6 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { ref, computed, onMounted, nextTick } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import { AlertService, HelpService } from '@service';

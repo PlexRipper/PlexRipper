@@ -68,7 +68,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, defineProps } from 'vue';
 import { QTreeViewTableHeader } from '@props';
 import { PlexMediaSlimDTO } from '@dto/mainApi';
 import Convert from '@class/Convert';

@@ -5,8 +5,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps, withDefaults } from 'vue';
-
 interface IBreakPoints {
 	xs?: string | number | boolean;
 	sm?: string | number | boolean;

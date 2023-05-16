@@ -185,7 +185,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import { useSubscription } from '@vueuse/rxjs';
 import Log from 'consola';
 import { SettingsService } from '@service';

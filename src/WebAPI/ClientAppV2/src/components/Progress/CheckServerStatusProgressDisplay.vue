@@ -20,7 +20,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import type { PlexServerDTO, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 
 defineProps<{

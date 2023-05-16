@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { defineProps, computed } from 'vue';
+
 import { useSubscription } from '@vueuse/rxjs';
 import { clone } from 'lodash-es';
 import type { PlexServerDTO, PlexServerSettingsModel } from '@dto/mainApi';

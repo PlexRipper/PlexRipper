@@ -55,7 +55,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import type ServerDialog from '@components/Navigation/ServerDialog.vue';

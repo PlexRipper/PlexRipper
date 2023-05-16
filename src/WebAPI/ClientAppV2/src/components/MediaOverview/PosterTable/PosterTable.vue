@@ -13,7 +13,6 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { defineProps, ref, withDefaults, onMounted } from 'vue';
 import { get, set, useScroll } from '@vueuse/core';
 import { PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import {
@@ -63,7 +62,7 @@ onMounted(() => {
 
 		const elementRect = get(scrollTargetElement)?.getBoundingClientRect();
 		// Scroll if not visible
-		if (elementRect?.bottom >= 0 && elementRect?.top <= window.innerHeight) {
+		if (elementRect?.bottom >= 0 && (elementRect?.top ?? 0) <= window.innerHeight) {
 			triggerBoxHighlight(element);
 		} else {
 			get(scrollTargetElement)?.scrollIntoView({

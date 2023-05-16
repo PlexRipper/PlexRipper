@@ -15,7 +15,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, computed } from 'vue';
 import { sendMediaOverviewScrollToCommand } from '@composables/event-bus';
 
 const props = defineProps<{

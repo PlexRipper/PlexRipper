@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
-import { ref, onMounted } from 'vue';
+
 import { set } from '@vueuse/core';
 import { AccountService } from '@service';
 import { PlexAccountDTO } from '@dto/mainApi';

@@ -6,6 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>PlexRipper.PlexApi</RootNamespace>
 		<AssemblyName>PlexRipper.PlexApi</AssemblyName>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -13,6 +14,7 @@
 		<PackageReference Include="Polly" Version="7.2.3" />
 		<PackageReference Include="RestSharp" Version="108.0.1" />
 		<PackageReference Include="RestSharp.Serializers.SystemTextJson" Version="106.15.0" />
+		<PackageReference Include="Riok.Mapperly" Version="2.8.0" />
 		<PackageReference Include="System.Text.Json" Version="7.0.2" />
 	</ItemGroup>
 
@@ -20,10 +22,6 @@
 		<Compile Include="..\Domain\GlobalUsings.cs" />
 		<ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
 		<ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="Common\" />
 	</ItemGroup>
 
 </Project>

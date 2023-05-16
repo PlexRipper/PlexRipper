@@ -59,8 +59,8 @@
 	</template>
 	<!-- Media Details Display-->
 	<DetailsOverview :name="mediaDetailsDialogName" />
-	<!--	&lt;!&ndash;	Loading overlay	&ndash;&gt;-->
-	<!--	<QLoadingOverlay :loading="loading" />-->
+	<!--	Loading overlay	-->
+	<QLoadingOverlay :loading="loading" />
 	<!--		Download confirmation dialog	-->
 	<DownloadConfirmation :name="downloadConfirmationName" :items="items" @download="DownloadService.downloadMedia($event)" />
 </template>
@@ -190,7 +190,7 @@ function refreshLibrary() {
 	});
 }
 
-function onRequestMedia({ page, size, refresh }: { page: number; size: number; refresh: () => void }) {
+function onRequestMedia({ page = 0, size = 0 }: { page: number; size: number }) {
 	useSubscription(
 		MediaService.getMediaData(props.libraryId, page, size).subscribe({
 			next: (mediaData) => {
@@ -204,10 +204,8 @@ function onRequestMedia({ page, size, refresh }: { page: number; size: number; r
 				Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
 			},
 			complete: () => {
-				if (refresh) {
-					refresh();
-				}
 				setScrollIndexes();
+				set(loading, false);
 			},
 		}),
 	);
@@ -403,9 +401,6 @@ onMounted(() => {
 	onRequestMedia({
 		page: 0,
 		size: 0,
-		refresh: () => {
-			set(loading, false);
-		},
 	});
 
 	// Get the server and library
@@ -458,7 +453,7 @@ onMounted(() => {
 				set(libraryProgress, data);
 				set(isRefreshing, data.isRefreshing);
 				if (data.isComplete) {
-					refreshLibrary();
+					onRequestMedia({ size: 0, page: 0 });
 				}
 			}
 		}),

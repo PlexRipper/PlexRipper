@@ -4,39 +4,39 @@
 		<tbody>
 			<!-- Machine Identifier -->
 			<tr>
-				<td style="width: 25%">{{ $t('components.server-dialog.tabs.server-data.machine-id') }}:</td>
+				<td style="width: 25%">{{ t('components.server-dialog.tabs.server-data.machine-id') }}:</td>
 				<td>{{ plexServer.machineIdentifier }}</td>
 			</tr>
 			<!-- Device -->
 			<tr>
-				<td>{{ $t('components.server-dialog.tabs.server-data.device') }}:</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.device') }}:</td>
 				<td>{{ plexServer.device }}</td>
 			</tr>
 			<!-- Platform and platform version -->
 			<tr>
-				<td>{{ $t('components.server-dialog.tabs.server-data.platform') }}:</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.platform') }}:</td>
 				<td>{{ plexServer.platform }} ({{ plexServer.platformVersion }})</td>
 			</tr>
 			<!-- Product and version -->
 			<tr>
-				<td>{{ $t('components.server-dialog.tabs.server-data.plex-version') }}:</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.plex-version') }}:</td>
 				<td>{{ plexServer.product }} ({{ plexServer.productVersion }})</td>
 			</tr>
 			<!-- Created On -->
 			<tr>
-				<td>{{ $t('components.server-dialog.tabs.server-data.created-on') }}:</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.created-on') }}:</td>
 				<td>
 					<q-date-time short-date :text="plexServer.createdAt" />
 				</td>
 			</tr>
 			<tr>
-				<td>{{ $t('components.server-dialog.tabs.server-data.last-seen-at') }}:</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.last-seen-at') }}:</td>
 				<td>
 					<q-date-time short-date :text="plexServer.lastSeenAt" />
 				</td>
 			</tr>
 			<tr>
-				<td>{{ $t('components.server-dialog.tabs.server-data.current-status') }}:</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.current-status') }}:</td>
 				<td>
 					<q-status pulse :value="hasSuccessServerStatus" />
 				</td>
@@ -56,6 +56,7 @@ import type { PlexServerDTO } from '@dto/mainApi';
 import { PlexServerConnectionDTO } from '@dto/mainApi';
 import { ServerConnectionService, ServerService } from '@service';
 
+const { t } = useI18n();
 const checkServerStatusLoading = ref(false);
 const hasSuccessServerStatus = ref(false);
 const serverConnections = ref<PlexServerConnectionDTO[]>([]);

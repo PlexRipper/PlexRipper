@@ -66,13 +66,17 @@ const props = withDefaults(
 		rows: PlexMediaSlimDTO[];
 		selection: ISelection | null;
 		scrollDict?: Record<string, number>;
-		disableHoverClick: boolean;
-		disableHighlight: boolean;
-		disableIntersection: boolean;
-		isScrollable: boolean;
+		disableHoverClick?: boolean;
+		disableHighlight?: boolean;
+		disableIntersection?: boolean;
+		isScrollable?: boolean;
 	}>(),
 	{
 		scrollDict: { '#': 0 } as any,
+		disableHoverClick: false,
+		disableHighlight: false,
+		disableIntersection: false,
+		isScrollable: true,
 	},
 );
 

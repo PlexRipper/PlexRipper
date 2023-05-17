@@ -1,5 +1,5 @@
 <template>
-	<q-list v-if="mediaItem?.children?.length > 0">
+	<q-list v-if="mediaItem?.children?.length ?? -1 > 0">
 		<!--	Root item	-->
 		<q-item>
 			<q-row align="center">
@@ -8,13 +8,13 @@
 				</q-col>
 				<q-col class="q-ml-md">
 					<q-sub-header bold>
-						{{ mediaItem.title }}
+						{{ mediaItem?.title ?? t('general.error.unknown') }}
 					</q-sub-header>
 				</q-col>
 				<!--	Total selected count	-->
 				<q-col v-if="selectedCount" cols="auto">
 					<span class="text-weight-bold">
-						{{ $t('components.media-list.selected-count', { selectedCount }) }}
+						{{ t('components.media-list.selected-count', { selectedCount }) }}
 					</span>
 				</q-col>
 			</q-row>
@@ -42,13 +42,17 @@
 						<q-sub-header bold>
 							{{ child.title }}
 							<span class="text-weight-light q-ml-md">
-								{{ $t('components.media-list.episode-count', { episodeCount: child.childCount }) }}
+								{{ t('components.media-list.episode-count', { episodeCount: child.childCount }) }}
 							</span>
 						</q-sub-header>
 					</q-col>
 					<q-col v-if="getSelected(child.id)?.keys.length" cols="auto">
 						<span class="text-weight-bold">
-							{{ $t('components.media-list.selected-count', { selectedCount: getSelected(child.id).keys.length }) }}
+							{{
+								t('components.media-list.selected-count', {
+									selectedCount: getSelected(child.id)?.keys.length ?? -1,
+								})
+							}}
 						</span>
 					</q-col>
 					<q-col cols="auto">
@@ -78,7 +82,7 @@
 	<q-list v-else>
 		<q-item>
 			<q-item-section>
-				<h2>{{ $t('components.media-list.no-media-found') }}</h2>
+				<h2>{{ t('components.media-list.no-media-found') }}</h2>
 			</q-item-section>
 		</q-item>
 	</q-list>
@@ -87,7 +91,7 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { get, set } from '@vueuse/core';
-import { DownloadMediaDTO, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
+import { DownloadMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
 import {
 	useMediaOverviewBarBus,
@@ -97,10 +101,10 @@ import {
 } from '#imports';
 
 const defaultOpened = ref(false);
-
+const { t } = useI18n();
 const props = withDefaults(
 	defineProps<{
-		mediaItem: PlexMediaDTO | null;
+		mediaItem: PlexMediaSlimDTO | null;
 		loading?: boolean;
 		disableIntersection: boolean;
 		disableHighlight: boolean;
@@ -134,13 +138,13 @@ const selectedCount = computed((): number => {
 	return selected.value?.reduce((acc, x) => acc + x.keys?.length ?? 0, 0) ?? 0;
 });
 
-const rootSetSelected = (value: boolean) => {
+function rootSetSelected(value: boolean) {
 	for (const child of props.mediaItem?.children ?? []) {
 		setSelected(child.id, child.children, value);
 	}
-};
+}
 
-const isSelected = (id: number): boolean | null => {
+function isSelected(id: number): boolean | null {
 	if (selected.value.length === 0) {
 		return false;
 	}
@@ -149,9 +153,9 @@ const isSelected = (id: number): boolean | null => {
 		return false;
 	}
 	return result.allSelected;
-};
+}
 
-const getSelected = (id: number): ISelection | null => {
+function getSelected(id: number): ISelection | null {
 	if (selected.value.length === 0) {
 		return null;
 	}
@@ -160,9 +164,9 @@ const getSelected = (id: number): ISelection | null => {
 		return null;
 	}
 	return result;
-};
+}
 
-function setSelected(id: number, children: PlexMediaDTO[], value: boolean) {
+function setSelected(id: number, children: PlexMediaSlimDTO[], value: boolean) {
 	const selection = get(selected).find((x) => x.indexKey === id);
 	if (selection) {
 		if (value) {
@@ -175,7 +179,7 @@ function setSelected(id: number, children: PlexMediaDTO[], value: boolean) {
 	}
 }
 
-const onSelection = (id: number, payload: ISelection) => {
+function onSelection(id: number, payload: ISelection) {
 	const i = selected.value.findIndex((x) => x.indexKey === id);
 	if (i === -1) {
 		selected.value.push({ indexKey: id, keys: payload.keys, allSelected: payload.allSelected });
@@ -184,22 +188,23 @@ const onSelection = (id: number, payload: ISelection) => {
 
 	selected.value[i].allSelected = payload.allSelected;
 	selected.value[i].keys = payload.keys;
-};
+}
+
 // endregion
 
-const expandAll = () => {
+function expandAll() {
 	defaultOpened.value = true;
-};
+}
 
 // region EventBus
 const mediaOverViewBarBus = useMediaOverviewBarBus();
 
-const sendBusConfig = () => {
+function sendBusConfig() {
 	mediaOverViewBarBus.emit({
 		downloadButtonVisible: get(selectedCount) > 0,
 		hasSelected: get(selectedCount) > 0,
 	});
-};
+}
 
 watch(selectedCount, () => {
 	sendBusConfig();

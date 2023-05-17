@@ -1,9 +1,11 @@
 <template>
-	<span v-if="size > 0">{{ formattedString }}{{ speed ? $t('general.units.per-second') : '' }}</span>
+	<span v-if="size > 0">{{ formattedString }}{{ speed ? t('general.units.per-second') : '' }}</span>
 	<span v-else> - </span>
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n();
+
 const props = defineProps<{
 	size: number;
 	speed?: boolean;

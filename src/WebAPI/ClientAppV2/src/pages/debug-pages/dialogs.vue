@@ -1,23 +1,23 @@
 <template>
 	<q-page>
 		<q-section>
-			<template #header> {{ $t('pages.debug.dialogs.header') }}</template>
+			<template #header> {{ t('pages.debug.dialogs.header') }}</template>
 			<q-markup-table>
 				<q-tr>
 					<q-td>
-						<DebugButton :label="$t('pages.debug.dialogs.buttons.server-dialog')" @click="openServerDialog" />
+						<DebugButton :label="t('pages.debug.dialogs.buttons.server-dialog')" @click="openServerDialog" />
 					</q-td>
 				</q-tr>
 				<q-tr>
 					<q-td>
 						<DebugButton
-							:label="$t('pages.debug.dialogs.buttons.download-confirmation')"
+							:label="t('pages.debug.dialogs.buttons.download-confirmation')"
 							@click="openDownloadConfirmationDialog" />
 					</q-td>
 				</q-tr>
 				<q-tr>
 					<q-td>
-						<DebugButton :label="$t('pages.debug.dialogs.buttons.help-dialog')" @click="openHelpDialog" />
+						<DebugButton :label="t('pages.debug.dialogs.buttons.help-dialog')" @click="openHelpDialog" />
 					</q-td>
 				</q-tr>
 				<q-tr>
@@ -29,7 +29,7 @@
 					<q-td>
 						<DebugButton
 							data-cy="check-server-connections-dialog-button"
-							:label="$t('pages.debug.dialogs.buttons.check-server-connections-dialog')"
+							:label="t('pages.debug.dialogs.buttons.check-server-connections-dialog')"
 							@click="openCheckServerConnectionsDialog" />
 					</q-td>
 				</q-tr>
@@ -37,7 +37,7 @@
 					<q-td>
 						<DebugButton
 							data-cy="open-verification-dialog-button"
-							:label="$t('pages.debug.dialogs.buttons.verification-dialog')"
+							:label="t('pages.debug.dialogs.buttons.verification-dialog')"
 							@click="openVerificationDialog" />
 					</q-td>
 				</q-tr>
@@ -52,12 +52,14 @@
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
+import { useI18n } from 'vue-i18n';
 import { useOpenControlDialog } from '@composables/event-bus';
 import { DownloadConfirmation } from '#components';
 import { AlertService, HelpService, MediaService } from '@service';
 import { PlexAccountDTO, PlexMediaSlimDTO } from '@dto/mainApi';
 import { generatePlexAccount } from '@factories';
 
+const { t } = useI18n();
 const serverDialogName = 'debugServerDialog';
 const downloadConfirmationName = 'debugDownloadConfirmation';
 const checkServerConnectionDialogName = 'checkServerConnectionDialogName';

@@ -34,7 +34,7 @@
 			<!-- No libraries available -->
 			<template v-else>
 				<q-item>
-					<q-item-section>{{ $t('components.server-drawer.no-libraries') }}</q-item-section>
+					<q-item-section>{{ t('components.server-drawer.no-libraries') }}</q-item-section>
 				</q-item>
 			</template>
 		</q-expansion-item>
@@ -46,10 +46,10 @@
 	<!-- No servers available -->
 	<template v-else>
 		<q-item>
-			<q-item-section>{{ $t('components.server-drawer.no-servers.header') }}</q-item-section>
+			<q-item-section>{{ t('components.server-drawer.no-servers.header') }}</q-item-section>
 		</q-item>
 		<q-item>
-			<q-item-section>{{ $t('components.server-drawer.no-servers.description') }}</q-item-section>
+			<q-item-section>{{ t('components.server-drawer.no-servers.description') }}</q-item-section>
 		</q-item>
 	</template>
 </template>
@@ -62,6 +62,7 @@ import { LibraryService, ServerService, ServerConnectionService } from '@service
 import { PlexLibraryDTO, PlexMediaType, PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
 import { useOpenControlDialog } from '#imports';
 
+const { t } = useI18n();
 const router = useRouter();
 
 const plexServers = ref<PlexServerDTO[]>([]);

@@ -9,7 +9,11 @@
 		@opened="open"
 		@closed="close">
 		<template #title>
-			{{ $t('components.server-dialog.header', { serverName: plexServer.name }) }}
+			{{
+				t('components.server-dialog.header', {
+					serverName: plexServer?.name ?? t('general.error.unknown'),
+				})
+			}}
 		</template>
 		<template #default>
 			<q-row align="start" full-height>
@@ -21,31 +25,31 @@
 							name="server-data"
 							icon="mdi-server"
 							data-cy="server-dialog-tab-1"
-							:label="$t('components.server-dialog.tabs.server-data.header')" />
+							:label="t('components.server-dialog.tabs.server-data.header')" />
 						<!--	Server Connections Tab Header	-->
 						<q-tab
 							name="server-connection"
 							icon="mdi-connection"
 							data-cy="server-dialog-tab-2"
-							:label="$t('components.server-dialog.tabs.server-connections.header')" />
+							:label="t('components.server-dialog.tabs.server-connections.header')" />
 						<!--	Server Configuration Tab Header	-->
 						<q-tab
 							name="server-config"
 							icon="mdi-cog-box"
 							data-cy="server-dialog-tab-3"
-							:label="$t('components.server-dialog.tabs.server-config.header')" />
+							:label="t('components.server-dialog.tabs.server-config.header')" />
 						<!--	Library Destinations Tab Header	-->
 						<q-tab
 							name="download-destinations"
 							icon="mdi-folder-edit-outline"
 							data-cy="server-dialog-tab-4"
-							:label="$t('components.server-dialog.tabs.download-destinations.header')" />
+							:label="t('components.server-dialog.tabs.download-destinations.header')" />
 						<!--	Server Commands Tab Header	-->
 						<q-tab
 							name="server-commands"
 							icon="mdi-console"
 							data-cy="server-dialog-tab-5"
-							:label="$t('components.server-dialog.tabs.server-commands.header')" />
+							:label="t('components.server-dialog.tabs.server-commands.header')" />
 					</q-tabs>
 				</q-col>
 				<q-col align-self="stretch" class="inherit-all-height scroll">
@@ -80,15 +84,15 @@
 			</q-row>
 
 			<!--			<q-card v-else class="server-dialog-content">-->
-			<!--				<h1>{{ $t('components.server-dialog.no-servers-error') }}</h1>-->
+			<!--				<h1>{{ t('components.server-dialog.no-servers-error') }}</h1>-->
 			<!--			</q-card>-->
 		</template>
 		<template #actions>
 			<BaseButton
 				cy="server-dialog-close-btn"
 				flat
-				:label="$t('general.commands.close')"
-				color="primary"
+				:label="t('general.commands.close')"
+				color="default"
 				@click="useCloseControlDialog(name)" />
 		</template>
 	</q-card-dialog>
@@ -113,6 +117,7 @@ const plexServerSettings = ref<PlexServerSettingsModel | null>(null);
 const plexServerId = ref(0);
 
 const isVisible = computed((): boolean => plexServerId.value > 0);
+const { t } = useI18n();
 
 function open(newPlexServerId: number): void {
 	set(plexServerId, newPlexServerId);

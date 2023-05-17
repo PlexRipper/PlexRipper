@@ -1,12 +1,13 @@
 <template>
 	<q-col class="q-py-sm">
-		<BaseButton flat :icon="getButtonIcon" :label="$t(getButtonText)" @click.stop="changeStatus" />
+		<BaseButton flat :icon="getButtonIcon" :label="t(getButtonText)" @click.stop="changeStatus" />
 	</q-col>
 </template>
 
 <script setup lang="ts">
 import { DownloadStatus } from '@dto/mainApi';
 
+const { t } = useI18n();
 const serverStatus = ref<DownloadStatus>(DownloadStatus.Paused);
 
 const getButtonIcon = computed(() => {

@@ -8,23 +8,23 @@
 			<q-markup-table class="section-table">
 				<tbody>
 					<tr>
-						<td style="width: 25%">{{ $t('components.download-details-dialog.overview.status') }}:</td>
+						<td style="width: 25%">{{ t('components.download-details-dialog.overview.status') }}:</td>
 						<td>{{ downloadTask.status }}</td>
 					</tr>
 					<tr v-if="downloadTask.fileName">
-						<td>{{ $t('components.download-details-dialog.overview.file-name') }}:</td>
+						<td>{{ t('components.download-details-dialog.overview.file-name') }}:</td>
 						<td>{{ downloadTask.fileName }}</td>
 					</tr>
 					<tr>
-						<td>{{ $t('components.download-details-dialog.overview.download-path') }} :</td>
+						<td>{{ t('components.download-details-dialog.overview.download-path') }} :</td>
 						<td>{{ downloadTask.downloadDirectory }}</td>
 					</tr>
 					<tr>
-						<td>{{ $t('components.download-details-dialog.overview.destination-path') }} :</td>
+						<td>{{ t('components.download-details-dialog.overview.destination-path') }} :</td>
 						<td>{{ downloadTask.destinationDirectory }}</td>
 					</tr>
 					<tr v-if="downloadTask.downloadUrl">
-						<td>{{ $t('components.download-details-dialog.overview.download-url') }} :</td>
+						<td>{{ t('components.download-details-dialog.overview.download-url') }} :</td>
 						<td>
 							<q-row no-gutters class="no-wrap">
 								<q-col>
@@ -47,11 +47,14 @@ import { set } from '@vueuse/core';
 import { DownloadTaskDTO } from '@dto/mainApi';
 import { detailDownloadTask } from '@api/plexDownloadApi';
 
+const { t } = useI18n();
+
+const loading = ref(true);
+const downloadTask = ref<DownloadTaskDTO>();
+
 defineProps<{
 	name: string;
 }>();
-const loading = ref(true);
-const downloadTask = ref<DownloadTaskDTO>();
 
 function onOpen(downloadTaskId: number) {
 	set(loading, true);

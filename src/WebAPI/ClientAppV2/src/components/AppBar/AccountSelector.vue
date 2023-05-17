@@ -1,7 +1,7 @@
 <template>
 	<q-btn-dropdown stretch flat icon="mdi-account" dropdown-icon="mdi-arrow-down">
 		<q-list v-if="accounts.length > 0">
-			<q-item-label header> ACTIVE ACCOUNT </q-item-label>
+			<q-item-label header> ACTIVE ACCOUNT</q-item-label>
 
 			<!--  Account Row  -->
 			<q-item
@@ -29,7 +29,7 @@
 		</q-list>
 		<!--	No account found -->
 		<q-list v-else>
-			<q-item-label> {{ $t('components.app-bar.no-accounts') }}</q-item-label>
+			<q-item-label> {{ t('components.app-bar.no-accounts') }}</q-item-label>
 		</q-list>
 	</q-btn-dropdown>
 </template>
@@ -39,6 +39,8 @@ import { useSubscription } from '@vueuse/rxjs';
 import { AccountService, ServerService, SettingsService } from '@service';
 import { refreshAccount } from '@api/accountApi';
 import { PlexAccountDTO } from '@dto/mainApi';
+
+const { t } = useI18n();
 
 const loading = ref<boolean[]>([false]);
 const isLoading = computed(() => loading.value.some((x) => x));

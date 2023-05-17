@@ -56,7 +56,7 @@
 			</template>
 		</template>
 		<!-- No row -->
-		<q-col v-else>{{ $t('components.q-tree-view-table-row.invalid-node') }}</q-col>
+		<q-col v-else>{{ t('components.q-tree-view-table-row.invalid-node') }}</q-col>
 		<!--	Highlight animation effect	-->
 		<svg v-if="!disableHighlight" class="glow-container">
 			<!--suppress HtmlUnknownAttribute -->
@@ -79,16 +79,24 @@ import {
 } from '@composables/event-bus';
 import { toDownloadMedia } from '@composables/conversion';
 
-const props = defineProps<{
-	selected?: boolean | null;
-	isHeader?: boolean;
-	selectable?: boolean;
-	row: PlexMediaSlimDTO;
-	columns: QTreeViewTableHeader[];
-	index: number;
-	disableHoverClick?: boolean;
-	disableHighlight: boolean;
-}>();
+const { t } = useI18n();
+const props = withDefaults(
+	defineProps<{
+		selected?: boolean | null;
+		isHeader?: boolean;
+		selectable?: boolean;
+		row: PlexMediaSlimDTO;
+		columns: QTreeViewTableHeader[];
+		index: number;
+		disableHoverClick?: boolean;
+		disableHighlight?: boolean;
+	}>(),
+	{
+		selected: false,
+		disableHoverClick: false,
+		disableHighlight: false,
+	},
+);
 
 defineEmits<{
 	(e: 'selected', state: boolean): void;

@@ -4,7 +4,7 @@
 		<q-row>
 			<q-col>
 				<q-alert border="bottom" colored-border type="warning" elevation="2">
-					{{ $t('general.alerts.disabled-paths') }}
+					{{ t('general.alerts.disabled-paths') }}
 				</q-alert>
 			</q-col>
 		</q-row>
@@ -37,8 +37,8 @@
 					<q-col cols="auto" align-self="center">
 						<valid-icon
 							:valid="folderPath.isValid"
-							:valid-text="$t('general.alerts.valid-directory')"
-							:invalid-text="$t('general.alerts.invalid-directory')" />
+							:valid-text="t('general.alerts.valid-directory')"
+							:invalid-text="t('general.alerts.invalid-directory')" />
 					</q-col>
 					<!--	Delete Button -->
 					<q-col v-if="folderGroup.IsFolderDeletable" cols="auto">
@@ -50,7 +50,7 @@
 			<template v-else>
 				<q-row justify="center" class="q-my-sm">
 					<q-col cols="auto">
-						<h2>{{ $t('components.folder-paths-overview.no-paths') }}</h2>
+						<h2>{{ t('components.folder-paths-overview.no-paths') }}</h2>
 					</q-col>
 				</q-row>
 			</template>

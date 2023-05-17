@@ -28,7 +28,7 @@
 								<q-icon name="mdi-check-circle-outline" />
 							</q-item-section>
 							<q-item-section>
-								{{ $t('components.notifications-drawer.no-notifications') }}
+								{{ t('components.notifications-drawer.no-notifications') }}
 							</q-item-section>
 						</q-item>
 					</q-list>
@@ -43,7 +43,7 @@
 						<q-icon name="mdi-close-circle" />
 					</q-item-section>
 					<q-item-section>
-						{{ $t('components.notifications-drawer.clear-notifications') }}
+						{{ t('components.notifications-drawer.clear-notifications') }}
 					</q-item-section>
 				</q-item>
 			</q-list>
@@ -58,6 +58,7 @@ import { NotificationDTO } from '@dto/mainApi';
 import notificationService from '~/service/notificationService';
 
 const notifications = ref<NotificationDTO[]>([]);
+const { t } = useI18n();
 
 defineProps<{
 	showDrawer: boolean;

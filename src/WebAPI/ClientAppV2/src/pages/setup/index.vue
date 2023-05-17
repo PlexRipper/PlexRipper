@@ -25,7 +25,7 @@
 												index + 1 === stepPagesCount ? 'green' : stepIndex > index + 1 ? 'green' : 'red'
 											"
 											:complete="index + 1 === stepPagesCount ? stepIndex > index : stepIndex > index + 1"
-											:label="$t(`pages.setup.${header}.header`)"
+											:label="t(`pages.setup.${header}.header`)"
 											:data-cy="`setup-header-tab-${index + 1}`"
 											edit-icon="$complete" />
 										<q-separator v-if="index < stepPagesCount - 1" :key="index + 100" />
@@ -43,18 +43,18 @@
 									<q-tab-panel :name="1">
 										<q-row no-gutters>
 											<q-col>
-												<h2>{{ $t('pages.setup.intro.title') }}</h2>
-												<p>{{ $t('pages.setup.intro.text.p-1') }}</p>
+												<h2>{{ t('pages.setup.intro.title') }}</h2>
+												<p>{{ t('pages.setup.intro.text.p-1') }}</p>
 												<ul>
 													<li>
-														{{ $t('pages.setup.intro.list.item-1') }}
+														{{ t('pages.setup.intro.list.item-1') }}
 														<ExternalLinkButton
 															href="https://github.com/PlexRipper/PlexRipper/issues" />
 													</li>
-													<li>{{ $t('pages.setup.intro.list.item-2') }}</li>
-													<li>{{ $t('pages.setup.intro.list.item-3') }}</li>
-													<li>{{ $t('pages.setup.intro.list.item-4') }}</li>
-													<li>{{ $t('pages.setup.intro.list.item-5') }}</li>
+													<li>{{ t('pages.setup.intro.list.item-2') }}</li>
+													<li>{{ t('pages.setup.intro.list.item-3') }}</li>
+													<li>{{ t('pages.setup.intro.list.item-4') }}</li>
+													<li>{{ t('pages.setup.intro.list.item-5') }}</li>
 												</ul>
 											</q-col>
 										</q-row>
@@ -63,41 +63,41 @@
 									<q-tab-panel :name="2">
 										<q-row no-gutters>
 											<q-col>
-												<h2 class="mt-2">{{ $t('pages.setup.future-plans.title') }}</h2>
+												<h2 class="mt-2">{{ t('pages.setup.future-plans.title') }}</h2>
 											</q-col>
 										</q-row>
 										<q-row no-gutters>
 											<q-col>
-												<p>{{ $t('pages.setup.future-plans.text.p-1') }}</p>
+												<p>{{ t('pages.setup.future-plans.text.p-1') }}</p>
 												<ul>
 													<li>
-														{{ $t('pages.setup.future-plans.list.item-1') }}
+														{{ t('pages.setup.future-plans.list.item-1') }}
 														<ul>
 															<li>
-																{{ $t('pages.setup.future-plans.list.item-1-1') }}
+																{{ t('pages.setup.future-plans.list.item-1-1') }}
 															</li>
 														</ul>
 													</li>
-													<li>{{ $t('pages.setup.future-plans.list.item-2') }}</li>
-													<li>{{ $t('pages.setup.future-plans.list.item-3') }}</li>
-													<li>{{ $t('pages.setup.future-plans.list.item-4') }}</li>
+													<li>{{ t('pages.setup.future-plans.list.item-2') }}</li>
+													<li>{{ t('pages.setup.future-plans.list.item-3') }}</li>
+													<li>{{ t('pages.setup.future-plans.list.item-4') }}</li>
 													<li>
-														{{ $t('pages.setup.future-plans.list.item-6') }}
+														{{ t('pages.setup.future-plans.list.item-6') }}
 														<ul>
 															<li>
-																{{ $t('pages.setup.future-plans.list.item-6-1') }}
+																{{ t('pages.setup.future-plans.list.item-6-1') }}
 															</li>
 														</ul>
 													</li>
 												</ul>
-												<h2 class="text-center">{{ $t('pages.setup.future-plans.text.p-2') }}</h2>
+												<h2 class="text-center">{{ t('pages.setup.future-plans.text.p-2') }}</h2>
 											</q-col>
 										</q-row>
 									</q-tab-panel>
 									<!-- Checking paths	-->
 									<q-tab-panel :name="3">
 										<h2>
-											{{ $t('pages.setup.paths.title') }}
+											{{ t('pages.setup.paths.title') }}
 										</h2>
 										<q-row no-gutters>
 											<q-col>
@@ -107,26 +107,26 @@
 									</q-tab-panel>
 									<!-- Plex Accounts	-->
 									<q-tab-panel :name="4">
-										<h2 class="mt-2">{{ $t('pages.setup.accounts.title') }}</h2>
+										<h2 class="mt-2">{{ t('pages.setup.accounts.title') }}</h2>
 										<account-overview />
 									</q-tab-panel>
 									<!-- Finished	-->
 									<q-tab-panel :name="5">
 										<q-row no-gutters>
 											<q-col>
-												<h2 class="mt-2">{{ $t('pages.setup.finished.title') }}</h2>
+												<h2 class="mt-2">{{ t('pages.setup.finished.title') }}</h2>
 											</q-col>
 										</q-row>
 										<q-row no-gutters>
 											<q-col>
-												<p>{{ $t('pages.setup.finished.text.p-1') }}</p>
+												<p>{{ t('pages.setup.finished.text.p-1') }}</p>
 												<q-list dense class="no-background">
 													<q-item v-for="(link, i) in links" :key="i" :href="link" target="_blank">
 														<q-item-section avatar>
 															<ul>
 																<li>
 																	<span style="font-weight: normal">
-																		{{ $t(`pages.setup.finished.list.item-${i + 1}`) }}
+																		{{ t(`pages.setup.finished.list.item-${i + 1}`) }}
 																	</span>
 																</li>
 															</ul>
@@ -191,6 +191,7 @@ import { SettingsService } from '@service';
 import { useRouter, useOpenControlDialog } from '#imports';
 
 const router = useRouter();
+const { t } = useI18n();
 
 const stepIndex = ref(1);
 const stepPagesCount = ref(5);

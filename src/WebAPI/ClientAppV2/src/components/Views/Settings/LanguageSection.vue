@@ -1,7 +1,7 @@
 <template>
 	<q-section>
 		<template #header>
-			{{ $t('pages.settings.ui.language.header') }}
+			{{ i18n.t('pages.settings.ui.language.header') }}
 		</template>
 		<q-row>
 			<q-col>

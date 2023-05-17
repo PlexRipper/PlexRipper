@@ -1,6 +1,6 @@
 <template>
 	<q-section>
-		<template #header> {{ $t('pages.settings.advanced.download-manager.header') }}</template>
+		<template #header> {{ t('pages.settings.advanced.download-manager.header') }}</template>
 		<!--	Max segmented downloads	-->
 		<q-row>
 			<q-col cols="4" align-self="center">
@@ -27,6 +27,7 @@ import { set } from '@vueuse/core';
 import { SettingsService } from '@service';
 import { DownloadManagerSettingsDTO } from '@dto/mainApi';
 
+const { t } = useI18n();
 const downloadSegments = ref(0);
 
 const updateSettings = (setting: keyof DownloadManagerSettingsDTO, value: any): void => {

@@ -1,6 +1,6 @@
 <template>
 	<q-section>
-		<template #header> {{ $t('pages.settings.advanced.debug.header') }}</template>
+		<template #header> {{ t('pages.settings.advanced.debug.header') }}</template>
 		<!--	Reset Database	-->
 		<q-row>
 			<q-col cols="4" align-self="center">
@@ -17,6 +17,8 @@ import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
 import { GeneralSettingsDTO } from '@dto/mainApi';
 import { SettingsService } from '@service';
+
+const { t } = useI18n();
 
 const debugMode = ref(false);
 

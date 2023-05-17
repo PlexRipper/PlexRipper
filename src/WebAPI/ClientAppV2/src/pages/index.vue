@@ -2,7 +2,7 @@
 	<q-page>
 		<q-row v-if="firstTimeSetup">
 			<q-col cols="12">
-				<h2>{{ $t('pages.home.setup-question') }}</h2>
+				<h2>{{ t('pages.home.setup-question') }}</h2>
 				<q-row justify="center">
 					<q-col cols="3">
 						<NavigationSkipSetupButton block @click="skipSetup()" />
@@ -15,7 +15,7 @@
 		</q-row>
 		<q-row v-else>
 			<q-col>
-				<h1>{{ $t('pages.home.header') }}</h1>
+				<h1>{{ t('pages.home.header') }}</h1>
 			</q-col>
 		</q-row>
 	</q-page>
@@ -28,7 +28,7 @@ import { set } from '@vueuse/core';
 import { SettingsService } from '@service';
 
 const firstTimeSetup = ref(false);
-
+const { t } = useI18n();
 const skipSetup = () => {
 	useSubscription(
 		SettingsService.updateGeneralSettings('firstTimeSetup', false).subscribe(() => {

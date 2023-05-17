@@ -1,7 +1,7 @@
 <template>
 	<q-card class="account-card background-sm" data-cy="account-card" @click="$emit('open-dialog', account)">
 		<q-card-section v-if="!isNew">
-			{{ account ? account.displayName : $t('components.account-card.no-account-name') }}
+			{{ account ? account.displayName : t('components.account-card.no-account-name') }}
 		</q-card-section>
 
 		<!-- Add new account -->
@@ -13,17 +13,17 @@
 		<q-card-section v-else>
 			<!-- Validation Chip -->
 			<q-chip v-if="account?.isValidated" color="green" text-color="white">
-				{{ $t('general.commands.validated') }}
+				{{ t('general.commands.validated') }}
 			</q-chip>
 			<q-chip v-else color="red" text-color="white">
-				{{ $t('general.commands.not-validated') }}
+				{{ t('general.commands.not-validated') }}
 			</q-chip>
 			<!-- IsEnabled Chip -->
 			<q-chip v-if="account?.isEnabled" color="green" text-color="white">
-				{{ $t('general.commands.enabled') }}
+				{{ t('general.commands.enabled') }}
 			</q-chip>
 			<q-chip v-else color="red" text-color="white">
-				{{ $t('general.commands.disabled') }}
+				{{ t('general.commands.disabled') }}
 			</q-chip>
 		</q-card-section>
 	</q-card>
@@ -31,6 +31,8 @@
 
 <script setup lang="ts">
 import type { PlexAccountDTO } from '@dto/mainApi';
+
+const { t } = useI18n();
 
 const props = defineProps<{
 	account?: PlexAccountDTO;

@@ -1,10 +1,10 @@
 <template>
 	<q-card-dialog :name="name" persistent max-width="700px" cy="2fa-code-verification-dialog">
 		<template #title>
-			{{ $t('components.account-verification-code-dialog.title') }}
+			{{ t('components.account-verification-code-dialog.title') }}
 		</template>
 		<template #top-row>
-			<q-sub-header>{{ $t('components.account-verification-code-dialog.sub-title') }}</q-sub-header>
+			<q-sub-header>{{ t('components.account-verification-code-dialog.sub-title') }}</q-sub-header>
 		</template>
 		<template #default>
 			<!--	Verification Code input	-->
@@ -26,7 +26,7 @@
 			<q-row v-if="errors.length > 0" justify="center">
 				<q-col cols="auto">
 					<span style="color: red; font-weight: bold">{{
-						$t('components.account-verification-code-dialog.error')
+						t('components.account-verification-code-dialog.error')
 					}}</span>
 				</q-col>
 			</q-row>
@@ -54,6 +54,8 @@ import { useSubscription } from '@vueuse/rxjs';
 import type { IError, PlexAccountDTO } from '@dto/mainApi';
 import { validateAccount } from '@api/accountApi';
 import { useCloseControlDialog } from '#imports';
+
+const { t } = useI18n();
 
 const props = defineProps<{
 	name: string;

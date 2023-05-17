@@ -1,6 +1,6 @@
 <template>
 	<q-section>
-		<template #header> {{ $t('pages.settings.advanced.database.header') }}</template>
+		<template #header> {{ t('pages.settings.advanced.database.header') }}</template>
 		<!--	Reset Database	-->
 		<q-row>
 			<q-col cols="4" align-self="center">
@@ -20,6 +20,8 @@ import { useSubscription } from '@vueuse/rxjs';
 import { resetDatabase } from '@api/settingsApi';
 import { GlobalService } from '@service';
 import { useOpenControlDialog } from '#imports';
+
+const { t } = useI18n();
 
 const router = useRouter();
 const confirmationDialogName = 'reset-database-confirmation-dialog';

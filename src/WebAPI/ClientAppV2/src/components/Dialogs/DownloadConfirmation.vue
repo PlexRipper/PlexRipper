@@ -2,11 +2,11 @@
 	<!-- The "Are you sure" dialog -->
 	<q-card-dialog :name="name" max-width="1200px" height="80vh" :loading="loading" @opened="openDialog" @closed="closeDialog">
 		<template #title>
-			{{ $t('components.download-confirmation.header') }}
+			{{ t('components.download-confirmation.header') }}
 		</template>
 		<template #top-row>
-			<span>{{ $t('components.download-confirmation.description') }}</span> <br />
-			<span>{{ $t('components.download-confirmation.total-size') }}</span>
+			<span>{{ t('components.download-confirmation.description') }}</span> <br />
+			<span>{{ t('components.download-confirmation.total-size') }}</span>
 			<q-file-size :size="totalSize" class="q-ml-sm" />
 		</template>
 		<template #default>
@@ -37,6 +37,8 @@ import { DownloadMediaDTO, DownloadPreviewDTO } from '@dto/mainApi';
 import { DownloadService } from '@service';
 import { QTreeViewTableHeader } from '@props';
 import { getDownloadPreviewTableColumns } from '#imports';
+
+const { t } = useI18n();
 
 defineProps<{ name: string }>();
 

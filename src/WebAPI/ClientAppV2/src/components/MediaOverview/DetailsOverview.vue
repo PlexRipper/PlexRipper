@@ -47,7 +47,7 @@
 										</tr>
 										<tr>
 											<td class="media-info-column">
-												{{ $t('components.details-overview.total-duration') }}
+												{{ t('components.details-overview.total-duration') }}
 											</td>
 											<td class="media-info-column">
 												<q-duration :value="mediaItemDetail?.duration ?? -1" />
@@ -55,13 +55,13 @@
 										</tr>
 										<tr>
 											<td class="media-info-column">
-												{{ $t('components.details-overview.media-count-label') }}
+												{{ t('components.details-overview.media-count-label') }}
 											</td>
 											<td class="media-info-column">{{ mediaCountFormatted }}</td>
 										</tr>
 										<tr>
 											<td class="media-info-column">
-												{{ $t('components.details-overview.summary') }}
+												{{ t('components.details-overview.summary') }}
 											</td>
 											<td class="media-info-column">{{ mediaItemDetail?.summary ?? '' }}</td>
 										</tr>
@@ -99,7 +99,7 @@ defineProps<{
 	name: string;
 }>();
 
-const t = useI18n().t;
+const { t } = useI18n();
 const loading = ref(false);
 const mediaItemDetail = ref<PlexMediaDTO | null>(null);
 const mediaItem = ref<PlexMediaSlimDTO | null>(null);
@@ -130,7 +130,7 @@ const mediaCountFormatted = computed(() => {
 function openDetails({ mediaId, type }: { mediaId: number; type: PlexMediaType }) {
 	set(loading, true);
 	Log.debug('MediaDetailsDialog', 'openDetails', { mediaId, type });
-	useMediaOverviewBarBus().emit({ downloadButtonVisible: false });
+	useMediaOverviewBarBus().emit({ downloadButtonVisible: false, hasSelected: false });
 
 	useSubscription(
 		forkJoin({

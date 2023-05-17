@@ -1,6 +1,6 @@
 <template>
 	<q-section>
-		<template #header> {{ $t('pages.settings.ui.confirmation-settings.header') }}</template>
+		<template #header> {{ t('pages.settings.ui.confirmation-settings.header') }}</template>
 		<q-row no-gutters>
 			<q-col>
 				<q-markup-table flat>
@@ -66,6 +66,7 @@ import { set } from '@vueuse/core';
 import { SettingsService } from '@service';
 import { ConfirmationSettingsDTO } from '@dto/mainApi';
 
+const { t } = useI18n();
 const askDownloadMovieConfirmation = ref(false);
 const askDownloadTvShowConfirmation = ref(false);
 const askDownloadSeasonConfirmation = ref(false);

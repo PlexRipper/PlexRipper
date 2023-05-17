@@ -43,7 +43,7 @@
 		</q-row>
 		<q-row v-else justify="center">
 			<q-col cols="auto">
-				<h2>{{ $t('pages.downloads.no-downloads') }}</h2>
+				<h2>{{ t('pages.downloads.no-downloads') }}</h2>
 			</q-col>
 		</q-row>
 		<download-details-dialog :name="dialogName" />
@@ -59,6 +59,7 @@ import { DownloadProgressDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@
 import ISelection from '@interfaces/ISelection';
 import { useOpenControlDialog } from '#imports';
 
+const { t } = useI18n();
 const plexServers = ref<PlexServerDTO[]>([]);
 const serverDownloads = ref<ServerDownloadProgressDTO[]>([]);
 const openExpansions = ref<number[]>([]);

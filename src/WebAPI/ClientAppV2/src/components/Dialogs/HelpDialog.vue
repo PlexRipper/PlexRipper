@@ -12,7 +12,7 @@
 		<!--	Close action	-->
 		<template #actions="{ close }">
 			<q-space />
-			<q-btn flat :label="$t('general.commands.close')" @click="close" />
+			<q-btn flat :label="t('general.commands.close')" @click="close" />
 		</template>
 	</q-card-dialog>
 </template>

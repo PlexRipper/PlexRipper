@@ -1,7 +1,7 @@
 <template>
 	<q-section>
 		<template #header>
-			{{ $t('pages.settings.ui.date-and-time.header') }}
+			{{ t('pages.settings.ui.date-and-time.header') }}
 		</template>
 		<q-row no-gutters>
 			<q-col>
@@ -96,6 +96,7 @@ import { SettingsService } from '@service';
 import { DateTimeSettingsDTO } from '@dto/mainApi';
 
 const i18n = useI18n();
+const { t } = useI18n();
 
 interface ISelectOption {
 	value: string;

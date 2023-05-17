@@ -48,15 +48,15 @@
 									<template v-if="isServer(node) && node.completed">
 										<!-- No Plex Server Connection -->
 										<span v-if="node.noConnections" :class="{ 'text-weight-bold': node.type === 'server' }">
-											{{ $t('components.check-server-connections-dialog.no-connections') }}
+											{{ t('components.check-server-connections-dialog.no-connections') }}
 										</span>
 										<span
 											v-else-if="node.connectionSuccessful"
 											:class="{ 'text-weight-bold': node.type === 'server' }">
-											{{ $t('components.check-server-connections-dialog.server-connectable') }}
+											{{ t('components.check-server-connections-dialog.server-connectable') }}
 										</span>
 										<span v-else :class="{ 'text-weight-bold': node.type === 'server' }">
-											{{ $t('components.check-server-connections-dialog.server-un-connectable') }}
+											{{ t('components.check-server-connections-dialog.server-un-connectable') }}
 										</span>
 									</template>
 									<template v-else-if="node.progress">
@@ -73,8 +73,8 @@
 				<q-col cols="auto">
 					<h2>
 						{{
-							$t('components.check-server-connections-dialog.no-servers', {
-								displayName: account?.displayName ?? $t('general.error.unknown'),
+							t('components.check-server-connections-dialog.no-servers', {
+								displayName: account?.displayName ?? t('general.error.unknown'),
 							})
 						}}
 					</h2>

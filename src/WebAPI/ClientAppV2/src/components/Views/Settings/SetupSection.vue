@@ -1,6 +1,6 @@
 <template>
 	<q-section>
-		<template #header> {{ $t('pages.settings.advanced.setup.header') }}</template>
+		<template #header> {{ t('pages.settings.advanced.setup.header') }}</template>
 		<!--	Reset Database	-->
 		<q-row>
 			<q-col cols="4" align-self="center">
@@ -12,3 +12,8 @@
 		</q-row>
 	</q-section>
 </template>
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+</script>

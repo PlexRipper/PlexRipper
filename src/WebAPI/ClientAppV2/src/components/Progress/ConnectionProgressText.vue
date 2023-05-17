@@ -3,7 +3,7 @@
 		<template v-if="!progress.completed">
 			<span v-if="progress && progress.retryAttemptIndex > 0">
 				{{
-					$t('components.connection-progress-text.retry-connection', {
+					t('components.connection-progress-text.retry-connection', {
 						attemptIndex: progress.retryAttemptIndex,
 						attemptCount: progress.retryAttemptCount,
 					})
@@ -13,10 +13,10 @@
 		<!--	Completed -->
 		<template v-else>
 			<span v-if="progress.connectionSuccessful">
-				{{ $t('components.connection-progress-text.connection-connectable') }}
+				{{ t('components.connection-progress-text.connection-connectable') }}
 			</span>
 			<span v-else>
-				{{ $t('components.connection-progress-text.connection-un-connectable') }}
+				{{ t('components.connection-progress-text.connection-un-connectable') }}
 			</span>
 		</template>
 	</div>
@@ -24,6 +24,8 @@
 
 <script setup lang="ts">
 import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
+
+const { t } = useI18n();
 
 withDefaults(
 	defineProps<{

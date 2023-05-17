@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<h4>{{ $t('components.server-dialog.tabs.server-connections.section-header') }}</h4>
+		<h4>{{ t('components.server-dialog.tabs.server-connections.section-header') }}</h4>
 	</div>
 	<q-list>
 		<template v-for="(connection, index) in serverConnections" :key="index">
@@ -49,6 +49,7 @@ import type { PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
 import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 import { ServerConnectionService, ServerService, SignalrService } from '@service';
 
+const { t } = useI18n();
 const serverConnections = ref<PlexServerConnectionDTO[]>([]);
 const loading = ref<number[]>([]);
 const progress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);

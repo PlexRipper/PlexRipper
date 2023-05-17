@@ -3,7 +3,7 @@
 	<q-row v-if="isRefreshing" justify="center" align="center" class="refresh-library-container" cy="refresh-library-container">
 		<q-col cols="8" align-self="center">
 			<progress-component circular-mode :percentage="libraryProgress?.percentage ?? -1" :text="refreshingText" />
-			<!--				<h1 v-else>{{ $t('components.media-overview.retrieving-library') }}</h1>-->
+			<!--				<h1 v-else>{{ t('components.media-overview.retrieving-library') }}</h1>-->
 		</q-col>
 	</q-row>
 	<!-- Media Overview -->
@@ -16,7 +16,6 @@
 					:library="library"
 					:view-mode="mediaViewMode"
 					:detail-mode="!showMediaOverview"
-					:hide-download-button="!mediaViewMode === ViewMode.Table"
 					@back="closeDetailsOverview"
 					@view-change="changeView"
 					@refresh-library="refreshLibrary" />
@@ -53,7 +52,7 @@
 	<template v-else-if="!loading && items.length === 0">
 		<q-row justify="center">
 			<q-col cols="auto">
-				<h1>{{ $t('components.media-overview.no-data') }}</h1>
+				<h1>{{ t('components.media-overview.no-data') }}</h1>
 			</q-col>
 		</q-row>
 	</template>

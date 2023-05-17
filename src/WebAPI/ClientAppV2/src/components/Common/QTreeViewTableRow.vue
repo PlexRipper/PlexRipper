@@ -82,7 +82,7 @@
 		</q-col>
 	</q-row>
 	<q-row v-else>
-		<q-col>{{ $t('components.q-tree-view-table-row.invalid-node') }}</q-col>
+		<q-col>{{ t('components.q-tree-view-table-row.invalid-node') }}</q-col>
 	</q-row>
 </template>
 
@@ -93,6 +93,7 @@ import Convert from '@class/Convert';
 defineOptions({
 	inheritAttrs: false,
 });
+const { t } = useI18n();
 
 const props = defineProps<{
 	selected?: boolean | null;

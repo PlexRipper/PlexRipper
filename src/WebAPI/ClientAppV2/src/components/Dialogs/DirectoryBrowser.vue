@@ -9,7 +9,7 @@
 		:loading="isLoading"
 		@opened="open">
 		<template #title>
-			{{ $t('components.directory-browser.select-path', { pathName: path?.displayName ?? '' }) }}
+			{{ t('components.directory-browser.select-path', { pathName: path?.displayName ?? '' }) }}
 		</template>
 		<template #top-row>
 			<q-row>
@@ -29,10 +29,10 @@
 						<thead>
 							<tr>
 								<th class="text-left" style="width: 100px">
-									{{ $t('components.directory-browser.type') }}
+									{{ t('components.directory-browser.type') }}
 								</th>
 								<th class="text-left">
-									{{ $t('components.directory-browser.path') }}
+									{{ t('components.directory-browser.path') }}
 								</th>
 							</tr>
 						</thead>
@@ -72,6 +72,7 @@ import type { FileSystemModelDTO, FolderPathDTO } from '@dto/mainApi';
 import { FileSystemEntityType } from '@dto/mainApi';
 import { useCloseControlDialog } from '~/composables/event-bus';
 
+const { t } = useI18n();
 const path = ref<FolderPathDTO>();
 const parentPath = ref('');
 const isLoading = ref(true);

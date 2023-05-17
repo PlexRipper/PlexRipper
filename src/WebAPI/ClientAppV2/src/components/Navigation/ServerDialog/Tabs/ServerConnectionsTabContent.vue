@@ -45,6 +45,7 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
+import { get, set } from '@vueuse/core';
 import type { PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
 import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 import { ServerConnectionService, ServerService, SignalrService } from '@service';
@@ -56,41 +57,44 @@ const progress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
 const preferredConnectionId = ref<number>(0);
 
 const props = defineProps<{
-	plexServer: PlexServerDTO;
+	plexServer: PlexServerDTO | null;
 	isVisible: boolean;
 }>();
 
 function getProgress(plexServerConnectionId: number): ServerConnectionCheckStatusProgressDTO | null {
-	return progress.value.find((x) => x.plexServerConnectionId === plexServerConnectionId) ?? null;
+	return get(progress).find((x) => x.plexServerConnectionId === plexServerConnectionId) ?? null;
 }
 
 function isLoading(plexServerConnectionId: number): boolean {
-	return loading.value.includes(plexServerConnectionId);
+	return get(loading).includes(plexServerConnectionId);
 }
 
 function checkPlexConnection(plexServerConnectionId: number) {
-	loading.value.push(plexServerConnectionId);
+	get(loading).push(plexServerConnectionId);
 	useSubscription(
 		ServerConnectionService.checkServerConnection(plexServerConnectionId).subscribe(() => {
-			loading.value = loading.value.filter((x) => x !== plexServerConnectionId);
+			set(
+				loading,
+				get(loading).filter((x) => x !== plexServerConnectionId),
+			);
 		}),
 	);
 }
 
 const setPreferredPlexServerConnection = (value: number) => {
-	preferredConnectionId.value = value;
-	useSubscription(ServerService.setPreferredPlexServerConnection(props.plexServer.id, value).subscribe());
+	set(preferredConnectionId, value);
+	useSubscription(ServerService.setPreferredPlexServerConnection(props.plexServer?.id ?? -1, value).subscribe());
 };
 
 const setup = () => {
 	useSubscription(
-		ServerConnectionService.getServerConnectionsByServerId(props.plexServer.id).subscribe((connections) => {
-			serverConnections.value = connections;
+		ServerConnectionService.getServerConnectionsByServerId(props.plexServer?.id ?? -1).subscribe((connections) => {
+			set(serverConnections, connections);
 		}),
 	);
 	useSubscription(
-		SignalrService.getServerConnectionProgressByPlexServerId(props.plexServer.id).subscribe((progressData) => {
-			progress.value = progressData;
+		SignalrService.getServerConnectionProgressByPlexServerId(props.plexServer?.id ?? -1).subscribe((progressData) => {
+			set(progress, progressData);
 		}),
 	);
 };
@@ -102,6 +106,6 @@ onMounted(() => {
 
 onUnmounted(() => {
 	Log.info('ServerConnectionsTabContent', 'onUnmounted');
-	progress.value = [];
+	set(progress, []);
 });
 </script>

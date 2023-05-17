@@ -27,14 +27,14 @@
 				<q-col>
 					<q-markup-table>
 						<thead>
-							<tr>
-								<th class="text-left" style="width: 100px">
-									{{ t('components.directory-browser.type') }}
-								</th>
-								<th class="text-left">
-									{{ t('components.directory-browser.path') }}
-								</th>
-							</tr>
+						<tr>
+							<th class="text-left" style="width: 100px">
+								{{ t('components.directory-browser.type') }}
+							</th>
+							<th class="text-left">
+								{{ t('components.directory-browser.path') }}
+							</th>
+						</tr>
 						</thead>
 					</q-markup-table>
 				</q-col>
@@ -44,14 +44,14 @@
 			<!--	Directory Browser	-->
 			<q-markup-table>
 				<tbody class="scroll">
-					<tr v-for="(row, index) in items" :key="index" @click="directoryNavigate(row)">
-						<td class="text-left" style="width: 100px">
-							<q-icon size="md" :name="getIcon(row.type)" />
-						</td>
-						<td class="text-left">
-							{{ row.path }}
-						</td>
-					</tr>
+				<tr v-for="(row, index) in items" :key="index" @click="directoryNavigate(row)">
+					<td class="text-left" style="width: 100px">
+						<q-icon size="md" :name="getIcon(row.type)" />
+					</td>
+					<td class="text-left">
+						{{ row.path }}
+					</td>
+				</tr>
 				</tbody>
 			</q-markup-table>
 		</template>
@@ -66,14 +66,14 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { cloneDeep } from 'lodash-es';
-import { get } from '@vueuse/core';
+import { get, set } from '@vueuse/core';
 import { getDirectoryPath } from '@api/pathApi';
 import type { FileSystemModelDTO, FolderPathDTO } from '@dto/mainApi';
 import { FileSystemEntityType } from '@dto/mainApi';
 import { useCloseControlDialog } from '~/composables/event-bus';
 
 const { t } = useI18n();
-const path = ref<FolderPathDTO>();
+const path = ref<FolderPathDTO | null>(null);
 const parentPath = ref('');
 const isLoading = ref(true);
 const items = ref<FileSystemModelDTO[]>([]);
@@ -109,15 +109,16 @@ const open = (selectedPath: FolderPathDTO): void => {
 	}
 	selectedPath = cloneDeep(selectedPath);
 	requestDirectories(selectedPath.directory);
-	path.value = selectedPath;
+	set(path, selectedPath);
 };
 
 function confirm(): void {
-	if (!path.value) {
+	if (!get(path)) {
 		Log.error('path was null when confirming DirectoryBrowser');
 		return;
 	}
-	emit('confirm', get(path));
+
+	emit('confirm', <FolderPathDTO>get(path));
 	useCloseControlDialog(props.name);
 }
 
@@ -128,16 +129,17 @@ function cancel(): void {
 
 function requestDirectories(newPath: string): void {
 	if (newPath === '' || newPath === '/') {
-		isLoading.value = true;
+		set(isLoading, true);
 	}
 	if (path.value) {
+		// @ts-ignore
 		path.value.directory = newPath;
 	}
 
 	useSubscription(
-		getDirectoryPath(newPath).subscribe((data) => {
-			if (data.isSuccess && data.value) {
-				items.value = data.value?.directories;
+		getDirectoryPath(newPath).subscribe(({ isSuccess, value }) => {
+			if (isSuccess && value) {
+				set(items, value?.directories);
 
 				// Don't add return row if in the root folder
 				if (newPath !== '') {
@@ -147,13 +149,13 @@ function requestDirectories(newPath: string): void {
 						type: FileSystemEntityType.Parent,
 						extension: '',
 						size: 0,
-						lastModified: '',
+						lastModified: ''
 					});
 				}
-				isLoading.value = false;
-				parentPath.value = data.value?.parent;
+				set(isLoading, false);
+				set(parentPath, value?.parent);
 			}
-		}),
+		})
 	);
 }
 

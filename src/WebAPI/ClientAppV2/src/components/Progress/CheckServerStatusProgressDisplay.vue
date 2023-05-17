@@ -23,7 +23,7 @@
 import type { PlexServerDTO, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 
 defineProps<{
-	plexServer: PlexServerDTO;
+	plexServer: PlexServerDTO | null;
 	progress: ServerConnectionCheckStatusProgressDTO | null;
 }>();
 </script>

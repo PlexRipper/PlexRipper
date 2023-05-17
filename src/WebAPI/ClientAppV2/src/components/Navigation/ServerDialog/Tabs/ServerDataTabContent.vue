@@ -1,7 +1,7 @@
 <template>
 	<!--	Server Data Tab Content	-->
 	<table class="section-table">
-		<tbody>
+		<tbody v-if="plexServer">
 			<!-- Machine Identifier -->
 			<tr>
 				<td style="width: 25%">{{ t('components.server-dialog.tabs.server-data.machine-id') }}:</td>
@@ -42,6 +42,11 @@
 				</td>
 			</tr>
 		</tbody>
+		<tbody>
+			<tr>
+				<td>{{ t('general.error.invalid-server') }}</td>
+			</tr>
+		</tbody>
 	</table>
 	<!--	Check Server Action	-->
 	<q-card-actions align="right">
@@ -52,6 +57,7 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
+import { set } from '@vueuse/core';
 import type { PlexServerDTO } from '@dto/mainApi';
 import { PlexServerConnectionDTO } from '@dto/mainApi';
 import { ServerConnectionService, ServerService } from '@service';
@@ -63,7 +69,7 @@ const serverConnections = ref<PlexServerConnectionDTO[]>([]);
 
 const props = withDefaults(
 	defineProps<{
-		plexServer: PlexServerDTO;
+		plexServer: PlexServerDTO | null;
 		isVisible: boolean;
 	}>(),
 	{
@@ -71,28 +77,28 @@ const props = withDefaults(
 	},
 );
 
-const checkServer = () => {
-	checkServerStatusLoading.value = true;
+function checkServer() {
+	set(checkServerStatusLoading, true);
 	useSubscription(
-		ServerService.checkServerStatus(props.plexServer.id).subscribe((value) => {
-			hasSuccessServerStatus.value = value;
-			checkServerStatusLoading.value = false;
+		ServerService.checkServerStatus(props.plexServer?.id ?? -1).subscribe((value) => {
+			set(hasSuccessServerStatus, value);
+			set(checkServerStatusLoading, false);
 		}),
 	);
-};
+}
 
-const setup = () => {
+function setup() {
 	useSubscription(
-		ServerConnectionService.getServerConnectionsByServerId(props.plexServer.id).subscribe((connections) => {
-			serverConnections.value = connections;
+		ServerConnectionService.getServerConnectionsByServerId(props.plexServer?.id ?? -1).subscribe((connections) => {
+			set(serverConnections, connections);
 		}),
 	);
 	useSubscription(
-		ServerService.getServerStatus(props.plexServer.id).subscribe((value) => {
-			hasSuccessServerStatus.value = value;
+		ServerService.getServerStatus(props.plexServer?.id ?? -1).subscribe((value) => {
+			set(hasSuccessServerStatus, value);
 		}),
 	);
-};
+}
 
 onMounted(() => {
 	Log.info('ServerDataTabContent', 'onMounted');
@@ -101,6 +107,6 @@ onMounted(() => {
 
 onUnmounted(() => {
 	Log.info('ServerDataTabContent', 'onUnmounted');
-	checkServerStatusLoading.value = false;
+	set(checkServerStatusLoading, false);
 });
 </script>

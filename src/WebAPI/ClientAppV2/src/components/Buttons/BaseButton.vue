@@ -1,7 +1,9 @@
 <script lang="ts">
-import { defineComponent, h, resolveComponent } from 'vue';
+import { defineComponent, h } from 'vue';
+import { QBtn, QTooltip } from 'quasar';
 import { useI18n, useRouter } from '#imports';
 import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
+import { IBaseButtonProps } from '@props';
 
 export default defineComponent({
 	name: 'BaseButton',
@@ -9,9 +11,7 @@ export default defineComponent({
 	props: baseBtnPropsDefault(),
 	emits: ['click'],
 	render() {
-		const QBtn = resolveComponent('QBtn');
-		const QTooltip = resolveComponent('QTooltip');
-		const props = this.$props;
+		const props = this.$props as IBaseButtonProps;
 		const emit = this.$emit;
 		const slots = this.$slots;
 		const style = {

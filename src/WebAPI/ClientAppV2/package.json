@@ -65,7 +65,7 @@
 		"eslint-plugin-cypress": "^2.13.3",
 		"eslint-plugin-prettier": "^4.2.1",
 		"eslint-plugin-vue": "^9.13.0",
-		"nuxt": "npm:nuxt3@^3.5.0-28064087.90ab1b50",
+		"nuxt": "^3.5.0",
 		"nuxt-quasar-ui": "^1.7.3",
 		"nuxt-vitest": "^0.7.0",
 		"object-path": "^0.11.8",

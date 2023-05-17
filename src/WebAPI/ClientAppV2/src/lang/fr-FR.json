@@ -211,7 +211,8 @@
             "public-connection": "Connexion publique"
         },
         "error": {
-            "unknown": "\"Inconnu\""
+            "unknown": "\"Inconnu\"",
+            "invalid-server": "L'objet serveur n'était pas valide"
         }
     },
     "help": {

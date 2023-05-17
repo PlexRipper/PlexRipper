@@ -211,7 +211,8 @@
             "public-connection": "Öffentliche Verbindung"
         },
         "error": {
-            "unknown": "\"Unbekannt\""
+            "unknown": "\"Unbekannt\"",
+            "invalid-server": "Das Serverobjekt war ungültig"
         }
     },
     "help": {

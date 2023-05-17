@@ -1,4 +1,4 @@
-import { describe, beforeAll, beforeEach, expect, test } from 'vitest';
+import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
 import ServerService from '@service/serverService';
 import { subscribeSpyTo, baseSetup, baseVars, getAxiosMock } from '@services-test-base';
 import { PLEX_SERVER_RELATIVE_PATH } from '@api-urls';

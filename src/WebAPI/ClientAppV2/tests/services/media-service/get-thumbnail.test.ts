@@ -1,7 +1,7 @@
 // @vitest-environment node
 // We need node due to the use of Object.createURL()
 
-import { expect } from 'vitest';
+import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
 import MediaService from '@service/mediaService';
 import { PlexMediaType } from '@dto/mainApi';

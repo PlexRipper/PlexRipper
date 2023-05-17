@@ -1,3 +1,4 @@
+import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
 import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
 import LibraryService from '@service/libraryService';
 import { generateResultDTO } from '@mock';
@@ -5,11 +6,10 @@ import { PLEX_LIBRARY_RELATIVE_PATH } from '@api-urls';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 describe('LibraryService.setup()', () => {
-	let { ctx, mock } = baseVars();
+	let { mock } = baseVars();
 
 	beforeAll(() => {
-		const result = baseSetup();
-		ctx = result.ctx;
+		baseSetup();
 	});
 
 	beforeEach(() => {
@@ -19,7 +19,7 @@ describe('LibraryService.setup()', () => {
 	test('Should return success and complete when setup is run', async () => {
 		// Arrange
 		mock.onGet(PLEX_LIBRARY_RELATIVE_PATH).reply(200, generateResultDTO([]));
-		const setup$ = LibraryService.setup(ctx);
+		const setup$ = LibraryService.setup();
 		const setupResult: ISetupResult = {
 			isSuccess: true,
 			name: LibraryService.name,

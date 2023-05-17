@@ -71,7 +71,7 @@ import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRouter, RouteLocationNormalized, RouteLocationNormalizedLoaded } from 'vue-router';
 import { isEqual, orderBy } from 'lodash-es';
-import { combineLatest, forkJoin } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaSlimDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, MediaService, SettingsService, SignalrService } from '@service';
@@ -96,7 +96,7 @@ import {
 // region SetupFields
 const { t } = useI18n();
 const router = useRouter();
-const scrollDict = ref<Record<string, number>>({});
+const scrollDict = ref<Record<string, number>>({ '#': 0 } as any);
 const selected = ref<ISelection>({ keys: [], allSelected: false, indexKey: 0 });
 
 // endregion
@@ -292,7 +292,7 @@ useMediaOverviewSortBus().on((event) => {
 	if (index > -1) {
 		newSortedState.splice(index, 1);
 	}
-	if (event.sort !== 'none') {
+	if (!event.sort) {
 		newSortedState.unshift(event);
 	}
 

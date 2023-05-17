@@ -1,5 +1,5 @@
 <template>
-	<div :class="{ 'media-table-header-column': true, sorted: sorted !== 'none' }" @click="onClick">
+	<div :class="{ 'media-table-header-column': true, sorted: sorted }" @click="onClick">
 		<span> {{ column.label }} <q-icon v-if="column.sortable" :name="icon" class="header-sort-icon" /></span>
 	</div>
 </template>
@@ -9,7 +9,7 @@ import { get, set } from '@vueuse/core';
 import { setMediaOverviewSort } from '@composables/event-bus';
 import { QTreeViewTableHeader } from '@props';
 
-const sorted = ref<'asc' | 'none' | 'desc'>('none');
+const sorted = ref<'asc' | 'desc' | boolean>(false);
 
 const props = defineProps<{
 	column: QTreeViewTableHeader;
@@ -29,21 +29,25 @@ const icon = computed(() => {
 });
 
 function onClick() {
-	if (get(sorted) === 'none') {
-		set(sorted, 'asc');
-	} else if (get(sorted) === 'asc') {
-		set(sorted, 'desc');
-	} else {
-		set(sorted, 'none');
+	switch (get(sorted)) {
+		case 'asc':
+			set(sorted, 'desc' as 'asc' | 'desc' | boolean);
+			break;
+		case 'desc':
+			set(sorted, false);
+			break;
+		default:
+			set(sorted, 'asc' as 'asc' | 'desc' | boolean);
+			break;
 	}
 	setMediaOverviewSort({
-		sort: get(sorted) === 'none' ? 'asc' : get(sorted),
+		sort: get(sorted) ? get(sorted) : false,
 		field: props.column.sortField ?? props.column.field,
 	});
 }
 
 onBeforeMount(() => {
-	set(sorted, props.column?.sortOrder ?? 'none');
+	set(sorted, props.column?.sortOrder ?? false);
 });
 </script>
 <style lang="scss">

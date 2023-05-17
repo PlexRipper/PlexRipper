@@ -46,12 +46,15 @@ onMounted(() => {
 			Log.error('Could not find container with reference: ', get(posterTableRef));
 			return;
 		}
-
+		if (!props.scrollDict) {
+			Log.error('Could not find scrollDict');
+			return;
+		}
 		// We have to revert to normal title sort otherwise the index will be wrong
 		setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
-		const index = props.scrollDict[letter];
+		const index = props.scrollDict[letter] ?? 0;
 		// noinspection TypeScriptValidateTypes
-		const element: HTMLElement = get(posterTableRef)?.querySelector(`[data-scroll-index="${index}"]`);
+		const element: HTMLElement | null = get(posterTableRef)?.querySelector(`[data-scroll-index="${index}"]`) ?? null;
 		if (!element) {
 			Log.error(`Could not find scroll target element for letter ${letter}`, `[data-scroll-index="${index}"]`);
 			return;
@@ -62,7 +65,7 @@ onMounted(() => {
 
 		const elementRect = get(scrollTargetElement)?.getBoundingClientRect();
 		// Scroll if not visible
-		if (elementRect?.bottom >= 0 && (elementRect?.top ?? 0) <= window.innerHeight) {
+		if ((elementRect?.bottom ?? 0) >= 0 && (elementRect?.top ?? 0) <= window.innerHeight) {
 			triggerBoxHighlight(element);
 		} else {
 			get(scrollTargetElement)?.scrollIntoView({

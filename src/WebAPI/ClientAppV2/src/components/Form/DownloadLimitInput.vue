@@ -20,6 +20,8 @@
 </template>
 
 <script setup lang="ts">
+import { get, set } from '@vueuse/core';
+
 const props = defineProps<{
 	plexServerId: number;
 	downloadSpeedLimit: number;
@@ -37,21 +39,24 @@ const downloadSpeedLimit = computed(() => {
 });
 
 const value = computed(() => {
-	if (mouseEvent.value === 'start') {
-		return sliderValue.value;
+	if (get(mouseEvent) === 'start') {
+		return get(sliderValue);
 	}
-	return downloadSpeedLimit.value;
+	return get(downloadSpeedLimit);
 });
 
-function updateDownloadLimit(value: number): void {
-	if (value < 0) {
+function updateDownloadLimit(value: number | null): void {
+	if (value == null || value < 0) {
 		value = 0;
 	}
-	sliderValue.value = value;
+	set(sliderValue, value);
 }
 
-function changeValue(value: number): void {
-	sliderValue.value = value;
+function changeValue(value: number | null): void {
+	if (value === null) {
+		return;
+	}
+	set(sliderValue, value);
 	emit('change', value);
 }
 </script>

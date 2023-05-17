@@ -113,7 +113,7 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-	(event: 'input', value: { prop: string; value: string | boolean }): void;
+	(event: 'input', value: { prop: string; value: string | number | null }): void;
 	(event: 'is-valid', valid: boolean): void;
 }>();
 
@@ -133,7 +133,7 @@ const getPasswordRules = computed(() => [
 
 // endregion
 
-function inputChanged({ prop, value }: { prop: string; value: string | boolean }): void {
+function inputChanged({ prop, value }: { prop: string; value: string | number | null }): void {
 	emit('input', { prop, value });
 }
 

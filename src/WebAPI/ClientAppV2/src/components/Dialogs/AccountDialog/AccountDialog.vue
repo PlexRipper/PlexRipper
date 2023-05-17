@@ -180,7 +180,7 @@ function isInputValid(value: boolean) {
 	get(changedPlexAccount).isInputValid = value;
 }
 
-function formChanged({ prop, value }: { prop: string; value: string | boolean }) {
+function formChanged({ prop, value }: { prop: string; value: string | number | null }) {
 	get(changedPlexAccount)[prop] = value;
 }
 

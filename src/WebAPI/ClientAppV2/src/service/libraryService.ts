@@ -46,7 +46,7 @@ export class LibraryService extends BaseService {
 	}
 
 	public fetchLibrary(libraryId: number): void {
-		getPlexLibrary(libraryId, 0)
+		getPlexLibrary(libraryId)
 			.pipe(take(1))
 			.subscribe((library) => {
 				if (library.isSuccess && library.value) {

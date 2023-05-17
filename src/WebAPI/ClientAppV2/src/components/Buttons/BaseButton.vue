@@ -35,15 +35,18 @@ export default defineComponent({
 			buttonText = useI18n().t(`general.commands.${props.textId}`);
 		}
 
-		const classes = {
-			'base-btn': true,
-			'base-btn-outline': style.outline,
-			'base-btn-block': props.block,
-			'base-btn-vertical': props.vertical,
-			[`base-btn-${props.color}`]: true,
-			'i18n-formatting': true,
-			...this.$attrs.class,
-		};
+		const classes = Object.assign(
+			{
+				'base-btn': true,
+				'base-btn-outline': style.outline,
+				'base-btn-block': props.block,
+				'base-btn-vertical': props.vertical,
+				[`base-btn-${props.color}`]: true,
+				'i18n-formatting': true,
+			},
+			this.$attrs.class,
+		);
+
 		return h(
 			QBtn,
 			{

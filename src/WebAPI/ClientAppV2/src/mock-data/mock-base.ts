@@ -24,6 +24,12 @@ export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 		episodeDownloadTask: 5,
 		connectionHasProgress: false,
 		maxServerConnections: 5,
+		plexMovieLibraryCount: 0,
+		plexTvShowLibraryCount: 0,
+		movieCount: 0,
+		tvShowCount: 0,
+		seasonCount: 0,
+		episodeCount: 0,
 	};
 
 	for (const configKey in config) {

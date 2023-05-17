@@ -36,6 +36,9 @@ export function generatePlexMedia({
 		mediaSize: randNumber({ min: 10000, max: 1000000 }),
 		addedAt: randRecentDate({ days: 120 }).toUTCString(),
 		updatedAt: randRecentDate({ days: 60 }).toUTCString(),
+		index: 0,
+		children: [],
+		qualities: [],
 		...partialData,
 	};
 }

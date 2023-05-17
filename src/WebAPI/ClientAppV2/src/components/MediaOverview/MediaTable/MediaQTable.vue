@@ -8,7 +8,7 @@
 		:rows-per-page-options="[0]"
 		hide-pagination
 		flat
-		@update:selected="updateSelected($event)">
+		@update:selected="updateSelected($event as PlexMediaSlimDTO[])">
 		<!-- Title -->
 		<template #body-cell-title="{ row }">
 			<q-td class="row-title text-eclipse">

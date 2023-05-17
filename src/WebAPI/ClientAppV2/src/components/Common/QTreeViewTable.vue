@@ -18,7 +18,7 @@
 		:accordion="false"
 		:default-expand-all="defaultExpandAll"
 		:label-key="labelKey"
-		@update:ticked="onSelected">
+		@update:ticked="onSelected($event as number[])">
 		<template #default-header="{ node }">
 			<QTreeViewTableRow :columns="columns" :selectable="isSelectable" :node="node" @action="$emit('action', $event)" />
 		</template>
@@ -48,13 +48,13 @@ const props = withDefaults(
 		columns: QTreeViewTableHeader[];
 		labelKey?: string;
 		defaultExpandAll?: boolean;
-		selected?: number[] | null;
+		selected?: number[];
 		connectors?: boolean;
 	}>(),
 	{
 		nodes: () => [],
 		labelKey: 'label',
-		selected: null,
+		selected: () => [],
 		connectors: false,
 	},
 );

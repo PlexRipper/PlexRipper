@@ -242,7 +242,7 @@ public class PlexApi
 
         var request = new RestRequest(new Uri(imageUrl));
         request.AddToken(authToken);
-        request.Timeout = 15000;
+        request.Timeout = 10000;
 
         return await _client.SendImageRequestAsync(request);
     }

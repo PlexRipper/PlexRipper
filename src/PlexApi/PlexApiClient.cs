@@ -79,7 +79,12 @@ public class PlexApiClient
                 });
 
             if (response == null || response.Length < 200)
-                return Result.Fail(new Error($"Image response was empty - Url: {request.Resource}")).LogError();
+            {
+                var errorMsg = $"Image response was empty - Url: {_client.BuildUri(request)}";
+                var result = Result.Fail(errorMsg);
+                result.Add408RequestTimeoutError(errorMsg).LogError();
+                return result;
+            }
 
             return Result.Ok(response);
         }

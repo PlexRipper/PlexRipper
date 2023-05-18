@@ -451,6 +451,7 @@ onMounted(() => {
 				set(isRefreshing, data.isRefreshing);
 				if (data.isComplete) {
 					onRequestMedia({ size: 0, page: 0 });
+					set(isRefreshing, false);
 				}
 			}
 		}),

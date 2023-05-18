@@ -9,6 +9,7 @@ import ResultDTO from '@dto/ResultDTO';
 export function checkForError<T = any>(
 	logText?: string,
 	fnName?: string,
+	suppressAlert?: boolean,
 ): (source$: AxiosObservable<ResultDTO<T>>) => Observable<ResultDTO<T>> {
 	return (source$) =>
 		source$.pipe(
@@ -16,12 +17,14 @@ export function checkForError<T = any>(
 				Log.error('FATAL NETWORK ERROR: ', error);
 
 				const url = new URL(error.config.url, error.config.baseURL);
-				AlertService.showAlert({
-					id: 0,
-					title: error.message,
-					text: `Failed a request to url: ${url}`,
-					result: JSON.parse(error.config.data),
-				});
+				if (!suppressAlert) {
+					AlertService.showAlert({
+						id: 0,
+						title: error.message,
+						text: `Failed a request to url: ${url}`,
+						result: JSON.parse(error.config.data),
+					});
+				}
 
 				// TODO Check wat the error contains in-case, of network failure and continue based on that
 				return of({

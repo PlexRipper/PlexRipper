@@ -30,7 +30,7 @@ export default class PlexRipperAxios {
 		return Axios.get<ResultDTO<T>>(url, {
 			params,
 			responseType,
-		});
+		}).pipe(checkForError<T>('Image', 'getImage', true));
 	}
 
 	public static put<T = any>({ url, data, apiCategory, apiName }: PlexRipperAxiosPut) {

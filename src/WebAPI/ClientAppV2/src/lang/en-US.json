@@ -499,6 +499,7 @@
                     "help-dialog": "Help Dialog",
                     "server-dialog": "Server Dialog",
                     "check-server-connections-dialog": "Check Server Connections Dialog",
+                    "directory-browser": "Directory Browser Dialog",
                     "verification-dialog": "2FA Verification Dialog"
                 },
                 "header": "Debug Dialog Modals"

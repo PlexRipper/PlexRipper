@@ -499,6 +499,7 @@
                     "help-dialog": "Hilfedialog",
                     "server-dialog": "Serverdialog",
                     "check-server-connections-dialog": "Dialogfeld \"Serververbindungen prüfen\".",
+                    "directory-browser": "Dialogfeld „Verzeichnisbrowser“.",
                     "verification-dialog": "2FA-Verifizierungsdialog"
                 },
                 "header": "Debug-Dialogmodalitäten"

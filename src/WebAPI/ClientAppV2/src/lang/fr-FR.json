@@ -499,6 +499,7 @@
                     "help-dialog": "Boîte de dialogue d'aide",
                     "server-dialog": "Boîte de dialogue du serveur",
                     "check-server-connections-dialog": "Boîte de dialogue Vérifier les connexions au serveur",
+                    "directory-browser": "Boîte de dialogue Navigateur de répertoire",
                     "verification-dialog": "Boîte de dialogue de vérification 2FA"
                 },
                 "header": "Modaux de dialogue de débogage"

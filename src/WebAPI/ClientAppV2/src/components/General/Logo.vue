@@ -1,5 +1,6 @@
 <template>
 	<q-img
+		no-spinner
 		:style="{ width: props.size + 'px', height: props.size + 'px' }"
 		src="/img/logo/full-logo-256.png"
 		alt="Loading PlexRipper" />

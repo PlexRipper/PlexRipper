@@ -1,6 +1,5 @@
-import { apiRoute, route } from '@fixtures/baseE2E';
-import { PLEX_LIBRARY_RELATIVE_PATH, SETTINGS_RELATIVE_PATH } from '@api-urls';
-import { LibraryProgress, MessageTypes, PlexMediaType, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
+import { APIRoute, apiRoute, route } from '@fixtures/baseE2E';
+import { LibraryProgress, MessageTypes, PlexMediaType } from '@dto/mainApi';
 
 describe('Test the refreshing of a PlexLibrary', () => {
 	beforeEach(() => {
@@ -29,7 +28,7 @@ describe('Test the refreshing of a PlexLibrary', () => {
 		cy.getPageData().then((data) => {
 			const movieLibrary = data.plexLibraries.find((x) => x.type === PlexMediaType.Movie);
 
-			cy.intercept('POST', apiRoute(PLEX_LIBRARY_RELATIVE_PATH + `/refresh/*`), (req) => {
+			cy.intercept('POST', apiRoute({ type: APIRoute.PlexLibrary, path: `/refresh`, wildcard: true }), (req) => {
 				expect(req.body).to.eql({ plexLibraryId: movieLibrary?.id ?? -1 });
 				req.reply({
 					statusCode: 200,

@@ -41,10 +41,19 @@
 							@click="openVerificationDialog" />
 					</q-td>
 				</q-tr>
+				<q-tr>
+					<q-td>
+						<DebugButton
+							data-cy="directory-browser-dialog-button"
+							:label="t('pages.debug.dialogs.buttons.directory-browser')"
+							@click="openDirectoryBrowserDialog" />
+					</q-td>
+				</q-tr>
 			</q-markup-table>
 			<ServerDialog :name="serverDialogName" />
 			<DownloadConfirmation :name="downloadConfirmationName" />
 			<AccountVerificationCodeDialog :name="verificationCodeDialogName" :account="account" />
+			<DirectoryBrowser :name="directoryBrowserName" />
 		</q-section>
 	</q-page>
 </template>
@@ -57,13 +66,14 @@ import { useOpenControlDialog } from '@composables/event-bus';
 import { DownloadConfirmation } from '#components';
 import { AlertService, HelpService, MediaService } from '@service';
 import { PlexAccountDTO, PlexMediaSlimDTO } from '@dto/mainApi';
-import { generatePlexAccount } from '@factories';
+import { generateDefaultFolderPaths, generatePlexAccount } from '@factories';
 
 const { t } = useI18n();
 const serverDialogName = 'debugServerDialog';
 const downloadConfirmationName = 'debugDownloadConfirmation';
 const checkServerConnectionDialogName = 'checkServerConnectionDialogName';
 const verificationCodeDialogName = 'verificationCodeDialogName';
+const directoryBrowserName = 'TestDirectoryBrowser';
 
 const mediaItem = ref<PlexMediaSlimDTO | null>();
 const mediaTableRows = ref<PlexMediaSlimDTO[]>([]);
@@ -74,6 +84,8 @@ const account = ref<PlexAccountDTO>(
 		plexServers: [],
 	}),
 );
+
+const folderPath = generateDefaultFolderPaths({})[0];
 
 function openServerDialog(): void {
 	useOpenControlDialog(serverDialogName, 1);
@@ -103,13 +115,16 @@ function openVerificationDialog(): void {
 	useOpenControlDialog(verificationCodeDialogName);
 }
 
+function openDirectoryBrowserDialog(): void {
+	useOpenControlDialog(directoryBrowserName, folderPath);
+}
+
 function addAlert(): void {
 	AlertService.showAlert({ id: 0, title: 'Alert Title', text: 'random alert' });
 	AlertService.showAlert({ id: 0, title: 'Alert Title', text: 'random alert' });
 }
 
 onMounted(() => {
-	openVerificationDialog();
 	useSubscription(
 		MediaService.getTvShowMediaData(32).subscribe((data) => {
 			if (data) {

@@ -30,6 +30,7 @@ export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 		tvShowCount: 0,
 		seasonCount: 0,
 		episodeCount: 0,
+		folderPathCount: 0,
 	};
 
 	for (const configKey in config) {

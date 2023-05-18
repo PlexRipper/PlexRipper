@@ -1,4 +1,4 @@
-import { PlexMediaType } from '@dto/mainApi';
+import { FolderType, PlexMediaType } from '@dto/mainApi';
 import ButtonType from '@enums/buttonType';
 
 export default abstract class Convert {
@@ -44,6 +44,29 @@ export default abstract class Convert {
 				return 'mdi-music';
 			default:
 				return 'mdi-help-circle-outline';
+		}
+	}
+
+	public static mediaTypeToFolderType(mediaType: PlexMediaType): FolderType {
+		switch (mediaType) {
+			case PlexMediaType.TvShow:
+				return FolderType.TvShowFolder;
+			case PlexMediaType.Season:
+				return FolderType.TvShowFolder;
+			case PlexMediaType.Episode:
+				return FolderType.TvShowFolder;
+			case PlexMediaType.Movie:
+				return FolderType.MovieFolder;
+			case PlexMediaType.OtherVideos:
+				return FolderType.OtherVideosFolder;
+			case PlexMediaType.Music:
+				return FolderType.MusicFolder;
+			case PlexMediaType.Album:
+				return FolderType.MusicFolder;
+			case PlexMediaType.Song:
+				return FolderType.MusicFolder;
+			default:
+				return FolderType.Unknown;
 		}
 	}
 }

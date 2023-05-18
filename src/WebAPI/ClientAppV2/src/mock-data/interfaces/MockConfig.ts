@@ -28,4 +28,5 @@ export interface MockConfig {
 	episodeCount: number;
 	// endregion
 	maxServerConnections: number;
+	folderPathCount: number;
 }

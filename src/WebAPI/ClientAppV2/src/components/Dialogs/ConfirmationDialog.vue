@@ -1,5 +1,5 @@
 <template>
-	<QCardDialog persistent :name="name" max-width="800px" button-align="between" @opened="onOpen">
+	<QCardDialog persistent :name="name" max-width="800px" button-align="between" cy="confirmation-dialog" @opened="onOpen">
 		<template #title>
 			{{ confirmationText.title }}
 		</template>
@@ -10,24 +10,27 @@
 			</p>
 		</template>
 		<template #actions>
-			<CancelButton @click="cancel" />
-			<ConfirmButton :loading="loading" @click="confirm" />
+			<CancelButton cy="confirmation-dialog-cancel-button" @click="cancel" />
+			<ConfirmButton cy="confirmation-dialog-confirmation-button" :loading="loading" @click="confirm" />
 		</template>
 	</QCardDialog>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '#imports';
+import { set } from '@vueuse/core';
+import { useI18n, useCloseControlDialog } from '#imports';
 
 const { t, te } = useI18n();
 
 const loading = ref(false);
+
 const confirmationText = ref<{
 	id?: string;
 	title?: string;
 	text?: string;
 	warning?: string;
 }>({});
+
 const props = defineProps<{
 	/**
 	 * The Vue-i18n text id used for the confirmation window that pops-up.
@@ -43,7 +46,7 @@ const emit = defineEmits<{
 	(e: 'cancel'): void;
 }>();
 
-const onOpen = () => {
+function onOpen() {
 	const textId = props.textId;
 	const result = {
 		id: textId,
@@ -66,21 +69,21 @@ const onOpen = () => {
 		result.warning = t(`confirmation.${textId}.warning`);
 	}
 
-	confirmationText.value = result;
-};
+	set(confirmationText, result);
+}
 
-const cancel = () => {
+function cancel() {
 	emit('cancel');
 	useCloseControlDialog(props.name);
-	loading.value = false;
-};
+	set(loading, false);
+}
 
-const confirm = () => {
+function confirm() {
 	emit('confirm');
 	if (props.confirmLoading) {
-		loading.value = true;
+		set(loading, true);
 	}
-};
+}
 
 interface IConfirmationResult {
 	id: string;

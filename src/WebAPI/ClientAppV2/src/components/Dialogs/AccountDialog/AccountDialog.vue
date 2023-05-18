@@ -13,7 +13,7 @@
 			<q-row justify="between" gutter="md">
 				<!-- Delete account -->
 				<q-col v-if="!isNewAccount">
-					<DeleteButton class="mx-2" block @click="openConfirmationDialog" />
+					<DeleteButton class="mx-2" block cy="account-dialog-delete-button" @click="openConfirmationDialog" />
 				</q-col>
 				<!-- Cancel button -->
 				<q-col>
@@ -87,7 +87,7 @@ interface IPlexAccount extends PlexAccountDTO {
 	validationErrors: IError[];
 }
 
-defineProps<{ name: string }>();
+const props = defineProps<{ name: string }>();
 
 const isNewAccount = ref(false);
 
@@ -308,6 +308,9 @@ function openDialog({ isNewAccountValue, account = null }: { isNewAccountValue: 
 function closeDialog() {
 	set(savingLoading, false);
 	closeVerificationDialog();
+	useCloseControlDialog(confirmationDialogName);
+	useCloseControlDialog(props.name);
+
 	reset();
 }
 

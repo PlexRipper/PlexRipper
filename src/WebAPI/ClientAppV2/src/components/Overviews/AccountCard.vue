@@ -1,5 +1,5 @@
 <template>
-	<q-card class="account-card background-sm" data-cy="account-card" @click="$emit('open-dialog', account)">
+	<q-card class="account-card" data-cy="account-card" @click="$emit('open-dialog', account)">
 		<q-card-section v-if="!isNew">
 			{{ account ? account.displayName : t('components.account-card.no-account-name') }}
 		</q-card-section>

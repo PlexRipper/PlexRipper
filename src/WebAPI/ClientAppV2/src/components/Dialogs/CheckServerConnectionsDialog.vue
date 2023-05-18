@@ -1,5 +1,5 @@
 <template>
-	<QCardDialog max-width="1000px" full-height :name="name" cy="check-server-connection-dialog">
+	<QCardDialog max-width="1000px" content-height="80" :name="name" cy="check-server-connection-dialog">
 		<template #top-row>
 			<!-- The total progress -->
 			<progress-component

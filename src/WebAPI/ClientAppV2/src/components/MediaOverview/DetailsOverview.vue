@@ -5,6 +5,7 @@
 		class="media-details-dialog"
 		maximized
 		seamless
+		content-height="100"
 		:loading="loading"
 		@opened="openDetails"
 		@closed="closeDetails">
@@ -202,8 +203,8 @@ body {
 	}
 
 	&.navigation-drawer-opened {
-		.q-dialog__inner {
-			.media-details-dialog {
+		.media-details-dialog {
+			.q-dialog__inner {
 				width: calc(100vw - $navigation-drawer-width);
 			}
 		}

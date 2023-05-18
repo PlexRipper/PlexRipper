@@ -4,9 +4,9 @@
 		:value="path"
 		min-width="70vw"
 		max-width="70vw"
-		min-height="60vh"
-		max-height="60vh"
+		content-height="80"
 		:loading="isLoading"
+		button-align="between"
 		@opened="open">
 		<template #title>
 			{{ t('components.directory-browser.select-path', { pathName: path?.displayName ?? '' }) }}

@@ -1,5 +1,5 @@
 <template>
-	<QCardDialog :name="name" :loading="loading" @opened="onOpen">
+	<QCardDialog :name="name" :loading="loading" content-height="60" @opened="onOpen">
 		<template v-if="downloadTask" #title>
 			<q-media-type-icon :size="36" :media-type="downloadTask.mediaType" />
 			{{ downloadTask.fullTitle }}

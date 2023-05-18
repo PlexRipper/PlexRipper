@@ -1,6 +1,12 @@
 <template>
 	<!-- The "Are you sure" dialog -->
-	<QCardDialog :name="name" max-width="1200px" height="80vh" :loading="loading" @opened="openDialog" @closed="closeDialog">
+	<QCardDialog
+		:name="name"
+		max-width="1200px"
+		content-height="80"
+		:loading="loading"
+		@opened="openDialog"
+		@closed="closeDialog">
 		<template #title>
 			{{ t('components.download-confirmation.header') }}
 		</template>
@@ -23,9 +29,6 @@
 					}
 				" />
 		</template>
-		<!--		<q-card bordered class="download-confirmation">-->
-
-		<!--		</q-card>-->
 	</QCardDialog>
 </template>
 
@@ -68,8 +71,3 @@ function closeDialog(): void {
 	downloadPreview.value = [];
 }
 </script>
-<style lang="scss">
-.download-confirmation {
-	width: 550px;
-}
-</style>

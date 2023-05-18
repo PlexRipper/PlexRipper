@@ -1,7 +1,6 @@
 <template>
 	<q-dialog
 		v-model:model-value="showDialog"
-		:full-height="fullHeight"
 		:no-route-dismiss="noRouteDismiss"
 		:no-backdrop-dismiss="noBackdropDismiss"
 		:persistent="persistent"
@@ -30,7 +29,7 @@
 					<slot name="top-row" />
 				</div>
 			</q-col>
-			<q-col v-if="$slots['default']" class="q-card-dialog-content" :class="{ scroll: scroll }" align-self="stretch">
+			<q-col v-if="$slots['default']" :class="contentClasses" align-self="stretch">
 				<div v-if="!loading">
 					<slot :value="parentValue" />
 				</div>
@@ -61,17 +60,12 @@ const props = withDefaults(
 	defineProps<{
 		name: string;
 		width?: string;
-		height?: string;
 		minWidth?: string;
-		minHeight?: string;
 		maxWidth?: string;
-		maxHeight?: string;
 		allWidth?: string;
-		allHeight?: string;
-		viewHeight?: string;
+		contentHeight?: '100' | '80' | '60' | '40' | '20' | '0';
 		value?: any;
 		loading?: boolean;
-		fullHeight?: boolean;
 		scroll?: boolean;
 		persistent?: boolean;
 		seamless?: boolean;
@@ -87,17 +81,12 @@ const props = withDefaults(
 	{
 		name: '',
 		width: '',
-		height: '',
 		minWidth: '',
-		minHeight: '',
 		maxWidth: '',
-		maxHeight: '',
 		allWidth: '',
-		allHeight: '',
-		viewHeight: '50vh',
+		contentHeight: '0',
 		value: null,
 		loading: false,
-		fullHeight: false,
 		scroll: true,
 		persistent: false,
 		seamless: false,
@@ -124,6 +113,10 @@ const parentValue = computed(() => {
 	return get(dataValue);
 });
 
+const contentClasses = computed(() => {
+	return ['q-card-dialog-content', `q-card-dialog-content-${props.contentHeight}`, props.scroll ? 'scroll' : ''];
+});
+
 function openDialog(value: any) {
 	// Data value should always be set first before opening, since that value is emitted on open
 	set(dataValue, value);
@@ -135,50 +128,20 @@ function closeDialog() {
 }
 
 const styles = computed(() => {
-	if (props.allWidth && props.allHeight) {
+	if (props.allWidth) {
 		return Object.assign(
 			{},
 			props.allWidth !== '' ? { width: props.allWidth } : null,
-			props.allHeight !== '' ? { height: props.allHeight } : null,
 			props.allWidth !== '' ? { minWidth: props.allWidth } : null,
-			props.allHeight !== '' ? { minHeight: props.allHeight } : null,
 			props.allWidth !== '' ? { maxWidth: props.allWidth } : null,
-			props.allHeight !== '' ? { maxHeight: props.allHeight } : null,
-		);
-	}
-
-	if (props.allWidth && !props.allHeight) {
-		return Object.assign(
-			{},
-			props.allWidth !== '' ? { width: props.allWidth } : null,
-			props.height !== '' ? { height: props.height } : null,
-			props.allWidth !== '' ? { minWidth: props.allWidth } : null,
-			props.minHeight !== '' ? { minHeight: props.minHeight } : null,
-			props.allWidth !== '' ? { maxWidth: props.allWidth } : null,
-			props.maxHeight !== '' ? { maxHeight: props.maxHeight } : null,
-		);
-	}
-
-	if (!props.allWidth && props.allHeight) {
-		return Object.assign(
-			{},
-			props.width !== '' ? { width: props.width } : null,
-			props.allHeight !== '' ? { height: props.allHeight } : null,
-			props.minWidth !== '' ? { minWidth: props.minWidth } : null,
-			props.allHeight !== '' ? { minHeight: props.allHeight } : null,
-			props.maxWidth !== '' ? { maxWidth: props.maxWidth } : null,
-			props.allHeight !== '' ? { maxHeight: props.allHeight } : null,
 		);
 	}
 
 	return Object.assign(
 		{},
 		props.width !== '' ? { width: props.width } : null,
-		props.height !== '' ? { height: props.height } : null,
 		props.minWidth !== '' ? { minWidth: props.minWidth } : null,
-		props.minHeight !== '' ? { minHeight: props.minHeight } : null,
 		props.maxWidth !== '' ? { maxWidth: props.maxWidth } : null,
-		props.maxHeight !== '' ? { maxHeight: props.maxHeight } : null,
 	);
 });
 
@@ -221,12 +184,56 @@ body {
 		&-content {
 			@extend .q-pt-none;
 			@extend .q-px-md;
+
+			&-0 {
+				min-height: inherit;
+				height: inherit;
+				max-height: inherit;
+			}
+
+			&-20 {
+				min-height: calc(20vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+				height: calc(20vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+				max-height: calc(20vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+			}
+
+			&-40 {
+				min-height: calc(40vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+				height: calc(40vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+				max-height: calc(40vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+			}
+
+			&-60 {
+				min-height: calc(60vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+				height: calc(60vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+				max-height: calc(60vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+			}
+
+			&-80 {
+				min-height: calc(80vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+				height: calc(80vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+				max-height: calc(80vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+			}
+
+			&-100 {
+				min-height: calc(100vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+				height: calc(100vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+				max-height: calc(100vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+			}
 		}
 
 		&-title,
 		&-actions {
 			height: auto;
 			width: 100% !important;
+		}
+
+		&-title {
+			max-height: $q-card-dialog-title-height;
+		}
+
+		&-actions {
+			max-height: $q-card-dialog-actions-height;
 		}
 	}
 

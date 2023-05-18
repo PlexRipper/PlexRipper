@@ -2,9 +2,10 @@
 	<QCardDialog
 		:name="name"
 		max-width="1200px"
-		height="800px"
+		content-height="80"
 		:scroll="false"
 		:loading="loading"
+		button-align="right"
 		cy="server-dialog-cy"
 		@opened="open"
 		@closed="close">
@@ -52,7 +53,7 @@
 							:label="t('components.server-dialog.tabs.server-commands.header')" />
 					</q-tabs>
 				</q-col>
-				<q-col align-self="stretch" class="inherit-all-height scroll">
+				<q-col align-self="stretch" class="tab-content inherit-all-height scroll">
 					<!-- Tab Content -->
 					<q-tab-panels v-model="tabIndex" animated vertical transition-prev="slide-down" transition-next="slide-up">
 						<!-- Server Data Tab Content -->
@@ -71,7 +72,10 @@
 						</q-tab-panel>
 
 						<!--	Library Download Destinations	Tab Content -->
-						<q-tab-panel name="download-destinations" class="scroll" data-cy="server-dialog-tab-content-4">
+						<q-tab-panel
+							name="download-destinations"
+							class="inherit-all-height"
+							data-cy="server-dialog-tab-content-4">
 							<server-library-destinations-tab-content :plex-server="plexServer" :plex-libraries="plexLibraries" />
 						</q-tab-panel>
 
@@ -153,3 +157,10 @@ function close(): void {
 	set(tabIndex, 'server-data');
 }
 </script>
+<style lang="scss">
+@import '@/assets/scss/variables.scss';
+
+.tab-content {
+	max-height: calc(80vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+}
+</style>

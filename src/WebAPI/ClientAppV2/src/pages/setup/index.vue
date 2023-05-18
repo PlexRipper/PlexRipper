@@ -13,7 +13,7 @@
 				<q-row class="setup-card" column>
 					<q-col align-self="stretch">
 						<!-- Tabs -->
-						<q-row>
+						<q-row align="start">
 							<q-col cols="auto">
 								<q-tabs v-model="stepIndex" vertical active-color="primary" indicator-color="primary">
 									<!-- Step headers	-->
@@ -100,7 +100,7 @@
 											{{ t('pages.setup.paths.title') }}
 										</h2>
 										<q-row no-gutters>
-											<q-col>
+											<q-col align-self="stretch">
 												<folder-paths-overview only-defaults />
 											</q-col>
 										</q-row>

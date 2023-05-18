@@ -1,5 +1,5 @@
 <template>
-	<q-card-dialog :name="name" persistent max-width="700px" cy="2fa-code-verification-dialog">
+	<QCardDialog :name="name" persistent max-width="700px" cy="2fa-code-verification-dialog">
 		<template #title>
 			{{ t('components.account-verification-code-dialog.title') }}
 		</template>
@@ -43,7 +43,7 @@
 				</q-col>
 			</q-row>
 		</template>
-	</q-card-dialog>
+	</QCardDialog>
 </template>
 
 <script setup lang="ts">

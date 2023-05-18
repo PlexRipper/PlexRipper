@@ -1,5 +1,5 @@
 <template>
-	<q-card-dialog :name="name" :loading="loading" @opened="onOpen">
+	<QCardDialog :name="name" :loading="loading" @opened="onOpen">
 		<template v-if="downloadTask" #title>
 			<q-media-type-icon :size="36" :media-type="downloadTask.mediaType" />
 			{{ downloadTask.fullTitle }}
@@ -39,7 +39,7 @@
 				</tbody>
 			</q-markup-table>
 		</template>
-	</q-card-dialog>
+	</QCardDialog>
 </template>
 
 <script setup lang="ts">

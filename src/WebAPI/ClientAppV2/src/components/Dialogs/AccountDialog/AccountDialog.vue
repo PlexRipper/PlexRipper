@@ -1,5 +1,5 @@
 <template>
-	<q-card-dialog max-width="900px" :name="name" persistent cy="account-dialog-form" @opened="openDialog" @closed="closeDialog">
+	<QCardDialog max-width="900px" :name="name" persistent cy="account-dialog-form" @opened="openDialog" @closed="closeDialog">
 		<!-- Dialog Header -->
 		<template #title>
 			{{ getDisplayName }}
@@ -49,7 +49,7 @@
 				</q-col>
 			</q-row>
 		</template>
-	</q-card-dialog>
+	</QCardDialog>
 
 	<!--	Account Verification Code Dialog	-->
 	<AccountVerificationCodeDialog

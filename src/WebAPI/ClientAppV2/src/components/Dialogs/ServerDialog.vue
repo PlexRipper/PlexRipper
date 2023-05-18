@@ -1,5 +1,5 @@
 <template>
-	<q-card-dialog
+	<QCardDialog
 		:name="name"
 		max-width="1200px"
 		height="800px"
@@ -95,7 +95,7 @@
 				color="default"
 				@click="useCloseControlDialog(name)" />
 		</template>
-	</q-card-dialog>
+	</QCardDialog>
 </template>
 
 <script setup lang="ts">

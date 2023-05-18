@@ -1,6 +1,6 @@
 <template>
 	<!-- The "Are you sure" dialog -->
-	<q-card-dialog :name="name" max-width="1200px" height="80vh" :loading="loading" @opened="openDialog" @closed="closeDialog">
+	<QCardDialog :name="name" max-width="1200px" height="80vh" :loading="loading" @opened="openDialog" @closed="closeDialog">
 		<template #title>
 			{{ t('components.download-confirmation.header') }}
 		</template>
@@ -26,7 +26,7 @@
 		<!--		<q-card bordered class="download-confirmation">-->
 
 		<!--		</q-card>-->
-	</q-card-dialog>
+	</QCardDialog>
 </template>
 
 <script setup lang="ts">

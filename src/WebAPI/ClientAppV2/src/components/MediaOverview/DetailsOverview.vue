@@ -1,5 +1,5 @@
 <template>
-	<q-card-dialog
+	<QCardDialog
 		:name="name"
 		no-background
 		class="media-details-dialog"
@@ -80,7 +80,7 @@
 				</q-row>
 			</q-col>
 		</template>
-	</q-card-dialog>
+	</QCardDialog>
 </template>
 
 <script setup lang="ts">

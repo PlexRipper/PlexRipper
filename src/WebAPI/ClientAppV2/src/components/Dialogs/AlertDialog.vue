@@ -1,5 +1,5 @@
 <template>
-	<q-card-dialog max-width="1000px" :name="name" @closed="onClose">
+	<QCardDialog max-width="1000px" :name="name" @closed="onClose">
 		<template #title>
 			{{ alert.title }}
 		</template>
@@ -14,7 +14,7 @@
 			<!--	Close action	-->
 			<base-button text-id="close" @click="close" />
 		</template>
-	</q-card-dialog>
+	</QCardDialog>
 </template>
 
 <script setup lang="ts">

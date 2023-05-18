@@ -1,5 +1,5 @@
 <template>
-	<q-card-dialog max-width="1000px" full-height :name="name" cy="check-server-connection-dialog">
+	<QCardDialog max-width="1000px" full-height :name="name" cy="check-server-connection-dialog">
 		<template #top-row>
 			<!-- The total progress -->
 			<progress-component
@@ -88,7 +88,7 @@
 				</q-col>
 			</q-row>
 		</template>
-	</q-card-dialog>
+	</QCardDialog>
 </template>
 
 <script setup lang="ts">

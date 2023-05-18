@@ -3,7 +3,8 @@
         "account-card": {
             "clear-notifications": "Effacer tout les notifications",
             "no-account-name": "Ajouter un surnom à ce compte",
-            "no-notifications": "Pas de notification disponible"
+            "no-notifications": "Pas de notification disponible",
+            "invalid-account": "L'objet de compte n'était pas valide"
         },
         "account-dialog": {
             "add-account-title": "",

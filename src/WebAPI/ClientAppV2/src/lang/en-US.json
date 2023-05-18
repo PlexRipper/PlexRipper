@@ -3,7 +3,8 @@
         "account-card": {
             "clear-notifications": "Clear All Notifications",
             "no-account-name": "Add Account Display Name",
-            "no-notifications": "No notifications available"
+            "no-notifications": "No notifications available",
+            "invalid-account": "Account object was invalid"
         },
         "account-dialog": {
             "add-account-title": "Add Plex Account",

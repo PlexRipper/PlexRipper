@@ -6,7 +6,7 @@
 			</q-sub-header>
 		</q-col>
 		<q-col v-if="hasHelpPage" cols="auto">
-			<BaseButton icon="mdi-help-circle-outline" class="q-ma-sm" icon-only @click="openDialog" />
+			<IconButton icon="mdi-help-circle-outline" class="q-ma-sm" @click="openDialog" />
 		</q-col>
 	</q-row>
 </template>

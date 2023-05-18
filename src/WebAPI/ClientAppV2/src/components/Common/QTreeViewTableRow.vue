@@ -55,13 +55,10 @@
 							<q-row justify="start" no-wrap>
 								<q-col cols="auto">
 									<!-- Item Actions -->
-									<BaseButton
+									<IconSquareButton
 										v-for="(action, y) in node[column.field]"
 										:key="`${i}-${y}`"
-										icon-only
 										dense
-										flat
-										square
 										:icon="Convert.buttonTypeToIcon(action)"
 										@click.stop="
 											$emit('action', {

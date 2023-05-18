@@ -1,19 +1,20 @@
 <script lang="ts">
 import { defineComponent, h, mergeProps } from 'vue';
-import IconButton from './IconButton.vue';
+import BaseButton from './BaseButton.vue';
 import { IBaseButtonProps } from '@props';
 import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
 export default defineComponent({
-	name: 'ExternalLinkButton',
+	name: 'IconButton',
 	props: baseBtnPropsDefault(),
 	render() {
 		return h(
-			IconButton,
+			BaseButton,
 			{
 				...mergeProps(this.$props, {
-					size: 'md',
-					icon: 'mdi-open-in-new',
+					round: true,
+					flat: true,
+					outline: false,
 				} as IBaseButtonProps),
 			},
 			this.$slots.default,

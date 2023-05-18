@@ -16,7 +16,13 @@ export interface IBaseButtonProps extends Record<string, any> {
 	size: string | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 	flat: boolean;
 	glossy: boolean;
+	/**
+	 * Makes a circle shaped button
+	 */
 	round: boolean;
+	/**
+	 * Applies a more prominent border-radius for a squared shape button
+	 */
 	rounded: boolean;
 	outline: boolean;
 	loading: boolean;
@@ -24,7 +30,6 @@ export interface IBaseButtonProps extends Record<string, any> {
 	push: boolean;
 	// Vuetify Legacy
 	block: boolean;
-	iconOnly: boolean;
 	// Unorganized
 	iconSize: number;
 	color: 'default' | 'positive' | 'warning' | 'negative';

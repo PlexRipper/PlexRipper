@@ -89,11 +89,6 @@ export function baseBtnPropsDefault(): Record<string, any> {
 			type: Boolean,
 			default: false,
 		},
-		iconOnly: {
-			type: Boolean,
-			default: false,
-		},
-
 		// endregion
 		iconSize: {
 			type: Number,

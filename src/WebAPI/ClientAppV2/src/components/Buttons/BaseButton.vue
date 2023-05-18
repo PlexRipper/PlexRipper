@@ -20,15 +20,6 @@ export default defineComponent({
 			rounded: props.rounded,
 			outline: props.outline,
 		};
-		if (props.iconOnly) {
-			style.flat = false;
-			style.round = true;
-			style.rounded = true;
-			style.outline = false;
-		}
-		if (props.iconOnly && props.flat) {
-			style.flat = true;
-		}
 
 		let buttonText = props.label;
 		if (props.textId) {

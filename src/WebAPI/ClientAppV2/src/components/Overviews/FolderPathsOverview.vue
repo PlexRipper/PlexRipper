@@ -24,13 +24,8 @@
 					</q-col>
 					<!--	Folder Path Display	-->
 					<q-col cols="7">
-						<q-input :model-value="folderPath.directory" readonly>
-							<BaseButton
-								icon="mdi-folder-open-outline"
-								icon-only
-								square
-								flat
-								@click="openDirectoryBrowser(folderPath)" />
+						<q-input :model-value="folderPath.directory" readonly class="folder-path-input">
+							<IconSquareButton icon="mdi-folder-open-outline" @click="openDirectoryBrowser(folderPath)" />
 						</q-input>
 					</q-col>
 					<!--	Is Valid Icon -->
@@ -195,3 +190,11 @@ interface IFolderPathGroup {
 	IsFolderDeletable: boolean;
 }
 </script>
+<style lang="scss">
+.folder-path-input {
+	.q-field__control {
+		// Ensures the folder button is outlined to the right border
+		padding: 0 0 0 12px;
+	}
+}
+</style>

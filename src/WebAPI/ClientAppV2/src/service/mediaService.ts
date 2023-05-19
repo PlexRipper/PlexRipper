@@ -39,16 +39,18 @@ export class MediaService extends BaseService {
 				value !== ''
 					? of(value)
 					: getThumbnail(mediaId, mediaType, width, height).pipe(
-							map((response) => {
+							switchMap((response) => {
 								if (response.data) {
 									// Convert imageUrl to objectUrl
 									const imageUrl: string = URL.createObjectURL(response.data);
 									if (imageUrl) {
 										this.updateStore('mediaUrls', { id: mediaId, type: mediaType, url: imageUrl });
 									}
-									return imageUrl;
+									return of(imageUrl);
 								}
-								return '';
+								return throwError(() => {
+									return new Error(`MediaType with ${mediaType} is not supported in getMediaDataById`);
+								});
 							}),
 					  ),
 			),

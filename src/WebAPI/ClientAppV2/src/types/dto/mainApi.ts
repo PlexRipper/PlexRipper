@@ -588,6 +588,7 @@ export interface PlexMediaDTO {
 	/** @format int32 */
 	plexServerId: number;
 	type: PlexMediaType;
+	thumbUrl: string;
 	qualities: PlexMediaQuality[];
 	children: PlexMediaDTO[];
 	/** @format int32 */
@@ -686,6 +687,7 @@ export interface PlexMediaSlimDTO {
 	plexServerId: number;
 	type: PlexMediaType;
 	hasThumb: boolean;
+	thumbUrl: string;
 	qualities: PlexMediaQuality[];
 	children: PlexMediaSlimDTO[];
 }

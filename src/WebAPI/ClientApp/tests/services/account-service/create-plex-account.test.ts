@@ -52,10 +52,10 @@ describe('AccountService.createPlexAccount()', () => {
 		await getServersResult.onComplete();
 
 		// Assert
-		expect(getServersResult.receivedComplete()).equal(true);
-		expect(createAccountResult.receivedComplete()).equal(true);
-		expect(getServersResult.getFirstValue()).equal([]);
-		expect(getServersResult.getLastValue()).equal(plexServers);
-		expect(createAccountResult.getLastValue()).equal(plexAccount);
+		expect(getServersResult.receivedComplete()).toEqual(true);
+		expect(createAccountResult.receivedComplete()).toEqual(true);
+		expect(getServersResult.getFirstValue()).toEqual([]);
+		expect(getServersResult.getLastValue()).toEqual(plexServers);
+		expect(createAccountResult.getLastValue()).toEqual(plexAccount);
 	});
 });

@@ -30,7 +30,7 @@ describe('FolderPathService.setup()', () => {
 		await result.onComplete();
 
 		// Assert
-		expect(result.getFirstValue()).to.equal(setupResult);
-		expect(result.receivedComplete()).to.equal(true);
+		expect(result.getFirstValue()).toEqual(setupResult);
+		expect(result.receivedComplete()).toEqual(true);
 	});
 });

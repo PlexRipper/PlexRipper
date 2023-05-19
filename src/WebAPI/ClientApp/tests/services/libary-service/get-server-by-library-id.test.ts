@@ -23,7 +23,7 @@ describe('LibraryService.getServerByLibraryId()', () => {
 		config = {
 			seed: 23695,
 			plexServerCount: 3,
-			plexLibraryCount: 20,
+			plexMovieLibraryCount: 5,
 		};
 
 		const servers = generatePlexServers({ config });
@@ -35,7 +35,7 @@ describe('LibraryService.getServerByLibraryId()', () => {
 		mock.onGet(PLEX_LIBRARY_RELATIVE_PATH).reply(200, generateResultDTO(libraries));
 		const serverSetup$ = ServerService.setup();
 		const librarySetup$ = LibraryService.setup();
-		const testLibrary = libraries[5];
+		const testLibrary = libraries[2];
 		// Act
 		const serverSetupResult = subscribeSpyTo(serverSetup$);
 		const librarySetupResult = subscribeSpyTo(librarySetup$);

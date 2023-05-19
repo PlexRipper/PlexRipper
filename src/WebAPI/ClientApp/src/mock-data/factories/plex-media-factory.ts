@@ -1,4 +1,4 @@
-import { randMovie, randNumber, randRecentDate } from '@ngneat/falso';
+import { randMovie, randNumber, randRecentDate, randUrl } from '@ngneat/falso';
 import { checkConfig, incrementSeed, MockConfig } from '@mock';
 import { PlexLibraryDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 
@@ -39,6 +39,7 @@ export function generatePlexMedia({
 		index: 0,
 		children: [],
 		qualities: [],
+		thumbUrl: 'https://www.omdbapi.com/src/poster.jpg',
 		...partialData,
 	};
 }

@@ -99,7 +99,7 @@ onMounted(() => {
 		const afterScroll = get(recycleScrollerRef)?.getScroll();
 
 		// No scroll happened, trigger highlight manually
-		if (beforeScroll.end === afterScroll.end) {
+		if (beforeScroll?.end ?? afterScroll?.end === 0 ?? 0) {
 			triggerBoxHighlight(getScrollTarget(index));
 		}
 	});

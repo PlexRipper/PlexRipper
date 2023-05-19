@@ -11,7 +11,12 @@
 				:indeterminate="plexServerNodes.length === 0" />
 		</template>
 		<template #default>
-			<q-tree v-if="plexServerNodes.length > 0" :nodes="plexServerNodes" node-key="title" default-expand-all>
+			<q-tree
+				v-if="plexServerNodes.length > 0"
+				v-model:expanded="expanded"
+				:nodes="plexServerNodes"
+				node-key="uniqueIndex"
+				default-expand-all>
 				<template #default-header="{ node }: { node: IPlexServerNode }">
 					<q-row justify="between" align="center">
 						<q-col cols="4">
@@ -106,7 +111,7 @@ const name = 'checkServerConnectionDialogName';
 const plexServers = ref<PlexServerDTO[]>([]);
 const connectionProgress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
 const account = ref<PlexAccountDTO | null>(null);
-
+const expanded = ref<number[]>([]);
 const completedCount = computed(() => {
 	return get(plexServerNodes).filter((progress) => progress.completed).length;
 });
@@ -125,6 +130,8 @@ const getProgressText = computed(() => {
 		});
 	}
 	if (get(totalPercentage) === 100) {
+		// Close all expanded nodes
+		set(expanded, []);
 		return t('components.check-server-connections-dialog.completed', {
 			length: get(plexServers).length,
 		});
@@ -136,12 +143,14 @@ const getProgressText = computed(() => {
 });
 
 const plexServerNodes = computed((): IPlexServerNode[] => {
+	let uniqueIndex = 0;
 	return get(plexServers).map((server) => {
 		const serverResult: IPlexServerNode = {
 			id: server.id,
 			type: 'server',
 			title: server.name,
 			completed: false,
+			index: uniqueIndex++,
 			connectionSuccessful: false,
 			noConnections: server.plexServerConnections.length === 0,
 			children: server.plexServerConnections.map((connection) => {
@@ -152,6 +161,7 @@ const plexServerNodes = computed((): IPlexServerNode[] => {
 					title: connection.url,
 					local: connection.local,
 					completed: progress.completed,
+					index: uniqueIndex++,
 					connectionSuccessful: progress.connectionSuccessful,
 					progress,
 					children: [],
@@ -213,6 +223,7 @@ onMounted(() => {
 interface IPlexServerNode {
 	id: number;
 	title: string;
+	index: number;
 	type: 'server' | 'connection';
 	completed: boolean;
 	connectionSuccessful: boolean;

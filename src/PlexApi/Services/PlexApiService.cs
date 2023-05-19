@@ -266,7 +266,7 @@ public class PlexApiService : IPlexApiService
         if (plexServerConnection.IsFailed)
             return plexServerConnection.ToResult();
 
-        return await _plexApi.GetPlexMediaImageAsync(plexServerConnection.Value.GetThumbPath(thumbPath), tokenResult.Value, width, height);
+        return await _plexApi.GetPlexMediaImageAsync(plexServerConnection.Value.GetThumbUrl(thumbPath), tokenResult.Value, width, height);
     }
 
     #endregion

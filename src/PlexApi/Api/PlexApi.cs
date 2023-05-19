@@ -233,12 +233,7 @@ public class PlexApi
     public async Task<Result<byte[]>> GetPlexMediaImageAsync(string imageUrl, string authToken, int width = 0, int height = 0)
     {
         if (width > 0 && height > 0)
-        {
-            var uri = new Uri(imageUrl);
-
-            imageUrl =
-                $"{uri.Scheme}://{uri.Host}:{uri.Port}/photo/:/transcode?url={uri.AbsolutePath}&width={width}&height={height}&minSize=1&upscale=1";
-        }
+            imageUrl = $"{imageUrl}&width={width}&height={height}&minSize=1&upscale=1";
 
         var request = new RestRequest(new Uri(imageUrl));
         request.AddToken(authToken);

@@ -77,9 +77,6 @@ public class PlexMediaController : BaseController
         return ToActionResult<PlexTvShow, PlexMediaDTO>(result);
     }
 
-
-
-
     // GET api/<PlexMedia>/library/5
     [HttpGet("library/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexMediaSlimDTO>>))]
@@ -92,10 +89,25 @@ public class PlexMediaController : BaseController
             return BadRequest(id, nameof(id));
 
         var result = await _mediator.Send(new GetPlexMediaDataByLibraryIdQuery(id, page, size));
-        if (result.IsFailed)
+        if (result.IsFailed || !result.Value.Any())
             return ToActionResult(result.ToResult());
 
+        var plexServerId = result.Value[0].PlexServerId;
+
+        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexServerId));
+        if (plexServerConnection.IsFailed)
+            return ToActionResult(plexServerConnection.ToResult());
+
+        var connection = plexServerConnection.Value;
+        var plexServerToken = await _mediator.Send(new GetPlexServerTokenQuery(plexServerId));
+
         var dto = _mapper.Map<List<PlexMediaSlimDTO>>(result.Value).SetIndex();
+
+        foreach (var mediaSlimDto in dto)
+        {
+            mediaSlimDto.ThumbUrl = connection.GetThumbUrl(mediaSlimDto.ThumbUrl);
+            mediaSlimDto.ThumbUrl += $"&X-Plex-Token={plexServerToken.Value}";
+        }
 
         return Ok(Result.Ok(dto));
     }

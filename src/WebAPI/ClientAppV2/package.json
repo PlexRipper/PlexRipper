@@ -37,6 +37,7 @@
 		"rxjs": "^7.8.1",
 		"three": "^0.123.0",
 		"vanta": "^0.5.24",
+		"vue-virtual-scroller": "^2.0.0-beta.8",
 		"vue3-otp-input": "^0.4.1"
 	},
 	"devDependencies": {

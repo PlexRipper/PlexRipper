@@ -1,18 +1,29 @@
 <template>
 	<!-- Poster display-->
-	<q-row id="poster-table" full-height justify="center" data-cy="poster-table">
+	<RecycleScroller
+		id="poster-table"
+		v-slot="{ item, index }"
+		ref="recycleScrollerRef"
+		:items="items"
+		:item-size="posterCardHeight"
+		:item-secondary-size="posterCardWidth"
+		:grid-items="gridItems"
+		:buffer="posterCardHeight * 5"
+		key-field="id"
+		@resize="onResize">
 		<media-poster
-			v-for="(item, index) in items"
-			:key="item.id"
 			:index="index"
 			:media-item="item"
 			:data-scroll-index="index"
 			@download="sendMediaOverviewDownloadCommand($event)" />
-	</q-row>
+	</RecycleScroller>
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
+import { RecycleScroller } from 'vue-virtual-scroller';
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
+
 import { get, set, useScroll } from '@vueuse/core';
 import { PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import {
@@ -23,7 +34,12 @@ import {
 import { triggerBoxHighlight } from '@composables/animations';
 
 const autoScrollEnabled = ref(false);
-const scrollTargetElement = ref<HTMLElement | null>(null);
+const recycleScrollerRef = ref<RecycleScroller | null>(null);
+const posterTableRef = computed(() => document.getElementById('poster-table') ?? null);
+const posterCardWidth = ref(200 + 32);
+const posterCardHeight = ref(340 + 32);
+const gridItems = ref(0);
+const scrolledIndex = ref(0);
 
 const props = withDefaults(
 	defineProps<{
@@ -37,7 +53,25 @@ const props = withDefaults(
 	},
 );
 
-const posterTableRef = computed(() => document.getElementById('poster-table'));
+defineEmits<{
+	(e: 'load', payload: any): void;
+}>();
+
+function onResize() {
+	const { width } = useElementBounding(posterTableRef);
+	Log.info('Resizing poster table', get(width));
+	set(gridItems, Math.floor(get(width) / get(posterCardWidth)));
+}
+
+function getScrollTarget(index: number): HTMLElement | null {
+	// noinspection TypeScriptValidateTypes
+	const element: HTMLElement | null = get(posterTableRef)?.querySelector(`[data-scroll-index="${index}"]`) ?? null;
+	if (!element) {
+		Log.error(`Could not find scroll target element for letter with index ${index}`, `[data-scroll-index="${index}"]`);
+		return null;
+	}
+	return element;
+}
 
 onMounted(() => {
 	// Listen for scroll to letter command
@@ -53,27 +87,20 @@ onMounted(() => {
 		// We have to revert to normal title sort otherwise the index will be wrong
 		setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
 		const index = props.scrollDict[letter] ?? 0;
-		// noinspection TypeScriptValidateTypes
-		const element: HTMLElement | null = get(posterTableRef)?.querySelector(`[data-scroll-index="${index}"]`) ?? null;
-		if (!element) {
-			Log.error(`Could not find scroll target element for letter ${letter}`, `[data-scroll-index="${index}"]`);
-			return;
-		}
-
-		set(scrollTargetElement, element);
+		set(scrolledIndex, index);
 		set(autoScrollEnabled, true);
 
-		const elementRect = get(scrollTargetElement)?.getBoundingClientRect();
-		// Scroll if not visible
-		if ((elementRect?.bottom ?? 0) >= 0 && (elementRect?.top ?? 0) <= window.innerHeight) {
-			triggerBoxHighlight(element);
-		} else {
-			get(scrollTargetElement)?.scrollIntoView({
-				block: 'start',
-				behavior: 'smooth',
-			});
+		// Scroll to item first, otherwise the target element won't exist in dom to highlight
+		const beforeScroll = get(recycleScrollerRef)?.getScroll();
+		get(recycleScrollerRef)?.scrollToItem(index);
+		const afterScroll = get(recycleScrollerRef)?.getScroll();
+
+		// No scroll happened, trigger highlight manually
+		if (beforeScroll.end === afterScroll.end) {
+			triggerBoxHighlight(getScrollTarget(index));
 		}
 	});
+
 	// Setup stopped scrolling event listener
 	useScroll(get(posterTableRef), {
 		onStop() {
@@ -82,7 +109,11 @@ onMounted(() => {
 				return;
 			}
 			set(autoScrollEnabled, false);
-			triggerBoxHighlight(get(scrollTargetElement));
+
+			// noinspection TypeScriptValidateTypes
+			const element: HTMLElement | null = getScrollTarget(get(scrolledIndex));
+
+			triggerBoxHighlight(element);
 		},
 	});
 });

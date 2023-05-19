@@ -212,7 +212,7 @@ function setScrollIndexes() {
 	setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
 	scrollDict.value['#'] = 0;
 	// Check for occurrence of title with alphabetic character
-	const sortTitles = get(items).map((x) => x.sortTitle[0].toLowerCase());
+	const sortTitles = get(items).map((x) => x.sortTitle[0]?.toLowerCase() ?? '#');
 	let lastIndex = 0;
 	for (const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase()) {
 		const index = sortTitles.indexOf(letter, lastIndex);

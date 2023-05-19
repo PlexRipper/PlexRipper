@@ -24,6 +24,7 @@ export interface IBaseButtonProps extends Record<string, any> {
 	 * Applies a more prominent border-radius for a squared shape button
 	 */
 	rounded: boolean;
+	square: boolean;
 	outline: boolean;
 	loading: boolean;
 	disabled: boolean;

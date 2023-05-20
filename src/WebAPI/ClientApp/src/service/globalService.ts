@@ -38,7 +38,7 @@ export class GlobalService extends BaseService {
 	}
 
 	public setup(config: IAppConfig): Observable<any> {
-		Log.info('Starting Setup Process', window);
+		Log.info('Starting Setup Process');
 
 		super.setup(config);
 

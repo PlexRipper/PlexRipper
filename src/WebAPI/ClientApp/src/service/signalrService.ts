@@ -66,7 +66,7 @@ export class SignalrService extends BaseService {
 			logger: LogLevel.Information,
 		};
 		// Setup Connections
-		const baseUrl = this._appConfig.baseURL;
+		const baseUrl = this._appConfig.baseUrl;
 		this._progressHubConnection =
 			useCypressSignalRMock('progress') ??
 			new HubConnectionBuilder().withUrl(`${baseUrl}/progress`, options).withAutomaticReconnect().build();

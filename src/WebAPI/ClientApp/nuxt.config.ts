@@ -13,14 +13,11 @@ export default defineNuxtConfig({
 		port: 3001,
 	},
 	runtimeConfig: {
-		// Private config that is only available on the server
-		apiSecret: '123',
 		// Config within public will be also exposed to the client
 		public: {
 			nodeEnv: process.env.NODE_ENV || 'development',
 			version: process.env.npm_package_version || '?',
-			baseURL: process.env.BASE_URL || 'http://localhost:5000',
-			baseApiPath: '/api',
+			apiPort: process.env.API_PORT || '5000',
 		},
 	},
 	modules: [
@@ -72,11 +69,11 @@ export default defineNuxtConfig({
 		locales: [
 			{ text: 'English', code: 'en-US', iso: 'en-US', file: 'en-US.json' },
 			{ text: 'Français', code: 'fr-FR', iso: 'fr-FR', file: 'fr-FR.json' },
-			{ text: 'Deutsch', code: 'de-DE', iso: 'de-DE', file: 'de-DE.json' }
+			{ text: 'Deutsch', code: 'de-DE', iso: 'de-DE', file: 'de-DE.json' },
 		],
 		// TODO: This breaks npm run build in "@nuxtjs/i18n": "^8.0.0-beta.11", check again when out of beta
 		// vueI18n: './src/config/vueI18n.config.ts',
-		strategy: 'no_prefix'
+		strategy: 'no_prefix',
 	},
 	/*
 	 ** Global CSS: https://nuxt.com/docs/api/configuration/nuxt-config#css
@@ -130,6 +127,11 @@ export default defineNuxtConfig({
 					additionalData: '@use "@/assets/scss/_variables.scss" as *;',
 				},
 			},
+		},
+	},
+	nitro: {
+		prerender: {
+			crawlLinks: true,
 		},
 	},
 	hooks: {

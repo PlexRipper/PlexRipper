@@ -26,8 +26,7 @@ export function baseSetup(): { ctx: Context; appConfig: IAppConfig } {
 	} as Context;
 
 	const appConfig: IAppConfig = {
-		baseApiUrl: 'http://localhost:5050',
-		baseURL: 'http://localhost:3030/',
+		baseUrl: 'http://localhost:3030/',
 		nodeEnv: 'TESTING',
 		version: '1.0',
 		isProduction: false,

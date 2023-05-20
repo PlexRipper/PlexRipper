@@ -17,25 +17,25 @@
           <list>
             <DockerVolumeBindingImpl>
               <option name="containerPath" value="/Downloads" />
-              <option name="hostPath" value="$PROJECT_DIR$/../PlexRipperDockerCache/Downloads/" />
+              <option name="hostPath" value="$PROJECT_DIR$/../../TURBO/PlexRipperDockerCache/Downloads/" />
             </DockerVolumeBindingImpl>
             <DockerVolumeBindingImpl>
               <option name="containerPath" value="/Movies" />
-              <option name="hostPath" value="$PROJECT_DIR$/../PlexRipperDockerCache/Movies/" />
+              <option name="hostPath" value="$PROJECT_DIR$/../../TURBO/PlexRipperDockerCache/Movies/" />
             </DockerVolumeBindingImpl>
             <DockerVolumeBindingImpl>
               <option name="containerPath" value="/Config" />
-              <option name="hostPath" value="$PROJECT_DIR$/../PlexRipperDockerCache/Config/" />
+              <option name="hostPath" value="$PROJECT_DIR$/../../TURBO/PlexRipperDockerCache/Config/" />
             </DockerVolumeBindingImpl>
             <DockerVolumeBindingImpl>
               <option name="containerPath" value="/TvShows" />
-              <option name="hostPath" value="$PROJECT_DIR$/../PlexRipperDockerCache/TvShows/" />
+              <option name="hostPath" value="$PROJECT_DIR$/../../TURBO/PlexRipperDockerCache/TvShows/" />
             </DockerVolumeBindingImpl>
           </list>
         </option>
       </settings>
     </deployment>
-    <EXTENSION ID="com.jetbrains.rider.docker.debug" isFastModeEnabled="true" isPublishEnabled="true" />
+    <EXTENSION ID="com.jetbrains.rider.docker.debug" isFastModeEnabled="false" isSslEnabled="false" />
     <method v="2" />
   </configuration>
 </component>

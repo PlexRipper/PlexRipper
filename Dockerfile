@@ -7,11 +7,10 @@ WORKDIR /app
 FROM node:18.11.0-alpine AS client-build
 WORKDIR /tmp/build/ClientApp
 
-ARG port=7000
 
 ENV NUXT_HOST=0.0.0.0
-ENV NUXT_PORT=$port
-ENV API_PORT=$port
+ENV NUXT_PORT=7000
+ENV API_PORT=7000
 # Essential config files
 COPY ./src/WebAPI/ClientApp/package*.json ./
 COPY ./src/WebAPI/ClientApp/tsconfig.json ./
@@ -71,10 +70,9 @@ RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish
 
 ## Merge into one container
 FROM base AS final
-ENV ASPNETCORE_ENVIRONMENT Production
 ENV DOTNET_ENVIRONMENT Production
-ENV ASPNETCORE_URLS=http://+:$port
-ENV DOTNET_URLS=http://+:$port
+ENV ASPNETCORE_URLS=http://+:7000
+ENV DOTNET_URLS=http://+:7000
 WORKDIR /app
 
 COPY --from=publish /app/publish .
@@ -83,7 +81,7 @@ COPY --from=client-build /tmp/build/ClientApp/dist /app/wwwroot
 LABEL company="PlexRipper"
 LABEL maintainer="plexripper@protonmail.com"
 
-EXPOSE $port
+EXPOSE 7000
 VOLUME /Config /Downloads /Movies /TvShows
 
 ENTRYPOINT ["dotnet", "PlexRipper.WebAPI.dll"]

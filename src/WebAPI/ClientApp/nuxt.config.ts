@@ -72,10 +72,11 @@ export default defineNuxtConfig({
 		locales: [
 			{ text: 'English', code: 'en-US', iso: 'en-US', file: 'en-US.json' },
 			{ text: 'Français', code: 'fr-FR', iso: 'fr-FR', file: 'fr-FR.json' },
-			{ text: 'Deutsch', code: 'de-DE', iso: 'de-DE', file: 'de-DE.json' },
+			{ text: 'Deutsch', code: 'de-DE', iso: 'de-DE', file: 'de-DE.json' }
 		],
-		vueI18n: './src/config/vueI18n.config.ts',
-		strategy: 'no_prefix',
+		// TODO: This breaks npm run build in "@nuxtjs/i18n": "^8.0.0-beta.11", check again when out of beta
+		// vueI18n: './src/config/vueI18n.config.ts',
+		strategy: 'no_prefix'
 	},
 	/*
 	 ** Global CSS: https://nuxt.com/docs/api/configuration/nuxt-config#css

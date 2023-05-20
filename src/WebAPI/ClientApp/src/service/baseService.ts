@@ -30,7 +30,7 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 
 	protected isInTestMode(): boolean {
 		// eslint-disable-next-line no-prototype-builtins
-		return process?.env?.hasOwnProperty('VITEST') && process.env.VITEST === 'true';
+		return typeof process !== 'undefined' && process?.env?.hasOwnProperty('VITEST') && process.env.VITEST === 'true';
 	}
 
 	protected setup(appConfig: IAppConfig | null = null): Observable<ISetupResult> {
@@ -110,7 +110,7 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 	protected getStateChanged<T>(propertyName: keyof IStoreState): Observable<T> {
 		return this.stateChanged.pipe(
 			filter((x) => !!x),
-			map((x) => x[propertyName] as unknown as T),
+			map((x) => x[propertyName] as unknown as T)
 		);
 	}
 

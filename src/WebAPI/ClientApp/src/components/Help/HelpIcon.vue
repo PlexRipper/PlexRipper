@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { useNuxtApp, useI18n } from '#imports';
+import { useI18n, getMessage } from '#imports';
 import { HelpService } from '@service';
 
 interface IHelp {
@@ -21,7 +21,6 @@ interface IHelp {
 	text: string;
 }
 
-const { $getMessage } = useNuxtApp();
 const { t } = useI18n();
 
 const props = withDefaults(
@@ -41,7 +40,7 @@ const getLabel = computed(() => {
 
 const hasHelpPage = computed(() => {
 	if (props.helpId) {
-		const msgObject = $getMessage(props.helpId) as IHelp;
+		const msgObject = getMessage(props.helpId) as IHelp;
 		// Complains about returning string if I return directly, instead of an if statement returning true
 		if (msgObject && msgObject.title && msgObject.text) {
 			return true;

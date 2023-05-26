@@ -6,84 +6,81 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Log from 'consola';
-import { Component, Prop, Vue } from 'vue-property-decorator';
 import * as THREE from 'three';
 import WAVES from 'vanta/dist/vanta.waves.min';
 import WebGL from '@class/WebGL';
 
-@Component
-export default class Background extends Vue {
-	vantaEffect: any;
+const $q = useQuasar();
 
-	@Prop({ type: Boolean, default: false })
-	readonly hideBackground!: Boolean;
+const vantaEffect = ref(null);
 
-	get isDark(): boolean {
-		return this.$vuetify.theme.dark;
-	}
+const props = defineProps<{ hideBackground: boolean }>();
 
-	get backgroundEffect(): any {
-		return {
-			'background-effect': true,
-			'still-background-effect': !this.vantaEffect,
-		};
-	}
+const isDark = computed(() => {
+	return $q.dark.isActive;
+});
 
-	get backgroundOverlay(): any {
-		if (this.hideBackground) {
-			return {
-				'background-overlay': true,
-				'no-background': true,
-			};
-		}
+const backgroundEffect = computed(() => {
+	return {
+		'background-effect': true,
+		'still-background-effect': !vantaEffect.value,
+	};
+});
+
+const backgroundOverlay = computed(() => {
+	if (props.hideBackground) {
 		return {
 			'background-overlay': true,
-			'dark-background': this.isDark,
-			'light-background': !this.isDark,
+			'no-background': true,
 		};
 	}
+	return {
+		'background-overlay': true,
+		'dark-background': isDark.value,
+		'light-background': !isDark.value,
+	};
+});
 
-	mounted(): void {
-		if (WebGL.isWebGLAvailable()) {
-			Log.info('Wave effect created!');
-			this.vantaEffect = WAVES({
-				THREE,
-				el: '.background-effect',
-				mouseControls: true,
-				touchControls: true,
-				gyroControls: false,
-				minHeight: 200.0,
-				minWidth: 200.0,
-				scale: 1.0,
-				scaleMobile: 1.0,
-				color: 0x880000,
-				shininess: 43.0,
-				waveHeight: 4.0,
-				waveSpeed: 1.25,
-				zoom: 0.65,
-			});
-		}
+onMounted(() => {
+	if (WebGL.isWebGLAvailable()) {
+		Log.info('Wave effect created!');
+		vantaEffect.value = WAVES({
+			THREE,
+			el: '.background-effect',
+			mouseControls: true,
+			touchControls: true,
+			gyroControls: false,
+			minHeight: 200.0,
+			minWidth: 200.0,
+			scale: 1.0,
+			scaleMobile: 1.0,
+			color: 0x880000,
+			shininess: 43.0,
+			waveHeight: 4.0,
+			waveSpeed: 1.25,
+			zoom: 0.65,
+		});
 	}
+});
 
-	beforeDestroy(): void {
-		if (this.vantaEffect) {
-			Log.info('Wave effect destroyed!');
-			this.vantaEffect.destroy();
-		}
+onBeforeUnmount(() => {
+	if (vantaEffect.value) {
+		Log.info('Wave effect destroyed!');
+		// @ts-ignore
+		vantaEffect.value.destroy();
 	}
-}
+});
 </script>
 
 <style lang="scss">
-@import 'assets/scss/_variables.scss';
-
 .background-effect,
 .background-overlay {
 	position: fixed;
 	width: 100%;
 	height: 100%;
+	top: 0;
 }
 
 .background-effect {
@@ -94,17 +91,7 @@ export default class Background extends Vue {
 	}
 
 	&.still-background-effect {
-		background-image: url('~assets/img/background/background.png');
-	}
-}
-
-.background-overlay {
-	&.dark-background {
-		background-color: $dark-background-color;
-	}
-
-	&.light-background {
-		background-color: $light-background-color;
+		background-image: url('/img/background/background.png');
 	}
 }
 </style>

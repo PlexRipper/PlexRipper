@@ -32,7 +32,9 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
         {
             config.PlexServerCount = 1;
             config.PlexLibraryCount = 1;
-            config.TvShowCount = 10;
+            config.TvShowCount = 5;
+            config.TvShowSeasonCount = 2;
+            config.TvShowEpisodeCount = 5;
             config.TvShowDownloadTasksCount = 5;
         });
 
@@ -71,7 +73,9 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
         {
             config.PlexServerCount = 1;
             config.PlexLibraryCount = 1;
-            config.TvShowCount = 10;
+            config.TvShowCount = 5;
+            config.TvShowSeasonCount = 2;
+            config.TvShowEpisodeCount = 5;
             config.TvShowDownloadTasksCount = 5;
         });
 

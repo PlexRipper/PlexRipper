@@ -86,7 +86,30 @@ export interface DownloadMediaDTO {
 	mediaIds: number[];
 	type: PlexMediaType;
 	/** @format int32 */
-	plexAccountId: number;
+	plexServerId: number;
+	/** @format int32 */
+	plexLibraryId: number;
+}
+
+export interface DownloadPreviewDTO {
+	/** @format int32 */
+	id: number;
+	title: string;
+	/** @format int64 */
+	size: number;
+	/** @format int32 */
+	childCount: number;
+	mediaType: PlexMediaType;
+	children: DownloadPreviewDTO[];
+}
+
+export interface DownloadPreviewDTOListResultDTO {
+	isFailed: boolean;
+	isSuccess: boolean;
+	reasons: ReasonDTO[];
+	errors: ErrorDTO[];
+	successes: SuccessDTO[];
+	value: DownloadPreviewDTO[];
 }
 
 export interface DownloadProgressDTO {
@@ -94,7 +117,7 @@ export interface DownloadProgressDTO {
 	id: number;
 	title: string;
 	mediaType: PlexMediaType;
-	status: string;
+	status: DownloadStatus;
 	/** @format double */
 	percentage: number;
 	/** @format int64 */
@@ -128,18 +151,25 @@ export enum DownloadStatus {
 export interface DownloadTaskDTO {
 	/** @format int32 */
 	id: number;
+	/** The formatted media title as shown in Plex. */
 	title: string;
+	/** The full media title including the [TvShow]/[Season]/[Episode] as shown in Plex. */
 	fullTitle: string;
 	status: DownloadStatus;
+	/** The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv. */
 	fileLocationUrl: string;
+	downloadUrl: string;
 	fileName: string;
 	mediaType: PlexMediaType;
 	downloadTaskType: DownloadTaskType;
-	/** @format int32 */
+	/**
+	 * The identifier used by Plex to keep track of media.
+	 * @format int32
+	 */
 	key: number;
 	/** @format int32 */
 	downloadSpeed: number;
-	/** @format int32 */
+	/** @format int64 */
 	fileTransferSpeed: number;
 	/** @format int64 */
 	dataReceived: number;
@@ -149,7 +179,10 @@ export interface DownloadTaskDTO {
 	percentage: number;
 	downloadDirectory: string;
 	destinationDirectory: string;
-	/** @format int32 */
+	/**
+	 * The download priority, the higher the more important.
+	 * @format int32
+	 */
 	priority: number;
 	/** @format int32 */
 	plexServerId: number;
@@ -160,7 +193,15 @@ export interface DownloadTaskDTO {
 	/** @format int64 */
 	timeRemaining: number;
 	quality: string;
+	/**
+	 * The nested PlexRipper.Domain.DownloadTask used for seasons and episodes.
+	 * "Required = Required.Default" is used for ensuring it's optional in the Typescript generating.
+	 */
 	children: DownloadTaskDTO[];
+	/**
+	 * The actions that can be taken on this PlexRipper.Domain.DownloadTask.
+	 * This is filled by the front-end and depends on the DownloadStatus
+	 */
 	actions: string[];
 }
 
@@ -291,6 +332,7 @@ export interface GeneralSettingsDTO {
 	firstTimeSetup: boolean;
 	/** @format int32 */
 	activeAccountId: number;
+	debugMode: boolean;
 }
 
 export interface IError {
@@ -504,9 +546,6 @@ export interface PlexLibraryDTO {
 	seasonCount: number;
 	/** @format int32 */
 	episodeCount: number;
-	movies: PlexMediaDTO[];
-	tvShows: PlexMediaDTO[];
-	downloadTasks: DownloadTaskDTO[];
 }
 
 export interface PlexLibraryDTOListResultDTO {
@@ -530,16 +569,30 @@ export interface PlexLibraryDTOResultDTO {
 export interface PlexMediaDTO {
 	/** @format int32 */
 	id: number;
-	/** @format int32 */
-	key: number;
-	treeKeyId: string;
 	title: string;
+	sortTitle: string;
 	/** @format int32 */
 	year: number;
 	/** @format int32 */
 	duration: number;
 	/** @format int64 */
 	mediaSize: number;
+	/** @format int32 */
+	childCount: number;
+	/** @format date-time */
+	addedAt: string;
+	/** @format date-time */
+	updatedAt: string;
+	/** @format int32 */
+	plexLibraryId: number;
+	/** @format int32 */
+	plexServerId: number;
+	type: PlexMediaType;
+	thumbUrl: string;
+	qualities: PlexMediaQuality[];
+	children: PlexMediaDTO[];
+	/** @format int32 */
+	key: number;
 	hasThumb: boolean;
 	hasArt: boolean;
 	hasBanner: boolean;
@@ -551,25 +604,13 @@ export interface PlexMediaDTO {
 	contentRating: string;
 	/** @format double */
 	rating: number;
-	/** @format int32 */
-	childCount: number;
-	/** @format date-time */
-	addedAt: string;
-	/** @format date-time */
-	updatedAt: string;
 	/** @format date-time */
 	originallyAvailableAt: string;
 	/** @format int32 */
 	tvShowId: number;
 	/** @format int32 */
 	tvShowSeasonId: number;
-	/** @format int32 */
-	plexLibraryId: number;
-	/** @format int32 */
-	plexServerId: number;
-	type: PlexMediaType;
 	mediaData: PlexMediaDataDTO[];
-	children: PlexMediaDTO[];
 }
 
 export interface PlexMediaDTOResultDTO {
@@ -615,6 +656,60 @@ export interface PlexMediaDataPartDTO {
 	videoProfile: string;
 }
 
+export interface PlexMediaQuality {
+	quality: string;
+	displayQuality: string;
+	hashId: string;
+}
+
+export interface PlexMediaSlimDTO {
+	/** @format int32 */
+	id: number;
+	/** @format int32 */
+	index: number;
+	title: string;
+	sortTitle: string;
+	/** @format int32 */
+	year: number;
+	/** @format int32 */
+	duration: number;
+	/** @format int64 */
+	mediaSize: number;
+	/** @format int32 */
+	childCount: number;
+	/** @format date-time */
+	addedAt: string;
+	/** @format date-time */
+	updatedAt: string;
+	/** @format int32 */
+	plexLibraryId: number;
+	/** @format int32 */
+	plexServerId: number;
+	type: PlexMediaType;
+	hasThumb: boolean;
+	thumbUrl: string;
+	qualities: PlexMediaQuality[];
+	children: PlexMediaSlimDTO[];
+}
+
+export interface PlexMediaSlimDTOListResultDTO {
+	isFailed: boolean;
+	isSuccess: boolean;
+	reasons: ReasonDTO[];
+	errors: ErrorDTO[];
+	successes: SuccessDTO[];
+	value: PlexMediaSlimDTO[];
+}
+
+export interface PlexMediaSlimDTOResultDTO {
+	isFailed: boolean;
+	isSuccess: boolean;
+	reasons: ReasonDTO[];
+	errors: ErrorDTO[];
+	successes: SuccessDTO[];
+	value: PlexMediaSlimDTO;
+}
+
 export enum PlexMediaType {
 	None = 'None',
 	Movie = 'Movie',
@@ -651,6 +746,7 @@ export interface PlexServerConnectionDTO {
 	/** @format int32 */
 	plexServerId: number;
 	url: string;
+	serverStatusList: PlexServerStatusDTO[];
 	latestConnectionStatus: PlexServerStatusDTO;
 	progress: ServerConnectionCheckStatusProgressDTO;
 }
@@ -704,7 +800,6 @@ export interface PlexServerDTO {
 	dnsRebindingProtection: boolean;
 	natLoopbackSupported: boolean;
 	plexServerConnections: PlexServerConnectionDTO[];
-	downloadTasks: DownloadProgressDTO[];
 }
 
 export interface PlexServerDTOListResultDTO {
@@ -743,6 +838,17 @@ export interface PlexServerStatusDTO {
 	lastChecked: string;
 	/** @format int32 */
 	plexServerId: number;
+	/** @format int32 */
+	plexServerConnectionId: number;
+}
+
+export interface PlexServerStatusDTOListResultDTO {
+	isFailed: boolean;
+	isSuccess: boolean;
+	reasons: ReasonDTO[];
+	errors: ErrorDTO[];
+	successes: SuccessDTO[];
+	value: PlexServerStatusDTO[];
 }
 
 export interface PlexServerStatusDTOResultDTO {
@@ -793,8 +899,13 @@ export interface ServerConnectionCheckStatusProgressDTO {
 }
 
 export interface ServerDownloadProgressDTO {
-	/** @format int32 */
+	/**
+	 * Gets or sets the PlexRipper.Domain.PlexServer Id.
+	 * @format int32
+	 */
 	id: number;
+	/** @format int32 */
+	downloadableTasksCount: number;
 	downloads: DownloadProgressDTO[];
 }
 
@@ -884,8 +995,6 @@ export interface UpdateDefaultDestinationDTO {
 }
 
 export enum ViewMode {
-	None = 'None',
 	Table = 'Table',
 	Poster = 'Poster',
-	Overview = 'Overview',
 }

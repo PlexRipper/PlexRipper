@@ -1,7 +1,8 @@
-import { Context } from '@nuxt/types';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
-import { BaseService, ServerService } from '@service';
+import BaseService from './baseService';
+
+import ServerService from '@service/serverService';
 import IStoreState from '@interfaces/service/IStoreState';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getAllPlexLibraries, getPlexLibrary, refreshPlexLibrary, updateDefaultDestination } from '@api/plexLibraryApi';
@@ -21,8 +22,8 @@ export class LibraryService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<ISetupResult> {
-		super.setup(nuxtContext);
+	public setup(): Observable<ISetupResult> {
+		super.setup();
 		return this.refreshLibraries().pipe(
 			switchMap(() => of({ name: this._name, isSuccess: true })),
 			take(1),
@@ -45,7 +46,7 @@ export class LibraryService extends BaseService {
 	}
 
 	public fetchLibrary(libraryId: number): void {
-		getPlexLibrary(libraryId, 0)
+		getPlexLibrary(libraryId)
 			.pipe(take(1))
 			.subscribe((library) => {
 				if (library.isSuccess && library.value) {
@@ -71,11 +72,15 @@ export class LibraryService extends BaseService {
 	public getServerByLibraryId(libraryId: number): Observable<PlexServerDTO | null> {
 		const libraries = this.getStoreSlice<PlexLibraryDTO[]>('libraries');
 		if (libraries.length === 0) {
-			return of(null);
+			return throwError(() => {
+				return new Error('No libraries found');
+			});
 		}
 		const library = libraries.find((x) => x.id === libraryId);
 		if (!library) {
-			return of(null);
+			return throwError(() => {
+				return new Error(`Library with id ${libraryId} not found`);
+			});
 		}
 
 		return ServerService.getServer(library.plexServerId);
@@ -113,5 +118,4 @@ export class LibraryService extends BaseService {
 	}
 }
 
-const libraryService = new LibraryService();
-export default libraryService;
+export default new LibraryService();

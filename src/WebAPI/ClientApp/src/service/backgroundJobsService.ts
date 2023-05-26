@@ -1,9 +1,8 @@
 import { Observable, of } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-import { Context } from '@nuxt/types';
-import { BaseService } from '@service';
+
+import BaseService from './baseService';
 import IStoreState from '@interfaces/service/IStoreState';
-import ISetupResult from '@interfaces/service/ISetupResult';
 import { JobStatusUpdateDTO, JobTypes } from '@dto/mainApi';
 
 export class BackgroundJobsService extends BaseService {
@@ -18,8 +17,8 @@ export class BackgroundJobsService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<ISetupResult> {
-		super.setup(nuxtContext);
+	public setup() {
+		super.setup();
 		return of({ name: this._name, isSuccess: true }).pipe(take(1));
 	}
 
@@ -47,5 +46,4 @@ export class BackgroundJobsService extends BaseService {
 	}
 }
 
-const backgroundJobsService = new BackgroundJobsService();
-export default backgroundJobsService;
+export default new BackgroundJobsService();

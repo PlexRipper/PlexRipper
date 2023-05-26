@@ -5,10 +5,10 @@
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/WebAPI" />
     <option name="PASS_PARENT_ENVS" value="1" />
     <envs>
-      <env name="DEVELOPMENT_ROOT_PATH" value="$PROJECT_DIR$/../PlexRipperCache/" />
-      <env name="DOTNET_ENVIRONMENT" value="Development" />
       <env name="ASPNETCORE_ENVIRONMENT" value="Development" />
       <env name="ASPNETCORE_URLS" value="http://+:5000" />
+      <env name="DEVELOPMENT_ROOT_PATH" value="$PROJECT_DIR$/../../TURBO/PlexRipperCache/" />
+      <env name="DOTNET_ENVIRONMENT" value="Development" />
       <env name="DOTNET_URLS" value="http://+:5000" />
     </envs>
     <option name="USE_EXTERNAL_CONSOLE" value="0" />

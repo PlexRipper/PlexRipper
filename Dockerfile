@@ -4,16 +4,18 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0 AS base
 WORKDIR /app
 
 ## Setup Nuxt front-end
-FROM node:16.18.1-alpine AS client-build
+FROM node:18.11.0-alpine AS client-build
 WORKDIR /tmp/build/ClientApp
 
-ENV PORT=7000
-ENV NUXT_ENV_BASE_URL="TEST IF BASE URL CAME THROUGH"
+
+ENV NUXT_HOST=0.0.0.0
+ENV NUXT_PORT=7000
+ENV API_PORT=7000
 # Essential config files
 COPY ./src/WebAPI/ClientApp/package*.json ./
 COPY ./src/WebAPI/ClientApp/tsconfig.json ./
 COPY ./src/WebAPI/ClientApp/nuxt.config.ts ./
-RUN npm install --legacy-peer-deps
+RUN npm install
 ## Copy the rest of the project files
 COPY ./src/WebAPI/ClientApp/ ./
 RUN npm run generate --fail-on-error
@@ -68,7 +70,6 @@ RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish
 
 ## Merge into one container
 FROM base AS final
-ENV ASPNETCORE_ENVIRONMENT Production
 ENV DOTNET_ENVIRONMENT Production
 ENV ASPNETCORE_URLS=http://+:7000
 ENV DOTNET_URLS=http://+:7000

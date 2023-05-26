@@ -12,11 +12,12 @@ public class ListDownloadTaskToListServerDownloadProgressDTOConverter : ITypeCon
         foreach (var serverId in source.Select(x => x.PlexServerId).Distinct())
         {
             var downloadTasks = source.Where(x => x.PlexServerId == serverId).ToList();
-            var downloadTaskDTO = context.Mapper.Map<List<DownloadProgressDTO>>(downloadTasks);
+            var downloads = context.Mapper.Map<List<DownloadProgressDTO>>(downloadTasks);
             serverDownloads.Add(new ServerDownloadProgressDTO
             {
                 Id = serverId,
-                Downloads = downloadTaskDTO,
+                DownloadableTasksCount = downloadTasks.Flatten(x => x.Children).ToList().FindAll(x => x.IsDownloadable).Count,
+                Downloads = downloads,
             });
         }
 

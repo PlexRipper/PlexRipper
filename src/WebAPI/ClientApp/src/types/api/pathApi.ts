@@ -14,7 +14,7 @@ export function getFolderPaths(): Observable<ResultDTO<FolderPathDTO[]>> {
 	});
 }
 
-export function getDirectoryPath(path: string = ''): Observable<ResultDTO<FileSystemDTO>> {
+export function getDirectoryPath(path = ''): Observable<ResultDTO<FileSystemDTO>> {
 	return PlexRipperAxios.get<FileSystemDTO>({
 		url: `${FOLDER_PATH_RELATIVE_PATH}/directory/?path=${path}`,
 		apiCategory: logText,

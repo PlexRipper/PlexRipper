@@ -1,11 +1,12 @@
-import { Context } from '@nuxt/types';
 import { combineLatest, EMPTY, Observable, of } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 import Log from 'consola';
-import { PlexAccountDTO, PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
-import { checkPlexServer, getPlexServers, setPreferredPlexServerConnection } from '@api/plexServerApi';
+import AccountService from './accountService';
+import BaseService from './baseService';
+import ServerConnectionService from './serverConnectionService';
+import { PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
+import { getPlexServers, setPreferredPlexServerConnection } from '@api/plexServerApi';
 import IStoreState from '@interfaces/service/IStoreState';
-import { AccountService, BaseService, ServerConnectionService } from '@service';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import ResultDTO from '@dto/ResultDTO';
 
@@ -22,8 +23,8 @@ export class ServerService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<ISetupResult> {
-		super.setup(nuxtContext);
+	public setup(): Observable<ISetupResult> {
+		super.setup();
 		return this.refreshPlexServers().pipe(
 			switchMap(() => of({ name: this._name, isSuccess: true })),
 			take(1),
@@ -57,7 +58,7 @@ export class ServerService extends BaseService {
 
 	public getServers(ids: number[] = []): Observable<PlexServerDTO[]> {
 		return this.stateChanged.pipe(
-			map((state: IStoreState) => state.servers ?? []),
+			map((state: IStoreState) => state?.servers ?? []),
 			map((serverList) => serverList.filter((server) => !ids.length || ids.includes(server.id))),
 		);
 	}
@@ -87,26 +88,17 @@ export class ServerService extends BaseService {
 
 	public getServerStatus(plexServerId: number): Observable<boolean> {
 		return ServerConnectionService.getServerConnectionsByServerId(plexServerId).pipe(
-			switchMap((connections) => of(connections.some((x) => x.latestConnectionStatus.isSuccessful))),
+			switchMap((connections) => of(connections.some((x) => x.latestConnectionStatus?.isSuccessful ?? false))),
 		);
 	}
 
-	public checkServer(plexServerId: number): Observable<PlexServerStatusDTO | null> {
-		return checkPlexServer(plexServerId).pipe(
-			map((serverStatus) => {
-				if (serverStatus.isSuccess && serverStatus.value) {
-					const servers = this.getState().servers;
-					const index = servers.findIndex((x) => x.id === serverStatus.value?.plexServerId);
-					if (index === -1) {
-						return serverStatus?.value ?? null;
-					}
-					const server = servers[index];
-					// server.status = serverStatus.value;
-					servers.splice(index, 1, server);
-					this.setState({ servers }, 'Update server status for ' + plexServerId);
-				}
-				return serverStatus?.value ?? null;
-			}),
+	/**
+	 * Forces a recheck of all the server connections for the given server id
+	 * @param plexServerId
+	 */
+	public checkServerStatus(plexServerId: number): Observable<boolean> {
+		return ServerConnectionService.reCheckAllServerConnections(plexServerId).pipe(
+			switchMap(() => this.getServerStatus(plexServerId)),
 		);
 	}
 
@@ -131,5 +123,4 @@ export class ServerService extends BaseService {
 	}
 }
 
-const serverService = new ServerService();
-export default serverService;
+export default new ServerService();

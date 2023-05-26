@@ -3,7 +3,7 @@
 		<template v-if="!progress.completed">
 			<span v-if="progress && progress.retryAttemptIndex > 0">
 				{{
-					$t('components.account-setup-progress.retry-connection', {
+					t('components.connection-progress-text.retry-connection', {
 						attemptIndex: progress.retryAttemptIndex,
 						attemptCount: progress.retryAttemptCount,
 					})
@@ -13,22 +13,26 @@
 		<!--	Completed -->
 		<template v-else>
 			<span v-if="progress.connectionSuccessful">
-				{{ $t('components.account-setup-progress.server-connectable') }}
+				{{ t('components.connection-progress-text.connection-connectable') }}
 			</span>
 			<span v-else>
-				{{ $t('components.account-setup-progress.server-un-connectable') }}
+				{{ t('components.connection-progress-text.connection-un-connectable') }}
 			</span>
 		</template>
 	</div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
 import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 
-@Component
-export default class ConnectionProgressText extends Vue {
-	@Prop({ required: true, type: Object as () => ServerConnectionCheckStatusProgressDTO })
-	progress!: ServerConnectionCheckStatusProgressDTO;
-}
+const { t } = useI18n();
+
+withDefaults(
+	defineProps<{
+		progress: ServerConnectionCheckStatusProgressDTO | null;
+	}>(),
+	{
+		progress: null,
+	},
+);
 </script>

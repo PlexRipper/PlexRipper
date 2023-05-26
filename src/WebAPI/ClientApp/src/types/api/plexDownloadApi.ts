@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { DOWNLOAD_RELATIVE_PATH } from '@api-urls';
-import { DownloadMediaDTO, DownloadTaskDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
+import { DownloadMediaDTO, DownloadPreviewDTO, DownloadTaskDTO, ServerDownloadProgressDTO } from '@dto/mainApi';
 import ResultDTO from '@dto/ResultDTO';
 import PlexRipperAxios from '@class/PlexRipperAxios';
 
@@ -19,6 +19,15 @@ export function downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): Observa
 		url: `${DOWNLOAD_RELATIVE_PATH}/download`,
 		apiCategory: logText,
 		apiName: downloadMedia.name,
+		data: downloadMediaCommand,
+	});
+}
+
+export function postPreviewDownload(downloadMediaCommand: DownloadMediaDTO[]): Observable<ResultDTO<DownloadPreviewDTO[]>> {
+	return PlexRipperAxios.post<DownloadPreviewDTO[]>({
+		url: `${DOWNLOAD_RELATIVE_PATH}/preview`,
+		apiCategory: logText,
+		apiName: postPreviewDownload.name,
 		data: downloadMediaCommand,
 	});
 }

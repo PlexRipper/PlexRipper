@@ -25,18 +25,18 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
 
     public Task<Result<PlexServerConnection>> GetPlexServerConnectionAsync(int plexServerConnectionId)
     {
-        return _mediator.Send(new GetPlexServerConnectionByIdQuery(plexServerConnectionId, includeStatus: true));
+        return _mediator.Send(new GetPlexServerConnectionByIdQuery(plexServerConnectionId));
     }
 
     public async Task<Result<List<PlexServerConnection>>> GetAllPlexServerConnectionsAsync()
     {
-        return await _mediator.Send(new GetAllPlexServerConnectionsQuery(includeStatus: true));
+        return await _mediator.Send(new GetAllPlexServerConnectionsQuery());
     }
 
     #endregion
 
     /// <inheritdoc />
-    public async Task<Result> CheckAllConnectionsOfPlexServerAsync(int plexServerId)
+    public async Task<Result<List<PlexServerStatus>>> CheckAllConnectionsOfPlexServerAsync(int plexServerId)
     {
         var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId, true));
         if (plexServerResult.IsFailed)
@@ -48,10 +48,10 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
             .Select(async plexServerConnection => await CheckPlexServerConnectionStatusAsync(plexServerConnection));
 
         var tasksResult = await Task.WhenAll(connectionTasks);
-        Result.Merge(tasksResult);
+        var x = Result.Merge(tasksResult);
 
         if (tasksResult.Any(statusResult => statusResult.Value.IsSuccessful))
-            return Result.Ok();
+            return Result.Ok(x.Value.ToList());
 
         return Result.Fail($"All connections to plex server with id: {plexServerId} failed to connect").LogError();
     }

@@ -3,17 +3,26 @@
         "account-card": {
             "clear-notifications": "Alle Benachrichtigungen löschen",
             "no-account-name": "Konto Anzeigenamen hinzufügen",
-            "no-notifications": "keine Benachrichtigungen verfügbar"
+            "no-notifications": "keine Benachrichtigungen verfügbar",
+            "invalid-account": "Das Kontoobjekt war ungültig"
         },
         "account-dialog": {
             "add-account-title": "Plex Konto hinzufügen",
             "edit-account-title": "Plex Konto bearbeiten"
         },
-        "account-setup-progress": {
-            "no-server-warning": "Konto {displayName} hat keine verfügbaren Server.",
+        "connection-progress-text": {
             "retry-connection": "Versuche Verbindung wieder aufzubauen, { attemptIndex } von { attemptCount } Versuch.",
+            "connection-connectable": "Verbindung ist gut!",
+            "connection-un-connectable": "Verbindung fehlgeschlagen!"
+        },
+        "check-server-connections-dialog": {
             "server-connectable": "Server ist erreichbar!",
-            "server-un-connectable": "Server ist nicht erreichbar."
+            "server-un-connectable": "Server ist nicht erreichbar.",
+            "checking-progress": "Überprüfe {count} von {total} Plex-Serververbindungen",
+            "completed": "Inspektion von {length} Plex-Servern abgeschlossen!",
+            "no-servers": "Konto {displayName} hat keine Server, auf die es zugreifen kann.",
+            "fetching-servers": "Abrufen zugänglicher Server für das Plex-Konto {displayName}",
+            "no-connections": "Für diesen Plex-Server wurden keine Verbindungen gefunden!"
         },
         "account-verification-code-dialog": {
             "error": "Der eingegebene Code ist ungültig, bitte versuchen Sie es erneut.",
@@ -25,12 +34,15 @@
         },
         "details-overview": {
             "database-id": "Datenbank ID:",
-            "duration": "Dauer:"
+            "total-duration": "Gesamtdauer:",
+            "media-count": "{seasonCount} Staffel - {episodeCount} Folgen",
+            "media-count-label": "Medienanzahl:",
+            "summary": "Zusammenfassung:"
         },
         "directory-browser": {
-            "path": "Pfad",
+            "path": "Pfad:",
             "select-path": "Wähle {pathName}",
-            "type": "typ"
+            "type": "typ:"
         },
         "download-confirmation": {
             "creating-tasks": "Erstelle download Aufgabe {current} von {total}",
@@ -56,17 +68,30 @@
             "accounts": "Konten",
             "advanced": "Erweitert",
             "debug": "Fehlersuche",
+            "dialogs": "Dialoge",
             "downloads": "Downloads",
             "paths": "Pfade",
             "settings": "Einstellungen",
-            "ui": "UI"
+            "ui": "UI",
+            "buttons": "Tasten"
         },
         "notifications-drawer": {
             "clear-notifications": "Alle Benachrichtigungen löschen",
             "no-notifications": "keine Benachrichtigungen verfügbar"
         },
-        "paths-custom-overview": {
-            "no-paths": "Keine Pfade festgelegt"
+        "folder-paths-overview": {
+            "no-paths": "Keine Pfade festgelegt",
+            "main": {
+                "header": "Standart Pfad"
+            },
+            "movie": {
+                "header": "Filme Pfad",
+                "default-name": "Filmordnerpfad"
+            },
+            "tv-show": {
+                "header": "Serien Pfad",
+                "default-name": ""
+            }
         },
         "server-dialog": {
             "header": "{serverName} Einstellung",
@@ -92,8 +117,7 @@
                     "created-on": "erstellt am",
                     "current-status": "aktueller Status",
                     "header": "Server Daten",
-                    "last-checked-on": "zuletzt überprüft",
-                    "last-updated-on": "zuletzt aktuallisiert",
+                    "last-seen-at": "Zuletzt gesehen bei",
                     "machine-id": "Machine Identifizierer",
                     "plex-version": "Plex Version",
                     "device": "Gerät",
@@ -110,14 +134,22 @@
                 "header": "Keine Server verfügbar!"
             }
         },
-        "check-server-connections-progress": {
-            "checking": "",
-            "completed": "Inspektion von {length} Plex-Servern abgeschlossen!"
+        "media-list": {
+            "no-media-found": "",
+            "selected-count": "",
+            "episode-count": "{episodeCount} Folgen"
+        },
+        "server-download-status": {
+            "pause": "Pause",
+            "start": "Start"
+        },
+        "q-tree-view-table-row": {
+            "invalid-node": "Der Knoten war nicht definiert oder null"
         }
     },
     "confirmation": {
         "delete-account": {
-            "text": "Dadurch wird dieses Plex-Konto aus Plex Ripper gelöscht!\n\nDadurch werden auch alle unzugänglichen Plex-Shared-Server, Plex-Bibliotheken und alle darin enthaltenen Medien gelöscht. Alle aktiven Downloads, die mit diesem Konto gestartet oder in die Warteschlange gestellt werden, werden abgebrochen und gelöscht. Abgeschlossene Downloads bleiben unberührt.",
+            "text": "Dadurch wird dieses Plex-Konto aus PlexRipper gelöscht!\n\nDadurch werden auch alle unzugänglichen Plex-Shared-Server, Plex-Bibliotheken und alle darin enthaltenen Medien gelöscht. Alle aktiven Downloads, die mit diesem Konto gestartet oder in die Warteschlange gestellt werden, werden abgebrochen und gelöscht. Abgeschlossene Downloads bleiben unberührt.",
             "title": "Sind Sie sicher?",
             "warning": "Dies wird ca.5 Minuten oder mehr benötigen. Wenn der Vorgang abgeschlossen ist schließt sich das Fenster selbstständig."
         },
@@ -128,12 +160,17 @@
         "skip-setup": {
             "text": "Das überspringt das Setup und Sie müssen PlexRipper manuell einrichten.",
             "title": "Sind Sie sicher?"
+        },
+        "not-found": {
+            "text": "Konnte den richtigen Bestätigungstext nicht finden..",
+            "title": "Konnte den richtigen Bestätigungstext nicht finden.."
         }
     },
     "general": {
         "alerts": {
             "disabled-paths": "Das Editieren der Pfade ist gesperrt wenn Downloads aktiv sind. Stelle sicher, dass alle Downloads gestoppt oder gelöscht sind!",
-            "invalid-directory": "ungültiger Pfad angegeben!"
+            "invalid-directory": "ungültiger Pfad angegeben!",
+            "valid-directory": "Verzeichnis ist ein gültiger Pfad!"
         },
         "commands": {
             "add-alert": "benachrichtigung hinzufügen",
@@ -162,7 +199,7 @@
             "update": "aktualisieren",
             "validate": "überprüfen",
             "validated": "überprüft",
-            "missing-text": "",
+            "missing-text": "Fehlender Text",
             "inspect-server": "Server untersuchen"
         },
         "name": "PlexRipper",
@@ -173,6 +210,10 @@
         "tooltip": {
             "local-connection": "Lokale Verbindung",
             "public-connection": "Öffentliche Verbindung"
+        },
+        "error": {
+            "unknown": "\"Unbekannt\"",
+            "invalid-server": "Das Serverobjekt war ungültig"
         }
     },
     "help": {
@@ -237,6 +278,11 @@
                         "text": "PlexRipper Multithread-Downloads und kann Medien, die heruntergeladen werden sollen, in individuellen teilen herunterladen und wieder zusammen führen. Das führt in der regel zu einer höheren Downloadgesschwindigkeit aber benötigt auch etwas mehr Zeit um die Teile wieder zusammenzusetzen.\n\nDas setzen auf den Wert 1 deaktiviert die Funktion und lädt die Datei am Stück herunter. Die Anzahl der Segmente hat keinen Einfluss auf die Dauer des zusammen setzens.",
                         "title": "Download Teile"
                     }
+                },
+                "debug-section": {
+                    "text": "Wenn Sie den Debug-Modus aktivieren, werden in verschiedenen Bereichen der Benutzeroberfläche mehr Informationen als gewöhnlich angezeigt.",
+                    "title": "Debug-Modus",
+                    "label": "Debug-Modus"
                 },
                 "reset-db": {
                     "label": "Datenbank zurück setzen",
@@ -321,8 +367,8 @@
                 "language": {
                     "language-selection": {
                         "label": "Sprache",
-                        "text": "",
-                        "title": ""
+                        "text": "Dies wird die Sprache für fast alles ändern. Text wie Fehler werden wahrscheinlich nicht übersetzt. Übersetzungskorrekturen oder neue Sprachen sind sehr willkommen, besuchen Sie www.plexripper.rocks für Informationen darüber, wie Sie neue Sprachen hinzufügen können.",
+                        "title": "Wählen Sie Ihre bevorzugte Sprache"
                     }
                 }
             }
@@ -365,23 +411,15 @@
                 "download-manager": {
                     "header": "Download Manager"
                 },
+                "debug": {
+                    "header": "Debug-Einstellungen"
+                },
                 "setup": {
                     "header": "PlexRipper Setup"
                 }
             },
             "debug": {
                 "header": "Fehlersuche"
-            },
-            "paths": {
-                "main": {
-                    "header": "Standart Pfad"
-                },
-                "movie": {
-                    "header": "Filme Pfad"
-                },
-                "tv-show": {
-                    "header": "Serien Pfad"
-                }
             },
             "ui": {
                 "confirmation-settings": {
@@ -421,7 +459,6 @@
                     "item-2": "Musik und Foto Download",
                     "item-3": "Untertitel Downloads",
                     "item-4": "Telegram Benachrichtigungen",
-                    "item-5": "Mehrsprachig",
                     "item-6": "noch bessere Plex Integration",
                     "item-6-1": "Lade Sammlungen herunter und füge alle Plex-relevanten informationen automatisch hinzu."
                 },
@@ -454,6 +491,19 @@
             "index": {
                 "header": "Serien Übersicht",
                 "sub-header": "Wählen Sie eine Serien-Mediathek auf der linken Seite"
+            }
+        },
+        "debug": {
+            "dialogs": {
+                "buttons": {
+                    "download-confirmation": "Bestätigung herunterladen",
+                    "help-dialog": "Hilfedialog",
+                    "server-dialog": "Serverdialog",
+                    "check-server-connections-dialog": "Dialogfeld \"Serververbindungen prüfen\".",
+                    "directory-browser": "Dialogfeld „Verzeichnisbrowser“.",
+                    "verification-dialog": "2FA-Verifizierungsdialog"
+                },
+                "header": "Debug-Dialogmodalitäten"
             }
         }
     }

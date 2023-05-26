@@ -1,6 +1,4 @@
-﻿using PlexRipper.DownloadManager;
-
-namespace PlexRipper.WebAPI.Common.DTO;
+﻿namespace PlexRipper.WebAPI.Common.DTO;
 
 public class PlexServerDTO
 {
@@ -53,6 +51,4 @@ public class PlexServerDTO
     public bool NatLoopbackSupported { get; set; }
 
     public List<PlexServerConnectionDTO> PlexServerConnections { get; set; } = new();
-
-    public List<DownloadProgressDTO> DownloadTasks { get; set; }
 }

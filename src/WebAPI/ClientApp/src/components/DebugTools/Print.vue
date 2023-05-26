@@ -1,28 +1,38 @@
 <template>
-	<v-expansion-panels>
-		<v-expansion-panel>
-			<v-expansion-panel-header> {{ title }} </v-expansion-panel-header>
-			<v-expansion-panel-content :style="{ height: object ? height + 'px' : '0px' }">
-				<vue-scroll>
-					<pre>{{ object }}</pre>
-				</vue-scroll>
-			</v-expansion-panel-content>
-		</v-expansion-panel>
-	</v-expansion-panels>
+	<q-list v-if="debugMode" bordered class="rounded-borders">
+		<q-expansion-item switch-toggle-side expand-separator :label="title" icon="mdi-debug">
+			<q-card :style="{ maxHeight: height + 'px' }" class="scroll">
+				<q-card-section>
+					<pre><slot /></pre>
+				</q-card-section>
+			</q-card>
+		</q-expansion-item>
+	</q-list>
 </template>
 
-<script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+<script setup lang="ts">
+import { useSubscription } from '@vueuse/rxjs';
+import { set } from '@vueuse/core';
+import { SettingsService } from '@service';
 
-@Component
-export default class Print extends Vue {
-	@Prop({ required: false, type: String, default: 'Print' })
-	readonly title!: string;
+const debugMode = ref(false);
 
-	@Prop({ required: true })
-	readonly object!: any;
+withDefaults(
+	defineProps<{
+		title?: string;
+		height?: number;
+	}>(),
+	{
+		title: 'Print',
+		height: 500,
+	},
+);
 
-	@Prop({ required: false, type: Number, default: 500 })
-	readonly height!: number;
-}
+onMounted(() => {
+	useSubscription(
+		SettingsService.getDebugMode().subscribe((value) => {
+			set(debugMode, value);
+		}),
+	);
+});
 </script>

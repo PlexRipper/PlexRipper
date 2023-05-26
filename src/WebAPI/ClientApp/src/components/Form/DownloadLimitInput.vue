@@ -1,68 +1,62 @@
 <template>
-	<v-row class="no-wrap">
-		<v-col :cols="8">
-			<v-slider
-				:value="value"
+	<q-row class="no-wrap" justify="between">
+		<q-col :cols="8">
+			<q-slider
+				:model-value="value"
 				:min="0"
 				:step="500"
-				:max="10000"
-				style="margin-top: 8px"
-				@input="sliderValue = $event"
-				@change="updateDownloadLimit"
-				@mousedown="mouseEvent = true"
-				@mouseup="mouseEvent = false"
-			/>
-		</v-col>
-		<v-col>
-			<p-text-field
-				:value="value"
-				full-width
-				hide-details
-				single-line
-				type="number"
-				suffix="kB/s"
-				hide-spin-buttons
-				@click.prevent
-				@change="updateDownloadLimit"
-			/>
-		</v-col>
-	</v-row>
+				:max="100000"
+				snap
+				label
+				style="margin-top: 24px"
+				@pan="mouseEvent = $event"
+				@change="changeValue"
+				@update:model-value="updateDownloadLimit" />
+		</q-col>
+		<q-col :cols="3">
+			<q-input :model-value="value" type="number" suffix="kB/s" @update="changeValue" />
+		</q-col>
+	</q-row>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
+import { get, set } from '@vueuse/core';
 
-@Component<DownloadLimitInput>({})
-export default class DownloadLimitInput extends Vue {
-	@Prop({ required: true, type: Number })
-	readonly plexServerId!: number;
+const props = defineProps<{
+	plexServerId: number;
+	downloadSpeedLimit: number;
+}>();
 
-	@Prop({ required: true, type: Number })
-	readonly downloadSpeedLimit!: number;
+const emit = defineEmits<{
+	(e: 'change', value: number): void;
+}>();
 
-	mouseEvent: boolean = false;
-	sliderValue: number = 0;
+const mouseEvent = ref('');
+const sliderValue = ref(0);
 
-	get value(): number {
-		if (this.mouseEvent) {
-			return this.sliderValue;
-		}
-		return this.downloadSpeedLimit;
+const downloadSpeedLimit = computed(() => {
+	return props.downloadSpeedLimit ?? 0;
+});
+
+const value = computed(() => {
+	if (get(mouseEvent) === 'start') {
+		return get(sliderValue);
 	}
+	return get(downloadSpeedLimit);
+});
 
-	updateDownloadLimit(value) {
-		value = Number(value);
-		if (value < 0) {
-			value = 0;
-		}
-		this.$emit('change', value);
+function updateDownloadLimit(value: number | null): void {
+	if (value == null || value < 0) {
+		value = 0;
 	}
+	set(sliderValue, value);
+}
+
+function changeValue(value: number | null): void {
+	if (value === null) {
+		return;
+	}
+	set(sliderValue, value);
+	emit('change', value);
 }
 </script>
-<!--suppress CssUnusedSymbol -->
-<style>
-/* This is to make the v-slider less high and help vertical center the label in front. */
-.v-messages {
-	display: none !important;
-}
-</style>

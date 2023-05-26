@@ -1,7 +1,7 @@
 import { Observable, of } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-import { Context } from '@nuxt/types';
-import { BaseService } from '@service';
+
+import BaseService from '@service/baseService';
 import IStoreState from '@interfaces/service/IStoreState';
 import IAlert from '@interfaces/IAlert';
 import ISetupResult from '@interfaces/service/ISetupResult';
@@ -18,8 +18,8 @@ export class AlertService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<ISetupResult> {
-		super.setup(nuxtContext);
+	public setup(): Observable<ISetupResult> {
+		super.setup();
 		return of({ name: this._name, isSuccess: true }).pipe(take(1));
 	}
 
@@ -31,7 +31,7 @@ export class AlertService extends BaseService {
 	public showAlert(alert: IAlert): void {
 		const alerts = this.getState().alerts;
 		// Add unique id
-		const id = (alerts.last()?.id ?? 0) + 1;
+		const id = Date.now();
 		this.setState({ alerts: [...alerts, ...[{ ...alert, id }]] });
 	}
 
@@ -42,5 +42,4 @@ export class AlertService extends BaseService {
 	// endregion
 }
 
-const alertService = new AlertService();
-export default alertService;
+export default new AlertService();

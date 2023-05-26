@@ -1,16 +1,12 @@
 import Log from 'consola';
-import { Context } from '@nuxt/types';
-import { ObservableStore } from '@codewithdan/observable-store';
-import { ObservableStoreSettings } from '@codewithdan/observable-store/interfaces';
-import { EMPTY, Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { ObservableStore, ObservableStoreSettings } from '@codewithdan/observable-store';
+import { filter, map, EMPTY, Observable } from 'rxjs';
 import IStoreState from '@interfaces/service/IStoreState';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import IAppConfig from '@class/IAppConfig';
 import DefaultState from '@const/default-state';
 
 export default abstract class BaseService extends ObservableStore<IStoreState> {
-	protected _nuxtContext!: Context;
 	protected _appConfig!: IAppConfig;
 	protected _name: string;
 
@@ -32,12 +28,17 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		Log.info(`Current state of ${this._name}`, this.getState(true));
 	}
 
-	protected setup(nuxtContext, appConfig: IAppConfig | null = null): Observable<ISetupResult> {
+	protected isInTestMode(): boolean {
+		// eslint-disable-next-line no-prototype-builtins
+		return typeof process !== 'undefined' && process?.env?.hasOwnProperty('VITEST') && process.env.VITEST === 'true';
+	}
+
+	protected setup(appConfig: IAppConfig | null = null): Observable<ISetupResult> {
 		if (!ObservableStore.isStoreInitialized) {
 			ObservableStore.initializeState(DefaultState);
 			Log.debug('Observable store was initialized');
 		}
-		this._nuxtContext = nuxtContext;
+
 		if (appConfig !== null) {
 			this._appConfig = appConfig;
 		}
@@ -55,7 +56,7 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 	 * @param idName
 	 * @protected
 	 */
-	protected updateStore(propertyName: keyof IStoreState, newObject: any, idName: string = 'id'): void {
+	protected updateStore(propertyName: keyof IStoreState, newObject: any, idName = 'id'): void {
 		const x = this.getState()[propertyName.toString()];
 		if (!x) {
 			Log.error(`Failed to get IStoreProperty property name: ${propertyName}`, this.getState());
@@ -81,7 +82,7 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 		this.setState(stateObject, `Update ${propertyName} with ${idName}: ${newObject[idName]}`);
 	}
 
-	protected setStoreProperty(propertyName: keyof IStoreState, newValue: any, action: string = ''): void {
+	protected setStoreProperty(propertyName: keyof IStoreState, newValue: any, action = ''): void {
 		const state = {};
 		state[propertyName] = newValue;
 
@@ -109,7 +110,7 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 	protected getStateChanged<T>(propertyName: keyof IStoreState): Observable<T> {
 		return this.stateChanged.pipe(
 			filter((x) => !!x),
-			map((x) => x[propertyName] as unknown as T),
+			map((x) => x[propertyName] as unknown as T)
 		);
 	}
 

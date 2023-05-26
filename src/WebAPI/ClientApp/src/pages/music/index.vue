@@ -1,16 +1,14 @@
 <template>
-	<page-container>
-		<v-row>
-			<v-col>
-				<h1>{{ $t('pages.music.index.header') }}</h1>
-			</v-col>
-		</v-row>
-	</page-container>
+	<q-page>
+		<q-row>
+			<q-col>
+				<h1>{{ t('pages.music.index.header') }}</h1>
+			</q-col>
+		</q-row>
+	</q-page>
 </template>
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-
-@Component
-export default class MusicOverview extends Vue {}
+const { t } = useI18n();
 </script>

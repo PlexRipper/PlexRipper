@@ -1,5 +1,7 @@
 ﻿using Application.Contracts;
 using AutoMapper;
+using Data.Contracts;
+using DownloadManager.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.WebAPI.Common.DTO;
@@ -12,13 +14,26 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class DownloadController : BaseController
 {
-    private readonly IPlexDownloadService _plexDownloadService;
+    private readonly IMediator _mediator;
+    private readonly IDownloadCommands _downloadCommands;
+    private readonly IDownloadTaskFactory _downloadTaskFactory;
+    private readonly IDownloadUrlGenerator _downloadUrlGenerator;
 
-    public DownloadController(ILog log, IPlexDownloadService plexDownloadService, IMapper mapper, INotificationsService notificationsService) : base(log,
+    public DownloadController(
+        ILog log,
+        IMediator mediator,
+        IDownloadCommands downloadCommands,
+        IDownloadTaskFactory downloadTaskFactory,
+        IDownloadUrlGenerator downloadUrlGenerator,
+        IMapper mapper,
+        INotificationsService notificationsService) : base(log,
         mapper,
         notificationsService)
     {
-        _plexDownloadService = plexDownloadService;
+        _mediator = mediator;
+        _downloadCommands = downloadCommands;
+        _downloadTaskFactory = downloadTaskFactory;
+        _downloadUrlGenerator = downloadUrlGenerator;
     }
 
     // GET: api/<DownloadController>
@@ -27,7 +42,8 @@ public class DownloadController : BaseController
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
     public async Task<IActionResult> GetDownloadTasks()
     {
-        var result = await _plexDownloadService.GetDownloadTasksAsync();
+        var result = await _mediator.Send(new GetAllDownloadTasksQuery());
+
         if (result.IsFailed)
             return InternalServerError(result.ToResult());
 
@@ -43,7 +59,7 @@ public class DownloadController : BaseController
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
     public async Task<IActionResult> ClearCompleted([FromBody] List<int> downloadTaskIds)
     {
-        return ToActionResult(await _plexDownloadService.ClearCompleted(downloadTaskIds));
+        return ToActionResult(await _downloadCommands.ClearCompleted(downloadTaskIds));
     }
 
     /// <summary>
@@ -56,7 +72,17 @@ public class DownloadController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     public async Task<IActionResult> DownloadMedia([FromBody] List<DownloadMediaDTO> downloadMedias)
     {
-        return ToActionResult(await _plexDownloadService.DownloadMedia(downloadMedias));
+        _log.DebugLine("Attempting to add download task orders: ");
+        foreach (var downloadMediaDto in downloadMedias)
+            _log.Debug("DownloadMediaDTO: {@DownloadMediaDto} ", downloadMediaDto);
+
+        var downloadTasks = await _downloadTaskFactory.GenerateAsync(downloadMedias);
+        if (downloadTasks.IsFailed)
+            return ToActionResult(downloadTasks.ToResult());
+
+        var result = await _downloadCommands.CreateDownloadTasks(downloadTasks.Value);
+
+        return ToActionResult(result);
     }
 
     #region BatchCommands
@@ -67,7 +93,7 @@ public class DownloadController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     public async Task<IActionResult> StartCommand(int id)
     {
-        return id <= 0 ? BadRequestInvalidId() : ToActionResult(await _plexDownloadService.StartDownloadTask(id));
+        return id <= 0 ? BadRequestInvalidId() : ToActionResult(await _downloadCommands.StartDownloadTask(id));
     }
 
     // GET api/<DownloadController>/pause/{id:int}
@@ -76,7 +102,7 @@ public class DownloadController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     public async Task<IActionResult> PauseCommand(int id)
     {
-        return id <= 0 ? BadRequestInvalidId() : ToActionResult(await _plexDownloadService.PauseDownloadTask(id));
+        return id <= 0 ? BadRequestInvalidId() : ToActionResult(await _downloadCommands.PauseDownloadTask(id));
     }
 
     // GET api/<DownloadController>/restart/{id:int}
@@ -85,7 +111,7 @@ public class DownloadController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     public async Task<IActionResult> RestartCommand(int id)
     {
-        return id <= 0 ? BadRequestInvalidId() : ToActionResult(await _plexDownloadService.RestartDownloadTask(id));
+        return id <= 0 ? BadRequestInvalidId() : ToActionResult(await _downloadCommands.RestartDownloadTask(id));
     }
 
     // GET: api/(DownloadController)/stop/{id:int}
@@ -94,7 +120,7 @@ public class DownloadController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     public async Task<IActionResult> StopCommand(int id)
     {
-        return id <= 0 ? BadRequestInvalidId() : ToActionResult(await _plexDownloadService.StopDownloadTask(id));
+        return id <= 0 ? BadRequestInvalidId() : ToActionResult(await _downloadCommands.StopDownloadTasks(id));
     }
 
     /// <summary>
@@ -110,21 +136,49 @@ public class DownloadController : BaseController
         if (!downloadTaskIds.Any())
             return BadRequest(Result.Fail("No list of download task Id's was given in the request body"));
 
-        var result = await _plexDownloadService.DeleteDownloadTasksAsync(downloadTaskIds);
+        var result = await _downloadCommands.DeleteDownloadTaskClients(downloadTaskIds);
+
         return ToActionResult(result.ToResult());
     }
 
     // GET: api/(DownloadController)/detail/{id:int}
     [HttpGet("detail/{id:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<DownloadTaskDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
     public async Task<IActionResult> GetDetail(int id, CancellationToken token)
     {
         if (id <= 0)
             return BadRequestInvalidId();
 
-        var downloadTaskResult = await _plexDownloadService.GetDownloadTaskDetailAsync(id, token);
-        return ToActionResult<DownloadTask, DownloadTaskDTO>(downloadTaskResult);
+        var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(id, true), token);
+
+        if (downloadTaskResult.IsFailed)
+            return ToActionResult(downloadTaskResult.ToResult());
+
+        if (!downloadTaskResult.Value.IsDownloadable)
+            return ToActionResult<DownloadTask, DownloadTaskDTO>(downloadTaskResult);
+
+        // Add DownloadUrl to DownloadTaskDTO
+        var downloadTaskDto = _mapper.Map<DownloadTaskDTO>(downloadTaskResult.Value);
+
+        var downloadUrl = await _downloadUrlGenerator.GetDownloadUrl(downloadTaskResult.Value, token);
+        if (downloadUrl.IsFailed)
+            return ToActionResult<DownloadTask, DownloadTaskDTO>(downloadTaskResult);
+
+        if (downloadTaskResult.Value.IsDownloadable)
+            downloadTaskDto.DownloadUrl = downloadUrl.Value;
+
+        return Ok(Result.Ok(downloadTaskDto));
+    }
+
+    [HttpPost("preview")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<DownloadPreviewDTO>>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+    public async Task<IActionResult> DownloadPreview([FromBody] List<DownloadMediaDTO> downloadMedias, CancellationToken token)
+    {
+        var result = await _mediator.Send(new GetDownloadPreviewQuery(downloadMedias), token);
+        return ToActionResult<List<DownloadPreview>, List<DownloadPreviewDTO>>(result);
     }
 
     #endregion

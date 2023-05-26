@@ -1,8 +1,9 @@
-import { Context } from '@nuxt/types';
 import { combineLatest, Observable, of } from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
+import BaseService from './baseService';
+import SignalrService from '@service/signalrService';
 import { DownloadStatus, DownloadTaskDTO } from '@dto/mainApi';
-import { BaseService, SignalrService } from '@service';
+
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class ProgressService extends BaseService {
@@ -10,8 +11,8 @@ export class ProgressService extends BaseService {
 		super('ProgressService', {});
 	}
 
-	setup(nuxtContext: Context): Observable<ISetupResult> {
-		super.setup(nuxtContext);
+	setup(): Observable<ISetupResult> {
+		super.setup();
 		return of({ name: this._name, isSuccess: true }).pipe(take(1));
 	}
 
@@ -20,7 +21,7 @@ export class ProgressService extends BaseService {
 	 * @param {number} serverId
 	 * @returns {Observable<DownloadTaskDTO[]>}
 	 */
-	public getMergedDownloadTaskProgress(serverId: number = 0) {
+	public getMergedDownloadTaskProgress(serverId = 0) {
 		return combineLatest([
 			SignalrService.getAllDownloadTaskUpdate().pipe(startWith([])),
 			SignalrService.getAllFileMergeProgress().pipe(startWith([])),
@@ -64,5 +65,4 @@ export class ProgressService extends BaseService {
 	}
 }
 
-const progressService = new ProgressService();
-export default progressService;
+export default new ProgressService();

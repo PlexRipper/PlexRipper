@@ -21,6 +21,7 @@ public class DownloadManagerModule : Module
         builder.RegisterType<DownloadTaskFactory>().As<IDownloadTaskFactory>().SingleInstance();
         builder.RegisterType<DownloadFileStream>().As<IDownloadFileStream>().SingleInstance();
         builder.RegisterType<DownloadTaskScheduler>().As<IDownloadTaskScheduler>().SingleInstance();
+        builder.RegisterType<DownloadUrlGenerator>().As<IDownloadUrlGenerator>().SingleInstance();
 
         builder.RegisterType<DownloadWorker>().InstancePerDependency();
         builder.RegisterType<PlexDownloadClient>().InstancePerDependency();

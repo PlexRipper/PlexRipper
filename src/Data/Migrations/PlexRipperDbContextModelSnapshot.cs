@@ -15,7 +15,9 @@ namespace PlexRipper.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.3");
+            modelBuilder
+                .UseCollation("NATURALSORT")
+                .HasAnnotation("ProductVersion", "7.0.3");
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
                 {
@@ -516,7 +518,7 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int>("DownloadFolderId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("DownloadSpeed")
+                    b.Property<long>("DownloadSpeed")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(18);
 
@@ -542,7 +544,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(11);
 
-                    b.Property<int>("FileTransferSpeed")
+                    b.Property<long>("FileTransferSpeed")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(19);
 

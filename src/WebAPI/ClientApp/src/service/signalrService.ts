@@ -1,12 +1,15 @@
 import Log from 'consola';
-// eslint-disable-next-line import/named
+
 import { HubConnection, HubConnectionBuilder, HubConnectionState, IHttpConnectionOptions, LogLevel } from '@microsoft/signalr';
-import { from, Observable, of, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
-import { Context } from '@nuxt/types';
+import { useCypressSignalRMock } from 'cypress-signalr-mock';
+import { Observable, of, Subject } from 'rxjs';
 import { isEqual } from 'lodash-es';
+import BackgroundJobsService from './backgroundJobsService';
+import NotificationService from './notificationService';
+import BaseService from './baseService';
 import IStoreState from '@interfaces/service/IStoreState';
-import { BaseService } from '@service';
+
 import {
 	DownloadTaskDTO,
 	FileMergeProgress,
@@ -19,10 +22,8 @@ import {
 	ServerDownloadProgressDTO,
 	SyncServerProgress,
 } from '@dto/mainApi';
-import notificationService from '~/service/notificationService';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import IAppConfig from '@class/IAppConfig';
-import backgroundJobsService from '~/service/backgroundJobsService';
 
 export class SignalrService extends BaseService {
 	private _progressHubConnection: HubConnection | null = null;
@@ -47,8 +48,8 @@ export class SignalrService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context, appConfig: IAppConfig | null = null): Observable<ISetupResult> {
-		super.setup(nuxtContext, appConfig);
+	public setup(appConfig: IAppConfig | null = null): Observable<ISetupResult> {
+		super.setup(appConfig);
 		return from(this.initializeHubs()).pipe(
 			switchMap(() => of({ name: this._name, isSuccess: true })),
 			take(1),
@@ -56,10 +57,8 @@ export class SignalrService extends BaseService {
 	}
 
 	private async initializeHubs(): Promise<void> {
-		// Ensure we don't run any SignalR functionality due to it being tricky to setup. Might revisit later
-		// TODO Re-enable when trying to test SignalR functionality
-		// @ts-ignore
-		if (window.jest || window.Cypress) {
+		// Disable SignalR initialization in test mode
+		if (this.isInTestMode()) {
 			return Promise.resolve();
 		}
 		Log.debug('Setting up SignalR Service');
@@ -67,15 +66,13 @@ export class SignalrService extends BaseService {
 			logger: LogLevel.Information,
 		};
 		// Setup Connections
-		const baseUrl = this._appConfig.baseURL;
-		this._progressHubConnection = new HubConnectionBuilder()
-			.withUrl(`${baseUrl}/progress`, options)
-			.withAutomaticReconnect()
-			.build();
-		this._notificationHubConnection = new HubConnectionBuilder()
-			.withUrl(`${baseUrl}/notifications`, options)
-			.withAutomaticReconnect()
-			.build();
+		const baseUrl = this._appConfig.baseUrl;
+		this._progressHubConnection =
+			useCypressSignalRMock('progress') ??
+			new HubConnectionBuilder().withUrl(`${baseUrl}/progress`, options).withAutomaticReconnect().build();
+		this._notificationHubConnection =
+			useCypressSignalRMock('notifications') ??
+			new HubConnectionBuilder().withUrl(`${baseUrl}/notifications`, options).withAutomaticReconnect().build();
 
 		await this.setupSubscriptions();
 		await this.startProgressHubConnection();
@@ -114,12 +111,12 @@ export class SignalrService extends BaseService {
 		});
 
 		this._progressHubConnection?.on(MessageTypes.JobStatusUpdate, (data: JobStatusUpdateDTO) => {
-			backgroundJobsService.setStatusJobUpdate(data);
+			BackgroundJobsService.setStatusJobUpdate(data);
 		});
 
 		this._notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) => {
 			// Notification slice is only updated in the notificationService.ts, we send it there.
-			notificationService.setNotification(data);
+			NotificationService.setNotification(data);
 		});
 	}
 
@@ -300,5 +297,4 @@ export class SignalrService extends BaseService {
 	// endregion
 }
 
-const signalrService = new SignalrService();
-export default signalrService;
+export default new SignalrService();

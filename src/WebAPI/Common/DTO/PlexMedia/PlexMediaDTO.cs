@@ -2,25 +2,9 @@
 
 namespace PlexRipper.WebAPI.Common.DTO;
 
-public class PlexMediaDTO
+public class PlexMediaDTO : PlexMediaSlimDTO
 {
-    public int Id { get; set; }
-
     public int Key { get; set; }
-
-    /// <summary>
-    /// Used specifically for the treeView display in the client
-    /// </summary>
-
-    public string TreeKeyId { get; set; }
-
-    public string Title { get; set; }
-
-    public int Year { get; set; }
-
-    public int Duration { get; set; }
-
-    public long MediaSize { get; set; }
 
     public bool HasThumb { get; set; }
 
@@ -40,23 +24,11 @@ public class PlexMediaDTO
 
     public double Rating { get; set; }
 
-    public int ChildCount { get; set; }
-
-    public DateTime AddedAt { get; set; }
-
-    public DateTime UpdatedAt { get; set; }
-
     public DateTime? OriginallyAvailableAt { get; set; }
 
     public int TvShowId { get; set; }
 
     public int TvShowSeasonId { get; set; }
-
-    public int PlexLibraryId { get; set; }
-
-    public int PlexServerId { get; set; }
-
-    public PlexMediaType Type { get; set; }
 
     public List<PlexMediaDataDTO> MediaData { get; set; }
 

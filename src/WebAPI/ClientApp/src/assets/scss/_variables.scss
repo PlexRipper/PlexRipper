@@ -1,14 +1,58 @@
-$dark-background-color: rgba(0, 0, 0, 0.8);
-$light-background-color: rgba(255, 255, 255, 0.8);
+@import 'quasar/src/css/variables.sass';
 
-$dark-dialog-background-color: rgba(0, 0, 0, 0.4);
-$light-dialog-background-color: rgba(255, 255, 255, 0.4);
+
+$dark-sm-background-color: rgba(0, 0, 0, 0.4);
+$light-sm-background-color: rgba(255, 255, 255, 0.4);
+
+$dark-md-background-color: rgba(0, 0, 0, 0.5);
+$light-md-background-color: rgba(255, 255, 255, 0.5);
+
+$dark-lg-background-color: rgba(0, 0, 0, 0.6);
+$light-lg-background-color: rgba(255, 255, 255, 0.6);
+
+$dark-xl-background-color: rgba(0, 0, 0, 0.8);
+$light-xl-background-color: rgba(255, 255, 255, 0.8);
 
 $dark-theme-glass-background: rgba(255, 255, 255, 0.08);
 $light-theme-glass-background: rgba(0, 0, 0, 0.08);
 
-$box-shadow: 0px 11px 15px -7px rgba(255, 0, 0, 0.2), 0px 24px 38px 3px rgba(255, 0, 0, 0.14), 0px 9px 46px 8px rgba(255, 0, 0, 0.12);
-$box-shadow-hover: 0px 0px 20px 3px rgba(255,0,0,1);
+$box-shadow: 0px 11px 15px -7px rgba(255, 0, 0, 0.2), 0px 24px 38px 3px rgba(255, 0, 0, 0.14),
+0px 9px 46px 8px rgba(255, 0, 0, 0.12);
+$box-shadow-hover: 0px 0px 20px 3px rgba(255, 0, 0, 1);
 
+
+$error-color: #ff0000;
+
+/*
+ * Quasar Variables
+ */
+
+$dark-shadow-color: rgba(0, 0, 0, 0.8);
+$primary: #ff0000;
+$q-dark: #ff0000;
+
+$default-dark-btn-color: #ffffff;
+$warning-dark-btn-color: #ffd300;
+$positive-dark-btn-color: #4caf50;
+$negative-dark-btn-color: #ff0000;
+
+$default-light-btn-color: #000000;
+$warning-light-btn-color: #ffd300;
+$positive-light-btn-color: #4caf50;
+$negative-light-btn-color: #ff0000;
+
+$button-light-shadow-active: $shadow-5;
+$button-dark-shadow-active: $dark-shadow-5;
+
+
+/*
+ * Component Variables
+ */
 $app-bar-height: 48px;
 $download-page-bar-height: 64px;
+$media-overview-bar-height: 85px;
+$media-table-row-height: 42px;
+$navigation-drawer-width: 400px;
+
+$q-card-dialog-title-height: 68px;
+$q-card-dialog-actions-height: 68px;

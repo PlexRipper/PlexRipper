@@ -1,35 +1,36 @@
 <template>
-	<v-btn icon @click="toggleNotificationDrawer">
-		<v-badge :content="getVisibleNotifications.length" :value="getVisibleNotifications.length > 0" color="green" overlap>
-			<v-icon>mdi-bell</v-icon>
-		</v-badge>
-	</v-btn>
+	<q-btn dense round flat icon="mdi-bell" @click="toggleNotificationDrawer">
+		<q-badge
+			v-if="getVisibleNotifications.length > 0"
+			color="green"
+			floating
+			transparent
+			:label="getVisibleNotifications.length" />
+	</q-btn>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
 import { NotificationDTO } from '@dto/mainApi';
-import notificationService from '~/service/notificationService';
+import { NotificationService } from '@service';
 
-@Component
-export default class NotificationButton extends Vue {
-	private notifications: NotificationDTO[] = [];
+const notifications = ref<NotificationDTO[]>([]);
 
-	get getVisibleNotifications(): NotificationDTO[] {
-		return this.notifications?.filter((x) => !x.hidden) ?? [];
-	}
+const emit = defineEmits<{ (e: 'toggle'): void }>();
 
-	toggleNotificationDrawer() {
-		this.$emit('toggle');
-	}
+const getVisibleNotifications = computed(() => {
+	return notifications.value?.filter((x) => !x.hidden) ?? [];
+});
 
-	mounted(): void {
-		useSubscription(
-			notificationService.getNotifications().subscribe((value) => {
-				this.notifications = value;
-			}),
-		);
-	}
+function toggleNotificationDrawer() {
+	emit('toggle');
 }
+
+onMounted(() => {
+	useSubscription(
+		NotificationService.getNotifications().subscribe((value) => {
+			notifications.value = value;
+		}),
+	);
+});
 </script>

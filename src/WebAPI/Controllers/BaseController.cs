@@ -127,6 +127,14 @@ public abstract class BaseController : ControllerBase
         if (result.Has404NotFoundError())
             return new NotFoundObjectResult(failedResult);
 
+        if (result.Has204NoContentRequestSuccess())
+        {
+            return new ObjectResult(failedResult)
+            {
+                StatusCode = StatusCodes.Status204NoContent,
+            };
+        }
+
         // Status Code 500
         return new ObjectResult(failedResult)
         {

@@ -3,17 +3,26 @@
         "account-card": {
             "clear-notifications": "Effacer tout les notifications",
             "no-account-name": "Ajouter un surnom à ce compte",
-            "no-notifications": "Pas de notification disponible"
+            "no-notifications": "Pas de notification disponible",
+            "invalid-account": "L'objet de compte n'était pas valide"
         },
         "account-dialog": {
             "add-account-title": "",
             "edit-account-title": "Modifier le compte Plex"
         },
-        "account-setup-progress": {
-            "no-server-warning": "Le compte {displayName} n'a pas accès à ce serveur.",
+        "connection-progress-text": {
             "retry-connection": "Tentative de nouvelle tentative de connexion, { attemptIndex } dans { attemptCount } tentative.",
+            "connection-connectable": "La connexion est bonne !",
+            "connection-un-connectable": "La connexion a échoué!"
+        },
+        "check-server-connections-dialog": {
             "server-connectable": "Serveur inaccessible!",
-            "server-un-connectable": "Impossible de joindre le serveur."
+            "server-un-connectable": "Impossible de joindre le serveur.",
+            "checking-progress": "Vérification de {count}  des {total}  connexions aux serveurs Plex",
+            "completed": "Inspection terminée de {length}  serveurs Plex!",
+            "no-servers": "Le compte {displayName} n'a aucun serveur auquel il peut accéder.",
+            "fetching-servers": "Récupération des serveurs accessibles pour le compte Plex {displayName}",
+            "no-connections": "Aucune connexion n'a été trouvée pour ce serveur Plex !"
         },
         "account-verification-code-dialog": {
             "error": "",
@@ -25,16 +34,19 @@
         },
         "details-overview": {
             "database-id": "identifiant de la base de donnée:",
-            "duration": "Durée:"
+            "total-duration": "Durée totale:",
+            "media-count": "{seasonCount} Saison - {episodeCount} Épisodes",
+            "media-count-label": "Nombre de médias :",
+            "summary": "Sommaire:"
         },
         "directory-browser": {
-            "path": "Chemin d'accès",
+            "path": "Chemin d'accès;",
             "select-path": "Sélectionner {pathName}",
-            "type": "Type"
+            "type": "Type:"
         },
         "download-confirmation": {
             "creating-tasks": "Création de tâches de téléchargement {current} de {total}",
-            "description": "Plex Ripper va commencera à télécharger ce qui suit:",
+            "description": "PlexRipper va commencera à télécharger ce qui suit:",
             "header": "Êtes vous sûr?",
             "total-size": "Taille Total:"
         },
@@ -56,17 +68,30 @@
             "accounts": "Comptes",
             "advanced": "Avancée",
             "debug": "Déboguer",
+            "dialogs": "Dialogues",
             "downloads": "Téléchargements",
             "paths": "Chemins",
             "settings": "Paramètres",
-            "ui": "Interface utilisateur"
+            "ui": "Interface utilisateur",
+            "buttons": "Boutons"
         },
         "notifications-drawer": {
             "clear-notifications": "Effacer tout les notifications",
             "no-notifications": "Pas de notification disponible"
         },
-        "paths-custom-overview": {
-            "no-paths": "Chemin d'accès invalide"
+        "folder-paths-overview": {
+            "no-paths": "Chemin d'accès invalide",
+            "main": {
+                "header": "Chemin d'accès par défaut"
+            },
+            "movie": {
+                "header": "Dossier films",
+                "default-name": "Chemin du dossier vidéo"
+            },
+            "tv-show": {
+                "header": "Dossier séries",
+                "default-name": ""
+            }
         },
         "server-dialog": {
             "header": "{serverName} configuration",
@@ -92,8 +117,7 @@
                     "created-on": "Créer le",
                     "current-status": "Statut actuel",
                     "header": "Donnée Serveur",
-                    "last-checked-on": "Dermière vérification le",
-                    "last-updated-on": "Dernière mis à jour le",
+                    "last-seen-at": "Vu dernièrement à",
                     "machine-id": "Identifiant Machine",
                     "plex-version": "Plex Version",
                     "device": "Dispositif",
@@ -110,14 +134,22 @@
                 "header": "Il n'y a pas de serveur disponible!"
             }
         },
-        "check-server-connections-progress": {
-            "checking": "",
-            "completed": "Inspection terminée de {length}  serveurs Plex!"
+        "media-list": {
+            "no-media-found": "",
+            "selected-count": "",
+            "episode-count": "{episodeCount}  épisodes"
+        },
+        "server-download-status": {
+            "pause": "Pause",
+            "start": "Début"
+        },
+        "q-tree-view-table-row": {
+            "invalid-node": "Le nœud était indéfini ou nul"
         }
     },
     "confirmation": {
         "delete-account": {
-            "text": "Cela supprimera ce compte Plex de Plex Ripper !\n\nCela supprimera également tous les serveurs partagés Plex inaccessibles, les bibliothèques Plex et tous les médias qu'ils contiennent. Tous les téléchargements actifs démarrés ou mis en file d'attente avec ce compte seront annulés et supprimés. Les téléchargements terminés resteront intacts.",
+            "text": "Cela supprimera ce compte Plex de PlexRipper !\n\nCela supprimera également tous les serveurs partagés Plex inaccessibles, les bibliothèques Plex et tous les médias qu'ils contiennent. Tous les téléchargements actifs démarrés ou mis en file d'attente avec ce compte seront annulés et supprimés. Les téléchargements terminés resteront intacts.",
             "title": "Êtes vous sûr ?",
             "warning": "Cela peut prendre environ 5 minutes ou plus, puis cette fenêtre se fermera d'elle-même!"
         },
@@ -128,12 +160,17 @@
         "skip-setup": {
             "text": "Ca ignorera le processus de configuration et vous devrez configurer PlexRipper manuellement.",
             "title": "Êtes vous sûr ?"
+        },
+        "not-found": {
+            "text": "Impossible de trouver le texte de confirmation correct.",
+            "title": "Impossible de trouver le texte de confirmation correct."
         }
     },
     "general": {
         "alerts": {
             "disabled-paths": "Modifier les chemins est impossible pendant un téléchargement. Vérifier que tout vos téléchargement sont arrété !",
-            "invalid-directory": "Dossier n'est pas un chemin d'accès valide !"
+            "invalid-directory": "Dossier n'est pas un chemin d'accès valide !",
+            "valid-directory": "Le répertoire est un chemin valide !"
         },
         "commands": {
             "add-alert": "Ajouter une Alert",
@@ -162,7 +199,7 @@
             "update": "Mettre à jour",
             "validate": "Valider",
             "validated": "Validaté",
-            "missing-text": "",
+            "missing-text": "Texte manquant",
             "inspect-server": "Inspecter le serveur"
         },
         "name": "PlexRipper",
@@ -173,6 +210,10 @@
         "tooltip": {
             "local-connection": "Connexion locale",
             "public-connection": "Connexion publique"
+        },
+        "error": {
+            "unknown": "\"Inconnu\"",
+            "invalid-server": "L'objet serveur n'était pas valide"
         }
     },
     "help": {
@@ -237,6 +278,11 @@
                         "text": "PlexRipper supporte le téléchargement multi-threaded et vous pouvez diviser le media qui va-t-être téléchargé en different parties individuelle. Cela a tendance à augmenter la vitesse de téléchargement globale, mais l'inconvénient est qu'il faudra plus de temps pour fusionner les différentes parties en un seul fichier multimédia complet.\n\nLa définition de cette valeur sur 1 désactivera le téléchargement multithread et téléchargera le fichier multimédia en tant que un dossier complet. Le nombre de segments de téléchargement n'a aucune influence sur la vitesse de fusion du fichier multimédia.",
                         "title": "Télécharger par Segments"
                     }
+                },
+                "debug-section": {
+                    "text": "L'activation du mode de débogage affichera plus d'informations que d'habitude dans diverses zones de l'interface utilisateur.",
+                    "title": "Mode débogage",
+                    "label": "Mode débogage"
                 },
                 "reset-db": {
                     "label": "Réinitialiser la base de donnée",
@@ -321,8 +367,8 @@
                 "language": {
                     "language-selection": {
                         "label": "Language",
-                        "text": "",
-                        "title": ""
+                        "text": "Cela changera la langue de presque tout. Il est peu probable que des textes tels que des erreurs soient traduits. Toutes les corrections de traduction ou de nouvelles langues sont grandement appréciées, consultez www.plexripper.rocks pour plus d'informations sur la façon dont vous pouvez ajouter de nouvelles langues.",
+                        "title": "Choisissez votre langue préférée"
                     }
                 }
             }
@@ -365,23 +411,15 @@
                 "download-manager": {
                     "header": "Gestionnaire de téléchargement"
                 },
+                "debug": {
+                    "header": "Paramètres de débogage"
+                },
                 "setup": {
                     "header": "PlexRipper Configuration"
                 }
             },
             "debug": {
                 "header": "Debug"
-            },
-            "paths": {
-                "main": {
-                    "header": "Chemin d'accès par défaut"
-                },
-                "movie": {
-                    "header": "Dossier films"
-                },
-                "tv-show": {
-                    "header": "Dossier séries"
-                }
             },
             "ui": {
                 "confirmation-settings": {
@@ -417,11 +455,10 @@
                 "header": "Plan Avenir!",
                 "list": {
                     "item-1": "Radarr et Sonarr integration",
-                    "item-1-1": "Toute recherche de média peut être redirigée vers Plex Ripper, et Plex Ripper recherchera tous les serveurs disponibles, téléchargera le média et informera Radarr/Sonarr du téléchargement terminé.",
+                    "item-1-1": "Toute recherche de média peut être redirigée vers PlexRipper, et PlexRipper recherchera tous les serveurs disponibles, téléchargera le média et informera Radarr/Sonarr du téléchargement terminé.",
                     "item-2": "Supporter le téléchargement de musique et de photos !",
                     "item-3": "Supporter le téléchargement des sous-titre !",
                     "item-4": "Supporter les notifications télégram !",
-                    "item-5": "Supporter plusieurs langue",
                     "item-6": "Une meilleur intégration de plex!",
                     "item-6-1": "Téléchargez des collections, ajoutez-les à votre propre serveur Plex et copiez automatiquement tous les paramètres et configurations liés à Plex."
                 },
@@ -434,16 +471,16 @@
             "intro": {
                 "header": "C'est se qu'on appelle être génial !",
                 "list": {
-                    "item-1": "Plex Ripper est en phase de développement, donc il peut y'avoir des bugs ici et là. S'il vous plait si vous rencontrez n'importe quel bug faîtes une issues sur notre page Github.",
+                    "item-1": "PlexRipper est en phase de développement, donc il peut y'avoir des bugs ici et là. S'il vous plait si vous rencontrez n'importe quel bug faîtes une issues sur notre page Github.",
                     "item-2": "Les retours ou les demandes de fonctionnalitées sont vraiment très apprécié ! Surtout sur le code source car il s'agit d'un projet personnel destiné à améliorer mes compétences en codage.",
-                    "item-3": "Plex Ripper peut télécharger des films et des séries, d'autres types tels que la musique ne sont actuellement pas pris en charge, mais le seront à l'avenir!",
-                    "item-4": "Plex Ripper ne collecte pas et ne collectera aucune donnée sur vous ou sur l'une de vos activités. Les seules données envoyées à Plex sont votre nom d'utilisateur et votre mot de passe pour authentifier votre compte Plex. Après quoi, toutes les communications se font directement avec les serveurs partagés auxquels vous avez accès.",
-                    "item-5": "Un mot d'avertissement : Plex, et peut-être les propriétaires de serveurs Plex, n'aiment pas que vous téléchargiez toutes \"leurs\" copies de médias 100% acquises légalement. C'est pourquoi il y a des garde-fous en place pour protéger les utilisateurs de Plex Ripper contre l'interdiction de Plex. Cependant, soyez respectueux envers les propriétaires de serveurs Plex en n'utilisant pas toute leur précieuse bande passante et ne vous plaignez pas d'être expulsé d'un serveur. À l'avenir, j'aimerais également protéger les propriétaires de serveurs Plex contre les abus de Plex Ripper, toutes les idées ou contributions sont les bienvenues."
+                    "item-3": "PlexRipper peut télécharger des films et des séries, d'autres types tels que la musique ne sont actuellement pas pris en charge, mais le seront à l'avenir!",
+                    "item-4": "PlexRipper ne collecte pas et ne collectera aucune donnée sur vous ou sur l'une de vos activités. Les seules données envoyées à Plex sont votre nom d'utilisateur et votre mot de passe pour authentifier votre compte Plex. Après quoi, toutes les communications se font directement avec les serveurs partagés auxquels vous avez accès.",
+                    "item-5": "Un mot d'avertissement : Plex, et peut-être les propriétaires de serveurs Plex, n'aiment pas que vous téléchargiez toutes \"leurs\" copies de médias 100% acquises légalement. C'est pourquoi il y a des garde-fous en place pour protéger les utilisateurs de PlexRipper contre l'interdiction de Plex. Cependant, soyez respectueux envers les propriétaires de serveurs Plex en n'utilisant pas toute leur précieuse bande passante et ne vous plaignez pas d'être expulsé d'un serveur. À l'avenir, j'aimerais également protéger les propriétaires de serveurs Plex contre les abus de PlexRipper, toutes les idées ou contributions sont les bienvenues."
                 },
                 "text": {
                     "p-1": "Here is some useful info:"
                 },
-                "title": "Vous êtes incroyable pour essayer avoir Plex Ripper!"
+                "title": "Vous êtes incroyable pour essayer avoir PlexRipper!"
             },
             "paths": {
                 "header": "Vérifiez les chemins d'accés",
@@ -454,6 +491,19 @@
             "index": {
                 "header": "Aperçu des Séries",
                 "sub-header": "Sélectionnez une bibliothèque sur le côté gauche"
+            }
+        },
+        "debug": {
+            "dialogs": {
+                "buttons": {
+                    "download-confirmation": "Télécharger la confirmation",
+                    "help-dialog": "Boîte de dialogue d'aide",
+                    "server-dialog": "Boîte de dialogue du serveur",
+                    "check-server-connections-dialog": "Boîte de dialogue Vérifier les connexions au serveur",
+                    "directory-browser": "Boîte de dialogue Navigateur de répertoire",
+                    "verification-dialog": "Boîte de dialogue de vérification 2FA"
+                },
+                "header": "Modaux de dialogue de débogage"
             }
         }
     }

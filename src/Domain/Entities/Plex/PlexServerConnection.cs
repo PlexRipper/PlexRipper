@@ -47,7 +47,7 @@ public class PlexServerConnection : BaseEntity
 
     public int PlexServerId { get; set; }
 
-    public List<PlexServerStatus> PlexServerStatus { get; set; }
+    public List<PlexServerStatus> PlexServerStatus { get; set; } = new();
 
     #endregion
 
@@ -68,9 +68,13 @@ public class PlexServerConnection : BaseEntity
     [NotMapped]
     public string Name => $"Connection: ({Url})";
 
-    public string GetThumbPath(string thumbPath)
+    [NotMapped]
+    public PlexServerStatus LatestConnectionStatus => PlexServerStatus.FirstOrDefault();
+
+    public string GetThumbUrl(string thumbPath)
     {
-        return Url + thumbPath;
+        var uri = new Uri(Url + thumbPath);
+        return $"{uri.Scheme}://{uri.Host}:{uri.Port}/photo/:/transcode?url={uri.AbsolutePath}";
     }
 
     public string GetDownloadUrl(string fileLocationUrl, string token)

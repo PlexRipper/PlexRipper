@@ -118,13 +118,15 @@ public static partial class FakeData
 
     public static Faker<PlexTvShow> GetPlexTvShows(int seed = 0, Action<FakeDataConfig> options = null)
     {
+        var config = FakeDataConfig.FromOptions(options);
+
         return new Faker<PlexTvShow>()
             .StrictMode(true)
             .UseSeed(seed)
             .ApplyBasePlexMedia(seed, options)
             .RuleFor(x => x.PlexTvShowGenres, _ => new List<PlexTvShowGenre>())
             .RuleFor(x => x.PlexTvShowRoles, _ => new List<PlexTvShowRole>())
-            .RuleFor(x => x.Seasons, _ => GetPlexTvShowSeason(seed, options).GenerateBetween(1, 4))
+            .RuleFor(x => x.Seasons, _ => GetPlexTvShowSeason(seed, options).Generate(config.TvShowSeasonCount))
             .FinishWith((_, tvShow) =>
             {
                 for (var seasonIndex = 0; seasonIndex < tvShow.Seasons.Count; seasonIndex++)
@@ -149,6 +151,8 @@ public static partial class FakeData
 
     public static Faker<PlexTvShowSeason> GetPlexTvShowSeason(int seed = 0, Action<FakeDataConfig> options = null)
     {
+        var config = FakeDataConfig.FromOptions(options);
+
         var seasonKeys = new List<int>();
         return new Faker<PlexTvShowSeason>()
             .StrictMode(true)
@@ -158,7 +162,7 @@ public static partial class FakeData
             .RuleFor(x => x.ParentKey, _ => GetUniqueId(seasonKeys, seed))
             .RuleFor(x => x.TvShowId, _ => 0)
             .RuleFor(x => x.TvShow, _ => null)
-            .RuleFor(x => x.Episodes, _ => GetPlexTvShowEpisode(seed, options).GenerateBetween(1, 10))
+            .RuleFor(x => x.Episodes, _ => GetPlexTvShowEpisode(seed, options).Generate(config.TvShowEpisodeCount))
             .FinishWith((_, tvShowSeason) => { tvShowSeason.MediaSize = tvShowSeason.Episodes.Select(x => x.MediaSize).Sum(); });
     }
 

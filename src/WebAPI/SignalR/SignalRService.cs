@@ -1,7 +1,7 @@
 using AutoMapper;
 using BackgroundServices.Contracts;
+using Logging.Interface;
 using Microsoft.AspNetCore.SignalR;
-using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.SignalR.Common;
 using PlexRipper.WebAPI.SignalR.Hubs;
@@ -14,6 +14,7 @@ namespace PlexRipper.WebAPI.SignalR;
 /// </summary>
 public class SignalRService : ISignalRService
 {
+    private readonly ILog _log;
     private readonly IHubContext<ProgressHub, IProgressHub> _progressHub;
 
     private readonly IHubContext<NotificationHub, INotificationHub> _notificationHub;
@@ -27,10 +28,12 @@ public class SignalRService : ISignalRService
     /// <param name="notificationHub">The <see cref="NotificationHub"/>.</param>
     /// <param name="mapper"></param>
     public SignalRService(
+        ILog log,
         IHubContext<ProgressHub, IProgressHub> progressHub,
         IHubContext<NotificationHub, INotificationHub> notificationHub,
         IMapper mapper)
     {
+        _log = log;
         _progressHub = progressHub;
         _notificationHub = notificationHub;
         _mapper = mapper;
@@ -55,14 +58,14 @@ public class SignalRService : ISignalRService
 
     public async Task SendDownloadProgressUpdateAsync(int plexServerId, List<DownloadTask> downloadTasks, CancellationToken cancellationToken = default)
     {
-        var downloadTasksDTO = _mapper.Map<List<DownloadProgressDTO>>(downloadTasks);
-        var update = new ServerDownloadProgressDTO
+        var update = _mapper.Map<List<ServerDownloadProgressDTO>>(downloadTasks);
+        if (!update.Any())
         {
-            Id = plexServerId,
-            Downloads = downloadTasksDTO,
-        };
+            _log.ErrorLine($"Update for ServerDownloadProgress contained no entries to be sent");
+            return;
+        }
 
-        await _progressHub.Clients.All.ServerDownloadProgress(update, cancellationToken);
+        await _progressHub.Clients.All.ServerDownloadProgress(update.First(), cancellationToken);
     }
 
     #endregion

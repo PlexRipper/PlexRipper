@@ -8,53 +8,52 @@
 				:disabled="inspectLoading"
 				:loading="syncLoading"
 				text-id="sync-server-libraries"
-				@click="syncServerLibraries"
-			/>
+				@click="syncServerLibraries" />
 		</FormRow>
 	</div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
+<script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
+import { set } from '@vueuse/core';
+import { ref, onUnmounted } from '#imports';
 import { inspectPlexServer, syncPlexServer } from '@api/plexServerApi';
 import type { PlexServerDTO } from '@dto/mainApi';
 
-@Component
-export default class ServerCommandsTabContent extends Vue {
-	@Prop({ required: true, type: Object as () => PlexServerDTO })
-	readonly plexServer!: PlexServerDTO;
+const props = defineProps<{
+	plexServer: PlexServerDTO | null;
+	isVisible: boolean;
+}>();
 
-	@Prop({ required: true, type: Boolean })
-	readonly isVisible!: boolean;
+const syncLoading = ref(false);
+const inspectLoading = ref(false);
 
-	syncLoading: boolean = false;
-	inspectLoading: boolean = false;
-
-	syncServerLibraries(): void {
-		this.syncLoading = true;
-		useSubscription(
-			syncPlexServer(this.plexServer.id, true).subscribe(() => {
-				this.syncLoading = false;
-			}),
-		);
+function syncServerLibraries(): void {
+	if (!props.plexServer) {
+		return;
 	}
-
-	inspectServer(): void {
-		this.inspectLoading = true;
-		useSubscription(
-			inspectPlexServer(this.plexServer.id).subscribe(() => {
-				this.inspectLoading = false;
-			}),
-		);
-	}
-
-	@Watch('isVisible')
-	onIsVisible(isVisible): void {
-		if (!isVisible) {
-			this.syncLoading = false;
-			this.inspectLoading = false;
-		}
-	}
+	set(syncLoading, true);
+	useSubscription(
+		syncPlexServer(props.plexServer.id, true).subscribe(() => {
+			set(syncLoading, false);
+		}),
+	);
 }
+
+function inspectServer(): void {
+	if (!props.plexServer) {
+		return;
+	}
+	set(inspectLoading, true);
+	useSubscription(
+		inspectPlexServer(props.plexServer.id).subscribe(() => {
+			set(inspectLoading, false);
+		}),
+	);
+}
+
+onUnmounted(() => {
+	set(syncLoading, false);
+	set(inspectLoading, false);
+});
 </script>

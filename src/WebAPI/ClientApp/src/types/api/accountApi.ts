@@ -40,7 +40,7 @@ export function createAccount(account: PlexAccountDTO): Observable<ResultDTO<Ple
 	});
 }
 
-export function updateAccount(account: PlexAccountDTO, inspect: boolean = false): Observable<ResultDTO<PlexAccountDTO | null>> {
+export function updateAccount(account: PlexAccountDTO, inspect = false): Observable<ResultDTO<PlexAccountDTO | null>> {
 	return PlexRipperAxios.put<PlexAccountDTO | null>({
 		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/${account.id}?inspect=${inspect}`,
 		apiCategory: logText,
@@ -73,7 +73,7 @@ export function refreshAccount(accountId: Number): Observable<ResultDTO> {
 	});
 }
 
-export function GetAndCheck2FaPin(clientId: String, authPinId: number = 0): Observable<ResultDTO<AuthPin>> {
+export function GetAndCheck2FaPin(clientId: String, authPinId = 0): Observable<ResultDTO<AuthPin>> {
 	return PlexRipperAxios.get<AuthPin>({
 		url: `${PLEX_ACCOUNT_RELATIVE_PATH}/authpin`,
 		apiCategory: logText,

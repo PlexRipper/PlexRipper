@@ -1,16 +1,28 @@
 import Log from 'consola';
-import { Context } from '@nuxt/types';
+
+import { ObservableStore } from '@codewithdan/observable-store';
 import { forkJoin, Observable, of } from 'rxjs';
 import { filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { ObservableStore } from '@codewithdan/observable-store';
 import DefaultState from '@const/default-state';
 import IAppConfig from '@class/IAppConfig';
 import IStoreState from '@interfaces/service/IStoreState';
-import * as Service from '@service';
-import { BaseService } from '@service';
-import { setConfigInAxios } from '~/plugins/axios';
-import { setLogConfig } from '~/plugins/setup';
-import { getBaseURL } from '@api-urls';
+import {
+	AccountService,
+	AlertService,
+	BackgroundJobsService,
+	BaseService,
+	DownloadService,
+	FolderPathService,
+	HelpService,
+	LibraryService,
+	MediaService,
+	NotificationService,
+	ProgressService,
+	ServerConnectionService,
+	ServerService,
+	SettingsService,
+	SignalrService,
+} from '@service';
 
 export class GlobalService extends BaseService {
 	public constructor() {
@@ -25,38 +37,29 @@ export class GlobalService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<any> {
-		const $config = nuxtContext.$config;
-		const baseUrl = getBaseURL($config.nodeEnv === 'production');
-		const appConfig: IAppConfig = {
-			version: $config.version,
-			nodeEnv: $config.nodeEnv,
-			isProduction: $config.nodeEnv === 'production',
-			baseURL: baseUrl,
-			baseApiUrl: `${baseUrl}/api`,
-		};
-		super.setup(nuxtContext, appConfig);
+	public setup(config: IAppConfig): Observable<any> {
+		Log.info('Starting Setup Process');
+
+		super.setup(config);
 
 		return of(this._appConfig).pipe(
-			tap((config) => setLogConfig(config)),
 			tap((config) => this.setConfigReady(config)),
-			tap((config) => setConfigInAxios(config)),
 			switchMap((config) =>
 				forkJoin([
-					Service.ProgressService.setup(nuxtContext),
-					Service.DownloadService.setup(nuxtContext),
-					Service.ServerService.setup(nuxtContext),
-					Service.ServerConnectionService.setup(nuxtContext),
-					Service.BackgroundJobsService.setup(nuxtContext),
-					Service.MediaService.setup(nuxtContext),
-					Service.SettingsService.setup(nuxtContext),
-					Service.NotificationService.setup(nuxtContext),
-					Service.FolderPathService.setup(nuxtContext),
-					Service.LibraryService.setup(nuxtContext),
-					Service.AccountService.setup(nuxtContext),
-					Service.SignalrService.setup(nuxtContext, config),
-					Service.HelpService.setup(nuxtContext),
-					Service.AlertService.setup(nuxtContext),
+					ProgressService.setup(),
+					DownloadService.setup(),
+					ServerService.setup(),
+					ServerConnectionService.setup(),
+					BackgroundJobsService.setup(),
+					MediaService.setup(),
+					SettingsService.setup(),
+					NotificationService.setup(),
+					FolderPathService.setup(),
+					LibraryService.setup(),
+					AccountService.setup(),
+					SignalrService.setup(config),
+					HelpService.setup(),
+					AlertService.setup(),
 				]),
 			),
 			tap((results) => {
@@ -74,8 +77,8 @@ export class GlobalService extends BaseService {
 		);
 	}
 
-	public setupServices(nuxtContext: Context): void {
-		this.setup(nuxtContext).subscribe();
+	public setupServices(config: IAppConfig): void {
+		this.setup(config).subscribe();
 	}
 
 	public resetStore(): void {
@@ -111,5 +114,4 @@ export class GlobalService extends BaseService {
 	}
 }
 
-const globalService = new GlobalService();
-export default globalService;
+export default new GlobalService();

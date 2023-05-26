@@ -9,6 +9,8 @@ public class GeneralSettingsModule : BaseSettingsModule<IGeneralSettings>, IGene
 
     public int ActiveAccountId { get; set; }
 
+    public bool DebugMode { get; set; }
+
     public override string Name => "GeneralSettings";
 
     public override IGeneralSettings DefaultValues()
@@ -17,12 +19,15 @@ public class GeneralSettingsModule : BaseSettingsModule<IGeneralSettings>, IGene
         {
             FirstTimeSetup = true,
             ActiveAccountId = 0,
+            DebugMode = false,
         };
     }
 
     public Result Update(IGeneralSettingsModule sourceSettings)
     {
         FirstTimeSetup = sourceSettings.FirstTimeSetup;
+        ActiveAccountId = sourceSettings.ActiveAccountId;
+        DebugMode = sourceSettings.DebugMode;
         return Result.Ok();
     }
 
@@ -31,6 +36,8 @@ public class GeneralSettingsModule : BaseSettingsModule<IGeneralSettings>, IGene
         return new GeneralSettings
         {
             FirstTimeSetup = FirstTimeSetup,
+            ActiveAccountId = ActiveAccountId,
+            DebugMode = DebugMode,
         };
     }
 }

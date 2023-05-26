@@ -1,8 +1,8 @@
 import { Observable, of } from 'rxjs';
 import { finalize, map, switchMap, take, tap } from 'rxjs/operators';
-import { Context } from '@nuxt/types';
+
+import BaseService from './baseService';
 import { FolderPathDTO } from '@dto/mainApi';
-import { BaseService } from '@service';
 import { getFolderPaths, createFolderPath, updateFolderPath, deleteFolderPath } from '@api/pathApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import ISetupResult from '@interfaces/service/ISetupResult';
@@ -19,8 +19,8 @@ export class FolderPathService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<ISetupResult> {
-		super.setup(nuxtContext);
+	public setup(): Observable<ISetupResult> {
+		super.setup();
 
 		return this.refreshFolderPaths().pipe(
 			switchMap(() => of({ name: this._name, isSuccess: true })),
@@ -69,5 +69,4 @@ export class FolderPathService extends BaseService {
 	}
 }
 
-const folderPathService = new FolderPathService();
-export default folderPathService;
+export default new FolderPathService();

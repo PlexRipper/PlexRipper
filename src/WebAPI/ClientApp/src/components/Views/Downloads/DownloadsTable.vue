@@ -1,116 +1,60 @@
 <template>
-	<div>
-		<v-tree-view-table
-			:items="downloadRows"
-			:headers="getHeaders"
-			height-auto
-			media-icons
-			load-children
-			item-key="id"
-			@action="tableAction"
-			@selected="selectedAction"
-		/>
-	</div>
+	<q-tree-view-table
+		:nodes="getData"
+		:selected="selected.keys"
+		:columns="getDownloadTableColumns"
+		@action="tableAction($event)"
+		@selected="onSelected($event)"
+		@aggregate-selected="onAggregateSelected($event)" />
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Log from 'consola';
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import { DownloadProgressDTO, DownloadTaskDTO, FileMergeProgress } from '@dto/mainApi';
-import ITreeViewTableHeader from '@vTreeViewTable/ITreeViewTableHeader';
-import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
+import { DownloadProgressDTO } from '@dto/mainApi';
+import { QTreeViewTableItem } from '@props';
+import { getDownloadTableColumns } from '#imports';
+import ISelection from '@interfaces/ISelection';
 
-@Component
-export default class DownloadsTable extends Vue {
-	@Prop({ type: Boolean })
-	readonly loading: Boolean = false;
+const props = defineProps<{
+	loading?: boolean;
+	serverId: number;
+	selected: ISelection;
+	downloadRows: DownloadProgressDTO[];
+}>();
 
-	@Prop({ required: true, type: Array as () => DownloadTaskDTO[] })
-	readonly value!: DownloadTaskDTO[];
+const emit = defineEmits<{
+	(e: 'action', payload: { action: string; item: DownloadProgressDTO }): void;
+	(e: 'selected', payload: ISelection): void;
+	(e: 'aggregate-selected', payload: ISelection): void;
+}>();
 
-	@Prop({ required: true, type: Number })
-	readonly serverId!: number;
+const getData = computed((): QTreeViewTableItem[] => {
+	return props.downloadRows as QTreeViewTableItem[];
+});
 
-	fileMergeProgressList: FileMergeProgress[] = [];
+function tableAction(payload: { action: string; data: QTreeViewTableItem }) {
+	Log.info('command', payload);
+	emit('action', {
+		action: payload.action,
+		item: payload.data as DownloadProgressDTO,
+	});
+}
 
-	@Prop({ required: true, type: Array as () => DownloadProgressDTO[] })
-	readonly downloadRows!: DownloadProgressDTO[];
+function onSelected(selected: number[]) {
+	Log.info('selected', selected);
+	emit('selected', {
+		indexKey: props.serverId,
+		keys: selected,
+		allSelected: false,
+	});
+}
 
-	get getHeaders(): ITreeViewTableHeader[] {
-		return [
-			// {
-			// 	text: 'Id',
-			// 	value: 'id',
-			// 	maxWidth: 50,
-			// },
-			{
-				text: 'Title',
-				value: 'title',
-				maxWidth: 250,
-			},
-			{
-				text: 'Status',
-				value: 'status',
-				width: 120,
-			},
-			{
-				text: 'Received',
-				value: 'dataReceived',
-				type: TreeViewTableHeaderEnum.FileSize,
-				width: 120,
-			},
-			{
-				text: 'Size',
-				value: 'dataTotal',
-				type: TreeViewTableHeaderEnum.FileSize,
-				width: 120,
-			},
-			{
-				text: 'Speed',
-				value: 'downloadSpeed',
-				type: TreeViewTableHeaderEnum.FileSpeed,
-				width: 120,
-			},
-			{
-				text: 'ETA',
-				value: 'timeRemaining',
-				type: TreeViewTableHeaderEnum.Duration,
-				width: 120,
-			},
-			{
-				text: 'Percentage',
-				value: 'percentage',
-				type: TreeViewTableHeaderEnum.Percentage,
-				width: 120,
-			},
-			{
-				text: 'Actions',
-				value: 'actions',
-				type: TreeViewTableHeaderEnum.Actions,
-				width: 160,
-				sortable: false,
-			},
-		];
-	}
-
-	get flatDownloadRows(): DownloadProgressDTO[] {
-		return [
-			this.downloadRows,
-			this.downloadRows.map((x) => x.children),
-			this.downloadRows.map((x) => x.children?.map((y) => y.children)),
-			this.downloadRows.map((x) => x.children?.map((y) => y.children?.map((z) => z.children))),
-		]
-			.flat(3)
-			.filter((x) => !!x) as DownloadProgressDTO[];
-	}
-
-	tableAction(payload: { action: string; item: DownloadTaskDTO }) {
-		Log.info('command', payload);
-		this.$emit('action', payload);
-	}
-
-	selectedAction(selected: number[]) {
-		this.$emit('selected', selected);
-	}
+function onAggregateSelected(selected: number[]) {
+	Log.info('aggregate-selected', selected);
+	emit('aggregate-selected', {
+		indexKey: props.serverId,
+		keys: selected,
+		allSelected: false,
+	});
 }
 </script>

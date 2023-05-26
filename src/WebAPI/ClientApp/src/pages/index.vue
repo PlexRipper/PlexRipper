@@ -1,50 +1,47 @@
 <template>
-	<page-container>
-		<v-row v-if="firstTimeSetup">
-			<v-col cols="12">
-				<h2>{{ $t('pages.home.setup-question') }}</h2>
-				<v-row justify="center">
-					<v-col cols="3">
-						<NavigationSkipSetupButton :block="true" @click="skipSetup()" />
-					</v-col>
-					<v-col cols="3">
-						<GoToButton text-id="go-to-setup-page" :block="true" to="/setup" color="green" />
-					</v-col>
-				</v-row>
-			</v-col>
-		</v-row>
-		<v-row v-else>
-			<v-col>
-				<h1>{{ $t('pages.home.header') }}</h1>
-			</v-col>
-		</v-row>
-	</page-container>
+	<q-page>
+		<q-row v-if="firstTimeSetup">
+			<q-col cols="12">
+				<h2>{{ t('pages.home.setup-question') }}</h2>
+				<q-row justify="center">
+					<q-col cols="3">
+						<NavigationSkipSetupButton block @click="skipSetup()" />
+					</q-col>
+					<q-col cols="3">
+						<GoToButton text-id="go-to-setup-page" block to="/setup" color="positive" />
+					</q-col>
+				</q-row>
+			</q-col>
+		</q-row>
+		<q-row v-else>
+			<q-col>
+				<h1>{{ t('pages.home.header') }}</h1>
+			</q-col>
+		</q-row>
+	</q-page>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Log from 'consola';
-import { Component, Vue } from 'vue-property-decorator';
 import { useSubscription } from '@vueuse/rxjs';
+import { set } from '@vueuse/core';
 import { SettingsService } from '@service';
 
-@Component<Home>({})
-export default class Home extends Vue {
-	firstTimeSetup: boolean = false;
+const firstTimeSetup = ref(false);
+const { t } = useI18n();
+const skipSetup = () => {
+	useSubscription(
+		SettingsService.updateGeneralSettings('firstTimeSetup', false).subscribe(() => {
+			Log.info('Setup process skipped');
+		}),
+	);
+};
 
-	skipSetup(): void {
-		useSubscription(
-			SettingsService.updateGeneralSettings('firstTimeSetup', false).subscribe(() => {
-				Log.info('Setup process skipped');
-			}),
-		);
-	}
-
-	mounted() {
-		useSubscription(
-			SettingsService.getFirstTimeSetup().subscribe((state) => {
-				this.firstTimeSetup = state;
-			}),
-		);
-	}
-}
+onMounted(() => {
+	useSubscription(
+		SettingsService.getFirstTimeSetup().subscribe((state) => {
+			set(firstTimeSetup, state);
+		}),
+	);
+});
 </script>

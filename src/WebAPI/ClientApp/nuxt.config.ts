@@ -1,95 +1,108 @@
-// noinspection AllyPlainJsInspection
+import { fileURLToPath } from 'url';
+import { resolve } from 'path';
+import { defineNuxtConfig } from 'nuxt/config';
+import { createCommonJS } from 'mlly';
 
-import Log from 'consola';
-import { NuxtConfig } from '@nuxt/types/config';
-import { NuxtWebpackEnv } from '@nuxt/types/config/build';
-import { Configuration as WebpackConfiguration } from 'webpack';
-import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
-// noinspection ES6PreferShortImport
-import { NuxtI18nConfigOptions } from './src/plugins/i18nPlugin';
+const { __dirname } = createCommonJS(import.meta.url);
 
-const config: NuxtConfig = {
-	target: 'static',
-	// Should always be true, otherwise SPA won't work once statically generated
+// https://nuxt.com/docs/api/configuration/nuxt-config
+export default defineNuxtConfig({
 	ssr: false,
-	srcDir: 'src/',
-	publicRuntimeConfig: {
-		nodeEnv: process.env.NODE_ENV || 'development',
-		version: process.env.npm_package_version || '?',
-		baseURL: process.env.BASE_URL || 'http://localhost:5000',
+	srcDir: 'src',
+	devServer: {
+		port: 3001,
 	},
-	/*
-	 ** Doc: https://nuxtjs.org/docs/configuration-glossary/configuration-telemetry
-	 */
-	telemetry: false,
-	/*
-	 ** Headers of the page
-	 */
-	head: {
-		titleTemplate: 'PlexRipper',
-		title: process.env.npm_package_name || '',
-		meta: [
-			{ charset: 'utf-8' },
-			{
-				name: 'viewport',
-				content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui',
-			},
-			{
-				hid: 'description',
-				name: 'description',
-				content: process.env.npm_package_description || '',
-			},
+	runtimeConfig: {
+		// Config within public will be also exposed to the client
+		public: {
+			nodeEnv: process.env.NODE_ENV || 'development',
+			version: process.env.npm_package_version || '?',
+			apiPort: process.env.API_PORT || '5000',
+		},
+	},
+	modules: [
+		// Doc: https://github.com/Maiquu/nuxt-quasar
+		'nuxt-quasar-ui',
+		'@vueuse/nuxt',
+		// '@nuxt/devtools',
+		// Doc: https://i18n.nuxtjs.org/
+		'@nuxtjs/i18n',
+		'@vue-macros/nuxt',
+		'nuxt-vitest',
+	],
+	quasar: {
+		// Plugins: https://quasar.dev/quasar-plugins
+		plugins: ['Loading'],
+		// Truthy values requires `sass@1.32.12`.
+		sassVariables: 'src/assets/scss/_variables.scss',
+		iconSet: 'mdi-v7',
+		config: {
+			dark: true, // or 'auto'
+		},
+		// Requires `@quasar/extras` package
+		extras: {
+			// string | null: Auto-import roboto font. https://quasar.dev/style/typography#default-font
+			font: 'roboto-font',
+			// string[]: Auto-import webfont icons. Usage: https://quasar.dev/vue-components/icon#webfont-usage
+			fontIcons: ['mdi-v7'],
+			// string[]: Auto-import svg icon collections. Usage: https://quasar.dev/vue-components/icon#svg-usage
+			svgIcons: [],
+			// string[]: Auto-import animations from 'animate.css'. Usage: https://quasar.dev/options/animations#usage
+			animations: ['fadeInLeft', 'fadeInRight', 'fadeInUp', 'fadeInDown', 'fadeOutLeft'],
+		},
+	},
+	typescript: {
+		// Doc: https://typescript.nuxtjs.org/guide/setup.html#configuration
+		// Packages,  @types/node, vue-tsc and typescript are required
+		typeCheck: true,
+		strict: true,
+	},
+	macros: {
+		// Enabled betterDefine to allow importing interfaces into defineProps
+		betterDefine: true,
+		defineOptions: true,
+	},
+	i18n: {
+		lazy: true,
+		langDir: './lang/',
+		defaultLocale: 'en-US',
+		locales: [
+			{ text: 'English', code: 'en-US', iso: 'en-US', file: 'en-US.json' },
+			{ text: 'Français', code: 'fr-FR', iso: 'fr-FR', file: 'fr-FR.json' },
+			{ text: 'Deutsch', code: 'de-DE', iso: 'de-DE', file: 'de-DE.json' },
 		],
-		link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.png' }],
+		// TODO: This breaks npm run build in "@nuxtjs/i18n": "^8.0.0-beta.11", check again when out of beta
+		// vueI18n: './src/config/vueI18n.config.ts',
+		strategy: 'no_prefix',
 	},
 	/*
-	 ** Global CSS: https://go.nuxtjs.dev/config-css
+	 ** Global CSS: https://nuxt.com/docs/api/configuration/nuxt-config#css
 	 */
 	css: ['@/assets/scss/style.scss'],
-	/*
-	 ** Customize the progress-bar color
-	 */
-	loading: false,
-	/*
-	 ** Plugins to load before mounting the App
-	 */
-	plugins: [
-		{ src: '@plugins/setup.ts', mode: 'client' },
-		{ src: '@plugins/vuetify.ts' },
-		{ src: '@plugins/filters.ts' },
-		{ src: '@plugins/axios.ts' },
-		{ src: '@plugins/i18nPlugin.ts' },
-		{ src: '@plugins/registerPlugins.ts', mode: 'client' },
-		{ src: '@plugins/typeExtensions.ts' },
-	],
-
-	/*
-	 ** Nuxt.js modules
-	 */
-	modules: [
-		// Doc: https://i18n.nuxtjs.org/
-		['@nuxtjs/i18n', NuxtI18nConfigOptions],
-	],
-	/*
-	 ** Nuxt.js dev-modules
-	 */
-	buildModules: [
-		// Doc: https://github.com/nuxt-community/eslint-module
-		'@nuxtjs/eslint-module',
-		// Doc: https://typescript.nuxtjs.org/guide/
-		'@nuxt/typescript-build',
-		// Doc: https://github.com/nuxt-community/stylelint-module
-		'@nuxtjs/stylelint-module',
-		// Doc: https://github.com/nuxt-community/vuetify-module
-		'@nuxtjs/vuetify',
-		// Doc: https://github.com/nuxt/components
-		// Note: this is added to fix the error "render function or template not defined in component: "
-		'@nuxt/components',
-		// Doc: https://vueuse.org/guide/index.html#installation
-		'@vueuse/nuxt',
-		// Doc: https://github.com/nuxt/postcss8#readme
-		'@nuxt/postcss8',
-	],
+	alias: {
+		// Doc: https://nuxt.com/docs/api/configuration/nuxt-config#alias
+		'@class': fileURLToPath(new URL('./src/types/class/', import.meta.url)),
+		'@dto': fileURLToPath(new URL('./src/types/dto/', import.meta.url)),
+		'@api': fileURLToPath(new URL('./src/types/api/', import.meta.url)),
+		'@const': fileURLToPath(new URL('./src/types/const/', import.meta.url)),
+		'@buttons': fileURLToPath(new URL('./src/components/Buttons/', import.meta.url)),
+		'@composables': fileURLToPath(new URL('./src/composables/', import.meta.url)),
+		'@api-urls': fileURLToPath(new URL('./src/types/const/api-urls.ts', import.meta.url)),
+		'@props': fileURLToPath(new URL('./src/types/props/', import.meta.url)),
+		'@fixtures': fileURLToPath(new URL('./cypress/fixtures/', import.meta.url)),
+		'@services-test-base': fileURLToPath(new URL('./tests/services/_base/base.ts', import.meta.url)),
+		'@lib': fileURLToPath(new URL('./src/types/lib/', import.meta.url)),
+		'@service': fileURLToPath(new URL('./src/service/', import.meta.url)),
+		'@img': fileURLToPath(new URL('./src/assets/img/', import.meta.url)),
+		'@enums': fileURLToPath(new URL('./src/types/enums/', import.meta.url)),
+		'@mock': fileURLToPath(new URL('./src/mock-data/', import.meta.url)),
+		'@factories': fileURLToPath(new URL('./src/mock-data/factories/', import.meta.url)),
+		'@interfaces': fileURLToPath(new URL('./src/types/interfaces/', import.meta.url)),
+		'@components': fileURLToPath(new URL('./src/components/', import.meta.url)),
+		'@overviews': fileURLToPath(new URL('./src/components/Overviews/', import.meta.url)),
+		'@mediaOverview': fileURLToPath(new URL('./src/components/MediaOverview/', import.meta.url)),
+		'@vTreeViewTable': fileURLToPath(new URL('./src/components/General/VTreeViewTable/', import.meta.url)),
+	},
 	/*
 	 ** Auto-import components
 	 *  Doc: https://github.com/nuxt/components
@@ -99,73 +112,62 @@ const config: NuxtConfig = {
 		dirs: [
 			// Components directory
 			{
-				path: './components',
-				pathPrefix: false,
-				extensions: ['vue'],
-			},
-			// Pages directory
-			{
-				path: './pages',
+				path: '~/components',
 				pathPrefix: false,
 				extensions: ['vue'],
 			},
 		],
 	},
-	router: {
-		extendRoutes(routes, resolve) {
-			routes.push({
-				name: 'details-overview',
+	vite: {
+		css: {
+			preprocessorOptions: {
+				scss: {
+					// Make variables available everywhere
+					// Doc: https://nuxt.com/docs/getting-started/assets#global-styles-imports
+					additionalData: '@use "@/assets/scss/_variables.scss" as *;',
+				},
+			},
+		},
+	},
+	nitro: {
+		prerender: {
+			crawlLinks: true,
+		},
+	},
+	hooks: {
+		'pages:extend'(pages) {
+			pages.push({
+				name: 'media-overview',
 				path: '/tvshows/:libraryId',
-				component: resolve(__dirname, 'src/pages/tvshows/_id.vue'),
+				file: resolve(__dirname, 'src/pages/tvshows/[libraryId].vue'),
+				meta: {
+					scrollPos: {
+						top: 0,
+						left: 0,
+					},
+				},
 				children: [
 					{
+						name: 'details-overview',
 						path: 'details/:tvShowId',
-						component: resolve(__dirname, 'src/pages/tvshows/_id.vue'),
+						file: resolve(__dirname, 'src/pages/tvshows/[libraryId].vue'),
+						meta: {
+							scrollPos: {
+								top: 0,
+								left: 0,
+							},
+						},
 					},
 				],
 			});
 		},
 	},
 	/*
-	 ** Build configuration
+	 ** Doc: https://nuxtjs.org/docs/configuration-glossary/configuration-telemetry
 	 */
-	build: {
-		/*
-		 ** You can extend webpack config here
-		 */
-		hotMiddleware: {
-			client: {
-				overlay: false,
-			},
-		},
-		transpile: [
-			// This is needed to extend Vuetify components in ~/components/Extensions
-			'vuetify/lib',
-		],
-		extractCSS: true,
-		// Will allow for debugging in Typescript + Nuxt
-		// Doc: https://nordschool.com/enable-vs-code-debugger-for-nuxt-and-typescript/
-		extend(config: WebpackConfiguration, { isDev, isClient }: NuxtWebpackEnv): void {
-			if (isDev) {
-				config.devtool = isClient ? 'source-map' : 'inline-source-map';
-			}
-
-			// Fix for many errors with "Can't import the named export 'bypassFilter' from non EcmaScript module (only default export is available)"
-			// Link: https://github.com/vueuse/vueuse/issues/718#issuecomment-913319680
-			config?.module?.rules.push({
-				test: /\.mjs$/,
-				include: /node_modules/,
-				type: 'javascript/auto',
-			});
-
-			// Doc: https://github.com/dividab/tsconfig-paths-webpack-plugin
-			if (config.resolve?.plugins) {
-				config.resolve.plugins.push(new TsconfigPathsPlugin());
-			} else {
-				Log.fatal('Setting up TS Path aliases in nuxt.config.ts => config.resolve.plugins was undefined');
-			}
-		},
-	},
-};
-
-export default config;
+	telemetry: false,
+	/*
+	 ** Customize the progress-bar color
+	 */
+	// loading: true, // TODO Maybe better to re-enable based on how it looks
+});

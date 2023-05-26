@@ -1,35 +1,23 @@
 <script lang="ts">
-import Vue, { CreateElement, VNode } from 'vue';
-import { RenderContext } from 'vue/types/options';
-import BaseButton, { IBaseButtonProps } from './BaseButton.vue';
+import { defineComponent, h, mergeProps } from 'vue';
+import IconButton from './IconButton.vue';
+import { IBaseButtonProps } from '@props';
+import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
-export default Vue.extend({
+export default defineComponent({
 	name: 'HelpButton',
-	functional: true,
-	props: {
-		disabled: {
-			type: Boolean,
-		},
-		cy: {
-			type: String,
-			default: '',
-		},
-		height: {
-			type: Number,
-			default: 50,
-		},
-	},
-	render(h: CreateElement, context: RenderContext): VNode {
-		return h(BaseButton, {
-			...context.data,
-			props: {
-				...context.props,
-				outlined: false,
-				icon: 'mdi-help-circle-outline',
-				iconOnly: true,
-				iconSize: 24,
-			} as Partial<IBaseButtonProps>,
-		});
+	props: baseBtnPropsDefault(),
+	render() {
+		return h(
+			IconButton,
+			{
+				...mergeProps(this.$props, {
+					icon: 'mdi-help-circle-outline',
+					size: 'md',
+				} as IBaseButtonProps),
+			},
+			this.$slots.default,
+		);
 	},
 });
 </script>

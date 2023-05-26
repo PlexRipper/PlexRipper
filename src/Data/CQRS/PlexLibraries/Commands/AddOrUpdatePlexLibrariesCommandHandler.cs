@@ -86,7 +86,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
             {
                 // Add entry
                 _log.Here().Debug(
-                    "PlexAccount: {PlexAccountDisplayName} does not have an association with PlexLibrary: {PlexLibraryName} of PlexServer: {PlexServerName} creating one now with the authentication token now",
+                    "PlexAccount: {PlexAccountDisplayName} does not have an association with PlexLibrary: {PlexLibraryName} of PlexServer: {PlexServerName} creating one with the authentication token now",
                     plexAccount.DisplayName, plexLibrary.Name, plexServer.Name);
 
                 await _dbContext.PlexAccountLibraries.AddAsync(new PlexAccountLibrary

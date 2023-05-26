@@ -185,7 +185,7 @@ public class PlexLibraryService : IPlexLibraryService
     #region Public
 
     /// <inheritdoc/>
-    public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId, bool topLevelMediaOnly = false)
+    public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId)
     {
         var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
 
@@ -201,25 +201,12 @@ public class PlexLibraryService : IPlexLibraryService
                 return refreshResult.ToResult();
         }
 
-        return await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId, true, true, topLevelMediaOnly));
+        return await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
     }
 
     public async Task<Result<List<PlexLibrary>>> GetAllPlexLibrariesAsync()
     {
         return await _mediator.Send(new GetAllPlexLibrariesQuery());
-    }
-
-    /// <inheritdoc/>
-    public async Task<Result<PlexServer>> GetPlexLibraryInServerAsync(int libraryId, bool topLevelMediaOnly = false)
-    {
-        var plexLibrary = await GetPlexLibraryAsync(libraryId, topLevelMediaOnly);
-        if (plexLibrary.IsFailed)
-            return plexLibrary.ToResult();
-
-        var plexServer = plexLibrary.Value.PlexServer;
-        plexServer.PlexLibraries.Clear();
-        plexServer.PlexLibraries.Add(plexLibrary.Value);
-        return Result.Ok(plexServer);
     }
 
     public async Task<Result> UpdateDefaultDestinationLibrary(int libraryId, int folderPathId)

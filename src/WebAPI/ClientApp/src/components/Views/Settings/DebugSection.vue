@@ -1,36 +1,36 @@
 <template>
-	<p-section>
-		<template #header> {{ $t('pages.settings.debug.header') }}</template>
+	<q-section>
+		<template #header> {{ t('pages.settings.advanced.debug.header') }}</template>
 		<!--	Reset Database	-->
-		<v-row>
-			<v-col cols="4" align-self="center">
-				<DebugButton text-id="add-alert" @click="addAlert" />
-			</v-col>
-			<v-col cols="8" align-self="center"></v-col>
-		</v-row>
-	</p-section>
+		<q-row>
+			<q-col cols="4" align-self="center">
+				<help-icon help-id="help.settings.advanced.debug-section" />
+			</q-col>
+			<q-col cols="4" align-self="center">
+				<q-toggle :model-value="debugMode" size="lg" @update:model-value="updateSettings('debugMode', $event)" />
+			</q-col>
+		</q-row>
+	</q-section>
 </template>
-
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
-import { resetDatabase } from '@api/settingsApi';
-import { AlertService } from '@service';
+import { set } from '@vueuse/core';
+import { GeneralSettingsDTO } from '@dto/mainApi';
+import { SettingsService } from '@service';
 
-@Component
-export default class DebugSection extends Vue {
-	addAlert(): void {
-		AlertService.showAlert({ id: 0, title: 'Alert Title', text: 'random alert' });
-		AlertService.showAlert({ id: 0, title: 'Alert Title', text: 'random alert' });
-	}
+const { t } = useI18n();
 
-	// TODO Fix the reset button for the database
-	resetDatabaseCommand(): void {
-		useSubscription(
-			resetDatabase().subscribe(() => {
-				this.$router.push('/setup');
-			}),
-		);
-	}
+const debugMode = ref(false);
+
+function updateSettings(key: keyof GeneralSettingsDTO, state: boolean): void {
+	useSubscription(SettingsService.updateGeneralSettings(key, state).subscribe());
 }
+
+onMounted(() => {
+	useSubscription(
+		SettingsService.getDebugMode().subscribe((value) => {
+			set(debugMode, value);
+		}),
+	);
+});
 </script>

@@ -1,0 +1,82 @@
+body {
+	&.body--dark {
+		h1,
+		h2,
+		h3,
+		h4,
+		h5,
+		h6,
+		p,
+		ul,
+		li,
+		input, select, textarea,
+		strong {
+			color: white;
+		}
+	}
+
+	&.body--light {
+		h1,
+		h2,
+		h3,
+		h4,
+		h5,
+		h6,
+		p,
+		ul,
+		li,
+		input, select, textarea,
+		strong {
+			color: black;
+		}
+	}
+}
+
+h1 {
+	text-align: center;
+	padding: 10px 0;
+	font-size: 3em;
+}
+
+h2 {
+	font-size: 2em;
+	text-align: center;
+	font-weight: bold;
+	line-height: 1.5;
+	padding: 0;
+}
+
+h3 {
+	font-size: 1.5em;
+	text-align: center;
+	font-weight: bold;
+	line-height: 1.5;
+	padding: 0;
+}
+
+h4 {
+	margin: 8px 0;
+	font-size: 17px;
+	font-weight: bold;
+}
+
+p {
+	font-size: 16px;
+}
+
+ul li {
+	font-size: 16px;
+	margin: 10px 0;
+}
+
+span.title {
+	font-size: 1.5em;
+	font-weight: bold;
+}
+
+/*
+Nuxt-i18n
+*/
+.i18n-formatting {
+	white-space: pre-line;
+}

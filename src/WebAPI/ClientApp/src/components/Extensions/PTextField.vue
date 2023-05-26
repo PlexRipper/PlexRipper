@@ -1,19 +1,24 @@
-<script lang="ts">
-import { Component, Prop } from 'vue-property-decorator';
-import { VTextField } from 'vuetify/lib';
+<template>
+	<q-input :model-value="modelValue" :outlined="props.outlined">
+		<template v-if="props.appendIcon" #append>
+			<q-btn :icon="appendIcon" flat @click="$emit('click:append')" />
+		</template>
+	</q-input>
+</template>
 
-@Component<PTextField>({})
-export default class PTextField extends VTextField {
-	@Prop({ required: false, type: Number, default: 50 })
-	readonly height!: number;
+<script setup lang="ts">
+const props = withDefaults(
+	defineProps<{
+		modelValue: string;
+		outlined?: boolean;
+		appendIcon?: string;
+	}>(),
+	{
+		modelValue: '',
+		outlined: true,
+		appendIcon: '',
+	},
+);
 
-	@Prop({ required: false, type: Boolean, default: true })
-	readonly dense!: boolean;
-
-	@Prop({ required: false, type: Boolean, default: true })
-	readonly outlined!: boolean;
-
-	@Prop({ required: false, type: Boolean, default: true })
-	readonly solo!: boolean;
-}
+defineEmits<{ (e: 'click:append'): void }>();
 </script>

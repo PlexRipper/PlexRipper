@@ -10,8 +10,15 @@ public class Metadata
 {
     #region Movie
 
+    /// <summary>
+    /// Gets or sets the unique identifier for this metadata
+    /// </summary>
     public string RatingKey { get; set; }
 
+    /// <summary>
+    /// Gets or sets the unique identifier prefixed with the RatingKey for this metadata
+    /// E.g: "/library/metadata/9718", where 9718 is the RatingKey
+    /// </summary>
     public string Key { get; set; }
 
     public string LibrarySectionTitle { get; set; }
@@ -84,23 +91,23 @@ public class Metadata
         }
     }
 
-    public List<Medium> Media { get; set; }
+    public List<Medium> Media { get; set; } = new();
 
-    public Genre[] Genres { get; set; }
+    public List<Genre> Genres { get; set; } = new();
 
-    public Director[] Directors { get; set; }
+    public List<Director> Directors { get; set; } = new();
 
-    public Writer[] Writers { get; set; }
+    public List<Writer> Writers { get; set; } = new();
 
-    public List<Producer> Producer { get; set; }
+    public List<Producer> Producer { get; set; } = new();
 
-    public Country[] Countries { get; set; }
+    public List<Country> Countries { get; set; } = new();
 
-    public List<MediaRole> Roles { get; set; }
+    public List<MediaRole> Roles { get; set; } = new();
 
-    public List<Similar> Similar { get; set; }
+    public List<Similar> Similar { get; set; } = new();
 
-    public List<Field> Field { get; set; }
+    public List<Field> Field { get; set; } = new();
 
     #region Library Sections
 

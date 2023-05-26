@@ -78,8 +78,6 @@ public static class EnumExtensions
     {
         return value switch
         {
-            "None" => ViewMode.None,
-            "Overview" => ViewMode.Overview,
             "Poster" => ViewMode.Poster,
             "Table" => ViewMode.Table,
             _ => DefaultException(),
@@ -102,8 +100,6 @@ public static class EnumExtensions
     {
         return value switch
         {
-            ViewMode.None => "None",
-            ViewMode.Overview => "Overview",
             ViewMode.Poster => "Poster",
             ViewMode.Table => "Table",
             _ => DefaultException(),
@@ -132,7 +128,9 @@ public static class EnumExtensions
         {
             "None" => PlexMediaType.None,
             "Movie" => PlexMediaType.Movie,
+            "movie" => PlexMediaType.Movie,
             "TvShow" => PlexMediaType.TvShow,
+            "show" => PlexMediaType.TvShow,
             "Season" => PlexMediaType.Season,
             "Episode" => PlexMediaType.Episode,
             "Music" => PlexMediaType.Music,

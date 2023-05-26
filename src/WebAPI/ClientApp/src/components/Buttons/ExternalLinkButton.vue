@@ -1,41 +1,23 @@
 <script lang="ts">
-import Vue, { CreateElement, VNode } from 'vue';
-import { RenderContext } from 'vue/types/options';
-import BaseButton, { IBaseButtonProps } from './BaseButton.vue';
+import { defineComponent, h, mergeProps } from 'vue';
+import IconButton from './IconButton.vue';
+import { IBaseButtonProps } from '@props';
+import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
-export default Vue.extend({
+export default defineComponent({
 	name: 'ExternalLinkButton',
-	functional: true,
-	props: {
-		cy: {
-			type: String,
-			default: '',
-		},
-		width: {
-			type: Number,
-			default: 130,
-		},
-		textId: {
-			type: String,
-			default: '',
-		},
-		href: {
-			type: String,
-			default: '',
-		},
-	},
-	render(h: CreateElement, context: RenderContext): VNode {
-		return h(BaseButton, {
-			...context.data,
-			props: {
-				...context.props,
-				outlined: false,
-				iconOnly: true,
-				icon: 'mdi-open-in-new',
-				iconSize: 24,
-				size: 'small',
-			} as Partial<IBaseButtonProps>,
-		});
+	props: baseBtnPropsDefault(),
+	render() {
+		return h(
+			IconButton,
+			{
+				...mergeProps(this.$props, {
+					size: 'md',
+					icon: 'mdi-open-in-new',
+				} as IBaseButtonProps),
+			},
+			this.$slots.default,
+		);
 	},
 });
 </script>

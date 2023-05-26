@@ -1,11 +1,10 @@
-import { Context } from '@nuxt/types';
 import { Observable, of } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
+import BaseService from './baseService';
 import { PlexServerConnectionDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import IStoreState from '@interfaces/service/IStoreState';
-import { BaseService } from '@service';
 import ISetupResult from '@interfaces/service/ISetupResult';
-import { checkPlexServerConnection, getPlexServerConnections } from '@api/plexServerConnectionApi';
+import { checkAllPlexServerConnections, checkPlexServerConnection, getPlexServerConnections } from '@api/plexServerConnectionApi';
 
 export class ServerConnectionService extends BaseService {
 	// region Constructor and Setup
@@ -20,8 +19,8 @@ export class ServerConnectionService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<ISetupResult> {
-		super.setup(nuxtContext);
+	public setup(): Observable<ISetupResult> {
+		super.setup();
 		return this.refreshPlexServerConnections().pipe(
 			switchMap(() => of({ name: this._name, isSuccess: true })),
 			take(1),
@@ -34,9 +33,9 @@ export class ServerConnectionService extends BaseService {
 
 	public refreshPlexServerConnections(): Observable<PlexServerConnectionDTO[]> {
 		return getPlexServerConnections().pipe(
-			tap((plexServers) => {
-				if (plexServers.isSuccess) {
-					this.setStoreProperty('serverConnections', plexServers.value);
+			tap((serverConnections) => {
+				if (serverConnections.isSuccess) {
+					this.setStoreProperty('serverConnections', serverConnections.value);
 				}
 			}),
 			map(() => this.getStoreSlice<PlexServerConnectionDTO[]>('serverConnections')),
@@ -46,7 +45,7 @@ export class ServerConnectionService extends BaseService {
 
 	// endregion
 
-	public getServerConnectionsByServerId(plexServerId: number = 0): Observable<PlexServerConnectionDTO[]> {
+	public getServerConnectionsByServerId(plexServerId = 0): Observable<PlexServerConnectionDTO[]> {
 		return this.stateChanged.pipe(
 			map(() => this.getStoreSlice<PlexServerConnectionDTO[]>('serverConnections')),
 			map((connections) =>
@@ -66,6 +65,10 @@ export class ServerConnectionService extends BaseService {
 		);
 	}
 
+	public reCheckAllServerConnections(serverId: number): Observable<PlexServerConnectionDTO[]> {
+		return checkAllPlexServerConnections(serverId).pipe(switchMap(() => this.refreshPlexServerConnections()));
+	}
+
 	public checkServerConnection(plexServerConnectionId: number): Observable<PlexServerStatusDTO | null> {
 		return checkPlexServerConnection(plexServerConnectionId).pipe(
 			map((serverStatus) => {
@@ -75,6 +78,7 @@ export class ServerConnectionService extends BaseService {
 					if (index === -1) {
 						return serverStatus.value;
 					}
+					serverConnections[index].serverStatusList.unshift(serverStatus.value);
 					serverConnections[index].latestConnectionStatus = serverStatus.value;
 					this.setState({ serverConnections }, 'Update server status for connection ' + plexServerConnectionId);
 				}
@@ -84,5 +88,4 @@ export class ServerConnectionService extends BaseService {
 	}
 }
 
-const serverConnectionService = new ServerConnectionService();
-export default serverConnectionService;
+export default new ServerConnectionService();

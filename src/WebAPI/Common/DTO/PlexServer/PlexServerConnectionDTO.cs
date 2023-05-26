@@ -26,7 +26,9 @@ public class PlexServerConnectionDTO
 
     public string Url { get; set; }
 
-    public PlexServerStatusDTO LatestConnectionStatus { get; set; }
+    public List<PlexServerStatusDTO> ServerStatusList { get; set; }
+
+    public PlexServerStatusDTO? LatestConnectionStatus { get; set; }
 
     /// <summary>
     /// Added as a progress container for the front-end

@@ -1,191 +1,205 @@
 <template>
-	<v-lazy
-		v-model="isVisible"
-		:options="{
-			threshold: 0.1,
-		}"
-		:width="thumbWidth"
-		:height="getLazyLoadingHeight"
-		:data-title="mediaItem.title"
-		transition="fade-transition"
-		class="mx-3"
-	>
-		<v-col cols="auto">
-			<v-hover v-slot="{ hover }">
-				<v-card :max-width="thumbWidth" :width="thumbWidth" :elevation="hover ? 12 : 2">
-					<v-img :src="imageUrl" :width="thumbWidth" :height="thumbHeight" :alt="mediaItem.title">
-						<!--	Placeholder	-->
-						<template #placeholder>
-							<!--	Show fallback image	-->
-							<template v-if="defaultImage">
-								<v-row align="center" justify="center" class="fill-height">
-									<v-col cols="auto">
-										<media-type-icon class="mx-3" :size="100" :media-type="mediaType" />
-									</v-col>
-									<v-col cols="12">
-										<h4 class="text-center">{{ mediaItem.title }}</h4>
-									</v-col>
-								</v-row>
-							</template>
-							<!--	Show  image	-->
-							<template v-else>
-								<v-row class="fill-height ma-0" align="center" justify="center">
-									<v-col cols="12">
-										<h4 class="text-center">{{ mediaItem.title }}</h4>
-									</v-col>
-									<v-col cols="auto">
-										<v-progress-circular indeterminate color="grey lighten-5" />
-									</v-col>
-								</v-row>
-							</template>
-						</template>
+	<q-card flat class="media-poster media-poster--card highlight-border-box">
+		<div>
+			<q-hover>
+				<template #default="{ hover }">
+					<q-img
+						v-if="!defaultImage"
+						loading="eager"
+						:src="imageUrl"
+						fit="fill"
+						no-spinner
+						class="media-poster--image"
+						:alt="mediaItem.title">
 						<!--	Overlay	-->
-						<v-container fluid :class="['poster-overlay', hover ? 'on-hover' : '', 'white--text']">
-							<v-row justify="center" align="end" style="height: 100%">
-								<v-col cols="12" class="text-center">
-									<h2>
+						<div :class="['media-poster--overlay', hover ? 'on-hover' : '', 'white--text']">
+							<q-row justify="center" align="end" style="height: 100%">
+								<q-col cols="12" text-align="center">
+									<span class="media-poster--title">
 										{{ mediaItem.title }}
-									</h2>
-								</v-col>
-								<v-col cols="auto">
-									<v-btn v-if="isMovieType" icon large @click="downloadMedia()">
-										<v-icon large> mdi-download</v-icon>
-									</v-btn>
-									<v-btn v-if="isTvShowType" icon large @click="openDetails()">
-										<v-icon large> mdi-magnify</v-icon>
-									</v-btn>
-								</v-col>
-							</v-row>
-						</v-container>
-					</v-img>
-					<!--	Poster bar	-->
-					<v-row justify="center" no-gutters>
-						<v-col cols="auto">
-							<v-chip
-								v-for="item in mediaItem.mediaData"
-								:key="item.id"
-								class="my-2"
-								:color="getQualityColor(item.videoResolution)"
-								text
-								small
-							>
-								{{ getQualityString(item.videoResolution) }}
-							</v-chip>
-						</v-col>
-					</v-row>
-				</v-card>
-			</v-hover>
-		</v-col>
-	</v-lazy>
+									</span>
+								</q-col>
+								<q-col cols="auto">
+									<BaseButton
+										v-if="mediaType === PlexMediaType.Movie"
+										icon="mdi-download"
+										size="xl"
+										flat
+										:outline="false"
+										@click="downloadMedia()" />
+									<BaseButton
+										v-if="mediaType === PlexMediaType.TvShow"
+										icon="mdi-magnify"
+										:outline="false"
+										size="xl"
+										flat
+										@click="sendMediaOverviewOpenDetailsCommand(mediaItem.id)" />
+								</q-col>
+							</q-row>
+						</div>
+					</q-img>
+					<!--	Show fallback image	-->
+					<template v-else>
+						<q-row column align="center" justify="between" class="media-poster--fallback">
+							<q-col>
+								<q-media-type-icon class="mx-3" :size="90" :media-type="mediaType" />
+							</q-col>
+							<q-col text-align="center">
+								<span class="media-poster--title">
+									{{ mediaItem.title }}
+								</span>
+							</q-col>
+
+							<q-col cols="auto">
+								<BaseButton
+									v-if="mediaType === PlexMediaType.Movie"
+									icon="mdi-download"
+									:outline="false"
+									size="xl"
+									flat
+									@click="downloadMedia()" />
+								<BaseButton
+									v-if="mediaType === PlexMediaType.TvShow"
+									icon="mdi-magnify"
+									:outline="false"
+									size="xl"
+									flat
+									@click="sendMediaOverviewOpenDetailsCommand(mediaItem.id)" />
+							</q-col>
+						</q-row>
+					</template>
+				</template>
+			</q-hover>
+		</div>
+		<!--	Poster bar	-->
+		<div v-if="qualities.length" class="media-poster--quality-bar">
+			<q-chip v-for="(quality, j) in qualities" :key="j" :color="getQualityColor(quality.quality)" size="md">
+				{{ quality.displayQuality }}
+			</q-chip>
+		</div>
+		<QLoadingOverlay :loading="loading" />
+		<!--	Highlight animation effect	-->
+		<svg class="glow-container">
+			<!--suppress HtmlUnknownAttribute -->
+			<rect pathLength="100" height="5" width="5" stroke-linecap="round" class="glow-blur" />
+			<!--suppress HtmlUnknownAttribute -->
+			<rect pathLength="100" height="5" width="5" stroke-linecap="round" class="glow-line" />
+		</svg>
+	</q-card>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import { useSubscription } from '@vueuse/rxjs';
-import { DownloadMediaDTO, PlexMediaType } from '@dto/mainApi';
-import type ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-import { MediaService } from '@service';
+<script setup lang="ts">
+import { get } from '@vueuse/core';
+import Log from 'consola';
+import { DownloadMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import { sendMediaOverviewOpenDetailsCommand } from '@composables/event-bus';
 
-@Component
-export default class MediaPoster extends Vue {
-	@Prop({ required: true, type: Object as () => ITreeViewItem })
-	readonly mediaItem!: ITreeViewItem;
+const props = defineProps<{
+	mediaItem: PlexMediaSlimDTO;
+	index: number;
+}>();
 
-	@Prop({ required: true, type: String })
-	readonly mediaType!: PlexMediaType;
+const emit = defineEmits<{
+	(e: 'download', downloadMediaCommands: DownloadMediaDTO[]): void;
+}>();
 
-	private thumbWidth: number = 200;
-	private thumbHeight: number = 300;
+const thumbWidth = ref(200);
+const thumbHeight = ref(300);
 
-	isVisible: boolean = false;
-	imageUrl: string = '';
-	defaultImage: boolean = false;
+const defaultImage = ref(false);
+const loading = ref(false);
+const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown);
+const qualities = computed(() => props.mediaItem?.qualities ?? []);
 
-	get getLazyLoadingHeight(): number {
-		return this.thumbHeight + 40;
+const imageUrl = computed(() => {
+	return props.mediaItem?.hasThumb ? `${props.mediaItem?.thumbUrl}&width=${get(thumbWidth)}&height=${get(thumbHeight)}` : '';
+});
+const getQualityColor = (quality: string): string => {
+	switch (quality) {
+		case 'sd':
+			return 'brown darken-4';
+		case '480':
+			return 'deep-orange';
+		case '576':
+			return 'yellow darken-1';
+		case '720':
+			return 'lime accent-4';
+		case '1080':
+			return 'blue accent-3';
+		case '4k':
+			return 'red darken-4';
+		default:
+			Log.debug('Missing quality color option', quality, props.mediaItem);
+			return 'black';
 	}
+};
 
-	get isMovieType(): boolean {
-		return this.mediaType === PlexMediaType.Movie;
-	}
+function downloadMedia() {
+	const downloadCommand: DownloadMediaDTO = {
+		type: get(mediaType),
+		mediaIds: [props.mediaItem.id],
+		plexLibraryId: props.mediaItem.plexLibraryId,
+		plexServerId: props.mediaItem.plexServerId,
+	};
 
-	get isTvShowType(): boolean {
-		return this.mediaType === PlexMediaType.TvShow;
-	}
-
-	getQualityColor(quality: string): string {
-		switch (quality) {
-			case 'sd':
-				return 'brown darken-4';
-			case '480':
-				return 'deep-orange';
-			case '576':
-				return 'yellow darken-1';
-			case '720':
-				return 'lime accent-4';
-			case '1080':
-				return 'blue accent-3';
-			case '4k':
-				return 'red darken-4';
-			default:
-				return 'white';
-		}
-	}
-
-	getQualityString(quality: string): string {
-		switch (quality) {
-			case '480':
-				return '480p';
-			case '576':
-				return '576p';
-			case '720':
-				return '720p';
-			case '1080':
-				return '1080p';
-			case '1440':
-				return '1440p';
-			default:
-				return quality;
-		}
-	}
-
-	@Watch('isVisible')
-	getThumbnail(): void {
-		if (!this.mediaItem.hasThumb) {
-			this.defaultImage = true;
-			return;
-		}
-
-		if (this.isVisible && !this.imageUrl) {
-			useSubscription(
-				MediaService.getThumbnail(this.mediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe({
-					next: (imageUrl) => {
-						if (!imageUrl) {
-							this.defaultImage = true;
-							return;
-						}
-						this.imageUrl = imageUrl;
-					},
-					error: () => {
-						this.defaultImage = true;
-					},
-				}),
-			);
-		}
-	}
-
-	downloadMedia(): void {
-		const downloadCommand: DownloadMediaDTO = {
-			type: this.mediaType,
-			mediaIds: [this.mediaItem.id],
-			plexAccountId: 0,
-		};
-
-		this.$emit('download', [downloadCommand]);
-	}
-
-	openDetails(): void {
-		this.$emit('open-details', this.mediaItem.id);
-	}
+	emit('download', [downloadCommand]);
 }
 </script>
+
+<style lang="scss">
+@import '@/assets/scss/_mixins.scss';
+
+.media-poster {
+	@extend .background-sm;
+
+	width: 200px;
+	height: 340px;
+	margin: 32px;
+
+	&--card {
+		width: 200px;
+		height: 340px;
+	}
+
+	&--image,
+	&--fallback {
+		width: 200px;
+		height: 300px;
+	}
+
+	&--fallback {
+		& > div {
+			margin: 16px 0;
+		}
+	}
+
+	&--title {
+		font-size: 1.5em;
+		font-weight: bold;
+		text-align: center;
+	}
+
+	&--overlay {
+		@extend .background-xl;
+		width: 100%;
+		height: 100%;
+		opacity: 0;
+		transition: opacity 0.2s ease-in-out;
+
+		&.on-hover {
+			opacity: 0.8;
+
+			.q-btn {
+				opacity: 1;
+			}
+		}
+	}
+
+	&--quality-bar {
+		height: 40px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+}
+</style>

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BackgroundServices.Contracts;
+using DownloadManager.Contracts;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
@@ -80,8 +81,9 @@ public class WebApiMappingProfile : Profile
 
         // PlexServerConnection -> PlexServerConnectionDTO
         CreateMap<PlexServerConnection, PlexServerConnectionDTO>(MemberList.Destination)
-            .ForMember(x => x.Progress, opt => opt.Ignore())
-            .ForMember(dto => dto.LatestConnectionStatus, entity => entity.MapFrom(x => x.PlexServerStatus.First()))
+            .ForMember(dto => dto.Progress, opt => opt.Ignore())
+            .ForMember(dto => dto.ServerStatusList, entity => entity.MapFrom(x => x.PlexServerStatus))
+            .ForMember(dto => dto.LatestConnectionStatus, entity => entity.MapFrom(x => x.LatestConnectionStatus))
             .ForMember(dto => dto.Url, entity => entity.MapFrom(x => x.Url));
 
         // PlexServerStatus -> PlexServerStatusDTO
@@ -90,31 +92,50 @@ public class WebApiMappingProfile : Profile
 
     private void DownloadTaskMappings()
     {
+        // DownloadTask -> DownloadTaskDTO
         CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)
+            .ForMember(dto => dto.DownloadUrl, opt => opt.Ignore())
             .ForMember(dto => dto.Status, opt => opt.MapFrom(entity => entity.DownloadStatus))
+            .ForMember(dto => dto.FileTransferSpeed, opt => opt.MapFrom(entity => entity.FileTransferSpeed))
             .ForMember(dto => dto.Actions, opt => opt.MapFrom(entity => DownloadTaskActions.Convert(entity.DownloadStatus)));
 
+        // DownloadTask -> DownloadProgressDTO
         CreateMap<DownloadTask, DownloadProgressDTO>(MemberList.Destination)
             .ForMember(dto => dto.Status, opt => opt.MapFrom(entity => entity.DownloadStatus))
             .ForMember(dto => dto.Actions, opt => opt.MapFrom(entity => DownloadTaskActions.Convert(entity.DownloadStatus)));
 
+        // List<DownloadTask> -> List<ServerDownloadProgressDTO>
         CreateMap<List<DownloadTask>, List<ServerDownloadProgressDTO>>(MemberList.Destination)
             .ConvertUsing<ListDownloadTaskToListServerDownloadProgressDTOConverter>();
+
+        // DownloadPreview -> DownloadPreviewDTO
+        CreateMap<DownloadPreview, DownloadPreviewDTO>(MemberList.Destination);
     }
 
     private void PlexMediaMappings()
     {
+        // PlexMediaSlim -> PlexMediaSlimDTO
+        CreateMap<PlexMediaSlim, PlexMediaSlimDTO>(MemberList.Destination)
+            .ForMember(dto => dto.Qualities, opt => opt.MapFrom(x => x.Qualities))
+            .ForMember(dto => dto.Children, opt => opt.Ignore())
+            .ForMember(dto => dto.Index, opt => opt.Ignore());
+
         // PlexMediaData -> PlexMediaDataDTO
         CreateMap<PlexMedia, PlexMediaDTO>(MemberList.Destination)
-            .ForMember(dto => dto.TreeKeyId, opt => opt.MapFrom(entity => entity.Id.ToString()))
+            .IncludeBase<PlexMediaSlim, PlexMediaSlimDTO>()
             .ForMember(dto => dto.TvShowId, opt => opt.Ignore())
             .ForMember(dto => dto.TvShowSeasonId, opt => opt.Ignore())
             .ForMember(dto => dto.MediaData, opt => opt.Ignore())
-            .ForMember(dto => dto.Children, opt => opt.Ignore());
+            .ForMember(dto => dto.Children, opt => opt.Ignore())
+            .ForMember(dto => dto.Index, opt => opt.Ignore());
 
         // PlexMediaData -> PlexMediaDataDTO
         CreateMap<PlexMediaData, PlexMediaDataDTO>(MemberList.Destination);
 
+        // PlexMediaQuality -> PlexMediaQualityDTO
+        CreateMap<PlexMediaQuality, PlexMediaQualityDTO>(MemberList.Destination);
+
+        // PlexMediaDataPart -> PlexMediaDataPartDTO
         CreateMap<PlexMediaDataPart, PlexMediaDataPartDTO>(MemberList.Destination);
     }
 
@@ -132,7 +153,6 @@ public class WebApiMappingProfile : Profile
         CreateMap<PlexTvShow, PlexMediaDTO>(MemberList.Destination)
             .IncludeBase<PlexMedia, PlexMediaDTO>()
             .ForMember(dto => dto.TvShowId, opt => opt.MapFrom(entity => entity.Id))
-            .ForMember(dto => dto.TreeKeyId, opt => opt.MapFrom(entity => entity.Id.ToString()))
             .ForMember(dto => dto.TvShowSeasonId, opt => opt.Ignore())
             .ForMember(dto => dto.Children, opt => opt.MapFrom(entity => entity.Seasons))
             .ForMember(dto => dto.MediaData, opt => opt.Ignore());
@@ -141,7 +161,6 @@ public class WebApiMappingProfile : Profile
         CreateMap<PlexTvShowSeason, PlexMediaDTO>(MemberList.Destination)
             .IncludeBase<PlexMedia, PlexMediaDTO>()
             .ForMember(dto => dto.TvShowSeasonId, opt => opt.MapFrom(entity => entity.Id))
-            .ForMember(dto => dto.TreeKeyId, opt => opt.MapFrom(entity => $"{entity.TvShowId.ToString()}-{entity.Id.ToString()}"))
             .ForMember(dto => dto.TvShowId, opt => opt.MapFrom(entity => entity.TvShowId))
             .ForMember(dto => dto.Children, opt => opt.MapFrom(entity => entity.Episodes))
             .ForMember(dto => dto.MediaData, opt => opt.Ignore());
@@ -150,11 +169,27 @@ public class WebApiMappingProfile : Profile
         CreateMap<PlexTvShowEpisode, PlexMediaDTO>(MemberList.Destination)
             .IncludeBase<PlexMedia, PlexMediaDTO>()
             .ForMember(dto => dto.Children, opt => opt.Ignore())
-            .ForMember(dto => dto.TreeKeyId,
-                opt => opt.MapFrom(entity => $"{entity.TvShowId.ToString()}-{entity.TvShowSeasonId.ToString()}-{entity.Id.ToString()}"))
             .ForMember(dto => dto.TvShowId, opt => opt.MapFrom(entity => entity.TvShowId))
             .ForMember(dto => dto.TvShowSeasonId, opt => opt.MapFrom(entity => entity.TvShowSeasonId))
             .ForMember(dto => dto.MediaData, entity => entity.MapFrom(x => x.EpisodeData));
+
+        // PlexTvShow -> PlexMediaSlimDTO
+        CreateMap<PlexTvShow, PlexMediaSlimDTO>(MemberList.Destination)
+            .IncludeBase<PlexMediaSlim, PlexMediaSlimDTO>()
+            .ForMember(dto => dto.Children, opt => opt.MapFrom(entity => entity.Seasons))
+            .ForMember(dto => dto.Index, opt => opt.Ignore());
+
+        // PlexTvShowSeason -> PlexMediaSlimDTO
+        CreateMap<PlexTvShowSeason, PlexMediaSlimDTO>(MemberList.Destination)
+            .IncludeBase<PlexMediaSlim, PlexMediaSlimDTO>()
+            .ForMember(dto => dto.Children, opt => opt.MapFrom(entity => entity.Episodes))
+            .ForMember(dto => dto.Index, opt => opt.Ignore());
+
+        // PlexTvShowEpisode -> PlexMediaSlimDTO
+        CreateMap<PlexTvShowEpisode, PlexMediaSlimDTO>(MemberList.Destination)
+            .IncludeBase<PlexMediaSlim, PlexMediaSlimDTO>()
+            .ForMember(dto => dto.Children, opt => opt.Ignore())
+            .ForMember(dto => dto.Index, opt => opt.Ignore());
     }
 
     private void SignalRMappings()

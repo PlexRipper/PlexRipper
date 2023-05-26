@@ -27,10 +27,8 @@ public class GetPlexServerConnectionByIdQueryHandler : BaseHandler, IRequestHand
         if (request.IncludeServer)
             query = query.Include(x => x.PlexServer);
 
-        if (request.IncludeStatus)
-            query = query.Include(x => x.PlexServerStatus);
-
         var plexServerConnection = await query
+            .Include(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(5))
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (plexServerConnection == null)

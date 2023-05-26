@@ -1,70 +1,54 @@
-import { cloneDeep } from 'lodash-es';
-import { faker } from '@faker-js/faker';
+import { seed as falsoSeed } from '@ngneat/falso';
 import { MockConfig } from '@mock/interfaces';
 import { PlexMediaType } from '@dto/mainApi';
+
+let currentSeed = 0;
 
 export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 	if (config === null || config === undefined) {
 		return checkConfig({});
 	}
+	const defaultConfig: MockConfig = {
+		plexServerCount: 5,
+		seed: 1234,
+		debugDisplayData: false,
+		plexAccountCount: 1,
+		firstTimeSetup: false,
+		plexLibraryCount: 5,
+		plexServerAccessCount: 3,
+		plexServerStatusCount: 3,
+		plexLibraryTypes: [PlexMediaType.Movie, PlexMediaType.TvShow],
+		movieDownloadTask: 5,
+		tvShowDownloadTask: 5,
+		seasonDownloadTask: 5,
+		episodeDownloadTask: 5,
+		connectionHasProgress: false,
+		maxServerConnections: 5,
+		plexMovieLibraryCount: 0,
+		plexTvShowLibraryCount: 0,
+		movieCount: 0,
+		tvShowCount: 0,
+		seasonCount: 0,
+		episodeCount: 0,
+		folderPathCount: 0,
+	};
 
-	const newConfig: Partial<MockConfig> = cloneDeep(config);
-	if (!hasConfigProperty(config, 'plexServerCount')) {
-		newConfig.plexServerCount = 5;
+	for (const configKey in config) {
+		if (!Object.hasOwn(config, configKey)) {
+			config[configKey] = defaultConfig[configKey];
+		}
 	}
 
-	if (!hasConfigProperty(config, 'seed')) {
-		newConfig.seed = 1234;
-	}
+	setSeed(config?.seed ?? defaultConfig.seed);
 
-	if (!hasConfigProperty(config, 'plexAccountCount')) {
-		newConfig.plexAccountCount = 2;
-	}
-
-	if (!hasConfigProperty(config, 'firstTimeSetup')) {
-		newConfig.firstTimeSetup = false;
-	}
-
-	if (!hasConfigProperty(config, 'plexLibraryCount')) {
-		newConfig.plexLibraryCount = 5;
-	}
-
-	if (!hasConfigProperty(config, 'plexServerAccessCount')) {
-		newConfig.plexServerAccessCount = 3;
-	}
-
-	if (!hasConfigProperty(config, 'plexLibraryTypes')) {
-		newConfig.plexLibraryTypes = [PlexMediaType.Movie, PlexMediaType.TvShow];
-	}
-
-	if (!hasConfigProperty(config, 'maxServerConnections')) {
-		newConfig.maxServerConnections = 3;
-	}
-
-	if (!hasConfigProperty(config, 'connectionHasProgress')) {
-		newConfig.connectionHasProgress = false;
-	}
-
-	faker.seed(config.seed);
-
-	return newConfig as MockConfig;
+	return config as MockConfig;
 }
 
 export function setSeed(seed: number) {
-	faker.seed(seed);
+	currentSeed = seed;
+	falsoSeed('' + seed);
 }
 
-export function incrementSeed(increment: number = 1) {
-	if (increment === 0) {
-		return;
-	}
-	setSeed(faker.seed() + increment);
-}
-
-function hasConfigProperty(config: Partial<MockConfig>, key: keyof MockConfig) {
-	return config.hasOwnProperty(key);
-}
-
-export function getId(): number {
-	return faker.datatype.number({ min: 1, max: 99999999999 });
+export function incrementSeed(value = 1): void {
+	falsoSeed('' + currentSeed + value);
 }

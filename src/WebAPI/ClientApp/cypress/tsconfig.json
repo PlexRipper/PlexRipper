@@ -1,16 +1,10 @@
 {
-  "extends": "../tsconfig.json",
-
-  "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "es5",
-      "dom"
-    ],
-    "types": [
-      "cypress",
-      "node"
-    ],
-    "baseUrl": "../src",
-  },
+	"extends": "../tsconfig.json", // Needed for the path aliases
+	"compilerOptions": {
+		"types": ["cypress", "cypress-signalr-mock", "@testing-library/cypress", "node"],
+		"baseUrl": "../",
+		"sourceMap": false,
+		"target": "ES2019" // Needs to have this target otherwise nullish coalescing operator (??) will not work
+	},
+	"include": ["**/*.ts", "../node_modules/cypress/types", "../node_modules/@types/mocha"],
 }

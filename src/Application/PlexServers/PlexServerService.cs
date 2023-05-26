@@ -55,7 +55,9 @@ public class PlexServerService : IPlexServerService
         var plexAccount = plexAccountResult.Value;
         var plexServers = plexAccountResult.Value.PlexServers;
 
-        _log.Here().Information("Inspecting {PlexServersCount} PlexServers for PlexAccount: {PlexAccountDisplayName}", plexServers.Count, plexAccountResult.Value.DisplayName);
+        _log.Here()
+            .Information("Inspecting {PlexServersCount} PlexServers for PlexAccount: {PlexAccountDisplayName}", plexServers.Count,
+                plexAccountResult.Value.DisplayName);
         if (!skipRefreshAccessibleServers)
         {
             var refreshResult = await RefreshAccessiblePlexServersAsync(plexAccount.Id);
@@ -67,8 +69,9 @@ public class PlexServerService : IPlexServerService
         }
         else
         {
-            _log.Here().Warning("Skipping {NameOfRefreshAccessiblePlexServersAsync} in {NameOfInspectAllPlexServersByAccountId}",
-                nameof(RefreshAccessiblePlexServersAsync), nameof(InspectAllPlexServersByAccountId));
+            _log.Here()
+                .Warning("Skipping {NameOfRefreshAccessiblePlexServersAsync} in {NameOfInspectAllPlexServersByAccountId}",
+                    nameof(RefreshAccessiblePlexServersAsync), nameof(InspectAllPlexServersByAccountId));
         }
 
         // Create connection check tasks for all connections
@@ -89,7 +92,7 @@ public class PlexServerService : IPlexServerService
 
         var checkResult = await _plexServerConnectionsService.CheckAllConnectionsOfPlexServerAsync(plexServerId);
         if (checkResult.IsFailed)
-            return checkResult;
+            return checkResult.ToResult();
 
         await _plexLibraryService.RetrieveAccessibleLibrariesForAllAccountsAsync(plexServerId);
 
@@ -214,17 +217,6 @@ public class PlexServerService : IPlexServerService
     }
 
     #region CRUD
-
-    public Task<Result<PlexServer>> GetServerAsync(int plexServerId)
-    {
-        return _mediator.Send(new GetPlexServerByIdQuery(plexServerId, includeLibraries: true));
-    }
-
-    /// <inheritdoc/>
-    public async Task<Result<List<PlexServer>>> GetAllPlexServersAsync(bool includeLibraries = false)
-    {
-        return await _mediator.Send(new GetAllPlexServersQuery(true, includeLibraries));
-    }
 
     public async Task<Result> SetPreferredConnection(int plexServerId, int plexServerConnectionId)
     {

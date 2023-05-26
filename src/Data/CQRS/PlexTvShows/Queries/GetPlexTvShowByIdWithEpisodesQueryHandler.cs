@@ -33,7 +33,7 @@ public class GetPlexTvShowByIdWithEpisodesQueryHandler : BaseHandler, IRequestHa
         if (plexTvShow == null)
             return ResultExtensions.EntityNotFound(nameof(PlexTvShow), request.Id);
 
-        plexTvShow.Seasons = plexTvShow.Seasons.OrderBy(x => x.Title).ToList();
+        plexTvShow.Seasons = plexTvShow.Seasons.OrderByNatural(x => x.Title).ToList();
 
         return Result.Ok(plexTvShow);
     }

@@ -3,19 +3,28 @@ import { switchMap, take, tap } from 'rxjs/operators';
 import { catchError, Observable, of } from 'rxjs';
 import { AxiosObservable } from 'axios-observable';
 import { AxiosError, AxiosResponse } from 'axios';
-import { AlertService } from '@service';
+import AlertService from '@service/alertService';
 import ResultDTO from '@dto/ResultDTO';
 
 export function checkForError<T = any>(
 	logText?: string,
 	fnName?: string,
+	suppressAlert?: boolean,
 ): (source$: AxiosObservable<ResultDTO<T>>) => Observable<ResultDTO<T>> {
 	return (source$) =>
 		source$.pipe(
 			catchError((error: AxiosError | any) => {
 				Log.error('FATAL NETWORK ERROR: ', error);
 
-				AlertService.showAlert({ id: 0, title: 'Network Error', text: error, result: error });
+				const url = new URL(error.config.url, error.config.baseURL);
+				if (!suppressAlert) {
+					AlertService.showAlert({
+						id: 0,
+						title: error.message,
+						text: `Failed a request to url: ${url}`,
+						result: JSON.parse(error.config.data),
+					});
+				}
 
 				// TODO Check wat the error contains in-case, of network failure and continue based on that
 				return of({

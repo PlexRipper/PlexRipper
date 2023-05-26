@@ -2,6 +2,7 @@
 using Bogus.Hollywood;
 using PlexRipper.PlexApi.Api;
 using PlexRipper.PlexApi.Models;
+using Stream = PlexRipper.PlexApi.Models.Stream;
 
 namespace PlexRipper.BaseTests;
 
@@ -32,13 +33,13 @@ public partial class FakePlexApiData
                 .RuleFor(x => x.ViewGroup, _ => library.Type)
                 .RuleFor(x => x.Nocache, f => f.Random.Bool())
                 .RuleFor(x => x.ViewMode, f => f.Random.Number(100000))
-                .RuleFor(x => x.Metadata, _ => GetLibraryMediaMetadata(library, options).Generate(config.LibraryMetaDataCount))
+                .RuleFor(x => x.Metadata, _ => GetLibraryMediaMetadata(library.Type.ToPlexMediaType(), options).Generate(config.LibraryMetaDataCount))
                 .Generate(),
         };
     }
 
-    private static Faker<Metadata> GetLibraryMediaMetadata(
-        LibrariesResponseDirectory library,
+    public static Faker<Metadata> GetLibraryMediaMetadata(
+        PlexMediaType type,
         Action<PlexApiDataConfig> options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
@@ -48,43 +49,104 @@ public partial class FakePlexApiData
             .UseSeed(config.Seed)
             .RuleFor(l => l.RatingKey, f => f.Random.Number(100000).ToString())
             .RuleFor(l => l.Key, _ => "")
-            .RuleFor(l => l.Guid, f => $"plex://{library.Type}/{f.Random.Guid()}")
+            .RuleFor(l => l.Guid, f => $"plex://{type.ToPlexMediaTypeString().ToLower()}/{f.Random.Guid()}")
             .RuleFor(l => l.Studio, f => f.Movies().Production())
-            .RuleFor(l => l.Type, _ => library.Type)
+            .RuleFor(l => l.Type, _ => type.ToPlexMediaTypeString().ToLower())
             .RuleFor(l => l.Title, f => f.Movies().MovieTitle())
             .RuleFor(l => l.TitleSort, _ => "")
             .RuleFor(l => l.ContentRating, _ => "nl/6")
             .RuleFor(l => l.Summary, f => f.Movies().MovieOverview())
             .RuleFor(l => l.Rating, f => f.Random.Double() * 10)
             .RuleFor(l => l.AudienceRating, f => f.Random.Double() * 10)
-            .RuleFor(l => l.ViewOffset, f => f.Random.Int())
+            .RuleFor(l => l.ViewOffset, f => f.Random.Int(1))
+            .RuleFor(l => l.LibrarySectionTitle, f => f.Company.CompanyName())
+            .RuleFor(l => l.LibrarySectionId, f => f.Random.Int(1))
+            .RuleFor(l => l.LibrarySectionKey, f => f.Random.Uuid().ToString())
             .RuleFor(l => l.LastViewedAt, _ => 0)
             .RuleFor(l => l.Year, f => f.Random.Int(0, 2023))
             .RuleFor(l => l.TagLine, f => f.Movies().MovieTagline())
-            .RuleFor(l => l.Thumb, _ => "/library/metadata/44909/thumb/15670134167")
-            .RuleFor(l => l.Art, _ => "/library/metadata/44909/art/15670134167")
-            .RuleFor(l => l.Duration, f => f.Random.Int())
+            .RuleFor(l => l.Thumb, __ => "")
+            .RuleFor(l => l.Banner, _ => "")
+            .RuleFor(l => l.Theme, _ => "")
+            .RuleFor(l => l.Art, _ => "")
+            .RuleFor(l => l.Duration, f => f.Random.Int(1))
             .RuleFor(l => l.OriginallyAvailableAt, f => f.Date.Past(2).ToShortDateString())
             .RuleFor(l => l.AddedAt, f => f.Date.Past(1))
             .RuleFor(l => l.UpdatedAt, f => f.Date.Recent())
             .RuleFor(l => l.AudienceRatingImage, _ => "rottentomatoes://image.rating.upright")
-            .RuleFor(l => l.Index, f => f.Random.Int())
-            .RuleFor(l => l.Banner, f => f.Lorem.Word())
-            .RuleFor(l => l.LeafCount, f => f.Random.Int())
-            .RuleFor(l => l.ViewedLeafCount, f => f.Random.Int())
-            .RuleFor(l => l.ChildCount, f => f.Random.Int())
+            .RuleFor(l => l.Index, f => f.Random.Int(1))
+            .RuleFor(l => l.LeafCount, f => f.Random.Int(1))
+            .RuleFor(l => l.ViewedLeafCount, f => f.Random.Int(1))
+            .RuleFor(l => l.ChildCount, f => f.Random.Int(1))
             .RuleFor(l => l.Genres, _ => default)
             .RuleFor(l => l.Roles, _ => default)
             .RuleFor(l => l.ViewCount, _ => default)
             .RuleFor(l => l.SkipCount, _ => default)
             .RuleFor(l => l.LastViewedAt, _ => default)
-            .RuleFor(l => l.Theme, f => f.Lorem.Word())
+            .RuleFor(l => l.Media, _ => new List<Medium>() { GetPlexMedium(options).Generate() })
             .RuleFor(l => l.FlattenSeasons, f => f.Random.Bool())
             .RuleFor(l => l.ShowOrdering, f => f.Lorem.Word())
-            .FinishWith((_, metadata) =>
+            .FinishWith((f, metadata) =>
             {
+                var metaDataKey = f.Random.Int(1);
+                metadata.Thumb = $"/library/metadata/{metadata.Key}/thumb/{metaDataKey}";
+                metadata.Art = $"/library/metadata/{metadata.Key}/art/{metaDataKey}";
+                metadata.Theme = $"/library/metadata/{metadata.Key}/theme/{metaDataKey}";
+                metadata.Banner = $"/library/metadata/{metadata.Key}/banner/{metaDataKey}";
+
                 metadata.Key = $"/library/metadata/{metadata.Key}";
                 metadata.TitleSort = metadata.TitleSort.ToLower();
             });
+    }
+
+    public static Faker<Medium> GetPlexMedium(
+        Action<PlexApiDataConfig> options = null)
+    {
+        var config = PlexApiDataConfig.FromOptions(options);
+
+        return new Faker<Medium>()
+            .StrictMode(true)
+            .UseSeed(config.Seed)
+            .RuleFor(l => l.Id, f => f.Random.Number(100000))
+            .RuleFor(l => l.Duration, f => f.Random.Int(1))
+            .RuleFor(l => l.Bitrate, f => f.Random.Int(1))
+            .RuleFor(l => l.Width, f => f.Random.Int(1))
+            .RuleFor(l => l.Height, f => f.Random.Int(1))
+            .RuleFor(l => l.AspectRatio, f => f.Random.Double())
+            .RuleFor(l => l.AudioChannels, f => f.Random.Int(1))
+            .RuleFor(l => l.AudioCodec, f => f.Lorem.Word())
+            .RuleFor(l => l.VideoCodec, f => f.Lorem.Word())
+            .RuleFor(l => l.Container, f => f.Lorem.Word())
+            .RuleFor(l => l.VideoFrameRate, _ => "24p")
+            .RuleFor(l => l.AudioProfile, _ => "dts")
+            .RuleFor(l => l.VideoProfile, _ => "high")
+            .RuleFor(l => l.OptimizedForStreaming, f => f.Random.Bool() ? 1 : 0)
+            .RuleFor(l => l.Container, f => f.Lorem.Word())
+            .RuleFor(l => l.Protocol, f => f.Lorem.Word())
+            .RuleFor(l => l.VideoResolution, f => f.Lorem.Word())
+            .RuleFor(l => l.Selected, f => f.Random.Bool())
+            .RuleFor(l => l.Part, _ => new[] { GetPlexPart(options).Generate() });
+    }
+
+    public static Faker<Part> GetPlexPart(
+        Action<PlexApiDataConfig> options = null)
+    {
+        var config = PlexApiDataConfig.FromOptions(options);
+
+        return new Faker<Part>()
+            .StrictMode(true)
+            .UseSeed(config.Seed)
+            .RuleFor(l => l.Id, f => f.Random.Number(100000))
+            .RuleFor(l => l.Key, f => f.Random.Uuid().ToString())
+            .RuleFor(l => l.Duration, f => f.Random.Int(1))
+            .RuleFor(l => l.File, f => f.Lorem.Word())
+            .RuleFor(l => l.Size, f => f.Random.Int(1))
+            .RuleFor(l => l.Stream, _ => new Stream[] { })
+            .RuleFor(l => l.HasChapterTextStream, f => f.Random.Bool())
+            .RuleFor(l => l.HasThumbnail, f => f.Random.Bool().ToString())
+            .RuleFor(l => l.AudioProfile, _ => "dts")
+            .RuleFor(l => l.Container, _ => "mkv")
+            .RuleFor(l => l.Indexes, _ => "sd")
+            .RuleFor(l => l.VideoProfile, _ => "high");
     }
 }

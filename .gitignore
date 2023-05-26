@@ -239,4 +239,4 @@ tests/MockPlexApiServer/media/movies/*
 *.LicenseKey
 
 # Used to define environment variables for the "act" Github actions debugging tool
-secrets.env
+.github/secrets.env

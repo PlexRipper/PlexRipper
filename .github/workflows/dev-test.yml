@@ -53,5 +53,5 @@ jobs:
         run: npm ci
       - name: Build front-end
         run: npm run build --if-present
-      - name: Run Jest tests
+      - name: Run Vitest tests
         run: npm test

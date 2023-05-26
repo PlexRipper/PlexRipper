@@ -53,6 +53,13 @@
       }
     ],
     [
+      "@semantic-release/npm",
+      {
+        "npmPublish": false,
+        "pkgRoot": "./src/WebAPI/ClientApp/"
+      }
+    ],
+    [
       "@semantic-release/git",
       {
         "assets": [

@@ -52,7 +52,7 @@ public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest<DisplayS
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        _sut.MovieViewMode.ShouldBe(ViewMode.Table);
+        _sut.MovieViewMode.ShouldBe(ViewMode.Poster);
         _sut.TvShowViewMode.ShouldBe(_sut.DefaultValues().TvShowViewMode);
     }
 }

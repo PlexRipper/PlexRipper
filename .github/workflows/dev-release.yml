@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GH_TOKEN }}
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -27,7 +29,11 @@ jobs:
         run: npm --prefix src/WebAPI/ClientApp/ install
       - name: GitHub Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GIT_AUTHOR_NAME: ${{ env.GIT_AUTHOR_NAME }}
+          GIT_AUTHOR_EMAIL:  ${{ env.GIT_AUTHOR_EMAIL }}
+          GIT_COMMITTER_NAME:  ${{ env.GIT_COMMITTER_NAME }}
+          GIT_COMMITTER_EMAIL:  ${{ env.GIT_COMMITTER_EMAIL }}
         run: npx --prefix src/WebAPI/ClientApp/ semantic-release
   # Build Docker Image
   CreateDockerDevRelease:

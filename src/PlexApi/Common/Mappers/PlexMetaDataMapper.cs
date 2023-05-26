@@ -27,7 +27,7 @@ public static partial class PlexMetaDataMapper
     {
         var plexTvShowSeason = source.ToPlexMedia().ToPlexTvShowSeason();
         plexTvShowSeason.FullTitle = $"{source.ParentTitle}/{source.Title}";
-        plexTvShowSeason.ParentKey = int.Parse(source.ParentRatingKey);
+        plexTvShowSeason.ParentKey = source.ParentRatingKey != null ? int.Parse(source.ParentRatingKey) : -1;
         return plexTvShowSeason;
     }
 
@@ -35,7 +35,7 @@ public static partial class PlexMetaDataMapper
     {
         var plexTvShowSeason = source.ToPlexMedia().ToPlexTvShowEpisode();
         plexTvShowSeason.FullTitle = $"{source.GrandparentTitle}/{source.ParentTitle}/{source.Title}";
-        plexTvShowSeason.ParentKey = int.Parse(source.ParentRatingKey);
+        plexTvShowSeason.ParentKey = source.ParentRatingKey != null ? int.Parse(source.ParentRatingKey) : -1;
         return plexTvShowSeason;
     }
 
@@ -58,7 +58,7 @@ public static partial class PlexMetaDataMapper
             },
 
             Type = PlexMediaType.None,
-            Key = int.Parse(source.RatingKey),
+            Key = source.ParentRatingKey != null ? int.Parse(source.RatingKey) : -1,
             MetaDataKey = RetrieveMetaDataKey(source),
             Studio = source.Studio,
             Summary = source.Summary,

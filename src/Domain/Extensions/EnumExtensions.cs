@@ -128,7 +128,9 @@ public static class EnumExtensions
         {
             "None" => PlexMediaType.None,
             "Movie" => PlexMediaType.Movie,
+            "movie" => PlexMediaType.Movie,
             "TvShow" => PlexMediaType.TvShow,
+            "show" => PlexMediaType.TvShow,
             "Season" => PlexMediaType.Season,
             "Episode" => PlexMediaType.Episode,
             "Music" => PlexMediaType.Music,

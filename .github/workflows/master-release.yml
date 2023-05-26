@@ -1,21 +1,20 @@
 name: Publish Docker image on push 'master' branch
 
 on:
-  release:
-    types: [released] # Should only trigger on published releases, and non pre-releases/drafts
+  workflow_dispatch:
 
 jobs:
   # Build Docker Image
   CreateDockerLatestAndTagRelease:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
       - name: Stable tag_name
         run: echo ${{ github.event.release.tag_name }}
       - name: Publish to Docker with latest and version tag
         uses: elgohr/Publish-Docker-Github-Action@v5
         with:
           name: plexripper/plexripper
-          username: "${{ secrets.DOCKER_USERNAME }}"
-          password: "${{ secrets.DOCKER_PASSWORD }}"
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
           tags: "latest,${{ github.event.release.tag_name }}"

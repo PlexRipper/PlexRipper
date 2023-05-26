@@ -75,6 +75,12 @@
         "successComment": false,
         "failComment": false
       }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "verifyReleaseCmd": "echo RELEASE_VERSION=${nextRelease.version} >> $GITHUB_ENV"
+      }
     ]
   ]
 }

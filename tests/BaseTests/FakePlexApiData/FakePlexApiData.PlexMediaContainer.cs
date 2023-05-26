@@ -89,7 +89,6 @@ public partial class FakePlexApiData
             .FinishWith((f, metadata) =>
             {
                 var metaDataKey = f.Random.Int(1);
-
                 metadata.Thumb = $"/library/metadata/{metadata.Key}/thumb/{metaDataKey}";
                 metadata.Art = $"/library/metadata/{metadata.Key}/art/{metaDataKey}";
                 metadata.Theme = $"/library/metadata/{metadata.Key}/theme/{metaDataKey}";

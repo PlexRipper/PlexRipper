@@ -10,8 +10,15 @@ public class Metadata
 {
     #region Movie
 
+    /// <summary>
+    /// Gets or sets the unique identifier for this metadata
+    /// </summary>
     public string RatingKey { get; set; }
 
+    /// <summary>
+    /// Gets or sets the unique identifier prefixed with the RatingKey for this metadata
+    /// E.g: "/library/metadata/9718", where 9718 is the RatingKey
+    /// </summary>
     public string Key { get; set; }
 
     public string LibrarySectionTitle { get; set; }

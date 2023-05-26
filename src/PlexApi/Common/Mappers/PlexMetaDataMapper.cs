@@ -58,7 +58,7 @@ public static partial class PlexMetaDataMapper
             },
 
             Type = PlexMediaType.None,
-            Key = source.ParentRatingKey != null ? int.Parse(source.RatingKey) : -1,
+            Key = source.RatingKey != null ? int.Parse(source.RatingKey) : -1,
             MetaDataKey = RetrieveMetaDataKey(source),
             Studio = source.Studio,
             Summary = source.Summary,

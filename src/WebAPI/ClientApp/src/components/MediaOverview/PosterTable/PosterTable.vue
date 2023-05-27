@@ -10,6 +10,7 @@
 		:grid-items="gridItems"
 		:buffer="posterCardHeight * 5"
 		key-field="id"
+		data-cy="poster-table"
 		@resize="onResize">
 		<media-poster
 			:index="index"

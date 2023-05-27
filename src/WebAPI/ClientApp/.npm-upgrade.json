@@ -3,6 +3,10 @@
 		"three": {
 			"versions": ">0.143.0",
 			"reason": "Incompatible with Vanta"
+		},
+		"@types/node": {
+			"versions": ">18.16.0",
+			"reason": "Node version pinned to 18"
 		}
 	}
 }

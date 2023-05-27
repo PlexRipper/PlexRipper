@@ -10,10 +10,53 @@ on:
       - '.run/**'
       - '.vscode/**'
 jobs:
+  # Front-End-Unit-Tests:
+  Front-End-Unit-Tests:
+    defaults:
+      run:
+        working-directory: src/WebAPI/ClientApp/
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Setup Node.js v18.11
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.11
+          cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
+      - name: Clean install npm modules
+        run: npm ci
+      - name: Build front-end
+        run: npm run build --if-present
+      - name: Run Vitest tests
+        run: npm test
+  # Front-End-Integration-Tests:
+  Front-End-Integration-Tests:
+    defaults:
+      run:
+        working-directory: src/WebAPI/ClientApp/
+    runs-on: ubuntu-latest
+    container:
+      image: cypress/included:12.13.0
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Cypress tests
+        uses: cypress-io/github-action@v5
+        with:
+          browser: chrome
+          headless: true
+          working-directory: ./src/WebAPI/ClientApp/
+          start: npm run cypress:ci
+          # build: npm run build:staging
+          wait-on: 'http://localhost:3030'
+  # Back-End Unit Tests
   Back-End-Unit-Tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
@@ -32,10 +75,12 @@ jobs:
         run: dotnet build PlexRipper.sln --no-restore
       - name: Unit Tests
         run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal
+  # Back-End Integration Tests
   Back-End-Integration-Tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
@@ -54,30 +99,13 @@ jobs:
         run: dotnet build PlexRipper.sln --no-restore
       - name: Integration Tests
         run: dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal
-  Front-End-Unit-Tests:
-    defaults:
-      run:
-        working-directory: src/WebAPI/ClientApp/
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup Node.js v18.11
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.11
-          cache: "npm"
-          cache-dependency-path: "**/package-lock.json"
-      - name: Clean install npm modules
-        run: npm ci
-      - name: Build front-end
-        run: npm run build --if-present
-      - name: Run Vitest tests
-        run: npm test
+  # Ensure the Docker image can be built without errors
   Test-Docker-Build:
-    needs: [ Front-End-Unit-Tests, Back-End-Unit-Tests, Back-End-Integration-Tests ]
+    needs: [ Front-End-Unit-Tests, Front-End-Integration-Tests, Back-End-Unit-Tests, Back-End-Integration-Tests ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
       - name: Publish to Registry with dev tag
         uses: elgohr/Publish-Docker-Github-Action@v5
         with:

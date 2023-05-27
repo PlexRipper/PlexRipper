@@ -1,6 +1,7 @@
 name: Create PlexRipper Dev Container Release
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - dev

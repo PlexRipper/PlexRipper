@@ -66,15 +66,16 @@ jobs:
       - name: Cypress tests
         uses: cypress-io/github-action@v5
         with:
-          start: npm run cypress:ci
           wait-on: 'http://localhost:3030'
+          build: npm run build
+          start: npm run start
+          command: npm run cypress:run
           record: true
           parallel: true
           browser: chrome
-          headless: false
+          headless: true
           timeout-minutes: 5
           working-directory: ./src/WebAPI/ClientApp/
-          # build: npm run build:staging
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

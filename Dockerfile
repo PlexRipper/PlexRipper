@@ -7,6 +7,7 @@ WORKDIR /app
 FROM node:18.11.0-alpine AS client-build
 WORKDIR /tmp/build/ClientApp
 
+ARG VERSION=0.0.0
 
 ENV NUXT_HOST=0.0.0.0
 ENV NUXT_PORT=7000
@@ -63,10 +64,10 @@ COPY ["src/WebAPI.Contracts/WebAPI.Contracts.csproj", "src/WebAPI.Contracts/"]
 RUN dotnet restore "src/WebAPI/WebAPI.csproj"
 COPY . .
 WORKDIR "/src/src/WebAPI"
-RUN dotnet build "WebAPI.csproj" -c Release -o /app/build
+RUN dotnet build "WebAPI.csproj" -c Release -o /app/build /p:AssemblyVersion=$VERSION
 
 FROM build AS publish
-RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish
+RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:AssemblyVersion=$VERSION
 
 ## Merge into one container
 FROM base AS final

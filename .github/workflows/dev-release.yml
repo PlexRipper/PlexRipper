@@ -37,6 +37,7 @@ jobs:
         run: npx --prefix src/WebAPI/ClientApp/ semantic-release
   # Build Docker Image
   CreateDockerDevRelease:
+    needs: [ SemanticRelease ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

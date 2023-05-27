@@ -27,14 +27,14 @@
 				<q-col>
 					<q-markup-table>
 						<thead>
-						<tr>
-							<th class="text-left" style="width: 100px">
-								{{ t('components.directory-browser.type') }}
-							</th>
-							<th class="text-left">
-								{{ t('components.directory-browser.path') }}
-							</th>
-						</tr>
+							<tr>
+								<th class="text-left" style="width: 100px">
+									{{ t('components.directory-browser.type') }}
+								</th>
+								<th class="text-left">
+									{{ t('components.directory-browser.path') }}
+								</th>
+							</tr>
 						</thead>
 					</q-markup-table>
 				</q-col>
@@ -44,14 +44,14 @@
 			<!--	Directory Browser	-->
 			<q-markup-table>
 				<tbody class="scroll">
-				<tr v-for="(row, index) in items" :key="index" @click="directoryNavigate(row)">
-					<td class="text-left" style="width: 100px">
-						<q-icon size="md" :name="getIcon(row.type)" />
-					</td>
-					<td class="text-left">
-						{{ row.path }}
-					</td>
-				</tr>
+					<tr v-for="(row, index) in items" :key="index" @click="directoryNavigate(row)">
+						<td class="text-left" style="width: 100px">
+							<q-icon size="md" :name="getIcon(row.type)" />
+						</td>
+						<td class="text-left">
+							{{ row.path }}
+						</td>
+					</tr>
 				</tbody>
 			</q-markup-table>
 		</template>
@@ -111,6 +111,10 @@ const open = (selectedPath: FolderPathDTO): void => {
 	requestDirectories(selectedPath.directory);
 	set(path, selectedPath);
 };
+function cancel(): void {
+	emit('cancel');
+	useCloseControlDialog(props.name);
+}
 
 function confirm(): void {
 	if (!get(path)) {
@@ -118,12 +122,7 @@ function confirm(): void {
 		return;
 	}
 
-	emit('confirm', <FolderPathDTO>get(path));
-	useCloseControlDialog(props.name);
-}
-
-function cancel(): void {
-	emit('cancel');
+	emit('confirm', get(path) as FolderPathDTO);
 	useCloseControlDialog(props.name);
 }
 
@@ -149,13 +148,13 @@ function requestDirectories(newPath: string): void {
 						type: FileSystemEntityType.Parent,
 						extension: '',
 						size: 0,
-						lastModified: ''
+						lastModified: '',
 					});
 				}
 				set(isLoading, false);
 				set(parentPath, value?.parent);
 			}
-		})
+		}),
 	);
 }
 

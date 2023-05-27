@@ -1,7 +1,7 @@
 import Log from 'consola';
+import Axios from 'axios-observable';
 import { GlobalService } from '@service';
 import IAppConfig from '@class/IAppConfig';
-import Axios from 'axios-observable';
 
 export default defineNuxtPlugin(() => {
 	const config = useRuntimeConfig();

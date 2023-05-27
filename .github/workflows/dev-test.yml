@@ -129,7 +129,7 @@ jobs:
         run: dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal
   # Ensure the Docker image can be built without errors
   Test-Docker-Build:
-    needs: [ Front-End-Unit-Tests, Front-End-Type-Check, Front-End-Integration-Tests, Back-End-Unit-Tests, Back-End-Integration-Tests ]
+    needs: [ Front-End-Unit-Tests, Front-End-Type-Check, Back-End-Unit-Tests, Back-End-Integration-Tests ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source Code

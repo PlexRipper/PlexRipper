@@ -32,7 +32,7 @@ export function generateSettingsModel({
 
 		generalSettings: {
 			firstTimeSetup: validConfig.firstTimeSetup,
-			debugMode: false,
+			debugMode: true,
 			activeAccountId: 0,
 		},
 		confirmationSettings: {

@@ -65,7 +65,7 @@ jobs:
         uses: cypress-io/github-action@v5
         with:
           browser: chrome
-          headless: true
+          headless: false
           working-directory: ./src/WebAPI/ClientApp/
           start: npm run cypress:ci
           # build: npm run build:staging

@@ -68,7 +68,7 @@ jobs:
         with:
           wait-on: 'http://localhost:3030'
           build: npm run build
-          start: npm run start
+          start: npm run cypress:ci
           command: npm run cypress:run
           record: true
           parallel: true

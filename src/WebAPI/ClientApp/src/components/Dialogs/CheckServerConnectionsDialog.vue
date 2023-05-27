@@ -15,7 +15,7 @@
 				v-if="plexServerNodes.length > 0"
 				v-model:expanded="expanded"
 				:nodes="plexServerNodes"
-				node-key="uniqueIndex"
+				node-key="index"
 				default-expand-all>
 				<template #default-header="{ node }: { node: IPlexServerNode }">
 					<q-row justify="between" align="center">

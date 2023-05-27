@@ -24,7 +24,7 @@
 		"npm-upgrade-packages": "npm-upgrade",
 		"test": "vitest --config ./vitest.config.ts run",
 		"test-watch": "vitest --config ./vitest.config.ts watch",
-		"cypress:open": "npx cypress open --e2e --browser chromium --env BASE_URL=http://localhost:3030",
+		"cypress:open": "npx cypress open --e2e --browser chromium",
 		"cypress:run": "npx cypress run",
 		"cypress:e2e": "start-server-and-test 'nuxi dev --port 3030 --dotenv .env.cypress' http://localhost:3030 cypress:open",
 		"cypress:ci": "start-server-and-test 'nuxi dev --port 3030 --dotenv .env.cypress' http://localhost:3030 cypress:run",

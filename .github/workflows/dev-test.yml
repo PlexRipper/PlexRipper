@@ -56,20 +56,28 @@ jobs:
       run:
         working-directory: src/WebAPI/ClientApp/
     runs-on: ubuntu-latest
-    container:
-      image: cypress/included:12.13.0
+    strategy:
+      fail-fast: false # https://github.com/cypress-io/github-action/issues/48
+      matrix:
+        containers: [1, 2] # Uses 2 parallel instances
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v3
       - name: Cypress tests
         uses: cypress-io/github-action@v5
         with:
+          start: npm run cypress:ci
+          wait-on: 'http://localhost:3030'
+          record: true
+          parallel: true
           browser: chrome
           headless: false
+          timeout-minutes: 5
           working-directory: ./src/WebAPI/ClientApp/
-          start: npm run cypress:ci
           # build: npm run build:staging
-          wait-on: 'http://localhost:3030'
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
   # Back-End Unit Tests
   Back-End-Unit-Tests:
     runs-on: ubuntu-latest

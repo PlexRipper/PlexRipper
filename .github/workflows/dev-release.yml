@@ -17,7 +17,7 @@ jobs:
       issues: write # to be able to comment on released issues
       pull-requests: write # to be able to comment on released pull requests
     steps:
-      - name: Checkout
+      - name: Checkout source code
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GH_TOKEN }}
@@ -37,9 +37,13 @@ jobs:
         run: npx --prefix src/WebAPI/ClientApp/ semantic-release
   # Build Docker Image
   CreateDockerDevRelease:
+    needs: [ SemanticRelease ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout source code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
       - name: Publish to Registry with dev tag
         uses: elgohr/Publish-Docker-Github-Action@v5
         env:

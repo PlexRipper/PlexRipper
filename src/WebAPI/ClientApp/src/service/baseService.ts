@@ -110,7 +110,7 @@ export default abstract class BaseService extends ObservableStore<IStoreState> {
 	protected getStateChanged<T>(propertyName: keyof IStoreState): Observable<T> {
 		return this.stateChanged.pipe(
 			filter((x) => !!x),
-			map((x) => x[propertyName] as unknown as T)
+			map((x) => x[propertyName] as unknown as T),
 		);
 	}
 

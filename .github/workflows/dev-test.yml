@@ -3,21 +3,93 @@ name: Execute Tests
 on:
   workflow_dispatch:
   pull_request:
-    branches: [master, dev]
+    branches: [ dev ]
     paths-ignore:
       - '.github/**'
       - '.idea/**'
       - '.run/**'
       - '.vscode/**'
 jobs:
-  tests-back-end:
+  # Front-End-Type-Check:
+  Front-End-Type-Check:
+    defaults:
+      run:
+        working-directory: src/WebAPI/ClientApp/
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup .NET
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Setup Node.js v18.11
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.11
+          cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
+      - name: Clean install npm modules
+        run: npm ci
+      - name: Run Typescript type check
+        run: npm run typecheck
+  # Front-End-Unit-Tests:
+  Front-End-Unit-Tests:
+    defaults:
+      run:
+        working-directory: src/WebAPI/ClientApp/
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Setup Node.js v18.11
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.11
+          cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
+      - name: Clean install npm modules
+        run: npm ci
+      - name: Build front-end
+        run: npm run build --if-present
+      - name: Run Vitest tests
+        run: npm test
+  # Front-End-Integration-Tests:
+#  Front-End-Integration-Tests: TODO Tests keep randomly failing during CI, need to investigate
+#    defaults:
+#      run:
+#        working-directory: src/WebAPI/ClientApp/
+#    runs-on: ubuntu-latest
+#    strategy:
+#      fail-fast: false # https://github.com/cypress-io/github-action/issues/48
+#      matrix:
+#        containers: [1, 2] # Uses 2 parallel instances
+#    steps:
+#      - name: Checkout Source Code
+#        uses: actions/checkout@v3
+#      - name: Cypress tests
+#        uses: cypress-io/github-action@v5
+#        with:
+#          wait-on: 'http://localhost:3030'
+#          build: npm run build
+#          start: npm run cypress:ci
+#          command: npm run cypress:run
+#          record: true
+#          parallel: true
+#          browser: chrome
+#          headless: true
+#          timeout-minutes: 5
+#          working-directory: ./src/WebAPI/ClientApp/
+#        env:
+#          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  # Back-End Unit Tests
+  Back-End-Unit-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 7.x.x
+          cache: true
       - uses: actions/cache@v3
         with:
           path: ~/.nuget/packages
@@ -31,27 +103,39 @@ jobs:
         run: dotnet build PlexRipper.sln --no-restore
       - name: Unit Tests
         run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal
-      - name: Integration Tests
-        run: dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal
-  tests-front-end:
-    defaults:
-      run:
-        working-directory: src/WebAPI/ClientApp/
-    strategy:
-      matrix:
-        node-version: [16.x]
+  # Back-End Integration Tests
+  Back-End-Integration-Tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: "npm"
-          cache-dependency-path: "**/package-lock.json"
-      - name: Clean install npm modules
-        run: npm ci
-      - name: Build front-end
-        run: npm run build --if-present
-      - name: Run Jest tests
-        run: npm test
+          dotnet-version: 7.x.x
+          cache: true
+      - uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          # Look to see if there is a cache hit for the corresponding requirements file
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget
+      - name: Restore dependencies
+        run: dotnet restore PlexRipper.sln
+      - name: Build
+        run: dotnet build PlexRipper.sln --no-restore
+      - name: Integration Tests
+        run: dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal
+  # Ensure the Docker image can be built without errors
+  Test-Docker-Build:
+    needs: [ Front-End-Unit-Tests, Front-End-Type-Check, Back-End-Unit-Tests, Back-End-Integration-Tests ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Publish to Registry with dev tag
+        uses: elgohr/Publish-Docker-Github-Action@v5
+        with:
+          name: plexripper/plexripper
+          no_push: true

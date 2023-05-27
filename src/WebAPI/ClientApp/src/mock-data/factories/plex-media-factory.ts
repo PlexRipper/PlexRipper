@@ -1,4 +1,4 @@
-import { randMovie, randNumber, randRecentDate, randUrl } from '@ngneat/falso';
+import { randMovie, randNumber, randRecentDate } from '@ngneat/falso';
 import { checkConfig, incrementSeed, MockConfig } from '@mock';
 import { PlexLibraryDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 

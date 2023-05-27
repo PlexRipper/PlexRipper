@@ -3,6 +3,14 @@
     <deployment type="dockerfile">
       <settings>
         <option name="imageTag" value="plexripper/plexripper:dev" />
+        <option name="buildArgs">
+          <list>
+            <DockerEnvVarImpl>
+              <option name="name" value="VERSION" />
+              <option name="value" value="9.9.9" />
+            </DockerEnvVarImpl>
+          </list>
+        </option>
         <option name="containerName" value="PlexRipperDev" />
         <option name="portBindings">
           <list>

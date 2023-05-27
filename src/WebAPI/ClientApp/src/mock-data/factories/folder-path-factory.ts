@@ -1,5 +1,5 @@
 import { randDirectoryPath, randProductName } from '@ngneat/falso';
-import { FolderPathDTO, FolderType, PlexLibraryDTO, PlexMediaType } from '@dto/mainApi';
+import { FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
 import { checkConfig, MockConfig } from '~/mock-data';
 import Convert from '@class/Convert';
 

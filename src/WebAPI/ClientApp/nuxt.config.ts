@@ -54,7 +54,6 @@ export default defineNuxtConfig({
 	typescript: {
 		// Doc: https://typescript.nuxtjs.org/guide/setup.html#configuration
 		// Packages,  @types/node, vue-tsc and typescript are required
-		typeCheck: true,
 		strict: true,
 	},
 	macros: {

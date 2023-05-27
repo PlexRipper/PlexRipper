@@ -7,6 +7,7 @@ describe('Check server connections dialog', () => {
 		cy.basePageSetup({
 			plexAccountCount: 1,
 			plexServerCount: 3,
+			maxServerConnections: 3,
 		});
 		cy.visit(route('/empty'));
 	});
@@ -25,7 +26,7 @@ describe('Check server connections dialog', () => {
 					}),
 				);
 			})
-			.get('[data-cy="check-server-connection-dialog"]')
+			.getCy('check-server-connection-dialog')
 			.should('exist')
 			.and('be.visible');
 
@@ -60,7 +61,7 @@ describe('Check server connections dialog', () => {
 					connectionSuccessful: true,
 					statusCode: 200,
 					completed: true,
-				} as ServerConnectionCheckStatusProgressDTO);
+				} as Partial<ServerConnectionCheckStatusProgressDTO>);
 			}
 		});
 

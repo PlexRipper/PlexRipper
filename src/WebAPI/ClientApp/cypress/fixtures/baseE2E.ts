@@ -180,9 +180,10 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 			apiRoute({
 				type: APIRoute.PlexMedia,
 				path: `/library/${library.id}`,
+				wildcard: false,
 				query: {
 					page: '*',
-					pageSize: '*',
+					size: '*',
 				},
 			}),
 			{

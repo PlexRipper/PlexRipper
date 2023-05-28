@@ -1,8 +1,12 @@
 {
   "branches": [
-    "master",
-    "dev",
-    "semantic-release"
+    {
+      "name": "master"
+    },
+    {
+      "name": "dev",
+      "prerelease": true
+    }
   ],
   "dryRun": false,
   "repositoryUrl": "https://github.com/PlexRipper/PlexRipper",

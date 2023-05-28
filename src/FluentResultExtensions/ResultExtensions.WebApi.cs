@@ -412,9 +412,9 @@ public static partial class ResultExtensions
         return result.AddStatusCodeSuccess(HttpCodes.Status204NoContent, message);
     }
 
-    public static Result<T> Create204NoContentResult<T>(string message = "")
+    public static Result<T> Create204NoContentResult<T>(T value,string message = "")
     {
-        return CreateSuccessStatusCodeResult(HttpCodes.Status204NoContent, message);
+        return CreateSuccessStatusCodeResult<T>(value, HttpCodes.Status204NoContent, message);
     }
 
     #endregion

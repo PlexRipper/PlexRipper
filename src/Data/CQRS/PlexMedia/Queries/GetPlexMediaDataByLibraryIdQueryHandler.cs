@@ -87,6 +87,6 @@ public class GetPlexMediaDataByLibraryIdQueryHandler : BaseHandler, IRequestHand
         if (entities.Any())
             return Result.Ok(entities);
 
-        return ResultExtensions.IsEmptyQueryResult(nameof(GetPlexMediaDataByLibraryIdQuery), nameof(PlexLibraries), request.LibraryId);
+        return ResultExtensions.IsEmptyQueryResult(new List<PlexMediaSlim>(), nameof(GetPlexMediaDataByLibraryIdQuery), nameof(PlexLibraries), request.LibraryId);
     }
 }

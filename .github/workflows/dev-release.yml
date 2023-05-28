@@ -14,7 +14,7 @@ on:
 
 jobs:
   call-workflow-semantic-release:
-    uses: ./.github/workflows/parts/semantic-release-part.yml
+    uses: ./.github/workflows/semantic-release-part.yml
     secrets: inherit
   # Build Docker Image
   CreateDockerDevRelease:

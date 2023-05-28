@@ -1,5 +1,5 @@
-import { MockConfig } from '@mock';
 import { IBasePageSetupResult } from '@fixtures/baseE2E';
+import { MockConfig } from '@mock';
 
 declare global {
 	namespace Cypress {

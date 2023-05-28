@@ -134,7 +134,7 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v3
-      - name: Publish to Registry with dev tag
+      - name: Test Docker Build
         uses: elgohr/Publish-Docker-Github-Action@v5
         with:
           name: plexripper/plexripper

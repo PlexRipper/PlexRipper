@@ -10,35 +10,15 @@ on:
       - '.idea/**'
       - '.run/**'
       - '.vscode/**'
+      - '.releaserc.json'
+
 jobs:
-  SemanticRelease:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write # to be able to publish a GitHub release
-      issues: write # to be able to comment on released issues
-      pull-requests: write # to be able to comment on released pull requests
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - name: Install dependencies
-        run: npm --prefix src/WebAPI/ClientApp/ install
-      - name: GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          GIT_AUTHOR_NAME: ${{ vars.GIT_AUTHOR_NAME }}
-          GIT_AUTHOR_EMAIL: ${{ vars.GIT_AUTHOR_EMAIL }}
-          GIT_COMMITTER_NAME: ${{ vars.GIT_COMMITTER_NAME }}
-          GIT_COMMITTER_EMAIL: ${{ vars.GIT_COMMITTER_EMAIL }}
-        run: npx --prefix src/WebAPI/ClientApp/ semantic-release
+  call-workflow-semantic-release:
+    uses: ./.github/workflows/semantic-release-part.yml
+    secrets: inherit
   # Build Docker Image
   CreateDockerDevRelease:
-    needs: [ SemanticRelease ]
+    needs: [ call-workflow-semantic-release ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code

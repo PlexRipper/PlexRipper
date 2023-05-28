@@ -2,10 +2,23 @@ name: Publish Docker latest and version tagged image
 # This should only run when a release is created with a version tag
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '.github/**'
+      - '.idea/**'
+      - '.run/**'
+      - '.vscode/**'
+      - '.releaserc.json'
 
 jobs:
+  call-workflow-semantic-release:
+    uses: ./.github/workflows/semantic-release-part.yml
+    secrets: inherit
   # Build Docker Image
   CreateDockerLatestAndTagRelease:
+    needs: [ call-workflow-semantic-release ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

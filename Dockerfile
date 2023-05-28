@@ -12,6 +12,8 @@ ARG VERSION=0.0.0
 ENV NUXT_HOST=0.0.0.0
 ENV NUXT_PORT=7000
 ENV API_PORT=7000
+ENV NUXT_PUBLIC_IS_DOCKER=true
+
 # Essential config files
 COPY ./src/WebAPI/ClientApp/package*.json ./
 COPY ./src/WebAPI/ClientApp/tsconfig.json ./

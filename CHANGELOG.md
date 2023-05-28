@@ -1,5 +1,12 @@
 PlexRipper Changelog
 
+## [0.11.1](https://github.com/PlexRipper/PlexRipper/compare/v0.11.0...v0.11.1) (2023-05-28)
+
+
+### Bug Fixes
+
+* **Web-UI:** Fixed the boot loop logo due to wrong url used when opening the web ui ([768e08b](https://github.com/PlexRipper/PlexRipper/commit/768e08bab1867c1b8b514e9dfd0242852c32b533))
+
 # [0.11.0](https://github.com/PlexRipper/PlexRipper/compare/v0.10.0...v0.11.0) (2023-05-27)
 
 

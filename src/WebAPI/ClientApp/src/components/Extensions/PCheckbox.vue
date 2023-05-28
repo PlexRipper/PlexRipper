@@ -1,17 +1,22 @@
 <template>
-	<v-checkbox :value="value" color="red" class="ma-3 pt-0" hide-details @click="handleInput()" />
+	<q-checkbox :model-value="value" color="red" class="ma-3 pt-0" hide-details @click="handleInput()" />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
+const props = withDefaults(
+	defineProps<{
+		value: boolean;
+	}>(),
+	{
+		value: false,
+	},
+);
 
-@Component
-export default class PCheckbox extends Vue {
-	@Prop({ required: true, type: Boolean })
-	readonly value!: boolean;
+const emit = defineEmits<{
+	(e: 'input', save: boolean): void;
+}>();
 
-	handleInput(): void {
-		this.$emit('input', !this.value);
-	}
+function handleInput(): void {
+	emit('input', !props.value);
 }
 </script>

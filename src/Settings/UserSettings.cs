@@ -1,8 +1,9 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text.Json;
-using PlexRipper.Application;
+using Logging.Interface;
 using PlexRipper.Settings.Models;
+using Settings.Contracts;
 
 namespace PlexRipper.Settings;
 
@@ -11,6 +12,7 @@ public class UserSettings : IUserSettings
 {
     #region Fields
 
+    private readonly ILog _log;
     private readonly IConfirmationSettingsModule _confirmationSettingsModule;
 
     private readonly IDateTimeSettingsModule _dateTimeSettingsModule;
@@ -40,6 +42,7 @@ public class UserSettings : IUserSettings
     /// <param name="languageSettingsModule"></param>
     /// <param name="serverSettingsModule"></param>
     public UserSettings(
+        ILog log,
         IConfirmationSettingsModule confirmationSettingsModule,
         IDateTimeSettingsModule dateTimeSettingsModule,
         IDisplaySettingsModule displaySettingsModule,
@@ -48,6 +51,7 @@ public class UserSettings : IUserSettings
         ILanguageSettingsModule languageSettingsModule,
         IServerSettingsModule serverSettingsModule)
     {
+        _log = log;
         _confirmationSettingsModule = confirmationSettingsModule;
         _dateTimeSettingsModule = dateTimeSettingsModule;
         _displaySettingsModule = displaySettingsModule;
@@ -78,7 +82,7 @@ public class UserSettings : IUserSettings
 
     public void Reset()
     {
-        Log.Information("Resetting UserSettings");
+        _log.InformationLine("Resetting UserSettings");
 
         _confirmationSettingsModule.Reset();
         _dateTimeSettingsModule.Reset();

@@ -1,4 +1,6 @@
-﻿using PlexRipper.Application.Notifications.Queries;
+﻿using Application.Contracts;
+using Data.Contracts;
+using WebAPI.Contracts;
 
 namespace PlexRipper.Application.Notifications;
 
@@ -39,7 +41,7 @@ public class NotificationsService : INotificationsService
         return SendResult(result.ToResult());
     }
 
-    public async Task<Result> ClearAllNotifications()
+    public async Task<Result<int>> ClearAllNotifications()
     {
         return await _mediator.Send(new ClearAllNotificationsCommand());
     }
@@ -56,7 +58,7 @@ public class NotificationsService : INotificationsService
                     return notificationId.ToResult();
 
                 notification.Id = notificationId.Value;
-                await _signalRService.SendNotification(notification);
+                await _signalRService.SendNotificationAsync(notification);
             }
         }
 

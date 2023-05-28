@@ -1,9 +1,9 @@
 ﻿using Autofac;
-using PlexRipper.Application;
 using PlexRipper.WebAPI.SignalR;
 using PlexRipper.WebAPI.SignalR.Hubs;
+using WebAPI.Contracts;
 
-namespace PlexRipper.WebAPI.Config;
+namespace PlexRipper.WebAPI;
 
 public class WebApiModule : Module
 {

@@ -1,36 +1,24 @@
 <script lang="ts">
-import Vue, { CreateElement, VNode } from 'vue';
-import { RenderContext } from 'vue/types/options';
-import BaseButton, { IBaseButtonProps } from './BaseButton.vue';
+import { defineComponent, h, mergeProps } from 'vue';
+import BaseButton from './BaseButton.vue';
+import { IBaseButtonProps } from '@props';
+import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
-export default Vue.extend({
+export default defineComponent({
 	name: 'ConfirmButton',
-	functional: true,
-	props: {
-		cy: {
-			type: String,
-			default: '',
-		},
-		width: {
-			type: Number,
-			default: 130,
-		},
-		loading: {
-			type: Boolean,
-			default: false,
-		},
-	},
-	render(h: CreateElement, context: RenderContext): VNode {
-		return h(BaseButton, {
-			...context.data,
-			props: {
-				...context.props,
-				outlined: true,
-				color: 'green',
-				textId: 'confirm',
-				icon: 'mdi-check',
-			} as Partial<IBaseButtonProps>,
-		});
+	props: baseBtnPropsDefault(),
+	render() {
+		return h(
+			BaseButton,
+			{
+				...mergeProps(this.$props, {
+					color: 'positive',
+					textId: 'confirm',
+					icon: 'mdi-check',
+				} as IBaseButtonProps),
+			},
+			this.$slots.default,
+		);
 	},
 });
 </script>

@@ -1,10 +1,12 @@
 ﻿using System.Globalization;
+using Logging.Interface;
 
 namespace PlexRipper.Domain;
 
 public static class DataFormat
 {
     private static readonly NumberFormatInfo NumberFormat = NumberFormatInfo.InvariantInfo;
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(DataFormat));
 
     /// <summary>
     /// Format file size or downloaded size string.
@@ -31,7 +33,7 @@ public static class DataFormat
     /// </summary>
     /// <param name="speed"></param>
     /// <returns></returns>
-    public static string FormatSpeedString(int speed)
+    public static string FormatSpeedString(long speed)
     {
         var kbSpeed = speed / 1024F;
         var mbSpeed = kbSpeed / 1024F;
@@ -75,7 +77,7 @@ public static class DataFormat
         }
         catch (Exception e)
         {
-            Log.Error(e);
+            _log.Error(e);
             throw;
         }
     }
@@ -91,7 +93,7 @@ public static class DataFormat
         }
         catch (Exception e)
         {
-            Log.Error(e);
+            _log.Error(e);
             throw;
         }
     }
@@ -121,7 +123,7 @@ public static class DataFormat
     /// <returns></returns>
     public static long GetPriority()
     {
-        return Convert.ToInt64((DateTime.Now - DateTime.UnixEpoch).TotalSeconds);
+        return Convert.ToInt64((DateTime.UtcNow - DateTime.UnixEpoch).TotalSeconds);
     }
 
     /// <summary>
@@ -132,7 +134,7 @@ public static class DataFormat
     {
         var list = new List<long>();
         for (var i = 0; i < count; i++)
-            list.Add(Convert.ToInt64((DateTime.Now - DateTime.UnixEpoch).TotalSeconds) + i);
+            list.Add(Convert.ToInt64((DateTime.UtcNow - DateTime.UnixEpoch).TotalSeconds) + i);
 
         return list;
     }

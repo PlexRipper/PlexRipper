@@ -40,4 +40,13 @@ public static class ApiRoutes
             return Controller + "/start/" + id;
         }
     }
+
+    public static class Account
+    {
+        public static string Controller => Base + "/" + nameof(PlexAccountController).Replace("Controller", string.Empty);
+
+        public static string PostValidate => Controller + "/validate";
+
+        public static string PostCreateAccount => Controller + "/";
+    }
 }

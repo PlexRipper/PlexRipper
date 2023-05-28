@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
-import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
+import { PlexServerDTO } from '@dto/mainApi';
 import ResultDTO from '@dto/ResultDTO';
 import PlexRipperAxios from '@class/PlexRipperAxios';
 
@@ -22,15 +22,7 @@ export function getPlexServers(): Observable<ResultDTO<PlexServerDTO[]>> {
 	});
 }
 
-export function checkPlexServer(serverId: number): Observable<ResultDTO<PlexServerStatusDTO | null>> {
-	return PlexRipperAxios.get<PlexServerStatusDTO>({
-		url: `${PLEX_SERVER_RELATIVE_PATH}/${serverId}/check`,
-		apiCategory: logText,
-		apiName: checkPlexServer.name,
-	});
-}
-
-export function syncPlexServer(serverId: number, forceSync: boolean = false): Observable<ResultDTO> {
+export function syncPlexServer(serverId: number, forceSync = false): Observable<ResultDTO> {
 	return PlexRipperAxios.get<void>({
 		url: `${PLEX_SERVER_RELATIVE_PATH}/${serverId}/sync?forceSync=${forceSync}`,
 		apiCategory: logText,
@@ -43,5 +35,12 @@ export function inspectPlexServer(serverId: number): Observable<ResultDTO> {
 		url: `${PLEX_SERVER_RELATIVE_PATH}/${serverId}/inspect`,
 		apiCategory: logText,
 		apiName: syncPlexServer.name,
+	});
+}
+
+export function setPreferredPlexServerConnection(serverId: number, connectionId: number): Observable<ResultDTO> {
+	return PlexRipperAxios.put<void>({
+		url: `${PLEX_SERVER_RELATIVE_PATH}/${serverId}/preferred-connection/${connectionId}`,
+		apiName: setPreferredPlexServerConnection.name,
 	});
 }

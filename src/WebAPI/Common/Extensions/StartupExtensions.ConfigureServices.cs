@@ -1,13 +1,14 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
+using Environment;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
-using NSwag;
-using NSwag.Generation.Processors.Security;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Http;
+using Microsoft.OpenApi.Models;
 using PlexRipper.Application;
-using PlexRipper.WebAPI.Config;
-using Quartz;
+using PlexRipper.Domain.Config;
 
 namespace PlexRipper.WebAPI.Common.Extensions;
 
@@ -21,20 +22,20 @@ public static partial class StartupExtensions
 
         services.SetupControllers();
 
-        services.SetupFrontEnd(env);
-        services.SetupQuartz();
+        if (!EnvironmentExtensions.IsIntegrationTestMode())
+        {
+            services.SetupFrontEnd(env);
+            services.SetupSignalR();
+            services.SetupOpenApiDocumentation();
+        }
 
-        services.SetupSignalR();
-
-        services.SetupOpenApiDocumentation();
         services.AddOptions();
-    }
 
-    public static void SetupTestConfigureServices(IServiceCollection services, IWebHostEnvironment env)
-    {
-        services.SetupCors();
-        services.SetupControllers();
-        services.AddOptions();
+        services.AddHttpClient();
+
+        // This will disable all the build-in HttpClient logging
+        // Source: https://stackoverflow.com/a/52970073/8205497
+        services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
     }
 
     public static void SetupCors(this IServiceCollection services)
@@ -63,10 +64,10 @@ public static partial class StartupExtensions
     {
         // Used to deploy the front-end Nuxt client
         if (env.IsProduction())
-            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "wwwroot"; });
+            services.AddSpaStaticFiles(configuration => configuration.RootPath = "wwwroot");
 
         if (env.IsDevelopment())
-            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp"; });
+            services.AddSpaStaticFiles(configuration => configuration.RootPath = "ClientApp");
     }
 
     public static void SetupControllers(this IServiceCollection services)
@@ -74,13 +75,20 @@ public static partial class StartupExtensions
         // Controllers and Json options
         services
             .AddControllers()
-            .AddJsonOptions(JsonSerializerOptionsWebApi.Config);
+            .AddJsonOptions(options =>
+            {
+                var config = DefaultJsonSerializerOptions.ConfigBase;
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = config.PropertyNameCaseInsensitive;
+                options.JsonSerializerOptions.PropertyNamingPolicy = config.PropertyNamingPolicy;
+                options.JsonSerializerOptions.DefaultIgnoreCondition = config.DefaultIgnoreCondition;
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
 
         // Customise default API behaviour
         services.AddHttpContextAccessor();
 
         // Fluent Validator
-        services.AddMvc(options => { options.Filters.Add<ValidateFilter>(); })
+        services.AddMvc()
             .AddFluentValidation(fv =>
             {
                 fv.RegisterValidatorsFromAssemblyContaining<WebApiModule>();
@@ -95,37 +103,30 @@ public static partial class StartupExtensions
         services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });
     }
 
-    public static void SetupQuartz(this IServiceCollection services)
-    {
-        // Quartz setup
-        services.AddQuartzHostedService(options =>
-        {
-            // when shutting down we want jobs to complete gracefully
-            options.WaitForJobsToComplete = true;
-        });
-    }
-
     public static void SetupSignalR(this IServiceCollection services)
     {
         // SignalR
-        services.AddSignalR().AddJsonProtocol(options => { options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+        services
+            .AddSignalR()
+            .AddJsonProtocol(options => options.PayloadSerializerOptions = DefaultJsonSerializerOptions.ConfigBase);
     }
 
     public static void SetupOpenApiDocumentation(this IServiceCollection services)
     {
-        services.AddOpenApiDocument(configure =>
+        services.AddSwaggerGen(c =>
         {
-            configure.GenerateEnumMappingDescription = true;
-            configure.Title = "PlexRipper API";
-            configure.AddSecurity("JWT", Enumerable.Empty<string>(), new OpenApiSecurityScheme
+            c.SwaggerDoc("v1", new OpenApiInfo
             {
-                Type = OpenApiSecuritySchemeType.ApiKey,
-                Name = "Authorization",
-                In = OpenApiSecurityApiKeyLocation.Header,
-                Description = "Type into the text box: Bearer {your JWT token}.",
+                Version = "v1",
+                Title = "PlexRipper Swagger Internal API",
             });
-            configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
-            configure.DocumentProcessors.Add(new NSwagAddExtraTypes());
+            c.SchemaGeneratorOptions.SupportNonNullableReferenceTypes = true;
+            c.SchemaFilter<RequiredMemberFilter>();
+            c.SchemaFilter<RequiredNotNullableSchemaFilter>();
+            c.AddSignalRSwaggerGen();
+            // Enables the XML-documentation for the Swagger UI
+            c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,
+                $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
         });
     }
 }

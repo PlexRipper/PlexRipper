@@ -1,4 +1,5 @@
 export default interface ISelection {
 	indexKey: number;
-	keys: string[];
+	keys: number[];
+	allSelected: boolean | null;
 }

@@ -1,16 +1,17 @@
 ﻿using Bogus;
+using ByteSizeLib;
 
 namespace PlexRipper.BaseTests;
 
 public static partial class FakeData
 {
-    public static Faker<T> ApplyBaseDownloadTask<T>(this Faker<T> faker, [CanBeNull] Action<UnitTestDataConfig> options = null) where T : DownloadTask
+    public static Faker<T> ApplyBaseDownloadTask<T>(this Faker<T> faker, int seed = 0, Action<FakeDataConfig> options = null) where T : DownloadTask
     {
-        var config = UnitTestDataConfig.FromOptions(options);
+        var config = FakeDataConfig.FromOptions(options);
 
         return faker
             .StrictMode(true)
-            .UseSeed(config.Seed)
+            .UseSeed(seed)
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.DownloadStatus, _ => DownloadStatus.Queued)
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
@@ -19,13 +20,15 @@ public static partial class FakeData
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Movie)
             .RuleFor(x => x.Priority, _ => 0)
             .RuleFor(x => x.DataReceived, _ => 0)
-            .RuleFor(x => x.DataTotal, f => f.Random.Long(1, 10000000))
+            .RuleFor(x => x.DataTotal, f => config.DownloadFileSizeInMb > 0
+                ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
+                : f.Random.Long(1, 10000000))
             .RuleFor(x => x.Percentage, _ => 0)
             .RuleFor(x => x.DownloadSpeed, _ => 0)
+            .RuleFor(x => x.FileTransferSpeed, _ => 0)
             .RuleFor(x => x.DownloadWorkerTasks, _ => new List<DownloadWorkerTask>())
             .RuleFor(x => x.FileName, _ => "file.mp4")
             .RuleFor(x => x.FileLocationUrl, _ => PlexMockServerConfig.FileUrl)
-            .RuleFor(x => x.DownloadUrl, f => config.MockServer?.DownloadUri?.ToString() ?? f.Internet.Url())
             .RuleFor(x => x.DownloadDirectory, f => f.System.FilePath())
             .RuleFor(x => x.DestinationDirectory, f => f.System.FilePath())
             .RuleFor(x => x.ParentId, _ => null)
@@ -43,22 +46,27 @@ public static partial class FakeData
             .RuleFor(x => x.DestinationFolder, _ => null)
             .RuleFor(x => x.ServerMachineIdentifier, f => f.Random.Hash())
             .RuleFor(x => x.DestinationFolderId, _ => 2)
-            .RuleFor(x => x.RootDownloadTask, _ => null)
-            .RuleFor(x => x.RootDownloadTaskId, _ => null);
+            .RuleFor(x => x.RootDownloadTaskId, _ => 0);
     }
 
     #region Movie
 
-    public static Faker<DownloadTask> GetMovieDownloadTask([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<DownloadTask> GetMovieDownloadTask(int seed = 0, Action<FakeDataConfig> options = null)
     {
-        var config = UnitTestDataConfig.FromOptions(options);
+        var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<DownloadTask>()
-            .ApplyBaseDownloadTask(options)
-            .UseSeed(config.Seed)
+            .ApplyBaseDownloadTask(seed, options)
+            .UseSeed(seed)
             .RuleFor(x => x.MediaType, PlexMediaType.Movie)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Movie)
-            .RuleFor(x => x.Children, _ => GetMovieDataDownloadTask(options).Generate(1))
+            .RuleFor(x => x.Children, _ =>
+            {
+                if (config.IncludeMultiPartMovies)
+                    return GetMoviePartDownloadTask(seed, options).Generate(2);
+
+                return GetMovieDataDownloadTask(seed, options).Generate(1);
+            })
             .RuleFor(x => x.DownloadFolderId, _ => 1)
             .RuleFor(x => x.DestinationFolderId, _ => 2)
             .FinishWith((_, downloadTask) =>
@@ -71,67 +79,89 @@ public static partial class FakeData
             });
     }
 
-    public static Faker<DownloadTask> GetMovieDataDownloadTask([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<DownloadTask> GetMovieDataDownloadTask(int seed = 0, Action<FakeDataConfig> options = null)
     {
-        var config = UnitTestDataConfig.FromOptions(options);
+        var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<DownloadTask>()
-            .ApplyBaseDownloadTask(options)
-            .UseSeed(config.Seed)
+            .ApplyBaseDownloadTask(seed, options)
+            .UseSeed(seed)
             .RuleFor(x => x.MediaType, PlexMediaType.Movie)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.MovieData);
+    }
+
+    public static Faker<DownloadTask> GetMoviePartDownloadTask(int seed = 0, Action<FakeDataConfig> options = null)
+    {
+        var config = FakeDataConfig.FromOptions(options);
+
+        return new Faker<DownloadTask>()
+            .ApplyBaseDownloadTask(seed, options)
+            .UseSeed(seed)
+            .RuleFor(x => x.MediaType, PlexMediaType.Movie)
+            .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.MoviePart);
     }
 
     #endregion
 
     #region TvShow
 
-    public static Faker<DownloadTask> GetTvShowDownloadTask([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<DownloadTask> GetTvShowDownloadTask(int seed = 0, Action<FakeDataConfig> options = null)
     {
-        var config = UnitTestDataConfig.FromOptions(options);
+        var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<DownloadTask>()
-            .ApplyBaseDownloadTask(options)
-            .UseSeed(config.Seed)
+            .ApplyBaseDownloadTask(seed, options)
+            .UseSeed(seed)
             .RuleFor(x => x.MediaType, PlexMediaType.TvShow)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.TvShow)
-            .RuleFor(x => x.DownloadUrl, _ => "")
-            .RuleFor(x => x.Children, _ => GetTvShowSeasonDownloadTask(options).Generate(config.TvShowSeasonDownloadTasksCount));
+            .RuleFor(x => x.Children, _ =>
+            {
+                var f = GetTvShowSeasonDownloadTask(seed, options);
+                if (config.TvShowSeasonDownloadTasksCount > 0)
+                    return f.Generate(config.TvShowSeasonDownloadTasksCount);
+
+                return f.GenerateBetween(1, 5);
+            });
     }
 
-    public static Faker<DownloadTask> GetTvShowSeasonDownloadTask([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<DownloadTask> GetTvShowSeasonDownloadTask(int seed = 0, Action<FakeDataConfig> options = null)
     {
-        var config = UnitTestDataConfig.FromOptions(options);
+        var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<DownloadTask>()
-            .ApplyBaseDownloadTask(options)
-            .UseSeed(config.Seed)
+            .ApplyBaseDownloadTask(seed, options)
+            .UseSeed(seed)
             .RuleFor(x => x.MediaType, PlexMediaType.Season)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Season)
-            .RuleFor(x => x.DownloadUrl, _ => "")
-            .RuleFor(x => x.Children, _ => GetTvShowEpisodeDownloadTask(options).Generate(config.TvShowEpisodeDownloadTasksCount));
+            .RuleFor(x => x.Children, _ =>
+            {
+                var f = GetTvShowEpisodeDownloadTask(seed, options);
+                if (config.TvShowEpisodeDownloadTasksCount > 0)
+                    return f.Generate(config.TvShowEpisodeDownloadTasksCount);
+
+                return f.GenerateBetween(5, 10);
+            });
     }
 
-    public static Faker<DownloadTask> GetTvShowEpisodeDownloadTask([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<DownloadTask> GetTvShowEpisodeDownloadTask(int seed = 0, Action<FakeDataConfig> options = null)
     {
-        var config = UnitTestDataConfig.FromOptions(options);
+        var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<DownloadTask>()
-            .ApplyBaseDownloadTask(options)
-            .UseSeed(config.Seed)
+            .ApplyBaseDownloadTask(seed, options)
+            .UseSeed(seed)
             .RuleFor(x => x.MediaType, PlexMediaType.Episode)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Episode)
-            .RuleFor(x => x.DownloadUrl, _ => "")
-            .RuleFor(x => x.Children, _ => GetTvShowEpisodeDataDownloadTask(options).Generate(1));
+            .RuleFor(x => x.Children, _ => GetTvShowEpisodeDataDownloadTask(seed, options).Generate(1));
     }
 
-    public static Faker<DownloadTask> GetTvShowEpisodeDataDownloadTask([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<DownloadTask> GetTvShowEpisodeDataDownloadTask(int seed = 0, Action<FakeDataConfig> options = null)
     {
-        var config = UnitTestDataConfig.FromOptions(options);
+        var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<DownloadTask>()
-            .ApplyBaseDownloadTask(options)
-            .UseSeed(config.Seed)
+            .ApplyBaseDownloadTask(seed, options)
+            .UseSeed(seed)
             .RuleFor(x => x.MediaType, PlexMediaType.Episode)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.EpisodeData);
     }
@@ -140,14 +170,14 @@ public static partial class FakeData
 
     #region DownloadWorkerTasks
 
-    public static Faker<DownloadWorkerTask> GetDownloadWorkerTask([CanBeNull] Action<UnitTestDataConfig> options = null)
+    public static Faker<DownloadWorkerTask> GetDownloadWorkerTask(int seed = 0, Action<FakeDataConfig> options = null)
     {
-        var config = UnitTestDataConfig.FromOptions(options);
+        var config = FakeDataConfig.FromOptions(options);
 
         var partIndex = 1;
         return new Faker<DownloadWorkerTask>()
             .StrictMode(true)
-            .UseSeed(config.Seed)
+            .UseSeed(seed)
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.FileName, f => f.System.FileName() + ".mp4")
             .RuleFor(x => x.StartByte, f => f.Random.Long(0))
@@ -156,7 +186,7 @@ public static partial class FakeData
             .RuleFor(x => x.PartIndex, _ => partIndex++)
             .RuleFor(x => x.TempDirectory, f => f.System.FilePath())
             .RuleFor(x => x.ElapsedTime, 0)
-            .RuleFor(x => x.DownloadUrl, f => config.MockServer?.DownloadUri.ToString() ?? f.Internet.Url())
+            .RuleFor(x => x.FileLocationUrl, f => f.Internet.UrlRootedPath())
             .RuleFor(x => x.DownloadStatus, DownloadStatus.Queued)
             .RuleFor(x => x.DownloadTaskId, _ => 0)
             .RuleFor(x => x.DownloadTask, _ => null)

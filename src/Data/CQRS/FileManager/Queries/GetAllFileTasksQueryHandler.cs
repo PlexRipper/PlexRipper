@@ -1,6 +1,7 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.FileManager.Queries;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.FileManager;
@@ -9,7 +10,7 @@ public class GetAllFileTasksQueryValidator : AbstractValidator<GetAllFileTasksQu
 
 public class GetAllFileTasksQueryHandler : BaseHandler, IRequestHandler<GetAllFileTasksQuery, Result<List<DownloadFileTask>>>
 {
-    public GetAllFileTasksQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public GetAllFileTasksQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<List<DownloadFileTask>>> Handle(GetAllFileTasksQuery request, CancellationToken cancellationToken)
     {

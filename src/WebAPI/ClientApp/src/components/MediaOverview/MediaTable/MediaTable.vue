@@ -1,253 +1,202 @@
 <template>
-	<v-tree-view-table
-		:items="items"
-		:headers="getHeaders"
-		:navigation="!hideNavigation"
-		:open-all="detailMode"
-		item-key="treeKeyId"
-		load-children
-		@selected="updateSelected"
-		@download="downloadMedia"
-		@load-children="getMedia"
-	/>
+	<div class="media-table" data-cy="media-table">
+		<MediaTableHeader
+			:columns="mediaTableColumns"
+			selectable
+			:selected="rootSelected"
+			class="media-table--header"
+			@selected="rootSetSelected($event)" />
+		<div
+			id="media-table-scroll"
+			ref="qTableRef"
+			:class="['media-table--content', isScrollable ? 'scroll' : '']"
+			data-cy="media-table-scroll">
+			<template v-if="disableIntersection">
+				<MediaTableRow
+					v-for="(row, index) in rows"
+					:key="index"
+					:index="index"
+					:data-cy="`media-table-row-${index}`"
+					:columns="mediaTableColumns"
+					:row="row"
+					selectable
+					:selected="isSelected(row.id)"
+					:disable-highlight="disableHighlight"
+					:disable-hover-click="disableHoverClick"
+					@selected="updateSelectedRow(row.id, $event)" />
+			</template>
+			<template v-else>
+				<q-intersection
+					v-for="(row, index) in rows"
+					:key="index"
+					:once="disableIntersection"
+					class="media-table--intersection highlight-border-box"
+					:data-scroll-index="index">
+					<MediaTableRow
+						:index="index"
+						:data-cy="`media-table-row-${index}`"
+						:columns="mediaTableColumns"
+						:row="row"
+						selectable
+						:selected="isSelected(row.id)"
+						:disable-highlight="disableHighlight"
+						:disable-hover-click="disableHoverClick"
+						@selected="updateSelectedRow(row.id, $event)" />
+				</q-intersection>
+			</template>
+		</div>
+	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Log from 'consola';
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import { DownloadMediaDTO, DownloadTaskCreationProgress, PlexMediaDTO, PlexMediaType } from '@dto/mainApi';
-import ITreeViewTableHeader from '@components/General/VTreeViewTable/ITreeViewTableHeader';
-import TreeViewTableHeaderEnum from '@enums/treeViewTableHeaderEnum';
-import ITreeDownloadItem from '@mediaOverview/MediaTable/types/ITreeDownloadItem';
+import { get, set, useScroll } from '@vueuse/core';
+import { setMediaOverviewSort, triggerBoxHighlight, listenMediaOverviewScrollToCommand } from '#imports';
+import { getMediaTableColumns } from '~/composables/mediaTableColumns';
+import { PlexMediaSlimDTO } from '@dto/mainApi';
+import ISelection from '@interfaces/ISelection';
 
-@Component
-export default class MediaTable extends Vue {
-	@Prop({ required: true, type: Array as () => PlexMediaDTO[] })
-	readonly items!: PlexMediaDTO[];
+const mediaTableColumns = getMediaTableColumns();
+const qTableRef = ref<HTMLElement | null>(null);
+const scrollTargetElement = ref<HTMLElement | null>(null);
+const autoScrollEnabled = ref(false);
 
-	@Prop({ required: true, type: String })
-	readonly mediaType!: PlexMediaType;
+const props = withDefaults(
+	defineProps<{
+		rows: PlexMediaSlimDTO[];
+		selection: ISelection | null;
+		scrollDict?: Record<string, number>;
+		disableHoverClick?: boolean;
+		disableHighlight?: boolean;
+		disableIntersection?: boolean;
+		isScrollable?: boolean;
+	}>(),
+	{
+		scrollDict: { '#': 0 } as any,
+		disableHoverClick: false,
+		disableHighlight: false,
+		disableIntersection: false,
+		isScrollable: true,
+	},
+);
 
-	@Prop({ required: false, type: Boolean })
-	readonly hideNavigation!: boolean;
+const emit = defineEmits<{
+	(e: 'selection', payload: ISelection): void;
+	(e: 'row-click', payload: PlexMediaSlimDTO): void;
+}>();
 
-	@Prop({ type: Boolean })
-	readonly detailMode!: boolean;
+function isSelected(mediaId: number) {
+	return (props.selection?.keys ?? []).includes(mediaId);
+}
 
-	@Prop({ required: true, type: Number })
-	readonly libraryId!: number;
-
-	expanded: string[] = [];
-
-	openDownloadPreviews: number[] = [];
-
-	progress: DownloadTaskCreationProgress | null = null;
-
-	visible: boolean[] = [];
-	loadingButtons: string[] = [];
-
-	selected: string[] = [];
-
-	@Watch('items')
-	updateVisible(): void {
-		this.items.forEach(() => this.visible.push(false));
+const rootSelected = computed((): boolean | null => {
+	if (props.selection?.keys.length === props.rows.length) {
+		return true;
 	}
 
-	get containerRef(): any {
-		return this.$refs.scrollbar;
+	if (props.selection?.keys.length === 0) {
+		return false;
 	}
 
-	isLoading(key: string): boolean {
-		return this.loadingButtons.includes(key);
-	}
+	return null;
+});
 
-	get getHeaders(): ITreeViewTableHeader[] {
-		return [
-			{
-				text: 'Title',
-				value: 'title',
-				maxWidth: 250,
-			},
-			{
-				text: 'Year',
-				value: 'year',
-				width: 50,
-			},
-			{
-				text: 'Size',
-				value: 'mediaSize',
-				type: TreeViewTableHeaderEnum.FileSize,
-				width: 100,
-			},
-			{
-				text: 'Added At',
-				value: 'addedAt',
-				type: TreeViewTableHeaderEnum.Date,
-				width: 100,
-			},
-			{
-				text: 'Updated At',
-				value: 'updatedAt',
-				type: TreeViewTableHeaderEnum.Date,
-				width: 100,
-			},
-			{
-				text: 'Actions',
-				value: 'actions',
-				type: TreeViewTableHeaderEnum.Actions,
-				width: 100,
-				sortable: false,
-				defaultActions: ['download'],
-			},
-		];
-	}
+function rootSetSelected(value: boolean) {
+	emit('selection', {
+		indexKey: props.selection?.indexKey ?? 0,
+		keys: value ? props.rows.map((x) => x.id) : [],
+		allSelected: value,
+	} as ISelection);
+}
 
-	createDownloadCommands(): DownloadMediaDTO[] {
-		const downloads: DownloadMediaDTO[] = [];
+function updateSelectedRow(mediaId: number, state: boolean) {
+	emit('selection', {
+		...props.selection,
+		keys: state ? [...(props.selection?.keys ?? []), mediaId] : (props.selection?.keys ?? []).filter((x) => x !== mediaId),
+		allSelected: false,
+	} as ISelection);
+}
 
-		if (this.mediaType === PlexMediaType.TvShow) {
-			const treeTvShows: ITreeDownloadItem[] = [];
-			const episodesKeys: string[] = this.selected.filter((x) => x?.split('-')?.length === 3 ?? false);
-
-			// Create a hierarchical tree of all selected media, TvShow -> Season -> Episode
-			episodesKeys.forEach((x) => {
-				const tvShowId = +x.split('-')[0];
-				const seasonId = +x.split('-')[1];
-				const episodeId = +x.split('-')[2];
-
-				// Add tvShow to tree
-				if (!treeTvShows.some((tvShow) => tvShow.id === tvShowId)) {
-					treeTvShows.push({ id: tvShowId, children: [] });
-				}
-
-				// Add season to tree
-				if (!treeTvShows.some((tvShow) => tvShow.children?.some((season) => season.id === seasonId))) {
-					treeTvShows.find((x) => x.id === tvShowId)?.children?.push({ id: seasonId, children: [] });
-				}
-
-				// Add episode to tree
-				treeTvShows
-					.find((x) => x.id === tvShowId)
-					?.children?.find((x) => x.id === seasonId)
-					?.children?.push({ id: episodeId });
-			});
-
-			// Use the hierarchical tree and create downloadCommands.
-			// The objective is to only return a seasonDownloadCommand, if all episodes have been selected
-			// Instead of 10 episodeIds, we get 1 seasonId if all episodes in that season have been selected.
-			// Same thing for a tvShowId, instead of multiple seasonIds, we get a single tvShowId if all seasons have been selected.
-			const tvShowIds: number[] = [];
-			let seasonIds: number[] = [];
-			const episodesIds: number[] = [];
-			treeTvShows.forEach((treeTvShow) => {
-				// Find tvShow
-				const tvShow = this.items.find((tvShow) => tvShow.id === treeTvShow.id);
-				if (tvShow) {
-					const tmpSeasonIds: number[] = [];
-					treeTvShow.children?.forEach((treeSeason) => {
-						// Find season
-						const season = tvShow?.children?.find((x) => x.id === treeSeason.id);
-						if (treeSeason?.children?.length === season?.children?.length) {
-							tmpSeasonIds.push(treeSeason.id);
-						} else {
-							treeSeason.children?.forEach((x) => episodesIds.push(x.id));
-						}
-					});
-
-					// Check if all seasons are checked, if so then add the TvShowId
-					if (tvShow?.children?.length === tmpSeasonIds.length) {
-						tvShowIds.push(treeTvShow.id);
-						// If not then add the remaining to the seasonIds
-					} else if (tmpSeasonIds.length > 0) {
-						seasonIds = seasonIds.concat(tmpSeasonIds);
-					}
-				}
-			});
-
-			if (tvShowIds.length > 0) {
-				downloads.push({
-					mediaIds: tvShowIds,
-					type: PlexMediaType.TvShow,
-					plexAccountId: 0,
-				});
-			}
-
-			if (seasonIds.length > 0) {
-				downloads.push({
-					mediaIds: seasonIds,
-					type: PlexMediaType.Season,
-					plexAccountId: 0,
-				});
-			}
-
-			if (episodesIds.length > 0) {
-				downloads.push({
-					mediaIds: episodesIds,
-					type: PlexMediaType.Episode,
-					plexAccountId: 0,
-				});
-			}
+onMounted(() => {
+	// Listen for scroll to letter command
+	listenMediaOverviewScrollToCommand((letter) => {
+		if (!get(qTableRef)) {
+			Log.error('qTableRef is null');
+			return;
 		}
 
-		if (this.mediaType === PlexMediaType.Movie) {
-			downloads.push({
-				mediaIds: this.selected?.map((x) => +x),
-				type: PlexMediaType.Movie,
-				plexAccountId: 0,
-			});
+		if (!props.scrollDict) {
+			Log.error('Could not find scrollDict');
+			return;
 		}
 
-		return downloads;
-	}
+		// We have to revert to normal title sort otherwise the index will be wrong
+		setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
 
-	updateSelected(selected: string[]): void {
-		this.selected = selected;
-		this.$emit('selected', selected);
-	}
-
-	async downloadMedia(item: PlexMediaDTO): Promise<void> {
-		// Set as currently loading.
-		this.loadingButtons.push(item.key.toString());
-		const downloadCommand: DownloadMediaDTO = {
-			type: item.type,
-			mediaIds: [],
-			plexAccountId: 0,
-		};
-		switch (item.type) {
-			case PlexMediaType.Movie:
-				downloadCommand.mediaIds.push(item.id);
-				break;
-			case PlexMediaType.TvShow:
-				if (item.children?.length === 0) {
-					await new Promise((resolve) => this.getMedia({ item, resolve }));
-				}
-				downloadCommand.mediaIds.push(item.id);
-				break;
-			case PlexMediaType.Season:
-				downloadCommand.mediaIds.push(item.id);
-				break;
-			case PlexMediaType.Episode:
-				downloadCommand.mediaIds.push(item.id);
-				break;
-			default:
-				return;
+		const index = props.scrollDict[letter] ? props.scrollDict[letter] : 0;
+		// noinspection TypeScriptValidateTypes
+		const element: HTMLElement | null = get(qTableRef)?.querySelector(`[data-scroll-index="${index}"]`) ?? null;
+		if (!element) {
+			Log.error(`Could not find scroll target element for letter ${letter}`, `[data-scroll-index="${index}"]`);
+			return;
 		}
-		// Set finished loading
-		const i = this.loadingButtons.findIndex((x) => x === item.key.toString());
-		if (i > -1) {
-			this.loadingButtons.splice(i, 1);
+
+		set(scrollTargetElement, element);
+		set(autoScrollEnabled, true);
+
+		const elementRect = get(scrollTargetElement)?.getBoundingClientRect();
+		// Scroll if not visible
+		if ((elementRect?.bottom ?? 0) >= 0 && (elementRect?.top ?? 0) <= window.innerHeight) {
+			triggerBoxHighlight(element);
 		} else {
-			this.loadingButtons = [];
+			get(scrollTargetElement)?.scrollIntoView({
+				block: 'start',
+				behavior: 'smooth',
+			});
 		}
-		Log.info('download', downloadCommand);
-		this.$emit('download', [downloadCommand]);
+	});
+	// Setup stopped scrolling event listener
+	useScroll(get(qTableRef), {
+		onStop() {
+			// Don't highlight if the user scrolls manually
+			if (!get(autoScrollEnabled)) {
+				return;
+			}
+			set(autoScrollEnabled, false);
+			triggerBoxHighlight(get(scrollTargetElement));
+		},
+	});
+});
+</script>
+
+<style lang="scss">
+@import '@/assets/scss/variables.scss';
+
+.media-table {
+	// overflow-y: auto;
+
+	&--header,
+	&--intersection,
+	&--intersection > div {
+		height: $media-table-row-height;
 	}
 
-	/*
-A promise is send to the parent, which will resolve once the data is available. After which the node expands.
- */
-	getMedia(payload: { item: any; resolve: Function }): void {
-		this.$emit('request-media', payload);
+	&--content {
+		max-height: calc(100vh - $app-bar-height - $media-overview-bar-height - $media-table-row-height);
 	}
 }
-</script>
+
+.row-title {
+	font-weight: bold;
+	min-width: 300px;
+	max-width: 300px;
+
+	&--hover {
+		cursor: pointer;
+
+		:hover {
+			color: $primary;
+		}
+	}
+}
+</style>

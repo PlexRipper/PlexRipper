@@ -1,10 +1,11 @@
 ﻿using Autofac;
 using FluentValidation;
 using MediatR.Extensions.Autofac.DependencyInjection;
+using MediatR.Extensions.Autofac.DependencyInjection.Builder;
+using MediatR.Pipeline;
 using PlexRipper.Data;
-using PlexRipper.Domain.Behavior.Pipelines;
 
-namespace PlexRipper.WebAPI.Config;
+namespace PlexRipper.WebAPI;
 
 public class MediatrModule : Module
 {
@@ -13,18 +14,20 @@ public class MediatrModule : Module
         var assembly = typeof(PlexRipperDbContext).Assembly;
 
         // MediatR
-        builder.RegisterMediatR(assembly);
+        var configuration = MediatRConfigurationBuilder
+            .Create(assembly)
+            .WithAllOpenGenericHandlerTypesRegistered()
+            .Build();
+        builder.RegisterMediatR(configuration);
 
         // Register the Command's Validators (Validators based on FluentValidation library)
         builder.RegisterAssemblyTypes(assembly)
             .Where(t => t.IsClosedTypeOf(typeof(IValidator<>)))
-            .AsImplementedInterfaces();
-
-        // Register all the Command classes (they implement IRequestHandler) in assembly holding the Commands
-        builder.RegisterAssemblyTypes(assembly)
-            .AsClosedTypesOf(typeof(IRequestHandler<,>));
+            .AsImplementedInterfaces()
+            .InstancePerDependency();
 
         // Register Behavior Pipeline
         builder.RegisterGeneric(typeof(ValidationPipeline<,>)).As(typeof(IPipelineBehavior<,>));
+        builder.RegisterGeneric(typeof(ExceptionLoggingHandler<,,>)).As(typeof(IRequestExceptionHandler<,,>));
     }
 }

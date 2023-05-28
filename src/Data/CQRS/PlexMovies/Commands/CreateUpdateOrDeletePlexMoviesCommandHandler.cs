@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
-using EFCore.BulkExtensions;
+using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.PlexMovies.Commands;
@@ -20,80 +20,72 @@ public class CreateUpdateOrDeletePlexMoviesValidator : AbstractValidator<CreateU
     }
 }
 
-public class CreateUpdateOrDeletePlexMoviesHandler : BaseHandler, IRequestHandler<CreateUpdateOrDeletePlexMoviesCommand, Result<bool>>
+public class CreateUpdateOrDeletePlexMoviesHandler : BaseHandler, IRequestHandler<CreateUpdateOrDeletePlexMoviesCommand, Result>
 {
-    public CreateUpdateOrDeletePlexMoviesHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public CreateUpdateOrDeletePlexMoviesHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
-    public async Task<Result<bool>> Handle(CreateUpdateOrDeletePlexMoviesCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(CreateUpdateOrDeletePlexMoviesCommand command, CancellationToken cancellationToken)
     {
         var plexLibrary = command.PlexLibrary;
-        var plexMoviesDict = new Dictionary<int, PlexMovie>();
-        Log.Debug($"Starting adding or updating movies in library: {plexLibrary.Title}");
+        var apiPlexMovies = plexLibrary.Movies;
+
+        _log.Debug("Starting adding or updating movies in library: {PlexLibraryTitle}", plexLibrary.Title);
         var stopWatch = new Stopwatch();
         stopWatch.Start();
 
-        command.PlexLibrary.Movies.ForEach(x =>
+        apiPlexMovies.ForEach(x =>
         {
             x.PlexLibraryId = plexLibrary.Id;
             x.PlexServerId = plexLibrary.PlexServerId;
-            plexMoviesDict.Add(x.Key, x);
         });
 
-        // Retrieve current tvShows
+        // Retrieve current Movies
         var plexMoviesInDb = await _dbContext.PlexMovies
             .Where(x => x.PlexLibraryId == plexLibrary.Id)
             .ToListAsync(cancellationToken);
 
         if (!plexMoviesInDb.Any())
         {
-            BulkInsert(plexMoviesDict.Values.ToList());
-
-            return Result.Ok(true);
+            _dbContext.PlexMovies.AddRange(apiPlexMovies);
+            await SaveChangesAsync(cancellationToken);
+            return Result.Ok();
         }
 
-        var plexMoviesDbDict = new Dictionary<int, PlexMovie>();
-        plexMoviesInDb.ForEach(x => plexMoviesDbDict.Add(x.Key, x));
-
-        // Create dictionaries on how to update the database.
-        var addDict = plexMoviesDict.Where(x => !plexMoviesDbDict.ContainsKey(x.Key)).ToDictionary(k => k.Key, v => v.Value);
-        var deleteDict = plexMoviesDbDict.Where(x => !plexMoviesDict.ContainsKey(x.Key)).ToDictionary(k => k.Key, v => v.Value);
-        var updateDict = plexMoviesDict.Where(x => !deleteDict.ContainsKey(x.Key) && !addDict.ContainsKey(x.Key))
-            .ToDictionary(k => k.Key, v => v.Value);
-
-        // Remove any that are not updated based on UpdatedAt
-        foreach (var keyValuePair in updateDict)
+        var addCount = 0;
+        var updateCount = 0;
+        var apiHash = apiPlexMovies.Select(x => x.Key).ToHashSet();
+        foreach (var apiMovie in apiPlexMovies)
         {
-            var plexMovieDb = plexMoviesDbDict[keyValuePair.Key];
-            keyValuePair.Value.Id = plexMovieDb.Id;
-            if (keyValuePair.Value.UpdatedAt <= plexMovieDb.UpdatedAt)
-                updateDict.Remove(keyValuePair.Key);
+            var existingMovie = plexMoviesInDb.FirstOrDefault(x => x.Key == apiMovie.Key);
+            if (existingMovie == null)
+            {
+                _dbContext.PlexMovies.Add(apiMovie);
+                addCount++;
+            }
+            else
+            {
+                apiMovie.Id = existingMovie.Id;
+                _dbContext.PlexMovies.Update(apiMovie);
+                updateCount++;
+            }
         }
 
-        // Update database
-        BulkInsert(addDict.Select(x => x.Value).ToList());
-        BulkUpdate(updateDict.Select(x => x.Value).ToList());
+        var deleteMovies = plexMoviesInDb.Where(x => !apiHash.Contains(x.Key)).ToList();
+        if (deleteMovies.Any())
+            _dbContext.PlexMovies.RemoveRange(deleteMovies);
 
-        _dbContext.PlexMovies.RemoveRange(deleteDict.Select(x => x.Value).ToList());
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        if (addCount == 0 && updateCount == 0 && deleteMovies.Count == 0)
+        {
+            _log.Information("No changes for library \"{PlexLibraryTitle}\"", plexLibrary.Title);
+            return Result.Ok();
+        }
 
-        Log.Information($"Finished updating plexLibrary: {plexLibrary.Title} with id: {plexLibrary.Id} in {stopWatch.Elapsed.TotalSeconds} seconds.");
+        await SaveChangesAsync(cancellationToken);
 
-        return Result.Ok(true);
-    }
+        _log.Debug("Finished syncing plexLibrary: {PlexLibraryTitle} with id: {PlexLibraryId} in {TotalSeconds} seconds", plexLibrary.Title,
+            plexLibrary.Id, stopWatch.Elapsed.TotalSeconds);
+        _log.Debug("Add count: {AddCount}, Update count: {UpdateCount}, Delete count: {DeleteMoviesCount}", addCount, updateCount, deleteMovies.Count);
 
-    private void BulkInsert(List<PlexMovie> plexMovies)
-    {
-        if (!plexMovies.Any())
-            return;
-
-        _dbContext.BulkInsert(plexMovies, _bulkConfig);
-    }
-
-    private void BulkUpdate(List<PlexMovie> plexMovies)
-    {
-        if (!plexMovies.Any())
-            return;
-
-        _dbContext.BulkUpdate(plexMovies);
+        return Result.Ok();
     }
 }

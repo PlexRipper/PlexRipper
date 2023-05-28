@@ -1,14 +1,7 @@
 <template>
-	<page-container>
+	<q-page>
+		<debug-section />
 		<download-manager-section />
-		<database-section />
 		<setup-section />
-	</page-container>
+	</q-page>
 </template>
-
-<script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
-
-@Component
-export default class AdvancedSettings extends Vue {}
-</script>

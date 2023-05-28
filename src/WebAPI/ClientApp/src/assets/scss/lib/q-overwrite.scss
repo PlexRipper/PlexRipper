@@ -1,0 +1,181 @@
+@import '../variables';
+@import '../mixins';
+
+
+.q-dark {
+	background-color: transparent;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * QCard
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+.q-card {
+	background: transparent;
+}
+
+.q-dialog {
+	.q-card {
+		@extend .default-shadow;
+		@extend .default-border-radius;
+		@extend .blur;
+
+		background-color: $light-sm-background-color;
+		transition: 0.1s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+		&.q-card--dark {
+			background-color: $dark-sm-background-color;
+		}
+
+		&--bordered {
+			@extend .default-border;
+		}
+	}
+}
+
+body {
+	&.body--dark {
+		.q-field {
+			color: white;
+		}
+
+		.q-menu {
+			@extend .blur;
+			background-color: $dark-sm-background-color;
+		}
+	}
+
+	&.body--light {
+		.q-menu {
+			@extend .blur;
+			background-color: $light-sm-background-color;
+		}
+	}
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * QDrawer
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+body {
+	&.body--dark,
+	&.body--light {
+		.q-drawer {
+			background-color: transparent;
+
+			&--left {
+				// border-right: 1px solid red;
+			}
+
+			&--right {
+				border-left: 1px solid red;
+			}
+		}
+	}
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * QAlert
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+.q-alert {
+	display: block;
+	font-size: 16px;
+	margin: 16px;
+	padding: 16px;
+	position: relative;
+	transition: 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+	border: 1px solid;
+	border-radius: 4px;
+}
+
+.q-field--readonly {
+	//	border: 1px solid;
+}
+
+.q-field {
+	&--outlined {
+		&.q-field--readonly {
+			.q-field__control:before {
+				border-style: solid;
+			}
+		}
+	}
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * QTabs
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+body {
+	&.body--dark,
+	&.body--light {
+		.q-tab-panels {
+			background-color: transparent;
+		}
+	}
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * QBtn
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// Changes the color of the box shadow around buttons when in dark mode
+//body {
+//	&.body--dark {
+//		.q-btn {
+//			&.q-btn--standard {
+//				&:before {
+//					box-shadow: $button-dark-shadow-active;
+//				}
+//			}
+//
+//			&:active,
+//			&.q-btn--active {
+//				&:before {
+//					box-shadow: $button-dark-shadow-active;
+//				}
+//			}
+//		}
+//	}
+//}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * Scrollbars
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// Source: https://codepen.io/Hawkeye64/pen/bGRXBOY?editors=1100
+:root {
+	--scrollbar-width-height: 10px;
+
+	--scrollbar-track: $primary;
+	--scrollbar-thumb: rgb(204, 231, 255);
+	--scrollbar-thumb-hover: rgb(33, 118, 210);
+
+	// Background color of the scrollbar
+	--scrollbar-track-dark: $dark-shadow-color;
+	--scrollbar-thumb-dark: rgb(140, 4, 4);
+	--scrollbar-thumb-hover-dark: red;
+}
+
+::-webkit-scrollbar {
+	width: var(--scrollbar-width-height);
+	height: var(--scrollbar-width-height);
+	transition: all 1s;
+}
+
+// the track (progress bar) of the scrollbar
+::-webkit-scrollbar-track {
+	// border-top: var(--markdown-border)
+	background: var(--scrollbar-track-dark);
+	box-shadow: inset 0 0 4px var(--scrollbar-track-dark);
+}
+
+// the bottom corner of the scrollbar, where both horizontal and vertical scrollbars meet
+::-webkit-scrollbar-corner {
+	background: var(--scrollbar-track-dark);
+}
+
+// the draggable scrolling handle
+::-webkit-scrollbar-thumb {
+	background: var(--scrollbar-thumb-dark);
+	border-radius: 5px;
+
+	&:hover {
+		background: var(--scrollbar-thumb-hover-dark);
+	}
+}

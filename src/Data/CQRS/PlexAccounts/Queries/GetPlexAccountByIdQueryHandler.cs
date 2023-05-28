@@ -1,6 +1,7 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexAccounts;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;
@@ -15,7 +16,7 @@ public class GetAccountByIdQueryValidator : AbstractValidator<GetPlexAccountById
 
 public class GetAccountByIdQueryHandler : BaseHandler, IRequestHandler<GetPlexAccountByIdQuery, Result<PlexAccount>>
 {
-    public GetAccountByIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public GetAccountByIdQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<PlexAccount>> Handle(GetPlexAccountByIdQuery request, CancellationToken cancellationToken)
     {

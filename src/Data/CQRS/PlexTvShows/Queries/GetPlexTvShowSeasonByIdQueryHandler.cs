@@ -1,6 +1,7 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.PlexTvShows;
@@ -15,7 +16,7 @@ public class GetPlexTvShowSeasonByIdQueryValidator : AbstractValidator<GetPlexTv
 
 public class GetPlexTvShowSeasonByIdQueryHandler : BaseHandler, IRequestHandler<GetPlexTvShowSeasonByIdQuery, Result<PlexTvShowSeason>>
 {
-    public GetPlexTvShowSeasonByIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public GetPlexTvShowSeasonByIdQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<PlexTvShowSeason>> Handle(GetPlexTvShowSeasonByIdQuery request, CancellationToken cancellationToken)
     {

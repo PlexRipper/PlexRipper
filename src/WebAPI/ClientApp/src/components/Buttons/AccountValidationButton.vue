@@ -1,43 +1,20 @@
 <script lang="ts">
-import Vue, { CreateElement, VNode } from 'vue';
-import { RenderContext } from 'vue/types/options';
-import BaseButton, { IBaseButtonProps } from './BaseButton.vue';
+import { defineComponent, h, mergeProps } from 'vue';
+import BaseButton from './BaseButton.vue';
+import { IBaseButtonProps } from '@props';
+import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
-export default Vue.extend({
+export default defineComponent({
 	name: 'AccountValidationButton',
-	functional: true,
-	props: {
-		cy: {
-			type: String,
-			default: '',
-		},
-		disabled: {
-			type: Boolean,
-		},
-		loading: {
-			type: Boolean,
-		},
-		width: {
-			type: Number,
-			default: 130,
-		},
-		icon: {
-			type: String,
-			default: '',
-		},
-		textId: {
-			type: String,
-			default: '',
-		},
-	},
-	render(h: CreateElement, context: RenderContext): VNode {
-		return h(BaseButton, {
-			...context.data,
-			props: {
-				...context.props,
-				outlined: true,
-			} as Partial<IBaseButtonProps>,
-		});
+	props: baseBtnPropsDefault(),
+	render() {
+		return h(
+			BaseButton,
+			{
+				...mergeProps(this.$props, {} as IBaseButtonProps),
+			},
+			this.$slots.default,
+		);
 	},
 });
 </script>

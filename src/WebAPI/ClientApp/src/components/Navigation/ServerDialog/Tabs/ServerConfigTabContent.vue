@@ -1,53 +1,46 @@
 <template>
-	<v-simple-table class="section-table">
-		<tbody>
-			<tr>
-				<td style="width: 25%">
-					<help-icon help-id="help.server-dialog.server-config.download-speed-limit" />
-				</td>
-				<td>
-					<download-limit-input
-						:plex-server-id="plexServer.id"
-						:download-speed-limit="downloadSpeedLimit"
-						@change="updateDownloadLimit"
-					/>
-				</td>
-			</tr>
-		</tbody>
-	</v-simple-table>
+	<q-row align="center">
+		<q-col cols="4">
+			<help-icon help-id="help.server-dialog.server-config.download-speed-limit" class="q-mt-sm" />
+		</q-col>
+		<q-col cols="8">
+			<download-limit-input
+				v-if="plexServer"
+				:plex-server-id="plexServer.id"
+				:download-speed-limit="downloadSpeedLimit"
+				@change="updateDownloadLimit($event)" />
+			<span v-else> Plex Server was null </span>
+		</q-col>
+	</q-row>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
 import Log from 'consola';
+
 import { useSubscription } from '@vueuse/rxjs';
+import { clone } from 'lodash-es';
 import type { PlexServerDTO, PlexServerSettingsModel } from '@dto/mainApi';
 import { SettingsService } from '@service';
 
-@Component<ServerConfigTabContent>({})
-export default class ServerConfigTabContent extends Vue {
-	@Prop({ required: true, type: Object as () => PlexServerDTO })
-	readonly plexServer!: PlexServerDTO;
+const props = defineProps<{
+	plexServer: PlexServerDTO | null;
+	plexServerSettings: PlexServerSettingsModel | null;
+}>();
 
-	@Prop({ required: true, type: Object as () => PlexServerSettingsModel })
-	readonly plexServerSettings!: PlexServerSettingsModel;
+const downloadSpeedLimit = computed((): number => {
+	return props.plexServerSettings?.downloadSpeedLimit ?? 0;
+});
 
-	get downloadSpeedLimit(): number {
-		return this.plexServerSettings?.downloadSpeedLimit ?? 0;
+function updateDownloadLimit(value) {
+	if (value < 0) {
+		value = 0;
 	}
-
-	updateDownloadLimit(value) {
-		if (value < 0) {
-			value = 0;
-		}
-		if (this.plexServerSettings) {
-			Log.info(value);
-			this.plexServerSettings.downloadSpeedLimit = value;
-			// Its copied due to the object containing Vue getters and setters which messes up the store
-			useSubscription(
-				SettingsService.updateServerSettings(JSON.parse(JSON.stringify(this.plexServerSettings))).subscribe(),
-			);
-		}
+	if (props.plexServerSettings) {
+		Log.debug('downloadSpeedLimit', value);
+		const settings = clone(props.plexServerSettings);
+		settings.downloadSpeedLimit = value;
+		// Its copied due to the object containing Vue getters and setters which messes up the store
+		useSubscription(SettingsService.updateServerSettings(settings).subscribe());
 	}
 }
 </script>

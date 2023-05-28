@@ -15,7 +15,452 @@ namespace PlexRipper.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.6");
+            modelBuilder
+                .UseCollation("NATURALSORT")
+                .HasAnnotation("ProductVersion", "7.0.3");
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
+                {
+                    b.Property<string>("SchedulerName")
+                        .HasColumnType("text")
+                        .HasColumnName("SCHED_NAME");
+
+                    b.Property<string>("TriggerName")
+                        .HasColumnType("text")
+                        .HasColumnName("TRIGGER_NAME");
+
+                    b.Property<string>("TriggerGroup")
+                        .HasColumnType("text")
+                        .HasColumnName("TRIGGER_GROUP");
+
+                    b.Property<byte[]>("BlobData")
+                        .HasColumnType("bytea")
+                        .HasColumnName("BLOB_DATA");
+
+                    b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
+
+                    b.ToTable("QRTZ_BLOB_TRIGGERS", (string)null);
+                });
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzCalendar", b =>
+                {
+                    b.Property<string>("SchedulerName")
+                        .HasColumnType("text")
+                        .HasColumnName("SCHED_NAME");
+
+                    b.Property<string>("CalendarName")
+                        .HasColumnType("text")
+                        .HasColumnName("CALENDAR_NAME");
+
+                    b.Property<byte[]>("Calendar")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("CALENDAR");
+
+                    b.HasKey("SchedulerName", "CalendarName");
+
+                    b.ToTable("QRTZ_CALENDARS", (string)null);
+                });
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzCronTrigger", b =>
+                {
+                    b.Property<string>("SchedulerName")
+                        .HasColumnType("text")
+                        .HasColumnName("SCHED_NAME");
+
+                    b.Property<string>("TriggerName")
+                        .HasColumnType("text")
+                        .HasColumnName("TRIGGER_NAME");
+
+                    b.Property<string>("TriggerGroup")
+                        .HasColumnType("text")
+                        .HasColumnName("TRIGGER_GROUP");
+
+                    b.Property<string>("CronExpression")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("CRON_EXPRESSION");
+
+                    b.Property<string>("TimeZoneId")
+                        .HasColumnType("text")
+                        .HasColumnName("TIME_ZONE_ID");
+
+                    b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
+
+                    b.ToTable("QRTZ_CRON_TRIGGERS", (string)null);
+                });
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzFiredTrigger", b =>
+                {
+                    b.Property<string>("SchedulerName")
+                        .HasColumnType("text")
+                        .HasColumnName("SCHED_NAME");
+
+                    b.Property<string>("EntryId")
+                        .HasColumnType("text")
+                        .HasColumnName("ENTRY_ID");
+
+                    b.Property<long>("FiredTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("FIRED_TIME");
+
+                    b.Property<string>("InstanceName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("INSTANCE_NAME");
+
+                    b.Property<bool>("IsNonConcurrent")
+                        .HasColumnType("bool")
+                        .HasColumnName("IS_NONCONCURRENT");
+
+                    b.Property<string>("JobGroup")
+                        .HasColumnType("text")
+                        .HasColumnName("JOB_GROUP");
+
+                    b.Property<string>("JobName")
+                        .HasColumnType("text")
+                        .HasColumnName("JOB_NAME");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer")
+                        .HasColumnName("PRIORITY");
+
+                    b.Property<bool?>("RequestsRecovery")
+                        .HasColumnType("bool")
+                        .HasColumnName("REQUESTS_RECOVERY");
+
+                    b.Property<long>("ScheduledTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("SCHED_TIME");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("STATE");
+
+                    b.Property<string>("TriggerGroup")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("TRIGGER_GROUP");
+
+                    b.Property<string>("TriggerName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("TRIGGER_NAME");
+
+                    b.HasKey("SchedulerName", "EntryId");
+
+                    b.HasIndex("InstanceName")
+                        .HasDatabaseName("IDX_QRTZ_FT_TRIG_INST_NAME");
+
+                    b.HasIndex("JobGroup")
+                        .HasDatabaseName("IDX_QRTZ_FT_JOB_GROUP");
+
+                    b.HasIndex("JobName")
+                        .HasDatabaseName("IDX_QRTZ_FT_JOB_NAME");
+
+                    b.HasIndex("RequestsRecovery")
+                        .HasDatabaseName("IDX_QRTZ_FT_JOB_REQ_RECOVERY");
+
+                    b.HasIndex("TriggerGroup")
+                        .HasDatabaseName("IDX_QRTZ_FT_TRIG_GROUP");
+
+                    b.HasIndex("TriggerName")
+                        .HasDatabaseName("IDX_QRTZ_FT_TRIG_NAME");
+
+                    b.HasIndex("SchedulerName", "TriggerName", "TriggerGroup")
+                        .HasDatabaseName("IDX_QRTZ_FT_TRIG_NM_GP");
+
+                    b.ToTable("QRTZ_FIRED_TRIGGERS", (string)null);
+                });
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzJobDetail", b =>
+                {
+                    b.Property<string>("SchedulerName")
+                        .HasColumnType("text")
+                        .HasColumnName("SCHED_NAME");
+
+                    b.Property<string>("JobName")
+                        .HasColumnType("text")
+                        .HasColumnName("JOB_NAME");
+
+                    b.Property<string>("JobGroup")
+                        .HasColumnType("text")
+                        .HasColumnName("JOB_GROUP");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("DESCRIPTION");
+
+                    b.Property<bool>("IsDurable")
+                        .HasColumnType("bool")
+                        .HasColumnName("IS_DURABLE");
+
+                    b.Property<bool>("IsNonConcurrent")
+                        .HasColumnType("bool")
+                        .HasColumnName("IS_NONCONCURRENT");
+
+                    b.Property<bool>("IsUpdateData")
+                        .HasColumnType("bool")
+                        .HasColumnName("IS_UPDATE_DATA");
+
+                    b.Property<string>("JobClassName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("JOB_CLASS_NAME");
+
+                    b.Property<byte[]>("JobData")
+                        .HasColumnType("bytea")
+                        .HasColumnName("JOB_DATA");
+
+                    b.Property<bool>("RequestsRecovery")
+                        .HasColumnType("bool")
+                        .HasColumnName("REQUESTS_RECOVERY");
+
+                    b.HasKey("SchedulerName", "JobName", "JobGroup");
+
+                    b.HasIndex("RequestsRecovery")
+                        .HasDatabaseName("IDX_QRTZ_J_REQ_RECOVERY");
+
+                    b.ToTable("QRTZ_JOB_DETAILS", (string)null);
+                });
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzLock", b =>
+                {
+                    b.Property<string>("SchedulerName")
+                        .HasColumnType("text")
+                        .HasColumnName("SCHED_NAME");
+
+                    b.Property<string>("LockName")
+                        .HasColumnType("text")
+                        .HasColumnName("LOCK_NAME");
+
+                    b.HasKey("SchedulerName", "LockName");
+
+                    b.ToTable("QRTZ_LOCKS", (string)null);
+                });
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzPausedTriggerGroup", b =>
+                {
+                    b.Property<string>("SchedulerName")
+                        .HasColumnType("text")
+                        .HasColumnName("SCHED_NAME");
+
+                    b.Property<string>("TriggerGroup")
+                        .HasColumnType("text")
+                        .HasColumnName("TRIGGER_GROUP");
+
+                    b.HasKey("SchedulerName", "TriggerGroup");
+
+                    b.ToTable("QRTZ_PAUSED_TRIGGER_GRPS", (string)null);
+                });
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSchedulerState", b =>
+                {
+                    b.Property<string>("SchedulerName")
+                        .HasColumnType("text")
+                        .HasColumnName("SCHED_NAME");
+
+                    b.Property<string>("InstanceName")
+                        .HasColumnType("text")
+                        .HasColumnName("INSTANCE_NAME");
+
+                    b.Property<long>("CheckInInterval")
+                        .HasColumnType("bigint")
+                        .HasColumnName("CHECKIN_INTERVAL");
+
+                    b.Property<long>("LastCheckInTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("LAST_CHECKIN_TIME");
+
+                    b.HasKey("SchedulerName", "InstanceName");
+
+                    b.ToTable("QRTZ_SCHEDULER_STATE", (string)null);
+                });
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimplePropertyTrigger", b =>
+                {
+                    b.Property<string>("SchedulerName")
+                        .HasColumnType("text")
+                        .HasColumnName("SCHED_NAME");
+
+                    b.Property<string>("TriggerName")
+                        .HasColumnType("text")
+                        .HasColumnName("TRIGGER_NAME");
+
+                    b.Property<string>("TriggerGroup")
+                        .HasColumnType("text")
+                        .HasColumnName("TRIGGER_GROUP");
+
+                    b.Property<bool?>("BooleanProperty1")
+                        .HasColumnType("bool")
+                        .HasColumnName("BOOL_PROP_1");
+
+                    b.Property<bool?>("BooleanProperty2")
+                        .HasColumnType("bool")
+                        .HasColumnName("BOOL_PROP_2");
+
+                    b.Property<decimal?>("DecimalProperty1")
+                        .HasColumnType("numeric")
+                        .HasColumnName("DEC_PROP_1");
+
+                    b.Property<decimal?>("DecimalProperty2")
+                        .HasColumnType("numeric")
+                        .HasColumnName("DEC_PROP_2");
+
+                    b.Property<int?>("IntegerProperty1")
+                        .HasColumnType("integer")
+                        .HasColumnName("INT_PROP_1");
+
+                    b.Property<int?>("IntegerProperty2")
+                        .HasColumnType("integer")
+                        .HasColumnName("INT_PROP_2");
+
+                    b.Property<long?>("LongProperty1")
+                        .HasColumnType("bigint")
+                        .HasColumnName("LONG_PROP_1");
+
+                    b.Property<long?>("LongProperty2")
+                        .HasColumnType("bigint")
+                        .HasColumnName("LONG_PROP_2");
+
+                    b.Property<string>("StringProperty1")
+                        .HasColumnType("text")
+                        .HasColumnName("STR_PROP_1");
+
+                    b.Property<string>("StringProperty2")
+                        .HasColumnType("text")
+                        .HasColumnName("STR_PROP_2");
+
+                    b.Property<string>("StringProperty3")
+                        .HasColumnType("text")
+                        .HasColumnName("STR_PROP_3");
+
+                    b.Property<string>("TimeZoneId")
+                        .HasColumnType("text")
+                        .HasColumnName("TIME_ZONE_ID");
+
+                    b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
+
+                    b.ToTable("QRTZ_SIMPROP_TRIGGERS", (string)null);
+                });
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimpleTrigger", b =>
+                {
+                    b.Property<string>("SchedulerName")
+                        .HasColumnType("text")
+                        .HasColumnName("SCHED_NAME");
+
+                    b.Property<string>("TriggerName")
+                        .HasColumnType("text")
+                        .HasColumnName("TRIGGER_NAME");
+
+                    b.Property<string>("TriggerGroup")
+                        .HasColumnType("text")
+                        .HasColumnName("TRIGGER_GROUP");
+
+                    b.Property<long>("RepeatCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("REPEAT_COUNT");
+
+                    b.Property<long>("RepeatInterval")
+                        .HasColumnType("bigint")
+                        .HasColumnName("REPEAT_INTERVAL");
+
+                    b.Property<long>("TimesTriggered")
+                        .HasColumnType("bigint")
+                        .HasColumnName("TIMES_TRIGGERED");
+
+                    b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
+
+                    b.ToTable("QRTZ_SIMPLE_TRIGGERS", (string)null);
+                });
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", b =>
+                {
+                    b.Property<string>("SchedulerName")
+                        .HasColumnType("text")
+                        .HasColumnName("SCHED_NAME");
+
+                    b.Property<string>("TriggerName")
+                        .HasColumnType("text")
+                        .HasColumnName("TRIGGER_NAME");
+
+                    b.Property<string>("TriggerGroup")
+                        .HasColumnType("text")
+                        .HasColumnName("TRIGGER_GROUP");
+
+                    b.Property<string>("CalendarName")
+                        .HasColumnType("text")
+                        .HasColumnName("CALENDAR_NAME");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("DESCRIPTION");
+
+                    b.Property<long?>("EndTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("END_TIME");
+
+                    b.Property<byte[]>("JobData")
+                        .HasColumnType("bytea")
+                        .HasColumnName("JOB_DATA");
+
+                    b.Property<string>("JobGroup")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("JOB_GROUP");
+
+                    b.Property<string>("JobName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("JOB_NAME");
+
+                    b.Property<short?>("MisfireInstruction")
+                        .HasColumnType("smallint")
+                        .HasColumnName("MISFIRE_INSTR");
+
+                    b.Property<long?>("NextFireTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("NEXT_FIRE_TIME");
+
+                    b.Property<long?>("PreviousFireTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("PREV_FIRE_TIME");
+
+                    b.Property<int?>("Priority")
+                        .HasColumnType("integer")
+                        .HasColumnName("PRIORITY");
+
+                    b.Property<long>("StartTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("START_TIME");
+
+                    b.Property<string>("TriggerState")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("TRIGGER_STATE");
+
+                    b.Property<string>("TriggerType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("TRIGGER_TYPE");
+
+                    b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
+
+                    b.HasIndex("NextFireTime")
+                        .HasDatabaseName("IDX_QRTZ_T_NEXT_FIRE_TIME");
+
+                    b.HasIndex("TriggerState")
+                        .HasDatabaseName("IDX_QRTZ_T_STATE");
+
+                    b.HasIndex("NextFireTime", "TriggerState")
+                        .HasDatabaseName("IDX_QRTZ_T_NFT_ST");
+
+                    b.HasIndex("SchedulerName", "JobName", "JobGroup");
+
+                    b.ToTable("QRTZ_TRIGGERS", (string)null);
+                });
 
             modelBuilder.Entity("PlexRipper.Domain.DownloadFileTask", b =>
                 {
@@ -73,7 +518,7 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int>("DownloadFolderId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("DownloadSpeed")
+                    b.Property<long>("DownloadSpeed")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(18);
 
@@ -91,10 +536,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(9);
 
-                    b.Property<string>("DownloadUrl")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(13);
-
                     b.Property<string>("FileLocationUrl")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(12);
@@ -102,6 +543,10 @@ namespace PlexRipper.Data.Migrations
                     b.Property<string>("FileName")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(11);
+
+                    b.Property<long>("FileTransferSpeed")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(19);
 
                     b.Property<string>("FullTitle")
                         .HasColumnType("TEXT")
@@ -138,12 +583,12 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(15);
 
-                    b.Property<int?>("RootDownloadTaskId")
+                    b.Property<int>("RootDownloadTaskId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ServerMachineIdentifier")
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(19);
+                        .HasColumnOrder(20);
 
                     b.Property<string>("Title")
                         .HasColumnType("TEXT")
@@ -164,8 +609,6 @@ namespace PlexRipper.Data.Migrations
                     b.HasIndex("PlexLibraryId");
 
                     b.HasIndex("PlexServerId");
-
-                    b.HasIndex("RootDownloadTaskId");
 
                     b.ToTable("DownloadTasks");
                 });
@@ -223,10 +666,6 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int>("DownloadTaskId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("DownloadUrl")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(10);
-
                     b.Property<long>("ElapsedTime")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(9);
@@ -234,6 +673,10 @@ namespace PlexRipper.Data.Migrations
                     b.Property<long>("EndByte")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(4);
+
+                    b.Property<string>("FileLocationUrl")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(10);
 
                     b.Property<string>("FileName")
                         .HasColumnType("TEXT")
@@ -508,15 +951,11 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<string>("AuthToken")
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(3);
+                        .HasColumnOrder(2);
 
                     b.Property<DateTime>("AuthTokenCreationDate")
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(4);
-
-                    b.Property<bool>("Owned")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(2);
+                        .HasColumnOrder(3);
 
                     b.HasKey("PlexAccountId", "PlexServerId");
 
@@ -794,53 +1233,154 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("Address")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(3);
-
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Host")
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(6);
+                        .HasColumnOrder(10);
 
-                    b.Property<string>("LocalAddresses")
+                    b.Property<string>("Device")
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(7);
+                        .HasColumnOrder(4);
+
+                    b.Property<bool>("DnsRebindingProtection")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(22);
+
+                    b.Property<bool>("Home")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(16);
+
+                    b.Property<bool>("HttpsRequired")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(20);
+
+                    b.Property<DateTime>("LastSeenAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(11);
 
                     b.Property<string>("MachineIdentifier")
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(8);
+                        .HasColumnOrder(12);
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(1);
 
-                    b.Property<long>("OwnerId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Port")
+                    b.Property<bool>("NatLoopbackSupported")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(4);
+                        .HasColumnOrder(23);
 
-                    b.Property<string>("Scheme")
-                        .HasColumnType("TEXT")
+                    b.Property<bool>("Owned")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(15);
+
+                    b.Property<long>("OwnerId")
+                        .HasColumnType("INTEGER")
                         .HasColumnOrder(2);
 
-                    b.Property<bool>("ServerFixApplyDNSFix")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Version")
+                    b.Property<string>("Platform")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(5);
+
+                    b.Property<string>("PlatformVersion")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(6);
+
+                    b.Property<string>("PlexServerOwnerUsername")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(3);
+
+                    b.Property<int>("PreferredConnectionId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(14);
+
+                    b.Property<bool>("Presence")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(19);
+
+                    b.Property<string>("Product")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(7);
+
+                    b.Property<string>("ProductVersion")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(8);
+
+                    b.Property<string>("Provides")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(9);
+
+                    b.Property<string>("PublicAddress")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(13);
+
+                    b.Property<bool>("PublicAddressMatches")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(21);
+
+                    b.Property<bool>("Relay")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(18);
+
+                    b.Property<bool>("ServerFixApplyDNSFix")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(24);
+
+                    b.Property<bool>("Synced")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(17);
 
                     b.HasKey("Id");
 
                     b.ToTable("PlexServers");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexServerConnection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Address")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(2);
+
+                    b.Property<bool>("IPv4")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(6);
+
+                    b.Property<bool>("IPv6")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(7);
+
+                    b.Property<bool>("Local")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(4);
+
+                    b.Property<int>("PlexServerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Port")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(3);
+
+                    b.Property<bool>("PortFix")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(8);
+
+                    b.Property<string>("Protocol")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(1);
+
+                    b.Property<bool>("Relay")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(5);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlexServerId");
+
+                    b.ToTable("PlexServerConnections");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexServerStatus", b =>
@@ -851,21 +1391,32 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<bool>("IsSuccessful")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(1);
 
                     b.Property<DateTime>("LastChecked")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(4);
+
+                    b.Property<int>("PlexServerConnectionId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(6);
 
                     b.Property<int>("PlexServerId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(5);
 
                     b.Property<int>("StatusCode")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(2);
 
                     b.Property<string>("StatusMessage")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(3);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PlexServerConnectionId");
 
                     b.HasIndex("PlexServerId");
 
@@ -1261,6 +1812,61 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("PlexTvShowSeason");
                 });
 
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
+                {
+                    b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", "Trigger")
+                        .WithMany("BlobTriggers")
+                        .HasForeignKey("SchedulerName", "TriggerName", "TriggerGroup")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Trigger");
+                });
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzCronTrigger", b =>
+                {
+                    b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", "Trigger")
+                        .WithMany("CronTriggers")
+                        .HasForeignKey("SchedulerName", "TriggerName", "TriggerGroup")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Trigger");
+                });
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimplePropertyTrigger", b =>
+                {
+                    b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", "Trigger")
+                        .WithMany("SimplePropertyTriggers")
+                        .HasForeignKey("SchedulerName", "TriggerName", "TriggerGroup")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Trigger");
+                });
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimpleTrigger", b =>
+                {
+                    b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", "Trigger")
+                        .WithMany("SimpleTriggers")
+                        .HasForeignKey("SchedulerName", "TriggerName", "TriggerGroup")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Trigger");
+                });
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", b =>
+                {
+                    b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzJobDetail", "JobDetail")
+                        .WithMany("Triggers")
+                        .HasForeignKey("SchedulerName", "JobName", "JobGroup")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("JobDetail");
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.DownloadFileTask", b =>
                 {
                     b.HasOne("PlexRipper.Domain.DownloadTask", "DownloadTask")
@@ -1303,10 +1909,6 @@ namespace PlexRipper.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlexRipper.Domain.DownloadTask", "RootDownloadTask")
-                        .WithMany()
-                        .HasForeignKey("RootDownloadTaskId");
-
                     b.Navigation("DestinationFolder");
 
                     b.Navigation("DownloadFolder");
@@ -1316,8 +1918,6 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexLibrary");
 
                     b.Navigation("PlexServer");
-
-                    b.Navigation("RootDownloadTask");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerLog", b =>
@@ -1353,7 +1953,7 @@ namespace PlexRipper.Data.Migrations
             modelBuilder.Entity("PlexRipper.Domain.PlexAccountLibrary", b =>
                 {
                     b.HasOne("PlexRipper.Domain.PlexAccount", "PlexAccount")
-                        .WithMany()
+                        .WithMany("PlexAccountLibraries")
                         .HasForeignKey("PlexAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1471,8 +2071,25 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("PlexMovie");
                 });
 
+            modelBuilder.Entity("PlexRipper.Domain.PlexServerConnection", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                        .WithMany("PlexServerConnections")
+                        .HasForeignKey("PlexServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PlexServer");
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.PlexServerStatus", b =>
                 {
+                    b.HasOne("PlexRipper.Domain.PlexServerConnection", "PlexServerConnection")
+                        .WithMany("PlexServerStatus")
+                        .HasForeignKey("PlexServerConnectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
                         .WithMany("ServerStatus")
                         .HasForeignKey("PlexServerId")
@@ -1480,6 +2097,8 @@ namespace PlexRipper.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("PlexServer");
+
+                    b.Navigation("PlexServerConnection");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShow", b =>
@@ -1601,6 +2220,22 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("TvShow");
                 });
 
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzJobDetail", b =>
+                {
+                    b.Navigation("Triggers");
+                });
+
+            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", b =>
+                {
+                    b.Navigation("BlobTriggers");
+
+                    b.Navigation("CronTriggers");
+
+                    b.Navigation("SimplePropertyTriggers");
+
+                    b.Navigation("SimpleTriggers");
+                });
+
             modelBuilder.Entity("PlexRipper.Domain.DownloadTask", b =>
                 {
                     b.Navigation("Children");
@@ -1620,6 +2255,8 @@ namespace PlexRipper.Data.Migrations
 
             modelBuilder.Entity("PlexRipper.Domain.PlexAccount", b =>
                 {
+                    b.Navigation("PlexAccountLibraries");
+
                     b.Navigation("PlexAccountServers");
                 });
 
@@ -1657,7 +2294,14 @@ namespace PlexRipper.Data.Migrations
 
                     b.Navigation("PlexLibraries");
 
+                    b.Navigation("PlexServerConnections");
+
                     b.Navigation("ServerStatus");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.PlexServerConnection", b =>
+                {
+                    b.Navigation("PlexServerStatus");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.PlexTvShow", b =>

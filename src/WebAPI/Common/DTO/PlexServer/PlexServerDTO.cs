@@ -1,52 +1,54 @@
-﻿using Newtonsoft.Json;
-using PlexRipper.DownloadManager;
-
-namespace PlexRipper.WebAPI.Common.DTO;
+﻿namespace PlexRipper.WebAPI.Common.DTO;
 
 public class PlexServerDTO
 {
-    [JsonProperty("id", Required = Required.Always)]
     public int Id { get; set; }
 
-    [JsonProperty("name", Required = Required.Always)]
     public string Name { get; set; }
 
-    [JsonProperty("address", Required = Required.Always)]
-    public string Address { get; set; }
-
-    [JsonProperty("port", Required = Required.Always)]
-    public int Port { get; set; }
-
-    [JsonProperty("version", Required = Required.Always)]
-    public string Version { get; set; }
-
-    [JsonProperty("scheme", Required = Required.Always)]
-    public string Scheme { get; set; }
-
-    [JsonProperty("host", Required = Required.Always)]
-    public string Host { get; set; }
-
-    [JsonProperty("localAddresses", Required = Required.Always)]
-    public string LocalAddresses { get; set; }
-
-    [JsonProperty("serverUrl", Required = Required.Always)]
-    public string ServerUrl { get; set; }
-
-    [JsonProperty("machineIdentifier", Required = Required.Always)]
-    public string MachineIdentifier { get; set; }
-
-    [JsonProperty("createdAt", Required = Required.Always)]
-    public DateTime CreatedAt { get; set; }
-
-    [JsonProperty("updatedAt", Required = Required.Always)]
-    public DateTime UpdatedAt { get; set; }
-
-    [JsonProperty("ownerId", Required = Required.Always)]
     public int OwnerId { get; set; }
 
-    [JsonProperty("downloadTasks", Required = Required.Always)]
-    public List<DownloadProgressDTO> DownloadTasks { get; set; }
+    public string PlexServerOwnerUsername { get; set; }
 
-    [JsonProperty("status", Required = Required.Always)]
-    public PlexServerStatusDTO Status { get; set; }
+    public string Device { get; set; }
+
+    public string Platform { get; set; }
+
+    public string PlatformVersion { get; set; }
+
+    public string Product { get; set; }
+
+    public string ProductVersion { get; set; }
+
+    public string Provides { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime LastSeenAt { get; set; }
+
+    public string MachineIdentifier { get; set; }
+
+    public string PublicAddress { get; set; }
+
+    public int PreferredConnectionId { get; set; }
+
+    public bool Owned { get; set; }
+
+    public bool Home { get; set; }
+
+    public bool Synced { get; set; }
+
+    public bool Relay { get; set; }
+
+    public bool Presence { get; set; }
+
+    public bool HttpsRequired { get; set; }
+
+    public bool PublicAddressMatches { get; set; }
+
+    public bool DnsRebindingProtection { get; set; }
+
+    public bool NatLoopbackSupported { get; set; }
+
+    public List<PlexServerConnectionDTO> PlexServerConnections { get; set; } = new();
 }

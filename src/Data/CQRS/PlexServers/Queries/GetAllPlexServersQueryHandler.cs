@@ -1,6 +1,7 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.PlexServers;
@@ -9,36 +10,20 @@ public class GetAllPlexServersQueryValidator : AbstractValidator<GetAllPlexServe
 
 public class GetAllPlexServersQueryHandler : BaseHandler, IRequestHandler<GetAllPlexServersQuery, Result<List<PlexServer>>>
 {
-    public GetAllPlexServersQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public GetAllPlexServersQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<List<PlexServer>>> Handle(GetAllPlexServersQuery request, CancellationToken cancellationToken)
     {
-        if (request.PlexAccountId == 0)
-        {
-            var query = PlexServerQueryable.Include(x => x.ServerStatus).AsQueryable();
+        var query = PlexServerQueryable.AsQueryable();
 
-            if (request.IncludeLibraries)
-                query = query.Include(x => x.PlexLibraries);
+        if (request.IncludeConnections)
+            query = query.Include(x => x.PlexServerConnections);
 
-            var plexServers = await query.ToListAsync(cancellationToken);
+        if (request.IncludeLibraries)
+            query = query.Include(x => x.PlexLibraries);
 
-            // TODO This might return PlexServers which have no PlexAccounts available that can access them.
-            return Result.Ok(plexServers);
-        }
-        else
-        {
-            var query = _dbContext.PlexAccountServers
-                .Include(x => x.PlexServer)
-                .AsQueryable();
+        var plexServers = await query.ToListAsync(cancellationToken);
 
-            if (request.IncludeLibraries)
-                query = query.Include(x => x.PlexServer).ThenInclude(x => x.PlexLibraries);
-
-            var plexServers = await query
-                .Where(x => x.PlexAccountId == request.PlexAccountId)
-                .ToListAsync(cancellationToken);
-
-            return Result.Ok(plexServers.Select(x => x.PlexServer).ToList());
-        }
+        return Result.Ok(plexServers);
     }
 }

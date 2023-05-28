@@ -1,23 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
-        <LangVersion>10</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <AssemblyName>PlexRipper.FileSystem</AssemblyName>
-        <RootNamespace>PlexRipper.FileSystem</RootNamespace>
-    </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<LangVersion>11</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<AssemblyName>PlexRipper.FileSystem</AssemblyName>
+		<RootNamespace>PlexRipper.FileSystem</RootNamespace>
+	</PropertyGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Application\Application.csproj"/>
-    </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
+		<ProjectReference Include="..\BackgroundServices.Contracts\BackgroundServices.Contracts.csproj" />
+		<ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
+		<ProjectReference Include="..\DownloadManager.Contracts\DownloadManager.Contracts.csproj" />
+		<ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
+	</ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="System.IO.Abstractions" Version="17.0.18"/>
-    </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Autofac" Version="6.5.0" />
+		<PackageReference Include="Autofac.Extras.Quartz" Version="8.0.0" />
+		<PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="10.0.0" />
+		<PackageReference Include="System.IO.Abstractions" Version="17.0.18" />
+	</ItemGroup>
 
-    <ItemGroup>
-        <Compile Include="..\Domain\GlobalUsings.cs"/>
-    </ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\Domain\GlobalUsings.cs" />
+	</ItemGroup>
 
 </Project>

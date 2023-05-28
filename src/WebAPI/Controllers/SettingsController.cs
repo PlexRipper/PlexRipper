@@ -1,9 +1,9 @@
-﻿using AutoMapper;
+﻿using Application.Contracts;
+using AutoMapper;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application;
-using PlexRipper.Settings.Models;
-using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
+using Settings.Contracts;
 
 namespace PlexRipper.WebAPI.Controllers;
 
@@ -11,17 +11,14 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class SettingsController : BaseController
 {
-    private readonly IPlexRipperDatabaseService _plexRipperDatabaseService;
-
     private readonly IUserSettings _userSettings;
 
     public SettingsController(
+        ILog log,
         IMapper mapper,
-        IPlexRipperDatabaseService plexRipperDatabaseService,
         IUserSettings userSettings,
-        INotificationsService notificationsService) : base(mapper, notificationsService)
+        INotificationsService notificationsService) : base(log, mapper, notificationsService)
     {
-        _plexRipperDatabaseService = plexRipperDatabaseService;
         _userSettings = userSettings;
     }
 
@@ -42,20 +39,22 @@ public class SettingsController : BaseController
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
     public IActionResult UpdateSettings([FromBody] SettingsModelDTO settingsModelDto)
     {
-        var settings = _mapper.Map<SettingsModel>(settingsModelDto);
-        var updateResult = _userSettings.UpdateSettings(settings);
-        if (updateResult.IsFailed)
-            return ToActionResult(updateResult.ToResult());
+        try
+        {
+            if (settingsModelDto == null)
+                return BadRequest();
 
-        return ToActionResult<ISettingsModel, SettingsModelDTO>(Result.Ok(_userSettings.GetSettingsModel()));
-    }
+            var settings = _mapper.Map<ISettingsModel>(settingsModelDto);
+            var updateResult = _userSettings.UpdateSettings(settings);
+            if (updateResult.IsFailed)
+                return ToActionResult(updateResult.ToResult());
 
-    // GET api/<SettingsController>/ResetDb
-    [HttpGet("ResetDb")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> ResetDatabase()
-    {
-        return ToActionResult(await _plexRipperDatabaseService.ResetDatabase());
+            return ToActionResult<ISettingsModel, SettingsModelDTO>(Result.Ok(_userSettings.GetSettingsModel()));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 }

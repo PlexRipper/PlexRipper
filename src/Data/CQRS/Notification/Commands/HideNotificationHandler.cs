@@ -1,6 +1,7 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Notifications;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;
@@ -15,7 +16,7 @@ public class HideNotificationValidator : AbstractValidator<HideNotificationComma
 
 public class HideNotificationHandler : BaseHandler, IRequestHandler<HideNotificationCommand, Result>
 {
-    public HideNotificationHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public HideNotificationHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result> Handle(HideNotificationCommand command, CancellationToken cancellationToken)
     {

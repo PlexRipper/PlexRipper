@@ -1,13 +1,13 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="PlexRipper Back-End Development" type="DotNetProject" factoryName=".NET Project">
-    <option name="EXE_PATH" value="$PROJECT_DIR$/src/WebAPI/bin/Debug/net6.0/PlexRipper.WebAPI" />
+    <option name="EXE_PATH" value="$PROJECT_DIR$/src/WebAPI/bin/Debug/net7.0/PlexRipper.WebAPI" />
     <option name="PROGRAM_PARAMETERS" value="" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/WebAPI" />
     <option name="PASS_PARENT_ENVS" value="1" />
     <envs>
       <env name="ASPNETCORE_ENVIRONMENT" value="Development" />
       <env name="ASPNETCORE_URLS" value="http://+:5000" />
-      <env name="DEVELOPMENT_ROOT_PATH" value="$PROJECT_DIR$/../PlexRipperCache/" />
+      <env name="DEVELOPMENT_ROOT_PATH" value="$PROJECT_DIR$/../../TURBO/PlexRipperCache/" />
       <env name="DOTNET_ENVIRONMENT" value="Development" />
       <env name="DOTNET_URLS" value="http://+:5000" />
     </envs>
@@ -20,7 +20,7 @@
     <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
     <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="1" />
     <option name="PROJECT_KIND" value="DotNetCore" />
-    <option name="PROJECT_TFM" value="net6.0" />
+    <option name="PROJECT_TFM" value="net7.0" />
     <method v="2">
       <option name="Build" />
     </method>

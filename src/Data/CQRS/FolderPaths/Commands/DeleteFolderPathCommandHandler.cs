@@ -1,6 +1,7 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.FolderPaths;
@@ -15,7 +16,7 @@ public class DeleteFolderPathValidator : AbstractValidator<DeleteFolderPathComma
 
 public class DeleteFolderPathHandler : BaseHandler, IRequestHandler<DeleteFolderPathCommand, Result>
 {
-    public DeleteFolderPathHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public DeleteFolderPathHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result> Handle(DeleteFolderPathCommand command, CancellationToken cancellationToken)
     {
@@ -26,7 +27,7 @@ public class DeleteFolderPathHandler : BaseHandler, IRequestHandler<DeleteFolder
 
         _dbContext.FolderPaths.Remove(folderPath);
         await _dbContext.SaveChangesAsync(cancellationToken);
-        Log.Debug($"Deleted {nameof(FolderPath)} with Id: {command.Id} from the database");
+        _log.Debug("Deleted {FolderPathName} with Id: {CommandId} from the database", nameof(FolderPath), command.Id);
 
         return Result.Ok();
     }

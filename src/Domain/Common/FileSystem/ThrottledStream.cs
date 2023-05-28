@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using ByteSizeLib;
 
 namespace PlexRipper.Domain;
 
@@ -13,7 +14,7 @@ public class ThrottledStream : Stream
 
     private readonly Stopwatch _watch = Stopwatch.StartNew();
 
-    private int _throttle;
+    private long _throttle;
 
     private long _totalBytesRead;
 
@@ -28,7 +29,7 @@ public class ThrottledStream : Stream
     /// <param name="throttleKb">The kb/s to throttle by.</param>
     public ThrottledStream(Stream @in, int throttleKb)
     {
-        _throttle = throttleKb * 1024;
+        _throttle = (long)ByteSize.FromKibiBytes(throttleKb).Bytes;
         _inputStream = @in;
     }
 
@@ -72,6 +73,20 @@ public class ThrottledStream : Stream
     }
 
     /// <inheritdoc/>
+    public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+    {
+        var newCount = await GetBytesToReturnAsync(count);
+        if (_inputStream != null)
+        {
+            var read = await _inputStream.ReadAsync(buffer, offset, newCount, cancellationToken);
+            Interlocked.Add(ref _totalBytesRead, read);
+            return read;
+        }
+
+        return 0;
+    }
+
+    /// <inheritdoc/>
     public override long Seek(long offset, SeekOrigin origin)
     {
         return _inputStream.Seek(offset, origin);
@@ -82,7 +97,7 @@ public class ThrottledStream : Stream
 
     public void SetThrottleSpeed(int throttleKb)
     {
-        _throttle = throttleKb * 1024;
+        _throttle = (long)ByteSize.FromKibiBytes(throttleKb).Bytes;
     }
 
     /// <inheritdoc/>

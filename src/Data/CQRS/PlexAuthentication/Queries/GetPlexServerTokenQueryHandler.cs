@@ -1,6 +1,7 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.PlexAuthentication.Queries;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.PlexAuthentication;
@@ -15,7 +16,7 @@ public class GetPlexServerTokenQueryValidator : AbstractValidator<GetPlexServerT
 
 public class GetPlexServerTokenHandler : BaseHandler, IRequestHandler<GetPlexServerTokenQuery, Result<string>>
 {
-    public GetPlexServerTokenHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public GetPlexServerTokenHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<string>> Handle(GetPlexServerTokenQuery request, CancellationToken cancellationToken)
     {
@@ -23,7 +24,7 @@ public class GetPlexServerTokenHandler : BaseHandler, IRequestHandler<GetPlexSer
         if (request.PlexAccountId == 0)
         {
             var nonMainServerToken = await _dbContext.PlexAccountServers.Include(x => x.PlexAccount)
-                .FirstOrDefaultAsync(x => x.PlexServerId == request.PlexServerId && !x.PlexAccount.IsMain);
+                .FirstOrDefaultAsync(x => x.PlexServerId == request.PlexServerId && !x.PlexAccount.IsMain, cancellationToken);
 
             // Check if we have access with a non-main account
             if (nonMainServerToken != null)
@@ -31,7 +32,8 @@ public class GetPlexServerTokenHandler : BaseHandler, IRequestHandler<GetPlexSer
 
             // Fallback to a main-account access
             var mainServerToken = await _dbContext.PlexAccountServers.Include(x => x.PlexAccount)
-                .FirstOrDefaultAsync(x => x.PlexServerId == request.PlexServerId);
+                .FirstOrDefaultAsync(x => x.PlexServerId == request.PlexServerId, cancellationToken);
+
             if (mainServerToken != null)
                 return Result.Ok(mainServerToken.AuthToken);
 
@@ -45,6 +47,7 @@ public class GetPlexServerTokenHandler : BaseHandler, IRequestHandler<GetPlexSer
             return Result.Ok(authToken.AuthToken);
 
         return Result.Fail(new Error(
-            $"Could not find an authenticationToken for PlexAccount with id: {request.PlexAccountId} and PlexServer with id: {request.PlexServerId}"));
+                $"Could not find an authenticationToken for PlexAccount with id: {request.PlexAccountId} and PlexServer with id: {request.PlexServerId}"))
+            .LogError();
     }
 }

@@ -1,10 +1,13 @@
-﻿using EFCore.BulkExtensions;
+using EFCore.BulkExtensions;
+using Logging.Interface;
 
 namespace PlexRipper.Data.Common;
 
 public abstract class BaseHandler
 {
     #region Fields
+
+    protected readonly ILog _log;
 
     private protected readonly PlexRipperDbContext _dbContext;
 
@@ -18,8 +21,9 @@ public abstract class BaseHandler
 
     #region Constructors
 
-    protected BaseHandler(PlexRipperDbContext dbContext)
+    protected BaseHandler(ILog log, PlexRipperDbContext dbContext)
     {
+        _log = log;
         _dbContext = dbContext;
     }
 
@@ -85,7 +89,7 @@ public abstract class BaseHandler
                 case PlexMediaType.TvShow:
                     return plexLibraryQuery.IncludeTvShows(topLevelMediaOnly);
                 default:
-                    Log.Error($"PlexLibrary with MediaType {type} is currently not supported");
+                    _log.Error("PlexLibrary with MediaType {Type} is currently not supported", type);
                     return plexLibraryQuery;
             }
         }
@@ -108,10 +112,15 @@ public abstract class BaseHandler
         return Result.Fail(new Error($"Could not find entities of {typeof(T)} with an id of {id}"));
     }
 
-    protected async Task SaveChangesAsync()
+    protected async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     #endregion
+
+    // public void Dispose()
+    // {
+    //     // This is here as a reminder that the dbContext will be disposed by the dependency injection container
+    // }
 }

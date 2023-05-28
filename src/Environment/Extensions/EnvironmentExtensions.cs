@@ -5,11 +5,11 @@ public static class EnvironmentExtensions
 {
     #region Fields
 
-    public static string IntegrationTestModeKey = "IntegrationTestMode";
+    public const string IntegrationTestModeKey = "IntegrationTestMode";
 
-    public static string DevelopmentRootPathKey = "DEVELOPMENT_ROOT_PATH";
+    public const string DevelopmentRootPathKey = "DEVELOPMENT_ROOT_PATH";
 
-    private static readonly string _trueValue = Convert.ToString(true);
+    private static readonly string TrueValue = Convert.ToString(true);
 
     #endregion
 
@@ -19,7 +19,7 @@ public static class EnvironmentExtensions
 
     public static bool IsIntegrationTestMode()
     {
-        return System.Environment.GetEnvironmentVariable(IntegrationTestModeKey) == _trueValue;
+        return System.Environment.GetEnvironmentVariable(IntegrationTestModeKey) == TrueValue;
     }
 
     /// <summary>

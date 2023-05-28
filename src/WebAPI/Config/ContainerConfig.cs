@@ -5,11 +5,10 @@ using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.DownloadManager;
 using PlexRipper.FileSystem.Config;
-using PlexRipper.HttpClient;
 using PlexRipper.PlexApi;
 using PlexRipper.Settings.Config;
 
-namespace PlexRipper.WebAPI.Config;
+namespace PlexRipper.WebAPI;
 
 public static class ContainerConfig
 {
@@ -22,6 +21,7 @@ public static class ContainerConfig
     {
         // Application
         builder.RegisterModule<ApplicationModule>();
+        builder.RegisterModule<LogModule>();
 
         // Infrastructure
         builder.RegisterModule<DataModule>();

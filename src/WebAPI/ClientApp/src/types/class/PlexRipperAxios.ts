@@ -27,6 +27,7 @@ export default class PlexRipperAxios {
 	}
 
 	public static getImage<T = any>({ url, params, responseType }) {
+		// Don't add checkForError here, because it will mess up the image response.
 		return Axios.get<ResultDTO<T>>(url, {
 			params,
 			responseType,

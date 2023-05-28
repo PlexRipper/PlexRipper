@@ -1,30 +1,22 @@
 <script lang="ts">
-import Vue, { CreateElement, VNode } from 'vue';
-import { RenderContext } from 'vue/types/options';
-import BaseButton, { IBaseButtonProps } from './BaseButton.vue';
+import { defineComponent, h, mergeProps } from 'vue';
+import BaseButton from './BaseButton.vue';
+import { IBaseButtonProps } from '@props';
+import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
-export default Vue.extend({
+export default defineComponent({
 	name: 'DebugButton',
-	functional: true,
-	props: {
-		cy: {
-			type: String,
-			default: '',
-		},
-		textId: {
-			type: String,
-			default: '',
-		},
-	},
-	render(h: CreateElement, context: RenderContext): VNode {
-		return h(BaseButton, {
-			...context.data,
-			props: {
-				...context.props,
-				outlined: true,
-				icon: 'mdi-bug-outline',
-			} as Partial<IBaseButtonProps>,
-		});
+	props: baseBtnPropsDefault(),
+	render() {
+		return h(
+			BaseButton,
+			{
+				...mergeProps(this.$props, {
+					icon: 'mdi-bug-outline',
+				} as IBaseButtonProps),
+			},
+			this.$slots.default,
+		);
 	},
 });
 </script>

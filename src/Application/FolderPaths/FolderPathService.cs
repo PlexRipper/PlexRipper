@@ -1,4 +1,8 @@
-﻿namespace PlexRipper.Application;
+﻿using Application.Contracts;
+using Data.Contracts;
+using FileSystem.Contracts;
+
+namespace PlexRipper.Application;
 
 public class FolderPathService : IFolderPathService
 {

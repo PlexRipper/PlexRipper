@@ -1,6 +1,7 @@
-﻿using AutoMapper;
+﻿using Application.Contracts;
+using AutoMapper;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -10,7 +11,7 @@ public class PlexAccountController : BaseController
 {
     private readonly IPlexAccountService _plexAccountService;
 
-    public PlexAccountController(IPlexAccountService plexAccountService, IMapper mapper, INotificationsService notificationsService) : base(
+    public PlexAccountController(ILog log, IPlexAccountService plexAccountService, IMapper mapper, INotificationsService notificationsService) : base(log,
         mapper, notificationsService)
     {
         _plexAccountService = plexAccountService;
@@ -30,14 +31,12 @@ public class PlexAccountController : BaseController
         var mapResult = _mapper.Map<List<PlexAccountDTO>>(result.Value);
         if (!mapResult.Any() && enabledOnly)
         {
-            var msg = "Could not find any enabled accounts";
-            Log.Warning(msg);
-            return NotFound(Result.Fail(msg));
+            var logEvent = _log.WarningLine("Could not find any enabled accounts");
+            return NotFound(Result.Fail(logEvent.ToLogString()));
         }
 
-        var msg2 = $"Returned {mapResult.Count} accounts";
-        Log.Debug(msg2);
-        return Ok(Result.Ok(mapResult).WithSuccess(msg2));
+        _log.Debug("Returned {PlexAccountCount} accounts", mapResult.Count);
+        return Ok(Result.Ok(mapResult).WithSuccess($"Returned {mapResult.Count} accounts"));
     }
 
     // GET api/<PlexAccountController>/5
@@ -128,15 +127,13 @@ public class PlexAccountController : BaseController
 
             if (result.Value)
             {
-                var msg = $"Username: {username} is available";
-                Log.Debug(msg);
-                return Ok(Result.Ok(true).WithSuccess(msg));
+                var logEvent = _log.Debug("Username: {UserName} is available", username);
+                return Ok(Result.Ok(true).WithSuccess(logEvent.ToLogString()));
             }
             else
             {
-                var msg = $"Account with username: \"{username}\" already exists!";
-                Log.Warning(msg);
-                return Ok(Result.Ok(false).WithError(msg));
+                var logEvent = _log.Warning("Account with username: {Username} already exists!", username);
+                return Ok(Result.Ok(false).WithError(logEvent.ToLogString()));
             }
         }
         catch (Exception e)
@@ -152,14 +149,6 @@ public class PlexAccountController : BaseController
     public async Task<IActionResult> RefreshPlexAccount(int id)
     {
         return ToActionResult(await _plexAccountService.RefreshPlexAccount(id));
-    }
-
-    [HttpGet("clientid")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<string>))]
-    public IActionResult GenerateClientId()
-    {
-        var result = Result.Ok(_plexAccountService.GeneratePlexAccountClientId());
-        return ToActionResult<string, string>(result);
     }
 
     // GET api/<PlexAccountController>/authpin/

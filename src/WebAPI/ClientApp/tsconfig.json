@@ -1,48 +1,10 @@
 {
+	// https://nuxt.com/docs/guide/concepts/typescript
+	"extends": "./.nuxt/tsconfig.json",
 	"compilerOptions": {
-		"target": "esnext",
-		"module": "esnext",
-		"moduleResolution": "node",
-		"lib": ["esnext", "esnext.asynciterable", "dom"],
-		"esModuleInterop": true,
-		"allowJs": false,
 		"sourceMap": true,
-		"strict": true,
-		"skipLibCheck": true,
-		"allowSyntheticDefaultImports": true,
+		// TODO This might be better to enable
 		"noImplicitAny": false,
-		"noEmit": true,
-		"importHelpers": true,
-		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true,
-		"resolveJsonModule": true,
-		"baseUrl": "src",
-		"outDir": "./build/",
-		"paths": {
-			"~/*": ["./*"],
-			"@/*": ["./*"],
-			"@class/*": ["./types/class/*"],
-			"@dto/*": ["./types/dto/*"],
-			"@api/*": ["./types/api/*"],
-			"@const/*": ["./types/const/*"],
-			"@buttons": ["./components/Buttons/index.ts"],
-			"@buttons/*": ["./components/Buttons/*"],
-			"@api-urls": ["./types/const/api-urls.ts"],
-			"@services-test-base": ["./tests/services/_base/base.ts"],
-			"@lib/*": ["./types/lib/*"],
-			"@service": ["./service/index.ts"],
-			"@img/*": ["./assets/img/*"],
-			"@enums/*": ["./types/enums/*"],
-			"@mock": ["./mock-data/index.ts"],
-			"@mock/*": ["./mock-data/*"],
-			"@interfaces/*": ["./types/interfaces/*"],
-			"@components/*": ["./components/*"],
-			"@overviews/*": ["./components/overviews/*"],
-			"@mediaOverview": ["./components/MediaOverview/index.ts"],
-			"@mediaOverview/*": ["./components/MediaOverview/*"],
-			"@vTreeViewTable/*": ["./components/General/VTreeViewTable/*"]
-		},
-		"types": ["@types/node", "@nuxt/types", "vuetify", "@nuxtjs/vuetify", "@nuxtjs/i18n", "@types/jest"]
-	},
-	"exclude": ["*.config.js","node_modules", ".nuxt", "dist", ".vscode"]
+		"types": ["unplugin-vue-define-options/macros-global", "@nuxtjs/i18n", "vitest/importMeta", "vitest/globals", "@testing-library/cypress", "cypress"]
+	}
 }

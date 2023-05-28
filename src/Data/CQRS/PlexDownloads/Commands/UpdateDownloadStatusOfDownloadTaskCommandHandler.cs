@@ -1,6 +1,7 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;
@@ -17,19 +18,13 @@ public class UpdateDownloadStatusOfDownloadTaskCommandValidator : AbstractValida
 public class UpdateDownloadStatusOfDownloadTaskCommandHandler : BaseHandler,
     IRequestHandler<UpdateDownloadStatusOfDownloadTaskCommand, Result>
 {
-    public UpdateDownloadStatusOfDownloadTaskCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public UpdateDownloadStatusOfDownloadTaskCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result> Handle(UpdateDownloadStatusOfDownloadTaskCommand command, CancellationToken cancellationToken)
     {
-        var downloadTasks = await DownloadTasksQueryable
-            .AsTracking()
+        await _dbContext.DownloadTasks
             .Where(x => command.DownloadTaskIds.Contains(x.Id))
-            .ToListAsync(cancellationToken);
-
-        foreach (var downloadTask in downloadTasks)
-            downloadTask.DownloadStatus = command.DownloadStatus;
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, x => command.DownloadStatus), cancellationToken);
 
         return Result.Ok();
     }

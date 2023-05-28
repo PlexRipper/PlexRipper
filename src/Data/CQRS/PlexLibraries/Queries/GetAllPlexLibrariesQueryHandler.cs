@@ -1,6 +1,7 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.PlexLibraries;
@@ -12,7 +13,7 @@ public class GetAllPlexLibrariesQueryValidator : AbstractValidator<GetAllPlexLib
 
 public class GetAllPlexLibrariesQueryHandler : BaseHandler, IRequestHandler<GetAllPlexLibrariesQuery, Result<List<PlexLibrary>>>
 {
-    public GetAllPlexLibrariesQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public GetAllPlexLibrariesQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<List<PlexLibrary>>> Handle(GetAllPlexLibrariesQuery request, CancellationToken cancellationToken)
     {

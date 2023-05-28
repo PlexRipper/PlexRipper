@@ -1,47 +1,43 @@
 <template>
-	<v-col class="py-1">
-		<v-btn depressed tile class="no-background" @click.native.stop="changeStatus">
-			<v-icon large left>{{ getButtonIcon }}</v-icon>
-			<span class="hidden-sm-and-down">{{ getButtonText }}</span>
-		</v-btn>
-	</v-col>
+	<q-col class="q-py-sm">
+		<BaseButton flat :icon="getButtonIcon" :label="t(getButtonText)" @click.stop="changeStatus" />
+	</q-col>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
 import { DownloadStatus } from '@dto/mainApi';
 
-@Component<ServerDownloadStatus>({})
-export default class ServerDownloadStatus extends Vue {
-	serverStatus: DownloadStatus = DownloadStatus.Paused;
-	get getButtonIcon(): string {
-		if (this.serverStatus === DownloadStatus.Paused) {
-			return 'mdi-play';
-		}
+const { t } = useI18n();
+const serverStatus = ref<DownloadStatus>(DownloadStatus.Paused);
 
-		if (this.serverStatus === DownloadStatus.Downloading) {
-			return 'mdi-pause';
-		}
-		return 'mdi-question';
+const getButtonIcon = computed(() => {
+	if (serverStatus.value === DownloadStatus.Paused) {
+		return 'mdi-play';
 	}
 
-	get getButtonText(): string {
-		if (this.serverStatus === DownloadStatus.Paused) {
-			return 'Start';
-		}
-
-		if (this.serverStatus === DownloadStatus.Downloading) {
-			return 'Pause';
-		}
-		return 'mdi-question';
+	if (serverStatus.value === DownloadStatus.Downloading) {
+		return 'mdi-pause';
 	}
 
-	changeStatus(): void {
-		if (this.serverStatus === DownloadStatus.Paused) {
-			this.serverStatus = DownloadStatus.Downloading;
-		} else if (this.serverStatus === DownloadStatus.Downloading) {
-			this.serverStatus = DownloadStatus.Paused;
-		}
+	return 'mdi-question';
+});
+
+const getButtonText = computed(() => {
+	if (serverStatus.value === DownloadStatus.Paused) {
+		return 'components.server-download-status.start';
+	}
+
+	if (serverStatus.value === DownloadStatus.Downloading) {
+		return 'components.server-download-status.pause';
+	}
+	return '';
+});
+
+function changeStatus(): void {
+	if (serverStatus.value === DownloadStatus.Paused) {
+		serverStatus.value = DownloadStatus.Downloading;
+	} else if (serverStatus.value === DownloadStatus.Downloading) {
+		serverStatus.value = DownloadStatus.Paused;
 	}
 }
 </script>

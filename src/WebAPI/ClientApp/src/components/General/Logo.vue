@@ -1,13 +1,13 @@
 <template>
-	<v-img :height="size" :width="size" :src="require('@img/logo/full-logo-256.png')" />
+	<q-img
+		no-spinner
+		:style="{ width: props.size + 'px', height: props.size + 'px' }"
+		src="/img/logo/full-logo-256.png"
+		alt="Loading PlexRipper" />
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
-
-@Component<Logo>({})
-export default class Logo extends Vue {
-	@Prop({ required: true, type: Number, default: 128 })
-	readonly size!: number;
-}
+<script setup lang="ts">
+const props = withDefaults(defineProps<{ size: number }>(), {
+	size: 128,
+});
 </script>

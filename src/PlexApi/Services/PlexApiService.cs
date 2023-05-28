@@ -1,5 +1,8 @@
-﻿using AutoMapper;
-using PlexRipper.Application;
+﻿using Application.Contracts;
+using AutoMapper;
+using Data.Contracts;
+using Logging.Interface;
+using PlexApi.Contracts;
 
 namespace PlexRipper.PlexApi.Services;
 
@@ -12,17 +15,21 @@ public class PlexApiService : IPlexApiService
     #region Fields
 
     private readonly IMapper _mapper;
+    private readonly IMediator _mediator;
 
+    private readonly ILog _log;
     private readonly Api.PlexApi _plexApi;
 
     #endregion
 
     #region Constructors
 
-    public PlexApiService(Api.PlexApi plexApi, IMapper mapper)
+    public PlexApiService(ILog log, Api.PlexApi plexApi, IMapper mapper, IMediator mediator)
     {
+        _log = log;
         _plexApi = plexApi;
         _mapper = mapper;
+        _mediator = mediator;
     }
 
     #endregion
@@ -31,16 +38,23 @@ public class PlexApiService : IPlexApiService
 
     #region Public
 
-    public async Task<PlexAccount> GetAccountAsync(string authToken)
+    public async Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(PlexLibrary plexLibrary)
     {
-        var result = await _plexApi.GetAccountAsync(authToken);
-        return _mapper.Map<PlexAccount>(result);
-    }
+        var tokenResult = await GetPlexServerTokenAsync(plexLibrary.PlexServerId);
+        if (tokenResult.IsFailed)
+            return tokenResult.ToResult();
 
-    public async Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(string serverAuthToken, string plexFullHost, string plexLibraryKey)
-    {
         var stepSize = 5000;
-        var result = await _plexApi.GetAllEpisodesAsync(serverAuthToken, plexFullHost, plexLibraryKey, 0, stepSize);
+        var authToken = tokenResult.Value;
+        var plexLibraryKey = plexLibrary.Key;
+
+        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexLibrary.PlexServerId));
+        if (plexServerConnection.IsFailed)
+            return plexServerConnection.ToResult();
+
+        var serverUrl = plexServerConnection.Value.Url;
+
+        var result = await _plexApi.GetAllEpisodesAsync(authToken, serverUrl, plexLibraryKey, 0, stepSize);
         if (result != null)
         {
             var metaData = result.MediaContainer.Metadata;
@@ -51,7 +65,7 @@ public class PlexApiService : IPlexApiService
 
                 for (var i = 1; i < loops; i++)
                 {
-                    var rangeResult = await _plexApi.GetAllEpisodesAsync(serverAuthToken, plexFullHost, plexLibraryKey, i * stepSize, stepSize);
+                    var rangeResult = await _plexApi.GetAllEpisodesAsync(authToken, serverUrl, plexLibraryKey, i * stepSize, stepSize);
                     if (rangeResult?.MediaContainer?.Metadata?.Count > 0)
                         metaData.AddRange(rangeResult.MediaContainer.Metadata);
                 }
@@ -59,35 +73,47 @@ public class PlexApiService : IPlexApiService
                 var success = metaData.Count == totalSize;
             }
 
-            return Result.Ok(_mapper.Map<List<PlexTvShowEpisode>>(metaData));
+            return Result.Ok(metaData.ToPlexTvShowEpisodes());
         }
 
         return Result.Fail($"Failed to retrieve episodes for library with key {plexLibraryKey}");
     }
 
-    public async Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(
-        string serverAuthToken,
-        string plexFullHost,
-        string plexLibraryKey)
+    /// <inheritdoc/>
+    public async Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(PlexLibrary plexLibrary)
     {
-        var result = await _plexApi.GetAllSeasonsAsync(serverAuthToken, plexFullHost, plexLibraryKey);
-        if (result != null)
-            return Result.Ok(_mapper.Map<List<PlexTvShowSeason>>(result.MediaContainer.Metadata));
+        var tokenResult = await GetPlexServerTokenAsync(plexLibrary.PlexServerId);
+        if (tokenResult.IsFailed)
+            return tokenResult.ToResult();
 
-        return Result.Fail($"Failed to retrieve seasons for library with key {plexLibraryKey}");
+        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexLibrary.PlexServerId));
+        if (plexServerConnection.IsFailed)
+            return plexServerConnection.ToResult();
+
+        var serverUrl = plexServerConnection.Value.Url;
+
+        var result = await _plexApi.GetAllSeasonsAsync(tokenResult.Value, serverUrl, plexLibrary.Key);
+        if (result != null)
+            return Result.Ok(result.MediaContainer.Metadata.ToPlexTvShowSeasons());
+
+        return Result.Fail($"Failed to retrieve seasons for library with key {plexLibrary.Key}");
     }
 
-    /// <summary>
-    /// Returns the latest version of the <see cref="PlexLibrary"/> with the included media. Id and PlexServerId are copied over from the input parameter.
-    /// </summary>
-    /// <param name="plexLibrary"></param>
-    /// <param name="authToken">The token used to authenticate with the <see cref="PlexServer"/>.</param>
-    /// <param name="plexServerBaseUrl"></param>
-    /// <returns></returns>
-    public async Task<Result<PlexLibrary>> GetLibraryMediaAsync(PlexLibrary plexLibrary, string authToken)
+    /// <inheritdoc/>
+    public async Task<Result<PlexLibrary>> GetLibraryMediaAsync(PlexLibrary plexLibrary, PlexAccount plexAccount = null)
     {
+        var tokenResult = await GetPlexServerTokenAsync(plexLibrary.PlexServerId, plexAccount?.Id ?? 0);
+        if (tokenResult.IsFailed)
+            return tokenResult.ToResult();
+
+        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexLibrary.PlexServerId));
+        if (plexServerConnection.IsFailed)
+            return plexServerConnection.ToResult();
+
+        var serverUrl = plexServerConnection.Value.Url;
+
         // Retrieve updated version of the PlexLibrary
-        var plexLibraries = await GetLibrarySectionsAsync(authToken, plexLibrary.ServerUrl);
+        var plexLibraries = await GetLibrarySectionsAsync(plexLibrary.PlexServerId);
 
         if (plexLibraries.IsFailed)
             return plexLibraries.ToResult();
@@ -95,48 +121,66 @@ public class PlexApiService : IPlexApiService
         var updatedPlexLibrary = plexLibraries.Value.Find(x => x.Key == plexLibrary.Key);
         updatedPlexLibrary.Id = plexLibrary.Id;
         updatedPlexLibrary.PlexServerId = plexLibrary.PlexServerId;
-        updatedPlexLibrary.SyncedAt = DateTime.Now;
+        updatedPlexLibrary.SyncedAt = DateTime.UtcNow;
 
         // Retrieve the media for this library
-        var result = await _plexApi.GetMetadataForLibraryAsync(authToken, plexLibrary.ServerUrl, plexLibrary.Key);
+        var result = await _plexApi.GetMetadataForLibraryAsync(tokenResult.Value, serverUrl, plexLibrary.Key);
 
-        if (result == null)
-            return null;
+        if (result.IsFailed)
+            return result.ToResult().LogError();
 
-        var mediaList = result.MediaContainer.Metadata;
+        var mediaList = result.Value.MediaContainer.Metadata;
 
         // Determine how to map based on the Library type.
-        switch (result.MediaContainer.ViewGroup)
+        switch (result.Value.MediaContainer.ViewGroup)
         {
             case "movie":
-                updatedPlexLibrary.Movies = _mapper.Map<List<PlexMovie>>(mediaList);
+                updatedPlexLibrary.Movies = mediaList.ToPlexMovies();
                 break;
             case "show":
-                updatedPlexLibrary.TvShows = _mapper.Map<List<PlexTvShow>>(mediaList);
+                updatedPlexLibrary.TvShows = mediaList.ToPlexTvShows();
                 break;
         }
 
         return Result.Ok(updatedPlexLibrary);
     }
 
-    /// <summary>
-    /// Retrieves all accessible <see cref="PlexLibrary"/> from this <see cref="PlexServer"/> by this AuthToken.
-    /// </summary>
-    /// <param name="authToken">The token used to authenticate with the <see cref="PlexServer"/>.</param>
-    /// <param name="plexServerBaseUrl">The full PlexServer Url.</param>
-    /// <returns>List of accessible <see cref="PlexLibrary"/>.</returns>
-    public async Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(string authToken, string plexServerBaseUrl)
+    /// <inheritdoc/>
+    public async Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(int plexServerId, int plexAccountId = 0)
     {
-        var result = await _plexApi.GetLibrarySectionsAsync(authToken, plexServerBaseUrl);
+        var tokenResult = await GetPlexServerTokenAsync(plexServerId, plexAccountId);
+        if (tokenResult.IsFailed)
+            return tokenResult.ToResult();
+
+        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexServerId));
+        if (plexServerConnection.IsFailed)
+            return plexServerConnection.ToResult();
+
+        var serverUrl = plexServerConnection.Value.Url;
+        var plexServer = plexServerConnection.Value.PlexServer;
+
+        var result = await _plexApi.GetLibrarySectionsAsync(tokenResult.Value, serverUrl);
         if (result.IsFailed)
         {
-            Log.Warning($"{plexServerBaseUrl} returned no libraries");
+            _log.Warning("Plex server with name: {PlexServerName} returned no libraries", plexServer.Name);
+            return result.ToResult();
+        }
+
+        if (result.Value?.MediaContainer?.Directory is null)
+        {
+            _log.Error("Plex server: {PlexServerResultName} returned an empty response when libraries were requested", plexServer.Name);
             return result.ToResult();
         }
 
         var directories = result.Value.MediaContainer.Directory;
 
-        return Result.Ok(_mapper.Map<List<PlexLibrary>>(directories));
+        var mappedLibraries = _mapper.Map<List<PlexLibrary>>(directories);
+
+        // Ensure every library has the Plex server id set
+        foreach (var mappedLibrary in mappedLibraries)
+            mappedLibrary.PlexServerId = plexServerId;
+
+        return Result.Ok(mappedLibraries);
     }
 
     public async Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string plexFullHost, int ratingKey)
@@ -151,27 +195,85 @@ public class PlexApiService : IPlexApiService
         return _mapper.Map<PlexMediaMetaData>(result);
     }
 
-    public Task<PlexServerStatus> GetPlexServerStatusAsync(string authToken, string serverBaseUrl, Action<PlexApiClientProgress> action = null)
+    /// <inheritdoc/>
+    public async Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(int plexServerConnectionId, Action<PlexApiClientProgress> action = null)
     {
-        return _plexApi.GetServerStatusAsync(authToken, serverBaseUrl, action);
+        var plexServerConnectionResult = await _mediator.Send(new GetPlexServerConnectionByIdQuery(plexServerConnectionId));
+        if (plexServerConnectionResult.IsFailed)
+            return plexServerConnectionResult.ToResult();
+
+        var tokenResult = await GetPlexServerTokenAsync(plexServerConnectionResult.Value.PlexServerId);
+        if (tokenResult.IsFailed)
+            return tokenResult.ToResult();
+
+        var serverStatusResult = await _plexApi.GetServerStatusAsync(plexServerConnectionResult.Value.Url, tokenResult.Value, action);
+        if (serverStatusResult.IsFailed)
+            return serverStatusResult;
+
+        serverStatusResult.Value.PlexServerId = plexServerConnectionResult.Value.PlexServerId;
+        serverStatusResult.Value.PlexServerConnectionId = plexServerConnectionResult.Value.Id;
+        return serverStatusResult;
     }
 
     public async Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow)
     {
         var result = await _plexApi.GetSeasonsAsync(serverAuthToken, plexFullHost, plexTvShow.Key);
-        return result != null ? _mapper.Map<List<PlexTvShowSeason>>(result.MediaContainer.Metadata) : new List<PlexTvShowSeason>();
+        return result?.MediaContainer?.Metadata.ToPlexTvShowSeasons() ?? new List<PlexTvShowSeason>();
     }
 
     /// <inheritdoc/>
-    public async Task<List<PlexServer>> GetServersAsync(string plexAccountToken)
+    public async Task<(Result<List<PlexServer>> servers, Result<List<ServerAccessTokenDTO>> tokens)> GetAccessiblePlexServersAsync(int plexAccountId)
     {
-        var result = await _plexApi.GetServerAsync(plexAccountToken);
-        if (result != null)
-            return _mapper.Map<List<PlexServer>>(result);
+        var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
+        if (plexAccountResult.IsFailed)
+            return (plexAccountResult.ToResult(), plexAccountResult.ToResult());
 
-        Log.Warning("Failed to retrieve PlexServers");
-        return new List<PlexServer>();
+        var plexAccountToken = await GetPlexApiTokenAsync(plexAccountResult.Value);
+        if (plexAccountToken.IsFailed)
+            return (plexAccountToken.ToResult(), plexAccountToken.ToResult());
+
+        var result = await _plexApi.GetServerAsync(plexAccountToken.Value);
+        if (result.IsFailed)
+        {
+            _log.Warning("Failed to retrieve PlexServers for PlexAccount: {PlexAccountName}", plexAccountResult.Value.DisplayName);
+            return (result.ToResult(), result.ToResult());
+        }
+
+        var mapServersResult = _mapper.Map<List<PlexServer>>(result.Value);
+        var mapAccessResult = _mapper.Map<List<ServerAccessTokenDTO>>(result.Value);
+
+        // The servers have an OwnerId of 0 when it belongs to the PlexAccount that was used to request it.
+        foreach (var plexServer in mapServersResult.Where(plexServer => plexServer.OwnerId == 0))
+            plexServer.OwnerId = plexAccountResult.Value.PlexId;
+
+        // Ensure every token has the PlexAccountId assigned
+        foreach (var serverAccessTokenDto in mapAccessResult)
+            serverAccessTokenDto.PlexAccountId = plexAccountId;
+
+        return (Result.Ok(mapServersResult), Result.Ok(mapAccessResult));
     }
+
+    #region Images
+
+    /// <inheritdoc/>
+    public async Task<Result<byte[]>> GetPlexMediaImageAsync(PlexServer plexServer, string thumbPath, int width = 0, int height = 0)
+    {
+        var tokenResult = await GetPlexServerTokenAsync(plexServer.Id);
+        if (tokenResult.IsFailed)
+            return tokenResult.ToResult();
+
+        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexServer.Id));
+        if (plexServerConnection.IsFailed)
+            return plexServerConnection.ToResult();
+
+        return await _plexApi.GetPlexMediaImageAsync(plexServerConnection.Value.GetThumbUrl(thumbPath), tokenResult.Value, width, height);
+    }
+
+    #endregion
+
+    #region Authentication
+
+    #region PlexSignIn
 
     public async Task<Result<PlexAccount>> PlexSignInAsync(PlexAccount plexAccount)
     {
@@ -187,24 +289,14 @@ public class PlexApiService : IPlexApiService
             mapResult.IsEnabled = plexAccount.IsEnabled;
             mapResult.IsMain = plexAccount.IsMain;
             mapResult.IsValidated = true;
-            mapResult.ValidatedAt = DateTime.Now;
+            mapResult.ValidatedAt = DateTime.UtcNow;
             mapResult.VerificationCode = "";
 
-            Log.Information($"Successfully retrieved the PlexAccount data for user {plexAccount.DisplayName} from the PlexApi");
+            _log.Information("Successfully retrieved the PlexAccount data for user {PlexAccountDisplayName} from the PlexApi", plexAccount.DisplayName);
             return Result.Ok(mapResult);
         }
 
         return result.ToResult();
-    }
-
-    public Task<string> RefreshPlexAuthTokenAsync(PlexAccount account)
-    {
-        return _plexApi.RefreshPlexAuthTokenAsync(account);
-    }
-
-    public Task<Result<byte[]>> GetPlexMediaImageAsync(string thumbUrl, string authToken, int width = 0, int height = 0)
-    {
-        return _plexApi.GetPlexMediaImageAsync(thumbUrl, authToken, width, height);
     }
 
     public Task<Result<AuthPin>> Get2FAPin(string clientId)
@@ -216,6 +308,59 @@ public class PlexApiService : IPlexApiService
     {
         return _plexApi.Check2FAPin(pinId, clientId);
     }
+
+    #endregion
+
+    private async Task<Result<string>> GetPlexApiTokenAsync(PlexAccount plexAccount)
+    {
+        if (plexAccount == null)
+            return ResultExtensions.IsNull(nameof(plexAccount));
+
+        if (plexAccount.AuthenticationToken != string.Empty)
+        {
+            // TODO Make the token refresh limit configurable
+            if ((plexAccount.ValidatedAt - DateTime.UtcNow).TotalDays < 30)
+            {
+                _log.InformationLine("Plex AuthToken was still valid, using from local DB");
+                return plexAccount.AuthenticationToken;
+            }
+
+            _log.InformationLine("Plex AuthToken has expired, refreshing Plex AuthToken now");
+
+            // TODO Account for 2FA
+            return await _plexApi.RefreshPlexAuthTokenAsync(plexAccount);
+        }
+
+        return Result.Fail($"PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!").LogError();
+    }
+
+    /// <summary>
+    /// Returns the authentication token needed to authenticate communication with the <see cref="PlexServer"/>.
+    /// Note: If no plexAccountId is specified then it will search for a valid <see cref="PlexAccount"/> automatically.
+    /// </summary>
+    /// <param name="plexServerId">The id of the <see cref="PlexServer"/> to retrieve a token for.</param>
+    /// <param name="plexAccountId">The id of the <see cref="PlexAccount"/> to authenticate with.</param>
+    /// <returns>The authentication token.</returns>
+    private Task<Result<string>> GetPlexServerTokenAsync(int plexServerId, int plexAccountId = 0)
+    {
+        // TODO if there is no token then it should refresh a token
+        return _mediator.Send(new GetPlexServerTokenQuery(plexServerId, plexAccountId));
+    }
+
+    public async Task<Result<string>> GetPlexServerTokenWithUrl(int plexServerId, string serverUrl, int plexAccountId = 0)
+    {
+        if (string.IsNullOrEmpty(serverUrl))
+            return ResultExtensions.IsNull(nameof(serverUrl)).LogWarning();
+
+        var token = await GetPlexServerTokenAsync(plexServerId, plexAccountId);
+        if (token.IsFailed)
+            return token.ToResult();
+
+        // TODO verify that download=1 is not needed.
+        return Result.Ok($"{serverUrl}?X-Plex-Token={token.Value}");
+    }
+
+    #endregion
 
     #endregion
 

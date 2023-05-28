@@ -1,13 +1,16 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text.Json;
-using PlexRipper.Application;
+using Logging.Interface;
+using Settings.Contracts;
 
 namespace PlexRipper.Settings;
 
 public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel> where TModel : class
 {
     #region Fields
+
+    protected readonly ILog _log = LogManager.CreateLogInstance<TModel>();
 
     private readonly Subject<TModel> _moduleUpdatedSubject = new();
 
@@ -69,9 +72,10 @@ public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel> w
             }
             else
             {
-                Log.Warning(
-                    $"The userSettings, in module \"{Name}\", was missing property \"{prop.Name}\". " +
-                    $"Will revert to default value now, this is normal if you just updated PlexRipper as new settings might have been added.");
+                _log.Warning(
+                    "The userSettings, in module {Name}, was missing property {PropName}. " +
+                    $"Will revert to default value now, this is normal if you just updated PlexRipper as new settings might have been added.", Name, prop.Name,
+                    0);
                 var defaultValue = defaultValues.GetType().GetProperty(prop.Name).GetValue(defaultValues, null);
                 if (defaultValue != targetValue)
                     targetProp.SetValue(this, defaultValue);
@@ -85,7 +89,7 @@ public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel> w
     {
         if (sourceSettings is null)
         {
-            Log.Warning($"Can not update settings module {Name} with source settings null");
+            _log.Warning("Can not update settings module {Name} with source settings null", Name);
             return GetValues();
         }
 

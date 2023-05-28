@@ -1,0 +1,34 @@
+name: "Feature request 🚀"
+description: Suggest a feature that will improve PlexRipper!
+title: "💡 [REQUEST] - <title>"
+labels: [
+  "enhancement"
+]
+body:
+  - type: markdown
+    attributes:
+      value: "**Thank you for taking the time to fill out this feature request! The more details you can provide the better!**"
+  - type: checkboxes
+    attributes:
+      label: Checks
+      options:
+        - label: I have searched the existing issue and my feature request does not exist!
+          required: true
+        - label: I have tried out the latest development build and can confirm my feature request is not yet implemented!
+          required: true
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Describe the feature
+      description: A clear and concise description of what you think would be a helpful addition to PlexRipper.
+      placeholder: Feature description
+    validations:
+      required: true
+  - type: checkboxes
+    id: additional-info
+    attributes:
+      label: Additional information
+      description: Additional information that helps us decide how to proceed.
+      options:
+        - label: Would you be willing to help implement this feature?
+        - label: Does this feature have a potential to break existing features?

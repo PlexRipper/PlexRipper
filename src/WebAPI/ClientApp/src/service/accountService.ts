@@ -1,10 +1,11 @@
-import Log from 'consola';
 import { Observable, of } from 'rxjs';
 import { map, mergeMap, switchMap, take, tap } from 'rxjs/operators';
-import { Context } from '@nuxt/types';
-import { createAccount, deleteAccount, getAccount, getAllAccounts, updateAccount } from '@api/accountApi';
+import BaseService from './baseService';
+import ServerService from './serverService';
+import LibraryService from './libraryService';
 import { PlexAccountDTO } from '@dto/mainApi';
-import { BaseService, ServerService } from '@service';
+import { createAccount, deleteAccount, getAccount, getAllAccounts, updateAccount } from '@api/accountApi';
+
 import IStoreState from '@interfaces/service/IStoreState';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
@@ -22,8 +23,8 @@ export class AccountService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<ISetupResult> {
-		super.setup(nuxtContext);
+	public setup(): Observable<ISetupResult> {
+		super.setup();
 		return this.refreshAccounts().pipe(
 			switchMap(() => of({ name: this._name, isSuccess: true })),
 			take(1),
@@ -83,7 +84,7 @@ export class AccountService extends BaseService {
 		);
 	}
 
-	public updatePlexAccount(account: PlexAccountDTO, inspect: boolean = false): Observable<PlexAccountDTO | null> {
+	public updatePlexAccount(account: PlexAccountDTO, inspect = false): Observable<PlexAccountDTO | null> {
 		return updateAccount(account, inspect).pipe(
 			map((accountResult): PlexAccountDTO | null => accountResult?.value ?? null),
 			mergeMap((account) =>
@@ -93,9 +94,12 @@ export class AccountService extends BaseService {
 	}
 
 	public deleteAccount(accountId: number) {
-		return deleteAccount(accountId).pipe(switchMap(() => this.refreshAccounts()));
+		return deleteAccount(accountId).pipe(
+			switchMap(() => this.refreshAccounts()),
+			switchMap(() => ServerService.refreshPlexServers()),
+			switchMap(() => LibraryService.refreshLibraries()),
+		);
 	}
 }
 
-const accountService = new AccountService();
-export default accountService;
+export default new AccountService();

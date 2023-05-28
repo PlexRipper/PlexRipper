@@ -1,0 +1,127 @@
+@import 'variables';
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * Text
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+.text-eclipse {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * Background
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+.blur {
+	backdrop-filter: blur(30px);
+}
+
+.no-background {
+	background-color: transparent !important;
+	backdrop-filter: none !important;
+}
+
+
+body {
+	&.body--dark {
+		.background-sm {
+			background: $dark-sm-background-color;
+		}
+	}
+
+	&.body--light {
+		.background-sm {
+			background: $light-sm-background-color;
+		}
+	}
+}
+
+body {
+	&.body--dark {
+		.background-md {
+			background: $dark-md-background-color;
+		}
+	}
+
+	&.body--light {
+		.background-md {
+			background: $light-md-background-color;
+		}
+	}
+}
+
+body {
+	&.body--dark {
+		.background-lg {
+			background: $dark-lg-background-color;
+		}
+	}
+
+	&.body--light {
+		.background-lg {
+			background: $light-lg-background-color;
+		}
+	}
+}
+
+body {
+	&.body--dark {
+		.background-xl {
+			background: $dark-xl-background-color;
+		}
+	}
+
+	&.body--light {
+		.background-xl {
+			background: $light-xl-background-color;
+		}
+	}
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * Borders
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+.default-border {
+	border: 2px solid red;
+}
+
+.success-border {
+	border: 2px solid limegreen;
+}
+
+.default-border-radius {
+	border-radius: 15px;
+}
+
+// Used for low opacity borders in tables
+.body--dark {
+	.fade-out-border {
+		border-bottom: 1px solid $separator-dark-color;
+	}
+}
+
+.body--light {
+	.fade-out-border {
+		border-bottom: 1px solid $separator-color;
+	}
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * Shadows
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+.default-shadow {
+	box-shadow: $box-shadow;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * Size
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+.inherit-all-height {
+	min-height: inherit;
+	max-height: inherit;
+	height: inherit;
+}

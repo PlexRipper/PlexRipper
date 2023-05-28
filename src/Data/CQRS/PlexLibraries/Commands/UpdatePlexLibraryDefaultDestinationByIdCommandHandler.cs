@@ -1,6 +1,7 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.PlexLibraries;
@@ -17,7 +18,7 @@ public class UpdatePlexLibraryDefaultDestinationByIdCommandHandlerValidator : Ab
 public class UpdatePlexLibraryDefaultDestinationByIdCommandHandlerHandler : BaseHandler,
     IRequestHandler<UpdatePlexLibraryDefaultDestinationByIdCommand, Result>
 {
-    public UpdatePlexLibraryDefaultDestinationByIdCommandHandlerHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public UpdatePlexLibraryDefaultDestinationByIdCommandHandlerHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result> Handle(UpdatePlexLibraryDefaultDestinationByIdCommand command, CancellationToken cancellationToken)
     {

@@ -1,7 +1,8 @@
 using System.Net;
-using Environment;
-using PlexRipper.Application;
-using PlexRipper.DownloadManager;
+using BackgroundServices.Contracts;
+using DownloadManager.Contracts;
+using Logging.Interface;
+using Settings.Contracts;
 
 namespace PlexRipper.WebAPI;
 
@@ -12,48 +13,31 @@ public class Boot : IBoot
 {
     #region Fields
 
+    private readonly ILog _log;
     private readonly IHostApplicationLifetime _appLifetime;
 
     private readonly IConfigManager _configManager;
 
-    private readonly IFileMerger _fileMerger;
-
-    private readonly IPlexRipperDatabaseService _plexRipperDatabaseService;
-
     private readonly ISchedulerService _schedulerService;
 
-    private readonly IMigrationService _migrationService;
-
-    private readonly IDownloadSubscriptions _downloadSubscriptions;
-
     private readonly IDownloadQueue _downloadQueue;
-
-    private readonly IDownloadTracker _downloadTracker;
 
     #endregion
 
     #region Constructor
 
     public Boot(
+        ILog log,
         IHostApplicationLifetime appLifetime,
         IConfigManager configManager,
-        IFileMerger fileMerger,
-        IPlexRipperDatabaseService plexRipperDatabaseService,
         ISchedulerService schedulerService,
-        IMigrationService migrationService,
-        IDownloadSubscriptions downloadSubscriptions,
-        IDownloadQueue downloadQueue,
-        IDownloadTracker downloadTracker)
+        IDownloadQueue downloadQueue)
     {
+        _log = log;
         _appLifetime = appLifetime;
         _configManager = configManager;
-        _fileMerger = fileMerger;
-        _plexRipperDatabaseService = plexRipperDatabaseService;
         _schedulerService = schedulerService;
-        _migrationService = migrationService;
-        _downloadSubscriptions = downloadSubscriptions;
         _downloadQueue = downloadQueue;
-        _downloadTracker = downloadTracker;
     }
 
     #endregion
@@ -62,35 +46,24 @@ public class Boot : IBoot
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        Log.Information("Shutting down the container");
+        _log.InformationLine("Shutting down the container");
         await _schedulerService.StopAsync();
     }
 
     public async Task WaitForStartAsync(CancellationToken cancellationToken)
     {
-        Log.Information("Initiating boot process");
+        _log.InformationLine("Initiating boot process");
         ServicePointManager.DefaultConnectionLimit = 1000;
 
-        // First await the finishing off all these
-        Log.SetupLogging();
         _configManager.Setup();
-        await _plexRipperDatabaseService.SetupAsync();
-        await _migrationService.SetupAsync();
-
-        _downloadSubscriptions.Setup();
         _downloadQueue.Setup();
-        _downloadTracker.Setup();
-        await _fileMerger.SetupAsync();
-
-        // TODO Remove this once the plexServer sync has been compatible for the integration test
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
-            await _schedulerService.SetupAsync();
+        await _schedulerService.SetupAsync();
 
         _appLifetime.ApplicationStarted.Register(OnStarted);
         _appLifetime.ApplicationStopping.Register(OnStopping);
         _appLifetime.ApplicationStopped.Register(OnStopped);
 
-        Log.Information("Finished Initiating boot process");
+        _log.InformationLine("Finished Initiating boot process");
     }
 
     #endregion
@@ -99,21 +72,21 @@ public class Boot : IBoot
 
     private void OnStarted()
     {
-        Log.Information("Boot.OnStarted has been called.");
+        _log.InformationLine("Boot.OnStarted has been called");
 
         // Perform post-startup activities here
     }
 
     private void OnStopped()
     {
-        Log.Information("Boot.OnStopped has been called.");
+        _log.InformationLine("Boot.OnStopped has been called");
 
         // Perform post-stopped activities here
     }
 
     private void OnStopping()
     {
-        Log.Information("Boot.OnStopping has been called.");
+        _log.InformationLine("Boot.OnStopping has been called");
 
         // Perform on-stopping activities here
     }

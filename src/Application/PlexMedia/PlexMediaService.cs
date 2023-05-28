@@ -1,108 +1,76 @@
-﻿namespace PlexRipper.Application;
+﻿using Application.Contracts;
+using Data.Contracts;
+using PlexApi.Contracts;
+
+namespace PlexRipper.Application;
 
 public class PlexMediaService : IPlexMediaService
 {
     protected readonly IMediator _mediator;
 
-    protected readonly IPlexAuthenticationService _plexAuthenticationService;
-
     protected readonly IPlexApiService _plexServiceApi;
 
-    public PlexMediaService(
-        IMediator mediator,
-        IPlexAuthenticationService plexAuthenticationService,
-        IPlexApiService plexServiceApi)
+    public PlexMediaService(IMediator mediator, IPlexApiService plexServiceApi)
     {
         _mediator = mediator;
-        _plexAuthenticationService = plexAuthenticationService;
         _plexServiceApi = plexServiceApi;
     }
 
     public async Task<Result<byte[]>> GetThumbnailImage(int mediaId, PlexMediaType mediaType, int width = 0, int height = 0)
     {
-        string thumbPath;
-        PlexServer plexServer;
-
-        switch (mediaType)
+        if (mediaType == PlexMediaType.Movie)
         {
-            case PlexMediaType.Movie:
-            {
-                var movieResult = await _mediator.Send(new GetPlexMovieByIdQuery(mediaId, includeServer: true));
-                if (movieResult.IsFailed)
-                    return movieResult.ToResult();
+            var movieResult = await _mediator.Send(new GetPlexMovieByIdQuery(mediaId, includeServer: true));
+            if (movieResult.IsFailed)
+                return movieResult.ToResult();
 
-                if (!movieResult.Value.HasThumb)
-                    return Result.Fail($"Movie: {movieResult.Value.Title} has no thumbnail.");
+            if (!movieResult.Value.HasThumb)
+                return Result.Fail($"Movie: {movieResult.Value.Title} has no thumbnail.");
 
-                thumbPath = movieResult.Value.ThumbUrl;
-                plexServer = movieResult.Value.PlexServer;
-                break;
-            }
-            case PlexMediaType.TvShow:
-            {
-                var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdQuery(mediaId, true));
-                if (tvShowResult.IsFailed)
-                    return tvShowResult.ToResult();
-
-                if (!tvShowResult.Value.HasThumb)
-                    return Result.Fail($"TvShow: {tvShowResult.Value.Title} has no thumbnail.");
-
-                thumbPath = tvShowResult.Value.ThumbUrl;
-                plexServer = tvShowResult.Value.PlexServer;
-                break;
-            }
-            default:
-                return Result.Fail($"MediaType: {mediaType} is not supported when retrieving thumbnails.");
+            return await _plexServiceApi.GetPlexMediaImageAsync(movieResult.Value.PlexServer, movieResult.Value.ThumbUrl, width, height);
         }
 
-        var token = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Id);
-        if (token.IsFailed)
-            return token.ToResult();
+        if (mediaType == PlexMediaType.TvShow)
+        {
+            var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdQuery(mediaId, true));
+            if (tvShowResult.IsFailed)
+                return tvShowResult.ToResult();
 
-        return await _plexServiceApi.GetPlexMediaImageAsync(plexServer.ServerUrl + thumbPath, token.Value, width, height);
+            if (!tvShowResult.Value.HasThumb)
+                return Result.Fail($"TvShow: {tvShowResult.Value.Title} has no thumbnail.");
+
+            return await _plexServiceApi.GetPlexMediaImageAsync(tvShowResult.Value.PlexServer, tvShowResult.Value.ThumbUrl, width, height);
+        }
+
+        return Result.Fail($"MediaType: {mediaType} is not supported when retrieving thumbnails.");
     }
 
     public async Task<Result<byte[]>> GetBannerImage(int mediaId, PlexMediaType mediaType, int width = 0, int height = 0)
     {
-        string bannerPath;
-        PlexServer plexServer;
-
-        switch (mediaType)
+        if (mediaType == PlexMediaType.Movie)
         {
-            case PlexMediaType.Movie:
-            {
-                var movieResult = await _mediator.Send(new GetPlexMovieByIdQuery(mediaId, includeServer: true));
-                if (movieResult.IsFailed)
-                    return movieResult.ToResult();
+            var movieResult = await _mediator.Send(new GetPlexMovieByIdQuery(mediaId, includeServer: true));
+            if (movieResult.IsFailed)
+                return movieResult.ToResult();
 
-                if (!movieResult.Value.HasBanner)
-                    return Result.Fail($"Movie: {movieResult.Value.Title} has no banner.");
+            if (!movieResult.Value.HasBanner)
+                return Result.Fail($"Movie: {movieResult.Value.Title} has no banner.");
 
-                bannerPath = movieResult.Value.ThumbUrl;
-                plexServer = movieResult.Value.PlexServer;
-                break;
-            }
-            case PlexMediaType.TvShow:
-            {
-                var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdQuery(mediaId, true));
-                if (tvShowResult.IsFailed)
-                    return tvShowResult.ToResult();
-
-                if (!tvShowResult.Value.HasBanner)
-                    return Result.Fail($"TvShow: {tvShowResult.Value.Title} has no banner.");
-
-                bannerPath = tvShowResult.Value.ThumbUrl;
-                plexServer = tvShowResult.Value.PlexServer;
-                break;
-            }
-            default:
-                return Result.Fail($"MediaType: {mediaType} is not supported when retrieving banners.");
+            return await _plexServiceApi.GetPlexMediaImageAsync(movieResult.Value.PlexServer, movieResult.Value.BannerUrl, width, height);
         }
 
-        var token = await _plexAuthenticationService.GetPlexServerTokenAsync(plexServer.Id);
-        if (token.IsFailed)
-            return token.ToResult();
+        if (mediaType == PlexMediaType.TvShow)
+        {
+            var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdQuery(mediaId, true));
+            if (tvShowResult.IsFailed)
+                return tvShowResult.ToResult();
 
-        return await _plexServiceApi.GetPlexMediaImageAsync(plexServer.ServerUrl + bannerPath, token.Value, width, height);
+            if (!tvShowResult.Value.HasBanner)
+                return Result.Fail($"TvShow: {tvShowResult.Value.Title} has no banner.");
+
+            return await _plexServiceApi.GetPlexMediaImageAsync(tvShowResult.Value.PlexServer, tvShowResult.Value.BannerUrl, width, height);
+        }
+
+        return Result.Fail($"MediaType: {mediaType} is not supported when retrieving banners.");
     }
 }

@@ -1,23 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
-        <LangVersion>10</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>PlexRipper.Application</RootNamespace>
-        <AssemblyName>PlexRipper.Application</AssemblyName>
-    </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<LangVersion>11</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>PlexRipper.Application</RootNamespace>
+		<AssemblyName>PlexRipper.Application</AssemblyName>
+	</PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Autofac.Extras.Quartz" Version="8.0.0"/>
-        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="9.3.0"/>
-        <PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="7.0.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0"/>
-    </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Autofac.Extras.Quartz" Version="8.0.0" />
+		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="9.3.0" />
+		<PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="10.0.0" />
+	</ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Domain\Domain.csproj"/>
-        <Compile Include="..\Domain\GlobalUsings.cs"/>
-    </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
+		<ProjectReference Include="..\BackgroundServices.Contracts\BackgroundServices.Contracts.csproj" />
+		<ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
+		<ProjectReference Include="..\Domain\Domain.csproj" />
+		<Compile Include="..\Domain\GlobalUsings.cs" />
+		<ProjectReference Include="..\DownloadManager.Contracts\DownloadManager.Contracts.csproj" />
+		<ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
+		<ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
+		<ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
+		<ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj" />
+	</ItemGroup>
 
 </Project>

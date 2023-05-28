@@ -1,4 +1,4 @@
-﻿using PlexRipper.Application;
+﻿using FileSystem.Contracts;
 using PlexRipper.FileSystem.Common;
 
 namespace PlexRipper.FileSystem;

@@ -14,6 +14,13 @@ public static partial class PlexRipperDbContextExtensions
             .AsQueryable();
     }
 
+    public static IQueryable<PlexServer> IncludeConnections(this IQueryable<PlexServer> plexServer)
+    {
+        return plexServer
+            .Include(x => x.PlexServerConnections)
+            .AsQueryable();
+    }
+
     public static IQueryable<DownloadTask> IncludeDownloadTasks(this IQueryable<DownloadTask> downloadTasks)
     {
         return downloadTasks.IncludeDownloadTasks("");

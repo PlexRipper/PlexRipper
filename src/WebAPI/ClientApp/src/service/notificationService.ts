@@ -1,8 +1,8 @@
 import { Observable, of } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
-import { Context } from '@nuxt/types';
+
+import BaseService from './baseService';
 import { NotificationDTO } from '@dto/mainApi';
-import { BaseService } from '@service';
 import { clearAllNotifications, getNotifications, hideNotification } from '@api/notificationApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import ISetupResult from '@interfaces/service/ISetupResult';
@@ -19,8 +19,8 @@ export class NotificationService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<ISetupResult> {
-		super.setup(nuxtContext);
+	public setup(): Observable<ISetupResult> {
+		super.setup();
 
 		return getNotifications().pipe(
 			tap((notifications) => {
@@ -61,5 +61,4 @@ export class NotificationService extends BaseService {
 	// endregion
 }
 
-const notificationService = new NotificationService();
-export default notificationService;
+export default new NotificationService();

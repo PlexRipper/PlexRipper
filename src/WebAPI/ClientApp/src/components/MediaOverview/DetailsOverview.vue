@@ -1,177 +1,213 @@
 <template>
-	<page-container v-show="isOpen">
-		<template v-if="mediaItem">
-			<!--	Details Overview Bar	-->
-			<v-row class="mx-0">
-				<media-overview-bar
-					detail-mode
-					:library="library"
-					:server="server"
-					:media-item="mediaItem"
-					:has-selected="selected.length > 0"
-					@download="downloadSelectedMedia"
-					@back="close"
-				/>
-			</v-row>
-
-			<!--	Header	-->
-			<v-row style="max-height: 250px; height: 250px">
-				<!--	Poster	-->
-				<v-col cols="auto">
-					<v-card :max-width="thumbWidth" :width="thumbWidth">
-						<v-img :src="imageUrl" :width="thumbWidth" :height="thumbHeight">
-							<!--	Placeholder	-->
-							<template #placeholder>
-								<!--	Show fallback image	-->
-								<template v-if="defaultImage">
-									<v-row align="center" justify="center" class="fill-height">
-										<v-col cols="auto">
-											<media-type-icon :size="100" class="mx-3" media-type="mediaType" />
-										</v-col>
-										<v-col cols="12">
-											<h4 class="text-center">{{ mediaItem.title }}</h4>
-										</v-col>
-									</v-row>
+	<QCardDialog
+		:name="name"
+		no-background
+		class="media-details-dialog"
+		maximized
+		seamless
+		content-height="100"
+		:loading="loading"
+		@opened="openDetails"
+		@closed="closeDetails">
+		<template #default>
+			<q-col>
+				<!--	Header	-->
+				<q-row>
+					<q-col cols="auto">
+						<q-card class="q-ma-md media-info-container">
+							<!--	Poster	-->
+							<q-img :src="imageUrl" fit="fill" :width="`${thumbWidth}px`" :height="`${thumbHeight}px`" ratio="2/3">
+								<!--	Placeholder	-->
+								<template #loading>
+									<!--	Show fallback image	-->
+									<q-row align="center" justify="center" class="fill-height">
+										<q-col cols="auto">
+											<q-media-type-icon
+												:size="100"
+												class="mx-3"
+												:media-type="mediaItem?.type ?? PlexMediaType.Unknown" />
+										</q-col>
+										<q-col cols="12">
+											<h4 class="text-center">{{ mediaItem?.title ?? 'unknown' }}</h4>
+										</q-col>
+									</q-row>
 								</template>
-								<!--	Show  image	-->
-								<template v-else>
-									<v-row class="fill-height ma-0" align="center" justify="center">
-										<v-col cols="12">
-											<h4 class="text-center">{{ mediaItem.title }}</h4>
-										</v-col>
-										<v-col cols="auto">
-											<v-progress-circular indeterminate color="grey lighten-5" />
-										</v-col>
-									</v-row>
-								</template>
-							</template>
-						</v-img>
-					</v-card>
-				</v-col>
+							</q-img>
+						</q-card>
+					</q-col>
+					<q-col>
+						<q-card class="q-ma-md media-info-container" :style="{ height: thumbHeight + 'px' }">
+							<!-- Media info-->
+							<q-card-section>
+								<q-markup-table wrap-cells>
+									<tbody>
+										<tr class="q-tr--no-hover">
+											<td colspan="2" class="media-info-column media-title">
+												{{ mediaItemDetail?.title ?? 'unknown' }}
+											</td>
+										</tr>
+										<tr>
+											<td class="media-info-column">
+												{{ t('components.details-overview.total-duration') }}
+											</td>
+											<td class="media-info-column">
+												<q-duration :value="mediaItemDetail?.duration ?? -1" />
+											</td>
+										</tr>
+										<tr>
+											<td class="media-info-column">
+												{{ t('components.details-overview.media-count-label') }}
+											</td>
+											<td class="media-info-column">{{ mediaCountFormatted }}</td>
+										</tr>
+										<tr>
+											<td class="media-info-column">
+												{{ t('components.details-overview.summary') }}
+											</td>
+											<td class="media-info-column">{{ mediaItemDetail?.summary ?? '' }}</td>
+										</tr>
+									</tbody>
+								</q-markup-table>
+							</q-card-section>
+						</q-card>
+					</q-col>
+				</q-row>
 
-				<v-col>
-					<v-card>
-						<v-card-title>
-							<h1>{{ mediaItem.title }}</h1>
-						</v-card-title>
-						<v-card-text>
-							<v-row no-gutters>
-								<v-col cols="12">
-									<span
-										>{{ $t('components.details-overview.duration') }} <duration :value="mediaItem.duration" />
-									</span>
-								</v-col>
-								<v-col cols="12">
-									<span>{{ $t('components.details-overview.database-id') }} {{ mediaItem.id }}</span>
-								</v-col>
-							</v-row>
-						</v-card-text>
-					</v-card>
-				</v-col>
-			</v-row>
-
-			<!--	Media Table	-->
-			<v-row no-gutters>
-				<v-col>
-					<media-table
-						ref="detail-media-table"
-						:items="[mediaItem]"
-						:media-type="mediaType"
-						:library-id="library.id"
-						hide-navigation
-						detail-mode
-						@download="downloadMedia"
-						@selected="selected = $event"
-					/>
-				</v-col>
-			</v-row>
+				<!--	Media Table	-->
+				<q-row no-gutters>
+					<q-col>
+						<MediaList use-q-table :media-item="mediaItem" disable-intersection disable-highlight />
+					</q-col>
+				</q-row>
+			</q-col>
 		</template>
-		<!--	Loading	-->
-		<template v-else>
-			<v-row justify="center">
-				<v-col cols="auto">
-					<loading-spinner :size="60" />
-				</v-col>
-			</v-row>
-		</template>
-	</page-container>
+	</QCardDialog>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
-import MediaTable from '@mediaOverview/MediaTable/MediaTable.vue';
-import ITreeViewItem from '@mediaOverview/MediaTable/types/ITreeViewItem';
-import { DownloadMediaDTO, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
+<script setup lang="ts">
+import { get, set } from '@vueuse/core';
+import { useSubscription } from '@vueuse/rxjs';
+import sum from 'lodash-es/sum';
+import { forkJoin } from 'rxjs';
+import { take } from 'rxjs/operators';
+import Log from 'consola';
+import { PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import { MediaList } from '#components';
 import { MediaService } from '@service';
+import { useI18n, useMediaOverviewBarBus } from '#imports';
 
-@Component
-export default class DetailsOverview extends Vue {
-	@Prop({ required: true, type: String })
-	readonly mediaType!: PlexMediaType;
+defineProps<{
+	name: string;
+}>();
 
-	@Prop({ type: Object as () => ITreeViewItem })
-	readonly mediaItem!: ITreeViewItem | null;
+const { t } = useI18n();
+const loading = ref(false);
+const mediaItemDetail = ref<PlexMediaDTO | null>(null);
+const mediaItem = ref<PlexMediaSlimDTO | null>(null);
+const thumbWidth = ref(180);
+const thumbHeight = ref(270);
+const defaultImage = ref(false);
+const imageUrl = ref('');
 
-	@Prop({ required: false, type: Object as () => PlexLibraryDTO | null })
-	readonly library!: PlexLibraryDTO | null;
-
-	@Prop({ required: false, type: Object as () => PlexServerDTO | null })
-	readonly server!: PlexServerDTO | null;
-
-	@Prop({ required: true, type: Number })
-	readonly activeAccountId!: number;
-
-	@Ref('detail-media-table')
-	readonly detailMediaTable!: MediaTable;
-
-	private thumbWidth: number = 150;
-	private thumbHeight: number = 200;
-	isOpen: boolean = false;
-	mediaId: number = 0;
-	defaultImage: boolean = false;
-	imageUrl: string = '';
-	selected: string[] = [];
-	downloadMediaCommand: DownloadMediaDTO[] = [];
-	close(): void {
-		this.isOpen = false;
-		this.$emit('close');
+const mediaCountFormatted = computed(() => {
+	const item = get(mediaItem);
+	if (item) {
+		switch (item.type) {
+			case PlexMediaType.Movie:
+				return `1 Movie`;
+			case PlexMediaType.TvShow:
+				return t('components.details-overview.media-count', {
+					seasonCount: item.childCount,
+					episodeCount: sum(item.children?.map((x) => x.childCount)),
+				});
+			default:
+				return `Library type ${item.type} is not supported in the media count`;
+		}
 	}
 
-	@Watch('mediaItem')
-	mediaItemIsDone(newMediaItem: ITreeViewItem | null): void {
-		if (newMediaItem) {
-			MediaService.getThumbnail(newMediaItem.id, this.mediaType, this.thumbWidth, this.thumbHeight).subscribe(
-				(imageUrl) => {
-					if (!imageUrl) {
-						this.defaultImage = true;
-						return;
+	return 'unknown media count';
+});
+
+function openDetails({ mediaId, type }: { mediaId: number; type: PlexMediaType }) {
+	set(loading, true);
+	Log.debug('MediaDetailsDialog', 'openDetails', { mediaId, type });
+	useMediaOverviewBarBus().emit({ downloadButtonVisible: false, hasSelected: false });
+
+	useSubscription(
+		forkJoin({
+			mediaDetail: MediaService.getMediaDataDetailById(mediaId, type),
+			mediaItemData: MediaService.getMediaDataById(mediaId, type),
+			thumbnail: MediaService.getThumbnail(mediaId, type, get(thumbWidth), get(thumbHeight)),
+		})
+			.pipe(take(1))
+			.subscribe({
+				next: ({ mediaDetail, mediaItemData, thumbnail }) => {
+					// Media detail
+					set(mediaItemDetail, mediaDetail);
+					// Media item
+					set(mediaItem, mediaItemData);
+					// Thumbnail
+					if (!thumbnail) {
+						set(defaultImage, true);
+					} else {
+						set(imageUrl, thumbnail);
 					}
-					this.imageUrl = imageUrl;
 				},
-			);
-		}
-	}
+				error: () => {
+					set(defaultImage, true);
+				},
+				complete: () => {
+					set(loading, false);
+				},
+			}),
+	);
+}
 
-	openDetails(): void {
-		this.isOpen = true;
-	}
-
-	downloadSelectedMedia(): void {
-		if (this.mediaType === PlexMediaType.TvShow) {
-			this.$emit('download', this.detailMediaTable.createDownloadCommands());
-		}
-		if (this.mediaType === PlexMediaType.Movie) {
-			this.$emit('download', {
-				mediaIds: [this.mediaItem?.id],
-				plexAccountId: this.activeAccountId,
-				type: PlexMediaType.Movie,
-				libraryId: this.library?.id,
-			} as DownloadMediaDTO);
-		}
-	}
-
-	downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): void {
-		this.$emit('download', downloadMediaCommand);
-	}
+function closeDetails() {
+	set(mediaItem, null);
+	set(mediaItemDetail, null);
+	set(loading, true);
 }
 </script>
+<style lang="scss">
+@import '@/assets/scss/variables.scss';
+
+.media-details-dialog {
+	.q-dialog__inner {
+		height: calc(100vh - $app-bar-height - $media-overview-bar-height);
+		transition: all 0.12s ease;
+
+		top: auto !important;
+		left: auto !important;
+		bottom: 0 !important;
+		right: 0 !important;
+	}
+}
+
+body {
+	// Disable transitions animation when manually resizing the window
+	&.window-resizing {
+		.media-details-dialog {
+			.q-dialog__inner {
+				transition: none !important;
+			}
+		}
+	}
+
+	&.navigation-drawer-closed {
+		.media-details-dialog {
+			.q-dialog__inner {
+				width: 100vw !important;
+			}
+		}
+	}
+
+	&.navigation-drawer-opened {
+		.media-details-dialog {
+			.q-dialog__inner {
+				width: calc(100vw - $navigation-drawer-width);
+			}
+		}
+	}
+}
+</style>

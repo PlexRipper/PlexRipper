@@ -25,7 +25,7 @@ public static class PlexApiExtensions
         // TODO Add seed to database PlexAccount and use that to generate the below values
 
         request.AddQueryParameter("X-Plex-Product", "Plex Web");
-        request.AddQueryParameter("X-Plex-Client-Identifier", clientId);
+        request.AddPlexClientIdentifier();
         request.AddQueryParameter("X-Plex-Platform", "Chrome");
         request.AddQueryParameter("X-Plex-Platform-Version", "87.0");
         request.AddQueryParameter("X-Plex-Sync-Version", "2");
@@ -36,6 +36,12 @@ public static class PlexApiExtensions
         request.AddQueryParameter("X-Plex-Device-Screen-Resolution", "1673x1297,2560x1440");
         request.AddQueryParameter("X-Plex-Language", "en");
 
+        return request;
+    }
+
+    public static RestRequest AddPlexClientIdentifier(this RestRequest request, string clientId = "")
+    {
+        request.AddQueryParameter("X-Plex-Client-Identifier", string.IsNullOrEmpty(clientId) ? "Chrome" : clientId);
         return request;
     }
 

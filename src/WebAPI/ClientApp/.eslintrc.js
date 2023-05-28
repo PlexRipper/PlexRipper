@@ -4,29 +4,37 @@ module.exports = {
 		browser: true,
 		node: true,
 	},
-	extends: [
-		'plugin:@intlify/vue-i18n/recommended',
-		'@nuxtjs/eslint-config-typescript',
-		'plugin:nuxt/recommended',
-		'prettier',
-		'plugin:prettier/recommended',
-	],
-	plugins: ['prettier'],
-	// add your custom rules here
+	parser: 'vue-eslint-parser',
+	parserOptions: {
+		parser: '@typescript-eslint/parser',
+	},
+	extends: ['@nuxtjs/eslint-config-typescript', 'plugin:vue/vue3-recommended', 'plugin:prettier/recommended'],
+	plugins: [],
 	rules: {
-		// 'vue/html-quotes': ['error', 'double', { avoidEscape: false }],
-		'vue/valid-v-slot': 0,
-		'vue/no-v-html': 'off',
-		'no-use-before-define': 'off',
-		'no-extend-native': 'off',
-		'import/no-named-as-default': 'off',
-		'no-prototype-builtins': 'off',
-		'@intlify/vue-i18n/no-raw-text': [
-			'warn',
+		// Reason: This ensures that the order of components is always the same
+		'vue/component-tags-order': [
+			'error',
 			{
-				ignoreNodes: ['md-icon', 'v-icon'],
-				ignorePattern: '^[-#:()&]+$',
-				ignoreText: ['EUR', 'HKD', 'USD', '%', '?', ''],
+				order: ['template', 'script', 'style'],
+			},
+		],
+		// Reason: This allows for defining interfaces in any order
+		'no-use-before-define': 'off',
+		// Reason: This allows services to be exported as their name from index.ts
+		'import/no-named-as-default': 'off',
+		// Reason: This allows nested index.ts to pass through exports without naming them
+		'import/export': 'off',
+		'vue/html-indent': ['error', 'tab'], // enforce tabs in template
+		// Reason: Triggers on page names like [id].vue
+		'vue/multi-word-component-names': 'off',
+		// Reason: Opinionated not to have useless empty lines with just a closing tag
+		'vue/html-closing-bracket-newline': ['error', { multiline: 'never' }],
+		'vue/component-name-in-template-casing': [
+			'error',
+			'PascalCase',
+			{
+				registeredComponentsOnly: true,
+				ignores: [],
 			},
 		],
 	},

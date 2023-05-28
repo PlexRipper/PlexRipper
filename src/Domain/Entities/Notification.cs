@@ -11,7 +11,7 @@ public class Notification : BaseEntity
     public Notification(IError error)
     {
         Level = NotificationLevel.Error;
-        CreatedAt = DateTime.Now;
+        CreatedAt = DateTime.UtcNow;
         Message = error.Message;
     }
 

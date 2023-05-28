@@ -1,6 +1,7 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;
@@ -16,7 +17,7 @@ public class UpdateRootDownloadStatusOfDownloadTaskCommandHandlerValidator : Abs
 public class UpdateRootDownloadStatusOfDownloadTaskCommandHandler : BaseHandler,
     IRequestHandler<UpdateRootDownloadStatusOfDownloadTaskCommand, Result>
 {
-    public UpdateRootDownloadStatusOfDownloadTaskCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public UpdateRootDownloadStatusOfDownloadTaskCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result> Handle(UpdateRootDownloadStatusOfDownloadTaskCommand command, CancellationToken cancellationToken)
     {
@@ -37,7 +38,7 @@ public class UpdateRootDownloadStatusOfDownloadTaskCommandHandler : BaseHandler,
 
         SetDownloadStatus(downloadTaskDb);
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
         return Result.Ok();
     }
 }

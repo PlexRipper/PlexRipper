@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import { PlexLibraryDTO } from '@dto/mainApi';
 import ResultDTO from '@dto/ResultDTO';
 import PlexRipperAxios from '@class/PlexRipperAxios';
 import { PLEX_LIBRARY_RELATIVE_PATH } from '@api-urls';
@@ -14,19 +14,11 @@ export function getAllPlexLibraries(): Observable<ResultDTO<PlexLibraryDTO[]>> {
 	});
 }
 
-export function getPlexLibrary(libraryId: number, plexAccountId: number): Observable<ResultDTO<PlexLibraryDTO>> {
+export function getPlexLibrary(libraryId: number): Observable<ResultDTO<PlexLibraryDTO>> {
 	return PlexRipperAxios.get<PlexLibraryDTO>({
-		url: `${PLEX_LIBRARY_RELATIVE_PATH}/${libraryId}?plexAccountId=${plexAccountId}`,
+		url: `${PLEX_LIBRARY_RELATIVE_PATH}/${libraryId}`,
 		apiCategory: logText,
 		apiName: getPlexLibrary.name,
-	});
-}
-
-export function getPlexLibraryInServer(libraryId: number, plexAccountId: number): Observable<ResultDTO<PlexServerDTO | null>> {
-	return PlexRipperAxios.get<PlexServerDTO | null>({
-		url: `${PLEX_LIBRARY_RELATIVE_PATH}/inserver/${libraryId}?plexAccountId=${plexAccountId}`,
-		apiCategory: logText,
-		apiName: getPlexLibraryInServer.name,
 	});
 }
 

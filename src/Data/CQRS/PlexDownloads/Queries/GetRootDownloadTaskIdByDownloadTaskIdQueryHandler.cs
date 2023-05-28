@@ -1,6 +1,7 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;
@@ -16,7 +17,7 @@ public class GetRootDownloadTaskIdByDownloadTaskIdQueryValidator : AbstractValid
 public class GetRootDownloadTaskIdByDownloadTaskIdQueryHandler : BaseHandler,
     IRequestHandler<GetRootDownloadTaskIdByDownloadTaskIdQuery, Result<int>>
 {
-    public GetRootDownloadTaskIdByDownloadTaskIdQueryHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public GetRootDownloadTaskIdByDownloadTaskIdQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<int>> Handle(GetRootDownloadTaskIdByDownloadTaskIdQuery request, CancellationToken cancellationToken)
     {
@@ -25,7 +26,7 @@ public class GetRootDownloadTaskIdByDownloadTaskIdQueryHandler : BaseHandler,
             await DownloadTasksQueryable
                 .Where(x => x.Id == request.Id)
                 .Select(x => x.RootDownloadTaskId)
-                .SingleOrDefaultAsync() ?? request.Id;
+                .SingleOrDefaultAsync(cancellationToken);
 
         return rootId > 0 ? Result.Ok(rootId) : Result.Fail($"Could not find DownloadTask with id {request.Id}");
     }

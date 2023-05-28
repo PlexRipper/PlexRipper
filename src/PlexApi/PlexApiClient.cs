@@ -1,7 +1,8 @@
 using System.Net;
 using System.Text.Json;
-using PlexRipper.Application;
-using PlexRipper.PlexApi.Converters;
+using FluentResultExtensions;
+using Logging.Interface;
+using PlexApi.Contracts;
 using PlexRipper.PlexApi.Extensions;
 using Polly;
 using RestSharp;
@@ -12,6 +13,7 @@ namespace PlexRipper.PlexApi;
 
 public class PlexApiClient
 {
+    private readonly ILog _log;
     private readonly RestClient _client;
 
     public static JsonSerializerOptions SerializerOptions => new()
@@ -22,11 +24,12 @@ public class PlexApiClient
         Converters = { new LongToDateTime() },
     };
 
-    public PlexApiClient(HttpClient httpClient)
+    public PlexApiClient(ILog log, HttpClient httpClient)
     {
+        _log = log;
         var options = new RestClientOptions()
         {
-            MaxTimeout = 10000,
+            MaxTimeout = 60000,
             ThrowOnAnyError = false,
         };
         _client = new RestClient(httpClient, options);
@@ -36,11 +39,17 @@ public class PlexApiClient
 
     public async Task<Result<T>> SendRequestAsync<T>(RestRequest request, int retryCount = 2, Action<PlexApiClientProgress> action = null) where T : class
     {
-        Log.Debug($"Sending request to: {request.Resource}");
+        _log.Debug("Sending request to: {Request}", _client.BuildUri(request));
 
-        return await _client.SendRequestWithPolly<T>(request, retryCount);
+        var response = await _client.SendRequestWithPolly<T>(request, retryCount, action);
+        return GenerateResponseResult(response);
     }
 
+    /// <summary>
+    /// This method is used to send a request to the Plex API and download the image.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     public async Task<Result<byte[]>> SendImageRequestAsync(RestRequest request)
     {
         try
@@ -50,7 +59,7 @@ public class PlexApiClient
                 .WaitAndRetryAsync(1, retryAttempt =>
                     {
                         var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
-                        Log.Warning($"Waiting {timeToWait.TotalSeconds} seconds before retrying again.");
+                        _log.Warning("Waiting {TotalSeconds} seconds before retrying again", timeToWait.TotalSeconds);
                         return timeToWait;
                     }
                 )
@@ -58,11 +67,11 @@ public class PlexApiClient
                 {
                     try
                     {
-                        return await Task.Run(() => _client.DownloadData(request));
+                        return await _client.DownloadDataAsync(request);
                     }
                     catch (Exception e)
                     {
-                        Log.Error(e.Message);
+                        _log.Error(e);
 
                         // Needs to throw to catch and retry again
                         throw;
@@ -70,7 +79,12 @@ public class PlexApiClient
                 });
 
             if (response == null || response.Length < 200)
-                return Result.Fail(new Error($"Image response was empty - Url: {request.Resource}")).LogError();
+            {
+                var errorMsg = $"Image response was empty - Url: {_client.BuildUri(request)}";
+                var result = Result.Fail(errorMsg);
+                result.Add408RequestTimeoutError(errorMsg).LogError();
+                return result;
+            }
 
             return Result.Ok(response);
         }
@@ -84,24 +98,52 @@ public class PlexApiClient
         }
     }
 
-    private static Result ParsePlexErrors(Result result, RestResponse response)
+    /// <summary>
+    /// Generates a <see cref="Result{T}"/> from the <see cref="RestResponse{T}"/>
+    /// </summary>
+    /// <param name="response"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    private static Result<T> GenerateResponseResult<T>(RestResponse<T> response) where T : class
     {
+        var isSuccessful = response.IsSuccessful;
+
+        var statusCode = (int)response.StatusCode;
+        var statusDescription = isSuccessful ? response.StatusDescription : response.ErrorMessage;
+        if (statusCode == 0 && statusDescription.Contains("Timeout"))
+            statusCode = HttpCodes.Status504GatewayTimeout;
+
+        if (isSuccessful)
+            return Result.Ok(response.Data).AddStatusCode(statusCode, statusDescription).LogDebug();
+
+        return ParsePlexErrors(response);
+    }
+
+    /// <summary>
+    /// Parses the Plex errors and returns a <see cref="Result{T}"/>
+    /// </summary>
+    /// <param name="response"></param>
+    /// <returns></returns>
+    private static Result ParsePlexErrors(RestResponse response)
+    {
+        var requestUrl = response.Request.Resource;
+        var statusCode = (int)response.StatusCode;
+        var errorMessage = response.ErrorMessage;
+
+        var result = Result.Fail($"Request to {requestUrl} failed with status code: {statusCode} - {errorMessage}");
         try
         {
-            if (!string.IsNullOrEmpty(response.ErrorMessage))
-            {
-                if (response.ErrorMessage.Contains("Timeout"))
-                    result.Add408RequestTimeoutError(response.ErrorMessage);
-
-                return result;
-            }
+            if (!string.IsNullOrEmpty(response.ErrorMessage) && response.ErrorMessage.Contains("Timeout"))
+                result.Add408RequestTimeoutError(response.ErrorMessage);
+            else
+                result.AddStatusCode(statusCode, errorMessage);
 
             var content = response.Content;
             if (!string.IsNullOrEmpty(content))
             {
-                var errorsResponse = JsonSerializer.Deserialize<PlexErrorsResponse>(content, SerializerOptions) ?? new PlexErrorsResponse();
-                if (errorsResponse.Errors.Any())
-                    result.WithErrors(errorsResponse.Errors);
+                var errorsResponse = JsonSerializer.Deserialize<PlexErrorsResponseDTO>(content, SerializerOptions) ?? new PlexErrorsResponseDTO();
+                if (errorsResponse.Errors != null && errorsResponse.Errors.Any())
+                    result.WithErrors(errorsResponse.ToResultErrors());
             }
         }
         catch (Exception)
@@ -109,6 +151,6 @@ public class PlexApiClient
             return result.WithError(new Error($"Failed to deserialize: {response}"));
         }
 
-        return result;
+        return result.LogError();
     }
 }

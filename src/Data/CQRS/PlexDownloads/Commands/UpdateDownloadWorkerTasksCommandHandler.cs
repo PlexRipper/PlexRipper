@@ -1,5 +1,6 @@
-﻿using FluentValidation;
-using PlexRipper.Application;
+﻿using Data.Contracts;
+using FluentValidation;
+using Logging.Interface;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;
@@ -23,7 +24,7 @@ public class UpdateDownloadWorkerTasksCommandValidator : AbstractValidator<Updat
 public class UpdateDownloadWorkerTasksCommandHandler : BaseHandler,
     IRequestHandler<UpdateDownloadWorkerTasksCommand, Result<bool>>
 {
-    public UpdateDownloadWorkerTasksCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public UpdateDownloadWorkerTasksCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<bool>> Handle(UpdateDownloadWorkerTasksCommand command, CancellationToken cancellationToken)
     {

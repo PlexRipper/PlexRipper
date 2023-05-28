@@ -1,7 +1,8 @@
 import { Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, take, tap } from 'rxjs/operators';
-import { Context } from '@nuxt/types';
+
 import { isEqual } from 'lodash-es';
+import BaseService from './baseService';
 import {
 	ConfirmationSettingsDTO,
 	DateTimeSettingsDTO,
@@ -13,7 +14,6 @@ import {
 	SettingsModelDTO,
 	ViewMode,
 } from '@dto/mainApi';
-import { BaseService } from '@service';
 import { getSettings, updateSettings } from '@api/settingsApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import ISetupResult from '@interfaces/service/ISetupResult';
@@ -37,8 +37,8 @@ export class SettingsService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<ISetupResult> {
-		super.setup(nuxtContext);
+	public setup(): Observable<ISetupResult> {
+		super.setup();
 
 		// On app load, request the settings once
 		return this.fetchSettings().pipe(
@@ -122,7 +122,13 @@ export class SettingsService extends BaseService {
 	public getFirstTimeSetup(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.generalSettings.firstTimeSetup ?? null),
-			filter((x) => x !== null),
+			distinctUntilChanged(isEqual),
+		);
+	}
+
+	public getDebugMode(): Observable<boolean> {
+		return this.stateChanged.pipe(
+			map((x) => x?.generalSettings.debugMode ?? null),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -183,7 +189,6 @@ export class SettingsService extends BaseService {
 	public getAskDownloadMovieConfirmation(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.confirmationSettings.askDownloadMovieConfirmation),
-			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -191,7 +196,6 @@ export class SettingsService extends BaseService {
 	public getAskDownloadTvShowConfirmation(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.confirmationSettings.askDownloadTvShowConfirmation),
-			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -199,7 +203,6 @@ export class SettingsService extends BaseService {
 	public getAskDownloadSeasonConfirmation(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.confirmationSettings.askDownloadSeasonConfirmation),
-			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -207,7 +210,6 @@ export class SettingsService extends BaseService {
 	public getAskDownloadEpisodeConfirmation(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.confirmationSettings.askDownloadEpisodeConfirmation),
-			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -266,7 +268,6 @@ export class SettingsService extends BaseService {
 	public getShowRelativeDates(): Observable<boolean> {
 		return this.stateChanged.pipe(
 			map((x) => x?.dateTimeSettings.showRelativeDates),
-			filter((x) => !!x),
 			distinctUntilChanged(isEqual),
 		);
 	}
@@ -359,16 +360,13 @@ export class SettingsService extends BaseService {
 		);
 	}
 
-	public getServerSettings(machineIdentifier: string): Observable<PlexServerSettingsModel> {
+	public getServerSettings(machineIdentifier: string): Observable<PlexServerSettingsModel | null> {
 		return this.stateChanged.pipe(
-			map((x) => x?.serverSettings.data.find((y) => y.machineIdentifier === machineIdentifier)),
-			filter((x) => !!x),
-			distinctUntilChanged(isEqual),
+			map((x) => x?.serverSettings.data.find((y) => y.machineIdentifier === machineIdentifier) ?? null),
 		);
 	}
 
 	// endregion
 }
 
-const settingsService = new SettingsService();
-export default settingsService;
+export default new SettingsService();

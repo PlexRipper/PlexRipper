@@ -1,6 +1,7 @@
-﻿using AutoMapper;
+﻿using Application.Contracts;
+using AutoMapper;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -12,7 +13,7 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class TestController : BaseController
 {
-    public TestController(IMapper mapper, INotificationsService notificationsService) : base(mapper, notificationsService) { }
+    public TestController(ILog log, IMapper mapper, INotificationsService notificationsService) : base(log, mapper, notificationsService) { }
 
     // GET: api/<FolderPathController>
     [HttpGet("OkResult")]

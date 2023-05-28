@@ -244,6 +244,25 @@ public static partial class ResultExtensions
 
     #endregion
 
+    #region 204
+
+    public static bool Has204NoContentRequestSuccess(this Result result)
+    {
+        return result.HasStatusCode(HttpCodes.Status204NoContent);
+    }
+
+    public static Result Add204NoContentRequestSuccess(this Result result, string message = "No Content")
+    {
+        return result.AddStatusCodeSuccess(HttpCodes.Status204NoContent, message);
+    }
+
+    public static Result Create204NoContentResult(string message = "")
+    {
+        return CreateSuccessStatusCodeResult(HttpCodes.Status204NoContent, message);
+    }
+
+    #endregion
+
     #region 400
 
     public static bool Has400BadRequestError(this Result result)
@@ -377,6 +396,25 @@ public static partial class ResultExtensions
     public static Result<T> Create201CreatedResult<T>(T value, string message = "")
     {
         return CreateSuccessStatusCodeResult(value, HttpCodes.Status201Created, message);
+    }
+
+    #endregion
+
+    #region 204
+
+    public static bool Has204NoContentRequestSuccess<T>(this Result<T> result)
+    {
+        return result.HasStatusCode(HttpCodes.Status204NoContent);
+    }
+
+    public static Result<T> Add204NoContentRequestSuccess<T>(this Result<T> result, string message = "No Content")
+    {
+        return result.AddStatusCodeSuccess(HttpCodes.Status204NoContent, message);
+    }
+
+    public static Result<T> Create204NoContentResult<T>(string message = "")
+    {
+        return CreateSuccessStatusCodeResult(HttpCodes.Status204NoContent, message);
     }
 
     #endregion

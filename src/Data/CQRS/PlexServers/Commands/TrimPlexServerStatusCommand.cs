@@ -1,6 +1,7 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.PlexServers;
@@ -9,7 +10,7 @@ public class TrimPlexServerStatusCommandHandlerValidator : AbstractValidator<Tri
 
 public class TrimPlexServerStatusCommandHandler : BaseHandler, IRequestHandler<TrimPlexServerStatusCommand, Result<bool>>
 {
-    public TrimPlexServerStatusCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public TrimPlexServerStatusCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<bool>> Handle(TrimPlexServerStatusCommand command, CancellationToken cancellationToken)
     {

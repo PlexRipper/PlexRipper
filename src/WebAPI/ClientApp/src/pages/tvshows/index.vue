@@ -1,13 +1,9 @@
 <template>
-	<page-container>
-		<h1>{{ $t('pages.tvshows.index.header') }}</h1>
-		<p>{{ $t('pages.tvshows.index.sub-header') }}</p>
-	</page-container>
+	<q-page>
+		<h1>{{ t('pages.tvshows.index.header') }}</h1>
+		<p>{{ t('pages.tvshows.index.sub-header') }}</p>
+	</q-page>
 </template>
-
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-
-@Component
-export default class TvShowOverview extends Vue {}
+<script setup lang="ts">
+const { t } = useI18n();
 </script>

@@ -1,5 +1,11 @@
+using Application.Contracts;
 using AutoMapper;
-using PlexRipper.Application;
+using Data.Contracts;
+using DownloadManager.Contracts;
+using FileSystem.Contracts;
+using Logging.Interface;
+using PlexApi.Contracts;
+using Settings.Contracts;
 
 namespace PlexRipper.DownloadManager;
 
@@ -10,36 +16,38 @@ public class DownloadTaskFactory : IDownloadTaskFactory
     private readonly IFolderPathService _folderPathService;
 
     private readonly IPathSystem _pathSystem;
+    private readonly IPlexApiService _plexApiService;
 
     private readonly IDownloadManagerSettingsModule _downloadManagerSettings;
 
     private readonly IMapper _mapper;
 
+    private readonly ILog _log;
     private readonly IMediator _mediator;
 
     private readonly INotificationsService _notificationsService;
-
-    private readonly IPlexAuthenticationService _plexAuthenticationService;
 
     #endregion
 
     #region Constructor
 
     public DownloadTaskFactory(
+        ILog log,
         IMediator mediator,
         IMapper mapper,
-        IPlexAuthenticationService plexAuthenticationService,
         INotificationsService notificationsService,
         IFolderPathService folderPathService,
         IPathSystem pathSystem,
+        IPlexApiService plexApiService,
         IDownloadManagerSettingsModule downloadManagerSettings)
     {
+        _log = log;
         _mediator = mediator;
         _mapper = mapper;
-        _plexAuthenticationService = plexAuthenticationService;
         _notificationsService = notificationsService;
         _folderPathService = folderPathService;
         _pathSystem = pathSystem;
+        _plexApiService = plexApiService;
         _downloadManagerSettings = downloadManagerSettings;
     }
 
@@ -334,7 +342,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         if (!plexMovieIds.Any())
             return ResultExtensions.IsEmpty(nameof(plexMovieIds)).LogWarning();
 
-        Log.Debug($"Creating {plexMovieIds.Count} movie download tasks.");
+        _log.Debug("Creating {PlexMovieIdsCount} movie download tasks", plexMovieIds.Count);
         var plexMoviesResult = await _mediator.Send(new GetMultiplePlexMoviesByIdsQuery(plexMovieIds, true, true));
 
         if (plexMoviesResult.IsFailed)
@@ -358,6 +366,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                 {
                     var moviePartDownloadTask = _mapper.Map<DownloadTask>(plexMovie);
                     moviePartDownloadTask.FullTitle = fullTitle;
+                    moviePartDownloadTask.MediaType = PlexMediaType.Movie;
                     moviePartDownloadTask.DownloadTaskType = DownloadTaskType.MoviePart;
                     moviePartDownloadTask.FileName = Path.GetFileName(part.File);
                     moviePartDownloadTask.DataTotal = part.Size;
@@ -392,7 +401,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         if (!downloadTaskIds.Any())
             return ResultExtensions.IsEmpty(nameof(downloadTaskIds)).LogWarning();
 
-        Log.Debug($"Regenerating {downloadTaskIds.Count} download tasks.");
+        _log.Debug("Regenerating {DownloadTaskIdsCount} download tasks", downloadTaskIds.Count);
 
         var freshDownloadTasks = new List<DownloadTask>();
 
@@ -438,9 +447,11 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             freshDownloadTasks.AddRange(downloadTasksResult.Value);
         }
 
-        Log.Debug($"Successfully regenerated {freshDownloadTasks.Count} out of {downloadTaskIds.Count} download tasks.");
+        _log.Debug("Successfully regenerated {FreshDownloadTasksCount} out of {DownloadTaskIdsCount} download tasks", freshDownloadTasks.Count,
+            downloadTaskIds.Count);
+
         if (downloadTaskIds.Count - freshDownloadTasks.Count > 0)
-            Log.Error("Failed to generate");
+            _log.ErrorLine("Failed to generate");
 
         return Result.Ok(freshDownloadTasks);
     }
@@ -492,9 +503,12 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             return downloadFolder.ToResult();
 
         // Get Plex libraries
-        var plexLibraries = await _mediator.Send(new GetAllPlexLibrariesQuery(true));
-        if (plexLibraries.IsFailed)
-            return plexLibraries.ToResult();
+        var plexLibrariesResult = await _mediator.Send(new GetAllPlexLibrariesQuery(true));
+        if (plexLibrariesResult.IsFailed)
+            return plexLibrariesResult.ToResult();
+
+        var plexLibraries = plexLibrariesResult.Value;
+        var plexServers = plexLibraries.Select(x => x.PlexServer).DistinctBy(x => x.Id).ToList();
 
         // Get Plex libraries
         var folderPaths = await _mediator.Send(new GetAllFolderPathsQuery());
@@ -512,8 +526,9 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             {
                 downloadTask.DownloadFolderId = downloadFolder.Value.Id;
                 downloadTask.DownloadFolder = downloadFolder.Value;
+                downloadTask.PlexServer = plexServers.Find(x => x.Id == downloadTask.PlexServerId);
                 downloadTask.ServerMachineIdentifier = downloadTask.PlexServer.MachineIdentifier;
-                var plexLibrary = plexLibraries.Value.Find(x => x.Id == downloadTask.PlexLibraryId);
+                var plexLibrary = plexLibraries.Find(x => x.Id == downloadTask.PlexLibraryId);
                 if (plexLibrary is not null)
                 {
                     if (plexLibrary.DefaultDestinationId is not null)
@@ -528,17 +543,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                         downloadTask.DestinationFolder = destination;
                     }
                 }
-
-                // Create Download URL
-                var downloadUrl = $"{downloadTask.PlexServer.ServerUrl}{downloadTask.FileLocationUrl}";
-                var serverTokenWithUrl = await _plexAuthenticationService.GetPlexServerTokenWithUrl(downloadTask.PlexServerId, downloadUrl);
-                if (serverTokenWithUrl.IsFailed)
-                {
-                    Log.Error($"Failed to retrieve server token to create DownloadUrl for PlexServer {downloadTask.PlexServer.Name}");
-                    return serverTokenWithUrl.ToResult();
-                }
-
-                downloadTask.DownloadUrl = serverTokenWithUrl.Value;
 
                 // Determine download directory
                 var downloadDir = GetDownloadDirectory(downloadTask);
@@ -609,7 +613,8 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                 path = Path.Join(_pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1]));
                 break;
             case PlexMediaType.Episode:
-                path = Path.Join(_pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1]), _pathSystem.SanitizePath(titles[2]));
+                // Since the episode can be multiple parts, we need put that in a separate folder
+                path = Path.Join(_pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1]),  forDownloadFolder ? _pathSystem.SanitizePath(titles[2]) : "");
                 break;
             default:
                 path = Path.Join(downloadTaskTitle);

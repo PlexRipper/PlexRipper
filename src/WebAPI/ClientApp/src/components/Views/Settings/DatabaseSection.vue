@@ -1,46 +1,41 @@
 <template>
-	<p-section>
-		<template #header> {{ $t('pages.settings.advanced.database.header') }}</template>
+	<q-section>
+		<template #header> {{ t('pages.settings.advanced.database.header') }}</template>
 		<!--	Reset Database	-->
-		<v-row>
-			<v-col cols="4" align-self="center">
+		<q-row>
+			<q-col cols="4" align-self="center">
 				<help-icon help-id="help.settings.advanced.reset-db" />
-			</v-col>
+			</q-col>
 			<!--	Reset Database button	-->
-			<v-col cols="8" align-self="center">
-				<WarningButton :width="400" text-id="reset-db" @click="confirmationDialog = true" />
-				<confirmation-dialog
-					text-id="reset-db"
-					:dialog="confirmationDialog"
-					@confirm="resetDatabaseCommand"
-					@cancel="confirmationDialog = false"
-				/>
-			</v-col>
-		</v-row>
-	</p-section>
+			<q-col cols="8" align-self="center">
+				<WarningButton :width="400" text-id="reset-db" block @click="useOpenControlDialog(confirmationDialogName)" />
+				<confirmation-dialog text-id="reset-db" :name="confirmationDialogName" @confirm="resetDatabaseCommand" />
+			</q-col>
+		</q-row>
+	</q-section>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import Log from 'consola';
+<script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
 import { resetDatabase } from '@api/settingsApi';
 import { GlobalService } from '@service';
+import { useOpenControlDialog } from '#imports';
 
-@Component
-export default class DatabaseSection extends Vue {
-	confirmationDialog: boolean = false;
+const { t } = useI18n();
 
-	resetDatabaseCommand(): void {
-		useSubscription(
-			resetDatabase().subscribe((value) => {
-				GlobalService.resetStore();
-				Log.debug('reset db', value);
-				if (value.isSuccess) {
-					this.$router.push('/setup');
-				}
-			}),
-		);
-	}
-}
+const router = useRouter();
+const confirmationDialogName = 'reset-database-confirmation-dialog';
+const resetDatabaseCommand = (): void => {
+	useSubscription(
+		resetDatabase().subscribe((value) => {
+			GlobalService.resetStore();
+			if (value.isSuccess) {
+				router.push('/setup').then(() => {
+					// Refresh the page when we go to the home page to make sure we get all new data.
+					location.reload();
+				});
+			}
+		}),
+	);
+};
 </script>

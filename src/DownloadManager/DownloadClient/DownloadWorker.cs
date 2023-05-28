@@ -1,34 +1,38 @@
 using System.Net.Http.Headers;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using ByteSizeLib;
+using DownloadManager.Contracts;
+using Logging.Interface;
+using RestSharp;
 using Timer = System.Timers.Timer;
 
-namespace PlexRipper.DownloadManager.DownloadClient;
+namespace PlexRipper.DownloadManager;
 
 /// <summary>
 /// The <see cref="DownloadWorker"/> is part of the multi-threaded <see cref="PlexDownloadClient"/>
 /// and will download a part of the <see cref="DownloadTask"/>.
 /// </summary>
-public class DownloadWorker
+public class DownloadWorker : IDisposable
 {
     #region Fields
-
-    private readonly CancellationTokenSource _cancellationToken = new();
 
     private readonly Subject<DownloadWorkerLog> _downloadWorkerLog = new();
 
     private readonly Subject<DownloadWorkerTask> _downloadWorkerUpdate = new();
 
+    private readonly ILog<DownloadWorker> _log;
+    private readonly IMediator _mediator;
+    private readonly IDownloadUrlGenerator _downloadUrlGenerator;
+
     private readonly IDownloadFileStream _downloadFileSystem;
 
-    private readonly IPlexRipperHttpClient _httpClient;
+    private readonly RestClient _httpClient;
 
     private readonly Timer _timer = new(100)
     {
         AutoReset = true,
     };
-
-    private Stream _destinationStream;
 
     private int _downloadSpeedLimit;
 
@@ -41,17 +45,33 @@ public class DownloadWorker
     /// <summary>
     /// Initializes a new instance of the <see cref="DownloadWorker"/> class.
     /// </summary>
+    /// <param name="log"></param>
+    /// <param name="mediator"></param>
     /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
     /// <param name="downloadFileSystem">The filesystem used to store the downloaded data.</param>
-    /// <param name="httpClient"></param>
+    /// <param name="httpClientFactory"></param>
     public DownloadWorker(
+        ILog<DownloadWorker> log,
+        IMediator mediator,
         DownloadWorkerTask downloadWorkerTask,
+        IDownloadUrlGenerator downloadUrlGenerator,
         IDownloadFileStream downloadFileSystem,
-        IPlexRipperHttpClient httpClient)
+        IHttpClientFactory httpClientFactory
+    )
     {
-        DownloadWorkerTask = downloadWorkerTask;
+        _log = log;
+        _mediator = mediator;
+        _downloadUrlGenerator = downloadUrlGenerator;
         _downloadFileSystem = downloadFileSystem;
-        _httpClient = httpClient;
+        DownloadWorkerTask = downloadWorkerTask;
+
+        var options = new RestClientOptions()
+        {
+            MaxTimeout = 10000,
+            ThrowOnAnyError = false,
+        };
+
+        _httpClient = new RestClient(httpClientFactory.CreateClient(), options);
 
         _timer.Elapsed += (_, _) => { DownloadWorkerTask.ElapsedTime += (long)_timer.Interval; };
     }
@@ -64,14 +84,12 @@ public class DownloadWorker
 
     public IObservable<DownloadWorkerLog> DownloadWorkerLog => _downloadWorkerLog.AsObservable();
 
+    public IObservable<DownloadWorkerTask> DownloadWorkerTaskUpdate => _downloadWorkerUpdate.AsObservable();
+
     /// <summary>
     /// Gets the current <see cref="DownloadWorkerTask"/> being executed.
     /// </summary>
     public DownloadWorkerTask DownloadWorkerTask { get; }
-
-    public IObservable<DownloadWorkerTask> DownloadWorkerTaskUpdate => _downloadWorkerUpdate
-        .Sample(TimeSpan.FromMilliseconds(100))
-        .AsObservable();
 
     public string FileName => DownloadWorkerTask.FileName;
 
@@ -86,26 +104,9 @@ public class DownloadWorker
 
     public Result Start()
     {
-        Log.Debug($"Download worker {Id} start for {FileName}");
+        _log.Here().Debug("Download worker with id: {Id} start for filename: {FileName}", Id, FileName);
 
-        // Create and check Filestream to which to download.
-        var _fileStreamResult =
-            _downloadFileSystem.CreateDownloadFileStream(DownloadWorkerTask.TempDirectory, FileName, DownloadWorkerTask.DataTotal);
-        if (_fileStreamResult.IsFailed)
-        {
-            SendDownloadWorkerError(_fileStreamResult.ToResult());
-            return _fileStreamResult.ToResult();
-        }
-
-        try
-        {
-            SetDownloadWorkerTaskChanged(DownloadStatus.Downloading);
-            DownloadProcessTask = Task.Run(() => DownloadProcessAsync(_fileStreamResult.Value), _cancellationToken.Token);
-        }
-        catch (TaskCanceledException)
-        {
-            // Ignore cancellation exceptions
-        }
+        DownloadProcessTask = DownloadProcessAsync();
 
         return Result.Ok();
     }
@@ -122,27 +123,8 @@ public class DownloadWorker
         if (DownloadProcessTask is not null)
             await DownloadProcessTask;
 
-        _timer.Stop();
         SetDownloadWorkerTaskChanged(DownloadStatus.Stopped);
-
-        return Result.Ok(DownloadWorkerTask);
-    }
-
-    /// <summary>
-    /// Stops the downloading.
-    /// </summary>
-    /// <returns>Is successful.</returns>
-    public async Task<Result<DownloadWorkerTask>> PauseAsync()
-    {
-        _isDownloading = false;
-
-        // Wait for it to gracefully end.
-        if (DownloadProcessTask is not null)
-            await DownloadProcessTask;
-
-        _timer.Stop();
-        SetDownloadWorkerTaskChanged(DownloadStatus.Paused);
-
+        Shutdown();
         return Result.Ok(DownloadWorkerTask);
     }
 
@@ -153,62 +135,85 @@ public class DownloadWorker
 
     public void Dispose()
     {
-        _destinationStream?.Close();
+        _timer.Dispose();
+        _httpClient?.Dispose();
+        _downloadWorkerUpdate.Dispose();
+        _downloadWorkerLog.Dispose();
     }
 
     #endregion
 
     #region Private Methods
 
-    private async Task<Result> DownloadProcessAsync(Stream destinationStream)
+    private async Task<Result> DownloadProcessAsync(CancellationToken cancellationToken = default)
     {
-        if (destinationStream is null)
-            return ResultExtensions.IsNull(nameof(destinationStream)).LogWarning();
-
+        ThrottledStream throttledStream = null;
+        Stream destinationStream = null;
+        Stream responseStream = null;
         try
         {
-            _destinationStream = destinationStream;
+            // Retrieve Download URL
+            var downloadUrlResult = await _downloadUrlGenerator.GetDownloadUrl(
+                DownloadWorkerTask.PlexServerId,
+                DownloadWorkerTask.FileLocationUrl, cancellationToken);
+
+            if (downloadUrlResult.IsFailed)
+                return downloadUrlResult.LogError();
+
+            var downloadUrl = downloadUrlResult.Value;
+
+            // Prepare destination stream
+            var _fileStreamResult =
+                _downloadFileSystem.CreateDownloadFileStream(DownloadWorkerTask.TempDirectory, FileName, DownloadWorkerTask.DataTotal);
+            if (_fileStreamResult.IsFailed)
+            {
+                var result = Result.Fail(new Error($"Could not create a download destination filestream for DownloadWorker with id {DownloadWorkerTask.Id}"));
+                result.Errors.AddRange(_fileStreamResult.Errors);
+                SendDownloadWorkerError(result);
+                return result;
+            }
+
+            destinationStream = _fileStreamResult.Value;
 
             // Is 0 when starting new and > 0 when resuming.
-            _destinationStream.Position = DownloadWorkerTask.BytesReceived;
+            destinationStream.Position = DownloadWorkerTask.BytesReceived;
 
             // Create download client
-            using var response = await _httpClient.SendAsync(new HttpRequestMessage
+            var request = new RestRequest(downloadUrl)
             {
-                RequestUri = DownloadWorkerTask.Uri,
-                Method = HttpMethod.Get,
-                Headers =
-                {
-                    Range = new RangeHeaderValue(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte),
-                },
-            }, HttpCompletionOption.ResponseHeadersRead);
+                CompletionOption = HttpCompletionOption.ResponseHeadersRead,
+            };
 
-            await using var responseStream = await response.Content.ReadAsStreamAsync();
+            request.AddHeader("Range", new RangeHeaderValue(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte).ToString());
+
+            responseStream = await _httpClient.DownloadStreamAsync(request, cancellationToken);
 
             // Throttle the stream to enable download speed limiting
-            var throttledStream = new ThrottledStream(responseStream, _downloadSpeedLimit);
+            throttledStream = new ThrottledStream(responseStream, _downloadSpeedLimit);
 
             // Buffer is based on: https://stackoverflow.com/a/39355385/8205497
-            var buffer = new byte[524288000];
+            var buffer = new byte[(long)ByteSize.FromMebiBytes(4).Bytes];
 
             _timer.Start();
+
+            SetDownloadWorkerTaskChanged(DownloadStatus.Downloading);
 
             while (_isDownloading)
             {
                 throttledStream.SetThrottleSpeed(_downloadSpeedLimit);
-                var bytesRead = await throttledStream.ReadAsync(buffer, 0, buffer.Length, _cancellationToken.Token);
+                var bytesRead = await throttledStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
                 if (bytesRead > 0)
                     bytesRead = (int)Math.Min(DownloadWorkerTask.DataRemaining, bytesRead);
 
                 if (bytesRead <= 0)
                 {
-                    SendDownloadWorkerUpdate();
-                    SetDownloadWorkerTaskChanged(DownloadStatus.DownloadFinished);
+                    await DisposeResources();
+                    SendDownloadFinished();
                     break;
                 }
 
-                await _destinationStream.WriteAsync(buffer.AsMemory(0, bytesRead), _cancellationToken.Token);
-                await _destinationStream.FlushAsync(_cancellationToken.Token);
+                await destinationStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
+                await destinationStream.FlushAsync(cancellationToken);
 
                 DownloadWorkerTask.BytesReceived += bytesRead;
                 SendDownloadWorkerUpdate();
@@ -216,17 +221,29 @@ public class DownloadWorker
         }
         catch (Exception e)
         {
-            SendDownloadWorkerError(Result.Fail(new ExceptionalError(e)).LogError());
+            var result = Result.Fail(new ExceptionalError(e)).LogError();
+            SendDownloadWorkerError(result);
+            return result;
         }
         finally
         {
-            _timer.Dispose();
-            await _destinationStream.DisposeAsync();
-            _downloadWorkerUpdate.OnCompleted();
-            _downloadWorkerLog.OnCompleted();
+            await DisposeResources();
         }
 
         return Result.Ok();
+
+        // Dispose all streams
+        async Task DisposeResources()
+        {
+            if (responseStream != null)
+                await responseStream.DisposeAsync();
+
+            if (throttledStream != null)
+                await throttledStream.DisposeAsync();
+
+            if (destinationStream != null)
+                await destinationStream.DisposeAsync();
+        }
     }
 
     private void SendDownloadWorkerError(Result errorResult)
@@ -234,11 +251,19 @@ public class DownloadWorker
         if (errorResult.Errors.Any() && !errorResult.Errors[0].Metadata.ContainsKey(nameof(DownloadWorker) + "Id"))
             errorResult.Errors[0].Metadata.Add(nameof(DownloadWorker) + "Id", Id);
 
-        Log.Error($"Download worker {Id} with {FileName} had an error!");
+        _log.Here().Error("Download worker {Id} with {FileName} had an error!", Id, FileName);
+        errorResult.LogError();
         DownloadWorkerTask.DownloadStatus = DownloadStatus.Error;
-
-        SendDownloadWorkerLog(NotificationLevel.Error, errorResult.ToString());
         SendDownloadWorkerUpdate();
+        SendDownloadWorkerLog(NotificationLevel.Error, errorResult.ToString());
+        Shutdown();
+    }
+
+    private void SendDownloadFinished()
+    {
+        SetDownloadWorkerTaskChanged(DownloadStatus.DownloadFinished);
+        _log.Here().Information("Download worker {Id} with {FileName} finished!", Id, FileName);
+        Shutdown();
     }
 
     private void SendDownloadWorkerLog(NotificationLevel logLevel, string message)
@@ -247,7 +272,7 @@ public class DownloadWorker
         {
             Message = message,
             LogLevel = logLevel,
-            CreatedAt = DateTime.Now,
+            CreatedAt = DateTime.UtcNow,
             DownloadWorkerTaskId = DownloadWorkerTask.Id,
         });
     }
@@ -262,11 +287,19 @@ public class DownloadWorker
         if (DownloadWorkerTask.DownloadStatus == status)
             return;
 
-        var log = $"Download worker {Id} with {FileName} changed status to {status}";
-        Log.Debug(log);
+        _log.Debug("Download worker with id: {Id} and with filename: {FileName} changed status to {Status}", Id, FileName, status);
         DownloadWorkerTask.DownloadStatus = status;
-        SendDownloadWorkerLog(NotificationLevel.Information, log);
+        SendDownloadWorkerLog(NotificationLevel.Information,
+            $"Download worker with id: {Id} and with filename: {FileName} changed status to {status}");
         SendDownloadWorkerUpdate();
+    }
+
+    private void Shutdown()
+    {
+        _isDownloading = false;
+        _timer.Stop();
+        _downloadWorkerLog.OnCompleted();
+        _downloadWorkerUpdate.OnCompleted();
     }
 
     #endregion

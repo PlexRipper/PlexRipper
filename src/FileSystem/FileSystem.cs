@@ -1,5 +1,6 @@
 ﻿using Environment;
-using PlexRipper.Application;
+using FileSystem.Contracts;
+using Logging.Interface;
 
 namespace PlexRipper.FileSystem;
 
@@ -7,6 +8,7 @@ public class FileSystem : IFileSystem
 {
     #region Fields
 
+    private readonly ILog _log;
     private readonly IPathProvider _pathProvider;
 
     private readonly System.IO.Abstractions.IFileSystem _abstractedFileSystem;
@@ -22,12 +24,14 @@ public class FileSystem : IFileSystem
     #region Constructor
 
     public FileSystem(
+        ILog log,
         IPathProvider pathProvider,
         System.IO.Abstractions.IFileSystem abstractedFileSystem,
         IDiskProvider diskProvider,
         IDiskSystem diskSystem,
         IDirectorySystem directorySystem)
     {
+        _log = log;
         _pathProvider = pathProvider;
         _abstractedFileSystem = abstractedFileSystem;
         _diskProvider = diskProvider;
@@ -116,7 +120,7 @@ public class FileSystem : IFileSystem
 
     public Result<FileSystemResult> LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes)
     {
-        Log.Debug($"Looking up path: {query}");
+        _log.Debug("Looking up path: {Query}", query);
         var directoryExistsResult = _directorySystem.Exists(query);
         if (directoryExistsResult.IsFailed)
             return directoryExistsResult.ToResult();

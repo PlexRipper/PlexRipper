@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace PlexRipper.PlexApi.Models;
 
 /// <summary>
@@ -29,57 +27,39 @@ namespace PlexRipper.PlexApi.Models;
 /// </summary>
 public class Medium
 {
-    [JsonPropertyName("id")]
     public int Id { get; set; }
 
-    [JsonPropertyName("aspectRatio")]
     public double AspectRatio { get; set; }
 
-    [JsonPropertyName("audioProfile")]
     public string AudioProfile { get; set; }
 
-    [JsonPropertyName("videoProfile")]
     public string VideoProfile { get; set; }
 
-    [JsonPropertyName("audioChannels")]
     public int AudioChannels { get; set; }
 
-    [JsonPropertyName("audioCodec")]
     public string AudioCodec { get; set; }
 
-    [JsonPropertyName("bitrate")]
     public int Bitrate { get; set; }
 
-    [JsonPropertyName("container")]
     public string Container { get; set; }
 
-    [JsonPropertyName("duration")]
     public long Duration { get; set; }
 
-    [JsonPropertyName("height")]
     public int Height { get; set; }
 
-    [JsonPropertyName("optimizedForStreaming")]
     public int OptimizedForStreaming { get; set; } // TODO Convert to boolean at some point.
 
-    [JsonPropertyName("protocol")]
     public string Protocol { get; set; }
 
-    [JsonPropertyName("videoCodec")]
     public string VideoCodec { get; set; }
 
-    [JsonPropertyName("videoFrameRate")]
     public string VideoFrameRate { get; set; }
 
-    [JsonPropertyName("videoResolution")]
     public string VideoResolution { get; set; }
 
-    [JsonPropertyName("width")]
     public int Width { get; set; }
 
-    [JsonPropertyName("selected")]
     public bool Selected { get; set; }
 
-    [JsonPropertyName("Part")]
     public Part[] Part { get; set; }
 }

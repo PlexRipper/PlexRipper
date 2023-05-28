@@ -1,6 +1,7 @@
-﻿using AutoMapper;
+﻿using Application.Contracts;
+using AutoMapper;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.FluentResult;
 using PlexRipper.WebAPI.SignalR.Common;
 
@@ -10,7 +11,7 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class NotificationController : BaseController
 {
-    public NotificationController(INotificationsService notificationsService, IMapper mapper) : base(mapper, notificationsService) { }
+    public NotificationController(ILog log, INotificationsService notificationsService, IMapper mapper) : base(log, mapper, notificationsService) { }
 
     // GET api/<NotificationController>/
     [HttpGet]
@@ -48,10 +49,10 @@ public class NotificationController : BaseController
 
     // POST api/<NotificationController>/clear
     [HttpPost("clear")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<int>))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
     public async Task<IActionResult> ClearAllNotifications()
     {
-        return ToActionResult(await _notificationsService.ClearAllNotifications());
+        return ToActionResult<int, int>(await _notificationsService.ClearAllNotifications());
     }
 }

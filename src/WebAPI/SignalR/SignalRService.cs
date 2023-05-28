@@ -1,10 +1,11 @@
 using AutoMapper;
+using BackgroundServices.Contracts;
+using Logging.Interface;
 using Microsoft.AspNetCore.SignalR;
-using PlexRipper.Application;
-using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.SignalR.Common;
 using PlexRipper.WebAPI.SignalR.Hubs;
+using WebAPI.Contracts;
 
 namespace PlexRipper.WebAPI.SignalR;
 
@@ -13,9 +14,10 @@ namespace PlexRipper.WebAPI.SignalR;
 /// </summary>
 public class SignalRService : ISignalRService
 {
-    private readonly IHubContext<ProgressHub> _progressHub;
+    private readonly ILog _log;
+    private readonly IHubContext<ProgressHub, IProgressHub> _progressHub;
 
-    private readonly IHubContext<NotificationHub> _notificationHub;
+    private readonly IHubContext<NotificationHub, INotificationHub> _notificationHub;
 
     private readonly IMapper _mapper;
 
@@ -25,8 +27,13 @@ public class SignalRService : ISignalRService
     /// <param name="progressHub">The <see cref="ProgressHub"/>.</param>
     /// <param name="notificationHub">The <see cref="NotificationHub"/>.</param>
     /// <param name="mapper"></param>
-    public SignalRService(IHubContext<ProgressHub> progressHub, IHubContext<NotificationHub> notificationHub, IMapper mapper)
+    public SignalRService(
+        ILog log,
+        IHubContext<ProgressHub, IProgressHub> progressHub,
+        IHubContext<NotificationHub, INotificationHub> notificationHub,
+        IMapper mapper)
     {
+        _log = log;
         _progressHub = progressHub;
         _notificationHub = notificationHub;
         _mapper = mapper;
@@ -34,131 +41,76 @@ public class SignalRService : ISignalRService
 
     #region ProgressHub
 
-    public void SendLibraryProgressUpdate(LibraryProgress libraryProgress)
+    public async Task SendLibraryProgressUpdateAsync(int id, int received, int total, bool isRefreshing = true)
     {
-        if (_progressHub?.Clients?.All == null)
-        {
-            Log.Warning("No Clients connected to ProgressHub");
-            return;
-        }
-
-        Task.Run(() => _progressHub.Clients.All.SendAsync(nameof(LibraryProgress), libraryProgress));
-    }
-
-    public void SendLibraryProgressUpdate(int id, int received, int total, bool isRefreshing = true)
-    {
-        if (_progressHub?.Clients?.All == null)
-        {
-            Log.Warning("No Clients connected to ProgressHub");
-            return;
-        }
-
-        SendLibraryProgressUpdate(new LibraryProgress(id, received, total, isRefreshing));
-    }
-
-    public async Task SendDownloadTaskCreationProgressUpdate(int current, int total)
-    {
-        if (_progressHub?.Clients?.All == null)
-        {
-            Log.Warning("No Clients connected to ProgressHub");
-            return;
-        }
-
-        var progress = new DownloadTaskCreationProgress
-        {
-            Percentage = DataFormat.GetPercentage(current, total),
-            Current = current,
-            Total = total,
-            IsComplete = current >= total,
-        };
-
-        await _progressHub.Clients.All.SendAsync(nameof(DownloadTaskCreationProgress), progress);
+        var libraryProgress = new LibraryProgress(id, received, total, isRefreshing);
+        await _progressHub.Clients.All.LibraryProgress(libraryProgress);
     }
 
     /// <inheritdoc/>
-    public void SendDownloadTaskUpdate(DownloadTask downloadTask)
+    public async Task SendDownloadTaskUpdateAsync(DownloadTask downloadTask, CancellationToken cancellationToken = default)
     {
-        if (_progressHub?.Clients?.All == null)
-        {
-            Log.Warning("No Clients connected to ProgressHub");
-            return;
-        }
-
         var downloadTaskDTO = _mapper.Map<DownloadTaskDTO>(downloadTask);
-        Task.Run(() => _progressHub.Clients.All.SendAsync("DownloadTaskUpdate", downloadTaskDTO));
+        await _progressHub.Clients.All.DownloadTaskUpdate(downloadTaskDTO, cancellationToken);
     }
 
     #region DownloadProgress
 
-    public async Task SendDownloadProgressUpdate(int plexServerId, List<DownloadTask> downloadTasks)
+    public async Task SendDownloadProgressUpdateAsync(int plexServerId, List<DownloadTask> downloadTasks, CancellationToken cancellationToken = default)
     {
-        if (_progressHub?.Clients?.All == null)
+        var update = _mapper.Map<List<ServerDownloadProgressDTO>>(downloadTasks);
+        if (!update.Any())
         {
-            Log.Warning("No Clients connected to ProgressHub");
+            _log.ErrorLine($"Update for ServerDownloadProgress contained no entries to be sent");
             return;
         }
 
-        var downloadTasksDTO = _mapper.Map<List<DownloadProgressDTO>>(downloadTasks);
-        var update = new ServerDownloadProgressDTO
-        {
-            Id = plexServerId,
-            Downloads = downloadTasksDTO,
-        };
-
-        await _progressHub.Clients.All.SendAsync("ServerDownloadProgress", update);
+        await _progressHub.Clients.All.ServerDownloadProgress(update.First(), cancellationToken);
     }
 
     #endregion
 
-    public async Task SendServerInspectStatusProgress(InspectServerProgress progress)
+    public async Task SendServerInspectStatusProgressAsync(InspectServerProgress progress)
     {
-        if (_progressHub?.Clients?.All == null)
-        {
-            Log.Warning("No Clients connected to ProgressHub");
-            return;
-        }
+        var progressDTO = _mapper.Map<InspectServerProgressDTO>(progress);
+        await _progressHub.Clients.All.InspectServerProgress(progressDTO);
+    }
 
-        Log.Debug($"{nameof(InspectServerProgress)} => {progress}");
-        await _progressHub.Clients.All.SendAsync(nameof(InspectServerProgress), progress);
+    public async Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress)
+    {
+        var progressDTO = _mapper.Map<ServerConnectionCheckStatusProgressDTO>(progress);
+        await _progressHub.Clients.All.ServerConnectionCheckStatusProgress(progressDTO);
     }
 
     /// <inheritdoc/>
-    public void SendFileMergeProgressUpdate(FileMergeProgress fileMergeProgress)
+    public async Task SendFileMergeProgressUpdateAsync(FileMergeProgress fileMergeProgress, CancellationToken cancellationToken = default)
     {
-        if (_progressHub?.Clients?.All == null)
-        {
-            Log.Warning("No Clients connected to ProgressHub");
-            return;
-        }
-
-        Task.Run(() => _progressHub.Clients.All.SendAsync(nameof(FileMergeProgress), fileMergeProgress));
+        await _progressHub.Clients.All.FileMergeProgress(fileMergeProgress, cancellationToken);
     }
 
-    public void SendServerSyncProgressUpdate(SyncServerProgress syncServerProgress)
+    public async Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress)
     {
-        if (_progressHub?.Clients?.All == null)
-        {
-            Log.Warning("No Clients connected to ProgressHub");
-            return;
-        }
-
-        Task.Run(() => _progressHub.Clients.All.SendAsync(nameof(SyncServerProgress), syncServerProgress));
+        await _progressHub.Clients.All.SyncServerProgress(syncServerProgress);
     }
 
     #endregion
 
     #region NotificationHub
 
-    public async Task SendNotification(Notification notification)
+    public async Task SendNotificationAsync(Notification notification)
     {
-        if (_notificationHub?.Clients?.All == null)
-        {
-            Log.Warning("No Clients connected to NotificationHub");
-            return;
-        }
+        var notificationDto = _mapper.Map<NotificationDTO>(notification);
+        await _notificationHub.Clients.All.Notification(notificationDto);
+    }
 
-        var notificationUpdate = _mapper.Map<NotificationDTO>(notification);
-        await _notificationHub.Clients.All.SendAsync(nameof(Notification), notificationUpdate);
+    #endregion
+
+    #region JobStateNotification
+
+    public async Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate)
+    {
+        var jobStatusUpdateDto = _mapper.Map<JobStatusUpdateDTO>(jobStatusUpdate);
+        await _progressHub.Clients.All.JobStatusUpdate(jobStatusUpdateDto);
     }
 
     #endregion

@@ -1,186 +1,146 @@
 <template>
-	<v-navigation-drawer
-		ref="drawer"
-		:value="showDrawer"
-		:permanent="showDrawer"
-		:width="width"
-		app
-		clipped
-		class="navigation-drawer no-background"
-	>
-		<!-- Server drawer -->
-		<server-drawer />
-		<!-- Menu items -->
-		<template #append>
-			<v-list>
-				<template v-for="(item, i) in getNavItems">
-					<!-- Grouped nav items -->
-					<v-list-group v-if="item.children && item.children.length > 0" :key="item.title" color="">
-						<template #activator>
-							<v-list-item-icon>
-								<v-icon>{{ item.icon }}</v-icon>
-							</v-list-item-icon>
-							<v-list-item-title>{{ $t(item.title) }}</v-list-item-title>
-						</template>
-						<v-list-item v-for="(child, j) in item.children" :key="j" link nuxt :to="child.link">
-							<v-list-item-icon>
-								<v-icon>{{ child.icon }}</v-icon>
-							</v-list-item-icon>
-
-							<v-list-item-content>
-								<v-list-item-title>{{ $t(child.title) }}</v-list-item-title>
-							</v-list-item-content>
-						</v-list-item>
-					</v-list-group>
-					<!-- Single nav item  -->
-					<v-list-item v-else :key="i" link nuxt :to="item.link">
-						<v-list-item-icon>
-							<v-icon>{{ item.icon }}</v-icon>
-						</v-list-item-icon>
-
-						<v-list-item-content>
-							<v-list-item-title>
-								{{ $t(item.title) }}
-							</v-list-item-title>
-						</v-list-item-content>
-						<v-list-item-action v-if="item.title.includes('downloads')">
-							<v-avatar v-if="downloadTaskCount > 0" class="red" size="32">
-								<b>{{ downloadTaskCount }}</b>
-							</v-avatar>
-						</v-list-item-action>
-					</v-list-item>
-				</template>
-			</v-list>
-		</template>
-	</v-navigation-drawer>
+	<q-drawer
+		class="navigation-drawer"
+		:model-value="showDrawer"
+		:width="400"
+		bordered
+		style="overflow-x: hidden"
+		@before-show="onShow"
+		@before-hide="onHide">
+		<q-col class="server-drawer-container">
+			<q-scroll>
+				<!-- Server drawer -->
+				<server-drawer />
+			</q-scroll>
+		</q-col>
+		<q-col class="menu-items">
+			<q-separator />
+			<!-- Menu items -->
+			<q-expansion-list :items="getNavItems" />
+		</q-col>
+	</q-drawer>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
-import VNavigationDrawer from 'vuetify/lib/components/VNavigationDrawer/VNavigationDrawer.js';
+<script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
-import { DownloadService } from '@service';
+import { get, set } from '@vueuse/core';
+import { DownloadService, SettingsService } from '@service';
+import { QExpansionListProps } from '@interfaces/components/QExpansionListProps';
 
-interface INavItem {
-	title: string;
-	icon: string;
-	link: string;
-	children?: INavItem[];
-}
+withDefaults(defineProps<{ showDrawer: boolean }>(), {
+	showDrawer: false,
+});
+const debugMode = ref(false);
 
-@Component<NavigationDrawer>({})
-export default class NavigationDrawer extends Vue {
-	items: object[] = [];
-	downloadTaskCount = 0;
-	width: Number = 350;
-	borderSize: Number = 3;
+const items = ref<object[]>([]);
 
-	@Prop({ required: true, type: Boolean })
-	readonly showDrawer!: boolean;
+const downloadTaskCount = ref(0);
 
-	@Ref('drawer')
-	readonly drawer!: VNavigationDrawer;
-
-	get getNavItems(): INavItem[] {
-		return [
-			{
-				title: 'components.navigation-drawer.downloads',
-				icon: 'mdi-download',
-				link: '/downloads',
-			},
-			{
-				title: 'components.navigation-drawer.settings',
-				icon: 'mdi-cog',
-				link: '/settings',
-				children: [
-					{
-						title: 'components.navigation-drawer.accounts',
-						icon: 'mdi-account',
-						link: '/settings/accounts',
-					},
-					{
-						title: 'components.navigation-drawer.paths',
-						icon: 'mdi-folder',
-						link: '/settings/paths',
-					},
-					{
-						title: 'components.navigation-drawer.ui',
-						icon: 'mdi-television-guide',
-						link: '/settings/ui',
-					},
-					{
-						title: 'components.navigation-drawer.advanced',
-						icon: 'mdi-wrench',
-						link: '/settings/advanced',
-					},
-					{
-						title: 'components.navigation-drawer.debug',
-						icon: 'mdi-bug-outline',
-						link: '/settings/debug',
-					},
-				],
-			},
-		];
-	}
-
-	setBorderWidth(): void {
-		const i = this.drawer.$el.querySelector<HTMLElement>('.v-navigation-drawer__border');
-		if (i) {
-			i.style.width = this.borderSize + 'px';
-			i.style.cursor = 'ew-resize';
-		}
-	}
-
-	setEvents() {
-		// https://codepen.io/oze4/pen/mojrZM
-		const minSize = this.borderSize;
-		const el = this.drawer.$el;
-		const drawerBorder = el.querySelector<HTMLElement>('.v-navigation-drawer__border');
-		const vm = this;
-
-		function resize(e) {
-			document.body.style.cursor = 'ew-resize';
-			if (e.clientX > 300) {
-				el.style.width = e.clientX + 'px';
-			}
-		}
-
-		if (drawerBorder) {
-			drawerBorder.addEventListener(
-				'mousedown',
-				function (e) {
-					if (e.offsetX < minSize) {
-						// m_pos = e.x;
-						el.style.transition = 'initial';
-						document.addEventListener('mousemove', resize, false);
-					}
+const getNavItems = computed((): QExpansionListProps[] => {
+	const mainItems: QExpansionListProps[] = [
+		{
+			title: 'components.navigation-drawer.downloads',
+			icon: 'mdi-download',
+			link: '/downloads',
+			type: 'badge',
+			count: downloadTaskCount.value,
+		},
+		{
+			title: 'components.navigation-drawer.settings',
+			icon: 'mdi-cog',
+			link: '/settings',
+			children: [
+				{
+					title: 'components.navigation-drawer.accounts',
+					icon: 'mdi-account',
+					link: '/settings/accounts',
 				},
-				false,
-			);
-		}
+				{
+					title: 'components.navigation-drawer.paths',
+					icon: 'mdi-folder',
+					link: '/settings/paths',
+				},
+				{
+					title: 'components.navigation-drawer.ui',
+					icon: 'mdi-television-guide',
+					link: '/settings/ui',
+				},
+				{
+					title: 'components.navigation-drawer.advanced',
+					icon: 'mdi-wrench',
+					link: '/settings/advanced',
+				},
+			],
+		},
+	];
 
-		document.addEventListener(
-			'mouseup',
-			() => {
-				if (drawerBorder) {
-					el.style.transition = '';
-					vm.width = +el.style.width;
-				}
-				document.body.style.cursor = '';
-				document.removeEventListener('mousemove', resize, false);
-			},
-			false,
-		);
+	if (get(debugMode)) {
+		mainItems.push({
+			title: 'components.navigation-drawer.debug',
+			icon: 'mdi-bug-outline',
+			children: [
+				{
+					title: 'components.navigation-drawer.dialogs',
+					icon: 'mdi-dock-window',
+					link: '/debug-pages/dialogs',
+				},
+				{
+					title: 'components.navigation-drawer.buttons',
+					icon: 'mdi-button-pointer',
+					link: '/debug-pages/buttons',
+				},
+			],
+		});
+	}
+	return mainItems;
+});
+
+function onShow() {
+	document.body.classList.remove('navigation-drawer-closed');
+	document.body.classList.add('navigation-drawer-opened');
+}
+
+function onHide() {
+	document.body.classList.remove('navigation-drawer-opened');
+	document.body.classList.add('navigation-drawer-closed');
+}
+
+onMounted(() => {
+	items.value = getNavItems.value;
+	document.body.classList.add('navigation-drawer-opened');
+
+	useSubscription(
+		DownloadService.getTotalDownloadsCount().subscribe((count) => {
+			set(downloadTaskCount, count);
+		}),
+	);
+
+	useSubscription(
+		SettingsService.getDebugMode().subscribe((value) => {
+			set(debugMode, value);
+		}),
+	);
+});
+</script>
+
+<style lang="scss">
+@import '@/assets/scss/variables.scss';
+
+.navigation-drawer {
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+
+	.server-drawer-container {
+		overflow-y: auto;
+		overflow-x: hidden;
+
+		flex-grow: 3;
 	}
 
-	mounted(): void {
-		// this.setBorderWidth();
-		// this.setEvents();
-		useSubscription(
-			DownloadService.getDownloadList().subscribe((downloadTasks) => {
-				this.downloadTaskCount = downloadTasks?.length ?? -1;
-			}),
-		);
+	.menu-items {
+		flex-grow: 0;
 	}
 }
-</script>
+</style>

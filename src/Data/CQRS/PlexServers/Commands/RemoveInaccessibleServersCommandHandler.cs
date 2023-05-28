@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics;
+using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.PlexServers;
@@ -10,7 +11,7 @@ public class RemoveInaccessibleServersCommandValidator : AbstractValidator<Remov
 
 public class RemoveInaccessibleServersCommandHandler : BaseHandler, IRequestHandler<RemoveInaccessibleServersCommand, Result>
 {
-    public RemoveInaccessibleServersCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public RemoveInaccessibleServersCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result> Handle(RemoveInaccessibleServersCommand command, CancellationToken cancellationToken)
     {
@@ -34,11 +35,12 @@ public class RemoveInaccessibleServersCommandHandler : BaseHandler, IRequestHand
         if (serverRemovalList.Count > 0)
         {
             _dbContext.PlexServers.RemoveRange(serverRemovalList);
-            await SaveChangesAsync();
+            await SaveChangesAsync(cancellationToken);
         }
 
         stopwatch.Stop();
-        Log.Debug($"{nameof(RemoveInaccessibleServersCommandHandler)} was completed in {stopwatch.Elapsed.TotalSeconds}!");
+        _log.Debug("{NameOfRemoveInaccessibleServersCommandHandler} was completed in {TotalSeconds}!", nameof(RemoveInaccessibleServersCommandHandler),
+            stopwatch.Elapsed.TotalSeconds);
         return Result.Ok();
     }
 }

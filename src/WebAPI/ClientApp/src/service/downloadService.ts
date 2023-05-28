@@ -1,19 +1,29 @@
 import { Observable, of } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
-import { Context } from '@nuxt/types';
+
+import { sum } from 'lodash-es';
+import BaseService from './baseService';
 import {
 	clearDownloadTasks,
 	deleteDownloadTasks,
 	downloadMedia,
 	getAllDownloads,
 	pauseDownloadTask,
+	postPreviewDownload,
 	restartDownloadTasks,
 	startDownloadTask,
 	stopDownloadTasks,
 } from '@api/plexDownloadApi';
-import { DownloadMediaDTO, DownloadProgressDTO, DownloadStatus, PlexMediaType, ServerDownloadProgressDTO } from '@dto/mainApi';
+import {
+	DownloadMediaDTO,
+	DownloadPreviewDTO,
+	DownloadProgressDTO,
+	DownloadStatus,
+	PlexMediaType,
+	ServerDownloadProgressDTO,
+} from '@dto/mainApi';
 import IStoreState from '@interfaces/service/IStoreState';
-import { BaseService, SignalrService } from '@service';
+import SignalrService from '@service/signalrService';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class DownloadService extends BaseService {
@@ -28,8 +38,8 @@ export class DownloadService extends BaseService {
 		});
 	}
 
-	public setup(nuxtContext: Context): Observable<ISetupResult> {
-		super.setup(nuxtContext);
+	public setup(): Observable<ISetupResult> {
+		super.setup();
 
 		SignalrService.GetServerDownloadProgress().subscribe((data: ServerDownloadProgressDTO) => {
 			this.updateStore('serverDownloads', data);
@@ -55,7 +65,7 @@ export class DownloadService extends BaseService {
 		);
 	}
 
-	public getActiveDownloadList(serverId: number = 0): Observable<DownloadProgressDTO[]> {
+	public getActiveDownloadList(serverId = 0): Observable<DownloadProgressDTO[]> {
 		return this.getDownloadList(serverId).pipe(
 			map((x) =>
 				x.filter(
@@ -73,17 +83,38 @@ export class DownloadService extends BaseService {
 		return this.stateChanged.pipe(map((state) => state?.serverDownloads ?? []));
 	}
 
-	public getDownloadList(serverId: number = 0): Observable<DownloadProgressDTO[]> {
+	public getDownloadList(serverId = 0): Observable<DownloadProgressDTO[]> {
 		if (serverId > 0) {
 			return this.getServerDownloadList().pipe(map((x) => x.find((y) => y.id === serverId)?.downloads ?? []));
 		}
 		return this.getServerDownloadList().pipe(map((x) => x.map((y) => y.downloads).flat() ?? []));
 	}
 
+	/**
+	 * Get the total number of download tasks that are downloadable in the download list.
+	 */
+	public getTotalDownloadsCount(): Observable<number> {
+		return this.getServerDownloadList().pipe(
+			map((x) => x.map((y) => y.downloadableTasksCount).flat()),
+			map((x) => sum(x)),
+		);
+	}
+
 	public downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): void {
 		downloadMedia(downloadMediaCommand)
 			.pipe(switchMap(() => this.fetchDownloadList()))
 			.subscribe();
+	}
+
+	public previewDownload(downloadMediaCommand: DownloadMediaDTO[]): Observable<DownloadPreviewDTO[]> {
+		return postPreviewDownload(downloadMediaCommand).pipe(
+			map((response) => {
+				if (response && response.isSuccess) {
+					return response.value ?? [];
+				}
+				return [];
+			}),
+		);
 	}
 
 	// region Commands
@@ -163,5 +194,4 @@ export class DownloadService extends BaseService {
 	}
 }
 
-const downloadService = new DownloadService();
-export default downloadService;
+export default new DownloadService();

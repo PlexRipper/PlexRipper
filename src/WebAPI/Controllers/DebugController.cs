@@ -1,7 +1,8 @@
-﻿using AutoMapper;
+﻿using Application.Contracts;
+using AutoMapper;
+using BackgroundServices.Contracts;
+using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.Application;
-using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers;
 
@@ -9,34 +10,39 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class DebugController : BaseController
 {
-    private readonly IDownloadProgressScheduler _downloadProgressScheduler;
+    private readonly IDownloadTaskScheduler _downloadTaskScheduler;
+    private readonly IInspectServerScheduler _inspectServerScheduler;
 
     public DebugController(
-        IDownloadProgressScheduler downloadProgressScheduler,
+        ILog log,
+        IDownloadTaskScheduler downloadTaskScheduler,
         IMapper mapper,
-        INotificationsService notificationsService) : base(mapper,
+        INotificationsService notificationsService,
+        IInspectServerScheduler inspectServerScheduler) : base(log, mapper,
         notificationsService)
     {
-        _downloadProgressScheduler = downloadProgressScheduler;
+        _downloadTaskScheduler = downloadTaskScheduler;
+        _inspectServerScheduler = inspectServerScheduler;
     }
 
-    // GET: api/<DebugController>/StartServerDownloadProgress
-    [HttpGet("StartServerDownloadProgress")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> StartDownloadProgressJob([FromQuery] int plexServerId)
+    [HttpGet("InspectServerScheduler/{plexServerId:int}")]
+    public async Task<IActionResult> InspectServerSchedulerJob(int plexServerId)
     {
-        var result = await _downloadProgressScheduler.StartDownloadProgressJob(plexServerId);
+        var result = await _inspectServerScheduler.QueueInspectPlexServerJob(plexServerId);
         return ToActionResult(result);
     }
 
-    // GET: api/<DebugController>/StopServerDownloadProgress
-    [HttpGet("StopServerDownloadProgress")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> StopDownloadProgressJob([FromQuery] int plexServerId)
+    [HttpGet("RefreshAccessiblePlexServersJob/{plexAccountId:int}")]
+    public async Task<IActionResult> RefreshAccessiblePlexServersJob(int plexAccountId)
     {
-        var result = await _downloadProgressScheduler.StopDownloadProgressJob(plexServerId);
+        var result = await _inspectServerScheduler.QueueRefreshAccessiblePlexServersJob(plexAccountId);
+        return ToActionResult(result);
+    }
+
+    [HttpGet("QueueInspectPlexServerByPlexAccountIdJob/{plexAccountId:int}")]
+    public async Task<IActionResult> QueueInspectPlexServerByPlexAccountIdJob(int plexAccountId)
+    {
+        var result = await _inspectServerScheduler.QueueInspectPlexServerByPlexAccountIdJob(plexAccountId);
         return ToActionResult(result);
     }
 }

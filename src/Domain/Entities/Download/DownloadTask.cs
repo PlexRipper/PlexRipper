@@ -34,6 +34,9 @@ public class DownloadTask : BaseEntity
     [Column(Order = 5)]
     public long DataReceived { get; set; }
 
+    /// <summary>
+    /// The total size of the file in bytes.
+    /// </summary>
     [Column(Order = 6)]
     public long DataTotal { get; set; }
 
@@ -58,13 +61,6 @@ public class DownloadTask : BaseEntity
     /// </summary>
     [Column(Order = 12)]
     public string FileLocationUrl { get; set; }
-
-    /// <summary>
-    /// Gets or sets the full download url including the <see cref="PlexServer"/> token of the media to be downloaded.
-    /// This is only set if <see cref="DownloadTask"/> is downloadable.
-    /// </summary>
-    [Column(Order = 13)]
-    public string DownloadUrl { get; set; }
 
     /// <summary>
     /// Gets or sets the full formatted media title, based on the <see cref="PlexMediaType"/>.
@@ -92,9 +88,12 @@ public class DownloadTask : BaseEntity
     public string DestinationDirectory { get; set; }
 
     [Column(Order = 18)]
-    public int DownloadSpeed { get; set; }
+    public long DownloadSpeed { get; set; }
 
     [Column(Order = 19)]
+    public long FileTransferSpeed { get; set; }
+
+    [Column(Order = 20)]
     public string ServerMachineIdentifier { get; set; }
 
     /// <summary>
@@ -126,9 +125,7 @@ public class DownloadTask : BaseEntity
 
     public DownloadTask Parent { get; set; }
 
-    public int? RootDownloadTaskId { get; set; }
-
-    public DownloadTask RootDownloadTask { get; set; }
+    public int RootDownloadTaskId { get; set; }
 
     public List<DownloadTask> Children { get; set; }
 
@@ -136,20 +133,20 @@ public class DownloadTask : BaseEntity
 
     #region Helpers
 
+    /// <summary>
+    /// If the Id is the same as it's RootDownloadTaskId then this is the root of the <see cref="DownloadTask"/> hierarchy.
+    /// </summary>
     [NotMapped]
-    public int MediaParts => DownloadWorkerTasks?.Count ?? 0;
+    public bool IsRoot => Id == RootDownloadTaskId;
 
     [NotMapped]
-    public Uri DownloadUri => !string.IsNullOrWhiteSpace(DownloadUrl) ? new Uri(DownloadUrl, UriKind.Absolute) : null;
+    public int MediaParts => DownloadWorkerTasks?.Count ?? 0;
 
     [NotMapped]
     public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);
 
     [NotMapped]
-    public long TimeRemaining => DataFormat.GetTimeRemaining(BytesRemaining, DownloadSpeed);
-
-    [NotMapped]
-    public long BytesRemaining => DataTotal - DataReceived;
+    public long TimeRemaining => DataFormat.GetTimeRemaining(DataTotal - DataReceived, DownloadSpeed);
 
     /// <summary>
     /// Gets a joined string of temp file paths of the <see cref="DownloadWorkerTasks"/> delimited by ";".
@@ -190,7 +187,8 @@ public class DownloadTask : BaseEntity
     {
         var orderedList = DownloadWorkerTasks?.OrderBy(x => x.Id).ToList();
         var builder = new StringBuilder();
-        builder.Append($"[Status: {DownloadStatus}] - ");
+        builder.Append($"[File: {FileName} - ");
+        builder.Append($"Status: {DownloadStatus}] - ");
         foreach (var progress in orderedList)
             builder.Append($"({progress.Id} - {progress.Percentage} {progress.DownloadSpeedFormatted}) + ");
 

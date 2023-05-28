@@ -5,26 +5,20 @@ using PlexRipper.Settings.Modules;
 
 namespace Settings.UnitTests.Modules;
 
-public class DisplaySettingsModule_SetFromJson_UnitTests
+public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest<DisplaySettingsModule>
 {
-    public DisplaySettingsModule_SetFromJson_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public DisplaySettingsModule_SetFromJson_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public void ShouldSetPropertiesFromJson_WhenValidJsonSettingsAreGiven()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
-        var _sut = mock.Create<DisplaySettingsModule>();
-
         var settingsModel = new SettingsModel
         {
             DisplaySettings = new DisplaySettings
             {
-                MovieViewMode = ViewMode.Overview,
-                TvShowViewMode = ViewMode.Overview,
+                MovieViewMode = ViewMode.Table,
+                TvShowViewMode = ViewMode.Poster,
             },
         };
         var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
@@ -35,17 +29,14 @@ public class DisplaySettingsModule_SetFromJson_UnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        _sut.MovieViewMode.ShouldBe(ViewMode.Overview);
-        _sut.TvShowViewMode.ShouldBe(ViewMode.Overview);
+        _sut.MovieViewMode.ShouldBe(ViewMode.Table);
+        _sut.TvShowViewMode.ShouldBe(ViewMode.Poster);
     }
 
     [Fact]
     public void ShouldSetPropertiesFromJson_WhenInvalidJsonSettingsAreGiven()
     {
         // Arrange
-        using var mock = AutoMock.GetStrict();
-        var _sut = mock.Create<DisplaySettingsModule>();
-
         var settingsModel = new SettingsModel
         {
             DisplaySettings = FakeData.GetDisplaySettings(config => { config.Seed = 234; }).Generate(),
@@ -61,7 +52,7 @@ public class DisplaySettingsModule_SetFromJson_UnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        _sut.MovieViewMode.ShouldBe(ViewMode.Overview);
+        _sut.MovieViewMode.ShouldBe(ViewMode.Poster);
         _sut.TvShowViewMode.ShouldBe(_sut.DefaultValues().TvShowViewMode);
     }
 }

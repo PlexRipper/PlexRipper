@@ -1,6 +1,7 @@
-﻿using EFCore.BulkExtensions;
+﻿using Data.Contracts;
+using EFCore.BulkExtensions;
 using FluentValidation;
-using PlexRipper.Application;
+using Logging.Interface;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;
@@ -32,13 +33,7 @@ public class CreateDownloadTasksCommandValidator : AbstractValidator<CreateDownl
                     x.RuleFor(y => y.FileName).NotEmpty();
 
                     x.RuleFor(y => y.FileLocationUrl).NotEmpty();
-                    x.RuleFor(y => y.DownloadUrl).NotEmpty();
-                    x.RuleFor(y => y.DownloadUri).NotNull();
-                    x.RuleFor(y => y.DownloadUri.IsAbsoluteUri).NotNull().When(y => y.DownloadUri != null);
 
-                    x.RuleFor(y => Uri.IsWellFormedUriString(y.DownloadUri.AbsoluteUri, UriKind.Absolute))
-                        .NotEqual(false)
-                        .When(y => y.DownloadUri != null);
                     x.RuleFor(y => y.Created).NotEqual(DateTime.MinValue);
                 });
             });
@@ -47,7 +42,7 @@ public class CreateDownloadTasksCommandValidator : AbstractValidator<CreateDownl
 
 public class CreateDownloadTasksCommandHandler : BaseHandler, IRequestHandler<CreateDownloadTasksCommand, Result>
 {
-    public CreateDownloadTasksCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public CreateDownloadTasksCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result> Handle(CreateDownloadTasksCommand command, CancellationToken cancellationToken)
     {
@@ -68,27 +63,12 @@ public class CreateDownloadTasksCommandHandler : BaseHandler, IRequestHandler<Cr
             if (downloadTask.Children is null || !downloadTask.Children.Any())
                 continue;
 
-            downloadTask.Children = SetRootId(downloadTask.Children, downloadTask.Id);
+            downloadTask.Children = downloadTask.Children.SetRootId(downloadTask.Id);
         }
 
         InsertDownloadTasks(command.DownloadTasks);
 
         return Result.Ok();
-    }
-
-
-    private static List<DownloadTask> SetRootId(List<DownloadTask> downloadTasks, int rootTaskId)
-    {
-        foreach (var downloadTask in downloadTasks)
-        {
-            downloadTask.RootDownloadTaskId = rootTaskId;
-            if (downloadTask.Children is null || !downloadTask.Children.Any())
-                continue;
-
-            downloadTask.Children = SetRootId(downloadTask.Children, rootTaskId);
-        }
-
-        return downloadTasks;
     }
 
     private void InsertDownloadTasks(List<DownloadTask> downloadTasks)

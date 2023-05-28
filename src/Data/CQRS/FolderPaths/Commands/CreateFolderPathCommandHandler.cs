@@ -1,5 +1,6 @@
-﻿using FluentValidation;
-using PlexRipper.Application;
+﻿using Data.Contracts;
+using FluentValidation;
+using Logging.Interface;
 using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.FolderPaths;
@@ -19,7 +20,7 @@ public class CreateFolderPathValidator : AbstractValidator<CreateFolderPathComma
 
 public class CreateFolderPathCommandHandler : BaseHandler, IRequestHandler<CreateFolderPathCommand, Result<int>>
 {
-    public CreateFolderPathCommandHandler(PlexRipperDbContext dbContext) : base(dbContext) { }
+    public CreateFolderPathCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
 
     public async Task<Result<int>> Handle(CreateFolderPathCommand command, CancellationToken cancellationToken)
     {

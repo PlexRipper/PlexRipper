@@ -7,17 +7,18 @@ public static class DefaultJsonSerializerOptions
 {
     public static JsonSerializerOptions ConfigBase { get; } = new()
     {
+        // PropertyNameCaseInsensitive is crucial otherwise empty objects are created with no values
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         Converters = { new JsonStringEnumConverter() },
-        IgnoreNullValues = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
     public static JsonSerializerOptions ConfigCaptialized { get; } = new()
     {
         PropertyNameCaseInsensitive = true,
         Converters = { new JsonStringEnumConverter() },
-        IgnoreNullValues = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
     public static JsonSerializerOptions ConfigIndented { get; } = new()

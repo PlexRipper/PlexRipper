@@ -1,145 +1,85 @@
 <template>
-	<v-app-bar class="app-bar" dense app clipped-left clipped-right>
-		<v-toolbar-title>
-			<v-app-bar-nav-icon @click.stop="showNavigationDrawer" />
-			<v-btn to="/" outlined nuxt>
-				<logo :size="24" class="mr-3" />
-				{{ $t('general.name-version', { version }) }}
-			</v-btn>
-		</v-toolbar-title>
+	<q-header class="app-bar">
+		<q-row no-wrap>
+			<q-toolbar class="app-bar">
+				<q-toolbar-title>
+					<q-btn flat round dense icon="mdi-menu" class="q-mr-sm" @click.stop="showNavigationDrawer" />
+					<q-btn to="/" flat>
+						<logo :size="24" class="q-mr-md" />
+						{{ t('general.name-version', { version }) }}
+					</q-btn>
+				</q-toolbar-title>
 
-		<v-spacer></v-spacer>
-		<app-bar-progress-bar />
-		<v-spacer></v-spacer>
+				<q-space />
 
-		<v-btn icon href="https://github.com/PlexRipper/PlexRipper" target="_blank">
-			<v-icon>mdi-github</v-icon>
-		</v-btn>
+				<AppBarProgressBar />
 
-		<!-- DarkMode toggle -->
-		<dark-mode-toggle />
+				<q-space />
 
-		<!-- Account Selector -->
-		<v-menu left bottom offset-y :close-on-content-click="false">
-			<template #activator="{ on }">
-				<v-btn icon v-on="on">
-					<v-icon>mdi-account</v-icon>
-				</v-btn>
-			</template>
-			<v-list>
-				<v-list-item-group v-if="accounts.length > 0" :value="activeAccountId">
-					<!--	Button per account	-->
-					<v-list-item v-for="(account, index) in accounts" :key="index" @click="updateActiveAccountId(account.id)">
-						<v-list-item-content>
-							<v-list-item-title> {{ account.displayName }}</v-list-item-title>
-						</v-list-item-content>
-						<v-list-item-action>
-							<v-btn
-								icon
-								:loading="loading[0] || loading[index]"
-								:disabled="isLoading"
-								@click.native.stop="refreshAccount(account.id)"
-							>
-								<v-icon color="grey lighten-1">mdi-refresh</v-icon>
-							</v-btn>
-						</v-list-item-action>
-					</v-list-item>
-				</v-list-item-group>
-				<!--	No account found -->
-				<v-list-item v-else>
-					<v-list-item-title> {{ $t('components.app-bar.no-accounts') }}</v-list-item-title>
-				</v-list-item>
-			</v-list>
-		</v-menu>
+				<q-btn icon="mdi-github" flat href="https://github.com/PlexRipper/PlexRipper" target="_blank" />
 
-		<!-- Notifications Selector -->
-		<notification-button @toggle="showNotificationsDrawer" />
-	</v-app-bar>
+				<!-- DarkMode toggle -->
+				<DarkModeToggleButton />
+
+				<!-- Account Selector -->
+				<AccountSelector />
+
+				<!-- Notifications Selector -->
+				<NotificationButton @toggle="showNotificationsDrawer" />
+			</q-toolbar>
+		</q-row>
+	</q-header>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
-import { AccountService, GlobalService, ServerService, SettingsService } from '@service';
-import { refreshAccount } from '@api/accountApi';
-import type { PlexAccountDTO } from '@dto/mainApi';
+import { GlobalService } from '@service';
 
-@Component
-export default class AppBar extends Vue {
-	private accounts: PlexAccountDTO[] = [];
-	private loading: boolean[] = [false];
-	private version: string = '?';
+const { t } = useI18n();
 
-	activeAccountId: number = 0;
+const version = ref('?');
 
-	get isLoading(): boolean {
-		return this.loading.some((x) => x);
+const emit = defineEmits<{
+	(e: 'show-navigation'): void;
+	(e: 'show-notifications'): void;
+}>();
+
+function showNavigationDrawer(): void {
+	emit('show-navigation');
+}
+
+function showNotificationsDrawer(): void {
+	emit('show-notifications');
+}
+
+onMounted(() => {
+	useSubscription(
+		GlobalService.getConfigReady().subscribe((config) => {
+			version.value = config.version;
+		}),
+	);
+});
+</script>
+
+<style lang="scss">
+@import '@/assets/scss/variables.scss';
+
+.app-bar {
+	// @extend .glossy;
+	height: $app-bar-height;
+}
+
+body {
+	&.body--dark {
+		.app-bar {
+			background: rgba(255, 0, 0, 0.2) !important;
+		}
 	}
 
-	showNavigationDrawer(): void {
-		this.$emit('show-navigation');
-	}
-
-	showNotificationsDrawer(): void {
-		this.$emit('show-notifications');
-	}
-
-	updateActiveAccountId(accountId: number): void {
-		useSubscription(SettingsService.updateGeneralSettings('activeAccountId', accountId).subscribe());
-	}
-
-	refreshAccount(accountId: number = 0): void {
-		const index = accountId === 0 ? 0 : this.accounts.findIndex((x) => x.id === accountId);
-		this.loading.splice(index, 1, true);
-		refreshAccount(accountId).subscribe(() => {
-			AccountService.refreshAccounts();
-			ServerService.fetchServers();
-			this.loading.splice(index, 1, false);
-		});
-	}
-
-	mounted(): void {
-		useSubscription(
-			GlobalService.getConfigReady().subscribe((config) => {
-				this.version = config.version;
-			}),
-		);
-
-		useSubscription(
-			AccountService.getAccounts().subscribe((data) => {
-				this.accounts = [
-					{
-						id: 0,
-						displayName: 'All Accounts',
-					} as any,
-				];
-				data?.filter((x) => x.isEnabled).forEach((account) => this.accounts.push(account));
-				this.accounts.forEach(() => this.loading.push(false));
-			}),
-		);
-
-		useSubscription(
-			SettingsService.getActiveAccountId().subscribe((activeAccountId) => {
-				if (activeAccountId || activeAccountId >= 0) {
-					this.activeAccountId = activeAccountId;
-				}
-			}),
-		);
-
-		// useSubscription(SignalrService.getPlexAccountRefreshProgress(), (data) => {
-		// 	if (data) {
-		// 		const index = this.accountRefreshProgress.findIndex((x) => x.plexAccountId === data.plexAccountId);
-		// 		if (index > -1) {
-		// 			if (!data.isComplete) {
-		// 				this.accountRefreshProgress.splice(index, 1, data);
-		// 			} else {
-		// 				this.accountRefreshProgress.splice(index, 1);
-		// 			}
-		// 		} else {
-		// 			this.accountRefreshProgress.push(data);
-		// 		}
-		// 	}
-		// });
+	&.body--light {
+		.app-bar {
+			background: rgba(255, 0, 0, 1) !important;
+		}
 	}
 }
-</script>
+</style>

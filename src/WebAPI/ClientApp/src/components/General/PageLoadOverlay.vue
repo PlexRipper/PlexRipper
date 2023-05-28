@@ -1,20 +1,11 @@
 <template>
-	<v-overlay :value="value" :opacity="0">
+	<div class="q-pa-md">
 		<div class="logo-square">
 			<logo :size="256" />
 		</div>
-	</v-overlay>
+	</div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
-
-@Component<PageLoadOverlay>({})
-export default class PageLoadOverlay extends Vue {
-	@Prop({ required: true, type: Boolean })
-	readonly value!: boolean;
-}
-</script>
 <style>
 .logo-square {
 	width: 256px;

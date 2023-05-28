@@ -1,32 +1,33 @@
 ﻿using System.Reactive.Subjects;
 using Autofac;
 using Environment;
+using FileSystem.Contracts;
+using Logging.Interface;
 using PlexRipper.Application;
 using PlexRipper.Settings;
+using Settings.Contracts;
 
 namespace Settings.UnitTests;
 
-public class ConfigManager_SaveConfig_UnitTests
+public class ConfigManager_SaveConfig_UnitTests : BaseUnitTest<ConfigManager>
 {
-    public ConfigManager_SaveConfig_UnitTests(ITestOutputHelper output)
-    {
-        Log.SetupTestLogging(output);
-    }
+    public ConfigManager_SaveConfig_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public void ShouldLoadConfigDuringSetup_WhenConfigFileAlreadyExists()
     {
         // Arrange
         var settingsModel = FakeData.GetSettingsModel().Generate();
-        using var mock = AutoMock.GetStrict();
         mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<ISettingsModel>());
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
         mock.Mock<IUserSettings>().Setup(x => x.GetSettingsModel()).Returns(settingsModel);
         mock.Mock<IFileSystem>().Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok);
 
+        // Were mocking other methods from ConfigManager, that's why we need to mock it manually here
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
+            mock.Container.Resolve<ILog>(),
             mock.Container.Resolve<IFileSystem>(),
             mock.Container.Resolve<IDirectorySystem>(),
             mock.Container.Resolve<IPathProvider>(),

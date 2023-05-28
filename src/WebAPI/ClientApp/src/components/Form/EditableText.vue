@@ -1,37 +1,25 @@
 <template>
-	<v-row justify="space-between" class="flex-nowrap" no-gutters>
-		<v-col cols="9">
-			<v-subheader v-if="!editMode" class="form-label text-no-wrap">{{ newValue }}</v-subheader>
-			<p-text-field v-else v-model="newValue" />
-		</v-col>
-		<v-col justify="right">
-			<EditIconButton v-if="!editMode" :disabled="disabled" :height="50" @click="edit" />
-			<SaveIconButton v-else :disabled="disabled" :height="50" @click="save" />
-		</v-col>
-	</v-row>
+	<q-list>
+		<q-item v-ripple clickable>
+			<q-item-section>
+				<q-sub-header>
+					{{ value }}
+				</q-sub-header>
+			</q-item-section>
+			<QPopupEdit v-slot="scope" :model-value="value" auto-save @save="$emit('save', $event)">
+				<q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set" />
+			</QPopupEdit>
+		</q-item>
+	</q-list>
 </template>
 
-<script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+<script setup lang="ts">
+defineProps<{
+	value: string;
+	disabled?: boolean;
+}>();
 
-@Component
-export default class EditableText extends Vue {
-	@Prop({ required: false, type: String })
-	readonly value!: string;
-
-	@Prop({ required: false, type: Boolean })
-	readonly disabled!: boolean;
-
-	editMode: boolean = false;
-	newValue: string = this.value;
-
-	edit(): void {
-		this.editMode = true;
-	}
-
-	save(): void {
-		this.editMode = false;
-		this.$emit('save', this.newValue);
-	}
-}
+defineEmits<{
+	(e: 'save', save: string): void;
+}>();
 </script>

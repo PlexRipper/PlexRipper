@@ -1,8 +1,8 @@
 import { Observable, of } from 'rxjs';
-import { switchMap, take } from 'rxjs/operators';
-import { Context } from '@nuxt/types';
+import { map, take } from 'rxjs/operators';
+
+import BaseService from './baseService';
 import IStoreState from '@interfaces/service/IStoreState';
-import { BaseService } from '@service';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 export class HelpService extends BaseService {
@@ -17,13 +17,13 @@ export class HelpService extends BaseService {
 		});
 	}
 
-	setup(nuxtContext: Context): Observable<ISetupResult> {
-		super.setup(nuxtContext);
+	setup(): Observable<ISetupResult> {
+		super.setup();
 		return of({ name: this._name, isSuccess: true }).pipe(take(1));
 	}
 
 	public getHelpDialog(): Observable<string> {
-		return this.stateChanged.pipe(switchMap((x) => of(x?.helpIdDialog ?? '')));
+		return this.stateChanged.pipe(map((x) => x?.helpIdDialog ?? ''));
 	}
 
 	public openHelpDialog(helpId: string): void {
@@ -31,5 +31,4 @@ export class HelpService extends BaseService {
 	}
 }
 
-const helpService = new HelpService();
-export default helpService;
+export default new HelpService();

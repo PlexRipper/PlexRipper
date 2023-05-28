@@ -1,4 +1,4 @@
-using Environment;
+using Logging.Interface;
 using PlexRipper.WebAPI.Common.Extensions;
 
 namespace PlexRipper.WebAPI;
@@ -8,6 +8,8 @@ namespace PlexRipper.WebAPI;
 /// </summary>
 public sealed class Startup
 {
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(Startup));
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Startup"/> class.
     /// </summary>
@@ -15,7 +17,7 @@ public sealed class Startup
     public Startup(IWebHostEnvironment env)
     {
         CurrentEnvironment = env;
-        Log.Information($"PlexRipper running in {CurrentEnvironment.EnvironmentName ?? "Unknown"} mode.");
+        _log.Information("PlexRipper running in {Environment} mode", CurrentEnvironment.EnvironmentName);
     }
 
     private IWebHostEnvironment CurrentEnvironment { get; }
@@ -26,13 +28,7 @@ public sealed class Startup
     /// <param name="services"></param>
     public void ConfigureServices(IServiceCollection services)
     {
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
-        {
-            StartupExtensions.SetupConfigureServices(services, CurrentEnvironment);
-            return;
-        }
-
-        StartupExtensions.SetupTestConfigureServices(services, CurrentEnvironment);
+        StartupExtensions.SetupConfigureServices(services, CurrentEnvironment);
     }
 
     /// <summary>
@@ -41,12 +37,6 @@ public sealed class Startup
     /// <param name="app">The <see cref="IApplicationBuilder"/> instance to configure.</param>
     public void Configure(IApplicationBuilder app)
     {
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
-        {
-            StartupExtensions.SetupConfigure(app, CurrentEnvironment);
-            return;
-        }
-
-        StartupExtensions.SetupTestConfigure(app, CurrentEnvironment);
+        StartupExtensions.SetupConfigure(app, CurrentEnvironment);
     }
 }

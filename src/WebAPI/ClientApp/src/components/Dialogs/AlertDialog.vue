@@ -1,44 +1,36 @@
 <template>
-	<v-dialog v-model="show" max-width="800" @click:outside="close">
-		<v-card>
-			<v-card-title class="headline i18n-formatting">{{ alert.title }}</v-card-title>
-
-			<v-card-text class="i18n-formatting">
-				<p>{{ alert.text }}</p>
-				<pre style="white-space: break-spaces">{{ errors }}</pre>
-			</v-card-text>
-
+	<QCardDialog max-width="1000px" :name="name" @closed="onClose">
+		<template #title>
+			{{ alert.title }}
+		</template>
+		<template #default>
+			<pre style="white-space: break-spaces">{{ alert.text }}</pre>
+			<span>Request data sent:</span>
+			<pre v-if="alert.result" style="white-space: break-spaces">{{ alert.result }}</pre>
+			<pre v-if="errors" style="white-space: break-spaces">{{ errors }}</pre>
+		</template>
+		<template #actions="{ close }">
+			<q-space />
 			<!--	Close action	-->
-			<v-card-actions>
-				<v-spacer></v-spacer>
-				<v-btn color="green darken-1" text @click="close"> {{ $t('general.commands.close') }} </v-btn>
-			</v-card-actions>
-		</v-card>
-	</v-dialog>
+			<base-button text-id="close" @click="close" />
+		</template>
+	</QCardDialog>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+<script setup lang="ts">
 import type IAlert from '@interfaces/IAlert';
-import { Error } from '@dto/mainApi';
+import { AlertService } from '@service';
 
-@Component
-export default class AlertDialog extends Vue {
-	show: boolean = true;
+const props = defineProps<{ name: string; alert: IAlert }>();
 
-	@Prop({ required: true, type: Object as () => IAlert })
-	readonly alert!: IAlert;
-
-	get errors(): Error[] {
-		if (this.alert?.result?.errors) {
-			return this.alert.result.errors;
-		}
-		return [];
+const errors = computed(() => {
+	if (props.alert?.result?.errors) {
+		return props.alert.result.errors;
 	}
+	return null;
+});
 
-	close(): void {
-		this.show = false;
-		this.$emit('close', this.alert);
-	}
+function onClose(): void {
+	AlertService.removeAlert(props.alert.id);
 }
 </script>

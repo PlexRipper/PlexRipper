@@ -30,6 +30,7 @@ export function baseSetup(): { ctx: Context; appConfig: IAppConfig } {
 		nodeEnv: 'TESTING',
 		version: '1.0',
 		isProduction: false,
+		isDocker: false,
 	};
 	process.env.NODE_ENV = 'dev';
 	process.client = true;

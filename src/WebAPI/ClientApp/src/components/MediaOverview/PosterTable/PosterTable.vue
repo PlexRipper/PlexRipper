@@ -58,14 +58,10 @@ defineEmits<{
 	(e: 'load', payload: any): void;
 }>();
 
-const onResize = useDebounceFn(
-	() => {
-		const { width } = useElementBounding(posterTableRef);
-		set(gridItems, Math.floor(get(width) / get(posterCardWidth)));
-	},
-	500,
-	{ maxWait: 5000 },
-);
+function onResize() {
+	const { width } = useElementBounding(posterTableRef);
+	set(gridItems, Math.floor(get(width) / get(posterCardWidth)));
+}
 
 function getScrollTarget(index: number): HTMLElement | null {
 	// noinspection TypeScriptValidateTypes

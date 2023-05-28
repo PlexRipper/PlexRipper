@@ -18,6 +18,7 @@ export default defineNuxtConfig({
 			nodeEnv: process.env.NODE_ENV || 'development',
 			version: process.env.npm_package_version || '?',
 			apiPort: process.env.API_PORT || '5000',
+			isDocker: process.env.IS_DOCKER || false,
 		},
 	},
 	modules: [

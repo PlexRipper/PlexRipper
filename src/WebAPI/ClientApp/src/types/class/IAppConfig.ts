@@ -3,4 +3,5 @@ export default interface IAppConfig {
 	version: string;
 	isProduction: boolean;
 	baseUrl: string;
+	isDocker: boolean;
 }

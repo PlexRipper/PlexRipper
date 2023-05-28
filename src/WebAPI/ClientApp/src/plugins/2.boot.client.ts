@@ -4,18 +4,24 @@ import { GlobalService } from '@service';
 import IAppConfig from '@class/IAppConfig';
 
 export default defineNuxtPlugin(() => {
-	const config = useRuntimeConfig();
+	const publicEnv = useRuntimeConfig().public;
 
 	Log.level = 4;
 	// Log.level = config.public.isProduction ? LogLevel.Debug : LogLevel.Debug;
-	Log.info(`Nuxt Environment: ${config.public.version}`);
-	const publicEnv = useRuntimeConfig().public;
+	Log.info(`Nuxt Environment: ${publicEnv.version}`);
+
+	let baseUrl = `http://localhost:${publicEnv.apiPort}`;
+	if (publicEnv.isDocker) {
+		const currentLocation = window.location;
+		baseUrl = `${currentLocation.protocol}//${currentLocation.hostname}:${currentLocation.port}`;
+	}
 
 	const appConfig: IAppConfig = {
 		version: publicEnv.version,
 		nodeEnv: publicEnv.nodeEnv,
 		isProduction: publicEnv.nodeEnv === 'production',
-		baseUrl: `http://localhost:${publicEnv.apiPort}`,
+		isDocker: publicEnv.isDocker,
+		baseUrl,
 	};
 
 	setupAxios(appConfig);

@@ -3,12 +3,13 @@
 		<q-expansion-item v-for="(server, index) in plexServers" :key="index" :label="server.name" expand-icon="mdi-chevron-down">
 			<!-- Server header	-->
 			<template #header>
-				<q-item-section avatar>
+				<q-item-section side no-wrap>
 					<q-status :value="isConnected(server)" />
 				</q-item-section>
 
 				<q-item-section>
 					<div class="server-name">
+						<q-icon v-if="server.owned" name="mdi-home" size="24px" left />
 						{{ server.name }}
 					</div>
 				</q-item-section>
@@ -123,3 +124,33 @@ onMounted(() => {
 	);
 });
 </script>
+<style lang="scss">
+.server-name {
+	width: 190px;
+	display: flex;
+	line-height: 24px;
+	align-content: center;
+	text-overflow: ellipsis;
+}
+
+.server-panels {
+	z-index: 0;
+
+	&.theme--dark {
+		.v-expansion-panel {
+			background: rgba(0, 0, 0, 0.3);
+		}
+	}
+
+	&.theme--light {
+		.v-expansion-panel {
+			background: rgba(255, 255, 255, 0.3);
+		}
+	}
+}
+
+.ps {
+	height: 100%;
+	width: 100%;
+}
+</style>

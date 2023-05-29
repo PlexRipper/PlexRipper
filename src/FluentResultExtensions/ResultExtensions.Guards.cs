@@ -56,6 +56,11 @@ public static partial class ResultExtensions
         return Create204NoContentResult($"The {queryName} returned an empty result with {entityName} id: {entityId}");
     }
 
+    public static Result<T> IsEmptyQueryResult<T>(T value, string queryName, string entityName, int entityId)
+    {
+        return Create204NoContentResult<T>(value, $"The {queryName} returned an empty result with {entityName} id: {entityId}");
+    }
+
     public static Result IsInvalidId(string parameterName, int value = 0)
     {
         return Create400BadRequestResult($"The {parameterName} parameter was an invalid id of {value}");

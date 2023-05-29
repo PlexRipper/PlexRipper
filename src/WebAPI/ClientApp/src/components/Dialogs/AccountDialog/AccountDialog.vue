@@ -213,17 +213,10 @@ function validate() {
 					}
 
 					// Account has 2FA
-					if (account?.isValidated && account?.is2Fa) {
+					if (!account?.isValidated && account?.is2Fa) {
 						Log.info('Account has 2FA enabled');
 						set(changedPlexAccount, { ...get(changedPlexAccount), ...account });
 						useOpenControlDialog(verificationCodeDialogName);
-						return;
-					}
-
-					if (!account?.isValidated && account?.is2Fa) {
-						// Account has 2FA and was invalid
-						Log.info('Account has 2FA and was invalid');
-						set(changedPlexAccount, { ...get(changedPlexAccount), ...account });
 					}
 				},
 				complete: () => {

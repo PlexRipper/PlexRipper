@@ -47,9 +47,15 @@ public class PlexAccount : BaseEntity
     [Column(Order = 3)]
     public string Password { get; set; }
 
+    /// <summary>
+    /// Gets or sets whether this <see cref="PlexAccount"/> is enabled and that it should be used for downloading media.
+    /// </summary>
     [Column(Order = 4)]
     public bool IsEnabled { get; set; }
 
+    /// <summary>
+    /// Gets or sets whether this <see cref="PlexAccount"/> has been validated against the Plex API and contain valid credentials.
+    /// </summary>
     [Column(Order = 5)]
     public bool IsValidated { get; set; }
 

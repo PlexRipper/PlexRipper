@@ -13,9 +13,15 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class PlexServerController : BaseController
 {
+    #region Fields
+
     private readonly IMediator _mediator;
     private readonly IPlexServerService _plexServerService;
     private readonly ISyncServerScheduler _syncServerScheduler;
+
+    #endregion
+
+    #region Constructors
 
     public PlexServerController(
         ILog log,
@@ -30,12 +36,24 @@ public class PlexServerController : BaseController
         _syncServerScheduler = syncServerScheduler;
     }
 
+    #endregion
+
+    #region Methods
+
+    #region Public
+
     // GET api/<PlexServerController>/
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexServerDTO>>))]
     public async Task<IActionResult> GetAll()
     {
-        var plexServersResult = await _mediator.Send(new GetAllPlexServersQuery(true, false));
+        var plexServersResult = await _mediator.Send(new GetAllPlexServersQuery(true));
+
+        if (plexServersResult.IsFailed)
+            return ToActionResult(plexServersResult.ToResult());
+
+        plexServersResult.WithValue(plexServersResult.Value.SortByOwnedOrder());
+
         return ToActionResult<List<PlexServer>, List<PlexServerDTO>>(plexServersResult);
     }
 
@@ -49,7 +67,7 @@ public class PlexServerController : BaseController
         if (id <= 0)
             return BadRequestInvalidId();
 
-        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(id, true, false));
+        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(id, true));
         return ToActionResult<PlexServer, PlexServerDTO>(plexServerResult);
     }
 
@@ -107,4 +125,8 @@ public class PlexServerController : BaseController
 
         return ToActionResult(await _plexServerService.SetPreferredConnection(plexServerId, plexServerConnectionId));
     }
+
+    #endregion
+
+    #endregion
 }

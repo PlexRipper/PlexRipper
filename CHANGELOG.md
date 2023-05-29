@@ -1,5 +1,20 @@
 PlexRipper Changelog
 
+# [0.12.0](https://github.com/PlexRipper/PlexRipper/compare/v0.11.1...v0.12.0) (2023-05-29)
+
+
+### Bug Fixes
+
+* **Database:** Fixed a null exception when a library with no media is returned ([970473e](https://github.com/PlexRipper/PlexRipper/commit/970473e490687c4cc7b9b3fb35716fb63d8b3e8f))
+* **Web-UI:** Fixed the single column media posters jumping to the correct size when navigating libraries ([9c6cad9](https://github.com/PlexRipper/PlexRipper/commit/9c6cad9fb0a14328e7d5e0bd128849110624b57d))
+* **Web-UI:** Fixed the verification dialog not appearing when 2FA is enabled ([8150978](https://github.com/PlexRipper/PlexRipper/commit/815097817684ab7141b8657ce85d9c03331d15b6))
+
+
+### Features
+
+* **Web-UI:** A home icon is displayed next to the server list when that server is owned by a Plex account ([fe8ed71](https://github.com/PlexRipper/PlexRipper/commit/fe8ed71bcdab45f26323973fd33b37c49ea76726))
+* **Web-UI:** The Plex servers on the left side are now ordered from owned to then sorted by name ([dec9bb0](https://github.com/PlexRipper/PlexRipper/commit/dec9bb0646e3ded70c03b6f96e1d2a2b95f8f005))
+
 # [0.12.0-dev.1](https://github.com/PlexRipper/PlexRipper/compare/v0.11.1...v0.12.0-dev.1) (2023-05-29)
 
 

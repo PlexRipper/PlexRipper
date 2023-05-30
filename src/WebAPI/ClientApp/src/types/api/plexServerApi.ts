@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
-import { PlexServerDTO } from '@dto/mainApi';
+import { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import ResultDTO from '@dto/ResultDTO';
 import PlexRipperAxios from '@class/PlexRipperAxios';
 
@@ -42,5 +42,13 @@ export function setPreferredPlexServerConnection(serverId: number, connectionId:
 	return PlexRipperAxios.put<void>({
 		url: `${PLEX_SERVER_RELATIVE_PATH}/${serverId}/preferred-connection/${connectionId}`,
 		apiName: setPreferredPlexServerConnection.name,
+	});
+}
+
+export function checkPlexServer(serverId: number): Observable<ResultDTO<PlexServerStatusDTO>> {
+	return PlexRipperAxios.get<PlexServerStatusDTO>({
+		url: `${PLEX_SERVER_RELATIVE_PATH}/status-check/${serverId}`,
+		apiCategory: logText,
+		apiName: checkPlexServer.name,
 	});
 }

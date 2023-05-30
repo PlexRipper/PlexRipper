@@ -76,18 +76,6 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
             .LogIfFailed();
     }
 
-    /// <inheritdoc/>
-    public async Task<Result<PlexServerStatus>> CheckPlexServerConnectionStatusAsync(
-        int plexServerConnectionId,
-        bool trimEntries = true)
-    {
-        var plexServerConnectionResult = await _mediator.Send(new GetPlexServerConnectionByIdQuery(plexServerConnectionId));
-        if (plexServerConnectionResult.IsFailed)
-            return plexServerConnectionResult.ToResult();
-
-        return await CheckPlexServerConnectionStatusAsync(plexServerConnectionResult.Value, trimEntries);
-    }
-
     public async Task<Result<PlexServerStatus>> CheckPlexServerConnectionStatusAsync(PlexServerConnection plexServerConnection, bool trimEntries = true)
     {
         // The call-back action from the httpClient

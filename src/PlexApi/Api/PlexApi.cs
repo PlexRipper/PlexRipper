@@ -11,7 +11,13 @@ namespace PlexRipper.PlexApi.Api;
 
 public class PlexApi
 {
+    #region Fields
+
     private readonly ILog _log;
+
+    #endregion
+
+    #region Constructors
 
     public PlexApi(ILog log, PlexApiClient client)
     {
@@ -19,13 +25,23 @@ public class PlexApi
         _client = client;
     }
 
+    #endregion
+
+    #region Properties
+
     private PlexApiClient _client { get; }
 
+    #endregion
+
+    #region Methods
+
+    #region Public
+
     /// <summary>
-    /// Sign into the Plex API
-    /// This is for authenticating users credentials with Plex.
-    /// <remarks>NOTE: Plex "Managed" users do not work.</remarks>
-    /// <example>URL: https://plex.tv/api/v2/users/signin?X-Plex-Client-Identifier=Chrome</example>
+    ///     Sign into the Plex API
+    ///     This is for authenticating users credentials with Plex.
+    ///     <remarks>NOTE: Plex "Managed" users do not work.</remarks>
+    ///     <example>URL: https://plex.tv/api/v2/users/signin?X-Plex-Client-Identifier=Chrome</example>
     /// </summary>
     /// <returns></returns>
     public async Task<Result<SignInResponse>> PlexSignInAsync(PlexAccount plexAccount)
@@ -61,7 +77,7 @@ public class PlexApi
         return Result.Fail("Result from RequestPlexSignInDataAsync() was null.").LogError();
     }
 
-    public async Task<Result<PlexServerStatus>> GetServerStatusAsync(string serverBaseUrl, string authToken, Action<PlexApiClientProgress> action = null)
+    public async Task<Result<PlexServerStatus>> GetServerStatusAsync(string serverBaseUrl, Action<PlexApiClientProgress> action = null)
     {
         var request = new RestRequest(PlexApiPaths.ServerIdentity(serverBaseUrl));
         request.Timeout = 10000;
@@ -75,10 +91,10 @@ public class PlexApi
         switch (statusCode)
         {
             case 200:
-                statusMessage = $"The Plex server is online!";
+                statusMessage = "The Plex server is online!";
                 break;
             case 408:
-                statusMessage = $"The Plex server could not be reached, most likely it's offline.";
+                statusMessage = "The Plex server could not be reached, most likely it's offline.";
                 break;
         }
 
@@ -92,8 +108,8 @@ public class PlexApi
     }
 
     /// <summary>
-    /// Retrieves all the accessible plex server based on the <see cref="PlexAccount"/> token
-    /// <remarks>https://plex.tv/api/v2/resources?X-Plex-Token={{AUTH_TOKEN}}</remarks>
+    ///     Retrieves all the accessible plex server based on the <see cref="PlexAccount" /> token
+    ///     <remarks>https://plex.tv/api/v2/resources?X-Plex-Token={{AUTH_TOKEN}}</remarks>
     /// </summary>
     /// <param name="authToken">The Plex account authentication token.</param>
     /// <returns></returns>
@@ -109,8 +125,8 @@ public class PlexApi
     }
 
     /// <summary>
-    /// Returns an detailed overview of the PlexLibraries in a PlexServer from the PlexAPI.
-    /// <remarks>{{SERVER_URL}}/library/sections?X-Plex-Token={{SERVER_TOKEN}}</remarks>
+    ///     Returns an detailed overview of the PlexLibraries in a PlexServer from the PlexAPI.
+    ///     <remarks>{{SERVER_URL}}/library/sections?X-Plex-Token={{SERVER_TOKEN}}</remarks>
     /// </summary>
     /// <param name="plexAuthToken"></param>
     /// <param name="plexFullHost"></param>
@@ -127,8 +143,8 @@ public class PlexApi
     }
 
     /// <summary>
-    /// Gets the all the root level media metadata contained in this Plex library. For movies its all movies, and for tv shows its all the shows without seasons and episodes.
-    /// <remarks>URL: {{SERVER_URL}}/library/sections/{{LIBRARY_KEY}}/all?X-Plex-Token={{SERVER_TOKEN}}</remarks>
+    ///     Gets the all the root level media metadata contained in this Plex library. For movies its all movies, and for tv shows its all the shows without seasons and episodes.
+    ///     <remarks>URL: {{SERVER_URL}}/library/sections/{{LIBRARY_KEY}}/all?X-Plex-Token={{SERVER_TOKEN}}</remarks>
     /// </summary>
     /// <param name="authToken"></param>
     /// <param name="plexServerBaseUrl"></param>
@@ -175,11 +191,11 @@ public class PlexApi
     }
 
     /// <summary>
-    /// Gets all seasons contained within a media container.
+    ///     Gets all seasons contained within a media container.
     /// </summary>
     /// <param name="authToken">The authentication token.</param>
-    /// <param name="plexServerUrl">The <see cref="PlexServer"/> url.</param>
-    /// <param name="plexLibraryKey">The rating key from the <see cref="PlexLibrary"/>.</param>
+    /// <param name="plexServerUrl">The <see cref="PlexServer" /> url.</param>
+    /// <param name="plexLibraryKey">The rating key from the <see cref="PlexLibrary" />.</param>
     /// <returns></returns>
     public async Task<PlexMediaContainerDTO> GetAllSeasonsAsync(string authToken, string plexServerUrl, string plexLibraryKey)
     {
@@ -193,11 +209,11 @@ public class PlexApi
     }
 
     /// <summary>
-    /// Gets all episodes within a media container.
+    ///     Gets all episodes within a media container.
     /// </summary>
     /// <param name="authToken">The authentication token.</param>
     /// <param name="plexServerUrl"></param>
-    /// <param name="plexLibraryKey">The rating key from the <see cref="PlexLibrary"/>.</param>
+    /// <param name="plexLibraryKey">The rating key from the <see cref="PlexLibrary" />.</param>
     /// <param name="from">The start range from which to request.</param>
     /// <param name="to">The end range to request for.</param>
     /// <returns></returns>
@@ -223,13 +239,13 @@ public class PlexApi
     }
 
     /// <summary>
-    /// Retrieves the banner of <see cref="PlexMedia"/>. Max size is width 680px and height 1000px;
+    ///     Retrieves the banner of <see cref="PlexMedia" />. Max size is width 680px and height 1000px;
     /// </summary>
     /// <param name="imageUrl">The absolute url of the banner, e.g. http://serverurl.com/library/metadata/22519/banner/252352</param>
     /// <param name="authToken">The server authentication token.</param>
     /// <param name="width">The optional width of the banner, default is 680px.</param>
     /// <param name="height">The optional height of the banner, default is 1000px.</param>
-    /// <returns>The raw image data in a <see cref="Result"/></returns>
+    /// <returns>The raw image data in a <see cref="Result" /></returns>
     public async Task<Result<byte[]>> GetPlexMediaImageAsync(string imageUrl, string authToken, int width = 0, int height = 0)
     {
         if (width > 0 && height > 0)
@@ -262,4 +278,8 @@ public class PlexApi
 
         return await _client.SendRequestAsync<AuthPin>(request);
     }
+
+    #endregion
+
+    #endregion
 }

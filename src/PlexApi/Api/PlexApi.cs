@@ -83,7 +83,7 @@ public class PlexApi
         request.Timeout = 10000;
 
         _log.Debug("Requesting PlexServerStatus for {ServerBaseUrl}", serverBaseUrl);
-        var response = await _client.SendRequestAsync<ServerIdentityResponse>(request, 2, action);
+        var response = await _client.SendRequestAsync<ServerIdentityResponse>(request, 1, action);
 
         var statusCodeReason = response.GetStatusCodeReason();
         var statusCode = statusCodeReason?.StatusCode() ?? 0;

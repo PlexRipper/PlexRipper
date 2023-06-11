@@ -8,10 +8,16 @@ namespace PlexRipper.Application;
 
 public class PlexServerConnectionsService : IPlexServerConnectionsService
 {
-    private readonly IMediator _mediator;
+    #region Fields
+
     private readonly IMapper _mapper;
-    private readonly ISignalRService _signalRService;
+    private readonly IMediator _mediator;
     private readonly IPlexApiService _plexApiService;
+    private readonly ISignalRService _signalRService;
+
+    #endregion
+
+    #region Constructors
 
     public PlexServerConnectionsService(IMediator mediator, IMapper mapper, ISignalRService signalRService, IPlexApiService plexApiService)
     {
@@ -21,19 +27,11 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
         _plexApiService = plexApiService;
     }
 
-    #region CRUD
-
-    public Task<Result<PlexServerConnection>> GetPlexServerConnectionAsync(int plexServerConnectionId)
-    {
-        return _mediator.Send(new GetPlexServerConnectionByIdQuery(plexServerConnectionId));
-    }
-
-    public async Task<Result<List<PlexServerConnection>>> GetAllPlexServerConnectionsAsync()
-    {
-        return await _mediator.Send(new GetAllPlexServerConnectionsQuery());
-    }
-
     #endregion
+
+    #region Methods
+
+    #region Public
 
     /// <inheritdoc />
     public async Task<Result<List<PlexServerStatus>>> CheckAllConnectionsOfPlexServerAsync(int plexServerId)
@@ -107,12 +105,21 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
         return serverStatusResult.Value;
     }
 
-    /// <summary>
-    /// Send server inspect status to front-end
-    /// </summary>
-    /// <param name="progress"></param>
-    private async Task SendServerProgress(InspectServerProgress progress)
+    #endregion
+
+    #endregion
+
+    #region CRUD
+
+    public Task<Result<PlexServerConnection>> GetPlexServerConnectionAsync(int plexServerConnectionId)
     {
-        await _signalRService.SendServerInspectStatusProgressAsync(progress);
+        return _mediator.Send(new GetPlexServerConnectionByIdQuery(plexServerConnectionId));
     }
+
+    public async Task<Result<List<PlexServerConnection>>> GetAllPlexServerConnectionsAsync()
+    {
+        return await _mediator.Send(new GetAllPlexServerConnectionsQuery());
+    }
+
+    #endregion
 }

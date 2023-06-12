@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Environment;
 using Logging.Common;
 using Logging.Enricher;
@@ -26,12 +27,16 @@ public static class LogConfig
 
     public static LoggerConfiguration GetBaseConfiguration()
     {
-        return new LoggerConfiguration()
+        var config = new LoggerConfiguration()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
             .MinimumLevel.Override("Quartz", LogEventLevel.Information)
-            .Enrich.FromLogContext()
-            .Enrich.WithSensitiveDataMasking(options =>
+            .Enrich.FromLogContext();
+
+        // Do not mask data when debugging
+        if (!Debugger.IsAttached)
+        {
+            config.Enrich.WithSensitiveDataMasking(options =>
             {
                 options.MaskingOperators.Clear();
                 options.MaskingOperators = new List<IMaskingOperator>()
@@ -51,8 +56,10 @@ public static class LogConfig
                 options.MaskProperties.Add("DownloadUrl");
                 options.MaskProperties.Add("AuthToken");
                 options.MaskProperties.Add("MachineIdentifier");
-            })
-            .Enrich.With<ExternalFrameworkEnricher>()
+            });
+        }
+
+        return config.Enrich.With<ExternalFrameworkEnricher>()
             .WriteTo.Debug(outputTemplate: Template)
             .WriteTo.Console(theme: LogThemes.SystemColored, outputTemplate: Template);
     }

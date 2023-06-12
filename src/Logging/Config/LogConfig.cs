@@ -1,8 +1,10 @@
 using Environment;
 using Logging.Common;
 using Logging.Enricher;
+using Logging.Masks;
 using Serilog;
 using Serilog.Core;
+using Serilog.Enrichers.Sensitive;
 using Serilog.Events;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.Console.LogThemes;
@@ -29,6 +31,27 @@ public static class LogConfig
             .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
             .MinimumLevel.Override("Quartz", LogEventLevel.Information)
             .Enrich.FromLogContext()
+            .Enrich.WithSensitiveDataMasking(options =>
+            {
+                options.MaskingOperators.Clear();
+                options.MaskingOperators = new List<IMaskingOperator>()
+                {
+                    new EmailAddressMaskingOperator(),
+                    new UrlMaskingOperator(),
+                };
+                options.MaskProperties.Add("PlexLibraryTitle");
+                options.MaskProperties.Add("PlexAccountDisplayName");
+                options.MaskProperties.Add("PlexLibraryName");
+                options.MaskProperties.Add("PlexServerName");
+                options.MaskProperties.Add("UserName");
+                options.MaskProperties.Add("PublicAddress");
+                options.MaskProperties.Add("PlexServerConnectionUrl");
+                options.MaskProperties.Add("PlexServerConnection");
+                options.MaskProperties.Add("PlexServerStatus");
+                options.MaskProperties.Add("DownloadUrl");
+                options.MaskProperties.Add("AuthToken");
+                options.MaskProperties.Add("MachineIdentifier");
+            })
             .Enrich.With<ExternalFrameworkEnricher>()
             .WriteTo.Debug(outputTemplate: Template)
             .WriteTo.Console(theme: LogThemes.SystemColored, outputTemplate: Template);

@@ -1,10 +1,16 @@
-using Application.Contracts;
-
 namespace PlexRipper.PlexApi;
 
 public class PlexErrorsResponseDTO
 {
-    public List<PlexErrorDTO> Errors { get; set; }
+    #region Properties
+
+    public List<PlexErrorDTO> Errors { get; set; } = new();
+
+    #endregion
+
+    #region Methods
+
+    #region Public
 
     public List<PlexError> ToResultErrors()
     {
@@ -15,13 +21,8 @@ public class PlexErrorsResponseDTO
             })
             .ToList();
     }
-}
 
-public class PlexErrorDTO
-{
-    public int Code { get; set; }
+    #endregion
 
-    public string Message { get; set; }
-
-    public int Status { get; set; }
+    #endregion
 }

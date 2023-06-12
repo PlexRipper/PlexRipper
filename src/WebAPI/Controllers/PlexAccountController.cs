@@ -132,7 +132,7 @@ public class PlexAccountController : BaseController
             }
             else
             {
-                var logEvent = _log.Warning("Account with username: {Username} already exists!", username);
+                var logEvent = _log.Warning("Account with username: {UserName} already exists!", username);
                 return Ok(Result.Ok(false).WithError(logEvent.ToLogString()));
             }
         }

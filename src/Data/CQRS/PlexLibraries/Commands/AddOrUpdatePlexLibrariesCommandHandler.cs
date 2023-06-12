@@ -8,6 +8,8 @@ namespace PlexRipper.Data.PlexLibraries;
 
 public class AddOrUpdatePlexLibrariesValidator : AbstractValidator<AddOrUpdatePlexLibrariesCommand>
 {
+    #region Constructors
+
     public AddOrUpdatePlexLibrariesValidator()
     {
         RuleFor(x => x.PlexAccountId).GreaterThan(0);
@@ -20,11 +22,21 @@ public class AddOrUpdatePlexLibrariesValidator : AbstractValidator<AddOrUpdatePl
                 library.RuleFor(x => x.Uuid).NotEmpty();
             });
     }
+
+    #endregion
 }
 
 public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result>
 {
+    #region Constructors
+
     public AddOrUpdatePlexLibrariesCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+
+    #endregion
+
+    #region Methods
+
+    #region Public
 
     public async Task<Result> Handle(AddOrUpdatePlexLibrariesCommand command, CancellationToken cancellationToken)
     {
@@ -53,13 +65,13 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
 
             if (plexLibraryDB == null)
             {
-                _log.Here().Debug("Adding {PlexLibraryName} {PlexLibraryTitle} to the database", nameof(plexLibrary), plexLibrary.Title);
+                _log.Here().Debug("Adding PlexLibrary {PlexLibraryName} to the database", plexLibrary.Title);
                 await _dbContext.PlexLibraries.AddAsync(plexLibrary, cancellationToken);
             }
             else
             {
                 // PlexServer already exists
-                _log.Debug("Updating {PlexLibraryName} {PlexLibraryTitle} with id: {PlexLibraryId} in the database", nameof(plexLibrary), plexLibrary.Title,
+                _log.Debug("Updating PlexLibrary {PlexLibraryName} with id: {PlexLibraryId} in the database", plexLibrary.Title,
                     plexLibrary.Id);
 
                 plexLibrary.Id = plexLibraryDB.Id;
@@ -85,9 +97,10 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
             if (plexAccountLibrary == null)
             {
                 // Add entry
-                _log.Here().Debug(
-                    "PlexAccount: {PlexAccountDisplayName} does not have an association with PlexLibrary: {PlexLibraryName} of PlexServer: {PlexServerName} creating one with the authentication token now",
-                    plexAccount.DisplayName, plexLibrary.Name, plexServer.Name);
+                _log.Here()
+                    .Debug(
+                        "PlexAccount: {PlexAccountDisplayName} does not have an association with PlexLibrary: {PlexLibraryName} of PlexServer: {PlexServerName} creating one with the authentication token now",
+                        plexAccount.DisplayName, plexLibrary.Name, plexServer.Name);
 
                 await _dbContext.PlexAccountLibraries.AddAsync(new PlexAccountLibrary
                 {
@@ -99,9 +112,10 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
             else
             {
                 // Update entry
-                _log.Here().Debug(
-                    "PlexAccount: {PlexAccountDisplayName} already has an association with PlexLibrary: {PlexLibraryName} of PlexServer: {PlexServerName} skipping for now",
-                    plexAccount.DisplayName, plexLibrary.Name, plexServer.Name);
+                _log.Here()
+                    .Debug(
+                        "PlexAccount: {PlexAccountDisplayName} already has an association with PlexLibrary: {PlexLibraryName} of PlexServer: {PlexServerName} skipping for now",
+                        plexAccount.DisplayName, plexLibrary.Name, plexServer.Name);
             }
         }
 
@@ -109,4 +123,8 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
 
         return Result.Ok();
     }
+
+    #endregion
+
+    #endregion
 }

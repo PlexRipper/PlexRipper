@@ -168,7 +168,7 @@ public class PlexApiService : IPlexApiService
 
         if (result.Value?.MediaContainer?.Directory is null)
         {
-            _log.Error("Plex server: {PlexServerResultName} returned an empty response when libraries were requested", plexServer.Name);
+            _log.Error("Plex server: {PlexServerName} returned an empty response when libraries were requested", plexServer.Name);
             return result.ToResult();
         }
 
@@ -231,7 +231,7 @@ public class PlexApiService : IPlexApiService
         var result = await _plexApi.GetAccessibleServers(plexAccountToken.Value);
         if (result.IsFailed)
         {
-            _log.Warning("Failed to retrieve PlexServers for PlexAccount: {PlexAccountName}", plexAccountResult.Value.DisplayName);
+            _log.Warning("Failed to retrieve PlexServers for PlexAccount: {PlexAccountDisplayName}", plexAccountResult.Value.DisplayName);
             return (result.ToResult(), result.ToResult());
         }
 

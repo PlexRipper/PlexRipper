@@ -24,7 +24,7 @@ public class SetPreferredPlexServerConnectionCommandHandler : BaseHandler, IRequ
         var plexServerConnectionId = command.PlexServerConnectionId;
         var plexServerId = command.PlexServerId;
 
-        _log.Debug("Setting the preferred {PlexServerConnectionName} for {PlexServerIdName}: {PlexServerId}", nameof(PlexServerConnection),
+        _log.Debug("Setting the preferred {NameOfPlexServerConnection} for {PlexServerIdName}: {PlexServerId}", nameof(PlexServerConnection),
             nameof(plexServerId), plexServerId);
 
         var plexServer = await _dbContext.PlexServers

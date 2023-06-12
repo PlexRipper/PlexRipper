@@ -46,7 +46,7 @@ public class PlexApi
     /// <returns></returns>
     public async Task<Result<SignInResponse>> PlexSignInAsync(PlexAccount plexAccount)
     {
-        _log.Debug("Requesting PlexToken for account {Username}", plexAccount.Username);
+        _log.Debug("Requesting PlexToken for account {UserName}", plexAccount.Username);
         var credentials = new CredentialsDTO
         {
             Login = plexAccount.Username,
@@ -82,7 +82,7 @@ public class PlexApi
         var request = new RestRequest(PlexApiPaths.ServerIdentity(serverBaseUrl));
         request.Timeout = 10000;
 
-        _log.Debug("Requesting PlexServerStatus for {ServerBaseUrl}", serverBaseUrl);
+        _log.Debug("Requesting PlexServerStatus for {Url}", serverBaseUrl);
         var response = await _client.SendRequestAsync<ServerIdentityResponse>(request, 1, action);
 
         var statusCodeReason = response.GetStatusCodeReason();
@@ -138,7 +138,7 @@ public class PlexApi
         request.AddToken(plexAuthToken);
         request.Timeout = 15000;
 
-        _log.Debug("GetLibrarySectionsAsync => {RequestResource}", request.Resource);
+        _log.Debug("GetLibrarySectionsAsync => {Url}", request.Resource);
         return await _client.SendRequestAsync<LibrariesResponse>(request);
     }
 

@@ -59,7 +59,7 @@ public class PlexAccountService : IPlexAccountService
             return plexSignInResult;
         }
 
-        _log.Debug("The PlexAccount with displayName {DisplayName} has been validated", plexAccount.DisplayName);
+        _log.Debug("The PlexAccount with displayName {PlexAccountDisplayName} has been validated", plexAccount.DisplayName);
         return plexSignInResult;
     }
 
@@ -102,7 +102,7 @@ public class PlexAccountService : IPlexAccountService
 
         if (result.Value != null)
         {
-            _log.Warning("An Account with the username: {Username} already exists", username);
+            _log.Warning("An Account with the username: {UserName} already exists", username);
             return Result.Ok(false);
         }
 

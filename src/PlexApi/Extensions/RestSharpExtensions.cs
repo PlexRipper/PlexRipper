@@ -48,7 +48,7 @@ public static class RestSharpExtensions
             .WaitAndRetryAsync(retryCount, retryAttempt =>
             {
                 var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
-                _log.Warning("Request to: {RequestResource} failed, waiting {TotalSeconds} seconds before retrying again ({RetryAttempt} of {RetryCount})", request.Resource, timeToWait.TotalSeconds, retryAttempt, retryCount);
+                _log.Warning("Request to: {Url} failed, waiting {TotalSeconds} seconds before retrying again ({RetryAttempt} of {RetryCount})", request.Resource, timeToWait.TotalSeconds, retryAttempt, retryCount);
 
                 retryIndex = retryAttempt;
 
@@ -114,7 +114,7 @@ public static class RestSharpExtensions
         if (response.Outcome == OutcomeType.Successful)
         {
             if (response.Result.Content != string.Empty)
-                _log.Verbose("Response Content: {Content}", response.Result.Content);
+                _log.Verbose("Response Content: {@Content}", response.Result.Content);
             else
                 _log.VerboseLine("Response was empty");
 

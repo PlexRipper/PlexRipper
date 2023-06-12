@@ -12,8 +12,4 @@
 		<ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Folder Include="DTO\WebApi" />
-	</ItemGroup>
-
 </Project>

@@ -47,10 +47,11 @@ public static partial class ResultExtensions
         this Result<T> result,
         LogEventLevel logLevel,
         Exception e = null,
-        string memberName = "",
-        string sourceFilePath = "")
+        string memberName = default!,
+        string sourceFilePath = default!,
+        int sourceLineNumber = default!)
     {
-        LogReasons(result.ToResult(), logLevel, e, memberName, sourceFilePath);
+        LogReasons(result.ToResult(), logLevel, e, memberName, sourceFilePath, sourceLineNumber);
 
         return result;
     }
@@ -59,10 +60,11 @@ public static partial class ResultExtensions
         this Result result,
         LogEventLevel logLevel,
         Exception e = null,
-        string memberName = "",
-        string sourceFilePath = "")
+        string memberName = default!,
+        string sourceFilePath = default!,
+        int sourceLineNumber = default!)
     {
-        LogReasons(result, logLevel, e, memberName, sourceFilePath);
+        LogReasons(result, logLevel, e, memberName, sourceFilePath, sourceLineNumber);
 
         return result;
     }
@@ -71,71 +73,59 @@ public static partial class ResultExtensions
         this Result result,
         LogEventLevel logLevel,
         Exception e = null,
-        string memberName = "",
-        string sourceFilePath = "")
+        string memberName = default!,
+        string sourceFilePath = default!,
+        int sourceLineNumber = default!)
     {
         foreach (var success in result.Successes)
-        {
-            LogByType(logLevel, success.Message, null, memberName, sourceFilePath);
-
-            if (success.Metadata.Any())
-            {
-                foreach (var entry in success.Metadata)
-                    LogByType(logLevel, $"{entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
-            }
-        }
+            LogByType(logLevel, success.ToLogString(), null, memberName, sourceFilePath, sourceLineNumber);
 
         foreach (var error in result.Errors)
         {
-            LogByType(logLevel, error.Message, null, memberName, sourceFilePath);
-
-            if (error.Metadata.Any())
-            {
-                foreach (var entry in error.Metadata)
-                    LogByType(logLevel, $"{entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
-            }
-
-            foreach (var errorReason in error.Reasons)
-            {
-                LogByType(logLevel, "--" + errorReason.Message, null, memberName, sourceFilePath);
-                if (errorReason.Metadata.Any())
-                {
-                    foreach (var entry in errorReason.Metadata)
-                        LogByType(logLevel, $"--{entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
-                }
-
-                foreach (var childErrorReason in errorReason.Reasons)
-                {
-                    LogByType(logLevel, "----" + childErrorReason.Message, null, memberName, sourceFilePath);
-                    if (childErrorReason.Metadata.Any())
-                    {
-                        foreach (var entry in childErrorReason.Metadata)
-                            LogByType(logLevel, $"----MetaData: {entry.Key} - {entry.Value}", null, memberName, sourceFilePath);
-                    }
-                }
-            }
-
             if (error is ExceptionalError exceptional)
             {
                 var exception = exceptional.Exception;
-                LogByType(logLevel, "Exception", null, memberName, sourceFilePath);
-                LogByType(logLevel, $"--{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
-                if (exception.InnerException is not null)
-                {
-                    exception = exception.InnerException;
-                    LogByType(logLevel, $"----{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
-                    if (exception.InnerException is not null)
-                    {
-                        exception = exception.InnerException.InnerException;
-                        if (exception is not null)
-                            LogByType(logLevel, $"-------{exception.Message} - {exception.Source}", null, memberName, sourceFilePath);
-                    }
-                }
+                LogByType(logLevel, error.ToLogString(), exception, memberName, sourceFilePath, sourceLineNumber);
+                continue;
             }
+
+            LogByType(logLevel, error.ToLogString(), null, memberName, sourceFilePath, sourceLineNumber);
         }
 
         if (e != null)
             LogByType(logLevel, string.Empty, e, memberName, sourceFilePath);
+    }
+
+    private static string ToLogString(this IError error)
+    {
+        var msg = ((IReason)error).ToLogString();
+        foreach (var reason in error.Reasons)
+            msg += $"{System.Environment.NewLine} {Delimiter(1)} {reason.ToLogString(2)}";
+
+        return msg;
+    }
+
+    private static string ToLogString(this IReason reason, int level = 1)
+    {
+        var msg = reason.Message;
+
+        if (reason.Metadata.Any())
+        {
+            msg += $"{System.Environment.NewLine} {Delimiter(level)} Metadata:";
+            foreach (var entry in reason.Metadata)
+                msg += $"{System.Environment.NewLine} {Delimiter(level + 1)} {entry.Key} - {entry.Value}";
+        }
+
+        return msg;
+    }
+
+    private static string Delimiter(int level)
+    {
+        var delimiter = string.Empty;
+        for (var i = 0; i < level; i++)
+            delimiter += "-";
+
+        return delimiter;
     }
 
     #endregion
@@ -148,13 +138,15 @@ public static partial class ResultExtensions
     /// <param name="result">The result to use for logging.</param>
     /// <param name="memberName">The function name where the result happened.</param>
     /// <param name="sourceFilePath">The path to the source.</param>
+    /// <param name="sourceLineNumber">This is automatically passed by the Caller Information and should not be filled in.</param>
     /// <returns>The result unchanged.</returns>
     public static Result LogVerbose(
         this Result result,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!)
     {
-        return LogResult(result, LogEventLevel.Verbose, null, memberName, sourceFilePath);
+        return LogResult(result, LogEventLevel.Verbose, null, memberName, sourceFilePath, sourceLineNumber);
     }
 
     /// <summary>
@@ -163,13 +155,15 @@ public static partial class ResultExtensions
     /// <param name="result">The result to use for logging.</param>
     /// <param name="memberName">The function name where the result happened.</param>
     /// <param name="sourceFilePath">The path to the source.</param>
+    /// <param name="sourceLineNumber">This is automatically passed by the Caller Information and should not be filled in.</param>
     /// <returns>The result unchanged.</returns>
     public static Result LogDebug(
         this Result result,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!)
     {
-        return LogResult(result, LogEventLevel.Debug, null, memberName, sourceFilePath);
+        return LogResult(result, LogEventLevel.Debug, null, memberName, sourceFilePath, sourceLineNumber);
     }
 
     /// <summary>
@@ -178,13 +172,15 @@ public static partial class ResultExtensions
     /// <param name="result">The result to use for logging.</param>
     /// <param name="memberName">The function name where the result happened.</param>
     /// <param name="sourceFilePath">The path to the source.</param>
+    /// <param name="sourceLineNumber">This is automatically passed by the Caller Information and should not be filled in.</param>
     /// <returns>The result unchanged.</returns>
     public static Result LogInformation(
         this Result result,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!)
     {
-        return LogResult(result, LogEventLevel.Information, null, memberName, sourceFilePath);
+        return LogResult(result, LogEventLevel.Information, null, memberName, sourceFilePath, sourceLineNumber);
     }
 
     /// <summary>
@@ -193,13 +189,15 @@ public static partial class ResultExtensions
     /// <param name="result">The result to use for logging.</param>
     /// <param name="memberName">The function name where the result happened.</param>
     /// <param name="sourceFilePath">The path to the source.</param>
+    /// <param name="sourceLineNumber">This is automatically passed by the Caller Information and should not be filled in.</param>
     /// <returns>The result unchanged.</returns>
     public static Result LogWarning(
         this Result result,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!)
     {
-        return LogResult(result, LogEventLevel.Warning, null, memberName, sourceFilePath);
+        return LogResult(result, LogEventLevel.Warning, null, memberName, sourceFilePath, sourceLineNumber);
     }
 
     /// <summary>
@@ -209,14 +207,16 @@ public static partial class ResultExtensions
     /// <param name="e">The optional exception which can be passed to Log.Error().</param>
     /// <param name="memberName">The function name where the result happened.</param>
     /// <param name="sourceFilePath">The path to the source.</param>
+    /// <param name="sourceLineNumber">This is automatically passed by the Caller Information and should not be filled in.</param>
     /// <returns>The result unchanged.</returns>
     public static Result LogError(
         this Result result,
         Exception e = null,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!)
     {
-        return LogResult(result, LogEventLevel.Error, e, memberName, sourceFilePath);
+        return LogResult(result, LogEventLevel.Error, e, memberName, sourceFilePath, sourceLineNumber);
     }
 
     /// <summary>
@@ -226,14 +226,16 @@ public static partial class ResultExtensions
     /// <param name="e">The optional exception which can be passed to Log.Error().</param>
     /// <param name="memberName">The function name where the result happened.</param>
     /// <param name="sourceFilePath">The path to the source.</param>
+    /// <param name="sourceLineNumber">This is automatically passed by the Caller Information and should not be filled in.</param>
     /// <returns>The result unchanged.</returns>
     public static Result LogFatal(
         this Result result,
         Exception e = null,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!)
     {
-        return LogResult(result, LogEventLevel.Fatal, e, memberName, sourceFilePath);
+        return LogResult(result, LogEventLevel.Fatal, e, memberName, sourceFilePath, sourceLineNumber);
     }
 
     #endregion
@@ -246,14 +248,16 @@ public static partial class ResultExtensions
     /// <param name="result">The result to use for logging.</param>
     /// <param name="memberName">The function name where the result happened.</param>
     /// <param name="sourceFilePath">The path to the source.</param>
+    /// <param name="sourceLineNumber">This is automatically passed by the Caller Information and should not be filled in.</param>
     /// <typeparam name="T">The result type.</typeparam>
     /// <returns>The result unchanged.</returns>
     public static Result<T> LogVerbose<T>(
         this Result<T> result,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!)
     {
-        return LogResult(result, LogEventLevel.Verbose, null, memberName, sourceFilePath);
+        return LogResult(result, LogEventLevel.Verbose, null, memberName, sourceFilePath, sourceLineNumber);
     }
 
     /// <summary>
@@ -262,14 +266,16 @@ public static partial class ResultExtensions
     /// <param name="result">The result to use for logging.</param>
     /// <param name="memberName">The function name where the result happened.</param>
     /// <param name="sourceFilePath">The path to the source.</param>
+    /// <param name="sourceLineNumber">This is automatically passed by the Caller Information and should not be filled in.</param>
     /// <typeparam name="T">The result type.</typeparam>
     /// <returns>The result unchanged.</returns>
     public static Result<T> LogDebug<T>(
         this Result<T> result,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!)
     {
-        return LogResult(result, LogEventLevel.Debug, null, memberName, sourceFilePath);
+        return LogResult(result, LogEventLevel.Debug, null, memberName, sourceFilePath, sourceLineNumber);
     }
 
     /// <summary>
@@ -278,14 +284,16 @@ public static partial class ResultExtensions
     /// <param name="result">The result to use for logging.</param>
     /// <param name="memberName">The function name where the result happened.</param>
     /// <param name="sourceFilePath">The path to the source.</param>
+    /// <param name="sourceLineNumber">This is automatically passed by the Caller Information and should not be filled in.</param>
     /// <typeparam name="T">The result type.</typeparam>
     /// <returns>The result unchanged.</returns>
     public static Result<T> LogInformation<T>(
         this Result<T> result,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!)
     {
-        return LogResult(result, LogEventLevel.Information, null, memberName, sourceFilePath);
+        return LogResult(result, LogEventLevel.Information, null, memberName, sourceFilePath, sourceLineNumber);
     }
 
     /// <summary>
@@ -294,14 +302,16 @@ public static partial class ResultExtensions
     /// <param name="result">The result to use for logging.</param>
     /// <param name="memberName">The function name where the result happened.</param>
     /// <param name="sourceFilePath">The path to the source.</param>
+    /// <param name="sourceLineNumber">This is automatically passed by the Caller Information and should not be filled in.</param>
     /// <typeparam name="T">The result type.</typeparam>
     /// <returns>The result unchanged.</returns>
     public static Result<T> LogWarning<T>(
         this Result<T> result,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!)
     {
-        return LogResult(result, LogEventLevel.Warning, null, memberName, sourceFilePath);
+        return LogResult(result, LogEventLevel.Warning, null, memberName, sourceFilePath, sourceLineNumber);
     }
 
     /// <summary>
@@ -311,15 +321,17 @@ public static partial class ResultExtensions
     /// <param name="e">The optional exception which can be passed to Log.Error().</param>
     /// <param name="memberName">The function name where the result happened.</param>
     /// <param name="sourceFilePath">The path to the source.</param>
+    /// <param name="sourceLineNumber">This is automatically passed by the Caller Information and should not be filled in.</param>
     /// <typeparam name="T">The result type.</typeparam>
     /// <returns>The result unchanged.</returns>
     public static Result LogError<T>(
         this Result<T> result,
         Exception e = null,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!)
     {
-        return LogResult(result, LogEventLevel.Error, e, memberName, sourceFilePath).ToResult();
+        return LogResult(result, LogEventLevel.Error, e, memberName, sourceFilePath, sourceLineNumber).ToResult();
     }
 
     /// <summary>
@@ -329,15 +341,17 @@ public static partial class ResultExtensions
     /// <param name="e">The optional exception which can be passed to Log.Error().</param>
     /// <param name="memberName">The function name where the result happened.</param>
     /// <param name="sourceFilePath">The path to the source.</param>
+    /// <param name="sourceLineNumber">This is automatically passed by the Caller Information and should not be filled in.</param>
     /// <typeparam name="T">The result type.</typeparam>
     /// <returns>The result unchanged.</returns>
     public static Result LogFatal<T>(
         this Result<T> result,
         Exception e = null,
-        [CallerMemberName] string memberName = "",
-        [CallerFilePath] string sourceFilePath = "")
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!)
     {
-        return LogResult(result, LogEventLevel.Fatal, e, memberName, sourceFilePath).ToResult();
+        return LogResult(result, LogEventLevel.Fatal, e, memberName, sourceFilePath, sourceLineNumber).ToResult();
     }
 
     #endregion

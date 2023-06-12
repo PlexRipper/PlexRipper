@@ -14,16 +14,13 @@ public static class LogConfig
 {
     #region Properties
 
-    public static readonly string Template =
-        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(LogMetaData.ClassName)}}}.{{{nameof(LogMetaData.MethodName)}}}:{{{nameof(LogMetaData.LineNumber)}}}] => {{Message}}{{NewLine}}{{Exception}}";
-
     public static MessageTemplateTextFormatter TemplateTextFormatter => new(Template);
 
     #endregion
 
     #region Methods
 
-    #region Private
+    #region Public
 
     public static LoggerConfiguration GetBaseConfiguration()
     {
@@ -37,20 +34,10 @@ public static class LogConfig
             .WriteTo.Console(theme: LogThemes.SystemColored, outputTemplate: Template);
     }
 
-    #endregion
-
-    #region Public
-
     public static void SetTestOutputHelper(ITestOutputHelper output)
     {
         _testOutput = output;
     }
-
-    #endregion
-
-    #endregion
-
-    private static ITestOutputHelper _testOutput;
 
     public static Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
@@ -75,4 +62,13 @@ public static class LogConfig
             .MinimumLevel.Is(minimumLogLevel)
             .CreateLogger();
     }
+
+    #endregion
+
+    #endregion
+
+    public static readonly string Template =
+        $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(LogMetaData.ClassName)}}}.{{{nameof(LogMetaData.MethodName)}}}:{{{nameof(LogMetaData.LineNumber)}}}] => {{Message:lj}}{{NewLine}}{{Exception}}";
+
+    private static ITestOutputHelper _testOutput;
 }

@@ -145,6 +145,9 @@
         },
         "q-tree-view-table-row": {
             "invalid-node": "Der Knoten war nicht definiert oder null"
+        },
+        "server-library-destinations-tab-content": {
+            "no-libraries": "Dieser Plex-Server verfügt über keine Bibliotheken, für die das Standardziel festgelegt werden kann"
         }
     },
     "confirmation": {

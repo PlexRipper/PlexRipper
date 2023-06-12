@@ -145,6 +145,9 @@
         },
         "q-tree-view-table-row": {
             "invalid-node": "Le nœud était indéfini ou nul"
+        },
+        "server-library-destinations-tab-content": {
+            "no-libraries": "Ce serveur Plex n'a pas de bibliothèques pour lesquelles définir la destination par défaut"
         }
     },
     "confirmation": {

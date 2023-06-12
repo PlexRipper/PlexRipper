@@ -5,30 +5,14 @@ namespace FluentResultExtensionTests.Logging;
 
 public class ResultExtensionsLoggingTests : BaseUnitTest
 {
+    #region Setup/Teardown
+
     public ResultExtensionsLoggingTests(ITestOutputHelper output) : base(output, LogEventLevel.Verbose)
     {
         ResultExtensions.SetLogger(_log);
     }
 
-    #region Result
-
-    [Fact]
-    public void ShouldHaveVerboseLoggedWithParameterName_WhenLogVerboseIsCalled()
-    {
-        using (TestCorrelator.CreateContext())
-        {
-            // Arrange
-            var parameterName = "ParameterXYZ";
-
-            // Act
-            ResultExtensions.IsNull(parameterName).LogVerbose();
-
-            // Assert
-            var logEvent = TestCorrelator.GetLogEventsFromCurrentContext().First();
-            logEvent.MessageTemplate.Text.ShouldContain(parameterName);
-            logEvent.Level.ShouldBe(LogEventLevel.Verbose);
-        }
-    }
+    #endregion
 
     [Fact]
     public void ShouldHaveDebugLoggedWithParameterName_WhenLogDebugIsCalled()
@@ -45,100 +29,6 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
             var logEvent = TestCorrelator.GetLogEventsFromCurrentContext().First();
             logEvent.MessageTemplate.Text.ShouldContain(parameterName);
             logEvent.Level.ShouldBe(LogEventLevel.Debug);
-        }
-    }
-
-    [Fact]
-    public void ShouldHaveInformationLoggedWithParameterName_WhenLogInformationIsCalled()
-    {
-        using (TestCorrelator.CreateContext())
-        {
-            // Arrange
-            var parameterName = "ParameterXYZ";
-
-            // Act
-            ResultExtensions.IsNull(parameterName).LogInformation();
-
-            // Assert
-            var logEvent = TestCorrelator.GetLogEventsFromCurrentContext().First();
-            logEvent.MessageTemplate.Text.ShouldContain(parameterName);
-            logEvent.Level.ShouldBe(LogEventLevel.Information);
-        }
-    }
-
-    [Fact]
-    public void ShouldHaveWarningLoggedWithParameterName_WhenLogWarningIsCalled()
-    {
-        using (TestCorrelator.CreateContext())
-        {
-            // Arrange
-            var parameterName = "ParameterXYZ";
-
-            // Act
-            ResultExtensions.IsNull(parameterName).LogWarning();
-
-            // Assert
-            var logEvent = TestCorrelator.GetLogEventsFromCurrentContext().First();
-            logEvent.MessageTemplate.Text.ShouldContain(parameterName);
-            logEvent.Level.ShouldBe(LogEventLevel.Warning);
-        }
-    }
-
-    [Fact]
-    public void ShouldHaveErrorLoggedWithParameterName_WhenLogErrorIsCalled()
-    {
-        using (TestCorrelator.CreateContext())
-        {
-            // Arrange
-            var parameterName = "ParameterXYZ";
-
-            // Act
-            ResultExtensions.IsNull(parameterName).LogError();
-
-            // Assert
-            var logEvent = TestCorrelator.GetLogEventsFromCurrentContext().First();
-            logEvent.MessageTemplate.Text.ShouldContain(parameterName);
-            logEvent.Level.ShouldBe(LogEventLevel.Error);
-        }
-    }
-
-    [Fact]
-    public void ShouldHaveFatalLoggedWithParameterName_WhenLogFatalIsCalled()
-    {
-        using (TestCorrelator.CreateContext())
-        {
-            // Arrange
-            var parameterName = "ParameterXYZ";
-
-            // Act
-            ResultExtensions.IsNull(parameterName).LogFatal();
-
-            // Assert
-            var logEvent = TestCorrelator.GetLogEventsFromCurrentContext().First();
-            logEvent.MessageTemplate.Text.ShouldContain(parameterName);
-            logEvent.Level.ShouldBe(LogEventLevel.Fatal);
-        }
-    }
-
-    #endregion
-
-    #region Result<T>
-
-    [Fact]
-    public void ShouldHaveVerboseLoggedWithParameterName_WhenLogVerboseIsCalledOnResultT()
-    {
-        using (TestCorrelator.CreateContext())
-        {
-            // Arrange
-            var parameterName = "ParameterXYZ";
-
-            // Act
-            ResultExtensions.Create201CreatedResult(100, parameterName).LogVerbose();
-
-            // Assert
-            var logEvent = TestCorrelator.GetLogEventsFromCurrentContext().First();
-            logEvent.MessageTemplate.Text.ShouldContain(parameterName);
-            logEvent.Level.ShouldBe(LogEventLevel.Verbose);
         }
     }
 
@@ -161,7 +51,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
     }
 
     [Fact]
-    public void ShouldHaveInformationLoggedWithParameterName_WhenLogInformationIsCalledOnResultT()
+    public void ShouldHaveErrorLoggedWithParameterName_WhenLogErrorIsCalled()
     {
         using (TestCorrelator.CreateContext())
         {
@@ -169,30 +59,12 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
             var parameterName = "ParameterXYZ";
 
             // Act
-            ResultExtensions.Create201CreatedResult(100, parameterName).LogInformation();
+            ResultExtensions.IsNull(parameterName).LogError();
 
             // Assert
             var logEvent = TestCorrelator.GetLogEventsFromCurrentContext().First();
             logEvent.MessageTemplate.Text.ShouldContain(parameterName);
-            logEvent.Level.ShouldBe(LogEventLevel.Information);
-        }
-    }
-
-    [Fact]
-    public void ShouldHaveWarningLoggedWithParameterName_WhenLogWarningIsCalledOnResultT()
-    {
-        using (TestCorrelator.CreateContext())
-        {
-            // Arrange
-            var parameterName = "ParameterXYZ";
-
-            // Act
-            ResultExtensions.Create201CreatedResult(100, parameterName).LogWarning();
-
-            // Assert
-            var logEvent = TestCorrelator.GetLogEventsFromCurrentContext().First();
-            logEvent.MessageTemplate.Text.ShouldContain(parameterName);
-            logEvent.Level.ShouldBe(LogEventLevel.Warning);
+            logEvent.Level.ShouldBe(LogEventLevel.Error);
         }
     }
 
@@ -215,6 +87,47 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
     }
 
     [Fact]
+    public void ShouldHaveExceptionErrorLogged_WhenResultHasExceptionalError()
+    {
+        using (TestCorrelator.CreateContext())
+        {
+            // Arrange
+            var exceptionError = new ExceptionalError("Test Exceptional Error #1", new Exception("Test Exception #1"));
+            var result = Result.Fail(exceptionError);
+
+            // Act
+            result.LogError();
+
+            // Assert
+            var logContext = TestCorrelator.GetLogEventsFromCurrentContext().ToList();
+
+            var logEvent = logContext.First();
+            logEvent.Level.ShouldBe(LogEventLevel.Error);
+            logEvent.MessageTemplate.Text.ShouldContain("Test Exceptional Error #1");
+            logEvent.Exception.ShouldNotBeNull();
+            logEvent.Exception.Message.ShouldBe("Test Exception #1");
+        }
+    }
+
+    [Fact]
+    public void ShouldHaveFatalLoggedWithParameterName_WhenLogFatalIsCalled()
+    {
+        using (TestCorrelator.CreateContext())
+        {
+            // Arrange
+            var parameterName = "ParameterXYZ";
+
+            // Act
+            ResultExtensions.IsNull(parameterName).LogFatal();
+
+            // Assert
+            var logEvent = TestCorrelator.GetLogEventsFromCurrentContext().First();
+            logEvent.MessageTemplate.Text.ShouldContain(parameterName);
+            logEvent.Level.ShouldBe(LogEventLevel.Fatal);
+        }
+    }
+
+    [Fact]
     public void ShouldHaveFatalLoggedWithParameterName_WhenLogFatalIsCalledOnResultT()
     {
         using (TestCorrelator.CreateContext())
@@ -232,9 +145,41 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    #endregion
+    [Fact]
+    public void ShouldHaveInformationLoggedWithParameterName_WhenLogInformationIsCalled()
+    {
+        using (TestCorrelator.CreateContext())
+        {
+            // Arrange
+            var parameterName = "ParameterXYZ";
 
-    #region LogReasons
+            // Act
+            ResultExtensions.IsNull(parameterName).LogInformation();
+
+            // Assert
+            var logEvent = TestCorrelator.GetLogEventsFromCurrentContext().First();
+            logEvent.MessageTemplate.Text.ShouldContain(parameterName);
+            logEvent.Level.ShouldBe(LogEventLevel.Information);
+        }
+    }
+
+    [Fact]
+    public void ShouldHaveInformationLoggedWithParameterName_WhenLogInformationIsCalledOnResultT()
+    {
+        using (TestCorrelator.CreateContext())
+        {
+            // Arrange
+            var parameterName = "ParameterXYZ";
+
+            // Act
+            ResultExtensions.Create201CreatedResult(100, parameterName).LogInformation();
+
+            // Assert
+            var logEvent = TestCorrelator.GetLogEventsFromCurrentContext().First();
+            logEvent.MessageTemplate.Text.ShouldContain(parameterName);
+            logEvent.Level.ShouldBe(LogEventLevel.Information);
+        }
+    }
 
     [Fact]
     public void ShouldHaveMultipleErrorsLogged_WhenResultHasMultipleErrors()
@@ -254,6 +199,45 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
             {
                 logContext[i].Level.ShouldBe(LogEventLevel.Error);
                 logContext[i].MessageTemplate.Text.ShouldContain($"Test Error #{i + 1}");
+            }
+        }
+    }
+
+    [Fact]
+    public void ShouldHaveMultipleNestedErrorsAndMetadataLogged_WhenResultHasMultipleNestedErrorsAndMetadata()
+    {
+        using (TestCorrelator.CreateContext())
+        {
+            // Arrange
+            var numberOfErrors = 5;
+            var numberOfMetadata = 5;
+            var result = Result.Fail("Test Error #1");
+
+            for (var i = 1; i <= numberOfErrors; i++)
+            {
+                var error = new Error($"Nested Error #{i}");
+
+                for (var j = 1; j <= numberOfMetadata; j++)
+                    error.WithMetadata($"Key{j}", $"Value{j}");
+
+                result.Errors.First().Reasons.Add(error);
+            }
+
+            // Act
+            result.LogError();
+
+            // Assert
+            var logContext = TestCorrelator.GetLogEventsFromCurrentContext().ToList();
+
+            var logEvent = logContext.First();
+            logEvent.Level.ShouldBe(LogEventLevel.Error);
+            logEvent.MessageTemplate.Text.ShouldContain("Test Error #1");
+
+            for (var i = 1; i <= numberOfErrors; i++)
+            {
+                logEvent.MessageTemplate.Text.ShouldContain($"Nested Error #{i}");
+                for (var j = 1; j <= numberOfMetadata; j++)
+                    logEvent.MessageTemplate.Text.ShouldContain($"Key{j} - Value{j}");
             }
         }
     }
@@ -293,5 +277,100 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
         }
     }
 
-    #endregion
+    [Fact]
+    public void ShouldHaveMultipleNestedMetadataLogged_WhenResultHasMultipleNestedMetadata()
+    {
+        using (TestCorrelator.CreateContext())
+        {
+            // Arrange
+            var result = Result.Fail("Test Error #1");
+            for (var i = 1; i < 5; i++)
+                result.Errors.First().Metadata.Add($"Key{i}", $"Value{i}");
+
+            // Act
+            result.LogError();
+
+            // Assert
+            var logContext = TestCorrelator.GetLogEventsFromCurrentContext().ToList();
+
+            var logEvent = logContext.First();
+            logEvent.Level.ShouldBe(LogEventLevel.Error);
+            logEvent.MessageTemplate.Text.ShouldContain("Test Error #1");
+
+            for (var i = 1; i < 5; i++)
+                logEvent.MessageTemplate.Text.ShouldContain($"Key{i} - Value{i}");
+        }
+    }
+
+    [Fact]
+    public void ShouldHaveVerboseLoggedWithParameterName_WhenLogVerboseIsCalled()
+    {
+        using (TestCorrelator.CreateContext())
+        {
+            // Arrange
+            var parameterName = "ParameterXYZ";
+
+            // Act
+            ResultExtensions.IsNull(parameterName).LogVerbose();
+
+            // Assert
+            var logEvent = TestCorrelator.GetLogEventsFromCurrentContext().First();
+            logEvent.MessageTemplate.Text.ShouldContain(parameterName);
+            logEvent.Level.ShouldBe(LogEventLevel.Verbose);
+        }
+    }
+
+    [Fact]
+    public void ShouldHaveVerboseLoggedWithParameterName_WhenLogVerboseIsCalledOnResultT()
+    {
+        using (TestCorrelator.CreateContext())
+        {
+            // Arrange
+            var parameterName = "ParameterXYZ";
+
+            // Act
+            ResultExtensions.Create201CreatedResult(100, parameterName).LogVerbose();
+
+            // Assert
+            var logEvent = TestCorrelator.GetLogEventsFromCurrentContext().First();
+            logEvent.MessageTemplate.Text.ShouldContain(parameterName);
+            logEvent.Level.ShouldBe(LogEventLevel.Verbose);
+        }
+    }
+
+    [Fact]
+    public void ShouldHaveWarningLoggedWithParameterName_WhenLogWarningIsCalled()
+    {
+        using (TestCorrelator.CreateContext())
+        {
+            // Arrange
+            var parameterName = "ParameterXYZ";
+
+            // Act
+            ResultExtensions.IsNull(parameterName).LogWarning();
+
+            // Assert
+            var logEvent = TestCorrelator.GetLogEventsFromCurrentContext().First();
+            logEvent.MessageTemplate.Text.ShouldContain(parameterName);
+            logEvent.Level.ShouldBe(LogEventLevel.Warning);
+        }
+    }
+
+    [Fact]
+    public void ShouldHaveWarningLoggedWithParameterName_WhenLogWarningIsCalledOnResultT()
+    {
+        using (TestCorrelator.CreateContext())
+        {
+            // Arrange
+            var parameterName = "ParameterXYZ";
+
+            // Act
+            ResultExtensions.Create201CreatedResult(100, parameterName).LogWarning();
+
+            // Assert
+            var logEvent = TestCorrelator.GetLogEventsFromCurrentContext().First();
+            logEvent.MessageTemplate.Text.ShouldContain(parameterName);
+            logEvent.Level.ShouldBe(LogEventLevel.Warning);
+        }
+    }
 }

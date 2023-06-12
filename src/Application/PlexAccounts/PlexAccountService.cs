@@ -50,17 +50,10 @@ public class PlexAccountService : IPlexAccountService
         if (plexSignInResult.IsFailed)
         {
             // Check if 2FA might be enabled
-            if (plexSignInResult.HasError<PlexError>())
+            if (plexSignInResult.HasPlexErrorEnterVerificationCode())
             {
-                var errors = plexSignInResult.Errors.OfType<PlexError>().ToList();
-
-                // If the message is "Please enter the verification code" then 2FA is enabled.
-                var has2Fa = errors.Any(x => x.Code == 1029);
-                if (has2Fa)
-                {
-                    plexAccount.Is2Fa = true;
-                    return Result.Ok(plexAccount);
-                }
+                plexAccount.Is2Fa = true;
+                return Result.Ok(plexAccount);
             }
 
             return plexSignInResult;

@@ -1,11 +1,14 @@
 ﻿using Bogus;
-using PlexRipper.PlexApi;
 using PlexRipper.PlexApi.Api;
 
 namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
+    #region Methods
+
+    #region Public
+
     public static Faker<ServerResource> GetServerResource(Action<PlexApiDataConfig> options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
@@ -58,19 +61,7 @@ public partial class FakePlexApiData
             .FinishWith((_, connection) => { connection.Uri = new UriBuilder(connection.Protocol, connection.Address, connection.Port).ToString(); });
     }
 
-    public static PlexErrorsResponseDTO GetFailedServerResourceResponse()
-    {
-        return new PlexErrorsResponseDTO()
-        {
-            Errors = new List<PlexErrorDTO>()
-            {
-                new()
-                {
-                    Code = 1001,
-                    Message = "User could not be authenticated",
-                    Status = 401,
-                },
-            },
-        };
-    }
+    #endregion
+
+    #endregion
 }

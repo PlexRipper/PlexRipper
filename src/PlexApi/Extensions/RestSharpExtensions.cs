@@ -1,33 +1,26 @@
+using System.Text.Json;
 using Logging.Interface;
 using PlexApi.Contracts;
 using Polly;
 using RestSharp;
 
-namespace PlexRipper.PlexApi.Extensions;
+namespace PlexRipper.PlexApi;
 
 public static class RestSharpExtensions
 {
-    #region Methods
+    #region Properties
 
-    #region Private
-
-    private static RestResponse<T> ToResponse<T>(PolicyResult<RestResponse> response)
+    public static JsonSerializerOptions SerializerOptions => new()
     {
-        var isSuccessful = response.Outcome == OutcomeType.Successful;
-        if (isSuccessful)
-        {
-            if (response.Result.Content != string.Empty)
-                _log.Verbose("Response Content: {Content}", response.Result.Content);
-            else
-                _log.VerboseLine("Response was empty");
-
-            return response.Result as RestResponse<T>;
-        }
-
-        return response.FinalHandledResult as RestResponse<T>;
-    }
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+        WriteIndented = true,
+        Converters = { new LongToDateTime() },
+    };
 
     #endregion
+
+    #region Methods
 
     #region Public
 
@@ -77,21 +70,108 @@ public static class RestSharpExtensions
             response = await restClient.ExecuteAsync<T>(request, cancellationToken);
             return response;
         });
-        if (action is not null)
+
+        // Send final progress update
+        action?.Invoke(new PlexApiClientProgress
         {
-            action(new PlexApiClientProgress
-            {
-                StatusCode = (int)response.StatusCode,
-                Message = response.IsSuccessful ? "Request successful!" : $"Content: \"{response.Content}\" - ErrorMessage: \"{response.ErrorMessage}\"",
-                RetryAttemptIndex = retryIndex,
-                RetryAttemptCount = retryCount,
-                TimeToNextRetry = 0,
-                ConnectionSuccessful = response.IsSuccessful,
-                Completed = true,
-            });
-        }
+            StatusCode = (int)response.StatusCode,
+            Message = response.IsSuccessful ? "Request successful!" : $"Content: \"{response.Content}\" - ErrorMessage: \"{response.ErrorMessage}\"",
+            RetryAttemptIndex = retryIndex,
+            RetryAttemptCount = retryCount,
+            TimeToNextRetry = 0,
+            ConnectionSuccessful = response.IsSuccessful,
+            Completed = true,
+        });
 
         return ToResponse<T>(responseResult);
+    }
+
+    /// <summary>
+    /// Generates a <see cref="Result{T}"/> from the <see cref="RestResponse{T}"/>
+    /// </summary>
+    /// <param name="response"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static Result<T> ToResponseResult<T>(this RestResponse<T> response) where T : class
+    {
+        // In case of timeout
+        if (response.ResponseStatus == ResponseStatus.TimedOut)
+            return Result.Fail("Request timed out").Add408RequestTimeoutError().LogError();
+
+        // Weird case where the status code is 200 but the content is "Bad Gateway"
+        if (response.IsSuccessful && response.Content == "Bad Gateway")
+            return Result.Fail("Server responded with Bad Gateway").Add502BadGatewayError();
+
+        // Successful response
+        if (response.IsSuccessful)
+            return Result.Ok(response.Data).AddStatusCode((int)response.StatusCode).LogDebug();
+
+        var statusDescription = "";
+        if (response.StatusDescription != null)
+        {
+            statusDescription += $"Response: {response.StatusDescription}";
+            if (response.ErrorMessage != null)
+                statusDescription += " - ";
+        }
+
+        if (response.ErrorMessage != null)
+            statusDescription += $"ErrorMessage: {response.ErrorMessage}";
+
+        return ParsePlexErrors(response);
+    }
+
+    #endregion
+
+    #region Private
+
+    private static RestResponse<T> ToResponse<T>(PolicyResult<RestResponse> response)
+    {
+        if (response.Outcome == OutcomeType.Successful)
+        {
+            if (response.Result.Content != string.Empty)
+                _log.Verbose("Response Content: {Content}", response.Result.Content);
+            else
+                _log.VerboseLine("Response was empty");
+
+            return response.Result as RestResponse<T>;
+        }
+
+        return response.FinalHandledResult as RestResponse<T>;
+    }
+
+    /// <summary>
+    /// Parses the Plex errors and returns a <see cref="Result{T}"/>
+    /// </summary>
+    /// <param name="response"></param>
+    /// <returns></returns>
+    private static Result ParsePlexErrors(RestResponse response)
+    {
+        var requestUrl = response.Request.Resource;
+        var statusCode = (int)response.StatusCode;
+        var errorMessage = response.ErrorMessage;
+
+        var result = Result.Fail($"Request to {requestUrl} failed with status code: {statusCode} - {errorMessage}");
+        try
+        {
+            if (!string.IsNullOrEmpty(response.ErrorMessage) && response.ErrorMessage.Contains("Timeout"))
+                result.Add408RequestTimeoutError(response.ErrorMessage);
+            else
+                result.AddStatusCode(statusCode, errorMessage);
+
+            var content = response.Content;
+            if (!string.IsNullOrEmpty(content))
+            {
+                var errorsResponse = JsonSerializer.Deserialize<PlexErrorsResponseDTO>(content, SerializerOptions) ?? new PlexErrorsResponseDTO();
+                if (errorsResponse.Errors != null && errorsResponse.Errors.Any())
+                    result.WithErrors(errorsResponse.ToResultErrors());
+            }
+        }
+        catch (Exception)
+        {
+            return result.WithError(new Error($"Failed to deserialize: {response}"));
+        }
+
+        return result.LogError();
     }
 
     #endregion

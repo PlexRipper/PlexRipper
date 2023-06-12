@@ -31,6 +31,7 @@ public static class RestSharpExtensions
     /// <param name="request">The <see cref="RestRequest"/> to send.</param>
     /// <param name="retryCount">How many times should the request be attempted before giving up.</param>
     /// <param name="action"></param>
+    /// <param name="cancellationToken"></param>
     /// <typeparam name="T">The parsed type of the response when successful.</typeparam>
     /// <returns>Returns Result.Ok() whether the response was successful or failed, on unhandled exception will return Result.Fail()</returns>
     public static async Task<RestResponse<T>> SendRequestWithPolly<T>(
@@ -47,19 +48,12 @@ public static class RestSharpExtensions
             .WaitAndRetryAsync(retryCount, retryAttempt =>
             {
                 var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
-                var msg = _log.Warning(
-                    "Request to: {RequestResource} failed, waiting {TotalSeconds} seconds before retrying again ({RetryAttempt} of {RetryCount})",
-                    request.Resource, timeToWait.TotalSeconds, retryAttempt, retryCount);
+                _log.Warning("Request to: {RequestResource} failed, waiting {TotalSeconds} seconds before retrying again ({RetryAttempt} of {RetryCount})", request.Resource, timeToWait.TotalSeconds, retryAttempt, retryCount);
+
                 retryIndex = retryAttempt;
-                action?.Invoke(new PlexApiClientProgress
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Message = msg.ToLogString(),
-                    RetryAttemptIndex = retryAttempt,
-                    RetryAttemptCount = retryCount,
-                    TimeToNextRetry = (int)timeToWait.TotalSeconds,
-                    Completed = false,
-                });
+
+                // Send update
+                action?.Send(response, retryAttempt, retryCount, (int)timeToWait.TotalSeconds);
 
                 return timeToWait;
             });
@@ -72,16 +66,7 @@ public static class RestSharpExtensions
         });
 
         // Send final progress update
-        action?.Invoke(new PlexApiClientProgress
-        {
-            StatusCode = (int)response.StatusCode,
-            Message = response.IsSuccessful ? "Request successful!" : $"Content: \"{response.Content}\" - ErrorMessage: \"{response.ErrorMessage}\"",
-            RetryAttemptIndex = retryIndex,
-            RetryAttemptCount = retryCount,
-            TimeToNextRetry = 0,
-            ConnectionSuccessful = response.IsSuccessful,
-            Completed = true,
-        });
+        action?.Send(response, retryIndex, retryCount);
 
         return ToResponse<T>(responseResult);
     }
@@ -172,6 +157,30 @@ public static class RestSharpExtensions
         }
 
         return result.LogError();
+    }
+
+    private static void Send(this Action<PlexApiClientProgress> action, RestResponse response, int retryAttempt, int retryCount, int timeToWaitSeconds = 0)
+    {
+        var request = response.Request;
+        var msg = "Request successful!";
+
+        if (!response.IsSuccessful && response.ResponseStatus != ResponseStatus.TimedOut)
+            msg = $"Request to: {request.Resource} failed, waiting {timeToWaitSeconds} seconds before retrying again ({retryAttempt} of {retryCount})";
+
+        if (!response.IsSuccessful && response.ResponseStatus == ResponseStatus.TimedOut)
+            msg = $"Request to: {request.Resource} timed-out, waiting {timeToWaitSeconds} seconds before retrying again ({retryAttempt} of {retryCount})";
+
+        action?.Invoke(new PlexApiClientProgress
+        {
+            StatusCode = (int)response.StatusCode,
+            Message = msg,
+            RetryAttemptIndex = retryAttempt,
+            RetryAttemptCount = retryCount,
+            TimeToNextRetry = timeToWaitSeconds,
+            Completed = response.ResponseStatus == ResponseStatus.Completed,
+            ErrorMessage = response.ErrorMessage ?? "",
+            ConnectionSuccessful = response.IsSuccessful,
+        });
     }
 
     #endregion

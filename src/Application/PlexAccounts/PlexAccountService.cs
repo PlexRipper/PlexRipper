@@ -8,12 +8,17 @@ namespace PlexRipper.Application.PlexAccounts;
 
 public class PlexAccountService : IPlexAccountService
 {
+    #region Fields
+
+    private readonly IInspectServerScheduler _inspectServerScheduler;
     private readonly ILog _log;
     private readonly IMediator _mediator;
 
     private readonly IPlexApiService _plexApiService;
 
-    private readonly IInspectServerScheduler _inspectServerScheduler;
+    #endregion
+
+    #region Constructors
 
     public PlexAccountService(
         ILog log,
@@ -26,6 +31,12 @@ public class PlexAccountService : IPlexAccountService
         _plexApiService = plexApiService;
         _inspectServerScheduler = inspectServerScheduler;
     }
+
+    #endregion
+
+    #region Methods
+
+    #region Public
 
     public virtual async Task<Result<PlexAccount>> ValidatePlexAccountAsync(PlexAccount plexAccount)
     {
@@ -105,6 +116,10 @@ public class PlexAccountService : IPlexAccountService
         _log.Debug("The username: {UserName} is available", username);
         return Result.Ok(true);
     }
+
+    #endregion
+
+    #endregion
 
     #region Authentication
 

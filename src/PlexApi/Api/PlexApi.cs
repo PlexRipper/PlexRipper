@@ -113,7 +113,7 @@ public class PlexApi
     /// </summary>
     /// <param name="authToken">The Plex account authentication token.</param>
     /// <returns></returns>
-    public async Task<Result<List<ServerResource>>> GetServerAsync(string authToken)
+    public async Task<Result<List<ServerResource>>> GetAccessibleServers(string authToken)
     {
         var request = new RestRequest(PlexApiPaths.ServerResourcesUrl);
         request.AddToken(authToken);

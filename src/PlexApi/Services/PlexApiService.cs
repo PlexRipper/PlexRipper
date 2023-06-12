@@ -228,7 +228,7 @@ public class PlexApiService : IPlexApiService
         if (plexAccountToken.IsFailed)
             return (plexAccountToken.ToResult(), plexAccountToken.ToResult());
 
-        var result = await _plexApi.GetServerAsync(plexAccountToken.Value);
+        var result = await _plexApi.GetAccessibleServers(plexAccountToken.Value);
         if (result.IsFailed)
         {
             _log.Warning("Failed to retrieve PlexServers for PlexAccount: {PlexAccountName}", plexAccountResult.Value.DisplayName);

@@ -8,7 +8,9 @@ namespace Logging;
 
 public static class LogManager
 {
-    private static readonly ILog _log = CreateLogInstance(typeof(LogManager));
+    #region Methods
+
+    #region Public
 
     [MessageTemplateFormatMethod("messageTemplate")]
     public static void DbContextLogger(
@@ -21,15 +23,15 @@ public static class LogManager
         {
             // ReSharper disable once StringLiteralTypo
             case { } s when s.StartsWith("dbug:"):
-                // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+
                 _log.Debug(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case { } s when s.StartsWith("info:"):
-                // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+
                 _log.Information(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case { } s when s.StartsWith("fail:"):
-                // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
+
                 _log.Error(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
         }
@@ -84,4 +86,10 @@ public static class LogManager
     {
         Serilog.Log.CloseAndFlush();
     }
+
+    #endregion
+
+    #endregion
+
+    private static readonly ILog _log = CreateLogInstance(typeof(LogManager));
 }

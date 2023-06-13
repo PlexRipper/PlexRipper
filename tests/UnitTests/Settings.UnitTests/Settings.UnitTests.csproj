@@ -6,6 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<IsPackable>false</IsPackable>
 		<IncludeSymbolsInSingleFile>true</IncludeSymbolsInSingleFile>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	</PropertyGroup>
 
 	<ItemGroup>

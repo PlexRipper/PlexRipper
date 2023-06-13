@@ -6,6 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AssemblyName>Environment</AssemblyName>
 		<RootNamespace>Environment</RootNamespace>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	</PropertyGroup>
 
 </Project>

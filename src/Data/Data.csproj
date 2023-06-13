@@ -6,6 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>PlexRipper.Data</RootNamespace>
 		<AssemblyName>PlexRipper.Data</AssemblyName>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	</PropertyGroup>
 
 	<ItemGroup>

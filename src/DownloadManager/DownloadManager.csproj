@@ -8,6 +8,7 @@
 		<RootNamespace>PlexRipper.DownloadManager</RootNamespace>
 		<AssemblyName>PlexRipper.DownloadManager</AssemblyName>
 		<OutputType>Library</OutputType>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -30,7 +31,7 @@
 		<ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
 		<ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
 		<ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
-		
+
 	</ItemGroup>
 
 	<ItemGroup>

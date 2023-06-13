@@ -2,7 +2,7 @@
 import { defineComponent, h, mergeProps } from 'vue';
 import { IBaseButtonProps } from '@props';
 import { baseBtnPropsDefault } from '@composables/baseBtnProps';
-import BaseButton from '@buttons/BaseButton.vue';
+import BaseButton from '@components/Buttons/BaseButton.vue';
 
 export default defineComponent({
 	name: 'VerticalButton',

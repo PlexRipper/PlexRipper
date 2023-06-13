@@ -6,6 +6,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AssemblyName>PlexRipper.FileSystem</AssemblyName>
 		<RootNamespace>PlexRipper.FileSystem</RootNamespace>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
 	</PropertyGroup>
 
 	<ItemGroup>

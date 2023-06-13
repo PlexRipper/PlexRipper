@@ -1,11 +1,14 @@
 ﻿using Bogus;
-using PlexRipper.PlexApi;
 using PlexRipper.PlexApi.Api;
 
 namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
+    #region Methods
+
+    #region Public
+
     public static Faker<ServerResource> GetServerResource(Action<PlexApiDataConfig> options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
@@ -20,8 +23,8 @@ public partial class FakePlexApiData
             .RuleFor(x => x.PlatformVersion, f => f.System.Semver())
             .RuleFor(x => x.Device, f => f.PlexApi().Device)
             .RuleFor(x => x.ClientIdentifier, f => f.PlexApi().ClientId)
-            .RuleFor(x => x.CreatedAt, f => f.Date.Past(10, DateTime.UtcNow))
-            .RuleFor(x => x.LastSeenAt, f => f.Date.Recent(30))
+            .RuleFor(x => x.CreatedAt, f => f.Date.Past(10, DateTime.UtcNow).ToLongDateString())
+            .RuleFor(x => x.LastSeenAt, f => f.Date.Recent(30).ToLongDateString())
             .RuleFor(x => x.Provides, _ => "server")
             .RuleFor(x => x.OwnerId, f => f.Random.Int(1000, 100000))
             .RuleFor(x => x.SourceTitle, f => f.Internet.UserName())
@@ -58,19 +61,7 @@ public partial class FakePlexApiData
             .FinishWith((_, connection) => { connection.Uri = new UriBuilder(connection.Protocol, connection.Address, connection.Port).ToString(); });
     }
 
-    public static PlexErrorsResponseDTO GetFailedServerResourceResponse()
-    {
-        return new PlexErrorsResponseDTO()
-        {
-            Errors = new List<PlexErrorDTO>()
-            {
-                new()
-                {
-                    Code = 1001,
-                    Message = "User could not be authenticated",
-                    Status = 401,
-                },
-            },
-        };
-    }
+    #endregion
+
+    #endregion
 }

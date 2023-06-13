@@ -1,10 +1,16 @@
 using Logging.Common;
+using Serilog.Core;
 using Serilog.Events;
 
 namespace Logging;
 
 public static partial class LogExtensions
 {
+    #region Methods
+
+    #region Public
+
+    [MessageTemplateFormatMethod("messageTemplate")]
     public static LogMetaData Verbose<T0>(
         this LogMetaData logMetaData,
         string messageTemplate,
@@ -14,6 +20,7 @@ public static partial class LogExtensions
         return logMetaData;
     }
 
+    [MessageTemplateFormatMethod("messageTemplate")]
     public static LogMetaData Verbose<T0, T1>(
         this LogMetaData logMetaData,
         string messageTemplate,
@@ -24,6 +31,7 @@ public static partial class LogExtensions
         return logMetaData;
     }
 
+    [MessageTemplateFormatMethod("messageTemplate")]
     public static LogMetaData Verbose<T0, T1, T2>(
         this LogMetaData logMetaData,
         string messageTemplate,
@@ -35,6 +43,7 @@ public static partial class LogExtensions
         return logMetaData;
     }
 
+    [MessageTemplateFormatMethod("messageTemplate")]
     public static LogMetaData Verbose<T0, T1, T2, T3>(
         this LogMetaData logMetaData,
         string messageTemplate,
@@ -46,4 +55,8 @@ public static partial class LogExtensions
         logMetaData.Update(LogEventLevel.Verbose, messageTemplate, propertyValue0, propertyValue1, propertyValue2, propertyValue3).Write();
         return logMetaData;
     }
+
+    #endregion
+
+    #endregion
 }

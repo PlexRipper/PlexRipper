@@ -38,6 +38,40 @@ public class PlexLibraryService : IPlexLibraryService
 
     #region Methods
 
+    #region Public
+
+    /// <inheritdoc/>
+    public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId)
+    {
+        var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
+
+        if (libraryDB.IsFailed)
+            return libraryDB;
+
+        if (!libraryDB.Value.HasMedia)
+        {
+            _log.Information("PlexLibrary with id {LibraryId} has no media, forcing refresh from the PlexApi", libraryId);
+
+            var refreshResult = await RefreshLibraryMediaAsync(libraryId);
+            if (refreshResult.IsFailed)
+                return refreshResult.ToResult();
+        }
+
+        return await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
+    }
+
+    public async Task<Result<List<PlexLibrary>>> GetAllPlexLibrariesAsync()
+    {
+        return await _mediator.Send(new GetAllPlexLibrariesQuery());
+    }
+
+    public async Task<Result> UpdateDefaultDestinationLibrary(int libraryId, int folderPathId)
+    {
+        return await _mediator.Send(new UpdatePlexLibraryDefaultDestinationByIdCommand(libraryId, folderPathId));
+    }
+
+    #endregion
+
     #region Private
 
     /// <summary>
@@ -115,7 +149,7 @@ public class PlexLibraryService : IPlexLibraryService
 
         // Phase 3 of 4: PlexLibrary media data was parsed successfully.
         SendProgress(3, 4);
-        _log.Debug("Finished retrieving all media for library {Title} in {Elapsed:000} seconds", plexLibrary.Title, timer.Elapsed.TotalSeconds);
+        _log.Here().Debug("Finished retrieving all media for library {PlexLibraryName} in {Elapsed:000} seconds", plexLibrary.Title, timer.Elapsed.TotalSeconds);
         timer.Restart();
 
         // Update the MetaData of this library
@@ -131,7 +165,7 @@ public class PlexLibraryService : IPlexLibraryService
         if (createResult.IsFailed)
             return createResult.ToResult();
 
-        _log.Debug("Finished updating all media in the database for library {Title} in {Elapsed:000} seconds", plexLibrary.Title,
+        _log.Here().Debug("Finished updating all media in the database for library {PlexLibraryName} in {Elapsed:000} seconds", plexLibrary.Title,
             timer.Elapsed.TotalSeconds);
 
         // Phase 4 of 4: Database has been successfully updated with new library data.
@@ -182,37 +216,7 @@ public class PlexLibraryService : IPlexLibraryService
 
     #endregion
 
-    #region Public
-
-    /// <inheritdoc/>
-    public async Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId)
-    {
-        var libraryDB = await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
-
-        if (libraryDB.IsFailed)
-            return libraryDB;
-
-        if (!libraryDB.Value.HasMedia)
-        {
-            _log.Information("PlexLibrary with id {LibraryId} has no media, forcing refresh from the PlexApi", libraryId);
-
-            var refreshResult = await RefreshLibraryMediaAsync(libraryId);
-            if (refreshResult.IsFailed)
-                return refreshResult.ToResult();
-        }
-
-        return await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
-    }
-
-    public async Task<Result<List<PlexLibrary>>> GetAllPlexLibrariesAsync()
-    {
-        return await _mediator.Send(new GetAllPlexLibrariesQuery());
-    }
-
-    public async Task<Result> UpdateDefaultDestinationLibrary(int libraryId, int folderPathId)
-    {
-        return await _mediator.Send(new UpdatePlexLibraryDefaultDestinationByIdCommand(libraryId, folderPathId));
-    }
+    #endregion
 
     #region RefreshLibrary
 
@@ -306,13 +310,9 @@ public class PlexLibraryService : IPlexLibraryService
                 return await RefreshPlexTvShowLibrary(newPlexLibrary, progressAction);
         }
 
-        _log.Information("Successfully refreshed library {PlexLibraryTitle} with id: {PlexLibraryId}", newPlexLibrary.Title, newPlexLibrary.Id);
+        _log.Information("Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}", newPlexLibrary.Title, newPlexLibrary.Id);
         return Result.Ok(newPlexLibrary);
     }
-
-    #endregion
-
-    #endregion
 
     #endregion
 }

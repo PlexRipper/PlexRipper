@@ -83,7 +83,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler : BaseHandler, IRequest
         {
             foreach (var plexAccountServer in removalList)
             {
-                _log.Here().Warning("PlexAccount {DisplayName} has lost access to {PlexServerName}!", plexAccountServer.PlexAccount.DisplayName, plexAccountServer.PlexServer.Name);
+                _log.Here().Warning("PlexAccount {PlexAccountDisplayName} has lost access to {PlexServerName}!", plexAccountServer.PlexAccount.DisplayName, plexAccountServer.PlexServer.Name);
                 _dbContext.Entry(plexAccountServer).State = EntityState.Deleted;
             }
         }

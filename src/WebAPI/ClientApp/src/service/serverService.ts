@@ -4,8 +4,8 @@ import Log from 'consola';
 import AccountService from './accountService';
 import BaseService from './baseService';
 import ServerConnectionService from './serverConnectionService';
-import { PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
-import { getPlexServers, setPreferredPlexServerConnection } from '@api/plexServerApi';
+import { PlexAccountDTO, PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
+import { checkPlexServer, getPlexServers, setPreferredPlexServerConnection } from '@api/plexServerApi';
 import IStoreState from '@interfaces/service/IStoreState';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import ResultDTO from '@dto/ResultDTO';
@@ -96,10 +96,8 @@ export class ServerService extends BaseService {
 	 * Forces a recheck of all the server connections for the given server id
 	 * @param plexServerId
 	 */
-	public checkServerStatus(plexServerId: number): Observable<boolean> {
-		return ServerConnectionService.reCheckAllServerConnections(plexServerId).pipe(
-			switchMap(() => this.getServerStatus(plexServerId)),
-		);
+	public checkServerStatus(plexServerId: number): Observable<PlexServerStatusDTO | null> {
+		return checkPlexServer(plexServerId).pipe(map((x) => x?.value ?? null));
 	}
 
 	public setPreferredPlexServerConnection(serverId: number, connectionId: number): Observable<ResultDTO> {

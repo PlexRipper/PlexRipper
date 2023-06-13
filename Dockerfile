@@ -63,10 +63,10 @@ COPY ["src/WebAPI/WebAPI.csproj", "src/WebAPI/"]
 COPY ["src/WebAPI.Contracts/WebAPI.Contracts.csproj", "src/WebAPI.Contracts/"]
 
 ## Restore Projects
-RUN dotnet restore "src/WebAPI/WebAPI.csproj"
+RUN dotnet restore "src/WebAPI/WebAPI.csproj" --locked-mode
 COPY . .
 WORKDIR "/src/src/WebAPI"
-RUN dotnet build "WebAPI.csproj" -c Release -o /app/build /p:AssemblyVersion=$VERSION
+RUN dotnet build "WebAPI.csproj" -c Release -o /app/build /p:AssemblyVersion=$VERSION --no-restore
 
 FROM build AS publish
 RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:AssemblyVersion=$VERSION

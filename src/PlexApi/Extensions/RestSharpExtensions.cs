@@ -1,13 +1,28 @@
+using System.Text.Json;
 using Logging.Interface;
 using PlexApi.Contracts;
 using Polly;
 using RestSharp;
 
-namespace PlexRipper.PlexApi.Extensions;
+namespace PlexRipper.PlexApi;
 
 public static class RestSharpExtensions
 {
-    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(RestSharpExtensions));
+    #region Properties
+
+    public static JsonSerializerOptions SerializerOptions => new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+        WriteIndented = true,
+        Converters = { new LongToDateTime() },
+    };
+
+    #endregion
+
+    #region Methods
+
+    #region Public
 
     /// <summary>
     /// Sends a <see cref="RestRequest"/> with a <see cref="Policy"/>
@@ -16,78 +31,90 @@ public static class RestSharpExtensions
     /// <param name="request">The <see cref="RestRequest"/> to send.</param>
     /// <param name="retryCount">How many times should the request be attempted before giving up.</param>
     /// <param name="action"></param>
+    /// <param name="cancellationToken"></param>
     /// <typeparam name="T">The parsed type of the response when successful.</typeparam>
     /// <returns>Returns Result.Ok() whether the response was successful or failed, on unhandled exception will return Result.Fail()</returns>
     public static async Task<RestResponse<T>> SendRequestWithPolly<T>(
         this RestClient restClient,
         RestRequest request,
         int retryCount = 2,
-        Action<PlexApiClientProgress> action = null) where T : class
+        Action<PlexApiClientProgress> action = null,
+        CancellationToken cancellationToken = default) where T : class
     {
         RestResponse<T> response = null;
         var retryIndex = 0;
-        var policyResult = await Policy
+        var policyResult = Policy
             .HandleResult<RestResponse>(x => !x.IsSuccessful)
             .WaitAndRetryAsync(retryCount, retryAttempt =>
             {
                 var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
-                var msg = _log.Warning(
-                    "Request: {RequestResource} failed, waiting {TotalSeconds} seconds before retrying again ({RetryAttempt} of {RetryCount})",
-                    request.Resource, timeToWait.TotalSeconds, retryAttempt, retryCount);
-
-                if (response != null && response.ErrorMessage != string.Empty)
-                {
-                    _log.ErrorLine(response.ErrorMessage);
-                    _log.Error(response.ErrorException);
-                }
+                _log.Warning("Request to: {Url} failed, waiting {TotalSeconds} seconds before retrying again ({RetryAttempt} of {RetryCount})", request.Resource, timeToWait.TotalSeconds, retryAttempt, retryCount);
 
                 retryIndex = retryAttempt;
-                if (action is not null)
-                {
-                    action(new PlexApiClientProgress
-                    {
-                        StatusCode = (int)response.StatusCode,
-                        Message = msg.ToLogString(),
-                        RetryAttemptIndex = retryAttempt,
-                        RetryAttemptCount = retryCount,
-                        TimeToNextRetry = (int)timeToWait.TotalSeconds,
-                        Completed = false,
-                    });
-                }
+
+                // Send update
+                action?.Send(response, retryAttempt, retryCount, (int)timeToWait.TotalSeconds);
 
                 return timeToWait;
-            })
-            .ExecuteAndCaptureAsync(async () =>
-            {
-                // We store the response here so we have access to the last response in the WaitAndRetryAsync() above.
-                response = await restClient.ExecuteAsync<T>(request);
-                return response;
             });
 
-        if (action is not null)
+        var responseResult = await policyResult.ExecuteAndCaptureAsync(async () =>
         {
-            action(new PlexApiClientProgress
-            {
-                StatusCode = (int)response.StatusCode,
-                Message = response.IsSuccessful ? "Request successful!" : $"Content: \"{response.Content}\" - ErrorMessage: \"{response.ErrorMessage}\"",
-                RetryAttemptIndex = retryIndex,
-                RetryAttemptCount = retryCount,
-                TimeToNextRetry = 0,
-                ConnectionSuccessful = response.IsSuccessful,
-                Completed = true,
-            });
+            // We store the response here so we have access to the last response in the WaitAndRetryAsync() above.
+            response = await restClient.ExecuteAsync<T>(request, cancellationToken);
+            return response;
+        });
+
+        // Send final progress update
+        action?.Send(response, retryIndex, retryCount);
+
+        return ToResponse<T>(responseResult);
+    }
+
+    /// <summary>
+    /// Generates a <see cref="Result{T}"/> from the <see cref="RestResponse{T}"/>
+    /// </summary>
+    /// <param name="response"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static Result<T> ToResponseResult<T>(this RestResponse<T> response) where T : class
+    {
+        // In case of timeout
+        if (response.ResponseStatus == ResponseStatus.TimedOut)
+            return Result.Fail("Request timed out").Add408RequestTimeoutError().LogError();
+
+        // Weird case where the status code is 200 but the content is "Bad Gateway"
+        if (response.IsSuccessful && response.Content == "Bad Gateway")
+            return Result.Fail("Server responded with Bad Gateway").Add502BadGatewayError();
+
+        // Successful response
+        if (response.IsSuccessful)
+            return Result.Ok(response.Data).AddStatusCode((int)response.StatusCode).LogDebug();
+
+        var statusDescription = "";
+        if (response.StatusDescription != null)
+        {
+            statusDescription += $"Response: {response.StatusDescription}";
+            if (response.ErrorMessage != null)
+                statusDescription += " - ";
         }
 
-        return ToResponse<T>(policyResult);
+        if (response.ErrorMessage != null)
+            statusDescription += $"ErrorMessage: {response.ErrorMessage}";
+
+        return ParsePlexErrors(response);
     }
+
+    #endregion
+
+    #region Private
 
     private static RestResponse<T> ToResponse<T>(PolicyResult<RestResponse> response)
     {
-        var isSuccessful = response.Outcome == OutcomeType.Successful;
-        if (isSuccessful)
+        if (response.Outcome == OutcomeType.Successful)
         {
             if (response.Result.Content != string.Empty)
-                _log.Verbose("Response Content: {Content}", response.Result.Content);
+                _log.Verbose("Response Content: {@Content}", response.Result.Content);
             else
                 _log.VerboseLine("Response was empty");
 
@@ -96,4 +123,69 @@ public static class RestSharpExtensions
 
         return response.FinalHandledResult as RestResponse<T>;
     }
+
+    /// <summary>
+    /// Parses the Plex errors and returns a <see cref="Result{T}"/>
+    /// </summary>
+    /// <param name="response"></param>
+    /// <returns></returns>
+    private static Result ParsePlexErrors(RestResponse response)
+    {
+        var requestUrl = response.Request.Resource;
+        var statusCode = (int)response.StatusCode;
+        var errorMessage = response.ErrorMessage;
+
+        var result = Result.Fail($"Request to {requestUrl} failed with status code: {statusCode} - {errorMessage}");
+        try
+        {
+            if (!string.IsNullOrEmpty(response.ErrorMessage) && response.ErrorMessage.Contains("Timeout"))
+                result.Add408RequestTimeoutError(response.ErrorMessage);
+            else
+                result.AddStatusCode(statusCode, errorMessage);
+
+            var content = response.Content;
+            if (!string.IsNullOrEmpty(content))
+            {
+                var errorsResponse = JsonSerializer.Deserialize<PlexErrorsResponseDTO>(content, SerializerOptions) ?? new PlexErrorsResponseDTO();
+                if (errorsResponse.Errors != null && errorsResponse.Errors.Any())
+                    result.WithErrors(errorsResponse.ToResultErrors());
+            }
+        }
+        catch (Exception)
+        {
+            return result.WithError(new Error($"Failed to deserialize: {response}"));
+        }
+
+        return result.LogError();
+    }
+
+    private static void Send(this Action<PlexApiClientProgress> action, RestResponse response, int retryAttempt, int retryCount, int timeToWaitSeconds = 0)
+    {
+        var request = response.Request;
+        var msg = "Request successful!";
+
+        if (!response.IsSuccessful && response.ResponseStatus != ResponseStatus.TimedOut)
+            msg = $"Request to: {request.Resource} failed, waiting {timeToWaitSeconds} seconds before retrying again ({retryAttempt} of {retryCount})";
+
+        if (!response.IsSuccessful && response.ResponseStatus == ResponseStatus.TimedOut)
+            msg = $"Request to: {request.Resource} timed-out, waiting {timeToWaitSeconds} seconds before retrying again ({retryAttempt} of {retryCount})";
+
+        action?.Invoke(new PlexApiClientProgress
+        {
+            StatusCode = (int)response.StatusCode,
+            Message = msg,
+            RetryAttemptIndex = retryAttempt,
+            RetryAttemptCount = retryCount,
+            TimeToNextRetry = timeToWaitSeconds,
+            Completed = response.ResponseStatus == ResponseStatus.Completed,
+            ErrorMessage = response.ErrorMessage ?? "",
+            ConnectionSuccessful = response.IsSuccessful,
+        });
+    }
+
+    #endregion
+
+    #endregion
+
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(RestSharpExtensions));
 }

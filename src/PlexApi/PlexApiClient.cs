@@ -1,9 +1,7 @@
 using System.Net;
 using System.Text.Json;
-using FluentResultExtensions;
 using Logging.Interface;
 using PlexApi.Contracts;
-using PlexRipper.PlexApi.Extensions;
 using Polly;
 using RestSharp;
 using RestSharp.Serializers.Json;
@@ -13,16 +11,14 @@ namespace PlexRipper.PlexApi;
 
 public class PlexApiClient
 {
-    private readonly ILog _log;
-    private readonly RestClient _client;
+    #region Fields
 
-    public static JsonSerializerOptions SerializerOptions => new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        PropertyNameCaseInsensitive = true,
-        WriteIndented = true,
-        Converters = { new LongToDateTime() },
-    };
+    private readonly RestClient _client;
+    private readonly ILog _log;
+
+    #endregion
+
+    #region Constructors
 
     public PlexApiClient(ILog log, HttpClient httpClient)
     {
@@ -33,16 +29,36 @@ public class PlexApiClient
             ThrowOnAnyError = false,
         };
         _client = new RestClient(httpClient, options);
+        // HTTPS connections expect an user agent to be set
+        _client.AddDefaultHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64)");
         _client.UseSystemTextJson(SerializerOptions);
         _client.UseDotNetXmlSerializer();
     }
+
+    #endregion
+
+    #region Properties
+
+    public static JsonSerializerOptions SerializerOptions => new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+        WriteIndented = true,
+        Converters = { new LongToDateTime() },
+    };
+
+    #endregion
+
+    #region Methods
+
+    #region Public
 
     public async Task<Result<T>> SendRequestAsync<T>(RestRequest request, int retryCount = 2, Action<PlexApiClientProgress> action = null) where T : class
     {
         _log.Debug("Sending request to: {Request}", _client.BuildUri(request));
 
         var response = await _client.SendRequestWithPolly<T>(request, retryCount, action);
-        return GenerateResponseResult(response);
+        return response.ToResponseResult();
     }
 
     /// <summary>
@@ -98,59 +114,7 @@ public class PlexApiClient
         }
     }
 
-    /// <summary>
-    /// Generates a <see cref="Result{T}"/> from the <see cref="RestResponse{T}"/>
-    /// </summary>
-    /// <param name="response"></param>
-    /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
-    private static Result<T> GenerateResponseResult<T>(RestResponse<T> response) where T : class
-    {
-        var isSuccessful = response.IsSuccessful;
+    #endregion
 
-        var statusCode = (int)response.StatusCode;
-        var statusDescription = isSuccessful ? response.StatusDescription : response.ErrorMessage;
-        if (statusCode == 0 && statusDescription.Contains("Timeout"))
-            statusCode = HttpCodes.Status504GatewayTimeout;
-
-        if (isSuccessful)
-            return Result.Ok(response.Data).AddStatusCode(statusCode, statusDescription).LogDebug();
-
-        return ParsePlexErrors(response);
-    }
-
-    /// <summary>
-    /// Parses the Plex errors and returns a <see cref="Result{T}"/>
-    /// </summary>
-    /// <param name="response"></param>
-    /// <returns></returns>
-    private static Result ParsePlexErrors(RestResponse response)
-    {
-        var requestUrl = response.Request.Resource;
-        var statusCode = (int)response.StatusCode;
-        var errorMessage = response.ErrorMessage;
-
-        var result = Result.Fail($"Request to {requestUrl} failed with status code: {statusCode} - {errorMessage}");
-        try
-        {
-            if (!string.IsNullOrEmpty(response.ErrorMessage) && response.ErrorMessage.Contains("Timeout"))
-                result.Add408RequestTimeoutError(response.ErrorMessage);
-            else
-                result.AddStatusCode(statusCode, errorMessage);
-
-            var content = response.Content;
-            if (!string.IsNullOrEmpty(content))
-            {
-                var errorsResponse = JsonSerializer.Deserialize<PlexErrorsResponseDTO>(content, SerializerOptions) ?? new PlexErrorsResponseDTO();
-                if (errorsResponse.Errors != null && errorsResponse.Errors.Any())
-                    result.WithErrors(errorsResponse.ToResultErrors());
-            }
-        }
-        catch (Exception)
-        {
-            return result.WithError(new Error($"Failed to deserialize: {response}"));
-        }
-
-        return result.LogError();
-    }
+    #endregion
 }

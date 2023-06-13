@@ -16,7 +16,7 @@
 			<q-file-size :size="totalSize" class="q-ml-sm" />
 		</template>
 		<template #default>
-			<QTreeViewTable :columns="columns" :nodes="downloadPreview" default-expand-all connectors />
+			<QTreeViewTable :columns="columns" :nodes="downloadPreview" default-expand-all connectors not-selectable />
 		</template>
 		<template #actions="{ close }">
 			<CancelButton @click="close()" />

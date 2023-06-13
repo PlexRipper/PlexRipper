@@ -145,6 +145,9 @@
         },
         "q-tree-view-table-row": {
             "invalid-node": "The node was undefined or null"
+        },
+        "server-library-destinations-tab-content": {
+            "no-libraries": "This Plex server has no libraries to set the default destination for"
         }
     },
     "confirmation": {

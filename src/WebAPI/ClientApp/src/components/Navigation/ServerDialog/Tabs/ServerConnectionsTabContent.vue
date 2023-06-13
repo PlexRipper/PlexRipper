@@ -81,12 +81,12 @@ function checkPlexConnection(plexServerConnectionId: number) {
 	);
 }
 
-const setPreferredPlexServerConnection = (value: number) => {
+function setPreferredPlexServerConnection(value: number) {
 	set(preferredConnectionId, value);
 	useSubscription(ServerService.setPreferredPlexServerConnection(props.plexServer?.id ?? -1, value).subscribe());
-};
+}
 
-const setup = () => {
+function setup() {
 	useSubscription(
 		ServerConnectionService.getServerConnectionsByServerId(props.plexServer?.id ?? -1).subscribe((connections) => {
 			set(serverConnections, connections);
@@ -97,7 +97,7 @@ const setup = () => {
 			set(progress, progressData);
 		}),
 	);
-};
+}
 
 onMounted(() => {
 	Log.info('ServerConnectionsTabContent', 'onMounted');

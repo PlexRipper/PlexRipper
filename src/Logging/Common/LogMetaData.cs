@@ -6,6 +6,8 @@ namespace Logging.Common;
 
 public record LogMetaData
 {
+    #region Constructors
+
     public LogMetaData(string className, string memberName, int lineNumber)
     {
         ClassName = className;
@@ -21,7 +23,11 @@ public record LogMetaData
         LineNumber = lineNumber;
     }
 
-    private ILogger _logger { get; init; }
+    #endregion
+
+    #region Properties
+
+    private ILogger _logger { get; }
 
     public string ClassName { get; init; }
     public string MethodName { get; init; }
@@ -32,6 +38,12 @@ public record LogMetaData
     public LogEventLevel LogLevel { get; set; }
     public Exception? Exception { get; set; }
 
+    #endregion
+
+    #region Methods
+
+    #region Public
+
     public LogMetaData Update(LogEventLevel logLevel, string messageTemplate, params object?[]? propertyValues)
     {
         LogLevel = logLevel;
@@ -40,11 +52,26 @@ public record LogMetaData
         return this;
     }
 
+    public void Write()
+    {
+        _logger.Write(ToEvent());
+    }
+
+    public string ToLogString()
+    {
+        using var writer = new StringWriter();
+        LogConfig.TemplateTextFormatter.Format(ToEvent(), writer);
+        return writer.ToString();
+    }
+
+    #endregion
+
+    #region Private
+
     private LogEvent ToEvent()
     {
         var dateTimeOffset = DateTimeOffset.Now;
 
-        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
         _logger.BindMessageTemplate(MessageTemplate, PropertyValues, out var parsedTemplate, out var boundProperties);
         if (parsedTemplate is null)
         {
@@ -65,15 +92,7 @@ public record LogMetaData
         return new LogEvent(dateTimeOffset, LogLevel, Exception, parsedTemplate, properties);
     }
 
-    public void Write()
-    {
-        _logger.Write(ToEvent());
-    }
+    #endregion
 
-    public string ToLogString()
-    {
-        using var writer = new StringWriter();
-        LogConfig.TemplateTextFormatter.Format(ToEvent(), writer);
-        return writer.ToString();
-    }
+    #endregion
 }

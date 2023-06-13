@@ -11,7 +11,7 @@
 		ref="qTreeViewTableTreeRef"
 		:ticked="selected"
 		class="q-tree-view-table q-ma-sm"
-		:tick-strategy="isSelectable ? 'leaf' : 'none'"
+		:tick-strategy="!notSelectable ? 'leaf' : 'none'"
 		:nodes="nodes"
 		node-key="id"
 		:no-connectors="!connectors"
@@ -20,7 +20,7 @@
 		:label-key="labelKey"
 		@update:ticked="onSelected($event as number[])">
 		<template #default-header="{ node }">
-			<QTreeViewTableRow :columns="columns" :selectable="isSelectable" :node="node" @action="$emit('action', $event)" />
+			<QTreeViewTableRow :columns="columns" :selectable="!notSelectable" :node="node" @action="$emit('action', $event)" />
 		</template>
 	</QTree>
 </template>
@@ -50,12 +50,14 @@ const props = withDefaults(
 		defaultExpandAll?: boolean;
 		selected?: number[];
 		connectors?: boolean;
+		notSelectable?: boolean;
 	}>(),
 	{
 		nodes: () => [],
 		labelKey: 'label',
 		selected: () => [],
 		connectors: false,
+		notSelectable: false,
 	},
 );
 
@@ -72,10 +74,6 @@ const emits = defineEmits<{
 	 */
 	(e: 'aggregate-selected', payload: number[]): void;
 }>();
-
-const isSelectable = computed((): boolean => {
-	return props.selected !== null;
-});
 
 const qTreeViewTableTreeRef = ref<InstanceType<typeof QTree> | null>(null);
 

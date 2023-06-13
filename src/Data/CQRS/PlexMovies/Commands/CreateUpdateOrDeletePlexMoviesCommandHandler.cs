@@ -29,7 +29,7 @@ public class CreateUpdateOrDeletePlexMoviesHandler : BaseHandler, IRequestHandle
         var plexLibrary = command.PlexLibrary;
         var apiPlexMovies = plexLibrary.Movies;
 
-        _log.Debug("Starting adding or updating movies in library: {PlexLibraryTitle}", plexLibrary.Title);
+        _log.Debug("Starting adding or updating movies in library: {PlexLibraryName}", plexLibrary.Title);
         var stopWatch = new Stopwatch();
         stopWatch.Start();
 
@@ -76,13 +76,13 @@ public class CreateUpdateOrDeletePlexMoviesHandler : BaseHandler, IRequestHandle
 
         if (addCount == 0 && updateCount == 0 && deleteMovies.Count == 0)
         {
-            _log.Information("No changes for library \"{PlexLibraryTitle}\"", plexLibrary.Title);
+            _log.Information("No changes for library \"{PlexLibraryName}\"", plexLibrary.Title);
             return Result.Ok();
         }
 
         await SaveChangesAsync(cancellationToken);
 
-        _log.Debug("Finished syncing plexLibrary: {PlexLibraryTitle} with id: {PlexLibraryId} in {TotalSeconds} seconds", plexLibrary.Title,
+        _log.Debug("Finished syncing plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalSeconds} seconds", plexLibrary.Title,
             plexLibrary.Id, stopWatch.Elapsed.TotalSeconds);
         _log.Debug("Add count: {AddCount}, Update count: {UpdateCount}, Delete count: {DeleteMoviesCount}", addCount, updateCount, deleteMovies.Count);
 

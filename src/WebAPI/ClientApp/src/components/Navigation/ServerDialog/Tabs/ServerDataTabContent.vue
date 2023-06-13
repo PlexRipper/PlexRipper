@@ -1,10 +1,10 @@
 <template>
 	<!--	Server Data Tab Content	-->
-	<table class="section-table">
+	<q-markup-table wrap-cells>
 		<tbody v-if="plexServer">
 			<!-- Machine Identifier -->
 			<tr>
-				<td style="width: 25%">{{ t('components.server-dialog.tabs.server-data.machine-id') }}:</td>
+				<td style="width: 30%">{{ t('components.server-dialog.tabs.server-data.machine-id') }}:</td>
 				<td>{{ plexServer.machineIdentifier }}</td>
 			</tr>
 			<!-- Device -->
@@ -41,31 +41,38 @@
 					<q-status pulse :value="hasSuccessServerStatus" />
 				</td>
 			</tr>
+			<!--	Check Server Action	-->
+			<tr>
+				<td>
+					<BaseButton text-id="check-server-status" :loading="checkServerStatusLoading" @click="checkServer" />
+				</td>
+				<td>
+					{{ checkServerStatusMessage }}
+				</td>
+			</tr>
 		</tbody>
-		<tbody>
+		<tbody v-else>
 			<tr>
 				<td>{{ t('general.error.invalid-server') }}</td>
 			</tr>
 		</tbody>
-	</table>
-	<!--	Check Server Action	-->
-	<q-card-actions align="right">
-		<BaseButton text-id="check-server-status" :loading="checkServerStatusLoading" @click="checkServer" />
-	</q-card-actions>
+	</q-markup-table>
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
-import { set } from '@vueuse/core';
-import type { PlexServerDTO } from '@dto/mainApi';
-import { PlexServerConnectionDTO } from '@dto/mainApi';
-import { ServerConnectionService, ServerService } from '@service';
+import { get, set } from '@vueuse/core';
+import type { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
+import { PlexServerConnectionDTO, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
+import { ServerConnectionService, ServerService, SignalrService } from '@service';
 
 const { t } = useI18n();
 const checkServerStatusLoading = ref(false);
 const hasSuccessServerStatus = ref(false);
 const serverConnections = ref<PlexServerConnectionDTO[]>([]);
+const serverStatus = ref<PlexServerStatusDTO | null>(null);
+const progress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
 
 const props = withDefaults(
 	defineProps<{
@@ -73,29 +80,47 @@ const props = withDefaults(
 		isVisible: boolean;
 	}>(),
 	{
+		plexServer: null,
 		isVisible: false,
 	},
 );
 
+const plexServerId = computed(() => props.plexServer?.id ?? -1);
+
+const checkServerStatusMessage = computed(() => {
+	if (get(checkServerStatusLoading)) {
+		return progress.value.map((x) => x.message).join('\n');
+	}
+
+	return get(serverStatus)?.statusMessage ?? '';
+});
+
 function checkServer() {
 	set(checkServerStatusLoading, true);
 	useSubscription(
-		ServerService.checkServerStatus(props.plexServer?.id ?? -1).subscribe((value) => {
-			set(hasSuccessServerStatus, value);
+		ServerService.checkServerStatus(get(plexServerId)).subscribe((value) => {
+			set(hasSuccessServerStatus, value?.isSuccessful ?? false);
 			set(checkServerStatusLoading, false);
+			set(serverStatus, value ?? null);
 		}),
 	);
 }
 
 function setup() {
 	useSubscription(
-		ServerConnectionService.getServerConnectionsByServerId(props.plexServer?.id ?? -1).subscribe((connections) => {
+		ServerConnectionService.getServerConnectionsByServerId(get(plexServerId)).subscribe((connections) => {
 			set(serverConnections, connections);
 		}),
 	);
 	useSubscription(
-		ServerService.getServerStatus(props.plexServer?.id ?? -1).subscribe((value) => {
+		ServerService.getServerStatus(get(plexServerId)).subscribe((value) => {
 			set(hasSuccessServerStatus, value);
+		}),
+	);
+
+	useSubscription(
+		SignalrService.getServerConnectionProgressByPlexServerId(get(plexServerId)).subscribe((progressData) => {
+			set(progress, progressData);
 		}),
 	);
 }

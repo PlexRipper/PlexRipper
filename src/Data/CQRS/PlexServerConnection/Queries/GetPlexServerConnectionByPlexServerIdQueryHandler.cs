@@ -39,7 +39,7 @@ public class GetPlexServerConnectionByPlexServerIdQueryHandler : BaseHandler,
                 return Result.Ok(connection);
 
             _log.Here()
-                .Verbose("Could not find preferred connection with id {PlexServerConnectionId} for server {Name}", plexServer.PreferredConnectionId,
+                .Verbose("Could not find preferred connection with id {PlexServerConnectionId} for server {PlexServerName}", plexServer.PreferredConnectionId,
                     plexServer.Name);
         }
 
@@ -50,7 +50,7 @@ public class GetPlexServerConnectionByPlexServerIdQueryHandler : BaseHandler,
         if (publicConnection is not null)
             return Result.Ok(publicConnection);
 
-        _log.Here().Verbose("Could not find connection based on public address: {PublicAddress} for server {Name}", plexServer.PublicAddress, plexServer.Name);
+        _log.Here().Verbose("Could not find connection based on public address: {PublicAddress} for server {PlexServerName}", plexServer.PublicAddress, plexServer.Name);
 
         // Find based on what's successful
         var successPlexServerConnections = plexServerConnections

@@ -6,9 +6,13 @@ namespace FluentResults;
 
 public static partial class ResultExtensions
 {
+    #region Properties
+
     public static string StatusCodeName => "StatusCode";
 
     public static string ErrorMessageName => "ErrorMessage";
+
+    #endregion
 
     #region Implementation
 
@@ -341,7 +345,7 @@ public static partial class ResultExtensions
 
     #region 502
 
-    public static bool Has502BadGatewayNotFoundError(this Result result)
+    public static bool Has502BadGatewayError(this Result result)
     {
         return result.HasStatusCode(HttpCodes.Status502BadGateway);
     }
@@ -412,7 +416,7 @@ public static partial class ResultExtensions
         return result.AddStatusCodeSuccess(HttpCodes.Status204NoContent, message);
     }
 
-    public static Result<T> Create204NoContentResult<T>(T value,string message = "")
+    public static Result<T> Create204NoContentResult<T>(T value, string message = "")
     {
         return CreateSuccessStatusCodeResult<T>(value, HttpCodes.Status204NoContent, message);
     }
@@ -477,7 +481,7 @@ public static partial class ResultExtensions
 
     #region 502
 
-    public static bool Has502BadGatewayNotFoundError<T>(this Result<T> result)
+    public static bool Has502BadGatewayError<T>(this Result<T> result)
     {
         return result.HasStatusCode(HttpCodes.Status502BadGateway);
     }

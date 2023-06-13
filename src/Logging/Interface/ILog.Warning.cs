@@ -15,6 +15,18 @@ public partial interface ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!);
 
+    #region Exception
+
+    [MessageTemplateFormatMethod("messageTemplate")]
+    LogMetaData Warning(
+        Exception ex,
+        string messageTemplate,
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!);
+
+    #endregion
+
     [MessageTemplateFormatMethod("messageTemplate")]
     LogMetaData Warning<T>(
         string messageTemplate,

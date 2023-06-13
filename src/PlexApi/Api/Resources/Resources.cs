@@ -20,9 +20,9 @@ public class ServerResource
 
     public string ClientIdentifier { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public string CreatedAt { get; set; }
 
-    public DateTime LastSeenAt { get; set; }
+    public string LastSeenAt { get; set; }
 
     public string Provides { get; set; }
 

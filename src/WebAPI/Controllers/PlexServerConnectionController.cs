@@ -1,5 +1,6 @@
 ﻿using Application.Contracts;
 using AutoMapper;
+using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.WebAPI.Common.DTO;
@@ -11,16 +12,31 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class PlexServerConnectionController : BaseController
 {
+    #region Fields
+
+    private readonly IMediator _mediator;
     private readonly IPlexServerConnectionsService _plexServerConnectionsService;
+
+    #endregion
+
+    #region Constructors
 
     public PlexServerConnectionController(
         ILog log,
         IMapper mapper,
+        IMediator mediator,
         IPlexServerConnectionsService plexServerConnectionsService,
         INotificationsService notificationsService) : base(log, mapper, notificationsService)
     {
+        _mediator = mediator;
         _plexServerConnectionsService = plexServerConnectionsService;
     }
+
+    #endregion
+
+    #region Methods
+
+    #region Public
 
     // GET api/<PlexServerConnectionController>/
     [HttpGet]
@@ -56,10 +72,21 @@ public class PlexServerConnectionController : BaseController
         if (id <= 0)
             return BadRequestInvalidId();
 
-        return ToActionResult<PlexServerStatus, PlexServerStatusDTO>(await _plexServerConnectionsService.CheckPlexServerConnectionStatusAsync(id));
+        var plexServerConnectionResult = await _mediator.Send(new GetPlexServerConnectionByIdQuery(id));
+        if (plexServerConnectionResult.IsFailed)
+            return ToActionResult(plexServerConnectionResult.ToResult());
+
+        var result = await _plexServerConnectionsService
+            .CheckPlexServerConnectionStatusAsync(plexServerConnectionResult.Value);
+        return ToActionResult<PlexServerStatus, PlexServerStatusDTO>(result);
     }
 
-    // GET api/<PlexServerController>/check/by-server/5/
+    /// <summary>
+    /// Checks if the server is currently online
+    /// GET: api/<PlexServerController>/check/by-server/5/
+    /// </summary>
+    /// <param name="plexServerId"></param>
+    /// <returns></returns>
     [HttpGet("check/by-server/{plexServerId:int}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexServerStatusDTO>>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
@@ -73,4 +100,8 @@ public class PlexServerConnectionController : BaseController
 
         return ToActionResult<List<PlexServerStatus>, List<PlexServerStatusDTO>>(result);
     }
+
+    #endregion
+
+    #endregion
 }

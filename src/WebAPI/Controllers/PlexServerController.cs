@@ -16,6 +16,7 @@ public class PlexServerController : BaseController
     #region Fields
 
     private readonly IMediator _mediator;
+    private readonly IPlexServerConnectionsService _plexServerConnectionsService;
     private readonly IPlexServerService _plexServerService;
     private readonly ISyncServerScheduler _syncServerScheduler;
 
@@ -28,11 +29,13 @@ public class PlexServerController : BaseController
         IMapper mapper,
         IMediator mediator,
         IPlexServerService plexServerService,
+        IPlexServerConnectionsService plexServerConnectionsService,
         ISyncServerScheduler syncServerScheduler,
         INotificationsService notificationsService) : base(log, mapper, notificationsService)
     {
         _mediator = mediator;
         _plexServerService = plexServerService;
+        _plexServerConnectionsService = plexServerConnectionsService;
         _syncServerScheduler = syncServerScheduler;
     }
 
@@ -124,6 +127,27 @@ public class PlexServerController : BaseController
             return BadRequestInvalidId(nameof(plexServerConnectionId));
 
         return ToActionResult(await _plexServerService.SetPreferredConnection(plexServerId, plexServerConnectionId));
+    }
+
+    /// <summary>
+    ///     Checks if the server is currently online and available.
+    /// </summary>
+    /// <param name="plexServerId"></param>
+    /// <returns></returns>
+    [HttpGet("status-check/{plexServerId:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerStatusDTO>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
+    public async Task<IActionResult> CheckPlexServerStatus(int plexServerId)
+    {
+        if (plexServerId <= 0)
+            return BadRequestInvalidId(nameof(plexServerId));
+
+        var plexServerConnectionResult = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexServerId));
+
+        var result = await _plexServerConnectionsService.CheckPlexServerConnectionStatusAsync(plexServerConnectionResult.Value);
+
+        return ToActionResult<PlexServerStatus, PlexServerStatusDTO>(result);
     }
 
     #endregion

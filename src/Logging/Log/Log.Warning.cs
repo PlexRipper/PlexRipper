@@ -17,8 +17,19 @@ public partial class Log : ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!)
     {
-        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
         return Write(LogEventLevel.Warning, messageTemplate, sourceFilePath, memberName, sourceLineNumber);
+    }
+
+    /// <inheritdoc/>
+    [MessageTemplateFormatMethod("messageTemplate")]
+    public LogMetaData Warning(
+        Exception ex,
+        string messageTemplate,
+        [CallerMemberName] string memberName = default!,
+        [CallerFilePath] string sourceFilePath = default!,
+        [CallerLineNumber] int sourceLineNumber = default!)
+    {
+        return Write(LogEventLevel.Warning, ex, messageTemplate, sourceFilePath, memberName, sourceLineNumber);
     }
 
     [MessageTemplateFormatMethod("messageTemplate")]
@@ -29,7 +40,6 @@ public partial class Log : ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!)
     {
-        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
         return Write(LogEventLevel.Warning, messageTemplate, sourceFilePath, memberName, sourceLineNumber, propertyValue);
     }
 
@@ -42,7 +52,6 @@ public partial class Log : ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!)
     {
-        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
         return Write(LogEventLevel.Warning, messageTemplate, sourceFilePath, memberName, sourceLineNumber, propertyValue0, propertyValue1);
     }
 
@@ -56,7 +65,6 @@ public partial class Log : ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!)
     {
-        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
         return Write(LogEventLevel.Warning, messageTemplate, sourceFilePath, memberName, sourceLineNumber, propertyValue0, propertyValue1,
             propertyValue2);
     }
@@ -72,7 +80,6 @@ public partial class Log : ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!)
     {
-        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
         return Write(LogEventLevel.Warning, messageTemplate, sourceFilePath, memberName, sourceLineNumber, propertyValue0, propertyValue1,
             propertyValue2,
             propertyValue3);
@@ -90,7 +97,6 @@ public partial class Log : ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!)
     {
-        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
         return Write(LogEventLevel.Warning, messageTemplate, sourceFilePath, memberName, sourceLineNumber, propertyValue0, propertyValue1,
             propertyValue2,
             propertyValue3, propertyValue4);
@@ -109,7 +115,6 @@ public partial class Log : ILog
         [CallerFilePath] string sourceFilePath = default!,
         [CallerLineNumber] int sourceLineNumber = default!)
     {
-        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
         return Write(LogEventLevel.Warning, messageTemplate, sourceFilePath, memberName, sourceLineNumber, propertyValue0, propertyValue1, propertyValue2,
             propertyValue3, propertyValue4, propertyValue5);
     }

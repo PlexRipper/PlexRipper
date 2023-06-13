@@ -6,6 +6,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<IsPackable>false</IsPackable>
 		<IncludeSymbolsInSingleFile>true</IncludeSymbolsInSingleFile>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
 	</PropertyGroup>
 
 	<ItemGroup>

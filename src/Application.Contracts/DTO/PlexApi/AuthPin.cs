@@ -1,7 +1,11 @@
-﻿namespace Application.Contracts;
+﻿using FluentResults;
+
+namespace Application.Contracts;
 
 public class AuthPin
 {
+    #region Properties
+
     public List<PlexError> Errors { get; set; }
 
     public int Id { get; set; }
@@ -23,4 +27,6 @@ public class AuthPin
     public string AuthToken { get; set; }
 
     public string NewRegistration { get; set; }
+
+    #endregion
 }

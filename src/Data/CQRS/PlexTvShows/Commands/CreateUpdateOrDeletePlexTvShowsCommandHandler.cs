@@ -40,7 +40,7 @@ public class CreateUpdateOrDeletePlexTvShowsCommandHandler : BaseHandler, IReque
     {
         var plexLibrary = command.PlexLibrary;
 
-        _log.Debug("Starting adding, updating or deleting of tv shows in library: {PlexLibraryTitle} with id:  {PlexLibraryId}", plexLibrary.Title,
+        _log.Debug("Starting adding, updating or deleting of tv shows in library: {PlexLibraryName} with id:  {PlexLibraryId}", plexLibrary.Title,
             plexLibrary.Id);
 
         var stopWatch = new Stopwatch();
@@ -187,7 +187,7 @@ public class CreateUpdateOrDeletePlexTvShowsCommandHandler : BaseHandler, IReque
 
         stopWatch.Stop();
         _log.Information(
-            "Finished updating plexLibrary: {PlexLibraryTitle} with id: {PlexLibraryId} in {TotalSeconds} seconds", plexLibrary.Title, plexLibrary.Id,
+            "Finished updating plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalSeconds} seconds", plexLibrary.Title, plexLibrary.Id,
             stopWatch.Elapsed.TotalSeconds);
         return Result.Ok(true);
     }

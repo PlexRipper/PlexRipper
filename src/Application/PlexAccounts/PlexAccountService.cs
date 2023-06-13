@@ -8,12 +8,17 @@ namespace PlexRipper.Application.PlexAccounts;
 
 public class PlexAccountService : IPlexAccountService
 {
+    #region Fields
+
+    private readonly IInspectServerScheduler _inspectServerScheduler;
     private readonly ILog _log;
     private readonly IMediator _mediator;
 
     private readonly IPlexApiService _plexApiService;
 
-    private readonly IInspectServerScheduler _inspectServerScheduler;
+    #endregion
+
+    #region Constructors
 
     public PlexAccountService(
         ILog log,
@@ -27,6 +32,12 @@ public class PlexAccountService : IPlexAccountService
         _inspectServerScheduler = inspectServerScheduler;
     }
 
+    #endregion
+
+    #region Methods
+
+    #region Public
+
     public virtual async Task<Result<PlexAccount>> ValidatePlexAccountAsync(PlexAccount plexAccount)
     {
         if (plexAccount is null)
@@ -39,23 +50,16 @@ public class PlexAccountService : IPlexAccountService
         if (plexSignInResult.IsFailed)
         {
             // Check if 2FA might be enabled
-            if (plexSignInResult.HasError<PlexError>())
+            if (plexSignInResult.HasPlexErrorEnterVerificationCode())
             {
-                var errors = plexSignInResult.Errors.OfType<PlexError>().ToList();
-
-                // If the message is "Please enter the verification code" then 2FA is enabled.
-                var has2Fa = errors.Any(x => x.Code == 1029);
-                if (has2Fa)
-                {
-                    plexAccount.Is2Fa = true;
-                    return Result.Ok(plexAccount);
-                }
+                plexAccount.Is2Fa = true;
+                return Result.Ok(plexAccount);
             }
 
             return plexSignInResult;
         }
 
-        _log.Debug("The PlexAccount with displayName {DisplayName} has been validated", plexAccount.DisplayName);
+        _log.Debug("The PlexAccount with displayName {PlexAccountDisplayName} has been validated", plexAccount.DisplayName);
         return plexSignInResult;
     }
 
@@ -98,13 +102,17 @@ public class PlexAccountService : IPlexAccountService
 
         if (result.Value != null)
         {
-            _log.Warning("An Account with the username: {Username} already exists", username);
+            _log.Warning("An Account with the username: {UserName} already exists", username);
             return Result.Ok(false);
         }
 
         _log.Debug("The username: {UserName} is available", username);
         return Result.Ok(true);
     }
+
+    #endregion
+
+    #endregion
 
     #region Authentication
 
@@ -161,8 +169,7 @@ public class PlexAccountService : IPlexAccountService
     /// <returns>A list of all <see cref="PlexAccount"/>s.</returns>
     public Task<Result<List<PlexAccount>>> GetAllPlexAccountsAsync(bool onlyEnabled = false)
     {
-        // ReSharper disable once TemplateIsNotCompileTimeConstantProblem
-        _log.DebugLine(onlyEnabled ? "Returning only enabled account" : "Returning all accounts");
+        _log.Debug("Returning {Category} PlexAccounts", onlyEnabled ? "only enabled" : "all");
         return _mediator.Send(new GetAllPlexAccountsQuery(true, true, onlyEnabled));
     }
 

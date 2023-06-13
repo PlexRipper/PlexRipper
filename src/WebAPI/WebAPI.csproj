@@ -16,6 +16,8 @@
 		<SpaRoot>ClientApp\</SpaRoot>
 		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
 	</PropertyGroup>
 	<ItemGroup>
 		<InternalsVisibleTo Include="FluentResultExtension.UnitTests" />

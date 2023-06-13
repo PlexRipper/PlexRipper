@@ -24,7 +24,7 @@ public class CreatePlexServerStatusCommandHandler : BaseHandler, IRequestHandler
 
     public async Task<Result<int>> Handle(CreatePlexServerStatusCommand command, CancellationToken cancellationToken)
     {
-        _log.Debug("Creating a new PlexServerStatus {@Status} in the database for {ServerId} ", command.PlexServerStatus,
+        _log.Debug("Creating a new PlexServerStatus {@PlexServerStatus} in the database for {ServerId} ", command.PlexServerStatus,
             command.PlexServerStatus.PlexServerId);
 
         command.PlexServerStatus.PlexServer = null;

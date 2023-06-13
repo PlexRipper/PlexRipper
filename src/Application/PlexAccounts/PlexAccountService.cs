@@ -169,7 +169,7 @@ public class PlexAccountService : IPlexAccountService
     /// <returns>A list of all <see cref="PlexAccount"/>s.</returns>
     public Task<Result<List<PlexAccount>>> GetAllPlexAccountsAsync(bool onlyEnabled = false)
     {
-        _log.DebugLine("Returning {Category} PlexAccounts", onlyEnabled ? "only enabled" : "all");
+        _log.Debug("Returning {Category} PlexAccounts", onlyEnabled ? "only enabled" : "all");
         return _mediator.Send(new GetAllPlexAccountsQuery(true, true, onlyEnabled));
     }
 

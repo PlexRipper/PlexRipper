@@ -1,5 +1,39 @@
 PlexRipper Changelog
 
+# [0.13.0-dev.1](https://github.com/PlexRipper/PlexRipper/compare/v0.12.0...v0.13.0-dev.1) (2023-06-13)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fixed Plex server HTTPS connections not working due to missing user-agent ([8f9a48a](https://github.com/PlexRipper/PlexRipper/commit/8f9a48a1376a09e2ba897cc4847d85e900bfe3af))
+* **GithubActions:** Fixed the caching of back-end nuget packages by specificing the package.lock.json path ([d5e67b3](https://github.com/PlexRipper/PlexRipper/commit/d5e67b3d91a8fc4af173dfc23bc3b91d8e932373))
+* **WebAPI:** Fixed the CreatedAt and LastSeen values being incorrect when displaying the Server Dialog ([4c0bd15](https://github.com/PlexRipper/PlexRipper/commit/4c0bd159a608815d3f39bce05bcaaa3224a3d07a))
+* **WebAPI:** Fixed the download confirmation dialog displaying a checkbox which is not needed ([8c894cb](https://github.com/PlexRipper/PlexRipper/commit/8c894cb9cb9a0da869e529b73303d7360c889ce2))
+* **WebAPI:** Fixed the downloading failing when connecting with an HTTPS connection ([2ed6c48](https://github.com/PlexRipper/PlexRipper/commit/2ed6c48b817d68d61d3601265144a56b0e14a586))
+* **Web-UI:** Fixed the empty Server Dialog -> Download Destinations page when no libraries are available by displaying an error text ([c527d6b](https://github.com/PlexRipper/PlexRipper/commit/c527d6bc5d8fee9987f19fda1b6adc7ae7d5afa9))
+* **WebAPI:** Fixed the logging being formatted in a bloated redundant way, it should now be more compact ([9bc1b8d](https://github.com/PlexRipper/PlexRipper/commit/9bc1b8d651337f70addbd57a1625cf04d323779e))
+* **WebAPI:** Fixed the UrlMaskingOperator being matched on everything ([e5a5579](https://github.com/PlexRipper/PlexRipper/commit/e5a5579b3b44af213045954000b6a28ea5194b32))
+* **Web-UI:** Fixed the width being too large of the download details dialog ([3d87b7a](https://github.com/PlexRipper/PlexRipper/commit/3d87b7a7d8c8d7ff4d51b5742e5d30549ff8db01))
+* **GithubActions:** Specified the solution to build ([0f62a44](https://github.com/PlexRipper/PlexRipper/commit/0f62a44ccd9ef4a53ff7a205e9a1b84c5ffb839f))
+* **GithubActions:** Specified the solution to restore ([43a188b](https://github.com/PlexRipper/PlexRipper/commit/43a188b9f4b1584eea62a0a228e6aa95603ae2b1))
+
+
+### Features
+
+* **WebAPI:** All sensitive data that is logged is now masked, which should make sharing the logs much safer. ([de96ee3](https://github.com/PlexRipper/PlexRipper/commit/de96ee3d7036325e5c15085d98b29cc2d3e57dec))
+* **Web-UI:** Improved the layout of the server data displayed in the Server settings dialog ([b456ed0](https://github.com/PlexRipper/PlexRipper/commit/b456ed06cf530de69fc19d1a3e85de25a4478806))
+
+
+### Performance Improvements
+
+* **Docker:** Added --no-restore to the build step and used --locked-mode to force the use of the NuGet package.lock.json ([fb1a63f](https://github.com/PlexRipper/PlexRipper/commit/fb1a63f80754a0665302f949936e4e0aa0269a4c))
+* **GithubActions:** Possible optimization to share the build step for the back-end testing jobs ([6e38832](https://github.com/PlexRipper/PlexRipper/commit/6e38832a228e4516808a16082cb55fc0e5354e94))
+
+
+### Reverts
+
+* **GithubActions:** Revert attempt to split the build step for back-end testing ([77e4ec8](https://github.com/PlexRipper/PlexRipper/commit/77e4ec874e1745aa49adf1c8c303ba703acb97b4))
+
 # [0.12.0](https://github.com/PlexRipper/PlexRipper/compare/v0.11.1...v0.12.0) (2023-05-29)
 
 

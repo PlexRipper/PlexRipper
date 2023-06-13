@@ -79,7 +79,8 @@ jobs:
 #        env:
 #          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
 #          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-  Build-Back-End:
+  # Back-End Unit Tests
+  Back-End-Unit-Tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source Code
@@ -94,26 +95,10 @@ jobs:
         run: dotnet restore PlexRipper.sln --locked-mode
       - name: Build
         run: dotnet build PlexRipper.sln --no-restore
-  # Back-End Unit Tests
-  Back-End-Unit-Tests:
-    needs: [ Build-Back-End ]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v3
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 7.x.x
-          cache: true
-          cache-dependency-path: "**/package-lock.json"
-      - name: Restore dependencies
-        run: dotnet restore PlexRipper.sln --locked-mode
       - name: Unit Tests
         run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal
   # Back-End Integration Tests
   Back-End-Integration-Tests:
-    needs: [ Build-Back-End ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source Code
@@ -126,6 +111,8 @@ jobs:
           cache-dependency-path: "**/package-lock.json"
       - name: Restore dependencies
         run: dotnet restore PlexRipper.sln --locked-mode
+      - name: Build
+        run: dotnet build PlexRipper.sln --no-restore
       - name: Integration Tests
         run: dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal
   # Ensure the Docker image can be built without errors

@@ -9,6 +9,7 @@
 		<AssemblyName>PlexRipper.DownloadManager</AssemblyName>
 		<OutputType>Library</OutputType>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
 	</PropertyGroup>
 
 	<ItemGroup>

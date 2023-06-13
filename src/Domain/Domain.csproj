@@ -7,6 +7,7 @@
 		<RootNamespace>PlexRipper.Domain</RootNamespace>
 		<AssemblyName>PlexRipper.Domain</AssemblyName>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
 	</PropertyGroup>
 
 	<ItemGroup>

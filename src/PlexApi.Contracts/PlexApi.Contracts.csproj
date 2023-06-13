@@ -6,6 +6,7 @@
 		<Nullable>enable</Nullable>
 		<LangVersion>11</LangVersion>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
 	</PropertyGroup>
 
 	<ItemGroup>

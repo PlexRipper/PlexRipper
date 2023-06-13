@@ -8,6 +8,7 @@
 		<AssemblyName>PlexRipper.PlexApi</AssemblyName>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
 	</PropertyGroup>
 
 	<ItemGroup>

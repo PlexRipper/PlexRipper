@@ -30,6 +30,7 @@ export default defineNuxtConfig({
 		'@nuxtjs/i18n',
 		'@vue-macros/nuxt',
 		'nuxt-vitest',
+		'@pinia/nuxt',
 	],
 	quasar: {
 		// Plugins: https://quasar.dev/quasar-plugins

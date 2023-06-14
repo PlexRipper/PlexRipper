@@ -22,6 +22,8 @@ public class SettingsModel : ISettingsModel
 
     public ILanguageSettings LanguageSettings { get; set; }
 
+    public IDebugSettings DebugSettings { get; set; }
+
     public IServerSettings ServerSettings { get; set; }
 
     #endregion
@@ -31,6 +33,7 @@ public class SettingsModel : ISettingsModel
         return new SettingsModel()
         {
             GeneralSettings = new GeneralSettingsModule(),
+            DebugSettings = new DebugSettingsModule(),
             ConfirmationSettings = new ConfirmationSettingsModule(),
             DateTimeSettings = new DateTimeSettingsModule(),
             DisplaySettings = new DisplaySettingsModule(),

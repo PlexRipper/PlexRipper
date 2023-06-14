@@ -23,6 +23,8 @@ public class UserSettings : IUserSettings
 
     private readonly IGeneralSettingsModule _generalSettingsModule;
 
+    private readonly IDebugSettingsModule _debugSettingsModule;
+
     private readonly ILanguageSettingsModule _languageSettingsModule;
 
     private readonly IServerSettingsModule _serverSettingsModule;
@@ -39,6 +41,7 @@ public class UserSettings : IUserSettings
     /// <param name="displaySettingsModule"></param>
     /// <param name="downloadManagerSettingsModule"></param>
     /// <param name="generalSettingsModule"></param>
+    /// <param name="debugSettingsModule"></param>
     /// <param name="languageSettingsModule"></param>
     /// <param name="serverSettingsModule"></param>
     public UserSettings(
@@ -48,6 +51,7 @@ public class UserSettings : IUserSettings
         IDisplaySettingsModule displaySettingsModule,
         IDownloadManagerSettingsModule downloadManagerSettingsModule,
         IGeneralSettingsModule generalSettingsModule,
+        IDebugSettingsModule debugSettingsModule,
         ILanguageSettingsModule languageSettingsModule,
         IServerSettingsModule serverSettingsModule)
     {
@@ -57,6 +61,7 @@ public class UserSettings : IUserSettings
         _displaySettingsModule = displaySettingsModule;
         _downloadManagerSettingsModule = downloadManagerSettingsModule;
         _generalSettingsModule = generalSettingsModule;
+        _debugSettingsModule = debugSettingsModule;
         _languageSettingsModule = languageSettingsModule;
         _serverSettingsModule = serverSettingsModule;
 
@@ -67,6 +72,7 @@ public class UserSettings : IUserSettings
                 _displaySettingsModule.ModuleHasChanged.Select(_ => 1),
                 _downloadManagerSettingsModule.ModuleHasChanged.Select(_ => 1),
                 _generalSettingsModule.ModuleHasChanged.Select(_ => 1),
+                _debugSettingsModule.ModuleHasChanged.Select(_ => 1),
                 _languageSettingsModule.ModuleHasChanged.Select(_ => 1),
                 _serverSettingsModule.ModuleHasChanged.Select(_ => 1)
             )
@@ -89,6 +95,7 @@ public class UserSettings : IUserSettings
         _displaySettingsModule.Reset();
         _downloadManagerSettingsModule.Reset();
         _generalSettingsModule.Reset();
+        _debugSettingsModule.Reset();
         _languageSettingsModule.Reset();
         _serverSettingsModule.Reset();
     }
@@ -104,6 +111,7 @@ public class UserSettings : IUserSettings
             GeneralSettings = _generalSettingsModule.Update(sourceSettings.GeneralSettings),
             LanguageSettings = _languageSettingsModule.Update(sourceSettings.LanguageSettings),
             ServerSettings = _serverSettingsModule.Update(sourceSettings.ServerSettings),
+            DebugSettings = _debugSettingsModule.Update(sourceSettings.DebugSettings),
         };
 
         return Result.Ok((ISettingsModel)settings);
@@ -124,6 +132,7 @@ public class UserSettings : IUserSettings
             ServerSettings = _serverSettingsModule.GetValues(),
             DateTimeSettings = _dateTimeSettingsModule.GetValues(),
             DownloadManagerSettings = _downloadManagerSettingsModule.GetValues(),
+            DebugSettings = _debugSettingsModule.GetValues(),
         };
     }
 
@@ -142,6 +151,7 @@ public class UserSettings : IUserSettings
             ServerSettings = _serverSettingsModule.DefaultValues(),
             DateTimeSettings = _dateTimeSettingsModule.DefaultValues(),
             DownloadManagerSettings = _downloadManagerSettingsModule.DefaultValues(),
+            DebugSettings = _debugSettingsModule.DefaultValues(),
         };
     }
 
@@ -156,6 +166,7 @@ public class UserSettings : IUserSettings
             _generalSettingsModule.SetFromJson(settingsJsonElement),
             _languageSettingsModule.SetFromJson(settingsJsonElement),
             _serverSettingsModule.SetFromJson(settingsJsonElement),
+            _debugSettingsModule.SetFromJson(settingsJsonElement),
         };
 
         if (results.Any(x => x.IsFailed))

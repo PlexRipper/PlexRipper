@@ -1,7 +1,7 @@
 <template>
 	<q-btn-dropdown stretch flat icon="mdi-account" dropdown-icon="mdi-arrow-down">
 		<q-list v-if="accounts.length > 0">
-			<q-item-label header> ACTIVE ACCOUNT</q-item-label>
+			<q-item-label header> {{ $t('components.account-selector.title') }}</q-item-label>
 
 			<!--  Account Row  -->
 			<q-item
@@ -67,7 +67,7 @@ onMounted(() => {
 			accounts.value = [
 				{
 					id: 0,
-					displayName: 'All Accounts',
+					displayName: t('components.account-selector.all-accounts'),
 				} as any,
 			];
 			data?.filter((x) => x.isEnabled).forEach((account) => accounts.value.push(account));

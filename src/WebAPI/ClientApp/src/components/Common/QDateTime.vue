@@ -4,12 +4,9 @@
 
 <script setup lang="ts">
 import { format } from 'date-fns';
-import { useSubscription } from '@vueuse/rxjs';
-import { SettingsService } from '@service';
+import { useSettingsStore } from '~/store';
 
-const shortDateFormat = ref('dd/MM/yyyy');
-const longDateFormat = ref('EEEE, dd MMMM yyyy');
-const timeFormat = ref('HH:mm:ss');
+const settingsStore = useSettingsStore();
 
 const props = withDefaults(defineProps<{ text: string; shortDate?: boolean; longDate?: boolean; time?: boolean }>(), {
 	text: '',
@@ -28,38 +25,20 @@ const dateTimeString = computed(() => {
 	}
 	let string = '';
 	if (props.time) {
-		string += format(date.value, timeFormat.value);
+		string += format(date.value, settingsStore.dateTimeSettings.timeFormat);
 	}
 	if (props.time && (props.shortDate || props.longDate)) {
 		string += ' - ';
 	}
 
-	if (props.shortDate && shortDateFormat.value) {
-		string += format(date.value, shortDateFormat.value);
+	if (props.shortDate && settingsStore.dateTimeSettings.shortDateFormat) {
+		string += format(date.value, settingsStore.dateTimeSettings.shortDateFormat);
 	}
 
-	if (props.longDate && longDateFormat.value) {
-		string += format(date.value, longDateFormat.value);
+	if (props.longDate && settingsStore.dateTimeSettings.longDateFormat) {
+		string += format(date.value, settingsStore.dateTimeSettings.longDateFormat);
 	}
 
 	return string;
-});
-
-onMounted(() => {
-	useSubscription(
-		SettingsService.getShortDateFormat().subscribe((value) => {
-			shortDateFormat.value = value;
-		}),
-	);
-	useSubscription(
-		SettingsService.getLongDateFormat().subscribe((value) => {
-			longDateFormat.value = value;
-		}),
-	);
-	useSubscription(
-		SettingsService.getTimeFormat().subscribe((value) => {
-			timeFormat.value = value;
-		}),
-	);
 });
 </script>

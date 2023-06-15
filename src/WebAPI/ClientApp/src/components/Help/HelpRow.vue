@@ -1,12 +1,16 @@
 <template>
-	<q-row>
-		<q-col cols="4" align-self="center">
-			<help-icon :help-id="helpId" />
-		</q-col>
-		<q-col cols="4" align-self="center">
-			<slot />
-		</q-col>
-	</q-row>
+	<q-markup-table dark>
+		<tbody>
+			<tr>
+				<td style="width: 30%">
+					<help-icon :help-id="helpId" />
+				</td>
+				<td>
+					<slot />
+				</td>
+			</tr>
+		</tbody>
+	</q-markup-table>
 </template>
 
 <script setup lang="ts">

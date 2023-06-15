@@ -68,7 +68,9 @@
 
 						<!--	Server Configuration Tab Content	-->
 						<q-tab-panel name="server-config" data-cy="server-dialog-tab-content-3">
-							<server-config-tab-content :plex-server="plexServer" :plex-server-settings="plexServerSettings" />
+							<server-config-tab-content
+								:plex-server="plexServer"
+								:plex-server-settings="settingsStore.getServerSettings(plexServer?.machineIdentifier)" />
 						</q-tab-panel>
 
 						<!--	Library Download Destinations	Tab Content -->
@@ -104,12 +106,13 @@
 
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
-import { switchMap, take, tap } from 'rxjs/operators';
+import { take, tap } from 'rxjs/operators';
 import { set } from '@vueuse/core';
 import { ref, computed, useCloseControlDialog } from '#imports';
-import type { PlexLibraryDTO, PlexServerDTO, PlexServerSettingsModel } from '@dto/mainApi';
-import { LibraryService, ServerService, SettingsService } from '@service';
+import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import { LibraryService, ServerService } from '@service';
 import { ServerDataTabContent, ServerConnectionsTabContent } from '#components';
+import { useSettingsStore } from '~/store';
 
 defineProps<{ name: string }>();
 
@@ -117,11 +120,11 @@ const loading = ref(false);
 const tabIndex = ref<string>('server-data');
 const plexServer = ref<PlexServerDTO | null>(null);
 const plexLibraries = ref<PlexLibraryDTO[]>([]);
-const plexServerSettings = ref<PlexServerSettingsModel | null>(null);
 const plexServerId = ref(0);
 
 const isVisible = computed((): boolean => plexServerId.value > 0);
 const { t } = useI18n();
+const settingsStore = useSettingsStore();
 
 function open(newPlexServerId: number): void {
 	set(plexServerId, newPlexServerId);
@@ -133,13 +136,9 @@ function open(newPlexServerId: number): void {
 				tap((plexServerData) => {
 					set(plexServer, plexServerData);
 				}),
-				switchMap((plexServer) => SettingsService.getServerSettings(plexServer?.machineIdentifier ?? '')),
 				take(1),
 			)
 			.subscribe({
-				next: (plexServerSettingsData) => {
-					set(plexServerSettings, plexServerSettingsData);
-				},
 				complete: () => {
 					set(loading, false);
 				},

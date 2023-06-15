@@ -2,16 +2,10 @@
 	<q-section>
 		<template #header> {{ t('pages.settings.advanced.database.header') }}</template>
 		<!--	Reset Database	-->
-		<q-row>
-			<q-col cols="4" align-self="center">
-				<help-icon help-id="help.settings.advanced.reset-db" />
-			</q-col>
-			<!--	Reset Database button	-->
-			<q-col cols="8" align-self="center">
-				<WarningButton :width="400" text-id="reset-db" block @click="useOpenControlDialog(confirmationDialogName)" />
-				<confirmation-dialog text-id="reset-db" :name="confirmationDialogName" @confirm="resetDatabaseCommand" />
-			</q-col>
-		</q-row>
+		<help-row help-id="help.settings.advanced.reset-db">
+			<WarningButton :width="400" text-id="reset-db" block @click="useOpenControlDialog(confirmationDialogName)" />
+			<confirmation-dialog text-id="reset-db" :name="confirmationDialogName" @confirm="resetDatabaseCommand" />
+		</help-row>
 	</q-section>
 </template>
 

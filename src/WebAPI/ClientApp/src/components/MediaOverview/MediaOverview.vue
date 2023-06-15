@@ -91,9 +91,11 @@ import {
 	listenMediaOverviewOpenDetailsCommand,
 	sendMediaOverviewOpenDetailsCommand,
 } from '@composables/event-bus';
+import { useSettingsStore } from '~/store';
 
 // region SetupFields
 const { t } = useI18n();
+const settingsStore = useSettingsStore();
 const router = useRouter();
 const scrollDict = ref<Record<string, number>>({ '#': 0 } as any);
 const selected = ref<ISelection>({ keys: [], allSelected: false, indexKey: 0 });
@@ -112,12 +114,6 @@ const items = ref<PlexMediaSlimDTO[]>([]);
 
 const loading = ref(true);
 const showMediaOverview = ref(true);
-const mediaViewMode = ref<ViewMode>(ViewMode.Poster);
-
-const askDownloadMovieConfirmation = ref(false);
-const askDownloadTvShowConfirmation = ref(false);
-const askDownloadSeasonConfirmation = ref(false);
-const askDownloadEpisodeConfirmation = ref(false);
 
 const props = defineProps<{
 	libraryId: number;
@@ -128,15 +124,26 @@ const props = defineProps<{
 const isConfirmationEnabled = computed(() => {
 	switch (props.mediaType) {
 		case PlexMediaType.Movie:
-			return askDownloadMovieConfirmation.value;
+			return settingsStore.confirmationSettings.askDownloadMovieConfirmation;
 		case PlexMediaType.TvShow:
-			return askDownloadTvShowConfirmation.value;
+			return settingsStore.confirmationSettings.askDownloadTvShowConfirmation;
 		case PlexMediaType.Season:
-			return askDownloadSeasonConfirmation.value;
+			return settingsStore.confirmationSettings.askDownloadSeasonConfirmation;
 		case PlexMediaType.Episode:
-			return askDownloadEpisodeConfirmation.value;
+			return settingsStore.confirmationSettings.askDownloadEpisodeConfirmation;
 		default:
 			return true;
+	}
+});
+
+const mediaViewMode = computed(() => {
+	switch (props.mediaType) {
+		case PlexMediaType.Movie:
+			return settingsStore.displaySettings.movieViewMode;
+		case PlexMediaType.TvShow:
+			return settingsStore.displaySettings.tvShowViewMode;
+		default:
+			return ViewMode.Poster;
 	}
 });
 
@@ -323,10 +330,10 @@ function setupRouter() {
 		// From MediaOverview => DetailsOverview
 		if (!from.path.includes('details') && to.path.includes('details')) {
 			let tableRef: HTMLElement | null = null;
-			if (mediaViewMode.value === ViewMode.Table) {
+			if (get(mediaViewMode) === ViewMode.Table) {
 				tableRef = document.getElementById('media-table-scroll');
 			}
-			if (mediaViewMode.value === ViewMode.Poster) {
+			if (get(mediaViewMode) === ViewMode.Poster) {
 				tableRef = document.getElementById('poster-table');
 			}
 
@@ -416,34 +423,10 @@ onMounted(() => {
 			} else {
 				set(server, data.server);
 			}
-		}),
-	);
-	// Get display settings
-	useSubscription(
-		combineLatest({
-			movieViewMode: SettingsService.getMovieViewMode(),
-			tvShowViewMode: SettingsService.getTvShowViewMode(),
-			askMovieConfirmation: SettingsService.getAskDownloadMovieConfirmation(),
-			askTvShowConfirmation: SettingsService.getAskDownloadTvShowConfirmation(),
-			askSeasonConfirmation: SettingsService.getAskDownloadSeasonConfirmation(),
-			askEpisodeConfirmation: SettingsService.getAskDownloadEpisodeConfirmation(),
-		}).subscribe((data) => {
-			Log.info('Display settings', data);
-			set(askDownloadMovieConfirmation, data.askMovieConfirmation);
-			set(askDownloadTvShowConfirmation, data.askTvShowConfirmation);
-			set(askDownloadSeasonConfirmation, data.askSeasonConfirmation);
-			set(askDownloadEpisodeConfirmation, data.askEpisodeConfirmation);
-			switch (props.mediaType) {
-				case PlexMediaType.Movie:
-					set(mediaViewMode, data.movieViewMode);
-					break;
-				case PlexMediaType.TvShow:
-					set(mediaViewMode, data.tvShowViewMode);
-					break;
-			}
 			setupRouter();
 		}),
 	);
+
 	useSubscription(
 		SignalrService.getLibraryProgress(props.libraryId).subscribe((data) => {
 			if (data) {

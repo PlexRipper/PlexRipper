@@ -71,7 +71,7 @@ import { DownloadService, FolderPathService } from '@service';
 import { useI18n, useOpenControlDialog, toFolderPathStringId } from '#imports';
 
 const { t } = useI18n();
-const props = withDefaults(defineProps<{ onlyDefaults: boolean }>(), {
+const props = withDefaults(defineProps<{ onlyDefaults?: boolean }>(), {
 	onlyDefaults: false,
 });
 

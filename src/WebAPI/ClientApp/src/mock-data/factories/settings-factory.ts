@@ -13,18 +13,23 @@ export function generateSettingsModel({
 
 	return <SettingsModelDTO>{
 		dateTimeSettings: {
-			shortDateFormat: 'dd/MM/yyyy',
 			longDateFormat: 'EEEE, dd MMMM yyyy',
+			shortDateFormat: 'dd/MM/yyyy',
+			showRelativeDates: false,
 			timeFormat: 'HH:mm:ss',
 			timeZone: 'UTC',
-			showRelativeDates: randBoolean(),
+		},
+		debugSettings: {
+			debugModeEnabled: false,
+			maskLibraryNames: false,
+			maskServerNames: false,
 		},
 		displaySettings: {
-			tvShowViewMode: ViewMode.Table,
-			movieViewMode: ViewMode.Table,
+			movieViewMode: ViewMode.Poster,
+			tvShowViewMode: ViewMode.Poster,
 		},
 		downloadManagerSettings: {
-			downloadSegments: 5,
+			downloadSegments: 4,
 		},
 		languageSettings: {
 			language: 'en-US',
@@ -36,10 +41,10 @@ export function generateSettingsModel({
 			activeAccountId: 0,
 		},
 		confirmationSettings: {
-			askDownloadMovieConfirmation: randBoolean(),
-			askDownloadEpisodeConfirmation: randBoolean(),
-			askDownloadSeasonConfirmation: randBoolean(),
-			askDownloadTvShowConfirmation: randBoolean(),
+			askDownloadEpisodeConfirmation: true,
+			askDownloadMovieConfirmation: true,
+			askDownloadSeasonConfirmation: true,
+			askDownloadTvShowConfirmation: true,
 		},
 		serverSettings: {
 			data: plexServers.map((x) => {

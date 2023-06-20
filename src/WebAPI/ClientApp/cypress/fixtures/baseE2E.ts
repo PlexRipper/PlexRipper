@@ -30,6 +30,7 @@ import {
 	PlexServerConnectionDTO,
 	PlexServerDTO,
 	ServerDownloadProgressDTO,
+	SettingsModelDTO,
 } from '@dto/mainApi';
 import Chainable = Cypress.Chainable;
 
@@ -43,6 +44,7 @@ export interface IBasePageSetupResult {
 		libraryId: number;
 		media: PlexMediaSlimDTO[];
 	}[];
+	settings: SettingsModelDTO;
 	config: MockConfig;
 }
 
@@ -230,6 +232,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 		plexAccounts,
 		downloadTasks,
 		mediaData,
+		settings,
 	});
 }
 

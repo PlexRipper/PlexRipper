@@ -5,19 +5,47 @@
 		</template>
 		<!--	Short Date Format Setting	-->
 		<help-row help-id="help.settings.ui.date-and-time.short-date-format">
-			<q-select v-model:model-value="shortDateFormat" :options="shortDateOptions" />
+			<q-select v-model:model-value="shortDateFormat" :options="shortDateOptions" data-cy="short-date-format">
+				<template #option="scope">
+					<q-item v-bind="scope.itemProps" :data-cy="`option-${scope.opt.value}`">
+						<q-item-section>
+							<q-item-label> {{ scope.opt.label }}</q-item-label>
+						</q-item-section>
+					</q-item>
+				</template>
+			</q-select>
 		</help-row>
 		<!--	Long Date Format Setting	-->
 		<help-row help-id="help.settings.ui.date-and-time.long-date-format">
-			<q-select v-model:model-value="longDateFormat" :options="longDateOptions" />
+			<q-select v-model:model-value="longDateFormat" :options="longDateOptions" data-cy="long-date-format">
+				<template #option="scope">
+					<q-item v-bind="scope.itemProps" :data-cy="`option-${scope.opt.value}`">
+						<q-item-section>
+							<q-item-label> {{ scope.opt.label }}</q-item-label>
+						</q-item-section>
+					</q-item>
+				</template>
+			</q-select>
 		</help-row>
 		<!--	Time Format Setting	-->
 		<help-row help-id="help.settings.ui.date-and-time.time-format">
-			<q-select v-model:model-value="timeFormat" :options="timeFormatOptions" />
+			<q-select v-model:model-value="timeFormat" :options="timeFormatOptions" data-cy="time-format">
+				<template #option="scope">
+					<q-item v-bind="scope.itemProps" :data-cy="`option-${scope.opt.value}`">
+						<q-item-section>
+							<q-item-label> {{ scope.opt.label }}</q-item-label>
+						</q-item-section>
+					</q-item>
+				</template>
+			</q-select>
 		</help-row>
 		<!--	Show Relative Dates Setting	-->
 		<help-row help-id="help.settings.ui.date-and-time.show-relative-dates">
-			<q-toggle v-model:model-value="settingsStore.dateTimeSettings.showRelativeDates" size="lg" color="red" />
+			<q-toggle
+				v-model:model-value="settingsStore.dateTimeSettings.showRelativeDates"
+				size="lg"
+				color="red"
+				data-cy="relative-date" />
 		</help-row>
 
 		<!--	TODO: Dealing with Timezones is 1 big clusterfuck, will go back to try again later-->

@@ -4,7 +4,7 @@
 			{{ $t('pages.settings.ui.language.header') }}
 		</template>
 		<help-row help-id="help.settings.ui.language.language-selection">
-			<q-select v-model:model-value="language" :dense="false" :options="languageOptions">
+			<q-select v-model:model-value="language" :dense="false" :options="languageOptions" data-cy="language-selector">
 				<template #selected-item="scope">
 					<q-item>
 						<q-item-section avatar>
@@ -16,7 +16,7 @@
 					</q-item>
 				</template>
 				<template #option="scope">
-					<q-item v-bind="scope.itemProps">
+					<q-item v-bind="scope.itemProps" :data-cy="`option-${scope.opt.code}`">
 						<q-item-section avatar>
 							<q-img :src="scope.opt.img" height="50" :max-width="80" :alt="scope.opt.text" />
 						</q-item-section>

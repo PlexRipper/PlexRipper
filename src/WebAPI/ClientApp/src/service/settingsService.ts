@@ -15,14 +15,15 @@ export class SettingsService extends BaseService {
 	public setup(): Observable<ISetupResult> {
 		super.setup();
 
-		// Send the settings to the server when they change
-		useSettingsStore().$subscribe((_, state) => {
-			updateSettings(state).subscribe();
-		});
-
 		// On app load, request the settings once
 		return this.fetchSettings().pipe(
 			switchMap(() => of({ name: this._name, isSuccess: true })),
+			tap(() => {
+				// Send the settings to the server when they change
+				useSettingsStore().$subscribe((_, state) => {
+					updateSettings(state).subscribe();
+				});
+			}),
 			take(1),
 		);
 	}

@@ -1,15 +1,15 @@
 <template>
 	<div>
-		<FormRow form-id="help.server-dialog.server-commands.inspect-server">
+		<HelpRow help-id="help.server-dialog.server-commands.inspect-server">
 			<BaseButton :disabled="syncLoading" :loading="inspectLoading" text-id="inspect-server" @click="inspectServer" />
-		</FormRow>
-		<FormRow form-id="help.server-dialog.server-commands.sync-server-libraries">
+		</HelpRow>
+		<HelpRow help-id="help.server-dialog.server-commands.sync-server-libraries">
 			<BaseButton
 				:disabled="inspectLoading"
 				:loading="syncLoading"
 				text-id="sync-server-libraries"
 				@click="syncServerLibraries" />
-		</FormRow>
+		</HelpRow>
 	</div>
 </template>
 

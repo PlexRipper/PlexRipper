@@ -17,6 +17,7 @@ public class UserSettings_Reset_UnitTests : BaseUnitTest
             new DisplaySettingsModule(),
             new DownloadManagerSettingsModule(),
             new GeneralSettingsModule(),
+            new DebugSettingsModule(),
             new LanguageSettingsModule(),
             new ServerSettingsModule());
     }

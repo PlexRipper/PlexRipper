@@ -1,5 +1,5 @@
-import { Observable, of } from 'rxjs';
-import { map, switchMap, take, tap } from 'rxjs/operators';
+import { Observable, of, Subject } from 'rxjs';
+import { debounceTime, switchMap, take, tap } from 'rxjs/operators';
 import BaseService from './baseService';
 import { SettingsModelDTO } from '@dto/mainApi';
 import { getSettings, updateSettings } from '@api/settingsApi';
@@ -7,6 +7,7 @@ import ISetupResult from '@interfaces/service/ISetupResult';
 import { useSettingsStore } from '~/store';
 
 export class SettingsService extends BaseService {
+	private _settingsUpdated = new Subject<SettingsModelDTO>();
 	// region Constructor and Setup
 	public constructor() {
 		super('SettingsService', {});
@@ -15,13 +16,20 @@ export class SettingsService extends BaseService {
 	public setup(): Observable<ISetupResult> {
 		super.setup();
 
+		this._settingsUpdated
+			.pipe(
+				debounceTime(1000),
+				switchMap((settings) => updateSettings(settings)),
+			)
+			.subscribe();
+
 		// On app load, request the settings once
 		return this.fetchSettings().pipe(
 			switchMap(() => of({ name: this._name, isSuccess: true })),
 			tap(() => {
 				// Send the settings to the server when they change
 				useSettingsStore().$subscribe((_, state) => {
-					updateSettings(state).subscribe();
+					this._settingsUpdated.next(state);
 				});
 			}),
 			take(1),

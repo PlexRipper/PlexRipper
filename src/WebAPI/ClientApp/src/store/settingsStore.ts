@@ -65,8 +65,12 @@ export const useSettingsStore = defineStore('settingsStore', {
 		},
 		updateDownloadLimit(machineIdentifier: string, downloadLimit: number) {
 			const i = this.serverSettings.data.findIndex((server) => server.machineIdentifier === machineIdentifier);
-			if (i === -1) {
-				this.serverSettings.data[i].downloadSpeedLimit = downloadLimit;
+			if (i > -1) {
+				this.serverSettings.data.splice(i, 1, {
+					machineIdentifier,
+					plexServerName: this.serverSettings.data[i].plexServerName,
+					downloadSpeedLimit: downloadLimit,
+				});
 			}
 		},
 	},
@@ -78,3 +82,7 @@ export const useSettingsStore = defineStore('settingsStore', {
 		},
 	},
 });
+
+if (import.meta.hot) {
+	import.meta.hot.accept(acceptHMRUpdate(useSettingsStore, import.meta.hot));
+}

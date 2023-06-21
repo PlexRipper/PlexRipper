@@ -71,9 +71,9 @@ import { useSubscription } from '@vueuse/rxjs';
 import { useRouter, RouteLocationNormalized, RouteLocationNormalizedLoaded } from 'vue-router';
 import { isEqual, orderBy } from 'lodash-es';
 import { combineLatest } from 'rxjs';
-import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaSlimDTO, PlexServerDTO } from '@dto/mainApi';
+import type { DownloadMediaDTO, PlexMediaSlimDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
-import { DownloadService, LibraryService, MediaService, SettingsService, SignalrService } from '@service';
+import { DownloadService, LibraryService, MediaService, SignalrService } from '@service';
 import { DetailsOverview, DownloadConfirmation, MediaTable } from '#components';
 import ISelection from '@interfaces/ISelection';
 import {
@@ -155,21 +155,7 @@ const refreshingText = computed(() => {
 });
 
 function changeView(viewMode: ViewMode) {
-	let type: keyof DisplaySettingsDTO | null = null;
-
-	switch (props.mediaType) {
-		case PlexMediaType.Movie:
-			type = 'movieViewMode';
-			break;
-		case PlexMediaType.TvShow:
-			type = 'tvShowViewMode';
-			break;
-		default:
-			Log.error('Could not set view mode for type' + props.mediaType);
-	}
-	if (type) {
-		useSubscription(SettingsService.updateDisplaySettings(type, viewMode).subscribe());
-	}
+	settingsStore.updateDisplayMode(props.mediaType, viewMode);
 }
 
 function resetProgress(isRefreshingValue: boolean) {
@@ -242,7 +228,7 @@ listenMediaOverviewDownloadCommand((command) => {
 		if (isConfirmationEnabled.value) {
 			useOpenControlDialog(downloadConfirmationName, command);
 		} else {
-			// sendDownloadCommand(command);
+			DownloadService.downloadMedia(command);
 		}
 	}
 });

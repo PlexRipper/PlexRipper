@@ -1,49 +1,99 @@
 <template>
-	<QCardDialog max-width="500px" :name="name" :loading="false" @opened="onOpen($event)" @closed="onClose">
+	<QCardDialog min-width="50vw" max-width="50vw" :name="name" :loading="false" @opened="onOpen()" @closed="onClose">
 		<template #title>
-			{{ helpTitle ? helpTitle : missingHelpTitle }}
+			{{
+				$t('components.media-selection-dialog.title', {
+					min: selectedRange.min,
+					max: selectedRange.max,
+				})
+			}}
 		</template>
 		<!--	Help text	-->
 		<template #default>
-			<div class="i18n-formatting">
-				{{ helpText ? helpText : missingHelpText }}
-			</div>
+			<q-row justify="center" align="center" class="q-pt-lg">
+				<q-col cols="11" class="q-my-md">
+					<q-range
+						v-model="selectedRange"
+						:min="1"
+						:max="mediaOverviewStore.itemsLength"
+						:step="1"
+						track-size="5px"
+						thumb-size="35px"
+						label-always
+						drag-range
+						color="red" />
+				</q-col>
+			</q-row>
+			<q-row justify="between">
+				<q-col v-for="column in ['min', 'max']" :key="column" cols="auto" class="q-mx-xs">
+					<table>
+						<tr>
+							<td colspan="2">
+								<q-input v-model.number="numberInput[column]" type="number" outlined style="max-width: 200px" />
+							</td>
+						</tr>
+						<tr v-for="index in [1, 10, 100, 1000, 10000]" :key="index">
+							<td>
+								<base-button :label="`-${index}`" block @click="adjustValue(column, -1 * index)" />
+							</td>
+							<td>
+								<base-button :label="`+${index}`" block @click="adjustValue(column, index)" />
+							</td>
+						</tr>
+					</table>
+				</q-col>
+			</q-row>
 		</template>
 		<!--	Close action	-->
 		<template #actions="{ close }">
-			<q-space />
-			<q-btn flat :label="t('general.commands.close')" @click="close" />
+			<q-row justify="between">
+				<q-col cols="2">
+					<base-button text-id="close" block @click="close" />
+				</q-col>
+				<q-col cols="2">
+					<base-button text-id="set-selection" color="positive" block @click="setSelection" />
+				</q-col>
+			</q-row>
 		</template>
 	</QCardDialog>
 </template>
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import { useI18n } from '#imports';
+import { clamp } from 'lodash-es';
+import { useMediaOverviewStore } from '#imports';
+
+const mediaOverviewStore = useMediaOverviewStore();
 
 defineProps<{ name: string }>();
 
-const { t } = useI18n();
-const helpId = ref('');
-const helpTitle = ref('');
-const helpText = ref('');
+const selectedRange = ref({
+	min: 1,
+	max: 1,
+});
 
-const missingHelpTitle = ref(t('help.default.title'));
-const missingHelpText = ref(t('help.default.text'));
+const numberInput = computed({
+	get: () => selectedRange.value,
+	set: (value) => {
+		selectedRange.value = {
+			min: clamp(value.min, 1, mediaOverviewStore.itemsLength),
+			max: clamp(value.max, 1, mediaOverviewStore.itemsLength),
+		};
+	},
+});
 
-function onOpen(value: string): void {
-	set(helpId, value);
-	if (get(helpId) === '') {
-		set(helpTitle, t('help.default.title'));
-		set(helpText, t('help.default.text'));
-	} else {
-		set(helpTitle, t(`${get(helpId)}.title`));
-		set(helpText, t(`${get(helpId)}.text`));
-	}
+function adjustValue(type: string, value: number) {
+	get(selectedRange)[type] = clamp(get(selectedRange)[type] + value, 1, mediaOverviewStore.itemsLength);
 }
 
-function onClose() {
-	set(helpTitle, '');
-	set(helpText, '');
+function setSelection() {
+	mediaOverviewStore.setSelectionRange(selectedRange.value.min, selectedRange.value.max);
 }
+function onOpen(): void {
+	set(selectedRange, {
+		min: 1,
+		max: mediaOverviewStore.itemsLength,
+	});
+}
+function onClose() {}
 </script>

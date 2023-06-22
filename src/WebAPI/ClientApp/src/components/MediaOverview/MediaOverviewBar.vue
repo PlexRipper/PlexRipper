@@ -94,8 +94,8 @@ import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { PlexMediaType, ViewMode } from '@dto/mainApi';
 import { useMediaOverviewBarDownloadCommandBus, useMediaOverviewStore } from '#imports';
 
-const downloadCommandBus = useMediaOverviewBarDownloadCommandBus();
 const mediaOverviewStore = useMediaOverviewStore();
+const downloadCommandBus = useMediaOverviewBarDownloadCommandBus();
 
 interface IViewOptions {
 	label: string;

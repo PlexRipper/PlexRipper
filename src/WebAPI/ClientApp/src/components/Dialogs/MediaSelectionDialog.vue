@@ -75,15 +75,25 @@ const selectedRange = ref({
 const numberInput = computed({
 	get: () => selectedRange.value,
 	set: (value) => {
-		selectedRange.value = {
-			min: clamp(value.min, 1, mediaOverviewStore.itemsLength),
-			max: clamp(value.max, 1, mediaOverviewStore.itemsLength),
-		};
+		adjustValue('min', value.min);
+		adjustValue('max', value.max);
 	},
 });
 
 function adjustValue(type: string, value: number) {
-	get(selectedRange)[type] = clamp(get(selectedRange)[type] + value, 1, mediaOverviewStore.itemsLength);
+	let minValue = 1;
+	let maxValue = mediaOverviewStore.itemsLength;
+	switch (type) {
+		case 'min':
+			minValue = 1;
+			maxValue = get(selectedRange).max;
+			break;
+		case 'max':
+			minValue = get(selectedRange).min;
+			maxValue = mediaOverviewStore.itemsLength;
+			break;
+	}
+	get(selectedRange)[type] = clamp(get(selectedRange)[type] + value, minValue, maxValue);
 }
 
 function setSelection() {

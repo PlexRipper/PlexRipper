@@ -60,7 +60,18 @@ describe('Add Plex account to PlexRipper', () => {
 		cy.getCy('account-form-username-input').type(plexAccount.username);
 		cy.getCy('account-form-password-input').type(plexAccount.password);
 
-		// Validate Action
+		// Validate Action, should return is2Fa true and isValidated false
+		cy.intercept('POST', apiRoute({ type: APIRoute.PlexAccount, path: `/validate` }), {
+			statusCode: 200,
+			body: generateResultDTO({
+				...plexAccount,
+				isValidated: false,
+				is2Fa: true,
+			}),
+		});
+		cy.getCy('account-dialog-validate-button').click();
+		cy.getCy('2fa-code-verification-dialog').should('exist');
+		// Insert verification code, should return is2Fa true and isValidated true
 		cy.intercept('POST', apiRoute({ type: APIRoute.PlexAccount, path: `/validate` }), {
 			statusCode: 200,
 			body: generateResultDTO({
@@ -69,9 +80,6 @@ describe('Add Plex account to PlexRipper', () => {
 				is2Fa: true,
 			}),
 		});
-		cy.getCy('account-dialog-validate-button').click();
-		cy.getCy('2fa-code-verification-dialog').should('exist');
-		// Insert verification code
 		cy.get(':nth-child(1) > [data-test="single-input"]').type('123456');
 
 		// Create Action

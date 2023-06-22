@@ -94,11 +94,13 @@ import { get, set } from '@vueuse/core';
 import { DownloadMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
 import {
-	useMediaOverviewBarBus,
 	useMediaOverviewBarDownloadCommandBus,
 	toDownloadMedia,
 	sendMediaOverviewDownloadCommand,
+	useMediaOverviewStore,
 } from '#imports';
+
+const mediaOverviewStore = useMediaOverviewStore();
 
 const defaultOpened = ref(false);
 const { t } = useI18n();
@@ -197,17 +199,8 @@ function expandAll() {
 }
 
 // region EventBus
-const mediaOverViewBarBus = useMediaOverviewBarBus();
-
-function sendBusConfig() {
-	mediaOverViewBarBus.emit({
-		downloadButtonVisible: get(selectedCount) > 0,
-		hasSelected: get(selectedCount) > 0,
-	});
-}
-
 watch(selectedCount, () => {
-	sendBusConfig();
+	mediaOverviewStore.downloadButtonVisible = get(selectedCount) > 0;
 });
 
 useMediaOverviewBarDownloadCommandBus().on(() => {
@@ -269,6 +262,5 @@ onMounted(() => {
 
 defineExpose({
 	expandAll,
-	sendBusConfig,
 });
 </script>

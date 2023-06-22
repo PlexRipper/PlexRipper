@@ -72,6 +72,12 @@ export interface DateTimeSettingsDTO {
 	showRelativeDates: boolean;
 }
 
+export interface DebugSettingsDTO {
+	debugModeEnabled: boolean;
+	maskServerNames: boolean;
+	maskLibraryNames: boolean;
+}
+
 export interface DisplaySettingsDTO {
 	tvShowViewMode: ViewMode;
 	movieViewMode: ViewMode;
@@ -924,6 +930,7 @@ export interface ServerSettingsDTO {
 
 export interface SettingsModelDTO {
 	generalSettings: GeneralSettingsDTO;
+	debugSettings: DebugSettingsDTO;
 	confirmationSettings: ConfirmationSettingsDTO;
 	dateTimeSettings: DateTimeSettingsDTO;
 	displaySettings: DisplaySettingsDTO;

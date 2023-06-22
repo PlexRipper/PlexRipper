@@ -22,6 +22,7 @@ public class SettingsMappingProfile : Profile
         CreateMap<LanguageSettingsDTO, LanguageSettings>();
         CreateMap<DownloadManagerSettingsDTO, DownloadManagerSettings>();
         CreateMap<ServerSettingsDTO, ServerSettings>();
+        CreateMap<DebugSettingsDTO, DebugSettings>();
 
         CreateMap<SettingsModelDTO, ISettingsModel>().As<SettingsModel>();
         CreateMap<GeneralSettingsDTO, IGeneralSettings>().As<GeneralSettings>();
@@ -31,6 +32,7 @@ public class SettingsMappingProfile : Profile
         CreateMap<LanguageSettingsDTO, ILanguageSettings>().As<LanguageSettings>();
         CreateMap<DownloadManagerSettingsDTO, IDownloadManagerSettings>().As<DownloadManagerSettings>();
         CreateMap<ServerSettingsDTO, IServerSettings>().As<ServerSettings>();
+        CreateMap<DebugSettingsDTO, IDebugSettings>().As<DebugSettings>();
     }
 
     private void InterfaceToDto()
@@ -43,5 +45,6 @@ public class SettingsMappingProfile : Profile
         CreateMap<IDownloadManagerSettings, DownloadManagerSettingsDTO>();
         CreateMap<ILanguageSettings, LanguageSettingsDTO>();
         CreateMap<IServerSettings, ServerSettingsDTO>();
+        CreateMap<IDebugSettings, DebugSettingsDTO>();
     }
 }

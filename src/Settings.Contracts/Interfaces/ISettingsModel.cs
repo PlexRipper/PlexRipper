@@ -15,4 +15,5 @@ public interface ISettingsModel
     ILanguageSettings LanguageSettings { get; set; }
 
     IServerSettings ServerSettings { get; set; }
+    IDebugSettings DebugSettings { get; set; }
 }

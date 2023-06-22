@@ -12,5 +12,8 @@ public class PlexTvShowSeasonConfiguration : IEntityTypeConfiguration<PlexTvShow
         // builder
         //     .Property(x => x.MediaData)
         //     .HasJsonValueConversion();
+
+        builder.Property(c => c.SortTitle)
+            .UseCollation(OrderByNaturalExtensions.CollationName);
     }
 }

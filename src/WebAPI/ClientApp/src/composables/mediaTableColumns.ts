@@ -13,7 +13,8 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 		{
 			label: 'Title',
 			field: 'title',
-			sortField: 'sortTitle',
+			// The media is pre sorted with the index, using the index is more efficient to than sort on and ensures the same sorting is used as the back-end uses
+			sortField: 'index',
 			type: 'title',
 			align: 'left',
 			sortOrder: 'asc',
@@ -125,7 +126,7 @@ export const getDownloadPreviewTableColumns: QTreeViewTableHeader[] = [
 		label: 'Title',
 		field: 'title',
 		align: 'left',
-		sortOrder: 'ad',
+		sortOrder: 'asc',
 		sortable: true,
 		required: true,
 	},

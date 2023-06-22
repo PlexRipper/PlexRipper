@@ -4,6 +4,7 @@ using Logging.Interface;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NaturalSort.Extension;
 using PlexRipper.Data;
 using PlexRipper.Data.Common;
 
@@ -15,6 +16,7 @@ public static class MockDatabase
 {
     private static int _seed;
     private static readonly ILog _log = LogManager.CreateLogInstance(typeof(MockDatabase));
+    private static readonly NaturalSortComparer NaturalComparer = new(StringComparison.InvariantCultureIgnoreCase);
 
     #region Methods
 
@@ -199,8 +201,12 @@ public static class MockDatabase
         dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
 
         var connectionString = DatabaseConnectionString(dbName, disableForeignKeyCheck);
+        SqliteConnection databaseConnection = new(connectionString);
 
-        optionsBuilder.UseSqlite(connectionString);
+        databaseConnection.CreateCollation(OrderByNaturalExtensions.CollationName, (x, y) => NaturalComparer.Compare(x, y));
+
+        optionsBuilder.UseSqlite(databaseConnection);
+
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         optionsBuilder.EnableSensitiveDataLogging();
         optionsBuilder.EnableDetailedErrors();

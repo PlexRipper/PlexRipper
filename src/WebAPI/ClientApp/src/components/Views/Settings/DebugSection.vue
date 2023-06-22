@@ -1,36 +1,23 @@
 <template>
 	<q-section>
 		<template #header> {{ t('pages.settings.advanced.debug.header') }}</template>
-		<!--	Reset Database	-->
-		<q-row>
-			<q-col cols="4" align-self="center">
-				<help-icon help-id="help.settings.advanced.debug-section" />
-			</q-col>
-			<q-col cols="4" align-self="center">
-				<q-toggle :model-value="debugMode" size="lg" @update:model-value="updateSettings('debugMode', $event)" />
-			</q-col>
-		</q-row>
+		<!--	Toggle Debug Mode	-->
+		<HelpRow help-id="help.settings.advanced.debug-section.debug-mode">
+			<q-toggle v-model:model-value="settingsStore.debugSettings.debugModeEnabled" size="lg" />
+		</HelpRow>
+		<!--	Mask Plex Server Names	-->
+		<HelpRow help-id="help.settings.advanced.debug-section.mask-plex-servers">
+			<q-toggle v-model:model-value="settingsStore.debugSettings.maskServerNames" size="lg" />
+		</HelpRow>
+		<!--	Mask Plex Library Names	-->
+		<HelpRow help-id="help.settings.advanced.debug-section.mask-plex-libraries">
+			<q-toggle v-model:model-value="settingsStore.debugSettings.maskLibraryNames" size="lg" />
+		</HelpRow>
 	</q-section>
 </template>
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
-import { set } from '@vueuse/core';
-import { GeneralSettingsDTO } from '@dto/mainApi';
-import { SettingsService } from '@service';
+import { useSettingsStore } from '~/store';
 
 const { t } = useI18n();
-
-const debugMode = ref(false);
-
-function updateSettings(key: keyof GeneralSettingsDTO, state: boolean): void {
-	useSubscription(SettingsService.updateGeneralSettings(key, state).subscribe());
-}
-
-onMounted(() => {
-	useSubscription(
-		SettingsService.getDebugMode().subscribe((value) => {
-			set(debugMode, value);
-		}),
-	);
-});
+const settingsStore = useSettingsStore();
 </script>

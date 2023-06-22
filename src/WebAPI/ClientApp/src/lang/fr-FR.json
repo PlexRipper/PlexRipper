@@ -101,16 +101,16 @@
                 },
                 "server-commands": {
                     "header": "Commands du serveur",
-                    "inspect-server": "",
+                    "inspect-server": "Inspecter le serveur",
                     "re-sync-server": "Resyncroniser les bibliothèques"
                 },
                 "server-config": {
                     "download-speed-limit": "Télécharger la limite de vitesse",
-                    "header": ""
+                    "header": "Configuration du serveur"
                 },
                 "server-connections": {
-                    "download-speed-limit": "",
-                    "header": "",
+                    "download-speed-limit": "Télécharger la limite de vitesse",
+                    "header": "Connexions au serveur",
                     "section-header": "Sélectionnez la connexion serveur préférée :"
                 },
                 "server-data": {
@@ -148,6 +148,13 @@
         },
         "server-library-destinations-tab-content": {
             "no-libraries": "Ce serveur Plex n'a pas de bibliothèques pour lesquelles définir la destination par défaut"
+        },
+        "account-selector": {
+            "all-accounts": "Tous les comptes Plex",
+            "title": "Comptes actifs"
+        },
+        "media-selection-dialog": {
+            "title": "Définissez la plage d'index pour sélectionner le média (#{min} - #{max})"
         }
     },
     "confirmation": {
@@ -203,7 +210,9 @@
             "validate": "Valider",
             "validated": "Validaté",
             "missing-text": "Texte manquant",
-            "inspect-server": "Inspecter le serveur"
+            "inspect-server": "Inspecter le serveur",
+            "selection": "Sélection",
+            "set-selection": "Définir la sélection"
         },
         "name": "PlexRipper",
         "name-version": "PlexRipper - V{version}",
@@ -283,9 +292,21 @@
                     }
                 },
                 "debug-section": {
-                    "text": "L'activation du mode de débogage affichera plus d'informations que d'habitude dans diverses zones de l'interface utilisateur.",
-                    "title": "Mode débogage",
-                    "label": "Mode débogage"
+                    "debug-mode": {
+                        "text": "L'activation du mode de débogage affichera plus d'informations que d'habitude dans diverses zones de l'interface utilisateur.",
+                        "title": "Mode débogage",
+                        "label": "Mode débogage"
+                    },
+                    "mask-plex-libraries": {
+                        "label": "Masquer les noms de bibliothèque Plex",
+                        "text": "Cela masquera les noms des bibliothèques Plex dans l'interface utilisateur. Ceci est utile lors de la prise de captures d'écran anonymes",
+                        "title": "Masquer les noms de bibliothèque Plex"
+                    },
+                    "mask-plex-servers": {
+                        "label": "Masquer les noms de serveur Plex",
+                        "text": "Cela masquera les noms des serveurs Plex dans l'interface utilisateur. Ceci est utile lors de la prise de captures d'écran anonymes.",
+                        "title": "Masquer les noms de serveur Plex"
+                    }
                 },
                 "reset-db": {
                     "label": "Réinitialiser la base de donnée",

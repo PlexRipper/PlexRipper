@@ -148,6 +148,13 @@
         },
         "server-library-destinations-tab-content": {
             "no-libraries": "This Plex server has no libraries to set the default destination for"
+        },
+        "account-selector": {
+            "all-accounts": "All Plex Accounts",
+            "title": "Active Accounts"
+        },
+        "media-selection-dialog": {
+            "title": "Set the index range to select the media (#{min} - #{max})"
         }
     },
     "confirmation": {
@@ -203,7 +210,9 @@
             "validate": "Validate",
             "validated": "Validated",
             "missing-text": "Missing Text",
-            "inspect-server": "Inspect Server"
+            "inspect-server": "Inspect Server",
+            "selection": "Selection",
+            "set-selection": "Set Selection"
         },
         "name": "PlexRipper",
         "name-version": "PlexRipper - V{version}",
@@ -283,9 +292,21 @@
                     }
                 },
                 "debug-section": {
-                    "text": "Enabling debug mode will display more information than usual in various area of the user interface.",
-                    "title": "Debug Mode",
-                    "label": "Debug Mode"
+                    "debug-mode": {
+                        "text": "Enabling debug mode will display more information than usual in various area of the user interface.",
+                        "title": "Debug Mode",
+                        "label": "Debug Mode"
+                    },
+                    "mask-plex-libraries": {
+                        "label": "Mask Plex Library Names",
+                        "text": "This will mask the names of Plex libraries in the UI. This is useful when taking anonymous screenshots ",
+                        "title": "Mask Plex Library Names"
+                    },
+                    "mask-plex-servers": {
+                        "label": "Mask Plex Server Names",
+                        "text": "This will mask the names of Plex servers in the UI. This is useful when taking anonymous screenshots.",
+                        "title": "Mask Plex Server Names"
+                    }
                 },
                 "reset-db": {
                     "label": "Reset Database",
@@ -343,8 +364,8 @@
                 "date-and-time": {
                     "long-date-format": {
                         "label": "Long Date Format",
-                        "text": "Test",
-                        "title": "Long Date Format"
+                        "text": "",
+                        "title": ""
                     },
                     "short-date-format": {
                         "label": "Short Date Format",

@@ -23,14 +23,15 @@
 
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
-import { get, set } from '@vueuse/core';
-import { DownloadService, SettingsService } from '@service';
+import { set } from '@vueuse/core';
+import { DownloadService } from '@service';
 import { QExpansionListProps } from '@interfaces/components/QExpansionListProps';
+import { useSettingsStore } from '~/store';
 
 withDefaults(defineProps<{ showDrawer: boolean }>(), {
 	showDrawer: false,
 });
-const debugMode = ref(false);
+const settingsStore = useSettingsStore();
 
 const items = ref<object[]>([]);
 
@@ -74,7 +75,7 @@ const getNavItems = computed((): QExpansionListProps[] => {
 		},
 	];
 
-	if (get(debugMode)) {
+	if (settingsStore.debugMode) {
 		mainItems.push({
 			title: 'components.navigation-drawer.debug',
 			icon: 'mdi-bug-outline',
@@ -112,12 +113,6 @@ onMounted(() => {
 	useSubscription(
 		DownloadService.getTotalDownloadsCount().subscribe((count) => {
 			set(downloadTaskCount, count);
-		}),
-	);
-
-	useSubscription(
-		SettingsService.getDebugMode().subscribe((value) => {
-			set(debugMode, value);
 		}),
 	);
 });

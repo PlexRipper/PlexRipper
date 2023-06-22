@@ -27,6 +27,7 @@ public static partial class FakeData
             .RuleFor(x => x.DisplaySettings, _ => GetDisplaySettings(options).Generate())
             .RuleFor(x => x.DownloadManagerSettings, _ => GetDownloadManagerSettings(options).Generate())
             .RuleFor(x => x.LanguageSettings, _ => GetLanguageSettings(options).Generate())
+            .RuleFor(x => x.DebugSettings, _ => GetDebugSettings(options).Generate())
             .RuleFor(x => x.ServerSettings, _ => GetServerSettings(options).Generate());
     }
 
@@ -110,6 +111,18 @@ public static partial class FakeData
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(x => x.Language, f => f.Random.String(2));
+    }
+
+    public static Faker<DebugSettings> GetDebugSettings(Action<UnitTestDataConfig> options = null)
+    {
+        var config = UnitTestDataConfig.FromOptions(options);
+
+        return new Faker<DebugSettings>()
+            .StrictMode(true)
+            .UseSeed(config.Seed)
+            .RuleFor(x => x.DebugModeEnabled, f => f.Random.Bool())
+            .RuleFor(x => x.MaskServerNames, f => f.Random.Bool())
+            .RuleFor(x => x.MaskLibraryNames, f => f.Random.Bool());
     }
 
     public static Faker<ServerSettings> GetServerSettings(Action<UnitTestDataConfig> options = null)

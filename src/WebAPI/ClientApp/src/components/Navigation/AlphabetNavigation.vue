@@ -2,7 +2,7 @@
 	<div class="alphabet-navigation-container">
 		<div class="alphabet-navigation">
 			<q-btn
-				v-for="letter in alphabet"
+				v-for="letter in mediaOverviewStore.scrollAlphabet"
 				:key="letter"
 				class="navigation-btn"
 				:label="letter"
@@ -17,13 +17,7 @@
 <script setup lang="ts">
 import { sendMediaOverviewScrollToCommand } from '@composables/event-bus';
 
-const props = defineProps<{
-	scrollDict: Record<string, number>;
-}>();
-
-const alphabet = computed((): string[] => {
-	return Object.keys(props.scrollDict);
-});
+const mediaOverviewStore = useMediaOverviewStore();
 </script>
 <style lang="scss">
 @import '@/assets/scss/_mixins.scss';

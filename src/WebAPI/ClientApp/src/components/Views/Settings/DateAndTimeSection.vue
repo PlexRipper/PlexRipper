@@ -1,86 +1,68 @@
 <template>
 	<q-section>
 		<template #header>
-			{{ t('pages.settings.ui.date-and-time.header') }}
+			{{ $t('pages.settings.ui.date-and-time.header') }}
 		</template>
-		<q-row no-gutters>
-			<q-col>
-				<q-markup-table flat>
-					<tbody>
-						<!--	Short Date Format Setting	-->
-						<tr>
-							<td style="width: 30%">
-								<help-icon help-id="help.settings.ui.date-and-time.short-date-format" />
-							</td>
-							<td>
-								<q-select
-									:model-value="shortDateFormat"
-									:options="shortDateOptions"
-									@update:model-value="updateSettings('shortDateFormat', $event.value)" />
-							</td>
-						</tr>
-						<!--	Long Date Format Setting	-->
-						<tr>
-							<td>
-								<help-icon help-id="help.settings.ui.date-and-time.long-date-format" />
-							</td>
-							<td>
-								<q-select
-									:model-value="longDateFormat"
-									:options="longDateOptions"
-									@update:model-value="updateSettings('longDateFormat', $event.value)" />
-							</td>
-						</tr>
-						<!--	Time Format Setting	-->
-						<tr>
-							<td>
-								<help-icon help-id="help.settings.ui.date-and-time.time-format" />
-							</td>
-							<td>
-								<q-select
-									:model-value="timeFormat"
-									:options="timeFormatOptions"
-									@update:model-value="updateSettings('timeFormat', $event.value)" />
-							</td>
-						</tr>
-						<!--	Time Zone Setting	-->
-						<!--	Dealing with Timezones is 1 big clusterfuck, will go back to try again later-->
-						<!--						<tr>-->
-						<!--							<td>-->
-						<!--								<help-icon help-id="help.settings.ui.date-and-time.time-zone" />-->
-						<!--							</td>-->
-						<!--							<td>-->
-						<!--								<v-select-->
-						<!--									v-model="timeZone"-->
-						<!--									color="red"-->
-						<!--									filled-->
-						<!--									outlined-->
-						<!--									dense-->
-						<!--									class="my-3"-->
-						<!--									hide-details="auto"-->
-						<!--									:menu-props="getMenuProps"-->
-						<!--									:options="timeZoneOptions"-->
-						<!--								/>-->
-						<!--							</td>-->
-						<!--						</tr>-->
+		<!--	Short Date Format Setting	-->
+		<help-row help-id="help.settings.ui.date-and-time.short-date-format">
+			<q-select v-model:model-value="shortDateFormat" :options="shortDateOptions" data-cy="short-date-format">
+				<template #option="scope">
+					<q-item v-bind="scope.itemProps" :data-cy="`option-${scope.opt.value}`">
+						<q-item-section>
+							<q-item-label> {{ scope.opt.label }}</q-item-label>
+						</q-item-section>
+					</q-item>
+				</template>
+			</q-select>
+		</help-row>
+		<!--	Long Date Format Setting	-->
+		<help-row help-id="help.settings.ui.date-and-time.long-date-format">
+			<q-select v-model:model-value="longDateFormat" :options="longDateOptions" data-cy="long-date-format">
+				<template #option="scope">
+					<q-item v-bind="scope.itemProps" :data-cy="`option-${scope.opt.value}`">
+						<q-item-section>
+							<q-item-label> {{ scope.opt.label }}</q-item-label>
+						</q-item-section>
+					</q-item>
+				</template>
+			</q-select>
+		</help-row>
+		<!--	Time Format Setting	-->
+		<help-row help-id="help.settings.ui.date-and-time.time-format">
+			<q-select v-model:model-value="timeFormat" :options="timeFormatOptions" data-cy="time-format">
+				<template #option="scope">
+					<q-item v-bind="scope.itemProps" :data-cy="`option-${scope.opt.value}`">
+						<q-item-section>
+							<q-item-label> {{ scope.opt.label }}</q-item-label>
+						</q-item-section>
+					</q-item>
+				</template>
+			</q-select>
+		</help-row>
+		<!--	Show Relative Dates Setting	-->
+		<help-row help-id="help.settings.ui.date-and-time.show-relative-dates">
+			<q-toggle
+				v-model:model-value="settingsStore.dateTimeSettings.showRelativeDates"
+				size="lg"
+				color="red"
+				data-cy="relative-date" />
+		</help-row>
 
-						<!--	Show Relative Dates Setting	-->
-						<tr>
-							<td>
-								<help-icon help-id="help.settings.ui.date-and-time.show-relative-dates" />
-							</td>
-							<td>
-								<q-toggle
-									:model-value="showRelativeDates"
-									size="lg"
-									color="red"
-									@update:model-value="updateSettings('showRelativeDates', $event)" />
-							</td>
-						</tr>
-					</tbody>
-				</q-markup-table>
-			</q-col>
-		</q-row>
+		<!--	TODO: Dealing with Timezones is 1 big cluster fuck, will go back to try again later-->
+		<!--	Time Zone Setting	-->
+		<!--		<help-row help-id="help.settings.ui.date-and-time.time-zone">-->
+		<!--								<v-select-->
+		<!--									v-model="timeZone"-->
+		<!--									color="red"-->
+		<!--									filled-->
+		<!--									outlined-->
+		<!--									dense-->
+		<!--									class="my-3"-->
+		<!--									hide-details="auto"-->
+		<!--									:menu-props="getMenuProps"-->
+		<!--									:options="timeZoneOptions"-->
+		<!--								/>-->
+		<!--		</help-row>-->
 	</q-section>
 </template>
 
@@ -90,13 +72,11 @@ import { format } from 'date-fns';
 // eslint-disable-next-line import/no-duplicates
 import { enUS, fr } from 'date-fns/locale';
 
-import { useSubscription } from '@vueuse/rxjs';
-import { get, set } from '@vueuse/core';
-import { SettingsService } from '@service';
-import { DateTimeSettingsDTO } from '@dto/mainApi';
+import { get } from '@vueuse/core';
+import { useSettingsStore } from '~/store';
 
 const i18n = useI18n();
-const { t } = useI18n();
+const settingsStore = useSettingsStore();
 
 interface ISelectOption {
 	value: string;
@@ -104,11 +84,27 @@ interface ISelectOption {
 }
 
 // region Settings
-const shortDateFormat = ref<ISelectOption | null>(null);
-const longDateFormat = ref<ISelectOption | null>(null);
-const timeFormat = ref<ISelectOption | null>(null);
-const timeZone = ref<ISelectOption | null>(null);
-const showRelativeDates = ref(false);
+const defaultSelectOption: ISelectOption = { value: '', label: '' };
+const shortDateFormat = computed({
+	get: (): ISelectOption =>
+		get(shortDateOptions).find((x) => x.value === settingsStore.dateTimeSettings.shortDateFormat) ?? defaultSelectOption,
+	set: (value: ISelectOption) => (settingsStore.dateTimeSettings.shortDateFormat = value.value),
+});
+const longDateFormat = computed({
+	get: (): ISelectOption =>
+		get(longDateOptions).find((x) => x.value === settingsStore.dateTimeSettings.longDateFormat) ?? defaultSelectOption,
+	set: (value: ISelectOption) => (settingsStore.dateTimeSettings.longDateFormat = value.value),
+});
+const timeFormat = computed({
+	get: (): ISelectOption =>
+		get(timeFormatOptions).find((x) => x.value === settingsStore.dateTimeSettings.timeFormat) ?? defaultSelectOption,
+	set: (value: ISelectOption) => (settingsStore.dateTimeSettings.timeFormat = value.value),
+});
+
+// const timeZone = computed({
+// 	get: () => get(timeZoneOptions).find((x) => x.value === settingsStore.dateTimeSettings.timeZone),
+// 	set: (value: ISelectOption) => (settingsStore.dateTimeSettings.timeZone = value.value),
+// });
 
 // endregion
 
@@ -127,10 +123,10 @@ const shortDateOptions = computed(() => {
 	const values: string[] = ['MMM dd yyyy', 'dd MMM yyyy', 'MM/dd/yyyy', 'dd/MM/yyyy', 'yyyy-MM-dd'];
 	const date = Date.now();
 
-	return values.map((x) => {
+	return values.map((dateFormat) => {
 		return {
-			value: x,
-			label: format(date, x, getLocale.value),
+			value: dateFormat,
+			label: format(date, dateFormat, getLocale.value),
 		};
 	});
 });
@@ -158,41 +154,9 @@ const timeFormatOptions = computed(() => {
 	});
 });
 
-const timeZoneOptions = computed(() => {
-	const currentTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
-	const offSet = new Date().getTimezoneOffset() / 60;
-	return [{ label: `${offSet} ${currentTZ}`, value: currentTZ }];
-});
-
-const updateSettings = (key: keyof DateTimeSettingsDTO, state: any): void => {
-	useSubscription(SettingsService.updateDateTimeSetting(key, state).subscribe());
-};
-
-onMounted(() => {
-	useSubscription(
-		SettingsService.getShortDateFormat().subscribe((data) => {
-			set(shortDateFormat, get(shortDateOptions).find((x) => x.value === data) ?? get(shortDateOptions)[0]);
-		}),
-	);
-	useSubscription(
-		SettingsService.getLongDateFormat().subscribe((data) => {
-			set(longDateFormat, get(longDateOptions).find((x) => x.value === data) ?? get(longDateOptions)[0]);
-		}),
-	);
-	useSubscription(
-		SettingsService.getTimeFormat().subscribe((data) => {
-			set(timeFormat, get(timeFormatOptions).find((x) => x.value === data) ?? get(timeFormatOptions)[0]);
-		}),
-	);
-	useSubscription(
-		SettingsService.getTimeZone().subscribe((data) => {
-			set(timeZone, get(timeZoneOptions).find((x) => x.value === data) ?? get(timeZoneOptions)[0]);
-		}),
-	);
-	useSubscription(
-		SettingsService.getShowRelativeDates().subscribe((data) => {
-			set(showRelativeDates, data);
-		}),
-	);
-});
+// const timeZoneOptions = computed(() => {
+// 	const currentTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+// 	const offSet = new Date().getTimezoneOffset() / 60;
+// 	return [{ label: `${offSet} ${currentTZ}`, value: currentTZ }];
+// });
 </script>

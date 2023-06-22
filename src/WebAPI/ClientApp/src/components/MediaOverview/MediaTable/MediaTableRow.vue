@@ -9,7 +9,7 @@
 				<!-- Index -->
 				<template v-if="column['type'] === 'index'">
 					<q-col cols="auto" style="min-width: 50px" class="media-table-row--column">
-						<span> #{{ index + 1 }} </span>
+						<span> #{{ row[column.field] }} </span>
 					</q-col>
 				</template>
 				<!-- Title -->

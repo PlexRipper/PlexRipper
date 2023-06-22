@@ -19,7 +19,7 @@ import IObjectUrl from '@interfaces/IObjectUrl';
 import IAlert from '@interfaces/IAlert';
 import IAppConfig from '@class/IAppConfig';
 
-export default interface IStoreState extends SettingsModelDTO {
+export default interface IStoreState {
 	pageReady: boolean;
 	config: IAppConfig;
 	accounts: PlexAccountDTO[];

@@ -278,7 +278,6 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 
 let sortedState: IMediaOverviewSort[] = [];
 useMediaOverviewSortBus().on((event) => {
-	Log.debug('new sorted event', event);
 	const newSortedState = [...sortedState];
 	const index = newSortedState.findIndex((x) => x.field === event.field);
 	if (index > -1) {
@@ -293,7 +292,6 @@ useMediaOverviewSortBus().on((event) => {
 		return;
 	}
 	sortedState = newSortedState;
-	Log.debug('new sorted state', sortedState);
 	const sortedItems = orderBy(
 		get(items), // Items to sort
 		sortedState.map((x) => x.field), // Sort by field

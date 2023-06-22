@@ -45,7 +45,7 @@ function onClick() {
 			newSort.sort = 'desc';
 			break;
 		case 'desc':
-			newSort.sort = 'no-sort';
+			newSort.sort = 'asc';
 			break;
 		case 'no-sort':
 			newSort.sort = 'asc';
@@ -61,7 +61,7 @@ function onClick() {
 onBeforeMount(() => {
 	set(sorted, {
 		field: props.column.sortField ?? props.column.field,
-		sort: 'no-sort',
+		sort: 'asc',
 	});
 });
 </script>

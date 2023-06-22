@@ -36,5 +36,8 @@ public class DownloadTaskConfiguration : IEntityTypeConfiguration<DownloadTask>
             .HasMaxLength(20)
             .HasConversion(x => x.ToDownloadStatusString(), x => x.ToDownloadStatus())
             .IsUnicode(false);
+
+        builder.Property(c => c.Title)
+            .UseCollation(OrderByNaturalExtensions.CollationName);
     }
 }

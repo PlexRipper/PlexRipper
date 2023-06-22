@@ -12,5 +12,8 @@ public class PlexMovieConfiguration : IEntityTypeConfiguration<PlexMovie>
         // builder
         //     .Property(x => x.MediaData)
         //     .HasJsonValueConversion();
+
+        builder.Property(c => c.SortTitle)
+            .UseCollation(OrderByNaturalExtensions.CollationName);
     }
 }

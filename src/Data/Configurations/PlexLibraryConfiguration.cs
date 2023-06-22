@@ -53,5 +53,8 @@ public class PlexLibraryConfiguration : IEntityTypeConfiguration<PlexLibrary>
             .WithMany(x => x.PlexLibraries)
             .HasForeignKey(x => x.DefaultDestinationId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        builder.Property(c => c.Title)
+            .UseCollation(OrderByNaturalExtensions.CollationName);
     }
 }

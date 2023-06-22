@@ -14,4 +14,6 @@ public static class OrderByNaturalExtensions
     {
         return objects.OrderByNatural(func).Reverse();
     }
+
+    public static string CollationName => "NATURALSORT";
 }

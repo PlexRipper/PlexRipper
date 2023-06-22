@@ -127,7 +127,7 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
         {
             // Source: https://github.com/tompazourek/NaturalSort.Extension
             SqliteConnection databaseConnection = new(PathProvider.DatabaseConnectionString);
-            databaseConnection.CreateCollation("NATURALSORT", (x, y) => NaturalComparer.Compare(x, y));
+            databaseConnection.CreateCollation(OrderByNaturalExtensions.CollationName, (x, y) => NaturalComparer.Compare(x, y));
 
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             optionsBuilder.LogTo(text => LogManager.DbContextLogger(text), LogLevel.Error);
@@ -138,7 +138,7 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        builder.UseCollation("NATURALSORT");
+        builder.UseCollation(OrderByNaturalExtensions.CollationName);
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         builder.AddQuartz(x => x.UseSqlite());

@@ -59,6 +59,7 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import type ServerDialog from '@components/Navigation/ServerDialog.vue';
+import { get, set } from '@vueuse/core';
 import { LibraryService, ServerService, ServerConnectionService } from '@service';
 import { PlexLibraryDTO, PlexMediaType, PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
 import { useOpenControlDialog } from '#imports';
@@ -72,7 +73,7 @@ const connections = ref<PlexServerConnectionDTO[]>([]);
 const serverDialogName = 'serverDialog';
 
 function filterLibraries(plexServerId: number): PlexLibraryDTO[] {
-	return plexLibraries.value.filter((x) => x.plexServerId === plexServerId);
+	return get(plexLibraries).filter((x) => x.plexServerId === plexServerId);
 }
 
 function openServerSettings(serverId: number): void {
@@ -96,10 +97,10 @@ function openMediaPage(library: PlexLibraryDTO): void {
 }
 
 function isConnected(server: PlexServerDTO) {
-	if (connections.value.length === 0) {
+	if (get(connections).length === 0) {
 		return false;
 	}
-	return connections.value
+	return get(connections)
 		.filter((x) => x.plexServerId === server.id)
 		.some((x) => x.latestConnectionStatus?.isSuccessful ?? false);
 }
@@ -107,19 +108,19 @@ function isConnected(server: PlexServerDTO) {
 onMounted(() => {
 	useSubscription(
 		ServerService.getServers().subscribe((data: PlexServerDTO[]) => {
-			plexServers.value = data;
+			set(plexServers, data);
 		}),
 	);
 
 	useSubscription(
 		ServerConnectionService.getServerConnections().subscribe((data) => {
-			connections.value = data;
+			set(connections, data);
 		}),
 	);
 
 	useSubscription(
 		LibraryService.getLibraries().subscribe((data: PlexLibraryDTO[]) => {
-			plexLibraries.value = data;
+			set(plexLibraries, data);
 		}),
 	);
 });

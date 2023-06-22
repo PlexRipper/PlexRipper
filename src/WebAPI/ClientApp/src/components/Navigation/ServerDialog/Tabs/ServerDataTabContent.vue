@@ -63,6 +63,7 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
+import { switchMap, tap } from 'rxjs/operators';
 import type { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { PlexServerConnectionDTO, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 import { ServerConnectionService, ServerService, SignalrService } from '@service';
@@ -98,11 +99,16 @@ const checkServerStatusMessage = computed(() => {
 function checkServer() {
 	set(checkServerStatusLoading, true);
 	useSubscription(
-		ServerService.checkServerStatus(get(plexServerId)).subscribe((value) => {
-			set(hasSuccessServerStatus, value?.isSuccessful ?? false);
-			set(checkServerStatusLoading, false);
-			set(serverStatus, value ?? null);
-		}),
+		ServerService.checkServerStatus(get(plexServerId))
+			.pipe(
+				tap((value) => {
+					set(hasSuccessServerStatus, value?.isSuccessful ?? false);
+					set(checkServerStatusLoading, false);
+					set(serverStatus, value ?? null);
+				}),
+				switchMap(() => ServerConnectionService.refreshPlexServerConnections()),
+			)
+			.subscribe(),
 	);
 }
 

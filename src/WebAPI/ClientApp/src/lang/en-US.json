@@ -152,6 +152,9 @@
         "account-selector": {
             "all-accounts": "All Plex Accounts",
             "title": "Active Accounts"
+        },
+        "media-selection-dialog": {
+            "title": "Set the index range to select the media (#{min} - #{max})"
         }
     },
     "confirmation": {
@@ -207,7 +210,9 @@
             "validate": "Validate",
             "validated": "Validated",
             "missing-text": "Missing Text",
-            "inspect-server": "Inspect Server"
+            "inspect-server": "Inspect Server",
+            "selection": "Selection",
+            "set-selection": "Set Selection"
         },
         "name": "PlexRipper",
         "name-version": "PlexRipper - V{version}",

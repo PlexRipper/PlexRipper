@@ -1133,6 +1133,31 @@
 								</children>
 							</folder_node>
 							<folder_node>
+								<name>media-selection-dialog</name>
+								<children>
+									<concept_node>
+										<name>title</name>
+										<description/>
+										<comment/>
+										<default_text/>
+										<translations>
+											<translation>
+												<language>de-DE</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>en-US</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+										</translations>
+									</concept_node>
+								</children>
+							</folder_node>
+							<folder_node>
 								<name>navigation-drawer</name>
 								<children>
 									<concept_node>
@@ -2662,6 +2687,46 @@
 									</concept_node>
 									<concept_node>
 										<name>save</name>
+										<description/>
+										<comment/>
+										<default_text/>
+										<translations>
+											<translation>
+												<language>de-DE</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>en-US</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+										</translations>
+									</concept_node>
+									<concept_node>
+										<name>selection</name>
+										<description/>
+										<comment/>
+										<default_text/>
+										<translations>
+											<translation>
+												<language>de-DE</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>en-US</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+										</translations>
+									</concept_node>
+									<concept_node>
+										<name>set-selection</name>
 										<description/>
 										<comment/>
 										<default_text/>

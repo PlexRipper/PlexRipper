@@ -12,5 +12,8 @@ public class PlexTvShowEpisodeConfiguration : IEntityTypeConfiguration<PlexTvSho
         // builder
         //     .Property(x => x.MediaData)
         //     .HasJsonValueConversion();
+
+        builder.Property(c => c.SortTitle)
+            .UseCollation(OrderByNaturalExtensions.CollationName);
     }
 }

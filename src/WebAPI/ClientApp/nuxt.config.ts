@@ -30,6 +30,12 @@ export default defineNuxtConfig({
 		'@nuxtjs/i18n',
 		'@vue-macros/nuxt',
 		'nuxt-vitest',
+		[
+			'@pinia/nuxt',
+			{
+				autoImports: ['defineStore', 'acceptHMRUpdate'],
+			},
+		],
 	],
 	quasar: {
 		// Plugins: https://quasar.dev/quasar-plugins
@@ -79,6 +85,9 @@ export default defineNuxtConfig({
 	 ** Global CSS: https://nuxt.com/docs/api/configuration/nuxt-config#css
 	 */
 	css: ['@/assets/scss/style.scss'],
+	imports: {
+		dirs: ['store'],
+	},
 	alias: {
 		// Doc: https://nuxt.com/docs/api/configuration/nuxt-config#alias
 		'@class': fileURLToPath(new URL('./src/types/class/', import.meta.url)),

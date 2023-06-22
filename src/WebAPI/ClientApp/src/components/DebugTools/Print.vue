@@ -1,5 +1,5 @@
 <template>
-	<q-list v-if="debugMode" bordered class="rounded-borders">
+	<q-list v-if="settingsStore.debugMode" bordered class="rounded-borders">
 		<q-expansion-item switch-toggle-side expand-separator :label="title" icon="mdi-debug">
 			<q-card :style="{ maxHeight: height + 'px' }" class="scroll">
 				<q-card-section>
@@ -11,11 +11,9 @@
 </template>
 
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
-import { set } from '@vueuse/core';
-import { SettingsService } from '@service';
+import { useSettingsStore } from '~/store';
 
-const debugMode = ref(false);
+const settingsStore = useSettingsStore();
 
 withDefaults(
 	defineProps<{
@@ -27,12 +25,4 @@ withDefaults(
 		height: 500,
 	},
 );
-
-onMounted(() => {
-	useSubscription(
-		SettingsService.getDebugMode().subscribe((value) => {
-			set(debugMode, value);
-		}),
-	);
-});
 </script>

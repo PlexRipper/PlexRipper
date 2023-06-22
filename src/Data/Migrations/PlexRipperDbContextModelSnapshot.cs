@@ -592,7 +592,8 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<string>("Title")
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(2);
+                        .HasColumnOrder(2)
+                        .UseCollation("NATURALSORT");
 
                     b.Property<int>("Year")
                         .HasColumnType("INTEGER")
@@ -1022,7 +1023,8 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<string>("Title")
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(2);
+                        .HasColumnOrder(2)
+                        .UseCollation("NATURALSORT");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -1127,7 +1129,8 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<string>("SortTitle")
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(4);
+                        .HasColumnOrder(4)
+                        .UseCollation("NATURALSORT");
 
                     b.Property<string>("Studio")
                         .HasColumnType("TEXT")
@@ -1502,7 +1505,8 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<string>("SortTitle")
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(4);
+                        .HasColumnOrder(4)
+                        .UseCollation("NATURALSORT");
 
                     b.Property<string>("Studio")
                         .HasColumnType("TEXT")
@@ -1615,7 +1619,8 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<string>("SortTitle")
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(4);
+                        .HasColumnOrder(4)
+                        .UseCollation("NATURALSORT");
 
                     b.Property<string>("Studio")
                         .HasColumnType("TEXT")
@@ -1776,7 +1781,8 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<string>("SortTitle")
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(4);
+                        .HasColumnOrder(4)
+                        .UseCollation("NATURALSORT");
 
                     b.Property<string>("Studio")
                         .HasColumnType("TEXT")

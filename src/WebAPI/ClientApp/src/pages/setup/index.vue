@@ -185,13 +185,13 @@
 </template>
 
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
 import Log from 'consola';
-import { SettingsService } from '@service';
 import { useRouter, useOpenControlDialog } from '#imports';
+import { useSettingsStore } from '~/store';
 
 const router = useRouter();
 const { t } = useI18n();
+const settingsStore = useSettingsStore();
 
 const stepIndex = ref(1);
 const stepPagesCount = ref(5);
@@ -227,15 +227,12 @@ const back = () => {
 };
 
 const finishSetup = () => {
-	useSubscription(
-		SettingsService.updateGeneralSettings('firstTimeSetup', false).subscribe(() => {
-			Log.info('Setup process is finished or skipped, redirecting to home page now and refreshing the page');
-			router.push('/').then(() => {
-				// Refresh the page when we go to the home page to make sure we get all new data.
-				location.reload();
-			});
-		}),
-	);
+	settingsStore.generalSettings.firstTimeSetup = false;
+	Log.info('Setup process is finished or skipped, redirecting to home page now and refreshing the page');
+	router.push('/').then(() => {
+		// Refresh the page when we go to the home page to make sure we get all new data.
+		location.reload();
+	});
 };
 </script>
 <style lang="scss">

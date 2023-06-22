@@ -10,14 +10,26 @@ public class GetAllPlexServersQueryValidator : AbstractValidator<GetAllPlexServe
 
 public class GetAllPlexServersQueryHandler : BaseHandler, IRequestHandler<GetAllPlexServersQuery, Result<List<PlexServer>>>
 {
+    #region Constructors
+
     public GetAllPlexServersQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+
+    #endregion
+
+    #region Methods
+
+    #region Public
 
     public async Task<Result<List<PlexServer>>> Handle(GetAllPlexServersQuery request, CancellationToken cancellationToken)
     {
         var query = PlexServerQueryable.AsQueryable();
 
         if (request.IncludeConnections)
-            query = query.Include(x => x.PlexServerConnections);
+        {
+            query = query
+                .Include(x => x.PlexServerConnections)
+                .ThenInclude(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(1));
+        }
 
         if (request.IncludeLibraries)
             query = query.Include(x => x.PlexLibraries);
@@ -26,4 +38,8 @@ public class GetAllPlexServersQueryHandler : BaseHandler, IRequestHandler<GetAll
 
         return Result.Ok(plexServers);
     }
+
+    #endregion
+
+    #endregion
 }

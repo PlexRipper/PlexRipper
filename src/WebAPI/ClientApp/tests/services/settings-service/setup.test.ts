@@ -1,4 +1,5 @@
 import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
+import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, baseVars, getAxiosMock } from '@services-test-base';
 import SettingsService from '@service/settingsService';
 import { generateResultDTO, generateSettingsModel } from '@mock';
@@ -15,6 +16,7 @@ describe('SettingsService.setup()', () => {
 
 	beforeEach(() => {
 		mock = getAxiosMock();
+		setActivePinia(createPinia());
 	});
 
 	test('Should return success and complete when setup is run', async () => {

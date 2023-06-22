@@ -1,6 +1,6 @@
 <template>
 	<q-page>
-		<q-row v-if="firstTimeSetup">
+		<q-row v-if="settingsStore.generalSettings.firstTimeSetup">
 			<q-col cols="12">
 				<h2>{{ t('pages.home.setup-question') }}</h2>
 				<q-row justify="center">
@@ -23,25 +23,13 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { useSubscription } from '@vueuse/rxjs';
-import { set } from '@vueuse/core';
-import { SettingsService } from '@service';
+import { useSettingsStore } from '~/store';
 
-const firstTimeSetup = ref(false);
 const { t } = useI18n();
-const skipSetup = () => {
-	useSubscription(
-		SettingsService.updateGeneralSettings('firstTimeSetup', false).subscribe(() => {
-			Log.info('Setup process skipped');
-		}),
-	);
-};
+const settingsStore = useSettingsStore();
 
-onMounted(() => {
-	useSubscription(
-		SettingsService.getFirstTimeSetup().subscribe((state) => {
-			set(firstTimeSetup, state);
-		}),
-	);
-});
+const skipSetup = () => {
+	Log.info('Setup process skipped');
+	settingsStore.generalSettings.firstTimeSetup = false;
+};
 </script>

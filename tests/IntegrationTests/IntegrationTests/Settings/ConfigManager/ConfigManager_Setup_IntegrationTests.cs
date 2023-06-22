@@ -17,6 +17,7 @@ public class ConfigManager_Setup_IntegrationTests : BaseIntegrationTests
             new DisplaySettingsModule(),
             new DownloadManagerSettingsModule(),
             new GeneralSettingsModule(),
+            new DebugSettingsModule(),
             new LanguageSettingsModule(),
             new ServerSettingsModule());
     }

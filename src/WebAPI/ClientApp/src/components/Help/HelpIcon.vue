@@ -2,7 +2,7 @@
 	<q-row no-wrap align="center">
 		<q-col>
 			<q-sub-header>
-				{{ getLabel }}
+				{{ $t(`${helpId}.label`) }}
 			</q-sub-header>
 		</q-col>
 		<q-col v-if="hasHelpPage" cols="auto">
@@ -12,41 +12,17 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n, getMessage } from '#imports';
+import { useI18n } from '#imports';
 import { HelpService } from '@service';
-
-interface IHelp {
-	label: string;
-	title: string;
-	text: string;
-}
 
 const { t } = useI18n();
 
-const props = withDefaults(
-	defineProps<{
-		labelId?: string;
-		helpId?: string;
-	}>(),
-	{
-		labelId: '',
-		helpId: '',
-	},
-);
-
-const getLabel = computed(() => {
-	return t(`${props.helpId}.label`);
-});
+const props = defineProps<{
+	helpId: string;
+}>();
 
 const hasHelpPage = computed(() => {
-	if (props.helpId) {
-		const msgObject = getMessage(props.helpId) as IHelp;
-		// Complains about returning string if I return directly, instead of an if statement returning true
-		if (msgObject && msgObject.title && msgObject.text) {
-			return true;
-		}
-	}
-	return false;
+	return props.helpId && t(`${props.helpId}.title`) && t(`${props.helpId}.text`);
 });
 
 function openDialog(): void {

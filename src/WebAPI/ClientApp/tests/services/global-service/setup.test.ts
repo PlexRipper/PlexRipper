@@ -1,4 +1,5 @@
 import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
+import { createPinia, setActivePinia } from 'pinia';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
 import GlobalService from '@service/globalService';
 import { generatePlexServers, generateResultDTO, generateSettingsModel } from '@mock';
@@ -23,6 +24,7 @@ describe('GlobalService.setup()', () => {
 
 	beforeEach(() => {
 		mock = getAxiosMock();
+		setActivePinia(createPinia());
 	});
 
 	test('Should return success and complete when all setup services are run', async () => {

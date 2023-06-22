@@ -1,7 +1,7 @@
 <template>
 	<q-btn-dropdown stretch flat icon="mdi-account" dropdown-icon="mdi-arrow-down">
 		<q-list v-if="accounts.length > 0">
-			<q-item-label header> ACTIVE ACCOUNT</q-item-label>
+			<q-item-label header> {{ $t('components.account-selector.title') }}</q-item-label>
 
 			<!--  Account Row  -->
 			<q-item
@@ -36,19 +36,20 @@
 
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
-import { AccountService, ServerService, SettingsService } from '@service';
+import { AccountService, ServerService } from '@service';
 import { refreshAccount } from '@api/accountApi';
 import { PlexAccountDTO } from '@dto/mainApi';
+import { useSettingsStore } from '~/store';
 
 const { t } = useI18n();
+const settingsStore = useSettingsStore();
 
 const loading = ref<boolean[]>([false]);
 const isLoading = computed(() => loading.value.some((x) => x));
 const accounts = ref<PlexAccountDTO[]>([]);
-const activeAccountId = ref(0);
 
 function updateActiveAccountId(accountId: number): void {
-	useSubscription(SettingsService.updateGeneralSettings('activeAccountId', accountId).subscribe());
+	settingsStore.generalSettings.activeAccountId = accountId;
 }
 
 function runRefreshAccount(accountId = 0): void {
@@ -67,19 +68,11 @@ onMounted(() => {
 			accounts.value = [
 				{
 					id: 0,
-					displayName: 'All Accounts',
+					displayName: t('components.account-selector.all-accounts'),
 				} as any,
 			];
 			data?.filter((x) => x.isEnabled).forEach((account) => accounts.value.push(account));
 			accounts.value.forEach(() => loading.value.push(false));
-		}),
-	);
-
-	useSubscription(
-		SettingsService.getActiveAccountId().subscribe((newActiveAccountId) => {
-			if (newActiveAccountId || newActiveAccountId >= 0) {
-				activeAccountId.value = newActiveAccountId;
-			}
 		}),
 	);
 });

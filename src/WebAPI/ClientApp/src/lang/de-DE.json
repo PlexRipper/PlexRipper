@@ -101,16 +101,16 @@
                 },
                 "server-commands": {
                     "header": "Server Befehle",
-                    "inspect-server": "",
+                    "inspect-server": "Server untersuchen",
                     "re-sync-server": "Re-sync Mediathekdaten"
                 },
                 "server-config": {
                     "download-speed-limit": "Geschwindigkeitsbegrenzung herunterladen",
-                    "header": ""
+                    "header": "Serverkonfiguration"
                 },
                 "server-connections": {
-                    "download-speed-limit": "",
-                    "header": "",
+                    "download-speed-limit": "Geschwindigkeitsbegrenzung herunterladen",
+                    "header": "Serververbindungen",
                     "section-header": "Wählen Sie die bevorzugte Serververbindung aus:"
                 },
                 "server-data": {
@@ -148,6 +148,13 @@
         },
         "server-library-destinations-tab-content": {
             "no-libraries": "Dieser Plex-Server verfügt über keine Bibliotheken, für die das Standardziel festgelegt werden kann"
+        },
+        "account-selector": {
+            "all-accounts": "Alle Plex-Konten",
+            "title": "Aktive Konten"
+        },
+        "media-selection-dialog": {
+            "title": "Legen Sie den Indexbereich fest, um das Medium auszuwählen (#{min} - #{max})"
         }
     },
     "confirmation": {
@@ -203,7 +210,9 @@
             "validate": "überprüfen",
             "validated": "überprüft",
             "missing-text": "Fehlender Text",
-            "inspect-server": "Server untersuchen"
+            "inspect-server": "Server untersuchen",
+            "selection": "Auswahl",
+            "set-selection": "Auswahl festlegen"
         },
         "name": "PlexRipper",
         "name-version": "PlexRipper - V{version}",
@@ -283,9 +292,21 @@
                     }
                 },
                 "debug-section": {
-                    "text": "Wenn Sie den Debug-Modus aktivieren, werden in verschiedenen Bereichen der Benutzeroberfläche mehr Informationen als gewöhnlich angezeigt.",
-                    "title": "Debug-Modus",
-                    "label": "Debug-Modus"
+                    "debug-mode": {
+                        "text": "Wenn Sie den Debug-Modus aktivieren, werden in verschiedenen Bereichen der Benutzeroberfläche mehr Informationen als gewöhnlich angezeigt.",
+                        "title": "Debug-Modus",
+                        "label": "Debug-Modus"
+                    },
+                    "mask-plex-libraries": {
+                        "label": "Plex-Bibliotheksnamen maskieren",
+                        "text": "Dadurch werden die Namen der Plex-Bibliotheken in der Benutzeroberfläche maskiert. Dies ist nützlich, wenn Sie anonyme Screenshots erstellen",
+                        "title": "Plex-Bibliotheksnamen maskieren"
+                    },
+                    "mask-plex-servers": {
+                        "label": "Maskieren Sie Plex-Servernamen",
+                        "text": "Dadurch werden die Namen der Plex-Server in der Benutzeroberfläche maskiert. Dies ist nützlich, wenn Sie anonyme Screenshots erstellen.",
+                        "title": "Maskieren Sie Plex-Servernamen"
+                    }
                 },
                 "reset-db": {
                     "label": "Datenbank zurück setzen",

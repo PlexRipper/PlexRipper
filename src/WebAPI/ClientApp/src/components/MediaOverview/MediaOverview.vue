@@ -7,49 +7,42 @@
 		</q-col>
 	</q-row>
 	<!-- Media Overview -->
-	<template v-else-if="!loading && items.length">
+	<template v-else-if="!loading && mediaOverviewStore.itemsLength">
 		<q-row no-gutters>
 			<q-col>
 				<!--	Overview bar	-->
 				<media-overview-bar
 					:server="server"
 					:library="library"
-					:view-mode="mediaViewMode"
-					:detail-mode="!showMediaOverview"
+					:detail-mode="!mediaOverviewStore.showMediaOverview"
 					@back="closeDetailsOverview"
 					@view-change="changeView"
+					@selection-dialog="useOpenControlDialog(mediaSelectionDialogName)"
 					@refresh-library="refreshLibrary" />
 				<!--	Data table display	-->
 				<q-row id="media-container" align="start">
-					<q-col v-show="showMediaOverview">
-						<template v-if="mediaViewMode === ViewMode.Table">
+					<q-col v-show="mediaOverviewStore.showMediaOverview">
+						<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
 							<MediaTable
-								:rows="items"
-								:selection="selected"
+								:rows="mediaOverviewStore.items"
 								:disable-hover-click="mediaType !== PlexMediaType.TvShow"
-								:scroll-dict="scrollDict"
-								is-scrollable
-								@selection="selected = $event" />
+								is-scrollable />
 						</template>
 
 						<!-- Poster display-->
 						<template v-else>
-							<poster-table
-								:library-id="libraryId"
-								:media-type="mediaType"
-								:items="items"
-								:scroll-dict="scrollDict" />
+							<poster-table :library-id="libraryId" :media-type="mediaType" :items="mediaOverviewStore.items" />
 						</template>
 					</q-col>
 
 					<!-- Alphabet Navigation-->
-					<alphabet-navigation v-show="showMediaOverview" :scroll-dict="scrollDict" />
+					<alphabet-navigation v-show="mediaOverviewStore.showMediaOverview" />
 				</q-row>
 			</q-col>
 		</q-row>
 	</template>
 	<!-- No Media Overview -->
-	<template v-else-if="!loading && items.length === 0">
+	<template v-else-if="!loading && mediaOverviewStore.itemsLength === 0">
 		<q-row justify="center">
 			<q-col cols="auto">
 				<h1>{{ t('components.media-overview.no-data') }}</h1>
@@ -58,10 +51,15 @@
 	</template>
 	<!-- Media Details Display-->
 	<DetailsOverview :name="mediaDetailsDialogName" />
+	<!-- Media Selection Dialog-->
+	<MediaSelectionDialog :name="mediaSelectionDialogName" />
 	<!--	Loading overlay	-->
 	<QLoadingOverlay :loading="loading" />
 	<!--		Download confirmation dialog	-->
-	<DownloadConfirmation :name="downloadConfirmationName" :items="items" @download="DownloadService.downloadMedia($event)" />
+	<DownloadConfirmation
+		:name="downloadConfirmationName"
+		:items="mediaOverviewStore.items"
+		@download="DownloadService.downloadMedia($event)" />
 </template>
 
 <script setup lang="ts">
@@ -69,16 +67,12 @@ import Log from 'consola';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRouter, RouteLocationNormalized, RouteLocationNormalizedLoaded } from 'vue-router';
-import { isEqual, orderBy } from 'lodash-es';
 import { combineLatest } from 'rxjs';
-import type { DisplaySettingsDTO, DownloadMediaDTO, PlexMediaSlimDTO, PlexServerDTO } from '@dto/mainApi';
+import type { DownloadMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
-import { DownloadService, LibraryService, MediaService, SettingsService, SignalrService } from '@service';
+import { DownloadService, LibraryService, MediaService, SignalrService } from '@service';
 import { DetailsOverview, DownloadConfirmation, MediaTable } from '#components';
-import ISelection from '@interfaces/ISelection';
 import {
-	setMediaOverviewSort,
-	useMediaOverviewBarBus,
 	useMediaOverviewBarDownloadCommandBus,
 	useMediaOverviewSortBus,
 	useOpenControlDialog,
@@ -86,38 +80,28 @@ import {
 	useCloseControlDialog,
 	sendMediaOverviewDownloadCommand,
 } from '#imports';
-import {
-	IMediaOverviewSort,
-	listenMediaOverviewOpenDetailsCommand,
-	sendMediaOverviewOpenDetailsCommand,
-} from '@composables/event-bus';
+import { listenMediaOverviewOpenDetailsCommand, sendMediaOverviewOpenDetailsCommand } from '@composables/event-bus';
+import { useMediaOverviewStore, useSettingsStore } from '~/store';
 
 // region SetupFields
 const { t } = useI18n();
+const settingsStore = useSettingsStore();
+const mediaOverviewStore = useMediaOverviewStore();
 const router = useRouter();
-const scrollDict = ref<Record<string, number>>({ '#': 0 } as any);
-const selected = ref<ISelection>({ keys: [], allSelected: false, indexKey: 0 });
 
 // endregion
 
 const downloadConfirmationName = 'mediaDownloadConfirmation';
 const mediaDetailsDialogName = 'mediaDetailsDialogName';
+const mediaSelectionDialogName = 'mediaSelectionDialogName';
 const isRefreshing = ref(false);
 
 const server = ref<PlexServerDTO | null>(null);
 const library = ref<PlexLibraryDTO | null>(null);
 
 const libraryProgress = ref<LibraryProgress | null>(null);
-const items = ref<PlexMediaSlimDTO[]>([]);
 
 const loading = ref(true);
-const showMediaOverview = ref(true);
-const mediaViewMode = ref<ViewMode>(ViewMode.Poster);
-
-const askDownloadMovieConfirmation = ref(false);
-const askDownloadTvShowConfirmation = ref(false);
-const askDownloadSeasonConfirmation = ref(false);
-const askDownloadEpisodeConfirmation = ref(false);
 
 const props = defineProps<{
 	libraryId: number;
@@ -128,13 +112,13 @@ const props = defineProps<{
 const isConfirmationEnabled = computed(() => {
 	switch (props.mediaType) {
 		case PlexMediaType.Movie:
-			return askDownloadMovieConfirmation.value;
+			return settingsStore.confirmationSettings.askDownloadMovieConfirmation;
 		case PlexMediaType.TvShow:
-			return askDownloadTvShowConfirmation.value;
+			return settingsStore.confirmationSettings.askDownloadTvShowConfirmation;
 		case PlexMediaType.Season:
-			return askDownloadSeasonConfirmation.value;
+			return settingsStore.confirmationSettings.askDownloadSeasonConfirmation;
 		case PlexMediaType.Episode:
-			return askDownloadEpisodeConfirmation.value;
+			return settingsStore.confirmationSettings.askDownloadEpisodeConfirmation;
 		default:
 			return true;
 	}
@@ -148,21 +132,7 @@ const refreshingText = computed(() => {
 });
 
 function changeView(viewMode: ViewMode) {
-	let type: keyof DisplaySettingsDTO | null = null;
-
-	switch (props.mediaType) {
-		case PlexMediaType.Movie:
-			type = 'movieViewMode';
-			break;
-		case PlexMediaType.TvShow:
-			type = 'tvShowViewMode';
-			break;
-		default:
-			Log.error('Could not set view mode for type' + props.mediaType);
-	}
-	if (type) {
-		useSubscription(SettingsService.updateDisplaySettings(type, viewMode).subscribe());
-	}
+	settingsStore.updateDisplayMode(props.mediaType, viewMode);
 }
 
 function resetProgress(isRefreshingValue: boolean) {
@@ -194,33 +164,16 @@ function onRequestMedia({ page = 0, size = 0 }: { page: number; size: number }) 
 				if (!mediaData) {
 					Log.error(`MediaOverview => No media data for library id ${props.libraryId} was found`);
 				}
-
-				set(items, mediaData);
+				mediaOverviewStore.setMedia(mediaData, props.mediaType);
 			},
 			error: (error) => {
 				Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
 			},
 			complete: () => {
-				setScrollIndexes();
 				set(loading, false);
 			},
 		}),
 	);
-}
-
-function setScrollIndexes() {
-	setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
-	scrollDict.value['#'] = 0;
-	// Check for occurrence of title with alphabetic character
-	const sortTitles = get(items).map((x) => x.sortTitle[0]?.toLowerCase() ?? '#');
-	let lastIndex = 0;
-	for (const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase()) {
-		const index = sortTitles.indexOf(letter, lastIndex);
-		if (index > -1) {
-			get(scrollDict)[letter] = index;
-			lastIndex = index;
-		}
-	}
 }
 
 // region Eventbus
@@ -235,7 +188,7 @@ listenMediaOverviewDownloadCommand((command) => {
 		if (isConfirmationEnabled.value) {
 			useOpenControlDialog(downloadConfirmationName, command);
 		} else {
-			// sendDownloadCommand(command);
+			DownloadService.downloadMedia(command);
 		}
 	}
 });
@@ -254,7 +207,7 @@ listenMediaOverviewOpenDetailsCommand((mediaId: number) => {
 		})
 		.then(() => {
 			useOpenControlDialog(mediaDetailsDialogName, { mediaId, type: props.mediaType });
-			set(showMediaOverview, false);
+			mediaOverviewStore.showMediaOverview = false;
 		});
 });
 
@@ -268,54 +221,24 @@ function closeDetailsOverview() {
 		})
 		.then(() => {
 			useCloseControlDialog(mediaDetailsDialogName);
-			set(showMediaOverview, true);
+			mediaOverviewStore.showMediaOverview = true;
 		});
 }
 
 useMediaOverviewBarDownloadCommandBus().on(() => {
-	if (showMediaOverview.value) {
+	if (mediaOverviewStore.showMediaOverview) {
 		const downloadCommand: DownloadMediaDTO = {
 			plexServerId: server.value?.id ?? 0,
 			plexLibraryId: props.libraryId,
-			mediaIds: selected.value.keys,
+			mediaIds: mediaOverviewStore.selection.keys,
 			type: props.mediaType,
 		};
 		sendMediaOverviewDownloadCommand([downloadCommand]);
 	}
 });
 
-let sortedState: IMediaOverviewSort[] = [];
 useMediaOverviewSortBus().on((event) => {
-	const newSortedState = [...sortedState];
-	const index = newSortedState.findIndex((x) => x.field === event.field);
-	if (index > -1) {
-		newSortedState.splice(index, 1);
-	}
-	if (!event.sort) {
-		newSortedState.unshift(event);
-	}
-
-	// Prevent unnecessary sorting
-	if (isEqual(sortedState, newSortedState)) {
-		return;
-	}
-	sortedState = newSortedState;
-	Log.debug('new sorted state', sortedState);
-	const sortedItems = orderBy(
-		get(items),
-		sortedState.map((x) => x.field),
-		sortedState.map((x) => x.sort),
-	);
-
-	set(items, sortedItems);
-});
-
-const mediaOverViewBarBus = useMediaOverviewBarBus();
-watch(selected, () => {
-	mediaOverViewBarBus.emit({
-		downloadButtonVisible: get(selected).keys.length > 0,
-		hasSelected: get(selected).keys.length > 0,
-	});
+	mediaOverviewStore.sortMedia(event);
 });
 
 function setupRouter() {
@@ -323,15 +246,15 @@ function setupRouter() {
 		// From MediaOverview => DetailsOverview
 		if (!from.path.includes('details') && to.path.includes('details')) {
 			let tableRef: HTMLElement | null = null;
-			if (mediaViewMode.value === ViewMode.Table) {
+			if (mediaOverviewStore.getMediaViewMode === ViewMode.Table) {
 				tableRef = document.getElementById('media-table-scroll');
 			}
-			if (mediaViewMode.value === ViewMode.Poster) {
+			if (mediaOverviewStore.getMediaViewMode === ViewMode.Poster) {
 				tableRef = document.getElementById('poster-table');
 			}
 
 			if (!tableRef) {
-				Log.error('tableRef was null for type', get(mediaViewMode));
+				Log.error('tableRef was null for type', mediaOverviewStore.getMediaViewMode);
 				return next();
 			}
 			// Save the current scroll position to be restored when navigating back
@@ -347,7 +270,7 @@ function setupRouter() {
 			return new Promise((resolve) => {
 				setTimeout(() => {
 					let tableRef: HTMLElement | null = null;
-					switch (get(mediaViewMode)) {
+					switch (mediaOverviewStore.getMediaViewMode) {
 						case ViewMode.Table:
 							tableRef = document.getElementById('media-table-scroll');
 							break;
@@ -355,12 +278,12 @@ function setupRouter() {
 							tableRef = document.getElementById('poster-table');
 							break;
 						default:
-							Log.error('Unknown mediaViewMode', get(mediaViewMode));
+							Log.error('Unknown mediaViewMode', mediaOverviewStore.getMediaViewMode);
 							return;
 					}
 
 					if (!tableRef) {
-						Log.error('tableRef was null for type', get(mediaViewMode));
+						Log.error('tableRef was null for type', mediaOverviewStore.getMediaViewMode);
 						return;
 					}
 
@@ -416,34 +339,10 @@ onMounted(() => {
 			} else {
 				set(server, data.server);
 			}
-		}),
-	);
-	// Get display settings
-	useSubscription(
-		combineLatest({
-			movieViewMode: SettingsService.getMovieViewMode(),
-			tvShowViewMode: SettingsService.getTvShowViewMode(),
-			askMovieConfirmation: SettingsService.getAskDownloadMovieConfirmation(),
-			askTvShowConfirmation: SettingsService.getAskDownloadTvShowConfirmation(),
-			askSeasonConfirmation: SettingsService.getAskDownloadSeasonConfirmation(),
-			askEpisodeConfirmation: SettingsService.getAskDownloadEpisodeConfirmation(),
-		}).subscribe((data) => {
-			Log.info('Display settings', data);
-			set(askDownloadMovieConfirmation, data.askMovieConfirmation);
-			set(askDownloadTvShowConfirmation, data.askTvShowConfirmation);
-			set(askDownloadSeasonConfirmation, data.askSeasonConfirmation);
-			set(askDownloadEpisodeConfirmation, data.askEpisodeConfirmation);
-			switch (props.mediaType) {
-				case PlexMediaType.Movie:
-					set(mediaViewMode, data.movieViewMode);
-					break;
-				case PlexMediaType.TvShow:
-					set(mediaViewMode, data.tvShowViewMode);
-					break;
-			}
 			setupRouter();
 		}),
 	);
+
 	useSubscription(
 		SignalrService.getLibraryProgress(props.libraryId).subscribe((data) => {
 			if (data) {

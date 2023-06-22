@@ -27,15 +27,19 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
+import { storeToRefs } from 'pinia';
 import { AlertService, HelpService } from '@service';
 import IAlert from '@interfaces/IAlert';
 import PageLoadOverlay from '@components/General/PageLoadOverlay.vue';
 import globalService from '@service/globalService';
 import { useOpenControlDialog } from '#imports';
+import { useSettingsStore } from '~/store';
 
 const $q = useQuasar();
 const route = useRoute();
-
+const settingsStore = useSettingsStore();
+const { languageSettings } = storeToRefs(settingsStore);
+const { setLocale } = useI18n();
 const isLoading = ref(true);
 
 const alerts = ref<IAlert[]>([]);
@@ -61,6 +65,11 @@ function toggleNavigationsDrawer() {
 function toggleNotificationsDrawer() {
 	set(showNotificationsDrawerState, !get(showNotificationsDrawerState));
 }
+
+watch(
+	() => languageSettings.value.language,
+	(value) => setLocale(value),
+);
 
 onMounted(() => {
 	$q.loading.show({

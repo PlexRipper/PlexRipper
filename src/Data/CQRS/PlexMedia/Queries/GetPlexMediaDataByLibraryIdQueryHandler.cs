@@ -40,7 +40,7 @@ public class GetPlexMediaDataByLibraryIdQueryHandler : BaseHandler, IRequestHand
             {
                 entities = await _dbContext.PlexMovies.AsNoTracking()
                     .Where(x => x.PlexLibraryId == request.LibraryId)
-                    .OrderBy(x => x.SortTitle)
+                    .OrderBy(x => x.Title)
                     .Skip(skip)
                     .Take(take)
                     .ProjectTo<PlexMediaSlim>(_mapper.ConfigurationProvider)
@@ -51,7 +51,7 @@ public class GetPlexMediaDataByLibraryIdQueryHandler : BaseHandler, IRequestHand
             {
                 entities = await _dbContext.PlexTvShows.AsNoTracking()
                     .Where(x => x.PlexLibraryId == request.LibraryId)
-                    .OrderBy(x => x.SortTitle)
+                    .OrderBy(x => x.Title)
                     .Skip(skip)
                     .Take(take)
                     .ProjectTo<PlexMediaSlim>(_mapper.ConfigurationProvider)
@@ -62,7 +62,7 @@ public class GetPlexMediaDataByLibraryIdQueryHandler : BaseHandler, IRequestHand
             {
                 entities = await _dbContext.PlexTvShowSeason.AsNoTracking()
                     .Where(x => x.PlexLibraryId == request.LibraryId)
-                    .OrderBy(x => x.SortTitle)
+                    .OrderBy(x => x.Title)
                     .Skip(skip)
                     .Take(take)
                     .ProjectTo<PlexMediaSlim>(_mapper.ConfigurationProvider)
@@ -73,7 +73,7 @@ public class GetPlexMediaDataByLibraryIdQueryHandler : BaseHandler, IRequestHand
             {
                 entities = await _dbContext.PlexTvShowEpisodes.AsNoTracking()
                     .Where(x => x.PlexLibraryId == request.LibraryId)
-                    .OrderBy(x => x.SortTitle)
+                    .OrderBy(x => x.Title)
                     .Skip(skip)
                     .Take(take)
                     .ProjectTo<PlexMediaSlim>(_mapper.ConfigurationProvider)

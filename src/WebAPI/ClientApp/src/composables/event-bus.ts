@@ -35,10 +35,6 @@ export interface IMediaOverviewBarBus {
 	hasSelected: boolean;
 }
 
-export function useMediaOverviewBarBus(): UseEventBusReturn<IMediaOverviewBarBus, any> {
-	return useEventBus<IMediaOverviewBarBus>('mediaOverViewBarBus');
-}
-
 export interface IMediaOverviewSort {
 	field: string;
 	sort: 'asc' | 'desc' | 'no-sort';
@@ -46,10 +42,6 @@ export interface IMediaOverviewSort {
 
 export function useMediaOverviewSortBus(): UseEventBusReturn<IMediaOverviewSort, any> {
 	return useEventBus<IMediaOverviewSort>('mediaOverviewSort');
-}
-
-export function setMediaOverviewSort(action: IMediaOverviewSort) {
-	useMediaOverviewSortBus().emit(action);
 }
 
 // region General

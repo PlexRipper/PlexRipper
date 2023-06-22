@@ -26,10 +26,8 @@
 						<template v-if="mediaViewMode === ViewMode.Table">
 							<MediaTable
 								:rows="mediaOverviewStore.items"
-								:selection="selected"
 								:disable-hover-click="mediaType !== PlexMediaType.TvShow"
-								is-scrollable
-								@selection="selected = $event" />
+								is-scrollable />
 						</template>
 
 						<!-- Poster display-->
@@ -75,9 +73,7 @@ import type { DownloadMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, MediaService, SignalrService } from '@service';
 import { DetailsOverview, DownloadConfirmation, MediaTable } from '#components';
-import ISelection from '@interfaces/ISelection';
 import {
-	useMediaOverviewBarBus,
 	useMediaOverviewBarDownloadCommandBus,
 	useMediaOverviewSortBus,
 	useOpenControlDialog,
@@ -93,7 +89,6 @@ const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const mediaOverviewStore = useMediaOverviewStore();
 const router = useRouter();
-const selected = ref<ISelection>({ keys: [], allSelected: false, indexKey: 0 });
 
 // endregion
 
@@ -248,7 +243,7 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 		const downloadCommand: DownloadMediaDTO = {
 			plexServerId: server.value?.id ?? 0,
 			plexLibraryId: props.libraryId,
-			mediaIds: selected.value.keys,
+			mediaIds: mediaOverviewStore.selection.keys,
 			type: props.mediaType,
 		};
 		sendMediaOverviewDownloadCommand([downloadCommand]);
@@ -257,14 +252,6 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 
 useMediaOverviewSortBus().on((event) => {
 	mediaOverviewStore.sortMedia(event);
-});
-
-const mediaOverViewBarBus = useMediaOverviewBarBus();
-watch(selected, () => {
-	mediaOverViewBarBus.emit({
-		downloadButtonVisible: get(selected).keys.length > 0,
-		hasSelected: get(selected).keys.length > 0,
-	});
 });
 
 function setupRouter() {

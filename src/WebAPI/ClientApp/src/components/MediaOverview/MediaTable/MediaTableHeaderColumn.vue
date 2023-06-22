@@ -6,8 +6,11 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import { IMediaOverviewSort, setMediaOverviewSort } from '@composables/event-bus';
+import { IMediaOverviewSort } from '@composables/event-bus';
 import { QTreeViewTableHeader } from '@props';
+import { useMediaOverviewStore } from '~/store';
+
+const mediaOverviewStore = useMediaOverviewStore();
 
 const props = defineProps<{
 	column: QTreeViewTableHeader;
@@ -55,7 +58,7 @@ function onClick() {
 			break;
 	}
 	set(sorted, newSort);
-	setMediaOverviewSort(get(sorted));
+	mediaOverviewStore.sortMedia(get(sorted));
 }
 
 onBeforeMount(() => {

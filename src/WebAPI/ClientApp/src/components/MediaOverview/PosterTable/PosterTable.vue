@@ -27,11 +27,7 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 
 import { get, set, useScroll } from '@vueuse/core';
 import { PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
-import {
-	listenMediaOverviewScrollToCommand,
-	sendMediaOverviewDownloadCommand,
-	setMediaOverviewSort,
-} from '@composables/event-bus';
+import { listenMediaOverviewScrollToCommand, sendMediaOverviewDownloadCommand } from '@composables/event-bus';
 import { triggerBoxHighlight } from '@composables/animations';
 const mediaOverviewStore = useMediaOverviewStore();
 
@@ -75,9 +71,8 @@ onMounted(() => {
 			Log.error('Could not find container with reference: ', get(posterTableRef));
 			return;
 		}
-
 		// We have to revert to normal title sort otherwise the index will be wrong
-		setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
+		mediaOverviewStore.sortMedia({ sort: 'asc', field: 'title' });
 		const index = mediaOverviewStore.scrollDict[letter] ?? 0;
 		set(scrolledIndex, index);
 		set(autoScrollEnabled, true);

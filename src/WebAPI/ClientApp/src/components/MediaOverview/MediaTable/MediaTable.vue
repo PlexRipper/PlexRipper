@@ -3,9 +3,9 @@
 		<MediaTableHeader
 			:columns="mediaTableColumns"
 			selectable
-			:selected="rootSelected"
+			:selected="mediaOverviewStore.isRootSelected"
 			class="media-table--header"
-			@selected="rootSetSelected($event)" />
+			@selected="mediaOverviewStore.setRootSelected($event)" />
 		<div
 			id="media-table-scroll"
 			ref="qTableRef"
@@ -51,7 +51,7 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { get, set, useScroll } from '@vueuse/core';
-import { setMediaOverviewSort, triggerBoxHighlight, listenMediaOverviewScrollToCommand, useMediaOverviewStore } from '#imports';
+import { triggerBoxHighlight, listenMediaOverviewScrollToCommand, useMediaOverviewStore } from '#imports';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 import { PlexMediaSlimDTO } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
@@ -62,10 +62,9 @@ const qTableRef = ref<HTMLElement | null>(null);
 const scrollTargetElement = ref<HTMLElement | null>(null);
 const autoScrollEnabled = ref(false);
 
-const props = withDefaults(
+withDefaults(
 	defineProps<{
 		rows: PlexMediaSlimDTO[];
-		selection: ISelection | null;
 		disableHoverClick?: boolean;
 		disableHighlight?: boolean;
 		disableIntersection?: boolean;
@@ -76,42 +75,24 @@ const props = withDefaults(
 		disableHighlight: false,
 		disableIntersection: false,
 		isScrollable: true,
+		rows: () => [],
 	},
 );
 
-const emit = defineEmits<{
-	(e: 'selection', payload: ISelection): void;
+defineEmits<{
 	(e: 'row-click', payload: PlexMediaSlimDTO): void;
 }>();
 
 function isSelected(mediaId: number) {
-	return (props.selection?.keys ?? []).includes(mediaId);
-}
-
-const rootSelected = computed((): boolean | null => {
-	if (props.selection?.keys.length === props.rows.length) {
-		return true;
-	}
-
-	if (props.selection?.keys.length === 0) {
-		return false;
-	}
-
-	return null;
-});
-
-function rootSetSelected(value: boolean) {
-	emit('selection', {
-		indexKey: props.selection?.indexKey ?? 0,
-		keys: value ? props.rows.map((x) => x.id) : [],
-		allSelected: value,
-	} as ISelection);
+	return (mediaOverviewStore.selection?.keys ?? []).includes(mediaId);
 }
 
 function updateSelectedRow(mediaId: number, state: boolean) {
-	emit('selection', {
-		...props.selection,
-		keys: state ? [...(props.selection?.keys ?? []), mediaId] : (props.selection?.keys ?? []).filter((x) => x !== mediaId),
+	mediaOverviewStore.setSelection({
+		...mediaOverviewStore.selection,
+		keys: state
+			? [...(mediaOverviewStore.selection?.keys ?? []), mediaId]
+			: (mediaOverviewStore.selection?.keys ?? []).filter((x) => x !== mediaId),
 		allSelected: false,
 	} as ISelection);
 }
@@ -125,8 +106,7 @@ onMounted(() => {
 		}
 
 		// We have to revert to normal title sort otherwise the index will be wrong
-		setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
-
+		mediaOverviewStore.sortMedia({ sort: 'asc', field: 'title' });
 		const index = mediaOverviewStore.scrollDict[letter] ? mediaOverviewStore.scrollDict[letter] : 0;
 		// noinspection TypeScriptValidateTypes
 		const element: HTMLElement | null = get(qTableRef)?.querySelector(`[data-scroll-index="${index}"]`) ?? null;

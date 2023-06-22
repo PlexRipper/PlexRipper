@@ -31,13 +31,21 @@
 
 		<!--	Download button	-->
 		<vertical-button
-			v-if="config.downloadButtonVisible"
+			v-if="mediaOverviewStore.downloadButtonVisible"
 			icon="mdi-download"
 			label="Download"
 			:height="barHeight"
 			:width="verticalButtonWidth"
-			:disabled="!config.hasSelected"
+			:disabled="!mediaOverviewStore.hasSelectedMedia"
 			@click="download" />
+
+		<!--	Selection Dialog Button	-->
+		<vertical-button
+			icon="mdi-select-marker"
+			text-id="selection"
+			:height="barHeight"
+			:width="verticalButtonWidth"
+			@click="$emit('selection-dialog')" />
 
 		<!--	Refresh library button	-->
 		<vertical-button
@@ -84,9 +92,10 @@
 <script setup lang="ts">
 import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { PlexMediaType, ViewMode } from '@dto/mainApi';
-import { IMediaOverviewBarBus, useMediaOverviewBarBus, useMediaOverviewBarDownloadCommandBus } from '#imports';
+import { useMediaOverviewBarDownloadCommandBus, useMediaOverviewStore } from '#imports';
 
 const downloadCommandBus = useMediaOverviewBarDownloadCommandBus();
+const mediaOverviewStore = useMediaOverviewStore();
 
 interface IViewOptions {
 	label: string;
@@ -102,16 +111,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{
 	(e: 'back'): void;
+	(e: 'selection-dialog'): void;
 	(e: 'refresh-library', libraryId: number): void;
 	(e: 'view-change', viewMode: ViewMode): void;
 }>();
 
 const barHeight = ref(85);
 const verticalButtonWidth = ref(120);
-const config = ref<IMediaOverviewBarBus>({
-	downloadButtonVisible: false,
-	hasSelected: false,
-});
 
 const refreshLibrary = () => {
 	emit('refresh-library', props.library?.id ?? -1);
@@ -155,12 +161,4 @@ const viewOptions = computed((): IViewOptions[] => {
 		},
 	];
 });
-// region EventBus
-
-const mediaOverViewBarBus = useMediaOverviewBarBus();
-mediaOverViewBarBus.on((data) => {
-	config.value = { ...config.value, ...data };
-});
-
-// endregion
 </script>

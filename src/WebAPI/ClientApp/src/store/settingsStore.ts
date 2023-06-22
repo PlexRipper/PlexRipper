@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia';
+import { defineStore, acceptHMRUpdate } from 'pinia';
 import Log from 'consola';
 import {
 	ConfirmationSettingsDTO,

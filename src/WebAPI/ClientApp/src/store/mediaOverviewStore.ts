@@ -1,6 +1,8 @@
 import { isEqual, orderBy } from 'lodash-es';
+import { acceptHMRUpdate } from 'pinia';
 import { PlexMediaSlimDTO } from '@dto/mainApi';
 import { IMediaOverviewSort } from '@composables/event-bus';
+import ISelection from '@interfaces/ISelection';
 
 export const useMediaOverviewStore = defineStore('mediaOverviewStore', {
 	state: (): {
@@ -9,12 +11,16 @@ export const useMediaOverviewStore = defineStore('mediaOverviewStore', {
 		sortedState: IMediaOverviewSort[];
 		scrollDict: Record<string, number>;
 		scrollAlphabet: string[];
+		selection: ISelection;
+		downloadButtonVisible: boolean;
 	} => ({
 		items: [],
 		itemsLength: 0,
 		sortedState: [],
 		scrollDict: { '#': 0 },
 		scrollAlphabet: [],
+		selection: { keys: [], allSelected: false, indexKey: 0 },
+		downloadButtonVisible: true,
 	}),
 	actions: {
 		setMedia(items: PlexMediaSlimDTO[]) {
@@ -33,6 +39,16 @@ export const useMediaOverviewStore = defineStore('mediaOverviewStore', {
 				}
 			}
 			this.scrollAlphabet = Object.keys(this.scrollDict);
+		},
+		setSelection(selection: ISelection) {
+			this.selection = selection;
+		},
+		setRootSelected(value: boolean) {
+			this.setSelection({
+				indexKey: this.selection?.indexKey ?? 0,
+				keys: value ? this.items.map((x) => x.id) : [],
+				allSelected: value,
+			} as ISelection);
 		},
 		sortMedia(event: IMediaOverviewSort) {
 			const newSortedState = [...this.sortedState];
@@ -62,7 +78,22 @@ export const useMediaOverviewStore = defineStore('mediaOverviewStore', {
 			this.sortedState = newSortedState;
 		},
 	},
-	getters: {},
+	getters: {
+		hasSelectedMedia(): boolean {
+			return this.selection.keys.length > 0;
+		},
+		isRootSelected(): boolean | null {
+			if (this.selection?.keys.length === this.itemsLength) {
+				return true;
+			}
+
+			if (this.selection?.keys.length === 0) {
+				return false;
+			}
+
+			return null;
+		},
+	},
 });
 
 if (import.meta.hot) {

@@ -1,6 +1,7 @@
 import { isEqual, orderBy } from 'lodash-es';
 import { acceptHMRUpdate } from 'pinia';
-import { PlexMediaSlimDTO } from '@dto/mainApi';
+import { useSettingsStore } from './settingsStore';
+import { PlexMediaSlimDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { IMediaOverviewSort } from '@composables/event-bus';
 import ISelection from '@interfaces/ISelection';
 
@@ -13,6 +14,8 @@ export const useMediaOverviewStore = defineStore('mediaOverviewStore', {
 		scrollAlphabet: string[];
 		selection: ISelection;
 		downloadButtonVisible: boolean;
+		showMediaOverview: boolean;
+		mediaType: PlexMediaType;
 	} => ({
 		items: [],
 		itemsLength: 0,
@@ -20,12 +23,15 @@ export const useMediaOverviewStore = defineStore('mediaOverviewStore', {
 		scrollDict: { '#': 0 },
 		scrollAlphabet: [],
 		selection: { keys: [], allSelected: false, indexKey: 0 },
-		downloadButtonVisible: true,
+		downloadButtonVisible: false,
+		showMediaOverview: true,
+		mediaType: PlexMediaType.None,
 	}),
 	actions: {
-		setMedia(items: PlexMediaSlimDTO[]) {
+		setMedia(items: PlexMediaSlimDTO[], mediaType: PlexMediaType) {
 			this.items = items;
 			this.itemsLength = items.length;
+			this.mediaType = mediaType;
 			// Create scroll indexes for each letter
 			this.scrollDict['#'] = 0;
 			// Check for occurrence of title with alphabetic character
@@ -88,6 +94,23 @@ export const useMediaOverviewStore = defineStore('mediaOverviewStore', {
 	getters: {
 		hasSelectedMedia(): boolean {
 			return this.selection.keys.length > 0;
+		},
+		getMediaViewMode(): ViewMode {
+			const settingsStore = useSettingsStore();
+			switch (this.mediaType) {
+				case PlexMediaType.Movie:
+					return settingsStore.displaySettings.movieViewMode;
+				case PlexMediaType.TvShow:
+					return settingsStore.displaySettings.tvShowViewMode;
+				default:
+					return ViewMode.Poster;
+			}
+		},
+		showSelectionButton(): boolean {
+			return this.showMediaOverview && this.getMediaViewMode === ViewMode.Table;
+		},
+		showDownloadButton(): boolean {
+			return this.downloadButtonVisible || (this.hasSelectedMedia && this.getMediaViewMode === ViewMode.Table);
 		},
 		isRootSelected(): boolean | null {
 			if (this.selection?.keys.length === this.itemsLength) {

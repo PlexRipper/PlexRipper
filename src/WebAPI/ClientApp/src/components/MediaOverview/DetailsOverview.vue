@@ -166,6 +166,7 @@ function closeDetails() {
 	set(mediaItem, null);
 	set(mediaItemDetail, null);
 	set(loading, true);
+	mediaOverviewStore.downloadButtonVisible = false;
 }
 </script>
 <style lang="scss">

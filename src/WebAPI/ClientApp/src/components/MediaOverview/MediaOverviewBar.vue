@@ -31,16 +31,16 @@
 
 		<!--	Download button	-->
 		<vertical-button
-			v-if="mediaOverviewStore.downloadButtonVisible"
+			v-if="mediaOverviewStore.showDownloadButton"
 			icon="mdi-download"
 			label="Download"
 			:height="barHeight"
 			:width="verticalButtonWidth"
-			:disabled="!mediaOverviewStore.hasSelectedMedia"
 			@click="download" />
 
 		<!--	Selection Dialog Button	-->
 		<vertical-button
+			v-if="mediaOverviewStore.showSelectionButton"
 			icon="mdi-select-marker"
 			text-id="selection"
 			:height="barHeight"
@@ -105,7 +105,6 @@ interface IViewOptions {
 const props = defineProps<{
 	server: PlexServerDTO | null;
 	library: PlexLibraryDTO | null;
-	viewMode: ViewMode;
 	detailMode?: boolean;
 }>();
 
@@ -132,7 +131,7 @@ const changeView = (viewMode: ViewMode) => {
 };
 
 const isSelected = (viewMode: ViewMode) => {
-	return props.viewMode === viewMode;
+	return mediaOverviewStore.getMediaViewMode === viewMode;
 };
 
 const libraryCountFormatted = computed(() => {

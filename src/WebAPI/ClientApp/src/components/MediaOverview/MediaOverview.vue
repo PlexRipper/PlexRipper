@@ -14,16 +14,15 @@
 				<media-overview-bar
 					:server="server"
 					:library="library"
-					:view-mode="mediaViewMode"
-					:detail-mode="!showMediaOverview"
+					:detail-mode="!mediaOverviewStore.showMediaOverview"
 					@back="closeDetailsOverview"
 					@view-change="changeView"
 					@selection-dialog="useOpenControlDialog(mediaSelectionDialogName)"
 					@refresh-library="refreshLibrary" />
 				<!--	Data table display	-->
 				<q-row id="media-container" align="start">
-					<q-col v-show="showMediaOverview">
-						<template v-if="mediaViewMode === ViewMode.Table">
+					<q-col v-show="mediaOverviewStore.showMediaOverview">
+						<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
 							<MediaTable
 								:rows="mediaOverviewStore.items"
 								:disable-hover-click="mediaType !== PlexMediaType.TvShow"
@@ -37,7 +36,7 @@
 					</q-col>
 
 					<!-- Alphabet Navigation-->
-					<alphabet-navigation v-show="showMediaOverview" />
+					<alphabet-navigation v-show="mediaOverviewStore.showMediaOverview" />
 				</q-row>
 			</q-col>
 		</q-row>
@@ -103,7 +102,6 @@ const library = ref<PlexLibraryDTO | null>(null);
 const libraryProgress = ref<LibraryProgress | null>(null);
 
 const loading = ref(true);
-const showMediaOverview = ref(true);
 
 const props = defineProps<{
 	libraryId: number;
@@ -123,17 +121,6 @@ const isConfirmationEnabled = computed(() => {
 			return settingsStore.confirmationSettings.askDownloadEpisodeConfirmation;
 		default:
 			return true;
-	}
-});
-
-const mediaViewMode = computed(() => {
-	switch (props.mediaType) {
-		case PlexMediaType.Movie:
-			return settingsStore.displaySettings.movieViewMode;
-		case PlexMediaType.TvShow:
-			return settingsStore.displaySettings.tvShowViewMode;
-		default:
-			return ViewMode.Poster;
 	}
 });
 
@@ -177,7 +164,7 @@ function onRequestMedia({ page = 0, size = 0 }: { page: number; size: number }) 
 				if (!mediaData) {
 					Log.error(`MediaOverview => No media data for library id ${props.libraryId} was found`);
 				}
-				mediaOverviewStore.setMedia(mediaData);
+				mediaOverviewStore.setMedia(mediaData, props.mediaType);
 			},
 			error: (error) => {
 				Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
@@ -220,7 +207,7 @@ listenMediaOverviewOpenDetailsCommand((mediaId: number) => {
 		})
 		.then(() => {
 			useOpenControlDialog(mediaDetailsDialogName, { mediaId, type: props.mediaType });
-			set(showMediaOverview, false);
+			mediaOverviewStore.showMediaOverview = false;
 		});
 });
 
@@ -234,12 +221,12 @@ function closeDetailsOverview() {
 		})
 		.then(() => {
 			useCloseControlDialog(mediaDetailsDialogName);
-			set(showMediaOverview, true);
+			mediaOverviewStore.showMediaOverview = true;
 		});
 }
 
 useMediaOverviewBarDownloadCommandBus().on(() => {
-	if (showMediaOverview.value) {
+	if (mediaOverviewStore.showMediaOverview) {
 		const downloadCommand: DownloadMediaDTO = {
 			plexServerId: server.value?.id ?? 0,
 			plexLibraryId: props.libraryId,
@@ -259,15 +246,15 @@ function setupRouter() {
 		// From MediaOverview => DetailsOverview
 		if (!from.path.includes('details') && to.path.includes('details')) {
 			let tableRef: HTMLElement | null = null;
-			if (get(mediaViewMode) === ViewMode.Table) {
+			if (mediaOverviewStore.getMediaViewMode === ViewMode.Table) {
 				tableRef = document.getElementById('media-table-scroll');
 			}
-			if (get(mediaViewMode) === ViewMode.Poster) {
+			if (mediaOverviewStore.getMediaViewMode === ViewMode.Poster) {
 				tableRef = document.getElementById('poster-table');
 			}
 
 			if (!tableRef) {
-				Log.error('tableRef was null for type', get(mediaViewMode));
+				Log.error('tableRef was null for type', mediaOverviewStore.getMediaViewMode);
 				return next();
 			}
 			// Save the current scroll position to be restored when navigating back
@@ -283,7 +270,7 @@ function setupRouter() {
 			return new Promise((resolve) => {
 				setTimeout(() => {
 					let tableRef: HTMLElement | null = null;
-					switch (get(mediaViewMode)) {
+					switch (mediaOverviewStore.getMediaViewMode) {
 						case ViewMode.Table:
 							tableRef = document.getElementById('media-table-scroll');
 							break;
@@ -291,12 +278,12 @@ function setupRouter() {
 							tableRef = document.getElementById('poster-table');
 							break;
 						default:
-							Log.error('Unknown mediaViewMode', get(mediaViewMode));
+							Log.error('Unknown mediaViewMode', mediaOverviewStore.getMediaViewMode);
 							return;
 					}
 
 					if (!tableRef) {
-						Log.error('tableRef was null for type', get(mediaViewMode));
+						Log.error('tableRef was null for type', mediaOverviewStore.getMediaViewMode);
 						return;
 					}
 

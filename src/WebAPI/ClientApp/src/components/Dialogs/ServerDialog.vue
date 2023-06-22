@@ -110,7 +110,6 @@ import { ref, computed, useCloseControlDialog } from '#imports';
 import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryService, ServerService } from '@service';
 import { ServerDataTabContent, ServerConnectionsTabContent } from '#components';
-import { useSettingsStore } from '~/store';
 
 defineProps<{ name: string }>();
 
@@ -122,7 +121,6 @@ const plexServerId = ref(0);
 
 const isVisible = computed((): boolean => plexServerId.value > 0);
 const { t } = useI18n();
-const settingsStore = useSettingsStore();
 
 function open(newPlexServerId: number): void {
 	set(plexServerId, newPlexServerId);

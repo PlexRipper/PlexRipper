@@ -6,48 +6,63 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import { setMediaOverviewSort } from '@composables/event-bus';
+import { IMediaOverviewSort, setMediaOverviewSort } from '@composables/event-bus';
 import { QTreeViewTableHeader } from '@props';
-
-const sorted = ref<'asc' | 'desc' | boolean>(false);
 
 const props = defineProps<{
 	column: QTreeViewTableHeader;
 }>();
 
+const sorted = ref<IMediaOverviewSort>({
+	sort: props.column.sortOrder ?? 'no-sort',
+	field: props.column.sortField ?? props.column.field,
+});
+
 defineEmits<{
 	(e: 'sort'): void;
 }>();
+
 const icon = computed(() => {
-	if (get(sorted) === 'asc') {
-		return 'mdi-arrow-up';
-	} else if (get(sorted) === 'desc') {
-		return 'mdi-arrow-down';
-	} else {
-		return 'mdi-arrow-up';
+	switch (get(sorted).sort) {
+		case 'asc':
+			return 'mdi-arrow-up';
+		case 'desc':
+			return 'mdi-arrow-down';
+		case 'no-sort':
+			return '';
+		default:
+			return 'mdi-arrow-up';
 	}
 });
 
 function onClick() {
-	switch (get(sorted)) {
+	const newSort: IMediaOverviewSort = {
+		sort: get(sorted)?.sort ?? 'no-sort',
+		field: props.column.sortField ?? props.column.field,
+	};
+	switch (newSort.sort) {
 		case 'asc':
-			set(sorted, 'desc' as 'asc' | 'desc' | boolean);
+			newSort.sort = 'desc';
 			break;
 		case 'desc':
-			set(sorted, false);
+			newSort.sort = 'no-sort';
+			break;
+		case 'no-sort':
+			newSort.sort = 'asc';
 			break;
 		default:
-			set(sorted, 'asc' as 'asc' | 'desc' | boolean);
+			newSort.sort = 'no-sort';
 			break;
 	}
-	setMediaOverviewSort({
-		sort: get(sorted) ? get(sorted) : false,
-		field: props.column.sortField ?? props.column.field,
-	});
+	set(sorted, newSort);
+	setMediaOverviewSort(get(sorted));
 }
 
 onBeforeMount(() => {
-	set(sorted, props.column?.sortOrder ?? false);
+	set(sorted, {
+		field: props.column.sortField ?? props.column.field,
+		sort: 'no-sort',
+	});
 });
 </script>
 <style lang="scss">

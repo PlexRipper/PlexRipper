@@ -202,7 +202,6 @@ function onRequestMedia({ page = 0, size = 0 }: { page: number; size: number }) 
 }
 
 function setScrollIndexes() {
-	setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
 	scrollDict.value['#'] = 0;
 	// Check for occurrence of title with alphabetic character
 	const sortTitles = get(items).map((x) => x.sortTitle[0]?.toLowerCase() ?? '#');
@@ -279,12 +278,13 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 
 let sortedState: IMediaOverviewSort[] = [];
 useMediaOverviewSortBus().on((event) => {
+	Log.debug('new sorted event', event);
 	const newSortedState = [...sortedState];
 	const index = newSortedState.findIndex((x) => x.field === event.field);
 	if (index > -1) {
 		newSortedState.splice(index, 1);
 	}
-	if (!event.sort) {
+	if (event.sort) {
 		newSortedState.unshift(event);
 	}
 
@@ -295,9 +295,9 @@ useMediaOverviewSortBus().on((event) => {
 	sortedState = newSortedState;
 	Log.debug('new sorted state', sortedState);
 	const sortedItems = orderBy(
-		get(items),
-		sortedState.map((x) => x.field),
-		sortedState.map((x) => x.sort),
+		get(items), // Items to sort
+		sortedState.map((x) => x.field), // Sort by field
+		sortedState.map((x) => x.sort), // Sort by sort, asc or desc
 	);
 
 	set(items, sortedItems);

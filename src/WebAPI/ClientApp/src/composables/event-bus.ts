@@ -41,7 +41,7 @@ export function useMediaOverviewBarBus(): UseEventBusReturn<IMediaOverviewBarBus
 
 export interface IMediaOverviewSort {
 	field: string;
-	sort: 'asc' | 'desc' | boolean;
+	sort: 'asc' | 'desc' | 'no-sort';
 }
 
 export function useMediaOverviewSortBus(): UseEventBusReturn<IMediaOverviewSort, any> {

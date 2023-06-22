@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import Log from 'consola';
 import {
 	ConfirmationSettingsDTO,
 	DateTimeSettingsDTO,
@@ -7,6 +8,7 @@ import {
 	DownloadManagerSettingsDTO,
 	GeneralSettingsDTO,
 	LanguageSettingsDTO,
+	PlexMediaType,
 	ServerSettingsDTO,
 	SettingsModelDTO,
 	ViewMode,
@@ -71,6 +73,18 @@ export const useSettingsStore = defineStore('settingsStore', {
 					plexServerName: this.serverSettings.data[i].plexServerName,
 					downloadSpeedLimit: downloadLimit,
 				});
+			}
+		},
+		updateDisplayMode(type: PlexMediaType, viewMode: ViewMode) {
+			switch (type) {
+				case PlexMediaType.Movie:
+					this.displaySettings.movieViewMode = viewMode;
+					break;
+				case PlexMediaType.TvShow:
+					this.displaySettings.tvShowViewMode = viewMode;
+					break;
+				default:
+					Log.error('Could not set view mode for type' + type);
 			}
 		},
 	},

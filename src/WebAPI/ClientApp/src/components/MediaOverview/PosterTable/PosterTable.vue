@@ -33,6 +33,7 @@ import {
 	setMediaOverviewSort,
 } from '@composables/event-bus';
 import { triggerBoxHighlight } from '@composables/animations';
+const mediaOverviewStore = useMediaOverviewStore();
 
 const autoScrollEnabled = ref(false);
 const recycleScrollerRef = ref<RecycleScroller | null>(null);
@@ -42,17 +43,11 @@ const posterCardHeight = ref(340 + 32);
 const gridItems = ref(0);
 const scrolledIndex = ref(0);
 
-const props = withDefaults(
-	defineProps<{
-		mediaType: PlexMediaType;
-		libraryId: number;
-		items: PlexMediaSlimDTO[];
-		scrollDict?: Record<string, number>;
-	}>(),
-	{
-		scrollDict: { '#': 0 } as any,
-	},
-);
+defineProps<{
+	mediaType: PlexMediaType;
+	libraryId: number;
+	items: PlexMediaSlimDTO[];
+}>();
 
 defineEmits<{
 	(e: 'load', payload: any): void;
@@ -80,13 +75,10 @@ onMounted(() => {
 			Log.error('Could not find container with reference: ', get(posterTableRef));
 			return;
 		}
-		if (!props.scrollDict) {
-			Log.error('Could not find scrollDict');
-			return;
-		}
+
 		// We have to revert to normal title sort otherwise the index will be wrong
 		setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
-		const index = props.scrollDict[letter] ?? 0;
+		const index = mediaOverviewStore.scrollDict[letter] ?? 0;
 		set(scrolledIndex, index);
 		set(autoScrollEnabled, true);
 

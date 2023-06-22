@@ -51,11 +51,12 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { get, set, useScroll } from '@vueuse/core';
-import { setMediaOverviewSort, triggerBoxHighlight, listenMediaOverviewScrollToCommand } from '#imports';
+import { setMediaOverviewSort, triggerBoxHighlight, listenMediaOverviewScrollToCommand, useMediaOverviewStore } from '#imports';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 import { PlexMediaSlimDTO } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
 
+const mediaOverviewStore = useMediaOverviewStore();
 const mediaTableColumns = getMediaTableColumns();
 const qTableRef = ref<HTMLElement | null>(null);
 const scrollTargetElement = ref<HTMLElement | null>(null);
@@ -65,14 +66,12 @@ const props = withDefaults(
 	defineProps<{
 		rows: PlexMediaSlimDTO[];
 		selection: ISelection | null;
-		scrollDict?: Record<string, number>;
 		disableHoverClick?: boolean;
 		disableHighlight?: boolean;
 		disableIntersection?: boolean;
 		isScrollable?: boolean;
 	}>(),
 	{
-		scrollDict: { '#': 0 } as any,
 		disableHoverClick: false,
 		disableHighlight: false,
 		disableIntersection: false,
@@ -125,15 +124,10 @@ onMounted(() => {
 			return;
 		}
 
-		if (!props.scrollDict) {
-			Log.error('Could not find scrollDict');
-			return;
-		}
-
 		// We have to revert to normal title sort otherwise the index will be wrong
 		setMediaOverviewSort({ sort: 'asc', field: 'sortTitle' });
 
-		const index = props.scrollDict[letter] ? props.scrollDict[letter] : 0;
+		const index = mediaOverviewStore.scrollDict[letter] ? mediaOverviewStore.scrollDict[letter] : 0;
 		// noinspection TypeScriptValidateTypes
 		const element: HTMLElement | null = get(qTableRef)?.querySelector(`[data-scroll-index="${index}"]`) ?? null;
 		if (!element) {

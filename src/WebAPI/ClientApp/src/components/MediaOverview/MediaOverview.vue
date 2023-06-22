@@ -7,7 +7,7 @@
 		</q-col>
 	</q-row>
 	<!-- Media Overview -->
-	<template v-else-if="!loading && items.length">
+	<template v-else-if="!loading && mediaOverviewStore.itemsLength">
 		<q-row no-gutters>
 			<q-col>
 				<!--	Overview bar	-->
@@ -18,38 +18,34 @@
 					:detail-mode="!showMediaOverview"
 					@back="closeDetailsOverview"
 					@view-change="changeView"
+					@selection-dialog="useOpenControlDialog(mediaSelectionDialogName)"
 					@refresh-library="refreshLibrary" />
 				<!--	Data table display	-->
 				<q-row id="media-container" align="start">
 					<q-col v-show="showMediaOverview">
 						<template v-if="mediaViewMode === ViewMode.Table">
 							<MediaTable
-								:rows="items"
+								:rows="mediaOverviewStore.items"
 								:selection="selected"
 								:disable-hover-click="mediaType !== PlexMediaType.TvShow"
-								:scroll-dict="scrollDict"
 								is-scrollable
 								@selection="selected = $event" />
 						</template>
 
 						<!-- Poster display-->
 						<template v-else>
-							<poster-table
-								:library-id="libraryId"
-								:media-type="mediaType"
-								:items="items"
-								:scroll-dict="scrollDict" />
+							<poster-table :library-id="libraryId" :media-type="mediaType" :items="mediaOverviewStore.items" />
 						</template>
 					</q-col>
 
 					<!-- Alphabet Navigation-->
-					<alphabet-navigation v-show="showMediaOverview" :scroll-dict="scrollDict" />
+					<alphabet-navigation v-show="showMediaOverview" />
 				</q-row>
 			</q-col>
 		</q-row>
 	</template>
 	<!-- No Media Overview -->
-	<template v-else-if="!loading && items.length === 0">
+	<template v-else-if="!loading && mediaOverviewStore.itemsLength === 0">
 		<q-row justify="center">
 			<q-col cols="auto">
 				<h1>{{ t('components.media-overview.no-data') }}</h1>
@@ -58,10 +54,15 @@
 	</template>
 	<!-- Media Details Display-->
 	<DetailsOverview :name="mediaDetailsDialogName" />
+	<!-- Media Selection Dialog-->
+	<MediaSelectionDialog :name="mediaSelectionDialogName" />
 	<!--	Loading overlay	-->
 	<QLoadingOverlay :loading="loading" />
 	<!--		Download confirmation dialog	-->
-	<DownloadConfirmation :name="downloadConfirmationName" :items="items" @download="DownloadService.downloadMedia($event)" />
+	<DownloadConfirmation
+		:name="downloadConfirmationName"
+		:items="mediaOverviewStore.items"
+		@download="DownloadService.downloadMedia($event)" />
 </template>
 
 <script setup lang="ts">
@@ -69,15 +70,13 @@ import Log from 'consola';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRouter, RouteLocationNormalized, RouteLocationNormalizedLoaded } from 'vue-router';
-import { isEqual, orderBy } from 'lodash-es';
 import { combineLatest } from 'rxjs';
-import type { DownloadMediaDTO, PlexMediaSlimDTO, PlexServerDTO } from '@dto/mainApi';
+import type { DownloadMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { DownloadService, LibraryService, MediaService, SignalrService } from '@service';
 import { DetailsOverview, DownloadConfirmation, MediaTable } from '#components';
 import ISelection from '@interfaces/ISelection';
 import {
-	setMediaOverviewSort,
 	useMediaOverviewBarBus,
 	useMediaOverviewBarDownloadCommandBus,
 	useMediaOverviewSortBus,
@@ -86,31 +85,27 @@ import {
 	useCloseControlDialog,
 	sendMediaOverviewDownloadCommand,
 } from '#imports';
-import {
-	IMediaOverviewSort,
-	listenMediaOverviewOpenDetailsCommand,
-	sendMediaOverviewOpenDetailsCommand,
-} from '@composables/event-bus';
-import { useSettingsStore } from '~/store';
+import { listenMediaOverviewOpenDetailsCommand, sendMediaOverviewOpenDetailsCommand } from '@composables/event-bus';
+import { useMediaOverviewStore, useSettingsStore } from '~/store';
 
 // region SetupFields
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
+const mediaOverviewStore = useMediaOverviewStore();
 const router = useRouter();
-const scrollDict = ref<Record<string, number>>({ '#': 0 } as any);
 const selected = ref<ISelection>({ keys: [], allSelected: false, indexKey: 0 });
 
 // endregion
 
 const downloadConfirmationName = 'mediaDownloadConfirmation';
 const mediaDetailsDialogName = 'mediaDetailsDialogName';
+const mediaSelectionDialogName = 'mediaSelectionDialogName';
 const isRefreshing = ref(false);
 
 const server = ref<PlexServerDTO | null>(null);
 const library = ref<PlexLibraryDTO | null>(null);
 
 const libraryProgress = ref<LibraryProgress | null>(null);
-const items = ref<PlexMediaSlimDTO[]>([]);
 
 const loading = ref(true);
 const showMediaOverview = ref(true);
@@ -187,32 +182,16 @@ function onRequestMedia({ page = 0, size = 0 }: { page: number; size: number }) 
 				if (!mediaData) {
 					Log.error(`MediaOverview => No media data for library id ${props.libraryId} was found`);
 				}
-
-				set(items, mediaData);
+				mediaOverviewStore.setMedia(mediaData);
 			},
 			error: (error) => {
 				Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
 			},
 			complete: () => {
-				setScrollIndexes();
 				set(loading, false);
 			},
 		}),
 	);
-}
-
-function setScrollIndexes() {
-	scrollDict.value['#'] = 0;
-	// Check for occurrence of title with alphabetic character
-	const sortTitles = get(items).map((x) => x.sortTitle[0]?.toLowerCase() ?? '#');
-	let lastIndex = 0;
-	for (const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase()) {
-		const index = sortTitles.indexOf(letter, lastIndex);
-		if (index > -1) {
-			get(scrollDict)[letter] = index;
-			lastIndex = index;
-		}
-	}
 }
 
 // region Eventbus
@@ -276,29 +255,8 @@ useMediaOverviewBarDownloadCommandBus().on(() => {
 	}
 });
 
-let sortedState: IMediaOverviewSort[] = [];
 useMediaOverviewSortBus().on((event) => {
-	const newSortedState = [...sortedState];
-	const index = newSortedState.findIndex((x) => x.field === event.field);
-	if (index > -1) {
-		newSortedState.splice(index, 1);
-	}
-	if (event.sort) {
-		newSortedState.unshift(event);
-	}
-
-	// Prevent unnecessary sorting
-	if (isEqual(sortedState, newSortedState)) {
-		return;
-	}
-	sortedState = newSortedState;
-	const sortedItems = orderBy(
-		get(items), // Items to sort
-		sortedState.map((x) => x.field), // Sort by field
-		sortedState.map((x) => x.sort), // Sort by sort, asc or desc
-	);
-
-	set(items, sortedItems);
+	mediaOverviewStore.sortMedia(event);
 });
 
 const mediaOverViewBarBus = useMediaOverviewBarBus();

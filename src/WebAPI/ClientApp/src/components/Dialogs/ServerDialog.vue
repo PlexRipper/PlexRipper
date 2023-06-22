@@ -68,9 +68,7 @@
 
 						<!--	Server Configuration Tab Content	-->
 						<q-tab-panel name="server-config" data-cy="server-dialog-tab-content-3">
-							<server-config-tab-content
-								:plex-server="plexServer"
-								:plex-server-settings="settingsStore.getServerSettings(plexServer?.machineIdentifier)" />
+							<server-config-tab-content :plex-server="plexServer" />
 						</q-tab-panel>
 
 						<!--	Library Download Destinations	Tab Content -->

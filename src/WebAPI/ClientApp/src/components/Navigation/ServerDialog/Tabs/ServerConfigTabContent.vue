@@ -9,12 +9,11 @@
 </template>
 
 <script setup lang="ts">
-import type { PlexServerDTO, PlexServerSettingsModel } from '@dto/mainApi';
+import type { PlexServerDTO } from '@dto/mainApi';
 import { useSettingsStore } from '~/store';
 const settingsStore = useSettingsStore();
 
 defineProps<{
 	plexServer: PlexServerDTO | null;
-	plexServerSettings: PlexServerSettingsModel | null;
 }>();
 </script>

@@ -51,7 +51,7 @@ const settingsStore = useSettingsStore();
 const languageOptions = ref<ILanguageOption[]>([]);
 
 const language = computed({
-	get: () => get(languageOptions).find((x) => x.value === settingsStore.languageSettings.language),
+	get: () => get(languageOptions).find((x) => x.value === settingsStore.languageSettings.language) ?? ({} as ILanguageOption),
 	set: (value: ILanguageOption) => (settingsStore.languageSettings.language = value.code),
 });
 

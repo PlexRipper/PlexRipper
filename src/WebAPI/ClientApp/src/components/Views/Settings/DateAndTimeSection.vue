@@ -48,7 +48,7 @@
 				data-cy="relative-date" />
 		</help-row>
 
-		<!--	TODO: Dealing with Timezones is 1 big clusterfuck, will go back to try again later-->
+		<!--	TODO: Dealing with Timezones is 1 big cluster fuck, will go back to try again later-->
 		<!--	Time Zone Setting	-->
 		<!--		<help-row help-id="help.settings.ui.date-and-time.time-zone">-->
 		<!--								<v-select-->
@@ -84,23 +84,27 @@ interface ISelectOption {
 }
 
 // region Settings
-
+const defaultSelectOption: ISelectOption = { value: '', label: '' };
 const shortDateFormat = computed({
-	get: () => get(shortDateOptions).find((x) => x.value === settingsStore.dateTimeSettings.shortDateFormat),
+	get: (): ISelectOption =>
+		get(shortDateOptions).find((x) => x.value === settingsStore.dateTimeSettings.shortDateFormat) ?? defaultSelectOption,
 	set: (value: ISelectOption) => (settingsStore.dateTimeSettings.shortDateFormat = value.value),
 });
 const longDateFormat = computed({
-	get: () => get(longDateOptions).find((x) => x.value === settingsStore.dateTimeSettings.longDateFormat),
+	get: (): ISelectOption =>
+		get(longDateOptions).find((x) => x.value === settingsStore.dateTimeSettings.longDateFormat) ?? defaultSelectOption,
 	set: (value: ISelectOption) => (settingsStore.dateTimeSettings.longDateFormat = value.value),
 });
 const timeFormat = computed({
-	get: () => get(timeFormatOptions).find((x) => x.value === settingsStore.dateTimeSettings.timeFormat),
+	get: (): ISelectOption =>
+		get(timeFormatOptions).find((x) => x.value === settingsStore.dateTimeSettings.timeFormat) ?? defaultSelectOption,
 	set: (value: ISelectOption) => (settingsStore.dateTimeSettings.timeFormat = value.value),
 });
-const timeZone = computed({
-	get: () => get(timeZoneOptions).find((x) => x.value === settingsStore.dateTimeSettings.timeZone),
-	set: (value: ISelectOption) => (settingsStore.dateTimeSettings.timeZone = value.value),
-});
+
+// const timeZone = computed({
+// 	get: () => get(timeZoneOptions).find((x) => x.value === settingsStore.dateTimeSettings.timeZone),
+// 	set: (value: ISelectOption) => (settingsStore.dateTimeSettings.timeZone = value.value),
+// });
 
 // endregion
 
@@ -150,9 +154,9 @@ const timeFormatOptions = computed(() => {
 	});
 });
 
-const timeZoneOptions = computed(() => {
-	const currentTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
-	const offSet = new Date().getTimezoneOffset() / 60;
-	return [{ label: `${offSet} ${currentTZ}`, value: currentTZ }];
-});
+// const timeZoneOptions = computed(() => {
+// 	const currentTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+// 	const offSet = new Date().getTimezoneOffset() / 60;
+// 	return [{ label: `${offSet} ${currentTZ}`, value: currentTZ }];
+// });
 </script>

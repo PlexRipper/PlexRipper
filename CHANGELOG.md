@@ -1,5 +1,38 @@
 PlexRipper Changelog
 
+# [0.14.0](https://github.com/PlexRipper/PlexRipper/compare/v0.13.0...v0.14.0) (2023-06-22)
+
+
+### Bug Fixes
+
+* **Translations:** Added translations for the media selection dialog ([8f0c808](https://github.com/PlexRipper/PlexRipper/commit/8f0c8080038669365c3753ab384000687adbb6a6))
+* **Translations:** Added translations for the Plex Account selector in the top right corner ([3aca494](https://github.com/PlexRipper/PlexRipper/commit/3aca49467c527df938ee8b9a627e944d59e9a151))
+* **Web-UI:** Ensured the media selection range cannot exceed the other value, prevents min > max and max < min ([0776baf](https://github.com/PlexRipper/PlexRipper/commit/0776bafe00c049f761d9cdf80405f226073b98b0))
+* **Web-UI:** Fixed empty help dialog appearing for options that have no text available ([8aeb3ef](https://github.com/PlexRipper/PlexRipper/commit/8aeb3efff460867b2b8035d261ed6db4fcb6821b))
+* **Web-UI:** Fixed missing translations for the account selector in the top right corner ([943f12f](https://github.com/PlexRipper/PlexRipper/commit/943f12ff6444c7024302dbff5af6a10c9e3f61e1))
+* **Web-UI:** Fixed the download commands not working when download confirmations have been disabled ([8cbd736](https://github.com/PlexRipper/PlexRipper/commit/8cbd736253358b4b29a9f3cf009d9ab8caf6543e))
+* **Web-UI:** Fixed the DownloadSpeedLimit not displaying the correct value when changing in the server dialog ([e4a059f](https://github.com/PlexRipper/PlexRipper/commit/e4a059f02a40ede3ed42fc5f58763e67398fa080))
+* **Web-UI:** Fixed the index shown in the MediaTable not being the same as the one coming from the back-end ([2100fef](https://github.com/PlexRipper/PlexRipper/commit/2100fef77d605d002c59dc7f69c9d4404a6eacff))
+* **WebAPI:** Fixed the media data not being properly sorted, this will now use Natural sort by using the title instead of the sortTitle ([603d1fe](https://github.com/PlexRipper/PlexRipper/commit/603d1fe209283ab27161c56cbcb30432caecb602))
+* **Web-UI:** Fixed the media table sort requiring two clicks to begin sorting ([e024617](https://github.com/PlexRipper/PlexRipper/commit/e024617babb4c47f3cee625fe082e2622365c05c))
+* **Web-UI:** Fixed the MediaTable sorting not correctly using the same sorting as the back-end ([27613f1](https://github.com/PlexRipper/PlexRipper/commit/27613f1fdc055b744595843767aa791ae5806eaa))
+* **WebAPI:** Fixed the PlexServerConnections connection status not being retrieved when requesting the PlexServers ([53b236e](https://github.com/PlexRipper/PlexRipper/commit/53b236ecd6b6f97634bc352ca2151d71b7b7f46d))
+* **Web-UI:** Fixed the PlexStatus icon displayed next to the server names not being updated when it changes ([29b4b49](https://github.com/PlexRipper/PlexRipper/commit/29b4b49f75725937a7a4f268f4f1153457eb2afa))
+* **Web-UI:** Fixed the Poster / Table dropdown selector not working due to Pinia migration ([c308986](https://github.com/PlexRipper/PlexRipper/commit/c308986e629493ccf0c2c7b8c84d84ea747eea1d))
+* **Web-UI:** Fixed the service layer initializing too early when for example Pinia is not ready yet, this is now dependent on a Nuxt hook ([289de1d](https://github.com/PlexRipper/PlexRipper/commit/289de1de57c92c48efb4eee1c385aca191c41d68))
+* **Web-UI:** Fixed the settings being updated on page load when nothing could have changed ([7c44fd5](https://github.com/PlexRipper/PlexRipper/commit/7c44fd5d9d3b0abc68751de6877bf9b59cb30df6))
+
+
+### Features
+
+* **Web-UI:** Added a selection button to the MediaTable to make it way easier to make media selections ([0323cbf](https://github.com/PlexRipper/PlexRipper/commit/0323cbf289f91277bc77fcd55f147bf845aa35a2))
+
+
+### Performance Improvements
+
+* **Web-UI:** Replaced the settings system with Pinia instead of an observable store, this should improve performance ([a628731](https://github.com/PlexRipper/PlexRipper/commit/a62873196bd51b019ef2ee3310c02ec0f699b30c))
+* **Web-UI:** Settings are now updated once every second when something changes, this debounce effect prevents DDOS'ing the back-end ([a8116d3](https://github.com/PlexRipper/PlexRipper/commit/a8116d3ee533c41167c55f53efe298ca78965d32))
+
 # [0.14.0-dev.1](https://github.com/PlexRipper/PlexRipper/compare/v0.13.0...v0.14.0-dev.1) (2023-06-22)
 
 

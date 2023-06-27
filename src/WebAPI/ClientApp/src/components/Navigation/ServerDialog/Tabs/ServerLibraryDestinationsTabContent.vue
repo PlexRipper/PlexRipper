@@ -12,7 +12,7 @@
 						:model-value="getDefaultDestination(library.id)"
 						option-label="displayName"
 						option-value="id"
-						:options="getFolderPathOptions(library.type)"
+						:options="folderPathStore.getFolderPathOptions(library.type)"
 						@update:model-value="updateDefaultDestination(library.id, $event.id)" />
 				</q-td>
 			</q-tr>
@@ -30,26 +30,15 @@
 </template>
 
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
-import { get, set } from '@vueuse/core';
-import { FolderPathDTO, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
-import { FolderPathService, LibraryService } from '@service';
-import { ref } from '#imports';
+import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import { LibraryService } from '@service';
+import { useFolderPathStore } from '#imports';
 
+const folderPathStore = useFolderPathStore();
 const props = defineProps<{
 	plexServer: PlexServerDTO | null;
 	plexLibraries: PlexLibraryDTO[];
 }>();
-
-const folderPaths = ref<FolderPathDTO[]>([]);
-
-function getFolderPathOptions(type: PlexMediaType): FolderPathDTO[] {
-	if (type === PlexMediaType.Movie || type === PlexMediaType.TvShow) {
-		return get(folderPaths).filter((x) => x.mediaType === type);
-	}
-
-	return get(folderPaths);
-}
 
 function getDefaultDestination(libraryId: number): { id: number; displayName: string } {
 	const library = props.plexLibraries.find((x) => x.id === libraryId);
@@ -62,19 +51,11 @@ function getDefaultDestination(libraryId: number): { id: number; displayName: st
 
 	return {
 		id: library.defaultDestinationId,
-		displayName: get(folderPaths).find((x) => x.id === library.defaultDestinationId)?.displayName ?? 'Not set',
+		displayName: folderPathStore.getFolderPath(library.defaultDestinationId)?.displayName ?? 'Not set',
 	};
 }
 
 function updateDefaultDestination(libraryId: number, folderPathId: number): void {
 	LibraryService.updateDefaultDestination(libraryId, folderPathId);
 }
-
-onMounted(() => {
-	useSubscription(
-		FolderPathService.getFolderPaths().subscribe((folderPathsData) => {
-			set(folderPaths, folderPathsData);
-		}),
-	);
-});
 </script>

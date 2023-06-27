@@ -12,7 +12,6 @@ import {
 	BackgroundJobsService,
 	BaseService,
 	DownloadService,
-	FolderPathService,
 	HelpService,
 	LibraryService,
 	MediaService,
@@ -54,7 +53,6 @@ export class GlobalService extends BaseService {
 					MediaService.setup(),
 					SettingsService.setup(),
 					NotificationService.setup(),
-					FolderPathService.setup(),
 					LibraryService.setup(),
 					AccountService.setup(),
 					SignalrService.setup(config),
@@ -62,6 +60,9 @@ export class GlobalService extends BaseService {
 					AlertService.setup(),
 				]),
 			),
+			tap(() => {
+				useFolderPathStore().setup();
+			}),
 			tap((results) => {
 				if (results.some((result) => !result.isSuccess)) {
 					for (const result of results) {

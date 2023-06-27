@@ -3,7 +3,6 @@ import GlobalService from './globalService';
 import ProgressService from './progressService';
 import DownloadService from './downloadService';
 import ServerService from './serverService';
-import FolderPathService from './folderPathService';
 import LibraryService from './libraryService';
 import MediaService from './mediaService';
 import AccountService from './accountService';
@@ -26,7 +25,6 @@ export {
 	MediaService,
 	SettingsService,
 	NotificationService,
-	FolderPathService,
 	LibraryService,
 	AccountService,
 	SignalrService,

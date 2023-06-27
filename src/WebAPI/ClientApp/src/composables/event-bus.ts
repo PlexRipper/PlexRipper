@@ -30,11 +30,6 @@ export function useCloseControlDialog(name: string) {
 
 // region MediaOverview
 
-export interface IMediaOverviewBarBus {
-	downloadButtonVisible: boolean;
-	hasSelected: boolean;
-}
-
 export interface IMediaOverviewSort {
 	field: string;
 	sort: 'asc' | 'desc' | 'no-sort';

@@ -51,7 +51,7 @@
 			</template>
 			<!--	Add Path Button	-->
 			<q-row v-if="folderGroup.isFolderAddable" justify="center" class="q-my-sm">
-				<q-col cols="1">
+				<q-col cols="auto">
 					<AddIconButton :disabled="!allowEditing" @click="addFolderPath(folderGroup)" />
 				</q-col>
 			</q-row>

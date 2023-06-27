@@ -2,9 +2,6 @@ name: Publish Docker latest and version tagged image
 # This should only run when a release is created with a version tag
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
     paths-ignore:
       - '.github/**'
       - '.idea/**'

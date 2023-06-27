@@ -13,10 +13,7 @@ on:
       - '.releaserc.json'
 
 jobs:
-  call-workflow-semantic-release:
-    uses: ./.github/workflows/semantic-release-part.yml
-    secrets: inherit
-  # Build Docker Image
+  # Build And Release Docker Image
   CreateDockerDevRelease:
     needs: [ call-workflow-semantic-release ]
     runs-on: ubuntu-latest

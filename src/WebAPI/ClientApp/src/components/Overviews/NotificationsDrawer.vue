@@ -52,11 +52,10 @@
 </template>
 
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
-import { NotificationService } from '@service';
 import { NotificationDTO } from '@dto/mainApi';
-import notificationService from '~/service/notificationService';
+import { useNotificationsStore } from '~/store';
 
+const notificationsStore = useNotificationsStore();
 const notifications = ref<NotificationDTO[]>([]);
 const { t } = useI18n();
 
@@ -71,21 +70,13 @@ const emit = defineEmits<{
 const getVisibleNotifications = computed(() => notifications.value?.filter((x) => !x.hidden) ?? []);
 
 function hideNotification(id: number): void {
-	NotificationService.hideNotification(id);
+	notificationsStore.hideNotification(id);
 }
 
 function clearAllNotifications() {
-	NotificationService.clearAllNotifications();
+	notificationsStore.clearAllNotifications();
 	emit('cleared');
 }
-
-onMounted(() => {
-	useSubscription(
-		notificationService.getNotifications().subscribe((value) => {
-			notifications.value = value;
-		}),
-	);
-});
 </script>
 
 <style lang="scss">

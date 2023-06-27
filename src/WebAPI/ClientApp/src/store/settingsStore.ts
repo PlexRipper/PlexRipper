@@ -14,7 +14,7 @@ import {
 	ViewMode,
 } from '@dto/mainApi';
 
-export const useSettingsStore = defineStore('settingsStore', {
+export const useSettingsStore = defineStore('SettingsStore', {
 	state: (): {
 		generalSettings: GeneralSettingsDTO;
 		debugSettings: DebugSettingsDTO;

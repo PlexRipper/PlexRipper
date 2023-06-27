@@ -5,7 +5,7 @@ import { PlexMediaSlimDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { IMediaOverviewSort } from '@composables/event-bus';
 import ISelection from '@interfaces/ISelection';
 
-export const useMediaOverviewStore = defineStore('mediaOverviewStore', {
+export const useMediaOverviewStore = defineStore('MediaOverviewStore', {
 	state: (): {
 		items: PlexMediaSlimDTO[];
 		itemsLength: number;

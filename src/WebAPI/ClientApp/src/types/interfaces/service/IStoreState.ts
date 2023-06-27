@@ -1,18 +1,15 @@
 import {
 	DownloadTaskDTO,
 	FileMergeProgress,
-	FolderPathDTO,
 	InspectServerProgressDTO,
 	JobStatusUpdateDTO,
 	LibraryProgress,
-	NotificationDTO,
 	PlexAccountDTO,
 	PlexLibraryDTO,
 	PlexServerConnectionDTO,
 	PlexServerDTO,
 	ServerConnectionCheckStatusProgressDTO,
 	ServerDownloadProgressDTO,
-	SettingsModelDTO,
 	SyncServerProgress,
 } from '@dto/mainApi';
 import IObjectUrl from '@interfaces/IObjectUrl';
@@ -27,8 +24,6 @@ export default interface IStoreState {
 	serverConnections: PlexServerConnectionDTO[];
 	libraries: PlexLibraryDTO[];
 	serverDownloads: ServerDownloadProgressDTO[];
-	notifications: NotificationDTO[];
-	folderPaths: FolderPathDTO[];
 	alerts: IAlert[];
 	mediaUrls: IObjectUrl[];
 	helpIdDialog: string;

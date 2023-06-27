@@ -9,8 +9,6 @@ const defaultState: IStoreState = {
 	serverConnections: [],
 	libraries: [],
 	mediaUrls: [],
-	notifications: [],
-	folderPaths: [],
 	alerts: [],
 	helpIdDialog: '',
 	downloadTaskUpdateList: [],

@@ -6,7 +6,6 @@ import { useCypressSignalRMock } from 'cypress-signalr-mock';
 import { Observable, of, Subject } from 'rxjs';
 import { isEqual } from 'lodash-es';
 import BackgroundJobsService from './backgroundJobsService';
-import NotificationService from './notificationService';
 import BaseService from './baseService';
 import IStoreState from '@interfaces/service/IStoreState';
 
@@ -24,6 +23,7 @@ import {
 } from '@dto/mainApi';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import IAppConfig from '@class/IAppConfig';
+import { useNotificationsStore } from '~/store';
 
 export class SignalrService extends BaseService {
 	private _progressHubConnection: HubConnection | null = null;
@@ -42,7 +42,6 @@ export class SignalrService extends BaseService {
 					inspectServerProgress: state.inspectServerProgress,
 					serverConnectionCheckStatusProgress: state.serverConnectionCheckStatusProgress,
 					syncServerProgress: state.syncServerProgress,
-					notifications: state.notifications,
 				};
 			},
 		});
@@ -116,7 +115,7 @@ export class SignalrService extends BaseService {
 
 		this._notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) => {
 			// Notification slice is only updated in the notificationService.ts, we send it there.
-			NotificationService.setNotification(data);
+			useNotificationsStore().setNotification(data);
 		});
 	}
 
@@ -206,13 +205,6 @@ export class SignalrService extends BaseService {
 	public getAllLibraryProgress(): Observable<LibraryProgress[]> {
 		return this.stateChanged.pipe(
 			map((x) => x?.libraryProgress ?? []),
-			distinctUntilChanged(isEqual),
-		);
-	}
-
-	public getAllNotifications(): Observable<NotificationDTO[]> {
-		return this.stateChanged.pipe(
-			map((x) => x?.notifications ?? []),
 			distinctUntilChanged(isEqual),
 		);
 	}

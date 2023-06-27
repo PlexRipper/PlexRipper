@@ -15,7 +15,6 @@ import {
 	HelpService,
 	LibraryService,
 	MediaService,
-	NotificationService,
 	ProgressService,
 	ServerConnectionService,
 	ServerService,
@@ -52,7 +51,6 @@ export class GlobalService extends BaseService {
 					BackgroundJobsService.setup(),
 					MediaService.setup(),
 					SettingsService.setup(),
-					NotificationService.setup(),
 					LibraryService.setup(),
 					AccountService.setup(),
 					SignalrService.setup(config),
@@ -62,6 +60,7 @@ export class GlobalService extends BaseService {
 			),
 			tap(() => {
 				useFolderPathStore().setup();
+				useNotificationsStore().setup();
 			}),
 			tap((results) => {
 				if (results.some((result) => !result.isSuccess)) {

@@ -15,7 +15,6 @@ on:
 jobs:
   # Build And Release Docker Image
   CreateDockerDevRelease:
-    needs: [ call-workflow-semantic-release ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code

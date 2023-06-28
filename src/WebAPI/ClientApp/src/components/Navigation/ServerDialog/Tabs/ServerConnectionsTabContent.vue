@@ -3,7 +3,9 @@
 		<h4>{{ t('components.server-dialog.tabs.server-connections.section-header') }}</h4>
 	</div>
 	<q-list>
-		<template v-for="(connection, index) in serverConnections" :key="index">
+		<template
+			v-for="(connection, index) in serverConnectionStore.getServerConnectionsByServerId(plexServer?.id)"
+			:key="index">
 			<q-item>
 				<!-- Radio Button -->
 				<q-item-section avatar tag="label">
@@ -46,12 +48,13 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import type { PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
+import type { PlexServerDTO } from '@dto/mainApi';
 import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
-import { ServerConnectionService, ServerService, SignalrService } from '@service';
+import { SignalrService } from '@service';
+import { useServerConnectionStore } from '~/store';
 
+const serverConnectionStore = useServerConnectionStore();
 const { t } = useI18n();
-const serverConnections = ref<PlexServerConnectionDTO[]>([]);
 const loading = ref<number[]>([]);
 const progress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
 const preferredConnectionId = ref<number>(0);
@@ -72,7 +75,7 @@ function isLoading(plexServerConnectionId: number): boolean {
 function checkPlexConnection(plexServerConnectionId: number) {
 	get(loading).push(plexServerConnectionId);
 	useSubscription(
-		ServerConnectionService.checkServerConnection(plexServerConnectionId).subscribe(() => {
+		serverConnectionStore.checkServerConnection(plexServerConnectionId).subscribe(() => {
 			set(
 				loading,
 				get(loading).filter((x) => x !== plexServerConnectionId),
@@ -83,15 +86,11 @@ function checkPlexConnection(plexServerConnectionId: number) {
 
 function setPreferredPlexServerConnection(value: number) {
 	set(preferredConnectionId, value);
-	useSubscription(ServerService.setPreferredPlexServerConnection(props.plexServer?.id ?? -1, value).subscribe());
+
+	useSubscription(serverConnectionStore.setPreferredPlexServerConnection(props.plexServer?.id ?? -1, value).subscribe());
 }
 
 function setup() {
-	useSubscription(
-		ServerConnectionService.getServerConnectionsByServerId(props.plexServer?.id ?? -1).subscribe((connections) => {
-			set(serverConnections, connections);
-		}),
-	);
 	useSubscription(
 		SignalrService.getServerConnectionProgressByPlexServerId(props.plexServer?.id ?? -1).subscribe((progressData) => {
 			set(progress, progressData);

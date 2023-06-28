@@ -12,8 +12,8 @@
 			<q-col>
 				<!--	Overview bar	-->
 				<media-overview-bar
-					:server="server"
-					:library="library"
+					:server="libraryStore.getServerByLibraryId(props.libraryId)"
+					:library="libraryStore.getLibrary(props.libraryId)"
 					:detail-mode="!mediaOverviewStore.showMediaOverview"
 					@back="closeDetailsOverview"
 					@view-change="changeView"
@@ -64,13 +64,12 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { get, set } from '@vueuse/core';
+import { set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRouter, RouteLocationNormalized, RouteLocationNormalizedLoaded } from 'vue-router';
-import { combineLatest } from 'rxjs';
-import type { DownloadMediaDTO, PlexServerDTO } from '@dto/mainApi';
-import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
-import { LibraryService, MediaService, SignalrService } from '@service';
+import type { DownloadMediaDTO } from '@dto/mainApi';
+import { LibraryProgress, PlexMediaType, ViewMode } from '@dto/mainApi';
+import { MediaService, SignalrService } from '@service';
 import { DetailsOverview, DownloadConfirmation, MediaTable } from '#components';
 import {
 	useMediaOverviewBarDownloadCommandBus,
@@ -88,6 +87,7 @@ const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const mediaOverviewStore = useMediaOverviewStore();
 const downloadStore = useDownloadStore();
+const libraryStore = useLibraryStore();
 const router = useRouter();
 
 // endregion
@@ -96,9 +96,6 @@ const downloadConfirmationName = 'mediaDownloadConfirmation';
 const mediaDetailsDialogName = 'mediaDetailsDialogName';
 const mediaSelectionDialogName = 'mediaSelectionDialogName';
 const isRefreshing = ref(false);
-
-const server = ref<PlexServerDTO | null>(null);
-const library = ref<PlexLibraryDTO | null>(null);
 
 const libraryProgress = ref<LibraryProgress | null>(null);
 
@@ -126,9 +123,11 @@ const isConfirmationEnabled = computed(() => {
 });
 
 const refreshingText = computed(() => {
+	const library = libraryStore.getLibrary(props.libraryId);
+	const server = libraryStore.getServerByLibraryId(props.libraryId);
 	return t('components.media-overview.is-refreshing', {
-		library: get(library) ? get(library)?.title : t('general.commands.unknown'),
-		server: get(server) ? get(server)?.name : t('general.commands.unknown'),
+		library: library ? library?.title : t('general.commands.unknown'),
+		server: server ? server?.name : t('general.commands.unknown'),
 	});
 });
 
@@ -153,9 +152,11 @@ function resetProgress(isRefreshingValue: boolean) {
 function refreshLibrary() {
 	set(isRefreshing, true);
 	resetProgress(true);
-	LibraryService.refreshLibrary(props.libraryId).subscribe(() => {
-		set(isRefreshing, false);
-	});
+	useSubscription(
+		libraryStore.reSyncLibrary(props.libraryId).subscribe(() => {
+			set(isRefreshing, false);
+		}),
+	);
 }
 
 function onRequestMedia({ page = 0, size = 0 }: { page: number; size: number }) {
@@ -229,7 +230,7 @@ function closeDetailsOverview() {
 useMediaOverviewBarDownloadCommandBus().on(() => {
 	if (mediaOverviewStore.showMediaOverview) {
 		const downloadCommand: DownloadMediaDTO = {
-			plexServerId: server.value?.id ?? 0,
+			plexServerId: libraryStore.getServerByLibraryId(props.libraryId)?.id ?? 0,
 			plexLibraryId: props.libraryId,
 			mediaIds: mediaOverviewStore.selection.keys,
 			type: props.mediaType,
@@ -324,25 +325,7 @@ onMounted(() => {
 		size: 0,
 	});
 
-	// Get the server and library
-	useSubscription(
-		combineLatest({
-			library: LibraryService.getLibrary(props.libraryId),
-			server: LibraryService.getServerByLibraryId(props.libraryId),
-		}).subscribe((data) => {
-			if (!data.library) {
-				Log.error(`MediaOverview => Library for library id ${props.libraryId} was not found`);
-			} else {
-				set(library, data.library);
-			}
-			if (!data.server) {
-				Log.error(`MediaOverview => Server for library id ${props.libraryId} was not found`);
-			} else {
-				set(server, data.server);
-			}
-			setupRouter();
-		}),
-	);
+	setupRouter();
 
 	useSubscription(
 		SignalrService.getLibraryProgress(props.libraryId).subscribe((data) => {

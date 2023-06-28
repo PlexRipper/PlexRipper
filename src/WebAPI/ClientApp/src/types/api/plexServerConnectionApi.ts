@@ -25,8 +25,8 @@ export function checkPlexServerConnection(serverConnectionId: number): Observabl
 	});
 }
 
-export function checkAllPlexServerConnections(serverId: number): Observable<ResultDTO<PlexServerStatusDTO | null>> {
-	return PlexRipperAxios.get<PlexServerStatusDTO>({
+export function checkAllPlexServerConnections(serverId: number): Observable<ResultDTO<PlexServerStatusDTO[]>> {
+	return PlexRipperAxios.get<PlexServerStatusDTO[]>({
 		url: `${PLEX_SERVER_CONNECTION_RELATIVE_PATH}/check/by-server/${serverId}`,
 		apiName: checkAllPlexServerConnections.name,
 	});

@@ -4,3 +4,6 @@ export * from './folderPathStore';
 export * from './notificationsStore';
 export * from './serverStore';
 export * from './downloadStore';
+export * from './serverConnection';
+export * from './accountStore';
+export * from './libraryStore';

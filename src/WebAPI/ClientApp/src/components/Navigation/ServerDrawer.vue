@@ -1,10 +1,14 @@
 <template>
-	<template v-if="plexServers.length > 0">
-		<q-expansion-item v-for="(server, index) in plexServers" :key="index" :label="server.name" expand-icon="mdi-chevron-down">
+	<template v-if="serverStore.getServers().length > 0">
+		<q-expansion-item
+			v-for="(server, index) in serverStore.getServers()"
+			:key="index"
+			:label="server.name"
+			expand-icon="mdi-chevron-down">
 			<!-- Server header	-->
 			<template #header>
 				<q-item-section side no-wrap>
-					<q-status :value="isConnected(server)" />
+					<q-status :value="serverConnectionStore.isServerConnected(server.id)" />
 				</q-item-section>
 
 				<q-item-section>
@@ -57,23 +61,19 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { useSubscription } from '@vueuse/rxjs';
 import type ServerDialog from '@components/Navigation/ServerDialog.vue';
-import { get, set } from '@vueuse/core';
-import { LibraryService, ServerService, ServerConnectionService } from '@service';
-import { PlexLibraryDTO, PlexMediaType, PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
+import { PlexLibraryDTO, PlexMediaType } from '@dto/mainApi';
 import { useOpenControlDialog } from '#imports';
 
 const { t } = useI18n();
 const router = useRouter();
-
-const plexServers = ref<PlexServerDTO[]>([]);
-const plexLibraries = ref<PlexLibraryDTO[]>([]);
-const connections = ref<PlexServerConnectionDTO[]>([]);
+const serverStore = useServerStore();
+const libraryStore = useLibraryStore();
+const serverConnectionStore = useServerConnectionStore();
 const serverDialogName = 'serverDialog';
 
 function filterLibraries(plexServerId: number): PlexLibraryDTO[] {
-	return get(plexLibraries).filter((x) => x.plexServerId === plexServerId);
+	return libraryStore.getLibraries.filter((x) => x.plexServerId === plexServerId);
 }
 
 function openServerSettings(serverId: number): void {
@@ -95,35 +95,6 @@ function openMediaPage(library: PlexLibraryDTO): void {
 			Log.error(library.type + ' was neither a movie, tvshow or music library');
 	}
 }
-
-function isConnected(server: PlexServerDTO) {
-	if (get(connections).length === 0) {
-		return false;
-	}
-	return get(connections)
-		.filter((x) => x.plexServerId === server.id)
-		.some((x) => x.latestConnectionStatus?.isSuccessful ?? false);
-}
-
-onMounted(() => {
-	useSubscription(
-		ServerService.getServers().subscribe((data: PlexServerDTO[]) => {
-			set(plexServers, data);
-		}),
-	);
-
-	useSubscription(
-		ServerConnectionService.getServerConnections().subscribe((data) => {
-			set(connections, data);
-		}),
-	);
-
-	useSubscription(
-		LibraryService.getLibraries().subscribe((data: PlexLibraryDTO[]) => {
-			set(plexLibraries, data);
-		}),
-	);
-});
 </script>
 <style lang="scss">
 .server-name {

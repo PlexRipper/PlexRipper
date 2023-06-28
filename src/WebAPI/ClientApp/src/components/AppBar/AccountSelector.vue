@@ -1,11 +1,11 @@
 <template>
 	<q-btn-dropdown stretch flat icon="mdi-account" dropdown-icon="mdi-arrow-down">
-		<q-list v-if="accounts.length > 0">
+		<q-list v-if="accountsDisplay.length > 0">
 			<q-item-label header> {{ $t('components.account-selector.title') }}</q-item-label>
 
 			<!--  Account Row  -->
 			<q-item
-				v-for="(account, index) in accounts"
+				v-for="(account, index) in accountsDisplay"
 				:key="index"
 				v-close-popup
 				clickable
@@ -23,7 +23,7 @@
 						icon="mdi-refresh"
 						:loading="loading[0] || loading[index]"
 						:disabled="isLoading"
-						@click.stop="runRefreshAccount(account.id)" />
+						@click.stop="runReSyncAccount(account.id)" />
 				</q-item-section>
 			</q-item>
 		</q-list>
@@ -35,45 +35,46 @@
 </template>
 
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
-import { AccountService, ServerService } from '@service';
-import { refreshAccount } from '@api/accountApi';
-import { PlexAccountDTO } from '@dto/mainApi';
-import { useSettingsStore } from '~/store';
+import { get } from '@vueuse/core';
+import { useSettingsStore, useAccountStore } from '~/store';
+import { useSubscription } from '#imports';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
+const accountStore = useAccountStore();
 
-const loading = ref<boolean[]>([false]);
-const isLoading = computed(() => loading.value.some((x) => x));
-const accounts = ref<PlexAccountDTO[]>([]);
+const loading = ref<Record<number, boolean>>({ 0: false });
+const isLoading = computed(() => Object.values(get(loading)).some((x) => x));
+
+const accountsDisplay = computed(() => {
+	return [
+		{
+			id: 0,
+			displayName: t('components.account-selector.all-accounts'),
+			loading: get(loading)[0],
+		} as any,
+		...accountStore.accounts
+			.filter((x) => x.isEnabled)
+			.map((x) => {
+				return {
+					id: x.id,
+					displayName: x.displayName,
+					loading: get(loading)[x.id] ?? false,
+				};
+			}),
+	];
+});
 
 function updateActiveAccountId(accountId: number): void {
 	settingsStore.generalSettings.activeAccountId = accountId;
 }
 
-function runRefreshAccount(accountId = 0): void {
-	const index = accountId === 0 ? 0 : accounts.value.findIndex((x) => x.id === accountId);
-	loading.value.splice(index, 1, true);
-	refreshAccount(accountId).subscribe(() => {
-		AccountService.refreshAccounts();
-		ServerService.fetchServers();
-		loading.value.splice(index, 1, false);
-	});
-}
-
-onMounted(() => {
+function runReSyncAccount(accountId = 0): void {
+	get(loading)[accountId] = true;
 	useSubscription(
-		AccountService.getAccounts().subscribe((data) => {
-			accounts.value = [
-				{
-					id: 0,
-					displayName: t('components.account-selector.all-accounts'),
-				} as any,
-			];
-			data?.filter((x) => x.isEnabled).forEach((account) => accounts.value.push(account));
-			accounts.value.forEach(() => loading.value.push(false));
+		accountStore.reSyncAccount(accountId).subscribe(() => {
+			get(loading)[accountId] = false;
 		}),
 	);
-});
+}
 </script>

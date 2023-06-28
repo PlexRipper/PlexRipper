@@ -1,44 +1,51 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
+import { switchMap, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 import { FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
 import { createFolderPath, deleteFolderPath, getFolderPaths, updateFolderPath } from '@api/pathApi';
 import { useI18n } from '#build/imports';
 import IFolderPathGroup from '@interfaces/IFolderPathGroup';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
 export const useFolderPathStore = defineStore('FolderPathStore', {
 	state: (): { folderPaths: FolderPathDTO[] } => ({
 		folderPaths: [],
 	}),
 	actions: {
-		setup() {
-			this.refreshFolderPaths();
+		setup(): Observable<ISetupResult> {
+			return this.refreshFolderPaths().pipe(switchMap(() => of({ name: useFolderPathStore.name, isSuccess: true })));
 		},
 		refreshFolderPaths() {
-			getFolderPaths().subscribe((folderPaths) => {
-				if (folderPaths.isSuccess) {
-					this.folderPaths = folderPaths.value ?? [];
-				}
-			});
+			return getFolderPaths().pipe(
+				tap((result) => {
+					if (result.isSuccess && result.value) {
+						this.folderPaths = result.value ?? [];
+					}
+				}),
+			);
 		},
-		createFolderPath(folderPath: FolderPathDTO): void {
-			createFolderPath(folderPath).subscribe((folderPath) => {
-				if (folderPath?.isSuccess && folderPath.value) {
-					this.folderPaths.push(folderPath.value);
-				}
-			});
+		createFolderPath(folderPath: FolderPathDTO) {
+			return createFolderPath(folderPath).pipe(
+				tap((result) => {
+					if (result?.isSuccess && result.value) {
+						this.folderPaths.push(result.value);
+					}
+				}),
+			);
 		},
-		updateFolderPath(folderPath: FolderPathDTO): void {
+		updateFolderPath(folderPath: FolderPathDTO) {
 			const i = this.folderPaths.findIndex((x) => x.id === folderPath.id);
 			if (i > -1) {
 				this.folderPaths.splice(i, 1, folderPath);
 			}
-			updateFolderPath(folderPath).subscribe();
+			return updateFolderPath(folderPath);
 		},
-		deleteFolderPath(folderPathId: number): void {
+		deleteFolderPath(folderPathId: number) {
 			const i = this.folderPaths.findIndex((x) => x.id === folderPathId);
 			if (i > -1) {
 				this.folderPaths.splice(i, 1);
 			}
-			deleteFolderPath(folderPathId).subscribe();
+			return deleteFolderPath(folderPathId);
 		},
 	},
 	getters: {

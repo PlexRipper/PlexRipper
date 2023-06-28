@@ -101,14 +101,16 @@ import { clamp } from 'lodash-es';
 import { useSubscription } from '@vueuse/rxjs';
 import { filter, switchMap, tap } from 'rxjs/operators';
 import { get, set } from '@vueuse/core';
-import type { JobStatusUpdateDTO, PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
+import { of } from 'rxjs';
+import type { JobStatusUpdateDTO, PlexAccountDTO } from '@dto/mainApi';
 import { JobStatus, JobTypes, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
-import { AccountService, BackgroundJobsService, ServerService, SignalrService } from '@service';
-import { useI18n, useOpenControlDialog } from '#imports';
+import { BackgroundJobsService, SignalrService } from '@service';
+import { useI18n, useOpenControlDialog, useServerStore } from '#imports';
 
 const { t } = useI18n();
+const serverStore = useServerStore();
+const accountStore = useAccountStore();
 const name = 'checkServerConnectionDialogName';
-const plexServers = ref<PlexServerDTO[]>([]);
 const connectionProgress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
 const account = ref<PlexAccountDTO | null>(null);
 const expanded = ref<number[]>([]);
@@ -121,6 +123,10 @@ const totalPercentage = computed(() => {
 		return 0;
 	}
 	return clamp(Math.round((get(completedCount) / get(plexServerNodes).length) * 100), 0, 100);
+});
+
+const plexServers = computed(() => {
+	return serverStore.getServersByPlexAccountId(get(account)?.id ?? 0);
 });
 
 const getProgressText = computed(() => {
@@ -203,14 +209,11 @@ onMounted(() => {
 			.pipe(
 				filter((update) => update.status === JobStatus.Running),
 				tap(() => useOpenControlDialog(name)),
-				switchMap((update: JobStatusUpdateDTO) => AccountService.getAccount(update.primaryKeyValue)),
+				switchMap((update: JobStatusUpdateDTO) => of(accountStore.getAccount(update.primaryKeyValue))),
 				tap((newAccount) => set(account, newAccount)),
-				switchMap(() => ServerService.refreshPlexServers()),
-				switchMap(() => ServerService.getServersByPlexAccountId(get(account)?.id ?? 0)),
+				switchMap(() => serverStore.refreshPlexServers()),
 			)
-			.subscribe((servers) => {
-				set(plexServers, servers);
-			}),
+			.subscribe(),
 	);
 
 	useSubscription(

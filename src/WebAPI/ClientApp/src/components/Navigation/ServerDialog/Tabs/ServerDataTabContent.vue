@@ -38,7 +38,7 @@
 			<tr>
 				<td>{{ t('components.server-dialog.tabs.server-data.current-status') }}:</td>
 				<td>
-					<q-status pulse :value="hasSuccessServerStatus" />
+					<q-status pulse :value="serverStore.getServerStatus(plexServer.id)" />
 				</td>
 			</tr>
 			<!--	Check Server Action	-->
@@ -63,16 +63,14 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import { switchMap, tap } from 'rxjs/operators';
-import type { PlexServerDTO, PlexServerStatusDTO } from '@dto/mainApi';
-import { PlexServerConnectionDTO, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
-import { ServerConnectionService, ServerService, SignalrService } from '@service';
+import type { PlexServerDTO } from '@dto/mainApi';
+import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
+import { SignalrService } from '@service';
 
 const { t } = useI18n();
+const serverStore = useServerStore();
+const serverConnectionStore = useServerConnectionStore();
 const checkServerStatusLoading = ref(false);
-const hasSuccessServerStatus = ref(false);
-const serverConnections = ref<PlexServerConnectionDTO[]>([]);
-const serverStatus = ref<PlexServerStatusDTO | null>(null);
 const progress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
 
 const props = withDefaults(
@@ -86,44 +84,25 @@ const props = withDefaults(
 	},
 );
 
-const plexServerId = computed(() => props.plexServer?.id ?? -1);
+const plexServerId = computed(() => props?.plexServer?.id ?? -1);
 
 const checkServerStatusMessage = computed(() => {
 	if (get(checkServerStatusLoading)) {
 		return progress.value.map((x) => x.message).join('\n');
 	}
-
-	return get(serverStatus)?.statusMessage ?? '';
+	return serverConnectionStore.getServerConnectionsByServerId(get(plexServerId)).flatMap((x) => x.statusMessage);
 });
 
 function checkServer() {
 	set(checkServerStatusLoading, true);
 	useSubscription(
-		ServerService.checkServerStatus(get(plexServerId))
-			.pipe(
-				tap((value) => {
-					set(hasSuccessServerStatus, value?.isSuccessful ?? false);
-					set(checkServerStatusLoading, false);
-					set(serverStatus, value ?? null);
-				}),
-				switchMap(() => ServerConnectionService.refreshPlexServerConnections()),
-			)
-			.subscribe(),
+		serverConnectionStore.checkServerStatus(get(plexServerId)).subscribe(() => {
+			set(checkServerStatusLoading, false);
+		}),
 	);
 }
 
 function setup() {
-	useSubscription(
-		ServerConnectionService.getServerConnectionsByServerId(get(plexServerId)).subscribe((connections) => {
-			set(serverConnections, connections);
-		}),
-	);
-	useSubscription(
-		ServerService.getServerStatus(get(plexServerId)).subscribe((value) => {
-			set(hasSuccessServerStatus, value);
-		}),
-	);
-
 	useSubscription(
 		SignalrService.getServerConnectionProgressByPlexServerId(get(plexServerId)).subscribe((progressData) => {
 			set(progress, progressData);

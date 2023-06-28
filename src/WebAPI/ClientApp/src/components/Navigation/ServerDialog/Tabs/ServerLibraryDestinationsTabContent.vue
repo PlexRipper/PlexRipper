@@ -13,7 +13,7 @@
 						option-label="displayName"
 						option-value="id"
 						:options="folderPathStore.getFolderPathOptions(library.type)"
-						@update:model-value="updateDefaultDestination(library.id, $event.id)" />
+						@update:model-value="libraryStore.updateDefaultDestination(library.id, $event.id)" />
 				</q-td>
 			</q-tr>
 		</template>
@@ -31,10 +31,10 @@
 
 <script setup lang="ts">
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
-import { LibraryService } from '@service';
 import { useFolderPathStore } from '#imports';
 
 const folderPathStore = useFolderPathStore();
+const libraryStore = useLibraryStore();
 const props = defineProps<{
 	plexServer: PlexServerDTO | null;
 	plexLibraries: PlexLibraryDTO[];
@@ -53,9 +53,5 @@ function getDefaultDestination(libraryId: number): { id: number; displayName: st
 		id: library.defaultDestinationId,
 		displayName: folderPathStore.getFolderPath(library.defaultDestinationId)?.displayName ?? 'Not set',
 	};
-}
-
-function updateDefaultDestination(libraryId: number, folderPathId: number): void {
-	LibraryService.updateDefaultDestination(libraryId, folderPathId);
 }
 </script>

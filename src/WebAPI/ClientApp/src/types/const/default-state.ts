@@ -4,9 +4,6 @@ import IAppConfig from '@class/IAppConfig';
 const defaultState: IStoreState = {
 	config: {} as IAppConfig,
 	pageReady: false,
-	accounts: [],
-	servers: [],
-	serverConnections: [],
 	libraries: [],
 	mediaUrls: [],
 	alerts: [],

@@ -1,7 +1,7 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import Log from 'consola';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { map, switchMap, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 import { sum } from 'lodash-es';
 import {
 	DownloadMediaDTO,
@@ -24,38 +24,43 @@ import {
 } from '@api/plexDownloadApi';
 import ISelection from '@interfaces/ISelection';
 import { SignalrService } from '@service';
+import ISetupResult from '@interfaces/service/ISetupResult';
 export const useDownloadStore = defineStore('DownloadStore', {
 	state: (): { serverDownloads: ServerDownloadProgressDTO[]; selected: ISelection[] } => ({
 		serverDownloads: [],
 		selected: [],
 	}),
 	actions: {
-		setup(): void {
-			this.fetchDownloadList();
-			for (const server of this.serverDownloads) {
-				if (this.selected.some((x) => x.indexKey === server.id)) {
-					continue;
-				}
-				this.selected.push({
-					keys: [],
-					indexKey: server.id,
-					allSelected: false,
-				});
-			}
+		setup(): Observable<ISetupResult> {
 			SignalrService.GetServerDownloadProgress().subscribe((data: ServerDownloadProgressDTO) => {
 				Log.info('DownloadStore: SignalR: GetServerDownloadProgress', data);
 				// this.serverDownloads = data;
 			});
+			return this.fetchDownloadList().pipe(switchMap(() => of({ name: useDownloadStore.name, isSuccess: true })));
 		},
 		/**
 		 * Fetch the download list from the API.
 		 */
-		fetchDownloadList(): void {
-			getAllDownloads().subscribe((downloads) => {
-				if (downloads.isSuccess) {
-					this.serverDownloads = downloads.value ?? [];
-				}
-			});
+		fetchDownloadList() {
+			return getAllDownloads().pipe(
+				tap((downloads) => {
+					if (downloads.isSuccess) {
+						this.serverDownloads = downloads.value ?? [];
+					}
+				}),
+				tap((downloads) => {
+					for (const server of downloads.value ?? []) {
+						if (this.selected.some((x) => x.indexKey === server.id)) {
+							continue;
+						}
+						this.selected.push({
+							keys: [],
+							indexKey: server.id,
+							allSelected: false,
+						});
+					}
+				}),
+			);
 		},
 		executeDownloadCommand(action: string, downloadTaskIds: number[]): void {
 			const downloadTaskId = downloadTaskIds[0];
@@ -104,9 +109,9 @@ export const useDownloadStore = defineStore('DownloadStore', {
 			);
 		},
 		downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): void {
-			downloadMedia(downloadMediaCommand).subscribe(() => {
-				this.fetchDownloadList();
-			});
+			downloadMedia(downloadMediaCommand)
+				.pipe(switchMap(() => this.fetchDownloadList()))
+				.subscribe();
 		},
 		updateSelected(id: number, payload: ISelection): void {
 			const i = this.selected.findIndex((x) => x.indexKey === id);
@@ -132,7 +137,7 @@ export const useDownloadStore = defineStore('DownloadStore', {
 			},
 		getServersWithDownloads(): { plexServer: PlexServerDTO; downloads: DownloadProgressDTO[] }[] {
 			const serverIds = this.serverDownloads.map((x) => x.id);
-			const plexServersWithDownloads = plexServers.filter((x) => serverIds.includes(x.id));
+			const plexServersWithDownloads = useServerStore().servers.filter((x) => serverIds.includes(x.id));
 
 			return plexServersWithDownloads.map((x) => {
 				return {

@@ -76,7 +76,9 @@
 							name="download-destinations"
 							class="inherit-all-height"
 							data-cy="server-dialog-tab-content-4">
-							<server-library-destinations-tab-content :plex-server="plexServer" :plex-libraries="plexLibraries" />
+							<server-library-destinations-tab-content
+								:plex-server="plexServer"
+								:plex-libraries="libraryStore.getLibrariesByServerId(plexServer?.id ?? 0)" />
 						</q-tab-panel>
 
 						<!--	Server Commands -->
@@ -103,20 +105,17 @@
 </template>
 
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
-import { take, tap } from 'rxjs/operators';
 import { set } from '@vueuse/core';
 import { ref, computed, useCloseControlDialog } from '#imports';
-import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
-import { LibraryService, ServerService } from '@service';
+import type { PlexServerDTO } from '@dto/mainApi';
 import { ServerDataTabContent, ServerConnectionsTabContent } from '#components';
 
 defineProps<{ name: string }>();
-
+const serverStore = useServerStore();
+const libraryStore = useLibraryStore();
 const loading = ref(false);
 const tabIndex = ref<string>('server-data');
 const plexServer = ref<PlexServerDTO | null>(null);
-const plexLibraries = ref<PlexLibraryDTO[]>([]);
 const plexServerId = ref(0);
 
 const isVisible = computed((): boolean => plexServerId.value > 0);
@@ -126,25 +125,8 @@ function open(newPlexServerId: number): void {
 	set(plexServerId, newPlexServerId);
 	set(loading, true);
 
-	useSubscription(
-		ServerService.getServer(newPlexServerId)
-			.pipe(
-				tap((plexServerData) => {
-					set(plexServer, plexServerData);
-				}),
-				take(1),
-			)
-			.subscribe({
-				complete: () => {
-					set(loading, false);
-				},
-			}),
-	);
-	useSubscription(
-		LibraryService.getLibrariesByServerId(newPlexServerId).subscribe((plexLibrariesData) => {
-			set(plexLibraries, plexLibrariesData);
-		}),
-	);
+	set(plexServer, serverStore.getServer(newPlexServerId));
+	set(loading, false);
 }
 
 function close(): void {

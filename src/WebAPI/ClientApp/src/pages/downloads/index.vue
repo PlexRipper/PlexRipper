@@ -52,16 +52,12 @@
 
 <script setup lang="ts">
 import { get } from '@vueuse/core';
-import { useSubscription } from '@vueuse/rxjs';
-import { ServerService } from '@service';
-import { DownloadProgressDTO, PlexServerDTO } from '@dto/mainApi';
+import { DownloadProgressDTO } from '@dto/mainApi';
 import ISelection from '@interfaces/ISelection';
 import { useOpenControlDialog } from '#imports';
 
 const { t } = useI18n();
 const downloadStore = useDownloadStore();
-const plexServers = ref<PlexServerDTO[]>([]);
-const openExpansions = ref<number[]>([]);
 const aggregateSelected = ref<ISelection[]>([]);
 const dialogName = 'download-details-dialog';
 
@@ -99,12 +95,4 @@ function updateAggregateSelected(id: number, payload: ISelection): void {
 }
 
 // endregion
-onMounted(() => {
-	useSubscription(
-		ServerService.getServers().subscribe((servers) => {
-			plexServers.value = servers;
-			openExpansions.value = [...Array(servers?.length).keys()] ?? [];
-		}),
-	);
-});
 </script>

@@ -1,21 +1,26 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
+import { switchMap, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 import { NotificationDTO } from '@dto/mainApi';
 import { clearAllNotifications, getNotifications, hideNotification } from '@api/notificationApi';
+import ISetupResult from '@interfaces/service/ISetupResult';
 
 export const useNotificationsStore = defineStore('NotificationsStore', {
 	state: (): { notifications: NotificationDTO[] } => ({
 		notifications: [],
 	}),
 	actions: {
-		setup() {
-			this.fetchNotifications();
+		setup(): Observable<ISetupResult> {
+			return this.fetchNotifications().pipe(switchMap(() => of({ name: useNotificationsStore.name, isSuccess: true })));
 		},
 		fetchNotifications() {
-			getNotifications().subscribe((notifications) => {
-				if (notifications.isSuccess) {
-					this.notifications = notifications.value ?? [];
-				}
-			});
+			return getNotifications().pipe(
+				tap((result) => {
+					if (result.isSuccess) {
+						this.notifications = result.value ?? [];
+					}
+				}),
+			);
 		},
 		setNotification(notification: NotificationDTO) {
 			this.notifications.push(notification);

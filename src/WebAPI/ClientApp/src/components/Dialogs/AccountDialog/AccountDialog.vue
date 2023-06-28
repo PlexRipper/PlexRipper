@@ -71,16 +71,14 @@ import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import { cloneDeep } from 'lodash-es';
-import { merge } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { IError, PlexAccountDTO } from '@dto/mainApi';
 import { validateAccount } from '@api/accountApi';
-import { AccountService, LibraryService, ServerService } from '@service';
-import { useI18n, useOpenControlDialog, useCloseControlDialog } from '#imports';
+import { useI18n, useOpenControlDialog, useCloseControlDialog, useAccountStore } from '#imports';
 import type { AccountForm } from '#components';
 
 const { t } = useI18n();
-
+const accountStore = useAccountStore();
 interface IPlexAccount extends PlexAccountDTO {
 	isInputValid: boolean;
 	hasValidationErrors: boolean;
@@ -253,45 +251,37 @@ function saveAccount(close: any) {
 
 	if (get(isNewAccount)) {
 		useSubscription(
-			AccountService.createPlexAccount(get(changedPlexAccount)).subscribe((account) => {
+			accountStore.createPlexAccount(get(changedPlexAccount)).subscribe(() => {
+				set(savingLoading, false);
+				close();
+			}),
+		);
+	} else {
+		useSubscription(
+			accountStore.updatePlexAccount(get(changedPlexAccount), get(hasCredentialsChanged)).subscribe((account) => {
 				if (account) {
 					set(changedPlexAccount, {
 						...get(changedPlexAccount),
 						...account,
 					});
-					close();
+					if (!get(hasCredentialsChanged)) {
+						close();
+					}
 				} else {
-					Log.error('Result was invalid when saving a created account', account);
+					Log.error('Result was invalid when saving an updated account', account);
 					set(savingLoading, false);
 				}
 			}),
 		);
-		return;
 	}
-	useSubscription(
-		AccountService.updatePlexAccount(get(changedPlexAccount), get(hasCredentialsChanged)).subscribe((account) => {
-			if (account) {
-				set(changedPlexAccount, {
-					...get(changedPlexAccount),
-					...account,
-				});
-				if (!hasCredentialsChanged.value) {
-					close();
-					refreshAccounts();
-				}
-			} else {
-				Log.error('Result was invalid when saving an updated account', account);
-				set(savingLoading, false);
-			}
-		}),
-	);
 }
 
 function deleteAccount() {
-	AccountService.deleteAccount(get(changedPlexAccount).id).subscribe(() => {
-		closeDialog();
-		refreshAccounts();
-	});
+	useSubscription(
+		accountStore.deleteAccount(get(changedPlexAccount).id).subscribe(() => {
+			closeDialog();
+		}),
+	);
 }
 
 function openDialog({ isNewAccountValue, account = null }: { isNewAccountValue: boolean; account: PlexAccountDTO | null }) {
@@ -310,16 +300,5 @@ function closeDialog() {
 
 	reset();
 }
-
-function refreshAccounts(): void {
-	useSubscription(
-		merge([
-			AccountService.refreshAccounts(),
-			ServerService.refreshPlexServers(),
-			LibraryService.refreshLibraries(),
-		]).subscribe(),
-	);
-}
-
 // endregion
 </script>

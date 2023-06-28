@@ -6,8 +6,6 @@ import {
 	LibraryProgress,
 	PlexAccountDTO,
 	PlexLibraryDTO,
-	PlexServerConnectionDTO,
-	PlexServerDTO,
 	ServerConnectionCheckStatusProgressDTO,
 	SyncServerProgress,
 } from '@dto/mainApi';
@@ -18,9 +16,6 @@ import IAppConfig from '@class/IAppConfig';
 export default interface IStoreState {
 	pageReady: boolean;
 	config: IAppConfig;
-	accounts: PlexAccountDTO[];
-	servers: PlexServerDTO[];
-	serverConnections: PlexServerConnectionDTO[];
 	libraries: PlexLibraryDTO[];
 	alerts: IAlert[];
 	mediaUrls: IObjectUrl[];

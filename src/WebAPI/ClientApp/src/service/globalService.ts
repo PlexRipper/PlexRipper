@@ -7,19 +7,25 @@ import DefaultState from '@const/default-state';
 import IAppConfig from '@class/IAppConfig';
 import IStoreState from '@interfaces/service/IStoreState';
 import {
-	AccountService,
 	AlertService,
 	BackgroundJobsService,
 	BaseService,
 	HelpService,
-	LibraryService,
 	MediaService,
 	ProgressService,
-	ServerConnectionService,
-	ServerService,
 	SettingsService,
 	SignalrService,
 } from '@service';
+import {
+	useServerStore,
+	useLibraryStore,
+	useDownloadStore,
+	useAccountStore,
+	useNotificationsStore,
+	useFolderPathStore,
+	useServerConnectionStore,
+	useSettingsStore,
+} from '#imports';
 
 export class GlobalService extends BaseService {
 	public constructor() {
@@ -44,23 +50,22 @@ export class GlobalService extends BaseService {
 			switchMap((config) =>
 				forkJoin([
 					ProgressService.setup(),
-					ServerService.setup(),
-					ServerConnectionService.setup(),
 					BackgroundJobsService.setup(),
 					MediaService.setup(),
 					SettingsService.setup(),
-					LibraryService.setup(),
-					AccountService.setup(),
 					SignalrService.setup(config),
 					HelpService.setup(),
 					AlertService.setup(),
+					useAccountStore().setup(),
+					useDownloadStore().setup(),
+					useFolderPathStore().setup(),
+					useLibraryStore().setup(),
+					useNotificationsStore().setup(),
+					useServerConnectionStore().setup(),
+					useServerStore().setup(),
+					useSettingsStore().setup(),
 				]),
 			),
-			tap(() => {
-				useFolderPathStore().setup();
-				useNotificationsStore().setup();
-				useDownloadStore().setup();
-			}),
 			tap((results) => {
 				if (results.some((result) => !result.isSuccess)) {
 					for (const result of results) {

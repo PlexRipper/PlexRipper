@@ -65,7 +65,7 @@
 <script setup lang="ts">
 import { kebabCase } from 'lodash-es';
 import { FolderPathDTO } from '@dto/mainApi';
-import { useI18n, useOpenControlDialog, toFolderPathStringId, useFolderPathStore } from '#imports';
+import { useI18n, useOpenControlDialog, toFolderPathStringId, useFolderPathStore, useSubscription } from '#imports';
 import IFolderPathGroup from '@interfaces/IFolderPathGroup';
 
 const { t } = useI18n();
@@ -93,20 +93,24 @@ const confirmDirectoryBrowser = (path: FolderPathDTO): void => {
 	}
 };
 
-const addFolderPath = (folderGroup: IFolderPathGroup): void => {
-	folderPathStore.createFolderPath({
-		id: 0,
-		displayName: t(`components.folder-paths-overview.${toFolderPathStringId(folderGroup.folderType)}.default-name`),
-		directory: '',
-		folderType: folderGroup.folderType,
-		mediaType: folderGroup.mediaType,
-		isValid: false,
-	});
-};
+function addFolderPath(folderGroup: IFolderPathGroup): void {
+	useSubscription(
+		folderPathStore
+			.createFolderPath({
+				id: 0,
+				displayName: t(`components.folder-paths-overview.${toFolderPathStringId(folderGroup.folderType)}.default-name`),
+				directory: '',
+				folderType: folderGroup.folderType,
+				mediaType: folderGroup.mediaType,
+				isValid: false,
+			})
+			.subscribe(),
+	);
+}
 
-const deleteFolderPath = (id: number): void => {
-	folderPathStore.deleteFolderPath(id);
-};
+function deleteFolderPath(id: number): void {
+	folderPathStore.deleteFolderPath(id).subscribe();
+}
 
 function toTranslation(type: string): string {
 	return `help.settings.paths.${kebabCase(type)}`;

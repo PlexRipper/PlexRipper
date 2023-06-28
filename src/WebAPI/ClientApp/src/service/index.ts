@@ -1,7 +1,6 @@
 import BaseService from './baseService';
 import GlobalService from './globalService';
 import ProgressService from './progressService';
-import DownloadService from './downloadService';
 import ServerService from './serverService';
 import LibraryService from './libraryService';
 import MediaService from './mediaService';
@@ -17,7 +16,6 @@ export {
 	BaseService,
 	GlobalService,
 	ProgressService,
-	DownloadService,
 	ServerService,
 	ServerConnectionService,
 	BackgroundJobsService,

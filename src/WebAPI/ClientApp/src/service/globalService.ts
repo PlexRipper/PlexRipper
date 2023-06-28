@@ -11,7 +11,6 @@ import {
 	AlertService,
 	BackgroundJobsService,
 	BaseService,
-	DownloadService,
 	HelpService,
 	LibraryService,
 	MediaService,
@@ -45,7 +44,6 @@ export class GlobalService extends BaseService {
 			switchMap((config) =>
 				forkJoin([
 					ProgressService.setup(),
-					DownloadService.setup(),
 					ServerService.setup(),
 					ServerConnectionService.setup(),
 					BackgroundJobsService.setup(),
@@ -61,6 +59,7 @@ export class GlobalService extends BaseService {
 			tap(() => {
 				useFolderPathStore().setup();
 				useNotificationsStore().setup();
+				useDownloadStore().setup();
 			}),
 			tap((results) => {
 				if (results.some((result) => !result.isSuccess)) {

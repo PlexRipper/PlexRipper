@@ -59,7 +59,7 @@
 	<DownloadConfirmation
 		:name="downloadConfirmationName"
 		:items="mediaOverviewStore.items"
-		@download="DownloadService.downloadMedia($event)" />
+		@download="downloadStore.downloadMedia($event)" />
 </template>
 
 <script setup lang="ts">
@@ -70,7 +70,7 @@ import { useRouter, RouteLocationNormalized, RouteLocationNormalizedLoaded } fro
 import { combineLatest } from 'rxjs';
 import type { DownloadMediaDTO, PlexServerDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
-import { DownloadService, LibraryService, MediaService, SignalrService } from '@service';
+import { LibraryService, MediaService, SignalrService } from '@service';
 import { DetailsOverview, DownloadConfirmation, MediaTable } from '#components';
 import {
 	useMediaOverviewBarDownloadCommandBus,
@@ -87,6 +87,7 @@ import { useMediaOverviewStore, useSettingsStore } from '~/store';
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const mediaOverviewStore = useMediaOverviewStore();
+const downloadStore = useDownloadStore();
 const router = useRouter();
 
 // endregion
@@ -188,7 +189,7 @@ listenMediaOverviewDownloadCommand((command) => {
 		if (isConfirmationEnabled.value) {
 			useOpenControlDialog(downloadConfirmationName, command);
 		} else {
-			DownloadService.downloadMedia(command);
+			downloadStore.downloadMedia(command);
 		}
 	}
 });

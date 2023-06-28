@@ -1,10 +1,9 @@
 import { isEqual, orderBy } from 'lodash-es';
-import { acceptHMRUpdate } from 'pinia';
+import { defineStore, acceptHMRUpdate } from 'pinia';
 import { useSettingsStore } from './settingsStore';
 import { PlexMediaSlimDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { IMediaOverviewSort } from '@composables/event-bus';
 import ISelection from '@interfaces/ISelection';
-
 export const useMediaOverviewStore = defineStore('MediaOverviewStore', {
 	state: (): {
 		items: PlexMediaSlimDTO[];

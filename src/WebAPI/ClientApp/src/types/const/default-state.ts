@@ -17,7 +17,6 @@ const defaultState: IStoreState = {
 	inspectServerProgress: [],
 	syncServerProgress: [],
 	libraryProgress: [],
-	serverDownloads: [],
 	serverConnectionCheckStatusProgress: [],
 	jobStatus: [],
 };

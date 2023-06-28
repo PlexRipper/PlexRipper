@@ -167,13 +167,6 @@ export class SignalrService extends BaseService {
 		);
 	}
 
-	public getAllServerDownloadProgress(): Observable<ServerDownloadProgressDTO[]> {
-		return this.stateChanged.pipe(
-			map((x) => x?.serverDownloads ?? []),
-			distinctUntilChanged(isEqual),
-		);
-	}
-
 	public getAllFileMergeProgress(): Observable<FileMergeProgress[]> {
 		return this.stateChanged.pipe(
 			map((x) => x?.fileMergeProgressList ?? []),
@@ -219,14 +212,6 @@ export class SignalrService extends BaseService {
 
 	public getFileMergeProgress(id: number): Observable<FileMergeProgress | null> {
 		return this.getAllFileMergeProgress().pipe(
-			map((x) => x?.find((x) => x.id === id) ?? null),
-			filter((progress) => !!progress),
-			distinctUntilChanged(isEqual),
-		);
-	}
-
-	public getServerDownloadProgress(id: number): Observable<ServerDownloadProgressDTO | null> {
-		return this.getAllServerDownloadProgress().pipe(
 			map((x) => x?.find((x) => x.id === id) ?? null),
 			filter((progress) => !!progress),
 			distinctUntilChanged(isEqual),

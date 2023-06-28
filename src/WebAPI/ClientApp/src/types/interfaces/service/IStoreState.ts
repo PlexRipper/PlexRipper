@@ -9,7 +9,6 @@ import {
 	PlexServerConnectionDTO,
 	PlexServerDTO,
 	ServerConnectionCheckStatusProgressDTO,
-	ServerDownloadProgressDTO,
 	SyncServerProgress,
 } from '@dto/mainApi';
 import IObjectUrl from '@interfaces/IObjectUrl';
@@ -23,7 +22,6 @@ export default interface IStoreState {
 	servers: PlexServerDTO[];
 	serverConnections: PlexServerConnectionDTO[];
 	libraries: PlexLibraryDTO[];
-	serverDownloads: ServerDownloadProgressDTO[];
 	alerts: IAlert[];
 	mediaUrls: IObjectUrl[];
 	helpIdDialog: string;

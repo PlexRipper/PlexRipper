@@ -1,5 +1,4 @@
-import { acceptHMRUpdate } from 'pinia';
-import { take } from 'rxjs/operators';
+import { defineStore, acceptHMRUpdate } from 'pinia';
 import { NotificationDTO } from '@dto/mainApi';
 import { clearAllNotifications, getNotifications, hideNotification } from '@api/notificationApi';
 

@@ -1,4 +1,4 @@
-import { acceptHMRUpdate } from 'pinia';
+import { defineStore, acceptHMRUpdate } from 'pinia';
 import { FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
 import { createFolderPath, deleteFolderPath, getFolderPaths, updateFolderPath } from '@api/pathApi';
 import { useI18n } from '#build/imports';

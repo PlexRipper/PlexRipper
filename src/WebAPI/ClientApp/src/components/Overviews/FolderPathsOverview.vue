@@ -63,26 +63,27 @@
 </template>
 
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
 import { kebabCase } from 'lodash-es';
 import { FolderPathDTO } from '@dto/mainApi';
-import { DownloadService } from '@service';
 import { useI18n, useOpenControlDialog, toFolderPathStringId, useFolderPathStore } from '#imports';
 import IFolderPathGroup from '@interfaces/IFolderPathGroup';
 
 const { t } = useI18n();
 const folderPathStore = useFolderPathStore();
-
+const downloadStore = useDownloadStore();
 withDefaults(defineProps<{ onlyDefaults: boolean }>(), {
 	onlyDefaults: false,
 });
 
 const directoryBrowserName = 'customDirectoryBrowser';
-const allowEditing = ref(true);
 
 const openDirectoryBrowser = (path: FolderPathDTO): void => {
 	useOpenControlDialog(directoryBrowserName, path);
 };
+
+const allowEditing = computed(() => {
+	return downloadStore.getActiveDownloadList().length === 0;
+});
 
 const confirmDirectoryBrowser = (path: FolderPathDTO): void => {
 	const i = folderPathStore.getFolderPaths.findIndex((x) => x.id === path.id);
@@ -118,15 +119,6 @@ const saveDisplayName = (id: number, value: string): void => {
 		folderPathStore.updateFolderPath(folderPath);
 	}
 };
-
-onMounted(() => {
-	// Ensure there are no active downloads before being allowed to change.
-	useSubscription(
-		DownloadService.getActiveDownloadList().subscribe((data) => {
-			allowEditing.value = data?.length === 0 ?? false;
-		}),
-	);
-});
 </script>
 <style lang="scss">
 .folder-path-input {

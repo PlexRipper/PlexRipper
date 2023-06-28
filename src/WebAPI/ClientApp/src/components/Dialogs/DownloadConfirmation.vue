@@ -37,11 +37,11 @@ import { useSubscription } from '@vueuse/rxjs';
 import sum from 'lodash-es/sum';
 import { set } from '@vueuse/core';
 import { DownloadMediaDTO, DownloadPreviewDTO } from '@dto/mainApi';
-import { DownloadService } from '@service';
 import { QTreeViewTableHeader } from '@props';
 import { getDownloadPreviewTableColumns } from '#imports';
 
 const { t } = useI18n();
+const downloadStore = useDownloadStore();
 
 defineProps<{ name: string }>();
 
@@ -59,7 +59,7 @@ function openDialog(data: DownloadMediaDTO[]): void {
 	set(loading, true);
 	set(downloadMediaCommand, data);
 	useSubscription(
-		DownloadService.previewDownload(data).subscribe((result) => {
+		downloadStore.previewDownload(data).subscribe((result) => {
 			set(downloadPreview, result);
 			set(totalSize, sum(result.map((x) => x.size)));
 			set(loading, false);

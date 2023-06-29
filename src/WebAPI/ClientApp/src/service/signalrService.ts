@@ -5,7 +5,6 @@ import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operato
 import { useCypressSignalRMock } from 'cypress-signalr-mock';
 import { Observable, of, Subject } from 'rxjs';
 import { isEqual } from 'lodash-es';
-import BackgroundJobsService from './backgroundJobsService';
 import BaseService from './baseService';
 import IStoreState from '@interfaces/service/IStoreState';
 
@@ -110,7 +109,7 @@ export class SignalrService extends BaseService {
 		});
 
 		this._progressHubConnection?.on(MessageTypes.JobStatusUpdate, (data: JobStatusUpdateDTO) => {
-			BackgroundJobsService.setStatusJobUpdate(data);
+			useBackgroundJobsStore().setStatusJobUpdate(data);
 		});
 
 		this._notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) => {

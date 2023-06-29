@@ -7,3 +7,4 @@ export * from './downloadStore';
 export * from './serverConnection';
 export * from './accountStore';
 export * from './libraryStore';
+export * from './backgroundJobsStore';

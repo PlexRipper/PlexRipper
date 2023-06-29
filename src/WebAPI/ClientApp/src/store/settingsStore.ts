@@ -1,7 +1,7 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import Log from 'consola';
-import { EMPTY, Observable, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { take } from 'rxjs/operators';
 import {
 	ConfirmationSettingsDTO,
 	DateTimeSettingsDTO,
@@ -59,7 +59,7 @@ export const useSettingsStore = defineStore('SettingsStore', {
 	}),
 	actions: {
 		setup(): Observable<ISetupResult> {
-			return EMPTY.pipe(switchMap(() => of({ name: useSettingsStore.name, isSuccess: true })));
+			return of({ name: useSettingsStore.name, isSuccess: true }).pipe(take(1));
 		},
 		setSettingsState(settings: SettingsModelDTO) {
 			this.generalSettings = settings.generalSettings;

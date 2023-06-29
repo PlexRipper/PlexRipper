@@ -64,9 +64,9 @@ export const useServerConnectionStore = defineStore('ServerConnection', {
 	getters: {
 		getServerConnectionsByServerId:
 			(state) =>
-			(plexServerId = 0) => {
+			(plexServerId = 0): PlexServerConnectionDTO[] => {
 				return state.serverConnections.filter((connection) =>
-					plexServerId > 0 ? connection.plexServerId === plexServerId : true,
+					plexServerId > 0 ? connection.plexServerId === plexServerId : false,
 				);
 			},
 		getServerConnections: (state): PlexServerConnectionDTO[] => state.serverConnections,

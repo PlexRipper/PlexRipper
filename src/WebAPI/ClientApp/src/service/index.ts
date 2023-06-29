@@ -6,16 +6,5 @@ import SettingsService from './settingsService';
 import SignalrService from './signalrService';
 import HelpService from './helpService';
 import AlertService from './alertService';
-import BackgroundJobsService from './backgroundJobsService';
 
-export {
-	BaseService,
-	GlobalService,
-	ProgressService,
-	BackgroundJobsService,
-	MediaService,
-	SettingsService,
-	SignalrService,
-	HelpService,
-	AlertService,
-};
+export { BaseService, GlobalService, ProgressService, MediaService, SettingsService, SignalrService, HelpService, AlertService };

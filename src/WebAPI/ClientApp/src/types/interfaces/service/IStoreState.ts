@@ -2,9 +2,7 @@ import {
 	DownloadTaskDTO,
 	FileMergeProgress,
 	InspectServerProgressDTO,
-	JobStatusUpdateDTO,
 	LibraryProgress,
-	PlexAccountDTO,
 	PlexLibraryDTO,
 	ServerConnectionCheckStatusProgressDTO,
 	SyncServerProgress,
@@ -27,5 +25,4 @@ export default interface IStoreState {
 	inspectServerProgress: InspectServerProgressDTO[];
 	serverConnectionCheckStatusProgress: ServerConnectionCheckStatusProgressDTO[];
 	syncServerProgress: SyncServerProgress[];
-	jobStatus: JobStatusUpdateDTO[];
 }

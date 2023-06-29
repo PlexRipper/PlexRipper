@@ -104,12 +104,13 @@ import { get, set } from '@vueuse/core';
 import { of } from 'rxjs';
 import type { JobStatusUpdateDTO, PlexAccountDTO } from '@dto/mainApi';
 import { JobStatus, JobTypes, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
-import { BackgroundJobsService, SignalrService } from '@service';
-import { useI18n, useOpenControlDialog, useServerStore } from '#imports';
+import { SignalrService } from '@service';
+import { useBackgroundJobsStore, useI18n, useOpenControlDialog, useServerStore } from '#imports';
 
 const { t } = useI18n();
 const serverStore = useServerStore();
 const accountStore = useAccountStore();
+const backgroundJobStore = useBackgroundJobsStore();
 const name = 'checkServerConnectionDialogName';
 const connectionProgress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
 const account = ref<PlexAccountDTO | null>(null);
@@ -205,7 +206,8 @@ function isServer(node: IPlexServerNode): boolean {
 
 onMounted(() => {
 	useSubscription(
-		BackgroundJobsService.getJobs(JobTypes.InspectPlexServerByPlexAccountIdJob)
+		backgroundJobStore
+			.getJobStatusUpdate(JobTypes.InspectPlexServerByPlexAccountIdJob)
 			.pipe(
 				filter((update) => update.status === JobStatus.Running),
 				tap(() => useOpenControlDialog(name)),

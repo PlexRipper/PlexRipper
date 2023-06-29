@@ -90,7 +90,9 @@ const checkServerStatusMessage = computed(() => {
 	if (get(checkServerStatusLoading)) {
 		return progress.value.map((x) => x.message).join('\n');
 	}
-	return serverConnectionStore.getServerConnectionsByServerId(get(plexServerId)).flatMap((x) => x.statusMessage);
+	return serverConnectionStore
+		.getServerConnectionsByServerId(get(plexServerId))
+		.flatMap((x) => x.latestConnectionStatus.statusMessage);
 });
 
 function checkServer() {

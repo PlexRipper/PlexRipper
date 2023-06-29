@@ -6,7 +6,7 @@ import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 import DefaultState from '@const/default-state';
 import IAppConfig from '@class/IAppConfig';
 import IStoreState from '@interfaces/service/IStoreState';
-import { AlertService, BaseService, HelpService, MediaService, ProgressService, SettingsService, SignalrService } from '@service';
+import { AlertService, BaseService, HelpService, MediaService, ProgressService, SignalrService } from '@service';
 import {
 	useServerStore,
 	useLibraryStore,
@@ -43,7 +43,6 @@ export class GlobalService extends BaseService {
 				forkJoin([
 					ProgressService.setup(),
 					MediaService.setup(),
-					SettingsService.setup(),
 					SignalrService.setup(config),
 					HelpService.setup(),
 					AlertService.setup(),

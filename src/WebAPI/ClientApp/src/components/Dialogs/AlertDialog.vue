@@ -1,5 +1,5 @@
 <template>
-	<QCardDialog max-width="1000px" :name="name" @closed="onClose">
+	<QCardDialog max-width="1000px" :name="name" @closed="alertStore.removeAlert(alert.id)">
 		<template #title>
 			{{ alert.title }}
 		</template>
@@ -19,7 +19,9 @@
 
 <script setup lang="ts">
 import type IAlert from '@interfaces/IAlert';
-import { AlertService } from '@service';
+import { useAlertStore } from '~/store';
+
+const alertStore = useAlertStore();
 
 const props = defineProps<{ name: string; alert: IAlert }>();
 
@@ -29,8 +31,4 @@ const errors = computed(() => {
 	}
 	return null;
 });
-
-function onClose(): void {
-	AlertService.removeAlert(props.alert.id);
-}
 </script>

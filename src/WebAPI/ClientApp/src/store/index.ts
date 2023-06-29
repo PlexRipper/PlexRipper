@@ -8,3 +8,5 @@ export * from './serverConnection';
 export * from './accountStore';
 export * from './libraryStore';
 export * from './backgroundJobsStore';
+export * from './helpStore';
+export * from './alertStore';

@@ -6,7 +6,7 @@ import { filter, map, switchMap, take, tap } from 'rxjs/operators';
 import DefaultState from '@const/default-state';
 import IAppConfig from '@class/IAppConfig';
 import IStoreState from '@interfaces/service/IStoreState';
-import { AlertService, BaseService, HelpService, MediaService, ProgressService, SignalrService } from '@service';
+import { BaseService, MediaService, ProgressService, SignalrService } from '@service';
 import {
 	useServerStore,
 	useLibraryStore,
@@ -17,6 +17,8 @@ import {
 	useServerConnectionStore,
 	useSettingsStore,
 	useBackgroundJobsStore,
+	useHelpStore,
+	useAlertStore,
 } from '#imports';
 
 export class GlobalService extends BaseService {
@@ -44,8 +46,6 @@ export class GlobalService extends BaseService {
 					ProgressService.setup(),
 					MediaService.setup(),
 					SignalrService.setup(config),
-					HelpService.setup(),
-					AlertService.setup(),
 					useAccountStore().setup(),
 					useDownloadStore().setup(),
 					useFolderPathStore().setup(),
@@ -55,6 +55,8 @@ export class GlobalService extends BaseService {
 					useServerStore().setup(),
 					useSettingsStore().setup(),
 					useBackgroundJobsStore().setup(),
+					useHelpStore().setup(),
+					useAlertStore().setup(),
 				]),
 			),
 			tap((results) => {

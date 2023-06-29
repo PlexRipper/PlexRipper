@@ -28,16 +28,16 @@ import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
-import { AlertService, HelpService } from '@service';
-import IAlert from '@interfaces/IAlert';
 import PageLoadOverlay from '@components/General/PageLoadOverlay.vue';
 import globalService from '@service/globalService';
-import { useOpenControlDialog } from '#imports';
-import { useSettingsStore } from '~/store';
+import { useSettingsStore, useHelpStore, useAlertStore } from '#imports';
+import IAlert from '@interfaces/IAlert';
 
 const $q = useQuasar();
 const route = useRoute();
 const settingsStore = useSettingsStore();
+const helpStore = useHelpStore();
+const alertStore = useAlertStore();
 const { languageSettings } = storeToRefs(settingsStore);
 const { setLocale } = useI18n();
 const isLoading = ref(true);
@@ -90,7 +90,7 @@ onMounted(() => {
 	);
 
 	useSubscription(
-		HelpService.getHelpDialog().subscribe((newHelpId) => {
+		helpStore.getHelpDialog.subscribe((newHelpId) => {
 			if (newHelpId) {
 				useOpenControlDialog(helpDialogName, newHelpId);
 			}
@@ -98,7 +98,7 @@ onMounted(() => {
 	);
 
 	useSubscription(
-		AlertService.getAlerts().subscribe((newAlerts) => {
+		alertStore.getAlerts.subscribe((newAlerts) => {
 			if (newAlerts) {
 				set(alerts, newAlerts);
 				// Allow the alert dialog to render first before opening it

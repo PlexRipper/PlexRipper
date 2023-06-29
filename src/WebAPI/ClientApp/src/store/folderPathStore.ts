@@ -7,19 +7,21 @@ import { useI18n } from '#build/imports';
 import IFolderPathGroup from '@interfaces/IFolderPathGroup';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
-export const useFolderPathStore = defineStore('FolderPathStore', {
-	state: (): { folderPaths: FolderPathDTO[] } => ({
+export const useFolderPathStore = defineStore('FolderPathStore', () => {
+	const state = reactive<{ folderPaths: FolderPathDTO[] }>({
 		folderPaths: [],
-	}),
-	actions: {
+	});
+
+	// Actions
+	const actions = {
 		setup(): Observable<ISetupResult> {
-			return this.refreshFolderPaths().pipe(switchMap(() => of({ name: useFolderPathStore.name, isSuccess: true })));
+			return actions.refreshFolderPaths().pipe(switchMap(() => of({ name: useFolderPathStore.name, isSuccess: true })));
 		},
 		refreshFolderPaths() {
 			return getFolderPaths().pipe(
 				tap((result) => {
 					if (result.isSuccess && result.value) {
-						this.folderPaths = result.value ?? [];
+						state.folderPaths = result.value ?? [];
 					}
 				}),
 			);
@@ -28,47 +30,42 @@ export const useFolderPathStore = defineStore('FolderPathStore', {
 			return createFolderPath(folderPath).pipe(
 				tap((result) => {
 					if (result?.isSuccess && result.value) {
-						this.folderPaths.push(result.value);
+						state.folderPaths.push(result.value);
 					}
 				}),
 			);
 		},
 		updateFolderPath(folderPath: FolderPathDTO) {
-			const i = this.folderPaths.findIndex((x) => x.id === folderPath.id);
+			const i = state.folderPaths.findIndex((x) => x.id === folderPath.id);
 			if (i > -1) {
-				this.folderPaths.splice(i, 1, folderPath);
+				state.folderPaths.splice(i, 1, folderPath);
 			}
 			return updateFolderPath(folderPath);
 		},
 		deleteFolderPath(folderPathId: number) {
-			const i = this.folderPaths.findIndex((x) => x.id === folderPathId);
+			const i = state.folderPaths.findIndex((x) => x.id === folderPathId);
 			if (i > -1) {
-				this.folderPaths.splice(i, 1);
+				state.folderPaths.splice(i, 1);
 			}
 			return deleteFolderPath(folderPathId);
 		},
-	},
-	getters: {
-		getFolderPaths(state): FolderPathDTO[] {
+	};
+
+	// Getters
+	const getters = {
+		getFolderPaths: computed((state): FolderPathDTO[] => state.folderPaths),
+		getFolderPath: (id: number): FolderPathDTO | undefined => {
+			return state.folderPaths.find((x) => x.id === id);
+		},
+		getFolderPathOptions: (type: PlexMediaType): FolderPathDTO[] => {
+			if (type === PlexMediaType.Movie || type === PlexMediaType.TvShow) {
+				return state.folderPaths.filter((x) => x.mediaType === type);
+			}
+
 			return state.folderPaths;
 		},
-		getFolderPath:
-			(state) =>
-			(id: number): FolderPathDTO | undefined => {
-				return state.folderPaths.find((x) => x.id === id);
-			},
-		getFolderPathOptions:
-			(state) =>
-			(type: PlexMediaType): FolderPathDTO[] => {
-				if (type === PlexMediaType.Movie || type === PlexMediaType.TvShow) {
-					return state.folderPaths.filter((x) => x.mediaType === type);
-				}
-
-				return state.folderPaths;
-			},
-		getFolderPathsGroups: (state) => (onlyDefaults: boolean) => {
+		getFolderPathsGroups: (onlyDefaults: boolean) => {
 			const { t } = useI18n();
-
 			const folderPathGroups: IFolderPathGroup[] = [];
 			// Default Paths
 			folderPathGroups.push({
@@ -114,7 +111,13 @@ export const useFolderPathStore = defineStore('FolderPathStore', {
 
 			return folderPathGroups;
 		},
-	},
+	};
+
+	return {
+		...toRefs(state),
+		...actions,
+		...getters,
+	};
 });
 
 if (import.meta.hot) {

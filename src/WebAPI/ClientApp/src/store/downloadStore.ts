@@ -25,12 +25,17 @@ import {
 import ISelection from '@interfaces/ISelection';
 import { SignalrService } from '@service';
 import ISetupResult from '@interfaces/service/ISetupResult';
-export const useDownloadStore = defineStore('DownloadStore', {
-	state: (): { serverDownloads: ServerDownloadProgressDTO[]; selected: ISelection[] } => ({
+import { useServerStore } from '#build/imports';
+export const useDownloadStore = defineStore('DownloadStore', () => {
+	const state = reactive<{ serverDownloads: ServerDownloadProgressDTO[]; selected: ISelection[] }>({
 		serverDownloads: [],
 		selected: [],
-	}),
-	actions: {
+	});
+
+	const serverStore = useServerStore();
+
+	// Actions
+	const actions = {
 		setup(): Observable<ISetupResult> {
 			SignalrService.GetServerDownloadProgress().subscribe((data: ServerDownloadProgressDTO) => {
 				Log.info('DownloadStore: SignalR: GetServerDownloadProgress', data);
@@ -45,15 +50,15 @@ export const useDownloadStore = defineStore('DownloadStore', {
 			return getAllDownloads().pipe(
 				tap((downloads) => {
 					if (downloads.isSuccess) {
-						this.serverDownloads = downloads.value ?? [];
+						state.serverDownloads = downloads.value ?? [];
 					}
 				}),
 				tap((downloads) => {
 					for (const server of downloads.value ?? []) {
-						if (this.selected.some((x) => x.indexKey === server.id)) {
+						if (state.selected.some((x) => x.indexKey === server.id)) {
 							continue;
 						}
-						this.selected.push({
+						state.selected.push({
 							keys: [],
 							indexKey: server.id,
 							allSelected: false,
@@ -89,7 +94,7 @@ export const useDownloadStore = defineStore('DownloadStore', {
 			}
 		},
 		updateServerDownloadProgress(downloadProgress: DownloadProgressDTO): void {
-			const i = this.serverDownloads.findIndex((x) => x.id === downloadProgress.id);
+			const i = state.serverDownloads.findIndex((x) => x.id === downloadProgress.id);
 			if (i === -1) {
 			}
 		},
@@ -114,65 +119,66 @@ export const useDownloadStore = defineStore('DownloadStore', {
 				.subscribe();
 		},
 		updateSelected(id: number, payload: ISelection): void {
-			const i = this.selected.findIndex((x) => x.indexKey === id);
+			const i = state.selected.findIndex((x) => x.indexKey === id);
 			if (i === -1) {
-				this.selected.push({ indexKey: id, keys: payload.keys, allSelected: payload.allSelected });
+				state.selected.push({ indexKey: id, keys: payload.keys, allSelected: payload.allSelected });
 				return;
 			}
-			this.selected.splice(i, 1, {
-				...this.selected[i],
+			state.selected.splice(i, 1, {
+				...state.selected[i],
 				keys: payload.keys,
 				allSelected: payload.allSelected,
 			});
 		},
-	},
-	getters: {
-		getDownloadsByServerId:
-			(state) =>
-			(serverId = 0): DownloadProgressDTO[] => {
-				if (serverId === 0) {
-					return state.serverDownloads.flatMap((x) => x.downloads);
-				}
-				return state.serverDownloads.find((server) => server.id === serverId)?.downloads ?? [];
-			},
-		getServersWithDownloads(): { plexServer: PlexServerDTO; downloads: DownloadProgressDTO[] }[] {
-			const serverIds = this.serverDownloads.map((x) => x.id);
-			const plexServersWithDownloads = useServerStore().servers.filter((x) => serverIds.includes(x.id));
+	};
+
+	// Getters
+	const getters = {
+		getDownloadsByServerId: (serverId = 0): DownloadProgressDTO[] => {
+			if (serverId === 0) {
+				return state.serverDownloads.flatMap((x) => x.downloads);
+			}
+			return state.serverDownloads.find((server) => server.id === serverId)?.downloads ?? [];
+		},
+		getServersWithDownloads: computed((): { plexServer: PlexServerDTO; downloads: DownloadProgressDTO[] }[] => {
+			const serverIds = state.serverDownloads.map((x) => x.id);
+			const plexServersWithDownloads = serverStore.servers.filter((x) => serverIds.includes(x.id));
 
 			return plexServersWithDownloads.map((x) => {
 				return {
 					plexServer: x,
-					downloads: this.getDownloadsByServerId(x.id),
+					downloads: getters.getDownloadsByServerId(x.id),
 				};
 			});
-		},
-		getActiveDownloadList() {
-			return (serverId = 0): DownloadProgressDTO[] => {
-				if (!this) {
-					Log.error('this is undefined in DownloadStore => getActiveDownloadList');
-					return [];
-				}
-				return this.getDownloadsByServerId(serverId).filter(
-					(y) =>
-						y.status === DownloadStatus.Downloading ||
-						y.status === DownloadStatus.Moving ||
-						y.status === DownloadStatus.Merging ||
-						y.status === DownloadStatus.Paused,
-				);
-			};
+		}),
+		getActiveDownloadList(serverId = 0): DownloadProgressDTO[] {
+			if (!this) {
+				Log.error('this is undefined in DownloadStore => getActiveDownloadList');
+				return [];
+			}
+			return this.getDownloadsByServerId(serverId).filter(
+				(y) =>
+					y.status === DownloadStatus.Downloading ||
+					y.status === DownloadStatus.Moving ||
+					y.status === DownloadStatus.Merging ||
+					y.status === DownloadStatus.Paused,
+			);
 		},
 		/**
 		 * Get the total number of download tasks that are downloadable in the download list.
 		 */
-		getTotalDownloadsCount: (state): number => {
+		getTotalDownloadsCount: computed((): number => {
 			return sum(state.serverDownloads.flatMap((x) => x.downloadableTasksCount));
-		},
-		hasSelected: (state) => state.selected.some((x) => x.keys.length > 0),
-		getSelected:
-			(state) =>
-			(serverId: number): ISelection =>
-				state.selected.find((x) => x.indexKey === serverId) as ISelection,
-	},
+		}),
+		hasSelected: computed(() => state.selected.some((x) => x.keys.length > 0)),
+		getSelected: (serverId: number): ISelection => state.selected.find((x) => x.indexKey === serverId) as ISelection,
+	};
+
+	return {
+		...toRefs(state),
+		...actions,
+		...getters,
+	};
 });
 
 if (import.meta.hot) {

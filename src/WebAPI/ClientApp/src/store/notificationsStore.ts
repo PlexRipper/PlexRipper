@@ -5,46 +5,50 @@ import { NotificationDTO } from '@dto/mainApi';
 import { clearAllNotifications, getNotifications, hideNotification } from '@api/notificationApi';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
-export const useNotificationsStore = defineStore('NotificationsStore', {
-	state: (): { notifications: NotificationDTO[] } => ({
+export const useNotificationsStore = defineStore('NotificationsStore', () => {
+	const state = reactive<{ notifications: NotificationDTO[] }>({
 		notifications: [],
-	}),
-	actions: {
+	});
+
+	const actions = {
 		setup(): Observable<ISetupResult> {
-			return this.fetchNotifications().pipe(switchMap(() => of({ name: useNotificationsStore.name, isSuccess: true })));
+			return actions.fetchNotifications().pipe(switchMap(() => of({ name: useNotificationsStore.name, isSuccess: true })));
 		},
 		fetchNotifications() {
 			return getNotifications().pipe(
 				tap((result) => {
 					if (result.isSuccess) {
-						this.notifications = result.value ?? [];
+						state.notifications = result.value ?? [];
 					}
 				}),
 			);
 		},
 		setNotification(notification: NotificationDTO) {
-			this.notifications.push(notification);
+			state.notifications.push(notification);
 		},
 		hideNotification(id: number): void {
-			const i = this.notifications.findIndex((x) => x.id === id);
+			const i = state.notifications.findIndex((x) => x.id === id);
 			if (i > -1) {
-				this.notifications.splice(i, i, { ...this.notifications[i], hidden: true });
+				state.notifications.splice(i, i, { ...state.notifications[i], hidden: true });
 			}
 			hideNotification(id).subscribe();
 		},
 		clearAllNotifications(): void {
-			this.notifications = [];
+			state.notifications = [];
 			clearAllNotifications().subscribe();
 		},
-	},
-	getters: {
-		getNotifications(state): NotificationDTO[] {
-			return state.notifications;
-		},
-		getVisibleNotifications(state): NotificationDTO[] {
-			return state.notifications.filter((x) => !x.hidden);
-		},
-	},
+	};
+
+	const getters = {
+		getNotifications: computed((): NotificationDTO[] => state.notifications),
+		getVisibleNotifications: computed((): NotificationDTO[] => state.notifications.filter((x) => !x.hidden)),
+	};
+
+	return {
+		...toRefs(state),
+		...actions,
+		...getters,
+	};
 });
 
 if (import.meta.hot) {

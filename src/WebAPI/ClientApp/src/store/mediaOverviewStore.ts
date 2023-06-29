@@ -1,11 +1,12 @@
 import { isEqual, orderBy } from 'lodash-es';
 import { defineStore, acceptHMRUpdate } from 'pinia';
-import { useSettingsStore } from './settingsStore';
+import { get } from '@vueuse/core';
+import { useSettingsStore } from '#build/imports';
 import { PlexMediaSlimDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { IMediaOverviewSort } from '@composables/event-bus';
 import ISelection from '@interfaces/ISelection';
-export const useMediaOverviewStore = defineStore('MediaOverviewStore', {
-	state: (): {
+export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
+	const state = reactive<{
 		items: PlexMediaSlimDTO[];
 		itemsLength: number;
 		sortedState: IMediaOverviewSort[];
@@ -15,7 +16,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', {
 		downloadButtonVisible: boolean;
 		showMediaOverview: boolean;
 		mediaType: PlexMediaType;
-	} => ({
+	}>({
 		items: [],
 		itemsLength: 0,
 		sortedState: [],
@@ -25,45 +26,48 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', {
 		downloadButtonVisible: false,
 		showMediaOverview: true,
 		mediaType: PlexMediaType.None,
-	}),
-	actions: {
+	});
+
+	const settingsStore = useSettingsStore();
+
+	const actions = {
 		setMedia(items: PlexMediaSlimDTO[], mediaType: PlexMediaType) {
-			this.items = items;
-			this.itemsLength = items.length;
-			this.mediaType = mediaType;
+			state.items = items;
+			state.itemsLength = items.length;
+			state.mediaType = mediaType;
 			// Create scroll indexes for each letter
-			this.scrollDict['#'] = 0;
+			state.scrollDict['#'] = 0;
 			// Check for occurrence of title with alphabetic character
-			const sortTitles = this.items.map((x) => x.sortTitle[0]?.toLowerCase() ?? '#');
+			const sortTitles = state.items.map((x) => x.sortTitle[0]?.toLowerCase() ?? '#');
 			let lastIndex = 0;
 			for (const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase()) {
 				const index = sortTitles.indexOf(letter, lastIndex);
 				if (index > -1) {
-					this.scrollDict[letter] = index;
+					state.scrollDict[letter] = index;
 					lastIndex = index;
 				}
 			}
-			this.scrollAlphabet = Object.keys(this.scrollDict);
+			state.scrollAlphabet = Object.keys(state.scrollDict);
 		},
 		setSelection(selection: ISelection) {
-			this.selection = selection;
+			state.selection = selection;
 		},
 		setSelectionRange(min: number, max: number) {
 			this.setSelection({
-				indexKey: this.selection.indexKey,
-				keys: this.items.filter((x) => x.index >= min && x.index <= max).map((x) => x.id),
+				indexKey: state.selection.indexKey,
+				keys: state.items.filter((x) => x.index >= min && x.index <= max).map((x) => x.id),
 				allSelected: false,
 			} as ISelection);
 		},
 		setRootSelected(value: boolean) {
 			this.setSelection({
-				indexKey: this.selection?.indexKey ?? 0,
-				keys: value ? this.items.map((x) => x.id) : [],
+				indexKey: state.selection?.indexKey ?? 0,
+				keys: value ? state.items.map((x) => x.id) : [],
 				allSelected: value,
 			} as ISelection);
 		},
 		sortMedia(event: IMediaOverviewSort) {
-			const newSortedState = [...this.sortedState];
+			const newSortedState = [...state.sortedState];
 			const index = newSortedState.findIndex((x) => x.field === event.field);
 			if (index > -1) {
 				newSortedState.splice(index, 1);
@@ -73,7 +77,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', {
 			}
 
 			// Prevent unnecessary sorting
-			if (isEqual(this.sortedState, newSortedState)) {
+			if (isEqual(state.sortedState, newSortedState)) {
 				return;
 			}
 			const lodashFormat = newSortedState.map((x) => {
@@ -82,21 +86,20 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', {
 					sort: x.sort !== 'no-sort' ? x.sort : false,
 				};
 			});
-			this.items = orderBy(
-				this.items, // Items to sort
+			state.items = orderBy(
+				state.items, // Items to sort
 				lodashFormat.map((x) => x.field), // Sort by field
 				lodashFormat.map((x) => x.sort), // Sort by sort, asc or desc
 			);
-			this.sortedState = newSortedState;
+			state.sortedState = newSortedState;
 		},
-	},
-	getters: {
-		hasSelectedMedia(): boolean {
-			return this.selection.keys.length > 0;
-		},
-		getMediaViewMode(): ViewMode {
-			const settingsStore = useSettingsStore();
-			switch (this.mediaType) {
+	};
+	const getters = {
+		hasSelectedMedia: computed((): boolean => {
+			return state.selection.keys.length > 0;
+		}),
+		getMediaViewMode: computed((): ViewMode => {
+			switch (state.mediaType) {
 				case PlexMediaType.Movie:
 					return settingsStore.displaySettings.movieViewMode;
 				case PlexMediaType.TvShow:
@@ -104,25 +107,30 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', {
 				default:
 					return ViewMode.Poster;
 			}
-		},
-		showSelectionButton(): boolean {
-			return this.showMediaOverview && this.getMediaViewMode === ViewMode.Table;
-		},
-		showDownloadButton(): boolean {
-			return this.downloadButtonVisible || (this.hasSelectedMedia && this.getMediaViewMode === ViewMode.Table);
-		},
-		isRootSelected(): boolean | null {
-			if (this.selection?.keys.length === this.itemsLength) {
+		}),
+		showSelectionButton: computed((): boolean => {
+			return state.showMediaOverview && get(getters.getMediaViewMode) === ViewMode.Table;
+		}),
+		showDownloadButton: computed((): boolean => {
+			return state.downloadButtonVisible || (getters.hasSelectedMedia && get(getters.getMediaViewMode) === ViewMode.Table);
+		}),
+		isRootSelected: computed((): boolean | null => {
+			if (state.selection?.keys.length === state.itemsLength) {
 				return true;
 			}
 
-			if (this.selection?.keys.length === 0) {
+			if (state.selection?.keys.length === 0) {
 				return false;
 			}
 
 			return null;
-		},
-	},
+		}),
+	};
+	return {
+		...toRefs(state),
+		...actions,
+		...getters,
+	};
 });
 
 if (import.meta.hot) {

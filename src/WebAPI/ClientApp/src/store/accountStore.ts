@@ -5,19 +5,20 @@ import { PlexAccountDTO } from '@dto/mainApi';
 import { createAccount, deleteAccount, getAllAccounts, refreshAccount, updateAccount } from '@api/accountApi';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
-export const useAccountStore = defineStore('AccountStore', {
-	state: (): { accounts: PlexAccountDTO[] } => ({
+export const useAccountStore = defineStore('AccountStore', () => {
+	const state = reactive<{ accounts: PlexAccountDTO[] }>({
 		accounts: [],
-	}),
-	actions: {
+	});
+
+	const actions = {
 		setup(): Observable<ISetupResult> {
-			return this.refreshAccounts().pipe(switchMap(() => of({ name: useAccountStore.name, isSuccess: true })));
+			return actions.refreshAccounts().pipe(switchMap(() => of({ name: useAccountStore.name, isSuccess: true })));
 		},
 		refreshAccounts() {
 			return getAllAccounts().pipe(
 				tap((result) => {
 					if (result.isSuccess && result.value) {
-						this.accounts = result.value;
+						state.accounts = result.value;
 					}
 				}),
 			);
@@ -41,7 +42,7 @@ export const useAccountStore = defineStore('AccountStore', {
 						useLibraryStore().refreshLibraries(),
 					]),
 				),
-				switchMap(() => of(this.getAccount(account.id))),
+				switchMap(() => of(actions.getAccount(account.id))),
 			);
 		},
 		updatePlexAccount(account: PlexAccountDTO, inspect = false) {
@@ -53,7 +54,7 @@ export const useAccountStore = defineStore('AccountStore', {
 						useLibraryStore().refreshLibraries(),
 					]),
 				),
-				switchMap(() => of(this.getAccount(account.id))),
+				switchMap(() => of(actions.getAccount(account.id))),
 			);
 		},
 		deleteAccount(accountId: number) {
@@ -67,17 +68,21 @@ export const useAccountStore = defineStore('AccountStore', {
 				),
 			);
 		},
-	},
-	getters: {
-		getAccount:
-			(state) =>
-			(id: number): PlexAccountDTO | undefined => {
-				return state.accounts.find((x) => x.id === id);
-			},
-		getAccounts: (state) => {
-			return state.accounts;
+		getAccount(id: number): PlexAccountDTO | undefined {
+			return state.accounts.find((x) => x.id === id);
 		},
-	},
+	};
+
+	// Getters
+	const getters = {
+		getAccounts: computed(() => state.accounts),
+	};
+
+	return {
+		...toRefs(state),
+		...actions,
+		...getters,
+	};
 });
 
 if (import.meta.hot) {

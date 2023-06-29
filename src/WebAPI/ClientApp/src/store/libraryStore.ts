@@ -1,16 +1,20 @@
 import { acceptHMRUpdate } from 'pinia';
 import { Observable, of } from 'rxjs';
-import { map, switchMap, take, tap } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
+import { get } from '@vueuse/core';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getAllPlexLibraries, getPlexLibrary, reSyncPlexLibrary, updateDefaultDestination } from '@api/plexLibraryApi';
 import { useServerStore } from '#build/imports';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
-export const useLibraryStore = defineStore('LibraryStore', {
-	state: (): { libraries: PlexLibraryDTO[] } => ({
+export const useLibraryStore = defineStore('LibraryStore', () => {
+	const state = reactive<{ libraries: PlexLibraryDTO[] }>({
 		libraries: [],
-	}),
-	actions: {
+	});
+
+	const serverStore = useServerStore();
+
+	const actions = {
 		setup(): Observable<ISetupResult> {
 			return this.refreshLibraries().pipe(switchMap(() => of({ name: useLibraryStore.name, isSuccess: true })));
 		},
@@ -18,22 +22,22 @@ export const useLibraryStore = defineStore('LibraryStore', {
 			return getAllPlexLibraries().pipe(
 				tap((plexLibraries) => {
 					if (plexLibraries.isSuccess) {
-						this.libraries = plexLibraries.value ?? [];
+						state.libraries = plexLibraries.value ?? [];
 					}
 				}),
-				map(() => this.getLibraries),
+				map(() => get(getters.getLibraries)),
 			);
 		},
 		refreshLibrary(libraryId: number) {
 			return getPlexLibrary(libraryId).pipe(
 				tap((library) => {
 					if (library.isSuccess && library.value) {
-						const i = this.libraries.findIndex((x) => x.id === libraryId);
+						const i = state.libraries.findIndex((x) => x.id === libraryId);
 						if (i > -1) {
 							// We freeze library here as it doesn't have to be Vue reactive.
-							this.libraries.splice(i, 1, Object.freeze(library.value));
+							state.libraries.splice(i, 1, Object.freeze(library.value));
 						}
-						this.libraries.push(Object.freeze(library.value));
+						state.libraries.push(Object.freeze(library.value));
 					}
 				}),
 			);
@@ -46,45 +50,44 @@ export const useLibraryStore = defineStore('LibraryStore', {
 			return reSyncPlexLibrary(libraryId).pipe(
 				tap((library) => {
 					if (library.isSuccess && library.value) {
-						const i = this.libraries.findIndex((x) => x.id === libraryId);
+						const i = state.libraries.findIndex((x) => x.id === libraryId);
 						if (i > -1) {
-							this.libraries.splice(i, 1, library.value);
+							state.libraries.splice(i, 1, library.value);
 						}
-						this.libraries.push(library.value);
+						state.libraries.push(library.value);
 					}
 				}),
-				switchMap((library) => of(this.getLibrary(library.value?.id ?? 0))),
+				switchMap((library): Observable<PlexLibraryDTO | null> => of(getters.getLibrary(library.value?.id ?? 0))),
 			);
 		},
 		updateDefaultDestination(libraryId: number, folderPathId: number): void {
 			updateDefaultDestination(libraryId, folderPathId).subscribe((result) => {
 				if (result.isSuccess) {
-					const index = this.libraries.findIndex((x) => x.id === libraryId);
+					const index = state.libraries.findIndex((x) => x.id === libraryId);
 					if (index > -1) {
-						this.libraries.splice(index, 1, { ...this.libraries[index], defaultDestinationId: folderPathId });
+						state.libraries.splice(index, 1, { ...state.libraries[index], defaultDestinationId: folderPathId });
 					}
 				}
 			});
 		},
-	},
-	getters: {
-		getLibrariesByServerId: (state) => (plexServerId: number) =>
-			state.libraries.filter((y) => y.plexServerId === plexServerId),
-		getLibrary:
-			(state) =>
-			(libraryId: number): PlexLibraryDTO | null =>
-				state.libraries.find((x) => x.id === libraryId) ?? null,
-		getLibraries: (state) => state.libraries,
-		getServerByLibraryId:
-			(state) =>
-			(libraryId: number): PlexServerDTO | null => {
-				const library = state.libraries.find((x) => x.id === libraryId) ?? null;
-				if (library) {
-					return useServerStore().getServer(library.plexServerId);
-				}
-				return null;
-			},
-	},
+	};
+	const getters = {
+		getLibrariesByServerId: (plexServerId: number) => state.libraries.filter((y) => y.plexServerId === plexServerId),
+		getLibrary: (libraryId: number): PlexLibraryDTO | null => state.libraries.find((x) => x.id === libraryId) ?? null,
+		getLibraries: computed(() => state.libraries),
+		getServerByLibraryId: (libraryId: number): PlexServerDTO | null => {
+			const library = state.libraries.find((x) => x.id === libraryId) ?? null;
+			if (library) {
+				return serverStore.getServer(library.plexServerId);
+			}
+			return null;
+		},
+	};
+	return {
+		...toRefs(state),
+		...actions,
+		...getters,
+	};
 });
 
 if (import.meta.hot) {

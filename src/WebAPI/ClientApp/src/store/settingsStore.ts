@@ -65,6 +65,7 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
+			// Send the settings to the server when they change
 			_settingsUpdated
 				.pipe(
 					debounceTime(1000),
@@ -73,7 +74,6 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 				.subscribe();
 
 			return actions.refreshSettings().pipe(
-				// Send the settings to the server when they change
 				tap(() => {
 					useSettingsStore().$subscribe((_, state) => {
 						_settingsUpdated.next(state);
@@ -87,7 +87,7 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 				switchMap((settingsResult) => of(settingsResult?.value ?? null)),
 				tap((settings) => {
 					if (settings) {
-						this.setSettingsState(settings);
+						actions.setSettingsState(settings);
 					}
 				}),
 			);
@@ -129,8 +129,10 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 	// Getters
 	const getters = {
 		debugMode: computed((): boolean => state.debugSettings.debugModeEnabled),
-		getServerSettings: (machineIdentifier?: string) =>
-			machineIdentifier ? state.serverSettings.data.find((user) => user.machineIdentifier === machineIdentifier) : null,
+		getServerSettings: computed(
+			() => (machineIdentifier?: string) =>
+				machineIdentifier ? state.serverSettings.data.find((user) => user.machineIdentifier === machineIdentifier) : null,
+		),
 	};
 	return {
 		...toRefs(state),

@@ -15,7 +15,6 @@ const defaultState: IStoreState = {
 	syncServerProgress: [],
 	libraryProgress: [],
 	serverConnectionCheckStatusProgress: [],
-	jobStatus: [],
 };
 
 export default defaultState;

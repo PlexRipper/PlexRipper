@@ -46,10 +46,36 @@
 				<td>
 					<BaseButton text-id="check-server-status" :loading="checkServerStatusLoading" @click="checkServer" />
 				</td>
-				<td>
-					{{ checkServerStatusMessage }}
+				<td style="padding: 0">
+					<q-markup-table v-if="hasCheckedServerStatus" wrap-cells>
+						<tbody v-if="checkServerStatusLoading">
+							<tr v-for="(progressItem, index) in progress" :key="index">
+								<td>
+									<q-status pulse :value="progressItem.connectionSuccessful" />
+								</td>
+								<td>{{ progressItem.message }}</td>
+							</tr>
+						</tbody>
+						<tbody v-else-if="progress.every((x) => x.completed)">
+							<tr>
+								<td>
+									<q-status pulse :value="progress.some((x) => x.connectionSuccessful)" />
+								</td>
+								<td>
+									{{ checkServerStatusMessage }}
+								</td>
+							</tr>
+						</tbody>
+					</q-markup-table>
 				</td>
 			</tr>
+			<!--			<tr v-if="settingsStore.debugMode">-->
+			<!--				<td colspan="2">-->
+			<!--					<print>-->
+			<!--						{{ progress }}-->
+			<!--					</print>-->
+			<!--				</td>-->
+			<!--			</tr>-->
 		</tbody>
 		<tbody v-else>
 			<tr>
@@ -67,10 +93,12 @@ import type { PlexServerDTO } from '@dto/mainApi';
 import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 import { SignalrService } from '@service';
 
+const settingsStore = useSettingsStore();
 const { t } = useI18n();
 const serverStore = useServerStore();
 const serverConnectionStore = useServerConnectionStore();
 const checkServerStatusLoading = ref(false);
+const hasCheckedServerStatus = ref(false);
 const progress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
 
 const props = withDefaults(
@@ -87,16 +115,19 @@ const props = withDefaults(
 const plexServerId = computed(() => props?.plexServer?.id ?? -1);
 
 const checkServerStatusMessage = computed(() => {
-	if (get(checkServerStatusLoading)) {
-		return progress.value.map((x) => x.message).join('\n');
+	if (get(progress).length === 0) {
+		return '';
 	}
-	return serverConnectionStore
-		.getServerConnectionsByServerId(get(plexServerId))
-		.flatMap((x) => x.latestConnectionStatus.statusMessage);
+	if (get(progress).some((x) => x.connectionSuccessful)) {
+		return t('components.server-dialog.tabs.server-data.at-least-one-connection-successful');
+	}
+	return t('components.server-dialog.tabs.server-data.all-connections-failed');
 });
 
 function checkServer() {
+	set(hasCheckedServerStatus, true);
 	set(checkServerStatusLoading, true);
+	set(progress, []);
 	useSubscription(
 		serverConnectionStore.checkServerStatus(get(plexServerId)).subscribe(() => {
 			set(checkServerStatusLoading, false);
@@ -120,5 +151,7 @@ onMounted(() => {
 onUnmounted(() => {
 	Log.info('ServerDataTabContent', 'onUnmounted');
 	set(checkServerStatusLoading, false);
+	set(hasCheckedServerStatus, false);
+	set(progress, []);
 });
 </script>

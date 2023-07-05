@@ -1,6 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { Observable, of, Subject } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { filter, map, take } from 'rxjs/operators';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import { JobStatusUpdateDTO, JobTypes } from '@dto/mainApi';
 
@@ -34,18 +34,7 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 	// Getters
 	const getters = {
 		getJobStatusUpdate: (jobType: JobTypes): Observable<JobStatusUpdateDTO> =>
-			state.jobStatusObservable.pipe(
-				map((): JobStatusUpdateDTO[] => state.jobStatusList.filter((jobStatus) => jobStatus.jobType === jobType)),
-				map(
-					(jobStatusList: JobStatusUpdateDTO[]) =>
-						jobStatusList.sort(function compare(a, b) {
-							const dateA = new Date(a.jobStartTime);
-							const dateB = new Date(b.jobStartTime);
-							// @ts-ignore
-							return dateA - dateB;
-						})[0],
-				),
-			),
+			state.jobStatusObservable.pipe(filter((jobStatus) => jobStatus.jobType === jobType)),
 	};
 
 	return {

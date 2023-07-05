@@ -3,7 +3,7 @@ import Log from 'consola';
 import { HubConnection, HubConnectionBuilder, HubConnectionState, IHttpConnectionOptions, LogLevel } from '@microsoft/signalr';
 import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
 import { useCypressSignalRMock } from 'cypress-signalr-mock';
-import { Observable, of, Subject } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { isEqual } from 'lodash-es';
 import BaseService from './baseService';
 import IStoreState from '@interfaces/service/IStoreState';
@@ -22,13 +22,11 @@ import {
 } from '@dto/mainApi';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import IAppConfig from '@class/IAppConfig';
-import { useNotificationsStore } from '~/store';
+import { useNotificationsStore, useBackgroundJobsStore, useDownloadStore } from '~/store';
 
 export class SignalrService extends BaseService {
 	private _progressHubConnection: HubConnection | null = null;
 	private _notificationHubConnection: HubConnection | null = null;
-
-	private _serverDownloadProgress = new Subject<ServerDownloadProgressDTO>();
 
 	public constructor() {
 		super('SignalrService', {
@@ -78,14 +76,14 @@ export class SignalrService extends BaseService {
 	}
 
 	private setupSubscriptions(): void {
+		const downloadStore = useDownloadStore();
 		this._progressHubConnection?.on(MessageTypes.DownloadTaskUpdate, (data: DownloadTaskDTO) => {
 			this.updateStore('downloadTaskUpdateList', data);
 		});
 
-		this._progressHubConnection?.on(MessageTypes.ServerDownloadProgress, (data: ServerDownloadProgressDTO) => {
-			// TODO Each subscription should work like this, every subscription here should pass its values to the designated services for that type
-			this._serverDownloadProgress.next(data);
-		});
+		this._progressHubConnection?.on(MessageTypes.ServerDownloadProgress, (data: ServerDownloadProgressDTO) =>
+			downloadStore.updateServerDownloadProgress(data),
+		);
 
 		this._progressHubConnection?.on(MessageTypes.FileMergeProgress, (data: FileMergeProgress) => {
 			this.updateStore('fileMergeProgressList', data);
@@ -204,10 +202,6 @@ export class SignalrService extends BaseService {
 	// endregion
 
 	// region Single Progress
-
-	public GetServerDownloadProgress() {
-		return this._serverDownloadProgress.asObservable();
-	}
 
 	public getFileMergeProgress(id: number): Observable<FileMergeProgress | null> {
 		return this.getAllFileMergeProgress().pipe(

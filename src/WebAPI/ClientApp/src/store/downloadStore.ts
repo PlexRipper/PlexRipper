@@ -2,7 +2,7 @@ import { defineStore, acceptHMRUpdate } from 'pinia';
 import Log from 'consola';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
-import { sum } from 'lodash-es';
+import { sum, merge, keyBy, values } from 'lodash-es';
 import {
 	DownloadMediaDTO,
 	DownloadPreviewDTO,
@@ -23,7 +23,6 @@ import {
 	stopDownloadTasks,
 } from '@api/plexDownloadApi';
 import ISelection from '@interfaces/ISelection';
-import { SignalrService } from '@service';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import { useServerStore } from '#build/imports';
 export const useDownloadStore = defineStore('DownloadStore', () => {
@@ -37,11 +36,7 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			SignalrService.GetServerDownloadProgress().subscribe((data: ServerDownloadProgressDTO) => {
-				Log.info('DownloadStore: SignalR: GetServerDownloadProgress', data);
-				// this.serverDownloads = data;
-			});
-			return this.fetchDownloadList().pipe(switchMap(() => of({ name: useDownloadStore.name, isSuccess: true })));
+			return actions.fetchDownloadList().pipe(switchMap(() => of({ name: useDownloadStore.name, isSuccess: true })));
 		},
 		/**
 		 * Fetch the download list from the API.
@@ -93,14 +88,25 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 					Log.error(`Action: ${action} does not have a assigned command with payload: ${downloadTaskIds}`);
 			}
 		},
-		updateServerDownloadProgress(downloadProgress: DownloadProgressDTO): void {
-			const i = state.serverDownloads.findIndex((x) => x.id === downloadProgress.id);
+		updateServerDownloadProgress(serverDownloadProgress: ServerDownloadProgressDTO): void {
+			const i = state.serverDownloads.findIndex((x) => x.id === serverDownloadProgress.id);
 			if (i === -1) {
+				state.serverDownloads.push(serverDownloadProgress);
+				return;
 			}
+
+			const merged: DownloadProgressDTO[] = values(
+				merge(keyBy(state.serverDownloads[i].downloads, 'id'), keyBy(serverDownloadProgress.downloads, 'id')),
+			);
+
+			state.serverDownloads.splice(i, 1, {
+				...state.serverDownloads[i],
+				downloads: merged,
+			});
 		},
 		clearDownloadTasks(downloadTaskIds: number[] = []): void {
 			clearDownloadTasks(downloadTaskIds).subscribe(() => {
-				this.fetchDownloadList();
+				actions.fetchDownloadList();
 			});
 		},
 		previewDownload(downloadMediaCommand: DownloadMediaDTO[]): Observable<DownloadPreviewDTO[]> {
@@ -115,7 +121,7 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 		},
 		downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): void {
 			downloadMedia(downloadMediaCommand)
-				.pipe(switchMap(() => this.fetchDownloadList()))
+				.pipe(switchMap(() => actions.fetchDownloadList()))
 				.subscribe();
 		},
 		updateSelected(id: number, payload: ISelection): void {
@@ -152,17 +158,15 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 			});
 		}),
 		getActiveDownloadList(serverId = 0): DownloadProgressDTO[] {
-			if (!this) {
-				Log.error('this is undefined in DownloadStore => getActiveDownloadList');
-				return [];
-			}
-			return this.getDownloadsByServerId(serverId).filter(
-				(y) =>
-					y.status === DownloadStatus.Downloading ||
-					y.status === DownloadStatus.Moving ||
-					y.status === DownloadStatus.Merging ||
-					y.status === DownloadStatus.Paused,
-			);
+			return getters
+				.getDownloadsByServerId(serverId)
+				.filter(
+					(y) =>
+						y.status === DownloadStatus.Downloading ||
+						y.status === DownloadStatus.Moving ||
+						y.status === DownloadStatus.Merging ||
+						y.status === DownloadStatus.Paused,
+				);
 		},
 		/**
 		 * Get the total number of download tasks that are downloadable in the download list.

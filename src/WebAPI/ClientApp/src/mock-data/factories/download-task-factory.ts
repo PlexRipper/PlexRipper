@@ -68,11 +68,11 @@ export function generateDownloadTask({
 	return {
 		id,
 		dataReceived: 0,
-		dataTotal: 0,
+		dataTotal: 1000000000, // 1 GB in bytes
 		downloadSpeed: 0,
 		fileTransferSpeed: 0,
 		mediaType: toPlexMediaType(type),
-		percentage: 55,
+		percentage: 0,
 		status: DownloadStatus.Queued,
 		timeRemaining: 0,
 		title: randMovie(),

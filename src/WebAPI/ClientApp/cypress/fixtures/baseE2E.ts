@@ -39,7 +39,7 @@ export interface IBasePageSetupResult {
 	plexServerConnections: PlexServerConnectionDTO[];
 	plexLibraries: PlexLibraryDTO[];
 	plexAccounts: PlexAccountDTO[];
-	downloadTasks: ServerDownloadProgressDTO[];
+	serverDownloadProgress: ServerDownloadProgressDTO[];
 	mediaData: {
 		libraryId: number;
 		media: PlexMediaSlimDTO[];
@@ -126,7 +126,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 	});
 
 	// DownloadTasks call
-	const downloadTasks = plexServers
+	const serverDownloadProgress = plexServers
 		.map((x) =>
 			generateServerDownloadTasks({
 				plexServerId: x.id,
@@ -137,10 +137,10 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 		.flat();
 	cy.intercept('GET', apiRoute({ type: APIRoute.Download }), {
 		statusCode: 200,
-		body: generateResultDTO(downloadTasks),
+		body: generateResultDTO(serverDownloadProgress),
 	}).then(() => {
 		if (validConfig.debugDisplayData) {
-			cy.log('BasePageSetup -> downloadTasks', downloadTasks);
+			cy.log('BasePageSetup -> downloadTasks', serverDownloadProgress);
 		}
 	});
 
@@ -230,7 +230,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 		plexServerConnections,
 		plexLibraries,
 		plexAccounts,
-		downloadTasks,
+		serverDownloadProgress,
 		mediaData,
 		settings,
 	});

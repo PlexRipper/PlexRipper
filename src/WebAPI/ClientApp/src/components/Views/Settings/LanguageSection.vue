@@ -31,41 +31,28 @@
 </template>
 
 <script setup lang="ts">
-import { get, set } from '@vueuse/core';
-import { useI18n } from 'vue-i18n';
-import { useSettingsStore } from '~/store';
+import { get } from '@vueuse/core';
+import { useLocalizationStore } from '~/store';
+import ILocaleConfig from '@interfaces/ILocaleConfig';
 
-interface ILanguageOption {
-	code: string;
-	file: string;
-	iso: string;
-	text: string;
+interface ILanguageOption extends ILocaleConfig {
 	path: string;
 	value: string;
 	img: string;
 }
 
-const i18n = useI18n();
-const settingsStore = useSettingsStore();
-
-const languageOptions = ref<ILanguageOption[]>([]);
+const localizationStore = useLocalizationStore();
 
 const language = computed({
-	get: () => get(languageOptions).find((x) => x.value === settingsStore.languageSettings.language) ?? ({} as ILanguageOption),
-	set: (value: ILanguageOption) => (settingsStore.languageSettings.language = value.code),
+	get: () => get(languageOptions).find((x) => x.value === localizationStore.getLanguageLocale.code) ?? ({} as ILanguageOption),
+	set: (value: ILanguageOption) => localizationStore.changeLanguageLocale(value.code),
 });
 
-onMounted(() => {
-	// @ts-ignore
-	set(
-		languageOptions,
-		i18n.locales.value.map((locale) => {
-			return {
-				...locale,
-				value: locale.code,
-				img: `/img/flags/${locale.code}.svg`,
-			};
-		}) as ILanguageOption[],
-	);
-});
+const languageOptions = computed(() =>
+	localizationStore.getLanguageLocaleOptions.map((locale) => ({
+		...locale,
+		value: locale.code,
+		img: `/img/flags/${locale.code}.svg`,
+	})),
+);
 </script>

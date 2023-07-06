@@ -1,37 +1,34 @@
 import Log from 'consola';
 import Axios from 'axios-observable';
-import { GlobalService } from '@service';
 import IAppConfig from '@class/IAppConfig';
+import { GlobalService } from '@service';
+import I18nObjectType from '@interfaces/i18nObjectType';
 
-export default defineNuxtPlugin({
-	name: 'plex-ripper-boot',
-	enforce: 'post',
-	hooks: {
-		'app:created'() {
-			const publicEnv = useRuntimeConfig().public;
-			Log.level = 4;
-			// Log.level = config.public.isProduction ? LogLevel.Debug : LogLevel.Debug;
-			Log.info(`Nuxt Environment: ${publicEnv.version}`);
+export default defineNuxtPlugin((nuxtApp) => {
+	const publicEnv = useRuntimeConfig().public;
 
-			let baseUrl = `http://localhost:${publicEnv.apiPort}`;
-			if (publicEnv.isDocker) {
-				const currentLocation = window.location;
-				baseUrl = `${currentLocation.protocol}//${currentLocation.hostname}:${currentLocation.port}`;
-			}
+	nuxtApp.hook('app:created', () => {
+		Log.level = 4;
+		// Log.level = config.public.isProduction ? LogLevel.Debug : LogLevel.Debug;
+		Log.info(`Nuxt Environment: ${publicEnv.version}`);
 
-			const appConfig: IAppConfig = {
-				version: publicEnv.version,
-				nodeEnv: publicEnv.nodeEnv,
-				isProduction: publicEnv.nodeEnv === 'production',
-				isDocker: publicEnv.isDocker,
-				baseUrl,
-			};
+		let baseUrl = `http://localhost:${publicEnv.apiPort}`;
+		if (publicEnv.isDocker) {
+			const currentLocation = window.location;
+			baseUrl = `${currentLocation.protocol}//${currentLocation.hostname}:${currentLocation.port}`;
+		}
 
-			setupAxios(appConfig);
+		const appConfig: IAppConfig = {
+			version: publicEnv.version,
+			nodeEnv: publicEnv.nodeEnv,
+			isProduction: publicEnv.nodeEnv === 'production',
+			isDocker: publicEnv.isDocker,
+			baseUrl,
+		};
+		setupAxios(appConfig);
 
-			GlobalService.setupServices(appConfig);
-		},
-	},
+		GlobalService.setupServices({ config: appConfig, i18n: nuxtApp.$i18n as I18nObjectType }).subscribe();
+	});
 });
 
 function setupAxios(appConfig: IAppConfig) {

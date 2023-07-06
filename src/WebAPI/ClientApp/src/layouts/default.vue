@@ -27,20 +27,15 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import { storeToRefs } from 'pinia';
-import { tap } from 'rxjs/operators';
 import PageLoadOverlay from '@components/General/PageLoadOverlay.vue';
 import globalService from '@service/globalService';
-import { useSettingsStore, useHelpStore, useAlertStore } from '#imports';
+import { useHelpStore, useAlertStore } from '#imports';
 import IAlert from '@interfaces/IAlert';
 
 const $q = useQuasar();
 const route = useRoute();
-const settingsStore = useSettingsStore();
 const helpStore = useHelpStore();
 const alertStore = useAlertStore();
-const { languageSettings } = storeToRefs(settingsStore);
-const i18n = useI18n();
 const isLoading = ref(true);
 
 const alerts = ref<IAlert[]>([]);
@@ -67,41 +62,22 @@ function toggleNotificationsDrawer() {
 	set(showNotificationsDrawerState, !get(showNotificationsDrawerState));
 }
 
-/**
- * This is done because I18n doesn't work inside a Pinia store
- * Source: https://stackoverflow.com/a/76477511/8205497
- */
-watch(
-	() => languageSettings.value.language,
-	(value) => {
-		i18n.setLocale(value);
-		settingsStore.setI18nObject(i18n);
-	},
-);
-
 onMounted(() => {
 	$q.loading.show({
 		spinner: PageLoadOverlay,
 	});
 	useSubscription(
-		globalService
-			.getPageSetupReady()
-			.pipe(
-				tap(() => {
-					settingsStore.setI18nObject(i18n);
-				}),
-			)
-			.subscribe({
-				next: () => {
-					Log.debug('Loading has finished, displaying page now');
-					set(isLoading, false);
-					$q.loading.hide();
-				},
-				error: (err) => {
-					Log.error('Error while loading page', err);
-					$q.loading.hide();
-				},
-			}),
+		globalService.getPageSetupReady().subscribe({
+			next: () => {
+				Log.debug('Loading has finished, displaying page now');
+				set(isLoading, false);
+				$q.loading.hide();
+			},
+			error: (err) => {
+				Log.error('Error while loading page', err);
+				$q.loading.hide();
+			},
+		}),
 	);
 
 	useSubscription(

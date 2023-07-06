@@ -19,7 +19,9 @@ import {
 	useBackgroundJobsStore,
 	useHelpStore,
 	useAlertStore,
+	useLocalizationStore,
 } from '#imports';
+import I18nObjectType from '@interfaces/i18nObjectType';
 
 export class GlobalService extends BaseService {
 	public constructor() {
@@ -34,7 +36,7 @@ export class GlobalService extends BaseService {
 		});
 	}
 
-	public setup(config: IAppConfig): Observable<any> {
+	public setupServices({ config, i18n }: { config: IAppConfig; i18n: I18nObjectType }): Observable<any> {
 		Log.info('Starting Setup Process');
 
 		super.setup(config);
@@ -57,6 +59,7 @@ export class GlobalService extends BaseService {
 					useBackgroundJobsStore().setup(),
 					useHelpStore().setup(),
 					useAlertStore().setup(),
+					useLocalizationStore().setup(i18n),
 				]),
 			),
 			tap((results) => {
@@ -72,10 +75,6 @@ export class GlobalService extends BaseService {
 			}),
 			take(1),
 		);
-	}
-
-	public setupServices(config: IAppConfig): void {
-		this.setup(config).subscribe();
 	}
 
 	public resetStore(): void {

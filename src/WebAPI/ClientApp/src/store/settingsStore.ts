@@ -2,8 +2,6 @@ import { defineStore, acceptHMRUpdate } from 'pinia';
 import Log from 'consola';
 import { Observable, of, Subject } from 'rxjs';
 import { debounceTime, switchMap, tap } from 'rxjs/operators';
-import { Composer, UseI18nOptions } from 'vue-i18n';
-import { get } from '@vueuse/core';
 import {
 	ConfirmationSettingsDTO,
 	DateTimeSettingsDTO,
@@ -19,7 +17,6 @@ import {
 } from '@dto/mainApi';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import { getSettings, updateSettings } from '@api/settingsApi';
-import ILocaleConfig from '@interfaces/ILocaleConfig';
 
 export const useSettingsStore = defineStore('SettingsStore', () => {
 	// State
@@ -32,8 +29,6 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 		downloadManagerSettings: DownloadManagerSettingsDTO;
 		languageSettings: LanguageSettingsDTO;
 		serverSettings: ServerSettingsDTO;
-		currentLocale: ILocaleConfig;
-		locales: ILocaleConfig[];
 	}>({
 		generalSettings: {
 			debugMode: false,
@@ -63,8 +58,6 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 		serverSettings: {
 			data: [],
 		},
-		currentLocale: {} as ILocaleConfig,
-		locales: [],
 	});
 
 	const _settingsUpdated = new Subject<SettingsModelDTO>();
@@ -82,8 +75,8 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 
 			return actions.refreshSettings().pipe(
 				tap(() => {
-					useSettingsStore().$subscribe((_, state) => {
-						_settingsUpdated.next(state);
+					useSettingsStore().$subscribe((mutation, state) => {
+						if (mutation.type) _settingsUpdated.next(state);
 					});
 				}),
 				switchMap(() => of({ name: useSettingsStore.name, isSuccess: true })),
@@ -109,27 +102,7 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			state.languageSettings = settings.languageSettings;
 			state.serverSettings = settings.serverSettings;
 		},
-		setI18nObject(
-			i18n: Composer<
-				NonNullable<UseI18nOptions['messages']>,
-				NonNullable<UseI18nOptions['datetimeFormats']>,
-				NonNullable<UseI18nOptions['numberFormats']>,
-				UseI18nOptions['locale'] extends unknown ? string : UseI18nOptions['locale']
-			>,
-		) {
-			state.locales = get(i18n.locales).map((x) => {
-				return {
-					text: x.text,
-					code: x.code,
-					file: x.file,
-					iso: x.iso,
-					bcp47Code: x.bcp47Code,
-				};
-			});
-			state.currentLocale = state.locales.find((locale) => locale.code === get(i18n.locale)) as ILocaleConfig;
-			Log.info('Localization Options:', get(getters.getLanguageLocaleOptions));
-			Log.info('Localization has been set to:', get(getters.getLanguageLocale));
-		},
+
 		updateDownloadLimit(machineIdentifier: string, downloadLimit: number) {
 			const i = state.serverSettings.data.findIndex((server) => server.machineIdentifier === machineIdentifier);
 			if (i > -1) {
@@ -161,12 +134,6 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			() => (machineIdentifier?: string) =>
 				machineIdentifier ? state.serverSettings.data.find((user) => user.machineIdentifier === machineIdentifier) : null,
 		),
-		getLanguageLocale: computed((): ILocaleConfig => {
-			return state.currentLocale;
-		}),
-		getLanguageLocaleOptions: computed((): ILocaleConfig[] => {
-			return state.locales;
-		}),
 	};
 	return {
 		...toRefs(state),

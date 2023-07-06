@@ -10,3 +10,4 @@ export * from './libraryStore';
 export * from './backgroundJobsStore';
 export * from './helpStore';
 export * from './alertStore';
+export * from './localizationStore';

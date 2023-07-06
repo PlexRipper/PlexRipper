@@ -72,10 +72,11 @@ export default defineNuxtConfig({
 		lazy: true,
 		langDir: './lang/',
 		defaultLocale: 'en-US',
+		// Ensure the SettingsStore is updated as well when changes are made here:
 		locales: [
-			{ text: 'English', code: 'en-US', iso: 'en-US', file: 'en-US.json' },
-			{ text: 'Français', code: 'fr-FR', iso: 'fr-FR', file: 'fr-FR.json' },
-			{ text: 'Deutsch', code: 'de-DE', iso: 'de-DE', file: 'de-DE.json' },
+			{ text: 'English', code: 'en-US', iso: 'en-US', bcp47Code: 'en', file: 'en-US.json' },
+			{ text: 'Français', code: 'fr-FR', iso: 'fr-FR', bcp47Code: 'fr', file: 'fr-FR.json' },
+			{ text: 'Deutsch', code: 'de-DE', iso: 'de-DE', bcp47Code: 'de', file: 'de-DE.json' },
 		],
 		// TODO: This breaks npm run build in "@nuxtjs/i18n": "^8.0.0-beta.11", check again when out of beta
 		// vueI18n: './src/config/vueI18n.config.ts',

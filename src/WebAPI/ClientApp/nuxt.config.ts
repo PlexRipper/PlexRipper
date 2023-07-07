@@ -58,12 +58,24 @@ export default defineNuxtConfig({
 			animations: ['fadeInLeft', 'fadeInRight', 'fadeInUp', 'fadeInDown', 'fadeOutLeft'],
 		},
 	},
+	app: {
+		head: {
+			link: [
+				{
+					id: 'plexripper-theme',
+					rel: 'stylesheet',
+					href: '/primevue/theme2.css',
+				},
+			],
+		},
+	},
 	typescript: {
 		// Doc: https://typescript.nuxtjs.org/guide/setup.html#configuration
 		// Packages,  @types/node, vue-tsc and typescript are required
 		strict: true,
 	},
 	macros: {
+		// TODO this can be removed in Vue 3.3
 		// Enabled betterDefine to allow importing interfaces into defineProps
 		betterDefine: true,
 		defineOptions: true,
@@ -85,7 +97,7 @@ export default defineNuxtConfig({
 	/*
 	 ** Global CSS: https://nuxt.com/docs/api/configuration/nuxt-config#css
 	 */
-	css: ['@/assets/scss/style.scss'],
+	css: ['primevue/resources/primevue.css', '@/assets/scss/style.scss'],
 	imports: {
 		dirs: ['store'],
 	},
@@ -137,6 +149,9 @@ export default defineNuxtConfig({
 		prerender: {
 			crawlLinks: true,
 		},
+	},
+	build: {
+		transpile: ['primevue'],
 	},
 	hooks: {
 		'pages:extend'(pages) {

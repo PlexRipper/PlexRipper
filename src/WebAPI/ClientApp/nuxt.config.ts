@@ -58,17 +58,6 @@ export default defineNuxtConfig({
 			animations: ['fadeInLeft', 'fadeInRight', 'fadeInUp', 'fadeInDown', 'fadeOutLeft'],
 		},
 	},
-	app: {
-		head: {
-			link: [
-				{
-					id: 'plexripper-theme',
-					rel: 'stylesheet',
-					href: '/primevue/theme2.css',
-				},
-			],
-		},
-	},
 	typescript: {
 		// Doc: https://typescript.nuxtjs.org/guide/setup.html#configuration
 		// Packages,  @types/node, vue-tsc and typescript are required
@@ -97,7 +86,7 @@ export default defineNuxtConfig({
 	/*
 	 ** Global CSS: https://nuxt.com/docs/api/configuration/nuxt-config#css
 	 */
-	css: ['primevue/resources/primevue.css', '@/assets/scss/style.scss'],
+	css: ['primevue/resources/primevue.css', '@/assets/scss/primevue/plexripper-theme/theme.scss', '@/assets/scss/style.scss'],
 	imports: {
 		dirs: ['store'],
 	},

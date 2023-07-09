@@ -52,7 +52,7 @@ $inputFilledFocusBg:#f8f9fa;
 
 /// Backgroud color of an input group addon
 /// @group form
-$inputGroupBg: #e9ecef;
+$inputGroupBg: transparent;
 
 /// Text color of an input group addon
 /// @group form
@@ -64,7 +64,7 @@ $inputGroupAddOnMinWidth: 2.357rem;
 
 /// Background of an input list such as dropdown, listbox, multiselect
 /// @group form
-$inputListBg: #ffffff;
+$inputListBg: transparent;
 
 /// Text color of an input list
 /// @group form
@@ -92,7 +92,7 @@ $inputListItemTextColor: $textColor;
 
 /// Hover state background for an individual itrem of an input list
 /// @group form
-$inputListItemHoverBg: #e9ecef;
+$inputListItemHoverBg: $highlightBg;
 
 /// Hover state text color for an individual itrem of an input list
 /// @group form

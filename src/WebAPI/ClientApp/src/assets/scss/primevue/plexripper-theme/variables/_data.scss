@@ -36,11 +36,11 @@ $paginatorElementBorder: 0 none;
 
 /// Icon color of a paginator element
 /// @group data
-$paginatorElementIconColor: $textSecondaryColor;
+$paginatorElementIconColor: $textColor;
 
 /// Background of a paginator element in hover state
 /// @group data
-$paginatorElementHoverBg: #e9ecef;
+$paginatorElementHoverBg: $highlightBg;
 
 /// Border color of a paginator element in hover state
 /// @group data
@@ -48,7 +48,7 @@ $paginatorElementHoverBorderColor: transparent;
 
 /// Icon color of a paginator element in hover state
 /// @group data
-$paginatorElementIconHoverColor: $textSecondaryColor;
+$paginatorElementIconHoverColor: $textColor;
 
 /// Border radius of a paginator element
 /// @group data

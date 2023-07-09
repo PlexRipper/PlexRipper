@@ -76,6 +76,11 @@ const getNavItems = computed((): QExpansionListProps[] => {
 			icon: 'mdi-bug-outline',
 			children: [
 				{
+					title: 'components.navigation-drawer.scratchpad',
+					icon: 'mdi-note-edit',
+					link: '/debug-pages/scratchpad',
+				},
+				{
 					title: 'components.navigation-drawer.dialogs',
 					icon: 'mdi-dock-window',
 					link: '/debug-pages/dialogs',

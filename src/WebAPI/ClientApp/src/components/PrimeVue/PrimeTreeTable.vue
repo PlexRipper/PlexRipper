@@ -9,6 +9,9 @@
 		:rows="10"
 		scrollable
 		scroll-height="flex"
+		paginator-position="both"
+		:page-link-size="10"
+		:row-hover="true"
 		:rows-per-page-options="[10, 25, 50, 100]"
 		@update:selection-keys="onSelectionChange">
 		<PColumn
@@ -19,13 +22,17 @@
 			:field="column.field"
 			:header="column.label"
 			:expander="index === 0">
+			<template #header>
+				<QCheckbox
+					v-if="column.type === 'title'"
+					:model-value="headerSelected"
+					@update:model-value="$emit('all-selected', $event)" />
+			</template>
 			<template #body="{ node }: { node: any, data: TreeNode }">
 				<PTreeTableRow :column="column" :index="index" :node="node" @action="$emit('action', $event)" />
 			</template>
 		</PColumn>
 	</PTreeTable>
-	<!--	<teleport to=".p-column-title">-->
-	<!--	</teleport>-->
 </template>
 
 <script setup lang="ts">
@@ -37,6 +44,7 @@ import IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
 defineProps<{
 	nodes: TreeNode[];
 	columns: QTreeViewTableHeader[];
+	headerSelected?: boolean | null;
 	selected: IPTreeTableSelectionKeys;
 	maxSelectionCount?: number;
 	notSelectable?: boolean;
@@ -54,6 +62,7 @@ function onSelectionChange(keys: IPTreeTableSelectionKeys) {
 const emits = defineEmits<{
 	(e: 'update:model-value', payload: boolean): void;
 	(e: 'selected', payload: TreeTableSelectionKeys): void;
+	(e: 'all-selected', payload: boolean): void;
 	(e: 'action', payload: { action: string; data: QTreeViewTableItem }): void;
 }>();
 </script>
@@ -81,6 +90,10 @@ const emits = defineEmits<{
 		background: transparent;
 		//outline: 0.15rem solid white;
 		border-bottom: rgba(255, 255, 255, 0.28) 0.13rem solid;
+
+		&:focus {
+			outline: none;
+		}
 	}
 
 	.p-checkbox-box {

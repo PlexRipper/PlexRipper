@@ -4,10 +4,6 @@
 			<q-row justify="between" align="center">
 				<!-- Download Server Settings -->
 				<q-col cols="auto" style="white-space: nowrap">
-					<QCheckbox
-						style="display: inline-block"
-						:model-value="downloadStore.getHeaderSelection(plexServer.id)"
-						@update:model-value="downloadStore.setAllSelectedDownloadTasks(plexServer.id, $event)" />
 					<server-download-status v-if="false" style="display: inline-block" />
 				</q-col>
 				<q-col> </q-col>
@@ -22,9 +18,11 @@
 			<PrimeTreeTable
 				:nodes="nodes"
 				:columns="getDownloadTableColumns"
+				:header-selected="downloadStore.getHeaderSelection(plexServer.id)"
 				:selected="downloadStore.getSelectedDownloadTasks(plexServer.id)"
 				:max-selection-count="downloadStore.getDownloadSelection(plexServer.id)?.maxSelectionCount"
 				@action="tableAction($event)"
+				@all-selected="downloadStore.setAllSelectedDownloadTasks(plexServer.id, $event)"
 				@selected="downloadStore.updateSelectedDownloadTasks(plexServer.id, $event)" />
 		</template>
 	</q-expansion-item>

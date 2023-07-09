@@ -7,34 +7,13 @@
 		<q-row v-if="downloadStore.getServersWithDownloads.length > 0" justify="center">
 			<q-col cols="12">
 				<q-list>
-					<q-expansion-item
+					<downloads-table
 						v-for="{ plexServer, downloads } in downloadStore.getServersWithDownloads"
 						:key="plexServer.id"
-						default-opened
-						class="background-sm default-border-radius q-ma-md">
-						<template #header>
-							<q-row align="center">
-								<!-- Download Server Settings -->
-								<q-col>
-									<server-download-status />
-								</q-col>
-								<!-- Download Server Title -->
-								<q-col cols="auto">
-									<span class="title">{{ plexServer.name }}</span>
-								</q-col>
-								<q-col class="q-py-none"></q-col>
-							</q-row>
-						</template>
-						<template #default>
-							<div class="q-py-lg">
-								<downloads-table
-									:download-rows="downloads"
-									:server-id="plexServer.id"
-									@action="commandSwitch($event)"
-									@aggregate-selected="updateAggregateSelected(plexServer.id, $event)" />
-							</div>
-						</template>
-					</q-expansion-item>
+						:download-rows="downloads"
+						:plex-server="plexServer"
+						@action="commandSwitch($event)"
+						@aggregate-selected="updateAggregateSelected(plexServer.id, $event)" />
 				</q-list>
 			</q-col>
 		</q-row>

@@ -1,6 +1,6 @@
 <template>
 	<template v-if="column['type'] === 'title'">
-		<q-media-type-icon v-if="node['mediaType']" :media-type="node['mediaType']" class="q-mr-sm" />
+		<q-media-type-icon v-if="node['mediaType']" :size="26" :media-type="node['mediaType']" class="q-mr-sm" />
 		<span :data-cy="`column-${column.field}-${node.id}`">{{ node[column.field] }}</span>
 	</template>
 	<!-- Duration format -->

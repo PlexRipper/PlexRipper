@@ -1,21 +1,21 @@
 <template>
 	<PTreeTable
 		:value="nodes"
-		resizable-columns
-		:table-props="{ style: { minWidth: '50rem' } }"
 		auto-layout
 		:selection-keys="selected"
 		selection-mode="checkbox"
 		class="p-treetable-sm"
 		:paginator="true"
-		:rows="50"
+		:rows="10"
+		scrollable
+		scroll-height="flex"
 		:rows-per-page-options="[10, 25, 50, 100]"
 		@update:selection-keys="onSelectionChange">
 		<PColumn
 			v-for="(column, index) in columns"
 			:key="index"
 			column-key="id"
-			:style="{ width: column.width + 'px' }"
+			:style="{ minWidth: index === 0 ? '20%' : '7%', maxWidth: index === 0 ? 'none' : '100px', height: '55px' }"
 			:field="column.field"
 			:header="column.label"
 			:expander="index === 0">
@@ -24,14 +24,12 @@
 			</template>
 		</PColumn>
 	</PTreeTable>
-	<teleport to=".p-column-title">
-		<QCheckbox label="Title" :model-value="headerSelected" @update:model-value="$emit('all-selected', $event)" />
-	</teleport>
+	<!--	<teleport to=".p-column-title">-->
+	<!--	</teleport>-->
 </template>
 
 <script setup lang="ts">
 import { TreeNode } from 'primevue/tree/Tree';
-import Log from 'consola';
 import { TreeTableSelectionKeys } from 'primevue/treetable';
 import { QTreeViewTableHeader, QTreeViewTableItem } from '@props';
 import IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
@@ -39,7 +37,6 @@ import IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
 defineProps<{
 	nodes: TreeNode[];
 	columns: QTreeViewTableHeader[];
-	headerSelected?: boolean | null;
 	selected: IPTreeTableSelectionKeys;
 	maxSelectionCount?: number;
 	notSelectable?: boolean;
@@ -57,12 +54,16 @@ function onSelectionChange(keys: IPTreeTableSelectionKeys) {
 const emits = defineEmits<{
 	(e: 'update:model-value', payload: boolean): void;
 	(e: 'selected', payload: TreeTableSelectionKeys): void;
-	(e: 'all-selected', payload: boolean): void;
 	(e: 'action', payload: { action: string; data: QTreeViewTableItem }): void;
 }>();
 </script>
 <style lang="scss">
 .p-treetable {
+	table {
+		white-space: nowrap;
+		width: 100%;
+	}
+
 	.p-treetable-header {
 		color: inherit;
 		background: transparent;
@@ -89,6 +90,11 @@ const emits = defineEmits<{
 		.p-checkbox-icon {
 			color: white;
 		}
+	}
+
+	.p-paginator {
+		color: inherit;
+		background: transparent;
 	}
 }
 </style>

@@ -2,7 +2,7 @@ import { defineStore, acceptHMRUpdate } from 'pinia';
 import Log from 'consola';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
-import { sum, merge, keyBy, values } from 'lodash-es';
+import { sum, merge, keyBy, values, flatMapDeep, clone } from 'lodash-es';
 import {
 	DownloadMediaDTO,
 	DownloadPreviewDTO,
@@ -22,11 +22,12 @@ import {
 	startDownloadTask,
 	stopDownloadTasks,
 } from '@api/plexDownloadApi';
-import ISelection from '@interfaces/ISelection';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import { useServerStore } from '#build/imports';
+import IDownloadsSelection from '@interfaces/IDownloadsSelection';
+import IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
 export const useDownloadStore = defineStore('DownloadStore', () => {
-	const state = reactive<{ serverDownloads: ServerDownloadProgressDTO[]; selected: ISelection[] }>({
+	const state = reactive<{ serverDownloads: ServerDownloadProgressDTO[]; selected: IDownloadsSelection[] }>({
 		serverDownloads: [],
 		selected: [],
 	});
@@ -48,18 +49,6 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 						state.serverDownloads = downloads.value ?? [];
 					}
 				}),
-				tap((downloads) => {
-					for (const server of downloads.value ?? []) {
-						if (state.selected.some((x) => x.indexKey === server.id)) {
-							continue;
-						}
-						state.selected.push({
-							keys: [],
-							indexKey: server.id,
-							allSelected: false,
-						});
-					}
-				}),
 			);
 		},
 		executeDownloadCommand(action: string, downloadTaskIds: number[]): void {
@@ -70,10 +59,10 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 					pauseDownloadTask(downloadTaskId).subscribe();
 					break;
 				case 'clear':
-					clearDownloadTasks(downloadTaskIds).subscribe();
+					clearDownloadTasks(downloadTaskIds).pipe(switchMap(actions.fetchDownloadList)).subscribe();
 					break;
 				case 'delete':
-					deleteDownloadTasks(downloadTaskIds).subscribe();
+					deleteDownloadTasks(downloadTaskIds).pipe(switchMap(actions.fetchDownloadList)).subscribe();
 					break;
 				case 'stop':
 					stopDownloadTasks(downloadTaskId).subscribe();
@@ -92,6 +81,7 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 			const i = state.serverDownloads.findIndex((x) => x.id === serverDownloadProgress.id);
 			if (i === -1) {
 				state.serverDownloads.push(serverDownloadProgress);
+				actions.setupSelection(serverDownloadProgress.id);
 				return;
 			}
 
@@ -102,11 +92,6 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 			state.serverDownloads.splice(i, 1, {
 				...state.serverDownloads[i],
 				downloads: merged,
-			});
-		},
-		clearDownloadTasks(downloadTaskIds: number[] = []): void {
-			clearDownloadTasks(downloadTaskIds).subscribe(() => {
-				actions.fetchDownloadList();
 			});
 		},
 		previewDownload(downloadMediaCommand: DownloadMediaDTO[]): Observable<DownloadPreviewDTO[]> {
@@ -124,16 +109,54 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 				.pipe(switchMap(() => actions.fetchDownloadList()))
 				.subscribe();
 		},
-		updateSelected(id: number, payload: ISelection): void {
-			const i = state.selected.findIndex((x) => x.indexKey === id);
+		setupSelection(serverId: number): void {
+			const downloads = getters.getDownloadsByServerId(serverId);
+			const getLeafs = (x) => {
+				if (!x.children || !x.children.length) {
+					return x;
+				}
+				return [x, flatMapDeep(x.children, getLeafs)];
+			};
+
+			const allSelection: IPTreeTableSelectionKeys = flatMapDeep(downloads, getLeafs).reduce(
+				(a, v) => ({
+					...a,
+					[`${v.mediaType}-${v.id}`]: {
+						checked: true,
+						partialChecked: false,
+					},
+				}),
+				{},
+			);
+			state.selected.push({
+				plexServerId: serverId,
+				allSelection,
+				maxSelectionCount: Object.keys(allSelection).length,
+				selection: {},
+			});
+		},
+		setAllSelectedDownloadTasks(serverId: number, value: boolean): void {
+			let i = state.selected.findIndex((x) => x.plexServerId === serverId);
 			if (i === -1) {
-				state.selected.push({ indexKey: id, keys: payload.keys, allSelected: payload.allSelected });
-				return;
+				actions.setupSelection(serverId);
+				i = state.selected.length - 1;
 			}
 			state.selected.splice(i, 1, {
 				...state.selected[i],
-				keys: payload.keys,
-				allSelected: payload.allSelected,
+				selection: value ? clone(state.selected[i].allSelection) : {},
+			});
+		},
+		updateSelectedDownloadTasks(serverId: number, selection: IPTreeTableSelectionKeys): void {
+			let i = state.selected.findIndex((x) => x.plexServerId === serverId);
+			if (i === -1) {
+				actions.setupSelection(serverId);
+				i = state.selected.length - 1;
+			}
+			state.selected.splice(i, 1, {
+				plexServerId: serverId,
+				allSelection: state.selected[i].allSelection,
+				maxSelectionCount: state.selected[i].maxSelectionCount,
+				selection,
 			});
 		},
 	};
@@ -174,8 +197,22 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 		getTotalDownloadsCount: computed((): number => {
 			return sum(state.serverDownloads.flatMap((x) => x.downloadableTasksCount));
 		}),
-		hasSelected: computed(() => state.selected.some((x) => x.keys.length > 0)),
-		getSelected: (serverId: number): ISelection => state.selected.find((x) => x.indexKey === serverId) as ISelection,
+		hasSelected: computed(() => state.selected.some((x) => Object.keys(x?.selection ?? {}).length > 0)),
+		getSelectedDownloadTasks(serverId: number): IPTreeTableSelectionKeys {
+			return getters.getDownloadSelection(serverId)?.selection ?? {};
+		},
+		getDownloadSelection(serverId: number): IDownloadsSelection | null {
+			return state.selected.find((x) => x.plexServerId === serverId) ?? null;
+		},
+		getHeaderSelection(serverId: number): boolean | null {
+			const downloadSelection = getters.getDownloadSelection(serverId);
+			const selectionLength = Object.keys(downloadSelection?.selection ?? {}).length;
+			if (selectionLength === 0) {
+				return false;
+			}
+
+			return downloadSelection?.maxSelectionCount === selectionLength ? true : null;
+		},
 	};
 
 	return {

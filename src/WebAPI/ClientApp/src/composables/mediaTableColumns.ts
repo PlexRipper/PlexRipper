@@ -69,6 +69,7 @@ export const getDownloadTableColumns: QTreeViewTableHeader[] = [
 	{
 		label: 'Title',
 		field: 'title',
+		type: 'title',
 	},
 	{
 		label: 'Status',

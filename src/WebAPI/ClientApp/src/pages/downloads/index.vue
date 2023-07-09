@@ -28,12 +28,9 @@
 						<template #default>
 							<div class="q-py-lg">
 								<downloads-table
-									v-model="downloadStore.selected"
-									:selected="downloadStore.getSelected(plexServer.id)"
 									:download-rows="downloads"
 									:server-id="plexServer.id"
 									@action="commandSwitch($event)"
-									@selected="downloadStore.updateSelected(plexServer.id, $event)"
 									@aggregate-selected="updateAggregateSelected(plexServer.id, $event)" />
 							</div>
 						</template>

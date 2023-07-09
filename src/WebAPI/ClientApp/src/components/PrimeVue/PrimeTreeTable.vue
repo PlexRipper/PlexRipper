@@ -110,4 +110,23 @@ const emits = defineEmits<{
 		background: transparent;
 	}
 }
+
+//this creates a pseudochild of the button the size of the first anscestor with "relative" size
+button.p-treetable-toggler.p-link::before {
+	content: '';
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+//this element originally had "relative" size, overwriting it allow the pseudochild to be sized relative to a later anscestor
+.p-treetable-toggler {
+	position: static;
+}
+// this element contains the full row, by making it relative the pseudochild can size itself based on this
+.p-treetable .p-treetable-tbody > tr {
+	position: relative;
+}
 </style>

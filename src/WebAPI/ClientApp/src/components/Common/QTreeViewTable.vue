@@ -14,6 +14,7 @@
 		:tick-strategy="!notSelectable ? 'leaf' : 'none'"
 		:nodes="nodes"
 		node-key="id"
+		no-transition
 		:no-connectors="!connectors"
 		:accordion="false"
 		:default-expand-all="defaultExpandAll"

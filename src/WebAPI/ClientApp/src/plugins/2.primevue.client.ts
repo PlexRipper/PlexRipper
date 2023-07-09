@@ -5,7 +5,7 @@ import Column from 'primevue/column';
 import Checkbox from 'primevue/checkbox';
 
 export default defineNuxtPlugin((nuxtApp) => {
-	nuxtApp.vueApp.use(PrimeVue, { ripple: true, theme: 'plexripper-theme' });
+	nuxtApp.vueApp.use(PrimeVue, { ripple: true });
 	nuxtApp.vueApp.component('PTreeTable', TreeTable);
 	nuxtApp.vueApp.component('PColumn', Column);
 	nuxtApp.vueApp.component('Checkbox', Checkbox);

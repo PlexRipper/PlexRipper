@@ -12,7 +12,7 @@ $fontWeight: normal;
 
 /// Primary text color
 /// @group general
-$textColor: #495057;
+$textColor: $primaryTextColor;
 
 /// Secondary text color
 /// @group general
@@ -80,7 +80,7 @@ $errorColor: #e4677e;
 
 /// Outline color of a focused element
 /// @group general
-$focusOutlineColor: #bfd1f6;
+$focusOutlineColor: $primaryColor;
 
 /// Outline of a focused element
 /// @group general
@@ -92,7 +92,7 @@ $focusOutlineOffset: 0;
 
 /// Box shadow of a focused element
 /// @group general
-$focusShadow: 0 0 0 0.2rem $focusOutlineColor;
+$focusShadow: 0 0 0 0rem $focusOutlineColor;
 
 /// Width of an action icon
 /// @group general
@@ -112,7 +112,7 @@ $actionIconBorder: 0 none;
 
 /// Color of an action icon
 /// @group general
-$actionIconColor: $textSecondaryColor;
+$actionIconColor: $textColor;
 
 /// Backgroun of an action icon in hover state
 /// @group general
@@ -124,7 +124,7 @@ $actionIconHoverBorderColor: transparent;
 
 /// Color of an action icon in hover state
 /// @group general
-$actionIconHoverColor: $textColor;
+$actionIconHoverColor: $primaryColor;
 
 /// Border radius of an action icon
 /// @group general

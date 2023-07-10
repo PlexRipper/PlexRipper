@@ -70,12 +70,11 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import { cloneDeep } from 'lodash-es';
 import { take } from 'rxjs/operators';
+import { AccountForm } from '#components';
 import { IError, PlexAccountDTO } from '@dto/mainApi';
 import { validateAccount } from '@api/accountApi';
 import { useI18n, useOpenControlDialog, useCloseControlDialog, useAccountStore } from '#imports';
-import type { AccountForm } from '#components';
 
 const { t } = useI18n();
 const accountStore = useAccountStore();

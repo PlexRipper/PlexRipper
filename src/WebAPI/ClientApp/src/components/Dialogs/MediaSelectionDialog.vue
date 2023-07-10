@@ -60,7 +60,6 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import { clamp } from 'lodash-es';
 import { useMediaOverviewStore } from '#imports';
 
 const mediaOverviewStore = useMediaOverviewStore();

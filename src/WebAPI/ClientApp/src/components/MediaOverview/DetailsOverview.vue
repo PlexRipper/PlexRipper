@@ -86,7 +86,6 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import sum from 'lodash-es/sum';
 import { forkJoin } from 'rxjs';
 import { take } from 'rxjs/operators';
 import Log from 'consola';

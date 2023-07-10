@@ -63,7 +63,6 @@
 </template>
 
 <script setup lang="ts">
-import { kebabCase } from 'lodash-es';
 import { FolderPathDTO } from '@dto/mainApi';
 import { useI18n, useOpenControlDialog, toFolderPathStringId, useFolderPathStore, useSubscription } from '#imports';
 import IFolderPathGroup from '@interfaces/IFolderPathGroup';

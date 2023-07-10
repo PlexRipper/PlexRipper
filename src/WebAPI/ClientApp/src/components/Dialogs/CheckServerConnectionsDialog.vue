@@ -97,7 +97,6 @@
 </template>
 
 <script setup lang="ts">
-import { clamp } from 'lodash-es';
 import { useSubscription } from '@vueuse/rxjs';
 import { filter, switchMap, tap } from 'rxjs/operators';
 import { get, set } from '@vueuse/core';

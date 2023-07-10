@@ -34,7 +34,6 @@
 
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
-import sum from 'lodash-es/sum';
 import { set } from '@vueuse/core';
 import { DownloadMediaDTO, DownloadPreviewDTO } from '@dto/mainApi';
 import { QTreeViewTableHeader } from '@props';

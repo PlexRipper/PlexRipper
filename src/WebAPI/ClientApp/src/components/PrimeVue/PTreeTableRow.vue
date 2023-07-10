@@ -5,23 +5,23 @@
 	</template>
 	<!-- Duration format -->
 	<template v-else-if="column['type'] === 'duration'">
-		<QDuration short :node-cy="`column-${column.field}-${node.id}`" :value="node[column.field]" />
+		<QDuration short :data-cy="`column-${column.field}-${node.id}`" :value="node[column.field]" />
 	</template>
 	<!-- Date format -->
 	<template v-else-if="column['type'] === 'date'">
-		<QDateTime short-date :node-cy="`column-${column.field}-${node.id}`" :text="node[column.field]" />
+		<QDateTime short-date :data-cy="`column-${column.field}-${node.id}`" :text="node[column.field]" />
 	</template>
 	<!-- Filesize format -->
 	<template v-else-if="column['type'] === 'file-size'">
-		<QFileSize :node-cy="`column-${column.field}-${node.id}`" :size="node[column.field]" />
+		<QFileSize :data-cy="`column-${column.field}-${node.id}`" :size="node[column.field]" />
 	</template>
 	<!-- File Speed format -->
 	<template v-else-if="column['type'] === 'file-speed'">
-		<QFileSize :node-cy="`column-${column.field}-${node.id}`" :size="node[column.field]" speed />
+		<QFileSize :data-cy="`column-${column.field}-${node.id}`" :size="node[column.field]" speed />
 	</template>
 	<!-- Percentage -->
 	<template v-else-if="column['type'] === 'percentage'">
-		<QProgressBar :node-cy="`column-${column.field}-${node.id}`" :value="node[column.field]" />
+		<QProgressBar :data-cy="`column-${column.field}-${node.id}`" :value="node[column.field]" />
 	</template>
 	<!-- Actions -->
 	<template v-else-if="column['type'] === 'actions'">

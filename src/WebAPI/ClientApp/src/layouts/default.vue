@@ -27,12 +27,10 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import PageLoadOverlay from '@components/General/PageLoadOverlay.vue';
 import globalService from '@service/globalService';
 import { useHelpStore, useAlertStore } from '#imports';
 import IAlert from '@interfaces/IAlert';
 
-const $q = useQuasar();
 const route = useRoute();
 const helpStore = useHelpStore();
 const alertStore = useAlertStore();
@@ -63,19 +61,14 @@ function toggleNotificationsDrawer() {
 }
 
 onMounted(() => {
-	$q.loading.show({
-		spinner: PageLoadOverlay,
-	});
 	useSubscription(
 		globalService.getPageSetupReady().subscribe({
 			next: () => {
 				Log.debug('Loading has finished, displaying page now');
 				set(isLoading, false);
-				$q.loading.hide();
 			},
 			error: (err) => {
 				Log.error('Error while loading page', err);
-				$q.loading.hide();
 			},
 		}),
 	);

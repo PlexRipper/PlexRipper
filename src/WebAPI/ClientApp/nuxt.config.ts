@@ -21,6 +21,16 @@ export default defineNuxtConfig({
 			isDocker: process.env.IS_DOCKER === 'true' || false,
 		},
 	},
+	app: {
+		head: {
+			script: [
+				{ src: 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js' },
+				{ src: 'https://cdn.jsdelivr.net/npm/vanta/dist/vanta.waves.min.js' },
+				{ src: './background-effect-config.js' },
+			],
+			noscript: [{ children: 'JavaScript is required' }],
+		},
+	},
 	modules: [
 		// Doc: https://github.com/Maiquu/nuxt-quasar
 		'nuxt-quasar-ui',
@@ -30,7 +40,7 @@ export default defineNuxtConfig({
 		'@nuxtjs/i18n',
 		'@vue-macros/nuxt',
 		'nuxt-vitest',
-		['nuxt-lodash'],
+		'nuxt-lodash',
 		[
 			'@pinia/nuxt',
 			{

@@ -1,9 +1,8 @@
 @import '../variables';
 @import '../mixins';
 
-
-.q-dark {
-	background-color: transparent;
+body.body--dark {
+	background-image: url('/img/background/background.png');
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

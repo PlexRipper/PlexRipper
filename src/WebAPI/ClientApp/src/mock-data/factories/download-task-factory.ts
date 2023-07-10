@@ -1,4 +1,5 @@
 import { randMovie } from '@ngneat/falso';
+import { times } from 'lodash-es';
 import { toPlexMediaType } from '@composables/conversion';
 import { MockConfig } from '@mock/interfaces';
 import { DownloadProgressDTO, DownloadStatus, DownloadTaskType, ServerDownloadProgressDTO } from '@dto/mainApi';
@@ -135,16 +136,14 @@ export function generateDownloadTaskMovies({
 }): DownloadProgressDTO[] {
 	const validConfig = checkConfig(config);
 
-	return Array(validConfig.movieDownloadTask)
-		.fill(null)
-		.map(() =>
-			generateDownloadTaskMovie({
-				id: downloadTaskIdIndex++,
-				plexServerId,
-				plexLibraryId,
-				config,
-			}),
-		);
+	return times(validConfig.movieDownloadTask, () =>
+		generateDownloadTaskMovie({
+			id: downloadTaskIdIndex++,
+			plexServerId,
+			plexLibraryId,
+			config,
+		}),
+	);
 }
 
 export function generateDownloadTaskTvShows({
@@ -157,17 +156,14 @@ export function generateDownloadTaskTvShows({
 	config?: Partial<MockConfig>;
 }): DownloadProgressDTO[] {
 	const validConfig = checkConfig(config);
-
-	return Array(validConfig.tvShowDownloadTask)
-		.fill(null)
-		.map(() =>
-			generateDownloadTaskTvShow({
-				id: downloadTaskIdIndex++,
-				plexServerId,
-				plexLibraryId,
-				config,
-			}),
-		);
+	return times(validConfig.tvShowDownloadTask, () =>
+		generateDownloadTaskTvShow({
+			id: downloadTaskIdIndex++,
+			plexServerId,
+			plexLibraryId,
+			config,
+		}),
+	);
 }
 
 export function generateDownloadTaskTvShowSeason({
@@ -207,18 +203,16 @@ export function generateDownloadTaskTvShowSeasons({
 	const validConfig = checkConfig(config);
 
 	let seasonIndex = 1;
-	return Array(validConfig.seasonDownloadTask)
-		.fill(null)
-		.map(() => {
-			const season = generateDownloadTaskTvShowSeason({
-				id: downloadTaskIdIndex++,
-				plexServerId,
-				plexLibraryId,
-				config,
-			});
-			season.title = `Season ${seasonIndex++}`;
-			return season;
+	return times(validConfig.seasonDownloadTask, () => {
+		const season = generateDownloadTaskTvShowSeason({
+			id: downloadTaskIdIndex++,
+			plexServerId,
+			plexLibraryId,
+			config,
 		});
+		season.title = `Season ${seasonIndex++}`;
+		return season;
+	});
 }
 
 export function generateDownloadTaskTvShowEpisode({
@@ -247,16 +241,14 @@ export function generateDownloadTaskTvShowEpisodes({
 	const validConfig = checkConfig(config);
 	let episodeIndex = 1;
 
-	return Array(validConfig.episodeDownloadTask)
-		.fill(null)
-		.map(() => {
-			const episode = generateDownloadTaskTvShowEpisode({
-				id: downloadTaskIdIndex++,
-				plexServerId,
-				plexLibraryId,
-				config,
-			});
-			episode.title = `Episode ${episodeIndex++} - ${episode.title}`;
-			return episode;
+	return times(validConfig.episodeDownloadTask, () => {
+		const episode = generateDownloadTaskTvShowEpisode({
+			id: downloadTaskIdIndex++,
+			plexServerId,
+			plexLibraryId,
+			config,
 		});
+		episode.title = `Episode ${episodeIndex++} - ${episode.title}`;
+		return episode;
+	});
 }

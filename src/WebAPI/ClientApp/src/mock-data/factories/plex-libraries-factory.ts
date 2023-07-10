@@ -1,4 +1,5 @@
 import { randCompanyName, randDirectoryPath, randNumber, randRecentDate, randUuid } from '@ngneat/falso';
+import { times } from 'lodash-es';
 import { checkConfig, incrementSeed, MockConfig } from '@mock';
 import { FolderPathDTO, PlexLibraryDTO, PlexMediaType } from '@dto/mainApi';
 
@@ -67,7 +68,5 @@ export function generatePlexLibraries({
 		default:
 			throw new Error(`Invalid Plex media type: ${type}`);
 	}
-	return Array(count)
-		.fill(null)
-		.map(() => generatePlexLibrary({ id: plexLibraryIdIndex++, type, plexServerId, partialData }));
+	return times(count, () => generatePlexLibrary({ id: plexLibraryIdIndex++, type, plexServerId, partialData }));
 }

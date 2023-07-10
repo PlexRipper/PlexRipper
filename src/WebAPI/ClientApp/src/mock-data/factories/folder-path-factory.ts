@@ -1,4 +1,5 @@
 import { randDirectoryPath, randProductName } from '@ngneat/falso';
+import { times } from 'lodash-es';
 import { FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
 import { checkConfig, MockConfig } from '~/mock-data';
 import Convert from '@class/Convert';
@@ -39,9 +40,7 @@ export function generateFolderPaths({
 	config?: Partial<MockConfig>;
 }): FolderPathDTO[] {
 	const validConfig = checkConfig(config);
-	return Array(validConfig.folderPathCount)
-		.fill(null)
-		.map(() => generateFolderPath({ id: folderPathIdIndex++, type, partialData, config }));
+	return times(validConfig.folderPathCount, () => generateFolderPath({ id: folderPathIdIndex++, type, partialData, config }));
 }
 
 export function generateDefaultFolderPaths({ config = {} }: { config?: Partial<MockConfig> }): FolderPathDTO[] {

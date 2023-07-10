@@ -1,4 +1,5 @@
 import { randMovie, randNumber, randRecentDate } from '@ngneat/falso';
+import { times } from 'lodash-es';
 import { checkConfig, incrementSeed, MockConfig } from '@mock';
 import { PlexLibraryDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 
@@ -76,18 +77,16 @@ export function generatePlexMedias({
 			throw new Error(`Invalid PlexMediaType: ${type}`);
 	}
 	let index = 1;
-	return Array(count)
-		.fill(null)
-		.map(() =>
-			generatePlexMedia({
-				id: plexMediaIdIndex++,
-				plexServerId,
-				plexLibraryId,
-				type,
-				config,
-				partialData,
-			}),
-		)
+	return times(count, () =>
+		generatePlexMedia({
+			id: plexMediaIdIndex++,
+			plexServerId,
+			plexLibraryId,
+			type,
+			config,
+			partialData,
+		}),
+	)
 		.sort((a, b) => a.sortTitle.localeCompare(b.sortTitle))
 		.map((x) => {
 			return {

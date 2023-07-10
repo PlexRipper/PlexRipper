@@ -25,7 +25,7 @@ export default defineNuxtConfig({
 		// Doc: https://github.com/Maiquu/nuxt-quasar
 		'nuxt-quasar-ui',
 		'@vueuse/nuxt',
-		// '@nuxt/devtools',
+		'@nuxt/devtools',
 		// Doc: https://i18n.nuxtjs.org/
 		'@nuxtjs/i18n',
 		'@vue-macros/nuxt',

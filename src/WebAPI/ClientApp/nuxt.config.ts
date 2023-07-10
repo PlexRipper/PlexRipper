@@ -30,6 +30,7 @@ export default defineNuxtConfig({
 		'@nuxtjs/i18n',
 		'@vue-macros/nuxt',
 		'nuxt-vitest',
+		['nuxt-lodash'],
 		[
 			'@pinia/nuxt',
 			{
@@ -68,6 +69,11 @@ export default defineNuxtConfig({
 		// Enabled betterDefine to allow importing interfaces into defineProps
 		betterDefine: true,
 		defineOptions: true,
+	},
+	lodash: {
+		prefix: false,
+		prefixSkip: false,
+		upperAfterPrefix: false,
 	},
 	i18n: {
 		lazy: true,

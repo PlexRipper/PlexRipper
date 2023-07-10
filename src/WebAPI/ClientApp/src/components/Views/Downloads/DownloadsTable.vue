@@ -9,7 +9,8 @@
 				<q-col> </q-col>
 				<!-- Download Server Title -->
 				<q-col cols="auto">
-					<span class="title">{{ plexServer.name }}</span>
+					<QStatus :value="serverConnectionStore.isServerConnected(plexServer.id)" />
+					<span class="title q-ml-md">{{ plexServer.name }}</span>
 				</q-col>
 				<q-col class="q-py-none"></q-col>
 			</q-row>
@@ -37,6 +38,7 @@ import { getDownloadTableColumns } from '#imports';
 import ISelection from '@interfaces/ISelection';
 
 const downloadStore = useDownloadStore();
+const serverConnectionStore = useServerConnectionStore();
 
 const props = defineProps<{
 	loading?: boolean;

@@ -71,7 +71,7 @@ import IFolderPathGroup from '@interfaces/IFolderPathGroup';
 const { t } = useI18n();
 const folderPathStore = useFolderPathStore();
 const downloadStore = useDownloadStore();
-withDefaults(defineProps<{ onlyDefaults: boolean }>(), {
+withDefaults(defineProps<{ onlyDefaults?: boolean }>(), {
 	onlyDefaults: false,
 });
 

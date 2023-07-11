@@ -4,10 +4,6 @@ import { route } from '@fixtures/baseE2E';
 import { DownloadStatus, MessageTypes } from '@dto/mainApi';
 
 describe('Downloads page', () => {
-	beforeEach(() => {
-		cy.visit(route('/downloads')).as('downloadsPage');
-		cy.url().should('eq', route('/downloads'));
-	});
 	it('Should update the download task row when the download process is updated', () => {
 		cy.basePageSetup({
 			plexAccountCount: 1,
@@ -16,6 +12,8 @@ describe('Downloads page', () => {
 			movieDownloadTask: 3,
 		});
 
+		cy.visit(route('/downloads')).as('downloadsPage');
+		cy.url().should('eq', route('/downloads'));
 		cy.getPageData().then((data) => {
 			const downloadTasks = data.serverDownloadProgress[0].downloads;
 			Cypress._.times(downloadTasks.length, (downloadTaskIndex) => {
@@ -59,10 +57,13 @@ describe('Downloads page', () => {
 			plexServerCount: 1,
 			plexLibraryCount: 5,
 			tvShowDownloadTask: 100,
-		}).then((data) => {
+		});
+		cy.visit(route('/downloads')).as('downloadsPage');
+		cy.url().should('eq', route('/downloads'));
+		cy.getPageData().then((data) => {
 			const downloads = data.serverDownloadProgress[0].downloads;
 			Cypress._.times(10, (i) => {
-				cy.get(`.p-paginator-top > .p-paginator > .p-paginator-pages > [aria-label="${i + 1}"]`).click();
+				cy.get(`:nth-child(1) > .p-paginator > .p-paginator-pages > [aria-label="${i + 1}"]`).click();
 				// Ensure the table content changes by checking the first row title
 				cy.getCy(`column-title-${downloads[i * 10 + 1].id}`).should('have.text', downloads[i * 10 + 1].title);
 			});

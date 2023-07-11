@@ -6,7 +6,7 @@ import { MockConfig } from '@mock';
 Cypress.Commands.add('basePageSetup', (config: Partial<MockConfig> = {}) => basePageSetup(config).as('pageData'));
 Cypress.Commands.add('getPageData', () =>
 	cy
-		.get('[data-cy="page-load-completed"]') // Wait for page load
+		.get('[data-cy="page-load-completed"]', { timeout: 10000 }) // Wait for page load
 		.get('@pageData')
 		.then((x) => {
 			const data = x as unknown as IBasePageSetupResult;

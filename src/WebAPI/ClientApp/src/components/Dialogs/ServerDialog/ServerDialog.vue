@@ -108,7 +108,6 @@
 import { set } from '@vueuse/core';
 import { ref, computed, useCloseControlDialog } from '#imports';
 import type { PlexServerDTO } from '@dto/mainApi';
-import { ServerDataTabContent, ServerConnectionsTabContent } from '#components';
 
 defineProps<{ name: string }>();
 const serverStore = useServerStore();
@@ -135,7 +134,7 @@ function close(): void {
 }
 </script>
 <style lang="scss">
-@import '@/assets/scss/variables.scss';
+@import 'variables';
 
 .tab-content {
 	max-height: calc(80vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;

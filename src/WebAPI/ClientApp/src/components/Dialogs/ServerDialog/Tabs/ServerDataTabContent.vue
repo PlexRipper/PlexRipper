@@ -144,12 +144,10 @@ function setup() {
 }
 
 onMounted(() => {
-	Log.info('ServerDataTabContent', 'onMounted');
 	setup();
 });
 
 onUnmounted(() => {
-	Log.info('ServerDataTabContent', 'onUnmounted');
 	set(checkServerStatusLoading, false);
 	set(hasCheckedServerStatus, false);
 	set(progress, []);

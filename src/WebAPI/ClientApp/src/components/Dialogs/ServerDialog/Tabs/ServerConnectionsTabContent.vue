@@ -99,12 +99,10 @@ function setup() {
 }
 
 onMounted(() => {
-	Log.info('ServerConnectionsTabContent', 'onMounted');
 	setup();
 });
 
 onUnmounted(() => {
-	Log.info('ServerConnectionsTabContent', 'onUnmounted');
 	set(progress, []);
 });
 </script>

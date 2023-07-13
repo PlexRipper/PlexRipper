@@ -134,7 +134,7 @@ function close(): void {
 }
 </script>
 <style lang="scss">
-@import 'variables';
+@import '@/assets/scss/variables.scss';
 
 .tab-content {
 	max-height: calc(80vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;

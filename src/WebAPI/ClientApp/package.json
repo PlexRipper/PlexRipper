@@ -17,6 +17,7 @@
 		"build": "nuxi build",
 		"generate": "nuxi generate",
 		"preview": "nuxi preview",
+		"dev:analyze": "nuxi analyze",
 		"postinstall": "nuxi prepare",
 		"generate-ts": "npx swagger-typescript-api -p http://localhost:5000/swagger/v1/swagger.json --no-client -o ./src/types/dto/ -n mainApi.ts",
 		"typecheck": "vue-tsc --noEmit --pretty",

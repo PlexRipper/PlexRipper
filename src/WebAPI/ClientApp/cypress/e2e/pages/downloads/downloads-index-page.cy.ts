@@ -71,4 +71,25 @@ describe('Downloads page', () => {
 
 		cy.url().should('eq', route('/downloads'));
 	});
+
+	it('Should open details dialog when clicking on the details action button next to a download task row', () => {
+		cy.basePageSetup({
+			plexAccountCount: 1,
+			plexServerCount: 1,
+			plexLibraryCount: 5,
+			movieDownloadTask: 5,
+			setDownloadDetails: true,
+		});
+		cy.visit(route('/downloads')).as('downloadsPage');
+		cy.url().should('eq', route('/downloads'));
+		cy.getPageData().then((data) => {
+			const downloadTask = data.detailDownloadTasks[0];
+			cy.getCy(`column-actions-details-${downloadTask.id}`).click();
+			cy.getCy('download-details-dialog-status').should('contain.text', downloadTask.status);
+			cy.getCy('download-details-dialog-file-name').should('contain.text', downloadTask.fileName);
+			cy.getCy('download-details-dialog-download-path').should('contain.text', downloadTask.downloadDirectory);
+			cy.getCy('download-details-dialog-destination-path').should('contain.text', downloadTask.destinationDirectory);
+			cy.getCy('download-details-dialog-download-url').should('contain.text', downloadTask.downloadUrl);
+		});
+	});
 });

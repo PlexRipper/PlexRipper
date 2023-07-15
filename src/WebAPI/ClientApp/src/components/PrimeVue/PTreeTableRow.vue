@@ -32,7 +32,7 @@
 					v-for="(action, y) in node[column.field]"
 					:key="`${index}-${y}`"
 					dense
-					:cy="`column-${column.field}-${node.id}`"
+					:cy="`column-${column.field}-${action}-${node.id}`"
 					:icon="Convert.buttonTypeToIcon(action)"
 					@click.stop="
 						$emit('action', {

@@ -44,7 +44,7 @@ function batchCommandSwitch(action: string) {
 	downloadStore.executeDownloadCommand(action, ids);
 }
 
-const commandSwitch = ({ action, item }: { action: string; item: DownloadProgressDTO }) => {
+function commandSwitch({ action, item }: { action: string; item: DownloadProgressDTO }) {
 	const ids: number[] = [item.id];
 
 	if (action === 'details') {
@@ -53,7 +53,7 @@ const commandSwitch = ({ action, item }: { action: string; item: DownloadProgres
 	}
 
 	downloadStore.executeDownloadCommand(action, ids);
-};
+}
 
 // endregion
 

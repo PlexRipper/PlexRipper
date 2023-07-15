@@ -17,8 +17,9 @@ import {
 	generateResultDTO,
 	MockConfig,
 	checkConfig,
-	generateServerDownloadTasks,
+	generateServerDownloadProgress,
 	generatePlexMedias,
+	generateDownloadTask,
 } from '@mock';
 import { generateSettingsModel } from '@factories/settings-factory';
 import { generatePlexAccounts } from '@factories/plex-account-factory';
@@ -31,8 +32,10 @@ import {
 	PlexServerDTO,
 	ServerDownloadProgressDTO,
 	SettingsModelDTO,
+	DownloadTaskDTO,
 } from '@dto/mainApi';
 import Chainable = Cypress.Chainable;
+import { toDownloadTaskType } from '@composables/conversion';
 
 export interface IBasePageSetupResult {
 	plexServers: PlexServerDTO[];
@@ -40,6 +43,7 @@ export interface IBasePageSetupResult {
 	plexLibraries: PlexLibraryDTO[];
 	plexAccounts: PlexAccountDTO[];
 	serverDownloadProgress: ServerDownloadProgressDTO[];
+	detailDownloadTasks: DownloadTaskDTO[];
 	mediaData: {
 		libraryId: number;
 		media: PlexMediaSlimDTO[];
@@ -50,31 +54,42 @@ export interface IBasePageSetupResult {
 
 export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBasePageSetupResult> {
 	const validConfig = checkConfig(config);
+	const result: IBasePageSetupResult = {
+		config: validConfig,
+		mediaData: [],
+		plexAccounts: [],
+		plexLibraries: [],
+		plexServerConnections: [],
+		serverDownloadProgress: [],
+		settings: {} as SettingsModelDTO,
+		plexServers: [],
+		detailDownloadTasks: [],
+	};
 
 	// PlexServers call
-	const plexServers = generatePlexServers({ config });
+	result.plexServers = generatePlexServers({ config });
 	cy.intercept('GET', apiRoute({ type: APIRoute.PlexServer }), {
 		statusCode: 200,
-		body: generateResultDTO(plexServers),
+		body: generateResultDTO(result.plexServers),
 	}).then(() => {
 		if (validConfig.debugDisplayData) {
-			cy.log('BasePageSetup -> plexServers', plexServers);
+			cy.log('BasePageSetup -> plexServers', result.plexServers);
 		}
 	});
 
 	// PlexServerConnections call
-	const plexServerConnections = plexServers.flatMap((x) => x.plexServerConnections);
+	result.plexServerConnections = result.plexServers.flatMap((x) => x.plexServerConnections);
 	cy.intercept('GET', apiRoute({ type: APIRoute.PlexServerConnection }), {
 		statusCode: 200,
-		body: generateResultDTO(plexServerConnections),
+		body: generateResultDTO(result.plexServerConnections),
 	}).then(() => {
 		if (validConfig.debugDisplayData) {
-			cy.log('BasePageSetup -> plexServerConnections', plexServerConnections);
+			cy.log('BasePageSetup -> plexServerConnections', result.plexServerConnections);
 		}
 	});
 
 	// PlexLibraries call
-	const plexLibraries = plexServers
+	result.plexLibraries = result.plexServers
 		.map((x) => {
 			return [
 				...generatePlexLibraries({
@@ -92,15 +107,15 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 		.flat();
 	cy.intercept('GET', apiRoute({ type: APIRoute.PlexLibrary }), {
 		statusCode: 200,
-		body: generateResultDTO(plexLibraries),
+		body: generateResultDTO(result.plexLibraries),
 	}).then(() => {
 		if (validConfig.debugDisplayData) {
-			cy.log('BasePageSetup -> plexLibraries', plexLibraries);
+			cy.log('BasePageSetup -> plexLibraries', result.plexLibraries);
 		}
 	});
 
 	// Detail call for every library
-	for (const library of plexLibraries) {
+	for (const library of result.plexLibraries) {
 		cy.intercept(
 			'GET',
 			apiRoute({
@@ -115,7 +130,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 	}
 
 	// PlexAccount call
-	const plexAccounts = generatePlexAccounts({ config, plexServers, plexLibraries });
+	const plexAccounts = generatePlexAccounts({ config, plexServers: result.plexServers, plexLibraries: result.plexLibraries });
 	cy.intercept('GET', apiRoute({ type: APIRoute.PlexAccount }), {
 		statusCode: 200,
 		body: generateResultDTO(plexAccounts),
@@ -126,9 +141,9 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 	});
 
 	// DownloadTasks call
-	const serverDownloadProgress = plexServers
+	result.serverDownloadProgress = result.plexServers
 		.map((x) =>
-			generateServerDownloadTasks({
+			generateServerDownloadProgress({
 				plexServerId: x.id,
 				plexLibraryId: -1,
 				config,
@@ -137,15 +152,44 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 		.flat();
 	cy.intercept('GET', apiRoute({ type: APIRoute.Download }), {
 		statusCode: 200,
-		body: generateResultDTO(serverDownloadProgress),
+		body: generateResultDTO(result.serverDownloadProgress),
 	}).then(() => {
 		if (validConfig.debugDisplayData) {
-			cy.log('BasePageSetup -> downloadTasks', serverDownloadProgress);
+			cy.log('BasePageSetup -> downloadTasks', result.serverDownloadProgress);
 		}
 	});
 
+	// DownloadDetails call
+	if (config.setDownloadDetails) {
+		for (const serverDownload of result.serverDownloadProgress) {
+			const downloadTasks = result.serverDownloadProgress.flatMap((x) => x.downloads);
+			for (const downloadTask of downloadTasks) {
+				const generatedDownloadTask = generateDownloadTask({
+					config,
+					id: downloadTask.id,
+					plexLibraryId: 1,
+					plexServerId: serverDownload.id,
+					type: toDownloadTaskType(downloadTask.mediaType),
+					// partial: downloadTask,
+				});
+				result.detailDownloadTasks.push(generatedDownloadTask);
+				cy.intercept(
+					'GET',
+					apiRoute({
+						type: APIRoute.Download,
+						path: `/detail/${downloadTask.id}`,
+					}),
+					{
+						statusCode: 200,
+						body: generateResultDTO(generatedDownloadTask),
+					},
+				);
+			}
+		}
+	}
+
 	// Settings call
-	const settings = generateSettingsModel({ plexServers, config });
+	const settings = generateSettingsModel({ plexServers: result.plexServers, config });
 	cy.intercept('GET', apiRoute({ type: APIRoute.Settings }), {
 		statusCode: 200,
 		body: generateResultDTO(settings),
@@ -156,11 +200,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 	});
 
 	// Generate library media page data
-	const mediaData: {
-		libraryId: number;
-		media: PlexMediaSlimDTO[];
-	}[] = [];
-	for (const library of plexLibraries) {
+	for (const library of result.plexLibraries) {
 		if (library.type !== PlexMediaType.Movie) {
 			continue;
 		}
@@ -171,7 +211,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 			config,
 		});
 
-		mediaData.push({
+		result.mediaData.push({
 			libraryId: library.id,
 			media: mediaList,
 		});
@@ -216,24 +256,15 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 	});
 
 	// Correct library data
-	for (const library of plexLibraries) {
-		const mediaList = mediaData.find((x) => x.libraryId === library.id)?.media ?? [];
+	for (const library of result.plexLibraries) {
+		const mediaList = result.mediaData.find((x) => x.libraryId === library.id)?.media ?? [];
 		if (mediaList.length) {
 			library.mediaSize = mediaList.reduce((acc, x) => acc + x.mediaSize, 0);
 			library.count = mediaList.length;
 		}
 	}
 
-	return cy.wrap({
-		config: validConfig,
-		plexServers,
-		plexServerConnections,
-		plexLibraries,
-		plexAccounts,
-		serverDownloadProgress,
-		mediaData,
-		settings,
-	});
+	return cy.wrap(result);
 }
 
 export function route(path: string) {

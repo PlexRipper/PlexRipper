@@ -1,29 +1,11 @@
-import { randMovie } from '@ngneat/falso';
+import { randMovie, randDirectoryPath, randUrl, randFileName, randNumber } from '@ngneat/falso';
 import { times } from 'lodash-es';
 import { toPlexMediaType } from '@composables/conversion';
 import { MockConfig } from '@mock/interfaces';
-import { DownloadProgressDTO, DownloadStatus, DownloadTaskType, ServerDownloadProgressDTO } from '@dto/mainApi';
+import { DownloadStatus, DownloadTaskDTO, DownloadTaskType } from '@dto/mainApi';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
 
 let downloadTaskIdIndex = 1;
-
-export function generateServerDownloadTasks({
-	plexServerId,
-	plexLibraryId,
-	config = {},
-}: {
-	plexServerId: number;
-	plexLibraryId: number;
-	config: Partial<MockConfig>;
-}): ServerDownloadProgressDTO {
-	const downloadTasks: DownloadProgressDTO[] = generateDownloadTasks({ plexServerId, plexLibraryId, config });
-
-	return {
-		id: plexServerId,
-		downloads: downloadTasks,
-		downloadableTasksCount: downloadTasks.length,
-	};
-}
 
 export function generateDownloadTasks({
 	plexServerId,
@@ -33,10 +15,10 @@ export function generateDownloadTasks({
 	plexServerId: number;
 	plexLibraryId: number;
 	config: Partial<MockConfig>;
-}): DownloadProgressDTO[] {
+}): DownloadTaskDTO[] {
 	const validConfig = checkConfig(config);
 
-	const downloadTasks: DownloadProgressDTO[] = [];
+	const downloadTasks: DownloadTaskDTO[] = [];
 	if (validConfig.movieDownloadTask > 0) {
 		downloadTasks.push(...generateDownloadTaskMovies({ plexServerId, plexLibraryId, config }));
 	}
@@ -56,29 +38,45 @@ export function generateDownloadTask({
 	plexLibraryId,
 	type,
 	config = {},
+	partial = {},
 }: {
 	id: number;
 	plexServerId: number;
 	plexLibraryId: number;
 	type: DownloadTaskType;
 	config: Partial<MockConfig>;
-}): DownloadProgressDTO {
+	partial?: Partial<DownloadTaskDTO>;
+}): DownloadTaskDTO {
 	checkConfig(config);
 	incrementSeed(id);
-
+	const title = randMovie();
 	return {
 		id,
+		title,
 		dataReceived: 0,
 		dataTotal: 1000000000, // 1 GB in bytes
 		downloadSpeed: 0,
 		fileTransferSpeed: 0,
-		mediaType: toPlexMediaType(type),
 		percentage: 0,
+		mediaType: toPlexMediaType(type),
 		status: DownloadStatus.Queued,
 		timeRemaining: 0,
-		title: randMovie(),
 		actions: ['details'],
+		destinationDirectory: randDirectoryPath(),
+		downloadDirectory: randDirectoryPath(),
+		downloadTaskType: type,
+		downloadUrl: randUrl(),
+		fileLocationUrl: randUrl(),
+		fileName: randFileName(),
+		fullTitle: title,
+		key: randNumber({ min: 1, max: 1000000 }),
+		parentId: 0,
+		plexLibraryId: 0,
+		plexServerId: 0,
+		priority: 0,
+		quality: '1080p',
 		children: [],
+		...partial,
 	};
 }
 
@@ -87,22 +85,33 @@ export function generateDownloadTaskTvShow({
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	partial = {},
 }: {
 	id: number;
 	plexServerId: number;
 	plexLibraryId: number;
 	config: Partial<MockConfig>;
-}): DownloadProgressDTO {
-	return {
-		...generateDownloadTask({
-			id,
-			plexServerId,
-			plexLibraryId,
-			type: DownloadTaskType.TvShow,
-			config,
-		}),
-		children: generateDownloadTaskTvShowSeasons({ plexServerId, plexLibraryId, config }),
-	};
+	partial: Partial<DownloadTaskDTO>;
+}): DownloadTaskDTO {
+	return generateDownloadTask({
+		id,
+		plexServerId,
+		plexLibraryId,
+		type: DownloadTaskType.TvShow,
+		config,
+		partial: {
+			downloadTaskType: DownloadTaskType.TvShow,
+			children: generateDownloadTaskTvShowSeasons({
+				plexServerId,
+				plexLibraryId,
+				config,
+				partial: {
+					parentId: id,
+				},
+			}),
+			...partial,
+		},
+	});
 }
 
 export function generateDownloadTaskMovie({
@@ -110,18 +119,24 @@ export function generateDownloadTaskMovie({
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	partial = {},
 }: {
 	id: number;
 	plexServerId: number;
 	plexLibraryId: number;
 	config: Partial<MockConfig>;
-}): DownloadProgressDTO {
+	partial: Partial<DownloadTaskDTO>;
+}): DownloadTaskDTO {
 	return generateDownloadTask({
 		id,
 		plexServerId,
 		plexLibraryId,
 		type: DownloadTaskType.Movie,
 		config,
+		partial: {
+			downloadTaskType: DownloadTaskType.Movie,
+			...partial,
+		},
 	});
 }
 
@@ -129,11 +144,13 @@ export function generateDownloadTaskMovies({
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	partial = {},
 }: {
 	plexServerId: number;
 	plexLibraryId: number;
-	config: Partial<MockConfig>;
-}): DownloadProgressDTO[] {
+	config?: Partial<MockConfig>;
+	partial?: Partial<DownloadTaskDTO>;
+}): DownloadTaskDTO[] {
 	const validConfig = checkConfig(config);
 
 	return times(validConfig.movieDownloadTask, () =>
@@ -142,6 +159,7 @@ export function generateDownloadTaskMovies({
 			plexServerId,
 			plexLibraryId,
 			config,
+			partial,
 		}),
 	);
 }
@@ -150,11 +168,13 @@ export function generateDownloadTaskTvShows({
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	partial = {},
 }: {
 	plexServerId: number;
 	plexLibraryId: number;
 	config?: Partial<MockConfig>;
-}): DownloadProgressDTO[] {
+	partial?: Partial<DownloadTaskDTO>;
+}): DownloadTaskDTO[] {
 	const validConfig = checkConfig(config);
 	return times(validConfig.tvShowDownloadTask, () =>
 		generateDownloadTaskTvShow({
@@ -162,6 +182,7 @@ export function generateDownloadTaskTvShows({
 			plexServerId,
 			plexLibraryId,
 			config,
+			partial,
 		}),
 	);
 }
@@ -171,48 +192,58 @@ export function generateDownloadTaskTvShowSeason({
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	partial = {},
 }: {
 	id: number;
 	plexServerId: number;
 	plexLibraryId: number;
 	config?: Partial<MockConfig>;
-}): DownloadProgressDTO {
+	partial: Partial<DownloadTaskDTO>;
+}): DownloadTaskDTO {
 	incrementSeed(id);
 
-	return {
-		...generateDownloadTask({
-			id,
-			plexServerId,
-			plexLibraryId,
-			type: DownloadTaskType.Season,
-			config,
-		}),
-		children: generateDownloadTaskTvShowEpisodes({ plexServerId, plexLibraryId, config }),
-	};
+	return generateDownloadTask({
+		id,
+		plexServerId,
+		plexLibraryId,
+		type: DownloadTaskType.Season,
+		config,
+		partial: {
+			children: generateDownloadTaskTvShowEpisodes({ plexServerId, plexLibraryId, config }),
+			downloadTaskType: DownloadTaskType.Season,
+			...partial,
+		},
+	});
 }
 
 export function generateDownloadTaskTvShowSeasons({
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	partial = {},
 }: {
 	plexServerId: number;
 	plexLibraryId: number;
 	config?: Partial<MockConfig>;
-}): DownloadProgressDTO[] {
+	partial?: Partial<DownloadTaskDTO>;
+}): DownloadTaskDTO[] {
 	const validConfig = checkConfig(config);
 
-	let seasonIndex = 1;
-	return times(validConfig.seasonDownloadTask, () => {
-		const season = generateDownloadTaskTvShowSeason({
-			id: downloadTaskIdIndex++,
+	const seasonIndex = 1;
+	const id = downloadTaskIdIndex++;
+	return times(validConfig.seasonDownloadTask, () =>
+		generateDownloadTaskTvShowSeason({
+			id,
 			plexServerId,
 			plexLibraryId,
 			config,
-		});
-		season.title = `Season ${seasonIndex++}`;
-		return season;
-	});
+			partial: {
+				title: `Season ${seasonIndex}`,
+				parentId: id,
+				...partial,
+			},
+		}),
+	);
 }
 
 export function generateDownloadTaskTvShowEpisode({
@@ -220,24 +251,28 @@ export function generateDownloadTaskTvShowEpisode({
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	partial = {},
 }: {
 	id: number;
 	plexServerId: number;
 	plexLibraryId: number;
 	config?: Partial<MockConfig>;
-}): DownloadProgressDTO {
-	return generateDownloadTask({ id, plexServerId, plexLibraryId, type: DownloadTaskType.Episode, config });
+	partial: Partial<DownloadTaskDTO>;
+}): DownloadTaskDTO {
+	return generateDownloadTask({ id, plexServerId, plexLibraryId, type: DownloadTaskType.Episode, config, partial });
 }
 
 export function generateDownloadTaskTvShowEpisodes({
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	partial = {},
 }: {
 	plexServerId: number;
 	plexLibraryId: number;
 	config?: Partial<MockConfig>;
-}): DownloadProgressDTO[] {
+	partial?: Partial<DownloadTaskDTO>;
+}): DownloadTaskDTO[] {
 	const validConfig = checkConfig(config);
 	let episodeIndex = 1;
 
@@ -247,6 +282,7 @@ export function generateDownloadTaskTvShowEpisodes({
 			plexServerId,
 			plexLibraryId,
 			config,
+			partial,
 		});
 		episode.title = `Episode ${episodeIndex++} - ${episode.title}`;
 		return episode;

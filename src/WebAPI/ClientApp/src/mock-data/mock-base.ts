@@ -23,6 +23,7 @@ export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 		seasonDownloadTask: 5,
 		episodeDownloadTask: 5,
 		connectionHasProgress: false,
+		setDownloadDetails: false,
 		maxServerConnections: 5,
 		plexMovieLibraryCount: 0,
 		plexTvShowLibraryCount: 0,

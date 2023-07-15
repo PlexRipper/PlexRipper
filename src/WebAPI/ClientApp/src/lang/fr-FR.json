@@ -57,6 +57,10 @@
                 "download-url": "URL de téléchargement",
                 "file-name": "Nom du fichier",
                 "status": "Statut"
+            },
+            "invalid-download-task": {
+                "body": "Erreur lors de la récupération des détails de cette tâche de téléchargement :",
+                "title": "La tâche de téléchargement n'a pas pu être récupérée"
             }
         },
         "media-overview": {
@@ -73,7 +77,8 @@
             "paths": "Chemins",
             "settings": "Paramètres",
             "ui": "Interface utilisateur",
-            "buttons": "Boutons"
+            "buttons": "Boutons",
+            "scratchpad": "Bloc-notes"
         },
         "notifications-drawer": {
             "clear-notifications": "Effacer tout les notifications",
@@ -122,7 +127,9 @@
                     "plex-version": "Plex Version",
                     "device": "Dispositif",
                     "platform": "Plate-forme",
-                    "platform-version": "Version de la plate-forme"
+                    "platform-version": "Version de la plate-forme",
+                    "all-connections-failed": "Toutes les connexions ont échoué lorsqu'elles sont utilisées pour se connecter au serveur, le serveur est probablement hors ligne...",
+                    "at-least-one-connection-successful": "Au moins une connexion a réussi, ce qui signifie que le serveur peut être connecté !"
                 }
             },
             "no-servers-error": ""
@@ -155,6 +162,10 @@
         },
         "media-selection-dialog": {
             "title": "Définissez la plage d'index pour sélectionner le média (#{min} - #{max})"
+        },
+        "q-status": {
+            "server-connectable": "Le serveur est en ligne et connectable !",
+            "server-unconnectable": "Le serveur ne peut pas être connecté et peut être hors ligne."
         }
     },
     "confirmation": {

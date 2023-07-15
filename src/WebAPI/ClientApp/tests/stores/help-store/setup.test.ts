@@ -1,25 +1,31 @@
 import { describe, beforeAll, test, expect } from 'vitest';
+import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, baseVars } from '@services-test-base';
-import HelpService from '@service/helpService';
 import ISetupResult from '@interfaces/service/ISetupResult';
+import { useHelpStore } from '~/store';
 
-describe('HelpService.setup()', () => {
+describe('HelpStore.setup()', () => {
 	baseVars();
 
 	beforeAll(() => {
 		baseSetup();
 	});
 
+	beforeEach(() => {
+		setActivePinia(createPinia());
+	});
+
 	test('Should return success and complete when setup is run', async () => {
 		// Arrange
-		const setup$ = HelpService.setup();
+		const helpStore = useHelpStore();
+
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: HelpService.name,
+			name: useHelpStore.name,
 		};
 
 		// Act
-		const result = subscribeSpyTo(setup$);
+		const result = subscribeSpyTo(helpStore.setup());
 		await result.onComplete();
 
 		// Assert

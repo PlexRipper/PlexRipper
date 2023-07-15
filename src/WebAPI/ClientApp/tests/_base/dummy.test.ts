@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 describe('Dummy Tests', () => {
-	test('Should pass when Jest is setup correctly', () => {
+	test('Should pass when Vitest is setup correctly', () => {
 		// Arrange
 
 		// Act

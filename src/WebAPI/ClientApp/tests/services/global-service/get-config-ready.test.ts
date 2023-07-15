@@ -40,7 +40,7 @@ describe('GlobalService.getConfigReady()', () => {
 		mock.onGet(SETTINGS_RELATIVE_PATH).reply(200, generateResultDTO(generateSettingsModel({ config })));
 		mock.onGet(PLEX_SERVER_CONNECTION_RELATIVE_PATH).reply(200, generateResultDTO([]));
 
-		const setup$ = GlobalService.setup(appConfig);
+		const setup$ = GlobalService.setupServices({ config: appConfig, i18n: null });
 		const configReady$ = GlobalService.getConfigReady();
 
 		// Act

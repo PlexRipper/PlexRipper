@@ -2,24 +2,22 @@
 	<!--	Instead of multiple layouts we merge into one default layout to prevent full
         page change (flashing white background) during transitions.	-->
 	<q-layout view="hHh LpR lFf">
-		<template v-if="!isLoading">
-			<!--	Use for everything else	-->
-			<template v-if="!isEmptyLayout">
-				<app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer" />
-				<NavigationDrawer :show-drawer="showNavigationDrawerState" />
-				<NotificationsDrawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer" />
-			</template>
-			<!--	page-load-completed is only visible once the page is done loading. This is used for Cypress E2E	-->
-			<q-page-container data-cy="page-load-completed">
-				<slot />
-			</q-page-container>
+		<!--	Use for everything else	-->
+		<template v-if="!isEmptyLayout">
+			<app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer" />
+			<NavigationDrawer :show-drawer="showNavigationDrawerState" />
+			<NotificationsDrawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer" />
 		</template>
+		<!--	page-load-completed is only visible once the page is done loading. This is used for Cypress E2E	-->
+		<q-page-container data-cy="page-load-completed">
+			<slot />
+		</q-page-container>
 		<!--	Dialogs	-->
 		<help-dialog :name="helpDialogName" />
 		<alert-dialog v-for="(alertItem, i) in alerts" :key="i" :name="`alert-dialog-${alertItem.id}`" :alert="alertItem" />
 		<CheckServerConnectionsDialog />
 		<!--	Background	-->
-		<Background :hide-background="isNoBackground" />
+		<Background :hide-background="isEmptyLayout" />
 	</q-layout>
 </template>
 
@@ -34,7 +32,6 @@ import IAlert from '@interfaces/IAlert';
 const route = useRoute();
 const helpStore = useHelpStore();
 const alertStore = useAlertStore();
-const isLoading = ref(true);
 
 const alerts = ref<IAlert[]>([]);
 const showNavigationDrawerState = ref(true);
@@ -43,13 +40,6 @@ const helpDialogName = 'helpDialog';
 
 const isEmptyLayout = computed((): boolean => {
 	return route.fullPath.includes('setup');
-});
-
-const isNoBackground = computed((): boolean => {
-	if (isLoading.value) {
-		return true;
-	}
-	return isEmptyLayout.value;
 });
 
 function toggleNavigationsDrawer() {
@@ -65,7 +55,6 @@ onMounted(() => {
 		globalService.getPageSetupReady().subscribe({
 			next: () => {
 				Log.debug('Loading has finished, displaying page now');
-				set(isLoading, false);
 			},
 			error: (err) => {
 				Log.error('Error while loading page', err);

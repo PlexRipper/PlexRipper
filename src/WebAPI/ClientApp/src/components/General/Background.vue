@@ -7,7 +7,9 @@
 <script setup lang="ts">
 const $q = useQuasar();
 
-const props = defineProps<{ hideBackground: boolean }>();
+const props = withDefaults(defineProps<{ hideBackground?: boolean }>(), {
+	hideBackground: false,
+});
 
 const isDark = computed(() => {
 	return $q.dark.isActive;

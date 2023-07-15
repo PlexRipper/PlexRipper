@@ -13,13 +13,13 @@ import {
 } from '@api-urls';
 import {
 	generatePlexServers,
-	generatePlexLibraries,
 	generateResultDTO,
 	MockConfig,
 	checkConfig,
 	generateServerDownloadProgress,
 	generatePlexMedias,
 	generateDownloadTask,
+	generatePlexLibrariesFromPlexServers,
 } from '@mock';
 import { generateSettingsModel } from '@factories/settings-factory';
 import { generatePlexAccounts } from '@factories/plex-account-factory';
@@ -89,22 +89,8 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 	});
 
 	// PlexLibraries call
-	result.plexLibraries = result.plexServers
-		.map((x) => {
-			return [
-				...generatePlexLibraries({
-					type: PlexMediaType.Movie,
-					config,
-					plexServerId: x.id,
-				}),
-				...generatePlexLibraries({
-					type: PlexMediaType.TvShow,
-					config,
-					plexServerId: x.id,
-				}),
-			];
-		})
-		.flat();
+	result.plexLibraries = generatePlexLibrariesFromPlexServers({ plexServers: result.plexServers, config });
+
 	cy.intercept('GET', apiRoute({ type: APIRoute.PlexLibrary }), {
 		statusCode: 200,
 		body: generateResultDTO(result.plexLibraries),

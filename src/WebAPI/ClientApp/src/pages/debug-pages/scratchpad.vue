@@ -1,18 +1,36 @@
 <template>
 	<q-page>
-		<DownloadsTable :plex-server="plexServer" :download-rows="downloadStore.getDownloadsByServerId(plexServer.id)" />
+		<DownloadsTable
+			:plex-server="plexServer"
+			:download-rows="downloadStore.getDownloadsByServerId(plexServer.id)"
+			@action="commandSwitch($event)" />
+		<download-details-dialog :name="dialogName" />
 	</q-page>
 </template>
 
 <script setup lang="ts">
-import { generateDownloadTaskTvShows, generatePlexServer } from '@factories';
+import { generateDownloadProgressTvShows, generatePlexServer } from '@factories';
+import { DownloadProgressDTO } from '@dto/mainApi';
+import { useOpenControlDialog } from '@composables/event-bus';
 const downloadStore = useDownloadStore();
+const dialogName = 'download-details-dialog';
 
 const plexServer = generatePlexServer({
 	id: 1,
 });
 
-const downloadTasks = generateDownloadTaskTvShows({
+function commandSwitch({ action, item }: { action: string; item: DownloadProgressDTO }) {
+	const ids: number[] = [item.id];
+
+	if (action === 'details') {
+		useOpenControlDialog(dialogName, item.id);
+		return;
+	}
+
+	downloadStore.executeDownloadCommand(action, ids);
+}
+
+const downloadTasks = generateDownloadProgressTvShows({
 	plexLibraryId: 1,
 	plexServerId: plexServer.id,
 	config: {

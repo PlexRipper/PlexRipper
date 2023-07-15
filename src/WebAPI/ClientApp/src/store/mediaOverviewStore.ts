@@ -53,14 +53,14 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			state.selection = selection;
 		},
 		setSelectionRange(min: number, max: number) {
-			this.setSelection({
+			actions.setSelection({
 				indexKey: state.selection.indexKey,
 				keys: state.items.filter((x) => x.index >= min && x.index <= max).map((x) => x.id),
 				allSelected: false,
 			} as ISelection);
 		},
 		setRootSelected(value: boolean) {
-			this.setSelection({
+			actions.setSelection({
 				indexKey: state.selection?.indexKey ?? 0,
 				keys: value ? state.items.map((x) => x.id) : [],
 				allSelected: value,

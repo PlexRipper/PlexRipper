@@ -53,7 +53,7 @@ export const useServerConnectionStore = defineStore('ServerConnection', () => {
 		checkServerStatus(plexServerId: number) {
 			return checkAllPlexServerConnections(plexServerId).pipe(
 				map((x) => x?.value ?? []),
-				switchMap(() => this.refreshPlexServerConnections()),
+				switchMap(() => actions.refreshPlexServerConnections()),
 			);
 		},
 		setPreferredPlexServerConnection(serverId: number, connectionId: number) {

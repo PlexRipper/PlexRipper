@@ -16,7 +16,7 @@ export const useServerStore = defineStore('ServerStore', () => {
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return this.refreshPlexServers().pipe(switchMap(() => of({ name: useServerStore.name, isSuccess: true })));
+			return actions.refreshPlexServers().pipe(switchMap(() => of({ name: useServerStore.name, isSuccess: true })));
 		},
 		refreshPlexServer(serverId: number) {
 			return getPlexServer(serverId).pipe(
@@ -33,13 +33,14 @@ export const useServerStore = defineStore('ServerStore', () => {
 		/**
 		 * Forces a refresh of all the PlexServers currently in store by fetching it from the API.
 		 */
-		refreshPlexServers() {
+		refreshPlexServers(): Observable<PlexServerDTO[]> {
 			return getPlexServers().pipe(
 				tap((plexServers) => {
 					if (plexServers.isSuccess) {
 						state.servers = plexServers?.value ?? [];
 					}
 				}),
+				switchMap(() => of(state.servers)),
 			);
 		},
 	};

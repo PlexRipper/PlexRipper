@@ -4,11 +4,15 @@ import { switchMap, tap } from 'rxjs/operators';
 import { PlexAccountDTO } from '@dto/mainApi';
 import { createAccount, deleteAccount, getAllAccounts, refreshAccount, updateAccount } from '@api/accountApi';
 import ISetupResult from '@interfaces/service/ISetupResult';
+import { useServerStore, useLibraryStore } from '#build/imports';
 
 export const useAccountStore = defineStore('AccountStore', () => {
 	const state = reactive<{ accounts: PlexAccountDTO[] }>({
 		accounts: [],
 	});
+
+	const serverStore = useServerStore();
+	const libraryStore = useLibraryStore();
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
@@ -25,8 +29,8 @@ export const useAccountStore = defineStore('AccountStore', () => {
 		},
 		reSyncAccount(accountId: number) {
 			return refreshAccount(accountId).pipe(
-				switchMap(() => this.refreshAccounts()),
-				switchMap(() => useServerStore().refreshPlexServers()),
+				switchMap(() => actions.refreshAccounts()),
+				switchMap(() => serverStore.refreshPlexServers()),
 			);
 		},
 		/**
@@ -36,11 +40,7 @@ export const useAccountStore = defineStore('AccountStore', () => {
 		createPlexAccount(account: PlexAccountDTO) {
 			return createAccount(account).pipe(
 				switchMap(() =>
-					forkJoin([
-						this.refreshAccounts(),
-						useServerStore().refreshPlexServers(),
-						useLibraryStore().refreshLibraries(),
-					]),
+					forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()]),
 				),
 				switchMap(() => of(actions.getAccount(account.id))),
 			);
@@ -48,11 +48,7 @@ export const useAccountStore = defineStore('AccountStore', () => {
 		updatePlexAccount(account: PlexAccountDTO, inspect = false) {
 			return updateAccount(account, inspect).pipe(
 				switchMap(() =>
-					forkJoin([
-						this.refreshAccounts(),
-						useServerStore().refreshPlexServers(),
-						useLibraryStore().refreshLibraries(),
-					]),
+					forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()]),
 				),
 				switchMap(() => of(actions.getAccount(account.id))),
 			);
@@ -60,11 +56,7 @@ export const useAccountStore = defineStore('AccountStore', () => {
 		deleteAccount(accountId: number) {
 			return deleteAccount(accountId).pipe(
 				switchMap(() =>
-					forkJoin([
-						this.refreshAccounts(),
-						useServerStore().refreshPlexServers(),
-						useLibraryStore().refreshLibraries(),
-					]),
+					forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()]),
 				),
 			);
 		},

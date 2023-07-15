@@ -17,7 +17,7 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return this.refreshLibraries().pipe(switchMap(() => of({ name: useLibraryStore.name, isSuccess: true })));
+			return actions.refreshLibraries().pipe(switchMap(() => of({ name: useLibraryStore.name, isSuccess: true })));
 		},
 		refreshLibraries(): Observable<PlexLibraryDTO[]> {
 			return getAllPlexLibraries().pipe(

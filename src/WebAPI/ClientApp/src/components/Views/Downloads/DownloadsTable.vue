@@ -10,7 +10,7 @@
 				<!-- Download Server Title -->
 				<q-col cols="auto">
 					<QStatus :value="serverConnectionStore.isServerConnected(plexServer.id)" />
-					<span class="title q-ml-md">{{ plexServer.name }}</span>
+					<span class="title q-ml-md">{{ serverStore.getServerName(plexServer.id) }}</span>
 				</q-col>
 				<q-col class="q-py-none"></q-col>
 			</q-row>
@@ -36,10 +36,11 @@ import { DownloadProgressDTO, PlexServerDTO } from '@dto/mainApi';
 import { QTreeViewTableItem } from '@props';
 import { getDownloadTableColumns } from '#imports';
 import ISelection from '@interfaces/ISelection';
+import { useDownloadStore, useServerConnectionStore, useServerStore } from '~/store';
 
 const downloadStore = useDownloadStore();
 const serverConnectionStore = useServerConnectionStore();
-
+const serverStore = useServerStore();
 const props = defineProps<{
 	loading?: boolean;
 	plexServer: PlexServerDTO;

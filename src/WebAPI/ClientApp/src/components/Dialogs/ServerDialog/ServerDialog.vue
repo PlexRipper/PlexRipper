@@ -12,7 +12,7 @@
 		<template #title>
 			{{
 				t('components.server-dialog.header', {
-					serverName: plexServer?.name ?? t('general.error.unknown'),
+					serverName: serverStore.getServerName(plexServer?.id ?? 0) ?? t('general.error.unknown'),
 				})
 			}}
 		</template>

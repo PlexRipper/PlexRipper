@@ -4,7 +4,7 @@ import { map, switchMap, tap } from 'rxjs/operators';
 import { get } from '@vueuse/core';
 import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getAllPlexLibraries, getPlexLibrary, reSyncPlexLibrary, updateDefaultDestination } from '@api/plexLibraryApi';
-import { useServerStore } from '#build/imports';
+import { useServerStore, useSettingsStore } from '#build/imports';
 import ISetupResult from '@interfaces/service/ISetupResult';
 
 export const useLibraryStore = defineStore('LibraryStore', () => {
@@ -13,6 +13,7 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 	});
 
 	const serverStore = useServerStore();
+	const settingsStore = useSettingsStore();
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
@@ -81,6 +82,12 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 				return serverStore.getServer(library.plexServerId);
 			}
 			return null;
+		},
+		getLibraryName: (libraryId: number): string => {
+			if (settingsStore.shouldMaskServerNames) {
+				return '**MASKED**';
+			}
+			return getters.getLibrary(libraryId)?.title ?? '';
 		},
 	};
 	return {

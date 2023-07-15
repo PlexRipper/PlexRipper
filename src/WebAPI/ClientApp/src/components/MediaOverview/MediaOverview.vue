@@ -70,7 +70,6 @@ import { useRouter, RouteLocationNormalized, RouteLocationNormalizedLoaded } fro
 import type { DownloadMediaDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexMediaType, ViewMode } from '@dto/mainApi';
 import { MediaService, SignalrService } from '@service';
-import { DetailsOverview, DownloadConfirmation, MediaTable } from '#components';
 import {
 	useMediaOverviewBarDownloadCommandBus,
 	useMediaOverviewSortBus,
@@ -80,7 +79,7 @@ import {
 	sendMediaOverviewDownloadCommand,
 } from '#imports';
 import { listenMediaOverviewOpenDetailsCommand, sendMediaOverviewOpenDetailsCommand } from '@composables/event-bus';
-import { useMediaOverviewStore, useSettingsStore } from '~/store';
+import { useMediaOverviewStore, useSettingsStore, useDownloadStore, useLibraryStore, useServerStore } from '~/store';
 
 // region SetupFields
 const { t } = useI18n();
@@ -88,6 +87,7 @@ const settingsStore = useSettingsStore();
 const mediaOverviewStore = useMediaOverviewStore();
 const downloadStore = useDownloadStore();
 const libraryStore = useLibraryStore();
+const serverStore = useServerStore();
 const router = useRouter();
 
 // endregion
@@ -126,8 +126,8 @@ const refreshingText = computed(() => {
 	const library = libraryStore.getLibrary(props.libraryId);
 	const server = libraryStore.getServerByLibraryId(props.libraryId);
 	return t('components.media-overview.is-refreshing', {
-		library: library ? library?.title : t('general.commands.unknown'),
-		server: server ? server?.name : t('general.commands.unknown'),
+		library: library ? libraryStore.getLibraryName(library.id) : t('general.commands.unknown'),
+		server: server ? serverStore.getServerName(server.id) : t('general.commands.unknown'),
 	});
 });
 

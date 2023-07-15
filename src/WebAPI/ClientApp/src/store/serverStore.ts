@@ -4,7 +4,7 @@ import { switchMap, tap } from 'rxjs/operators';
 import { PlexServerDTO } from '@dto/mainApi';
 import { getPlexServer, getPlexServers } from '@api/plexServerApi';
 import ISetupResult from '@interfaces/service/ISetupResult';
-import { useAccountStore, useServerConnectionStore } from '#build/imports';
+import { useAccountStore, useServerConnectionStore, useSettingsStore } from '#build/imports';
 
 export const useServerStore = defineStore('ServerStore', () => {
 	const state = reactive<{ servers: PlexServerDTO[] }>({
@@ -12,7 +12,7 @@ export const useServerStore = defineStore('ServerStore', () => {
 	});
 	const accountStore = useAccountStore();
 	const serverConnectionStore = useServerConnectionStore();
-
+	const settingsStore = useSettingsStore();
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
@@ -65,6 +65,12 @@ export const useServerStore = defineStore('ServerStore', () => {
 			}
 			const serverIds = account.plexServerAccess.map((x) => x.plexServerId);
 			return state.servers.filter((server) => serverIds.includes(server.id));
+		},
+		getServerName: (serverId: number): string => {
+			if (settingsStore.shouldMaskServerNames) {
+				return '**MASKED**';
+			}
+			return getters.getServer(serverId)?.name ?? '';
 		},
 		getServerStatus: (plexServerId: number) =>
 			serverConnectionStore

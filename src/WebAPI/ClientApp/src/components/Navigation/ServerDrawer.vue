@@ -3,7 +3,7 @@
 		<q-expansion-item
 			v-for="(server, index) in serverStore.getServers()"
 			:key="index"
-			:label="server.name"
+			:label="serverStore.getServerName(server.id)"
 			expand-icon="mdi-chevron-down">
 			<!-- Server header	-->
 			<template #header>
@@ -14,7 +14,7 @@
 				<q-item-section>
 					<div class="server-name">
 						<q-icon v-if="server.owned" name="mdi-home" size="24px" left />
-						{{ server.name }}
+						{{ serverStore.getServerName(server.id) }}
 					</div>
 				</q-item-section>
 				<q-item-section side>
@@ -33,7 +33,7 @@
 					<q-item-section avatar>
 						<q-media-type-icon :media-type="library.type" />
 					</q-item-section>
-					<q-item-section>{{ library.title }}</q-item-section>
+					<q-item-section>{{ libraryStore.getLibraryName(library.id) }}</q-item-section>
 				</q-item>
 			</q-list>
 			<!-- No libraries available -->

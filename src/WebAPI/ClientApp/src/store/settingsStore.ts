@@ -134,6 +134,12 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			() => (machineIdentifier?: string) =>
 				machineIdentifier ? state.serverSettings.data.find((user) => user.machineIdentifier === machineIdentifier) : null,
 		),
+		shouldMaskServerNames: computed(
+			(): boolean => state.debugSettings.debugModeEnabled && state.debugSettings.maskServerNames,
+		),
+		shouldMaskLibraryNames: computed(
+			(): boolean => state.debugSettings.debugModeEnabled && state.debugSettings.maskLibraryNames,
+		),
 	};
 	return {
 		...toRefs(state),

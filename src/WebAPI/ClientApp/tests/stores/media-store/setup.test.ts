@@ -1,23 +1,25 @@
 import { describe, beforeAll, test, expect } from 'vitest';
-import { subscribeSpyTo, baseSetup } from '@services-test-base';
-import MediaService from '@service/mediaService';
+import { createPinia, setActivePinia } from 'pinia';
+import { subscribeSpyTo, baseSetup } from '~~/tests/_base/base';
 import ISetupResult from '@interfaces/service/ISetupResult';
+import { useMediaStore } from '#imports';
 
-describe('MediaService.setup()', () => {
+describe('MediaStore.setup()', () => {
 	beforeAll(() => {
 		baseSetup();
+		setActivePinia(createPinia());
 	});
 
 	test('Should return success and complete when setup is run', async () => {
 		// Arrange
-		const setup$ = MediaService.setup();
+		const mediaStore = useMediaStore();
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: MediaService.name,
+			name: useMediaStore.name,
 		};
 
 		// Act
-		const result = subscribeSpyTo(setup$);
+		const result = subscribeSpyTo(mediaStore.setup());
 		await result.onComplete();
 
 		// Assert

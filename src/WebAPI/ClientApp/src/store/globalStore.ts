@@ -4,7 +4,7 @@ import Log from 'consola';
 import { switchMap, take, tap } from 'rxjs/operators';
 import IAppConfig from '@class/IAppConfig';
 import I18nObjectType from '@interfaces/i18nObjectType';
-import { MediaService, SignalrService } from '@service';
+import { SignalrService } from '@service';
 import {
 	useServerStore,
 	useLibraryStore,
@@ -18,6 +18,7 @@ import {
 	useHelpStore,
 	useAlertStore,
 	useLocalizationStore,
+	useMediaStore,
 } from '#imports';
 
 export const useGlobalStore = defineStore('GlobalStore', () => {
@@ -35,7 +36,6 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 			return of(config).pipe(
 				switchMap((config) =>
 					forkJoin([
-						MediaService.setup(),
 						SignalrService.setup(config),
 						useAccountStore().setup(),
 						useDownloadStore().setup(),
@@ -49,6 +49,7 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 						useHelpStore().setup(),
 						useAlertStore().setup(),
 						useLocalizationStore().setup(i18n),
+						useMediaStore().setup(),
 					]),
 				),
 				tap((results) => {

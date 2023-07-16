@@ -63,10 +63,9 @@ import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import { useOpenControlDialog } from '@composables/event-bus';
-import { MediaService } from '@service';
 import { PlexAccountDTO, PlexMediaSlimDTO } from '@dto/mainApi';
 import { generateDefaultFolderPaths, generatePlexAccount } from '@factories';
-import { useAlertStore, useHelpStore } from '~/store';
+import { useAlertStore, useHelpStore, useMediaStore } from '~/store';
 
 const { t } = useI18n();
 const helpStore = useHelpStore();
@@ -129,12 +128,14 @@ function addAlert(): void {
 
 onMounted(() => {
 	useSubscription(
-		MediaService.getTvShowMediaData(32).subscribe((data) => {
-			if (data) {
-				set(mediaTableRows, [data]);
-				set(mediaItem, data);
-			}
-		}),
+		useMediaStore()
+			.getTvShowMediaData(32)
+			.subscribe((data) => {
+				if (data) {
+					set(mediaTableRows, [data]);
+					set(mediaItem, data);
+				}
+			}),
 	);
 });
 </script>

@@ -69,7 +69,7 @@ import { useSubscription } from '@vueuse/rxjs';
 import { useRouter, RouteLocationNormalized, RouteLocationNormalizedLoaded } from 'vue-router';
 import type { DownloadMediaDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexMediaType, ViewMode } from '@dto/mainApi';
-import { MediaService, SignalrService } from '@service';
+import { SignalrService } from '@service';
 import {
 	useMediaOverviewBarDownloadCommandBus,
 	useMediaOverviewSortBus,
@@ -77,9 +77,15 @@ import {
 	listenMediaOverviewDownloadCommand,
 	useCloseControlDialog,
 	sendMediaOverviewDownloadCommand,
+	useMediaStore,
+	useMediaOverviewStore,
+	useSettingsStore,
+	useDownloadStore,
+	useLibraryStore,
+	useServerStore,
+	useI18n,
 } from '#imports';
 import { listenMediaOverviewOpenDetailsCommand, sendMediaOverviewOpenDetailsCommand } from '@composables/event-bus';
-import { useMediaOverviewStore, useSettingsStore, useDownloadStore, useLibraryStore, useServerStore } from '~/store';
 
 // region SetupFields
 const { t } = useI18n();
@@ -161,20 +167,22 @@ function refreshLibrary() {
 
 function onRequestMedia({ page = 0, size = 0 }: { page: number; size: number }) {
 	useSubscription(
-		MediaService.getMediaData(props.libraryId, page, size).subscribe({
-			next: (mediaData) => {
-				if (!mediaData) {
-					Log.error(`MediaOverview => No media data for library id ${props.libraryId} was found`);
-				}
-				mediaOverviewStore.setMedia(mediaData, props.mediaType);
-			},
-			error: (error) => {
-				Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
-			},
-			complete: () => {
-				set(loading, false);
-			},
-		}),
+		useMediaStore()
+			.getMediaData(props.libraryId, page, size)
+			.subscribe({
+				next: (mediaData) => {
+					if (!mediaData) {
+						Log.error(`MediaOverview => No media data for library id ${props.libraryId} was found`);
+					}
+					mediaOverviewStore.setMedia(mediaData, props.mediaType);
+				},
+				error: (error) => {
+					Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
+				},
+				complete: () => {
+					set(loading, false);
+				},
+			}),
 	);
 }
 

@@ -25,8 +25,7 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import globalService from '@service/globalService';
-import { useHelpStore, useAlertStore } from '#imports';
+import { useHelpStore, useAlertStore, useGlobalStore, useRoute } from '#imports';
 import IAlert from '@interfaces/IAlert';
 
 const route = useRoute();
@@ -52,7 +51,7 @@ function toggleNotificationsDrawer() {
 
 onMounted(() => {
 	useSubscription(
-		globalService.getPageSetupReady().subscribe({
+		useGlobalStore().getPageSetupReady.subscribe({
 			next: () => {
 				Log.debug('Loading has finished, displaying page now');
 			},

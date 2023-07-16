@@ -1,8 +1,8 @@
 import Log from 'consola';
 import Axios from 'axios-observable';
 import IAppConfig from '@class/IAppConfig';
-import { GlobalService } from '@service';
 import I18nObjectType from '@interfaces/i18nObjectType';
+import { useGlobalStore } from '#imports';
 
 export default defineNuxtPlugin((nuxtApp) => {
 	const publicEnv = useRuntimeConfig().public;
@@ -26,8 +26,9 @@ export default defineNuxtPlugin((nuxtApp) => {
 			baseUrl,
 		};
 		setupAxios(appConfig);
-
-		GlobalService.setupServices({ config: appConfig, i18n: nuxtApp.$i18n as I18nObjectType }).subscribe();
+		useGlobalStore()
+			.setupServices({ config: appConfig, i18n: nuxtApp.$i18n as I18nObjectType })
+			.subscribe();
 	});
 });
 

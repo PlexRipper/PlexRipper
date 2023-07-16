@@ -12,7 +12,6 @@
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
 import { resetDatabase } from '@api/settingsApi';
-import { GlobalService } from '@service';
 import { useOpenControlDialog } from '#imports';
 
 const { t } = useI18n();
@@ -22,7 +21,6 @@ const confirmationDialogName = 'reset-database-confirmation-dialog';
 const resetDatabaseCommand = (): void => {
 	useSubscription(
 		resetDatabase().subscribe((value) => {
-			GlobalService.resetStore();
 			if (value.isSuccess) {
 				router.push('/setup').then(() => {
 					// Refresh the page when we go to the home page to make sure we get all new data.

@@ -6,7 +6,7 @@
 					<q-btn flat round dense icon="mdi-menu" class="q-mr-sm" @click.stop="showNavigationDrawer" />
 					<q-btn to="/" flat>
 						<logo :size="24" class="q-mr-md" />
-						{{ t('general.name-version', { version }) }}
+						{{ t('general.name-version', { version: globalStore.getAppVersion }) }}
 					</q-btn>
 				</q-toolbar-title>
 
@@ -32,12 +32,10 @@
 </template>
 
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
-import { GlobalService } from '@service';
+import { useGlobalStore } from '#imports';
 
 const { t } = useI18n();
-
-const version = ref('?');
+const globalStore = useGlobalStore();
 
 const emit = defineEmits<{
 	(e: 'show-navigation'): void;
@@ -51,14 +49,6 @@ function showNavigationDrawer(): void {
 function showNotificationsDrawer(): void {
 	emit('show-notifications');
 }
-
-onMounted(() => {
-	useSubscription(
-		GlobalService.getConfigReady().subscribe((config) => {
-			version.value = config.version;
-		}),
-	);
-});
 </script>
 
 <style lang="scss">

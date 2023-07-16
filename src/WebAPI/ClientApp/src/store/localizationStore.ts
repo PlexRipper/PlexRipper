@@ -21,6 +21,10 @@ export const useLocalizationStore = defineStore('LocalizationStore', () => {
 			return of({ name: useHelpStore.name, isSuccess: true }).pipe(tap(() => actions.setI18nObject(i18n)));
 		},
 		setI18nObject(i18n: I18nObjectType) {
+			if (!i18n) {
+				Log.error('i18n object is not defined');
+				return;
+			}
 			// @ts-ignore
 			state.i18nRef = i18n;
 			state.locales = get(i18n.locales).map((x) => {

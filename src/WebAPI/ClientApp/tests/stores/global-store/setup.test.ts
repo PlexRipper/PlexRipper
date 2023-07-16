@@ -1,7 +1,6 @@
 import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
-import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
-import GlobalService from '@service/globalService';
+import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '~~/tests/_base/base';
 import { generatePlexServers, generateResultDTO, generateSettingsModel } from '@mock';
 import {
 	DOWNLOAD_RELATIVE_PATH,
@@ -32,6 +31,8 @@ describe('GlobalService.setup()', () => {
 		config = {
 			plexServerCount: 3,
 		};
+		const globalStore = useGlobalStore();
+
 		mock.onGet(DOWNLOAD_RELATIVE_PATH).reply(200, generateResultDTO([]));
 		mock.onGet(PLEX_ACCOUNT_RELATIVE_PATH).reply(200, generateResultDTO([]));
 		mock.onGet(FOLDER_PATH_RELATIVE_PATH).reply(200, generateResultDTO([]));
@@ -41,13 +42,11 @@ describe('GlobalService.setup()', () => {
 		mock.onGet(SETTINGS_RELATIVE_PATH).reply(200, generateResultDTO(generateSettingsModel({ config })));
 		mock.onGet(PLEX_SERVER_CONNECTION_RELATIVE_PATH).reply(200, generateResultDTO([]));
 
-		const setup$ = GlobalService.setup(appConfig);
-
 		// Act
-		const result = subscribeSpyTo(setup$);
-		await result.onComplete();
+		const setupResult = subscribeSpyTo(globalStore.setupServices({ config: appConfig }));
+		await setupResult.onComplete();
 
 		// Assert
-		expect(result.receivedComplete()).toEqual(true);
+		expect(setupResult.receivedComplete()).toEqual(true);
 	});
 });

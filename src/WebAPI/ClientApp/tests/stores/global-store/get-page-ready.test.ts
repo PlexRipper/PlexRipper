@@ -1,7 +1,6 @@
-import { describe, beforeAll, test, expect } from 'vitest';
+import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
-import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
-import GlobalService from '@service/globalService';
+import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '~~/tests/_base/base';
 import {
 	DOWNLOAD_RELATIVE_PATH,
 	FOLDER_PATH_RELATIVE_PATH,
@@ -13,8 +12,7 @@ import {
 	SETTINGS_RELATIVE_PATH,
 } from '@api-urls';
 import { generatePlexServers, generateResultDTO, generateSettingsModel } from '@mock';
-
-describe('GlobalService.getConfigReady()', () => {
+describe('GlobalStore.getConfigReady()', () => {
 	let { appConfig, mock, config } = baseVars();
 	beforeAll(() => {
 		const result = baseSetup();
@@ -31,6 +29,8 @@ describe('GlobalService.getConfigReady()', () => {
 		config = {
 			plexServerCount: 3,
 		};
+		const globalStore = useGlobalStore();
+
 		mock.onGet(DOWNLOAD_RELATIVE_PATH).reply(200, generateResultDTO([]));
 		mock.onGet(PLEX_ACCOUNT_RELATIVE_PATH).reply(200, generateResultDTO([]));
 		mock.onGet(FOLDER_PATH_RELATIVE_PATH).reply(200, generateResultDTO([]));
@@ -40,16 +40,13 @@ describe('GlobalService.getConfigReady()', () => {
 		mock.onGet(SETTINGS_RELATIVE_PATH).reply(200, generateResultDTO(generateSettingsModel({ config })));
 		mock.onGet(PLEX_SERVER_CONNECTION_RELATIVE_PATH).reply(200, generateResultDTO([]));
 
-		const setup$ = GlobalService.setupServices({ config: appConfig, i18n: null });
-		const configReady$ = GlobalService.getConfigReady();
-
 		// Act
-		const setupResult = subscribeSpyTo(setup$);
-		const configResult = subscribeSpyTo(configReady$);
+		const setupResult = subscribeSpyTo(globalStore.setupServices({ config: appConfig }));
+		const pageSetupResult = subscribeSpyTo(globalStore.getPageSetupReady);
 		await setupResult.onComplete();
 		// Assert
 		expect(setupResult.receivedComplete()).toEqual(true);
-		expect(configResult.getFirstValue()).not.toBeNaN();
-		expect(configResult.getFirstValue().version).not.toBeFalsy();
+		expect(pageSetupResult.getValues()).toHaveLength(1);
+		expect(pageSetupResult.getFirstValue()).toEqual(true);
 	});
 });

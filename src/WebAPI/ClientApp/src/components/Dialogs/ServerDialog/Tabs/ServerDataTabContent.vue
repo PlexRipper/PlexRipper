@@ -86,15 +86,16 @@
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import type { PlexServerDTO } from '@dto/mainApi';
 import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
-import { SignalrService } from '@service';
+import { useSignalrStore, useSettingsStore, useI18n } from '#imports';
 
-const settingsStore = useSettingsStore();
 const { t } = useI18n();
+const signalrStore = useSignalrStore();
+const settingsStore = useSettingsStore();
+
 const serverStore = useServerStore();
 const serverConnectionStore = useServerConnectionStore();
 const checkServerStatusLoading = ref(false);
@@ -137,7 +138,7 @@ function checkServer() {
 
 function setup() {
 	useSubscription(
-		SignalrService.getServerConnectionProgressByPlexServerId(get(plexServerId)).subscribe((progressData) => {
+		signalrStore.getServerConnectionProgressByPlexServerId(get(plexServerId)).subscribe((progressData) => {
 			set(progress, progressData);
 		}),
 	);

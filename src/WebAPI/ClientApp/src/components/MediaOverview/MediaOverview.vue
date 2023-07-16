@@ -69,7 +69,6 @@ import { useSubscription } from '@vueuse/rxjs';
 import { useRouter, RouteLocationNormalized, RouteLocationNormalizedLoaded } from 'vue-router';
 import type { DownloadMediaDTO } from '@dto/mainApi';
 import { LibraryProgress, PlexMediaType, ViewMode } from '@dto/mainApi';
-import { SignalrService } from '@service';
 import {
 	useMediaOverviewBarDownloadCommandBus,
 	useMediaOverviewSortBus,
@@ -336,16 +335,18 @@ onMounted(() => {
 	setupRouter();
 
 	useSubscription(
-		SignalrService.getLibraryProgress(props.libraryId).subscribe((data) => {
-			if (data) {
-				set(libraryProgress, data);
-				set(isRefreshing, data.isRefreshing);
-				if (data.isComplete) {
-					onRequestMedia({ size: 0, page: 0 });
-					set(isRefreshing, false);
+		useSignalrStore()
+			.getLibraryProgress(props.libraryId)
+			.subscribe((data) => {
+				if (data) {
+					set(libraryProgress, data);
+					set(isRefreshing, data.isRefreshing);
+					if (data.isComplete) {
+						onRequestMedia({ size: 0, page: 0 });
+						set(isRefreshing, false);
+					}
 				}
-			}
-		}),
+			}),
 	);
 
 	if (props.mediaId) {

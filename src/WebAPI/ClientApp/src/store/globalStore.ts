@@ -4,7 +4,6 @@ import Log from 'consola';
 import { switchMap, take, tap } from 'rxjs/operators';
 import IAppConfig from '@class/IAppConfig';
 import I18nObjectType from '@interfaces/i18nObjectType';
-import { SignalrService } from '@service';
 import {
 	useServerStore,
 	useLibraryStore,
@@ -19,6 +18,7 @@ import {
 	useAlertStore,
 	useLocalizationStore,
 	useMediaStore,
+	useSignalrStore,
 } from '#imports';
 
 export const useGlobalStore = defineStore('GlobalStore', () => {
@@ -36,7 +36,6 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 			return of(config).pipe(
 				switchMap((config) =>
 					forkJoin([
-						SignalrService.setup(config),
 						useAccountStore().setup(),
 						useDownloadStore().setup(),
 						useFolderPathStore().setup(),
@@ -50,6 +49,7 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 						useAlertStore().setup(),
 						useLocalizationStore().setup(i18n),
 						useMediaStore().setup(),
+						useSignalrStore().setup(config),
 					]),
 				),
 				tap((results) => {

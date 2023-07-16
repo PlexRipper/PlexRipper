@@ -116,7 +116,7 @@ export default defineNuxtConfig({
 		'@props': fileURLToPath(new URL('./src/types/props/', import.meta.url)),
 		'@fixtures': fileURLToPath(new URL('./cypress/fixtures/', import.meta.url)),
 		'@services-test-base': fileURLToPath(new URL('./tests/_base/base.ts', import.meta.url)),
-		'@service': fileURLToPath(new URL('./src/service/', import.meta.url)),
+		'@store': fileURLToPath(new URL('./src/store/', import.meta.url)),
 		'@enums': fileURLToPath(new URL('./src/types/enums/', import.meta.url)),
 		'@mock': fileURLToPath(new URL('./src/mock-data/', import.meta.url)),
 		'@factories': fileURLToPath(new URL('./src/mock-data/factories/', import.meta.url)),

@@ -103,8 +103,7 @@ import { get, set } from '@vueuse/core';
 import { of } from 'rxjs';
 import type { JobStatusUpdateDTO, PlexAccountDTO } from '@dto/mainApi';
 import { JobStatus, JobTypes, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
-import { SignalrService } from '@service';
-import { useBackgroundJobsStore, useI18n, useOpenControlDialog, useServerStore } from '#imports';
+import { useBackgroundJobsStore, useI18n, useOpenControlDialog, useServerStore, useSignalrStore } from '#imports';
 
 const { t } = useI18n();
 const serverStore = useServerStore();
@@ -218,9 +217,11 @@ onMounted(() => {
 	);
 
 	useSubscription(
-		SignalrService.getAllServerConnectionProgress().subscribe((connections) => {
-			set(connectionProgress, connections);
-		}),
+		useSignalrStore()
+			.getAllServerConnectionProgress()
+			.subscribe((connections) => {
+				set(connectionProgress, connections);
+			}),
 	);
 });
 

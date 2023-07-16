@@ -45,16 +45,16 @@
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import type { PlexServerDTO } from '@dto/mainApi';
 import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
-import { SignalrService } from '@service';
-import { useServerConnectionStore } from '~/store';
+import { useServerConnectionStore, useSignalrStore } from '~/store';
 
-const serverConnectionStore = useServerConnectionStore();
 const { t } = useI18n();
+const signalrStore = useSignalrStore();
+const serverConnectionStore = useServerConnectionStore();
+
 const loading = ref<number[]>([]);
 const progress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
 const preferredConnectionId = ref<number>(0);
@@ -92,9 +92,9 @@ function setPreferredPlexServerConnection(value: number) {
 
 function setup() {
 	useSubscription(
-		SignalrService.getServerConnectionProgressByPlexServerId(props.plexServer?.id ?? -1).subscribe((progressData) => {
-			set(progress, progressData);
-		}),
+		signalrStore
+			.getServerConnectionProgressByPlexServerId(props.plexServer?.id ?? -1)
+			.subscribe((progressData) => set(progress, progressData)),
 	);
 }
 

@@ -12,8 +12,9 @@
 
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
-import { SignalrService } from '@service';
+import { set } from '@vueuse/core';
 import { SyncServerProgress } from '@dto/mainApi';
+import { useSignalrStore } from '~/store';
 
 const progressList = ref<SyncServerProgress[]>([]);
 
@@ -32,9 +33,11 @@ const getText = computed(() => {
 
 onMounted(() => {
 	useSubscription(
-		SignalrService.getAllSyncServerProgress().subscribe((progress) => {
-			progressList.value = progress;
-		}),
+		useSignalrStore()
+			.getAllSyncServerProgress()
+			.subscribe((progress) => {
+				set(progressList, progress);
+			}),
 	);
 
 	// useSubscription(SignalrService.getPlexAccountRefreshProgress(), (data) => {

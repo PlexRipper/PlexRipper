@@ -60,29 +60,25 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		setup(config: IAppConfig): Observable<ISetupResult> {
 			return from(
 				(async () => {
-					// Disable SignalR initialization in test mode
-					// if (this.isInTestMode()) {
-					// 	return Promise.resolve();
-					// }
 					Log.debug('Setting up SignalR Service');
 					const options: IHttpConnectionOptions = {
 						logger: LogLevel.Information,
 					};
 					// Setup Connections
 					progressHubConnection =
-						useCypressSignalRMock('progress') ??
+						useCypressSignalRMock('progress', { enableForVitest: true }) ??
 						new HubConnectionBuilder()
 							.withUrl(`${config.baseUrl}/progress`, options)
 							.withAutomaticReconnect()
 							.build();
 					notificationHubConnection =
-						useCypressSignalRMock('notifications') ??
+						useCypressSignalRMock('notifications', { enableForVitest: true }) ??
 						new HubConnectionBuilder()
 							.withUrl(`${config.baseUrl}/notifications`, options)
 							.withAutomaticReconnect()
 							.build();
 
-					await setupSubscriptions();
+					setupSubscriptions();
 					await startProgressHubConnection();
 					await startNotificationHubConnection();
 				})(),

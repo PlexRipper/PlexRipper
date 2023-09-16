@@ -129,27 +129,6 @@ public class PlexServerController : BaseController
         return ToActionResult(await _plexServerService.SetPreferredConnection(plexServerId, plexServerConnectionId));
     }
 
-    /// <summary>
-    ///     Checks if the server is currently online and available.
-    /// </summary>
-    /// <param name="plexServerId"></param>
-    /// <returns></returns>
-    [HttpGet("status-check/{plexServerId:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerStatusDTO>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> CheckPlexServerStatus(int plexServerId)
-    {
-        if (plexServerId <= 0)
-            return BadRequestInvalidId(nameof(plexServerId));
-
-        var plexServerConnectionResult = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexServerId));
-
-        var result = await _plexServerConnectionsService.CheckPlexServerConnectionStatusAsync(plexServerConnectionResult.Value);
-
-        return ToActionResult<PlexServerStatus, PlexServerStatusDTO>(result);
-    }
-
     #endregion
 
     #endregion

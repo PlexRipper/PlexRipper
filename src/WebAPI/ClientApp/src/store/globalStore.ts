@@ -27,7 +27,7 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 		config: {} as IAppConfig,
 	});
 	const actions = {
-		setupServices({ config, i18n }: { config: IAppConfig; i18n: I18nObjectType }): Observable<any> {
+		setupServices({ config, i18n }: { config: IAppConfig; i18n?: I18nObjectType }): Observable<any> {
 			Log.info('Starting Setup Process');
 
 			state.config = config;

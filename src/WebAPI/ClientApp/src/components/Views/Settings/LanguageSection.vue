@@ -36,7 +36,6 @@ import { useLocalizationStore } from '~/store';
 import ILocaleConfig from '@interfaces/ILocaleConfig';
 
 interface ILanguageOption extends ILocaleConfig {
-	path: string;
 	value: string;
 	img: string;
 }
@@ -44,11 +43,12 @@ interface ILanguageOption extends ILocaleConfig {
 const localizationStore = useLocalizationStore();
 
 const language = computed({
-	get: () => get(languageOptions).find((x) => x.value === localizationStore.getLanguageLocale.code) ?? ({} as ILanguageOption),
+	get: (): ILanguageOption =>
+		get(languageOptions).find((x) => x.value === localizationStore.getLanguageLocale.code) ?? ({} as ILanguageOption),
 	set: (value: ILanguageOption) => localizationStore.changeLanguageLocale(value.code),
 });
 
-const languageOptions = computed(() =>
+const languageOptions = computed((): ILanguageOption[] =>
 	localizationStore.getLanguageLocaleOptions.map((locale) => ({
 		...locale,
 		value: locale.code,

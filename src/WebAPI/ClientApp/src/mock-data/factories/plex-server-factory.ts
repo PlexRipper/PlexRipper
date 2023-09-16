@@ -12,7 +12,7 @@ export function generatePlexServer({
 	partialData = {},
 }: {
 	id: number;
-	config: Partial<MockConfig>;
+	config?: Partial<MockConfig>;
 	partialData?: Partial<PlexServerConnectionDTO>;
 }): PlexServerDTO {
 	checkConfig(config);

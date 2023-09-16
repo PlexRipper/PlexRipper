@@ -17,10 +17,10 @@ export const useLocalizationStore = defineStore('LocalizationStore', () => {
 
 	// Actions
 	const actions = {
-		setup(i18n: I18nObjectType): Observable<ISetupResult> {
+		setup(i18n?: I18nObjectType): Observable<ISetupResult> {
 			return of({ name: useHelpStore.name, isSuccess: true }).pipe(tap(() => actions.setI18nObject(i18n)));
 		},
-		setI18nObject(i18n: I18nObjectType) {
+		setI18nObject(i18n?: I18nObjectType) {
 			if (!i18n) {
 				Log.error('i18n object is not defined');
 				return;
@@ -40,9 +40,10 @@ export const useLocalizationStore = defineStore('LocalizationStore', () => {
 			actions.changeLanguageLocale(get(i18n.locale));
 		},
 		changeLanguageLocale(isoCode: string) {
-			state.i18nRef.setLocale(isoCode);
-			useSettingsStore().languageSettings.language = isoCode;
-			Log.info('Localization has been set to:', isoCode);
+			state.i18nRef.setLocale(isoCode).then(() => {
+				useSettingsStore().languageSettings.language = isoCode;
+				Log.info('Localization has been set to:', isoCode);
+			});
 		},
 	};
 

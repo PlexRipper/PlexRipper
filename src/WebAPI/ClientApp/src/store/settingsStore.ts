@@ -1,5 +1,7 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import Log from 'consola';
+import { Observable, of, Subject } from 'rxjs';
+import { debounceTime, switchMap, tap } from 'rxjs/operators';
 import {
 	ConfirmationSettingsDTO,
 	DateTimeSettingsDTO,
@@ -13,9 +15,12 @@ import {
 	SettingsModelDTO,
 	ViewMode,
 } from '@dto/mainApi';
+import ISetupResult from '@interfaces/service/ISetupResult';
+import { getSettings, updateSettings } from '@api/settingsApi';
 
-export const useSettingsStore = defineStore('settingsStore', {
-	state: (): {
+export const useSettingsStore = defineStore('SettingsStore', () => {
+	// State
+	const state = reactive<{
 		generalSettings: GeneralSettingsDTO;
 		debugSettings: DebugSettingsDTO;
 		confirmationSettings: ConfirmationSettingsDTO;
@@ -24,7 +29,7 @@ export const useSettingsStore = defineStore('settingsStore', {
 		downloadManagerSettings: DownloadManagerSettingsDTO;
 		languageSettings: LanguageSettingsDTO;
 		serverSettings: ServerSettingsDTO;
-	} => ({
+	}>({
 		generalSettings: {
 			debugMode: false,
 			activeAccountId: 0,
@@ -53,24 +58,57 @@ export const useSettingsStore = defineStore('settingsStore', {
 		serverSettings: {
 			data: [],
 		},
-	}),
-	actions: {
-		setSettingsState(settings: SettingsModelDTO) {
-			this.generalSettings = settings.generalSettings;
-			this.debugSettings = settings.debugSettings;
-			this.confirmationSettings = settings.confirmationSettings;
-			this.dateTimeSettings = settings.dateTimeSettings;
-			this.displaySettings = settings.displaySettings;
-			this.downloadManagerSettings = settings.downloadManagerSettings;
-			this.languageSettings = settings.languageSettings;
-			this.serverSettings = settings.serverSettings;
+	});
+
+	const _settingsUpdated = new Subject<SettingsModelDTO>();
+
+	// Actions
+	const actions = {
+		setup(): Observable<ISetupResult> {
+			// Send the settings to the server when they change
+			_settingsUpdated
+				.pipe(
+					debounceTime(1000),
+					switchMap((settings) => updateSettings(settings)),
+				)
+				.subscribe();
+
+			return actions.refreshSettings().pipe(
+				tap(() => {
+					useSettingsStore().$subscribe((mutation, state) => {
+						if (mutation.type) _settingsUpdated.next(state);
+					});
+				}),
+				switchMap(() => of({ name: useSettingsStore.name, isSuccess: true })),
+			);
 		},
+		refreshSettings(): Observable<SettingsModelDTO | null> {
+			return getSettings().pipe(
+				switchMap((settingsResult) => of(settingsResult?.value ?? null)),
+				tap((settings) => {
+					if (settings) {
+						actions.setSettingsState(settings);
+					}
+				}),
+			);
+		},
+		setSettingsState(settings: SettingsModelDTO) {
+			state.generalSettings = settings.generalSettings;
+			state.debugSettings = settings.debugSettings;
+			state.confirmationSettings = settings.confirmationSettings;
+			state.dateTimeSettings = settings.dateTimeSettings;
+			state.displaySettings = settings.displaySettings;
+			state.downloadManagerSettings = settings.downloadManagerSettings;
+			state.languageSettings = settings.languageSettings;
+			state.serverSettings = settings.serverSettings;
+		},
+
 		updateDownloadLimit(machineIdentifier: string, downloadLimit: number) {
-			const i = this.serverSettings.data.findIndex((server) => server.machineIdentifier === machineIdentifier);
+			const i = state.serverSettings.data.findIndex((server) => server.machineIdentifier === machineIdentifier);
 			if (i > -1) {
-				this.serverSettings.data.splice(i, 1, {
+				state.serverSettings.data.splice(i, 1, {
 					machineIdentifier,
-					plexServerName: this.serverSettings.data[i].plexServerName,
+					plexServerName: state.serverSettings.data[i].plexServerName,
 					downloadSpeedLimit: downloadLimit,
 				});
 			}
@@ -78,23 +116,36 @@ export const useSettingsStore = defineStore('settingsStore', {
 		updateDisplayMode(type: PlexMediaType, viewMode: ViewMode) {
 			switch (type) {
 				case PlexMediaType.Movie:
-					this.displaySettings.movieViewMode = viewMode;
+					state.displaySettings.movieViewMode = viewMode;
 					break;
 				case PlexMediaType.TvShow:
-					this.displaySettings.tvShowViewMode = viewMode;
+					state.displaySettings.tvShowViewMode = viewMode;
 					break;
 				default:
 					Log.error('Could not set view mode for type' + type);
 			}
 		},
-	},
-	getters: {
-		debugMode: (state) => state.debugSettings.debugModeEnabled,
-		getServerSettings: (state) => {
-			return (machineIdentifier?: string) =>
-				machineIdentifier ? state.serverSettings.data.find((user) => user.machineIdentifier === machineIdentifier) : null;
-		},
-	},
+	};
+
+	// Getters
+	const getters = {
+		debugMode: computed((): boolean => state.debugSettings.debugModeEnabled),
+		getServerSettings: computed(
+			() => (machineIdentifier?: string) =>
+				machineIdentifier ? state.serverSettings.data.find((user) => user.machineIdentifier === machineIdentifier) : null,
+		),
+		shouldMaskServerNames: computed(
+			(): boolean => state.debugSettings.debugModeEnabled && state.debugSettings.maskServerNames,
+		),
+		shouldMaskLibraryNames: computed(
+			(): boolean => state.debugSettings.debugModeEnabled && state.debugSettings.maskLibraryNames,
+		),
+	};
+	return {
+		...toRefs(state),
+		...actions,
+		...getters,
+	};
 });
 
 if (import.meta.hot) {

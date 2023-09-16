@@ -22,11 +22,11 @@ export function getPlexLibrary(libraryId: number): Observable<ResultDTO<PlexLibr
 	});
 }
 
-export function refreshPlexLibrary(libraryId: number): Observable<ResultDTO<PlexLibraryDTO | null>> {
+export function reSyncPlexLibrary(libraryId: number): Observable<ResultDTO<PlexLibraryDTO | null>> {
 	return PlexRipperAxios.post({
 		url: `${PLEX_LIBRARY_RELATIVE_PATH}/refresh/`,
 		apiCategory: logText,
-		apiName: refreshPlexLibrary.name,
+		apiName: reSyncPlexLibrary.name,
 		data: {
 			plexLibraryId: libraryId,
 		},

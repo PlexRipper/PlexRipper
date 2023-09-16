@@ -1,4 +1,3 @@
-import { randBoolean } from '@ngneat/falso';
 import { checkConfig, MockConfig } from '@mock';
 import { PlexServerDTO, SettingsModelDTO, ViewMode } from '@dto/mainApi';
 
@@ -34,7 +33,6 @@ export function generateSettingsModel({
 		languageSettings: {
 			language: 'en-US',
 		},
-
 		generalSettings: {
 			firstTimeSetup: validConfig.firstTimeSetup,
 			debugMode: true,

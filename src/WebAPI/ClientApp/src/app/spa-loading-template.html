@@ -1,0 +1,77 @@
+<html>
+	<head>
+		<title>PlexRipper!</title>
+		<style>
+			html,
+			body {
+				height: 100%;
+				margin: 0;
+				padding: 0;
+			}
+
+			body {
+				background-color: #2a0909 !important;
+				background-image: url('/img/background/background.png');
+			}
+
+			.background-effect {
+				z-index: -1 !important;
+				position: fixed;
+				width: 100%;
+				height: 100%;
+				top: 0;
+				display: flex;
+				justify-content: center;
+			}
+
+			.background-effect .logo-square {
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				margin: auto;
+				animation: rotate-animation 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+			}
+
+			@keyframes rotate-animation {
+				from {
+					transform: rotateY(0deg);
+				}
+
+				to {
+					transform: rotateY(359deg);
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="background-effect">
+			<img alt="PlexRipper Logo" class="logo-square" height="256" src="/img/logo/full-logo-256.png" width="256" />
+		</div>
+		<script>
+			// Check if WebGL is available.
+			const canvas = document.createElement('canvas');
+			const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+			window.waveEffect = null;
+
+			if (gl instanceof WebGLRenderingContext) {
+				window.waveEffect = VANTA.WAVES({
+					el: 'body',
+					mouseControls: true,
+					touchControls: true,
+					gyroControls: false,
+					minHeight: 1000.0,
+					minWidth: 1200.0,
+					scale: 1.0,
+					scaleMobile: 1.0,
+					color: 0x880000,
+					shininess: 43.0,
+					waveHeight: 4.0,
+					waveSpeed: 1.25,
+					zoom: 0.65,
+				});
+			}
+		</script>
+	</body>
+</html>

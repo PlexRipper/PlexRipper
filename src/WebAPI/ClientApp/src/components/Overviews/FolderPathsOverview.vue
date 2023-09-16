@@ -10,7 +10,7 @@
 		</q-row>
 	</template>
 	<template v-else>
-		<q-section v-for="(folderGroup, i) in getFolderPathsGroups" :key="i">
+		<q-section v-for="(folderGroup, i) in folderPathStore.getFolderPathsGroups(onlyDefaults)" :key="i">
 			<template v-if="!onlyDefaults" #header> {{ folderGroup.header }}</template>
 			<template v-if="folderGroup.paths.length > 0">
 				<q-row v-for="folderPath in folderGroup.paths" :key="folderPath.id" class="q-my-sm">
@@ -51,7 +51,7 @@
 			</template>
 			<!--	Add Path Button	-->
 			<q-row v-if="folderGroup.isFolderAddable" justify="center" class="q-my-sm">
-				<q-col cols="1">
+				<q-col cols="auto">
 					<AddIconButton :disabled="!allowEditing" @click="addFolderPath(folderGroup)" />
 				</q-col>
 			</q-row>
@@ -63,132 +63,65 @@
 </template>
 
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
-import { get } from '@vueuse/core';
-import { kebabCase } from 'lodash-es';
-import { FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
-import { DownloadService, FolderPathService } from '@service';
-import { useI18n, useOpenControlDialog, toFolderPathStringId } from '#imports';
+import { FolderPathDTO } from '@dto/mainApi';
+import { useI18n, useOpenControlDialog, toFolderPathStringId, useFolderPathStore, useSubscription } from '#imports';
+import IFolderPathGroup from '@interfaces/IFolderPathGroup';
 
 const { t } = useI18n();
-const props = withDefaults(defineProps<{ onlyDefaults?: boolean }>(), {
+const folderPathStore = useFolderPathStore();
+const downloadStore = useDownloadStore();
+withDefaults(defineProps<{ onlyDefaults?: boolean }>(), {
 	onlyDefaults: false,
 });
 
 const directoryBrowserName = 'customDirectoryBrowser';
-const folderPaths = ref<FolderPathDTO[]>([]);
-const allowEditing = ref(true);
-
-const getFolderPathsGroups = computed((): IFolderPathGroup[] => {
-	const folderPathGroups: IFolderPathGroup[] = [];
-	// Default Paths
-	folderPathGroups.push({
-		header: t('components.folder-paths-overview.main.header'),
-		// The first 3 folderPaths are always the default ones.
-		paths: get(folderPaths).filter((x) => x.id === 1 || x.id === 2 || x.id === 3),
-		mediaType: PlexMediaType.None,
-		folderType: FolderType.None,
-		IsFolderDeletable: false,
-		isFolderNameEditable: false,
-		isFolderAddable: false,
-	});
-
-	if (props.onlyDefaults) {
-		return folderPathGroups;
-	}
-
-	// Movie Paths
-	folderPathGroups.push({
-		header: t('components.folder-paths-overview.movie.header'),
-		paths: get(folderPaths).filter(
-			(x) => x.folderType === FolderType.MovieFolder && !folderPathGroups[0].paths.some((y) => y.id === x.id),
-		),
-		mediaType: PlexMediaType.Movie,
-		folderType: FolderType.MovieFolder,
-		IsFolderDeletable: true,
-		isFolderNameEditable: true,
-		isFolderAddable: true,
-	});
-
-	// TvShow Paths
-	folderPathGroups.push({
-		header: t('components.folder-paths-overview.tv-show.header'),
-		paths: get(folderPaths).filter(
-			(x) => x.folderType === FolderType.TvShowFolder && !folderPathGroups[0].paths.some((y) => y.id === x.id),
-		),
-		mediaType: PlexMediaType.TvShow,
-		folderType: FolderType.TvShowFolder,
-		IsFolderDeletable: true,
-		isFolderNameEditable: true,
-		isFolderAddable: true,
-	});
-
-	return folderPathGroups;
-});
 
 const openDirectoryBrowser = (path: FolderPathDTO): void => {
 	useOpenControlDialog(directoryBrowserName, path);
 };
 
+const allowEditing = computed(() => {
+	return downloadStore.getActiveDownloadList().length === 0;
+});
+
 const confirmDirectoryBrowser = (path: FolderPathDTO): void => {
-	const i = folderPaths.value.findIndex((x) => x.id === path.id);
+	const i = folderPathStore.getFolderPaths.findIndex((x) => x.id === path.id);
 	if (i > -1) {
-		const folderPath = { ...folderPaths.value[i], directory: path.directory };
-		FolderPathService.updateFolderPath(folderPath);
+		const folderPath = { ...folderPathStore.getFolderPaths[i], directory: path.directory };
+		folderPathStore.updateFolderPath(folderPath);
 	}
 };
 
-const addFolderPath = (folderGroup: IFolderPathGroup): void => {
-	FolderPathService.createFolderPath({
-		id: 0,
-		displayName: t(`components.folder-paths-overview.${toFolderPathStringId(folderGroup.folderType)}.default-name`),
-		directory: '',
-		folderType: folderGroup.folderType,
-		mediaType: folderGroup.mediaType,
-		isValid: false,
-	});
-};
+function addFolderPath(folderGroup: IFolderPathGroup): void {
+	useSubscription(
+		folderPathStore
+			.createFolderPath({
+				id: 0,
+				displayName: t(`components.folder-paths-overview.${toFolderPathStringId(folderGroup.folderType)}.default-name`),
+				directory: '',
+				folderType: folderGroup.folderType,
+				mediaType: folderGroup.mediaType,
+				isValid: false,
+			})
+			.subscribe(),
+	);
+}
 
-const deleteFolderPath = (id: number): void => {
-	FolderPathService.deleteFolderPath(id);
-};
+function deleteFolderPath(id: number): void {
+	folderPathStore.deleteFolderPath(id).subscribe();
+}
 
 function toTranslation(type: string): string {
 	return `help.settings.paths.${kebabCase(type)}`;
 }
 
 const saveDisplayName = (id: number, value: string): void => {
-	const folderPathIndex = folderPaths.value.findIndex((x) => x.id === id);
+	const folderPathIndex = folderPathStore.getFolderPaths.findIndex((x) => x.id === id);
 	if (folderPathIndex > -1) {
-		const folderPath = { ...folderPaths.value[folderPathIndex], displayName: value };
-		FolderPathService.updateFolderPath(folderPath);
+		const folderPath = { ...folderPathStore.getFolderPaths[folderPathIndex], displayName: value };
+		folderPathStore.updateFolderPath(folderPath);
 	}
 };
-
-onMounted(() => {
-	useSubscription(
-		FolderPathService.getFolderPaths().subscribe((data) => {
-			folderPaths.value = data ?? [];
-		}),
-	);
-
-	// Ensure there are no active downloads before being allowed to change.
-	useSubscription(
-		DownloadService.getActiveDownloadList().subscribe((data) => {
-			allowEditing.value = data?.length === 0 ?? false;
-		}),
-	);
-});
-
-interface IFolderPathGroup {
-	header: string;
-	paths: FolderPathDTO[];
-	mediaType: PlexMediaType;
-	folderType: FolderType;
-	isFolderNameEditable: boolean;
-	isFolderAddable: boolean;
-	IsFolderDeletable: boolean;
-}
 </script>
 <style lang="scss">
 .folder-path-input {

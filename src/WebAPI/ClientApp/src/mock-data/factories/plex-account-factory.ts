@@ -8,6 +8,7 @@ import {
 	randRecentDate,
 	randUuid,
 } from '@ngneat/falso';
+import { times } from 'lodash-es';
 import { MockConfig } from '@mock/interfaces/MockConfig';
 import { PlexAccountDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
@@ -70,7 +71,7 @@ export function generatePlexAccounts({
 	partialData?: Partial<PlexAccountDTO>;
 }): PlexAccountDTO[] {
 	const validConfig = checkConfig(config);
-	return Array(validConfig.plexAccountCount)
-		.fill(null)
-		.map(() => generatePlexAccount({ id: plexAccountIdIndex++, plexServers, plexLibraries, partialData, config }));
+	return times(validConfig.plexAccountCount, () =>
+		generatePlexAccount({ id: plexAccountIdIndex++, plexServers, plexLibraries, partialData, config }),
+	);
 }

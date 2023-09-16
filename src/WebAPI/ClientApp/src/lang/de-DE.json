@@ -57,6 +57,10 @@
                 "download-url": "Download URL",
                 "file-name": "Datei Name",
                 "status": "Status"
+            },
+            "invalid-download-task": {
+                "body": "Fehler beim Abrufen der Details für diese Download-Aufgabe:",
+                "title": "Die Download-Aufgabe konnte nicht abgerufen werden"
             }
         },
         "media-overview": {
@@ -73,7 +77,8 @@
             "paths": "Pfade",
             "settings": "Einstellungen",
             "ui": "UI",
-            "buttons": "Tasten"
+            "buttons": "Tasten",
+            "scratchpad": "Notizblock"
         },
         "notifications-drawer": {
             "clear-notifications": "Alle Benachrichtigungen löschen",
@@ -122,7 +127,9 @@
                     "plex-version": "Plex Version",
                     "device": "Gerät",
                     "platform": "Plattform",
-                    "platform-version": "Plattformversion"
+                    "platform-version": "Plattformversion",
+                    "all-connections-failed": "Beim Herstellen einer Verbindung zum Server sind alle Verbindungen fehlgeschlagen. Der Server ist höchstwahrscheinlich offline ...",
+                    "at-least-one-connection-successful": "Mindestens eine Verbindung war erfolgreich, was bedeutet, dass mit dem Server eine Verbindung hergestellt werden kann!"
                 }
             },
             "no-servers-error": ""
@@ -155,6 +162,10 @@
         },
         "media-selection-dialog": {
             "title": "Legen Sie den Indexbereich fest, um das Medium auszuwählen (#{min} - #{max})"
+        },
+        "q-status": {
+            "server-connectable": "Server ist online und verbindbar!",
+            "server-unconnectable": "Es kann keine Verbindung zum Server hergestellt werden und er ist möglicherweise offline."
         }
     },
     "confirmation": {

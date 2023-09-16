@@ -3,8 +3,8 @@ import { switchMap, take, tap } from 'rxjs/operators';
 import { catchError, Observable, of } from 'rxjs';
 import { AxiosObservable } from 'axios-observable';
 import { AxiosError, AxiosResponse } from 'axios';
-import AlertService from '@service/alertService';
 import ResultDTO from '@dto/ResultDTO';
+import { useAlertStore } from '~/store';
 
 export function checkForError<T = any>(
 	logText?: string,
@@ -14,11 +14,12 @@ export function checkForError<T = any>(
 	return (source$) =>
 		source$.pipe(
 			catchError((error: AxiosError | any) => {
+				const alertStore = useAlertStore();
 				Log.error('FATAL NETWORK ERROR: ', error);
 
 				const url = new URL(error.config.url, error.config.baseURL);
 				if (!suppressAlert) {
-					AlertService.showAlert({
+					alertStore.showAlert({
 						id: 0,
 						title: error.message,
 						text: `Failed a request to url: ${url}`,

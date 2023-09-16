@@ -63,12 +63,14 @@ import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import { useOpenControlDialog } from '@composables/event-bus';
-import { DownloadConfirmation } from '#components';
-import { AlertService, HelpService, MediaService } from '@service';
 import { PlexAccountDTO, PlexMediaSlimDTO } from '@dto/mainApi';
 import { generateDefaultFolderPaths, generatePlexAccount } from '@factories';
+import { useAlertStore, useHelpStore, useMediaStore } from '~/store';
 
 const { t } = useI18n();
+const helpStore = useHelpStore();
+const alertStore = useAlertStore();
+
 const serverDialogName = 'debugServerDialog';
 const downloadConfirmationName = 'debugDownloadConfirmation';
 const checkServerConnectionDialogName = 'checkServerConnectionDialogName';
@@ -104,7 +106,7 @@ function openDownloadConfirmationDialog(): void {
 }
 
 function openHelpDialog(): void {
-	HelpService.openHelpDialog('help.settings.ui.language.language-selection');
+	helpStore.openHelpDialog('help.settings.ui.language.language-selection');
 }
 
 function openCheckServerConnectionsDialog(): void {
@@ -120,18 +122,20 @@ function openDirectoryBrowserDialog(): void {
 }
 
 function addAlert(): void {
-	AlertService.showAlert({ id: 0, title: 'Alert Title', text: 'random alert' });
-	AlertService.showAlert({ id: 0, title: 'Alert Title', text: 'random alert' });
+	alertStore.showAlert({ id: 0, title: 'Alert Title 1', text: 'random alert' });
+	alertStore.showAlert({ id: 0, title: 'Alert Title 2', text: 'random alert' });
 }
 
 onMounted(() => {
 	useSubscription(
-		MediaService.getTvShowMediaData(32).subscribe((data) => {
-			if (data) {
-				set(mediaTableRows, [data]);
-				set(mediaItem, data);
-			}
-		}),
+		useMediaStore()
+			.getTvShowMediaData(32)
+			.subscribe((data) => {
+				if (data) {
+					set(mediaTableRows, [data]);
+					set(mediaItem, data);
+				}
+			}),
 	);
 });
 </script>

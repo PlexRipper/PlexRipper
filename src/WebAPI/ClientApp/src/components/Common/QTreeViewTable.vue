@@ -14,6 +14,7 @@
 		:tick-strategy="!notSelectable ? 'leaf' : 'none'"
 		:nodes="nodes"
 		node-key="id"
+		no-transition
 		:no-connectors="!connectors"
 		:accordion="false"
 		:default-expand-all="defaultExpandAll"
@@ -26,7 +27,6 @@
 </template>
 
 <script setup lang="ts">
-import { flatMapDeep } from 'lodash-es';
 import { QTree } from 'quasar';
 import { get } from '@vueuse/core';
 import { QTreeViewTableHeader, QTreeViewTableItem } from '@props';

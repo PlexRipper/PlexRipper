@@ -26,9 +26,22 @@ export function toPlexMediaType(downloadType: DownloadTaskType) {
 			return PlexMediaType.Season;
 		case DownloadTaskType.Episode:
 			return PlexMediaType.Episode;
-		// case DownloadTaskType.Music:
-		// 	return PlexMediaType.Music;
 		default:
 			return PlexMediaType.Unknown;
+	}
+}
+
+export function toDownloadTaskType(mediaType: PlexMediaType) {
+	switch (mediaType) {
+		case PlexMediaType.Movie:
+			return DownloadTaskType.Movie;
+		case PlexMediaType.TvShow:
+			return DownloadTaskType.TvShow;
+		case PlexMediaType.Season:
+			return DownloadTaskType.Season;
+		case PlexMediaType.Episode:
+			return DownloadTaskType.Episode;
+		default:
+			return DownloadTaskType.None;
 	}
 }

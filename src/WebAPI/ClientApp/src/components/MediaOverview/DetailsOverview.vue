@@ -86,19 +86,17 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import sum from 'lodash-es/sum';
 import { forkJoin } from 'rxjs';
 import { take } from 'rxjs/operators';
 import Log from 'consola';
 import { PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
-import { MediaList } from '#components';
-import { MediaService } from '@service';
-import { useI18n, useMediaOverviewStore } from '#imports';
+import { useMediaStore, useMediaOverviewStore, useI18n } from '#imports';
 
 defineProps<{
 	name: string;
 }>();
 
+const mediaStore = useMediaStore();
 const mediaOverviewStore = useMediaOverviewStore();
 const { t } = useI18n();
 const loading = ref(false);
@@ -134,9 +132,9 @@ function openDetails({ mediaId, type }: { mediaId: number; type: PlexMediaType }
 	mediaOverviewStore.downloadButtonVisible = false;
 	useSubscription(
 		forkJoin({
-			mediaDetail: MediaService.getMediaDataDetailById(mediaId, type),
-			mediaItemData: MediaService.getMediaDataById(mediaId, type),
-			thumbnail: MediaService.getThumbnail(mediaId, type, get(thumbWidth), get(thumbHeight)),
+			mediaDetail: mediaStore.getMediaDataDetailById(mediaId, type),
+			mediaItemData: mediaStore.getMediaDataById(mediaId, type),
+			thumbnail: mediaStore.getThumbnail(mediaId, type, get(thumbWidth), get(thumbHeight)),
 		})
 			.pipe(take(1))
 			.subscribe({

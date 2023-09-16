@@ -44,11 +44,3 @@ export function setPreferredPlexServerConnection(serverId: number, connectionId:
 		apiName: setPreferredPlexServerConnection.name,
 	});
 }
-
-export function checkPlexServer(serverId: number): Observable<ResultDTO<PlexServerStatusDTO>> {
-	return PlexRipperAxios.get<PlexServerStatusDTO>({
-		url: `${PLEX_SERVER_RELATIVE_PATH}/status-check/${serverId}`,
-		apiCategory: logText,
-		apiName: checkPlexServer.name,
-	});
-}

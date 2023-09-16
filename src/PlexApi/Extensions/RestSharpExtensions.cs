@@ -177,7 +177,7 @@ public static class RestSharpExtensions
             RetryAttemptIndex = retryAttempt,
             RetryAttemptCount = retryCount,
             TimeToNextRetry = timeToWaitSeconds,
-            Completed = response.ResponseStatus == ResponseStatus.Completed,
+            Completed = response.ResponseStatus == ResponseStatus.Completed || retryAttempt == retryCount,
             ErrorMessage = response.ErrorMessage ?? "",
             ConnectionSuccessful = response.IsSuccessful,
         });

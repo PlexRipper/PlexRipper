@@ -1,9 +1,12 @@
 @import '../variables';
 @import '../mixins';
 
-
 .q-dark {
 	background-color: transparent;
+}
+
+body.body--dark {
+	background-image: url('/img/background/background.png');
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -71,6 +74,23 @@ body {
 		}
 	}
 }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * QTooltip
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+.q-tooltip {
+	@extend .blur
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * QPage
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+.q-page {
+	// We need a set height so we calculate the remaining content space by subtracting other component heights
+	height: calc(100vh - $app-bar-height);
+	width: 100%;
+	overflow: scroll;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // * QAlert
@@ -107,6 +127,18 @@ body {
 	&.body--dark,
 	&.body--light {
 		.q-tab-panels {
+			background-color: transparent;
+		}
+	}
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * QMarkUpTable
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+body {
+	&.body--dark,
+	&.body--light {
+		.q-markup-table {
 			background-color: transparent;
 		}
 	}

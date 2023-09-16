@@ -12,8 +12,8 @@
 			<q-col>
 				<!--	Overview bar	-->
 				<media-overview-bar
-					:server="server"
-					:library="library"
+					:server="libraryStore.getServerByLibraryId(props.libraryId)"
+					:library="libraryStore.getLibrary(props.libraryId)"
 					:detail-mode="!mediaOverviewStore.showMediaOverview"
 					@back="closeDetailsOverview"
 					@view-change="changeView"
@@ -59,19 +59,16 @@
 	<DownloadConfirmation
 		:name="downloadConfirmationName"
 		:items="mediaOverviewStore.items"
-		@download="DownloadService.downloadMedia($event)" />
+		@download="downloadStore.downloadMedia($event)" />
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
-import { get, set } from '@vueuse/core';
+import { set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRouter, RouteLocationNormalized, RouteLocationNormalizedLoaded } from 'vue-router';
-import { combineLatest } from 'rxjs';
-import type { DownloadMediaDTO, PlexServerDTO } from '@dto/mainApi';
-import { LibraryProgress, PlexLibraryDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
-import { DownloadService, LibraryService, MediaService, SignalrService } from '@service';
-import { DetailsOverview, DownloadConfirmation, MediaTable } from '#components';
+import type { DownloadMediaDTO } from '@dto/mainApi';
+import { LibraryProgress, PlexMediaType, ViewMode } from '@dto/mainApi';
 import {
 	useMediaOverviewBarDownloadCommandBus,
 	useMediaOverviewSortBus,
@@ -79,14 +76,23 @@ import {
 	listenMediaOverviewDownloadCommand,
 	useCloseControlDialog,
 	sendMediaOverviewDownloadCommand,
+	useMediaStore,
+	useMediaOverviewStore,
+	useSettingsStore,
+	useDownloadStore,
+	useLibraryStore,
+	useServerStore,
+	useI18n,
 } from '#imports';
 import { listenMediaOverviewOpenDetailsCommand, sendMediaOverviewOpenDetailsCommand } from '@composables/event-bus';
-import { useMediaOverviewStore, useSettingsStore } from '~/store';
 
 // region SetupFields
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const mediaOverviewStore = useMediaOverviewStore();
+const downloadStore = useDownloadStore();
+const libraryStore = useLibraryStore();
+const serverStore = useServerStore();
 const router = useRouter();
 
 // endregion
@@ -95,9 +101,6 @@ const downloadConfirmationName = 'mediaDownloadConfirmation';
 const mediaDetailsDialogName = 'mediaDetailsDialogName';
 const mediaSelectionDialogName = 'mediaSelectionDialogName';
 const isRefreshing = ref(false);
-
-const server = ref<PlexServerDTO | null>(null);
-const library = ref<PlexLibraryDTO | null>(null);
 
 const libraryProgress = ref<LibraryProgress | null>(null);
 
@@ -125,9 +128,11 @@ const isConfirmationEnabled = computed(() => {
 });
 
 const refreshingText = computed(() => {
+	const library = libraryStore.getLibrary(props.libraryId);
+	const server = libraryStore.getServerByLibraryId(props.libraryId);
 	return t('components.media-overview.is-refreshing', {
-		library: get(library) ? get(library)?.title : t('general.commands.unknown'),
-		server: get(server) ? get(server)?.name : t('general.commands.unknown'),
+		library: library ? libraryStore.getLibraryName(library.id) : t('general.commands.unknown'),
+		server: server ? serverStore.getServerName(server.id) : t('general.commands.unknown'),
 	});
 });
 
@@ -152,27 +157,31 @@ function resetProgress(isRefreshingValue: boolean) {
 function refreshLibrary() {
 	set(isRefreshing, true);
 	resetProgress(true);
-	LibraryService.refreshLibrary(props.libraryId).subscribe(() => {
-		set(isRefreshing, false);
-	});
+	useSubscription(
+		libraryStore.reSyncLibrary(props.libraryId).subscribe(() => {
+			set(isRefreshing, false);
+		}),
+	);
 }
 
 function onRequestMedia({ page = 0, size = 0 }: { page: number; size: number }) {
 	useSubscription(
-		MediaService.getMediaData(props.libraryId, page, size).subscribe({
-			next: (mediaData) => {
-				if (!mediaData) {
-					Log.error(`MediaOverview => No media data for library id ${props.libraryId} was found`);
-				}
-				mediaOverviewStore.setMedia(mediaData, props.mediaType);
-			},
-			error: (error) => {
-				Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
-			},
-			complete: () => {
-				set(loading, false);
-			},
-		}),
+		useMediaStore()
+			.getMediaData(props.libraryId, page, size)
+			.subscribe({
+				next: (mediaData) => {
+					if (!mediaData) {
+						Log.error(`MediaOverview => No media data for library id ${props.libraryId} was found`);
+					}
+					mediaOverviewStore.setMedia(mediaData, props.mediaType);
+				},
+				error: (error) => {
+					Log.error(`MediaOverview => Error while server and mediaData for library id ${props.libraryId}:`, error);
+				},
+				complete: () => {
+					set(loading, false);
+				},
+			}),
 	);
 }
 
@@ -188,7 +197,7 @@ listenMediaOverviewDownloadCommand((command) => {
 		if (isConfirmationEnabled.value) {
 			useOpenControlDialog(downloadConfirmationName, command);
 		} else {
-			DownloadService.downloadMedia(command);
+			downloadStore.downloadMedia(command);
 		}
 	}
 });
@@ -228,7 +237,7 @@ function closeDetailsOverview() {
 useMediaOverviewBarDownloadCommandBus().on(() => {
 	if (mediaOverviewStore.showMediaOverview) {
 		const downloadCommand: DownloadMediaDTO = {
-			plexServerId: server.value?.id ?? 0,
+			plexServerId: libraryStore.getServerByLibraryId(props.libraryId)?.id ?? 0,
 			plexLibraryId: props.libraryId,
 			mediaIds: mediaOverviewStore.selection.keys,
 			type: props.mediaType,
@@ -323,37 +332,21 @@ onMounted(() => {
 		size: 0,
 	});
 
-	// Get the server and library
-	useSubscription(
-		combineLatest({
-			library: LibraryService.getLibrary(props.libraryId),
-			server: LibraryService.getServerByLibraryId(props.libraryId),
-		}).subscribe((data) => {
-			if (!data.library) {
-				Log.error(`MediaOverview => Library for library id ${props.libraryId} was not found`);
-			} else {
-				set(library, data.library);
-			}
-			if (!data.server) {
-				Log.error(`MediaOverview => Server for library id ${props.libraryId} was not found`);
-			} else {
-				set(server, data.server);
-			}
-			setupRouter();
-		}),
-	);
+	setupRouter();
 
 	useSubscription(
-		SignalrService.getLibraryProgress(props.libraryId).subscribe((data) => {
-			if (data) {
-				set(libraryProgress, data);
-				set(isRefreshing, data.isRefreshing);
-				if (data.isComplete) {
-					onRequestMedia({ size: 0, page: 0 });
-					set(isRefreshing, false);
+		useSignalrStore()
+			.getLibraryProgress(props.libraryId)
+			.subscribe((data) => {
+				if (data) {
+					set(libraryProgress, data);
+					set(isRefreshing, data.isRefreshing);
+					if (data.isComplete) {
+						onRequestMedia({ size: 0, page: 0 });
+						set(isRefreshing, false);
+					}
 				}
-			}
-		}),
+			}),
 	);
 
 	if (props.mediaId) {

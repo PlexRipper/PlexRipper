@@ -21,15 +21,25 @@ export default defineNuxtConfig({
 			isDocker: process.env.IS_DOCKER === 'true' || false,
 		},
 	},
+	app: {
+		head: {
+			script: [
+				{ src: 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js' },
+				{ src: 'https://cdn.jsdelivr.net/npm/vanta/dist/vanta.waves.min.js' },
+			],
+			noscript: [{ children: 'JavaScript is required' }],
+		},
+	},
 	modules: [
 		// Doc: https://github.com/Maiquu/nuxt-quasar
 		'nuxt-quasar-ui',
 		'@vueuse/nuxt',
-		// '@nuxt/devtools',
 		// Doc: https://i18n.nuxtjs.org/
 		'@nuxtjs/i18n',
 		'@vue-macros/nuxt',
 		'nuxt-vitest',
+		'nuxt-lodash',
+		// '@nuxt/devtools',
 		[
 			'@pinia/nuxt',
 			{
@@ -64,18 +74,25 @@ export default defineNuxtConfig({
 		strict: true,
 	},
 	macros: {
+		// TODO this can be removed in Vue 3.3
 		// Enabled betterDefine to allow importing interfaces into defineProps
 		betterDefine: true,
 		defineOptions: true,
+	},
+	lodash: {
+		prefix: false,
+		prefixSkip: false,
+		upperAfterPrefix: false,
 	},
 	i18n: {
 		lazy: true,
 		langDir: './lang/',
 		defaultLocale: 'en-US',
+		// Ensure the SettingsStore is updated as well when changes are made here:
 		locales: [
-			{ text: 'English', code: 'en-US', iso: 'en-US', file: 'en-US.json' },
-			{ text: 'Français', code: 'fr-FR', iso: 'fr-FR', file: 'fr-FR.json' },
-			{ text: 'Deutsch', code: 'de-DE', iso: 'de-DE', file: 'de-DE.json' },
+			{ text: 'English', code: 'en-US', iso: 'en-US', bcp47Code: 'en', file: 'en-US.json' },
+			{ text: 'Français', code: 'fr-FR', iso: 'fr-FR', bcp47Code: 'fr', file: 'fr-FR.json' },
+			{ text: 'Deutsch', code: 'de-DE', iso: 'de-DE', bcp47Code: 'de', file: 'de-DE.json' },
 		],
 		// TODO: This breaks npm run build in "@nuxtjs/i18n": "^8.0.0-beta.11", check again when out of beta
 		// vueI18n: './src/config/vueI18n.config.ts',
@@ -84,7 +101,7 @@ export default defineNuxtConfig({
 	/*
 	 ** Global CSS: https://nuxt.com/docs/api/configuration/nuxt-config#css
 	 */
-	css: ['@/assets/scss/style.scss'],
+	css: ['primevue/resources/primevue.css', '@/assets/scss/primevue/plexripper-theme/theme.scss', '@/assets/scss/style.scss'],
 	imports: {
 		dirs: ['store'],
 	},
@@ -98,8 +115,8 @@ export default defineNuxtConfig({
 		'@api-urls': fileURLToPath(new URL('./src/types/const/api-urls.ts', import.meta.url)),
 		'@props': fileURLToPath(new URL('./src/types/props/', import.meta.url)),
 		'@fixtures': fileURLToPath(new URL('./cypress/fixtures/', import.meta.url)),
-		'@services-test-base': fileURLToPath(new URL('./tests/services/_base/base.ts', import.meta.url)),
-		'@service': fileURLToPath(new URL('./src/service/', import.meta.url)),
+		'@services-test-base': fileURLToPath(new URL('./tests/_base/base.ts', import.meta.url)),
+		'@store': fileURLToPath(new URL('./src/store/', import.meta.url)),
 		'@enums': fileURLToPath(new URL('./src/types/enums/', import.meta.url)),
 		'@mock': fileURLToPath(new URL('./src/mock-data/', import.meta.url)),
 		'@factories': fileURLToPath(new URL('./src/mock-data/factories/', import.meta.url)),
@@ -136,6 +153,9 @@ export default defineNuxtConfig({
 		prerender: {
 			crawlLinks: true,
 		},
+	},
+	build: {
+		transpile: ['primevue'],
 	},
 	hooks: {
 		'pages:extend'(pages) {

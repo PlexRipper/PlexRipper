@@ -16,7 +16,8 @@
 							</q-item-section>
 							<q-item-section>
 								<q-item-label>
-									{{ server ? server.name : '?' }} - {{ library ? library.title : '?' }}
+									{{ server ? serverStore.getServerName(server.id) : $t('general.commands.unknown') }} -
+									{{ library ? libraryStore.getLibraryName(library.id) : $t('general.commands.unknown') }}
 								</q-item-label>
 								<q-item-label v-if="library && !detailMode" caption>
 									{{ libraryCountFormatted }} -
@@ -92,8 +93,10 @@
 <script setup lang="ts">
 import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { PlexMediaType, ViewMode } from '@dto/mainApi';
-import { useMediaOverviewBarDownloadCommandBus, useMediaOverviewStore } from '#imports';
+import { useLibraryStore, useMediaOverviewBarDownloadCommandBus, useMediaOverviewStore, useServerStore } from '#imports';
 
+const libraryStore = useLibraryStore();
+const serverStore = useServerStore();
 const mediaOverviewStore = useMediaOverviewStore();
 const downloadCommandBus = useMediaOverviewBarDownloadCommandBus();
 

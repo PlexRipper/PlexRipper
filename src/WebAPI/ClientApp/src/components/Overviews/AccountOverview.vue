@@ -1,7 +1,14 @@
 <template>
 	<q-row justify="center">
 		<!-- Plex Accounts -->
-		<q-col v-for="(account, index) in accounts" :key="index" class="q-pa-sm" cols="4" md="6" style="max-width: 395px" xs="12">
+		<q-col
+			v-for="(account, index) in accountStore.getAccounts"
+			:key="index"
+			class="q-pa-sm"
+			cols="4"
+			md="6"
+			style="max-width: 395px"
+			xs="12">
 			<account-card :account="account" @open-dialog="openDialog(false, account)" />
 		</q-col>
 		<!-- Add new Account card -->
@@ -14,15 +21,12 @@
 </template>
 
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
-
-import { set } from '@vueuse/core';
-import { AccountService } from '@service';
 import { PlexAccountDTO } from '@dto/mainApi';
 import { useOpenControlDialog } from '@composables/event-bus';
+import { useAccountStore } from '~/store';
 
-const accounts = ref<PlexAccountDTO[]>([]);
 const accountDialogName = 'accountDialogName';
+const accountStore = useAccountStore();
 
 function openDialog(isNewAccount: boolean, account: PlexAccountDTO | null = null): void {
 	useOpenControlDialog(accountDialogName, {
@@ -30,12 +34,4 @@ function openDialog(isNewAccount: boolean, account: PlexAccountDTO | null = null
 		account,
 	});
 }
-
-onMounted(() => {
-	useSubscription(
-		AccountService.getAccounts().subscribe((data) => {
-			set(accounts, data ?? []);
-		}),
-	);
-});
 </script>

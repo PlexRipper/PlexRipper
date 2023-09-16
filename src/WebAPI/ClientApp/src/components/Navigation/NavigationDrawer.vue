@@ -22,9 +22,6 @@
 </template>
 
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
-import { set } from '@vueuse/core';
-import { DownloadService } from '@service';
 import { QExpansionListProps } from '@interfaces/components/QExpansionListProps';
 import { useSettingsStore } from '~/store';
 
@@ -32,10 +29,8 @@ withDefaults(defineProps<{ showDrawer: boolean }>(), {
 	showDrawer: false,
 });
 const settingsStore = useSettingsStore();
-
+const downloadStore = useDownloadStore();
 const items = ref<object[]>([]);
-
-const downloadTaskCount = ref(0);
 
 const getNavItems = computed((): QExpansionListProps[] => {
 	const mainItems: QExpansionListProps[] = [
@@ -44,7 +39,7 @@ const getNavItems = computed((): QExpansionListProps[] => {
 			icon: 'mdi-download',
 			link: '/downloads',
 			type: 'badge',
-			count: downloadTaskCount.value,
+			count: downloadStore.getActiveDownloadList().length,
 		},
 		{
 			title: 'components.navigation-drawer.settings',
@@ -81,6 +76,11 @@ const getNavItems = computed((): QExpansionListProps[] => {
 			icon: 'mdi-bug-outline',
 			children: [
 				{
+					title: 'components.navigation-drawer.scratchpad',
+					icon: 'mdi-note-edit',
+					link: '/debug-pages/scratchpad',
+				},
+				{
 					title: 'components.navigation-drawer.dialogs',
 					icon: 'mdi-dock-window',
 					link: '/debug-pages/dialogs',
@@ -109,12 +109,6 @@ function onHide() {
 onMounted(() => {
 	items.value = getNavItems.value;
 	document.body.classList.add('navigation-drawer-opened');
-
-	useSubscription(
-		DownloadService.getTotalDownloadsCount().subscribe((count) => {
-			set(downloadTaskCount, count);
-		}),
-	);
 });
 </script>
 

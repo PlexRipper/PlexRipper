@@ -12,6 +12,8 @@ public class PathProvider : IPathProvider
 
     private static readonly string _logsFolder = "Logs";
 
+    public static string DefaultRootSubDirectory => "PlexRipper";
+
     public static string DefaultMovieDestinationFolder => "Movies";
 
     public static string DefaultDownloadsDestinationFolder => "Downloads";
@@ -60,16 +62,44 @@ public class PathProvider : IPathProvider
             if (devRootPath is not null)
                 return devRootPath;
 
+            string rootPath = "/";
+
             switch (OsInfo.CurrentOS)
             {
                 case OperatingSystemPlatform.Linux:
                 case OperatingSystemPlatform.Osx:
-                    return "/";
+
+                    string PlexRipperEnvRootPath = EnvironmentExtensions.GetPlexRipperRootPath();
+                    string HomeDirectory = EnvironmentExtensions.GetUserHomeDirectoryPath();
+
+                    if (PlexRipperEnvRootPath is not null)
+                    {
+                        rootPath = PlexRipperEnvRootPath;
+                        break;
+                    }
+
+                    if (HomeDirectory is not null)
+                    {
+                        rootPath = Path.Combine(HomeDirectory, DefaultRootSubDirectory);
+                        break;
+                    }
+
+                    rootPath = Path.Combine("/", DefaultRootSubDirectory);
+                    break;
                 case OperatingSystemPlatform.Windows:
-                    return Path.GetPathRoot(Assembly.GetExecutingAssembly().Location) ?? @"C:\";
+                    rootPath = Path.GetPathRoot(Assembly.GetExecutingAssembly().Location) ?? @"C:\";
+                    break;
                 default:
-                    return "/";
+                    rootPath = "/";
+                    break;
             }
+
+            if (!System.IO.Directory.Exists(rootPath))
+            {
+                Directory.CreateDirectory(rootPath);
+            }
+
+            return rootPath;
         }
     }
 

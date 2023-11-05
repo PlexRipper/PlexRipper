@@ -62,15 +62,15 @@ public class PathProvider : IPathProvider
             if (devRootPath is not null)
                 return devRootPath;
 
-            string rootPath = "/";
+            var rootPath = "/";
 
             switch (OsInfo.CurrentOS)
             {
                 case OperatingSystemPlatform.Linux:
                 case OperatingSystemPlatform.Osx:
 
-                    string PlexRipperEnvRootPath = EnvironmentExtensions.GetPlexRipperRootPath();
-                    string HomeDirectory = EnvironmentExtensions.GetUserHomeDirectoryPath();
+                    var PlexRipperEnvRootPath = EnvironmentExtensions.GetPlexRipperRootPath();
+                    var HomeDirectory = EnvironmentExtensions.GetUserHomeDirectoryPath();
 
                     if (PlexRipperEnvRootPath is not null)
                     {
@@ -94,7 +94,7 @@ public class PathProvider : IPathProvider
                     break;
             }
 
-            if (!System.IO.Directory.Exists(rootPath))
+            if (!Directory.Exists(rootPath))
             {
                 Directory.CreateDirectory(rootPath);
             }

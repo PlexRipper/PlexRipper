@@ -293,12 +293,12 @@
                 },
                 "date-and-time": {
                     "long-date-format": {
-                        "label": "Dazum langformat",
+                        "label": "Datum im Langformat",
                         "text": "",
                         "title": ""
                     },
                     "short-date-format": {
-                        "label": "Datum kurzformat",
+                        "label": "Datum im Kurzformat",
                         "text": "",
                         "title": ""
                     },

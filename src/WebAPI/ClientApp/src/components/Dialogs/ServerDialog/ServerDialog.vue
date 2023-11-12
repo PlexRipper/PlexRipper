@@ -63,7 +63,7 @@
 
 						<!-- Server Connections Tab Content	-->
 						<q-tab-panel name="server-connection" data-cy="server-dialog-tab-content-2">
-							<ServerConnectionsTabContent :plex-server="plexServer" :is-visible="isVisible" />
+							<ServerConnectionsTabContent :plex-server-id="plexServerId" :is-visible="isVisible" />
 						</q-tab-panel>
 
 						<!--	Server Configuration Tab Content	-->
@@ -78,7 +78,7 @@
 							data-cy="server-dialog-tab-content-4">
 							<server-library-destinations-tab-content
 								:plex-server="plexServer"
-								:plex-libraries="libraryStore.getLibrariesByServerId(plexServer?.id ?? 0)" />
+								:plex-libraries="libraryStore.getLibrariesByServerId(plexServerId)" />
 						</q-tab-panel>
 
 						<!--	Server Commands -->

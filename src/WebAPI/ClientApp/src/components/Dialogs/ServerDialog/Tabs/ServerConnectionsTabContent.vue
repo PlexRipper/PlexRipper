@@ -9,11 +9,7 @@
 			<q-item>
 				<!-- Radio Button -->
 				<q-item-section avatar tag="label">
-					<q-radio
-						:model-value="preferredConnectionId"
-						:val="connection.id"
-						color="red"
-						@update:model-value="setPreferredPlexServerConnection" />
+					<q-radio v-model="preferredConnectionId" :val="connection.id" color="red" />
 				</q-item-section>
 				<!-- Connection Icon -->
 				<q-item-section avatar tag="label">
@@ -52,17 +48,27 @@ import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 import { useServerConnectionStore, useSignalrStore } from '~/store';
 
 const { t } = useI18n();
+
+const serverStore = useServerStore();
 const signalrStore = useSignalrStore();
 const serverConnectionStore = useServerConnectionStore();
 
 const loading = ref<number[]>([]);
 const progress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
-const preferredConnectionId = ref<number>(0);
 
 const props = defineProps<{
-	plexServer: PlexServerDTO | null;
+	plexServerId: number;
 	isVisible: boolean;
 }>();
+
+const plexServer = computed<PlexServerDTO | null>(() => serverStore.getServer(props.plexServerId));
+
+const preferredConnectionId = computed<number>({
+	get: () => get(plexServer)?.preferredConnectionId ?? -1,
+	set: (value) => {
+		useSubscription(serverConnectionStore.setPreferredPlexServerConnection(props.plexServerId, value).subscribe());
+	},
+});
 
 function getProgress(plexServerConnectionId: number): ServerConnectionCheckStatusProgressDTO | null {
 	return get(progress).find((x) => x.plexServerConnectionId === plexServerConnectionId) ?? null;
@@ -84,16 +90,10 @@ function checkPlexConnection(plexServerConnectionId: number) {
 	);
 }
 
-function setPreferredPlexServerConnection(value: number) {
-	set(preferredConnectionId, value);
-
-	useSubscription(serverConnectionStore.setPreferredPlexServerConnection(props.plexServer?.id ?? -1, value).subscribe());
-}
-
 function setup() {
 	useSubscription(
 		signalrStore
-			.getServerConnectionProgressByPlexServerId(props.plexServer?.id ?? -1)
+			.getServerConnectionProgressByPlexServerId(props.plexServerId)
 			.subscribe((progressData) => set(progress, progressData)),
 	);
 }

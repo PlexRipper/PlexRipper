@@ -405,6 +405,13 @@
                         "text": "Cela changera la langue de presque tout. Il est peu probable que des textes tels que des erreurs soient traduits. Toutes les corrections de traduction ou de nouvelles langues sont grandement appréciées, consultez www.plexripper.rocks pour plus d'informations sur la façon dont vous pouvez ajouter de nouvelles langues.",
                         "title": "Choisissez votre langue préférée"
                     }
+                },
+                "general-settings": {
+                    "toggle-animated-background": {
+                        "label": "Désactiver l'arrière-plan animé",
+                        "text": "L'arrière-plan animé peut entraîner des problèmes de performances dans le navigateur. Cette bascule peut désactiver l'animation et afficher uniquement un arrière-plan statique.",
+                        "title": "Désactiver l'animation d'arrière-plan"
+                    }
                 }
             }
         }
@@ -465,6 +472,9 @@
                 },
                 "language": {
                     "header": "Language"
+                },
+                "general-settings": {
+                    "header": "Général"
                 }
             }
         },

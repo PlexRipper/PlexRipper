@@ -34,6 +34,7 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			debugMode: false,
 			activeAccountId: 0,
 			firstTimeSetup: true,
+			disableAnimatedBackground: false,
 		},
 		debugSettings: { debugModeEnabled: false, maskLibraryNames: false, maskServerNames: false },
 		confirmationSettings: {

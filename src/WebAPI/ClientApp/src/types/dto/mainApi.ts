@@ -339,6 +339,7 @@ export interface GeneralSettingsDTO {
 	/** @format int32 */
 	activeAccountId: number;
 	debugMode: boolean;
+	disableAnimatedBackground: boolean;
 }
 
 export interface IError {

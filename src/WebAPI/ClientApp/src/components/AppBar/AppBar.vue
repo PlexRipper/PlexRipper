@@ -18,6 +18,9 @@
 
 				<q-btn icon="mdi-github" flat href="https://github.com/PlexRipper/PlexRipper" target="_blank" />
 
+				<!-- Background Animation Toggle -->
+				<BackgroundAnimationToggleButton />
+
 				<!-- DarkMode toggle -->
 				<DarkModeToggleButton />
 

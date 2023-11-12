@@ -405,6 +405,13 @@
                         "text": "This will change the language to almost everything. Text such as errors are unlikely to be translated. Any translation fixes or new languages are greatly appreciated, check www.plexripper.rocks for information on how you can add new languages.",
                         "title": "Pick your preferred language"
                     }
+                },
+                "general-settings": {
+                    "toggle-animated-background": {
+                        "label": "Disable Animated Background",
+                        "text": "The animated background can cause performance issues in the browser. This toggle can be disable the animation and show just a static background.",
+                        "title": "Disable the background animation"
+                    }
                 }
             }
         }
@@ -465,6 +472,9 @@
                 },
                 "language": {
                     "header": "Language"
+                },
+                "general-settings": {
+                    "header": "General"
                 }
             }
         },

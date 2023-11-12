@@ -5,6 +5,11 @@
 </template>
 
 <script setup lang="ts">
+import { useSettingsStore } from '@store';
+import { destroyBackgroundEffect, setupBackgroundEffect } from '@/public/background-effect.js';
+
+const settingsStore = useSettingsStore();
+
 const $q = useQuasar();
 
 const props = withDefaults(defineProps<{ hideBackground?: boolean }>(), {
@@ -15,10 +20,10 @@ const isDark = computed(() => {
 	return $q.dark.isActive;
 });
 
-const vantaEffect = computed(() => {
-	// @ts-ignore
-	return window?.waveEffect ?? null;
-});
+watch(
+	() => settingsStore.generalSettings.disableAnimatedBackground,
+	(value) => toggleAnimatedBackground(!value),
+);
 
 const backgroundOverlay = computed(() => {
 	if (props.hideBackground) {
@@ -32,6 +37,18 @@ const backgroundOverlay = computed(() => {
 		'dark-background': isDark.value,
 		'light-background': !isDark.value,
 	};
+});
+
+function toggleAnimatedBackground(state: boolean) {
+	if (state) {
+		setupBackgroundEffect();
+	} else {
+		destroyBackgroundEffect();
+	}
+}
+
+onMounted(() => {
+	toggleAnimatedBackground(!settingsStore.generalSettings.disableAnimatedBackground);
 });
 </script>
 

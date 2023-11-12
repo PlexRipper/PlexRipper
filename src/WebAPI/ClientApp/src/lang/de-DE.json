@@ -405,6 +405,13 @@
                         "text": "Dies wird die Sprache für fast alles ändern. Text wie Fehler werden wahrscheinlich nicht übersetzt. Übersetzungskorrekturen oder neue Sprachen sind sehr willkommen, besuchen Sie www.plexripper.rocks für Informationen darüber, wie Sie neue Sprachen hinzufügen können.",
                         "title": "Wählen Sie Ihre bevorzugte Sprache"
                     }
+                },
+                "general-settings": {
+                    "toggle-animated-background": {
+                        "label": "Deaktivieren Sie den animierten Hintergrund",
+                        "text": "Der animierte Hintergrund kann zu Leistungsproblemen im Browser führen. Mit diesem Schalter kann die Animation deaktiviert und nur ein statischer Hintergrund angezeigt werden.",
+                        "title": "Deaktivieren Sie die Hintergrundanimation"
+                    }
                 }
             }
         }
@@ -465,6 +472,9 @@
                 },
                 "language": {
                     "header": "Sprache"
+                },
+                "general-settings": {
+                    "header": "Allgemeines"
                 }
             }
         },

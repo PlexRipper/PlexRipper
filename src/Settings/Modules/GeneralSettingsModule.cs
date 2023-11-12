@@ -11,6 +11,8 @@ public class GeneralSettingsModule : BaseSettingsModule<IGeneralSettings>, IGene
 
     public bool DebugMode { get; set; }
 
+    public bool DisableAnimatedBackground { get; set; }
+
     public override string Name => "GeneralSettings";
 
     public override IGeneralSettings DefaultValues()
@@ -20,6 +22,7 @@ public class GeneralSettingsModule : BaseSettingsModule<IGeneralSettings>, IGene
             FirstTimeSetup = true,
             ActiveAccountId = 0,
             DebugMode = false,
+            DisableAnimatedBackground = false,
         };
     }
 
@@ -28,6 +31,7 @@ public class GeneralSettingsModule : BaseSettingsModule<IGeneralSettings>, IGene
         FirstTimeSetup = sourceSettings.FirstTimeSetup;
         ActiveAccountId = sourceSettings.ActiveAccountId;
         DebugMode = sourceSettings.DebugMode;
+        DisableAnimatedBackground = sourceSettings.DisableAnimatedBackground;
         return Result.Ok();
     }
 
@@ -38,6 +42,7 @@ public class GeneralSettingsModule : BaseSettingsModule<IGeneralSettings>, IGene
             FirstTimeSetup = FirstTimeSetup,
             ActiveAccountId = ActiveAccountId,
             DebugMode = DebugMode,
+            DisableAnimatedBackground = DisableAnimatedBackground,
         };
     }
 }

@@ -6,4 +6,6 @@ public class GeneralSettingsDTO : IGeneralSettings
 
     public int ActiveAccountId { get; set; }
     public bool DebugMode { get; set; }
+
+    public bool DisableAnimatedBackground { get; set; }
 }

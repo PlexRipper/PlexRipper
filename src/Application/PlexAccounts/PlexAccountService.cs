@@ -70,7 +70,7 @@ public class PlexAccountService : IPlexAccountService
 
         if (plexAccountId == 0)
         {
-            var enabledAccounts = await _mediator.Send(new GetAllPlexAccountsQuery(onlyEnabled: true));
+            var enabledAccounts = await _mediator.Send(new GetAllPlexAccountsQuery(OnlyEnabled: true));
             if (enabledAccounts.IsFailed)
                 return enabledAccounts.ToResult();
 

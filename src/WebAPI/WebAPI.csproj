@@ -58,5 +58,15 @@
 	<ItemGroup>
 		<Compile Include="..\Domain\GlobalUsings.cs" />
 	</ItemGroup>
+	<ItemGroup>
+	  <_ContentIncludedByDefault Remove="ClientAppLegacy\.npm-upgrade.json" />
+	  <_ContentIncludedByDefault Remove="ClientAppLegacy\cypress\tsconfig.json" />
+	  <_ContentIncludedByDefault Remove="ClientAppLegacy\package-lock.json" />
+	  <_ContentIncludedByDefault Remove="ClientAppLegacy\package.json" />
+	  <_ContentIncludedByDefault Remove="ClientAppLegacy\src\lang\de-DE.json" />
+	  <_ContentIncludedByDefault Remove="ClientAppLegacy\src\lang\en-US.json" />
+	  <_ContentIncludedByDefault Remove="ClientAppLegacy\src\lang\fr-FR.json" />
+	  <_ContentIncludedByDefault Remove="ClientAppLegacy\tsconfig.json" />
+	</ItemGroup>
 
 </Project>

@@ -1,5 +1,6 @@
 ﻿using Application.Contracts;
 using AutoMapper;
+using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.WebAPI.Common.DTO;
@@ -9,13 +10,32 @@ namespace PlexRipper.WebAPI.Controllers;
 
 public class PlexAccountController : BaseController
 {
+    #region Fields
+
+    private readonly IMediator _mediator;
     private readonly IPlexAccountService _plexAccountService;
 
-    public PlexAccountController(ILog log, IPlexAccountService plexAccountService, IMapper mapper, INotificationsService notificationsService) : base(log,
+    #endregion
+
+    #region Constructors
+
+    public PlexAccountController(
+        ILog log,
+        IMediator mediator,
+        IPlexAccountService plexAccountService,
+        IMapper mapper,
+        INotificationsService notificationsService) : base(log,
         mapper, notificationsService)
     {
+        _mediator = mediator;
         _plexAccountService = plexAccountService;
     }
+
+    #endregion
+
+    #region Methods
+
+    #region Public
 
     // GET: api/<PlexAccountController>
     [HttpGet]
@@ -115,26 +135,10 @@ public class PlexAccountController : BaseController
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
     public async Task<IActionResult> CheckUsername(string username)
     {
-        if (string.IsNullOrEmpty(username) || username.Length < 5)
-            return BadRequest(Result.Fail("Invalid username"));
-
         try
         {
-            var result = await _plexAccountService.CheckIfUsernameIsAvailableAsync(username);
-
-            if (result.IsFailed)
-                return BadRequest(result.ToResult());
-
-            if (result.Value)
-            {
-                var logEvent = _log.Debug("Username: {UserName} is available", username);
-                return Ok(Result.Ok(true).WithSuccess(logEvent.ToLogString()));
-            }
-            else
-            {
-                var logEvent = _log.Warning("Account with username: {UserName} already exists!", username);
-                return Ok(Result.Ok(false).WithError(logEvent.ToLogString()));
-            }
+            var result = await _mediator.Send(new CheckUsernameTaskQuery(username));
+            return result.IsFailed ? BadRequest(result.ToResult()) : Ok(result);
         }
         catch (Exception e)
         {
@@ -169,4 +173,8 @@ public class PlexAccountController : BaseController
 
         return ToActionResult<AuthPin, AuthPin>(authPinResult);
     }
+
+    #endregion
+
+    #endregion
 }

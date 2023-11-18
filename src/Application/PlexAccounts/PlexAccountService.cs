@@ -85,30 +85,6 @@ public class PlexAccountService : IPlexAccountService
         return Result.Ok();
     }
 
-    /// <summary>
-    /// Checks if an <see cref="PlexAccount"/> with the same username already exists.
-    /// </summary>
-    /// <param name="username">The username to check for.</param>
-    /// <returns>true if username is available.</returns>
-    public virtual async Task<Result<bool>> CheckIfUsernameIsAvailableAsync(string username)
-    {
-        var result = await _mediator.Send(new GetPlexAccountByUsernameQuery(username));
-
-        if (result.Has404NotFoundError())
-            return Result.Ok(true);
-
-        if (result.IsFailed)
-            return result.ToResult();
-
-        if (result.Value != null)
-        {
-            _log.Warning("An Account with the username: {UserName} already exists", username);
-            return Result.Ok(false);
-        }
-
-        _log.Debug("The username: {UserName} is available", username);
-        return Result.Ok(true);
-    }
 
     #endregion
 
@@ -181,7 +157,7 @@ public class PlexAccountService : IPlexAccountService
     public async Task<Result<PlexAccount>> CreatePlexAccountAsync(PlexAccount plexAccount)
     {
         _log.Debug("Creating account with username {UserName}", plexAccount.Username);
-        var result = await CheckIfUsernameIsAvailableAsync(plexAccount.Username);
+        var result = await _mediator.Send(new CheckUsernameTaskQuery(plexAccount.Username));
 
         // Fail on validation errors
         if (result.IsFailed)

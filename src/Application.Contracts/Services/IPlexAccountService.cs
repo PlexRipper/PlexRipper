@@ -8,13 +8,6 @@ public interface IPlexAccountService
     Task<Result<PlexAccount>> ValidatePlexAccountAsync(PlexAccount plexAccount);
 
     /// <summary>
-    /// Checks if an <see cref="PlexAccount"/> with the same username already exists.
-    /// </summary>
-    /// <param name="username">The username to check for.</param>
-    /// <returns>true if username is available.</returns>
-    Task<Result<bool>> CheckIfUsernameIsAvailableAsync(string username);
-
-    /// <summary>
     /// Returns the <see cref="PlexAccount"/> with the corresponding <see cref="PlexAccount"/>
     /// and the accessible <see cref="PlexServer">PlexServers</see>.
     /// </summary>

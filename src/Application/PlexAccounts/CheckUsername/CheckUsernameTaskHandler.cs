@@ -3,43 +3,27 @@ using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
 
-namespace PlexRipper.Application.PlexAccounts.CheckUsername;
+namespace PlexRipper.Application;
 
 public class CheckUsernameTaskValidator : AbstractValidator<CheckUsernameTaskRequest>
 {
-    #region Constructors
-
     public CheckUsernameTaskValidator()
     {
         RuleFor(x => x.Username).NotEmpty();
         RuleFor(x => x.Username).MinimumLength(5);
     }
-
-    #endregion
 }
 
 public class CheckUsernameTaskHandler : IRequestHandler<CheckUsernameTaskRequest, Result<bool>>
 {
-    #region Fields
-
     private readonly ILog _log;
     private readonly IMediator _mediator;
-
-    #endregion
-
-    #region Constructors
 
     public CheckUsernameTaskHandler(ILog log, IMediator mediator)
     {
         _log = log;
         _mediator = mediator;
     }
-
-    #endregion
-
-    #region Methods
-
-    #region Public
 
     public async Task<Result<bool>> Handle(CheckUsernameTaskRequest request, CancellationToken cancellationToken)
     {
@@ -60,8 +44,4 @@ public class CheckUsernameTaskHandler : IRequestHandler<CheckUsernameTaskRequest
         _log.Debug("The username: {UserName} is available", request.Username);
         return Result.Ok(true);
     }
-
-    #endregion
-
-    #endregion
 }

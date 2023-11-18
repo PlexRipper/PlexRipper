@@ -1,6 +1,5 @@
 ﻿using Application.Contracts;
 using AutoMapper;
-using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.WebAPI.Common.DTO;
@@ -10,14 +9,8 @@ namespace PlexRipper.WebAPI.Controllers;
 
 public class PlexAccountController : BaseController
 {
-    #region Fields
-
     private readonly IMediator _mediator;
     private readonly IPlexAccountService _plexAccountService;
-
-    #endregion
-
-    #region Constructors
 
     public PlexAccountController(
         ILog log,
@@ -30,12 +23,6 @@ public class PlexAccountController : BaseController
         _mediator = mediator;
         _plexAccountService = plexAccountService;
     }
-
-    #endregion
-
-    #region Methods
-
-    #region Public
 
     // GET: api/<PlexAccountController>
     [HttpGet]
@@ -173,8 +160,4 @@ public class PlexAccountController : BaseController
 
         return ToActionResult<AuthPin, AuthPin>(authPinResult);
     }
-
-    #endregion
-
-    #endregion
 }

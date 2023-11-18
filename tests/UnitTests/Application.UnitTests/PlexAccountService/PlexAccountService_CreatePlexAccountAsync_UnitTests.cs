@@ -1,8 +1,6 @@
 ﻿using Application.Contracts;
 using BackgroundServices.Contracts;
 using Data.Contracts;
-using PlexApi.Contracts;
-using PlexRipper.Application.PlexAccounts;
 
 namespace PlexRipper.Application.UnitTests;
 

@@ -4,7 +4,7 @@ using Data.Contracts;
 using Logging.Interface;
 using PlexApi.Contracts;
 
-namespace PlexRipper.Application.PlexAccounts;
+namespace PlexRipper.Application;
 
 public class PlexAccountService : IPlexAccountService
 {
@@ -84,7 +84,6 @@ public class PlexAccountService : IPlexAccountService
 
         return Result.Ok();
     }
-
 
     #endregion
 

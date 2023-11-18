@@ -5,7 +5,7 @@ using Logging.Interface;
 
 namespace PlexRipper.Application.PlexAccounts.CheckUsername;
 
-public class CheckUsernameTaskValidator : AbstractValidator<CheckUsernameTaskQuery>
+public class CheckUsernameTaskValidator : AbstractValidator<CheckUsernameTaskRequest>
 {
     #region Constructors
 
@@ -18,7 +18,7 @@ public class CheckUsernameTaskValidator : AbstractValidator<CheckUsernameTaskQue
     #endregion
 }
 
-public class CheckUsernameTaskHandler : IRequestHandler<CheckUsernameTaskQuery, Result<bool>>
+public class CheckUsernameTaskHandler : IRequestHandler<CheckUsernameTaskRequest, Result<bool>>
 {
     #region Fields
 
@@ -41,7 +41,7 @@ public class CheckUsernameTaskHandler : IRequestHandler<CheckUsernameTaskQuery, 
 
     #region Public
 
-    public async Task<Result<bool>> Handle(CheckUsernameTaskQuery request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(CheckUsernameTaskRequest request, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetPlexAccountByUsernameQuery(request.Username), cancellationToken);
 

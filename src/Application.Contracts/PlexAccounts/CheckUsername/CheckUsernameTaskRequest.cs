@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Application.Contracts;
 
-public class CheckUsernameTaskQuery : IRequest<Result<bool>>
+public class CheckUsernameTaskRequest : IRequest<Result<bool>>
 {
     #region Constructors
 
@@ -12,7 +12,7 @@ public class CheckUsernameTaskQuery : IRequest<Result<bool>>
     /// </summary>
     /// <param name="username">The username to check for.</param>
     /// <returns>true if the username is available.</returns>
-    public CheckUsernameTaskQuery(string username)
+    public CheckUsernameTaskRequest(string username)
     {
         Username = username;
     }

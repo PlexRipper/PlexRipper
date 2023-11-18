@@ -116,13 +116,13 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 	}
 
 	// PlexAccount call
-	const plexAccounts = generatePlexAccounts({ config, plexServers: result.plexServers, plexLibraries: result.plexLibraries });
+	result.plexAccounts = generatePlexAccounts({ config, plexServers: result.plexServers, plexLibraries: result.plexLibraries });
 	cy.intercept('GET', apiRoute({ type: APIRoute.PlexAccount }), {
 		statusCode: 200,
-		body: generateResultDTO(plexAccounts),
+		body: generateResultDTO(result.plexAccounts),
 	}).then(() => {
 		if (validConfig.debugDisplayData) {
-			cy.log('BasePageSetup -> plexAccounts', plexAccounts);
+			cy.log('BasePageSetup -> plexAccounts', result.plexAccounts);
 		}
 	});
 
@@ -175,13 +175,13 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBase
 	}
 
 	// Settings call
-	const settings = generateSettingsModel({ plexServers: result.plexServers, config });
+	result.settings = generateSettingsModel({ plexServers: result.plexServers, config });
 	cy.intercept('GET', apiRoute({ type: APIRoute.Settings }), {
 		statusCode: 200,
-		body: generateResultDTO(settings),
+		body: generateResultDTO(result.settings),
 	}).then(() => {
 		if (validConfig.debugDisplayData) {
-			cy.log('BasePageSetup -> settings', settings);
+			cy.log('BasePageSetup -> settings', result.settings);
 		}
 	});
 

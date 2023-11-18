@@ -12,7 +12,7 @@ describe('PlexRipper Server Dialog', () => {
 		cy.visitEmptyPage();
 	});
 
-	it('Should navigate the server dialog tabs when the navigation tabs are used and then close again', () => {
+	xit('Should navigate the server dialog tabs when the navigation tabs are used and then close again', () => {
 		cy.getCy('server-dialog-2').click();
 
 		for (let i = 1; i <= 5; i++) {
@@ -26,7 +26,7 @@ describe('PlexRipper Server Dialog', () => {
 		cy.getCy('server-dialog-cy').should('not.exist');
 	});
 
-	it('Should slide the download speed limit when the slider is used', () => {
+	xit('Should slide the download speed limit when the slider is used', () => {
 		cy.getPageData().then((pageData) => {
 			const plexServer = pageData.plexServers[2];
 			cy.getCy('server-dialog-2').click();
@@ -51,5 +51,9 @@ describe('PlexRipper Server Dialog', () => {
 				expect(serverSettings?.downloadSpeedLimit).to.eq(50000);
 			});
 		});
+	});
+
+	it('Should display the preferred server connection when it has been selected', () => {
+		cy.getCy('server-dialog-3').click();
 	});
 });

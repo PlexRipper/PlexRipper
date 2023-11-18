@@ -12,8 +12,4 @@
 		<ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="PlexAccounts\GetAll\" />
-	</ItemGroup>
-
 </Project>

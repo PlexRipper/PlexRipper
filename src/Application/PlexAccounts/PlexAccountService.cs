@@ -138,17 +138,6 @@ public class PlexAccountService : IPlexAccountService
     }
 
     /// <summary>
-    /// Retrieves all <see cref="PlexAccount"/>s with the included <see cref="PlexServer"/>s and <see cref="PlexLibrary"/>s.
-    /// </summary>
-    /// <param name="onlyEnabled">Should only enabled <see cref="PlexAccount"/>s be retrieved.</param>
-    /// <returns>A list of all <see cref="PlexAccount"/>s.</returns>
-    public Task<Result<List<PlexAccount>>> GetAllPlexAccountsAsync(bool onlyEnabled = false)
-    {
-        _log.Debug("Returning {Category} PlexAccounts", onlyEnabled ? "only enabled" : "all");
-        return _mediator.Send(new GetAllPlexAccountsQuery(true, true, onlyEnabled));
-    }
-
-    /// <summary>
     /// Creates an <see cref="PlexAccount"/> in the Database and performs an SetupAccountAsync().
     /// </summary>
     /// <param name="plexAccount">The unique account.</param>

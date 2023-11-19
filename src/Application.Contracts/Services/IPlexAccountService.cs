@@ -15,8 +15,6 @@ public interface IPlexAccountService
     /// <returns>The account found.</returns>
     Task<Result<PlexAccount>> GetPlexAccountAsync(int accountId);
 
-    Task<Result<List<PlexAccount>>> GetAllPlexAccountsAsync(bool onlyEnabled = false);
-
     /// <summary>
     /// Creates an <see cref="PlexAccount"/> in the Database and performs an SetupAccountAsync().
     /// </summary>

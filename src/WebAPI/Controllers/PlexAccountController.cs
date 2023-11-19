@@ -27,13 +27,12 @@ public class PlexAccountController : BaseController
     // GET: api/<PlexAccountController>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexAccountDTO>>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
     public async Task<IActionResult> GetAllAccounts([FromQuery] bool enabledOnly = false)
     {
-        var result = await _plexAccountService.GetAllPlexAccountsAsync(enabledOnly);
+        var result = await _mediator.Send(new GetAllPlexAccountsQuery(enabledOnly));
         if (result.IsFailed)
-            return BadRequest(result.ToResult());
+            return InternalServerError(result.ToResult());
 
         var mapResult = _mapper.Map<List<PlexAccountDTO>>(result.Value);
         if (!mapResult.Any() && enabledOnly)
@@ -42,7 +41,6 @@ public class PlexAccountController : BaseController
             return NotFound(Result.Fail(logEvent.ToLogString()));
         }
 
-        _log.Debug("Returned {PlexAccountCount} accounts", mapResult.Count);
         return Ok(Result.Ok(mapResult).WithSuccess($"Returned {mapResult.Count} accounts"));
     }
 

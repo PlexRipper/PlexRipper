@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Reflection;
 using AppAny.Quartz.EntityFrameworkCore.Migrations;
 using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
+using Data.Contracts;
 using Environment;
 using Logging.Interface;
 using Microsoft.Data.Sqlite;
@@ -12,7 +13,7 @@ using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;
 
-public sealed class PlexRipperDbContext : DbContext, ISetup
+public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContext
 {
     private readonly IPathProvider _pathProvider;
 
@@ -94,7 +95,6 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
     public bool HasBeenSetup { get; set; }
 
     private static readonly NaturalSortComparer NaturalComparer = new(StringComparison.InvariantCultureIgnoreCase);
-
 
     #endregion Properties
 

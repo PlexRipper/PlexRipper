@@ -32,13 +32,13 @@ public class CheckIsUsernameAvailableQueryHandler : IRequestHandler<CheckIsUsern
 
         if (plexAccount is null)
         {
-            _log.Warning("An Account with the username: {UserName} already exists", request.Username);
-            return Result.Ok(false);
+            _log.Debug("The username: {UserName} is available", request.Username);
+            return Result.Ok(true);
         }
         else
         {
-            _log.Debug("The username: {UserName} is available", request.Username);
-            return Result.Ok(true);
+            _log.Warning("An Account with the username: {UserName} already exists", request.Username);
+            return Result.Ok(false);
         }
     }
 }

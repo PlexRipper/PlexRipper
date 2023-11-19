@@ -38,31 +38,6 @@ public class PlexAccountService : IPlexAccountService
 
     #region Public
 
-    public virtual async Task<Result<PlexAccount>> ValidatePlexAccountAsync(PlexAccount plexAccount)
-    {
-        if (plexAccount is null)
-            return ResultExtensions.IsNull(nameof(plexAccount));
-
-        if (plexAccount.Username == string.Empty || plexAccount.Password == string.Empty)
-            return Result.Fail("Either the username or password were empty").LogWarning();
-
-        var plexSignInResult = await _plexApiService.PlexSignInAsync(plexAccount);
-        if (plexSignInResult.IsFailed)
-        {
-            // Check if 2FA might be enabled
-            if (plexSignInResult.HasPlexErrorEnterVerificationCode())
-            {
-                plexAccount.Is2Fa = true;
-                return Result.Ok(plexAccount);
-            }
-
-            return plexSignInResult;
-        }
-
-        _log.Debug("The PlexAccount with displayName {PlexAccountDisplayName} has been validated", plexAccount.DisplayName);
-        return plexSignInResult;
-    }
-
     /// <inheritdoc/>
     public async Task<Result> RefreshPlexAccount(int plexAccountId = 0)
     {
@@ -70,7 +45,7 @@ public class PlexAccountService : IPlexAccountService
 
         if (plexAccountId == 0)
         {
-            var enabledAccounts = await _mediator.Send(new GetAllPlexAccountsQuery(OnlyEnabled: true));
+            var enabledAccounts = await _mediator.Send(new GetAllPlexAccountsQuery(true));
             if (enabledAccounts.IsFailed)
                 return enabledAccounts.ToResult();
 

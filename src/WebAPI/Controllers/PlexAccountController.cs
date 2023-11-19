@@ -110,7 +110,7 @@ public class PlexAccountController : BaseController
     public async Task<IActionResult> Validate([FromBody] PlexAccountDTO account)
     {
         var plexAccount = _mapper.Map<PlexAccount>(account);
-        var result = await _plexAccountService.ValidatePlexAccountAsync(plexAccount);
+        var result = await _mediator.Send(new ValidatePlexAccountCommand(plexAccount));
         return ToActionResult<PlexAccount, PlexAccountDTO>(result);
     }
 

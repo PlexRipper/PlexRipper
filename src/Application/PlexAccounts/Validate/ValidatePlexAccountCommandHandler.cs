@@ -1,0 +1,50 @@
+using Application.Contracts;
+using Data.Contracts;
+using FluentValidation;
+using Logging.Interface;
+using PlexApi.Contracts;
+
+namespace PlexRipper.Application;
+
+public class ValidatePlexAccountCommandValidator : AbstractValidator<ValidatePlexAccountCommand>
+{
+    public ValidatePlexAccountCommandValidator()
+    {
+        RuleFor(x => x.PlexAccount).NotNull();
+        RuleFor(x => x.PlexAccount.Username).NotEmpty();
+        RuleFor(x => x.PlexAccount.Password).NotEmpty();
+    }
+}
+
+public class ValidatePlexAccountCommandHandler : IRequestHandler<ValidatePlexAccountCommand, Result<PlexAccount>>
+{
+    private readonly ILog _log;
+    private readonly IPlexRipperDbContext _dbContext;
+    private readonly IPlexApiService _plexApiService;
+
+    public ValidatePlexAccountCommandHandler(ILog log, IPlexRipperDbContext dbContext, IPlexApiService plexApiService)
+    {
+        _log = log;
+        _dbContext = dbContext;
+        _plexApiService = plexApiService;
+    }
+
+    public async Task<Result<PlexAccount>> Handle(ValidatePlexAccountCommand request, CancellationToken cancellationToken)
+    {
+        var plexSignInResult = await _plexApiService.PlexSignInAsync(request.PlexAccount);
+        if (plexSignInResult.IsFailed)
+        {
+            // Check if 2FA might be enabled
+            if (plexSignInResult.HasPlexErrorEnterVerificationCode())
+            {
+                request.PlexAccount.Is2Fa = true;
+                return Result.Ok(request.PlexAccount);
+            }
+
+            return plexSignInResult;
+        }
+
+        _log.Debug("The PlexAccount with displayName {PlexAccountDisplayName} has been validated", request.PlexAccount.DisplayName);
+        return plexSignInResult;
+    }
+}

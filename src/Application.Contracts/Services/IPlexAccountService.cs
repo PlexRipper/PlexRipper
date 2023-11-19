@@ -5,8 +5,6 @@ namespace Application.Contracts;
 
 public interface IPlexAccountService
 {
-    Task<Result<PlexAccount>> ValidatePlexAccountAsync(PlexAccount plexAccount);
-
     /// <summary>
     /// Returns the <see cref="PlexAccount"/> with the corresponding <see cref="PlexAccount"/>
     /// and the accessible <see cref="PlexServer">PlexServers</see>.

@@ -156,7 +156,7 @@ public class PlexAccountService : IPlexAccountService
     public async Task<Result<PlexAccount>> CreatePlexAccountAsync(PlexAccount plexAccount)
     {
         _log.Debug("Creating account with username {UserName}", plexAccount.Username);
-        var result = await _mediator.Send(new CheckUsernameTaskRequest(plexAccount.Username));
+        var result = await _mediator.Send(new CheckIsUsernameAvailableQuery(plexAccount.Username));
 
         // Fail on validation errors
         if (result.IsFailed)

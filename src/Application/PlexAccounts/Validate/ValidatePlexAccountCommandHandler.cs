@@ -1,5 +1,4 @@
 using Application.Contracts;
-using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
 using PlexApi.Contracts;
@@ -19,13 +18,11 @@ public class ValidatePlexAccountCommandValidator : AbstractValidator<ValidatePle
 public class ValidatePlexAccountCommandHandler : IRequestHandler<ValidatePlexAccountCommand, Result<PlexAccount>>
 {
     private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
     private readonly IPlexApiService _plexApiService;
 
-    public ValidatePlexAccountCommandHandler(ILog log, IPlexRipperDbContext dbContext, IPlexApiService plexApiService)
+    public ValidatePlexAccountCommandHandler(ILog log, IPlexApiService plexApiService)
     {
         _log = log;
-        _dbContext = dbContext;
         _plexApiService = plexApiService;
     }
 
@@ -44,7 +41,10 @@ public class ValidatePlexAccountCommandHandler : IRequestHandler<ValidatePlexAcc
         return Result.Ok(request.PlexAccount);
     }
 
-    private static bool IsTwoFactorAuth(Result<PlexAccount> plexSignInResult) => plexSignInResult.HasPlexErrorEnterVerificationCode();
+    private static bool IsTwoFactorAuth(Result<PlexAccount> plexSignInResult)
+    {
+        return plexSignInResult.HasPlexErrorEnterVerificationCode();
+    }
 
     private Result<PlexAccount> SignInSuccess(ValidatePlexAccountCommand request, Result<PlexAccount> plexSignInResult)
     {

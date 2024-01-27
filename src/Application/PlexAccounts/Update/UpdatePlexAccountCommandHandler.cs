@@ -1,10 +1,10 @@
-﻿using Data.Contracts;
+﻿using Application.Contracts;
+using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data;
+namespace PlexRipper.Application;
 
 public class UpdatePlexAccountValidator : AbstractValidator<UpdatePlexAccountCommand>
 {
@@ -23,9 +23,16 @@ public class UpdatePlexAccountValidator : AbstractValidator<UpdatePlexAccountCom
     }
 }
 
-public class UpdatePlexAccountHandler : BaseHandler, IRequestHandler<UpdatePlexAccountCommand, Result>
+public class UpdatePlexAccountHandler : IRequestHandler<UpdatePlexAccountCommand, Result>
 {
-    public UpdatePlexAccountHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    private readonly ILog _log;
+    private readonly IPlexRipperDbContext _dbContext;
+
+    public UpdatePlexAccountHandler(ILog log, IPlexRipperDbContext dbContext)
+    {
+        _log = log;
+        _dbContext = dbContext;
+    }
 
     public async Task<Result> Handle(UpdatePlexAccountCommand command, CancellationToken cancellationToken)
     {

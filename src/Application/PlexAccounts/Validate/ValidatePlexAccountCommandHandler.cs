@@ -32,18 +32,22 @@ public class ValidatePlexAccountCommandHandler : IRequestHandler<ValidatePlexAcc
     public async Task<Result<PlexAccount>> Handle(ValidatePlexAccountCommand request, CancellationToken cancellationToken)
     {
         var plexSignInResult = await _plexApiService.PlexSignInAsync(request.PlexAccount);
-        if (plexSignInResult.IsFailed)
-        {
-            // Check if 2FA might be enabled
-            if (plexSignInResult.HasPlexErrorEnterVerificationCode())
-            {
-                request.PlexAccount.Is2Fa = true;
-                return Result.Ok(request.PlexAccount);
-            }
+        if (plexSignInResult.IsSuccess)
+            return SignInSuccess(request, plexSignInResult);
 
-            return plexSignInResult;
-        }
+        return IsTwoFactorAuth(plexSignInResult) ? SignInTwoFactorAuth(request) : plexSignInResult;
+    }
 
+    private static Result<PlexAccount> SignInTwoFactorAuth(ValidatePlexAccountCommand request)
+    {
+        request.PlexAccount.Is2Fa = true;
+        return Result.Ok(request.PlexAccount);
+    }
+
+    private static bool IsTwoFactorAuth(Result<PlexAccount> plexSignInResult) => plexSignInResult.HasPlexErrorEnterVerificationCode();
+
+    private Result<PlexAccount> SignInSuccess(ValidatePlexAccountCommand request, Result<PlexAccount> plexSignInResult)
+    {
         _log.Debug("The PlexAccount with displayName {PlexAccountDisplayName} has been validated", request.PlexAccount.DisplayName);
         return plexSignInResult;
     }

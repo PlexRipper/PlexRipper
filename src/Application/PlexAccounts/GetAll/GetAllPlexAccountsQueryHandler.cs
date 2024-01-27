@@ -16,20 +16,14 @@ public class GetAllPlexAccountsQueryHandler : IRequestHandler<GetAllPlexAccounts
         _dbContext = dbContext;
     }
 
-    public async Task<Result<List<PlexAccount>>> Handle(
-        GetAllPlexAccountsQuery request,
-        CancellationToken cancellationToken)
+    public async Task<Result<List<PlexAccount>>> Handle(GetAllPlexAccountsQuery request, CancellationToken cancellationToken)
     {
         var query = _dbContext.PlexAccounts.AsQueryable();
-
-        List<PlexAccount> plexAccounts;
         if (request.OnlyEnabled)
-            plexAccounts = await query.Where(x => x.IsEnabled).ToListAsync(cancellationToken);
-        else
-            plexAccounts = await query.ToListAsync(cancellationToken);
+            query = query.Where(x => x.IsEnabled);
 
+        var plexAccounts = await query.ToListAsync(cancellationToken);
         _log.Debug("Returned {PlexAccountCount} accounts", plexAccounts.Count);
-
         return Result.Ok(plexAccounts);
     }
 }

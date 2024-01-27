@@ -14,7 +14,6 @@ public class PlexAccountService_CreatePlexAccountAsync_UnitTests : BaseUnitTest<
         // Arrange
         var newAccount = new PlexAccount("TestUsername", "Password123");
 
-        mock.Mock<IPlexAccountService>().Setup(x => x.ValidatePlexAccountAsync(newAccount)).ReturnsAsync(Result.Ok());
         mock.Mock<IInspectServerScheduler>().Setup(x => x.QueueInspectPlexServerByPlexAccountIdJob(1)).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<CheckIsUsernameAvailableQuery>).ReturnsAsync(Result.Ok(true));
         mock.SetupMediator(It.IsAny<CreatePlexAccountCommand>).ReturnsAsync(Result.Ok(1));
@@ -65,7 +64,6 @@ public class PlexAccountService_CreatePlexAccountAsync_UnitTests : BaseUnitTest<
         // Arrange
         var newAccount = new PlexAccount("TestUsername", "Password123");
         mock.SetupMediator(It.IsAny<CheckIsUsernameAvailableQuery>).ReturnsAsync(Result.Ok(true));
-        mock.Mock<IPlexAccountService>().Setup(x => x.ValidatePlexAccountAsync(newAccount)).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<CreatePlexAccountCommand>).ReturnsAsync(Result.Fail("Error #1"));
         mock.SetupMediator(It.IsAny<GetPlexAccountByUsernameQuery>).ReturnsAsync(Result.Fail("Error #1").Add404NotFoundError());
 

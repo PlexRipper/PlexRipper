@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using PlexRipper.Domain;
 
 namespace Data.Contracts;
@@ -29,6 +30,8 @@ public interface IPlexRipperDbContext
     public string DatabaseName { get; set; }
     public string DatabasePath { get; set; }
     public string ConfigDirectory { get; set; }
+
+    public EntityEntry Entry(object entity);
 
     /// <summary>
     /// Determines if this <see cref="PlexRipperDbContext"/> has been setup already during integration or unit testing.

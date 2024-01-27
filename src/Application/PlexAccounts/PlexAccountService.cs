@@ -91,28 +91,6 @@ public class PlexAccountService : IPlexAccountService
     #region CRUD
 
     /// <summary>
-    /// Returns the <see cref="PlexAccount"/> with the accessible <see cref="PlexServer"/>s and all <see cref="PlexLibrary"/>.
-    /// </summary>
-    /// <param name="accountId">The Id to retrieve the <see cref="PlexAccount"/> by.</param>
-    /// <returns>The account found.</returns>
-    public async Task<Result<PlexAccount>> GetPlexAccountAsync(int accountId)
-    {
-        var result = await _mediator.Send(new GetPlexAccountByIdQuery(accountId, true, true));
-
-        if (result.IsFailed)
-            return result;
-
-        if (result.Value != null)
-        {
-            _log.Debug("Found an Account with the id: {AccountId}", accountId);
-            return result;
-        }
-
-        _log.Warning("Could not find an Account with id: {AccountId}", accountId);
-        return result;
-    }
-
-    /// <summary>
     /// Creates an <see cref="PlexAccount"/> in the Database and performs an SetupAccountAsync().
     /// </summary>
     /// <param name="plexAccount">The unique account.</param>

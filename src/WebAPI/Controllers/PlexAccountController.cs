@@ -1,5 +1,6 @@
 ﻿using Application.Contracts;
 using AutoMapper;
+using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.WebAPI.Common.DTO;
@@ -45,17 +46,27 @@ public class PlexAccountController : BaseController
     }
 
     // GET api/<PlexAccountController>/5
-    [HttpGet("{id:int}")]
+    [HttpGet("{accountId:int}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexAccountDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetAccount(int id)
+    public async Task<IActionResult> GetAccount(int accountId)
     {
-        if (id <= 0)
+        if (accountId <= 0)
             return BadRequestInvalidId();
 
-        return ToActionResult<PlexAccount, PlexAccountDTO>(await _plexAccountService.GetPlexAccountAsync(id));
+        var result = await _mediator.Send(new GetPlexAccountByIdQuery(accountId, true, true));
+
+        if (result.Value != null)
+        {
+            _log.Debug("Found an Account with the id: {AccountId}", accountId);
+        }
+
+        _log.Warning("Could not find an Account with id: {AccountId}", accountId);
+
+
+        return ToActionResult<PlexAccount, PlexAccountDTO>(result);
     }
 
     // PUT api/<PlexAccountController>/5

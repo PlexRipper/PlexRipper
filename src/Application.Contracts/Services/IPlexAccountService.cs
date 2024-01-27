@@ -6,14 +6,6 @@ namespace Application.Contracts;
 public interface IPlexAccountService
 {
     /// <summary>
-    /// Returns the <see cref="PlexAccount"/> with the corresponding <see cref="PlexAccount"/>
-    /// and the accessible <see cref="PlexServer">PlexServers</see>.
-    /// </summary>
-    /// <param name="accountId">The Id to retrieve the <see cref="PlexAccount"/> by.</param>
-    /// <returns>The account found.</returns>
-    Task<Result<PlexAccount>> GetPlexAccountAsync(int accountId);
-
-    /// <summary>
     /// Creates an <see cref="PlexAccount"/> in the Database and performs an SetupAccountAsync().
     /// </summary>
     /// <param name="plexAccount">The unique account.</param>

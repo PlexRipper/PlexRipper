@@ -23,7 +23,7 @@ public class UpdatePlexAccountValidator : AbstractValidator<UpdatePlexAccountCom
     }
 }
 
-public class UpdatePlexAccountHandler : IRequestHandler<UpdatePlexAccountCommand, Result>
+public class UpdatePlexAccountHandler : IRequestHandler<UpdatePlexAccountCommand, Result<PlexAccount>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -34,7 +34,7 @@ public class UpdatePlexAccountHandler : IRequestHandler<UpdatePlexAccountCommand
         _dbContext = dbContext;
     }
 
-    public async Task<Result> Handle(UpdatePlexAccountCommand command, CancellationToken cancellationToken)
+    public async Task<Result<PlexAccount>> Handle(UpdatePlexAccountCommand command, CancellationToken cancellationToken)
     {
         var plexAccount = command.PlexAccount;
         var accountInDb = await _dbContext.PlexAccounts
@@ -48,6 +48,11 @@ public class UpdatePlexAccountHandler : IRequestHandler<UpdatePlexAccountCommand
 
         _dbContext.Entry(accountInDb).CurrentValues.SetValues(plexAccount);
         await _dbContext.SaveChangesAsync(cancellationToken);
-        return Result.Ok();
+
+        // Re-validate if the credentials changed
+        if (command.inspectServers || accountInDb.Username != plexAccount.Username || accountInDb.Password != plexAccount.Password)
+            throw new NotImplementedException("Account revalidation is not implemented yet when account is updated with a different username or password");
+
+        return Result.Ok(accountInDb);
     }
 }

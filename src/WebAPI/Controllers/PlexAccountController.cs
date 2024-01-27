@@ -59,12 +59,9 @@ public class PlexAccountController : BaseController
         var result = await _mediator.Send(new GetPlexAccountByIdQuery(accountId, true, true));
 
         if (result.Value != null)
-        {
             _log.Debug("Found an Account with the id: {AccountId}", accountId);
-        }
 
         _log.Warning("Could not find an Account with id: {AccountId}", accountId);
-
 
         return ToActionResult<PlexAccount, PlexAccountDTO>(result);
     }
@@ -81,7 +78,8 @@ public class PlexAccountController : BaseController
             return BadRequestInvalidId();
 
         var mapResult = _mapper.Map<PlexAccount>(updatedAccount);
-        return ToActionResult<PlexAccount, PlexAccountDTO>(await _plexAccountService.UpdatePlexAccountAsync(mapResult, inspect));
+        var result = await _mediator.Send(new UpdatePlexAccountCommand(mapResult, inspect));
+        return ToActionResult<PlexAccount, PlexAccountDTO>(result);
     }
 
     // POST api/<AccountController>

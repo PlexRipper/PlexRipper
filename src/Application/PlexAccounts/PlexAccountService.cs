@@ -122,27 +122,6 @@ public class PlexAccountService : IPlexAccountService
         return await _mediator.Send(new GetPlexAccountByIdQuery(createResult.Value, true, true));
     }
 
-    public async Task<Result<PlexAccount>> UpdatePlexAccountAsync(PlexAccount plexAccount, bool inspectServers = false)
-    {
-        var result = await _mediator.Send(new UpdatePlexAccountCommand(plexAccount));
-        if (result.IsFailed)
-        {
-            var msg = "Failed to validate the PlexAccount that will be updated";
-            result.Errors.Add(new Error(msg));
-            return result.LogError();
-        }
-
-        var plexAccountDb = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccount.Id));
-        if (plexAccountDb.IsFailed)
-            return plexAccountDb;
-
-        // Re-validate if the credentials changed
-        if (inspectServers || plexAccountDb.Value.Username != plexAccount.Username || plexAccountDb.Value.Password != plexAccount.Password)
-            return await GetPlexAccountAsync(plexAccountDb.Value.Id);
-
-        return plexAccountDb;
-    }
-
     /// <summary>
     /// Hard deletes the PlexAccount from the Database.
     /// </summary>

@@ -19,8 +19,6 @@ public interface IPlexAccountService
     /// <returns></returns>
     Task<Result> DeletePlexAccountAsync(int plexAccountId);
 
-    Task<Result<PlexAccount>> UpdatePlexAccountAsync(PlexAccount plexAccount, bool inspectServers = false);
-
     /// <summary>
     /// Refreshes the <see cref="PlexServer"/> and <see cref="PlexLibrary"/> access of the <see cref="PlexAccount"/>.
     /// </summary>

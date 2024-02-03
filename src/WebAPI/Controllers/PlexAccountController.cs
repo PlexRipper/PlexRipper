@@ -108,8 +108,12 @@ public class PlexAccountController : BaseController
         if (id <= 0)
             return BadRequestInvalidId();
 
-        var deleteResult = await _plexAccountService.DeletePlexAccountAsync(id);
-        return ToActionResult(deleteResult);
+        var deleteAccountResult = await _mediator.Send(new DeletePlexAccountCommand(id));
+        if (deleteAccountResult.IsFailed)
+            return ToActionResult(deleteAccountResult);
+
+        // TODO Decide what to do with PlexServers that cannot be accessed anymore
+        return await _mediator.Send(new RemoveInaccessibleServersCommand());
     }
 
     [HttpPost("validate")]

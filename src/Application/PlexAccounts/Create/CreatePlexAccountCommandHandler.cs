@@ -18,14 +18,14 @@ public class CreatePlexAccountCommandValidator : AbstractValidator<CreatePlexAcc
     }
 }
 
-public class CreateAccountHandler : IRequestHandler<CreatePlexAccountCommand, Result<int>>
+public class CreatePlexAccountHandler : IRequestHandler<CreatePlexAccountCommand, Result<int>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
     private readonly IInspectServerScheduler _inspectServerScheduler;
 
-    public CreateAccountHandler(ILog log, IPlexRipperDbContext dbContext, IMediator mediator, IInspectServerScheduler inspectServerScheduler)
+    public CreatePlexAccountHandler(ILog log, IPlexRipperDbContext dbContext, IMediator mediator, IInspectServerScheduler inspectServerScheduler)
     {
         _log = log;
         _dbContext = dbContext;
@@ -61,7 +61,12 @@ public class CreateAccountHandler : IRequestHandler<CreatePlexAccountCommand, Re
         await _dbContext.SaveChangesAsync(cancellationToken);
         await _dbContext.Entry(command.PlexAccount).GetDatabaseValuesAsync(cancellationToken);
 
-        await _inspectServerScheduler.QueueInspectPlexServerByPlexAccountIdJob(command.PlexAccount.Id);
+        var queueInspectPlexServerResult = await _inspectServerScheduler.QueueInspectPlexServerByPlexAccountIdJob(command.PlexAccount.Id);
+        if (queueInspectPlexServerResult.IsFailed)
+        {
+            _log.Error("Failed to queue inspect server job for PlexAccount with id {PlexAccountId}", command.PlexAccount.Id);
+            return queueInspectPlexServerResult;
+        }
 
         return Result.Ok(command.PlexAccount.Id).Add201CreatedRequestSuccess("PlexAccount created successfully.");
     }

@@ -88,8 +88,6 @@ public partial class BaseContainer : IDisposable
 
     public IFolderPathService GetFolderPathService => Resolve<IFolderPathService>();
 
-    public IPlexAccountService GetPlexAccountService => Resolve<IPlexAccountService>();
-
     public IPlexApiService GetPlexApiService => Resolve<IPlexApiService>();
 
     public IPlexLibraryService GetPlexLibraryService => Resolve<IPlexLibraryService>();

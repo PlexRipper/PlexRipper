@@ -87,40 +87,4 @@ public class PlexAccountService : IPlexAccountService
     }
 
     #endregion
-
-    #region CRUD
-
-    /// <summary>
-    /// Creates an <see cref="PlexAccount"/> in the Database and performs an SetupAccountAsync().
-    /// </summary>
-    /// <param name="plexAccount">The unique account.</param>
-    /// <returns>Returns the added account after setup.</returns>
-    public async Task<Result<PlexAccount>> CreatePlexAccountAsync(PlexAccount plexAccount)
-    {
-        _log.Debug("Creating account with username {UserName}", plexAccount.Username);
-        var result = await _mediator.Send(new CheckIsUsernameAvailableQuery(plexAccount.Username));
-
-        // Fail on validation errors
-        if (result.IsFailed)
-            return result.ToResult();
-
-        if (!result.Value)
-        {
-            var msg =
-                $"Account with username {plexAccount.Username} cannot be created due to an account with the same username already existing";
-            return result.ToResult().WithError(msg).LogWarning();
-        }
-
-        // Create PlexAccount
-        plexAccount.ClientId = GeneratePlexAccountClientId();
-        var createResult = await _mediator.Send(new CreatePlexAccountCommand(plexAccount));
-        if (createResult.IsFailed)
-            return createResult.ToResult();
-
-        await _inspectServerScheduler.QueueInspectPlexServerByPlexAccountIdJob(createResult.Value);
-
-        return await _mediator.Send(new GetPlexAccountByIdQuery(createResult.Value, true, true));
-    }
-
-    #endregion
 }

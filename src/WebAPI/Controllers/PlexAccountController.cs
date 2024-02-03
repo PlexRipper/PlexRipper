@@ -93,8 +93,13 @@ public class PlexAccountController : BaseController
             return BadRequest("The new account was null");
 
         var mapResult = _mapper.Map<PlexAccount>(newAccount);
-        var createResult = await _plexAccountService.CreatePlexAccountAsync(mapResult);
-        return ToActionResult<PlexAccount, PlexAccountDTO>(createResult);
+
+        var createResult = await _mediator.Send(new CreatePlexAccountCommand(mapResult));
+        if (createResult.IsFailed)
+            return ToActionResult(createResult.ToResult());
+
+        var getResult = await _mediator.Send(new GetPlexAccountByIdQuery(createResult.Value, true, true));
+        return ToActionResult<PlexAccount, PlexAccountDTO>(getResult);
     }
 
     /// <summary>

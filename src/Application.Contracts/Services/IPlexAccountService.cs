@@ -6,13 +6,6 @@ namespace Application.Contracts;
 public interface IPlexAccountService
 {
     /// <summary>
-    /// Creates an <see cref="PlexAccount"/> in the Database and performs an SetupAccountAsync().
-    /// </summary>
-    /// <param name="plexAccount">The unique account.</param>
-    /// <returns>Returns the added account after setup.</returns>
-    Task<Result<PlexAccount>> CreatePlexAccountAsync(PlexAccount plexAccount);
-
-    /// <summary>
     /// Refreshes the <see cref="PlexServer"/> and <see cref="PlexLibrary"/> access of the <see cref="PlexAccount"/>.
     /// </summary>
     /// <param name="plexAccountId">Can be 0 to refresh all enabled PlexAccounts.</param>

@@ -29,6 +29,4 @@ public interface IPlexServerService
     Task<Result<PlexServer>> RefreshPlexServerConnectionsAsync(int plexServerId);
 
     Task<Result<PlexServer>> InspectPlexServer(int plexServerId);
-
-    Task<Result> SetPreferredConnection(int plexServerId, int plexServerConnectionId);
 }

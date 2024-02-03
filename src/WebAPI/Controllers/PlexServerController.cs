@@ -120,13 +120,17 @@ public class PlexServerController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
     public async Task<IActionResult> SetPreferredConnection(int plexServerId, int plexServerConnectionId)
     {
+
         if (plexServerId <= 0)
             return BadRequestInvalidId(nameof(plexServerId));
 
         if (plexServerConnectionId <= 0)
             return BadRequestInvalidId(nameof(plexServerConnectionId));
 
-        return ToActionResult(await _plexServerService.SetPreferredConnection(plexServerId, plexServerConnectionId));
+        var result = await _mediator.Send(new SetPreferredPlexServerConnectionCommand(plexServerId, plexServerConnectionId));
+
+
+        return ToActionResult(result);
     }
 
     #endregion

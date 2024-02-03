@@ -77,14 +77,6 @@ public class PlexServerService : IPlexServerService
         return Result.Fail($"No account could be chosen to connect to PlexServer with id: {plexServerId}").LogError();
     }
 
-    #region CRUD
-
-    public async Task<Result> SetPreferredConnection(int plexServerId, int plexServerConnectionId)
-    {
-        return await _mediator.Send(new SetPreferredPlexServerConnectionCommand(plexServerId, plexServerConnectionId));
-    }
-
-    #endregion
 
     #endregion
 

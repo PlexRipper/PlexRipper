@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
 using Autofac;
+using MediatR.Extensions.Autofac.DependencyInjection;
+using MediatR.Extensions.Autofac.DependencyInjection.Builder;
 using Module = Autofac.Module;
 
 namespace PlexRipper.Application;
@@ -19,5 +21,12 @@ public class ApplicationModule : Module
             .Where(t => t.Name.EndsWith("Service"))
             .AsImplementedInterfaces()
             .SingleInstance();
+
+        // MediatR
+        var configuration = MediatRConfigurationBuilder
+            .Create(assembly)
+            .WithAllOpenGenericHandlerTypesRegistered()
+            .Build();
+        builder.RegisterMediatR(configuration);
     }
 }

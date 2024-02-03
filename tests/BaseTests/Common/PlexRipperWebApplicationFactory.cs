@@ -1,12 +1,12 @@
 using System.Collections.Specialized;
 using Autofac;
 using Autofac.Extras.Quartz;
+using Data.Contracts;
 using FileSystem.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Data;
-using PlexRipper.Domain.Autofac;
 using PlexRipper.WebAPI.Common;
 using Settings.Contracts;
 
@@ -38,11 +38,15 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
         builder
             .ConfigureContainer<ContainerBuilder>(autoFacBuilder =>
             {
+                // Database context can be setup once and then retrieved by its DB name.
                 autoFacBuilder
-
-                    // Database context can be setup once and then retrieved by its DB name.
                     .Register((_, _) => MockDatabase.GetMemoryDbContext(_memoryDbName))
                     .As<PlexRipperDbContext>()
+                    .InstancePerDependency();
+
+                autoFacBuilder
+                    .Register((_, _) => MockDatabase.GetMemoryDbContext(_memoryDbName))
+                    .As<IPlexRipperDbContext>()
                     .InstancePerDependency();
 
                 autoFacBuilder.RegisterModule<TestModule>();

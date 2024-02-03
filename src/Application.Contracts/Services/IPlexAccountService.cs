@@ -13,13 +13,6 @@ public interface IPlexAccountService
     Task<Result<PlexAccount>> CreatePlexAccountAsync(PlexAccount plexAccount);
 
     /// <summary>
-    /// Hard deletes the <see cref="PlexAccount"/> from the Database.
-    /// </summary>
-    /// <param name="plexAccountId"></param>
-    /// <returns></returns>
-    Task<Result> DeletePlexAccountAsync(int plexAccountId);
-
-    /// <summary>
     /// Refreshes the <see cref="PlexServer"/> and <see cref="PlexLibrary"/> access of the <see cref="PlexAccount"/>.
     /// </summary>
     /// <param name="plexAccountId">Can be 0 to refresh all enabled PlexAccounts.</param>

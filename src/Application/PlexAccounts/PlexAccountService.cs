@@ -122,20 +122,5 @@ public class PlexAccountService : IPlexAccountService
         return await _mediator.Send(new GetPlexAccountByIdQuery(createResult.Value, true, true));
     }
 
-    /// <summary>
-    /// Hard deletes the PlexAccount from the Database.
-    /// </summary>
-    /// <param name="plexAccountId"></param>
-    /// <returns></returns>
-    public async Task<Result> DeletePlexAccountAsync(int plexAccountId)
-    {
-        var deleteAccountResult = await _mediator.Send(new DeletePlexAccountCommand(plexAccountId));
-        if (deleteAccountResult.IsFailed)
-            return deleteAccountResult;
-
-        // TODO Decide what to do with PlexServers that cannot be accessed anymore
-        return await _mediator.Send(new RemoveInaccessibleServersCommand());
-    }
-
     #endregion
 }

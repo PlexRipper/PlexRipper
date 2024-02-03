@@ -97,7 +97,12 @@ public class PlexAccountController : BaseController
         return ToActionResult<PlexAccount, PlexAccountDTO>(createResult);
     }
 
-    // DELETE api/<AccountController>/5
+    /// <summary>
+    /// Deletes a PlexAccount by its id.
+    /// DELETE api/PlexAccount/5
+    /// </summary>
+    /// <param name="id">The id of the <see cref="PlexAccount"/> to delete.</param>
+    /// <returns></returns>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
@@ -109,11 +114,7 @@ public class PlexAccountController : BaseController
             return BadRequestInvalidId();
 
         var deleteAccountResult = await _mediator.Send(new DeletePlexAccountCommand(id));
-        if (deleteAccountResult.IsFailed)
-            return ToActionResult(deleteAccountResult);
-
-        // TODO Decide what to do with PlexServers that cannot be accessed anymore
-        return await _mediator.Send(new RemoveInaccessibleServersCommand());
+        return ToActionResult(deleteAccountResult);
     }
 
     [HttpPost("validate")]

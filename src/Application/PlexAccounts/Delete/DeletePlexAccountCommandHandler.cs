@@ -34,6 +34,7 @@ public class DeletePlexAccountHandler : IRequestHandler<DeletePlexAccountCommand
 
         _dbContext.PlexAccounts.Remove(plexAccount);
         await _dbContext.SaveChangesAsync(cancellationToken);
+
         _log.Debug("Deleted {PlexAccount} with Id: {CommandId} from the database", nameof(PlexAccount), command.Id);
 
         return Result.Ok();

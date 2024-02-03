@@ -1,8 +1,10 @@
 ﻿using Application.Contracts;
 using AutoMapper;
+using BackgroundServices.Contracts;
 using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
+using PlexApi.Contracts;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -11,18 +13,21 @@ namespace PlexRipper.WebAPI.Controllers;
 public class PlexAccountController : BaseController
 {
     private readonly IMediator _mediator;
-    private readonly IPlexAccountService _plexAccountService;
+    private readonly IPlexApiService _plexApiService;
+    private readonly IInspectServerScheduler _inspectServerScheduler;
 
     public PlexAccountController(
         ILog log,
         IMediator mediator,
-        IPlexAccountService plexAccountService,
         IMapper mapper,
-        INotificationsService notificationsService) : base(log,
+        IPlexApiService plexApiService,
+        INotificationsService notificationsService,
+        IInspectServerScheduler inspectServerScheduler) : base(log,
         mapper, notificationsService)
     {
         _mediator = mediator;
-        _plexAccountService = plexAccountService;
+        _plexApiService = plexApiService;
+        _inspectServerScheduler = inspectServerScheduler;
     }
 
     // GET: api/<PlexAccountController>
@@ -150,13 +155,30 @@ public class PlexAccountController : BaseController
         }
     }
 
-    [HttpGet("refresh/{id:int}")]
+    // TODO Split up this endpoint between a single and all refresh
+    [HttpGet("refresh/{plexAccountId:int}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> RefreshPlexAccount(int id)
+    public async Task<IActionResult> RefreshPlexAccount(int plexAccountId)
     {
-        return ToActionResult(await _plexAccountService.RefreshPlexAccount(id));
+        var plexAccountIds = new List<int>();
+
+        if (plexAccountId == 0)
+        {
+            var enabledAccounts = await _mediator.Send(new GetAllPlexAccountsQuery(true));
+            if (enabledAccounts.IsFailed)
+                return ToActionResult(enabledAccounts.ToResult());
+
+            plexAccountIds.AddRange(enabledAccounts.Value.Select(x => x.Id));
+        }
+        else
+            plexAccountIds.Add(plexAccountId);
+
+        foreach (var id in plexAccountIds)
+            await _inspectServerScheduler.QueueRefreshAccessiblePlexServersJob(id);
+
+        return ToActionResult(Result.Ok());
     }
 
     // GET api/<PlexAccountController>/authpin/
@@ -171,9 +193,9 @@ public class PlexAccountController : BaseController
 
         Result<AuthPin> authPinResult;
         if (authPinId == 0)
-            authPinResult = await _plexAccountService.Get2FAPin(clientId);
+            authPinResult = await _plexApiService.Get2FAPin(clientId);
         else
-            authPinResult = await _plexAccountService.Check2FAPin(authPinId, clientId);
+            authPinResult = await _plexApiService.Check2FAPin(authPinId, clientId);
 
         return ToActionResult<AuthPin, AuthPin>(authPinResult);
     }

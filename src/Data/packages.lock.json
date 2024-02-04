@@ -51,19 +51,6 @@
           "Microsoft.Extensions.Identity.Stores": "7.0.8"
         }
       },
-      "Microsoft.EntityFrameworkCore": {
-        "type": "Direct",
-        "requested": "[7.0.8, )",
-        "resolved": "7.0.8",
-        "contentHash": "J4eNwnGsaEeudWGvgEO+n9u5XYfKb/QmMjLPH/T2xUBKzuZsJ7nyNoEtNDo3DhQqyDHPxf2fDSuUwSJQFEj6JQ==",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore.Abstractions": "7.0.8",
-          "Microsoft.EntityFrameworkCore.Analyzers": "7.0.8",
-          "Microsoft.Extensions.Caching.Memory": "7.0.0",
-          "Microsoft.Extensions.DependencyInjection": "7.0.0",
-          "Microsoft.Extensions.Logging": "7.0.0"
-        }
-      },
       "Microsoft.EntityFrameworkCore.Design": {
         "type": "Direct",
         "requested": "[7.0.8, )",
@@ -247,6 +234,18 @@
         "contentHash": "I4Vp+DBwXduX3/T/SlUzNX/B2FL/Y4/+KVpXtUksDmpLJyRxDXxg1O+pFDlyaTNpK8HPoEvreXJw6M7f9rVX6Q==",
         "dependencies": {
           "SQLitePCLRaw.core": "2.1.4"
+        }
+      },
+      "Microsoft.EntityFrameworkCore": {
+        "type": "Transitive",
+        "resolved": "7.0.8",
+        "contentHash": "J4eNwnGsaEeudWGvgEO+n9u5XYfKb/QmMjLPH/T2xUBKzuZsJ7nyNoEtNDo3DhQqyDHPxf2fDSuUwSJQFEj6JQ==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Abstractions": "7.0.8",
+          "Microsoft.EntityFrameworkCore.Analyzers": "7.0.8",
+          "Microsoft.Extensions.Caching.Memory": "7.0.0",
+          "Microsoft.Extensions.DependencyInjection": "7.0.0",
+          "Microsoft.Extensions.Logging": "7.0.0"
         }
       },
       "Microsoft.EntityFrameworkCore.Abstractions": {
@@ -1629,6 +1628,7 @@
         "type": "Project",
         "dependencies": {
           "DownloadManager.Contracts": "[1.0.0, )",
+          "Microsoft.EntityFrameworkCore": "[7.0.8, )",
           "PlexRipper.Domain": "[1.0.0, )"
         }
       },

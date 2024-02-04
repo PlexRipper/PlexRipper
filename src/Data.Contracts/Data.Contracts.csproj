@@ -20,6 +20,7 @@
 
 	<ItemGroup>
 	  <Folder Include="CQRS\PlexAccounts\Commands\" />
+	  <Folder Include="Extensions\" />
 	</ItemGroup>
 
 </Project>

@@ -15,6 +15,7 @@ public class PlexServerService : IPlexServerService
     private readonly IMediator _mediator;
     private readonly IPlexLibraryService _plexLibraryService;
     private readonly IPlexServerConnectionsService _plexServerConnectionsService;
+    private readonly IPlexServerRepository _plexServerRepository;
 
     private readonly IPlexApiService _plexServiceApi;
 
@@ -32,13 +33,15 @@ public class PlexServerService : IPlexServerService
         IPlexLibraryService plexLibraryService,
         IServerSettingsModule serverSettingsModule,
         ISyncServerScheduler syncServerScheduler,
-        IPlexServerConnectionsService plexServerConnectionsService)
+        IPlexServerConnectionsService plexServerConnectionsService,
+        IPlexServerRepository plexServerRepository)
     {
         _log = log;
         _mediator = mediator;
         _serverSettingsModule = serverSettingsModule;
         _syncServerScheduler = syncServerScheduler;
         _plexServerConnectionsService = plexServerConnectionsService;
+        _plexServerRepository = plexServerRepository;
         _plexServiceApi = plexServiceApi;
         _plexLibraryService = plexLibraryService;
     }
@@ -49,12 +52,12 @@ public class PlexServerService : IPlexServerService
 
     #region Public
 
-    public async Task<Result<PlexAccount>> ChoosePlexAccountToConnect(int plexServerId)
+    public async Task<Result<PlexAccount>> ChoosePlexAccountToConnect(int plexServerId, CancellationToken cancellationToken)
     {
         if (plexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId);
 
-        var plexAccountsResult = await _mediator.Send(new GetPlexAccountsWithAccessByPlexServerIdQuery(plexServerId));
+        var plexAccountsResult = await _plexServerRepository.GetPlexAccountsWithAccess(plexServerId, cancellationToken);
         if (plexAccountsResult.IsFailed)
             return plexAccountsResult.ToResult();
 
@@ -76,7 +79,6 @@ public class PlexServerService : IPlexServerService
 
         return Result.Fail($"No account could be chosen to connect to PlexServer with id: {plexServerId}").LogError();
     }
-
 
     #endregion
 
@@ -152,10 +154,10 @@ public class PlexServerService : IPlexServerService
     #region RefreshPlexServers
 
     /// <inheritdoc/>
-    public async Task<Result<PlexServer>> RefreshPlexServerConnectionsAsync(int plexServerId)
+    public async Task<Result<PlexServer>> RefreshPlexServerConnectionsAsync(int plexServerId, CancellationToken token = default)
     {
         // Pick an account that has access to the PlexServer to connect with
-        var plexAccountResult = await ChoosePlexAccountToConnect(plexServerId);
+        var plexAccountResult = await ChoosePlexAccountToConnect(plexServerId, token);
         if (plexAccountResult.IsFailed)
             return plexAccountResult.ToResult();
 

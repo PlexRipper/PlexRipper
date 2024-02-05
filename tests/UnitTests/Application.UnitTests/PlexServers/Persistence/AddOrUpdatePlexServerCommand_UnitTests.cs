@@ -1,11 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 
-namespace Data.UnitTests.PlexServers.Commands;
+namespace PlexRipper.Application.UnitTests;
 
-public class AddOrUpdatePlexServerCommandHandler_UnitTests : BaseUnitTest
+public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
 {
-    public AddOrUpdatePlexServerCommandHandler_UnitTests(ITestOutputHelper output) : base(output) { }
+    public AddOrUpdatePlexServerCommand_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public async Task ShouldAddAllServers_WhenNoneExistInTheDatabase()

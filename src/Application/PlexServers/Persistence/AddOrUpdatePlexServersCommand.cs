@@ -1,38 +1,29 @@
+using Application.Contracts;
 using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.PlexServers;
+namespace PlexRipper.Application;
 
-public class AddOrUpdatePlexServersValidator : AbstractValidator<AddOrUpdatePlexServersCommand>
+public class AddOrUpdatePlexServersCommand : IAddOrUpdatePlexServersCommand
 {
-    public AddOrUpdatePlexServersValidator()
+    private readonly ILog _log;
+    private readonly IPlexRipperDbContext _dbContext;
+    private readonly AddOrUpdatePlexServersValidator _validator;
+
+    public AddOrUpdatePlexServersCommand(ILog log, IPlexRipperDbContext dbContext)
     {
-        RuleFor(x => x.PlexServers).NotEmpty();
-        RuleForEach(x => x.PlexServers)
-            .ChildRules(server =>
-            {
-                server.RuleFor(x => x.PlexServerConnections).NotEmpty();
-                server.RuleForEach(x => x.PlexServerConnections)
-                    .ChildRules(connection =>
-                    {
-                        connection.RuleFor(x => x.Protocol).NotEmpty();
-                        connection.RuleFor(x => x.Address).NotEmpty();
-                        connection.RuleFor(x => x.Port).NotEmpty();
-                    });
-            });
+        _log = log;
+        _dbContext = dbContext;
+        _validator = new AddOrUpdatePlexServersValidator();
     }
-}
 
-public class AddOrUpdatePlexServersCommandHandler : BaseHandler, IRequestHandler<AddOrUpdatePlexServersCommand, Result>
-{
-    public AddOrUpdatePlexServersCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
-
-    public async Task<Result> Handle(AddOrUpdatePlexServersCommand command, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(List<PlexServer> plexServers, CancellationToken cancellationToken = default)
     {
-        var plexServers = command.PlexServers;
+        var result = await _validator.ValidateAsync(plexServers, cancellationToken);
+        if (!result.IsValid)
+            return result.ToFluentResult().LogError();
 
         // Add or update the PlexServers in the database
         _log.Information("Adding or updating {PlexServersCount} PlexServers now", plexServers.Count);
@@ -61,7 +52,9 @@ public class AddOrUpdatePlexServersCommandHandler : BaseHandler, IRequestHandler
                 _dbContext.PlexServers.Add(plexServer);
                 foreach (var plexServerConnection in plexServer.PlexServerConnections)
                 {
-                    _log.Here().Debug("Creating connection {PlexServerConnection} from {PlexServerName} in the database", plexServerConnection.ToString(), plexServer.Name);
+                    _log.Here()
+                        .Debug("Creating connection {PlexServerConnection} from {PlexServerName} in the database", plexServerConnection.ToString(),
+                            plexServer.Name);
                     plexServerConnection.PlexServerId = plexServer.Id;
                 }
 
@@ -85,13 +78,17 @@ public class AddOrUpdatePlexServersCommandHandler : BaseHandler, IRequestHandler
             if (connectionDb is null)
             {
                 // Creating Connection
-                _log.Here().Debug("Creating connection {PlexServerConnection} from {PlexServerName} in the database", plexServerConnection.ToString(), plexServerDB.Name);
+                _log.Here()
+                    .Debug("Creating connection {PlexServerConnection} from {PlexServerName} in the database", plexServerConnection.ToString(),
+                        plexServerDB.Name);
                 _dbContext.PlexServerConnections.Add(plexServerConnection);
             }
             else
             {
                 // Updating Connection
-                _log.Here().Debug("Updating connection {PlexServerConnection} from {PlexServerName} in the database", plexServerConnection.ToString(), plexServerDB.Name);
+                _log.Here()
+                    .Debug("Updating connection {PlexServerConnection} from {PlexServerName} in the database", plexServerConnection.ToString(),
+                        plexServerDB.Name);
                 plexServerConnection.Id = connectionDb.Id;
                 _dbContext.Entry(connectionDb).CurrentValues.SetValues(plexServerConnection);
             }
@@ -104,10 +101,32 @@ public class AddOrUpdatePlexServersCommandHandler : BaseHandler, IRequestHandler
             var connection = plexServer.PlexServerConnections.Find(x => x.Address == plexServerConnectionDB.Address);
             if (connection is null)
             {
-                _log.Here().Debug("Removing connection {PlexServerConnection} from {PlexServerName} in the database", plexServerConnectionDB.ToString(), plexServerDB.Name);
+                _log.Here()
+                    .Debug("Removing connection {PlexServerConnection} from {PlexServerName} in the database", plexServerConnectionDB.ToString(),
+                        plexServerDB.Name);
 
                 _dbContext.Entry(plexServerConnectionDB).State = EntityState.Deleted;
             }
         }
+    }
+}
+
+public class AddOrUpdatePlexServersValidator : AbstractValidator<List<PlexServer>>
+{
+    public AddOrUpdatePlexServersValidator()
+    {
+        RuleFor(x => x).NotEmpty();
+        RuleForEach(x => x)
+            .ChildRules(server =>
+            {
+                server.RuleFor(x => x.PlexServerConnections).NotEmpty();
+                server.RuleForEach(x => x.PlexServerConnections)
+                    .ChildRules(connection =>
+                    {
+                        connection.RuleFor(x => x.Protocol).NotEmpty();
+                        connection.RuleFor(x => x.Address).NotEmpty();
+                        connection.RuleFor(x => x.Port).NotEmpty();
+                    });
+            });
     }
 }

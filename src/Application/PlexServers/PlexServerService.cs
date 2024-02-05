@@ -21,6 +21,7 @@ public class PlexServerService : IPlexServerService
     private readonly IServerSettingsModule _serverSettingsModule;
     private readonly ISyncServerScheduler _syncServerScheduler;
     private readonly IAddOrUpdatePlexServersCommand _addOrUpdatePlexServersCommand;
+    private readonly IAddOrUpdatePlexAccountServersCommand _addOrUpdatePlexAccountServersCommand;
 
     #endregion
 
@@ -34,6 +35,7 @@ public class PlexServerService : IPlexServerService
         IServerSettingsModule serverSettingsModule,
         ISyncServerScheduler syncServerScheduler,
         IAddOrUpdatePlexServersCommand addOrUpdatePlexServersCommand,
+        IAddOrUpdatePlexAccountServersCommand addOrUpdatePlexAccountServersCommand,
         IPlexServerConnectionsService plexServerConnectionsService)
     {
         _log = log;
@@ -41,6 +43,7 @@ public class PlexServerService : IPlexServerService
         _serverSettingsModule = serverSettingsModule;
         _syncServerScheduler = syncServerScheduler;
         _addOrUpdatePlexServersCommand = addOrUpdatePlexServersCommand;
+        _addOrUpdatePlexAccountServersCommand = addOrUpdatePlexAccountServersCommand;
         _plexServerConnectionsService = plexServerConnectionsService;
         _plexServiceApi = plexServiceApi;
         _plexLibraryService = plexLibraryService;
@@ -195,7 +198,7 @@ public class PlexServerService : IPlexServerService
             return updateResult;
 
         // We only want to update tokens for the plexServer and discard the rest
-        var plexAccountTokensResult = await _mediator.Send(new AddOrUpdatePlexAccountServersCommand(plexAccount, serverAccessTokens));
+        var plexAccountTokensResult = await _addOrUpdatePlexAccountServersCommand.ExecuteAsync(plexAccount.Id, serverAccessTokens);
         if (plexAccountTokensResult.IsFailed)
             return plexAccountTokensResult;
 

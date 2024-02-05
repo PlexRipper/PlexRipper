@@ -8,4 +8,4 @@ namespace Application.Contracts;
 /// </summary>
 /// <param name="Username">The username to check for.</param>
 /// <returns>true if the username is available.</returns>
-public record CheckIsUsernameAvailableQuery(string Username) : IRequest<Result<bool>>;
+public record IsUsernameAvailableQuery(string Username) : IRequest<Result<bool>>;

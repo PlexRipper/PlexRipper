@@ -30,8 +30,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="CQRS\PlexAccounts\Commands\" />
-		<Folder Include="CQRS\PlexAuthentication\Commands" />
 		<Folder Include="Migrations" />
 	</ItemGroup>
 

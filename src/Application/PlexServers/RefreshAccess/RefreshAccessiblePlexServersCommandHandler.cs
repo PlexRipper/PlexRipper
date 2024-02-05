@@ -1,5 +1,7 @@
 using Application.Contracts;
+using AutoMapper;
 using Data.Contracts;
+using Data.Contracts.Extensions;
 using FluentValidation;
 using Logging.Interface;
 using PlexApi.Contracts;
@@ -25,22 +27,28 @@ public class RefreshAccessiblePlexServersCommandHandler : IRequestHandler<Refres
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
+    private readonly IMapper _mapper;
     private readonly IServerSettingsModule _serverSettingsModule;
     private readonly IAddOrUpdatePlexServersCommand _addOrUpdatePlexServersCommand;
+    private readonly IAddOrUpdatePlexAccountServersCommand _addOrUpdatePlexAccountServersCommand;
     private readonly IPlexApiService _plexServiceApi;
 
     public RefreshAccessiblePlexServersCommandHandler(
         ILog log,
         IPlexRipperDbContext dbContext,
+        IMapper mapper,
         IServerSettingsModule serverSettingsModule,
         IAddOrUpdatePlexServersCommand addOrUpdatePlexServersCommand,
+        IAddOrUpdatePlexAccountServersCommand addOrUpdatePlexAccountServersCommand,
         IPlexApiService plexServiceApi
     )
     {
         _log = log;
         _dbContext = dbContext;
+        _mapper = mapper;
         _serverSettingsModule = serverSettingsModule;
         _addOrUpdatePlexServersCommand = addOrUpdatePlexServersCommand;
+        _addOrUpdatePlexAccountServersCommand = addOrUpdatePlexAccountServersCommand;
         _plexServiceApi = plexServiceApi;
     }
 
@@ -50,7 +58,12 @@ public class RefreshAccessiblePlexServersCommandHandler : IRequestHandler<Refres
         if (plexAccountId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexAccountId)).LogWarning();
 
+        var plexAccount = await _dbContext.PlexAccounts.FindAsync(plexAccountId, cancellationToken);
+        if (plexAccount is null)
+            return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountId);
+
         _log.Debug("Refreshing Plex servers for PlexAccount: {PlexAccountId}", plexAccountId);
+
         var tupleResult = await _plexServiceApi.GetAccessiblePlexServersAsync(plexAccountId);
         var serversResult = tupleResult.servers;
         var tokensResult = tupleResult.tokens;
@@ -72,15 +85,13 @@ public class RefreshAccessiblePlexServersCommandHandler : IRequestHandler<Refres
         // Check if every server has a settings entry
         _serverSettingsModule.EnsureAllServersHaveASettingsEntry(serverList);
 
-        var plexAccountResult = await _mediator.Send(new GetPlexAccountByIdQuery(plexAccountId));
-        if (plexAccountResult.IsFailed)
-            return plexAccountResult.ToResult();
-
-        var plexAccountTokensResult = await _mediator.Send(new AddOrUpdatePlexAccountServersCommand(plexAccountResult.Value, serverAccessTokens));
+        // Add or update the PlexAccount and PlexServer relationships
+        var plexAccountTokensResult = await _addOrUpdatePlexAccountServersCommand.ExecuteAsync(plexAccountId, serverAccessTokens, cancellationToken);
         if (plexAccountTokensResult.IsFailed)
             return plexAccountTokensResult;
 
-        _log.Information("Successfully refreshed accessible Plex servers for account {PlexAccountDisplayName}", plexAccountResult.Value.DisplayName);
-        return await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccountId));
+        _log.Information("Successfully refreshed accessible Plex servers for account {PlexAccountDisplayName}", plexAccount.DisplayName);
+
+        return await _dbContext.GetAllPlexServersByPlexAccountIdQuery(_mapper, plexAccountId, cancellationToken);
     }
 }

@@ -5,5 +5,5 @@ namespace Application.Contracts;
 
 public interface IAddOrUpdatePlexAccountServersCommand
 {
-    Task<Result> ExecuteAsync(PlexAccount plexAccount, List<ServerAccessTokenDTO> serverAccessTokens, CancellationToken cancellationToken);
+    Task<Result> ExecuteAsync(int plexAccountId, List<ServerAccessTokenDTO> serverAccessTokens, CancellationToken cancellationToken = default);
 }

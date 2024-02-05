@@ -16,8 +16,15 @@ public class AddOrUpdatePlexAccountServersCommand : IAddOrUpdatePlexAccountServe
         _dbContext = dbContext;
     }
 
-    public async Task<Result> ExecuteAsync(PlexAccount plexAccount, List<ServerAccessTokenDTO> serverAccessTokens, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(
+        int plexAccountId,
+        List<ServerAccessTokenDTO> serverAccessTokens,
+        CancellationToken cancellationToken = default)
     {
+        var plexAccount = await _dbContext.PlexAccounts.FindAsync(plexAccountId, cancellationToken);
+        if (plexAccount is null)
+            return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountId);
+
         // Add or update the PlexAccount and PlexServer relationships
         _log.InformationLine("Adding or updating the PlexAccount association with PlexServers now");
         var accessiblePlexServers = new List<int>();
@@ -34,7 +41,7 @@ public class AddOrUpdatePlexAccountServersCommand : IAddOrUpdatePlexAccountServe
 
             // Check if this PlexAccount has been associated with the plexServer already
             var plexAccountServer = await _dbContext.PlexAccountServers
-                .Where(x => x.PlexAccountId == plexAccount.Id && x.PlexServerId == plexServer.Id)
+                .Where(x => x.PlexAccountId == plexAccountId && x.PlexServerId == plexServer.Id)
                 .AsTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -47,7 +54,7 @@ public class AddOrUpdatePlexAccountServersCommand : IAddOrUpdatePlexAccountServe
                         plexAccount.DisplayName, plexServer.Name);
                 var accountServerEntry = new PlexAccountServer
                 {
-                    PlexAccountId = plexAccount.Id,
+                    PlexAccountId = plexAccountId,
                     PlexServerId = plexServer.Id,
                     AuthToken = serverAccessToken.AccessToken,
                     AuthTokenCreationDate = DateTime.UtcNow,
@@ -70,7 +77,7 @@ public class AddOrUpdatePlexAccountServersCommand : IAddOrUpdatePlexAccountServe
 
         // The list of all past and current serverId's the plexAccount has access too
         var removalList = await _dbContext.PlexAccountServers
-            .Where(x => x.PlexAccountId == plexAccount.Id && !accessiblePlexServers.Contains(x.PlexServerId))
+            .Where(x => x.PlexAccountId == plexAccountId && !accessiblePlexServers.Contains(x.PlexServerId))
             .Include(x => x.PlexServer)
             .Include(x => x.PlexAccount)
             .ToListAsync(cancellationToken);

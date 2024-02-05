@@ -7,14 +7,14 @@ namespace BackgroundServices.InspectPlexServer;
 public class RefreshAccessiblePlexServersJob : IJob
 {
     private readonly ILog _log;
-    private readonly IPlexServerService _plexServerService;
+    private readonly IMediator _mediator;
 
     public static string PlexAccountIdParameter => "plexAccountId";
 
-    public RefreshAccessiblePlexServersJob(ILog log, IPlexServerService plexServerService)
+    public RefreshAccessiblePlexServersJob(ILog log, IMediator mediator)
     {
         _log = log;
-        _plexServerService = plexServerService;
+        _mediator = mediator;
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -29,7 +29,7 @@ public class RefreshAccessiblePlexServersJob : IJob
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         try
         {
-            await _plexServerService.RefreshAccessiblePlexServersAsync(plexAccountId);
+            await _mediator.Send(new RefreshAccessiblePlexServersCommand(plexAccountId));
         }
         catch (Exception e)
         {

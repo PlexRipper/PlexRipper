@@ -29,6 +29,12 @@ public class ApplicationModule : Module
             .Build();
         builder.RegisterMediatR(configuration);
 
+        // register all I*Commands
+        builder.RegisterAssemblyTypes(assembly)
+            .Where(t => t.Name.EndsWith("Command"))
+            .AsImplementedInterfaces()
+            .SingleInstance();
+
         // register all I*Repository
         builder.RegisterAssemblyTypes(assembly)
             .Where(t => t.Name.EndsWith("Repository"))

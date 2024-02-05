@@ -30,13 +30,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="CQRS\PlexAccounts\Commands\" />
 		<Folder Include="CQRS\PlexAuthentication\Commands" />
 		<Folder Include="Migrations" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Compile Include="..\Domain\GlobalUsings.cs" />
+		<Compile Remove="CQRS\PlexServers\Commands\AddOrUpdatePlexServersCommandHandler.cs" />
 	</ItemGroup>
 
 </Project>

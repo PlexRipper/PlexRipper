@@ -73,6 +73,23 @@
         "resolved": "2022.1.0",
         "contentHash": "ASfpoFJxiRsC9Xc4TWuPM41Zb/gl64xwfMOhnOZ3RnVWGYIZchjpWQV5zshJgoc/ZxVtgjaF7b577lURj7E6ig=="
       },
+      "LanguageExt.Core": {
+        "type": "Transitive",
+        "resolved": "4.4.8",
+        "contentHash": "zd3+mICicbTvf17OuOaruTpluiA5qEl9e28rXSokkI/rK9vdtZzpigYN6+D6Yx9jTkkVDZlvoYUg28RtQqtGiw==",
+        "dependencies": {
+          "Microsoft.Bcl.AsyncInterfaces": "7.0.0",
+          "Microsoft.CSharp": "4.7.0",
+          "System.Diagnostics.Contracts": "4.3.0",
+          "System.Linq": "4.3.0",
+          "System.Linq.Queryable": "4.3.0",
+          "System.Memory": "4.5.5",
+          "System.Reflection.Emit": "4.7.0",
+          "System.Reflection.Emit.Lightweight": "4.7.0",
+          "System.Threading.Tasks.Extensions": "4.5.4",
+          "System.ValueTuple": "4.5.0"
+        }
+      },
       "MediatR": {
         "type": "Transitive",
         "resolved": "12.0.0",
@@ -524,6 +541,14 @@
           "System.Text.Encoding": "4.3.0"
         }
       },
+      "System.Diagnostics.Contracts": {
+        "type": "Transitive",
+        "resolved": "4.3.0",
+        "contentHash": "eelRRbnm+OloiQvp9CXS0ixjNQldjjkHO4iIkR5XH2VIP8sUB/SIpa1TdUW6/+HDcQ+MlhP3pNa1u5SbzYuWGA==",
+        "dependencies": {
+          "System.Runtime": "4.3.0"
+        }
+      },
       "System.Diagnostics.Debug": {
         "type": "Transitive",
         "resolved": "4.3.0",
@@ -711,6 +736,26 @@
           "System.Threading": "4.3.0"
         }
       },
+      "System.Linq.Queryable": {
+        "type": "Transitive",
+        "resolved": "4.3.0",
+        "contentHash": "In1Bmmvl/j52yPu3xgakQSI0YIckPUr870w4K5+Lak3JCCa8hl+my65lABOuKfYs4ugmZy25ScFerC4nz8+b6g==",
+        "dependencies": {
+          "System.Collections": "4.3.0",
+          "System.Diagnostics.Debug": "4.3.0",
+          "System.Linq": "4.3.0",
+          "System.Linq.Expressions": "4.3.0",
+          "System.Reflection": "4.3.0",
+          "System.Reflection.Extensions": "4.3.0",
+          "System.Resources.ResourceManager": "4.3.0",
+          "System.Runtime": "4.3.0"
+        }
+      },
+      "System.Memory": {
+        "type": "Transitive",
+        "resolved": "4.5.5",
+        "contentHash": "XIWiDvKPXaTveaB7HVganDlOCRoj03l+jrwNvcge/t8vhGYKvqV+dMv6G4SAX2NoNmN0wZfVPTAlFwZcZvVOUw=="
+      },
       "System.Net.Http": {
         "type": "Transitive",
         "resolved": "4.3.0",
@@ -817,15 +862,8 @@
       },
       "System.Reflection.Emit": {
         "type": "Transitive",
-        "resolved": "4.3.0",
-        "contentHash": "228FG0jLcIwTVJyz8CLFKueVqQK36ANazUManGaJHkO0icjiIypKW7YLWLIWahyIkdh5M7mV2dJepllLyA1SKg==",
-        "dependencies": {
-          "System.IO": "4.3.0",
-          "System.Reflection": "4.3.0",
-          "System.Reflection.Emit.ILGeneration": "4.3.0",
-          "System.Reflection.Primitives": "4.3.0",
-          "System.Runtime": "4.3.0"
-        }
+        "resolved": "4.7.0",
+        "contentHash": "VR4kk8XLKebQ4MZuKuIni/7oh+QGFmZW3qORd1GvBq/8026OpW501SzT/oypwiQl4TvT8ErnReh/NzY9u+C6wQ=="
       },
       "System.Reflection.Emit.ILGeneration": {
         "type": "Transitive",
@@ -839,14 +877,8 @@
       },
       "System.Reflection.Emit.Lightweight": {
         "type": "Transitive",
-        "resolved": "4.3.0",
-        "contentHash": "oadVHGSMsTmZsAF864QYN1t1QzZjIcuKU3l2S9cZOwDdDueNTrqq1yRj7koFfIGEnKpt6NjpL3rOzRhs4ryOgA==",
-        "dependencies": {
-          "System.Reflection": "4.3.0",
-          "System.Reflection.Emit.ILGeneration": "4.3.0",
-          "System.Reflection.Primitives": "4.3.0",
-          "System.Runtime": "4.3.0"
-        }
+        "resolved": "4.7.0",
+        "contentHash": "a4OLB4IITxAXJeV74MDx49Oq2+PsF6Sml54XAFv+2RyWwtDBcabzoxiiJRhdhx+gaohLh4hEGCLQyBozXoQPqA=="
       },
       "System.Reflection.Extensions": {
         "type": "Transitive",
@@ -1205,6 +1237,11 @@
           "System.Runtime": "4.3.0"
         }
       },
+      "System.ValueTuple": {
+        "type": "Transitive",
+        "resolved": "4.5.0",
+        "contentHash": "okurQJO6NRE/apDIP23ajJ0hpiNmJ+f0BwOlB/cSqTLQlw5upkf+5+96+iG2Jw40G1fCVCyPz/FhIABUjMR+RQ=="
+      },
       "System.Windows.Extensions": {
         "type": "Transitive",
         "resolved": "4.7.0",
@@ -1361,6 +1398,7 @@
           "FluentResultExtensions": "[1.0.0, )",
           "FluentValidation": "[9.3.0, )",
           "JetBrains.Annotations": "[2022.1.0, )",
+          "LanguageExt.Core": "[4.4.8, )",
           "MediatR": "[12.0.0, )",
           "NaturalSort.Extension": "[4.0.0, )",
           "System.ComponentModel.Annotations": "[5.0.0, )",

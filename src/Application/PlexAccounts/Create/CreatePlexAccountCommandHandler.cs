@@ -39,7 +39,7 @@ public class CreatePlexAccountHandler : IRequestHandler<CreatePlexAccountCommand
 
         _log.Debug("Creating account with username {UserName}", command.PlexAccount.Username);
 
-        var result = await _mediator.Send(new CheckIsUsernameAvailableQuery(plexAccount.Username), cancellationToken);
+        var result = await _mediator.Send(new IsUsernameAvailableQuery(plexAccount.Username), cancellationToken);
 
         // Fail on validation errors
         if (result.IsFailed)

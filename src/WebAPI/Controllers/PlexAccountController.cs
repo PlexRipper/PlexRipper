@@ -146,7 +146,7 @@ public class PlexAccountController : BaseController
     {
         try
         {
-            var result = await _mediator.Send(new CheckIsUsernameAvailableQuery(username));
+            var result = await _mediator.Send(new IsUsernameAvailableQuery(username));
             return result.IsFailed ? BadRequest(result.ToResult()) : Ok(result);
         }
         catch (Exception e)

@@ -14,7 +14,7 @@ public class CreatePlexAccountCommand_UnitTests : BaseUnitTest<CreatePlexAccount
         await SetupDatabase();
         var newAccount = new PlexAccount("TestUsername", "Password123");
 
-        mock.SetupMediator(It.IsAny<CheckIsUsernameAvailableQuery>).ReturnsAsync(Result.Ok(true));
+        mock.SetupMediator(It.IsAny<IsUsernameAvailableQuery>).ReturnsAsync(Result.Ok(true));
         mock.Mock<IInspectServerScheduler>().Setup(x => x.QueueInspectPlexServerByPlexAccountIdJob(1)).ReturnsAsync(Result.Ok());
 
         // Act
@@ -32,7 +32,7 @@ public class CreatePlexAccountCommand_UnitTests : BaseUnitTest<CreatePlexAccount
         await SetupDatabase();
         var newAccount = new PlexAccount("TestUsername", "Password123");
 
-        mock.SetupMediator(It.IsAny<CheckIsUsernameAvailableQuery>).ReturnsAsync(Result.Ok(false));
+        mock.SetupMediator(It.IsAny<IsUsernameAvailableQuery>).ReturnsAsync(Result.Ok(false));
         mock.Mock<IInspectServerScheduler>().Setup(x => x.QueueInspectPlexServerByPlexAccountIdJob(1)).ReturnsAsync(Result.Ok());
 
         // Act
@@ -50,7 +50,7 @@ public class CreatePlexAccountCommand_UnitTests : BaseUnitTest<CreatePlexAccount
         await SetupDatabase();
         var newAccount = new PlexAccount("TestUsername", "Password123");
 
-        mock.SetupMediator(It.IsAny<CheckIsUsernameAvailableQuery>).ReturnsAsync(Result.Fail("Error #1"));
+        mock.SetupMediator(It.IsAny<IsUsernameAvailableQuery>).ReturnsAsync(Result.Fail("Error #1"));
         mock.Mock<IInspectServerScheduler>().Setup(x => x.QueueInspectPlexServerByPlexAccountIdJob(1)).ReturnsAsync(Result.Ok());
 
         // Act
@@ -69,7 +69,7 @@ public class CreatePlexAccountCommand_UnitTests : BaseUnitTest<CreatePlexAccount
         await SetupDatabase();
         var newAccount = new PlexAccount("TestUsername", "Password123");
 
-        mock.SetupMediator(It.IsAny<CheckIsUsernameAvailableQuery>).ReturnsAsync(Result.Fail("Error #1"));
+        mock.SetupMediator(It.IsAny<IsUsernameAvailableQuery>).ReturnsAsync(Result.Fail("Error #1"));
         mock.Mock<IInspectServerScheduler>().Setup(x => x.QueueInspectPlexServerByPlexAccountIdJob(1)).ReturnsAsync(Result.Ok());
 
         // Act

@@ -16,7 +16,6 @@
 		<PackageReference Include="EFCore.BulkExtensions.SQLite" Version="7.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.8" />
 		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.8" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.8" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.8">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -31,7 +30,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="CQRS\PlexAuthentication\Commands" />
 		<Folder Include="Migrations" />
 	</ItemGroup>
 

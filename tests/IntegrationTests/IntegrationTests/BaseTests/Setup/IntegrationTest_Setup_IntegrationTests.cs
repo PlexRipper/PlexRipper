@@ -21,7 +21,6 @@ public class IntegrationTest_Setup : BaseIntegrationTests
         Container.GetDownloadTaskFactory.ShouldNotBeNull();
         Container.GetDownloadTaskValidator.ShouldNotBeNull();
         Container.GetFolderPathService.ShouldNotBeNull();
-        Container.GetPlexAccountService.ShouldNotBeNull();
         Container.GetPlexApiService.ShouldNotBeNull();
         Container.GetPlexLibraryService.ShouldNotBeNull();
         Container.GetPlexServerService.ShouldNotBeNull();

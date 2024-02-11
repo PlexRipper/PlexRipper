@@ -1,7 +1,10 @@
 ﻿using Application.Contracts;
 using AutoMapper;
+using BackgroundServices.Contracts;
+using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
+using PlexApi.Contracts;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -9,24 +12,33 @@ namespace PlexRipper.WebAPI.Controllers;
 
 public class PlexAccountController : BaseController
 {
-    private readonly IPlexAccountService _plexAccountService;
+    private readonly IMediator _mediator;
+    private readonly IPlexApiService _plexApiService;
+    private readonly IInspectServerScheduler _inspectServerScheduler;
 
-    public PlexAccountController(ILog log, IPlexAccountService plexAccountService, IMapper mapper, INotificationsService notificationsService) : base(log,
+    public PlexAccountController(
+        ILog log,
+        IMediator mediator,
+        IMapper mapper,
+        IPlexApiService plexApiService,
+        INotificationsService notificationsService,
+        IInspectServerScheduler inspectServerScheduler) : base(log,
         mapper, notificationsService)
     {
-        _plexAccountService = plexAccountService;
+        _mediator = mediator;
+        _plexApiService = plexApiService;
+        _inspectServerScheduler = inspectServerScheduler;
     }
 
     // GET: api/<PlexAccountController>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexAccountDTO>>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
     public async Task<IActionResult> GetAllAccounts([FromQuery] bool enabledOnly = false)
     {
-        var result = await _plexAccountService.GetAllPlexAccountsAsync(enabledOnly);
+        var result = await _mediator.Send(new GetAllPlexAccountsQuery(enabledOnly));
         if (result.IsFailed)
-            return BadRequest(result.ToResult());
+            return InternalServerError(result.ToResult());
 
         var mapResult = _mapper.Map<List<PlexAccountDTO>>(result.Value);
         if (!mapResult.Any() && enabledOnly)
@@ -35,22 +47,28 @@ public class PlexAccountController : BaseController
             return NotFound(Result.Fail(logEvent.ToLogString()));
         }
 
-        _log.Debug("Returned {PlexAccountCount} accounts", mapResult.Count);
         return Ok(Result.Ok(mapResult).WithSuccess($"Returned {mapResult.Count} accounts"));
     }
 
     // GET api/<PlexAccountController>/5
-    [HttpGet("{id:int}")]
+    [HttpGet("{accountId:int}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexAccountDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetAccount(int id)
+    public async Task<IActionResult> GetAccount(int accountId)
     {
-        if (id <= 0)
+        if (accountId <= 0)
             return BadRequestInvalidId();
 
-        return ToActionResult<PlexAccount, PlexAccountDTO>(await _plexAccountService.GetPlexAccountAsync(id));
+        var result = await _mediator.Send(new GetPlexAccountByIdQuery(accountId, true, true));
+
+        if (result.Value != null)
+            _log.Debug("Found an Account with the id: {AccountId}", accountId);
+
+        _log.Warning("Could not find an Account with id: {AccountId}", accountId);
+
+        return ToActionResult<PlexAccount, PlexAccountDTO>(result);
     }
 
     // PUT api/<PlexAccountController>/5
@@ -65,7 +83,8 @@ public class PlexAccountController : BaseController
             return BadRequestInvalidId();
 
         var mapResult = _mapper.Map<PlexAccount>(updatedAccount);
-        return ToActionResult<PlexAccount, PlexAccountDTO>(await _plexAccountService.UpdatePlexAccountAsync(mapResult, inspect));
+        var result = await _mediator.Send(new UpdatePlexAccountCommand(mapResult, inspect));
+        return ToActionResult<PlexAccount, PlexAccountDTO>(result);
     }
 
     // POST api/<AccountController>
@@ -79,11 +98,21 @@ public class PlexAccountController : BaseController
             return BadRequest("The new account was null");
 
         var mapResult = _mapper.Map<PlexAccount>(newAccount);
-        var createResult = await _plexAccountService.CreatePlexAccountAsync(mapResult);
-        return ToActionResult<PlexAccount, PlexAccountDTO>(createResult);
+
+        var createResult = await _mediator.Send(new CreatePlexAccountCommand(mapResult));
+        if (createResult.IsFailed)
+            return ToActionResult(createResult.ToResult());
+
+        var getResult = await _mediator.Send(new GetPlexAccountByIdQuery(createResult.Value, true, true));
+        return ToActionResult<PlexAccount, PlexAccountDTO>(getResult);
     }
 
-    // DELETE api/<AccountController>/5
+    /// <summary>
+    /// Deletes a PlexAccount by its id.
+    /// DELETE api/PlexAccount/5
+    /// </summary>
+    /// <param name="id">The id of the <see cref="PlexAccount"/> to delete.</param>
+    /// <returns></returns>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
@@ -94,8 +123,8 @@ public class PlexAccountController : BaseController
         if (id <= 0)
             return BadRequestInvalidId();
 
-        var deleteResult = await _plexAccountService.DeletePlexAccountAsync(id);
-        return ToActionResult(deleteResult);
+        var deleteAccountResult = await _mediator.Send(new DeletePlexAccountCommand(id));
+        return ToActionResult(deleteAccountResult);
     }
 
     [HttpPost("validate")]
@@ -105,7 +134,7 @@ public class PlexAccountController : BaseController
     public async Task<IActionResult> Validate([FromBody] PlexAccountDTO account)
     {
         var plexAccount = _mapper.Map<PlexAccount>(account);
-        var result = await _plexAccountService.ValidatePlexAccountAsync(plexAccount);
+        var result = await _mediator.Send(new ValidatePlexAccountCommand(plexAccount));
         return ToActionResult<PlexAccount, PlexAccountDTO>(result);
     }
 
@@ -115,26 +144,10 @@ public class PlexAccountController : BaseController
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
     public async Task<IActionResult> CheckUsername(string username)
     {
-        if (string.IsNullOrEmpty(username) || username.Length < 5)
-            return BadRequest(Result.Fail("Invalid username"));
-
         try
         {
-            var result = await _plexAccountService.CheckIfUsernameIsAvailableAsync(username);
-
-            if (result.IsFailed)
-                return BadRequest(result.ToResult());
-
-            if (result.Value)
-            {
-                var logEvent = _log.Debug("Username: {UserName} is available", username);
-                return Ok(Result.Ok(true).WithSuccess(logEvent.ToLogString()));
-            }
-            else
-            {
-                var logEvent = _log.Warning("Account with username: {UserName} already exists!", username);
-                return Ok(Result.Ok(false).WithError(logEvent.ToLogString()));
-            }
+            var result = await _mediator.Send(new IsUsernameAvailableQuery(username));
+            return result.IsFailed ? BadRequest(result.ToResult()) : Ok(result);
         }
         catch (Exception e)
         {
@@ -142,13 +155,30 @@ public class PlexAccountController : BaseController
         }
     }
 
-    [HttpGet("refresh/{id:int}")]
+    // TODO Split up this endpoint between a single and all refresh
+    [HttpGet("refresh/{plexAccountId:int}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> RefreshPlexAccount(int id)
+    public async Task<IActionResult> RefreshPlexAccount(int plexAccountId)
     {
-        return ToActionResult(await _plexAccountService.RefreshPlexAccount(id));
+        var plexAccountIds = new List<int>();
+
+        if (plexAccountId == 0)
+        {
+            var enabledAccounts = await _mediator.Send(new GetAllPlexAccountsQuery(true));
+            if (enabledAccounts.IsFailed)
+                return ToActionResult(enabledAccounts.ToResult());
+
+            plexAccountIds.AddRange(enabledAccounts.Value.Select(x => x.Id));
+        }
+        else
+            plexAccountIds.Add(plexAccountId);
+
+        foreach (var id in plexAccountIds)
+            await _inspectServerScheduler.QueueRefreshAccessiblePlexServersJob(id);
+
+        return ToActionResult(Result.Ok());
     }
 
     // GET api/<PlexAccountController>/authpin/
@@ -163,9 +193,9 @@ public class PlexAccountController : BaseController
 
         Result<AuthPin> authPinResult;
         if (authPinId == 0)
-            authPinResult = await _plexAccountService.Get2FAPin(clientId);
+            authPinResult = await _plexApiService.Get2FAPin(clientId);
         else
-            authPinResult = await _plexAccountService.Check2FAPin(authPinId, clientId);
+            authPinResult = await _plexApiService.Check2FAPin(authPinId, clientId);
 
         return ToActionResult<AuthPin, AuthPin>(authPinResult);
     }

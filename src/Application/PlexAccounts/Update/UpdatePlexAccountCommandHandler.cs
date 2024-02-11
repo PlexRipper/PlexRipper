@@ -1,10 +1,10 @@
-﻿using Data.Contracts;
+﻿using Application.Contracts;
+using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data;
+namespace PlexRipper.Application;
 
 public class UpdatePlexAccountValidator : AbstractValidator<UpdatePlexAccountCommand>
 {
@@ -23,11 +23,18 @@ public class UpdatePlexAccountValidator : AbstractValidator<UpdatePlexAccountCom
     }
 }
 
-public class UpdatePlexAccountHandler : BaseHandler, IRequestHandler<UpdatePlexAccountCommand, Result>
+public class UpdatePlexAccountHandler : IRequestHandler<UpdatePlexAccountCommand, Result<PlexAccount>>
 {
-    public UpdatePlexAccountHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    private readonly ILog _log;
+    private readonly IPlexRipperDbContext _dbContext;
 
-    public async Task<Result> Handle(UpdatePlexAccountCommand command, CancellationToken cancellationToken)
+    public UpdatePlexAccountHandler(ILog log, IPlexRipperDbContext dbContext)
+    {
+        _log = log;
+        _dbContext = dbContext;
+    }
+
+    public async Task<Result<PlexAccount>> Handle(UpdatePlexAccountCommand command, CancellationToken cancellationToken)
     {
         var plexAccount = command.PlexAccount;
         var accountInDb = await _dbContext.PlexAccounts
@@ -41,6 +48,11 @@ public class UpdatePlexAccountHandler : BaseHandler, IRequestHandler<UpdatePlexA
 
         _dbContext.Entry(accountInDb).CurrentValues.SetValues(plexAccount);
         await _dbContext.SaveChangesAsync(cancellationToken);
-        return Result.Ok();
+
+        // Re-validate if the credentials changed
+        if (command.inspectServers || accountInDb.Username != plexAccount.Username || accountInDb.Password != plexAccount.Password)
+            throw new NotImplementedException("Account revalidation is not implemented yet when account is updated with a different username or password");
+
+        return Result.Ok(accountInDb);
     }
 }

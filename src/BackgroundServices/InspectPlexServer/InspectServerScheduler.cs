@@ -15,31 +15,6 @@ public class InspectServerScheduler : BaseScheduler, IInspectServerScheduler
         _mediator = mediator;
     }
 
-    public async Task<Result> QueueInspectPlexServerJob(int plexServerId)
-    {
-        var jobKey = InspectPlexServerJob.GetJobKey(plexServerId);
-        if (await IsJobRunning(jobKey))
-        {
-            return Result.Fail($"A {nameof(InspectPlexServerJob)} with {nameof(plexServerId)} {plexServerId} is already running")
-                .LogWarning();
-        }
-
-        var job = JobBuilder.Create<InspectPlexServerJob>()
-            .UsingJobData(InspectPlexServerJob.PlexServerIdParameter, plexServerId)
-            .WithIdentity(jobKey)
-            .Build();
-
-        var trigger = TriggerBuilder.Create()
-            .WithIdentity($"{jobKey.Name}_trigger", jobKey.Group)
-            .ForJob(job)
-            .StartNow()
-            .Build();
-
-        await ScheduleJob(job, trigger);
-
-        return Result.Ok();
-    }
-
     public async Task<Result> QueueRefreshAccessiblePlexServersJob(int plexAccountId)
     {
         if (plexAccountId <= 0)

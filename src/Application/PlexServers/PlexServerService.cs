@@ -38,51 +38,6 @@ public class PlexServerService : IPlexServerService
 
     #endregion
 
-    #region Methods
-
-    #region Public
-
-    public async Task<Result<PlexAccount>> ChoosePlexAccountToConnect(int plexServerId, CancellationToken ct = default)
-    {
-        if (plexServerId <= 0)
-            return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId);
-
-        var plexAccountsResult = await _dbContext.GetPlexAccountsWithAccessAsync(plexServerId, ct);
-        if (plexAccountsResult.IsFailed)
-            return plexAccountsResult.ToResult();
-
-        var plexAccounts = plexAccountsResult.Value.FindAll(x => x.IsEnabled);
-        if (!Enumerable.Any<PlexAccount>(plexAccounts))
-            return Result.Fail($"There are no enabled accounts that can access PlexServer with id: {plexServerId}").LogError();
-
-        if (plexAccounts.Count == 1)
-            return Result.Ok(Enumerable.First<PlexAccount>(plexAccounts));
-
-        // Prefer to use a non-main account
-        var dummyAccount = Enumerable.FirstOrDefault<PlexAccount>(plexAccounts, x => !x.IsMain);
-        if (dummyAccount is not null)
-            return Result.Ok(dummyAccount);
-
-        var mainAccount = Enumerable.FirstOrDefault<PlexAccount>(plexAccounts, x => x.IsMain);
-        if (mainAccount is not null)
-            return Result.Ok(mainAccount);
-
-        return Result.Fail($"No account could be chosen to connect to PlexServer with id: {plexServerId}").LogError();
-    }
-
-    #region CRUD
-
-    public async Task<Result> SetPreferredConnection(int plexServerId, int plexServerConnectionId)
-    {
-        return await _mediator.Send(new SetPreferredPlexServerConnectionCommand(plexServerId, plexServerConnectionId));
-    }
-
-    #endregion
-
-    #endregion
-
-    #endregion
-
     #region InspectPlexServers
 
     /// <summary>
@@ -128,24 +83,6 @@ public class PlexServerService : IPlexServerService
         _log.Information("Successfully finished the inspection of all plexServers related to {NameOfPlexAccount} {PlexAccountId}", nameof(PlexAccount),
             plexAccountId);
         return Result.Ok();
-    }
-
-    public async Task<Result<PlexServer>> InspectPlexServer(int plexServerId)
-    {
-        var refreshResult = await _mediator.Send(new RefreshPlexServerConnectionsCommand(plexServerId));
-        if (refreshResult.IsFailed)
-            return refreshResult.ToResult();
-
-        var checkResult = await _plexServerConnectionsService.CheckAllConnectionsOfPlexServerAsync(plexServerId);
-        if (checkResult.IsFailed)
-            return checkResult.ToResult();
-
-        await _plexLibraryService.RetrieveAccessibleLibrariesForAllAccountsAsync(plexServerId);
-
-        await _syncServerScheduler.QueueSyncPlexServerJob(plexServerId, true);
-
-        _log.Information("Successfully finished the inspection of {NameOfPlexServer} with id {PlexServerId}", nameof(PlexServer), plexServerId);
-        return await _mediator.Send(new GetPlexServerByIdQuery(plexServerId, true));
     }
 
     #endregion

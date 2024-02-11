@@ -13,6 +13,4 @@ public interface IPlexServerService
     /// <param name="skipRefreshAccessibleServers"></param>
     /// <returns></returns>
     Task<Result> InspectAllPlexServersByAccountId(int plexAccountId, bool skipRefreshAccessibleServers = false);
-
-    Task<Result<PlexServer>> InspectPlexServer(int plexServerId);
 }

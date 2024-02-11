@@ -2,9 +2,10 @@
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.PlexServers;
+namespace PlexRipper.Application;
+
+public record SetPreferredPlexServerConnectionCommand(int PlexServerId, int PlexServerConnectionId) : IRequest<Result>;
 
 public class SetPreferredPlexServerConnectionCommandValidator : AbstractValidator<SetPreferredPlexServerConnectionCommand>
 {
@@ -15,9 +16,16 @@ public class SetPreferredPlexServerConnectionCommandValidator : AbstractValidato
     }
 }
 
-public class SetPreferredPlexServerConnectionCommandHandler : BaseHandler, IRequestHandler<SetPreferredPlexServerConnectionCommand, Result>
+public class SetPreferredPlexServerConnectionCommandHandler : IRequestHandler<SetPreferredPlexServerConnectionCommand, Result>
 {
-    public SetPreferredPlexServerConnectionCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    private readonly ILog _log;
+    private readonly IPlexRipperDbContext _dbContext;
+
+    public SetPreferredPlexServerConnectionCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    {
+        _log = log;
+        _dbContext = dbContext;
+    }
 
     public async Task<Result> Handle(SetPreferredPlexServerConnectionCommand command, CancellationToken cancellationToken)
     {
@@ -45,7 +53,7 @@ public class SetPreferredPlexServerConnectionCommandHandler : BaseHandler, IRequ
 
         plexServer.PreferredConnectionId = plexServerConnectionId;
 
-        await SaveChangesAsync(cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

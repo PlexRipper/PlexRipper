@@ -2,8 +2,6 @@ using Application.Contracts;
 using BackgroundServices.Contracts;
 using Data.Contracts;
 using Logging.Interface;
-using PlexApi.Contracts;
-using Settings.Contracts;
 
 namespace PlexRipper.Application;
 
@@ -16,13 +14,7 @@ public class PlexServerService : IPlexServerService
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IPlexLibraryService _plexLibraryService;
     private readonly IPlexServerConnectionsService _plexServerConnectionsService;
-
-    private readonly IPlexApiService _plexServiceApi;
-
-    private readonly IServerSettingsModule _serverSettingsModule;
     private readonly ISyncServerScheduler _syncServerScheduler;
-    private readonly IAddOrUpdatePlexServersCommand _addOrUpdatePlexServersCommand;
-    private readonly IAddOrUpdatePlexAccountServersCommand _addOrUpdatePlexAccountServersCommand;
 
     #endregion
 
@@ -32,23 +24,15 @@ public class PlexServerService : IPlexServerService
         ILog log,
         IMediator mediator,
         IPlexRipperDbContext dbContext,
-        IPlexApiService plexServiceApi,
         IPlexLibraryService plexLibraryService,
-        IServerSettingsModule serverSettingsModule,
         ISyncServerScheduler syncServerScheduler,
-        IAddOrUpdatePlexServersCommand addOrUpdatePlexServersCommand,
-        IAddOrUpdatePlexAccountServersCommand addOrUpdatePlexAccountServersCommand,
         IPlexServerConnectionsService plexServerConnectionsService)
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
-        _serverSettingsModule = serverSettingsModule;
         _syncServerScheduler = syncServerScheduler;
-        _addOrUpdatePlexServersCommand = addOrUpdatePlexServersCommand;
-        _addOrUpdatePlexAccountServersCommand = addOrUpdatePlexAccountServersCommand;
         _plexServerConnectionsService = plexServerConnectionsService;
-        _plexServiceApi = plexServiceApi;
         _plexLibraryService = plexLibraryService;
     }
 
@@ -148,7 +132,7 @@ public class PlexServerService : IPlexServerService
 
     public async Task<Result<PlexServer>> InspectPlexServer(int plexServerId)
     {
-        var refreshResult = await RefreshPlexServerConnectionsAsync(plexServerId);
+        var refreshResult = await _mediator.Send(new RefreshPlexServerConnectionsCommand(plexServerId));
         if (refreshResult.IsFailed)
             return refreshResult.ToResult();
 
@@ -161,50 +145,6 @@ public class PlexServerService : IPlexServerService
         await _syncServerScheduler.QueueSyncPlexServerJob(plexServerId, true);
 
         _log.Information("Successfully finished the inspection of {NameOfPlexServer} with id {PlexServerId}", nameof(PlexServer), plexServerId);
-        return await _mediator.Send(new GetPlexServerByIdQuery(plexServerId, true));
-    }
-
-    #endregion
-
-    #region RefreshPlexServers
-
-    /// <inheritdoc/>
-    public async Task<Result<PlexServer>> RefreshPlexServerConnectionsAsync(int plexServerId, CancellationToken ct = default)
-    {
-        // Pick an account that has access to the PlexServer to connect with
-        var plexAccountResult = await ChoosePlexAccountToConnect(plexServerId, ct);
-        if (plexAccountResult.IsFailed)
-            return plexAccountResult.ToResult();
-
-        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId));
-        if (plexServerResult.IsFailed)
-            return plexServerResult.ToResult();
-
-        var plexServer = plexServerResult.Value;
-        var plexAccount = plexAccountResult.Value;
-
-        // Retrieve the PlexApi server data
-        var tupleResult = await _plexServiceApi.GetAccessiblePlexServersAsync(plexAccount.Id);
-        var serverList = tupleResult.servers.Value
-            .FindAll(x => x.MachineIdentifier == plexServer.MachineIdentifier);
-
-        // Check if we got the plex server we are looking for
-        if (!serverList.Any())
-            return Result.Fail($"Could not retrieve the Plex server data with machine id: {plexServer.MachineIdentifier}");
-
-        var serverAccessTokens = tupleResult.tokens.Value
-            .FindAll(x => x.MachineIdentifier == plexServer.MachineIdentifier);
-
-        // We only want to update one plexServer and discard the rest
-        var updateResult = await _addOrUpdatePlexServersCommand.ExecuteAsync(serverList);
-        if (updateResult.IsFailed)
-            return updateResult;
-
-        // We only want to update tokens for the plexServer and discard the rest
-        var plexAccountTokensResult = await _addOrUpdatePlexAccountServersCommand.ExecuteAsync(plexAccount.Id, serverAccessTokens);
-        if (plexAccountTokensResult.IsFailed)
-            return plexAccountTokensResult;
-
         return await _mediator.Send(new GetPlexServerByIdQuery(plexServerId, true));
     }
 

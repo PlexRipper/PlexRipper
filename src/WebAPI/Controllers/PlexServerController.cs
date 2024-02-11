@@ -4,6 +4,7 @@ using BackgroundServices.Contracts;
 using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -97,7 +98,8 @@ public class PlexServerController : BaseController
         if (plexServerId <= 0)
             return BadRequestInvalidId();
 
-        return ToActionResult<PlexServer, PlexServerDTO>(await _plexServerService.RefreshPlexServerConnectionsAsync(plexServerId));
+        var refreshResult = await _mediator.Send(new RefreshPlexServerConnectionsCommand(plexServerId));
+        return ToActionResult<PlexServer, PlexServerDTO>(refreshResult);
     }
 
     // GET api/<PlexServerController>/5/sync
@@ -120,7 +122,6 @@ public class PlexServerController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
     public async Task<IActionResult> SetPreferredConnection(int plexServerId, int plexServerConnectionId)
     {
-
         if (plexServerId <= 0)
             return BadRequestInvalidId(nameof(plexServerId));
 
@@ -128,7 +129,6 @@ public class PlexServerController : BaseController
             return BadRequestInvalidId(nameof(plexServerConnectionId));
 
         var result = await _mediator.Send(new SetPreferredPlexServerConnectionCommand(plexServerId, plexServerConnectionId));
-
 
         return ToActionResult(result);
     }

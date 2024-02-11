@@ -14,13 +14,5 @@ public interface IPlexServerService
     /// <returns></returns>
     Task<Result> InspectAllPlexServersByAccountId(int plexAccountId, bool skipRefreshAccessibleServers = false);
 
-    /// <summary>
-    /// Refreshes the <see cref="PlexServer"/> data with connections from the Plex API
-    /// </summary>
-    /// <param name="plexServerId"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    Task<Result<PlexServer>> RefreshPlexServerConnectionsAsync(int plexServerId, CancellationToken ct = default);
-
     Task<Result<PlexServer>> InspectPlexServer(int plexServerId);
 }

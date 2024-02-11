@@ -1,6 +1,5 @@
 using Application.Contracts;
 using Data.Contracts;
-using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application.Persistence;
 
@@ -13,29 +12,12 @@ public class PlexServerRepository : IPlexServerRepository
         _dbContext = dbContext;
     }
 
-    public async Task<Result<List<PlexAccount>>> GetPlexAccountsWithAccess(int plexServerId, CancellationToken cancellationToken = default)
-    {
-        if (plexServerId <= 0)
-            return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId).LogError();
-
-        var query = await _dbContext.PlexAccountServers
-            .Include(x => x.PlexAccount)
-            .Where(x => x.PlexServerId == plexServerId)
-            .Select(x => x.PlexAccount)
-            .ToListAsync(cancellationToken);
-
-        if (!query.Any())
-            return Result.Fail($"There were no PlexAccounts that have access to PlexServer with id: {plexServerId}").LogError();
-
-        return Result.Ok(query);
-    }
-
-    public async Task<Result<PlexAccount>> ChoosePlexAccountToConnect(int plexServerId, CancellationToken cancellationToken = default)
+    public async Task<Result<PlexAccount>> ChoosePlexAccountToConnect(int plexServerId, CancellationToken ct = default)
     {
         if (plexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId);
 
-        var plexAccountsResult = await GetPlexAccountsWithAccess(plexServerId, cancellationToken);
+        var plexAccountsResult = await _dbContext.GetPlexAccountsWithAccessAsync(plexServerId, ct);
         if (plexAccountsResult.IsFailed)
             return plexAccountsResult.ToResult();
 

@@ -16,6 +16,7 @@ public class PlexLibraryService : IPlexLibraryService
 
     private readonly IPlexApiService _plexServiceApi;
     private readonly IPlexServerRepository _plexServerRepository;
+    private readonly IPlexRipperDbContext _dbContext;
 
     private readonly ISignalRService _signalRService;
 
@@ -28,12 +29,14 @@ public class PlexLibraryService : IPlexLibraryService
         IMediator mediator,
         IPlexApiService plexServiceApi,
         IPlexServerRepository plexServerRepository,
+        IPlexRipperDbContext dbContext,
         ISignalRService signalRService)
     {
         _log = log;
         _mediator = mediator;
         _plexServiceApi = plexServiceApi;
         _plexServerRepository = plexServerRepository;
+        _dbContext = dbContext;
         _signalRService = signalRService;
     }
 
@@ -230,7 +233,7 @@ public class PlexLibraryService : IPlexLibraryService
         if (plexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexServerId)).LogWarning();
 
-        var accountsResult = await _plexServerRepository.GetPlexAccountsWithAccess(plexServerId);
+        var accountsResult = await _dbContext.GetPlexAccountsWithAccessAsync(plexServerId);
         if (accountsResult.IsFailed)
             return accountsResult.ToResult();
 

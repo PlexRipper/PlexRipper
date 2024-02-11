@@ -13,6 +13,7 @@ public class PlexServerService : IPlexServerService
 
     private readonly ILog _log;
     private readonly IMediator _mediator;
+    private readonly IPlexRipperDbContext _dbContext;
     private readonly IPlexLibraryService _plexLibraryService;
     private readonly IPlexServerConnectionsService _plexServerConnectionsService;
 
@@ -30,6 +31,7 @@ public class PlexServerService : IPlexServerService
     public PlexServerService(
         ILog log,
         IMediator mediator,
+        IPlexRipperDbContext dbContext,
         IPlexApiService plexServiceApi,
         IPlexLibraryService plexLibraryService,
         IServerSettingsModule serverSettingsModule,
@@ -40,6 +42,7 @@ public class PlexServerService : IPlexServerService
     {
         _log = log;
         _mediator = mediator;
+        _dbContext = dbContext;
         _serverSettingsModule = serverSettingsModule;
         _syncServerScheduler = syncServerScheduler;
         _addOrUpdatePlexServersCommand = addOrUpdatePlexServersCommand;
@@ -55,28 +58,28 @@ public class PlexServerService : IPlexServerService
 
     #region Public
 
-    public async Task<Result<PlexAccount>> ChoosePlexAccountToConnect(int plexServerId)
+    public async Task<Result<PlexAccount>> ChoosePlexAccountToConnect(int plexServerId, CancellationToken ct = default)
     {
         if (plexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId);
 
-        var plexAccountsResult = await _mediator.Send(new GetPlexAccountsWithAccessByPlexServerIdQuery(plexServerId));
+        var plexAccountsResult = await _dbContext.GetPlexAccountsWithAccessAsync(plexServerId, ct);
         if (plexAccountsResult.IsFailed)
             return plexAccountsResult.ToResult();
 
         var plexAccounts = plexAccountsResult.Value.FindAll(x => x.IsEnabled);
-        if (!plexAccounts.Any())
+        if (!Enumerable.Any<PlexAccount>(plexAccounts))
             return Result.Fail($"There are no enabled accounts that can access PlexServer with id: {plexServerId}").LogError();
 
         if (plexAccounts.Count == 1)
-            return Result.Ok(plexAccounts.First());
+            return Result.Ok(Enumerable.First<PlexAccount>(plexAccounts));
 
         // Prefer to use a non-main account
-        var dummyAccount = plexAccounts.FirstOrDefault(x => !x.IsMain);
+        var dummyAccount = Enumerable.FirstOrDefault<PlexAccount>(plexAccounts, x => !x.IsMain);
         if (dummyAccount is not null)
             return Result.Ok(dummyAccount);
 
-        var mainAccount = plexAccounts.FirstOrDefault(x => x.IsMain);
+        var mainAccount = Enumerable.FirstOrDefault<PlexAccount>(plexAccounts, x => x.IsMain);
         if (mainAccount is not null)
             return Result.Ok(mainAccount);
 
@@ -166,10 +169,10 @@ public class PlexServerService : IPlexServerService
     #region RefreshPlexServers
 
     /// <inheritdoc/>
-    public async Task<Result<PlexServer>> RefreshPlexServerConnectionsAsync(int plexServerId)
+    public async Task<Result<PlexServer>> RefreshPlexServerConnectionsAsync(int plexServerId, CancellationToken ct = default)
     {
         // Pick an account that has access to the PlexServer to connect with
-        var plexAccountResult = await ChoosePlexAccountToConnect(plexServerId);
+        var plexAccountResult = await ChoosePlexAccountToConnect(plexServerId, ct);
         if (plexAccountResult.IsFailed)
             return plexAccountResult.ToResult();
 

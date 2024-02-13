@@ -56,4 +56,20 @@ public static class PlexAccountExtensions
 
         return Result.Fail($"No account could be chosen to connect to PlexServer with id: {plexServerId}").LogError();
     }
+
+    public static async Task<Result<List<PlexServer>>> GetAccessiblePlexServers(
+        this IPlexRipperDbContext dbContext,
+        int plexAccountId,
+        CancellationToken cancellationToken = default)
+    {
+        var plexAccount = await dbContext.PlexAccounts.AsNoTracking()
+            .Include(x => x.PlexAccountServers)
+            .ThenInclude(x => x.PlexServer)
+            .FirstOrDefaultAsync(x => x.Id == plexAccountId, cancellationToken);
+
+        if (plexAccount == null)
+            return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountId);
+
+        return Result.Ok(plexAccount.PlexServers);
+    }
 }

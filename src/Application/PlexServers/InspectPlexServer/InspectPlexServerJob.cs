@@ -10,7 +10,6 @@ public class InspectPlexServerJob : IJob
 {
     public static string PlexServerIdParameter => "plexServerId";
 
-    private readonly IPlexServerService _plexServerService;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IPlexLibraryService _plexLibraryService;
     private readonly ISyncServerScheduler _syncServerScheduler;
@@ -21,7 +20,6 @@ public class InspectPlexServerJob : IJob
     public InspectPlexServerJob(
         ILog log,
         IMediator mediator,
-        IPlexServerService plexServerService,
         IPlexRipperDbContext dbContext,
         IPlexLibraryService plexLibraryService,
         ISyncServerScheduler syncServerScheduler,
@@ -29,7 +27,6 @@ public class InspectPlexServerJob : IJob
     {
         _log = log;
         _mediator = mediator;
-        _plexServerService = plexServerService;
         _dbContext = dbContext;
         _plexLibraryService = plexLibraryService;
         _plexServerConnectionsService = plexServerConnectionsService;

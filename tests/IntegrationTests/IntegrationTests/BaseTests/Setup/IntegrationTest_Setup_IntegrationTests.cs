@@ -23,7 +23,6 @@ public class IntegrationTest_Setup : BaseIntegrationTests
         Container.GetFolderPathService.ShouldNotBeNull();
         Container.GetPlexApiService.ShouldNotBeNull();
         Container.GetPlexLibraryService.ShouldNotBeNull();
-        Container.GetPlexServerService.ShouldNotBeNull();
         Container.Mediator.ShouldNotBeNull();
         Container.PathProvider.ShouldNotBeNull();
         Container.PlexRipperDbContext.ShouldNotBeNull();

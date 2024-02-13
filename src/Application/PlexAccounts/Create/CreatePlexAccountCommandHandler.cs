@@ -1,5 +1,4 @@
 ﻿using Application.Contracts;
-using BackgroundServices.Contracts;
 using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
@@ -23,14 +22,12 @@ public class CreatePlexAccountHandler : IRequestHandler<CreatePlexAccountCommand
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
-    private readonly IInspectServerScheduler _inspectServerScheduler;
 
-    public CreatePlexAccountHandler(ILog log, IPlexRipperDbContext dbContext, IMediator mediator, IInspectServerScheduler inspectServerScheduler)
+    public CreatePlexAccountHandler(ILog log, IPlexRipperDbContext dbContext, IMediator mediator)
     {
         _log = log;
         _dbContext = dbContext;
         _mediator = mediator;
-        _inspectServerScheduler = inspectServerScheduler;
     }
 
     public async Task<Result<int>> Handle(CreatePlexAccountCommand command, CancellationToken cancellationToken)
@@ -61,11 +58,11 @@ public class CreatePlexAccountHandler : IRequestHandler<CreatePlexAccountCommand
         await _dbContext.SaveChangesAsync(cancellationToken);
         await _dbContext.Entry(command.PlexAccount).GetDatabaseValuesAsync(cancellationToken);
 
-        var queueInspectPlexServerResult = await _inspectServerScheduler.QueueInspectPlexServerByPlexAccountIdJob(command.PlexAccount.Id);
-        if (queueInspectPlexServerResult.IsFailed)
+        var inspectResult = await _mediator.Send(new InspectAllPlexServersByAccountIdCommand(command.PlexAccount.Id), cancellationToken);
+        if (result.IsFailed)
         {
             _log.Error("Failed to queue inspect server job for PlexAccount with id {PlexAccountId}", command.PlexAccount.Id);
-            return queueInspectPlexServerResult;
+            return inspectResult;
         }
 
         return Result.Ok(command.PlexAccount.Id).Add201CreatedRequestSuccess("PlexAccount created successfully.");

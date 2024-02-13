@@ -22,7 +22,6 @@ public class IntegrationTest_Setup : BaseIntegrationTests
         Container.GetDownloadTaskValidator.ShouldNotBeNull();
         Container.GetFolderPathService.ShouldNotBeNull();
         Container.GetPlexApiService.ShouldNotBeNull();
-        Container.GetPlexLibraryService.ShouldNotBeNull();
         Container.Mediator.ShouldNotBeNull();
         Container.PathProvider.ShouldNotBeNull();
         Container.PlexRipperDbContext.ShouldNotBeNull();

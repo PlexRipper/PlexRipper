@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Autofac;
+using Autofac.Extras.Quartz;
 using MediatR.Extensions.Autofac.DependencyInjection;
 using MediatR.Extensions.Autofac.DependencyInjection.Builder;
 using Module = Autofac.Module;
@@ -40,5 +41,8 @@ public class ApplicationModule : Module
             .Where(t => t.Name.EndsWith("Repository"))
             .AsImplementedInterfaces()
             .SingleInstance();
+
+        // register all Quartz jobs
+        builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
     }
 }

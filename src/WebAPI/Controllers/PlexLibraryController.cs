@@ -1,8 +1,8 @@
 ﻿using Application.Contracts;
 using AutoMapper;
-using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -12,20 +12,25 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class PlexLibraryController : BaseController
 {
-    private readonly IPlexLibraryService _plexLibraryService;
+    private readonly IMediator _mediator;
 
-    public PlexLibraryController(ILog log, IPlexLibraryService plexLibraryService, IMapper mapper, INotificationsService notificationsService) : base(log,
+    public PlexLibraryController(
+        ILog log,
+        IMediator mediator,
+        IMapper mapper,
+        INotificationsService notificationsService) : base(log,
         mapper, notificationsService)
     {
-        _plexLibraryService = plexLibraryService;
+        _mediator = mediator;
     }
 
     // GET api/<PlexLibrary>/
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexLibraryDTO>>))]
-    public async Task<IActionResult> GetPlexLibraries()
+    public async Task<IActionResult> GetPlexLibraries(CancellationToken cancellationToken = default)
     {
-        return ToActionResult<List<PlexLibrary>, List<PlexLibraryDTO>>(await _plexLibraryService.GetAllPlexLibrariesAsync());
+        var result = await _mediator.Send(new GetAllPlexLibrariesQuery(), cancellationToken);
+        return ToActionResult<List<PlexLibrary>, List<PlexLibraryDTO>>(result);
     }
 
     // GET api/<PlexLibrary>/5
@@ -33,12 +38,13 @@ public class PlexLibraryController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexLibraryDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetPlexLibrary(int id)
+    public async Task<IActionResult> GetPlexLibrary(int id, CancellationToken cancellationToken = default)
     {
         if (id <= 0)
             return BadRequest(id, nameof(id));
 
-        return ToActionResult<PlexLibrary, PlexLibraryDTO>(await _plexLibraryService.GetPlexLibraryAsync(id));
+        var result = await _mediator.Send(new GetPlexLibraryQuery(id), cancellationToken);
+        return ToActionResult<PlexLibrary, PlexLibraryDTO>(result);
     }
 
     // POST api/<PlexLibrary>/refresh
@@ -51,7 +57,8 @@ public class PlexLibraryController : BaseController
         if (refreshPlexLibraryDto is null)
             return BadRequest();
 
-        return ToActionResult<PlexLibrary, PlexLibraryDTO>(await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibraryDto.PlexLibraryId));
+        var result = await _mediator.Send(new RefreshLibraryMediaCommand(refreshPlexLibraryDto.PlexLibraryId));
+        return ToActionResult<PlexLibrary, PlexLibraryDTO>(result);
     }
 
     // POST api/<PlexLibrary>/settings/default/destination/{id:int}
@@ -63,6 +70,7 @@ public class PlexLibraryController : BaseController
         if (payload is null)
             return BadRequest();
 
-        return ToActionResult(await _plexLibraryService.UpdateDefaultDestinationLibrary(payload.LibraryId, payload.FolderPathId));
+        var result = await _mediator.Send(new UpdatePlexLibraryDefaultDestinationByIdCommand(payload.LibraryId, payload.FolderPathId));
+        return ToActionResult(result);
     }
 }

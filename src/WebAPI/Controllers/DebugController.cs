@@ -46,7 +46,7 @@ public class DebugController : BaseController
     [HttpGet("QueueInspectPlexServerByPlexAccountIdJob/{plexAccountId:int}")]
     public async Task<IActionResult> QueueInspectPlexServerByPlexAccountIdJob(int plexAccountId)
     {
-        var result = await _inspectServerScheduler.QueueInspectPlexServerByPlexAccountIdJob(plexAccountId);
+        var result = await _mediator.Send(new InspectAllPlexServersByAccountIdCommand(plexAccountId));
         return ToActionResult(result);
     }
 }

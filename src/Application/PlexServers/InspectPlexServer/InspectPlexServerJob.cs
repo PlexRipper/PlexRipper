@@ -11,7 +11,6 @@ public class InspectPlexServerJob : IJob
     public static string PlexServerIdParameter => "plexServerId";
 
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IPlexLibraryService _plexLibraryService;
     private readonly ISyncServerScheduler _syncServerScheduler;
     private readonly IPlexServerConnectionsService _plexServerConnectionsService;
     private readonly ILog _log;
@@ -21,14 +20,12 @@ public class InspectPlexServerJob : IJob
         ILog log,
         IMediator mediator,
         IPlexRipperDbContext dbContext,
-        IPlexLibraryService plexLibraryService,
         ISyncServerScheduler syncServerScheduler,
         IPlexServerConnectionsService plexServerConnectionsService)
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
-        _plexLibraryService = plexLibraryService;
         _plexServerConnectionsService = plexServerConnectionsService;
         _syncServerScheduler = syncServerScheduler;
     }
@@ -59,7 +56,7 @@ public class InspectPlexServerJob : IJob
                 return;
             }
 
-            await _plexLibraryService.RetrieveAccessibleLibrariesForAllAccountsAsync(plexServerId);
+            await RefreshAccessibleLibraries(plexServerId);
 
             await _syncServerScheduler.QueueSyncPlexServerJob(plexServerId, true);
 
@@ -69,6 +66,16 @@ public class InspectPlexServerJob : IJob
         {
             _log.Error(e);
         }
+    }
+
+    private async Task RefreshAccessibleLibraries(int plexServerId)
+    {
+        var accountsResult = await _dbContext.GetPlexAccountsWithAccessAsync(plexServerId);
+        if (accountsResult.IsFailed)
+            return;
+
+        foreach (var plexAccount in accountsResult.Value)
+            await _mediator.Send(new RefreshLibraryAccessCommand(plexAccount.Id, plexServerId));
     }
 
     public static JobKey GetJobKey(int id)

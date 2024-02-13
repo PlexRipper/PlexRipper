@@ -30,8 +30,6 @@ public interface IPlexLibraryService
     /// <returns>Valid result if found.</returns>
     Task<Result<PlexLibrary>> GetPlexLibraryAsync(int libraryId);
 
-    Task<Result<List<PlexLibrary>>> GetAllPlexLibrariesAsync();
-
     Task<Result> RetrieveAccessibleLibrariesForAllAccountsAsync(int plexServerId);
     Task<Result> RetrieveAllAccessibleLibrariesAsync(int plexAccountId);
 }

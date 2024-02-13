@@ -32,7 +32,8 @@ public class PlexLibraryController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexLibraryDTO>>))]
     public async Task<IActionResult> GetPlexLibraries()
     {
-        return ToActionResult<List<PlexLibrary>, List<PlexLibraryDTO>>(await _plexLibraryService.GetAllPlexLibrariesAsync());
+        var result = await _mediator.Send(new GetAllPlexLibrariesQuery());
+        return ToActionResult<List<PlexLibrary>, List<PlexLibraryDTO>>(result);
     }
 
     // GET api/<PlexLibrary>/5

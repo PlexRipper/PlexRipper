@@ -63,11 +63,6 @@ public class PlexLibraryService : IPlexLibraryService
         return await _mediator.Send(new GetPlexLibraryByIdQuery(libraryId));
     }
 
-    public async Task<Result<List<PlexLibrary>>> GetAllPlexLibrariesAsync()
-    {
-        return await _mediator.Send(new GetAllPlexLibrariesQuery());
-    }
-
     #endregion
 
     #region Private

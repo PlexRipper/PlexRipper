@@ -4,6 +4,7 @@ using Data.Contracts;
 using DownloadManager.Contracts;
 using FileSystem.Contracts;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
 using Settings.Contracts;
 
@@ -21,6 +22,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
     private readonly IDownloadManagerSettingsModule _downloadManagerSettings;
 
     private readonly IMapper _mapper;
+    private readonly IPlexRipperDbContext _dbContext;
 
     private readonly ILog _log;
     private readonly IMediator _mediator;
@@ -35,6 +37,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         ILog log,
         IMediator mediator,
         IMapper mapper,
+        IPlexRipperDbContext dbContext,
         INotificationsService notificationsService,
         IFolderPathService folderPathService,
         IPathSystem pathSystem,
@@ -44,6 +47,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         _log = log;
         _mediator = mediator;
         _mapper = mapper;
+        _dbContext = dbContext;
         _notificationsService = notificationsService;
         _folderPathService = folderPathService;
         _pathSystem = pathSystem;
@@ -503,11 +507,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             return downloadFolder.ToResult();
 
         // Get Plex libraries
-        var plexLibrariesResult = await _mediator.Send(new GetAllPlexLibrariesQuery(true));
-        if (plexLibrariesResult.IsFailed)
-            return plexLibrariesResult.ToResult();
-
-        var plexLibraries = plexLibrariesResult.Value;
+        var plexLibraries = await _dbContext.PlexLibraries.Include(x => x.PlexServer).ToListAsync();
         var plexServers = plexLibraries.Select(x => x.PlexServer).DistinctBy(x => x.Id).ToList();
 
         // Get Plex libraries

@@ -84,6 +84,28 @@ public class InspectPlexServerByPlexAccountIdJob : IJob
         }
     }
 
+    private Task RetrieveAllAccessibleLibrariesAsync(int plexAccountId)
+    {
+        _log.Information("Retrieving accessible Plex libraries for Plex account with id {PlexAccountId}", plexAccountId);
+
+        // TODO Replace with:
+        // return await _dbContext.GetAllPlexServersByPlexAccountIdQuery(_mapper, plexAccountId, cancellationToken);
+
+        var plexServersResult = await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccountId));
+        if (plexServersResult.IsFailed)
+            return plexServersResult.ToResult().LogError();
+
+        //var onlineServers = plexServersResult.Value.FindAll(x => x.)
+
+        // Create connection check tasks for all connections
+        var retrieveTasks = plexServersResult.Value
+            .Select(async plexServer => await _mediator.Send(new RefreshLibraryAccessCommand(plexAccountId, plexServer.Id)));
+
+        var tasksResult = await Task.WhenAll(retrieveTasks);
+        return tasksResult.Merge();
+
+    }
+
     public static JobKey GetJobKey(int id)
     {
         return new JobKey($"{PlexAccountIdParameter}_{id}", nameof(InspectPlexServerByPlexAccountIdJob));

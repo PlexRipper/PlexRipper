@@ -59,7 +59,7 @@ public class InspectPlexServerJob : IJob
                 return;
             }
 
-            await _plexLibraryService.RetrieveAccessibleLibrariesForAllAccountsAsync(plexServerId);
+            await RefreshAccessibleLibraries(plexServerId);
 
             await _syncServerScheduler.QueueSyncPlexServerJob(plexServerId, true);
 
@@ -69,6 +69,16 @@ public class InspectPlexServerJob : IJob
         {
             _log.Error(e);
         }
+    }
+
+    private async Task RefreshAccessibleLibraries(int plexServerId)
+    {
+        var accountsResult = await _dbContext.GetPlexAccountsWithAccessAsync(plexServerId);
+        if (accountsResult.IsFailed)
+            return;
+
+        foreach (var plexAccount in accountsResult.Value)
+            await _mediator.Send(new RefreshLibraryAccessCommand(plexAccount.Id, plexServerId));
     }
 
     public static JobKey GetJobKey(int id)

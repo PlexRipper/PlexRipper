@@ -29,4 +29,8 @@
 		<ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="PlexLibraries\Get\" />
+	</ItemGroup>
+
 </Project>

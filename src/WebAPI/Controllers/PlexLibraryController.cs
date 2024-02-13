@@ -59,7 +59,8 @@ public class PlexLibraryController : BaseController
         if (refreshPlexLibraryDto is null)
             return BadRequest();
 
-        return ToActionResult<PlexLibrary, PlexLibraryDTO>(await _plexLibraryService.RefreshLibraryMediaAsync(refreshPlexLibraryDto.PlexLibraryId));
+        var result = await _mediator.Send(new RefreshLibraryMediaCommand(refreshPlexLibraryDto.PlexLibraryId));
+        return ToActionResult<PlexLibrary, PlexLibraryDTO>(result);
     }
 
     // POST api/<PlexLibrary>/settings/default/destination/{id:int}

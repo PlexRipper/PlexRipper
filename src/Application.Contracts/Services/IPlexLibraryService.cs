@@ -1,19 +1,10 @@
 ﻿using FluentResults;
 using PlexRipper.Domain;
-using WebAPI.Contracts;
 
 namespace Application.Contracts;
 
 public interface IPlexLibraryService
 {
-    /// <summary>
-    /// Retrieves the new media metadata from the PlexApi and stores it in the database.
-    /// </summary>
-    /// <param name="plexLibraryId">The id of the <see cref="PlexLibrary"/> to retrieve.</param>
-    /// <param name="progressAction">The action to call for a progress update.</param>
-    /// <returns>Returns the PlexLibrary with the containing media.</returns>
-    Task<Result<PlexLibrary>> RefreshLibraryMediaAsync(int plexLibraryId, Action<LibraryProgress> progressAction = null);
-
     /// <summary>
     /// Retrieve the accessible <see cref="PlexLibrary">PlexLibraries</see> for this <see cref="PlexServer"/> which the <see cref="PlexAccount"/> has access to and update the database.
     /// </summary>

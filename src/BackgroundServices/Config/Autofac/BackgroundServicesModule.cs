@@ -3,7 +3,6 @@ using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
 using BackgroundServices.Contracts;
-using BackgroundServices.SyncServer;
 using Environment;
 using PlexRipper.Domain.Autofac;
 using Module = Autofac.Module;
@@ -60,8 +59,6 @@ public class BackgroundServicesModule : Module
                 .AsImplementedInterfaces()
                 .SingleInstance();
         }
-
-        builder.RegisterModule(new QuartzAutofacJobsModule(typeof(SyncServerJob).Assembly));
 
         builder.RegisterType<SchedulerService>().As<ISchedulerService>().InstancePerDependency();
 

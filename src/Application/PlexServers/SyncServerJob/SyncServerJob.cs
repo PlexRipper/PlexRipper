@@ -4,7 +4,7 @@ using Logging.Interface;
 using Quartz;
 using WebAPI.Contracts;
 
-namespace BackgroundServices.SyncServer;
+namespace PlexRipper.Application;
 
 public class SyncServerJob : IJob
 {
@@ -15,6 +15,11 @@ public class SyncServerJob : IJob
 
     public static string PlexServerIdParameter => "plexServerId";
     public static string ForceSyncParameter => "forceSync";
+
+    public static JobKey GetJobKey(int id)
+    {
+        return new JobKey($"{PlexServerIdParameter}_{id}", nameof(SyncServerJob));
+    }
 
     public SyncServerJob(
         ILog log,
@@ -82,14 +87,14 @@ public class SyncServerJob : IJob
             // Sync movie type libraries first because it is a lot quicker than TvShows.
             foreach (var library in plexLibraries.FindAll(x => x.Type == PlexMediaType.Movie))
             {
-                var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id, progress);
+                var result = await _mediator.Send(new RefreshLibraryMediaCommand(library.Id, progress));
                 if (result.IsFailed)
                     results.Add(result.ToResult());
             }
 
             foreach (var library in plexLibraries.FindAll(x => x.Type == PlexMediaType.TvShow))
             {
-                var result = await _plexLibraryService.RefreshLibraryMediaAsync(library.Id, progress);
+                var result = await _mediator.Send(new RefreshLibraryMediaCommand(library.Id, progress));
                 if (result.IsFailed)
                     results.Add(result.ToResult());
             }

@@ -5,7 +5,6 @@ using DownloadManager.Contracts;
 using FileSystem.Contracts;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexApi.Contracts;
 using Settings.Contracts;
 
 namespace PlexRipper.DownloadManager;
@@ -17,7 +16,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
     private readonly IFolderPathService _folderPathService;
 
     private readonly IPathSystem _pathSystem;
-    private readonly IPlexApiService _plexApiService;
 
     private readonly IDownloadManagerSettingsModule _downloadManagerSettings;
 
@@ -41,7 +39,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         INotificationsService notificationsService,
         IFolderPathService folderPathService,
         IPathSystem pathSystem,
-        IPlexApiService plexApiService,
         IDownloadManagerSettingsModule downloadManagerSettings)
     {
         _log = log;
@@ -51,7 +48,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         _notificationsService = notificationsService;
         _folderPathService = folderPathService;
         _pathSystem = pathSystem;
-        _plexApiService = plexApiService;
         _downloadManagerSettings = downloadManagerSettings;
     }
 
@@ -614,7 +610,8 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                 break;
             case PlexMediaType.Episode:
                 // Since the episode can be multiple parts, we need put that in a separate folder
-                path = Path.Join(_pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1]),  forDownloadFolder ? _pathSystem.SanitizePath(titles[2]) : "");
+                path = Path.Join(_pathSystem.SanitizePath(titles[0]), _pathSystem.SanitizePath(titles[1]),
+                    forDownloadFolder ? _pathSystem.SanitizePath(titles[2]) : "");
                 break;
             default:
                 path = Path.Join(downloadTaskTitle);

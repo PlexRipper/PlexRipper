@@ -26,14 +26,12 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
 {
     private readonly ILog _log;
     private readonly IMediator _mediator;
-    private readonly IPlexRipperDbContext _dbContext;
     private readonly IPlexApiService _plexServiceApi;
 
-    public RefreshLibraryAccessHandler(ILog log, IMediator mediator, IPlexRipperDbContext dbContext, IPlexApiService plexServiceApi)
+    public RefreshLibraryAccessHandler(ILog log, IMediator mediator, IPlexApiService plexServiceApi)
     {
         _log = log;
         _mediator = mediator;
-        _dbContext = dbContext;
         _plexServiceApi = plexServiceApi;
     }
 

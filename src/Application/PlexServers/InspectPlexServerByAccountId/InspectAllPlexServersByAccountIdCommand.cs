@@ -43,22 +43,9 @@ public class InspectAllPlexServersByAccountIdCommandHandler : IRequestHandler<In
 
     public async Task<Result> Handle(InspectAllPlexServersByAccountIdCommand command, CancellationToken cancellationToken)
     {
-        var plexAccount = await _dbContext.PlexAccounts.FindAsync(command.PlexAccountId, cancellationToken);
-        var plexServers = await _dbContext.GetAccessiblePlexServers(command.PlexAccountId, cancellationToken);
-
-        if (!plexServers.Value.Any())
-        {
-            _log.Warning("No accessible PlexServers found for PlexAccount: {PlexAccountDisplayName}", plexAccount.DisplayName);
-            return Result.Ok();
-        }
-
-        _log.Here()
-            .Information("Inspecting {PlexServersCount} PlexServers for PlexAccount: {PlexAccountDisplayName}", plexServers.Value.Count,
-                plexAccount.DisplayName);
-
         if (!command.SkipRefreshAccessibleServers)
         {
-            var refreshResult = await _mediator.Send(new RefreshAccessiblePlexServersCommand(plexAccount.Id), cancellationToken);
+            var refreshResult = await _mediator.Send(new RefreshAccessiblePlexServersCommand(command.PlexAccountId), cancellationToken);
             if (refreshResult.IsFailed)
                 return refreshResult.ToResult();
         }
@@ -67,6 +54,19 @@ public class InspectAllPlexServersByAccountIdCommandHandler : IRequestHandler<In
             _log.Here()
                 .Warning("Skipping refreshing of the accessible plex server in {NameOfInspectAllPlexServersByAccountId}",
                     nameof(InspectAllPlexServersByAccountIdCommand));
+        }
+
+        var plexAccount = await _dbContext.PlexAccounts.FindAsync(command.PlexAccountId, cancellationToken);
+        var plexServers = await _dbContext.GetAccessiblePlexServers(command.PlexAccountId, cancellationToken);
+
+        _log.Here()
+            .Information("Inspecting {PlexServersCount} PlexServers for PlexAccount: {PlexAccountDisplayName}", plexServers.Value.Count,
+                plexAccount.DisplayName);
+
+        if (!plexServers.Value.Any())
+        {
+            _log.Warning("No accessible PlexServers found for PlexAccount: {PlexAccountDisplayName}", plexAccount.DisplayName);
+            return Result.Ok();
         }
 
         // Create connection check tasks for all connections
@@ -79,7 +79,6 @@ public class InspectAllPlexServersByAccountIdCommandHandler : IRequestHandler<In
         // Sync libraries
         foreach (var plexServer in plexServers.Value)
             await _mediator.Send(new QueueSyncServerJobCommand(plexServer.Id, true), cancellationToken);
-
 
         _log.Here()
             .Information("Successfully finished the inspection of all plexServers related to {NameOfPlexAccount} {PlexAccountDisplayName}", nameof(PlexAccount),

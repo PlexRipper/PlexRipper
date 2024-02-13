@@ -1,5 +1,4 @@
 ﻿using Application.Contracts;
-using BackgroundServices.Contracts;
 using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
@@ -23,14 +22,12 @@ public class CreatePlexAccountHandler : IRequestHandler<CreatePlexAccountCommand
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
-    private readonly IInspectServerScheduler _inspectServerScheduler;
 
-    public CreatePlexAccountHandler(ILog log, IPlexRipperDbContext dbContext, IMediator mediator, IInspectServerScheduler inspectServerScheduler)
+    public CreatePlexAccountHandler(ILog log, IPlexRipperDbContext dbContext, IMediator mediator)
     {
         _log = log;
         _dbContext = dbContext;
         _mediator = mediator;
-        _inspectServerScheduler = inspectServerScheduler;
     }
 
     public async Task<Result<int>> Handle(CreatePlexAccountCommand command, CancellationToken cancellationToken)

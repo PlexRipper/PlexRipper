@@ -25,12 +25,14 @@ public class RefreshLibraryAccessValidator : AbstractValidator<RefreshLibraryAcc
 public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessCommand, Result>
 {
     private readonly ILog _log;
+    private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IPlexApiService _plexServiceApi;
 
-    public RefreshLibraryAccessHandler(ILog log, IPlexRipperDbContext dbContext, IPlexApiService plexServiceApi)
+    public RefreshLibraryAccessHandler(ILog log, IMediator mediator, IPlexRipperDbContext dbContext, IPlexApiService plexServiceApi)
     {
         _log = log;
+        _mediator = mediator;
         _dbContext = dbContext;
         _plexServiceApi = plexServiceApi;
     }
@@ -53,6 +55,6 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
             return Result.Fail(msg).LogWarning();
         }
 
-        return await _mediator.Send(new AddOrUpdatePlexLibrariesCommand(plexAccountId, libraries.Value));
+        return await _mediator.Send(new AddOrUpdatePlexLibrariesCommand(plexAccountId, libraries.Value), cancellationToken);
     }
 }

@@ -13,26 +13,23 @@ namespace PlexRipper.WebAPI.Controllers;
 public class PlexLibraryController : BaseController
 {
     private readonly IMediator _mediator;
-    private readonly IPlexLibraryService _plexLibraryService;
 
     public PlexLibraryController(
         ILog log,
         IMediator mediator,
-        IPlexLibraryService plexLibraryService,
         IMapper mapper,
         INotificationsService notificationsService) : base(log,
         mapper, notificationsService)
     {
         _mediator = mediator;
-        _plexLibraryService = plexLibraryService;
     }
 
     // GET api/<PlexLibrary>/
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexLibraryDTO>>))]
-    public async Task<IActionResult> GetPlexLibraries()
+    public async Task<IActionResult> GetPlexLibraries(CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new GetAllPlexLibrariesQuery());
+        var result = await _mediator.Send(new GetAllPlexLibrariesQuery(), cancellationToken);
         return ToActionResult<List<PlexLibrary>, List<PlexLibraryDTO>>(result);
     }
 
@@ -41,12 +38,13 @@ public class PlexLibraryController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexLibraryDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetPlexLibrary(int id)
+    public async Task<IActionResult> GetPlexLibrary(int id, CancellationToken cancellationToken = default)
     {
         if (id <= 0)
             return BadRequest(id, nameof(id));
 
-        return ToActionResult<PlexLibrary, PlexLibraryDTO>(await _plexLibraryService.GetPlexLibraryAsync(id));
+        var result = await _mediator.Send(new GetPlexLibraryQuery(id), cancellationToken);
+        return ToActionResult<PlexLibrary, PlexLibraryDTO>(result);
     }
 
     // POST api/<PlexLibrary>/refresh

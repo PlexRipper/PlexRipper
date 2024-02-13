@@ -3,6 +3,7 @@ using AutoMapper;
 using BackgroundServices.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Application;
 
 namespace PlexRipper.WebAPI.Controllers;
 
@@ -10,17 +11,20 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class DebugController : BaseController
 {
+    private readonly IMediator _mediator;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IInspectServerScheduler _inspectServerScheduler;
 
     public DebugController(
         ILog log,
+        IMediator mediator,
         IDownloadTaskScheduler downloadTaskScheduler,
         IMapper mapper,
         INotificationsService notificationsService,
         IInspectServerScheduler inspectServerScheduler) : base(log, mapper,
         notificationsService)
     {
+        _mediator = mediator;
         _downloadTaskScheduler = downloadTaskScheduler;
         _inspectServerScheduler = inspectServerScheduler;
     }
@@ -28,7 +32,7 @@ public class DebugController : BaseController
     [HttpGet("InspectServerScheduler/{plexServerId:int}")]
     public async Task<IActionResult> InspectServerSchedulerJob(int plexServerId)
     {
-        var result = await _inspectServerScheduler.QueueInspectPlexServerJob(plexServerId);
+        var result = await _mediator.Send(new QueueInspectPlexServerJobCommand(plexServerId));
         return ToActionResult(result);
     }
 

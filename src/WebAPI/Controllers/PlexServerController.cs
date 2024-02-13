@@ -4,6 +4,7 @@ using BackgroundServices.Contracts;
 using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -16,8 +17,6 @@ public class PlexServerController : BaseController
     #region Fields
 
     private readonly IMediator _mediator;
-    private readonly IPlexServerConnectionsService _plexServerConnectionsService;
-    private readonly IPlexServerService _plexServerService;
     private readonly ISyncServerScheduler _syncServerScheduler;
 
     #endregion
@@ -28,14 +27,10 @@ public class PlexServerController : BaseController
         ILog log,
         IMapper mapper,
         IMediator mediator,
-        IPlexServerService plexServerService,
-        IPlexServerConnectionsService plexServerConnectionsService,
         ISyncServerScheduler syncServerScheduler,
         INotificationsService notificationsService) : base(log, mapper, notificationsService)
     {
         _mediator = mediator;
-        _plexServerService = plexServerService;
-        _plexServerConnectionsService = plexServerConnectionsService;
         _syncServerScheduler = syncServerScheduler;
     }
 
@@ -75,16 +70,17 @@ public class PlexServerController : BaseController
     }
 
     // GET api/<PlexServerController>/5/inspect
-    [HttpGet("{id:int}/inspect")]
+    [HttpGet("{plexServerId:int}/inspect")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> InspectServer(int id)
+    public async Task<IActionResult> InspectServer(int plexServerId)
     {
-        if (id <= 0)
+        if (plexServerId <= 0)
             return BadRequestInvalidId();
 
-        return ToActionResult<PlexServer, PlexServerDTO>(await _plexServerService.InspectPlexServer(id));
+        var result = await _mediator.Send(new QueueInspectPlexServerJobCommand(plexServerId));
+        return ToActionResult<PlexServer, PlexServerDTO>(result);
     }
 
     // GET api/<PlexServerController>/5/inspect
@@ -97,7 +93,8 @@ public class PlexServerController : BaseController
         if (plexServerId <= 0)
             return BadRequestInvalidId();
 
-        return ToActionResult<PlexServer, PlexServerDTO>(await _plexServerService.RefreshPlexServerConnectionsAsync(plexServerId));
+        var refreshResult = await _mediator.Send(new RefreshPlexServerConnectionsCommand(plexServerId));
+        return ToActionResult<PlexServer, PlexServerDTO>(refreshResult);
     }
 
     // GET api/<PlexServerController>/5/sync
@@ -113,7 +110,12 @@ public class PlexServerController : BaseController
         return ToActionResult(await _syncServerScheduler.QueueSyncPlexServerJob(plexServerId, forceSync));
     }
 
-    // PUT api/<PlexServerController>/5/sync
+    /// <summary>
+    /// Sets the preferred connection for a <see cref="PlexServer"/>
+    /// </summary>
+    /// <param name="plexServerId"></param>
+    /// <param name="plexServerConnectionId"></param>
+    /// <returns></returns>
     [HttpPut("{plexServerId:int}/preferred-connection/{plexServerConnectionId:int}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
@@ -126,7 +128,9 @@ public class PlexServerController : BaseController
         if (plexServerConnectionId <= 0)
             return BadRequestInvalidId(nameof(plexServerConnectionId));
 
-        return ToActionResult(await _plexServerService.SetPreferredConnection(plexServerId, plexServerConnectionId));
+        var result = await _mediator.Send(new SetPreferredPlexServerConnectionCommand(plexServerId, plexServerConnectionId));
+
+        return ToActionResult(result);
     }
 
     #endregion

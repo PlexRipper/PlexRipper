@@ -1,6 +1,7 @@
 using Application.Contracts;
 using Data.Contracts;
 using FluentValidation;
+using LanguageExt;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,8 +29,15 @@ public class IsUsernameAvailableQueryHandler : IRequestHandler<IsUsernameAvailab
 
     public async Task<Result<bool>> Handle(IsUsernameAvailableQuery request, CancellationToken cancellationToken)
     {
-        var plexAccount = await _dbContext.PlexAccounts.FirstOrDefaultAsync(x => x.Username == request.Username, cancellationToken);
-        return plexAccount is null ? AvailableAccount(request) : UnavailableAccount(request);
+        return await GetPlexAccount(request, cancellationToken)
+            .Match(
+                _ => UnavailableAccount(request),
+                () => AvailableAccount(request));
+    }
+
+    private OptionAsync<PlexAccount> GetPlexAccount(IsUsernameAvailableQuery request, CancellationToken cancellationToken)
+    {
+        return _dbContext.PlexAccounts.FirstOrDefaultAsync(x => x.Username == request.Username, cancellationToken);
     }
 
     private Result<bool> UnavailableAccount(IsUsernameAvailableQuery request)

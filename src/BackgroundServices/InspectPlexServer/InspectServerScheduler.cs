@@ -7,37 +7,12 @@ namespace BackgroundServices.InspectPlexServer;
 
 public class InspectServerScheduler : BaseScheduler, IInspectServerScheduler
 {
-    private readonly IPlexServerService _plexServerService;
+    private readonly IMediator _mediator;
     protected override JobKey DefaultJobKey => new($"PlexServerId_", nameof(InspectServerScheduler));
 
-    public InspectServerScheduler(ILog log, IScheduler scheduler, IPlexServerService plexServerService) : base(log, scheduler)
+    public InspectServerScheduler(ILog log, IScheduler scheduler, IMediator mediator) : base(log, scheduler)
     {
-        _plexServerService = plexServerService;
-    }
-
-    public async Task<Result> QueueInspectPlexServerJob(int plexServerId)
-    {
-        var jobKey = InspectPlexServerJob.GetJobKey(plexServerId);
-        if (await IsJobRunning(jobKey))
-        {
-            return Result.Fail($"A {nameof(InspectPlexServerJob)} with {nameof(plexServerId)} {plexServerId} is already running")
-                .LogWarning();
-        }
-
-        var job = JobBuilder.Create<InspectPlexServerJob>()
-            .UsingJobData(InspectPlexServerJob.PlexServerIdParameter, plexServerId)
-            .WithIdentity(jobKey)
-            .Build();
-
-        var trigger = TriggerBuilder.Create()
-            .WithIdentity($"{jobKey.Name}_trigger", jobKey.Group)
-            .ForJob(job)
-            .StartNow()
-            .Build();
-
-        await ScheduleJob(job, trigger);
-
-        return Result.Ok();
+        _mediator = mediator;
     }
 
     public async Task<Result> QueueRefreshAccessiblePlexServersJob(int plexAccountId)
@@ -81,7 +56,7 @@ public class InspectServerScheduler : BaseScheduler, IInspectServerScheduler
         }
 
         // Before returning we must ensure the accessible plex servers are retrieved because otherwise the front-end will prematurely re-fetch the created plex account without any accessibility.
-        var plexServerResult = await _plexServerService.RefreshAccessiblePlexServersAsync(plexAccountId);
+        var plexServerResult = await _mediator.Send(new RefreshAccessiblePlexServersCommand(plexAccountId));
         if (plexServerResult.IsFailed)
             return plexServerResult.ToResult();
 

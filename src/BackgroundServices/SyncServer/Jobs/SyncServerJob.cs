@@ -10,7 +10,6 @@ public class SyncServerJob : IJob
 {
     private readonly ILog _log;
     private readonly IMediator _mediator;
-    private readonly IPlexServerService _plexServerService;
     private readonly IPlexLibraryService _plexLibraryService;
     private readonly ISignalRService _signalRService;
 
@@ -20,13 +19,11 @@ public class SyncServerJob : IJob
     public SyncServerJob(
         ILog log,
         IMediator mediator,
-        IPlexServerService plexServerService,
         IPlexLibraryService plexLibraryService,
         ISignalRService signalRService)
     {
         _log = log;
         _mediator = mediator;
-        _plexServerService = plexServerService;
         _plexLibraryService = plexLibraryService;
         _signalRService = signalRService;
     }

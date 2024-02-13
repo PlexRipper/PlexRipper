@@ -1,6 +1,5 @@
-using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.PlexServers;
+using PlexRipper.Application;
 
 namespace Data.UnitTests.PlexServers.Commands;
 
@@ -26,9 +25,8 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         ResetDbContext();
 
         // Act
-        var request = new AddOrUpdatePlexAccountServersCommand(plexAccount, serverAccessTokens);
-        var handler = new AddOrUpdatePlexAccountServersCommandHandler(_log, DbContext);
-        var result = await handler.Handle(request, CancellationToken.None);
+        var handler = new AddOrUpdatePlexAccountServersCommand(_log, DbContext);
+        var result = await handler.ExecuteAsync(plexAccount.Id, serverAccessTokens, CancellationToken.None);
 
         // Assert
         ResetDbContext();
@@ -68,9 +66,8 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         serverAccessTokens.ForEach(x => x.AccessToken = "######");
 
         // Act
-        var request = new AddOrUpdatePlexAccountServersCommand(plexAccount, serverAccessTokens);
-        var handler = new AddOrUpdatePlexAccountServersCommandHandler(_log, DbContext);
-        var result = await handler.Handle(request, CancellationToken.None);
+        var handler = new AddOrUpdatePlexAccountServersCommand(_log, DbContext);
+        var result = await handler.ExecuteAsync(plexAccount.Id, serverAccessTokens, CancellationToken.None);
 
         // Assert
         ResetDbContext();

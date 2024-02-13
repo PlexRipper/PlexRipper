@@ -15,6 +15,7 @@ public class PlexLibraryService : IPlexLibraryService
     private readonly IMediator _mediator;
 
     private readonly IPlexApiService _plexServiceApi;
+    private readonly IPlexRipperDbContext _dbContext;
 
     private readonly ISignalRService _signalRService;
 
@@ -26,11 +27,13 @@ public class PlexLibraryService : IPlexLibraryService
         ILog log,
         IMediator mediator,
         IPlexApiService plexServiceApi,
+        IPlexRipperDbContext dbContext,
         ISignalRService signalRService)
     {
         _log = log;
         _mediator = mediator;
         _plexServiceApi = plexServiceApi;
+        _dbContext = dbContext;
         _signalRService = signalRService;
     }
 
@@ -149,7 +152,8 @@ public class PlexLibraryService : IPlexLibraryService
 
         // Phase 3 of 4: PlexLibrary media data was parsed successfully.
         SendProgress(3, 4);
-        _log.Here().Debug("Finished retrieving all media for library {PlexLibraryName} in {Elapsed:000} seconds", plexLibrary.Title, timer.Elapsed.TotalSeconds);
+        _log.Here()
+            .Debug("Finished retrieving all media for library {PlexLibraryName} in {Elapsed:000} seconds", plexLibrary.Title, timer.Elapsed.TotalSeconds);
         timer.Restart();
 
         // Update the MetaData of this library
@@ -165,8 +169,9 @@ public class PlexLibraryService : IPlexLibraryService
         if (createResult.IsFailed)
             return createResult.ToResult();
 
-        _log.Here().Debug("Finished updating all media in the database for library {PlexLibraryName} in {Elapsed:000} seconds", plexLibrary.Title,
-            timer.Elapsed.TotalSeconds);
+        _log.Here()
+            .Debug("Finished updating all media in the database for library {PlexLibraryName} in {Elapsed:000} seconds", plexLibrary.Title,
+                timer.Elapsed.TotalSeconds);
 
         // Phase 4 of 4: Database has been successfully updated with new library data.
         SendProgress(4, 4);
@@ -225,7 +230,7 @@ public class PlexLibraryService : IPlexLibraryService
         if (plexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexServerId)).LogWarning();
 
-        var accountsResult = await _mediator.Send(new GetPlexAccountsWithAccessByPlexServerIdQuery(plexServerId));
+        var accountsResult = await _dbContext.GetPlexAccountsWithAccessAsync(plexServerId);
         if (accountsResult.IsFailed)
             return accountsResult.ToResult();
 
@@ -263,6 +268,10 @@ public class PlexLibraryService : IPlexLibraryService
     public async Task<Result> RetrieveAllAccessibleLibrariesAsync(int plexAccountId)
     {
         _log.Information("Retrieving accessible Plex libraries for Plex account with id {PlexAccountId}", plexAccountId);
+
+        // TODO Replace with:
+        // return await _dbContext.GetAllPlexServersByPlexAccountIdQuery(_mapper, plexAccountId, cancellationToken);
+
         var plexServersResult = await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccountId));
         if (plexServersResult.IsFailed)
             return plexServersResult.ToResult().LogError();

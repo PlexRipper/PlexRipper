@@ -92,8 +92,6 @@ public partial class BaseContainer : IDisposable
 
     public IPlexLibraryService GetPlexLibraryService => Resolve<IPlexLibraryService>();
 
-    public IPlexServerService GetPlexServerService => Resolve<IPlexServerService>();
-
     public IMediator Mediator => Resolve<IMediator>();
 
     public IPathProvider PathProvider => Resolve<IPathProvider>();

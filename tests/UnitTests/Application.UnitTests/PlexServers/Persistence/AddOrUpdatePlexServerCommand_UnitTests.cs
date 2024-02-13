@@ -1,12 +1,10 @@
-using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.PlexServers;
 
-namespace Data.UnitTests.PlexServers.Commands;
+namespace PlexRipper.Application.UnitTests;
 
-public class AddOrUpdatePlexServerCommandHandler_UnitTests : BaseUnitTest
+public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
 {
-    public AddOrUpdatePlexServerCommandHandler_UnitTests(ITestOutputHelper output) : base(output) { }
+    public AddOrUpdatePlexServerCommand_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public async Task ShouldAddAllServers_WhenNoneExistInTheDatabase()
@@ -17,9 +15,8 @@ public class AddOrUpdatePlexServerCommandHandler_UnitTests : BaseUnitTest
         var expectedPlexServers = FakeData.GetPlexServer(Seed).Generate(5);
 
         // Act
-        var request = new AddOrUpdatePlexServersCommand(expectedPlexServers);
-        var handler = new AddOrUpdatePlexServersCommandHandler(_log, DbContext);
-        var result = await handler.Handle(request, CancellationToken.None);
+        var handler = new AddOrUpdatePlexServersCommand(_log, GetDbContext());
+        var result = await handler.ExecuteAsync(expectedPlexServers, CancellationToken.None);
 
         // Assert
         ResetDbContext();
@@ -44,15 +41,15 @@ public class AddOrUpdatePlexServerCommandHandler_UnitTests : BaseUnitTest
     {
         // Arrange
         Seed = 23724;
-        await SetupDatabase(config => { config.PlexServerCount = 5; });
-        var plexServers = DbContext.PlexServers.ToList();
+        await SetupDatabase(config => config.PlexServerCount = 5);
+        var plexServers = DbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
         plexServers.Count.ShouldBe(5);
 
         // Update data setup
         var updatedServers = plexServers.Take(2).ToList();
 
         // Simulate the server being unchanged, and only the connections having changed except the connection
-        // // address which it is matched on during updating
+        // address which it is matched on during updating
         foreach (var updatedServer in updatedServers)
         {
             var connectionCount = updatedServer.PlexServerConnections.Count;
@@ -65,9 +62,8 @@ public class AddOrUpdatePlexServerCommandHandler_UnitTests : BaseUnitTest
 
         // Act
         // Now update
-        var handler = new AddOrUpdatePlexServersCommandHandler(_log, GetDbContext());
-        var request = new AddOrUpdatePlexServersCommand(updatedServers);
-        var updateResult = await handler.Handle(request, CancellationToken.None);
+        var handler = new AddOrUpdatePlexServersCommand(_log, GetDbContext());
+        var updateResult = await handler.ExecuteAsync(updatedServers, CancellationToken.None);
         ResetDbContext();
 
         // Assert
@@ -97,8 +93,8 @@ public class AddOrUpdatePlexServerCommandHandler_UnitTests : BaseUnitTest
     {
         // Arrange
         Seed = 23724;
-        await SetupDatabase(config => { config.PlexServerCount = 5; });
-        var plexServers = DbContext.PlexServers.ToList();
+        await SetupDatabase(config => config.PlexServerCount = 5);
+        var plexServers = DbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
         var changedPlexServers = FakeData.GetPlexServer(9236).Generate(3);
 
         var expectedPlexServers = new List<PlexServer>()
@@ -116,15 +112,13 @@ public class AddOrUpdatePlexServerCommandHandler_UnitTests : BaseUnitTest
 
         // Act
         // First add the 5 servers
-        var request = new AddOrUpdatePlexServersCommand(plexServers);
-        var handler = new AddOrUpdatePlexServersCommandHandler(_log, DbContext);
-        var addResult = await handler.Handle(request, CancellationToken.None);
+        var handler = new AddOrUpdatePlexServersCommand(_log, GetDbContext());
+        var addResult = await handler.ExecuteAsync(plexServers, CancellationToken.None);
 
         // Now update
         ResetDbContext();
-        request = new AddOrUpdatePlexServersCommand(changedPlexServers);
-        handler = new AddOrUpdatePlexServersCommandHandler(_log, DbContext);
-        var updateResult = await handler.Handle(request, CancellationToken.None);
+        handler = new AddOrUpdatePlexServersCommand(_log, GetDbContext());
+        var updateResult = await handler.ExecuteAsync(changedPlexServers, CancellationToken.None);
 
         // Assert
         ResetDbContext();

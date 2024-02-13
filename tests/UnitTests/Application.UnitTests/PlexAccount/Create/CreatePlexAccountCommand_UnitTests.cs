@@ -15,7 +15,6 @@ public class CreatePlexAccountCommand_UnitTests : BaseUnitTest<CreatePlexAccount
         var newAccount = new PlexAccount("TestUsername", "Password123");
 
         mock.SetupMediator(It.IsAny<IsUsernameAvailableQuery>).ReturnsAsync(Result.Ok(true));
-        mock.Mock<IInspectServerScheduler>().Setup(x => x.QueueInspectPlexServerByPlexAccountIdJob(1)).ReturnsAsync(Result.Ok());
 
         // Act
         var handler = new CreatePlexAccountHandler(_log, GetDbContext(), mock.Create<IMediator>(), mock.Create<IInspectServerScheduler>());
@@ -33,7 +32,6 @@ public class CreatePlexAccountCommand_UnitTests : BaseUnitTest<CreatePlexAccount
         var newAccount = new PlexAccount("TestUsername", "Password123");
 
         mock.SetupMediator(It.IsAny<IsUsernameAvailableQuery>).ReturnsAsync(Result.Ok(false));
-        mock.Mock<IInspectServerScheduler>().Setup(x => x.QueueInspectPlexServerByPlexAccountIdJob(1)).ReturnsAsync(Result.Ok());
 
         // Act
         var handler = new CreatePlexAccountHandler(_log, GetDbContext(), mock.Create<IMediator>(), mock.Create<IInspectServerScheduler>());
@@ -51,7 +49,6 @@ public class CreatePlexAccountCommand_UnitTests : BaseUnitTest<CreatePlexAccount
         var newAccount = new PlexAccount("TestUsername", "Password123");
 
         mock.SetupMediator(It.IsAny<IsUsernameAvailableQuery>).ReturnsAsync(Result.Fail("Error #1"));
-        mock.Mock<IInspectServerScheduler>().Setup(x => x.QueueInspectPlexServerByPlexAccountIdJob(1)).ReturnsAsync(Result.Ok());
 
         // Act
         var handler = new CreatePlexAccountHandler(_log, GetDbContext(), mock.Create<IMediator>(), mock.Create<IInspectServerScheduler>());
@@ -70,7 +67,6 @@ public class CreatePlexAccountCommand_UnitTests : BaseUnitTest<CreatePlexAccount
         var newAccount = new PlexAccount("TestUsername", "Password123");
 
         mock.SetupMediator(It.IsAny<IsUsernameAvailableQuery>).ReturnsAsync(Result.Fail("Error #1"));
-        mock.Mock<IInspectServerScheduler>().Setup(x => x.QueueInspectPlexServerByPlexAccountIdJob(1)).ReturnsAsync(Result.Ok());
 
         // Act
         var handler = new CreatePlexAccountHandler(_log, GetDbContext(), mock.Create<IMediator>(), mock.Create<IInspectServerScheduler>());

@@ -46,17 +46,21 @@ public class InspectAllPlexServersByAccountIdCommandHandler : IRequestHandler<In
         var plexAccount = await _dbContext.PlexAccounts.FindAsync(command.PlexAccountId, cancellationToken);
         var plexServers = await _dbContext.GetAccessiblePlexServers(command.PlexAccountId, cancellationToken);
 
+        if (!plexServers.Value.Any())
+        {
+            _log.Warning("No accessible PlexServers found for PlexAccount: {PlexAccountDisplayName}", plexAccount.DisplayName);
+            return Result.Ok();
+        }
+
         _log.Here()
             .Information("Inspecting {PlexServersCount} PlexServers for PlexAccount: {PlexAccountDisplayName}", plexServers.Value.Count,
                 plexAccount.DisplayName);
+
         if (!command.SkipRefreshAccessibleServers)
         {
             var refreshResult = await _mediator.Send(new RefreshAccessiblePlexServersCommand(plexAccount.Id), cancellationToken);
             if (refreshResult.IsFailed)
                 return refreshResult.ToResult();
-
-            // TODO needs refresh libraries accessible
-            // await _plexLibraryService.RetrieveAccessibleLibrariesAsync(plexAccountId,)
         }
         else
         {
@@ -70,10 +74,34 @@ public class InspectAllPlexServersByAccountIdCommandHandler : IRequestHandler<In
         if (checkResult.IsFailed)
             return checkResult;
 
+        await RetrieveAllAccessibleLibrariesAsync(plexAccount.Id);
+
+        // Sync libraries
+        foreach (var plexServer in plexServers.Value)
+            await _mediator.Send(new QueueSyncServerJobCommand(plexServer.Id, true), cancellationToken);
+
+
         _log.Here()
             .Information("Successfully finished the inspection of all plexServers related to {NameOfPlexAccount} {PlexAccountDisplayName}", nameof(PlexAccount),
                 plexAccount.DisplayName);
 
         return Result.Ok();
+    }
+
+    private async Task RetrieveAllAccessibleLibrariesAsync(int plexAccountId)
+    {
+        _log.Information("Retrieving accessible Plex libraries for Plex account with id {PlexAccountId}", plexAccountId);
+
+        var plexServersResult = await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccountId));
+        if (plexServersResult.IsFailed)
+        {
+            plexServersResult.LogError();
+            return;
+        }
+
+        var retrieveTasks = plexServersResult.Value
+            .Select(async plexServer => await _mediator.Send(new RefreshLibraryAccessCommand(plexAccountId, plexServer.Id)));
+
+        await Task.WhenAll(retrieveTasks);
     }
 }

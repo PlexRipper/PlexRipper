@@ -31,8 +31,8 @@ public class IsUsernameAvailableQueryHandler : IRequestHandler<IsUsernameAvailab
     {
         return await GetPlexAccount(request, cancellationToken)
             .Match(
-                _ => AvailableAccount(request),
-                () => UnavailableAccount(request));
+                _ => UnavailableAccount(request),
+                () => AvailableAccount(request));
     }
 
     private OptionAsync<PlexAccount> GetPlexAccount(IsUsernameAvailableQuery request, CancellationToken cancellationToken)

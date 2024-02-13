@@ -1,8 +1,8 @@
 ﻿using Application.Contracts;
 using AutoMapper;
-using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -12,11 +12,18 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class PlexLibraryController : BaseController
 {
+    private readonly IMediator _mediator;
     private readonly IPlexLibraryService _plexLibraryService;
 
-    public PlexLibraryController(ILog log, IPlexLibraryService plexLibraryService, IMapper mapper, INotificationsService notificationsService) : base(log,
+    public PlexLibraryController(
+        ILog log,
+        IMediator mediator,
+        IPlexLibraryService plexLibraryService,
+        IMapper mapper,
+        INotificationsService notificationsService) : base(log,
         mapper, notificationsService)
     {
+        _mediator = mediator;
         _plexLibraryService = plexLibraryService;
     }
 
@@ -63,6 +70,7 @@ public class PlexLibraryController : BaseController
         if (payload is null)
             return BadRequest();
 
-        return ToActionResult(await _plexLibraryService.UpdateDefaultDestinationLibrary(payload.LibraryId, payload.FolderPathId));
+        var result = await _mediator.Send(new UpdatePlexLibraryDefaultDestinationByIdCommand(payload.LibraryId, payload.FolderPathId));
+        return ToActionResult(result);
     }
 }

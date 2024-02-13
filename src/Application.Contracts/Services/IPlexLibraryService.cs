@@ -32,7 +32,6 @@ public interface IPlexLibraryService
 
     Task<Result<List<PlexLibrary>>> GetAllPlexLibrariesAsync();
 
-    Task<Result> UpdateDefaultDestinationLibrary(int libraryId, int folderPathId);
     Task<Result> RetrieveAccessibleLibrariesForAllAccountsAsync(int plexServerId);
     Task<Result> RetrieveAllAccessibleLibrariesAsync(int plexAccountId);
 }

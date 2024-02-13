@@ -68,11 +68,6 @@ public class PlexLibraryService : IPlexLibraryService
         return await _mediator.Send(new GetAllPlexLibrariesQuery());
     }
 
-    public async Task<Result> UpdateDefaultDestinationLibrary(int libraryId, int folderPathId)
-    {
-        return await _mediator.Send(new UpdatePlexLibraryDefaultDestinationByIdCommand(libraryId, folderPathId));
-    }
-
     #endregion
 
     #region Private

@@ -41,15 +41,15 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
     {
         // Arrange
         Seed = 23724;
-        await SetupDatabase(config => { config.PlexServerCount = 5; });
-        var plexServers = DbContext.PlexServers.ToList();
+        await SetupDatabase(config => config.PlexServerCount = 5);
+        var plexServers = DbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
         plexServers.Count.ShouldBe(5);
 
         // Update data setup
         var updatedServers = plexServers.Take(2).ToList();
 
         // Simulate the server being unchanged, and only the connections having changed except the connection
-        // // address which it is matched on during updating
+        // address which it is matched on during updating
         foreach (var updatedServer in updatedServers)
         {
             var connectionCount = updatedServer.PlexServerConnections.Count;
@@ -93,8 +93,8 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
     {
         // Arrange
         Seed = 23724;
-        await SetupDatabase(config => { config.PlexServerCount = 5; });
-        var plexServers = DbContext.PlexServers.ToList();
+        await SetupDatabase(config => config.PlexServerCount = 5);
+        var plexServers = DbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
         var changedPlexServers = FakeData.GetPlexServer(9236).Generate(3);
 
         var expectedPlexServers = new List<PlexServer>()

@@ -15,7 +15,6 @@ public class PlexLibraryService : IPlexLibraryService
     private readonly IMediator _mediator;
 
     private readonly IPlexApiService _plexServiceApi;
-    private readonly IPlexServerRepository _plexServerRepository;
     private readonly IPlexRipperDbContext _dbContext;
 
     private readonly ISignalRService _signalRService;
@@ -28,14 +27,12 @@ public class PlexLibraryService : IPlexLibraryService
         ILog log,
         IMediator mediator,
         IPlexApiService plexServiceApi,
-        IPlexServerRepository plexServerRepository,
         IPlexRipperDbContext dbContext,
         ISignalRService signalRService)
     {
         _log = log;
         _mediator = mediator;
         _plexServiceApi = plexServiceApi;
-        _plexServerRepository = plexServerRepository;
         _dbContext = dbContext;
         _signalRService = signalRService;
     }

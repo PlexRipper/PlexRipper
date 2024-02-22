@@ -1,10 +1,10 @@
 ﻿using Data.Contracts;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data;
+namespace PlexRipper.Application;
+
+public record GetPlexServerConnectionByIdQuery(int Id) : IRequest<Result<PlexServerConnection>>;
 
 public class GetPlexServerConnectionByIdQueryValidator : AbstractValidator<GetPlexServerConnectionByIdQuery>
 {
@@ -14,20 +14,19 @@ public class GetPlexServerConnectionByIdQueryValidator : AbstractValidator<GetPl
     }
 }
 
-public class GetPlexServerConnectionByIdQueryHandler : BaseHandler, IRequestHandler<GetPlexServerConnectionByIdQuery, Result<PlexServerConnection>>
+public class GetPlexServerConnectionByIdQueryHandler : IRequestHandler<GetPlexServerConnectionByIdQuery, Result<PlexServerConnection>>
 {
-    public GetPlexServerConnectionByIdQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    private readonly IPlexRipperDbContext _dbContext;
+
+    public GetPlexServerConnectionByIdQueryHandler(IPlexRipperDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
 
     public async Task<Result<PlexServerConnection>> Handle(GetPlexServerConnectionByIdQuery request, CancellationToken cancellationToken)
     {
-        var query = _dbContext
+        var plexServerConnection = await _dbContext
             .PlexServerConnections
-            .AsQueryable();
-
-        if (request.IncludeServer)
-            query = query.Include(x => x.PlexServer);
-
-        var plexServerConnection = await query
             .Include(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(5))
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 

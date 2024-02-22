@@ -18,18 +18,20 @@ public class PlexApiService : IPlexApiService
 
     private readonly IMapper _mapper;
     private readonly IMediator _mediator;
+    private readonly IPlexRipperDbContext _dbContext;
     private readonly Api.PlexApi _plexApi;
 
     #endregion
 
     #region Constructors
 
-    public PlexApiService(ILog log, Api.PlexApi plexApi, IMapper mapper, IMediator mediator)
+    public PlexApiService(ILog log, Api.PlexApi plexApi, IMapper mapper, IMediator mediator, IPlexRipperDbContext dbContext)
     {
         _log = log;
         _plexApi = plexApi;
         _mapper = mapper;
         _mediator = mediator;
+        _dbContext = dbContext;
     }
 
     #endregion
@@ -198,16 +200,13 @@ public class PlexApiService : IPlexApiService
     /// <inheritdoc />
     public async Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(int plexServerConnectionId, Action<PlexApiClientProgress> action = null)
     {
-        var plexServerConnectionResult = await _mediator.Send(new GetPlexServerConnectionByIdQuery(plexServerConnectionId));
-        if (plexServerConnectionResult.IsFailed)
-            return plexServerConnectionResult.ToResult();
-
-        var serverStatusResult = await _plexApi.GetServerStatusAsync(plexServerConnectionResult.Value.Url, action);
+        var connection = await _dbContext.PlexServerConnections.FindAsync(plexServerConnectionId);
+        var serverStatusResult = await _plexApi.GetServerStatusAsync(connection.Url, action);
         if (serverStatusResult.IsFailed)
             return serverStatusResult;
 
-        serverStatusResult.Value.PlexServerId = plexServerConnectionResult.Value.PlexServerId;
-        serverStatusResult.Value.PlexServerConnectionId = plexServerConnectionResult.Value.Id;
+        serverStatusResult.Value.PlexServerId = connection.PlexServerId;
+        serverStatusResult.Value.PlexServerConnectionId = connection.Id;
         return serverStatusResult;
     }
 

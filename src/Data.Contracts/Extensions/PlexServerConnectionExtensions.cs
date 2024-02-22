@@ -1,31 +1,25 @@
-﻿using Data.Contracts;
-using FluentValidation;
+using FluentResults;
+using Logging;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
+using PlexRipper.Domain;
 
-namespace PlexRipper.Data;
+namespace Data.Contracts;
 
-public class GetPlexServerConnectionByPlexServerIdQueryValidator : AbstractValidator<GetPlexServerConnectionByPlexServerIdQuery>
+public static class PlexServerConnectionExtensions
 {
-    public GetPlexServerConnectionByPlexServerIdQueryValidator()
-    {
-        RuleFor(x => x.PlexServerId).GreaterThan(0);
-    }
-}
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(PlexServerConnectionExtensions));
 
-public class GetPlexServerConnectionByPlexServerIdQueryHandler : BaseHandler,
-    IRequestHandler<GetPlexServerConnectionByPlexServerIdQuery, Result<PlexServerConnection>>
-{
-    public GetPlexServerConnectionByPlexServerIdQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
-
-    public async Task<Result<PlexServerConnection>> Handle(GetPlexServerConnectionByPlexServerIdQuery request, CancellationToken cancellationToken)
+    public static async Task<Result<PlexServerConnection>> GetValidPlexServerConnection(
+        this IPlexRipperDbContext dbContext,
+        int plexServerId,
+        CancellationToken cancellationToken = default)
     {
-        var plexServer = await _dbContext
+        var plexServer = await dbContext
             .PlexServers
             .Include(x => x.PlexServerConnections)
             .ThenInclude(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(5))
-            .FirstOrDefaultAsync(x => x.Id == request.PlexServerId, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == plexServerId, cancellationToken);
 
         var plexServerConnections = plexServer.PlexServerConnections;
         if (!plexServerConnections.Any())
@@ -50,7 +44,9 @@ public class GetPlexServerConnectionByPlexServerIdQueryHandler : BaseHandler,
         if (publicConnection is not null)
             return Result.Ok(publicConnection);
 
-        _log.Here().Verbose("Could not find connection based on public address: {PublicAddress} for server {PlexServerName}", plexServer.PublicAddress, plexServer.Name);
+        _log.Here()
+            .Verbose("Could not find connection based on public address: {PublicAddress} for server {PlexServerName}", plexServer.PublicAddress,
+                plexServer.Name);
 
         // Find based on what's successful
         var successPlexServerConnections = plexServerConnections

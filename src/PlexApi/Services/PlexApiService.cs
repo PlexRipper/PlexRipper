@@ -40,7 +40,7 @@ public class PlexApiService : IPlexApiService
 
     #region Public
 
-    public async Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(PlexLibrary plexLibrary)
+    public async Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(PlexLibrary plexLibrary, CancellationToken cancellationToken = default)
     {
         var tokenResult = await GetPlexServerTokenAsync(plexLibrary.PlexServerId);
         if (tokenResult.IsFailed)
@@ -50,7 +50,7 @@ public class PlexApiService : IPlexApiService
         var authToken = tokenResult.Value;
         var plexLibraryKey = plexLibrary.Key;
 
-        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexLibrary.PlexServerId));
+        var plexServerConnection =  await _dbContext.GetValidPlexServerConnection(plexLibrary.PlexServerId, cancellationToken);;
         if (plexServerConnection.IsFailed)
             return plexServerConnection.ToResult();
 
@@ -88,7 +88,7 @@ public class PlexApiService : IPlexApiService
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexLibrary.PlexServerId));
+        var plexServerConnection =  await _dbContext.GetValidPlexServerConnection(plexLibrary.PlexServerId);;
         if (plexServerConnection.IsFailed)
             return plexServerConnection.ToResult();
 
@@ -108,7 +108,7 @@ public class PlexApiService : IPlexApiService
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexLibrary.PlexServerId));
+        var plexServerConnection =  await _dbContext.GetValidPlexServerConnection(plexLibrary.PlexServerId);;
         if (plexServerConnection.IsFailed)
             return plexServerConnection.ToResult();
 
@@ -154,7 +154,7 @@ public class PlexApiService : IPlexApiService
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexServerId));
+        var plexServerConnection =  await _dbContext.GetValidPlexServerConnection(plexServerId);
         if (plexServerConnection.IsFailed)
             return plexServerConnection.ToResult();
 
@@ -257,7 +257,7 @@ public class PlexApiService : IPlexApiService
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexServer.Id));
+        var plexServerConnection =  await _dbContext.GetValidPlexServerConnection(plexServer.Id);
         if (plexServerConnection.IsFailed)
             return plexServerConnection.ToResult();
 

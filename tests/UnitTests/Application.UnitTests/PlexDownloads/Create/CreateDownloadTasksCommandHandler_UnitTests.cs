@@ -2,10 +2,9 @@
 using DownloadManager.Contracts;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
-namespace Data.UnitTests.Commands;
+namespace PlexRipper.Application.UnitTests;
 
 public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDownloadTasksCommandHandler>
 {

@@ -45,7 +45,7 @@ public class PlexServerConnectionController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
     public async Task<IActionResult> GetAll()
     {
-        var connections = await _plexServerConnectionsService.GetAllPlexServerConnectionsAsync();
+        var connections = await _mediator.Send(new GetAllPlexServerConnectionsQuery());
         return ToActionResult<List<PlexServerConnection>, List<PlexServerConnectionDTO>>(connections);
     }
 

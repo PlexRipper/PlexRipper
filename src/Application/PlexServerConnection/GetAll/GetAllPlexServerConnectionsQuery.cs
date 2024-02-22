@@ -2,26 +2,28 @@
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data;
+namespace PlexRipper.Application;
+
+public record GetAllPlexServerConnectionsQuery() : IRequest<Result<List<PlexServerConnection>>>;
 
 public class GetAllPlexServerConnectionsQueryValidator : AbstractValidator<GetAllPlexServerConnectionsQuery> { }
 
-public class GetAllPlexServerConnectionsQueryHandlerHandler : BaseHandler, IRequestHandler<GetAllPlexServerConnectionsQuery, Result<List<PlexServerConnection>>>
+public class GetAllPlexServerConnectionsQueryHandlerHandler : IRequestHandler<GetAllPlexServerConnectionsQuery, Result<List<PlexServerConnection>>>
 {
-    public GetAllPlexServerConnectionsQueryHandlerHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    private readonly ILog _log;
+    private readonly IPlexRipperDbContext _dbContext;
+
+    public GetAllPlexServerConnectionsQueryHandlerHandler(ILog log, IPlexRipperDbContext dbContext)
+    {
+        _log = log;
+        _dbContext = dbContext;
+    }
 
     public async Task<Result<List<PlexServerConnection>>> Handle(GetAllPlexServerConnectionsQuery request, CancellationToken cancellationToken)
     {
-        var query = _dbContext
+        var plexServerConnections = await _dbContext
             .PlexServerConnections
-            .AsQueryable();
-
-        if (request.IncludeServer)
-            query = query.Include(x => x.PlexServer);
-
-        var plexServerConnections = await query
             .Include(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(5))
             .ToListAsync(cancellationToken);
 

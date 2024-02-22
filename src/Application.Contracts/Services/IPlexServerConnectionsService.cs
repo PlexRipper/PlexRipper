@@ -19,9 +19,6 @@ public interface IPlexServerConnectionsService
     /// <returns>Returns successful result if any connection connected.</returns>
     Task<Result<List<PlexServerStatus>>> CheckAllConnectionsOfPlexServerAsync(int plexServerId);
 
-    Task<Result<PlexServerConnection>> GetPlexServerConnectionAsync(int plexServerConnectionId);
-
-    Task<Result<List<PlexServerConnection>>> GetAllPlexServerConnectionsAsync();
     Task<Result> CheckAllConnectionsOfPlexServersByAccountIdAsync(int plexAccountId);
 
     #endregion

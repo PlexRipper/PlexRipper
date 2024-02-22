@@ -13,8 +13,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
 {
     #region Fields
 
-    private readonly IFolderPathService _folderPathService;
-
     private readonly IPathSystem _pathSystem;
 
     private readonly IDownloadManagerSettingsModule _downloadManagerSettings;
@@ -37,7 +35,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         IMapper mapper,
         IPlexRipperDbContext dbContext,
         INotificationsService notificationsService,
-        IFolderPathService folderPathService,
         IPathSystem pathSystem,
         IDownloadManagerSettingsModule downloadManagerSettings)
     {
@@ -46,7 +43,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         _mapper = mapper;
         _dbContext = dbContext;
         _notificationsService = notificationsService;
-        _folderPathService = folderPathService;
         _pathSystem = pathSystem;
         _downloadManagerSettings = downloadManagerSettings;
     }
@@ -507,13 +503,11 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         var plexLibraries = await _dbContext.PlexLibraries.Include(x => x.PlexServer).ToListAsync();
         var plexServers = plexLibraries.Select(x => x.PlexServer).DistinctBy(x => x.Id).ToList();
 
-        // Get Plex libraries
+        // Get Folder Paths
         var folderPaths = await _dbContext.FolderPaths.ToListAsync();
 
         // Default destination dictionary
-        var defaultDestinationDict = await _folderPathService.GetDefaultDestinationFolderDictionary();
-        if (defaultDestinationDict.IsFailed)
-            return defaultDestinationDict.ToResult();
+        var defaultDestinationDict = await _dbContext.FolderPaths.GetDefaultDestinationFolderDictionary();
 
         async Task<Result<List<DownloadTask>>> FillDownloadTasks(List<DownloadTask> tasks)
         {
@@ -533,7 +527,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                     }
                     else
                     {
-                        var destination = defaultDestinationDict.Value[downloadTask.MediaType];
+                        var destination = defaultDestinationDict[downloadTask.MediaType];
                         downloadTask.DestinationFolderId = destination.Id;
                         downloadTask.DestinationFolder = destination;
                     }

@@ -16,20 +16,17 @@ namespace PlexRipper.WebAPI.Controllers;
 public class FolderPathController : BaseController
 {
     private readonly IMediator _mediator;
-    private readonly IFolderPathService _folderPathService;
 
     private readonly IFileSystem _fileSystem;
 
     public FolderPathController(
         ILog log,
         IMediator mediator,
-        IFolderPathService folderPathService,
         IFileSystem fileSystem,
         IMapper mapper,
         INotificationsService notificationsService) : base(log, mapper, notificationsService)
     {
         _mediator = mediator;
-        _folderPathService = folderPathService;
         _fileSystem = fileSystem;
     }
 

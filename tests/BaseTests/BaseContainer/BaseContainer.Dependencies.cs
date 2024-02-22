@@ -1,6 +1,5 @@
 ﻿#region
 
-using Application.Contracts;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
@@ -85,8 +84,6 @@ public partial class BaseContainer : IDisposable
     public IDownloadTaskFactory GetDownloadTaskFactory => Resolve<IDownloadTaskFactory>();
 
     public IDownloadTaskValidator GetDownloadTaskValidator => Resolve<IDownloadTaskValidator>();
-
-    public IFolderPathService GetFolderPathService => Resolve<IFolderPathService>();
 
     public IPlexApiService GetPlexApiService => Resolve<IPlexApiService>();
 

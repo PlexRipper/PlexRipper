@@ -1,5 +1,4 @@
-﻿using Application.Contracts;
-using BackgroundServices.Contracts;
+﻿using BackgroundServices.Contracts;
 using Data.Contracts;
 using Logging.Interface;
 using Quartz;
@@ -12,7 +11,6 @@ public class InspectPlexServerJob : IJob
 
     private readonly IPlexRipperDbContext _dbContext;
     private readonly ISyncServerScheduler _syncServerScheduler;
-    private readonly IPlexServerConnectionsService _plexServerConnectionsService;
     private readonly ILog _log;
     private readonly IMediator _mediator;
 
@@ -20,13 +18,11 @@ public class InspectPlexServerJob : IJob
         ILog log,
         IMediator mediator,
         IPlexRipperDbContext dbContext,
-        ISyncServerScheduler syncServerScheduler,
-        IPlexServerConnectionsService plexServerConnectionsService)
+        ISyncServerScheduler syncServerScheduler)
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
-        _plexServerConnectionsService = plexServerConnectionsService;
         _syncServerScheduler = syncServerScheduler;
     }
 
@@ -49,7 +45,7 @@ public class InspectPlexServerJob : IJob
                 return;
             }
 
-            var checkResult = await _plexServerConnectionsService.CheckAllConnectionsOfPlexServerAsync(plexServerId);
+            var checkResult = await _mediator.Send(new CheckAllConnectionStatusCommand(plexServerId));
             if (checkResult.IsFailed)
             {
                 checkResult.ToResult().LogError();

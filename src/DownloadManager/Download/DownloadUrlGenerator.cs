@@ -8,11 +8,13 @@ public class DownloadUrlGenerator : IDownloadUrlGenerator
 {
     private readonly ILog _log;
     private readonly IMediator _mediator;
+    private readonly IPlexRipperDbContext _dbContext;
 
-    public DownloadUrlGenerator(ILog log, IMediator mediator)
+    public DownloadUrlGenerator(ILog log, IMediator mediator, IPlexRipperDbContext dbContext)
     {
         _log = log;
         _mediator = mediator;
+        _dbContext = dbContext;
     }
 
     public async Task<Result<string>> GetDownloadUrl(DownloadTask downloadTask, CancellationToken cancellationToken = default)
@@ -22,8 +24,8 @@ public class DownloadUrlGenerator : IDownloadUrlGenerator
 
     public async Task<Result<string>> GetDownloadUrl(int plexServerId, string fileLocationUrl, CancellationToken cancellationToken = default)
     {
-        var plexServerConnectionResult =
-            await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexServerId), cancellationToken);
+
+        var plexServerConnectionResult = await _dbContext.GetValidPlexServerConnection(plexServerId, cancellationToken);
         if (plexServerConnectionResult.IsFailed)
             return plexServerConnectionResult.ToResult().LogError();
 

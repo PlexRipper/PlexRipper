@@ -1,8 +1,8 @@
 ﻿using Application.Contracts;
 using AutoMapper;
-using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -15,7 +15,6 @@ public class PlexServerConnectionController : BaseController
     #region Fields
 
     private readonly IMediator _mediator;
-    private readonly IPlexServerConnectionsService _plexServerConnectionsService;
 
     #endregion
 
@@ -25,11 +24,9 @@ public class PlexServerConnectionController : BaseController
         ILog log,
         IMapper mapper,
         IMediator mediator,
-        IPlexServerConnectionsService plexServerConnectionsService,
         INotificationsService notificationsService) : base(log, mapper, notificationsService)
     {
         _mediator = mediator;
-        _plexServerConnectionsService = plexServerConnectionsService;
     }
 
     #endregion
@@ -45,7 +42,7 @@ public class PlexServerConnectionController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
     public async Task<IActionResult> GetAll()
     {
-        var connections = await _plexServerConnectionsService.GetAllPlexServerConnectionsAsync();
+        var connections = await _mediator.Send(new GetAllPlexServerConnectionsQuery());
         return ToActionResult<List<PlexServerConnection>, List<PlexServerConnectionDTO>>(connections);
     }
 
@@ -59,7 +56,8 @@ public class PlexServerConnectionController : BaseController
         if (id <= 0)
             return BadRequestInvalidId();
 
-        return ToActionResult<PlexServerConnection, PlexServerConnectionDTO>(await _plexServerConnectionsService.GetPlexServerConnectionAsync(id));
+        var result = await _mediator.Send(new GetPlexServerConnectionByIdQuery(id));
+        return ToActionResult<PlexServerConnection, PlexServerConnectionDTO>(result);
     }
 
     // GET api/<PlexServerConnectionController>/check/5
@@ -72,12 +70,7 @@ public class PlexServerConnectionController : BaseController
         if (id <= 0)
             return BadRequestInvalidId();
 
-        var plexServerConnectionResult = await _mediator.Send(new GetPlexServerConnectionByIdQuery(id));
-        if (plexServerConnectionResult.IsFailed)
-            return ToActionResult(plexServerConnectionResult.ToResult());
-
-        var result = await _plexServerConnectionsService
-            .CheckPlexServerConnectionStatusAsync(plexServerConnectionResult.Value);
+        var result = await _mediator.Send(new CheckConnectionStatusCommand(id));
         return ToActionResult<PlexServerStatus, PlexServerStatusDTO>(result);
     }
 
@@ -96,8 +89,7 @@ public class PlexServerConnectionController : BaseController
         if (plexServerId <= 0)
             return BadRequestInvalidId(nameof(plexServerId));
 
-        var result = await _plexServerConnectionsService.CheckAllConnectionsOfPlexServerAsync(plexServerId);
-
+        var result = await _mediator.Send(new CheckAllConnectionStatusCommand(plexServerId));
         return ToActionResult<List<PlexServerStatus>, List<PlexServerStatusDTO>>(result);
     }
 

@@ -76,8 +76,9 @@ public interface IPlexApiService
     /// Fetches all the <see cref="PlexTvShowEpisode">Plex TvShow Episodes</see> from the Plex api with the given <see cref="PlexLibrary"/>.
     /// </summary>
     /// <param name="plexLibrary"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(PlexLibrary plexLibrary);
+    Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(PlexLibrary plexLibrary, CancellationToken cancellationToken = default);
 
     Task<Result<AuthPin>> Get2FAPin(string clientId);
 

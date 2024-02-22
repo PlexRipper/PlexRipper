@@ -14,6 +14,7 @@ namespace PlexRipper.WebAPI.Controllers;
 public class PlexMediaController : BaseController
 {
     private readonly IMediator _mediator;
+    private readonly IPlexRipperDbContext _dbContext;
 
     private readonly IPlexMovieService _plexMovieService;
 
@@ -22,12 +23,14 @@ public class PlexMediaController : BaseController
     public PlexMediaController(
         ILog log,
         IMediator mediator,
+        IPlexRipperDbContext dbContext,
         IMapper mapper,
         INotificationsService notificationsService,
         IPlexMovieService plexMovieService,
         IPlexMediaService plexMediaService) : base(log, mapper, notificationsService)
     {
         _mediator = mediator;
+        _dbContext = dbContext;
         _plexMovieService = plexMovieService;
         _plexMediaService = plexMediaService;
     }
@@ -94,7 +97,7 @@ public class PlexMediaController : BaseController
 
         var plexServerId = result.Value[0].PlexServerId;
 
-        var plexServerConnection = await _mediator.Send(new GetPlexServerConnectionByPlexServerIdQuery(plexServerId));
+        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexServerId);
         if (plexServerConnection.IsFailed)
             return ToActionResult(plexServerConnection.ToResult());
 

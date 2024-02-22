@@ -38,13 +38,6 @@ public interface IDownloadCommands
     Task<Result> StopDownloadTasks(int downloadTaskId);
 
     /// <summary>
-    /// Will clear any completed <see cref="DownloadTask"/> from the database.
-    /// </summary>
-    /// <param name="downloadTaskIds"></param>
-    /// <returns>Is successful.</returns>
-    Task<Result> ClearCompleted(List<int> downloadTaskIds = null);
-
-    /// <summary>
     /// Stops and deletes (active) PlexDownloadClients and removes <see cref="DownloadTask"/> from the database.
     /// </summary>
     /// <param name="downloadTaskIds">The list of <see cref="DownloadTask"/> to delete.</param>

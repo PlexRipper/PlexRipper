@@ -1,17 +1,27 @@
 ﻿using Data.Contracts;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data;
+namespace PlexRipper.Application;
+
+/// <summary>
+/// Will clear any completed <see cref="DownloadTask"/> from the database.
+/// </summary>
+/// <param name="DownloadTaskIds"> The list of <see cref="DownloadTask"/> id's to delete.</param>
+/// <returns>Is successful.</returns>
+public record ClearCompletedDownloadTasksCommand(List<int> DownloadTaskIds) : IRequest<Result>;
 
 public class ClearCompletedDownloadTasksCommandValidator : AbstractValidator<ClearCompletedDownloadTasksCommand> { }
 
-public class ClearCompletedDownloadTasksHandler : BaseHandler,
+public class ClearCompletedDownloadTasksHandler :
     IRequestHandler<ClearCompletedDownloadTasksCommand, Result>
 {
-    public ClearCompletedDownloadTasksHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    private readonly IPlexRipperDbContext _dbContext;
+
+    public ClearCompletedDownloadTasksHandler(IPlexRipperDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
 
     public async Task<Result> Handle(ClearCompletedDownloadTasksCommand command, CancellationToken cancellationToken)
     {

@@ -207,12 +207,6 @@ public class DownloadCommands : IDownloadCommands
     #endregion
 
     /// <inheritdoc/>
-    public Task<Result> ClearCompleted(List<int> downloadTaskIds)
-    {
-        return _mediator.Send(new ClearCompletedDownloadTasksCommand(downloadTaskIds));
-    }
-
-    /// <inheritdoc/>
     public async Task<Result<bool>> DeleteDownloadTaskClients(List<int> downloadTaskIds)
     {
         if (downloadTaskIds is null || !downloadTaskIds.Any())

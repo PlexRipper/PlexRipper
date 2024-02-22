@@ -4,6 +4,7 @@ using Data.Contracts;
 using DownloadManager.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 using PlexRipper.WebAPI.SignalR.Common;
@@ -59,7 +60,8 @@ public class DownloadController : BaseController
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
     public async Task<IActionResult> ClearCompleted([FromBody] List<int> downloadTaskIds)
     {
-        return ToActionResult(await _downloadCommands.ClearCompleted(downloadTaskIds));
+        var result = await _mediator.Send(new ClearCompletedDownloadTasksCommand(downloadTaskIds));
+        return ToActionResult(result);
     }
 
     /// <summary>

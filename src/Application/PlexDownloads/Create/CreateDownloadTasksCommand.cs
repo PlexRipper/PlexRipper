@@ -62,7 +62,7 @@ public class CreateDownloadTasksCommandHandler : IRequestHandler<CreateDownloadT
         // Add to Database
         await InsertDownloadTasks(validateResult.Value, cancellationToken);
 
-        _log.Debug("Successfully added all {ValidateCount} DownloadTasks", validateResult.Value.Count);
+        _log.Debug("Successfully added all {ValidateCount} DownloadTasks", validateResult.Value.Flatten(x => x.Children).ToList().Count);
 
         // Notify the DownloadQueue to check for new tasks in the PlexSevers with new DownloadTasks
         var uniquePlexServers = downloadTasks.Value.Select(x => x.PlexServerId).Distinct().ToList();

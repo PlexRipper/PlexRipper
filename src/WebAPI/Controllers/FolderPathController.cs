@@ -4,7 +4,6 @@ using FileSystem.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
-using PlexRipper.Data.FolderPaths;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -69,7 +68,8 @@ public class FolderPathController : BaseController
     public async Task<IActionResult> Create([FromBody] FolderPathDTO folderPathDto)
     {
         var folderPath = _mapper.Map<FolderPath>(folderPathDto);
-        return ToActionResult<FolderPath, FolderPathDTO>(await _folderPathService.CreateFolderPath(folderPath));
+        var result = await _mediator.Send(new CreateFolderPathCommand(folderPath));
+        return ToActionResult<FolderPath, FolderPathDTO>(result);
     }
 
     // Delete: api/<FolderPathController>

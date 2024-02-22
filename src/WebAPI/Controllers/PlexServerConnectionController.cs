@@ -73,12 +73,7 @@ public class PlexServerConnectionController : BaseController
         if (id <= 0)
             return BadRequestInvalidId();
 
-        var plexServerConnectionResult = await _mediator.Send(new GetPlexServerConnectionByIdQuery(id));
-        if (plexServerConnectionResult.IsFailed)
-            return ToActionResult(plexServerConnectionResult.ToResult());
-
-        var result = await _plexServerConnectionsService
-            .CheckPlexServerConnectionStatusAsync(plexServerConnectionResult.Value);
+        var result = await _mediator.Send(new CheckConnectionStatusCommand(id));
         return ToActionResult<PlexServerStatus, PlexServerStatusDTO>(result);
     }
 

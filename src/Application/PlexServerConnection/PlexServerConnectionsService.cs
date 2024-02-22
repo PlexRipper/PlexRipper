@@ -74,37 +74,6 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
             .LogIfFailed();
     }
 
-    public async Task<Result<PlexServerStatus>> CheckPlexServerConnectionStatusAsync(PlexServerConnection plexServerConnection, bool trimEntries = true)
-    {
-        // The call-back action from the httpClient
-        async void Action(PlexApiClientProgress progress)
-        {
-            var checkStatusProgress = _mapper.Map<ServerConnectionCheckStatusProgress>(progress);
-            checkStatusProgress.PlexServerConnection = plexServerConnection;
-            await _signalRService.SendServerConnectionCheckStatusProgressAsync(checkStatusProgress);
-        }
-
-        // Request status
-        var serverStatusResult = await _plexApiService.GetPlexServerStatusAsync(plexServerConnection.Id, Action);
-        if (serverStatusResult.IsFailed)
-            return serverStatusResult.LogError();
-
-        // Add plexServer status to DB, the PlexServerStatus table functions as a server log.
-        var result = await _mediator.Send(new CreatePlexServerStatusCommand(serverStatusResult.Value));
-        if (result.IsFailed)
-            return result.ToResult();
-
-        if (trimEntries)
-        {
-            // Ensure that there are not too many PlexServerStatuses stored.
-            var trimResult = await _mediator.Send(new TrimPlexServerStatusCommand(serverStatusResult.Value.PlexServerId));
-            if (trimResult.IsFailed)
-                return trimResult.ToResult();
-        }
-
-        return serverStatusResult.Value;
-    }
-
     #endregion
 
     #endregion

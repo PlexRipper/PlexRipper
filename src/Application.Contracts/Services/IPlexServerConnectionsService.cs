@@ -9,8 +9,6 @@ public interface IPlexServerConnectionsService
 
     #region Public
 
-    Task<Result<PlexServerStatus>> CheckPlexServerConnectionStatusAsync(PlexServerConnection plexServerConnectionId, bool trimEntries = true);
-
     /// <summary>
     /// Checks every <see cref="PlexServerConnection"/> in parallel of a <see cref="PlexServer"/> whether it connects or not
     /// and then stores that <see cref="PlexServerStatus"/> in the database.

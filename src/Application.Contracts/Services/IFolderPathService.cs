@@ -5,8 +5,6 @@ namespace Application.Contracts;
 
 public interface IFolderPathService
 {
-    Task<Result<FolderPath>> UpdateFolderPathAsync(FolderPath folderPath);
-
     Task<Result> CheckIfFolderPathsAreValid(PlexMediaType mediaType = PlexMediaType.None);
 
     /// <summary>

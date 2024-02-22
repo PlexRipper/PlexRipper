@@ -59,7 +59,8 @@ public class FolderPathController : BaseController
     public async Task<IActionResult> Put([FromBody] FolderPathDTO folderPathDto)
     {
         var folderPath = _mapper.Map<FolderPath>(folderPathDto);
-        return ToActionResult<FolderPath, FolderPathDTO>(await _folderPathService.UpdateFolderPathAsync(folderPath));
+        var result = await _mediator.Send(new UpdateFolderPathCommand(folderPath));
+        return ToActionResult<FolderPath, FolderPathDTO>(result);
     }
 
     // POST: api/<FolderPathController>

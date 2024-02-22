@@ -19,11 +19,6 @@ public class FolderPathService : IFolderPathService
         _directorySystem = directorySystem;
     }
 
-    public Task<Result<FolderPath>> UpdateFolderPathAsync(FolderPath folderPath)
-    {
-        return _mediator.Send(new UpdateFolderPathCommand(folderPath));
-    }
-
     /// <inheritdoc/>
     public async Task<Result<Dictionary<PlexMediaType, FolderPath>>> GetDefaultDestinationFolderDictionary()
     {

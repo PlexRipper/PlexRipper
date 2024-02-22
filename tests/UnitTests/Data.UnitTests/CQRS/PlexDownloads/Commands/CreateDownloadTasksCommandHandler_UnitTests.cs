@@ -1,7 +1,5 @@
-﻿using Data.Contracts;
-using EFCore.BulkExtensions;
-using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using PlexRipper.Application;
 using PlexRipper.Data.Common;
 
 namespace Data.UnitTests.Commands;

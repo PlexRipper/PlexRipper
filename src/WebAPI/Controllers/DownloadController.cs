@@ -78,12 +78,7 @@ public class DownloadController : BaseController
         foreach (var downloadMediaDto in downloadMedias)
             _log.Debug("DownloadMediaDTO: {@DownloadMediaDto} ", downloadMediaDto);
 
-        var downloadTasks = await _downloadTaskFactory.GenerateAsync(downloadMedias);
-        if (downloadTasks.IsFailed)
-            return ToActionResult(downloadTasks.ToResult());
-
-        var result = await _downloadCommands.CreateDownloadTasks(downloadTasks.Value);
-
+        var result = await _mediator.Send(new CreateDownloadTasksCommand(downloadMedias));
         return ToActionResult(result);
     }
 

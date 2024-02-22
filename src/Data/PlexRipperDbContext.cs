@@ -3,6 +3,7 @@ using System.Reflection;
 using AppAny.Quartz.EntityFrameworkCore.Migrations;
 using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using Data.Contracts;
+using EFCore.BulkExtensions;
 using Environment;
 using Logging.Interface;
 using Microsoft.Data.Sqlite;
@@ -93,6 +94,11 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
     /// Determines if this <see cref="PlexRipperDbContext"/> has been setup already during integration or unit testing.
     /// </summary>
     public bool HasBeenSetup { get; set; }
+
+    public async Task BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig = null, CancellationToken cancellationToken = default) where T : class
+    {
+        await DbContextBulkExtensions.BulkInsertAsync(this, entities, bulkConfig, cancellationToken: cancellationToken);
+    }
 
     private static readonly NaturalSortComparer NaturalComparer = new(StringComparison.InvariantCultureIgnoreCase);
 

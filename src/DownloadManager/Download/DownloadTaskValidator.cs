@@ -1,5 +1,6 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
+using DownloadManager.Contracts;
 using FluentValidation;
 using Logging.Interface;
 
@@ -81,8 +82,9 @@ public class DownloadTaskValidator : IDownloadTaskValidator
             var downloadTask = downloadTasks[i];
 
             // Check validity
-            _log.Here().Debug("Validating DownloadTask {Index} of {DownloadTasksCount} with title {DownloadTaskFullTitle}", i + 1, downloadTasks.Count.ToString(),
-                downloadTask.FullTitle);
+            _log.Here()
+                .Debug("Validating DownloadTask {Index} of {DownloadTasksCount} with title {DownloadTaskFullTitle}", i + 1, downloadTasks.Count.ToString(),
+                    downloadTask.FullTitle);
 
             var validationResult = validator.Validate(downloadTask).ToFluentResult();
             if (validationResult.IsFailed)
@@ -94,8 +96,9 @@ public class DownloadTaskValidator : IDownloadTaskValidator
             }
             else
             {
-                _log.Here().Debug("DownloadTask {Index} of {DownloadTasksCount} with title {DownloadTaskFullTitle} was valid", i + 1, downloadTasks.Count.ToString(),
-                    downloadTask.FullTitle);
+                _log.Here()
+                    .Debug("DownloadTask {Index} of {DownloadTasksCount} with title {DownloadTaskFullTitle} was valid", i + 1, downloadTasks.Count.ToString(),
+                        downloadTask.FullTitle);
             }
         }
 

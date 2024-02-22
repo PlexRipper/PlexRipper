@@ -44,10 +44,4 @@ public interface IDownloadCommands
     /// <returns><see cref="Result"/> fails on error.</returns>
     Task<Result<bool>> DeleteDownloadTaskClients(List<int> downloadTaskIds);
 
-    /// <summary>
-    /// Adds a list of <see cref="DownloadTask"/>s to the download queue.
-    /// </summary>
-    /// <param name="downloadTasks">The list of <see cref="DownloadTask"/>s that will be checked and added.</param>
-    /// <returns>Returns true if all downloadTasks were added successfully.</returns>
-    Task<Result> CreateDownloadTasks(List<DownloadTask> downloadTasks);
 }

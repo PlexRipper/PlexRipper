@@ -1,5 +1,5 @@
 ﻿using Autofac;
-using PlexRipper.DownloadManager;
+using DownloadManager.Contracts;
 using PlexRipper.FileSystem.Common;
 using Settings.Contracts;
 using WebAPI.Contracts;

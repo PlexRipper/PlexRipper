@@ -30,7 +30,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="CQRS\FolderPaths\Commands\" />
 		<Folder Include="Extensions\" />
 		<Folder Include="Migrations" />
 	</ItemGroup>

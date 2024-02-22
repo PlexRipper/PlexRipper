@@ -4,6 +4,7 @@ using FileSystem.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
+using PlexRipper.Data.FolderPaths;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -80,6 +81,7 @@ public class FolderPathController : BaseController
         if (id <= 0)
             return BadRequestInvalidId();
 
-        return ToActionResult(await _folderPathService.DeleteFolderPathAsync(id));
+        var result = await _mediator.Send(new DeleteFolderPathCommand(id));
+        return ToActionResult(result);
     }
 }

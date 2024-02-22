@@ -15,7 +15,6 @@ public class PlexServerConnectionController : BaseController
     #region Fields
 
     private readonly IMediator _mediator;
-    private readonly IPlexServerConnectionsService _plexServerConnectionsService;
 
     #endregion
 
@@ -25,11 +24,9 @@ public class PlexServerConnectionController : BaseController
         ILog log,
         IMapper mapper,
         IMediator mediator,
-        IPlexServerConnectionsService plexServerConnectionsService,
         INotificationsService notificationsService) : base(log, mapper, notificationsService)
     {
         _mediator = mediator;
-        _plexServerConnectionsService = plexServerConnectionsService;
     }
 
     #endregion

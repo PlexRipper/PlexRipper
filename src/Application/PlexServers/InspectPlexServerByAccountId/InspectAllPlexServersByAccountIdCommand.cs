@@ -26,18 +26,15 @@ public class InspectAllPlexServersByAccountIdCommandHandler : IRequestHandler<In
 {
     private readonly ILog _log;
     private readonly IMediator _mediator;
-    private readonly IPlexServerConnectionsService _plexServerConnectionsService;
     private readonly IPlexRipperDbContext _dbContext;
 
     public InspectAllPlexServersByAccountIdCommandHandler(
         ILog log,
         IMediator mediator,
-        IPlexServerConnectionsService plexServerConnectionsService,
         IPlexRipperDbContext dbContext)
     {
         _log = log;
         _mediator = mediator;
-        _plexServerConnectionsService = plexServerConnectionsService;
         _dbContext = dbContext;
     }
 
@@ -70,7 +67,7 @@ public class InspectAllPlexServersByAccountIdCommandHandler : IRequestHandler<In
         }
 
         // Create connection check tasks for all connections
-        var checkResult = await _plexServerConnectionsService.CheckAllConnectionsOfPlexServersByAccountIdAsync(plexAccount.Id);
+        var checkResult = await CheckAllConnectionsOfPlexServersByAccountIdAsync(plexAccount.Id, cancellationToken);
         if (checkResult.IsFailed)
             return checkResult;
 
@@ -85,6 +82,25 @@ public class InspectAllPlexServersByAccountIdCommandHandler : IRequestHandler<In
                 plexAccount.DisplayName);
 
         return Result.Ok();
+    }
+
+    private async Task<Result> CheckAllConnectionsOfPlexServersByAccountIdAsync(int plexAccountId, CancellationToken cancellationToken = default)
+    {
+        var plexServersResult = await _dbContext.GetAccessiblePlexServers(plexAccountId, cancellationToken);
+        if (plexServersResult.IsFailed)
+        {
+            return plexServersResult
+                .WithError($"Could not retrieve any PlexAccount from database with id {plexAccountId}.")
+                .LogError();
+        }
+
+        var plexServers = plexServersResult.Value;
+        var serverTasks = plexServers.Select(async plexServer => await _mediator.Send(new CheckAllConnectionStatusCommand(plexServer.Id), cancellationToken));
+
+        var tasksResult = await Task.WhenAll(serverTasks);
+        return Result.OkIf(tasksResult.Any(x => x.IsSuccess),
+                $"None of the servers that were checked for {nameof(PlexAccount)} with id {plexAccountId} were connectable")
+            .LogIfFailed();
     }
 
     private async Task RetrieveAllAccessibleLibrariesAsync(int plexAccountId)

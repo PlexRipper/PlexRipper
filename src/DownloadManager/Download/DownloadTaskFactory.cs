@@ -13,8 +13,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
 {
     #region Fields
 
-    private readonly IFolderPathService _folderPathService;
-
     private readonly IPathSystem _pathSystem;
 
     private readonly IDownloadManagerSettingsModule _downloadManagerSettings;
@@ -37,7 +35,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         IMapper mapper,
         IPlexRipperDbContext dbContext,
         INotificationsService notificationsService,
-        IFolderPathService folderPathService,
         IPathSystem pathSystem,
         IDownloadManagerSettingsModule downloadManagerSettings)
     {
@@ -46,7 +43,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         _mapper = mapper;
         _dbContext = dbContext;
         _notificationsService = notificationsService;
-        _folderPathService = folderPathService;
         _pathSystem = pathSystem;
         _downloadManagerSettings = downloadManagerSettings;
     }
@@ -57,9 +53,10 @@ public class DownloadTaskFactory : IDownloadTaskFactory
 
     public async Task<Result<List<DownloadTask>>> GenerateAsync(List<DownloadMediaDTO> downloadMedias)
     {
-        var resultFolderPath = await _folderPathService.CheckIfFolderPathsAreValid();
-        if (resultFolderPath.IsFailed)
-            return resultFolderPath.LogError();
+        // TODO This might not be needed so it's disabled for now
+        // var resultFolderPath = await _mediator.Send(new ValidateFolderPathsCommand());
+        // if (resultFolderPath.IsFailed)
+        //     return resultFolderPath.LogError();
 
         var downloadTasks = new List<DownloadTask>();
 
@@ -498,30 +495,26 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             return ResultExtensions.IsEmpty(nameof(downloadTasks)).LogWarning();
 
         // Get the download folder
-        var downloadFolder = await _folderPathService.GetDownloadFolderAsync();
-        if (downloadFolder.IsFailed)
-            return downloadFolder.ToResult();
+        var downloadFolder = await _dbContext.FolderPaths.GetDownloadFolderAsync();
+        if (downloadFolder is null)
+            return ResultExtensions.IsNull(nameof(downloadFolder)).LogError();
 
         // Get Plex libraries
         var plexLibraries = await _dbContext.PlexLibraries.Include(x => x.PlexServer).ToListAsync();
         var plexServers = plexLibraries.Select(x => x.PlexServer).DistinctBy(x => x.Id).ToList();
 
-        // Get Plex libraries
-        var folderPaths = await _mediator.Send(new GetAllFolderPathsQuery());
-        if (folderPaths.IsFailed)
-            return folderPaths.ToResult();
+        // Get Folder Paths
+        var folderPaths = await _dbContext.FolderPaths.ToListAsync();
 
         // Default destination dictionary
-        var defaultDestinationDict = await _folderPathService.GetDefaultDestinationFolderDictionary();
-        if (defaultDestinationDict.IsFailed)
-            return defaultDestinationDict.ToResult();
+        var defaultDestinationDict = await _dbContext.FolderPaths.GetDefaultDestinationFolderDictionary();
 
         async Task<Result<List<DownloadTask>>> FillDownloadTasks(List<DownloadTask> tasks)
         {
             foreach (var downloadTask in tasks)
             {
-                downloadTask.DownloadFolderId = downloadFolder.Value.Id;
-                downloadTask.DownloadFolder = downloadFolder.Value;
+                downloadTask.DownloadFolderId = downloadFolder.Id;
+                downloadTask.DownloadFolder = downloadFolder;
                 downloadTask.PlexServer = plexServers.Find(x => x.Id == downloadTask.PlexServerId);
                 downloadTask.ServerMachineIdentifier = downloadTask.PlexServer.MachineIdentifier;
                 var plexLibrary = plexLibraries.Find(x => x.Id == downloadTask.PlexLibraryId);
@@ -530,11 +523,11 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                     if (plexLibrary.DefaultDestinationId is not null)
                     {
                         downloadTask.DestinationFolderId = plexLibrary.DefaultDestinationId ?? default(int);
-                        downloadTask.DestinationFolder = folderPaths.Value.Find(x => x.Id == downloadTask.DestinationFolderId);
+                        downloadTask.DestinationFolder = folderPaths.Find(x => x.Id == downloadTask.DestinationFolderId);
                     }
                     else
                     {
-                        var destination = defaultDestinationDict.Value[downloadTask.MediaType];
+                        var destination = defaultDestinationDict[downloadTask.MediaType];
                         downloadTask.DestinationFolderId = destination.Id;
                         downloadTask.DestinationFolder = destination;
                     }

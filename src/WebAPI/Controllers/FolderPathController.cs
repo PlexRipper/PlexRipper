@@ -3,10 +3,9 @@ using AutoMapper;
 using FileSystem.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.FluentResult;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace PlexRipper.WebAPI.Controllers;
 
@@ -14,18 +13,17 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class FolderPathController : BaseController
 {
-    private readonly IFolderPathService _folderPathService;
-
+    private readonly IMediator _mediator;
     private readonly IFileSystem _fileSystem;
 
     public FolderPathController(
         ILog log,
-        IFolderPathService folderPathService,
+        IMediator mediator,
         IFileSystem fileSystem,
         IMapper mapper,
         INotificationsService notificationsService) : base(log, mapper, notificationsService)
     {
-        _folderPathService = folderPathService;
+        _mediator = mediator;
         _fileSystem = fileSystem;
     }
 
@@ -34,7 +32,8 @@ public class FolderPathController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<FolderPathDTO>>))]
     public async Task<IActionResult> Get()
     {
-        return ToActionResult<List<FolderPath>, List<FolderPathDTO>>(await _folderPathService.GetAllFolderPathsAsync());
+        var result = await _mediator.Send(new GetAllFolderPathsQuery());
+        return ToActionResult<List<FolderPath>, List<FolderPathDTO>>(result);
     }
 
     // GET: api/<FolderPathController>/directory?path=
@@ -53,7 +52,8 @@ public class FolderPathController : BaseController
     public async Task<IActionResult> Put([FromBody] FolderPathDTO folderPathDto)
     {
         var folderPath = _mapper.Map<FolderPath>(folderPathDto);
-        return ToActionResult<FolderPath, FolderPathDTO>(await _folderPathService.UpdateFolderPathAsync(folderPath));
+        var result = await _mediator.Send(new UpdateFolderPathCommand(folderPath));
+        return ToActionResult<FolderPath, FolderPathDTO>(result);
     }
 
     // POST: api/<FolderPathController>
@@ -62,7 +62,8 @@ public class FolderPathController : BaseController
     public async Task<IActionResult> Create([FromBody] FolderPathDTO folderPathDto)
     {
         var folderPath = _mapper.Map<FolderPath>(folderPathDto);
-        return ToActionResult<FolderPath, FolderPathDTO>(await _folderPathService.CreateFolderPath(folderPath));
+        var result = await _mediator.Send(new CreateFolderPathCommand(folderPath));
+        return ToActionResult<FolderPath, FolderPathDTO>(result);
     }
 
     // Delete: api/<FolderPathController>
@@ -74,6 +75,7 @@ public class FolderPathController : BaseController
         if (id <= 0)
             return BadRequestInvalidId();
 
-        return ToActionResult(await _folderPathService.DeleteFolderPathAsync(id));
+        var result = await _mediator.Send(new DeleteFolderPathCommand(id));
+        return ToActionResult(result);
     }
 }

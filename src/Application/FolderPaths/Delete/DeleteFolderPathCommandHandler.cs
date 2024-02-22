@@ -2,9 +2,10 @@
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.FolderPaths;
+namespace PlexRipper.Application;
+
+public record DeleteFolderPathCommand(int Id) : IRequest<Result>;
 
 public class DeleteFolderPathValidator : AbstractValidator<DeleteFolderPathCommand>
 {
@@ -14,9 +15,16 @@ public class DeleteFolderPathValidator : AbstractValidator<DeleteFolderPathComma
     }
 }
 
-public class DeleteFolderPathHandler : BaseHandler, IRequestHandler<DeleteFolderPathCommand, Result>
+public class DeleteFolderPathHandler : IRequestHandler<DeleteFolderPathCommand, Result>
 {
-    public DeleteFolderPathHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    private readonly ILog _log;
+    private readonly IPlexRipperDbContext _dbContext;
+
+    public DeleteFolderPathHandler(ILog log, IPlexRipperDbContext dbContext)
+    {
+        _log = log;
+        _dbContext = dbContext;
+    }
 
     public async Task<Result> Handle(DeleteFolderPathCommand command, CancellationToken cancellationToken)
     {

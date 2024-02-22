@@ -2,9 +2,10 @@
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.FolderPaths;
+namespace PlexRipper.Application;
+
+public record UpdateFolderPathCommand(FolderPath FolderPath) : IRequest<Result<FolderPath>>;
 
 public class UpdateFolderPathCommandValidator : AbstractValidator<UpdateFolderPathCommand>
 {
@@ -18,9 +19,16 @@ public class UpdateFolderPathCommandValidator : AbstractValidator<UpdateFolderPa
     }
 }
 
-public class UpdateFolderPathCommandHandler : BaseHandler, IRequestHandler<UpdateFolderPathCommand, Result<FolderPath>>
+public class UpdateFolderPathCommandHandler : IRequestHandler<UpdateFolderPathCommand, Result<FolderPath>>
 {
-    public UpdateFolderPathCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    private readonly ILog _log;
+    private readonly IPlexRipperDbContext _dbContext;
+
+    public UpdateFolderPathCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    {
+        _log = log;
+        _dbContext = dbContext;
+    }
 
     public async Task<Result<FolderPath>> Handle(UpdateFolderPathCommand command, CancellationToken cancellationToken)
     {
@@ -30,7 +38,7 @@ public class UpdateFolderPathCommandHandler : BaseHandler, IRequestHandler<Updat
             return ResultExtensions.EntityNotFound(nameof(FolderPath), command.FolderPath.Id);
 
         _dbContext.Entry(folderPath).CurrentValues.SetValues(command.FolderPath);
-        await SaveChangesAsync(cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok(folderPath);
     }

@@ -1,7 +1,6 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
 using FileSystem.Contracts;
-using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
@@ -43,29 +42,5 @@ public class FolderPathService : IFolderPathService
         };
 
         return Result.Ok(dict);
-    }
-
-    public async Task<Result> CheckIfFolderPathsAreValid(PlexMediaType mediaType = PlexMediaType.None)
-    {
-        if (mediaType is PlexMediaType.None or PlexMediaType.Unknown)
-            return Result.Fail("The media type is not valid for this operation").LogError();
-
-        var folderPaths = await _dbContext.FolderPaths.ToListAsync();
-
-        var errors = new List<IError>();
-        foreach (var folderPath in folderPaths)
-        {
-            var folderPathExitsResult = _directorySystem.Exists(folderPath.DirectoryPath);
-            if (folderPathExitsResult.IsFailed)
-            {
-                errors.AddRange(folderPathExitsResult.Errors);
-                continue;
-            }
-
-            if (folderPath.MediaType == mediaType && !folderPathExitsResult.Value)
-                errors.Add(new Error($"The {folderPath.DisplayName} is not a valid or existing directory"));
-        }
-
-        return errors.Count > 0 ? new Result().WithErrors(errors).LogError() : Result.Ok();
     }
 }

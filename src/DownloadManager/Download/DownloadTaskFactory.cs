@@ -57,9 +57,10 @@ public class DownloadTaskFactory : IDownloadTaskFactory
 
     public async Task<Result<List<DownloadTask>>> GenerateAsync(List<DownloadMediaDTO> downloadMedias)
     {
-        var resultFolderPath = await _folderPathService.CheckIfFolderPathsAreValid();
-        if (resultFolderPath.IsFailed)
-            return resultFolderPath.LogError();
+        // TODO This might not be needed so it's disabled for now
+        // var resultFolderPath = await _mediator.Send(new ValidateFolderPathsCommand());
+        // if (resultFolderPath.IsFailed)
+        //     return resultFolderPath.LogError();
 
         var downloadTasks = new List<DownloadTask>();
 

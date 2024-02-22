@@ -5,8 +5,6 @@ namespace Application.Contracts;
 
 public interface IFolderPathService
 {
-    Task<Result> CheckIfFolderPathsAreValid(PlexMediaType mediaType = PlexMediaType.None);
-
     /// <summary>
     /// Creates a <see cref="Dictionary{TKey,TValue}"/> with <see cref="PlexMediaType"/> keys,
     /// which are mapped to the default <see cref="FolderPath"/> destinations.

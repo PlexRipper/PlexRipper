@@ -3,6 +3,7 @@ using AutoMapper;
 using FileSystem.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -14,17 +15,20 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class FolderPathController : BaseController
 {
+    private readonly IMediator _mediator;
     private readonly IFolderPathService _folderPathService;
 
     private readonly IFileSystem _fileSystem;
 
     public FolderPathController(
         ILog log,
+        IMediator mediator,
         IFolderPathService folderPathService,
         IFileSystem fileSystem,
         IMapper mapper,
         INotificationsService notificationsService) : base(log, mapper, notificationsService)
     {
+        _mediator = mediator;
         _folderPathService = folderPathService;
         _fileSystem = fileSystem;
     }
@@ -34,7 +38,9 @@ public class FolderPathController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<FolderPathDTO>>))]
     public async Task<IActionResult> Get()
     {
-        return ToActionResult<List<FolderPath>, List<FolderPathDTO>>(await _folderPathService.GetAllFolderPathsAsync());
+        var result = await _mediator.Send(new GetAllFolderPathsQuery());
+
+        return ToActionResult<List<FolderPath>, List<FolderPathDTO>>(result);
     }
 
     // GET: api/<FolderPathController>/directory?path=

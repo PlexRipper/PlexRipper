@@ -1,24 +1,22 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
 using FileSystem.Contracts;
+using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
 public class FolderPathService : IFolderPathService
 {
     private readonly IMediator _mediator;
+    private readonly IPlexRipperDbContext _dbContext;
 
     private readonly IDirectorySystem _directorySystem;
 
-    public FolderPathService(IMediator mediator, IDirectorySystem directorySystem)
+    public FolderPathService(IMediator mediator, IPlexRipperDbContext dbContext, IDirectorySystem directorySystem)
     {
         _mediator = mediator;
+        _dbContext = dbContext;
         _directorySystem = directorySystem;
-    }
-
-    public Task<Result<List<FolderPath>>> GetAllFolderPathsAsync()
-    {
-        return _mediator.Send(new GetAllFolderPathsQuery());
     }
 
     public async Task<Result<FolderPath>> CreateFolderPath(FolderPath folderPath)
@@ -101,15 +99,13 @@ public class FolderPathService : IFolderPathService
 
     public async Task<Result> CheckIfFolderPathsAreValid(PlexMediaType mediaType = PlexMediaType.None)
     {
-        var folderPaths = await GetAllFolderPathsAsync();
-        if (folderPaths.IsFailed)
-            return folderPaths.ToResult();
-
         if (mediaType is PlexMediaType.None or PlexMediaType.Unknown)
-            return folderPaths.ToResult();
+            return Result.Fail("The media type is not valid for this operation").LogError();
+
+        var folderPaths = await _dbContext.FolderPaths.ToListAsync();
 
         var errors = new List<IError>();
-        foreach (var folderPath in folderPaths.Value)
+        foreach (var folderPath in folderPaths)
         {
             var folderPathExitsResult = _directorySystem.Exists(folderPath.DirectoryPath);
             if (folderPathExitsResult.IsFailed)

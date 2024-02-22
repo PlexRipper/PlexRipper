@@ -507,9 +507,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         var plexServers = plexLibraries.Select(x => x.PlexServer).DistinctBy(x => x.Id).ToList();
 
         // Get Plex libraries
-        var folderPaths = await _mediator.Send(new GetAllFolderPathsQuery());
-        if (folderPaths.IsFailed)
-            return folderPaths.ToResult();
+        var folderPaths = await _dbContext.FolderPaths.ToListAsync();
 
         // Default destination dictionary
         var defaultDestinationDict = await _folderPathService.GetDefaultDestinationFolderDictionary();
@@ -530,7 +528,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                     if (plexLibrary.DefaultDestinationId is not null)
                     {
                         downloadTask.DestinationFolderId = plexLibrary.DefaultDestinationId ?? default(int);
-                        downloadTask.DestinationFolder = folderPaths.Value.Find(x => x.Id == downloadTask.DestinationFolderId);
+                        downloadTask.DestinationFolder = folderPaths.Find(x => x.Id == downloadTask.DestinationFolderId);
                     }
                     else
                     {

@@ -7,8 +7,6 @@ using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
 using PlexRipper.WebAPI.Common.FluentResult;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace PlexRipper.WebAPI.Controllers;
 
 [Route("api/[controller]")]
@@ -16,7 +14,6 @@ namespace PlexRipper.WebAPI.Controllers;
 public class FolderPathController : BaseController
 {
     private readonly IMediator _mediator;
-
     private readonly IFileSystem _fileSystem;
 
     public FolderPathController(
@@ -36,7 +33,6 @@ public class FolderPathController : BaseController
     public async Task<IActionResult> Get()
     {
         var result = await _mediator.Send(new GetAllFolderPathsQuery());
-
         return ToActionResult<List<FolderPath>, List<FolderPathDTO>>(result);
     }
 

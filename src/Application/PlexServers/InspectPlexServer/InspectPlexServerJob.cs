@@ -49,7 +49,7 @@ public class InspectPlexServerJob : IJob
                 return;
             }
 
-            var checkResult = await _plexServerConnectionsService.CheckAllConnectionsOfPlexServerAsync(plexServerId);
+            var checkResult = await _mediator.Send(new CheckAllConnectionStatusCommand(plexServerId));
             if (checkResult.IsFailed)
             {
                 checkResult.ToResult().LogError();

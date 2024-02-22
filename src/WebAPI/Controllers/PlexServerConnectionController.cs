@@ -92,8 +92,7 @@ public class PlexServerConnectionController : BaseController
         if (plexServerId <= 0)
             return BadRequestInvalidId(nameof(plexServerId));
 
-        var result = await _plexServerConnectionsService.CheckAllConnectionsOfPlexServerAsync(plexServerId);
-
+        var result = await _mediator.Send(new CheckAllConnectionStatusCommand(plexServerId));
         return ToActionResult<List<PlexServerStatus>, List<PlexServerStatusDTO>>(result);
     }
 

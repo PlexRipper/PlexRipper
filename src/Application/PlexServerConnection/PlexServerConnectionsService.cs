@@ -33,26 +33,7 @@ public class PlexServerConnectionsService : IPlexServerConnectionsService
 
     #region Public
 
-    /// <inheritdoc />
-    public async Task<Result<List<PlexServerStatus>>> CheckAllConnectionsOfPlexServerAsync(int plexServerId)
-    {
-        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId, true));
-        if (plexServerResult.IsFailed)
-            return plexServerResult.ToResult();
 
-        // Create connection check tasks for all connections
-        var connectionTasks = plexServerResult.Value
-            .PlexServerConnections
-            .Select(async plexServerConnection => await CheckPlexServerConnectionStatusAsync(plexServerConnection));
-
-        var tasksResult = await Task.WhenAll(connectionTasks);
-        var x = Result.Merge(tasksResult);
-
-        if (tasksResult.Any(statusResult => statusResult.Value.IsSuccessful))
-            return Result.Ok(x.Value.ToList());
-
-        return Result.Fail($"All connections to plex server with id: {plexServerId} failed to connect").LogError();
-    }
 
     public async Task<Result> CheckAllConnectionsOfPlexServersByAccountIdAsync(int plexAccountId)
     {

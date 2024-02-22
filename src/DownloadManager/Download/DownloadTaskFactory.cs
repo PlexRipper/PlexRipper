@@ -498,9 +498,9 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             return ResultExtensions.IsEmpty(nameof(downloadTasks)).LogWarning();
 
         // Get the download folder
-        var downloadFolder = await _folderPathService.GetDownloadFolderAsync();
-        if (downloadFolder.IsFailed)
-            return downloadFolder.ToResult();
+        var downloadFolder = await _dbContext.FolderPaths.GetDownloadFolderAsync();
+        if (downloadFolder is null)
+            return ResultExtensions.IsNull(nameof(downloadFolder)).LogError();
 
         // Get Plex libraries
         var plexLibraries = await _dbContext.PlexLibraries.Include(x => x.PlexServer).ToListAsync();
@@ -518,8 +518,8 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         {
             foreach (var downloadTask in tasks)
             {
-                downloadTask.DownloadFolderId = downloadFolder.Value.Id;
-                downloadTask.DownloadFolder = downloadFolder.Value;
+                downloadTask.DownloadFolderId = downloadFolder.Id;
+                downloadTask.DownloadFolder = downloadFolder;
                 downloadTask.PlexServer = plexServers.Find(x => x.Id == downloadTask.PlexServerId);
                 downloadTask.ServerMachineIdentifier = downloadTask.PlexServer.MachineIdentifier;
                 var plexLibrary = plexLibraries.Find(x => x.Id == downloadTask.PlexLibraryId);

@@ -34,39 +34,6 @@ public class FolderPathService : IFolderPathService
     }
 
     /// <inheritdoc/>
-    public async Task<Result<FolderPath>> GetDownloadFolderAsync()
-    {
-        return await _mediator.Send(new GetFolderPathByIdQuery(1));
-    }
-
-    /// <inheritdoc/>
-    public async Task<Result<FolderPath>> GetMovieDestinationFolderAsync()
-    {
-        return await _mediator.Send(new GetFolderPathByIdQuery(2));
-    }
-
-    /// <inheritdoc/>
-    public async Task<Result<FolderPath>> GetTvShowDestinationFolderAsync()
-    {
-        return await _mediator.Send(new GetFolderPathByIdQuery(3));
-    }
-
-    public async Task<Result<FolderPath>> GetDestinationFolderByMediaType(PlexMediaType mediaType)
-    {
-        switch (mediaType)
-        {
-            case PlexMediaType.Movie:
-                return await GetMovieDestinationFolderAsync();
-            case PlexMediaType.TvShow:
-            case PlexMediaType.Season:
-            case PlexMediaType.Episode:
-                return await GetTvShowDestinationFolderAsync();
-            default:
-                return await GetDownloadFolderAsync();
-        }
-    }
-
-    /// <inheritdoc/>
     public async Task<Result<Dictionary<PlexMediaType, FolderPath>>> GetDefaultDestinationFolderDictionary()
     {
         var folderPaths = await _mediator.Send(new GetAllFolderPathsQuery());

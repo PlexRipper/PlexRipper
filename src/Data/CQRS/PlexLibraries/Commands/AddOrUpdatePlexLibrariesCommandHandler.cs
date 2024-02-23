@@ -44,8 +44,8 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
         var plexAccountId = command.PlexAccountId;
         var plexServerId = plexLibraries[0].PlexServerId;
 
-        var plexAccount = await _dbContext.PlexAccounts.FindAsync(plexAccountId);
-        var plexServer = await _dbContext.PlexServers.FindAsync(plexServerId);
+        var plexAccount = await _dbContext.PlexAccounts.GetAsync(plexAccountId, cancellationToken);
+        var plexServer = await _dbContext.PlexServers.GetAsync(plexServerId,  cancellationToken);
 
         if (plexAccount is null)
             return ResultExtensions.IsNull(nameof(plexAccount));

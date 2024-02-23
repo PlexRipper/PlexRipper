@@ -49,7 +49,7 @@ public class RefreshPlexServerConnectionsCommandHandler : IRequestHandler<Refres
             return plexAccountResult.ToResult();
 
         var plexAccount = plexAccountResult.Value;
-        var plexServer = await _dbContext.PlexServers.FindAsync(request.PlexServerId, cancellationToken);
+        var plexServer = await _dbContext.PlexServers.GetAsync(request.PlexServerId, cancellationToken);
         if (plexServer is null)
             return ResultExtensions.EntityNotFound(nameof(PlexServer), request.PlexServerId).LogError();
 

@@ -21,7 +21,7 @@ public class AddOrUpdatePlexAccountServersCommand : IAddOrUpdatePlexAccountServe
         List<ServerAccessTokenDTO> serverAccessTokens,
         CancellationToken cancellationToken = default)
     {
-        var plexAccount = await _dbContext.PlexAccounts.FindAsync(plexAccountId, cancellationToken);
+        var plexAccount = await _dbContext.PlexAccounts.GetAsync(plexAccountId, cancellationToken);
         if (plexAccount is null)
             return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountId);
 

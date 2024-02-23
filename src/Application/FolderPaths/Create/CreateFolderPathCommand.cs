@@ -34,7 +34,7 @@ public class CreateFolderPathCommandHandler : IRequestHandler<CreateFolderPathCo
     {
         await _dbContext.FolderPaths.AddAsync(command.FolderPath, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
-        var findResult = await _dbContext.FolderPaths.FindAsync(command.FolderPath.Id);
+        var findResult = await _dbContext.FolderPaths.GetAsync(command.FolderPath.Id, cancellationToken);
         return Result.Ok(findResult);
     }
 }

@@ -200,7 +200,7 @@ public class PlexApiService : IPlexApiService
     /// <inheritdoc />
     public async Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(int plexServerConnectionId, Action<PlexApiClientProgress> action = null)
     {
-        var connection = await _dbContext.PlexServerConnections.FindAsync(plexServerConnectionId);
+        var connection = await _dbContext.PlexServerConnections.GetAsync(plexServerConnectionId);
         var serverStatusResult = await _plexApi.GetServerStatusAsync(connection.Url, action);
         if (serverStatusResult.IsFailed)
             return serverStatusResult;

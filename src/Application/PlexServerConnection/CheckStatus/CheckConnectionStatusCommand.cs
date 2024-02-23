@@ -43,7 +43,7 @@ public class CheckConnectionStatusCommandHandler : IRequestHandler<CheckConnecti
 
     public async Task<Result<PlexServerStatus>> Handle(CheckConnectionStatusCommand command, CancellationToken cancellationToken)
     {
-        _plexServerConnection = await _dbContext.PlexServerConnections.FindAsync(command.PlexServerConnectionId, cancellationToken);
+        _plexServerConnection = await _dbContext.PlexServerConnections.GetAsync(command.PlexServerConnectionId, cancellationToken);
 
         // Request status
         var serverStatusResult = await _plexApiService.GetPlexServerStatusAsync(command.PlexServerConnectionId, Action);

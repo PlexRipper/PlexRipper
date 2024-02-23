@@ -1,5 +1,6 @@
 using Autofac;
 using AutoMapper;
+using Data.Contracts;
 using Logging.Interface;
 using PlexRipper.Data;
 using PlexRipper.WebAPI;
@@ -128,11 +129,13 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest where TUnitTestClass : 
             // Database context can be setup once and then retrieved by its DB name.
             builder.Register((_, _) => GetDbContext())
                 .As<PlexRipperDbContext>()
+                .As<IPlexRipperDbContext>()
                 .InstancePerDependency();
 
             builder.RegisterType<Log>().As<ILog>().SingleInstance();
             builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();
         });
+
         mock.Mock<IHttpClientFactory>()
             .Setup(x => x.CreateClient(It.IsAny<string>()))
             .Returns(new HttpClient());

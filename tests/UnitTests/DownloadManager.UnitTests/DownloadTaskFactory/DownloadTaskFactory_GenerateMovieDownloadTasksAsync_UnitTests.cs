@@ -12,6 +12,7 @@ public class DownloadTaskFactory_GenerateMovieDownloadTasksAsync_UnitTests : Bas
     public async Task ShouldHaveFailedResult_WhenPlexMoviesAreEmpty()
     {
         // Arrange
+        await SetupDatabase();
         var movies = new List<int>();
 
         // Act

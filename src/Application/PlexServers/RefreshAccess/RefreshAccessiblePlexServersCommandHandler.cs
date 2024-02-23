@@ -1,7 +1,6 @@
 using Application.Contracts;
 using AutoMapper;
 using Data.Contracts;
-using Data.Contracts.Extensions;
 using FluentValidation;
 using Logging.Interface;
 using PlexApi.Contracts;
@@ -52,7 +51,7 @@ public class RefreshAccessiblePlexServersCommandHandler : IRequestHandler<Refres
         if (plexAccountId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexAccountId)).LogWarning();
 
-        var plexAccount = await _dbContext.PlexAccounts.FindAsync(plexAccountId, cancellationToken);
+        var plexAccount = await _dbContext.PlexAccounts.GetAsync(plexAccountId, cancellationToken);
         if (plexAccount is null)
             return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountId);
 

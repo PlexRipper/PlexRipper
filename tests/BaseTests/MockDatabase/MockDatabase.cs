@@ -47,8 +47,9 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        _log.Here().Debug("Added {PlexServerCount} {NameOfPlexServer}s to {NameOfPlexRipperDbContext}: {DatabaseName}", config.PlexServerCount,
-            nameof(PlexServer), nameof(PlexRipperDbContext), context.DatabaseName);
+        _log.Here()
+            .Debug("Added {PlexServerCount} {NameOfPlexServer}s to {NameOfPlexRipperDbContext}: {DatabaseName}", config.PlexServerCount,
+                nameof(PlexServer), nameof(PlexRipperDbContext), context.DatabaseName);
         return context;
     }
 
@@ -101,8 +102,9 @@ public static class MockDatabase
         await context.PlexAccounts.AddAsync(plexAccount);
         await context.SaveChangesAsync();
 
-        _log.Here().Debug("Added 1 {NameOfPlexAccount}: {PlexAccountTitle} to PlexRipperDbContext: {DatabaseName}", nameof(PlexAccount), plexAccount.Title,
-            context.DatabaseName);
+        _log.Here()
+            .Debug("Added 1 {NameOfPlexAccount}: {PlexAccountTitle} to PlexRipperDbContext: {DatabaseName}", nameof(PlexAccount), plexAccount.Title,
+                context.DatabaseName);
 
         var plexAccountServer = plexServers.Select(x => new PlexAccountServer
         {
@@ -277,16 +279,18 @@ public static class MockDatabase
     private static async Task<PlexRipperDbContext> AddMovieDownloadTasks(this PlexRipperDbContext context, Action<FakeDataConfig> options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
-
         var downloadTasks = FakeData.GetMovieDownloadTask(_seed, options).Generate(config.MovieDownloadTasksCount);
-        var plexLibrary = context.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.Movie);
-        plexLibrary.ShouldNotBeNull();
 
-        var plexServer = context.PlexServers.IncludeConnections().FirstOrDefault(x => x.Id == plexLibrary.PlexServerId);
-        plexServer.ShouldNotBeNull();
+        if (!config.DisableForeignKeyCheck)
+        {
+            var plexLibrary = context.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.Movie);
+            plexLibrary.ShouldNotBeNull("No PlexLibrary available with type Movie, consider setting config.DisableForeignKeyCheck = true");
 
-        downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
+            var plexServer = context.PlexServers.IncludeConnections().FirstOrDefault(x => x.Id == plexLibrary.PlexServerId);
+            plexServer.ShouldNotBeNull();
 
+            downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
+        }
 
         context.DownloadTasks.AddRange(downloadTasks);
         await context.SaveChangesAsync();
@@ -300,7 +304,9 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        _log.Here().Debug("Added {MovieDownloadTasksCount} Movie {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}", config.MovieDownloadTasksCount, nameof(DownloadTask), context.DatabaseName);
+        _log.Here()
+            .Debug("Added {MovieDownloadTasksCount} Movie {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}", config.MovieDownloadTasksCount,
+                nameof(DownloadTask), context.DatabaseName);
 
         return context;
     }
@@ -310,14 +316,18 @@ public static class MockDatabase
         var config = FakeDataConfig.FromOptions(options);
 
         var downloadTasks = FakeData.GetTvShowDownloadTask(_seed, options).Generate(config.TvShowDownloadTasksCount);
-        var plexLibrary = context.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.TvShow);
-        plexLibrary.ShouldNotBeNull();
-        var plexServer = context.PlexServers.IncludeConnections().FirstOrDefault(x => x.Id == plexLibrary.PlexServerId);
-        plexServer.ShouldNotBeNull();
 
-        downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
+        if (!config.DisableForeignKeyCheck)
+        {
+            var plexLibrary = context.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.TvShow);
+            plexLibrary.ShouldNotBeNull("No PlexLibrary available with type TvShow, consider setting config.DisableForeignKeyCheck = true");
+            var plexServer = context.PlexServers.IncludeConnections().FirstOrDefault(x => x.Id == plexLibrary.PlexServerId);
+            plexServer.ShouldNotBeNull();
 
-        plexServer.PlexServerConnections.ShouldNotBeEmpty();
+            downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
+
+            plexServer.PlexServerConnections.ShouldNotBeEmpty();
+        }
 
         context.DownloadTasks.AddRange(downloadTasks);
         await context.SaveChangesAsync();
@@ -331,7 +341,9 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        _log.Here().Debug("Added {TvShowDownloadTasksCount} TvShow {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}", config.TvShowDownloadTasksCount, nameof(DownloadTask), context.DatabaseName);
+        _log.Here()
+            .Debug("Added {TvShowDownloadTasksCount} TvShow {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}", config.TvShowDownloadTasksCount,
+                nameof(DownloadTask), context.DatabaseName);
 
         return context;
     }
@@ -362,7 +374,8 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        _log.Here().Debug("Added {MovieCount} {NameOfPlexMovie}s to PlexRipperDbContext: {DatabaseName}", config.MovieCount, nameof(PlexMovie), context.DatabaseName);
+        _log.Here()
+            .Debug("Added {MovieCount} {NameOfPlexMovie}s to PlexRipperDbContext: {DatabaseName}", config.MovieCount, nameof(PlexMovie), context.DatabaseName);
 
         return context;
     }
@@ -404,7 +417,9 @@ public static class MockDatabase
 
         await context.SaveChangesAsync();
 
-        _log.Here().Debug("Added {TvShowCount} {NameOfPlexTvShow}s to PlexRipperDbContext: {DatabaseName}", config.TvShowCount, nameof(PlexTvShow), context.DatabaseName);
+        _log.Here()
+            .Debug("Added {TvShowCount} {NameOfPlexTvShow}s to PlexRipperDbContext: {DatabaseName}", config.TvShowCount, nameof(PlexTvShow),
+                context.DatabaseName);
 
         return context;
     }

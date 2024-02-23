@@ -27,8 +27,6 @@ public static class ApiRoutes
 
         public static string PostDownloadMedia => Controller + "/download";
 
-        public static string PostPauseCommand => Controller + "/pause";
-
         public static string PostDeleteCommand => Controller + "/delete";
 
         public static string PostRestartCommand => Controller + "/restart";
@@ -38,6 +36,11 @@ public static class ApiRoutes
         public static string GetStartCommand(int id)
         {
             return Controller + "/start/" + id;
+        }
+
+        public static string GetPauseCommand(int id)
+        {
+            return Controller + "/pause/" + id;
         }
     }
 

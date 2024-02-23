@@ -3,7 +3,7 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Domain;
 
-namespace Data.Contracts.Extensions;
+namespace Data.Contracts;
 
 public static class DbContextExtensions
 {

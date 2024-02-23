@@ -15,6 +15,7 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
     public async Task ShouldHaveFailedResult_WhenPlexTvShowsAreEmpty()
     {
         // Arrange
+        await SetupDatabase();
         var tvShowIds = new List<int>();
 
         // Act

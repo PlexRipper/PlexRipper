@@ -39,8 +39,4 @@
 		<Compile Include="..\Domain\GlobalUsings.cs" />
 		<InternalsVisibleTo Include="DownloadManager.UnitTests" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Common\Interfaces\" />
-	</ItemGroup>
 </Project>

@@ -15,7 +15,6 @@ public class DownloadManagerModule : Module
     {
         var assembly = Assembly.GetExecutingAssembly();
 
-        builder.RegisterType<DownloadCommands>().As<IDownloadCommands>().SingleInstance();
         builder.RegisterType<DownloadQueue>().As<IDownloadQueue>().SingleInstance();
         builder.RegisterType<DownloadTaskValidator>().As<IDownloadTaskValidator>().SingleInstance();
         builder.RegisterType<DownloadTaskFactory>().As<IDownloadTaskFactory>().SingleInstance();

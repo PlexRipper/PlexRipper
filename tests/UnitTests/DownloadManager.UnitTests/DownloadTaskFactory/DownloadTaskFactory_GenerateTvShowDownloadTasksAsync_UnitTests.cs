@@ -13,6 +13,7 @@ public class DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests : Ba
     public async Task ShouldHaveFailedResult_WhenPlexTvShowsAreEmpty()
     {
         // Arrange
+        await SetupDatabase();
         var tvShowIds = new List<int>();
 
         // Act

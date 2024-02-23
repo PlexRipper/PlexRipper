@@ -77,8 +77,6 @@ public partial class BaseContainer : IDisposable
 
     public IFileSystem FileSystem => Resolve<IFileSystem>();
 
-    public IDownloadCommands GetDownloadCommands => Resolve<IDownloadCommands>();
-
     public IDownloadQueue GetDownloadQueue => Resolve<IDownloadQueue>();
 
     public IDownloadTaskFactory GetDownloadTaskFactory => Resolve<IDownloadTaskFactory>();

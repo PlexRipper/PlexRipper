@@ -1,8 +1,9 @@
 using PlexRipper.Data.Common;
+using PlexRipper.WebAPI.Common;
+using PlexRipper.WebAPI.Common.FluentResult;
 using Serilog.Events;
 
 namespace IntegrationTests.DownloadManager.DownloadCommands;
-
 
 public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTests
 {
@@ -37,17 +38,19 @@ public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTe
         var childDownloadTask = downloadTask.Children[0];
 
         // Act
-        var startResult = await Container.GetDownloadCommands.StartDownloadTask(childDownloadTask.Id);
+        var response = await Container.GetAsync(ApiRoutes.Download.GetStartCommand(childDownloadTask.Id));
+        var startResult = await response.Deserialize<ResultDTO>();
         await Task.Delay(2000);
 
-        var pauseResult = await Container.GetDownloadCommands.PauseDownloadTask(childDownloadTask.Id);
+        response = await Container.GetAsync(ApiRoutes.Download.GetPauseCommand(childDownloadTask.Id));
+        var pauseResult = await response.Deserialize<ResultDTO>();
+
         await Container.SchedulerService.AwaitScheduler();
         await Task.Delay(2000);
 
         // Assert
 
         startResult.IsSuccess.ShouldBeTrue();
-
         pauseResult.IsSuccess.ShouldBeTrue();
 
         var downloadTaskDb = DbContext

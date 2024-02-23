@@ -53,7 +53,7 @@ public class InspectAllPlexServersByAccountIdCommandHandler : IRequestHandler<In
                     nameof(InspectAllPlexServersByAccountIdCommand));
         }
 
-        var plexAccount = await _dbContext.PlexAccounts.FindAsync(command.PlexAccountId, cancellationToken);
+        var plexAccount = await _dbContext.PlexAccounts.GetAsync(command.PlexAccountId, cancellationToken);
         var plexServers = await _dbContext.GetAccessiblePlexServers(command.PlexAccountId, cancellationToken);
 
         _log.Here()

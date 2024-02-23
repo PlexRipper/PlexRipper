@@ -1,3 +1,3 @@
 ﻿namespace Application.Contracts;
 
-public interface IPlexMovieService : IPlexMediaService { }
+public interface IPlexMovieService { }

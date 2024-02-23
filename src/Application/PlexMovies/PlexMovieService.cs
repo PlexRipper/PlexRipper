@@ -3,7 +3,7 @@ using PlexApi.Contracts;
 
 namespace PlexRipper.Application;
 
-public class PlexMovieService : PlexMediaService, IPlexMovieService
+public class PlexMovieService : IPlexMovieService
 {
-    public PlexMovieService(IMediator mediator, IPlexApiService plexServiceApi) : base(mediator, plexServiceApi) { }
+    public PlexMovieService(IMediator mediator, IPlexApiService plexServiceApi) { }
 }

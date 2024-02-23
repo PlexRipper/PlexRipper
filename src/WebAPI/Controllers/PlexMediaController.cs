@@ -3,6 +3,7 @@ using AutoMapper;
 using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
+using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.Extensions;
 using PlexRipper.WebAPI.Common.FluentResult;
@@ -18,21 +19,17 @@ public class PlexMediaController : BaseController
 
     private readonly IPlexMovieService _plexMovieService;
 
-    private readonly IPlexMediaService _plexMediaService;
-
     public PlexMediaController(
         ILog log,
         IMediator mediator,
         IPlexRipperDbContext dbContext,
         IMapper mapper,
         INotificationsService notificationsService,
-        IPlexMovieService plexMovieService,
-        IPlexMediaService plexMediaService) : base(log, mapper, notificationsService)
+        IPlexMovieService plexMovieService) : base(log, mapper, notificationsService)
     {
         _mediator = mediator;
         _dbContext = dbContext;
         _plexMovieService = plexMovieService;
-        _plexMediaService = plexMediaService;
     }
 
     /// <summary>
@@ -120,12 +117,17 @@ public class PlexMediaController : BaseController
     [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(FileContentResult))]
     [ProducesResponseType(StatusCodes.Status408RequestTimeout, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetThumb(int plexMediaId, PlexMediaType plexMediaType, int width, int height)
+    public async Task<IActionResult> GetThumb(
+        int plexMediaId,
+        PlexMediaType plexMediaType,
+        int width,
+        int height,
+        CancellationToken cancellationToken = default)
     {
         if (plexMediaId == 0)
             return BadRequestInvalidId();
 
-        var result = await _plexMediaService.GetThumbnailImage(plexMediaId, plexMediaType, width, height);
+        var result = await _mediator.Send(new GetThumbnailImageQuery(plexMediaId, plexMediaType, width, height), cancellationToken);
 
         if (result.IsSuccess)
         {
@@ -143,12 +145,17 @@ public class PlexMediaController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileContentResult))]
     [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(FileContentResult))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetBanner(int plexMediaId, PlexMediaType plexMediaType, int width, int height)
+    public async Task<IActionResult> GetBanner(
+        int plexMediaId,
+        PlexMediaType plexMediaType,
+        int width,
+        int height,
+        CancellationToken cancellationToken = default)
     {
         if (plexMediaId == 0)
             return BadRequestInvalidId();
 
-        var result = await _plexMediaService.GetBannerImage(plexMediaId, plexMediaType, width, height);
+        var result = await _mediator.Send(new GetBannerImageQuery(plexMediaId, plexMediaType, width, height), cancellationToken);
 
         if (result.IsSuccess)
         {

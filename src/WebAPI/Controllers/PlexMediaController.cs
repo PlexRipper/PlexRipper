@@ -17,19 +17,15 @@ public class PlexMediaController : BaseController
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
 
-    private readonly IPlexMovieService _plexMovieService;
-
     public PlexMediaController(
         ILog log,
         IMediator mediator,
         IPlexRipperDbContext dbContext,
         IMapper mapper,
-        INotificationsService notificationsService,
-        IPlexMovieService plexMovieService) : base(log, mapper, notificationsService)
+        INotificationsService notificationsService) : base(log, mapper, notificationsService)
     {
         _mediator = mediator;
         _dbContext = dbContext;
-        _plexMovieService = plexMovieService;
     }
 
     /// <summary>

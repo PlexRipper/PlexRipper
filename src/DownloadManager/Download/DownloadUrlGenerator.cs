@@ -24,7 +24,6 @@ public class DownloadUrlGenerator : IDownloadUrlGenerator
 
     public async Task<Result<string>> GetDownloadUrl(int plexServerId, string fileLocationUrl, CancellationToken cancellationToken = default)
     {
-
         var plexServerConnectionResult = await _dbContext.GetValidPlexServerConnection(plexServerId, cancellationToken);
         if (plexServerConnectionResult.IsFailed)
             return plexServerConnectionResult.ToResult().LogError();
@@ -32,7 +31,7 @@ public class DownloadUrlGenerator : IDownloadUrlGenerator
         var plexServerConnection = plexServerConnectionResult.Value;
         var plexServer = plexServerConnection.PlexServer;
 
-        var tokenResult = await _mediator.Send(new GetPlexServerTokenQuery(plexServerId), cancellationToken);
+        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexServerId, cancellationToken: cancellationToken);
         if (tokenResult.IsFailed)
         {
             _log.Error("Could not find a valid token for server {ServerName}", plexServer.Name);

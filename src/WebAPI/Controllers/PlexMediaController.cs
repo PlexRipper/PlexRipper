@@ -86,7 +86,7 @@ public class PlexMediaController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetLibraryMedia(int id, [FromQuery] int page, [FromQuery] int size)
+    public async Task<IActionResult> GetLibraryMedia(int id, [FromQuery] int page, [FromQuery] int size, CancellationToken cancellationToken = default)
     {
         if (id <= 0)
             return BadRequest(id, nameof(id));
@@ -97,13 +97,12 @@ public class PlexMediaController : BaseController
 
         var plexServerId = result.Value[0].PlexServerId;
 
-        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexServerId);
+        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexServerId, cancellationToken);
         if (plexServerConnection.IsFailed)
             return ToActionResult(plexServerConnection.ToResult());
 
         var connection = plexServerConnection.Value;
-        var plexServerToken = await _mediator.Send(new GetPlexServerTokenQuery(plexServerId));
-
+        var plexServerToken = await _dbContext.GetPlexServerTokenAsync(plexServerId, cancellationToken);
         var dto = _mapper.Map<List<PlexMediaSlimDTO>>(result.Value).SetIndex();
 
         foreach (var mediaSlimDto in dto)

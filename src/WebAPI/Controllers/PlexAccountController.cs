@@ -1,10 +1,10 @@
 ﻿using Application.Contracts;
 using AutoMapper;
-using BackgroundServices.Contracts;
 using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexApi.Contracts;
+using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.FluentResult;
 
@@ -14,20 +14,18 @@ public class PlexAccountController : BaseController
 {
     private readonly IMediator _mediator;
     private readonly IPlexApiService _plexApiService;
-    private readonly IInspectServerScheduler _inspectServerScheduler;
 
     public PlexAccountController(
         ILog log,
         IMediator mediator,
         IMapper mapper,
         IPlexApiService plexApiService,
-        INotificationsService notificationsService,
-        IInspectServerScheduler inspectServerScheduler) : base(log,
+        INotificationsService notificationsService
+    ) : base(log,
         mapper, notificationsService)
     {
         _mediator = mediator;
         _plexApiService = plexApiService;
-        _inspectServerScheduler = inspectServerScheduler;
     }
 
     // GET: api/<PlexAccountController>
@@ -176,7 +174,7 @@ public class PlexAccountController : BaseController
             plexAccountIds.Add(plexAccountId);
 
         foreach (var id in plexAccountIds)
-            await _inspectServerScheduler.QueueRefreshAccessiblePlexServersJob(id);
+            await _mediator.Send(new QueueRefreshPlexServerAccessJob(id));
 
         return ToActionResult(Result.Ok());
     }

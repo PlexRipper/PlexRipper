@@ -19,11 +19,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Common\DTO" />
-		<Folder Include="Common\Enum" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Autofac" Version="6.5.0" />
 		<PackageReference Include="Autofac.Extras.Quartz" Version="8.0.0" />
 	</ItemGroup>

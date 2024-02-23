@@ -1,5 +1,4 @@
-﻿using Application.Contracts;
-using Data.Contracts;
+﻿using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
 
@@ -42,9 +41,9 @@ public class InspectAllPlexServersByAccountIdCommandHandler : IRequestHandler<In
     {
         if (!command.SkipRefreshAccessibleServers)
         {
-            var refreshResult = await _mediator.Send(new RefreshAccessiblePlexServersCommand(command.PlexAccountId), cancellationToken);
+            var refreshResult = await _mediator.Send(new QueueRefreshPlexServerAccessJob(command.PlexAccountId), cancellationToken);
             if (refreshResult.IsFailed)
-                return refreshResult.ToResult();
+                return refreshResult.LogError();
         }
         else
         {

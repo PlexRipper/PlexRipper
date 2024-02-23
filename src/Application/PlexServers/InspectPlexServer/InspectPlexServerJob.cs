@@ -1,5 +1,4 @@
-﻿using BackgroundServices.Contracts;
-using Data.Contracts;
+﻿using Data.Contracts;
 using Logging.Interface;
 using Quartz;
 
@@ -10,20 +9,17 @@ public class InspectPlexServerJob : IJob
     public static string PlexServerIdParameter => "plexServerId";
 
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly ISyncServerScheduler _syncServerScheduler;
     private readonly ILog _log;
     private readonly IMediator _mediator;
 
     public InspectPlexServerJob(
         ILog log,
         IMediator mediator,
-        IPlexRipperDbContext dbContext,
-        ISyncServerScheduler syncServerScheduler)
+        IPlexRipperDbContext dbContext)
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
-        _syncServerScheduler = syncServerScheduler;
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -54,7 +50,7 @@ public class InspectPlexServerJob : IJob
 
             await RefreshAccessibleLibraries(plexServerId);
 
-            await _syncServerScheduler.QueueSyncPlexServerJob(plexServerId, true);
+            await _mediator.Send(new QueueSyncServerJobCommand(plexServerId, true));
 
             _log.Information("Successfully finished the inspection of {NameOfPlexServer} with id {PlexServerId}", nameof(PlexServer), plexServerId);
         }

@@ -41,7 +41,7 @@ public class InspectAllPlexServersByAccountIdCommandHandler : IRequestHandler<In
     {
         if (!command.SkipRefreshAccessibleServers)
         {
-            var refreshResult = await _mediator.Send(new QueueRefreshPlexServerAccessJob(command.PlexAccountId), cancellationToken);
+            var refreshResult = await _mediator.Send(new QueueRefreshPlexServerAccessJobCommand(command.PlexAccountId), cancellationToken);
             if (refreshResult.IsFailed)
                 return refreshResult.LogError();
         }

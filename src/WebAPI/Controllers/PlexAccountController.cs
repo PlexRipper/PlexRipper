@@ -174,7 +174,7 @@ public class PlexAccountController : BaseController
             plexAccountIds.Add(plexAccountId);
 
         foreach (var id in plexAccountIds)
-            await _mediator.Send(new QueueRefreshPlexServerAccessJob(id));
+            await _mediator.Send(new QueueRefreshPlexServerAccessJobCommand(id));
 
         return ToActionResult(Result.Ok());
     }

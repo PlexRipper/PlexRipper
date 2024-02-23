@@ -4,6 +4,7 @@ using DownloadManager.Contracts;
 using FileSystem.Contracts;
 using FluentValidation;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
@@ -46,7 +47,7 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
 
     public async Task<Result> Handle(StopDownloadTaskCommand command, CancellationToken cancellationToken)
     {
-        var downloadTask = await _dbContext.DownloadTasks.GetAsync(command.DownloadTaskId, cancellationToken);
+        var downloadTask = await _dbContext.DownloadTasks.AsTracking().GetAsync(command.DownloadTaskId, cancellationToken);
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTask), command.DownloadTaskId).LogError();
 
@@ -56,13 +57,14 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
         if (stopResult.IsFailed)
             return stopResult;
 
-        downloadTask.DownloadStatus = DownloadStatus.Stopped;
-
         _log.Debug("Deleting partially downloaded files of {DownloadTaskFullTitle}", downloadTask.FullTitle);
 
         var removeTempResult = _directorySystem.DeleteAllFilesFromDirectory(downloadTask.DownloadDirectory);
         if (removeTempResult.IsFailed)
             return removeTempResult;
+
+        downloadTask.DownloadStatus = DownloadStatus.Stopped;
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         await _mediator.Send(new DownloadTaskUpdated(downloadTask), cancellationToken);
 

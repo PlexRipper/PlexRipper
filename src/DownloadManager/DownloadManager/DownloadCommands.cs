@@ -81,9 +81,9 @@ public class DownloadCommands : IDownloadCommands
         if (downloadTaskIds is null || !downloadTaskIds.Any())
             return Result.Fail("Parameter downloadTaskIds was empty or null").LogError();
 
-        foreach (var downloadTaskId in downloadTaskIds)
-            if (await _downloadTaskScheduler.IsDownloading(downloadTaskId))
-                await StopDownloadTasks(downloadTaskId);
+        // foreach (var downloadTaskId in downloadTaskIds)
+        //     if (await _downloadTaskScheduler.IsDownloading(downloadTaskId))
+        //         await StopDownloadTasks(downloadTaskId);
 
         return await _mediator.Send(new DeleteDownloadTasksByIdCommand(downloadTaskIds));
     }

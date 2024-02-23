@@ -48,27 +48,7 @@ public class DownloadCommands : IDownloadCommands
 
     #region Public Methods
 
-    /// <inheritdoc/>
-    public async Task<Result> CreateDownloadTasks(List<DownloadTask> downloadTasks)
-    {
-        if (!downloadTasks.Any())
-            return ResultExtensions.IsEmpty(nameof(downloadTasks)).LogWarning();
 
-        var validateResult = _downloadTaskValidator.ValidateDownloadTasks(downloadTasks);
-        if (validateResult.IsFailed)
-            return validateResult.ToResult().LogDebug();
-
-        // Add to Database
-        var createResult = await _mediator.Send(new CreateDownloadTasksCommand(validateResult.Value));
-        if (createResult.IsFailed)
-            return createResult.ToResult().LogError();
-
-        _log.Debug("Successfully added all {ValidateCount} DownloadTasks", validateResult.Value.Count);
-        var uniquePlexServers = downloadTasks.Select(x => x.PlexServerId).Distinct().ToList();
-
-        await _mediator.Publish(new CheckDownloadQueue(uniquePlexServers));
-        return Result.Ok();
-    }
 
     /// <inheritdoc/>
     public async Task<Result> RestartDownloadTask(int downloadTaskId)
@@ -205,12 +185,6 @@ public class DownloadCommands : IDownloadCommands
     }
 
     #endregion
-
-    /// <inheritdoc/>
-    public Task<Result> ClearCompleted(List<int> downloadTaskIds)
-    {
-        return _mediator.Send(new ClearCompletedDownloadTasksCommand(downloadTaskIds));
-    }
 
     /// <inheritdoc/>
     public async Task<Result<bool>> DeleteDownloadTaskClients(List<int> downloadTaskIds)

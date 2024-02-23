@@ -15,6 +15,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="EFCore.BulkExtensions.SQLite" Version="7.0.0" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.8" />
 	</ItemGroup>
 

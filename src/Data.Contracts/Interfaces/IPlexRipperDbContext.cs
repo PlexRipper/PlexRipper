@@ -1,3 +1,4 @@
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using PlexRipper.Domain;
@@ -42,4 +43,9 @@ public interface IPlexRipperDbContext
     public int SaveChanges(bool acceptAllChangesOnSuccess);
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     public Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken);
+
+    public Task BulkInsertAsync<T>(
+        IList<T> entities,
+        BulkConfig? bulkConfig = null,
+        CancellationToken cancellationToken = default) where T : class;
 }

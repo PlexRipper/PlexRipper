@@ -1,4 +1,5 @@
 using Autofac;
+using DownloadManager.Contracts;
 using PlexRipper.DownloadManager;
 
 namespace DownloadManager.UnitTests;

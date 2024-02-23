@@ -13,13 +13,6 @@ public interface IDownloadCommands
     Task<Result> RestartDownloadTask(int downloadTaskId);
 
     /// <summary>
-    /// Starts a queued task immediately.
-    /// </summary>
-    /// <param name="downloadTaskId">The ids of the <see cref="DownloadTask"/> to start.</param>
-    /// <returns>Is successful.</returns>
-    Task<Result> ResumeDownloadTask(int downloadTaskId);
-
-    /// <summary>
     /// Pause a currently downloading <see cref="DownloadTask"/>.
     /// </summary>
     /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to pause.</param>

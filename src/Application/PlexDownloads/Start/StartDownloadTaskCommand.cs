@@ -32,7 +32,7 @@ public class StartDownloadTaskCommandHandler : IRequestHandler<StartDownloadTask
     {
         var downloadTask = await _dbContext.DownloadTasks.GetAsync(command.DownloadTaskId, cancellationToken);
         if (downloadTask is null)
-            return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();
+            return ResultExtensions.EntityNotFound(nameof(DownloadTask), command.DownloadTaskId).LogWarning();
 
         if (downloadTask.IsDownloadable)
             return await _downloadTaskScheduler.StartDownloadTaskJob(downloadTask.Id, downloadTask.PlexServerId);

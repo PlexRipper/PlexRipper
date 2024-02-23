@@ -74,27 +74,6 @@ public class DownloadCommands : IDownloadCommands
         return await SetDownloadTaskUpdated(downloadTaskId);
     }
 
-    public async Task<Result> ResumeDownloadTask(int downloadTaskId)
-    {
-        if (downloadTaskId <= 0)
-            return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
-
-        var downloadTasksResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true));
-        if (downloadTasksResult.IsFailed)
-            return downloadTasksResult.ToResult();
-
-        if (await _downloadTaskScheduler.IsDownloading(downloadTaskId))
-        {
-            _log.Information("PlexServer {PlexServerName} already has a DownloadTask downloading so another one cannot be started",
-                downloadTasksResult.Value.PlexServer.Name);
-            return Result.Ok();
-        }
-
-        await _mediator.Publish(new CheckDownloadQueue(downloadTasksResult.Value.PlexServerId));
-
-        return Result.Ok();
-    }
-
     #region Stop
 
     /// <inheritdoc/>

@@ -410,7 +410,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
 
             var downloadTask = downloadTaskResult.Value;
 
-            var mediaIdResult = await _mediator.Send(new GetPlexMediaIdByKeyQuery(downloadTask));
+            var mediaIdResult = await _dbContext.GetPlexMediaByMediaKeyAsync(downloadTask.Id, downloadTask.PlexServerId, downloadTask.MediaType);
             if (mediaIdResult.IsFailed)
             {
                 var result = Result.Fail($"Could not recreate the download task for {downloadTask.FullTitle}");

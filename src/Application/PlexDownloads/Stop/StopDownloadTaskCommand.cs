@@ -63,8 +63,10 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
         if (removeTempResult.IsFailed)
             return removeTempResult;
 
-        downloadTask.DownloadStatus = DownloadStatus.Stopped;
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        // Update the download task status
+        await _dbContext.DownloadTasks
+            .Where(x => x.Id == downloadTask.Id)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Stopped), cancellationToken);
 
         await _mediator.Send(new DownloadTaskUpdated(downloadTask), cancellationToken);
 

@@ -48,33 +48,6 @@ public class DownloadCommands : IDownloadCommands
 
     #region Public Methods
 
-    #region Pause
-
-    /// <inheritdoc/>
-    public async Task<Result> PauseDownloadTask(int downloadTaskId)
-    {
-        if (downloadTaskId <= 0)
-            return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
-
-        _log.Information("Pausing DownloadTask with id {DownloadTaskFullTitle} from downloading", downloadTaskId);
-
-        var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskId);
-        if (stopResult.IsFailed)
-            await _notificationsService.SendResult(stopResult);
-
-        await _downloadTaskScheduler.AwaitDownloadTaskJob(downloadTaskId);
-
-        _log.Debug("DownloadTask {DownloadTaskId} has been Paused, meaning no downloaded files have been deleted", downloadTaskId);
-
-        var updateResult = await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(downloadTaskId, DownloadStatus.Paused));
-        if (updateResult.IsFailed)
-            return updateResult.LogError();
-
-        return await SetDownloadTaskUpdated(downloadTaskId);
-    }
-
-    #endregion
-
     /// <inheritdoc/>
     public async Task<Result<bool>> DeleteDownloadTaskClients(List<int> downloadTaskIds)
     {

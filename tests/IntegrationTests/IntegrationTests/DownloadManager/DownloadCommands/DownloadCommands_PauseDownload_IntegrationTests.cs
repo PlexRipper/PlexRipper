@@ -42,7 +42,9 @@ public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTe
         var startResult = await response.Deserialize<ResultDTO>();
         await Task.Delay(2000);
 
-        var pauseResult = await Container.GetDownloadCommands.PauseDownloadTask(childDownloadTask.Id);
+        response = await Container.GetAsync(ApiRoutes.Download.GetPauseCommand(childDownloadTask.Id));
+        var pauseResult = await response.Deserialize<ResultDTO>();
+
         await Container.SchedulerService.AwaitScheduler();
         await Task.Delay(2000);
 

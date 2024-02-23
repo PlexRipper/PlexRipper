@@ -1,4 +1,3 @@
-using Application.Contracts;
 using Data.Contracts;
 using FileSystem.Contracts;
 using FluentValidation;
@@ -6,6 +5,8 @@ using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
+
+public record ValidateFolderPathsCommand(PlexMediaType MediaType = PlexMediaType.None) : IRequest<Result>;
 
 public class ValidateFolderPathsValidator : AbstractValidator<ValidateFolderPathsCommand>
 {

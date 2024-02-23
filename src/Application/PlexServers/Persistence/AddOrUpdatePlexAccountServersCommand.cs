@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public class AddOrUpdatePlexAccountServersCommand : IAddOrUpdatePlexAccountServersCommand
+public class  AddOrUpdatePlexAccountServersCommand : IAddOrUpdatePlexAccountServersCommand
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;

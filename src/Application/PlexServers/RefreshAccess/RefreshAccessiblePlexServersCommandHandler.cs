@@ -1,7 +1,6 @@
 using Application.Contracts;
 using AutoMapper;
 using Data.Contracts;
-using Data.Contracts.Extensions;
 using FluentValidation;
 using Logging.Interface;
 using PlexApi.Contracts;

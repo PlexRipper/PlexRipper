@@ -26,10 +26,6 @@ public interface IDownloadCommands
     /// <returns>Is successful.</returns>
     Task<Result> PauseDownloadTask(int downloadTaskId);
 
-    Task<Result> StartDownloadTask(int downloadTaskId);
-
-    Task<Result> StartDownloadTask(DownloadTask downloadTask);
-
     /// <summary>
     /// Stops and disposes of the PlexDownloadClient executing the <see cref="DownloadTask"/> if it is downloading.
     /// </summary>
@@ -43,5 +39,4 @@ public interface IDownloadCommands
     /// <param name="downloadTaskIds">The list of <see cref="DownloadTask"/> to delete.</param>
     /// <returns><see cref="Result"/> fails on error.</returns>
     Task<Result<bool>> DeleteDownloadTaskClients(List<int> downloadTaskIds);
-
 }

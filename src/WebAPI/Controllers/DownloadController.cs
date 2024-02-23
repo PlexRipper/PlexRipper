@@ -90,7 +90,11 @@ public class DownloadController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     public async Task<IActionResult> StartCommand(int id)
     {
-        return id <= 0 ? BadRequestInvalidId() : ToActionResult(await _downloadCommands.StartDownloadTask(id));
+        if (id <= 0)
+            return BadRequestInvalidId();
+
+        var startResult = await _mediator.Send(new StartDownloadTaskCommand(id));
+        return ToActionResult(startResult);
     }
 
     // GET api/<DownloadController>/pause/{id:int}

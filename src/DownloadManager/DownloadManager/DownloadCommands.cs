@@ -48,8 +48,6 @@ public class DownloadCommands : IDownloadCommands
 
     #region Public Methods
 
-
-
     /// <inheritdoc/>
     public async Task<Result> RestartDownloadTask(int downloadTaskId)
     {
@@ -96,36 +94,6 @@ public class DownloadCommands : IDownloadCommands
 
         return Result.Ok();
     }
-
-    #region Start
-
-    public async Task<Result> StartDownloadTask(DownloadTask downloadTask)
-    {
-        if (downloadTask is null)
-            return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();
-
-        if (downloadTask.IsDownloadable)
-            return await _downloadTaskScheduler.StartDownloadTaskJob(downloadTask.Id, downloadTask.PlexServerId);
-
-        await _mediator.Publish(new CheckDownloadQueue(downloadTask.PlexServerId));
-
-        return Result.Fail($"Failed to start downloadTask {downloadTask.FullTitle}, it's not directly downloadable.");
-    }
-
-    public async Task<Result> StartDownloadTask(int downloadTaskId)
-    {
-        if (downloadTaskId <= 0)
-            return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
-
-        var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId));
-
-        if (downloadTaskResult.IsFailed)
-            return downloadTaskResult.ToResult();
-
-        return await StartDownloadTask(downloadTaskResult.Value);
-    }
-
-    #endregion
 
     #region Stop
 

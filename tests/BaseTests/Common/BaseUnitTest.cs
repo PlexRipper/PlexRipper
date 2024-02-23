@@ -129,11 +129,13 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest where TUnitTestClass : 
             // Database context can be setup once and then retrieved by its DB name.
             builder.Register((_, _) => GetDbContext())
                 .As<PlexRipperDbContext>()
-                .InstancePerDependency();
-
-            builder.Register((_, _) => GetDbContext())
                 .As<IPlexRipperDbContext>()
                 .InstancePerDependency();
+
+            //builder.RegisterMock<IPlexRipperDbContext>().
+            // builder.Register((_, _) => GetDbContext())
+            //     .As<IPlexRipperDbContext>()
+            //     .InstancePerDependency();
 
             builder.RegisterType<Log>().As<ILog>().SingleInstance();
             builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();

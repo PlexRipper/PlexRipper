@@ -25,9 +25,6 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
 
         mock.Mock<IDownloadTaskFactory>().Setup(x => x.GenerateAsync(It.IsAny<List<DownloadMediaDTO>>())).ReturnsAsync(Result.Ok(downloadTasks));
         mock.Mock<IDownloadTaskValidator>().Setup(x => x.ValidateDownloadTasks(It.IsAny<List<DownloadTask>>())).Returns(Result.Ok(downloadTasks));
-        mock.Mock<IPlexRipperDbContext>()
-            .Setup(x => x.BulkInsertAsync(It.IsAny<List<DownloadTask>>(), It.IsAny<BulkConfig>(), It.IsAny<CancellationToken>()))
-            .Returns<List<DownloadTask>, BulkConfig, CancellationToken>((tasks, bulkConfig, token) => DbContext.BulkInsertAsync(tasks, bulkConfig, token));
         mock.Mock<IMediator>().Setup(x => x.Publish(It.IsAny<CheckDownloadQueue>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
@@ -52,9 +49,6 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
 
         mock.Mock<IDownloadTaskFactory>().Setup(x => x.GenerateAsync(It.IsAny<List<DownloadMediaDTO>>())).ReturnsAsync(Result.Ok(downloadTasks));
         mock.Mock<IDownloadTaskValidator>().Setup(x => x.ValidateDownloadTasks(It.IsAny<List<DownloadTask>>())).Returns(Result.Ok(downloadTasks));
-        mock.Mock<IPlexRipperDbContext>()
-            .Setup(x => x.BulkInsertAsync(It.IsAny<List<DownloadTask>>(), It.IsAny<BulkConfig>(), It.IsAny<CancellationToken>()))
-            .Returns<List<DownloadTask>, BulkConfig, CancellationToken>((tasks, bulkConfig, token) => DbContext.BulkInsertAsync(tasks, bulkConfig, token));
         mock.Mock<IMediator>().Setup(x => x.Publish(It.IsAny<CheckDownloadQueue>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
@@ -77,9 +71,6 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
 
         mock.Mock<IDownloadTaskFactory>().Setup(x => x.GenerateAsync(It.IsAny<List<DownloadMediaDTO>>())).ReturnsAsync(Result.Ok(downloadTasks));
         mock.Mock<IDownloadTaskValidator>().Setup(x => x.ValidateDownloadTasks(It.IsAny<List<DownloadTask>>())).Returns(Result.Ok(downloadTasks));
-        mock.Mock<IPlexRipperDbContext>()
-            .Setup(x => x.BulkInsertAsync(It.IsAny<List<DownloadTask>>(), It.IsAny<BulkConfig>(), It.IsAny<CancellationToken>()))
-            .Returns<List<DownloadTask>, BulkConfig, CancellationToken>((tasks, bulkConfig, token) => DbContext.BulkInsertAsync(tasks, bulkConfig, token));
         mock.Mock<IMediator>().Setup(x => x.Publish(It.IsAny<CheckDownloadQueue>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act

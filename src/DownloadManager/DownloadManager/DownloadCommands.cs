@@ -48,32 +48,6 @@ public class DownloadCommands : IDownloadCommands
 
     #region Public Methods
 
-    /// <inheritdoc/>
-    public async Task<Result> RestartDownloadTask(int downloadTaskId)
-    {
-        if (downloadTaskId <= 0)
-            return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
-
-        var stopDownloadTasksResult = await StopDownloadTasks(downloadTaskId);
-        if (stopDownloadTasksResult.IsFailed)
-            return stopDownloadTasksResult.ToResult().LogError();
-
-        var regeneratedDownloadTasks = await _downloadTaskFactory.RegenerateDownloadTask(new List<int>() { downloadTaskId });
-        if (regeneratedDownloadTasks.IsFailed)
-            return regeneratedDownloadTasks.LogError();
-
-        var downloadTasks = regeneratedDownloadTasks.Value;
-        var restartedDownloadTask = downloadTasks.Flatten(x => x.Children).FirstOrDefault(x => x.Id == downloadTaskId);
-        if (restartedDownloadTask == null)
-            return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogError();
-
-        await _mediator.Send(new UpdateDownloadTasksByIdCommand(downloadTasks));
-
-        await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(downloadTaskId, DownloadStatus.Queued));
-
-        return await SetDownloadTaskUpdated(downloadTaskId);
-    }
-
     #region Stop
 
     /// <inheritdoc/>

@@ -6,13 +6,6 @@ namespace DownloadManager.Contracts;
 public interface IDownloadCommands
 {
     /// <summary>
-    /// Restart the <see cref="DownloadTask"/> by deleting the PlexDownloadClient and starting a new one.
-    /// </summary>
-    /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to restart.</param>
-    /// <returns>Is successful.</returns>
-    Task<Result> RestartDownloadTask(int downloadTaskId);
-
-    /// <summary>
     /// Pause a currently downloading <see cref="DownloadTask"/>.
     /// </summary>
     /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to pause.</param>

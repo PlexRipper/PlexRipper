@@ -9,7 +9,7 @@ namespace PlexRipper.Application;
 /// <summary>
 /// Starts a queued task immediately.
 /// </summary>
-/// <param name="downloadTaskId">The ids of the <see cref="DownloadTask"/> to start.</param>
+/// <param name="DownloadTaskId">The ids of the <see cref="DownloadTask"/> to start.</param>
 /// <returns>Is successful.</returns>
 public record ResumeDownloadTaskCommand(int DownloadTaskId) : IRequest<Result>;
 

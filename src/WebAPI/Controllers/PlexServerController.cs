@@ -45,7 +45,7 @@ public class PlexServerController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexServerDTO>>))]
     public async Task<IActionResult> GetAll()
     {
-        var plexServersResult = await _mediator.Send(new GetAllPlexServersQuery(true));
+        var plexServersResult = await _mediator.Send(new GetAllPlexServersQuery());
 
         if (plexServersResult.IsFailed)
             return ToActionResult(plexServersResult.ToResult());

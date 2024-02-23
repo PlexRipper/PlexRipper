@@ -13,13 +13,6 @@ public interface IDownloadCommands
     Task<Result> PauseDownloadTask(int downloadTaskId);
 
     /// <summary>
-    /// Stops and disposes of the PlexDownloadClient executing the <see cref="DownloadTask"/> if it is downloading.
-    /// </summary>
-    /// <param name="downloadTaskId">The id of the <see cref="DownloadTask"/> to stop.</param>
-    /// <returns>If successful a list of the DownloadTasks that were stopped.</returns>
-    Task<Result> StopDownloadTasks(int downloadTaskId);
-
-    /// <summary>
     /// Stops and deletes (active) PlexDownloadClients and removes <see cref="DownloadTask"/> from the database.
     /// </summary>
     /// <param name="downloadTaskIds">The list of <see cref="DownloadTask"/> to delete.</param>

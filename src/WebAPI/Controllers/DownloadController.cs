@@ -16,15 +16,11 @@ namespace PlexRipper.WebAPI.Controllers;
 public class DownloadController : BaseController
 {
     private readonly IMediator _mediator;
-    private readonly IDownloadCommands _downloadCommands;
-    private readonly IDownloadTaskFactory _downloadTaskFactory;
     private readonly IDownloadUrlGenerator _downloadUrlGenerator;
 
     public DownloadController(
         ILog log,
         IMediator mediator,
-        IDownloadCommands downloadCommands,
-        IDownloadTaskFactory downloadTaskFactory,
         IDownloadUrlGenerator downloadUrlGenerator,
         IMapper mapper,
         INotificationsService notificationsService) : base(log,
@@ -32,8 +28,6 @@ public class DownloadController : BaseController
         notificationsService)
     {
         _mediator = mediator;
-        _downloadCommands = downloadCommands;
-        _downloadTaskFactory = downloadTaskFactory;
         _downloadUrlGenerator = downloadUrlGenerator;
     }
 
@@ -149,9 +143,8 @@ public class DownloadController : BaseController
         if (!downloadTaskIds.Any())
             return BadRequest(Result.Fail("No list of download task Id's was given in the request body"));
 
-        var result = await _downloadCommands.DeleteDownloadTaskClients(downloadTaskIds);
-
-        return ToActionResult(result.ToResult());
+        var deleteResult = await _mediator.Send(new DeleteDownloadTaskCommand(downloadTaskIds));
+        return ToActionResult(deleteResult);
     }
 
     // GET: api/(DownloadController)/detail/{id:int}

@@ -10,7 +10,7 @@ public abstract class BaseScheduler
 
     protected readonly ILog _log;
 
-    private readonly IScheduler _scheduler;
+    protected readonly IScheduler _scheduler;
 
     #endregion
 
@@ -30,15 +30,8 @@ public abstract class BaseScheduler
 
     #endregion
 
-    protected JobKey GetJobKey(int id)
-    {
-        return new JobKey($"{DefaultJobKey.Name}_{id}", DefaultJobKey.Group);
-    }
-
-    protected Task<bool> IsJobRunning(JobKey key)
-    {
-        return _scheduler.CheckExists(key);
-    }
+    protected JobKey GetJobKey(int id) => new($"{DefaultJobKey.Name}_{id}", DefaultJobKey.Group);
+    protected Task<bool> IsJobRunning(JobKey key) => _scheduler.CheckExists(key);
 
     protected async Task AwaitJobRunning(JobKey key, CancellationToken cancellationToken = default)
     {
@@ -61,20 +54,14 @@ public abstract class BaseScheduler
             .ToList();
     }
 
-    protected async Task<bool> DeleteJob(JobKey key)
-    {
-        return await _scheduler.DeleteJob(key);
-    }
+    protected async Task<bool> DeleteJob(JobKey key) => await _scheduler.DeleteJob(key);
 
     protected async Task TriggerJob(JobKey key, JobDataMap jobDataMap)
     {
         await _scheduler.TriggerJob(key, jobDataMap);
     }
 
-    protected async Task<bool> StopJob(JobKey key)
-    {
-        return await _scheduler.Interrupt(key);
-    }
+    protected async Task<bool> StopJob(JobKey key) => await _scheduler.Interrupt(key);
 
     protected async Task<Result> ScheduleJob(IJobDetail jobDetail, ITrigger trigger, CancellationToken cancellationToken = default)
     {

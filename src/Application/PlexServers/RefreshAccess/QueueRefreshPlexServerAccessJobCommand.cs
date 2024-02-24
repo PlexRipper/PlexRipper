@@ -9,7 +9,7 @@ namespace PlexRipper.Application;
 /// Queue a job to retrieves the latest accessible <see cref="PlexServer">PlexServers</see> for this <see cref="PlexAccount"/> from the PlexAPI and stores it in the Database.
 /// </summary>
 /// <param name="PlexAccountId">The id of the <see cref="PlexAccount"/> to check.</param>
-public record QueueRefreshPlexServerAccessJobCommand(int PlexAccountId) : IRequest<Result>;
+public record QueueRefreshPlexServerAccessJobCommand(int PlexAccountId) : IRequest<Result<JobKey>>;
 
 public class QueueRefreshPlexServerAccessJobCommandValidator : AbstractValidator<QueueRefreshPlexServerAccessJobCommand>
 {
@@ -19,7 +19,7 @@ public class QueueRefreshPlexServerAccessJobCommandValidator : AbstractValidator
     }
 }
 
-public class QueueRefreshPlexServerAccessJobHandler : IRequestHandler<QueueRefreshPlexServerAccessJobCommand, Result>
+public class QueueRefreshPlexServerAccessJobHandler : IRequestHandler<QueueRefreshPlexServerAccessJobCommand, Result<JobKey>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -32,7 +32,7 @@ public class QueueRefreshPlexServerAccessJobHandler : IRequestHandler<QueueRefre
         _scheduler = scheduler;
     }
 
-    public async Task<Result> Handle(QueueRefreshPlexServerAccessJobCommand command, CancellationToken cancellationToken)
+    public async Task<Result<JobKey>> Handle(QueueRefreshPlexServerAccessJobCommand command, CancellationToken cancellationToken)
     {
         var plexAccountId = command.PlexAccountId;
         var key = RefreshPlexServersAccessJob.GetJobKey(plexAccountId);
@@ -55,6 +55,6 @@ public class QueueRefreshPlexServerAccessJobHandler : IRequestHandler<QueueRefre
 
         await _scheduler.ScheduleJob(job, trigger, cancellationToken);
 
-        return Result.Ok();
+        return Result.Ok(key);
     }
 }

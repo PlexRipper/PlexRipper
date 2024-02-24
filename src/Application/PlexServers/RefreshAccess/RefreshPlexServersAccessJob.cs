@@ -1,5 +1,4 @@
 ﻿using Application.Contracts;
-using AutoMapper;
 using Data.Contracts;
 using Logging.Interface;
 using PlexApi.Contracts;
@@ -12,7 +11,6 @@ public class RefreshPlexServersAccessJob : IJob
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMapper _mapper;
     private readonly IServerSettingsModule _serverSettingsModule;
     private readonly IAddOrUpdatePlexServersCommand _addOrUpdatePlexServersCommand;
     private readonly IAddOrUpdatePlexAccountServersCommand _addOrUpdatePlexAccountServersCommand;
@@ -20,15 +18,11 @@ public class RefreshPlexServersAccessJob : IJob
 
     public static string PlexAccountIdParameter => "plexAccountId";
 
-    public static JobKey GetJobKey(int id)
-    {
-        return new JobKey($"{PlexAccountIdParameter}_{id}", nameof(RefreshPlexServersAccessJob));
-    }
+    public static JobKey GetJobKey(int id) => new($"{PlexAccountIdParameter}_{id}", nameof(RefreshPlexServersAccessJob));
 
     public RefreshPlexServersAccessJob(
         ILog log,
         IPlexRipperDbContext dbContext,
-        IMapper mapper,
         IServerSettingsModule serverSettingsModule,
         IAddOrUpdatePlexServersCommand addOrUpdatePlexServersCommand,
         IAddOrUpdatePlexAccountServersCommand addOrUpdatePlexAccountServersCommand,
@@ -36,7 +30,6 @@ public class RefreshPlexServersAccessJob : IJob
     {
         _log = log;
         _dbContext = dbContext;
-        _mapper = mapper;
         _serverSettingsModule = serverSettingsModule;
         _addOrUpdatePlexServersCommand = addOrUpdatePlexServersCommand;
         _addOrUpdatePlexAccountServersCommand = addOrUpdatePlexAccountServersCommand;
@@ -105,8 +98,6 @@ public class RefreshPlexServersAccessJob : IJob
             }
 
             _log.Information("Successfully refreshed accessible Plex servers for account {PlexAccountDisplayName}", plexAccount.DisplayName);
-
-            await _dbContext.GetAllPlexServersByPlexAccountIdQuery(_mapper, plexAccountId, cancellationToken);
         }
         catch (Exception e)
         {

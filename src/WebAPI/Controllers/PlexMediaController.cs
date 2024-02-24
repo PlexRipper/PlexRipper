@@ -84,27 +84,12 @@ public class PlexMediaController : BaseController
         if (id <= 0)
             return BadRequest(id, nameof(id));
 
-        var result = await _mediator.Send(new GetPlexMediaDataByLibraryIdQuery(id, page, size));
-        if (result.IsFailed || !result.Value.Any())
+        var result = await _mediator.Send(new GetPlexMediaDataByLibraryIdQuery(id, page, size), cancellationToken);
+        if (result.IsFailed)
             return ToActionResult(result.ToResult());
 
-        var plexServerId = result.Value[0].PlexServerId;
-
-        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexServerId, cancellationToken);
-        if (plexServerConnection.IsFailed)
-            return ToActionResult(plexServerConnection.ToResult());
-
-        var connection = plexServerConnection.Value;
-        var plexServerToken = await _dbContext.GetPlexServerTokenAsync(plexServerId, cancellationToken);
-        var dto = _mapper.Map<List<PlexMediaSlimDTO>>(result.Value).SetIndex();
-
-        foreach (var mediaSlimDto in dto)
-        {
-            mediaSlimDto.ThumbUrl = connection.GetThumbUrl(mediaSlimDto.ThumbUrl);
-            mediaSlimDto.ThumbUrl += $"&X-Plex-Token={plexServerToken.Value}";
-        }
-
-        return Ok(Result.Ok(dto));
+        var dtos = _mapper.Map<List<PlexMediaSlimDTO>>(result.Value).SetIndex();
+        return Ok(Result.Ok(dtos));
     }
 
     // GET api/<PlexMedia>/5

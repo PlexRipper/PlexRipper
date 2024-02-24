@@ -4,9 +4,10 @@ using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.PlexMedia;
+namespace PlexRipper.Application;
+
+public record GetPlexMediaDataByLibraryIdQuery(int LibraryId, int Page = 0, int PageSize = 0) : IRequest<Result<List<PlexMediaSlim>>>;
 
 public class GetPlexMediaDataByLibraryIdQueryValidator : AbstractValidator<GetPlexMediaDataByLibraryIdQuery>
 {
@@ -16,18 +17,22 @@ public class GetPlexMediaDataByLibraryIdQueryValidator : AbstractValidator<GetPl
     }
 }
 
-public class GetPlexMediaDataByLibraryIdQueryHandler : BaseHandler, IRequestHandler<GetPlexMediaDataByLibraryIdQuery, Result<List<PlexMediaSlim>>>
+public class GetPlexMediaDataByLibraryIdQueryHandler : IRequestHandler<GetPlexMediaDataByLibraryIdQuery, Result<List<PlexMediaSlim>>>
 {
+    private readonly ILog _log;
     private readonly IMapper _mapper;
+    private readonly IPlexRipperDbContext _dbContext;
 
-    public GetPlexMediaDataByLibraryIdQueryHandler(ILog log, IMapper mapper, PlexRipperDbContext dbContext) : base(log, dbContext)
+    public GetPlexMediaDataByLibraryIdQueryHandler(ILog log, IMapper mapper, IPlexRipperDbContext dbContext)
     {
+        _log = log;
         _mapper = mapper;
+        _dbContext = dbContext;
     }
 
     public async Task<Result<List<PlexMediaSlim>>> Handle(GetPlexMediaDataByLibraryIdQuery request, CancellationToken cancellationToken)
     {
-        var plexLibrary = await _dbContext.PlexLibraries.AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.LibraryId, cancellationToken);
+        var plexLibrary = await _dbContext.PlexLibraries.AsNoTracking().Include(x => x.PlexServer).GetAsync(request.LibraryId, cancellationToken);
 
         // When 0, just take everything
         var take = request.PageSize <= 0 ? -1 : request.PageSize;
@@ -84,9 +89,30 @@ public class GetPlexMediaDataByLibraryIdQueryHandler : BaseHandler, IRequestHand
                 return Result.Fail($"Type {plexLibrary.Type} is not supported for retrieving the PlexMedia data by library id");
         }
 
-        if (entities.Any())
-            return Result.Ok(entities);
+        if (!entities.Any())
+        {
+            return ResultExtensions.IsEmptyQueryResult(new List<PlexMediaSlim>(), nameof(GetPlexMediaDataByLibraryIdQuery), nameof(PlexLibrary),
+                request.LibraryId);
+        }
 
-        return ResultExtensions.IsEmptyQueryResult(new List<PlexMediaSlim>(), nameof(GetPlexMediaDataByLibraryIdQuery), nameof(PlexLibraries), request.LibraryId);
+        var plexServerId = plexLibrary.PlexServerId;
+
+        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexServerId, cancellationToken);
+        if (plexServerConnection.IsFailed)
+            return plexServerConnection.ToResult();
+
+        var connection = plexServerConnection.Value;
+        var plexServerToken = await _dbContext.GetPlexServerTokenAsync(plexServerId, cancellationToken);
+
+        foreach (var mediaSlim in entities)
+            mediaSlim.FullThumbUrl = GetThumbnailUrl(connection.Url, mediaSlim.ThumbUrl, plexServerToken.Value);
+
+        return Result.Ok(entities);
+    }
+
+    private string GetThumbnailUrl(string connectionUrl, string thumbPath, string plexServerToken)
+    {
+        var uri = new Uri(connectionUrl + thumbPath);
+        return $"{uri.Scheme}://{uri.Host}:{uri.Port}/photo/:/transcode?url={uri.AbsolutePath}&X-Plex-Token={plexServerToken}";
     }
 }

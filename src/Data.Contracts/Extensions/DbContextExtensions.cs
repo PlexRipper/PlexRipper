@@ -24,4 +24,10 @@ public static class DbContextExtensions
             .ProjectTo<PlexServer>(mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
     }
+
+    public static async Task<string> GetPlexServerNameById(this IPlexRipperDbContext dbContext, int plexServerId, CancellationToken cancellationToken = default)
+    {
+        var plexServer = await dbContext.PlexServers.GetAsync(plexServerId, cancellationToken);
+        return plexServer?.Name ?? "Server Name Not Found";
+    }
 }

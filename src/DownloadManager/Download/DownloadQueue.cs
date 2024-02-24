@@ -15,6 +15,7 @@ public class DownloadQueue : IDownloadQueue
 
     private readonly ILog _log;
     private readonly IMediator _mediator;
+    private readonly IPlexRipperDbContext _dbContext;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     private readonly Channel<int> _plexServersToCheckChannel = Channel.CreateUnbounded<int>();
@@ -27,10 +28,11 @@ public class DownloadQueue : IDownloadQueue
 
     #region Constructor
 
-    public DownloadQueue(ILog log, IMediator mediator, IDownloadTaskScheduler downloadTaskScheduler)
+    public DownloadQueue(ILog log, IMediator mediator, IPlexRipperDbContext dbContext, IDownloadTaskScheduler downloadTaskScheduler)
     {
         _log = log;
         _mediator = mediator;
+        _dbContext = dbContext;
         _downloadTaskScheduler = downloadTaskScheduler;
     }
 
@@ -76,16 +78,14 @@ public class DownloadQueue : IDownloadQueue
         if (downloadTasksResult.IsFailed)
             return downloadTasksResult.LogError();
 
-        var plexServerName = await _mediator.Send(new GetPlexServerNameByIdQuery(plexServerId), _token);
-        if (plexServerName.IsFailed)
-            return plexServerName.LogError();
+        var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, _token);
 
-        _log.Here().Debug("Checking {NameOfPlexServer}: {PlexServerName} for the next download to start", nameof(PlexServer), plexServerName.Value);
+        _log.Here().Debug("Checking {NameOfPlexServer}: {PlexServerName} for the next download to start", nameof(PlexServer), plexServerName);
 
         var nextDownloadTaskResult = GetNextDownloadTask(downloadTasksResult.Value);
         if (nextDownloadTaskResult.IsFailed)
         {
-            _log.Information("There are no available downloadTasks remaining for PlexServer with Id: {PlexServerName}", plexServerName.Value);
+            _log.Information("There are no available downloadTasks remaining for PlexServer with Id: {PlexServerName}", plexServerName);
             return Result.Ok();
         }
 

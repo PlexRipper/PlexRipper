@@ -1,21 +1,26 @@
 ﻿using Data.Contracts;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data;
+namespace PlexRipper.Application;
+
+public record GetAllDownloadTasksQuery : IRequest<Result<List<DownloadTask>>> { }
 
 public class GetAllDownloadTasksQueryValidator : AbstractValidator<GetAllDownloadTasksQuery> { }
 
-public class GetAllDownloadTasksQueryHandler : BaseHandler, IRequestHandler<GetAllDownloadTasksQuery, Result<List<DownloadTask>>>
+public class GetAllDownloadTasksQueryHandler : IRequestHandler<GetAllDownloadTasksQuery, Result<List<DownloadTask>>>
 {
-    public GetAllDownloadTasksQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    private readonly IPlexRipperDbContext _dbContext;
+
+    public GetAllDownloadTasksQueryHandler(IPlexRipperDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
 
     public async Task<Result<List<DownloadTask>>> Handle(GetAllDownloadTasksQuery request, CancellationToken cancellationToken)
     {
         // AsTracking due to Children->Parent cycle error, therefore all navigation properties are added as well
-        var downloadList = await DownloadTasksQueryable
+        var downloadList = await _dbContext.DownloadTasks
             .AsTracking()
             .IncludeDownloadTasks()
             .Where(x => x.ParentId == null) // Where clause is to retrieve only the root DownloadTasks

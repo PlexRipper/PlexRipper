@@ -1,9 +1,6 @@
-using Data.Contracts;
-using PlexRipper.Data;
+namespace PlexRipper.Application.UnitTests;
 
-namespace Data.UnitTests;
-
-public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest
+public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest<GetAllDownloadTasksQueryHandler>
 {
     public GetAllDownloadTasksQueryHandler_UnitTests(ITestOutputHelper output) : base(output) { }
 
@@ -12,12 +9,11 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest
     {
         // Arrange
         await SetupDatabase();
-        var handle = new GetAllDownloadTasksQueryHandler(_log, GetDbContext());
-
         var request = new GetAllDownloadTasksQuery();
+        var handler = mock.Create<GetAllDownloadTasksQueryHandler>();
 
         // Act
-        var result = await handle.Handle(request, CancellationToken.None);
+        var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -37,11 +33,11 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest
             config.MovieDownloadTasksCount = 10;
         });
 
-        var handle = new GetAllDownloadTasksQueryHandler(_log, GetDbContext());
         var request = new GetAllDownloadTasksQuery();
+        var handler = mock.Create<GetAllDownloadTasksQueryHandler>();
 
         // Act
-        var result = await handle.Handle(request, CancellationToken.None);
+        var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -71,11 +67,11 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest
             config.TvShowEpisodeDownloadTasksCount = 5;
         });
 
-        var handle = new GetAllDownloadTasksQueryHandler(_log, GetDbContext());
         var request = new GetAllDownloadTasksQuery();
+        var handler = mock.Create<GetAllDownloadTasksQueryHandler>();
 
         // Act
-        var result = await handle.Handle(request, CancellationToken.None);
+        var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

@@ -1,5 +1,4 @@
 using AutoMapper;
-using Data.Contracts;
 
 namespace PlexRipper.Data;
 
@@ -36,10 +35,5 @@ public class DataMappingProfile : Profile
             .ForMember(x => x.Type, opt => opt.MapFrom(x => PlexMediaType.Episode))
             .ForMember(x => x.SortTitle, opt => opt.MapFrom(x => x.SortTitle ?? x.Title))
             .ForMember(x => x.Qualities, opt => opt.Ignore());
-
-        CreateProjection<PlexTvShowEpisode, TvShowEpisodeKeyDTO>()
-            .ForMember(x => x.TvShowId, opt => opt.MapFrom(x => x.TvShowId))
-            .ForMember(x => x.SeasonId, opt => opt.MapFrom(x => x.TvShowSeasonId))
-            .ForMember(x => x.EpisodeId, opt => opt.MapFrom(x => x.Id));
     }
 }

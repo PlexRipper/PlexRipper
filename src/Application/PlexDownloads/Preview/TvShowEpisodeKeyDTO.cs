@@ -1,4 +1,4 @@
-namespace Data.Contracts;
+namespace PlexRipper.Application;
 
 public class TvShowEpisodeKeyDTO
 {

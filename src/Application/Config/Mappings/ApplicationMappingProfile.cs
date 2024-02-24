@@ -43,5 +43,10 @@ public class ApplicationMappingProfile : Profile
             .ForMember(x => x.SeasonId, opt => opt.MapFrom(x => x.TvShowSeasonId))
             .ForMember(x => x.Size, opt => opt.MapFrom(x => x.MediaSize))
             .ForMember(x => x.MediaType, opt => opt.MapFrom(x => PlexMediaType.Episode));
+
+        CreateProjection<PlexTvShowEpisode, TvShowEpisodeKeyDTO>()
+            .ForMember(x => x.TvShowId, opt => opt.MapFrom(x => x.TvShowId))
+            .ForMember(x => x.SeasonId, opt => opt.MapFrom(x => x.TvShowSeasonId))
+            .ForMember(x => x.EpisodeId, opt => opt.MapFrom(x => x.Id));
     }
 }

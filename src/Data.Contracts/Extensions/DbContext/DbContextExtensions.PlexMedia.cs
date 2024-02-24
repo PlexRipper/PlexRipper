@@ -4,7 +4,7 @@ using PlexRipper.Domain;
 
 namespace Data.Contracts;
 
-public static class PlexMediaExtensions
+public static partial class DbContextExtensions
 {
     public static async Task<Result<int>> GetPlexMediaByMediaKeyAsync(
         this IPlexRipperDbContext dbContext,

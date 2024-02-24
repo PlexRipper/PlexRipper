@@ -6,9 +6,9 @@ using PlexRipper.Domain;
 
 namespace Data.Contracts;
 
-public static class PlexServerConnectionExtensions
+public static partial class DbContextExtensions
 {
-    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(PlexServerConnectionExtensions));
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(DbContextExtensions));
 
     public static async Task<Result<PlexServerConnection>> GetValidPlexServerConnection(
         this IPlexRipperDbContext dbContext,

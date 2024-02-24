@@ -4,7 +4,7 @@ using PlexRipper.Domain;
 
 namespace Data.Contracts;
 
-public static class PlexAccountExtensions
+public static partial class DbContextExtensions
 {
     public static async Task<Result<List<PlexAccount>>> GetPlexAccountsWithAccessAsync(
         this IPlexRipperDbContext dbContext,

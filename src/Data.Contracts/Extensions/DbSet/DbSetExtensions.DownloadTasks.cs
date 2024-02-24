@@ -1,35 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using PlexRipper.Domain;
 
-namespace PlexRipper.Data.Common;
+namespace Data.Contracts;
 
-public static partial class PlexRipperDbContextExtensions
+public static partial class DbSetExtensions
 {
-    #region PlexDownloadTasks
+    public static IQueryable<DownloadTask> IncludeDownloadTasks(this IQueryable<DownloadTask> downloadTasks) => downloadTasks.IncludeDownloadTasks("");
 
-    public static IQueryable<PlexServer> IncludeDownloadTasks(this IQueryable<PlexServer> plexServer)
-    {
-        return plexServer
-            .Include(x => x.PlexLibraries)
-            .IncludeDownloadTasks("PlexLibraries.DownloadTasks.")
-            .AsQueryable();
-    }
-
-    public static IQueryable<PlexServer> IncludeConnections(this IQueryable<PlexServer> plexServer)
-    {
-        return plexServer
-            .Include(x => x.PlexServerConnections)
-            .AsQueryable();
-    }
-
-    public static IQueryable<DownloadTask> IncludeDownloadTasks(this IQueryable<DownloadTask> downloadTasks)
-    {
-        return downloadTasks.IncludeDownloadTasks("");
-    }
-
-    public static IQueryable<DownloadTask> IncludeByRoot(this IQueryable<DownloadTask> downloadTasks)
-    {
-        return downloadTasks.Where(x => x.ParentId == null);
-    }
+    public static IQueryable<DownloadTask> IncludeByRoot(this IQueryable<DownloadTask> downloadTasks) => downloadTasks.Where(x => x.ParentId == null);
 
     private static IQueryable<T> IncludeDownloadTasks<T>(this IQueryable<T> query, string prefix = "") where T : class
     {
@@ -56,6 +34,4 @@ public static partial class PlexRipperDbContextExtensions
 
         return query;
     }
-
-    #endregion
 }

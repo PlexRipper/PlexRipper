@@ -1,3 +1,4 @@
+using Data.Contracts;
 using EFCore.BulkExtensions;
 using Logging.Interface;
 

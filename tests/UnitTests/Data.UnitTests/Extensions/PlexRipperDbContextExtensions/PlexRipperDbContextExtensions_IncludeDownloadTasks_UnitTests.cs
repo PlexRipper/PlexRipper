@@ -1,4 +1,5 @@
-﻿using PlexRipper.Data.Common;
+﻿using Data.Contracts;
+using PlexRipper.Data.Common;
 
 namespace Data.UnitTests.Extensions;
 

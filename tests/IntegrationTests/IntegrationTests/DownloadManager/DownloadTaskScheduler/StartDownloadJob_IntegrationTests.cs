@@ -1,3 +1,4 @@
+using Data.Contracts;
 using PlexRipper.Data.Common;
 
 namespace IntegrationTests.DownloadManager.DownloadTaskScheduler;

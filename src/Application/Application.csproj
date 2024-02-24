@@ -14,6 +14,8 @@
 		<PackageReference Include="Autofac.Extras.Quartz" Version="8.0.0" />
 		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="9.3.0" />
 		<PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
+		<PackageReference Include="RestSharp" Version="108.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>

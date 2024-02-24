@@ -1,6 +1,5 @@
 ﻿using Application.Contracts;
 using AutoMapper;
-using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
@@ -61,7 +60,7 @@ public class PlexServerController : BaseController
         if (id <= 0)
             return BadRequestInvalidId();
 
-        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(id, true));
+        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(id));
         return ToActionResult<PlexServer, PlexServerDTO>(plexServerResult);
     }
 

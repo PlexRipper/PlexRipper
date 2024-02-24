@@ -5,8 +5,6 @@ namespace Application.Contracts;
 
 public interface INotificationsService
 {
-    Task<Result<int>> CreateNotification(Notification notification);
-
     Task<Result<List<Notification>>> GetNotifications();
 
     Task<Result> HideNotification(int id);

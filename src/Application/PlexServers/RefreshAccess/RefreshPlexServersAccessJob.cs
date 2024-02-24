@@ -7,6 +7,7 @@ using Settings.Contracts;
 
 namespace PlexRipper.Application;
 
+// TODO This job might be unneeded due to the length of time it takes to refresh the Plex servers
 public class RefreshPlexServersAccessJob : IJob
 {
     private readonly ILog _log;

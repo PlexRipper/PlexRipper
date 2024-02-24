@@ -2,7 +2,7 @@
 using Data.Contracts;
 using WebAPI.Contracts;
 
-namespace PlexRipper.Application.Notifications;
+namespace PlexRipper.Application;
 
 public class NotificationsService : INotificationsService
 {
@@ -16,35 +16,13 @@ public class NotificationsService : INotificationsService
         _signalRService = signalRService;
     }
 
-    /// <summary>
-    /// Creates a <see cref="Notification"/> in the database.
-    /// </summary>
-    /// <param name="notification">The Notification to create.</param>
-    /// <returns>The Id of the created <see cref="Notification"/>.</returns>
-    public async Task<Result<int>> CreateNotification(Notification notification)
-    {
-        return await _mediator.Send(new CreateNotificationCommand(notification));
-    }
+    public async Task<Result<List<Notification>>> GetNotifications() => await _mediator.Send(new GetNotificationsQuery());
 
-    public async Task<Result<List<Notification>>> GetNotifications()
-    {
-        return await _mediator.Send(new GetNotificationsQuery());
-    }
+    public async Task<Result> HideNotification(int id) => await _mediator.Send(new HideNotificationCommand(id));
 
-    public async Task<Result> HideNotification(int id)
-    {
-        return await _mediator.Send(new HideNotificationCommand(id));
-    }
+    public Task<Result> SendResult<T>(Result<T> result) => SendResult(result.ToResult());
 
-    public Task<Result> SendResult<T>(Result<T> result)
-    {
-        return SendResult(result.ToResult());
-    }
-
-    public async Task<Result<int>> ClearAllNotifications()
-    {
-        return await _mediator.Send(new ClearAllNotificationsCommand());
-    }
+    public async Task<Result<int>> ClearAllNotifications() => await _mediator.Send(new ClearAllNotificationsCommand());
 
     public async Task<Result> SendResult(Result result)
     {

@@ -48,4 +48,9 @@ public interface IPlexRipperDbContext
         IList<T> entities,
         BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default) where T : class;
+
+    public Task BulkUpdateAsync<T>(
+        IList<T> entities,
+        BulkConfig? bulkConfig = null,
+        CancellationToken cancellationToken = default) where T : class;
 }

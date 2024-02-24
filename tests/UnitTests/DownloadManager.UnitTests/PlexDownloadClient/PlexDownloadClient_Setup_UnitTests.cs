@@ -54,12 +54,6 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
         var downloadTaskUpdates = new List<DownloadTask>();
 
         // Capture the update in the callback
-        mock.SetupMediator(It.IsAny<UpdateDownloadTasksByIdCommand>)
-            .Callback<IRequest<Result>, CancellationToken>((request, _) =>
-            {
-                downloadTaskUpdates.AddRange(((UpdateDownloadTasksByIdCommand)request).DownloadTasks);
-            })
-            .ReturnOk();
         mock.SetupMediator(It.IsAny<DownloadTaskUpdated>).Returns(Task.CompletedTask);
         mock.Mock<IDownloadManagerSettingsModule>().SetupGet(x => x.DownloadSegments).Returns(4);
         mock.Mock<IServerSettingsModule>().Setup(x => x.GetDownloadSpeedLimit(It.IsAny<string>())).Returns(4000);
@@ -85,8 +79,6 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
         await _sut.DownloadProcessTask;
 
         // Assert
-        mock.VerifyMediator(It.IsAny<UpdateDownloadTasksByIdCommand>, Times.Once);
-
         downloadTaskUpdates.Count.ShouldBe(1);
         downloadTaskUpdates.ShouldAllBe(x => x.DownloadStatus == DownloadStatus.Error);
     }

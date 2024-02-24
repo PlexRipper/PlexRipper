@@ -100,6 +100,11 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
         await DbContextBulkExtensions.BulkInsertAsync(this, entities, bulkConfig, cancellationToken: cancellationToken);
     }
 
+    public async Task BulkUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig = null, CancellationToken cancellationToken = default) where T : class
+    {
+        await DbContextBulkExtensions.BulkUpdateAsync(this, entities, bulkConfig, cancellationToken: cancellationToken);
+    }
+
     private static readonly NaturalSortComparer NaturalComparer = new(StringComparison.InvariantCultureIgnoreCase);
 
     #endregion Properties

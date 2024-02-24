@@ -55,7 +55,7 @@ public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownload
         if (restartedDownloadTask == null)
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogError();
 
-        await _mediator.Send(new UpdateDownloadTasksByIdCommand(downloadTasks), cancellationToken);
+        await _dbContext.UpdateDownloadTasksAsync(downloadTasks, cancellationToken);
 
         await _dbContext.DownloadTasks.SetDownloadStatusAsync(downloadTaskId, DownloadStatus.Queued, cancellationToken);
 

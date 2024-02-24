@@ -42,4 +42,26 @@ public static partial class DbContextExtensions
         dbContext.DownloadWorkerTasks.RemoveRange(downloadWorkerTasks);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public static async Task UpdateDownloadTasksAsync(
+        this IPlexRipperDbContext dbContext,
+        List<DownloadTask> downloadTasks,
+        CancellationToken cancellationToken = default)
+    {
+        var flattenedDownloadTasks = downloadTasks.Flatten(x => x.Children).ToList();
+
+        await dbContext.BulkUpdateAsync(flattenedDownloadTasks, cancellationToken: cancellationToken);
+        await dbContext.BulkUpdateAsync(flattenedDownloadTasks.SelectMany(x => x.DownloadWorkerTasks).ToList(),
+            cancellationToken: cancellationToken);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public static async Task UpdateDownloadTasksAsync(
+        this IPlexRipperDbContext dbContext,
+        DownloadTask downloadTask,
+        CancellationToken cancellationToken = default)
+    {
+        await dbContext.UpdateDownloadTasksAsync(new List<DownloadTask>() { downloadTask }, cancellationToken);
+    }
 }

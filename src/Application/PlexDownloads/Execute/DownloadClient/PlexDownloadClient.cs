@@ -214,7 +214,7 @@ public class PlexDownloadClient : IAsyncDisposable
         var statusIsChanged = DownloadStatus != newDownloadStatus;
         DownloadStatus = newDownloadStatus;
 
-        await _mediator.Send(new UpdateDownloadTasksByIdCommand(DownloadTask), cancellationToken);
+        await _dbContext.UpdateDownloadTasksAsync(DownloadTask, cancellationToken);
 
         await _mediator.Send(new DownloadTaskUpdated(DownloadTask), cancellationToken);
 

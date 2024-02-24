@@ -4,11 +4,11 @@ using Data.Contracts;
 using DownloadManager.Contracts;
 using DownloadManager.Contracts.Extensions;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data;
+namespace PlexRipper.Application;
+
+public record GetDownloadPreviewQuery(List<DownloadMediaDTO> DownloadMedias) : IRequest<Result<List<DownloadPreview>>>;
 
 public class GetDownloadPreviewQueryValidator : AbstractValidator<GetDownloadPreviewQuery>
 {
@@ -18,13 +18,15 @@ public class GetDownloadPreviewQueryValidator : AbstractValidator<GetDownloadPre
     }
 }
 
-public class GetDownloadPreviewQueryHandler : BaseHandler, IRequestHandler<GetDownloadPreviewQuery, Result<List<DownloadPreview>>>
+public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreviewQuery, Result<List<DownloadPreview>>>
 {
     private readonly IMapper _mapper;
+    private readonly IPlexRipperDbContext _dbContext;
 
-    public GetDownloadPreviewQueryHandler(ILog log, IMapper mapper, PlexRipperDbContext dbContext) : base(log, dbContext)
+    public GetDownloadPreviewQueryHandler(IMapper mapper, IPlexRipperDbContext dbContext)
     {
         _mapper = mapper;
+        _dbContext = dbContext;
     }
 
     public async Task<Result<List<DownloadPreview>>> Handle(GetDownloadPreviewQuery request, CancellationToken cancellationToken)

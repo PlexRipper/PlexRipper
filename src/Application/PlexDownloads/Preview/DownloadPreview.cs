@@ -1,6 +1,4 @@
-using PlexRipper.Domain;
-
-namespace DownloadManager.Contracts;
+namespace PlexRipper.Application;
 
 public class DownloadPreview
 {

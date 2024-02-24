@@ -1,7 +1,6 @@
-using Data.Contracts;
 using DownloadManager.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data;
+using PlexRipper.Application;
 
 namespace Data.UnitTests;
 
@@ -82,6 +81,7 @@ public class GetDownloadPreviewQueryHandler_UnitTests : BaseUnitTest<GetDownload
 
         value.ShouldNotBeEmpty();
         value.Count.ShouldBe(4);
+
         // Full tvShows should have been added
         for (var i = 0; i < 1; i++)
         {

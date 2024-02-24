@@ -3,7 +3,7 @@ using PlexRipper.Domain;
 
 namespace Data.Contracts;
 
-public static class DbSetExtensions
+public static partial class DbSetExtensions
 {
     public static async Task<TEntity?> GetAsync<TEntity>(this DbSet<TEntity> dbSet, int id, CancellationToken cancellationToken = default)
         where TEntity : BaseEntity

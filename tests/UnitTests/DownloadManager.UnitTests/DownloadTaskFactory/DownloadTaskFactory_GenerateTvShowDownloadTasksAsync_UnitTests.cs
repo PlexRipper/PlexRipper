@@ -1,4 +1,5 @@
 ﻿using Data.Contracts;
+using PlexRipper.Application;
 using PlexRipper.BaseTests.Asserts;
 using PlexRipper.Data.Common;
 using PlexRipper.DownloadManager;
@@ -40,7 +41,7 @@ public class DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests : Ba
         var tvShows = DbContext.PlexTvShows.IncludeEpisodes().IncludePlexServer().IncludePlexLibrary().ToList();
 
         mock.SetupMediator(It.IsAny<GetPlexTvShowByIdWithEpisodesQuery>)
-            .ReturnsAsync((GetPlexTvShowByIdWithEpisodesQuery query, CancellationToken _) => Result.Ok(tvShows.Find(x => x.Id == query.Id)));
+            .ReturnsAsync((GetPlexTvShowByIdWithEpisodesQuery query, CancellationToken _) => Result.Ok(tvShows.Find(x => x.Id == query.PlexTvShowId)));
         mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>)
             .ReturnsAsync(Result.Fail(""));
 

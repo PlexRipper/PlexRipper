@@ -88,24 +88,9 @@ public static partial class PlexRipperDbContextExtensions
             .Include(IncludePath.PlexTvShow_Seasons_Episodes_PlexLibrary);
     }
 
-    public static IQueryable<PlexTvShow> IncludePlexLibrary(this IQueryable<PlexTvShow> plexTvShows)
-    {
-        return plexTvShows.Include(x => x.PlexLibrary);
-    }
-
-    public static IQueryable<PlexTvShow> IncludePlexServer(this IQueryable<PlexTvShow> plexTvShows)
-    {
-        return plexTvShows.Include(x => x.PlexServer).ThenInclude(x => x.PlexServerConnections);
-    }
-
     public static IQueryable<PlexTvShow> IncludeSeasons(this IQueryable<PlexTvShow> plexTvShows)
     {
         return plexTvShows.Include(IncludePath.PlexTvShow_Seasons);
-    }
-
-    public static IQueryable<PlexTvShow> IncludeEpisodes(this IQueryable<PlexTvShow> plexTvShows)
-    {
-        return plexTvShows.Include(IncludePath.PlexTvShow_Seasons_Episodes);
     }
 
     #endregion

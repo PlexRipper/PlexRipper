@@ -37,7 +37,7 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdated>
             rootDownloadTaskId = downloadTask.RootDownloadTaskId;
         }
 
-        await _mediator.Send(new ReCalculateRootDownloadTaskCommand(rootDownloadTaskId), cancellationToken);
+        await ReCalculateRootDownloadTask(rootDownloadTaskId, cancellationToken);
 
         // Send away the new result
         var downloadTasks = await _dbContext.PlexServers
@@ -46,5 +46,36 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdated>
             .GetAsync(plexServerId, cancellationToken);
         var rootDownloadTasks = downloadTasks.DownloadTasks.Where(x => x.ParentId == null).ToList();
         await _signalRService.SendDownloadProgressUpdateAsync(plexServerId, rootDownloadTasks, cancellationToken);
+    }
+
+    /// <summary>
+    ///  Recalculates the root download task based on the children's progress status.
+    /// </summary>
+    /// <param name="rootDownloadTaskId"> The root download task id. </param>
+    /// <param name="cancellationToken"> The cancellation token. </param>
+    public async Task ReCalculateRootDownloadTask(int rootDownloadTaskId, CancellationToken cancellationToken)
+    {
+        var downloadTaskDb = await _dbContext.DownloadTasks
+            .IncludeDownloadTasks()
+            .GetAsync(rootDownloadTaskId, cancellationToken);
+
+        void SetDownloadStatus(DownloadTask downloadTask)
+        {
+            if (downloadTask.Children is null || !downloadTask.Children.Any())
+                return;
+
+            foreach (var downloadTaskChild in downloadTask.Children)
+                SetDownloadStatus(downloadTaskChild);
+
+            downloadTask.DownloadStatus = DownloadTaskActions.Aggregate(downloadTask.Children.Select(x => x.DownloadStatus).ToList());
+            downloadTask.DownloadSpeed = downloadTask.Children.Sum(x => x.DownloadSpeed);
+            downloadTask.FileTransferSpeed = downloadTask.Children.Sum(x => x.FileTransferSpeed);
+            downloadTask.Percentage = (int)downloadTask.Children.Average(x => x.Percentage);
+            downloadTask.DataReceived = downloadTask.Children.Sum(x => x.DataReceived);
+        }
+
+        SetDownloadStatus(downloadTaskDb);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

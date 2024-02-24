@@ -3,6 +3,7 @@ using WebAPI.Contracts;
 
 namespace PlexRipper.Application;
 
+// TODO Delete this
 public class NotificationsService : INotificationsService
 {
     private readonly ISignalRService _signalRService;
@@ -21,11 +22,11 @@ public class NotificationsService : INotificationsService
             foreach (var error in result.Errors)
             {
                 var notification = new Notification(error);
-                var notificationId = await CreateNotification(notification);
-                if (notificationId.IsFailed)
-                    return notificationId.ToResult();
+                // var notificationId = await CreateNotification(notification);
+                // if (notificationId.IsFailed)
+                //     return notificationId.ToResult();
 
-                notification.Id = notificationId.Value;
+               // notification.Id = notificationId.Value;
                 await _signalRService.SendNotificationAsync(notification);
             }
         }

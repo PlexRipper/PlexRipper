@@ -61,7 +61,6 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
             })
             .ReturnOk();
         mock.SetupMediator(It.IsAny<DownloadTaskUpdated>).Returns(Task.CompletedTask);
-        mock.SetupMediator(It.IsAny<AddDownloadWorkerLogsCommand>).ReturnOk();
         mock.Mock<IDownloadManagerSettingsModule>().SetupGet(x => x.DownloadSegments).Returns(4);
         mock.Mock<IServerSettingsModule>().Setup(x => x.GetDownloadSpeedLimit(It.IsAny<string>())).Returns(4000);
         mock.Mock<IServerSettingsModule>()

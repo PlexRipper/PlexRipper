@@ -18,6 +18,7 @@ public class PlexDownloadClient : IAsyncDisposable
 
     private readonly ILog _log;
     private readonly IMediator _mediator;
+    private readonly IPlexRipperDbContext _dbContext;
     private readonly Func<DownloadWorkerTask, DownloadWorker> _downloadWorkerFactory;
 
     private readonly List<DownloadWorker> _downloadWorkers = new();
@@ -44,11 +45,13 @@ public class PlexDownloadClient : IAsyncDisposable
     public PlexDownloadClient(
         ILog log,
         IMediator mediator,
+        IPlexRipperDbContext dbContext,
         Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory,
         IServerSettingsModule serverSettings)
     {
         _log = log;
         _mediator = mediator;
+        _dbContext = dbContext;
         _downloadWorkerFactory = downloadWorkerFactory;
         _serverSettings = serverSettings;
     }
@@ -263,7 +266,8 @@ public class PlexDownloadClient : IAsyncDisposable
             .Select(x => x.DownloadWorkerLog)
             .Merge()
             .Buffer(TimeSpan.FromSeconds(1))
-            .SelectMany(async logs => await _mediator.Send(new AddDownloadWorkerLogsCommand(logs), cancellationToken).ToObservable())
+            .SelectMany(async logs => await InsertDownloadWorkerLogs(logs, cancellationToken)
+                .ToObservable())
             .Subscribe(
                 _ => { },
                 ex =>
@@ -272,6 +276,12 @@ public class PlexDownloadClient : IAsyncDisposable
                     _downloadWorkerLogCompletionSource.SetException(ex);
                 },
                 () => _downloadWorkerLogCompletionSource.SetResult(true));
+    }
+
+    private async Task InsertDownloadWorkerLogs(IList<DownloadWorkerLog> logs, CancellationToken cancellationToken = default)
+    {
+        await _dbContext.DownloadWorkerTasksLogs.AddRangeAsync(logs, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     #endregion

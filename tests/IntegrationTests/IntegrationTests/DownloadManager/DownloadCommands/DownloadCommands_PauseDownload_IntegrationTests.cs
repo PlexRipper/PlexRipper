@@ -1,3 +1,4 @@
+using Data.Contracts;
 using PlexRipper.Data.Common;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.FluentResult;

@@ -120,7 +120,13 @@ public class PlexMediaSlim : BaseEntity
     public string ThumbUrl => HasThumb ? $"{MetaDataUrl}/thumb/{MetaDataKey}" : string.Empty;
 
     [NotMapped]
+    public string FullThumbUrl { get; set; }
+
+    [NotMapped]
     public string BannerUrl => HasBanner ? $"{MetaDataUrl}/banner/{MetaDataKey}" : string.Empty;
+
+    [NotMapped]
+    public string FullBannerUrl { get; set; }
 
     [NotMapped]
     public string ArtUrl => HasArt ? $"{MetaDataUrl}/art/{MetaDataKey}" : string.Empty;

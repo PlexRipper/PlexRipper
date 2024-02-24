@@ -1,3 +1,4 @@
+using Data.Contracts;
 using DownloadManager.Contracts;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Data.Common;

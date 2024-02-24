@@ -1,5 +1,6 @@
 ﻿using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
+using PlexRipper.Application;
 using PlexRipper.BaseTests.Asserts;
 using PlexRipper.Data.Common;
 using PlexRipper.DownloadManager;
@@ -43,7 +44,7 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
 
         mock.AddMapper();
         mock.SetupMediator(It.IsAny<GetPlexTvShowByIdQuery>)
-            .ReturnsAsync((GetPlexTvShowByIdQuery query, CancellationToken _) => Result.Ok(tvShows.Find(x => x.Id == query.Id)));
+            .ReturnsAsync((GetPlexTvShowByIdQuery query, CancellationToken _) => Result.Ok(tvShows.Find(x => x.Id == query.PlexTvShowId)));
 
         mock.SetupMediator(It.IsAny<GetPlexTvShowEpisodeByIdQuery>)
             .ReturnsAsync((GetPlexTvShowEpisodeByIdQuery query, CancellationToken _) =>

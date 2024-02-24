@@ -1,7 +1,7 @@
-﻿using Application.Contracts;
-using Data.Contracts;
+﻿using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
+using Quartz;
 
 namespace PlexRipper.Application;
 
@@ -27,24 +27,30 @@ public class InspectAllPlexServersByAccountIdCommandHandler : IRequestHandler<In
     private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
+    private readonly IScheduler _scheduler;
 
     public InspectAllPlexServersByAccountIdCommandHandler(
         ILog log,
         IMediator mediator,
-        IPlexRipperDbContext dbContext)
+        IPlexRipperDbContext dbContext,
+        IScheduler scheduler)
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
+        _scheduler = scheduler;
     }
 
     public async Task<Result> Handle(InspectAllPlexServersByAccountIdCommand command, CancellationToken cancellationToken)
     {
         if (!command.SkipRefreshAccessibleServers)
         {
-            var refreshResult = await _mediator.Send(new RefreshAccessiblePlexServersCommand(command.PlexAccountId), cancellationToken);
+            var refreshResult = await _mediator.Send(new QueueRefreshPlexServerAccessJobCommand(command.PlexAccountId), cancellationToken);
             if (refreshResult.IsFailed)
-                return refreshResult.ToResult();
+                return refreshResult.LogError();
+
+            // Await job running
+            await _scheduler.AwaitJobRunning(refreshResult.Value, cancellationToken);
         }
         else
         {

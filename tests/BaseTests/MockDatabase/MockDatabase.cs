@@ -1,5 +1,6 @@
 #region
 
+using Data.Contracts;
 using Logging.Interface;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;

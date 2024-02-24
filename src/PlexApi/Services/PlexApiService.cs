@@ -42,7 +42,7 @@ public class PlexApiService : IPlexApiService
 
     public async Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(PlexLibrary plexLibrary, CancellationToken cancellationToken = default)
     {
-        var tokenResult = await GetPlexServerTokenAsync(plexLibrary.PlexServerId);
+        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexLibrary.PlexServerId, cancellationToken);
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
@@ -50,7 +50,7 @@ public class PlexApiService : IPlexApiService
         var authToken = tokenResult.Value;
         var plexLibraryKey = plexLibrary.Key;
 
-        var plexServerConnection =  await _dbContext.GetValidPlexServerConnection(plexLibrary.PlexServerId, cancellationToken);;
+        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexLibrary.PlexServerId, cancellationToken);
         if (plexServerConnection.IsFailed)
             return plexServerConnection.ToResult();
 
@@ -82,13 +82,14 @@ public class PlexApiService : IPlexApiService
     }
 
     /// <inheritdoc />
-    public async Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(PlexLibrary plexLibrary)
+    public async Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(PlexLibrary plexLibrary, CancellationToken cancellationToken = default)
     {
-        var tokenResult = await GetPlexServerTokenAsync(plexLibrary.PlexServerId);
+        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexLibrary.PlexServerId, cancellationToken);
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var plexServerConnection =  await _dbContext.GetValidPlexServerConnection(plexLibrary.PlexServerId);;
+        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexLibrary.PlexServerId, cancellationToken);
+        ;
         if (plexServerConnection.IsFailed)
             return plexServerConnection.ToResult();
 
@@ -102,13 +103,17 @@ public class PlexApiService : IPlexApiService
     }
 
     /// <inheritdoc />
-    public async Task<Result<PlexLibrary>> GetLibraryMediaAsync(PlexLibrary plexLibrary, PlexAccount plexAccount = null)
+    public async Task<Result<PlexLibrary>> GetLibraryMediaAsync(
+        PlexLibrary plexLibrary,
+        PlexAccount plexAccount = null,
+        CancellationToken cancellationToken = default)
     {
-        var tokenResult = await GetPlexServerTokenAsync(plexLibrary.PlexServerId, plexAccount?.Id ?? 0);
+        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexLibrary.PlexServerId, plexAccount?.Id ?? 0, cancellationToken);
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var plexServerConnection =  await _dbContext.GetValidPlexServerConnection(plexLibrary.PlexServerId);;
+        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexLibrary.PlexServerId, cancellationToken);
+        ;
         if (plexServerConnection.IsFailed)
             return plexServerConnection.ToResult();
 
@@ -148,13 +153,13 @@ public class PlexApiService : IPlexApiService
     }
 
     /// <inheritdoc />
-    public async Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(int plexServerId, int plexAccountId = 0)
+    public async Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(int plexServerId, int plexAccountId = 0, CancellationToken cancellationToken = default)
     {
-        var tokenResult = await GetPlexServerTokenAsync(plexServerId, plexAccountId);
+        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexServerId, plexAccountId, cancellationToken);
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var plexServerConnection =  await _dbContext.GetValidPlexServerConnection(plexServerId);
+        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexServerId, cancellationToken);
         if (plexServerConnection.IsFailed)
             return plexServerConnection.ToResult();
 
@@ -251,13 +256,18 @@ public class PlexApiService : IPlexApiService
     #region Images
 
     /// <inheritdoc />
-    public async Task<Result<byte[]>> GetPlexMediaImageAsync(PlexServer plexServer, string thumbPath, int width = 0, int height = 0)
+    public async Task<Result<byte[]>> GetPlexMediaImageAsync(
+        PlexServer plexServer,
+        string thumbPath,
+        int width = 0,
+        int height = 0,
+        CancellationToken cancellationToken = default)
     {
-        var tokenResult = await GetPlexServerTokenAsync(plexServer.Id);
+        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexServer.Id, cancellationToken);
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var plexServerConnection =  await _dbContext.GetValidPlexServerConnection(plexServer.Id);
+        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexServer.Id, cancellationToken);
         if (plexServerConnection.IsFailed)
             return plexServerConnection.ToResult();
 
@@ -331,32 +341,6 @@ public class PlexApiService : IPlexApiService
         }
 
         return Result.Fail($"PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!").LogError();
-    }
-
-    /// <summary>
-    ///     Returns the authentication token needed to authenticate communication with the <see cref="PlexServer" />.
-    ///     Note: If no plexAccountId is specified then it will search for a valid <see cref="PlexAccount" /> automatically.
-    /// </summary>
-    /// <param name="plexServerId">The id of the <see cref="PlexServer" /> to retrieve a token for.</param>
-    /// <param name="plexAccountId">The id of the <see cref="PlexAccount" /> to authenticate with.</param>
-    /// <returns>The authentication token.</returns>
-    private Task<Result<string>> GetPlexServerTokenAsync(int plexServerId, int plexAccountId = 0)
-    {
-        // TODO if there is no token then it should refresh a token
-        return _mediator.Send(new GetPlexServerTokenQuery(plexServerId, plexAccountId));
-    }
-
-    public async Task<Result<string>> GetPlexServerTokenWithUrl(int plexServerId, string serverUrl, int plexAccountId = 0)
-    {
-        if (string.IsNullOrEmpty(serverUrl))
-            return ResultExtensions.IsNull(nameof(serverUrl)).LogWarning();
-
-        var token = await GetPlexServerTokenAsync(plexServerId, plexAccountId);
-        if (token.IsFailed)
-            return token.ToResult();
-
-        // TODO verify that download=1 is not needed.
-        return Result.Ok($"{serverUrl}?X-Plex-Token={token.Value}");
     }
 
     #endregion

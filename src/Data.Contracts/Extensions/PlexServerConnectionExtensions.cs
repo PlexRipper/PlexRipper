@@ -60,4 +60,63 @@ public static class PlexServerConnectionExtensions
             plexServerConnections.First());
         return Result.Ok(plexServerConnections.First());
     }
+
+    /// <summary>
+    /// Returns an authentication token needed to authenticate communication with the <see cref="PlexServer" />.
+    /// Note: An PlexAccountId of 0 can be passed to automatically retrieve first a non-main account token, and if not found a main account server token.
+    /// </summary>
+    /// <param name="plexServerId">The id of the <see cref="PlexServer" /> to retrieve a token for.</param>
+    /// <param name="cancellationToken"> The cancellation token to cancel operation.</param>
+    public static Task<Result<string>> GetPlexServerTokenAsync(
+        this IPlexRipperDbContext dbContext,
+        int plexServerId,
+        CancellationToken cancellationToken = default)
+    {
+        return GetPlexServerTokenAsync(dbContext, plexServerId, 0, cancellationToken);
+    }
+
+    /// <summary>
+    ///  Returns the authentication token needed to authenticate communication with the <see cref="PlexServer" />.
+    /// Note: An PlexAccountId of 0 can be passed to automatically retrieve first a non-main account token, and if not found a main account server token.
+    /// </summary>
+    /// <param name="dbContext">The <see cref="IPlexRipperDbContext" /> to retrieve the token from.</param>
+    /// <param name="plexServerId">The id of the <see cref="PlexServer" /> to retrieve a token for.</param>
+    /// <param name="plexAccountId"> An PlexAccountId of 0 can be passed to automatically retrieve first a non-main account token, and if not found a main account server token.</param>
+    /// <param name="cancellationToken"> The cancellation token to cancel operation.</param>
+    public static async Task<Result<string>> GetPlexServerTokenAsync(
+        this IPlexRipperDbContext dbContext,
+        int plexServerId,
+        int plexAccountId = 0,
+        CancellationToken cancellationToken = default)
+    {
+        // Attempt to find a non-main account token first
+        if (plexAccountId == 0)
+        {
+            var nonMainServerToken = await dbContext.PlexAccountServers.Include(x => x.PlexAccount)
+                .FirstOrDefaultAsync(x => x.PlexServerId == plexServerId && !x.PlexAccount.IsMain, cancellationToken);
+
+            // Check if we have access with a non-main account
+            if (nonMainServerToken != null)
+                return Result.Ok(nonMainServerToken.AuthToken);
+
+            // Fallback to a main-account access
+            var mainServerToken = await dbContext.PlexAccountServers.Include(x => x.PlexAccount)
+                .FirstOrDefaultAsync(x => x.PlexServerId == plexServerId, cancellationToken);
+
+            if (mainServerToken != null)
+                return Result.Ok(mainServerToken.AuthToken);
+
+            return Result.Fail($"Could not find any authenticationToken for PlexServer with id: {plexServerId}").LogError();
+        }
+
+        var authToken = await dbContext.PlexAccountServers.FirstOrDefaultAsync(
+            x => x.PlexAccountId == plexAccountId && x.PlexServerId == plexServerId, cancellationToken);
+
+        if (authToken != null)
+            return Result.Ok(authToken.AuthToken);
+
+        return Result.Fail(new Error(
+                $"Could not find an authenticationToken for PlexAccount with id: {plexAccountId} and PlexServer with id: {plexServerId}"))
+            .LogError();
+    }
 }

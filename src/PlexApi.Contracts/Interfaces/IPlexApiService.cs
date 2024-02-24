@@ -27,8 +27,9 @@ public interface IPlexApiService
     /// </summary>
     /// <param name="plexServerId"></param>
     /// <param name="plexAccountId"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns>List of accessible <see cref="PlexLibrary"/>.</returns>
-    Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(int plexServerId, int plexAccountId = 0);
+    Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(int plexServerId, int plexAccountId = 0, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Fetches the PlexLibrary container with either Movies, Series, Music or Photos media depending on the type.
@@ -36,8 +37,9 @@ public interface IPlexApiService
     /// </summary>
     /// <param name="plexLibrary"></param>
     /// <param name="plexAccount">The optional PlexAccount used to connect to the <see cref="PlexServer"/> </param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Result<PlexLibrary>> GetLibraryMediaAsync(PlexLibrary plexLibrary, PlexAccount plexAccount = null);
+    Task<Result<PlexLibrary>> GetLibraryMediaAsync(PlexLibrary plexLibrary, PlexAccount plexAccount = null, CancellationToken cancellationToken = default);
 
     Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string metaDataUrl);
 
@@ -60,8 +62,14 @@ public interface IPlexApiService
     /// <param name="thumbPath">The relative media url</param>
     /// <param name="width">The optional width of the image.</param>
     /// <param name="height">The optional height of the image.</param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Result<byte[]>> GetPlexMediaImageAsync(PlexServer plexServer, string thumbPath, int width = 0, int height = 0);
+    Task<Result<byte[]>> GetPlexMediaImageAsync(
+        PlexServer plexServer,
+        string thumbPath,
+        int width = 0,
+        int height = 0,
+        CancellationToken cancellationToken = default);
 
     #endregion
 
@@ -69,8 +77,9 @@ public interface IPlexApiService
     /// Fetches all the <see cref="PlexTvShowSeason">Plex TvShow Seasons</see> from the Plex api with the given <see cref="PlexLibrary"/>.
     /// </summary>
     /// <param name="plexLibrary"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(PlexLibrary plexLibrary);
+    Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(PlexLibrary plexLibrary, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Fetches all the <see cref="PlexTvShowEpisode">Plex TvShow Episodes</see> from the Plex api with the given <see cref="PlexLibrary"/>.
@@ -83,6 +92,4 @@ public interface IPlexApiService
     Task<Result<AuthPin>> Get2FAPin(string clientId);
 
     Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId);
-
-    Task<Result<string>> GetPlexServerTokenWithUrl(int plexServerId, string serverUrl, int plexAccountId = 0);
 }

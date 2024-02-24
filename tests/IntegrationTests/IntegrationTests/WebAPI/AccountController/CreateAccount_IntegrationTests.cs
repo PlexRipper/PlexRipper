@@ -1,10 +1,9 @@
+using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
 
 namespace IntegrationTests.WebAPI.AccountController;
-
 
 public class CreateAccount_IntegrationTests : BaseIntegrationTests
 {
@@ -22,7 +21,7 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         var plexAccount = FakeData.GetPlexAccount(4347564).Generate();
         var plexAccountDTO = Container.Mapper.Map<PlexAccountDTO>(plexAccount);
 
-       // Act
+        // Act
         var response = await Container.ApiClient.PostAsJsonAsync(ApiRoutes.Account.PostCreateAccount, plexAccountDTO);
         var resultDTO = await response.Deserialize<PlexAccountDTO>();
         resultDTO.IsSuccess.ShouldBeTrue();

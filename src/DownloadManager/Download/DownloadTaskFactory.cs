@@ -155,14 +155,12 @@ public class DownloadTaskFactory : IDownloadTaskFactory
 
         foreach (var tvShowId in plexTvShowIds)
         {
-            var tvShowResult = await _mediator.Send(new GetPlexTvShowByIdWithEpisodesQuery(tvShowId, true, true));
-            if (tvShowResult.IsFailed)
+            var tvShow = await _dbContext.PlexTvShows.IncludeEpisodes().IncludePlexServer().IncludePlexLibrary().GetAsync(tvShowId);
+            if (tvShow is null)
             {
-                tvShowResult.LogError();
+                ResultExtensions.EntityNotFound(nameof(PlexTvShow), tvShowId).LogError();
                 continue;
             }
-
-            var tvShow = tvShowResult.Value;
 
             // Check if the tvShowDownloadTask has already been created
             var tvShowDownloadTaskIndex = downloadTasks.FindIndex(x => x.Equals(tvShow));
@@ -410,7 +408,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
 
             var downloadTask = downloadTaskResult.Value;
 
-            var mediaIdResult = await _mediator.Send(new GetPlexMediaIdByKeyQuery(downloadTask));
+            var mediaIdResult = await _dbContext.GetPlexMediaByMediaKeyAsync(downloadTask.Id, downloadTask.PlexServerId, downloadTask.MediaType);
             if (mediaIdResult.IsFailed)
             {
                 var result = Result.Fail($"Could not recreate the download task for {downloadTask.FullTitle}");

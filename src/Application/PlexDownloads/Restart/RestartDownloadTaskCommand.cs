@@ -57,7 +57,7 @@ public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownload
 
         await _mediator.Send(new UpdateDownloadTasksByIdCommand(downloadTasks), cancellationToken);
 
-        await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(downloadTaskId, DownloadStatus.Queued), cancellationToken);
+        await _dbContext.DownloadTasks.SetDownloadStatusAsync(downloadTaskId, DownloadStatus.Queued, cancellationToken);
 
         // Notify of a DownloadTask being updated
         var downloadTask = await _dbContext.DownloadTasks.GetAsync(downloadTaskId, cancellationToken);

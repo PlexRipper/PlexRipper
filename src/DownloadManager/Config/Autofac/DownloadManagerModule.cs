@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Autofac;
 using Autofac.Extras.Quartz;
-using BackgroundServices.Contracts;
 using DownloadManager.Contracts;
 using MediatR.Extensions.Autofac.DependencyInjection;
 using MediatR.Extensions.Autofac.DependencyInjection.Builder;
@@ -19,11 +18,7 @@ public class DownloadManagerModule : Module
         builder.RegisterType<DownloadTaskValidator>().As<IDownloadTaskValidator>().SingleInstance();
         builder.RegisterType<DownloadTaskFactory>().As<IDownloadTaskFactory>().SingleInstance();
         builder.RegisterType<DownloadFileStream>().As<IDownloadFileStream>().SingleInstance();
-        builder.RegisterType<DownloadTaskScheduler>().As<IDownloadTaskScheduler>().SingleInstance();
         builder.RegisterType<DownloadUrlGenerator>().As<IDownloadUrlGenerator>().SingleInstance();
-
-        builder.RegisterType<DownloadWorker>().InstancePerDependency();
-        builder.RegisterType<PlexDownloadClient>().InstancePerDependency();
 
         builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
 

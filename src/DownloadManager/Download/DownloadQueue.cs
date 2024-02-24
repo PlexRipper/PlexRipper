@@ -1,5 +1,5 @@
 ﻿using System.Threading.Channels;
-using BackgroundServices.Contracts;
+using Application.Contracts;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using Logging.Interface;

@@ -2,9 +2,10 @@
 using Data.Contracts;
 using DownloadManager.Contracts;
 using Logging.Interface;
+using PlexRipper.DownloadManager;
 using Quartz;
 
-namespace PlexRipper.DownloadManager.Jobs;
+namespace PlexRipper.Application;
 
 public class DownloadJob : IJob, IDisposable
 {
@@ -13,10 +14,6 @@ public class DownloadJob : IJob, IDisposable
     private readonly IDownloadTaskFactory _downloadTaskFactory;
     private readonly INotificationsService _notificationsService;
     private readonly PlexDownloadClient _plexDownloadClient;
-
-    #region Fields
-
-    #endregion
 
     #region Constructors
 
@@ -48,10 +45,7 @@ public class DownloadJob : IJob, IDisposable
 
     #region Public
 
-    public static JobKey GetJobKey(int id)
-    {
-        return new JobKey($"{DownloadTaskIdParameter}_{id}", nameof(DownloadJob));
-    }
+    public static JobKey GetJobKey(int id) => new($"{DownloadTaskIdParameter}_{id}", nameof(DownloadJob));
 
     public async Task Execute(IJobExecutionContext context)
     {

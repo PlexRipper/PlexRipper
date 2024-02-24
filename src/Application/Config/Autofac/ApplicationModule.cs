@@ -1,8 +1,10 @@
 ﻿using System.Reflection;
+using Application.Contracts;
 using Autofac;
 using Autofac.Extras.Quartz;
 using MediatR.Extensions.Autofac.DependencyInjection;
 using MediatR.Extensions.Autofac.DependencyInjection.Builder;
+using PlexRipper.DownloadManager;
 using Module = Autofac.Module;
 
 namespace PlexRipper.Application;
@@ -41,6 +43,10 @@ public class ApplicationModule : Module
             .Where(t => t.Name.EndsWith("Repository"))
             .AsImplementedInterfaces()
             .SingleInstance();
+
+        builder.RegisterType<DownloadTaskScheduler>().As<IDownloadTaskScheduler>().SingleInstance();
+        builder.RegisterType<DownloadWorker>().InstancePerDependency();
+        builder.RegisterType<PlexDownloadClient>().InstancePerDependency();
 
         // register all Quartz jobs
         builder.RegisterModule(new QuartzAutofacJobsModule(assembly));

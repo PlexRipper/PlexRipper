@@ -1,7 +1,6 @@
-using BackgroundServices.Contracts;
+using Application.Contracts;
 using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 using PlexRipper.DownloadManager;
 
 namespace DownloadManager.UnitTests;

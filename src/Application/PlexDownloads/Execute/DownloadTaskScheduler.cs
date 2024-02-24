@@ -1,9 +1,9 @@
+using Application.Contracts;
 using BackgroundServices.Contracts;
 using Logging.Interface;
-using PlexRipper.DownloadManager.Jobs;
 using Quartz;
 
-namespace PlexRipper.DownloadManager;
+namespace PlexRipper.Application;
 
 public class DownloadTaskScheduler : BaseScheduler, IDownloadTaskScheduler
 {

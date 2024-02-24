@@ -4,10 +4,11 @@ using System.Reactive.Subjects;
 using ByteSizeLib;
 using DownloadManager.Contracts;
 using Logging.Interface;
+using PlexRipper.DownloadManager;
 using RestSharp;
 using Timer = System.Timers.Timer;
 
-namespace PlexRipper.DownloadManager;
+namespace PlexRipper.Application;
 
 /// <summary>
 /// The <see cref="DownloadWorker"/> is part of the multi-threaded <see cref="PlexDownloadClient"/>

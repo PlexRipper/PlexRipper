@@ -1,5 +1,6 @@
 ﻿#region
 
+using Application.Contracts;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
@@ -11,7 +12,6 @@ using Logging.Interface;
 using Microsoft.AspNetCore.Mvc.Testing;
 using PlexApi.Contracts;
 using PlexRipper.Data;
-using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI;
 using Settings.Contracts;
 using WebAPI.Contracts;
@@ -120,10 +120,7 @@ public partial class BaseContainer : IDisposable
 
     #region Public Methods
 
-    private T Resolve<T>()
-    {
-        return _lifeTimeScope.Resolve<T>();
-    }
+    private T Resolve<T>() => _lifeTimeScope.Resolve<T>();
 
     #endregion
 

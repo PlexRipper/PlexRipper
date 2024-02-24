@@ -3,6 +3,7 @@ using System.Reactive.Threading.Tasks;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using Logging.Interface;
+using PlexRipper.Application;
 using Settings.Contracts;
 
 namespace PlexRipper.DownloadManager;

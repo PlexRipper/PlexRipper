@@ -29,4 +29,13 @@
 		<ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Reference Include="Microsoft.Extensions.Http">
+	    <HintPath>..\..\..\..\..\home\jason\.nuget\packages\microsoft.extensions.http\7.0.0\lib\net7.0\Microsoft.Extensions.Http.dll</HintPath>
+	  </Reference>
+	  <Reference Include="RestSharp">
+	    <HintPath>..\..\..\..\..\home\jason\.nuget\packages\restsharp\108.0.1\lib\net6.0\RestSharp.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
 </Project>

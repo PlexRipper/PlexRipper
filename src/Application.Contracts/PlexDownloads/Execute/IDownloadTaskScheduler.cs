@@ -1,6 +1,6 @@
 ﻿using FluentResults;
 
-namespace BackgroundServices.Contracts;
+namespace Application.Contracts;
 
 public interface IDownloadTaskScheduler
 {

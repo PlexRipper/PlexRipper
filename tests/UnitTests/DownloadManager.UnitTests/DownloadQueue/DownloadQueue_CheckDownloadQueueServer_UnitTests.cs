@@ -37,14 +37,12 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
 
         var downloadTasks = await DbContext.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToListAsync();
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<int>(), It.IsAny<int>())).ReturnOk();
-        mock.SetupMediator(It.IsAny<GetDownloadTasksByPlexServerIdQuery>)
-            .ReturnsAsync((GetDownloadTasksByPlexServerIdQuery query, CancellationToken _) =>
-                Result.Ok(downloadTasks.Where(x => x.PlexServerId == query.PlexServerId).ToList()));
 
         var plexServers = await DbContext.PlexServers
             .AsTracking()
             .Include(x => x.PlexLibraries)
             .ThenInclude(x => x.DownloadTasks)
+            .ThenInclude(downloadTask => downloadTask.Children)
             .ToListAsync();
 
         var startedDownloadTask = plexServers[0].PlexLibraries[0].DownloadTasks[0];
@@ -73,12 +71,11 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
             config.MovieDownloadTasksCount = 5;
         });
 
-        var downloadTasks = await DbContext.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToListAsync();
+        var downloadTasks = await DbContext.DownloadTasks.IncludeDownloadTasks()
+            .Where(x => x.ParentId == null)
+            .Include(downloadTask => downloadTask.Children)
+            .ToListAsync();
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<int>(), It.IsAny<int>())).ReturnOk();
-
-        mock.SetupMediator(It.IsAny<GetDownloadTasksByPlexServerIdQuery>)
-            .ReturnsAsync((GetDownloadTasksByPlexServerIdQuery query, CancellationToken _) =>
-                Result.Ok(downloadTasks.Where(x => x.PlexServerId == query.PlexServerId).ToList()));
 
         // Act
         var result = await _sut.CheckDownloadQueueServer(downloadTasks.First().PlexServerId);
@@ -104,9 +101,6 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
 
         var downloadTasks = await DbContext.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToListAsync();
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<int>(), It.IsAny<int>())).ReturnOk();
-        mock.SetupMediator(It.IsAny<GetDownloadTasksByPlexServerIdQuery>)
-            .ReturnsAsync((GetDownloadTasksByPlexServerIdQuery query, CancellationToken _) =>
-                Result.Ok(downloadTasks.Where(x => x.PlexServerId == query.PlexServerId).ToList()));
 
         // ** Set first task to Completed
         var movieDownloadTask = DbContext.DownloadTasks.Include(x => x.Children).AsTracking().First();
@@ -138,9 +132,6 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
 
         var downloadTasks = await DbContext.DownloadTasks.IncludeDownloadTasks().IncludeByRoot().ToListAsync();
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<int>(), It.IsAny<int>())).ReturnOk();
-        mock.SetupMediator(It.IsAny<GetDownloadTasksByPlexServerIdQuery>)
-            .ReturnsAsync((GetDownloadTasksByPlexServerIdQuery query, CancellationToken _) =>
-                Result.Ok(downloadTasks.Where(x => x.PlexServerId == query.PlexServerId).ToList()));
 
         // ** Set first task to Completed
         var tvShowDownloadTask = downloadTasks[0];
@@ -179,9 +170,6 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
         await DbContext.SaveChangesAsync();
 
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<int>(), It.IsAny<int>())).ReturnOk();
-        mock.SetupMediator(It.IsAny<GetDownloadTasksByPlexServerIdQuery>)
-            .ReturnsAsync((GetDownloadTasksByPlexServerIdQuery query, CancellationToken _) =>
-                Result.Ok(downloadTasks.Where(x => x.PlexServerId == query.PlexServerId).ToList()));
 
         // Act
         var result = await _sut.CheckDownloadQueueServer(1);

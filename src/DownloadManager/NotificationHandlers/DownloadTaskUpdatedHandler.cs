@@ -1,5 +1,6 @@
 using Data.Contracts;
 using DownloadManager.Contracts;
+using Microsoft.EntityFrameworkCore;
 using WebAPI.Contracts;
 
 namespace PlexRipper.DownloadManager;
@@ -31,6 +32,7 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdated>
                 ResultExtensions.EntityNotFound(nameof(DownloadTask), downloadTaskId).LogError();
                 return;
             }
+
             plexServerId = downloadTask.PlexServerId;
             rootDownloadTaskId = downloadTask.RootDownloadTaskId;
         }
@@ -38,13 +40,11 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdated>
         await _mediator.Send(new ReCalculateRootDownloadTaskCommand(rootDownloadTaskId), cancellationToken);
 
         // Send away the new result
-        var downloadTasksResult = await _mediator.Send(new GetDownloadTasksByPlexServerIdQuery(plexServerId), cancellationToken);
-        if (downloadTasksResult.IsFailed)
-        {
-            downloadTasksResult.LogError();
-            return;
-        }
-
-        await _signalRService.SendDownloadProgressUpdateAsync(plexServerId, downloadTasksResult.Value, cancellationToken);
+        var downloadTasks = await _dbContext.PlexServers
+            .AsTracking()
+            .IncludeDownloadTasks()
+            .GetAsync(plexServerId, cancellationToken);
+        var rootDownloadTasks = downloadTasks.DownloadTasks.Where(x => x.ParentId == null).ToList();
+        await _signalRService.SendDownloadProgressUpdateAsync(plexServerId, rootDownloadTasks, cancellationToken);
     }
 }

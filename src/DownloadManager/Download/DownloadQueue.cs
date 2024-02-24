@@ -3,6 +3,7 @@ using Application.Contracts;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.DownloadManager;
 
@@ -74,15 +75,15 @@ public class DownloadQueue : IDownloadQueue
         if (plexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId).LogWarning();
 
-        var downloadTasksResult = await _mediator.Send(new GetDownloadTasksByPlexServerIdQuery(plexServerId), _token);
-        if (downloadTasksResult.IsFailed)
-            return downloadTasksResult.LogError();
-
         var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, _token);
+        var downloadTasks = await _dbContext.PlexServers
+            .AsTracking()
+            .IncludeDownloadTasks()
+            .GetAsync(plexServerId, _token);
+        var rootDownloadTasks = downloadTasks.DownloadTasks.Where(x => x.ParentId == null).ToList();
 
         _log.Here().Debug("Checking {NameOfPlexServer}: {PlexServerName} for the next download to start", nameof(PlexServer), plexServerName);
-
-        var nextDownloadTaskResult = GetNextDownloadTask(downloadTasksResult.Value);
+        var nextDownloadTaskResult = GetNextDownloadTask(rootDownloadTasks);
         if (nextDownloadTaskResult.IsFailed)
         {
             _log.Information("There are no available downloadTasks remaining for PlexServer with Id: {PlexServerName}", plexServerName);

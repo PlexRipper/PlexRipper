@@ -16,8 +16,6 @@ public class NotificationsService : INotificationsService
         _signalRService = signalRService;
     }
 
-    public async Task<Result> HideNotification(int id) => await _mediator.Send(new HideNotificationCommand(id));
-
     public Task<Result> SendResult<T>(Result<T> result) => SendResult(result.ToResult());
 
     public async Task<Result<int>> ClearAllNotifications() => await _mediator.Send(new ClearAllNotificationsCommand());

@@ -1,1 +1,0 @@
-﻿namespace Data.Contracts;

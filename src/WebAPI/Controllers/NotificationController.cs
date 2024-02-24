@@ -40,7 +40,8 @@ public class NotificationController : BaseController
         if (id <= 0)
             return BadRequestInvalidId();
 
-        return ToActionResult<List<Notification>, List<NotificationDTO>>(await _notificationsService.HideNotification(id));
+        var result = await _mediator.Send(new HideNotificationCommand(id));
+        return ToActionResult<List<Notification>, List<NotificationDTO>>(result);
     }
 
     [HttpPost]

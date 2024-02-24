@@ -1,25 +1,21 @@
 using Application.Contracts;
-using BackgroundServices.Contracts;
 using Logging.Interface;
 using Quartz;
 
 namespace PlexRipper.Application;
 
-public class DownloadTaskScheduler : BaseScheduler, IDownloadTaskScheduler
+public class DownloadTaskScheduler : IDownloadTaskScheduler
 {
-    #region Fields
+    private readonly ILog _log;
+    private readonly IScheduler _scheduler;
 
-    protected override JobKey DefaultJobKey => new($"DownloadTaskId_", nameof(DownloadTaskScheduler));
+    protected JobKey DefaultJobKey => new($"DownloadTaskId_", nameof(DownloadTaskScheduler));
 
-    #endregion
-
-    #region Constructor
-
-    public DownloadTaskScheduler(ILog log, IScheduler scheduler) : base(log, scheduler) { }
-
-    #endregion
-
-    #region Public Methods
+    public DownloadTaskScheduler(ILog log, IScheduler scheduler)
+    {
+        _log = log;
+        _scheduler = scheduler;
+    }
 
     public async Task<Result> StartDownloadTaskJob(int downloadTaskId, int plexServerId)
     {
@@ -27,7 +23,7 @@ public class DownloadTaskScheduler : BaseScheduler, IDownloadTaskScheduler
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
 
         var jobKey = DownloadJob.GetJobKey(downloadTaskId);
-        if (await IsJobRunning(jobKey))
+        if (await _scheduler.IsJobRunning(jobKey))
             return Result.Fail($"{nameof(DownloadJob)} with {jobKey} already exists").LogWarning();
 
         var job = JobBuilder.Create<DownloadJob>()
@@ -41,7 +37,7 @@ public class DownloadTaskScheduler : BaseScheduler, IDownloadTaskScheduler
             .StartNow()
             .Build();
 
-        await ScheduleJob(job, trigger);
+        await _scheduler.ScheduleJob(job, trigger);
 
         return Result.Ok();
     }
@@ -54,29 +50,27 @@ public class DownloadTaskScheduler : BaseScheduler, IDownloadTaskScheduler
         _log.Information("Stopping DownloadClient for DownloadTaskId {DownloadTaskId}", downloadTaskId);
 
         var jobKey = DownloadJob.GetJobKey(downloadTaskId);
-        if (!await IsJobRunning(jobKey))
+        if (!await _scheduler.IsJobRunning(jobKey))
             return Result.Fail($"{nameof(DownloadJob)} with {jobKey} cannot be stopped because it is not running").LogWarning();
 
-        return Result.OkIf(await StopJob(jobKey), $"Failed to stop {nameof(DownloadTask)} with id {downloadTaskId}");
+        return Result.OkIf(await _scheduler.StopJob(jobKey), $"Failed to stop {nameof(DownloadTask)} with id {downloadTaskId}");
     }
 
     public Task AwaitDownloadTaskJob(int downloadTaskId, CancellationToken cancellationToken = default)
     {
         var jobKey = DownloadJob.GetJobKey(downloadTaskId);
-        return AwaitJobRunning(jobKey, cancellationToken);
+        return _scheduler.AwaitJobRunning(jobKey, cancellationToken);
     }
 
     public Task<bool> IsDownloading(int downloadTaskId)
     {
         var jobKey = DownloadJob.GetJobKey(downloadTaskId);
-        return IsJobRunning(jobKey);
+        return _scheduler.IsJobRunningAsync(jobKey);
     }
 
     public async Task<bool> IsServerDownloading(int plexServerId)
     {
-        var data = await GetRunningJobDataMaps(typeof(DownloadJob));
+        var data = await _scheduler.GetRunningJobDataMaps(typeof(DownloadJob));
         return data.Select(x => x.GetIntValue(DownloadJob.PlexServerIdParameter)).ToList().Contains(plexServerId);
     }
-
-    #endregion
 }

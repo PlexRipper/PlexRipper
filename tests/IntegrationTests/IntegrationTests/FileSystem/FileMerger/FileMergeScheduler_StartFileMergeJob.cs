@@ -2,7 +2,6 @@ using Data.Contracts;
 
 namespace IntegrationTests.FileSystem.FileMerger;
 
-
 public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegrationTests
 {
     public FileMergeScheduler_StartFileMergeJob_IntegrationTests(ITestOutputHelper output) : base(output) { }
@@ -42,11 +41,11 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
 
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
-        var downloadTaskResult = await Container.Mediator.Send(new GetDownloadTaskByIdQuery(downloadTask.RootDownloadTaskId, true));
-        downloadTaskResult.IsSuccess.ShouldBeTrue();
-        var downloadTaskDb = downloadTaskResult.Value;
+
+        var downloadTaskDb = await DbContext.DownloadTasks.IncludeDownloadTasks().GetAsync(downloadTask.RootDownloadTaskId);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
+
         foreach (var childDownloadTask in downloadTaskDb.Children)
             childDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Completed);
         Container.MockSignalRService.FileMergeProgressList.Count.ShouldBeGreaterThan(10);

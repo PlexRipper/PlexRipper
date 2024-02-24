@@ -402,11 +402,12 @@ public class DownloadTaskFactory : IDownloadTaskFactory
 
         foreach (var downloadTaskId in downloadTaskIds)
         {
-            var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId));
-            if (downloadTaskResult.IsFailed)
+            var downloadTask = await _dbContext.DownloadTasks.GetAsync(downloadTaskId);
+            if (downloadTask is null)
+            {
+                ResultExtensions.EntityNotFound(nameof(DownloadTask), downloadTaskId).LogError();
                 continue;
-
-            var downloadTask = downloadTaskResult.Value;
+            }
 
             var mediaIdResult = await _dbContext.GetPlexMediaByMediaKeyAsync(downloadTask.Id, downloadTask.PlexServerId, downloadTask.MediaType);
             if (mediaIdResult.IsFailed)

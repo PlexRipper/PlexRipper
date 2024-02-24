@@ -157,7 +157,7 @@ public class DownloadController : BaseController
         if (id <= 0)
             return BadRequestInvalidId();
 
-        var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(id, true), token);
+        var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(id), token);
 
         if (downloadTaskResult.IsFailed)
             return ToActionResult(downloadTaskResult.ToResult());

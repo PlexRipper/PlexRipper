@@ -56,9 +56,16 @@ public class NotificationController : BaseController
         return ToActionResult<int, int>(result);
     }
 
-    // POST api/<NotificationController>/clear
+    /// <summary>
+    /// Deletes/Clears all <see cref="Notification">Notifications</see>.
+    /// </summary>
+    /// <returns>Returns the number of <see cref="Notification">Notifications</see> that have been deleted.</returns>
     [HttpPost("clear")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<int>))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> ClearAllNotifications() => ToActionResult<int, int>(await _notificationsService.ClearAllNotifications());
+    public async Task<IActionResult> ClearAllNotifications()
+    {
+        var result = await _mediator.Send(new ClearAllNotificationsCommand());
+        return ToActionResult<int, int>(result);
+    }
 }

@@ -1,24 +1,18 @@
 ﻿using Application.Contracts;
-using Data.Contracts;
 using WebAPI.Contracts;
 
 namespace PlexRipper.Application;
 
 public class NotificationsService : INotificationsService
 {
-    private readonly IMediator _mediator;
-
     private readonly ISignalRService _signalRService;
 
-    public NotificationsService(IMediator mediator, ISignalRService signalRService)
+    public NotificationsService(ISignalRService signalRService)
     {
-        _mediator = mediator;
         _signalRService = signalRService;
     }
 
     public Task<Result> SendResult<T>(Result<T> result) => SendResult(result.ToResult());
-
-    public async Task<Result<int>> ClearAllNotifications() => await _mediator.Send(new ClearAllNotificationsCommand());
 
     public async Task<Result> SendResult(Result result)
     {

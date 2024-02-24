@@ -2,9 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.BaseTests.Asserts;
-using PlexRipper.Data.Common;
 using PlexRipper.DownloadManager;
-using PlexRipper.WebAPI;
 
 namespace DownloadManager.UnitTests;
 
@@ -50,8 +48,6 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
             .ReturnsAsync((GetPlexTvShowEpisodeByIdQuery query, CancellationToken _) =>
                 Result.Ok(DbContext.PlexTvShowEpisodes.IncludeAll().FirstOrDefault(x => x.Id == query.Id)));
 
-        mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>).ReturnsAsync(Result.Fail(""));
-
         var tvShowDb = tvShows.Last();
         var episodeIds = new List<int> { tvShowDb.Seasons.First().Episodes.Last().Id };
 
@@ -91,20 +87,6 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
             .ReturnsAsync((GetPlexTvShowEpisodeByIdQuery query, CancellationToken _) =>
                 Result.Ok(DbContext.PlexTvShowEpisodes.IncludeAll().FirstOrDefault(x => x.Id == query.Id)));
 
-        mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>, true)
-            .ReturnsAsync((GetDownloadTaskByMediaKeyQuery query, CancellationToken _) =>
-            {
-                // We create the downloadTask tvShow to pretend the parent already exists and the episode and season need to be created.
-                if (query.MediaKey == tvShowDb.Key)
-                {
-                    var result = MapperSetup.CreateMapper().Map<DownloadTask>(tvShowDb);
-                    result.Id = 999;
-                    return Result.Ok(result);
-                }
-
-                return Result.Fail("");
-            });
-
         // Act
         var result = await _sut.GenerateTvShowEpisodesDownloadTasksAsync(episodeIds);
 
@@ -114,7 +96,6 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
         tvShowDownloadTask.Id.ShouldBe(999);
 
         mock.VerifyMediator(It.IsAny<GetPlexTvShowEpisodeByIdQuery>, Times.Once);
-        mock.VerifyMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>, Times.Exactly(3));
 
         tvShowDownloadTask.Children.ShouldAllBe(x => x.Id == 0);
         tvShowDownloadTask.Children.SelectMany(x => x.Children).ToList().ShouldAllBe(x => x.Id == 0);

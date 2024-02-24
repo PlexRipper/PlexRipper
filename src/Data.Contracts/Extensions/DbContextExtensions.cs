@@ -1,5 +1,6 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Domain;
 
@@ -29,5 +30,22 @@ public static class DbContextExtensions
     {
         var plexServer = await dbContext.PlexServers.GetAsync(plexServerId, cancellationToken);
         return plexServer?.Name ?? "Server Name Not Found";
+    }
+
+    public static async Task<Result<DownloadTask>> GetDownloadTaskByMediaKeyQuery(
+        this IPlexRipperDbContext dbContext,
+        int plexServerId,
+        int mediaKey,
+        CancellationToken cancellationToken = default)
+    {
+        var downloadTask =
+            await dbContext.DownloadTasks
+                .IncludeDownloadTasks()
+                .FirstOrDefaultAsync(x => x.PlexServerId == plexServerId && x.Key == mediaKey, cancellationToken);
+
+        if (downloadTask is null)
+            return Result.Fail<DownloadTask>($"Couldn't find a download task with key {mediaKey}, plexServerId {plexServerId}");
+
+        return Result.Ok(downloadTask);
     }
 }

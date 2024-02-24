@@ -9,12 +9,8 @@ public static partial class DbSetExtensions
         .AsTracking()
         .IncludePlexServer()
         .IncludePlexLibrary()
-        .IncludeSeasons()
         .Include($"{nameof(PlexTvShow.Seasons)}.{nameof(PlexTvShow.PlexServer)}")
         .Include($"{nameof(PlexTvShow.Seasons)}.{nameof(PlexTvShow.PlexLibrary)}")
-        .Include($"{nameof(PlexTvShow.Seasons)}.{nameof(PlexTvShowSeason.Episodes)}")
-        .Include($"{nameof(PlexTvShow.Seasons)}.{nameof(PlexTvShowSeason.Episodes)}.{nameof(PlexTvShowEpisode.TvShow)}")
-        .Include($"{nameof(PlexTvShow.Seasons)}.{nameof(PlexTvShowSeason.Episodes)}.{nameof(PlexTvShowEpisode.TvShowSeason)}")
         .Include($"{nameof(PlexTvShow.Seasons)}.{nameof(PlexTvShowSeason.Episodes)}.{nameof(PlexTvShow.PlexServer)}")
         .Include($"{nameof(PlexTvShow.Seasons)}.{nameof(PlexTvShowSeason.Episodes)}.{nameof(PlexTvShow.PlexLibrary)}");
 

@@ -436,7 +436,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                 continue;
             }
 
-            await _mediator.Send(new DeleteDownloadWorkerTasksByDownloadTaskIdCommand(downloadTask.Id));
+            await _dbContext.DeleteDownloadWorkerTasksAsync(downloadTask.Id);
 
             downloadTasksResult.Value[0].Id = downloadTask.Id;
             downloadTasksResult.Value[0].Priority = downloadTask.Priority;

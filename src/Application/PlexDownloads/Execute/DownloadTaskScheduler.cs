@@ -9,8 +9,6 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
     private readonly ILog _log;
     private readonly IScheduler _scheduler;
 
-    protected JobKey DefaultJobKey => new($"DownloadTaskId_", nameof(DownloadTaskScheduler));
-
     public DownloadTaskScheduler(ILog log, IScheduler scheduler)
     {
         _log = log;

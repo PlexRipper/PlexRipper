@@ -30,8 +30,11 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
 
         // Act
         var downloadWorkerTasks = Container.GetDownloadTaskFactory.GenerateDownloadWorkerTasks(downloadTask);
-        var addWorkersResult = await Container.Mediator.Send(new AddDownloadWorkerTasksCommand(downloadWorkerTasks.Value));
-        addWorkersResult.IsSuccess.ShouldBeTrue();
+
+        downloadWorkerTasks.Value.ForEach(x => x.DownloadTask = null);
+        await DbContext.DownloadWorkerTasks.AddRangeAsync(downloadWorkerTasks.Value);
+        await DbContext.SaveChangesAsync();
+
         var createResult = await Container.FileMergeScheduler.CreateFileTaskFromDownloadTask(downloadTask.Id);
         createResult.IsSuccess.ShouldBeTrue();
         var startResult = await Container.FileMergeScheduler.StartFileMergeJob(createResult.Value.Id);

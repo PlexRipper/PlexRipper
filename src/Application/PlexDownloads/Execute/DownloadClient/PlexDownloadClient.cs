@@ -280,8 +280,18 @@ public class PlexDownloadClient : IAsyncDisposable
 
     private async Task InsertDownloadWorkerLogs(IList<DownloadWorkerLog> logs, CancellationToken cancellationToken = default)
     {
-        await _dbContext.DownloadWorkerTasksLogs.AddRangeAsync(logs, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        if (logs is null || !logs.Any())
+            return;
+
+        try
+        {
+            await _dbContext.DownloadWorkerTasksLogs.AddRangeAsync(logs, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _log.Error(e);
+        }
     }
 
     #endregion

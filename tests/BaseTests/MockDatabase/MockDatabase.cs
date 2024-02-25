@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NaturalSort.Extension;
 using PlexRipper.Data;
-using PlexRipper.Data.Common;
 
 #endregion
 
@@ -184,10 +183,7 @@ public static class MockDatabase
 
     #region Public
 
-    public static string GetMemoryDatabaseName()
-    {
-        return $"memory_database_{Random.Shared.Next(1, int.MaxValue)}_{Random.Shared.Next(int.MaxValue)}";
-    }
+    public static string GetMemoryDatabaseName() => $"memory_database_{Random.Shared.Next(1, int.MaxValue)}_{Random.Shared.Next(int.MaxValue)}";
 
     /// <summary>
     /// Creates an in-memory database only to be used for unit and integration testing.
@@ -217,10 +213,10 @@ public static class MockDatabase
         return new PlexRipperDbContext(optionsBuilder.Options, dbName);
     }
 
-    public static string DatabaseConnectionString(string dbName = "", bool disableForeignKeyCheck = false)
-    {
+    public static string DatabaseConnectionString(string dbName = "", bool disableForeignKeyCheck = false) =>
+
         // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
-        return new SqliteConnectionStringBuilder
+        new SqliteConnectionStringBuilder
         {
             // Real file is used for testing due to otherwise flaky tests when doing in memory
             Mode = SqliteOpenMode.ReadWriteCreate,
@@ -230,7 +226,6 @@ public static class MockDatabase
             DataSource = dbName,
             Cache = SqliteCacheMode.Shared,
         }.ToString();
-    }
 
     public static async Task<PlexRipperDbContext> Setup(this PlexRipperDbContext context, int seed = 0, Action<FakeDataConfig> options = null)
     {
@@ -328,6 +323,14 @@ public static class MockDatabase
             downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
 
             plexServer.PlexServerConnections.ShouldNotBeEmpty();
+        }
+
+        if (config.TvShowCount > 0)
+        {
+            var tvShowsDb = await context.PlexTvShows.IncludeEpisodes().ToListAsync();
+
+            for (var i = 0; i < Math.Min(downloadTasks.Count, tvShowsDb.Count); i++)
+                downloadTasks[i].Key = tvShowsDb[i].Key;
         }
 
         context.DownloadTasks.AddRange(downloadTasks);

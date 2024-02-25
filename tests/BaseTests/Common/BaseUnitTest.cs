@@ -93,11 +93,6 @@ public class BaseUnitTest : IDisposable
         DbContext = await GetDbContext().Setup(Seed, options);
         _databaseName = DbContext.DatabaseName;
     }
-
-    protected void SaveChanges()
-    {
-        DbContext.SaveChanges();
-    }
 }
 
 public class BaseUnitTest<TUnitTestClass> : BaseUnitTest where TUnitTestClass : class
@@ -128,11 +123,8 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest where TUnitTestClass : 
 
             // Database context can be setup once and then retrieved by its DB name.
             builder.Register((_, _) => GetDbContext())
-                .As<IPlexRipperDbContext>()
-                .InstancePerDependency();
-
-            builder.Register((_, _) => GetDbContext())
-                .AsSelf()
+                .As<PlexRipperDbContext>() // Register as concrete type
+                .As<IPlexRipperDbContext>() // Also register as interface
                 .InstancePerDependency();
 
             builder.RegisterType<Log>().As<ILog>().SingleInstance();

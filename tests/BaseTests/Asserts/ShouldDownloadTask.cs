@@ -21,9 +21,7 @@ public static class ShouldDownloadTask
         source.Parent.ShouldBeNull();
         source.ParentId.ShouldBeNull();
 
-        source.PlexLibrary.ShouldNotBeNull();
         source.PlexLibraryId.ShouldBe(target.PlexLibraryId);
-        source.PlexServer.ShouldNotBeNull();
         source.PlexServerId.ShouldBe(target.PlexServerId);
 
         source.MediaType.ShouldBe(target.Type);
@@ -57,9 +55,7 @@ public static class ShouldDownloadTask
         source.Year.ShouldBe(target.Year);
 
         source.PlexLibraryId.ShouldBe(source.PlexLibraryId);
-        source.PlexLibrary.ShouldNotBeNull();
         source.PlexServerId.ShouldBe(source.PlexServerId);
-        source.PlexServer.ShouldNotBeNull();
 
         source.MediaType.ShouldBe(target.Type);
         source.FileLocationUrl.ShouldBeNull();
@@ -91,9 +87,7 @@ public static class ShouldDownloadTask
 
         source.Year.ShouldBe(target.Year);
 
-        source.PlexLibrary.ShouldNotBeNull();
         source.PlexLibraryId.ShouldBe(source.PlexLibraryId);
-        source.PlexServer.ShouldNotBeNull();
         source.PlexServerId.ShouldBe(source.PlexServerId);
 
         source.MediaType.ShouldBe(target.Type);

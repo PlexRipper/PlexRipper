@@ -12,6 +12,8 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
     public async Task ShouldCallDownloadWorkerTaskUpdate_WhenInErrorState()
     {
         // Arrange
+        await SetupDatabase();
+
         mock.Mock<IDownloadFileStream>()
             .Setup(x => x.CreateDownloadFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
             .Returns(Result.Fail("Failed Error"));

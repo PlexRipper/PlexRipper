@@ -34,7 +34,6 @@ public class DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests : Ba
             config.TvShowCount = 5;
             config.TvShowSeasonCount = 2;
             config.TvShowEpisodeCount = 5;
-            config.TvShowDownloadTasksCount = 1;
         });
 
         var tvShows = DbContext.PlexTvShows.IncludeEpisodes().IncludePlexServer().IncludePlexLibrary().ToList();

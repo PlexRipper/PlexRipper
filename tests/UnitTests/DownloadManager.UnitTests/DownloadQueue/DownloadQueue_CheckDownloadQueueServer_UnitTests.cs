@@ -13,6 +13,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
     public async Task ShouldHaveNoUpdates_WhenGivenAnEmptyList()
     {
         // Arrange
+        await SetupDatabase();
 
         // Act
         _sut.Setup();

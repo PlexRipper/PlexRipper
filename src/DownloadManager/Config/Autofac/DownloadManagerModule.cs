@@ -18,7 +18,6 @@ public class DownloadManagerModule : Module
         builder.RegisterType<DownloadTaskValidator>().As<IDownloadTaskValidator>().SingleInstance();
         builder.RegisterType<DownloadTaskFactory>().As<IDownloadTaskFactory>().SingleInstance();
         builder.RegisterType<DownloadFileStream>().As<IDownloadFileStream>().SingleInstance();
-        builder.RegisterType<DownloadUrlGenerator>().As<IDownloadUrlGenerator>().SingleInstance();
 
         builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
 

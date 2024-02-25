@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ByteSizeLib;
+using Data.Contracts;
 using DownloadManager.Contracts;
 using Logging.Interface;
 using PlexRipper.DownloadManager;
@@ -23,10 +24,9 @@ public class DownloadWorker : IDisposable
     private readonly Subject<DownloadWorkerTask> _downloadWorkerUpdate = new();
 
     private readonly ILog<DownloadWorker> _log;
-    private readonly IMediator _mediator;
-    private readonly IDownloadUrlGenerator _downloadUrlGenerator;
 
     private readonly IDownloadFileStream _downloadFileSystem;
+    private readonly IPlexRipperDbContext _dbContext;
 
     private readonly RestClient _httpClient;
 
@@ -48,22 +48,21 @@ public class DownloadWorker : IDisposable
     /// </summary>
     /// <param name="log"></param>
     /// <param name="mediator"></param>
+    /// <param name="dbContext"></param>
     /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
     /// <param name="downloadFileSystem">The filesystem used to store the downloaded data.</param>
     /// <param name="httpClientFactory"></param>
     public DownloadWorker(
         ILog<DownloadWorker> log,
-        IMediator mediator,
+        IPlexRipperDbContext dbContext,
         DownloadWorkerTask downloadWorkerTask,
-        IDownloadUrlGenerator downloadUrlGenerator,
         IDownloadFileStream downloadFileSystem,
         IHttpClientFactory httpClientFactory
     )
     {
         _log = log;
-        _mediator = mediator;
-        _downloadUrlGenerator = downloadUrlGenerator;
         _downloadFileSystem = downloadFileSystem;
+        _dbContext = dbContext;
         DownloadWorkerTask = downloadWorkerTask;
 
         var options = new RestClientOptions()
@@ -155,7 +154,7 @@ public class DownloadWorker : IDisposable
         try
         {
             // Retrieve Download URL
-            var downloadUrlResult = await _downloadUrlGenerator.GetDownloadUrl(
+            var downloadUrlResult = await _dbContext.GetDownloadUrl(
                 DownloadWorkerTask.PlexServerId,
                 DownloadWorkerTask.FileLocationUrl, cancellationToken);
 

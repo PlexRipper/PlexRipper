@@ -15,7 +15,6 @@ public class DownloadQueue : IDownloadQueue
     #region Fields
 
     private readonly ILog _log;
-    private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
@@ -29,10 +28,9 @@ public class DownloadQueue : IDownloadQueue
 
     #region Constructor
 
-    public DownloadQueue(ILog log, IMediator mediator, IPlexRipperDbContext dbContext, IDownloadTaskScheduler downloadTaskScheduler)
+    public DownloadQueue(ILog log, IPlexRipperDbContext dbContext, IDownloadTaskScheduler downloadTaskScheduler)
     {
         _log = log;
-        _mediator = mediator;
         _dbContext = dbContext;
         _downloadTaskScheduler = downloadTaskScheduler;
     }

@@ -15,20 +15,20 @@ namespace PlexRipper.WebAPI.Controllers;
 [ApiController]
 public class DownloadController : BaseController
 {
+    private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
-    private readonly IDownloadUrlGenerator _downloadUrlGenerator;
 
     public DownloadController(
         ILog log,
+        IPlexRipperDbContext dbContext,
         IMediator mediator,
-        IDownloadUrlGenerator downloadUrlGenerator,
         IMapper mapper,
         INotificationsService notificationsService) : base(log,
         mapper,
         notificationsService)
     {
+        _dbContext = dbContext;
         _mediator = mediator;
-        _downloadUrlGenerator = downloadUrlGenerator;
     }
 
     // GET: api/<DownloadController>
@@ -168,7 +168,8 @@ public class DownloadController : BaseController
         // Add DownloadUrl to DownloadTaskDTO
         var downloadTaskDto = _mapper.Map<DownloadTaskDTO>(downloadTaskResult.Value);
 
-        var downloadUrl = await _downloadUrlGenerator.GetDownloadUrl(downloadTaskResult.Value, token);
+        var downloadUrl =
+            await _dbContext.GetDownloadUrl(downloadTaskDto.PlexServerId, downloadTaskDto.FileLocationUrl, token);
         if (downloadUrl.IsFailed)
             return ToActionResult<DownloadTask, DownloadTaskDTO>(downloadTaskResult);
 

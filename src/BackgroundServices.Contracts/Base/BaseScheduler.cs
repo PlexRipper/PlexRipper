@@ -45,15 +45,6 @@ public abstract class BaseScheduler
         }
     }
 
-    protected async Task<List<JobDataMap>> GetRunningJobDataMaps(Type jobType)
-    {
-        var jobs = await _scheduler.GetCurrentlyExecutingJobs();
-        return jobs
-            .Where(x => x.JobInstance.GetType() == jobType)
-            .Select(x => x.JobDetail.JobDataMap)
-            .ToList();
-    }
-
     protected async Task<bool> DeleteJob(JobKey key) => await _scheduler.DeleteJob(key);
 
     protected async Task TriggerJob(JobKey key, JobDataMap jobDataMap)

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using BackgroundServices.Contracts;
-using DownloadManager.Contracts;
+using PlexRipper.Application;
 using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
@@ -210,8 +210,5 @@ public class WebApiMappingProfile : Profile
             .ForMember(dto => dto.JobType, entity => entity.MapFrom(x => ToJobType(x.JobGroup)));
     }
 
-    private static JobTypes ToJobType(string jobGroup)
-    {
-        return Enum.TryParse<JobTypes>(jobGroup, out var jobType) ? jobType : JobTypes.Unknown;
-    }
+    private static JobTypes ToJobType(string jobGroup) => Enum.TryParse<JobTypes>(jobGroup, out var jobType) ? jobType : JobTypes.Unknown;
 }

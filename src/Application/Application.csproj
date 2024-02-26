@@ -14,6 +14,8 @@
 		<PackageReference Include="Autofac.Extras.Quartz" Version="8.0.0" />
 		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="9.3.0" />
 		<PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
+		<PackageReference Include="RestSharp" Version="108.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -27,6 +29,15 @@
 		<ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
 		<ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
 		<ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="Microsoft.Extensions.Http">
+	    <HintPath>..\..\..\..\..\home\jason\.nuget\packages\microsoft.extensions.http\7.0.0\lib\net7.0\Microsoft.Extensions.Http.dll</HintPath>
+	  </Reference>
+	  <Reference Include="RestSharp">
+	    <HintPath>..\..\..\..\..\home\jason\.nuget\packages\restsharp\108.0.1\lib\net6.0\RestSharp.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 </Project>

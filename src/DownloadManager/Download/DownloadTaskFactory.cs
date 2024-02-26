@@ -166,7 +166,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             var tvShowDownloadTaskIndex = downloadTasks.FindIndex(x => x.Equals(tvShow));
             if (tvShowDownloadTaskIndex == -1)
             {
-                var result = await _mediator.Send(new GetDownloadTaskByMediaKeyQuery(tvShow.PlexServerId, tvShow.Key));
+                var result = await _dbContext.GetDownloadTaskByMediaKeyQuery(tvShow.PlexServerId, tvShow.Key);
                 var tvShowDownloadTask = result.IsSuccess ? result.Value : _mapper.Map<DownloadTask>(tvShow);
                 downloadTasks.Add(tvShowDownloadTask);
             }
@@ -225,7 +225,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             var tvShowDownloadTaskIndex = downloadTasks.FindIndex(x => x.Equals(season.TvShow));
             if (tvShowDownloadTaskIndex == -1)
             {
-                var result = await _mediator.Send(new GetDownloadTaskByMediaKeyQuery(season.TvShow.PlexServerId, season.TvShow.Key));
+                var result = await _dbContext.GetDownloadTaskByMediaKeyQuery(season.TvShow.PlexServerId, season.TvShow.Key);
                 downloadTasks.Add(result.IsSuccess ? result.Value : _mapper.Map<DownloadTask>(season.TvShow));
                 tvShowDownloadTaskIndex = downloadTasks.FindIndex(x => x.Equals(season.TvShow));
             }
@@ -234,7 +234,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             var seasonDownloadTaskIndex = downloadTasks[tvShowDownloadTaskIndex].Children.FindIndex(x => x.Equals(season));
             if (seasonDownloadTaskIndex == -1)
             {
-                var result = await _mediator.Send(new GetDownloadTaskByMediaKeyQuery(season.PlexServerId, season.Key));
+                var result = await _dbContext.GetDownloadTaskByMediaKeyQuery(season.PlexServerId, season.Key);
                 var seasonDownloadTask = result.IsSuccess ? result.Value : _mapper.Map<DownloadTask>(season);
                 seasonDownloadTask.ParentId = downloadTasks[tvShowDownloadTaskIndex].Id;
                 downloadTasks[tvShowDownloadTaskIndex].Children.Add(seasonDownloadTask);
@@ -281,48 +281,38 @@ public class DownloadTaskFactory : IDownloadTaskFactory
             // Retrieve episode media from database or passed in list
             var episode = episodes?.Find(x => x.Id == episodeId);
             if (episode is null)
-            {
-                var episodeResult = await _mediator.Send(new GetPlexTvShowEpisodeByIdQuery(episodeId));
-                if (episodeResult.IsFailed)
-                {
-                    episodeResult.LogError();
-                    continue;
-                }
-
-                episode = episodeResult.Value;
-            }
+                episode = await _dbContext.PlexTvShowEpisodes.IncludeTvShow().IncludeSeason().GetAsync(episodeId);
 
             // Check if the tvShowDownloadTask has already been created
-            var tvShowDownloadTaskIndex = downloadTasks.FindIndex(x => x.Equals(episode.TvShow));
-            if (tvShowDownloadTaskIndex == -1)
+            var tvShowDownloadTask = downloadTasks.FirstOrDefault(x => x.Equals(episode.TvShow));
+            if (tvShowDownloadTask is null)
             {
-                var result = await _mediator.Send(new GetDownloadTaskByMediaKeyQuery(episode.PlexServerId, episode.TvShow.Key));
+                var result = await _dbContext.GetDownloadTaskByMediaKeyQuery(episode.PlexServerId, episode.TvShow.Key);
                 downloadTasks.Add(result.IsSuccess ? result.Value : _mapper.Map<DownloadTask>(episode.TvShow));
-                tvShowDownloadTaskIndex = downloadTasks.FindIndex(x => x.Equals(episode.TvShow));
+                tvShowDownloadTask = downloadTasks.FirstOrDefault(x => x.Equals(episode.TvShow));
             }
 
             // Check if the tvShowSeasonDownloadTask has already been created
-            var seasonDownloadTaskIndex = downloadTasks[tvShowDownloadTaskIndex].Children.FindIndex(x => x.Equals(episode.TvShowSeason));
-            if (seasonDownloadTaskIndex == -1)
+            var seasonDownloadTask = tvShowDownloadTask.Children.FirstOrDefault(x => x.Equals(episode.TvShowSeason));
+            if (seasonDownloadTask is null)
             {
-                var result = await _mediator.Send(new GetDownloadTaskByMediaKeyQuery(episode.TvShowSeason.PlexServerId,
-                    episode.TvShowSeason.Key));
-                var seasonDownloadTask = result.IsSuccess ? result.Value : _mapper.Map<DownloadTask>(episode.TvShowSeason);
-                seasonDownloadTask.ParentId = downloadTasks[tvShowDownloadTaskIndex].Id;
-                downloadTasks[tvShowDownloadTaskIndex].Children.Add(seasonDownloadTask);
-                seasonDownloadTaskIndex = downloadTasks[tvShowDownloadTaskIndex].Children.FindIndex(x => x.Equals(episode.TvShowSeason));
+                var result = await _dbContext.GetDownloadTaskByMediaKeyQuery(episode.TvShowSeason.PlexServerId,
+                    episode.TvShowSeason.Key);
+
+                seasonDownloadTask = result.IsSuccess ? result.Value : _mapper.Map<DownloadTask>(episode.TvShowSeason);
+                seasonDownloadTask.ParentId = tvShowDownloadTask.Id;
+                tvShowDownloadTask.Children.Add(seasonDownloadTask);
+                seasonDownloadTask = tvShowDownloadTask.Children.FirstOrDefault(x => x.Equals(episode.TvShowSeason));
             }
 
             // Check if the tvShowEpisodesDownloadTask has already been created
-            var episodeDownloadTaskIndex = downloadTasks[tvShowDownloadTaskIndex]
-                .Children[seasonDownloadTaskIndex]
-                .Children.FindIndex(x => x.Equals(episode));
-            if (episodeDownloadTaskIndex == -1)
+            var episodeDownloadTask = seasonDownloadTask.Children.FirstOrDefault(x => x.Equals(episode));
+            if (episodeDownloadTask is null)
             {
-                var result = await _mediator.Send(new GetDownloadTaskByMediaKeyQuery(episode.PlexServerId, episode.Key));
-                var episodeDownloadTask = result.IsSuccess ? result.Value : CreateEpisodeDownloadTask(episode);
-                episodeDownloadTask.ParentId = downloadTasks[tvShowDownloadTaskIndex].Children[seasonDownloadTaskIndex].Id;
-                downloadTasks[tvShowDownloadTaskIndex].Children[seasonDownloadTaskIndex].Children.Add(episodeDownloadTask);
+                var result = await _dbContext.GetDownloadTaskByMediaKeyQuery(episode.PlexServerId, episode.Key);
+                episodeDownloadTask = result.IsSuccess ? result.Value : CreateEpisodeDownloadTask(episode);
+                episodeDownloadTask.ParentId = seasonDownloadTask.Id;
+                seasonDownloadTask.Children.Add(episodeDownloadTask);
             }
         }
 
@@ -402,11 +392,12 @@ public class DownloadTaskFactory : IDownloadTaskFactory
 
         foreach (var downloadTaskId in downloadTaskIds)
         {
-            var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId));
-            if (downloadTaskResult.IsFailed)
+            var downloadTask = await _dbContext.DownloadTasks.GetAsync(downloadTaskId);
+            if (downloadTask is null)
+            {
+                ResultExtensions.EntityNotFound(nameof(DownloadTask), downloadTaskId).LogError();
                 continue;
-
-            var downloadTask = downloadTaskResult.Value;
+            }
 
             var mediaIdResult = await _dbContext.GetPlexMediaByMediaKeyAsync(downloadTask.Id, downloadTask.PlexServerId, downloadTask.MediaType);
             if (mediaIdResult.IsFailed)
@@ -434,7 +425,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                 continue;
             }
 
-            await _mediator.Send(new DeleteDownloadWorkerTasksByDownloadTaskIdCommand(downloadTask.Id));
+            await _dbContext.DeleteDownloadWorkerTasksAsync(downloadTask.Id);
 
             downloadTasksResult.Value[0].Id = downloadTask.Id;
             downloadTasksResult.Value[0].Priority = downloadTask.Priority;

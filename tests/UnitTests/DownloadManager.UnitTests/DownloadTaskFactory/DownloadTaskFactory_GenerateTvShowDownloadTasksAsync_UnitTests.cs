@@ -1,7 +1,6 @@
 ﻿using Data.Contracts;
 using PlexRipper.Application;
 using PlexRipper.BaseTests.Asserts;
-using PlexRipper.Data.Common;
 using PlexRipper.DownloadManager;
 
 namespace DownloadManager.UnitTests;
@@ -35,15 +34,12 @@ public class DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests : Ba
             config.TvShowCount = 5;
             config.TvShowSeasonCount = 2;
             config.TvShowEpisodeCount = 5;
-            config.TvShowDownloadTasksCount = 1;
         });
 
         var tvShows = DbContext.PlexTvShows.IncludeEpisodes().IncludePlexServer().IncludePlexLibrary().ToList();
 
         mock.SetupMediator(It.IsAny<GetPlexTvShowByIdWithEpisodesQuery>)
             .ReturnsAsync((GetPlexTvShowByIdWithEpisodesQuery query, CancellationToken _) => Result.Ok(tvShows.Find(x => x.Id == query.PlexTvShowId)));
-        mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>)
-            .ReturnsAsync(Result.Fail(""));
 
         var tvShowIds = new List<int> { 1 };
 

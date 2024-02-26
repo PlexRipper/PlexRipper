@@ -2233,8 +2233,10 @@
           "FileSystem.Contracts": "[1.0.0, )",
           "FluentValidation.DependencyInjectionExtensions": "[9.3.0, )",
           "MediatR.Extensions.Autofac.DependencyInjection": "[10.0.0, )",
+          "Microsoft.Extensions.Http": "[7.0.0, )",
           "PlexApi.Contracts": "[1.0.0, )",
           "PlexRipper.Domain": "[1.0.0, )",
+          "RestSharp": "[108.0.1, )",
           "Settings.Contracts": "[1.0.0, )",
           "WebAPI.Contracts": "[1.0.0, )"
         }

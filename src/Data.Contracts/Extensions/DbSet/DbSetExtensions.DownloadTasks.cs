@@ -34,4 +34,15 @@ public static partial class DbSetExtensions
 
         return query;
     }
+
+    public static async Task SetDownloadStatusAsync(
+        this IQueryable<DownloadTask> downloadTasks,
+        int downloadTaskId,
+        DownloadStatus downloadStatus,
+        CancellationToken cancellationToken = default)
+    {
+        await downloadTasks
+            .Where(x => x.Id == downloadTaskId)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, x => downloadStatus), cancellationToken);
+    }
 }

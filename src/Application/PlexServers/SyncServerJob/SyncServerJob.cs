@@ -1,5 +1,4 @@
-﻿using Application.Contracts;
-using Data.Contracts;
+﻿using Data.Contracts;
 using Logging.Interface;
 using Quartz;
 using WebAPI.Contracts;
@@ -10,23 +9,23 @@ public class SyncServerJob : IJob
 {
     private readonly ILog _log;
     private readonly IMediator _mediator;
+    private readonly IPlexRipperDbContext _dbContext;
     private readonly ISignalRService _signalRService;
 
     public static string PlexServerIdParameter => "plexServerId";
     public static string ForceSyncParameter => "forceSync";
 
-    public static JobKey GetJobKey(int id)
-    {
-        return new JobKey($"{PlexServerIdParameter}_{id}", nameof(SyncServerJob));
-    }
+    public static JobKey GetJobKey(int id) => new($"{PlexServerIdParameter}_{id}", nameof(SyncServerJob));
 
     public SyncServerJob(
         ILog log,
         IMediator mediator,
+        IPlexRipperDbContext dbContext,
         ISignalRService signalRService)
     {
         _log = log;
         _mediator = mediator;
+        _dbContext = dbContext;
         _signalRService = signalRService;
     }
 
@@ -42,14 +41,13 @@ public class SyncServerJob : IJob
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         try
         {
-            var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(plexServerId, includeLibraries: true));
-            if (plexServerResult.IsFailed)
+            var plexServer = await _dbContext.PlexServers.IncludeLibraries().GetAsync(plexServerId);
+            if (plexServer is null)
             {
-                plexServerResult.LogError();
+                ResultExtensions.EntityNotFound(nameof(PlexServer), plexServerId).LogError();
                 return;
             }
 
-            var plexServer = plexServerResult.Value;
             var results = new List<Result>();
 
             var plexLibraries = forceSync

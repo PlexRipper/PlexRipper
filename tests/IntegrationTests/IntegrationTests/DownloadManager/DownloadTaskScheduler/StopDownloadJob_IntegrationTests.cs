@@ -38,13 +38,13 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
 
         // Act
         var startResult = await Container.DownloadTaskScheduler.StartDownloadTaskJob(childDownloadTask.Id, childDownloadTask.PlexServerId);
-        await Task.Delay(2000);
+        await Task.Delay(500);
         var stopResult = await Container.DownloadTaskScheduler.StopDownloadTaskJob(childDownloadTask.Id);
         await Container.SchedulerService.AwaitScheduler();
 
         // Assert
-        startResult.IsSuccess.ShouldBeTrue();
-        stopResult.IsSuccess.ShouldBeTrue();
+        startResult.IsSuccess.ShouldBeTrue(startResult.ToString());
+        stopResult.IsSuccess.ShouldBeTrue(stopResult.ToString());
         var downloadTaskDb = DbContext.DownloadTasks
             .IncludeDownloadTasks()
             .FirstOrDefault(x => x.Id == childDownloadTask.Id);

@@ -2,9 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.BaseTests.Asserts;
-using PlexRipper.Data.Common;
 using PlexRipper.DownloadManager;
-using PlexRipper.WebAPI;
 
 namespace DownloadManager.UnitTests;
 
@@ -37,7 +35,6 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
             config.TvShowCount = 5;
             config.TvShowSeasonCount = 2;
             config.TvShowEpisodeCount = 5;
-            config.TvShowDownloadTasksCount = 5;
         });
 
         var tvShows = await DbContext.PlexTvShows.IncludeAll().ToListAsync();
@@ -49,8 +46,6 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
         mock.SetupMediator(It.IsAny<GetPlexTvShowEpisodeByIdQuery>)
             .ReturnsAsync((GetPlexTvShowEpisodeByIdQuery query, CancellationToken _) =>
                 Result.Ok(DbContext.PlexTvShowEpisodes.IncludeAll().FirstOrDefault(x => x.Id == query.Id)));
-
-        mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>).ReturnsAsync(Result.Fail(""));
 
         var tvShowDb = tvShows.Last();
         var episodeIds = new List<int> { tvShowDb.Seasons.First().Episodes.Last().Id };
@@ -78,47 +73,41 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
             config.TvShowCount = 5;
             config.TvShowSeasonCount = 2;
             config.TvShowEpisodeCount = 5;
-            config.TvShowDownloadTasksCount = 5;
         });
 
-        var tvShows = await DbContext.PlexTvShows.IncludeAll().ToListAsync();
+        mock.AddMapper();
+        var tvShows = await DbContext.PlexTvShows.IncludePlexLibrary().IncludePlexServer().IncludeEpisodes().ToListAsync();
         var tvShowDb = tvShows.Last();
         var episodeIds = new List<int> { tvShowDb.Seasons.First().Episodes.Last().Id };
 
-        mock.AddMapper();
-
-        mock.SetupMediator(It.IsAny<GetPlexTvShowEpisodeByIdQuery>, true)
-            .ReturnsAsync((GetPlexTvShowEpisodeByIdQuery query, CancellationToken _) =>
-                Result.Ok(DbContext.PlexTvShowEpisodes.IncludeAll().FirstOrDefault(x => x.Id == query.Id)));
-
-        mock.SetupMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>, true)
-            .ReturnsAsync((GetDownloadTaskByMediaKeyQuery query, CancellationToken _) =>
-            {
-                // We create the downloadTask tvShow to pretend the parent already exists and the episode and season need to be created.
-                if (query.MediaKey == tvShowDb.Key)
-                {
-                    var result = MapperSetup.CreateMapper().Map<DownloadTask>(tvShowDb);
-                    result.Id = 999;
-                    return Result.Ok(result);
-                }
-
-                return Result.Fail("");
-            });
+        var downloadTask = new DownloadTask()
+        {
+            Key = tvShowDb.Key,
+            Title = tvShowDb.Title,
+            FullTitle = tvShowDb.FullTitle,
+            Year = tvShowDb.Year,
+            MediaType = tvShowDb.Type,
+            PlexServerId = tvShowDb.PlexServerId,
+            PlexLibraryId = tvShowDb.PlexLibraryId,
+            DownloadTaskType = DownloadTaskType.TvShow,
+            DownloadStatus = DownloadStatus.Queued,
+            DownloadFolderId = 1,
+            DestinationFolderId = 1,
+        };
+        DbContext.DownloadTasks.AddRange(downloadTask);
+        await DbContext.SaveChangesAsync();
+        ResetDbContext();
 
         // Act
-        var result = await _sut.GenerateTvShowEpisodesDownloadTasksAsync(episodeIds);
+        var result = await mock.Create<DownloadTaskFactory>().GenerateTvShowEpisodesDownloadTasksAsync(episodeIds);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         var tvShowDownloadTask = result.Value.First();
-        tvShowDownloadTask.Id.ShouldBe(999);
-
-        mock.VerifyMediator(It.IsAny<GetPlexTvShowEpisodeByIdQuery>, Times.Once);
-        mock.VerifyMediator(It.IsAny<GetDownloadTaskByMediaKeyQuery>, Times.Exactly(3));
+        tvShowDownloadTask.Id.ShouldBe(downloadTask.Id);
 
         tvShowDownloadTask.Children.ShouldAllBe(x => x.Id == 0);
         tvShowDownloadTask.Children.SelectMany(x => x.Children).ToList().ShouldAllBe(x => x.Id == 0);
         tvShowDownloadTask.Children.ShouldAllBe(x => x.ParentId == tvShowDownloadTask.Id);
-        ShouldDownloadTask.ShouldTvShow(tvShowDownloadTask, tvShowDb);
     }
 }

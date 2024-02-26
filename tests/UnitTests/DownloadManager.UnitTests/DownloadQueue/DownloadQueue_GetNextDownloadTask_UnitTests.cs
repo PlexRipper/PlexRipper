@@ -58,9 +58,11 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
     }
 
     [Fact]
-    public void ShouldHaveNextDownloadTask_WhenAllAreQueued()
+    public async Task ShouldHaveNextDownloadTask_WhenAllAreQueued()
     {
         // Arrange
+        await SetupDatabase();
+
         var downloadTasks = TestDownloadTasks(2);
 
         // Act
@@ -72,9 +74,11 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
     }
 
     [Fact]
-    public void ShouldHaveNextDownloadTask_WhenADownloadTaskHasBeenCompleted()
+    public async Task ShouldHaveNextDownloadTask_WhenADownloadTaskHasBeenCompleted()
     {
         // Arrange
+        await SetupDatabase();
+
         var downloadTasks = TestDownloadTasks(3);
         downloadTasks[0].DownloadStatus = DownloadStatus.Completed;
         downloadTasks[0].Children = downloadTasks[0].Children.SetToCompleted();
@@ -88,9 +92,11 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
     }
 
     [Fact]
-    public void ShouldHaveNextQueuedDownloadTaskInDownloadingTask_WhenAParentDownloadTaskIsAlreadyDownloading()
+    public async Task ShouldHaveNextQueuedDownloadTaskInDownloadingTask_WhenAParentDownloadTaskIsAlreadyDownloading()
     {
         // Arrange
+        await SetupDatabase();
+
         var downloadTasks = TestDownloadTasks(3);
         downloadTasks[0].DownloadStatus = DownloadStatus.Downloading;
 
@@ -103,9 +109,11 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
     }
 
     [Fact]
-    public void ShouldHaveNoDownloadTask_WhenADownloadTaskIsAlreadyDownloading()
+    public async Task ShouldHaveNoDownloadTask_WhenADownloadTaskIsAlreadyDownloading()
     {
         // Arrange
+        await SetupDatabase();
+
         var downloadTasks = TestDownloadTasks(2);
         downloadTasks[0].DownloadStatus = DownloadStatus.Downloading;
         downloadTasks[0].Children = downloadTasks[0].Children.SetToDownloading();

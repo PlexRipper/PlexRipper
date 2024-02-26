@@ -3,6 +3,7 @@ using Data.Contracts;
 using DownloadManager.Contracts;
 using FluentValidation;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.DownloadManager;
 
@@ -12,6 +13,7 @@ public class DownloadTaskValidator : IDownloadTaskValidator
 
     private readonly ILog _log;
     private readonly IMediator _mediator;
+    private readonly IPlexRipperDbContext _dbContext;
 
     private readonly INotificationsService _notificationsService;
 
@@ -19,10 +21,11 @@ public class DownloadTaskValidator : IDownloadTaskValidator
 
     #region Constructor
 
-    public DownloadTaskValidator(ILog log, IMediator mediator, INotificationsService notificationsService)
+    public DownloadTaskValidator(ILog log, IMediator mediator, IPlexRipperDbContext dbContext, INotificationsService notificationsService)
     {
         _log = log;
         _mediator = mediator;
+        _dbContext = dbContext;
         _notificationsService = notificationsService;
     }
 
@@ -35,12 +38,9 @@ public class DownloadTaskValidator : IDownloadTaskValidator
         if (!downloadTasks.Any())
             return ResultExtensions.IsEmpty(nameof(downloadTasks)).LogWarning();
 
-        var downloadTasksDb = await _mediator.Send(new GetAllDownloadTasksQuery());
-        if (downloadTasksDb.IsFailed)
-            return downloadTasksDb.ToResult();
-
         var existingDownloadTasks = new List<DownloadTask>();
-        var flattenedDownloadTaskDb = downloadTasksDb.Value.Flatten(x => x.Children).ToList();
+        var flattenedDownloadTaskDb = await _dbContext.DownloadTasks.ToListAsync();
+
         var errors = new List<Error>();
         foreach (var downloadTask in downloadTasks)
             if (flattenedDownloadTaskDb.Any(x =>

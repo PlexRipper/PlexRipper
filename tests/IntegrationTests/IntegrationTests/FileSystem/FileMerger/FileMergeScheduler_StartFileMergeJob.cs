@@ -2,7 +2,6 @@ using Data.Contracts;
 
 namespace IntegrationTests.FileSystem.FileMerger;
 
-
 public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegrationTests
 {
     public FileMergeScheduler_StartFileMergeJob_IntegrationTests(ITestOutputHelper output) : base(output) { }
@@ -30,8 +29,11 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
 
         // Act
         var downloadWorkerTasks = Container.GetDownloadTaskFactory.GenerateDownloadWorkerTasks(downloadTask);
-        var addWorkersResult = await Container.Mediator.Send(new AddDownloadWorkerTasksCommand(downloadWorkerTasks.Value));
-        addWorkersResult.IsSuccess.ShouldBeTrue();
+
+        downloadWorkerTasks.Value.ForEach(x => x.DownloadTask = null);
+        await DbContext.DownloadWorkerTasks.AddRangeAsync(downloadWorkerTasks.Value);
+        await DbContext.SaveChangesAsync();
+
         var createResult = await Container.FileMergeScheduler.CreateFileTaskFromDownloadTask(downloadTask.Id);
         createResult.IsSuccess.ShouldBeTrue();
         var startResult = await Container.FileMergeScheduler.StartFileMergeJob(createResult.Value.Id);
@@ -39,11 +41,11 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
 
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
-        var downloadTaskResult = await Container.Mediator.Send(new GetDownloadTaskByIdQuery(downloadTask.RootDownloadTaskId, true));
-        downloadTaskResult.IsSuccess.ShouldBeTrue();
-        var downloadTaskDb = downloadTaskResult.Value;
+
+        var downloadTaskDb = await DbContext.DownloadTasks.IncludeDownloadTasks().GetAsync(downloadTask.RootDownloadTaskId);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
+
         foreach (var childDownloadTask in downloadTaskDb.Children)
             childDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Completed);
         Container.MockSignalRService.FileMergeProgressList.Count.ShouldBeGreaterThan(10);

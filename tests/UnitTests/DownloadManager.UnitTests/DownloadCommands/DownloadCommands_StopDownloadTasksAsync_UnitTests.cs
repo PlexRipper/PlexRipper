@@ -1,10 +1,9 @@
-﻿using BackgroundServices.Contracts;
+﻿using Application.Contracts;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using FileSystem.Contracts;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
-using PlexRipper.Data.Common;
 
 namespace DownloadManager.UnitTests;
 
@@ -72,7 +71,8 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
         mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StopDownloadTaskJob(It.IsAny<int>()), Times.Once);
         mock.VerifyMediator(It.IsAny<DownloadTaskUpdated>, Times.Once);
-        var downloadTasksDb = await GetDbContext().DownloadTasks
+        var downloadTasksDb = await GetDbContext()
+            .DownloadTasks
             .IncludeDownloadTasks()
             .FirstOrDefaultAsync(x => x.Id == downloadTaskIds.First());
         downloadTasksDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);

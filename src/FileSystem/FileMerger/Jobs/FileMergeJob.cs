@@ -16,6 +16,7 @@ public class FileMergeJob : IJob
 {
     private readonly ILog _log;
     private readonly IMediator _mediator;
+    private readonly IPlexRipperDbContext _dbContext;
     private readonly IFileMergeSystem _fileMergeSystem;
     private readonly INotificationsService _notificationsService;
     private readonly IFileMergeStreamProvider _fileMergeStreamProvider;
@@ -25,12 +26,14 @@ public class FileMergeJob : IJob
     public FileMergeJob(
         ILog log,
         IMediator mediator,
+        IPlexRipperDbContext dbContext,
         IFileMergeSystem fileMergeSystem,
         INotificationsService notificationsService,
         IFileMergeStreamProvider fileMergeStreamProvider)
     {
         _log = log;
         _mediator = mediator;
+        _dbContext = dbContext;
         _fileMergeSystem = fileMergeSystem;
         _notificationsService = notificationsService;
         _fileMergeStreamProvider = fileMergeStreamProvider;
@@ -38,10 +41,7 @@ public class FileMergeJob : IJob
 
     public static string FileTaskId => "FileTaskId";
 
-    public static JobKey GetJobKey(int id)
-    {
-        return new JobKey($"{FileTaskId}_{id}", nameof(FileMergeJob));
-    }
+    public static JobKey GetJobKey(int id) => new($"{FileTaskId}_{id}", nameof(FileMergeJob));
 
     public async Task Execute(IJobExecutionContext context)
     {
@@ -81,7 +81,8 @@ public class FileMergeJob : IJob
             downloadTask.DownloadStatus = newDownloadStatus;
             downloadTask.DownloadWorkerTasks.ForEach(x => x.DownloadStatus = newDownloadStatus);
 
-            await _mediator.Send(new UpdateDownloadTasksByIdCommand(downloadTask), token);
+            await _dbContext.UpdateDownloadTasksAsync(downloadTask, token);
+
             await _mediator.Send(new DownloadTaskUpdated(downloadTask), token);
 
             // Verify all file paths exists

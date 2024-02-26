@@ -6,11 +6,13 @@ namespace PlexRipper.FileSystem;
 
 public class FileMergeFinishedHandler : INotificationHandler<FileMergeFinishedNotification>
 {
+    private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
     private readonly IFileMergeSystem _fileMergeSystem;
 
-    public FileMergeFinishedHandler(IMediator mediator, IFileMergeSystem fileMergeSystem)
+    public FileMergeFinishedHandler(IPlexRipperDbContext dbContext, IMediator mediator, IFileMergeSystem fileMergeSystem)
     {
+        _dbContext = dbContext;
         _mediator = mediator;
         _fileMergeSystem = fileMergeSystem;
     }
@@ -29,7 +31,7 @@ public class FileMergeFinishedHandler : INotificationHandler<FileMergeFinishedNo
 
         _fileMergeSystem.DeleteDirectoryFromFilePath(fileTask.FilePaths.First());
 
-        await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(fileTask.DownloadTaskId, DownloadStatus.Completed), cancellationToken);
+        await _dbContext.DownloadTasks.SetDownloadStatusAsync(fileTask.DownloadTaskId, DownloadStatus.Completed, cancellationToken);
 
         await _mediator.Send(new DeleteFileTaskByIdCommand(notification.FileTaskId), cancellationToken);
 

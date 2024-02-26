@@ -1,8 +1,9 @@
 ﻿using System.Threading.Channels;
-using BackgroundServices.Contracts;
+using Application.Contracts;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.DownloadManager;
 
@@ -14,7 +15,7 @@ public class DownloadQueue : IDownloadQueue
     #region Fields
 
     private readonly ILog _log;
-    private readonly IMediator _mediator;
+    private readonly IPlexRipperDbContext _dbContext;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     private readonly Channel<int> _plexServersToCheckChannel = Channel.CreateUnbounded<int>();
@@ -27,10 +28,10 @@ public class DownloadQueue : IDownloadQueue
 
     #region Constructor
 
-    public DownloadQueue(ILog log, IMediator mediator, IDownloadTaskScheduler downloadTaskScheduler)
+    public DownloadQueue(ILog log, IPlexRipperDbContext dbContext, IDownloadTaskScheduler downloadTaskScheduler)
     {
         _log = log;
-        _mediator = mediator;
+        _dbContext = dbContext;
         _downloadTaskScheduler = downloadTaskScheduler;
     }
 
@@ -72,20 +73,18 @@ public class DownloadQueue : IDownloadQueue
         if (plexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId).LogWarning();
 
-        var downloadTasksResult = await _mediator.Send(new GetDownloadTasksByPlexServerIdQuery(plexServerId), _token);
-        if (downloadTasksResult.IsFailed)
-            return downloadTasksResult.LogError();
+        var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, _token);
+        var downloadTasks = await _dbContext.PlexServers
+            .AsTracking()
+            .IncludeDownloadTasks()
+            .GetAsync(plexServerId, _token);
+        var rootDownloadTasks = downloadTasks.DownloadTasks.Where(x => x.ParentId == null).ToList();
 
-        var plexServerName = await _mediator.Send(new GetPlexServerNameByIdQuery(plexServerId), _token);
-        if (plexServerName.IsFailed)
-            return plexServerName.LogError();
-
-        _log.Here().Debug("Checking {NameOfPlexServer}: {PlexServerName} for the next download to start", nameof(PlexServer), plexServerName.Value);
-
-        var nextDownloadTaskResult = GetNextDownloadTask(downloadTasksResult.Value);
+        _log.Here().Debug("Checking {NameOfPlexServer}: {PlexServerName} for the next download to start", nameof(PlexServer), plexServerName);
+        var nextDownloadTaskResult = GetNextDownloadTask(rootDownloadTasks);
         if (nextDownloadTaskResult.IsFailed)
         {
-            _log.Information("There are no available downloadTasks remaining for PlexServer with Id: {PlexServerName}", plexServerName.Value);
+            _log.Information("There are no available downloadTasks remaining for PlexServer with Id: {PlexServerName}", plexServerName);
             return Result.Ok();
         }
 

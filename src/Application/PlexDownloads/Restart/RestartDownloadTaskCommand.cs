@@ -1,4 +1,4 @@
-using BackgroundServices.Contracts;
+using Application.Contracts;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using FluentValidation;
@@ -55,9 +55,9 @@ public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownload
         if (restartedDownloadTask == null)
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogError();
 
-        await _mediator.Send(new UpdateDownloadTasksByIdCommand(downloadTasks), cancellationToken);
+        await _dbContext.UpdateDownloadTasksAsync(downloadTasks, cancellationToken);
 
-        await _mediator.Send(new UpdateDownloadStatusOfDownloadTaskCommand(downloadTaskId, DownloadStatus.Queued), cancellationToken);
+        await _dbContext.DownloadTasks.SetDownloadStatusAsync(downloadTaskId, DownloadStatus.Queued, cancellationToken);
 
         // Notify of a DownloadTask being updated
         var downloadTask = await _dbContext.DownloadTasks.GetAsync(downloadTaskId, cancellationToken);

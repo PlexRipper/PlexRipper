@@ -9,10 +9,12 @@ namespace PlexRipper.FileSystem;
 public class FileMergeScheduler : BaseScheduler, IFileMergeScheduler
 {
     private readonly IMediator _mediator;
+    private readonly IPlexRipperDbContext _dbContext;
 
-    public FileMergeScheduler(ILog log, IScheduler scheduler, IMediator mediator) : base(log, scheduler)
+    public FileMergeScheduler(ILog log, IScheduler scheduler, IMediator mediator, IPlexRipperDbContext dbContext) : base(log, scheduler)
     {
         _mediator = mediator;
+        _dbContext = dbContext;
     }
 
     protected override JobKey DefaultJobKey => new($"DownloadTaskId_", nameof(FileMergeJob));
@@ -26,12 +28,12 @@ public class FileMergeScheduler : BaseScheduler, IFileMergeScheduler
         if (downloadTaskId == 0)
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId)).LogError();
 
-        var downloadTask = await _mediator.Send(new GetDownloadTaskByIdQuery(downloadTaskId, true));
-        if (downloadTask.IsFailed)
-            return downloadTask.ToResult().LogError();
+        var downloadTask = await _dbContext.DownloadTasks.IncludeDownloadTasks().GetAsync(downloadTaskId);
+        if (downloadTask is null)
+            return ResultExtensions.EntityNotFound(nameof(DownloadTask), downloadTaskId);
 
-        _log.Here().Debug("Adding DownloadTask {DownloadTaskTitle} with id {Id} to a FileTask to be merged", downloadTask.Value.Title, downloadTask.Value.Id);
-        var result = await _mediator.Send(new AddFileTaskFromDownloadTaskCommand(downloadTask.Value));
+        _log.Here().Debug("Adding DownloadTask {DownloadTaskTitle} with id {Id} to a FileTask to be merged", downloadTask.Title, downloadTask.Id);
+        var result = await _mediator.Send(new AddFileTaskFromDownloadTaskCommand(downloadTask));
         if (result.IsFailed)
             return result.ToResult().LogError();
 

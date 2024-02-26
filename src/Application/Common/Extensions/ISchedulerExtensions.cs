@@ -36,4 +36,17 @@ public static class ISchedulerExtensions
             await Task.Delay(500, cancellationToken);
         }
     }
+
+    public static Task<bool> StopJob(this IScheduler scheduler, JobKey key) => scheduler.Interrupt(key);
+
+    public static Task<bool> IsJobRunning(this IScheduler scheduler, JobKey key) => scheduler.CheckExists(key);
+
+    public static async Task<List<JobDataMap>> GetRunningJobDataMaps(this IScheduler scheduler, Type jobType)
+    {
+        var jobs = await scheduler.GetCurrentlyExecutingJobs();
+        return jobs
+            .Where(x => x.JobInstance.GetType() == jobType)
+            .Select(x => x.JobDetail.JobDataMap)
+            .ToList();
+    }
 }

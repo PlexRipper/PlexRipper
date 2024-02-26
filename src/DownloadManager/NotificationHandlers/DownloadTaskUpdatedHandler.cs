@@ -61,7 +61,7 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdated>
 
         void SetDownloadStatus(DownloadTask downloadTask)
         {
-            if (downloadTask.Children is null || !downloadTask.Children.Any())
+            if (downloadTask?.Children is null || !downloadTask.Children.Any())
                 return;
 
             foreach (var downloadTaskChild in downloadTask.Children)

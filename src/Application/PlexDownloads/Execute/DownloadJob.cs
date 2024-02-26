@@ -51,7 +51,7 @@ public class DownloadJob : IJob, IDisposable
         try
         {
             // Create the multiple download worker tasks which will split up the work
-            var downloadTask = await _dbContext.DownloadTasks.IncludeDownloadTasks().GetAsync(downloadTaskId, token);
+            var downloadTask = await _dbContext.DownloadTasks.IncludeDownloadTasks().Include(x => x.PlexServer).GetAsync(downloadTaskId, token);
             if (downloadTask is null)
             {
                 ResultExtensions.EntityNotFound(nameof(DownloadTask), downloadTaskId).LogError();

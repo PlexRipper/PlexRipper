@@ -1,0 +1,85 @@
+using Microsoft.EntityFrameworkCore;
+using PlexRipper.Domain;
+
+namespace Data.Contracts;
+
+public static partial class DbContextExtensions
+{
+    public static async Task<DownloadTaskGeneric?> GetDownloadTaskByKeyQuery(
+        this IPlexRipperDbContext dbContext,
+        DownloadTaskType type,
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        switch (type)
+        {
+            // DownloadTaskType.Movie
+            case DownloadTaskType.Movie:
+                var downloadTaskMovie = await dbContext.DownloadTaskMovie
+                    .Include(x => x.PlexServer)
+                    .Include(x => x.PlexLibrary)
+                    .Include(x => x.Children)
+                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                return downloadTaskMovie.ToGeneric();
+
+            // DownloadTaskType.MovieData
+            case DownloadTaskType.MovieData:
+            case DownloadTaskType.MoviePart:
+                var downloadTaskMovieFile = await dbContext.DownloadTaskMovieFile
+                    .Include(x => x.PlexServer)
+                    .Include(x => x.PlexLibrary)
+                    .Include(x => x.DestinationFolder)
+                    .Include(x => x.DownloadFolder)
+                    .Include(x => x.DownloadWorkerTasks)
+                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                return downloadTaskMovieFile.ToGeneric();
+
+            // DownloadTaskType.TvShow
+            case DownloadTaskType.TvShow:
+                var downloadTaskTvShow = await dbContext.DownloadTaskTvShow
+                    .Include(x => x.PlexServer)
+                    .Include(x => x.PlexLibrary)
+                    .Include(x => x.Children)
+                    .ThenInclude(x => x.Children)
+                    .ThenInclude(x => x.Children)
+                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                return downloadTaskTvShow.ToGeneric();
+
+            // DownloadTaskType.TvShowSeason
+            case DownloadTaskType.Season:
+                var downloadTaskTvShowSeason = await dbContext.DownloadTaskTvShowSeason
+                    .Include(x => x.PlexServer)
+                    .Include(x => x.PlexLibrary)
+                    .Include(x => x.Children)
+                    .ThenInclude(x => x.Children)
+                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                return downloadTaskTvShowSeason.ToGeneric();
+
+            // DownloadTaskType.Episode
+            case DownloadTaskType.Episode:
+                var downloadTaskTvShowEpisode = await dbContext.DownloadTaskTvShowEpisode
+                    .Include(x => x.PlexServer)
+                    .Include(x => x.PlexLibrary)
+                    .Include(x => x.Children)
+                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                return downloadTaskTvShowEpisode.ToGeneric();
+
+            // DownloadTaskType.EpisodeData
+            case DownloadTaskType.EpisodeData:
+            case DownloadTaskType.EpisodePart:
+                var downloadTaskTvShowEpisodeFile = await dbContext.DownloadTaskTvShowEpisodeFile
+                    .Include(x => x.PlexServer)
+                    .Include(x => x.PlexLibrary)
+                    .Include(x => x.DestinationFolder)
+                    .Include(x => x.DownloadFolder)
+                    .Include(x => x.DownloadWorkerTasks)
+                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                return downloadTaskTvShowEpisodeFile.ToGeneric();
+
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        return null;
+    }
+}

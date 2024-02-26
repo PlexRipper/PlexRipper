@@ -152,18 +152,18 @@ public class DownloadController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<DownloadTaskDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetDetail(int id, CancellationToken token)
+    public async Task<IActionResult> GetDetail(int id, [FromQuery] DownloadTaskType type, CancellationToken token)
     {
         if (id <= 0)
             return BadRequestInvalidId();
 
-        var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(id), token);
+        var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(type, id), token);
 
         if (downloadTaskResult.IsFailed)
             return ToActionResult(downloadTaskResult.ToResult());
 
         if (!downloadTaskResult.Value.IsDownloadable)
-            return ToActionResult<DownloadTask, DownloadTaskDTO>(downloadTaskResult);
+            return ToActionResult<DownloadTaskGeneric, DownloadTaskDTO>(downloadTaskResult);
 
         // Add DownloadUrl to DownloadTaskDTO
         var downloadTaskDto = _mapper.Map<DownloadTaskDTO>(downloadTaskResult.Value);
@@ -171,7 +171,7 @@ public class DownloadController : BaseController
         var downloadUrl =
             await _dbContext.GetDownloadUrl(downloadTaskDto.PlexServerId, downloadTaskDto.FileLocationUrl, token);
         if (downloadUrl.IsFailed)
-            return ToActionResult<DownloadTask, DownloadTaskDTO>(downloadTaskResult);
+            return ToActionResult<DownloadTaskGeneric, DownloadTaskDTO>(downloadTaskResult);
 
         if (downloadTaskResult.Value.IsDownloadable)
             downloadTaskDto.DownloadUrl = downloadUrl.Value;

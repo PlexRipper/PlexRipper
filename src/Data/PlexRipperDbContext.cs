@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NaturalSort.Extension;
 using PlexRipper.Data.Common;
+using PlexRipper.Domain.DownloadV2;
 
 namespace PlexRipper.Data;
 
@@ -25,8 +26,6 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
     #region Tables
 
     public DbSet<PlexAccount> PlexAccounts { get; set; }
-
-    public DbSet<DownloadTask> DownloadTasks { get; set; }
 
     public DbSet<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
 
@@ -69,6 +68,24 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
     public DbSet<PlexServerStatus> PlexServerStatuses { get; set; }
 
     #endregion
+
+    #endregion
+
+    #region DownloadTasks
+
+    public DbSet<DownloadTask> DownloadTasks { get; set; }
+
+    public DbSet<DownloadTaskMovie> DownloadTaskMovie { get; set; }
+
+    public DbSet<DownloadTaskMovieFile> DownloadTaskMovieFile { get; set; }
+
+    public DbSet<DownloadTaskTvShow> DownloadTaskTvShow { get; set; }
+
+    public DbSet<DownloadTaskTvShowSeason> DownloadTaskTvShowSeason { get; set; }
+
+    public DbSet<DownloadTaskTvShowEpisode> DownloadTaskTvShowEpisode { get; set; }
+
+    public DbSet<DownloadTaskTvShowEpisodeFile> DownloadTaskTvShowEpisodeFile { get; set; }
 
     #endregion
 

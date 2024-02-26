@@ -171,6 +171,10 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
 
         builder.AddQuartz(x => x.UseSqlite());
 
+        builder.Entity<DownloadTaskBase>().UseTpcMappingStrategy();
+        builder.Entity<DownloadTaskParentBase>().UseTpcMappingStrategy();
+        builder.Entity<DownloadTaskFileBase>().UseTpcMappingStrategy();
+
         // NOTE: This has been added to PlexRipperDbContext.OnModelCreating
         // Based on: https://stackoverflow.com/a/63992731/8205497
         builder.Entity<PlexMovie>()

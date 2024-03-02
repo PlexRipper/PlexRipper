@@ -16,9 +16,7 @@ public static partial class DbContextExtensions
             // DownloadTaskType.Movie
             case DownloadTaskType.Movie:
                 var downloadTaskMovie = await dbContext.DownloadTaskMovie
-                    .Include(x => x.PlexServer)
-                    .Include(x => x.PlexLibrary)
-                    .Include(x => x.Children)
+                    .IncludeAll()
                     .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
                 return downloadTaskMovie.ToGeneric();
 
@@ -81,5 +79,24 @@ public static partial class DbContextExtensions
         }
 
         return null;
+    }
+
+    public static async Task<List<DownloadTaskGeneric>> GetAllDownloadTasksAsync(
+        this IPlexRipperDbContext dbContext,
+        CancellationToken cancellationToken = default)
+    {
+        var downloadTasks = new List<DownloadTaskGeneric>();
+
+        var downloadTasksMovies = await dbContext.DownloadTaskMovie
+            .IncludeAll()
+            .ToListAsync(cancellationToken);
+
+        var downloadTasksTvShows = await dbContext.DownloadTaskTvShow.IncludeAll()
+            .ToListAsync(cancellationToken);
+
+        downloadTasks.AddRange(downloadTasksMovies.Select(x => x.ToGeneric()));
+        downloadTasks.AddRange(downloadTasksTvShows.Select(x => x.ToGeneric()));
+
+        return downloadTasks;
     }
 }

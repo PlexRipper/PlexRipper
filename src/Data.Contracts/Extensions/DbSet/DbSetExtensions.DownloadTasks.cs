@@ -45,4 +45,28 @@ public static partial class DbSetExtensions
             .Where(x => x.Id == downloadTaskId)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, x => downloadStatus), cancellationToken);
     }
+
+    public static IQueryable<DownloadTaskMovie> IncludeAll(this IQueryable<DownloadTaskMovie> downloadTasks) => downloadTasks
+        .Include(x => x.PlexServer)
+        .Include(x => x.PlexLibrary)
+        .Include($"{nameof(DownloadTaskMovie.Children)}.{nameof(DownloadTaskMovieFile.PlexLibrary)}")
+        .Include($"{nameof(DownloadTaskMovie.Children)}.{nameof(DownloadTaskMovieFile.PlexServer)}")
+        .Include($"{nameof(DownloadTaskMovie.Children)}.{nameof(DownloadTaskMovieFile.DestinationFolder)}")
+        .Include($"{nameof(DownloadTaskMovie.Children)}.{nameof(DownloadTaskMovieFile.DownloadFolder)}");
+
+    public static IQueryable<DownloadTaskTvShow> IncludeAll(this IQueryable<DownloadTaskTvShow> downloadTasks) => downloadTasks
+        .Include($"{nameof(DownloadTaskTvShow.PlexServer)}")
+        .Include($"{nameof(DownloadTaskTvShow.PlexLibrary)}")
+        .Include($"{nameof(DownloadTaskTvShow.Children)}.{nameof(DownloadTaskTvShowSeason.PlexServer)}")
+        .Include($"{nameof(DownloadTaskTvShow.Children)}.{nameof(DownloadTaskTvShowSeason.PlexLibrary)}")
+        .Include($"{nameof(DownloadTaskTvShow.Children)}.{nameof(DownloadTaskTvShowSeason.Children)}.{nameof(DownloadTaskTvShowEpisode.PlexLibrary)}")
+        .Include($"{nameof(DownloadTaskTvShow.Children)}.{nameof(DownloadTaskTvShowSeason.Children)}.{nameof(DownloadTaskTvShowEpisode.PlexServer)}")
+        .Include(
+            $"{nameof(DownloadTaskTvShow.Children)}.{nameof(DownloadTaskTvShowSeason.Children)}.{nameof(DownloadTaskTvShowEpisode.Children)}.{nameof(DownloadTaskTvShowEpisodeFile.PlexLibrary)}")
+        .Include(
+            $"{nameof(DownloadTaskTvShow.Children)}.{nameof(DownloadTaskTvShowSeason.Children)}.{nameof(DownloadTaskTvShowEpisode.Children)}.{nameof(DownloadTaskTvShowEpisodeFile.PlexServer)}")
+        .Include(
+            $"{nameof(DownloadTaskTvShow.Children)}.{nameof(DownloadTaskTvShowSeason.Children)}.{nameof(DownloadTaskTvShowEpisode.Children)}.{nameof(DownloadTaskTvShowEpisodeFile.DownloadFolder)}")
+        .Include(
+            $"{nameof(DownloadTaskTvShow.Children)}.{nameof(DownloadTaskTvShowSeason.Children)}.{nameof(DownloadTaskTvShowEpisode.Children)}.{nameof(DownloadTaskTvShowEpisodeFile.DestinationFolder)}");
 }

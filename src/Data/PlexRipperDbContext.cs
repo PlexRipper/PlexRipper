@@ -11,7 +11,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NaturalSort.Extension;
 using PlexRipper.Data.Common;
-using PlexRipper.Domain.DownloadV2;
 
 namespace PlexRipper.Data;
 

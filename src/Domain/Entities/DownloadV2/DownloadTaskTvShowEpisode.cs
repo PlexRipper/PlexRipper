@@ -1,4 +1,4 @@
-namespace PlexRipper.Domain.DownloadV2;
+namespace PlexRipper.Domain;
 
 public class DownloadTaskTvShowEpisode : DownloadTaskParentBase
 {

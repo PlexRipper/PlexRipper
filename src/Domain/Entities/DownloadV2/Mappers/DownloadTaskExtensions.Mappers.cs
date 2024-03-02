@@ -1,5 +1,3 @@
-using PlexRipper.Domain.DownloadV2;
-
 namespace PlexRipper.Domain;
 
 public static class DownloadTaskExtensions_Mappers

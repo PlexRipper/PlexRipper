@@ -2,7 +2,6 @@ using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using PlexRipper.Domain;
-using PlexRipper.Domain.DownloadV2;
 
 namespace Data.Contracts;
 

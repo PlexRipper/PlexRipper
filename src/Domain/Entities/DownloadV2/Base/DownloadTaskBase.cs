@@ -7,7 +7,7 @@ public abstract class DownloadTaskBase
 {
     [Key]
     [Column(Order = 0)]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Gets or sets the unique identifier used by the Plex Api to keep track of media.

@@ -42,7 +42,7 @@ public class DownloadController : BaseController
         if (result.IsFailed)
             return InternalServerError(result.ToResult());
 
-        return ToActionResult<List<DownloadTask>, List<ServerDownloadProgressDTO>>(result);
+        return ToActionResult<List<DownloadTaskGeneric>, List<ServerDownloadProgressDTO>>(result);
     }
 
     /// <summary>
@@ -147,14 +147,14 @@ public class DownloadController : BaseController
         return ToActionResult(deleteResult);
     }
 
-    // GET: api/(DownloadController)/detail/{id:int}
-    [HttpGet("detail/{id:int}")]
+    // GET: api/(DownloadController)/detail/{id:guid}/
+    [HttpGet("detail/{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<DownloadTaskDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetDetail(int id, [FromQuery] DownloadTaskType type, CancellationToken token)
+    public async Task<IActionResult> GetDetail(Guid id, DownloadTaskType type, CancellationToken token)
     {
-        if (id <= 0)
+        if (id == Guid.Empty)
             return BadRequestInvalidId();
 
         var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(type, id), token);

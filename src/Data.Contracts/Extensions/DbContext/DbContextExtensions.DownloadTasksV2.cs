@@ -8,7 +8,7 @@ public static partial class DbContextExtensions
     public static async Task<DownloadTaskGeneric?> GetDownloadTaskByKeyQuery(
         this IPlexRipperDbContext dbContext,
         DownloadTaskType type,
-        int id,
+        Guid id,
         CancellationToken cancellationToken = default)
     {
         switch (type)

@@ -1,18 +1,17 @@
 ﻿using Data.Contracts;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
 public record GetDownloadTaskByIdQuery(
     DownloadTaskType Type,
-    int DownloadTaskId) : IRequest<Result<DownloadTaskGeneric>>;
+    Guid DownloadTaskId) : IRequest<Result<DownloadTaskGeneric>>;
 
 public class GetDownloadTaskByIdQueryValidator : AbstractValidator<GetDownloadTaskByIdQuery>
 {
     public GetDownloadTaskByIdQueryValidator()
     {
-        RuleFor(x => x.DownloadTaskId).GreaterThan(0);
+        RuleFor(x => x.DownloadTaskId).NotEmpty();
         RuleFor(x => x.Type).NotEqual(DownloadTaskType.None);
     }
 }

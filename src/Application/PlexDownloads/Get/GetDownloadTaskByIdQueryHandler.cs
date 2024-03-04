@@ -4,15 +4,15 @@ using FluentValidation;
 namespace PlexRipper.Application;
 
 public record GetDownloadTaskByIdQuery(
-    DownloadTaskType Type,
-    Guid DownloadTaskId) : IRequest<Result<DownloadTaskGeneric>>;
+    Guid DownloadTaskId,
+    DownloadTaskType Type = DownloadTaskType.None
+) : IRequest<Result<DownloadTaskGeneric>>;
 
 public class GetDownloadTaskByIdQueryValidator : AbstractValidator<GetDownloadTaskByIdQuery>
 {
     public GetDownloadTaskByIdQueryValidator()
     {
         RuleFor(x => x.DownloadTaskId).NotEmpty();
-        RuleFor(x => x.Type).NotEqual(DownloadTaskType.None);
     }
 }
 
@@ -27,7 +27,7 @@ public class GetDownloadTaskByIdQueryHandler : IRequestHandler<GetDownloadTaskBy
 
     public async Task<Result<DownloadTaskGeneric>> Handle(GetDownloadTaskByIdQuery request, CancellationToken cancellationToken)
     {
-        var downloadTask = await _dbContext.GetDownloadTaskByKeyQuery(request.Type, request.DownloadTaskId, cancellationToken);
+        var downloadTask = await _dbContext.GetDownloadTaskByKeyQuery(request.DownloadTaskId, request.Type, cancellationToken);
 
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTask), request.DownloadTaskId);

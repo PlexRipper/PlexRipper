@@ -152,12 +152,12 @@ public class DownloadController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<DownloadTaskDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetDetail(Guid id, DownloadTaskType type, CancellationToken token)
+    public async Task<IActionResult> GetDetail(Guid id, CancellationToken token)
     {
         if (id == Guid.Empty)
             return BadRequestInvalidId();
 
-        var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(type, id), token);
+        var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(id), token);
 
         if (downloadTaskResult.IsFailed)
             return ToActionResult(downloadTaskResult.ToResult());

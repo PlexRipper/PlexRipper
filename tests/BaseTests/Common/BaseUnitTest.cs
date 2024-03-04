@@ -16,6 +16,7 @@ public class BaseUnitTest : IDisposable
 
     private string _databaseName;
     protected PlexRipperDbContext DbContext;
+    protected IPlexRipperDbContext IDbContext => DbContext;
     private bool disableForeignKeyCheck;
     private bool isDatabaseSetup;
     protected ILog _log;

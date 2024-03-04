@@ -18,7 +18,7 @@ public static partial class MockDatabase
             var plexServer = context.PlexServers.IncludeConnections().FirstOrDefault(x => x.Id == plexLibrary.PlexServerId);
             plexServer.ShouldNotBeNull();
 
-            downloadTasks = downloadTasks.SetRelationshipIds(plexLibrary.PlexServerId, plexLibrary.Id);
+            downloadTasks.SetRelationshipIds(plexLibrary.PlexServerId, plexLibrary.Id);
         }
 
         context.DownloadTaskMovie.AddRange(downloadTasks);
@@ -44,7 +44,7 @@ public static partial class MockDatabase
             var plexServer = context.PlexServers.IncludeConnections().FirstOrDefault(x => x.Id == plexLibrary.PlexServerId);
             plexServer.ShouldNotBeNull();
 
-            downloadTasks = downloadTasks.SetRelationshipIds(plexLibrary.PlexServerId, plexLibrary.Id);
+            downloadTasks.SetRelationshipIds(plexLibrary.PlexServerId, plexLibrary.Id);
         }
 
         context.DownloadTaskTvShow.AddRange(downloadTasks);

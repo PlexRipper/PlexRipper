@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Domain;
 
@@ -11,19 +10,28 @@ public static partial class DbContextExtensions
         Guid guid,
         CancellationToken cancellationToken = default)
     {
-        Expression<Func<DownloadTaskBase, DownloadTaskType>> CheckIfNull(DownloadTaskType successType) =>
-            u => u.Id != Guid.Empty ? successType : DownloadTaskType.None;
+        if (guid == Guid.Empty)
+            return DownloadTaskType.None;
 
-        var queryA = dbContext.DownloadTaskTvShow.Where(e => e.Id == guid).Select(CheckIfNull(DownloadTaskType.TvShow));
-        var queryB = dbContext.DownloadTaskTvShowSeason.Where(e => e.Id == guid).Select(CheckIfNull(DownloadTaskType.Season));
-        var queryC = dbContext.DownloadTaskTvShowEpisode.Where(e => e.Id == guid).Select(CheckIfNull(DownloadTaskType.Episode));
-        var queryD = dbContext.DownloadTaskTvShowEpisodeFile.Where(e => e.Id == guid).Select(CheckIfNull(DownloadTaskType.EpisodeData));
-        var queryE = dbContext.DownloadTaskMovie.Where(e => e.Id == guid).Select(CheckIfNull(DownloadTaskType.Movie));
-        var queryF = dbContext.DownloadTaskMovieFile.Where(e => e.Id == guid).Select(CheckIfNull(DownloadTaskType.MovieData));
+        if (await dbContext.DownloadTaskTvShow.AnyAsync(x => x.Id == guid, cancellationToken))
+            return DownloadTaskType.TvShow;
 
-        var results = await queryA.Concat(queryB).Concat(queryC).Concat(queryD).Concat(queryE).Concat(queryF).ToListAsync(cancellationToken);
+        if (await dbContext.DownloadTaskMovie.AnyAsync(x => x.Id == guid, cancellationToken))
+            return DownloadTaskType.Movie;
 
-        return results.Where(x => x != DownloadTaskType.None).ToList().FirstOrDefault();
+        if (await dbContext.DownloadTaskTvShowSeason.AnyAsync(x => x.Id == guid, cancellationToken))
+            return DownloadTaskType.Season;
+
+        if (await dbContext.DownloadTaskTvShowEpisode.AnyAsync(x => x.Id == guid, cancellationToken))
+            return DownloadTaskType.Episode;
+
+        if (await dbContext.DownloadTaskTvShowEpisodeFile.AnyAsync(x => x.Id == guid, cancellationToken))
+            return DownloadTaskType.EpisodeData;
+
+        if (await dbContext.DownloadTaskMovieFile.AnyAsync(x => x.Id == guid, cancellationToken))
+            return DownloadTaskType.MovieData;
+
+        return DownloadTaskType.None;
     }
 
     public static async Task<DownloadTaskGeneric?> GetDownloadTaskByKeyQuery(

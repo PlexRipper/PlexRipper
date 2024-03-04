@@ -167,31 +167,4 @@ public static partial class FakeData
     }
 
     #endregion
-
-    #region DownloadWorkerTasks
-
-    public static Faker<DownloadWorkerTask> GetDownloadWorkerTask(int seed = 0, Action<FakeDataConfig> options = null)
-    {
-        var config = FakeDataConfig.FromOptions(options);
-
-        var partIndex = 1;
-        return new Faker<DownloadWorkerTask>()
-            .StrictMode(true)
-            .UseSeed(seed)
-            .RuleFor(x => x.Id, _ => 0)
-            .RuleFor(x => x.FileName, f => f.System.FileName() + ".mp4")
-            .RuleFor(x => x.StartByte, f => f.Random.Long(0))
-            .RuleFor(x => x.EndByte, f => f.Random.Long(0))
-            .RuleFor(x => x.BytesReceived, 0)
-            .RuleFor(x => x.PartIndex, _ => partIndex++)
-            .RuleFor(x => x.TempDirectory, f => f.System.FilePath())
-            .RuleFor(x => x.ElapsedTime, 0)
-            .RuleFor(x => x.FileLocationUrl, f => f.Internet.UrlRootedPath())
-            .RuleFor(x => x.DownloadStatus, DownloadStatus.Queued)
-            .RuleFor(x => x.DownloadTaskId, _ => 0)
-            .RuleFor(x => x.DownloadTask, _ => null)
-            .RuleFor(x => x.DownloadWorkerTaskLogs, new List<DownloadWorkerLog>());
-    }
-
-    #endregion
 }

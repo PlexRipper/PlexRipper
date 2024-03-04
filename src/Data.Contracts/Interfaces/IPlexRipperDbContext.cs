@@ -12,14 +12,17 @@ public interface IPlexRipperDbContext
     public DbSet<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
     public DbSet<DownloadWorkerLog> DownloadWorkerTasksLogs { get; set; }
     public DbSet<FolderPath> FolderPaths { get; set; }
+
     public DbSet<DownloadFileTask> FileTasks { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+
     public DbSet<PlexGenre> PlexGenres { get; set; }
     public DbSet<PlexLibrary> PlexLibraries { get; set; }
     public DbSet<PlexMovie> PlexMovies { get; set; }
     public DbSet<PlexTvShow> PlexTvShows { get; set; }
     public DbSet<PlexTvShowSeason> PlexTvShowSeason { get; set; }
     public DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; set; }
+
     public DbSet<PlexRole> PlexRoles { get; set; }
     public DbSet<PlexServer> PlexServers { get; set; }
     public DbSet<PlexServerConnection> PlexServerConnections { get; set; }

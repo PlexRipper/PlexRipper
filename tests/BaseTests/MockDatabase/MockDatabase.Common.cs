@@ -12,7 +12,7 @@ using PlexRipper.Data;
 
 namespace PlexRipper.BaseTests;
 
-public static class MockDatabase
+public static partial class MockDatabase
 {
     private static int _seed;
     private static readonly ILog _log = LogManager.CreateLogInstance(typeof(MockDatabase));
@@ -255,7 +255,10 @@ public static class MockDatabase
             context = await context.AddPlexTvShows(options);
 
         if (config.MovieDownloadTasksCount > 0)
+        {
             context = await context.AddMovieDownloadTasks(options);
+            context = await context.AddDownloadTaskMovies(options);
+        }
 
         if (config.TvShowDownloadTasksCount > 0)
             context = await context.AddTvShowDownloadTasks(options);

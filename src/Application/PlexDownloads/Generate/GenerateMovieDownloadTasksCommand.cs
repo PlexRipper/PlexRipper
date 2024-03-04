@@ -68,14 +68,10 @@ public class GenerateMovieDownloadTasksCommandHandler : IRequestHandler<Generate
                 // TODO Might need to be set when download starts to allow free FolderPath's change
                 foreach (var downloadTaskMovieFile in movieDownloadTask.Children)
                     if (plexLibrary.DefaultDestinationId is not null)
-                    {
-                        downloadTaskMovieFile.DestinationFolderId = plexLibrary.DefaultDestinationId ?? default(int);
                         downloadTaskMovieFile.DownloadDirectory = downloadFolderPath;
-                    }
                     else
                     {
                         var destination = defaultDestinationDict[movieDownloadTask.MediaType];
-                        downloadTaskMovieFile.DestinationFolderId = destination.Id;
                         downloadTaskMovieFile.DownloadDirectory = downloadFolderPath;
                     }
 

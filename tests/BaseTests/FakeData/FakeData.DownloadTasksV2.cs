@@ -59,10 +59,6 @@ public static partial class FakeData
             .RuleFor(x => x.DownloadDirectory, f => f.System.FilePath())
             .RuleFor(x => x.DownloadDirectory, f => f.System.FilePath())
             .RuleFor(x => x.DestinationDirectory, f => f.System.FilePath())
-            .RuleFor(x => x.DownloadFolder, _ => null)
-            .RuleFor(x => x.DownloadFolderId, _ => 1)
-            .RuleFor(x => x.DestinationFolder, _ => null)
-            .RuleFor(x => x.DestinationFolderId, _ => 2)
             .RuleFor(x => x.DownloadWorkerTasks, _ => new List<DownloadWorkerTask>());
     }
 

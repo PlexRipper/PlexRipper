@@ -61,8 +61,6 @@ public static partial class DbContextExtensions
                 var downloadTaskMovieFile = await dbContext.DownloadTaskMovieFile
                     .Include(x => x.PlexServer)
                     .Include(x => x.PlexLibrary)
-                    .Include(x => x.DestinationFolder)
-                    .Include(x => x.DownloadFolder)
                     .Include(x => x.DownloadWorkerTasks)
                     .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
                 return downloadTaskMovieFile.ToGeneric();
@@ -103,8 +101,6 @@ public static partial class DbContextExtensions
                 var downloadTaskTvShowEpisodeFile = await dbContext.DownloadTaskTvShowEpisodeFile
                     .Include(x => x.PlexServer)
                     .Include(x => x.PlexLibrary)
-                    .Include(x => x.DestinationFolder)
-                    .Include(x => x.DownloadFolder)
                     .Include(x => x.DownloadWorkerTasks)
                     .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
                 return downloadTaskTvShowEpisodeFile.ToGeneric();

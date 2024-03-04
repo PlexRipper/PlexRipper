@@ -50,9 +50,7 @@ public static partial class DbSetExtensions
         .Include(x => x.PlexServer)
         .Include(x => x.PlexLibrary)
         .Include($"{nameof(DownloadTaskMovie.Children)}.{nameof(DownloadTaskMovieFile.PlexLibrary)}")
-        .Include($"{nameof(DownloadTaskMovie.Children)}.{nameof(DownloadTaskMovieFile.PlexServer)}")
-        .Include($"{nameof(DownloadTaskMovie.Children)}.{nameof(DownloadTaskMovieFile.DestinationFolder)}")
-        .Include($"{nameof(DownloadTaskMovie.Children)}.{nameof(DownloadTaskMovieFile.DownloadFolder)}");
+        .Include($"{nameof(DownloadTaskMovie.Children)}.{nameof(DownloadTaskMovieFile.PlexServer)}");
 
     public static IQueryable<DownloadTaskTvShow> IncludeAll(this IQueryable<DownloadTaskTvShow> downloadTasks) => downloadTasks
         .Include($"{nameof(DownloadTaskTvShow.PlexServer)}")
@@ -64,9 +62,5 @@ public static partial class DbSetExtensions
         .Include(
             $"{nameof(DownloadTaskTvShow.Children)}.{nameof(DownloadTaskTvShowSeason.Children)}.{nameof(DownloadTaskTvShowEpisode.Children)}.{nameof(DownloadTaskTvShowEpisodeFile.PlexLibrary)}")
         .Include(
-            $"{nameof(DownloadTaskTvShow.Children)}.{nameof(DownloadTaskTvShowSeason.Children)}.{nameof(DownloadTaskTvShowEpisode.Children)}.{nameof(DownloadTaskTvShowEpisodeFile.PlexServer)}")
-        .Include(
-            $"{nameof(DownloadTaskTvShow.Children)}.{nameof(DownloadTaskTvShowSeason.Children)}.{nameof(DownloadTaskTvShowEpisode.Children)}.{nameof(DownloadTaskTvShowEpisodeFile.DownloadFolder)}")
-        .Include(
-            $"{nameof(DownloadTaskTvShow.Children)}.{nameof(DownloadTaskTvShowSeason.Children)}.{nameof(DownloadTaskTvShowEpisode.Children)}.{nameof(DownloadTaskTvShowEpisodeFile.DestinationFolder)}");
+            $"{nameof(DownloadTaskTvShow.Children)}.{nameof(DownloadTaskTvShowSeason.Children)}.{nameof(DownloadTaskTvShowEpisode.Children)}.{nameof(DownloadTaskTvShowEpisodeFile.PlexServer)}");
 }

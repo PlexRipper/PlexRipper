@@ -50,14 +50,6 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase
 
     #region Relationships
 
-    public FolderPath DestinationFolder { get; set; }
-
-    public int DestinationFolderId { get; set; }
-
-    public FolderPath DownloadFolder { get; set; }
-
-    public int DownloadFolderId { get; set; }
-
     public List<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = new();
 
     #endregion
@@ -67,8 +59,6 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase
     public override void SetNull()
     {
         base.SetNull();
-        DestinationFolder = null;
-        DownloadFolder = null;
         DownloadWorkerTasks = null;
     }
 

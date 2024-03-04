@@ -33,15 +33,53 @@ public class GetDownloadTaskTypeAsync_UnitTests : BaseUnitTest
         await SetupDatabase(config =>
         {
             config.DisableForeignKeyCheck = true;
-            config.TvShowDownloadTasksCount = 5;
+            config.TvShowDownloadTasksCount = 2;
         });
         var downloadTasks = await IDbContext.DownloadTaskTvShow.ToListAsync();
-        var testDownloadTask = downloadTasks[3];
+        var testDownloadTask = downloadTasks[1];
 
         // Act
         var downloadTaskType = await IDbContext.GetDownloadTaskTypeAsync(testDownloadTask.Id);
 
         // Assert
         downloadTaskType.ShouldBe(DownloadTaskType.TvShow);
+    }
+
+    [Fact]
+    public async Task ShouldReturnDownloadTaskTypeSeason_WhenTheGuidIsOfTypeDownloadTaskTvShowSeason()
+    {
+        // Arrange
+        await SetupDatabase(config =>
+        {
+            config.DisableForeignKeyCheck = true;
+            config.TvShowDownloadTasksCount = 3;
+        });
+        var downloadTasks = await IDbContext.DownloadTaskTvShowSeason.ToListAsync();
+        var testDownloadTask = downloadTasks[2];
+
+        // Act
+        var downloadTaskType = await IDbContext.GetDownloadTaskTypeAsync(testDownloadTask.Id);
+
+        // Assert
+        downloadTaskType.ShouldBe(DownloadTaskType.Season);
+    }
+
+    [Fact]
+    public async Task ShouldReturnDownloadTaskTypeEpisode_WhenTheGuidIsOfTypeDownloadTaskTvShowEpisode()
+    {
+        // Arrange
+        await SetupDatabase(config =>
+        {
+            config.DisableForeignKeyCheck = true;
+            config.TvShowDownloadTasksCount = 2;
+        });
+        var downloadTasks = await IDbContext.DownloadTaskTvShowEpisode.ToListAsync();
+        var testDownloadTask = downloadTasks[0];
+
+        // Act
+        var downloadTaskType = await IDbContext.GetDownloadTaskTypeAsync(testDownloadTask.Id);
+
+        // Assert
+        downloadTaskType.ShouldBe(DownloadTaskType.Episode);
     }
 }

@@ -26,6 +26,8 @@ public class GenerateMovieDownloadTasksCommandHandler : IRequestHandler<Generate
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
+    private FolderPath _downloadFolder;
+    private Dictionary<PlexMediaType, FolderPath> _defaultDestinationDict;
 
     public GenerateMovieDownloadTasksCommandHandler(ILog log, IPlexRipperDbContext dbContext)
     {
@@ -36,9 +38,8 @@ public class GenerateMovieDownloadTasksCommandHandler : IRequestHandler<Generate
     public async Task<Result> Handle(GenerateMovieDownloadTasksCommand command, CancellationToken cancellationToken)
     {
         var plexMoviesList = command.DownloadMedias.FindAll(x => x.Type == PlexMediaType.Movie);
-        var downloadFolder = await _dbContext.FolderPaths.GetDownloadFolderAsync(cancellationToken);
-
-        var defaultDestinationDict = await _dbContext.FolderPaths.GetDefaultDestinationFolderDictionary(cancellationToken);
+        _downloadFolder = await _dbContext.FolderPaths.GetDownloadFolderAsync(cancellationToken);
+        _defaultDestinationDict = await _dbContext.FolderPaths.GetDefaultDestinationFolderDictionary(cancellationToken);
 
         _log.Debug("Creating {PlexMovieIdsCount} movie download tasks", plexMoviesList.SelectMany(x => x.MediaIds).ToList().Count);
 
@@ -46,8 +47,11 @@ public class GenerateMovieDownloadTasksCommandHandler : IRequestHandler<Generate
         var downloadTasks = new List<DownloadTaskMovie>();
         foreach (var downloadMediaDto in plexMoviesList)
         {
-            var plexLibrary = await _dbContext.PlexLibraries.Include(x => x.PlexServer).GetAsync(downloadMediaDto.PlexLibraryId, cancellationToken);
+            var plexLibrary = await _dbContext.PlexLibraries.Include(x => x.PlexServer)
+                .Include(x => x.DefaultDestination)
+                .GetAsync(downloadMediaDto.PlexLibraryId, cancellationToken);
             var plexServer = plexLibrary.PlexServer;
+            var destinationFolder = await GetDestinationFolder(plexLibrary, cancellationToken);
 
             var plexMovies = await _dbContext.PlexMovies
                 .Where(x => downloadMediaDto.MediaIds.Contains(x.Id))
@@ -57,23 +61,24 @@ public class GenerateMovieDownloadTasksCommandHandler : IRequestHandler<Generate
             {
                 // TODO Check for duplicate DownloadTasks already existing
                 var movieDownloadTask = plexMovie.MapToDownloadTask();
-                var downloadFolderPath = Path.Join(downloadFolder.DirectoryPath, "Movies", $"{movieDownloadTask.Title} ({movieDownloadTask.Year})", "/");
+                var downloadFolderPath = GetDownloadFolderPath(movieDownloadTask);
+                var destinationFolderPath = GetDestinationFolderPath(destinationFolder.DirectoryPath, movieDownloadTask);
 
                 // TODO Takes first entry which assumes its the highest quality one
                 var movieData = plexMovie.MovieData.First();
 
+                // Map movieData to DownloadTaskMovieFile and add to movieDownloadTask
                 movieDownloadTask.Children.AddRange(movieData.MapToDownloadTask(plexMovie));
 
                 // Set download and destination folder of each downloadable file
                 // TODO Might need to be set when download starts to allow free FolderPath's change
                 foreach (var downloadTaskMovieFile in movieDownloadTask.Children)
-                    if (plexLibrary.DefaultDestinationId is not null)
-                        downloadTaskMovieFile.DownloadDirectory = downloadFolderPath;
-                    else
-                    {
-                        var destination = defaultDestinationDict[movieDownloadTask.MediaType];
-                        downloadTaskMovieFile.DownloadDirectory = downloadFolderPath;
-                    }
+                {
+                    downloadTaskMovieFile.DestinationDirectory = destinationFolderPath;
+                    downloadTaskMovieFile.DownloadDirectory = downloadFolderPath;
+                }
+
+                movieDownloadTask.Calculate();
 
                 downloadTasks.Add(movieDownloadTask);
             }
@@ -86,5 +91,19 @@ public class GenerateMovieDownloadTasksCommandHandler : IRequestHandler<Generate
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
+    }
+
+    private string GetDownloadFolderPath(DownloadTaskMovie downloadTaskMovie) =>
+        Path.Join(_downloadFolder.DirectoryPath, "Movies", $"{downloadTaskMovie.Title} ({downloadTaskMovie.Year})", "/");
+
+    private string GetDestinationFolderPath(string destinationFolder, DownloadTaskMovie downloadTaskMovie) =>
+        Path.Join(destinationFolder, $"{downloadTaskMovie.Title} ({downloadTaskMovie.Year})", "/");
+
+    private async Task<FolderPath> GetDestinationFolder(PlexLibrary library, CancellationToken cancellationToken = default)
+    {
+        if (library.DefaultDestinationId is null || library.DefaultDestinationId == 0)
+            return _defaultDestinationDict[library.Type];
+
+        return await _dbContext.FolderPaths.GetAsync(library.DefaultDestinationId ?? 0, cancellationToken);
     }
 }

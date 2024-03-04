@@ -29,7 +29,7 @@ public static class PlexMediaExtensions
                 Id = default,
                 Key = 0,
                 DataTotal = part.Size,
-                DownloadStatus = DownloadStatus.Unknown,
+                DownloadStatus = DownloadStatus.Queued,
                 Created = DateTime.Now,
                 PlexServer = null,
                 PlexServerId = plexMovie.PlexServerId,

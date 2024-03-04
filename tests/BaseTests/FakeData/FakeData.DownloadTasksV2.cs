@@ -110,70 +110,76 @@ public static partial class FakeData
 
     #endregion
 
-    // #region TvShow
-    //
-    // public static Faker<DownloadTask> GetTvShowDownloadTask(int seed = 0, Action<FakeDataConfig> options = null)
-    // {
-    //     var config = FakeDataConfig.FromOptions(options);
-    //
-    //     return new Faker<DownloadTask>()
-    //         .ApplyBaseDownloadTask(seed, options)
-    //         .UseSeed(seed)
-    //         .RuleFor(x => x.MediaType, PlexMediaType.TvShow)
-    //         .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.TvShow)
-    //         .RuleFor(x => x.Children, _ =>
-    //         {
-    //             var f = GetTvShowSeasonDownloadTask(seed, options);
-    //             if (config.TvShowSeasonDownloadTasksCount > 0)
-    //                 return f.Generate(config.TvShowSeasonDownloadTasksCount);
-    //
-    //             return f.GenerateBetween(1, 5);
-    //         });
-    // }
-    //
-    // public static Faker<DownloadTask> GetTvShowSeasonDownloadTask(int seed = 0, Action<FakeDataConfig> options = null)
-    // {
-    //     var config = FakeDataConfig.FromOptions(options);
-    //
-    //     return new Faker<DownloadTask>()
-    //         .ApplyBaseDownloadTask(seed, options)
-    //         .UseSeed(seed)
-    //         .RuleFor(x => x.MediaType, PlexMediaType.Season)
-    //         .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Season)
-    //         .RuleFor(x => x.Children, _ =>
-    //         {
-    //             var f = GetTvShowEpisodeDownloadTask(seed, options);
-    //             if (config.TvShowEpisodeDownloadTasksCount > 0)
-    //                 return f.Generate(config.TvShowEpisodeDownloadTasksCount);
-    //
-    //             return f.GenerateBetween(5, 10);
-    //         });
-    // }
-    //
-    // public static Faker<DownloadTask> GetTvShowEpisodeDownloadTask(int seed = 0, Action<FakeDataConfig> options = null)
-    // {
-    //     var config = FakeDataConfig.FromOptions(options);
-    //
-    //     return new Faker<DownloadTask>()
-    //         .ApplyBaseDownloadTask(seed, options)
-    //         .UseSeed(seed)
-    //         .RuleFor(x => x.MediaType, PlexMediaType.Episode)
-    //         .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Episode)
-    //         .RuleFor(x => x.Children, _ => GetTvShowEpisodeDataDownloadTask(seed, options).Generate(1));
-    // }
-    //
-    // public static Faker<DownloadTask> GetTvShowEpisodeDataDownloadTask(int seed = 0, Action<FakeDataConfig> options = null)
-    // {
-    //     var config = FakeDataConfig.FromOptions(options);
-    //
-    //     return new Faker<DownloadTask>()
-    //         .ApplyBaseDownloadTask(seed, options)
-    //         .UseSeed(seed)
-    //         .RuleFor(x => x.MediaType, PlexMediaType.Episode)
-    //         .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.EpisodeData);
-    // }
-    //
-    // #endregion
+    #region TvShow
+
+    public static Faker<DownloadTaskTvShow> GetDownloadTaskTvShow(int seed = 0, Action<FakeDataConfig> options = null)
+    {
+        var config = FakeDataConfig.FromOptions(options);
+
+        return new Faker<DownloadTaskTvShow>()
+            .ApplyDownloadTaskParentBaseV2(seed, options)
+            .UseSeed(seed)
+            .RuleFor(x => x.MediaType, PlexMediaType.TvShow)
+            .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.TvShow)
+            .RuleFor(x => x.Children, _ =>
+            {
+                var f = GetDownloadTaskTvShowSeason(seed, options);
+                if (config.TvShowSeasonDownloadTasksCount > 0)
+                    return f.Generate(config.TvShowSeasonDownloadTasksCount);
+
+                return f.GenerateBetween(1, 5);
+            });
+    }
+
+    public static Faker<DownloadTaskTvShowSeason> GetDownloadTaskTvShowSeason(int seed = 0, Action<FakeDataConfig> options = null)
+    {
+        var config = FakeDataConfig.FromOptions(options);
+
+        return new Faker<DownloadTaskTvShowSeason>()
+            .ApplyDownloadTaskParentBaseV2(seed, options)
+            .UseSeed(seed)
+            .RuleFor(x => x.Parent, _ => null)
+            .RuleFor(x => x.ParentId, _ => Guid.Empty)
+            .RuleFor(x => x.MediaType, PlexMediaType.Season)
+            .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Season)
+            .RuleFor(x => x.Children, _ =>
+            {
+                var f = GetDownloadTaskTvShowEpisode(seed, options);
+                if (config.TvShowEpisodeDownloadTasksCount > 0)
+                    return f.Generate(config.TvShowEpisodeDownloadTasksCount);
+
+                return f.GenerateBetween(5, 10);
+            });
+    }
+
+    public static Faker<DownloadTaskTvShowEpisode> GetDownloadTaskTvShowEpisode(int seed = 0, Action<FakeDataConfig> options = null)
+    {
+        var config = FakeDataConfig.FromOptions(options);
+
+        return new Faker<DownloadTaskTvShowEpisode>()
+            .ApplyDownloadTaskParentBaseV2(seed, options)
+            .UseSeed(seed)
+            .RuleFor(x => x.Parent, _ => null)
+            .RuleFor(x => x.ParentId, _ => Guid.Empty)
+            .RuleFor(x => x.MediaType, PlexMediaType.Episode)
+            .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Episode)
+            .RuleFor(x => x.Children, _ => GetDownloadTaskTvShowEpisodeFile(seed, options).Generate(1));
+    }
+
+    public static Faker<DownloadTaskTvShowEpisodeFile> GetDownloadTaskTvShowEpisodeFile(int seed = 0, Action<FakeDataConfig> options = null)
+    {
+        var config = FakeDataConfig.FromOptions(options);
+
+        return new Faker<DownloadTaskTvShowEpisodeFile>()
+            .ApplyDownloadTaskFileBaseV2(seed, options)
+            .UseSeed(seed)
+            .RuleFor(x => x.Parent, _ => null)
+            .RuleFor(x => x.ParentId, _ => Guid.Empty)
+            .RuleFor(x => x.MediaType, PlexMediaType.Episode)
+            .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.EpisodeData);
+    }
+
+    #endregion
 
     #region DownloadWorkerTasks
 

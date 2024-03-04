@@ -25,4 +25,23 @@ public class GetDownloadTaskTypeAsync_UnitTests : BaseUnitTest
         // Assert
         downloadTaskType.ShouldBe(DownloadTaskType.Movie);
     }
+
+    [Fact]
+    public async Task ShouldReturnDownloadTaskTypeTvShow_WhenTheGuidIsOfTypeDownloadTaskTvShow()
+    {
+        // Arrange
+        await SetupDatabase(config =>
+        {
+            config.DisableForeignKeyCheck = true;
+            config.TvShowDownloadTasksCount = 5;
+        });
+        var downloadTasks = await IDbContext.DownloadTaskTvShow.ToListAsync();
+        var testDownloadTask = downloadTasks[3];
+
+        // Act
+        var downloadTaskType = await IDbContext.GetDownloadTaskTypeAsync(testDownloadTask.Id);
+
+        // Assert
+        downloadTaskType.ShouldBe(DownloadTaskType.TvShow);
+    }
 }

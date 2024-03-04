@@ -6,7 +6,7 @@ public class DownloadTaskTvShowEpisodeFile : DownloadTaskFileBase
 
     public DownloadTaskTvShowEpisode Parent { get; set; }
 
-    public int ParentId { get; set; }
+    public Guid ParentId { get; set; }
 
     #endregion
 

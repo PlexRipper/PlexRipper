@@ -261,7 +261,10 @@ public static partial class MockDatabase
         }
 
         if (config.TvShowDownloadTasksCount > 0)
+        {
             context = await context.AddTvShowDownloadTasks(options);
+            context = await context.AddDownloadTaskTvShows(options);
+        }
 
         if (config.AccountHasAccessToAllLibraries)
             context = await context.AddPlexAccountLibraries(options);

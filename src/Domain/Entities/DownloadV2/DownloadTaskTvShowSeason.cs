@@ -6,6 +6,10 @@ public class DownloadTaskTvShowSeason : DownloadTaskParentBase
 
     public List<DownloadTaskTvShowEpisode> Children { get; set; } = new();
 
+    public Guid ParentId { get; set; }
+
+    public DownloadTaskTvShow Parent { get; set; }
+
     #endregion
 
     #region Helpers

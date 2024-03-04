@@ -18,9 +18,11 @@ public class DownloadTaskFactory : IDownloadTaskFactory
     private readonly IDownloadManagerSettingsModule _downloadManagerSettings;
 
     private readonly IMapper _mapper;
+
     private readonly IPlexRipperDbContext _dbContext;
 
     private readonly ILog _log;
+
     private readonly IMediator _mediator;
 
     private readonly INotificationsService _notificationsService;
@@ -92,14 +94,14 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                 result.LogError();
         }
 
-        if (plexMovieIds.Any())
-        {
-            var result = await GenerateMovieDownloadTasksAsync(plexMovieIds);
-            if (result.IsSuccess)
-                downloadTasks.AddRange(result.Value);
-            else
-                result.LogError();
-        }
+        // if (plexMovieIds.Any())
+        // {
+        //     var result = await GenerateMovieDownloadTasksAsync(plexMovieIds);
+        //     if (result.IsSuccess)
+        //         downloadTasks.AddRange(result.Value);
+        //     else
+        //         result.LogError();
+        // }
 
         // Add the final property values
         var finalizeDownloadTasksResult = await FinalizeDownloadTasks(downloadTasks);
@@ -317,65 +319,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         }
 
         downloadTasks.ForEach(x => x.Calculate());
-
-        return Result.Ok(downloadTasks);
-    }
-
-    /// <inheritdoc/>
-    public async Task<Result<List<DownloadTask>>> GenerateMovieDownloadTasksAsync(List<int> plexMovieIds)
-    {
-        if (!plexMovieIds.Any())
-            return ResultExtensions.IsEmpty(nameof(plexMovieIds)).LogWarning();
-
-        _log.Debug("Creating {PlexMovieIdsCount} movie download tasks", plexMovieIds.Count);
-        var plexMoviesResult = await _mediator.Send(new GetMultiplePlexMoviesByIdsQuery(plexMovieIds, true, true));
-
-        if (plexMoviesResult.IsFailed)
-            return plexMoviesResult.ToResult();
-
-        // Create downloadTasks
-        var downloadTasks = new List<DownloadTask>();
-        foreach (var plexMovie in plexMoviesResult.Value)
-        {
-            var movieDownloadTask = _mapper.Map<DownloadTask>(plexMovie);
-            var fullTitle = $"{plexMovie.Title} ({plexMovie.Year})";
-            movieDownloadTask.FullTitle = fullTitle;
-
-            // TODO Takes first entry which assumes its the highest quality one
-            var movieData = plexMovie.MovieData.First();
-
-            if (movieData.IsMultiPart)
-            {
-                // create a downloadTask for each multi-part movie.
-                foreach (var part in movieData.Parts)
-                {
-                    var moviePartDownloadTask = _mapper.Map<DownloadTask>(plexMovie);
-                    moviePartDownloadTask.FullTitle = fullTitle;
-                    moviePartDownloadTask.MediaType = PlexMediaType.Movie;
-                    moviePartDownloadTask.DownloadTaskType = DownloadTaskType.MoviePart;
-                    moviePartDownloadTask.FileName = Path.GetFileName(part.File);
-                    moviePartDownloadTask.DataTotal = part.Size;
-                    moviePartDownloadTask.Quality = movieData.VideoResolution;
-                    moviePartDownloadTask.FileLocationUrl = part.ObfuscatedFilePath;
-                    moviePartDownloadTask.FileName = Path.GetFileName(part.File);
-                    movieDownloadTask.Children.Add(moviePartDownloadTask);
-                }
-
-                // Calculate total data
-                movieDownloadTask.DataTotal = movieDownloadTask.Children.Select(x => x.DataTotal).Sum();
-            }
-            else
-            {
-                var part = movieData.Parts.First();
-                movieDownloadTask.MediaType = PlexMediaType.Movie;
-                movieDownloadTask.DownloadTaskType = DownloadTaskType.MovieData;
-                movieDownloadTask.DataTotal = part.Size;
-                movieDownloadTask.FileName = Path.GetFileName(part.File);
-                movieDownloadTask.FileLocationUrl = part.ObfuscatedFilePath;
-            }
-
-            downloadTasks.Add(movieDownloadTask);
-        }
 
         return Result.Ok(downloadTasks);
     }

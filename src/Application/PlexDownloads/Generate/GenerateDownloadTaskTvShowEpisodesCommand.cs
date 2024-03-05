@@ -40,11 +40,15 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<
         if (!plexEpisodeList.Any())
             return ResultExtensions.IsEmpty(nameof(plexEpisodeList)).LogWarning();
 
+        _log.Debug("Creating {PlexEpisodeIdsCount} episodes download tasks", plexEpisodeList
+            .SelectMany(x => x.MediaIds)
+            .ToList()
+            .Count);
+
         _downloadFolder = await _dbContext.FolderPaths.GetDownloadFolderAsync(cancellationToken);
         _defaultDestinationDict = await _dbContext.FolderPaths.GetDefaultDestinationFolderDictionary(cancellationToken);
 
-        var episodesIds = new List<DownloadMediaDTO>();
-
+        var episodesToInsert = new List<DownloadTaskTvShowEpisode>();
         foreach (var downloadMediaDto in plexEpisodeList)
         {
             var plexLibrary = await _dbContext.PlexLibraries
@@ -58,7 +62,6 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<
                 .Where(x => downloadMediaDto.MediaIds.Contains(x.Id))
                 .ToListAsync(cancellationToken);
 
-            var episodesToInsert = new List<DownloadTaskTvShowEpisode>();
             foreach (var tvShowEpisode in plexEpisodes)
             {
                 var plexTvShow = tvShowEpisode.TvShow;
@@ -96,6 +99,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<
                     episodesToInsert.Add(episodeDownloadTask);
                 }
 
+                // TODO Quality Selector needs to be implemented here
                 var episodeData = tvShowEpisode.EpisodeData.First();
 
                 // Map movieData to DownloadTaskMovieFile and add to movieDownloadTask
@@ -114,12 +118,11 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<
 
                 episodeDownloadTask.Calculate();
             }
-
-            // Insert all episodes into the database
-            episodesToInsert.SetRelationshipIds(plexServer.Id, plexLibrary.Id);
-            _dbContext.DownloadTaskTvShowEpisode.AddRange(episodesToInsert);
-            await _dbContext.SaveChangesAsync(cancellationToken);
         }
+
+        // Insert all episodes into the database
+        _dbContext.DownloadTaskTvShowEpisode.AddRange(episodesToInsert);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

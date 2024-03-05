@@ -51,6 +51,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler : IRequestHandler<Generat
                 .ToListAsync(cancellationToken);
 
             var seasonsIds = new List<DownloadMediaDTO>();
+            var tvShowsToInsert = new List<DownloadTaskTvShow>();
 
             foreach (var tvShow in plexTvShows)
             {
@@ -59,11 +60,9 @@ public class GenerateDownloadTaskTvShowsCommandHandler : IRequestHandler<Generat
 
                 if (downloadTaskTvShow is null)
                 {
-                    // Insert the tvShowDownloadTask into the database
                     downloadTaskTvShow = tvShow.MapToDownloadTask();
-                    _dbContext.DownloadTaskTvShow.Add(downloadTaskTvShow);
-                    await _dbContext.SaveChangesAsync(cancellationToken);
 
+                    tvShowsToInsert.Add(downloadTaskTvShow);
                     seasonsIds.Add(new DownloadMediaDTO
                     {
                         MediaIds = tvShow.Seasons.Select(x => x.Id).ToList(),
@@ -73,6 +72,10 @@ public class GenerateDownloadTaskTvShowsCommandHandler : IRequestHandler<Generat
                     });
                 }
             }
+
+            // Insert the tvShowDownloadTask into the database
+            _dbContext.DownloadTaskTvShow.AddRange(tvShowsToInsert);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             // Create seasons downloadTasks
             await _mediator.Send(new GenerateDownloadTaskTvShowSeasonsCommand(seasonsIds), cancellationToken);

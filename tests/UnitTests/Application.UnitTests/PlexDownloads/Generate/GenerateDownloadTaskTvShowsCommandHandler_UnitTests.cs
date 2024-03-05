@@ -1,11 +1,14 @@
 ﻿using DownloadManager.Contracts;
 using Microsoft.EntityFrameworkCore;
+using PlexRipper.Domain.Validators;
 
 namespace PlexRipper.Application.UnitTests;
 
-public class DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests : BaseUnitTest<GenerateDownloadTaskTvShowsCommandHandler>
+public class GenerateDownloadTaskTvShowsCommandHandler_UnitTests : BaseUnitTest<GenerateDownloadTaskTvShowsCommandHandler>
 {
-    public DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests(ITestOutputHelper output) : base(output) { }
+    private DownloadTaskTvShowValidator validator = new();
+
+    public GenerateDownloadTaskTvShowsCommandHandler_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public async Task ShouldHaveInsertedValidDownloadTaskTvShowsInDatabase_WhenGivenValidPlexTvShows()
@@ -45,8 +48,24 @@ public class DownloadTaskFactory_GenerateTvShowDownloadTasksAsync_UnitTests : Ba
 
         downloadTaskTvShows.Count.ShouldBe(5);
 
-        // foreach (var downloadTaskMovie in plexDownloadTaskMovies)
-        //     (await validator.ValidateAsync(downloadTaskMovie)).Errors.ShouldBeEmpty();
+        foreach (var downloadTaskTvShow in downloadTaskTvShows)
+        {
+            downloadTaskTvShow.Id.ShouldNotBe(Guid.Empty);
+            downloadTaskTvShow.Key.ShouldBeGreaterThan(0);
+            downloadTaskTvShow.Title.ShouldNotBeEmpty();
+            downloadTaskTvShow.FullTitle.ShouldNotBeEmpty();
+            downloadTaskTvShow.Year.ShouldBeGreaterThan(0);
+            downloadTaskTvShow.DataTotal.ShouldBeGreaterThan(0);
+            downloadTaskTvShow.DownloadStatus.ShouldBe(DownloadStatus.Queued);
+            downloadTaskTvShow.Created.ShouldBe(DateTime.Now, TimeSpan.FromSeconds(5));
+
+            downloadTaskTvShow.PlexServerId.ShouldBe(1);
+            downloadTaskTvShow.PlexLibraryId.ShouldBe(1);
+
+            downloadTaskTvShow.DownloadTaskType.ShouldBe(DownloadTaskType.TvShow);
+            downloadTaskTvShow.MediaType.ShouldBe(PlexMediaType.TvShow);
+            downloadTaskTvShow.Children.ShouldBeEmpty();
+        }
     }
 
 //     [Fact]

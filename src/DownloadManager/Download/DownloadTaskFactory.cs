@@ -53,68 +53,7 @@ public class DownloadTaskFactory : IDownloadTaskFactory
     #region Public Methods
 
     /// <inheritdoc/>
-    public async Task<Result<List<DownloadTask>>> RegenerateDownloadTask(List<int> downloadTaskIds)
-    {
-        if (!downloadTaskIds.Any())
-            return ResultExtensions.IsEmpty(nameof(downloadTaskIds)).LogWarning();
-
-        _log.Debug("Regenerating {DownloadTaskIdsCount} download tasks", downloadTaskIds.Count);
-
-        var freshDownloadTasks = new List<DownloadTask>();
-
-        foreach (var downloadTaskId in downloadTaskIds)
-        {
-            var downloadTask = await _dbContext.DownloadTasks.GetAsync(downloadTaskId);
-            if (downloadTask is null)
-            {
-                ResultExtensions.EntityNotFound(nameof(DownloadTask), downloadTaskId).LogError();
-                continue;
-            }
-
-            var mediaIdResult = await _dbContext.GetPlexMediaByMediaKeyAsync(downloadTask.Id, downloadTask.PlexServerId, downloadTask.MediaType);
-            if (mediaIdResult.IsFailed)
-            {
-                var result = Result.Fail($"Could not recreate the download task for {downloadTask.FullTitle}");
-                result.WithReasons(mediaIdResult.Reasons);
-                await _notificationsService.SendResult(result);
-                continue;
-            }
-
-            var list = new List<DownloadMediaDTO>
-            {
-                new()
-                {
-                    Type = downloadTask.MediaType,
-                    MediaIds = new List<int> { mediaIdResult.Value },
-                },
-            };
-
-            // var downloadTasksResult = await GenerateAsync(list);
-            // if (downloadTasksResult.IsFailed)
-            // {
-            //     var result = Result.Fail($"Could not recreate the download task for {downloadTask.FullTitle}").WithReasons(mediaIdResult.Reasons);
-            //     await _notificationsService.SendResult(result);
-            //     continue;
-            // }
-
-            await _dbContext.DeleteDownloadWorkerTasksAsync(downloadTask.Id);
-
-            // downloadTasksResult.Value[0].Id = downloadTask.Id;
-            // downloadTasksResult.Value[0].Priority = downloadTask.Priority;
-
-            //  freshDownloadTasks.AddRange(downloadTasksResult.Value);
-        }
-
-        _log.Debug("Successfully regenerated {FreshDownloadTasksCount} out of {DownloadTaskIdsCount} download tasks", freshDownloadTasks.Count,
-            downloadTaskIds.Count);
-
-        if (downloadTaskIds.Count - freshDownloadTasks.Count > 0)
-            _log.ErrorLine("Failed to generate");
-
-        return Result.Ok(freshDownloadTasks);
-    }
-
-    public Result<List<DownloadWorkerTask>> GenerateDownloadWorkerTasks(DownloadTask downloadTask)
+    public Result<List<DownloadWorkerTask>> GenerateDownloadWorkerTasks(DownloadTaskFileBase downloadTask)
     {
         if (downloadTask is null)
             return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();

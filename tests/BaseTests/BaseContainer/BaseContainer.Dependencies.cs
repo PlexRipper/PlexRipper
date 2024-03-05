@@ -81,8 +81,6 @@ public partial class BaseContainer : IDisposable
 
     public IDownloadTaskFactory GetDownloadTaskFactory => Resolve<IDownloadTaskFactory>();
 
-    public IDownloadTaskValidator GetDownloadTaskValidator => Resolve<IDownloadTaskValidator>();
-
     public IPlexApiService GetPlexApiService => Resolve<IPlexApiService>();
 
     public IMediator Mediator => Resolve<IMediator>();

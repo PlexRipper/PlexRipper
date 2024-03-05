@@ -5,8 +5,6 @@ namespace DownloadManager.Contracts;
 
 public interface IDownloadTaskFactory
 {
-    Task<Result<List<DownloadTask>>> GenerateAsync(List<DownloadMediaDTO> downloadMedias);
-
     /// <summary>
     /// Regenerates <see cref="DownloadTask">DownloadTasks</see> while maintaining the Id and priority.
     /// Will also remove old <see cref="DownloadWorkerTask">DownloadWorkerTasks</see> assigned to the old downloadTasks from the database.

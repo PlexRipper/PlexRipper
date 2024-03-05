@@ -128,4 +128,37 @@ public static partial class DbContextExtensions
 
         return downloadTasks;
     }
+
+    public static Task<DownloadTaskTvShow?> GetDownloadTaskTvShowByMediaKeyQuery(
+        this IPlexRipperDbContext dbContext,
+        int plexServerId,
+        int mediaKey,
+        CancellationToken cancellationToken = default)
+    {
+        return dbContext.DownloadTaskTvShow
+            .IncludeAll()
+            .FirstOrDefaultAsync(x => x.PlexServerId == plexServerId && x.Key == mediaKey, cancellationToken);
+    }
+
+    public static Task<DownloadTaskTvShowSeason?> GetDownloadTaskTvShowSeasonByMediaKeyQuery(
+        this IPlexRipperDbContext dbContext,
+        int plexServerId,
+        int mediaKey,
+        CancellationToken cancellationToken = default)
+    {
+        return dbContext.DownloadTaskTvShowSeason
+            .IncludeAll()
+            .FirstOrDefaultAsync(x => x.PlexServerId == plexServerId && x.Key == mediaKey, cancellationToken);
+    }
+
+    public static Task<DownloadTaskTvShowEpisode?> GetDownloadTaskTvShowEpisodeByMediaKeyQuery(
+        this IPlexRipperDbContext dbContext,
+        int plexServerId,
+        int mediaKey,
+        CancellationToken cancellationToken = default)
+    {
+        return dbContext.DownloadTaskTvShowEpisode
+            .IncludeAll()
+            .FirstOrDefaultAsync(x => x.PlexServerId == plexServerId && x.Key == mediaKey, cancellationToken);
+    }
 }

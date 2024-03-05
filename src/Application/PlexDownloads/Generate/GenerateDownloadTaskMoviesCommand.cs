@@ -1,5 +1,6 @@
 using Data.Contracts;
 using DownloadManager.Contracts;
+using DownloadManager.Contracts.Extensions;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -11,43 +12,52 @@ namespace PlexRipper.Application;
 /// Creates <see cref="DownloadTaskMovie">DownloadTaskMovies</see> from <see cref="PlexMovie">PlexMovies</see> and inserts it into Database.
 /// </summary>
 /// <returns>The created <see cref="DownloadTask"/>.</returns>
-public record GenerateMovieDownloadTasksCommand(List<DownloadMediaDTO> DownloadMedias) : IRequest<Result>;
+public record GenerateDownloadTaskMoviesCommand(List<DownloadMediaDTO> DownloadMedias) : IRequest<Result>;
 
-public class GenerateMovieDownloadTasksCommandValidator : AbstractValidator<GenerateMovieDownloadTasksCommand>
+public class GenerateDownloadTaskMoviesCommandValidator : AbstractValidator<GenerateDownloadTaskMoviesCommand>
 {
-    public GenerateMovieDownloadTasksCommandValidator()
+    public GenerateDownloadTaskMoviesCommandValidator()
     {
         RuleFor(x => x.DownloadMedias).NotNull();
         RuleFor(x => x.DownloadMedias).NotEmpty();
     }
 }
 
-public class GenerateMovieDownloadTasksCommandHandler : IRequestHandler<GenerateMovieDownloadTasksCommand, Result>
+public class GenerateDownloadTaskMoviesCommandHandler : IRequestHandler<GenerateDownloadTaskMoviesCommand, Result>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
+
     private FolderPath _downloadFolder;
     private Dictionary<PlexMediaType, FolderPath> _defaultDestinationDict;
 
-    public GenerateMovieDownloadTasksCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    public GenerateDownloadTaskMoviesCommandHandler(ILog log, IPlexRipperDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;
     }
 
-    public async Task<Result> Handle(GenerateMovieDownloadTasksCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(GenerateDownloadTaskMoviesCommand command, CancellationToken cancellationToken)
     {
-        var plexMoviesList = command.DownloadMedias.FindAll(x => x.Type == PlexMediaType.Movie);
+        var groupedList = command.DownloadMedias.MergeAndGroupList();
+        var plexMoviesList = groupedList.FindAll(x => x.Type == PlexMediaType.Movie);
+        if (!plexMoviesList.Any())
+            return ResultExtensions.IsEmpty(nameof(plexMoviesList)).LogWarning();
+
         _downloadFolder = await _dbContext.FolderPaths.GetDownloadFolderAsync(cancellationToken);
         _defaultDestinationDict = await _dbContext.FolderPaths.GetDefaultDestinationFolderDictionary(cancellationToken);
 
-        _log.Debug("Creating {PlexMovieIdsCount} movie download tasks", plexMoviesList.SelectMany(x => x.MediaIds).ToList().Count);
+        _log.Debug("Creating {PlexMovieIdsCount} movie download tasks", plexMoviesList
+            .SelectMany(x => x.MediaIds)
+            .ToList()
+            .Count);
 
         // Create downloadTasks
         var downloadTasks = new List<DownloadTaskMovie>();
         foreach (var downloadMediaDto in plexMoviesList)
         {
-            var plexLibrary = await _dbContext.PlexLibraries.Include(x => x.PlexServer)
+            var plexLibrary = await _dbContext.PlexLibraries
+                .Include(x => x.PlexServer)
                 .Include(x => x.DefaultDestination)
                 .GetAsync(downloadMediaDto.PlexLibraryId, cancellationToken);
             var plexServer = plexLibrary.PlexServer;

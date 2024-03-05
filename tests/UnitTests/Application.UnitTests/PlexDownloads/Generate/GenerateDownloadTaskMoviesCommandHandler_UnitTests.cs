@@ -5,14 +5,14 @@ using PlexRipper.Domain.Validators;
 
 namespace PlexRipper.Application.UnitTests;
 
-public class DownloadTaskFactory_GenerateMovieDownloadTasksAsync_UnitTests : BaseUnitTest<GenerateMovieDownloadTasksCommandHandler>
+public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<GenerateDownloadTaskMoviesCommandHandler>
 {
     private DownloadTaskMovieValidator validator = new();
 
-    public DownloadTaskFactory_GenerateMovieDownloadTasksAsync_UnitTests(ITestOutputHelper output) : base(output) { }
+    public GenerateDownloadTaskMoviesCommandHandler_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
-    public async Task ShouldHaveInsertedValidDownloadTaskMoviesInDatabase_WhenGivenValidPlexMoviesAreEmpty()
+    public async Task ShouldHaveInsertedValidDownloadTaskMoviesInDatabase_WhenGivenValidPlexMovies()
     {
         // Arrange
         await SetupDatabase(config =>
@@ -35,7 +35,7 @@ public class DownloadTaskFactory_GenerateMovieDownloadTasksAsync_UnitTests : Bas
         };
 
         // Act
-        var command = new GenerateMovieDownloadTasksCommand(movies);
+        var command = new GenerateDownloadTaskMoviesCommand(movies);
         var result = await _sut.Handle(command, CancellationToken.None);
 
         // Assert
@@ -77,7 +77,7 @@ public class DownloadTaskFactory_GenerateMovieDownloadTasksAsync_UnitTests : Bas
         };
 
         // Act
-        var command = new GenerateMovieDownloadTasksCommand(movies);
+        var command = new GenerateDownloadTaskMoviesCommand(movies);
         var result = await _sut.Handle(command, CancellationToken.None);
 
         // Assert

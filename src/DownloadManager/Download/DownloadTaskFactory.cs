@@ -67,14 +67,14 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         var plexTvShowEpisodeIds = downloadMedias.FindAll(x => x.Type == PlexMediaType.Episode).SelectMany(x => x.MediaIds).ToList();
         var plexMovieIds = downloadMedias.FindAll(x => x.Type == PlexMediaType.Movie).SelectMany(x => x.MediaIds).ToList();
 
-        if (plexTvShowIds.Any())
-        {
-            var result = await GenerateTvShowDownloadTasksAsync(plexTvShowIds, downloadTasks);
-            if (result.IsSuccess)
-                downloadTasks = result.Value;
-            else
-                result.LogError();
-        }
+        // if (plexTvShowIds.Any())
+        // {
+        //     var result = await GenerateTvShowDownloadTasksAsync(plexTvShowIds, downloadTasks);
+        //     if (result.IsSuccess)
+        //         downloadTasks = result.Value;
+        //     else
+        //         result.LogError();
+        // }
 
         if (plexTvShowSeasonIds.Any())
         {
@@ -85,14 +85,14 @@ public class DownloadTaskFactory : IDownloadTaskFactory
                 result.LogError();
         }
 
-        if (plexTvShowEpisodeIds.Any())
-        {
-            var result = await GenerateTvShowEpisodesDownloadTasksAsync(plexTvShowEpisodeIds, downloadTasks);
-            if (result.IsSuccess)
-                downloadTasks = result.Value;
-            else
-                result.LogError();
-        }
+        // if (plexTvShowEpisodeIds.Any())
+        // {
+        //     var result = await GenerateTvShowEpisodesDownloadTasksAsync(plexTvShowEpisodeIds, downloadTasks);
+        //     if (result.IsSuccess)
+        //         downloadTasks = result.Value;
+        //     else
+        //         result.LogError();
+        // }
 
         // if (plexMovieIds.Any())
         // {
@@ -144,58 +144,6 @@ public class DownloadTaskFactory : IDownloadTaskFactory
         }
 
         return episodeDownloadTask;
-    }
-
-    public async Task<Result<List<DownloadTask>>> GenerateTvShowDownloadTasksAsync(
-        List<int> plexTvShowIds,
-        List<DownloadTask> downloadTasks = null)
-    {
-        if (!plexTvShowIds.Any())
-            return ResultExtensions.IsEmpty(nameof(plexTvShowIds)).LogWarning();
-
-        downloadTasks ??= new List<DownloadTask>();
-
-        foreach (var tvShowId in plexTvShowIds)
-        {
-            var tvShow = await _dbContext.PlexTvShows.IncludeEpisodes().IncludePlexServer().IncludePlexLibrary().GetAsync(tvShowId);
-            if (tvShow is null)
-            {
-                ResultExtensions.EntityNotFound(nameof(PlexTvShow), tvShowId).LogError();
-                continue;
-            }
-
-            // Check if the tvShowDownloadTask has already been created
-            var tvShowDownloadTaskIndex = downloadTasks.FindIndex(x => x.Equals(tvShow));
-            if (tvShowDownloadTaskIndex == -1)
-            {
-                var result = await _dbContext.GetDownloadTaskByMediaKeyQuery(tvShow.PlexServerId, tvShow.Key);
-                var tvShowDownloadTask = result.IsSuccess ? result.Value : _mapper.Map<DownloadTask>(tvShow);
-                downloadTasks.Add(tvShowDownloadTask);
-            }
-
-            // We set this to not have to query the database to deep
-            tvShow.Seasons.ForEach(x =>
-            {
-                x.TvShow = tvShow;
-                x.PlexServer = tvShow.PlexServer;
-                x.PlexLibrary = tvShow.PlexLibrary;
-            });
-
-            // Create seasons downloadTasks
-            var seasonIds = tvShow.Seasons.Select(x => x.Id).ToList();
-            var seasonsResult = await GenerateTvShowSeasonDownloadTasksAsync(seasonIds, downloadTasks, tvShow.Seasons);
-            if (seasonsResult.IsFailed)
-            {
-                seasonsResult.LogError();
-                continue;
-            }
-
-            downloadTasks = seasonsResult.Value;
-        }
-
-        downloadTasks.ForEach(x => x.Calculate());
-
-        return Result.Ok(downloadTasks);
     }
 
     public async Task<Result<List<DownloadTask>>> GenerateTvShowSeasonDownloadTasksAsync(
@@ -253,69 +201,15 @@ public class DownloadTaskFactory : IDownloadTaskFactory
 
             // Create episodes downloadTasks
             var episodesIds = season.Episodes.Select(x => x.Id).ToList();
-            var seasonsResult = await GenerateTvShowEpisodesDownloadTasksAsync(episodesIds, downloadTasks, season.Episodes);
-            if (seasonsResult.IsFailed)
-            {
-                seasonsResult.LogError();
-                continue;
-            }
 
-            downloadTasks = seasonsResult.Value;
-        }
+            // var seasonsResult = await GenerateTvShowEpisodesDownloadTasksAsync(episodesIds, downloadTasks, season.Episodes);
+            // if (seasonsResult.IsFailed)
+            // {
+            //     seasonsResult.LogError();
+            //     continue;
+            // }
 
-        downloadTasks.ForEach(x => x.Calculate());
-
-        return Result.Ok(downloadTasks);
-    }
-
-    public async Task<Result<List<DownloadTask>>> GenerateTvShowEpisodesDownloadTasksAsync(
-        List<int> plexTvShowEpisodeIds,
-        List<DownloadTask> downloadTasks = null,
-        List<PlexTvShowEpisode> episodes = null)
-    {
-        if (!plexTvShowEpisodeIds.Any())
-            return ResultExtensions.IsEmpty(nameof(plexTvShowEpisodeIds)).LogWarning();
-
-        downloadTasks ??= new List<DownloadTask>();
-
-        foreach (var episodeId in plexTvShowEpisodeIds)
-        {
-            // Retrieve episode media from database or passed in list
-            var episode = episodes?.Find(x => x.Id == episodeId);
-            if (episode is null)
-                episode = await _dbContext.PlexTvShowEpisodes.IncludeTvShow().IncludeSeason().GetAsync(episodeId);
-
-            // Check if the tvShowDownloadTask has already been created
-            var tvShowDownloadTask = downloadTasks.FirstOrDefault(x => x.Equals(episode.TvShow));
-            if (tvShowDownloadTask is null)
-            {
-                var result = await _dbContext.GetDownloadTaskByMediaKeyQuery(episode.PlexServerId, episode.TvShow.Key);
-                downloadTasks.Add(result.IsSuccess ? result.Value : _mapper.Map<DownloadTask>(episode.TvShow));
-                tvShowDownloadTask = downloadTasks.FirstOrDefault(x => x.Equals(episode.TvShow));
-            }
-
-            // Check if the tvShowSeasonDownloadTask has already been created
-            var seasonDownloadTask = tvShowDownloadTask.Children.FirstOrDefault(x => x.Equals(episode.TvShowSeason));
-            if (seasonDownloadTask is null)
-            {
-                var result = await _dbContext.GetDownloadTaskByMediaKeyQuery(episode.TvShowSeason.PlexServerId,
-                    episode.TvShowSeason.Key);
-
-                seasonDownloadTask = result.IsSuccess ? result.Value : _mapper.Map<DownloadTask>(episode.TvShowSeason);
-                seasonDownloadTask.ParentId = tvShowDownloadTask.Id;
-                tvShowDownloadTask.Children.Add(seasonDownloadTask);
-                seasonDownloadTask = tvShowDownloadTask.Children.FirstOrDefault(x => x.Equals(episode.TvShowSeason));
-            }
-
-            // Check if the tvShowEpisodesDownloadTask has already been created
-            var episodeDownloadTask = seasonDownloadTask.Children.FirstOrDefault(x => x.Equals(episode));
-            if (episodeDownloadTask is null)
-            {
-                var result = await _dbContext.GetDownloadTaskByMediaKeyQuery(episode.PlexServerId, episode.Key);
-                episodeDownloadTask = result.IsSuccess ? result.Value : CreateEpisodeDownloadTask(episode);
-                episodeDownloadTask.ParentId = seasonDownloadTask.Id;
-                seasonDownloadTask.Children.Add(episodeDownloadTask);
-            }
+            // downloadTasks = seasonsResult.Value;
         }
 
         downloadTasks.ForEach(x => x.Calculate());

@@ -29,15 +29,6 @@ public class MockSignalRService : ISignalRService
 
     public Task SendDownloadTaskCreationProgressUpdate(int current, int total) => Task.CompletedTask;
 
-    public Task SendDownloadTaskUpdateAsync(DownloadTask downloadTask, CancellationToken cancellationToken = default)
-    {
-        var downloadTaskDTO = _mapper.Map<DownloadTaskDTO>(downloadTask);
-        DownloadTaskUpdate.Add(downloadTaskDTO, cancellationToken);
-        _log.Verbose("{ClassName} => {@DownloadTaskDto}", nameof(MockSignalRService), downloadTaskDTO);
-
-        return Task.CompletedTask;
-    }
-
     public Task SendFileMergeProgressUpdateAsync(FileMergeProgress fileMergeProgress, CancellationToken cancellationToken = default)
     {
         FileMergeProgressList.Add(fileMergeProgress, cancellationToken);

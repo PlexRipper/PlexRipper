@@ -47,13 +47,6 @@ public class SignalRService : ISignalRService
         await _progressHub.Clients.All.LibraryProgress(libraryProgress);
     }
 
-    /// <inheritdoc/>
-    public async Task SendDownloadTaskUpdateAsync(DownloadTask downloadTask, CancellationToken cancellationToken = default)
-    {
-        var downloadTaskDTO = _mapper.Map<DownloadTaskDTO>(downloadTask);
-        await _progressHub.Clients.All.DownloadTaskUpdate(downloadTaskDTO, cancellationToken);
-    }
-
     #region DownloadProgress
 
     public async Task SendDownloadProgressUpdateAsync(int plexServerId, List<DownloadTaskGeneric> downloadTasks, CancellationToken cancellationToken = default)

@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
 using BackgroundServices.Contracts;
-using PlexRipper.Application;
-using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.DTO.FolderPath;
@@ -47,7 +45,6 @@ public class WebApiMappingProfile : Profile
 
         PlexAccountMappings();
         PlexServerMappings();
-        DownloadTaskMappings();
         PlexMediaMappings();
         PlexMovieMappings();
         PlexTvShowMappings();
@@ -88,28 +85,6 @@ public class WebApiMappingProfile : Profile
 
         // PlexServerStatus -> PlexServerStatusDTO
         CreateMap<PlexServerStatus, PlexServerStatusDTO>(MemberList.Destination);
-    }
-
-    private void DownloadTaskMappings()
-    {
-        // DownloadTask -> DownloadTaskDTO
-        CreateMap<DownloadTask, DownloadTaskDTO>(MemberList.Destination)
-            .ForMember(dto => dto.DownloadUrl, opt => opt.Ignore())
-            .ForMember(dto => dto.Status, opt => opt.MapFrom(entity => entity.DownloadStatus))
-            .ForMember(dto => dto.FileTransferSpeed, opt => opt.MapFrom(entity => entity.FileTransferSpeed))
-            .ForMember(dto => dto.Actions, opt => opt.MapFrom(entity => DownloadTaskActions.Convert(entity.DownloadStatus)));
-
-        // DownloadTask -> DownloadProgressDTO
-        CreateMap<DownloadTask, DownloadProgressDTO>(MemberList.Destination)
-            .ForMember(dto => dto.Status, opt => opt.MapFrom(entity => entity.DownloadStatus))
-            .ForMember(dto => dto.Actions, opt => opt.MapFrom(entity => DownloadTaskActions.Convert(entity.DownloadStatus)));
-
-        // List<DownloadTask> -> List<ServerDownloadProgressDTO>
-        CreateMap<List<DownloadTask>, List<ServerDownloadProgressDTO>>(MemberList.Destination)
-            .ConvertUsing<ListDownloadTaskToListServerDownloadProgressDTOConverter>();
-
-        // DownloadPreview -> DownloadPreviewDTO
-        CreateMap<DownloadPreview, DownloadPreviewDTO>(MemberList.Destination);
     }
 
     private void PlexMediaMappings()

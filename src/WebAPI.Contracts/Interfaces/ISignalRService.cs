@@ -7,8 +7,6 @@ public interface ISignalRService
 {
     Task SendLibraryProgressUpdateAsync(int id, int received, int total, bool isRefreshing = true);
 
-    Task SendDownloadTaskUpdateAsync(DownloadTask downloadTask, CancellationToken cancellationToken = default);
-
     /// <summary>
     /// Sends a <see cref="FileMergeProgress"/> object to the SignalR client in the front-end.
     /// </summary>

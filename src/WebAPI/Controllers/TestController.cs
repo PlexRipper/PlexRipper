@@ -38,16 +38,4 @@ public class TestController : BaseController
         else
             return ToActionResult(Result.Fail(new Error("Failed reason #1")));
     }
-
-    // GET: api/<FolderPathController>
-    [HttpGet("OkResult/object")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<DownloadTaskDTO>))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public IActionResult GetOkResultObject([FromQuery] bool fail)
-    {
-        if (!fail)
-            return ToActionResult<DownloadTask, DownloadTaskDTO>(Result.Ok(new DownloadTask()));
-        else
-            return ToActionResult(Result.Fail(new Error("Failed reason #1")));
-    }
 }

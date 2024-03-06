@@ -2,7 +2,6 @@
 using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.Domain.Config.AutoMapper;
-using PlexRipper.DownloadManager.AutoMapper;
 using PlexRipper.PlexApi.Mappings;
 using PlexRipper.Settings.Config;
 
@@ -18,7 +17,6 @@ public static class MapperSetup
 
         // Infrastructure
         cfg.AddProfile(new PlexApiMappingProfile());
-        cfg.AddProfile(new DownloadManagerMappingProfile());
         cfg.AddProfile(new SettingsMappingProfile());
         cfg.AddProfile(new DataMappingProfile());
 

@@ -34,7 +34,7 @@ public class DownloadWorkerLog : BaseEntity
     /// <summary>
     ///  Gets the <see cref="DownloadWorkerTask">DownloadWorkerTask</see> that the log entry belongs to.
     /// </summary>
-    public DownloadWorkerTask DownloadTask { get; init; }
+    public DownloadWorkerTask DownloadWorkerTask { get; init; }
 
     /// <summary>
     ///  Gets the id of the <see cref="DownloadWorkerTask">DownloadWorkerTask</see> that the log entry belongs to.

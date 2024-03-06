@@ -172,6 +172,12 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
         builder.Entity<DownloadTaskParentBase>().UseTpcMappingStrategy();
         builder.Entity<DownloadTaskFileBase>().UseTpcMappingStrategy();
 
+        builder.Entity<DownloadTaskFileBase>()
+            .HasMany(x => x.DownloadWorkerTasks)
+            .WithOne(x => x.DownloadTask)
+            .HasForeignKey(x => x.DownloadTaskId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         // NOTE: This has been added to PlexRipperDbContext.OnModelCreating
         // Based on: https://stackoverflow.com/a/63992731/8205497
         builder.Entity<PlexMovie>()

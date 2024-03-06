@@ -71,10 +71,10 @@ public static partial class MockDatabase
         foreach (var plexServer in plexServers)
         {
             var plexLibraries = new List<PlexLibrary>();
-            if (config.MovieCount > 0)
+            if (config.MovieCount > 0 || config.MovieDownloadTasksCount > 0)
                 plexLibraries.Add(FakeData.GetPlexLibrary(_seed, PlexMediaType.Movie).Generate());
 
-            if (config.TvShowCount > 0)
+            if (config.TvShowCount > 0 || config.TvShowDownloadTasksCount > 0)
                 plexLibraries.Add(FakeData.GetPlexLibrary(_seed, PlexMediaType.TvShow).Generate());
 
             if (plexLibraryCount > 0)

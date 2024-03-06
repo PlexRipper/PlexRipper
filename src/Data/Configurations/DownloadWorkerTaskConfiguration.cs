@@ -9,7 +9,7 @@ public class DownloadWorkerTaskConfiguration : IEntityTypeConfiguration<Download
     {
         builder
             .HasMany(x => x.DownloadWorkerTaskLogs)
-            .WithOne(x => x.DownloadTask)
+            .WithOne(x => x.DownloadWorkerTask)
             .HasForeignKey(x => x.DownloadWorkerTaskId)
             .OnDelete(DeleteBehavior.Cascade);
 

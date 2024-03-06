@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Data;
 
@@ -10,9 +11,11 @@ using PlexRipper.Data;
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    partial class PlexRipperDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240306160939_RelationShipFixe2s")]
+    partial class RelationShipFixe2s
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1968,7 +1971,13 @@ namespace PlexRipper.Data.Migrations
 
             modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerTask", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.DownloadTaskFileBase", "DownloadTask")
+                    b.HasOne("PlexRipper.Domain.DownloadTaskMovieFile", null)
+                        .WithMany("DownloadWorkerTasks")
+                        .HasForeignKey("DownloadTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.DownloadTaskTvShowEpisodeFile", null)
                         .WithMany("DownloadWorkerTasks")
                         .HasForeignKey("DownloadTaskId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1979,8 +1988,6 @@ namespace PlexRipper.Data.Migrations
                         .HasForeignKey("PlexServerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("DownloadTask");
 
                     b.Navigation("PlexServer");
                 });
@@ -2407,7 +2414,12 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("Episodes");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskFileBase", b =>
+            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskMovieFile", b =>
+                {
+                    b.Navigation("DownloadWorkerTasks");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowEpisodeFile", b =>
                 {
                     b.Navigation("DownloadWorkerTasks");
                 });

@@ -15,7 +15,6 @@ public class DownloadManagerModule : Module
         var assembly = Assembly.GetExecutingAssembly();
 
         builder.RegisterType<DownloadQueue>().As<IDownloadQueue>().SingleInstance();
-        builder.RegisterType<DownloadTaskFactory>().As<IDownloadTaskFactory>().SingleInstance();
         builder.RegisterType<DownloadFileStream>().As<IDownloadFileStream>().SingleInstance();
 
         builder.RegisterModule(new QuartzAutofacJobsModule(assembly));

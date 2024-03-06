@@ -1,3 +1,3 @@
 namespace PlexRipper.Domain;
 
-public record DownloadTaskKey(DownloadTaskType Type, int Id);
+public record DownloadTaskKey(DownloadTaskType Type, Guid Id, int PlexServerId, int PlexLibraryId);

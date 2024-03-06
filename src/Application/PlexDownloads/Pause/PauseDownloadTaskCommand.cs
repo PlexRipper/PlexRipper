@@ -3,7 +3,6 @@ using Data.Contracts;
 using DownloadManager.Contracts;
 using FluentValidation;
 using Logging.Interface;
-using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
@@ -12,13 +11,13 @@ namespace PlexRipper.Application;
 /// </summary>
 /// <param name="DownloadTaskId">The id of the <see cref="DownloadTask"/> to pause.</param>
 /// <returns>Is successful.</returns>
-public record PauseDownloadTaskCommand(int DownloadTaskId) : IRequest<Result>;
+public record PauseDownloadTaskCommand(Guid DownloadTaskId) : IRequest<Result>;
 
 public class PauseDownloadTaskCommandValidator : AbstractValidator<PauseDownloadTaskCommand>
 {
     public PauseDownloadTaskCommandValidator()
     {
-        RuleFor(x => x.DownloadTaskId).GreaterThan(0);
+        RuleFor(x => x.DownloadTaskId).GreaterThan(Guid.Empty);
     }
 }
 
@@ -51,11 +50,10 @@ public class PauseDownloadTaskCommandHandler : IRequestHandler<PauseDownloadTask
         _log.Debug("DownloadTask {DownloadTaskId} has been Paused, meaning no downloaded files have been deleted", downloadTaskId);
 
         // Update the download task status
-        await _dbContext.DownloadTasks
-            .Where(x => x.Id == downloadTaskId)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Paused), cancellationToken);
+        await _dbContext.SetDownloadStatus(downloadTaskId, DownloadStatus.Paused, cancellationToken: cancellationToken);
 
-        await _mediator.Send(new DownloadTaskUpdated(downloadTaskId), cancellationToken);
+        var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskId, cancellationToken: cancellationToken);
+        await _mediator.Send(new DownloadTaskUpdated(downloadTask.ToKey()), cancellationToken);
 
         return Result.Ok();
     }

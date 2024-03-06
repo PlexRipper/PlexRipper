@@ -56,7 +56,7 @@ public class SignalRService : ISignalRService
 
     #region DownloadProgress
 
-    public async Task SendDownloadProgressUpdateAsync(int plexServerId, List<DownloadTask> downloadTasks, CancellationToken cancellationToken = default)
+    public async Task SendDownloadProgressUpdateAsync(int plexServerId, List<DownloadTaskGeneric> downloadTasks, CancellationToken cancellationToken = default)
     {
         var update = _mapper.Map<List<ServerDownloadProgressDTO>>(downloadTasks);
         if (!update.Any())

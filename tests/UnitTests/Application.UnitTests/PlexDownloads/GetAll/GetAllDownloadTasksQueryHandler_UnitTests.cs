@@ -48,8 +48,6 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest<GetAllDown
         var flatList = downloadTasks.Flatten(x => x.Children).ToList();
         flatList.ShouldAllBe(x => x.PlexServer != null);
         flatList.ShouldAllBe(x => x.PlexLibrary != null);
-        flatList.ShouldAllBe(x => x.DownloadFolder != null);
-        flatList.ShouldAllBe(x => x.DestinationFolder != null);
     }
 
     [Fact]
@@ -85,8 +83,6 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest<GetAllDown
             {
                 downloadTask.PlexServer.ShouldNotBeNull();
                 downloadTask.PlexLibrary.ShouldNotBeNull();
-                downloadTask.DownloadFolder.ShouldNotBeNull();
-                downloadTask.DestinationFolder.ShouldNotBeNull();
                 if (downloadTask.Children.Any())
                     ValidateDownloadTasks(downloadTask.Children);
             }

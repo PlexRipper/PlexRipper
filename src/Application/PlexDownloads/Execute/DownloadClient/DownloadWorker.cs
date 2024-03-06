@@ -5,7 +5,6 @@ using ByteSizeLib;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using Logging.Interface;
-using PlexRipper.DownloadManager;
 using RestSharp;
 using Timer = System.Timers.Timer;
 

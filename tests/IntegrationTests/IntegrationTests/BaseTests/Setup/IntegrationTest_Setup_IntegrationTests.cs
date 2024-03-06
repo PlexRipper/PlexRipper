@@ -17,7 +17,6 @@ public class IntegrationTest_Setup : BaseIntegrationTests
         await CreateContainer();
         Container.FileSystem.ShouldNotBeNull();
         Container.GetDownloadQueue.ShouldNotBeNull();
-        Container.GetDownloadTaskFactory.ShouldNotBeNull();
         Container.GetPlexApiService.ShouldNotBeNull();
         Container.Mediator.ShouldNotBeNull();
         Container.PathProvider.ShouldNotBeNull();

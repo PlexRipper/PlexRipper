@@ -25,15 +25,9 @@ public class MockSignalRService : ISignalRService
 
     public void SendLibraryProgressUpdate(LibraryProgress libraryProgress) { }
 
-    public Task SendLibraryProgressUpdateAsync(int id, int received, int total, bool isRefreshing = true)
-    {
-        return Task.CompletedTask;
-    }
+    public Task SendLibraryProgressUpdateAsync(int id, int received, int total, bool isRefreshing = true) => Task.CompletedTask;
 
-    public Task SendDownloadTaskCreationProgressUpdate(int current, int total)
-    {
-        return Task.CompletedTask;
-    }
+    public Task SendDownloadTaskCreationProgressUpdate(int current, int total) => Task.CompletedTask;
 
     public Task SendDownloadTaskUpdateAsync(DownloadTask downloadTask, CancellationToken cancellationToken = default)
     {
@@ -51,22 +45,13 @@ public class MockSignalRService : ISignalRService
         return Task.CompletedTask;
     }
 
-    public Task SendNotificationAsync(Notification notification)
-    {
-        return Task.CompletedTask;
-    }
+    public Task SendNotificationAsync(Notification notification) => Task.CompletedTask;
 
-    public Task SendServerInspectStatusProgressAsync(InspectServerProgress progress)
-    {
-        return Task.CompletedTask;
-    }
+    public Task SendServerInspectStatusProgressAsync(InspectServerProgress progress) => Task.CompletedTask;
 
-    public Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress)
-    {
-        return Task.CompletedTask;
-    }
+    public Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress) => Task.CompletedTask;
 
-    public Task SendDownloadProgressUpdateAsync(int plexServerId, List<DownloadTask> downloadTasks, CancellationToken cancellationToken = default)
+    public Task SendDownloadProgressUpdateAsync(int plexServerId, List<DownloadTaskGeneric> downloadTasks, CancellationToken cancellationToken = default)
     {
         var update = _mapper.Map<List<ServerDownloadProgressDTO>>(downloadTasks);
 
@@ -76,13 +61,7 @@ public class MockSignalRService : ISignalRService
         return Task.CompletedTask;
     }
 
-    public Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress)
-    {
-        return Task.CompletedTask;
-    }
+    public Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress) => Task.CompletedTask;
 
-    public Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate)
-    {
-        return Task.CompletedTask;
-    }
+    public Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate) => Task.CompletedTask;
 }

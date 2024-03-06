@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlexRipper.Domain;
 
-public abstract class DownloadTaskParentBase : DownloadTaskBase
+public abstract class DownloadTaskParentBase : DownloadTaskBase, IDownloadTaskProgress
 {
     /// <summary>
     /// Gets or sets the media display title.

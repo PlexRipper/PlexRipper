@@ -7,6 +7,7 @@ using Data.Contracts;
 using DownloadManager.Contracts;
 using Environment;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 using PlexRipper.FileSystem.Common;
 using Quartz;
 
@@ -63,7 +64,7 @@ public class FileMergeJob : IJob
             }
 
             var fileTask = fileTaskResult.Value;
-            var downloadTask = fileTask.DownloadTask;
+            var downloadTask = await _dbContext.GetDownloadTaskAsync(fileTask.DownloadTaskId, cancellationToken: token);
 
             _log.Information("Executing {NameOfFileMergeJob} with name {FileTaskFileName} and id {FileTaskId}", nameof(FileMergeJob), fileTask.FileName,
                 fileTaskId);
@@ -81,9 +82,12 @@ public class FileMergeJob : IJob
             downloadTask.DownloadStatus = newDownloadStatus;
             downloadTask.DownloadWorkerTasks.ForEach(x => x.DownloadStatus = newDownloadStatus);
 
-            await _dbContext.UpdateDownloadTasksAsync(downloadTask, token);
+            await _dbContext.SetDownloadStatus(downloadTask.ToKey(), newDownloadStatus, token);
+            var downloadWorkerIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
+            await _dbContext.DownloadWorkerTasks.Where(x => downloadWorkerIds.Contains(x.Id))
+                .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, newDownloadStatus), token);
 
-            await _mediator.Send(new DownloadTaskUpdated(downloadTask), token);
+            await _mediator.Send(new DownloadTaskUpdated(downloadTask.ToKey()), token);
 
             // Verify all file paths exists
             foreach (var path in fileTask.FilePaths)

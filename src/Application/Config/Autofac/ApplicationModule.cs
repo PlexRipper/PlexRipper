@@ -4,7 +4,6 @@ using Autofac;
 using Autofac.Extras.Quartz;
 using MediatR.Extensions.Autofac.DependencyInjection;
 using MediatR.Extensions.Autofac.DependencyInjection.Builder;
-using PlexRipper.DownloadManager;
 using Module = Autofac.Module;
 
 namespace PlexRipper.Application;

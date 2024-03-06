@@ -28,13 +28,19 @@ public class FileMergeFinishedHandler : INotificationHandler<FileMergeFinishedNo
         }
 
         var fileTask = fileTaskResult.Value;
+        var downloadTask = await _dbContext.GetDownloadTaskAsync(fileTask.DownloadTaskId, cancellationToken: cancellationToken);
+        if (downloadTask is null)
+        {
+            ResultExtensions.EntityNotFound(nameof(DownloadTask), fileTask.DownloadTaskId).LogError();
+            return;
+        }
 
         _fileMergeSystem.DeleteDirectoryFromFilePath(fileTask.FilePaths.First());
 
-        await _dbContext.DownloadTasks.SetDownloadStatusAsync(fileTask.DownloadTaskId, DownloadStatus.Completed, cancellationToken);
+        await _dbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.Completed, cancellationToken);
 
         await _mediator.Send(new DeleteFileTaskByIdCommand(notification.FileTaskId), cancellationToken);
 
-        await _mediator.Send(new DownloadTaskUpdated(fileTask.DownloadTask), cancellationToken);
+        await _mediator.Send(new DownloadTaskUpdated(downloadTask.ToKey()), cancellationToken);
     }
 }

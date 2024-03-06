@@ -73,4 +73,6 @@ public abstract class DownloadTaskBase
         episode is not null && PlexServerId == episode.PlexServerId && MediaType == episode.Type && Key == episode.Key;
 
     #endregion
+
+    public DownloadTaskKey ToKey() => new(DownloadTaskType, Id, PlexServerId, PlexLibraryId);
 }

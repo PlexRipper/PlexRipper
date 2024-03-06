@@ -16,7 +16,7 @@ public class DownloadTaskFinishedHandler : INotificationHandler<DownloadTaskFini
 
     public async Task Handle(DownloadTaskFinished notification, CancellationToken cancellationToken)
     {
-        var addFileTaskResult = await _fileMergeScheduler.CreateFileTaskFromDownloadTask(notification.DownloadTaskId);
+        var addFileTaskResult = await _fileMergeScheduler.CreateFileTaskFromDownloadTask(notification.Key);
         if (addFileTaskResult.IsFailed)
         {
             addFileTaskResult.LogError();

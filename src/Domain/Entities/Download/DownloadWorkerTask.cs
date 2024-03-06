@@ -12,11 +12,11 @@ public class DownloadWorkerTask : BaseEntity
     /// <summary>
     /// Initializes a new instance of the <see cref="DownloadWorkerTask"/> class.
     /// </summary>
-    /// <param name="downloadTask"></param>
+    /// <param name="DownloadTaskFileBase"></param>
     /// <param name="partIndex"></param>
     /// <param name="startPosition"></param>
     /// <param name="endPosition"></param>
-    public DownloadWorkerTask(DownloadTask downloadTask, int partIndex, long startPosition, long endPosition)
+    public DownloadWorkerTask(DownloadTaskGeneric downloadTask, int partIndex, long startPosition, long endPosition)
     {
         TempDirectory = downloadTask.DownloadDirectory;
         FileLocationUrl = downloadTask.FileLocationUrl;
@@ -79,7 +79,7 @@ public class DownloadWorkerTask : BaseEntity
 
     public DownloadTask DownloadTask { get; set; }
 
-    public int DownloadTaskId { get; set; }
+    public Guid DownloadTaskId { get; set; }
 
     public PlexServer PlexServer { get; set; }
 

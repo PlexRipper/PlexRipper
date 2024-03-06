@@ -9,11 +9,7 @@ public class AddFileTaskFromDownloadTaskCommandValidator : AbstractValidator<Add
 {
     public AddFileTaskFromDownloadTaskCommandValidator()
     {
-        RuleFor(x => x.DownloadTask).NotNull();
-        RuleFor(x => x.DownloadTask.Id).GreaterThan(0);
-        RuleFor(x => x.DownloadTask.DownloadWorkerTasks).NotEmpty();
-        RuleFor(x => x.DownloadTask.DestinationFolder).NotNull();
-        RuleFor(x => x.DownloadTask.DestinationFolderId).GreaterThan(0);
+        RuleFor(x => x.DownloadTaskKey).NotNull();
     }
 }
 
@@ -23,11 +19,12 @@ public class AddFileTaskFromDownloadTaskCommandHandler : BaseHandler, IRequestHa
 
     public async Task<Result<int>> Handle(AddFileTaskFromDownloadTaskCommand command, CancellationToken cancellationToken)
     {
+        var downloadTask = await _dbContext.GetDownloadTaskAsync(command.DownloadTaskKey, cancellationToken);
         var fileTask = new DownloadFileTask
         {
-            DownloadTaskId = command.DownloadTask.Id,
+            DownloadTaskId = downloadTask.Id,
             CreatedAt = DateTime.UtcNow,
-            FilePathsCompressed = command.DownloadTask.GetFilePathsCompressed,
+            FilePathsCompressed = string.Join(';', downloadTask.DownloadWorkerTasks.Select(x => x.TempFilePath).ToArray()),
         };
 
         await _dbContext.FileTasks.AddAsync(fileTask, cancellationToken);

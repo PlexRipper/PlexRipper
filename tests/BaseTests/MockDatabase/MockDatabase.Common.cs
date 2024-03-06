@@ -1,6 +1,5 @@
 #region
 
-using Data.Contracts;
 using Logging.Interface;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -255,16 +254,10 @@ public static partial class MockDatabase
             context = await context.AddPlexTvShows(options);
 
         if (config.MovieDownloadTasksCount > 0)
-        {
-            context = await context.AddMovieDownloadTasks(options);
             context = await context.AddDownloadTaskMovies(options);
-        }
 
         if (config.TvShowDownloadTasksCount > 0)
-        {
-            context = await context.AddTvShowDownloadTasks(options);
             context = await context.AddDownloadTaskTvShows(options);
-        }
 
         if (config.AccountHasAccessToAllLibraries)
             context = await context.AddPlexAccountLibraries(options);
@@ -273,90 +266,6 @@ public static partial class MockDatabase
     }
 
     #endregion
-
-    #endregion
-
-    #region Add DownloadTasks
-
-    private static async Task<PlexRipperDbContext> AddMovieDownloadTasks(this PlexRipperDbContext context, Action<FakeDataConfig> options = null)
-    {
-        var config = FakeDataConfig.FromOptions(options);
-        var downloadTasks = FakeData.GetMovieDownloadTask(_seed, options).Generate(config.MovieDownloadTasksCount);
-
-        if (!config.DisableForeignKeyCheck)
-        {
-            var plexLibrary = context.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.Movie);
-            plexLibrary.ShouldNotBeNull("No PlexLibrary available with type Movie, consider setting config.DisableForeignKeyCheck = true");
-
-            var plexServer = context.PlexServers.IncludeConnections().FirstOrDefault(x => x.Id == plexLibrary.PlexServerId);
-            plexServer.ShouldNotBeNull();
-
-            downloadTasks = downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
-        }
-
-        context.DownloadTasks.AddRange(downloadTasks);
-        await context.SaveChangesAsync();
-
-        // Ensure there is a rootId
-        foreach (var downloadTask in downloadTasks)
-        {
-            downloadTask.RootDownloadTaskId = downloadTask.Id;
-            downloadTask.Children.SetRootId(downloadTask.Id);
-        }
-
-        await context.SaveChangesAsync();
-
-        _log.Here()
-            .Debug("Added {MovieDownloadTasksCount} Movie {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}", config.MovieDownloadTasksCount,
-                nameof(DownloadTask), context.DatabaseName);
-
-        return context;
-    }
-
-    private static async Task<PlexRipperDbContext> AddTvShowDownloadTasks(this PlexRipperDbContext context, Action<FakeDataConfig> options = null)
-    {
-        var config = FakeDataConfig.FromOptions(options);
-
-        var downloadTasks = FakeData.GetTvShowDownloadTask(_seed, options).Generate(config.TvShowDownloadTasksCount);
-
-        if (!config.DisableForeignKeyCheck)
-        {
-            var plexLibrary = context.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.TvShow);
-            plexLibrary.ShouldNotBeNull("No PlexLibrary available with type TvShow, consider setting config.DisableForeignKeyCheck = true");
-            var plexServer = context.PlexServers.IncludeConnections().FirstOrDefault(x => x.Id == plexLibrary.PlexServerId);
-            plexServer.ShouldNotBeNull();
-
-            downloadTasks.SetIds(plexLibrary.PlexServerId, plexLibrary.Id, plexServer.MachineIdentifier);
-
-            plexServer.PlexServerConnections.ShouldNotBeEmpty();
-        }
-
-        if (config.TvShowCount > 0)
-        {
-            var tvShowsDb = await context.PlexTvShows.IncludeEpisodes().ToListAsync();
-
-            for (var i = 0; i < Math.Min(downloadTasks.Count, tvShowsDb.Count); i++)
-                downloadTasks[i].Key = tvShowsDb[i].Key;
-        }
-
-        context.DownloadTasks.AddRange(downloadTasks);
-        await context.SaveChangesAsync();
-
-        // Ensure there is a rootId
-        foreach (var downloadTask in downloadTasks)
-        {
-            downloadTask.RootDownloadTaskId = downloadTask.Id;
-            downloadTask.Children.SetRootId(downloadTask.Id);
-        }
-
-        await context.SaveChangesAsync();
-
-        _log.Here()
-            .Debug("Added {TvShowDownloadTasksCount} TvShow {NameOfDownloadTask}s to PlexRipperDbContext: {DatabaseName}", config.TvShowDownloadTasksCount,
-                nameof(DownloadTask), context.DatabaseName);
-
-        return context;
-    }
 
     #endregion
 

@@ -4,10 +4,10 @@ namespace Application.Contracts;
 
 public interface IDownloadTaskScheduler
 {
-    Task<Result> StartDownloadTaskJob(int downloadTaskId, int plexServerId);
-    Task<Result> StopDownloadTaskJob(int downloadTaskId);
-    Task<bool> IsDownloading(int downloadTaskId);
+    Task<Result> StartDownloadTaskJob(Guid downloadTaskId, int plexServerId);
+    Task<Result> StopDownloadTaskJob(Guid downloadTaskId);
+    Task<bool> IsDownloading(Guid downloadTaskId);
 
     Task<bool> IsServerDownloading(int plexServerId);
-    Task AwaitDownloadTaskJob(int downloadTaskId, CancellationToken cancellationToken = default);
+    Task AwaitDownloadTaskJob(Guid downloadTaskId, CancellationToken cancellationToken = default);
 }

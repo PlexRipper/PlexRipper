@@ -1,4 +1,4 @@
-﻿using PlexRipper.DownloadManager;
+﻿using PlexRipper.Application;
 
 namespace DownloadManager.UnitTests;
 
@@ -13,7 +13,7 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
         await SetupDatabase();
 
         // Act
-        var result = _sut.Setup(null);
+        var result = await _sut.Setup(null);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
@@ -26,11 +26,11 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
         //Arrange
         await SetupDatabase();
 
-        var downloadTask = FakeData.GetMovieDownloadTask().Generate();
+        var downloadTask = FakeData.GetMovieDownloadTaskV2().Generate();
         downloadTask.PlexServer = null;
 
         // Act
-        var result = _sut.Setup(downloadTask);
+        var result = await _sut.Setup(downloadTask.ToKey());
 
         // Assert
         result.IsFailed.ShouldBeTrue();

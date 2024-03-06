@@ -34,6 +34,7 @@ public class DownloadTaskTvShowEpisode : DownloadTaskParentBase
         DataReceived = Children.Select(x => x.DataReceived).Sum();
         DataTotal = Children.Select(x => x.DataTotal).Sum();
         Percentage = DataFormat.GetPercentage(DataReceived, DataTotal);
+        DownloadStatus = DownloadTaskActions.Aggregate(Children.Select(x => x.DownloadStatus).ToList());
     }
 
     #endregion

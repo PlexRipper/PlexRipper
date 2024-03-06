@@ -24,26 +24,6 @@ public static partial class DbContextExtensions
         return Result.Ok(downloadTask);
     }
 
-    public static async Task DeleteDownloadWorkerTasksAsync(
-        this IPlexRipperDbContext dbContext,
-        int downloadTaskId,
-        CancellationToken cancellationToken = default)
-    {
-        var downloadWorkerTasks = await dbContext.DownloadWorkerTasks.AsTracking()
-            .Where(x => x.DownloadTaskId == downloadTaskId)
-            .ToListAsync(cancellationToken);
-        if (!downloadWorkerTasks.Any())
-        {
-            Result.Fail(
-                    $"Could not find any {nameof(DownloadWorkerTask)}s assigned to {nameof(DownloadTask)} with id: {downloadTaskId}")
-                .LogWarning();
-            return;
-        }
-
-        dbContext.DownloadWorkerTasks.RemoveRange(downloadWorkerTasks);
-        await dbContext.SaveChangesAsync(cancellationToken);
-    }
-
     public static async Task UpdateDownloadTasksAsync(
         this IPlexRipperDbContext dbContext,
         List<DownloadTask> downloadTasks,

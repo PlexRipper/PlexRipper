@@ -197,8 +197,7 @@ public static partial class FakeData
             .RuleFor(x => x.ElapsedTime, 0)
             .RuleFor(x => x.FileLocationUrl, f => f.Internet.UrlRootedPath())
             .RuleFor(x => x.DownloadStatus, DownloadStatus.Queued)
-            .RuleFor(x => x.DownloadTaskId, _ => 0)
-            .RuleFor(x => x.DownloadTask, _ => null)
+            .RuleFor(x => x.DownloadTaskId, _ => Guid.Empty)
             .RuleFor(x => x.DownloadWorkerTaskLogs, new List<DownloadWorkerLog>());
     }
 

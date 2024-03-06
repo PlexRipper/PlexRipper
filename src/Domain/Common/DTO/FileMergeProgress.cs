@@ -13,7 +13,9 @@ public class FileMergeProgress
     /// <summary>
     /// This is equal to the <see cref="DownloadTask"/> Id the <see cref="DownloadFileTask"/> is currently handling.
     /// </summary>
-    public int DownloadTaskId { get; set; }
+    public Guid DownloadTaskId { get; set; }
+
+    public DownloadTaskType DownloadTaskType { get; set; }
 
     public long DataTransferred { get; set; }
 
@@ -44,4 +46,6 @@ public class FileMergeProgress
     /// Note: This is needed in the front-end to update the correct DownloadTask.
     /// </summary>
     public int PlexLibraryId { get; set; }
+
+    public DownloadTaskKey ToKey() => new(DownloadTaskType, DownloadTaskId, PlexServerId, PlexLibraryId);
 }

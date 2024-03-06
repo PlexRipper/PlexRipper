@@ -6,41 +6,41 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
 {
     public DownloadQueue_GetNextDownloadTask_UnitTests(ITestOutputHelper output) : base(output) { }
 
-    private List<DownloadTask> TestDownloadTasks(int count)
+    private List<DownloadTaskGeneric> TestDownloadTasks(int count)
     {
-        var downloadTasks = new List<DownloadTask>();
+        var downloadTasks = new List<DownloadTaskGeneric>();
         var index = 1;
         for (var i = 0; i < count; i++)
         {
-            var downloadTask_i = new DownloadTask
+            var downloadTask_i = new DownloadTaskGeneric
             {
-                Id = index++,
+                Id = Guid.NewGuid(),
                 DownloadStatus = DownloadStatus.Queued,
-                Children = new List<DownloadTask>(),
+                Children = new List<DownloadTaskGeneric>(),
             };
             for (var j = 0; j < count; j++)
             {
-                var downloadTask_j = new DownloadTask
+                var downloadTask_j = new DownloadTaskGeneric
                 {
-                    Id = index++,
+                    Id = Guid.NewGuid(),
                     DownloadStatus = DownloadStatus.Queued,
-                    Children = new List<DownloadTask>(),
+                    Children = new List<DownloadTaskGeneric>(),
                 };
                 for (var k = 0; k < count; k++)
                 {
-                    var downloadTask_k = new DownloadTask
+                    var downloadTask_k = new DownloadTaskGeneric
                     {
-                        Id = index++,
+                        Id = Guid.NewGuid(),
                         DownloadStatus = DownloadStatus.Queued,
-                        Children = new List<DownloadTask>(),
+                        Children = new List<DownloadTaskGeneric>(),
                     };
                     for (var l = 0; l < count; l++)
                     {
-                        var downloadTask_l = new DownloadTask
+                        var downloadTask_l = new DownloadTaskGeneric
                         {
-                            Id = index++,
+                            Id = Guid.NewGuid(),
                             DownloadStatus = DownloadStatus.Queued,
-                            Children = new List<DownloadTask>(),
+                            Children = new List<DownloadTaskGeneric>(),
                         };
                         downloadTask_k.Children.Add(downloadTask_l);
                     }
@@ -70,7 +70,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
 
         // Assert
         nextDownloadTask.IsSuccess.ShouldBeTrue();
-        nextDownloadTask.Value.Id.ShouldBe(4);
+        nextDownloadTask.Value.Id.ShouldBe(downloadTasks[4].Id);
     }
 
     [Fact]
@@ -80,15 +80,14 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
         await SetupDatabase();
 
         var downloadTasks = TestDownloadTasks(3);
-        downloadTasks[0].DownloadStatus = DownloadStatus.Completed;
-        downloadTasks[0].Children = downloadTasks[0].Children.SetToCompleted();
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
 
         // Act
         var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
 
         // Assert
         nextDownloadTask.IsSuccess.ShouldBeTrue();
-        nextDownloadTask.Value.Id.ShouldBe(44);
+        nextDownloadTask.Value.Id.ShouldBe(downloadTasks[44].Id);
     }
 
     [Fact]
@@ -98,14 +97,14 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
         await SetupDatabase();
 
         var downloadTasks = TestDownloadTasks(3);
-        downloadTasks[0].DownloadStatus = DownloadStatus.Downloading;
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Downloading);
 
         // Act
         var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
 
         // Assert
         nextDownloadTask.IsSuccess.ShouldBeTrue();
-        nextDownloadTask.Value.Id.ShouldBe(4);
+        nextDownloadTask.Value.Id.ShouldBe(downloadTasks[0].Id);
     }
 
     [Fact]
@@ -115,8 +114,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
         await SetupDatabase();
 
         var downloadTasks = TestDownloadTasks(2);
-        downloadTasks[0].DownloadStatus = DownloadStatus.Downloading;
-        downloadTasks[0].Children = downloadTasks[0].Children.SetToDownloading();
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Downloading);
 
         // Act
         var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);

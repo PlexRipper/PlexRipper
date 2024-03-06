@@ -4,7 +4,6 @@ using DownloadManager.Contracts;
 using FileSystem.Contracts;
 using FluentValidation;
 using Logging.Interface;
-using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
@@ -13,13 +12,13 @@ namespace PlexRipper.Application;
 /// </summary>
 /// <param name="DownloadTaskId">The id of the <see cref="DownloadTask"/> to stop.</param>
 /// <returns>If successful a list of the DownloadTasks that were stopped.</returns>
-public record StopDownloadTaskCommand(int DownloadTaskId) : IRequest<Result>;
+public record StopDownloadTaskCommand(Guid DownloadTaskId) : IRequest<Result>;
 
 public class StopDownloadTaskCommandValidator : AbstractValidator<StopDownloadTaskCommand>
 {
     public StopDownloadTaskCommandValidator()
     {
-        RuleFor(x => x.DownloadTaskId).GreaterThan(0);
+        RuleFor(x => x.DownloadTaskId).GreaterThan(Guid.Empty);
     }
 }
 
@@ -47,7 +46,7 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
 
     public async Task<Result> Handle(StopDownloadTaskCommand command, CancellationToken cancellationToken)
     {
-        var downloadTask = await _dbContext.DownloadTasks.AsTracking().GetAsync(command.DownloadTaskId, cancellationToken);
+        var downloadTask = await _dbContext.GetDownloadTaskAsync(command.DownloadTaskId, cancellationToken: cancellationToken);
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTask), command.DownloadTaskId).LogError();
 
@@ -64,11 +63,9 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
             return removeTempResult;
 
         // Update the download task status
-        await _dbContext.DownloadTasks
-            .Where(x => x.Id == downloadTask.Id)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, DownloadStatus.Stopped), cancellationToken);
+        await _dbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.Stopped, cancellationToken);
 
-        await _mediator.Send(new DownloadTaskUpdated(downloadTask), cancellationToken);
+        await _mediator.Send(new DownloadTaskUpdated(downloadTask.ToKey()), cancellationToken);
 
         return Result.Ok();
     }

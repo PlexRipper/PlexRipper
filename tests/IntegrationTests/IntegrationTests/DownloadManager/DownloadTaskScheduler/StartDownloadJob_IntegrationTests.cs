@@ -1,8 +1,6 @@
-using Data.Contracts;
-using PlexRipper.Data.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationTests.DownloadManager.DownloadTaskScheduler;
-
 
 public class StartDownloadJob_IntegrationTests : BaseIntegrationTests
 {
@@ -28,16 +26,11 @@ public class StartDownloadJob_IntegrationTests : BaseIntegrationTests
         SetupMockPlexApi();
 
         await CreateContainer(config => { config.DownloadSpeedLimitInKib = 5000; });
-
-        var downloadTask = Container.PlexRipperDbContext
-            .DownloadTasks
-            .IncludeDownloadTasks()
-            .FirstOrDefault();
-        downloadTask.ShouldNotBeNull();
-        var childDownloadTask = downloadTask.Children[0];
+        var movieDownloadTasks = await Container.PlexRipperDbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
+        var movieFileDownloadTask = movieDownloadTasks[0].Children[0];
 
         // Act
-        var startResult = await Container.DownloadTaskScheduler.StartDownloadTaskJob(childDownloadTask.Id, childDownloadTask.PlexServerId);
+        var startResult = await Container.DownloadTaskScheduler.StartDownloadTaskJob(movieFileDownloadTask.Id, movieFileDownloadTask.PlexServerId);
         await Container.SchedulerService.AwaitScheduler();
 
         // Assert

@@ -22,18 +22,15 @@ public class FileMergeScheduler : BaseScheduler, IFileMergeScheduler
     /// <summary>
     /// Creates an FileTask from a completed <see cref="DownloadTask"/> and adds this to the database.
     /// </summary>
-    /// <param name="downloadTaskId"></param>
-    public async Task<Result<DownloadFileTask>> CreateFileTaskFromDownloadTask(int downloadTaskId)
+    /// <param name="downloadTaskKey"></param>
+    public async Task<Result<DownloadFileTask>> CreateFileTaskFromDownloadTask(DownloadTaskKey downloadTaskKey)
     {
-        if (downloadTaskId == 0)
-            return ResultExtensions.IsInvalidId(nameof(downloadTaskId)).LogError();
-
-        var downloadTask = await _dbContext.DownloadTasks.IncludeDownloadTasks().GetAsync(downloadTaskId);
+        var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskKey);
         if (downloadTask is null)
-            return ResultExtensions.EntityNotFound(nameof(DownloadTask), downloadTaskId);
+            return ResultExtensions.EntityNotFound(nameof(DownloadTask), downloadTaskKey.Id);
 
-        _log.Here().Debug("Adding DownloadTask {DownloadTaskTitle} with id {Id} to a FileTask to be merged", downloadTask.Title, downloadTask.Id);
-        var result = await _mediator.Send(new AddFileTaskFromDownloadTaskCommand(downloadTask));
+        _log.Here().Debug("Adding DownloadTask \"{DownloadTaskTitle}\" with id {Id} to a FileTask to be merged", downloadTask.FullTitle, downloadTask.Id);
+        var result = await _mediator.Send(new AddFileTaskFromDownloadTaskCommand(downloadTaskKey));
         if (result.IsFailed)
             return result.ToResult().LogError();
 

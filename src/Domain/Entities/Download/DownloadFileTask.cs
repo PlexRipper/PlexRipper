@@ -17,7 +17,7 @@ public class DownloadFileTask : BaseEntity
 
     public DownloadTask DownloadTask { get; set; }
 
-    public int DownloadTaskId { get; set; }
+    public Guid DownloadTaskId { get; set; }
 
     #endregion
 

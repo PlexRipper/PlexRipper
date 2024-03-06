@@ -21,7 +21,8 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
 
     public long DataTotal { get; set; }
 
-    public DateTime Created { get; init; }
+    public DateTime CreatedAt { get; init; }
+
     public string FileName { get; init; }
 
     public bool IsDownloadable { get; init; }

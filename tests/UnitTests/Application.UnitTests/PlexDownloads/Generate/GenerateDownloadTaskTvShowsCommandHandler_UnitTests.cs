@@ -57,7 +57,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler_UnitTests : BaseUnitTest<
             downloadTaskTvShow.Year.ShouldBeGreaterThan(0);
             downloadTaskTvShow.DataTotal.ShouldBeGreaterThan(0);
             downloadTaskTvShow.DownloadStatus.ShouldBe(DownloadStatus.Queued);
-            downloadTaskTvShow.Created.ShouldBe(DateTime.Now, TimeSpan.FromSeconds(5));
+            downloadTaskTvShow.CreatedAt.ShouldBe(DateTime.Now, TimeSpan.FromSeconds(5));
 
             downloadTaskTvShow.PlexServerId.ShouldBe(1);
             downloadTaskTvShow.PlexLibraryId.ShouldBe(1);

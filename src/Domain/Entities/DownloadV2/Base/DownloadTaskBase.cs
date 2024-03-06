@@ -32,7 +32,7 @@ public abstract class DownloadTaskBase
     public DownloadStatus DownloadStatus { get; set; }
 
     [Column(Order = 10)]
-    public DateTime Created { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the full formatted media title, based on the <see cref="PlexMediaType"/>.

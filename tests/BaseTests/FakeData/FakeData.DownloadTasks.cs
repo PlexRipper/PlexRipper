@@ -21,7 +21,7 @@ public static partial class FakeData
                 ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
                 : f.Random.Long(1, 10000000))
             .RuleFor(x => x.DownloadStatus, _ => DownloadStatus.Queued)
-            .RuleFor(x => x.Created, f => f.Date.Recent(30))
+            .RuleFor(x => x.CreatedAt, _ => DateTime.UtcNow)
             .RuleFor(x => x.PlexServerId, _ => 0)
             .RuleFor(x => x.PlexServer, _ => null)
             .RuleFor(x => x.PlexLibraryId, _ => 0)

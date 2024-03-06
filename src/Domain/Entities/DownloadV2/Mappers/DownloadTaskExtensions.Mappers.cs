@@ -9,7 +9,7 @@ public static class DownloadTaskExtensions_Mappers
         return new DownloadTaskGeneric
         {
             Children = children,
-            Created = downloadTaskMovie.Created,
+            CreatedAt = downloadTaskMovie.CreatedAt,
             DataReceived = children.Sum(x => x.DataReceived),
             DataTotal = children.Sum(x => x.DataTotal),
             DestinationDirectory = string.Empty,
@@ -36,7 +36,7 @@ public static class DownloadTaskExtensions_Mappers
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskMovieFile downloadTaskMovieFile) => new()
     {
         Children = new List<DownloadTaskGeneric>(),
-        Created = downloadTaskMovieFile.Created,
+        CreatedAt = downloadTaskMovieFile.CreatedAt,
         DataReceived = downloadTaskMovieFile.DataReceived,
         DataTotal = downloadTaskMovieFile.DataTotal,
         DestinationDirectory = downloadTaskMovieFile.DestinationDirectory,
@@ -73,7 +73,7 @@ public static class DownloadTaskExtensions_Mappers
         return new DownloadTaskGeneric
         {
             Children = children,
-            Created = downloadTaskTvShow.Created,
+            CreatedAt = downloadTaskTvShow.CreatedAt,
             DataReceived = children.Sum(x => x.DataReceived),
             DataTotal = children.Sum(x => x.DataTotal),
             DestinationDirectory = string.Empty,
@@ -109,7 +109,7 @@ public static class DownloadTaskExtensions_Mappers
         return new DownloadTaskGeneric
         {
             Children = children,
-            Created = downloadTaskTvShowSeason.Created,
+            CreatedAt = downloadTaskTvShowSeason.CreatedAt,
             DataReceived = children.Sum(x => x.DataReceived),
             DataTotal = children.Sum(x => x.DataTotal),
             DestinationDirectory = string.Empty,
@@ -140,7 +140,7 @@ public static class DownloadTaskExtensions_Mappers
         return new DownloadTaskGeneric
         {
             Children = downloadTaskTvShowEpisode.Children.Select(x => x.ToGeneric()).ToList(),
-            Created = downloadTaskTvShowEpisode.Created,
+            CreatedAt = downloadTaskTvShowEpisode.CreatedAt,
             DataReceived = downloadTaskTvShowEpisode.Children.Sum(x => x.DataReceived),
             DataTotal = downloadTaskTvShowEpisode.Children.Sum(x => x.DataTotal),
             DestinationDirectory = string.Empty,
@@ -169,7 +169,7 @@ public static class DownloadTaskExtensions_Mappers
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskTvShowEpisodeFile downloadTaskTvShowEpisodeFile) => new()
     {
         Children = new List<DownloadTaskGeneric>(),
-        Created = downloadTaskTvShowEpisodeFile.Created,
+        CreatedAt = downloadTaskTvShowEpisodeFile.CreatedAt,
         DataReceived = downloadTaskTvShowEpisodeFile.DataReceived,
         DataTotal = downloadTaskTvShowEpisodeFile.DataTotal,
         DestinationDirectory = downloadTaskTvShowEpisodeFile.DestinationDirectory,

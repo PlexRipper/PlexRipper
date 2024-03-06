@@ -12,7 +12,7 @@ public class DownloadTaskEpisodeFileValidator : AbstractValidator<DownloadTaskTv
         RuleFor(x => x.MediaType).Equal(PlexMediaType.Episode);
         RuleFor(x => x.PlexLibraryId).GreaterThan(0);
         RuleFor(x => x.PlexServerId).GreaterThan(0);
-        RuleFor(x => x.Created).GreaterThan(DateTime.MinValue);
+        RuleFor(x => x.CreatedAt).GreaterThan(DateTime.MinValue);
         RuleFor(x => x.DataTotal).GreaterThan(0);
         RuleFor(x => x.DestinationDirectory).NotEmpty();
         RuleFor(x => x.DownloadDirectory).NotEmpty();

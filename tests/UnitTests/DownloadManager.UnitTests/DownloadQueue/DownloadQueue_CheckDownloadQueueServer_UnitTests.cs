@@ -103,11 +103,11 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _sut.CheckDownloadQueueServer(downloadTasks.First().PlexServerId);
+        var result = await _sut.CheckDownloadQueueServer(movieDownloadTask.PlexServerId);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Id.ShouldBe(movieDownloadTask.Id);
+        result.Value.Id.ShouldBe(movieDownloadTask.Children.First().Id);
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Id.ShouldBe(downloadTasks[1].Children[0].Children[0].Children[0].Id);
+        result.Value.Id.ShouldBe(tvShowDownloadTask.Children[0].Children[0].Children[0].Id);
     }
 
     [Fact]
@@ -157,13 +157,12 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
         });
 
         var downloadTasks = await DbContext.DownloadTaskTvShow
+            .AsTracking()
             .IncludeAll()
             .ToListAsync();
 
         downloadTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
-
-        foreach (var tvShowDownloadTask in downloadTasks)
-            tvShowDownloadTask.Children[0].Children[1].DownloadStatus = DownloadStatus.Queued;
+        downloadTasks[1].SetDownloadStatus(DownloadStatus.Queued);
 
         await DbContext.SaveChangesAsync();
 
@@ -174,6 +173,6 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Id.ShouldBe(downloadTasks[0].Children[0].Children[1].Children[0].Id);
+        result.Value.Id.ShouldBe(downloadTasks[1].Children[0].Children[0].Children[0].Id);
     }
 }

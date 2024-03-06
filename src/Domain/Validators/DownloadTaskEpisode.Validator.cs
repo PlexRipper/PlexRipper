@@ -13,7 +13,7 @@ public class DownloadTaskEpisodeValidator : AbstractValidator<DownloadTaskTvShow
         RuleFor(x => x.Year).GreaterThan(0);
         RuleFor(x => x.DataTotal).GreaterThan(0);
         RuleFor(x => x.DownloadStatus).Equal(DownloadStatus.Queued);
-        RuleFor(x => x.Created).GreaterThan(DateTime.MinValue);
+        RuleFor(x => x.CreatedAt).GreaterThan(DateTime.MinValue);
 
         RuleFor(x => x.PlexLibraryId).GreaterThan(0);
         RuleFor(x => x.PlexServerId).GreaterThan(0);

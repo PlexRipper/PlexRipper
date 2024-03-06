@@ -8,9 +8,9 @@ using Logging.Interface;
 namespace PlexRipper.Application;
 
 /// <summary>
-/// Stops and disposes of the PlexDownloadClient executing the <see cref="DownloadTask"/> if it is downloading.
+/// Stops and disposes of the PlexDownloadClient executing the <see cref="DownloadTaskGeneric"/> if it is downloading.
 /// </summary>
-/// <param name="DownloadTaskId">The id of the <see cref="DownloadTask"/> to stop.</param>
+/// <param name="DownloadTaskId">The id of the <see cref="DownloadTaskGeneric"/> to stop.</param>
 /// <returns>If successful a list of the DownloadTasks that were stopped.</returns>
 public record StopDownloadTaskCommand(Guid DownloadTaskId) : IRequest<Result>;
 
@@ -48,7 +48,7 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
     {
         var downloadTask = await _dbContext.GetDownloadTaskAsync(command.DownloadTaskId, cancellationToken: cancellationToken);
         if (downloadTask is null)
-            return ResultExtensions.EntityNotFound(nameof(DownloadTask), command.DownloadTaskId).LogError();
+            return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.DownloadTaskId).LogError();
 
         _log.Information("Stopping {DownloadTaskFullTitle} from downloading", downloadTask.FullTitle);
 

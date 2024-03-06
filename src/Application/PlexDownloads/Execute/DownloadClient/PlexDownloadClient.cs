@@ -9,7 +9,7 @@ using Settings.Contracts;
 namespace PlexRipper.Application;
 
 /// <summary>
-/// The PlexDownloadClient handles a single <see cref="DownloadTask"/> at a time and
+/// The PlexDownloadClient handles a single <see cref="DownloadTaskGeneric"/> at a time and
 /// manages the <see cref="DownloadWorker"/>s responsible for the multi-threaded downloading.
 /// </summary>
 public class PlexDownloadClient : IAsyncDisposable
@@ -115,7 +115,7 @@ public class PlexDownloadClient : IAsyncDisposable
     }
 
     /// <summary>
-    /// Starts the download workers for the <see cref="DownloadTask"/> given during setup.
+    /// Starts the download workers for the <see cref="DownloadTaskGeneric"/> given during setup.
     /// </summary>
     /// <returns>Is successful.</returns>
     public Result Start(CancellationToken cancellationToken = default)
@@ -186,10 +186,10 @@ public class PlexDownloadClient : IAsyncDisposable
     private Result<List<DownloadWorkerTask>> CreateDownloadWorkers(DownloadTaskGeneric downloadTask)
     {
         if (downloadTask is null)
-            return ResultExtensions.IsNull(nameof(downloadTask)).LogWarning();
+            return ResultExtensions.IsNull(nameof(DownloadTaskGeneric)).LogWarning();
 
         if (!downloadTask.DownloadWorkerTasks.Any())
-            return ResultExtensions.IsEmpty($"{nameof(downloadTask)}.{nameof(downloadTask.DownloadWorkerTasks)}").LogWarning();
+            return ResultExtensions.IsEmpty($"{nameof(DownloadTaskGeneric)}.{nameof(downloadTask.DownloadWorkerTasks)}").LogWarning();
 
         _downloadWorkers.AddRange(downloadTask.DownloadWorkerTasks
             .Select(downloadWorkerTask => _downloadWorkerFactory(downloadWorkerTask)));

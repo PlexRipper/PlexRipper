@@ -5,7 +5,7 @@ using FluentValidation;
 namespace PlexRipper.Application;
 
 /// <summary>
-/// Generates a nested list of <see cref="DownloadTask"/> and adds to the download queue.
+/// Generates a nested list of <see cref="DownloadTaskGeneric"/> and adds to the download queue.
 /// </summary>
 /// <returns>Returns true if all downloadTasks were added successfully.</returns>
 public record CreateDownloadTasksCommand(List<DownloadMediaDTO> DownloadMediaDtos) : IRequest<Result>;

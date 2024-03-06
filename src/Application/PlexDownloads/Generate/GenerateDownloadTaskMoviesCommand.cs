@@ -11,7 +11,7 @@ namespace PlexRipper.Application;
 /// <summary>
 /// Creates <see cref="DownloadTaskMovie">DownloadTaskMovies</see> from <see cref="PlexMovie">PlexMovies</see> and inserts it into Database.
 /// </summary>
-/// <returns>The created <see cref="DownloadTask"/>.</returns>
+/// <returns>The created <see cref="DownloadTaskGeneric"/>.</returns>
 public record GenerateDownloadTaskMoviesCommand(List<DownloadMediaDTO> DownloadMedias) : IRequest<Result>;
 
 public class GenerateDownloadTaskMoviesCommandValidator : AbstractValidator<GenerateDownloadTaskMoviesCommand>

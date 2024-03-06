@@ -20,14 +20,14 @@ public class FileMergeScheduler : BaseScheduler, IFileMergeScheduler
     protected override JobKey DefaultJobKey => new($"DownloadTaskId_", nameof(FileMergeJob));
 
     /// <summary>
-    /// Creates an FileTask from a completed <see cref="DownloadTask"/> and adds this to the database.
+    /// Creates an FileTask from a completed <see cref="DownloadTaskGeneric"/> and adds this to the database.
     /// </summary>
     /// <param name="downloadTaskKey"></param>
     public async Task<Result<DownloadFileTask>> CreateFileTaskFromDownloadTask(DownloadTaskKey downloadTaskKey)
     {
         var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskKey);
         if (downloadTask is null)
-            return ResultExtensions.EntityNotFound(nameof(DownloadTask), downloadTaskKey.Id);
+            return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.Id);
 
         _log.Here().Debug("Adding DownloadTask \"{DownloadTaskTitle}\" with id {Id} to a FileTask to be merged", downloadTask.FullTitle, downloadTask.Id);
         var result = await _mediator.Send(new AddFileTaskFromDownloadTaskCommand(downloadTaskKey));

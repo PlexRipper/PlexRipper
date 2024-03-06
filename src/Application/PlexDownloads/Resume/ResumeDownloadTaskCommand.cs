@@ -9,7 +9,7 @@ namespace PlexRipper.Application;
 /// <summary>
 /// Starts a queued task immediately.
 /// </summary>
-/// <param name="DownloadTaskId">The ids of the <see cref="DownloadTask"/> to start.</param>
+/// <param name="DownloadTaskId">The ids of the <see cref="DownloadTaskGeneric"/> to start.</param>
 /// <returns>Is successful.</returns>
 public record ResumeDownloadTaskCommand(Guid DownloadTaskId) : IRequest<Result>;
 
@@ -40,7 +40,7 @@ public class ResumeDownloadTaskCommandHandler : IRequestHandler<ResumeDownloadTa
     {
         var downloadTask = await _dbContext.GetDownloadTaskAsync(command.DownloadTaskId, cancellationToken: cancellationToken);
         if (downloadTask is null)
-            return ResultExtensions.EntityNotFound(nameof(DownloadTask), command.DownloadTaskId).LogError();
+            return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.DownloadTaskId).LogError();
 
         // Don't allow more than 2 downloads at a time from the same server
         if (await _downloadTaskScheduler.IsServerDownloading(downloadTask.PlexServerId))

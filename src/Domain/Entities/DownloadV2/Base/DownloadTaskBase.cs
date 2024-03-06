@@ -56,7 +56,7 @@ public abstract class DownloadTaskBase
     public abstract DownloadTaskType DownloadTaskType { get; }
 
     /// <summary>
-    /// Gets a value indicating whether this <see cref="DownloadTask"/> is downloadable.
+    /// Gets a value indicating whether this <see cref="DownloadTaskGeneric"/> is downloadable.
     /// e.g. A episode or movie part, an episode or movie without parts.
     /// </summary>
     public abstract bool IsDownloadable { get; }

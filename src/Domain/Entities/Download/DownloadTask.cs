@@ -70,7 +70,7 @@ public class DownloadTask : BaseEntity
     public string FullTitle { get; set; }
 
     /// <summary>
-    /// Gets or sets get or sets the media quality of this <see cref="DownloadTask"/>.
+    /// Gets or sets get or sets the media quality of this <see cref="DownloadTaskGeneric"/>.
     /// </summary>
     [Column(Order = 15)]
     public string Quality { get; set; }
@@ -134,7 +134,7 @@ public class DownloadTask : BaseEntity
     #region Helpers
 
     /// <summary>
-    /// If the Id is the same as it's RootDownloadTaskId then this is the root of the <see cref="DownloadTask"/> hierarchy.
+    /// If the Id is the same as it's RootDownloadTaskId then this is the root of the <see cref="DownloadTaskGeneric"/> hierarchy.
     /// </summary>
     [NotMapped]
     public bool IsRoot => Id == RootDownloadTaskId;
@@ -155,7 +155,7 @@ public class DownloadTask : BaseEntity
     public string GetFilePathsCompressed => string.Join(';', DownloadWorkerTasks.Select(x => x.TempFilePath).ToArray());
 
     /// <summary>
-    /// Gets a value indicating whether this <see cref="DownloadTask"/> is downloadable.
+    /// Gets a value indicating whether this <see cref="DownloadTaskGeneric"/> is downloadable.
     /// e.g. A episode or movie part, an episode or movie without parts.
     /// </summary>
     public bool IsDownloadable => DownloadTaskType
@@ -205,20 +205,12 @@ public class DownloadTask : BaseEntity
 
     #region Compare
 
-    public bool Equals(PlexTvShow tvShow)
-    {
-        return tvShow is not null && PlexServerId == tvShow.PlexServerId && MediaType == tvShow.Type && Key == tvShow.Key;
-    }
+    public bool Equals(PlexTvShow tvShow) => tvShow is not null && PlexServerId == tvShow.PlexServerId && MediaType == tvShow.Type && Key == tvShow.Key;
 
-    public bool Equals(PlexTvShowSeason season)
-    {
-        return season is not null && PlexServerId == season.PlexServerId && MediaType == season.Type && Key == season.Key;
-    }
+    public bool Equals(PlexTvShowSeason season) => season is not null && PlexServerId == season.PlexServerId && MediaType == season.Type && Key == season.Key;
 
-    public bool Equals(PlexTvShowEpisode episode)
-    {
-        return episode is not null && PlexServerId == episode.PlexServerId && MediaType == episode.Type && Key == episode.Key;
-    }
+    public bool Equals(PlexTvShowEpisode episode) =>
+        episode is not null && PlexServerId == episode.PlexServerId && MediaType == episode.Type && Key == episode.Key;
 
     #endregion
 }

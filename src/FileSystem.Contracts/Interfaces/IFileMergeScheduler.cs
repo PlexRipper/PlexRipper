@@ -10,7 +10,7 @@ public interface IFileMergeScheduler
     Task<Result> StopFileMergeJob(int fileTaskId);
 
     /// <summary>
-    /// Creates an FileTask from a completed <see cref="DownloadTask"/> and adds this to the database.
+    /// Creates an FileTask from a completed <see cref="DownloadTaskGeneric"/> and adds this to the database.
     /// </summary>
     /// <param name="downloadTaskKey"></param>
     Task<Result<DownloadFileTask>> CreateFileTaskFromDownloadTask(DownloadTaskKey downloadTaskKey);

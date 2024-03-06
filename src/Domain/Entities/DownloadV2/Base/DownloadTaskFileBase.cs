@@ -31,7 +31,7 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase
     public string FileLocationUrl { get; set; }
 
     /// <summary>
-    /// Gets or sets get or sets the media quality of this <see cref="DownloadTask"/>.
+    /// Gets or sets get or sets the media quality of this <see cref="DownloadTaskGeneric"/>.
     /// </summary>
     [Column(Order = 15)]
     public string Quality { get; set; }

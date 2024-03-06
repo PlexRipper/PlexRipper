@@ -6,9 +6,9 @@ using Logging.Interface;
 namespace PlexRipper.Application;
 
 /// <summary>
-/// Restart the <see cref="DownloadTask"/> by deleting the PlexDownloadClient and starting a new one.
+/// Restart the <see cref="DownloadTaskGeneric"/> by deleting the PlexDownloadClient and starting a new one.
 /// </summary>
-/// <param name="DownloadTaskGuid">The id of the <see cref="DownloadTask"/> to restart.</param>
+/// <param name="DownloadTaskGuid">The id of the <see cref="DownloadTaskGeneric"/> to restart.</param>
 /// <returns>Is successful.</returns>
 public record RestartDownloadTaskCommand(Guid DownloadTaskGuid) : IRequest<Result>;
 
@@ -64,7 +64,7 @@ public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownload
         // // Notify of a DownloadTask being updated
         // var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskGuid, cancellationToken: cancellationToken);
         // if (downloadTask is null)
-        //     return ResultExtensions.EntityNotFound(nameof(DownloadTask), command.DownloadTaskGuid).LogError();
+        //     return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.DownloadTaskGuid).LogError();
         //
         // await _mediator.Send(new DownloadTaskUpdated(downloadTask.ToKey()), cancellationToken);
         //
@@ -74,11 +74,11 @@ public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownload
     }
 
     /// <summary>
-    /// Regenerates <see cref="DownloadTask">DownloadTasks</see> while maintaining the Guid and priority.
+    /// Regenerates <see cref="DownloadTaskGeneric">DownloadTasks</see> while maintaining the Guid and priority.
     /// Will also remove old <see cref="DownloadWorkerTask">DownloadWorkerTasks</see> assigned to the old downloadTasks from the database.
     /// </summary>
     /// <param name="downloadTaskGuids"></param>
-    /// <returns>A list of newly generated <see cref="DownloadTask">DownloadTasks</see></returns>
+    /// <returns>A list of newly generated <see cref="DownloadTaskGeneric">DownloadTasks</see></returns>
     private async Task<Result<List<DownloadTaskGeneric>>> RegenerateDownloadTask(List<Guid> downloadTaskGuids)
     {
         if (!downloadTaskGuids.Any())
@@ -97,7 +97,7 @@ public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownload
         //     var downloadTask = await _dbContext.DownloadTasks.GetAsync(downloadTaskId);
         //     if (downloadTask is null)
         //     {
-        //         ResultExtensions.EntityNotFound(nameof(DownloadTask), downloadTaskId).LogError();
+        //         ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskId).LogError();
         //         continue;
         //     }
         //

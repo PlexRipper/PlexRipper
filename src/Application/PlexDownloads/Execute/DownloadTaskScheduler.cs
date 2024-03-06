@@ -51,7 +51,7 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
         if (!await _scheduler.IsJobRunning(jobKey))
             return Result.Fail($"{nameof(DownloadJob)} with {jobKey} cannot be stopped because it is not running").LogWarning();
 
-        return Result.OkIf(await _scheduler.StopJob(jobKey), $"Failed to stop {nameof(DownloadTask)} with id {downloadTaskId}");
+        return Result.OkIf(await _scheduler.StopJob(jobKey), $"Failed to stop {nameof(DownloadTaskGeneric)} with id {downloadTaskId}");
     }
 
     public Task AwaitDownloadTaskJob(Guid downloadTaskId, CancellationToken cancellationToken = default)

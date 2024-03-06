@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 namespace PlexRipper.Application;
 
 /// <summary>
-/// Will clear any completed <see cref="DownloadTask"/> from the database.
+/// Will clear any completed <see cref="DownloadTaskGeneric"/> from the database.
 /// </summary>
-/// <param name="DownloadTaskIds"> The list of <see cref="DownloadTask"/> id's to delete.</param>
+/// <param name="DownloadTaskIds"> The list of <see cref="DownloadTaskGeneric"/> id's to delete.</param>
 /// <returns>Is successful.</returns>
 public record ClearCompletedDownloadTasksCommand(List<Guid> DownloadTaskIds) : IRequest<Result>;
 

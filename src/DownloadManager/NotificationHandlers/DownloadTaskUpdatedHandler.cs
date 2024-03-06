@@ -23,7 +23,7 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdated>
         var downloadTask = await _dbContext.GetDownloadTaskAsync(notification.Key, cancellationToken);
         if (downloadTask is null)
         {
-            ResultExtensions.EntityNotFound(nameof(DownloadTask), downloadTaskId).LogError();
+            ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskId).LogError();
             return;
         }
 

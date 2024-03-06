@@ -77,8 +77,6 @@ public class DownloadWorkerTask : BaseEntity
 
     #region Relationships
 
-    public DownloadTask DownloadTask { get; set; }
-
     public Guid DownloadTaskId { get; set; }
 
     public PlexServer PlexServer { get; set; }

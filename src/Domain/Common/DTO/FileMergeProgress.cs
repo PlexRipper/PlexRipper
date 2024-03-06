@@ -11,7 +11,7 @@ public class FileMergeProgress
     public int Id { get; set; }
 
     /// <summary>
-    /// This is equal to the <see cref="DownloadTask"/> Id the <see cref="DownloadFileTask"/> is currently handling.
+    /// This is equal to the <see cref="DownloadTaskGeneric"/> Id the <see cref="DownloadFileTask"/> is currently handling.
     /// </summary>
     public Guid DownloadTaskId { get; set; }
 

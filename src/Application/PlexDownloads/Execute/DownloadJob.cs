@@ -48,7 +48,7 @@ public class DownloadJob : IJob, IDisposable
             var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskId, cancellationToken: token);
             if (downloadTask is null)
             {
-                ResultExtensions.EntityNotFound(nameof(DownloadTask), downloadTaskId).LogError();
+                ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskId).LogError();
                 return;
             }
 
@@ -89,13 +89,13 @@ public class DownloadJob : IJob, IDisposable
         }
         finally
         {
-            _log.Debug("Exiting job: {DownloadJobName} for {DownloadTaskName} with id: {DownloadTaskId}", nameof(DownloadJob), nameof(DownloadTask),
+            _log.Debug("Exiting job: {DownloadJobName} for {DownloadTaskName} with id: {DownloadTaskId}", nameof(DownloadJob), nameof(DownloadTaskGeneric),
                 downloadTaskId);
         }
     }
 
     public void Dispose()
     {
-        _log.Here().Warning("Disposing job: {DownloadJobName} for {DownloadTaskName}", nameof(DownloadJob), nameof(DownloadTask));
+        _log.Here().Warning("Disposing job: {DownloadJobName} for {DownloadTaskName}", nameof(DownloadJob), nameof(DownloadTaskGeneric));
     }
 }

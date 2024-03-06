@@ -7,9 +7,9 @@ using Logging.Interface;
 namespace PlexRipper.Application;
 
 /// <summary>
-/// Pause a currently downloading <see cref="DownloadTask"/>.
+/// Pause a currently downloading <see cref="DownloadTaskGeneric"/>.
 /// </summary>
-/// <param name="DownloadTaskId">The id of the <see cref="DownloadTask"/> to pause.</param>
+/// <param name="DownloadTaskId">The id of the <see cref="DownloadTaskGeneric"/> to pause.</param>
 /// <returns>Is successful.</returns>
 public record PauseDownloadTaskCommand(Guid DownloadTaskId) : IRequest<Result>;
 

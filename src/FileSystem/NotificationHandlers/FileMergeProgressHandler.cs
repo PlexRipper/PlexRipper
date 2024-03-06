@@ -22,7 +22,7 @@ public class FileMergeProgressHandler : INotificationHandler<FileMergeProgressNo
         var downloadTask = await _dbContext.GetDownloadTaskAsync(notification.Progress.ToKey(), cancellationToken);
         if (downloadTask is null)
         {
-            ResultExtensions.EntityNotFound(nameof(DownloadTask), notification.Progress.DownloadTaskId).LogError();
+            ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), notification.Progress.DownloadTaskId).LogError();
             return;
         }
 

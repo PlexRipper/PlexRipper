@@ -10,7 +10,7 @@ public enum DownloadTaskType
     None = 0,
 
     /// <summary>
-    /// Functions as a wrapper for a MovieData and MoviePart <see cref="DownloadTask"/>.
+    /// Functions as a wrapper for a MovieData and MoviePart <see cref="DownloadTaskGeneric"/>.
     /// </summary>
     [EnumMember(Value = "Movie")]
     Movie = 1,

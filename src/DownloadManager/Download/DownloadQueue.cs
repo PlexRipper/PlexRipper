@@ -93,7 +93,7 @@ public class DownloadQueue : IDownloadQueue
     }
 
     /// <summary>
-    ///  Determines the next downloadable <see cref="DownloadTask"/>.
+    ///  Determines the next downloadable <see cref="DownloadTaskGeneric"/>.
     /// Will only return a successful result if a queued task can be found
     /// </summary>
     /// <param name="downloadTasks"></param>

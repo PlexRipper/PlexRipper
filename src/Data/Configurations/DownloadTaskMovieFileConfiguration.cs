@@ -8,6 +8,12 @@ public class DownloadTaskMovieFileConfiguration : IEntityTypeConfiguration<Downl
     public void Configure(EntityTypeBuilder<DownloadTaskMovieFile> builder)
     {
         builder
+            .HasMany(x => x.DownloadWorkerTasks)
+            .WithOne()
+            .HasForeignKey(x => x.DownloadTaskId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
             .Property(e => e.DownloadTaskType)
             .HasMaxLength(50)
             .HasConversion(x => x.ToDownloadTaskString(), x => x.ToDownloadTaskType())

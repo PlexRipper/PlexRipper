@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 namespace PlexRipper.Application;
 
 /// <summary>
-/// Stops and deletes (active) PlexDownloadClients and removes <see cref="DownloadTask"/> from the database.
+/// Stops and deletes (active) PlexDownloadClients and removes <see cref="DownloadTaskGeneric"/> from the database.
 /// </summary>
-/// <param name="DownloadTaskIds">The list of <see cref="DownloadTask"/> to delete.</param>
+/// <param name="DownloadTaskIds">The list of <see cref="DownloadTaskGeneric"/> to delete.</param>
 /// <returns><see cref="Result"/> fails on error.</returns>
 public record DeleteDownloadTaskCommand(List<Guid> DownloadTaskIds) : IRequest<Result>;
 

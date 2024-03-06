@@ -8,12 +8,6 @@ public class DownloadTaskConfiguration : IEntityTypeConfiguration<DownloadTask>
     public void Configure(EntityTypeBuilder<DownloadTask> builder)
     {
         builder
-            .HasMany(x => x.DownloadWorkerTasks)
-            .WithOne(x => x.DownloadTask)
-            .HasForeignKey(x => x.DownloadTaskId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder
             .HasMany(x => x.Children)
             .WithOne(x => x.Parent)
             .HasForeignKey(x => x.ParentId)

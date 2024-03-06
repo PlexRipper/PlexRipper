@@ -30,7 +30,7 @@ public class GetDownloadTaskByIdQueryHandler : IRequestHandler<GetDownloadTaskBy
         var downloadTask = await _dbContext.GetDownloadTaskAsync(request.DownloadTaskId, request.Type, cancellationToken);
 
         if (downloadTask is null)
-            return ResultExtensions.EntityNotFound(nameof(DownloadTask), request.DownloadTaskId);
+            return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), request.DownloadTaskId);
 
         return Result.Ok(downloadTask);
     }

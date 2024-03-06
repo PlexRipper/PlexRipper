@@ -6,6 +6,7 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
 
     public int Key { get; init; }
 
+    public string Title { get; init; }
     public string FullTitle { get; init; }
 
     public PlexMediaType MediaType { get; init; }

@@ -17,6 +17,12 @@ public abstract class DownloadTaskBase
     public int Key { get; set; }
 
     /// <summary>
+    /// Gets or sets the media display title.
+    /// </summary>
+    [Column(Order = 2)]
+    public string Title { get; set; }
+
+    /// <summary>
     /// The total size of the file in bytes.
     /// </summary>
     [Column(Order = 6)]
@@ -27,6 +33,13 @@ public abstract class DownloadTaskBase
 
     [Column(Order = 10)]
     public DateTime Created { get; set; }
+
+    /// <summary>
+    /// Gets or sets the full formatted media title, based on the <see cref="PlexMediaType"/>.
+    /// E.g. "TvShow/Season/Episode".
+    /// </summary>
+    [Column(Order = 14)]
+    public string FullTitle { get; set; }
 
     #region Relationships
 

@@ -67,8 +67,7 @@ public static partial class FakeData
             .RuleFor(x => x.DefaultDestinationId, f => f.Random.Int(1, 5))
             .RuleFor(x => x.Movies, _ => new List<PlexMovie>())
             .RuleFor(x => x.TvShows, _ => new List<PlexTvShow>())
-            .RuleFor(x => x.PlexAccountLibraries, _ => null)
-            .RuleFor(x => x.DownloadTasks, _ => null);
+            .RuleFor(x => x.PlexAccountLibraries, _ => null);
     }
 
     public static Faker<FolderPath> GetFolderPaths(int seed = 0)

@@ -1,11 +1,9 @@
 ﻿using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace IntegrationTests.WebAPI.DownloadController;
-
 
 public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationTests
 {
@@ -29,7 +27,7 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
         });
 
         await CreateContainer();
-        var downloadTasks = await Container.PlexRipperDbContext.DownloadTasks.ToListAsync();
+        var downloadTasks = await DbContext.DownloadTaskMovie.ToListAsync();
         downloadTasks.Count.ShouldBe(10);
         var downloadTask = downloadTasks.First();
 
@@ -41,7 +39,7 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var downloadTaskDb = await DbContext.DownloadTasks.IncludeDownloadTasks().SingleOrDefaultAsync(x => x.Id == downloadTask.RootDownloadTaskId);
+        var downloadTaskDb = await DbContext.DownloadTaskMovie.IncludeAll().SingleOrDefaultAsync(x => x.Id == downloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
         downloadTaskDb.Children.ShouldAllBe(x => x.DownloadStatus == DownloadStatus.Completed);

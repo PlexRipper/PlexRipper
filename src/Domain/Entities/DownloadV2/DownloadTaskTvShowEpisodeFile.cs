@@ -24,5 +24,7 @@ public class DownloadTaskTvShowEpisodeFile : DownloadTaskFileBase
 
     public override bool IsDownloadable => true;
 
+    public override int Count => 1;
+
     #endregion
 }

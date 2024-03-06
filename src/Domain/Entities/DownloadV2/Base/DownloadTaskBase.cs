@@ -61,6 +61,8 @@ public abstract class DownloadTaskBase
     /// </summary>
     public abstract bool IsDownloadable { get; }
 
+    public abstract int Count { get; }
+
     #endregion
 
     #region Compare

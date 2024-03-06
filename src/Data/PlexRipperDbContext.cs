@@ -72,8 +72,6 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
 
     #region DownloadTasks
 
-    public DbSet<DownloadTask> DownloadTasks { get; set; }
-
     public DbSet<DownloadTaskMovie> DownloadTaskMovie { get; set; }
 
     public DbSet<DownloadTaskMovieFile> DownloadTaskMovieFile { get; set; }

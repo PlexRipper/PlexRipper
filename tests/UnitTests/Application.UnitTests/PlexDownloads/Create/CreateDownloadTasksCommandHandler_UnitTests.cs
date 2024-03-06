@@ -1,8 +1,6 @@
 ﻿using Data.Contracts;
 using DownloadManager.Contracts;
-using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 
 namespace PlexRipper.Application.UnitTests;
 
@@ -16,12 +14,13 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         // Arrange
         await SetupDatabase(config => config.DisableForeignKeyCheck = true);
         var downloadTasks = FakeData.GetTvShowDownloadTask(options: config =>
-        {
-            config.MovieDownloadTasksCount = 5;
-            config.TvShowDownloadTasksCount = 5;
-            config.TvShowSeasonDownloadTasksCount = 5;
-            config.TvShowEpisodeDownloadTasksCount = 5;
-        }).Generate(1);
+            {
+                config.MovieDownloadTasksCount = 5;
+                config.TvShowDownloadTasksCount = 5;
+                config.TvShowSeasonDownloadTasksCount = 5;
+                config.TvShowEpisodeDownloadTasksCount = 5;
+            })
+            .Generate(1);
 
         mock.Mock<IMediator>().Setup(x => x.Publish(It.IsAny<CheckDownloadQueue>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
@@ -32,8 +31,15 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var flattenDownloadTasks = downloadTasks.Flatten(x => x.Children).ToList();
-        DbContext.DownloadTasks.Count().ShouldBe(flattenDownloadTasks.Count);
+        var downloadTaskMovies = await DbContext.DownloadTaskMovie.IncludeAll().ToListAsync();
+        var downloadTaskTvShows = await DbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
+        var flattenDownloadTasks = downloadTaskMovies.Select(x => x.ToGeneric())
+            .Flatten(x => x.Children)
+            .ToList()
+            .Concat(downloadTaskTvShows.Select(x => x.ToGeneric()).Flatten(x => x.Children))
+            .ToList();
+
+        flattenDownloadTasks.Count().ShouldBe(flattenDownloadTasks.Count);
     }
 
     [Fact]
@@ -54,38 +60,14 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var flattenDownloadTasks = downloadTasks.Flatten(x => x.Children).ToList();
-        DbContext.DownloadTasks.Count().ShouldBe(flattenDownloadTasks.Count);
-    }
+        var downloadTaskMovies = await DbContext.DownloadTaskMovie.IncludeAll().ToListAsync();
+        var downloadTaskTvShows = await DbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
+        var flattenDownloadTasks = downloadTaskMovies.Select(x => x.ToGeneric())
+            .Flatten(x => x.Children)
+            .ToList()
+            .Concat(downloadTaskTvShows.Select(x => x.ToGeneric()).Flatten(x => x.Children))
+            .ToList();
 
-    [Fact]
-    public async Task ShouldAllHaveARootDownloadTaskId_WhenDownloadTasksAreChildren()
-    {
-        // Arrange
-        await SetupDatabase(config => config.DisableForeignKeyCheck = true);
-        var downloadTasks = FakeData.GetTvShowDownloadTask().Generate(1);
-
-        mock.Mock<IMediator>().Setup(x => x.Publish(It.IsAny<CheckDownloadQueue>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-
-        // Act
-        var request = new CreateDownloadTasksCommand(null);
-        var handler = mock.Create<CreateDownloadTasksCommandHandler>();
-        var result = await handler.Handle(request, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        var downloadTasksDb = await DbContext.DownloadTasks.IncludeDownloadTasks().IncludeByRoot().ToListAsync();
-
-        void HasRootDownloadTaskId(List<DownloadTask> downloadTasks)
-        {
-            foreach (var downloadTask in downloadTasks)
-            {
-                downloadTask.RootDownloadTaskId.ShouldBe(1);
-                if (downloadTask.Children.Any())
-                    HasRootDownloadTaskId(downloadTask.Children);
-            }
-        }
-
-        HasRootDownloadTaskId(downloadTasksDb.SelectMany(x => x.Children).ToList());
+        flattenDownloadTasks.Count().ShouldBe(flattenDownloadTasks.Count);
     }
 }

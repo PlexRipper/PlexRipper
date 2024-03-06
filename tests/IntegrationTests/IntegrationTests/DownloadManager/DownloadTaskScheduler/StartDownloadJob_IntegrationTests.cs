@@ -26,7 +26,7 @@ public class StartDownloadJob_IntegrationTests : BaseIntegrationTests
         SetupMockPlexApi();
 
         await CreateContainer(config => { config.DownloadSpeedLimitInKib = 5000; });
-        var movieDownloadTasks = await Container.PlexRipperDbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
+        var movieDownloadTasks = await DbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
         var movieFileDownloadTask = movieDownloadTasks[0].Children[0];
 
         // Act

@@ -1,7 +1,6 @@
 using Data.Contracts;
 using DownloadManager.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.FluentResult;
 using Serilog.Events;
@@ -49,9 +48,7 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var downloadTasksDb = await DbContext.DownloadTasks
-            .IncludeDownloadTasks()
-            .ToListAsync();
+        var downloadTasksDb = await DbContext.DownloadTaskMovie.IncludeAll().ToListAsync();
         downloadTasksDb.ShouldNotBeNull();
         downloadTasksDb.ShouldNotBeEmpty();
         downloadTasksDb.Count.ShouldBe(plexMovieCount);

@@ -1,5 +1,4 @@
 using Data.Contracts;
-using PlexRipper.Data.Common;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.FluentResult;
 using Serilog.Events;
@@ -31,10 +30,7 @@ public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTe
 
         await CreateContainer(config => config.DownloadSpeedLimitInKib = 5000);
 
-        var downloadTask = DbContext
-            .DownloadTasks
-            .IncludeDownloadTasks()
-            .FirstOrDefault();
+        var downloadTask = DbContext.DownloadTaskMovie.IncludeAll().FirstOrDefault();
         downloadTask.ShouldNotBeNull();
         var childDownloadTask = downloadTask.Children[0];
 
@@ -53,11 +49,7 @@ public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTe
 
         startResult.IsSuccess.ShouldBeTrue();
         pauseResult.IsSuccess.ShouldBeTrue();
-
-        var downloadTaskDb = DbContext
-            .DownloadTasks
-            .IncludeDownloadTasks()
-            .FirstOrDefault(x => x.Id == childDownloadTask.Id);
+        var downloadTaskDb = DbContext.DownloadTaskMovie.IncludeAll().FirstOrDefault(x => x.Id == childDownloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Paused);
     }

@@ -49,8 +49,10 @@ public static partial class DbSetExtensions
     public static IQueryable<DownloadTaskMovie> IncludeAll(this IQueryable<DownloadTaskMovie> downloadTasks) => downloadTasks
         .Include(x => x.PlexServer)
         .Include(x => x.PlexLibrary)
-        .Include($"{nameof(DownloadTaskMovie.Children)}.{nameof(DownloadTaskMovieFile.PlexLibrary)}")
-        .Include($"{nameof(DownloadTaskMovie.Children)}.{nameof(DownloadTaskMovieFile.PlexServer)}");
+        .Include(x => x.Children)
+        .ThenInclude(x => x.PlexServer)
+        .Include(x => x.Children)
+        .ThenInclude(x => x.PlexLibrary);
 
     public static IQueryable<DownloadTaskTvShow> IncludeAll(this IQueryable<DownloadTaskTvShow> downloadTasks) => downloadTasks
         .Include($"{nameof(DownloadTaskTvShow.PlexServer)}")

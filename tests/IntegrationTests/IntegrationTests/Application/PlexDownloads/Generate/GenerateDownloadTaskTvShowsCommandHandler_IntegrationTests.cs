@@ -27,7 +27,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests : BaseIn
             config.TvShowEpisodeCount = 3;
         });
 
-        var plexTvShows = await Container.PlexRipperDbContext.PlexTvShows.ToListAsync();
+        var plexTvShows = await DbContext.PlexTvShows.ToListAsync();
 
         var tvShows = new List<DownloadMediaDTO>
         {

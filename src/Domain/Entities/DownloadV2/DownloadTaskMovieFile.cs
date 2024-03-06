@@ -18,6 +18,8 @@ public class DownloadTaskMovieFile : DownloadTaskFileBase
         Parent = null;
     }
 
+    public override int Count => 1;
+
     public override PlexMediaType MediaType => PlexMediaType.Movie;
 
     public override DownloadTaskType DownloadTaskType => DownloadTaskType.MovieData;

@@ -27,7 +27,7 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
 
         await CreateContainer(config => { config.DownloadSpeedLimitInKib = 5000; });
 
-        var movieDownloadTasks = await Container.PlexRipperDbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
+        var movieDownloadTasks = await DbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
 
         var childDownloadTask = movieDownloadTasks[0].Children[0];
 

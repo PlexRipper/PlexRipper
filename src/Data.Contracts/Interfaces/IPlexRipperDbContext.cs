@@ -8,7 +8,6 @@ namespace Data.Contracts;
 public interface IPlexRipperDbContext
 {
     public DbSet<PlexAccount> PlexAccounts { get; set; }
-    public DbSet<DownloadTask> DownloadTasks { get; set; }
     public DbSet<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
     public DbSet<DownloadWorkerLog> DownloadWorkerTasksLogs { get; set; }
     public DbSet<FolderPath> FolderPaths { get; set; }

@@ -9,7 +9,7 @@ namespace PlexRipper.Application;
 /// </summary>
 /// <param name="DownloadTaskIds"> The list of <see cref="DownloadTask"/> id's to delete.</param>
 /// <returns>Is successful.</returns>
-public record ClearCompletedDownloadTasksCommand(List<int> DownloadTaskIds) : IRequest<Result>;
+public record ClearCompletedDownloadTasksCommand(List<Guid> DownloadTaskIds) : IRequest<Result>;
 
 public class ClearCompletedDownloadTasksCommandValidator : AbstractValidator<ClearCompletedDownloadTasksCommand> { }
 
@@ -25,22 +25,27 @@ public class ClearCompletedDownloadTasksHandler :
 
     public async Task<Result> Handle(ClearCompletedDownloadTasksCommand command, CancellationToken cancellationToken)
     {
-        if (command.DownloadTaskIds != null && command.DownloadTaskIds.Any())
-        {
-            var downloadTasks = await _dbContext.DownloadTasks
-                .Where(x => command.DownloadTaskIds.Contains(x.Id) && x.DownloadStatus == DownloadStatus.Completed)
-                .ToListAsync(cancellationToken);
-            _dbContext.DownloadTasks.RemoveRange(downloadTasks);
-        }
-        else
-        {
-            var downloadTasks = await _dbContext.DownloadTasks.AsTracking()
-                .Where(x => x.DownloadStatus == DownloadStatus.Completed)
-                .ToListAsync(cancellationToken);
-            _dbContext.DownloadTasks.RemoveRange(downloadTasks);
-        }
+        var hasDownloadTaskIds = command.DownloadTaskIds != null && command.DownloadTaskIds.Any();
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _dbContext.DownloadTaskMovie
+            .Where(x => (!hasDownloadTaskIds || command.DownloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
+            .ExecuteDeleteAsync(cancellationToken);
+        await _dbContext.DownloadTaskMovieFile
+            .Where(x => (!hasDownloadTaskIds || command.DownloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        await _dbContext.DownloadTaskTvShow
+            .Where(x => (!hasDownloadTaskIds || command.DownloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
+            .ExecuteDeleteAsync(cancellationToken);
+        await _dbContext.DownloadTaskTvShowSeason
+            .Where(x => (!hasDownloadTaskIds || command.DownloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
+            .ExecuteDeleteAsync(cancellationToken);
+        await _dbContext.DownloadTaskTvShowEpisode
+            .Where(x => (!hasDownloadTaskIds || command.DownloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
+            .ExecuteDeleteAsync(cancellationToken);
+        await _dbContext.DownloadTaskTvShowEpisodeFile
+            .Where(x => (!hasDownloadTaskIds || command.DownloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
+            .ExecuteDeleteAsync(cancellationToken);
 
         return Result.Ok();
     }

@@ -11,13 +11,13 @@ namespace PlexRipper.Application;
 /// </summary>
 /// <param name="DownloadTaskId">The ids of the <see cref="DownloadTask"/> to start.</param>
 /// <returns>Is successful.</returns>
-public record ResumeDownloadTaskCommand(int DownloadTaskId) : IRequest<Result>;
+public record ResumeDownloadTaskCommand(Guid DownloadTaskId) : IRequest<Result>;
 
 public class ResumeDownloadTaskCommandValidator : AbstractValidator<ResumeDownloadTaskCommand>
 {
     public ResumeDownloadTaskCommandValidator()
     {
-        RuleFor(x => x.DownloadTaskId).GreaterThan(0);
+        RuleFor(x => x.DownloadTaskId).GreaterThan(Guid.Empty);
     }
 }
 
@@ -38,7 +38,7 @@ public class ResumeDownloadTaskCommandHandler : IRequestHandler<ResumeDownloadTa
 
     public async Task<Result> Handle(ResumeDownloadTaskCommand command, CancellationToken cancellationToken)
     {
-        var downloadTask = await _dbContext.DownloadTasks.GetAsync(command.DownloadTaskId, cancellationToken);
+        var downloadTask = await _dbContext.GetDownloadTaskAsync(command.DownloadTaskId, cancellationToken: cancellationToken);
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTask), command.DownloadTaskId).LogError();
 

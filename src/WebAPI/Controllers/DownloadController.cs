@@ -52,7 +52,7 @@ public class DownloadController : BaseController
     [HttpPost("clear")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> ClearCompleted([FromBody] List<int> downloadTaskIds)
+    public async Task<IActionResult> ClearCompleted([FromBody] List<Guid> downloadTaskIds)
     {
         var result = await _mediator.Send(new ClearCompletedDownloadTasksCommand(downloadTaskIds));
         return ToActionResult(result);

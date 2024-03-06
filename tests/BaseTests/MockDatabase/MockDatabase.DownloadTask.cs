@@ -8,7 +8,7 @@ public static partial class MockDatabase
     private static async Task<PlexRipperDbContext> AddDownloadTaskMovies(this PlexRipperDbContext context, Action<FakeDataConfig> options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
-        var downloadTasks = FakeData.GetMovieDownloadTaskV2(_seed, options).Generate(config.MovieDownloadTasksCount);
+        var downloadTasks = FakeData.GetMovieDownloadTask(_seed, options).Generate(config.MovieDownloadTasksCount);
 
         if (!config.DisableForeignKeyCheck)
         {

@@ -7,7 +7,7 @@ public static partial class FakeData
 {
     #region Base
 
-    private static Faker<T> ApplyDownloadTaskBaseV2<T>(this Faker<T> faker, int seed = 0, Action<FakeDataConfig> options = null) where T : DownloadTaskBase
+    private static Faker<T> ApplyDownloadTaskBase<T>(this Faker<T> faker, int seed = 0, Action<FakeDataConfig> options = null) where T : DownloadTaskBase
     {
         var config = FakeDataConfig.FromOptions(options);
         return faker
@@ -15,6 +15,8 @@ public static partial class FakeData
             .UseSeed(seed)
             .RuleFor(x => x.Id, _ => Guid.Empty)
             .RuleFor(x => x.Key, _ => _random.Next(1, 10000))
+            .RuleFor(x => x.Title, _ => "")
+            .RuleFor(x => x.FullTitle, _ => "")
             .RuleFor(x => x.DataTotal, f => config.DownloadFileSizeInMb > 0
                 ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
                 : f.Random.Long(1, 10000000))
@@ -27,28 +29,27 @@ public static partial class FakeData
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.None);
     }
 
-    public static Faker<T> ApplyDownloadTaskParentBaseV2<T>(this Faker<T> faker, int seed = 0, Action<FakeDataConfig> options = null)
+    public static Faker<T> ApplyDownloadTaskParentBase<T>(this Faker<T> faker, int seed = 0, Action<FakeDataConfig> options = null)
         where T : DownloadTaskParentBase
     {
         return faker
             .StrictMode(true)
             .UseSeed(seed)
-            .ApplyDownloadTaskBaseV2(seed, options)
+            .ApplyDownloadTaskBase(seed, options)
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
             .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
-            .RuleFor(x => x.FullTitle, f => f.Company.CompanyName())
             .RuleFor(x => x.Percentage, _ => 0)
             .RuleFor(x => x.DataReceived, _ => 0)
             .RuleFor(x => x.DownloadSpeed, _ => 0);
     }
 
-    public static Faker<T> ApplyDownloadTaskFileBaseV2<T>(this Faker<T> faker, int seed = 0, Action<FakeDataConfig> options = null)
+    public static Faker<T> ApplyDownloadTaskFileBase<T>(this Faker<T> faker, int seed = 0, Action<FakeDataConfig> options = null)
         where T : DownloadTaskFileBase
     {
         return faker
             .StrictMode(true)
             .UseSeed(seed)
-            .ApplyDownloadTaskBaseV2(seed, options)
+            .ApplyDownloadTaskBase(seed, options)
             .RuleFor(x => x.Percentage, _ => 0)
             .RuleFor(x => x.DataReceived, _ => 0)
             .RuleFor(x => x.DownloadSpeed, _ => 0)
@@ -66,16 +67,17 @@ public static partial class FakeData
 
     #region Movie
 
-    public static Faker<DownloadTaskMovie> GetMovieDownloadTaskV2(int seed = 0, Action<FakeDataConfig> options = null)
+    public static Faker<DownloadTaskMovie> GetMovieDownloadTask(int seed = 0, Action<FakeDataConfig> options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<DownloadTaskMovie>()
-            .ApplyDownloadTaskParentBaseV2(seed, options)
+            .ApplyDownloadTaskParentBase(seed, options)
             .UseSeed(seed)
             .RuleFor(x => x.MediaType, PlexMediaType.Movie)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Movie)
             .RuleFor(x => x.DownloadStatus, _ => DownloadStatus.Queued)
+            .RuleFor(x => x.Title, f => "Movie " + f.Random.Int(1, 10000))
             .RuleFor(x => x.Children, _ =>
             {
                 if (config.IncludeMultiPartMovies)
@@ -83,12 +85,14 @@ public static partial class FakeData
 
                 return GetDownloadTaskMovieFile(seed, options).Generate(1);
             })
-            .FinishWith((_, downloadTask) =>
+            .FinishWith((_, movie) =>
             {
-                downloadTask.Children.ForEach(child =>
+                var movieIndex = 1;
+                movie.FullTitle = movie.Title;
+                movie.Children.ForEach(movieFile =>
                 {
-                    child.Parent = downloadTask;
-                    child.ParentId = child.Id;
+                    movieFile.Title = $"{movieFile.Title} {movieIndex++}";
+                    movieFile.FullTitle = $"{movie.FullTitle}/{movieIndex}-{movieFile.FileName}";
                 });
             });
     }
@@ -96,12 +100,18 @@ public static partial class FakeData
     public static Faker<DownloadTaskMovieFile> GetDownloadTaskMovieFile(int seed = 0, Action<FakeDataConfig> options = null)
     {
         return new Faker<DownloadTaskMovieFile>()
-            .ApplyDownloadTaskFileBaseV2(seed, options)
+            .ApplyDownloadTaskFileBase(seed, options)
             .UseSeed(seed)
             .RuleFor(x => x.Parent, _ => null)
             .RuleFor(x => x.ParentId, _ => Guid.Empty)
             .RuleFor(x => x.MediaType, PlexMediaType.Movie)
-            .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.MovieData);
+            .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.MovieData)
+            .FinishWith((f, movieFile) =>
+            {
+                movieFile.FileName = $"[{movieFile.Quality}].{f.System.FileName("mp4")}";
+                movieFile.Title = movieFile.FileName;
+                movieFile.FullTitle = movieFile.FileName;
+            });
     }
 
     #endregion
@@ -113,10 +123,12 @@ public static partial class FakeData
         var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<DownloadTaskTvShow>()
-            .ApplyDownloadTaskParentBaseV2(seed, options)
             .UseSeed(seed)
+            .StrictMode(true)
+            .ApplyDownloadTaskParentBase(seed, options)
             .RuleFor(x => x.MediaType, PlexMediaType.TvShow)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.TvShow)
+            .RuleFor(x => x.Title, f => "TvShow " + f.Random.Int(1, 10000))
             .RuleFor(x => x.Children, _ =>
             {
                 var f = GetDownloadTaskTvShowSeason(seed, options);
@@ -124,7 +136,27 @@ public static partial class FakeData
                     return f.Generate(config.TvShowSeasonDownloadTasksCount);
 
                 return f.GenerateBetween(1, 5);
+            })
+            .FinishWith((_, tvShow) =>
+            {
+                var seasonIndex = 1;
+                tvShow.FullTitle = tvShow.Title;
+                tvShow.Children.ForEach(season =>
+                {
+                    season.Title = $"{season.Title} {seasonIndex++}";
+                    season.FullTitle = $"{tvShow.FullTitle}/{season.Title}";
+
+                    season.Children.ForEach(episode =>
+                    {
+                        episode.FullTitle = $"{season.FullTitle}/{episode.Title}";
+
+                        var fileIndex = 1;
+                        episode.Children.ForEach(file => { file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}"; });
+                    });
+                });
             });
+
+        ;
     }
 
     public static Faker<DownloadTaskTvShowSeason> GetDownloadTaskTvShowSeason(int seed = 0, Action<FakeDataConfig> options = null)
@@ -132,11 +164,14 @@ public static partial class FakeData
         var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<DownloadTaskTvShowSeason>()
-            .ApplyDownloadTaskParentBaseV2(seed, options)
             .UseSeed(seed)
+            .StrictMode(true)
+            .ApplyDownloadTaskParentBase(seed, options)
             .RuleFor(x => x.Parent, _ => null)
             .RuleFor(x => x.ParentId, _ => Guid.Empty)
             .RuleFor(x => x.MediaType, PlexMediaType.Season)
+            .RuleFor(x => x.Title, _ => "Season")
+            .RuleFor(x => x.FullTitle, _ => "Season")
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Season)
             .RuleFor(x => x.Children, _ =>
             {
@@ -145,6 +180,20 @@ public static partial class FakeData
                     return f.Generate(config.TvShowEpisodeDownloadTasksCount);
 
                 return f.GenerateBetween(5, 10);
+            })
+            .FinishWith((_, season) =>
+            {
+                season.FullTitle = season.Title;
+
+                var episodeIndex = 1;
+                season.Children.ForEach(episode =>
+                {
+                    episode.Title = $"{episode.Title} {episodeIndex++}";
+                    episode.FullTitle = $"{season.FullTitle}/{episode.Title}";
+
+                    var fileIndex = 1;
+                    episode.Children.ForEach(file => { file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}"; });
+                });
             });
     }
 
@@ -153,13 +202,21 @@ public static partial class FakeData
         var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<DownloadTaskTvShowEpisode>()
-            .ApplyDownloadTaskParentBaseV2(seed, options)
             .UseSeed(seed)
+            .StrictMode(true)
+            .ApplyDownloadTaskParentBase(seed, options)
             .RuleFor(x => x.Parent, _ => null)
             .RuleFor(x => x.ParentId, _ => Guid.Empty)
+            .RuleFor(x => x.Title, _ => "Episode")
+            .RuleFor(x => x.FullTitle, _ => "Episode")
             .RuleFor(x => x.MediaType, PlexMediaType.Episode)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Episode)
-            .RuleFor(x => x.Children, _ => GetDownloadTaskTvShowEpisodeFile(seed, options).Generate(1));
+            .RuleFor(x => x.Children, _ => GetDownloadTaskTvShowEpisodeFile(seed, options).Generate(1))
+            .FinishWith((_, episode) =>
+            {
+                var fileIndex = 1;
+                episode.Children.ForEach(file => { file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}"; });
+            });
     }
 
     public static Faker<DownloadTaskTvShowEpisodeFile> GetDownloadTaskTvShowEpisodeFile(int seed = 0, Action<FakeDataConfig> options = null)
@@ -167,12 +224,19 @@ public static partial class FakeData
         var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<DownloadTaskTvShowEpisodeFile>()
-            .ApplyDownloadTaskFileBaseV2(seed, options)
             .UseSeed(seed)
+            .StrictMode(true)
+            .ApplyDownloadTaskFileBase(seed, options)
             .RuleFor(x => x.Parent, _ => null)
             .RuleFor(x => x.ParentId, _ => Guid.Empty)
             .RuleFor(x => x.MediaType, PlexMediaType.Episode)
-            .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.EpisodeData);
+            .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.EpisodeData)
+            .FinishWith((f, episodeFile) =>
+            {
+                episodeFile.FileName = $"[{episodeFile.Quality}].{f.System.FileName("mp4")}";
+                episodeFile.Title = episodeFile.FileName;
+                episodeFile.FullTitle = episodeFile.FileName;
+            });
     }
 
     #endregion

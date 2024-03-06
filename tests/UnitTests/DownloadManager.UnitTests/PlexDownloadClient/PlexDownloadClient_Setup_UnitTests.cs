@@ -26,7 +26,7 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
         //Arrange
         await SetupDatabase();
 
-        var downloadTask = FakeData.GetMovieDownloadTaskV2().Generate();
+        var downloadTask = FakeData.GetMovieDownloadTask().Generate();
         downloadTask.PlexServer = null;
 
         // Act

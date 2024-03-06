@@ -1,22 +1,9 @@
 using FluentResults;
-using PlexRipper.Domain;
 
 namespace Data.Contracts;
 
 public static partial class DbContextExtensions
 {
-    public static async Task UpdateDownloadTasksAsync(
-        this IPlexRipperDbContext dbContext,
-        List<DownloadTask> downloadTasks,
-        CancellationToken cancellationToken = default)
-    {
-        var flattenedDownloadTasks = downloadTasks.Flatten(x => x.Children).ToList();
-
-        await dbContext.BulkUpdateAsync(flattenedDownloadTasks, cancellationToken: cancellationToken);
-        await dbContext.BulkUpdateAsync(flattenedDownloadTasks.SelectMany(x => x.DownloadWorkerTasks).ToList(),
-            cancellationToken: cancellationToken);
-    }
-
     public static async Task<Result<string>> GetDownloadUrl(
         this IPlexRipperDbContext dbContext,
         int plexServerId,

@@ -4,9 +4,9 @@ using PlexRipper.WebAPI.SignalR.Common;
 
 namespace PlexRipper.WebAPI;
 
-public class ListDownloadTaskToListServerDownloadProgressDTOConverter : ITypeConverter<List<DownloadTask>, List<ServerDownloadProgressDTO>>
+public class ListDownloadTaskToListServerDownloadProgressDTOConverter : ITypeConverter<List<DownloadTaskGeneric>, List<ServerDownloadProgressDTO>>
 {
-    public List<ServerDownloadProgressDTO> Convert(List<DownloadTask> source, List<ServerDownloadProgressDTO> destination, ResolutionContext context)
+    public List<ServerDownloadProgressDTO> Convert(List<DownloadTaskGeneric> source, List<ServerDownloadProgressDTO> destination, ResolutionContext context)
     {
         var serverDownloads = new List<ServerDownloadProgressDTO>();
         foreach (var serverId in source.Select(x => x.PlexServerId).Distinct())

@@ -13,7 +13,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
     {
         // Arrange
         await SetupDatabase(config => config.DisableForeignKeyCheck = true);
-        var downloadTasks = FakeData.GetTvShowDownloadTask(options: config =>
+        var downloadTasks = FakeData.GetDownloadTaskTvShow(options: config =>
             {
                 config.MovieDownloadTasksCount = 5;
                 config.TvShowDownloadTasksCount = 5;
@@ -47,9 +47,9 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
     {
         // Arrange
         await SetupDatabase(config => config.DisableForeignKeyCheck = true);
-        var downloadTasks = FakeData.GetTvShowDownloadTask().Generate(1);
-        await DbContext.BulkInsertAsync(new List<DownloadTask> { downloadTasks.First() });
-        downloadTasks[0].Id = 1;
+        var downloadTasks = FakeData.GetDownloadTaskTvShow().Generate(1);
+        await DbContext.DownloadTaskTvShow.AddAsync(downloadTasks.First());
+        await DbContext.SaveChangesAsync();
 
         mock.Mock<IMediator>().Setup(x => x.Publish(It.IsAny<CheckDownloadQueue>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 

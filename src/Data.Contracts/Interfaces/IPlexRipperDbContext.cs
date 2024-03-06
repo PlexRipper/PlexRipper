@@ -12,7 +12,7 @@ public interface IPlexRipperDbContext
     public DbSet<DownloadWorkerLog> DownloadWorkerTasksLogs { get; set; }
     public DbSet<FolderPath> FolderPaths { get; set; }
 
-    public DbSet<DownloadFileTask> FileTasks { get; set; }
+    public DbSet<FileTask> FileTasks { get; set; }
     public DbSet<Notification> Notifications { get; set; }
 
     public DbSet<PlexGenre> PlexGenres { get; set; }

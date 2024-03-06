@@ -56,15 +56,8 @@ public class FileMergeJob : IJob
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         try
         {
-            var fileTaskResult = await _mediator.Send(new GetFileTaskByIdQuery(fileTaskId), token);
-            if (fileTaskResult.IsFailed)
-            {
-                fileTaskResult.LogError();
-                return;
-            }
-
-            var fileTask = fileTaskResult.Value;
-            var downloadTask = await _dbContext.GetDownloadTaskAsync(fileTask.DownloadTaskId, cancellationToken: token);
+            var fileTask = await _dbContext.FileTasks.GetAsync(fileTaskId, token);
+            var downloadTask = await _dbContext.GetDownloadTaskAsync(fileTask.DownloadTaskKey, token);
 
             _log.Information("Executing {NameOfFileMergeJob} with name {FileTaskFileName} and id {FileTaskId}", nameof(FileMergeJob), fileTask.FileName,
                 fileTaskId);
@@ -145,7 +138,7 @@ public class FileMergeJob : IJob
         }
     }
 
-    private void SetupSubscription(DownloadFileTask fileTask, CancellationToken token)
+    private void SetupSubscription(FileTask fileTask, CancellationToken token)
     {
         var timeContext = new EventLoopScheduler();
         var transferStarted = DateTime.UtcNow;
@@ -160,9 +153,9 @@ public class FileMergeJob : IJob
                     Id = fileTask.Id,
                     DataTransferred = dataTransferred,
                     DataTotal = fileTask.FileSize,
-                    DownloadTaskId = fileTask.DownloadTaskId,
-                    PlexLibraryId = fileTask.DownloadTask.PlexLibraryId,
-                    PlexServerId = fileTask.DownloadTask.PlexServerId,
+                    DownloadTaskId = fileTask.DownloadTaskKey.Id,
+                    PlexLibraryId = fileTask.DownloadTaskKey.PlexLibraryId,
+                    PlexServerId = fileTask.DownloadTaskKey.PlexServerId,
                     TransferSpeed = DataFormat.GetTransferSpeed(dataTransferred, elapsedTime.TotalSeconds),
                 };
             })

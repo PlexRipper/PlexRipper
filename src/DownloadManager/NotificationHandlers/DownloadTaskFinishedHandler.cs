@@ -24,6 +24,6 @@ public class DownloadTaskFinishedHandler : INotificationHandler<DownloadTaskFini
         }
 
         await _fileMergeScheduler.StartFileMergeJob(addFileTaskResult.Value.Id);
-        await _mediator.Publish(new CheckDownloadQueue(addFileTaskResult.Value.DownloadTask.PlexServerId), cancellationToken);
+        await _mediator.Publish(new CheckDownloadQueue(notification.Key.PlexServerId), cancellationToken);
     }
 }

@@ -13,5 +13,5 @@ public interface IFileMergeScheduler
     /// Creates an FileTask from a completed <see cref="DownloadTaskGeneric"/> and adds this to the database.
     /// </summary>
     /// <param name="downloadTaskKey"></param>
-    Task<Result<DownloadFileTask>> CreateFileTaskFromDownloadTask(DownloadTaskKey downloadTaskKey);
+    Task<Result<FileTask>> CreateFileTaskFromDownloadTask(DownloadTaskKey downloadTaskKey);
 }

@@ -32,7 +32,7 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
 
     public DbSet<FolderPath> FolderPaths { get; set; }
 
-    public DbSet<DownloadFileTask> FileTasks { get; set; }
+    public DbSet<FileTask> FileTasks { get; set; }
 
     public DbSet<Notification> Notifications { get; set; }
 

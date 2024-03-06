@@ -1,5 +1,6 @@
 using Data.Contracts;
 using DownloadManager.Contracts;
+using Microsoft.EntityFrameworkCore;
 using PlexRipper.FileSystem.Common;
 
 namespace PlexRipper.FileSystem;
@@ -19,15 +20,8 @@ public class FileMergeFinishedHandler : INotificationHandler<FileMergeFinishedNo
 
     public async Task Handle(FileMergeFinishedNotification notification, CancellationToken cancellationToken)
     {
-        var fileTaskId = notification.FileTaskId;
-        var fileTaskResult = await _mediator.Send(new GetFileTaskByIdQuery(fileTaskId), cancellationToken);
-        if (fileTaskResult.IsFailed)
-        {
-            fileTaskResult.LogError();
-            return;
-        }
+        var fileTask = await _dbContext.FileTasks.GetAsync(notification.FileTaskId, cancellationToken);
 
-        var fileTask = fileTaskResult.Value;
         var downloadTask = await _dbContext.GetDownloadTaskAsync(fileTask.DownloadTaskId, cancellationToken: cancellationToken);
         if (downloadTask is null)
         {
@@ -39,7 +33,7 @@ public class FileMergeFinishedHandler : INotificationHandler<FileMergeFinishedNo
 
         await _dbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.Completed, cancellationToken);
 
-        await _mediator.Send(new DeleteFileTaskByIdCommand(notification.FileTaskId), cancellationToken);
+        await _dbContext.FileTasks.Where(x => x.Id == notification.FileTaskId).ExecuteDeleteAsync(cancellationToken);
 
         await _mediator.Send(new DownloadTaskUpdated(downloadTask.ToKey()), cancellationToken);
     }

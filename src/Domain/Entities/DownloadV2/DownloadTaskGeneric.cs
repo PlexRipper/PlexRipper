@@ -49,6 +49,8 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
 
     public List<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
 
+    public Guid ParentId { get; init; }
+
     public PlexServer PlexServer { get; init; }
 
     public int PlexServerId { get; init; }
@@ -60,4 +62,20 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
     #endregion
 
     public DownloadTaskKey ToKey() => new(DownloadTaskType, Id, PlexServerId, PlexLibraryId);
+
+    public DownloadTaskKey? ToParentKey()
+    {
+        return DownloadTaskType switch
+        {
+            DownloadTaskType.Movie => null,
+            DownloadTaskType.MovieData => new DownloadTaskKey(DownloadTaskType.Movie, ParentId, PlexServerId, PlexLibraryId),
+            DownloadTaskType.MoviePart => new DownloadTaskKey(DownloadTaskType.Movie, ParentId, PlexServerId, PlexLibraryId),
+            DownloadTaskType.TvShow => null,
+            DownloadTaskType.Season => new DownloadTaskKey(DownloadTaskType.TvShow, ParentId, PlexServerId, PlexLibraryId),
+            DownloadTaskType.Episode => new DownloadTaskKey(DownloadTaskType.Season, ParentId, PlexServerId, PlexLibraryId),
+            DownloadTaskType.EpisodeData => new DownloadTaskKey(DownloadTaskType.Episode, ParentId, PlexServerId, PlexLibraryId),
+            DownloadTaskType.EpisodePart => new DownloadTaskKey(DownloadTaskType.Episode, ParentId, PlexServerId, PlexLibraryId),
+            _ => null,
+        };
+    }
 }

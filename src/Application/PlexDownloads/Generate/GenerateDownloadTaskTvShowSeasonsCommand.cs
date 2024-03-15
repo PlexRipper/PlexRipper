@@ -16,6 +16,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandValidator : AbstractValidat
     {
         RuleFor(x => x.DownloadMedias).NotNull();
         RuleFor(x => x.DownloadMedias).NotEmpty();
+        RuleForEach(x => x.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
     }
 }
 

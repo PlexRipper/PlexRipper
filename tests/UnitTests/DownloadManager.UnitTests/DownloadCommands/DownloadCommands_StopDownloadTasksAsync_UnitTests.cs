@@ -1,4 +1,5 @@
 ﻿using Application.Contracts;
+using Data.Contracts;
 using DownloadManager.Contracts;
 using FileSystem.Contracts;
 using Microsoft.EntityFrameworkCore;
@@ -21,17 +22,14 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
 
         // Assert
         result.IsFailed.ShouldBeTrue();
+        result.Has404NotFoundError().ShouldBeTrue();
     }
 
     [Fact]
     public async Task ShouldHaveFailedResult_WhenTheDownloadTaskCouldNotBeStopped()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.MovieDownloadTasksCount = 2;
-            config.DisableForeignKeyCheck = true;
-        });
+        await SetupDatabase(config => config.MovieDownloadTasksCount = 2);
         var movieDownloadTasks = await GetDbContext().DownloadTaskMovie.ToListAsync();
 
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StopDownloadTaskJob(It.IsAny<Guid>())).ReturnsAsync(Result.Fail("Error"));
@@ -43,6 +41,7 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
 
         // Assert
         result.IsFailed.ShouldBeTrue();
+        result.Has404NotFoundError().ShouldNotBe(true);
     }
 
     [Fact]
@@ -53,9 +52,8 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
         await SetupDatabase(config =>
         {
             config.MovieDownloadTasksCount = 2;
-            config.DisableForeignKeyCheck = true;
         });
-        var movieDownloadTasks = await GetDbContext().DownloadTaskMovie.ToListAsync();
+        var movieDownloadTasks = await DbContext.GetAllDownloadTasksAsync();
 
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StopDownloadTaskJob(It.IsAny<Guid>())).ReturnOk();
         mock.Mock<IDirectorySystem>().Setup(x => x.DeleteAllFilesFromDirectory(It.IsAny<string>())).Returns(Result.Ok());

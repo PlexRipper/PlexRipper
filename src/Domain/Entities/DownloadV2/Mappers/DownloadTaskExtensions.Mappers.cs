@@ -4,8 +4,11 @@ public static class DownloadTaskExtensions_Mappers
 {
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskMovie downloadTaskMovie)
     {
-        var children = downloadTaskMovie.Children.Select(x => x.ToGeneric())
-            .ToList();
+        if (downloadTaskMovie is null)
+            throw new ArgumentNullException(nameof(downloadTaskMovie));
+
+        var children = downloadTaskMovie.Children?.Select(x => x.ToGeneric())
+            .ToList() ?? new List<DownloadTaskGeneric>();
         return new DownloadTaskGeneric
         {
             Children = children,
@@ -28,7 +31,9 @@ public static class DownloadTaskExtensions_Mappers
             Key = downloadTaskMovie.Key,
             MediaType = downloadTaskMovie.MediaType,
             Percentage = children.Any() ? children.Average(x => x.Percentage) : 0,
+            PlexLibrary = downloadTaskMovie.PlexLibrary,
             PlexLibraryId = downloadTaskMovie.PlexLibraryId,
+            PlexServer = downloadTaskMovie.PlexServer,
             PlexServerId = downloadTaskMovie.PlexServerId,
         };
     }
@@ -63,12 +68,15 @@ public static class DownloadTaskExtensions_Mappers
 
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskTvShow downloadTaskTvShow)
     {
-        var children = downloadTaskTvShow.Children.Select(x =>
+        if (downloadTaskTvShow is null)
+            throw new ArgumentNullException(nameof(downloadTaskTvShow));
+
+        var children = downloadTaskTvShow.Children?.Select(x =>
             {
                 x.Calculate();
                 return x.ToGeneric();
             })
-            .ToList();
+            .ToList() ?? new List<DownloadTaskGeneric>();
 
         return new DownloadTaskGeneric
         {
@@ -92,13 +100,18 @@ public static class DownloadTaskExtensions_Mappers
             Key = downloadTaskTvShow.Key,
             MediaType = downloadTaskTvShow.MediaType,
             Percentage = children.Any() ? children.Average(x => x.Percentage) : 0,
+            PlexLibrary = downloadTaskTvShow.PlexLibrary,
             PlexLibraryId = downloadTaskTvShow.PlexLibraryId,
+            PlexServer = downloadTaskTvShow.PlexServer,
             PlexServerId = downloadTaskTvShow.PlexServerId,
         };
     }
 
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskTvShowSeason downloadTaskTvShowSeason)
     {
+        if (downloadTaskTvShowSeason is null)
+            throw new ArgumentNullException(nameof(downloadTaskTvShowSeason));
+
         var children = downloadTaskTvShowSeason.Children.Select(x =>
             {
                 x.Calculate();
@@ -128,15 +141,18 @@ public static class DownloadTaskExtensions_Mappers
             Key = downloadTaskTvShowSeason.Key,
             MediaType = downloadTaskTvShowSeason.MediaType,
             Percentage = children.Any() ? children.Average(x => x.Percentage) : 0,
-            PlexLibrary = null,
+            PlexLibrary = downloadTaskTvShowSeason.PlexLibrary,
             PlexLibraryId = downloadTaskTvShowSeason.PlexLibraryId,
-            PlexServer = null,
+            PlexServer = downloadTaskTvShowSeason.PlexServer,
             PlexServerId = downloadTaskTvShowSeason.PlexServerId,
         };
     }
 
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskTvShowEpisode downloadTaskTvShowEpisode)
     {
+        if (downloadTaskTvShowEpisode is null)
+            throw new ArgumentNullException(nameof(downloadTaskTvShowEpisode));
+
         return new DownloadTaskGeneric
         {
             Children = downloadTaskTvShowEpisode.Children.Select(x => x.ToGeneric()).ToList(),
@@ -159,9 +175,9 @@ public static class DownloadTaskExtensions_Mappers
             Key = downloadTaskTvShowEpisode.Key,
             MediaType = downloadTaskTvShowEpisode.MediaType,
             Percentage = downloadTaskTvShowEpisode.Children.Any() ? downloadTaskTvShowEpisode.Children.Average(x => x.Percentage) : 0,
-            PlexLibrary = null,
+            PlexLibrary = downloadTaskTvShowEpisode.PlexLibrary,
             PlexLibraryId = downloadTaskTvShowEpisode.PlexLibraryId,
-            PlexServer = null,
+            PlexServer = downloadTaskTvShowEpisode.PlexServer,
             PlexServerId = downloadTaskTvShowEpisode.PlexServerId,
         };
     }
@@ -188,9 +204,9 @@ public static class DownloadTaskExtensions_Mappers
         Key = downloadTaskTvShowEpisodeFile.Key,
         MediaType = downloadTaskTvShowEpisodeFile.MediaType,
         Percentage = downloadTaskTvShowEpisodeFile.Percentage,
-        PlexLibrary = null,
+        PlexLibrary = downloadTaskTvShowEpisodeFile.PlexLibrary,
         PlexLibraryId = downloadTaskTvShowEpisodeFile.PlexLibraryId,
-        PlexServer = null,
+        PlexServer = downloadTaskTvShowEpisodeFile.PlexServer,
         PlexServerId = downloadTaskTvShowEpisodeFile.PlexServerId,
     };
 }

@@ -24,13 +24,13 @@ public static partial class MockDatabase
     private static async Task<PlexRipperDbContext> AddPlexServers(this PlexRipperDbContext context, Action<FakeDataConfig> options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
-
-        var plexServers = FakeData.GetPlexServer(_seed).Generate(config.PlexServerCount);
+        var plexServerCount = Math.Max(1, config.PlexServerCount);
+        var plexServers = FakeData.GetPlexServer(_seed).Generate(plexServerCount);
 
         if (config.MockServerUris.Any())
         {
             config.MockServerUris.Count.ShouldBeGreaterThanOrEqualTo(plexServers.Count,
-                $"The mocked plex server count ({config.MockServerUris.Count}) was lower than the generated {nameof(config.PlexServerCount)} ({config.PlexServerCount})");
+                $"The mocked plex server count ({config.MockServerUris.Count}) was lower than the generated {nameof(config.PlexServerCount)} ({plexServerCount})");
 
             for (var i = 0; i < config.MockServerUris.Count; i++)
             {
@@ -47,7 +47,7 @@ public static partial class MockDatabase
         await context.SaveChangesAsync();
 
         _log.Here()
-            .Debug("Added {PlexServerCount} {NameOfPlexServer}s to {NameOfPlexRipperDbContext}: {DatabaseName}", config.PlexServerCount,
+            .Debug("Added {PlexServerCount} {NameOfPlexServer}s to {NameOfPlexRipperDbContext}: {DatabaseName}", plexServerCount,
                 nameof(PlexServer), nameof(PlexRipperDbContext), context.DatabaseName);
         return context;
     }
@@ -71,10 +71,10 @@ public static partial class MockDatabase
         foreach (var plexServer in plexServers)
         {
             var plexLibraries = new List<PlexLibrary>();
-            if (config.MovieCount > 0 || config.MovieDownloadTasksCount > 0)
+            if (config.ShouldHaveMoviePlexLibrary)
                 plexLibraries.Add(FakeData.GetPlexLibrary(_seed, PlexMediaType.Movie).Generate());
 
-            if (config.TvShowCount > 0 || config.TvShowDownloadTasksCount > 0)
+            if (config.ShouldHaveTvShowPlexLibrary)
                 plexLibraries.Add(FakeData.GetPlexLibrary(_seed, PlexMediaType.TvShow).Generate());
 
             if (plexLibraryCount > 0)
@@ -155,29 +155,6 @@ public static partial class MockDatabase
         return context;
     }
 
-    private static void ValidateOptions(FakeDataConfig config)
-    {
-        if (config.PlexLibraryCount > 0)
-            config.PlexServerCount.ShouldBeGreaterThan(0);
-
-        if (config.MovieCount > 0 && config.TvShowCount > 0)
-        {
-            config.PlexServerCount.ShouldBeGreaterThanOrEqualTo(1,
-                $"{nameof(config.PlexServerCount)} should be greater than zero when either {nameof(config.MovieCount)} or {nameof(config.TvShowCount)} is also greater than zero!");
-
-            config.PlexLibraryCount.ShouldBeGreaterThanOrEqualTo(2,
-                $"{nameof(config.PlexLibraryCount)} should be greater than the sum of when either {nameof(config.MovieCount)} or {nameof(config.TvShowCount)} is also greater than zero!");
-        }
-
-        if (config.MovieCount > 0 || config.TvShowCount > 0)
-        {
-            config.PlexServerCount.ShouldBeGreaterThanOrEqualTo(1,
-                $"{nameof(config.PlexServerCount)} should be greater than zero when either {nameof(config.MovieCount)} or {nameof(config.TvShowCount)} is also greater than zero!");
-            config.PlexLibraryCount.ShouldBeGreaterThanOrEqualTo(1,
-                $"{nameof(config.PlexLibraryCount)} should be greater than zero when either {nameof(config.MovieCount)} or {nameof(config.TvShowCount)} is also greater than zero!");
-        }
-    }
-
     #endregion
 
     #region Public
@@ -231,17 +208,16 @@ public static partial class MockDatabase
         _seed = seed;
 
         var config = FakeDataConfig.FromOptions(options);
-        ValidateOptions(config);
 
         context.HasBeenSetup = true;
 
         // PlexServers and Libraries added
         _log.Here().Debug("Setting up {NameOfPlexRipperDbContext} for {DatabaseName}", nameof(PlexRipperDbContext), context.DatabaseName);
 
-        if (config.PlexServerCount > 0)
+        if (config.ShouldHavePlexServer)
             context = await context.AddPlexServers(options);
 
-        if (config.PlexLibraryCount > 0)
+        if (config.ShouldHavePlexLibrary)
             context = await context.AddPlexLibraries(options);
 
         if (config.PlexAccountCount > 0)

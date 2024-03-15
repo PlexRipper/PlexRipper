@@ -27,7 +27,7 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdated>
             return;
         }
 
-        var downloadTasks = await _dbContext.GetAllDownloadTasksAsync(plexServerId, cancellationToken);
+        var downloadTasks = await _dbContext.GetAllDownloadTasksAsync(plexServerId, cancellationToken: cancellationToken);
 
         // Send away the new result
         await _signalRService.SendDownloadProgressUpdateAsync(plexServerId, downloadTasks, cancellationToken);

@@ -23,14 +23,19 @@ public static partial class DownloadTaskExtensions
         return downloadTask;
     }
 
+    public static DownloadTaskTvShowSeason SetDownloadStatus(this DownloadTaskTvShowSeason downloadTask, DownloadStatus downloadStatus)
+    {
+        downloadTask.DownloadStatus = downloadStatus;
+        if (downloadTask.Children is not null && downloadTask.Children.Any())
+            downloadTask.Children = downloadTask.Children.SetDownloadStatus(downloadStatus);
+
+        return downloadTask;
+    }
+
     public static List<DownloadTaskTvShowSeason> SetDownloadStatus(this List<DownloadTaskTvShowSeason> downloadTasks, DownloadStatus downloadStatus)
     {
         foreach (var downloadTask in downloadTasks)
-        {
-            downloadTask.DownloadStatus = downloadStatus;
-            if (downloadTask.Children is not null && downloadTask.Children.Any())
-                downloadTask.Children = downloadTask.Children.SetDownloadStatus(downloadStatus);
-        }
+            downloadTask.SetDownloadStatus(downloadStatus);
 
         return downloadTasks;
     }

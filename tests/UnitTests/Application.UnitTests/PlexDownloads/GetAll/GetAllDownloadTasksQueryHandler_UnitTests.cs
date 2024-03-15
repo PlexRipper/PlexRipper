@@ -33,10 +33,9 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest<GetAllDown
             config.MovieDownloadTasksCount = 10;
         });
 
+        // Act
         var request = new GetAllDownloadTasksQuery();
         var handler = mock.Create<GetAllDownloadTasksQueryHandler>();
-
-        // Act
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
@@ -65,10 +64,9 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest<GetAllDown
             config.TvShowEpisodeDownloadTasksCount = 5;
         });
 
+        // Act
         var request = new GetAllDownloadTasksQuery();
         var handler = mock.Create<GetAllDownloadTasksQueryHandler>();
-
-        // Act
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
@@ -81,8 +79,8 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest<GetAllDown
             downloadTasks.Count.ShouldBe(5);
             foreach (var downloadTask in shouldDownloadTasks)
             {
-                downloadTask.PlexServer.ShouldNotBeNull();
-                downloadTask.PlexLibrary.ShouldNotBeNull();
+                downloadTask.PlexServer.ShouldNotBeNull($"DownloadTaskType {downloadTask.DownloadTaskType} has PlexServer null");
+                downloadTask.PlexLibrary.ShouldNotBeNull($"DownloadTaskType {downloadTask.DownloadTaskType} has PlexLibrary null");
                 if (downloadTask.Children.Any())
                     ValidateDownloadTasks(downloadTask.Children);
             }

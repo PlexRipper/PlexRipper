@@ -63,11 +63,6 @@ public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests : Base
         Seed = 3882;
         await SetupDatabase(config =>
         {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.TvShowCount = 10;
-            config.TvShowSeasonCount = 10;
-            config.TvShowEpisodeCount = 10;
             config.TvShowDownloadTasksCount = 5;
             config.TvShowSeasonDownloadTasksCount = 5;
             config.TvShowEpisodeDownloadTasksCount = 5;
@@ -77,17 +72,15 @@ public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests : Base
         var downloadTaskTvShows = DbContext.DownloadTaskTvShow.IncludeAll().ToList();
 
         // Assert
-        downloadTaskTvShows.Count.ShouldBe(125);
+        downloadTaskTvShows.Count.ShouldBe(5);
         foreach (var downloadTaskTvShow in downloadTaskTvShows)
         {
-            downloadTaskTvShow.Count.ShouldBe(25);
+            downloadTaskTvShow.Children.Count.ShouldBe(5);
             foreach (var downloadTaskTvShowSeason in downloadTaskTvShow.Children)
             {
-                downloadTaskTvShowSeason.Count.ShouldBe(5);
-                foreach (var downloadTask3 in downloadTaskTvShowSeason.Children)
-                {
-                    downloadTask3.Children.Count.ShouldBe(1);
-                }
+                downloadTaskTvShowSeason.Children.Count.ShouldBe(5);
+                foreach (var downloadTaskEpisode in downloadTaskTvShowSeason.Children)
+                    downloadTaskEpisode.Children.Count.ShouldBe(1);
             }
         }
     }

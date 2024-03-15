@@ -58,7 +58,7 @@ public static partial class DbContextExtensions
                 var downloadTaskMovie = await dbContext.DownloadTaskMovie
                     .IncludeAll()
                     .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-                return downloadTaskMovie.ToGeneric();
+                return downloadTaskMovie?.ToGeneric() ?? null;
 
             // DownloadTaskType.MovieData
             case DownloadTaskType.MovieData:
@@ -68,7 +68,7 @@ public static partial class DbContextExtensions
                     .Include(x => x.PlexLibrary)
                     .Include(x => x.DownloadWorkerTasks)
                     .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-                return downloadTaskMovieFile.ToGeneric();
+                return downloadTaskMovieFile?.ToGeneric() ?? null;
 
             // DownloadTaskType.TvShow
             case DownloadTaskType.TvShow:
@@ -79,7 +79,7 @@ public static partial class DbContextExtensions
                     .ThenInclude(x => x.Children)
                     .ThenInclude(x => x.Children)
                     .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-                return downloadTaskTvShow.ToGeneric();
+                return downloadTaskTvShow?.ToGeneric() ?? null;
 
             // DownloadTaskType.TvShowSeason
             case DownloadTaskType.Season:
@@ -89,7 +89,7 @@ public static partial class DbContextExtensions
                     .Include(x => x.Children)
                     .ThenInclude(x => x.Children)
                     .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-                return downloadTaskTvShowSeason.ToGeneric();
+                return downloadTaskTvShowSeason?.ToGeneric() ?? null;
 
             // DownloadTaskType.Episode
             case DownloadTaskType.Episode:
@@ -98,7 +98,7 @@ public static partial class DbContextExtensions
                     .Include(x => x.PlexLibrary)
                     .Include(x => x.Children)
                     .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-                return downloadTaskTvShowEpisode.ToGeneric();
+                return downloadTaskTvShowEpisode?.ToGeneric() ?? null;
 
             // DownloadTaskType.EpisodeData
             case DownloadTaskType.EpisodeData:
@@ -108,7 +108,7 @@ public static partial class DbContextExtensions
                     .Include(x => x.PlexLibrary)
                     .Include(x => x.DownloadWorkerTasks)
                     .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-                return downloadTaskTvShowEpisodeFile.ToGeneric();
+                return downloadTaskTvShowEpisodeFile?.ToGeneric() ?? null;
 
             default:
                 return null;
@@ -118,21 +118,28 @@ public static partial class DbContextExtensions
     public static async Task<List<DownloadTaskGeneric>> GetAllDownloadTasksAsync(
         this IPlexRipperDbContext dbContext,
         int plexServerId = 0,
+        bool asTracking = false,
         CancellationToken cancellationToken = default)
     {
         var downloadTasks = new List<DownloadTaskGeneric>();
 
         var downloadTasksMovies = await dbContext.DownloadTaskMovie
+            .AsTracking(asTracking ? QueryTrackingBehavior.TrackAll : QueryTrackingBehavior.NoTracking)
             .IncludeAll()
             .Where(x => plexServerId <= 0 || x.PlexServerId == plexServerId)
             .ToListAsync(cancellationToken);
 
-        var downloadTasksTvShows = await dbContext.DownloadTaskTvShow.IncludeAll()
+        var downloadTasksTvShows = await dbContext.DownloadTaskTvShow
+            .AsTracking(asTracking ? QueryTrackingBehavior.TrackAll : QueryTrackingBehavior.NoTracking)
+            .IncludeAll()
             .Where(x => plexServerId <= 0 || x.PlexServerId == plexServerId)
             .ToListAsync(cancellationToken);
 
         downloadTasks.AddRange(downloadTasksMovies.Select(x => x.ToGeneric()));
         downloadTasks.AddRange(downloadTasksTvShows.Select(x => x.ToGeneric()));
+
+        // Sort by CreatedAt
+        downloadTasks.Sort((x, y) => DateTime.Compare(x.CreatedAt, y.CreatedAt));
 
         return downloadTasks;
     }

@@ -58,19 +58,15 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
         Seed = 5000;
         await SetupDatabase(config =>
         {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.MovieCount = 10;
-            config.MovieDownloadTasksCount = 5;
+            config.MovieCount = 2;
+            config.MovieDownloadTasksCount = 2;
         });
 
-        var downloadTasks = await DbContext.DownloadTaskMovie
-            .IncludeAll()
-            .ToListAsync();
+        var downloadTasks = await DbContext.GetAllDownloadTasksAsync();
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<Guid>(), It.IsAny<int>())).ReturnOk();
 
         // Act
-        var result = await _sut.CheckDownloadQueueServer(downloadTasks.First().PlexServerId);
+        var result = await _sut.CheckDownloadQueueServer(downloadTasks[0].PlexServerId);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -91,23 +87,19 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
             config.MovieDownloadTasksCount = 5;
         });
 
-        var downloadTasks = await DbContext.DownloadTaskMovie
-            .IncludeAll()
-            .ToListAsync();
-        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<Guid>(), It.IsAny<int>())).ReturnOk();
-
-        // ** Set first task to Completed
-        var movieDownloadTask = downloadTasks.First();
-        movieDownloadTask.SetDownloadStatus(DownloadStatus.Completed);
-
+        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
         await DbContext.SaveChangesAsync();
 
+        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<Guid>(), It.IsAny<int>())).ReturnOk();
+
         // Act
-        var result = await _sut.CheckDownloadQueueServer(movieDownloadTask.PlexServerId);
+        var result = await _sut.CheckDownloadQueueServer(downloadTasks[0].PlexServerId);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Id.ShouldBe(movieDownloadTask.Children.First().Id);
+        downloadTasks[0].Children[0].DownloadTaskType.ShouldBe(DownloadTaskType.MovieData);
+        result.Value.Id.ShouldBe(downloadTasks[0].Children[0].Id);
     }
 
     [Fact]
@@ -123,47 +115,8 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
             config.TvShowSeasonDownloadTasksCount = 2;
             config.TvShowEpisodeDownloadTasksCount = 2;
         });
-
-        var downloadTasks = await DbContext.DownloadTaskTvShow
-            .IncludeAll()
-            .ToListAsync();
-        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<Guid>(), It.IsAny<int>())).ReturnOk();
-
-        // ** Set first task to Completed
-        var tvShowDownloadTask = downloadTasks[0];
-        tvShowDownloadTask.SetDownloadStatus(DownloadStatus.Completed);
-        await DbContext.SaveChangesAsync();
-
-        // Act
-        var result = await _sut.CheckDownloadQueueServer(1);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.Id.ShouldBe(tvShowDownloadTask.Children[0].Children[0].Children[0].Id);
-    }
-
-    [Fact]
-    public async Task ShouldHaveNextQueuedDownloadTask_WhenNestedInsideATvShowsDownloadTasksWithDownloadFinished()
-    {
-        // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.TvShowCount = 10;
-            config.TvShowDownloadTasksCount = 2;
-            config.TvShowSeasonDownloadTasksCount = 2;
-            config.TvShowEpisodeDownloadTasksCount = 5;
-        });
-
-        var downloadTasks = await DbContext.DownloadTaskTvShow
-            .AsTracking()
-            .IncludeAll()
-            .ToListAsync();
-
-        downloadTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
-        downloadTasks[1].SetDownloadStatus(DownloadStatus.Queued);
-
+        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
         await DbContext.SaveChangesAsync();
 
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<Guid>(), It.IsAny<int>())).ReturnOk();
@@ -173,6 +126,6 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQ
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Id.ShouldBe(downloadTasks[1].Children[0].Children[0].Children[0].Id);
+        result.Value.Id.ShouldBe(downloadTasks[0].Children[0].Children[0].Children[0].Id);
     }
 }

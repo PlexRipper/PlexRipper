@@ -14,6 +14,8 @@ public static partial class DbSetExtensions
         .ThenInclude(x => x.PlexLibrary);
 
     public static IQueryable<DownloadTaskTvShow> IncludeAll(this IQueryable<DownloadTaskTvShow> downloadTasks) => downloadTasks
+        .Include(x => x.PlexServer)
+        .Include(x => x.PlexLibrary)
 
         // Include Seasons
         .Include(x => x.Children.OrderBy(y => y.CreatedAt))

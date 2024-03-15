@@ -73,7 +73,7 @@ public class DownloadQueue : IDownloadQueue
             return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId).LogWarning();
 
         var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, _token);
-        var downloadTasks = await _dbContext.GetAllDownloadTasksAsync(plexServerId, _token);
+        var downloadTasks = await _dbContext.GetAllDownloadTasksAsync(plexServerId, cancellationToken: _token);
 
         _log.Here().Debug("Checking {NameOfPlexServer}: {PlexServerName} for the next download to start", nameof(PlexServer), plexServerName);
         var nextDownloadTaskResult = GetNextDownloadTask(downloadTasks);

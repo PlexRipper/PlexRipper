@@ -44,14 +44,8 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-       var downloadWorkerTasks = await  DbContext.DownloadWorkerTasks.ToListAsync();
-       downloadWorkerTasks.Count.ShouldBe(4);
-       downloadWorkerTasks.ShouldAllBe(x => x.DownloadTaskId == downloadTask.Id);
-       
-      var downloadWorkers = await DbContext.DownloadTaskMovieFile.Include(x => x.DownloadWorkerTasks).Include(x => x.PlexLibrary).FirstAsync();
-      if (true)
-      {
-          
-      }
+        var downloadWorkerTasks = await DbContext.DownloadWorkerTasks.ToListAsync();
+        downloadWorkerTasks.Count.ShouldBe(4);
+        downloadWorkerTasks.ShouldAllBe(x => x.DownloadTaskId == downloadTask.Id);
     }
 }

@@ -218,13 +218,11 @@ public class PlexDownloadClient : IAsyncDisposable
         DownloadStatus = newDownloadStatus;
 
         await _dbContext.UpdateDownloadProgress(DownloadTask.ToKey(), DownloadTask, cancellationToken);
+        await _dbContext.SetDownloadStatus(DownloadTask.ToKey(), DownloadStatus, cancellationToken);
 
         await _mediator.Send(new DownloadTaskUpdatedNotification(DownloadTask.ToKey()), cancellationToken);
 
         _log.Debug("{@DownloadTask}", DownloadTask.ToString());
-
-        if (statusIsChanged && DownloadStatus == DownloadStatus.DownloadFinished)
-            await _mediator.Publish(new DownloadTaskFinishedNotification(DownloadTask.ToKey()), cancellationToken);
     }
 
     private async Task SetupDownloadLimitWatcher(DownloadTaskGeneric downloadTask)
@@ -266,21 +264,21 @@ public class PlexDownloadClient : IAsyncDisposable
                 },
                 () => _downloadWorkerTaskUpdateCompletionSource.SetResult(true));
 
-        // Download Worker Log subscription
-        _downloadWorkerLog = _downloadWorkers
-            .Select(x => x.DownloadWorkerLog)
-            .Merge()
-            .Buffer(TimeSpan.FromSeconds(1))
-            .SelectMany(async logs => await _mediator.Publish(new DownloadTaskWorkerLogNotification(logs), cancellationToken)
-                .ToObservable())
-            .Subscribe(
-                _ => { },
-                ex =>
-                {
-                    _log.Error(ex);
-                    _downloadWorkerLogCompletionSource.SetException(ex);
-                },
-                () => _downloadWorkerLogCompletionSource.SetResult(true));
+        // // Download Worker Log subscription
+        // _downloadWorkerLog = _downloadWorkers
+        //     .Select(x => x.DownloadWorkerLog)
+        //     .Merge()
+        //     .Buffer(TimeSpan.FromSeconds(1))
+        //     .SelectMany(async logs => await _mediator.Publish(new DownloadTaskWorkerLogNotification(logs), cancellationToken)
+        //         .ToObservable())
+        //     .Subscribe(
+        //         _ => { },
+        //         ex =>
+        //         {
+        //             _log.Error(ex);
+        //             _downloadWorkerLogCompletionSource.SetException(ex);
+        //         },
+        //         () => _downloadWorkerLogCompletionSource.SetResult(true));
     }
 
     #endregion

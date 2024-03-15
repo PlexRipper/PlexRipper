@@ -107,6 +107,8 @@ public static class PlexMediaExtensions
                 DownloadWorkerTasks = null,
                 Parent = null,
                 ParentId = default,
+                FullTitle = $"{plexMovie.FullTitle}/{part.File}",
+                Title = part.File,
             })
             .ToList();
     }

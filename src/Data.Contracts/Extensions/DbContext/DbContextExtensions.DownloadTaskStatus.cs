@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Domain;
 
@@ -21,9 +22,7 @@ public static partial class DbContextExtensions
                 case DownloadTaskType.Movie:
                 {
                     var downloadStatusList = downloadTaskCheck.Children.Select(x => x.DownloadStatus).ToList();
-                    downloadTaskCheck.DownloadStatus = DownloadTaskActions.Aggregate(downloadStatusList);
-                    await dbContext.SetDownloadStatus(downloadTaskCheck.ToKey(), downloadTaskCheck.DownloadStatus, cancellationToken);
-                    downloadTaskCheck = null;
+                    await Update(parentKey, downloadStatusList);
                     break;
                 }
                 case DownloadTaskType.TvShow:
@@ -32,32 +31,50 @@ public static partial class DbContextExtensions
                         .SelectMany(x => x.Children)
                         .Select(x => x.DownloadStatus)
                         .ToList();
-                    downloadTaskCheck.DownloadStatus = DownloadTaskActions.Aggregate(downloadStatusList);
-                    await dbContext.SetDownloadStatus(downloadTaskCheck.ToKey(), downloadTaskCheck.DownloadStatus, cancellationToken);
-                    downloadTaskCheck = null;
+                    await Update(parentKey, downloadStatusList);
                     break;
                 }
                 case DownloadTaskType.Season:
                 {
                     var downloadStatusList = downloadTaskCheck.Children.SelectMany(x => x.Children).Select(x => x.DownloadStatus).ToList();
-                    downloadTaskCheck.DownloadStatus = DownloadTaskActions.Aggregate(downloadStatusList);
-                    await dbContext.SetDownloadStatus(downloadTaskCheck.ToKey(), downloadTaskCheck.DownloadStatus, cancellationToken);
-                    downloadTaskCheck = parentKey is not null ? await dbContext.GetDownloadTaskAsync(parentKey, cancellationToken) : null;
+                    await Update(parentKey, downloadStatusList);
                     break;
                 }
                 case DownloadTaskType.Episode:
                 {
                     var downloadStatusList = downloadTaskCheck.Children.Select(x => x.DownloadStatus).ToList();
-                    downloadTaskCheck.DownloadStatus = DownloadTaskActions.Aggregate(downloadStatusList);
-                    await dbContext.SetDownloadStatus(downloadTaskCheck.ToKey(), downloadTaskCheck.DownloadStatus, cancellationToken);
+                    await Update(parentKey, downloadStatusList);
+                    break;
+                }
+
+                // The DownloadStatus here is determined by PlexDownloadClient and the FileMerger
+                case DownloadTaskType.MovieData:
+                case DownloadTaskType.EpisodeData:
+                {
                     downloadTaskCheck = parentKey is not null ? await dbContext.GetDownloadTaskAsync(parentKey, cancellationToken) : null;
                     break;
                 }
                 default:
                     _log.Error("DownloadTaskType {DownloadTaskType} is not supported in {CalculateDownloadStatusName}", downloadTaskCheck.DownloadTaskType,
                         nameof(CalculateDownloadStatus), 0);
+                    downloadTaskCheck = null;
                     break;
             }
+        }
+
+        return;
+
+        [SuppressMessage("ReSharper", "AccessToModifiedClosure")]
+        async Task Update(DownloadTaskKey? parentKey, List<DownloadStatus> downloadStatusList)
+        {
+            var newStatus = DownloadTaskActions.Aggregate(downloadStatusList);
+            if (downloadTaskCheck.DownloadStatus != newStatus)
+            {
+                downloadTaskCheck.DownloadStatus = newStatus;
+                await dbContext.SetDownloadStatus(downloadTaskCheck.ToKey(), downloadTaskCheck.DownloadStatus, cancellationToken);
+            }
+
+            downloadTaskCheck = parentKey is not null ? await dbContext.GetDownloadTaskAsync(parentKey, cancellationToken) : null;
         }
     }
 

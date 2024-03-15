@@ -34,7 +34,7 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
 
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StopDownloadTaskJob(It.IsAny<Guid>())).ReturnsAsync(Result.Fail("Error"));
         mock.Mock<IDirectorySystem>().Setup(x => x.DeleteAllFilesFromDirectory(It.IsAny<string>())).Returns(Result.Ok());
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdated>).Returns(Task.CompletedTask);
+        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>).Returns(Task.CompletedTask);
 
         // Act
         var result = await _sut.Handle(new StopDownloadTaskCommand(movieDownloadTasks.First().Id), CancellationToken.None);
@@ -57,7 +57,7 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
 
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StopDownloadTaskJob(It.IsAny<Guid>())).ReturnOk();
         mock.Mock<IDirectorySystem>().Setup(x => x.DeleteAllFilesFromDirectory(It.IsAny<string>())).Returns(Result.Ok());
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdated>).Returns(Task.CompletedTask);
+        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>).Returns(Task.CompletedTask);
 
         // Act
         var result = await _sut.Handle(new StopDownloadTaskCommand(movieDownloadTasks.First().Id), CancellationToken.None);
@@ -66,7 +66,7 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
         result.IsSuccess.ShouldBeTrue();
         mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StopDownloadTaskJob(It.IsAny<Guid>()), Times.Once);
-        mock.VerifyMediator(It.IsAny<DownloadTaskUpdated>, Times.Once);
+        mock.VerifyMediator(It.IsAny<DownloadTaskUpdatedNotification>, Times.Once);
         var downloadTasksDb = await GetDbContext()
             .DownloadTaskMovie
             .FirstOrDefaultAsync(x => x.Id == movieDownloadTasks.First().Id);

@@ -1,9 +1,10 @@
-using DownloadManager.Contracts;
 using FileSystem.Contracts;
 
-namespace PlexRipper.DownloadManager;
+namespace PlexRipper.Application;
 
-public class DownloadTaskFinishedHandler : INotificationHandler<DownloadTaskFinished>
+public record DownloadTaskFinishedNotification(DownloadTaskKey Key) : INotification;
+
+public class DownloadTaskFinishedHandler : INotificationHandler<DownloadTaskFinishedNotification>
 {
     private readonly IMediator _mediator;
     private readonly IFileMergeScheduler _fileMergeScheduler;
@@ -14,7 +15,7 @@ public class DownloadTaskFinishedHandler : INotificationHandler<DownloadTaskFini
         _fileMergeScheduler = fileMergeScheduler;
     }
 
-    public async Task Handle(DownloadTaskFinished notification, CancellationToken cancellationToken)
+    public async Task Handle(DownloadTaskFinishedNotification notification, CancellationToken cancellationToken)
     {
         var addFileTaskResult = await _fileMergeScheduler.CreateFileTaskFromDownloadTask(notification.Key);
         if (addFileTaskResult.IsFailed)
@@ -24,6 +25,6 @@ public class DownloadTaskFinishedHandler : INotificationHandler<DownloadTaskFini
         }
 
         await _fileMergeScheduler.StartFileMergeJob(addFileTaskResult.Value.Id);
-        await _mediator.Publish(new CheckDownloadQueue(notification.Key.PlexServerId), cancellationToken);
+        await _mediator.Publish(new CheckDownloadQueueNotification(notification.Key.PlexServerId), cancellationToken);
     }
 }

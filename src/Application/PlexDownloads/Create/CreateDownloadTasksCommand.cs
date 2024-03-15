@@ -68,7 +68,7 @@ public class CreateDownloadTasksCommandHandler : IRequestHandler<CreateDownloadT
                 .Select(x => x.PlexServerId)
                 .Distinct()
                 .ToList();
-            await _mediator.Publish(new CheckDownloadQueue(uniquePlexServers), cancellationToken);
+            await _mediator.Publish(new CheckDownloadQueueNotification(uniquePlexServers), cancellationToken);
         }
 
         return Result.Ok();

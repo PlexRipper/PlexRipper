@@ -3,9 +3,10 @@ using Data.Contracts;
 using FileSystem.Contracts;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
+using PlexRipper.FileSystem;
 using Quartz;
 
-namespace PlexRipper.FileSystem;
+namespace PlexRipper.Application;
 
 public class FileMergeScheduler : BaseScheduler, IFileMergeScheduler
 {

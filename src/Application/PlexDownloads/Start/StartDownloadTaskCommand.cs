@@ -1,6 +1,5 @@
 using Application.Contracts;
 using Data.Contracts;
-using DownloadManager.Contracts;
 using FluentValidation;
 
 namespace PlexRipper.Application;
@@ -37,7 +36,7 @@ public class StartDownloadTaskCommandHandler : IRequestHandler<StartDownloadTask
         if (downloadTask.IsDownloadable)
             return await _downloadTaskScheduler.StartDownloadTaskJob(downloadTask.Id, downloadTask.PlexServerId);
 
-        await _mediator.Publish(new CheckDownloadQueue(downloadTask.PlexServerId), cancellationToken);
+        await _mediator.Publish(new CheckDownloadQueueNotification(downloadTask.PlexServerId), cancellationToken);
 
         return Result.Fail($"Failed to start downloadTask {downloadTask.FullTitle}, it's not directly downloadable.");
     }

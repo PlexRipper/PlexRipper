@@ -53,7 +53,7 @@ public class PauseDownloadTaskCommandHandler : IRequestHandler<PauseDownloadTask
         await _dbContext.SetDownloadStatus(downloadTaskId, DownloadStatus.Paused, cancellationToken: cancellationToken);
 
         var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskId, cancellationToken: cancellationToken);
-        await _mediator.Send(new DownloadTaskUpdated(downloadTask.ToKey()), cancellationToken);
+        await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTask.ToKey()), cancellationToken);
 
         return Result.Ok();
     }

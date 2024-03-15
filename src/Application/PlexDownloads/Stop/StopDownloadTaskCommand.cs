@@ -65,7 +65,7 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
         // Update the download task status
         await _dbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.Stopped, cancellationToken);
 
-        await _mediator.Send(new DownloadTaskUpdated(downloadTask.ToKey()), cancellationToken);
+        await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTask.ToKey()), cancellationToken);
 
         return Result.Ok();
     }

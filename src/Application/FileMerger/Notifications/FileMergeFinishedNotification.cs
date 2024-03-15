@@ -1,9 +1,10 @@
 using Data.Contracts;
-using DownloadManager.Contracts;
+using FileSystem.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.FileSystem.Common;
 
-namespace PlexRipper.FileSystem;
+namespace PlexRipper.Application;
+
+public record FileMergeFinishedNotification(int FileTaskId) : INotification;
 
 public class FileMergeFinishedHandler : INotificationHandler<FileMergeFinishedNotification>
 {
@@ -35,6 +36,6 @@ public class FileMergeFinishedHandler : INotificationHandler<FileMergeFinishedNo
 
         await _dbContext.FileTasks.Where(x => x.Id == notification.FileTaskId).ExecuteDeleteAsync(cancellationToken);
 
-        await _mediator.Send(new DownloadTaskUpdated(downloadTask.ToKey()), cancellationToken);
+        await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTask.ToKey()), cancellationToken);
     }
 }

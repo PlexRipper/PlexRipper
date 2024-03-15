@@ -1,4 +1,6 @@
-﻿namespace PlexRipper.FileSystem.Common;
+﻿using FluentResults;
+
+namespace FileSystem.Contracts;
 
 public interface IFileMergeSystem
 {

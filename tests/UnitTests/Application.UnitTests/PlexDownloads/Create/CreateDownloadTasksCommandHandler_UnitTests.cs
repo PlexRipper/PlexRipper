@@ -1,4 +1,5 @@
 ﻿using DownloadManager.Contracts;
+using PlexRipper.DownloadManager;
 
 namespace PlexRipper.Application.UnitTests;
 
@@ -14,7 +15,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>).ReturnsAsync(Result.Ok());
-        mock.PublishMediator(It.IsAny<CheckDownloadQueue>).Returns(Task.CompletedTask);
+        mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
         var downloadMediaDtos = new List<DownloadMediaDTO>()
         {
@@ -51,7 +52,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Once);
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Once);
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>, Times.Once);
-        mock.VerifyNotification(It.IsAny<CheckDownloadQueue>, Times.Once);
+        mock.VerifyNotification(It.IsAny<CheckDownloadQueueNotification>, Times.Once);
     }
 
     [Fact]
@@ -62,7 +63,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>).ReturnsAsync(Result.Ok());
-        mock.PublishMediator(It.IsAny<CheckDownloadQueue>).Returns(Task.CompletedTask);
+        mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
         var downloadMediaDtos = new List<DownloadMediaDTO>()
         {
@@ -89,7 +90,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Once);
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Never);
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>, Times.Never);
-        mock.VerifyNotification(It.IsAny<CheckDownloadQueue>, Times.Once);
+        mock.VerifyNotification(It.IsAny<CheckDownloadQueueNotification>, Times.Once);
     }
 
     [Fact]
@@ -100,7 +101,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>).ReturnsAsync(Result.Ok());
-        mock.PublishMediator(It.IsAny<CheckDownloadQueue>).Returns(Task.CompletedTask);
+        mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
         // Act
         var request = new CreateDownloadTasksCommand(new List<DownloadMediaDTO>());
@@ -113,6 +114,6 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Never);
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Never);
         mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>, Times.Never);
-        mock.VerifyNotification(It.IsAny<CheckDownloadQueue>, Times.Never);
+        mock.VerifyNotification(It.IsAny<CheckDownloadQueueNotification>, Times.Never);
     }
 }

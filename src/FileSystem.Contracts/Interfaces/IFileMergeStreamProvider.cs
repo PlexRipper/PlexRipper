@@ -1,6 +1,7 @@
 ﻿using System.Reactive.Subjects;
+using FluentResults;
 
-namespace PlexRipper.FileSystem.Common;
+namespace FileSystem.Contracts;
 
 public interface IFileMergeStreamProvider
 {

@@ -1,6 +1,5 @@
 using Application.Contracts;
 using Data.Contracts;
-using DownloadManager.Contracts;
 using FluentValidation;
 using Logging.Interface;
 
@@ -54,7 +53,7 @@ public class ResumeDownloadTaskCommandHandler : IRequestHandler<ResumeDownloadTa
 
         // TODO This here should pause other download tasks from the same server and start this one
 
-        await _mediator.Publish(new CheckDownloadQueue(downloadTask.PlexServerId), cancellationToken);
+        await _mediator.Publish(new CheckDownloadQueueNotification(downloadTask.PlexServerId), cancellationToken);
 
         return Result.Ok();
     }

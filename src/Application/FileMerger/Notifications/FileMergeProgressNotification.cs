@@ -1,8 +1,9 @@
 using Data.Contracts;
-using DownloadManager.Contracts;
 using WebAPI.Contracts;
 
-namespace PlexRipper.FileSystem;
+namespace PlexRipper.Application;
+
+public record FileMergeProgressNotification(FileMergeProgress Progress) : INotification;
 
 public class FileMergeProgressHandler : INotificationHandler<FileMergeProgressNotification>
 {
@@ -34,6 +35,6 @@ public class FileMergeProgressHandler : INotificationHandler<FileMergeProgressNo
 
         await _signalRService.SendFileMergeProgressUpdateAsync(notification.Progress, cancellationToken);
 
-        await _mediator.Send(new DownloadTaskUpdated(downloadTask.ToKey()), cancellationToken);
+        await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTask.ToKey()), cancellationToken);
     }
 }

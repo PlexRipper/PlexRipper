@@ -1,6 +1,6 @@
 ﻿using Autofac;
 using DownloadManager.Contracts;
-using PlexRipper.FileSystem.Common;
+using FileSystem.Contracts;
 using Settings.Contracts;
 using WebAPI.Contracts;
 

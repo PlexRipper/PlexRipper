@@ -4,11 +4,11 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using Application.Contracts;
 using Data.Contracts;
-using DownloadManager.Contracts;
 using Environment;
+using FileSystem.Contracts;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.FileSystem.Common;
+using PlexRipper.Application;
 using Quartz;
 
 namespace PlexRipper.FileSystem;
@@ -80,7 +80,7 @@ public class FileMergeJob : IJob
             await _dbContext.DownloadWorkerTasks.Where(x => downloadWorkerIds.Contains(x.Id))
                 .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, newDownloadStatus), token);
 
-            await _mediator.Send(new DownloadTaskUpdated(downloadTask.ToKey()), token);
+            await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTask.ToKey()), token);
 
             // Verify all file paths exists
             foreach (var path in fileTask.FilePaths)

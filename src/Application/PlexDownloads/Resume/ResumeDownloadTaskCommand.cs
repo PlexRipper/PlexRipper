@@ -17,7 +17,7 @@ public class ResumeDownloadTaskCommandValidator : AbstractValidator<ResumeDownlo
 {
     public ResumeDownloadTaskCommandValidator()
     {
-        RuleFor(x => x.DownloadTaskId).GreaterThan(Guid.Empty);
+        RuleFor(x => x.DownloadTaskId).NotEmpty();
     }
 }
 

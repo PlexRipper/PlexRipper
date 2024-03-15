@@ -33,7 +33,7 @@ public class DownloadJob : IJob, IDisposable
     public async Task Execute(IJobExecutionContext context)
     {
         var dataMap = context.JobDetail.JobDataMap;
-        var downloadTaskId = dataMap.GetGuidValueFromString(DownloadTaskIdParameter);
+        var downloadTaskId = dataMap.GetGuidValue(DownloadTaskIdParameter);
         var plexServerId = dataMap.GetIntValue(PlexServerIdParameter);
 
         var token = context.CancellationToken;

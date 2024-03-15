@@ -11,7 +11,7 @@ public class StartDownloadTaskCommandValidator : AbstractValidator<StartDownload
 {
     public StartDownloadTaskCommandValidator()
     {
-        RuleFor(x => x.DownloadTaskGuid).GreaterThan(Guid.Empty);
+        RuleFor(x => x.DownloadTaskGuid).NotEmpty();
     }
 }
 

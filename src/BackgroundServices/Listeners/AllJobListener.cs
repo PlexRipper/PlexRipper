@@ -29,15 +29,12 @@ public class AllJobListener : IAllJobListener
             JobStartTime = context.FireTimeUtc.UtcDateTime,
             Status = JobStatus.Running,
             PrimaryKey = data.Key ?? string.Empty,
-            PrimaryKeyValue = Convert.ToInt32(data.Value ?? 0),
+            PrimaryKeyValue = data.Value?.ToString() ?? string.Empty,
         };
         await _signalRService.SendJobStatusUpdateAsync(update);
     }
 
-    public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = new())
-    {
-        return Task.CompletedTask;
-    }
+    public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = new()) => Task.CompletedTask;
 
     public async Task JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException, CancellationToken cancellationToken = new())
     {

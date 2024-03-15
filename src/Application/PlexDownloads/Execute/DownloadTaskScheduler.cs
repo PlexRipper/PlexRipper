@@ -17,7 +17,7 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
 
     public async Task<Result> StartDownloadTaskJob(Guid downloadTaskId, int plexServerId)
     {
-        if (downloadTaskId != Guid.Empty)
+        if (downloadTaskId == Guid.Empty)
             return ResultExtensions.IsInvalidId(nameof(downloadTaskId), downloadTaskId).LogWarning();
 
         var jobKey = DownloadJob.GetJobKey(downloadTaskId);

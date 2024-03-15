@@ -1,18 +1,16 @@
-using AutoMapper;
-using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI.SignalR.Common;
 
-namespace PlexRipper.WebAPI;
+namespace PlexRipper.WebAPI.Common.Mappers;
 
-public class ListDownloadTaskToListServerDownloadProgressDTOConverter : ITypeConverter<List<DownloadTaskGeneric>, List<ServerDownloadProgressDTO>>
+public static class DownloadTaskGenericToServerDownloadProgressDTOMapper
 {
-    public List<ServerDownloadProgressDTO> Convert(List<DownloadTaskGeneric> source, List<ServerDownloadProgressDTO> destination, ResolutionContext context)
+    public static List<ServerDownloadProgressDTO> ToServerDownloadProgressDTOList(this List<DownloadTaskGeneric> source)
     {
         var serverDownloads = new List<ServerDownloadProgressDTO>();
         foreach (var serverId in source.Select(x => x.PlexServerId).Distinct())
         {
             var downloadTasks = source.Where(x => x.PlexServerId == serverId).ToList();
-            var downloads = context.Mapper.Map<List<DownloadProgressDTO>>(downloadTasks);
+            var downloads = downloadTasks.Select(x => x.ToDownloadProgressDto()).ToList();
             serverDownloads.Add(new ServerDownloadProgressDTO
             {
                 Id = serverId,

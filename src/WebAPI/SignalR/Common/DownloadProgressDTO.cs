@@ -1,8 +1,8 @@
-﻿namespace PlexRipper.DownloadManager;
+﻿namespace PlexRipper.WebAPI;
 
 public class DownloadProgressDTO
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// The formatted media title as shown in Plex.

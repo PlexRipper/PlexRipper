@@ -78,8 +78,8 @@ public class DownloadController : BaseController
 
     #region BatchCommands
 
-    // GET api/<DownloadController>/start/{id:int}
-    [HttpGet("start/{guid:int}")]
+    // GET api/<DownloadController>/start/{guid:guid}
+    [HttpGet("start/{guid:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     public async Task<IActionResult> StartCommand(Guid guid)
@@ -91,8 +91,8 @@ public class DownloadController : BaseController
         return ToActionResult(startResult);
     }
 
-    // GET api/<DownloadController>/pause/{id:int}
-    [HttpGet("pause/{guid:int}")]
+    // GET api/<DownloadController>/pause/{guid:guid}
+    [HttpGet("pause/{guid:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     public async Task<IActionResult> PauseCommand(Guid guid)
@@ -104,8 +104,8 @@ public class DownloadController : BaseController
         return ToActionResult(pauseResult);
     }
 
-    // GET api/<DownloadController>/restart/{id:int}
-    [HttpGet("restart/{guid:int}")]
+    // GET api/<DownloadController>/restart/{guid:guid}
+    [HttpGet("restart/{guid:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     public async Task<IActionResult> RestartCommand(Guid guid)
@@ -117,8 +117,8 @@ public class DownloadController : BaseController
         return ToActionResult(restartResult);
     }
 
-    // GET: api/(DownloadController)/stop/{id:int}
-    [HttpGet("stop/{guid:int}")]
+    // GET: api/(DownloadController)/stop/{guid:guid}
+    [HttpGet("stop/{guid:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
     public async Task<IActionResult> StopCommand(Guid guid)

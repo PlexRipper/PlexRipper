@@ -3,6 +3,7 @@ using AutoMapper;
 using BackgroundServices.Contracts;
 using Logging.Interface;
 using PlexRipper.WebAPI.Common.DTO;
+using PlexRipper.WebAPI.Common.Mappers;
 using PlexRipper.WebAPI.SignalR.Common;
 using WebAPI.Contracts;
 
@@ -44,7 +45,7 @@ public class MockSignalRService : ISignalRService
 
     public Task SendDownloadProgressUpdateAsync(int plexServerId, List<DownloadTaskGeneric> downloadTasks, CancellationToken cancellationToken = default)
     {
-        var update = _mapper.Map<List<ServerDownloadProgressDTO>>(downloadTasks);
+        var update = downloadTasks.ToServerDownloadProgressDTOList();
 
         ServerDownloadProgressList.Add(update.First(), cancellationToken);
         _log.Verbose("{ClassName} => {@DownloadTaskDto}", nameof(MockSignalRService), update);

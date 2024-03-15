@@ -98,7 +98,7 @@ public class PlexDownloadClient : IAsyncDisposable
         if (!DownloadTask.DownloadWorkerTasks.Any())
         {
             var parts = _downloadManagerSettings.DownloadSegments;
-            DownloadTask.GenerateDownloadWorkerTasks(parts);
+            DownloadTask.DownloadWorkerTasks = DownloadTask.GenerateDownloadWorkerTasks(parts);
             await _dbContext.DownloadWorkerTasks.AddRangeAsync(DownloadTask.DownloadWorkerTasks, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
             _log.Debug("Generated DownloadWorkerTasks for {DownloadTaskFullTitle}", DownloadTask.FullTitle);

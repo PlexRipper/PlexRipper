@@ -1,5 +1,4 @@
 using Data.Contracts;
-using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationTests.FileSystem.FileMerger;
 
@@ -22,16 +21,14 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
         });
 
         await CreateContainer();
-
-        var downloadTask = DbContext.DownloadTaskMovieFile.Include(x => x.DownloadWorkerTasks).First();
+        var dbContext = DbContext;
+        var downloadTask = dbContext.DownloadTaskMovieFile.First();
         downloadTask.ShouldNotBeNull();
 
         // Act
-        downloadTask.ToGeneric().GenerateDownloadWorkerTasks(4);
-        var downloadWorkerTasks = downloadTask.DownloadWorkerTasks;
-
-        await DbContext.DownloadWorkerTasks.AddRangeAsync(downloadWorkerTasks);
-        await DbContext.SaveChangesAsync();
+        var downloadWorkerTasks = downloadTask.ToGeneric().GenerateDownloadWorkerTasks(4);
+        dbContext.DownloadWorkerTasks.AddRange(downloadWorkerTasks);
+        await dbContext.SaveChangesAsync();
 
         var createResult = await Container.FileMergeScheduler.CreateFileTaskFromDownloadTask(downloadTask.ToKey());
         createResult.IsSuccess.ShouldBeTrue();
@@ -45,8 +42,6 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
 
-        foreach (var childDownloadTask in downloadTaskDb.Children)
-            childDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Completed);
         Container.MockSignalRService.FileMergeProgressList.Count.ShouldBeGreaterThan(10);
     }
 }

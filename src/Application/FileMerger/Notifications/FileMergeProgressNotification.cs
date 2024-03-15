@@ -1,4 +1,5 @@
 using Data.Contracts;
+using Logging.Interface;
 using WebAPI.Contracts;
 
 namespace PlexRipper.Application;
@@ -7,12 +8,14 @@ public record FileMergeProgressNotification(FileMergeProgress Progress) : INotif
 
 public class FileMergeProgressHandler : INotificationHandler<FileMergeProgressNotification>
 {
+    private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly ISignalRService _signalRService;
 
-    public FileMergeProgressHandler(IMediator mediator, IPlexRipperDbContext dbContext, ISignalRService signalRService)
+    public FileMergeProgressHandler(ILog log, IMediator mediator, IPlexRipperDbContext dbContext, ISignalRService signalRService)
     {
+        _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
         _signalRService = signalRService;
@@ -26,6 +29,8 @@ public class FileMergeProgressHandler : INotificationHandler<FileMergeProgressNo
             ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), notification.Progress.DownloadTaskId).LogError();
             return;
         }
+
+        _log.DebugLine(notification.Progress.ToString());
 
         downloadTask.Percentage = notification.Progress.Percentage;
         downloadTask.FileTransferSpeed = notification.Progress.TransferSpeed;

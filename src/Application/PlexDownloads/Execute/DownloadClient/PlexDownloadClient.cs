@@ -1,9 +1,7 @@
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using Data.Contracts;
-using DownloadManager.Contracts;
 using Logging.Interface;
-using Microsoft.EntityFrameworkCore;
 using Settings.Contracts;
 
 namespace PlexRipper.Application;
@@ -219,41 +217,14 @@ public class PlexDownloadClient : IAsyncDisposable
         var statusIsChanged = DownloadStatus != newDownloadStatus;
         DownloadStatus = newDownloadStatus;
 
-        await UpdateDownloadTaskProgress(DownloadTask, cancellationToken);
+        await _dbContext.UpdateDownloadProgress(DownloadTask.ToKey(), DownloadTask, cancellationToken);
 
-        await _mediator.Send(new DownloadTaskUpdated(DownloadTask.ToKey()), cancellationToken);
+        await _mediator.Send(new DownloadTaskUpdatedNotification(DownloadTask.ToKey()), cancellationToken);
 
         _log.Debug("{@DownloadTask}", DownloadTask.ToString());
 
         if (statusIsChanged && DownloadStatus == DownloadStatus.DownloadFinished)
-            await _mediator.Publish(new DownloadTaskFinished(DownloadTask.ToKey()), cancellationToken);
-    }
-
-    private async Task UpdateDownloadTaskProgress(DownloadTaskGeneric downloadTask, CancellationToken cancellationToken = default)
-    {
-        switch (downloadTask.DownloadTaskType)
-        {
-            case DownloadTaskType.MovieData:
-                await _dbContext.DownloadTaskMovieFile
-                    .Where(p => p.Id <= downloadTask.Id)
-                    .ExecuteUpdateAsync(p =>
-                        p.SetProperty(x => x.DownloadStatus, downloadTask.DownloadStatus)
-                            .SetProperty(x => x.DataReceived, downloadTask.DataReceived)
-                            .SetProperty(x => x.Percentage, downloadTask.Percentage)
-                            .SetProperty(x => x.DownloadSpeed, downloadTask.DownloadSpeed), cancellationToken);
-                break;
-            case DownloadTaskType.EpisodeData:
-                await _dbContext.DownloadTaskTvShowEpisodeFile
-                    .Where(p => p.Id <= downloadTask.Id)
-                    .ExecuteUpdateAsync(p =>
-                        p.SetProperty(x => x.DownloadStatus, downloadTask.DownloadStatus)
-                            .SetProperty(x => x.DataReceived, downloadTask.DataReceived)
-                            .SetProperty(x => x.Percentage, downloadTask.Percentage)
-                            .SetProperty(x => x.DownloadSpeed, downloadTask.DownloadSpeed), cancellationToken);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+            await _mediator.Publish(new DownloadTaskFinishedNotification(DownloadTask.ToKey()), cancellationToken);
     }
 
     private async Task SetupDownloadLimitWatcher(DownloadTaskGeneric downloadTask)
@@ -300,7 +271,7 @@ public class PlexDownloadClient : IAsyncDisposable
             .Select(x => x.DownloadWorkerLog)
             .Merge()
             .Buffer(TimeSpan.FromSeconds(1))
-            .SelectMany(async logs => await InsertDownloadWorkerLogs(logs, cancellationToken)
+            .SelectMany(async logs => await _mediator.Publish(new DownloadTaskWorkerLogNotification(logs), cancellationToken)
                 .ToObservable())
             .Subscribe(
                 _ => { },
@@ -310,22 +281,6 @@ public class PlexDownloadClient : IAsyncDisposable
                     _downloadWorkerLogCompletionSource.SetException(ex);
                 },
                 () => _downloadWorkerLogCompletionSource.SetResult(true));
-    }
-
-    private async Task InsertDownloadWorkerLogs(IList<DownloadWorkerLog> logs, CancellationToken cancellationToken = default)
-    {
-        if (logs is null || !logs.Any())
-            return;
-
-        try
-        {
-            await _dbContext.DownloadWorkerTasksLogs.AddRangeAsync(logs, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-        }
-        catch (Exception e)
-        {
-            _log.Error(e);
-        }
     }
 
     #endregion

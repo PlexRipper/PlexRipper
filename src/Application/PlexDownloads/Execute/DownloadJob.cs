@@ -71,7 +71,7 @@ public class DownloadJob : IJob, IDisposable
                 return;
             }
 
-            SetupSubscription(_plexDownloadClient, token);
+            SetupSubscription(_plexDownloadClient);
 
             var startResult = _plexDownloadClient.Start();
             if (startResult.IsFailed)
@@ -89,10 +89,9 @@ public class DownloadJob : IJob, IDisposable
                 await _plexDownloadClient.StopAsync();
             }
         }
-        catch (TaskCanceledException) { }
-        catch (Exception e)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            _log.Error(e);
+            _log.Error(ex);
         }
         finally
         {
@@ -106,27 +105,27 @@ public class DownloadJob : IJob, IDisposable
         _log.Here().Warning("Disposing job: {DownloadJobName} for {DownloadTaskName}", nameof(DownloadJob), nameof(DownloadTaskGeneric));
     }
 
-    private void SetupSubscription(PlexDownloadClient plexDownloadClient, CancellationToken cancellationToken = default)
+    private void SetupSubscription(PlexDownloadClient plexDownloadClient)
     {
         plexDownloadClient.ListenToDownloadWorkerLog
-            .Select(logs => Observable.Defer(() => CreateLog(logs, cancellationToken).ToObservable()))
+            .Select(logs => Observable.Defer(() => CreateLog(logs).ToObservable()))
             .Concat()
-            .Subscribe(_ => { }, ex => { _log.Error(ex); });
+            .Subscribe();
     }
 
-    private async Task CreateLog(IList<DownloadWorkerLog> logs, CancellationToken cancellationToken = default)
+    private async Task CreateLog(IList<DownloadWorkerLog> logs)
     {
         if (logs is null || !logs.Any())
             return;
 
         try
         {
-            await _dbContext.DownloadWorkerTasksLogs.AddRangeAsync(logs, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.DownloadWorkerTasksLogs.AddRangeAsync(logs);
+            await _dbContext.SaveChangesAsync(CancellationToken.None);
         }
-        catch (Exception e)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            _log.Error(e);
+            _log.Error(ex);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using Data.Contracts;
 using Logging.Interface;
 using PlexRipper.Data;
 using PlexRipper.Domain.Config;
@@ -148,6 +149,8 @@ public class BaseIntegrationTests : IAsyncLifetime
     }
 
     protected PlexRipperDbContext DbContext => Container.PlexRipperDbContext;
+
+    protected IPlexRipperDbContext IDbContext => Container.IPlexRipperDbContext;
 
     #endregion
 

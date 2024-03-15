@@ -5,6 +5,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using BackgroundServices.Contracts;
+using Data.Contracts;
 using DownloadManager.Contracts;
 using Environment;
 using FileSystem.Contracts;
@@ -88,6 +89,7 @@ public partial class BaseContainer : IDisposable
     public ITestStreamTracker TestStreamTracker => Resolve<ITestStreamTracker>();
 
     public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
+    public IPlexRipperDbContext IPlexRipperDbContext => Resolve<IPlexRipperDbContext>();
 
     public ISchedulerService SchedulerService => Resolve<ISchedulerService>();
 

@@ -110,7 +110,7 @@ public class PlexDownloadClient : IAsyncDisposable
 
         await SetupDownloadLimitWatcher(DownloadTask);
 
-        SetupSubscriptions(cancellationToken);
+        SetupSubscriptions();
 
         return Result.Ok();
     }
@@ -195,7 +195,7 @@ public class PlexDownloadClient : IAsyncDisposable
         return Result.Ok();
     }
 
-    private async Task OnDownloadWorkerTaskUpdate(IList<DownloadWorkerTask> downloadWorkerUpdates, CancellationToken cancellationToken = default)
+    private async Task OnDownloadWorkerTaskUpdate(IList<DownloadWorkerTask> downloadWorkerUpdates)
     {
         if (!downloadWorkerUpdates.Any())
             return;
@@ -216,10 +216,10 @@ public class PlexDownloadClient : IAsyncDisposable
 
         DownloadStatus = newDownloadStatus;
 
-        await _dbContext.UpdateDownloadProgress(DownloadTask.ToKey(), DownloadTask, cancellationToken);
-        await _dbContext.SetDownloadStatus(DownloadTask.ToKey(), DownloadStatus, cancellationToken);
+        await _dbContext.UpdateDownloadProgress(DownloadTask.ToKey(), DownloadTask);
+        await _dbContext.SetDownloadStatus(DownloadTask.ToKey(), DownloadStatus);
 
-        await _mediator.Send(new DownloadTaskUpdatedNotification(DownloadTask.ToKey()), cancellationToken);
+        await _mediator.Send(new DownloadTaskUpdatedNotification(DownloadTask.ToKey()));
 
         _log.Debug("{@DownloadTask}", DownloadTask.ToString());
     }
@@ -240,7 +240,7 @@ public class PlexDownloadClient : IAsyncDisposable
             .Subscribe(SetDownloadSpeedLimit);
     }
 
-    private void SetupSubscriptions(CancellationToken cancellationToken = default)
+    private void SetupSubscriptions()
     {
         if (!_downloadWorkers.Any())
         {
@@ -253,13 +253,18 @@ public class PlexDownloadClient : IAsyncDisposable
             .Select(x => x.DownloadWorkerTaskUpdate)
             .CombineLatest()
             .Sample(TimeSpan.FromSeconds(1))
-            .SelectMany(async data => await OnDownloadWorkerTaskUpdate(data, cancellationToken).ToObservable())
+            .SelectMany(async data => await OnDownloadWorkerTaskUpdate(data).ToObservable())
             .Subscribe(
                 _ => { },
                 ex =>
                 {
-                    _log.Error(ex);
-                    _downloadWorkerTaskUpdateCompletionSource.SetException(ex);
+                    if (ex.GetType() != typeof(OperationCanceledException))
+                    {
+                        _log.Error(ex);
+                        _downloadWorkerTaskUpdateCompletionSource.SetException(ex);
+                    }
+
+                    _downloadWorkerTaskUpdateCompletionSource.SetResult(true);
                 },
                 () => _downloadWorkerTaskUpdateCompletionSource.SetResult(true));
 
@@ -275,8 +280,13 @@ public class PlexDownloadClient : IAsyncDisposable
             _ => { },
             ex =>
             {
-                _log.Error(ex);
-                _downloadWorkerLogCompletionSource.SetException(ex);
+                if (ex.GetType() != typeof(OperationCanceledException))
+                {
+                    _log.Error(ex);
+                    _downloadWorkerLogCompletionSource.SetException(ex);
+                }
+
+                _downloadWorkerLogCompletionSource.SetResult(true);
             },
             () => _downloadWorkerLogCompletionSource.SetResult(true));
     }

@@ -1,3 +1,4 @@
+using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationTests.DownloadManager.DownloadTaskScheduler;
@@ -40,8 +41,7 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
         // Assert
         startResult.IsSuccess.ShouldBeTrue(startResult.ToString());
         stopResult.IsSuccess.ShouldBeTrue(stopResult.ToString());
-        var downloadTaskDb = DbContext.DownloadTaskMovie
-            .FirstOrDefault(x => x.Id == childDownloadTask.Id);
+        var downloadTaskDb = await IDbContext.GetDownloadTaskAsync(childDownloadTask.ToKey());
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
     }

@@ -70,73 +70,81 @@ public static partial class DbContextExtensions
         DownloadTaskType type = DownloadTaskType.None,
         CancellationToken cancellationToken = default)
     {
-        if (id == Guid.Empty)
-            return null;
-
-        if (type == DownloadTaskType.None)
-            type = await dbContext.GetDownloadTaskTypeAsync(id, cancellationToken);
-
-        switch (type)
+        try
         {
-            // DownloadTaskType.Movie
-            case DownloadTaskType.Movie:
-                var downloadTaskMovie = await dbContext.DownloadTaskMovie
-                    .IncludeAll()
-                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-                return downloadTaskMovie?.ToGeneric() ?? null;
-
-            // DownloadTaskType.MovieData
-            case DownloadTaskType.MovieData:
-            case DownloadTaskType.MoviePart:
-                var downloadTaskMovieFile = await dbContext.DownloadTaskMovieFile
-                    .Include(x => x.PlexServer)
-                    .Include(x => x.PlexLibrary)
-                    .Include(x => x.DownloadWorkerTasks)
-                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-                return downloadTaskMovieFile?.ToGeneric() ?? null;
-
-            // DownloadTaskType.TvShow
-            case DownloadTaskType.TvShow:
-                var downloadTaskTvShow = await dbContext.DownloadTaskTvShow
-                    .Include(x => x.PlexServer)
-                    .Include(x => x.PlexLibrary)
-                    .Include(x => x.Children)
-                    .ThenInclude(x => x.Children)
-                    .ThenInclude(x => x.Children)
-                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-                return downloadTaskTvShow?.ToGeneric() ?? null;
-
-            // DownloadTaskType.TvShowSeason
-            case DownloadTaskType.Season:
-                var downloadTaskTvShowSeason = await dbContext.DownloadTaskTvShowSeason
-                    .Include(x => x.PlexServer)
-                    .Include(x => x.PlexLibrary)
-                    .Include(x => x.Children)
-                    .ThenInclude(x => x.Children)
-                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-                return downloadTaskTvShowSeason?.ToGeneric() ?? null;
-
-            // DownloadTaskType.Episode
-            case DownloadTaskType.Episode:
-                var downloadTaskTvShowEpisode = await dbContext.DownloadTaskTvShowEpisode
-                    .Include(x => x.PlexServer)
-                    .Include(x => x.PlexLibrary)
-                    .Include(x => x.Children)
-                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-                return downloadTaskTvShowEpisode?.ToGeneric() ?? null;
-
-            // DownloadTaskType.EpisodeData
-            case DownloadTaskType.EpisodeData:
-            case DownloadTaskType.EpisodePart:
-                var downloadTaskTvShowEpisodeFile = await dbContext.DownloadTaskTvShowEpisodeFile
-                    .Include(x => x.PlexServer)
-                    .Include(x => x.PlexLibrary)
-                    .Include(x => x.DownloadWorkerTasks)
-                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-                return downloadTaskTvShowEpisodeFile?.ToGeneric() ?? null;
-
-            default:
+            if (id == Guid.Empty)
                 return null;
+
+            if (type == DownloadTaskType.None)
+                type = await dbContext.GetDownloadTaskTypeAsync(id, cancellationToken);
+
+            switch (type)
+            {
+                // DownloadTaskType.Movie
+                case DownloadTaskType.Movie:
+                    var downloadTaskMovie = await dbContext.DownloadTaskMovie
+                        .IncludeAll()
+                        .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                    return downloadTaskMovie?.ToGeneric() ?? null;
+
+                // DownloadTaskType.MovieData
+                case DownloadTaskType.MovieData:
+                case DownloadTaskType.MoviePart:
+                    var downloadTaskMovieFile = await dbContext.DownloadTaskMovieFile
+                        .Include(x => x.PlexServer)
+                        .Include(x => x.PlexLibrary)
+                        .Include(x => x.DownloadWorkerTasks)
+                        .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                    return downloadTaskMovieFile?.ToGeneric() ?? null;
+
+                // DownloadTaskType.TvShow
+                case DownloadTaskType.TvShow:
+                    var downloadTaskTvShow = await dbContext.DownloadTaskTvShow
+                        .Include(x => x.PlexServer)
+                        .Include(x => x.PlexLibrary)
+                        .Include(x => x.Children)
+                        .ThenInclude(x => x.Children)
+                        .ThenInclude(x => x.Children)
+                        .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                    return downloadTaskTvShow?.ToGeneric() ?? null;
+
+                // DownloadTaskType.TvShowSeason
+                case DownloadTaskType.Season:
+                    var downloadTaskTvShowSeason = await dbContext.DownloadTaskTvShowSeason
+                        .Include(x => x.PlexServer)
+                        .Include(x => x.PlexLibrary)
+                        .Include(x => x.Children)
+                        .ThenInclude(x => x.Children)
+                        .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                    return downloadTaskTvShowSeason?.ToGeneric() ?? null;
+
+                // DownloadTaskType.Episode
+                case DownloadTaskType.Episode:
+                    var downloadTaskTvShowEpisode = await dbContext.DownloadTaskTvShowEpisode
+                        .Include(x => x.PlexServer)
+                        .Include(x => x.PlexLibrary)
+                        .Include(x => x.Children)
+                        .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                    return downloadTaskTvShowEpisode?.ToGeneric() ?? null;
+
+                // DownloadTaskType.EpisodeData
+                case DownloadTaskType.EpisodeData:
+                case DownloadTaskType.EpisodePart:
+                    var downloadTaskTvShowEpisodeFile = await dbContext.DownloadTaskTvShowEpisodeFile
+                        .Include(x => x.PlexServer)
+                        .Include(x => x.PlexLibrary)
+                        .Include(x => x.DownloadWorkerTasks)
+                        .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                    return downloadTaskTvShowEpisodeFile?.ToGeneric() ?? null;
+
+                default:
+                    return null;
+            }
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _log.Error(ex);
+            throw;
         }
     }
 

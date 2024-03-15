@@ -188,6 +188,11 @@
           "System.Diagnostics.DiagnosticSource": "4.7.1"
         }
       },
+      "Riok.Mapperly": {
+        "type": "Transitive",
+        "resolved": "3.4.0",
+        "contentHash": "bTxBEQ0+2x816IL78Fv0B/KkaGRtzfisit9dfWTfa7jjjwMMzpMW9A+V/hyxqHdJtYvtDL6dUNMLJige4zxJvw=="
+      },
       "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
         "type": "Transitive",
         "resolved": "4.3.0",
@@ -1248,6 +1253,7 @@
           "LanguageExt.Core": "[4.4.8, )",
           "MediatR": "[12.0.0, )",
           "NaturalSort.Extension": "[4.0.0, )",
+          "Riok.Mapperly": "[3.4.0, )",
           "System.ComponentModel.Annotations": "[5.0.0, )",
           "System.Reactive": "[5.0.0, )",
           "System.Reactive.Interfaces": "[5.0.0, )",

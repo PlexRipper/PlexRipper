@@ -1,10 +1,9 @@
 ﻿using System.Collections.Concurrent;
-using AutoMapper;
 using BackgroundServices.Contracts;
 using Logging.Interface;
+using PlexRipper.WebAPI;
 using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.Mappers;
-using PlexRipper.WebAPI.SignalR.Common;
 using WebAPI.Contracts;
 
 namespace PlexRipper.BaseTests;
@@ -12,16 +11,15 @@ namespace PlexRipper.BaseTests;
 public class MockSignalRService : ISignalRService
 {
     private readonly ILog<MockSignalRService> _log;
-    private readonly IMapper _mapper;
+
     public BlockingCollection<DownloadTaskDTO> DownloadTaskUpdate { get; } = new();
     public BlockingCollection<FileMergeProgress> FileMergeProgressList { get; } = new();
 
     public BlockingCollection<ServerDownloadProgressDTO> ServerDownloadProgressList { get; } = new();
 
-    public MockSignalRService(ILog<MockSignalRService> log, IMapper mapper)
+    public MockSignalRService(ILog<MockSignalRService> log)
     {
         _log = log;
-        _mapper = mapper;
     }
 
     public void SendLibraryProgressUpdate(LibraryProgress libraryProgress) { }

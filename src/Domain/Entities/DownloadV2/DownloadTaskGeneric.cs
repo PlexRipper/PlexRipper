@@ -28,6 +28,8 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
 
     public bool IsDownloadable { get; init; }
 
+    public long TimeRemaining { get; init; }
+
     /// <summary>
     /// Gets or sets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
     /// </summary>

@@ -3,6 +3,7 @@ using BackgroundServices.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.WebAPI.Common.DTO;
+using PlexRipper.WebAPI.Common.Mappers;
 using PlexRipper.WebAPI.SignalR.Common;
 using PlexRipper.WebAPI.SignalR.Hubs;
 using WebAPI.Contracts;
@@ -51,7 +52,7 @@ public class SignalRService : ISignalRService
 
     public async Task SendDownloadProgressUpdateAsync(int plexServerId, List<DownloadTaskGeneric> downloadTasks, CancellationToken cancellationToken = default)
     {
-        var update = _mapper.Map<List<ServerDownloadProgressDTO>>(downloadTasks);
+        var update = downloadTasks.ToServerDownloadProgressDTOList();
         if (!update.Any())
         {
             _log.ErrorLine($"Update for ServerDownloadProgress contained no entries to be sent");

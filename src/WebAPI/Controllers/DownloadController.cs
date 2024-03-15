@@ -6,8 +6,9 @@ using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
+using PlexRipper.WebAPI.Common.Extensions;
 using PlexRipper.WebAPI.Common.FluentResult;
-using PlexRipper.WebAPI.SignalR.Common;
+using PlexRipper.WebAPI.Common.Mappers;
 
 namespace PlexRipper.WebAPI.Controllers;
 
@@ -42,7 +43,8 @@ public class DownloadController : BaseController
         if (result.IsFailed)
             return InternalServerError(result.ToResult());
 
-        return ToActionResult<List<DownloadTaskGeneric>, List<ServerDownloadProgressDTO>>(result);
+        var returnResult = result.ToResultDTO(result.Value.ToServerDownloadProgressDTOList());
+        return Ok(returnResult);
     }
 
     /// <summary>

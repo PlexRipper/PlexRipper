@@ -1,8 +1,7 @@
-﻿using PlexRipper.WebAPI.Common;
-using PlexRipper.WebAPI.SignalR.Common;
+﻿using PlexRipper.WebAPI;
+using PlexRipper.WebAPI.Common;
 
 namespace IntegrationTests.WebAPI.DownloadController;
-
 
 public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrationTests
 {

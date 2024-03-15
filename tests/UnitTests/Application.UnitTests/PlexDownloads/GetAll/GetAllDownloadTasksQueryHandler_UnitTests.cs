@@ -76,13 +76,15 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest<GetAllDown
 
         void ValidateDownloadTasks(List<DownloadTaskGeneric> shouldDownloadTasks)
         {
+            if (shouldDownloadTasks is null)
+                return;
+
             downloadTasks.Count.ShouldBe(5);
             foreach (var downloadTask in shouldDownloadTasks)
             {
                 downloadTask.PlexServer.ShouldNotBeNull($"DownloadTaskType {downloadTask.DownloadTaskType} has PlexServer null");
                 downloadTask.PlexLibrary.ShouldNotBeNull($"DownloadTaskType {downloadTask.DownloadTaskType} has PlexLibrary null");
-                if (downloadTask.Children.Any())
-                    ValidateDownloadTasks(downloadTask.Children);
+                ValidateDownloadTasks(downloadTask.Children);
             }
         }
 

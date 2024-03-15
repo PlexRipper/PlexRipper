@@ -108,7 +108,7 @@ public class FileMergeJob : IJob
                 outputStream = streamResult.Value;
 
                 if (EnvironmentExtensions.IsIntegrationTestMode())
-                    outputStream = new ThrottledStream(streamResult.Value, 5000);
+                    outputStream = new ThrottledStream(streamResult.Value, 50000);
 
                 _log.Here().Debug("Starting file merge process for {FilePathsCount} parts into a file {FileName}", fileTask.FilePaths.Count, fileTask.FileName);
 

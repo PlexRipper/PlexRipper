@@ -1,4 +1,6 @@
-﻿using Application.Contracts;
+﻿using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
+using Application.Contracts;
 using Data.Contracts;
 using Logging.Interface;
 using Quartz;
@@ -9,17 +11,20 @@ public class DownloadJob : IJob, IDisposable
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
+    private readonly IMediator _mediator;
     private readonly INotificationsService _notificationsService;
     private readonly PlexDownloadClient _plexDownloadClient;
 
     public DownloadJob(
         ILog log,
         IPlexRipperDbContext dbContext,
+        IMediator mediator,
         INotificationsService notificationsService,
         PlexDownloadClient plexDownloadClient)
     {
         _log = log;
         _dbContext = dbContext;
+        _mediator = mediator;
         _notificationsService = notificationsService;
         _plexDownloadClient = plexDownloadClient;
     }
@@ -66,6 +71,8 @@ public class DownloadJob : IJob, IDisposable
                 return;
             }
 
+            SetupSubscription(_plexDownloadClient, token);
+
             var startResult = _plexDownloadClient.Start();
             if (startResult.IsFailed)
                 await _notificationsService.SendResult(startResult);
@@ -97,5 +104,29 @@ public class DownloadJob : IJob, IDisposable
     public void Dispose()
     {
         _log.Here().Warning("Disposing job: {DownloadJobName} for {DownloadTaskName}", nameof(DownloadJob), nameof(DownloadTaskGeneric));
+    }
+
+    private void SetupSubscription(PlexDownloadClient plexDownloadClient, CancellationToken cancellationToken = default)
+    {
+        plexDownloadClient.ListenToDownloadWorkerLog
+            .Select(logs => Observable.Defer(() => CreateLog(logs, cancellationToken).ToObservable()))
+            .Concat()
+            .Subscribe(_ => { }, ex => { _log.Error(ex); });
+    }
+
+    private async Task CreateLog(IList<DownloadWorkerLog> logs, CancellationToken cancellationToken = default)
+    {
+        if (logs is null || !logs.Any())
+            return;
+
+        try
+        {
+            await _dbContext.DownloadWorkerTasksLogs.AddRangeAsync(logs, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _log.Error(e);
+        }
     }
 }

@@ -130,7 +130,6 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
         nextDownloadTask.IsSuccess.ShouldBeFalse();
     }
 
-
     [Fact]
     public async Task ShouldHaveNextQueuedDownloadTask_WhenNestedInsideATvShowsDownloadTasksWithDownloadFinished()
     {
@@ -155,6 +154,50 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
         // Assert
         nextDownloadTask.IsSuccess.ShouldBeTrue();
         var nextDownloadTaskId = downloadTasks[1].Children[0].Children[0].Children[0].Id;
+        nextDownloadTask.Value.Id.ShouldBe(nextDownloadTaskId);
+    }
+
+    [Fact]
+    public async Task ShouldHaveNoNextDownloadTask_WhenMergingAndDownloadFinished()
+    {
+        // Arrange
+        await SetupDatabase(config => { config.MovieDownloadTasksCount = 5; });
+
+        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Merging);
+        downloadTasks[1].SetDownloadStatus(DownloadStatus.DownloadFinished);
+        downloadTasks[2].SetDownloadStatus(DownloadStatus.DownloadFinished);
+        downloadTasks[3].SetDownloadStatus(DownloadStatus.DownloadFinished);
+        downloadTasks[4].SetDownloadStatus(DownloadStatus.DownloadFinished);
+        await DbContext.SaveChangesAsync();
+
+        // Act
+        var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
+
+        // Assert
+        nextDownloadTask.IsSuccess.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task ShouldHaveLastQueuedDownloadTask_WhenMergingQueuedAndDownloadFinished()
+    {
+        // Arrange
+        await SetupDatabase(config => { config.MovieDownloadTasksCount = 5; });
+
+        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Merging);
+        downloadTasks[1].SetDownloadStatus(DownloadStatus.DownloadFinished);
+        downloadTasks[2].SetDownloadStatus(DownloadStatus.DownloadFinished);
+        downloadTasks[3].SetDownloadStatus(DownloadStatus.DownloadFinished);
+        downloadTasks[4].SetDownloadStatus(DownloadStatus.Queued);
+        await DbContext.SaveChangesAsync();
+
+        // Act
+        var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
+
+        // Assert
+        nextDownloadTask.IsSuccess.ShouldBeTrue();
+        var nextDownloadTaskId = downloadTasks[4].Children[0].Id;
         nextDownloadTask.Value.Id.ShouldBe(nextDownloadTaskId);
     }
 }

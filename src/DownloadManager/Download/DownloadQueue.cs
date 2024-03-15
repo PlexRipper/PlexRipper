@@ -127,19 +127,6 @@ public class DownloadQueue : IDownloadQueue
             return Result.Ok(nextDownloadTask);
         }
 
-        // Check if there is anything queued
-        nextDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.DownloadFinished);
-        if (nextDownloadTask is not null)
-        {
-            if (nextDownloadTask.Children is not null && nextDownloadTask.Children.Any())
-            {
-                var children = nextDownloadTask.Children;
-                return GetNextDownloadTask(children);
-            }
-
-            return Result.Ok(nextDownloadTask);
-        }
-
         return Result.Fail("There were no downloadTasks left to download.").LogDebug();
     }
 

@@ -33,7 +33,7 @@ public class FileMergeScheduler : BaseScheduler, IFileMergeScheduler
         await _dbContext.FileTasks.AddAsync(downloadTask.ToFileTask());
         _dbContext.SaveChanges();
 
-        return await _dbContext.FileTasks.FirstOrDefaultAsync(x => x.DownloadTaskKey.Id == downloadTaskKey.Id);
+        return await _dbContext.FileTasks.FirstOrDefaultAsync(x => x.DownloadTaskId == downloadTaskKey.Id);
     }
 
     public async Task<Result> StartFileMergeJob(int fileTaskId)

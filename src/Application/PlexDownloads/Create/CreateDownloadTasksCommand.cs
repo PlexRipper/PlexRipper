@@ -22,6 +22,7 @@ public class CreateDownloadTasksCommandValidator : AbstractValidator<CreateDownl
 public class CreateDownloadTasksCommandHandler : IRequestHandler<CreateDownloadTasksCommand, Result>
 {
     private readonly IMediator _mediator;
+    private bool _generatedTasks = false;
 
     public CreateDownloadTasksCommandHandler(
         IMediator mediator)
@@ -35,33 +36,41 @@ public class CreateDownloadTasksCommandHandler : IRequestHandler<CreateDownloadT
         {
             var result = await _mediator.Send(new GenerateDownloadTaskMoviesCommand(command.DownloadMediaDtos), cancellationToken);
             result.LogIfFailed();
+            _generatedTasks = true;
         }
 
         if (command.DownloadMediaDtos.Any(x => x.Type == PlexMediaType.TvShow))
         {
             var result = await _mediator.Send(new GenerateDownloadTaskTvShowsCommand(command.DownloadMediaDtos), cancellationToken);
             result.LogIfFailed();
+            _generatedTasks = true;
         }
 
         if (command.DownloadMediaDtos.Any(x => x.Type == PlexMediaType.Season))
         {
             var result = await _mediator.Send(new GenerateDownloadTaskTvShowSeasonsCommand(command.DownloadMediaDtos), cancellationToken);
             result.LogIfFailed();
+            _generatedTasks = true;
         }
 
         if (command.DownloadMediaDtos.Any(x => x.Type == PlexMediaType.Episode))
         {
             var result = await _mediator.Send(new GenerateDownloadTaskTvShowEpisodesCommand(command.DownloadMediaDtos), cancellationToken);
             result.LogIfFailed();
+            _generatedTasks = true;
         }
 
-        // Notify the DownloadQueue to check for new tasks in the PlexSevers with new DownloadTasks
-        var uniquePlexServers = command.DownloadMediaDtos
-            .MergeAndGroupList()
-            .Select(x => x.PlexServerId)
-            .Distinct()
-            .ToList();
-        await _mediator.Publish(new CheckDownloadQueue(uniquePlexServers), cancellationToken);
+        if (_generatedTasks)
+        {
+            // Notify the DownloadQueue to check for new tasks in the PlexSevers with new DownloadTasks
+            var uniquePlexServers = command.DownloadMediaDtos
+                .MergeAndGroupList()
+                .Select(x => x.PlexServerId)
+                .Distinct()
+                .ToList();
+            await _mediator.Publish(new CheckDownloadQueue(uniquePlexServers), cancellationToken);
+        }
+
         return Result.Ok();
     }
 }

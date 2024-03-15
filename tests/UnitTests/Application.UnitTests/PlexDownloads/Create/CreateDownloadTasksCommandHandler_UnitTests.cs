@@ -1,6 +1,4 @@
-﻿using Data.Contracts;
-using DownloadManager.Contracts;
-using Microsoft.EntityFrameworkCore;
+﻿using DownloadManager.Contracts;
 
 namespace PlexRipper.Application.UnitTests;
 
@@ -9,65 +7,112 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
     public CreateDownloadTasksCommandHandler_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
-    public async Task ShouldCreateAllDownloadTasks_WhenAllAreNew()
+    public async Task ShouldGenerateAllDownloadTaskTypes_WhenAllMediaTypesAreGiven()
     {
         // Arrange
-        await SetupDatabase(config => config.DisableForeignKeyCheck = true);
-        var downloadTasks = FakeData.GetDownloadTaskTvShow(options: config =>
-            {
-                config.MovieDownloadTasksCount = 5;
-                config.TvShowDownloadTasksCount = 5;
-                config.TvShowSeasonDownloadTasksCount = 5;
-                config.TvShowEpisodeDownloadTasksCount = 5;
-            })
-            .Generate(1);
+        mock.SetupMediator(It.IsAny<GenerateDownloadTaskMoviesCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>).ReturnsAsync(Result.Ok());
+        mock.PublishMediator(It.IsAny<CheckDownloadQueue>).Returns(Task.CompletedTask);
 
-        mock.Mock<IMediator>().Setup(x => x.Publish(It.IsAny<CheckDownloadQueue>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var downloadMediaDtos = new List<DownloadMediaDTO>()
+        {
+            new()
+            {
+                Type = PlexMediaType.Movie,
+                MediaIds = new List<int>() { 1, 2, 3 },
+            },
+            new()
+            {
+                Type = PlexMediaType.TvShow,
+                MediaIds = new List<int>() { 1, 2, 3 },
+            },
+            new()
+            {
+                Type = PlexMediaType.Season,
+                MediaIds = new List<int>() { 1, 2, 3 },
+            },
+            new()
+            {
+                Type = PlexMediaType.Episode,
+                MediaIds = new List<int>() { 1, 2, 3 },
+            },
+        };
 
         // Act
-        var request = new CreateDownloadTasksCommand(null);
+        var request = new CreateDownloadTasksCommand(downloadMediaDtos);
         var handler = mock.Create<CreateDownloadTasksCommandHandler>();
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var downloadTaskMovies = await DbContext.DownloadTaskMovie.IncludeAll().ToListAsync();
-        var downloadTaskTvShows = await DbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
-        var flattenDownloadTasks = downloadTaskMovies.Select(x => x.ToGeneric())
-            .Flatten(x => x.Children)
-            .ToList()
-            .Concat(downloadTaskTvShows.Select(x => x.ToGeneric()).Flatten(x => x.Children))
-            .ToList();
-
-        flattenDownloadTasks.Count().ShouldBe(flattenDownloadTasks.Count);
+        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskMoviesCommand>, Times.Once);
+        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Once);
+        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Once);
+        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>, Times.Once);
+        mock.VerifyNotification(It.IsAny<CheckDownloadQueue>, Times.Once);
     }
 
     [Fact]
-    public async Task ShouldCreateOnlyChildDownloadTasks_WhenParentAlreadyExists()
+    public async Task ShouldOnlyGenerateTvShowAndMoviesAndCallCheckDownloadQueue_WhenOnlyTvShowAndMovieMediaIdsAreGiven()
     {
         // Arrange
-        await SetupDatabase(config => config.DisableForeignKeyCheck = true);
-        var downloadTasks = FakeData.GetDownloadTaskTvShow().Generate(1);
-        await DbContext.DownloadTaskTvShow.AddAsync(downloadTasks.First());
-        await DbContext.SaveChangesAsync();
+        mock.SetupMediator(It.IsAny<GenerateDownloadTaskMoviesCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>).ReturnsAsync(Result.Ok());
+        mock.PublishMediator(It.IsAny<CheckDownloadQueue>).Returns(Task.CompletedTask);
 
-        mock.Mock<IMediator>().Setup(x => x.Publish(It.IsAny<CheckDownloadQueue>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var downloadMediaDtos = new List<DownloadMediaDTO>()
+        {
+            new()
+            {
+                Type = PlexMediaType.TvShow,
+                MediaIds = new List<int>() { 1, 2, 3 },
+            },
+            new()
+            {
+                Type = PlexMediaType.Movie,
+                MediaIds = new List<int>() { 1, 2, 3 },
+            },
+        };
 
         // Act
-        var request = new CreateDownloadTasksCommand(null);
+        var request = new CreateDownloadTasksCommand(downloadMediaDtos);
         var handler = mock.Create<CreateDownloadTasksCommandHandler>();
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var downloadTaskMovies = await DbContext.DownloadTaskMovie.IncludeAll().ToListAsync();
-        var downloadTaskTvShows = await DbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
-        var flattenDownloadTasks = downloadTaskMovies.Select(x => x.ToGeneric())
-            .Flatten(x => x.Children)
-            .ToList()
-            .Concat(downloadTaskTvShows.Select(x => x.ToGeneric()).Flatten(x => x.Children))
-            .ToList();
+        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskMoviesCommand>, Times.Once);
+        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Once);
+        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Never);
+        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>, Times.Never);
+        mock.VerifyNotification(It.IsAny<CheckDownloadQueue>, Times.Once);
+    }
 
-        flattenDownloadTasks.Count().ShouldBe(flattenDownloadTasks.Count);
+    [Fact]
+    public async Task ShouldNotCallCheckDownloadQueue_WhenNoMediaIdsAreGiven()
+    {
+        // Arrange
+        mock.SetupMediator(It.IsAny<GenerateDownloadTaskMoviesCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>).ReturnsAsync(Result.Ok());
+        mock.SetupMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>).ReturnsAsync(Result.Ok());
+        mock.PublishMediator(It.IsAny<CheckDownloadQueue>).Returns(Task.CompletedTask);
+
+        // Act
+        var request = new CreateDownloadTasksCommand(new List<DownloadMediaDTO>());
+        var handler = mock.Create<CreateDownloadTasksCommandHandler>();
+        var result = await handler.Handle(request, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskMoviesCommand>, Times.Never);
+        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowsCommand>, Times.Never);
+        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowSeasonsCommand>, Times.Never);
+        mock.VerifyMediator(It.IsAny<GenerateDownloadTaskTvShowEpisodesCommand>, Times.Never);
+        mock.VerifyNotification(It.IsAny<CheckDownloadQueue>, Times.Never);
     }
 }

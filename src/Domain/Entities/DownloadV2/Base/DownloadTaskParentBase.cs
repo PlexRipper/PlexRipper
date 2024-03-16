@@ -15,11 +15,23 @@ public abstract class DownloadTaskParentBase : DownloadTaskBase, IDownloadTaskPr
     [NotMapped]
     public decimal Percentage { get; set; }
 
+    /// <summary>
+    /// The total size received of the file in bytes.
+    /// </summary>
     [NotMapped]
     public long DataReceived { get; set; }
 
+    /// <summary>
+    /// The total size of the file in bytes.
+    /// </summary>
+    [NotMapped]
+    public long DataTotal { get; set; }
+
     [NotMapped]
     public long DownloadSpeed { get; set; }
+
+    [NotMapped]
+    public long FileTransferSpeed { get; set; }
 
     /// <summary>
     /// Calculate properties such as DataReceived, DataTotal based on the nested children.

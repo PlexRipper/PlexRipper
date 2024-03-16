@@ -37,6 +37,8 @@ public class DownloadTaskTvShowSeason : DownloadTaskParentBase
         foreach (var downloadTask in Children)
             downloadTask.Calculate();
 
+        DownloadSpeed = Children.Select(x => x.DownloadSpeed).Sum();
+        FileTransferSpeed = Children.Select(x => x.FileTransferSpeed).Sum();
         DataReceived = Children.Select(x => x.DataReceived).Sum();
         DataTotal = Children.Select(x => x.DataTotal).Sum();
         Percentage = DataFormat.GetPercentage(DataReceived, DataTotal);

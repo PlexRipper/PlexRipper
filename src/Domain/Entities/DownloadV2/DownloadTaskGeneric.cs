@@ -83,4 +83,19 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
     }
 
     public override string ToString() => $"[DownloadTask [{DownloadTaskType}] [{DownloadStatus}] [{Title}]";
+
+    public IDownloadTaskProgress Calculate()
+    {
+        if (Children is null || !Children.Any())
+            return this;
+
+        DownloadSpeed = Children.Select(x => x.DownloadSpeed).Sum();
+        FileTransferSpeed = Children.Select(x => x.FileTransferSpeed).Sum();
+        DataReceived = Children.Select(x => x.DataReceived).Sum();
+        DataTotal = Children.Select(x => x.DataTotal).Sum();
+        Percentage = DataFormat.GetPercentage(DataReceived, DataTotal);
+        DownloadStatus = DownloadTaskActions.Aggregate(Children.Select(x => x.DownloadStatus).ToList());
+
+        return this;
+    }
 }

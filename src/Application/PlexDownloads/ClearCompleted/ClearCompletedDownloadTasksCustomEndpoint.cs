@@ -6,13 +6,13 @@ namespace PlexRipper.Application;
 
 public record ClearCompletedDownloadTasksRequest(List<Guid> DownloadTaskIds);
 
-public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<ClearCompletedDownloadTasksRequest, ResultDTO>
+public class ClearCompletedDownloadTasksCustomEndpoint : BaseCustomEndpoint<ClearCompletedDownloadTasksRequest, ResultDTO>
 {
     private readonly IMediator _mediator;
 
     public override string EndpointPath => "/api/download/clear";
 
-    public ClearCompletedDownloadTasksEndpoint(IMediator mediator)
+    public ClearCompletedDownloadTasksCustomEndpoint(IMediator mediator)
     {
         _mediator = mediator;
     }

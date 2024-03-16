@@ -48,55 +48,55 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<
         _downloadFolder = await _dbContext.FolderPaths.GetDownloadFolderAsync(cancellationToken);
         _defaultDestinationDict = await _dbContext.FolderPaths.GetDefaultDestinationFolderDictionary(cancellationToken);
 
-        var episodesToInsert = new List<DownloadTaskTvShowEpisode>();
         foreach (var downloadMediaDto in plexEpisodeList)
         {
             var plexLibrary = await _dbContext.PlexLibraries
                 .Include(x => x.PlexServer)
                 .Include(x => x.DefaultDestination)
                 .GetAsync(downloadMediaDto.PlexLibraryId, cancellationToken);
-            var plexServer = plexLibrary.PlexServer;
             var destinationFolder = await GetDestinationFolder(plexLibrary, cancellationToken);
 
-            var plexEpisodes = await _dbContext.PlexTvShowEpisodes.IncludeAll()
+            var plexEpisodes = await _dbContext.PlexTvShowEpisodes
+                .AsTracking()
+                .IncludeAll()
                 .Where(x => downloadMediaDto.MediaIds.Contains(x.Id))
                 .ToListAsync(cancellationToken);
+
+            var tvShowDownloads = new List<DownloadTaskTvShow>();
 
             foreach (var tvShowEpisode in plexEpisodes)
             {
                 var plexTvShow = tvShowEpisode.TvShow;
                 var plexSeason = tvShowEpisode.TvShowSeason;
 
-                // Check if the tvShowDownloadTask has already been created
-                var downloadTaskTvShow = await _dbContext.GetDownloadTaskTvShowByMediaKeyQuery(plexTvShow.PlexServerId, plexTvShow.Key, cancellationToken);
+                // Check if the tvShowDownloadTask has already been created this run
+                var downloadTaskTvShow = tvShowDownloads.FirstOrDefault(x => x.Key == plexTvShow.Key);
+
+                // Check if the tvShowDownloadTask has already been created ever
                 if (downloadTaskTvShow is null)
-                {
-                    // Insert the tvShowDownloadTask into the database
+                    downloadTaskTvShow = await _dbContext.GetDownloadTaskTvShowByMediaKeyQuery(plexTvShow.PlexServerId, plexTvShow.Key, cancellationToken);
+
+                if (downloadTaskTvShow is null)
                     downloadTaskTvShow = plexTvShow.MapToDownloadTask();
-                    _dbContext.DownloadTaskTvShow.Add(downloadTaskTvShow);
-                    await _dbContext.SaveChangesAsync(cancellationToken);
-                }
+
+                tvShowDownloads.Add(downloadTaskTvShow);
 
                 // Check if the SeasonDownloadTask has already been created
-                var downloadTaskTvShowSeason = downloadTaskTvShow.Children
-                    .Find(x => x.PlexServerId == plexServer.Id && x.Key == plexSeason.Key);
+                var downloadTaskTvShowSeason = downloadTaskTvShow.Children.FirstOrDefault(x => x.Key == plexSeason.Key);
                 if (downloadTaskTvShowSeason is null)
                 {
-                    var seasonDownloadTask = plexSeason.MapToDownloadTask();
-                    seasonDownloadTask.ParentId = downloadTaskTvShow.Id;
-                    _dbContext.DownloadTaskTvShowSeason.Add(seasonDownloadTask);
-                    await _dbContext.SaveChangesAsync(cancellationToken);
-                    downloadTaskTvShow.Children.Add(seasonDownloadTask);
+                    downloadTaskTvShowSeason = plexSeason.MapToDownloadTask();
+                    downloadTaskTvShowSeason.ParentId = downloadTaskTvShow.Id;
+                    downloadTaskTvShow.Children.Add(downloadTaskTvShowSeason);
                 }
 
                 // Check if the tvShowEpisodesDownloadTask has already been created
-                var episodeDownloadTask = downloadTaskTvShowSeason.Children.FirstOrDefault(x => x.Key == plexSeason.Key && x.PlexServerId == plexServer.Id);
+                var episodeDownloadTask = downloadTaskTvShowSeason.Children.FirstOrDefault(x => x.Key == plexSeason.Key);
                 if (episodeDownloadTask is null)
                 {
                     episodeDownloadTask = tvShowEpisode.MapToDownloadTask();
                     episodeDownloadTask.ParentId = downloadTaskTvShowSeason.Id;
                     downloadTaskTvShowSeason.Children.Add(episodeDownloadTask);
-                    episodesToInsert.Add(episodeDownloadTask);
                 }
 
                 // TODO Quality Selector needs to be implemented here
@@ -115,15 +115,15 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<
                     downloadTaskTvShowEpisodeFile.DestinationDirectory = destinationFolderPath;
                     downloadTaskTvShowEpisodeFile.DownloadDirectory = downloadFolderPath;
                 }
-
-                episodeDownloadTask.Calculate();
             }
+
+            tvShowDownloads.ForEach(x => x.Calculate());
+
+            _dbContext.DownloadTaskTvShow.AddRange(tvShowDownloads);
         }
 
         // Insert all episodes into the database
-        _dbContext.DownloadTaskTvShowEpisode.AddRange(episodesToInsert);
         await _dbContext.SaveChangesAsync(cancellationToken);
-
         return Result.Ok();
     }
 

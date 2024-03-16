@@ -45,9 +45,9 @@ public class GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests : BaseIn
         var result = await mediatr.Send(new GenerateDownloadTaskTvShowsCommand(tvShows));
 
         // Assert
-        var downloadTaskTvShows = await Container
-            .PlexRipperDbContext
-            .DownloadTaskTvShow.IncludeAll()
+        var downloadTaskTvShows = await DbContext
+            .DownloadTaskTvShow
+            .IncludeAll()
             .ToListAsync();
 
         downloadTaskTvShows.Count.ShouldBe(5);

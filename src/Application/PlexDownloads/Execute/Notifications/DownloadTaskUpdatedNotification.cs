@@ -29,7 +29,7 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdatedNot
     {
         var plexServerId = notification.Key.PlexServerId;
 
-        await _dbContext.CalculateDownloadStatus(notification.Key, cancellationToken);
+        await _dbContext.DetermineDownloadStatus(notification.Key, cancellationToken);
 
         var downloadTasks = await _dbContext.GetAllDownloadTasksAsync(plexServerId, cancellationToken: cancellationToken);
 

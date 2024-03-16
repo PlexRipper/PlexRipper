@@ -17,7 +17,7 @@ public class CalculateDownloadStatus_UnitTests : BaseUnitTest
         await IDbContext.SetDownloadStatus(testDownloadTask.ToKey(), DownloadStatus.DownloadFinished);
 
         // Act
-        await IDbContext.CalculateDownloadStatus(testDownloadTask.ToKey());
+        await IDbContext.DetermineDownloadStatus(testDownloadTask.ToKey());
 
         // Assert
         downloadTasks = await IDbContext.GetAllDownloadTasksAsync(asTracking: true);
@@ -41,7 +41,7 @@ public class CalculateDownloadStatus_UnitTests : BaseUnitTest
         await IDbContext.SetDownloadStatus(testDownloadTask.ToKey(), DownloadStatus.Error);
 
         // Act
-        await IDbContext.CalculateDownloadStatus(testDownloadTask.ToKey());
+        await IDbContext.DetermineDownloadStatus(testDownloadTask.ToKey());
 
         // Assert
         downloadTasks = await IDbContext.GetAllDownloadTasksAsync(asTracking: true);

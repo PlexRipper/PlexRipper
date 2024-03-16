@@ -6,7 +6,13 @@ namespace Data.Contracts;
 
 public static partial class DbContextExtensions
 {
-    public static async Task CalculateDownloadStatus(
+    /// <summary>
+    /// This will determine the download status of the download task and it's children. It will start from the lower nested hierarchy and traverse up to the root to determine the <see cref="DownloadStatus"/>.
+    /// </summary>
+    /// <param name="dbContext">The <see cref="IPlexRipperDbContext"/> to extend from. </param>
+    /// <param name="key">The <see cref="DownloadTaskKey"/> to traverse from. </param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/> to observe. </param>
+    public static async Task DetermineDownloadStatus(
         this IPlexRipperDbContext dbContext,
         DownloadTaskKey key,
         CancellationToken cancellationToken = default)
@@ -58,7 +64,7 @@ public static partial class DbContextExtensions
                     }
                     default:
                         _log.Error("DownloadTaskType {DownloadTaskType} is not supported in {CalculateDownloadStatusName}", downloadTaskCheck.DownloadTaskType,
-                            nameof(CalculateDownloadStatus), 0);
+                            nameof(DetermineDownloadStatus), 0);
                         downloadTaskCheck = null;
                         break;
                 }

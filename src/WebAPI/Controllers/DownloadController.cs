@@ -5,8 +5,6 @@ using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
-using PlexRipper.WebAPI.Common.Extensions;
-using PlexRipper.WebAPI.Common.FluentResult;
 using PlexRipper.WebAPI.Common.Mappers;
 
 namespace PlexRipper.WebAPI.Controllers;
@@ -46,18 +44,18 @@ public class DownloadController : BaseController
         return Ok(returnResult);
     }
 
-    /// <summary>
-    /// POST: "api/(DownloadController)/clear".
-    /// </summary>
-    /// <returns>Is successful.</returns>
-    [HttpPost("clear")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> ClearCompleted([FromBody] List<Guid> downloadTaskIds)
-    {
-        var result = await _mediator.Send(new ClearCompletedDownloadTasksCommand(downloadTaskIds));
-        return ToActionResult(result);
-    }
+    // /// <summary>
+    // /// POST: "api/(DownloadController)/clear".
+    // /// </summary>
+    // /// <returns>Is successful.</returns>
+    // [HttpPost("clear")]
+    // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
+    // [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
+    // public async Task<IActionResult> ClearCompleted([FromBody] List<Guid> downloadTaskIds)
+    // {
+    //     var result = await _mediator.Send(new ClearCompletedDownloadTasksCommand(downloadTaskIds));
+    //     return ToActionResult(result);
+    // }
 
     /// <summary>
     /// POST: api/(DownloadController)/download/

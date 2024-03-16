@@ -1,4 +1,6 @@
-﻿namespace PlexRipper.WebAPI.Common.FluentResult;
+﻿using FluentResults;
+
+namespace Application.Contracts;
 
 public class ResultDTO
 {

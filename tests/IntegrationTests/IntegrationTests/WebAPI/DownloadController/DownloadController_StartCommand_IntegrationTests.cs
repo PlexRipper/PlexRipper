@@ -1,7 +1,6 @@
-﻿using Data.Contracts;
-using Microsoft.EntityFrameworkCore;
+﻿using Application.Contracts;
+using Data.Contracts;
 using PlexRipper.WebAPI.Common;
-using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace IntegrationTests.WebAPI.DownloadController;
 

@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using PlexApi.Contracts;
 using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
-using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers;
 

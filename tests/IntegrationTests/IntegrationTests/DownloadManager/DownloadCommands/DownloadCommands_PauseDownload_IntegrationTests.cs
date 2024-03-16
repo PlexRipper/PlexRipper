@@ -1,6 +1,6 @@
+using Application.Contracts;
 using Data.Contracts;
 using PlexRipper.WebAPI.Common;
-using PlexRipper.WebAPI.Common.FluentResult;
 using Serilog.Events;
 
 namespace IntegrationTests.DownloadManager.DownloadCommands;

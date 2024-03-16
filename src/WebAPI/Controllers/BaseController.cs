@@ -5,7 +5,6 @@ using Logging.Interface;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI.Controllers;
 
@@ -58,10 +57,7 @@ public abstract class BaseController : ControllerBase
     }
 
     [NonAction]
-    protected IActionResult BadRequestInvalidId(string parameterName = "Id")
-    {
-        return BadRequest(Result.Fail($"The {parameterName} was 0 or lower"));
-    }
+    protected IActionResult BadRequestInvalidId(string parameterName = "Id") => BadRequest(Result.Fail($"The {parameterName} was 0 or lower"));
 
     [NonAction]
     protected IActionResult BadRequest(Result result)

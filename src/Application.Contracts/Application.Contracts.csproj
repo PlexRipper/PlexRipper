@@ -12,4 +12,13 @@
 		<ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Reference Include="Microsoft.AspNetCore.Http.Abstractions">
+	    <HintPath>..\..\..\..\..\home\jason\.nuget\packages\microsoft.aspnetcore.app.ref\7.0.17\ref\net7.0\Microsoft.AspNetCore.Http.Abstractions.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Microsoft.AspNetCore.Http.Results">
+	    <HintPath>..\..\..\..\..\home\jason\.nuget\packages\microsoft.aspnetcore.app.ref\7.0.17\ref\net7.0\Microsoft.AspNetCore.Http.Results.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
 </Project>

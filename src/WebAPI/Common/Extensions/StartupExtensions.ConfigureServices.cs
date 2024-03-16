@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Environment;
+using FastEndpoints;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +31,12 @@ public static partial class StartupExtensions
         }
 
         services.AddOptions();
+
+        services.AddFastEndpoints(options =>
+        {
+            options.DisableAutoDiscovery = true;
+            options.Assemblies = new[] { Assembly.GetAssembly(typeof(BaseEndpoint)) };
+        });
 
         services.AddHttpClient();
 
@@ -124,6 +131,7 @@ public static partial class StartupExtensions
             c.SchemaFilter<RequiredMemberFilter>();
             c.SchemaFilter<RequiredNotNullableSchemaFilter>();
             c.AddSignalRSwaggerGen();
+
             // Enables the XML-documentation for the Swagger UI
             c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,
                 $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));

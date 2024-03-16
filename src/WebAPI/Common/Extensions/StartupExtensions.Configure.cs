@@ -1,4 +1,5 @@
 using Environment;
+using FastEndpoints;
 using PlexRipper.WebAPI.SignalR.Hubs;
 
 namespace PlexRipper.WebAPI.Common.Extensions;
@@ -20,6 +21,8 @@ public static partial class StartupExtensions
                 options.EnableFilter();
             });
         }
+
+        app.UseFastEndpoints();
 
         app.UseEndpoints(endpoints =>
         {

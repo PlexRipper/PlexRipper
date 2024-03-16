@@ -2,7 +2,6 @@
 using AutoMapper;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
-using PlexRipper.WebAPI.Common.FluentResult;
 using Settings.Contracts;
 
 namespace PlexRipper.WebAPI.Controllers;

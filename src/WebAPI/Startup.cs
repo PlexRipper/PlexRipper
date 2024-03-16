@@ -1,5 +1,4 @@
 using Logging.Interface;
-using PlexRipper.WebAPI.Common.Extensions;
 
 namespace PlexRipper.WebAPI;
 
@@ -26,17 +25,11 @@ public sealed class Startup
     /// This method gets called by the runtime. Use this method to add services to the container.
     /// </summary>
     /// <param name="services"></param>
-    public void ConfigureServices(IServiceCollection services)
-    {
-        StartupExtensions.SetupConfigureServices(services, CurrentEnvironment);
-    }
+    public void ConfigureServices(IServiceCollection services) { }
 
     /// <summary>
     /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     /// </summary>
     /// <param name="app">The <see cref="IApplicationBuilder"/> instance to configure.</param>
-    public void Configure(IApplicationBuilder app)
-    {
-        StartupExtensions.SetupConfigure(app, CurrentEnvironment);
-    }
+    public void Configure(IApplicationBuilder app) { }
 }

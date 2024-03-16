@@ -27,10 +27,7 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
         _config = UnitTestDataConfig.FromOptions(options);
     }
 
-    protected override IHostBuilder CreateHostBuilder()
-    {
-        return PlexRipperHost.Setup();
-    }
+    protected override IHostBuilder CreateHostBuilder() => PlexRipperHost.Setup();
 
     protected override IHost CreateHost(IHostBuilder builder)
     {

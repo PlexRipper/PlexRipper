@@ -79,7 +79,7 @@ public static partial class DbContextExtensions
                 if (downloadTaskCheck.DownloadStatus != newStatus)
                 {
                     downloadTaskCheck.DownloadStatus = newStatus;
-                    await dbContext.SetDownloadStatus(downloadTaskCheck.ToKey(), downloadTaskCheck.DownloadStatus, cancellationToken);
+                    await dbContext.SetDownloadStatus(downloadTaskCheck.ToKey(), downloadTaskCheck.DownloadStatus);
                 }
 
                 downloadTaskCheck = parentKey is not null ? await dbContext.GetDownloadTaskAsync(parentKey, cancellationToken) : null;
@@ -95,53 +95,59 @@ public static partial class DbContextExtensions
     public static async Task SetDownloadStatus(
         this IPlexRipperDbContext dbContext,
         DownloadTaskKey key,
-        DownloadStatus status,
-        CancellationToken cancellationToken = default)
+        DownloadStatus status)
     {
-        await dbContext.SetDownloadStatus(key.Id, status, key.Type, cancellationToken);
+        await dbContext.SetDownloadStatus(key.Id, status, key.Type);
     }
 
+    /// <summary>
+    /// Sets the <see cref="DownloadStatus"/> of the download task but not its children or parent and immediately saves the changes to the database.
+    /// </summary>
+    /// <param name="dbContext"> The <see cref="IPlexRipperDbContext"/> to extend from. </param>
+    /// <param name="id"> The <see cref="Guid"/> of the download task to update. </param>
+    /// <param name="status"> The <see cref="DownloadStatus"/> to set. </param>
+    /// <param name="type"> The <see cref="DownloadTaskType"/>  of the DownloadTask, not required. </param>
+    /// <exception cref="ArgumentOutOfRangeException"> Thrown when the <see cref="DownloadTaskType"/> is not supported. </exception>
     public static async Task SetDownloadStatus(
         this IPlexRipperDbContext dbContext,
         Guid id,
         DownloadStatus status,
-        DownloadTaskType type = DownloadTaskType.None,
-        CancellationToken cancellationToken = default)
+        DownloadTaskType type = DownloadTaskType.None)
     {
         if (type == DownloadTaskType.None)
-            type = await dbContext.GetDownloadTaskTypeAsync(id, cancellationToken);
+            type = await dbContext.GetDownloadTaskTypeAsync(id);
 
         switch (type)
         {
             case DownloadTaskType.Movie:
                 await dbContext.DownloadTaskMovie
                     .Where(x => x.Id == id)
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), cancellationToken);
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status));
                 break;
             case DownloadTaskType.MovieData:
                 await dbContext.DownloadTaskMovieFile
                     .Where(x => x.Id == id)
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), cancellationToken);
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status));
                 break;
             case DownloadTaskType.TvShow:
                 await dbContext.DownloadTaskTvShow
                     .Where(x => x.Id == id)
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), cancellationToken);
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status));
                 break;
             case DownloadTaskType.Season:
                 await dbContext.DownloadTaskTvShowSeason
                     .Where(x => x.Id == id)
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), cancellationToken);
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status));
                 break;
             case DownloadTaskType.Episode:
                 await dbContext.DownloadTaskTvShowEpisode
                     .Where(x => x.Id == id)
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), cancellationToken);
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status));
                 break;
             case DownloadTaskType.EpisodeData:
                 await dbContext.DownloadTaskTvShowEpisodeFile
                     .Where(x => x.Id == id)
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status), cancellationToken);
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status));
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

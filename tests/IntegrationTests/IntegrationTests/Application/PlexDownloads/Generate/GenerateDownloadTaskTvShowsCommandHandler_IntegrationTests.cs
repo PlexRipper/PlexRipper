@@ -54,6 +54,10 @@ public class GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests : BaseIn
         result.IsSuccess.ShouldBeTrue();
 
         foreach (var downloadTaskTvShow in downloadTaskTvShows)
-            (await validator.ValidateAsync(downloadTaskTvShow)).Errors.ShouldBeEmpty();
+        {
+            downloadTaskTvShow.Calculate();
+            (await validator.ValidateAsync(downloadTaskTvShow))
+                .Errors.ShouldBeEmpty();
+        }
     }
 }

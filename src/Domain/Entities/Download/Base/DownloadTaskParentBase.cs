@@ -31,7 +31,7 @@ public abstract class DownloadTaskParentBase : DownloadTaskBase, IDownloadTaskPr
     /// NOTE: This is calculated at runtime and not stored in the database.
     /// </summary>
     [NotMapped]
-    public new long DataTotal { get; set; }
+    public long DataTotal { get; set; }
 
     /// <summary>
     /// Gets or sets get the download speeds in bytes per second.

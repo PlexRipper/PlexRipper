@@ -9,7 +9,6 @@ public static partial class FakeData
 
     private static Faker<T> ApplyDownloadTaskBase<T>(this Faker<T> faker, int seed = 0, Action<FakeDataConfig> options = null) where T : DownloadTaskBase
     {
-        var config = FakeDataConfig.FromOptions(options);
         return faker
             .StrictMode(true)
             .UseSeed(seed)
@@ -17,9 +16,6 @@ public static partial class FakeData
             .RuleFor(x => x.Key, _ => _random.Next(1, 10000))
             .RuleFor(x => x.Title, _ => "")
             .RuleFor(x => x.FullTitle, _ => "")
-            .RuleFor(x => x.DataTotal, f => config.DownloadFileSizeInMb > 0
-                ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
-                : f.Random.Long(1, 10000000))
             .RuleFor(x => x.DownloadStatus, _ => DownloadStatus.Queued)
             .RuleFor(x => x.CreatedAt, _ => DateTime.UtcNow)
             .RuleFor(x => x.PlexServerId, _ => 0)
@@ -32,6 +28,8 @@ public static partial class FakeData
     public static Faker<T> ApplyDownloadTaskParentBase<T>(this Faker<T> faker, int seed = 0, Action<FakeDataConfig> options = null)
         where T : DownloadTaskParentBase
     {
+        var config = FakeDataConfig.FromOptions(options);
+
         return faker
             .StrictMode(true)
             .UseSeed(seed)
@@ -41,18 +39,26 @@ public static partial class FakeData
             .RuleFor(x => x.FileTransferSpeed, _ => 0)
             .RuleFor(x => x.Percentage, _ => 0)
             .RuleFor(x => x.DataReceived, _ => 0)
-            .RuleFor(x => x.DownloadSpeed, _ => 0);
+            .RuleFor(x => x.DownloadSpeed, _ => 0)
+            .RuleFor(x => x.DataTotal, f => config.DownloadFileSizeInMb > 0
+                ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
+                : f.Random.Long(1, 10000000));
     }
 
     public static Faker<T> ApplyDownloadTaskFileBase<T>(this Faker<T> faker, int seed = 0, Action<FakeDataConfig> options = null)
         where T : DownloadTaskFileBase
     {
+        var config = FakeDataConfig.FromOptions(options);
+
         return faker
             .StrictMode(true)
             .UseSeed(seed)
             .ApplyDownloadTaskBase(seed, options)
             .RuleFor(x => x.Percentage, _ => 0)
             .RuleFor(x => x.DataReceived, _ => 0)
+            .RuleFor(x => x.DataTotal, f => config.DownloadFileSizeInMb > 0
+                ? (long)ByteSize.FromMebiBytes(config.DownloadFileSizeInMb).Bytes
+                : f.Random.Long(1, 10000000))
             .RuleFor(x => x.DownloadSpeed, _ => 0)
             .RuleFor(x => x.FileTransferSpeed, _ => 0)
             .RuleFor(x => x.FileName, _ => "file.mp4")

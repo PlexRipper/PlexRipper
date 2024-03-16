@@ -6,22 +6,26 @@ namespace Data.Contracts;
 [Mapper(UseReferenceHandling = true, RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class DownloadTaskGenericMapper
 {
+    #region Movie
+
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskMovie downloadTaskMovieFile)
     {
         var result = downloadTaskMovieFile.ToGenericMapper();
         result.Children ??= new List<DownloadTaskGeneric>();
         result.DownloadWorkerTasks ??= new List<DownloadWorkerTask>();
-        result.DataReceived = result.Children.Sum(x => x.DataReceived);
-        result.DataTotal = result.Children.Sum(x => x.DataTotal);
-        result.DownloadSpeed = result.Children.Sum(x => x.DownloadSpeed);
-        result.FileTransferSpeed = result.Children.Sum(x => x.FileTransferSpeed);
-        result.Percentage = result.Children.Any() ? result.Children.Average(x => x.Percentage) : 0;
+        result.Calculate();
         return result;
     }
 
     private static partial DownloadTaskGeneric ToGenericMapper(this DownloadTaskMovie downloadTaskMovie);
 
+    #endregion
+
+    #region MovieFile
+
     public static partial DownloadTaskGeneric ToGeneric(this DownloadTaskMovieFile downloadTaskMovieFile);
+
+    #endregion
 
     #region TvShow
 
@@ -30,18 +34,7 @@ public static partial class DownloadTaskGenericMapper
         var result = downloadTaskTvShow.ToGenericMapper();
         result.DownloadWorkerTasks ??= new List<DownloadWorkerTask>();
         result.Children ??= new List<DownloadTaskGeneric>();
-        result.Children = downloadTaskTvShow.Children.Select(x =>
-            {
-                x.Calculate();
-                return x.ToGeneric();
-            })
-            .ToList();
-
-        result.DataReceived = result.Children.Sum(x => x.DataReceived);
-        result.DataTotal = result.Children.Sum(x => x.DataTotal);
-        result.DownloadSpeed = result.Children.Sum(x => x.DownloadSpeed);
-        result.FileTransferSpeed = result.Children.Sum(x => x.FileTransferSpeed);
-        result.Percentage = result.Children.Any() ? result.Children.Average(x => x.Percentage) : 0;
+        result.Calculate();
         return result;
     }
 
@@ -56,18 +49,7 @@ public static partial class DownloadTaskGenericMapper
         var result = downloadTaskTvShowSeason.ToGenericMapper();
         result.DownloadWorkerTasks ??= new List<DownloadWorkerTask>();
         result.Children ??= new List<DownloadTaskGeneric>();
-        result.Children = downloadTaskTvShowSeason.Children.Select(x =>
-            {
-                x.Calculate();
-                return x.ToGeneric();
-            })
-            .ToList();
-
-        result.DataReceived = result.Children.Sum(x => x.DataReceived);
-        result.DataTotal = result.Children.Sum(x => x.DataTotal);
-        result.DownloadSpeed = result.Children.Sum(x => x.DownloadSpeed);
-        result.FileTransferSpeed = result.Children.Sum(x => x.FileTransferSpeed);
-        result.Percentage = result.Children.Any() ? result.Children.Average(x => x.Percentage) : 0;
+        result.Calculate();
         return result;
     }
 
@@ -82,11 +64,7 @@ public static partial class DownloadTaskGenericMapper
         var result = downloadTaskTvShowEpisode.ToGenericMapper();
         result.Children ??= new List<DownloadTaskGeneric>();
         result.DownloadWorkerTasks ??= new List<DownloadWorkerTask>();
-        result.DataReceived = result.Children.Sum(x => x.DataReceived);
-        result.DataTotal = result.Children.Sum(x => x.DataTotal);
-        result.DownloadSpeed = result.Children.Sum(x => x.DownloadSpeed);
-        result.FileTransferSpeed = result.Children.Sum(x => x.FileTransferSpeed);
-        result.Percentage = result.Children.Any() ? result.Children.Average(x => x.Percentage) : 0;
+        result.Calculate();
         return result;
     }
 

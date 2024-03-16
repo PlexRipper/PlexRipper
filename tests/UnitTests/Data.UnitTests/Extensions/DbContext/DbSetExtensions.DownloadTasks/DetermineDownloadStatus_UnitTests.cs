@@ -2,9 +2,9 @@ using Data.Contracts;
 
 namespace Data.UnitTests.Extensions.DbContext.DbSetExtensions.DownloadTasks;
 
-public class CalculateDownloadStatus_UnitTests : BaseUnitTest
+public class DetermineDownloadStatus_UnitTests : BaseUnitTest
 {
-    public CalculateDownloadStatus_UnitTests(ITestOutputHelper output) : base(output) { }
+    public DetermineDownloadStatus_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public async Task ShouldSetTheDownloadTaskParentOfTypeMovieDataToDownloadFinished_WhenTheMovieDataIsDownloadStatusIsDownloadFinished()

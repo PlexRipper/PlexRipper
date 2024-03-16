@@ -9,6 +9,8 @@ public static class DownloadTaskExtensions
         if (downloadTask.Children is null || !downloadTask.Children.Any())
             return downloadTask;
 
+        downloadTask.Children.ForEach(x => x.Calculate());
+
         downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Sum();
         downloadTask.FileTransferSpeed = downloadTask.Children.Select(x => x.FileTransferSpeed).Sum();
         downloadTask.DataReceived = downloadTask.Children.Select(x => x.DataReceived).Sum();
@@ -42,6 +44,8 @@ public static class DownloadTaskExtensions
         if (downloadTask.Children is null || !downloadTask.Children.Any())
             return downloadTask;
 
+        downloadTask.Children.ForEach(x => x.Calculate());
+
         downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Sum();
         downloadTask.FileTransferSpeed = downloadTask.Children.Select(x => x.FileTransferSpeed).Sum();
         downloadTask.DataReceived = downloadTask.Children.Select(x => x.DataReceived).Sum();
@@ -59,6 +63,8 @@ public static class DownloadTaskExtensions
     {
         if (downloadTask.Children is null || !downloadTask.Children.Any())
             return downloadTask;
+
+        downloadTask.Children.ForEach(x => x.Calculate());
 
         downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Sum();
         downloadTask.FileTransferSpeed = downloadTask.Children.Select(x => x.FileTransferSpeed).Sum();

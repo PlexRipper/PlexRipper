@@ -214,6 +214,26 @@
         "resolved": "2.2.0",
         "contentHash": "KQiRf7ZsxtM7ue768Wm1mnA7JfwbSJ1kUQv3+6U4LheJ/4aKITiVMsE6GPOrwKqBY9h/ROUpILyyZsJl76j7aQ=="
       },
+      "FastEndpoints": {
+        "type": "Transitive",
+        "resolved": "5.23.0",
+        "contentHash": "RTrCER39JzeGhS2jxG2tdnjwZalBNJjn8U9N5ZFQOVrN76nEWsL6zSxYPSdguKP+Y13JrECGeIBSSNQrEf+mvQ==",
+        "dependencies": {
+          "FastEndpoints.Attributes": "5.23.0",
+          "FastEndpoints.Messaging.Core": "5.23.0",
+          "FluentValidation": "11.9.0"
+        }
+      },
+      "FastEndpoints.Attributes": {
+        "type": "Transitive",
+        "resolved": "5.23.0",
+        "contentHash": "9cbwRi8UBdQVQssYSzLQoYeqxJUbr7nBOfsN6EZ0kxNBgiEhcUXqo7Cnr5RSIvK/DXaRpS/I/cpaAZb6N7+KjQ=="
+      },
+      "FastEndpoints.Messaging.Core": {
+        "type": "Transitive",
+        "resolved": "5.23.0",
+        "contentHash": "3fkE2TZdDSOv2+mUwJPGn1XMuhZxKiJDsVxCZtwUN1Lg1lI5GGCu7WXLUlWcYWFQRAQgYbg83aJxBCrlLtG5bQ=="
+      },
       "FluentResults": {
         "type": "Transitive",
         "resolved": "3.15.1",
@@ -225,8 +245,8 @@
       },
       "FluentValidation": {
         "type": "Transitive",
-        "resolved": "9.3.0",
-        "contentHash": "C44l6Ih+YwpED/TsXfl6LIq6Z4wLXahstnr6T70uUg1Hs7/bLBKKAo9Nl0sLhVjDE8TA+fF+O3IM4nDrwabcSQ=="
+        "resolved": "11.9.0",
+        "contentHash": "VneVlTvwYDkfHV5av3QrQ0amALgrLX6LV94wlYyEsh0B/klJBW7C8y2eAtj5tOZ3jH6CAVpr4s1ZGgew/QWyig=="
       },
       "FluentValidation.AspNetCore": {
         "type": "Transitive",
@@ -3511,6 +3531,7 @@
           "Autofac.Extras.Quartz": "[8.0.0, )",
           "BackgroundServices.Contracts": "[1.0.0, )",
           "Data.Contracts": "[1.0.0, )",
+          "FastEndpoints": "[5.23.0, )",
           "FileSystem.Contracts": "[1.0.0, )",
           "FluentValidation.DependencyInjectionExtensions": "[9.3.0, )",
           "MediatR.Extensions.Autofac.DependencyInjection": "[10.0.0, )",

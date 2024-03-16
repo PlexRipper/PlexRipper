@@ -13,6 +13,17 @@
           "Quartz": "[3.4.0, 4.0.0)"
         }
       },
+      "FastEndpoints": {
+        "type": "Direct",
+        "requested": "[5.23.0, )",
+        "resolved": "5.23.0",
+        "contentHash": "RTrCER39JzeGhS2jxG2tdnjwZalBNJjn8U9N5ZFQOVrN76nEWsL6zSxYPSdguKP+Y13JrECGeIBSSNQrEf+mvQ==",
+        "dependencies": {
+          "FastEndpoints.Attributes": "5.23.0",
+          "FastEndpoints.Messaging.Core": "5.23.0",
+          "FluentValidation": "11.9.0"
+        }
+      },
       "FluentValidation.DependencyInjectionExtensions": {
         "type": "Direct",
         "requested": "[9.3.0, )",
@@ -110,6 +121,16 @@
           "Microsoft.EntityFrameworkCore.Sqlite.Core": "7.0.2"
         }
       },
+      "FastEndpoints.Attributes": {
+        "type": "Transitive",
+        "resolved": "5.23.0",
+        "contentHash": "9cbwRi8UBdQVQssYSzLQoYeqxJUbr7nBOfsN6EZ0kxNBgiEhcUXqo7Cnr5RSIvK/DXaRpS/I/cpaAZb6N7+KjQ=="
+      },
+      "FastEndpoints.Messaging.Core": {
+        "type": "Transitive",
+        "resolved": "5.23.0",
+        "contentHash": "3fkE2TZdDSOv2+mUwJPGn1XMuhZxKiJDsVxCZtwUN1Lg1lI5GGCu7WXLUlWcYWFQRAQgYbg83aJxBCrlLtG5bQ=="
+      },
       "FluentResults": {
         "type": "Transitive",
         "resolved": "3.15.1",
@@ -121,8 +142,8 @@
       },
       "FluentValidation": {
         "type": "Transitive",
-        "resolved": "9.3.0",
-        "contentHash": "C44l6Ih+YwpED/TsXfl6LIq6Z4wLXahstnr6T70uUg1Hs7/bLBKKAo9Nl0sLhVjDE8TA+fF+O3IM4nDrwabcSQ=="
+        "resolved": "11.9.0",
+        "contentHash": "VneVlTvwYDkfHV5av3QrQ0amALgrLX6LV94wlYyEsh0B/klJBW7C8y2eAtj5tOZ3jH6CAVpr4s1ZGgew/QWyig=="
       },
       "JetBrains.Annotations": {
         "type": "Transitive",

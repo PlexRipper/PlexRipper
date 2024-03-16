@@ -33,12 +33,6 @@
           "System.Text.Json": "5.0.2"
         }
       },
-      "Riok.Mapperly": {
-        "type": "Direct",
-        "requested": "[2.8.0, )",
-        "resolved": "2.8.0",
-        "contentHash": "tBnpMLnbyUSvlEG48nOarppqwkrcuZR7P6htrgdsN6Q0DMgHSh4/pXuqFg5HvdyN6BgMPWieXJEDKOK05FBPHA=="
-      },
       "System.Text.Json": {
         "type": "Direct",
         "requested": "[7.0.2, )",
@@ -491,6 +485,11 @@
           "System.Configuration.ConfigurationManager": "4.7.0",
           "System.Diagnostics.DiagnosticSource": "4.7.1"
         }
+      },
+      "Riok.Mapperly": {
+        "type": "Transitive",
+        "resolved": "3.4.0",
+        "contentHash": "bTxBEQ0+2x816IL78Fv0B/KkaGRtzfisit9dfWTfa7jjjwMMzpMW9A+V/hyxqHdJtYvtDL6dUNMLJige4zxJvw=="
       },
       "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
         "type": "Transitive",
@@ -1620,6 +1619,7 @@
           "LanguageExt.Core": "[4.4.8, )",
           "MediatR": "[12.0.0, )",
           "NaturalSort.Extension": "[4.0.0, )",
+          "Riok.Mapperly": "[3.4.0, )",
           "System.ComponentModel.Annotations": "[5.0.0, )",
           "System.Reactive": "[5.0.0, )",
           "System.Reactive.Interfaces": "[5.0.0, )",

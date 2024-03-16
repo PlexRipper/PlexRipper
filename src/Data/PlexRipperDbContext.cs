@@ -32,7 +32,7 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
 
     public DbSet<FolderPath> FolderPaths { get; set; }
 
-    public DbSet<DownloadFileTask> FileTasks { get; set; }
+    public DbSet<FileTask> FileTasks { get; set; }
 
     public DbSet<Notification> Notifications { get; set; }
 
@@ -71,8 +71,6 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
     #endregion
 
     #region DownloadTasks
-
-    public DbSet<DownloadTask> DownloadTasks { get; set; }
 
     public DbSet<DownloadTaskMovie> DownloadTaskMovie { get; set; }
 
@@ -169,10 +167,6 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         builder.AddQuartz(x => x.UseSqlite());
-
-        builder.Entity<DownloadTaskBase>().UseTpcMappingStrategy();
-        builder.Entity<DownloadTaskParentBase>().UseTpcMappingStrategy();
-        builder.Entity<DownloadTaskFileBase>().UseTpcMappingStrategy();
 
         // NOTE: This has been added to PlexRipperDbContext.OnModelCreating
         // Based on: https://stackoverflow.com/a/63992731/8205497

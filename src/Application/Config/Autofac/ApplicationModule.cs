@@ -2,9 +2,9 @@
 using Application.Contracts;
 using Autofac;
 using Autofac.Extras.Quartz;
+using FileSystem.Contracts;
 using MediatR.Extensions.Autofac.DependencyInjection;
 using MediatR.Extensions.Autofac.DependencyInjection.Builder;
-using PlexRipper.DownloadManager;
 using Module = Autofac.Module;
 
 namespace PlexRipper.Application;
@@ -45,6 +45,7 @@ public class ApplicationModule : Module
             .SingleInstance();
 
         builder.RegisterType<DownloadTaskScheduler>().As<IDownloadTaskScheduler>().SingleInstance();
+        builder.RegisterType<FileMergeScheduler>().As<IFileMergeScheduler>().SingleInstance();
         builder.RegisterType<DownloadWorker>().InstancePerDependency();
         builder.RegisterType<PlexDownloadClient>().InstancePerDependency();
 

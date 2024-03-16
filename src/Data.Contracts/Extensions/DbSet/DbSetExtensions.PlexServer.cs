@@ -15,11 +15,6 @@ public static partial class DbSetExtensions
         .ThenInclude(x => x.Seasons)
         .ThenInclude(x => x.Episodes);
 
-    public static IQueryable<PlexServer> IncludeDownloadTasks(this IQueryable<PlexServer> plexServer) => plexServer
-        .Include(x => x.PlexLibraries)
-        .IncludeDownloadTasks("PlexLibraries.DownloadTasks.")
-        .AsQueryable();
-
     public static IQueryable<PlexServer> IncludeConnections(this IQueryable<PlexServer> plexServer) => plexServer
         .Include(x => x.PlexServerConnections)
         .AsQueryable();

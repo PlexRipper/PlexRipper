@@ -26,4 +26,18 @@ public static class DownloadMediaExtensions
 
         return result;
     }
+
+    public static List<DownloadMediaDTO> MergeAndGroupList(this List<DownloadMediaDTO> downloadMediaList)
+    {
+        return downloadMediaList
+            .GroupBy(x => new { x.PlexServerId, x.PlexLibraryId, x.Type })
+            .Select(group => new DownloadMediaDTO
+            {
+                PlexServerId = group.Key.PlexServerId,
+                PlexLibraryId = group.Key.PlexLibraryId,
+                MediaIds = group.SelectMany(x => x.MediaIds).Distinct().ToList(),
+                Type = group.Key.Type,
+            })
+            .ToList();
+    }
 }

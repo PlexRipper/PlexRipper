@@ -1,9 +1,9 @@
 ﻿using System.Collections.Concurrent;
-using AutoMapper;
 using BackgroundServices.Contracts;
 using Logging.Interface;
+using PlexRipper.WebAPI;
 using PlexRipper.WebAPI.Common.DTO;
-using PlexRipper.WebAPI.SignalR.Common;
+using PlexRipper.WebAPI.Common.Mappers;
 using WebAPI.Contracts;
 
 namespace PlexRipper.BaseTests;
@@ -11,38 +11,22 @@ namespace PlexRipper.BaseTests;
 public class MockSignalRService : ISignalRService
 {
     private readonly ILog<MockSignalRService> _log;
-    private readonly IMapper _mapper;
+
     public BlockingCollection<DownloadTaskDTO> DownloadTaskUpdate { get; } = new();
     public BlockingCollection<FileMergeProgress> FileMergeProgressList { get; } = new();
 
     public BlockingCollection<ServerDownloadProgressDTO> ServerDownloadProgressList { get; } = new();
 
-    public MockSignalRService(ILog<MockSignalRService> log, IMapper mapper)
+    public MockSignalRService(ILog<MockSignalRService> log)
     {
         _log = log;
-        _mapper = mapper;
     }
 
     public void SendLibraryProgressUpdate(LibraryProgress libraryProgress) { }
 
-    public Task SendLibraryProgressUpdateAsync(int id, int received, int total, bool isRefreshing = true)
-    {
-        return Task.CompletedTask;
-    }
+    public Task SendLibraryProgressUpdateAsync(int id, int received, int total, bool isRefreshing = true) => Task.CompletedTask;
 
-    public Task SendDownloadTaskCreationProgressUpdate(int current, int total)
-    {
-        return Task.CompletedTask;
-    }
-
-    public Task SendDownloadTaskUpdateAsync(DownloadTask downloadTask, CancellationToken cancellationToken = default)
-    {
-        var downloadTaskDTO = _mapper.Map<DownloadTaskDTO>(downloadTask);
-        DownloadTaskUpdate.Add(downloadTaskDTO, cancellationToken);
-        _log.Verbose("{ClassName} => {@DownloadTaskDto}", nameof(MockSignalRService), downloadTaskDTO);
-
-        return Task.CompletedTask;
-    }
+    public Task SendDownloadTaskCreationProgressUpdate(int current, int total) => Task.CompletedTask;
 
     public Task SendFileMergeProgressUpdateAsync(FileMergeProgress fileMergeProgress, CancellationToken cancellationToken = default)
     {
@@ -51,24 +35,15 @@ public class MockSignalRService : ISignalRService
         return Task.CompletedTask;
     }
 
-    public Task SendNotificationAsync(Notification notification)
-    {
-        return Task.CompletedTask;
-    }
+    public Task SendNotificationAsync(Notification notification) => Task.CompletedTask;
 
-    public Task SendServerInspectStatusProgressAsync(InspectServerProgress progress)
-    {
-        return Task.CompletedTask;
-    }
+    public Task SendServerInspectStatusProgressAsync(InspectServerProgress progress) => Task.CompletedTask;
 
-    public Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress)
-    {
-        return Task.CompletedTask;
-    }
+    public Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress) => Task.CompletedTask;
 
-    public Task SendDownloadProgressUpdateAsync(int plexServerId, List<DownloadTask> downloadTasks, CancellationToken cancellationToken = default)
+    public Task SendDownloadProgressUpdateAsync(int plexServerId, List<DownloadTaskGeneric> downloadTasks, CancellationToken cancellationToken = default)
     {
-        var update = _mapper.Map<List<ServerDownloadProgressDTO>>(downloadTasks);
+        var update = downloadTasks.ToServerDownloadProgressDTOList();
 
         ServerDownloadProgressList.Add(update.First(), cancellationToken);
         _log.Verbose("{ClassName} => {@DownloadTaskDto}", nameof(MockSignalRService), update);
@@ -76,13 +51,7 @@ public class MockSignalRService : ISignalRService
         return Task.CompletedTask;
     }
 
-    public Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress)
-    {
-        return Task.CompletedTask;
-    }
+    public Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress) => Task.CompletedTask;
 
-    public Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate)
-    {
-        return Task.CompletedTask;
-    }
+    public Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate) => Task.CompletedTask;
 }

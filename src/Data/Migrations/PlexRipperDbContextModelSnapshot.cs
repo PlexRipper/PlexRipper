@@ -462,65 +462,20 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable("QRTZ_TRIGGERS", (string)null);
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadFileTask", b =>
+            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskBase", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("TEXT")
                         .HasColumnOrder(0);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("DownloadTaskId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("FilePathsCompressed")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DownloadTaskId");
-
-                    b.ToTable("FileTasks");
-                });
-
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTask", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(0);
-
-                    b.Property<DateTime>("Created")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(10);
-
-                    b.Property<long>("DataReceived")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(5);
 
                     b.Property<long>("DataTotal")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(6);
-
-                    b.Property<string>("DestinationDirectory")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(17);
-
-                    b.Property<int>("DestinationFolderId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("DownloadDirectory")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(16);
-
-                    b.Property<int>("DownloadFolderId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("DownloadSpeed")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(18);
 
                     b.Property<string>("DownloadStatus")
                         .IsRequired()
@@ -528,25 +483,6 @@ namespace PlexRipper.Data.Migrations
                         .IsUnicode(false)
                         .HasColumnType("TEXT")
                         .HasColumnOrder(8);
-
-                    b.Property<string>("DownloadTaskType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(9);
-
-                    b.Property<string>("FileLocationUrl")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(12);
-
-                    b.Property<string>("FileName")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(11);
-
-                    b.Property<long>("FileTransferSpeed")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(19);
 
                     b.Property<string>("FullTitle")
                         .HasColumnType("TEXT")
@@ -556,92 +492,16 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
 
-                    b.Property<string>("MediaType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .IsUnicode(false)
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(7);
-
-                    b.Property<int?>("ParentId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<decimal>("Percentage")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(4);
-
                     b.Property<int>("PlexLibraryId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("PlexServerId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<long>("Priority")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Quality")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(15);
-
-                    b.Property<int>("RootDownloadTaskId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ServerMachineIdentifier")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(20);
 
                     b.Property<string>("Title")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(2)
                         .UseCollation("NATURALSORT");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(3);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DestinationFolderId");
-
-                    b.HasIndex("DownloadFolderId");
-
-                    b.HasIndex("ParentId");
-
-                    b.HasIndex("PlexLibraryId");
-
-                    b.HasIndex("PlexServerId");
-
-                    b.ToTable("DownloadTasks");
-                });
-
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskBase", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(0);
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(10);
-
-                    b.Property<long>("DataTotal")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(6);
-
-                    b.Property<int>("DownloadStatus")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(8);
-
-                    b.Property<int>("Key")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(1);
-
-                    b.Property<int>("PlexLibraryId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PlexServerId")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -704,11 +564,8 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(5);
 
-                    b.Property<Guid?>("DownloadTaskFileBaseId")
+                    b.Property<Guid>("DownloadTaskId")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("DownloadTaskId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<long>("ElapsedTime")
                         .HasColumnType("INTEGER")
@@ -743,13 +600,57 @@ namespace PlexRipper.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DownloadTaskFileBaseId");
-
                     b.HasIndex("DownloadTaskId");
 
                     b.HasIndex("PlexServerId");
 
                     b.ToTable("DownloadWorkerTasks");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.FileTask", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DestinationDirectory")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("DownloadTaskId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DownloadTaskType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FilePathsCompressed")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexLibraryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlexServerId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlexLibraryId");
+
+                    b.HasIndex("PlexServerId");
+
+                    b.ToTable("FileTasks");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.FolderPath", b =>
@@ -1875,15 +1776,9 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(17);
 
-                    b.Property<int>("DestinationFolderId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("DownloadDirectory")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(16);
-
-                    b.Property<int>("DownloadFolderId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<long>("DownloadSpeed")
                         .HasColumnType("INTEGER")
@@ -1895,7 +1790,8 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<string>("FileName")
                         .HasColumnType("TEXT")
-                        .HasColumnOrder(11);
+                        .HasColumnOrder(11)
+                        .UseCollation("NATURALSORT");
 
                     b.Property<long>("FileTransferSpeed")
                         .HasColumnType("INTEGER")
@@ -1909,24 +1805,12 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(15);
 
-                    b.HasIndex("DestinationFolderId");
-
-                    b.HasIndex("DownloadFolderId");
-
                     b.ToTable((string)null);
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.DownloadTaskParentBase", b =>
                 {
                     b.HasBaseType("PlexRipper.Domain.DownloadTaskBase");
-
-                    b.Property<string>("FullTitle")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(14);
-
-                    b.Property<string>("Title")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(2);
 
                     b.Property<int>("Year")
                         .HasColumnType("INTEGER")
@@ -1939,13 +1823,10 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.HasBaseType("PlexRipper.Domain.DownloadTaskFileBase");
 
-                    b.Property<int>("ParentId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid?>("ParentId1")
+                    b.Property<Guid>("ParentId")
                         .HasColumnType("TEXT");
 
-                    b.HasIndex("ParentId1");
+                    b.HasIndex("ParentId");
 
                     b.ToTable("DownloadTaskMovieFile");
                 });
@@ -1954,13 +1835,10 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.HasBaseType("PlexRipper.Domain.DownloadTaskFileBase");
 
-                    b.Property<int>("ParentId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid?>("ParentId1")
+                    b.Property<Guid>("ParentId")
                         .HasColumnType("TEXT");
 
-                    b.HasIndex("ParentId1");
+                    b.HasIndex("ParentId");
 
                     b.ToTable("DownloadTaskTvShowEpisodeFile");
                 });
@@ -1983,10 +1861,10 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.HasBaseType("PlexRipper.Domain.DownloadTaskParentBase");
 
-                    b.Property<Guid?>("DownloadTaskTvShowSeasonId")
+                    b.Property<Guid>("ParentId")
                         .HasColumnType("TEXT");
 
-                    b.HasIndex("DownloadTaskTvShowSeasonId");
+                    b.HasIndex("ParentId");
 
                     b.ToTable("DownloadTaskTvShowEpisode");
                 });
@@ -1995,10 +1873,10 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.HasBaseType("PlexRipper.Domain.DownloadTaskParentBase");
 
-                    b.Property<Guid?>("DownloadTaskTvShowId")
+                    b.Property<Guid>("ParentId")
                         .HasColumnType("TEXT");
 
-                    b.HasIndex("DownloadTaskTvShowId");
+                    b.HasIndex("ParentId");
 
                     b.ToTable("DownloadTaskTvShowSeason");
                 });
@@ -2058,59 +1936,6 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("JobDetail");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadFileTask", b =>
-                {
-                    b.HasOne("PlexRipper.Domain.DownloadTask", "DownloadTask")
-                        .WithMany()
-                        .HasForeignKey("DownloadTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DownloadTask");
-                });
-
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTask", b =>
-                {
-                    b.HasOne("PlexRipper.Domain.FolderPath", "DestinationFolder")
-                        .WithMany()
-                        .HasForeignKey("DestinationFolderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PlexRipper.Domain.FolderPath", "DownloadFolder")
-                        .WithMany()
-                        .HasForeignKey("DownloadFolderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PlexRipper.Domain.DownloadTask", "Parent")
-                        .WithMany("Children")
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
-                        .WithMany("DownloadTasks")
-                        .HasForeignKey("PlexLibraryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
-                        .WithMany()
-                        .HasForeignKey("PlexServerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DestinationFolder");
-
-                    b.Navigation("DownloadFolder");
-
-                    b.Navigation("Parent");
-
-                    b.Navigation("PlexLibrary");
-
-                    b.Navigation("PlexServer");
-                });
-
             modelBuilder.Entity("PlexRipper.Domain.DownloadTaskBase", b =>
                 {
                     b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
@@ -2132,22 +1957,18 @@ namespace PlexRipper.Data.Migrations
 
             modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerLog", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.DownloadWorkerTask", "DownloadTask")
+                    b.HasOne("PlexRipper.Domain.DownloadWorkerTask", "DownloadWorkerTask")
                         .WithMany("DownloadWorkerTaskLogs")
                         .HasForeignKey("DownloadWorkerTaskId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("DownloadTask");
+                    b.Navigation("DownloadWorkerTask");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerTask", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.DownloadTaskFileBase", null)
-                        .WithMany("DownloadWorkerTasks")
-                        .HasForeignKey("DownloadTaskFileBaseId");
-
-                    b.HasOne("PlexRipper.Domain.DownloadTask", "DownloadTask")
+                    b.HasOne("PlexRipper.Domain.DownloadTaskFileBase", "DownloadTask")
                         .WithMany("DownloadWorkerTasks")
                         .HasForeignKey("DownloadTaskId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2160,6 +1981,25 @@ namespace PlexRipper.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("DownloadTask");
+
+                    b.Navigation("PlexServer");
+                });
+
+            modelBuilder.Entity("PlexRipper.Domain.FileTask", b =>
+                {
+                    b.HasOne("PlexRipper.Domain.PlexLibrary", "PlexLibrary")
+                        .WithMany()
+                        .HasForeignKey("PlexLibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PlexRipper.Domain.PlexServer", "PlexServer")
+                        .WithMany()
+                        .HasForeignKey("PlexServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PlexLibrary");
 
                     b.Navigation("PlexServer");
                 });
@@ -2434,30 +2274,13 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("TvShow");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskFileBase", b =>
-                {
-                    b.HasOne("PlexRipper.Domain.FolderPath", "DestinationFolder")
-                        .WithMany()
-                        .HasForeignKey("DestinationFolderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PlexRipper.Domain.FolderPath", "DownloadFolder")
-                        .WithMany()
-                        .HasForeignKey("DownloadFolderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DestinationFolder");
-
-                    b.Navigation("DownloadFolder");
-                });
-
             modelBuilder.Entity("PlexRipper.Domain.DownloadTaskMovieFile", b =>
                 {
                     b.HasOne("PlexRipper.Domain.DownloadTaskMovie", "Parent")
                         .WithMany("Children")
-                        .HasForeignKey("ParentId1");
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Parent");
                 });
@@ -2466,23 +2289,33 @@ namespace PlexRipper.Data.Migrations
                 {
                     b.HasOne("PlexRipper.Domain.DownloadTaskTvShowEpisode", "Parent")
                         .WithMany("Children")
-                        .HasForeignKey("ParentId1");
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowEpisode", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.DownloadTaskTvShowSeason", null)
+                    b.HasOne("PlexRipper.Domain.DownloadTaskTvShowSeason", "Parent")
                         .WithMany("Children")
-                        .HasForeignKey("DownloadTaskTvShowSeasonId");
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowSeason", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.DownloadTaskTvShow", null)
+                    b.HasOne("PlexRipper.Domain.DownloadTaskTvShow", "Parent")
                         .WithMany("Children")
-                        .HasForeignKey("DownloadTaskTvShowId");
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzJobDetail", b =>
@@ -2499,13 +2332,6 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("SimplePropertyTriggers");
 
                     b.Navigation("SimpleTriggers");
-                });
-
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTask", b =>
-                {
-                    b.Navigation("Children");
-
-                    b.Navigation("DownloadWorkerTasks");
                 });
 
             modelBuilder.Entity("PlexRipper.Domain.DownloadWorkerTask", b =>
@@ -2532,8 +2358,6 @@ namespace PlexRipper.Data.Migrations
 
             modelBuilder.Entity("PlexRipper.Domain.PlexLibrary", b =>
                 {
-                    b.Navigation("DownloadTasks");
-
                     b.Navigation("Movies");
 
                     b.Navigation("PlexAccountLibraries");

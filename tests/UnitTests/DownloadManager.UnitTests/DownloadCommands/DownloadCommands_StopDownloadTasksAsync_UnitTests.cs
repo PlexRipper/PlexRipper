@@ -18,30 +18,30 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
         await SetupDatabase(config => config.DisableForeignKeyCheck = true);
 
         // Act
-        var result = await _sut.Handle(new StopDownloadTaskCommand(0), CancellationToken.None);
+        var result = await _sut.Handle(new StopDownloadTaskCommand(Guid.Empty), CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
+        result.Has404NotFoundError().ShouldBeTrue();
     }
 
     [Fact]
     public async Task ShouldHaveFailedResult_WhenTheDownloadTaskCouldNotBeStopped()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.MovieDownloadTasksCount = 2;
-            config.DisableForeignKeyCheck = true;
-        });
-        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StopDownloadTaskJob(It.IsAny<int>())).ReturnsAsync(Result.Fail("Error"));
+        await SetupDatabase(config => config.MovieDownloadTasksCount = 2);
+        var movieDownloadTasks = await GetDbContext().DownloadTaskMovie.ToListAsync();
+
+        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StopDownloadTaskJob(It.IsAny<Guid>())).ReturnsAsync(Result.Fail("Error"));
         mock.Mock<IDirectorySystem>().Setup(x => x.DeleteAllFilesFromDirectory(It.IsAny<string>())).Returns(Result.Ok());
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdated>).Returns(Task.CompletedTask);
+        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>).Returns(Task.CompletedTask);
 
         // Act
-        var result = await _sut.Handle(new StopDownloadTaskCommand(1), CancellationToken.None);
+        var result = await _sut.Handle(new StopDownloadTaskCommand(movieDownloadTasks.First().Id), CancellationToken.None);
 
         // Assert
         result.IsFailed.ShouldBeTrue();
+        result.Has404NotFoundError().ShouldNotBe(true);
     }
 
     [Fact]
@@ -52,29 +52,24 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
         await SetupDatabase(config =>
         {
             config.MovieDownloadTasksCount = 2;
-            config.DisableForeignKeyCheck = true;
         });
+        var movieDownloadTasks = await DbContext.GetAllDownloadTasksAsync();
 
-        var downloadTasks = await DbContext.DownloadTasks.Include(downloadTask => downloadTask.Children).ToListAsync();
-        downloadTasks = downloadTasks.Flatten(x => x.Children).ToList();
-        var downloadTaskIds = downloadTasks.Select(x => x.Id).ToList();
-
-        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StopDownloadTaskJob(It.IsAny<int>())).ReturnOk();
+        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StopDownloadTaskJob(It.IsAny<Guid>())).ReturnOk();
         mock.Mock<IDirectorySystem>().Setup(x => x.DeleteAllFilesFromDirectory(It.IsAny<string>())).Returns(Result.Ok());
-        mock.SetupMediator(It.IsAny<DownloadTaskUpdated>).Returns(Task.CompletedTask);
+        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>).Returns(Task.CompletedTask);
 
         // Act
-        var result = await _sut.Handle(new StopDownloadTaskCommand(downloadTaskIds.First()), CancellationToken.None);
+        var result = await _sut.Handle(new StopDownloadTaskCommand(movieDownloadTasks.First().Id), CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
         mock.Mock<IDownloadTaskScheduler>()
-            .Verify(x => x.StopDownloadTaskJob(It.IsAny<int>()), Times.Once);
-        mock.VerifyMediator(It.IsAny<DownloadTaskUpdated>, Times.Once);
+            .Verify(x => x.StopDownloadTaskJob(It.IsAny<Guid>()), Times.Once);
+        mock.VerifyMediator(It.IsAny<DownloadTaskUpdatedNotification>, Times.Once);
         var downloadTasksDb = await GetDbContext()
-            .DownloadTasks
-            .IncludeDownloadTasks()
-            .FirstOrDefaultAsync(x => x.Id == downloadTaskIds.First());
+            .DownloadTaskMovie
+            .FirstOrDefaultAsync(x => x.Id == movieDownloadTasks.First().Id);
         downloadTasksDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
     }
 }

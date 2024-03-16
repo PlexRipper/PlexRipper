@@ -1,8 +1,7 @@
 using Data.Contracts;
-using PlexRipper.Data.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationTests.DownloadManager.DownloadTaskScheduler;
-
 
 public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
 {
@@ -29,12 +28,9 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
 
         await CreateContainer(config => { config.DownloadSpeedLimitInKib = 5000; });
 
-        var downloadTask = DbContext
-            .DownloadTasks
-            .IncludeDownloadTasks()
-            .FirstOrDefault();
-        downloadTask.ShouldNotBeNull();
-        var childDownloadTask = downloadTask.Children[0];
+        var movieDownloadTasks = await DbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
+
+        var childDownloadTask = movieDownloadTasks[0].Children[0];
 
         // Act
         var startResult = await Container.DownloadTaskScheduler.StartDownloadTaskJob(childDownloadTask.Id, childDownloadTask.PlexServerId);
@@ -45,9 +41,7 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
         // Assert
         startResult.IsSuccess.ShouldBeTrue(startResult.ToString());
         stopResult.IsSuccess.ShouldBeTrue(stopResult.ToString());
-        var downloadTaskDb = DbContext.DownloadTasks
-            .IncludeDownloadTasks()
-            .FirstOrDefault(x => x.Id == childDownloadTask.Id);
+        var downloadTaskDb = await IDbContext.GetDownloadTaskAsync(childDownloadTask.ToKey());
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
     }

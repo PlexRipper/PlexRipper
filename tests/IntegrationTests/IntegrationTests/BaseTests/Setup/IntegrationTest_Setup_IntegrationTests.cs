@@ -17,12 +17,10 @@ public class IntegrationTest_Setup : BaseIntegrationTests
         await CreateContainer();
         Container.FileSystem.ShouldNotBeNull();
         Container.GetDownloadQueue.ShouldNotBeNull();
-        Container.GetDownloadTaskFactory.ShouldNotBeNull();
-        Container.GetDownloadTaskValidator.ShouldNotBeNull();
         Container.GetPlexApiService.ShouldNotBeNull();
         Container.Mediator.ShouldNotBeNull();
         Container.PathProvider.ShouldNotBeNull();
-        Container.PlexRipperDbContext.ShouldNotBeNull();
+        DbContext.ShouldNotBeNull();
     }
 
     [Fact]
@@ -31,14 +29,11 @@ public class IntegrationTest_Setup : BaseIntegrationTests
         // Arrange
         await CreateContainer(9999);
 
-        // Act
-        var dbContext = Container.PlexRipperDbContext;
-
         // Assert
         Container.ShouldNotBeNull();
-        dbContext.ShouldNotBeNull();
-        dbContext.DatabaseName.ShouldNotBeEmpty();
-        dbContext.DatabaseName.ShouldContain("memory_database");
+        DbContext.ShouldNotBeNull();
+        DbContext.DatabaseName.ShouldNotBeEmpty();
+        DbContext.DatabaseName.ShouldContain("memory_database");
     }
 
     [Fact]
@@ -48,11 +43,8 @@ public class IntegrationTest_Setup : BaseIntegrationTests
         await CreateContainer(3457);
         await CreateContainer(9654);
 
-        // Act
-        var dbContext = Container.PlexRipperDbContext;
-
         // Assert
         Container.ShouldNotBeNull();
-        dbContext.ShouldNotBeNull();
+        DbContext.ShouldNotBeNull();
     }
 }

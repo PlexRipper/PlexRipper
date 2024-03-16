@@ -1,17 +1,16 @@
 using Application.Contracts;
 using Data.Contracts;
-using DownloadManager.Contracts;
 using FluentValidation;
 
 namespace PlexRipper.Application;
 
-public record StartDownloadTaskCommand(int DownloadTaskId) : IRequest<Result>;
+public record StartDownloadTaskCommand(Guid DownloadTaskGuid) : IRequest<Result>;
 
 public class StartDownloadTaskCommandValidator : AbstractValidator<StartDownloadTaskCommand>
 {
     public StartDownloadTaskCommandValidator()
     {
-        RuleFor(x => x.DownloadTaskId).GreaterThan(0);
+        RuleFor(x => x.DownloadTaskGuid).NotEmpty();
     }
 }
 
@@ -30,14 +29,14 @@ public class StartDownloadTaskCommandHandler : IRequestHandler<StartDownloadTask
 
     public async Task<Result> Handle(StartDownloadTaskCommand command, CancellationToken cancellationToken)
     {
-        var downloadTask = await _dbContext.DownloadTasks.GetAsync(command.DownloadTaskId, cancellationToken);
+        var downloadTask = await _dbContext.GetDownloadTaskAsync(command.DownloadTaskGuid, cancellationToken: cancellationToken);
         if (downloadTask is null)
-            return ResultExtensions.EntityNotFound(nameof(DownloadTask), command.DownloadTaskId).LogWarning();
+            return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.DownloadTaskGuid).LogWarning();
 
         if (downloadTask.IsDownloadable)
             return await _downloadTaskScheduler.StartDownloadTaskJob(downloadTask.Id, downloadTask.PlexServerId);
 
-        await _mediator.Publish(new CheckDownloadQueue(downloadTask.PlexServerId), cancellationToken);
+        await _mediator.Publish(new CheckDownloadQueueNotification(downloadTask.PlexServerId), cancellationToken);
 
         return Result.Fail($"Failed to start downloadTask {downloadTask.FullTitle}, it's not directly downloadable.");
     }

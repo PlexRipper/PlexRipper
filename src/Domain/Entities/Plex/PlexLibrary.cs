@@ -107,8 +107,6 @@ public class PlexLibrary : BaseEntity
 
     public List<PlexAccountLibrary> PlexAccountLibraries { get; set; } = new();
 
-    public List<DownloadTask> DownloadTasks { get; set; } = new();
-
     #endregion
 
     #region Helpers
@@ -262,7 +260,6 @@ public class PlexLibrary : BaseEntity
         Movies = null;
         TvShows = null;
         PlexAccountLibraries = null;
-        DownloadTasks = null;
     }
 
     #endregion

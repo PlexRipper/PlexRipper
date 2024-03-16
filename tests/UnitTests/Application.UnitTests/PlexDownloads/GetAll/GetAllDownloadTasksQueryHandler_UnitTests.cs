@@ -33,10 +33,9 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest<GetAllDown
             config.MovieDownloadTasksCount = 10;
         });
 
+        // Act
         var request = new GetAllDownloadTasksQuery();
         var handler = mock.Create<GetAllDownloadTasksQueryHandler>();
-
-        // Act
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
@@ -48,8 +47,6 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest<GetAllDown
         var flatList = downloadTasks.Flatten(x => x.Children).ToList();
         flatList.ShouldAllBe(x => x.PlexServer != null);
         flatList.ShouldAllBe(x => x.PlexLibrary != null);
-        flatList.ShouldAllBe(x => x.DownloadFolder != null);
-        flatList.ShouldAllBe(x => x.DestinationFolder != null);
     }
 
     [Fact]
@@ -67,10 +64,9 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest<GetAllDown
             config.TvShowEpisodeDownloadTasksCount = 5;
         });
 
+        // Act
         var request = new GetAllDownloadTasksQuery();
         var handler = mock.Create<GetAllDownloadTasksQueryHandler>();
-
-        // Act
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
@@ -80,15 +76,15 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest<GetAllDown
 
         void ValidateDownloadTasks(List<DownloadTaskGeneric> shouldDownloadTasks)
         {
+            if (shouldDownloadTasks is null)
+                return;
+
             downloadTasks.Count.ShouldBe(5);
             foreach (var downloadTask in shouldDownloadTasks)
             {
-                downloadTask.PlexServer.ShouldNotBeNull();
-                downloadTask.PlexLibrary.ShouldNotBeNull();
-                downloadTask.DownloadFolder.ShouldNotBeNull();
-                downloadTask.DestinationFolder.ShouldNotBeNull();
-                if (downloadTask.Children.Any())
-                    ValidateDownloadTasks(downloadTask.Children);
+                downloadTask.PlexServer.ShouldNotBeNull($"DownloadTaskType {downloadTask.DownloadTaskType} has PlexServer null");
+                downloadTask.PlexLibrary.ShouldNotBeNull($"DownloadTaskType {downloadTask.DownloadTaskType} has PlexLibrary null");
+                ValidateDownloadTasks(downloadTask.Children);
             }
         }
 

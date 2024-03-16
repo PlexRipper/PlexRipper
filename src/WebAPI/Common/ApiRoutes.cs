@@ -33,15 +33,9 @@ public static class ApiRoutes
 
         public static string PostStopCommand => Controller + "/stop";
 
-        public static string GetStartCommand(int id)
-        {
-            return Controller + "/start/" + id;
-        }
+        public static string GetStartCommand(Guid id) => Controller + "/start/" + id;
 
-        public static string GetPauseCommand(int id)
-        {
-            return Controller + "/pause/" + id;
-        }
+        public static string GetPauseCommand(Guid id) => Controller + "/pause/" + id;
     }
 
     public static class Account

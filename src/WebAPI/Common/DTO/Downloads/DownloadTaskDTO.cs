@@ -76,13 +76,13 @@ public class DownloadTaskDTO
     public string Quality { get; set; }
 
     /// <summary>
-    /// The nested <see cref="DownloadTask"/> used for seasons and episodes.
+    /// The nested <see cref="DownloadTaskGeneric"/> used for seasons and episodes.
     /// "Required = Required.Default" is used for ensuring it's optional in the Typescript generating.
     /// </summary>
     public List<DownloadTaskDTO> Children { get; set; }
 
     /// <summary>
-    /// The actions that can be taken on this <see cref="DownloadTask"/>.
+    /// The actions that can be taken on this <see cref="DownloadTaskGeneric"/>.
     /// This is filled by the front-end and depends on the DownloadStatus
     /// </summary>
     public string[] Actions { get; set; }

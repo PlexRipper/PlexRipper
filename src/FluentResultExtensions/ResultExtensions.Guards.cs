@@ -52,7 +52,10 @@ public static partial class ResultExtensions
         Create204NoContentResult<T>(value, $"The {queryName} returned an empty result with {entityName} id: {entityId}");
 
     public static Result IsInvalidId(string parameterName, int value = 0) =>
-        Create400BadRequestResult($"The {parameterName} parameter was an invalid id of {value}");
+        Create400BadRequestResult($"The {parameterName} parameter has an invalid id of {value}");
+
+    public static Result IsInvalidId(string parameterName, Guid value) =>
+        Create400BadRequestResult($"The {parameterName} parameter has an invalid id of {value}");
 
     /// <summary>
     /// Creates a new Result with a 404NotFound error set.

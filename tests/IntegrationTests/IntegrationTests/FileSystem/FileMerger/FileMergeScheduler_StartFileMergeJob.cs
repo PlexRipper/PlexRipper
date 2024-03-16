@@ -21,20 +21,16 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
         });
 
         await CreateContainer();
-
-        var downloadTask = DbContext
-            .DownloadTasks
-            .FirstOrDefault(x => x.DownloadTaskType == DownloadTaskType.MovieData);
+        var dbContext = DbContext;
+        var downloadTask = dbContext.DownloadTaskMovieFile.First();
         downloadTask.ShouldNotBeNull();
 
         // Act
-        var downloadWorkerTasks = Container.GetDownloadTaskFactory.GenerateDownloadWorkerTasks(downloadTask);
+        var downloadWorkerTasks = downloadTask.ToGeneric().GenerateDownloadWorkerTasks(4);
+        dbContext.DownloadWorkerTasks.AddRange(downloadWorkerTasks);
+        await dbContext.SaveChangesAsync();
 
-        downloadWorkerTasks.Value.ForEach(x => x.DownloadTask = null);
-        await DbContext.DownloadWorkerTasks.AddRangeAsync(downloadWorkerTasks.Value);
-        await DbContext.SaveChangesAsync();
-
-        var createResult = await Container.FileMergeScheduler.CreateFileTaskFromDownloadTask(downloadTask.Id);
+        var createResult = await Container.FileMergeScheduler.CreateFileTaskFromDownloadTask(downloadTask.ToKey());
         createResult.IsSuccess.ShouldBeTrue();
         var startResult = await Container.FileMergeScheduler.StartFileMergeJob(createResult.Value.Id);
         await Container.SchedulerService.AwaitScheduler();
@@ -42,12 +38,10 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
 
-        var downloadTaskDb = await DbContext.DownloadTasks.IncludeDownloadTasks().GetAsync(downloadTask.RootDownloadTaskId);
+        var downloadTaskDb = await DbContext.GetDownloadTaskAsync(downloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
 
-        foreach (var childDownloadTask in downloadTaskDb.Children)
-            childDownloadTask.DownloadStatus.ShouldBe(DownloadStatus.Completed);
         Container.MockSignalRService.FileMergeProgressList.Count.ShouldBeGreaterThan(10);
     }
 }

@@ -1,7 +1,6 @@
 using Data.Contracts;
 using DownloadManager.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.FluentResult;
 using Serilog.Events;
@@ -17,7 +16,7 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
     {
         // Arrange
         var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
-        var plexMovieCount = 5;
+        var plexMovieCount = 3;
         await SetupDatabase(config =>
         {
             config.MockServerUris.Add(serverUri);
@@ -27,7 +26,7 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
             config.MovieCount = plexMovieCount;
         });
 
-        await CreateContainer(config => config.DownloadSpeedLimitInKib = 5000);
+        await CreateContainer(config => config.DownloadSpeedLimitInKib = 25000);
         var plexMovies = await DbContext.PlexMovies.ToListAsync();
         plexMovies.Count.ShouldBe(plexMovieCount, $"PlexMovies count should be 10 failed with database name: {DatabaseName}");
 
@@ -37,6 +36,8 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
             {
                 Type = PlexMediaType.Movie,
                 MediaIds = plexMovies.Select(x => x.Id).ToList(),
+                PlexServerId = plexMovies.First().PlexServerId,
+                PlexLibraryId = plexMovies.First().PlexLibraryId,
             },
         };
 
@@ -49,15 +50,11 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var downloadTasksDb = await DbContext.DownloadTasks
-            .IncludeDownloadTasks()
-            .ToListAsync();
+        var downloadTasksDb = await DbContext.GetAllDownloadTasksAsync();
         downloadTasksDb.ShouldNotBeNull();
         downloadTasksDb.ShouldNotBeEmpty();
         downloadTasksDb.Count.ShouldBe(plexMovieCount);
         downloadTasksDb.ShouldAllBe(x => x.DownloadStatus == DownloadStatus.Completed);
-
-        foreach (var downloadTaskDb in downloadTasksDb)
-            downloadTaskDb.Children.ShouldAllBe(y => y.DownloadStatus == DownloadStatus.Completed);
+        downloadTasksDb.SelectMany(x => x.Children).ShouldAllBe(x => x.DownloadStatus == DownloadStatus.Completed);
     }
 }

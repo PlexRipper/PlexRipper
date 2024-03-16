@@ -30,11 +30,10 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var db = Container.PlexRipperDbContext;
-        db.PlexAccounts.ToList().Count.ShouldBe(1);
+        DbContext.PlexAccounts.ToList().Count.ShouldBe(1);
 
         // Ensure account has been created
-        var plexAccountDb = db.PlexAccounts
+        var plexAccountDb = DbContext.PlexAccounts
             .Include(x => x.PlexAccountServers)
             .ThenInclude(x => x.PlexServer)
             .Include(x => x.PlexAccountLibraries)
@@ -47,8 +46,8 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         plexAccountDb.PlexAccountLibraries.Count.ShouldBe(libraryCount);
 
         // Ensure PlexServer has been created
-        db.PlexServers.ToList().Count.ShouldBe(1);
-        var plexServersDb = db.PlexServers.IncludeLibrariesWithMedia().FirstOrDefault();
+        DbContext.PlexServers.ToList().Count.ShouldBe(1);
+        var plexServersDb = DbContext.PlexServers.IncludeLibrariesWithMedia().FirstOrDefault();
         plexServersDb.MachineIdentifier.ShouldNotBeEmpty();
         plexServersDb.PlexLibraries.Count.ShouldBe(libraryCount);
 

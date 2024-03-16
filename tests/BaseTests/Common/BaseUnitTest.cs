@@ -16,7 +16,6 @@ public class BaseUnitTest : IDisposable
 
     private string _databaseName;
     protected PlexRipperDbContext DbContext;
-    protected IPlexRipperDbContext IDbContext => DbContext;
     private bool disableForeignKeyCheck;
     private bool isDatabaseSetup;
     protected ILog _log;
@@ -43,6 +42,13 @@ public class BaseUnitTest : IDisposable
     #region Properties
 
     protected int Seed { get; set; } = 0;
+
+    /// <summary>
+    /// Gets a new instance of <see cref="PlexRipperDbContext"/> for every time it is called.
+    /// </summary>
+
+    // ReSharper disable once InconsistentNaming
+    protected IPlexRipperDbContext IDbContext => GetDbContext();
 
     #endregion
 

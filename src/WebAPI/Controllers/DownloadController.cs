@@ -6,8 +6,9 @@ using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
 using PlexRipper.WebAPI.Common.DTO;
+using PlexRipper.WebAPI.Common.Extensions;
 using PlexRipper.WebAPI.Common.FluentResult;
-using PlexRipper.WebAPI.SignalR.Common;
+using PlexRipper.WebAPI.Common.Mappers;
 
 namespace PlexRipper.WebAPI.Controllers;
 
@@ -42,7 +43,8 @@ public class DownloadController : BaseController
         if (result.IsFailed)
             return InternalServerError(result.ToResult());
 
-        return ToActionResult<List<DownloadTaskGeneric>, List<ServerDownloadProgressDTO>>(result);
+        var returnResult = result.ToResultDTO(result.Value.ToServerDownloadProgressDTOList());
+        return Ok(returnResult);
     }
 
     /// <summary>
@@ -52,7 +54,7 @@ public class DownloadController : BaseController
     [HttpPost("clear")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> ClearCompleted([FromBody] List<int> downloadTaskIds)
+    public async Task<IActionResult> ClearCompleted([FromBody] List<Guid> downloadTaskIds)
     {
         var result = await _mediator.Send(new ClearCompletedDownloadTasksCommand(downloadTaskIds));
         return ToActionResult(result);
@@ -78,55 +80,55 @@ public class DownloadController : BaseController
 
     #region BatchCommands
 
-    // GET api/<DownloadController>/start/{id:int}
-    [HttpGet("start/{id:int}")]
+    // GET api/<DownloadController>/start/{guid:guid}
+    [HttpGet("start/{guid:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> StartCommand(int id)
+    public async Task<IActionResult> StartCommand(Guid guid)
     {
-        if (id <= 0)
+        if (guid == Guid.Empty)
             return BadRequestInvalidId();
 
-        var startResult = await _mediator.Send(new StartDownloadTaskCommand(id));
+        var startResult = await _mediator.Send(new StartDownloadTaskCommand(guid));
         return ToActionResult(startResult);
     }
 
-    // GET api/<DownloadController>/pause/{id:int}
-    [HttpGet("pause/{id:int}")]
+    // GET api/<DownloadController>/pause/{guid:guid}
+    [HttpGet("pause/{guid:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> PauseCommand(int id)
+    public async Task<IActionResult> PauseCommand(Guid guid)
     {
-        if (id <= 0)
+        if (guid == Guid.Empty)
             return BadRequestInvalidId();
 
-        var pauseResult = await _mediator.Send(new PauseDownloadTaskCommand(id));
+        var pauseResult = await _mediator.Send(new PauseDownloadTaskCommand(guid));
         return ToActionResult(pauseResult);
     }
 
-    // GET api/<DownloadController>/restart/{id:int}
-    [HttpGet("restart/{id:int}")]
+    // GET api/<DownloadController>/restart/{guid:guid}
+    [HttpGet("restart/{guid:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> RestartCommand(int id)
+    public async Task<IActionResult> RestartCommand(Guid guid)
     {
-        if (id <= 0)
+        if (guid == Guid.Empty)
             return BadRequestInvalidId();
 
-        var restartResult = await _mediator.Send(new RestartDownloadTaskCommand(id));
+        var restartResult = await _mediator.Send(new RestartDownloadTaskCommand(guid));
         return ToActionResult(restartResult);
     }
 
-    // GET: api/(DownloadController)/stop/{id:int}
-    [HttpGet("stop/{id:int}")]
+    // GET: api/(DownloadController)/stop/{guid:guid}
+    [HttpGet("stop/{guid:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> StopCommand(int id)
+    public async Task<IActionResult> StopCommand(Guid guid)
     {
-        if (id <= 0)
+        if (guid == Guid.Empty)
             return BadRequestInvalidId();
 
-        var stopResult = await _mediator.Send(new StopDownloadTaskCommand(id));
+        var stopResult = await _mediator.Send(new StopDownloadTaskCommand(guid));
         return ToActionResult(stopResult);
     }
 
@@ -138,7 +140,7 @@ public class DownloadController : BaseController
     [HttpPost("delete")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> DeleteCommand([FromBody] List<int> downloadTaskIds)
+    public async Task<IActionResult> DeleteCommand([FromBody] List<Guid> downloadTaskIds)
     {
         if (!downloadTaskIds.Any())
             return BadRequest(Result.Fail("No list of download task Id's was given in the request body"));

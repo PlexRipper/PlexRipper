@@ -18,7 +18,7 @@ public class GetAllDownloadTasksQueryHandler : IRequestHandler<GetAllDownloadTas
 
     public async Task<Result<List<DownloadTaskGeneric>>> Handle(GetAllDownloadTasksQuery request, CancellationToken cancellationToken)
     {
-        var downloadList = await _dbContext.GetAllDownloadTasksAsync(cancellationToken);
+        var downloadList = await _dbContext.GetAllDownloadTasksAsync(cancellationToken: cancellationToken);
         return Result.Ok(downloadList);
     }
 }

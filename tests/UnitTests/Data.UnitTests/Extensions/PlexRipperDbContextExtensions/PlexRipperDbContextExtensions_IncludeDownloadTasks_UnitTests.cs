@@ -1,5 +1,4 @@
 ﻿using Data.Contracts;
-using PlexRipper.Data.Common;
 
 namespace Data.UnitTests.Extensions;
 
@@ -21,7 +20,7 @@ public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests : Base
         });
 
         // Act
-        var downloadTasks = DbContext.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToList();
+        var downloadTasks = DbContext.DownloadTaskMovie.IncludeAll().ToList();
 
         // Assert
         downloadTasks.Count.ShouldBe(5);
@@ -50,11 +49,11 @@ public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests : Base
         });
 
         // Act
-        var downloadTasksDb = DbContext.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToList();
+        var downloadTasksDb = DbContext.DownloadTaskTvShow.IncludeAll().ToList();
 
         // Assert
         downloadTasksDb.Count.ShouldBe(5);
-        downloadTasksDb.Flatten(x => x.Children).Count().ShouldBe(280);
+        downloadTasksDb.Sum(x => x.Count).ShouldBe(280);
     }
 
     [Fact]
@@ -64,50 +63,25 @@ public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests : Base
         Seed = 3882;
         await SetupDatabase(config =>
         {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.TvShowCount = 10;
-            config.TvShowSeasonCount = 10;
-            config.TvShowEpisodeCount = 10;
             config.TvShowDownloadTasksCount = 5;
             config.TvShowSeasonDownloadTasksCount = 5;
             config.TvShowEpisodeDownloadTasksCount = 5;
         });
 
         // Act
-        var downloadTasksDb = DbContext.DownloadTasks.IncludeDownloadTasks().Where(x => x.ParentId == null).ToList();
+        var downloadTaskTvShows = DbContext.DownloadTaskTvShow.IncludeAll().ToList();
 
         // Assert
-        downloadTasksDb.Count.ShouldBe(5);
-        foreach (var downloadTask in downloadTasksDb)
+        downloadTaskTvShows.Count.ShouldBe(5);
+        foreach (var downloadTaskTvShow in downloadTaskTvShows)
         {
-            downloadTask.Children.Count.ShouldBe(5);
-            downloadTask.Parent.ShouldBeNull();
-            foreach (var downloadTask2 in downloadTask.Children)
+            downloadTaskTvShow.Children.Count.ShouldBe(5);
+            foreach (var downloadTaskTvShowSeason in downloadTaskTvShow.Children)
             {
-                downloadTask2.Children.Count.ShouldBe(5);
-                downloadTask2.Parent.ShouldNotBeNull();
-                foreach (var downloadTask3 in downloadTask2.Children)
-                {
-                    downloadTask3.Parent.ShouldNotBeNull();
-                    downloadTask3.Children.Count.ShouldBe(1);
-                }
+                downloadTaskTvShowSeason.Children.Count.ShouldBe(5);
+                foreach (var downloadTaskEpisode in downloadTaskTvShowSeason.Children)
+                    downloadTaskEpisode.Children.Count.ShouldBe(1);
             }
         }
-
-        void CheckChildren(List<DownloadTask> downloadTasks)
-        {
-            foreach (var downloadTask in downloadTasks)
-            {
-                downloadTask.PlexServer.ShouldNotBeNull();
-                downloadTask.PlexLibrary.ShouldNotBeNull();
-                downloadTask.DownloadFolder.ShouldNotBeNull();
-                downloadTask.DestinationFolder.ShouldNotBeNull();
-                if (downloadTask.Children.Any())
-                    CheckChildren(downloadTask.Children);
-            }
-        }
-
-        CheckChildren(downloadTasksDb);
     }
 }

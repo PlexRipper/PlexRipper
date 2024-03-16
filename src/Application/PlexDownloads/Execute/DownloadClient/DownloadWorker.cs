@@ -5,7 +5,6 @@ using ByteSizeLib;
 using Data.Contracts;
 using DownloadManager.Contracts;
 using Logging.Interface;
-using PlexRipper.DownloadManager;
 using RestSharp;
 using Timer = System.Timers.Timer;
 
@@ -13,7 +12,7 @@ namespace PlexRipper.Application;
 
 /// <summary>
 /// The <see cref="DownloadWorker"/> is part of the multi-threaded <see cref="PlexDownloadClient"/>
-/// and will download a part of the <see cref="DownloadTask"/>.
+/// and will download a part of the <see cref="DownloadTaskGeneric"/>.
 /// </summary>
 public class DownloadWorker : IDisposable
 {
@@ -159,7 +158,10 @@ public class DownloadWorker : IDisposable
                 DownloadWorkerTask.FileLocationUrl, cancellationToken);
 
             if (downloadUrlResult.IsFailed)
-                return downloadUrlResult.LogError();
+            {
+                SendDownloadWorkerError(downloadUrlResult.ToResult());
+                return downloadUrlResult.ToResult();
+            }
 
             var downloadUrl = downloadUrlResult.Value;
 

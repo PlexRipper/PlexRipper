@@ -1,5 +1,5 @@
 ﻿using System.Reactive.Subjects;
-using PlexRipper.FileSystem.Common;
+using FileSystem.Contracts;
 
 namespace PlexRipper.BaseTests;
 

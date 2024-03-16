@@ -1,6 +1,5 @@
 using Application.Contracts;
 using Data.Contracts;
-using DownloadManager.Contracts;
 using FluentValidation;
 using Logging.Interface;
 
@@ -9,15 +8,15 @@ namespace PlexRipper.Application;
 /// <summary>
 /// Starts a queued task immediately.
 /// </summary>
-/// <param name="DownloadTaskId">The ids of the <see cref="DownloadTask"/> to start.</param>
+/// <param name="DownloadTaskId">The ids of the <see cref="DownloadTaskGeneric"/> to start.</param>
 /// <returns>Is successful.</returns>
-public record ResumeDownloadTaskCommand(int DownloadTaskId) : IRequest<Result>;
+public record ResumeDownloadTaskCommand(Guid DownloadTaskId) : IRequest<Result>;
 
 public class ResumeDownloadTaskCommandValidator : AbstractValidator<ResumeDownloadTaskCommand>
 {
     public ResumeDownloadTaskCommandValidator()
     {
-        RuleFor(x => x.DownloadTaskId).GreaterThan(0);
+        RuleFor(x => x.DownloadTaskId).NotEmpty();
     }
 }
 
@@ -38,9 +37,9 @@ public class ResumeDownloadTaskCommandHandler : IRequestHandler<ResumeDownloadTa
 
     public async Task<Result> Handle(ResumeDownloadTaskCommand command, CancellationToken cancellationToken)
     {
-        var downloadTask = await _dbContext.DownloadTasks.GetAsync(command.DownloadTaskId, cancellationToken);
+        var downloadTask = await _dbContext.GetDownloadTaskAsync(command.DownloadTaskId, cancellationToken: cancellationToken);
         if (downloadTask is null)
-            return ResultExtensions.EntityNotFound(nameof(DownloadTask), command.DownloadTaskId).LogError();
+            return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.DownloadTaskId).LogError();
 
         // Don't allow more than 2 downloads at a time from the same server
         if (await _downloadTaskScheduler.IsServerDownloading(downloadTask.PlexServerId))
@@ -54,7 +53,7 @@ public class ResumeDownloadTaskCommandHandler : IRequestHandler<ResumeDownloadTa
 
         // TODO This here should pause other download tasks from the same server and start this one
 
-        await _mediator.Publish(new CheckDownloadQueue(downloadTask.PlexServerId), cancellationToken);
+        await _mediator.Publish(new CheckDownloadQueueNotification(downloadTask.PlexServerId), cancellationToken);
 
         return Result.Ok();
     }

@@ -1,4 +1,5 @@
-﻿using PlexRipper.DownloadManager;
+﻿using Data.Contracts;
+using PlexRipper.DownloadManager;
 
 namespace DownloadManager.UnitTests;
 
@@ -6,41 +7,41 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
 {
     public DownloadQueue_GetNextDownloadTask_UnitTests(ITestOutputHelper output) : base(output) { }
 
-    private List<DownloadTask> TestDownloadTasks(int count)
+    private List<DownloadTaskGeneric> TestDownloadTasks(int count)
     {
-        var downloadTasks = new List<DownloadTask>();
+        var downloadTasks = new List<DownloadTaskGeneric>();
         var index = 1;
         for (var i = 0; i < count; i++)
         {
-            var downloadTask_i = new DownloadTask
+            var downloadTask_i = new DownloadTaskGeneric
             {
-                Id = index++,
+                Id = Guid.NewGuid(),
                 DownloadStatus = DownloadStatus.Queued,
-                Children = new List<DownloadTask>(),
+                Children = new List<DownloadTaskGeneric>(),
             };
             for (var j = 0; j < count; j++)
             {
-                var downloadTask_j = new DownloadTask
+                var downloadTask_j = new DownloadTaskGeneric
                 {
-                    Id = index++,
+                    Id = Guid.NewGuid(),
                     DownloadStatus = DownloadStatus.Queued,
-                    Children = new List<DownloadTask>(),
+                    Children = new List<DownloadTaskGeneric>(),
                 };
                 for (var k = 0; k < count; k++)
                 {
-                    var downloadTask_k = new DownloadTask
+                    var downloadTask_k = new DownloadTaskGeneric
                     {
-                        Id = index++,
+                        Id = Guid.NewGuid(),
                         DownloadStatus = DownloadStatus.Queued,
-                        Children = new List<DownloadTask>(),
+                        Children = new List<DownloadTaskGeneric>(),
                     };
                     for (var l = 0; l < count; l++)
                     {
-                        var downloadTask_l = new DownloadTask
+                        var downloadTask_l = new DownloadTaskGeneric
                         {
-                            Id = index++,
+                            Id = Guid.NewGuid(),
                             DownloadStatus = DownloadStatus.Queued,
-                            Children = new List<DownloadTask>(),
+                            Children = new List<DownloadTaskGeneric>(),
                         };
                         downloadTask_k.Children.Add(downloadTask_l);
                     }
@@ -61,67 +62,115 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
     public async Task ShouldHaveNextDownloadTask_WhenAllAreQueued()
     {
         // Arrange
-        await SetupDatabase();
-
-        var downloadTasks = TestDownloadTasks(2);
+        await SetupDatabase(config => { config.TvShowDownloadTasksCount = 5; });
+        var downloadTasks = await DbContext.GetAllDownloadTasksAsync();
 
         // Act
         var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
 
         // Assert
         nextDownloadTask.IsSuccess.ShouldBeTrue();
-        nextDownloadTask.Value.Id.ShouldBe(4);
+        var nextDownloadTaskId = downloadTasks[0].Children[0].Children[0].Children[0].Id;
+        nextDownloadTask.Value.Id.ShouldBe(nextDownloadTaskId);
     }
 
     [Fact]
     public async Task ShouldHaveNextDownloadTask_WhenADownloadTaskHasBeenCompleted()
     {
         // Arrange
-        await SetupDatabase();
-
-        var downloadTasks = TestDownloadTasks(3);
-        downloadTasks[0].DownloadStatus = DownloadStatus.Completed;
-        downloadTasks[0].Children = downloadTasks[0].Children.SetToCompleted();
+        await SetupDatabase(config => { config.TvShowDownloadTasksCount = 5; });
+        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
+        await DbContext.SaveChangesAsync();
 
         // Act
         var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
 
         // Assert
         nextDownloadTask.IsSuccess.ShouldBeTrue();
-        nextDownloadTask.Value.Id.ShouldBe(44);
+        var nextDownloadTaskId = downloadTasks[1].Children[0].Children[0].Children[0].Id;
+        nextDownloadTask.Value.Id.ShouldBe(nextDownloadTaskId);
     }
 
     [Fact]
     public async Task ShouldHaveNextQueuedDownloadTaskInDownloadingTask_WhenAParentDownloadTaskIsAlreadyDownloading()
     {
         // Arrange
-        await SetupDatabase();
+        await SetupDatabase(config => { config.TvShowDownloadTasksCount = 5; });
 
-        var downloadTasks = TestDownloadTasks(3);
-        downloadTasks[0].DownloadStatus = DownloadStatus.Downloading;
+        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Downloading);
+        foreach (var child in downloadTasks[0].Children)
+            child.SetDownloadStatus(DownloadStatus.Queued);
+        await DbContext.SaveChangesAsync();
 
         // Act
         var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
 
         // Assert
         nextDownloadTask.IsSuccess.ShouldBeTrue();
-        nextDownloadTask.Value.Id.ShouldBe(4);
+        var nextDownloadTaskId = downloadTasks[0].Children[0].Children[0].Children[0].Id;
+        nextDownloadTask.Value.Id.ShouldBe(nextDownloadTaskId);
     }
 
     [Fact]
     public async Task ShouldHaveNoDownloadTask_WhenADownloadTaskIsAlreadyDownloading()
     {
         // Arrange
-        await SetupDatabase();
+        await SetupDatabase(config => { config.TvShowDownloadTasksCount = 5; });
 
-        var downloadTasks = TestDownloadTasks(2);
-        downloadTasks[0].DownloadStatus = DownloadStatus.Downloading;
-        downloadTasks[0].Children = downloadTasks[0].Children.SetToDownloading();
+        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Downloading);
+        await DbContext.SaveChangesAsync();
 
         // Act
         var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
 
         // Assert
         nextDownloadTask.IsSuccess.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task ShouldHaveNoNextDownloadTask_WhenMergingAndDownloadFinished()
+    {
+        // Arrange
+        await SetupDatabase(config => { config.MovieDownloadTasksCount = 5; });
+
+        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Merging);
+        downloadTasks[1].SetDownloadStatus(DownloadStatus.DownloadFinished);
+        downloadTasks[2].SetDownloadStatus(DownloadStatus.DownloadFinished);
+        downloadTasks[3].SetDownloadStatus(DownloadStatus.DownloadFinished);
+        downloadTasks[4].SetDownloadStatus(DownloadStatus.DownloadFinished);
+        await DbContext.SaveChangesAsync();
+
+        // Act
+        var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
+
+        // Assert
+        nextDownloadTask.IsSuccess.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task ShouldHaveLastQueuedDownloadTask_WhenMergingQueuedAndDownloadFinished()
+    {
+        // Arrange
+        await SetupDatabase(config => { config.MovieDownloadTasksCount = 5; });
+
+        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
+        downloadTasks[0].SetDownloadStatus(DownloadStatus.Merging);
+        downloadTasks[1].SetDownloadStatus(DownloadStatus.DownloadFinished);
+        downloadTasks[2].SetDownloadStatus(DownloadStatus.DownloadFinished);
+        downloadTasks[3].SetDownloadStatus(DownloadStatus.DownloadFinished);
+        downloadTasks[4].SetDownloadStatus(DownloadStatus.Queued);
+        await DbContext.SaveChangesAsync();
+
+        // Act
+        var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
+
+        // Assert
+        nextDownloadTask.IsSuccess.ShouldBeTrue();
+        var nextDownloadTaskId = downloadTasks[4].Children[0].Id;
+        nextDownloadTask.Value.Id.ShouldBe(nextDownloadTaskId);
     }
 }

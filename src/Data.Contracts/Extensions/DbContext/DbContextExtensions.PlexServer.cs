@@ -30,4 +30,13 @@ public static partial class DbContextExtensions
         var plexServer = await dbContext.PlexServers.GetAsync(plexServerId, cancellationToken);
         return plexServer?.Name ?? "Server Name Not Found";
     }
+
+    public static async Task<string> GetPlexServerMachineIdentifierById(
+        this IPlexRipperDbContext dbContext,
+        int plexServerId,
+        CancellationToken cancellationToken = default)
+    {
+        var plexServer = await dbContext.PlexServers.GetAsync(plexServerId, cancellationToken);
+        return plexServer?.MachineIdentifier ?? string.Empty;
+    }
 }

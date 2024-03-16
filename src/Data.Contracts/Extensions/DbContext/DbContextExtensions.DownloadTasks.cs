@@ -218,40 +218,8 @@ public static partial class DbContextExtensions
     {
         switch (key.Type)
         {
-            case DownloadTaskType.Movie:
-                await dbContext.DownloadTaskMovie.Where(x => x.Id == key.Id)
-                    .ExecuteUpdateAsync(p => p
-                        .SetProperty(x => x.Percentage, progress.Percentage)
-                        .SetProperty(x => x.DownloadSpeed, progress.DownloadSpeed)
-                        .SetProperty(x => x.DataReceived, progress.DataReceived)
-                        .SetProperty(x => x.DataTotal, progress.DataTotal), cancellationToken);
-                break;
             case DownloadTaskType.MovieData:
                 await dbContext.DownloadTaskMovieFile.Where(x => x.Id == key.Id)
-                    .ExecuteUpdateAsync(p => p
-                        .SetProperty(x => x.Percentage, progress.Percentage)
-                        .SetProperty(x => x.DownloadSpeed, progress.DownloadSpeed)
-                        .SetProperty(x => x.DataReceived, progress.DataReceived)
-                        .SetProperty(x => x.DataTotal, progress.DataTotal), cancellationToken);
-                break;
-            case DownloadTaskType.TvShow:
-                await dbContext.DownloadTaskTvShow.Where(x => x.Id == key.Id)
-                    .ExecuteUpdateAsync(p => p
-                        .SetProperty(x => x.Percentage, progress.Percentage)
-                        .SetProperty(x => x.DownloadSpeed, progress.DownloadSpeed)
-                        .SetProperty(x => x.DataReceived, progress.DataReceived)
-                        .SetProperty(x => x.DataTotal, progress.DataTotal), cancellationToken);
-                break;
-            case DownloadTaskType.Season:
-                await dbContext.DownloadTaskTvShowSeason.Where(x => x.Id == key.Id)
-                    .ExecuteUpdateAsync(p => p
-                        .SetProperty(x => x.Percentage, progress.Percentage)
-                        .SetProperty(x => x.DownloadSpeed, progress.DownloadSpeed)
-                        .SetProperty(x => x.DataReceived, progress.DataReceived)
-                        .SetProperty(x => x.DataTotal, progress.DataTotal), cancellationToken);
-                break;
-            case DownloadTaskType.Episode:
-                await dbContext.DownloadTaskTvShowEpisode.Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(p => p
                         .SetProperty(x => x.Percentage, progress.Percentage)
                         .SetProperty(x => x.DownloadSpeed, progress.DownloadSpeed)
@@ -266,6 +234,12 @@ public static partial class DbContextExtensions
                         .SetProperty(x => x.DataReceived, progress.DataReceived)
                         .SetProperty(x => x.DataTotal, progress.DataTotal), cancellationToken);
                 break;
+            case DownloadTaskType.Movie:
+            case DownloadTaskType.TvShow:
+            case DownloadTaskType.Season:
+            case DownloadTaskType.Episode:
+                _log.Error("{Name} of type {Type} is not supported in {MethodName}", nameof(DownloadTaskType), key.Type, nameof(UpdateDownloadProgress), 0);
+                return;
             default:
                 throw new ArgumentOutOfRangeException();
         }

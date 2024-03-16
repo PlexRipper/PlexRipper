@@ -28,18 +28,5 @@ public class DownloadTaskTvShowEpisode : DownloadTaskParentBase
 
     public override int Count => Children.Sum(x => x.Count) + 1;
 
-    public override void Calculate()
-    {
-        if (!Children.Any())
-            return;
-
-        DownloadSpeed = Children.Select(x => x.DownloadSpeed).Sum();
-        FileTransferSpeed = Children.Select(x => x.FileTransferSpeed).Sum();
-        DataReceived = Children.Select(x => x.DataReceived).Sum();
-        DataTotal = Children.Select(x => x.DataTotal).Sum();
-        Percentage = DataFormat.GetPercentage(DataReceived, DataTotal);
-        DownloadStatus = DownloadTaskActions.Aggregate(Children.Select(x => x.DownloadStatus).ToList());
-    }
-
     #endregion
 }

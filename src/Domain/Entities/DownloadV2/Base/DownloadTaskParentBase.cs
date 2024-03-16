@@ -33,10 +33,5 @@ public abstract class DownloadTaskParentBase : DownloadTaskBase, IDownloadTaskPr
     [NotMapped]
     public long FileTransferSpeed { get; set; }
 
-    /// <summary>
-    /// Calculate properties such as DataReceived, DataTotal based on the nested children.
-    /// </summary>
-    public abstract void Calculate();
-
     #endregion
 }

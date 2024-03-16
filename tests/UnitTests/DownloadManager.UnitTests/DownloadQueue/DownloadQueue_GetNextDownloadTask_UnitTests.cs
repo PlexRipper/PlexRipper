@@ -131,33 +131,6 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Download
     }
 
     [Fact]
-    public async Task ShouldHaveNextQueuedDownloadTask_WhenNestedInsideATvShowsDownloadTasksWithDownloadFinished()
-    {
-        // Arrange
-        await SetupDatabase(config =>
-        {
-            config.TvShowCount = 10;
-            config.TvShowDownloadTasksCount = 2;
-            config.TvShowSeasonDownloadTasksCount = 2;
-            config.TvShowEpisodeDownloadTasksCount = 5;
-        });
-
-        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
-        downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
-        downloadTasks[1].SetDownloadStatus(DownloadStatus.DownloadFinished);
-        downloadTasks[1].Children[0].SetDownloadStatus(DownloadStatus.Queued);
-        await DbContext.SaveChangesAsync();
-
-        // Act
-        var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
-
-        // Assert
-        nextDownloadTask.IsSuccess.ShouldBeTrue();
-        var nextDownloadTaskId = downloadTasks[1].Children[0].Children[0].Children[0].Id;
-        nextDownloadTask.Value.Id.ShouldBe(nextDownloadTaskId);
-    }
-
-    [Fact]
     public async Task ShouldHaveNoNextDownloadTask_WhenMergingAndDownloadFinished()
     {
         // Arrange

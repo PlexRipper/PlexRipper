@@ -49,7 +49,10 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
         plexDownloadTaskMovies.Count.ShouldBe(5);
 
         foreach (var downloadTaskMovie in plexDownloadTaskMovies)
+        {
+            downloadTaskMovie.Calculate();
             (await validator.ValidateAsync(downloadTaskMovie)).Errors.ShouldBeEmpty();
+        }
     }
 
     [Fact]
@@ -93,6 +96,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
 
         foreach (var downloadTaskMovie in plexDownloadTaskMovies)
         {
+            downloadTaskMovie.Calculate();
             (await validator.ValidateAsync(downloadTaskMovie)).Errors.ShouldBeEmpty();
             downloadTaskMovie.Children.Count.ShouldBe(2);
         }

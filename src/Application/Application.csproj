@@ -24,7 +24,6 @@
 		<ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
 		<ProjectReference Include="..\Domain\Domain.csproj" />
 		<Compile Include="..\Domain\GlobalUsings.cs" />
-		<ProjectReference Include="..\DownloadManager.Contracts\DownloadManager.Contracts.csproj" />
 		<ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
 		<ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
 		<ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />

@@ -23,7 +23,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\src\DownloadManager\DownloadManager.csproj" />
 		<ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
 	</ItemGroup>
 	<ItemGroup>

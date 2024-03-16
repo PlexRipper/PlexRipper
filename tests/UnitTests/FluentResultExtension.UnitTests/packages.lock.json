@@ -3460,15 +3460,8 @@
       "data.contracts": {
         "type": "Project",
         "dependencies": {
-          "DownloadManager.Contracts": "[1.0.0, )",
           "EFCore.BulkExtensions.SQLite": "[7.0.0, )",
           "Microsoft.EntityFrameworkCore": "[7.0.8, )",
-          "PlexRipper.Domain": "[1.0.0, )"
-        }
-      },
-      "downloadmanager.contracts": {
-        "type": "Project",
-        "dependencies": {
           "PlexRipper.Domain": "[1.0.0, )"
         }
       },
@@ -3518,7 +3511,6 @@
           "Autofac.Extras.Quartz": "[8.0.0, )",
           "BackgroundServices.Contracts": "[1.0.0, )",
           "Data.Contracts": "[1.0.0, )",
-          "DownloadManager.Contracts": "[1.0.0, )",
           "FileSystem.Contracts": "[1.0.0, )",
           "FluentValidation.DependencyInjectionExtensions": "[9.3.0, )",
           "MediatR.Extensions.Autofac.DependencyInjection": "[10.0.0, )",
@@ -3582,27 +3574,6 @@
           "System.Reactive.Linq": "[5.0.0, )"
         }
       },
-      "PlexRipper.DownloadManager": {
-        "type": "Project",
-        "dependencies": {
-          "Application.Contracts": "[1.0.0, )",
-          "Autofac": "[6.5.0, )",
-          "Autofac.Extras.Quartz": "[8.0.0, )",
-          "BackgroundServices.Contracts": "[1.0.0, )",
-          "Data.Contracts": "[1.0.0, )",
-          "DownloadManager.Contracts": "[1.0.0, )",
-          "FileSystem.Contracts": "[1.0.0, )",
-          "MediatR.Extensions.Autofac.DependencyInjection": "[10.0.0, )",
-          "Microsoft.Extensions.Hosting": "[7.0.1, )",
-          "Microsoft.Extensions.Http": "[7.0.0, )",
-          "Microsoft.Extensions.Http.Polly": "[7.0.8, )",
-          "PlexApi.Contracts": "[1.0.0, )",
-          "Polly": "[7.2.3, )",
-          "Polly.Extensions.Http": "[3.0.0, )",
-          "RestSharp": "[108.0.1, )",
-          "Settings.Contracts": "[1.0.0, )"
-        }
-      },
       "PlexRipper.FileSystem": {
         "type": "Project",
         "dependencies": {
@@ -3611,7 +3582,6 @@
           "Autofac.Extras.Quartz": "[8.0.0, )",
           "BackgroundServices.Contracts": "[1.0.0, )",
           "Data.Contracts": "[1.0.0, )",
-          "DownloadManager.Contracts": "[1.0.0, )",
           "FileSystem.Contracts": "[1.0.0, )",
           "MediatR.Extensions.Autofac.DependencyInjection": "[10.0.0, )",
           "System.IO.Abstractions": "[17.0.18, )"
@@ -3651,7 +3621,6 @@
           "NSwag.Generation.AspNetCore": "[13.19.0, )",
           "PlexRipper.Application": "[1.0.0, )",
           "PlexRipper.Data": "[1.0.0, )",
-          "PlexRipper.DownloadManager": "[1.0.0, )",
           "PlexRipper.FileSystem": "[1.0.0, )",
           "PlexRipper.PlexApi": "[1.0.0, )",
           "PlexRipper.Settings": "[1.0.0, )",

@@ -1567,15 +1567,8 @@
       "data.contracts": {
         "type": "Project",
         "dependencies": {
-          "DownloadManager.Contracts": "[1.0.0, )",
           "EFCore.BulkExtensions.SQLite": "[7.0.0, )",
           "Microsoft.EntityFrameworkCore": "[7.0.8, )",
-          "PlexRipper.Domain": "[1.0.0, )"
-        }
-      },
-      "downloadmanager.contracts": {
-        "type": "Project",
-        "dependencies": {
           "PlexRipper.Domain": "[1.0.0, )"
         }
       },

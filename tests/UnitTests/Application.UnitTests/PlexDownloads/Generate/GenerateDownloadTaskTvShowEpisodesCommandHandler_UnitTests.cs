@@ -1,6 +1,4 @@
-﻿using PlexRipper.DownloadManager;
-
-namespace DownloadManager.UnitTests;
+﻿namespace DownloadManager.UnitTests;
 
 public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTests : BaseUnitTest
 {

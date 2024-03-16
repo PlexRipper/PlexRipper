@@ -39,4 +39,7 @@
 	  </Reference>
 	</ItemGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="PlexRipper.Application.UnitTests" />
+	</ItemGroup>
 </Project>

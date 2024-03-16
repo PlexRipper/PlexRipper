@@ -48,10 +48,7 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
     {
         // Arrange
         Seed = 9999;
-        await SetupDatabase(config =>
-        {
-            config.MovieDownloadTasksCount = 2;
-        });
+        await SetupDatabase(config => { config.MovieDownloadTasksCount = 2; });
         var movieDownloadTasks = await DbContext.GetAllDownloadTasksAsync();
 
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StopDownloadTaskJob(It.IsAny<Guid>())).ReturnOk();

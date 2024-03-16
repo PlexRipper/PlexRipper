@@ -23,13 +23,13 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
             config.PlexServerCount = 1;
             config.PlexLibraryCount = 2;
             config.MovieCount = 10;
-            config.MovieDownloadTasksCount = 5;
+            config.MovieDownloadTasksCount = 1;
         });
 
         await CreateContainer();
-        var downloadTasks = await DbContext.DownloadTaskMovie.ToListAsync();
-        downloadTasks.Count.ShouldBe(10);
-        var downloadTask = downloadTasks.First();
+        var downloadTasks = await DbContext.GetAllDownloadTasksAsync();
+        downloadTasks.Count.ShouldBe(1);
+        var downloadTask = downloadTasks[0].Children[0];
 
         // Act
         var response = await Container.GetAsync(ApiRoutes.Download.GetStartCommand(downloadTask.Id));
@@ -39,9 +39,8 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var downloadTaskDb = await DbContext.DownloadTaskMovie.IncludeAll().SingleOrDefaultAsync(x => x.Id == downloadTask.Id);
+        var downloadTaskDb = await DbContext.GetDownloadTaskAsync(downloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
-        downloadTaskDb.Children.ShouldAllBe(x => x.DownloadStatus == DownloadStatus.Completed);
     }
 }

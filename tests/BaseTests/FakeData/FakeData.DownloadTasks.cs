@@ -38,6 +38,7 @@ public static partial class FakeData
             .ApplyDownloadTaskBase(seed, options)
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
             .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
+            .RuleFor(x => x.FileTransferSpeed, _ => 0)
             .RuleFor(x => x.Percentage, _ => 0)
             .RuleFor(x => x.DataReceived, _ => 0)
             .RuleFor(x => x.DownloadSpeed, _ => 0);

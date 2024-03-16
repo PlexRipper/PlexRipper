@@ -1,5 +1,5 @@
+using Application.Contracts;
 using Data.Contracts;
-using DownloadManager.Contracts;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using PlexRipper.Domain.Validators;

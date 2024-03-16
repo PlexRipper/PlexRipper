@@ -6,7 +6,6 @@ using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using BackgroundServices.Contracts;
 using Data.Contracts;
-using DownloadManager.Contracts;
 using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;

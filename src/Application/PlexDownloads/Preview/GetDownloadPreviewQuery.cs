@@ -1,8 +1,7 @@
-﻿using AutoMapper;
+﻿using Application.Contracts;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Data.Contracts;
-using DownloadManager.Contracts;
-using DownloadManager.Contracts.Extensions;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 

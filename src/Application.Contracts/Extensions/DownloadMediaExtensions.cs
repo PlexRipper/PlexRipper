@@ -1,6 +1,6 @@
 using PlexRipper.Domain;
 
-namespace DownloadManager.Contracts.Extensions;
+namespace Application.Contracts;
 
 public static class DownloadMediaExtensions
 {

@@ -1,6 +1,5 @@
+using Application.Contracts;
 using Data.Contracts;
-using DownloadManager.Contracts;
-using DownloadManager.Contracts.Extensions;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;

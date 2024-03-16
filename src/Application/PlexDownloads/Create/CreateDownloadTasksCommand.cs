@@ -1,5 +1,4 @@
-using DownloadManager.Contracts;
-using DownloadManager.Contracts.Extensions;
+using Application.Contracts;
 using FluentValidation;
 
 namespace PlexRipper.Application;

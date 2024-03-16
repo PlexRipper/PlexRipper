@@ -1,5 +1,5 @@
+using Application.Contracts;
 using Data.Contracts;
-using DownloadManager.Contracts;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.WebAPI.Common;
 using PlexRipper.WebAPI.Common.FluentResult;

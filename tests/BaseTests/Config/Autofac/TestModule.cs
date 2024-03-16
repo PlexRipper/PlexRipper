@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using DownloadManager.Contracts;
 using FileSystem.Contracts;
 using Settings.Contracts;
 using WebAPI.Contracts;

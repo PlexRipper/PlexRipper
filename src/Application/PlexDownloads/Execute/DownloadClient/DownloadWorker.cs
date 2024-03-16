@@ -158,7 +158,10 @@ public class DownloadWorker : IDisposable
                 DownloadWorkerTask.FileLocationUrl, cancellationToken);
 
             if (downloadUrlResult.IsFailed)
-                return downloadUrlResult.LogError();
+            {
+                SendDownloadWorkerError(downloadUrlResult.ToResult());
+                return downloadUrlResult.ToResult();
+            }
 
             var downloadUrl = downloadUrlResult.Value;
 

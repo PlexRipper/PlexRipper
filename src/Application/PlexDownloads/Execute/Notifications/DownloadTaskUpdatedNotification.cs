@@ -33,11 +33,14 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdatedNot
 
         var downloadTasks = await _dbContext.GetAllDownloadTasksAsync(plexServerId, cancellationToken: cancellationToken);
 
+        foreach (var downloadTask in downloadTasks)
+            downloadTask.Calculate();
+
         // Send away the new result
         await _signalRService.SendDownloadProgressUpdateAsync(plexServerId, downloadTasks, cancellationToken);
 
-        var downloadTask = await _dbContext.GetDownloadTaskAsync(notification.Key, cancellationToken);
-        if (downloadTask.DownloadStatus == DownloadStatus.DownloadFinished)
+        var changedDownloadTask = await _dbContext.GetDownloadTaskAsync(notification.Key, cancellationToken);
+        if (changedDownloadTask.DownloadStatus == DownloadStatus.DownloadFinished)
         {
             var addFileTaskResult = await _fileMergeScheduler.CreateFileTaskFromDownloadTask(notification.Key);
             if (addFileTaskResult.IsFailed)

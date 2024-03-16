@@ -50,7 +50,7 @@ public class PauseDownloadTaskCommandHandler : IRequestHandler<PauseDownloadTask
         _log.Debug("DownloadTask {DownloadTaskId} has been Paused, meaning no downloaded files have been deleted", downloadTaskId);
 
         // Update the download task status
-        await _dbContext.SetDownloadStatus(downloadTaskId, DownloadStatus.Paused, cancellationToken: cancellationToken);
+        await _dbContext.SetDownloadStatus(downloadTaskId, DownloadStatus.Paused);
 
         var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskId, cancellationToken: cancellationToken);
         await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTask.ToKey()), cancellationToken);

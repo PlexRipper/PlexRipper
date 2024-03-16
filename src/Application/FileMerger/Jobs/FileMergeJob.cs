@@ -75,7 +75,7 @@ public class FileMergeJob : IJob
             downloadTask.DownloadStatus = newDownloadStatus;
             downloadTask.DownloadWorkerTasks.ForEach(x => x.DownloadStatus = newDownloadStatus);
 
-            await _dbContext.SetDownloadStatus(downloadTask.ToKey(), newDownloadStatus, token);
+            await _dbContext.SetDownloadStatus(downloadTask.ToKey(), newDownloadStatus);
             var downloadWorkerIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
             await _dbContext.DownloadWorkerTasks.Where(x => downloadWorkerIds.Contains(x.Id))
                 .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, newDownloadStatus), token);

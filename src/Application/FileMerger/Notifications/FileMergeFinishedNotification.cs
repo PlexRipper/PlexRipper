@@ -32,7 +32,7 @@ public class FileMergeFinishedHandler : INotificationHandler<FileMergeFinishedNo
 
         _fileMergeSystem.DeleteDirectoryFromFilePath(fileTask.FilePaths.First());
 
-        await _dbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.Completed, cancellationToken);
+        await _dbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.Completed);
 
         await _dbContext.FileTasks.Where(x => x.Id == notification.FileTaskId).ExecuteDeleteAsync(cancellationToken);
 

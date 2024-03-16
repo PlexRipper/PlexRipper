@@ -1,4 +1,6 @@
-namespace PlexRipper.Domain;
+using PlexRipper.Domain;
+
+namespace Data.Contracts;
 
 public static partial class DbContextExtensions
 {

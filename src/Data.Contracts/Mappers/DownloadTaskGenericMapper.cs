@@ -1,6 +1,7 @@
+using PlexRipper.Domain;
 using Riok.Mapperly.Abstractions;
 
-namespace PlexRipper.Domain;
+namespace Data.Contracts;
 
 [Mapper(UseReferenceHandling = true, RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class DownloadTaskGenericMapper

@@ -29,7 +29,7 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdatedNot
     {
         var plexServerId = notification.Key.PlexServerId;
 
-        // Ensure the download status is up to date as the DownloadQueue depends on that status to pick a new DownloadTask
+        // Ensure the up to date download status is written to the database as the DownloadQueue depends on that status to pick a new DownloadTask
         await _dbContext.DetermineDownloadStatus(notification.Key, cancellationToken);
 
         var downloadTasks = await _dbContext.GetAllDownloadTasksAsync(plexServerId, cancellationToken: cancellationToken);

@@ -43,6 +43,11 @@ public class BaseUnitTest : IDisposable
 
     protected int Seed { get; set; } = 0;
 
+    /// <summary>
+    /// Gets a new instance of <see cref="PlexRipperDbContext"/> for every time it is called.
+    /// </summary>
+
+    // ReSharper disable once InconsistentNaming
     protected IPlexRipperDbContext IDbContext => GetDbContext();
 
     #endregion

@@ -23,11 +23,8 @@ public abstract class DownloadTaskBase
     public string Title { get; set; }
 
     /// <summary>
-    /// The total size of the file in bytes.
+    ///  Gets or sets the current download state of this DownloadTask.
     /// </summary>
-    [Column(Order = 6)]
-    public long DataTotal { get; set; }
-
     [Column(Order = 8)]
     public DownloadStatus DownloadStatus { get; set; }
 
@@ -75,17 +72,6 @@ public abstract class DownloadTaskBase
     public abstract bool IsDownloadable { get; }
 
     public abstract int Count { get; }
-
-    #endregion
-
-    #region Compare
-
-    public bool Equals(PlexTvShow tvShow) => tvShow is not null && PlexServerId == tvShow.PlexServerId && MediaType == tvShow.Type && Key == tvShow.Key;
-
-    public bool Equals(PlexTvShowSeason season) => season is not null && PlexServerId == season.PlexServerId && MediaType == season.Type && Key == season.Key;
-
-    public bool Equals(PlexTvShowEpisode episode) =>
-        episode is not null && PlexServerId == episode.PlexServerId && MediaType == episode.Type && Key == episode.Key;
 
     #endregion
 

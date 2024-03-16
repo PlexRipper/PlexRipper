@@ -26,8 +26,6 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
 
     public DbSet<PlexAccount> PlexAccounts { get; set; }
 
-    public DbSet<DownloadTask> DownloadTasks { get; set; }
-
     public DbSet<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
 
     public DbSet<DownloadWorkerLog> DownloadWorkerTasksLogs { get; set; }
@@ -69,6 +67,24 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
     public DbSet<PlexServerStatus> PlexServerStatuses { get; set; }
 
     #endregion
+
+    #endregion
+
+    #region DownloadTasks
+
+    public DbSet<DownloadTask> DownloadTasks { get; set; }
+
+    public DbSet<DownloadTaskMovie> DownloadTaskMovie { get; set; }
+
+    public DbSet<DownloadTaskMovieFile> DownloadTaskMovieFile { get; set; }
+
+    public DbSet<DownloadTaskTvShow> DownloadTaskTvShow { get; set; }
+
+    public DbSet<DownloadTaskTvShowSeason> DownloadTaskTvShowSeason { get; set; }
+
+    public DbSet<DownloadTaskTvShowEpisode> DownloadTaskTvShowEpisode { get; set; }
+
+    public DbSet<DownloadTaskTvShowEpisodeFile> DownloadTaskTvShowEpisodeFile { get; set; }
 
     #endregion
 
@@ -153,6 +169,10 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         builder.AddQuartz(x => x.UseSqlite());
+
+        builder.Entity<DownloadTaskBase>().UseTpcMappingStrategy();
+        builder.Entity<DownloadTaskParentBase>().UseTpcMappingStrategy();
+        builder.Entity<DownloadTaskFileBase>().UseTpcMappingStrategy();
 
         // NOTE: This has been added to PlexRipperDbContext.OnModelCreating
         // Based on: https://stackoverflow.com/a/63992731/8205497

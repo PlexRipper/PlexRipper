@@ -1,20 +1,22 @@
 ﻿using Data.Contracts;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record GetDownloadTaskByIdQuery(int DownloadTaskId) : IRequest<Result<DownloadTask>>;
+public record GetDownloadTaskByIdQuery(
+    Guid DownloadTaskId,
+    DownloadTaskType Type = DownloadTaskType.None
+) : IRequest<Result<DownloadTaskGeneric>>;
 
 public class GetDownloadTaskByIdQueryValidator : AbstractValidator<GetDownloadTaskByIdQuery>
 {
     public GetDownloadTaskByIdQueryValidator()
     {
-        RuleFor(x => x.DownloadTaskId).GreaterThan(0);
+        RuleFor(x => x.DownloadTaskId).NotEmpty();
     }
 }
 
-public class GetDownloadTaskByIdQueryHandler : IRequestHandler<GetDownloadTaskByIdQuery, Result<DownloadTask>>
+public class GetDownloadTaskByIdQueryHandler : IRequestHandler<GetDownloadTaskByIdQuery, Result<DownloadTaskGeneric>>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -23,17 +25,9 @@ public class GetDownloadTaskByIdQueryHandler : IRequestHandler<GetDownloadTaskBy
         _dbContext = dbContext;
     }
 
-    public async Task<Result<DownloadTask>> Handle(GetDownloadTaskByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<DownloadTaskGeneric>> Handle(GetDownloadTaskByIdQuery request, CancellationToken cancellationToken)
     {
-        var downloadTask = await
-            _dbContext.DownloadTasks.AsTracking()
-                .Include(x => x.PlexServer)
-                .Include(x => x.PlexLibrary)
-                .Include(x => x.DestinationFolder)
-                .Include(x => x.DownloadFolder)
-                .Include(x => x.DownloadWorkerTasks)
-                .IncludeDownloadTasks()
-                .GetAsync(request.DownloadTaskId, cancellationToken);
+        var downloadTask = await _dbContext.GetDownloadTaskByKeyQuery(request.DownloadTaskId, request.Type, cancellationToken);
 
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTask), request.DownloadTaskId);

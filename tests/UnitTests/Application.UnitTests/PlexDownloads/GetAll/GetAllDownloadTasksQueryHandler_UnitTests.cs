@@ -78,7 +78,7 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest<GetAllDown
         var downloadTasks = result.Value;
         downloadTasks.ShouldNotBeEmpty();
 
-        void ValidateDownloadTasks(List<DownloadTask> shouldDownloadTasks)
+        void ValidateDownloadTasks(List<DownloadTaskGeneric> shouldDownloadTasks)
         {
             downloadTasks.Count.ShouldBe(5);
             foreach (var downloadTask in shouldDownloadTasks)

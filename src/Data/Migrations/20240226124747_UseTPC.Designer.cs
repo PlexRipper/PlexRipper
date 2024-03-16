@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Data;
 
@@ -10,9 +11,11 @@ using PlexRipper.Data;
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    partial class PlexRipperDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240226124747_UseTPC")]
+    partial class UseTPC
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -616,9 +619,8 @@ namespace PlexRipper.Data.Migrations
 
             modelBuilder.Entity("PlexRipper.Domain.DownloadTaskBase", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
+                    b.Property<int>("Id")
+                        .HasColumnType("INTEGER")
                         .HasColumnOrder(0);
 
                     b.Property<DateTime>("Created")
@@ -704,8 +706,8 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(5);
 
-                    b.Property<Guid?>("DownloadTaskFileBaseId")
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("DownloadTaskFileBaseId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("DownloadTaskId")
                         .HasColumnType("INTEGER");
@@ -1935,68 +1937,62 @@ namespace PlexRipper.Data.Migrations
                     b.ToTable((string)null);
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskMovieFile", b =>
+            modelBuilder.Entity("PlexRipper.Domain.DownloadV2.DownloadTaskMovieFile", b =>
                 {
                     b.HasBaseType("PlexRipper.Domain.DownloadTaskFileBase");
 
                     b.Property<int>("ParentId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid?>("ParentId1")
-                        .HasColumnType("TEXT");
-
-                    b.HasIndex("ParentId1");
+                    b.HasIndex("ParentId");
 
                     b.ToTable("DownloadTaskMovieFile");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowEpisodeFile", b =>
+            modelBuilder.Entity("PlexRipper.Domain.DownloadV2.DownloadTaskTvShowEpisodeFile", b =>
                 {
                     b.HasBaseType("PlexRipper.Domain.DownloadTaskFileBase");
 
                     b.Property<int>("ParentId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid?>("ParentId1")
-                        .HasColumnType("TEXT");
-
-                    b.HasIndex("ParentId1");
+                    b.HasIndex("ParentId");
 
                     b.ToTable("DownloadTaskTvShowEpisodeFile");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskMovie", b =>
+            modelBuilder.Entity("PlexRipper.Domain.DownloadV2.DownloadTaskMovie", b =>
                 {
                     b.HasBaseType("PlexRipper.Domain.DownloadTaskParentBase");
 
                     b.ToTable("DownloadTaskMovie");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShow", b =>
+            modelBuilder.Entity("PlexRipper.Domain.DownloadV2.DownloadTaskTvShow", b =>
                 {
                     b.HasBaseType("PlexRipper.Domain.DownloadTaskParentBase");
 
                     b.ToTable("DownloadTaskTvShow");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowEpisode", b =>
+            modelBuilder.Entity("PlexRipper.Domain.DownloadV2.DownloadTaskTvShowEpisode", b =>
                 {
                     b.HasBaseType("PlexRipper.Domain.DownloadTaskParentBase");
 
-                    b.Property<Guid?>("DownloadTaskTvShowSeasonId")
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("DownloadTaskTvShowSeasonId")
+                        .HasColumnType("INTEGER");
 
                     b.HasIndex("DownloadTaskTvShowSeasonId");
 
                     b.ToTable("DownloadTaskTvShowEpisode");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowSeason", b =>
+            modelBuilder.Entity("PlexRipper.Domain.DownloadV2.DownloadTaskTvShowSeason", b =>
                 {
                     b.HasBaseType("PlexRipper.Domain.DownloadTaskParentBase");
 
-                    b.Property<Guid?>("DownloadTaskTvShowId")
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("DownloadTaskTvShowId")
+                        .HasColumnType("INTEGER");
 
                     b.HasIndex("DownloadTaskTvShowId");
 
@@ -2453,34 +2449,38 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("DownloadFolder");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskMovieFile", b =>
+            modelBuilder.Entity("PlexRipper.Domain.DownloadV2.DownloadTaskMovieFile", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.DownloadTaskMovie", "Parent")
+                    b.HasOne("PlexRipper.Domain.DownloadV2.DownloadTaskMovie", "Parent")
                         .WithMany("Children")
-                        .HasForeignKey("ParentId1");
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowEpisodeFile", b =>
+            modelBuilder.Entity("PlexRipper.Domain.DownloadV2.DownloadTaskTvShowEpisodeFile", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.DownloadTaskTvShowEpisode", "Parent")
+                    b.HasOne("PlexRipper.Domain.DownloadV2.DownloadTaskTvShowEpisode", "Parent")
                         .WithMany("Children")
-                        .HasForeignKey("ParentId1");
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowEpisode", b =>
+            modelBuilder.Entity("PlexRipper.Domain.DownloadV2.DownloadTaskTvShowEpisode", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.DownloadTaskTvShowSeason", null)
+                    b.HasOne("PlexRipper.Domain.DownloadV2.DownloadTaskTvShowSeason", null)
                         .WithMany("Children")
                         .HasForeignKey("DownloadTaskTvShowSeasonId");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowSeason", b =>
+            modelBuilder.Entity("PlexRipper.Domain.DownloadV2.DownloadTaskTvShowSeason", b =>
                 {
-                    b.HasOne("PlexRipper.Domain.DownloadTaskTvShow", null)
+                    b.HasOne("PlexRipper.Domain.DownloadV2.DownloadTaskTvShow", null)
                         .WithMany("Children")
                         .HasForeignKey("DownloadTaskTvShowId");
                 });
@@ -2588,22 +2588,22 @@ namespace PlexRipper.Data.Migrations
                     b.Navigation("DownloadWorkerTasks");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskMovie", b =>
+            modelBuilder.Entity("PlexRipper.Domain.DownloadV2.DownloadTaskMovie", b =>
                 {
                     b.Navigation("Children");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShow", b =>
+            modelBuilder.Entity("PlexRipper.Domain.DownloadV2.DownloadTaskTvShow", b =>
                 {
                     b.Navigation("Children");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowEpisode", b =>
+            modelBuilder.Entity("PlexRipper.Domain.DownloadV2.DownloadTaskTvShowEpisode", b =>
                 {
                     b.Navigation("Children");
                 });
 
-            modelBuilder.Entity("PlexRipper.Domain.DownloadTaskTvShowSeason", b =>
+            modelBuilder.Entity("PlexRipper.Domain.DownloadV2.DownloadTaskTvShowSeason", b =>
                 {
                     b.Navigation("Children");
                 });

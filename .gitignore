@@ -240,3 +240,5 @@ tests/MockPlexApiServer/media/movies/*
 
 # Used to define environment variables for the "act" Github actions debugging tool
 .github/secrets.env
+
+.idea/.idea.PlexRipper/.idea/git_toolbox_prj.xml

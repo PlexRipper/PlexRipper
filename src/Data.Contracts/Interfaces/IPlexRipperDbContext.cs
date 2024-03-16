@@ -32,6 +32,18 @@ public interface IPlexRipperDbContext
     public string DatabasePath { get; set; }
     public string ConfigDirectory { get; set; }
 
+    public DbSet<DownloadTaskMovie> DownloadTaskMovie { get; set; }
+
+    public DbSet<DownloadTaskMovieFile> DownloadTaskMovieFile { get; set; }
+
+    public DbSet<DownloadTaskTvShow> DownloadTaskTvShow { get; set; }
+
+    public DbSet<DownloadTaskTvShowSeason> DownloadTaskTvShowSeason { get; set; }
+
+    public DbSet<DownloadTaskTvShowEpisode> DownloadTaskTvShowEpisode { get; set; }
+
+    public DbSet<DownloadTaskTvShowEpisodeFile> DownloadTaskTvShowEpisodeFile { get; set; }
+
     public EntityEntry Entry(object entity);
 
     /// <summary>

@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using PlexRipper.Domain;
 
-namespace DownloadManager.Contracts;
+namespace Application.Contracts;
 
 public interface IDownloadQueue : ISetup, IBusy
 {

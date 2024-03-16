@@ -1,7 +1,6 @@
-﻿using DownloadManager.Contracts;
-using FileSystem.Contracts;
+﻿using FileSystem.Contracts;
 
-namespace PlexRipper.DownloadManager;
+namespace PlexRipper.FileSystem;
 
 public class DownloadFileStream : IDownloadFileStream
 {

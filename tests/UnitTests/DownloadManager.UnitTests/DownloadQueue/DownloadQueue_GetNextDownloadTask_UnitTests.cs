@@ -1,5 +1,5 @@
 ﻿using Data.Contracts;
-using PlexRipper.DownloadManager;
+using PlexRipper.Application;
 
 namespace DownloadManager.UnitTests;
 

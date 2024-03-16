@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ByteSizeLib;
 using Data.Contracts;
-using DownloadManager.Contracts;
+using FileSystem.Contracts;
 using Logging.Interface;
 using RestSharp;
 using Timer = System.Timers.Timer;

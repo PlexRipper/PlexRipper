@@ -1,7 +1,6 @@
 ﻿using Application.Contracts;
 using AutoMapper;
 using Data.Contracts;
-using DownloadManager.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;

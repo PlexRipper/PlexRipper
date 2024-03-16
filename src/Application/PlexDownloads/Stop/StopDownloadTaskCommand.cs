@@ -1,6 +1,5 @@
 using Application.Contracts;
 using Data.Contracts;
-using DownloadManager.Contracts;
 using FileSystem.Contracts;
 using FluentValidation;
 using Logging.Interface;

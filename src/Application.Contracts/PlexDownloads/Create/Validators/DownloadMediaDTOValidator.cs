@@ -1,7 +1,7 @@
 using FluentValidation;
 using PlexRipper.Domain;
 
-namespace DownloadManager.Contracts;
+namespace Application.Contracts;
 
 public class DownloadMediaDTOValidator : AbstractValidator<DownloadMediaDTO>
 {

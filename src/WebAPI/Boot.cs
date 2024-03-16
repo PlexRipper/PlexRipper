@@ -1,6 +1,6 @@
 using System.Net;
+using Application.Contracts;
 using BackgroundServices.Contracts;
-using DownloadManager.Contracts;
 using Logging.Interface;
 using Settings.Contracts;
 

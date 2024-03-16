@@ -1,10 +1,9 @@
 ﻿using System.Threading.Channels;
 using Application.Contracts;
 using Data.Contracts;
-using DownloadManager.Contracts;
 using Logging.Interface;
 
-namespace PlexRipper.DownloadManager;
+namespace PlexRipper.Application;
 
 /// <summary>
 /// The DownloadQueue is responsible for deciding which downloadTask is handled by the <see cref="DownloadManager"/>.

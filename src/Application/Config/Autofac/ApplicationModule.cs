@@ -44,6 +44,7 @@ public class ApplicationModule : Module
             .AsImplementedInterfaces()
             .SingleInstance();
 
+        builder.RegisterType<DownloadQueue>().As<IDownloadQueue>().SingleInstance();
         builder.RegisterType<DownloadTaskScheduler>().As<IDownloadTaskScheduler>().SingleInstance();
         builder.RegisterType<FileMergeScheduler>().As<IFileMergeScheduler>().SingleInstance();
         builder.RegisterType<DownloadWorker>().InstancePerDependency();

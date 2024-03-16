@@ -1,109 +1,126 @@
-﻿using PlexRipper.DownloadManager;
+﻿using Application.Contracts;
+using Data.Contracts;
+using Microsoft.EntityFrameworkCore;
+using PlexRipper.Domain.PlexMediaExtensions;
+using PlexRipper.Domain.Validators;
 
-namespace DownloadManager.UnitTests;
+namespace PlexRipper.Application.UnitTests;
 
-public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTests : BaseUnitTest
+public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTests : BaseUnitTest<GenerateDownloadTaskTvShowEpisodesCommandHandler>
 {
+    private DownloadTaskTvShowValidator validator = new();
+
     public DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTests(ITestOutputHelper output) : base(output) { }
 
-    // [Fact]
-    // public async Task ShouldHaveFailedResult_WhenPlexTvShowsAreEmpty()
-    // {
-    //     // Arrange
-    //     await SetupDatabase();
-    //     var tvShowIds = new List<int>();
-    //
-    //     // Act
-    //     var result = await _sut.GenerateTvShowEpisodesDownloadTasksAsync(tvShowIds);
-    //
-    //     // Assert
-    //     result.IsFailed.ShouldBeTrue();
-    // }
-    //
-    // [Fact]
-    // public async Task ShouldGenerateValidTvShowDownloadTaskWithEpisodeDownloadTask_WhenNoDownloadTasksExist()
-    // {
-    //     // Arrange
-    //     await SetupDatabase(config =>
-    //     {
-    //         config.PlexServerCount = 1;
-    //         config.PlexLibraryCount = 1;
-    //         config.TvShowCount = 5;
-    //         config.TvShowSeasonCount = 2;
-    //         config.TvShowEpisodeCount = 5;
-    //     });
-    //
-    //     var tvShows = await DbContext.PlexTvShows.IncludeAll().ToListAsync();
-    //
-    //     mock.AddMapper();
-    //     mock.SetupMediator(It.IsAny<GetPlexTvShowByIdQuery>)
-    //         .ReturnsAsync((GetPlexTvShowByIdQuery query, CancellationToken _) => Result.Ok(tvShows.Find(x => x.Id == query.PlexTvShowId)));
-    //
-    //     mock.SetupMediator(It.IsAny<GetPlexTvShowEpisodeByIdQuery>)
-    //         .ReturnsAsync((GetPlexTvShowEpisodeByIdQuery query, CancellationToken _) =>
-    //             Result.Ok(DbContext.PlexTvShowEpisodes.IncludeAll().FirstOrDefault(x => x.Id == query.Id)));
-    //
-    //     var tvShowDb = tvShows.Last();
-    //     var episodeIds = new List<int> { tvShowDb.Seasons.First().Episodes.Last().Id };
-    //
-    //     // Act
-    //     var result = await _sut.GenerateTvShowEpisodesDownloadTasksAsync(episodeIds);
-    //
-    //     // Assert
-    //     result.IsSuccess.ShouldBeTrue();
-    //     var tvShowDownloadTask = result.Value.First();
-    //     tvShowDownloadTask.Id.ShouldBe(0);
-    //     tvShowDownloadTask.Children.ShouldAllBe(x => x.Id == 0);
-    //     tvShowDownloadTask.Children.SelectMany(x => x.Children).ToList().ShouldAllBe(x => x.Id == 0);
-    //     ShouldDownloadTask.ShouldTvShow(tvShowDownloadTask, tvShowDb);
-    // }
-    //
-    // [Fact]
-    // public async Task ShouldGenerateValidEpisodeDownloadTask_WhenTvShowParentDownloadTaskAlreadyExist()
-    // {
-    //     // Arrange
-    //     await SetupDatabase(config =>
-    //     {
-    //         config.PlexServerCount = 1;
-    //         config.PlexLibraryCount = 1;
-    //         config.TvShowCount = 5;
-    //         config.TvShowSeasonCount = 2;
-    //         config.TvShowEpisodeCount = 5;
-    //     });
-    //
-    //     mock.AddMapper();
-    //     var tvShows = await DbContext.PlexTvShows.IncludePlexLibrary().IncludePlexServer().IncludeEpisodes().ToListAsync();
-    //     var tvShowDb = tvShows.Last();
-    //     var episodeIds = new List<int> { tvShowDb.Seasons.First().Episodes.Last().Id };
-    //
-    //     var downloadTask = new DownloadTask()
-    //     {
-    //         Key = tvShowDb.Key,
-    //         Title = tvShowDb.Title,
-    //         FullTitle = tvShowDb.FullTitle,
-    //         Year = tvShowDb.Year,
-    //         MediaType = tvShowDb.Type,
-    //         PlexServerId = tvShowDb.PlexServerId,
-    //         PlexLibraryId = tvShowDb.PlexLibraryId,
-    //         DownloadTaskType = DownloadTaskType.TvShow,
-    //         DownloadStatus = DownloadStatus.Queued,
-    //         DownloadFolderId = 1,
-    //         DestinationFolderId = 1,
-    //     };
-    //     DbContext.DownloadTasks.AddRange(downloadTask);
-    //     await DbContext.SaveChangesAsync();
-    //     ResetDbContext();
-    //
-    //     // Act
-    //     var result = await mock.Create<DownloadTaskFactory>().GenerateTvShowEpisodesDownloadTasksAsync(episodeIds);
-    //
-    //     // Assert
-    //     result.IsSuccess.ShouldBeTrue();
-    //     var tvShowDownloadTask = result.Value.First();
-    //     tvShowDownloadTask.Id.ShouldBe(downloadTask.Id);
-    //
-    //     tvShowDownloadTask.Children.ShouldAllBe(x => x.Id == 0);
-    //     tvShowDownloadTask.Children.SelectMany(x => x.Children).ToList().ShouldAllBe(x => x.Id == 0);
-    //     tvShowDownloadTask.Children.ShouldAllBe(x => x.ParentId == tvShowDownloadTask.Id);
-    // }
+    [Fact]
+    public async Task ShouldHaveFailedResult_WhenPlexTvShowsAreEmpty()
+    {
+        // Arrange
+        await SetupDatabase();
+        var downloadMediaDtos = new List<DownloadMediaDTO> { };
+
+        // Act
+        var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
+        var result = await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailed.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldGenerateValidTvShowDownloadTaskWithEpisodeDownloadTask_WhenNoDownloadTasksExist()
+    {
+        // Arrange
+        await SetupDatabase(config =>
+        {
+            config.TvShowCount = 5;
+            config.TvShowSeasonCount = 5;
+            config.TvShowEpisodeCount = 5;
+        });
+
+        var plexTvShows = await DbContext.PlexTvShows.IncludeAll().ToListAsync();
+        var plexEpisodes = plexTvShows
+            .SelectMany(x => x.Seasons)
+            .SelectMany(x => x.Episodes)
+            .ToList();
+        var downloadMediaDtos = new List<DownloadMediaDTO>
+        {
+            new()
+            {
+                Type = PlexMediaType.Episode,
+                MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
+                PlexServerId = 1,
+                PlexLibraryId = 1,
+            },
+        };
+
+        // Act
+        var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
+        var result = await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue(result.ToString());
+        var downloadTaskTvShows = await DbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
+        downloadTaskTvShows.Count.ShouldBe(5);
+
+        var downloadTaskSeasons = downloadTaskTvShows.SelectMany(x => x.Children).ToList();
+        downloadTaskSeasons.Count.ShouldBe(25);
+
+        var downloadTaskEpisodes = downloadTaskSeasons.SelectMany(x => x.Children).ToList();
+        downloadTaskEpisodes.Count.ShouldBe(125);
+
+        var downloadTaskEpisodeFiles = downloadTaskEpisodes.SelectMany(x => x.Children).ToList();
+        downloadTaskEpisodeFiles.Count.ShouldBe(125);
+
+        foreach (var downloadTaskTvShow in downloadTaskTvShows)
+        {
+            downloadTaskTvShow.Calculate();
+            (await validator.ValidateAsync(downloadTaskTvShow)).Errors.ShouldBeEmpty();
+        }
+    }
+
+    [Fact]
+    public async Task ShouldGenerateValidEpisodeDownloadTask_WhenTvShowParentDownloadTaskAlreadyExist()
+    {
+        // Arrange
+        await SetupDatabase(config =>
+        {
+            config.TvShowCount = 5;
+            config.TvShowSeasonCount = 5;
+            config.TvShowEpisodeCount = 5;
+        });
+        var dbContext = IDbContext;
+        var plexTvShows = await dbContext.PlexTvShows.IncludeAll().ToListAsync();
+        var plexEpisodes = plexTvShows
+            .SelectMany(x => x.Seasons)
+            .SelectMany(x => x.Episodes)
+            .ToList();
+
+        // Create a download task for the tv show
+        var createdTvShowDownloadTask = plexTvShows.First().MapToDownloadTask();
+        dbContext.DownloadTaskTvShow.Add(createdTvShowDownloadTask);
+        await dbContext.SaveChangesAsync(CancellationToken.None);
+        ResetDbContext();
+
+        var downloadMediaDtos = new List<DownloadMediaDTO>
+        {
+            new()
+            {
+                Type = PlexMediaType.Episode,
+                MediaIds = plexEpisodes.Select(x => x.Id).ToList(),
+                PlexServerId = 1,
+                PlexLibraryId = 1,
+            },
+        };
+
+        // Act
+        var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
+        var result = await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue(result.ToString());
+        var downloadTaskTvShows = await DbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
+        downloadTaskTvShows.Count.ShouldBe(5);
+        downloadTaskTvShows.FirstOrDefault(x => x.Id == createdTvShowDownloadTask.Id).ShouldNotBeNull();
+    }
 }

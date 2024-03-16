@@ -1,6 +1,4 @@
-﻿using DownloadManager.Contracts;
-using PlexRipper.DownloadManager;
-
+﻿using Application.Contracts;
 namespace PlexRipper.Application.UnitTests;
 
 public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDownloadTasksCommandHandler>

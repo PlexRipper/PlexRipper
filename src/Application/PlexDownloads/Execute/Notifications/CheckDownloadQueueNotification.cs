@@ -1,4 +1,4 @@
-using DownloadManager.Contracts;
+using Application.Contracts;
 
 namespace PlexRipper.Application;
 

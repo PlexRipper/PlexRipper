@@ -3,7 +3,6 @@ using AutoMapper;
 using BackgroundServices;
 using PlexRipper.Application;
 using PlexRipper.Data;
-using PlexRipper.DownloadManager;
 using PlexRipper.FileSystem.Config;
 using PlexRipper.PlexApi;
 using PlexRipper.Settings.Config;
@@ -25,7 +24,6 @@ public static class ContainerConfig
 
         // Infrastructure
         builder.RegisterModule<DataModule>();
-        builder.RegisterModule<DownloadManagerModule>();
         builder.RegisterModule<FileSystemModule>();
         builder.RegisterModule<PlexApiModule>();
         builder.RegisterModule<SettingsModule>();

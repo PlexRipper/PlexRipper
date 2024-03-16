@@ -1,9 +1,8 @@
 using Application.Contracts;
 using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.DownloadManager;
 
-namespace DownloadManager.UnitTests;
+namespace PlexRipper.Application.UnitTests;
 
 public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQueue>
 {

@@ -31,6 +31,7 @@ public class FileSystemModule : Module
         builder.RegisterType<DiskProvider>().As<IDiskProvider>().SingleInstance();
         builder.RegisterType<FileMergeStreamProvider>().As<IFileMergeStreamProvider>().SingleInstance();
         builder.RegisterType<FileMergeSystem>().As<IFileMergeSystem>().SingleInstance();
+        builder.RegisterType<DownloadFileStream>().As<IDownloadFileStream>().SingleInstance();
 
         builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
 

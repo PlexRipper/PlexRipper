@@ -1,6 +1,6 @@
 ﻿using FluentResults;
 
-namespace DownloadManager.Contracts;
+namespace FileSystem.Contracts;
 
 public interface IDownloadFileStream
 {

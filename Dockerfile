@@ -44,9 +44,6 @@ COPY ["src/BackgroundServices.Contracts/BackgroundServices.Contracts.csproj", "s
 ### Data Access
 COPY ["src/Data/Data.csproj", "src/Data/"]
 COPY ["src/Data.Contracts/Data.Contracts.csproj", "src/Data.Contracts/"]
-### Download Manager
-COPY ["src/DownloadManager/DownloadManager.csproj", "src/DownloadManager/"]
-COPY ["src/DownloadManager.Contracts/DownloadManager.Contracts.csproj", "src/DownloadManager.Contracts/"]
 ### File System
 COPY ["src/FileSystem/FileSystem.csproj", "src/FileSystem/"]
 COPY ["src/FileSystem.Contracts/FileSystem.Contracts.csproj", "src/FileSystem.Contracts/"]

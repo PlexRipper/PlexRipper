@@ -82,6 +82,9 @@ cmake-build-*/
 # Mongo Explorer plugin
 .idea/**/mongoSettings.xml
 
+#Github Copilot
+.idea/copilot/
+
 # File-based project format
 *.iws
 

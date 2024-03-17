@@ -5,13 +5,13 @@ using Settings.Contracts;
 
 namespace PlexRipper.Application;
 
-public class GetSettingsEndpoint : BaseCustomEndpointWithoutRequest
+public class GetUserSettingsEndpoint : BaseCustomEndpointWithoutRequest
 {
     private readonly IUserSettings _userSettings;
 
     public override string EndpointPath => ApiRoutes.SettingsController + "/";
 
-    public GetSettingsEndpoint(IUserSettings userSettings)
+    public GetUserSettingsEndpoint(IUserSettings userSettings)
     {
         _userSettings = userSettings;
     }

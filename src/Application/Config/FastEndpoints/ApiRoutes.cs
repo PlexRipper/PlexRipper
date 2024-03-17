@@ -18,6 +18,8 @@ public static class ApiRoutes
     public static string DownloadController => Base + "/" + "Download";
     public static string FolderPathController => Base + "/" + "FolderPath";
 
+    public static string SettingsController => Base + "/" + "Settings";
+
     public static class Download
     {
         public static string Controller => Base + "/" + nameof(DownloadController).Replace("Controller", string.Empty);

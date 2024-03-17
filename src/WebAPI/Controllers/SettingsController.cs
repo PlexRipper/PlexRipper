@@ -21,16 +21,6 @@ public class SettingsController : BaseController
         _userSettings = userSettings;
     }
 
-    // GET api/<SettingsController>/
-    [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<SettingsModelDTO>))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public IActionResult GetSettings()
-    {
-        var settings = _userSettings.GetSettingsModel();
-        return ToActionResult<ISettingsModel, SettingsModelDTO>(Result.Ok(settings));
-    }
-
     // PUT api/<SettingsController>/
     [HttpPut]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<SettingsModelDTO>))]

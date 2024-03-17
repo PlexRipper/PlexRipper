@@ -9,8 +9,7 @@ using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
-using Microsoft.OpenApi.Models;
-using PlexRipper.Application.FastEndpoints;
+using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.Domain.Config;
 using PlexRipper.WebAPI.Common;
@@ -41,14 +40,12 @@ public static class Program
             builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory())
                 .ConfigureContainer<ContainerBuilder>(containerBuilder =>
                 {
-                    // Your log message might need to be adjusted based on where you place it.
                     _log.DebugLine("Setting up Autofac Containers");
                     ContainerConfig.ConfigureContainer(containerBuilder);
                 });
 
             // Setup the services
             builder.Services.SetupConfigureServices(builder.Environment);
-
             var app = builder.Build();
 
             // Setup the app
@@ -91,12 +88,8 @@ public static class Program
             // });
         }
 
-        app.UseFastEndpoints()
-            .UseSwaggerGen(options =>
-            {
-                options.Path = "v1/swagger.json";
-                options.DocumentName = "[FastEndpoints] PlexRipper Swagger Internal API";
-            });
+        app.UseFastEndpoints();
+        app.UseSwaggerGen();
 
         // app.UseEndpoints(endpoints =>
         // {
@@ -187,6 +180,9 @@ public static class Program
             })
             .SwaggerDocument(options =>
             {
+                options.AutoTagPathSegmentIndex = 2;
+
+                // options.ExcludeNonFastEndpoints = true;
                 options.DocumentSettings = s =>
                 {
                     s.Title = "[FastEndpoints] PlexRipper Swagger Internal API";

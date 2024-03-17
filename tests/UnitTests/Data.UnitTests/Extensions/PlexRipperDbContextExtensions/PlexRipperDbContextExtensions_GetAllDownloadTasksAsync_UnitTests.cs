@@ -1,23 +1,22 @@
-namespace PlexRipper.Application.UnitTests;
+using Data.Contracts;
 
-public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest<GetAllDownloadTasksQueryHandler>
+namespace Data.UnitTests.Extensions;
+
+public class PlexRipperDbContextExtensions_GetAllDownloadTasksAsync_UnitTests : BaseUnitTest
 {
-    public GetAllDownloadTasksQueryHandler_UnitTests(ITestOutputHelper output) : base(output) { }
+    public PlexRipperDbContextExtensions_GetAllDownloadTasksAsync_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public async Task ShouldReturnNoDownloadTasks_WhenNoDownloadTasksAreInDb()
     {
         // Arrange
         await SetupDatabase();
-        var request = new GetAllDownloadTasksQuery();
-        var handler = mock.Create<GetAllDownloadTasksQueryHandler>();
 
         // Act
-        var result = await handler.Handle(request, CancellationToken.None);
+        var downloadTasks = await IDbContext.GetAllDownloadTasksAsync();
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBeEmpty();
+        downloadTasks.ShouldBeEmpty();
     }
 
     [Fact]
@@ -34,13 +33,9 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest<GetAllDown
         });
 
         // Act
-        var request = new GetAllDownloadTasksQuery();
-        var handler = mock.Create<GetAllDownloadTasksQueryHandler>();
-        var result = await handler.Handle(request, CancellationToken.None);
+        var downloadTasks = await IDbContext.GetAllDownloadTasksAsync();
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
-        var downloadTasks = result.Value;
         downloadTasks.ShouldNotBeEmpty();
         downloadTasks.Count.ShouldBe(10);
 
@@ -65,13 +60,9 @@ public class GetAllDownloadTasksQueryHandler_UnitTests : BaseUnitTest<GetAllDown
         });
 
         // Act
-        var request = new GetAllDownloadTasksQuery();
-        var handler = mock.Create<GetAllDownloadTasksQueryHandler>();
-        var result = await handler.Handle(request, CancellationToken.None);
+        var downloadTasks = await IDbContext.GetAllDownloadTasksAsync();
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
-        var downloadTasks = result.Value;
         downloadTasks.ShouldNotBeEmpty();
 
         void ValidateDownloadTasks(List<DownloadTaskGeneric> shouldDownloadTasks)

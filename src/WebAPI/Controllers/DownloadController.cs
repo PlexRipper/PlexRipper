@@ -4,7 +4,6 @@ using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
-using PlexRipper.WebAPI.Common.Mappers;
 
 namespace PlexRipper.WebAPI.Controllers;
 
@@ -26,21 +25,6 @@ public class DownloadController : BaseController
     {
         _dbContext = dbContext;
         _mediator = mediator;
-    }
-
-    // GET: api/<DownloadController>
-    [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<ServerDownloadProgressDTO>>))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetDownloadTasks()
-    {
-        var result = await _mediator.Send(new GetAllDownloadTasksQuery());
-
-        if (result.IsFailed)
-            return InternalServerError(result.ToResult());
-
-        var returnResult = result.ToResultDTO(result.Value.ToServerDownloadProgressDTOList());
-        return Ok(returnResult);
     }
 
     // /// <summary>

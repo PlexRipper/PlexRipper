@@ -1,6 +1,5 @@
 using Application.Contracts;
 using FastEndpoints;
-using PlexRipper.Application.FastEndpoints;
 
 namespace PlexRipper.Application;
 
@@ -10,7 +9,7 @@ public class ClearCompletedDownloadTasksCustomEndpoint : BaseCustomEndpoint<Clea
 {
     private readonly IMediator _mediator;
 
-    public override string EndpointPath => "/api/download/clear";
+    public override string EndpointPath => ApiRoutes.DownloadController + "/clear";
 
     public ClearCompletedDownloadTasksCustomEndpoint(IMediator mediator)
     {

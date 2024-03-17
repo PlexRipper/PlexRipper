@@ -1,9 +1,24 @@
-using PlexRipper.WebAPI.SignalR.Common;
+using PlexRipper.Domain;
+using Riok.Mapperly.Abstractions;
 
-namespace PlexRipper.WebAPI.Common.Mappers;
+namespace Application.Contracts;
 
-public static class DownloadTaskGenericToServerDownloadProgressDTOMapper
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class DownloadTaskGenericToDTOMapper
 {
+    public static DownloadProgressDTO ToDownloadProgressDto(this DownloadTaskGeneric downloadTask)
+    {
+        if (downloadTask is null)
+            return null;
+
+        var result = downloadTask.ToDownloadProgressDtoMapper();
+        result.Actions = DownloadTaskActions.Convert(result.Status);
+        return result;
+    }
+
+    [MapProperty(nameof(DownloadTaskGeneric.DownloadStatus), nameof(DownloadProgressDTO.Status))]
+    private static partial DownloadProgressDTO ToDownloadProgressDtoMapper(this DownloadTaskGeneric downloadTask);
+
     public static List<ServerDownloadProgressDTO> ToServerDownloadProgressDTOList(this List<DownloadTaskGeneric> source)
     {
         var serverDownloads = new List<ServerDownloadProgressDTO>();

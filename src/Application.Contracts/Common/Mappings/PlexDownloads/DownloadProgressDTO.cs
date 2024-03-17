@@ -1,4 +1,6 @@
-﻿namespace PlexRipper.WebAPI;
+﻿using PlexRipper.Domain;
+
+namespace Application.Contracts;
 
 public class DownloadProgressDTO
 {

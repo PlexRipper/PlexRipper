@@ -1,5 +1,4 @@
 ﻿using Application.Contracts;
-using Application.Contracts.FolderPath;
 using Application.Contracts.PlexMediaData;
 using AutoMapper;
 using BackgroundServices.Contracts;

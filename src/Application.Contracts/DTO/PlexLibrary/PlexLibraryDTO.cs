@@ -1,5 +1,4 @@
-﻿using Application.Contracts.FolderPath;
-using PlexRipper.Domain;
+﻿using PlexRipper.Domain;
 
 namespace Application.Contracts;
 

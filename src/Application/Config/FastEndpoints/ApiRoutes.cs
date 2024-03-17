@@ -1,6 +1,4 @@
-﻿using PlexRipper.WebAPI.Controllers;
-
-namespace PlexRipper.WebAPI.Common;
+﻿namespace PlexRipper.Application;
 
 public static class ApiRoutes
 {
@@ -8,7 +6,7 @@ public static class ApiRoutes
 
     public static class Settings
     {
-        public static string Controller => Base + "/" + nameof(SettingsController).Replace("Controller", string.Empty);
+        public static string Controller => Base + "/" + "".Replace("Controller", string.Empty);
 
         public static string GetSettings => Controller;
 
@@ -16,6 +14,9 @@ public static class ApiRoutes
 
         public static string ResetDatabase => Controller + "ResetDb";
     }
+
+    public static string DownloadController => Base + "/" + "Download";
+    public static string FolderPathController => Base + "/" + "FolderPath";
 
     public static class Download
     {
@@ -38,9 +39,11 @@ public static class ApiRoutes
         public static string GetPauseCommand(Guid id) => Controller + "/pause/" + id;
     }
 
+    public static string PlexAccountController => Base + "/" + "Download";
+
     public static class Account
     {
-        public static string Controller => Base + "/" + nameof(PlexAccountController).Replace("Controller", string.Empty);
+        public static string Controller => Base + "/" + "".Replace("Controller", string.Empty);
 
         public static string PostValidate => Controller + "/validate";
 

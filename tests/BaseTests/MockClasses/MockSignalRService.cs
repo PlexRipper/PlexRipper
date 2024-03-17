@@ -2,8 +2,6 @@
 using Application.Contracts;
 using BackgroundServices.Contracts;
 using Logging.Interface;
-using PlexRipper.WebAPI;
-using PlexRipper.WebAPI.Common.Mappers;
 using WebAPI.Contracts;
 
 namespace PlexRipper.BaseTests;

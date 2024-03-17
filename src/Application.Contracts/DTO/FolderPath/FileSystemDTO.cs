@@ -1,4 +1,4 @@
-﻿namespace Application.Contracts.FolderPath;
+﻿namespace Application.Contracts;
 
 public class FileSystemDTO
 {

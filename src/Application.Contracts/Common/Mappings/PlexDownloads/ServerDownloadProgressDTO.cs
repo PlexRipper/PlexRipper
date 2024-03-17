@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.WebAPI;
+﻿namespace Application.Contracts;
 
 public record ServerDownloadProgressDTO
 {

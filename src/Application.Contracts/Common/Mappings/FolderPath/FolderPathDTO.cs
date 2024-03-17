@@ -1,6 +1,6 @@
 ﻿using PlexRipper.Domain;
 
-namespace Application.Contracts.FolderPath;
+namespace Application.Contracts;
 
 public class FolderPathDTO
 {

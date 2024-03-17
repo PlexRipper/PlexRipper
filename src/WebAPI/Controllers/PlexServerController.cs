@@ -33,34 +33,6 @@ public class PlexServerController : BaseController
 
     #region Public
 
-    // GET api/<PlexServerController>/5
-    [HttpGet("{id:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerDTO>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetById(int id)
-    {
-        if (id <= 0)
-            return BadRequestInvalidId();
-
-        var plexServerResult = await _mediator.Send(new GetPlexServerByIdQuery(id));
-        return ToActionResult<PlexServer, PlexServerDTO>(plexServerResult);
-    }
-
-    // GET api/<PlexServerController>/5/inspect
-    [HttpGet("{plexServerId:int}/inspect")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerDTO>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> InspectServer(int plexServerId)
-    {
-        if (plexServerId <= 0)
-            return BadRequestInvalidId();
-
-        var result = await _mediator.Send(new QueueInspectPlexServerJobCommand(plexServerId));
-        return ToActionResult<PlexServer, PlexServerDTO>(result);
-    }
-
     // GET api/<PlexServerController>/5/inspect
     [HttpGet("{plexServerId:int}/refresh")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerDTO>))]

@@ -20,7 +20,7 @@ public class GetPlexServerByIdEndpoint : BaseCustomEndpoint<GetPlexServerByIdEnd
 {
     private readonly IPlexRipperDbContext _dbContext;
 
-    public override string EndpointPath => throw new NotImplementedException();
+    public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}";
 
     public GetPlexServerByIdEndpoint(IPlexRipperDbContext dbContext)
     {

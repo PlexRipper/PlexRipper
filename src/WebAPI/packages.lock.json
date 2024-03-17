@@ -2175,6 +2175,7 @@
           "Microsoft.Extensions.Http": "[7.0.0, )",
           "PlexApi.Contracts": "[1.0.0, )",
           "PlexRipper.Domain": "[1.0.0, )",
+          "PlexRipper.Settings": "[1.0.0, )",
           "RestSharp": "[108.0.1, )",
           "Settings.Contracts": "[1.0.0, )",
           "WebAPI.Contracts": "[1.0.0, )"

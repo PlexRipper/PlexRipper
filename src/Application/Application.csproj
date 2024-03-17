@@ -28,6 +28,7 @@
 		<ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
 		<ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
 		<ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
+		<ProjectReference Include="..\Settings\Settings.csproj" />
 		<ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj" />
 	</ItemGroup>
 

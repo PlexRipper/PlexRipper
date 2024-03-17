@@ -33,20 +33,6 @@ public class PlexServerController : BaseController
 
     #region Public
 
-    // GET api/<PlexServerController>/5/sync
-    [HttpGet("{plexServerId:int}/sync")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> SyncServer(int plexServerId, [FromQuery] bool forceSync = false)
-    {
-        if (plexServerId <= 0)
-            return BadRequestInvalidId(nameof(plexServerId));
-
-        var result = await _mediator.Send(new QueueSyncServerJobCommand(plexServerId, true));
-        return ToActionResult(result);
-    }
-
     /// <summary>
     /// Sets the preferred connection for a <see cref="PlexServer"/>
     /// </summary>

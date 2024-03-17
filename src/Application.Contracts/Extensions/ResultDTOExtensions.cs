@@ -77,7 +77,8 @@ public static partial class ResultDTOExtensions
             return Results.Ok(resultDTO);
         }
 
-        var failedResult = result.ToResultDTO();
+        // Ensure we first cast to result to avoid result.value being null
+        var failedResult = result.ToResult().ToResultDTO();
         if (result.Has400BadRequestError())
             return Results.BadRequest(failedResult);
 

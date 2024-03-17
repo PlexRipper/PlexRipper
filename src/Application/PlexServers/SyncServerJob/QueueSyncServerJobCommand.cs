@@ -1,3 +1,4 @@
+using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Quartz;
@@ -6,7 +7,7 @@ namespace PlexRipper.Application;
 
 public record QueueSyncServerJobCommand(int PlexServerId, bool ForceSync = false) : IRequest<Result>;
 
-public class QueueSyncServerJobCommandValidator : AbstractValidator<QueueSyncServerJobCommand>
+public class QueueSyncServerJobCommandValidator : Validator<QueueSyncServerJobCommand>
 {
     public QueueSyncServerJobCommandValidator()
     {

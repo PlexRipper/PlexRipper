@@ -35,6 +35,7 @@ public class GetFolderPathDirectoryEndpoint : BaseCustomEndpoint<GetFolderPathDi
     {
         Get(EndpointPath);
         AllowAnonymous();
+        Summary(x => { x.Summary = "Get all the FolderPaths entities in the database"; });
         Description(x => x
             .Produces(StatusCodes.Status200OK, typeof(ResultDTO<FileSystemDTO>))
             .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

@@ -43,6 +43,7 @@ public class UpdateFolderPathEndpoint : BaseCustomEndpoint<UpdateFolderPathEndpo
         AllowAnonymous();
         Description(x => x
             .Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<FolderPathDTO>>))
+            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
             .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
     }
 

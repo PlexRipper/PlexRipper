@@ -29,7 +29,7 @@ public class CreateFolderPathEndpoint : BaseCustomEndpoint<CreateFolderPathEndpo
 {
     private readonly IPlexRipperDbContext _dbContext;
 
-    public override string EndpointPath => throw new NotImplementedException();
+    public override string EndpointPath => ApiRoutes.FolderPathController + "/";
 
     public CreateFolderPathEndpoint(IPlexRipperDbContext dbContext)
     {
@@ -42,6 +42,7 @@ public class CreateFolderPathEndpoint : BaseCustomEndpoint<CreateFolderPathEndpo
         AllowAnonymous();
         Description(x => x
             .Produces(StatusCodes.Status200OK, typeof(ResultDTO<FolderPathDTO>))
+            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
             .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
     }
 

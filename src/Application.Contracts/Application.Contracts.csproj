@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
 		<LangVersion>11</LangVersion>
@@ -13,12 +12,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Reference Include="Microsoft.AspNetCore.Http.Abstractions">
-	    <HintPath>..\..\..\..\..\home\jason\.nuget\packages\microsoft.aspnetcore.app.ref\7.0.17\ref\net7.0\Microsoft.AspNetCore.Http.Abstractions.dll</HintPath>
-	  </Reference>
-	  <Reference Include="Microsoft.AspNetCore.Http.Results">
-	    <HintPath>..\..\..\..\..\home\jason\.nuget\packages\microsoft.aspnetcore.app.ref\7.0.17\ref\net7.0\Microsoft.AspNetCore.Http.Results.dll</HintPath>
-	  </Reference>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
-
 </Project>

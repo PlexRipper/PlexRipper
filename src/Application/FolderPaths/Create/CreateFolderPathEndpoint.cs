@@ -48,7 +48,7 @@ public class CreateFolderPathEndpoint : BaseCustomEndpoint<CreateFolderPathEndpo
 
     public override async Task HandleAsync(CreateFolderPathEndpointRequest req, CancellationToken ct)
     {
-        var folderPath = req.FolderPathDto.ToEntity();
+        var folderPath = req.FolderPathDto.ToModel();
         await _dbContext.FolderPaths.AddAsync(folderPath, ct);
         await _dbContext.SaveChangesAsync(ct);
 

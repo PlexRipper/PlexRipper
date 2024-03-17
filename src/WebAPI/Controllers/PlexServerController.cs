@@ -33,21 +33,6 @@ public class PlexServerController : BaseController
 
     #region Public
 
-    // GET api/<PlexServerController>/
-    [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexServerDTO>>))]
-    public async Task<IActionResult> GetAll()
-    {
-        var plexServersResult = await _mediator.Send(new GetAllPlexServersQuery());
-
-        if (plexServersResult.IsFailed)
-            return ToActionResult(plexServersResult.ToResult());
-
-        plexServersResult.WithValue(plexServersResult.Value.SortByOwnedOrder());
-
-        return ToActionResult<List<PlexServer>, List<PlexServerDTO>>(plexServersResult);
-    }
-
     // GET api/<PlexServerController>/5
     [HttpGet("{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerDTO>))]

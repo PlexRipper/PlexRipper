@@ -50,7 +50,7 @@ public class UpdateFolderPathEndpoint : BaseCustomEndpoint<UpdateFolderPathEndpo
     public override async Task HandleAsync(UpdateFolderPathEndpointRequest req, CancellationToken ct)
     {
         // TODO Should prevent updating reserved folder paths with id < 10
-        var folderPath = req.FolderPathDto.ToEntity();
+        var folderPath = req.FolderPathDto.ToModel();
         var folderPathDb = await _dbContext.FolderPaths.AsTracking().FirstOrDefaultAsync(x => x.Id == folderPath.Id, ct);
 
         if (folderPathDb is null)

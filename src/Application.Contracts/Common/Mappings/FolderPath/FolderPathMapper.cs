@@ -22,11 +22,11 @@ public static partial class FolderPathMapper
 
     [MapperRequiredMapping(RequiredMappingStrategy.Source)]
     [MapProperty(nameof(FolderPathDTO.Directory), nameof(FolderPath.DirectoryPath))]
-    public static partial FolderPath ToEntity(this FolderPathDTO folderPaths);
+    public static partial FolderPath ToModel(this FolderPathDTO folderPaths);
 
     [MapperRequiredMapping(RequiredMappingStrategy.Source)]
     [MapProperty(nameof(FolderPathDTO.Directory), nameof(FolderPath.DirectoryPath))]
-    public static partial List<FolderPath> ToEntity(this List<FolderPathDTO> folderPaths);
+    public static partial List<FolderPath> ToModel(this List<FolderPathDTO> folderPaths);
 
     #endregion
 }

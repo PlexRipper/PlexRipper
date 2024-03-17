@@ -23,17 +23,6 @@ public class FolderPathController : BaseController
         _fileSystem = fileSystem;
     }
 
-    // // PUT: api/<FolderPathController>
-    // [HttpPut]
-    // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<FolderPathDTO>>))]
-    // [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    // public async Task<IActionResult> Put([FromBody] FolderPathDTO folderPathDto)
-    // {
-    //     var folderPath = _mapper.Map<FolderPath>(folderPathDto);
-    //     var result = await _mediator.Send(new UpdateFolderPathCommand(folderPath));
-    //     return ToActionResult<FolderPath, FolderPathDTO>(result);
-    // }
-    //
     // // POST: api/<FolderPathController>
     // [HttpPost]
     // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<FolderPathDTO>))]

@@ -23,15 +23,6 @@ public class FolderPathController : BaseController
         _fileSystem = fileSystem;
     }
 
-    // // GET: api/<FolderPathController>/directory?path=
-    // [HttpGet("directory")]
-    // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<FileSystemDTO>))]
-    // public IActionResult Get(string path)
-    // {
-    //     path = path == "null" ? string.Empty : path;
-    //     return ToActionResult<FileSystemResult, FileSystemDTO>(_fileSystem.LookupContents(path, false, true));
-    // }
-
     // // PUT: api/<FolderPathController>
     // [HttpPut]
     // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<FolderPathDTO>>))]

@@ -6,6 +6,7 @@ using Environment;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Logging.Interface;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
@@ -88,7 +89,20 @@ public static class Program
             // });
         }
 
-        app.UseFastEndpoints();
+        app.UseFastEndpoints(c =>
+        {
+            c.Errors.ResponseBuilder = (failures, ctx, statusCode) =>
+            {
+                var result = ResultExtensions.Create400BadRequestResult($"Bad request: {ctx.Request.GetDisplayUrl()}");
+                var errors = failures.GroupBy(f => f.PropertyName)
+                    .ToDictionary(
+                        e => e.Key,
+                        e => e.Select(m => m.ErrorMessage).ToArray());
+                foreach (var reason in errors)
+                    result.Errors[0].Metadata.Add(reason.Key, reason.Value);
+                return result;
+            };
+        });
         app.UseSwaggerGen();
 
         // app.UseEndpoints(endpoints =>

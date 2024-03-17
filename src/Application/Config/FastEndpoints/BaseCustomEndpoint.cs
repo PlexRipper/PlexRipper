@@ -11,6 +11,11 @@ public abstract class BaseCustomEndpoint<TRequest, TResponse> : Endpoint<TReques
     {
         await SendResultAsync(result.ToIResult());
     }
+
+    protected async Task SendResult<T>(Result<T> result, CancellationToken ct)
+    {
+        await SendResultAsync(result.ToIResult());
+    }
 }
 
 public abstract class BaseCustomEndpointWithoutRequest : EndpointWithoutRequest

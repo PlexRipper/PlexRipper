@@ -1,8 +1,8 @@
+using Application.Contracts;
 using AutoMapper;
 using BackgroundServices.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.SignalR;
-using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.Mappers;
 using PlexRipper.WebAPI.SignalR.Common;
 using PlexRipper.WebAPI.SignalR.Hubs;

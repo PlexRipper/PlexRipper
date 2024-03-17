@@ -1,4 +1,4 @@
-using PlexRipper.WebAPI.Common.DTO;
+using Application.Contracts;
 using PlexRipper.WebAPI.SignalR.Common;
 using SignalRSwaggerGen.Attributes;
 using SignalRSwaggerGen.Enums;

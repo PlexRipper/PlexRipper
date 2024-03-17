@@ -4,7 +4,6 @@ using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
-using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.Mappers;
 
 namespace PlexRipper.WebAPI.Controllers;

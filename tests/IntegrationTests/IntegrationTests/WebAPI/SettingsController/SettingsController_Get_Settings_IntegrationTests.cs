@@ -1,11 +1,10 @@
 ﻿using System.Text.Json;
+using PlexRipper.Application;
 using PlexRipper.Domain.Config;
 using PlexRipper.Settings.Models;
-using PlexRipper.WebAPI.Common;
 using Settings.Contracts;
 
 namespace IntegrationTests.WebAPI.SettingsController;
-
 
 public class SettingsController_Get_Settings_IntegrationTests : BaseIntegrationTests
 {

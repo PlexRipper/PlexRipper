@@ -1,8 +1,8 @@
 ﻿using System.Collections.Concurrent;
+using Application.Contracts;
 using BackgroundServices.Contracts;
 using Logging.Interface;
 using PlexRipper.WebAPI;
-using PlexRipper.WebAPI.Common.DTO;
 using PlexRipper.WebAPI.Common.Mappers;
 using WebAPI.Contracts;
 

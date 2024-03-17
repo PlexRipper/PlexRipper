@@ -1,8 +1,7 @@
-using PlexRipper.WebAPI.Common;
-using PlexRipper.WebAPI.Common.DTO;
+using Application.Contracts;
+using PlexRipper.Application;
 
 namespace IntegrationTests.WebAPI.AccountController;
-
 
 public class ValidateAccount_IntegrationTests : BaseIntegrationTests
 {

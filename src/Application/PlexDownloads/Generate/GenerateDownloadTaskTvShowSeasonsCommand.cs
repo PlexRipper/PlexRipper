@@ -1,4 +1,5 @@
 using Application.Contracts;
+using Application.Contracts.Validators;
 using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;

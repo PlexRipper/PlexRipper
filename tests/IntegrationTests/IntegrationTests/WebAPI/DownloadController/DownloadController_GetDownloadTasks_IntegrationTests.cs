@@ -1,5 +1,5 @@
-﻿using PlexRipper.WebAPI;
-using PlexRipper.WebAPI.Common;
+﻿using PlexRipper.Application;
+using PlexRipper.WebAPI;
 
 namespace IntegrationTests.WebAPI.DownloadController;
 

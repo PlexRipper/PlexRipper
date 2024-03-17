@@ -1,7 +1,7 @@
+using Application.Contracts;
 using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.WebAPI.Common;
-using PlexRipper.WebAPI.Common.DTO;
+using PlexRipper.Application;
 
 namespace IntegrationTests.WebAPI.AccountController;
 

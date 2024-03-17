@@ -1,5 +1,6 @@
 using FluentResults;
 using MediatR;
+using PlexRipper.Domain;
 
 namespace Application.Contracts;
 

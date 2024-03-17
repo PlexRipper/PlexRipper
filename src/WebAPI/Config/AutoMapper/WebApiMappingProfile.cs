@@ -1,10 +1,9 @@
 ﻿using Application.Contracts;
+using Application.Contracts.FolderPath;
+using Application.Contracts.PlexMediaData;
 using AutoMapper;
 using BackgroundServices.Contracts;
 using PlexRipper.WebAPI.Common;
-using PlexRipper.WebAPI.Common.DTO;
-using PlexRipper.WebAPI.Common.DTO.FolderPath;
-using PlexRipper.WebAPI.Common.DTO.PlexMediaData;
 using PlexRipper.WebAPI.SignalR.Common;
 using WebAPI.Contracts;
 

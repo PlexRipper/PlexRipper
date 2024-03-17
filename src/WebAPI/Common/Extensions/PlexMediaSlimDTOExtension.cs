@@ -1,4 +1,4 @@
-using PlexRipper.WebAPI.Common.DTO;
+using Application.Contracts;
 
 namespace PlexRipper.WebAPI.Common.Extensions;
 

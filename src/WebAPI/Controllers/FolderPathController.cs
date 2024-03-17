@@ -1,10 +1,10 @@
 ﻿using Application.Contracts;
+using Application.Contracts.FolderPath;
 using AutoMapper;
 using FileSystem.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
-using PlexRipper.WebAPI.Common.DTO.FolderPath;
 
 namespace PlexRipper.WebAPI.Controllers;
 

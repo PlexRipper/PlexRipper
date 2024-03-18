@@ -33,20 +33,6 @@ public class PlexServerConnectionController : BaseController
 
     #region Public
 
-    // GET api/<PlexServerConnectionController>/5
-    [HttpGet("{id:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerConnectionDTO>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetById(int id)
-    {
-        if (id <= 0)
-            return BadRequestInvalidId();
-
-        var result = await _mediator.Send(new GetPlexServerConnectionByIdQuery(id));
-        return ToActionResult<PlexServerConnection, PlexServerConnectionDTO>(result);
-    }
-
     // GET api/<PlexServerConnectionController>/check/5
     [HttpGet("check/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexServerStatusDTO>))]

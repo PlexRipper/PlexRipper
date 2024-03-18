@@ -1,23 +1,11 @@
 using Application.Contracts;
 using Data.Contracts;
-using FastEndpoints;
-using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record GetAllPlexServerConnectionsEndpointRequest();
-
-public class GetAllPlexServerConnectionsEndpointRequestValidator : Validator<GetAllPlexServerConnectionsEndpointRequest>
-{
-    public GetAllPlexServerConnectionsEndpointRequestValidator()
-    {
-        RuleFor(x => x).NotNull();
-    }
-}
-
-public class GetAllPlexServerConnectionsEndpoint : BaseCustomEndpoint<GetAllPlexServerConnectionsEndpointRequest, ResultDTO<List<PlexServerConnectionDTO>>>
+public class GetAllPlexServerConnectionsEndpoint : BaseCustomEndpointWithoutRequest<ResultDTO<List<PlexServerConnectionDTO>>>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -37,7 +25,7 @@ public class GetAllPlexServerConnectionsEndpoint : BaseCustomEndpoint<GetAllPlex
             .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
     }
 
-    public override async Task HandleAsync(GetAllPlexServerConnectionsEndpointRequest req, CancellationToken ct)
+    public override async Task HandleAsync(CancellationToken ct)
     {
         var plexServerConnections = await _dbContext
             .PlexServerConnections

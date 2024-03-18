@@ -1,4 +1,4 @@
-﻿namespace PlexApi.Contracts;
+﻿namespace Application.Contracts;
 
 public class PlexApiClientProgress
 {

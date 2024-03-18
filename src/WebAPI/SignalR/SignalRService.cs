@@ -71,8 +71,7 @@ public class SignalRService : ISignalRService
 
     public async Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress)
     {
-        var progressDTO = _mapper.Map<ServerConnectionCheckStatusProgressDTO>(progress);
-        await _progressHub.Clients.All.ServerConnectionCheckStatusProgress(progressDTO);
+        await _progressHub.Clients.All.ServerConnectionCheckStatusProgress(progress.ToDTO());
     }
 
     /// <inheritdoc/>
@@ -92,8 +91,7 @@ public class SignalRService : ISignalRService
 
     public async Task SendNotificationAsync(Notification notification)
     {
-        var notificationDto = _mapper.Map<NotificationDTO>(notification);
-        await _notificationHub.Clients.All.Notification(notificationDto);
+        await _notificationHub.Clients.All.Notification(notification.ToDTO());
     }
 
     #endregion

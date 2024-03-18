@@ -18,7 +18,7 @@ public static partial class FolderPathMapper
 
     #endregion
 
-    #region ToEntity
+    #region ToModel
 
     [MapperRequiredMapping(RequiredMappingStrategy.Source)]
     [MapProperty(nameof(FolderPathDTO.Directory), nameof(FolderPath.DirectoryPath))]

@@ -1,5 +1,5 @@
-﻿using AutoMapper;
-using PlexApi.Contracts;
+﻿using Application.Contracts;
+using AutoMapper;
 using WebAPI.Contracts;
 
 namespace PlexRipper.Application;
@@ -10,9 +10,6 @@ public class ApplicationMappingProfile : Profile
     {
         // PlexApiClientProgress -> InspectServerProgress
         CreateMap<PlexApiClientProgress, InspectServerProgress>(MemberList.None);
-
-        // PlexApiClientProgress -> ServerConnectionCheckStatusProgress
-        CreateMap<PlexApiClientProgress, ServerConnectionCheckStatusProgress>(MemberList.None);
 
         DownloadPreviewProjection();
     }

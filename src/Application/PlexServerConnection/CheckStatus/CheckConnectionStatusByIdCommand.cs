@@ -1,47 +1,43 @@
-using AutoMapper;
+using Application.Contracts;
 using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
-using WebAPI.Contracts;
 
 namespace PlexRipper.Application;
 
-public record CheckConnectionStatusCommand(int PlexServerConnectionId) : IRequest<Result<PlexServerStatus>>;
+public record CheckConnectionStatusByIdCommand(int PlexServerConnectionId) : IRequest<Result<PlexServerStatus>>;
 
-public class CheckConnectionStatusCommandValidator : AbstractValidator<CheckConnectionStatusCommand>
+public class CheckConnectionStatusByIdCommandValidator : AbstractValidator<CheckConnectionStatusByIdCommand>
 {
-    public CheckConnectionStatusCommandValidator()
+    public CheckConnectionStatusByIdCommandValidator()
     {
         RuleFor(x => x.PlexServerConnectionId).GreaterThan(0);
     }
 }
 
-public class CheckConnectionStatusCommandHandler : IRequestHandler<CheckConnectionStatusCommand, Result<PlexServerStatus>>
+public class CheckConnectionStatusByIdCommandHandler : IRequestHandler<CheckConnectionStatusByIdCommand, Result<PlexServerStatus>>
 {
     private readonly ILog _log;
-    private readonly IMapper _mapper;
     private readonly ISignalRService _signalRService;
     private readonly IPlexApiService _plexApiService;
     private readonly IPlexRipperDbContext _dbContext;
     private PlexServerConnection _plexServerConnection;
 
-    public CheckConnectionStatusCommandHandler(
+    public CheckConnectionStatusByIdCommandHandler(
         ILog log,
         IPlexRipperDbContext dbContext,
-        IMapper mapper,
         ISignalRService signalRService,
         IPlexApiService plexApiService)
     {
         _log = log;
-        _mapper = mapper;
         _dbContext = dbContext;
         _signalRService = signalRService;
         _plexApiService = plexApiService;
     }
 
-    public async Task<Result<PlexServerStatus>> Handle(CheckConnectionStatusCommand command, CancellationToken cancellationToken)
+    public async Task<Result<PlexServerStatus>> Handle(CheckConnectionStatusByIdCommand command, CancellationToken cancellationToken)
     {
         _plexServerConnection = await _dbContext.PlexServerConnections.GetAsync(command.PlexServerConnectionId, cancellationToken);
 
@@ -64,7 +60,7 @@ public class CheckConnectionStatusCommandHandler : IRequestHandler<CheckConnecti
     /// <param name="progress"></param>
     private async void Action(PlexApiClientProgress progress)
     {
-        var checkStatusProgress = _mapper.Map<ServerConnectionCheckStatusProgress>(progress);
+        var checkStatusProgress = progress.ToServerConnectionCheckStatusProgress();
         checkStatusProgress.PlexServerConnection = _plexServerConnection;
         await _signalRService.SendServerConnectionCheckStatusProgressAsync(checkStatusProgress);
     }

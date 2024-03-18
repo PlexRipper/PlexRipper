@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Application.Contracts;
 using Logging.Interface;
 using PlexApi.Contracts;
 using Polly;
@@ -29,6 +30,7 @@ public class PlexApiClient
             ThrowOnAnyError = false,
         };
         _client = new RestClient(httpClient, options);
+
         // HTTPS connections expect an user agent to be set
         _client.AddDefaultHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64)");
         _client.UseSystemTextJson(SerializerOptions);

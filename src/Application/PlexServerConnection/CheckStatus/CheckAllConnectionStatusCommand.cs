@@ -8,7 +8,7 @@ namespace PlexRipper.Application;
 /// Checks every <see cref="PlexServerConnection"/> in parallel of a <see cref="PlexServer"/> whether it connects or not
 /// and then stores that <see cref="PlexServerStatus"/> in the database.
 /// </summary>
-/// <param name="plexServerId">The id of the <see cref="PlexServer" /> to check the connections for.</param>
+/// <param name="PlexServerId">The id of the <see cref="PlexServer" /> to check the connections for.</param>
 /// <returns>Returns successful result if any connection connected.</returns>
 public record CheckAllConnectionStatusCommand(int PlexServerId) : IRequest<Result<List<PlexServerStatus>>>;
 
@@ -43,7 +43,7 @@ public class CheckAllConnectionStatusCommandHandler : IRequestHandler<CheckAllCo
 
         // Create connection check tasks for all connections
         var connectionTasks = connections
-            .Select(async plexServerConnection => await _mediator.Send(new CheckConnectionStatusCommand(plexServerConnection.Id), cancellationToken));
+            .Select(async plexServerConnection => await _mediator.Send(new CheckConnectionStatusByIdCommand(plexServerConnection.Id), cancellationToken));
 
         var tasksResult = await Task.WhenAll(connectionTasks);
         var combinedResults = Result.Merge(tasksResult);

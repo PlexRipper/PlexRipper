@@ -16,7 +16,7 @@ public static partial class NotificationMapper
 
     #endregion
 
-    #region ToEntity
+    #region ToModel
 
     [MapperRequiredMapping(RequiredMappingStrategy.Source)]
     public static partial Notification ToModel(this NotificationDTO notifications);

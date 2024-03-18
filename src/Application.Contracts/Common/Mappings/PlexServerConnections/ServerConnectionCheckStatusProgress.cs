@@ -1,6 +1,6 @@
 using PlexRipper.Domain;
 
-namespace WebAPI.Contracts;
+namespace Application.Contracts;
 
 public class ServerConnectionCheckStatusProgress
 {
@@ -24,14 +24,11 @@ public class ServerConnectionCheckStatusProgress
 
     public PlexServerConnection PlexServerConnection { get; set; }
 
-    public override string ToString()
-    {
-        return $"{nameof(ServerConnectionCheckStatusProgress)}: " +
-               $"ConnectionId: {PlexServerConnectionId} - " +
-               $"ServerId: {PlexServerId} - " +
-               $"({RetryAttemptIndex} of {RetryAttemptCount}) -" +
-               $" Completed: {Completed} -" +
-               $" Status: {StatusCode}" +
-               $" Message: {Message}";
-    }
+    public override string ToString() => $"{nameof(ServerConnectionCheckStatusProgress)}: " +
+                                         $"ConnectionId: {PlexServerConnectionId} - " +
+                                         $"ServerId: {PlexServerId} - " +
+                                         $"({RetryAttemptIndex} of {RetryAttemptCount}) -" +
+                                         $" Completed: {Completed} -" +
+                                         $" Status: {StatusCode}" +
+                                         $" Message: {Message}";
 }

@@ -1,7 +1,7 @@
-﻿using Autofac;
+﻿using Application.Contracts;
+using Autofac;
 using FileSystem.Contracts;
 using Settings.Contracts;
-using WebAPI.Contracts;
 
 namespace PlexRipper.BaseTests;
 

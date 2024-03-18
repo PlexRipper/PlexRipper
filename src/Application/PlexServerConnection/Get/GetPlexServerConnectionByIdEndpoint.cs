@@ -21,7 +21,7 @@ public class GetPlexServerConnectionByIdEndpoint : BaseCustomEndpoint<GetPlexSer
 {
     private readonly IPlexRipperDbContext _dbContext;
 
-    public override string EndpointPath => throw new NotImplementedException();
+    public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/{PlexServerConnectionId}";
 
     public GetPlexServerConnectionByIdEndpoint(IPlexRipperDbContext dbContext)
     {
@@ -53,6 +53,6 @@ public class GetPlexServerConnectionByIdEndpoint : BaseCustomEndpoint<GetPlexSer
             return;
         }
 
-        await SendResult(Result.Ok(plexServerConnection), ct);
+        await SendResult(Result.Ok(plexServerConnection.ToDTO()), ct);
     }
 }

@@ -1,6 +1,6 @@
+using Application.Contracts;
 using Data.Contracts;
 using Logging.Interface;
-using WebAPI.Contracts;
 
 namespace PlexRipper.Application;
 

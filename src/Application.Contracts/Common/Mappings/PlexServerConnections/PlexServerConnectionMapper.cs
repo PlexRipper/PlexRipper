@@ -15,15 +15,29 @@ public static partial class PlexServerConnectionMapper
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
     public static partial List<PlexServerConnectionDTO> ToDTO(this List<PlexServerConnection> plexServerConnections);
 
+    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
+    public static partial ServerConnectionCheckStatusProgressDTO ToDTO(this ServerConnectionCheckStatusProgress serverConnectionCheckStatusProgress);
+
+    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
+    public static partial List<ServerConnectionCheckStatusProgressDTO> ToDTO(
+        this List<ServerConnectionCheckStatusProgress> serverConnectionCheckStatusProgress);
+
     #endregion
 
-    #region ToEntity
+    #region ToModel
 
     [MapperRequiredMapping(RequiredMappingStrategy.Source)]
     public static partial PlexServerConnection ToModel(this PlexServerConnectionDTO plexServerConnection);
 
     [MapperRequiredMapping(RequiredMappingStrategy.Source)]
     public static partial List<PlexServerConnection> ToModel(this List<PlexServerConnectionDTO> plexServerConnections);
+
+    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
+    public static partial ServerConnectionCheckStatusProgress ToModel(this ServerConnectionCheckStatusProgressDTO serverConnectionCheckStatusProgress);
+
+    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
+    public static partial List<ServerConnectionCheckStatusProgress> ToModel(
+        this List<ServerConnectionCheckStatusProgressDTO> serverConnectionCheckStatusProgress);
 
     #endregion
 }

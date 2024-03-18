@@ -16,7 +16,7 @@ public static partial class PlexServerStatusMapper
 
     #endregion
 
-    #region ToEntity
+    #region ToModel
 
     [MapperRequiredMapping(RequiredMappingStrategy.Source)]
     public static partial PlexServerStatus ToModel(this PlexServerStatusDTO plexServer);

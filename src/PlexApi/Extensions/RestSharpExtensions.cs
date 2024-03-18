@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Application.Contracts;
 using Logging.Interface;
 using PlexApi.Contracts;
 using Polly;
@@ -48,7 +49,8 @@ public static class RestSharpExtensions
             .WaitAndRetryAsync(retryCount, retryAttempt =>
             {
                 var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
-                _log.Warning("Request to: {Url} failed, waiting {TotalSeconds} seconds before retrying again ({RetryAttempt} of {RetryCount})", request.Resource, timeToWait.TotalSeconds, retryAttempt, retryCount);
+                _log.Warning("Request to: {Url} failed, waiting {TotalSeconds} seconds before retrying again ({RetryAttempt} of {RetryCount})",
+                    request.Resource, timeToWait.TotalSeconds, retryAttempt, retryCount);
 
                 retryIndex = retryAttempt;
 

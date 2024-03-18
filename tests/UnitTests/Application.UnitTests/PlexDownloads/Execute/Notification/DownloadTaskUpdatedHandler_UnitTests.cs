@@ -1,6 +1,6 @@
+using Application.Contracts;
 using Data.Contracts;
 using FileSystem.Contracts;
-using WebAPI.Contracts;
 
 namespace PlexRipper.Application.UnitTests.Execute.Notification;
 

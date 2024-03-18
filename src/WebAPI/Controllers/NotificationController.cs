@@ -18,18 +18,6 @@ public class NotificationController : BaseController
         _mediator = mediator;
     }
 
-    [HttpPost]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<int>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> CreateNotification([FromBody] NotificationDTO notificationDto)
-    {
-        var notification = _mapper.Map<Notification>(notificationDto);
-
-        var result = await _mediator.Send(new CreateNotificationCommand(notification));
-        return ToActionResult<int, int>(result);
-    }
-
     /// <summary>
     /// Deletes/Clears all <see cref="Notification">Notifications</see>.
     /// </summary>

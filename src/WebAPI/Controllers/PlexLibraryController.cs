@@ -22,15 +22,6 @@ public class PlexLibraryController : BaseController
         _mediator = mediator;
     }
 
-    // GET api/<PlexLibrary>/
-    [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexLibraryDTO>>))]
-    public async Task<IActionResult> GetPlexLibraries(CancellationToken cancellationToken = default)
-    {
-        var result = await _mediator.Send(new GetAllPlexLibrariesQuery(), cancellationToken);
-        return ToActionResult<List<PlexLibrary>, List<PlexLibraryDTO>>(result);
-    }
-
     // GET api/<PlexLibrary>/5
     [HttpGet("{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexLibraryDTO>))]

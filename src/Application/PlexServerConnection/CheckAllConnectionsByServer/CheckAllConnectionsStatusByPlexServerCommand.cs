@@ -10,22 +10,22 @@ namespace PlexRipper.Application;
 /// </summary>
 /// <param name="PlexServerId">The id of the <see cref="PlexServer" /> to check the connections for.</param>
 /// <returns>Returns successful result if any connection connected.</returns>
-public record CheckAllConnectionStatusCommand(int PlexServerId) : IRequest<Result<List<PlexServerStatus>>>;
+public record CheckAllConnectionsStatusByPlexServerCommand(int PlexServerId) : IRequest<Result<List<PlexServerStatus>>>;
 
-public class CheckAllConnectionStatusCommandValidator : AbstractValidator<CheckAllConnectionStatusCommand>
+public class CheckAllConnectionsStatusByPlexServerCommandValidator : AbstractValidator<CheckAllConnectionsStatusByPlexServerCommand>
 {
-    public CheckAllConnectionStatusCommandValidator()
+    public CheckAllConnectionsStatusByPlexServerCommandValidator()
     {
         RuleFor(x => x.PlexServerId).GreaterThan(0);
     }
 }
 
-public class CheckAllConnectionStatusCommandHandler : IRequestHandler<CheckAllConnectionStatusCommand, Result<List<PlexServerStatus>>>
+public class CheckAllConnectionsStatusByPlexServerCommandHandler : IRequestHandler<CheckAllConnectionsStatusByPlexServerCommand, Result<List<PlexServerStatus>>>
 {
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
 
-    public CheckAllConnectionStatusCommandHandler(
+    public CheckAllConnectionsStatusByPlexServerCommandHandler(
         IPlexRipperDbContext dbContext,
         IMediator mediator)
     {
@@ -33,7 +33,7 @@ public class CheckAllConnectionStatusCommandHandler : IRequestHandler<CheckAllCo
         _mediator = mediator;
     }
 
-    public async Task<Result<List<PlexServerStatus>>> Handle(CheckAllConnectionStatusCommand command, CancellationToken cancellationToken)
+    public async Task<Result<List<PlexServerStatus>>> Handle(CheckAllConnectionsStatusByPlexServerCommand command, CancellationToken cancellationToken)
     {
         var connections = await _dbContext.PlexServerConnections.Where(x => x.PlexServerId == command.PlexServerId)
             .ToListAsync(cancellationToken);

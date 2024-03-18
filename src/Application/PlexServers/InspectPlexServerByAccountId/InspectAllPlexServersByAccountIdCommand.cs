@@ -101,7 +101,7 @@ public class InspectAllPlexServersByAccountIdCommandHandler : IRequestHandler<In
         }
 
         var plexServers = plexServersResult.Value;
-        var serverTasks = plexServers.Select(async plexServer => await _mediator.Send(new CheckAllConnectionStatusCommand(plexServer.Id), cancellationToken));
+        var serverTasks = plexServers.Select(async plexServer => await _mediator.Send(new CheckAllConnectionsStatusByPlexServerCommand(plexServer.Id), cancellationToken));
 
         var tasksResult = await Task.WhenAll(serverTasks);
         return Result.OkIf(tasksResult.Any(x => x.IsSuccess),

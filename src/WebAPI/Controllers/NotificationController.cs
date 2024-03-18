@@ -19,16 +19,6 @@ public class NotificationController : BaseController
         _mediator = mediator;
     }
 
-    // GET api/<NotificationController>/
-    [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<NotificationDTO>>))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetNotifications()
-    {
-        var result = await _mediator.Send(new GetAllNotificationsQuery());
-        return ToActionResult<List<Notification>, List<NotificationDTO>>(result);
-    }
-
     // PUT api/<NotificationController>/5
     [HttpPut("{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]

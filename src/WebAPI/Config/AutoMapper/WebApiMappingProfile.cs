@@ -174,10 +174,6 @@ public class WebApiMappingProfile : Profile
         // InspectServerProgress -> InspectServerProgressDTO
         CreateMap<ServerConnectionCheckStatusProgress, ServerConnectionCheckStatusProgressDTO>(MemberList.Destination);
 
-        // Notification <-> NotificationUpdate
-        CreateMap<Notification, NotificationDTO>(MemberList.Destination)
-            .ReverseMap();
-
         // JobStatusUpdate -> JobStatusUpdateDTO
         CreateMap<JobStatusUpdate, JobStatusUpdateDTO>(MemberList.Destination)
             .ForMember(dto => dto.JobType, entity => entity.MapFrom(x => ToJobType(x.JobGroup)));

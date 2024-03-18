@@ -38,6 +38,9 @@ public class RefreshPlexServerConnectionsEndpoint : BaseCustomEndpoint<RefreshPl
     public override async Task HandleAsync(RefreshPlexServerConnectionsEndpointRequest req, CancellationToken ct)
     {
         var result = await _mediator.Send(new RefreshPlexServerConnectionsCommand(req.PlexServerId), ct);
-        await SendResult(result, ct);
+        if (result.IsFailed)
+            await SendResult(result, ct);
+        else
+            await SendResult(Result.Ok(result.Value.ToDTO()), ct);
     }
 }

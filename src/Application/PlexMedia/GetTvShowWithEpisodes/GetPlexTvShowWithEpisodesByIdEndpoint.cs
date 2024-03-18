@@ -46,7 +46,7 @@ public class GetPlexTvShowWithEpisodesByIdEndpoint : BaseCustomEndpoint<GetPlexT
     {
         var plexTvShow = await _dbContext.PlexTvShows.IncludeEpisodes().GetAsync(req.PlexTvShowId, ct);
 
-        if (plexTvShow == null)
+        if (plexTvShow is null)
         {
             await SendResult(ResultExtensions.EntityNotFound(nameof(PlexTvShow), req.PlexTvShowId), ct);
             return;

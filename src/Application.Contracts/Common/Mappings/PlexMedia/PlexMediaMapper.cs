@@ -6,20 +6,7 @@ namespace Application.Contracts;
 [Mapper]
 public static partial class PlexMediaMapper
 {
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexMediaSlim.FullThumbUrl), nameof(PlexMediaSlimDTO.ThumbUrl))]
-    [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Children))]
-    [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Index))]
-    public static partial PlexMediaSlimDTO ToDTO(this PlexMediaSlim plexMediaSlim);
-
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexMedia.FullThumbUrl), nameof(PlexMediaDTO.ThumbUrl))]
-    [MapperIgnoreTarget(nameof(PlexMediaDTO.TvShowId))]
-    [MapperIgnoreTarget(nameof(PlexMediaDTO.TvShowSeasonId))]
-    [MapperIgnoreTarget(nameof(PlexMediaDTO.MediaData))]
-    [MapperIgnoreTarget(nameof(PlexMediaDTO.Children))]
-    [MapperIgnoreTarget(nameof(PlexMediaDTO.Index))]
-    public static partial PlexMediaDTO ToDTO(this PlexMedia plexMediaSlim);
+    #region MediaData
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
     public static partial PlexMediaDataDTO ToDTO(this PlexMediaData plexMediaSlim);
@@ -29,6 +16,8 @@ public static partial class PlexMediaMapper
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
     public static partial PlexMediaDataPartDTO ToDTO(this PlexMediaDataPart plexMediaSlim);
+
+    #endregion
 
     #region PlexMovie
 

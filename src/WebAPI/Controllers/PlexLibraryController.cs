@@ -22,20 +22,6 @@ public class PlexLibraryController : BaseController
         _mediator = mediator;
     }
 
-    // POST api/<PlexLibrary>/refresh
-    [HttpPost("refresh")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexLibraryDTO>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> RefreshLibrary([FromBody] RefreshPlexLibraryDTO refreshPlexLibraryDto)
-    {
-        if (refreshPlexLibraryDto is null)
-            return BadRequest();
-
-        var result = await _mediator.Send(new RefreshLibraryMediaCommand(refreshPlexLibraryDto.PlexLibraryId));
-        return ToActionResult<PlexLibrary, PlexLibraryDTO>(result);
-    }
-
     // POST api/<PlexLibrary>/settings/default/destination/{id:int}
     [HttpPut("settings/default/destination")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]

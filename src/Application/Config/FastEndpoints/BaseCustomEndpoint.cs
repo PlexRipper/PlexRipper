@@ -18,6 +18,21 @@ public abstract class BaseCustomEndpoint<TRequest, TResponse> : Endpoint<TReques
     }
 }
 
+public abstract class BaseCustomEndpointWithoutRequest<TResponse> : EndpointWithoutRequest<TResponse>
+{
+    public abstract string EndpointPath { get; }
+
+    protected async Task SendResult(Result result, CancellationToken ct = default)
+    {
+        await SendResultAsync(result.ToIResult());
+    }
+
+    protected async Task SendResult<T>(Result<T> result, CancellationToken ct = default)
+    {
+        await SendResultAsync(result.ToIResult());
+    }
+}
+
 public abstract class BaseCustomEndpointWithoutRequest : EndpointWithoutRequest
 {
     public abstract string EndpointPath { get; }

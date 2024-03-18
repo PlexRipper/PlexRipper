@@ -3,7 +3,6 @@ using AutoMapper;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
-using PlexRipper.WebAPI.SignalR.Common;
 
 namespace PlexRipper.WebAPI.Controllers;
 
@@ -17,20 +16,6 @@ public class NotificationController : BaseController
         notificationsService)
     {
         _mediator = mediator;
-    }
-
-    // PUT api/<NotificationController>/5
-    [HttpPut("{id:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> HideNotification(int id)
-    {
-        if (id <= 0)
-            return BadRequestInvalidId();
-
-        var result = await _mediator.Send(new HideNotificationCommand(id));
-        return ToActionResult<List<Notification>, List<NotificationDTO>>(result);
     }
 
     [HttpPost]

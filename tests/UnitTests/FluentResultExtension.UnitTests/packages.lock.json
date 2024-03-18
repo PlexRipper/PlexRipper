@@ -259,19 +259,19 @@
       },
       "FluentValidation.AspNetCore": {
         "type": "Transitive",
-        "resolved": "9.3.0",
-        "contentHash": "0ZKHVvNIVgZEGgCe8z4NyVoPaCmM0kTRM0EySC23Enuc4jzBdhI+LtGhcvkF7lAulNlxR2S9IDnLibOM6RDaHg==",
+        "resolved": "11.3.0",
+        "contentHash": "jtFVgKnDFySyBlPS8bZbTKEEwJZnn11rXXJ2SQnjDhZ56rQqybBg9Joq4crRLz3y0QR8WoOq4iE4piV81w/Djg==",
         "dependencies": {
-          "FluentValidation": "9.3.0",
-          "FluentValidation.DependencyInjectionExtensions": "9.3.0"
+          "FluentValidation": "11.5.1",
+          "FluentValidation.DependencyInjectionExtensions": "11.5.1"
         }
       },
       "FluentValidation.DependencyInjectionExtensions": {
         "type": "Transitive",
-        "resolved": "9.3.0",
-        "contentHash": "5PnAIlsApzWPp9rjxfu3xVWSj2qMDeFnEE3P4yx/oIQO1aLhPEEn4yW7JiydP9kpQKAtZ53qwNaOoQ1xSxajuA==",
+        "resolved": "11.9.0",
+        "contentHash": "Ko++xvN7HUf4WlHJL6bhsybUj/uho8ApOYIdxGjpF8Ot7Fukz6LRfRJ06H0KXhWqmMHWEbu89hJbjKJHtg7b9g==",
         "dependencies": {
-          "FluentValidation": "9.3.0",
+          "FluentValidation": "11.9.0",
           "Microsoft.Extensions.Dependencyinjection.Abstractions": "2.1.0"
         }
       },
@@ -3575,7 +3575,7 @@
         "type": "Project",
         "dependencies": {
           "FluentResults": "[3.15.1, )",
-          "FluentValidation": "[9.3.0, )",
+          "FluentValidation": "[11.9.0, )",
           "Logging": "[1.0.0, )"
         }
       },
@@ -3610,7 +3610,7 @@
           "Data.Contracts": "[1.0.0, )",
           "FastEndpoints": "[5.23.0, )",
           "FileSystem.Contracts": "[1.0.0, )",
-          "FluentValidation.DependencyInjectionExtensions": "[9.3.0, )",
+          "FluentValidation.DependencyInjectionExtensions": "[11.9.0, )",
           "MediatR.Extensions.Autofac.DependencyInjection": "[10.0.0, )",
           "Microsoft.Extensions.Http": "[7.0.0, )",
           "PlexApi.Contracts": "[1.0.0, )",
@@ -3661,7 +3661,7 @@
           "AutoMapper": "[12.0.1, )",
           "ByteSize": "[2.1.1, )",
           "FluentResultExtensions": "[1.0.0, )",
-          "FluentValidation": "[9.3.0, )",
+          "FluentValidation": "[11.9.0, )",
           "JetBrains.Annotations": "[2022.1.0, )",
           "LanguageExt.Core": "[4.4.8, )",
           "MediatR": "[12.0.0, )",
@@ -3714,7 +3714,7 @@
           "Autofac.Extensions.DependencyInjection": "[8.0.0, )",
           "BackgroundServices": "[1.0.0, )",
           "FastEndpoints.Swagger": "[5.23.0, )",
-          "FluentValidation.AspNetCore": "[9.3.0, )",
+          "FluentValidation.AspNetCore": "[11.3.0, )",
           "Microsoft.AspNetCore.SpaServices.Extensions": "[7.0.8, )",
           "Microsoft.Extensions.Http.Polly": "[7.0.8, )",
           "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": "[1.16.1, )",

@@ -32,7 +32,7 @@ export function reSyncPlexLibrary(libraryId: number): Observable<ResultDTO<PlexL
 
 export function updateDefaultDestination(libraryId: number, folderPathId: number): Observable<ResultDTO> {
 	return PlexRipperAxios.put({
-		url: `${PLEX_LIBRARY_RELATIVE_PATH}/settings/default/destination`,
+		url: `${PLEX_LIBRARY_RELATIVE_PATH}/default/destination/{folderPathId}`,
 		apiCategory: logText,
 		apiName: updateDefaultDestination.name,
 		data: {

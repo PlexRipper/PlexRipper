@@ -80,18 +80,10 @@ public static class Program
         app.UseCors(CORSConfiguration);
 
         app.UseAuthorization();
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
-        {
-            // app.UseSwaggerUI(options =>
-            // {
-            //     options.SwaggerEndpoint("v1/swagger.json", "PlexRipper Swagger API V1");
-            //     options.EnableFilter();
-            // });
-        }
 
         app.UseFastEndpoints(c =>
         {
-            c.Errors.ResponseBuilder = (failures, ctx, statusCode) =>
+            c.Errors.ResponseBuilder = (failures, ctx, _) =>
             {
                 var result = ResultExtensions.Create400BadRequestResult($"Bad request: {ctx.Request.GetDisplayUrl()}");
                 var errors = failures.GroupBy(f => f.PropertyName)
@@ -185,24 +177,43 @@ public static class Program
 
         // Setup FastEndpoints
         services.AddFastEndpoints(options =>
+        {
+            options.DisableAutoDiscovery = true;
+            options.Assemblies = new[]
             {
-                options.DisableAutoDiscovery = true;
-                options.Assemblies = new[]
-                {
-                    Assembly.GetAssembly(typeof(BaseCustomEndpoint<,>)),
-                };
-            })
-            .SwaggerDocument(options =>
-            {
-                options.AutoTagPathSegmentIndex = 2;
+                Assembly.GetAssembly(typeof(BaseCustomEndpoint<,>)),
+            };
+        });
+        services.SwaggerDocument(options =>
+        {
+            // https://fast-endpoints.com/docs/swagger-support#swagger-operation-tags
+            options.AutoTagPathSegmentIndex = 2;
 
-                // options.ExcludeNonFastEndpoints = true;
-                options.DocumentSettings = s =>
-                {
-                    s.Title = "[FastEndpoints] PlexRipper Swagger Internal API";
-                    s.Version = "v1";
-                };
-            });
+            // https://fast-endpoints.com/docs/swagger-support#short-schema-names
+            options.ShortSchemaNames = true;
+
+            // https://fast-endpoints.com/docs/swagger-support#removing-empty-schema
+            options.RemoveEmptyRequestSchema = true;
+
+            options.FlattenSchema = true;
+
+            options.SerializerSettings = serializerOptions =>
+            {
+                var config = DefaultJsonSerializerOptions.ConfigBase;
+                serializerOptions.PropertyNameCaseInsensitive = config.PropertyNameCaseInsensitive;
+                serializerOptions.PropertyNamingPolicy = config.PropertyNamingPolicy;
+                serializerOptions.DefaultIgnoreCondition = config.DefaultIgnoreCondition;
+                // This will ensure that Enums are not exported as integers but as string values in the Swagger UI
+                serializerOptions.Converters.Add(new JsonStringEnumConverter());
+            };
+
+            // options.ExcludeNonFastEndpoints = true;
+            options.DocumentSettings = s =>
+            {
+                s.Title = "[FastEndpoints] PlexRipper Swagger Internal API";
+                s.Version = "v1";
+            };
+        });
 
         services.AddHttpClient();
 

@@ -6,23 +6,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-/// <summary>
-/// The request to clear any completed <see cref="DownloadTaskGeneric"/> from the database.
-/// </summary>
-public class ClearCompletedDownloadTasksRequest
-{
-    /// <summary>
-    /// Optional: The list of only these <see cref="DownloadTaskGeneric"/> id's to delete.
-    /// </summary>
-    [FromBody]
-    public List<Guid> DownloadTaskIds { get; init; }
-}
+// /// <summary>
+// /// The request to clear any completed <see cref="DownloadTaskGeneric"/> from the database.
+// /// </summary>
+// public class ClearCompletedDownloadTasksRequest
+// {
+//     /// <summary>
+//     /// Optional: The list of only these <see cref="DownloadTaskGeneric"/> id's to delete.
+//     /// </summary>
+//     [FromBody]
+//     public List<Guid> DownloadTaskIds { get; init; }
+// }
 
 /// <summary>
 /// Will clear any completed <see cref="DownloadTaskGeneric"/> from the database.
 /// </summary>
 /// <returns>Is successful.</returns>
-public class ClearCompletedDownloadTasksEndpoint : BaseCustomEndpoint<ClearCompletedDownloadTasksRequest, ResultDTO>
+public class ClearCompletedDownloadTasksEndpoint : BaseCustomEndpoint<List<Guid>, ResultDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -42,32 +42,32 @@ public class ClearCompletedDownloadTasksEndpoint : BaseCustomEndpoint<ClearCompl
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO)));
     }
 
-    public override async Task HandleAsync(ClearCompletedDownloadTasksRequest req, CancellationToken ct)
+    public override async Task HandleAsync(List<Guid> downloadTaskIds, CancellationToken ct)
     {
-        var hasDownloadTaskIds = req.DownloadTaskIds != null && req.DownloadTaskIds.Any();
+        var hasDownloadTaskIds = downloadTaskIds != null && downloadTaskIds.Any();
 
         await _dbContext.DownloadTaskMovie
-            .Where(x => (!hasDownloadTaskIds || req.DownloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
+            .Where(x => (!hasDownloadTaskIds || downloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
             .ExecuteDeleteAsync(ct);
 
         await _dbContext.DownloadTaskMovieFile
-            .Where(x => (!hasDownloadTaskIds || req.DownloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
+            .Where(x => (!hasDownloadTaskIds || downloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
             .ExecuteDeleteAsync(ct);
 
         await _dbContext.DownloadTaskTvShow
-            .Where(x => (!hasDownloadTaskIds || req.DownloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
+            .Where(x => (!hasDownloadTaskIds || downloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
             .ExecuteDeleteAsync(ct);
 
         await _dbContext.DownloadTaskTvShowSeason
-            .Where(x => (!hasDownloadTaskIds || req.DownloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
+            .Where(x => (!hasDownloadTaskIds || downloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
             .ExecuteDeleteAsync(ct);
 
         await _dbContext.DownloadTaskTvShowEpisode
-            .Where(x => (!hasDownloadTaskIds || req.DownloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
+            .Where(x => (!hasDownloadTaskIds || downloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
             .ExecuteDeleteAsync(ct);
 
         await _dbContext.DownloadTaskTvShowEpisodeFile
-            .Where(x => (!hasDownloadTaskIds || req.DownloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
+            .Where(x => (!hasDownloadTaskIds || downloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
             .ExecuteDeleteAsync(ct);
 
         await SendResult(Result.Ok(), ct);

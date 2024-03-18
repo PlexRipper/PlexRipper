@@ -15,11 +15,12 @@ public class CheckAllConnectionsStatusByPlexServerRequestValidator : Validator<C
     }
 }
 
-public class CheckAllConnectionsStatusByPlexServerEndpoint : BaseCustomEndpoint<CheckAllConnectionsStatusByPlexServerRequest, ResultDTO<List<PlexServerStatusDTO>>>
+public class CheckAllConnectionsStatusByPlexServerEndpoint : BaseCustomEndpoint<CheckAllConnectionsStatusByPlexServerRequest,
+    ResultDTO<List<PlexServerStatusDTO>>>
 {
     private readonly IMediator _mediator;
 
-    public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "check/by-server/{PlexServerId}";
+    public override string EndpointPath => ApiRoutes.PlexServerConnectionController + "/check/by-server/{PlexServerId}";
 
     public CheckAllConnectionsStatusByPlexServerEndpoint(IMediator mediator)
     {

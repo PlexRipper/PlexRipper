@@ -27,31 +27,6 @@ public class PlexMediaController : BaseController
     }
 
     /// <summary>
-    /// Get the <see cref="PlexTvShow"/> with the <see cref="PlexTvShowSeason"/> and <see cref="PlexTvShowEpisode"/> in a minimal format.
-    /// </summary>
-    /// <param name="id">The id of the <see cref="PlexTvShow"/></param>
-    /// <returns></returns>
-    [HttpGet("tvshow/{id:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexMediaSlimDTO>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetTvShow(int id)
-    {
-        if (id <= 0)
-            return BadRequest(id, nameof(id));
-
-        var result = await _mediator.Send(new GetPlexTvShowByIdWithEpisodesQuery(id));
-
-        if (result.IsFailed)
-            return ToActionResult(result.ToResult());
-
-        var dto = _mapper.Map<PlexMediaSlimDTO>(result.Value).SetIndex();
-
-        return Ok(Result.Ok(dto));
-    }
-
-    /// <summary>
     /// Get the <see cref="PlexTvShow"/> without the <see cref="PlexTvShowSeason"/> and <see cref="PlexTvShowEpisode"/>
     /// </summary>
     /// <param name="id">The id of the <see cref="PlexTvShow"/></param>
@@ -107,34 +82,6 @@ public class PlexMediaController : BaseController
             return BadRequestInvalidId();
 
         var result = await _mediator.Send(new GetThumbnailImageQuery(plexMediaId, plexMediaType, width, height), cancellationToken);
-
-        if (result.IsSuccess)
-        {
-            if (result.Value.Any())
-                return File(result.Value, "image/jpeg");
-
-            return NoContent();
-        }
-
-        return ToActionResult(result.ToResult());
-    }
-
-    // GET api/<PlexMedia>/5
-    [HttpGet("banner")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileContentResult))]
-    [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(FileContentResult))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetBanner(
-        int plexMediaId,
-        PlexMediaType plexMediaType,
-        int width,
-        int height,
-        CancellationToken cancellationToken = default)
-    {
-        if (plexMediaId == 0)
-            return BadRequestInvalidId();
-
-        var result = await _mediator.Send(new GetBannerImageQuery(plexMediaId, plexMediaType, width, height), cancellationToken);
 
         if (result.IsSuccess)
         {

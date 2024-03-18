@@ -1,5 +1,4 @@
 ﻿using Application.Contracts;
-using Application.Contracts.PlexMediaData;
 using AutoMapper;
 using BackgroundServices.Contracts;
 using PlexRipper.WebAPI.Common;

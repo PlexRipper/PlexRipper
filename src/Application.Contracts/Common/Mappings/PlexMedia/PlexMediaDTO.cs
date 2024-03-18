@@ -1,6 +1,4 @@
-﻿using Application.Contracts.PlexMediaData;
-
-namespace Application.Contracts;
+﻿namespace Application.Contracts;
 
 public class PlexMediaDTO : PlexMediaSlimDTO
 {

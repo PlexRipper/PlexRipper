@@ -26,6 +26,8 @@ public static class ApiRoutes
 
     public static string SettingsController => Base + "/" + "Settings";
 
+    public static string PlexMediaController => Base + "/" + "PlexMedia";
+
     public static class Download
     {
         public static string Controller => Base + "/" + nameof(DownloadController).Replace("Controller", string.Empty);

@@ -34,7 +34,7 @@ public class PlexMediaSlimDTO
 
     public string ThumbUrl { get; set; }
 
-    public List<PlexMediaQuality> Qualities { get; set; }
+    public List<PlexMediaQualityDTO> Qualities { get; set; }
 
     public List<PlexMediaSlimDTO> Children { get; set; } = new();
 }

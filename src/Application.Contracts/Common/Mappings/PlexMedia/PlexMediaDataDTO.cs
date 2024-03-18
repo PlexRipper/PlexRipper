@@ -1,4 +1,4 @@
-﻿namespace Application.Contracts.PlexMediaData;
+﻿namespace Application.Contracts;
 
 public class PlexMediaDataDTO
 {

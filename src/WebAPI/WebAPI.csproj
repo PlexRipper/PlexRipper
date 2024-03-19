@@ -43,13 +43,10 @@
 		<ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<Content Remove="nswag.json" />
-	</ItemGroup>
-	<ItemGroup>
 		<None Remove="WebAPI.csproj.DotSettings" />
 	</ItemGroup>
 	<ItemGroup>
-		<Folder Include="Common\Mappers\" />
+		<Folder Include="Common\Extensions\" />
 		<Folder Include="Properties\" />
 	</ItemGroup>
 	<ItemGroup>

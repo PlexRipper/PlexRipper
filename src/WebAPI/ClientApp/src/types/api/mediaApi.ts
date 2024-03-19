@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import { PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import ResultDTO from '@dto/ResultDTO';
 import PlexRipperAxios from '@class/PlexRipperAxios';
-import { PLEX_MEDIA_RELATIVE_PATH } from '@api-urls';
+import { PLEX_LIBRARY_RELATIVE_PATH, PLEX_MEDIA_RELATIVE_PATH } from '@api-urls';
 
 export function getTvShow(id: number): Observable<ResultDTO<PlexMediaSlimDTO>> {
 	return PlexRipperAxios.get<PlexMediaSlimDTO>({
@@ -22,7 +22,7 @@ export function getTvShowDetail(id: number): Observable<ResultDTO<PlexMediaDTO>>
 
 export function getLibraryMediaData(id: number, page: number, size: number): Observable<ResultDTO<PlexMediaSlimDTO[]>> {
 	return PlexRipperAxios.get<PlexMediaSlimDTO[]>({
-		url: `${PLEX_MEDIA_RELATIVE_PATH}/library/${id}`,
+		url: `${PLEX_LIBRARY_RELATIVE_PATH}/${id}/media`,
 		params: { page, size },
 		apiCategory: '',
 		apiName: getLibraryMediaData.name,

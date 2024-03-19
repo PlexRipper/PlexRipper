@@ -23,7 +23,9 @@ public static partial class PlexMediaMapper
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
     [MapProperty(nameof(PlexMovie.MovieData), nameof(PlexMediaDTO.MediaData))]
-    public static partial PlexMediaDTO ToDTO(this PlexMovie plexMediaSlim);
+    public static partial PlexMediaDTO ToDTO(this PlexMovie plexMovie);
+
+    public static partial IQueryable<PlexMediaSlimDTO> ProjectToDTO(this IQueryable<PlexMovie> plexMovie);
 
     #endregion
 
@@ -35,13 +37,15 @@ public static partial class PlexMediaMapper
     [MapProperty(nameof(PlexTvShow.Seasons), nameof(PlexMediaDTO.Children))]
     [MapperIgnoreTarget(nameof(PlexMediaDTO.TvShowSeasonId))]
     [MapperIgnoreTarget(nameof(PlexMediaDTO.MediaData))]
-    public static partial PlexMediaDTO ToDTO(this PlexTvShow plexMediaSlim);
+    public static partial PlexMediaDTO ToDTO(this PlexTvShow plexTvShow);
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
     [MapProperty(nameof(PlexTvShow.FullThumbUrl), nameof(PlexMediaSlimDTO.ThumbUrl))]
     [MapProperty(nameof(PlexTvShow.Seasons), nameof(PlexMediaSlimDTO.Children))]
     [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Index))]
-    public static partial PlexMediaSlimDTO ToSlimDTO(this PlexTvShow plexMediaSlim);
+    public static partial PlexMediaSlimDTO ToSlimDTO(this PlexTvShow plexTvShow);
+
+    public static partial IQueryable<PlexMediaSlimDTO> ProjectToDTO(this IQueryable<PlexTvShow> plexTvShow);
 
     #endregion
 

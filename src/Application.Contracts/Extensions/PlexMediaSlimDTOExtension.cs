@@ -1,6 +1,4 @@
-using Application.Contracts;
-
-namespace PlexRipper.WebAPI.Common.Extensions;
+namespace Application.Contracts;
 
 public static class PlexMediaSlimDTOExtension
 {

@@ -4,7 +4,6 @@ using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexRipper.Application;
-using PlexRipper.WebAPI.Common.Extensions;
 
 namespace PlexRipper.WebAPI.Controllers;
 
@@ -24,25 +23,6 @@ public class PlexMediaController : BaseController
     {
         _mediator = mediator;
         _dbContext = dbContext;
-    }
-
-    // GET api/<PlexMedia>/library/5
-    [HttpGet("library/{id:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<PlexMediaSlimDTO>>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetLibraryMedia(int id, [FromQuery] int page, [FromQuery] int size, CancellationToken cancellationToken = default)
-    {
-        if (id <= 0)
-            return BadRequest(id, nameof(id));
-
-        var result = await _mediator.Send(new GetPlexMediaDataByLibraryIdQuery(id, page, size), cancellationToken);
-        if (result.IsFailed)
-            return ToActionResult(result.ToResult());
-
-        var dtos = _mapper.Map<List<PlexMediaSlimDTO>>(result.Value).SetIndex();
-        return Ok(Result.Ok(dtos));
     }
 
     // GET api/<PlexMedia>/5

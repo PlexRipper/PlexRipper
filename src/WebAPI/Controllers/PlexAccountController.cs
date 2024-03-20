@@ -26,22 +26,6 @@ public class PlexAccountController : BaseController
         _plexApiService = plexApiService;
     }
 
-    // PUT api/<PlexAccountController>/5
-    [HttpPut("{id:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexAccountDTO>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> Put(int id, [FromBody] PlexAccountDTO updatedAccount, [FromQuery] bool inspect = false)
-    {
-        if (id <= 0)
-            return BadRequestInvalidId();
-
-        var mapResult = _mapper.Map<PlexAccount>(updatedAccount);
-        var result = await _mediator.Send(new UpdatePlexAccountCommand(mapResult, inspect));
-        return ToActionResult<PlexAccount, PlexAccountDTO>(result);
-    }
-
     // POST api/<AccountController>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ResultDTO<PlexAccountDTO>))]

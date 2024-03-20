@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public class GetAllFolderPathsEndpoint : BaseCustomEndpointWithoutRequest
+public class GetAllFolderPathsEndpoint : BaseCustomEndpointWithoutRequest<List<FolderPathDTO>>
 {
     private readonly IPlexRipperDbContext _dbContext;
     public override string EndpointPath => ApiRoutes.FolderPathController + "/";
@@ -27,6 +27,6 @@ public class GetAllFolderPathsEndpoint : BaseCustomEndpointWithoutRequest
     {
         var folderPaths = await _dbContext.FolderPaths.ToListAsync(ct);
 
-        await SendResult(Result.Ok(folderPaths.ToDTO()), ct);
+        await SendFluentResult(Result.Ok(folderPaths), list => list.ToDTO(), ct);
     }
 }

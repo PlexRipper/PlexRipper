@@ -15,7 +15,7 @@ public class RefreshLibraryMediaEndpointRequestValidator : Validator<RefreshLibr
     }
 }
 
-public class RefreshLibraryMediaEndpoint : BaseCustomEndpoint<RefreshLibraryMediaEndpointRequest, ResultDTO<PlexLibraryDTO>>
+public class RefreshLibraryMediaEndpoint : BaseCustomEndpoint<RefreshLibraryMediaEndpointRequest, PlexLibraryDTO>
 {
     private readonly IMediator _mediator;
 
@@ -40,6 +40,7 @@ public class RefreshLibraryMediaEndpoint : BaseCustomEndpoint<RefreshLibraryMedi
     public override async Task HandleAsync(RefreshLibraryMediaEndpointRequest req, CancellationToken ct)
     {
         var result = await _mediator.Send(new RefreshLibraryMediaCommand(req.PlexLibraryId), ct);
-        await SendResult(Result.Ok(result.Value.ToDTO()), ct);
+
+        await SendFluentResult(result, x => x.ToDTO(), ct);
     }
 }

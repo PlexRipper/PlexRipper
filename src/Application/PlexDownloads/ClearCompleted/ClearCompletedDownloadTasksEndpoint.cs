@@ -70,6 +70,6 @@ public class ClearCompletedDownloadTasksEndpoint : BaseCustomEndpoint<List<Guid>
             .Where(x => (!hasDownloadTaskIds || downloadTaskIds.Contains(x.Id)) && x.DownloadStatus == DownloadStatus.Completed)
             .ExecuteDeleteAsync(ct);
 
-        await SendResult(Result.Ok(), ct);
+       await SendFluentResult(Result.Ok(), ct);
     }
 }

@@ -37,7 +37,7 @@ public class UpdatePlexAccountByIdEndpointRequestValidator : Validator<UpdatePle
     }
 }
 
-public class UpdatePlexAccountByIdEndpoint : BaseCustomEndpoint<UpdatePlexAccountByIdEndpointRequest, ResultDTO<PlexAccountDTO>>
+public class UpdatePlexAccountByIdEndpoint : BaseCustomEndpoint<UpdatePlexAccountByIdEndpointRequest, PlexAccountDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -68,7 +68,7 @@ public class UpdatePlexAccountByIdEndpoint : BaseCustomEndpoint<UpdatePlexAccoun
 
         if (accountInDb == null)
         {
-            await SendResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountDTO.Id), ct);
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountDTO.Id), ct);
             return;
         }
 
@@ -79,11 +79,11 @@ public class UpdatePlexAccountByIdEndpoint : BaseCustomEndpoint<UpdatePlexAccoun
         // Re-validate if the credentials changed
         if (req.Inspect || accountInDb.Username != plexAccountDTO.Username || accountInDb.Password != plexAccountDTO.Password)
         {
-            await SendResult(
+            await SendFluentResult(
                 Result.Fail("Account revalidation is not implemented yet when account is updated with a different username or password").LogError(), ct);
             return;
         }
 
-        await SendResult(Result.Ok(accountInDb.ToDTO()), ct);
+        await SendFluentResult(Result.Ok(accountInDb), x => x.ToDTO(), ct);
     }
 }

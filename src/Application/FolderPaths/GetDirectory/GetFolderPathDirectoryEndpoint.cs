@@ -20,7 +20,7 @@ public class GetFolderPathDirectoryRequestValidator : Validator<GetFolderPathDir
     }
 }
 
-public class GetFolderPathDirectoryEndpoint : BaseCustomEndpoint<GetFolderPathDirectoryRequest, ResultDTO<FileSystemDTO>>
+public class GetFolderPathDirectoryEndpoint : BaseCustomEndpoint<GetFolderPathDirectoryRequest, FileSystemDTO>
 {
     private readonly IFileSystem _fileSystem;
 
@@ -45,6 +45,6 @@ public class GetFolderPathDirectoryEndpoint : BaseCustomEndpoint<GetFolderPathDi
     public override async Task HandleAsync(GetFolderPathDirectoryRequest req, CancellationToken ct)
     {
         var result = _fileSystem.LookupContents(req.Path, false, true);
-        await SendResult(result, ct);
+        await SendFluentResult(result, x => x.ToDTO(), ct);
     }
 }

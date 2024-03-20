@@ -43,6 +43,6 @@ public class HideNotificationEndpoint : BaseCustomEndpoint<HideNotificationEndpo
             .Where(x => x.Id == req.NotificationId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.Hidden, true), ct);
 
-        await SendResult(Result.Ok(), ct);
+        await SendFluentResult(Result.Ok(), ct);
     }
 }

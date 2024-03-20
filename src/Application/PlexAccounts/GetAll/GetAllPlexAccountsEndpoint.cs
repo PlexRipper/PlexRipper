@@ -13,7 +13,7 @@ namespace PlexRipper.Application;
 /// <returns>A list of all <see cref="PlexAccount"/>s.</returns>
 public record GetAllPlexAccountsEndpointRequest(bool EnabledOnly = false);
 
-public class GetAllPlexAccountsEndpoint : BaseCustomEndpoint<GetAllPlexAccountsEndpointRequest, ResultDTO<List<PlexAccountDTO>>>
+public class GetAllPlexAccountsEndpoint : BaseCustomEndpoint<GetAllPlexAccountsEndpointRequest, List<PlexAccountDTO>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -48,6 +48,6 @@ public class GetAllPlexAccountsEndpoint : BaseCustomEndpoint<GetAllPlexAccountsE
         else
             _log.Debug("Returned {PlexAccountCount} accounts", plexAccounts.Count);
 
-        await SendResult(Result.Ok(plexAccounts.ToDTO()), ct);
+        await SendFluentResult(Result.Ok(plexAccounts), x => x.ToDTO(), ct);
     }
 }

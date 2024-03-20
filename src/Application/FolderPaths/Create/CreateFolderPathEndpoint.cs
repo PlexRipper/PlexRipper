@@ -25,7 +25,7 @@ public class CreateFolderPathEndpointRequestValidator : Validator<CreateFolderPa
     }
 }
 
-public class CreateFolderPathEndpoint : BaseCustomEndpoint<CreateFolderPathEndpointRequest, ResultDTO<FolderPathDTO>>
+public class CreateFolderPathEndpoint : BaseCustomEndpoint<CreateFolderPathEndpointRequest, FolderPathDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -53,6 +53,6 @@ public class CreateFolderPathEndpoint : BaseCustomEndpoint<CreateFolderPathEndpo
         await _dbContext.SaveChangesAsync(ct);
 
         folderPath = await _dbContext.FolderPaths.GetAsync(folderPath.Id, ct);
-        await SendResult(Result.Ok(folderPath.ToDTO()), ct);
+        await SendFluentResult(Result.Ok(folderPath), path => path.ToDTO(), ct);
     }
 }

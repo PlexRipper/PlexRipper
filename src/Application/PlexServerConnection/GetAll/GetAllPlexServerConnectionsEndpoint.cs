@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public class GetAllPlexServerConnectionsEndpoint : BaseCustomEndpointWithoutRequest<ResultDTO<List<PlexServerConnectionDTO>>>
+public class GetAllPlexServerConnectionsEndpoint : BaseCustomEndpointWithoutRequest<List<PlexServerConnectionDTO>>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -32,6 +32,6 @@ public class GetAllPlexServerConnectionsEndpoint : BaseCustomEndpointWithoutRequ
             .Include(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(5))
             .ToListAsync(ct);
 
-        await SendResult(Result.Ok(plexServerConnections.ToDTO()), ct);
+        await SendFluentResult(Result.Ok(plexServerConnections), x => x.ToDTO(), ct);
     }
 }

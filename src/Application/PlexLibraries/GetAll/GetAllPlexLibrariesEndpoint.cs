@@ -8,7 +8,7 @@ namespace PlexRipper.Application;
 /// <summary>
 /// Retrieves all the <see cref="PlexLibrary">PlexLibraries</see> from the database.
 /// </summary>
-public class GetAllPlexLibrariesEndpoint : BaseCustomEndpointWithoutRequest<ResultDTO<List<PlexLibraryDTO>>>
+public class GetAllPlexLibrariesEndpoint : BaseCustomEndpointWithoutRequest<List<PlexLibraryDTO>>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -32,6 +32,6 @@ public class GetAllPlexLibrariesEndpoint : BaseCustomEndpointWithoutRequest<Resu
     {
         var plexLibraries = await _dbContext.PlexLibraries.ToListAsync(ct);
 
-        await SendResult(Result.Ok(plexLibraries.ToDTO()), ct);
+        await SendFluentResult(Result.Ok(plexLibraries), x => x.ToDTO(), ct);
     }
 }

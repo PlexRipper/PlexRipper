@@ -23,7 +23,7 @@ public class GetPlexLibraryByIdEndpointRequestValidator : Validator<GetPlexLibra
     }
 }
 
-public class GetPlexLibraryByIdEndpoint : BaseCustomEndpoint<GetPlexLibraryByIdEndpointRequest, ResultDTO<PlexLibraryDTO>>
+public class GetPlexLibraryByIdEndpoint : BaseCustomEndpoint<GetPlexLibraryByIdEndpointRequest, PlexLibraryDTO>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -54,7 +54,7 @@ public class GetPlexLibraryByIdEndpoint : BaseCustomEndpoint<GetPlexLibraryByIdE
         var plexLibrary = await _dbContext.PlexLibraries.GetAsync(req.PlexLibraryId, ct);
         if (plexLibrary is null)
         {
-            await SendResult(ResultExtensions.EntityNotFound(nameof(plexLibrary), req.PlexLibraryId), ct);
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(plexLibrary), req.PlexLibraryId), ct);
             return;
         }
 
@@ -65,11 +65,11 @@ public class GetPlexLibraryByIdEndpoint : BaseCustomEndpoint<GetPlexLibraryByIdE
             var refreshResult = await _mediator.Send(new RefreshLibraryMediaCommand(plexLibrary.Id), ct);
             if (refreshResult.IsFailed)
             {
-                await SendResult(refreshResult, ct);
+                await SendFluentResult(refreshResult.ToResult(), ct);
                 return;
             }
         }
 
-        await SendResult(Result.Ok(plexLibrary.ToDTO()), ct);
+        await SendFluentResult(Result.Ok(plexLibrary), x => x.ToDTO(), ct);
     }
 }

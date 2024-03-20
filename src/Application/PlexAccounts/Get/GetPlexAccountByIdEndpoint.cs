@@ -17,7 +17,7 @@ public class GetPlexAccountByIdEndpointRequestValidator : Validator<GetPlexAccou
     }
 }
 
-public class GetPlexAccountByIdEndpoint : BaseCustomEndpoint<GetPlexAccountByIdEndpointRequest, ResultDTO<PlexAccountDTO>>
+public class GetPlexAccountByIdEndpoint : BaseCustomEndpoint<GetPlexAccountByIdEndpointRequest, PlexAccountDTO>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -46,11 +46,11 @@ public class GetPlexAccountByIdEndpoint : BaseCustomEndpoint<GetPlexAccountByIdE
         var plexAccount = await _dbContext.PlexAccounts.IncludeServerAccess().IncludeLibraryAccess().GetAsync(req.PlexAccountId, ct);
         if (plexAccount is null)
         {
-            await SendResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), req.PlexAccountId).LogWarning(), ct);
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), req.PlexAccountId).LogWarning(), ct);
             return;
         }
 
         _log.Debug("Found an {NameOfPlexAccount} with the id: {AccountId}", nameof(PlexAccount), req.PlexAccountId);
-        await SendResult(Result.Ok(plexAccount.ToDTO()), ct);
+        await SendFluentResult(Result.Ok(plexAccount), x => x.ToDTO(), ct);
     }
 }

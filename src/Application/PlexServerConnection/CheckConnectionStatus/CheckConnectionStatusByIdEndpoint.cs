@@ -15,7 +15,7 @@ public class CheckConnectionStatusByIdRequestValidator : Validator<CheckConnecti
     }
 }
 
-public class CheckConnectionStatusByIdEndpoint : BaseCustomEndpoint<CheckConnectionStatusByIdRequest, ResultDTO<PlexServerStatusDTO>>
+public class CheckConnectionStatusByIdEndpoint : BaseCustomEndpoint<CheckConnectionStatusByIdRequest, PlexServerStatusDTO>
 {
     private readonly IMediator _mediator;
 
@@ -41,8 +41,8 @@ public class CheckConnectionStatusByIdEndpoint : BaseCustomEndpoint<CheckConnect
     {
         var result = await _mediator.Send(new CheckConnectionStatusByIdCommand(req.PlexServerConnectionId), ct);
         if (result.IsFailed)
-            await SendResult(result, ct);
+            await SendFluentResult(result.ToResult(), ct);
         else
-            await SendResult(Result.Ok(result.Value.ToDTO()), ct);
+            await SendFluentResult(result, x => x.ToDTO(), ct);
     }
 }

@@ -20,7 +20,7 @@ public class GetPlexTvShowByIdEndpointRequestValidator : Validator<GetPlexTvShow
     }
 }
 
-public class GetPlexTvShowByIdEndpoint : BaseCustomEndpoint<GetPlexTvShowByIdEndpointRequest, ResultDTO<PlexMediaDTO>>
+public class GetPlexTvShowByIdEndpoint : BaseCustomEndpoint<GetPlexTvShowByIdEndpointRequest, PlexMediaDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -48,10 +48,10 @@ public class GetPlexTvShowByIdEndpoint : BaseCustomEndpoint<GetPlexTvShowByIdEnd
 
         if (plexTvShow is null)
         {
-            await SendResult(ResultExtensions.EntityNotFound(nameof(PlexTvShow), req.PlexTvShowId), ct);
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexTvShow), req.PlexTvShowId), ct);
             return;
         }
 
-        await SendResult(Result.Ok(plexTvShow.ToDTO()), ct);
+        await SendFluentResult(Result.Ok(plexTvShow), x => x.ToDTO(), ct);
     }
 }

@@ -58,7 +58,7 @@ public class GetThumbnailImageEndpoint : BaseCustomEndpoint<GetThumbnailImageEnd
 
                 if (plexMovie is null)
                 {
-                    await SendResult(ResultExtensions.EntityNotFound(nameof(PlexMovie), req.MediaId).LogError(), ct);
+                    await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexMovie), req.MediaId).LogError(), ct);
                     return;
                 }
 
@@ -74,7 +74,7 @@ public class GetThumbnailImageEndpoint : BaseCustomEndpoint<GetThumbnailImageEnd
 
                 if (tvShow is null)
                 {
-                    await SendResult(ResultExtensions.EntityNotFound(nameof(PlexTvShow), req.MediaId).LogError(), ct);
+                    await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexTvShow), req.MediaId).LogError(), ct);
                     return;
                 }
 
@@ -86,13 +86,13 @@ public class GetThumbnailImageEndpoint : BaseCustomEndpoint<GetThumbnailImageEnd
 
         if (!plexMedia.HasThumb)
         {
-            await SendResult(Result.Fail($"{plexMedia.Type}: {plexMedia.Title} has no thumbnail."), ct);
+            await SendFluentResult(Result.Fail($"{plexMedia.Type}: {plexMedia.Title} has no thumbnail."), ct);
             return;
         }
 
         var imageResult = await _plexServiceApi.GetPlexMediaImageAsync(plexServer!, plexMedia.ThumbUrl, req.Width, req.Height, ct);
         if (imageResult.IsFailed)
-            await SendResult(imageResult, ct);
+            await SendFluentResult(imageResult.ToResult(), ct);
 
         await SendBytesAsync(imageResult.Value, contentType: "image/jpeg", cancellation: ct);
     }

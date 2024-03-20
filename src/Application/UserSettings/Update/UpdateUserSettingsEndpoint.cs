@@ -1,5 +1,4 @@
 using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -31,7 +30,7 @@ public class UpdateUserSettingsEndpointRequestValidator : Validator<UpdateUserSe
     }
 }
 
-public class UpdateUserSettingsEndpoint : BaseCustomEndpoint<UpdateUserSettingsEndpointRequest, ResultDTO<SettingsModelDTO>>
+public class UpdateUserSettingsEndpoint : BaseCustomEndpoint<UpdateUserSettingsEndpointRequest, SettingsModelDTO>
 {
     private readonly IUserSettings _userSettings;
 
@@ -57,11 +56,12 @@ public class UpdateUserSettingsEndpoint : BaseCustomEndpoint<UpdateUserSettingsE
         var updateResult = _userSettings.UpdateSettings(req.SettingsModelDto.ToModel());
         if (updateResult.IsFailed)
         {
-            await SendResult(updateResult, ct);
+            await SendFluentResult(updateResult.ToResult(), ct);
             return;
         }
 
         var settings = _userSettings.GetSettingsModel();
-        await SendResult(Result.Ok(settings.ToDTO()), ct);
+
+        await SendFluentResult(Result.Ok(settings), x => x.ToDTO(), ct);
     }
 }

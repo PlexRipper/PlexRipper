@@ -1,12 +1,11 @@
 using Application.Contracts;
 using Data.Contracts;
-using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public class GetAllNotificationsEndpoint : BaseCustomEndpointWithoutRequest
+public class GetAllNotificationsEndpoint : BaseCustomEndpointWithoutRequest<List<NotificationDTO>>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -29,6 +28,6 @@ public class GetAllNotificationsEndpoint : BaseCustomEndpointWithoutRequest
     public override async Task HandleAsync(CancellationToken ct)
     {
         var list = await _dbContext.Notifications.ToListAsync(ct);
-        await SendResult(Result.Ok(list.ToDTO()), ct);
+        await SendFluentResult(Result.Ok(list), x => x.ToDTO(), ct);
     }
 }

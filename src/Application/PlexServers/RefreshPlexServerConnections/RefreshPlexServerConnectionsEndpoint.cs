@@ -15,7 +15,7 @@ public class RefreshPlexServerConnectionsEndpointRequestValidator : Validator<Re
     }
 }
 
-public class RefreshPlexServerConnectionsEndpoint : BaseCustomEndpoint<RefreshPlexServerConnectionsEndpointRequest, ResultDTO<PlexServerDTO>>
+public class RefreshPlexServerConnectionsEndpoint : BaseCustomEndpoint<RefreshPlexServerConnectionsEndpointRequest, PlexServerDTO>
 {
     private readonly IMediator _mediator;
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/refresh";
@@ -39,8 +39,8 @@ public class RefreshPlexServerConnectionsEndpoint : BaseCustomEndpoint<RefreshPl
     {
         var result = await _mediator.Send(new RefreshPlexServerConnectionsCommand(req.PlexServerId), ct);
         if (result.IsFailed)
-            await SendResult(result, ct);
+            await SendFluentResult(result.ToResult(), ct);
         else
-            await SendResult(Result.Ok(result.Value.ToDTO()), ct);
+            await SendFluentResult(result, x => x.ToDTO(), ct);
     }
 }

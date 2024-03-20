@@ -35,7 +35,7 @@ public class IsUsernameAvailableEndpointRequestValidator : Validator<IsUsernameA
     }
 }
 
-public class IsUsernameAvailableEndpoint : BaseCustomEndpoint<IsUsernameAvailableEndpointRequest, ResultDTO<bool>>
+public class IsUsernameAvailableEndpoint : BaseCustomEndpoint<IsUsernameAvailableEndpointRequest, bool>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -57,6 +57,7 @@ public class IsUsernameAvailableEndpoint : BaseCustomEndpoint<IsUsernameAvailabl
 
     public override async Task HandleAsync(IsUsernameAvailableEndpointRequest req, CancellationToken ct)
     {
-        await SendResult(Result.Ok(_dbContext.IsUsernameAvailable(req.Username, ct)), ct);
+        var isUsernameAvailable = await _dbContext.IsUsernameAvailable(req.Username, ct);
+        await SendFluentResult(Result.Ok(isUsernameAvailable), _ => _, ct);
     }
 }

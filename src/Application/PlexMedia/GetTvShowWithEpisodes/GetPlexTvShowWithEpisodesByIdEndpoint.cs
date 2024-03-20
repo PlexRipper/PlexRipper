@@ -20,7 +20,7 @@ public class GetPlexTvShowWithEpisodesByIdEndpointRequestValidator : Validator<G
     }
 }
 
-public class GetPlexTvShowWithEpisodesByIdEndpoint : BaseCustomEndpoint<GetPlexTvShowWithEpisodesByIdEndpointRequest, ResultDTO<PlexMediaSlimDTO>>
+public class GetPlexTvShowWithEpisodesByIdEndpoint : BaseCustomEndpoint<GetPlexTvShowWithEpisodesByIdEndpointRequest, PlexMediaSlimDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -48,12 +48,12 @@ public class GetPlexTvShowWithEpisodesByIdEndpoint : BaseCustomEndpoint<GetPlexT
 
         if (plexTvShow is null)
         {
-            await SendResult(ResultExtensions.EntityNotFound(nameof(PlexTvShow), req.PlexTvShowId), ct);
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexTvShow), req.PlexTvShowId), ct);
             return;
         }
 
         plexTvShow.Seasons = plexTvShow.Seasons.OrderByNatural(x => x.Title).ToList();
 
-        await SendResult(Result.Ok(plexTvShow.ToSlimDTO()), ct);
+        await SendFluentResult(Result.Ok(plexTvShow), x => x.ToSlimDTO(), ct);
     }
 }

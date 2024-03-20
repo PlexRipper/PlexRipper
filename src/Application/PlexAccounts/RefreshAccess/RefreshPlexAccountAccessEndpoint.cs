@@ -53,7 +53,7 @@ public class RefreshPlexAccountAccessEndpoint : BaseCustomEndpoint<RefreshPlexAc
         if (!enabledAccounts.Any())
         {
             _log.WarningLine("No enabled Plex accounts found to start the refresh PlexServer access job");
-            await SendResult(Result.Ok(), ct);
+            await SendFluentResult(Result.Ok(), ct);
             return;
         }
 
@@ -62,6 +62,6 @@ public class RefreshPlexAccountAccessEndpoint : BaseCustomEndpoint<RefreshPlexAc
         foreach (var id in plexAccountIds)
             await _mediator.Send(new QueueRefreshPlexServerAccessJobCommand(id), ct);
 
-        await SendResult(Result.Ok(), ct);
+        await SendFluentResult(Result.Ok(), ct);
     }
 }

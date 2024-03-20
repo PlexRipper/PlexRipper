@@ -16,7 +16,7 @@ public class GetPlexServerByIdEndpointRequestValidator : Validator<GetPlexServer
     }
 }
 
-public class GetPlexServerByIdEndpoint : BaseCustomEndpoint<GetPlexServerByIdEndpointRequest, ResultDTO<PlexServerDTO>>
+public class GetPlexServerByIdEndpoint : BaseCustomEndpoint<GetPlexServerByIdEndpointRequest, PlexServerDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -43,10 +43,10 @@ public class GetPlexServerByIdEndpoint : BaseCustomEndpoint<GetPlexServerByIdEnd
 
         if (plexServer is null)
         {
-            await SendResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), req.PlexServerId), ct);
             return;
         }
 
-        await SendResult(Result.Ok(plexServer.ToDTO()), ct);
+        await SendFluentResult(Result.Ok(plexServer), x => x.ToDTO(), ct);
     }
 }

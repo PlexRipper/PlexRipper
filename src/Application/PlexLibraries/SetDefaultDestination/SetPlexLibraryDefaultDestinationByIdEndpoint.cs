@@ -49,8 +49,8 @@ public class SetPlexLibraryDefaultDestinationByIdEndpoint : BaseCustomEndpoint<S
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.DefaultDestinationId, req.FolderPathId), ct);
 
         if (plexLibraryDb == 0)
-            await SendResult(Result.Fail($"No library found with id {req.PlexLibraryId} that could have its default folder destination updated"), ct);
+            await SendFluentResult(Result.Fail($"No library found with id {req.PlexLibraryId} that could have its default folder destination updated"), ct);
         else
-            await SendResult(Result.Ok(), ct);
+            await SendFluentResult(Result.Ok(), ct);
     }
 }

@@ -5,7 +5,7 @@ using Settings.Contracts;
 
 namespace PlexRipper.Application;
 
-public class GetUserSettingsEndpoint : BaseCustomEndpointWithoutRequest
+public class GetUserSettingsEndpoint : BaseCustomEndpointWithoutRequest<SettingsModelDTO>
 {
     private readonly IUserSettings _userSettings;
 
@@ -28,6 +28,7 @@ public class GetUserSettingsEndpoint : BaseCustomEndpointWithoutRequest
     public override async Task HandleAsync(CancellationToken ct)
     {
         var settings = _userSettings.GetSettingsModel();
-        await SendResult(Result.Ok(settings.ToDTO()), ct);
+
+        await SendFluentResult(Result.Ok(settings), x => x.ToDTO(), ct);
     }
 }

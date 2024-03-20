@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
-public class GetAllDownloadTasksEndpoint : BaseCustomEndpointWithoutRequest
+public class GetAllDownloadTasksEndpoint : BaseCustomEndpointWithoutRequest<List<ServerDownloadProgressDTO>>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -20,13 +20,13 @@ public class GetAllDownloadTasksEndpoint : BaseCustomEndpointWithoutRequest
         Get(EndpointPath);
         AllowAnonymous();
         Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<FolderPathDTO>>))
+            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<ServerDownloadProgressDTO>>))
             .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
     }
 
     public override async Task HandleAsync(CancellationToken ct)
     {
         var downloadList = await _dbContext.GetAllDownloadTasksAsync(cancellationToken: ct);
-        await SendResult(Result.Ok(downloadList.ToServerDownloadProgressDTOList()), ct);
+        await SendFluentResult(Result.Ok(downloadList), x => x.ToServerDownloadProgressDTOList(), ct);
     }
 }

@@ -39,6 +39,6 @@ public class QueueInspectPlexServerJobEndpoint : BaseCustomEndpoint<QueueInspect
     public override async Task HandleAsync(QueueInspectPlexServerJobEndpointRequest req, CancellationToken ct)
     {
         var result = await _mediator.Send(new QueueInspectPlexServerJobCommand(req.PlexServerId), ct);
-        await SendResult(result, ct);
+        await SendFluentResult(result, ct);
     }
 }

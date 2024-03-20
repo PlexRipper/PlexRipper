@@ -9,7 +9,7 @@ namespace PlexRipper.Application;
 /// <summary>
 /// Retrieves all the <see cref="PlexServer">PlexServers</see>, without PlexLibraries but with all its connections.
 /// </summary>
-public class GetAllPlexServersEndpoint : BaseCustomEndpointWithoutRequest
+public class GetAllPlexServersEndpoint : BaseCustomEndpointWithoutRequest<List<PlexServerDTO>>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -44,6 +44,6 @@ public class GetAllPlexServersEndpoint : BaseCustomEndpointWithoutRequest
             .ThenBy(x => x.Name, StringComparison.OrdinalIgnoreCase.WithNaturalSort())
             .ToList();
 
-        await SendResult(Result.Ok(plexServers.ToDTO()), ct);
+        await SendFluentResult(Result.Ok(plexServers), x => x.ToDTO(), ct);
     }
 }

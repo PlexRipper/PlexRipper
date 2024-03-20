@@ -26,7 +26,7 @@ public class UpdateFolderPathEndpointRequestValidator : Validator<UpdateFolderPa
     }
 }
 
-public class UpdateFolderPathEndpoint : BaseCustomEndpoint<UpdateFolderPathEndpointRequest, ResultDTO<List<FolderPathDTO>>>
+public class UpdateFolderPathEndpoint : BaseCustomEndpoint<UpdateFolderPathEndpointRequest, FolderPathDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -42,7 +42,7 @@ public class UpdateFolderPathEndpoint : BaseCustomEndpoint<UpdateFolderPathEndpo
         Put(EndpointPath);
         AllowAnonymous();
         Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<FolderPathDTO>>))
+            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<FolderPathDTO>))
             .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
             .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
     }
@@ -55,13 +55,13 @@ public class UpdateFolderPathEndpoint : BaseCustomEndpoint<UpdateFolderPathEndpo
 
         if (folderPathDb is null)
         {
-            await SendResult(ResultExtensions.EntityNotFound(nameof(FolderPath), folderPath.Id), ct);
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(FolderPath), folderPath.Id), ct);
             return;
         }
 
         _dbContext.Entry(folderPathDb).CurrentValues.SetValues(folderPath);
         await _dbContext.SaveChangesAsync(ct);
 
-        await SendResult(Result.Ok(folderPathDb.ToDTO()), ct);
+        await SendFluentResult(Result.Ok(folderPathDb), path => path.ToDTO(), ct);
     }
 }

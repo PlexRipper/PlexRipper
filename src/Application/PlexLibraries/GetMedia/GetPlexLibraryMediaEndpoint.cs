@@ -29,7 +29,7 @@ public class GetPlexLibraryMediaEndpointRequestValidator : Validator<GetPlexLibr
     }
 }
 
-public class GetPlexLibraryMediaEndpoint : BaseCustomEndpoint<GetPlexLibraryMediaEndpointRequest, ResultDTO<List<PlexMediaSlimDTO>>>
+public class GetPlexLibraryMediaEndpoint : BaseCustomEndpoint<GetPlexLibraryMediaEndpointRequest, List<PlexMediaSlimDTO>>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -59,7 +59,7 @@ public class GetPlexLibraryMediaEndpoint : BaseCustomEndpoint<GetPlexLibraryMedi
             .GetAsync(req.PlexLibraryId, ct);
         if (plexLibrary is null)
         {
-            await SendResult(ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId), ct);
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId), ct);
             return;
         }
 
@@ -93,7 +93,7 @@ public class GetPlexLibraryMediaEndpoint : BaseCustomEndpoint<GetPlexLibraryMedi
                 break;
             }
             default:
-                await SendResult(Result.Fail($"Type {plexLibrary.Type} is not supported for retrieving the PlexMedia data by library id"), ct);
+                await SendFluentResult(Result.Fail($"Type {plexLibrary.Type} is not supported for retrieving the PlexMedia data by library id"), ct);
                 return;
         }
 
@@ -102,21 +102,21 @@ public class GetPlexLibraryMediaEndpoint : BaseCustomEndpoint<GetPlexLibraryMedi
         var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexServerId, ct);
         if (plexServerConnection.IsFailed)
         {
-            await SendResult(plexServerConnection.ToResult(), ct);
+            await SendFluentResult(plexServerConnection.ToResult(), ct);
             return;
         }
 
         var plexServerToken = await _dbContext.GetPlexServerTokenAsync(plexServerId, ct);
         if (plexServerToken.IsFailed)
         {
-            await SendResult(plexServerToken.ToResult(), ct);
+            await SendFluentResult(plexServerToken.ToResult(), ct);
             return;
         }
 
         foreach (var mediaSlim in entities)
             mediaSlim.ThumbUrl = GetThumbnailUrl(plexServerConnection.Value.Url, mediaSlim.ThumbUrl, plexServerToken.Value);
 
-        await SendResult(Result.Ok(entities.SetIndex()), ct);
+        await SendFluentResult(Result.Ok(entities.SetIndex()), _ => _, ct);
     }
 
     private string GetThumbnailUrl(string connectionUrl, string thumbPath, string plexServerToken)

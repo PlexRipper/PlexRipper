@@ -46,6 +46,6 @@ public class DeleteFolderPathEndpoint : BaseCustomEndpoint<DeleteFolderPathEndpo
         await _dbContext.FolderPaths.Where(x => x.Id == req.Id).ExecuteDeleteAsync(ct);
         _log.Debug("Deleted {FolderPathName} with Id: {CommandId} from the database", nameof(FolderPath), req.Id);
 
-        await SendResult(Result.Ok(), ct);
+        await SendFluentResult(Result.Ok(), ct);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Application.Contracts;
 using AutoMapper;
-using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexApi.Contracts;
@@ -23,26 +22,6 @@ public class PlexAccountController : BaseController
     {
         _mediator = mediator;
         _plexApiService = plexApiService;
-    }
-
-    // POST api/<AccountController>
-    [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ResultDTO<PlexAccountDTO>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> CreateAccount([FromBody] PlexAccountDTO newAccount)
-    {
-        if (newAccount is null)
-            return BadRequest("The new account was null");
-
-        var mapResult = _mapper.Map<PlexAccount>(newAccount);
-
-        var createResult = await _mediator.Send(new CreatePlexAccountCommand(mapResult));
-        if (createResult.IsFailed)
-            return ToActionResult(createResult.ToResult());
-
-        var getResult = await _mediator.Send(new GetPlexAccountByIdQuery(createResult.Value, true, true));
-        return ToActionResult<PlexAccount, PlexAccountDTO>(getResult);
     }
 
     /// <summary>

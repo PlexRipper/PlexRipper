@@ -39,24 +39,24 @@ public static partial class ResultDTOExtensions
             if (result.Has201CreatedRequestSuccess())
             {
                 // Status code 201 Created
-                return Results.Created(resultDTO.ToString(), resultDTO);
+                return TypedResults.Created(resultDTO.ToString(), resultDTO);
             }
 
-            return Results.Ok(resultDTO);
+            return TypedResults.Ok(resultDTO);
         }
 
         var failedResult = result.ToResultDTO();
         if (result.Has400BadRequestError())
-            return Results.BadRequest(failedResult);
+            return TypedResults.BadRequest(failedResult);
 
         if (result.Has404NotFoundError())
-            return Results.NotFound(failedResult);
+            return TypedResults.NotFound(failedResult);
 
         if (result.Has204NoContentRequestSuccess())
-            return Results.NoContent();
+            return TypedResults.NoContent();
 
         // Status Code 500
-        return Results.Problem(new ProblemDetails()
+        return TypedResults.Problem(new ProblemDetails()
         {
             Detail = failedResult.ToString(),
             Status = StatusCodes.Status500InternalServerError,
@@ -71,25 +71,25 @@ public static partial class ResultDTOExtensions
             if (result.Has201CreatedRequestSuccess())
             {
                 // Status code 201 Created
-                return Results.Created(resultDTO.ToString(), resultDTO);
+                return TypedResults.Created("test", resultDTO);
             }
 
-            return Results.Ok(resultDTO);
+            return TypedResults.Ok(resultDTO);
         }
 
         // Ensure we first cast to result to avoid result.value being null
         var failedResult = result.ToResult().ToResultDTO();
         if (result.Has400BadRequestError())
-            return Results.BadRequest(failedResult);
+            return TypedResults.BadRequest(failedResult);
 
         if (result.Has404NotFoundError())
-            return Results.NotFound(failedResult);
+            return TypedResults.NotFound(failedResult);
 
         if (result.Has204NoContentRequestSuccess())
-            return Results.NoContent();
+            return TypedResults.NoContent();
 
         // Status Code 500
-        return Results.Problem(new ProblemDetails()
+        return TypedResults.Problem(new ProblemDetails()
         {
             Detail = failedResult.ToString(),
             Status = StatusCodes.Status500InternalServerError,

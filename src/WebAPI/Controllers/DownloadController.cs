@@ -116,37 +116,5 @@ public class DownloadController : BaseController
         return ToActionResult(deleteResult);
     }
 
-    // GET: api/(DownloadController)/detail/{id:guid}/
-    [HttpGet("detail/{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<DownloadTaskDTO>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetDetail(Guid id, CancellationToken token)
-    {
-        if (id == Guid.Empty)
-            return BadRequestInvalidId();
-
-        var downloadTaskResult = await _mediator.Send(new GetDownloadTaskByIdQuery(id), token);
-
-        if (downloadTaskResult.IsFailed)
-            return ToActionResult(downloadTaskResult.ToResult());
-
-        if (!downloadTaskResult.Value.IsDownloadable)
-            return ToActionResult<DownloadTaskGeneric, DownloadTaskDTO>(downloadTaskResult);
-
-        // Add DownloadUrl to DownloadTaskDTO
-        var downloadTaskDto = _mapper.Map<DownloadTaskDTO>(downloadTaskResult.Value);
-
-        var downloadUrl =
-            await _dbContext.GetDownloadUrl(downloadTaskDto.PlexServerId, downloadTaskDto.FileLocationUrl, token);
-        if (downloadUrl.IsFailed)
-            return ToActionResult<DownloadTaskGeneric, DownloadTaskDTO>(downloadTaskResult);
-
-        if (downloadTaskResult.Value.IsDownloadable)
-            downloadTaskDto.DownloadUrl = downloadUrl.Value;
-
-        return Ok(Result.Ok(downloadTaskDto));
-    }
-
     #endregion
 }

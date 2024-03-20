@@ -3,9 +3,20 @@ using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+[Mapper]
 public static partial class DownloadTaskGenericToDTOMapper
 {
+    #region ToDTO
+
+    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
+    [MapProperty(nameof(DownloadTaskGeneric.DownloadStatus), nameof(DownloadTaskDTO.Status))]
+    [MapperIgnoreTarget(nameof(DownloadTaskDTO.Quality))]
+    public static partial DownloadTaskDTO ToDTO(this DownloadTaskGeneric downloadTask);
+
+    #endregion
+
+    #region DownloadProgress
+
     public static DownloadProgressDTO ToDownloadProgressDto(this DownloadTaskGeneric downloadTask)
     {
         if (downloadTask is null)
@@ -16,6 +27,7 @@ public static partial class DownloadTaskGenericToDTOMapper
         return result;
     }
 
+    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
     [MapProperty(nameof(DownloadTaskGeneric.DownloadStatus), nameof(DownloadProgressDTO.Status))]
     private static partial DownloadProgressDTO ToDownloadProgressDtoMapper(this DownloadTaskGeneric downloadTask);
 
@@ -36,4 +48,6 @@ public static partial class DownloadTaskGenericToDTOMapper
 
         return serverDownloads;
     }
+
+    #endregion
 }

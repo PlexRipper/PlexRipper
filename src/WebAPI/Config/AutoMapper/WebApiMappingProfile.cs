@@ -54,11 +54,6 @@ public class WebApiMappingProfile : Profile
         CreateMap<UpdatePlexAccountDTO, PlexAccount>(MemberList.Source)
             .ReverseMap();
 
-        // PlexAccountDTO <-> PlexAccount
-        CreateMap<PlexAccountDTO, PlexAccount>(MemberList.None)
-            .ForMember(x => x.PlexServers, opt => opt.Ignore())
-            .ForMember(x => x.PlexAccountServers, opt => opt.Ignore());
-
         // PlexAccount -> PlexAccountDTO
         CreateMap<PlexAccount, PlexAccountDTO>(MemberList.Destination)
             .ForMember(dto => dto.PlexServerAccess, opt => opt.MapFrom(x => x.PlexAccountServers.Select(y => y.PlexServer).ToList()));

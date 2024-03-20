@@ -16,8 +16,11 @@ public static class ApiRoutes
     }
 
     public static string DownloadController => Base + "/" + "Download";
+
     public static string PlexServerController => Base + "/" + "PlexServer";
+
     public static string PlexLibraryController => Base + "/" + "PlexLibrary";
+
     public static string PlexServerConnectionController => Base + "/" + "PlexServerConnection";
 
     public static string FolderPathController => Base + "/" + "FolderPath";
@@ -26,7 +29,9 @@ public static class ApiRoutes
 
     public static string SettingsController => Base + "/" + "Settings";
 
-    public static string PlexMediaController => Base + "/" + "PlexMedia";
+    public static string PlexMediaController => Base + "/" + "PlexAccount";
+
+    public static string PlexAccountController => Base + "/" + "Download";
 
     public static class Download
     {
@@ -48,8 +53,6 @@ public static class ApiRoutes
 
         public static string GetPauseCommand(Guid id) => Controller + "/pause/" + id;
     }
-
-    public static string PlexAccountController => Base + "/" + "Download";
 
     public static class Account
     {

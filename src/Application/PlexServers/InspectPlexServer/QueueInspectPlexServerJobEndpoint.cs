@@ -15,7 +15,7 @@ public class QueueInspectPlexServerJobEndpointRequestValidator : Validator<Queue
     }
 }
 
-public class QueueInspectPlexServerJobEndpoint : BaseCustomEndpoint<QueueInspectPlexServerJobEndpointRequest, ResultDTO<PlexServerDTO>>
+public class QueueInspectPlexServerJobEndpoint : BaseEndpoint<QueueInspectPlexServerJobEndpointRequest, ResultDTO<PlexServerDTO>>
 {
     private readonly IMediator _mediator;
 

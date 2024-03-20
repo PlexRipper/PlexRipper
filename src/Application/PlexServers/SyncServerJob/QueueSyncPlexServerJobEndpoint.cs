@@ -15,7 +15,7 @@ public class QueueSyncPlexServerJobEndpointRequestValidator : Validator<QueueSyn
     }
 }
 
-public class QueueSyncPlexServerJobEndpoint : BaseCustomEndpoint<QueueSyncPlexServerJobEndpointRequest, ResultDTO>
+public class QueueSyncPlexServerJobEndpoint : BaseEndpoint<QueueSyncPlexServerJobEndpointRequest, ResultDTO>
 {
     private readonly IMediator _mediator;
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/sync";

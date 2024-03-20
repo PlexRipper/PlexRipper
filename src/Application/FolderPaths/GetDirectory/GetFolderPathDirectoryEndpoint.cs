@@ -20,7 +20,7 @@ public class GetFolderPathDirectoryRequestValidator : Validator<GetFolderPathDir
     }
 }
 
-public class GetFolderPathDirectoryEndpoint : BaseCustomEndpoint<GetFolderPathDirectoryRequest, FileSystemDTO>
+public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirectoryRequest, FileSystemDTO>
 {
     private readonly IFileSystem _fileSystem;
 

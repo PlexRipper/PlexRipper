@@ -17,7 +17,7 @@ public class GetPlexServerConnectionByIdEndpointRequestValidator : Validator<Get
     }
 }
 
-public class GetPlexServerConnectionByIdEndpoint : BaseCustomEndpoint<GetPlexServerConnectionByIdEndpointRequest, PlexServerConnectionDTO>
+public class GetPlexServerConnectionByIdEndpoint : BaseEndpoint<GetPlexServerConnectionByIdEndpointRequest, PlexServerConnectionDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 

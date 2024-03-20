@@ -25,7 +25,7 @@ public class SetPreferredPlexServerConnectionEndpointRequestValidator : Validato
     }
 }
 
-public class SetPreferredPlexServerConnectionEndpoint : BaseCustomEndpoint<SetPreferredPlexServerConnectionEndpointRequest, ResultDTO>
+public class SetPreferredPlexServerConnectionEndpoint : BaseEndpoint<SetPreferredPlexServerConnectionEndpointRequest, ResultDTO>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;

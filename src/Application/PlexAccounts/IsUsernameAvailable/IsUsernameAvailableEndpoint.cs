@@ -35,7 +35,7 @@ public class IsUsernameAvailableEndpointRequestValidator : Validator<IsUsernameA
     }
 }
 
-public class IsUsernameAvailableEndpoint : BaseCustomEndpoint<IsUsernameAvailableEndpointRequest, bool>
+public class IsUsernameAvailableEndpoint : BaseEndpoint<IsUsernameAvailableEndpointRequest, bool>
 {
     private readonly IPlexRipperDbContext _dbContext;
 

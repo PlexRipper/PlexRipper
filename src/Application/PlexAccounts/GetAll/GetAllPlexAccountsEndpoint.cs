@@ -13,7 +13,7 @@ namespace PlexRipper.Application;
 /// <returns>A list of all <see cref="PlexAccount"/>s.</returns>
 public record GetAllPlexAccountsEndpointRequest(bool EnabledOnly = false);
 
-public class GetAllPlexAccountsEndpoint : BaseCustomEndpoint<GetAllPlexAccountsEndpointRequest, List<PlexAccountDTO>>
+public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpointRequest, List<PlexAccountDTO>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;

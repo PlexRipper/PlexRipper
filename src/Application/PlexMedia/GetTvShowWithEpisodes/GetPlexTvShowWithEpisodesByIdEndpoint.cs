@@ -20,7 +20,7 @@ public class GetPlexTvShowWithEpisodesByIdEndpointRequestValidator : Validator<G
     }
 }
 
-public class GetPlexTvShowWithEpisodesByIdEndpoint : BaseCustomEndpoint<GetPlexTvShowWithEpisodesByIdEndpointRequest, PlexMediaSlimDTO>
+public class GetPlexTvShowWithEpisodesByIdEndpoint : BaseEndpoint<GetPlexTvShowWithEpisodesByIdEndpointRequest, PlexMediaSlimDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 

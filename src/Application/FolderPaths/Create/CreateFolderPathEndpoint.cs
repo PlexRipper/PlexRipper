@@ -25,7 +25,7 @@ public class CreateFolderPathEndpointRequestValidator : Validator<CreateFolderPa
     }
 }
 
-public class CreateFolderPathEndpoint : BaseCustomEndpoint<CreateFolderPathEndpointRequest, FolderPathDTO>
+public class CreateFolderPathEndpoint : BaseEndpoint<CreateFolderPathEndpointRequest, FolderPathDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 

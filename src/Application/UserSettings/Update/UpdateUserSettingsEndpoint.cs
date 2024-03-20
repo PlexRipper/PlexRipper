@@ -30,7 +30,7 @@ public class UpdateUserSettingsEndpointRequestValidator : Validator<UpdateUserSe
     }
 }
 
-public class UpdateUserSettingsEndpoint : BaseCustomEndpoint<UpdateUserSettingsEndpointRequest, SettingsModelDTO>
+public class UpdateUserSettingsEndpoint : BaseEndpoint<UpdateUserSettingsEndpointRequest, SettingsModelDTO>
 {
     private readonly IUserSettings _userSettings;
 

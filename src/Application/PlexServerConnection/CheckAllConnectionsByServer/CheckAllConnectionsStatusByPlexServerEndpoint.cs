@@ -15,7 +15,7 @@ public class CheckAllConnectionsStatusByPlexServerRequestValidator : Validator<C
     }
 }
 
-public class CheckAllConnectionsStatusByPlexServerEndpoint : BaseCustomEndpoint<CheckAllConnectionsStatusByPlexServerRequest,
+public class CheckAllConnectionsStatusByPlexServerEndpoint : BaseEndpoint<CheckAllConnectionsStatusByPlexServerRequest,
     List<PlexServerStatusDTO>>
 {
     private readonly IMediator _mediator;

@@ -23,7 +23,7 @@ public class SetPlexLibraryDefaultDestinationByIdEndpointRequestValidator : Vali
     }
 }
 
-public class SetPlexLibraryDefaultDestinationByIdEndpoint : BaseCustomEndpoint<SetPlexLibraryDefaultDestinationByIdEndpointRequest, ResultDTO>
+public class SetPlexLibraryDefaultDestinationByIdEndpoint : BaseEndpoint<SetPlexLibraryDefaultDestinationByIdEndpointRequest, ResultDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 

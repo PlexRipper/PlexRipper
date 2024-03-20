@@ -17,7 +17,7 @@ public class HideNotificationEndpointRequestValidator : Validator<HideNotificati
     }
 }
 
-public class HideNotificationEndpoint : BaseCustomEndpoint<HideNotificationEndpointRequest, ResultDTO>
+public class HideNotificationEndpoint : BaseEndpoint<HideNotificationEndpointRequest, ResultDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 

@@ -18,7 +18,7 @@ public class RefreshPlexAccountAccessEndpointRequestValidator : Validator<Refres
     }
 }
 
-public class RefreshPlexAccountAccessEndpoint : BaseCustomEndpoint<RefreshPlexAccountAccessEndpointRequest, ResultDTO>
+public class RefreshPlexAccountAccessEndpoint : BaseEndpoint<RefreshPlexAccountAccessEndpointRequest, ResultDTO>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;

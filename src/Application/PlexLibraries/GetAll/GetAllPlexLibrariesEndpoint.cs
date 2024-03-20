@@ -8,7 +8,7 @@ namespace PlexRipper.Application;
 /// <summary>
 /// Retrieves all the <see cref="PlexLibrary">PlexLibraries</see> from the database.
 /// </summary>
-public class GetAllPlexLibrariesEndpoint : BaseCustomEndpointWithoutRequest<List<PlexLibraryDTO>>
+public class GetAllPlexLibrariesEndpoint : BaseEndpointWithoutRequest<List<PlexLibraryDTO>>
 {
     private readonly IPlexRipperDbContext _dbContext;
 

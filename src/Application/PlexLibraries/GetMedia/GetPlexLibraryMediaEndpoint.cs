@@ -29,7 +29,7 @@ public class GetPlexLibraryMediaEndpointRequestValidator : Validator<GetPlexLibr
     }
 }
 
-public class GetPlexLibraryMediaEndpoint : BaseCustomEndpoint<GetPlexLibraryMediaEndpointRequest, List<PlexMediaSlimDTO>>
+public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpointRequest, List<PlexMediaSlimDTO>>
 {
     private readonly IPlexRipperDbContext _dbContext;
 

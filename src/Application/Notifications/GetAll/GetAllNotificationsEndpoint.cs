@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public class GetAllNotificationsEndpoint : BaseCustomEndpointWithoutRequest<List<NotificationDTO>>
+public class GetAllNotificationsEndpoint : BaseEndpointWithoutRequest<List<NotificationDTO>>
 {
     private readonly IPlexRipperDbContext _dbContext;
 

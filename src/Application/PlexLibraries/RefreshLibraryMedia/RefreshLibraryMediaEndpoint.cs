@@ -15,7 +15,7 @@ public class RefreshLibraryMediaEndpointRequestValidator : Validator<RefreshLibr
     }
 }
 
-public class RefreshLibraryMediaEndpoint : BaseCustomEndpoint<RefreshLibraryMediaEndpointRequest, PlexLibraryDTO>
+public class RefreshLibraryMediaEndpoint : BaseEndpoint<RefreshLibraryMediaEndpointRequest, PlexLibraryDTO>
 {
     private readonly IMediator _mediator;
 

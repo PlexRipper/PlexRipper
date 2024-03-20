@@ -17,7 +17,7 @@ public class GetPlexAccountByIdEndpointRequestValidator : Validator<GetPlexAccou
     }
 }
 
-public class GetPlexAccountByIdEndpoint : BaseCustomEndpoint<GetPlexAccountByIdEndpointRequest, PlexAccountDTO>
+public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpointRequest, PlexAccountDTO>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;

@@ -26,7 +26,7 @@ public class UpdateFolderPathEndpointRequestValidator : Validator<UpdateFolderPa
     }
 }
 
-public class UpdateFolderPathEndpoint : BaseCustomEndpoint<UpdateFolderPathEndpointRequest, FolderPathDTO>
+public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointRequest, FolderPathDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 

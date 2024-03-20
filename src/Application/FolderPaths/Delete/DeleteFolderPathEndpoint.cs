@@ -18,7 +18,7 @@ public class DeleteFolderPathEndpointRequestValidator : Validator<DeleteFolderPa
     }
 }
 
-public class DeleteFolderPathEndpoint : BaseCustomEndpoint<DeleteFolderPathEndpointRequest, ResultDTO>
+public class DeleteFolderPathEndpoint : BaseEndpoint<DeleteFolderPathEndpointRequest, ResultDTO>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;

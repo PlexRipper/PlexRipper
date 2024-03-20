@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
-public class GetAllDownloadTasksEndpoint : BaseCustomEndpointWithoutRequest<List<ServerDownloadProgressDTO>>
+public class GetAllDownloadTasksEndpoint : BaseEndpointWithoutRequest<List<ServerDownloadProgressDTO>>
 {
     private readonly IPlexRipperDbContext _dbContext;
 

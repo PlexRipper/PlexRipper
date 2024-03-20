@@ -20,7 +20,7 @@ public class GetThumbnailImageEndpointRequestValidator : Validator<GetThumbnailI
     }
 }
 
-public class GetThumbnailImageEndpoint : BaseCustomEndpoint<GetThumbnailImageEndpointRequest, ResultDTO<FileContentResult>>
+public class GetThumbnailImageEndpoint : BaseEndpoint<GetThumbnailImageEndpointRequest, ResultDTO<FileContentResult>>
 {
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IPlexApiService _plexServiceApi;

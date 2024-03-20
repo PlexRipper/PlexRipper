@@ -15,7 +15,7 @@ public class CheckConnectionStatusByIdRequestValidator : Validator<CheckConnecti
     }
 }
 
-public class CheckConnectionStatusByIdEndpoint : BaseCustomEndpoint<CheckConnectionStatusByIdRequest, PlexServerStatusDTO>
+public class CheckConnectionStatusByIdEndpoint : BaseEndpoint<CheckConnectionStatusByIdRequest, PlexServerStatusDTO>
 {
     private readonly IMediator _mediator;
 

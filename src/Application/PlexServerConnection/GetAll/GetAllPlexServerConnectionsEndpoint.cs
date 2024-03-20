@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public class GetAllPlexServerConnectionsEndpoint : BaseCustomEndpointWithoutRequest<List<PlexServerConnectionDTO>>
+public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<List<PlexServerConnectionDTO>>
 {
     private readonly IPlexRipperDbContext _dbContext;
 

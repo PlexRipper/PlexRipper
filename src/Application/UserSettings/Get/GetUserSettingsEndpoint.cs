@@ -5,7 +5,7 @@ using Settings.Contracts;
 
 namespace PlexRipper.Application;
 
-public class GetUserSettingsEndpoint : BaseCustomEndpointWithoutRequest<SettingsModelDTO>
+public class GetUserSettingsEndpoint : BaseEndpointWithoutRequest<SettingsModelDTO>
 {
     private readonly IUserSettings _userSettings;
 

@@ -181,7 +181,7 @@ public static class Program
             options.DisableAutoDiscovery = true;
             options.Assemblies = new[]
             {
-                Assembly.GetAssembly(typeof(BaseCustomEndpoint<,>)),
+                Assembly.GetAssembly(typeof(BaseEndpoint<,>)),
             };
         });
         services.SwaggerDocument(options =>

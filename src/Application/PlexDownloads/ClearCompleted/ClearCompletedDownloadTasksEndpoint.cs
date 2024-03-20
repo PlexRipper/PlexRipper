@@ -22,7 +22,7 @@ namespace PlexRipper.Application;
 /// Will clear any completed <see cref="DownloadTaskGeneric"/> from the database.
 /// </summary>
 /// <returns>Is successful.</returns>
-public class ClearCompletedDownloadTasksEndpoint : BaseCustomEndpoint<List<Guid>, ResultDTO>
+public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, ResultDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 

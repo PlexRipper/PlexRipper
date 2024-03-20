@@ -15,7 +15,7 @@ public class RefreshPlexServerConnectionsEndpointRequestValidator : Validator<Re
     }
 }
 
-public class RefreshPlexServerConnectionsEndpoint : BaseCustomEndpoint<RefreshPlexServerConnectionsEndpointRequest, PlexServerDTO>
+public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServerConnectionsEndpointRequest, PlexServerDTO>
 {
     private readonly IMediator _mediator;
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/refresh";

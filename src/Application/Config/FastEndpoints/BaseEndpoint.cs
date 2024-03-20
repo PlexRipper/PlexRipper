@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
-public abstract class BaseCustomEndpoint<TRequest> : Endpoint<TRequest, ResultDTO>
+public abstract class BaseEndpoint<TRequest> : Endpoint<TRequest, ResultDTO>
     where TRequest : class
 {
     protected async Task SendFluentResult(Result result, CancellationToken ct = default)
@@ -46,7 +46,7 @@ public abstract class BaseCustomEndpoint<TRequest> : Endpoint<TRequest, ResultDT
     }
 }
 
-public abstract class BaseCustomEndpoint<TRequest, TDTO> : BaseCustomEndpoint<TRequest>
+public abstract class BaseEndpoint<TRequest, TDTO> : BaseEndpoint<TRequest>
     where TRequest : class
 {
     public abstract string EndpointPath { get; }
@@ -79,12 +79,8 @@ public abstract class BaseCustomEndpoint<TRequest, TDTO> : BaseCustomEndpoint<TR
     }
 }
 
-public abstract class BaseCustomEndpointWithoutRequest<TResponse> : BaseCustomEndpointWithoutRequest
+public abstract class BaseEndpointWithoutRequest<TResponse> : BaseEndpointWithoutRequest
 {
-    // protected async Task SendFluentResult<T>(Result<T> result, CancellationToken ct = default)
-    // {
-    //
-    // }
     protected async Task SendFluentResult<T>(Result<T> result, Func<T, TResponse> mapper, CancellationToken ct = default)
     {
         if (result.IsSuccess)
@@ -113,7 +109,7 @@ public abstract class BaseCustomEndpointWithoutRequest<TResponse> : BaseCustomEn
     }
 }
 
-public abstract class BaseCustomEndpointWithoutRequest : EndpointWithoutRequest<ResultDTO>
+public abstract class BaseEndpointWithoutRequest : EndpointWithoutRequest<ResultDTO>
 {
     public abstract string EndpointPath { get; }
 

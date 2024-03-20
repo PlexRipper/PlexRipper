@@ -9,7 +9,7 @@ namespace PlexRipper.Application;
 /// Deletes/Clears all <see cref="Notification">Notifications</see>.
 /// </summary>
 /// <returns>Returns the number of <see cref="Notification">Notifications</see> that have been deleted.</returns>
-public class ClearAllNotificationsEndpoint : BaseCustomEndpointWithoutRequest<int>
+public class ClearAllNotificationsEndpoint : BaseEndpointWithoutRequest<int>
 {
     private readonly IPlexRipperDbContext _dbContext;
 

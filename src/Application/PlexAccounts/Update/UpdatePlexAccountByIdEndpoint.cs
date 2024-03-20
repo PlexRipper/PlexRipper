@@ -37,7 +37,7 @@ public class UpdatePlexAccountByIdEndpointRequestValidator : Validator<UpdatePle
     }
 }
 
-public class UpdatePlexAccountByIdEndpoint : BaseCustomEndpoint<UpdatePlexAccountByIdEndpointRequest, PlexAccountDTO>
+public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdEndpointRequest, PlexAccountDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 

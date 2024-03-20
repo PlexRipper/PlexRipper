@@ -1,6 +1,4 @@
 ﻿using Application.Contracts;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Data.Contracts;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -19,12 +17,10 @@ public class GetDownloadPreviewQueryValidator : AbstractValidator<GetDownloadPre
 
 public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreviewQuery, Result<List<DownloadPreview>>>
 {
-    private readonly IMapper _mapper;
     private readonly IPlexRipperDbContext _dbContext;
 
-    public GetDownloadPreviewQueryHandler(IMapper mapper, IPlexRipperDbContext dbContext)
+    public GetDownloadPreviewQueryHandler(IPlexRipperDbContext dbContext)
     {
-        _mapper = mapper;
         _dbContext = dbContext;
     }
 
@@ -44,7 +40,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
             var movieIds = moviesPreview.SelectMany(x => x.MediaIds).ToList();
             var result = await _dbContext.PlexMovies.AsNoTracking()
                 .Where(x => movieIds.Contains(x.Id))
-                .ProjectTo<DownloadPreview>(_mapper.ConfigurationProvider)
+                .ProjectToDownloadPreview()
                 .ToListAsync(cancellationToken);
             downloadPreviews.AddRange(result.OrderByNatural(x => x.Title));
         }
@@ -94,12 +90,7 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
             episodesKeys = await _dbContext.PlexTvShowEpisodes
                 .AsNoTracking()
                 .Where(x => episodePreviewIds.Contains(x.Id))
-                .Select(x => new TvShowEpisodeKeyDTO
-                {
-                    TvShowId = x.TvShowId,
-                    SeasonId = x.TvShowSeasonId,
-                    EpisodeId = x.Id,
-                })
+                .ProjectToEpisodeKey()
                 .ToListAsync(cancellationToken);
         }
 
@@ -120,17 +111,17 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
         // Retrieve all the tv shows, seasons and episodes
         var tvShows = await _dbContext.PlexTvShows.AsNoTracking()
             .Where(x => tvShowIds.Contains(x.Id))
-            .ProjectTo<DownloadPreview>(_mapper.ConfigurationProvider)
+            .ProjectToDownloadPreview()
             .ToListAsync(cancellationToken);
 
         var seasons = await _dbContext.PlexTvShowSeason.AsNoTracking()
             .Where(x => seasonIds.Contains(x.Id))
-            .ProjectTo<DownloadPreview>(_mapper.ConfigurationProvider)
+            .ProjectToDownloadPreview()
             .ToListAsync(cancellationToken);
 
         var episodes = await _dbContext.PlexTvShowEpisodes.AsNoTracking()
             .Where(x => episodeIds.Contains(x.Id))
-            .ProjectTo<DownloadPreview>(_mapper.ConfigurationProvider)
+            .ProjectToDownloadPreview()
             .ToListAsync(cancellationToken);
 
         // Build hierarchy

@@ -1,4 +1,6 @@
-namespace PlexRipper.Application;
+using PlexRipper.Domain;
+
+namespace Application.Contracts;
 
 public class DownloadPreview
 {
@@ -9,6 +11,7 @@ public class DownloadPreview
     public long Size { get; set; }
 
     public int ChildCount { get; set; }
+
     public PlexMediaType MediaType { get; set; } = PlexMediaType.Unknown;
 
     public int TvShowId { get; set; }

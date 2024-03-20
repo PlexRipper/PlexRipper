@@ -148,14 +148,5 @@ public class DownloadController : BaseController
         return Ok(Result.Ok(downloadTaskDto));
     }
 
-    [HttpPost("preview")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<List<DownloadPreviewDTO>>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> DownloadPreview([FromBody] List<DownloadMediaDTO> downloadMedias, CancellationToken token)
-    {
-        var result = await _mediator.Send(new GetDownloadPreviewQuery(downloadMedias), token);
-        return ToActionResult<List<DownloadPreview>, List<DownloadPreviewDTO>>(result);
-    }
-
     #endregion
 }

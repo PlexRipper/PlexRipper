@@ -7,6 +7,8 @@ namespace PlexRipper.Application;
 public abstract class BaseEndpoint<TRequest> : Endpoint<TRequest, ResultDTO>
     where TRequest : class
 {
+    public abstract string EndpointPath { get; }
+
     protected async Task SendFluentResult(Result result, CancellationToken ct = default)
     {
         var resultDTO = result.ToResultDTO();
@@ -49,8 +51,6 @@ public abstract class BaseEndpoint<TRequest> : Endpoint<TRequest, ResultDTO>
 public abstract class BaseEndpoint<TRequest, TDTO> : BaseEndpoint<TRequest>
     where TRequest : class
 {
-    public abstract string EndpointPath { get; }
-
     protected async Task SendFluentResult<T>(Result<T> result, Func<T, TDTO> mapper, CancellationToken ct = default)
     {
         if (result.IsSuccess)
@@ -81,6 +81,8 @@ public abstract class BaseEndpoint<TRequest, TDTO> : BaseEndpoint<TRequest>
 
 public abstract class BaseEndpointWithoutRequest<TResponse> : BaseEndpointWithoutRequest
 {
+    public abstract string EndpointPath { get; }
+
     protected async Task SendFluentResult<T>(Result<T> result, Func<T, TResponse> mapper, CancellationToken ct = default)
     {
         if (result.IsSuccess)
@@ -111,8 +113,6 @@ public abstract class BaseEndpointWithoutRequest<TResponse> : BaseEndpointWithou
 
 public abstract class BaseEndpointWithoutRequest : EndpointWithoutRequest<ResultDTO>
 {
-    public abstract string EndpointPath { get; }
-
     protected async Task SendFluentResult(Result result, CancellationToken ct = default)
     {
         var resultDTO = result.ToResultDTO();

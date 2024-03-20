@@ -24,26 +24,6 @@ public class PlexAccountController : BaseController
         _plexApiService = plexApiService;
     }
 
-    /// <summary>
-    /// Deletes a PlexAccount by its id.
-    /// DELETE api/PlexAccount/5
-    /// </summary>
-    /// <param name="id">The id of the <see cref="PlexAccount"/> to delete.</param>
-    /// <returns></returns>
-    [HttpDelete("{id:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> DeleteAccount(int id)
-    {
-        if (id <= 0)
-            return BadRequestInvalidId();
-
-        var deleteAccountResult = await _mediator.Send(new DeletePlexAccountCommand(id));
-        return ToActionResult(deleteAccountResult);
-    }
-
     [HttpPost("validate")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexAccountDTO>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]

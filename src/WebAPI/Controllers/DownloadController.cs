@@ -99,22 +99,5 @@ public class DownloadController : BaseController
         return ToActionResult(stopResult);
     }
 
-    /// <summary>
-    /// HttpPost api/(DownloadController)/delete
-    /// </summary>
-    /// <param name="downloadTaskIds">The list of downloadTasks to delete by id.</param>
-    /// <returns>HTTP Response.</returns>
-    [HttpPost("delete")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> DeleteCommand([FromBody] List<Guid> downloadTaskIds)
-    {
-        if (!downloadTaskIds.Any())
-            return BadRequest(Result.Fail("No list of download task Id's was given in the request body"));
-
-        var deleteResult = await _mediator.Send(new DeleteDownloadTaskCommand(downloadTaskIds));
-        return ToActionResult(deleteResult);
-    }
-
     #endregion
 }

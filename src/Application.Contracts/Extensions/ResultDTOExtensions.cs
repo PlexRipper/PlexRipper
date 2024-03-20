@@ -27,6 +27,16 @@ public static partial class ResultDTOExtensions
         Successes = result.Successes.ToSuccessDTOs(),
     };
 
+    public static ResultDTO<TDTO> ToResultDTO<T, TDTO>(this Result<T> result, Func<T, TDTO> mapper) => new()
+    {
+        Value = mapper(result.Value),
+        IsFailed = result.IsFailed,
+        IsSuccess = result.IsSuccess,
+        Reasons = result.Reasons.ToReasonDTOs(),
+        Errors = result.Errors.ToErrorDTOs(),
+        Successes = result.Successes.ToSuccessDTOs(),
+    };
+
     private static partial List<ReasonDTO> ToReasonDTOs(this List<IReason> reasons);
     private static partial List<ErrorDTO> ToErrorDTOs(this List<IError> reasons);
     private static partial List<SuccessDTO> ToSuccessDTOs(this List<ISuccess> reasons);

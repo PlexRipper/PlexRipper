@@ -17,6 +17,8 @@ public static class ApiRoutes
 
     public static string DownloadController => Base + "/" + "Download";
 
+    public static string PlexAccountController => Base + "/" + "PlexAccount";
+
     public static string PlexServerController => Base + "/" + "PlexServer";
 
     public static string PlexLibraryController => Base + "/" + "PlexLibrary";
@@ -29,9 +31,7 @@ public static class ApiRoutes
 
     public static string SettingsController => Base + "/" + "Settings";
 
-    public static string PlexMediaController => Base + "/" + "PlexAccount";
-
-    public static string PlexAccountController => Base + "/" + "Download";
+    public static string PlexMediaController => Base + "/" + "PlexMedia";
 
     public static class Download
     {

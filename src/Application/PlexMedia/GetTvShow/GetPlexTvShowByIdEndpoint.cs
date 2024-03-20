@@ -24,7 +24,7 @@ public class GetPlexTvShowByIdEndpoint : BaseCustomEndpoint<GetPlexTvShowByIdEnd
 {
     private readonly IPlexRipperDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexMediaController + "tvshow/detail/{PlexTvShowId}";
+    public override string EndpointPath => ApiRoutes.PlexMediaController + "/tvshow/detail/{PlexTvShowId}";
 
     public GetPlexTvShowByIdEndpoint(IPlexRipperDbContext dbContext)
     {

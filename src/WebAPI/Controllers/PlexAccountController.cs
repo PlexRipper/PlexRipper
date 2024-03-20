@@ -4,7 +4,6 @@ using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Mvc;
 using PlexApi.Contracts;
-using PlexRipper.Application;
 
 namespace PlexRipper.WebAPI.Controllers;
 
@@ -92,32 +91,6 @@ public class PlexAccountController : BaseController
         {
             return InternalServerError(e);
         }
-    }
-
-    // TODO Split up this endpoint between a single and all refresh
-    [HttpGet("refresh/{plexAccountId:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> RefreshPlexAccount(int plexAccountId)
-    {
-        var plexAccountIds = new List<int>();
-
-        if (plexAccountId == 0)
-        {
-            var enabledAccounts = await _mediator.Send(new GetAllPlexAccountsQuery(true));
-            if (enabledAccounts.IsFailed)
-                return ToActionResult(enabledAccounts.ToResult());
-
-            plexAccountIds.AddRange(enabledAccounts.Value.Select(x => x.Id));
-        }
-        else
-            plexAccountIds.Add(plexAccountId);
-
-        foreach (var id in plexAccountIds)
-            await _mediator.Send(new QueueRefreshPlexServerAccessJobCommand(id));
-
-        return ToActionResult(Result.Ok());
     }
 
     // GET api/<PlexAccountController>/authpin/

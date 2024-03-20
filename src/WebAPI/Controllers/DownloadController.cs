@@ -86,18 +86,5 @@ public class DownloadController : BaseController
         return ToActionResult(restartResult);
     }
 
-    // GET: api/(DownloadController)/stop/{guid:guid}
-    [HttpGet("stop/{guid:guid}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> StopCommand(Guid guid)
-    {
-        if (guid == Guid.Empty)
-            return BadRequestInvalidId();
-
-        var stopResult = await _mediator.Send(new StopDownloadTaskCommand(guid));
-        return ToActionResult(stopResult);
-    }
-
     #endregion
 }

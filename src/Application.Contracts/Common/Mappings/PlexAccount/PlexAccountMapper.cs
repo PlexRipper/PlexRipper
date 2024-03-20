@@ -11,15 +11,29 @@ public static partial class PlexAccountMapper
     public static PlexAccountDTO ToDTO(this PlexAccount plexAccount)
     {
         var dto = plexAccount.ToDTOMapper();
-        dto.PlexServerAccess = plexAccount.PlexAccountServers.Select(y => y.PlexServer).ToList().ToAccessDTO();
+        dto.PlexServerAccess = new List<PlexServerAccessDTO>();
+
+        if (plexAccount.PlexAccountLibraries is not null && plexAccount.PlexAccountServers is not null)
+        {
+            var plexLibraries = plexAccount.PlexAccountLibraries.Select(y => y.PlexLibrary).ToList();
+            foreach (var plexAccountServer in plexAccount.PlexAccountServers)
+            {
+                var plexServerAccess = plexAccountServer.PlexServer.ToAccessDTO();
+                plexServerAccess.PlexLibraryIds = plexLibraries
+                    .FindAll(x => x.PlexServerId == plexAccountServer.PlexServerId)
+                    .Select(x => x.Id)
+                    .ToList();
+                dto.PlexServerAccess.Add(plexServerAccess);
+            }
+        }
+
         return dto;
     }
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
     private static partial PlexAccountDTO ToDTOMapper(this PlexAccount plexAccount);
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial List<PlexAccountDTO> ToDTO(this List<PlexAccount> plexAccounts);
+    public static List<PlexAccountDTO> ToDTO(this List<PlexAccount> plexAccounts) => plexAccounts.Select(x => x.ToDTO()).ToList();
 
     #endregion
 

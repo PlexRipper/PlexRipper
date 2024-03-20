@@ -26,27 +26,6 @@ public class PlexAccountController : BaseController
         _plexApiService = plexApiService;
     }
 
-    // GET api/<PlexAccountController>/5
-    [HttpGet("{accountId:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexAccountDTO>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> GetAccount(int accountId)
-    {
-        if (accountId <= 0)
-            return BadRequestInvalidId();
-
-        var result = await _mediator.Send(new GetPlexAccountByIdQuery(accountId, true, true));
-
-        if (result.Value != null)
-            _log.Debug("Found an Account with the id: {AccountId}", accountId);
-
-        _log.Warning("Could not find an Account with id: {AccountId}", accountId);
-
-        return ToActionResult<PlexAccount, PlexAccountDTO>(result);
-    }
-
     // PUT api/<PlexAccountController>/5
     [HttpPut("{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexAccountDTO>))]

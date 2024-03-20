@@ -13,6 +13,7 @@ public static partial class PlexAccountMapper
         var dto = plexAccount.ToDTOMapper();
         dto.PlexServerAccess = new List<PlexServerAccessDTO>();
 
+        // Determine the access for each server and libraries
         if (plexAccount.PlexAccountLibraries is not null && plexAccount.PlexAccountServers is not null)
         {
             var plexLibraries = plexAccount.PlexAccountLibraries.Select(y => y.PlexLibrary).ToList();
@@ -46,6 +47,9 @@ public static partial class PlexAccountMapper
 
     [MapperRequiredMapping(RequiredMappingStrategy.Source)]
     public static partial List<PlexAccount> ToModel(this List<PlexAccountDTO> plexAccounts);
+
+    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
+    public static partial PlexAccount ToModel(this UpdatePlexAccountDTO plexAccount);
 
     #endregion
 }

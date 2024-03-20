@@ -13,7 +13,7 @@ public class UpdatePlexAccountByIdEndpointRequest
     public int PlexAccountId { get; init; }
 
     [FromBody]
-    public PlexAccountDTO PlexAccountDTO { get; init; }
+    public UpdatePlexAccountDTO PlexAccountDTO { get; init; }
 
     [QueryParam]
     public bool Inspect { get; init; }
@@ -29,11 +29,8 @@ public class UpdatePlexAccountByIdEndpointRequestValidator : Validator<UpdatePle
         RuleFor(x => x.PlexAccountDTO.DisplayName).NotEmpty();
         RuleFor(x => x.PlexAccountDTO.Username).NotEmpty().MinimumLength(5);
         RuleFor(x => x.PlexAccountDTO.Password).NotEmpty().MinimumLength(5);
-        RuleFor(x => x.PlexAccountDTO.IsValidated).NotNull();
-        RuleFor(x => x.PlexAccountDTO.PlexId).GreaterThan(0);
-        RuleFor(x => x.PlexAccountDTO.Uuid).NotEmpty().MinimumLength(5);
-        RuleFor(x => x.PlexAccountDTO.Title).NotEmpty().MinimumLength(5);
-        RuleFor(x => x.PlexAccountDTO.AuthenticationToken).NotEmpty().MinimumLength(10);
+        RuleFor(x => x.PlexAccountDTO.IsEnabled).NotNull();
+        RuleFor(x => x.PlexAccountDTO.IsMain).NotNull();
     }
 }
 

@@ -9,9 +9,11 @@ public static partial class PlexLibraryMapper
     #region ToDTO
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
+    [MapProperty(nameof(PlexLibrary.MediaCount), nameof(PlexLibraryDTO.Count))]
     public static partial PlexLibraryDTO ToDTO(this PlexLibrary plexLibrary);
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
+    [MapProperty(nameof(PlexLibrary.MediaCount), nameof(PlexLibraryDTO.Count))]
     public static partial List<PlexLibraryDTO> ToDTO(this List<PlexLibrary> plexLibraries);
 
     #endregion

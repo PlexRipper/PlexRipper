@@ -24,17 +24,6 @@ public class PlexAccountController : BaseController
         _plexApiService = plexApiService;
     }
 
-    [HttpPost("validate")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<PlexAccountDTO>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> Validate([FromBody] PlexAccountDTO account)
-    {
-        var plexAccount = _mapper.Map<PlexAccount>(account);
-        var result = await _mediator.Send(new ValidatePlexAccountCommand(plexAccount));
-        return ToActionResult<PlexAccount, PlexAccountDTO>(result);
-    }
-
     // GET api/<PlexAccountController>/authpin/
     [HttpGet("authpin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<AuthPin>))]

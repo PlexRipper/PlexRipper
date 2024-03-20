@@ -36,17 +36,13 @@ public class CreatePlexAccountHandler : IRequestHandler<CreatePlexAccountCommand
 
         _log.Debug("Creating account with username {UserName}", command.PlexAccount.Username);
 
-        var result = await _mediator.Send(new IsUsernameAvailableQuery(plexAccount.Username), cancellationToken);
+        var isAvailable = await _dbContext.IsUsernameAvailable(command.PlexAccount.Username, cancellationToken);
 
-        // Fail on validation errors
-        if (result.IsFailed)
-            return result.ToResult();
-
-        if (!result.Value)
+        if (!isAvailable)
         {
             var msg =
                 $"Account with username {plexAccount.Username} cannot be created due to an account with the same username already existing";
-            return result.ToResult().WithError(msg).LogWarning();
+            return Result.Fail(msg).LogWarning();
         }
 
         _log.DebugLine("Creating a new Account in DB");
@@ -59,7 +55,7 @@ public class CreatePlexAccountHandler : IRequestHandler<CreatePlexAccountCommand
         await _dbContext.Entry(command.PlexAccount).GetDatabaseValuesAsync(cancellationToken);
 
         var inspectResult = await _mediator.Send(new InspectAllPlexServersByAccountIdCommand(command.PlexAccount.Id), cancellationToken);
-        if (result.IsFailed)
+        if (inspectResult.IsFailed)
         {
             _log.Error("Failed to queue inspect server job for PlexAccount with id {PlexAccountId}", command.PlexAccount.Id);
             return inspectResult;

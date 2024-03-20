@@ -76,23 +76,6 @@ public class PlexAccountController : BaseController
         return ToActionResult<PlexAccount, PlexAccountDTO>(result);
     }
 
-    [HttpGet("check/{username}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<bool>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> CheckUsername(string username)
-    {
-        try
-        {
-            var result = await _mediator.Send(new IsUsernameAvailableQuery(username));
-            return result.IsFailed ? BadRequest(result.ToResult()) : Ok(result);
-        }
-        catch (Exception e)
-        {
-            return InternalServerError(e);
-        }
-    }
-
     // GET api/<PlexAccountController>/authpin/
     [HttpGet("authpin")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO<AuthPin>))]

@@ -72,4 +72,13 @@ public static partial class DbContextExtensions
 
         return Result.Ok(plexAccount.PlexServers);
     }
+
+    public static async Task<bool> IsUsernameAvailable(
+        this IPlexRipperDbContext dbContext,
+        string username,
+        CancellationToken cancellationToken = default)
+    {
+        var plexAccount = await dbContext.PlexAccounts.FirstOrDefaultAsync(x => x.Username == username, cancellationToken);
+        return plexAccount == null;
+    }
 }

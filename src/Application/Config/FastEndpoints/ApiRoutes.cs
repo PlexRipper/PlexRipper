@@ -53,13 +53,4 @@ public static class ApiRoutes
 
         public static string GetPauseCommand(Guid id) => Controller + "/pause/" + id;
     }
-
-    public static class Account
-    {
-        public static string Controller => Base + "/" + "".Replace("Controller", string.Empty);
-
-        public static string PostValidate => Controller + "/validate";
-
-        public static string PostCreateAccount => Controller + "/";
-    }
 }

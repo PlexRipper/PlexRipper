@@ -9,12 +9,10 @@ using Data.Contracts;
 using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;
-using Microsoft.AspNetCore.Mvc.Testing;
 using PlexApi.Contracts;
 using PlexRipper.Data;
 using PlexRipper.WebAPI;
 using Settings.Contracts;
-using WebAPI.Contracts;
 
 #endregion
 
@@ -24,7 +22,7 @@ public partial class BaseContainer : IDisposable
 {
     #region Fields
 
-    private readonly WebApplicationFactory<Startup> _factory;
+    private readonly PlexRipperWebApplicationFactory _factory;
 
     private static ILog _log;
 
@@ -39,7 +37,7 @@ public partial class BaseContainer : IDisposable
     /// </summary>
     private BaseContainer(string memoryDbName, Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
     {
-        _factory = new PlexRipperWebApplicationFactory<Startup>(memoryDbName, options, mockPlexApi);
+        _factory = new PlexRipperWebApplicationFactory(memoryDbName, options, mockPlexApi);
         ApiClient = _factory.CreateDefaultClient();
 
         // Create a separate scope as not to interfere with tests running in parallel

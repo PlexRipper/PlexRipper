@@ -19,13 +19,13 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         await CreateContainer();
 
         var plexAccount = FakeData.GetPlexAccount(4347564).Generate();
-        var plexAccountDTO = Container.Mapper.Map<PlexAccountDTO>(plexAccount);
+        var plexAccountDTO = plexAccount.ToDTO();
 
         // Act
-        var response = await Container.ApiClient.PostAsJsonAsync(ApiRoutes.Account.PostCreateAccount, plexAccountDTO);
+        var response = await Container.ApiClient.PostAsJsonAsync(ApiRoutes.PlexAccountController, plexAccountDTO);
         var resultDTO = await response.Deserialize<PlexAccountDTO>();
         resultDTO.IsSuccess.ShouldBeTrue();
-        var result = Container.Mapper.Map<Result<PlexAccountDTO>>(resultDTO);
+        var result = resultDTO.ToResultModel();
         await Container.SchedulerService.AwaitScheduler();
 
         // Assert

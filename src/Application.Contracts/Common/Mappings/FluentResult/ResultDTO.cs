@@ -27,9 +27,9 @@ public class ReasonDTO : IReason
     public Dictionary<string, object> Metadata { get; set; }
 }
 
-public class ErrorDTO
+public class ErrorDTO : IError
 {
-    public List<ErrorDTO> Reasons { get; set; }
+    public List<IError> Reasons { get; set; }
 
     public string Message { get; set; }
 

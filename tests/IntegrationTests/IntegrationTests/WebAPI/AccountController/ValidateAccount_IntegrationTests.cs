@@ -19,7 +19,7 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
         var plexAccountDTO = Container.Mapper.Map<PlexAccountDTO>(plexAccount);
 
         // Act
-        var response = await Container.ApiClient.PostAsJsonAsync(ApiRoutes.Account.PostValidate, plexAccountDTO);
+        var response = await Container.ApiClient.PostAsJsonAsync(ApiRoutes.PlexAccountController + "/validate", plexAccountDTO);
         var result = await response.Deserialize<PlexAccountDTO>();
 
         // Assert
@@ -38,7 +38,7 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
         var plexAccountDTO = Container.Mapper.Map<PlexAccountDTO>(plexAccount);
 
         // Act
-        var response = await Container.ApiClient.PostAsJsonAsync(ApiRoutes.Account.PostValidate, plexAccountDTO);
+        var response = await Container.ApiClient.PostAsJsonAsync(ApiRoutes.PlexAccountController + "/validate", plexAccountDTO);
         var resultDTO = await response.Deserialize<PlexAccountDTO>();
         var result = Container.Mapper.Map<Result>(resultDTO);
 

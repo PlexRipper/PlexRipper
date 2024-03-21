@@ -44,8 +44,6 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected int Seed { get; set; } = Random.Shared.Next(int.MaxValue);
 
-    protected IMediator _mediatr => Container.Mediator;
-
     #endregion
 
     #region Methods

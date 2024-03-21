@@ -4,17 +4,6 @@ public static class ApiRoutes
 {
     public static string Base => "/api";
 
-    public static class Settings
-    {
-        public static string Controller => Base + "/" + "".Replace("Controller", string.Empty);
-
-        public static string GetSettings => Controller;
-
-        public static string UpdateSettings => Controller;
-
-        public static string ResetDatabase => Controller + "ResetDb";
-    }
-
     public static string DownloadController => Base + "/" + "Download";
 
     public static string PlexAccountController => Base + "/" + "PlexAccount";
@@ -33,24 +22,31 @@ public static class ApiRoutes
 
     public static string PlexMediaController => Base + "/" + "PlexMedia";
 
+    public static class Settings
+    {
+        public static string GetSettings => SettingsController;
+
+        public static string UpdateSettings => SettingsController;
+
+        public static string ResetDatabase => SettingsController + "ResetDb";
+    }
+
     public static class Download
     {
-        public static string Controller => Base + "/" + nameof(DownloadController).Replace("Controller", string.Empty);
+        public static string GetDownloadTasks => DownloadController;
 
-        public static string GetDownloadTasks => Controller;
+        public static string PostClearCompleted => DownloadController + "/clear";
 
-        public static string PostClearCompleted => Controller + "/clear";
+        public static string PostDownloadMedia => DownloadController + "/download";
 
-        public static string PostDownloadMedia => Controller + "/download";
+        public static string PostDeleteCommand => DownloadController + "/delete";
 
-        public static string PostDeleteCommand => Controller + "/delete";
+        public static string PostRestartCommand => DownloadController + "/restart";
 
-        public static string PostRestartCommand => Controller + "/restart";
+        public static string PostStopCommand => DownloadController + "/stop";
 
-        public static string PostStopCommand => Controller + "/stop";
+        public static string GetStartCommand(Guid id) => DownloadController + "/start/" + id;
 
-        public static string GetStartCommand(Guid id) => Controller + "/start/" + id;
-
-        public static string GetPauseCommand(Guid id) => Controller + "/pause/" + id;
+        public static string GetPauseCommand(Guid id) => DownloadController + "/pause/" + id;
     }
 }

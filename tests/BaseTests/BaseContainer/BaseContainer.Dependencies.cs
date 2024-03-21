@@ -97,8 +97,6 @@ public partial class BaseContainer : IDisposable
 
     public TestLoggingClass TestLoggingClass => Resolve<TestLoggingClass>();
 
-    public IMapper Mapper => Resolve<IMapper>();
-
     public IBoot Boot => Resolve<IBoot>();
 
     #region Settings

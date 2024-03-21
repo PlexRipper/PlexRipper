@@ -58,6 +58,9 @@ public static class Startup
         // Setup FastEndpoints
         app.UseFastEndpoints(c =>
         {
+            // https://fast-endpoints.com/docs/swagger-support#short-endpoint-names
+            c.Endpoints.ShortNames = true;
+
             c.Errors.ResponseBuilder = (failures, ctx, _) =>
             {
                 var result = ResultExtensions.Create400BadRequestResult($"Bad request: {ctx.Request.GetDisplayUrl()}");
@@ -146,7 +149,10 @@ public static class Startup
                 // https://fast-endpoints.com/docs/swagger-support#removing-empty-schema
                 options.RemoveEmptyRequestSchema = true;
 
+                options.AutoTagPathSegmentIndex = 2;
+
                 options.FlattenSchema = true;
+
                 options.SerializerSettings = serializerOptions =>
                 {
                     var config = DefaultJsonSerializerOptions.ConfigBase;

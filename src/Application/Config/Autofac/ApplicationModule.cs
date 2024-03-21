@@ -3,6 +3,7 @@ using Application.Contracts;
 using Autofac;
 using Autofac.Extras.Quartz;
 using FileSystem.Contracts;
+using FluentValidation;
 using MediatR.Extensions.Autofac.DependencyInjection;
 using MediatR.Extensions.Autofac.DependencyInjection.Builder;
 using Module = Autofac.Module;
@@ -38,11 +39,10 @@ public class ApplicationModule : Module
             .AsImplementedInterfaces()
             .SingleInstance();
 
-        // register all I*Repository
+        // register all FluentValidators
         builder.RegisterAssemblyTypes(assembly)
-            .Where(t => t.Name.EndsWith("Repository"))
-            .AsImplementedInterfaces()
-            .SingleInstance();
+            .Where(t => t.IsClosedTypeOf(typeof(IValidator<>)))
+            .AsImplementedInterfaces();
 
         builder.RegisterType<DownloadQueue>().As<IDownloadQueue>().SingleInstance();
         builder.RegisterType<DownloadTaskScheduler>().As<IDownloadTaskScheduler>().SingleInstance();

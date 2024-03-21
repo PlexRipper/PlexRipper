@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
 		<LangVersion>11</LangVersion>
@@ -12,4 +11,7 @@
 		<ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
 </Project>

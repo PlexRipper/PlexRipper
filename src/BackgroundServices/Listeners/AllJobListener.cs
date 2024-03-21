@@ -1,6 +1,6 @@
+using Application.Contracts;
 using BackgroundServices.Contracts;
 using Quartz;
-using WebAPI.Contracts;
 
 namespace BackgroundServices.Listeners;
 

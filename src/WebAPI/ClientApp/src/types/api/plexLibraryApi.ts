@@ -23,19 +23,16 @@ export function getPlexLibrary(libraryId: number): Observable<ResultDTO<PlexLibr
 }
 
 export function reSyncPlexLibrary(libraryId: number): Observable<ResultDTO<PlexLibraryDTO | null>> {
-	return PlexRipperAxios.post({
-		url: `${PLEX_LIBRARY_RELATIVE_PATH}/refresh/`,
+	return PlexRipperAxios.get({
+		url: `${PLEX_LIBRARY_RELATIVE_PATH}/refresh/${libraryId}`,
 		apiCategory: logText,
 		apiName: reSyncPlexLibrary.name,
-		data: {
-			plexLibraryId: libraryId,
-		},
 	});
 }
 
 export function updateDefaultDestination(libraryId: number, folderPathId: number): Observable<ResultDTO> {
 	return PlexRipperAxios.put({
-		url: `${PLEX_LIBRARY_RELATIVE_PATH}/settings/default/destination`,
+		url: `${PLEX_LIBRARY_RELATIVE_PATH}/default/destination/{folderPathId}`,
 		apiCategory: logText,
 		apiName: updateDefaultDestination.name,
 		data: {

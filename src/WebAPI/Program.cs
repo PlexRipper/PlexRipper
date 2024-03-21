@@ -1,14 +1,33 @@
-using PlexRipper.WebAPI.Common;
+using Environment;
+using Logging.Interface;
+using Serilog.Events;
 
 namespace PlexRipper.WebAPI;
 
 public class Program
 {
-    public static void Main()
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(Program));
+
+    public static void Main(string[] args)
     {
         try
         {
-            PlexRipperHost.Setup().Build().Run();
+            LogManager.SetupLogging(LogEventLevel.Verbose);
+            _log.Information("Currently running on {CurrentOS}", OsInfo.CurrentOS);
+
+            var builder = WebApplication.CreateBuilder(args);
+
+            builder.ConfigureDatabase();
+
+            builder.Host.ConfigureHostBuilder();
+
+            builder.Services.ConfigureServices(builder.Environment);
+
+            var app = builder.Build();
+
+            app.ConfigureApplication(app.Environment);
+
+            app.Run();
         }
         catch (Exception e)
         {

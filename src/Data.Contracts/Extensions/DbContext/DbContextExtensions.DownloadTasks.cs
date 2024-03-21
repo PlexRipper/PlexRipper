@@ -30,6 +30,34 @@ public static partial class DbContextExtensions
         return Result.Ok(downloadUrl);
     }
 
+    public static async Task<DownloadTaskKey?> GetDownloadTaskKeyAsync(
+        this IPlexRipperDbContext dbContext,
+        Guid guid,
+        CancellationToken cancellationToken = default)
+    {
+        if (guid == Guid.Empty)
+            return null;
+
+        var queries = new List<IQueryable<DownloadTaskKey>>()
+        {
+            dbContext.DownloadTaskTvShow.ProjectToKey(),
+            dbContext.DownloadTaskTvShowSeason.ProjectToKey(),
+            dbContext.DownloadTaskTvShowEpisode.ProjectToKey(),
+            dbContext.DownloadTaskTvShowEpisodeFile.ProjectToKey(),
+            dbContext.DownloadTaskMovie.ProjectToKey(),
+            dbContext.DownloadTaskMovieFile.ProjectToKey(),
+        };
+
+        foreach (var query in queries)
+        {
+            var downloadTaskKey = await query.FirstOrDefaultAsync(x => x.Id == guid, cancellationToken);
+            if (downloadTaskKey is not null)
+                return downloadTaskKey;
+        }
+
+        return null;
+    }
+
     public static async Task<DownloadTaskType> GetDownloadTaskTypeAsync(
         this IPlexRipperDbContext dbContext,
         Guid guid,

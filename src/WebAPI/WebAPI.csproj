@@ -21,20 +21,17 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<InternalsVisibleTo Include="FluentResultExtension.UnitTests" />
-		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
+		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
 		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
-		<PackageReference Include="FluentValidation.AspNetCore" Version="9.3.0" />
+		<PackageReference Include="FastEndpoints.Swagger" Version="5.23.0" />
+		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="7.0.8" />
 		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.8" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.16.1" />
-		<PackageReference Include="NSwag.Generation.AspNetCore" Version="13.19.0" />
 		<PackageReference Include="Quartz.Extensions.Hosting" Version="3.5.0" />
 		<PackageReference Include="Quartz.Serialization.Json" Version="3.5.0" />
 		<PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
 		<PackageReference Include="SignalRSwaggerGen" Version="4.2.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.5.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\BackgroundServices\BackgroundServices.csproj" />
@@ -46,9 +43,6 @@
 		<ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<Content Remove="nswag.json" />
-	</ItemGroup>
-	<ItemGroup>
 		<None Remove="WebAPI.csproj.DotSettings" />
 	</ItemGroup>
 	<ItemGroup>
@@ -57,15 +51,4 @@
 	<ItemGroup>
 		<Compile Include="..\Domain\GlobalUsings.cs" />
 	</ItemGroup>
-	<ItemGroup>
-	  <_ContentIncludedByDefault Remove="ClientAppLegacy\.npm-upgrade.json" />
-	  <_ContentIncludedByDefault Remove="ClientAppLegacy\cypress\tsconfig.json" />
-	  <_ContentIncludedByDefault Remove="ClientAppLegacy\package-lock.json" />
-	  <_ContentIncludedByDefault Remove="ClientAppLegacy\package.json" />
-	  <_ContentIncludedByDefault Remove="ClientAppLegacy\src\lang\de-DE.json" />
-	  <_ContentIncludedByDefault Remove="ClientAppLegacy\src\lang\en-US.json" />
-	  <_ContentIncludedByDefault Remove="ClientAppLegacy\src\lang\fr-FR.json" />
-	  <_ContentIncludedByDefault Remove="ClientAppLegacy\tsconfig.json" />
-	</ItemGroup>
-
 </Project>

@@ -19,8 +19,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Autofac" Version="6.5.0" />
-		<PackageReference Include="Autofac.Extras.Quartz" Version="8.0.0" />
+		<PackageReference Include="Autofac" Version="8.0.0" />
+		<PackageReference Include="Autofac.Extras.Quartz" Version="10.0.0" />
 	</ItemGroup>
 
 </Project>

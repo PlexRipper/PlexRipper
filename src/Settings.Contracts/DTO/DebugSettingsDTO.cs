@@ -1,6 +1,4 @@
-﻿using PlexRipper.Domain.DownloadManager;
-
-namespace Settings.Contracts;
+﻿namespace Settings.Contracts;
 
 public class DebugSettingsDTO : IDebugSettings
 {

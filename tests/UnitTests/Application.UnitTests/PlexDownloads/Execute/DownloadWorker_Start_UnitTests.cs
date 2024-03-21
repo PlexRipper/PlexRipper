@@ -1,8 +1,7 @@
 using Autofac;
 using FileSystem.Contracts;
-using PlexRipper.Application;
 
-namespace DownloadManager.UnitTests;
+namespace PlexRipper.Application.UnitTests.Execute;
 
 public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
 {

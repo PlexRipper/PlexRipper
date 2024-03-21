@@ -1,11 +1,11 @@
 ﻿using System.Text.Json;
+using PlexRipper.Application;
 using PlexRipper.Domain.Config;
+using PlexRipper.Settings;
 using PlexRipper.Settings.Models;
-using PlexRipper.WebAPI.Common;
 using Settings.Contracts;
 
 namespace IntegrationTests.WebAPI.SettingsController;
-
 
 public class SettingsController_Get_Settings_IntegrationTests : BaseIntegrationTests
 {
@@ -24,7 +24,7 @@ public class SettingsController_Get_Settings_IntegrationTests : BaseIntegrationT
         // Assert
         response.IsSuccessStatusCode.ShouldBeTrue();
         result.IsSuccess.ShouldBeTrue();
-        var settingsModel = Container.Mapper.Map<SettingsModel>(result.Value);
+        var settingsModel = result.Value.ToModel();
         var responseSettings = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigBase);
         var defaultSettings = JsonSerializer.Serialize(SettingsModel.DefaultSettings(), DefaultJsonSerializerOptions.ConfigBase);
 

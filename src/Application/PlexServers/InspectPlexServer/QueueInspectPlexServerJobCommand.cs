@@ -1,6 +1,4 @@
-﻿using Data.Contracts;
-using FluentValidation;
-using Logging.Interface;
+﻿using FluentValidation;
 using Quartz;
 
 namespace PlexRipper.Application;
@@ -17,15 +15,11 @@ public class QueueInspectPlexServerJobCommandValidator : AbstractValidator<Queue
 
 public class QueueInspectPlexServerJobCommandHandler : IRequestHandler<QueueInspectPlexServerJobCommand, Result>
 {
-    private readonly ILog _log;
     private readonly IScheduler _scheduler;
-    private readonly IPlexRipperDbContext _dbContext;
 
-    public QueueInspectPlexServerJobCommandHandler(ILog log, IScheduler scheduler, IPlexRipperDbContext dbContext)
+    public QueueInspectPlexServerJobCommandHandler(IScheduler scheduler)
     {
-        _log = log;
         _scheduler = scheduler;
-        _dbContext = dbContext;
     }
 
     public async Task<Result> Handle(QueueInspectPlexServerJobCommand command, CancellationToken cancellationToken)

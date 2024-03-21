@@ -23,7 +23,7 @@ export function hideNotification(id: number): Observable<ResultDTO<boolean>> {
 }
 
 export function clearAllNotifications(): Observable<ResultDTO> {
-	return PlexRipperAxios.post({
+	return PlexRipperAxios.delete({
 		url: `${NOTIFICATION_RELATIVE_PATH}/clear`,
 		apiCategory: logText,
 		apiName: clearAllNotifications.name,

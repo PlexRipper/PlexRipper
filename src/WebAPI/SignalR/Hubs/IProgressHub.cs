@@ -1,10 +1,9 @@
-using PlexRipper.WebAPI.Common.DTO;
-using PlexRipper.WebAPI.SignalR.Common;
+using Application.Contracts;
 using SignalRSwaggerGen.Attributes;
 using SignalRSwaggerGen.Enums;
 using WebAPI.Contracts;
 
-namespace PlexRipper.WebAPI.SignalR.Hubs;
+namespace PlexRipper.WebAPI;
 
 [SignalRHub(autoDiscover: AutoDiscover.MethodsAndParams)]
 public interface IProgressHub

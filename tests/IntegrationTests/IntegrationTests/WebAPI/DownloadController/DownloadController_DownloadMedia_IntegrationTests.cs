@@ -1,8 +1,7 @@
 using Application.Contracts;
 using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.WebAPI.Common;
-using PlexRipper.WebAPI.Common.FluentResult;
+using PlexRipper.Application;
 using Serilog.Events;
 
 namespace IntegrationTests.WebAPI.DownloadController;

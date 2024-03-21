@@ -7,16 +7,16 @@ using Logging.Interface;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.Data;
-using PlexRipper.WebAPI.Common;
+using PlexRipper.WebAPI;
 using Settings.Contracts;
 
 namespace PlexRipper.BaseTests;
 
-public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup : class
+public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
 {
     private readonly string _memoryDbName;
     private readonly MockPlexApi _mockPlexApi;
-    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(PlexRipperWebApplicationFactory<>));
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(PlexRipperWebApplicationFactory));
 
     private readonly UnitTestDataConfig _config;
 
@@ -25,11 +25,6 @@ public class PlexRipperWebApplicationFactory<TStartup> : WebApplicationFactory<T
         _memoryDbName = memoryDbName;
         _mockPlexApi = mockPlexApi;
         _config = UnitTestDataConfig.FromOptions(options);
-    }
-
-    protected override IHostBuilder CreateHostBuilder()
-    {
-        return PlexRipperHost.Setup();
     }
 
     protected override IHost CreateHost(IHostBuilder builder)

@@ -26,5 +26,8 @@
 		<Compile Include="..\..\..\src\Domain\GlobalUsings.cs" />
 		<Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="PlexDownloads\GetAll\" />
+	</ItemGroup>
 
 </Project>

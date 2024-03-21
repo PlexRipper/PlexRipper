@@ -10,7 +10,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="FluentResults" Version="3.15.1" />
-		<PackageReference Include="FluentValidation" Version="9.3.0" />
+		<PackageReference Include="FluentValidation" Version="11.9.0" />
 	</ItemGroup>
 
 	<ItemGroup>

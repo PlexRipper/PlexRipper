@@ -1,5 +1,5 @@
+using Application.Contracts;
 using AutoMapper;
-using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.WebAPI;
 

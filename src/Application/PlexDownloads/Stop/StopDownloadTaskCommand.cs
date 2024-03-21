@@ -9,15 +9,15 @@ namespace PlexRipper.Application;
 /// <summary>
 /// Stops and disposes of the PlexDownloadClient executing the <see cref="DownloadTaskGeneric"/> if it is downloading.
 /// </summary>
-/// <param name="DownloadTaskId">The id of the <see cref="DownloadTaskGeneric"/> to stop.</param>
+/// <param name="DownloadTaskGuid">The id of the <see cref="DownloadTaskGeneric"/> to stop.</param>
 /// <returns>If successful a list of the DownloadTasks that were stopped.</returns>
-public record StopDownloadTaskCommand(Guid DownloadTaskId) : IRequest<Result>;
+public record StopDownloadTaskCommand(Guid DownloadTaskGuid) : IRequest<Result>;
 
 public class StopDownloadTaskCommandValidator : AbstractValidator<StopDownloadTaskCommand>
 {
     public StopDownloadTaskCommandValidator()
     {
-        RuleFor(x => x.DownloadTaskId).NotEmpty();
+        RuleFor(x => x.DownloadTaskGuid).NotEmpty();
     }
 }
 
@@ -45,13 +45,13 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
 
     public async Task<Result> Handle(StopDownloadTaskCommand command, CancellationToken cancellationToken)
     {
-        var downloadTask = await _dbContext.GetDownloadTaskAsync(command.DownloadTaskId, cancellationToken: cancellationToken);
+        var downloadTask = await _dbContext.GetDownloadTaskAsync(command.DownloadTaskGuid, cancellationToken: cancellationToken);
         if (downloadTask is null)
-            return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.DownloadTaskId).LogError();
+            return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.DownloadTaskGuid).LogError();
 
         _log.Information("Stopping {DownloadTaskFullTitle} from downloading", downloadTask.FullTitle);
 
-        var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(command.DownloadTaskId);
+        var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(command.DownloadTaskGuid);
         if (stopResult.IsFailed)
             return stopResult;
 

@@ -1,6 +1,4 @@
-﻿using Data.Contracts;
-using FluentValidation;
-using Logging.Interface;
+﻿using FluentValidation;
 using Quartz;
 
 namespace PlexRipper.Application;

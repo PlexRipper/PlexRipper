@@ -3,7 +3,6 @@
 using Application.Contracts;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using AutoMapper;
 using BackgroundServices.Contracts;
 using Data.Contracts;
 using Environment;

@@ -1,10 +1,9 @@
 ﻿using Application.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.SignalR;
-using PlexRipper.WebAPI.SignalR.Common;
 using SignalRSwaggerGen.Attributes;
 
-namespace PlexRipper.WebAPI.SignalR.Hubs;
+namespace PlexRipper.WebAPI;
 
 public class NotificationHub : Hub<INotificationHub>
 {

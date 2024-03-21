@@ -2,7 +2,6 @@
 using AutoMapper;
 using BackgroundServices.Contracts;
 using PlexRipper.WebAPI.Common;
-using PlexRipper.WebAPI.SignalR.Common;
 using WebAPI.Contracts;
 
 namespace PlexRipper.WebAPI;

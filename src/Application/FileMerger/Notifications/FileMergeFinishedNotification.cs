@@ -2,7 +2,7 @@ using Data.Contracts;
 using FileSystem.Contracts;
 using Microsoft.EntityFrameworkCore;
 
-namespace PlexRipper.Application;
+namespace PlexRipper.Application.Notifications;
 
 public record FileMergeFinishedNotification(int FileTaskId) : INotification;
 

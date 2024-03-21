@@ -2,9 +2,8 @@
 using Data.Contracts;
 using FileSystem.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 
-namespace DownloadManager.UnitTests;
+namespace PlexRipper.Application.UnitTests.Stop;
 
 public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<StopDownloadTaskCommandHandler>
 {

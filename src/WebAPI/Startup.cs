@@ -12,7 +12,6 @@ using Microsoft.Extensions.Http;
 using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.Domain.Config;
-using PlexRipper.WebAPI.SignalR.Hubs;
 using Serilog;
 
 namespace PlexRipper.WebAPI;

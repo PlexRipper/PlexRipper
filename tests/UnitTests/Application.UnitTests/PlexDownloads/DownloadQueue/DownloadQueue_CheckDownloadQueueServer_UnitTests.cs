@@ -2,9 +2,9 @@ using Application.Contracts;
 using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
 
-namespace PlexRipper.Application.UnitTests;
+namespace PlexRipper.Application.UnitTests.DownloadQueue;
 
-public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<DownloadQueue>
+public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Application.DownloadQueue>
 {
     public DownloadQueue_CheckDownloadQueue_UnitTests(ITestOutputHelper output) : base(output) { }
 

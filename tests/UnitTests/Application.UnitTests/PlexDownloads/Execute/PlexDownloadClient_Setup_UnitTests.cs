@@ -1,9 +1,8 @@
 ﻿using System.Reactive.Linq;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
 using Settings.Contracts;
 
-namespace DownloadManager.UnitTests;
+namespace PlexRipper.Application.UnitTests.Execute;
 
 public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClient>
 {

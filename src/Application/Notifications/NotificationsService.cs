@@ -1,5 +1,4 @@
 ﻿using Application.Contracts;
-using WebAPI.Contracts;
 
 namespace PlexRipper.Application;
 

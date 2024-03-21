@@ -2,7 +2,6 @@
 using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;
-using PlexRipper.Application;
 using PlexRipper.Settings;
 using Settings.Contracts;
 

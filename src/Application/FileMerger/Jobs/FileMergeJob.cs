@@ -8,10 +8,10 @@ using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application;
+using PlexRipper.Application.Notifications;
 using Quartz;
 
-namespace PlexRipper.FileSystem;
+namespace PlexRipper.Application.Jobs;
 
 public class FileMergeJob : IJob
 {

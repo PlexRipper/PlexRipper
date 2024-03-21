@@ -1,8 +1,8 @@
 ﻿using Data.Contracts;
 
-namespace PlexRipper.Application.UnitTests;
+namespace PlexRipper.Application.UnitTests.DownloadQueue;
 
-public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<DownloadQueue>
+public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Application.DownloadQueue>
 {
     public DownloadQueue_GetNextDownloadTask_UnitTests(ITestOutputHelper output) : base(output) { }
 

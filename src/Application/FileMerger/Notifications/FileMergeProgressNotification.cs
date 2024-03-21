@@ -2,7 +2,7 @@ using Application.Contracts;
 using Data.Contracts;
 using Logging.Interface;
 
-namespace PlexRipper.Application;
+namespace PlexRipper.Application.Notifications;
 
 public record FileMergeProgressNotification(FileMergeProgress Progress) : INotification;
 

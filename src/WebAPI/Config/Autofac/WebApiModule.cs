@@ -1,7 +1,5 @@
 ﻿using Application.Contracts;
 using Autofac;
-using PlexRipper.WebAPI.SignalR;
-using PlexRipper.WebAPI.SignalR.Hubs;
 
 namespace PlexRipper.WebAPI;
 

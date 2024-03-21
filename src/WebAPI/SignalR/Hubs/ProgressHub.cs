@@ -1,8 +1,6 @@
 ﻿using Application.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.SignalR;
-using PlexRipper.WebAPI.SignalR.Common;
-using PlexRipper.WebAPI.SignalR.Hubs;
 using SignalRSwaggerGen.Attributes;
 using WebAPI.Contracts;
 

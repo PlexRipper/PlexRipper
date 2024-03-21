@@ -1,4 +1,4 @@
-﻿namespace PlexRipper.WebAPI.SignalR.Common;
+﻿namespace PlexRipper.WebAPI;
 
 public class DownloadTaskCreationProgress
 {

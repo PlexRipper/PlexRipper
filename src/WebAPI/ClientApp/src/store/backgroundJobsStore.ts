@@ -1,6 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { Observable, of, Subject } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import ISetupResult from '@interfaces/service/ISetupResult';
 import { JobStatusUpdateDTO, JobTypes } from '@dto/mainApi';
 

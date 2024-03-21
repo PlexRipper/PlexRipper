@@ -7,7 +7,6 @@ using FastEndpoints;
 using FastEndpoints.Swagger;
 using Logging.Interface;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using PlexRipper.Application;
@@ -89,6 +88,7 @@ public static class Program
             app.MapHub<NotificationHub>("/notifications");
         }
 
+        // Setup FastEndpoints
         app.UseFastEndpoints(c =>
         {
             c.Errors.ResponseBuilder = (failures, ctx, _) =>
@@ -104,6 +104,7 @@ public static class Program
             };
         });
 
+        // Setup FastEndpoints Swagger
         app.UseSwaggerGen();
 
         if (!EnvironmentExtensions.IsIntegrationTestMode() && env.IsProduction())
@@ -134,9 +135,6 @@ public static class Program
                         .AllowCredentials();
                 });
         });
-
-        // TODO this can maybe be removed due to the use of FastEndpoints
-        services.SetupControllers();
 
         services.AddOptions();
 
@@ -203,29 +201,5 @@ public static class Program
 
         // Removing all registered IHttpMessageHandlerBuilderFilter instances to disable built-in HttpClient logging
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
-    }
-
-    // TODO this can maybe be removed due to the use of FastEndpoints
-    public static void SetupControllers(this IServiceCollection services)
-    {
-        // Controllers and Json options
-        services
-            .AddControllers()
-            .AddJsonOptions(options =>
-            {
-                var config = DefaultJsonSerializerOptions.ConfigBase;
-                options.JsonSerializerOptions.PropertyNameCaseInsensitive = config.PropertyNameCaseInsensitive;
-                options.JsonSerializerOptions.PropertyNamingPolicy = config.PropertyNamingPolicy;
-                options.JsonSerializerOptions.DefaultIgnoreCondition = config.DefaultIgnoreCondition;
-                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
-
-        // Customise default API behaviour
-        services.AddHttpContextAccessor();
-
-        // https://autofac.readthedocs.io/en/latest/integration/aspnetcore.html#controllers-as-services
-        services.AddMvc().AddControllersAsServices();
-
-        services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });
     }
 }

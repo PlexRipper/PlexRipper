@@ -29,6 +29,7 @@ public abstract class BaseEndpoint<TRequest> : Endpoint<TRequest, ResultDTO>
 
             // Status code 200 Ok
             await SendOkAsync(resultDTO, ct);
+            return;
         }
 
         if (result.Has400BadRequestError())
@@ -72,6 +73,7 @@ public abstract class BaseEndpoint<TRequest, TDTO> : BaseEndpoint<TRequest>
 
             // Status code 200 Ok
             await SendOkAsync(resultDTO, ct);
+            return;
         }
 
         // If in failed state, then we can call the non-generic version of SendFluentResult because there wont be a non-null value
@@ -104,6 +106,7 @@ public abstract class BaseEndpointWithoutRequest<TResponse> : BaseEndpointWithou
 
             // Status code 200 Ok
             await SendOkAsync(resultDTO, ct);
+            return;
         }
 
         // If in failed state, then we can call the non-generic version of SendFluentResult because there wont be a non-null value
@@ -133,6 +136,7 @@ public abstract class BaseEndpointWithoutRequest : EndpointWithoutRequest<Result
 
             // Status code 200 Ok
             await SendOkAsync(resultDTO, ct);
+            return;
         }
 
         if (result.Has400BadRequestError())

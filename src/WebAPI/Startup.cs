@@ -1,8 +1,11 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Environment;
 using FastEndpoints;
 using FastEndpoints.Swagger;
+using Logging.Interface;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
@@ -10,18 +13,81 @@ using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.Domain.Config;
 using PlexRipper.WebAPI.SignalR.Hubs;
+using Serilog;
 
 namespace PlexRipper.WebAPI;
 
-public class Startup
+public static class Startup
 {
     public static readonly string CORSConfiguration = "CORS_Configuration";
+
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(Startup));
+
+    public static void ConfigureHostBuilder(this IHostBuilder builder)
+    {
+        // Use Autofac as the DI container
+        builder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+        builder.ConfigureContainer<ContainerBuilder>(containerBuilder =>
+        {
+            _log.DebugLine("Setting up Autofac Containers");
+            ContainerConfig.ConfigureContainer(containerBuilder);
+        });
+
+        // Add services to the container.
+        builder.UseSerilog(LogConfig.GetLogger());
+    }
+
+    /// <summary>
+    /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+    /// </summary>
+    /// <param name="app">The <see cref="IApplicationBuilder"/> instance to configure.</param>
+    public static void ConfigureApplication(this WebApplication app, IWebHostEnvironment env)
+    {
+        app.UseRouting();
+
+        app.UseCors(CORSConfiguration);
+
+        app.UseAuthorization();
+
+        if (!EnvironmentExtensions.IsIntegrationTestMode())
+        {
+            // SignalR configuration
+            app.MapHub<ProgressHub>("/progress");
+            app.MapHub<NotificationHub>("/notifications");
+        }
+
+        // Setup FastEndpoints
+        app.UseFastEndpoints(c =>
+        {
+            c.Errors.ResponseBuilder = (failures, ctx, _) =>
+            {
+                var result = ResultExtensions.Create400BadRequestResult($"Bad request: {ctx.Request.GetDisplayUrl()}");
+                var errors = failures.GroupBy(f => f.PropertyName)
+                    .ToDictionary(
+                        e => e.Key,
+                        e => e.Select(m => m.ErrorMessage).ToArray());
+                foreach (var reason in errors)
+                    result.Errors[0].Metadata.Add(reason.Key, reason.Value);
+                return result;
+            };
+        });
+
+        // Setup FastEndpoints Swagger
+        app.UseSwaggerGen();
+
+        if (!EnvironmentExtensions.IsIntegrationTestMode() && env.IsProduction())
+        {
+            // Used to deploy the front-end Nuxt client
+            app.UseSpaStaticFiles();
+            app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
+        }
+    }
 
     /// <summary>
     /// This method gets called by the runtime. Use this method to add services to the container.
     /// </summary>
     /// <param name="services"></param>
-    public void ConfigureServices(IServiceCollection services, IWebHostEnvironment env)
+    public static void ConfigureServices(this IServiceCollection services, IWebHostEnvironment env)
     {
         // Set CORS Configuration
         services.AddCors(options =>
@@ -111,53 +177,7 @@ public class Startup
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
     }
 
-    /// <summary>
-    /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    /// </summary>
-    /// <param name="app">The <see cref="IApplicationBuilder"/> instance to configure.</param>
-    public void Configure(WebApplication app, IWebHostEnvironment env)
-    {
-        app.UseRouting();
-
-        app.UseCors(CORSConfiguration);
-
-        app.UseAuthorization();
-
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
-        {
-            // SignalR configuration
-            app.MapHub<ProgressHub>("/progress");
-            app.MapHub<NotificationHub>("/notifications");
-        }
-
-        // Setup FastEndpoints
-        app.UseFastEndpoints(c =>
-        {
-            c.Errors.ResponseBuilder = (failures, ctx, _) =>
-            {
-                var result = ResultExtensions.Create400BadRequestResult($"Bad request: {ctx.Request.GetDisplayUrl()}");
-                var errors = failures.GroupBy(f => f.PropertyName)
-                    .ToDictionary(
-                        e => e.Key,
-                        e => e.Select(m => m.ErrorMessage).ToArray());
-                foreach (var reason in errors)
-                    result.Errors[0].Metadata.Add(reason.Key, reason.Value);
-                return result;
-            };
-        });
-
-        // Setup FastEndpoints Swagger
-        app.UseSwaggerGen();
-
-        if (!EnvironmentExtensions.IsIntegrationTestMode() && env.IsProduction())
-        {
-            // Used to deploy the front-end Nuxt client
-            app.UseSpaStaticFiles();
-            app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
-        }
-    }
-
-    public static void ConfigureDatabase()
+    public static void ConfigureDatabase(this WebApplicationBuilder builder)
     {
         var dbContext = new PlexRipperDbContext(new PathProvider());
         dbContext.Setup();

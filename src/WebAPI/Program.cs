@@ -1,8 +1,5 @@
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using Environment;
 using Logging.Interface;
-using Serilog;
 using Serilog.Events;
 
 namespace PlexRipper.WebAPI;
@@ -20,27 +17,15 @@ public class Program
 
             var builder = WebApplication.CreateBuilder(args);
 
-            var startup = new Startup();
+            builder.ConfigureDatabase();
 
-            Startup.ConfigureDatabase();
+            builder.Host.ConfigureHostBuilder();
 
-            // Use Autofac as the DI container
-            builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
-            builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
-            {
-                _log.DebugLine("Setting up Autofac Containers");
-                ContainerConfig.ConfigureContainer(containerBuilder);
-            });
+            builder.Services.ConfigureServices(builder.Environment);
 
-            // Add services to the container.
-            builder.Host.UseSerilog(LogConfig.GetLogger());
-
-            // Setup the services
-            startup.ConfigureServices(builder.Services, builder.Environment);
             var app = builder.Build();
 
-            // Setup the app
-            startup.Configure(app, app.Environment);
+            app.ConfigureApplication(app.Environment);
 
             app.Run();
         }

@@ -44,21 +44,4 @@ public class DownloadController : BaseController
         var result = await _mediator.Send(new CreateDownloadTasksCommand(downloadMedias));
         return ToActionResult(result);
     }
-
-    #region BatchCommands
-
-    // GET api/<DownloadController>/start/{guid:guid}
-    [HttpGet("start/{guid:guid}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResultDTO))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResultDTO))]
-    public async Task<IActionResult> StartCommand(Guid guid)
-    {
-        if (guid == Guid.Empty)
-            return BadRequestInvalidId();
-
-        var startResult = await _mediator.Send(new StartDownloadTaskCommand(guid));
-        return ToActionResult(startResult);
-    }
-
-    #endregion
 }

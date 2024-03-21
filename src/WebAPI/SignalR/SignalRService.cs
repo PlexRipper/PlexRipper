@@ -7,7 +7,7 @@ using PlexRipper.WebAPI.SignalR.Common;
 using PlexRipper.WebAPI.SignalR.Hubs;
 using WebAPI.Contracts;
 
-namespace PlexRipper.WebAPI.SignalR;
+namespace PlexRipper.WebAPI;
 
 /// <summary>
 /// A SignalR wrapper to send data to the front-end implementation.

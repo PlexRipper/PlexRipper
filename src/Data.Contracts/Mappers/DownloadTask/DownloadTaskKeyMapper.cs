@@ -3,7 +3,7 @@ using Riok.Mapperly.Abstractions;
 
 namespace Data.Contracts;
 
-[Mapper]
+[Mapper(EnumMappingStrategy = EnumMappingStrategy.ByName, EnumMappingIgnoreCase = true)]
 public static partial class DownloadTaskKeyMapper
 {
     #region PlexMovie
@@ -17,7 +17,7 @@ public static partial class DownloadTaskKeyMapper
     #region PlexMovieFile
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(DownloadTaskMovie.DownloadTaskType), nameof(DownloadTaskKey.Type))]
+    [MapProperty(nameof(DownloadTaskMovieFile.DownloadTaskType), nameof(DownloadTaskKey.Type))]
     public static partial IQueryable<DownloadTaskKey> ProjectToKey(this IQueryable<DownloadTaskMovieFile> downloadTaskMovieFile);
 
     #endregion
@@ -49,7 +49,7 @@ public static partial class DownloadTaskKeyMapper
     #region PlexTvShowEpisodeFile
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(DownloadTaskTvShowEpisode.DownloadTaskType), nameof(DownloadTaskKey.Type))]
+    [MapProperty(nameof(DownloadTaskTvShowEpisodeFile.DownloadTaskType), nameof(DownloadTaskKey.Type))]
     public static partial IQueryable<DownloadTaskKey> ProjectToKey(this IQueryable<DownloadTaskTvShowEpisodeFile> downloadTaskTvShowEpisodeFile);
 
     #endregion

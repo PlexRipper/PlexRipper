@@ -19,7 +19,7 @@ public class RestartDownloadTaskEndpoint : BaseEndpoint<RestartDownloadTaskEndpo
 {
     private readonly IMediator _mediator;
 
-    public override string EndpointPath => ApiRoutes.DownloadController + "/restart";
+    public override string EndpointPath => ApiRoutes.DownloadController + "/restart/{DownloadTaskGuid}";
 
     public RestartDownloadTaskEndpoint(IMediator mediator)
     {

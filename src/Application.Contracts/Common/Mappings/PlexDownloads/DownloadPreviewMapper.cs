@@ -24,6 +24,8 @@ public static partial class DownloadPreviewMapper
     [MapperIgnoreTarget(nameof(DownloadPreview.Children))]
     [MapperIgnoreTarget(nameof(DownloadPreview.TvShowId))]
     [MapperIgnoreTarget(nameof(DownloadPreview.SeasonId))]
+    private static partial DownloadPreview ProjectToDownloadPreviewMapper(this PlexMovie plexMovie);
+
     public static partial IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexMovie> plexMovie);
 
     #endregion
@@ -36,6 +38,8 @@ public static partial class DownloadPreviewMapper
     [MapperIgnoreTarget(nameof(DownloadPreview.Children))]
     [MapperIgnoreTarget(nameof(DownloadPreview.TvShowId))]
     [MapperIgnoreTarget(nameof(DownloadPreview.SeasonId))]
+    private static partial DownloadPreview ProjectToDownloadPreviewMapper(this PlexTvShow plexTvShow);
+
     public static partial IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexTvShow> plexTvShow);
 
     #endregion
@@ -45,8 +49,9 @@ public static partial class DownloadPreviewMapper
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
     [MapProperty(nameof(PlexTvShowSeason.MediaSize), nameof(DownloadPreview.Size))]
     [MapProperty(nameof(PlexTvShowSeason.Type), nameof(DownloadPreview.MediaType))]
-    [MapperIgnoreTarget(nameof(DownloadPreview.Children))]
     [MapperIgnoreTarget(nameof(DownloadPreview.SeasonId))]
+    private static partial DownloadPreview ProjectToDownloadPreviewMapper(this PlexTvShowSeason plexSeason);
+
     public static partial IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexTvShowSeason> plexSeason);
 
     #endregion
@@ -58,6 +63,8 @@ public static partial class DownloadPreviewMapper
     [MapProperty(nameof(PlexTvShowEpisode.Type), nameof(DownloadPreview.MediaType))]
     [MapProperty(nameof(PlexTvShowEpisode.TvShowSeasonId), nameof(DownloadPreview.SeasonId))]
     [MapperIgnoreTarget(nameof(DownloadPreview.Children))]
+    private static partial DownloadPreview ProjectToDownloadPreviewMapper(this PlexTvShowEpisode plexEpisode);
+
     public static partial IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexTvShowEpisode> plexEpisode);
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
@@ -65,6 +72,8 @@ public static partial class DownloadPreviewMapper
     [MapProperty(nameof(PlexTvShowEpisode.TvShowSeasonId), nameof(TvShowEpisodeKeyDTO.SeasonId))]
     [MapProperty(nameof(PlexTvShowEpisode.Id), nameof(TvShowEpisodeKeyDTO.EpisodeId))]
     [MapperIgnoreTarget(nameof(DownloadPreview.Children))]
+    private static partial TvShowEpisodeKeyDTO ProjectToEpisodeKey(this PlexTvShowEpisode plexEpisode);
+
     public static partial IQueryable<TvShowEpisodeKeyDTO> ProjectToEpisodeKey(this IQueryable<PlexTvShowEpisode> plexEpisode);
 
     #endregion

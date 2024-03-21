@@ -1,18 +1,17 @@
 using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
-using Microsoft.AspNetCore.Http;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
-public record RestartDownloadTaskEndpointRequest(Guid Guid);
+public record RestartDownloadTaskEndpointRequest(Guid DownloadTaskGuid);
 
 public class RestartDownloadTaskEndpointRequestValidator : Validator<RestartDownloadTaskEndpointRequest>
 {
     public RestartDownloadTaskEndpointRequestValidator()
     {
-        RuleFor(x => x.Guid).NotEmpty();
+        RuleFor(x => x.DownloadTaskGuid).NotEmpty();
     }
 }
 
@@ -39,7 +38,7 @@ public class RestartDownloadTaskEndpoint : BaseEndpoint<RestartDownloadTaskEndpo
 
     public override async Task HandleAsync(RestartDownloadTaskEndpointRequest req, CancellationToken ct)
     {
-        var restartResult = await _mediator.Send(new RestartDownloadTaskCommand(req.Guid), ct);
+        var restartResult = await _mediator.Send(new RestartDownloadTaskCommand(req.DownloadTaskGuid), ct);
 
         await SendFluentResult(restartResult, ct);
     }

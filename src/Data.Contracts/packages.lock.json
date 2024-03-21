@@ -28,10 +28,10 @@
       },
       "Autofac": {
         "type": "Transitive",
-        "resolved": "6.5.0",
-        "contentHash": "sm6HWWBDEoTPGXeyOchMygJ/7L89VxmVH72BFxakG88J34AVjA8RMi5jbv3PdpUtXI/d9ZLKOaxCmOSIo2K4aA==",
+        "resolved": "8.0.0",
+        "contentHash": "qxVqJcl3fixxa5aZc9TmIuYTwooI9GCL5RzfUiTZtTlbAF3NcWz7bPeEyJEAyS/0qGhSyGnXeku2eiu/7L+3qw==",
         "dependencies": {
-          "System.Diagnostics.DiagnosticSource": "4.7.1"
+          "System.Diagnostics.DiagnosticSource": "7.0.2"
         }
       },
       "AutoMapper": {
@@ -719,8 +719,8 @@
       },
       "System.Diagnostics.DiagnosticSource": {
         "type": "Transitive",
-        "resolved": "5.0.0",
-        "contentHash": "tCQTzPsGZh/A9LhhA6zrqCRV4hOHsK90/G7q3Khxmn6tnB1PuNU0cRaKANP2AWcF9bn0zsuOoZOSrHuJk6oNBA=="
+        "resolved": "7.0.2",
+        "contentHash": "hYr3I9N9811e0Bjf2WNwAGGyTuAFbbTgX1RPLt/3Wbm68x3IGcX5Cl75CMmgT6WlNwLQ2tCCWfqYPpypjaf2xA=="
       },
       "System.Diagnostics.Tools": {
         "type": "Transitive",
@@ -1528,7 +1528,7 @@
       "logging": {
         "type": "Project",
         "dependencies": {
-          "Autofac": "[6.5.0, )",
+          "Autofac": "[8.0.0, )",
           "Environment": "[1.0.0, )",
           "Serilog": "[2.12.0, )",
           "Serilog.Enrichers.Sensitive": "[1.7.2, )",

@@ -2,10 +2,11 @@
 using Logging.Interface;
 using Microsoft.AspNetCore.SignalR;
 using PlexRipper.WebAPI.SignalR.Common;
+using PlexRipper.WebAPI.SignalR.Hubs;
 using SignalRSwaggerGen.Attributes;
 using WebAPI.Contracts;
 
-namespace PlexRipper.WebAPI.SignalR.Hubs;
+namespace PlexRipper.WebAPI;
 
 public class ProgressHub : Hub<IProgressHub>
 {

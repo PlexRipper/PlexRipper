@@ -14,6 +14,7 @@ using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.Domain.Config;
 using PlexRipper.WebAPI.Common;
+using PlexRipper.WebAPI.SignalR.Hubs;
 using Serilog;
 using Serilog.Events;
 
@@ -81,6 +82,13 @@ public static class Program
 
         app.UseAuthorization();
 
+        if (!EnvironmentExtensions.IsIntegrationTestMode())
+        {
+            // SignalR configuration
+            app.MapHub<ProgressHub>("/progress");
+            app.MapHub<NotificationHub>("/notifications");
+        }
+
         app.UseFastEndpoints(c =>
         {
             c.Errors.ResponseBuilder = (failures, ctx, _) =>
@@ -95,20 +103,8 @@ public static class Program
                 return result;
             };
         });
-        app.UseSwaggerGen();
 
-        // app.UseEndpoints(endpoints =>
-        // {
-        //     endpoints.MapControllers();
-        //     if (!EnvironmentExtensions.IsIntegrationTestMode())
-        //     {
-        //         endpoints.MapSwagger();
-        //
-        //         // SignalR configuration
-        //         endpoints.MapHub<ProgressHub>("/progress");
-        //         endpoints.MapHub<NotificationHub>("/notifications");
-        //     }
-        // });
+        app.UseSwaggerGen();
 
         if (!EnvironmentExtensions.IsIntegrationTestMode() && env.IsProduction())
         {
@@ -139,7 +135,20 @@ public static class Program
                 });
         });
 
+        // TODO this can maybe be removed due to the use of FastEndpoints
         services.SetupControllers();
+
+        services.AddOptions();
+
+        // Setup FastEndpoints
+        services.AddFastEndpoints(options =>
+        {
+            options.DisableAutoDiscovery = true;
+            options.Assemblies = new[]
+            {
+                Assembly.GetAssembly(typeof(BaseEndpoint<,>)),
+            };
+        });
 
         if (!EnvironmentExtensions.IsIntegrationTestMode())
         {
@@ -155,65 +164,40 @@ public static class Program
                 .AddSignalR()
                 .AddJsonProtocol(options => options.PayloadSerializerOptions = DefaultJsonSerializerOptions.ConfigBase);
 
-            // services.AddSwaggerGen(c =>
-            // {
-            //     c.SwaggerDoc("v1", new OpenApiInfo
-            //     {
-            //         Version = "v1",
-            //         Title = "PlexRipper Swagger Internal API",
-            //     });
-            //     c.SchemaGeneratorOptions.SupportNonNullableReferenceTypes = true;
-            //     c.SchemaFilter<RequiredMemberFilter>();
-            //     c.SchemaFilter<RequiredNotNullableSchemaFilter>();
-            //     c.AddSignalRSwaggerGen();
-            //
-            //     // Enables the XML-documentation for the Swagger UI
-            //     c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,
-            //         $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
-            // });
+            services.SwaggerDocument(options =>
+            {
+                // https://fast-endpoints.com/docs/swagger-support#swagger-operation-tags
+                options.AutoTagPathSegmentIndex = 2;
+
+                // https://fast-endpoints.com/docs/swagger-support#short-schema-names
+                options.ShortSchemaNames = true;
+
+                // https://fast-endpoints.com/docs/swagger-support#removing-empty-schema
+                options.RemoveEmptyRequestSchema = true;
+
+                options.FlattenSchema = true;
+                options.SerializerSettings = serializerOptions =>
+                {
+                    var config = DefaultJsonSerializerOptions.ConfigBase;
+                    serializerOptions.PropertyNameCaseInsensitive = config.PropertyNameCaseInsensitive;
+                    serializerOptions.PropertyNamingPolicy = config.PropertyNamingPolicy;
+                    serializerOptions.DefaultIgnoreCondition = config.DefaultIgnoreCondition;
+
+                    // This will ensure that Enums are not exported as integers but as string values in the Swagger UI
+                    serializerOptions.Converters.Add(new JsonStringEnumConverter());
+                };
+
+                // options.ExcludeNonFastEndpoints = true;
+                options.DocumentSettings = s =>
+                {
+                    s.Title = "[FastEndpoints] PlexRipper Swagger Internal API";
+                    s.Version = "v1";
+                    s.MarkNonNullablePropsAsRequired();
+                    s.RequireParametersWithoutDefault = true;
+                    s.DocumentProcessors.Add(new NSwagAddExtraTypes());
+                };
+            });
         }
-
-        services.AddOptions();
-
-        // Setup FastEndpoints
-        services.AddFastEndpoints(options =>
-        {
-            options.DisableAutoDiscovery = true;
-            options.Assemblies = new[]
-            {
-                Assembly.GetAssembly(typeof(BaseEndpoint<,>)),
-            };
-        });
-        services.SwaggerDocument(options =>
-        {
-            // https://fast-endpoints.com/docs/swagger-support#swagger-operation-tags
-            options.AutoTagPathSegmentIndex = 2;
-
-            // https://fast-endpoints.com/docs/swagger-support#short-schema-names
-            options.ShortSchemaNames = true;
-
-            // https://fast-endpoints.com/docs/swagger-support#removing-empty-schema
-            options.RemoveEmptyRequestSchema = true;
-
-            options.FlattenSchema = true;
-
-            options.SerializerSettings = serializerOptions =>
-            {
-                var config = DefaultJsonSerializerOptions.ConfigBase;
-                serializerOptions.PropertyNameCaseInsensitive = config.PropertyNameCaseInsensitive;
-                serializerOptions.PropertyNamingPolicy = config.PropertyNamingPolicy;
-                serializerOptions.DefaultIgnoreCondition = config.DefaultIgnoreCondition;
-                // This will ensure that Enums are not exported as integers but as string values in the Swagger UI
-                serializerOptions.Converters.Add(new JsonStringEnumConverter());
-            };
-
-            // options.ExcludeNonFastEndpoints = true;
-            options.DocumentSettings = s =>
-            {
-                s.Title = "[FastEndpoints] PlexRipper Swagger Internal API";
-                s.Version = "v1";
-            };
-        });
 
         services.AddHttpClient();
 
@@ -221,6 +205,7 @@ public static class Program
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
     }
 
+    // TODO this can maybe be removed due to the use of FastEndpoints
     public static void SetupControllers(this IServiceCollection services)
     {
         // Controllers and Json options

@@ -46,7 +46,6 @@
 		<None Remove="WebAPI.csproj.DotSettings" />
 	</ItemGroup>
 	<ItemGroup>
-		<Folder Include="Common\Extensions\" />
 		<Folder Include="Properties\" />
 	</ItemGroup>
 	<ItemGroup>

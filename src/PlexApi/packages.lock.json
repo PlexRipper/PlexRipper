@@ -476,16 +476,6 @@
           "System.Xml.XDocument": "4.3.0"
         }
       },
-      "Quartz": {
-        "type": "Transitive",
-        "resolved": "3.5.0",
-        "contentHash": "tgWAByEvwWC/CE4VXfrMgt7h5FXdFKIl9Sf5X/0d4yq1rsvSgiVbcAPdFUFAgIOOTcLTtRXp1rXBGqHukIWAgQ==",
-        "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "2.1.1",
-          "System.Configuration.ConfigurationManager": "4.7.0",
-          "System.Diagnostics.DiagnosticSource": "4.7.1"
-        }
-      },
       "Riok.Mapperly": {
         "type": "Transitive",
         "resolved": "3.4.0",
@@ -1553,13 +1543,6 @@
           "WebAPI.Contracts": "[1.0.0, )"
         }
       },
-      "backgroundservices.contracts": {
-        "type": "Project",
-        "dependencies": {
-          "PlexRipper.Domain": "[1.0.0, )",
-          "Quartz": "[3.5.0, )"
-        }
-      },
       "data.contracts": {
         "type": "Project",
         "dependencies": {
@@ -1622,7 +1605,6 @@
       "webapi.contracts": {
         "type": "Project",
         "dependencies": {
-          "BackgroundServices.Contracts": "[1.0.0, )",
           "PlexRipper.Domain": "[1.0.0, )"
         }
       }

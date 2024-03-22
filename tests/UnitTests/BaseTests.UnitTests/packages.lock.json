@@ -3522,23 +3522,6 @@
           "WebAPI.Contracts": "[1.0.0, )"
         }
       },
-      "backgroundservices": {
-        "type": "Project",
-        "dependencies": {
-          "Application.Contracts": "[1.0.0, )",
-          "Autofac": "[8.0.0, )",
-          "Autofac.Extras.Quartz": "[10.0.0, )",
-          "BackgroundServices.Contracts": "[1.0.0, )",
-          "Data.Contracts": "[1.0.0, )"
-        }
-      },
-      "backgroundservices.contracts": {
-        "type": "Project",
-        "dependencies": {
-          "PlexRipper.Domain": "[1.0.0, )",
-          "Quartz": "[3.5.0, )"
-        }
-      },
       "data.contracts": {
         "type": "Project",
         "dependencies": {
@@ -3591,7 +3574,6 @@
         "dependencies": {
           "Application.Contracts": "[1.0.0, )",
           "Autofac.Extras.Quartz": "[10.0.0, )",
-          "BackgroundServices.Contracts": "[1.0.0, )",
           "Data.Contracts": "[1.0.0, )",
           "FastEndpoints": "[5.23.0, )",
           "FileSystem.Contracts": "[1.0.0, )",
@@ -3664,7 +3646,6 @@
           "Application.Contracts": "[1.0.0, )",
           "Autofac": "[8.0.0, )",
           "Autofac.Extras.Quartz": "[10.0.0, )",
-          "BackgroundServices.Contracts": "[1.0.0, )",
           "Data.Contracts": "[1.0.0, )",
           "FileSystem.Contracts": "[1.0.0, )",
           "MediatR.Extensions.Autofac.DependencyInjection": "[10.0.0, )",
@@ -3697,7 +3678,6 @@
         "dependencies": {
           "AutoMapper.Extensions.Microsoft.DependencyInjection": "[12.0.0, )",
           "Autofac.Extensions.DependencyInjection": "[9.0.0, )",
-          "BackgroundServices": "[1.0.0, )",
           "FastEndpoints.Swagger": "[5.23.0, )",
           "FluentValidation.AspNetCore": "[11.3.0, )",
           "Microsoft.AspNetCore.SpaServices.Extensions": "[7.0.8, )",
@@ -3725,7 +3705,6 @@
       "webapi.contracts": {
         "type": "Project",
         "dependencies": {
-          "BackgroundServices.Contracts": "[1.0.0, )",
           "PlexRipper.Domain": "[1.0.0, )"
         }
       }

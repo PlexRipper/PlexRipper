@@ -28,6 +28,12 @@ dotnet_style_predefined_type_for_locals_parameters_members = true:suggestion
 dotnet_style_predefined_type_for_member_access = true:suggestion
 dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggestion
 
+# Mapperly properties
+dotnet_diagnostic.RMG012.severity = error # Unmapped target member
+dotnet_diagnostic.RMG020.severity = error # Unmapped source member
+dotnet_diagnostic.RMG037.severity = error # Unmapped target enum value
+dotnet_diagnostic.RMG038.severity = error # Unmapped source enum value
+
 # ReSharper properties
 resharper_autodetect_indent_settings = true
 resharper_blank_lines_after_control_transfer_statements = 1

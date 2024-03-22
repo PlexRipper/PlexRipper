@@ -1,7 +1,5 @@
 ﻿using Application.Contracts;
 using AutoMapper;
-using BackgroundServices.Contracts;
-using PlexRipper.WebAPI.Common;
 using WebAPI.Contracts;
 
 namespace PlexRipper.WebAPI;
@@ -133,11 +131,5 @@ public class WebApiMappingProfile : Profile
 
         // InspectServerProgress -> InspectServerProgressDTO
         CreateMap<ServerConnectionCheckStatusProgress, ServerConnectionCheckStatusProgressDTO>(MemberList.Destination);
-
-        // JobStatusUpdate -> JobStatusUpdateDTO
-        CreateMap<JobStatusUpdate, JobStatusUpdateDTO>(MemberList.Destination)
-            .ForMember(dto => dto.JobType, entity => entity.MapFrom(x => ToJobType(x.JobGroup)));
     }
-
-    private static JobTypes ToJobType(string jobGroup) => Enum.TryParse<JobTypes>(jobGroup, out var jobType) ? jobType : JobTypes.Unknown;
 }

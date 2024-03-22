@@ -1,5 +1,4 @@
-﻿using BackgroundServices.Contracts;
-using PlexRipper.Domain;
+﻿using PlexRipper.Domain;
 using WebAPI.Contracts;
 
 namespace Application.Contracts;

@@ -1,6 +1,5 @@
 using Application.Contracts;
 using AutoMapper;
-using BackgroundServices.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.SignalR;
 using WebAPI.Contracts;
@@ -98,8 +97,7 @@ public class SignalRService : ISignalRService
 
     public async Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate)
     {
-        var jobStatusUpdateDto = _mapper.Map<JobStatusUpdateDTO>(jobStatusUpdate);
-        await _progressHub.Clients.All.JobStatusUpdate(jobStatusUpdateDto);
+        await _progressHub.Clients.All.JobStatusUpdate(jobStatusUpdate.ToDTO());
     }
 
     #endregion

@@ -1,4 +1,4 @@
-namespace BackgroundServices.Contracts;
+namespace Application.Contracts;
 
 public class JobStatusUpdate
 {

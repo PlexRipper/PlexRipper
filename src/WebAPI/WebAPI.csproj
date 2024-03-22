@@ -45,6 +45,7 @@
 		<None Remove="WebAPI.csproj.DotSettings" />
 	</ItemGroup>
 	<ItemGroup>
+		<Folder Include="Common\Enums\" />
 		<Folder Include="Properties\" />
 	</ItemGroup>
 	<ItemGroup>

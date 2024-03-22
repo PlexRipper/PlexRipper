@@ -1,7 +1,4 @@
-﻿using BackgroundServices.Contracts;
-using PlexRipper.WebAPI.Common;
-
-namespace PlexRipper.WebAPI;
+﻿namespace Application.Contracts;
 
 public class JobStatusUpdateDTO
 {

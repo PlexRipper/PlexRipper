@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using Application.Contracts;
-using BackgroundServices.Contracts;
 using Logging.Interface;
 using WebAPI.Contracts;
 
@@ -11,6 +10,7 @@ public class MockSignalRService : ISignalRService
     private readonly ILog<MockSignalRService> _log;
 
     public BlockingCollection<DownloadTaskDTO> DownloadTaskUpdate { get; } = new();
+
     public BlockingCollection<FileMergeProgress> FileMergeProgressList { get; } = new();
 
     public BlockingCollection<ServerDownloadProgressDTO> ServerDownloadProgressList { get; } = new();

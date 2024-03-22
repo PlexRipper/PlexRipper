@@ -1,5 +1,4 @@
 using Application.Contracts;
-using BackgroundServices.Contracts;
 using Quartz;
 
 namespace PlexRipper.Application;

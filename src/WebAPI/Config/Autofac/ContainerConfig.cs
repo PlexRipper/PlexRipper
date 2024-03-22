@@ -28,7 +28,6 @@ public static class ContainerConfig
         builder.RegisterModule<PlexApiModule>();
         builder.RegisterModule<SettingsModule>();
         builder.RegisterModule<HttpClientModule>();
-        builder.RegisterModule<BackgroundServicesModule>();
 
         // Presentation
         builder.RegisterModule<WebApiModule>();

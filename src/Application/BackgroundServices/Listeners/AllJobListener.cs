@@ -2,7 +2,7 @@ using Application.Contracts;
 using BackgroundServices.Contracts;
 using Quartz;
 
-namespace BackgroundServices.Listeners;
+namespace PlexRipper.Application;
 
 public class AllJobListener : IAllJobListener
 {

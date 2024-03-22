@@ -62,11 +62,7 @@ public class FolderPath : BaseEntity
     /// Checks if the <see cref="FolderPath"/> is valid by checking if the directory exists.
     /// </summary>
     /// <returns>If the check is successful.</returns>
-    public bool IsValid()
-    {
-        // TODO This is only here for the mapping to FolderPathDTO and should not be directly accessing Directory.Exists but use the DirectorySystem
-        return Directory.Exists(DirectoryPath);
-    }
+    public bool IsValid => Directory.Exists(DirectoryPath);
 
     #endregion
 }

@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { FolderPathDTO } from '@dto/mainApi';
+import type { FolderPathDTO } from '@dto/mainApi';
 import {
 	useI18n,
 	useOpenControlDialog,
@@ -72,7 +72,7 @@ import {
 	useSubscription,
 	showErrorNotification,
 } from '#imports';
-import IFolderPathGroup from '@interfaces/IFolderPathGroup';
+import type IFolderPathGroup from '@interfaces/IFolderPathGroup';
 
 const { t } = useI18n();
 const folderPathStore = useFolderPathStore();

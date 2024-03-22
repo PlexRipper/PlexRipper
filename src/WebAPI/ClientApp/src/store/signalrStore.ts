@@ -2,25 +2,26 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { Observable, of, Subject, from } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
 import Log from 'consola';
-import { HubConnection, HubConnectionBuilder, HubConnectionState, IHttpConnectionOptions, LogLevel } from '@microsoft/signalr';
+import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
+import type { IHttpConnectionOptions } from '@microsoft/signalr';
 import { useCypressSignalRMock } from 'cypress-signalr-mock';
 import { isEqual } from 'lodash-es';
-import ISetupResult from '@interfaces/service/ISetupResult';
+import type ISetupResult from '@interfaces/service/ISetupResult';
 import { useDownloadStore } from '~/store/downloadStore';
-import {
+import type {
 	FileMergeProgress,
 	InspectServerProgressDTO,
 	JobStatusUpdateDTO,
 	LibraryProgress,
-	MessageTypes,
 	NotificationDTO,
 	ServerConnectionCheckStatusProgressDTO,
 	ServerDownloadProgressDTO,
 	SyncServerProgress,
 } from '@dto/mainApi';
+import { MessageTypes } from '@dto/mainApi';
 import { useBackgroundJobsStore } from '~/store/backgroundJobsStore';
 import { useNotificationsStore } from '~/store/notificationsStore';
-import IAppConfig from '@class/IAppConfig';
+import type IAppConfig from '@class/IAppConfig';
 
 export const useSignalrStore = defineStore('SignalrStore', () => {
 	interface ISignalRStoreState {

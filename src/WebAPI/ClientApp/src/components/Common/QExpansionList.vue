@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { QExpansionListProps } from '@interfaces/components/QExpansionListProps';
+import type { QExpansionListProps } from '@interfaces/components/QExpansionListProps';
 
 const { t } = useI18n();
 

@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { NotificationDTO } from '@dto/mainApi';
+import type { NotificationDTO } from '@dto/mainApi';
 import ResultDTO from '@dto/ResultDTO';
 import PlexRipperAxios from '@class/PlexRipperAxios';
 import { NOTIFICATION_RELATIVE_PATH } from '@api-urls';

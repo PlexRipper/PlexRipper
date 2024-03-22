@@ -5,7 +5,7 @@
 </template>
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
-import { PlexMediaType } from '@dto/mainApi';
+import type { PlexMediaType } from '@dto/mainApi';
 
 const route = useRoute();
 

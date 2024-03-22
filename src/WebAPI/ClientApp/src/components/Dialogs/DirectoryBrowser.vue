@@ -15,10 +15,9 @@
 			<q-row>
 				<q-col>
 					<p-text-field
-						:model-value="path?.directory ?? ''"
+						v-model:model-value="currentPath"
 						outlined
 						color="red"
-						debounce="500"
 						@update:model-value="requestDirectories" />
 					<q-text v-if="!(path?.directory ?? '')" size="large" align="center">
 						{{ t('components.directory-browser.no-path') }}
@@ -75,6 +74,7 @@ import { useCloseControlDialog } from '~/composables/event-bus';
 
 const { t } = useI18n();
 const path = ref<FolderPathDTO | null>(null);
+const currentPath = ref('');
 const parentPath = ref('');
 const isLoading = ref(true);
 const items = ref<FileSystemModelDTO[]>([]);
@@ -111,6 +111,7 @@ const open = (selectedPath: FolderPathDTO): void => {
 	selectedPath = cloneDeep(selectedPath);
 	requestDirectories(selectedPath.directory);
 	set(path, selectedPath);
+	set(currentPath, selectedPath.directory);
 };
 function cancel(): void {
 	emit('cancel');

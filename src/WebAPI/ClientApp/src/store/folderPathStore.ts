@@ -1,6 +1,6 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { switchMap, tap } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
 import { createFolderPath, deleteFolderPath, getFolderPaths, updateFolderPath } from '@api/pathApi';
 import { useI18n } from '#build/imports';
@@ -35,7 +35,23 @@ export const useFolderPathStore = defineStore('FolderPathStore', () => {
 				}),
 			);
 		},
-		updateFolderPath(folderPath: FolderPathDTO) {
+		setFolderPathDirectory(folderPathId: number, directory: string): Observable<FolderPathDTO> {
+			let folderPath = getters.getFolderPath(folderPathId);
+			if (folderPath) {
+				folderPath = { ...folderPath, directory };
+				return actions.updateFolderPath(folderPath);
+			}
+			return throwError(() => 'Could not find folderPath with id: ' + folderPathId);
+		},
+		setFolderPathDisplayName(folderPathId: number, displayName: string): Observable<FolderPathDTO> {
+			let folderPath = getters.getFolderPath(folderPathId);
+			if (folderPath) {
+				folderPath = { ...folderPath, displayName };
+				return actions.updateFolderPath(folderPath);
+			}
+			return throwError(() => 'Could not find folderPath with id: ' + folderPathId);
+		},
+		updateFolderPath(folderPath: FolderPathDTO): Observable<FolderPathDTO> {
 			const i = state.folderPaths.findIndex((x) => x.id === folderPath.id);
 			if (i > -1) {
 				state.folderPaths.splice(i, 1, folderPath);
@@ -53,7 +69,7 @@ export const useFolderPathStore = defineStore('FolderPathStore', () => {
 
 	// Getters
 	const getters = {
-		getFolderPaths: computed((state): FolderPathDTO[] => state.folderPaths),
+		getFolderPaths: (): FolderPathDTO[] => state.folderPaths,
 		getFolderPath: (id: number): FolderPathDTO | undefined => {
 			return state.folderPaths.find((x) => x.id === id);
 		},

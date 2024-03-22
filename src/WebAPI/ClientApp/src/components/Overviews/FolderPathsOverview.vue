@@ -64,7 +64,14 @@
 
 <script setup lang="ts">
 import { FolderPathDTO } from '@dto/mainApi';
-import { useI18n, useOpenControlDialog, toFolderPathStringId, useFolderPathStore, useSubscription } from '#imports';
+import {
+	useI18n,
+	useOpenControlDialog,
+	toFolderPathStringId,
+	useFolderPathStore,
+	useSubscription,
+	showErrorNotification,
+} from '#imports';
 import IFolderPathGroup from '@interfaces/IFolderPathGroup';
 
 const { t } = useI18n();
@@ -85,11 +92,13 @@ const allowEditing = computed(() => {
 });
 
 const confirmDirectoryBrowser = (path: FolderPathDTO): void => {
-	const i = folderPathStore.getFolderPaths.findIndex((x) => x.id === path.id);
-	if (i > -1) {
-		const folderPath = { ...folderPathStore.getFolderPaths[i], directory: path.directory };
-		folderPathStore.updateFolderPath(folderPath);
-	}
+	useSubscription(
+		folderPathStore.setFolderPathDirectory(path.id, path.directory).subscribe({
+			error(err) {
+				showErrorNotification(err);
+			},
+		}),
+	);
 };
 
 function addFolderPath(folderGroup: IFolderPathGroup): void {
@@ -116,11 +125,13 @@ function toTranslation(type: string): string {
 }
 
 const saveDisplayName = (id: number, value: string): void => {
-	const folderPathIndex = folderPathStore.getFolderPaths.findIndex((x) => x.id === id);
-	if (folderPathIndex > -1) {
-		const folderPath = { ...folderPathStore.getFolderPaths[folderPathIndex], displayName: value };
-		folderPathStore.updateFolderPath(folderPath);
-	}
+	useSubscription(
+		folderPathStore.setFolderPathDirectory(id, value).subscribe({
+			error(err) {
+				showErrorNotification(err);
+			},
+		}),
+	);
 };
 </script>
 <style lang="scss">

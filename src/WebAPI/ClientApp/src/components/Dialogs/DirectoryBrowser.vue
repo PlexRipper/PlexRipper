@@ -19,8 +19,10 @@
 						outlined
 						color="red"
 						debounce="500"
-						placeholder="Start typing or select a path below"
 						@update:model-value="requestDirectories" />
+					<q-text v-if="!(path?.directory ?? '')" size="large" align="center">
+						{{ t('components.directory-browser.no-path') }}
+					</q-text>
 				</q-col>
 			</q-row>
 			<q-row>
@@ -49,7 +51,7 @@
 							<q-icon size="md" :name="getIcon(row.type)" />
 						</td>
 						<td class="text-left">
-							{{ row.path }}
+							{{ row.name }}
 						</td>
 					</tr>
 				</tbody>

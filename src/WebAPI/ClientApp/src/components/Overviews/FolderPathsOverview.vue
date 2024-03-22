@@ -126,7 +126,7 @@ function toTranslation(type: string): string {
 
 const saveDisplayName = (id: number, value: string): void => {
 	useSubscription(
-		folderPathStore.setFolderPathDirectory(id, value).subscribe({
+		folderPathStore.setFolderPathDisplayName(id, value).subscribe({
 			error(err) {
 				showErrorNotification(err);
 			},

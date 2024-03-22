@@ -15,7 +15,7 @@
 			<q-row>
 				<q-col>
 					<p-text-field
-						v-model:model-value="currentPath"
+						v-model="currentPath"
 						outlined
 						color="red"
 						@update:model-value="requestDirectories" />
@@ -163,8 +163,10 @@ function requestDirectories(newPath: string): void {
 function directoryNavigate(dataRow: FileSystemModelDTO): void {
 	if (dataRow.path === '..') {
 		requestDirectories(parentPath.value);
+		set(currentPath, parentPath.value)
 	} else {
 		requestDirectories(dataRow.path);
+		set(currentPath, dataRow.path)
 	}
 }
 </script>

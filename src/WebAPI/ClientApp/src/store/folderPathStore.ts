@@ -1,16 +1,23 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { switchMap, tap } from 'rxjs/operators';
 import { Observable, of, throwError } from 'rxjs';
-import { FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
+import { type FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
 import { createFolderPath, deleteFolderPath, getFolderPaths, updateFolderPath } from '@api/pathApi';
 import { useI18n } from '#build/imports';
-import IFolderPathGroup from '@interfaces/IFolderPathGroup';
-import ISetupResult from '@interfaces/service/ISetupResult';
+import type IFolderPathGroup from '@interfaces/IFolderPathGroup';
+import type ISetupResult from '@interfaces/service/ISetupResult';
 
 export const useFolderPathStore = defineStore('FolderPathStore', () => {
 	const state = reactive<{ folderPaths: FolderPathDTO[] }>({
 		folderPaths: [],
 	});
+
+	function updateFolderPathInState(folderPath: FolderPathDTO) {
+		const i = state.folderPaths.findIndex((x) => x.id === folderPath.id);
+		if (i > -1) {
+			state.folderPaths.splice(i, 1, folderPath);
+		}
+	}
 
 	// Actions
 	const actions = {
@@ -52,11 +59,9 @@ export const useFolderPathStore = defineStore('FolderPathStore', () => {
 			return throwError(() => 'Could not find folderPath with id: ' + folderPathId);
 		},
 		updateFolderPath(folderPath: FolderPathDTO): Observable<FolderPathDTO> {
-			const i = state.folderPaths.findIndex((x) => x.id === folderPath.id);
-			if (i > -1) {
-				state.folderPaths.splice(i, 1, folderPath);
-			}
-			return updateFolderPath(folderPath);
+			updateFolderPathInState(folderPath);
+
+			return updateFolderPath(folderPath).pipe(tap((x) => updateFolderPathInState(x)));
 		},
 		deleteFolderPath(folderPathId: number) {
 			const i = state.folderPaths.findIndex((x) => x.id === folderPathId);

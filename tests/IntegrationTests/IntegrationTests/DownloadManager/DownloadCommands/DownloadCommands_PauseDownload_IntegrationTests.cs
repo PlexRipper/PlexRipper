@@ -1,5 +1,6 @@
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using PlexRipper.Application;
 using Serilog.Events;
 
@@ -34,12 +35,14 @@ public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTe
         var childDownloadTask = downloadTasks[0].Children[0];
 
         // Act
-        var response = await Container.GetAsync(ApiRoutes.Download.GetStartCommand(childDownloadTask.Id));
-        var startResult = await response.Deserialize<ResultDTO>();
+        var response = await Container.ApiClient.GETAsync<StartDownloadTaskEndpoint, Guid, ResultDTO>(childDownloadTask.Id);
+        var startResult = response.Result;
+        response.Response.IsSuccessStatusCode.ShouldBeTrue();
         await Task.Delay(2000);
 
-        response = await Container.GetAsync(ApiRoutes.Download.GetPauseCommand(childDownloadTask.Id));
-        var pauseResult = await response.Deserialize<ResultDTO>();
+        response = await Container.ApiClient.GETAsync<PauseDownloadTaskEndpoint, Guid, ResultDTO>(childDownloadTask.Id);
+        response.Response.IsSuccessStatusCode.ShouldBeTrue();
+        var pauseResult = response.Result;
 
         await Container.SchedulerService.AwaitScheduler();
         await Task.Delay(2000);

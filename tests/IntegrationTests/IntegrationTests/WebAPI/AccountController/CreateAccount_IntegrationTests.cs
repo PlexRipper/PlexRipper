@@ -1,5 +1,6 @@
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 
@@ -22,8 +23,11 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         var plexAccountDTO = plexAccount.ToDTO();
 
         // Act
-        var response = await Container.ApiClient.PostAsJsonAsync(ApiRoutes.PlexAccountController, plexAccountDTO);
-        var resultDTO = await response.Deserialize<PlexAccountDTO>();
+        var response = await Container.ApiClient.POSTAsync<CreatePlexAccountEndpoint, PlexAccountDTO,
+            ResultDTO<PlexAccount>>(plexAccountDTO);
+        response.Response.IsSuccessStatusCode.ShouldBeTrue();
+
+        var resultDTO = response.Result;
         resultDTO.IsSuccess.ShouldBeTrue();
         var result = resultDTO.ToResultModel();
         await Container.SchedulerService.AwaitScheduler();

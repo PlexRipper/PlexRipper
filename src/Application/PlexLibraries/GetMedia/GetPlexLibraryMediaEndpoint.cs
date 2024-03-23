@@ -72,24 +72,24 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
         {
             case PlexMediaType.Movie:
             {
-                entities = await _dbContext.PlexMovies.AsNoTracking()
+                var plexMovies = await _dbContext.PlexMovies.AsNoTracking()
                     .Where(x => x.PlexLibraryId == req.PlexLibraryId)
                     .OrderBy(x => x.Title)
                     .Skip(skip)
                     .Take(take)
-                    .ProjectToDTO()
                     .ToListAsync(ct);
+                entities = plexMovies.Select(x => x.ToSlimDTO()).ToList();
                 break;
             }
             case PlexMediaType.TvShow:
             {
-                entities = await _dbContext.PlexTvShows.AsNoTracking()
+                var plexTvShow = await _dbContext.PlexTvShows.AsNoTracking()
                     .Where(x => x.PlexLibraryId == req.PlexLibraryId)
                     .OrderBy(x => x.Title)
                     .Skip(skip)
                     .Take(take)
-                    .ProjectToDTO()
                     .ToListAsync(ct);
+                entities = plexTvShow.Select(x => x.ToSlimDTO()).ToList();
                 break;
             }
             default:
@@ -114,13 +114,19 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
         }
 
         foreach (var mediaSlim in entities)
+        {
             mediaSlim.ThumbUrl = GetThumbnailUrl(plexServerConnection.Value.Url, mediaSlim.ThumbUrl, plexServerToken.Value);
+            mediaSlim.HasThumb = mediaSlim.ThumbUrl != string.Empty;
+        }
 
         await SendFluentResult(Result.Ok(entities.SetIndex()), _ => _, ct);
     }
 
     private string GetThumbnailUrl(string connectionUrl, string thumbPath, string plexServerToken)
     {
+        if (connectionUrl == "" || thumbPath == "" || plexServerToken is "")
+            return string.Empty;
+
         var uri = new Uri(connectionUrl + thumbPath);
         return $"{uri.Scheme}://{uri.Host}:{uri.Port}/photo/:/transcode?url={uri.AbsolutePath}&X-Plex-Token={plexServerToken}";
     }

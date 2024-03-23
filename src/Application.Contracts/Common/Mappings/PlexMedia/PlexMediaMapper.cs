@@ -25,7 +25,9 @@ public static partial class PlexMediaMapper
     [MapProperty(nameof(PlexMovie.MovieData), nameof(PlexMediaDTO.MediaData))]
     public static partial PlexMediaDTO ToDTO(this PlexMovie plexMovie);
 
-    public static partial IQueryable<PlexMediaSlimDTO> ProjectToDTO(this IQueryable<PlexMovie> plexMovie);
+    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
+    [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Index))]
+    public static partial PlexMediaSlimDTO ToSlimDTO(this PlexMovie plexMovie);
 
     #endregion
 
@@ -44,8 +46,6 @@ public static partial class PlexMediaMapper
     [MapProperty(nameof(PlexTvShow.Seasons), nameof(PlexMediaSlimDTO.Children))]
     [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Index))]
     public static partial PlexMediaSlimDTO ToSlimDTO(this PlexTvShow plexTvShow);
-
-    public static partial IQueryable<PlexMediaSlimDTO> ProjectToDTO(this IQueryable<PlexTvShow> plexTvShow);
 
     #endregion
 

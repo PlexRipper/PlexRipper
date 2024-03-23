@@ -3,6 +3,7 @@ using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using PlexRipper.Domain.PlexMediaExtensions;
 
 namespace PlexRipper.Application;
 
@@ -53,6 +54,22 @@ public class GetPlexTvShowWithEpisodesByIdEndpoint : BaseEndpoint<GetPlexTvShowW
         }
 
         plexTvShow.Seasons = plexTvShow.Seasons.OrderByNatural(x => x.Title).ToList();
+
+        // Do continue, even if the connection is invalid, worst case is that the thumbnail will not work
+        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexTvShow.PlexServerId, ct);
+        if (plexServerConnection.IsFailed)
+            plexServerConnection.ToResult().LogError();
+
+        var plexServerToken = await _dbContext.GetPlexServerTokenAsync(plexTvShow.PlexServerId, ct);
+        if (plexServerToken.IsFailed)
+            plexServerToken.ToResult().LogError();
+
+        plexTvShow.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value);
+        foreach (var season in plexTvShow.Seasons)
+        {
+            season.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value);
+            season.Episodes.ForEach(x => x.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value));
+        }
 
         await SendFluentResult(Result.Ok(plexTvShow), x => x.ToSlimDTO(), ct);
     }

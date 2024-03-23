@@ -135,15 +135,15 @@
       },
       "Bogus": {
         "type": "Transitive",
-        "resolved": "34.0.2",
-        "contentHash": "2KQAuMn3fLAQ2r6jeiffZnpv0bi3GCW3iRB2v1KeHIEBu8MNTh9dBlLTZwGvM0pr+9doKkU8L5JgCURmTmT88A=="
+        "resolved": "35.5.0",
+        "contentHash": "iCXszbIvvxgfb01bPe/s3R6pQSKX6rpcQWqM7wqDt+lsMogR6fkSWBwqOxLpdXmMB7mgZNNk2hm2M1shoIiekA=="
       },
       "Bogus.Hollywood": {
         "type": "Transitive",
-        "resolved": "34.0.2",
-        "contentHash": "IG5+XMOwJD3WgVi5Qt2L9QQmMD4fs39JuY8VNJx7+IItwcVc9nkKfKTEejojvi2vT+HGmvLZV0n4Z6ZFk7QMEg==",
+        "resolved": "35.5.0",
+        "contentHash": "8jmP9jdJqSPkHUn64lFT5uYrvZwnEu48+hd/pgiRyFVh/HIgxQQvHCDBVOUtNfBqs+Urr+h/Clhlr8cj8e1V1Q==",
         "dependencies": {
-          "Bogus": "34.0.2"
+          "Bogus": "35.5.0"
         }
       },
       "ByteSize": {
@@ -215,6 +215,17 @@
         "dependencies": {
           "FastEndpoints": "5.23.0",
           "NSwag.AspNetCore": "14.0.3"
+        }
+      },
+      "FastEndpoints.Testing": {
+        "type": "Transitive",
+        "resolved": "5.23.0",
+        "contentHash": "n+4Y7RIc2xke+JDq6vYGy7nNdq7GcpBneGD/OjWtqx4mm/8qtKskQUxOB225EbDtpU0GHz/BdB95BPSL5evS4Q==",
+        "dependencies": {
+          "Bogus": "35.4.0",
+          "MartinCostello.Logging.XUnit": "0.3.0",
+          "Microsoft.AspNetCore.Mvc.Testing": "7.0.16",
+          "Xunit.Priority": "1.1.6"
         }
       },
       "FluentResults": {
@@ -823,6 +834,16 @@
           "System.ValueTuple": "4.5.0"
         }
       },
+      "MartinCostello.Logging.XUnit": {
+        "type": "Transitive",
+        "resolved": "0.3.0",
+        "contentHash": "p6SWKQRLXEqYqnzA7mulCPfdZraDXFc7gHCErj1uw9KTNi4agFZqFDCANIfwAJ7ivWlAUAFZDTDFxb4cAhkPlw==",
+        "dependencies": {
+          "Microsoft.Extensions.Logging": "2.0.0",
+          "xunit.abstractions": "2.0.2",
+          "xunit.extensibility.execution": "2.4.0"
+        }
+      },
       "MediatR": {
         "type": "Transitive",
         "resolved": "12.0.0",
@@ -888,10 +909,10 @@
       },
       "Microsoft.AspNetCore.Mvc.Testing": {
         "type": "Transitive",
-        "resolved": "7.0.8",
-        "contentHash": "wyGG8vhYH5ROugE+OPpfw3rzLvaZODwSe/0/QbW4zPcoT3CUDfRLfUb0jHWxj4Ci+YDvd5buldEgZkzZbtfQ8A==",
+        "resolved": "7.0.17",
+        "contentHash": "P9E2/SjJEdc1QJbzLeBW1z8QGvAn+XCuTTEnWnKh9DV8Ba7xZ8N3jETT6+PZsvfcWWPsrmp2mOw16DQ35rib8w==",
         "dependencies": {
-          "Microsoft.AspNetCore.TestHost": "7.0.8",
+          "Microsoft.AspNetCore.TestHost": "7.0.17",
           "Microsoft.Extensions.DependencyModel": "7.0.0",
           "Microsoft.Extensions.Hosting": "7.0.1"
         }
@@ -906,8 +927,8 @@
       },
       "Microsoft.AspNetCore.TestHost": {
         "type": "Transitive",
-        "resolved": "7.0.8",
-        "contentHash": "FJZgfDx1yQY9yZC5GiEXwE0aySWxJ4xvTauhX68WLDteifVTjj2brSCnfqwoAH/NWD25ooJuDiJPAksfgKgrwA==",
+        "resolved": "7.0.17",
+        "contentHash": "XnfZhgbk1+I7UnvDpRPtWxQzymsnyWsc0EvzZfNbdjLn68HUcyTtDmduqVmOmNvMVVZCkN9T4kLJoGpcBZiIbQ==",
         "dependencies": {
           "System.IO.Pipelines": "7.0.0"
         }
@@ -3504,6 +3525,14 @@
           "xunit.extensibility.core": "[2.4.2]"
         }
       },
+      "Xunit.Priority": {
+        "type": "Transitive",
+        "resolved": "1.1.6",
+        "contentHash": "VF8yb6PHWb7ABkbEoWbesg0DsN3Pt7HQ2CGaIjyUh23jo3aCRm1zOAP/zQQh3B3Gi3K+5Xds8qs+SRUB2Hyr6Q==",
+        "dependencies": {
+          "xunit.extensibility.core": "2.3.1"
+        }
+      },
       "YamlDotNet": {
         "type": "Transitive",
         "resolved": "13.7.1",
@@ -3587,10 +3616,11 @@
         "dependencies": {
           "Autofac": "[8.0.0, )",
           "Autofac.Extras.Moq": "[6.1.1, )",
-          "Bogus": "[34.0.2, )",
-          "Bogus.Hollywood": "[34.0.2, )",
+          "Bogus": "[35.5.0, )",
+          "Bogus.Hollywood": "[35.5.0, )",
+          "FastEndpoints.Testing": "[5.23.0, )",
           "JustEat.HttpClientInterception": "[4.0.0, )",
-          "Microsoft.AspNetCore.Mvc.Testing": "[7.0.8, )",
+          "Microsoft.AspNetCore.Mvc.Testing": "[7.0.17, )",
           "Microsoft.AspNetCore.SpaServices.Extensions": "[7.0.8, )",
           "Microsoft.NET.Test.Sdk": "[17.5.0, )",
           "Moq": "[4.18.1, )",

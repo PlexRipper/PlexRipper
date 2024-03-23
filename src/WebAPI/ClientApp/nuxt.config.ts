@@ -72,12 +72,6 @@ export default defineNuxtConfig({
 		// Packages,  @types/node, vue-tsc and typescript are required
 		strict: true,
 	},
-	macros: {
-		// TODO this can be removed in Vue 3.3
-		// Enabled betterDefine to allow importing interfaces into defineProps
-		betterDefine: true,
-		defineOptions: true,
-	},
 	lodash: {
 		prefix: false,
 		prefixSkip: false,

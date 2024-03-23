@@ -29,8 +29,10 @@ dotnet_style_predefined_type_for_member_access = true:suggestion
 dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggestion
 
 # Mapperly properties
-dotnet_diagnostic.RMG012.severity = error # Unmapped target member
-dotnet_diagnostic.RMG020.severity = error # Unmapped source member
+# https://mapperly.riok.app/docs/configuration/analyzer-diagnostics/
+dotnet_diagnostic.RMG004.severity = error # Ignored target member not found.
+dotnet_diagnostic.RMG007.severity = error # Could not map member.
+dotnet_diagnostic.RMG023.severity = error # Mapping source member for a required target member not found
 dotnet_diagnostic.RMG037.severity = error # Unmapped target enum value
 dotnet_diagnostic.RMG038.severity = error # Unmapped source enum value
 

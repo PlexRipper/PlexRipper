@@ -105,7 +105,6 @@ const mediaItem = ref<PlexMediaSlimDTO | null>(null);
 const thumbWidth = ref(180);
 const thumbHeight = ref(270);
 const defaultImage = ref(false);
-const imageUrl = ref('');
 
 const mediaCountFormatted = computed(() => {
 	const item = get(mediaItem);
@@ -126,6 +125,10 @@ const mediaCountFormatted = computed(() => {
 	return 'unknown media count';
 });
 
+const imageUrl = computed(() => {
+	return get(mediaItem)?.hasThumb ? `${get(mediaItem)?.thumbUrl}&width=${get(thumbWidth)}&height=${get(thumbHeight)}` : '';
+});
+
 function openDetails({ mediaId, type }: { mediaId: number; type: PlexMediaType }) {
 	set(loading, true);
 	Log.debug('MediaDetailsDialog', 'openDetails', { mediaId, type });
@@ -134,21 +137,14 @@ function openDetails({ mediaId, type }: { mediaId: number; type: PlexMediaType }
 		forkJoin({
 			mediaDetail: mediaStore.getMediaDataDetailById(mediaId, type),
 			mediaItemData: mediaStore.getMediaDataById(mediaId, type),
-			thumbnail: mediaStore.getThumbnail(mediaId, type, get(thumbWidth), get(thumbHeight)),
 		})
 			.pipe(take(1))
 			.subscribe({
-				next: ({ mediaDetail, mediaItemData, thumbnail }) => {
+				next: ({ mediaDetail, mediaItemData }) => {
 					// Media detail
 					set(mediaItemDetail, mediaDetail);
 					// Media item
 					set(mediaItem, mediaItemData);
-					// Thumbnail
-					if (!thumbnail) {
-						set(defaultImage, true);
-					} else {
-						set(imageUrl, thumbnail);
-					}
 				},
 				error: () => {
 					set(defaultImage, true);

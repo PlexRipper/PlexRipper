@@ -89,7 +89,7 @@ import { get, set } from '@vueuse/core';
 import { forkJoin } from 'rxjs';
 import { take } from 'rxjs/operators';
 import Log from 'consola';
-import { PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import { type PlexMediaDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import { useMediaStore, useMediaOverviewStore, useI18n } from '#imports';
 
 defineProps<{

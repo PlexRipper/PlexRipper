@@ -36,10 +36,10 @@
 </template>
 
 <script setup lang="ts">
-import { TreeNode } from 'primevue/tree/Tree';
-import { TreeTableSelectionKeys } from 'primevue/treetable';
-import { QTreeViewTableHeader, QTreeViewTableItem } from '@props';
-import IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
+import type { TreeNode } from 'primevue/treenode/TreeNode.d.ts';
+import type { TreeTableSelectionKeys } from 'primevue/treetable';
+import type { QTreeViewTableHeader, QTreeViewTableItem } from '@props';
+import type IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
 
 defineProps<{
 	nodes: TreeNode[];

@@ -28,8 +28,8 @@
 
 <script setup lang="ts">
 import { get } from '@vueuse/core';
-import { DownloadProgressDTO } from '@dto/mainApi';
-import ISelection from '@interfaces/ISelection';
+import type { DownloadProgressDTO } from '@dto/mainApi';
+import type ISelection from '@interfaces/ISelection';
 import { useOpenControlDialog } from '#imports';
 
 const { t } = useI18n();

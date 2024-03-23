@@ -31,11 +31,11 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { TreeNode } from 'primevue/tree';
-import { DownloadProgressDTO, PlexServerDTO } from '@dto/mainApi';
-import { QTreeViewTableItem } from '@props';
+import type { TreeNode } from 'primevue/treenode/TreeNode.d.ts';
+import type { DownloadProgressDTO, PlexServerDTO } from '@dto/mainApi';
+import type { QTreeViewTableItem } from '@props';
 import { getDownloadTableColumns } from '#imports';
-import ISelection from '@interfaces/ISelection';
+import type ISelection from '@interfaces/ISelection';
 import { useDownloadStore, useServerConnectionStore, useServerStore } from '~/store';
 
 const downloadStore = useDownloadStore();

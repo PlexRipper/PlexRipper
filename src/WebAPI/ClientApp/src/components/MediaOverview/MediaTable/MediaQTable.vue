@@ -66,14 +66,14 @@
 </template>
 
 <script setup lang="ts">
-import { QTableProps } from 'quasar';
+import type { QTableProps } from 'quasar';
 import Convert from '@class/Convert';
 import ButtonType from '@enums/buttonType';
-import { PlexMediaSlimDTO } from '@dto/mainApi';
-import ISelection from '@interfaces/ISelection';
+import type { PlexMediaSlimDTO } from '@dto/mainApi';
+import type ISelection from '@interfaces/ISelection';
 import { getMediaTableColumns } from '@composables/mediaTableColumns';
 import {
-	IMediaOverviewCommands,
+	type IMediaOverviewCommands,
 	sendMediaOverviewDownloadCommand,
 	sendMediaOverviewOpenDetailsCommand,
 } from '@composables/event-bus';

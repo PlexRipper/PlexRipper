@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import { generateDownloadProgressTvShows, generatePlexServer } from '@factories';
-import { DownloadProgressDTO } from '@dto/mainApi';
+import type { DownloadProgressDTO } from '@dto/mainApi';
 import { useOpenControlDialog } from '@composables/event-bus';
 const downloadStore = useDownloadStore();
 const dialogName = 'download-details-dialog';

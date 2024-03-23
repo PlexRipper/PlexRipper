@@ -35,8 +35,8 @@
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
-import { DownloadMediaDTO, DownloadPreviewDTO } from '@dto/mainApi';
-import { QTreeViewTableHeader } from '@props';
+import type { DownloadMediaDTO, DownloadPreviewDTO } from '@dto/mainApi';
+import type { QTreeViewTableHeader } from '@props';
 import { getDownloadPreviewTableColumns } from '#imports';
 
 const { t } = useI18n();

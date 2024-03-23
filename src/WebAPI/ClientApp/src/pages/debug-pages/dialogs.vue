@@ -63,7 +63,7 @@ import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import { useOpenControlDialog } from '@composables/event-bus';
-import { PlexAccountDTO, PlexMediaSlimDTO } from '@dto/mainApi';
+import type { PlexAccountDTO, PlexMediaSlimDTO } from '@dto/mainApi';
 import { generateDefaultFolderPaths, generatePlexAccount } from '@factories';
 import { useAlertStore, useHelpStore, useMediaStore } from '~/store';
 

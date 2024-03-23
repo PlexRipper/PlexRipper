@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 import { set } from '@vueuse/core';
-import { DownloadTaskDTO, ReasonDTO } from '@dto/mainApi';
+import type { DownloadTaskDTO, ReasonDTO } from '@dto/mainApi';
 import { detailDownloadTask } from '@api/plexDownloadApi';
 
 const { t } = useI18n();

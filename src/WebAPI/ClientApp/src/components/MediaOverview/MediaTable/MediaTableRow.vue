@@ -68,12 +68,12 @@
 </template>
 
 <script setup lang="ts">
-import { QTreeViewTableHeader } from '@props';
-import { PlexMediaSlimDTO } from '@dto/mainApi';
+import type { QTreeViewTableHeader } from '@props';
+import type { PlexMediaSlimDTO } from '@dto/mainApi';
 import Convert from '@class/Convert';
 import ButtonType from '@enums/buttonType';
 import {
-	IMediaOverviewCommands,
+	type IMediaOverviewCommands,
 	sendMediaOverviewDownloadCommand,
 	sendMediaOverviewOpenDetailsCommand,
 } from '@composables/event-bus';

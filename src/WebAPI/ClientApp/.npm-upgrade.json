@@ -7,10 +7,6 @@
 		"@types/node": {
 			"versions": ">18.16.0",
 			"reason": "Node version pinned to 18"
-		},
-		"vitest": {
-			"versions": "^0.33.0",
-			"reason": "Nuxt-Vitest is stuck on 0.31.1, can be updated once nuxt-vitest updates"
 		}
 	}
 }

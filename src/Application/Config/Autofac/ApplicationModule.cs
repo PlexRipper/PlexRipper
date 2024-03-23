@@ -53,21 +53,16 @@ public class ApplicationModule : Module
         builder.RegisterType<DownloadWorker>().InstancePerDependency();
         builder.RegisterType<PlexDownloadClient>().InstancePerDependency();
 
-        // register all Quartz jobs
-        builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
-
         // Setup Quartz
-        SetupQuartz(builder);
+        SetupQuartz(builder, assembly);
 
         builder.RegisterType<SchedulerService>().As<ISchedulerService>().InstancePerDependency();
         builder.RegisterType<AllJobListener>().As<IAllJobListener>().InstancePerDependency();
     }
 
-    private void SetupQuartz(ContainerBuilder builder)
+    private void SetupQuartz(ContainerBuilder builder, Assembly assembly)
     {
-        if (!EnvironmentExtensions.IsIntegrationTestMode())
-            return;
-
+        // Source: https://github.com/alphacloud/Autofac.Extras.Quartz
         var quartzProps = new NameValueCollection
         {
             { "quartz.scheduler.instanceName", "PlexRipper Scheduler" },
@@ -89,17 +84,11 @@ public class ApplicationModule : Module
         // Register Quartz dependencies
         builder.RegisterModule(new QuartzAutofacFactoryModule
         {
-            // JobScopeConfigurator = (cb, tag) =>
-            // {
-            //     // override dependency for job scope
-            //     cb.Register(_ => new ScopedDependency("job-local " + DateTime.UtcNow.ToLongTimeString()))
-            //         .AsImplementedInterfaces()
-            //         .InstancePerMatchingLifetimeScope(tag);
-            // },
-
-            // During integration testing, we cannot use a real JobStore so we revert to default
             ConfigurationProvider = _ => quartzProps,
         });
+
+        // register all Quartz jobs
+        builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
 
         // Source: https://github.com/alphacloud/Autofac.Extras.Quartz/blob/develop/src/Samples/Shared/Bootstrap.cs
         builder.Register(_ => new ScopedDependency("global"))

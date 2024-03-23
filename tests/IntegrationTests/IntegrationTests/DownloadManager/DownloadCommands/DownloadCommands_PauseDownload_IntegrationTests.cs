@@ -35,14 +35,17 @@ public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTe
         var childDownloadTask = downloadTasks[0].Children[0];
 
         // Act
-        var response = await Container.ApiClient.GETAsync<StartDownloadTaskEndpoint, Guid, ResultDTO>(childDownloadTask.Id);
+        var response =
+            await Container.ApiClient.GETAsync<StartDownloadTaskEndpoint, StartDownloadTaskEndpointRequest, ResultDTO>(
+                new StartDownloadTaskEndpointRequest(childDownloadTask.Id));
         var startResult = response.Result;
-        response.Response.IsSuccessStatusCode.ShouldBeTrue();
+        response.Response.IsSuccessStatusCode.ShouldBeTrue(startResult.ToString());
         await Task.Delay(2000);
 
-        response = await Container.ApiClient.GETAsync<PauseDownloadTaskEndpoint, Guid, ResultDTO>(childDownloadTask.Id);
-        response.Response.IsSuccessStatusCode.ShouldBeTrue();
+        response = await Container.ApiClient.GETAsync<PauseDownloadTaskEndpoint, PauseDownloadTaskEndpointRequest, ResultDTO>(
+            new PauseDownloadTaskEndpointRequest(childDownloadTask.Id));
         var pauseResult = response.Result;
+        response.Response.IsSuccessStatusCode.ShouldBeTrue(pauseResult.ToString());
 
         await Container.SchedulerService.AwaitScheduler();
         await Task.Delay(2000);

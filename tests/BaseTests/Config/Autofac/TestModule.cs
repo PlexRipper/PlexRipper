@@ -64,6 +64,7 @@ public class TestModule : Module
 
     private void RegisterBackgroundScheduler(ContainerBuilder builder)
     {
+        // During integration testing, we cannot use a real JobStore so we revert to default
         var testQuartzProps = new NameValueCollection
         {
             { "quartz.scheduler.instanceName", "TestPlexRipper Scheduler" },
@@ -76,15 +77,6 @@ public class TestModule : Module
         // Register Quartz dependencies
         builder.RegisterModule(new QuartzAutofacFactoryModule
         {
-            // JobScopeConfigurator = (cb, tag) =>
-            // {
-            //     // override dependency for job scope
-            //     cb.Register(_ => new ScopedDependency("job-local " + DateTime.UtcNow.ToLongTimeString()))
-            //         .AsImplementedInterfaces()
-            //         .InstancePerMatchingLifetimeScope(tag);
-            // },
-
-            // During integration testing, we cannot use a real JobStore so we revert to default
             ConfigurationProvider = _ => testQuartzProps,
         });
     }

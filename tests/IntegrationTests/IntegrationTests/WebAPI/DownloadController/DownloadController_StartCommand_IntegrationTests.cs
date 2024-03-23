@@ -32,7 +32,9 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
         var downloadTask = downloadTasks[0].Children[0];
 
         // Act
-        var response = await Container.ApiClient.GETAsync<StartDownloadTaskEndpoint, Guid, ResultDTO>(downloadTask.Id);
+        var response =
+            await Container.ApiClient.GETAsync<StartDownloadTaskEndpoint, StartDownloadTaskEndpointRequest, ResultDTO>(
+                new StartDownloadTaskEndpointRequest(downloadTask.Id));
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         await Container.SchedulerService.AwaitScheduler();

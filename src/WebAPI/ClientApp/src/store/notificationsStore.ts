@@ -3,7 +3,7 @@ import { switchMap, tap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import type { NotificationDTO } from '@dto/mainApi';
 import { clearAllNotifications, getNotifications, hideNotification } from '@api/notificationApi';
-import ISetupResult from '@interfaces/service/ISetupResult';
+import type { ISetupResult } from '@interfaces';
 
 export const useNotificationsStore = defineStore('NotificationsStore', () => {
 	const state = reactive<{ notifications: NotificationDTO[] }>({

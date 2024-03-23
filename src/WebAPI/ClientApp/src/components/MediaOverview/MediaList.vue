@@ -92,7 +92,7 @@
 import Log from 'consola';
 import { get, set } from '@vueuse/core';
 import { type DownloadMediaDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
-import type ISelection from '@interfaces/ISelection';
+import type { ISelection } from '@interfaces';
 import {
 	useMediaOverviewBarDownloadCommandBus,
 	toDownloadMedia,

@@ -20,7 +20,7 @@ const plexServer = generatePlexServer({
 });
 
 function commandSwitch({ action, item }: { action: string; item: DownloadProgressDTO }) {
-	const ids: number[] = [item.id];
+	const ids: string[] = [item.id];
 
 	if (action === 'details') {
 		useOpenControlDialog(dialogName, item.id);

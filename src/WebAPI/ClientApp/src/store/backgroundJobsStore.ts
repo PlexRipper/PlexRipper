@@ -1,8 +1,8 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { Observable, of, Subject } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
-import ISetupResult from '@interfaces/service/ISetupResult';
-import { JobStatusUpdateDTO, JobTypes } from '@dto/mainApi';
+import type { ISetupResult } from '@interfaces';
+import { type JobStatusUpdateDTO, JobTypes } from '@dto/mainApi';
 
 export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 	// State

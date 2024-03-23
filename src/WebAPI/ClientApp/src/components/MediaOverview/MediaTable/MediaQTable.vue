@@ -70,7 +70,7 @@ import type { QTableProps } from 'quasar';
 import Convert from '@class/Convert';
 import ButtonType from '@enums/buttonType';
 import type { PlexMediaSlimDTO } from '@dto/mainApi';
-import type ISelection from '@interfaces/ISelection';
+import type { ISelection } from '@interfaces';
 import { getMediaTableColumns } from '@composables/mediaTableColumns';
 import {
 	type IMediaOverviewCommands,

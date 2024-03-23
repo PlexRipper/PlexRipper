@@ -1,10 +1,9 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { Observable, Observer, of, switchMap, throwError } from 'rxjs';
+import { Observable, of, switchMap, throwError, type Observer } from 'rxjs';
 import { map, mergeMap, take } from 'rxjs/operators';
 import Log from 'consola';
-import ISetupResult from '@interfaces/service/ISetupResult';
-import IObjectUrl from '@interfaces/IObjectUrl';
-import { PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import type { ISetupResult, IObjectUrl } from '@interfaces';
+import { PlexMediaType, type PlexMediaDTO, type PlexMediaSlimDTO } from '@dto/mainApi';
 import { getLibraryMediaData, getThumbnail, getTvShow, getTvShowDetail } from '@api/mediaApi';
 
 export const useMediaStore = defineStore('MediaStore', () => {
@@ -41,7 +40,7 @@ export const useMediaStore = defineStore('MediaStore', () => {
 										return new Error(`MediaType with ${mediaType} is not supported in getMediaDataById`);
 									});
 								}),
-						  ),
+							),
 				),
 				take(1),
 			);

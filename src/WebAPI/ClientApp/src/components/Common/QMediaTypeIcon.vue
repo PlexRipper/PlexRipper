@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import Convert from '@class/Convert';
-import type { PlexMediaType } from '@dto/mainApi';
+import { PlexMediaType } from '@dto/mainApi';
 
 const props = withDefaults(defineProps<{ mediaType: string; size?: number }>(), {
 	mediaType: '',

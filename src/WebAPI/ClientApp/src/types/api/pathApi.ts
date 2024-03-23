@@ -1,7 +1,7 @@
 import { from, Observable, of, throwError } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { FolderPathDTO, FileSystemDTO } from '@dto/mainApi';
-import ResultDTO from '@dto/ResultDTO';
+import type { FolderPathDTO, FileSystemDTO } from '@dto/mainApi';
+import type ResultDTO from '@dto/ResultDTO';
 import PlexRipperAxios from '@class/PlexRipperAxios';
 import { FOLDER_PATH_RELATIVE_PATH } from '@api-urls';
 import ApiClient from '@dto/ApiClient';

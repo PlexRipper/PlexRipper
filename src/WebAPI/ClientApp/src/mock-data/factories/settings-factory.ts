@@ -1,5 +1,5 @@
-import { checkConfig, MockConfig } from '@mock';
-import { PlexServerDTO, SettingsModelDTO, ViewMode } from '@dto/mainApi';
+import { checkConfig, type MockConfig } from '@mock';
+import { type PlexServerDTO, type SettingsModelDTO, ViewMode } from '@dto/mainApi';
 
 export function generateSettingsModel({
 	plexServers = [],

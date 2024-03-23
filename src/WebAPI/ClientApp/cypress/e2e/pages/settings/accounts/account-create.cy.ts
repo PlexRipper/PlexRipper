@@ -1,6 +1,6 @@
 import { route, apiRoute, APIRoute } from '@fixtures/baseE2E';
 import { generatePlexAccount, generateResultDTO } from '@mock';
-import { PlexAccountDTO } from '@dto/mainApi';
+import type { PlexAccountDTO } from '@dto/mainApi';
 
 describe('Add Plex account to PlexRipper', () => {
 	beforeEach(() => {

@@ -54,7 +54,7 @@ import { get, set, useScroll } from '@vueuse/core';
 import { triggerBoxHighlight, listenMediaOverviewScrollToCommand, useMediaOverviewStore } from '#imports';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 import type { PlexMediaSlimDTO } from '@dto/mainApi';
-import type ISelection from '@interfaces/ISelection';
+import type { ISelection } from '@interfaces';
 
 const mediaOverviewStore = useMediaOverviewStore();
 const mediaTableColumns = getMediaTableColumns();

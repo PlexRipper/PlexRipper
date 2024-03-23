@@ -1,5 +1,5 @@
 import { APIRoute, apiRoute } from '@fixtures/baseE2E';
-import type { generateResultDTO } from '@mock';
+import { generateResultDTO } from '@mock';
 import type { SettingsModelDTO } from '@dto/mainApi';
 describe('PlexRipper Server Dialog', () => {
 	beforeEach(() => {

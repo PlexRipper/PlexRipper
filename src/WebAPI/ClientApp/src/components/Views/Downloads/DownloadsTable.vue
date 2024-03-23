@@ -35,7 +35,7 @@ import type { TreeNode } from 'primevue/treenode/TreeNode.d.ts';
 import type { DownloadProgressDTO, PlexServerDTO } from '@dto/mainApi';
 import type { QTreeViewTableItem } from '@props';
 import { getDownloadTableColumns } from '#imports';
-import type ISelection from '@interfaces/ISelection';
+import type { ISelection } from '@interfaces';
 import { useDownloadStore, useServerConnectionStore, useServerStore } from '~/store';
 
 const downloadStore = useDownloadStore();
@@ -72,7 +72,7 @@ function tableAction(payload: { action: string; data: QTreeViewTableItem }) {
 	Log.info('command', payload);
 	emit('action', {
 		action: payload.action,
-		item: payload.data as DownloadProgressDTO,
+		item: payload.data as unknown as DownloadProgressDTO,
 	});
 }
 </script>

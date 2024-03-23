@@ -67,7 +67,7 @@ defineProps<{
 	name: string;
 }>();
 
-function onOpen(downloadTaskId: number) {
+function onOpen(downloadTaskId: string) {
 	set(loading, true);
 	detailDownloadTask(downloadTaskId).subscribe((data) => {
 		if (data.isSuccess && data.value) {

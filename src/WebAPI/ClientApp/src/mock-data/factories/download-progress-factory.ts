@@ -1,11 +1,9 @@
-import { randMovie } from '@ngneat/falso';
+import { randMovie, randUuid } from '@ngneat/falso';
 import { times } from 'lodash-es';
 import { toPlexMediaType } from '@composables/conversion';
-import { MockConfig } from '@mock/interfaces';
-import { DownloadProgressDTO, DownloadStatus, DownloadTaskType, ServerDownloadProgressDTO } from '@dto/mainApi';
+import type { MockConfig } from '@mock';
+import { DownloadStatus, DownloadTaskType, type DownloadProgressDTO, type ServerDownloadProgressDTO } from '@dto/mainApi';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
-
-let downloadTaskIdIndex = 1;
 
 export function generateServerDownloadProgress({
 	plexServerId,
@@ -57,14 +55,14 @@ export function generateDownloadProgressBase({
 	type,
 	config = {},
 }: {
-	id: number;
+	id: string;
 	plexServerId: number;
 	plexLibraryId: number;
 	type: DownloadTaskType;
 	config: Partial<MockConfig>;
 }): DownloadProgressDTO {
 	checkConfig(config);
-	incrementSeed(id);
+	incrementSeed();
 
 	return {
 		id,
@@ -88,7 +86,7 @@ export function generateDownloadProgressTvShow({
 	plexLibraryId,
 	config = {},
 }: {
-	id: number;
+	id: string;
 	plexServerId: number;
 	plexLibraryId: number;
 	config: Partial<MockConfig>;
@@ -111,7 +109,7 @@ export function generateDownloadProgressMovie({
 	plexLibraryId,
 	config = {},
 }: {
-	id: number;
+	id: string;
 	plexServerId: number;
 	plexLibraryId: number;
 	config: Partial<MockConfig>;
@@ -138,7 +136,7 @@ export function generateDownloadProgressMovies({
 
 	return times(validConfig.movieDownloadTask, () =>
 		generateDownloadProgressMovie({
-			id: downloadTaskIdIndex++,
+			id: randUuid(),
 			plexServerId,
 			plexLibraryId,
 			config,
@@ -158,7 +156,7 @@ export function generateDownloadProgressTvShows({
 	const validConfig = checkConfig(config);
 	return times(validConfig.tvShowDownloadTask, () =>
 		generateDownloadProgressTvShow({
-			id: downloadTaskIdIndex++,
+			id: randUuid(),
 			plexServerId,
 			plexLibraryId,
 			config,
@@ -172,12 +170,12 @@ export function generateDownloadProgressTvShowSeason({
 	plexLibraryId,
 	config = {},
 }: {
-	id: number;
+	id: string;
 	plexServerId: number;
 	plexLibraryId: number;
 	config?: Partial<MockConfig>;
 }): DownloadProgressDTO {
-	incrementSeed(id);
+	incrementSeed();
 
 	return {
 		...generateDownloadProgressBase({
@@ -205,7 +203,7 @@ export function generateDownloadProgressTvShowSeasons({
 	let seasonIndex = 1;
 	return times(validConfig.seasonDownloadTask, () => {
 		const season = generateDownloadProgressTvShowSeason({
-			id: downloadTaskIdIndex++,
+			id: randUuid(),
 			plexServerId,
 			plexLibraryId,
 			config,
@@ -221,7 +219,7 @@ export function generateDownloadProgressTvShowEpisode({
 	plexLibraryId,
 	config = {},
 }: {
-	id: number;
+	id: string;
 	plexServerId: number;
 	plexLibraryId: number;
 	config?: Partial<MockConfig>;
@@ -243,7 +241,7 @@ export function generateDownloadProgressTvShowEpisodes({
 
 	return times(validConfig.episodeDownloadTask, () => {
 		const episode = generateDownloadProgressTvShowEpisode({
-			id: downloadTaskIdIndex++,
+			id: randUuid(),
 			plexServerId,
 			plexLibraryId,
 			config,

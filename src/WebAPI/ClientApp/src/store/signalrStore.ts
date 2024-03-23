@@ -6,7 +6,7 @@ import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } fro
 import type { IHttpConnectionOptions } from '@microsoft/signalr';
 import { useCypressSignalRMock } from 'cypress-signalr-mock';
 import { isEqual } from 'lodash-es';
-import type ISetupResult from '@interfaces/service/ISetupResult';
+import type { ISetupResult } from '@interfaces';
 import { useDownloadStore } from '~/store/downloadStore';
 import type {
 	FileMergeProgress,

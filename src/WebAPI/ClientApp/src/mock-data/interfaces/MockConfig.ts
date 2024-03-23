@@ -1,4 +1,4 @@
-import type { PlexMediaType } from '@dto/mainApi';
+import { PlexMediaType } from '@dto/mainApi';
 
 export interface MockConfig {
 	seed: number;

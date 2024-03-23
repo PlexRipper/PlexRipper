@@ -5,7 +5,7 @@ import { type FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
 import { createFolderPath, deleteFolderPath, getFolderPaths, updateFolderPath } from '@api/pathApi';
 import { useI18n } from '#build/imports';
 import type IFolderPathGroup from '@interfaces/IFolderPathGroup';
-import type ISetupResult from '@interfaces/service/ISetupResult';
+import type { ISetupResult } from '@interfaces';
 
 export const useFolderPathStore = defineStore('FolderPathStore', () => {
 	const state = reactive<{ folderPaths: FolderPathDTO[] }>({

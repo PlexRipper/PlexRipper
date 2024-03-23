@@ -61,7 +61,6 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import type ServerDialog from '@components/Navigation/ServerDialog.vue';
 import { type PlexLibraryDTO, PlexMediaType } from '@dto/mainApi';
 import { useOpenControlDialog } from '#imports';
 

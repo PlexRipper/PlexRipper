@@ -4,9 +4,7 @@ import { get } from '@vueuse/core';
 import Log from 'consola';
 import { tap } from 'rxjs/operators';
 import { useSettingsStore } from './settingsStore';
-import ILocaleConfig from '@interfaces/ILocaleConfig';
-import ISetupResult from '@interfaces/service/ISetupResult';
-import I18nObjectType from '@interfaces/i18nObjectType';
+import type { ISetupResult, ILocaleConfig, I18nObjectType } from '@interfaces';
 
 export const useLocalizationStore = defineStore('LocalizationStore', () => {
 	// State
@@ -30,10 +28,10 @@ export const useLocalizationStore = defineStore('LocalizationStore', () => {
 			state.locales = get(i18n.locales).map((x) => {
 				return {
 					text: x.text,
-					code: x.code,
-					file: x.file,
-					iso: x.iso,
+					code: x.code ?? '',
+					iso: x.iso ?? '',
 					bcp47Code: x.bcp47Code,
+					file: x.file as string,
 				};
 			});
 			Log.info('Localization Options:', get(getters.getLanguageLocaleOptions));

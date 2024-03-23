@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-const model = defineModel()
+const model = defineModel<string>();
 const props = withDefaults(
 	defineProps<{
 		outlined?: boolean;

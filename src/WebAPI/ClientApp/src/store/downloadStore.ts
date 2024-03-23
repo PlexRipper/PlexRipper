@@ -3,14 +3,14 @@ import Log from 'consola';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { sum, merge, keyBy, values, flatMapDeep, clone } from 'lodash-es';
-import {
+import type {
 	DownloadMediaDTO,
 	DownloadPreviewDTO,
 	DownloadProgressDTO,
-	DownloadStatus,
 	PlexServerDTO,
 	ServerDownloadProgressDTO,
 } from '@dto/mainApi';
+import { DownloadStatus } from '@dto/mainApi';
 import {
 	clearDownloadTasks,
 	deleteDownloadTasks,
@@ -22,10 +22,10 @@ import {
 	startDownloadTask,
 	stopDownloadTasks,
 } from '@api/plexDownloadApi';
-import ISetupResult from '@interfaces/service/ISetupResult';
+import type { ISetupResult } from '@interfaces';
 import { useServerStore } from '#build/imports';
-import IDownloadsSelection from '@interfaces/IDownloadsSelection';
-import IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
+import type IDownloadsSelection from '@interfaces/IDownloadsSelection';
+import type IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
 export const useDownloadStore = defineStore('DownloadStore', () => {
 	const state = reactive<{ serverDownloads: ServerDownloadProgressDTO[]; selected: IDownloadsSelection[] }>({
 		serverDownloads: [],
@@ -51,7 +51,7 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 				}),
 			);
 		},
-		executeDownloadCommand(action: string, downloadTaskIds: number[]): void {
+		executeDownloadCommand(action: string, downloadTaskIds: string[]): void {
 			const downloadTaskId = downloadTaskIds[0];
 			// TODO verify if we need to re-fetch the download list after each action
 			switch (action) {

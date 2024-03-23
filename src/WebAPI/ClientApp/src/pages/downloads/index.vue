@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import { get } from '@vueuse/core';
 import type { DownloadProgressDTO } from '@dto/mainApi';
-import type ISelection from '@interfaces/ISelection';
+import type { ISelection } from '@interfaces';
 import { useOpenControlDialog } from '#imports';
 
 const { t } = useI18n();
@@ -40,12 +40,12 @@ const dialogName = 'download-details-dialog';
 // region single commands
 
 function batchCommandSwitch(action: string) {
-	const ids = get(aggregateSelected).flatMap((x) => x.keys);
+	const ids = get(aggregateSelected).flatMap((x) => x.keys.toString());
 	downloadStore.executeDownloadCommand(action, ids);
 }
 
 function commandSwitch({ action, item }: { action: string; item: DownloadProgressDTO }) {
-	const ids: number[] = [item.id];
+	const ids: string[] = [item.id];
 
 	if (action === 'details') {
 		useOpenControlDialog(dialogName, item.id);

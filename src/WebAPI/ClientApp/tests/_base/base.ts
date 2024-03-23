@@ -1,9 +1,9 @@
-import { Context } from 'vm';
+import type { Context } from 'vm';
 import Log from 'consola';
 import MockAdapter from 'axios-mock-adapter';
 import Axios from 'axios-observable';
-import { MockConfig } from '@mock';
-import IAppConfig from '@class/IAppConfig';
+import type { MockConfig } from '@mock';
+import type IAppConfig from '@class/IAppConfig';
 
 export * from '@hirez_io/observer-spy';
 

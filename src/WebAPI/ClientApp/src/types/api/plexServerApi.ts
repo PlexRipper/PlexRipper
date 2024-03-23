@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
-import { PlexServerDTO } from '@dto/mainApi';
-import ResultDTO from '@dto/ResultDTO';
+import type { PlexServerDTO } from '@dto/mainApi';
+import type ResultDTO from '@dto/ResultDTO';
 import PlexRipperAxios from '@class/PlexRipperAxios';
 
 const logText = 'From PlexServerAPI => ';

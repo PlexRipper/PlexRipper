@@ -1,7 +1,7 @@
 import { randMovie, randNumber, randRecentDate } from '@ngneat/falso';
 import { times } from 'lodash-es';
-import { checkConfig, incrementSeed, MockConfig } from '@mock';
-import { PlexLibraryDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import { checkConfig, incrementSeed, type MockConfig } from '@mock';
+import { PlexMediaType, type PlexLibraryDTO, type PlexMediaSlimDTO } from '@dto/mainApi';
 
 let plexMediaIdIndex = 1;
 

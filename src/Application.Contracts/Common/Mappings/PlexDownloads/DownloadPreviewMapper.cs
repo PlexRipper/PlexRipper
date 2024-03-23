@@ -50,6 +50,7 @@ public static partial class DownloadPreviewMapper
     [MapProperty(nameof(PlexTvShowSeason.MediaSize), nameof(DownloadPreview.Size))]
     [MapProperty(nameof(PlexTvShowSeason.Type), nameof(DownloadPreview.MediaType))]
     [MapperIgnoreTarget(nameof(DownloadPreview.SeasonId))]
+    [MapperIgnoreTarget(nameof(DownloadPreview.Children))]
     private static partial DownloadPreview ProjectToDownloadPreviewMapper(this PlexTvShowSeason plexSeason);
 
     public static partial IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexTvShowSeason> plexSeason);
@@ -71,7 +72,6 @@ public static partial class DownloadPreviewMapper
     [MapProperty(nameof(PlexTvShowEpisode.TvShowId), nameof(TvShowEpisodeKeyDTO.TvShowId))]
     [MapProperty(nameof(PlexTvShowEpisode.TvShowSeasonId), nameof(TvShowEpisodeKeyDTO.SeasonId))]
     [MapProperty(nameof(PlexTvShowEpisode.Id), nameof(TvShowEpisodeKeyDTO.EpisodeId))]
-    [MapperIgnoreTarget(nameof(DownloadPreview.Children))]
     private static partial TvShowEpisodeKeyDTO ProjectToEpisodeKey(this PlexTvShowEpisode plexEpisode);
 
     public static partial IQueryable<TvShowEpisodeKeyDTO> ProjectToEpisodeKey(this IQueryable<PlexTvShowEpisode> plexEpisode);

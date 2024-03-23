@@ -47,5 +47,8 @@ public abstract class DownloadTaskParentBase : DownloadTaskBase, IDownloadTaskPr
     [NotMapped]
     public long FileTransferSpeed { get; set; }
 
+    [NotMapped]
+    public long TimeRemaining => DataFormat.GetTimeRemaining(DataTotal - DataReceived, DownloadSpeed);
+
     #endregion
 }

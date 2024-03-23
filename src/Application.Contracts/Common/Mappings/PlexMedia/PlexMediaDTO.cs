@@ -4,15 +4,12 @@ public class PlexMediaDTO : PlexMediaSlimDTO
 {
     public int Key { get; set; }
 
-    public bool HasThumb { get; set; }
-
     public bool HasArt { get; set; }
 
     public bool HasBanner { get; set; }
 
     public bool HasTheme { get; set; }
 
-    public int Index { get; set; }
 
     public string Studio { get; set; }
 
@@ -30,5 +27,5 @@ public class PlexMediaDTO : PlexMediaSlimDTO
 
     public List<PlexMediaDataDTO> MediaData { get; set; }
 
-    public List<PlexMediaDTO> Children { get; set; } = new();
+    public new List<PlexMediaDTO> Children { get; set; } = new();
 }

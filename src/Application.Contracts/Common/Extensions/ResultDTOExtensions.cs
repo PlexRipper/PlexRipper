@@ -5,7 +5,7 @@ using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+[Mapper]
 public static partial class ResultDTOExtensions
 {
     public static ResultDTO ToResultDTO(this Result result) => new()
@@ -37,8 +37,13 @@ public static partial class ResultDTOExtensions
         Successes = result.Successes.ToSuccessDTOs(),
     };
 
+    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
     private static partial List<ReasonDTO> ToReasonDTOs(this List<IReason> reasons);
+
+    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
     private static partial List<ErrorDTO> ToErrorDTOs(this List<IError> reasons);
+
+    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
     private static partial List<SuccessDTO> ToSuccessDTOs(this List<ISuccess> reasons);
 
     public static IResult ToIResult(this Result result)

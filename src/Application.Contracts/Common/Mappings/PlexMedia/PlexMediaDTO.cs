@@ -10,7 +10,6 @@ public class PlexMediaDTO : PlexMediaSlimDTO
 
     public bool HasTheme { get; set; }
 
-
     public string Studio { get; set; }
 
     public string Summary { get; set; }
@@ -24,6 +23,7 @@ public class PlexMediaDTO : PlexMediaSlimDTO
     public int TvShowId { get; set; }
 
     public int TvShowSeasonId { get; set; }
+    public string FullThumbUrl { get; set; } = string.Empty;
 
     public List<PlexMediaDataDTO> MediaData { get; set; }
 

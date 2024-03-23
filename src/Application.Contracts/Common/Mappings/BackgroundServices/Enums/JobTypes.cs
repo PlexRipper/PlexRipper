@@ -23,8 +23,8 @@ public enum JobTypes
     [EnumMember(Value = nameof(SyncServerJob))]
     SyncServerJob = 4,
 
-    [EnumMember(Value = nameof(RefreshAccessiblePlexServersJob))]
-    RefreshAccessiblePlexServersJob = 5,
+    [EnumMember(Value = nameof(RefreshPlexServersAccessJob))]
+    RefreshPlexServersAccessJob = 5,
 
     [EnumMember(Value = nameof(DownloadProgressJobs))]
     DownloadProgressJobs = 6,

@@ -16,38 +16,34 @@ public class AllJobListener : IAllJobListener
 
     public async Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = new())
     {
-        var key = context.JobDetail.Key;
-        var data = context.JobDetail.JobDataMap.WrappedMap.FirstOrDefault();
-
-        var update = new JobStatusUpdate()
+        // Source: https://www.quartz-scheduler.net/documentation/quartz-3.x/tutorial/trigger-and-job-listeners.html
+        // Make sure your trigger and job listeners never throw an exception (use a try-catch) and that they can handle internal problems. Jobs can get stuck after Quartz is unable to determine whether required logic in listener was completed successfully when listener notification failed.
+        try
         {
-            Id = context.FireInstanceId,
-            JobName = key.Name,
-            JobGroup = key.Group,
-            JobRuntime = context.JobRunTime,
-            JobStartTime = context.FireTimeUtc.UtcDateTime,
-            Status = JobStatus.Running,
-            PrimaryKey = data.Key ?? string.Empty,
-            PrimaryKeyValue = data.Value?.ToString() ?? string.Empty,
-        };
-        await _signalRService.SendJobStatusUpdateAsync(update);
+            var update = context.ToUpdate(JobStatus.Started);
+            await _signalRService.SendJobStatusUpdateAsync(update);
+        }
+        catch (Exception e)
+        {
+            Result.Fail(new ExceptionalError(e)).LogError();
+        }
     }
 
     public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = new()) => Task.CompletedTask;
 
     public async Task JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException, CancellationToken cancellationToken = new())
     {
-        var key = context.JobDetail.Key;
-        var update = new JobStatusUpdate()
+        // Source: https://www.quartz-scheduler.net/documentation/quartz-3.x/tutorial/trigger-and-job-listeners.html
+        // Make sure your trigger and job listeners never throw an exception (use a try-catch) and that they can handle internal problems. Jobs can get stuck after Quartz is unable to determine whether required logic in listener was completed successfully when listener notification failed.
+        try
         {
-            Id = context.FireInstanceId,
-            JobName = key.Name,
-            JobGroup = key.Group,
-            JobRuntime = context.JobRunTime,
-            JobStartTime = context.FireTimeUtc.UtcDateTime,
-            Status = JobStatus.Completed,
-        };
-
-        await _signalRService.SendJobStatusUpdateAsync(update);
+            var update = context.ToUpdate(JobStatus.Completed);
+            await _signalRService.SendJobStatusUpdateAsync(update);
+        }
+        catch (Exception e)
+        {
+            Result.Fail(new ExceptionalError(e)).LogError();
+        }
     }
 }
+

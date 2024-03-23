@@ -12,6 +12,8 @@ public class JobStatusUpdate
 
     public DateTime JobStartTime { get; set; }
 
+    public JobTypes JobType { get; set; }
+
     public JobStatus Status { get; set; }
 
     public string PrimaryKey { get; set; }

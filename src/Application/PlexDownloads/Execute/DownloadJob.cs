@@ -11,20 +11,17 @@ public class DownloadJob : IJob, IDisposable
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
     private readonly INotificationsService _notificationsService;
     private readonly PlexDownloadClient _plexDownloadClient;
 
     public DownloadJob(
         ILog log,
         IPlexRipperDbContext dbContext,
-        IMediator mediator,
         INotificationsService notificationsService,
         PlexDownloadClient plexDownloadClient)
     {
         _log = log;
         _dbContext = dbContext;
-        _mediator = mediator;
         _notificationsService = notificationsService;
         _plexDownloadClient = plexDownloadClient;
     }

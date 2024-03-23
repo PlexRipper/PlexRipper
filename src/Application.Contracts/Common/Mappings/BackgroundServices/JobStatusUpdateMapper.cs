@@ -1,3 +1,4 @@
+using Quartz;
 using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
@@ -5,18 +6,33 @@ namespace Application.Contracts;
 [Mapper]
 public static partial class JobStatusUpdateMapper
 {
-    #region ToDTO
+    #region FromScheduler
 
-    public static JobStatusUpdateDTO ToDTO(this JobStatusUpdate jobStatusUpdate)
+    public static JobStatusUpdate ToUpdate(this IJobExecutionContext context, JobStatus jobStatus)
     {
-        var dto = jobStatusUpdate.ToDTOMapper();
-        dto.JobType = ToJobType(jobStatusUpdate.JobGroup);
-        return dto;
+        var key = context.JobDetail.Key;
+        var data = context.JobDetail.JobDataMap.WrappedMap.FirstOrDefault();
+
+        return new JobStatusUpdate()
+        {
+            Id = context.FireInstanceId,
+            JobName = key.Name,
+            JobGroup = key.Group,
+            JobRuntime = context.JobRunTime,
+            JobStartTime = context.FireTimeUtc.UtcDateTime,
+            Status = jobStatus,
+            PrimaryKey = data.Key ?? string.Empty,
+            PrimaryKeyValue = data.Value?.ToString() ?? string.Empty,
+            JobType = ToJobType(key.Group),
+        };
     }
 
+    #endregion
+
+    #region ToDTO
+
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapperIgnoreTarget(nameof(JobStatusUpdateDTO.JobType))]
-    private static partial JobStatusUpdateDTO ToDTOMapper(this JobStatusUpdate jobStatusUpdate);
+    public static partial JobStatusUpdateDTO ToDTO(this JobStatusUpdate jobStatusUpdate);
 
     #endregion
 

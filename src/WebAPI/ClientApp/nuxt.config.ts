@@ -36,7 +36,6 @@ export default defineNuxtConfig({
 		'@vueuse/nuxt',
 		// Doc: https://i18n.nuxtjs.org/
 		'@nuxtjs/i18n',
-		'@vue-macros/nuxt',
 		'nuxt-lodash',
 		// '@nuxt/devtools',
 		'@nuxt/test-utils/module',

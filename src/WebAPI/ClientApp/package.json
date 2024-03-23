@@ -72,7 +72,6 @@
 		"@types/node": "^18.16.3",
 		"@typescript-eslint/eslint-plugin": "^7.3.1",
 		"@typescript-eslint/parser": "^7.3.1",
-		"@vue-macros/nuxt": "^1.9.25",
 		"@vueuse/core": "^10.9.0",
 		"@vueuse/nuxt": "^10.9.0",
 		"axios-mock-adapter": "^1.21.5",

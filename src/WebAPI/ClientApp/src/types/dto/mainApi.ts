@@ -337,15 +337,15 @@ export enum JobStatus {
 }
 
 export interface JobStatusUpdateDTO {
-	id?: string | null;
-	jobGroup?: string | null;
-	jobName?: string | null;
+	id: string;
+	jobGroup: string;
+	jobName: string;
 	/** @format duration */
 	jobRuntime: string;
 	/** @format date-time */
 	jobStartTime: string;
 	jobType: JobTypes;
-	primaryKey?: string | null;
+	primaryKey: string;
 	/** @format int32 */
 	primaryKeyValue: number;
 	status: JobStatus;
@@ -357,7 +357,7 @@ export enum JobTypes {
 	DownloadJob = 'DownloadJob',
 	DownloadProgressJob = 'DownloadProgressJob',
 	SyncServerJob = 'SyncServerJob',
-	RefreshAccessiblePlexServersJob = 'RefreshAccessiblePlexServersJob',
+	RefreshPlexServersAccessJob = 'RefreshPlexServersAccessJob',
 	DownloadProgressJobs = 'DownloadProgressJobs',
 	InspectPlexServerByPlexAccountIdJob = 'InspectPlexServerByPlexAccountIdJob',
 }
@@ -496,6 +496,7 @@ export interface PlexMediaDTO {
 	contentRating: string;
 	/** @format int32 */
 	duration: number;
+	fullThumbUrl: string;
 	hasArt: boolean;
 	hasBanner: boolean;
 	hasTheme: boolean;
@@ -521,7 +522,6 @@ export interface PlexMediaDTO {
 	sortTitle: string;
 	studio: string;
 	summary: string;
-	thumbUrl: string;
 	title: string;
 	/** @format int32 */
 	tvShowId: number;
@@ -582,6 +582,7 @@ export interface PlexMediaSlimDTO {
 	children: PlexMediaSlimDTO[];
 	/** @format int32 */
 	duration: number;
+	fullThumbUrl: string;
 	hasThumb: boolean;
 	/** @format int32 */
 	id: number;
@@ -595,7 +596,6 @@ export interface PlexMediaSlimDTO {
 	plexServerId: number;
 	qualities: PlexMediaQualityDTO[];
 	sortTitle: string;
-	thumbUrl: string;
 	title: string;
 	type: PlexMediaType;
 	/** @format date-time */
@@ -883,15 +883,6 @@ export interface ResultDTOOfPlexMediaDTO {
 	reasons: ReasonDTO[];
 	successes: SuccessDTO[];
 	value?: PlexMediaDTO | null;
-}
-
-export interface ResultDTOOfPlexMediaSlimDTO {
-	errors: ErrorDTO[];
-	isFailed: boolean;
-	isSuccess: boolean;
-	reasons: ReasonDTO[];
-	successes: SuccessDTO[];
-	value?: PlexMediaSlimDTO | null;
 }
 
 export interface ResultDTOOfPlexServerConnectionDTO {
@@ -1743,6 +1734,28 @@ export class GeneratedApiClient<SecurityDataType extends unknown> extends HttpCl
 		 * No description
 		 *
 		 * @tags Plexmedia
+		 * @name GetMediaDetailByIdEndpoint
+		 * @request GET:/api/PlexMedia/detail/{plexMediaId}
+		 */
+		getMediaDetailByIdEndpoint: (
+			plexMediaId: number,
+			query: {
+				type: PlexMediaType;
+			},
+			params: RequestParams = {},
+		) =>
+			this.request<ResultDTOOfPlexMediaDTO, ResultDTO>({
+				path: `/api/PlexMedia/detail/${plexMediaId}`,
+				method: 'GET',
+				query: query,
+				format: 'json',
+				...params,
+			}),
+
+		/**
+		 * No description
+		 *
+		 * @tags Plexmedia
 		 * @name GetThumbnailImageEndpoint
 		 * @request GET:/api/PlexMedia/thumb
 		 */
@@ -1768,36 +1781,6 @@ export class GeneratedApiClient<SecurityDataType extends unknown> extends HttpCl
 				path: `/api/PlexMedia/thumb`,
 				method: 'GET',
 				query: query,
-				format: 'json',
-				...params,
-			}),
-
-		/**
-		 * No description
-		 *
-		 * @tags Plexmedia
-		 * @name GetPlexTvShowByIdEndpoint
-		 * @request GET:/api/PlexMedia/tvshow/detail/{plexTvShowId}
-		 */
-		getPlexTvShowByIdEndpoint: (plexTvShowId: number, params: RequestParams = {}) =>
-			this.request<ResultDTOOfPlexMediaDTO, ResultDTO>({
-				path: `/api/PlexMedia/tvshow/detail/${plexTvShowId}`,
-				method: 'GET',
-				format: 'json',
-				...params,
-			}),
-
-		/**
-		 * No description
-		 *
-		 * @tags Plexmedia
-		 * @name GetPlexTvShowWithEpisodesByIdEndpoint
-		 * @request GET:/api/PlexMedia/tvshow/{plexTvShowId}
-		 */
-		getPlexTvShowWithEpisodesByIdEndpoint: (plexTvShowId: number, params: RequestParams = {}) =>
-			this.request<ResultDTOOfPlexMediaSlimDTO, ResultDTO>({
-				path: `/api/PlexMedia/tvshow/${plexTvShowId}`,
-				method: 'GET',
 				format: 'json',
 				...params,
 			}),

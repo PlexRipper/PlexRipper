@@ -40,7 +40,7 @@ export function generatePlexMedia({
 		index: 0,
 		children: [],
 		qualities: [],
-		thumbUrl: 'https://www.omdbapi.com/src/poster.jpg',
+		fullThumbUrl: 'https://www.omdbapi.com/src/poster.jpg',
 		...partialData,
 	};
 }

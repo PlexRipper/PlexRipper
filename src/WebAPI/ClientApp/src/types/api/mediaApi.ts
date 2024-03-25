@@ -1,8 +1,10 @@
-import { Observable } from 'rxjs';
-import type { PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import { Observable, of, throwError } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import type { PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto';
 import type ResultDTO from '@dto/ResultDTO';
 import PlexRipperAxios from '@class/PlexRipperAxios';
 import { PLEX_LIBRARY_RELATIVE_PATH, PLEX_MEDIA_RELATIVE_PATH } from '@api-urls';
+import ApiClient from '@dto/ApiClient';
 
 export function getTvShow(id: number): Observable<ResultDTO<PlexMediaSlimDTO>> {
 	return PlexRipperAxios.get<PlexMediaSlimDTO>({
@@ -12,12 +14,23 @@ export function getTvShow(id: number): Observable<ResultDTO<PlexMediaSlimDTO>> {
 	});
 }
 
-export function getTvShowDetail(id: number): Observable<ResultDTO<PlexMediaDTO>> {
-	return PlexRipperAxios.get<PlexMediaDTO>({
-		url: `${PLEX_MEDIA_RELATIVE_PATH}/tvshow/detail/${id}`,
-		apiCategory: '',
-		apiName: getTvShowDetail.name,
-	});
+export function getMediaDetailByIdEndpoint(plexMediaId: number, type: PlexMediaType): Observable<PlexMediaDTO> {
+	return from(
+		ApiClient.plexMedia.getMediaDetailByIdEndpoint(plexMediaId, {
+			type,
+		}),
+	).pipe(
+		switchMap(({ data }) => {
+			if (data.isFailed) {
+				return throwError(() => data.errors);
+			}
+			if (data.value) {
+				return of(data.value);
+			}
+
+			return throwError(() => 'No value returned');
+		}),
+	);
 }
 
 export function getLibraryMediaData(id: number, page: number, size: number): Observable<ResultDTO<PlexMediaSlimDTO[]>> {

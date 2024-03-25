@@ -25,10 +25,10 @@
 											<q-media-type-icon
 												:size="100"
 												class="mx-3"
-												:media-type="mediaItem?.type ?? PlexMediaType.Unknown" />
+												:media-type="mediaItemDetail?.type ?? PlexMediaType.Unknown" />
 										</q-col>
 										<q-col cols="12">
-											<h4 class="text-center">{{ mediaItem?.title ?? 'unknown' }}</h4>
+											<h4 class="text-center">{{ mediaItemDetail?.title ?? 'unknown' }}</h4>
 										</q-col>
 									</q-row>
 								</template>
@@ -76,7 +76,7 @@
 				<!--	Media Table	-->
 				<q-row no-gutters>
 					<q-col>
-						<MediaList use-q-table :media-item="mediaItem" disable-intersection disable-highlight />
+						<MediaList use-q-table :media-item="mediaItemDetail" disable-intersection disable-highlight />
 					</q-col>
 				</q-row>
 			</q-col>
@@ -89,7 +89,7 @@ import { get, set } from '@vueuse/core';
 import { forkJoin } from 'rxjs';
 import { take } from 'rxjs/operators';
 import Log from 'consola';
-import { type PlexMediaDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import { PlexMediaType, type PlexMediaDTO } from '@dto/mainApi';
 import { useMediaStore, useMediaOverviewStore, useI18n } from '#imports';
 
 defineProps<{
@@ -101,13 +101,12 @@ const mediaOverviewStore = useMediaOverviewStore();
 const { t } = useI18n();
 const loading = ref(false);
 const mediaItemDetail = ref<PlexMediaDTO | null>(null);
-const mediaItem = ref<PlexMediaSlimDTO | null>(null);
 const thumbWidth = ref(180);
 const thumbHeight = ref(270);
 const defaultImage = ref(false);
 
 const mediaCountFormatted = computed(() => {
-	const item = get(mediaItem);
+	const item = get(mediaItemDetail);
 	if (item) {
 		switch (item.type) {
 			case PlexMediaType.Movie:
@@ -126,7 +125,9 @@ const mediaCountFormatted = computed(() => {
 });
 
 const imageUrl = computed(() => {
-	return get(mediaItem)?.hasThumb ? `${get(mediaItem)?.thumbUrl}&width=${get(thumbWidth)}&height=${get(thumbHeight)}` : '';
+	return get(mediaItemDetail)?.hasThumb
+		? `${get(mediaItemDetail)?.fullThumbUrl}&width=${get(thumbWidth)}&height=${get(thumbHeight)}`
+		: '';
 });
 
 function openDetails({ mediaId, type }: { mediaId: number; type: PlexMediaType }) {
@@ -136,15 +137,12 @@ function openDetails({ mediaId, type }: { mediaId: number; type: PlexMediaType }
 	useSubscription(
 		forkJoin({
 			mediaDetail: mediaStore.getMediaDataDetailById(mediaId, type),
-			mediaItemData: mediaStore.getMediaDataById(mediaId, type),
 		})
 			.pipe(take(1))
 			.subscribe({
-				next: ({ mediaDetail, mediaItemData }) => {
+				next: ({ mediaDetail }) => {
 					// Media detail
 					set(mediaItemDetail, mediaDetail);
-					// Media item
-					set(mediaItem, mediaItemData);
 				},
 				error: () => {
 					set(defaultImage, true);
@@ -157,7 +155,6 @@ function openDetails({ mediaId, type }: { mediaId: number; type: PlexMediaType }
 }
 
 function closeDetails() {
-	set(mediaItem, null);
 	set(mediaItemDetail, null);
 	set(loading, true);
 	mediaOverviewStore.downloadButtonVisible = false;

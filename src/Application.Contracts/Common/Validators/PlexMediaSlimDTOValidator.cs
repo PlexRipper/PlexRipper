@@ -22,7 +22,9 @@ public class PlexMediaSlimDTOValidator : AbstractValidator<PlexMediaSlimDTO>
         RuleFor(x => x.Type).Must(x => x == PlexMediaType.Movie || x == PlexMediaType.TvShow || x == PlexMediaType.Season || x == PlexMediaType.Episode);
 
         RuleFor(x => x.UpdatedAt).NotEmpty();
-        RuleFor(x => x.ThumbUrl).NotEmpty();
+        RuleFor(x => x.FullThumbUrl).NotEmpty().When(x => x.HasThumb);
+        RuleFor(x => x.FullThumbUrl).Must(x => new Uri(x).IsAbsoluteUri).When(x => x.HasThumb);
+        RuleFor(x => x.FullThumbUrl).Must(x => new Uri(x).PathAndQuery.Contains("X-Plex-Token=")).When(x => x.HasThumb);
         RuleForEach(x => x.Qualities)
             .ChildRules(y =>
             {

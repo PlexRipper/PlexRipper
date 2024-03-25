@@ -4,7 +4,7 @@ using Riok.Mapperly.Abstractions;
 namespace Application.Contracts;
 
 [Mapper]
-public static partial class PlexMediaMapper
+public static partial class PlexMediaDTOMapper
 {
     #region MediaData
 
@@ -33,8 +33,12 @@ public static partial class PlexMediaMapper
     {
         var dto = plexTvShow.ToDTOMapper();
         dto.Children = new List<PlexMediaDTO>();
-        foreach (var tvShowSeason in plexTvShow.Seasons)
-            dto.Children.Add(tvShowSeason.ToDTO());
+        if (plexTvShow.Seasons is not null)
+        {
+            foreach (var tvShowSeason in plexTvShow.Seasons)
+                dto.Children.Add(tvShowSeason.ToDTO());
+        }
+
         return dto;
     }
 
@@ -49,12 +53,17 @@ public static partial class PlexMediaMapper
     #endregion
 
     #region PlexSeason
+
     public static PlexMediaDTO ToDTO(this PlexTvShowSeason plexTvShowSeason)
     {
         var dto = plexTvShowSeason.ToDTOMapper();
         dto.Children = new List<PlexMediaDTO>();
-        foreach (var episode in plexTvShowSeason.Episodes)
-            dto.Children.Add(episode.ToDTO());
+        if (plexTvShowSeason.Episodes is not null)
+        {
+            foreach (var episode in plexTvShowSeason.Episodes)
+                dto.Children.Add(episode.ToDTO());
+        }
+
         return dto;
     }
 

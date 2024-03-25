@@ -48,7 +48,7 @@ public class WebApiMappingProfile : Profile
         // PlexMediaSlim -> PlexMediaSlimDTO
         CreateMap<PlexMediaSlim, PlexMediaSlimDTO>(MemberList.Destination)
             .ForMember(dto => dto.Qualities, opt => opt.MapFrom(x => x.Qualities))
-            .ForMember(dto => dto.ThumbUrl, opt => opt.MapFrom(x => x.FullThumbUrl))
+            .ForMember(dto => dto.FullThumbUrl, opt => opt.MapFrom(x => x.FullThumbUrl))
             .ForMember(dto => dto.Children, opt => opt.Ignore())
             .ForMember(dto => dto.Index, opt => opt.Ignore());
 

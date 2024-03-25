@@ -23,9 +23,7 @@ public class PlexMediaDTO : PlexMediaSlimDTO
     public int TvShowId { get; set; }
 
     public int TvShowSeasonId { get; set; }
-    public string FullThumbUrl { get; set; } = string.Empty;
-
-    public List<PlexMediaDataDTO> MediaData { get; set; }
+    public List<PlexMediaDataDTO> MediaData { get; set; } = new();
 
     public new List<PlexMediaDTO> Children { get; set; } = new();
 }

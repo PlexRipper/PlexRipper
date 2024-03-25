@@ -32,7 +32,7 @@ public class PlexMediaSlimDTO
 
     public bool HasThumb { get; set; }
 
-    public string ThumbUrl { get; set; } = string.Empty;
+    public string FullThumbUrl { get; set; } = string.Empty;
 
     public List<PlexMediaQualityDTO> Qualities { get; set; } = new();
 

@@ -23,7 +23,6 @@ public static partial class PlexMediaSlimDTOMapper
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
     [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Index))]
-    [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.ThumbUrl))]
     public static partial PlexMediaSlimDTO ToSlimDTO(this PlexMovie plexMovie);
 
     #endregion
@@ -34,13 +33,17 @@ public static partial class PlexMediaSlimDTOMapper
     {
         var dto = plexTvShow.ToSlimDTOMapper();
         dto.Children = new List<PlexMediaSlimDTO>();
-        foreach (var tvShowSeason in plexTvShow.Seasons)
-            dto.Children.Add(tvShowSeason.ToSlimDTO());
+        if (plexTvShow.Seasons is not null)
+        {
+            foreach (var tvShowSeason in plexTvShow.Seasons)
+                dto.Children.Add(tvShowSeason.ToSlimDTO());
+        }
+
         return dto;
     }
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexTvShow.FullThumbUrl), nameof(PlexMediaDTO.ThumbUrl))]
+    [MapProperty(nameof(PlexTvShow.FullThumbUrl), nameof(PlexMediaSlimDTO.FullThumbUrl))]
     [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Index))]
     [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Children))]
     private static partial PlexMediaSlimDTO ToSlimDTOMapper(this PlexTvShow plexTvShow);
@@ -53,13 +56,17 @@ public static partial class PlexMediaSlimDTOMapper
     {
         var dto = plexTvShowSeason.ToSlimDTOMapper();
         dto.Children = new List<PlexMediaSlimDTO>();
-        foreach (var episode in plexTvShowSeason.Episodes)
-            dto.Children.Add(episode.ToSlimDTO());
+        if (plexTvShowSeason.Episodes is not null)
+        {
+            foreach (var episode in plexTvShowSeason.Episodes)
+                dto.Children.Add(episode.ToSlimDTO());
+        }
+
         return dto;
     }
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexTvShowSeason.FullThumbUrl), nameof(PlexMediaSlimDTO.ThumbUrl))]
+    [MapProperty(nameof(PlexTvShowSeason.FullThumbUrl), nameof(PlexMediaSlimDTO.FullThumbUrl))]
     [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Index))]
     [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Children))]
     [MapperIgnoreSource(nameof(PlexTvShowSeason.Episodes))]
@@ -70,7 +77,7 @@ public static partial class PlexMediaSlimDTOMapper
     #region PlexEpisode
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexTvShowEpisode.FullThumbUrl), nameof(PlexMediaSlimDTO.ThumbUrl))]
+    [MapProperty(nameof(PlexTvShowEpisode.FullThumbUrl), nameof(PlexMediaSlimDTO.FullThumbUrl))]
     [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Index))]
     [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Children))]
     public static partial PlexMediaSlimDTO ToSlimDTO(this PlexTvShowEpisode plexTvShowEpisode);

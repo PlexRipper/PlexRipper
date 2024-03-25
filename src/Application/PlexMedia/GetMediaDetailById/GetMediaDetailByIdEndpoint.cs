@@ -11,11 +11,6 @@ namespace PlexRipper.Application;
 /// </summary>
 public class GetMediaDetailByIdEndpointRequest
 {
-    /// <summary>
-    /// Gets the <see cref="PlexMediaDTO"/> with all children
-    /// </summary>
-    /// <param name="PlexMediaId">The id of the <see cref="PlexMedia"/>.</param>
-    /// <param name="Type"> The <see cref="PlexMediaType">Type</see> of the PlexMedia.</param>
     public GetMediaDetailByIdEndpointRequest(int PlexMediaId, PlexMediaType Type)
     {
         this.PlexMediaId = PlexMediaId;
@@ -30,6 +25,11 @@ public class GetMediaDetailByIdEndpointRequest
     public PlexMediaType Type { get; init; }
 }
 
+/// <summary>
+/// Gets the <see cref="PlexMediaDTO"/> with all children
+/// </summary>
+/// <param name="PlexMediaId">The id of the <see cref="PlexMedia"/>.</param>
+/// <param name="Type"> The <see cref="PlexMediaType">Type</see> of the PlexMedia.</param>
 public class GetMediaDetailByIdEndpointRequestValidator : Validator<GetMediaDetailByIdEndpointRequest>
 {
     public GetMediaDetailByIdEndpointRequestValidator()

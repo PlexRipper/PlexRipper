@@ -6,22 +6,23 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace PlexRipper.Application.UnitTests;
 
-public class GetMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibraryMediaEndpoint>
+public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibraryMediaEndpoint>
 {
     private PlexMediaSlimDTOValidator PlexMediaSlimDtoValidator => new();
 
-    public GetMediaEndpoint_UnitTests(ITestOutputHelper output) : base(output) { }
+    public GetPlexLibraryMediaEndpoint_UnitTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public async Task ShouldHaveAllThePlexLibraryMedia_WhenPageAndSizeAreNotSetAndMediaIsMovies()
     {
         // Arrange
+        var movieCount = 100;
         await SetupDatabase(config =>
         {
             config.PlexServerCount = 1;
             config.PlexLibraryCount = 1;
             config.PlexAccountCount = 1;
-            config.MovieCount = 100;
+            config.MovieCount = movieCount;
         });
         var ep = Factory.Create<GetPlexLibraryMediaEndpoint>(ctx =>
             ctx.AddTestServices(s => s.AddTransient(_ => mock.Create<IPlexRipperDbContext>()))
@@ -40,7 +41,7 @@ public class GetMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibraryMediaEndpoi
 
         // Assert
         result.ShouldNotBeNull();
-        result.Value.Count.ShouldBe(500);
+        result.Value.Count.ShouldBe(movieCount);
         foreach (var plexMediaSlimDto in result.Value)
         {
             var validationResult = await PlexMediaSlimDtoValidator.ValidateAsync(plexMediaSlimDto);

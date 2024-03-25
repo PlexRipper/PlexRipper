@@ -46,8 +46,8 @@ public static partial class PlexMediaDTOMapper
     [MapProperty(nameof(PlexTvShow.Id), nameof(PlexMediaDTO.TvShowId))]
     [MapperIgnoreTarget(nameof(PlexMediaDTO.TvShowSeasonId))]
     [MapperIgnoreTarget(nameof(PlexMediaDTO.MediaData))]
-    [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Index))]
-    [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Children))]
+    [MapperIgnoreTarget(nameof(PlexMediaDTO.Index))]
+    [MapperIgnoreTarget(nameof(PlexMediaDTO.Children))]
     private static partial PlexMediaDTO ToDTOMapper(this PlexTvShow plexTvShow);
 
     #endregion

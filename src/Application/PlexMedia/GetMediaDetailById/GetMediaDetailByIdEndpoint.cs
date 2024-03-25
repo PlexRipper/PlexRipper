@@ -3,6 +3,7 @@ using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using PlexRipper.Domain.PlexMediaExtensions;
 
 namespace PlexRipper.Application;
 
@@ -11,6 +12,11 @@ namespace PlexRipper.Application;
 /// </summary>
 public class GetMediaDetailByIdEndpointRequest
 {
+    /// <summary>
+    /// Gets the <see cref="PlexMediaDTO"/> with all children
+    /// </summary>
+    /// <param name="PlexMediaId">The id of the <see cref="PlexMedia"/>.</param>
+    /// <param name="Type"> The <see cref="PlexMediaType">Type</see> of the PlexMedia.</param>
     public GetMediaDetailByIdEndpointRequest(int PlexMediaId, PlexMediaType Type)
     {
         this.PlexMediaId = PlexMediaId;
@@ -25,17 +31,12 @@ public class GetMediaDetailByIdEndpointRequest
     public PlexMediaType Type { get; init; }
 }
 
-/// <summary>
-/// Gets the <see cref="PlexMediaDTO"/> with all children
-/// </summary>
-/// <param name="PlexMediaId">The id of the <see cref="PlexMedia"/>.</param>
-/// <param name="Type"> The <see cref="PlexMediaType">Type</see> of the PlexMedia.</param>
 public class GetMediaDetailByIdEndpointRequestValidator : Validator<GetMediaDetailByIdEndpointRequest>
 {
     public GetMediaDetailByIdEndpointRequestValidator()
     {
         RuleFor(x => x.PlexMediaId).GreaterThan(0);
-        RuleFor(x => x.Type).Must(x => x != PlexMediaType.None && x != PlexMediaType.Unknown);
+        RuleFor(x => x.Type).Must(x => x == PlexMediaType.Movie || x == PlexMediaType.TvShow);
     }
 }
 
@@ -72,6 +73,8 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
                 if (plexMovie is null)
                     break;
 
+                await SetNestedMovieProperties(plexMovie, ct);
+
                 plexMediaDTO = plexMovie.ToDTO();
                 break;
             }
@@ -82,23 +85,10 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
                     break;
 
                 plexTvShow.Seasons = plexTvShow.Seasons.OrderByNatural(x => x.Title).ToList();
+                await SetNestedTvShowProperties(plexTvShow, ct);
                 plexMediaDTO = plexTvShow.ToDTO();
                 break;
             }
-            case PlexMediaType.Season:
-                var plexSeason = await _dbContext.PlexTvShowSeason.IncludeEpisodes().GetAsync(req.PlexMediaId, ct);
-                if (plexSeason is null)
-                    break;
-
-                plexMediaDTO = plexSeason.ToDTO();
-                break;
-            case PlexMediaType.Episode:
-                var plexEpisode = await _dbContext.PlexTvShowEpisodes.GetAsync(req.PlexMediaId, ct);
-                if (plexEpisode is null)
-                    break;
-
-                plexMediaDTO = plexEpisode.ToDTO();
-                break;
             default:
                 await SendFluentResult(ResultExtensions.Create400BadRequestResult($"Type {req.Type} is not allowed"), ct);
                 return;
@@ -110,27 +100,50 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
             return;
         }
 
-        // Do continue, even if the connection is invalid, worst case is that the thumbnail will not work
-        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexMediaDTO.PlexServerId, ct);
-        if (plexServerConnection.IsFailed)
-            plexServerConnection.ToResult().LogError();
-
-        var plexServerToken = await _dbContext.GetPlexServerTokenAsync(plexMediaDTO.PlexServerId, ct);
-        if (plexServerToken.IsFailed)
-            plexServerToken.ToResult().LogError();
-
-        SetNestedProperties(plexMediaDTO, plexServerConnection.Value.Url, plexServerToken.Value);
-
         await SendFluentResult(Result.Ok(plexMediaDTO), x => x, ct);
     }
 
-    private void SetNestedProperties(PlexMediaDTO plexMediaDto, string connectionUrl, string plexServerToken)
+    private async Task SetNestedMovieProperties(PlexMovie plexMovie, CancellationToken ct = default)
     {
-        plexMediaDto.SetFullThumbnailUrl(connectionUrl, plexServerToken);
-        if (!plexMediaDto.Children.Any())
+        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexMovie.PlexServerId, ct);
+        if (plexServerConnection.IsFailed)
+        {
+            plexServerConnection.ToResult().LogError();
             return;
+        }
 
-        foreach (var child in plexMediaDto.Children)
-            SetNestedProperties(child, connectionUrl, plexServerToken);
+        var plexServerToken = await _dbContext.GetPlexServerTokenAsync(plexMovie.PlexServerId, ct);
+        if (plexServerToken.IsFailed)
+        {
+            plexServerToken.ToResult().LogError();
+            return;
+        }
+
+        plexMovie.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value);
+    }
+
+    private async Task SetNestedTvShowProperties(PlexTvShow plexTvShow, CancellationToken ct = default)
+    {
+        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexTvShow.PlexServerId, ct);
+        if (plexServerConnection.IsFailed)
+        {
+            plexServerConnection.ToResult().LogError();
+            return;
+        }
+
+        var plexServerToken = await _dbContext.GetPlexServerTokenAsync(plexTvShow.PlexServerId, ct);
+        if (plexServerToken.IsFailed)
+        {
+            plexServerToken.ToResult().LogError();
+            return;
+        }
+
+        plexTvShow.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value);
+        foreach (var plexTvShowSeason in plexTvShow.Seasons)
+        {
+            plexTvShowSeason.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value);
+            foreach (var plexTvShowEpisode in plexTvShowSeason.Episodes)
+                plexTvShowEpisode.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value);
+        }
     }
 }

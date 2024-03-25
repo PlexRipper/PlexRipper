@@ -4,11 +4,8 @@ public static class PlexMediaExtensions
 {
     public static void SetFullThumbnailUrl(this PlexMediaSlim plexMediaSlim, string connectionUrl, string plexServerToken)
     {
-        if (connectionUrl == string.Empty || plexMediaSlim.ThumbUrl == string.Empty || plexServerToken == string.Empty)
-        {
-            plexMediaSlim.HasThumb = false;
+        if (!plexMediaSlim.HasThumb || connectionUrl == string.Empty || plexMediaSlim.ThumbUrl == string.Empty || plexServerToken == string.Empty)
             return;
-        }
 
         var uri = new Uri(connectionUrl + plexMediaSlim.ThumbUrl);
         plexMediaSlim.FullThumbUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}/photo/:/transcode?url={uri.AbsolutePath}&X-Plex-Token={plexServerToken}";

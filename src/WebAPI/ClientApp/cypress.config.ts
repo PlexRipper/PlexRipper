@@ -1,5 +1,6 @@
 import { resolve } from 'path';
 import { defineConfig } from 'cypress';
+import vitePreprocessor from 'cypress-vite';
 
 export default defineConfig({
 	projectId: 'qo5tth',
@@ -12,9 +13,6 @@ export default defineConfig({
 		viewportHeight: 1080,
 		viewportWidth: 1920,
 		setupNodeEvents(on) {
-			// Source: https://github.com/mammadataei/cypress-vite/issues/10
-			// eslint-disable-next-line @typescript-eslint/no-var-requires
-			const vitePreprocessor = require('cypress-vite');
 			on(
 				'file:preprocessor',
 				vitePreprocessor({

@@ -18,5 +18,5 @@ public class JobStatusUpdateDTO
 
     public string PrimaryKey { get; set; }
 
-    public int PrimaryKeyValue { get; set; }
+    public string PrimaryKeyValue { get; set; }
 }

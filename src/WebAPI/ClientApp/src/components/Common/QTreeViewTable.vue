@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import { QTree } from 'quasar';
 import { get } from '@vueuse/core';
-import { QTreeViewTableHeader, QTreeViewTableItem } from '@props';
+import type { QTreeViewTableHeader, QTreeViewTableItem } from '@props';
 
 defineOptions({
 	inheritAttrs: false,

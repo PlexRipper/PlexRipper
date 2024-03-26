@@ -1,5 +1,12 @@
 import { kebabCase } from 'lodash-es';
-import { DownloadMediaDTO, DownloadTaskType, FolderType, PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import {
+	DownloadTaskType,
+	FolderType,
+	PlexMediaType,
+	type DownloadMediaDTO,
+	type PlexMediaDTO,
+	type PlexMediaSlimDTO,
+} from '@dto/mainApi';
 
 export function toDownloadMedia(mediaItem: PlexMediaDTO | PlexMediaSlimDTO): DownloadMediaDTO[] {
 	return [

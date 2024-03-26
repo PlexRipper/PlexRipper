@@ -32,6 +32,7 @@ public static partial class PlexAccountMapper
     }
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
+    [MapperIgnoreTarget(nameof(PlexAccountDTO.PlexServerAccess))]
     private static partial PlexAccountDTO ToDTOMapper(this PlexAccount plexAccount);
 
     public static List<PlexAccountDTO> ToDTO(this List<PlexAccount> plexAccounts) => plexAccounts.Select(x => x.ToDTO()).ToList();
@@ -40,9 +41,10 @@ public static partial class PlexAccountMapper
 
     #region ToModel
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
+    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
     [MapperIgnoreTarget(nameof(PlexAccount.PlexServers))]
     [MapperIgnoreTarget(nameof(PlexAccount.PlexAccountServers))]
+    [MapperIgnoreSource(nameof(PlexAccountDTO.PlexServerAccess))]
     public static partial PlexAccount ToModel(this PlexAccountDTO plexAccount);
 
     [MapperRequiredMapping(RequiredMappingStrategy.Source)]

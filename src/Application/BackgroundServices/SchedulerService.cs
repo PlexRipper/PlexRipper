@@ -1,9 +1,9 @@
-﻿using BackgroundServices.Contracts;
+﻿using Application.Contracts;
 using Logging.Interface;
 using Quartz;
 using Quartz.Impl.Matchers;
 
-namespace BackgroundServices;
+namespace PlexRipper.Application;
 
 public class SchedulerService : ISchedulerService
 {

@@ -3,7 +3,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { useAccountStore } from '#build/imports';
 import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
 import { PLEX_ACCOUNT_RELATIVE_PATH } from '@api-urls';
-import ISetupResult from '@interfaces/service/ISetupResult';
+import type { ISetupResult } from '@interfaces';
 import { generateResultDTO } from '@mock';
 
 describe('AccountStore.setup()', () => {

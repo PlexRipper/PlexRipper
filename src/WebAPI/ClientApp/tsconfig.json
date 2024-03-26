@@ -6,7 +6,6 @@
 		// TODO This might be better to enable
 		"noImplicitAny": false,
 		"types": [
-			"unplugin-vue-define-options/macros-global",
 			"@nuxtjs/i18n",
 			"@pinia/nuxt",
 			"vitest/importMeta",

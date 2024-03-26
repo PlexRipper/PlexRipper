@@ -42,7 +42,8 @@
         "directory-browser": {
             "path": "Pfad:",
             "select-path": "Wähle {pathName}",
-            "type": "typ:"
+            "type": "typ:",
+            "no-path": "Beginnen Sie mit der Eingabe oder wählen Sie unten einen Pfad aus."
         },
         "download-confirmation": {
             "creating-tasks": "Erstelle download Aufgabe {current} von {total}",

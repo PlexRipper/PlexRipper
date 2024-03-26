@@ -26,7 +26,7 @@ import { RecycleScroller } from 'vue-virtual-scroller';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 
 import { get, set, useScroll } from '@vueuse/core';
-import { PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import { type PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import { listenMediaOverviewScrollToCommand, sendMediaOverviewDownloadCommand } from '@composables/event-bus';
 import { triggerBoxHighlight } from '@composables/animations';
 const mediaOverviewStore = useMediaOverviewStore();

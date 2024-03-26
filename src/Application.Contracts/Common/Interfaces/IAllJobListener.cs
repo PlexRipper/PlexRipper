@@ -1,5 +1,5 @@
 using Quartz;
 
-namespace BackgroundServices;
+namespace Application.Contracts;
 
 public interface IAllJobListener : IJobListener { }

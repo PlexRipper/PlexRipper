@@ -1,8 +1,8 @@
 import { Observable } from 'rxjs';
-import { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
 import Axios from 'axios-observable';
 import { map } from 'rxjs/operators';
-import ResultDTO from '@dto/ResultDTO';
+import type ResultDTO from '@dto/ResultDTO';
 import { HEALTH_RELATIVE_PATH } from '@api-urls';
 
 export function getHealthStatus(): Observable<ResultDTO<string>> {

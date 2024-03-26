@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { useFolderPathStore } from '#imports';
 
 const folderPathStore = useFolderPathStore();

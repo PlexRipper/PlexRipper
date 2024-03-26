@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using AutoMapper;
-using BackgroundServices;
 using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.FileSystem.Config;
@@ -28,7 +27,6 @@ public static class ContainerConfig
         builder.RegisterModule<PlexApiModule>();
         builder.RegisterModule<SettingsModule>();
         builder.RegisterModule<HttpClientModule>();
-        builder.RegisterModule<BackgroundServicesModule>();
 
         // Presentation
         builder.RegisterModule<WebApiModule>();

@@ -13,8 +13,8 @@
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
-import { SyncServerProgress } from '@dto/mainApi';
 import { useSignalrStore } from '~/store';
+import type { SyncServerProgress } from '@dto/mainApi';
 
 const progressList = ref<SyncServerProgress[]>([]);
 

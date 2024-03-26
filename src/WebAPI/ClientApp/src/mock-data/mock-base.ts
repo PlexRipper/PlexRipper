@@ -1,5 +1,5 @@
 import { seed as falsoSeed } from '@ngneat/falso';
-import { MockConfig } from '@mock/interfaces';
+import type { MockConfig } from '@mock';
 import { PlexMediaType } from '@dto/mainApi';
 
 let currentSeed = 0;

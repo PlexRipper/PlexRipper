@@ -13,14 +13,15 @@
 	<ItemGroup>
 		<PackageReference Include="Autofac" Version="8.0.0" />
 		<PackageReference Include="Autofac.Extras.Moq" Version="6.1.1" />
-		<PackageReference Include="Bogus" Version="34.0.2" />
-		<PackageReference Include="Bogus.Hollywood" Version="34.0.2" />
-		<PackageReference Include="Bogus.Tools.Analyzer" Version="34.0.2">
+		<PackageReference Include="Bogus" Version="35.5.0" />
+		<PackageReference Include="Bogus.Hollywood" Version="35.5.0" />
+		<PackageReference Include="Bogus.Tools.Analyzer" Version="35.5.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="FastEndpoints.Testing" Version="5.23.0" />
 		<PackageReference Include="JustEat.HttpClientInterception" Version="4.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.17" />
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="7.0.8" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
 		<PackageReference Include="Moq" Version="4.18.1" />

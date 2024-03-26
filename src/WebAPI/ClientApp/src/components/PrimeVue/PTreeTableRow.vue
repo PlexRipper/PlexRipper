@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { QTreeViewTableHeader, QTreeViewTableItem } from '@props';
+import type { QTreeViewTableHeader, QTreeViewTableItem } from '@props';
 import Convert from '@class/Convert';
 
 defineProps<{

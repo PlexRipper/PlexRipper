@@ -1,7 +1,4 @@
-﻿using BackgroundServices.Contracts;
-using PlexRipper.WebAPI.Common;
-
-namespace PlexRipper.WebAPI;
+﻿namespace Application.Contracts;
 
 public class JobStatusUpdateDTO
 {
@@ -21,5 +18,5 @@ public class JobStatusUpdateDTO
 
     public string PrimaryKey { get; set; }
 
-    public int PrimaryKeyValue { get; set; }
+    public string PrimaryKeyValue { get; set; }
 }

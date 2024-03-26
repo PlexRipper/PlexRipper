@@ -2,7 +2,7 @@ import { defineStore, acceptHMRUpdate } from 'pinia';
 import Log from 'consola';
 import { Observable, of, Subject } from 'rxjs';
 import { debounceTime, switchMap, tap } from 'rxjs/operators';
-import {
+import type {
 	ConfirmationSettingsDTO,
 	DateTimeSettingsDTO,
 	DebugSettingsDTO,
@@ -10,12 +10,12 @@ import {
 	DownloadManagerSettingsDTO,
 	GeneralSettingsDTO,
 	LanguageSettingsDTO,
-	PlexMediaType,
 	ServerSettingsDTO,
 	SettingsModelDTO,
-	ViewMode,
 } from '@dto/mainApi';
-import ISetupResult from '@interfaces/service/ISetupResult';
+
+import { PlexMediaType, ViewMode } from '@dto/mainApi';
+import type { ISetupResult } from '@interfaces';
 import { getSettings, updateSettings } from '@api/settingsApi';
 
 export const useSettingsStore = defineStore('SettingsStore', () => {

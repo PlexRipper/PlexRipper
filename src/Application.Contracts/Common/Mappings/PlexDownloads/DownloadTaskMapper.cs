@@ -11,6 +11,8 @@ public static partial class DownloadTaskGenericToDTOMapper
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
     [MapProperty(nameof(DownloadTaskGeneric.DownloadStatus), nameof(DownloadTaskDTO.Status))]
     [MapperIgnoreTarget(nameof(DownloadTaskDTO.Quality))]
+    [MapperIgnoreTarget(nameof(DownloadTaskDTO.DownloadUrl))]
+    [MapperIgnoreTarget(nameof(DownloadTaskDTO.Actions))]
     public static partial DownloadTaskDTO ToDTO(this DownloadTaskGeneric downloadTask);
 
     #endregion
@@ -29,6 +31,12 @@ public static partial class DownloadTaskGenericToDTOMapper
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
     [MapProperty(nameof(DownloadTaskGeneric.DownloadStatus), nameof(DownloadProgressDTO.Status))]
+    [MapperIgnoreTarget(nameof(DownloadProgressDTO.Actions))]
+    [MapperIgnoreSource(nameof(DownloadTaskGeneric.Key))]
+    [MapperIgnoreSource(nameof(DownloadTaskGeneric.FullTitle))]
+    [MapperIgnoreSource(nameof(DownloadTaskGeneric.DownloadTaskType))]
+    [MapperIgnoreSource(nameof(DownloadTaskGeneric.CreatedAt))]
+    [MapperIgnoreSource(nameof(DownloadTaskGeneric.FileName))]
     private static partial DownloadProgressDTO ToDownloadProgressDtoMapper(this DownloadTaskGeneric downloadTask);
 
     public static List<ServerDownloadProgressDTO> ToServerDownloadProgressDTOList(this List<DownloadTaskGeneric> source)

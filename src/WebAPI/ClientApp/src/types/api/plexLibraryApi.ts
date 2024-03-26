@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
-import { PlexLibraryDTO } from '@dto/mainApi';
-import ResultDTO from '@dto/ResultDTO';
+import type { PlexLibraryDTO } from '@dto/mainApi';
+import type ResultDTO from '@dto/ResultDTO';
 import PlexRipperAxios from '@class/PlexRipperAxios';
 import { PLEX_LIBRARY_RELATIVE_PATH } from '@api-urls';
 

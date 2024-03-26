@@ -1,7 +1,7 @@
 import Axios from 'axios-observable';
-import { ResponseType } from 'axios';
+import type { ResponseType } from 'axios';
 import { checkForError } from '@api/baseApi';
-import ResultDTO from '@dto/ResultDTO';
+import type ResultDTO from '@dto/ResultDTO';
 
 export interface PlexRipperAxiosGet {
 	url: string;

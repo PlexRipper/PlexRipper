@@ -1,4 +1,4 @@
-import { QTreeViewTableHeader } from '@props';
+import type { QTreeViewTableHeader } from '@props';
 
 export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 	return [

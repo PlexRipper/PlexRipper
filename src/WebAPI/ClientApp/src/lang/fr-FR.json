@@ -42,7 +42,8 @@
         "directory-browser": {
             "path": "Chemin d'accès;",
             "select-path": "Sélectionner {pathName}",
-            "type": "Type:"
+            "type": "Type:",
+            "no-path": "Commencez à taper ou sélectionnez un chemin ci-dessous."
         },
         "download-confirmation": {
             "creating-tasks": "Création de tâches de téléchargement {current} de {total}",

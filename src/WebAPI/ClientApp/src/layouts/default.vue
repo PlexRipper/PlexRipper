@@ -26,7 +26,7 @@ import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import { useHelpStore, useAlertStore, useGlobalStore, useRoute } from '#imports';
-import IAlert from '@interfaces/IAlert';
+import type IAlert from '@interfaces/IAlert';
 
 const route = useRoute();
 const helpStore = useHelpStore();

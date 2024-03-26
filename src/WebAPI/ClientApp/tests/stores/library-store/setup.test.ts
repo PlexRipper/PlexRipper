@@ -3,7 +3,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
 import { generateResultDTO } from '@mock';
 import { PLEX_LIBRARY_RELATIVE_PATH } from '@api-urls';
-import ISetupResult from '@interfaces/service/ISetupResult';
+import type { ISetupResult } from '@interfaces';
 import { useLibraryStore } from '#build/imports';
 
 describe('LibraryStore.setup()', () => {

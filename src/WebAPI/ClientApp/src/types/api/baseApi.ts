@@ -1,9 +1,9 @@
 import Log from 'consola';
 import { switchMap, take, tap } from 'rxjs/operators';
 import { catchError, Observable, of } from 'rxjs';
-import { AxiosObservable } from 'axios-observable';
-import { AxiosError, AxiosResponse } from 'axios';
-import ResultDTO from '@dto/ResultDTO';
+import type { AxiosObservable } from 'axios-observable';
+import { AxiosError, type AxiosResponse } from 'axios';
+import type ResultDTO from '@dto/ResultDTO';
 import { useAlertStore } from '~/store';
 
 export function checkForError<T = any>(
@@ -29,6 +29,7 @@ export function checkForError<T = any>(
 
 				// TODO Check wat the error contains in-case, of network failure and continue based on that
 				return of({
+					// @ts-ignore
 					data: { isSuccess: false, isFailed: true, errors: [{ message: error.message }] } as ResultDTO,
 				} as AxiosResponse<ResultDTO<T>>);
 			}),

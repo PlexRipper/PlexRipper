@@ -1,8 +1,6 @@
 using Application.Contracts;
-using BackgroundServices.Contracts;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
-using PlexRipper.WebAPI.Common;
 using WebAPI.Contracts;
 
 namespace PlexRipper.WebAPI;

@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { QExpansionListProps } from '@interfaces/components/QExpansionListProps';
+import type { QExpansionListProps } from '@interfaces/components/QExpansionListProps';
 import { useSettingsStore } from '~/store';
 
 withDefaults(defineProps<{ showDrawer: boolean }>(), {

@@ -1,7 +1,7 @@
 import { randIp, randPort } from '@ngneat/falso';
 import { times } from 'lodash-es';
-import { checkConfig, incrementSeed, MockConfig } from '~/mock-data';
-import {
+import { checkConfig, incrementSeed, type MockConfig } from '~/mock-data';
+import type {
 	PlexServerConnectionDTO,
 	PlexServerDTO,
 	PlexServerStatusDTO,

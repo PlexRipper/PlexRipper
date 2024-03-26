@@ -2,10 +2,10 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { Observable, of } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { get } from '@vueuse/core';
-import { PlexServerConnectionDTO, PlexServerStatusDTO } from '@dto/mainApi';
+import type { PlexServerConnectionDTO, PlexServerStatusDTO } from '@dto/mainApi';
 import { setPreferredPlexServerConnection } from '@api/plexServerApi';
 import { useServerStore } from '#build/imports';
-import ISetupResult from '@interfaces/service/ISetupResult';
+import type { ISetupResult } from '@interfaces';
 import { checkAllPlexServerConnections, checkPlexServerConnection, getPlexServerConnections } from '@api/plexServerConnectionApi';
 
 export const useServerConnectionStore = defineStore('ServerConnection', () => {

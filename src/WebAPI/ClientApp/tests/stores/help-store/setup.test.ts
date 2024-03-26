@@ -1,7 +1,7 @@
 import { describe, beforeAll, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, baseVars } from '@services-test-base';
-import ISetupResult from '@interfaces/service/ISetupResult';
+import type { ISetupResult } from '@interfaces';
 import { useHelpStore } from '~/store';
 
 describe('HelpStore.setup()', () => {

@@ -1,8 +1,8 @@
 import { Observable } from 'rxjs';
-import ResultDTO from '@dto/ResultDTO';
+import type ResultDTO from '@dto/ResultDTO';
 import PlexRipperAxios from '@class/PlexRipperAxios';
 import { PLEX_SERVER_CONNECTION_RELATIVE_PATH } from '@api-urls';
-import { PlexServerConnectionDTO, PlexServerStatusDTO } from '@dto/mainApi';
+import type { PlexServerConnectionDTO, PlexServerStatusDTO } from '@dto/mainApi';
 
 export function getPlexServerConnection(serverConnectionId: number): Observable<ResultDTO<PlexServerConnectionDTO | null>> {
 	return PlexRipperAxios.get<PlexServerConnectionDTO>({

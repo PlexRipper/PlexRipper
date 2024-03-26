@@ -9,8 +9,8 @@ import {
 	randUuid,
 } from '@ngneat/falso';
 import { times } from 'lodash-es';
-import { MockConfig } from '@mock/interfaces/MockConfig';
-import { PlexAccountDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import type { MockConfig } from '@mock';
+import type { PlexAccountDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
 
 let plexAccountIdIndex = 1;

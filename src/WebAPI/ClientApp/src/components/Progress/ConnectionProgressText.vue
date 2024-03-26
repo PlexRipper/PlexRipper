@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
+import type { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 
 const { t } = useI18n();
 

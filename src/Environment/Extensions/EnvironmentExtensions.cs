@@ -17,19 +17,13 @@ public static class EnvironmentExtensions
 
     #region Get
 
-    public static bool IsIntegrationTestMode()
-    {
-        return System.Environment.GetEnvironmentVariable(IntegrationTestModeKey) == TrueValue;
-    }
+    public static bool IsIntegrationTestMode() => System.Environment.GetEnvironmentVariable(IntegrationTestModeKey) == TrueValue;
 
     /// <summary>
     /// This is the path that is used to store the /config, /downloads, /movies and /tvshows folders required to boot PlexRipper in development mode in a non-docker environment.
     /// </summary>
     /// <returns></returns>
-    public static string? GetDevelopmentRootPath()
-    {
-        return System.Environment.GetEnvironmentVariable(DevelopmentRootPathKey);
-    }
+    public static string? GetDevelopmentRootPath() => System.Environment.GetEnvironmentVariable(DevelopmentRootPathKey);
 
     #endregion
 

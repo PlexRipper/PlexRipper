@@ -1,7 +1,9 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
-namespace BackgroundServices.Contracts;
+namespace Application.Contracts;
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum JobStatus
 {
     // NOTE: Make sure the indexes are correct, 1,2,3,4,5 etc and that there is no skip in between

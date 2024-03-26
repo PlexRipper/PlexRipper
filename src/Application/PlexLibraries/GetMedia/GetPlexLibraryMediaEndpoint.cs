@@ -5,6 +5,7 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using PlexRipper.Domain.PlexMediaExtensions;
 
 namespace PlexRipper.Application;
 
@@ -67,29 +68,54 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
         var take = req.Size <= 0 ? -1 : req.Size;
         var skip = req.Page * req.Size;
 
-        List<PlexMediaSlimDTO> entities;
+        var plexServerId = plexLibrary.PlexServerId;
+
+        // Do continue, even if the connection is invalid, worst case is that the thumbnail will not work
+        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexServerId, ct);
+        if (plexServerConnection.IsFailed)
+            plexServerConnection.ToResult().LogError();
+
+        var plexServerToken = await _dbContext.GetPlexServerTokenAsync(plexServerId, ct);
+        if (plexServerToken.IsFailed)
+            plexServerToken.ToResult().LogError();
+
+        var entities = new List<PlexMediaSlimDTO>();
         switch (plexLibrary.Type)
         {
             case PlexMediaType.Movie:
             {
-                entities = await _dbContext.PlexMovies.AsNoTracking()
+                var plexMovies = await _dbContext.PlexMovies.AsNoTracking()
                     .Where(x => x.PlexLibraryId == req.PlexLibraryId)
                     .OrderBy(x => x.Title)
                     .Skip(skip)
                     .Take(take)
-                    .ProjectToDTO()
                     .ToListAsync(ct);
+
+                foreach (var plexMovie in plexMovies)
+                {
+                    if (plexMovie.HasThumb)
+                        plexMovie.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value);
+                    entities.Add(plexMovie.ToSlimDTO());
+                }
+
                 break;
             }
             case PlexMediaType.TvShow:
             {
-                entities = await _dbContext.PlexTvShows.AsNoTracking()
+                var plexTvShow = await _dbContext.PlexTvShows.AsNoTracking()
                     .Where(x => x.PlexLibraryId == req.PlexLibraryId)
                     .OrderBy(x => x.Title)
                     .Skip(skip)
                     .Take(take)
-                    .ProjectToDTO()
                     .ToListAsync(ct);
+
+                foreach (var tvShow in plexTvShow)
+                {
+                    if (tvShow.HasThumb)
+                        tvShow.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value);
+                    entities.Add(tvShow.ToSlimDTO());
+                }
+
                 break;
             }
             default:
@@ -97,31 +123,6 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
                 return;
         }
 
-        var plexServerId = plexLibrary.PlexServerId;
-
-        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexServerId, ct);
-        if (plexServerConnection.IsFailed)
-        {
-            await SendFluentResult(plexServerConnection.ToResult(), ct);
-            return;
-        }
-
-        var plexServerToken = await _dbContext.GetPlexServerTokenAsync(plexServerId, ct);
-        if (plexServerToken.IsFailed)
-        {
-            await SendFluentResult(plexServerToken.ToResult(), ct);
-            return;
-        }
-
-        foreach (var mediaSlim in entities)
-            mediaSlim.ThumbUrl = GetThumbnailUrl(plexServerConnection.Value.Url, mediaSlim.ThumbUrl, plexServerToken.Value);
-
         await SendFluentResult(Result.Ok(entities.SetIndex()), _ => _, ct);
-    }
-
-    private string GetThumbnailUrl(string connectionUrl, string thumbPath, string plexServerToken)
-    {
-        var uri = new Uri(connectionUrl + thumbPath);
-        return $"{uri.Scheme}://{uri.Host}:{uri.Port}/photo/:/transcode?url={uri.AbsolutePath}&X-Plex-Token={plexServerToken}";
     }
 }

@@ -1,6 +1,6 @@
-import { Composer, UseI18nOptions } from 'vue-i18n';
+import type { Composer, UseI18nOptions } from 'vue-i18n';
 
-export default interface I18nObjectType
+export interface I18nObjectType
 	extends Composer<
 		NonNullable<UseI18nOptions['messages']>,
 		NonNullable<UseI18nOptions['datetimeFormats']>,

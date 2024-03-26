@@ -89,7 +89,7 @@ body {
 	// We need a set height so we calculate the remaining content space by subtracting other component heights
 	height: calc(100vh - $app-bar-height);
 	width: 100%;
-	overflow: scroll;
+	overflow: hidden;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

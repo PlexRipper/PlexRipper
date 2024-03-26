@@ -12,9 +12,9 @@ import {
 	SETTINGS_RELATIVE_PATH,
 } from '@api-urls';
 import {
+	type MockConfig,
 	generatePlexServers,
 	generateResultDTO,
-	MockConfig,
 	checkConfig,
 	generateServerDownloadProgress,
 	generatePlexMedias,
@@ -23,18 +23,17 @@ import {
 } from '@mock';
 import { generateSettingsModel } from '@factories/settings-factory';
 import { generatePlexAccounts } from '@factories/plex-account-factory';
-import {
+import type {
 	PlexAccountDTO,
 	PlexLibraryDTO,
 	PlexMediaSlimDTO,
-	PlexMediaType,
 	PlexServerConnectionDTO,
 	PlexServerDTO,
 	ServerDownloadProgressDTO,
 	SettingsModelDTO,
 	DownloadTaskDTO,
 } from '@dto/mainApi';
-import Chainable = Cypress.Chainable;
+import { PlexMediaType } from '@dto/mainApi';
 import { toDownloadTaskType } from '@composables/conversion';
 
 export interface IBasePageSetupResult {
@@ -52,7 +51,7 @@ export interface IBasePageSetupResult {
 	config: MockConfig;
 }
 
-export function basePageSetup(config: Partial<MockConfig> = {}): Chainable<IBasePageSetupResult> {
+export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainable<IBasePageSetupResult> {
 	const validConfig = checkConfig(config);
 	const result: IBasePageSetupResult = {
 		config: validConfig,

@@ -1,7 +1,7 @@
 import { randMovie, randNumber, randRecentDate } from '@ngneat/falso';
 import { times } from 'lodash-es';
-import { checkConfig, incrementSeed, MockConfig } from '@mock';
-import { PlexLibraryDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import { checkConfig, incrementSeed, type MockConfig } from '@mock';
+import { PlexMediaType, type PlexLibraryDTO, type PlexMediaSlimDTO } from '@dto/mainApi';
 
 let plexMediaIdIndex = 1;
 
@@ -40,7 +40,7 @@ export function generatePlexMedia({
 		index: 0,
 		children: [],
 		qualities: [],
-		thumbUrl: 'https://www.omdbapi.com/src/poster.jpg',
+		fullThumbUrl: 'https://www.omdbapi.com/src/poster.jpg',
 		...partialData,
 	};
 }

@@ -2,7 +2,7 @@
 
 public class FileSystemDTO
 {
-    public string Parent { get; set; }
+    public string Parent { get; set; } = string.Empty;
 
     public List<FileSystemModelDTO> Directories { get; set; }
 

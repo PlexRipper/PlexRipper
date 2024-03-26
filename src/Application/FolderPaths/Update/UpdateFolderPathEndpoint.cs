@@ -1,6 +1,7 @@
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
+using FileSystem.Contracts;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -21,8 +22,8 @@ public class UpdateFolderPathEndpointRequestValidator : Validator<UpdateFolderPa
         RuleFor(x => x.FolderPathDto.Id).GreaterThan(0);
         RuleFor(x => x.FolderPathDto.DisplayName).NotEmpty();
         RuleFor(x => x.FolderPathDto.Directory).NotEmpty();
-        RuleFor(x => x.FolderPathDto.FolderType).NotEqual(FolderType.None).NotEqual(FolderType.Unknown);
-        RuleFor(x => x.FolderPathDto.MediaType).NotEqual(PlexMediaType.None).NotEqual(PlexMediaType.Unknown);
+        RuleFor(x => x.FolderPathDto.FolderType).NotEqual(FolderType.Unknown);
+        RuleFor(x => x.FolderPathDto.MediaType).NotEqual(PlexMediaType.Unknown);
     }
 }
 

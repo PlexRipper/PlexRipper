@@ -35,7 +35,6 @@ public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccoun
         };
 
         // Act
-
         await ep.HandleAsync(request, default);
         var result = ep.Response;
 
@@ -69,7 +68,6 @@ public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccoun
         };
 
         // Act
-
         await ep.HandleAsync(request, default);
         var result = ep.Response;
 

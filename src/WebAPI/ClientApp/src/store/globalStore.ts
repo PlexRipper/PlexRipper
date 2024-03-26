@@ -2,8 +2,8 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { forkJoin, Observable, of, Subject } from 'rxjs';
 import Log from 'consola';
 import { switchMap, take, tap } from 'rxjs/operators';
-import IAppConfig from '@class/IAppConfig';
-import I18nObjectType from '@interfaces/i18nObjectType';
+import type IAppConfig from '@class/IAppConfig';
+import type { I18nObjectType } from '@interfaces';
 import {
 	useServerStore,
 	useLibraryStore,

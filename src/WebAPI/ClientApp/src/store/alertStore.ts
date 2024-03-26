@@ -1,7 +1,7 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { Observable, of, Subject } from 'rxjs';
-import ISetupResult from '@interfaces/service/ISetupResult';
-import IAlert from '@interfaces/IAlert';
+import type { ISetupResult } from '@interfaces';
+import type IAlert from '@interfaces/IAlert';
 
 export const useAlertStore = defineStore('AlertStore', () => {
 	const state = reactive<{ alerts: IAlert[]; alertDialogObservable: Subject<IAlert[]> }>({

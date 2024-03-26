@@ -2,9 +2,9 @@ import { isEqual, orderBy } from 'lodash-es';
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { get } from '@vueuse/core';
 import { useSettingsStore } from '#build/imports';
-import { PlexMediaSlimDTO, PlexMediaType, ViewMode } from '@dto/mainApi';
-import { IMediaOverviewSort } from '@composables/event-bus';
-import ISelection from '@interfaces/ISelection';
+import { PlexMediaType, ViewMode, type PlexMediaSlimDTO } from '@dto/mainApi';
+import type { IMediaOverviewSort } from '@composables/event-bus';
+import type { ISelection } from '@interfaces';
 export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 	const state = reactive<{
 		items: PlexMediaSlimDTO[];

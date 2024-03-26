@@ -2,7 +2,7 @@ import { describe, beforeAll, test, expect, beforeEach } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { useSignalrStore } from '@store';
 import { subscribeSpyTo, baseSetup, baseVars } from '~~/tests/_base/base';
-import ISetupResult from '@interfaces/service/ISetupResult';
+import type { ISetupResult } from '@interfaces';
 
 describe('SignalrStore.setup()', () => {
 	const { appConfig } = baseVars();

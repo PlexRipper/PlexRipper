@@ -21,6 +21,9 @@ public static partial class DbContextExtensions
             .ThenInclude(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(5))
             .FirstOrDefaultAsync(x => x.Id == plexServerId, cancellationToken);
 
+        if (plexServer is null)
+            return ResultExtensions.EntityNotFound(nameof(PlexServer), plexServerId);
+
         var plexServerConnections = plexServer.PlexServerConnections;
         if (!plexServerConnections.Any())
             return Result.Fail($"PlexServer with id {plexServer.Id} and name {plexServer.Name} has no connections available!").LogError();
@@ -70,10 +73,7 @@ public static partial class DbContextExtensions
     public static Task<Result<string>> GetPlexServerTokenAsync(
         this IPlexRipperDbContext dbContext,
         int plexServerId,
-        CancellationToken cancellationToken = default)
-    {
-        return GetPlexServerTokenAsync(dbContext, plexServerId, 0, cancellationToken);
-    }
+        CancellationToken cancellationToken = default) => GetPlexServerTokenAsync(dbContext, plexServerId, 0, cancellationToken);
 
     /// <summary>
     ///  Returns the authentication token needed to authenticate communication with the <see cref="PlexServer" />.

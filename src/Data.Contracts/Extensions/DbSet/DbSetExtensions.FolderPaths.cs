@@ -28,18 +28,18 @@ public static partial class DbSetExtensions
 
         return new Dictionary<PlexMediaType, FolderPath>
         {
-            { PlexMediaType.Movie, folderPaths.FirstOrDefault(x => x.Id == 2) },
-            { PlexMediaType.TvShow, folderPaths.FirstOrDefault(x => x.Id == 3) },
-            { PlexMediaType.Season, folderPaths.FirstOrDefault(x => x.Id == 3) },
-            { PlexMediaType.Episode, folderPaths.FirstOrDefault(x => x.Id == 3) },
-            { PlexMediaType.Music, folderPaths.FirstOrDefault(x => x.Id == 4) },
-            { PlexMediaType.Album, folderPaths.FirstOrDefault(x => x.Id == 4) },
-            { PlexMediaType.Song, folderPaths.FirstOrDefault(x => x.Id == 4) },
-            { PlexMediaType.Photos, folderPaths.FirstOrDefault(x => x.Id == 5) },
-            { PlexMediaType.OtherVideos, folderPaths.FirstOrDefault(x => x.Id == 6) },
-            { PlexMediaType.Games, folderPaths.FirstOrDefault(x => x.Id == 7) },
-            { PlexMediaType.None, folderPaths.FirstOrDefault(x => x.Id == 1) },
-            { PlexMediaType.Unknown, folderPaths.FirstOrDefault(x => x.Id == 1) },
+            { PlexMediaType.Movie, folderPaths.FirstOrDefault(x => x.Id == 2)! },
+            { PlexMediaType.TvShow, folderPaths.FirstOrDefault(x => x.Id == 3)! },
+            { PlexMediaType.Season, folderPaths.FirstOrDefault(x => x.Id == 3)! },
+            { PlexMediaType.Episode, folderPaths.FirstOrDefault(x => x.Id == 3)! },
+            { PlexMediaType.Music, folderPaths.FirstOrDefault(x => x.Id == 4)! },
+            { PlexMediaType.Album, folderPaths.FirstOrDefault(x => x.Id == 4)! },
+            { PlexMediaType.Song, folderPaths.FirstOrDefault(x => x.Id == 4)! },
+            { PlexMediaType.Photos, folderPaths.FirstOrDefault(x => x.Id == 5)! },
+            { PlexMediaType.OtherVideos, folderPaths.FirstOrDefault(x => x.Id == 6)! },
+            { PlexMediaType.Games, folderPaths.FirstOrDefault(x => x.Id == 7)! },
+            { PlexMediaType.None, folderPaths.FirstOrDefault(x => x.Id == 1)! },
+            { PlexMediaType.Unknown, folderPaths.FirstOrDefault(x => x.Id == 1)! },
         };
     }
 }

@@ -10,6 +10,8 @@ public static partial class PlexServerConnectionMapper
     #region ToDTO
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]
+    [MapProperty(nameof(PlexServerConnection.LatestConnectionStatus), nameof(PlexServerConnectionDTO.LatestConnectionStatus))]
+    [MapperIgnoreSource(nameof(PlexServerConnection.PlexServer))]
     public static partial PlexServerConnectionDTO ToDTO(this PlexServerConnection plexServerConnection);
 
     [MapperRequiredMapping(RequiredMappingStrategy.Target)]

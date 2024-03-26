@@ -1,4 +1,4 @@
-namespace BackgroundServices.Contracts;
+namespace Application.Contracts;
 
 public class JobStatusUpdate
 {
@@ -11,6 +11,8 @@ public class JobStatusUpdate
     public TimeSpan JobRuntime { get; set; }
 
     public DateTime JobStartTime { get; set; }
+
+    public JobTypes JobType { get; set; }
 
     public JobStatus Status { get; set; }
 

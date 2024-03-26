@@ -1,5 +1,6 @@
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 using Serilog.Events;
@@ -41,13 +42,14 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
         };
 
         // Act
-        var response = await Container.PostAsync(ApiRoutes.Download.PostDownloadMedia, dtoList);
-        var result = await response.Deserialize<ResultDTO>();
+        var response = await Container.ApiClient.POSTAsync<CreateDownloadTasksEndpoint, List<DownloadMediaDTO>, ResultDTO>(dtoList);
+        response.Response.IsSuccessStatusCode.ShouldBeTrue();
         await Task.Delay(2000);
         await Container.SchedulerService.AwaitScheduler();
         await Task.Delay(2000);
 
         // Assert
+        var result = response.Result;
         result.IsSuccess.ShouldBeTrue();
         var downloadTasksDb = await DbContext.GetAllDownloadTasksAsync();
         downloadTasksDb.ShouldNotBeNull();

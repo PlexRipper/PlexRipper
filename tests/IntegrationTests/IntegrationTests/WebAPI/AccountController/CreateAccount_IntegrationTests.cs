@@ -1,5 +1,6 @@
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 
@@ -22,8 +23,10 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         var plexAccountDTO = plexAccount.ToDTO();
 
         // Act
-        var response = await Container.ApiClient.PostAsJsonAsync(ApiRoutes.PlexAccountController, plexAccountDTO);
-        var resultDTO = await response.Deserialize<PlexAccountDTO>();
+        var response = await Container.ApiClient.POSTAsync<CreatePlexAccountEndpoint, PlexAccountDTO, ResultDTO<PlexAccount>>(plexAccountDTO);
+        response.Response.IsSuccessStatusCode.ShouldBeTrue();
+
+        var resultDTO = response.Result;
         resultDTO.IsSuccess.ShouldBeTrue();
         var result = resultDTO.ToResultModel();
         await Container.SchedulerService.AwaitScheduler();
@@ -32,11 +35,13 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         result.IsSuccess.ShouldBeTrue();
         DbContext.PlexAccounts.ToList().Count.ShouldBe(1);
 
+        var jobStatusList = Container.MockSignalRService.JobStatusUpdateList;
+        jobStatusList.ShouldContain(x => x.JobType == JobTypes.RefreshPlexServersAccessJob);
+
         // Ensure account has been created
         var plexAccountDb = DbContext.PlexAccounts
-            .Include(x => x.PlexAccountServers)
-            .ThenInclude(x => x.PlexServer)
-            .Include(x => x.PlexAccountLibraries)
+            .IncludeServerAccess()
+            .IncludeLibraryAccess()
             .FirstOrDefault();
         plexAccountDb.IsValidated = true;
         plexAccountDb.PlexServers.Count.ShouldBe(1);

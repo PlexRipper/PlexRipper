@@ -36,10 +36,9 @@ export default defineNuxtConfig({
 		'@vueuse/nuxt',
 		// Doc: https://i18n.nuxtjs.org/
 		'@nuxtjs/i18n',
-		'@vue-macros/nuxt',
-		'nuxt-vitest',
 		'nuxt-lodash',
 		// '@nuxt/devtools',
+		'@nuxt/test-utils/module',
 		[
 			'@pinia/nuxt',
 			{
@@ -72,12 +71,6 @@ export default defineNuxtConfig({
 		// Doc: https://typescript.nuxtjs.org/guide/setup.html#configuration
 		// Packages,  @types/node, vue-tsc and typescript are required
 		strict: true,
-	},
-	macros: {
-		// TODO this can be removed in Vue 3.3
-		// Enabled betterDefine to allow importing interfaces into defineProps
-		betterDefine: true,
-		defineOptions: true,
 	},
 	lodash: {
 		prefix: false,

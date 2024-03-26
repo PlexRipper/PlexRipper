@@ -1,7 +1,7 @@
 import { randBoolean, randBrand, randIp, randNumber, randRecentDate, randSemver, randUuid } from '@ngneat/falso';
 import { times } from 'lodash-es';
-import { PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
-import { checkConfig, incrementSeed, MockConfig } from '@mock';
+import type { PlexServerConnectionDTO, PlexServerDTO } from '@dto/mainApi';
+import { checkConfig, incrementSeed, type MockConfig } from '@mock';
 import { generatePlexServerConnections } from '@factories/plex-server-connection-factory';
 
 let plexServerIdIndex = 1;

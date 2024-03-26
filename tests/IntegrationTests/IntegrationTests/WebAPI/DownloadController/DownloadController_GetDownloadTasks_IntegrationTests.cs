@@ -1,4 +1,5 @@
 ﻿using Application.Contracts;
+using FastEndpoints;
 using PlexRipper.Application;
 
 namespace IntegrationTests.WebAPI.DownloadController;
@@ -29,11 +30,11 @@ public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrat
         await CreateContainer();
 
         // Act
-        var response = await Container.ApiClient.GetAsync(ApiRoutes.Download.GetDownloadTasks);
-        var result = await response.Deserialize<List<ServerDownloadProgressDTO>>();
+        var response = await Container.ApiClient.GETAsync<GetAllDownloadTasksEndpoint, ResultDTO<List<ServerDownloadProgressDTO>>>();
+        response.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         // Assert
-        response.IsSuccessStatusCode.ShouldBeTrue();
+        var result = response.Result;
         result.IsSuccess.ShouldBeTrue();
         var plexServer = result.Value.First();
         plexServer.ShouldNotBeNull();

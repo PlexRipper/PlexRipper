@@ -1,4 +1,6 @@
 ﻿using System.Text.Json;
+using Application.Contracts;
+using FastEndpoints;
 using PlexRipper.Application;
 using PlexRipper.Domain.Config;
 using PlexRipper.Settings;
@@ -18,11 +20,11 @@ public class SettingsController_Get_Settings_IntegrationTests : BaseIntegrationT
         await CreateContainer(4564);
 
         // Act
-        var response = await Container.ApiClient.GetAsync(ApiRoutes.Settings.GetSettings);
-        var result = await response.Deserialize<SettingsModelDTO>();
+        var response = await Container.ApiClient.GETAsync<GetUserSettingsEndpoint, ResultDTO<SettingsModelDTO>>();
+        response.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         // Assert
-        response.IsSuccessStatusCode.ShouldBeTrue();
+        var result = response.Result;
         result.IsSuccess.ShouldBeTrue();
         var settingsModel = result.Value.ToModel();
         var responseSettings = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigBase);

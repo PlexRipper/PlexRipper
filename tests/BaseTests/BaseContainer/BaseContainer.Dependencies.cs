@@ -3,7 +3,6 @@
 using Application.Contracts;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using BackgroundServices.Contracts;
 using Data.Contracts;
 using Environment;
 using FileSystem.Contracts;
@@ -85,6 +84,7 @@ public partial class BaseContainer : IDisposable
     public ITestStreamTracker TestStreamTracker => Resolve<ITestStreamTracker>();
 
     public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
+
     public IPlexRipperDbContext IPlexRipperDbContext => Resolve<IPlexRipperDbContext>();
 
     public ISchedulerService SchedulerService => Resolve<ISchedulerService>();
@@ -92,6 +92,7 @@ public partial class BaseContainer : IDisposable
     public IDownloadTaskScheduler DownloadTaskScheduler => Resolve<IDownloadTaskScheduler>();
 
     public IFileMergeScheduler FileMergeScheduler => Resolve<IFileMergeScheduler>();
+
     public MockSignalRService MockSignalRService => (MockSignalRService)Resolve<ISignalRService>();
 
     public TestLoggingClass TestLoggingClass => Resolve<TestLoggingClass>();

@@ -1,7 +1,7 @@
 import { randCompanyName, randDirectoryPath, randNumber, randRecentDate, randUuid } from '@ngneat/falso';
 import { times } from 'lodash-es';
-import { checkConfig, incrementSeed, MockConfig } from '@mock';
-import { FolderPathDTO, PlexLibraryDTO, PlexMediaType, PlexServerDTO } from '@dto/mainApi';
+import { checkConfig, incrementSeed, type MockConfig } from '@mock';
+import { PlexMediaType, type FolderPathDTO, type PlexLibraryDTO, type PlexServerDTO } from '@dto/mainApi';
 
 let plexLibraryIdIndex = 1;
 

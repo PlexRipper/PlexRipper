@@ -1,4 +1,5 @@
 using Application.Contracts;
+using FastEndpoints;
 using PlexRipper.Application;
 
 namespace IntegrationTests.WebAPI.AccountController;
@@ -19,8 +20,9 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
         var plexAccountDTO = plexAccount.ToDTO();
 
         // Act
-        var response = await Container.ApiClient.PostAsJsonAsync(ApiRoutes.PlexAccountController + "/validate", plexAccountDTO);
-        var result = await response.Deserialize<PlexAccountDTO>();
+        var response = await Container.ApiClient.POSTAsync<ValidatePlexAccountEndpoint, PlexAccountDTO, ResultDTO<PlexAccountDTO>>(plexAccountDTO);
+        response.Response.IsSuccessStatusCode.ShouldBeTrue();
+        var result = response.Result;
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

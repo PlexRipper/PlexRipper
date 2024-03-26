@@ -2,7 +2,7 @@ import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, baseVars, getAxiosMock } from '@services-test-base';
 import { generateResultDTO, generateSettingsModel } from '@mock';
-import ISetupResult from '@interfaces/service/ISetupResult';
+import type { ISetupResult } from '@interfaces';
 import { SETTINGS_RELATIVE_PATH } from '@api-urls';
 import { useSettingsStore } from '#imports';
 

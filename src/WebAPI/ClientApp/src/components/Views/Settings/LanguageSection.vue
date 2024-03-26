@@ -33,7 +33,7 @@
 <script setup lang="ts">
 import { get } from '@vueuse/core';
 import { useLocalizationStore } from '~/store';
-import ILocaleConfig from '@interfaces/ILocaleConfig';
+import type { ILocaleConfig } from '@interfaces';
 
 interface ILanguageOption extends ILocaleConfig {
 	value: string;

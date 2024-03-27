@@ -6,8 +6,6 @@
 	</div>
 </template>
 <script lang="ts" setup>
-import { defineProps } from 'vue';
-
 withDefaults(
 	defineProps<{
 		size: 'small' | 'normal' | 'large';

@@ -2,35 +2,35 @@
 
 namespace Application.Contracts;
 
-public class DownloadProgressDTO
+public record DownloadProgressDTO
 {
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
     /// <summary>
     /// The formatted media title as shown in Plex.
     /// </summary>
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// Note: Naming third just 'type' will cause errors in the Typescript type generating.
     /// </summary>
-    public PlexMediaType MediaType { get; set; }
+    public required PlexMediaType MediaType { get; set; }
 
-    public DownloadStatus Status { get; set; }
+    public required DownloadStatus Status { get; set; }
 
-    public decimal Percentage { get; set; }
+    public required decimal Percentage { get; set; }
 
-    public long DataReceived { get; set; }
+    public required long DataReceived { get; set; }
 
-    public long DataTotal { get; set; }
+    public required long DataTotal { get; set; }
 
-    public long DownloadSpeed { get; set; }
+    public required long DownloadSpeed { get; set; }
 
-    public long FileTransferSpeed { get; set; }
+    public required long FileTransferSpeed { get; set; }
 
-    public long TimeRemaining { get; set; }
+    public required long TimeRemaining { get; set; }
 
-    public List<string> Actions { get; set; }
+    public required List<string> Actions { get; set; }
 
-    public List<DownloadProgressDTO> Children { get; set; }
+    public required List<DownloadProgressDTO> Children { get; set; }
 }

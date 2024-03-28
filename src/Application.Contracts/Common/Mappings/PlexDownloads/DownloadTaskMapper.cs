@@ -3,41 +3,41 @@ using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
 
-[Mapper]
 public static partial class DownloadTaskGenericToDTOMapper
 {
     #region ToDTO
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(DownloadTaskGeneric.DownloadStatus), nameof(DownloadTaskDTO.Status))]
-    [MapperIgnoreTarget(nameof(DownloadTaskDTO.Quality))]
-    [MapperIgnoreTarget(nameof(DownloadTaskDTO.DownloadUrl))]
-    [MapperIgnoreTarget(nameof(DownloadTaskDTO.Actions))]
-    public static partial DownloadTaskDTO ToDTO(this DownloadTaskGeneric downloadTask);
+    public static DownloadTaskDTO ToDTO(this DownloadTaskGeneric downloadTask, string DownloadUrl = "") => new()
+    {
+        Id = downloadTask.Id,
+        Key = downloadTask.Key,
+        Title = downloadTask.Title,
+        FullTitle = downloadTask.FullTitle,
+        MediaType = downloadTask.MediaType,
+        DownloadTaskType = downloadTask.DownloadTaskType,
+        Status = downloadTask.DownloadStatus,
+        Percentage = downloadTask.Percentage,
+        DataReceived = downloadTask.DataReceived,
+        DataTotal = downloadTask.DataTotal,
+        CreatedAt = downloadTask.CreatedAt,
+        FileName = downloadTask.FileName,
+        TimeRemaining = downloadTask.TimeRemaining,
+        DownloadDirectory = downloadTask.DownloadDirectory,
+        DestinationDirectory = downloadTask.DestinationDirectory,
+        FileLocationUrl = downloadTask.FileLocationUrl,
+        DownloadSpeed = downloadTask.DownloadSpeed,
+        FileTransferSpeed = downloadTask.FileTransferSpeed,
+        DownloadUrl = DownloadUrl,
+        PlexServerId = downloadTask.PlexServerId,
+        PlexLibraryId = downloadTask.PlexLibraryId,
+        ParentId = downloadTask.ParentId,
+        Children = downloadTask.Children.Select(x => x.ToDTO(DownloadUrl)).ToList(),
+        Actions = DownloadTaskActions.Convert(downloadTask.DownloadStatus),
+    };
 
     #endregion
 
     #region DownloadProgress
-
-    public static DownloadProgressDTO ToDownloadProgressDto(this DownloadTaskGeneric downloadTask)
-    {
-        if (downloadTask is null)
-            return null;
-
-        var result = downloadTask.ToDownloadProgressDtoMapper();
-        result.Actions = DownloadTaskActions.Convert(result.Status);
-        return result;
-    }
-
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(DownloadTaskGeneric.DownloadStatus), nameof(DownloadProgressDTO.Status))]
-    [MapperIgnoreTarget(nameof(DownloadProgressDTO.Actions))]
-    [MapperIgnoreSource(nameof(DownloadTaskGeneric.Key))]
-    [MapperIgnoreSource(nameof(DownloadTaskGeneric.FullTitle))]
-    [MapperIgnoreSource(nameof(DownloadTaskGeneric.DownloadTaskType))]
-    [MapperIgnoreSource(nameof(DownloadTaskGeneric.CreatedAt))]
-    [MapperIgnoreSource(nameof(DownloadTaskGeneric.FileName))]
-    private static partial DownloadProgressDTO ToDownloadProgressDtoMapper(this DownloadTaskGeneric downloadTask);
 
     public static List<ServerDownloadProgressDTO> ToServerDownloadProgressDTOList(this List<DownloadTaskGeneric> source)
     {
@@ -45,7 +45,7 @@ public static partial class DownloadTaskGenericToDTOMapper
         foreach (var serverId in source.Select(x => x.PlexServerId).Distinct())
         {
             var downloadTasks = source.Where(x => x.PlexServerId == serverId).ToList();
-            var downloads = downloadTasks.Select(x => x.ToDownloadProgressDto()).ToList();
+            var downloads = downloadTasks.ToDownloadProgressDto();
             serverDownloads.Add(new ServerDownloadProgressDTO
             {
                 Id = serverId,
@@ -55,6 +55,32 @@ public static partial class DownloadTaskGenericToDTOMapper
         }
 
         return serverDownloads;
+    }
+
+    public static List<DownloadProgressDTO> ToDownloadProgressDto(this List<DownloadTaskGeneric> downloadTasks)
+    {
+        var result = new List<DownloadProgressDTO>();
+        if (!downloadTasks.Any())
+            return new List<DownloadProgressDTO>();
+
+        foreach (var downloadTask in downloadTasks)
+            result.Add(new DownloadProgressDTO
+            {
+                Id = downloadTask.Id,
+                Title = downloadTask.Title,
+                MediaType = downloadTask.MediaType,
+                Status = downloadTask.DownloadStatus,
+                Percentage = downloadTask.Percentage,
+                DataReceived = downloadTask.DataReceived,
+                DataTotal = downloadTask.DataTotal,
+                TimeRemaining = downloadTask.TimeRemaining,
+                DownloadSpeed = downloadTask.DownloadSpeed,
+                FileTransferSpeed = downloadTask.FileTransferSpeed,
+                Children = downloadTask.Children.ToDownloadProgressDto(),
+                Actions = DownloadTaskActions.Convert(downloadTask.DownloadStatus),
+            });
+
+        return result;
     }
 
     #endregion

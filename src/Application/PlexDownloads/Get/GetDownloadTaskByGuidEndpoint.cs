@@ -49,24 +49,18 @@ public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidR
             return;
         }
 
-        var downloadTaskDto = downloadTask.ToDTO();
+        // Add DownloadUrl to DownloadTaskDTO
         if (!downloadTask.IsDownloadable)
         {
-            await SendFluentResult(Result.Ok(downloadTaskDto), x => x, ct);
+            var downloadUrl =
+                await _dbContext.GetDownloadUrl(downloadTask.PlexServerId, downloadTask.FileLocationUrl, ct);
+            if (downloadUrl.IsFailed)
+                downloadUrl.LogError();
+
+            await SendFluentResult(Result.Ok(downloadTask), x => x.ToDTO(downloadUrl.ValueOrDefault), ct);
             return;
         }
 
-        // Add DownloadUrl to DownloadTaskDTO
-        var downloadUrl =
-            await _dbContext.GetDownloadUrl(downloadTaskDto.PlexServerId, downloadTaskDto.FileLocationUrl, ct);
-        if (downloadUrl.IsFailed)
-        {
-            await SendFluentResult(downloadUrl.ToResult(), ct);
-            return;
-        }
-
-        downloadTaskDto.DownloadUrl = downloadUrl.Value;
-
-        await SendFluentResult(Result.Ok(downloadTaskDto), x => x, ct);
+        await SendFluentResult(Result.Ok(downloadTask), x => x.ToDTO(), ct);
     }
 }

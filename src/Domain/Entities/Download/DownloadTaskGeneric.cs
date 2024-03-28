@@ -101,5 +101,5 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
         };
     }
 
-    public override string ToString() => $"[DownloadTask [{DownloadTaskType}] [{DownloadStatus}] [{Title}]";
+    public override string ToString() => $"DownloadTaskUpdate: [{DownloadTaskType}] [{DownloadStatus}] [{Title}] [Download Location: {DownloadDirectory}]";
 }

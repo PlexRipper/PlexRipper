@@ -31,11 +31,10 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import type { TreeNode } from 'primevue/treenode/TreeNode.d.ts';
 import type { DownloadProgressDTO, PlexServerDTO } from '@dto/mainApi';
 import type { QTreeViewTableItem } from '@props';
 import { getDownloadTableColumns } from '#imports';
-import type { ISelection } from '@interfaces';
+import { IDownloadTableNode, ISelection } from '@interfaces';
 import { useDownloadStore, useServerConnectionStore, useServerStore } from '~/store';
 
 const downloadStore = useDownloadStore();
@@ -52,19 +51,22 @@ const emit = defineEmits<{
 	(e: 'selected', payload: ISelection): void;
 }>();
 
-const nodes = computed((): TreeNode[] => {
+const nodes = computed((): IDownloadTableNode[] => {
 	// TODO: Move this to the back-end to increase performance
 	return mapToTreeNodes(downloadStore.getDownloadsByServerId(props.plexServer.id));
 });
 
-function mapToTreeNodes(value: DownloadProgressDTO[]): TreeNode[] {
+function mapToTreeNodes(value: DownloadProgressDTO[]): IDownloadTableNode[] {
+	if (!value) {
+		return [];
+	}
 	return value.map((x) => {
 		return {
 			...x,
 			key: `${x.mediaType}-${x.id}`,
 			label: x.title,
 			children: mapToTreeNodes(x.children),
-		} as TreeNode;
+		};
 	});
 }
 

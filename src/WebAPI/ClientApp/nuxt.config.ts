@@ -37,7 +37,6 @@ export default defineNuxtConfig({
 		// Doc: https://i18n.nuxtjs.org/
 		'@nuxtjs/i18n',
 		'nuxt-lodash',
-		// '@nuxt/devtools',
 		'@nuxt/test-utils/module',
 		[
 			'@pinia/nuxt',

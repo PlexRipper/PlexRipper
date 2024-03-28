@@ -1,5 +1,5 @@
 <template>
-	<PTreeTable
+	<TreeTable
 		:value="nodes"
 		auto-layout
 		:selection-keys="selected"
@@ -8,13 +8,15 @@
 		:paginator="true"
 		:rows="10"
 		scrollable
+		resizable-columns
+		:table-props="{ style: { minWidth: '30rem' } }"
 		scroll-height="flex"
 		paginator-position="both"
 		:page-link-size="10"
 		:row-hover="true"
 		:rows-per-page-options="[10, 25, 50, 100]"
 		@update:selection-keys="onSelectionChange">
-		<PColumn
+		<Column
 			v-for="(column, index) in columns"
 			:key="index"
 			column-key="id"
@@ -28,21 +30,21 @@
 					:model-value="headerSelected"
 					@update:model-value="$emit('all-selected', $event)" />
 			</template>
-			<template #body="{ node }: { node: any, data: TreeNode }">
+			<template #body="{ node }: { node: IDownloadTableNode }">
 				<PTreeTableRow :column="column" :index="index" :node="node" @action="$emit('action', $event)" />
 			</template>
-		</PColumn>
-	</PTreeTable>
+		</Column>
+	</TreeTable>
 </template>
 
 <script setup lang="ts">
-import type { TreeNode } from 'primevue/treenode/TreeNode.d.ts';
 import type { TreeTableSelectionKeys } from 'primevue/treetable';
 import type { QTreeViewTableHeader, QTreeViewTableItem } from '@props';
 import type IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
+import type { IDownloadTableNode } from '@interfaces';
 
 defineProps<{
-	nodes: TreeNode[];
+	nodes: IDownloadTableNode[];
 	columns: QTreeViewTableHeader[];
 	headerSelected?: boolean | null;
 	selected: IPTreeTableSelectionKeys;

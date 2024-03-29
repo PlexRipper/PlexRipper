@@ -16,7 +16,7 @@ public class DownloadWorkerTask : BaseEntity
     /// <param name="partIndex"></param>
     /// <param name="startPosition"></param>
     /// <param name="endPosition"></param>
-    public DownloadWorkerTask(DownloadTaskGeneric downloadTask, int partIndex, long startPosition, long endPosition)
+    public DownloadWorkerTask(DownloadTaskFileBase downloadTask, int partIndex, long startPosition, long endPosition)
     {
         TempDirectory = downloadTask.DownloadDirectory;
         FileLocationUrl = downloadTask.FileLocationUrl;

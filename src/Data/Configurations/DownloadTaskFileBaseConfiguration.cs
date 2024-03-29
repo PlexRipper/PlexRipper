@@ -15,8 +15,6 @@ public class DownloadTaskFileBaseConfiguration : IEntityTypeConfiguration<Downlo
             .HasForeignKey(x => x.DownloadTaskId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.OwnsOne(x => x.DestinationDirectory, cb => { cb.ToJson(); });
-
-        builder.OwnsOne(x => x.DownloadDirectory, cb => { cb.ToJson(); });
+        builder.OwnsOne(x => x.DirectoryMeta, cb => { cb.ToJson(); });
     }
 }

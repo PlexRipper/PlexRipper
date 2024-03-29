@@ -55,17 +55,8 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase
     [Column(Order = 15)]
     public required string Quality { get; set; }
 
-    /// <summary>
-    /// Gets or sets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
-    /// </summary>
     [Column(Order = 16)]
-    public required DownloadTaskDirectory DownloadDirectory { get; set; }
-
-    /// <summary>
-    /// Gets or sets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
-    /// </summary>
-    [Column(Order = 17)]
-    public required DownloadTaskDirectory DestinationDirectory { get; set; }
+    public required DownloadTaskDirectory DirectoryMeta { get; set; }
 
     #region Relationships
 
@@ -78,6 +69,43 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase
     public override PlexMediaType MediaType => PlexMediaType.None;
 
     public override DownloadTaskType DownloadTaskType => DownloadTaskType.None;
+
+    /// <summary>
+    /// Gets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
+    /// </summary>
+    [NotMapped]
+    public string DownloadDirectory
+    {
+        get
+        {
+            switch (DownloadTaskType)
+            {
+                case DownloadTaskType.MovieData:
+                    return Path.Combine(DirectoryMeta.DownloadRootPath, "Movies", DirectoryMeta.MovieFolder);
+                case DownloadTaskType.EpisodeData:
+                    return Path.Combine(DirectoryMeta.DownloadRootPath, "TvShows", DirectoryMeta.TvShowFolder, DirectoryMeta.SeasonFolder);
+                default:
+                    Result.Fail<string>($"Invalid DownloadTaskType of type: {DownloadTaskType}").LogError();
+                    return string.Empty;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
+    /// </summary>
+    [NotMapped]
+    public Result<string> DestinationDirectory => DownloadTaskType switch
+    {
+        DownloadTaskType.MovieData => Result.Ok(Path.Combine(
+            DirectoryMeta.DestinationRootPath,
+            DirectoryMeta.MovieFolder)),
+        DownloadTaskType.EpisodeData => Result.Ok(Path.Combine(
+            DirectoryMeta.DestinationRootPath,
+            DirectoryMeta.TvShowFolder,
+            DirectoryMeta.SeasonFolder)),
+        _ => Result.Fail<string>($"Invalid DownloadTaskType of type: {DownloadTaskType}").LogError(),
+    };
 
     /// <summary>
     /// Gets a joined string of temp file paths of the <see cref="DownloadWorkerTasks"/> delimited by ";".

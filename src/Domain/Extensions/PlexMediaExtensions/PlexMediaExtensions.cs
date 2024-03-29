@@ -120,23 +120,13 @@ public static class PlexMediaExtensions
                 FileName = Path.GetFileName(part.File),
                 FileLocationUrl = part.ObfuscatedFilePath,
                 Quality = plexMediaData.VideoResolution,
-                DownloadDirectory = new DownloadTaskDirectory()
+                DirectoryMeta = new DownloadTaskDirectory()
                 {
-                    RootPath = string.Empty,
+                    DownloadRootPath = string.Empty,
+                    DestinationRootPath = string.Empty,
                     MovieFolder = plexMovie.Title,
-                    Type = DownloadTaskType.MovieData,
                     TvShowFolder = string.Empty,
                     SeasonFolder = string.Empty,
-                    FileName = Path.GetFileName(part.File),
-                },
-                DestinationDirectory = new DownloadTaskDirectory()
-                {
-                    RootPath = string.Empty,
-                    MovieFolder = plexMovie.Title,
-                    Type = DownloadTaskType.MovieData,
-                    TvShowFolder = string.Empty,
-                    SeasonFolder = string.Empty,
-                    FileName = Path.GetFileName(part.File),
                 },
                 DownloadWorkerTasks = null,
                 Parent = null,
@@ -167,23 +157,13 @@ public static class PlexMediaExtensions
                 FileName = Path.GetFileName(part.File),
                 FileLocationUrl = part.ObfuscatedFilePath,
                 Quality = plexMediaData.VideoResolution,
-                DownloadDirectory = new DownloadTaskDirectory()
+                DirectoryMeta = new DownloadTaskDirectory()
                 {
-                    RootPath = string.Empty,
+                    DownloadRootPath = string.Empty,
+                    DestinationRootPath = string.Empty,
                     MovieFolder = string.Empty,
-                    Type = DownloadTaskType.EpisodeData,
                     TvShowFolder = plexTvShowEpisode.TvShow.Title,
                     SeasonFolder = plexTvShowEpisode.TvShowSeason.Title,
-                    FileName = Path.GetFileName(part.File),
-                },
-                DestinationDirectory = new DownloadTaskDirectory()
-                {
-                    RootPath = string.Empty,
-                    MovieFolder = string.Empty,
-                    Type = DownloadTaskType.EpisodeData,
-                    TvShowFolder = plexTvShowEpisode.TvShow.Title,
-                    SeasonFolder = plexTvShowEpisode.TvShowSeason.Title,
-                    FileName = Path.GetFileName(part.File),
                 },
                 DownloadWorkerTasks = null,
                 Parent = null,

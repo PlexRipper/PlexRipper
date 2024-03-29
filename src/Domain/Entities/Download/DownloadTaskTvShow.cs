@@ -10,12 +10,6 @@ public class DownloadTaskTvShow : DownloadTaskParentBase
 
     #region Helpers
 
-    public override void SetNull()
-    {
-        base.SetNull();
-        Children = null;
-    }
-
     public override PlexMediaType MediaType => PlexMediaType.TvShow;
 
     public override DownloadTaskType DownloadTaskType => DownloadTaskType.TvShow;

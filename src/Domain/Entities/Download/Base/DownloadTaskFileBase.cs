@@ -75,12 +75,6 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase
 
     #region Helpers
 
-    public override void SetNull()
-    {
-        base.SetNull();
-        DownloadWorkerTasks = null;
-    }
-
     public override PlexMediaType MediaType => PlexMediaType.None;
 
     public override DownloadTaskType DownloadTaskType => DownloadTaskType.None;

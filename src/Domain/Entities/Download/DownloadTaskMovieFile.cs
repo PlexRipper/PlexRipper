@@ -12,12 +12,6 @@ public class DownloadTaskMovieFile : DownloadTaskFileBase
 
     #region Helpers
 
-    public override void SetNull()
-    {
-        base.SetNull();
-        Parent = null;
-    }
-
     public override int Count => 1;
 
     public override PlexMediaType MediaType => PlexMediaType.Movie;

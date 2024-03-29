@@ -14,12 +14,6 @@ public class DownloadTaskTvShowSeason : DownloadTaskParentBase
 
     #region Helpers
 
-    public override void SetNull()
-    {
-        base.SetNull();
-        Children = null;
-    }
-
     public override PlexMediaType MediaType => PlexMediaType.Season;
 
     public override DownloadTaskType DownloadTaskType => DownloadTaskType.Season;

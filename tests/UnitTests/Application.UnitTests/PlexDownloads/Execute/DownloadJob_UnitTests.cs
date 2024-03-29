@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Application.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
@@ -18,8 +19,7 @@ public class DownloadJob_UnitTests : BaseUnitTest<DownloadJob>
         mock.Mock<IDownloadManagerSettingsModule>().Setup(x => x.DownloadSegments).Returns(4);
         IDictionary<string, object> dict = new Dictionary<string, object>
         {
-            { DownloadJob.DownloadTaskIdParameter, testDownloadTask.Id },
-            { DownloadJob.PlexServerIdParameter, 1 },
+            { DownloadJob.DownloadTaskIdParameter, JsonSerializer.Serialize(testDownloadTask.ToKey()) },
         };
         mock.Mock<IJobExecutionContext>().SetupGet(x => x.JobDetail.JobDataMap).Returns(new JobDataMap(dict));
         mock.Mock<IJobExecutionContext>().SetupGet(x => x.CancellationToken).Returns(CancellationToken.None);

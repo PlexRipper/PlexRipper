@@ -30,7 +30,7 @@ public class StartDownloadJob_IntegrationTests : BaseIntegrationTests
         var movieFileDownloadTask = movieDownloadTasks[0].Children[0];
 
         // Act
-        var startResult = await Container.DownloadTaskScheduler.StartDownloadTaskJob(movieFileDownloadTask.Id, movieFileDownloadTask.PlexServerId);
+        var startResult = await Container.DownloadTaskScheduler.StartDownloadTaskJob(movieFileDownloadTask.ToKey());
         await Container.SchedulerService.AwaitScheduler();
 
         // Assert

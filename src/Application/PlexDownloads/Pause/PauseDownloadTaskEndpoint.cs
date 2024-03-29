@@ -53,7 +53,14 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
     {
         _log.Information("Pausing DownloadTask with id {DownloadTaskGuid} from downloading", req.DownloadTaskGuid);
 
-        var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(req.DownloadTaskGuid);
+        var downloadTaskKey = await _dbContext.GetDownloadTaskKeyAsync(req.DownloadTaskGuid, ct);
+        if (downloadTaskKey is null)
+        {
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), req.DownloadTaskGuid), ct);
+            return;
+        }
+
+        var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey);
         if (stopResult.IsFailed)
         {
             await SendFluentResult(stopResult, ct);
@@ -67,7 +74,6 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
         // Update the download task status
         await _dbContext.SetDownloadStatus(req.DownloadTaskGuid, DownloadStatus.Paused);
 
-        var downloadTaskKey = await _dbContext.GetDownloadTaskKeyAsync(req.DownloadTaskGuid, ct);
         await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTaskKey), ct);
 
         await SendFluentResult(Result.Ok(), ct);

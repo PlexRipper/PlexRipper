@@ -86,7 +86,7 @@ public class DownloadQueue : IDownloadQueue
 
         _log.Information("Selected download task {NextDownloadTaskFullTitle} to start as the next task", nextDownloadTask.FullTitle);
 
-        await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTask.Id, nextDownloadTask.PlexServerId);
+        await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTask.ToKey());
 
         return Result.Ok(nextDownloadTask);
     }

@@ -42,9 +42,11 @@ public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownload
     public async Task<Result> Handle(RestartDownloadTaskCommand command, CancellationToken cancellationToken)
     {
         var downloadTaskGuid = command.DownloadTaskGuid;
-        var stopDownloadTasksResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskGuid);
-        if (stopDownloadTasksResult.IsFailed)
-            return stopDownloadTasksResult.ToResult().LogError();
+
+        // var stopDownloadTasksResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskGuid);
+        // if (stopDownloadTasksResult.IsFailed)
+        //     return stopDownloadTasksResult.ToResult().LogError();
+        await Task.CompletedTask;
 
         // TODO Implement RegenerateDownloadTask
 

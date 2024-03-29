@@ -1909,11 +1909,11 @@
       },
       "Quartz.Serialization.Json": {
         "type": "Transitive",
-        "resolved": "3.5.0",
-        "contentHash": "zv/FDvMaJiVKwz1YU8ZYlnZihTG9eM7fhffPKaaZs/gw/vCMe/pcceUZVoURhzpJW53UIVw8CEYZzb4yRiC3SA==",
+        "resolved": "3.8.1",
+        "contentHash": "lrQOeR/F61pZDFKzFbOcQblSIhzwY6501D/SGrUafiwWSQUItKKDnjbcbGodCTKSfWvshblP6hohzEKdOw57kw==",
         "dependencies": {
-          "Newtonsoft.Json": "12.0.3",
-          "Quartz": "3.5.0"
+          "Newtonsoft.Json": "13.0.1",
+          "Quartz": "3.8.1"
         }
       },
       "RamlToOpenApiConverter": {
@@ -3244,7 +3244,7 @@
           "PlexRipper.PlexApi": "[1.0.0, )",
           "PlexRipper.Settings": "[1.0.0, )",
           "Quartz.Extensions.Hosting": "[3.8.1, )",
-          "Quartz.Serialization.Json": "[3.5.0, )",
+          "Quartz.Serialization.Json": "[3.8.1, )",
           "Serilog.AspNetCore": "[8.0.1, )",
           "SignalRSwaggerGen": "[4.2.0, )",
           "WebAPI.Contracts": "[1.0.0, )"

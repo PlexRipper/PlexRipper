@@ -13,22 +13,19 @@ public class RestsharpExtensions_ToResponseResult : BaseUnitTest<RestsharpExtens
 
     #endregion
 
-    private RestRequest CreateRestRequest()
+    private RestRequest CreateRestRequest() => new()
     {
-        return new RestRequest
-        {
-            Resource = "test",
-        };
-    }
+        Resource = "test",
+    };
 
     [Fact]
     public void ShouldHaveAFailedResult_WhenOkResponseContainsBadGateway()
     {
         // Arrange
         var content = "Bad Gateway";
-        var response = new RestResponse<string>()
+        var response = new RestResponse<string>(new RestRequest())
         {
-            IsSuccessful = true,
+            IsSuccessStatusCode = true,
             StatusCode = HttpStatusCode.OK,
             Content = content,
             Request = CreateRestRequest(),
@@ -47,7 +44,7 @@ public class RestsharpExtensions_ToResponseResult : BaseUnitTest<RestsharpExtens
     public void ShouldHaveAFailedResult_WhenTimeoutTaskCanceledException()
     {
         // Arrange
-        var response = new RestResponse<string>()
+        var response = new RestResponse<string>(new RestRequest())
         {
             StatusCode = 0,
             ResponseStatus = ResponseStatus.TimedOut,
@@ -69,7 +66,7 @@ public class RestsharpExtensions_ToResponseResult : BaseUnitTest<RestsharpExtens
     public void ShouldHaveAFailedResultWithPlexError_WhenPlexErrorEnterVerificationCodeResponse()
     {
         // Arrange
-        var response = new RestResponse<string>()
+        var response = new RestResponse<string>(new RestRequest())
         {
             StatusCode = HttpStatusCode.Unauthorized,
             ResponseStatus = ResponseStatus.Error,
@@ -90,7 +87,7 @@ public class RestsharpExtensions_ToResponseResult : BaseUnitTest<RestsharpExtens
     public void ShouldHaveAFailedResultWithPlexError_WhenPlexErrorInvalidVerificationCodeResponse()
     {
         // Arrange
-        var response = new RestResponse<string>()
+        var response = new RestResponse<string>(new RestRequest())
         {
             StatusCode = HttpStatusCode.Unauthorized,
             ResponseStatus = ResponseStatus.Error,
@@ -112,9 +109,9 @@ public class RestsharpExtensions_ToResponseResult : BaseUnitTest<RestsharpExtens
     {
         // Arrange
         var content = "test success";
-        var response = new RestResponse<string>()
+        var response = new RestResponse<string>(new RestRequest())
         {
-            IsSuccessful = true,
+            IsSuccessStatusCode = true,
             StatusCode = HttpStatusCode.OK,
             Data = content,
             Request = CreateRestRequest(),

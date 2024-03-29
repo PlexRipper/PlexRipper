@@ -27,6 +27,7 @@
 		<PackageReference Include="System.Reactive" Version="5.0.0" />
 		<PackageReference Include="System.Reactive.Interfaces" Version="5.0.0" />
 		<PackageReference Include="System.Reactive.Linq" Version="5.0.0" />
+		<PackageReference Include="System.Text.Json" Version="8.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>

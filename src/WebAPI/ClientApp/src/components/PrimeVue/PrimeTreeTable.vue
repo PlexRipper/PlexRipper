@@ -4,34 +4,76 @@
 		auto-layout
 		:selection-keys="selected"
 		selection-mode="checkbox"
-		class="p-treetable-sm"
 		:paginator="true"
 		:rows="10"
 		scrollable
-		resizable-columns
-		:table-props="{ style: { minWidth: '30rem' } }"
 		scroll-height="flex"
 		paginator-position="both"
 		:page-link-size="10"
 		:row-hover="true"
+		size="small"
 		:rows-per-page-options="[10, 25, 50, 100]"
 		@update:selection-keys="onSelectionChange">
-		<Column
-			v-for="(column, index) in columns"
-			:key="index"
-			column-key="id"
-			:style="{ minWidth: index === 0 ? '20%' : '7%', maxWidth: index === 0 ? 'none' : '100px', height: '55px' }"
-			:field="column.field"
-			:header="column.label"
-			:expander="index === 0">
+		<Column field="title" header="Title" expander>
 			<template #header>
-				<QCheckbox
-					v-if="column.type === 'title'"
-					:model-value="headerSelected"
-					@update:model-value="$emit('all-selected', $event)" />
+				<QCheckbox :model-value="headerSelected" @update:model-value="$emit('all-selected', $event)" />
 			</template>
-			<template #body="{ node }: { node: IDownloadTableNode }">
-				<PTreeTableRow :column="column" :index="index" :node="node" @action="$emit('action', $event)" />
+			<template #body="{ node, column }: { node: IDownloadTableNode; column: ColumnProps }">
+				<q-media-type-icon v-if="node.mediaType" :size="26" :media-type="node.mediaType" class="q-mr-md" />
+				<span :data-cy="`column-${column.field}-${node.id}`">{{ node.title }}</span>
+			</template>
+		</Column>
+		<Column field="status" header="Status" style="max-width: 10rem">
+			<template #body="{ node, column }: { node: IDownloadTableNode; column: ColumnProps }">
+				<span :data-cy="`column-${column.field}-${node.id}`">
+					{{ node.status }}
+				</span>
+			</template>
+		</Column>
+		<Column field="dataReceived" header="Received" style="max-width: 10rem">
+			<template #body="{ node, column }: { node: IDownloadTableNode; column: ColumnProps }">
+				<QFileSize :data-cy="`column-${column.field}-${node.id}`" :size="node.dataReceived" />
+			</template>
+		</Column>
+		<Column field="dataTotal" header="Size" style="max-width: 10rem">
+			<template #body="{ node, column }: { node: IDownloadTableNode; column: ColumnProps }">
+				<QFileSize :data-cy="`column-${column.field}-${node.id}`" :size="node.dataTotal" />
+			</template>
+		</Column>
+		<Column field="downloadSpeed" header="Speed" style="max-width: 10rem">
+			<template #body="{ node, column }: { node: IDownloadTableNode; column: ColumnProps }">
+				<QFileSize :data-cy="`column-${column.field}-${node.id}`" :size="node.downloadSpeed" speed />
+			</template>
+		</Column>
+		<Column field="timeRemaining" header="ETA" style="max-width: 10rem">
+			<template #body="{ node, column }: { node: IDownloadTableNode; column: ColumnProps }">
+				<QDuration short :data-cy="`column-${column.field}-${node.id}`" :value="node.timeRemaining" />
+			</template>
+		</Column>
+		<Column field="percentage" header="Percentage" style="max-width: 10rem">
+			<template #body="{ node, column }: { node: IDownloadTableNode; column: ColumnProps }">
+				<QProgressBar :data-cy="`column-${column.field}-${node.id}`" :value="node.percentage" />
+			</template>
+		</Column>
+		<Column field="actions" header="Actions" style="max-width: 15rem">
+			<template #body="{ node, column }: { node: IDownloadTableNode; column: ColumnProps }">
+				<q-row justify="start" no-wrap>
+					<q-col cols="auto">
+						<!-- Item Actions -->
+						<IconSquareButton
+							v-for="(action, y) in node.actions"
+							:key="`${node.id}-${y}`"
+							dense
+							:cy="`column-${column.field}-${action}-${node.id}`"
+							:icon="Convert.buttonTypeToIcon(action as ButtonType)"
+							@click.stop="
+								$emit('action', {
+									action: action,
+									data: node,
+								})
+							" />
+					</q-col>
+				</q-row>
 			</template>
 		</Column>
 	</TreeTable>
@@ -39,9 +81,12 @@
 
 <script setup lang="ts">
 import type { TreeTableSelectionKeys } from 'primevue/treetable';
-import type { QTreeViewTableHeader, QTreeViewTableItem } from '@props';
+import type { ColumnProps } from 'primevue/column';
+import type { QTreeViewTableHeader } from '@props';
 import type IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
 import type { IDownloadTableNode } from '@interfaces';
+import Convert from '@class/Convert';
+import ButtonType from '@enums/buttonType';
 
 defineProps<{
 	nodes: IDownloadTableNode[];
@@ -65,7 +110,7 @@ const emits = defineEmits<{
 	(e: 'update:model-value', payload: boolean): void;
 	(e: 'selected', payload: TreeTableSelectionKeys): void;
 	(e: 'all-selected', payload: boolean): void;
-	(e: 'action', payload: { action: string; data: QTreeViewTableItem }): void;
+	(e: 'action', payload: { action: string; data: IDownloadTableNode }): void;
 }>();
 </script>
 <style lang="scss">

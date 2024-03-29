@@ -86,11 +86,11 @@ public static class RestSharpExtensions
             return Result.Fail("Request timed out").Add408RequestTimeoutError().LogError();
 
         // Weird case where the status code is 200 but the content is "Bad Gateway"
-        if (response.IsSuccessful && response.Content == "Bad Gateway")
+        if (response.IsSuccessStatusCode && response.Content == "Bad Gateway")
             return Result.Fail("Server responded with Bad Gateway").Add502BadGatewayError();
 
         // Successful response
-        if (response.IsSuccessful)
+        if (response.IsSuccessStatusCode)
             return Result.Ok(response.Data).AddStatusCode((int)response.StatusCode).LogDebug();
 
         var statusDescription = "";

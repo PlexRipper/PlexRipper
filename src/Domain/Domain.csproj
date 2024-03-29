@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
-		<LangVersion>11</LangVersion>
+		<TargetFramework>net8.0</TargetFramework>
+		<LangVersion>12</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>PlexRipper.Domain</RootNamespace>
 		<AssemblyName>PlexRipper.Domain</AssemblyName>
@@ -12,12 +12,12 @@
 
 	<ItemGroup>
 		<PackageReference Include="AutoMapper" Version="12.0.1" />
-		<PackageReference Include="ByteSize" Version="2.1.1" />
+		<PackageReference Include="ByteSize" Version="2.1.2" />
 		<PackageReference Include="FluentValidation" Version="11.9.0" />
-		<PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
+		<PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
 		<PackageReference Include="LanguageExt.Core" Version="4.4.8" />
-		<PackageReference Include="MediatR" Version="12.0.0" />
-		<PackageReference Include="NaturalSort.Extension" Version="4.0.0" />
+		<PackageReference Include="MediatR" Version="12.2.0" />
+		<PackageReference Include="NaturalSort.Extension" Version="4.2.0" />
 		<PackageReference Include="Riok.Mapperly" Version="3.4.0" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.312">
 			<PrivateAssets>all</PrivateAssets>
@@ -25,8 +25,7 @@
 		</PackageReference>
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 		<PackageReference Include="System.Reactive" Version="5.0.0" />
-		<PackageReference Include="System.Reactive.Interfaces" Version="5.0.0" />
-		<PackageReference Include="System.Reactive.Linq" Version="5.0.0" />
+		<PackageReference Include="System.Text.Json" Version="8.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>

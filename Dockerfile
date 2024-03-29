@@ -24,7 +24,7 @@ COPY ./src/WebAPI/ClientApp/ ./
 RUN npm run generate --fail-on-error
 
 ## Setup .NET Core back-end
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 ## Domain Projects

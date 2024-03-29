@@ -32,7 +32,8 @@ public class PlexMockServer : IDisposable
 
         Server = WireMockServer.Start(new WireMockServerSettings()
         {
-            ThrowExceptionWhenMatcherFails = true,
+            // TODO Migrate this option to the new version: https://github.com/WireMock-Net/WireMock.Net/issues/1086
+            //ThrowExceptionWhenMatcherFails = true,
             HostingScheme = HostingScheme.HttpAndHttps,
         });
 

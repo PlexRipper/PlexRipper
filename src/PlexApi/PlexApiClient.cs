@@ -29,12 +29,14 @@ public class PlexApiClient
             MaxTimeout = 60000,
             ThrowOnAnyError = false,
         };
-        _client = new RestClient(httpClient, options);
+        _client = new RestClient(httpClient, options, configureSerialization: config =>
+        {
+            config.UseSystemTextJson(SerializerOptions);
+            config.UseDotNetXmlSerializer();
+        });
 
         // HTTPS connections expect an user agent to be set
         _client.AddDefaultHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64)");
-        _client.UseSystemTextJson(SerializerOptions);
-        _client.UseDotNetXmlSerializer();
     }
 
     #endregion

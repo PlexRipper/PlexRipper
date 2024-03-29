@@ -1618,11 +1618,6 @@
           "Newtonsoft.Json": "13.0.1"
         }
       },
-      "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": {
-        "type": "Transitive",
-        "resolved": "1.16.1",
-        "contentHash": "LbhMLd8inAwC5UvmzCfgT869zCmuXNNF1ICaBPROtB5TfGoMEpk9zEiTfa/e3PKOla/uz42WujhspNrv7d35AQ=="
-      },
       "Microsoft.Win32.SystemEvents": {
         "type": "Transitive",
         "resolved": "6.0.0",
@@ -1837,22 +1832,22 @@
       },
       "Quartz.Extensions.DependencyInjection": {
         "type": "Transitive",
-        "resolved": "3.5.0",
-        "contentHash": "dlXLaHXTfI7hkAmoMtnB0j10RxFmESr0p8nyAvdvrWOb4vmeNMac39i4TUCmO2oqlDUhmbt/ZqDoQucOPkrvzg==",
+        "resolved": "3.8.1",
+        "contentHash": "wXHLkm9fTFsIfaR8JHp4ttYYZB6fRjH7ZEgbhPtiiMp6V4LposWLC0UpG5ZLWjjIFk2LTr/N9fK983W+lJAo7w==",
         "dependencies": {
-          "Microsoft.Extensions.Configuration.Abstractions": "2.1.1",
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "2.1.1",
-          "Microsoft.Extensions.Options": "2.1.1",
-          "Quartz": "3.5.0"
+          "Microsoft.Extensions.Configuration.Abstractions": "8.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0",
+          "Microsoft.Extensions.Options": "8.0.0",
+          "Quartz": "3.8.1"
         }
       },
       "Quartz.Extensions.Hosting": {
         "type": "Transitive",
-        "resolved": "3.5.0",
-        "contentHash": "5to3zi9QFMjqRidmp+QvkdEDjozDiW0hUT8QZz0xsPK3mTZeJFXv35qSWCNb4wnw+XHT5e4WN9DnpN4qj6D3oA==",
+        "resolved": "3.8.1",
+        "contentHash": "pgxrlRNF8b0kFLduCknTxoQ8zhB+HB6i8NrTD6LxS8aw4ByRSl1Gb9hsgWff7YGAeJ/OK92p7tptQhSDWn8G4Q==",
         "dependencies": {
-          "Microsoft.Extensions.Hosting.Abstractions": "2.1.1",
-          "Quartz.Extensions.DependencyInjection": "3.5.0"
+          "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
+          "Quartz.Extensions.DependencyInjection": "3.8.1"
         }
       },
       "Quartz.Serialization.Json": {
@@ -3252,13 +3247,12 @@
           "FluentValidation.AspNetCore": "[11.3.0, )",
           "Microsoft.AspNetCore.SpaServices.Extensions": "[8.0.3, )",
           "Microsoft.Extensions.Http.Polly": "[8.0.3, )",
-          "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": "[1.16.1, )",
           "PlexRipper.Application": "[1.0.0, )",
           "PlexRipper.Data": "[1.0.0, )",
           "PlexRipper.FileSystem": "[1.0.0, )",
           "PlexRipper.PlexApi": "[1.0.0, )",
           "PlexRipper.Settings": "[1.0.0, )",
-          "Quartz.Extensions.Hosting": "[3.5.0, )",
+          "Quartz.Extensions.Hosting": "[3.8.1, )",
           "Quartz.Serialization.Json": "[3.5.0, )",
           "Serilog.AspNetCore": "[8.0.1, )",
           "SignalRSwaggerGen": "[4.2.0, )",

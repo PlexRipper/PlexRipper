@@ -62,20 +62,14 @@
           "Polly.Extensions.Http": "3.0.0"
         }
       },
-      "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": {
-        "type": "Direct",
-        "requested": "[1.16.1, )",
-        "resolved": "1.16.1",
-        "contentHash": "LbhMLd8inAwC5UvmzCfgT869zCmuXNNF1ICaBPROtB5TfGoMEpk9zEiTfa/e3PKOla/uz42WujhspNrv7d35AQ=="
-      },
       "Quartz.Extensions.Hosting": {
         "type": "Direct",
-        "requested": "[3.5.0, )",
-        "resolved": "3.5.0",
-        "contentHash": "5to3zi9QFMjqRidmp+QvkdEDjozDiW0hUT8QZz0xsPK3mTZeJFXv35qSWCNb4wnw+XHT5e4WN9DnpN4qj6D3oA==",
+        "requested": "[3.8.1, )",
+        "resolved": "3.8.1",
+        "contentHash": "pgxrlRNF8b0kFLduCknTxoQ8zhB+HB6i8NrTD6LxS8aw4ByRSl1Gb9hsgWff7YGAeJ/OK92p7tptQhSDWn8G4Q==",
         "dependencies": {
-          "Microsoft.Extensions.Hosting.Abstractions": "2.1.1",
-          "Quartz.Extensions.DependencyInjection": "3.5.0"
+          "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
+          "Quartz.Extensions.DependencyInjection": "3.8.1"
         }
       },
       "Quartz.Serialization.Json": {
@@ -941,13 +935,13 @@
       },
       "Quartz.Extensions.DependencyInjection": {
         "type": "Transitive",
-        "resolved": "3.5.0",
-        "contentHash": "dlXLaHXTfI7hkAmoMtnB0j10RxFmESr0p8nyAvdvrWOb4vmeNMac39i4TUCmO2oqlDUhmbt/ZqDoQucOPkrvzg==",
+        "resolved": "3.8.1",
+        "contentHash": "wXHLkm9fTFsIfaR8JHp4ttYYZB6fRjH7ZEgbhPtiiMp6V4LposWLC0UpG5ZLWjjIFk2LTr/N9fK983W+lJAo7w==",
         "dependencies": {
-          "Microsoft.Extensions.Configuration.Abstractions": "2.1.1",
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "2.1.1",
-          "Microsoft.Extensions.Options": "2.1.1",
-          "Quartz": "3.5.0"
+          "Microsoft.Extensions.Configuration.Abstractions": "8.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0",
+          "Microsoft.Extensions.Options": "8.0.0",
+          "Quartz": "3.8.1"
         }
       },
       "RestSharp": {

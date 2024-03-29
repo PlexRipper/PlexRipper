@@ -111,8 +111,7 @@ public class FileMergeJob : IJob
                     outputStream = new ThrottledStream(streamResult.Value, 50000);
 
                 _log.Here().Debug("Starting file merge process for {FilePathsCount} parts into a file {FileName}", fileTask.FilePaths.Count, fileTask.FileName);
-
-                await _fileMergeStreamProvider.MergeFiles(fileTask.FilePaths, outputStream, _bytesReceivedProgress, token);
+                await _fileMergeStreamProvider.MergeFiles(fileTask, outputStream, _bytesReceivedProgress, token);
             }
             catch (Exception e)
             {

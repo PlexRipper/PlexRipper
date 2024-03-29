@@ -56,11 +56,10 @@ public class SchedulerService : ISchedulerService
 
     #endregion
 
-    private Result SetupListeners()
+    private void SetupListeners()
     {
         _log.DebugLine("Setting up Quartz listeners");
         _scheduler.ListenerManager.AddJobListener(_allJobListener, GroupMatcher<JobKey>.AnyGroup());
-        return Result.Ok();
     }
 
     public async Task AwaitScheduler(CancellationToken cancellationToken = default)

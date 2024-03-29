@@ -3542,6 +3542,7 @@
         "type": "Project",
         "dependencies": {
           "PlexRipper.Domain": "[1.0.0, )",
+          "Quartz": "[3.8.1, )",
           "WebAPI.Contracts": "[1.0.0, )"
         }
       },

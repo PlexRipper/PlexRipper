@@ -4,7 +4,7 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0 AS base
 WORKDIR /app
 
 ## Setup Nuxt front-end
-FROM node:18.11.0-alpine AS client-build
+FROM node:20.12-alpine AS client-build
 WORKDIR /tmp/build/ClientApp
 
 ARG VERSION=0.0.0
@@ -38,9 +38,6 @@ COPY ["src/Application/Application.csproj", "src/Application/"]
 COPY ["src/Application.Contracts/Application.Contracts.csproj", "src/Application.Contracts/"]
 
 ## Infrastructure Projects
-### Background Services
-COPY ["src/BackgroundServices/BackgroundServices.csproj", "src/BackgroundServices/"]
-COPY ["src/BackgroundServices.Contracts/BackgroundServices.Contracts.csproj", "src/BackgroundServices.Contracts/"]
 ### Data Access
 COPY ["src/Data/Data.csproj", "src/Data/"]
 COPY ["src/Data.Contracts/Data.Contracts.csproj", "src/Data.Contracts/"]

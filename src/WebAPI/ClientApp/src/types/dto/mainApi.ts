@@ -189,7 +189,6 @@ export interface DownloadTaskDTO {
 	plexLibraryId: number;
 	/** @format int32 */
 	plexServerId: number;
-	quality: string;
 	status: DownloadStatus;
 	/** @format int64 */
 	timeRemaining: number;
@@ -346,8 +345,7 @@ export interface JobStatusUpdateDTO {
 	jobStartTime: string;
 	jobType: JobTypes;
 	primaryKey: string;
-	/** @format int32 */
-	primaryKeyValue: number;
+	primaryKeyValue: string;
 	status: JobStatus;
 }
 

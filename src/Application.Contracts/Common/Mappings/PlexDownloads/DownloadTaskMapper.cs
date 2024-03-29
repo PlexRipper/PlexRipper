@@ -57,10 +57,10 @@ public static partial class DownloadTaskGenericToDTOMapper
         return serverDownloads;
     }
 
-    public static List<DownloadProgressDTO> ToDownloadProgressDto(this List<DownloadTaskGeneric> downloadTasks)
+    public static List<DownloadProgressDTO> ToDownloadProgressDto(this List<DownloadTaskGeneric>? downloadTasks)
     {
         var result = new List<DownloadProgressDTO>();
-        if (!downloadTasks.Any())
+        if (downloadTasks is null || !downloadTasks.Any())
             return new List<DownloadProgressDTO>();
 
         foreach (var downloadTask in downloadTasks)

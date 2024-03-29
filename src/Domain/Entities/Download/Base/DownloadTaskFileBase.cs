@@ -9,67 +9,67 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase
     /// NOTE: This is calculated at runtime and not stored in the database.
     /// </summary>
     [Column(Order = 4)]
-    public decimal Percentage { get; set; }
+    public required decimal Percentage { get; set; }
 
     /// <summary>
     /// Gets or sets the total size received of the file in bytes.
     /// NOTE: This is calculated at runtime and not stored in the database.
     /// </summary>
     [Column(Order = 5)]
-    public long DataReceived { get; set; }
+    public required long DataReceived { get; set; }
 
     /// <summary>
     /// Gets or sets the total size of the file in bytes.
     /// NOTE: This is calculated at runtime and not stored in the database.
     /// </summary>
     [Column(Order = 6)]
-    public long DataTotal { get; set; }
+    public required long DataTotal { get; set; }
 
     /// <summary>
     /// Gets or sets get the download speeds in bytes per second.
     /// NOTE: This is calculated at runtime and not stored in the database.
     /// </summary>
     [Column(Order = 18)]
-    public long DownloadSpeed { get; set; }
+    public required long DownloadSpeed { get; set; }
 
     /// <summary>
     /// Gets or sets the file transfer speeds when the finished download is being merged/moved.
     /// NOTE: This is calculated at runtime and not stored in the database.
     /// </summary>
     [Column(Order = 19)]
-    public long FileTransferSpeed { get; set; }
+    public required long FileTransferSpeed { get; set; }
 
     [Column(Order = 11)]
-    public string FileName { get; set; }
+    public required string FileName { get; set; }
 
     /// <summary>
     /// Gets or sets the relative obfuscated URL of the media to be downloaded,
     /// e.g: /library/parts/47660/156234666/file.mkv.
     /// </summary>
     [Column(Order = 12)]
-    public string FileLocationUrl { get; set; }
+    public required string FileLocationUrl { get; set; }
 
     /// <summary>
     /// Gets or sets get or sets the media quality of this <see cref="DownloadTaskGeneric"/>.
     /// </summary>
     [Column(Order = 15)]
-    public string Quality { get; set; }
+    public required string Quality { get; set; }
 
     /// <summary>
     /// Gets or sets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
     /// </summary>
     [Column(Order = 16)]
-    public string DownloadDirectory { get; set; }
+    public required string DownloadDirectory { get; set; }
 
     /// <summary>
     /// Gets or sets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
     /// </summary>
     [Column(Order = 17)]
-    public string DestinationDirectory { get; set; }
+    public required string DestinationDirectory { get; set; }
 
     #region Relationships
 
-    public List<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = new();
+    public required List<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = new();
 
     #endregion
 

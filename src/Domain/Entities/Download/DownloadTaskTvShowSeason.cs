@@ -4,11 +4,11 @@ public class DownloadTaskTvShowSeason : DownloadTaskParentBase
 {
     #region Relationships
 
-    public List<DownloadTaskTvShowEpisode> Children { get; set; } = new();
+    public required List<DownloadTaskTvShowEpisode> Children { get; set; } = new();
 
-    public Guid ParentId { get; set; }
+    public required Guid ParentId { get; set; }
 
-    public DownloadTaskTvShow Parent { get; set; }
+    public required DownloadTaskTvShow Parent { get; set; }
 
     #endregion
 

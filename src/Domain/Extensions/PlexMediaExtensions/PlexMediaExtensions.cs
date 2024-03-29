@@ -29,6 +29,7 @@ public static class PlexMediaExtensions
         Percentage = 0,
         DataReceived = 0,
         DownloadSpeed = 0,
+        FileTransferSpeed = 0,
         Children = new List<DownloadTaskMovieFile>(),
     };
 
@@ -50,6 +51,7 @@ public static class PlexMediaExtensions
         DataReceived = 0,
         DownloadSpeed = 0,
         Children = new List<DownloadTaskTvShowSeason>(),
+        FileTransferSpeed = 0,
     };
 
     public static DownloadTaskTvShowSeason MapToDownloadTask(this PlexTvShowSeason plexTvShowSeason) => new()
@@ -70,6 +72,9 @@ public static class PlexMediaExtensions
         DataReceived = 0,
         DownloadSpeed = 0,
         Children = new List<DownloadTaskTvShowEpisode>(),
+        ParentId = default,
+        Parent = null,
+        FileTransferSpeed = 0,
     };
 
     public static DownloadTaskTvShowEpisode MapToDownloadTask(this PlexTvShowEpisode plexTvShowEpisode) => new()
@@ -90,6 +95,9 @@ public static class PlexMediaExtensions
         DataReceived = 0,
         DownloadSpeed = 0,
         Children = new List<DownloadTaskTvShowEpisodeFile>(),
+        ParentId = default,
+        Parent = null,
+        FileTransferSpeed = 0,
     };
 
     public static List<DownloadTaskMovieFile> MapToDownloadTask(this PlexMediaData plexMediaData, PlexMovie plexMovie)
@@ -118,7 +126,7 @@ public static class PlexMediaExtensions
                 Parent = null,
                 ParentId = default,
                 FullTitle = $"{plexMovie.FullTitle}/{Path.GetFileName(part.File)}",
-                Title = part.File,
+                Title = Path.GetFileName(part.File),
             })
             .ToList();
     }
@@ -148,6 +156,8 @@ public static class PlexMediaExtensions
                 DownloadWorkerTasks = null,
                 Parent = null,
                 ParentId = default,
+                FullTitle = $"{plexTvShowEpisode.FullTitle}/{Path.GetFileName(part.File)}",
+                Title = Path.GetFileName(part.File),
             })
             .ToList();
     }

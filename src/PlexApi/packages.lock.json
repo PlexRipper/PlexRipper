@@ -13,15 +13,21 @@
       },
       "Polly": {
         "type": "Direct",
-        "requested": "[7.2.3, )",
-        "resolved": "7.2.3",
-        "contentHash": "DeCY0OFbNdNxsjntr1gTXHJ5pKUwYzp04Er2LLeN3g6pWhffsGuKVfMBLe1lw7x76HrPkLxKEFxBlpRxS2nDEQ=="
+        "requested": "[8.3.1, )",
+        "resolved": "8.3.1",
+        "contentHash": "xN9AxOudus8u4a//Tfu6Wxd5Oj7S4pjh/651S6FfIiVrbxQ8TeM+ieZC8c0y7Qto70zKBM5g8rBTqbAJnbetOA==",
+        "dependencies": {
+          "Polly.Core": "8.3.1"
+        }
       },
       "RestSharp": {
         "type": "Direct",
-        "requested": "[108.0.1, )",
-        "resolved": "108.0.1",
-        "contentHash": "XKwuwWq7A4dxZ8l9QkS2+ePLJ9ImmLaJSeFO6H2kpII4Us4n1NRs4w3c//8H2BYpL1XqBE8nmsd9aNCVBwXmOA=="
+        "requested": "[110.2.0, )",
+        "resolved": "110.2.0",
+        "contentHash": "FXGw0IMcqY7yO/hzS9QrD3iNswNgb9UxJnxWmfOxmGs4kRlZWqdtBoGPLuhlbgsDzX1RFo4WKui8TGGKXWKalw==",
+        "dependencies": {
+          "System.Text.Json": "7.0.2"
+        }
       },
       "RestSharp.Serializers.SystemTextJson": {
         "type": "Direct",
@@ -31,6 +37,15 @@
         "dependencies": {
           "RestSharp": "106.15.0",
           "System.Text.Json": "5.0.2"
+        }
+      },
+      "RestSharp.Serializers.Xml": {
+        "type": "Direct",
+        "requested": "[110.2.0, )",
+        "resolved": "110.2.0",
+        "contentHash": "/2K0hKZZfgFFuL0v+i+jOxd3Qa5nqw7PRcC447GdpMpuPFnJ61XOK+TFJNGNb/yG4oh4+w50Tz4HANgha6FRkQ==",
+        "dependencies": {
+          "RestSharp": "110.2.0"
         }
       },
       "AutoMapper": {
@@ -478,6 +493,11 @@
         "dependencies": {
           "NetTopologySuite": "[2.0.0, 3.0.0-A)"
         }
+      },
+      "Polly.Core": {
+        "type": "Transitive",
+        "resolved": "8.3.1",
+        "contentHash": "b9mMAjqXuCXFCtf/RtRPwFUkAm/sz37s7G+taDvS5EqfkJsLiWfO2xO2cSISjIgIY+88oIZTGguP6UrRGRlqzg=="
       },
       "Quartz": {
         "type": "Transitive",

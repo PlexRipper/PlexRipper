@@ -1830,8 +1830,16 @@
       },
       "Polly": {
         "type": "Transitive",
-        "resolved": "7.2.4",
-        "contentHash": "bw00Ck5sh6ekduDE3mnCo1ohzuad946uslCDEENu3091+6UKnBuKLo4e+yaNcCzXxOZCXWY2gV4a35+K1d4LDA=="
+        "resolved": "8.3.1",
+        "contentHash": "xN9AxOudus8u4a//Tfu6Wxd5Oj7S4pjh/651S6FfIiVrbxQ8TeM+ieZC8c0y7Qto70zKBM5g8rBTqbAJnbetOA==",
+        "dependencies": {
+          "Polly.Core": "8.3.1"
+        }
+      },
+      "Polly.Core": {
+        "type": "Transitive",
+        "resolved": "8.3.1",
+        "contentHash": "b9mMAjqXuCXFCtf/RtRPwFUkAm/sz37s7G+taDvS5EqfkJsLiWfO2xO2cSISjIgIY+88oIZTGguP6UrRGRlqzg=="
       },
       "Polly.Extensions.Http": {
         "type": "Transitive",
@@ -1936,8 +1944,11 @@
       },
       "RestSharp": {
         "type": "Transitive",
-        "resolved": "108.0.1",
-        "contentHash": "XKwuwWq7A4dxZ8l9QkS2+ePLJ9ImmLaJSeFO6H2kpII4Us4n1NRs4w3c//8H2BYpL1XqBE8nmsd9aNCVBwXmOA=="
+        "resolved": "110.2.0",
+        "contentHash": "FXGw0IMcqY7yO/hzS9QrD3iNswNgb9UxJnxWmfOxmGs4kRlZWqdtBoGPLuhlbgsDzX1RFo4WKui8TGGKXWKalw==",
+        "dependencies": {
+          "System.Text.Json": "7.0.2"
+        }
       },
       "RestSharp.Serializers.SystemTextJson": {
         "type": "Transitive",
@@ -1946,6 +1957,14 @@
         "dependencies": {
           "RestSharp": "106.15.0",
           "System.Text.Json": "5.0.2"
+        }
+      },
+      "RestSharp.Serializers.Xml": {
+        "type": "Transitive",
+        "resolved": "110.2.0",
+        "contentHash": "/2K0hKZZfgFFuL0v+i+jOxd3Qa5nqw7PRcC447GdpMpuPFnJ61XOK+TFJNGNb/yG4oh4+w50Tz4HANgha6FRkQ==",
+        "dependencies": {
+          "RestSharp": "110.2.0"
         }
       },
       "Riok.Mapperly": {
@@ -3163,7 +3182,7 @@
           "PlexApi.Contracts": "[1.0.0, )",
           "PlexRipper.Domain": "[1.0.0, )",
           "PlexRipper.Settings": "[1.0.0, )",
-          "RestSharp": "[108.0.1, )",
+          "RestSharp": "[110.2.0, )",
           "Settings.Contracts": "[1.0.0, )",
           "WebAPI.Contracts": "[1.0.0, )"
         }
@@ -3177,8 +3196,7 @@
           "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": "[8.0.3, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[8.0.3, )",
           "Microsoft.EntityFrameworkCore.InMemory": "[8.0.3, )",
-          "Microsoft.EntityFrameworkCore.Sqlite": "[8.0.3, )",
-          "RestSharp": "[108.0.1, )"
+          "Microsoft.EntityFrameworkCore.Sqlite": "[8.0.3, )"
         }
       },
       "PlexRipper.Domain": {
@@ -3216,9 +3234,10 @@
           "Autofac": "[8.0.0, )",
           "Data.Contracts": "[1.0.0, )",
           "PlexApi.Contracts": "[1.0.0, )",
-          "Polly": "[7.2.3, )",
-          "RestSharp": "[108.0.1, )",
-          "RestSharp.Serializers.SystemTextJson": "[106.15.0, )"
+          "Polly": "[8.3.1, )",
+          "RestSharp": "[110.2.0, )",
+          "RestSharp.Serializers.SystemTextJson": "[106.15.0, )",
+          "RestSharp.Serializers.Xml": "[110.2.0, )"
         }
       },
       "PlexRipper.Settings": {

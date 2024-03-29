@@ -9,9 +9,6 @@ const { __dirname } = createCommonJS(import.meta.url);
 export default defineNuxtConfig({
 	ssr: false,
 	srcDir: 'src',
-	devServer: {
-		port: 3001,
-	},
 	runtimeConfig: {
 		// Config within public will be also exposed to the client
 		public: {

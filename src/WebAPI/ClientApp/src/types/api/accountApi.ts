@@ -1,25 +1,17 @@
-import { Observable, from, map } from 'rxjs';
+import { Observable } from 'rxjs';
 import type ResultDTO from '@dto/ResultDTO';
 import type { AuthPin, PlexAccountDTO } from '@dto/mainApi';
 import PlexRipperAxios from '@class/PlexRipperAxios';
 import { PLEX_ACCOUNT_RELATIVE_PATH } from '@api-urls';
-import ApiClient from '@dto/ApiClient';
 
 const logText = 'From AccountAPI => ';
 
-export function getAllAccounts(enabledOnly = false): Observable<ResultDTO<PlexAccountDTO[]>> {
-	return from(
-		ApiClient.plexAccount.getAllPlexAccountsEndpoint({
-			enabledOnly,
-		}),
-	).pipe(
-		map(({ data }) => {
-			return {
-				...data,
-				value: data.value ?? [],
-			};
-		}),
-	);
+export function getAllAccounts(): Observable<ResultDTO<PlexAccountDTO[]>> {
+	return PlexRipperAxios.get<PlexAccountDTO[]>({
+		url: `${PLEX_ACCOUNT_RELATIVE_PATH}`,
+		apiCategory: logText,
+		apiName: getAllAccounts.name,
+	});
 }
 
 export function getAllEnabledAccounts(): Observable<ResultDTO<PlexAccountDTO[]>> {

@@ -12,6 +12,7 @@ import {
 	SETTINGS_RELATIVE_PATH,
 } from '@api-urls';
 import { generatePlexServers, generateResultDTO, generateSettingsModel } from '@mock';
+
 describe('GlobalStore.getConfigReady()', () => {
 	let { appConfig, mock, config } = baseVars();
 	beforeAll(() => {

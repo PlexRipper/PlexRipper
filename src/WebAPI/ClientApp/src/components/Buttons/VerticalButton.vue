@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent, h, mergeProps } from 'vue';
-import { IBaseButtonProps } from '@props';
+import type { IBaseButtonProps } from '@props';
 import { baseBtnPropsDefault } from '@composables/baseBtnProps';
 import BaseButton from '@components/Buttons/BaseButton.vue';
 

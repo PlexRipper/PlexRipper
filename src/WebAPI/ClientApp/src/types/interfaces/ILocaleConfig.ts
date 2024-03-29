@@ -1,4 +1,4 @@
-export default interface ILocaleConfig {
+export interface ILocaleConfig {
 	text: string;
 	code: string;
 	iso: string;

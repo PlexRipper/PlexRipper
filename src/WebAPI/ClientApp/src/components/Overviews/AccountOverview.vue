@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { PlexAccountDTO } from '@dto/mainApi';
+import type { PlexAccountDTO } from '@dto/mainApi';
 import { useOpenControlDialog } from '@composables/event-bus';
 import { useAccountStore } from '~/store';
 

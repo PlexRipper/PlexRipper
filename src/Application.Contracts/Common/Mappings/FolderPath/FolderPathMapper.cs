@@ -22,6 +22,7 @@ public static partial class FolderPathMapper
 
     [MapperRequiredMapping(RequiredMappingStrategy.Source)]
     [MapProperty(nameof(FolderPathDTO.Directory), nameof(FolderPath.DirectoryPath))]
+    [MapperIgnoreSource(nameof(FolderPathDTO.IsValid))]
     public static partial FolderPath ToModel(this FolderPathDTO folderPaths);
 
     [MapperRequiredMapping(RequiredMappingStrategy.Source)]

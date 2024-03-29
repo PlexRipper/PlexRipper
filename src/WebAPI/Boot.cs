@@ -1,6 +1,5 @@
 using System.Net;
 using Application.Contracts;
-using BackgroundServices.Contracts;
 using Logging.Interface;
 using Settings.Contracts;
 

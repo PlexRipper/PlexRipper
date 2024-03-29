@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
-import { SettingsModelDTO } from '@dto/mainApi';
-import ResultDTO from '@dto/ResultDTO';
+import type { SettingsModelDTO } from '@dto/mainApi';
+import type ResultDTO from '@dto/ResultDTO';
 import PlexRipperAxios from '@class/PlexRipperAxios';
 import { SETTINGS_RELATIVE_PATH } from '@api-urls';
 

@@ -1,5 +1,5 @@
 import { route } from '@fixtures/baseE2E';
-import { JobStatus, JobTypes, MessageTypes, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
+import { JobStatus, JobTypes, MessageTypes, type ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 import { generateJobStatusUpdate } from '@factories';
 
 describe('Check server connections dialog', () => {
@@ -22,7 +22,7 @@ describe('Check server connections dialog', () => {
 						jobType: JobTypes.InspectPlexServerByPlexAccountIdJob,
 						jobStatus: JobStatus.Running,
 						primaryKey: 'plexAccountId',
-						primaryKeyValue: data.plexAccounts[0].id,
+						primaryKeyValue: data.plexAccounts[0].id.toString(),
 					}),
 				);
 			})

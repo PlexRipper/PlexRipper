@@ -8,9 +8,9 @@ public class PlexMediaSlimDTO
 
     public int Index { get; set; }
 
-    public string Title { get; set; }
+    public string Title { get; set; } = string.Empty;
 
-    public string SortTitle { get; set; }
+    public string SortTitle { get; set; } = string.Empty;
 
     public int Year { get; set; }
 
@@ -32,9 +32,9 @@ public class PlexMediaSlimDTO
 
     public bool HasThumb { get; set; }
 
-    public string ThumbUrl { get; set; }
+    public string FullThumbUrl { get; set; } = string.Empty;
 
-    public List<PlexMediaQualityDTO> Qualities { get; set; }
+    public List<PlexMediaQualityDTO> Qualities { get; set; } = new();
 
     public List<PlexMediaSlimDTO> Children { get; set; } = new();
 }

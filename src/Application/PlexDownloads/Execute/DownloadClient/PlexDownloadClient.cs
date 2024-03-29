@@ -1,5 +1,6 @@
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using Application.Contracts;
 using Data.Contracts;
 using Logging.Interface;
 using Settings.Contracts;
@@ -10,7 +11,7 @@ namespace PlexRipper.Application;
 /// The PlexDownloadClient handles a single <see cref="DownloadTaskGeneric"/> at a time and
 /// manages the <see cref="DownloadWorker"/>s responsible for the multi-threaded downloading.
 /// </summary>
-public class PlexDownloadClient : IAsyncDisposable
+public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
 {
     #region Fields
 
@@ -22,7 +23,6 @@ public class PlexDownloadClient : IAsyncDisposable
     private readonly List<DownloadWorker> _downloadWorkers = new();
 
     private readonly IServerSettingsModule _serverSettings;
-    private readonly IDownloadManagerSettingsModule _downloadManagerSettings;
 
     private IDisposable _downloadSpeedLimitSubscription;
     private IDisposable _downloadWorkerTaskUpdate;
@@ -45,15 +45,13 @@ public class PlexDownloadClient : IAsyncDisposable
         IMediator mediator,
         IPlexRipperDbContext dbContext,
         Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory,
-        IServerSettingsModule serverSettings,
-        IDownloadManagerSettingsModule downloadManagerSettings)
+        IServerSettingsModule serverSettings)
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
         _downloadWorkerFactory = downloadWorkerFactory;
         _serverSettings = serverSettings;
-        _downloadManagerSettings = downloadManagerSettings;
     }
 
     #endregion
@@ -63,7 +61,7 @@ public class PlexDownloadClient : IAsyncDisposable
     /// <summary>
     /// Gets the Task that completes when all download workers have finished.
     /// </summary>
-    public Task DownloadProcessTask;
+    public Task DownloadProcessTask { get; private set; }
 
     public DownloadStatus DownloadStatus
     {
@@ -95,18 +93,14 @@ public class PlexDownloadClient : IAsyncDisposable
 
         DownloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskKey, cancellationToken);
 
-        if (!DownloadTask.DownloadWorkerTasks.Any())
-        {
-            var parts = _downloadManagerSettings.DownloadSegments;
-            DownloadTask.DownloadWorkerTasks = DownloadTask.GenerateDownloadWorkerTasks(parts);
-            await _dbContext.DownloadWorkerTasks.AddRangeAsync(DownloadTask.DownloadWorkerTasks, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            _log.Debug("Generated DownloadWorkerTasks for {DownloadTaskFullTitle}", DownloadTask.FullTitle);
-        }
+        if (DownloadTask is null)
+            return ResultExtensions.IsNull(nameof(DownloadTaskGeneric)).LogWarning();
 
-        var createResult = CreateDownloadWorkers(DownloadTask);
-        if (createResult.IsFailed)
-            return createResult.ToResult().LogError();
+        if (!DownloadTask.DownloadWorkerTasks.Any())
+            return ResultExtensions.IsEmpty($"{nameof(DownloadTaskGeneric)}.{nameof(DownloadTask.DownloadWorkerTasks)}").LogWarning();
+
+        _downloadWorkers.AddRange(DownloadTask.DownloadWorkerTasks
+            .Select(downloadWorkerTask => _downloadWorkerFactory(downloadWorkerTask)));
 
         await SetupDownloadLimitWatcher(DownloadTask);
 
@@ -180,20 +174,6 @@ public class PlexDownloadClient : IAsyncDisposable
     #endregion
 
     #region Private Methods
-
-    private Result<List<DownloadWorkerTask>> CreateDownloadWorkers(DownloadTaskGeneric downloadTask)
-    {
-        if (downloadTask is null)
-            return ResultExtensions.IsNull(nameof(DownloadTaskGeneric)).LogWarning();
-
-        if (!downloadTask.DownloadWorkerTasks.Any())
-            return ResultExtensions.IsEmpty($"{nameof(DownloadTaskGeneric)}.{nameof(downloadTask.DownloadWorkerTasks)}").LogWarning();
-
-        _downloadWorkers.AddRange(downloadTask.DownloadWorkerTasks
-            .Select(downloadWorkerTask => _downloadWorkerFactory(downloadWorkerTask)));
-
-        return Result.Ok();
-    }
 
     private async Task OnDownloadWorkerTaskUpdate(IList<DownloadWorkerTask> downloadWorkerUpdates)
     {

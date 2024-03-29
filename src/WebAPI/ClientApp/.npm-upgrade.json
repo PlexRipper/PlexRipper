@@ -4,13 +4,13 @@
 			"versions": ">0.143.0",
 			"reason": "Incompatible with Vanta"
 		},
-		"@types/node": {
-			"versions": ">18.16.0",
-			"reason": "Node version pinned to 18"
+		"nuxt": {
+			"versions": ">3.6.4",
+			"reason": "Broken tsconfig.json path aliasing due to Nuxt update on 3.7.0: https://github.com/nuxt/nuxt/issues/26512"
 		},
-		"vitest": {
-			"versions": "^0.33.0",
-			"reason": "Nuxt-Vitest is stuck on 0.31.1, can be updated once nuxt-vitest updates"
+		"primevue": {
+			"versions": "^3.34.1",
+			"reason": "Implementation of @Layers breaks all CSS: https://github.com/primefaces/primevue/issues/4813"
 		}
 	}
 }

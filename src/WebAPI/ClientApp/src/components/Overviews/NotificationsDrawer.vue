@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { NotificationDTO } from '@dto/mainApi';
+import type { NotificationDTO } from '@dto/mainApi';
 import { useNotificationsStore } from '~/store';
 
 const notificationsStore = useNotificationsStore();

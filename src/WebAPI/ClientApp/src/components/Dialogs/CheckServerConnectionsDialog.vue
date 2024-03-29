@@ -101,8 +101,8 @@ import { useSubscription } from '@vueuse/rxjs';
 import { filter, switchMap, tap } from 'rxjs/operators';
 import { get, set } from '@vueuse/core';
 import { of } from 'rxjs';
-import type { JobStatusUpdateDTO, PlexAccountDTO } from '@dto/mainApi';
-import { JobStatus, JobTypes, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
+import { JobTypes, JobStatus } from '@dto/mainApi';
+import type { JobStatusUpdateDTO, PlexAccountDTO, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 import { useBackgroundJobsStore, useI18n, useOpenControlDialog, useServerStore, useSignalrStore } from '#imports';
 
 const { t } = useI18n();
@@ -209,7 +209,7 @@ onMounted(() => {
 			.pipe(
 				filter((update) => update.status === JobStatus.Running),
 				tap(() => useOpenControlDialog(name)),
-				switchMap((update: JobStatusUpdateDTO) => of(accountStore.getAccount(update.primaryKeyValue))),
+				switchMap((update: JobStatusUpdateDTO) => of(accountStore.getAccount(+update.primaryKeyValue))),
 				tap((newAccount) => set(account, newAccount)),
 				switchMap(() => serverStore.refreshPlexServers()),
 			)

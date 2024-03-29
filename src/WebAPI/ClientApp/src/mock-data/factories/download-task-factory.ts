@@ -1,11 +1,9 @@
-import { randMovie, randDirectoryPath, randUrl, randFileName, randNumber } from '@ngneat/falso';
+import { randMovie, randDirectoryPath, randUrl, randFileName, randNumber, randUuid } from '@ngneat/falso';
 import { times } from 'lodash-es';
 import { toPlexMediaType } from '@composables/conversion';
-import { MockConfig } from '@mock/interfaces';
-import { DownloadStatus, DownloadTaskDTO, DownloadTaskType } from '@dto/mainApi';
+import type { MockConfig } from '@mock';
+import { DownloadStatus, type DownloadTaskDTO, DownloadTaskType } from '@dto/mainApi';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
-
-let downloadTaskIdIndex = 1;
 
 export function generateDownloadTasks({
 	plexServerId,
@@ -40,7 +38,7 @@ export function generateDownloadTask({
 	config = {},
 	partial = {},
 }: {
-	id: number;
+	id: string;
 	plexServerId: number;
 	plexLibraryId: number;
 	type: DownloadTaskType;
@@ -48,7 +46,7 @@ export function generateDownloadTask({
 	partial?: Partial<DownloadTaskDTO>;
 }): DownloadTaskDTO {
 	checkConfig(config);
-	incrementSeed(id);
+	incrementSeed();
 	const title = randMovie();
 	return {
 		id,
@@ -70,11 +68,10 @@ export function generateDownloadTask({
 		fileName: randFileName(),
 		fullTitle: title,
 		key: randNumber({ min: 1, max: 1000000 }),
-		parentId: 0,
+		parentId: randUuid(),
 		plexLibraryId: 0,
 		plexServerId: 0,
-		priority: 0,
-		quality: '1080p',
+		createdAt: new Date().toISOString(),
 		children: [],
 		...partial,
 	};
@@ -87,7 +84,7 @@ export function generateDownloadTaskTvShow({
 	config = {},
 	partial = {},
 }: {
-	id: number;
+	id: string;
 	plexServerId: number;
 	plexLibraryId: number;
 	config: Partial<MockConfig>;
@@ -121,7 +118,7 @@ export function generateDownloadTaskMovie({
 	config = {},
 	partial = {},
 }: {
-	id: number;
+	id: string;
 	plexServerId: number;
 	plexLibraryId: number;
 	config: Partial<MockConfig>;
@@ -155,7 +152,7 @@ export function generateDownloadTaskMovies({
 
 	return times(validConfig.movieDownloadTask, () =>
 		generateDownloadTaskMovie({
-			id: downloadTaskIdIndex++,
+			id: randUuid(),
 			plexServerId,
 			plexLibraryId,
 			config,
@@ -178,7 +175,7 @@ export function generateDownloadTaskTvShows({
 	const validConfig = checkConfig(config);
 	return times(validConfig.tvShowDownloadTask, () =>
 		generateDownloadTaskTvShow({
-			id: downloadTaskIdIndex++,
+			id: randUuid(),
 			plexServerId,
 			plexLibraryId,
 			config,
@@ -194,13 +191,13 @@ export function generateDownloadTaskTvShowSeason({
 	config = {},
 	partial = {},
 }: {
-	id: number;
+	id: string;
 	plexServerId: number;
 	plexLibraryId: number;
 	config?: Partial<MockConfig>;
 	partial: Partial<DownloadTaskDTO>;
 }): DownloadTaskDTO {
-	incrementSeed(id);
+	incrementSeed();
 
 	return generateDownloadTask({
 		id,
@@ -230,7 +227,7 @@ export function generateDownloadTaskTvShowSeasons({
 	const validConfig = checkConfig(config);
 
 	const seasonIndex = 1;
-	const id = downloadTaskIdIndex++;
+	const id = randUuid();
 	return times(validConfig.seasonDownloadTask, () =>
 		generateDownloadTaskTvShowSeason({
 			id,
@@ -253,7 +250,7 @@ export function generateDownloadTaskTvShowEpisode({
 	config = {},
 	partial = {},
 }: {
-	id: number;
+	id: string;
 	plexServerId: number;
 	plexLibraryId: number;
 	config?: Partial<MockConfig>;
@@ -278,7 +275,7 @@ export function generateDownloadTaskTvShowEpisodes({
 
 	return times(validConfig.episodeDownloadTask, () => {
 		const episode = generateDownloadTaskTvShowEpisode({
-			id: downloadTaskIdIndex++,
+			id: randUuid(),
 			plexServerId,
 			plexLibraryId,
 			config,

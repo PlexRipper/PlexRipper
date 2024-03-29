@@ -3,7 +3,7 @@ import { defineComponent, h } from 'vue';
 import { QBtn, QTooltip } from 'quasar';
 import { useI18n, useRouter } from '#imports';
 import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
-import { IBaseButtonProps } from '@props';
+import type { IBaseButtonProps } from '@props';
 
 export default defineComponent({
 	name: 'BaseButton',

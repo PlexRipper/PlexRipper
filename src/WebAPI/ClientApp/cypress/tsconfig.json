@@ -2,7 +2,7 @@
 	"extends": "../tsconfig.json", // Needed for the path aliases
 	"compilerOptions": {
 		"types": ["cypress", "cypress-signalr-mock", "@testing-library/cypress", "node"],
-		"baseUrl": "../",
+		"baseUrl": "./",
 		"sourceMap": false,
 		"target": "ES2019" // Needs to have this target otherwise nullish coalescing operator (??) will not work
 	},

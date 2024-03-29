@@ -1588,14 +1588,8 @@
         "type": "Project",
         "dependencies": {
           "PlexRipper.Domain": "[1.0.0, )",
+          "Quartz": "[3.8.1, )",
           "WebAPI.Contracts": "[1.0.0, )"
-        }
-      },
-      "backgroundservices.contracts": {
-        "type": "Project",
-        "dependencies": {
-          "PlexRipper.Domain": "[1.0.0, )",
-          "Quartz": "[3.5.0, )"
         }
       },
       "data.contracts": {
@@ -1682,7 +1676,6 @@
       "webapi.contracts": {
         "type": "Project",
         "dependencies": {
-          "BackgroundServices.Contracts": "[1.0.0, )",
           "PlexRipper.Domain": "[1.0.0, )"
         }
       }

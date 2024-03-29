@@ -1,4 +1,4 @@
-export default interface ISetupResult {
+export interface ISetupResult {
 	name: string;
 	isSuccess: boolean;
 }

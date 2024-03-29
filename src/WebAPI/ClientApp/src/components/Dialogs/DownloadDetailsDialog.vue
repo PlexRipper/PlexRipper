@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 import { set } from '@vueuse/core';
-import { DownloadTaskDTO, ReasonDTO } from '@dto/mainApi';
+import type { DownloadTaskDTO, ReasonDTO } from '@dto/mainApi';
 import { detailDownloadTask } from '@api/plexDownloadApi';
 
 const { t } = useI18n();
@@ -67,7 +67,7 @@ defineProps<{
 	name: string;
 }>();
 
-function onOpen(downloadTaskId: number) {
+function onOpen(downloadTaskId: string) {
 	set(loading, true);
 	detailDownloadTask(downloadTaskId).subscribe((data) => {
 		if (data.isSuccess && data.value) {

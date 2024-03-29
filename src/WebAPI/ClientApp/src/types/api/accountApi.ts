@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
-import ResultDTO from '@dto/ResultDTO';
-import { AuthPin, PlexAccountDTO } from '@dto/mainApi';
+import type ResultDTO from '@dto/ResultDTO';
+import type { AuthPin, PlexAccountDTO } from '@dto/mainApi';
 import PlexRipperAxios from '@class/PlexRipperAxios';
 import { PLEX_ACCOUNT_RELATIVE_PATH } from '@api-urls';
 

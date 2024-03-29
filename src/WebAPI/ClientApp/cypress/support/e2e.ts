@@ -1,7 +1,7 @@
 import './commands';
 import Log from 'consola';
-import { basePageSetup, IBasePageSetupResult, route } from '@fixtures/baseE2E';
-import { MockConfig } from '@mock';
+import { basePageSetup, route, type IBasePageSetupResult } from '@fixtures/baseE2E';
+import type { MockConfig } from '@mock';
 
 Cypress.Commands.add('basePageSetup', (config: Partial<MockConfig> = {}) => basePageSetup(config).as('pageData'));
 Cypress.Commands.add('getPageData', () =>

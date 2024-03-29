@@ -63,7 +63,7 @@ import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import { useOpenControlDialog } from '@composables/event-bus';
-import { PlexAccountDTO, PlexMediaSlimDTO } from '@dto/mainApi';
+import type { PlexAccountDTO, PlexMediaSlimDTO } from '@dto/mainApi';
 import { generateDefaultFolderPaths, generatePlexAccount } from '@factories';
 import { useAlertStore, useHelpStore, useMediaStore } from '~/store';
 
@@ -77,8 +77,6 @@ const checkServerConnectionDialogName = 'checkServerConnectionDialogName';
 const verificationCodeDialogName = 'verificationCodeDialogName';
 const directoryBrowserName = 'TestDirectoryBrowser';
 
-const mediaItem = ref<PlexMediaSlimDTO | null>();
-const mediaTableRows = ref<PlexMediaSlimDTO[]>([]);
 const account = ref<PlexAccountDTO>(
 	generatePlexAccount({
 		id: 1,
@@ -125,17 +123,4 @@ function addAlert(): void {
 	alertStore.showAlert({ id: 0, title: 'Alert Title 1', text: 'random alert' });
 	alertStore.showAlert({ id: 0, title: 'Alert Title 2', text: 'random alert' });
 }
-
-onMounted(() => {
-	useSubscription(
-		useMediaStore()
-			.getTvShowMediaData(32)
-			.subscribe((data) => {
-				if (data) {
-					set(mediaTableRows, [data]);
-					set(mediaItem, data);
-				}
-			}),
-	);
-});
 </script>

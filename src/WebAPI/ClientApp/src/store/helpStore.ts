@@ -1,7 +1,7 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { Observable, of, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import ISetupResult from '@interfaces/service/ISetupResult';
+import type { ISetupResult } from '@interfaces';
 
 export const useHelpStore = defineStore('HelpStore', () => {
 	const state = reactive<{ helpIdDialog: string; helpDialogObservable: Subject<string> }>({

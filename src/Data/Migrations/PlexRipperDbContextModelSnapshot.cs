@@ -473,10 +473,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(10);
 
-                    b.Property<long>("DataTotal")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(6);
-
                     b.Property<string>("DownloadStatus")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -1771,6 +1767,10 @@ namespace PlexRipper.Data.Migrations
                     b.Property<long>("DataReceived")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(5);
+
+                    b.Property<long>("DataTotal")
+                        .HasColumnType("INTEGER")
+                        .HasColumnOrder(6);
 
                     b.Property<string>("DestinationDirectory")
                         .HasColumnType("TEXT")

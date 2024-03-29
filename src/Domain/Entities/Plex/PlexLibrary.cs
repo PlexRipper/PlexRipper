@@ -253,14 +253,5 @@ public class PlexLibrary : BaseEntity
         return Result.Ok();
     }
 
-    public override void SetNull()
-    {
-        PlexServer = null;
-        DefaultDestination = null;
-        Movies = null;
-        TvShows = null;
-        PlexAccountLibraries = null;
-    }
-
     #endregion
 }

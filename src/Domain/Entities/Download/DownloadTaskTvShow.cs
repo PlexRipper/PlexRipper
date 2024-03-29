@@ -4,17 +4,11 @@ public class DownloadTaskTvShow : DownloadTaskParentBase
 {
     #region Relationships
 
-    public List<DownloadTaskTvShowSeason> Children { get; set; } = new();
+    public required List<DownloadTaskTvShowSeason> Children { get; set; } = new();
 
     #endregion
 
     #region Helpers
-
-    public override void SetNull()
-    {
-        base.SetNull();
-        Children = null;
-    }
 
     public override PlexMediaType MediaType => PlexMediaType.TvShow;
 

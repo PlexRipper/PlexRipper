@@ -6,7 +6,6 @@ using PlexRipper.Domain.Validators;
 
 namespace IntegrationTests;
 
-[Collection("Sequential")]
 public class GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests : BaseIntegrationTests
 {
     private DownloadTaskTvShowValidator validator = new();

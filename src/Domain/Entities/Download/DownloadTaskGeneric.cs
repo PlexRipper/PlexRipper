@@ -45,12 +45,12 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
     /// <summary>
     /// Gets or sets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
     /// </summary>
-    public string DownloadDirectory { get; init; }
+    public string DownloadDirectory { get; set; }
 
     /// <summary>
     /// Gets or sets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
     /// </summary>
-    public string DestinationDirectory { get; init; }
+    public string DestinationDirectory { get; set; }
 
     /// <summary>
     /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv.
@@ -101,5 +101,5 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
         };
     }
 
-    public override string ToString() => $"[DownloadTask [{DownloadTaskType}] [{DownloadStatus}] [{Title}]";
+    public override string ToString() => $"DownloadTaskUpdate: [{DownloadTaskType}] [{DownloadStatus}] [{Title}] [Download Location: {DownloadDirectory}]";
 }

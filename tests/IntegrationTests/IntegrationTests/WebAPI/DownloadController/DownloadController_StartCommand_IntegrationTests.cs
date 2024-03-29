@@ -1,5 +1,6 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using PlexRipper.Application;
 
 namespace IntegrationTests.WebAPI.DownloadController;
@@ -31,12 +32,16 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
         var downloadTask = downloadTasks[0].Children[0];
 
         // Act
-        var response = await Container.GetAsync(ApiRoutes.Download.GetStartCommand(downloadTask.Id));
-        var result = await response.Deserialize<ResultDTO>();
+        var response =
+            await Container.ApiClient.GETAsync<StartDownloadTaskEndpoint, StartDownloadTaskEndpointRequest, ResultDTO>(
+                new StartDownloadTaskEndpointRequest(downloadTask.Id));
+        response.Response.IsSuccessStatusCode.ShouldBeTrue();
+
         await Container.SchedulerService.AwaitScheduler();
         await Task.Delay(2000);
 
         // Assert
+        var result = response.Result;
         result.IsSuccess.ShouldBeTrue();
         var downloadTaskDb = await DbContext.GetDownloadTaskAsync(downloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();

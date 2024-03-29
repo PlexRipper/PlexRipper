@@ -12,7 +12,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
-		<ProjectReference Include="..\BackgroundServices.Contracts\BackgroundServices.Contracts.csproj" />
 		<ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
 		<ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj" />
 	</ItemGroup>

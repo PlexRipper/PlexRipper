@@ -1,8 +1,10 @@
-import { Observable } from 'rxjs';
-import { FolderPathDTO, FileSystemDTO } from '@dto/mainApi';
-import ResultDTO from '@dto/ResultDTO';
+import { from, Observable, of, throwError } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import type { FolderPathDTO, FileSystemDTO } from '@dto/mainApi';
+import type ResultDTO from '@dto/ResultDTO';
 import PlexRipperAxios from '@class/PlexRipperAxios';
 import { FOLDER_PATH_RELATIVE_PATH } from '@api-urls';
+import ApiClient from '@dto/ApiClient';
 
 const logText = 'From folderPathApi => ';
 
@@ -22,13 +24,19 @@ export function getDirectoryPath(path = ''): Observable<ResultDTO<FileSystemDTO>
 	});
 }
 
-export function updateFolderPath(folderPath: FolderPathDTO): Observable<ResultDTO<FolderPathDTO>> {
-	return PlexRipperAxios.put<FolderPathDTO>({
-		url: `${FOLDER_PATH_RELATIVE_PATH}`,
-		data: folderPath,
-		apiCategory: logText,
-		apiName: updateFolderPath.name,
-	});
+export function updateFolderPath(folderPath: FolderPathDTO): Observable<FolderPathDTO> {
+	return from(ApiClient.folderPath.updateFolderPathEndpoint(folderPath)).pipe(
+		switchMap(({ data }) => {
+			if (data.isFailed) {
+				return throwError(() => data.errors);
+			}
+			if (data.value) {
+				return of(data.value);
+			}
+
+			return throwError(() => 'No value returned');
+		}),
+	);
 }
 
 export function createFolderPath(folderPath: FolderPathDTO): Observable<ResultDTO<FolderPathDTO>> {

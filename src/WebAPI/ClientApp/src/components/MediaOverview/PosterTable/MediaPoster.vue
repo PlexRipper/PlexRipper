@@ -91,7 +91,7 @@
 <script setup lang="ts">
 import { get } from '@vueuse/core';
 import Log from 'consola';
-import { DownloadMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import { type DownloadMediaDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
 import { sendMediaOverviewOpenDetailsCommand } from '@composables/event-bus';
 
 const props = defineProps<{
@@ -112,7 +112,9 @@ const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown)
 const qualities = computed(() => props.mediaItem?.qualities ?? []);
 
 const imageUrl = computed(() => {
-	return props.mediaItem?.hasThumb ? `${props.mediaItem?.thumbUrl}&width=${get(thumbWidth)}&height=${get(thumbHeight)}` : '';
+	return props.mediaItem?.hasThumb
+		? `${props.mediaItem?.fullThumbUrl}&width=${get(thumbWidth)}&height=${get(thumbHeight)}`
+		: '';
 });
 const getQualityColor = (quality: string): string => {
 	switch (quality) {

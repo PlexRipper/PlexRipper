@@ -1,11 +1,9 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { Observable, Observer, of, switchMap, throwError } from 'rxjs';
+import { Observable, of, switchMap, throwError, type Observer } from 'rxjs';
 import { map, mergeMap, take } from 'rxjs/operators';
-import Log from 'consola';
-import ISetupResult from '@interfaces/service/ISetupResult';
-import IObjectUrl from '@interfaces/IObjectUrl';
-import { PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
-import { getLibraryMediaData, getThumbnail, getTvShow, getTvShowDetail } from '@api/mediaApi';
+import type { ISetupResult, IObjectUrl } from '@interfaces';
+import { PlexMediaType, type PlexMediaDTO, type PlexMediaSlimDTO } from '@dto/mainApi';
+import { getLibraryMediaData, getThumbnail, getMediaDetailByIdEndpoint } from '@api/mediaApi';
 
 export const useMediaStore = defineStore('MediaStore', () => {
 	const state = reactive<{ mediaUrls: IObjectUrl[] }>({
@@ -41,7 +39,7 @@ export const useMediaStore = defineStore('MediaStore', () => {
 										return new Error(`MediaType with ${mediaType} is not supported in getMediaDataById`);
 									});
 								}),
-						  ),
+							),
 				),
 				take(1),
 			);
@@ -56,59 +54,8 @@ export const useMediaStore = defineStore('MediaStore', () => {
 				}),
 			);
 		},
-		getMediaDataById(mediaId: number, mediaType: PlexMediaType): Observable<PlexMediaSlimDTO | null> {
-			switch (mediaType) {
-				case PlexMediaType.TvShow:
-					return actions.getTvShowMediaData(mediaId);
-				default:
-					return throwError(() => {
-						return new Error(`MediaType with ${mediaType} is not supported in getMediaDataById`);
-					});
-			}
-		},
-		getTvShowMediaData(mediaId: number): Observable<PlexMediaSlimDTO | null> {
-			return getTvShow(mediaId).pipe(
-				switchMap((response) => {
-					if (response.isSuccess) {
-						return of(response.value ?? null);
-					}
-
-					return throwError(() => {
-						const error = new Error(`TvShow with id ${mediaId} was not found`);
-						response.errors?.forEach((err) => {
-							Log.error(err);
-						});
-						return error;
-					});
-				}),
-			);
-		},
-		getMediaDataDetailById(mediaId: number, mediaType: PlexMediaType): Observable<PlexMediaDTO | null> {
-			switch (mediaType) {
-				case PlexMediaType.TvShow:
-					return actions.getTvShowMediaDataDetail(mediaId);
-				default:
-					return throwError(() => {
-						return new Error(`MediaType with ${mediaType} is not supported in getMediaDataDetailById`);
-					});
-			}
-		},
-		getTvShowMediaDataDetail(mediaId: number): Observable<PlexMediaDTO | null> {
-			return getTvShowDetail(mediaId).pipe(
-				switchMap((response) => {
-					if (response.isSuccess) {
-						return of(response.value ?? null);
-					}
-
-					return throwError(() => {
-						const error = new Error(`TvShow with id ${mediaId} was not found`);
-						response.errors?.forEach((err) => {
-							Log.error(err);
-						});
-						return error;
-					});
-				}),
-			);
+		getMediaDataDetailById(mediaId: number, mediaType: PlexMediaType): Observable<PlexMediaDTO> {
+			return getMediaDetailByIdEndpoint(mediaId, mediaType);
 		},
 		updateMediaUrl(mediaUrl: IObjectUrl) {
 			const index = state.mediaUrls.findIndex((x) => x.type === mediaUrl.type && x.id === mediaUrl.id);

@@ -7,46 +7,46 @@ public abstract class DownloadTaskBase
 {
     [Key]
     [Column(Order = 0)]
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
     /// <summary>
     /// Gets or sets the unique identifier used by the Plex Api to keep track of media.
     /// This is only unique on that specific server.
     /// </summary>
     [Column(Order = 1)]
-    public int Key { get; set; }
+    public required int Key { get; set; }
 
     /// <summary>
     /// Gets or sets the media display title.
     /// </summary>
     [Column(Order = 2)]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
     ///  Gets or sets the current download state of this DownloadTask.
     /// </summary>
     [Column(Order = 8)]
-    public DownloadStatus DownloadStatus { get; set; }
+    public required DownloadStatus DownloadStatus { get; set; }
 
     [Column(Order = 10)]
-    public DateTime CreatedAt { get; set; }
+    public required DateTime CreatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the full formatted media title, based on the <see cref="PlexMediaType"/>.
     /// E.g. "TvShow/Season/Episode".
     /// </summary>
     [Column(Order = 14)]
-    public string FullTitle { get; set; }
+    public required string FullTitle { get; set; }
 
     #region Relationships
 
-    public PlexServer PlexServer { get; set; }
+    public required PlexServer PlexServer { get; set; }
 
-    public int PlexServerId { get; set; }
+    public required int PlexServerId { get; set; }
 
-    public PlexLibrary PlexLibrary { get; set; }
+    public required PlexLibrary PlexLibrary { get; set; }
 
-    public int PlexLibraryId { get; set; }
+    public required int PlexLibraryId { get; set; }
 
     #endregion
 

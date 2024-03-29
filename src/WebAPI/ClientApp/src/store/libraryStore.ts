@@ -2,10 +2,10 @@ import { acceptHMRUpdate } from 'pinia';
 import { Observable, of } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { get } from '@vueuse/core';
-import { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
 import { getAllPlexLibraries, getPlexLibrary, reSyncPlexLibrary, updateDefaultDestination } from '@api/plexLibraryApi';
 import { useServerStore, useSettingsStore } from '#build/imports';
-import ISetupResult from '@interfaces/service/ISetupResult';
+import type { ISetupResult } from '@interfaces';
 
 export const useLibraryStore = defineStore('LibraryStore', () => {
 	const state = reactive<{ libraries: PlexLibraryDTO[] }>({

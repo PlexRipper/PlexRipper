@@ -1,4 +1,4 @@
-import { IError, ReasonDTO, SuccessDTO } from '@dto/mainApi';
+import type { IError, ReasonDTO, SuccessDTO } from '@dto/mainApi';
 
 export default interface ResultDTO<T = void> {
 	isFailed?: boolean;

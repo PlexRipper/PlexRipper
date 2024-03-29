@@ -24,24 +24,36 @@
       },
       "Bogus": {
         "type": "Direct",
-        "requested": "[34.0.2, )",
-        "resolved": "34.0.2",
-        "contentHash": "2KQAuMn3fLAQ2r6jeiffZnpv0bi3GCW3iRB2v1KeHIEBu8MNTh9dBlLTZwGvM0pr+9doKkU8L5JgCURmTmT88A=="
+        "requested": "[35.5.0, )",
+        "resolved": "35.5.0",
+        "contentHash": "iCXszbIvvxgfb01bPe/s3R6pQSKX6rpcQWqM7wqDt+lsMogR6fkSWBwqOxLpdXmMB7mgZNNk2hm2M1shoIiekA=="
       },
       "Bogus.Hollywood": {
         "type": "Direct",
-        "requested": "[34.0.2, )",
-        "resolved": "34.0.2",
-        "contentHash": "IG5+XMOwJD3WgVi5Qt2L9QQmMD4fs39JuY8VNJx7+IItwcVc9nkKfKTEejojvi2vT+HGmvLZV0n4Z6ZFk7QMEg==",
+        "requested": "[35.5.0, )",
+        "resolved": "35.5.0",
+        "contentHash": "8jmP9jdJqSPkHUn64lFT5uYrvZwnEu48+hd/pgiRyFVh/HIgxQQvHCDBVOUtNfBqs+Urr+h/Clhlr8cj8e1V1Q==",
         "dependencies": {
-          "Bogus": "34.0.2"
+          "Bogus": "35.5.0"
         }
       },
       "Bogus.Tools.Analyzer": {
         "type": "Direct",
-        "requested": "[34.0.2, )",
-        "resolved": "34.0.2",
-        "contentHash": "a/JYQfwORDKFdsC3SezzDpWQ/5Ei2VI8xLimo+qOD+J9pUinkUaVWJqjjNIWJhnojPDjMp0UrsOaUOpf9dz90w=="
+        "requested": "[35.5.0, )",
+        "resolved": "35.5.0",
+        "contentHash": "EuHAeucnF2jV77N8rV5iWpMpmBOCCtIvNpcM4rrQSp3OZRORt9veI4hSzMuzBeXkdMzGXh0TNiWSZ95yY8JXDQ=="
+      },
+      "FastEndpoints.Testing": {
+        "type": "Direct",
+        "requested": "[5.23.0, )",
+        "resolved": "5.23.0",
+        "contentHash": "n+4Y7RIc2xke+JDq6vYGy7nNdq7GcpBneGD/OjWtqx4mm/8qtKskQUxOB225EbDtpU0GHz/BdB95BPSL5evS4Q==",
+        "dependencies": {
+          "Bogus": "35.4.0",
+          "MartinCostello.Logging.XUnit": "0.3.0",
+          "Microsoft.AspNetCore.Mvc.Testing": "7.0.16",
+          "Xunit.Priority": "1.1.6"
+        }
       },
       "JustEat.HttpClientInterception": {
         "type": "Direct",
@@ -55,11 +67,11 @@
       },
       "Microsoft.AspNetCore.Mvc.Testing": {
         "type": "Direct",
-        "requested": "[7.0.8, )",
-        "resolved": "7.0.8",
-        "contentHash": "wyGG8vhYH5ROugE+OPpfw3rzLvaZODwSe/0/QbW4zPcoT3CUDfRLfUb0jHWxj4Ci+YDvd5buldEgZkzZbtfQ8A==",
+        "requested": "[7.0.17, )",
+        "resolved": "7.0.17",
+        "contentHash": "P9E2/SjJEdc1QJbzLeBW1z8QGvAn+XCuTTEnWnKh9DV8Ba7xZ8N3jETT6+PZsvfcWWPsrmp2mOw16DQ35rib8w==",
         "dependencies": {
-          "Microsoft.AspNetCore.TestHost": "7.0.8",
+          "Microsoft.AspNetCore.TestHost": "7.0.17",
           "Microsoft.Extensions.DependencyModel": "7.0.0",
           "Microsoft.Extensions.Hosting": "7.0.1"
         }
@@ -921,6 +933,16 @@
           "System.ValueTuple": "4.5.0"
         }
       },
+      "MartinCostello.Logging.XUnit": {
+        "type": "Transitive",
+        "resolved": "0.3.0",
+        "contentHash": "p6SWKQRLXEqYqnzA7mulCPfdZraDXFc7gHCErj1uw9KTNi4agFZqFDCANIfwAJ7ivWlAUAFZDTDFxb4cAhkPlw==",
+        "dependencies": {
+          "Microsoft.Extensions.Logging": "2.0.0",
+          "xunit.abstractions": "2.0.2",
+          "xunit.extensibility.execution": "2.4.0"
+        }
+      },
       "MediatR": {
         "type": "Transitive",
         "resolved": "12.0.0",
@@ -986,8 +1008,8 @@
       },
       "Microsoft.AspNetCore.TestHost": {
         "type": "Transitive",
-        "resolved": "7.0.8",
-        "contentHash": "FJZgfDx1yQY9yZC5GiEXwE0aySWxJ4xvTauhX68WLDteifVTjj2brSCnfqwoAH/NWD25ooJuDiJPAksfgKgrwA==",
+        "resolved": "7.0.17",
+        "contentHash": "XnfZhgbk1+I7UnvDpRPtWxQzymsnyWsc0EvzZfNbdjLn68HUcyTtDmduqVmOmNvMVVZCkN9T4kLJoGpcBZiIbQ==",
         "dependencies": {
           "System.IO.Pipelines": "7.0.0"
         }
@@ -3522,6 +3544,14 @@
           "xunit.extensibility.core": "[2.4.2]"
         }
       },
+      "Xunit.Priority": {
+        "type": "Transitive",
+        "resolved": "1.1.6",
+        "contentHash": "VF8yb6PHWb7ABkbEoWbesg0DsN3Pt7HQ2CGaIjyUh23jo3aCRm1zOAP/zQQh3B3Gi3K+5Xds8qs+SRUB2Hyr6Q==",
+        "dependencies": {
+          "xunit.extensibility.core": "2.3.1"
+        }
+      },
       "YamlDotNet": {
         "type": "Transitive",
         "resolved": "13.7.1",
@@ -3531,24 +3561,8 @@
         "type": "Project",
         "dependencies": {
           "PlexRipper.Domain": "[1.0.0, )",
+          "Quartz": "[3.8.1, )",
           "WebAPI.Contracts": "[1.0.0, )"
-        }
-      },
-      "backgroundservices": {
-        "type": "Project",
-        "dependencies": {
-          "Application.Contracts": "[1.0.0, )",
-          "Autofac": "[8.0.0, )",
-          "Autofac.Extras.Quartz": "[10.0.0, )",
-          "BackgroundServices.Contracts": "[1.0.0, )",
-          "Data.Contracts": "[1.0.0, )"
-        }
-      },
-      "backgroundservices.contracts": {
-        "type": "Project",
-        "dependencies": {
-          "PlexRipper.Domain": "[1.0.0, )",
-          "Quartz": "[3.5.0, )"
         }
       },
       "data.contracts": {
@@ -3603,7 +3617,6 @@
         "dependencies": {
           "Application.Contracts": "[1.0.0, )",
           "Autofac.Extras.Quartz": "[10.0.0, )",
-          "BackgroundServices.Contracts": "[1.0.0, )",
           "Data.Contracts": "[1.0.0, )",
           "FastEndpoints": "[5.23.0, )",
           "FileSystem.Contracts": "[1.0.0, )",
@@ -3656,7 +3669,6 @@
           "Application.Contracts": "[1.0.0, )",
           "Autofac": "[8.0.0, )",
           "Autofac.Extras.Quartz": "[10.0.0, )",
-          "BackgroundServices.Contracts": "[1.0.0, )",
           "Data.Contracts": "[1.0.0, )",
           "FileSystem.Contracts": "[1.0.0, )",
           "MediatR.Extensions.Autofac.DependencyInjection": "[10.0.0, )",
@@ -3689,7 +3701,6 @@
         "dependencies": {
           "AutoMapper.Extensions.Microsoft.DependencyInjection": "[12.0.0, )",
           "Autofac.Extensions.DependencyInjection": "[9.0.0, )",
-          "BackgroundServices": "[1.0.0, )",
           "FastEndpoints.Swagger": "[5.23.0, )",
           "FluentValidation.AspNetCore": "[11.3.0, )",
           "Microsoft.AspNetCore.SpaServices.Extensions": "[7.0.8, )",
@@ -3717,7 +3728,6 @@
       "webapi.contracts": {
         "type": "Project",
         "dependencies": {
-          "BackgroundServices.Contracts": "[1.0.0, )",
           "PlexRipper.Domain": "[1.0.0, )"
         }
       }

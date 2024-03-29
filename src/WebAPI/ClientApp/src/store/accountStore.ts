@@ -1,9 +1,9 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { forkJoin, Observable, of } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
-import { PlexAccountDTO } from '@dto/mainApi';
+import type { PlexAccountDTO } from '@dto/mainApi';
 import { createAccount, deleteAccount, getAllAccounts, refreshAccount, updateAccount } from '@api/accountApi';
-import ISetupResult from '@interfaces/service/ISetupResult';
+import type { ISetupResult } from '@interfaces';
 import { useServerStore, useLibraryStore } from '#build/imports';
 
 export const useAccountStore = defineStore('AccountStore', () => {

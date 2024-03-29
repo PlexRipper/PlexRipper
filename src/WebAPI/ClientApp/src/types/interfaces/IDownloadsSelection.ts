@@ -1,4 +1,4 @@
-import IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
+import type IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
 
 export default interface IDownloadsSelection {
 	plexServerId: number;

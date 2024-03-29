@@ -44,7 +44,7 @@
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import type { PlexServerDTO } from '@dto/mainApi';
-import { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
+import type { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
 import { useServerConnectionStore, useSignalrStore } from '~/store';
 
 const { t } = useI18n();

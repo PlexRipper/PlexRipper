@@ -1,7 +1,5 @@
 ﻿using Application.Contracts;
 using AutoMapper;
-using BackgroundServices.Contracts;
-using PlexRipper.WebAPI.Common;
 using WebAPI.Contracts;
 
 namespace PlexRipper.WebAPI;
@@ -50,7 +48,7 @@ public class WebApiMappingProfile : Profile
         // PlexMediaSlim -> PlexMediaSlimDTO
         CreateMap<PlexMediaSlim, PlexMediaSlimDTO>(MemberList.Destination)
             .ForMember(dto => dto.Qualities, opt => opt.MapFrom(x => x.Qualities))
-            .ForMember(dto => dto.ThumbUrl, opt => opt.MapFrom(x => x.FullThumbUrl))
+            .ForMember(dto => dto.FullThumbUrl, opt => opt.MapFrom(x => x.FullThumbUrl))
             .ForMember(dto => dto.Children, opt => opt.Ignore())
             .ForMember(dto => dto.Index, opt => opt.Ignore());
 
@@ -133,11 +131,5 @@ public class WebApiMappingProfile : Profile
 
         // InspectServerProgress -> InspectServerProgressDTO
         CreateMap<ServerConnectionCheckStatusProgress, ServerConnectionCheckStatusProgressDTO>(MemberList.Destination);
-
-        // JobStatusUpdate -> JobStatusUpdateDTO
-        CreateMap<JobStatusUpdate, JobStatusUpdateDTO>(MemberList.Destination)
-            .ForMember(dto => dto.JobType, entity => entity.MapFrom(x => ToJobType(x.JobGroup)));
     }
-
-    private static JobTypes ToJobType(string jobGroup) => Enum.TryParse<JobTypes>(jobGroup, out var jobType) ? jobType : JobTypes.Unknown;
 }

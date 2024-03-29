@@ -90,7 +90,7 @@ public class GetThumbnailImageEndpoint : BaseEndpoint<GetThumbnailImageEndpointR
             return;
         }
 
-        var imageResult = await _plexServiceApi.GetPlexMediaImageAsync(plexServer!, plexMedia.ThumbUrl, req.Width, req.Height, ct);
+        var imageResult = await _plexServiceApi.GetPlexMediaImageAsync(plexServer!, plexMedia.FullThumbUrl, req.Width, req.Height, ct);
         if (imageResult.IsFailed)
             await SendFluentResult(imageResult.ToResult(), ct);
 

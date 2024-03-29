@@ -1,7 +1,7 @@
 import Log from 'consola';
 import Axios from 'axios-observable';
-import IAppConfig from '@class/IAppConfig';
-import I18nObjectType from '@interfaces/i18nObjectType';
+import type IAppConfig from '@class/IAppConfig';
+import type { I18nObjectType } from '@interfaces';
 import { useGlobalStore } from '#imports';
 
 export default defineNuxtPlugin((nuxtApp) => {

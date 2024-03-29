@@ -1,6 +1,6 @@
 import { defineNuxtPlugin } from '#app';
 import {
-	ComponentConstructor,
+	type ComponentConstructor,
 	QCircularProgress,
 	QLinearProgress,
 	QSelect,

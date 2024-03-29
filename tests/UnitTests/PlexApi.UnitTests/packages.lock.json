@@ -893,26 +893,25 @@
       },
       "MediatR": {
         "type": "Transitive",
-        "resolved": "12.0.0",
-        "contentHash": "1XodBmbn3I1y7T0iSCSl9sQqHOx/BF63GqWb7mtMQja9ESUk7QrcmzzJFOGie9ruSC7A/oaW/8TwaJLuA9RQRw==",
+        "resolved": "12.2.0",
+        "contentHash": "8TUFrHapKi6D74PhnSNEguRsH91HNGyP3R4ZQdgDorJgl9Wac5Prh0vA33QfrniAaS6L2xNNhc6vxzg+5AIbwA==",
         "dependencies": {
-          "MediatR.Contracts": "[2.0.0, 3.0.0)",
-          "Microsoft.Bcl.AsyncInterfaces": "7.0.0",
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "7.0.0"
+          "MediatR.Contracts": "[2.0.1, 3.0.0)",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0"
         }
       },
       "MediatR.Contracts": {
         "type": "Transitive",
-        "resolved": "2.0.0",
-        "contentHash": "DKkwHP3xb2BVeBQQedNvg7eMKvQU33H3SozHsc+drjDSCcnVb/ov4tSwdRAyLv74Nb0IUl2evVR9OQuqurGqpA=="
+        "resolved": "2.0.1",
+        "contentHash": "FYv95bNT4UwcNA+G/J1oX5OpRiSUxteXaUt2BJbRSdRNiIUNbggJF69wy6mnk2wYToaanpdXZdCwVylt96MpwQ=="
       },
       "MediatR.Extensions.Autofac.DependencyInjection": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "3p8Wx0Er/naxf2MMODLQnWBgYqwyN/64PxVgFvpG4a3vHEIHts1H1cD3p0lQsWYvmpUwrIFN/dpf+RWp3hz5iA==",
+        "resolved": "12.0.0",
+        "contentHash": "cyLHAmsAaST4hw+r9AOFtS8VQAdLjQbQqN97t9+90ifSPFsGdlmiTc1MP7ow68dJHRtS36BpcoKuvHN1R4P5+g==",
         "dependencies": {
-          "Autofac": "6.5.0",
-          "MediatR": "12.0.0"
+          "Autofac": "8.0.0",
+          "MediatR": "12.2.0"
         }
       },
       "MetadataReferenceService.Abstractions": {
@@ -3497,7 +3496,7 @@
           "FastEndpoints": "[5.23.0, )",
           "FileSystem.Contracts": "[1.0.0, )",
           "FluentValidation.DependencyInjectionExtensions": "[11.9.0, )",
-          "MediatR.Extensions.Autofac.DependencyInjection": "[10.0.0, )",
+          "MediatR.Extensions.Autofac.DependencyInjection": "[12.0.0, )",
           "Microsoft.Extensions.Http": "[8.0.0, )",
           "PlexApi.Contracts": "[1.0.0, )",
           "PlexRipper.Domain": "[1.0.0, )",
@@ -3549,7 +3548,7 @@
           "FluentValidation": "[11.9.0, )",
           "JetBrains.Annotations": "[2022.1.0, )",
           "LanguageExt.Core": "[4.4.8, )",
-          "MediatR": "[12.0.0, )",
+          "MediatR": "[12.2.0, )",
           "NaturalSort.Extension": "[4.0.0, )",
           "Riok.Mapperly": "[3.4.0, )",
           "System.ComponentModel.Annotations": "[5.0.0, )",
@@ -3565,7 +3564,7 @@
           "Autofac.Extras.Quartz": "[10.0.0, )",
           "Data.Contracts": "[1.0.0, )",
           "FileSystem.Contracts": "[1.0.0, )",
-          "MediatR.Extensions.Autofac.DependencyInjection": "[10.0.0, )",
+          "MediatR.Extensions.Autofac.DependencyInjection": "[12.0.0, )",
           "System.IO.Abstractions": "[17.0.18, )"
         }
       },

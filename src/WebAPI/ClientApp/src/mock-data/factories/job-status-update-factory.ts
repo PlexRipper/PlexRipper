@@ -12,7 +12,7 @@ export function generateJobStatusUpdate({
 	jobType: JobTypes;
 	jobStatus: JobStatus;
 	primaryKey: string;
-	primaryKeyValue: number;
+	primaryKeyValue: string;
 }): JobStatusUpdateDTO {
 	const id = jobStatusIdIndex++;
 	incrementSeed(id);

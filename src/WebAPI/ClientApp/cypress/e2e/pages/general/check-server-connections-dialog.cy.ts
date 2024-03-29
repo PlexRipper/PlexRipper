@@ -22,7 +22,7 @@ describe('Check server connections dialog', () => {
 						jobType: JobTypes.InspectPlexServerByPlexAccountIdJob,
 						jobStatus: JobStatus.Running,
 						primaryKey: 'plexAccountId',
-						primaryKeyValue: data.plexAccounts[0].id,
+						primaryKeyValue: data.plexAccounts[0].id.toString(),
 					}),
 				);
 			})

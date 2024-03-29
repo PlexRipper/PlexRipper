@@ -71,7 +71,6 @@ export function generateDownloadTask({
 		parentId: randUuid(),
 		plexLibraryId: 0,
 		plexServerId: 0,
-		quality: '1080p',
 		createdAt: new Date().toISOString(),
 		children: [],
 		...partial,

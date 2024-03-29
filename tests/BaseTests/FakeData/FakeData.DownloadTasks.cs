@@ -64,9 +64,24 @@ public static partial class FakeData
             .RuleFor(x => x.FileName, _ => "file.mp4")
             .RuleFor(x => x.FileLocationUrl, _ => PlexMockServerConfig.FileUrl)
             .RuleFor(x => x.Quality, f => f.PickRandom("sd", "720", "1080"))
-            .RuleFor(x => x.DownloadDirectory, f => f.System.FilePath())
-            .RuleFor(x => x.DownloadDirectory, f => f.System.FilePath())
-            .RuleFor(x => x.DestinationDirectory, f => f.System.FilePath())
+            .RuleFor(x => x.DownloadDirectory, _ => new DownloadTaskDirectory
+            {
+                Type = DownloadTaskType.None,
+                RootPath = string.Empty,
+                MovieFolder = string.Empty,
+                TvShowFolder = string.Empty,
+                SeasonFolder = string.Empty,
+                FileName = "file.mp4",
+            })
+            .RuleFor(x => x.DestinationDirectory, _ => new DownloadTaskDirectory
+            {
+                Type = DownloadTaskType.None,
+                RootPath = string.Empty,
+                MovieFolder = string.Empty,
+                TvShowFolder = string.Empty,
+                SeasonFolder = string.Empty,
+                FileName = "file.mp4",
+            })
             .RuleFor(x => x.DownloadWorkerTasks, _ => new List<DownloadWorkerTask>());
     }
 
@@ -100,6 +115,8 @@ public static partial class FakeData
                 {
                     movieFile.Title = $"{movieFile.Title} {movieIndex++}";
                     movieFile.FullTitle = $"{movie.FullTitle}/{movieIndex}-{movieFile.FileName}";
+                    movieFile.DownloadDirectory.MovieFolder = movie.Title;
+                    movieFile.DestinationDirectory.MovieFolder = movie.Title;
                 });
             });
     }
@@ -115,9 +132,16 @@ public static partial class FakeData
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.MovieData)
             .FinishWith((f, movieFile) =>
             {
+
+
                 movieFile.FileName = $"[{movieFile.Quality}].{f.System.FileName("mp4")}";
                 movieFile.Title = movieFile.FileName;
                 movieFile.FullTitle = movieFile.FileName;
+
+                movieFile.DownloadDirectory.Type = DownloadTaskType.MovieData;
+                movieFile.DownloadDirectory.FileName = movieFile.FileName;
+                movieFile.DestinationDirectory.Type = DownloadTaskType.MovieData;
+                movieFile.DestinationDirectory.FileName = movieFile.FileName;
             });
     }
 
@@ -158,7 +182,14 @@ public static partial class FakeData
                         episode.FullTitle = $"{season.FullTitle}/{episode.Title}";
 
                         var fileIndex = 1;
-                        episode.Children.ForEach(file => { file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}"; });
+                        episode.Children.ForEach(file =>
+                        {
+                            file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}";
+                            file.DestinationDirectory.TvShowFolder = tvShow.Title;
+                            file.DestinationDirectory.SeasonFolder = season.Title;
+                            file.DownloadDirectory.TvShowFolder = tvShow.Title;
+                            file.DownloadDirectory.SeasonFolder = season.Title;
+                        });
                     });
                 });
             });
@@ -199,7 +230,12 @@ public static partial class FakeData
                     episode.FullTitle = $"{season.FullTitle}/{episode.Title}";
 
                     var fileIndex = 1;
-                    episode.Children.ForEach(file => { file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}"; });
+                    episode.Children.ForEach(file =>
+                    {
+                        file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}";
+                        file.DownloadDirectory.SeasonFolder = season.Title;
+                        file.DestinationDirectory.SeasonFolder = season.Title;
+                    });
                 });
             });
     }
@@ -243,6 +279,12 @@ public static partial class FakeData
                 episodeFile.FileName = $"[{episodeFile.Quality}].{f.System.FileName("mp4")}";
                 episodeFile.Title = episodeFile.FileName;
                 episodeFile.FullTitle = episodeFile.FileName;
+
+                episodeFile.DownloadDirectory.Type = DownloadTaskType.EpisodeData;
+                episodeFile.DownloadDirectory.FileName = episodeFile.FileName;
+
+                episodeFile.DestinationDirectory.Type = DownloadTaskType.EpisodeData;
+                episodeFile.DestinationDirectory.FileName = episodeFile.FileName;
             });
     }
 

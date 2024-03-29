@@ -59,13 +59,13 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase
     /// Gets or sets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
     /// </summary>
     [Column(Order = 16)]
-    public required string DownloadDirectory { get; set; }
+    public required DownloadTaskDirectory DownloadDirectory { get; set; }
 
     /// <summary>
     /// Gets or sets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
     /// </summary>
     [Column(Order = 17)]
-    public required string DestinationDirectory { get; set; }
+    public required DownloadTaskDirectory DestinationDirectory { get; set; }
 
     #region Relationships
 

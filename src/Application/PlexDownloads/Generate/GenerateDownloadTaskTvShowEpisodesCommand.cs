@@ -57,7 +57,6 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<
                     .Include(x => x.PlexServer)
                     .Include(x => x.DefaultDestination)
                     .GetAsync(downloadMediaDto.PlexLibraryId, cancellationToken);
-                var destinationFolder = await GetDestinationFolder(plexLibrary, cancellationToken);
 
                 var plexEpisodes = await _dbContext.PlexTvShowEpisodes
                     .AsTracking()
@@ -117,17 +116,6 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<
                     var downloadFiles = episodeData.MapToDownloadTask(tvShowEpisode);
                     episodeDownloadTask.Children.AddRange(downloadFiles);
                     _dbContext.DownloadTaskTvShowEpisodeFile.AddRange(downloadFiles);
-
-                    var downloadFolderPath = GetDownloadFolderPath(episodeDownloadTask);
-                    var destinationFolderPath = GetDestinationFolderPath(destinationFolder.DirectoryPath, episodeDownloadTask);
-
-                    // Set download and destination folder of each downloadable file
-                    // TODO Might need to be set when download starts to allow free FolderPath's change
-                    foreach (var downloadTaskTvShowEpisodeFile in episodeDownloadTask.Children)
-                    {
-                        downloadTaskTvShowEpisodeFile.DestinationDirectory = destinationFolderPath;
-                        downloadTaskTvShowEpisodeFile.DownloadDirectory = downloadFolderPath;
-                    }
                 }
             }
 
@@ -138,19 +126,5 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<
         {
             return Result.Fail(new ExceptionalError(ex)).LogError();
         }
-    }
-
-    private string GetDownloadFolderPath(DownloadTaskTvShowEpisode downloadTaskTvShowEpisode) => Path.Join(_downloadFolder.DirectoryPath, "TvShows",
-        $"{downloadTaskTvShowEpisode.Title} ({downloadTaskTvShowEpisode.Year})", "/");
-
-    private string GetDestinationFolderPath(string destinationFolder, DownloadTaskTvShowEpisode downloadTaskEpisode) =>
-        Path.Join(destinationFolder, $"{downloadTaskEpisode.Title} ({downloadTaskEpisode.Year})", "/");
-
-    private async Task<FolderPath> GetDestinationFolder(PlexLibrary library, CancellationToken cancellationToken = default)
-    {
-        if (library.DefaultDestinationId is null || library.DefaultDestinationId == 0)
-            return _defaultDestinationDict[library.Type];
-
-        return await _dbContext.FolderPaths.GetAsync(library.DefaultDestinationId ?? 0, cancellationToken);
     }
 }

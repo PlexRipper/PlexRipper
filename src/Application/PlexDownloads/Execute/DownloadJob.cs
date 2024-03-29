@@ -74,6 +74,8 @@ public class DownloadJob : IJob, IDisposable
                 _log.Debug("Generated DownloadWorkerTasks for {DownloadTaskFullTitle}", downloadTask.FullTitle);
             }
 
+            SetDownloadAndDestination(downloadTask)
+
             _log.Debug("Creating Download client for {DownloadTaskFullTitle}", downloadTask.FullTitle);
             var downloadClientResult = await _plexDownloadClient.Setup(downloadTask.ToKey(), token);
             if (downloadClientResult.IsFailed)
@@ -140,33 +142,33 @@ public class DownloadJob : IJob, IDisposable
         }
     }
 
-    // private async Task<Result> SetDownloadAndDestination(DownloadTaskFileBase downloadTask)
-    // {
-    //     if (downloadTask.DownloadDirectory == string.Empty)
-    //     {
-    //         var downloadFolderPath = GetDownloadFolderPath(downloadTask);
-    //
-    //         // Set download and destination folder of each downloadable file
-    //
-    //         downloadTask.DownloadDirectory = downloadFolderPath;
-    //     }
-    //
-    //     if (downloadTask.DestinationDirectory == string.Empty)
-    //     {
-    //         var destinationFolderPath = await _dbContext.GetDestinationFolder(downloadTask.PlexLibraryId);
-    //         if (destinationFolderPath is null)
-    //             return Result.Fail($"Could not find destination folder for PlexLibrary with id {downloadTask.PlexLibraryId}");
-    //
-    //         switch (downloadTask.DownloadTaskType)
-    //         {
-    //             case DownloadTaskType.MovieData:
-    //                 downloadTask.DestinationDirectory = Path.Combine(destinationFolderPath.DirectoryPath, downloadTask.FullTitle, downloadTask.FileName);
-    //                 break;
-    //             case DownloadTaskType.EpisodeData:
-    //                 break;
-    //             default:
-    //                 throw new ArgumentOutOfRangeException();
-    //         }
-    //     }
-    // }
+    private async Task<Result> SetDownloadAndDestination(DownloadTaskFileBase downloadTask)
+    {
+        if (downloadTask.DownloadDirectory == string.Empty)
+        {
+            var downloadFolderPath = GetDownloadFolderPath(downloadTask);
+
+            // Set download and destination folder of each downloadable file
+
+            downloadTask.DownloadDirectory = downloadFolderPath;
+        }
+
+        if (downloadTask.DestinationDirectory == string.Empty)
+        {
+            var destinationFolderPath = await _dbContext.GetDestinationFolder(downloadTask.PlexLibraryId);
+            if (destinationFolderPath is null)
+                return Result.Fail($"Could not find destination folder for PlexLibrary with id {downloadTask.PlexLibraryId}");
+
+            switch (downloadTask.DownloadTaskType)
+            {
+                case DownloadTaskType.MovieData:
+                    downloadTask.DestinationDirectory = Path.Combine(destinationFolderPath.DirectoryPath, downloadTask.FullTitle, downloadTask.FileName);
+                    break;
+                case DownloadTaskType.EpisodeData:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
 }

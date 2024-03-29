@@ -159,8 +159,8 @@
       },
       "Castle.Core": {
         "type": "Transitive",
-        "resolved": "5.0.0",
-        "contentHash": "edc8jjyXqzzy8jFdhs36FZdwmlDDTgqPb2Zy1Q5F/f2uAc88bu/VS/0Tpvgupmpl9zJOvOo5ZizVANb0ltN1NQ==",
+        "resolved": "5.1.1",
+        "contentHash": "rpYtIczkzGpf+EkZgDr9CClTdemhsrwA/W5hMoPjLkRFnXzH44zDLoovXeKtmxb1ykXK9aJVODSpiJml8CTw2g==",
         "dependencies": {
           "System.Diagnostics.EventLog": "6.0.0"
         }
@@ -1706,11 +1706,10 @@
       },
       "Moq": {
         "type": "Transitive",
-        "resolved": "4.18.1",
-        "contentHash": "MmZIKNyvn8VrivSaqA8tqy5DmwUievC9zsuNTrcb00oY4IeGq6fXT5BQK329lZ05/tyi5vp30AWe9fl0d2PZQg==",
+        "resolved": "4.20.70",
+        "contentHash": "4rNnAwdpXJBuxqrOCzCyICXHSImOTRktCgCWXWykuF1qwoIsVvEnR7PjbMk/eLOxWvhmj5Kwt+kDV3RGUYcNwg==",
         "dependencies": {
-          "Castle.Core": "5.0.0",
-          "System.Threading.Tasks.Extensions": "4.5.4"
+          "Castle.Core": "5.1.1"
         }
       },
       "Namotion.Reflection": {
@@ -3518,7 +3517,7 @@
           "Microsoft.AspNetCore.Mvc.Testing": "[8.0.3, )",
           "Microsoft.AspNetCore.SpaServices.Extensions": "[8.0.3, )",
           "Microsoft.NET.Test.Sdk": "[17.9.0, )",
-          "Moq": "[4.18.1, )",
+          "Moq": "[4.20.70, )",
           "PlexRipper.WebAPI": "[1.0.0, )",
           "Shouldly": "[4.0.3, )",
           "WireMock.Net": "[1.5.51, )",

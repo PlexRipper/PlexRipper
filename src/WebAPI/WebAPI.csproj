@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
-		<LangVersion>11</LangVersion>
+		<TargetFramework>net8.0</TargetFramework>
+		<LangVersion>12</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<RootNamespace>PlexRipper.WebAPI</RootNamespace>
 		<AssemblyName>PlexRipper.WebAPI</AssemblyName>

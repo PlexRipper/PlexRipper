@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net7.0": {
+    "net8.0": {
       "Autofac": {
         "type": "Transitive",
         "resolved": "8.0.0",

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net7.0": {
+    "net8.0": {
       "Autofac.Extras.Quartz": {
         "type": "Direct",
         "requested": "[10.0.0, )",

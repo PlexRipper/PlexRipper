@@ -4,6 +4,7 @@ using Application.Contracts;
 using Data.Contracts;
 using Logging.Interface;
 using Quartz;
+using Settings.Contracts;
 
 namespace PlexRipper.Application;
 
@@ -12,17 +13,20 @@ public class DownloadJob : IJob, IDisposable
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly INotificationsService _notificationsService;
-    private readonly PlexDownloadClient _plexDownloadClient;
+    private readonly IDownloadManagerSettingsModule _downloadManagerSettings;
+    private readonly IPlexDownloadClient _plexDownloadClient;
 
     public DownloadJob(
         ILog log,
         IPlexRipperDbContext dbContext,
         INotificationsService notificationsService,
-        PlexDownloadClient plexDownloadClient)
+        IDownloadManagerSettingsModule downloadManagerSettings,
+        IPlexDownloadClient plexDownloadClient)
     {
         _log = log;
         _dbContext = dbContext;
         _notificationsService = notificationsService;
+        _downloadManagerSettings = downloadManagerSettings;
         _plexDownloadClient = plexDownloadClient;
     }
 
@@ -58,6 +62,16 @@ public class DownloadJob : IJob, IDisposable
             {
                 _log.Warning("DownloadTask {DownloadTaskId} is not downloadable, aborting DownloadJob", downloadTaskId);
                 return;
+            }
+
+            // Create the multiple download worker tasks which will split up the work
+            if (!downloadTask.DownloadWorkerTasks.Any())
+            {
+                var parts = _downloadManagerSettings.DownloadSegments;
+                downloadTask.DownloadWorkerTasks = downloadTask.GenerateDownloadWorkerTasks(parts);
+                await _dbContext.DownloadWorkerTasks.AddRangeAsync(downloadTask.DownloadWorkerTasks, token);
+                await _dbContext.SaveChangesAsync(token);
+                _log.Debug("Generated DownloadWorkerTasks for {DownloadTaskFullTitle}", downloadTask.FullTitle);
             }
 
             _log.Debug("Creating Download client for {DownloadTaskFullTitle}", downloadTask.FullTitle);
@@ -102,7 +116,7 @@ public class DownloadJob : IJob, IDisposable
         _log.Here().Warning("Disposing job: {DownloadJobName} for {DownloadTaskName}", nameof(DownloadJob), nameof(DownloadTaskGeneric));
     }
 
-    private void SetupSubscription(PlexDownloadClient plexDownloadClient)
+    private void SetupSubscription(IPlexDownloadClient plexDownloadClient)
     {
         plexDownloadClient.ListenToDownloadWorkerLog
             .Select(logs => Observable.Defer(() => CreateLog(logs).ToObservable()))

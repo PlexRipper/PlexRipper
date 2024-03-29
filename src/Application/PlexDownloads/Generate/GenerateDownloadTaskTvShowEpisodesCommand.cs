@@ -140,7 +140,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<
         }
     }
 
-    private string GetDownloadFolderPath(DownloadTaskTvShowEpisode downloadTaskTvShowEpisode) => Path.Join(_downloadFolder.DirectoryPath, "Movies",
+    private string GetDownloadFolderPath(DownloadTaskTvShowEpisode downloadTaskTvShowEpisode) => Path.Join(_downloadFolder.DirectoryPath, "TvShows",
         $"{downloadTaskTvShowEpisode.Title} ({downloadTaskTvShowEpisode.Year})", "/");
 
     private string GetDestinationFolderPath(string destinationFolder, DownloadTaskTvShowEpisode downloadTaskEpisode) =>

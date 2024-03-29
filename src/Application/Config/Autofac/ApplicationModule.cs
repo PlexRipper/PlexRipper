@@ -51,7 +51,7 @@ public class ApplicationModule : Module
         builder.RegisterType<DownloadTaskScheduler>().As<IDownloadTaskScheduler>().SingleInstance();
         builder.RegisterType<FileMergeScheduler>().As<IFileMergeScheduler>().SingleInstance();
         builder.RegisterType<DownloadWorker>().InstancePerDependency();
-        builder.RegisterType<PlexDownloadClient>().InstancePerDependency();
+        builder.RegisterType<PlexDownloadClient>().As<IPlexDownloadClient>().InstancePerDependency();
 
         // Setup Quartz
         SetupQuartz(builder, assembly);

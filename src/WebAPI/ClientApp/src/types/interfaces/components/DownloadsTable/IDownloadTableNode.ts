@@ -1,4 +1,4 @@
-import type { TreeNode } from 'primevue/treenode/TreeNode.d.ts';
+import { type TreeNode } from 'primevue/tree/Tree';
 import { DownloadProgressDTO } from '@dto';
 
 export interface IDownloadTableNode extends TreeNode, Omit<DownloadProgressDTO, 'children'> {

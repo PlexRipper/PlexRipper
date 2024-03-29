@@ -2,17 +2,17 @@
 
 namespace Application.Contracts;
 
-public class FolderPathDTO
+public record FolderPathDTO
 {
-    public int Id { get; set; }
+    public required int Id { get; set; }
 
-    public FolderType FolderType { get; set; }
+    public required FolderType FolderType { get; set; }
 
-    public PlexMediaType MediaType { get; set; }
+    public required PlexMediaType MediaType { get; set; }
 
-    public string DisplayName { get; set; }
+    public required string DisplayName { get; set; }
 
-    public string Directory { get; set; }
+    public required string Directory { get; set; }
 
-    public bool IsValid { get; set; }
+    public required bool IsValid { get; set; }
 }

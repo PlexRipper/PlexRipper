@@ -3,31 +3,36 @@ using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
 
-[Mapper]
 public static partial class FolderPathMapper
 {
     #region ToDTO
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(FolderPath.DirectoryPath), nameof(FolderPathDTO.Directory))]
-    public static partial FolderPathDTO ToDTO(this FolderPath folderPaths);
+    public static FolderPathDTO ToDTO(this FolderPath folderPaths) => new()
+    {
+        Id = folderPaths.Id,
+        FolderType = folderPaths.FolderType,
+        MediaType = folderPaths.MediaType,
+        DisplayName = folderPaths.DisplayName,
+        Directory = folderPaths.DirectoryPath,
+        IsValid = folderPaths.IsValid,
+    };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(FolderPath.DirectoryPath), nameof(FolderPathDTO.Directory))]
-    public static partial List<FolderPathDTO> ToDTO(this List<FolderPath> folderPaths);
+    public static List<FolderPathDTO> ToDTO(this List<FolderPath> folderPaths) => folderPaths.Select(ToDTO).ToList();
 
     #endregion
 
     #region ToModel
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    [MapProperty(nameof(FolderPathDTO.Directory), nameof(FolderPath.DirectoryPath))]
-    [MapperIgnoreSource(nameof(FolderPathDTO.IsValid))]
-    public static partial FolderPath ToModel(this FolderPathDTO folderPaths);
+    public static FolderPath ToModel(this FolderPathDTO? folderPaths) => new()
+    {
+        Id = folderPaths.Id,
+        FolderType = folderPaths.FolderType,
+        MediaType = folderPaths.MediaType,
+        DisplayName = folderPaths.DisplayName,
+        DirectoryPath = folderPaths.Directory,
+    };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    [MapProperty(nameof(FolderPathDTO.Directory), nameof(FolderPath.DirectoryPath))]
-    public static partial List<FolderPath> ToModel(this List<FolderPathDTO> folderPaths);
+    public static List<FolderPath> ToModel(this List<FolderPathDTO> folderPaths) => folderPaths.Select(ToModel).ToList();
 
     #endregion
 }

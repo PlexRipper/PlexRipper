@@ -2,64 +2,64 @@ namespace PlexRipper.Domain;
 
 public record DownloadTaskGeneric : IDownloadTaskProgress
 {
-    public Guid Id { get; init; }
+    public required Guid Id { get; init; }
 
     /// <summary>
     /// The identifier used by Plex to keep track of media.
     /// </summary>
-    public int Key { get; init; }
+    public required int Key { get; init; }
 
     /// <summary>
     /// The formatted media title as shown in Plex.
     /// </summary>
-    public string Title { get; init; }
+    public required string Title { get; init; }
 
     /// <summary>
     /// The full media title including the [TvShow]/[Season]/[Episode] as shown in Plex.
     /// </summary>
-    public string FullTitle { get; init; }
+    public required string FullTitle { get; init; }
 
     /// <summary>
     /// Note: Naming third just 'type' will cause errors in the Typescript type generating.
     /// </summary>
-    public PlexMediaType MediaType { get; init; }
+    public required PlexMediaType MediaType { get; init; }
 
-    public DownloadTaskType DownloadTaskType { get; init; }
+    public required DownloadTaskType DownloadTaskType { get; init; }
 
-    public DownloadStatus DownloadStatus { get; set; }
+    public required DownloadStatus DownloadStatus { get; set; }
 
-    public decimal Percentage { get; set; }
+    public required decimal Percentage { get; set; }
 
-    public long DataReceived { get; set; }
+    public required long DataReceived { get; set; }
 
-    public long DataTotal { get; set; }
+    public required long DataTotal { get; set; }
 
-    public DateTime CreatedAt { get; init; }
+    public required DateTime CreatedAt { get; init; }
 
-    public string FileName { get; init; }
+    public required string FileName { get; init; }
 
-    public bool IsDownloadable { get; init; }
+    public required bool IsDownloadable { get; init; }
 
-    public long TimeRemaining { get; init; }
+    public required long TimeRemaining { get; init; }
 
     /// <summary>
     /// Gets or sets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
     /// </summary>
-    public string DownloadDirectory { get; set; }
+    public required string DownloadDirectory { get; set; }
 
     /// <summary>
     /// Gets or sets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
     /// </summary>
-    public string DestinationDirectory { get; set; }
+    public required string DestinationDirectory { get; set; }
 
     /// <summary>
     /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv.
     /// </summary>
-    public string FileLocationUrl { get; set; }
+    public required string FileLocationUrl { get; set; }
 
-    public long DownloadSpeed { get; set; }
+    public required long DownloadSpeed { get; set; }
 
-    public long FileTransferSpeed { get; set; }
+    public required long FileTransferSpeed { get; set; }
 
     #region Relationships
 
@@ -67,19 +67,19 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
     /// The nested <see cref="DownloadTaskGeneric"/> used for seasons and episodes.
     /// "Required = Required.Default" is used for ensuring it's optional in the Typescript generating.
     /// </summary>
-    public List<DownloadTaskGeneric> Children { get; set; }
+    public required List<DownloadTaskGeneric> Children { get; set; }
 
-    public List<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
+    public required List<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
 
-    public Guid ParentId { get; init; }
+    public required Guid ParentId { get; init; }
 
-    public PlexServer PlexServer { get; init; }
+    public required PlexServer PlexServer { get; init; }
 
-    public int PlexServerId { get; init; }
+    public required int PlexServerId { get; init; }
 
-    public PlexLibrary PlexLibrary { get; init; }
+    public required PlexLibrary PlexLibrary { get; init; }
 
-    public int PlexLibraryId { get; init; }
+    public required int PlexLibraryId { get; init; }
 
     #endregion
 

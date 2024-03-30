@@ -20,6 +20,4 @@ public interface IPathSystem
     /// Directory separators are normalized in the returned string.
     /// </remarks>
     Result<string> GetDirectoryName(string filePath);
-
-    string SanitizePath(string name);
 }

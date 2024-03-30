@@ -49,8 +49,11 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
     public override async Task HandleAsync(DeleteDownloadTaskEndpointRequest req, CancellationToken ct)
     {
         foreach (var downloadTaskId in req.DownloadTaskIds)
-            if (await _downloadTaskScheduler.IsDownloading(downloadTaskId))
-                await _mediator.Send(new StopDownloadTaskCommand(downloadTaskId), ct);
+        {
+            var downloadTaskKey = await _dbContext.GetDownloadTaskKeyAsync(downloadTaskId, ct);
+            if (downloadTaskKey is not null && await _downloadTaskScheduler.IsDownloading(downloadTaskKey))
+                await _mediator.Send(new StopDownloadTaskCommand(downloadTaskKey.Id), ct);
+        }
 
         // Delete Download tasks
         await _dbContext.DownloadTaskMovie.Where(x => req.DownloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);

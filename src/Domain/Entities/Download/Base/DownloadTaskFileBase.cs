@@ -78,6 +78,9 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase
     {
         get
         {
+            if (DirectoryMeta == null || DirectoryMeta.DownloadRootPath == string.Empty)
+                return string.Empty;
+
             switch (DownloadTaskType)
             {
                 case DownloadTaskType.MovieData:
@@ -95,23 +98,31 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase
     /// Gets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
     /// </summary>
     [NotMapped]
-    public Result<string> DestinationDirectory => DownloadTaskType switch
+    public string DestinationDirectory
     {
-        DownloadTaskType.MovieData => Result.Ok(Path.Combine(
-            DirectoryMeta.DestinationRootPath,
-            DirectoryMeta.MovieFolder)),
-        DownloadTaskType.EpisodeData => Result.Ok(Path.Combine(
-            DirectoryMeta.DestinationRootPath,
-            DirectoryMeta.TvShowFolder,
-            DirectoryMeta.SeasonFolder)),
-        _ => Result.Fail<string>($"Invalid DownloadTaskType of type: {DownloadTaskType}").LogError(),
-    };
+        get
+        {
+            if (DirectoryMeta == null || DirectoryMeta.DestinationRootPath == string.Empty)
+                return string.Empty;
+
+            switch (DownloadTaskType)
+            {
+                case DownloadTaskType.MovieData:
+                    return Path.Combine(DirectoryMeta.DestinationRootPath, DirectoryMeta.MovieFolder);
+                case DownloadTaskType.EpisodeData:
+                    return Path.Combine(DirectoryMeta.DestinationRootPath, DirectoryMeta.TvShowFolder, DirectoryMeta.SeasonFolder);
+                default:
+                    Result.Fail<string>($"Invalid DownloadTaskType of type: {DownloadTaskType}").LogError();
+                    return string.Empty;
+            }
+        }
+    }
 
     /// <summary>
     /// Gets a joined string of temp file paths of the <see cref="DownloadWorkerTasks"/> delimited by ";".
     /// </summary>
     [NotMapped]
-    public string GetFilePathsCompressed => string.Join(';', DownloadWorkerTasks.Select(x => x.TempFilePath).ToArray());
+    public string GetFilePathsCompressed => string.Join(';', DownloadWorkerTasks.Select(x => x.DownloadFilePath).ToArray());
 
     [NotMapped]
     public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);

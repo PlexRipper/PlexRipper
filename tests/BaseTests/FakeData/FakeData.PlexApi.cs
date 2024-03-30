@@ -64,7 +64,7 @@ public static partial class FakeData
             .RuleFor(x => x.LibraryLocationPath, f => f.System.DirectoryPath())
             .RuleFor(x => x.MetaData, _ => new PlexLibraryMetaData())
             .RuleFor(x => x.DefaultDestination, _ => null)
-            .RuleFor(x => x.DefaultDestinationId, f => f.Random.Int(1, 5))
+            .RuleFor(x => x.DefaultDestinationId, _ => null)
             .RuleFor(x => x.Movies, _ => new List<PlexMovie>())
             .RuleFor(x => x.TvShows, _ => new List<PlexTvShow>())
             .RuleFor(x => x.PlexAccountLibraries, _ => null);

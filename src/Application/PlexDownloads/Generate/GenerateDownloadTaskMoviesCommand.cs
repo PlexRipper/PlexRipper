@@ -29,9 +29,6 @@ public class GenerateDownloadTaskMoviesCommandHandler : IRequestHandler<Generate
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
 
-    private FolderPath _downloadFolder;
-    private Dictionary<PlexMediaType, FolderPath> _defaultDestinationDict;
-
     public GenerateDownloadTaskMoviesCommandHandler(ILog log, IPlexRipperDbContext dbContext)
     {
         _log = log;
@@ -44,9 +41,6 @@ public class GenerateDownloadTaskMoviesCommandHandler : IRequestHandler<Generate
         var plexMoviesList = groupedList.FindAll(x => x.Type == PlexMediaType.Movie);
         if (!plexMoviesList.Any())
             return ResultExtensions.IsEmpty(nameof(plexMoviesList)).LogWarning();
-
-        _downloadFolder = await _dbContext.FolderPaths.GetDownloadFolderAsync(cancellationToken);
-        _defaultDestinationDict = await _dbContext.FolderPaths.GetDefaultDestinationFolderDictionary(cancellationToken);
 
         _log.Debug("Creating {PlexMovieIdsCount} movie download tasks", plexMoviesList
             .SelectMany(x => x.MediaIds)

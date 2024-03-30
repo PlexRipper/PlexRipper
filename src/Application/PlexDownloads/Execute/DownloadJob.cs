@@ -62,6 +62,13 @@ public class DownloadJob : IJob, IDisposable
                 return;
             }
 
+            var result = await SetDownloadAndDestination(downloadTask);
+            if (result.IsFailed)
+            {
+                result.LogError();
+                return;
+            }
+
             // Create the multiple download worker tasks which will split up the work
             if (!downloadTask.DownloadWorkerTasks.Any())
             {
@@ -70,13 +77,6 @@ public class DownloadJob : IJob, IDisposable
                 await _dbContext.DownloadWorkerTasks.AddRangeAsync(downloadTask.DownloadWorkerTasks, token);
                 await _dbContext.SaveChangesAsync(token);
                 _log.Debug("Generated DownloadWorkerTasks for {DownloadTaskFullTitle}", downloadTask.FullTitle);
-            }
-
-            var result = await SetDownloadAndDestination(downloadTask);
-            if (result.IsFailed)
-            {
-                result.LogError();
-                return;
             }
 
             downloadTask = result.Value;
@@ -160,14 +160,12 @@ public class DownloadJob : IJob, IDisposable
             case DownloadTaskType.MovieData:
                 await _dbContext.DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
                     .ExecuteUpdateAsync(p => p
-                        .SetProperty(x => x.DirectoryMeta.DownloadRootPath, downloadFolder.DirectoryPath)
-                        .SetProperty(x => x.DirectoryMeta.DestinationRootPath, destinationFolder.DirectoryPath));
+                        .SetProperty(x => x.DirectoryMeta, downloadTask.DirectoryMeta));
                 break;
             case DownloadTaskType.EpisodeData:
                 await _dbContext.DownloadTaskTvShowEpisodeFile.Where(x => x.Id == downloadTask.Id)
                     .ExecuteUpdateAsync(p => p
-                        .SetProperty(x => x.DirectoryMeta.DownloadRootPath, downloadFolder.DirectoryPath)
-                        .SetProperty(x => x.DirectoryMeta.DestinationRootPath, destinationFolder.DirectoryPath));
+                        .SetProperty(x => x.DirectoryMeta, downloadTask.DirectoryMeta));
                 break;
             default:
                 return Result.Fail($"DownloadTaskType {downloadTask.DownloadTaskType} is not supported");

@@ -39,10 +39,7 @@ public static class StringExtensions
         return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
     }
 
-    public static bool IsIpAddress(this string ipAddress)
-    {
-        return IPAddress.TryParse(ipAddress, out var parsedIp);
-    }
+    public static bool IsIpAddress(this string ipAddress) => IPAddress.TryParse(ipAddress, out var parsedIp);
 
     private static string GetProperCapitalization(DirectoryInfo dirInfo)
     {
@@ -59,5 +56,18 @@ public static class StringExtensions
             folderName = parentDirInfo.GetDirectories(dirInfo.Name)[0].Name;
 
         return Path.Combine(GetProperCapitalization(parentDirInfo), folderName);
+    }
+
+    /// <summary>
+    /// Replaces invalid characters from a file or folder name
+    /// Source: https://stackoverflow.com/a/13617375/8205497
+    /// </summary>
+    /// <param name="name"> The filename or folder name to sanitize. </param>
+    /// <returns> The sanitized filename or folder name. </returns>
+    public static string SanitizeFolderName(this string name)
+    {
+        var invalids = Path.GetInvalidFileNameChars();
+        name = name.Replace(@"·", "-").Replace(": ", " ");
+        return string.Join(" ", name.Split(invalids, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
     }
 }

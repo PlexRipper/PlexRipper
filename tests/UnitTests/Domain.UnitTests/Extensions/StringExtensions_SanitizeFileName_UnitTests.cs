@@ -1,8 +1,6 @@
-﻿using PlexRipper.FileSystem;
+﻿namespace Domain.UnitTests;
 
-namespace FileSystem.UnitTests;
-
-public class PathSystem_SanitizeFileName_UnitTests : BaseUnitTest<PathSystem>
+public class PathSystem_SanitizeFileName_UnitTests : BaseUnitTest
 {
     public PathSystem_SanitizeFileName_UnitTests(ITestOutputHelper output) : base(output) { }
 
@@ -12,7 +10,7 @@ public class PathSystem_SanitizeFileName_UnitTests : BaseUnitTest<PathSystem>
     public void ShouldFilterAllInvalidCharsFromName_WhenGivenInvalidName(string testString)
     {
         // Act
-        var result = _sut.SanitizePath(testString);
+        var result = testString.SanitizeFolderName();
 
         // Assert
         result.ShouldNotBeNullOrEmpty();

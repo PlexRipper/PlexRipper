@@ -279,7 +279,7 @@ public static partial class FakeData
             .RuleFor(x => x.EndByte, f => f.Random.Long(0))
             .RuleFor(x => x.BytesReceived, 0)
             .RuleFor(x => x.PartIndex, _ => partIndex++)
-            .RuleFor(x => x.TempDirectory, f => f.System.FilePath())
+            .RuleFor(x => x.DownloadDirectory, f => f.System.FilePath())
             .RuleFor(x => x.ElapsedTime, 0)
             .RuleFor(x => x.FileLocationUrl, f => f.Internet.UrlRootedPath())
             .RuleFor(x => x.DownloadStatus, DownloadStatus.Queued)

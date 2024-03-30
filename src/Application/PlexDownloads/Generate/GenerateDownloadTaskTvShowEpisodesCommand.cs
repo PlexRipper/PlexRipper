@@ -25,9 +25,6 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
 
-    private FolderPath _downloadFolder;
-    private Dictionary<PlexMediaType, FolderPath> _defaultDestinationDict;
-
     public GenerateDownloadTaskTvShowEpisodesCommandHandler(ILog log, IPlexRipperDbContext dbContext)
     {
         _log = log;
@@ -47,9 +44,6 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<
                 .SelectMany(x => x.MediaIds)
                 .ToList()
                 .Count);
-
-            _downloadFolder = await _dbContext.FolderPaths.GetDownloadFolderAsync(cancellationToken);
-            _defaultDestinationDict = await _dbContext.FolderPaths.GetDefaultDestinationFolderDictionary(cancellationToken);
 
             foreach (var downloadMediaDto in plexEpisodeList)
             {

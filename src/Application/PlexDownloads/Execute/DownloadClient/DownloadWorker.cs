@@ -169,7 +169,7 @@ public class DownloadWorker : IDisposable
 
             // Prepare destination stream
             var _fileStreamResult =
-                _downloadFileSystem.CreateDownloadFileStream(DownloadWorkerTask.TempDirectory, FileName, DownloadWorkerTask.DataTotal);
+                _downloadFileSystem.CreateDownloadFileStream(DownloadWorkerTask.DownloadDirectory, FileName, DownloadWorkerTask.DataTotal);
             if (_fileStreamResult.IsFailed)
             {
                 var result = Result.Fail(new Error($"Could not create a download destination filestream for DownloadWorker with id {DownloadWorkerTask.Id}"));

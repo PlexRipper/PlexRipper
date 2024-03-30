@@ -38,7 +38,7 @@ public static partial class DownloadTaskExtensions
             CreatedAt = DateTime.UtcNow,
             FilePathsCompressed = string.Join(
                 ';',
-                downloadTask.DownloadWorkerTasks.Select(x => x.TempFilePath)
+                downloadTask.DownloadWorkerTasks.Select(x => x.DownloadFilePath)
                     .ToArray()),
             FileName = downloadTask.FileName,
             FileSize = downloadTask.DataTotal,

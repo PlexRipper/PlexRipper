@@ -18,7 +18,7 @@ public class DownloadWorkerTask : BaseEntity
     /// <param name="endPosition"></param>
     public DownloadWorkerTask(DownloadTaskFileBase downloadTask, int partIndex, long startPosition, long endPosition)
     {
-        TempDirectory = downloadTask.DownloadDirectory;
+        DownloadDirectory = downloadTask.DownloadDirectory;
         FileLocationUrl = downloadTask.FileLocationUrl;
         DownloadTaskId = downloadTask.Id;
         PartIndex = partIndex;
@@ -62,7 +62,7 @@ public class DownloadWorkerTask : BaseEntity
     /// The download directory where the part is downloaded into.
     /// </summary>
     [Column(Order = 8)]
-    public string TempDirectory { get; internal set; }
+    public string DownloadDirectory { get; internal set; }
 
     /// <summary>
     /// The elapsed time in milliseconds with an accuracy of 100 milliseconds.
@@ -91,7 +91,7 @@ public class DownloadWorkerTask : BaseEntity
     #region Helpers
 
     [NotMapped]
-    public string TempFilePath => Path.Combine(TempDirectory, FileName);
+    public string DownloadFilePath => Path.Combine(DownloadDirectory, FileName);
 
     [NotMapped]
     public long DataTotal => EndByte - StartByte;

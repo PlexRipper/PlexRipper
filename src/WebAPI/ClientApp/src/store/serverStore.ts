@@ -2,9 +2,9 @@ import { defineStore, acceptHMRUpdate } from 'pinia';
 import { Observable, of } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
 import type { PlexServerDTO } from '@dto/mainApi';
-import { getPlexServer, getPlexServers } from '@api/plexServerApi';
 import type { ISetupResult } from '@interfaces';
 import { useAccountStore, useServerConnectionStore, useSettingsStore } from '#build/imports';
+import { plexServerApi } from '@api';
 
 export const useServerStore = defineStore('ServerStore', () => {
 	const state = reactive<{ servers: PlexServerDTO[] }>({
@@ -19,7 +19,7 @@ export const useServerStore = defineStore('ServerStore', () => {
 			return actions.refreshPlexServers().pipe(switchMap(() => of({ name: useServerStore.name, isSuccess: true })));
 		},
 		refreshPlexServer(serverId: number) {
-			return getPlexServer(serverId).pipe(
+			return plexServerApi.getPlexServerByIdEndpoint(serverId).pipe(
 				tap((result) => {
 					if (result.isSuccess && result.value) {
 						const i = state.servers.findIndex((x) => x.id === serverId);
@@ -34,7 +34,7 @@ export const useServerStore = defineStore('ServerStore', () => {
 		 * Forces a refresh of all the PlexServers currently in store by fetching it from the API.
 		 */
 		refreshPlexServers(): Observable<PlexServerDTO[]> {
-			return getPlexServers().pipe(
+			return plexServerApi.getAllPlexServersEndpoint().pipe(
 				tap((plexServers) => {
 					if (plexServers.isSuccess) {
 						state.servers = plexServers?.value ?? [];

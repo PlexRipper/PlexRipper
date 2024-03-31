@@ -14,11 +14,7 @@
 		<template #top-row>
 			<q-row>
 				<q-col>
-					<p-text-field
-						v-model="currentPath"
-						outlined
-						color="red"
-						@update:model-value="requestDirectories" />
+					<p-text-field v-model="currentPath" outlined color="red" @update:model-value="requestDirectories" />
 					<q-text v-if="!(path?.directory ?? '')" size="large" align="center">
 						{{ t('components.directory-browser.no-path') }}
 					</q-text>
@@ -67,10 +63,10 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import { getDirectoryPath } from '@api/pathApi';
 import type { FileSystemModelDTO, FolderPathDTO } from '@dto/mainApi';
 import { FileSystemEntityType } from '@dto/mainApi';
 import { useCloseControlDialog } from '~/composables/event-bus';
+import { folderPathApi } from '@api';
 
 const { t } = useI18n();
 const path = ref<FolderPathDTO | null>(null);
@@ -138,35 +134,39 @@ function requestDirectories(newPath: string): void {
 	}
 
 	useSubscription(
-		getDirectoryPath(newPath).subscribe(({ isSuccess, value }) => {
-			if (isSuccess && value) {
-				set(items, value?.directories);
+		folderPathApi
+			.getFolderPathDirectoryEndpoint({
+				path: newPath,
+			})
+			.subscribe(({ isSuccess, value }) => {
+				if (isSuccess && value) {
+					set(items, value?.directories);
 
-				// Don't add return row if in the root folder
-				if (newPath !== '') {
-					items.value.unshift({
-						name: '...',
-						path: '..',
-						type: FileSystemEntityType.Parent,
-						extension: '',
-						size: 0,
-						lastModified: '',
-					});
+					// Don't add return row if in the root folder
+					if (newPath !== '') {
+						items.value.unshift({
+							name: '...',
+							path: '..',
+							type: FileSystemEntityType.Parent,
+							extension: '',
+							size: 0,
+							lastModified: '',
+						});
+					}
+					set(isLoading, false);
+					set(parentPath, value?.parent);
 				}
-				set(isLoading, false);
-				set(parentPath, value?.parent);
-			}
-		}),
+			}),
 	);
 }
 
 function directoryNavigate(dataRow: FileSystemModelDTO): void {
 	if (dataRow.path === '..') {
 		requestDirectories(parentPath.value);
-		set(currentPath, parentPath.value)
+		set(currentPath, parentPath.value);
 	} else {
 		requestDirectories(dataRow.path);
-		set(currentPath, dataRow.path)
+		set(currentPath, dataRow.path);
 	}
 }
 </script>

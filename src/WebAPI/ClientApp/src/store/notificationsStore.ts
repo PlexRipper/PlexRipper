@@ -2,8 +2,8 @@ import { defineStore, acceptHMRUpdate } from 'pinia';
 import { switchMap, tap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import type { NotificationDTO } from '@dto/mainApi';
-import { clearAllNotifications, getNotifications, hideNotification } from '@api/notificationApi';
 import type { ISetupResult } from '@interfaces';
+import { notificationApi } from '@api';
 
 export const useNotificationsStore = defineStore('NotificationsStore', () => {
 	const state = reactive<{ notifications: NotificationDTO[] }>({
@@ -15,7 +15,7 @@ export const useNotificationsStore = defineStore('NotificationsStore', () => {
 			return actions.fetchNotifications().pipe(switchMap(() => of({ name: useNotificationsStore.name, isSuccess: true })));
 		},
 		fetchNotifications() {
-			return getNotifications().pipe(
+			return notificationApi.getAllNotificationsEndpoint().pipe(
 				tap((result) => {
 					if (result.isSuccess) {
 						state.notifications = result.value ?? [];
@@ -31,11 +31,11 @@ export const useNotificationsStore = defineStore('NotificationsStore', () => {
 			if (i > -1) {
 				state.notifications.splice(i, i, { ...state.notifications[i], hidden: true });
 			}
-			hideNotification(id).subscribe();
+			notificationApi.hideNotificationEndpoint(id).subscribe();
 		},
 		clearAllNotifications(): void {
 			state.notifications = [];
-			clearAllNotifications().subscribe();
+			notificationApi.clearAllNotificationsEndpoint().subscribe();
 		},
 	};
 

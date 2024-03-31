@@ -16,7 +16,7 @@ import type {
 
 import { PlexMediaType, ViewMode } from '@dto/mainApi';
 import type { ISetupResult } from '@interfaces';
-import { getSettings, updateSettings } from '@api/settingsApi';
+import { settingsApi } from '@api';
 
 export const useSettingsStore = defineStore('SettingsStore', () => {
 	// State
@@ -70,7 +70,7 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			_settingsUpdated
 				.pipe(
 					debounceTime(1000),
-					switchMap((settings) => updateSettings(settings)),
+					switchMap((settings) => settingsApi.updateUserSettingsEndpoint(settings)),
 				)
 				.subscribe();
 
@@ -84,7 +84,7 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			);
 		},
 		refreshSettings(): Observable<SettingsModelDTO | null> {
-			return getSettings().pipe(
+			return settingsApi.getUserSettingsEndpoint().pipe(
 				switchMap((settingsResult) => of(settingsResult?.value ?? null)),
 				tap((settings) => {
 					if (settings) {

@@ -3,10 +3,9 @@ import { Observable, of } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { get } from '@vueuse/core';
 import type { PlexServerConnectionDTO, PlexServerStatusDTO } from '@dto/mainApi';
-import { setPreferredPlexServerConnection } from '@api/plexServerApi';
 import { useServerStore } from '#build/imports';
 import type { ISetupResult } from '@interfaces';
-import { checkAllPlexServerConnections, checkPlexServerConnection, getPlexServerConnections } from '@api/plexServerConnectionApi';
+import { plexServerApi, plexServerConnectionApi } from '@api';
 
 export const useServerConnectionStore = defineStore('ServerConnection', () => {
 	const state = reactive<{ serverConnections: PlexServerConnectionDTO[] }>({
@@ -19,7 +18,7 @@ export const useServerConnectionStore = defineStore('ServerConnection', () => {
 				.pipe(switchMap(() => of({ name: useServerConnectionStore.name, isSuccess: true })));
 		},
 		refreshPlexServerConnections(): Observable<PlexServerConnectionDTO[]> {
-			return getPlexServerConnections().pipe(
+			return plexServerConnectionApi.getAllPlexServerConnectionsEndpoint().pipe(
 				tap((serverConnections) => {
 					if (serverConnections.isSuccess) {
 						state.serverConnections = serverConnections.value ?? [];
@@ -29,7 +28,7 @@ export const useServerConnectionStore = defineStore('ServerConnection', () => {
 			);
 		},
 		checkServerConnection(plexServerConnectionId: number): Observable<PlexServerStatusDTO | null> {
-			return checkPlexServerConnection(plexServerConnectionId).pipe(
+			return plexServerConnectionApi.checkConnectionStatusByIdEndpoint(plexServerConnectionId).pipe(
 				map((serverStatus) => {
 					if (serverStatus.isSuccess && serverStatus.value) {
 						const index = state.serverConnections.findIndex((x) => x.id === plexServerConnectionId);
@@ -51,15 +50,15 @@ export const useServerConnectionStore = defineStore('ServerConnection', () => {
 		 * @param plexServerId
 		 */
 		checkServerStatus(plexServerId: number) {
-			return checkAllPlexServerConnections(plexServerId).pipe(
+			return plexServerConnectionApi.checkAllConnectionsStatusByPlexServerEndpoint(plexServerId).pipe(
 				map((x) => x?.value ?? []),
 				switchMap(() => actions.refreshPlexServerConnections()),
 			);
 		},
 		setPreferredPlexServerConnection(serverId: number, connectionId: number) {
-			return setPreferredPlexServerConnection(serverId, connectionId).pipe(
-				switchMap(() => useServerStore().refreshPlexServer(serverId)),
-			);
+			return plexServerApi
+				.setPreferredPlexServerConnectionEndpoint(serverId, connectionId)
+				.pipe(switchMap(() => useServerStore().refreshPlexServer(serverId)));
 		},
 	};
 	const getters = {

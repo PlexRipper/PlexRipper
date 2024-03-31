@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { get } from '@vueuse/core';
-import type { DownloadProgressDTO } from '@dto/mainApi';
+import type { DownloadProgressDTO } from '@dto';
 import type { ISelection } from '@interfaces';
 import { useOpenControlDialog } from '#imports';
 

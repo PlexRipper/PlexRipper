@@ -1,7 +1,7 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { forkJoin, Observable, of } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
-import type { PlexAccountDTO } from '@dto/mainApi';
+import type { PlexAccountDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { useServerStore, useLibraryStore } from '#build/imports';
 import { plexAccountApi } from '@api';

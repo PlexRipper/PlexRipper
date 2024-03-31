@@ -1,6 +1,6 @@
 import { randRecentDate } from '@ngneat/falso';
 import { times } from 'lodash-es';
-import type { PlexServerStatusDTO } from '@dto/mainApi';
+import type { PlexServerStatusDTO } from '@dto';
 import { checkConfig, type MockConfig } from '@mock';
 
 let plexServerStatusIndexId = 1;

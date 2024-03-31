@@ -107,7 +107,7 @@ function cleanReturnType(value) {
 
  */
 <%~ route.routeName.usage %> = (<%~ wrapperArgs %>)<%~ config.toJS ? `: ${describeReturnType()}` : "" %> =>
-     from(Axios.request<<%~ cleanReturnType(type) %>>({
+     from(Axios.request<%~ responseFormatTmpl.includes('blob') ? '<Blob>' : `<${cleanReturnType(type)}>`; %>({
         url: `<%~ path %>`,
         method: '<%~ _.upperCase(method) %>',
         <%~ queryTmpl ? `params: ${queryTmpl},` : '' %>
@@ -116,4 +116,6 @@ function cleanReturnType(value) {
         <%~ bodyContentKindTmpl ? `type: ${bodyContentKindTmpl},` : '' %>
         <%~ responseFormatTmpl ? `format: ${responseFormatTmpl},` : '' %>
         ...<%~ _.get(requestConfigParam, "name") %>,
-    })).pipe(apiCheckPipe<<%~ cleanReturnType(type) %>>);
+})).pipe(apiCheckPipe<%~ responseFormatTmpl.includes('blob') ? '<Blob>' : `<${cleanReturnType(type)}>` %>);
+
+

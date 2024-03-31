@@ -63,8 +63,8 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import type { FileSystemModelDTO, FolderPathDTO } from '@dto/mainApi';
-import { FileSystemEntityType } from '@dto/mainApi';
+import type { FileSystemModelDTO, FolderPathDTO } from '@dto';
+import { FileSystemEntityType } from '@dto';
 import { useCloseControlDialog } from '~/composables/event-bus';
 import { folderPathApi } from '@api';
 

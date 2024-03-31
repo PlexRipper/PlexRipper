@@ -1,6 +1,6 @@
 import { APIRoute, apiRoute } from '@fixtures/baseE2E';
 import { generateResultDTO } from '@mock';
-import type { SettingsModelDTO } from '@dto/mainApi';
+import type { SettingsModelDTO } from '@dto';
 describe('PlexRipper Server Dialog', () => {
 	beforeEach(() => {
 		cy.basePageSetup({

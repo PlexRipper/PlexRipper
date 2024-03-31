@@ -1,5 +1,3 @@
-import Log from 'consola';
-import Axios, { AxiosRequestConfig } from 'axios';
 import { Download } from '@api/generated/Download';
 import { FolderPath } from '@api/generated/FolderPath';
 import { PlexLibrary } from '@api/generated/PlexLibrary';
@@ -12,19 +10,15 @@ import { PlexAccount } from '@api/generated/PlexAccount';
 
 export * from './baseApi';
 
-const axiosConfig: AxiosRequestConfig = {};
-Log.info('Setting Axios Config:', axiosConfig);
-
-const downloadApi = new Download({ ...axiosConfig });
-const folderPathApi = new FolderPath({ ...axiosConfig });
-const plexLibraryApi = new PlexLibrary({ ...axiosConfig });
-const notificationApi = new Notification({ ...axiosConfig });
-const plexMediaApi = new PlexMedia({ ...axiosConfig });
-const settingsApi = new Settings({ ...axiosConfig });
-const plexServerApi = new PlexServer({ ...axiosConfig });
-
-const plexAccountApi = new PlexAccount({ ...axiosConfig });
-const plexServerConnectionApi = new PlexServerConnection({ ...axiosConfig });
+const downloadApi = new Download();
+const folderPathApi = new FolderPath();
+const plexLibraryApi = new PlexLibrary();
+const notificationApi = new Notification();
+const plexMediaApi = new PlexMedia();
+const settingsApi = new Settings();
+const plexServerApi = new PlexServer();
+const plexAccountApi = new PlexAccount();
+const plexServerConnectionApi = new PlexServerConnection();
 
 export {
 	downloadApi,

@@ -1,4 +1,4 @@
-import { type FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
+import { type FolderPathDTO, FolderType, PlexMediaType } from '@dto';
 
 export default interface IFolderPathGroup {
 	header: string;

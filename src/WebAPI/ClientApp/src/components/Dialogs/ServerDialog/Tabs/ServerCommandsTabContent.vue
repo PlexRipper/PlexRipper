@@ -17,7 +17,7 @@
 import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
 import { ref, onUnmounted } from '#imports';
-import type { PlexServerDTO } from '@dto/mainApi';
+import type { PlexServerDTO } from '@dto';
 import { plexServerApi } from '@api';
 
 const props = defineProps<{

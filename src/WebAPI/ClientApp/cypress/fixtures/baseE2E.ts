@@ -32,8 +32,8 @@ import type {
 	ServerDownloadProgressDTO,
 	SettingsModelDTO,
 	DownloadTaskDTO,
-} from '@dto/mainApi';
-import { PlexMediaType } from '@dto/mainApi';
+} from '@dto';
+import { PlexMediaType } from '@dto';
 import { toDownloadTaskType } from '@composables/conversion';
 
 export interface IBasePageSetupResult {

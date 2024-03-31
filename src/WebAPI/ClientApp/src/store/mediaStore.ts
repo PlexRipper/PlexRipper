@@ -1,8 +1,8 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { Observable, of, switchMap, throwError, type Observer } from 'rxjs';
 import { map, mergeMap, take } from 'rxjs/operators';
+import { PlexMediaType, type PlexMediaDTO, type PlexMediaSlimDTO } from '@dto';
 import type { ISetupResult, IObjectUrl } from '@interfaces';
-import { PlexMediaType, type PlexMediaDTO, type PlexMediaSlimDTO } from '@dto/mainApi';
 import { plexLibraryApi, plexMediaApi } from '@api';
 
 export const useMediaStore = defineStore('MediaStore', () => {

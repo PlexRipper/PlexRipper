@@ -2,7 +2,7 @@ import { randMovie, randDirectoryPath, randUrl, randFileName, randNumber, randUu
 import { times } from 'lodash-es';
 import { toPlexMediaType } from '@composables/conversion';
 import type { MockConfig } from '@mock';
-import { DownloadStatus, type DownloadTaskDTO, DownloadTaskType } from '@dto/mainApi';
+import { DownloadStatus, type DownloadTaskDTO, DownloadTaskType } from '@dto';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
 
 export function generateDownloadTasks({

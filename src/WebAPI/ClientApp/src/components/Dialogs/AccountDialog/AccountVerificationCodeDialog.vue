@@ -51,7 +51,7 @@ import Log from 'consola';
 import VOtpInput from 'vue3-otp-input';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
-import type { IError, PlexAccountDTO } from '@dto/mainApi';
+import type { IError, PlexAccountDTO } from '@dto';
 import { useCloseControlDialog } from '#imports';
 import { plexAccountApi } from '@api';
 

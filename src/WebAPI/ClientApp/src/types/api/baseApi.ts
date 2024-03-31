@@ -1,16 +1,15 @@
 import Log from 'consola';
 import { switchMap, take, tap } from 'rxjs/operators';
 import { catchError, Observable, of } from 'rxjs';
-import type { AxiosObservable } from 'axios-observable';
 import { AxiosError, type AxiosResponse } from 'axios';
-import type ResultDTO from '@dto/ResultDTO';
+import type { ResultDTO } from '@interfaces';
 import { useAlertStore } from '~/store';
 
 export function checkForError<T = any>(
 	logText?: string,
 	fnName?: string,
 	suppressAlert?: boolean,
-): (source$: AxiosObservable<ResultDTO<T>>) => Observable<ResultDTO<T>> {
+): (source$) => Observable<ResultDTO<T>> {
 	return (source$) =>
 		source$.pipe(
 			catchError((error: AxiosError | any) => {

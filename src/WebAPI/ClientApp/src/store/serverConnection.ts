@@ -2,7 +2,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { Observable, of } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { get } from '@vueuse/core';
-import type { PlexServerConnectionDTO, PlexServerStatusDTO } from '@dto/mainApi';
+import type { PlexServerConnectionDTO, PlexServerStatusDTO } from '@dto';
 import { useServerStore } from '#build/imports';
 import type { ISetupResult } from '@interfaces';
 import { plexServerApi, plexServerConnectionApi } from '@api';

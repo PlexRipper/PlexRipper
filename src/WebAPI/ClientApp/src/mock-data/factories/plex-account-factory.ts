@@ -10,7 +10,7 @@ import {
 } from '@ngneat/falso';
 import { times } from 'lodash-es';
 import type { MockConfig } from '@mock';
-import type { PlexAccountDTO, PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
+import type { PlexAccountDTO, PlexLibraryDTO, PlexServerDTO } from '@dto';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
 
 let plexAccountIdIndex = 1;

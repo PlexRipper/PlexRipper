@@ -1,12 +1,7 @@
 import { randIp, randPort } from '@ngneat/falso';
 import { times } from 'lodash-es';
 import { checkConfig, incrementSeed, type MockConfig } from '~/mock-data';
-import type {
-	PlexServerConnectionDTO,
-	PlexServerDTO,
-	PlexServerStatusDTO,
-	ServerConnectionCheckStatusProgressDTO,
-} from '@dto/mainApi';
+import type { PlexServerConnectionDTO, PlexServerDTO, PlexServerStatusDTO, ServerConnectionCheckStatusProgressDTO } from '@dto';
 
 let plexServerConnectionIdIndex = 1;
 

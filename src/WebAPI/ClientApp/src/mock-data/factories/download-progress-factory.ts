@@ -2,7 +2,7 @@ import { randMovie, randUuid } from '@ngneat/falso';
 import { times } from 'lodash-es';
 import { toPlexMediaType } from '@composables/conversion';
 import type { MockConfig } from '@mock';
-import { DownloadStatus, DownloadTaskType, type DownloadProgressDTO, type ServerDownloadProgressDTO } from '@dto/mainApi';
+import { DownloadStatus, DownloadTaskType, type DownloadProgressDTO, type ServerDownloadProgressDTO } from '@dto';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
 
 export function generateServerDownloadProgress({

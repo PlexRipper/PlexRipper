@@ -61,7 +61,7 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { type PlexLibraryDTO, PlexMediaType } from '@dto/mainApi';
+import { type PlexLibraryDTO, PlexMediaType } from '@dto';
 import { useOpenControlDialog } from '#imports';
 
 const { t } = useI18n();

@@ -38,6 +38,7 @@ export class PlexServer {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ResultDTO>);
+
 	/**
  * No description
  *
@@ -55,6 +56,7 @@ export class PlexServer {
 				...params,
 			}),
 		).pipe(apiCheckPipe<PlexServerDTO>);
+
 	/**
  * @description  Retrieves all the PlexServers, without PlexLibraries but with all its connections currently in the database.
  *
@@ -73,6 +75,7 @@ export class PlexServer {
 				...params,
 			}),
 		).pipe(apiCheckPipe<PlexServerDTO[]>);
+
 	/**
  * No description
  *
@@ -90,6 +93,7 @@ export class PlexServer {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ResultDTO>);
+
 	/**
  * No description
  *
@@ -107,6 +111,7 @@ export class PlexServer {
 				...params,
 			}),
 		).pipe(apiCheckPipe<PlexServerDTO>);
+
 	/**
  * No description
  *

@@ -1,5 +1,5 @@
 import { APIRoute, apiRoute, route } from '@fixtures/baseE2E';
-import { type LibraryProgress, MessageTypes, PlexMediaType } from '@dto/mainApi';
+import { type LibraryProgress, MessageTypes, PlexMediaType } from '@dto';
 
 describe('Test the refreshing of a PlexLibrary', () => {
 	beforeEach(() => {

@@ -43,8 +43,7 @@
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import type { PlexServerDTO } from '@dto/mainApi';
-import type { ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
+import type { PlexServerDTO, ServerConnectionCheckStatusProgressDTO } from '@dto';
 import { useServerConnectionStore, useSignalrStore } from '~/store';
 
 const { t } = useI18n();

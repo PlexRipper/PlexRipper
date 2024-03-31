@@ -12,9 +12,9 @@ import type {
 	LanguageSettingsDTO,
 	ServerSettingsDTO,
 	SettingsModelDTO,
-} from '@dto/mainApi';
+} from '@dto';
 
-import { PlexMediaType, ViewMode } from '@dto/mainApi';
+import { PlexMediaType, ViewMode } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { settingsApi } from '@api';
 

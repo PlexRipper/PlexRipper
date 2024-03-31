@@ -3,14 +3,8 @@ import Log from 'consola';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { sum, merge, keyBy, values, flatMapDeep, clone } from 'lodash-es';
-import type {
-	DownloadMediaDTO,
-	DownloadPreviewDTO,
-	DownloadProgressDTO,
-	PlexServerDTO,
-	ServerDownloadProgressDTO,
-} from '@dto/mainApi';
-import { DownloadStatus } from '@dto/mainApi';
+import type { DownloadMediaDTO, DownloadPreviewDTO, DownloadProgressDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto';
+import { DownloadStatus } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { useServerStore } from '#build/imports';
 import type IDownloadsSelection from '@interfaces/IDownloadsSelection';

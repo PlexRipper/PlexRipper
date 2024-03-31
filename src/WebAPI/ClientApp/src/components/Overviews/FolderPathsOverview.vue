@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import type { FolderPathDTO } from '@dto/mainApi';
+import type { FolderPathDTO } from '@dto';
 import {
 	useI18n,
 	useOpenControlDialog,

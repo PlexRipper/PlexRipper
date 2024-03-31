@@ -1,6 +1,6 @@
 import { APIRoute, apiRoute, route } from '@fixtures/baseE2E';
 import { generateResultDTO } from '@mock';
-import type { SettingsModelDTO } from '@dto/mainApi';
+import type { SettingsModelDTO } from '@dto';
 
 describe('Change UI settings', () => {
 	beforeEach(() => {

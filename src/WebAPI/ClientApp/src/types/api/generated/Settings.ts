@@ -34,6 +34,7 @@ export class Settings {
 				...params,
 			}),
 		).pipe(apiCheckPipe<SettingsModelDTO>);
+
 	/**
  * No description
  *
@@ -53,6 +54,7 @@ export class Settings {
 				...params,
 			}),
 		).pipe(apiCheckPipe<SettingsModelDTO>);
+
 	/**
  * No description
  *

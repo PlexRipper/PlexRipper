@@ -19,7 +19,7 @@
 		"preview": "nuxi preview",
 		"dev:analyze": "nuxi analyze",
 		"postinstall": "nuxi prepare",
-		"generate-ts": "npx swagger-typescript-api -p http://localhost:5000/swagger/v1/swagger.json --sort-types --no-client --route-types --modular  --clean-output --module-name-index 1 --api-class-name GeneratedApiClient --templates ./src/types/api/templates/modular -o ./src/types/api/generated",
+		"generate-ts": "npx swagger-typescript-api -p http://localhost:5000/swagger/v1/swagger.json --sort-types --route-types --modular --clean-output --module-name-index 1 --axios --api-class-name GeneratedApiClient --templates ./src/types/api/templates/modular -o ./src/types/api/generated",
 		"typecheck": "vue-tsc --noEmit --pretty",
 		"typecheck-watch": "vue-tsc --noEmit --watch --pretty",
 		"npm-upgrade-packages": "npm-upgrade",

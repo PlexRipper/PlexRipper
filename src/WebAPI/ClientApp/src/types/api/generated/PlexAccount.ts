@@ -36,6 +36,7 @@ export class PlexAccount {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ResultDTO>);
+
 	/**
  * No description
  *
@@ -53,6 +54,7 @@ export class PlexAccount {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ResultDTO>);
+
 	/**
  * No description
  *
@@ -70,6 +72,7 @@ export class PlexAccount {
 				...params,
 			}),
 		).pipe(apiCheckPipe<PlexAccountDTO>);
+
 	/**
  * No description
  *
@@ -94,6 +97,7 @@ export class PlexAccount {
 				...params,
 			}),
 		).pipe(apiCheckPipe<PlexAccountDTO[]>);
+
 	/**
  * No description
  *
@@ -120,6 +124,7 @@ export class PlexAccount {
 				...params,
 			}),
 		).pipe(apiCheckPipe<PlexAccountDTO>);
+
 	/**
  * No description
  *
@@ -143,6 +148,7 @@ export class PlexAccount {
 				...params,
 			}),
 		).pipe(apiCheckPipe<Boolean>);
+
 	/**
  * No description
  *
@@ -160,6 +166,7 @@ export class PlexAccount {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ResultDTO>);
+
 	/**
  * No description
  *
@@ -179,6 +186,7 @@ export class PlexAccount {
 				...params,
 			}),
 		).pipe(apiCheckPipe<PlexAccountDTO>);
+
 	/**
  * No description
  *

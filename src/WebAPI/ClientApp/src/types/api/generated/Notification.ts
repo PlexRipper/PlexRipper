@@ -34,6 +34,7 @@ export class Notification {
 				...params,
 			}),
 		).pipe(apiCheckPipe<number>);
+
 	/**
  * No description
  *
@@ -51,6 +52,7 @@ export class Notification {
 				...params,
 			}),
 		).pipe(apiCheckPipe<NotificationDTO[]>);
+
 	/**
  * No description
  *

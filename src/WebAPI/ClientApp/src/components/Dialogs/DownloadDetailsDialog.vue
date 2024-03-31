@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 import { set } from '@vueuse/core';
-import type { DownloadTaskDTO, ReasonDTO } from '@dto/mainApi';
+import type { DownloadTaskDTO, ReasonDTO } from '@dto';
 import { downloadApi } from '@api';
 
 const { t } = useI18n();

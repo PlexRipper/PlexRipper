@@ -1,4 +1,4 @@
-import { DownloadStatus } from '@dto/mainApi';
+import { DownloadStatus } from '@dto';
 
 export function determineDownloadStatus(statuses: DownloadStatus[]): DownloadStatus {
 	for (const status in enumKeys(DownloadStatus)) {

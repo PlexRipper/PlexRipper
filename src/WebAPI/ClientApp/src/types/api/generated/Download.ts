@@ -43,6 +43,7 @@ export class Download {
 				...params,
 			}),
 		).pipe(apiCheckPipe<number>);
+
 	/**
  * No description
  *
@@ -62,6 +63,7 @@ export class Download {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ResultDTO>);
+
 	/**
  * No description
  *
@@ -81,6 +83,7 @@ export class Download {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ResultDTO>);
+
 	/**
  * No description
  *
@@ -106,6 +109,7 @@ export class Download {
 				...params,
 			}),
 		).pipe(apiCheckPipe<DownloadTaskDTO>);
+
 	/**
  * No description
  *
@@ -123,6 +127,7 @@ export class Download {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ServerDownloadProgressDTO[]>);
+
 	/**
  * No description
  *
@@ -140,6 +145,7 @@ export class Download {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ResultDTO>);
+
 	/**
  * No description
  *
@@ -159,6 +165,7 @@ export class Download {
 				...params,
 			}),
 		).pipe(apiCheckPipe<DownloadPreviewDTO[]>);
+
 	/**
  * No description
  *
@@ -176,6 +183,7 @@ export class Download {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ResultDTO>);
+
 	/**
  * No description
  *
@@ -193,6 +201,7 @@ export class Download {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ResultDTO>);
+
 	/**
  * No description
  *

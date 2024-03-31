@@ -97,7 +97,7 @@ export default defineNuxtConfig({
 	alias: {
 		// Doc: https://nuxt.com/docs/api/configuration/nuxt-config#alias
 		'@class': fileURLToPath(new URL('./src/types/class/', import.meta.url)),
-		'@dto': fileURLToPath(new URL('./src/types/dto/', import.meta.url)),
+		'@dto': fileURLToPath(new URL('./src/types/api/generated/data-contracts.ts', import.meta.url)),
 		'@api': fileURLToPath(new URL('./src/types/api/', import.meta.url)),
 		'@const': fileURLToPath(new URL('./src/types/const/', import.meta.url)),
 		'@composables': fileURLToPath(new URL('./src/composables/', import.meta.url)),

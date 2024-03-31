@@ -91,8 +91,8 @@
 </template>
 
 <script setup lang="ts">
-import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
-import { PlexMediaType, ViewMode } from '@dto/mainApi';
+import type { PlexLibraryDTO, PlexServerDTO } from '@dto';
+import { PlexMediaType, ViewMode } from '@dto';
 import { useLibraryStore, useMediaOverviewBarDownloadCommandBus, useMediaOverviewStore, useServerStore } from '#imports';
 
 const libraryStore = useLibraryStore();

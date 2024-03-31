@@ -1,5 +1,5 @@
 import { useEventBus, type UseEventBusReturn } from '@vueuse/core';
-import type { DownloadMediaDTO } from '@dto/mainApi';
+import type { DownloadMediaDTO } from '@dto';
 
 // region Dialog Controls
 

@@ -1,5 +1,5 @@
 import { APIRoute, apiRoute, route } from '@fixtures/baseE2E';
-import { PlexMediaType } from '@dto/mainApi';
+import { PlexMediaType } from '@dto';
 
 describe('Display media collection on the Library detail page', () => {
 	beforeEach(() => {

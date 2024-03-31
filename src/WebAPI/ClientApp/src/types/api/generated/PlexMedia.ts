@@ -9,7 +9,7 @@
  * ---------------------------------------------------------------
  */
 
-import { Blob, PlexMediaDTO, PlexMediaType } from './data-contracts';
+import { PlexMediaDTO, PlexMediaType } from './data-contracts';
 import { RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
@@ -41,6 +41,7 @@ export class PlexMedia {
 				...params,
 			}),
 		).pipe(apiCheckPipe<PlexMediaDTO>);
+
 	/**
  * No description
  *
@@ -65,7 +66,7 @@ export class PlexMedia {
 				url: `/api/PlexMedia/thumb/${mediaId}`,
 				method: 'GET',
 				params: query,
-				format: 'json',
+				format: 'blob',
 				...params,
 			}),
 		).pipe(apiCheckPipe<Blob>);

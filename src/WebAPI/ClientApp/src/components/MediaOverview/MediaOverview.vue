@@ -67,8 +67,7 @@ import Log from 'consola';
 import { set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRouter, type RouteLocationNormalized, type RouteLocationNormalizedLoaded } from 'vue-router';
-import type { DownloadMediaDTO } from '@dto/mainApi';
-import { type LibraryProgress, PlexMediaType, ViewMode } from '@dto/mainApi';
+import { type DownloadMediaDTO, type LibraryProgress, PlexMediaType, ViewMode } from '@dto';
 import {
 	useMediaOverviewBarDownloadCommandBus,
 	useMediaOverviewSortBus,

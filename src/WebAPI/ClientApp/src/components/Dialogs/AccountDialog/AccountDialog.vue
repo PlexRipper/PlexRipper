@@ -72,7 +72,7 @@ import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import { take } from 'rxjs/operators';
 import { AccountForm } from '#components';
-import type { IError, PlexAccountDTO } from '@dto/mainApi';
+import type { IError, PlexAccountDTO } from '@dto';
 import { useI18n, useOpenControlDialog, useCloseControlDialog, useAccountStore } from '#imports';
 import { plexAccountApi } from '@api';
 

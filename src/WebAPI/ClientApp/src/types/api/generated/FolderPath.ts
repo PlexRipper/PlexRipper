@@ -36,6 +36,7 @@ export class FolderPath {
 				...params,
 			}),
 		).pipe(apiCheckPipe<FolderPathDTO>);
+
 	/**
  * No description
  *
@@ -53,6 +54,7 @@ export class FolderPath {
 				...params,
 			}),
 		).pipe(apiCheckPipe<FolderPathDTO[]>);
+
 	/**
  * No description
  *
@@ -72,6 +74,7 @@ export class FolderPath {
 				...params,
 			}),
 		).pipe(apiCheckPipe<FolderPathDTO>);
+
 	/**
  * No description
  *
@@ -89,6 +92,7 @@ export class FolderPath {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ResultDTO>);
+
 	/**
  * No description
  *

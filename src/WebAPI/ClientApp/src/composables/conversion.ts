@@ -6,7 +6,7 @@ import {
 	type DownloadMediaDTO,
 	type PlexMediaDTO,
 	type PlexMediaSlimDTO,
-} from '@dto/mainApi';
+} from '@dto';
 
 export function toDownloadMedia(mediaItem: PlexMediaDTO | PlexMediaSlimDTO): DownloadMediaDTO[] {
 	return [

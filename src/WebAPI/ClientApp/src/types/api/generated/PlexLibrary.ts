@@ -34,6 +34,7 @@ export class PlexLibrary {
 				...params,
 			}),
 		).pipe(apiCheckPipe<PlexLibraryDTO>);
+
 	/**
  * No description
  *
@@ -51,6 +52,7 @@ export class PlexLibrary {
 				...params,
 			}),
 		).pipe(apiCheckPipe<PlexLibraryDTO[]>);
+
 	/**
  * No description
  *
@@ -84,6 +86,7 @@ export class PlexLibrary {
 				...params,
 			}),
 		).pipe(apiCheckPipe<PlexMediaSlimDTO[]>);
+
 	/**
  * No description
  *
@@ -101,6 +104,7 @@ export class PlexLibrary {
 				...params,
 			}),
 		).pipe(apiCheckPipe<PlexLibraryDTO>);
+
 	/**
  * No description
  *

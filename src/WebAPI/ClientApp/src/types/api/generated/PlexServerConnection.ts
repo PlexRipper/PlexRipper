@@ -34,6 +34,7 @@ export class PlexServerConnection {
 				...params,
 			}),
 		).pipe(apiCheckPipe<PlexServerStatusDTO[]>);
+
 	/**
  * No description
  *
@@ -51,6 +52,7 @@ export class PlexServerConnection {
 				...params,
 			}),
 		).pipe(apiCheckPipe<PlexServerStatusDTO>);
+
 	/**
  * No description
  *
@@ -68,6 +70,7 @@ export class PlexServerConnection {
 				...params,
 			}),
 		).pipe(apiCheckPipe<PlexServerConnectionDTO>);
+
 	/**
  * No description
  *

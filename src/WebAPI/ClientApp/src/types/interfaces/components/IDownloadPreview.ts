@@ -1,4 +1,4 @@
-import { PlexMediaType } from '@dto/mainApi';
+import { PlexMediaType } from '@dto';
 
 export default interface IDownloadPreview {
 	id: number;

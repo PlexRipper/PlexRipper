@@ -39,12 +39,6 @@ export interface AuthPinLocation {
 	timeZone: string;
 }
 
-export interface Blob {
-	isDefault: boolean;
-	/** @format int32 */
-	length: number;
-}
-
 export interface ConfirmationSettingsDTO {
 	askDownloadEpisodeConfirmation: boolean;
 	askDownloadMovieConfirmation: boolean;

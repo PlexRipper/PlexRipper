@@ -91,7 +91,7 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { get, set } from '@vueuse/core';
-import { type DownloadMediaDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import { type DownloadMediaDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto';
 import type { ISelection } from '@interfaces';
 import {
 	useMediaOverviewBarDownloadCommandBus,

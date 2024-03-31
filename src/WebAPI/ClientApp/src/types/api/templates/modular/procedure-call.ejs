@@ -86,9 +86,28 @@ const describeReturnType = () => {
 
 <%~ routeDocs.lines %>
 
+<%
+/*
+* Clean the return type from the ResultDTOOf prefix
+* @param {string} value
+ */
+function cleanReturnType(value) {
+	let result = value.replace('ResultDTOOf', '')
+    if (result.includes('ListOf')) {
+		// Turn into an array
+        result = result.replace(/^ListOf/, '') + '[]';
+    }
+
+    if (result === 'Int32'){
+        return 'number';
+    }
+    return result;
+}
+%>
+
  */
 <%~ route.routeName.usage %> = (<%~ wrapperArgs %>)<%~ config.toJS ? `: ${describeReturnType()}` : "" %> =>
-    <%~ config.singleHttpClient ? 'from(this.http.request' : 'from(this.request' %><<%~ type %>, <%~ errorType %>>({
+    <%~ config.singleHttpClient ? 'from(this.http.request' : 'from(this.request' %><<%~ cleanReturnType(type) %>, <%~ errorType %>>({
         path: `<%~ path %>`,
         method: '<%~ _.upperCase(method) %>',
         <%~ queryTmpl ? `query: ${queryTmpl},` : '' %>
@@ -97,4 +116,4 @@ const describeReturnType = () => {
         <%~ bodyContentKindTmpl ? `type: ${bodyContentKindTmpl},` : '' %>
         <%~ responseFormatTmpl ? `format: ${responseFormatTmpl},` : '' %>
         ...<%~ _.get(requestConfigParam, "name") %>,
-    })).pipe(map((response) => response.data));
+    })).pipe(apiCheckPipe<<%~ cleanReturnType(type) %>>);

@@ -12,8 +12,9 @@ import { HttpClient, RequestParams, ContentType, HttpResponse } from "./<%~ conf
 <% if (dataContracts.length) { %>
 import { <%~ dataContracts.join(", ") %> } from "./<%~ config.fileNames.dataContracts %>"
 <% } %>
+
 import { Observable, from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { apiCheckPipe } from '@api/base';
 
 export class <%= apiClassName %><SecurityDataType = unknown><% if (!config.singleHttpClient) { %> extends HttpClient<SecurityDataType> <% } %> {
 <% if(config.singleHttpClient) { %>

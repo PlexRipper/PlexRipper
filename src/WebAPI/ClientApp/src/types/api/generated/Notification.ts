@@ -9,13 +9,14 @@
  * ---------------------------------------------------------------
  */
 
-import { ErrorResponse, NotificationDTO, ResultDTO } from './data-contracts';
-import { HttpClient, RequestParams } from './http-client';
+import { NotificationDTO, ResultDTO } from './data-contracts';
+import { RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
+import Axios from 'axios';
 import { from } from 'rxjs';
 
-export class Notification<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Notification {
 	/**
  * No description
  *
@@ -26,8 +27,8 @@ export class Notification<SecurityDataType = unknown> extends HttpClient<Securit
  */
 	clearAllNotificationsEndpoint = (params: RequestParams = {}) =>
 		from(
-			this.request<number, ResultDTO>({
-				path: `/api/Notification/clear`,
+			Axios.request<number>({
+				url: `/api/Notification/clear`,
 				method: 'DELETE',
 				format: 'json',
 				...params,
@@ -43,8 +44,8 @@ export class Notification<SecurityDataType = unknown> extends HttpClient<Securit
  */
 	getAllNotificationsEndpoint = (params: RequestParams = {}) =>
 		from(
-			this.request<NotificationDTO[], ResultDTO>({
-				path: `/api/Notification/`,
+			Axios.request<NotificationDTO[]>({
+				url: `/api/Notification/`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -60,8 +61,8 @@ export class Notification<SecurityDataType = unknown> extends HttpClient<Securit
  */
 	hideNotificationEndpoint = (notificationId: number, params: RequestParams = {}) =>
 		from(
-			this.request<ResultDTO, ErrorResponse | ResultDTO>({
-				path: `/api/Notification/${notificationId}`,
+			Axios.request<ResultDTO>({
+				url: `/api/Notification/${notificationId}`,
 				method: 'PUT',
 				format: 'json',
 				...params,

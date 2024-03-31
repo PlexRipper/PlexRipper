@@ -14,16 +14,16 @@ import {
 	DownloadPreviewDTO,
 	DownloadTaskDTO,
 	DownloadTaskType,
-	ErrorResponse,
 	ResultDTO,
 	ServerDownloadProgressDTO,
 } from './data-contracts';
-import { ContentType, HttpClient, RequestParams } from './http-client';
+import { ContentType, RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
+import Axios from 'axios';
 import { from } from 'rxjs';
 
-export class Download<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Download {
 	/**
  * No description
  *
@@ -34,10 +34,10 @@ export class Download<SecurityDataType = unknown> extends HttpClient<SecurityDat
  */
 	clearCompletedDownloadTasksEndpoint = (data: string[], params: RequestParams = {}) =>
 		from(
-			this.request<number, any>({
-				path: `/api/Download/clear`,
+			Axios.request<number>({
+				url: `/api/Download/clear`,
 				method: 'POST',
-				body: data,
+				data: data,
 				type: ContentType.Json,
 				format: 'json',
 				...params,
@@ -53,10 +53,10 @@ export class Download<SecurityDataType = unknown> extends HttpClient<SecurityDat
  */
 	createDownloadTasksEndpoint = (data: DownloadMediaDTO[], params: RequestParams = {}) =>
 		from(
-			this.request<ResultDTO, ResultDTO>({
-				path: `/api/Download/download`,
+			Axios.request<ResultDTO>({
+				url: `/api/Download/download`,
 				method: 'POST',
-				body: data,
+				data: data,
 				type: ContentType.Json,
 				format: 'json',
 				...params,
@@ -72,10 +72,10 @@ export class Download<SecurityDataType = unknown> extends HttpClient<SecurityDat
  */
 	deleteDownloadTaskEndpoint = (data: string[], params: RequestParams = {}) =>
 		from(
-			this.request<ResultDTO, ResultDTO>({
-				path: `/api/Download/delete`,
+			Axios.request<ResultDTO>({
+				url: `/api/Download/delete`,
 				method: 'DELETE',
-				body: data,
+				data: data,
 				type: ContentType.Json,
 				format: 'json',
 				...params,
@@ -98,10 +98,10 @@ export class Download<SecurityDataType = unknown> extends HttpClient<SecurityDat
 		params: RequestParams = {},
 	) =>
 		from(
-			this.request<DownloadTaskDTO, ResultDTO>({
-				path: `/api/Download/detail/${downloadTaskGuid}`,
+			Axios.request<DownloadTaskDTO>({
+				url: `/api/Download/detail/${downloadTaskGuid}`,
 				method: 'GET',
-				query: query,
+				params: query,
 				format: 'json',
 				...params,
 			}),
@@ -116,8 +116,8 @@ export class Download<SecurityDataType = unknown> extends HttpClient<SecurityDat
  */
 	getAllDownloadTasksEndpoint = (params: RequestParams = {}) =>
 		from(
-			this.request<ServerDownloadProgressDTO[], ResultDTO>({
-				path: `/api/Download`,
+			Axios.request<ServerDownloadProgressDTO[]>({
+				url: `/api/Download`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -133,8 +133,8 @@ export class Download<SecurityDataType = unknown> extends HttpClient<SecurityDat
  */
 	pauseDownloadTaskEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
 		from(
-			this.request<ResultDTO, ResultDTO>({
-				path: `/api/Download/pause/${downloadTaskGuid}`,
+			Axios.request<ResultDTO>({
+				url: `/api/Download/pause/${downloadTaskGuid}`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -150,10 +150,10 @@ export class Download<SecurityDataType = unknown> extends HttpClient<SecurityDat
  */
 	getDownloadPreviewEndpoint = (data: DownloadMediaDTO[], params: RequestParams = {}) =>
 		from(
-			this.request<DownloadPreviewDTO[], ResultDTO>({
-				path: `/api/Download/preview`,
+			Axios.request<DownloadPreviewDTO[]>({
+				url: `/api/Download/preview`,
 				method: 'POST',
-				body: data,
+				data: data,
 				type: ContentType.Json,
 				format: 'json',
 				...params,
@@ -169,8 +169,8 @@ export class Download<SecurityDataType = unknown> extends HttpClient<SecurityDat
  */
 	restartDownloadTaskEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
 		from(
-			this.request<ResultDTO, ResultDTO>({
-				path: `/api/Download/restart/${downloadTaskGuid}`,
+			Axios.request<ResultDTO>({
+				url: `/api/Download/restart/${downloadTaskGuid}`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -186,8 +186,8 @@ export class Download<SecurityDataType = unknown> extends HttpClient<SecurityDat
  */
 	startDownloadTaskEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
 		from(
-			this.request<ResultDTO, ErrorResponse | ResultDTO>({
-				path: `/api/Download/start/${downloadTaskGuid}`,
+			Axios.request<ResultDTO>({
+				url: `/api/Download/start/${downloadTaskGuid}`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -203,8 +203,8 @@ export class Download<SecurityDataType = unknown> extends HttpClient<SecurityDat
  */
 	stopDownloadTaskEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
 		from(
-			this.request<ResultDTO, ResultDTO>({
-				path: `/api/Download/stop/${downloadTaskGuid}`,
+			Axios.request<ResultDTO>({
+				url: `/api/Download/stop/${downloadTaskGuid}`,
 				method: 'GET',
 				format: 'json',
 				...params,

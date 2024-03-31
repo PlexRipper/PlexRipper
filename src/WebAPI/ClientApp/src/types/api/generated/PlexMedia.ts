@@ -9,13 +9,14 @@
  * ---------------------------------------------------------------
  */
 
-import { Blob, PlexMediaDTO, PlexMediaType, ResultDTO } from './data-contracts';
-import { HttpClient, RequestParams } from './http-client';
+import { Blob, PlexMediaDTO, PlexMediaType } from './data-contracts';
+import { RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
+import Axios from 'axios';
 import { from } from 'rxjs';
 
-export class PlexMedia<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class PlexMedia {
 	/**
  * No description
  *
@@ -32,10 +33,10 @@ export class PlexMedia<SecurityDataType = unknown> extends HttpClient<SecurityDa
 		params: RequestParams = {},
 	) =>
 		from(
-			this.request<PlexMediaDTO, ResultDTO>({
-				path: `/api/PlexMedia/detail/${plexMediaId}`,
+			Axios.request<PlexMediaDTO>({
+				url: `/api/PlexMedia/detail/${plexMediaId}`,
 				method: 'GET',
-				query: query,
+				params: query,
 				format: 'json',
 				...params,
 			}),
@@ -60,10 +61,10 @@ export class PlexMedia<SecurityDataType = unknown> extends HttpClient<SecurityDa
 		params: RequestParams = {},
 	) =>
 		from(
-			this.request<Blob, ResultDTO>({
-				path: `/api/PlexMedia/thumb/${mediaId}`,
+			Axios.request<Blob>({
+				url: `/api/PlexMedia/thumb/${mediaId}`,
 				method: 'GET',
-				query: query,
+				params: query,
 				format: 'json',
 				...params,
 			}),

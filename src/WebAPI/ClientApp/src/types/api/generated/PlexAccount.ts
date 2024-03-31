@@ -9,13 +9,14 @@
  * ---------------------------------------------------------------
  */
 
-import { AuthPin, ErrorResponse, PlexAccountDTO, ResultDTO, UpdatePlexAccountDTO } from './data-contracts';
-import { ContentType, HttpClient, RequestParams } from './http-client';
+import { AuthPin, PlexAccountDTO, ResultDTO, UpdatePlexAccountDTO } from './data-contracts';
+import { ContentType, RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
+import Axios from 'axios';
 import { from } from 'rxjs';
 
-export class PlexAccount<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class PlexAccount {
 	/**
  * No description
  *
@@ -26,10 +27,10 @@ export class PlexAccount<SecurityDataType = unknown> extends HttpClient<Security
  */
 	createPlexAccountEndpoint = (data: PlexAccountDTO, params: RequestParams = {}) =>
 		from(
-			this.request<ResultDTO, ResultDTO>({
-				path: `/api/PlexAccount/`,
+			Axios.request<ResultDTO>({
+				url: `/api/PlexAccount/`,
 				method: 'POST',
-				body: data,
+				data: data,
 				type: ContentType.Json,
 				format: 'json',
 				...params,
@@ -45,8 +46,8 @@ export class PlexAccount<SecurityDataType = unknown> extends HttpClient<Security
  */
 	deletePlexAccountByIdEndpoint = (plexAccountId: number, params: RequestParams = {}) =>
 		from(
-			this.request<ResultDTO, ResultDTO>({
-				path: `/api/PlexAccount/${plexAccountId}`,
+			Axios.request<ResultDTO>({
+				url: `/api/PlexAccount/${plexAccountId}`,
 				method: 'DELETE',
 				format: 'json',
 				...params,
@@ -62,8 +63,8 @@ export class PlexAccount<SecurityDataType = unknown> extends HttpClient<Security
  */
 	getPlexAccountByIdEndpoint = (plexAccountId: number, params: RequestParams = {}) =>
 		from(
-			this.request<PlexAccountDTO, ResultDTO>({
-				path: `/api/PlexAccount/${plexAccountId}`,
+			Axios.request<PlexAccountDTO>({
+				url: `/api/PlexAccount/${plexAccountId}`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -85,10 +86,10 @@ export class PlexAccount<SecurityDataType = unknown> extends HttpClient<Security
 		params: RequestParams = {},
 	) =>
 		from(
-			this.request<PlexAccountDTO[], ResultDTO>({
-				path: `/api/PlexAccount`,
+			Axios.request<PlexAccountDTO[]>({
+				url: `/api/PlexAccount`,
 				method: 'GET',
-				query: query,
+				params: query,
 				format: 'json',
 				...params,
 			}),
@@ -109,11 +110,11 @@ export class PlexAccount<SecurityDataType = unknown> extends HttpClient<Security
 		params: RequestParams = {},
 	) =>
 		from(
-			this.request<PlexAccountDTO, ErrorResponse | ResultDTO>({
-				path: `/api/PlexAccount`,
+			Axios.request<PlexAccountDTO>({
+				url: `/api/PlexAccount`,
 				method: 'PUT',
-				query: query,
-				body: data,
+				params: query,
+				data: data,
 				type: ContentType.Json,
 				format: 'json',
 				...params,
@@ -134,10 +135,10 @@ export class PlexAccount<SecurityDataType = unknown> extends HttpClient<Security
 		params: RequestParams = {},
 	) =>
 		from(
-			this.request<Boolean, ErrorResponse | ResultDTO>({
-				path: `/api/PlexAccount/check`,
+			Axios.request<Boolean>({
+				url: `/api/PlexAccount/check`,
 				method: 'GET',
-				query: query,
+				params: query,
 				format: 'json',
 				...params,
 			}),
@@ -152,8 +153,8 @@ export class PlexAccount<SecurityDataType = unknown> extends HttpClient<Security
  */
 	refreshPlexAccountAccessEndpoint = (plexAccountId: number, params: RequestParams = {}) =>
 		from(
-			this.request<ResultDTO, ErrorResponse | ResultDTO>({
-				path: `/api/PlexAccount/refresh/${plexAccountId}`,
+			Axios.request<ResultDTO>({
+				url: `/api/PlexAccount/refresh/${plexAccountId}`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -169,10 +170,10 @@ export class PlexAccount<SecurityDataType = unknown> extends HttpClient<Security
  */
 	validatePlexAccountEndpoint = (data: PlexAccountDTO, params: RequestParams = {}) =>
 		from(
-			this.request<PlexAccountDTO, ResultDTO>({
-				path: `/api/PlexAccount/validate`,
+			Axios.request<PlexAccountDTO>({
+				url: `/api/PlexAccount/validate`,
 				method: 'POST',
-				body: data,
+				data: data,
 				type: ContentType.Json,
 				format: 'json',
 				...params,
@@ -198,10 +199,10 @@ export class PlexAccount<SecurityDataType = unknown> extends HttpClient<Security
 		params: RequestParams = {},
 	) =>
 		from(
-			this.request<AuthPin, ResultDTO>({
-				path: `/api/PlexAccount/authpin`,
+			Axios.request<AuthPin>({
+				url: `/api/PlexAccount/authpin`,
 				method: 'GET',
-				query: query,
+				params: query,
 				format: 'json',
 				...params,
 			}),

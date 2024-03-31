@@ -10,12 +10,13 @@
  */
 
 import { ResultDTO, SettingsModelDTO } from './data-contracts';
-import { ContentType, HttpClient, RequestParams } from './http-client';
+import { ContentType, RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
+import Axios from 'axios';
 import { from } from 'rxjs';
 
-export class Settings<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class Settings {
 	/**
  * No description
  *
@@ -26,8 +27,8 @@ export class Settings<SecurityDataType = unknown> extends HttpClient<SecurityDat
  */
 	getUserSettingsEndpoint = (params: RequestParams = {}) =>
 		from(
-			this.request<SettingsModelDTO, ResultDTO>({
-				path: `/api/Settings/`,
+			Axios.request<SettingsModelDTO>({
+				url: `/api/Settings/`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -43,10 +44,10 @@ export class Settings<SecurityDataType = unknown> extends HttpClient<SecurityDat
  */
 	updateUserSettingsEndpoint = (data: SettingsModelDTO, params: RequestParams = {}) =>
 		from(
-			this.request<SettingsModelDTO, ResultDTO>({
-				path: `/api/Settings/`,
+			Axios.request<SettingsModelDTO>({
+				url: `/api/Settings/`,
 				method: 'PUT',
-				body: data,
+				data: data,
 				type: ContentType.Json,
 				format: 'json',
 				...params,
@@ -62,8 +63,8 @@ export class Settings<SecurityDataType = unknown> extends HttpClient<SecurityDat
  */
 	resetDatabaseEndpoint = (params: RequestParams = {}) =>
 		from(
-			this.request<ResultDTO, ResultDTO>({
-				path: `/api/Settings/resetdb`,
+			Axios.request<ResultDTO>({
+				url: `/api/Settings/resetdb`,
 				method: 'GET',
 				format: 'json',
 				...params,

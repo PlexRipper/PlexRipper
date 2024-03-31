@@ -10,12 +10,13 @@
  */
 
 import { FileSystemDTO, FolderPathDTO, ResultDTO } from './data-contracts';
-import { ContentType, HttpClient, RequestParams } from './http-client';
+import { ContentType, RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
+import Axios from 'axios';
 import { from } from 'rxjs';
 
-export class FolderPath<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class FolderPath {
 	/**
  * No description
  *
@@ -26,10 +27,10 @@ export class FolderPath<SecurityDataType = unknown> extends HttpClient<SecurityD
  */
 	createFolderPathEndpoint = (data: FolderPathDTO, params: RequestParams = {}) =>
 		from(
-			this.request<FolderPathDTO, ResultDTO>({
-				path: `/api/FolderPath/`,
+			Axios.request<FolderPathDTO>({
+				url: `/api/FolderPath/`,
 				method: 'POST',
-				body: data,
+				data: data,
 				type: ContentType.Json,
 				format: 'json',
 				...params,
@@ -45,8 +46,8 @@ export class FolderPath<SecurityDataType = unknown> extends HttpClient<SecurityD
  */
 	getAllFolderPathsEndpoint = (params: RequestParams = {}) =>
 		from(
-			this.request<FolderPathDTO[], any>({
-				path: `/api/FolderPath/`,
+			Axios.request<FolderPathDTO[]>({
+				url: `/api/FolderPath/`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -62,10 +63,10 @@ export class FolderPath<SecurityDataType = unknown> extends HttpClient<SecurityD
  */
 	updateFolderPathEndpoint = (data: FolderPathDTO, params: RequestParams = {}) =>
 		from(
-			this.request<FolderPathDTO, ResultDTO>({
-				path: `/api/FolderPath/`,
+			Axios.request<FolderPathDTO>({
+				url: `/api/FolderPath/`,
 				method: 'PUT',
-				body: data,
+				data: data,
 				type: ContentType.Json,
 				format: 'json',
 				...params,
@@ -81,8 +82,8 @@ export class FolderPath<SecurityDataType = unknown> extends HttpClient<SecurityD
  */
 	deleteFolderPathEndpoint = (id: number, params: RequestParams = {}) =>
 		from(
-			this.request<ResultDTO, ResultDTO>({
-				path: `/api/FolderPath/${id}`,
+			Axios.request<ResultDTO>({
+				url: `/api/FolderPath/${id}`,
 				method: 'DELETE',
 				format: 'json',
 				...params,
@@ -104,10 +105,10 @@ export class FolderPath<SecurityDataType = unknown> extends HttpClient<SecurityD
 		params: RequestParams = {},
 	) =>
 		from(
-			this.request<FileSystemDTO, ResultDTO>({
-				path: `/api/FolderPath/directory`,
+			Axios.request<FileSystemDTO>({
+				url: `/api/FolderPath/directory`,
 				method: 'GET',
-				query: query,
+				params: query,
 				format: 'json',
 				...params,
 			}),

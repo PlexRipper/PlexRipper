@@ -9,13 +9,14 @@
  * ---------------------------------------------------------------
  */
 
-import { ErrorResponse, PlexLibraryDTO, PlexMediaSlimDTO, ResultDTO } from './data-contracts';
-import { HttpClient, RequestParams } from './http-client';
+import { PlexLibraryDTO, PlexMediaSlimDTO, ResultDTO } from './data-contracts';
+import { RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
+import Axios from 'axios';
 import { from } from 'rxjs';
 
-export class PlexLibrary<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class PlexLibrary {
 	/**
  * No description
  *
@@ -26,8 +27,8 @@ export class PlexLibrary<SecurityDataType = unknown> extends HttpClient<Security
  */
 	getPlexLibraryByIdEndpoint = (plexLibraryId: number, params: RequestParams = {}) =>
 		from(
-			this.request<PlexLibraryDTO, ResultDTO>({
-				path: `/api/PlexLibrary/${plexLibraryId}`,
+			Axios.request<PlexLibraryDTO>({
+				url: `/api/PlexLibrary/${plexLibraryId}`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -43,8 +44,8 @@ export class PlexLibrary<SecurityDataType = unknown> extends HttpClient<Security
  */
 	getAllPlexLibrariesEndpoint = (params: RequestParams = {}) =>
 		from(
-			this.request<PlexLibraryDTO[], ResultDTO>({
-				path: `/api/PlexLibrary/`,
+			Axios.request<PlexLibraryDTO[]>({
+				url: `/api/PlexLibrary/`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -75,10 +76,10 @@ export class PlexLibrary<SecurityDataType = unknown> extends HttpClient<Security
 		params: RequestParams = {},
 	) =>
 		from(
-			this.request<PlexMediaSlimDTO[], ResultDTO>({
-				path: `/api/PlexLibrary/${plexLibraryId}/media`,
+			Axios.request<PlexMediaSlimDTO[]>({
+				url: `/api/PlexLibrary/${plexLibraryId}/media`,
 				method: 'GET',
-				query: query,
+				params: query,
 				format: 'json',
 				...params,
 			}),
@@ -93,8 +94,8 @@ export class PlexLibrary<SecurityDataType = unknown> extends HttpClient<Security
  */
 	refreshLibraryMediaEndpoint = (plexLibraryId: number, params: RequestParams = {}) =>
 		from(
-			this.request<PlexLibraryDTO, ResultDTO>({
-				path: `/api/PlexLibrary/refresh/${plexLibraryId}`,
+			Axios.request<PlexLibraryDTO>({
+				url: `/api/PlexLibrary/refresh/${plexLibraryId}`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -110,8 +111,8 @@ export class PlexLibrary<SecurityDataType = unknown> extends HttpClient<Security
  */
 	setPlexLibraryDefaultDestinationByIdEndpoint = (plexLibraryId: number, folderPathId: number, params: RequestParams = {}) =>
 		from(
-			this.request<ResultDTO, ErrorResponse | ResultDTO>({
-				path: `/api/PlexLibrary/${plexLibraryId}/default/destination/${folderPathId}`,
+			Axios.request<ResultDTO>({
+				url: `/api/PlexLibrary/${plexLibraryId}/default/destination/${folderPathId}`,
 				method: 'PUT',
 				format: 'json',
 				...params,

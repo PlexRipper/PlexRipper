@@ -9,13 +9,14 @@
  * ---------------------------------------------------------------
  */
 
-import { ErrorResponse, PlexServerDTO, ResultDTO } from './data-contracts';
-import { HttpClient, RequestParams } from './http-client';
+import { PlexServerDTO, ResultDTO } from './data-contracts';
+import { RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
+import Axios from 'axios';
 import { from } from 'rxjs';
 
-export class PlexServer<SecurityDataType = unknown> extends HttpClient<SecurityDataType> {
+export class PlexServer {
 	/**
  * No description
  *
@@ -30,8 +31,8 @@ export class PlexServer<SecurityDataType = unknown> extends HttpClient<SecurityD
 		params: RequestParams = {},
 	) =>
 		from(
-			this.request<ResultDTO, ResultDTO>({
-				path: `/api/PlexServer/${plexServerId}/preferred-connection/${plexServerConnectionId}`,
+			Axios.request<ResultDTO>({
+				url: `/api/PlexServer/${plexServerId}/preferred-connection/${plexServerConnectionId}`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -47,8 +48,8 @@ export class PlexServer<SecurityDataType = unknown> extends HttpClient<SecurityD
  */
 	getPlexServerByIdEndpoint = (plexServerId: number, params: RequestParams = {}) =>
 		from(
-			this.request<PlexServerDTO, ErrorResponse | ResultDTO>({
-				path: `/api/PlexServer/${plexServerId}`,
+			Axios.request<PlexServerDTO>({
+				url: `/api/PlexServer/${plexServerId}`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -65,8 +66,8 @@ export class PlexServer<SecurityDataType = unknown> extends HttpClient<SecurityD
  */
 	getAllPlexServersEndpoint = (params: RequestParams = {}) =>
 		from(
-			this.request<PlexServerDTO[], ResultDTO>({
-				path: `/api/PlexServer/`,
+			Axios.request<PlexServerDTO[]>({
+				url: `/api/PlexServer/`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -82,8 +83,8 @@ export class PlexServer<SecurityDataType = unknown> extends HttpClient<SecurityD
  */
 	queueInspectPlexServerJobEndpoint = (plexServerId: number, params: RequestParams = {}) =>
 		from(
-			this.request<ResultDTO, ErrorResponse | ResultDTO>({
-				path: `/api/PlexServer/${plexServerId}/inspect`,
+			Axios.request<ResultDTO>({
+				url: `/api/PlexServer/${plexServerId}/inspect`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -99,8 +100,8 @@ export class PlexServer<SecurityDataType = unknown> extends HttpClient<SecurityD
  */
 	refreshPlexServerConnectionsEndpoint = (plexServerId: number, params: RequestParams = {}) =>
 		from(
-			this.request<PlexServerDTO, ErrorResponse | ResultDTO>({
-				path: `/api/PlexServer/${plexServerId}/refresh`,
+			Axios.request<PlexServerDTO>({
+				url: `/api/PlexServer/${plexServerId}/refresh`,
 				method: 'GET',
 				format: 'json',
 				...params,
@@ -123,10 +124,10 @@ export class PlexServer<SecurityDataType = unknown> extends HttpClient<SecurityD
 		params: RequestParams = {},
 	) =>
 		from(
-			this.request<ResultDTO, ResultDTO>({
-				path: `/api/PlexServer/${plexServerId}/sync`,
+			Axios.request<ResultDTO>({
+				url: `/api/PlexServer/${plexServerId}/sync`,
 				method: 'GET',
-				query: query,
+				params: query,
 				format: 'json',
 				...params,
 			}),

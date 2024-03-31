@@ -1,0 +1,30 @@
+<%
+const { utils, route, config, modelTypes } = it;
+const { _, pascalCase, require } = utils;
+const apiClassName = pascalCase(route.moduleName);
+const routes = route.routes;
+const dataContracts = _.map(modelTypes, "name");
+%>
+
+<% if (config.httpClientType === config.constants.HTTP_CLIENT.AXIOS) { %> import type { AxiosRequestConfig, AxiosResponse } from "axios"; <% } %>
+
+import { HttpClient, RequestParams, ContentType, HttpResponse } from "./<%~ config.fileNames.httpClient %>";
+<% if (dataContracts.length) { %>
+import { <%~ dataContracts.join(", ") %> } from "./<%~ config.fileNames.dataContracts %>"
+<% } %>
+import { Observable, from } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+export class <%= apiClassName %><SecurityDataType = unknown><% if (!config.singleHttpClient) { %> extends HttpClient<SecurityDataType> <% } %> {
+<% if(config.singleHttpClient) { %>
+  http: HttpClient<SecurityDataType>;
+
+  constructor (http: HttpClient<SecurityDataType>) {
+    this.http = http;
+  }
+<% } %>
+
+    <% for (const route of routes) { %>
+        <%~ includeFile('./procedure-call.ejs', { ...it, route }) %>
+    <% } %>
+}

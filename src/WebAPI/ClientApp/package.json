@@ -40,7 +40,6 @@
 		"@vueuse/components": "^10.9.0",
 		"@vueuse/rxjs": "^10.9.0",
 		"axios": "^1.6.8",
-		"axios-observable": "^2.0.0",
 		"consola": "^3.2.3",
 		"date-fns": "^2.30.0",
 		"pinia": "^2.1.7",

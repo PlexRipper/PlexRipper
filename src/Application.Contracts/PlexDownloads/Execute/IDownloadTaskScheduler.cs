@@ -7,7 +7,7 @@ public interface IDownloadTaskScheduler
 {
     Task<Result> StartDownloadTaskJob(DownloadTaskKey downloadTaskKey);
 
-    Task<Result> StopDownloadTaskJob(DownloadTaskKey downloadTaskKey);
+    Task<Result> StopDownloadTaskJob(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default);
 
     Task<bool> IsDownloading(DownloadTaskKey downloadTaskKey);
 

@@ -11,7 +11,7 @@ public static class DownloadTaskGenericMapper
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskMovie.Id,
-            Key = downloadTaskMovie.Key,
+            MediaKey = downloadTaskMovie.Key,
             Title = downloadTaskMovie.Title,
             FullTitle = downloadTaskMovie.FullTitle,
             MediaType = downloadTaskMovie.MediaType,
@@ -50,7 +50,7 @@ public static class DownloadTaskGenericMapper
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskMovieFile downloadTaskMovieFile) => new()
     {
         Id = downloadTaskMovieFile.Id,
-        Key = downloadTaskMovieFile.Key,
+        MediaKey = downloadTaskMovieFile.Key,
         Title = downloadTaskMovieFile.Title,
         FullTitle = downloadTaskMovieFile.FullTitle,
         MediaType = downloadTaskMovieFile.MediaType,
@@ -86,7 +86,7 @@ public static class DownloadTaskGenericMapper
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskTvShow.Id,
-            Key = downloadTaskTvShow.Key,
+            MediaKey = downloadTaskTvShow.Key,
             Title = downloadTaskTvShow.Title,
             FullTitle = downloadTaskTvShow.FullTitle,
             MediaType = downloadTaskTvShow.MediaType,
@@ -127,7 +127,7 @@ public static class DownloadTaskGenericMapper
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskTvShowSeason.Id,
-            Key = downloadTaskTvShowSeason.Key,
+            MediaKey = downloadTaskTvShowSeason.Key,
             Title = downloadTaskTvShowSeason.Title,
             FullTitle = downloadTaskTvShowSeason.FullTitle,
             MediaType = downloadTaskTvShowSeason.MediaType,
@@ -168,7 +168,7 @@ public static class DownloadTaskGenericMapper
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskTvShowEpisode.Id,
-            Key = downloadTaskTvShowEpisode.Key,
+            MediaKey = downloadTaskTvShowEpisode.Key,
             Title = downloadTaskTvShowEpisode.Title,
             FullTitle = downloadTaskTvShowEpisode.FullTitle,
             MediaType = downloadTaskTvShowEpisode.MediaType,
@@ -207,7 +207,7 @@ public static class DownloadTaskGenericMapper
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskTvShowEpisodeFile downloadTaskTvShowEpisodeFile) => new()
     {
         Id = downloadTaskTvShowEpisodeFile.Id,
-        Key = downloadTaskTvShowEpisodeFile.Key,
+        MediaKey = downloadTaskTvShowEpisodeFile.Key,
         Title = downloadTaskTvShowEpisodeFile.Title,
         FullTitle = downloadTaskTvShowEpisodeFile.FullTitle,
         MediaType = downloadTaskTvShowEpisodeFile.MediaType,

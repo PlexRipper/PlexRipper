@@ -40,7 +40,7 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
         return Result.Ok();
     }
 
-    public async Task<Result> StopDownloadTaskJob(DownloadTaskKey downloadTaskKey)
+    public async Task<Result> StopDownloadTaskJob(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)
     {
         if (!downloadTaskKey.IsValid)
             return ResultExtensions.IsInvalidId(nameof(DownloadTaskKey), downloadTaskKey.Id).LogWarning();
@@ -51,13 +51,22 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
         if (!await _scheduler.IsJobRunning(jobKey))
             return Result.Fail($"{nameof(DownloadJob)} with {jobKey} cannot be stopped because it is not running").LogWarning();
 
-        return Result.OkIf(await _scheduler.StopJob(jobKey), $"Failed to stop {nameof(DownloadTaskGeneric)} with id {downloadTaskKey}");
+        var stopResult = await _scheduler.StopJob(jobKey);
+        if (!stopResult)
+            return Result.Fail($"Failed to stop {nameof(DownloadTaskGeneric)} with id {downloadTaskKey}");
+
+        await AwaitDownloadTaskJob(downloadTaskKey.Id, cancellationToken);
+
+        return Result.Ok();
     }
 
-    public Task AwaitDownloadTaskJob(Guid downloadTaskId, CancellationToken cancellationToken = default)
+    public async Task AwaitDownloadTaskJob(Guid downloadTaskId, CancellationToken cancellationToken = default)
     {
         var jobKey = DownloadJob.GetJobKey(downloadTaskId);
-        return _scheduler.AwaitJobRunning(jobKey, cancellationToken);
+        if (!await _scheduler.IsJobRunning(jobKey))
+            return;
+
+        await _scheduler.AwaitJobRunning(jobKey, cancellationToken);
     }
 
     public Task<bool> IsDownloading(DownloadTaskKey downloadTaskKey)

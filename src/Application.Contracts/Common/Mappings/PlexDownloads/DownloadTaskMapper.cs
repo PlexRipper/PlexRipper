@@ -1,5 +1,4 @@
 using PlexRipper.Domain;
-using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
 
@@ -10,7 +9,7 @@ public static partial class DownloadTaskGenericToDTOMapper
     public static DownloadTaskDTO ToDTO(this DownloadTaskGeneric downloadTask, string DownloadUrl = "") => new()
     {
         Id = downloadTask.Id,
-        Key = downloadTask.Key,
+        Key = downloadTask.MediaKey,
         Title = downloadTask.Title,
         FullTitle = downloadTask.FullTitle,
         MediaType = downloadTask.MediaType,

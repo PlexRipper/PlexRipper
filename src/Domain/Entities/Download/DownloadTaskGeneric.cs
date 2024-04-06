@@ -7,7 +7,7 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
     /// <summary>
     /// The identifier used by Plex to keep track of media.
     /// </summary>
-    public required int Key { get; init; }
+    public required int MediaKey { get; init; }
 
     /// <summary>
     /// The formatted media title as shown in Plex.

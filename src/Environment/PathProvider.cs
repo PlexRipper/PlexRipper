@@ -99,12 +99,12 @@ public class PathProvider : IPathProvider
 
     string IPathProvider.ConfigDirectory => ConfigDirectory;
 
-    public List<string> DatabaseFiles => new()
-    {
+    public static List<string> DatabaseFiles =>
+    [
         DatabasePath,
         Database_SHM_Path,
         Database_WAL_Path,
-    };
+    ];
 
     #endregion
 

@@ -45,6 +45,7 @@
 		"pinia": "^2.1.7",
 		"pretty-bytes": "^6.1.1",
 		"primevue": "~3.34.1",
+		"query-string": "^9.0.0",
 		"rxjs": "^7.8.1",
 		"vue": "^3.4.21",
 		"vue-virtual-scroller": "^2.0.0-beta.8",

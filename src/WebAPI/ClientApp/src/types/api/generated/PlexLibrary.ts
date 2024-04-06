@@ -14,6 +14,7 @@ import { RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
 import Axios from 'axios';
+import queryString from 'query-string';
 import { from } from 'rxjs';
 
 export class PlexLibrary {
@@ -122,4 +123,33 @@ export class PlexLibrary {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ResultDTO>);
+}
+
+export class PlexLibraryPaths {
+	static getPlexLibraryByIdEndpoint = (plexLibraryId: number) =>
+		queryString.stringifyUrl({ url: `/api/PlexLibrary/${plexLibraryId}` });
+
+	static getAllPlexLibrariesEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexLibrary/` });
+
+	static getPlexLibraryMediaEndpoint = (
+		plexLibraryId: number,
+		query: {
+			/**
+			 * @format int32
+			 * @default 0
+			 */
+			page: number;
+			/**
+			 * @format int32
+			 * @default 0
+			 */
+			size: number;
+		},
+	) => queryString.stringifyUrl({ url: `/api/PlexLibrary/${plexLibraryId}/media`, query });
+
+	static refreshLibraryMediaEndpoint = (plexLibraryId: number) =>
+		queryString.stringifyUrl({ url: `/api/PlexLibrary/refresh/${plexLibraryId}` });
+
+	static setPlexLibraryDefaultDestinationByIdEndpoint = (plexLibraryId: number, folderPathId: number) =>
+		queryString.stringifyUrl({ url: `/api/PlexLibrary/${plexLibraryId}/default/destination/${folderPathId}` });
 }

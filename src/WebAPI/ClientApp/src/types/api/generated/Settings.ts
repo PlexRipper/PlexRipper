@@ -14,6 +14,7 @@ import { ContentType, RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
 import Axios from 'axios';
+import queryString from 'query-string';
 import { from } from 'rxjs';
 
 export class Settings {
@@ -72,4 +73,12 @@ export class Settings {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ResultDTO>);
+}
+
+export class SettingsPaths {
+	static getUserSettingsEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings/` });
+
+	static updateUserSettingsEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings/` });
+
+	static resetDatabaseEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings/resetdb` });
 }

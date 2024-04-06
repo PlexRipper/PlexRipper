@@ -14,6 +14,7 @@ import { ContentType, RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
 import Axios from 'axios';
+import queryString from 'query-string';
 import { from } from 'rxjs';
 
 export class PlexAccount {
@@ -215,4 +216,39 @@ export class PlexAccount {
 				...params,
 			}),
 		).pipe(apiCheckPipe<AuthPin>);
+}
+
+export class PlexAccountPaths {
+	static createPlexAccountEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexAccount/` });
+
+	static deletePlexAccountByIdEndpoint = (plexAccountId: number) =>
+		queryString.stringifyUrl({ url: `/api/PlexAccount/${plexAccountId}` });
+
+	static getPlexAccountByIdEndpoint = (plexAccountId: number) =>
+		queryString.stringifyUrl({ url: `/api/PlexAccount/${plexAccountId}` });
+
+	static getAllPlexAccountsEndpoint = (query?: {
+		/** @default false */
+		enabledOnly?: boolean;
+	}) => queryString.stringifyUrl({ url: `/api/PlexAccount`, query });
+
+	static updatePlexAccountByIdEndpoint = (query: { inspect: boolean }) =>
+		queryString.stringifyUrl({ url: `/api/PlexAccount`, query });
+
+	static isUsernameAvailableEndpoint = (query: { username: string }) =>
+		queryString.stringifyUrl({ url: `/api/PlexAccount/check`, query });
+
+	static refreshPlexAccountAccessEndpoint = (plexAccountId: number) =>
+		queryString.stringifyUrl({ url: `/api/PlexAccount/refresh/${plexAccountId}` });
+
+	static validatePlexAccountEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexAccount/validate` });
+
+	static verify2FaPinEndpoint = (query: {
+		/**
+		 * @format int32
+		 * @default 0
+		 */
+		authPinId?: number;
+		clientId: string;
+	}) => queryString.stringifyUrl({ url: `/api/PlexAccount/authpin`, query });
 }

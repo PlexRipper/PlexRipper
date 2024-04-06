@@ -14,6 +14,7 @@ import { <%~ dataContracts.join(", ") %> } from "./<%~ config.fileNames.dataCont
 <% } %>
 
 import Axios from 'axios';
+import queryString from 'query-string';
 import { Observable, from } from 'rxjs';
 import { apiCheckPipe } from '@api/base';
 
@@ -23,3 +24,12 @@ export class <%= apiClassName %> {
         <%~ includeFile('./procedure-call.ejs', { ...it, route }) %>
     <% } %>
 }
+
+export class <%= apiClassName %>Paths {
+
+    <% for (const route of routes) { %>
+        <%~ includeFile('./procedure-call-api-routes.ejs', { ...it, route }) %>
+    <% } %>
+}
+
+

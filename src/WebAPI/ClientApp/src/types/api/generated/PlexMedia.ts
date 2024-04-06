@@ -14,6 +14,7 @@ import { RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
 import Axios from 'axios';
+import queryString from 'query-string';
 import { from } from 'rxjs';
 
 export class PlexMedia {
@@ -70,4 +71,24 @@ export class PlexMedia {
 				...params,
 			}),
 		).pipe(apiCheckPipe<Blob>);
+}
+
+export class PlexMediaPaths {
+	static getMediaDetailByIdEndpoint = (
+		plexMediaId: number,
+		query: {
+			type: PlexMediaType;
+		},
+	) => queryString.stringifyUrl({ url: `/api/PlexMedia/detail/${plexMediaId}`, query });
+
+	static getThumbnailImageEndpoint = (
+		mediaId: number,
+		query: {
+			/** @format int32 */
+			height: number;
+			mediaType: PlexMediaType;
+			/** @format int32 */
+			width: number;
+		},
+	) => queryString.stringifyUrl({ url: `/api/PlexMedia/thumb/${mediaId}`, query });
 }

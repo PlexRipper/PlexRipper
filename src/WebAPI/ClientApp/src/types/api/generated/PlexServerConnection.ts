@@ -14,6 +14,7 @@ import { RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
 import Axios from 'axios';
+import queryString from 'query-string';
 import { from } from 'rxjs';
 
 export class PlexServerConnection {
@@ -88,4 +89,17 @@ export class PlexServerConnection {
 				...params,
 			}),
 		).pipe(apiCheckPipe<PlexServerConnectionDTO[]>);
+}
+
+export class PlexServerConnectionPaths {
+	static checkAllConnectionsStatusByPlexServerEndpoint = (plexServerId: number) =>
+		queryString.stringifyUrl({ url: `/api/PlexServerConnection/check/by-server/${plexServerId}` });
+
+	static checkConnectionStatusByIdEndpoint = (plexServerConnectionId: number) =>
+		queryString.stringifyUrl({ url: `/api/PlexServerConnection/check/${plexServerConnectionId}` });
+
+	static getPlexServerConnectionByIdEndpoint = (plexServerConnectionId: number) =>
+		queryString.stringifyUrl({ url: `/api/PlexServerConnection/${plexServerConnectionId}` });
+
+	static getAllPlexServerConnectionsEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexServerConnection/` });
 }

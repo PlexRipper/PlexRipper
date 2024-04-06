@@ -14,6 +14,7 @@ import { RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
 import Axios from 'axios';
+import queryString from 'query-string';
 import { from } from 'rxjs';
 
 export class Notification {
@@ -70,4 +71,13 @@ export class Notification {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ResultDTO>);
+}
+
+export class NotificationPaths {
+	static clearAllNotificationsEndpoint = () => queryString.stringifyUrl({ url: `/api/Notification/clear` });
+
+	static getAllNotificationsEndpoint = () => queryString.stringifyUrl({ url: `/api/Notification/` });
+
+	static hideNotificationEndpoint = (notificationId: number) =>
+		queryString.stringifyUrl({ url: `/api/Notification/${notificationId}` });
 }

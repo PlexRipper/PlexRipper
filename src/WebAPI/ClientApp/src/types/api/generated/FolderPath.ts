@@ -14,6 +14,7 @@ import { ContentType, RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
 import Axios from 'axios';
+import queryString from 'query-string';
 import { from } from 'rxjs';
 
 export class FolderPath {
@@ -117,4 +118,17 @@ export class FolderPath {
 				...params,
 			}),
 		).pipe(apiCheckPipe<FileSystemDTO>);
+}
+
+export class FolderPathPaths {
+	static createFolderPathEndpoint = () => queryString.stringifyUrl({ url: `/api/FolderPath/` });
+
+	static getAllFolderPathsEndpoint = () => queryString.stringifyUrl({ url: `/api/FolderPath/` });
+
+	static updateFolderPathEndpoint = () => queryString.stringifyUrl({ url: `/api/FolderPath/` });
+
+	static deleteFolderPathEndpoint = (id: number) => queryString.stringifyUrl({ url: `/api/FolderPath/${id}` });
+
+	static getFolderPathDirectoryEndpoint = (query: { path: string }) =>
+		queryString.stringifyUrl({ url: `/api/FolderPath/directory`, query });
 }

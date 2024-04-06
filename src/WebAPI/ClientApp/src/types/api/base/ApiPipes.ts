@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { AxiosResponse } from 'axios';
 import type { ResultDTO } from '@interfaces';
 
@@ -15,6 +15,7 @@ export function apiCheckPipe<T>(source$: Observable<AxiosResponse<T>>): Observab
 				value: res.value,
 			};
 		}),
-		// map((data) => data.value),
+		// Ensure we complete any API calls after the response has been received
+		take(1),
 	);
 }

@@ -21,6 +21,7 @@ import { ContentType, RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
 import Axios from 'axios';
+import queryString from 'query-string';
 import { from } from 'rxjs';
 
 export class Download {
@@ -219,4 +220,36 @@ export class Download {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ResultDTO>);
+}
+
+export class DownloadPaths {
+	static clearCompletedDownloadTasksEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/clear` });
+
+	static createDownloadTasksEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/download` });
+
+	static deleteDownloadTaskEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/delete` });
+
+	static getDownloadTaskByGuidEndpoint = (
+		downloadTaskGuid: string,
+		query?: {
+			/** @default 0 */
+			type?: DownloadTaskType;
+		},
+	) => queryString.stringifyUrl({ url: `/api/Download/detail/${downloadTaskGuid}`, query });
+
+	static getAllDownloadTasksEndpoint = () => queryString.stringifyUrl({ url: `/api/Download` });
+
+	static pauseDownloadTaskEndpoint = (downloadTaskGuid: string) =>
+		queryString.stringifyUrl({ url: `/api/Download/pause/${downloadTaskGuid}` });
+
+	static getDownloadPreviewEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/preview` });
+
+	static restartDownloadTaskEndpoint = (downloadTaskGuid: string) =>
+		queryString.stringifyUrl({ url: `/api/Download/restart/${downloadTaskGuid}` });
+
+	static startDownloadTaskEndpoint = (downloadTaskGuid: string) =>
+		queryString.stringifyUrl({ url: `/api/Download/start/${downloadTaskGuid}` });
+
+	static stopDownloadTaskEndpoint = (downloadTaskGuid: string) =>
+		queryString.stringifyUrl({ url: `/api/Download/stop/${downloadTaskGuid}` });
 }

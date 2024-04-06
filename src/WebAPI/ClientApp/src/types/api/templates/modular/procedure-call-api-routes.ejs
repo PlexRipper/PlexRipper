@@ -6,8 +6,13 @@ const { parameters, path, method, payload, query, formData, security, requestPar
 const { type, errorType, contentTypes } = route.response;
 const { HTTP_CLIENT, RESERVED_REQ_PARAMS_ARG_NAMES } = config.constants;
 const routeDocs = includeFile("@base/route-docs", { config, route, utils });
+
+const filteredParameters = parameters.filter(x => path.includes(x.name));
+console.log('path', path);
+console.log('filteredParameters', filteredParameters);
+
 const queryName = (query && query.name) || "query";
-const pathParams = _.values(parameters);
+const pathParams = _.values(filteredParameters);
 const pathParamsNames = _.map(pathParams, "name");
 
 const isFetchTemplate = config.httpClientType === HTTP_CLIENT.FETCH;
@@ -29,14 +34,11 @@ const rawWrapperArgs = config.extractRequestParams ?
           type: getInlineParseContent(requestParams),
         },
         ...(!requestParams ? pathParams : []),
-        payload,
-        requestConfigParam,
+        payload
     ]) :
     _.compact([
         ...pathParams,
         query,
-        payload,
-        requestConfigParam,
     ])
 
 const wrapperArgs = _
@@ -79,12 +81,6 @@ const describeReturnType = () => {
 }
 
 %>
-/**
-<%~ routeDocs.description %>
-
- *<% /* Here you can add some other JSDoc tags */ %>
-
-<%~ routeDocs.lines %>
 
 <%
 /*
@@ -105,16 +101,6 @@ function cleanReturnType(value) {
 }
 %>
 
- */
-<%~ route.routeName.usage %> = (<%~ wrapperArgs %>)<%~ config.toJS ? `: ${describeReturnType()}` : "" %> =>
-     from(Axios.request<%~ responseFormatTmpl.includes('blob') ? '<Blob>' : `<${cleanReturnType(type)}>`; %>({
-        url: `<%~ path %>`,
-        method: '<%~ _.upperCase(method) %>',
-        <%~ queryTmpl ? `params: ${queryTmpl},` : '' %>
-        <%~ bodyTmpl ? `data: ${bodyTmpl},` : '' %>
-        <%~ securityTmpl ? `secure: ${securityTmpl},` : '' %>
-        <%~ bodyContentKindTmpl ? `type: ${bodyContentKindTmpl},` : '' %>
-        <%~ responseFormatTmpl ? `format: ${responseFormatTmpl},` : '' %>
-        ...<%~ _.get(requestConfigParam, "name") %>,
-})).pipe(apiCheckPipe<%~ responseFormatTmpl.includes('blob') ? '<Blob>' : `<${cleanReturnType(type)}>` %>);
+static <%~ route.routeName.usage %> = (<%~ wrapperArgs %>) => queryString.stringifyUrl({url: `<%~ path %>`, <%~ query ? 'query' : '' %> });
+
 

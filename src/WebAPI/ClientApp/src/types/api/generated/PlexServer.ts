@@ -14,6 +14,7 @@ import { RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
 import Axios from 'axios';
+import queryString from 'query-string';
 import { from } from 'rxjs';
 
 export class PlexServer {
@@ -137,4 +138,28 @@ export class PlexServer {
 				...params,
 			}),
 		).pipe(apiCheckPipe<ResultDTO>);
+}
+
+export class PlexServerPaths {
+	static setPreferredPlexServerConnectionEndpoint = (plexServerId: number, plexServerConnectionId: number) =>
+		queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/preferred-connection/${plexServerConnectionId}` });
+
+	static getPlexServerByIdEndpoint = (plexServerId: number) =>
+		queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}` });
+
+	static getAllPlexServersEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexServer/` });
+
+	static queueInspectPlexServerJobEndpoint = (plexServerId: number) =>
+		queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/inspect` });
+
+	static refreshPlexServerConnectionsEndpoint = (plexServerId: number) =>
+		queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/refresh` });
+
+	static queueSyncPlexServerJobEndpoint = (
+		plexServerId: number,
+		query?: {
+			/** @default false */
+			forceSync?: boolean;
+		},
+	) => queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/sync`, query });
 }

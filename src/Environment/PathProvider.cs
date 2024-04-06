@@ -94,11 +94,6 @@ public class PathProvider : IPathProvider
                     break;
             }
 
-            if (!Directory.Exists(rootPath))
-            {
-                Directory.CreateDirectory(rootPath);
-            }
-
             return rootPath;
         }
     }

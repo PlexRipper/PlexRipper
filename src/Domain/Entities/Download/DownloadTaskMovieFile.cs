@@ -14,6 +14,8 @@ public class DownloadTaskMovieFile : DownloadTaskFileBase
 
     public override int Count => 1;
 
+    public override DownloadTaskKey ToParentKey() => new(DownloadTaskType.Movie, ParentId, PlexServerId, PlexLibraryId);
+
     public override PlexMediaType MediaType => PlexMediaType.Movie;
 
     public override DownloadTaskType DownloadTaskType => DownloadTaskType.MovieData;

@@ -68,6 +68,8 @@ public abstract class DownloadTaskBase : BaseEntityGuid
 
     public abstract int Count { get; }
 
+    public abstract DownloadTaskKey? ToParentKey();
+
     #endregion
 
     public DownloadTaskKey ToKey() => new(DownloadTaskType, Id, PlexServerId, PlexLibraryId);

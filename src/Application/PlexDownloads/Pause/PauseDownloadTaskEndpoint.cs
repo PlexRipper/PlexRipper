@@ -72,7 +72,7 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
         _log.Debug("DownloadTask {DownloadTaskId} has been Paused, meaning no downloaded files have been deleted", req.DownloadTaskGuid);
 
         // Update the download task status
-        await _dbContext.SetDownloadStatus(req.DownloadTaskGuid, DownloadStatus.Paused);
+        await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
 
         await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTaskKey), ct);
 

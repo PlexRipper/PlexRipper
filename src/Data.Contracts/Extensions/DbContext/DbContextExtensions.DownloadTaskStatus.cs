@@ -92,65 +92,51 @@ public static partial class DbContextExtensions
         }
     }
 
+    /// <summary>
+    /// Sets the <see cref="DownloadStatus"/> of the download task but not its children or parent and immediately saves the changes to the database.
+    /// </summary>
+    /// <param name="dbContext"> The <see cref="IPlexRipperDbContext"/> to extend from. </param>
+    /// <param name="key"> The <see cref="DownloadTaskKey"/> of the download task to update. </param>
+    /// <param name="status"> The <see cref="DownloadStatus"/> to set. </param>
     public static async Task SetDownloadStatus(
         this IPlexRipperDbContext dbContext,
         DownloadTaskKey key,
         DownloadStatus status)
     {
-        await dbContext.SetDownloadStatus(key.Id, status, key.Type);
-    }
-
-    /// <summary>
-    /// Sets the <see cref="DownloadStatus"/> of the download task but not its children or parent and immediately saves the changes to the database.
-    /// </summary>
-    /// <param name="dbContext"> The <see cref="IPlexRipperDbContext"/> to extend from. </param>
-    /// <param name="id"> The <see cref="Guid"/> of the download task to update. </param>
-    /// <param name="status"> The <see cref="DownloadStatus"/> to set. </param>
-    /// <param name="type"> The <see cref="DownloadTaskType"/>  of the DownloadTask, not required. </param>
-    /// <exception cref="ArgumentOutOfRangeException"> Thrown when the <see cref="DownloadTaskType"/> is not supported. </exception>
-    public static async Task SetDownloadStatus(
-        this IPlexRipperDbContext dbContext,
-        Guid id,
-        DownloadStatus status,
-        DownloadTaskType type = DownloadTaskType.None)
-    {
-        if (type == DownloadTaskType.None)
-            type = await dbContext.GetDownloadTaskTypeAsync(id);
-
-        switch (type)
+        switch (key.Type)
         {
             case DownloadTaskType.Movie:
                 await dbContext.DownloadTaskMovie
-                    .Where(x => x.Id == id)
+                    .Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status));
                 break;
             case DownloadTaskType.MovieData:
                 await dbContext.DownloadTaskMovieFile
-                    .Where(x => x.Id == id)
+                    .Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status));
                 break;
             case DownloadTaskType.TvShow:
                 await dbContext.DownloadTaskTvShow
-                    .Where(x => x.Id == id)
+                    .Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status));
                 break;
             case DownloadTaskType.Season:
                 await dbContext.DownloadTaskTvShowSeason
-                    .Where(x => x.Id == id)
+                    .Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status));
                 break;
             case DownloadTaskType.Episode:
                 await dbContext.DownloadTaskTvShowEpisode
-                    .Where(x => x.Id == id)
+                    .Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status));
                 break;
             case DownloadTaskType.EpisodeData:
                 await dbContext.DownloadTaskTvShowEpisodeFile
-                    .Where(x => x.Id == id)
+                    .Where(x => x.Id == key.Id)
                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, status));
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException($"{key.Type} is not supported in {nameof(SetDownloadStatus)}");
         }
     }
 }

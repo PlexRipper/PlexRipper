@@ -51,11 +51,12 @@ public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownload
         var downloadTaskGuid = command.DownloadTaskGuid;
 
         var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskGuid, cancellationToken: cancellationToken);
+        var downloadTaskKey = downloadTask.ToKey();
 
         // Ensure the downloadTask is not currently downloading
         if (downloadTask.IsDownloadable && downloadTask.DownloadStatus == DownloadStatus.Downloading)
         {
-            var stopDownloadTasksResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTask.ToKey(), cancellationToken);
+            var stopDownloadTasksResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
             if (stopDownloadTasksResult.IsFailed)
                 return stopDownloadTasksResult.ToResult().LogError();
 
@@ -71,7 +72,7 @@ public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownload
         // TODO delete filetasks
 
         // Reset progress of the downloadTask
-        await _dbContext.UpdateDownloadProgress(downloadTask.ToKey(), new DownloadTaskProgress
+        await _dbContext.UpdateDownloadProgress(downloadTaskKey, new DownloadTaskProgress
         {
             Percentage = 0,
             DataReceived = 0,
@@ -79,9 +80,9 @@ public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownload
             DownloadSpeed = 0,
         }, cancellationToken);
 
-        await _dbContext.SetDownloadStatus(downloadTaskGuid, DownloadStatus.Queued);
+        await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Queued);
 
-        await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTask.ToKey()), cancellationToken);
+        await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTaskKey), cancellationToken);
 
         await _mediator.Publish(new CheckDownloadQueueNotification(downloadTask.PlexServerId), cancellationToken);
 

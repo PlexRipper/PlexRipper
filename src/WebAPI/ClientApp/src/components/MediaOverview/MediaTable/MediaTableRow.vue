@@ -69,7 +69,7 @@
 
 <script setup lang="ts">
 import type { QTreeViewTableHeader } from '@props';
-import type { PlexMediaSlimDTO } from '@dto/mainApi';
+import type { PlexMediaSlimDTO } from '@dto';
 import Convert from '@class/Convert';
 import ButtonType from '@enums/buttonType';
 import {

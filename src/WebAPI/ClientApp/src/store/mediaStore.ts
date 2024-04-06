@@ -1,9 +1,9 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { Observable, of, switchMap, throwError, type Observer } from 'rxjs';
 import { map, mergeMap, take } from 'rxjs/operators';
+import { PlexMediaType, type PlexMediaDTO, type PlexMediaSlimDTO } from '@dto';
 import type { ISetupResult, IObjectUrl } from '@interfaces';
-import { PlexMediaType, type PlexMediaDTO, type PlexMediaSlimDTO } from '@dto/mainApi';
-import { getLibraryMediaData, getThumbnail, getMediaDetailByIdEndpoint } from '@api/mediaApi';
+import { plexLibraryApi, plexMediaApi } from '@api';
 
 export const useMediaStore = defineStore('MediaStore', () => {
 	const state = reactive<{ mediaUrls: IObjectUrl[] }>({
@@ -25,37 +25,52 @@ export const useMediaStore = defineStore('MediaStore', () => {
 				mergeMap((value) =>
 					value !== ''
 						? of(value)
-						: getThumbnail(mediaId, mediaType, width, height).pipe(
-								switchMap((response) => {
-									if (response.data) {
-										// Convert imageUrl to objectUrl
-										const imageUrl: string = URL.createObjectURL(response.data);
-										if (imageUrl) {
-											actions.updateMediaUrl({ id: mediaId, type: mediaType, url: imageUrl });
+						: plexMediaApi
+								.getThumbnailImageEndpoint(mediaId, {
+									mediaType,
+									width,
+									height,
+								})
+								.pipe(
+									switchMap((response) => {
+										if (response.value) {
+											// Convert imageUrl to objectUrl
+											const imageUrl: string = URL.createObjectURL(response.value);
+											if (imageUrl) {
+												actions.updateMediaUrl({ id: mediaId, type: mediaType, url: imageUrl });
+											}
+											return of(imageUrl);
 										}
-										return of(imageUrl);
-									}
-									return throwError(() => {
-										return new Error(`MediaType with ${mediaType} is not supported in getMediaDataById`);
-									});
-								}),
-							),
+										return throwError(() => {
+											return new Error(`MediaType with ${mediaType} is not supported in getMediaDataById`);
+										});
+									}),
+								),
 				),
 				take(1),
 			);
 		},
 		getMediaData(plexLibraryId: number, page: number, size: number): Observable<PlexMediaSlimDTO[]> {
-			return getLibraryMediaData(plexLibraryId, page, size).pipe(
-				map((response) => {
-					if (response && response.isSuccess) {
-						return response.value ?? [];
-					}
-					return [];
-				}),
-			);
+			return plexLibraryApi
+				.getPlexLibraryMediaEndpoint(plexLibraryId, {
+					page,
+					size,
+				})
+				.pipe(
+					map((response) => {
+						if (response && response.isSuccess) {
+							return response.value ?? [];
+						}
+						return [];
+					}),
+				);
 		},
 		getMediaDataDetailById(mediaId: number, mediaType: PlexMediaType): Observable<PlexMediaDTO> {
-			return getMediaDetailByIdEndpoint(mediaId, mediaType);
+			return plexMediaApi
+				.getMediaDetailByIdEndpoint(mediaId, {
+					type: mediaType,
+				})
+				.pipe(map((response) => response.value!));
 		},
 		updateMediaUrl(mediaUrl: IObjectUrl) {
 			const index = state.mediaUrls.findIndex((x) => x.type === mediaUrl.type && x.id === mediaUrl.id);

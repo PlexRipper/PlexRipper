@@ -91,7 +91,7 @@
 <script setup lang="ts">
 import { get } from '@vueuse/core';
 import Log from 'consola';
-import { type DownloadMediaDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import { type DownloadMediaDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto';
 import { sendMediaOverviewOpenDetailsCommand } from '@composables/event-bus';
 
 const props = defineProps<{

@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PlexAccountDTO } from '@dto/mainApi';
+import type { PlexAccountDTO } from '@dto';
 
 const { t } = useI18n();
 

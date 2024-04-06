@@ -176,6 +176,35 @@ public static partial class DbContextExtensions
         }
     }
 
+    public static async Task<DownloadTaskFileBase?> GetDownloadTaskFileAsync(
+        this IPlexRipperDbContext dbContext,
+        DownloadTaskKey key,
+        CancellationToken cancellationToken = default)
+    {
+        switch (key.Type)
+        {
+            // DownloadTaskType.MovieData
+            case DownloadTaskType.MovieData:
+            case DownloadTaskType.MoviePart:
+                return await dbContext.DownloadTaskMovieFile
+                    .Include(x => x.PlexServer)
+                    .Include(x => x.PlexLibrary)
+                    .Include(x => x.DownloadWorkerTasks)
+                    .FirstOrDefaultAsync(x => x.Id == key.Id, cancellationToken);
+
+            // DownloadTaskType.EpisodeData
+            case DownloadTaskType.EpisodeData:
+            case DownloadTaskType.EpisodePart:
+                return await dbContext.DownloadTaskTvShowEpisodeFile
+                    .Include(x => x.PlexServer)
+                    .Include(x => x.PlexLibrary)
+                    .Include(x => x.DownloadWorkerTasks)
+                    .FirstOrDefaultAsync(x => x.Id == key.Id, cancellationToken);
+            default:
+                return null;
+        }
+    }
+
     public static async Task<List<DownloadTaskGeneric>> GetAllDownloadTasksAsync(
         this IPlexRipperDbContext dbContext,
         int plexServerId = 0,

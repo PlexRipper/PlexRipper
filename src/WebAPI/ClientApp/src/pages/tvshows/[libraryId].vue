@@ -5,7 +5,7 @@
 </template>
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
-import { PlexMediaType } from '@dto/mainApi';
+import { PlexMediaType } from '@dto';
 import { definePageMeta } from '#imports';
 
 definePageMeta({

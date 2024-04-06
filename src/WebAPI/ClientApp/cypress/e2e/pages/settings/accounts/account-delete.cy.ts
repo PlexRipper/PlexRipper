@@ -1,5 +1,6 @@
-import { apiRoute, APIRoute, route } from '@fixtures/baseE2E';
+import { route } from '@fixtures/baseE2E';
 import { generateResultDTO } from '@mock';
+import { PlexAccountPaths } from '@api-urls';
 
 describe('Delete Plex account from PlexRipper', () => {
 	beforeEach(() => {
@@ -22,12 +23,12 @@ describe('Delete Plex account from PlexRipper', () => {
 			cy.getCy('confirmation-dialog').should('be.visible');
 
 			// Delete Action
-			cy.intercept('DELETE', apiRoute({ type: APIRoute.PlexAccount, path: `/${plexAccount.id}` }), {
+			cy.intercept('DELETE', PlexAccountPaths.deletePlexAccountByIdEndpoint(plexAccount.id), {
 				statusCode: 200,
 			});
 
 			// Return the accounts without the deleted one
-			cy.intercept('GET', apiRoute({ type: APIRoute.PlexAccount }), {
+			cy.intercept('GET', PlexAccountPaths.getAllPlexAccountsEndpoint(), {
 				statusCode: 200,
 				body: generateResultDTO(plexAccounts.filter((x) => x.id !== plexAccount.id)),
 			});
@@ -51,7 +52,7 @@ describe('Delete Plex account from PlexRipper', () => {
 			cy.getCy('confirmation-dialog').should('be.visible');
 
 			// Return the accounts without the deleted one
-			cy.intercept('GET', apiRoute({ type: APIRoute.PlexAccount }), {
+			cy.intercept('GET', PlexAccountPaths.getAllPlexAccountsEndpoint(), {
 				statusCode: 200,
 				body: generateResultDTO(plexAccounts.filter((x) => x.id !== plexAccount.id)),
 			});

@@ -1,6 +1,7 @@
-import { APIRoute, apiRoute, route } from '@fixtures/baseE2E';
+import { route } from '@fixtures/baseE2E';
 import { generateResultDTO } from '@mock';
-import type { SettingsModelDTO } from '@dto/mainApi';
+import type { SettingsModelDTO } from '@dto';
+import { SettingsPaths } from '@api-urls';
 
 describe('Change UI settings', () => {
 	beforeEach(() => {
@@ -15,7 +16,7 @@ describe('Change UI settings', () => {
 	it('Should change language to German when language selector is changed', () => {
 		cy.getPageData().then((pageData) => {
 			// Settings update call
-			cy.intercept('PUT', apiRoute({ type: APIRoute.Settings }), {
+			cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), {
 				statusCode: 200,
 				body: generateResultDTO(pageData.settings),
 			}).as('settingsUpdate');
@@ -33,7 +34,7 @@ describe('Change UI settings', () => {
 	it('Should change short date format when short date selector is changed', () => {
 		cy.getPageData().then((pageData) => {
 			// Settings update call
-			cy.intercept('PUT', apiRoute({ type: APIRoute.Settings }), {
+			cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), {
 				statusCode: 200,
 				body: generateResultDTO(pageData.settings),
 			}).as('settingsUpdate');
@@ -51,7 +52,7 @@ describe('Change UI settings', () => {
 	it('Should change long date format when long date selector is changed', () => {
 		cy.getPageData().then((pageData) => {
 			// Settings update call
-			cy.intercept('PUT', apiRoute({ type: APIRoute.Settings }), {
+			cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), {
 				statusCode: 200,
 				body: generateResultDTO(pageData.settings),
 			}).as('settingsUpdate');
@@ -69,7 +70,7 @@ describe('Change UI settings', () => {
 	it('Should change time format when time selector is changed', () => {
 		cy.getPageData().then((pageData) => {
 			// Settings update call
-			cy.intercept('PUT', apiRoute({ type: APIRoute.Settings }), {
+			cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), {
 				statusCode: 200,
 				body: generateResultDTO(pageData.settings),
 			}).as('settingsUpdate');
@@ -87,7 +88,7 @@ describe('Change UI settings', () => {
 	it('Should change relative dates when toggle is clicked', () => {
 		cy.getPageData().then((pageData) => {
 			// Settings update call
-			cy.intercept('PUT', apiRoute({ type: APIRoute.Settings }), {
+			cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), {
 				statusCode: 200,
 				body: generateResultDTO(pageData.settings),
 			}).as('settingsUpdate');
@@ -104,7 +105,7 @@ describe('Change UI settings', () => {
 	it('Should change download movie confirmation when toggle is clicked', () => {
 		cy.getPageData().then((pageData) => {
 			// Settings update call
-			cy.intercept('PUT', apiRoute({ type: APIRoute.Settings }), {
+			cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), {
 				statusCode: 200,
 				body: generateResultDTO(pageData.settings),
 			}).as('settingsUpdate');
@@ -121,7 +122,7 @@ describe('Change UI settings', () => {
 	it('Should change download tv-show confirmation when toggle is clicked', () => {
 		cy.getPageData().then((pageData) => {
 			// Settings update call
-			cy.intercept('PUT', apiRoute({ type: APIRoute.Settings }), {
+			cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), {
 				statusCode: 200,
 				body: generateResultDTO(pageData.settings),
 			}).as('settingsUpdate');
@@ -138,7 +139,7 @@ describe('Change UI settings', () => {
 	it('Should change download season confirmation when toggle is clicked', () => {
 		cy.getPageData().then((pageData) => {
 			// Settings update call
-			cy.intercept('PUT', apiRoute({ type: APIRoute.Settings }), {
+			cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), {
 				statusCode: 200,
 				body: generateResultDTO(pageData.settings),
 			}).as('settingsUpdate');
@@ -155,7 +156,7 @@ describe('Change UI settings', () => {
 	it('Should change download episode confirmation when toggle is clicked', () => {
 		cy.getPageData().then((pageData) => {
 			// Settings update call
-			cy.intercept('PUT', apiRoute({ type: APIRoute.Settings }), {
+			cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), {
 				statusCode: 200,
 				body: generateResultDTO(pageData.settings),
 			}).as('settingsUpdate');

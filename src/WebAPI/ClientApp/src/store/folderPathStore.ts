@@ -1,11 +1,11 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
-import { switchMap, tap } from 'rxjs/operators';
+import { switchMap, tap, map } from 'rxjs/operators';
 import { Observable, of, throwError } from 'rxjs';
-import { type FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
-import { createFolderPath, deleteFolderPath, getFolderPaths, updateFolderPath } from '@api/pathApi';
+import { type FolderPathDTO, FolderType, PlexMediaType } from '@dto';
 import { useI18n } from '#build/imports';
 import type IFolderPathGroup from '@interfaces/IFolderPathGroup';
 import type { ISetupResult } from '@interfaces';
+import { folderPathApi } from '@api';
 
 export const useFolderPathStore = defineStore('FolderPathStore', () => {
 	const state = reactive<{ folderPaths: FolderPathDTO[] }>({
@@ -25,7 +25,7 @@ export const useFolderPathStore = defineStore('FolderPathStore', () => {
 			return actions.refreshFolderPaths().pipe(switchMap(() => of({ name: useFolderPathStore.name, isSuccess: true })));
 		},
 		refreshFolderPaths() {
-			return getFolderPaths().pipe(
+			return folderPathApi.getAllFolderPathsEndpoint().pipe(
 				tap((result) => {
 					if (result.isSuccess && result.value) {
 						state.folderPaths = result.value ?? [];
@@ -34,7 +34,7 @@ export const useFolderPathStore = defineStore('FolderPathStore', () => {
 			);
 		},
 		createFolderPath(folderPath: FolderPathDTO) {
-			return createFolderPath(folderPath).pipe(
+			return folderPathApi.createFolderPathEndpoint(folderPath).pipe(
 				tap((result) => {
 					if (result?.isSuccess && result.value) {
 						state.folderPaths.push(result.value);
@@ -61,14 +61,21 @@ export const useFolderPathStore = defineStore('FolderPathStore', () => {
 		updateFolderPath(folderPath: FolderPathDTO): Observable<FolderPathDTO> {
 			updateFolderPathInState(folderPath);
 
-			return updateFolderPath(folderPath).pipe(tap((x) => updateFolderPathInState(x)));
+			return folderPathApi.updateFolderPathEndpoint(folderPath).pipe(
+				tap((x) => {
+					if (x.value) {
+						updateFolderPathInState(x.value);
+					}
+				}),
+				map((x) => x.value!),
+			);
 		},
 		deleteFolderPath(folderPathId: number) {
 			const i = state.folderPaths.findIndex((x) => x.id === folderPathId);
 			if (i > -1) {
 				state.folderPaths.splice(i, 1);
 			}
-			return deleteFolderPath(folderPathId);
+			return folderPathApi.deleteFolderPathEndpoint(folderPathId);
 		},
 	};
 

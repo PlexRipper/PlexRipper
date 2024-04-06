@@ -1,8 +1,8 @@
 import { describe, beforeAll, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
+import { PlexAccountPaths, PlexLibraryPaths, PlexServerPaths } from '@api-urls';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
 import { generatePlexAccount, generatePlexLibrariesFromPlexServers, generatePlexServers, generateResultDTO } from '@mock';
-import { PLEX_ACCOUNT_RELATIVE_PATH, PLEX_LIBRARY_RELATIVE_PATH, PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
 import { useAccountStore, useServerStore } from '#build/imports';
 
 describe('AccountService.createPlexAccount()', () => {
@@ -28,18 +28,18 @@ describe('AccountService.createPlexAccount()', () => {
 		const plexLibraries = generatePlexLibrariesFromPlexServers({ plexServers, config });
 		const plexAccount = generatePlexAccount({ id: 1, plexServers, plexLibraries, config });
 
-		mock.onGet(PLEX_SERVER_RELATIVE_PATH)
+		mock.onGet(PlexServerPaths.getAllPlexServersEndpoint())
 			.replyOnce(200, generateResultDTO([]))
-			.onGet(PLEX_SERVER_RELATIVE_PATH)
+			.onGet(PlexServerPaths.getAllPlexServersEndpoint())
 			.reply(200, generateResultDTO(plexServers));
-		mock.onGet(PLEX_ACCOUNT_RELATIVE_PATH)
+		mock.onGet(PlexAccountPaths.getAllPlexAccountsEndpoint())
 			.replyOnce(200, generateResultDTO([]))
-			.onGet(PLEX_ACCOUNT_RELATIVE_PATH)
+			.onGet(PlexAccountPaths.getAllPlexAccountsEndpoint())
 			.reply(200, generateResultDTO([plexAccount]));
 
-		mock.onGet(PLEX_LIBRARY_RELATIVE_PATH).reply(200, generateResultDTO(plexLibraries));
-		mock.onPost(PLEX_ACCOUNT_RELATIVE_PATH).reply(200, generateResultDTO(plexAccount));
-		mock.onGet(PLEX_ACCOUNT_RELATIVE_PATH + `/${plexAccount.id}`).reply(200, generateResultDTO(plexAccount));
+		mock.onGet(PlexLibraryPaths.getAllPlexLibrariesEndpoint()).reply(200, generateResultDTO(plexLibraries));
+		mock.onPost(PlexAccountPaths.createPlexAccountEndpoint()).reply(200, generateResultDTO(plexAccount));
+		mock.onGet(PlexAccountPaths.getPlexAccountByIdEndpoint(plexAccount.id)).reply(200, generateResultDTO(plexAccount));
 
 		// Subscriptions
 		const accountStore = useAccountStore();

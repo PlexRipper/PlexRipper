@@ -1,5 +1,5 @@
 import { route } from '@fixtures/baseE2E';
-import { JobStatus, JobTypes, MessageTypes, type ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
+import { JobStatus, JobTypes, MessageTypes, type ServerConnectionCheckStatusProgressDTO } from '@dto';
 import { generateJobStatusUpdate } from '@factories';
 
 describe('Check server connections dialog', () => {

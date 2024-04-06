@@ -31,8 +31,18 @@ public static partial class JobStatusUpdateMapper
 
     #region ToDTO
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial JobStatusUpdateDTO ToDTO(this JobStatusUpdate jobStatusUpdate);
+    public static JobStatusUpdateDTO ToDTO(this JobStatusUpdate jobStatusUpdate) => new()
+    {
+        Id = jobStatusUpdate.Id,
+        JobName = jobStatusUpdate.JobName,
+        JobGroup = jobStatusUpdate.JobGroup,
+        JobRuntime = jobStatusUpdate.JobRuntime,
+        JobStartTime = jobStatusUpdate.JobStartTime,
+        Status = jobStatusUpdate.Status,
+        PrimaryKey = jobStatusUpdate.PrimaryKey,
+        PrimaryKeyValue = jobStatusUpdate.PrimaryKeyValue,
+        JobType = jobStatusUpdate.JobType,
+    };
 
     #endregion
 

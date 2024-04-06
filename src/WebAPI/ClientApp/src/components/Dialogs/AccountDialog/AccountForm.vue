@@ -101,7 +101,7 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import type { PlexAccountDTO } from '@dto/mainApi';
+import type { PlexAccountDTO } from '@dto';
 import { QForm } from '#components';
 
 const labelCol = ref(3);

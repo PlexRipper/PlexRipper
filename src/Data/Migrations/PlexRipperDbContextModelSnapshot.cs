@@ -17,7 +17,7 @@ namespace PlexRipper.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("NATURALSORT")
-                .HasAnnotation("ProductVersion", "7.0.8");
+                .HasAnnotation("ProductVersion", "8.0.3");
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
                 {
@@ -553,6 +553,10 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(7);
 
+                    b.Property<string>("DownloadDirectory")
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(8);
+
                     b.Property<string>("DownloadStatus")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -589,10 +593,6 @@ namespace PlexRipper.Data.Migrations
                     b.Property<long>("StartByte")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(3);
-
-                    b.Property<string>("TempDirectory")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(8);
 
                     b.HasKey("Id");
 
@@ -1772,11 +1772,8 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(6);
 
-                    b.Property<string>("DestinationDirectory")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(17);
-
-                    b.Property<string>("DownloadDirectory")
+                    b.Property<string>("DirectoryMeta")
+                        .IsUnicode(true)
                         .HasColumnType("TEXT")
                         .HasColumnOrder(16);
 

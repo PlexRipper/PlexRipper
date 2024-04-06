@@ -14,7 +14,7 @@
 import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
 import { useSignalrStore } from '~/store';
-import type { SyncServerProgress } from '@dto/mainApi';
+import type { SyncServerProgress } from '@dto';
 
 const progressList = ref<SyncServerProgress[]>([]);
 

@@ -19,4 +19,6 @@ public record DownloadTaskKey
     public int PlexServerId { get; init; }
 
     public int PlexLibraryId { get; init; }
+
+    public bool IsValid => Id != Guid.Empty && PlexServerId > 0 && PlexLibraryId > 0 && Type != DownloadTaskType.None;
 }

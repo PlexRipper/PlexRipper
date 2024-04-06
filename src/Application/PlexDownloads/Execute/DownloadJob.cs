@@ -3,6 +3,7 @@ using System.Reactive.Threading.Tasks;
 using Application.Contracts;
 using Data.Contracts;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Settings.Contracts;
 
@@ -32,35 +33,39 @@ public class DownloadJob : IJob, IDisposable
 
     public static string DownloadTaskIdParameter => "DownloadTaskId";
 
-    public static string PlexServerIdParameter => "PlexServerId";
-
     public static JobKey GetJobKey(Guid id) => new($"{DownloadTaskIdParameter}_{id}", nameof(DownloadJob));
 
     public async Task Execute(IJobExecutionContext context)
     {
         var dataMap = context.JobDetail.JobDataMap;
-        var downloadTaskId = dataMap.GetGuidValue(DownloadTaskIdParameter);
-        var plexServerId = dataMap.GetIntValue(PlexServerIdParameter);
+        var downloadTaskKey = dataMap.GetJsonValue<DownloadTaskKey>(DownloadTaskIdParameter);
 
         var token = context.CancellationToken;
-        _log.Debug("Executing job: {DownloadJobName} for {DownloadTaskIdName} with id: {DownloadTaskId}", nameof(DownloadJob), nameof(downloadTaskId),
-            downloadTaskId);
+        _log.Debug("Executing job: {DownloadJobName} for {DownloadTaskIdName} with id: {DownloadTaskId}", nameof(DownloadJob), nameof(downloadTaskKey),
+            downloadTaskKey);
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         try
         {
             // Create the multiple download worker tasks which will split up the work
-            var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskId, cancellationToken: token);
+            var downloadTask = await _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, token);
             if (downloadTask is null)
             {
-                ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskId).LogError();
+                ResultExtensions.EntityNotFound(nameof(DownloadTaskFileBase), downloadTaskKey.Id).LogError();
                 return;
             }
 
             if (!downloadTask.IsDownloadable)
             {
-                _log.Warning("DownloadTask {DownloadTaskId} is not downloadable, aborting DownloadJob", downloadTaskId);
+                _log.Warning("DownloadTask {DownloadTaskId} is not downloadable, aborting DownloadJob", downloadTaskKey);
+                return;
+            }
+
+            var result = await SetDownloadAndDestination(downloadTask);
+            if (result.IsFailed)
+            {
+                result.LogError();
                 return;
             }
 
@@ -73,6 +78,8 @@ public class DownloadJob : IJob, IDisposable
                 await _dbContext.SaveChangesAsync(token);
                 _log.Debug("Generated DownloadWorkerTasks for {DownloadTaskFullTitle}", downloadTask.FullTitle);
             }
+
+            downloadTask = result.Value;
 
             _log.Debug("Creating Download client for {DownloadTaskFullTitle}", downloadTask.FullTitle);
             var downloadClientResult = await _plexDownloadClient.Setup(downloadTask.ToKey(), token);
@@ -95,7 +102,7 @@ public class DownloadJob : IJob, IDisposable
             catch (TaskCanceledException)
             {
                 _log.Information("{DownloadJobName} with {DownloadTaskIdName}: {DownloadTaskId} has been requested to be stopped", nameof(DownloadJob),
-                    nameof(downloadTaskId), downloadTaskId);
+                    nameof(downloadTaskKey), downloadTaskKey);
 
                 await _plexDownloadClient.StopAsync();
             }
@@ -107,7 +114,7 @@ public class DownloadJob : IJob, IDisposable
         finally
         {
             _log.Debug("Exiting job: {DownloadJobName} for {DownloadTaskName} with id: {DownloadTaskId}", nameof(DownloadJob), nameof(DownloadTaskGeneric),
-                downloadTaskId);
+                downloadTaskKey);
         }
     }
 
@@ -140,33 +147,30 @@ public class DownloadJob : IJob, IDisposable
         }
     }
 
-    // private async Task<Result> SetDownloadAndDestination(DownloadTaskFileBase downloadTask)
-    // {
-    //     if (downloadTask.DownloadDirectory == string.Empty)
-    //     {
-    //         var downloadFolderPath = GetDownloadFolderPath(downloadTask);
-    //
-    //         // Set download and destination folder of each downloadable file
-    //
-    //         downloadTask.DownloadDirectory = downloadFolderPath;
-    //     }
-    //
-    //     if (downloadTask.DestinationDirectory == string.Empty)
-    //     {
-    //         var destinationFolderPath = await _dbContext.GetDestinationFolder(downloadTask.PlexLibraryId);
-    //         if (destinationFolderPath is null)
-    //             return Result.Fail($"Could not find destination folder for PlexLibrary with id {downloadTask.PlexLibraryId}");
-    //
-    //         switch (downloadTask.DownloadTaskType)
-    //         {
-    //             case DownloadTaskType.MovieData:
-    //                 downloadTask.DestinationDirectory = Path.Combine(destinationFolderPath.DirectoryPath, downloadTask.FullTitle, downloadTask.FileName);
-    //                 break;
-    //             case DownloadTaskType.EpisodeData:
-    //                 break;
-    //             default:
-    //                 throw new ArgumentOutOfRangeException();
-    //         }
-    //     }
-    // }
+    private async Task<Result<DownloadTaskFileBase>> SetDownloadAndDestination(DownloadTaskFileBase downloadTask)
+    {
+        var downloadFolder = await _dbContext.GetDownloadFolder();
+        var destinationFolder = await _dbContext.GetDestinationFolder(downloadTask.PlexLibraryId);
+
+        downloadTask.DirectoryMeta.DownloadRootPath = downloadFolder.DirectoryPath;
+        downloadTask.DirectoryMeta.DestinationRootPath = destinationFolder.DirectoryPath;
+
+        switch (downloadTask.DownloadTaskType)
+        {
+            case DownloadTaskType.MovieData:
+                await _dbContext.DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
+                    .ExecuteUpdateAsync(p => p
+                        .SetProperty(x => x.DirectoryMeta, downloadTask.DirectoryMeta));
+                break;
+            case DownloadTaskType.EpisodeData:
+                await _dbContext.DownloadTaskTvShowEpisodeFile.Where(x => x.Id == downloadTask.Id)
+                    .ExecuteUpdateAsync(p => p
+                        .SetProperty(x => x.DirectoryMeta, downloadTask.DirectoryMeta));
+                break;
+            default:
+                return Result.Fail($"DownloadTaskType {downloadTask.DownloadTaskType} is not supported");
+        }
+
+        return Result.Ok(downloadTask);
+    }
 }

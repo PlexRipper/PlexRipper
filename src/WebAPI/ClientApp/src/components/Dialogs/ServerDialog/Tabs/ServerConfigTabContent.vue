@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PlexServerDTO } from '@dto/mainApi';
+import type { PlexServerDTO } from '@dto';
 import { useSettingsStore } from '~/store';
 const settingsStore = useSettingsStore();
 

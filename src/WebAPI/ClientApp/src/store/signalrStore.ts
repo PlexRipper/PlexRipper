@@ -17,8 +17,8 @@ import type {
 	ServerConnectionCheckStatusProgressDTO,
 	ServerDownloadProgressDTO,
 	SyncServerProgress,
-} from '@dto/mainApi';
-import { MessageTypes } from '@dto/mainApi';
+} from '@dto';
+import { MessageTypes } from '@dto';
 import { useBackgroundJobsStore } from '~/store/backgroundJobsStore';
 import { useNotificationsStore } from '~/store/notificationsStore';
 import type IAppConfig from '@class/IAppConfig';

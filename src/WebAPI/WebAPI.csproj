@@ -46,6 +46,7 @@
 	<ItemGroup>
 		<Folder Include="Common\Enums\" />
 		<Folder Include="Properties\" />
+		<Folder Include="TvShows\The Boondocks\Season 1\" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Include="..\Domain\GlobalUsings.cs" />

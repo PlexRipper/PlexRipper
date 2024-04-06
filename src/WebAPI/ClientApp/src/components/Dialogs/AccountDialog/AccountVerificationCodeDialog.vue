@@ -51,9 +51,9 @@ import Log from 'consola';
 import VOtpInput from 'vue3-otp-input';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
-import type { IError, PlexAccountDTO } from '@dto/mainApi';
-import { validateAccount } from '@api/accountApi';
+import type { IError, PlexAccountDTO } from '@dto';
 import { useCloseControlDialog } from '#imports';
+import { plexAccountApi } from '@api';
 
 const { t } = useI18n();
 
@@ -78,7 +78,7 @@ function onComplete() {
 	};
 
 	useSubscription(
-		validateAccount(accountWithCode).subscribe({
+		plexAccountApi.validatePlexAccountEndpoint(accountWithCode).subscribe({
 			next: (data) => {
 				if (data && data.isSuccess && data.value) {
 					emit('confirm', get(data.value));

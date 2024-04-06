@@ -2,7 +2,7 @@ import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { baseVars, subscribeSpyTo, baseSetup, getAxiosMock } from '@services-test-base';
 import { generatePlexServers, generateResultDTO } from '@mock';
-import { PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
+import { PlexServerPaths } from '@api/api-paths';
 import { useServerStore } from '#imports';
 
 describe('ServerStore.refresh-servers()', () => {
@@ -25,9 +25,9 @@ describe('ServerStore.refresh-servers()', () => {
 				plexServerCount: 3,
 			},
 		});
-		mock.onGet(PLEX_SERVER_RELATIVE_PATH)
+		mock.onGet(PlexServerPaths.getAllPlexServersEndpoint())
 			.replyOnce(200, [])
-			.onGet(PLEX_SERVER_RELATIVE_PATH)
+			.onGet(PlexServerPaths.getAllPlexServersEndpoint())
 			.reply(200, generateResultDTO(servers));
 
 		// Act

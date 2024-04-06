@@ -1,5 +1,5 @@
 import Log from 'consola';
-import Axios from 'axios-observable';
+import Axios from 'axios';
 import type IAppConfig from '@class/IAppConfig';
 import type { I18nObjectType } from '@interfaces';
 import { useGlobalStore } from '#imports';
@@ -33,7 +33,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 });
 
 function setupAxios(appConfig: IAppConfig) {
-	Axios.defaults.baseURL = appConfig.baseUrl + '/api';
+	Axios.defaults.baseURL = appConfig.baseUrl;
 
 	// Source: https://github.com/axios/axios/issues/41#issuecomment-484546457
 	Axios.defaults.validateStatus = () => true;

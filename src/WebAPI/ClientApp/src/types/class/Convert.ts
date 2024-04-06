@@ -1,4 +1,4 @@
-import { FolderType, PlexMediaType } from '@dto/mainApi';
+import { FolderType, PlexMediaType } from '@dto';
 import ButtonType from '@enums/buttonType';
 
 export default abstract class Convert {

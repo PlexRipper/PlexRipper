@@ -17,8 +17,8 @@
 import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
 import { ref, onUnmounted } from '#imports';
-import { inspectPlexServer, syncPlexServer } from '@api/plexServerApi';
-import type { PlexServerDTO } from '@dto/mainApi';
+import type { PlexServerDTO } from '@dto';
+import { plexServerApi } from '@api';
 
 const props = defineProps<{
 	plexServer: PlexServerDTO | null;
@@ -34,9 +34,13 @@ function syncServerLibraries(): void {
 	}
 	set(syncLoading, true);
 	useSubscription(
-		syncPlexServer(props.plexServer.id, true).subscribe(() => {
-			set(syncLoading, false);
-		}),
+		plexServerApi
+			.queueSyncPlexServerJobEndpoint(props.plexServer.id, {
+				forceSync: true,
+			})
+			.subscribe(() => {
+				set(syncLoading, false);
+			}),
 	);
 }
 
@@ -46,7 +50,7 @@ function inspectServer(): void {
 	}
 	set(inspectLoading, true);
 	useSubscription(
-		inspectPlexServer(props.plexServer.id).subscribe(() => {
+		plexServerApi.queueInspectPlexServerJobEndpoint(props.plexServer.id).subscribe(() => {
 			set(inspectLoading, false);
 		}),
 	);

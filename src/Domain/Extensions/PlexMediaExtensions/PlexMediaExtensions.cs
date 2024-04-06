@@ -120,8 +120,14 @@ public static class PlexMediaExtensions
                 FileName = Path.GetFileName(part.File),
                 FileLocationUrl = part.ObfuscatedFilePath,
                 Quality = plexMediaData.VideoResolution,
-                DownloadDirectory = null,
-                DestinationDirectory = null,
+                DirectoryMeta = new DownloadTaskDirectory()
+                {
+                    DownloadRootPath = string.Empty,
+                    DestinationRootPath = string.Empty,
+                    MovieFolder = plexMovie.Title.SanitizeFolderName(),
+                    TvShowFolder = string.Empty,
+                    SeasonFolder = string.Empty,
+                },
                 DownloadWorkerTasks = null,
                 Parent = null,
                 ParentId = default,
@@ -151,8 +157,14 @@ public static class PlexMediaExtensions
                 FileName = Path.GetFileName(part.File),
                 FileLocationUrl = part.ObfuscatedFilePath,
                 Quality = plexMediaData.VideoResolution,
-                DownloadDirectory = null,
-                DestinationDirectory = null,
+                DirectoryMeta = new DownloadTaskDirectory()
+                {
+                    DownloadRootPath = string.Empty,
+                    DestinationRootPath = string.Empty,
+                    MovieFolder = string.Empty,
+                    TvShowFolder = plexTvShowEpisode.TvShow.Title.SanitizeFolderName(),
+                    SeasonFolder = plexTvShowEpisode.TvShowSeason.Title.SanitizeFolderName(),
+                },
                 DownloadWorkerTasks = null,
                 Parent = null,
                 ParentId = default,

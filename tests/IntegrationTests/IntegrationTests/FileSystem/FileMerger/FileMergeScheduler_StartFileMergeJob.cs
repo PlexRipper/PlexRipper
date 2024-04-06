@@ -26,7 +26,7 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
         downloadTask.ShouldNotBeNull();
 
         // Act
-        var downloadWorkerTasks = downloadTask.ToGeneric().GenerateDownloadWorkerTasks(4);
+        var downloadWorkerTasks = downloadTask.GenerateDownloadWorkerTasks(4);
         dbContext.DownloadWorkerTasks.AddRange(downloadWorkerTasks);
         await dbContext.SaveChangesAsync();
 

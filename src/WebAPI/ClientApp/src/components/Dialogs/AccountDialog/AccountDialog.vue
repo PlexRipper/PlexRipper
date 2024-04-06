@@ -72,9 +72,9 @@ import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import { take } from 'rxjs/operators';
 import { AccountForm } from '#components';
-import type { IError, PlexAccountDTO } from '@dto/mainApi';
-import { validateAccount } from '@api/accountApi';
+import type { IError, PlexAccountDTO } from '@dto';
 import { useI18n, useOpenControlDialog, useCloseControlDialog, useAccountStore } from '#imports';
+import { plexAccountApi } from '@api';
 
 const { t } = useI18n();
 const accountStore = useAccountStore();
@@ -189,7 +189,8 @@ function validate() {
 	set(validateLoading, true);
 
 	useSubscription(
-		validateAccount(get(changedPlexAccount))
+		plexAccountApi
+			.validatePlexAccountEndpoint(get(changedPlexAccount))
 			.pipe(take(1))
 			.subscribe({
 				next: (data) => {

@@ -1,17 +1,4 @@
 import {
-	DOWNLOAD_RELATIVE_PATH,
-	FOLDER_PATH_RELATIVE_PATH,
-	NOTIFICATION_RELATIVE_PATH,
-	NOTIFICATIONS_RELATIVE_PATH,
-	PLEX_ACCOUNT_RELATIVE_PATH,
-	PLEX_LIBRARY_RELATIVE_PATH,
-	PLEX_MEDIA_RELATIVE_PATH,
-	PLEX_SERVER_CONNECTION_RELATIVE_PATH,
-	PLEX_SERVER_RELATIVE_PATH,
-	PROGRESS_HUB_RELATIVE_PATH,
-	SETTINGS_RELATIVE_PATH,
-} from '@api-urls';
-import {
 	type MockConfig,
 	generatePlexServers,
 	generateResultDTO,
@@ -32,9 +19,20 @@ import type {
 	ServerDownloadProgressDTO,
 	SettingsModelDTO,
 	DownloadTaskDTO,
-} from '@dto/mainApi';
-import { PlexMediaType } from '@dto/mainApi';
+} from '@dto';
+import { PlexMediaType } from '@dto';
 import { toDownloadTaskType } from '@composables/conversion';
+import {
+	DownloadPaths,
+	FolderPathPaths,
+	NotificationPaths,
+	PlexAccountPaths,
+	PlexLibraryPaths,
+	PlexMediaPaths,
+	PlexServerConnectionPaths,
+	PlexServerPaths,
+	SettingsPaths,
+} from '@api/api-paths';
 
 export interface IBasePageSetupResult {
 	plexServers: PlexServerDTO[];
@@ -67,7 +65,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 
 	// PlexServers call
 	result.plexServers = generatePlexServers({ config });
-	cy.intercept('GET', apiRoute({ type: APIRoute.PlexServer }), {
+	cy.intercept('GET', PlexServerPaths.getAllPlexServersEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO(result.plexServers),
 	}).then(() => {
@@ -78,7 +76,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 
 	// PlexServerConnections call
 	result.plexServerConnections = result.plexServers.flatMap((x) => x.plexServerConnections);
-	cy.intercept('GET', apiRoute({ type: APIRoute.PlexServerConnection }), {
+	cy.intercept('GET', PlexServerConnectionPaths.getAllPlexServerConnectionsEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO(result.plexServerConnections),
 	}).then(() => {
@@ -90,7 +88,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 	// PlexLibraries call
 	result.plexLibraries = generatePlexLibrariesFromPlexServers({ plexServers: result.plexServers, config });
 
-	cy.intercept('GET', apiRoute({ type: APIRoute.PlexLibrary }), {
+	cy.intercept('GET', PlexLibraryPaths.getAllPlexLibrariesEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO(result.plexLibraries),
 	}).then(() => {
@@ -101,22 +99,15 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 
 	// Detail call for every library
 	for (const library of result.plexLibraries) {
-		cy.intercept(
-			'GET',
-			apiRoute({
-				type: APIRoute.PlexLibrary,
-				path: `/${library.id}`,
-			}),
-			{
-				statusCode: 200,
-				body: generateResultDTO(library),
-			},
-		);
+		cy.intercept('GET', PlexLibraryPaths.getPlexLibraryByIdEndpoint(library.id), {
+			statusCode: 200,
+			body: generateResultDTO(library),
+		});
 	}
 
 	// PlexAccount call
 	const plexAccounts = generatePlexAccounts({ config, plexServers: result.plexServers, plexLibraries: result.plexLibraries });
-	cy.intercept('GET', apiRoute({ type: APIRoute.PlexAccount }), {
+	cy.intercept('GET', PlexAccountPaths.getAllPlexAccountsEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO(plexAccounts),
 	}).then(() => {
@@ -135,7 +126,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 			}),
 		)
 		.flat();
-	cy.intercept('GET', apiRoute({ type: APIRoute.Download }), {
+	cy.intercept('GET', DownloadPaths.getAllDownloadTasksEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO(result.serverDownloadProgress),
 	}).then(() => {
@@ -158,24 +149,17 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 					// partial: downloadTask,
 				});
 				result.detailDownloadTasks.push(generatedDownloadTask);
-				cy.intercept(
-					'GET',
-					apiRoute({
-						type: APIRoute.Download,
-						path: `/detail/${downloadTask.id}`,
-					}),
-					{
-						statusCode: 200,
-						body: generateResultDTO(generatedDownloadTask),
-					},
-				);
+				cy.intercept('GET', DownloadPaths.getDownloadTaskByGuidEndpoint(downloadTask.id), {
+					statusCode: 200,
+					body: generateResultDTO(generatedDownloadTask),
+				});
 			}
 		}
 	}
 
 	// Settings call
 	const settings = generateSettingsModel({ plexServers: result.plexServers, config });
-	cy.intercept('GET', apiRoute({ type: APIRoute.Settings }), {
+	cy.intercept('GET', SettingsPaths.getUserSettingsEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO(settings),
 	}).then(() => {
@@ -204,14 +188,8 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 		// Intercept the Library media call
 		cy.intercept(
 			'GET',
-			apiRoute({
-				type: APIRoute.PlexMedia,
-				path: `/library/${library.id}`,
-				wildcard: false,
-				query: {
-					page: '*',
-					size: '*',
-				},
+			PlexMediaPaths.getMediaDetailByIdEndpoint(library.id, {
+				type: library.type,
 			}),
 			{
 				statusCode: 200,
@@ -220,22 +198,22 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 		);
 	}
 
-	cy.intercept('GET', apiRoute({ type: APIRoute.FolderPath }), {
+	cy.intercept('GET', FolderPathPaths.getAllFolderPathsEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO([]),
 	});
 
-	cy.intercept('GET', apiRoute({ type: APIRoute.Notification }), {
+	cy.intercept('GET', NotificationPaths.getAllNotificationsEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO([]),
 	});
 
-	cy.intercept('GET', apiRoute({ type: APIRoute.ProgressHub, excludeApiPrefix: true }), {
+	cy.intercept('GET', '/progress', {
 		statusCode: 200,
 		body: {},
 	});
 
-	cy.intercept('GET', apiRoute({ type: APIRoute.NotificationsHub, excludeApiPrefix: true }), {
+	cy.intercept('GET', '/notifications', {
 		statusCode: 200,
 		body: {},
 	});
@@ -256,43 +234,29 @@ export function route(path: string) {
 	return Cypress.env('BASE_URL') + path;
 }
 
-export function apiRoute({
-	type,
-	path = '',
-	query = {},
-	wildcard = true,
-	excludeApiPrefix = false,
-}: {
-	type: APIRoute;
-	path?: string;
-	query?: Record<string, string>;
-	wildcard?: boolean;
-	excludeApiPrefix?: boolean;
-}): string {
-	const fullPath = `${!excludeApiPrefix ? '/api' : ''}${type}${path}`;
-	const urlBuilder = new URL(fullPath, 'http://localhost.com');
-
-	for (const param of Object.keys(query).map((x) => [x, query[x]])) {
-		urlBuilder.searchParams.append(param[0], param[1]);
-	}
-
-	let url = urlBuilder.toString().replace('http://localhost.com', '');
-	if (wildcard) {
-		url += '*';
-	}
-	return url;
-}
-
-export enum APIRoute {
-	PlexServer = PLEX_SERVER_RELATIVE_PATH,
-	PlexServerConnection = PLEX_SERVER_CONNECTION_RELATIVE_PATH,
-	PlexLibrary = PLEX_LIBRARY_RELATIVE_PATH,
-	PlexMedia = PLEX_MEDIA_RELATIVE_PATH,
-	PlexAccount = PLEX_ACCOUNT_RELATIVE_PATH,
-	Download = DOWNLOAD_RELATIVE_PATH,
-	Settings = SETTINGS_RELATIVE_PATH,
-	FolderPath = FOLDER_PATH_RELATIVE_PATH,
-	Notification = NOTIFICATION_RELATIVE_PATH,
-	ProgressHub = PROGRESS_HUB_RELATIVE_PATH,
-	NotificationsHub = NOTIFICATIONS_RELATIVE_PATH,
-}
+// export function apiRoute({
+// 	type,
+// 	path = '',
+// 	query = {},
+// 	wildcard = true,
+// 	excludeApiPrefix = false,
+// }: {
+// 	type: APIRoute;
+// 	path?: string;
+// 	query?: Record<string, string>;
+// 	wildcard?: boolean;
+// 	excludeApiPrefix?: boolean;
+// }): string {
+// 	const fullPath = `${!excludeApiPrefix ? '/api' : ''}${type}${path}`;
+// 	const urlBuilder = new URL(fullPath, 'http://localhost.com');
+//
+// 	for (const param of Object.keys(query).map((x) => [x, query[x]])) {
+// 		urlBuilder.searchParams.append(param[0], param[1]);
+// 	}
+//
+// 	let url = urlBuilder.toString().replace('http://localhost.com', '');
+// 	if (wildcard) {
+// 		url += '*';
+// 	}
+// 	return url;
+// }

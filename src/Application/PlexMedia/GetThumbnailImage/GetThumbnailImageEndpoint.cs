@@ -9,7 +9,19 @@ using PlexApi.Contracts;
 
 namespace PlexRipper.Application;
 
-public record GetThumbnailImageEndpointRequest(int MediaId, PlexMediaType MediaType, int Width = 0, int Height = 0);
+public class GetThumbnailImageEndpointRequest()
+{
+    public int MediaId { get; init; }
+
+    [QueryParam]
+    public PlexMediaType MediaType { get; init; }
+
+    [QueryParam]
+    public int Width { get; init; }
+
+    [QueryParam]
+    public int Height { get; init; }
+}
 
 public class GetThumbnailImageEndpointRequestValidator : Validator<GetThumbnailImageEndpointRequest>
 {
@@ -25,7 +37,7 @@ public class GetThumbnailImageEndpoint : BaseEndpoint<GetThumbnailImageEndpointR
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IPlexApiService _plexServiceApi;
 
-    public override string EndpointPath => ApiRoutes.PlexMediaController + "/thumb";
+    public override string EndpointPath => ApiRoutes.PlexMediaController + "/thumb/{MediaId}";
 
     public GetThumbnailImageEndpoint(IPlexRipperDbContext dbContext, IPlexApiService plexServiceApi)
     {
@@ -38,7 +50,7 @@ public class GetThumbnailImageEndpoint : BaseEndpoint<GetThumbnailImageEndpointR
         Get(EndpointPath);
         AllowAnonymous();
         Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO))
+            .Produces(StatusCodes.Status200OK, typeof(byte[]), "image/jpeg")
             .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
             .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
             .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));

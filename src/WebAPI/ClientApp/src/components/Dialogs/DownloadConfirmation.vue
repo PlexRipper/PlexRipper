@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
-import type { DownloadMediaDTO, DownloadPreviewDTO } from '@dto/mainApi';
+import type { DownloadMediaDTO, DownloadPreviewDTO } from '@dto';
 import type { QTreeViewTableHeader } from '@props';
 import { getDownloadPreviewTableColumns } from '#imports';
 

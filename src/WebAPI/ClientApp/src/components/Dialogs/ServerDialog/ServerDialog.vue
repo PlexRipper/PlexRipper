@@ -107,7 +107,7 @@
 <script setup lang="ts">
 import { set } from '@vueuse/core';
 import { ref, computed, useCloseControlDialog } from '#imports';
-import type { PlexServerDTO } from '@dto/mainApi';
+import type { PlexServerDTO } from '@dto';
 
 defineProps<{ name: string }>();
 const serverStore = useServerStore();

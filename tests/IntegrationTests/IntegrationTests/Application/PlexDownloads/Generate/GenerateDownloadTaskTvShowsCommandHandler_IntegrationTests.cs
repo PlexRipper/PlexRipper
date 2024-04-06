@@ -55,8 +55,12 @@ public class GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests : BaseIn
         foreach (var downloadTaskTvShow in downloadTaskTvShows)
         {
             downloadTaskTvShow.Calculate();
-            (await validator.ValidateAsync(downloadTaskTvShow))
-                .Errors.ShouldBeEmpty();
+            var validationResult = await validator.ValidateAsync(downloadTaskTvShow);
+            // Ignore DownloadDirectory and DestinationDirectory errors as these are set in the DownloadJob
+            var validErrors = validationResult.Errors.Filter(x =>
+                !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DownloadDirectory)) &&
+                !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DestinationDirectory)));
+            validErrors.ShouldBeEmpty();
         }
     }
 }

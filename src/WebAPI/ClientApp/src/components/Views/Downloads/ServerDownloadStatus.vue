@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { DownloadStatus } from '@dto/mainApi';
+import { DownloadStatus } from '@dto';
 
 const { t } = useI18n();
 const serverStatus = ref<DownloadStatus>(DownloadStatus.Paused);

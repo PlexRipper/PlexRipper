@@ -3,29 +3,13 @@ import Log from 'consola';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { sum, merge, keyBy, values, flatMapDeep, clone } from 'lodash-es';
-import type {
-	DownloadMediaDTO,
-	DownloadPreviewDTO,
-	DownloadProgressDTO,
-	PlexServerDTO,
-	ServerDownloadProgressDTO,
-} from '@dto/mainApi';
-import { DownloadStatus } from '@dto/mainApi';
-import {
-	clearDownloadTasks,
-	deleteDownloadTasks,
-	downloadMedia,
-	getAllDownloads,
-	pauseDownloadTask,
-	postPreviewDownload,
-	restartDownloadTasks,
-	startDownloadTask,
-	stopDownloadTasks,
-} from '@api/plexDownloadApi';
+import type { DownloadMediaDTO, DownloadPreviewDTO, DownloadProgressDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto';
+import { DownloadStatus } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { useServerStore } from '#build/imports';
 import type IDownloadsSelection from '@interfaces/IDownloadsSelection';
 import type IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
+import { downloadApi } from '@api';
 export const useDownloadStore = defineStore('DownloadStore', () => {
 	const state = reactive<{ serverDownloads: ServerDownloadProgressDTO[]; selected: IDownloadsSelection[] }>({
 		serverDownloads: [],
@@ -43,7 +27,7 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 		 * Fetch the download list from the API.
 		 */
 		fetchDownloadList() {
-			return getAllDownloads().pipe(
+			return downloadApi.getAllDownloadTasksEndpoint().pipe(
 				tap((downloads) => {
 					if (downloads.isSuccess) {
 						state.serverDownloads = downloads.value ?? [];
@@ -56,22 +40,28 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 			// TODO verify if we need to re-fetch the download list after each action
 			switch (action) {
 				case 'pause':
-					pauseDownloadTask(downloadTaskId).subscribe();
+					downloadApi.pauseDownloadTaskEndpoint(downloadTaskId).subscribe();
 					break;
 				case 'clear':
-					clearDownloadTasks(downloadTaskIds).pipe(switchMap(actions.fetchDownloadList)).subscribe();
+					downloadApi
+						.clearCompletedDownloadTasksEndpoint(downloadTaskIds)
+						.pipe(switchMap(actions.fetchDownloadList))
+						.subscribe();
 					break;
 				case 'delete':
-					deleteDownloadTasks(downloadTaskIds).pipe(switchMap(actions.fetchDownloadList)).subscribe();
+					downloadApi
+						.deleteDownloadTaskEndpoint(downloadTaskIds)
+						.pipe(switchMap(actions.fetchDownloadList))
+						.subscribe();
 					break;
 				case 'stop':
-					stopDownloadTasks(downloadTaskId).subscribe();
+					downloadApi.stopDownloadTaskEndpoint(downloadTaskId).subscribe();
 					break;
 				case 'restart':
-					restartDownloadTasks(downloadTaskId).subscribe();
+					downloadApi.restartDownloadTaskEndpoint(downloadTaskId).subscribe();
 					break;
 				case 'start':
-					startDownloadTask(downloadTaskId).subscribe();
+					downloadApi.startDownloadTaskEndpoint(downloadTaskId).subscribe();
 					break;
 				default:
 					Log.error(`Action: ${action} does not have a assigned command with payload: ${downloadTaskIds}`);
@@ -95,7 +85,7 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 			});
 		},
 		previewDownload(downloadMediaCommand: DownloadMediaDTO[]): Observable<DownloadPreviewDTO[]> {
-			return postPreviewDownload(downloadMediaCommand).pipe(
+			return downloadApi.getDownloadPreviewEndpoint(downloadMediaCommand).pipe(
 				map((response) => {
 					if (response && response.isSuccess) {
 						return response.value ?? [];
@@ -105,7 +95,8 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 			);
 		},
 		downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): void {
-			downloadMedia(downloadMediaCommand)
+			downloadApi
+				.createDownloadTasksEndpoint(downloadMediaCommand)
 				.pipe(switchMap(() => actions.fetchDownloadList()))
 				.subscribe();
 		},

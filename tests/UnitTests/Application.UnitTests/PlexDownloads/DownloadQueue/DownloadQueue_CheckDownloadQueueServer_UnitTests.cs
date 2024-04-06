@@ -36,7 +36,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
         });
 
         var downloadTasks = await DbContext.DownloadTaskMovie.AsTracking().Where(x => x.PlexServerId == 1).IncludeAll().ToListAsync();
-        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<Guid>(), It.IsAny<int>())).ReturnOk();
+        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
 
         var startedDownloadTask = downloadTasks[0];
         startedDownloadTask.SetDownloadStatus(DownloadStatus.Downloading);
@@ -62,7 +62,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
         });
 
         var downloadTasks = await DbContext.GetAllDownloadTasksAsync();
-        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<Guid>(), It.IsAny<int>())).ReturnOk();
+        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
 
         // Act
         var result = await _sut.CheckDownloadQueueServer(downloadTasks[0].PlexServerId);
@@ -90,7 +90,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
         await DbContext.SaveChangesAsync();
 
-        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<Guid>(), It.IsAny<int>())).ReturnOk();
+        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
 
         // Act
         var result = await _sut.CheckDownloadQueueServer(downloadTasks[0].PlexServerId);
@@ -118,7 +118,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
         await DbContext.SaveChangesAsync();
 
-        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<Guid>(), It.IsAny<int>())).ReturnOk();
+        mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
 
         // Act
         var result = await _sut.CheckDownloadQueueServer(1);

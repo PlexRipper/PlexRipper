@@ -51,7 +51,7 @@ public class StartDownloadTaskEndpoint : BaseEndpoint<StartDownloadTaskEndpointR
 
         if (downloadTask.IsDownloadable)
         {
-            var startResult = await _downloadTaskScheduler.StartDownloadTaskJob(downloadTask.Id, downloadTask.PlexServerId);
+            var startResult = await _downloadTaskScheduler.StartDownloadTaskJob(downloadTask.ToKey());
             await SendFluentResult(startResult, ct);
 
             await _mediator.Publish(new CheckDownloadQueueNotification(downloadTask.PlexServerId), ct);

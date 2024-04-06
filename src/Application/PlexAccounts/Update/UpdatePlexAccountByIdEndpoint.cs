@@ -9,9 +9,6 @@ namespace PlexRipper.Application;
 
 public class UpdatePlexAccountByIdEndpointRequest
 {
-    // TODO Id is not needed as the DTO already should have it
-    public int PlexAccountId { get; init; }
-
     [FromBody]
     public UpdatePlexAccountDTO PlexAccountDTO { get; init; }
 
@@ -23,7 +20,6 @@ public class UpdatePlexAccountByIdEndpointRequestValidator : Validator<UpdatePle
 {
     public UpdatePlexAccountByIdEndpointRequestValidator()
     {
-        RuleFor(x => x.PlexAccountId).GreaterThan(0);
         RuleFor(x => x.PlexAccountDTO).NotNull();
         RuleFor(x => x.PlexAccountDTO.Id).GreaterThan(0);
         RuleFor(x => x.PlexAccountDTO.DisplayName).NotEmpty();
@@ -38,7 +34,7 @@ public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdE
 {
     private readonly IPlexRipperDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexAccountController + "/{PlexAccountId}";
+    public override string EndpointPath => ApiRoutes.PlexAccountController;
 
     public UpdatePlexAccountByIdEndpoint(IPlexRipperDbContext dbContext)
     {

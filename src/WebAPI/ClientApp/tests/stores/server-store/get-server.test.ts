@@ -1,7 +1,7 @@
 import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
-import { PLEX_SERVER_CONNECTION_RELATIVE_PATH, PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
+import { PlexServerConnectionPaths, PlexServerPaths } from '@api/api-paths';
 import { generatePlexServers, generateResultDTO } from '@mock';
 import { useServerStore } from '~/store';
 
@@ -25,8 +25,8 @@ describe('ServerStore.getServers()', () => {
 		};
 		const serverStore = useServerStore();
 		const servers = generatePlexServers({ config });
-		mock.onGet(PLEX_SERVER_RELATIVE_PATH).reply(200, generateResultDTO(servers));
-		mock.onGet(PLEX_SERVER_CONNECTION_RELATIVE_PATH).reply(200, generateResultDTO([]));
+		mock.onGet(PlexServerPaths.getAllPlexServersEndpoint()).reply(200, generateResultDTO(servers));
+		mock.onGet(PlexServerConnectionPaths.getAllPlexServerConnectionsEndpoint()).reply(200, generateResultDTO([]));
 
 		// Act
 		await subscribeSpyTo(serverStore.setup()).onComplete();

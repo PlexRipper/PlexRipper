@@ -24,7 +24,7 @@ public class RefreshPlexAccountAccessEndpoint : BaseEndpoint<RefreshPlexAccountA
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
 
-    public override string EndpointPath => ApiRoutes.PlexAccountController + $"/refresh/{nameof(RefreshPlexAccountAccessEndpointRequest.PlexAccountId)}";
+    public override string EndpointPath => ApiRoutes.PlexAccountController + "/refresh/{PlexAccountId}";
 
     public RefreshPlexAccountAccessEndpoint(ILog log, IPlexRipperDbContext dbContext, IMediator mediator)
     {

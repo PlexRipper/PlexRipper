@@ -1,7 +1,7 @@
 import { cloneDeep } from 'lodash-es';
 import prettyBytes from 'pretty-bytes';
 import { route } from '@fixtures/baseE2E';
-import { DownloadStatus, MessageTypes } from '@dto/mainApi';
+import { DownloadStatus, MessageTypes } from '@dto';
 
 describe('Downloads page', () => {
 	it('Should update the download task row when the download process is updated', () => {

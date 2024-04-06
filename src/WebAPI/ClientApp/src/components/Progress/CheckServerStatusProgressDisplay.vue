@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PlexServerDTO, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
+import type { PlexServerDTO, ServerConnectionCheckStatusProgressDTO } from '@dto';
 
 defineProps<{
 	plexServer: PlexServerDTO | null;

@@ -2,10 +2,10 @@ import { acceptHMRUpdate } from 'pinia';
 import { Observable, of } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { get } from '@vueuse/core';
-import type { PlexLibraryDTO, PlexServerDTO } from '@dto/mainApi';
-import { getAllPlexLibraries, getPlexLibrary, reSyncPlexLibrary, updateDefaultDestination } from '@api/plexLibraryApi';
+import type { PlexLibraryDTO, PlexServerDTO } from '@dto';
 import { useServerStore, useSettingsStore } from '#build/imports';
 import type { ISetupResult } from '@interfaces';
+import { plexLibraryApi } from '@api';
 
 export const useLibraryStore = defineStore('LibraryStore', () => {
 	const state = reactive<{ libraries: PlexLibraryDTO[] }>({
@@ -20,17 +20,17 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 			return actions.refreshLibraries().pipe(switchMap(() => of({ name: useLibraryStore.name, isSuccess: true })));
 		},
 		refreshLibraries(): Observable<PlexLibraryDTO[]> {
-			return getAllPlexLibraries().pipe(
+			return plexLibraryApi.getAllPlexLibrariesEndpoint().pipe(
 				tap((plexLibraries) => {
-					if (plexLibraries.isSuccess) {
-						state.libraries = plexLibraries.value ?? [];
+					if (plexLibraries.value) {
+						state.libraries = plexLibraries.value;
 					}
 				}),
 				map(() => get(getters.getLibraries)),
 			);
 		},
 		refreshLibrary(libraryId: number) {
-			return getPlexLibrary(libraryId).pipe(
+			return plexLibraryApi.getPlexLibraryByIdEndpoint(libraryId).pipe(
 				tap((library) => {
 					if (library.isSuccess && library.value) {
 						const i = state.libraries.findIndex((x) => x.id === libraryId);
@@ -48,7 +48,7 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 		 * @param libraryId
 		 */
 		reSyncLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
-			return reSyncPlexLibrary(libraryId).pipe(
+			return plexLibraryApi.refreshLibraryMediaEndpoint(libraryId).pipe(
 				tap((library) => {
 					if (library.isSuccess && library.value) {
 						const i = state.libraries.findIndex((x) => x.id === libraryId);
@@ -62,7 +62,7 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 			);
 		},
 		updateDefaultDestination(libraryId: number, folderPathId: number): void {
-			updateDefaultDestination(libraryId, folderPathId).subscribe((result) => {
+			plexLibraryApi.setPlexLibraryDefaultDestinationByIdEndpoint(libraryId, folderPathId).subscribe((result) => {
 				if (result.isSuccess) {
 					const index = state.libraries.findIndex((x) => x.id === libraryId);
 					if (index > -1) {

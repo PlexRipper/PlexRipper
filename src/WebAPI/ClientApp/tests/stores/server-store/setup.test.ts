@@ -1,7 +1,7 @@
 import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, baseVars, getAxiosMock } from '@services-test-base';
-import { PLEX_SERVER_RELATIVE_PATH } from '@api-urls';
+import { PlexServerPaths } from '@api/api-paths';
 import { generatePlexServers, generateResultDTO } from '@mock';
 import type { ISetupResult } from '@interfaces';
 import { useServerStore } from '#imports';
@@ -26,7 +26,7 @@ describe('ServerStore.setup()', () => {
 
 		const serverStore = useServerStore();
 		const plexServers = generatePlexServers({ config });
-		mock.onGet(PLEX_SERVER_RELATIVE_PATH).reply(200, generateResultDTO(plexServers));
+		mock.onGet(PlexServerPaths.getAllPlexServersEndpoint()).reply(200, generateResultDTO(plexServers));
 		const setupResult: ISetupResult = {
 			isSuccess: true,
 			name: useServerStore.name,

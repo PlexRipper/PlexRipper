@@ -33,9 +33,9 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
         var childDownloadTask = movieDownloadTasks[0].Children[0];
 
         // Act
-        var startResult = await Container.DownloadTaskScheduler.StartDownloadTaskJob(childDownloadTask.Id, childDownloadTask.PlexServerId);
+        var startResult = await Container.DownloadTaskScheduler.StartDownloadTaskJob(childDownloadTask.ToKey());
         await Task.Delay(500);
-        var stopResult = await Container.DownloadTaskScheduler.StopDownloadTaskJob(childDownloadTask.Id);
+        var stopResult = await Container.DownloadTaskScheduler.StopDownloadTaskJob(childDownloadTask.ToKey());
         await Container.SchedulerService.AwaitScheduler();
 
         // Assert

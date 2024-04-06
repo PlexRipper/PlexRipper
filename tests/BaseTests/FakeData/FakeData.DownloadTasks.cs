@@ -64,9 +64,14 @@ public static partial class FakeData
             .RuleFor(x => x.FileName, _ => "file.mp4")
             .RuleFor(x => x.FileLocationUrl, _ => PlexMockServerConfig.FileUrl)
             .RuleFor(x => x.Quality, f => f.PickRandom("sd", "720", "1080"))
-            .RuleFor(x => x.DownloadDirectory, f => f.System.FilePath())
-            .RuleFor(x => x.DownloadDirectory, f => f.System.FilePath())
-            .RuleFor(x => x.DestinationDirectory, f => f.System.FilePath())
+            .RuleFor(x => x.DirectoryMeta, _ => new DownloadTaskDirectory
+            {
+                DestinationRootPath = string.Empty,
+                DownloadRootPath = string.Empty,
+                MovieFolder = string.Empty,
+                TvShowFolder = string.Empty,
+                SeasonFolder = string.Empty,
+            })
             .RuleFor(x => x.DownloadWorkerTasks, _ => new List<DownloadWorkerTask>());
     }
 
@@ -100,6 +105,7 @@ public static partial class FakeData
                 {
                     movieFile.Title = $"{movieFile.Title} {movieIndex++}";
                     movieFile.FullTitle = $"{movie.FullTitle}/{movieIndex}-{movieFile.FileName}";
+                    movieFile.DirectoryMeta.MovieFolder = movie.Title;
                 });
             });
     }
@@ -158,7 +164,12 @@ public static partial class FakeData
                         episode.FullTitle = $"{season.FullTitle}/{episode.Title}";
 
                         var fileIndex = 1;
-                        episode.Children.ForEach(file => { file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}"; });
+                        episode.Children.ForEach(file =>
+                        {
+                            file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}";
+                            file.DirectoryMeta.TvShowFolder = tvShow.Title;
+                            file.DirectoryMeta.SeasonFolder = season.Title;
+                        });
                     });
                 });
             });
@@ -199,7 +210,11 @@ public static partial class FakeData
                     episode.FullTitle = $"{season.FullTitle}/{episode.Title}";
 
                     var fileIndex = 1;
-                    episode.Children.ForEach(file => { file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}"; });
+                    episode.Children.ForEach(file =>
+                    {
+                        file.FullTitle = $"{episode.FullTitle}/{fileIndex}-{file.FileName}";
+                        file.DirectoryMeta.SeasonFolder = season.Title;
+                    });
                 });
             });
     }
@@ -264,7 +279,7 @@ public static partial class FakeData
             .RuleFor(x => x.EndByte, f => f.Random.Long(0))
             .RuleFor(x => x.BytesReceived, 0)
             .RuleFor(x => x.PartIndex, _ => partIndex++)
-            .RuleFor(x => x.TempDirectory, f => f.System.FilePath())
+            .RuleFor(x => x.DownloadDirectory, f => f.System.FilePath())
             .RuleFor(x => x.ElapsedTime, 0)
             .RuleFor(x => x.FileLocationUrl, f => f.Internet.UrlRootedPath())
             .RuleFor(x => x.DownloadStatus, DownloadStatus.Queued)

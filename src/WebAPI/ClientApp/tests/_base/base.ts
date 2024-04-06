@@ -1,7 +1,7 @@
 import type { Context } from 'vm';
 import Log from 'consola';
 import MockAdapter from 'axios-mock-adapter';
-import Axios from 'axios-observable';
+import Axios from 'axios';
 import type { MockConfig } from '@mock';
 import type IAppConfig from '@class/IAppConfig';
 

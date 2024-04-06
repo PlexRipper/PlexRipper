@@ -7,8 +7,6 @@ public static class EnvironmentExtensions
 
     public const string IntegrationTestModeKey = "IntegrationTestMode";
 
-    public const string DevelopmentRootPathKey = "DEVELOPMENT_ROOT_PATH";
-
     public const string PlexRipperRootPathKey = "PLEXRIPPER_ROOT_PATH";
 
     private static readonly string TrueValue = Convert.ToString(true);
@@ -22,16 +20,14 @@ public static class EnvironmentExtensions
     public static bool IsIntegrationTestMode() => System.Environment.GetEnvironmentVariable(IntegrationTestModeKey) == TrueValue;
 
     /// <summary>
-    /// This is the path that is used to store the /config, /downloads, /movies and /tvshows folders required to boot PlexRipper in development mode in a non-docker environment.
+    /// When a PlexRipperRootPath is set, it will be used as the root directory for the application.
     /// </summary>
-    public static string? GetDevelopmentRootPath() => System.Environment.GetEnvironmentVariable("DEVELOPMENT_ROOT_PATH");
+    public static string? GetPlexRipperRootPathEnv() => System.Environment.GetEnvironmentVariable(PlexRipperRootPathKey);
 
     /// <summary>
-    /// Get root path from env variable so we can adjust it per environment.
+    ///  Returns the path to the application directory bases on the current OS.
     /// </summary>
-    public static string? GetPlexRipperRootPath() => System.Environment.GetEnvironmentVariable(PlexRipperRootPathKey);
-
-    public static string? GetUserHomeDirectoryPath() => System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+    public static string GetApplicationDirectoryPath() => System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData);
 
     #endregion
 

@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace Environment;
+﻿namespace Environment;
 
 public class PathProvider : IPathProvider
 {
@@ -58,43 +56,22 @@ public class PathProvider : IPathProvider
     {
         get
         {
-            var devRootPath = EnvironmentExtensions.GetDevelopmentRootPath();
-            if (devRootPath is not null)
-                return devRootPath;
+            var rootPath = EnvironmentExtensions.GetPlexRipperRootPathEnv();
+            if (rootPath is not null)
+                return rootPath;
 
-            var rootPath = "/";
-
+            // Determine the root path based on the current OS
             switch (OsInfo.CurrentOS)
             {
                 case OperatingSystemPlatform.Linux:
                 case OperatingSystemPlatform.Osx:
+                    return Path.Combine(EnvironmentExtensions.GetApplicationDirectoryPath(), DefaultRootSubDirectory);
 
-                    var PlexRipperEnvRootPath = EnvironmentExtensions.GetPlexRipperRootPath();
-                    var HomeDirectory = EnvironmentExtensions.GetUserHomeDirectoryPath();
-
-                    if (PlexRipperEnvRootPath is not null)
-                    {
-                        rootPath = PlexRipperEnvRootPath;
-                        break;
-                    }
-
-                    if (HomeDirectory is not null)
-                    {
-                        rootPath = Path.Combine(HomeDirectory, DefaultRootSubDirectory);
-                        break;
-                    }
-
-                    rootPath = Path.Combine("/", DefaultRootSubDirectory);
-                    break;
                 case OperatingSystemPlatform.Windows:
-                    rootPath = Path.GetPathRoot(Assembly.GetExecutingAssembly().Location) ?? @"C:\";
-                    break;
+                    return Path.Combine(EnvironmentExtensions.GetApplicationDirectoryPath(), DefaultRootSubDirectory);
                 default:
-                    rootPath = "/";
-                    break;
+                    return "/";
             }
-
-            return rootPath;
         }
     }
 

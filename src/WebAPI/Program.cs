@@ -15,6 +15,9 @@ public class Program
             LogManager.SetupLogging(LogEventLevel.Verbose);
             _log.Information("Currently running on {CurrentOS}", OsInfo.CurrentOS);
 
+            _log.Information("Root directory: {RootDirectory}", PathProvider.RootDirectory);
+            _log.InformationLine("The Root directory can be set by passing in the \'PLEXRIPPER_ROOT_PATH\' env value with a valid folder path");
+
             var builder = WebApplication.CreateBuilder(args);
 
             builder.ConfigureDatabase();

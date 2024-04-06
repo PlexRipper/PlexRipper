@@ -1,6 +1,6 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { Observable, of } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
+import { switchMap, tap, map } from 'rxjs/operators';
 import type { PlexServerDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { useAccountStore, useServerConnectionStore, useSettingsStore } from '#build/imports';
@@ -40,7 +40,7 @@ export const useServerStore = defineStore('ServerStore', () => {
 						state.servers = plexServers?.value ?? [];
 					}
 				}),
-				switchMap(() => of(state.servers)),
+				map(() => state.servers),
 			);
 		},
 	};

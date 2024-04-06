@@ -2,7 +2,7 @@ import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
 import { generateResultDTO } from '@mock';
-import { PLEX_LIBRARY_RELATIVE_PATH } from '@api-urls';
+import { PlexLibraryPaths } from '@api/api-paths';
 import type { ISetupResult } from '@interfaces';
 import { useLibraryStore } from '#build/imports';
 
@@ -22,7 +22,7 @@ describe('LibraryStore.setup()', () => {
 		// Arrange
 		const libraryStore = useLibraryStore();
 
-		mock.onGet(PLEX_LIBRARY_RELATIVE_PATH).reply(200, generateResultDTO([]));
+		mock.onGet(PlexLibraryPaths.getAllPlexLibrariesEndpoint()).reply(200, generateResultDTO([]));
 		const setupResult: ISetupResult = {
 			isSuccess: true,
 			name: useLibraryStore.name,

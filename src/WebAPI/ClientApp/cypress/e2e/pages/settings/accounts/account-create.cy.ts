@@ -1,6 +1,7 @@
-import { route, apiRoute, APIRoute } from '@fixtures/baseE2E';
+import { route } from '@fixtures/baseE2E';
 import { generatePlexAccount, generateResultDTO } from '@mock';
 import type { PlexAccountDTO } from '@dto';
+import { PlexAccountPaths } from '@api-urls';
 
 describe('Add Plex account to PlexRipper', () => {
 	beforeEach(() => {
@@ -28,20 +29,20 @@ describe('Add Plex account to PlexRipper', () => {
 		cy.getCy('account-form-password-input').type(account.password);
 
 		// Validate Action
-		cy.intercept('POST', apiRoute({ type: APIRoute.PlexAccount, path: `/validate` }), {
+		cy.intercept('POST', PlexAccountPaths.validatePlexAccountEndpoint(), {
 			statusCode: 200,
 			body: generateResultDTO({ ...account, isValidated: true, is2Fa: false }),
 		});
 		cy.getCy('account-dialog-validate-button').click();
 
 		// Create Action
-		cy.intercept('POST', apiRoute({ type: APIRoute.PlexAccount }), {
+		cy.intercept('POST', PlexAccountPaths.createPlexAccountEndpoint(), {
 			statusCode: 200,
 			body: generateResultDTO(account),
 		});
 
 		// Hide Account dialog
-		cy.intercept('GET', apiRoute({ type: APIRoute.PlexAccount, path: `/${account.id}` }), {
+		cy.intercept('GET', PlexAccountPaths.getPlexAccountByIdEndpoint(account.id), {
 			statusCode: 200,
 			body: generateResultDTO(account),
 		});
@@ -61,7 +62,7 @@ describe('Add Plex account to PlexRipper', () => {
 		cy.getCy('account-form-password-input').type(plexAccount.password);
 
 		// Validate Action, should return is2Fa true and isValidated false
-		cy.intercept('POST', apiRoute({ type: APIRoute.PlexAccount, path: `/validate` }), {
+		cy.intercept('POST', PlexAccountPaths.validatePlexAccountEndpoint(), {
 			statusCode: 200,
 			body: generateResultDTO({
 				...plexAccount,
@@ -72,7 +73,7 @@ describe('Add Plex account to PlexRipper', () => {
 		cy.getCy('account-dialog-validate-button').click();
 		cy.getCy('2fa-code-verification-dialog').should('exist');
 		// Insert verification code, should return is2Fa true and isValidated true
-		cy.intercept('POST', apiRoute({ type: APIRoute.PlexAccount, path: `/validate` }), {
+		cy.intercept('POST', PlexAccountPaths.validatePlexAccountEndpoint(), {
 			statusCode: 200,
 			body: generateResultDTO({
 				...plexAccount,
@@ -83,12 +84,12 @@ describe('Add Plex account to PlexRipper', () => {
 		cy.get(':nth-child(1) > [data-test="single-input"]').type('123456');
 
 		// Create Action
-		cy.intercept('POST', apiRoute({ type: APIRoute.PlexAccount }), {
+		cy.intercept('POST', PlexAccountPaths.createPlexAccountEndpoint(), {
 			statusCode: 200,
 			body: generateResultDTO(plexAccount),
 		});
 
-		cy.intercept('GET', apiRoute({ type: APIRoute.PlexAccount, path: `/${plexAccount.id}` }), {
+		cy.intercept('GET', PlexAccountPaths.getPlexAccountByIdEndpoint(plexAccount.id), {
 			statusCode: 200,
 			body: generateResultDTO(plexAccount),
 		});

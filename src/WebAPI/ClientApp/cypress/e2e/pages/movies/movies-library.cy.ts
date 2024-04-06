@@ -1,5 +1,6 @@
-import { APIRoute, apiRoute, route } from '@fixtures/baseE2E';
+import { route } from '@fixtures/baseE2E';
 import { PlexMediaType } from '@dto';
+import { SettingsPaths } from '@api-urls';
 
 describe('Display media collection on the Library detail page', () => {
 	beforeEach(() => {
@@ -51,7 +52,7 @@ describe('Display media collection on the Library detail page', () => {
 
 	it('Should switch to poster view when changing the view the media', () => {
 		// Once the option has changed, the settings are saved
-		cy.intercept('PUT', apiRoute({ type: APIRoute.Settings }), {
+		cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), {
 			statusCode: 200,
 		});
 		cy.getCy('change-view-mode-btn').click();

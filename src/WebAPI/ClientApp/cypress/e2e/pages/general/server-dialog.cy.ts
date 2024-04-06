@@ -1,6 +1,7 @@
-import { APIRoute, apiRoute } from '@fixtures/baseE2E';
 import { generateResultDTO } from '@mock';
 import type { SettingsModelDTO } from '@dto';
+import { SettingsPaths } from '@api/api-paths';
+
 describe('PlexRipper Server Dialog', () => {
 	beforeEach(() => {
 		cy.basePageSetup({
@@ -34,7 +35,7 @@ describe('PlexRipper Server Dialog', () => {
 			cy.getCy('server-dialog-tab-3').click();
 			cy.getCy('server-dialog-tab-content-3').should('exist').and('be.visible');
 
-			cy.intercept('PUT', apiRoute({ type: APIRoute.Settings }), {
+			cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), {
 				statusCode: 200,
 				body: generateResultDTO(pageData.settings),
 			}).as('settingsUpdate');

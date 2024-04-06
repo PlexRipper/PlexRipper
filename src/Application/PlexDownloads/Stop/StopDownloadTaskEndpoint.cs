@@ -1,7 +1,7 @@
 using Application.Contracts;
 using FastEndpoints;
-using Microsoft.AspNetCore.Http;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
@@ -19,7 +19,7 @@ public class StopDownloadTaskEndpoint : BaseEndpoint<StopDownloadTaskEndpointReq
 {
     private readonly IMediator _mediator;
 
-    public override string EndpointPath => ApiRoutes.DownloadController + "/stop/{DownloadTaskId}";
+    public override string EndpointPath => ApiRoutes.DownloadController + "/stop/{DownloadTaskGuid}";
 
     public StopDownloadTaskEndpoint(IMediator mediator)
     {

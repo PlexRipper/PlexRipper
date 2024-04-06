@@ -31,9 +31,6 @@ public static class EnvironmentExtensions
     /// </summary>
     public static string? GetPlexRipperRootPath() => System.Environment.GetEnvironmentVariable(PlexRipperRootPathKey);
 
-    /// <summary>
-    /// This is the path that is used to store the /config, /downloads, /movies and /tvshows folders required to boot PlexRipper in development mode in a non-docker environment.
-    /// </summary>
     public static string? GetUserHomeDirectoryPath() => System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
 
     #endregion

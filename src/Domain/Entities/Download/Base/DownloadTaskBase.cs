@@ -1,14 +1,9 @@
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlexRipper.Domain;
 
-public abstract class DownloadTaskBase
+public abstract class DownloadTaskBase : BaseEntityGuid
 {
-    [Key]
-    [Column(Order = 0)]
-    public required Guid Id { get; set; }
-
     /// <summary>
     /// Gets or sets the unique identifier used by the Plex Api to keep track of media.
     /// This is only unique on that specific server.

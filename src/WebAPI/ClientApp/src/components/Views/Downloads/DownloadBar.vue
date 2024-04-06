@@ -7,31 +7,30 @@
 				<vertical-button
 					:icon="button.icon"
 					:label="button.name"
-					:disabled="button.disableOnNoSelected && !hasSelected"
+					:disabled="button.disableOnNoSelected && !downloadStore.hasSelected"
 					:width="verticalButtonWidth"
-					@click="$emit('action', button.value)" />
+					@click="downloadStore.executeBatchDownloadCommand(button.value)" />
 			</q-col>
 		</q-row>
 	</q-toolbar>
 </template>
 
 <script setup lang="ts">
-interface IButton {
-	name: string;
-	value: string;
-	icon: string;
-	disableOnNoSelected: boolean;
-}
+import { ref, computed } from 'vue';
+import { useDownloadStore } from '@store';
 
-defineProps<{
-	hasSelected: boolean;
-}>();
-
-defineEmits<{ (e: 'action', action: string): void }>();
+const downloadStore = useDownloadStore();
 
 const verticalButtonWidth = ref(120);
 
-const buttons = computed<IButton[]>(() => {
+const buttons = computed<
+	{
+		name: string;
+		value: string;
+		icon: string;
+		disableOnNoSelected: boolean;
+	}[]
+>(() => {
 	return [
 		{
 			name: 'Clear Completed',

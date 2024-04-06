@@ -1,7 +1,7 @@
 <template>
 	<q-page>
 		<!-- Download Toolbar -->
-		<download-bar :has-selected="downloadStore.hasSelected" @action="batchCommandSwitch($event)" />
+		<download-bar />
 
 		<!--	The Download Table	-->
 		<q-row v-if="downloadStore.getServersWithDownloads.length > 0" justify="center">
@@ -12,8 +12,7 @@
 						:key="plexServer.id"
 						:download-rows="downloads"
 						:plex-server="plexServer"
-						@action="commandSwitch($event)"
-						@aggregate-selected="updateAggregateSelected(plexServer.id, $event)" />
+						@action="commandSwitch($event)" />
 				</q-list>
 			</q-col>
 		</q-row>
@@ -27,22 +26,14 @@
 </template>
 
 <script setup lang="ts">
-import { get } from '@vueuse/core';
 import type { DownloadProgressDTO } from '@dto';
-import type { ISelection } from '@interfaces';
 import { useOpenControlDialog } from '#imports';
 
 const { t } = useI18n();
 const downloadStore = useDownloadStore();
-const aggregateSelected = ref<ISelection[]>([]);
 const dialogName = 'download-details-dialog';
 
 // region single commands
-
-function batchCommandSwitch(action: string) {
-	const ids = get(aggregateSelected).flatMap((x) => x.keys.toString());
-	downloadStore.executeDownloadCommand(action, ids);
-}
 
 function commandSwitch({ action, item }: { action: string; item: DownloadProgressDTO }) {
 	const ids: string[] = [item.id];
@@ -53,21 +44,6 @@ function commandSwitch({ action, item }: { action: string; item: DownloadProgres
 	}
 
 	downloadStore.executeDownloadCommand(action, ids);
-}
-
-// endregion
-
-// region Selection
-
-function updateAggregateSelected(id: number, payload: ISelection): void {
-	const i = get(aggregateSelected).findIndex((x) => x.indexKey === id);
-	if (i === -1) {
-		get(aggregateSelected).push({ indexKey: id, keys: payload.keys, allSelected: payload.allSelected });
-		return;
-	}
-
-	get(aggregateSelected)[i].allSelected = payload.allSelected;
-	get(aggregateSelected)[i].keys = payload.keys;
 }
 
 // endregion

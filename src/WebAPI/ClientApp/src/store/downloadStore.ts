@@ -35,6 +35,10 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 				}),
 			);
 		},
+		executeBatchDownloadCommand(action: string) {
+			const downloadTaskIds = state.selected.flatMap((x) => Object.keys(x.selection));
+			actions.executeDownloadCommand(action, downloadTaskIds);
+		},
 		executeDownloadCommand(action: string, downloadTaskIds: string[]): void {
 			const downloadTaskId = downloadTaskIds[0];
 			// TODO verify if we need to re-fetch the download list after each action

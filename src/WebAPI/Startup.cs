@@ -182,9 +182,9 @@ public static class Startup
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
     }
 
-    public static void ConfigureDatabase(this WebApplicationBuilder builder)
+    public static void ConfigureDatabase(this WebApplicationBuilder _)
     {
-        var dbContext = new PlexRipperDbContext(new PathProvider());
+        var dbContext = new PlexRipperDbContext();
         dbContext.Setup();
     }
 }

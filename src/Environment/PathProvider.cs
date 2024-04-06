@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace Environment;
+﻿namespace Environment;
 
 public class PathProvider : IPathProvider
 {
@@ -11,6 +9,8 @@ public class PathProvider : IPathProvider
     private static readonly string _configFolder = "Config";
 
     private static readonly string _logsFolder = "Logs";
+
+    public static string DefaultRootSubDirectory => "PlexRipper";
 
     public static string DefaultMovieDestinationFolder => "Movies";
 
@@ -56,17 +56,19 @@ public class PathProvider : IPathProvider
     {
         get
         {
-            var devRootPath = EnvironmentExtensions.GetDevelopmentRootPath();
-            if (devRootPath is not null)
-                return devRootPath;
+            var rootPath = EnvironmentExtensions.GetPlexRipperRootPathEnv();
+            if (rootPath is not null)
+                return rootPath;
 
+            // Determine the root path based on the current OS
             switch (OsInfo.CurrentOS)
             {
                 case OperatingSystemPlatform.Linux:
                 case OperatingSystemPlatform.Osx:
-                    return "/";
+                    return Path.Combine(EnvironmentExtensions.GetApplicationDirectoryPath(), DefaultRootSubDirectory);
+
                 case OperatingSystemPlatform.Windows:
-                    return Path.GetPathRoot(Assembly.GetExecutingAssembly().Location) ?? @"C:\";
+                    return Path.Combine(EnvironmentExtensions.GetApplicationDirectoryPath(), DefaultRootSubDirectory);
                 default:
                     return "/";
             }
@@ -97,12 +99,12 @@ public class PathProvider : IPathProvider
 
     string IPathProvider.ConfigDirectory => ConfigDirectory;
 
-    public List<string> DatabaseFiles => new()
-    {
+    public static List<string> DatabaseFiles =>
+    [
         DatabasePath,
         Database_SHM_Path,
         Database_WAL_Path,
-    };
+    ];
 
     #endregion
 

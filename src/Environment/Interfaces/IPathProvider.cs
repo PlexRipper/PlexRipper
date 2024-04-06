@@ -22,5 +22,5 @@ public interface IPathProvider
 
     string RootDirectory { get; }
 
-    List<string> DatabaseFiles { get; }
+    static List<string> DatabaseFiles { get; }
 }

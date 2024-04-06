@@ -16,8 +16,6 @@ namespace PlexRipper.Data;
 
 public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContext
 {
-    private readonly IPathProvider _pathProvider;
-
     private readonly ILog<PlexRipperDbContext> _log = LogManager.CreateLogInstance<PlexRipperDbContext>();
 
     #region Properties
@@ -125,14 +123,11 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
 
     #region Constructors
 
-    public PlexRipperDbContext() { }
-
-    public PlexRipperDbContext(IPathProvider pathProvider)
+    public PlexRipperDbContext()
     {
-        _pathProvider = pathProvider;
-        DatabaseName = _pathProvider.DatabaseName;
-        DatabasePath = _pathProvider.DatabasePath;
-        ConfigDirectory = _pathProvider.ConfigDirectory;
+        DatabaseName = PathProvider.DatabaseName;
+        DatabasePath = PathProvider.DatabasePath;
+        ConfigDirectory = PathProvider.ConfigDirectory;
     }
 
     public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options, string databaseName = "") : base(options)
@@ -252,20 +247,20 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
     private Result BackUpDatabase()
     {
         _log.InformationLine("Attempting to back-up the PlexRipper database");
-        if (!File.Exists(_pathProvider.DatabasePath))
-            return Result.Fail($"Could not find Database at path: {_pathProvider.DatabasePath}").LogError();
+        if (!File.Exists(PathProvider.DatabasePath))
+            return Result.Fail($"Could not find Database at path: {PathProvider.DatabasePath}").LogError();
 
         var dateString = DateTime.UtcNow.ToString("yy-MM-dd_hh-mm", CultureInfo.InvariantCulture);
-        var dbBackUpPath = Path.Combine(_pathProvider.DatabaseBackupDirectory, dateString);
+        var dbBackUpPath = Path.Combine(PathProvider.DatabaseBackupDirectory, dateString);
 
         try
         {
             Directory.CreateDirectory(dbBackUpPath);
 
             // Wait until the database is available.
-            StreamExtensions.WaitForFile(_pathProvider.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)?.Dispose();
+            StreamExtensions.WaitForFile(PathProvider.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)?.Dispose();
 
-            foreach (var databaseFilePath in _pathProvider.DatabaseFiles)
+            foreach (var databaseFilePath in PathProvider.DatabaseFiles)
             {
                 if (File.Exists(databaseFilePath))
                 {

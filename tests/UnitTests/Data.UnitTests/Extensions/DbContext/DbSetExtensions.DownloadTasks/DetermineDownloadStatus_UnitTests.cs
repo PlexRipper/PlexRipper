@@ -1,4 +1,5 @@
 using Data.Contracts;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data.UnitTests.Extensions.DbContext.DbSetExtensions.DownloadTasks;
 
@@ -12,7 +13,7 @@ public class DetermineDownloadStatus_UnitTests : BaseUnitTest
         // Arrange
         await SetupDatabase(config => { config.MovieDownloadTasksCount = 5; });
 
-        var downloadTasks = await IDbContext.GetAllDownloadTasksAsync(asTracking: true);
+        var downloadTasks = await IDbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
         var testDownloadTask = downloadTasks[0].Children[0];
         await IDbContext.SetDownloadStatus(testDownloadTask.ToKey(), DownloadStatus.DownloadFinished);
 
@@ -20,7 +21,7 @@ public class DetermineDownloadStatus_UnitTests : BaseUnitTest
         await IDbContext.DetermineDownloadStatus(testDownloadTask.ToKey());
 
         // Assert
-        downloadTasks = await IDbContext.GetAllDownloadTasksAsync(asTracking: true);
+        downloadTasks = await IDbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
 
         downloadTasks[0].DownloadStatus.ShouldBe(DownloadStatus.DownloadFinished);
     }
@@ -36,16 +37,16 @@ public class DetermineDownloadStatus_UnitTests : BaseUnitTest
             config.TvShowEpisodeCount = 5;
         });
 
-        var downloadTasks = await IDbContext.GetAllDownloadTasksAsync(asTracking: true);
-        var testDownloadTask = downloadTasks[3].Children[2].Children[3].Children[0];
-        await IDbContext.SetDownloadStatus(testDownloadTask.ToKey(), DownloadStatus.Error);
+        var dbContext = IDbContext;
+        var downloadTasks = await dbContext.DownloadTaskTvShow.AsTracking().IncludeAll().ToListAsync();
+        var downloadTaskTvShowEpisodeFile = downloadTasks[3].Children[2].Children[3].Children[0];
+        await dbContext.SetDownloadStatus(downloadTaskTvShowEpisodeFile.ToKey(), DownloadStatus.Error);
 
         // Act
-        await IDbContext.DetermineDownloadStatus(testDownloadTask.ToKey());
+        await IDbContext.DetermineDownloadStatus(downloadTaskTvShowEpisodeFile.ToKey());
 
         // Assert
-        downloadTasks = await IDbContext.GetAllDownloadTasksAsync(asTracking: true);
-
-        downloadTasks[3].DownloadStatus.ShouldBe(DownloadStatus.Error);
+        var downloadTasksDb = await IDbContext.DownloadTaskTvShow.AsTracking().IncludeAll().ToListAsync();
+        downloadTasksDb[3].DownloadStatus.ShouldBe(DownloadStatus.Error);
     }
 }

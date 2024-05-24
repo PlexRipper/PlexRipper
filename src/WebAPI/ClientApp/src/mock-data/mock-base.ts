@@ -34,7 +34,7 @@ export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 		folderPathCount: 0,
 	};
 
-	for (const configKey in config) {
+	for (const configKey in defaultConfig) {
 		if (!Object.hasOwn(config, configKey)) {
 			config[configKey] = defaultConfig[configKey];
 		}

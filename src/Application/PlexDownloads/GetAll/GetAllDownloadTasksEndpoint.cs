@@ -26,7 +26,7 @@ public class GetAllDownloadTasksEndpoint : BaseEndpointWithoutRequest<List<Serve
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        var downloadList = await _dbContext.GetAllDownloadTasksAsync(cancellationToken: ct);
+        var downloadList = await _dbContext.GetAllDownloadTasksByServerAsync(cancellationToken: ct);
         await SendFluentResult(Result.Ok(downloadList), x => x.ToServerDownloadProgressDTOList(), ct);
     }
 }

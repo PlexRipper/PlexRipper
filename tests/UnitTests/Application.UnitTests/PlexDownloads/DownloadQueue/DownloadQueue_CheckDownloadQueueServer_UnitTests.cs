@@ -61,7 +61,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
             config.MovieDownloadTasksCount = 2;
         });
 
-        var downloadTasks = await DbContext.GetAllDownloadTasksAsync();
+        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync();
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
 
         // Act
@@ -86,7 +86,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
             config.MovieDownloadTasksCount = 5;
         });
 
-        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
+        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
         await DbContext.SaveChangesAsync();
 
@@ -114,7 +114,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
             config.TvShowSeasonDownloadTasksCount = 2;
             config.TvShowEpisodeDownloadTasksCount = 2;
         });
-        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
+        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
         await DbContext.SaveChangesAsync();
 

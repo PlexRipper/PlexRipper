@@ -21,7 +21,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
             config.TvShowEpisodeDownloadTasksCount = 5;
         });
 
-        var downloadTasks = await IDbContext.GetAllDownloadTasksAsync();
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
         mock.Mock<ISignalRService>()
             .Setup(x => x.SendDownloadProgressUpdateAsync(It.IsAny<int>(), It.IsAny<List<DownloadTaskGeneric>>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
@@ -41,7 +41,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
         // Arrange
         await SetupDatabase(config => { config.MovieDownloadTasksCount = 5; });
 
-        var downloadTasks = await IDbContext.GetAllDownloadTasksAsync();
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
         var updatedDownloadTask = downloadTasks[0].Children[0];
         await IDbContext.SetDownloadStatus(updatedDownloadTask.ToKey(), DownloadStatus.DownloadFinished);
 

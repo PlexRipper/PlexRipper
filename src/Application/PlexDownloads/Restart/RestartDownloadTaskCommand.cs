@@ -1,8 +1,5 @@
-using Application.Contracts;
 using Data.Contracts;
-using FileSystem.Contracts;
 using FluentValidation;
-using Logging.Interface;
 
 namespace PlexRipper.Application;
 
@@ -23,68 +20,49 @@ public class RestartDownloadTaskCommandValidator : AbstractValidator<RestartDown
 
 public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownloadTaskCommand, Result>
 {
-    private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
-    private readonly INotificationsService _notificationsService;
-    private readonly IDownloadTaskScheduler _downloadTaskScheduler;
-    private readonly IDirectorySystem _directorySystem;
 
     public RestartDownloadTaskCommandHandler(
-        ILog log,
         IPlexRipperDbContext dbContext,
-        IMediator mediator,
-        INotificationsService notificationsService,
-        IDownloadTaskScheduler downloadTaskScheduler,
-        IDirectorySystem directorySystem)
+        IMediator mediator)
     {
-        _log = log;
         _dbContext = dbContext;
         _mediator = mediator;
-        _notificationsService = notificationsService;
-        _downloadTaskScheduler = downloadTaskScheduler;
-        _directorySystem = directorySystem;
     }
 
     public async Task<Result> Handle(RestartDownloadTaskCommand command, CancellationToken cancellationToken)
     {
-        var downloadTaskGuid = command.DownloadTaskGuid;
+        var downloadTaskKey = await _dbContext.GetDownloadTaskKeyAsync(command.DownloadTaskGuid, cancellationToken);
+        if (downloadTaskKey is null)
+            return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.DownloadTaskGuid).LogWarning();
 
-        var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskGuid, cancellationToken: cancellationToken);
-        var downloadTaskKey = downloadTask.ToKey();
+        var childKeys = await _dbContext.GetDownloadableChildTaskKeys(downloadTaskKey, cancellationToken);
 
-        // Ensure the downloadTask is not currently downloading
-        if (downloadTask.IsDownloadable && downloadTask.DownloadStatus == DownloadStatus.Downloading)
+        foreach (var childKey in childKeys)
         {
-            var stopDownloadTasksResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, cancellationToken);
-            if (stopDownloadTasksResult.IsFailed)
-                return stopDownloadTasksResult.ToResult().LogError();
+            var downloadTask = await _dbContext.GetDownloadTaskAsync(childKey, cancellationToken);
 
-            _log.Debug("Deleting partially downloaded files of {DownloadTaskFullTitle}", downloadTask.FullTitle);
+            var stopResult = await _mediator.Send(new StopDownloadTaskCommand(childKey.Id), cancellationToken);
 
-            var removeTempResult = _directorySystem.DeleteAllFilesFromDirectory(downloadTask.DownloadDirectory);
-            if (removeTempResult.IsFailed)
-                return removeTempResult;
+            if (stopResult.IsFailed)
+                return stopResult;
+
+            // Reset progress of the downloadTask
+            await _dbContext.UpdateDownloadProgress(childKey, new DownloadTaskProgress
+            {
+                Percentage = 0,
+                DataReceived = 0,
+                DataTotal = downloadTask.DataTotal,
+                DownloadSpeed = 0,
+            }, cancellationToken);
+
+            await _dbContext.SetDownloadStatus(childKey, DownloadStatus.Queued);
+
+            await _mediator.Send(new DownloadTaskUpdatedNotification(childKey), cancellationToken);
         }
 
-        // TODO delete downloadWorkertasks
-
-        // TODO delete filetasks
-
-        // Reset progress of the downloadTask
-        await _dbContext.UpdateDownloadProgress(downloadTaskKey, new DownloadTaskProgress
-        {
-            Percentage = 0,
-            DataReceived = 0,
-            DataTotal = downloadTask.DataTotal,
-            DownloadSpeed = 0,
-        }, cancellationToken);
-
-        await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Queued);
-
-        await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTaskKey), cancellationToken);
-
-        await _mediator.Publish(new CheckDownloadQueueNotification(downloadTask.PlexServerId), cancellationToken);
+        await _mediator.Publish(new CheckDownloadQueueNotification(downloadTaskKey.PlexServerId), cancellationToken);
 
         return Result.Ok();
     }

@@ -47,6 +47,8 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
     /// </summary>
     public required string DownloadDirectory { get; set; }
 
+    public required string Quality { get; set; }
+
     /// <summary>
     /// Gets or sets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
     /// </summary>
@@ -65,11 +67,11 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
 
     /// <summary>
     /// The nested <see cref="DownloadTaskGeneric"/> used for seasons and episodes.
-    /// "Required = Required.Default" is used for ensuring it's optional in the Typescript generating.
+    /// "Required = Required.Default" is used for ensuring its optional in the Typescript generating.
     /// </summary>
-    public required List<DownloadTaskGeneric> Children { get; set; }
+    public required List<DownloadTaskGeneric> Children { get; set; } = new();
 
-    public required List<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
+    public required List<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = new();
 
     public required Guid ParentId { get; init; }
 

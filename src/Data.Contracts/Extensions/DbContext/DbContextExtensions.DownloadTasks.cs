@@ -205,7 +205,7 @@ public static partial class DbContextExtensions
         }
     }
 
-    public static async Task<List<DownloadTaskGeneric>> GetAllDownloadTasksAsync(
+    public static async Task<List<DownloadTaskGeneric>> GetAllDownloadTasksByServerAsync(
         this IPlexRipperDbContext dbContext,
         int plexServerId = 0,
         bool asTracking = false,
@@ -278,6 +278,37 @@ public static partial class DbContextExtensions
                 return;
             default:
                 throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    public static async Task<List<DownloadTaskKey>> GetDownloadableChildTaskKeys(
+        this IPlexRipperDbContext dbContext,
+        DownloadTaskKey key,
+        CancellationToken cancellationToken = default)
+    {
+        var downloadTask = await dbContext.GetDownloadTaskAsync(key, cancellationToken);
+        if (downloadTask is null)
+            return new List<DownloadTaskKey>();
+
+        var keys = new List<DownloadTaskKey>();
+
+        FindDownloadableTaskKeys([downloadTask]);
+
+        return keys;
+
+        void FindDownloadableTaskKeys(List<DownloadTaskGeneric> tasks)
+        {
+            if (!tasks.Any())
+                return;
+
+            foreach (var task in tasks)
+            {
+                if (task.IsDownloadable)
+                    keys.Add(task.ToKey());
+
+                if (task.Children.Any())
+                    FindDownloadableTaskKeys(task.Children);
+            }
         }
     }
 }

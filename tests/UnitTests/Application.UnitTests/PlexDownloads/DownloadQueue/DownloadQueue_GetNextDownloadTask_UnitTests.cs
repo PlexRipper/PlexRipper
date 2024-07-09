@@ -11,7 +11,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
     {
         // Arrange
         await SetupDatabase(config => { config.TvShowDownloadTasksCount = 5; });
-        var downloadTasks = await DbContext.GetAllDownloadTasksAsync();
+        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync();
 
         // Act
         var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
@@ -27,7 +27,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
     {
         // Arrange
         await SetupDatabase(config => { config.TvShowDownloadTasksCount = 5; });
-        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
+        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
         await DbContext.SaveChangesAsync();
 
@@ -46,7 +46,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
         // Arrange
         await SetupDatabase(config => { config.TvShowDownloadTasksCount = 5; });
 
-        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
+        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Downloading);
         foreach (var child in downloadTasks[0].Children)
             child.SetDownloadStatus(DownloadStatus.Queued);
@@ -67,7 +67,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
         // Arrange
         await SetupDatabase(config => { config.TvShowDownloadTasksCount = 5; });
 
-        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
+        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Downloading);
         await DbContext.SaveChangesAsync();
 
@@ -84,7 +84,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
         // Arrange
         await SetupDatabase(config => { config.MovieDownloadTasksCount = 5; });
 
-        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
+        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Merging);
         downloadTasks[1].SetDownloadStatus(DownloadStatus.DownloadFinished);
         downloadTasks[2].SetDownloadStatus(DownloadStatus.DownloadFinished);
@@ -105,7 +105,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
         // Arrange
         await SetupDatabase(config => { config.MovieDownloadTasksCount = 5; });
 
-        var downloadTasks = await DbContext.GetAllDownloadTasksAsync(asTracking: true);
+        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Merging);
         downloadTasks[1].SetDownloadStatus(DownloadStatus.DownloadFinished);
         downloadTasks[2].SetDownloadStatus(DownloadStatus.DownloadFinished);

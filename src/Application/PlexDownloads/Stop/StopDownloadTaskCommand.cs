@@ -3,6 +3,7 @@ using Data.Contracts;
 using FileSystem.Contracts;
 using FluentValidation;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
@@ -46,14 +47,20 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
     public async Task<Result> Handle(StopDownloadTaskCommand command, CancellationToken cancellationToken)
     {
         var downloadTask = await _dbContext.GetDownloadTaskAsync(command.DownloadTaskGuid, cancellationToken: cancellationToken);
+
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.DownloadTaskGuid).LogError();
 
+        var key = downloadTask.ToKey();
+
         _log.Information("Stopping {DownloadTaskFullTitle} from downloading", downloadTask.FullTitle);
 
-        var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTask.ToKey());
-        if (stopResult.IsFailed)
-            return stopResult;
+        if (await _downloadTaskScheduler.IsDownloading(key))
+        {
+            var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(key, cancellationToken);
+            if (stopResult.IsFailed)
+                return stopResult;
+        }
 
         _log.Debug("Deleting partially downloaded files of {DownloadTaskFullTitle}", downloadTask.FullTitle);
 
@@ -62,9 +69,14 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
             return removeTempResult;
 
         // Update the download task status
-        await _dbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.Stopped);
+        await _dbContext.SetDownloadStatus(key, DownloadStatus.Stopped);
 
-        await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTask.ToKey()), cancellationToken);
+        // Delete all worker tasks
+        await _dbContext.DownloadWorkerTasks.Where(x => x.DownloadTaskId == key.Id).ExecuteDeleteAsync(cancellationToken);
+
+        // TODO delete filetasks but first check if already merging
+
+        await _mediator.Send(new DownloadTaskUpdatedNotification(key), cancellationToken);
 
         return Result.Ok();
     }

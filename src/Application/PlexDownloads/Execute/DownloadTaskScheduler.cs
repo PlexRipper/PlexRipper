@@ -53,7 +53,7 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
 
         var stopResult = await _scheduler.StopJob(jobKey);
         if (!stopResult)
-            return Result.Fail($"Failed to stop {nameof(DownloadTaskGeneric)} with id {downloadTaskKey}");
+            return Result.Fail($"Failed to stop {nameof(DownloadTaskGeneric)} with id {downloadTaskKey}").LogError();
 
         await AwaitDownloadTaskJob(downloadTaskKey.Id, cancellationToken);
 

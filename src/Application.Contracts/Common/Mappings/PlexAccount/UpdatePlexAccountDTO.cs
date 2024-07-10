@@ -2,15 +2,15 @@
 
 public class UpdatePlexAccountDTO
 {
-    public int Id { get; set; }
+    public required int Id { get; set; }
 
-    public string DisplayName { get; set; }
+    public required string DisplayName { get; set; }
 
-    public string Username { get; set; }
+    public required string Username { get; set; }
 
-    public string Password { get; set; }
+    public required string Password { get; set; }
 
-    public bool IsEnabled { get; set; }
+    public required bool IsEnabled { get; set; }
 
-    public bool IsMain { get; set; }
+    public required bool IsMain { get; set; }
 }

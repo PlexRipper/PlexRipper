@@ -1,28 +1,40 @@
 using PlexRipper.Domain;
-using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
 
-[Mapper]
-public static partial class NotificationMapper
+public static class NotificationMapper
 {
     #region ToDTO
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial NotificationDTO ToDTO(this Notification notifications);
+    public static NotificationDTO ToDTO(this Notification source) =>
+        new()
+        {
+            Id = source.Id,
+            Level = source.Level,
+            CreatedAt = source.CreatedAt,
+            Message = source.Message,
+            Hidden = source.Hidden,
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial List<NotificationDTO> ToDTO(this List<Notification> notifications);
+    public static List<NotificationDTO> ToDTO(this List<Notification> source) =>
+        source.ConvertAll(ToDTO);
 
     #endregion
 
     #region ToModel
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    public static partial Notification ToModel(this NotificationDTO notifications);
+    public static Notification ToModel(this NotificationDTO source) =>
+        new()
+        {
+            Id = source.Id,
+            Level = source.Level,
+            CreatedAt = source.CreatedAt,
+            Message = source.Message,
+            Hidden = source.Hidden,
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    public static partial List<Notification> ToModel(this List<NotificationDTO> notifications);
+    public static List<Notification> ToModel(this List<NotificationDTO> source) =>
+        source.ConvertAll(ToModel);
 
     #endregion
 }

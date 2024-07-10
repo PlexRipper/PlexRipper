@@ -1,80 +1,120 @@
 using PlexRipper.Domain;
-using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
 
-[Mapper]
-public static partial class DownloadPreviewMapper
+public static class DownloadPreviewMapper
 {
     #region ToDTO
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial DownloadPreviewDTO ToDTO(this DownloadPreview downloadPreview);
+    public static DownloadPreviewDTO ToDTO(this DownloadPreview source) =>
+        new()
+        {
+            Id = source.Id,
+            Title = source.Title,
+            Size = source.Size,
+            ChildCount = source.ChildCount,
+            MediaType = source.MediaType,
+            Children = source.Children.ToDTO(),
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial List<DownloadPreviewDTO> ToDTO(this List<DownloadPreview> downloadPreview);
+    public static List<DownloadPreviewDTO> ToDTO(this List<DownloadPreview> source) =>
+        source.ConvertAll(ToDTO);
 
     #endregion
 
     #region PlexMovie
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexMovie.MediaSize), nameof(DownloadPreview.Size))]
-    [MapProperty(nameof(PlexMovie.Type), nameof(DownloadPreview.MediaType))]
-    [MapperIgnoreTarget(nameof(DownloadPreview.Children))]
-    [MapperIgnoreTarget(nameof(DownloadPreview.TvShowId))]
-    [MapperIgnoreTarget(nameof(DownloadPreview.SeasonId))]
-    private static partial DownloadPreview ProjectToDownloadPreviewMapper(this PlexMovie plexMovie);
+    private static DownloadPreview ProjectToDownloadPreviewMapper(this PlexMovie source) =>
+        new()
+        {
+            Id = source.Id,
+            Title = source.Title,
+            Size = source.MediaSize,
+            ChildCount = source.ChildCount,
+            MediaType = source.Type,
+            TvShowId = default,
+            SeasonId = default,
+            Children = [],
+        };
 
-    public static partial IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexMovie> plexMovie);
+    public static IQueryable<DownloadPreview> ProjectToDownloadPreview(
+        this IQueryable<PlexMovie> source
+    ) => source.Select(x => ProjectToDownloadPreviewMapper(x));
 
     #endregion
 
     #region PlexTvShow
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexTvShow.MediaSize), nameof(DownloadPreview.Size))]
-    [MapProperty(nameof(PlexTvShow.Type), nameof(DownloadPreview.MediaType))]
-    [MapperIgnoreTarget(nameof(DownloadPreview.Children))]
-    [MapperIgnoreTarget(nameof(DownloadPreview.TvShowId))]
-    [MapperIgnoreTarget(nameof(DownloadPreview.SeasonId))]
-    private static partial DownloadPreview ProjectToDownloadPreviewMapper(this PlexTvShow plexTvShow);
+    private static DownloadPreview ProjectToDownloadPreviewMapper(this PlexTvShow source) =>
+        new()
+        {
+            Id = source.Id,
+            Title = source.Title,
+            Size = source.MediaSize,
+            ChildCount = source.ChildCount,
+            MediaType = source.Type,
+            TvShowId = default,
+            SeasonId = default,
+            Children = [],
+        };
 
-    public static partial IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexTvShow> plexTvShow);
+    public static IQueryable<DownloadPreview> ProjectToDownloadPreview(
+        this IQueryable<PlexTvShow> source
+    ) => source.Select(x => ProjectToDownloadPreviewMapper(x));
 
     #endregion
 
     #region PlexSeason
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexTvShowSeason.MediaSize), nameof(DownloadPreview.Size))]
-    [MapProperty(nameof(PlexTvShowSeason.Type), nameof(DownloadPreview.MediaType))]
-    [MapperIgnoreTarget(nameof(DownloadPreview.SeasonId))]
-    [MapperIgnoreTarget(nameof(DownloadPreview.Children))]
-    private static partial DownloadPreview ProjectToDownloadPreviewMapper(this PlexTvShowSeason plexSeason);
+    private static DownloadPreview ProjectToDownloadPreviewMapper(this PlexTvShowSeason source) =>
+        new()
+        {
+            Id = source.Id,
+            Title = source.Title,
+            Size = source.MediaSize,
+            ChildCount = source.ChildCount,
+            MediaType = source.Type,
+            TvShowId = source.TvShowId,
+            SeasonId = default,
+            Children = [],
+        };
 
-    public static partial IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexTvShowSeason> plexSeason);
+    public static IQueryable<DownloadPreview> ProjectToDownloadPreview(
+        this IQueryable<PlexTvShowSeason> source
+    ) => source.Select(x => ProjectToDownloadPreviewMapper(x));
 
     #endregion
 
     #region PlexTvShowEpisode
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexTvShowEpisode.MediaSize), nameof(DownloadPreview.Size))]
-    [MapProperty(nameof(PlexTvShowEpisode.Type), nameof(DownloadPreview.MediaType))]
-    [MapProperty(nameof(PlexTvShowEpisode.TvShowSeasonId), nameof(DownloadPreview.SeasonId))]
-    [MapperIgnoreTarget(nameof(DownloadPreview.Children))]
-    private static partial DownloadPreview ProjectToDownloadPreviewMapper(this PlexTvShowEpisode plexEpisode);
+    private static DownloadPreview ProjectToDownloadPreviewMapper(this PlexTvShowEpisode source) =>
+        new()
+        {
+            Id = source.Id,
+            Title = source.Title,
+            Size = source.MediaSize,
+            ChildCount = source.ChildCount,
+            MediaType = source.Type,
+            TvShowId = source.TvShowId,
+            SeasonId = source.TvShowSeasonId,
+            Children = [],
+        };
 
-    public static partial IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexTvShowEpisode> plexEpisode);
+    public static IQueryable<DownloadPreview> ProjectToDownloadPreview(
+        this IQueryable<PlexTvShowEpisode> source
+    ) => source.Select(x => ProjectToDownloadPreviewMapper(x));
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexTvShowEpisode.TvShowId), nameof(TvShowEpisodeKeyDTO.TvShowId))]
-    [MapProperty(nameof(PlexTvShowEpisode.TvShowSeasonId), nameof(TvShowEpisodeKeyDTO.SeasonId))]
-    [MapProperty(nameof(PlexTvShowEpisode.Id), nameof(TvShowEpisodeKeyDTO.EpisodeId))]
-    private static partial TvShowEpisodeKeyDTO ProjectToEpisodeKey(this PlexTvShowEpisode plexEpisode);
+    private static TvShowEpisodeKeyDTO ProjectToEpisodeKey(this PlexTvShowEpisode source) =>
+        new()
+        {
+            TvShowId = source.TvShowId,
+            SeasonId = source.TvShowSeasonId,
+            EpisodeId = source.Id,
+        };
 
-    public static partial IQueryable<TvShowEpisodeKeyDTO> ProjectToEpisodeKey(this IQueryable<PlexTvShowEpisode> plexEpisode);
+    public static IQueryable<TvShowEpisodeKeyDTO> ProjectToEpisodeKey(
+        this IQueryable<PlexTvShowEpisode> source
+    ) => source.Select(x => ProjectToEpisodeKey(x));
 
     #endregion
 }

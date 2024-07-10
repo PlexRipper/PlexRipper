@@ -26,8 +26,7 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
         Verbs(Http.POST);
         Post(EndpointPath);
         AllowAnonymous();
-        Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<int>)));
+        Description(x => x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<int>)));
     }
 
     public override async Task HandleAsync(List<Guid> downloadTaskIds, CancellationToken ct)
@@ -40,10 +39,7 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
         else
             totalRowsDeleted = await ClearAllCompleted(ct);
 
-        await SendFluentResult(Result.Ok(totalRowsDeleted), x => new ResultDTO<int>()
-        {
-            Value = x,
-        }, ct);
+        await SendFluentResult(Result.Ok(totalRowsDeleted), x => Result.Ok(x).ToResultDTO(), ct);
     }
 
     private async Task<int> ClearByGuids(List<Guid> downloadTaskIds, CancellationToken ct)
@@ -52,8 +48,10 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
 
         foreach (var downloadTaskId in downloadTaskIds)
         {
-            var rowsDeleted = await _dbContext.DownloadTaskMovie
-                .Where(x => x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed)
+            var rowsDeleted = await _dbContext
+                .DownloadTaskMovie.Where(x =>
+                    x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed
+                )
                 .ExecuteDeleteAsync(ct);
 
             if (rowsDeleted > 0)
@@ -62,8 +60,10 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
                 continue;
             }
 
-            rowsDeleted = await _dbContext.DownloadTaskMovieFile
-                .Where(x => x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed)
+            rowsDeleted = await _dbContext
+                .DownloadTaskMovieFile.Where(x =>
+                    x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed
+                )
                 .ExecuteDeleteAsync(ct);
 
             if (rowsDeleted > 0)
@@ -72,8 +72,10 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
                 continue;
             }
 
-            rowsDeleted = await _dbContext.DownloadTaskTvShow
-                .Where(x => x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed)
+            rowsDeleted = await _dbContext
+                .DownloadTaskTvShow.Where(x =>
+                    x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed
+                )
                 .ExecuteDeleteAsync(ct);
 
             if (rowsDeleted > 0)
@@ -82,8 +84,10 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
                 continue;
             }
 
-            rowsDeleted = await _dbContext.DownloadTaskTvShowSeason
-                .Where(x => x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed)
+            rowsDeleted = await _dbContext
+                .DownloadTaskTvShowSeason.Where(x =>
+                    x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed
+                )
                 .ExecuteDeleteAsync(ct);
 
             if (rowsDeleted > 0)
@@ -92,8 +96,10 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
                 continue;
             }
 
-            rowsDeleted = await _dbContext.DownloadTaskTvShowEpisode
-                .Where(x => x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed)
+            rowsDeleted = await _dbContext
+                .DownloadTaskTvShowEpisode.Where(x =>
+                    x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed
+                )
                 .ExecuteDeleteAsync(ct);
 
             if (rowsDeleted > 0)
@@ -102,8 +108,10 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
                 continue;
             }
 
-            rowsDeleted = await _dbContext.DownloadTaskTvShowEpisodeFile
-                .Where(x => x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed)
+            rowsDeleted = await _dbContext
+                .DownloadTaskTvShowEpisodeFile.Where(x =>
+                    x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed
+                )
                 .ExecuteDeleteAsync(ct);
 
             totalRowsDeleted += rowsDeleted;
@@ -116,28 +124,28 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
     {
         var totalRowsDeleted = 0;
 
-        totalRowsDeleted += await _dbContext.DownloadTaskMovie
-            .Where(x => x.DownloadStatus == DownloadStatus.Completed)
+        totalRowsDeleted += await _dbContext
+            .DownloadTaskMovie.Where(x => x.DownloadStatus == DownloadStatus.Completed)
             .ExecuteDeleteAsync(ct);
 
-        totalRowsDeleted += await _dbContext.DownloadTaskMovieFile
-            .Where(x => x.DownloadStatus == DownloadStatus.Completed)
+        totalRowsDeleted += await _dbContext
+            .DownloadTaskMovieFile.Where(x => x.DownloadStatus == DownloadStatus.Completed)
             .ExecuteDeleteAsync(ct);
 
-        totalRowsDeleted += await _dbContext.DownloadTaskTvShow
-            .Where(x => x.DownloadStatus == DownloadStatus.Completed)
+        totalRowsDeleted += await _dbContext
+            .DownloadTaskTvShow.Where(x => x.DownloadStatus == DownloadStatus.Completed)
             .ExecuteDeleteAsync(ct);
 
-        totalRowsDeleted += await _dbContext.DownloadTaskTvShowSeason
-            .Where(x => x.DownloadStatus == DownloadStatus.Completed)
+        totalRowsDeleted += await _dbContext
+            .DownloadTaskTvShowSeason.Where(x => x.DownloadStatus == DownloadStatus.Completed)
             .ExecuteDeleteAsync(ct);
 
-        totalRowsDeleted += await _dbContext.DownloadTaskTvShowEpisode
-            .Where(x => x.DownloadStatus == DownloadStatus.Completed)
+        totalRowsDeleted += await _dbContext
+            .DownloadTaskTvShowEpisode.Where(x => x.DownloadStatus == DownloadStatus.Completed)
             .ExecuteDeleteAsync(ct);
 
-        totalRowsDeleted += await _dbContext.DownloadTaskTvShowEpisodeFile
-            .Where(x => x.DownloadStatus == DownloadStatus.Completed)
+        totalRowsDeleted += await _dbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => x.DownloadStatus == DownloadStatus.Completed)
             .ExecuteDeleteAsync(ct);
 
         return totalRowsDeleted;

@@ -4,37 +4,36 @@ public class PlexServerConnectionDTO
 {
     #region Properties
 
-    public int Id { get; set; }
+    public required int Id { get; set; }
 
-    public string Protocol { get; set; }
+    public required string Protocol { get; set; }
 
-    public string Address { get; set; }
+    public required string Address { get; set; }
 
-    public int Port { get; set; }
+    public required int Port { get; set; }
 
-    public bool Local { get; set; }
+    public required bool Local { get; set; }
 
-    public bool Relay { get; set; }
+    public required bool Relay { get; set; }
 
-    public bool IPv4 { get; set; }
+    public required bool IPv4 { get; set; }
 
-    public bool IPv6 { get; set; }
+    public required bool IPv6 { get; set; }
 
-    public bool PortFix { get; set; }
+    public required bool PortFix { get; set; }
 
-    public int PlexServerId { get; set; }
+    public required int PlexServerId { get; set; }
 
-    public string Url { get; set; }
+    public required string Url { get; set; }
 
-    public List<PlexServerStatusDTO> ServerStatusList { get; set; }
+    public required List<PlexServerStatusDTO> ServerStatusList { get; set; }
 
-    public PlexServerStatusDTO? LatestConnectionStatus { get; set; }
+    public required PlexServerStatusDTO? LatestConnectionStatus { get; set; }
 
     /// <summary>
     /// Added as a progress container for the front-end
     /// </summary>
-
-    public ServerConnectionCheckStatusProgressDTO Progress { get; set; }
+    public required ServerConnectionCheckStatusProgressDTO Progress { get; set; }
 
     #endregion
 }

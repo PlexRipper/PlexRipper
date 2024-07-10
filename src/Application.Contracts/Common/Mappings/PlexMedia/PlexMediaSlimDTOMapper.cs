@@ -1,29 +1,32 @@
 using PlexRipper.Domain;
-using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
 
-[Mapper]
-public static partial class PlexMediaSlimDTOMapper
+public static class PlexMediaSlimDTOMapper
 {
-    #region MediaData
-
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial PlexMediaDataDTO ToDTO(this PlexMediaData plexMediaSlim);
-
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial PlexMediaQualityDTO ToDTO(this PlexMediaQuality plexMediaSlim);
-
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial PlexMediaDataPartDTO ToDTO(this PlexMediaDataPart plexMediaSlim);
-
-    #endregion
-
     #region PlexMovie
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Index))]
-    public static partial PlexMediaSlimDTO ToSlimDTO(this PlexMovie plexMovie);
+    public static PlexMediaSlimDTO ToSlimDTO(this PlexMovie source) =>
+        new()
+        {
+            Id = source.Id,
+            Index = source.Index,
+            Title = source.Title,
+            SortTitle = source.SortTitle,
+            Year = source.Year,
+            Duration = source.Duration,
+            MediaSize = source.MediaSize,
+            ChildCount = source.ChildCount,
+            AddedAt = source.AddedAt,
+            UpdatedAt = source.UpdatedAt,
+            PlexLibraryId = source.PlexLibraryId,
+            PlexServerId = source.PlexServerId,
+            Type = source.Type,
+            HasThumb = source.HasThumb,
+            FullThumbUrl = source.FullThumbUrl,
+            Qualities = source.Qualities.ToDTO(),
+            Children = new List<PlexMediaSlimDTO>(),
+        };
 
     #endregion
 
@@ -42,45 +45,93 @@ public static partial class PlexMediaSlimDTOMapper
         return dto;
     }
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexTvShow.FullThumbUrl), nameof(PlexMediaSlimDTO.FullThumbUrl))]
-    [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Index))]
-    [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Children))]
-    private static partial PlexMediaSlimDTO ToSlimDTOMapper(this PlexTvShow plexTvShow);
+    private static PlexMediaSlimDTO ToSlimDTOMapper(this PlexTvShow source) =>
+        new()
+        {
+            Id = source.Id,
+            Index = source.Index,
+            Title = source.Title,
+            SortTitle = source.SortTitle,
+            Year = source.Year,
+            Duration = source.Duration,
+            MediaSize = source.MediaSize,
+            ChildCount = source.ChildCount,
+            AddedAt = source.AddedAt,
+            UpdatedAt = source.UpdatedAt,
+            PlexLibraryId = source.PlexLibraryId,
+            PlexServerId = source.PlexServerId,
+            Type = source.Type,
+            HasThumb = source.HasThumb,
+            FullThumbUrl = source.FullThumbUrl,
+            Qualities = source.Qualities.ToDTO(),
+            Children = source.Seasons.ConvertAll(ToSlimDTO),
+        };
 
     #endregion
 
     #region PlexSeason
 
-    public static PlexMediaSlimDTO ToSlimDTO(this PlexTvShowSeason plexTvShowSeason)
+    public static PlexMediaSlimDTO ToSlimDTO(this PlexTvShowSeason source)
     {
-        var dto = plexTvShowSeason.ToSlimDTOMapper();
+        var dto = source.ToSlimDTOMapper();
         dto.Children = new List<PlexMediaSlimDTO>();
-        if (plexTvShowSeason.Episodes is not null)
+        if (source.Episodes is not null)
         {
-            foreach (var episode in plexTvShowSeason.Episodes)
+            foreach (var episode in source.Episodes)
                 dto.Children.Add(episode.ToSlimDTO());
         }
 
         return dto;
     }
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexTvShowSeason.FullThumbUrl), nameof(PlexMediaSlimDTO.FullThumbUrl))]
-    [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Index))]
-    [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Children))]
-    [MapperIgnoreSource(nameof(PlexTvShowSeason.Episodes))]
-    private static partial PlexMediaSlimDTO ToSlimDTOMapper(this PlexTvShowSeason plexTvShowSeason);
+    private static PlexMediaSlimDTO ToSlimDTOMapper(this PlexTvShowSeason source) =>
+        new()
+        {
+            Id = source.Id,
+
+            Index = source.Index,
+            Title = source.Title,
+            SortTitle = source.SortTitle,
+            Year = source.Year,
+            Duration = source.Duration,
+            MediaSize = source.MediaSize,
+            ChildCount = source.ChildCount,
+            AddedAt = source.AddedAt,
+            UpdatedAt = source.UpdatedAt,
+            PlexLibraryId = source.PlexLibraryId,
+            PlexServerId = source.PlexServerId,
+            Type = source.Type,
+            HasThumb = source.HasThumb,
+            FullThumbUrl = source.FullThumbUrl,
+            Qualities = source.Qualities.ToDTO(),
+            Children = source.Episodes.ConvertAll(ToSlimDTO),
+        };
 
     #endregion
 
     #region PlexEpisode
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexTvShowEpisode.FullThumbUrl), nameof(PlexMediaSlimDTO.FullThumbUrl))]
-    [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Index))]
-    [MapperIgnoreTarget(nameof(PlexMediaSlimDTO.Children))]
-    public static partial PlexMediaSlimDTO ToSlimDTO(this PlexTvShowEpisode plexTvShowEpisode);
+    public static PlexMediaSlimDTO ToSlimDTO(this PlexTvShowEpisode source) =>
+        new()
+        {
+            Id = source.Id,
+            Index = source.Index,
+            Title = source.Title,
+            SortTitle = source.SortTitle,
+            Year = source.Year,
+            Duration = source.Duration,
+            MediaSize = source.MediaSize,
+            ChildCount = source.ChildCount,
+            AddedAt = source.AddedAt,
+            UpdatedAt = source.UpdatedAt,
+            PlexLibraryId = source.PlexLibraryId,
+            PlexServerId = source.PlexServerId,
+            Type = source.Type,
+            HasThumb = source.HasThumb,
+            FullThumbUrl = source.FullThumbUrl,
+            Qualities = source.Qualities.ToDTO(),
+            Children = new List<PlexMediaSlimDTO>(),
+        };
 
     #endregion
 }

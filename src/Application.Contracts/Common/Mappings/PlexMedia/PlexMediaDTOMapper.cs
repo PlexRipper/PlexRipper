@@ -4,48 +4,6 @@ namespace Application.Contracts;
 
 public static class PlexMediaDTOMapper
 {
-    #region MediaData
-
-    public static PlexMediaDataDTO ToDTO(this PlexMediaData source) =>
-        new()
-        {
-            MediaFormat = source.MediaFormat,
-            Duration = source.Duration,
-            VideoResolution = source.VideoResolution,
-            Width = source.Width,
-            Height = source.Height,
-            Bitrate = source.Bitrate,
-            VideoCodec = source.VideoCodec,
-            VideoFrameRate = source.VideoFrameRate,
-            AspectRatio = source.AspectRatio,
-            VideoProfile = source.VideoProfile,
-            AudioProfile = source.AudioProfile,
-            AudioCodec = source.AudioCodec,
-            AudioChannels = source.AudioChannels,
-            Parts = source.Parts.ConvertAll(ToDTO),
-        };
-
-    public static PlexMediaQualityDTO ToDTO(this PlexMediaQuality source) =>
-        new()
-        {
-            Quality = source.Quality,
-            DisplayQuality = source.DisplayQuality,
-            HashId = source.HashId,
-        };
-
-    public static PlexMediaDataPartDTO ToDTO(this PlexMediaDataPart source) =>
-        new()
-        {
-            ObfuscatedFilePath = source.ObfuscatedFilePath,
-            Duration = source.Duration,
-            File = source.File,
-            Size = source.Size,
-            Container = source.Container,
-            VideoProfile = source.VideoProfile,
-        };
-
-    #endregion
-
     #region PlexMovie
 
     public static PlexMediaDTO ToDTO(this PlexMovie source) =>
@@ -54,7 +12,7 @@ public static class PlexMediaDTOMapper
             Id = source.Id,
             TvShowId = default,
             TvShowSeasonId = default,
-            MediaData = source.MovieData.ConvertAll(ToDTO),
+            MediaData = source.MovieData.ToDTO(),
             Index = source.Index,
             Title = source.Title,
             SortTitle = source.SortTitle,
@@ -69,7 +27,7 @@ public static class PlexMediaDTOMapper
             Type = source.Type,
             HasThumb = source.HasThumb,
             FullThumbUrl = source.FullThumbUrl,
-            Qualities = source.Qualities.ConvertAll(ToDTO),
+            Qualities = source.Qualities.ToDTO(),
             Key = source.Key,
             HasArt = source.HasArt,
             HasBanner = source.HasBanner,
@@ -120,7 +78,7 @@ public static class PlexMediaDTOMapper
             Type = source.Type,
             HasThumb = source.HasThumb,
             FullThumbUrl = source.FullThumbUrl,
-            Qualities = source.Qualities.ConvertAll(ToDTO),
+            Qualities = source.Qualities.ToDTO(),
             Key = source.Key,
             HasArt = source.HasArt,
             HasBanner = source.HasBanner,
@@ -171,7 +129,7 @@ public static class PlexMediaDTOMapper
             Type = source.Type,
             HasThumb = source.HasThumb,
             FullThumbUrl = source.FullThumbUrl,
-            Qualities = source.Qualities.ConvertAll(ToDTO),
+            Qualities = source.Qualities.ToDTO(),
             Key = source.Key,
             HasArt = source.HasArt,
             HasBanner = source.HasBanner,
@@ -194,7 +152,7 @@ public static class PlexMediaDTOMapper
             Id = source.Id,
             TvShowId = source.TvShowId,
             TvShowSeasonId = source.TvShowSeasonId,
-            MediaData = source.EpisodeData.ConvertAll(ToDTO),
+            MediaData = source.EpisodeData.ToDTO(),
             Index = source.Index,
             Title = source.Title,
             SortTitle = source.SortTitle,
@@ -209,7 +167,7 @@ public static class PlexMediaDTOMapper
             Type = source.Type,
             HasThumb = source.HasThumb,
             FullThumbUrl = source.FullThumbUrl,
-            Qualities = source.Qualities.ConvertAll(ToDTO),
+            Qualities = source.Qualities.ToDTO(),
             Key = source.Key,
             HasArt = source.HasArt,
             HasBanner = source.HasBanner,

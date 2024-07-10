@@ -1,48 +1,99 @@
 using PlexRipper.Domain;
-using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
 
-[Mapper]
-[UseStaticMapper(typeof(PlexServerConnectionMapper))]
-[UseStaticMapper(typeof(PlexServerStatusMapper))]
-public static partial class PlexServerMapper
+public static class PlexServerMapper
 {
     #region ToDTO
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial PlexServerDTO ToDTO(this PlexServer plexServer);
+    public static PlexServerDTO ToDTO(this PlexServer source) =>
+        new()
+        {
+            Id = source.Id,
+            Name = source.Name,
+            OwnerId = source.OwnerId,
+            PlexServerOwnerUsername = source.PlexServerOwnerUsername,
+            Device = source.Device,
+            Platform = source.Platform,
+            PlatformVersion = source.PlatformVersion,
+            Product = source.Product,
+            ProductVersion = source.ProductVersion,
+            Provides = source.Provides,
+            CreatedAt = source.CreatedAt,
+            LastSeenAt = source.LastSeenAt,
+            MachineIdentifier = source.MachineIdentifier,
+            PublicAddress = source.PublicAddress,
+            PreferredConnectionId = source.PreferredConnectionId,
+            Owned = source.Owned,
+            Home = source.Home,
+            Synced = source.Synced,
+            Relay = source.Relay,
+            Presence = source.Presence,
+            HttpsRequired = source.HttpsRequired,
+            PublicAddressMatches = source.PublicAddressMatches,
+            DnsRebindingProtection = source.DnsRebindingProtection,
+            NatLoopbackSupported = source.NatLoopbackSupported,
+            ServerFixApplyDNSFix = source.ServerFixApplyDNSFix,
+            PlexServerConnections = source.PlexServerConnections.ToDTO(),
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial List<PlexServerDTO> ToDTO(this List<PlexServer> plexServers);
+    public static List<PlexServerDTO> ToDTO(this List<PlexServer> source) =>
+        source.ConvertAll(ToDTO);
 
     #endregion
 
     #region PlexServerAccess
 
-    public static PlexServerAccessDTO ToAccessDTO(this PlexServer plexServer)
-    {
-        var dto = plexServer.ToAccessDTOMapper();
-        dto.PlexLibraryIds = plexServer.PlexLibraries.Select(x => x.Id).ToList();
-        return dto;
-    }
+    public static PlexServerAccessDTO ToAccessDTO(this PlexServer source) =>
+        new()
+        {
+            PlexServerId = source.Id,
+            PlexLibraryIds = source.PlexLibraries.Select(x => x.Id).ToList(),
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexServer.Id), nameof(PlexServerAccessDTO.PlexServerId))]
-    private static partial PlexServerAccessDTO ToAccessDTOMapper(this PlexServer plexServer);
-
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial List<PlexServerAccessDTO> ToAccessDTO(this List<PlexServer> plexServers);
+    public static List<PlexServerAccessDTO> ToAccessDTO(this List<PlexServer> source) =>
+        source.ConvertAll(ToAccessDTO);
 
     #endregion
 
     #region ToModel
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    public static partial PlexServer ToModel(this PlexServerDTO plexServer);
+    public static PlexServer ToModel(this PlexServerDTO source) =>
+        new()
+        {
+            Id = source.Id,
+            Name = source.Name,
+            OwnerId = source.OwnerId,
+            PlexServerOwnerUsername = source.PlexServerOwnerUsername,
+            Device = source.Device,
+            Platform = source.Platform,
+            PlatformVersion = source.PlatformVersion,
+            Product = source.Product,
+            ProductVersion = source.ProductVersion,
+            Provides = source.Provides,
+            CreatedAt = source.CreatedAt,
+            LastSeenAt = source.LastSeenAt,
+            MachineIdentifier = source.MachineIdentifier,
+            PublicAddress = source.PublicAddress,
+            PreferredConnectionId = source.PreferredConnectionId,
+            Owned = source.Owned,
+            Home = source.Home,
+            Synced = source.Synced,
+            Relay = source.Relay,
+            Presence = source.Presence,
+            HttpsRequired = source.HttpsRequired,
+            PublicAddressMatches = source.PublicAddressMatches,
+            DnsRebindingProtection = source.DnsRebindingProtection,
+            NatLoopbackSupported = source.NatLoopbackSupported,
+            ServerFixApplyDNSFix = source.ServerFixApplyDNSFix,
+            PlexAccountServers = new List<PlexAccountServer>(),
+            PlexLibraries = new List<PlexLibrary>(),
+            ServerStatus = new List<PlexServerStatus>(),
+            PlexServerConnections = source.PlexServerConnections.ToModel(),
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    public static partial List<PlexServer> ToModel(this List<PlexServerDTO> plexServers);
+    public static List<PlexServer> ToModel(this List<PlexServerDTO> source) =>
+        source.ConvertAll(ToModel);
 
     #endregion
 }

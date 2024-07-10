@@ -2,5 +2,5 @@
 
 public class LanguageSettingsDTO : ILanguageSettings
 {
-    public string Language { get; set; }
+    public required string Language { get; set; }
 }

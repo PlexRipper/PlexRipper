@@ -2,11 +2,11 @@
 
 public class ConfirmationSettingsDTO : IConfirmationSettings
 {
-    public bool AskDownloadMovieConfirmation { get; set; }
+    public required bool AskDownloadMovieConfirmation { get; set; }
 
-    public bool AskDownloadTvShowConfirmation { get; set; }
+    public required bool AskDownloadTvShowConfirmation { get; set; }
 
-    public bool AskDownloadSeasonConfirmation { get; set; }
+    public required bool AskDownloadSeasonConfirmation { get; set; }
 
-    public bool AskDownloadEpisodeConfirmation { get; set; }
+    public required bool AskDownloadEpisodeConfirmation { get; set; }
 }

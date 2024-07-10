@@ -4,7 +4,7 @@ namespace Settings.Contracts;
 
 public class DisplaySettingsDTO : IDisplaySettings
 {
-    public ViewMode TvShowViewMode { get; set; }
+    public required ViewMode TvShowViewMode { get; set; }
 
-    public ViewMode MovieViewMode { get; set; }
+    public required ViewMode MovieViewMode { get; set; }
 }

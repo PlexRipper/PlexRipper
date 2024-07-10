@@ -2,7 +2,9 @@
 
 public class DebugSettingsDTO : IDebugSettings
 {
-    public bool DebugModeEnabled { get; set; }
-    public bool MaskServerNames { get; set; }
-    public bool MaskLibraryNames { get; set; }
+    public required bool DebugModeEnabled { get; set; }
+
+    public required bool MaskServerNames { get; set; }
+
+    public required bool MaskLibraryNames { get; set; }
 }

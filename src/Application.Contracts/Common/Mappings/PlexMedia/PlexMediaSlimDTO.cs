@@ -4,37 +4,37 @@ namespace Application.Contracts;
 
 public class PlexMediaSlimDTO
 {
-    public int Id { get; set; }
+    public required int Id { get; set; }
 
-    public int Index { get; set; }
+    public required int Index { get; set; }
 
-    public string Title { get; set; } = string.Empty;
+    public required string Title { get; set; } = string.Empty;
 
-    public string SortTitle { get; set; } = string.Empty;
+    public required string SortTitle { get; set; } = string.Empty;
 
-    public int Year { get; set; }
+    public required int Year { get; set; }
 
-    public int Duration { get; set; }
+    public required int Duration { get; set; }
 
-    public long MediaSize { get; set; }
+    public required long MediaSize { get; set; }
 
-    public int ChildCount { get; set; }
+    public required int ChildCount { get; set; }
 
-    public DateTime AddedAt { get; set; }
+    public required DateTime AddedAt { get; set; }
 
-    public DateTime UpdatedAt { get; set; }
+    public required DateTime UpdatedAt { get; set; }
 
-    public int PlexLibraryId { get; set; }
+    public required int PlexLibraryId { get; set; }
 
-    public int PlexServerId { get; set; }
+    public required int PlexServerId { get; set; }
 
-    public PlexMediaType Type { get; set; }
+    public required PlexMediaType Type { get; set; }
 
-    public bool HasThumb { get; set; }
+    public required bool HasThumb { get; set; }
 
-    public string FullThumbUrl { get; set; } = string.Empty;
+    public required string FullThumbUrl { get; set; } = string.Empty;
 
-    public List<PlexMediaQualityDTO> Qualities { get; set; } = new();
+    public required List<PlexMediaQualityDTO> Qualities { get; set; } = new();
 
     public List<PlexMediaSlimDTO> Children { get; set; } = new();
 }

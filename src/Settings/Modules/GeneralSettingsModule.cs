@@ -15,16 +15,14 @@ public class GeneralSettingsModule : BaseSettingsModule<IGeneralSettings>, IGene
 
     public override string Name => "GeneralSettings";
 
-    public override IGeneralSettings DefaultValues()
-    {
-        return new GeneralSettings
+    public override IGeneralSettings DefaultValues() =>
+        new GeneralSettings
         {
             FirstTimeSetup = true,
             ActiveAccountId = 0,
             DebugMode = false,
             DisableAnimatedBackground = false,
         };
-    }
 
     public Result Update(IGeneralSettingsModule sourceSettings)
     {
@@ -35,14 +33,12 @@ public class GeneralSettingsModule : BaseSettingsModule<IGeneralSettings>, IGene
         return Result.Ok();
     }
 
-    public override IGeneralSettings GetValues()
-    {
-        return new GeneralSettings
+    public override IGeneralSettings GetValues() =>
+        new GeneralSettings
         {
             FirstTimeSetup = FirstTimeSetup,
             ActiveAccountId = ActiveAccountId,
             DebugMode = DebugMode,
             DisableAnimatedBackground = DisableAnimatedBackground,
         };
-    }
 }

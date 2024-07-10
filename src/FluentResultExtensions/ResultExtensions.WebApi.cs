@@ -126,7 +126,11 @@ public static partial class ResultExtensions
         return Result.Ok().WithSuccess(GetStatusCodeSuccess(statusCode, message));
     }
 
-    private static Result<T> CreateSuccessStatusCodeResult<T>(T value, int statusCode, string message = "")
+    private static Result<T> CreateSuccessStatusCodeResult<T>(
+        T value,
+        int statusCode,
+        string message = ""
+    )
     {
         return Result.Ok(value).WithSuccess(GetStatusCodeSuccess(statusCode, message));
     }
@@ -147,7 +151,11 @@ public static partial class ResultExtensions
 
     #region AddStatusCodeError
 
-    private static Result AddStatusCodeError(this Result result, int statusCode, string message = "")
+    private static Result AddStatusCodeError(
+        this Result result,
+        int statusCode,
+        string message = ""
+    )
     {
         if (string.IsNullOrEmpty(message))
             message = "No error message found";
@@ -161,7 +169,11 @@ public static partial class ResultExtensions
         return result;
     }
 
-    private static Result<T> AddStatusCodeError<T>(this Result<T> result, int statusCode, string message = "")
+    private static Result<T> AddStatusCodeError<T>(
+        this Result<T> result,
+        int statusCode,
+        string message = ""
+    )
     {
         return result.AddStatusCodeError(GetStatusCodeReason(statusCode, message));
     }
@@ -175,7 +187,11 @@ public static partial class ResultExtensions
 
     #region AddStatusCodeSuccess
 
-    private static Result AddStatusCodeSuccess(this Result result, int statusCode, string message = "")
+    private static Result AddStatusCodeSuccess(
+        this Result result,
+        int statusCode,
+        string message = ""
+    )
     {
         return result.AddStatusCodeSuccess(GetStatusCodeSuccess(statusCode, message));
     }
@@ -185,7 +201,11 @@ public static partial class ResultExtensions
         return result.WithSuccess(Success);
     }
 
-    private static Result<T> AddStatusCodeSuccess<T>(this Result<T> result, int statusCode, string message = "")
+    private static Result<T> AddStatusCodeSuccess<T>(
+        this Result<T> result,
+        int statusCode,
+        string message = ""
+    )
     {
         return result.AddStatusCodeSuccess(GetStatusCodeSuccess(statusCode, message));
     }
@@ -217,7 +237,10 @@ public static partial class ResultExtensions
         return result.HasStatusCode(HttpCodes.Status200OK);
     }
 
-    public static Result Add200OkRequestSuccess(this Result result, string message = "Ok successful")
+    public static Result Add200OkRequestSuccess(
+        this Result result,
+        string message = "Ok successful"
+    )
     {
         return result.AddStatusCodeSuccess(HttpCodes.Status200OK, message);
     }
@@ -236,7 +259,10 @@ public static partial class ResultExtensions
         return result.HasStatusCode(HttpCodes.Status201Created);
     }
 
-    public static Result Add201CreatedRequestSuccess(this Result result, string message = "Created successful")
+    public static Result Add201CreatedRequestSuccess(
+        this Result result,
+        string message = "Created successful"
+    )
     {
         return result.AddStatusCodeSuccess(HttpCodes.Status201Created, message);
     }
@@ -255,7 +281,10 @@ public static partial class ResultExtensions
         return result.HasStatusCode(HttpCodes.Status204NoContent);
     }
 
-    public static Result Add204NoContentRequestSuccess(this Result result, string message = "No Content")
+    public static Result Add204NoContentRequestSuccess(
+        this Result result,
+        string message = "No Content"
+    )
     {
         return result.AddStatusCodeSuccess(HttpCodes.Status204NoContent, message);
     }
@@ -293,7 +322,10 @@ public static partial class ResultExtensions
         return result.HasStatusCode(HttpCodes.Status401Unauthorized);
     }
 
-    public static Result Add401UnauthorizedError(this Result result, string message = "Unauthorized")
+    public static Result Add401UnauthorizedError(
+        this Result result,
+        string message = "Unauthorized"
+    )
     {
         return result.AddStatusCodeError(HttpCodes.Status401Unauthorized, message);
     }
@@ -331,7 +363,10 @@ public static partial class ResultExtensions
         return result.HasStatusCode(HttpCodes.Status408RequestTimeout);
     }
 
-    public static Result Add408RequestTimeoutError(this Result result, string message = "Request Timeout")
+    public static Result Add408RequestTimeoutError(
+        this Result result,
+        string message = "Request Timeout"
+    )
     {
         return result.AddStatusCodeError(HttpCodes.Status408RequestTimeout, message);
     }
@@ -373,7 +408,10 @@ public static partial class ResultExtensions
         return result.HasStatusCode(HttpCodes.Status200OK);
     }
 
-    public static Result<T> Add200OkRequestSuccess<T>(this Result<T> result, string message = "Ok successful")
+    public static Result<T> Add200OkRequestSuccess<T>(
+        this Result<T> result,
+        string message = "Ok successful"
+    )
     {
         return result.AddStatusCodeSuccess(HttpCodes.Status200OK, message);
     }
@@ -392,7 +430,10 @@ public static partial class ResultExtensions
         return result.HasStatusCode(HttpCodes.Status201Created);
     }
 
-    public static Result<T> Add201CreatedRequestSuccess<T>(this Result<T> result, string message = "Created successful")
+    public static Result<T> Add201CreatedRequestSuccess<T>(
+        this Result<T> result,
+        string message = "Created successful"
+    )
     {
         return result.AddStatusCodeSuccess(HttpCodes.Status201Created, message);
     }
@@ -411,14 +452,17 @@ public static partial class ResultExtensions
         return result.HasStatusCode(HttpCodes.Status204NoContent);
     }
 
-    public static Result<T> Add204NoContentRequestSuccess<T>(this Result<T> result, string message = "No Content")
+    public static Result<T> Add204NoContentRequestSuccess<T>(
+        this Result<T> result,
+        string message = "No Content"
+    )
     {
         return result.AddStatusCodeSuccess(HttpCodes.Status204NoContent, message);
     }
 
     public static Result<T> Create204NoContentResult<T>(T value, string message = "")
     {
-        return CreateSuccessStatusCodeResult<T>(value, HttpCodes.Status204NoContent, message);
+        return CreateSuccessStatusCodeResult(value, HttpCodes.Status204NoContent, message);
     }
 
     #endregion
@@ -430,7 +474,10 @@ public static partial class ResultExtensions
         return result.HasStatusCode(HttpCodes.Status400BadRequest);
     }
 
-    public static Result<T> Add400BadRequestError<T>(this Result<T> result, string message = "Bad request")
+    public static Result<T> Add400BadRequestError<T>(
+        this Result<T> result,
+        string message = "Bad request"
+    )
     {
         return result.AddStatusCodeError(HttpCodes.Status400BadRequest, message);
     }
@@ -444,7 +491,10 @@ public static partial class ResultExtensions
         return result.HasStatusCode(HttpCodes.Status401Unauthorized);
     }
 
-    public static Result<T> Add401UnauthorizedError<T>(this Result<T> result, string message = "Unauthorized")
+    public static Result<T> Add401UnauthorizedError<T>(
+        this Result<T> result,
+        string message = "Unauthorized"
+    )
     {
         return result.AddStatusCodeError(HttpCodes.Status401Unauthorized, message);
     }
@@ -458,7 +508,10 @@ public static partial class ResultExtensions
         return result.HasStatusCode(HttpCodes.Status404NotFound);
     }
 
-    public static Result<T> Add404NotFoundError<T>(this Result<T> result, string message = "Not Found")
+    public static Result<T> Add404NotFoundError<T>(
+        this Result<T> result,
+        string message = "Not Found"
+    )
     {
         return result.AddStatusCodeError(HttpCodes.Status404NotFound, message);
     }
@@ -472,7 +525,10 @@ public static partial class ResultExtensions
         return result.HasStatusCode(HttpCodes.Status408RequestTimeout);
     }
 
-    public static Result<T> Add408RequestTimeoutError<T>(this Result<T> result, string message = "Request Timeout")
+    public static Result<T> Add408RequestTimeoutError<T>(
+        this Result<T> result,
+        string message = "Request Timeout"
+    )
     {
         return result.AddStatusCodeError(HttpCodes.Status408RequestTimeout, message);
     }
@@ -486,7 +542,10 @@ public static partial class ResultExtensions
         return result.HasStatusCode(HttpCodes.Status502BadGateway);
     }
 
-    public static Result<T> Add502BadGatewayError<T>(this Result<T> result, string message = "Not Found")
+    public static Result<T> Add502BadGatewayError<T>(
+        this Result<T> result,
+        string message = "Not Found"
+    )
     {
         return result.AddStatusCodeError(HttpCodes.Status502BadGateway, message);
     }

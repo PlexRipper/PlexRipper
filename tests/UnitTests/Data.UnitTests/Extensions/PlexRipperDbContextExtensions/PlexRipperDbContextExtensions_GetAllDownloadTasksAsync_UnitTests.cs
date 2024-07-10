@@ -13,7 +13,7 @@ public class PlexRipperDbContextExtensions_GetAllDownloadTasksAsync_UnitTests : 
         await SetupDatabase();
 
         // Act
-        var downloadTasks = await IDbContext.GetAllDownloadTasksAsync();
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
 
         // Assert
         downloadTasks.ShouldBeEmpty();
@@ -33,7 +33,7 @@ public class PlexRipperDbContextExtensions_GetAllDownloadTasksAsync_UnitTests : 
         });
 
         // Act
-        var downloadTasks = await IDbContext.GetAllDownloadTasksAsync();
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
 
         // Assert
         downloadTasks.ShouldNotBeEmpty();
@@ -60,7 +60,7 @@ public class PlexRipperDbContextExtensions_GetAllDownloadTasksAsync_UnitTests : 
         });
 
         // Act
-        var downloadTasks = await IDbContext.GetAllDownloadTasksAsync();
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
 
         // Assert
         downloadTasks.ShouldNotBeEmpty();

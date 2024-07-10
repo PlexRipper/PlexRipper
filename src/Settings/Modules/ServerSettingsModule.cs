@@ -1,3 +1,4 @@
+#nullable enable
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using PlexRipper.Domain.DownloadManager;
@@ -24,60 +25,57 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
 
     #region Public Methods
 
-    public Result<PlexServerSettingsModel> AddServerToSettings(PlexServerSettingsModel plexServerSettings)
+    public Result<PlexServerSettingsModel> AddServerToSettings(
+        PlexServerSettingsModel plexServerSettings
+    )
     {
         if (string.IsNullOrEmpty(plexServerSettings.MachineIdentifier))
             return ResultExtensions.IsEmpty(nameof(plexServerSettings.MachineIdentifier));
 
         var settings = GetPlexServerSettings(plexServerSettings.MachineIdentifier);
-        if (settings is not null)
+        if (settings != null)
         {
-            _log.Information("A Server setting with {MachineIdentifier} already exists, will update now", plexServerSettings.MachineIdentifier);
+            _log.Information(
+                "A Server setting with {MachineIdentifier} already exists, will update now",
+                plexServerSettings.MachineIdentifier
+            );
             SetServerSettings(plexServerSettings);
         }
         else
         {
             Data.Add(plexServerSettings);
             EmitModuleHasChanged(GetValues());
+            settings = plexServerSettings;
         }
 
         return Result.Ok(settings);
     }
 
-    public override IServerSettings DefaultValues()
-    {
-        return new ServerSettings
-        {
-            Data = CreateServerSettingsFromDb(new List<PlexServer>()),
-        };
-    }
+    public override IServerSettings DefaultValues() =>
+        new ServerSettings { Data = CreateServerSettingsFromDb(new List<PlexServer>()) };
 
     public IObservable<int> GetDownloadSpeedLimitObservable(string machineIdentifier)
     {
         return ServerSettings(machineIdentifier).Select(x => x.DownloadSpeedLimit);
     }
 
-    public PlexServerSettingsModel GetPlexServerSettings(string machineIdentifier)
+    public PlexServerSettingsModel? GetPlexServerSettings(string machineIdentifier)
     {
-        return Data?.FirstOrDefault(x => x.MachineIdentifier == machineIdentifier);
+        return machineIdentifier == string.Empty
+            ? null
+            : Data.FirstOrDefault(x => x.MachineIdentifier == machineIdentifier);
     }
 
-    public int GetDownloadSpeedLimit(string machineIdentifier)
-    {
-        return GetPlexServerSettings(machineIdentifier)?.DownloadSpeedLimit ?? 0;
-    }
+    public int GetDownloadSpeedLimit(string machineIdentifier) =>
+        GetPlexServerSettings(machineIdentifier)?.DownloadSpeedLimit ?? 0;
 
-    public override IServerSettings GetValues()
-    {
-        return new ServerSettings
-        {
-            Data = Data,
-        };
-    }
+    public override IServerSettings GetValues() => new ServerSettings { Data = Data };
 
     public IObservable<PlexServerSettingsModel> ServerSettings(string machineIdentifier)
     {
-        return _serverSettingsUpdated.AsObservable().Where(x => x.MachineIdentifier == machineIdentifier);
+        return _serverSettingsUpdated
+            .AsObservable()
+            .Where(x => x.MachineIdentifier == machineIdentifier);
     }
 
     public Result SetDownloadSpeedLimit(string machineIdentifier, int downloadSpeedLimit = 0)
@@ -93,12 +91,16 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
             }
         }
 
-        return Result.Fail($"PlexServer with machineIdentifier \"{machineIdentifier}\" has no entry in the {nameof(ServerSettings)}");
+        return Result.Fail(
+            $"PlexServer with machineIdentifier \"{machineIdentifier}\" has no entry in the {nameof(ServerSettings)}"
+        );
     }
 
     public void SetServerSettings(PlexServerSettingsModel plexServerSettings)
     {
-        var index = Data.FindIndex(x => x.MachineIdentifier == plexServerSettings.MachineIdentifier);
+        var index = Data.FindIndex(x =>
+            x.MachineIdentifier == plexServerSettings.MachineIdentifier
+        );
         if (index > -1)
         {
             if (Data[index].DownloadSpeedLimit != plexServerSettings.DownloadSpeedLimit)
@@ -116,7 +118,7 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
 
     public override IServerSettings Update(IServerSettings sourceSettings)
     {
-        if (sourceSettings?.Data is null)
+        if (sourceSettings.Data == null)
         {
             _log.Warning("Can not update settings module {Name} with source settings null", Name);
             return GetValues();
@@ -146,12 +148,14 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
             var index = Data.FindIndex(x => x.MachineIdentifier == plexServer.MachineIdentifier);
             if (index == -1)
             {
-                newList.Add(new PlexServerSettingsModel
-                {
-                    MachineIdentifier = plexServer.MachineIdentifier,
-                    DownloadSpeedLimit = 0,
-                    PlexServerName = plexServer.Name,
-                });
+                newList.Add(
+                    new PlexServerSettingsModel
+                    {
+                        MachineIdentifier = plexServer.MachineIdentifier,
+                        DownloadSpeedLimit = 0,
+                        PlexServerName = plexServer.Name,
+                    }
+                );
             }
         }
 

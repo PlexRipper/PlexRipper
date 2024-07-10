@@ -28,6 +28,15 @@ public static partial class DownloadTaskKeyMapper
             Type = x.DownloadTaskType,
         });
 
+    public static IQueryable<DownloadTaskKey> ProjectToParentKey(this IQueryable<DownloadTaskMovieFile> downloadTaskMovieFile) => downloadTaskMovieFile.Select(
+        x => new DownloadTaskKey
+        {
+            Id = x.ParentId,
+            PlexServerId = x.PlexServerId,
+            PlexLibraryId = x.PlexLibraryId,
+            Type = DownloadTaskType.Movie,
+        });
+
     #endregion
 
     #region PlexTvShow
@@ -78,6 +87,15 @@ public static partial class DownloadTaskKeyMapper
             PlexServerId = x.PlexServerId,
             PlexLibraryId = x.PlexLibraryId,
             Type = x.DownloadTaskType,
+        });
+
+    public static IQueryable<DownloadTaskKey> ProjectToParentKey(this IQueryable<DownloadTaskTvShowEpisodeFile> downloadTaskTvShowEpisodeFile) =>
+        downloadTaskTvShowEpisodeFile.Select(x => new DownloadTaskKey
+        {
+            Id = x.ParentId,
+            PlexServerId = x.PlexServerId,
+            PlexLibraryId = x.PlexLibraryId,
+            Type = DownloadTaskType.Episode,
         });
 
     #endregion

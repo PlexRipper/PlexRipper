@@ -6,11 +6,11 @@ namespace Settings.UnitTests;
 
 public class UserSettings_Reset_UnitTests : BaseUnitTest
 {
-    public UserSettings_Reset_UnitTests(ITestOutputHelper output) : base(output) { }
+    public UserSettings_Reset_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
-    private UserSettings CreateUserSettings()
-    {
-        return new UserSettings(
+    private UserSettings CreateUserSettings() =>
+        new(
             _log,
             new ConfirmationSettingsModule(),
             new DateTimeSettingsModule(),
@@ -19,8 +19,8 @@ public class UserSettings_Reset_UnitTests : BaseUnitTest
             new GeneralSettingsModule(),
             new DebugSettingsModule(),
             new LanguageSettingsModule(),
-            new ServerSettingsModule());
-    }
+            new ServerSettingsModule()
+        );
 
     [Fact]
     public void ShouldHaveDefaultSettingsValues_WhenResetHasBeenCalled()
@@ -45,10 +45,7 @@ public class UserSettings_Reset_UnitTests : BaseUnitTest
                 AskDownloadSeasonConfirmation = false,
                 AskDownloadTvShowConfirmation = false,
             },
-            LanguageSettings = new LanguageSettings()
-            {
-                Language = string.Empty,
-            },
+            LanguageSettings = new LanguageSettings() { Language = string.Empty },
             DisplaySettings = new DisplaySettings(),
             GeneralSettings = new GeneralSettings(),
             ServerSettings = new ServerSettings(),

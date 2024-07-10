@@ -1,29 +1,44 @@
 using PlexRipper.Domain;
-using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
 
-[Mapper]
-public static partial class PlexMediaDTOMapper
+public static class PlexMediaDTOMapper
 {
-    #region MediaData
-
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial PlexMediaDataDTO ToDTO(this PlexMediaData plexMediaSlim);
-
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial PlexMediaQualityDTO ToDTO(this PlexMediaQuality plexMediaSlim);
-
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial PlexMediaDataPartDTO ToDTO(this PlexMediaDataPart plexMediaSlim);
-
-    #endregion
-
     #region PlexMovie
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexMovie.MovieData), nameof(PlexMediaDTO.MediaData))]
-    public static partial PlexMediaDTO ToDTO(this PlexMovie plexMovie);
+    public static PlexMediaDTO ToDTO(this PlexMovie source) =>
+        new()
+        {
+            Id = source.Id,
+            TvShowId = default,
+            TvShowSeasonId = default,
+            MediaData = source.MovieData.ToDTO(),
+            Index = source.Index,
+            Title = source.Title,
+            SortTitle = source.SortTitle,
+            Year = source.Year,
+            Duration = source.Duration,
+            MediaSize = source.MediaSize,
+            ChildCount = source.ChildCount,
+            AddedAt = source.AddedAt,
+            UpdatedAt = source.UpdatedAt,
+            PlexLibraryId = source.PlexLibraryId,
+            PlexServerId = source.PlexServerId,
+            Type = source.Type,
+            HasThumb = source.HasThumb,
+            FullThumbUrl = source.FullThumbUrl,
+            Qualities = source.Qualities.ToDTO(),
+            Key = source.Key,
+            HasArt = source.HasArt,
+            HasBanner = source.HasBanner,
+            HasTheme = source.HasTheme,
+            Studio = source.Studio,
+            Summary = source.Summary,
+            ContentRating = source.ContentRating,
+            Rating = source.Rating,
+            OriginallyAvailableAt = source.OriginallyAvailableAt,
+            Children = new List<PlexMediaDTO>(),
+        };
 
     #endregion
 
@@ -42,13 +57,39 @@ public static partial class PlexMediaDTOMapper
         return dto;
     }
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexTvShow.Id), nameof(PlexMediaDTO.TvShowId))]
-    [MapperIgnoreTarget(nameof(PlexMediaDTO.TvShowSeasonId))]
-    [MapperIgnoreTarget(nameof(PlexMediaDTO.MediaData))]
-    [MapperIgnoreTarget(nameof(PlexMediaDTO.Index))]
-    [MapperIgnoreTarget(nameof(PlexMediaDTO.Children))]
-    private static partial PlexMediaDTO ToDTOMapper(this PlexTvShow plexTvShow);
+    private static PlexMediaDTO ToDTOMapper(this PlexTvShow source) =>
+        new()
+        {
+            Id = source.Id,
+            TvShowId = source.Id,
+            TvShowSeasonId = default,
+            MediaData = new List<PlexMediaDataDTO>(),
+            Index = source.Index,
+            Title = source.Title,
+            SortTitle = source.SortTitle,
+            Year = source.Year,
+            Duration = source.Duration,
+            MediaSize = source.MediaSize,
+            ChildCount = source.ChildCount,
+            AddedAt = source.AddedAt,
+            UpdatedAt = source.UpdatedAt,
+            PlexLibraryId = source.PlexLibraryId,
+            PlexServerId = source.PlexServerId,
+            Type = source.Type,
+            HasThumb = source.HasThumb,
+            FullThumbUrl = source.FullThumbUrl,
+            Qualities = source.Qualities.ToDTO(),
+            Key = source.Key,
+            HasArt = source.HasArt,
+            HasBanner = source.HasBanner,
+            HasTheme = source.HasTheme,
+            Studio = source.Studio,
+            Summary = source.Summary,
+            ContentRating = source.ContentRating,
+            Rating = source.Rating,
+            OriginallyAvailableAt = source.OriginallyAvailableAt,
+            Children = source.Seasons.ConvertAll(ToDTO),
+        };
 
     #endregion
 
@@ -67,23 +108,77 @@ public static partial class PlexMediaDTOMapper
         return dto;
     }
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexTvShowSeason.Id), nameof(PlexMediaDTO.TvShowSeasonId))]
-    [MapProperty(nameof(PlexTvShowSeason.TvShowId), nameof(PlexMediaDTO.TvShowId))]
-    [MapProperty(nameof(PlexTvShowSeason.Episodes), nameof(PlexMediaDTO.Children))]
-    [MapperIgnoreTarget(nameof(PlexMediaDTO.MediaData))]
-    private static partial PlexMediaDTO ToDTOMapper(this PlexTvShowSeason plexTvShowSeason);
+    private static PlexMediaDTO ToDTOMapper(this PlexTvShowSeason source) =>
+        new()
+        {
+            Id = source.Id,
+            TvShowId = source.TvShowId,
+            TvShowSeasonId = source.Id,
+            MediaData = new List<PlexMediaDataDTO>(),
+            Index = source.Index,
+            Title = source.Title,
+            SortTitle = source.SortTitle,
+            Year = source.Year,
+            Duration = source.Duration,
+            MediaSize = source.MediaSize,
+            ChildCount = source.ChildCount,
+            AddedAt = source.AddedAt,
+            UpdatedAt = source.UpdatedAt,
+            PlexLibraryId = source.PlexLibraryId,
+            PlexServerId = source.PlexServerId,
+            Type = source.Type,
+            HasThumb = source.HasThumb,
+            FullThumbUrl = source.FullThumbUrl,
+            Qualities = source.Qualities.ToDTO(),
+            Key = source.Key,
+            HasArt = source.HasArt,
+            HasBanner = source.HasBanner,
+            HasTheme = source.HasTheme,
+            Studio = source.Studio,
+            Summary = source.Summary,
+            ContentRating = source.ContentRating,
+            Rating = source.Rating,
+            OriginallyAvailableAt = source.OriginallyAvailableAt,
+            Children = source.Episodes.ConvertAll(ToDTO),
+        };
 
     #endregion
 
     #region PlexEpisode
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexTvShowEpisode.TvShowId), nameof(PlexMediaDTO.TvShowId))]
-    [MapProperty(nameof(PlexTvShowEpisode.TvShowSeasonId), nameof(PlexMediaDTO.TvShowSeasonId))]
-    [MapProperty(nameof(PlexTvShowEpisode.EpisodeData), nameof(PlexMediaDTO.MediaData))]
-    [MapperIgnoreTarget(nameof(PlexMediaDTO.Children))]
-    public static partial PlexMediaDTO ToDTO(this PlexTvShowEpisode plexMediaSlim);
+    public static PlexMediaDTO ToDTO(this PlexTvShowEpisode source) =>
+        new()
+        {
+            Id = source.Id,
+            TvShowId = source.TvShowId,
+            TvShowSeasonId = source.TvShowSeasonId,
+            MediaData = source.EpisodeData.ToDTO(),
+            Index = source.Index,
+            Title = source.Title,
+            SortTitle = source.SortTitle,
+            Year = source.Year,
+            Duration = source.Duration,
+            MediaSize = source.MediaSize,
+            ChildCount = source.ChildCount,
+            AddedAt = source.AddedAt,
+            UpdatedAt = source.UpdatedAt,
+            PlexLibraryId = source.PlexLibraryId,
+            PlexServerId = source.PlexServerId,
+            Type = source.Type,
+            HasThumb = source.HasThumb,
+            FullThumbUrl = source.FullThumbUrl,
+            Qualities = source.Qualities.ToDTO(),
+            Key = source.Key,
+            HasArt = source.HasArt,
+            HasBanner = source.HasBanner,
+            HasTheme = source.HasTheme,
+            Studio = source.Studio,
+            Summary = source.Summary,
+            ContentRating = source.ContentRating,
+            Rating = source.Rating,
+            OriginallyAvailableAt = source.OriginallyAvailableAt,
+            Children = new List<PlexMediaDTO>(),
+        };
 
     #endregion
 }

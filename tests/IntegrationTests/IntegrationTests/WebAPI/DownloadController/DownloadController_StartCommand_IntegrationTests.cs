@@ -27,7 +27,7 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
         });
 
         await CreateContainer();
-        var downloadTasks = await DbContext.GetAllDownloadTasksAsync();
+        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync();
         downloadTasks.Count.ShouldBe(1);
         var downloadTask = downloadTasks[0].Children[0];
 

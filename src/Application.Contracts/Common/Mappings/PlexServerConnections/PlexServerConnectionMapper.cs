@@ -1,45 +1,95 @@
 using PlexRipper.Domain;
-using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
 
-[Mapper]
-[UseStaticMapper(typeof(PlexServerStatusMapper))]
-public static partial class PlexServerConnectionMapper
+public static class PlexServerConnectionMapper
 {
     #region ToDTO
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapProperty(nameof(PlexServerConnection.LatestConnectionStatus), nameof(PlexServerConnectionDTO.LatestConnectionStatus))]
-    [MapperIgnoreSource(nameof(PlexServerConnection.PlexServer))]
-    public static partial PlexServerConnectionDTO ToDTO(this PlexServerConnection plexServerConnection);
+    public static PlexServerConnectionDTO ToDTO(this PlexServerConnection source) =>
+        new()
+        {
+            Id = source.Id,
+            Protocol = source.Protocol,
+            Address = source.Address,
+            Port = source.Port,
+            Local = source.Local,
+            Relay = source.Relay,
+            IPv4 = source.IPv4,
+            IPv6 = source.IPv6,
+            PortFix = source.PortFix,
+            PlexServerId = source.PlexServerId,
+            Url = source.Url,
+            ServerStatusList = source.PlexServerStatus.ToDTO(),
+            LatestConnectionStatus = source.LatestConnectionStatus.ToDTO(),
+            Progress = default,
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial List<PlexServerConnectionDTO> ToDTO(this List<PlexServerConnection> plexServerConnections);
+    public static List<PlexServerConnectionDTO> ToDTO(this List<PlexServerConnection> source) =>
+        source.ConvertAll(ToDTO);
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial ServerConnectionCheckStatusProgressDTO ToDTO(this ServerConnectionCheckStatusProgress serverConnectionCheckStatusProgress);
+    public static ServerConnectionCheckStatusProgressDTO ToDTO(
+        this ServerConnectionCheckStatusProgress source
+    ) =>
+        new()
+        {
+            PlexServerId = source.PlexServerId,
+            PlexServerConnectionId = source.PlexServerConnectionId,
+            RetryAttemptIndex = source.RetryAttemptIndex,
+            RetryAttemptCount = source.RetryAttemptCount,
+            TimeToNextRetry = source.TimeToNextRetry,
+            StatusCode = source.StatusCode,
+            ConnectionSuccessful = source.ConnectionSuccessful,
+            Completed = source.Completed,
+            Message = source.Message,
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial List<ServerConnectionCheckStatusProgressDTO> ToDTO(
-        this List<ServerConnectionCheckStatusProgress> serverConnectionCheckStatusProgress);
+    public static List<ServerConnectionCheckStatusProgressDTO> ToDTO(
+        this List<ServerConnectionCheckStatusProgress> source
+    ) => source.ConvertAll(ToDTO);
 
     #endregion
 
     #region ToModel
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    public static partial PlexServerConnection ToModel(this PlexServerConnectionDTO plexServerConnection);
+    public static PlexServerConnection ToModel(this PlexServerConnectionDTO source) =>
+        new()
+        {
+            Id = source.Id,
+            Protocol = source.Protocol,
+            Address = source.Address,
+            Port = source.Port,
+            Local = source.Local,
+            Relay = source.Relay,
+            IPv4 = source.IPv4,
+            IPv6 = source.IPv6,
+            PortFix = source.PortFix,
+            PlexServer = null,
+            PlexServerId = source.PlexServerId,
+            PlexServerStatus = source.ServerStatusList.ToModel(),
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    public static partial List<PlexServerConnection> ToModel(this List<PlexServerConnectionDTO> plexServerConnections);
+    public static List<PlexServerConnection> ToModel(this List<PlexServerConnectionDTO> source) =>
+        source.ConvertAll(ToModel);
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    public static partial ServerConnectionCheckStatusProgress ToModel(this ServerConnectionCheckStatusProgressDTO serverConnectionCheckStatusProgress);
+    public static ServerConnectionCheckStatusProgress ToModel(
+        this ServerConnectionCheckStatusProgressDTO source
+    ) =>
+        new()
+        {
+            RetryAttemptIndex = source.RetryAttemptIndex,
+            RetryAttemptCount = source.RetryAttemptCount,
+            TimeToNextRetry = source.TimeToNextRetry,
+            StatusCode = source.StatusCode,
+            ConnectionSuccessful = source.ConnectionSuccessful,
+            Completed = source.Completed,
+            Message = source.Message,
+            PlexServerConnection = default,
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    public static partial List<ServerConnectionCheckStatusProgress> ToModel(
-        this List<ServerConnectionCheckStatusProgressDTO> serverConnectionCheckStatusProgress);
+    public static List<ServerConnectionCheckStatusProgress> ToModel(
+        this List<ServerConnectionCheckStatusProgressDTO> source
+    ) => source.ConvertAll(ToModel);
 
     #endregion
 }

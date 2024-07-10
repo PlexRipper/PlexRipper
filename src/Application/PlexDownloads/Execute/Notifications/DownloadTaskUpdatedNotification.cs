@@ -32,7 +32,7 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdatedNot
         // Ensure the up to date download status is written to the database as the DownloadQueue depends on that status to pick a new DownloadTask
         await _dbContext.DetermineDownloadStatus(notification.Key, cancellationToken);
 
-        var downloadTasks = await _dbContext.GetAllDownloadTasksAsync(plexServerId, cancellationToken: cancellationToken);
+        var downloadTasks = await _dbContext.GetAllDownloadTasksByServerAsync(plexServerId, cancellationToken: cancellationToken);
 
         // Update the front-end with the download progress
         await _signalRService.SendDownloadProgressUpdateAsync(plexServerId, downloadTasks, cancellationToken);

@@ -11,7 +11,7 @@ public static class DownloadTaskGenericMapper
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskMovie.Id,
-            Key = downloadTaskMovie.Key,
+            MediaKey = downloadTaskMovie.Key,
             Title = downloadTaskMovie.Title,
             FullTitle = downloadTaskMovie.FullTitle,
             MediaType = downloadTaskMovie.MediaType,
@@ -26,6 +26,7 @@ public static class DownloadTaskGenericMapper
             TimeRemaining = downloadTaskMovie.TimeRemaining,
             DownloadDirectory = string.Empty,
             DestinationDirectory = string.Empty,
+            Quality = string.Empty,
             FileLocationUrl = string.Empty,
             DownloadSpeed = downloadTaskMovie.DownloadSpeed,
             FileTransferSpeed = downloadTaskMovie.FileTransferSpeed,
@@ -50,7 +51,7 @@ public static class DownloadTaskGenericMapper
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskMovieFile downloadTaskMovieFile) => new()
     {
         Id = downloadTaskMovieFile.Id,
-        Key = downloadTaskMovieFile.Key,
+        MediaKey = downloadTaskMovieFile.Key,
         Title = downloadTaskMovieFile.Title,
         FullTitle = downloadTaskMovieFile.FullTitle,
         MediaType = downloadTaskMovieFile.MediaType,
@@ -69,6 +70,7 @@ public static class DownloadTaskGenericMapper
         DownloadSpeed = downloadTaskMovieFile.DownloadSpeed,
         FileTransferSpeed = downloadTaskMovieFile.FileTransferSpeed,
         Children = [],
+        Quality = string.Empty,
         DownloadWorkerTasks = downloadTaskMovieFile.DownloadWorkerTasks ?? [],
         ParentId = downloadTaskMovieFile.ParentId,
         PlexServer = downloadTaskMovieFile.PlexServer,
@@ -86,7 +88,7 @@ public static class DownloadTaskGenericMapper
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskTvShow.Id,
-            Key = downloadTaskTvShow.Key,
+            MediaKey = downloadTaskTvShow.Key,
             Title = downloadTaskTvShow.Title,
             FullTitle = downloadTaskTvShow.FullTitle,
             MediaType = downloadTaskTvShow.MediaType,
@@ -97,6 +99,7 @@ public static class DownloadTaskGenericMapper
             DataTotal = downloadTaskTvShow.DataTotal,
             CreatedAt = downloadTaskTvShow.CreatedAt,
             FileName = string.Empty,
+            Quality = string.Empty,
             IsDownloadable = downloadTaskTvShow.IsDownloadable,
             TimeRemaining = downloadTaskTvShow.TimeRemaining,
             DownloadDirectory = string.Empty,
@@ -127,7 +130,7 @@ public static class DownloadTaskGenericMapper
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskTvShowSeason.Id,
-            Key = downloadTaskTvShowSeason.Key,
+            MediaKey = downloadTaskTvShowSeason.Key,
             Title = downloadTaskTvShowSeason.Title,
             FullTitle = downloadTaskTvShowSeason.FullTitle,
             MediaType = downloadTaskTvShowSeason.MediaType,
@@ -143,6 +146,7 @@ public static class DownloadTaskGenericMapper
             DownloadDirectory = string.Empty,
             DestinationDirectory = string.Empty,
             FileLocationUrl = string.Empty,
+            Quality = string.Empty,
             DownloadSpeed = downloadTaskTvShowSeason.DownloadSpeed,
             FileTransferSpeed = downloadTaskTvShowSeason.FileTransferSpeed,
             Children = downloadTaskTvShowSeason.Children?.Select(x => x.ToGeneric()).ToList() ?? [],
@@ -168,7 +172,7 @@ public static class DownloadTaskGenericMapper
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskTvShowEpisode.Id,
-            Key = downloadTaskTvShowEpisode.Key,
+            MediaKey = downloadTaskTvShowEpisode.Key,
             Title = downloadTaskTvShowEpisode.Title,
             FullTitle = downloadTaskTvShowEpisode.FullTitle,
             MediaType = downloadTaskTvShowEpisode.MediaType,
@@ -179,6 +183,7 @@ public static class DownloadTaskGenericMapper
             DataTotal = downloadTaskTvShowEpisode.DataTotal,
             CreatedAt = downloadTaskTvShowEpisode.CreatedAt,
             FileName = string.Empty,
+            Quality = string.Empty,
             IsDownloadable = downloadTaskTvShowEpisode.IsDownloadable,
             TimeRemaining = downloadTaskTvShowEpisode.TimeRemaining,
             DownloadDirectory = string.Empty,
@@ -207,7 +212,7 @@ public static class DownloadTaskGenericMapper
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskTvShowEpisodeFile downloadTaskTvShowEpisodeFile) => new()
     {
         Id = downloadTaskTvShowEpisodeFile.Id,
-        Key = downloadTaskTvShowEpisodeFile.Key,
+        MediaKey = downloadTaskTvShowEpisodeFile.Key,
         Title = downloadTaskTvShowEpisodeFile.Title,
         FullTitle = downloadTaskTvShowEpisodeFile.FullTitle,
         MediaType = downloadTaskTvShowEpisodeFile.MediaType,
@@ -226,6 +231,7 @@ public static class DownloadTaskGenericMapper
         DownloadSpeed = downloadTaskTvShowEpisodeFile.DownloadSpeed,
         FileTransferSpeed = downloadTaskTvShowEpisodeFile.FileTransferSpeed,
         Children = [],
+        Quality = string.Empty,
         DownloadWorkerTasks = downloadTaskTvShowEpisodeFile.DownloadWorkerTasks ?? [],
         ParentId = downloadTaskTvShowEpisodeFile.ParentId,
         PlexServer = downloadTaskTvShowEpisodeFile.PlexServer,

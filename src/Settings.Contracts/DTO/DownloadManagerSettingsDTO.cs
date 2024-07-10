@@ -2,5 +2,5 @@
 
 public class DownloadManagerSettingsDTO : IDownloadManagerSettings
 {
-    public int DownloadSegments { get; set; }
+    public required int DownloadSegments { get; set; }
 }

@@ -20,5 +20,13 @@ public class DownloadTaskTvShowEpisodeFile : DownloadTaskFileBase
 
     public override int Count => 1;
 
+    public override DownloadTaskKey ToParentKey() => new()
+    {
+        Type = DownloadTaskType.Episode,
+        Id = ParentId,
+        PlexServerId = PlexServerId,
+        PlexLibraryId = PlexLibraryId,
+    };
+
     #endregion
 }

@@ -1,10 +1,8 @@
 using Quartz;
-using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
 
-[Mapper]
-public static partial class JobStatusUpdateMapper
+public static class JobStatusUpdateMapper
 {
     #region FromScheduler
 

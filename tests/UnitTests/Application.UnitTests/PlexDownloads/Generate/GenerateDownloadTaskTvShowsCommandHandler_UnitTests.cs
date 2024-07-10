@@ -43,14 +43,14 @@ public class GenerateDownloadTaskTvShowsCommandHandler_UnitTests : BaseUnitTest<
         // Assert
         result.IsSuccess.ShouldBeTrue();
         ResetDbContext();
-        var downloadTaskTvShows = await IDbContext.GetAllDownloadTasksAsync();
+        var downloadTaskTvShows = await IDbContext.GetAllDownloadTasksByServerAsync();
 
         downloadTaskTvShows.Count.ShouldBe(5);
 
         foreach (var downloadTaskTvShow in downloadTaskTvShows)
         {
             downloadTaskTvShow.Id.ShouldNotBe(Guid.Empty);
-            downloadTaskTvShow.Key.ShouldBeGreaterThan(0);
+            downloadTaskTvShow.MediaKey.ShouldBeGreaterThan(0);
             downloadTaskTvShow.Title.ShouldNotBeEmpty();
             downloadTaskTvShow.FullTitle.ShouldNotBeEmpty();
             downloadTaskTvShow.DownloadStatus.ShouldBe(DownloadStatus.Queued);

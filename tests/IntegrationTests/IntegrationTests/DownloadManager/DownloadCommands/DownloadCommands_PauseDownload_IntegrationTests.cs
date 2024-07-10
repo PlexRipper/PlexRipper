@@ -31,7 +31,7 @@ public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTe
 
         await CreateContainer(config => config.DownloadSpeedLimitInKib = 5000);
 
-        var downloadTasks = await DbContext.GetAllDownloadTasksAsync();
+        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync();
         var childDownloadTask = downloadTasks[0].Children[0];
 
         // Act

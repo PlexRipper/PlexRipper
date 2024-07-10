@@ -1,10 +1,8 @@
 using FluentResults;
-using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
 
-[Mapper]
-public static partial class ResultMapper
+public static class ResultMapper
 {
     public static Result<T> ToResultModel<T>(this ResultDTO<T> resultDTO)
     {

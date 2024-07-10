@@ -424,5 +424,12 @@ public static class EnumExtensions
         }
     }
 
+    public static bool IsDownloadable(this DownloadTaskType value) => value switch
+    {
+        DownloadTaskType.Movie or DownloadTaskType.TvShow or DownloadTaskType.Season or DownloadTaskType.Episode or DownloadTaskType.None => false,
+        DownloadTaskType.MovieData or DownloadTaskType.MoviePart or DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart => true,
+        var _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+    };
+
     #endregion
 }

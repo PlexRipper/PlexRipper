@@ -7,7 +7,7 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
     /// <summary>
     /// The identifier used by Plex to keep track of media.
     /// </summary>
-    public required int Key { get; init; }
+    public required int MediaKey { get; init; }
 
     /// <summary>
     /// The formatted media title as shown in Plex.
@@ -47,6 +47,8 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
     /// </summary>
     public required string DownloadDirectory { get; set; }
 
+    public required string Quality { get; set; }
+
     /// <summary>
     /// Gets or sets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
     /// </summary>
@@ -65,11 +67,11 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
 
     /// <summary>
     /// The nested <see cref="DownloadTaskGeneric"/> used for seasons and episodes.
-    /// "Required = Required.Default" is used for ensuring it's optional in the Typescript generating.
+    /// "Required = Required.Default" is used for ensuring its optional in the Typescript generating.
     /// </summary>
-    public required List<DownloadTaskGeneric> Children { get; set; }
+    public required List<DownloadTaskGeneric> Children { get; set; } = new();
 
-    public required List<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
+    public required List<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = new();
 
     public required Guid ParentId { get; init; }
 
@@ -83,23 +85,13 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
 
     #endregion
 
-    public DownloadTaskKey ToKey() => new(DownloadTaskType, Id, PlexServerId, PlexLibraryId);
-
-    public DownloadTaskKey? ToParentKey()
+    public DownloadTaskKey ToKey() => new()
     {
-        return DownloadTaskType switch
-        {
-            DownloadTaskType.Movie => null,
-            DownloadTaskType.MovieData => new DownloadTaskKey(DownloadTaskType.Movie, ParentId, PlexServerId, PlexLibraryId),
-            DownloadTaskType.MoviePart => new DownloadTaskKey(DownloadTaskType.Movie, ParentId, PlexServerId, PlexLibraryId),
-            DownloadTaskType.TvShow => null,
-            DownloadTaskType.Season => new DownloadTaskKey(DownloadTaskType.TvShow, ParentId, PlexServerId, PlexLibraryId),
-            DownloadTaskType.Episode => new DownloadTaskKey(DownloadTaskType.Season, ParentId, PlexServerId, PlexLibraryId),
-            DownloadTaskType.EpisodeData => new DownloadTaskKey(DownloadTaskType.Episode, ParentId, PlexServerId, PlexLibraryId),
-            DownloadTaskType.EpisodePart => new DownloadTaskKey(DownloadTaskType.Episode, ParentId, PlexServerId, PlexLibraryId),
-            _ => null,
-        };
-    }
+        Type = DownloadTaskType,
+        Id = Id,
+        PlexServerId = PlexServerId,
+        PlexLibraryId = PlexLibraryId,
+    };
 
     public override string ToString() => $"DownloadTaskUpdate: [{DownloadTaskType}] [{DownloadStatus}] [{Title}] [Download Location: {DownloadDirectory}]";
 }

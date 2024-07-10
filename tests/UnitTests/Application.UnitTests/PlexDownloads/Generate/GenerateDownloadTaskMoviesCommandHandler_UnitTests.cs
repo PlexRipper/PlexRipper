@@ -5,11 +5,13 @@ using PlexRipper.Domain.Validators;
 
 namespace PlexRipper.Application.UnitTests;
 
-public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<GenerateDownloadTaskMoviesCommandHandler>
+public class GenerateDownloadTaskMoviesCommandHandler_UnitTests
+    : BaseUnitTest<GenerateDownloadTaskMoviesCommandHandler>
 {
     private DownloadTaskMovieValidator validator = new();
 
-    public GenerateDownloadTaskMoviesCommandHandler_UnitTests(ITestOutputHelper output) : base(output) { }
+    public GenerateDownloadTaskMoviesCommandHandler_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldHaveInsertedValidDownloadTaskMoviesInDatabase_WhenGivenValidPlexMovies()
@@ -41,10 +43,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
         // Assert
         result.IsSuccess.ShouldBeTrue();
         ResetDbContext();
-        var plexDownloadTaskMovies = await IDbContext
-            .DownloadTaskMovie
-            .IncludeAll()
-            .ToListAsync();
+        var plexDownloadTaskMovies = await IDbContext.DownloadTaskMovie.IncludeAll().ToListAsync();
 
         plexDownloadTaskMovies.Count.ShouldBe(5);
 
@@ -53,9 +52,10 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
             downloadTaskMovie.Calculate();
             var validationResult = await validator.ValidateAsync(downloadTaskMovie);
             // Ignore DownloadDirectory and DestinationDirectory errors as these are set in the DownloadJob
-            var validErrors = validationResult.Errors.Filter(x =>
-                !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DownloadDirectory)) &&
-                !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DestinationDirectory)));
+            var validErrors = validationResult.Errors.FindAll(x =>
+                !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DownloadDirectory))
+                && !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DestinationDirectory))
+            );
             validErrors.ShouldBeEmpty();
         }
     }
@@ -92,10 +92,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
         result.IsSuccess.ShouldBeTrue();
 
         ResetDbContext();
-        var plexDownloadTaskMovies = await IDbContext
-            .DownloadTaskMovie
-            .IncludeAll()
-            .ToListAsync();
+        var plexDownloadTaskMovies = await IDbContext.DownloadTaskMovie.IncludeAll().ToListAsync();
 
         plexDownloadTaskMovies.Count.ShouldBe(2);
 
@@ -104,9 +101,10 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
             downloadTaskMovie.Calculate();
             var validationResult = await validator.ValidateAsync(downloadTaskMovie);
             // Ignore DownloadDirectory and DestinationDirectory errors as these are set in the DownloadJob
-            var validErrors = validationResult.Errors.Filter(x =>
-                !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DownloadDirectory)) &&
-                !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DestinationDirectory)));
+            var validErrors = validationResult.Errors.FindAll(x =>
+                !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DownloadDirectory))
+                && !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DestinationDirectory))
+            );
             validErrors.ShouldBeEmpty();
 
             downloadTaskMovie.Children.Count.ShouldBe(2);

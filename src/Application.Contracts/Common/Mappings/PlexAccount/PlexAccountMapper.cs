@@ -1,9 +1,7 @@
 using PlexRipper.Domain;
-using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
 
-[Mapper]
 public static partial class PlexAccountMapper
 {
     #region ToDTO
@@ -14,9 +12,14 @@ public static partial class PlexAccountMapper
         dto.PlexServerAccess = new List<PlexServerAccessDTO>();
 
         // Determine the access for each server and libraries
-        if (plexAccount.PlexAccountLibraries is not null && plexAccount.PlexAccountServers is not null)
+        if (
+            plexAccount.PlexAccountLibraries is not null
+            && plexAccount.PlexAccountServers is not null
+        )
         {
-            var plexLibraries = plexAccount.PlexAccountLibraries.Select(y => y.PlexLibrary).ToList();
+            var plexLibraries = plexAccount
+                .PlexAccountLibraries.Select(y => y.PlexLibrary)
+                .ToList();
             foreach (var plexAccountServer in plexAccount.PlexAccountServers)
             {
                 var plexServerAccess = plexAccountServer.PlexServer.ToAccessDTO();
@@ -31,27 +34,73 @@ public static partial class PlexAccountMapper
         return dto;
     }
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapperIgnoreTarget(nameof(PlexAccountDTO.PlexServerAccess))]
-    private static partial PlexAccountDTO ToDTOMapper(this PlexAccount plexAccount);
+    private static PlexAccountDTO ToDTOMapper(this PlexAccount plexAccount) =>
+        new()
+        {
+            Id = plexAccount.Id,
+            DisplayName = plexAccount.DisplayName,
+            Username = plexAccount.Username,
+            Password = plexAccount.Password,
+            IsEnabled = plexAccount.IsEnabled,
+            IsMain = plexAccount.IsMain,
+            IsValidated = plexAccount.IsValidated,
+            ValidatedAt = plexAccount.ValidatedAt,
+            Uuid = plexAccount.Uuid,
+            PlexId = plexAccount.PlexId,
+            Email = plexAccount.Email,
+            Title = plexAccount.Title,
+            HasPassword = plexAccount.HasPassword,
+            AuthenticationToken = plexAccount.AuthenticationToken,
+            ClientId = plexAccount.ClientId,
+            VerificationCode = plexAccount.VerificationCode,
+            Is2Fa = plexAccount.Is2Fa,
+            PlexServerAccess = [],
+        };
 
-    public static List<PlexAccountDTO> ToDTO(this List<PlexAccount> plexAccounts) => plexAccounts.Select(x => x.ToDTO()).ToList();
+    public static List<PlexAccountDTO> ToDTO(this List<PlexAccount> plexAccounts) =>
+        plexAccounts.ConvertAll(ToDTO);
 
     #endregion
 
     #region ToModel
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    [MapperIgnoreTarget(nameof(PlexAccount.PlexServers))]
-    [MapperIgnoreTarget(nameof(PlexAccount.PlexAccountServers))]
-    [MapperIgnoreSource(nameof(PlexAccountDTO.PlexServerAccess))]
-    public static partial PlexAccount ToModel(this PlexAccountDTO plexAccount);
+    public static PlexAccount ToModel(this PlexAccountDTO source) =>
+        new()
+        {
+            Id = source.Id,
+            DisplayName = source.DisplayName,
+            Username = source.Username,
+            Password = source.Password,
+            IsEnabled = source.IsEnabled,
+            IsMain = source.IsMain,
+            PlexAccountServers = [],
+            PlexAccountLibraries = [],
+            IsValidated = source.IsValidated,
+            ValidatedAt = source.ValidatedAt,
+            Uuid = source.Uuid,
+            PlexId = source.PlexId,
+            Email = source.Email,
+            Title = source.Title,
+            HasPassword = source.HasPassword,
+            AuthenticationToken = source.AuthenticationToken,
+            ClientId = source.ClientId,
+            VerificationCode = source.VerificationCode,
+            Is2Fa = source.Is2Fa,
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    public static partial List<PlexAccount> ToModel(this List<PlexAccountDTO> plexAccounts);
+    public static List<PlexAccount> ToModel(this List<PlexAccountDTO> source) =>
+        source.ConvertAll(ToModel);
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    public static partial PlexAccount ToModel(this UpdatePlexAccountDTO plexAccount);
+    public static PlexAccount ToModel(this UpdatePlexAccountDTO plexAccount) =>
+        new()
+        {
+            Id = plexAccount.Id,
+            DisplayName = plexAccount.DisplayName,
+            Username = plexAccount.Username,
+            Password = plexAccount.Password,
+            IsEnabled = plexAccount.IsEnabled,
+            IsMain = plexAccount.IsMain,
+        };
 
     #endregion
 }

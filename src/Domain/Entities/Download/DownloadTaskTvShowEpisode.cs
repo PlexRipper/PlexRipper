@@ -22,5 +22,13 @@ public class DownloadTaskTvShowEpisode : DownloadTaskParentBase
 
     public override int Count => Children.Sum(x => x.Count) + 1;
 
+    public override DownloadTaskKey ToParentKey() => new()
+    {
+        Type = DownloadTaskType.Season,
+        Id = ParentId,
+        PlexServerId = PlexServerId,
+        PlexLibraryId = PlexLibraryId,
+    };
+
     #endregion
 }

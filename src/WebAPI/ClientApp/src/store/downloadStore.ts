@@ -1,15 +1,15 @@
-import { defineStore, acceptHMRUpdate } from 'pinia';
 import Log from 'consola';
+import { defineStore, acceptHMRUpdate } from 'pinia';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { sum, merge, keyBy, values, flatMapDeep, clone } from 'lodash-es';
 import type { DownloadMediaDTO, DownloadPreviewDTO, DownloadProgressDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto';
-import { DownloadStatus } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { useServerStore } from '#build/imports';
 import type IDownloadsSelection from '@interfaces/IDownloadsSelection';
 import type IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
 import { downloadApi } from '@api';
+
 export const useDownloadStore = defineStore('DownloadStore', () => {
 	const state = reactive<{ serverDownloads: ServerDownloadProgressDTO[]; selected: IDownloadsSelection[] }>({
 		serverDownloads: [],
@@ -34,6 +34,10 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 					}
 				}),
 			);
+		},
+		executeBatchDownloadCommand(action: string) {
+			const downloadTaskIds = state.selected.flatMap((x) => Object.keys(x.selection));
+			actions.executeDownloadCommand(action, downloadTaskIds);
 		},
 		executeDownloadCommand(action: string, downloadTaskIds: string[]): void {
 			const downloadTaskId = downloadTaskIds[0];
@@ -172,15 +176,7 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 			});
 		}),
 		getActiveDownloadList(serverId = 0): DownloadProgressDTO[] {
-			return getters
-				.getDownloadsByServerId(serverId)
-				.filter(
-					(y) =>
-						y.status === DownloadStatus.Downloading ||
-						y.status === DownloadStatus.Moving ||
-						y.status === DownloadStatus.Merging ||
-						y.status === DownloadStatus.Paused,
-				);
+			return getters.getDownloadsByServerId(serverId);
 		},
 		/**
 		 * Get the total number of download tasks that are downloadable in the download list.

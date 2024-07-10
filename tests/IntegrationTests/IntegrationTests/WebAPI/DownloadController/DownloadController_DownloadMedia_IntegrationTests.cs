@@ -51,7 +51,7 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
         // Assert
         var result = response.Result;
         result.IsSuccess.ShouldBeTrue();
-        var downloadTasksDb = await DbContext.GetAllDownloadTasksAsync();
+        var downloadTasksDb = await DbContext.GetAllDownloadTasksByServerAsync();
         downloadTasksDb.ShouldNotBeNull();
         downloadTasksDb.ShouldNotBeEmpty();
         downloadTasksDb.Count.ShouldBe(plexMovieCount);

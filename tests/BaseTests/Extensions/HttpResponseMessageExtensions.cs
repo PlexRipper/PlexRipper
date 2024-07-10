@@ -9,24 +9,30 @@ public static class HttpResponseMessageExtensions
 {
     public static async Task<ResultDTO<T>> Deserialize<T>(this HttpResponseMessage response)
     {
-        var result = await response.Content.ReadFromJsonAsync<ResultDTO<T>>(DefaultJsonSerializerOptions.ConfigBase);
+        var result = await response.Content.ReadFromJsonAsync<ResultDTO<T>>(
+            DefaultJsonSerializerOptions.ConfigBase
+        );
 
-        result.Reasons = result.Reasons.Select(x => new ReasonDTO
+        result.Reasons = result
+            .Reasons.Select(x => new ReasonDTO
             {
                 Message = x.Message,
                 Metadata = x.Metadata.ToTypedResultMetaData(),
             })
             .ToList();
 
-        result.Successes = result.Successes.Select(x => new SuccessDTO()
+        result.Successes = result
+            .Successes.Select(x => new SuccessDTO()
             {
                 Message = x.Message,
                 Metadata = x.Metadata.ToTypedResultMetaData(),
             })
             .ToList();
 
-        result.Errors = result.Errors.Select(x => new ErrorDTO()
+        result.Errors = result
+            .Errors.Select(x => new ErrorDTO()
             {
+                Reasons = x.Reasons,
                 Message = x.Message,
                 Metadata = x.Metadata.ToTypedResultMetaData(),
             })
@@ -42,7 +48,9 @@ public static class HttpResponseMessageExtensions
     /// <param name="dict"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    private static Dictionary<string, object> ToTypedResultMetaData(this Dictionary<string, object> dict)
+    private static Dictionary<string, object> ToTypedResultMetaData(
+        this Dictionary<string, object> dict
+    )
     {
         foreach (var keyValuePair in dict)
         {

@@ -1,9 +1,7 @@
 using PlexRipper.PlexApi.Models;
-using Riok.Mapperly.Abstractions;
 
 namespace PlexRipper.PlexApi;
 
-[Mapper]
 public static partial class PlexMetaDataMapper
 {
     #region Single Conversions
@@ -27,15 +25,18 @@ public static partial class PlexMetaDataMapper
     {
         var plexTvShowSeason = source.ToPlexMedia().ToPlexTvShowSeason();
         plexTvShowSeason.FullTitle = $"{source.ParentTitle}/{source.Title}";
-        plexTvShowSeason.ParentKey = source.ParentRatingKey != null ? int.Parse(source.ParentRatingKey) : -1;
+        plexTvShowSeason.ParentKey =
+            source.ParentRatingKey != null ? int.Parse(source.ParentRatingKey) : -1;
         return plexTvShowSeason;
     }
 
     public static PlexTvShowEpisode ToPlexTvShowEpisode(this Metadata source)
     {
         var plexTvShowSeason = source.ToPlexMedia().ToPlexTvShowEpisode();
-        plexTvShowSeason.FullTitle = $"{source.GrandparentTitle}/{source.ParentTitle}/{source.Title}";
-        plexTvShowSeason.ParentKey = source.ParentRatingKey != null ? int.Parse(source.ParentRatingKey) : -1;
+        plexTvShowSeason.FullTitle =
+            $"{source.GrandparentTitle}/{source.ParentTitle}/{source.Title}";
+        plexTvShowSeason.ParentKey =
+            source.ParentRatingKey != null ? int.Parse(source.ParentRatingKey) : -1;
         return plexTvShowSeason;
     }
 
@@ -52,10 +53,7 @@ public static partial class PlexMetaDataMapper
             ChildCount = source.ChildCount,
             AddedAt = source.AddedAt,
             UpdatedAt = source.UpdatedAt,
-            MediaData = new PlexMediaContainer()
-            {
-                MediaData = source.Media.ToPlexMediaData(),
-            },
+            MediaData = new PlexMediaContainer() { MediaData = source.Media.ToPlexMediaData() },
 
             Type = PlexMediaType.None,
             Key = source.RatingKey != null ? int.Parse(source.RatingKey) : -1,
@@ -72,11 +70,11 @@ public static partial class PlexMetaDataMapper
             HasTheme = !string.IsNullOrEmpty(source.Theme),
 
             // Ignore the following
-            FullTitle = "",
-            PlexLibrary = null,
-            PlexServer = null,
-            PlexLibraryId = 0,
-            PlexServerId = 0,
+            FullTitle = default,
+            PlexLibrary = default,
+            PlexServer = default,
+            PlexLibraryId = default,
+            PlexServerId = default,
         };
     }
 
@@ -84,25 +82,17 @@ public static partial class PlexMetaDataMapper
 
     #region List Conversions
 
-    public static List<PlexMovie> ToPlexMovies(this List<Metadata> source)
-    {
-        return source.Select(x => x.ToPlexMovie()).ToList();
-    }
+    public static List<PlexMovie> ToPlexMovies(this List<Metadata> source) =>
+        source.ConvertAll(ToPlexMovie);
 
-    public static List<PlexTvShow> ToPlexTvShows(this List<Metadata> source)
-    {
-        return source.Select(x => x.ToPlexTvShow()).ToList();
-    }
+    public static List<PlexTvShow> ToPlexTvShows(this List<Metadata> source) =>
+        source.ConvertAll(ToPlexTvShow);
 
-    public static List<PlexTvShowSeason> ToPlexTvShowSeasons(this List<Metadata> source)
-    {
-        return source.Select(x => x.ToPlexTvShowSeason()).ToList();
-    }
+    public static List<PlexTvShowSeason> ToPlexTvShowSeasons(this List<Metadata> source) =>
+        source.ConvertAll(ToPlexTvShowSeason);
 
-    public static List<PlexTvShowEpisode> ToPlexTvShowEpisodes(this List<Metadata> source)
-    {
-        return source.Select(x => x.ToPlexTvShowEpisode()).ToList();
-    }
+    public static List<PlexTvShowEpisode> ToPlexTvShowEpisodes(this List<Metadata> source) =>
+        source.ConvertAll(ToPlexTvShowEpisode);
 
     #endregion
 
@@ -114,13 +104,7 @@ public static partial class PlexMetaDataMapper
     /// <returns></returns>
     private static int RetrieveMetaDataKey(Metadata metadata)
     {
-        List<string> list = new()
-        {
-            metadata.Thumb,
-            metadata.Banner,
-            metadata.Art,
-            metadata.Theme,
-        };
+        List<string> list = new() { metadata.Thumb, metadata.Banner, metadata.Art, metadata.Theme };
 
         foreach (var entry in list)
             if (!string.IsNullOrEmpty(entry))

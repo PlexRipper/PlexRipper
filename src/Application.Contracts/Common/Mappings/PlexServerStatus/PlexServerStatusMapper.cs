@@ -1,28 +1,46 @@
 using PlexRipper.Domain;
-using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
 
-[Mapper]
-public static partial class PlexServerStatusMapper
+public static class PlexServerStatusMapper
 {
     #region ToDTO
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial PlexServerStatusDTO ToDTO(this PlexServerStatus plexServer);
+    public static PlexServerStatusDTO ToDTO(this PlexServerStatus source) =>
+        new()
+        {
+            Id = source.Id,
+            StatusCode = source.StatusCode,
+            IsSuccessful = source.IsSuccessful,
+            StatusMessage = source.StatusMessage,
+            LastChecked = source.LastChecked,
+            PlexServerId = source.PlexServerId,
+            PlexServerConnectionId = source.PlexServerConnectionId,
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial List<PlexServerStatusDTO> ToDTO(this List<PlexServerStatus> plexServers);
+    public static List<PlexServerStatusDTO> ToDTO(this List<PlexServerStatus> source) =>
+        source.ConvertAll(ToDTO);
 
     #endregion
 
     #region ToModel
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    public static partial PlexServerStatus ToModel(this PlexServerStatusDTO plexServer);
+    public static PlexServerStatus ToModel(this PlexServerStatusDTO source) =>
+        new()
+        {
+            Id = source.Id,
+            IsSuccessful = source.IsSuccessful,
+            StatusCode = source.StatusCode,
+            StatusMessage = source.StatusMessage,
+            LastChecked = source.LastChecked,
+            PlexServer = default,
+            PlexServerId = source.PlexServerId,
+            PlexServerConnection = default,
+            PlexServerConnectionId = source.PlexServerConnectionId,
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    public static partial List<PlexServerStatus> ToModel(this List<PlexServerStatusDTO> plexServers);
+    public static List<PlexServerStatus> ToModel(this List<PlexServerStatusDTO> source) =>
+        source.ConvertAll(ToModel);
 
     #endregion
 }

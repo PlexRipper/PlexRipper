@@ -15,14 +15,15 @@ namespace PlexRipper.Application;
 /// <param name="PlexLibraryId">The id of the <see cref="PlexLibrary"/> to retrieve.</param>
 /// <param name="ProgressAction">The action to call for a progress update.</param>
 /// <returns>Returns the PlexLibrary with the containing media.</returns>
-public record RefreshLibraryMediaCommand(int PlexLibraryId, Action<LibraryProgress> ProgressAction = null) : IRequest<Result<PlexLibrary>>;
+public record RefreshLibraryMediaCommand(
+    int PlexLibraryId,
+    Action<LibraryProgress> ProgressAction = null
+) : IRequest<Result<PlexLibrary>>;
 
-public class RefreshLibraryMediaCommandValidator : AbstractValidator<RefreshLibraryMediaCommand>
-{
-    public RefreshLibraryMediaCommandValidator() { }
-}
+public class RefreshLibraryMediaCommandValidator : AbstractValidator<RefreshLibraryMediaCommand> { }
 
-public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryMediaCommand, Result<PlexLibrary>>
+public class RefreshLibraryMediaCommandHandler
+    : IRequestHandler<RefreshLibraryMediaCommand, Result<PlexLibrary>>
 {
     private readonly ILog _log;
     private readonly IMediator _mediator;
@@ -35,7 +36,8 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         IMediator mediator,
         IPlexRipperDbContext dbContext,
         ISignalRService signalRService,
-        IPlexApiService plexServiceApi)
+        IPlexApiService plexServiceApi
+    )
     {
         _log = log;
         _mediator = mediator;
@@ -44,9 +46,14 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         _plexServiceApi = plexServiceApi;
     }
 
-    public async Task<Result<PlexLibrary>> Handle(RefreshLibraryMediaCommand command, CancellationToken cancellationToken)
+    public async Task<Result<PlexLibrary>> Handle(
+        RefreshLibraryMediaCommand command,
+        CancellationToken cancellationToken
+    )
     {
-        var plexLibrary = await _dbContext.PlexLibraries.Include(x => x.PlexServer).FirstOrDefaultAsync(x => x.Id == command.PlexLibraryId, cancellationToken);
+        var plexLibrary = await _dbContext
+            .PlexLibraries.Include(x => x.PlexServer)
+            .FirstOrDefaultAsync(x => x.Id == command.PlexLibraryId, cancellationToken);
 
         // Retrieve overview of all media belonging to this PlexLibrary
         var newPlexLibraryResult = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary);
@@ -65,11 +72,18 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             case PlexMediaType.TvShow:
                 return await RefreshPlexTvShowLibrary(newPlexLibrary, command.ProgressAction);
             default:
-                return Result.Fail($"Library type {newPlexLibrary.Type} is currently not supported by PlexRipper").LogWarning();
+                return Result
+                    .Fail(
+                        $"Library type {newPlexLibrary.Type} is currently not supported by PlexRipper"
+                    )
+                    .LogWarning();
         }
     }
 
-    private async Task<Result> RefreshPlexTvShowLibrary(PlexLibrary plexLibrary, Action<LibraryProgress> progressAction = null)
+    private async Task<Result> RefreshPlexTvShowLibrary(
+        PlexLibrary plexLibrary,
+        Action<LibraryProgress> progressAction = null
+    )
     {
         if (plexLibrary == null)
             return ResultExtensions.IsNull(nameof(plexLibrary)).LogError();
@@ -79,8 +93,10 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
 
         if (plexLibrary.TvShows.Count == 0)
         {
-            return Result.Fail(
-                    $"PlexLibrary {plexLibrary.Name} with id {plexLibrary.Id} does not contain any TvShows and thus cannot request the corresponding media")
+            return Result
+                .Fail(
+                    $"PlexLibrary {plexLibrary.Name} with id {plexLibrary.Id} does not contain any TvShows and thus cannot request the corresponding media"
+                )
                 .LogError();
         }
 
@@ -113,7 +129,9 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
 
         foreach (var plexTvShow in plexLibrary.TvShows)
         {
-            plexTvShow.Seasons = rawSeasonDataResult.Value.FindAll(x => x.ParentKey == plexTvShow.Key);
+            plexTvShow.Seasons = rawSeasonDataResult.Value.FindAll(x =>
+                x.ParentKey == plexTvShow.Key
+            );
             plexTvShow.ChildCount = plexTvShow.Seasons.Count;
 
             foreach (var plexTvShowSeason in plexTvShow.Seasons)
@@ -121,7 +139,9 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 plexTvShowSeason.PlexLibraryId = plexLibrary.Id;
                 plexTvShowSeason.PlexLibrary = plexLibrary;
                 plexTvShowSeason.TvShow = plexTvShow;
-                plexTvShowSeason.Episodes = rawEpisodesDataResult.Value.FindAll(x => x.ParentKey == plexTvShowSeason.Key);
+                plexTvShowSeason.Episodes = rawEpisodesDataResult.Value.FindAll(x =>
+                    x.ParentKey == plexTvShowSeason.Key
+                );
                 plexTvShowSeason.ChildCount = plexTvShowSeason.Episodes.Count;
 
                 // Assume the season started on the year of the first episode
@@ -139,7 +159,11 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         // Phase 3 of 4: PlexLibrary media data was parsed successfully.
         SendProgress(3, 4);
         _log.Here()
-            .Debug("Finished retrieving all media for library {PlexLibraryName} in {Elapsed:000} seconds", plexLibrary.Title, timer.Elapsed.TotalSeconds);
+            .Debug(
+                "Finished retrieving all media for library {PlexLibraryName} in {Elapsed:000} seconds",
+                plexLibrary.Title,
+                timer.Elapsed.TotalSeconds
+            );
         timer.Restart();
 
         // Update the MetaData of this library
@@ -151,23 +175,35 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         if (updateResult.IsFailed)
             return updateResult.ToResult();
 
-        var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
+        var createResult = await _mediator.Send(
+            new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary)
+        );
         if (createResult.IsFailed)
             return createResult.ToResult();
 
         _log.Here()
-            .Debug("Finished updating all media in the database for library {PlexLibraryName} in {Elapsed:000} seconds", plexLibrary.Title,
-                timer.Elapsed.TotalSeconds);
+            .Debug(
+                "Finished updating all media in the database for library {PlexLibraryName} in {Elapsed:000} seconds",
+                plexLibrary.Title,
+                timer.Elapsed.TotalSeconds
+            );
 
         // Phase 4 of 4: Database has been successfully updated with new library data.
         SendProgress(4, 4);
 
-        _log.Information("Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}", plexLibrary.Title, plexLibrary.Id);
+        _log.Information(
+            "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
+            plexLibrary.Title,
+            plexLibrary.Id
+        );
 
         return Result.Ok();
     }
 
-    private async Task<Result> RefreshPlexMovieLibrary(PlexLibrary plexLibrary, Action<LibraryProgress> progressAction = null)
+    private async Task<Result> RefreshPlexMovieLibrary(
+        PlexLibrary plexLibrary,
+        Action<LibraryProgress> progressAction = null
+    )
     {
         if (plexLibrary == null)
             return ResultExtensions.IsNull(nameof(plexLibrary));
@@ -194,13 +230,19 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
 
         SendProgress(2, 3);
 
-        var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
+        var createResult = await _mediator.Send(
+            new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary)
+        );
         if (createResult.IsFailed)
             return createResult;
 
         SendProgress(3, 3);
 
-        _log.Information("Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}", plexLibrary.Title, plexLibrary.Id);
+        _log.Information(
+            "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
+            plexLibrary.Title,
+            plexLibrary.Id
+        );
 
         return Result.Ok();
     }

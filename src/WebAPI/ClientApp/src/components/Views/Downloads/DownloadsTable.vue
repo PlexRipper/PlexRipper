@@ -63,7 +63,7 @@ function mapToTreeNodes(value: DownloadProgressDTO[]): IDownloadTableNode[] {
 	return value.map((x) => {
 		return {
 			...x,
-			key: `${x.mediaType}-${x.id}`,
+			key: x.id,
 			label: x.title,
 			children: mapToTreeNodes(x.children),
 		};

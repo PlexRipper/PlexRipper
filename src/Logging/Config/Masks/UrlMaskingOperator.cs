@@ -8,7 +8,8 @@ public class UrlMaskingOperator : RegexMaskingOperator
 {
     #region Constructors
 
-    public UrlMaskingOperator() : base(urlReplacePattern) { }
+    public UrlMaskingOperator()
+        : base(urlReplacePattern) { }
 
     #endregion
 
@@ -23,7 +24,7 @@ public class UrlMaskingOperator : RegexMaskingOperator
             var token = HttpUtility.ParseQueryString(url.Query).Get("X-Plex-Token") ?? "None123";
             return $"{url.Scheme}://{mask}{url.PathAndQuery.Replace(token, mask)}";
         }
-        catch (Exception e)
+        catch (Exception _)
         {
             return match.Value;
         }

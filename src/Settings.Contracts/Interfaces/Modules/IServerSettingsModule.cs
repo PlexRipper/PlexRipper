@@ -10,7 +10,7 @@ public interface IServerSettingsModule : IBaseSettingsModule<IServerSettings>, I
 
     void SetServerSettings(PlexServerSettingsModel plexServerSettings);
 
-    PlexServerSettingsModel GetPlexServerSettings(string machineIdentifier);
+    PlexServerSettingsModel? GetPlexServerSettings(string machineIdentifier);
 
     int GetDownloadSpeedLimit(string machineIdentifier);
 

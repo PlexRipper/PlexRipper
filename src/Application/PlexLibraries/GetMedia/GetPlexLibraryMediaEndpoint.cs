@@ -15,14 +15,15 @@ public class GetPlexLibraryMediaEndpointRequest
 
     [QueryParam]
     [DefaultValue(0)]
-    public int Page { get; init; } = 0;
+    public int Page { get; init; }
 
     [QueryParam]
     [DefaultValue(0)]
-    public int Size { get; init; } = 0;
+    public int Size { get; init; }
 }
 
-public class GetPlexLibraryMediaEndpointRequestValidator : Validator<GetPlexLibraryMediaEndpointRequest>
+public class GetPlexLibraryMediaEndpointRequestValidator
+    : Validator<GetPlexLibraryMediaEndpointRequest>
 {
     public GetPlexLibraryMediaEndpointRequestValidator()
     {
@@ -30,11 +31,13 @@ public class GetPlexLibraryMediaEndpointRequestValidator : Validator<GetPlexLibr
     }
 }
 
-public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpointRequest, List<PlexMediaSlimDTO>>
+public class GetPlexLibraryMediaEndpoint
+    : BaseEndpoint<GetPlexLibraryMediaEndpointRequest, List<PlexMediaSlimDTO>>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/media";
+    public override string EndpointPath =>
+        ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/media";
 
     public GetPlexLibraryMediaEndpoint(IPlexRipperDbContext dbContext)
     {
@@ -45,22 +48,29 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexMediaSlimDTO>>))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexMediaSlimDTO>>))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
-    public override async Task HandleAsync(GetPlexLibraryMediaEndpointRequest req, CancellationToken ct)
+    public override async Task HandleAsync(
+        GetPlexLibraryMediaEndpointRequest req,
+        CancellationToken ct
+    )
     {
-        var plexLibrary = await _dbContext.PlexLibraries
-            .AsNoTracking()
+        var plexLibrary = await _dbContext
+            .PlexLibraries.AsNoTracking()
             .IncludePlexServer()
             .GetAsync(req.PlexLibraryId, ct);
         if (plexLibrary is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId), ct);
+            await SendFluentResult(
+                ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId),
+                ct
+            );
             return;
         }
 
@@ -84,7 +94,8 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
         {
             case PlexMediaType.Movie:
             {
-                var plexMovies = await _dbContext.PlexMovies.AsNoTracking()
+                var plexMovies = await _dbContext
+                    .PlexMovies.AsNoTracking()
                     .Where(x => x.PlexLibraryId == req.PlexLibraryId)
                     .OrderBy(x => x.Title)
                     .Skip(skip)
@@ -94,7 +105,10 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
                 foreach (var plexMovie in plexMovies)
                 {
                     if (plexMovie.HasThumb)
-                        plexMovie.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value);
+                        plexMovie.SetFullThumbnailUrl(
+                            plexServerConnection.Value.Url,
+                            plexServerToken.Value
+                        );
                     entities.Add(plexMovie.ToSlimDTO());
                 }
 
@@ -102,7 +116,8 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
             }
             case PlexMediaType.TvShow:
             {
-                var plexTvShow = await _dbContext.PlexTvShows.AsNoTracking()
+                var plexTvShow = await _dbContext
+                    .PlexTvShows.AsNoTracking()
                     .Where(x => x.PlexLibraryId == req.PlexLibraryId)
                     .OrderBy(x => x.Title)
                     .Skip(skip)
@@ -112,14 +127,22 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
                 foreach (var tvShow in plexTvShow)
                 {
                     if (tvShow.HasThumb)
-                        tvShow.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value);
+                        tvShow.SetFullThumbnailUrl(
+                            plexServerConnection.Value.Url,
+                            plexServerToken.Value
+                        );
                     entities.Add(tvShow.ToSlimDTO());
                 }
 
                 break;
             }
             default:
-                await SendFluentResult(Result.Fail($"Type {plexLibrary.Type} is not supported for retrieving the PlexMedia data by library id"), ct);
+                await SendFluentResult(
+                    Result.Fail(
+                        $"Type {plexLibrary.Type} is not supported for retrieving the PlexMedia data by library id"
+                    ),
+                    ct
+                );
                 return;
         }
 

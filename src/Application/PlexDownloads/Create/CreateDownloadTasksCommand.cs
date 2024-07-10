@@ -7,7 +7,8 @@ namespace PlexRipper.Application;
 /// Generates a nested list of <see cref="DownloadTaskGeneric"/> and adds to the download queue.
 /// </summary>
 /// <returns>Returns true if all downloadTasks were added successfully.</returns>
-public record CreateDownloadTasksCommand(List<DownloadMediaDTO> DownloadMediaDtos) : IRequest<Result>;
+public record CreateDownloadTasksCommand(List<DownloadMediaDTO> DownloadMediaDtos)
+    : IRequest<Result>;
 
 public class CreateDownloadTasksCommandValidator : AbstractValidator<CreateDownloadTasksCommand>
 {
@@ -21,40 +22,54 @@ public class CreateDownloadTasksCommandValidator : AbstractValidator<CreateDownl
 public class CreateDownloadTasksCommandHandler : IRequestHandler<CreateDownloadTasksCommand, Result>
 {
     private readonly IMediator _mediator;
-    private bool _generatedTasks = false;
+    private bool _generatedTasks;
 
-    public CreateDownloadTasksCommandHandler(
-        IMediator mediator)
+    public CreateDownloadTasksCommandHandler(IMediator mediator)
     {
         _mediator = mediator;
     }
 
-    public async Task<Result> Handle(CreateDownloadTasksCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(
+        CreateDownloadTasksCommand command,
+        CancellationToken cancellationToken
+    )
     {
         if (command.DownloadMediaDtos.Any(x => x.Type == PlexMediaType.Movie))
         {
-            var result = await _mediator.Send(new GenerateDownloadTaskMoviesCommand(command.DownloadMediaDtos), cancellationToken);
+            var result = await _mediator.Send(
+                new GenerateDownloadTaskMoviesCommand(command.DownloadMediaDtos),
+                cancellationToken
+            );
             result.LogIfFailed();
             _generatedTasks = true;
         }
 
         if (command.DownloadMediaDtos.Any(x => x.Type == PlexMediaType.TvShow))
         {
-            var result = await _mediator.Send(new GenerateDownloadTaskTvShowsCommand(command.DownloadMediaDtos), cancellationToken);
+            var result = await _mediator.Send(
+                new GenerateDownloadTaskTvShowsCommand(command.DownloadMediaDtos),
+                cancellationToken
+            );
             result.LogIfFailed();
             _generatedTasks = true;
         }
 
         if (command.DownloadMediaDtos.Any(x => x.Type == PlexMediaType.Season))
         {
-            var result = await _mediator.Send(new GenerateDownloadTaskTvShowSeasonsCommand(command.DownloadMediaDtos), cancellationToken);
+            var result = await _mediator.Send(
+                new GenerateDownloadTaskTvShowSeasonsCommand(command.DownloadMediaDtos),
+                cancellationToken
+            );
             result.LogIfFailed();
             _generatedTasks = true;
         }
 
         if (command.DownloadMediaDtos.Any(x => x.Type == PlexMediaType.Episode))
         {
-            var result = await _mediator.Send(new GenerateDownloadTaskTvShowEpisodesCommand(command.DownloadMediaDtos), cancellationToken);
+            var result = await _mediator.Send(
+                new GenerateDownloadTaskTvShowEpisodesCommand(command.DownloadMediaDtos),
+                cancellationToken
+            );
             result.LogIfFailed();
             _generatedTasks = true;
         }
@@ -62,12 +77,15 @@ public class CreateDownloadTasksCommandHandler : IRequestHandler<CreateDownloadT
         if (_generatedTasks)
         {
             // Notify the DownloadQueue to check for new tasks in the PlexSevers with new DownloadTasks
-            var uniquePlexServers = command.DownloadMediaDtos
-                .MergeAndGroupList()
+            var uniquePlexServers = command
+                .DownloadMediaDtos.MergeAndGroupList()
                 .Select(x => x.PlexServerId)
                 .Distinct()
                 .ToList();
-            await _mediator.Publish(new CheckDownloadQueueNotification(uniquePlexServers), cancellationToken);
+            await _mediator.Publish(
+                new CheckDownloadQueueNotification(uniquePlexServers),
+                cancellationToken
+            );
         }
 
         return Result.Ok();

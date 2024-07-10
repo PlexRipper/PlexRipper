@@ -8,9 +8,11 @@ using PlexRipper.Domain.PlexMediaExtensions;
 
 namespace PlexRipper.Application;
 
-public record GenerateDownloadTaskTvShowEpisodesCommand(List<DownloadMediaDTO> DownloadMedias) : IRequest<Result>;
+public record GenerateDownloadTaskTvShowEpisodesCommand(List<DownloadMediaDTO> DownloadMedias)
+    : IRequest<Result>;
 
-public class GenerateDownloadTaskTvShowEpisodesCommandValidator : AbstractValidator<GenerateDownloadTaskTvShowEpisodesCommand>
+public class GenerateDownloadTaskTvShowEpisodesCommandValidator
+    : AbstractValidator<GenerateDownloadTaskTvShowEpisodesCommand>
 {
     public GenerateDownloadTaskTvShowEpisodesCommandValidator()
     {
@@ -20,18 +22,25 @@ public class GenerateDownloadTaskTvShowEpisodesCommandValidator : AbstractValida
     }
 }
 
-public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<GenerateDownloadTaskTvShowEpisodesCommand, Result>
+public class GenerateDownloadTaskTvShowEpisodesCommandHandler
+    : IRequestHandler<GenerateDownloadTaskTvShowEpisodesCommand, Result>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
 
-    public GenerateDownloadTaskTvShowEpisodesCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    public GenerateDownloadTaskTvShowEpisodesCommandHandler(
+        ILog log,
+        IPlexRipperDbContext dbContext
+    )
     {
         _log = log;
         _dbContext = dbContext;
     }
 
-    public async Task<Result> Handle(GenerateDownloadTaskTvShowEpisodesCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(
+        GenerateDownloadTaskTvShowEpisodesCommand command,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
@@ -40,20 +49,20 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<
             if (!plexEpisodeList.Any())
                 return ResultExtensions.IsEmpty(nameof(plexEpisodeList)).LogWarning();
 
-            _log.Debug("Creating {PlexEpisodeIdsCount} episodes download tasks", plexEpisodeList
-                .SelectMany(x => x.MediaIds)
-                .ToList()
-                .Count);
+            _log.Debug(
+                "Creating {PlexEpisodeIdsCount} episodes download tasks",
+                plexEpisodeList.SelectMany(x => x.MediaIds).ToList().Count
+            );
 
             foreach (var downloadMediaDto in plexEpisodeList)
             {
-                var plexLibrary = await _dbContext.PlexLibraries
-                    .Include(x => x.PlexServer)
+                await _dbContext
+                    .PlexLibraries.Include(x => x.PlexServer)
                     .Include(x => x.DefaultDestination)
                     .GetAsync(downloadMediaDto.PlexLibraryId, cancellationToken);
 
-                var plexEpisodes = await _dbContext.PlexTvShowEpisodes
-                    .AsTracking()
+                var plexEpisodes = await _dbContext
+                    .PlexTvShowEpisodes.AsTracking()
                     .IncludeAll()
                     .Where(x => downloadMediaDto.MediaIds.Contains(x.Id))
                     .ToListAsync(cancellationToken);
@@ -66,12 +75,18 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<
                     var plexSeason = tvShowEpisode.TvShowSeason;
 
                     // Check if the tvShowDownloadTask has already been created this run
-                    var downloadTaskTvShow = tvShowDownloads.FirstOrDefault(x => x.Key == plexTvShow.Key);
+                    var downloadTaskTvShow = tvShowDownloads.FirstOrDefault(x =>
+                        x.Key == plexTvShow.Key
+                    );
 
                     // Check if the tvShowDownloadTask has already been created ever
                     if (downloadTaskTvShow is null)
                     {
-                        downloadTaskTvShow = await _dbContext.GetDownloadTaskTvShowByMediaKeyQuery(plexTvShow.PlexServerId, plexTvShow.Key, cancellationToken);
+                        downloadTaskTvShow = await _dbContext.GetDownloadTaskTvShowByMediaKeyQuery(
+                            plexTvShow.PlexServerId,
+                            plexTvShow.Key,
+                            cancellationToken
+                        );
                         if (downloadTaskTvShow is not null)
                             tvShowDownloads.Add(downloadTaskTvShow);
                     }
@@ -84,7 +99,9 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<
                     }
 
                     // Check if the SeasonDownloadTask has already been created
-                    var downloadTaskTvShowSeason = downloadTaskTvShow.Children.FirstOrDefault(x => x.Key == plexSeason.Key);
+                    var downloadTaskTvShowSeason = downloadTaskTvShow.Children.FirstOrDefault(x =>
+                        x.Key == plexSeason.Key
+                    );
                     if (downloadTaskTvShowSeason is null)
                     {
                         downloadTaskTvShowSeason = plexSeason.MapToDownloadTask();
@@ -94,7 +111,9 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler : IRequestHandler<
                     }
 
                     // Check if the tvShowEpisodesDownloadTask has already been created
-                    var episodeDownloadTask = downloadTaskTvShowSeason.Children.FirstOrDefault(x => x.Key == plexSeason.Key);
+                    var episodeDownloadTask = downloadTaskTvShowSeason.Children.FirstOrDefault(x =>
+                        x.Key == plexSeason.Key
+                    );
                     if (episodeDownloadTask is null)
                     {
                         episodeDownloadTask = tvShowEpisode.MapToDownloadTask();

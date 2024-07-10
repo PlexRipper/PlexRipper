@@ -1,9 +1,11 @@
-﻿using PlexRipper.Domain;
+﻿using System.Diagnostics.CodeAnalysis;
+using PlexRipper.Domain;
 
 namespace WebAPI.Contracts;
 
 public class SyncServerProgress
 {
+    [SetsRequiredMembers]
     public SyncServerProgress(int serverId, List<LibraryProgress> libraryProgresses)
     {
         Id = serverId;

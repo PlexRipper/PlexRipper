@@ -10,7 +10,8 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
 {
     private PlexMediaSlimDTOValidator PlexMediaSlimDtoValidator => new();
 
-    public GetPlexLibraryMediaEndpoint_UnitTests(ITestOutputHelper output) : base(output) { }
+    public GetPlexLibraryMediaEndpoint_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldHaveAllThePlexLibraryMedia_WhenPageAndSizeAreNotSetAndMediaIsMovies()
@@ -63,6 +64,7 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
             config.TvShowSeasonCount = 3;
             config.TvShowEpisodeCount = 5;
         });
+
         var ep = Factory.Create<GetPlexLibraryMediaEndpoint>(ctx =>
             ctx.AddTestServices(s => s.AddTransient(_ => mock.Create<IPlexRipperDbContext>()))
         );

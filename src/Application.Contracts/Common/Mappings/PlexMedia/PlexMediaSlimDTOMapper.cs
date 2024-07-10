@@ -64,7 +64,7 @@ public static class PlexMediaSlimDTOMapper
             HasThumb = source.HasThumb,
             FullThumbUrl = source.FullThumbUrl,
             Qualities = source.Qualities.ToDTO(),
-            Children = source.Seasons.ConvertAll(ToSlimDTO),
+            Children = source.Seasons?.ConvertAll(ToSlimDTO) ?? new List<PlexMediaSlimDTO>(),
         };
 
     #endregion

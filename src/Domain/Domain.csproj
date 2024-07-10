@@ -15,12 +15,11 @@
 		<PackageReference Include="ByteSize" Version="2.1.2" />
 		<PackageReference Include="FluentValidation" Version="11.9.0" />
 		<PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
-		<PackageReference Include="LanguageExt.Core" Version="4.4.8" />
 		<PackageReference Include="MediatR" Version="12.2.0" />
 		<PackageReference Include="NaturalSort.Extension" Version="4.2.0" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 		<PackageReference Include="System.Reactive" Version="5.0.0" />
-		<PackageReference Include="System.Text.Json" Version="8.0.3" />
+		<PackageReference Include="System.Text.Json" Version="8.0.4" />
 	</ItemGroup>
 
 	<ItemGroup>

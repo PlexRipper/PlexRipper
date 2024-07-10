@@ -1,3 +1,5 @@
+using PlexRipper.Domain;
+
 namespace Application.Contracts;
 
 public static partial class PlexApiClientProgressMapper
@@ -16,7 +18,7 @@ public static partial class PlexApiClientProgressMapper
             ConnectionSuccessful = source.ConnectionSuccessful,
             Completed = source.Completed,
             Message = source.Message,
-            PlexServerConnection = default,
+            PlexServerConnection = new PlexServerConnection(),
         };
 
     #endregion

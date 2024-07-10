@@ -1,21 +1,27 @@
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 
 namespace IntegrationTests.WebAPI.AccountController;
 
 public class CreateAccount_IntegrationTests : BaseIntegrationTests
 {
-    public CreateAccount_IntegrationTests(ITestOutputHelper output) : base(output) { }
+    public CreateAccount_IntegrationTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldCreateAndInspectAccessibleServers_WhenPlexAccountIsValid()
     {
         // Arrange
         var libraryCount = 3;
-        SpinUpPlexServer(config => { config.FakeDataConfig = dataConfig => { dataConfig.LibraryCount = libraryCount; }; });
+        SpinUpPlexServer(config =>
+        {
+            config.FakeDataConfig = dataConfig =>
+            {
+                dataConfig.LibraryCount = libraryCount;
+            };
+        });
         SetupMockPlexApi(config => config.AccessiblePlexServers = 1);
         await CreateContainer();
 
@@ -23,7 +29,11 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         var plexAccountDTO = plexAccount.ToDTO();
 
         // Act
-        var response = await Container.ApiClient.POSTAsync<CreatePlexAccountEndpoint, PlexAccountDTO, ResultDTO<PlexAccount>>(plexAccountDTO);
+        var response = await Container.ApiClient.POSTAsync<
+            CreatePlexAccountEndpoint,
+            PlexAccountDTO,
+            ResultDTO<PlexAccount>
+        >(plexAccountDTO);
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         var resultDTO = response.Result;
@@ -39,8 +49,8 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         jobStatusList.ShouldContain(x => x.JobType == JobTypes.RefreshPlexServersAccessJob);
 
         // Ensure account has been created
-        var plexAccountDb = DbContext.PlexAccounts
-            .IncludeServerAccess()
+        var plexAccountDb = DbContext
+            .PlexAccounts.IncludeServerAccess()
             .IncludeLibraryAccess()
             .FirstOrDefault();
         plexAccountDb.IsValidated = true;

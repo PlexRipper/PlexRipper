@@ -13,21 +13,24 @@ public class DomainMappingProfile : Profile
     public DomainMappingProfile()
     {
         // string <-> Guid
-        CreateMap<string, Guid>().ConvertUsing(s => Guid.Parse(s));
+        CreateMap<string, Guid>()
+            .ConvertUsing(s => Guid.Parse(s));
         CreateMap<Guid, string>().ConvertUsing(g => g.ToString("N"));
 
         // long <-> DateTime
-        CreateMap<long, DateTime>().ConvertUsing(g => DateTimeOffset.FromUnixTimeSeconds(g).DateTime.ToUniversalTime());
+        CreateMap<long, DateTime>()
+            .ConvertUsing(g => DateTimeOffset.FromUnixTimeSeconds(g).DateTime.ToUniversalTime());
         CreateMap<DateTime, long>().ConvertUsing(g => new DateTimeOffset(g).ToUnixTimeSeconds());
 
         // string <-> int
-        CreateMap<string, int>().ConvertUsing(g => ToInt(g));
+        CreateMap<string, int>()
+            .ConvertUsing(g => ToInt(g));
         CreateMap<int, string>().ConvertUsing(g => g.ToString());
 
         // Entities
         // PlexAccountServer => PlexServer
         CreateMap<PlexAccountServer, PlexServer>(MemberList.Destination)
-            .ConvertUsing(source => source.PlexServer ?? null);
+            .ConvertUsing(source => source.PlexServer);
     }
 
     private static int ToInt(string stringInt)

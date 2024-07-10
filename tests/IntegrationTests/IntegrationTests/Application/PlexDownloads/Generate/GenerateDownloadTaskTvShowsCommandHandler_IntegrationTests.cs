@@ -10,7 +10,8 @@ public class GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests : BaseIn
 {
     private DownloadTaskTvShowValidator validator = new();
 
-    public GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests(ITestOutputHelper output) : base(output) { }
+    public GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldHaveGeneratedAllTvShowsDownloadTasks_WhenGivenValidCommands()
@@ -44,10 +45,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests : BaseIn
         var result = await mediatr.Send(new GenerateDownloadTaskTvShowsCommand(tvShows));
 
         // Assert
-        var downloadTaskTvShows = await DbContext
-            .DownloadTaskTvShow
-            .IncludeAll()
-            .ToListAsync();
+        var downloadTaskTvShows = await DbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
 
         downloadTaskTvShows.Count.ShouldBe(5);
         result.IsSuccess.ShouldBeTrue();
@@ -57,9 +55,10 @@ public class GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests : BaseIn
             downloadTaskTvShow.Calculate();
             var validationResult = await validator.ValidateAsync(downloadTaskTvShow);
             // Ignore DownloadDirectory and DestinationDirectory errors as these are set in the DownloadJob
-            var validErrors = validationResult.Errors.Filter(x =>
-                !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DownloadDirectory)) &&
-                !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DestinationDirectory)));
+            var validErrors = validationResult.Errors.FindAll(x =>
+                !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DownloadDirectory))
+                && !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DestinationDirectory))
+            );
             validErrors.ShouldBeEmpty();
         }
     }

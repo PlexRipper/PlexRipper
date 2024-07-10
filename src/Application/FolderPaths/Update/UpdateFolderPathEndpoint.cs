@@ -1,7 +1,6 @@
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
-using FileSystem.Contracts;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -42,21 +41,30 @@ public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointReq
     {
         Put(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<FolderPathDTO>))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<FolderPathDTO>))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
-    public override async Task HandleAsync(UpdateFolderPathEndpointRequest req, CancellationToken ct)
+    public override async Task HandleAsync(
+        UpdateFolderPathEndpointRequest req,
+        CancellationToken ct
+    )
     {
         // TODO Should prevent updating reserved folder paths with id < 10
         var folderPath = req.FolderPathDto.ToModel();
-        var folderPathDb = await _dbContext.FolderPaths.AsTracking().FirstOrDefaultAsync(x => x.Id == folderPath.Id, ct);
+        var folderPathDb = await _dbContext
+            .FolderPaths.AsTracking()
+            .FirstOrDefaultAsync(x => x.Id == folderPath.Id, ct);
 
         if (folderPathDb is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(FolderPath), folderPath.Id), ct);
+            await SendFluentResult(
+                ResultExtensions.EntityNotFound(nameof(FolderPath), folderPath.Id),
+                ct
+            );
             return;
         }
 

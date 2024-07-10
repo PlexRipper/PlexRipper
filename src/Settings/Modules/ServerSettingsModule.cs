@@ -52,7 +52,7 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
     }
 
     public override IServerSettings DefaultValues() =>
-        new ServerSettings { Data = CreateServerSettingsFromDb(new List<PlexServer>()), };
+        new ServerSettings { Data = CreateServerSettingsFromDb(new List<PlexServer>()) };
 
     public IObservable<int> GetDownloadSpeedLimitObservable(string machineIdentifier)
     {
@@ -67,9 +67,9 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
     }
 
     public int GetDownloadSpeedLimit(string machineIdentifier) =>
-        GetPlexServerSettings(machineIdentifier).DownloadSpeedLimit;
+        GetPlexServerSettings(machineIdentifier)?.DownloadSpeedLimit ?? 0;
 
-    public override IServerSettings GetValues() => new ServerSettings { Data = Data, };
+    public override IServerSettings GetValues() => new ServerSettings { Data = Data };
 
     public IObservable<PlexServerSettingsModel> ServerSettings(string machineIdentifier)
     {

@@ -17,7 +17,7 @@ public class ResultDTO
 
 public class ResultDTO<T> : ResultDTO
 {
-    public required T Value { get; set; }
+    public T Value { get; set; }
 }
 
 public class ReasonDTO : IReason

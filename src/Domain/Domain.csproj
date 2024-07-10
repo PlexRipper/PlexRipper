@@ -18,11 +18,6 @@
 		<PackageReference Include="LanguageExt.Core" Version="4.4.8" />
 		<PackageReference Include="MediatR" Version="12.2.0" />
 		<PackageReference Include="NaturalSort.Extension" Version="4.2.0" />
-		<PackageReference Include="Riok.Mapperly" Version="3.4.0" />
-		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.312">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 		<PackageReference Include="System.Reactive" Version="5.0.0" />
 		<PackageReference Include="System.Text.Json" Version="8.0.3" />

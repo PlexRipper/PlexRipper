@@ -63,21 +63,6 @@
         "resolved": "4.2.0",
         "contentHash": "6aGueMxAOjclKlJ7NsuewASgPOc1Pl7Wtaz83BMUIWf8MgKWkTfcsHSnyy4xTZxzLWyfr8f6SngJdp9rmw50Jw=="
       },
-      "Riok.Mapperly": {
-        "type": "Direct",
-        "requested": "[3.4.0, )",
-        "resolved": "3.4.0",
-        "contentHash": "bTxBEQ0+2x816IL78Fv0B/KkaGRtzfisit9dfWTfa7jjjwMMzpMW9A+V/hyxqHdJtYvtDL6dUNMLJige4zxJvw=="
-      },
-      "StyleCop.Analyzers": {
-        "type": "Direct",
-        "requested": "[1.2.0-beta.312, )",
-        "resolved": "1.2.0-beta.312",
-        "contentHash": "SQCTxlYm6+d4rJ1/hNVLNryOZx6y23Z0JYp9WmUu6YtCApNMyUNJ//4yucqP7al2Jv0kwBuTRyK/4qWmGmIA/A==",
-        "dependencies": {
-          "StyleCop.Analyzers.Unstable": "1.2.0.312"
-        }
-      },
       "System.ComponentModel.Annotations": {
         "type": "Direct",
         "requested": "[5.0.0, )",
@@ -381,11 +366,6 @@
           "xunit.extensibility.core": "2.4.2",
           "xunit.extensibility.execution": "2.4.2"
         }
-      },
-      "StyleCop.Analyzers.Unstable": {
-        "type": "Transitive",
-        "resolved": "1.2.0.312",
-        "contentHash": "MtkINha/h9vxhjRR9mYiwtwGGeJQzgshCuQkwlSGHjXdo3hJB769Jiu6Lh0/ouyTXck0gE0ZD0UCjmaY6hCwHQ=="
       },
       "System.AppContext": {
         "type": "Transitive",

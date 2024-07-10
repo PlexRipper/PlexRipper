@@ -1,40 +1,64 @@
 using PlexRipper.Domain;
-using Riok.Mapperly.Abstractions;
 
 namespace Application.Contracts;
 
-[Mapper]
-public static partial class FileSystemMapper
+public static class FileSystemMapper
 {
     #region ToDTO
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial FileSystemDTO ToDTO(this FileSystemResult fileSystemResult);
+    public static FileSystemDTO ToDTO(this FileSystemResult value) =>
+        new()
+        {
+            Parent = value.Parent,
+            Directories = value.Directories.ToDTO(),
+            Files = value.Files.ToDTO(),
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial List<FileSystemDTO> ToDTO(this List<FileSystemResult> fileSystemResult);
+    public static List<FileSystemDTO> ToDTO(this List<FileSystemResult> value) =>
+        value.ConvertAll(ToDTO);
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial FileSystemModelDTO ToDTO(this FileSystemModel fileSystemModel);
+    public static FileSystemModelDTO ToDTO(this FileSystemModel value) =>
+        new()
+        {
+            Type = value.Type,
+            Name = value.Name,
+            Path = value.Path,
+            Extension = value.Extension,
+            Size = value.Size,
+            LastModified = value.LastModified,
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Target)]
-    public static partial List<FileSystemModelDTO> ToDTO(this List<FileSystemModel> fileSystemModel);
+    public static List<FileSystemModelDTO> ToDTO(this List<FileSystemModel> value) =>
+        value.ConvertAll(ToDTO);
 
     #endregion
 
     #region ToModel
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    public static partial FileSystemResult ToModel(this FileSystemDTO fileSystemResult);
+    public static FileSystemResult ToModel(this FileSystemDTO fileSystemResult) =>
+        new()
+        {
+            Parent = fileSystemResult.Parent,
+            Directories = fileSystemResult.Directories.ToModel(),
+            Files = fileSystemResult.Files.ToModel(),
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    public static partial List<FileSystemResult> ToModel(this List<FileSystemDTO> fileSystemResult);
+    public static List<FileSystemResult> ToModel(this List<FileSystemDTO> fileSystemResult) =>
+        fileSystemResult.ConvertAll(ToModel);
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    public static partial FileSystemModel ToModel(this FileSystemModelDTO fileSystemModel);
+    public static FileSystemModel ToModel(this FileSystemModelDTO fileSystemModel) =>
+        new()
+        {
+            Type = fileSystemModel.Type,
+            Name = fileSystemModel.Name,
+            Path = fileSystemModel.Path,
+            Extension = fileSystemModel.Extension,
+            Size = fileSystemModel.Size,
+            LastModified = fileSystemModel.LastModified,
+        };
 
-    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
-    public static partial List<FileSystemModel> ToModel(this List<FileSystemModelDTO> fileSystemModel);
+    public static List<FileSystemModel> ToModel(this List<FileSystemModelDTO> fileSystemModel) =>
+        fileSystemModel.ConvertAll(ToModel);
 
     #endregion
 }

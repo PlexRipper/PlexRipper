@@ -17,6 +17,12 @@
         "resolved": "2.1.2",
         "contentHash": "dSiH9B0apNU5abV3OVUs3eTfHiidEAa8IMOLGW0eEl5tB8Ba1ngkGC7RT/RGy61ifGcPzCe7DMP78KB8pA5kNg=="
       },
+      "CSharpier.MsBuild": {
+        "type": "Direct",
+        "requested": "[0.28.2, )",
+        "resolved": "0.28.2",
+        "contentHash": "eMPtBF9ECE5sMBXX6fZw/phFZ9UeV62E43z78VPKIgCJMppojxDc03RD6ROpPgk8Vvde11vkcZf69NveW/T1rg=="
+      },
       "FluentValidation": {
         "type": "Direct",
         "requested": "[11.9.0, )",

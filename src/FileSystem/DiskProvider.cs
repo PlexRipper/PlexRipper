@@ -111,6 +111,8 @@ public class DiskProvider : IDiskProvider
                 Path = GetDirectoryPath(d.FullName.GetActualCasing()),
                 LastModified = d.LastWriteTimeUtc,
                 Type = FileSystemEntityType.Folder,
+                Extension = d.Extension,
+                Size = 0, // TODO maybe calculating this is a bit expensive, see if needed
             })
             .ToList();
 
@@ -146,10 +148,7 @@ public class DiskProvider : IDiskProvider
         return GetAllMounts().Where(d => !IsSpecialMount(d)).ToList();
     }
 
-    protected virtual bool IsSpecialMount(IMount mount)
-    {
-        return false;
-    }
+    protected virtual bool IsSpecialMount(IMount mount) => false;
 
     protected virtual List<IMount> GetAllMounts()
     {

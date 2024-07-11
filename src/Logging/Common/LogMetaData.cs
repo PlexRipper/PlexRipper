@@ -27,7 +27,7 @@ public record LogMetaData
 
     #region Properties
 
-    private ILogger _logger { get; }
+    private ILogger _logger { get; } = null!;
 
     public string ClassName { get; init; }
     public string MethodName { get; init; }

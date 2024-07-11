@@ -1,10 +1,10 @@
 ﻿namespace PlexRipper.Domain.DownloadManager;
 
-public class PlexServerSettingsModel
+public record PlexServerSettingsModel
 {
-    public string PlexServerName { get; set; }
+    public required string PlexServerName { get; set; }
 
-    public string MachineIdentifier { get; set; }
+    public required string MachineIdentifier { get; set; }
 
-    public int DownloadSpeedLimit { get; set; }
+    public required int DownloadSpeedLimit { get; set; }
 }

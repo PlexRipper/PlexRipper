@@ -77,64 +77,48 @@ public class PlexServerConnection : BaseEntity
         return $"{uri.Scheme}://{uri.Host}:{uri.Port}/photo/:/transcode?url={uri.AbsolutePath}";
     }
 
-    public string GetDownloadUrl(string fileLocationUrl, string token)
-    {
-        return $"{Url}{fileLocationUrl}?X-Plex-Token={token}";
-    }
+    public string GetDownloadUrl(string fileLocationUrl, string token) =>
+        $"{Url}{fileLocationUrl}?X-Plex-Token={token}";
 
     #endregion
 
     #region Operators
 
-    public static bool operator ==(PlexServerConnection left, PlexServerConnection right)
-    {
-        return Equals(left, right);
-    }
+    public static bool operator ==(PlexServerConnection left, PlexServerConnection right) => Equals(left, right);
 
-    public static bool operator !=(PlexServerConnection left, PlexServerConnection right)
-    {
-        return !Equals(left, right);
-    }
+    public static bool operator !=(PlexServerConnection left, PlexServerConnection right) => !Equals(left, right);
 
     #endregion
 
     #region Equality
 
     /// <inheritdoc/>
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Protocol, Address, Port, Local, Relay, IPv6, PlexServerId);
-    }
+    public override int GetHashCode() => HashCode.Combine(Protocol, Address, Port, Local, Relay, IPv6, PlexServerId);
 
     /// <inheritdoc/>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (ReferenceEquals(null, obj))
             return false;
+
         if (ReferenceEquals(this, obj))
             return true;
-        if (obj.GetType() != GetType())
-            return false;
 
-        return Equals((PlexServerConnection)obj);
+        return obj.GetType() == GetType() && Equals((PlexServerConnection)obj);
     }
 
-    protected bool Equals(PlexServerConnection other)
-    {
-        return Protocol == other.Protocol
-            && Address == other.Address
-            && Port == other.Port
-            && Local == other.Local
-            && Relay == other.Relay
-            && IPv6 == other.IPv6
-            && PlexServerId == other.PlexServerId;
-    }
+    protected bool Equals(PlexServerConnection other) =>
+        Protocol == other.Protocol
+        && Address == other.Address
+        && Port == other.Port
+        && Local == other.Local
+        && Relay == other.Relay
+        && IPv6 == other.IPv6
+        && PlexServerId == other.PlexServerId;
 
     #endregion
 
     /// <inheritdoc/>
-    public override string ToString()
-    {
-        return $"[ServerId: {PlexServerId} - Url: {Url} - {nameof(PortFix)}: {PortFix} - Local: {Local} - Relay: {Relay} - IPv6: {IPv6}]";
-    }
+    public override string ToString() =>
+        $"[ServerId: {PlexServerId} - Url: {Url} - {nameof(PortFix)}: {PortFix} - Local: {Local} - Relay: {Relay} - IPv6: {IPv6}]";
 }

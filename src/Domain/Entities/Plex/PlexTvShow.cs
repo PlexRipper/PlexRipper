@@ -6,11 +6,11 @@ public class PlexTvShow : PlexMedia
 
     #region Relationships
 
-    public List<PlexTvShowGenre> PlexTvShowGenres { get; set; }
+    public List<PlexTvShowGenre> PlexTvShowGenres { get; set; } = new();
 
-    public List<PlexTvShowRole> PlexTvShowRoles { get; set; }
+    public List<PlexTvShowRole> PlexTvShowRoles { get; set; } = new();
 
-    public List<PlexTvShowSeason> Seasons { get; set; }
+    public List<PlexTvShowSeason> Seasons { get; set; } = new();
 
     #endregion
 }

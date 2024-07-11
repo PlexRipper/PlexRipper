@@ -1,10 +1,10 @@
 namespace PlexRipper.Domain;
 
-public class ServerAccessTokenDTO
+public record ServerAccessTokenDTO
 {
-    public int PlexAccountId { get; set; }
+    public required int PlexAccountId { get; set; }
 
-    public string MachineIdentifier { get; set; }
+    public required string MachineIdentifier { get; set; }
 
-    public string AccessToken { get; set; }
+    public required string AccessToken { get; set; }
 }

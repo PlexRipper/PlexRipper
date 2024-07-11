@@ -1,51 +1,35 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using System.IO;
 
-namespace PlexRipper.Domain;
-
-public class PlexMediaMetaData : BaseEntity
+namespace PlexRipper.Domain
 {
-    public string Title { get; set; }
+    public class PlexMediaMetaData : BaseEntity
+    {
+        public required string Title { get; set; }
+        public required string TitleTvShow { get; set; }
+        public required string TitleTvShowSeason { get; set; }
+        public required int RatingKey { get; set; }
+        public required long Duration { get; set; }
+        public required int Bitrate { get; set; }
+        public required int Width { get; set; }
+        public required int Height { get; set; }
+        public required double AspectRatio { get; set; }
+        public required int AudioChannels { get; set; }
+        public required string AudioCodec { get; set; }
+        public required string VideoCodec { get; set; }
+        public required string VideoResolution { get; set; }
+        public required string MediaFormat { get; set; }
+        public required string VideoFrameRate { get; set; }
+        public required string AudioProfile { get; set; }
+        public required string VideoProfile { get; set; }
+        public required string FilePath { get; set; }
+        public required string ObfuscatedFilePath { get; set; }
 
-    public string TitleTvShow { get; set; }
+        #region Helpers
 
-    public string TitleTvShowSeason { get; set; }
+        [NotMapped]
+        public string FileName => Path.GetFileName(FilePath);
 
-    public int RatingKey { get; set; }
-
-    public long Duration { get; set; }
-
-    public int Bitrate { get; set; }
-
-    public int Width { get; set; }
-
-    public int Height { get; set; }
-
-    public double AspectRatio { get; set; }
-
-    public int AudioChannels { get; set; }
-
-    public string AudioCodec { get; set; }
-
-    public string VideoCodec { get; set; }
-
-    public string VideoResolution { get; set; }
-
-    public string MediaFormat { get; set; }
-
-    public string VideoFrameRate { get; set; }
-
-    public string AudioProfile { get; set; }
-
-    public string VideoProfile { get; set; }
-
-    public string FilePath { get; set; }
-
-    public string ObfuscatedFilePath { get; set; }
-
-    #region Helpers
-
-    [NotMapped]
-    public string FileName => Path.GetFileName(FilePath);
-
-    #endregion
+        #endregion
+    }
 }

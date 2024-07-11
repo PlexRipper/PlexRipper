@@ -164,15 +164,9 @@ public class PlexServer : BaseEntity
 
     #region Operators
 
-    public static bool operator ==(PlexServer left, PlexServer right)
-    {
-        return Equals(left, right);
-    }
+    public static bool operator ==(PlexServer left, PlexServer right) => Equals(left, right);
 
-    public static bool operator !=(PlexServer left, PlexServer right)
-    {
-        return !Equals(left, right);
-    }
+    public static bool operator !=(PlexServer left, PlexServer right) => !Equals(left, right);
 
     #endregion
 
@@ -215,16 +209,15 @@ public class PlexServer : BaseEntity
     }
 
     /// <inheritdoc/>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (ReferenceEquals(null, obj))
             return false;
+
         if (ReferenceEquals(this, obj))
             return true;
-        if (obj.GetType() != GetType())
-            return false;
 
-        return Equals((PlexServer)obj);
+        return obj.GetType() == GetType() && Equals((PlexServer)obj);
     }
 
     /// <summary>
@@ -232,33 +225,31 @@ public class PlexServer : BaseEntity
     /// </summary>
     /// <param name="other">The other <see cref="PlexServer"/> to compare against.</param>
     /// <returns>Returns whether these <see cref="PlexServer">PlexServers</see> are equal.</returns>
-    protected bool Equals(PlexServer other)
-    {
-        return Name == other.Name
-            && OwnerId == other.OwnerId
-            && PlexServerOwnerUsername == other.PlexServerOwnerUsername
-            && Device == other.Device
-            && Platform == other.Platform
-            && PlatformVersion == other.PlatformVersion
-            && Product == other.Product
-            && ProductVersion == other.ProductVersion
-            && Provides == other.Provides
-            && CreatedAt.Equals(other.CreatedAt)
-            && LastSeenAt.Equals(other.LastSeenAt)
-            && MachineIdentifier == other.MachineIdentifier
-            && PublicAddress == other.PublicAddress
-            && PreferredConnectionId == other.PreferredConnectionId
-            && Owned == other.Owned
-            && Home == other.Home
-            && Synced == other.Synced
-            && Relay == other.Relay
-            && Presence == other.Presence
-            && HttpsRequired == other.HttpsRequired
-            && PublicAddressMatches == other.PublicAddressMatches
-            && DnsRebindingProtection == other.DnsRebindingProtection
-            && NatLoopbackSupported == other.NatLoopbackSupported
-            && ServerFixApplyDNSFix == other.ServerFixApplyDNSFix;
-    }
+    protected bool Equals(PlexServer other) =>
+        Name == other.Name
+        && OwnerId == other.OwnerId
+        && PlexServerOwnerUsername == other.PlexServerOwnerUsername
+        && Device == other.Device
+        && Platform == other.Platform
+        && PlatformVersion == other.PlatformVersion
+        && Product == other.Product
+        && ProductVersion == other.ProductVersion
+        && Provides == other.Provides
+        && CreatedAt.Equals(other.CreatedAt)
+        && LastSeenAt.Equals(other.LastSeenAt)
+        && MachineIdentifier == other.MachineIdentifier
+        && PublicAddress == other.PublicAddress
+        && PreferredConnectionId == other.PreferredConnectionId
+        && Owned == other.Owned
+        && Home == other.Home
+        && Synced == other.Synced
+        && Relay == other.Relay
+        && Presence == other.Presence
+        && HttpsRequired == other.HttpsRequired
+        && PublicAddressMatches == other.PublicAddressMatches
+        && DnsRebindingProtection == other.DnsRebindingProtection
+        && NatLoopbackSupported == other.NatLoopbackSupported
+        && ServerFixApplyDNSFix == other.ServerFixApplyDNSFix;
 
     #endregion
 }

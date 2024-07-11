@@ -99,7 +99,7 @@ public class PlexAccount : BaseEntity
     /// <summary>
     /// The associated <see cref="PlexServer"/> this <see cref="PlexAccount"/> has access to.
     /// </summary>
-    public List<PlexAccountServer> PlexAccountServers { get; set; }
+    public List<PlexAccountServer> PlexAccountServers { get; set; } = new();
 
     /// <summary>
     /// The associated <see cref="PlexLibrary"/> this <see cref="PlexAccount"/> has access to.

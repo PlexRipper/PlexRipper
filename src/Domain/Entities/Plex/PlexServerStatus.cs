@@ -22,12 +22,12 @@ public class PlexServerStatus : BaseEntity
 
     #region Relationships
 
-    public PlexServer PlexServer { get; set; }
+    public PlexServer? PlexServer { get; set; }
 
     [Column(Order = 5)]
     public int PlexServerId { get; set; }
 
-    public PlexServerConnection PlexServerConnection { get; set; }
+    public PlexServerConnection? PlexServerConnection { get; set; }
 
     [Column(Order = 6)]
     public int PlexServerConnectionId { get; set; }

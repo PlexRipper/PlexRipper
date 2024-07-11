@@ -47,15 +47,6 @@ public abstract class DownloadTaskBase : BaseEntityGuid
 
     #region Helpers
 
-    /// <summary>
-    /// Set all navigation properties to null to avoid unneeded database operation with these properties.
-    /// </summary>
-    public virtual void SetNull()
-    {
-        PlexServer = null;
-        PlexLibrary = null;
-    }
-
     public abstract PlexMediaType MediaType { get; }
 
     public abstract DownloadTaskType DownloadTaskType { get; }

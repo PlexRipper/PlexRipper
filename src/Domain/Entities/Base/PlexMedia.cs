@@ -11,16 +11,16 @@ public class PlexMedia : PlexMediaSlim
     #region Properties
 
     [Column(Order = 8)]
-    public string Studio { get; set; }
+    public string Studio { get; set; } = string.Empty;
 
     [Column(Order = 9)]
-    public string Summary { get; set; }
+    public string Summary { get; set; } = string.Empty;
 
     [Column(Order = 10)]
-    public string ContentRating { get; set; }
+    public string ContentRating { get; set; } = string.Empty;
 
     [Column(Order = 11)]
-    public double Rating { get; set; }
+    public double Rating { get; set; } = 0.0;
 
     /// <summary>
     /// Gets or sets when this media was released/aired to the public.
@@ -29,7 +29,7 @@ public class PlexMedia : PlexMediaSlim
     public DateTime? OriginallyAvailableAt { get; set; }
 
     [Column(Order = 16)]
-    public int Index { get; set; }
+    public int Index { get; set; } = -1;
 
     /// <summary>
     /// Gets or sets the full title path
@@ -43,9 +43,9 @@ public class PlexMedia : PlexMediaSlim
 
     #region Relationships
 
-    public PlexLibrary PlexLibrary { get; set; }
+    public PlexLibrary? PlexLibrary { get; set; }
 
-    public PlexServer PlexServer { get; set; }
+    public PlexServer? PlexServer { get; set; }
 
     #endregion
 }

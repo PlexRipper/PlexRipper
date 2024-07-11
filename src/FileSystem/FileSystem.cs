@@ -44,10 +44,7 @@ public class FileSystem : IFileSystem
 
     #region Public Methods
 
-    public bool FileExists(string path)
-    {
-        return !string.IsNullOrEmpty(path) && _abstractedFileSystem.File.Exists(path);
-    }
+    public bool FileExists(string path) => !string.IsNullOrEmpty(path) && _abstractedFileSystem.File.Exists(path);
 
     public Result<Stream> Open(string path, FileMode mode, FileAccess access, FileShare share)
     {
@@ -132,9 +129,7 @@ public class FileSystem : IFileSystem
 
         // If path is invalid return root file system
         if (string.IsNullOrWhiteSpace(query) || !directoryExistsResult.Value)
-        {
-            return Result.Ok(new FileSystemResult { Directories = GetDrives(), });
-        }
+            return Result.Ok(new FileSystemResult { Directories = GetDrives() });
 
         if (allowFoldersWithoutTrailingSlashes)
             return Result.Ok(GetResult(query, includeFiles));
@@ -148,12 +143,10 @@ public class FileSystem : IFileSystem
         return Result.Ok(new FileSystemResult());
     }
 
-    public string ToAbsolutePath(string relativePath)
-    {
-        return _abstractedFileSystem.Path.GetFullPath(
+    public string ToAbsolutePath(string relativePath) =>
+        _abstractedFileSystem.Path.GetFullPath(
             _abstractedFileSystem.Path.Combine(_pathProvider.RootDirectory, relativePath)
         );
-    }
 
     public Result FileMove(string sourceFileName, string destFileName, bool overwrite = true)
     {
@@ -182,6 +175,8 @@ public class FileSystem : IFileSystem
                 Name = _diskProvider.GetVolumeName(d),
                 Path = d.RootDirectory,
                 LastModified = null,
+                Extension = string.Empty,
+                Size = d.TotalSize,
             })
             .ToList();
     }

@@ -35,11 +35,11 @@ public abstract class DownloadTaskBase : BaseEntityGuid
 
     #region Relationships
 
-    public required PlexServer? PlexServer { get; set; }
+    public PlexServer? PlexServer { get; set; }
 
     public required int PlexServerId { get; set; }
 
-    public required PlexLibrary? PlexLibrary { get; set; }
+    public PlexLibrary? PlexLibrary { get; set; }
 
     public required int PlexLibraryId { get; set; }
 

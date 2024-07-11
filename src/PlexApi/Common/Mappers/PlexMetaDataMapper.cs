@@ -72,6 +72,8 @@ public static partial class PlexMetaDataMapper
             PlexServer = default,
             PlexLibraryId = default,
             PlexServerId = default,
+            FullThumbUrl = null,
+            FullBannerUrl = null,
         };
     }
 

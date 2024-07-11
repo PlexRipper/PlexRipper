@@ -7,24 +7,24 @@ public class PlexAccountServer
     #region Relationships
 
     [Column(Order = 0)]
-    public int PlexAccountId { get; set; }
+    public required int PlexAccountId { get; set; }
 
-    public virtual PlexAccount PlexAccount { get; set; }
+    public virtual PlexAccount? PlexAccount { get; set; }
 
     [Column(Order = 1)]
-    public int PlexServerId { get; set; }
+    public required int PlexServerId { get; set; }
 
-    public virtual PlexServer PlexServer { get; set; }
+    public virtual PlexServer? PlexServer { get; set; }
 
     #endregion
 
     #region Properties
 
     [Column(Order = 2)]
-    public string AuthToken { get; set; }
+    public required string AuthToken { get; set; }
 
     [Column(Order = 3)]
-    public DateTime AuthTokenCreationDate { get; set; }
+    public required DateTime AuthTokenCreationDate { get; set; }
 
     #endregion
 }

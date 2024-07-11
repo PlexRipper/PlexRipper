@@ -10,65 +10,65 @@ public class PlexLibrary : BaseEntity
     /// Gets or sets plex Library type, see: https://github.com/Arcanemagus/plex-api/wiki/MediaTypes.
     /// </summary>
     [Column(Order = 1)]
-    public PlexMediaType Type { get; set; }
+    public required PlexMediaType Type { get; init; }
 
     /// <summary>
     /// Gets or sets the display title of this <see cref="PlexLibrary"/>.
     /// </summary>
     [Column(Order = 2)]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// Gets or sets the Library Section Identifier used by Plex.
     /// </summary>
     [Column(Order = 3)]
-    public string Key { get; set; }
+    public required string Key { get; set; }
 
     /// <summary>
     /// Gets or sets the relative path of the Library location on the hosted PlexServer,
     /// E.g: /AnimeSeries, Q:\[T.V SHOWS].
     /// </summary>
     [Column(Order = 4)]
-    public string LibraryLocationPath { get; set; }
+    public required string LibraryLocationPath { get; set; }
 
     /// <summary>
     /// Gets or sets the creation date of this <see cref="PlexLibrary"/> on the <see cref="PlexServer"/> by the owner.
     /// Value is set by the PlexApi.
     /// </summary>
     [Column(Order = 5)]
-    public DateTime CreatedAt { get; set; }
+    public required DateTime CreatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the last time this <see cref="PlexLibrary"/> was updated by the <see cref="PlexServer"/> owner.
     /// Value is set by the PlexApi.
     /// </summary>
     [Column(Order = 6)]
-    public DateTime UpdatedAt { get; set; }
+    public required DateTime UpdatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the last time this <see cref="PlexLibrary"/> was scanned for new media by the <see cref="PlexServer"/> owner.
     /// Value is set by the PlexApi.
     /// </summary>
     [Column(Order = 7)]
-    public DateTime ScannedAt { get; set; }
+    public required DateTime ScannedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the DateTime this <see cref="PlexLibrary"/> was last synced with the PlexApi.
     /// </summary>
     [Column(Order = 8)]
-    public DateTime SyncedAt { get; set; }
+    public required DateTime SyncedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the unique id of the <see cref="PlexLibrary"/>.
     /// </summary>
     [Column(Order = 9)]
-    public Guid Uuid { get; set; }
+    public required Guid Uuid { get; set; }
 
     /// <summary>
     /// Gets or sets this relative path Id of the Library location.
     /// </summary>
     [Column(Order = 10)]
-    public int LibraryLocationId { get; set; }
+    public required int LibraryLocationId { get; set; }
 
     /// <summary>
     /// Gets or sets the <see cref="PlexLibraryMetaData"/>, this is a JSON field that contains a collection
@@ -89,7 +89,7 @@ public class PlexLibrary : BaseEntity
     /// <summary>
     /// Gets or sets the PlexServerId of the PlexServer this PlexLibrary belongs to.
     /// </summary>
-    public int PlexServerId { get; set; }
+    public required int PlexServerId { get; set; }
 
     /// <summary>
     /// Gets or sets the default download destination <see cref="FolderPath"/>.

@@ -12,7 +12,7 @@ public class DownloadWorkerTask : BaseEntity
     /// <summary>
     /// Initializes a new instance of the <see cref="DownloadWorkerTask"/> class.
     /// </summary>
-    /// <param name="DownloadTaskFileBase"></param>
+    /// <param name="downloadTask"></param>
     /// <param name="partIndex"></param>
     /// <param name="startPosition"></param>
     /// <param name="endPosition"></param>

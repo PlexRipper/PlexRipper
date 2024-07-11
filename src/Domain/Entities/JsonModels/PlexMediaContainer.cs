@@ -2,5 +2,5 @@
 
 public class PlexMediaContainer
 {
-    public List<PlexMediaData> MediaData { get; set; }
+    public required List<PlexMediaData> MediaData { get; set; }
 }

@@ -69,7 +69,7 @@ public class PlexServerConnection : BaseEntity
     public string Name => $"Connection: ({Url})";
 
     [NotMapped]
-    public PlexServerStatus LatestConnectionStatus => PlexServerStatus.FirstOrDefault();
+    public PlexServerStatus? LatestConnectionStatus => PlexServerStatus.FirstOrDefault();
 
     public string GetThumbUrl(string thumbPath)
     {

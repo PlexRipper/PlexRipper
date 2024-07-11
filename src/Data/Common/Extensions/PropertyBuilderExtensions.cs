@@ -12,14 +12,14 @@ public static class PropertyBuilderExtensions
     /// <summary>
     /// Serializes field as JSON blob in database.
     /// </summary>
-    public static PropertyBuilder<T> HasJsonValueConversion<T>(
-        this PropertyBuilder<T> propertyBuilder)
+    public static PropertyBuilder<T> HasJsonValueConversion<T>(this PropertyBuilder<T> propertyBuilder)
         where T : class
     {
         // TODO Could add JsonSchema Source Generators here to speed things up
         propertyBuilder.HasConversion(
             v => JsonSerializer.Serialize(v, DefaultJsonSerializerOptions.ConfigBase),
-            v => JsonSerializer.Deserialize<T>(v, DefaultJsonSerializerOptions.ConfigBase));
+            v => JsonSerializer.Deserialize<T>(v, DefaultJsonSerializerOptions.ConfigBase)
+        );
         return propertyBuilder;
     }
 }

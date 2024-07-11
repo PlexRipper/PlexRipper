@@ -4,7 +4,8 @@ namespace Settings.UnitTests.Modules;
 
 public class DisplaySettingsModule_Update_UnitTests : BaseUnitTest<DisplaySettingsModule>
 {
-    public DisplaySettingsModule_Update_UnitTests(ITestOutputHelper output) : base(output) { }
+    public DisplaySettingsModule_Update_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public void ShouldUpdateSettingsModule_WhenGivenValidSettingsObject()

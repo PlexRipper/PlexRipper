@@ -12,7 +12,8 @@ namespace PlexRipper.Application;
 /// <returns>Returns successful result if any connection connected.</returns>
 public record CheckAllConnectionsStatusByPlexServerCommand(int PlexServerId) : IRequest<Result<List<PlexServerStatus>>>;
 
-public class CheckAllConnectionsStatusByPlexServerCommandValidator : AbstractValidator<CheckAllConnectionsStatusByPlexServerCommand>
+public class CheckAllConnectionsStatusByPlexServerCommandValidator
+    : AbstractValidator<CheckAllConnectionsStatusByPlexServerCommand>
 {
     public CheckAllConnectionsStatusByPlexServerCommandValidator()
     {
@@ -20,30 +21,34 @@ public class CheckAllConnectionsStatusByPlexServerCommandValidator : AbstractVal
     }
 }
 
-public class CheckAllConnectionsStatusByPlexServerCommandHandler : IRequestHandler<CheckAllConnectionsStatusByPlexServerCommand, Result<List<PlexServerStatus>>>
+public class CheckAllConnectionsStatusByPlexServerCommandHandler
+    : IRequestHandler<CheckAllConnectionsStatusByPlexServerCommand, Result<List<PlexServerStatus>>>
 {
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
 
-    public CheckAllConnectionsStatusByPlexServerCommandHandler(
-        IPlexRipperDbContext dbContext,
-        IMediator mediator)
+    public CheckAllConnectionsStatusByPlexServerCommandHandler(IPlexRipperDbContext dbContext, IMediator mediator)
     {
         _dbContext = dbContext;
         _mediator = mediator;
     }
 
-    public async Task<Result<List<PlexServerStatus>>> Handle(CheckAllConnectionsStatusByPlexServerCommand command, CancellationToken cancellationToken)
+    public async Task<Result<List<PlexServerStatus>>> Handle(
+        CheckAllConnectionsStatusByPlexServerCommand command,
+        CancellationToken cancellationToken
+    )
     {
-        var connections = await _dbContext.PlexServerConnections.Where(x => x.PlexServerId == command.PlexServerId)
+        var connections = await _dbContext
+            .PlexServerConnections.Where(x => x.PlexServerId == command.PlexServerId)
             .ToListAsync(cancellationToken);
 
         if (!connections.Any())
             return Result.Fail($"No connections found for the given plex server id {command.PlexServerId}").LogError();
 
         // Create connection check tasks for all connections
-        var connectionTasks = connections
-            .Select(async plexServerConnection => await _mediator.Send(new CheckConnectionStatusByIdCommand(plexServerConnection.Id), cancellationToken));
+        var connectionTasks = connections.Select(async plexServerConnection =>
+            await _mediator.Send(new CheckConnectionStatusByIdCommand(plexServerConnection.Id), cancellationToken)
+        );
 
         var tasksResult = await Task.WhenAll(connectionTasks);
         var combinedResults = Result.Merge(tasksResult);
@@ -51,6 +56,8 @@ public class CheckAllConnectionsStatusByPlexServerCommandHandler : IRequestHandl
         if (tasksResult.Any(statusResult => statusResult.Value.IsSuccessful))
             return Result.Ok(combinedResults.Value.ToList());
 
-        return Result.Fail($"All connections to plex server with id: {command.PlexServerId} failed to connect").LogError();
+        return Result
+            .Fail($"All connections to plex server with id: {command.PlexServerId} failed to connect")
+            .LogError();
     }
 }

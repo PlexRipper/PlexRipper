@@ -12,5 +12,6 @@ public interface IFileMergeStreamProvider
         FileTask fileTask,
         Stream destination,
         Subject<long> bytesReceivedProgress,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 }

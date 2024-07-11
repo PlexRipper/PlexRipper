@@ -85,13 +85,15 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
 
     #endregion
 
-    public DownloadTaskKey ToKey() => new()
-    {
-        Type = DownloadTaskType,
-        Id = Id,
-        PlexServerId = PlexServerId,
-        PlexLibraryId = PlexLibraryId,
-    };
+    public DownloadTaskKey ToKey() =>
+        new()
+        {
+            Type = DownloadTaskType,
+            Id = Id,
+            PlexServerId = PlexServerId,
+            PlexLibraryId = PlexLibraryId,
+        };
 
-    public override string ToString() => $"DownloadTaskUpdate: [{DownloadTaskType}] [{DownloadStatus}] [{Title}] [Download Location: {DownloadDirectory}]";
+    public override string ToString() =>
+        $"DownloadTaskUpdate: [{DownloadTaskType}] [{DownloadStatus}] [{Title}] [Download Location: {DownloadDirectory}]";
 }

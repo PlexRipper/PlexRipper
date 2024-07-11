@@ -1,9 +1,11 @@
 ﻿using Application.Contracts;
+
 namespace PlexRipper.Application.UnitTests;
 
 public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDownloadTasksCommandHandler>
 {
-    public CreateDownloadTasksCommandHandler_UnitTests(ITestOutputHelper output) : base(output) { }
+    public CreateDownloadTasksCommandHandler_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldGenerateAllDownloadTaskTypes_WhenAllMediaTypesAreGiven()

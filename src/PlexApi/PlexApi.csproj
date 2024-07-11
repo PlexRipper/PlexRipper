@@ -13,6 +13,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="Autofac" Version="8.0.0" />
+		<PackageReference Include="CSharpier.MsBuild" Version="0.28.2">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="Polly" Version="8.3.1" />
 		<PackageReference Include="RestSharp" Version="110.2.0" />
 		<PackageReference Include="RestSharp.Serializers.SystemTextJson" Version="106.15.0" />

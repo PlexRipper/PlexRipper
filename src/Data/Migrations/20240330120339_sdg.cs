@@ -13,7 +13,8 @@ namespace PlexRipper.Data.Migrations
             migrationBuilder.RenameColumn(
                 name: "TempDirectory",
                 table: "DownloadWorkerTasks",
-                newName: "DownloadDirectory");
+                newName: "DownloadDirectory"
+            );
         }
 
         /// <inheritdoc />
@@ -22,7 +23,8 @@ namespace PlexRipper.Data.Migrations
             migrationBuilder.RenameColumn(
                 name: "DownloadDirectory",
                 table: "DownloadWorkerTasks",
-                newName: "TempDirectory");
+                newName: "TempDirectory"
+            );
         }
     }
 }

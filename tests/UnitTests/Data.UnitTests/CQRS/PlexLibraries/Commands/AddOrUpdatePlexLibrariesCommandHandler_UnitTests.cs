@@ -5,7 +5,8 @@ namespace Data.UnitTests.PlexLibraries;
 
 public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest
 {
-    public AddOrUpdatePlexLibrariesCommandHandler_UnitTests(ITestOutputHelper output) : base(output) { }
+    public AddOrUpdatePlexLibrariesCommandHandler_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldAddAllPlexLibraries_WhenNoneExistInTheDatabase()

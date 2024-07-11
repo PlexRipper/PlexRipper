@@ -25,9 +25,7 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
 
     #region Public Methods
 
-    public Result<PlexServerSettingsModel> AddServerToSettings(
-        PlexServerSettingsModel plexServerSettings
-    )
+    public Result<PlexServerSettingsModel> AddServerToSettings(PlexServerSettingsModel plexServerSettings)
     {
         if (string.IsNullOrEmpty(plexServerSettings.MachineIdentifier))
             return ResultExtensions.IsEmpty(nameof(plexServerSettings.MachineIdentifier));
@@ -73,9 +71,7 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
 
     public IObservable<PlexServerSettingsModel> ServerSettings(string machineIdentifier)
     {
-        return _serverSettingsUpdated
-            .AsObservable()
-            .Where(x => x.MachineIdentifier == machineIdentifier);
+        return _serverSettingsUpdated.AsObservable().Where(x => x.MachineIdentifier == machineIdentifier);
     }
 
     public Result SetDownloadSpeedLimit(string machineIdentifier, int downloadSpeedLimit = 0)
@@ -98,9 +94,7 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
 
     public void SetServerSettings(PlexServerSettingsModel plexServerSettings)
     {
-        var index = Data.FindIndex(x =>
-            x.MachineIdentifier == plexServerSettings.MachineIdentifier
-        );
+        var index = Data.FindIndex(x => x.MachineIdentifier == plexServerSettings.MachineIdentifier);
         if (index > -1)
         {
             if (Data[index].DownloadSpeedLimit != plexServerSettings.DownloadSpeedLimit)

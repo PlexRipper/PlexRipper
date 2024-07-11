@@ -27,9 +27,7 @@ public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpo
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/download";
 
-    public CreateDownloadTasksEndpoint(
-        ILog log,
-        IMediator mediator)
+    public CreateDownloadTasksEndpoint(ILog log, IMediator mediator)
     {
         _log = log;
         _mediator = mediator;
@@ -39,10 +37,11 @@ public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpo
     {
         Post(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(CreateDownloadTasksEndpointRequest req, CancellationToken ct)

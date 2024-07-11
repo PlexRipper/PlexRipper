@@ -32,11 +32,12 @@ public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidR
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<DownloadTaskDTO>))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<DownloadTaskDTO>))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(GetDownloadTaskByGuidRequest req, CancellationToken ct)
@@ -45,15 +46,21 @@ public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidR
 
         if (downloadTask is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), req.DownloadTaskGuid).LogError(), ct);
+            await SendFluentResult(
+                ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), req.DownloadTaskGuid).LogError(),
+                ct
+            );
             return;
         }
 
         // Add DownloadUrl to DownloadTaskDTO
         if (!downloadTask.IsDownloadable)
         {
-            var downloadUrl =
-                await _dbContext.GetDownloadUrl(downloadTask.PlexServerId, downloadTask.FileLocationUrl, ct);
+            var downloadUrl = await _dbContext.GetDownloadUrl(
+                downloadTask.PlexServerId,
+                downloadTask.FileLocationUrl,
+                ct
+            );
             if (downloadUrl.IsFailed)
                 downloadUrl.LogError();
 

@@ -16,7 +16,9 @@ public static class DownloadTaskExtensions
         downloadTask.DataReceived = downloadTask.Children.Select(x => x.DataReceived).Sum();
         downloadTask.DataTotal = downloadTask.Children.Select(x => x.DataTotal).Sum();
         downloadTask.Percentage = DataFormat.GetPercentage(downloadTask.DataReceived, downloadTask.DataTotal);
-        downloadTask.DownloadStatus = DownloadTaskActions.Aggregate(downloadTask.Children.Select(x => x.DownloadStatus).ToList());
+        downloadTask.DownloadStatus = DownloadTaskActions.Aggregate(
+            downloadTask.Children.Select(x => x.DownloadStatus).ToList()
+        );
 
         return downloadTask;
     }
@@ -31,7 +33,9 @@ public static class DownloadTaskExtensions
         downloadTask.DataReceived = downloadTask.Children.Select(x => x.DataReceived).Sum();
         downloadTask.DataTotal = downloadTask.Children.Select(x => x.DataTotal).Sum();
         downloadTask.Percentage = DataFormat.GetPercentage(downloadTask.DataReceived, downloadTask.DataTotal);
-        downloadTask.DownloadStatus = DownloadTaskActions.Aggregate(downloadTask.Children.Select(x => x.DownloadStatus).ToList());
+        downloadTask.DownloadStatus = DownloadTaskActions.Aggregate(
+            downloadTask.Children.Select(x => x.DownloadStatus).ToList()
+        );
 
         return downloadTask;
     }
@@ -51,7 +55,9 @@ public static class DownloadTaskExtensions
         downloadTask.DataReceived = downloadTask.Children.Select(x => x.DataReceived).Sum();
         downloadTask.DataTotal = downloadTask.Children.Select(x => x.DataTotal).Sum();
         downloadTask.Percentage = DataFormat.GetPercentage(downloadTask.DataReceived, downloadTask.DataTotal);
-        downloadTask.DownloadStatus = DownloadTaskActions.Aggregate(downloadTask.Children.Select(x => x.DownloadStatus).ToList());
+        downloadTask.DownloadStatus = DownloadTaskActions.Aggregate(
+            downloadTask.Children.Select(x => x.DownloadStatus).ToList()
+        );
 
         return downloadTask;
     }
@@ -71,7 +77,9 @@ public static class DownloadTaskExtensions
         downloadTask.DataReceived = downloadTask.Children.Select(x => x.DataReceived).Sum();
         downloadTask.DataTotal = downloadTask.Children.Select(x => x.DataTotal).Sum();
         downloadTask.Percentage = DataFormat.GetPercentage(downloadTask.DataReceived, downloadTask.DataTotal);
-        downloadTask.DownloadStatus = DownloadTaskActions.Aggregate(downloadTask.Children.Select(x => x.DownloadStatus).ToList());
+        downloadTask.DownloadStatus = DownloadTaskActions.Aggregate(
+            downloadTask.Children.Select(x => x.DownloadStatus).ToList()
+        );
 
         return downloadTask;
     }
@@ -89,7 +97,9 @@ public static class DownloadTaskExtensions
         downloadTask.DataReceived = downloadTask.Children.Select(x => x.DataReceived).Sum();
         downloadTask.DataTotal = downloadTask.Children.Select(x => x.DataTotal).Sum();
         downloadTask.Percentage = DataFormat.GetPercentage(downloadTask.DataReceived, downloadTask.DataTotal);
-        downloadTask.DownloadStatus = DownloadTaskActions.Aggregate(downloadTask.Children.Select(x => x.DownloadStatus).ToList());
+        downloadTask.DownloadStatus = DownloadTaskActions.Aggregate(
+            downloadTask.Children.Select(x => x.DownloadStatus).ToList()
+        );
 
         return downloadTask;
     }

@@ -8,19 +8,20 @@ namespace PlexRipper.WebAPI;
 
 public static class MapperSetup
 {
-    public static MapperConfiguration Configuration => new(cfg =>
-    {
-        // Application
-        cfg.AddProfile(new DomainMappingProfile());
-        cfg.AddProfile(new ApplicationMappingProfile());
+    public static MapperConfiguration Configuration =>
+        new(cfg =>
+        {
+            // Application
+            cfg.AddProfile(new DomainMappingProfile());
+            cfg.AddProfile(new ApplicationMappingProfile());
 
-        // Infrastructure
-        cfg.AddProfile(new PlexApiMappingProfile());
-        cfg.AddProfile(new DataMappingProfile());
+            // Infrastructure
+            cfg.AddProfile(new PlexApiMappingProfile());
+            cfg.AddProfile(new DataMappingProfile());
 
-        // Presentation
-        cfg.AddProfile(new WebApiMappingProfile());
-    });
+            // Presentation
+            cfg.AddProfile(new WebApiMappingProfile());
+        });
 
     public static IMapper CreateMapper() => Configuration.CreateMapper();
 }

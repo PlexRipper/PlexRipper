@@ -7,7 +7,8 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
 {
     #region Setup/Teardown
 
-    public ResultExtensionsLoggingTests(ITestOutputHelper output) : base(output, LogEventLevel.Verbose)
+    public ResultExtensionsLoggingTests(ITestOutputHelper output)
+        : base(output, LogEventLevel.Verbose)
     {
         ResultExtensions.SetLogger(_log);
     }
@@ -258,7 +259,8 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
                     new Error("Error #3"),
                     new Error("Error #4"),
                     new Error("Error #5"),
-                });
+                }
+            );
 
             // Act
             result.LogError();

@@ -12,11 +12,10 @@ namespace PlexRipper.Data.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTasks_DownloadTasks_RootDownloadTaskId",
-                table: "DownloadTasks");
+                table: "DownloadTasks"
+            );
 
-            migrationBuilder.DropIndex(
-                name: "IX_DownloadTasks_RootDownloadTaskId",
-                table: "DownloadTasks");
+            migrationBuilder.DropIndex(name: "IX_DownloadTasks_RootDownloadTaskId", table: "DownloadTasks");
 
             migrationBuilder.AlterColumn<int>(
                 name: "RootDownloadTaskId",
@@ -26,7 +25,8 @@ namespace PlexRipper.Data.Migrations
                 defaultValue: 0,
                 oldClrType: typeof(int),
                 oldType: "INTEGER",
-                oldNullable: true);
+                oldNullable: true
+            );
         }
 
         /// <inheritdoc />
@@ -38,19 +38,22 @@ namespace PlexRipper.Data.Migrations
                 type: "INTEGER",
                 nullable: true,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTasks_RootDownloadTaskId",
                 table: "DownloadTasks",
-                column: "RootDownloadTaskId");
+                column: "RootDownloadTaskId"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTasks_DownloadTasks_RootDownloadTaskId",
                 table: "DownloadTasks",
                 column: "RootDownloadTaskId",
                 principalTable: "DownloadTasks",
-                principalColumn: "Id");
+                principalColumn: "Id"
+            );
         }
     }
 }

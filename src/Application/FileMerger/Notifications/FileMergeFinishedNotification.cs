@@ -12,7 +12,11 @@ public class FileMergeFinishedHandler : INotificationHandler<FileMergeFinishedNo
     private readonly IMediator _mediator;
     private readonly IFileMergeSystem _fileMergeSystem;
 
-    public FileMergeFinishedHandler(IPlexRipperDbContext dbContext, IMediator mediator, IFileMergeSystem fileMergeSystem)
+    public FileMergeFinishedHandler(
+        IPlexRipperDbContext dbContext,
+        IMediator mediator,
+        IFileMergeSystem fileMergeSystem
+    )
     {
         _dbContext = dbContext;
         _mediator = mediator;
@@ -23,7 +27,10 @@ public class FileMergeFinishedHandler : INotificationHandler<FileMergeFinishedNo
     {
         var fileTask = await _dbContext.FileTasks.GetAsync(notification.FileTaskId, cancellationToken);
 
-        var downloadTask = await _dbContext.GetDownloadTaskAsync(fileTask.DownloadTaskId, cancellationToken: cancellationToken);
+        var downloadTask = await _dbContext.GetDownloadTaskAsync(
+            fileTask.DownloadTaskId,
+            cancellationToken: cancellationToken
+        );
         if (downloadTask is null)
         {
             ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), fileTask.DownloadTaskId).LogError();

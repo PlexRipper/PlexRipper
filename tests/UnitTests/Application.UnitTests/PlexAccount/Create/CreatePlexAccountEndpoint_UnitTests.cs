@@ -8,7 +8,8 @@ namespace PlexRipper.Application.UnitTests;
 
 public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccountEndpoint>
 {
-    public CreatePlexAccountEndpoint_UnitTests(ITestOutputHelper output) : base(output) { }
+    public CreatePlexAccountEndpoint_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task CreatePlexAccountAsync_ShouldSuccessResult_WhenAccountIsValid()
@@ -29,10 +30,7 @@ public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccoun
             });
         });
 
-        var request = new CreatePlexAccountEndpointRequest()
-        {
-            PlexAccount = newAccount.ToDTO(),
-        };
+        var request = new CreatePlexAccountEndpointRequest() { PlexAccount = newAccount.ToDTO(), };
 
         // Act
         await ep.HandleAsync(request, default);
@@ -62,10 +60,7 @@ public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccoun
             });
         });
 
-        var request = new CreatePlexAccountEndpointRequest()
-        {
-            PlexAccount = newAccount.ToDTO(),
-        };
+        var request = new CreatePlexAccountEndpointRequest() { PlexAccount = newAccount.ToDTO(), };
 
         // Act
         await ep.HandleAsync(request, default);
@@ -94,10 +89,7 @@ public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccoun
             });
         });
 
-        var request = new CreatePlexAccountEndpointRequest()
-        {
-            PlexAccount = newAccount.ToDTO(),
-        };
+        var request = new CreatePlexAccountEndpointRequest() { PlexAccount = newAccount.ToDTO(), };
 
         // Act
         await ep.HandleAsync(request, default);

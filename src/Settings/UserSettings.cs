@@ -53,7 +53,8 @@ public class UserSettings : IUserSettings
         IGeneralSettingsModule generalSettingsModule,
         IDebugSettingsModule debugSettingsModule,
         ILanguageSettingsModule languageSettingsModule,
-        IServerSettingsModule serverSettingsModule)
+        IServerSettingsModule serverSettingsModule
+    )
     {
         _log = log;
         _confirmationSettingsModule = confirmationSettingsModule;
@@ -66,7 +67,8 @@ public class UserSettings : IUserSettings
         _serverSettingsModule = serverSettingsModule;
 
         // Alert of any module changes
-        Observable.Merge(
+        Observable
+            .Merge(
                 _confirmationSettingsModule.ModuleHasChanged.Select(_ => 1),
                 _dateTimeSettingsModule.ModuleHasChanged.Select(_ => 1),
                 _displaySettingsModule.ModuleHasChanged.Select(_ => 1),
@@ -170,7 +172,9 @@ public class UserSettings : IUserSettings
         };
 
         if (results.Any(x => x.IsFailed))
-            return Result.Fail("Failed to set from json object").AddNestedErrors(results.SelectMany(x => x.Errors).ToList());
+            return Result
+                .Fail("Failed to set from json object")
+                .AddNestedErrors(results.SelectMany(x => x.Errors).ToList());
 
         return Result.Ok();
     }

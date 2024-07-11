@@ -4,7 +4,8 @@ namespace IntegrationTests.FileSystem.FileMerger;
 
 public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegrationTests
 {
-    public FileMergeScheduler_StartFileMergeJob_IntegrationTests(ITestOutputHelper output) : base(output) { }
+    public FileMergeScheduler_StartFileMergeJob_IntegrationTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldFinishMergingDownloadTaskAsFileTaskJobAndSetToCompleted_WhenDownloadTaskHasFinishedDownloading()

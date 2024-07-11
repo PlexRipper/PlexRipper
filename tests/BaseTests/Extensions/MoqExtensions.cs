@@ -8,7 +8,11 @@ namespace PlexRipper.BaseTests;
 public static class MoqExtensions
 {
     // TODO rename to SendMediator
-    public static ISetup<IMediator, Task<TResult>> SetupMediator<TResult>(this AutoMock mock, Func<IRequest<TResult>> request, bool isVerifiable = false)
+    public static ISetup<IMediator, Task<TResult>> SetupMediator<TResult>(
+        this AutoMock mock,
+        Func<IRequest<TResult>> request,
+        bool isVerifiable = false
+    )
     {
         var result = mock.Mock<IMediator>().Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
         if (isVerifiable)
@@ -16,7 +20,11 @@ public static class MoqExtensions
         return result;
     }
 
-    public static ISetup<IMediator, Task> SetupMediator(this AutoMock mock, Func<IRequest> request, bool isVerifiable = false)
+    public static ISetup<IMediator, Task> SetupMediator(
+        this AutoMock mock,
+        Func<IRequest> request,
+        bool isVerifiable = false
+    )
     {
         var result = mock.Mock<IMediator>().Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
         if (isVerifiable)
@@ -79,11 +87,17 @@ public static class MoqExtensions
 
     public static AutoMock AddMapper(this AutoMock mock)
     {
-        return AutoMock.GetStrict(builder => builder.RegisterInstance(MapperSetup.CreateMapper()).As<IMapper>().SingleInstance());
+        return AutoMock.GetStrict(builder =>
+            builder.RegisterInstance(MapperSetup.CreateMapper()).As<IMapper>().SingleInstance()
+        );
     }
 
-    public static IReturnsResult<T> ReturnOk<T>(this ISetup<T, Task<Result>> mock) where T : class => mock.ReturnsAsync(Result.Ok());
-    public static IReturnsResult<T> ReturnOk<T>(this ISetup<T, Task<Result<T>>> mock) where T : class => mock.ReturnsAsync(Result.Ok());
+    public static IReturnsResult<T> ReturnOk<T>(this ISetup<T, Task<Result>> mock)
+        where T : class => mock.ReturnsAsync(Result.Ok());
 
-    public static IReturnsResult<IMediator> ReturnOk(this IReturnsThrows<IMediator, Task<Result>> mock) => mock.ReturnsAsync(Result.Ok());
+    public static IReturnsResult<T> ReturnOk<T>(this ISetup<T, Task<Result<T>>> mock)
+        where T : class => mock.ReturnsAsync(Result.Ok());
+
+    public static IReturnsResult<IMediator> ReturnOk(this IReturnsThrows<IMediator, Task<Result>> mock) =>
+        mock.ReturnsAsync(Result.Ok());
 }

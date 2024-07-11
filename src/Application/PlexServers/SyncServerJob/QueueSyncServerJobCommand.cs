@@ -34,18 +34,21 @@ public class QueueSyncServerJobCommandHandler : IRequestHandler<QueueSyncServerJ
         var key = SyncServerJob.GetJobKey(command.PlexServerId);
         if (await _scheduler.IsJobRunningAsync(key, cancellationToken))
         {
-            return Result.Fail($"A {nameof(SyncServerJob)} with {nameof(PlexServer)} {command.PlexServerId} is already running")
+            return Result
+                .Fail($"A {nameof(SyncServerJob)} with {nameof(PlexServer)} {command.PlexServerId} is already running")
                 .LogWarning();
         }
 
-        var job = JobBuilder.Create<SyncServerJob>()
+        var job = JobBuilder
+            .Create<SyncServerJob>()
             .UsingJobData(SyncServerJob.PlexServerIdParameter, command.PlexServerId)
             .UsingJobData(SyncServerJob.ForceSyncParameter, command.ForceSync)
             .WithIdentity(key)
             .Build();
 
         // Trigger the job to run now
-        var trigger = TriggerBuilder.Create()
+        var trigger = TriggerBuilder
+            .Create()
             .WithIdentity($"{key.Name}_trigger", key.Group)
             .ForJob(job)
             .StartNow()

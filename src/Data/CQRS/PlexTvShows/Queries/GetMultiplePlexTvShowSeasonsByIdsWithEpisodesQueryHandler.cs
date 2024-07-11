@@ -6,7 +6,8 @@ using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.PlexTvShows;
 
-public class GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQueryValidator : AbstractValidator<GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQuery>
+public class GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQueryValidator
+    : AbstractValidator<GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQuery>
 {
     public GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQueryValidator()
     {
@@ -14,20 +15,23 @@ public class GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQueryValidator : Abstr
     }
 }
 
-public class GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQueryHandler : BaseHandler,
-    IRequestHandler<GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQuery, Result<List<PlexTvShowSeason>>>
+public class GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQueryHandler
+    : BaseHandler,
+        IRequestHandler<GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQuery, Result<List<PlexTvShowSeason>>>
 {
-    public GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQueryHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
-    public async Task<Result<List<PlexTvShowSeason>>> Handle(GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<PlexTvShowSeason>>> Handle(
+        GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQuery request,
+        CancellationToken cancellationToken
+    )
     {
         var query = PlexTvShowSeasonsQueryable;
 
         if (request.IncludeData)
         {
-            query = query
-                .Include(x => x.TvShow)
-                .Include(x => x.Episodes);
+            query = query.Include(x => x.TvShow).Include(x => x.Episodes);
         }
 
         if (request.IncludeLibrary)
@@ -36,9 +40,7 @@ public class GetMultiplePlexTvShowSeasonsByIdsWithEpisodesQueryHandler : BaseHan
         if (request.IncludeServer)
             query = query.IncludePlexServer();
 
-        var plexTvShowSeason = await query
-            .Where(x => request.Ids.Contains(x.Id))
-            .ToListAsync(cancellationToken);
+        var plexTvShowSeason = await query.Where(x => request.Ids.Contains(x.Id)).ToListAsync(cancellationToken);
 
         return Result.Ok(plexTvShowSeason);
     }

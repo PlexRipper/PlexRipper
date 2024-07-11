@@ -19,7 +19,8 @@ public class QueueRefreshPlexServerAccessJobCommandValidator : AbstractValidator
     }
 }
 
-public class QueueRefreshPlexServerAccessJobHandler : IRequestHandler<QueueRefreshPlexServerAccessJobCommand, Result<JobKey>>
+public class QueueRefreshPlexServerAccessJobHandler
+    : IRequestHandler<QueueRefreshPlexServerAccessJobCommand, Result<JobKey>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -32,22 +33,30 @@ public class QueueRefreshPlexServerAccessJobHandler : IRequestHandler<QueueRefre
         _scheduler = scheduler;
     }
 
-    public async Task<Result<JobKey>> Handle(QueueRefreshPlexServerAccessJobCommand command, CancellationToken cancellationToken)
+    public async Task<Result<JobKey>> Handle(
+        QueueRefreshPlexServerAccessJobCommand command,
+        CancellationToken cancellationToken
+    )
     {
         var plexAccountId = command.PlexAccountId;
         var key = RefreshPlexServersAccessJob.GetJobKey(plexAccountId);
         if (await _scheduler.IsJobRunningAsync(key, cancellationToken))
         {
-            return Result.Fail($"A {nameof(RefreshPlexServersAccessJob)} with {nameof(plexAccountId)} {plexAccountId} is already running")
+            return Result
+                .Fail(
+                    $"A {nameof(RefreshPlexServersAccessJob)} with {nameof(plexAccountId)} {plexAccountId} is already running"
+                )
                 .LogWarning();
         }
 
-        var job = JobBuilder.Create<RefreshPlexServersAccessJob>()
+        var job = JobBuilder
+            .Create<RefreshPlexServersAccessJob>()
             .UsingJobData(RefreshPlexServersAccessJob.PlexAccountIdParameter, plexAccountId)
             .WithIdentity(key)
             .Build();
 
-        var trigger = TriggerBuilder.Create()
+        var trigger = TriggerBuilder
+            .Create()
             .WithIdentity($"{key.Name}_trigger", key.Group)
             .ForJob(job)
             .StartNow()

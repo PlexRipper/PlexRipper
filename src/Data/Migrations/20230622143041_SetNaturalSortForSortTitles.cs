@@ -18,7 +18,8 @@ namespace PlexRipper.Data.Migrations
                 collation: "NATURALSORT",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "SortTitle",
@@ -28,7 +29,8 @@ namespace PlexRipper.Data.Migrations
                 collation: "NATURALSORT",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "SortTitle",
@@ -38,7 +40,8 @@ namespace PlexRipper.Data.Migrations
                 collation: "NATURALSORT",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "SortTitle",
@@ -48,7 +51,8 @@ namespace PlexRipper.Data.Migrations
                 collation: "NATURALSORT",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Title",
@@ -58,7 +62,8 @@ namespace PlexRipper.Data.Migrations
                 collation: "NATURALSORT",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Title",
@@ -68,7 +73,8 @@ namespace PlexRipper.Data.Migrations
                 collation: "NATURALSORT",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
         }
 
         /// <inheritdoc />
@@ -82,7 +88,8 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldNullable: true,
-                oldCollation: "NATURALSORT");
+                oldCollation: "NATURALSORT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "SortTitle",
@@ -92,7 +99,8 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldNullable: true,
-                oldCollation: "NATURALSORT");
+                oldCollation: "NATURALSORT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "SortTitle",
@@ -102,7 +110,8 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldNullable: true,
-                oldCollation: "NATURALSORT");
+                oldCollation: "NATURALSORT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "SortTitle",
@@ -112,7 +121,8 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldNullable: true,
-                oldCollation: "NATURALSORT");
+                oldCollation: "NATURALSORT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Title",
@@ -122,7 +132,8 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldNullable: true,
-                oldCollation: "NATURALSORT");
+                oldCollation: "NATURALSORT"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Title",
@@ -132,7 +143,8 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldNullable: true,
-                oldCollation: "NATURALSORT");
+                oldCollation: "NATURALSORT"
+            );
         }
     }
 }

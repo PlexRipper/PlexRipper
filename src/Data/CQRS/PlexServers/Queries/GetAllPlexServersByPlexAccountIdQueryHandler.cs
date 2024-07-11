@@ -16,20 +16,25 @@ public class GetAllPlexServersByPlexAccountIdQueryValidator : AbstractValidator<
     }
 }
 
-public class GetAllPlexServersByPlexAccountIdQueryHandler : BaseHandler, IRequestHandler<GetAllPlexServersByPlexAccountIdQuery, Result<List<PlexServer>>>
+public class GetAllPlexServersByPlexAccountIdQueryHandler
+    : BaseHandler,
+        IRequestHandler<GetAllPlexServersByPlexAccountIdQuery, Result<List<PlexServer>>>
 {
     private readonly IMapper _mapper;
 
-    public GetAllPlexServersByPlexAccountIdQueryHandler(ILog log, PlexRipperDbContext dbContext, IMapper mapper) : base(log, dbContext)
+    public GetAllPlexServersByPlexAccountIdQueryHandler(ILog log, PlexRipperDbContext dbContext, IMapper mapper)
+        : base(log, dbContext)
     {
         _mapper = mapper;
     }
 
-    public async Task<Result<List<PlexServer>>> Handle(GetAllPlexServersByPlexAccountIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<PlexServer>>> Handle(
+        GetAllPlexServersByPlexAccountIdQuery request,
+        CancellationToken cancellationToken
+    )
     {
         var serverList = await _dbContext
-            .PlexAccountServers
-            .Include(x => x.PlexServer)
+            .PlexAccountServers.Include(x => x.PlexServer)
             .ThenInclude(x => x.ServerStatus)
             .Include(x => x.PlexServer)
             .ThenInclude(x => x.PlexServerConnections)

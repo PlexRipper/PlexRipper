@@ -40,8 +40,11 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
         var plexAccountId = command.PlexAccountId;
         var plexServerId = command.PlexServerId;
 
-        _log.Debug("Retrieving accessible PlexLibraries for plexServer with id: {PlexServerId} by using Plex account with id {PlexAccountId}", plexServerId,
-            plexAccountId);
+        _log.Debug(
+            "Retrieving accessible PlexLibraries for plexServer with id: {PlexServerId} by using Plex account with id {PlexAccountId}",
+            plexServerId,
+            plexAccountId
+        );
 
         var libraries = await _plexServiceApi.GetLibrarySectionsAsync(plexServerId, plexAccountId);
         if (libraries.IsFailed)
@@ -49,10 +52,14 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
 
         if (!libraries.Value.Any())
         {
-            var msg = $"{nameof(PlexServer)} with Id {plexServerId} returned no Plex libraries for Plex account with id {plexAccountId}";
+            var msg =
+                $"{nameof(PlexServer)} with Id {plexServerId} returned no Plex libraries for Plex account with id {plexAccountId}";
             return Result.Fail(msg).LogWarning();
         }
 
-        return await _mediator.Send(new AddOrUpdatePlexLibrariesCommand(plexAccountId, libraries.Value), cancellationToken);
+        return await _mediator.Send(
+            new AddOrUpdatePlexLibrariesCommand(plexAccountId, libraries.Value),
+            cancellationToken
+        );
     }
 }

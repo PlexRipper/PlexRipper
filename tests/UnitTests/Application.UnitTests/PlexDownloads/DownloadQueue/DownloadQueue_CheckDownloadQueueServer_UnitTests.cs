@@ -6,7 +6,8 @@ namespace PlexRipper.Application.UnitTests.DownloadQueue;
 
 public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Application.DownloadQueue>
 {
-    public DownloadQueue_CheckDownloadQueue_UnitTests(ITestOutputHelper output) : base(output) { }
+    public DownloadQueue_CheckDownloadQueue_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldHaveNoUpdates_WhenGivenAnEmptyList()
@@ -35,7 +36,11 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
             config.MovieDownloadTasksCount = 5;
         });
 
-        var downloadTasks = await DbContext.DownloadTaskMovie.AsTracking().Where(x => x.PlexServerId == 1).IncludeAll().ToListAsync();
+        var downloadTasks = await DbContext
+            .DownloadTaskMovie.AsTracking()
+            .Where(x => x.PlexServerId == 1)
+            .IncludeAll()
+            .ToListAsync();
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
 
         var startedDownloadTask = downloadTasks[0];

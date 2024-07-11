@@ -2,7 +2,8 @@
 
 public class IntegrationTest_Setup : BaseIntegrationTests
 {
-    public IntegrationTest_Setup(ITestOutputHelper output) : base(output) { }
+    public IntegrationTest_Setup(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldHaveValidApiHttpClient_WhenStartingAnIntegrationTest()

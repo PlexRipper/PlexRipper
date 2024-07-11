@@ -5,7 +5,8 @@ namespace Data.UnitTests.Extensions.Entities;
 
 public class DownloadTaskExtensions_Calculate_UnitTests : BaseUnitTest
 {
-    public DownloadTaskExtensions_Calculate_UnitTests(ITestOutputHelper output) : base(output) { }
+    public DownloadTaskExtensions_Calculate_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldUpdateDownloadProgressAcrossAllLayers_WhenCallingCalculateOnRootDownloadTask()
@@ -50,7 +51,10 @@ public class DownloadTaskExtensions_Calculate_UnitTests : BaseUnitTest
         downloadTasks.SelectMany(x => x.Children).ShouldAllBe(x => x.Percentage == 50);
 
         downloadTasks.SelectMany(x => x.Children).SelectMany(x => x.Children).ShouldAllBe(x => x.DownloadSpeed == 20);
-        downloadTasks.SelectMany(x => x.Children).SelectMany(x => x.Children).ShouldAllBe(x => x.FileTransferSpeed == 100);
+        downloadTasks
+            .SelectMany(x => x.Children)
+            .SelectMany(x => x.Children)
+            .ShouldAllBe(x => x.FileTransferSpeed == 100);
         downloadTasks.SelectMany(x => x.Children).SelectMany(x => x.Children).ShouldAllBe(x => x.DataReceived == 5000);
         downloadTasks.SelectMany(x => x.Children).SelectMany(x => x.Children).ShouldAllBe(x => x.DataTotal == 10000);
         downloadTasks.SelectMany(x => x.Children).SelectMany(x => x.Children).ShouldAllBe(x => x.Percentage == 50);

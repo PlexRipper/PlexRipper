@@ -7,7 +7,8 @@ namespace Settings.UnitTests.Modules;
 
 public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest<DisplaySettingsModule>
 {
-    public DisplaySettingsModule_SetFromJson_UnitTests(ITestOutputHelper output) : base(output) { }
+    public DisplaySettingsModule_SetFromJson_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public void ShouldSetPropertiesFromJson_WhenValidJsonSettingsAreGiven()
@@ -15,14 +16,13 @@ public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest<DisplayS
         // Arrange
         var settingsModel = new SettingsModel
         {
-            DisplaySettings = new DisplaySettings
-            {
-                MovieViewMode = ViewMode.Table,
-                TvShowViewMode = ViewMode.Poster,
-            },
+            DisplaySettings = new DisplaySettings { MovieViewMode = ViewMode.Table, TvShowViewMode = ViewMode.Poster, },
         };
         var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
-        var loadedSettings = JsonSerializer.Deserialize<JsonElement>(json, DefaultJsonSerializerOptions.ConfigCaptialized);
+        var loadedSettings = JsonSerializer.Deserialize<JsonElement>(
+            json,
+            DefaultJsonSerializerOptions.ConfigCaptialized
+        );
 
         // Act
         var result = _sut.SetFromJson(loadedSettings);
@@ -39,13 +39,21 @@ public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest<DisplayS
         // Arrange
         var settingsModel = new SettingsModel
         {
-            DisplaySettings = FakeData.GetDisplaySettings(config => { config.Seed = 234; }).Generate(),
+            DisplaySettings = FakeData
+                .GetDisplaySettings(config =>
+                {
+                    config.Seed = 234;
+                })
+                .Generate(),
         };
         var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
 
         // ** Remove property to make corrupted
         json = json.Replace("\"TvShowViewMode\":\"Table\",", "");
-        var loadedSettings = JsonSerializer.Deserialize<JsonElement>(json, DefaultJsonSerializerOptions.ConfigCaptialized);
+        var loadedSettings = JsonSerializer.Deserialize<JsonElement>(
+            json,
+            DefaultJsonSerializerOptions.ConfigCaptialized
+        );
 
         // Act
         var result = _sut.SetFromJson(loadedSettings);

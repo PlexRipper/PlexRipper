@@ -12,14 +12,9 @@ public static partial class PlexAccountMapper
         dto.PlexServerAccess = new List<PlexServerAccessDTO>();
 
         // Determine the access for each server and libraries
-        if (
-            plexAccount.PlexAccountLibraries is not null
-            && plexAccount.PlexAccountServers is not null
-        )
+        if (plexAccount.PlexAccountLibraries is not null && plexAccount.PlexAccountServers is not null)
         {
-            var plexLibraries = plexAccount
-                .PlexAccountLibraries.Select(y => y.PlexLibrary)
-                .ToList();
+            var plexLibraries = plexAccount.PlexAccountLibraries.Select(y => y.PlexLibrary).ToList();
             foreach (var plexAccountServer in plexAccount.PlexAccountServers)
             {
                 var plexServerAccess = plexAccountServer.PlexServer.ToAccessDTO();
@@ -57,8 +52,7 @@ public static partial class PlexAccountMapper
             PlexServerAccess = [],
         };
 
-    public static List<PlexAccountDTO> ToDTO(this List<PlexAccount> plexAccounts) =>
-        plexAccounts.ConvertAll(ToDTO);
+    public static List<PlexAccountDTO> ToDTO(this List<PlexAccount> plexAccounts) => plexAccounts.ConvertAll(ToDTO);
 
     #endregion
 
@@ -88,8 +82,7 @@ public static partial class PlexAccountMapper
             Is2Fa = source.Is2Fa,
         };
 
-    public static List<PlexAccount> ToModel(this List<PlexAccountDTO> source) =>
-        source.ConvertAll(ToModel);
+    public static List<PlexAccount> ToModel(this List<PlexAccountDTO> source) => source.ConvertAll(ToModel);
 
     public static PlexAccount ToModel(this UpdatePlexAccountDTO plexAccount) =>
         new()

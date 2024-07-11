@@ -13,11 +13,11 @@ public static partial class DbContextExtensions
     public static async Task<Result<PlexServerConnection>> GetValidPlexServerConnection(
         this IPlexRipperDbContext dbContext,
         int plexServerId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var plexServer = await dbContext
-            .PlexServers
-            .Include(x => x.PlexServerConnections)
+            .PlexServers.Include(x => x.PlexServerConnections)
             .ThenInclude(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(5))
             .FirstOrDefaultAsync(x => x.Id == plexServerId, cancellationToken);
 
@@ -26,7 +26,9 @@ public static partial class DbContextExtensions
 
         var plexServerConnections = plexServer.PlexServerConnections;
         if (!plexServerConnections.Any())
-            return Result.Fail($"PlexServer with id {plexServer.Id} and name {plexServer.Name} has no connections available!").LogError();
+            return Result
+                .Fail($"PlexServer with id {plexServer.Id} and name {plexServer.Name} has no connections available!")
+                .LogError();
 
         // Find based on preference
         if (plexServer.PreferredConnectionId > 0)
@@ -36,20 +38,30 @@ public static partial class DbContextExtensions
                 return Result.Ok(connection);
 
             _log.Here()
-                .Verbose("Could not find preferred connection with id {PlexServerConnectionId} for server {PlexServerName}", plexServer.PreferredConnectionId,
-                    plexServer.Name);
+                .Verbose(
+                    "Could not find preferred connection with id {PlexServerConnectionId} for server {PlexServerName}",
+                    plexServer.PreferredConnectionId,
+                    plexServer.Name
+                );
         }
 
         // Find based on public address
-        _log.Here().Verbose("Attempting to find PlexServerConnection that matches the PlexServer public address: {PublicAddress}", plexServer.PublicAddress);
+        _log.Here()
+            .Verbose(
+                "Attempting to find PlexServerConnection that matches the PlexServer public address: {PublicAddress}",
+                plexServer.PublicAddress
+            );
 
         var publicConnection = plexServerConnections.Find(x => x.Address == plexServer.PublicAddress);
         if (publicConnection is not null)
             return Result.Ok(publicConnection);
 
         _log.Here()
-            .Verbose("Could not find connection based on public address: {PublicAddress} for server {PlexServerName}", plexServer.PublicAddress,
-                plexServer.Name);
+            .Verbose(
+                "Could not find connection based on public address: {PublicAddress} for server {PlexServerName}",
+                plexServer.PublicAddress,
+                plexServer.Name
+            );
 
         // Find based on what's successful
         var successPlexServerConnections = plexServerConnections
@@ -59,8 +71,10 @@ public static partial class DbContextExtensions
             return Result.Ok(successPlexServerConnections.First());
 
         // Find anything...
-        _log.Verbose("Could not find a recent successful connection. We're just gonna YOLO this and pick the first connection: {PlexServerConnectionUrl}",
-            plexServerConnections.First());
+        _log.Verbose(
+            "Could not find a recent successful connection. We're just gonna YOLO this and pick the first connection: {PlexServerConnectionUrl}",
+            plexServerConnections.First()
+        );
         return Result.Ok(plexServerConnections.First());
     }
 
@@ -73,7 +87,8 @@ public static partial class DbContextExtensions
     public static Task<Result<string>> GetPlexServerTokenAsync(
         this IPlexRipperDbContext dbContext,
         int plexServerId,
-        CancellationToken cancellationToken = default) => GetPlexServerTokenAsync(dbContext, plexServerId, 0, cancellationToken);
+        CancellationToken cancellationToken = default
+    ) => GetPlexServerTokenAsync(dbContext, plexServerId, 0, cancellationToken);
 
     /// <summary>
     ///  Returns the authentication token needed to authenticate communication with the <see cref="PlexServer" />.
@@ -87,12 +102,14 @@ public static partial class DbContextExtensions
         this IPlexRipperDbContext dbContext,
         int plexServerId,
         int plexAccountId = 0,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         // Attempt to find a non-main account token first
         if (plexAccountId == 0)
         {
-            var nonMainServerToken = await dbContext.PlexAccountServers.Include(x => x.PlexAccount)
+            var nonMainServerToken = await dbContext
+                .PlexAccountServers.Include(x => x.PlexAccount)
                 .FirstOrDefaultAsync(x => x.PlexServerId == plexServerId && !x.PlexAccount.IsMain, cancellationToken);
 
             // Check if we have access with a non-main account
@@ -100,23 +117,32 @@ public static partial class DbContextExtensions
                 return Result.Ok(nonMainServerToken.AuthToken);
 
             // Fallback to a main-account access
-            var mainServerToken = await dbContext.PlexAccountServers.Include(x => x.PlexAccount)
+            var mainServerToken = await dbContext
+                .PlexAccountServers.Include(x => x.PlexAccount)
                 .FirstOrDefaultAsync(x => x.PlexServerId == plexServerId, cancellationToken);
 
             if (mainServerToken != null)
                 return Result.Ok(mainServerToken.AuthToken);
 
-            return Result.Fail($"Could not find any authenticationToken for PlexServer with id: {plexServerId}").LogError();
+            return Result
+                .Fail($"Could not find any authenticationToken for PlexServer with id: {plexServerId}")
+                .LogError();
         }
 
         var authToken = await dbContext.PlexAccountServers.FirstOrDefaultAsync(
-            x => x.PlexAccountId == plexAccountId && x.PlexServerId == plexServerId, cancellationToken);
+            x => x.PlexAccountId == plexAccountId && x.PlexServerId == plexServerId,
+            cancellationToken
+        );
 
         if (authToken != null)
             return Result.Ok(authToken.AuthToken);
 
-        return Result.Fail(new Error(
-                $"Could not find an authenticationToken for PlexAccount with id: {plexAccountId} and PlexServer with id: {plexServerId}"))
+        return Result
+            .Fail(
+                new Error(
+                    $"Could not find an authenticationToken for PlexAccount with id: {plexAccountId} and PlexServer with id: {plexServerId}"
+                )
+            )
             .LogError();
     }
 }

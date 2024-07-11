@@ -7,7 +7,8 @@ namespace PlexRipper.Application;
 
 public record CheckAllConnectionsStatusByPlexServerRequest(int PlexServerId);
 
-public class CheckAllConnectionsStatusByPlexServerRequestValidator : Validator<CheckAllConnectionsStatusByPlexServerRequest>
+public class CheckAllConnectionsStatusByPlexServerRequestValidator
+    : Validator<CheckAllConnectionsStatusByPlexServerRequest>
 {
     public CheckAllConnectionsStatusByPlexServerRequestValidator()
     {
@@ -15,8 +16,8 @@ public class CheckAllConnectionsStatusByPlexServerRequestValidator : Validator<C
     }
 }
 
-public class CheckAllConnectionsStatusByPlexServerEndpoint : BaseEndpoint<CheckAllConnectionsStatusByPlexServerRequest,
-    List<PlexServerStatusDTO>>
+public class CheckAllConnectionsStatusByPlexServerEndpoint
+    : BaseEndpoint<CheckAllConnectionsStatusByPlexServerRequest, List<PlexServerStatusDTO>>
 {
     private readonly IMediator _mediator;
 
@@ -31,11 +32,12 @@ public class CheckAllConnectionsStatusByPlexServerEndpoint : BaseEndpoint<CheckA
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexServerStatusDTO>>))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexServerStatusDTO>>))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(CheckAllConnectionsStatusByPlexServerRequest req, CancellationToken ct)

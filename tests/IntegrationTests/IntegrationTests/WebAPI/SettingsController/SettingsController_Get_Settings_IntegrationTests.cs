@@ -11,7 +11,8 @@ namespace IntegrationTests.WebAPI.SettingsController;
 
 public class SettingsController_Get_Settings_IntegrationTests : BaseIntegrationTests
 {
-    public SettingsController_Get_Settings_IntegrationTests(ITestOutputHelper output) : base(output) { }
+    public SettingsController_Get_Settings_IntegrationTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldHaveDefaultSettings_OnFirstTimeBoot()
@@ -28,7 +29,10 @@ public class SettingsController_Get_Settings_IntegrationTests : BaseIntegrationT
         result.IsSuccess.ShouldBeTrue();
         var settingsModel = result.Value.ToModel();
         var responseSettings = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigBase);
-        var defaultSettings = JsonSerializer.Serialize(SettingsModel.DefaultSettings(), DefaultJsonSerializerOptions.ConfigBase);
+        var defaultSettings = JsonSerializer.Serialize(
+            SettingsModel.DefaultSettings(),
+            DefaultJsonSerializerOptions.ConfigBase
+        );
 
         responseSettings.ShouldBe(defaultSettings);
     }

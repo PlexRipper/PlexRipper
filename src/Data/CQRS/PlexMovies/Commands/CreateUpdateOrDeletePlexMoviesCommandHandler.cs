@@ -16,13 +16,20 @@ public class CreateUpdateOrDeletePlexMoviesValidator : AbstractValidator<CreateU
         RuleFor(x => x.PlexLibrary.Title).NotEmpty();
         RuleFor(x => x.PlexLibrary.Movies).NotEmpty();
 
-        RuleForEach(x => x.PlexLibrary.Movies).ChildRules(plexMovie => { plexMovie.RuleFor(x => x.Key).GreaterThan(0); });
+        RuleForEach(x => x.PlexLibrary.Movies)
+            .ChildRules(plexMovie =>
+            {
+                plexMovie.RuleFor(x => x.Key).GreaterThan(0);
+            });
     }
 }
 
-public class CreateUpdateOrDeletePlexMoviesHandler : BaseHandler, IRequestHandler<CreateUpdateOrDeletePlexMoviesCommand, Result>
+public class CreateUpdateOrDeletePlexMoviesHandler
+    : BaseHandler,
+        IRequestHandler<CreateUpdateOrDeletePlexMoviesCommand, Result>
 {
-    public CreateUpdateOrDeletePlexMoviesHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public CreateUpdateOrDeletePlexMoviesHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
     public async Task<Result> Handle(CreateUpdateOrDeletePlexMoviesCommand command, CancellationToken cancellationToken)
     {
@@ -40,8 +47,8 @@ public class CreateUpdateOrDeletePlexMoviesHandler : BaseHandler, IRequestHandle
         });
 
         // Retrieve current Movies
-        var plexMoviesInDb = await _dbContext.PlexMovies
-            .Where(x => x.PlexLibraryId == plexLibrary.Id)
+        var plexMoviesInDb = await _dbContext
+            .PlexMovies.Where(x => x.PlexLibraryId == plexLibrary.Id)
             .ToListAsync(cancellationToken);
 
         if (!plexMoviesInDb.Any())
@@ -82,9 +89,18 @@ public class CreateUpdateOrDeletePlexMoviesHandler : BaseHandler, IRequestHandle
 
         await SaveChangesAsync(cancellationToken);
 
-        _log.Debug("Finished syncing plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalSeconds} seconds", plexLibrary.Title,
-            plexLibrary.Id, stopWatch.Elapsed.TotalSeconds);
-        _log.Debug("Add count: {AddCount}, Update count: {UpdateCount}, Delete count: {DeleteMoviesCount}", addCount, updateCount, deleteMovies.Count);
+        _log.Debug(
+            "Finished syncing plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalSeconds} seconds",
+            plexLibrary.Title,
+            plexLibrary.Id,
+            stopWatch.Elapsed.TotalSeconds
+        );
+        _log.Debug(
+            "Add count: {AddCount}, Update count: {UpdateCount}, Delete count: {DeleteMoviesCount}",
+            addCount,
+            updateCount,
+            deleteMovies.Count
+        );
 
         return Result.Ok();
     }

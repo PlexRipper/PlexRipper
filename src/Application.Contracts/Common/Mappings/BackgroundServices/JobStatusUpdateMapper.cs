@@ -29,20 +29,22 @@ public static class JobStatusUpdateMapper
 
     #region ToDTO
 
-    public static JobStatusUpdateDTO ToDTO(this JobStatusUpdate jobStatusUpdate) => new()
-    {
-        Id = jobStatusUpdate.Id,
-        JobName = jobStatusUpdate.JobName,
-        JobGroup = jobStatusUpdate.JobGroup,
-        JobRuntime = jobStatusUpdate.JobRuntime,
-        JobStartTime = jobStatusUpdate.JobStartTime,
-        Status = jobStatusUpdate.Status,
-        PrimaryKey = jobStatusUpdate.PrimaryKey,
-        PrimaryKeyValue = jobStatusUpdate.PrimaryKeyValue,
-        JobType = jobStatusUpdate.JobType,
-    };
+    public static JobStatusUpdateDTO ToDTO(this JobStatusUpdate jobStatusUpdate) =>
+        new()
+        {
+            Id = jobStatusUpdate.Id,
+            JobName = jobStatusUpdate.JobName,
+            JobGroup = jobStatusUpdate.JobGroup,
+            JobRuntime = jobStatusUpdate.JobRuntime,
+            JobStartTime = jobStatusUpdate.JobStartTime,
+            Status = jobStatusUpdate.Status,
+            PrimaryKey = jobStatusUpdate.PrimaryKey,
+            PrimaryKeyValue = jobStatusUpdate.PrimaryKeyValue,
+            JobType = jobStatusUpdate.JobType,
+        };
 
     #endregion
 
-    private static JobTypes ToJobType(string jobGroup) => Enum.TryParse<JobTypes>(jobGroup, out var jobType) ? jobType : JobTypes.Unknown;
+    private static JobTypes ToJobType(string jobGroup) =>
+        Enum.TryParse<JobTypes>(jobGroup, out var jobType) ? jobType : JobTypes.Unknown;
 }

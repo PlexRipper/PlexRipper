@@ -49,11 +49,12 @@ public class GetThumbnailImageEndpoint : BaseEndpoint<GetThumbnailImageEndpointR
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(byte[]), "image/jpeg")
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(byte[]), "image/jpeg")
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(GetThumbnailImageEndpointRequest req, CancellationToken ct)
@@ -64,13 +65,17 @@ public class GetThumbnailImageEndpoint : BaseEndpoint<GetThumbnailImageEndpointR
         {
             case PlexMediaType.Movie:
             {
-                var plexMovie = await _dbContext.PlexMovies.AsQueryable()
+                var plexMovie = await _dbContext
+                    .PlexMovies.AsQueryable()
                     .Include(x => x.PlexServer)
                     .GetAsync(req.MediaId, ct);
 
                 if (plexMovie is null)
                 {
-                    await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexMovie), req.MediaId).LogError(), ct);
+                    await SendFluentResult(
+                        ResultExtensions.EntityNotFound(nameof(PlexMovie), req.MediaId).LogError(),
+                        ct
+                    );
                     return;
                 }
 
@@ -80,13 +85,17 @@ public class GetThumbnailImageEndpoint : BaseEndpoint<GetThumbnailImageEndpointR
             }
             case PlexMediaType.TvShow:
             {
-                var tvShow = await _dbContext.PlexTvShows.AsQueryable()
+                var tvShow = await _dbContext
+                    .PlexTvShows.AsQueryable()
                     .Include(x => x.PlexServer)
                     .GetAsync(req.MediaId, ct);
 
                 if (tvShow is null)
                 {
-                    await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexTvShow), req.MediaId).LogError(), ct);
+                    await SendFluentResult(
+                        ResultExtensions.EntityNotFound(nameof(PlexTvShow), req.MediaId).LogError(),
+                        ct
+                    );
                     return;
                 }
 
@@ -102,7 +111,13 @@ public class GetThumbnailImageEndpoint : BaseEndpoint<GetThumbnailImageEndpointR
             return;
         }
 
-        var imageResult = await _plexServiceApi.GetPlexMediaImageAsync(plexServer!, plexMedia.FullThumbUrl, req.Width, req.Height, ct);
+        var imageResult = await _plexServiceApi.GetPlexMediaImageAsync(
+            plexServer!,
+            plexMedia.FullThumbUrl,
+            req.Width,
+            req.Height,
+            ct
+        );
         if (imageResult.IsFailed)
             await SendFluentResult(imageResult.ToResult(), ct);
 

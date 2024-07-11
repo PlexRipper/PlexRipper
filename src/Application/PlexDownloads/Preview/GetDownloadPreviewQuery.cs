@@ -24,7 +24,10 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
         _dbContext = dbContext;
     }
 
-    public async Task<Result<List<DownloadPreview>>> Handle(GetDownloadPreviewQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<DownloadPreview>>> Handle(
+        GetDownloadPreviewQuery request,
+        CancellationToken cancellationToken
+    )
     {
         var downloadPreviews = new List<DownloadPreview>();
         if (!request.DownloadMedias.Any())
@@ -38,7 +41,8 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
         if (moviesPreview.Any() && moviesPreview.Any(x => x.MediaIds.Count > 0))
         {
             var movieIds = moviesPreview.SelectMany(x => x.MediaIds).ToList();
-            var result = await _dbContext.PlexMovies.AsNoTracking()
+            var result = await _dbContext
+                .PlexMovies.AsNoTracking()
                 .Where(x => movieIds.Contains(x.Id))
                 .ProjectToDownloadPreview()
                 .ToListAsync(cancellationToken);
@@ -50,17 +54,21 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
         if (!tvShowPreview.Any() || tvShowPreview.Any(x => x.MediaIds.Count > 0))
         {
             var tvShowPreviewIds = tvShowPreview.SelectMany(x => x.MediaIds).ToList();
-            tvShowEpisodeKeys = await _dbContext.PlexTvShows
-                .AsNoTracking()
+            tvShowEpisodeKeys = await _dbContext
+                .PlexTvShows.AsNoTracking()
                 .Include(x => x.Seasons)
                 .ThenInclude(x => x.Episodes)
                 .Where(x => tvShowPreviewIds.Contains(x.Id))
-                .SelectMany(x => x.Seasons.SelectMany(y => y.Episodes.Select(z => new TvShowEpisodeKeyDTO
-                {
-                    TvShowId = z.TvShowId,
-                    SeasonId = z.TvShowSeasonId,
-                    EpisodeId = z.Id,
-                })))
+                .SelectMany(x =>
+                    x.Seasons.SelectMany(y =>
+                        y.Episodes.Select(z => new TvShowEpisodeKeyDTO
+                        {
+                            TvShowId = z.TvShowId,
+                            SeasonId = z.TvShowSeasonId,
+                            EpisodeId = z.Id,
+                        })
+                    )
+                )
                 .ToListAsync(cancellationToken);
         }
 
@@ -69,16 +77,18 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
         if (!seasonPreview.Any() || seasonPreview.Any(x => x.MediaIds.Count > 0))
         {
             var seasonPreviewIds = seasonPreview.SelectMany(x => x.MediaIds).ToList();
-            seasonEpisodeKeys = await _dbContext.PlexTvShowSeason
-                .AsNoTracking()
+            seasonEpisodeKeys = await _dbContext
+                .PlexTvShowSeason.AsNoTracking()
                 .Include(x => x.Episodes)
                 .Where(x => seasonPreviewIds.Contains(x.Id))
-                .SelectMany(x => x.Episodes.Select(y => new TvShowEpisodeKeyDTO
-                {
-                    TvShowId = y.TvShowId,
-                    SeasonId = y.TvShowSeasonId,
-                    EpisodeId = y.Id,
-                }))
+                .SelectMany(x =>
+                    x.Episodes.Select(y => new TvShowEpisodeKeyDTO
+                    {
+                        TvShowId = y.TvShowId,
+                        SeasonId = y.TvShowSeasonId,
+                        EpisodeId = y.Id,
+                    })
+                )
                 .ToListAsync(cancellationToken);
         }
 
@@ -87,8 +97,8 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
         if (!episodePreview.Any() || episodePreview.Any(x => x.MediaIds.Count > 0))
         {
             var episodePreviewIds = episodePreview.SelectMany(x => x.MediaIds).ToList();
-            episodesKeys = await _dbContext.PlexTvShowEpisodes
-                .AsNoTracking()
+            episodesKeys = await _dbContext
+                .PlexTvShowEpisodes.AsNoTracking()
                 .Where(x => episodePreviewIds.Contains(x.Id))
                 .ProjectToEpisodeKey()
                 .ToListAsync(cancellationToken);
@@ -109,17 +119,20 @@ public class GetDownloadPreviewQueryHandler : IRequestHandler<GetDownloadPreview
         var episodeIds = allKeys.Select(x => x.EpisodeId).Distinct().ToList();
 
         // Retrieve all the tv shows, seasons and episodes
-        var tvShows = await _dbContext.PlexTvShows.AsNoTracking()
+        var tvShows = await _dbContext
+            .PlexTvShows.AsNoTracking()
             .Where(x => tvShowIds.Contains(x.Id))
             .ProjectToDownloadPreview()
             .ToListAsync(cancellationToken);
 
-        var seasons = await _dbContext.PlexTvShowSeason.AsNoTracking()
+        var seasons = await _dbContext
+            .PlexTvShowSeason.AsNoTracking()
             .Where(x => seasonIds.Contains(x.Id))
             .ProjectToDownloadPreview()
             .ToListAsync(cancellationToken);
 
-        var episodes = await _dbContext.PlexTvShowEpisodes.AsNoTracking()
+        var episodes = await _dbContext
+            .PlexTvShowEpisodes.AsNoTracking()
             .Where(x => episodeIds.Contains(x.Id))
             .ProjectToDownloadPreview()
             .ToListAsync(cancellationToken);

@@ -19,6 +19,10 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="CSharpier.MsBuild" Version="0.28.2">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="FastEndpoints.Testing" Version="5.23.0" />
 		<PackageReference Include="JustEat.HttpClientInterception" Version="4.2.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.3" />

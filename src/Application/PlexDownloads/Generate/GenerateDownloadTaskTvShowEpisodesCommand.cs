@@ -8,8 +8,7 @@ using PlexRipper.Domain.PlexMediaExtensions;
 
 namespace PlexRipper.Application;
 
-public record GenerateDownloadTaskTvShowEpisodesCommand(List<DownloadMediaDTO> DownloadMedias)
-    : IRequest<Result>;
+public record GenerateDownloadTaskTvShowEpisodesCommand(List<DownloadMediaDTO> DownloadMedias) : IRequest<Result>;
 
 public class GenerateDownloadTaskTvShowEpisodesCommandValidator
     : AbstractValidator<GenerateDownloadTaskTvShowEpisodesCommand>
@@ -28,10 +27,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
 
-    public GenerateDownloadTaskTvShowEpisodesCommandHandler(
-        ILog log,
-        IPlexRipperDbContext dbContext
-    )
+    public GenerateDownloadTaskTvShowEpisodesCommandHandler(ILog log, IPlexRipperDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;
@@ -75,9 +71,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                     var plexSeason = tvShowEpisode.TvShowSeason;
 
                     // Check if the tvShowDownloadTask has already been created this run
-                    var downloadTaskTvShow = tvShowDownloads.FirstOrDefault(x =>
-                        x.Key == plexTvShow.Key
-                    );
+                    var downloadTaskTvShow = tvShowDownloads.FirstOrDefault(x => x.Key == plexTvShow.Key);
 
                     // Check if the tvShowDownloadTask has already been created ever
                     if (downloadTaskTvShow is null)

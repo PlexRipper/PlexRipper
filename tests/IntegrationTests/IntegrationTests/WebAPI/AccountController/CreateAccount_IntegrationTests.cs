@@ -49,10 +49,7 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         jobStatusList.ShouldContain(x => x.JobType == JobTypes.RefreshPlexServersAccessJob);
 
         // Ensure account has been created
-        var plexAccountDb = DbContext
-            .PlexAccounts.IncludeServerAccess()
-            .IncludeLibraryAccess()
-            .FirstOrDefault();
+        var plexAccountDb = DbContext.PlexAccounts.IncludeServerAccess().IncludeLibraryAccess().FirstOrDefault();
         plexAccountDb.IsValidated = true;
         plexAccountDb.PlexServers.Count.ShouldBe(1);
         plexAccountDb.DisplayName.ShouldBe(plexAccountDTO.DisplayName);

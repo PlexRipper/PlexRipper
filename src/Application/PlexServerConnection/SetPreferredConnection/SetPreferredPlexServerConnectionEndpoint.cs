@@ -16,7 +16,8 @@ namespace PlexRipper.Application;
 /// <returns></returns>
 public record SetPreferredPlexServerConnectionEndpointRequest(int PlexServerId, int PlexServerConnectionId);
 
-public class SetPreferredPlexServerConnectionEndpointRequestValidator : Validator<SetPreferredPlexServerConnectionEndpointRequest>
+public class SetPreferredPlexServerConnectionEndpointRequestValidator
+    : Validator<SetPreferredPlexServerConnectionEndpointRequest>
 {
     public SetPreferredPlexServerConnectionEndpointRequestValidator()
     {
@@ -25,12 +26,14 @@ public class SetPreferredPlexServerConnectionEndpointRequestValidator : Validato
     }
 }
 
-public class SetPreferredPlexServerConnectionEndpoint : BaseEndpoint<SetPreferredPlexServerConnectionEndpointRequest, ResultDTO>
+public class SetPreferredPlexServerConnectionEndpoint
+    : BaseEndpoint<SetPreferredPlexServerConnectionEndpointRequest, ResultDTO>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/preferred-connection/{PlexServerConnectionId}";
+    public override string EndpointPath =>
+        ApiRoutes.PlexServerController + "/{PlexServerId}/preferred-connection/{PlexServerConnectionId}";
 
     public SetPreferredPlexServerConnectionEndpoint(ILog log, IPlexRipperDbContext dbContext)
     {
@@ -42,11 +45,12 @@ public class SetPreferredPlexServerConnectionEndpoint : BaseEndpoint<SetPreferre
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(SetPreferredPlexServerConnectionEndpointRequest req, CancellationToken ct)
@@ -54,26 +58,35 @@ public class SetPreferredPlexServerConnectionEndpoint : BaseEndpoint<SetPreferre
         var plexServerConnectionId = req.PlexServerConnectionId;
         var plexServerId = req.PlexServerId;
 
-        _log.Debug("Setting the preferred {NameOfPlexServerConnection} for {PlexServerIdName}: {PlexServerId}", nameof(PlexServerConnection),
-            nameof(plexServerId), plexServerId);
+        _log.Debug(
+            "Setting the preferred {NameOfPlexServerConnection} for {PlexServerIdName}: {PlexServerId}",
+            nameof(PlexServerConnection),
+            nameof(plexServerId),
+            plexServerId
+        );
 
-        var plexServer = await _dbContext.PlexServers
-            .Include(x => x.PlexServerConnections)
+        var plexServer = await _dbContext
+            .PlexServers.Include(x => x.PlexServerConnections)
             .AsTracking()
             .FirstOrDefaultAsync(x => x.Id == plexServerId, ct);
 
         if (plexServer is null)
         {
-           await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), plexServerId).LogError(), ct);
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexServer), plexServerId).LogError(), ct);
             return;
         }
 
         var connectionIds = plexServer.PlexServerConnections.Select(x => x.Id).ToList();
         if (!connectionIds.Contains(plexServerConnectionId))
         {
-           await SendFluentResult(Result
-                .Fail($"PlexServer with id {plexServerId} has no connections with id {plexServerConnectionId} and can not set that as preferred")
-                .LogError(), ct);
+            await SendFluentResult(
+                Result
+                    .Fail(
+                        $"PlexServer with id {plexServerId} has no connections with id {plexServerConnectionId} and can not set that as preferred"
+                    )
+                    .LogError(),
+                ct
+            );
             return;
         }
 
@@ -81,6 +94,6 @@ public class SetPreferredPlexServerConnectionEndpoint : BaseEndpoint<SetPreferre
 
         await _dbContext.SaveChangesAsync(ct);
 
-       await SendFluentResult(Result.Ok(), ct);
+        await SendFluentResult(Result.Ok(), ct);
     }
 }

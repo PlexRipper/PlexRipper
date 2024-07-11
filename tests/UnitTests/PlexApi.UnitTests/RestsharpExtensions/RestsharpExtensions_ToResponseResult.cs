@@ -9,14 +9,12 @@ public class RestsharpExtensions_ToResponseResult : BaseUnitTest<RestsharpExtens
 {
     #region Setup/Teardown
 
-    public RestsharpExtensions_ToResponseResult(ITestOutputHelper output) : base(output) { }
+    public RestsharpExtensions_ToResponseResult(ITestOutputHelper output)
+        : base(output) { }
 
     #endregion
 
-    private RestRequest CreateRestRequest() => new()
-    {
-        Resource = "test",
-    };
+    private RestRequest CreateRestRequest() => new() { Resource = "test", };
 
     [Fact]
     public void ShouldHaveAFailedResult_WhenOkResponseContainsBadGateway()

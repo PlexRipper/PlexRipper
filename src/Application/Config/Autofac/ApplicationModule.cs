@@ -24,7 +24,8 @@ public class ApplicationModule : Module
         var assembly = Assembly.GetExecutingAssembly();
 
         // register all I*Services
-        builder.RegisterAssemblyTypes(assembly)
+        builder
+            .RegisterAssemblyTypes(assembly)
             .Where(t => t.Name.EndsWith("Service"))
             .AsImplementedInterfaces()
             .SingleInstance();
@@ -37,13 +38,15 @@ public class ApplicationModule : Module
         builder.RegisterMediatR(configuration);
 
         // register all I*Commands
-        builder.RegisterAssemblyTypes(assembly)
+        builder
+            .RegisterAssemblyTypes(assembly)
             .Where(t => t.Name.EndsWith("Command"))
             .AsImplementedInterfaces()
             .SingleInstance();
 
         // register all FluentValidators
-        builder.RegisterAssemblyTypes(assembly)
+        builder
+            .RegisterAssemblyTypes(assembly)
             .Where(t => t.IsClosedTypeOf(typeof(IValidator<>)))
             .AsImplementedInterfaces();
 
@@ -74,7 +77,6 @@ public class ApplicationModule : Module
             { "quartz.jobStore.lockHandler.type", "Quartz.Impl.AdoJobStore.UpdateLockRowSemaphore, Quartz" },
             { "quartz.jobStore.dataSource", "default" },
             { "quartz.jobStore.tablePrefix", QuartzDatabaseConfig.Prefix },
-
             // { "quartz.jobStore.useProperties", "true" },
             { "quartz.jobStore.driverDelegateType", "Quartz.Impl.AdoJobStore.SQLiteDelegate, Quartz" },
             { "quartz.dataSource.default.provider", "SQLite-Microsoft" },
@@ -82,17 +84,12 @@ public class ApplicationModule : Module
         };
 
         // Register Quartz dependencies
-        builder.RegisterModule(new QuartzAutofacFactoryModule
-        {
-            ConfigurationProvider = _ => quartzProps,
-        });
+        builder.RegisterModule(new QuartzAutofacFactoryModule { ConfigurationProvider = _ => quartzProps, });
 
         // register all Quartz jobs
         builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
 
         // Source: https://github.com/alphacloud/Autofac.Extras.Quartz/blob/develop/src/Samples/Shared/Bootstrap.cs
-        builder.Register(_ => new ScopedDependency("global"))
-            .AsImplementedInterfaces()
-            .SingleInstance();
+        builder.Register(_ => new ScopedDependency("global")).AsImplementedInterfaces().SingleInstance();
     }
 }

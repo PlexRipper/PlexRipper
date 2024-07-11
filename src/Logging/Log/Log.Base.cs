@@ -33,7 +33,8 @@ public partial class Log : ILog
         string sourceFilePath = "",
         string memberName = "",
         int sourceLineNumber = 0,
-        params object?[]? propertyValues)
+        params object?[]? propertyValues
+    )
     {
         var logMetaData = new LogMetaData(this, GetClassName(sourceFilePath), memberName, sourceLineNumber)
         {
@@ -53,7 +54,8 @@ public partial class Log : ILog
         string sourceFilePath = "",
         string memberName = "",
         int sourceLineNumber = 0,
-        params object?[]? propertyValues)
+        params object?[]? propertyValues
+    )
     {
         var logMetaData = new LogMetaData(this, GetClassName(sourceFilePath), memberName, sourceLineNumber)
         {

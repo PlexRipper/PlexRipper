@@ -10,9 +10,12 @@ public static partial class LogExtensions
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,
-        T2 propertyValue2)
+        T2 propertyValue2
+    )
     {
-        logMetaData.Update(LogEventLevel.Fatal, messageTemplate, propertyValue0, propertyValue1, propertyValue2).Write();
+        logMetaData
+            .Update(LogEventLevel.Fatal, messageTemplate, propertyValue0, propertyValue1, propertyValue2)
+            .Write();
         return logMetaData;
     }
 }

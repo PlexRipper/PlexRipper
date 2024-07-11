@@ -22,7 +22,8 @@ public class DownloadJob : IJob, IDisposable
         IPlexRipperDbContext dbContext,
         INotificationsService notificationsService,
         IDownloadManagerSettingsModule downloadManagerSettings,
-        IPlexDownloadClient plexDownloadClient)
+        IPlexDownloadClient plexDownloadClient
+    )
     {
         _log = log;
         _dbContext = dbContext;
@@ -41,8 +42,12 @@ public class DownloadJob : IJob, IDisposable
         var downloadTaskKey = dataMap.GetJsonValue<DownloadTaskKey>(DownloadTaskIdParameter);
 
         var token = context.CancellationToken;
-        _log.Debug("Executing job: {DownloadJobName} for {DownloadTaskIdName} with id: {DownloadTaskId}", nameof(DownloadJob), nameof(downloadTaskKey),
-            downloadTaskKey);
+        _log.Debug(
+            "Executing job: {DownloadJobName} for {DownloadTaskIdName} with id: {DownloadTaskId}",
+            nameof(DownloadJob),
+            nameof(downloadTaskKey),
+            downloadTaskKey
+        );
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
@@ -58,7 +63,10 @@ public class DownloadJob : IJob, IDisposable
 
             if (!downloadTask.IsDownloadable)
             {
-                _log.Warning("DownloadTask {DownloadTaskId} is not downloadable, aborting DownloadJob", downloadTaskKey);
+                _log.Warning(
+                    "DownloadTask {DownloadTaskId} is not downloadable, aborting DownloadJob",
+                    downloadTaskKey
+                );
                 return;
             }
 
@@ -101,8 +109,12 @@ public class DownloadJob : IJob, IDisposable
             }
             catch (TaskCanceledException)
             {
-                _log.Information("{DownloadJobName} with {DownloadTaskIdName}: {DownloadTaskId} has been requested to be stopped", nameof(DownloadJob),
-                    nameof(downloadTaskKey), downloadTaskKey);
+                _log.Information(
+                    "{DownloadJobName} with {DownloadTaskIdName}: {DownloadTaskId} has been requested to be stopped",
+                    nameof(DownloadJob),
+                    nameof(downloadTaskKey),
+                    downloadTaskKey
+                );
 
                 await _plexDownloadClient.StopAsync();
             }
@@ -113,20 +125,29 @@ public class DownloadJob : IJob, IDisposable
         }
         finally
         {
-            _log.Debug("Exiting job: {DownloadJobName} for {DownloadTaskName} with id: {DownloadTaskId}", nameof(DownloadJob), nameof(DownloadTaskGeneric),
-                downloadTaskKey);
+            _log.Debug(
+                "Exiting job: {DownloadJobName} for {DownloadTaskName} with id: {DownloadTaskId}",
+                nameof(DownloadJob),
+                nameof(DownloadTaskGeneric),
+                downloadTaskKey
+            );
         }
     }
 
     public void Dispose()
     {
-        _log.Here().Warning("Disposing job: {DownloadJobName} for {DownloadTaskName}", nameof(DownloadJob), nameof(DownloadTaskGeneric));
+        _log.Here()
+            .Warning(
+                "Disposing job: {DownloadJobName} for {DownloadTaskName}",
+                nameof(DownloadJob),
+                nameof(DownloadTaskGeneric)
+            );
     }
 
     private void SetupSubscription(IPlexDownloadClient plexDownloadClient)
     {
-        plexDownloadClient.ListenToDownloadWorkerLog
-            .Select(logs => Observable.Defer(() => CreateLog(logs).ToObservable()))
+        plexDownloadClient
+            .ListenToDownloadWorkerLog.Select(logs => Observable.Defer(() => CreateLog(logs).ToObservable()))
             .Concat()
             .Subscribe();
     }
@@ -158,14 +179,14 @@ public class DownloadJob : IJob, IDisposable
         switch (downloadTask.DownloadTaskType)
         {
             case DownloadTaskType.MovieData:
-                await _dbContext.DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
-                    .ExecuteUpdateAsync(p => p
-                        .SetProperty(x => x.DirectoryMeta, downloadTask.DirectoryMeta));
+                await _dbContext
+                    .DownloadTaskMovieFile.Where(x => x.Id == downloadTask.Id)
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DirectoryMeta, downloadTask.DirectoryMeta));
                 break;
             case DownloadTaskType.EpisodeData:
-                await _dbContext.DownloadTaskTvShowEpisodeFile.Where(x => x.Id == downloadTask.Id)
-                    .ExecuteUpdateAsync(p => p
-                        .SetProperty(x => x.DirectoryMeta, downloadTask.DirectoryMeta));
+                await _dbContext
+                    .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == downloadTask.Id)
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.DirectoryMeta, downloadTask.DirectoryMeta));
                 break;
             default:
                 return Result.Fail($"DownloadTaskType {downloadTask.DownloadTaskType} is not supported");

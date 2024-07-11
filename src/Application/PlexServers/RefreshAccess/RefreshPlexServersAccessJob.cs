@@ -19,7 +19,8 @@ public class RefreshPlexServersAccessJob : IJob
 
     public static string PlexAccountIdParameter => "plexAccountId";
 
-    public static JobKey GetJobKey(int id) => new($"{PlexAccountIdParameter}_{id}", nameof(RefreshPlexServersAccessJob));
+    public static JobKey GetJobKey(int id) =>
+        new($"{PlexAccountIdParameter}_{id}", nameof(RefreshPlexServersAccessJob));
 
     public RefreshPlexServersAccessJob(
         ILog log,
@@ -27,7 +28,8 @@ public class RefreshPlexServersAccessJob : IJob
         IServerSettingsModule serverSettingsModule,
         IAddOrUpdatePlexServersCommand addOrUpdatePlexServersCommand,
         IAddOrUpdatePlexAccountServersCommand addOrUpdatePlexAccountServersCommand,
-        IPlexApiService plexServiceApi)
+        IPlexApiService plexServiceApi
+    )
     {
         _log = log;
         _dbContext = dbContext;
@@ -43,9 +45,12 @@ public class RefreshPlexServersAccessJob : IJob
         var plexAccountId = dataMap.GetIntValue(PlexAccountIdParameter);
         var cancellationToken = context.CancellationToken;
 
-        _log.Debug("Executing job: {NameOfRefreshAccessiblePlexServersJob)} for {NameOfPlexAccountId)} with id: {PlexAccountId}",
+        _log.Debug(
+            "Executing job: {NameOfRefreshAccessiblePlexServersJob)} for {NameOfPlexAccountId)} with id: {PlexAccountId}",
             nameof(RefreshPlexServersAccessJob),
-            nameof(plexAccountId), plexAccountId);
+            nameof(plexAccountId),
+            plexAccountId
+        );
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
@@ -91,14 +96,21 @@ public class RefreshPlexServersAccessJob : IJob
             _serverSettingsModule.EnsureAllServersHaveASettingsEntry(serverList);
 
             // Add or update the PlexAccount and PlexServer relationships
-            var plexAccountTokensResult = await _addOrUpdatePlexAccountServersCommand.ExecuteAsync(plexAccountId, serverAccessTokens, cancellationToken);
+            var plexAccountTokensResult = await _addOrUpdatePlexAccountServersCommand.ExecuteAsync(
+                plexAccountId,
+                serverAccessTokens,
+                cancellationToken
+            );
             if (plexAccountTokensResult.IsFailed)
             {
                 plexAccountTokensResult.LogError();
                 return;
             }
 
-            _log.Information("Successfully refreshed accessible Plex servers for account {PlexAccountDisplayName}", plexAccount.DisplayName);
+            _log.Information(
+                "Successfully refreshed accessible Plex servers for account {PlexAccountDisplayName}",
+                plexAccount.DisplayName
+            );
         }
         catch (Exception e)
         {

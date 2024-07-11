@@ -16,8 +16,7 @@ public static class NotificationMapper
             Hidden = source.Hidden,
         };
 
-    public static List<NotificationDTO> ToDTO(this List<Notification> source) =>
-        source.ConvertAll(ToDTO);
+    public static List<NotificationDTO> ToDTO(this List<Notification> source) => source.ConvertAll(ToDTO);
 
     #endregion
 
@@ -33,8 +32,7 @@ public static class NotificationMapper
             Hidden = source.Hidden,
         };
 
-    public static List<Notification> ToModel(this List<NotificationDTO> source) =>
-        source.ConvertAll(ToModel);
+    public static List<Notification> ToModel(this List<NotificationDTO> source) => source.ConvertAll(ToModel);
 
     #endregion
 }

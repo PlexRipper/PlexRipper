@@ -31,7 +31,12 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/pause/{DownloadTaskGuid}";
 
-    public PauseDownloadTaskEndpoint(ILog log, IPlexRipperDbContext dbContext, IMediator mediator, IDownloadTaskScheduler downloadTaskScheduler)
+    public PauseDownloadTaskEndpoint(
+        ILog log,
+        IPlexRipperDbContext dbContext,
+        IMediator mediator,
+        IDownloadTaskScheduler downloadTaskScheduler
+    )
     {
         _log = log;
         _dbContext = dbContext;
@@ -43,10 +48,11 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(PauseDownloadTaskEndpointRequest req, CancellationToken ct)
@@ -56,7 +62,10 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
         var downloadTaskKey = await _dbContext.GetDownloadTaskKeyAsync(req.DownloadTaskGuid, ct);
         if (downloadTaskKey is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), req.DownloadTaskGuid), ct);
+            await SendFluentResult(
+                ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), req.DownloadTaskGuid),
+                ct
+            );
             return;
         }
 
@@ -69,7 +78,10 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
 
         await _downloadTaskScheduler.AwaitDownloadTaskJob(req.DownloadTaskGuid, ct);
 
-        _log.Debug("DownloadTask {DownloadTaskId} has been Paused, meaning no downloaded files have been deleted", req.DownloadTaskGuid);
+        _log.Debug(
+            "DownloadTask {DownloadTaskId} has been Paused, meaning no downloaded files have been deleted",
+            req.DownloadTaskGuid
+        );
 
         // Update the download task status
         await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);

@@ -29,7 +29,11 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/delete";
 
-    public DeleteDownloadTaskEndpoint(IPlexRipperDbContext dbContext, IMediator mediator, IDownloadTaskScheduler downloadTaskScheduler)
+    public DeleteDownloadTaskEndpoint(
+        IPlexRipperDbContext dbContext,
+        IMediator mediator,
+        IDownloadTaskScheduler downloadTaskScheduler
+    )
     {
         _dbContext = dbContext;
         _mediator = mediator;
@@ -40,10 +44,11 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
     {
         Delete(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(DeleteDownloadTaskEndpointRequest req, CancellationToken ct)
@@ -60,8 +65,12 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
         await _dbContext.DownloadTaskMovieFile.Where(x => req.DownloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
         await _dbContext.DownloadTaskTvShow.Where(x => req.DownloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
         await _dbContext.DownloadTaskTvShowSeason.Where(x => req.DownloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
-        await _dbContext.DownloadTaskTvShowEpisode.Where(x => req.DownloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
-        await _dbContext.DownloadTaskTvShowEpisodeFile.Where(x => req.DownloadTaskIds.Contains(x.Id)).ExecuteDeleteAsync(ct);
+        await _dbContext
+            .DownloadTaskTvShowEpisode.Where(x => req.DownloadTaskIds.Contains(x.Id))
+            .ExecuteDeleteAsync(ct);
+        await _dbContext
+            .DownloadTaskTvShowEpisodeFile.Where(x => req.DownloadTaskIds.Contains(x.Id))
+            .ExecuteDeleteAsync(ct);
 
         await SendFluentResult(Result.Ok(), ct);
     }

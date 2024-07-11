@@ -19,7 +19,11 @@ public class MockFileSystem : IFileSystem
         return "";
     }
 
-    public Result<FileSystemResult> LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes)
+    public Result<FileSystemResult> LookupContents(
+        string query,
+        bool includeFiles,
+        bool allowFoldersWithoutTrailingSlashes
+    )
     {
         return Result.Ok();
     }

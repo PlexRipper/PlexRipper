@@ -17,15 +17,20 @@ public class UpdatePlexLibraryByIdCommandValidator : AbstractValidator<UpdatePle
     }
 }
 
-public class UpdatePlexLibraryByIdCommandHandler : BaseHandler, IRequestHandler<UpdatePlexLibraryByIdCommand, Result<bool>>
+public class UpdatePlexLibraryByIdCommandHandler
+    : BaseHandler,
+        IRequestHandler<UpdatePlexLibraryByIdCommand, Result<bool>>
 {
-    public UpdatePlexLibraryByIdCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public UpdatePlexLibraryByIdCommandHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
     public async Task<Result<bool>> Handle(UpdatePlexLibraryByIdCommand command, CancellationToken cancellationToken)
     {
         try
         {
-            var plexLibraryDb = await _dbContext.PlexLibraries.AsTracking().FirstOrDefaultAsync(x => x.Id == command.PlexLibrary.Id);
+            var plexLibraryDb = await _dbContext
+                .PlexLibraries.AsTracking()
+                .FirstOrDefaultAsync(x => x.Id == command.PlexLibrary.Id);
 
             _dbContext.Entry(plexLibraryDb).CurrentValues.SetValues(command.PlexLibrary);
 

@@ -13,10 +13,7 @@ public class LanguageSettingsModule : BaseSettingsModule<ILanguageSettings>, ILa
 
     public override ILanguageSettings DefaultValues()
     {
-        return new LanguageSettings
-        {
-            Language = "en-US",
-        };
+        return new LanguageSettings { Language = "en-US", };
     }
 
     #endregion
@@ -25,10 +22,7 @@ public class LanguageSettingsModule : BaseSettingsModule<ILanguageSettings>, ILa
 
     public override ILanguageSettings GetValues()
     {
-        return new LanguageSettings
-        {
-            Language = Language,
-        };
+        return new LanguageSettings { Language = Language, };
     }
 
     public Result Update(ILanguageSettingsModule sourceSettings)

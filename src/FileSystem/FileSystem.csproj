@@ -19,6 +19,10 @@
 	<ItemGroup>
 		<PackageReference Include="Autofac" Version="8.0.0" />
 		<PackageReference Include="Autofac.Extras.Quartz" Version="10.0.0" />
+		<PackageReference Include="CSharpier.MsBuild" Version="0.28.2">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="12.0.0" />
 		<PackageReference Include="System.IO.Abstractions" Version="17.0.18" />
 	</ItemGroup>

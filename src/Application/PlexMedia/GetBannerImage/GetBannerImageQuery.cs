@@ -6,7 +6,8 @@ using PlexApi.Contracts;
 
 namespace PlexRipper.Application;
 
-public record GetBannerImageQuery(int MediaId, PlexMediaType MediaType, int Width = 0, int Height = 0) : IRequest<Result<byte[]>>;
+public record GetBannerImageQuery(int MediaId, PlexMediaType MediaType, int Width = 0, int Height = 0)
+    : IRequest<Result<byte[]>>;
 
 public class GetBannerImageQueryValidator : AbstractValidator<GetBannerImageQuery>
 {
@@ -34,7 +35,8 @@ public class GetBannerImageQueryHandler : IRequestHandler<GetBannerImageQuery, R
     {
         if (command.MediaType == PlexMediaType.Movie)
         {
-            var plexMovie = await _dbContext.PlexMovies.AsQueryable()
+            var plexMovie = await _dbContext
+                .PlexMovies.AsQueryable()
                 .Include(x => x.PlexServer)
                 .GetAsync(command.MediaId, cancellationToken);
 
@@ -44,12 +46,19 @@ public class GetBannerImageQueryHandler : IRequestHandler<GetBannerImageQuery, R
             if (!plexMovie.HasBanner)
                 return Result.Fail($"Movie: {plexMovie.Title} has no banner.");
 
-            return await _plexServiceApi.GetPlexMediaImageAsync(plexMovie.PlexServer, plexMovie.BannerUrl, command.Width, command.Height, cancellationToken);
+            return await _plexServiceApi.GetPlexMediaImageAsync(
+                plexMovie.PlexServer,
+                plexMovie.BannerUrl,
+                command.Width,
+                command.Height,
+                cancellationToken
+            );
         }
 
         if (command.MediaType == PlexMediaType.TvShow)
         {
-            var tvShow = await _dbContext.PlexTvShows.AsQueryable()
+            var tvShow = await _dbContext
+                .PlexTvShows.AsQueryable()
                 .Include(x => x.PlexServer)
                 .GetAsync(command.MediaId, cancellationToken);
 
@@ -59,7 +68,13 @@ public class GetBannerImageQueryHandler : IRequestHandler<GetBannerImageQuery, R
             if (!tvShow.HasBanner)
                 return Result.Fail($"TvShow: {tvShow.Title} has no banner.");
 
-            return await _plexServiceApi.GetPlexMediaImageAsync(tvShow.PlexServer, tvShow.BannerUrl, command.Width, command.Height, cancellationToken);
+            return await _plexServiceApi.GetPlexMediaImageAsync(
+                tvShow.PlexServer,
+                tvShow.BannerUrl,
+                command.Width,
+                command.Height,
+                cancellationToken
+            );
         }
 
         return Result.Fail($"MediaType: {command.MediaType} is not supported when retrieving banners.");

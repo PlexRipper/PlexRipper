@@ -7,8 +7,7 @@ namespace PlexRipper.Application;
 /// Generates a nested list of <see cref="DownloadTaskGeneric"/> and adds to the download queue.
 /// </summary>
 /// <returns>Returns true if all downloadTasks were added successfully.</returns>
-public record CreateDownloadTasksCommand(List<DownloadMediaDTO> DownloadMediaDtos)
-    : IRequest<Result>;
+public record CreateDownloadTasksCommand(List<DownloadMediaDTO> DownloadMediaDtos) : IRequest<Result>;
 
 public class CreateDownloadTasksCommandValidator : AbstractValidator<CreateDownloadTasksCommand>
 {
@@ -29,10 +28,7 @@ public class CreateDownloadTasksCommandHandler : IRequestHandler<CreateDownloadT
         _mediator = mediator;
     }
 
-    public async Task<Result> Handle(
-        CreateDownloadTasksCommand command,
-        CancellationToken cancellationToken
-    )
+    public async Task<Result> Handle(CreateDownloadTasksCommand command, CancellationToken cancellationToken)
     {
         if (command.DownloadMediaDtos.Any(x => x.Type == PlexMediaType.Movie))
         {
@@ -82,10 +78,7 @@ public class CreateDownloadTasksCommandHandler : IRequestHandler<CreateDownloadT
                 .Select(x => x.PlexServerId)
                 .Distinct()
                 .ToList();
-            await _mediator.Publish(
-                new CheckDownloadQueueNotification(uniquePlexServers),
-                cancellationToken
-            );
+            await _mediator.Publish(new CheckDownloadQueueNotification(uniquePlexServers), cancellationToken);
         }
 
         return Result.Ok();

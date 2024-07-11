@@ -15,7 +15,8 @@ public class SettingsModule : Module
         var assembly = Assembly.GetExecutingAssembly();
 
         // register all I*SettingsModule
-        builder.RegisterAssemblyTypes(assembly)
+        builder
+            .RegisterAssemblyTypes(assembly)
             .Where(t => t.Name.EndsWith("SettingsModule"))
             .AsImplementedInterfaces()
             .SingleInstance();

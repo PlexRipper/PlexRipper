@@ -14,13 +14,20 @@ public class GetPlexTvShowEpisodeByIdQueryValidator : AbstractValidator<GetPlexT
     }
 }
 
-public class GetPlexTvShowEpisodeByIdQueryHandler : BaseHandler, IRequestHandler<GetPlexTvShowEpisodeByIdQuery, Result<PlexTvShowEpisode>>
+public class GetPlexTvShowEpisodeByIdQueryHandler
+    : BaseHandler,
+        IRequestHandler<GetPlexTvShowEpisodeByIdQuery, Result<PlexTvShowEpisode>>
 {
-    public GetPlexTvShowEpisodeByIdQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public GetPlexTvShowEpisodeByIdQueryHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
-    public async Task<Result<PlexTvShowEpisode>> Handle(GetPlexTvShowEpisodeByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PlexTvShowEpisode>> Handle(
+        GetPlexTvShowEpisodeByIdQuery request,
+        CancellationToken cancellationToken
+    )
     {
-        var plexTvShowEpisode = await PlexTvShowEpisodesQueryable.IncludeAll()
+        var plexTvShowEpisode = await PlexTvShowEpisodesQueryable
+            .IncludeAll()
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (plexTvShowEpisode == null)

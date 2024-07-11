@@ -10,15 +10,13 @@ namespace PlexRipper.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterDatabase(
-                collation: "NATURALSORT");
+            migrationBuilder.AlterDatabase(collation: "NATURALSORT");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterDatabase(
-                oldCollation: "NATURALSORT");
+            migrationBuilder.AlterDatabase(oldCollation: "NATURALSORT");
         }
     }
 }

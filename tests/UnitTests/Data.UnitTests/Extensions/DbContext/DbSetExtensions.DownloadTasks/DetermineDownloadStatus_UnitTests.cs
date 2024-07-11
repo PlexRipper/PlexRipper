@@ -5,13 +5,17 @@ namespace Data.UnitTests.Extensions.DbContext.DbSetExtensions.DownloadTasks;
 
 public class DetermineDownloadStatus_UnitTests : BaseUnitTest
 {
-    public DetermineDownloadStatus_UnitTests(ITestOutputHelper output) : base(output) { }
+    public DetermineDownloadStatus_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldSetTheDownloadTaskParentOfTypeMovieDataToDownloadFinished_WhenTheMovieDataIsDownloadStatusIsDownloadFinished()
     {
         // Arrange
-        await SetupDatabase(config => { config.MovieDownloadTasksCount = 5; });
+        await SetupDatabase(config =>
+        {
+            config.MovieDownloadTasksCount = 5;
+        });
 
         var downloadTasks = await IDbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
         var testDownloadTask = downloadTasks[0].Children[0];

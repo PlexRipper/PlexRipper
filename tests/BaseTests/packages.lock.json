@@ -43,6 +43,12 @@
         "resolved": "35.5.1",
         "contentHash": "U/abxcUm3/8vRsvZWxC+ZIkccSSdV1RBZAfzDSZ5H+Mh20B6gM8bmS4zg9/rjVIxbhknN7a8rsGzeeYIXoPgww=="
       },
+      "CSharpier.MsBuild": {
+        "type": "Direct",
+        "requested": "[0.28.2, )",
+        "resolved": "0.28.2",
+        "contentHash": "eMPtBF9ECE5sMBXX6fZw/phFZ9UeV62E43z78VPKIgCJMppojxDc03RD6ROpPgk8Vvde11vkcZf69NveW/T1rg=="
+      },
       "FastEndpoints.Testing": {
         "type": "Direct",
         "requested": "[5.23.0, )",

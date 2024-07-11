@@ -7,14 +7,18 @@ namespace IntegrationTests.WebAPI.DownloadController;
 
 public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationTests
 {
-    public DownloadController_StartCommand_IntegrationTests(ITestOutputHelper output) : base(output) { }
+    public DownloadController_StartCommand_IntegrationTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldStartQueuedMovieDownloadTaskOnStartCommand_WhenNoTasksAreDownloading()
     {
         // Arrange
         Seed = 5594564;
-        var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
+        var serverUri = SpinUpPlexServer(config =>
+        {
+            config.DownloadFileSizeInMb = 50;
+        });
 
         await SetupDatabase(config =>
         {
@@ -32,9 +36,11 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
         var downloadTask = downloadTasks[0].Children[0];
 
         // Act
-        var response =
-            await Container.ApiClient.GETAsync<StartDownloadTaskEndpoint, StartDownloadTaskEndpointRequest, ResultDTO>(
-                new StartDownloadTaskEndpointRequest(downloadTask.Id));
+        var response = await Container.ApiClient.GETAsync<
+            StartDownloadTaskEndpoint,
+            StartDownloadTaskEndpointRequest,
+            ResultDTO
+        >(new StartDownloadTaskEndpointRequest(downloadTask.Id));
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         await Container.SchedulerService.AwaitScheduler();

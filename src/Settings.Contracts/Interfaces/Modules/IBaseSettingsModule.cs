@@ -3,7 +3,8 @@ using FluentResults;
 
 namespace Settings.Contracts;
 
-public interface IBaseSettingsModule<TModel> where TModel : class
+public interface IBaseSettingsModule<TModel>
+    where TModel : class
 {
     public string Name { get; }
 

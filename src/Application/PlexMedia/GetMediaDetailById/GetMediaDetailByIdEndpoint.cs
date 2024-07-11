@@ -55,11 +55,12 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexMediaDTO>))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexMediaDTO>))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(GetMediaDetailByIdEndpointRequest req, CancellationToken ct)
@@ -90,7 +91,10 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
                 break;
             }
             default:
-                await SendFluentResult(ResultExtensions.Create400BadRequestResult($"Type {req.Type} is not allowed"), ct);
+                await SendFluentResult(
+                    ResultExtensions.Create400BadRequestResult($"Type {req.Type} is not allowed"),
+                    ct
+                );
                 return;
         }
 

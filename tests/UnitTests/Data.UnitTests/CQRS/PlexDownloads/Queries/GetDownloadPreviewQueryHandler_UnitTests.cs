@@ -6,7 +6,8 @@ namespace Data.UnitTests;
 
 public class GetDownloadPreviewQueryHandler_UnitTests : BaseUnitTest<GetDownloadPreviewQueryHandler>
 {
-    public GetDownloadPreviewQueryHandler_UnitTests(ITestOutputHelper output) : base(output) { }
+    public GetDownloadPreviewQueryHandler_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldReturnNoDownloadPreview_WhenEmptyListIsGiven()
@@ -37,8 +38,8 @@ public class GetDownloadPreviewQueryHandler_UnitTests : BaseUnitTest<GetDownload
             config.TvShowEpisodeCount = 5;
         });
 
-        var tvShows = await DbContext.PlexTvShows
-            .Include(x => x.Seasons)
+        var tvShows = await DbContext
+            .PlexTvShows.Include(x => x.Seasons)
             .ThenInclude(x => x.Episodes)
             .AsNoTracking()
             .ToListAsync();
@@ -49,26 +50,32 @@ public class GetDownloadPreviewQueryHandler_UnitTests : BaseUnitTest<GetDownload
 
         var downloadMedia = new List<DownloadMediaDTO>();
 
-        downloadMedia.Add(new DownloadMediaDTO
-        {
-            MediaIds = tvShows.GetRange(0, 2).Select(x => x.Id).ToList(),
-            Type = PlexMediaType.TvShow,
-            PlexServerId = 1,
-        });
+        downloadMedia.Add(
+            new DownloadMediaDTO
+            {
+                MediaIds = tvShows.GetRange(0, 2).Select(x => x.Id).ToList(),
+                Type = PlexMediaType.TvShow,
+                PlexServerId = 1,
+            }
+        );
 
-        downloadMedia.Add(new DownloadMediaDTO
-        {
-            MediaIds = tvShows[3].Seasons.GetRange(0, 3).Select(x => x.Id).ToList(),
-            Type = PlexMediaType.Season,
-            PlexServerId = 1,
-        });
+        downloadMedia.Add(
+            new DownloadMediaDTO
+            {
+                MediaIds = tvShows[3].Seasons.GetRange(0, 3).Select(x => x.Id).ToList(),
+                Type = PlexMediaType.Season,
+                PlexServerId = 1,
+            }
+        );
 
-        downloadMedia.Add(new DownloadMediaDTO
-        {
-            MediaIds = tvShows[4].Seasons[2].Episodes.GetRange(1, 4).Select(x => x.Id).ToList(),
-            Type = PlexMediaType.Episode,
-            PlexServerId = 1,
-        });
+        downloadMedia.Add(
+            new DownloadMediaDTO
+            {
+                MediaIds = tvShows[4].Seasons[2].Episodes.GetRange(1, 4).Select(x => x.Id).ToList(),
+                Type = PlexMediaType.Episode,
+                PlexServerId = 1,
+            }
+        );
 
         var request = new GetDownloadPreviewQuery(downloadMedia);
 

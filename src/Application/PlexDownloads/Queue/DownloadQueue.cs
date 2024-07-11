@@ -58,8 +58,11 @@ public class DownloadQueue : IDownloadQueue
             return ResultExtensions.IsEmpty(nameof(plexServerIds)).LogWarning();
 
         _log.Here()
-            .Information("Adding {PlexServerIdsCount} {NameOfPlexServer}s to the DownloadQueue to check for the next download", plexServerIds.Count,
-                nameof(PlexServer));
+            .Information(
+                "Adding {PlexServerIdsCount} {NameOfPlexServer}s to the DownloadQueue to check for the next download",
+                plexServerIds.Count,
+                nameof(PlexServer)
+            );
         foreach (var plexServerId in plexServerIds)
             await _plexServersToCheckChannel.Writer.WriteAsync(plexServerId, _token);
 
@@ -74,17 +77,28 @@ public class DownloadQueue : IDownloadQueue
         var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, _token);
         var downloadTasks = await _dbContext.GetAllDownloadTasksByServerAsync(plexServerId, cancellationToken: _token);
 
-        _log.Here().Debug("Checking {NameOfPlexServer}: {PlexServerName} for the next download to start", nameof(PlexServer), plexServerName);
+        _log.Here()
+            .Debug(
+                "Checking {NameOfPlexServer}: {PlexServerName} for the next download to start",
+                nameof(PlexServer),
+                plexServerName
+            );
         var nextDownloadTaskResult = GetNextDownloadTask(downloadTasks);
         if (nextDownloadTaskResult.IsFailed)
         {
-            _log.Information("There are no available downloadTasks remaining for PlexServer with Id: {PlexServerName}", plexServerName);
+            _log.Information(
+                "There are no available downloadTasks remaining for PlexServer with Id: {PlexServerName}",
+                plexServerName
+            );
             return Result.Ok();
         }
 
         var nextDownloadTask = nextDownloadTaskResult.Value;
 
-        _log.Information("Selected download task {NextDownloadTaskFullTitle} to start as the next task", nextDownloadTask.FullTitle);
+        _log.Information(
+            "Selected download task {NextDownloadTaskFullTitle} to start as the next task",
+            nextDownloadTask.FullTitle
+        );
 
         await _downloadTaskScheduler.StartDownloadTaskJob(nextDownloadTask.ToKey());
 

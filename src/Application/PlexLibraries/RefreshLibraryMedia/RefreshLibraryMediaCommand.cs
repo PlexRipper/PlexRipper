@@ -15,15 +15,12 @@ namespace PlexRipper.Application;
 /// <param name="PlexLibraryId">The id of the <see cref="PlexLibrary"/> to retrieve.</param>
 /// <param name="ProgressAction">The action to call for a progress update.</param>
 /// <returns>Returns the PlexLibrary with the containing media.</returns>
-public record RefreshLibraryMediaCommand(
-    int PlexLibraryId,
-    Action<LibraryProgress> ProgressAction = null
-) : IRequest<Result<PlexLibrary>>;
+public record RefreshLibraryMediaCommand(int PlexLibraryId, Action<LibraryProgress> ProgressAction = null)
+    : IRequest<Result<PlexLibrary>>;
 
 public class RefreshLibraryMediaCommandValidator : AbstractValidator<RefreshLibraryMediaCommand> { }
 
-public class RefreshLibraryMediaCommandHandler
-    : IRequestHandler<RefreshLibraryMediaCommand, Result<PlexLibrary>>
+public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryMediaCommand, Result<PlexLibrary>>
 {
     private readonly ILog _log;
     private readonly IMediator _mediator;
@@ -73,9 +70,7 @@ public class RefreshLibraryMediaCommandHandler
                 return await RefreshPlexTvShowLibrary(newPlexLibrary, command.ProgressAction);
             default:
                 return Result
-                    .Fail(
-                        $"Library type {newPlexLibrary.Type} is currently not supported by PlexRipper"
-                    )
+                    .Fail($"Library type {newPlexLibrary.Type} is currently not supported by PlexRipper")
                     .LogWarning();
         }
     }
@@ -129,9 +124,7 @@ public class RefreshLibraryMediaCommandHandler
 
         foreach (var plexTvShow in plexLibrary.TvShows)
         {
-            plexTvShow.Seasons = rawSeasonDataResult.Value.FindAll(x =>
-                x.ParentKey == plexTvShow.Key
-            );
+            plexTvShow.Seasons = rawSeasonDataResult.Value.FindAll(x => x.ParentKey == plexTvShow.Key);
             plexTvShow.ChildCount = plexTvShow.Seasons.Count;
 
             foreach (var plexTvShowSeason in plexTvShow.Seasons)
@@ -175,9 +168,7 @@ public class RefreshLibraryMediaCommandHandler
         if (updateResult.IsFailed)
             return updateResult.ToResult();
 
-        var createResult = await _mediator.Send(
-            new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary)
-        );
+        var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
         if (createResult.IsFailed)
             return createResult.ToResult();
 
@@ -230,9 +221,7 @@ public class RefreshLibraryMediaCommandHandler
 
         SendProgress(2, 3);
 
-        var createResult = await _mediator.Send(
-            new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary)
-        );
+        var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
         if (createResult.IsFailed)
             return createResult;
 

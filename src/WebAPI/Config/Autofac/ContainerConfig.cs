@@ -42,6 +42,9 @@ public static class ContainerConfig
             return config;
         });
 
-        builder.Register(ctx => ctx.Resolve<MapperConfiguration>().CreateMapper()).As<IMapper>().InstancePerLifetimeScope();
+        builder
+            .Register(ctx => ctx.Resolve<MapperConfiguration>().CreateMapper())
+            .As<IMapper>()
+            .InstancePerLifetimeScope();
     }
 }

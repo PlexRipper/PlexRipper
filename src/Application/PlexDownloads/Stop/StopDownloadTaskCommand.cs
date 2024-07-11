@@ -35,7 +35,8 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
         IPlexRipperDbContext dbContext,
         IDirectorySystem directorySystem,
         IMediator mediator,
-        IDownloadTaskScheduler downloadTaskScheduler)
+        IDownloadTaskScheduler downloadTaskScheduler
+    )
     {
         _log = log;
         _dbContext = dbContext;
@@ -46,7 +47,10 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
 
     public async Task<Result> Handle(StopDownloadTaskCommand command, CancellationToken cancellationToken)
     {
-        var downloadTask = await _dbContext.GetDownloadTaskAsync(command.DownloadTaskGuid, cancellationToken: cancellationToken);
+        var downloadTask = await _dbContext.GetDownloadTaskAsync(
+            command.DownloadTaskGuid,
+            cancellationToken: cancellationToken
+        );
 
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.DownloadTaskGuid).LogError();
@@ -72,7 +76,9 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
         await _dbContext.SetDownloadStatus(key, DownloadStatus.Stopped);
 
         // Delete all worker tasks
-        await _dbContext.DownloadWorkerTasks.Where(x => x.DownloadTaskId == key.Id).ExecuteDeleteAsync(cancellationToken);
+        await _dbContext
+            .DownloadWorkerTasks.Where(x => x.DownloadTaskId == key.Id)
+            .ExecuteDeleteAsync(cancellationToken);
 
         // TODO delete filetasks but first check if already merging
 

@@ -2,7 +2,8 @@
 
 public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClient>
 {
-    public PlexDownloadClient_Setup_UnitTests(ITestOutputHelper output) : base(output) { }
+    public PlexDownloadClient_Setup_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldReturnFailedResult_WhenNullDownloadTaskIsGiven()

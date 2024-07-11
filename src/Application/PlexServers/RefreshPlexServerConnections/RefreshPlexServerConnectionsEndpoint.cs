@@ -7,7 +7,8 @@ namespace PlexRipper.Application;
 
 public record RefreshPlexServerConnectionsEndpointRequest(int PlexServerId);
 
-public class RefreshPlexServerConnectionsEndpointRequestValidator : Validator<RefreshPlexServerConnectionsEndpointRequest>
+public class RefreshPlexServerConnectionsEndpointRequestValidator
+    : Validator<RefreshPlexServerConnectionsEndpointRequest>
 {
     public RefreshPlexServerConnectionsEndpointRequestValidator()
     {
@@ -15,7 +16,8 @@ public class RefreshPlexServerConnectionsEndpointRequestValidator : Validator<Re
     }
 }
 
-public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServerConnectionsEndpointRequest, PlexServerDTO>
+public class RefreshPlexServerConnectionsEndpoint
+    : BaseEndpoint<RefreshPlexServerConnectionsEndpointRequest, PlexServerDTO>
 {
     private readonly IMediator _mediator;
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/refresh";
@@ -29,10 +31,11 @@ public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServ
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerDTO>))
-            .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerDTO>))
+                .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(RefreshPlexServerConnectionsEndpointRequest req, CancellationToken ct)

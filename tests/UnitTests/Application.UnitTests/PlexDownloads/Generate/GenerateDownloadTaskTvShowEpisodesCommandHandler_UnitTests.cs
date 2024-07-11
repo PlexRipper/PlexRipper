@@ -11,9 +11,7 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
 {
     private DownloadTaskTvShowValidator validator = new();
 
-    public DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTests(
-        ITestOutputHelper output
-    )
+    public DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -43,10 +41,7 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
         });
 
         var plexTvShows = await DbContext.PlexTvShows.IncludeAll().ToListAsync();
-        var plexEpisodes = plexTvShows
-            .SelectMany(x => x.Seasons)
-            .SelectMany(x => x.Episodes)
-            .ToList();
+        var plexEpisodes = plexTvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).ToList();
         var downloadMediaDtos = new List<DownloadMediaDTO>
         {
             new()
@@ -101,10 +96,7 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
         });
         var dbContext = IDbContext;
         var plexTvShows = await dbContext.PlexTvShows.IncludeAll().ToListAsync();
-        var plexEpisodes = plexTvShows
-            .SelectMany(x => x.Seasons)
-            .SelectMany(x => x.Episodes)
-            .ToList();
+        var plexEpisodes = plexTvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).ToList();
 
         // Create a download task for the tv show
         var createdTvShowDownloadTask = plexTvShows.First().MapToDownloadTask();
@@ -131,8 +123,6 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
         result.IsSuccess.ShouldBeTrue(result.ToString());
         var downloadTaskTvShows = await DbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
         downloadTaskTvShows.Count.ShouldBe(5);
-        downloadTaskTvShows
-            .FirstOrDefault(x => x.Id == createdTvShowDownloadTask.Id)
-            .ShouldNotBeNull();
+        downloadTaskTvShows.FirstOrDefault(x => x.Id == createdTvShowDownloadTask.Id).ShouldNotBeNull();
     }
 }

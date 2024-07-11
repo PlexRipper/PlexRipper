@@ -23,11 +23,15 @@ public class MockSignalRService : ISignalRService
 
     public void SendLibraryProgressUpdate(LibraryProgress libraryProgress) { }
 
-    public Task SendLibraryProgressUpdateAsync(int id, int received, int total, bool isRefreshing = true) => Task.CompletedTask;
+    public Task SendLibraryProgressUpdateAsync(int id, int received, int total, bool isRefreshing = true) =>
+        Task.CompletedTask;
 
     public Task SendDownloadTaskCreationProgressUpdate(int current, int total) => Task.CompletedTask;
 
-    public Task SendFileMergeProgressUpdateAsync(FileMergeProgress fileMergeProgress, CancellationToken cancellationToken = default)
+    public Task SendFileMergeProgressUpdateAsync(
+        FileMergeProgress fileMergeProgress,
+        CancellationToken cancellationToken = default
+    )
     {
         FileMergeProgressList.Add(fileMergeProgress, cancellationToken);
         _log.Verbose("{ClassName} => {@FileMergeProgress}", nameof(MockSignalRService), fileMergeProgress);
@@ -40,7 +44,11 @@ public class MockSignalRService : ISignalRService
 
     public Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress) => Task.CompletedTask;
 
-    public Task SendDownloadProgressUpdateAsync(int plexServerId, List<DownloadTaskGeneric> downloadTasks, CancellationToken cancellationToken = default)
+    public Task SendDownloadProgressUpdateAsync(
+        int plexServerId,
+        List<DownloadTaskGeneric> downloadTasks,
+        CancellationToken cancellationToken = default
+    )
     {
         var update = downloadTasks.ToServerDownloadProgressDTOList();
 
@@ -50,7 +58,8 @@ public class MockSignalRService : ISignalRService
         return Task.CompletedTask;
     }
 
-    public Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress) => Task.CompletedTask;
+    public Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress) =>
+        Task.CompletedTask;
 
     public Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate)
     {

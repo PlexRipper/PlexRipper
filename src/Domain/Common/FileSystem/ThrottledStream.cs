@@ -128,7 +128,8 @@ public class ThrottledStream : Stream
             await Task.Delay((int)(waitInSec * 1000)).ConfigureAwait(false);
         }
 
-        if (diff >= count) return count;
+        if (diff >= count)
+            return count;
 
         return diff > 0 ? diff : Math.Min(1024 * 8, count);
     }

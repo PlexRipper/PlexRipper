@@ -17,8 +17,7 @@ public static class DownloadPreviewMapper
             Children = source.Children.ToDTO(),
         };
 
-    public static List<DownloadPreviewDTO> ToDTO(this List<DownloadPreview> source) =>
-        source.ConvertAll(ToDTO);
+    public static List<DownloadPreviewDTO> ToDTO(this List<DownloadPreview> source) => source.ConvertAll(ToDTO);
 
     #endregion
 
@@ -37,9 +36,8 @@ public static class DownloadPreviewMapper
             Children = [],
         };
 
-    public static IQueryable<DownloadPreview> ProjectToDownloadPreview(
-        this IQueryable<PlexMovie> source
-    ) => source.Select(x => ProjectToDownloadPreviewMapper(x));
+    public static IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexMovie> source) =>
+        source.Select(x => ProjectToDownloadPreviewMapper(x));
 
     #endregion
 
@@ -58,9 +56,8 @@ public static class DownloadPreviewMapper
             Children = [],
         };
 
-    public static IQueryable<DownloadPreview> ProjectToDownloadPreview(
-        this IQueryable<PlexTvShow> source
-    ) => source.Select(x => ProjectToDownloadPreviewMapper(x));
+    public static IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexTvShow> source) =>
+        source.Select(x => ProjectToDownloadPreviewMapper(x));
 
     #endregion
 
@@ -79,9 +76,8 @@ public static class DownloadPreviewMapper
             Children = [],
         };
 
-    public static IQueryable<DownloadPreview> ProjectToDownloadPreview(
-        this IQueryable<PlexTvShowSeason> source
-    ) => source.Select(x => ProjectToDownloadPreviewMapper(x));
+    public static IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexTvShowSeason> source) =>
+        source.Select(x => ProjectToDownloadPreviewMapper(x));
 
     #endregion
 
@@ -100,9 +96,8 @@ public static class DownloadPreviewMapper
             Children = [],
         };
 
-    public static IQueryable<DownloadPreview> ProjectToDownloadPreview(
-        this IQueryable<PlexTvShowEpisode> source
-    ) => source.Select(x => ProjectToDownloadPreviewMapper(x));
+    public static IQueryable<DownloadPreview> ProjectToDownloadPreview(this IQueryable<PlexTvShowEpisode> source) =>
+        source.Select(x => ProjectToDownloadPreviewMapper(x));
 
     private static TvShowEpisodeKeyDTO ProjectToEpisodeKey(this PlexTvShowEpisode source) =>
         new()
@@ -112,9 +107,8 @@ public static class DownloadPreviewMapper
             EpisodeId = source.Id,
         };
 
-    public static IQueryable<TvShowEpisodeKeyDTO> ProjectToEpisodeKey(
-        this IQueryable<PlexTvShowEpisode> source
-    ) => source.Select(x => ProjectToEpisodeKey(x));
+    public static IQueryable<TvShowEpisodeKeyDTO> ProjectToEpisodeKey(this IQueryable<PlexTvShowEpisode> source) =>
+        source.Select(x => ProjectToEpisodeKey(x));
 
     #endregion
 }

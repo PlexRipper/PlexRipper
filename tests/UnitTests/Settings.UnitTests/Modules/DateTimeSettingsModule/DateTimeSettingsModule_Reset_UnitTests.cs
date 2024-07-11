@@ -4,13 +4,19 @@ namespace Settings.UnitTests.Modules;
 
 public class DateTimeSettingsModule_Reset_UnitTests : BaseUnitTest<DateTimeSettingsModule>
 {
-    public DateTimeSettingsModule_Reset_UnitTests(ITestOutputHelper output) : base(output) { }
+    public DateTimeSettingsModule_Reset_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public void ShouldUpdateAndThenResetSettingsModule_WhenCallingResetAfterUpdate()
     {
         // Arrange
-        var settings = FakeData.GetDateTimeSettings(config => { config.Seed = 6223; }).Generate();
+        var settings = FakeData
+            .GetDateTimeSettings(config =>
+            {
+                config.Seed = 6223;
+            })
+            .Generate();
 
         // Act
         var updateResult = _sut.Update(settings);

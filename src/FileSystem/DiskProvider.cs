@@ -5,35 +5,33 @@ namespace PlexRipper.FileSystem;
 
 public class DiskProvider : IDiskProvider
 {
-    private readonly HashSet<string> _setToRemove = new()
-    {
-        // Windows
-        "boot",
-        "bootmgr",
-        "cache",
-        "msocache",
-        "recovery",
-        "$recycle.bin",
-        "recycler",
-        "system volume information",
-        "temporary internet files",
-        "windows",
-
-        // OS X
-        ".fseventd",
-        ".spotlight",
-        ".trashes",
-        ".vol",
-        "cachedmessages",
-        "caches",
-        "trash",
-
-        // QNAP
-        ".@__thumb",
-
-        // Synology
-        "@eadir",
-    };
+    private readonly HashSet<string> _setToRemove =
+        new()
+        {
+            // Windows
+            "boot",
+            "bootmgr",
+            "cache",
+            "msocache",
+            "recovery",
+            "$recycle.bin",
+            "recycler",
+            "system volume information",
+            "temporary internet files",
+            "windows",
+            // OS X
+            ".fseventd",
+            ".spotlight",
+            ".trashes",
+            ".vol",
+            "cachedmessages",
+            "caches",
+            "trash",
+            // QNAP
+            ".@__thumb",
+            // Synology
+            "@eadir",
+        };
 
     public FileSystemResult GetResult(string path, bool includeFiles)
     {
@@ -47,7 +45,6 @@ public class DiskProvider : IDiskProvider
             if (includeFiles)
                 result.Files = GetFiles(path);
         }
-
         catch (DirectoryNotFoundException)
         {
             return new FileSystemResult { Parent = GetParent(path) };
@@ -158,7 +155,8 @@ public class DiskProvider : IDiskProvider
     {
         return GetDriveInfoMounts()
             .Where(d =>
-                d.DriveType == DriveType.Fixed || d.DriveType == DriveType.Network || d.DriveType == DriveType.Removable)
+                d.DriveType == DriveType.Fixed || d.DriveType == DriveType.Network || d.DriveType == DriveType.Removable
+            )
             .Select(d => new DriveInfoMount(d))
             .Cast<IMount>()
             .ToList();
@@ -166,9 +164,7 @@ public class DiskProvider : IDiskProvider
 
     protected List<DriveInfo> GetDriveInfoMounts()
     {
-        return DriveInfo.GetDrives()
-            .Where(d => d.IsReady)
-            .ToList();
+        return DriveInfo.GetDrives().Where(d => d.IsReady).ToList();
     }
 
     public string GetVolumeName(IMount mountInfo)

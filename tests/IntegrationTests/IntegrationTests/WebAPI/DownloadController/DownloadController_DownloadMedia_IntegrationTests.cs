@@ -9,13 +9,17 @@ namespace IntegrationTests.WebAPI.DownloadController;
 
 public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegrationTests
 {
-    public DownloadController_DownloadMedia_IntegrationTests(ITestOutputHelper output) : base(output, LogEventLevel.Verbose) { }
+    public DownloadController_DownloadMedia_IntegrationTests(ITestOutputHelper output)
+        : base(output, LogEventLevel.Verbose) { }
 
     [Fact]
     public async Task ShouldDownloadMultipleMovieDownloadTasks_WhenDownloadTasksAreCreated()
     {
         // Arrange
-        var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
+        var serverUri = SpinUpPlexServer(config =>
+        {
+            config.DownloadFileSizeInMb = 50;
+        });
         var plexMovieCount = 3;
         await SetupDatabase(config =>
         {
@@ -28,7 +32,10 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
 
         await CreateContainer(config => config.DownloadSpeedLimitInKib = 25000);
         var plexMovies = await DbContext.PlexMovies.ToListAsync();
-        plexMovies.Count.ShouldBe(plexMovieCount, $"PlexMovies count should be 10 failed with database name: {DatabaseName}");
+        plexMovies.Count.ShouldBe(
+            plexMovieCount,
+            $"PlexMovies count should be 10 failed with database name: {DatabaseName}"
+        );
 
         var dtoList = new List<DownloadMediaDTO>()
         {
@@ -42,7 +49,11 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
         };
 
         // Act
-        var response = await Container.ApiClient.POSTAsync<CreateDownloadTasksEndpoint, List<DownloadMediaDTO>, ResultDTO>(dtoList);
+        var response = await Container.ApiClient.POSTAsync<
+            CreateDownloadTasksEndpoint,
+            List<DownloadMediaDTO>,
+            ResultDTO
+        >(dtoList);
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
         await Task.Delay(2000);
         await Container.SchedulerService.AwaitScheduler();

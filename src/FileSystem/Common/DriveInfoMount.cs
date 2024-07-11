@@ -8,7 +8,11 @@ public class DriveInfoMount : IMount
 
     private readonly DriveType _driveType;
 
-    public DriveInfoMount(DriveInfo driveInfo, DriveType driveType = DriveType.Unknown, MountOptions mountOptions = null)
+    public DriveInfoMount(
+        DriveInfo driveInfo,
+        DriveType driveType = DriveType.Unknown,
+        MountOptions mountOptions = null
+    )
     {
         _driveInfo = driveInfo;
         _driveType = driveType;

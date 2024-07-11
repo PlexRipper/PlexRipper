@@ -10,7 +10,8 @@ namespace Settings.UnitTests;
 
 public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
 {
-    public ConfigManager_Setup_UnitTests(ITestOutputHelper output) : base(output) { }
+    public ConfigManager_Setup_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public void ShouldLoadConfigDuringSetup_WhenConfigFileAlreadyExists()
@@ -29,7 +30,8 @@ public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
             mock.Container.Resolve<IFileSystem>(),
             mock.Container.Resolve<IDirectorySystem>(),
             mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>());
+            mock.Container.Resolve<IUserSettings>()
+        );
         sut.Setup(x => x.ConfigFileExists()).Returns(true);
         sut.Setup(x => x.LoadConfig()).Returns(Result.Ok);
 
@@ -52,7 +54,9 @@ public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/TEST_PlexRipperSettings.json");
         mock.Mock<IUserSettings>().Setup(x => x.GetSettingsModel()).Returns(settingsModel);
-        mock.Mock<IFileSystem>().Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok);
+        mock.Mock<IFileSystem>()
+            .Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(Result.Ok);
         mock.Mock<IDirectorySystem>().Setup(x => x.Exists(It.IsAny<string>())).Returns(Result.Ok(false));
         mock.Mock<IDirectorySystem>().Setup(x => x.CreateDirectory(It.IsAny<string>())).Returns(Result.Ok());
 
@@ -63,7 +67,8 @@ public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
             mock.Container.Resolve<IFileSystem>(),
             mock.Container.Resolve<IDirectorySystem>(),
             mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>());
+            mock.Container.Resolve<IUserSettings>()
+        );
         sut.Setup(x => x.ConfigFileExists()).Returns(false);
         sut.Setup(x => x.SaveConfig()).Returns(Result.Ok);
 

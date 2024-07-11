@@ -4,7 +4,8 @@ namespace PlexApi.UnitTests;
 
 public class JsonConverterTests : BaseUnitTest
 {
-    public JsonConverterTests(ITestOutputHelper output) : base(output) { }
+    public JsonConverterTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public void ShouldReturnValidLongFromJsonString_WhenJsonStringIsValidLong()

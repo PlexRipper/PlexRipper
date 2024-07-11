@@ -13,7 +13,8 @@ public static partial class DbContextExtensions
 
     public static async Task<FolderPath?> GetDestinationFolder(this IPlexRipperDbContext dbContext, int plexLibraryId)
     {
-        var plexLibrary = await dbContext.PlexLibraries.Include(x => x.DefaultDestination)
+        var plexLibrary = await dbContext
+            .PlexLibraries.Include(x => x.DefaultDestination)
             .FirstOrDefaultAsync(x => x.Id == plexLibraryId);
 
         if (plexLibrary is null)
@@ -38,7 +39,8 @@ public static partial class DbContextExtensions
     public static async Task<FolderPath> GetDefaultDestinationFolderPath(
         this IPlexRipperDbContext dbContext,
         PlexMediaType mediaType,
-        CancellationToken token = default)
+        CancellationToken token = default
+    )
     {
         switch (mediaType)
         {
@@ -61,8 +63,10 @@ public static partial class DbContextExtensions
             case PlexMediaType.None:
             case PlexMediaType.Unknown:
             default:
-                Log.Error("Unknown PlexMediaType {PlexMediaType} that could not be used to determine a default path, defaulting to the DownloadPath",
-                    mediaType);
+                Log.Error(
+                    "Unknown PlexMediaType {PlexMediaType} that could not be used to determine a default path, defaulting to the DownloadPath",
+                    mediaType
+                );
                 return (await dbContext.FolderPaths.GetAsync(1, token))!;
         }
     }

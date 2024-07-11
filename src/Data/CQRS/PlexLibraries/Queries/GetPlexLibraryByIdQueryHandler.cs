@@ -14,9 +14,12 @@ public class GetPlexLibraryByIdQueryValidator : AbstractValidator<GetPlexLibrary
     }
 }
 
-public class GetPlexLibraryByIdWithMediaHandler : BaseHandler, IRequestHandler<GetPlexLibraryByIdQuery, Result<PlexLibrary>>
+public class GetPlexLibraryByIdWithMediaHandler
+    : BaseHandler,
+        IRequestHandler<GetPlexLibraryByIdQuery, Result<PlexLibrary>>
 {
-    public GetPlexLibraryByIdWithMediaHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public GetPlexLibraryByIdWithMediaHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
     public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdQuery request, CancellationToken cancellationToken)
     {
@@ -26,7 +29,12 @@ public class GetPlexLibraryByIdWithMediaHandler : BaseHandler, IRequestHandler<G
         if (result == null)
             return ResultExtensions.EntityNotFound(nameof(PlexLibrary), request.Id);
 
-        var plexLibrary = await GetPlexLibraryQueryableByType(result.Type, request.IncludePlexServer, request.IncludeMedia, request.TopLevelMediaOnly)
+        var plexLibrary = await GetPlexLibraryQueryableByType(
+                result.Type,
+                request.IncludePlexServer,
+                request.IncludeMedia,
+                request.TopLevelMediaOnly
+            )
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         if (plexLibrary == null)

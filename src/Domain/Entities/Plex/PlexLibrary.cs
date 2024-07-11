@@ -212,8 +212,10 @@ public class PlexLibrary : BaseEntity
                     for (var j = 0; j < TvShows[i].Seasons.Count; j++)
                         if (TvShows[i].Seasons[j].Episodes?.Count > 0)
                         {
-                            TvShows[i].Seasons[j].Episodes =
-                                TvShows[i].Seasons[j].Episodes.OrderBy(x => x.Key).ToList();
+                            TvShows[i].Seasons[j].Episodes = TvShows[i]
+                                .Seasons[j]
+                                .Episodes.OrderBy(x => x.Key)
+                                .ToList();
                         }
                 }
         }
@@ -234,7 +236,9 @@ public class PlexLibrary : BaseEntity
                 MetaData.MovieCount = Movies.Count;
             }
             else
-                return Result.Fail("The PlexLibrary is of type Movie but has no Movies included to update the MetaData.");
+                return Result.Fail(
+                    "The PlexLibrary is of type Movie but has no Movies included to update the MetaData."
+                );
         }
 
         if (Type == PlexMediaType.TvShow)
@@ -247,7 +251,9 @@ public class PlexLibrary : BaseEntity
                 MetaData.TvShowEpisodeCount = TvShows.Sum(x => x.Seasons.Sum(y => y.Episodes.Count));
             }
             else
-                return Result.Fail("The PlexLibrary is of type TvShow but has no TvShows included to update the MetaData.");
+                return Result.Fail(
+                    "The PlexLibrary is of type TvShow but has no TvShows included to update the MetaData."
+                );
         }
 
         return Result.Ok();

@@ -29,16 +29,17 @@ public class QueueSyncPlexServerJobEndpoint : BaseEndpoint<QueueSyncPlexServerJo
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(QueueSyncPlexServerJobEndpointRequest req, CancellationToken ct)
     {
         var result = await _mediator.Send(new QueueSyncServerJobCommand(req.PlexServerId, req.ForceSync), ct);
-       await SendFluentResult(result, ct);
+        await SendFluentResult(result, ct);
     }
 }

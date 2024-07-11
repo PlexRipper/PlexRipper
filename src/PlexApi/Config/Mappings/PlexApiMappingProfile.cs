@@ -25,38 +25,44 @@ public class PlexApiMappingProfile : Profile
 
         // PlexMediaContainerDTO -> PlexMediaMetaData
         CreateMap<PlexMediaContainerDTO, PlexMediaMetaData>(MemberList.None)
-            .ConstructUsing((source, context) =>
-            {
-                if (source?.MediaContainer == null || !source.MediaContainer.Metadata.Any() || !source.MediaContainer.Metadata.First().Media.Any())
-                    return null;
-
-                var metaData = source?.MediaContainer?.Metadata?.First();
-                var medium = metaData.Media.First();
-                var part = medium.Part.Any() ? medium.Part.First() : null;
-
-                return new PlexMediaMetaData
+            .ConstructUsing(
+                (source, context) =>
                 {
-                    Duration = medium.Duration,
-                    Bitrate = medium.Bitrate,
-                    Width = medium.Width,
-                    Height = medium.Height,
-                    AspectRatio = medium.AspectRatio,
-                    AudioChannels = medium.AudioChannels,
-                    AudioCodec = medium.AudioCodec,
-                    VideoCodec = medium.VideoCodec,
-                    VideoResolution = medium.VideoResolution,
-                    MediaFormat = medium.Container,
-                    VideoFrameRate = medium.VideoFrameRate,
-                    AudioProfile = medium.AudioProfile,
-                    VideoProfile = medium.VideoProfile,
-                    FilePath = part != null ? part.File : "",
-                    Title = metaData.Title,
-                    ObfuscatedFilePath = part != null ? part.Key : "",
-                    TitleTvShow = metaData.GrandparentTitle,
-                    TitleTvShowSeason = metaData.ParentTitle,
-                    RatingKey = int.TryParse(metaData.RatingKey, out var result) ? result : 0,
-                };
-            });
+                    if (
+                        source?.MediaContainer == null
+                        || !source.MediaContainer.Metadata.Any()
+                        || !source.MediaContainer.Metadata.First().Media.Any()
+                    )
+                        return null;
+
+                    var metaData = source?.MediaContainer?.Metadata?.First();
+                    var medium = metaData.Media.First();
+                    var part = medium.Part.Any() ? medium.Part.First() : null;
+
+                    return new PlexMediaMetaData
+                    {
+                        Duration = medium.Duration,
+                        Bitrate = medium.Bitrate,
+                        Width = medium.Width,
+                        Height = medium.Height,
+                        AspectRatio = medium.AspectRatio,
+                        AudioChannels = medium.AudioChannels,
+                        AudioCodec = medium.AudioCodec,
+                        VideoCodec = medium.VideoCodec,
+                        VideoResolution = medium.VideoResolution,
+                        MediaFormat = medium.Container,
+                        VideoFrameRate = medium.VideoFrameRate,
+                        AudioProfile = medium.AudioProfile,
+                        VideoProfile = medium.VideoProfile,
+                        FilePath = part != null ? part.File : "",
+                        Title = metaData.Title,
+                        ObfuscatedFilePath = part != null ? part.Key : "",
+                        TitleTvShow = metaData.GrandparentTitle,
+                        TitleTvShowSeason = metaData.ParentTitle,
+                        RatingKey = int.TryParse(metaData.RatingKey, out var result) ? result : 0,
+                    };
+                }
+            );
 
         PlexServerMappings();
         PlexLibraryMappings();
@@ -80,7 +86,6 @@ public class PlexApiMappingProfile : Profile
             .ForMember(dest => dest.OwnerId, opt => opt.MapFrom(x => x.OwnerId))
             .ForMember(dest => dest.PlexServerOwnerUsername, opt => opt.MapFrom(x => x.SourceTitle))
             .ForMember(dest => dest.PublicAddress, opt => opt.MapFrom(x => x.PublicAddress))
-
             // Server flags
             .ForMember(dest => dest.Owned, opt => opt.MapFrom(x => x.Owned))
             .ForMember(dest => dest.Home, opt => opt.MapFrom(x => x.Home))
@@ -91,7 +96,6 @@ public class PlexApiMappingProfile : Profile
             .ForMember(dest => dest.PublicAddressMatches, opt => opt.MapFrom(x => x.PublicAddressMatches))
             .ForMember(dest => dest.DnsRebindingProtection, opt => opt.MapFrom(x => x.DnsRebindingProtection))
             .ForMember(dest => dest.NatLoopbackSupported, opt => opt.MapFrom(x => x.NatLoopbackSupported))
-
             // relations
             .ForMember(dest => dest.PlexLibraries, opt => opt.Ignore())
             .ForMember(dest => dest.ServerStatus, opt => opt.Ignore())
@@ -105,9 +109,11 @@ public class PlexApiMappingProfile : Profile
             .ForMember(dest => dest.PlexServer, opt => opt.Ignore())
             .ForMember(dest => dest.PlexServerId, opt => opt.Ignore())
             .ForMember(dest => dest.IPv4, opt => opt.MapFrom(x => x.Address.IsIpAddress() && !x.IPv6))
-
             // The port fix is when we don't want to use the port when Address is a domain name
-            .ForMember(dest => dest.PortFix, opt => opt.MapFrom(x => !x.Address.IsIpAddress() && !x.IPv6 && x.Address != "localhost"))
+            .ForMember(
+                dest => dest.PortFix,
+                opt => opt.MapFrom(x => !x.Address.IsIpAddress() && !x.IPv6 && x.Address != "localhost")
+            )
             .ForMember(dest => dest.PlexServerStatus, opt => opt.Ignore());
 
         CreateMap<ServerResource, ServerAccessTokenDTO>(MemberList.Destination)
@@ -126,13 +132,9 @@ public class PlexApiMappingProfile : Profile
 
         // LibrariesResponseDirectory -> PlexLibrary
         CreateMap<LibrariesResponseDirectory, PlexLibrary>(MemberList.None)
-            .ForMember(dest => dest.Type,
-                opt => opt.ConvertUsing(new StringToPlexMediaTypeConverter(), x => x.Type))
-            .ForMember(dest => dest.LibraryLocationId,
-                opt => opt.MapFrom(src => src.Location.First().Id))
-
+            .ForMember(dest => dest.Type, opt => opt.ConvertUsing(new StringToPlexMediaTypeConverter(), x => x.Type))
+            .ForMember(dest => dest.LibraryLocationId, opt => opt.MapFrom(src => src.Location.First().Id))
             // Location[0].Path -> LibraryLocationPath
-            .ForMember(dest => dest.LibraryLocationPath,
-                opt => opt.MapFrom(src => src.Location.First().Path));
+            .ForMember(dest => dest.LibraryLocationPath, opt => opt.MapFrom(src => src.Location.First().Path));
     }
 }

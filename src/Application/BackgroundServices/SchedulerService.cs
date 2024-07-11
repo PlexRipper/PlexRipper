@@ -43,7 +43,9 @@ public class SchedulerService : ISchedulerService
             await _scheduler.Start();
         }
 
-        return _scheduler.IsStarted ? Result.Ok() : Result.Fail($"Could not start Scheduler {_scheduler.SchedulerName}").LogError();
+        return _scheduler.IsStarted
+            ? Result.Ok()
+            : Result.Fail($"Could not start Scheduler {_scheduler.SchedulerName}").LogError();
     }
 
     public async Task<Result> StopAsync(bool graceFully = true)

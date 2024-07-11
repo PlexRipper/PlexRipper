@@ -10,7 +10,8 @@ public class GetMediaDetailByIdEndpoint_UnitTests : BaseUnitTest<GetMediaDetailB
 {
     private PlexMediaDTOValidator PlexMediaDtoValidator => new();
 
-    public GetMediaDetailByIdEndpoint_UnitTests(ITestOutputHelper output) : base(output) { }
+    public GetMediaDetailByIdEndpoint_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldHavePlexMediaData_WhenValidMediaIdAndPlexMediaTypeMovieIsRequested()

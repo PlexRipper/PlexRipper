@@ -100,7 +100,8 @@ public class PlexMediaSlim : BaseEntity
     {
         get
         {
-            return MediaData.MediaData.Select(x => new PlexMediaQuality()
+            return MediaData
+                .MediaData.Select(x => new PlexMediaQuality()
                 {
                     Quality = x.VideoResolution,
                     HashId = "NotImplementedYet",

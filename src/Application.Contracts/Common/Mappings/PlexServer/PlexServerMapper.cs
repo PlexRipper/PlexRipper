@@ -37,22 +37,16 @@ public static class PlexServerMapper
             PlexServerConnections = source.PlexServerConnections.ToDTO(),
         };
 
-    public static List<PlexServerDTO> ToDTO(this List<PlexServer> source) =>
-        source.ConvertAll(ToDTO);
+    public static List<PlexServerDTO> ToDTO(this List<PlexServer> source) => source.ConvertAll(ToDTO);
 
     #endregion
 
     #region PlexServerAccess
 
     public static PlexServerAccessDTO ToAccessDTO(this PlexServer source) =>
-        new()
-        {
-            PlexServerId = source.Id,
-            PlexLibraryIds = source.PlexLibraries.Select(x => x.Id).ToList(),
-        };
+        new() { PlexServerId = source.Id, PlexLibraryIds = source.PlexLibraries.Select(x => x.Id).ToList(), };
 
-    public static List<PlexServerAccessDTO> ToAccessDTO(this List<PlexServer> source) =>
-        source.ConvertAll(ToAccessDTO);
+    public static List<PlexServerAccessDTO> ToAccessDTO(this List<PlexServer> source) => source.ConvertAll(ToAccessDTO);
 
     #endregion
 
@@ -92,8 +86,7 @@ public static class PlexServerMapper
             PlexServerConnections = source.PlexServerConnections.ToModel(),
         };
 
-    public static List<PlexServer> ToModel(this List<PlexServerDTO> source) =>
-        source.ConvertAll(ToModel);
+    public static List<PlexServer> ToModel(this List<PlexServerDTO> source) => source.ConvertAll(ToModel);
 
     #endregion
 }

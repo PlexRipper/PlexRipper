@@ -12,10 +12,7 @@ public class InspectPlexServerJob : IJob
     private readonly ILog _log;
     private readonly IMediator _mediator;
 
-    public InspectPlexServerJob(
-        ILog log,
-        IMediator mediator,
-        IPlexRipperDbContext dbContext)
+    public InspectPlexServerJob(ILog log, IMediator mediator, IPlexRipperDbContext dbContext)
     {
         _log = log;
         _mediator = mediator;
@@ -26,9 +23,12 @@ public class InspectPlexServerJob : IJob
     {
         var dataMap = context.JobDetail.JobDataMap;
         var plexServerId = dataMap.GetIntValue(PlexServerIdParameter);
-        _log.Debug("Executing job: {InspectPlexServerJobName)} for {plexServerIdName)} with id: {PlexServerId}", nameof(InspectPlexServerJob),
+        _log.Debug(
+            "Executing job: {InspectPlexServerJobName)} for {plexServerIdName)} with id: {PlexServerId}",
+            nameof(InspectPlexServerJob),
             nameof(plexServerId),
-            plexServerId);
+            plexServerId
+        );
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
@@ -52,7 +52,11 @@ public class InspectPlexServerJob : IJob
 
             await _mediator.Send(new QueueSyncServerJobCommand(plexServerId, true));
 
-            _log.Information("Successfully finished the inspection of {NameOfPlexServer} with id {PlexServerId}", nameof(PlexServer), plexServerId);
+            _log.Information(
+                "Successfully finished the inspection of {NameOfPlexServer} with id {PlexServerId}",
+                nameof(PlexServer),
+                plexServerId
+            );
         }
         catch (Exception e)
         {

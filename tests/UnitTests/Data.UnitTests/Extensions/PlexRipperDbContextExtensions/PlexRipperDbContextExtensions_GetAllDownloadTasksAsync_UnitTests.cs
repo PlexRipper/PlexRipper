@@ -4,7 +4,8 @@ namespace Data.UnitTests.Extensions;
 
 public class PlexRipperDbContextExtensions_GetAllDownloadTasksAsync_UnitTests : BaseUnitTest
 {
-    public PlexRipperDbContextExtensions_GetAllDownloadTasksAsync_UnitTests(ITestOutputHelper output) : base(output) { }
+    public PlexRipperDbContextExtensions_GetAllDownloadTasksAsync_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldReturnNoDownloadTasks_WhenNoDownloadTasksAreInDb()
@@ -73,8 +74,12 @@ public class PlexRipperDbContextExtensions_GetAllDownloadTasksAsync_UnitTests : 
             downloadTasks.Count.ShouldBe(5);
             foreach (var downloadTask in shouldDownloadTasks)
             {
-                downloadTask.PlexServer.ShouldNotBeNull($"DownloadTaskType {downloadTask.DownloadTaskType} has PlexServer null");
-                downloadTask.PlexLibrary.ShouldNotBeNull($"DownloadTaskType {downloadTask.DownloadTaskType} has PlexLibrary null");
+                downloadTask.PlexServer.ShouldNotBeNull(
+                    $"DownloadTaskType {downloadTask.DownloadTaskType} has PlexServer null"
+                );
+                downloadTask.PlexLibrary.ShouldNotBeNull(
+                    $"DownloadTaskType {downloadTask.DownloadTaskType} has PlexLibrary null"
+                );
                 ValidateDownloadTasks(downloadTask.Children);
             }
         }

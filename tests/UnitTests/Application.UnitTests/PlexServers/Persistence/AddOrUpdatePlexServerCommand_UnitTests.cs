@@ -4,7 +4,8 @@ namespace PlexRipper.Application.UnitTests;
 
 public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
 {
-    public AddOrUpdatePlexServerCommand_UnitTests(ITestOutputHelper output) : base(output) { }
+    public AddOrUpdatePlexServerCommand_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldAddAllServers_WhenNoneExistInTheDatabase()
@@ -21,9 +22,7 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
         // Assert
         ResetDbContext();
         result.IsSuccess.ShouldBeTrue();
-        var plexServersDbs = DbContext.PlexServers
-            .Include(x => x.PlexServerConnections)
-            .ToList();
+        var plexServersDbs = DbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
         plexServersDbs.Count.ShouldBe(5);
 
         foreach (var expectedPlexServer in expectedPlexServers)
@@ -68,9 +67,7 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
 
         // Assert
         updateResult.IsSuccess.ShouldBeTrue();
-        var plexServersDbs = DbContext.PlexServers
-            .Include(x => x.PlexServerConnections)
-            .ToList();
+        var plexServersDbs = DbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
         plexServersDbs.Count.ShouldBe(5);
 
         foreach (var expectedServer in updatedServers)
@@ -80,7 +77,9 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
 
             foreach (var plexServerConnectionDb in plexServerDb.PlexServerConnections)
             {
-                var expectedConnection = expectedServer.PlexServerConnections.Find(x => x.Address == plexServerConnectionDb.Address);
+                var expectedConnection = expectedServer.PlexServerConnections.Find(x =>
+                    x.Address == plexServerConnectionDb.Address
+                );
                 expectedConnection.ShouldNotBeNull();
                 plexServerConnectionDb.Id.ShouldBe(expectedConnection.Id);
                 plexServerConnectionDb.ShouldBe(expectedConnection);
@@ -124,9 +123,7 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
         ResetDbContext();
         addResult.IsSuccess.ShouldBeTrue();
         updateResult.IsSuccess.ShouldBeTrue();
-        var plexServersDbs = DbContext.PlexServers
-            .Include(x => x.PlexServerConnections)
-            .ToList();
+        var plexServersDbs = DbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
         plexServersDbs.Count.ShouldBe(5);
 
         foreach (var expectedPlexServer in expectedPlexServers)

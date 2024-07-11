@@ -20,7 +20,8 @@ public static partial class ResultExtensions
         Exception e = null,
         string memberName = default!,
         string sourceFilePath = default!,
-        int sourceLineNumber = default!)
+        int sourceLineNumber = default!
+    )
     {
         switch (logLevel)
         {
@@ -50,7 +51,8 @@ public static partial class ResultExtensions
         LogEventLevel logLevel,
         string memberName = default!,
         string sourceFilePath = default!,
-        int sourceLineNumber = default!)
+        int sourceLineNumber = default!
+    )
     {
         LogReasons(result.ToResult(), logLevel, memberName, sourceFilePath, sourceLineNumber);
 
@@ -62,7 +64,8 @@ public static partial class ResultExtensions
         LogEventLevel logLevel,
         string memberName = default!,
         string sourceFilePath = default!,
-        int sourceLineNumber = default!)
+        int sourceLineNumber = default!
+    )
     {
         LogReasons(result, logLevel, memberName, sourceFilePath, sourceLineNumber);
 
@@ -74,7 +77,8 @@ public static partial class ResultExtensions
         LogEventLevel logLevel,
         string memberName = default!,
         string sourceFilePath = default!,
-        int sourceLineNumber = default!)
+        int sourceLineNumber = default!
+    )
     {
         foreach (var success in result.Successes)
             LogByType(logLevel, success.ToLogString(), null, memberName, sourceFilePath, sourceLineNumber);
@@ -140,7 +144,8 @@ public static partial class ResultExtensions
         this Result result,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
+        [CallerLineNumber] int sourceLineNumber = default!
+    )
     {
         return LogResult(result, LogEventLevel.Verbose, memberName, sourceFilePath, sourceLineNumber);
     }
@@ -157,7 +162,8 @@ public static partial class ResultExtensions
         this Result result,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
+        [CallerLineNumber] int sourceLineNumber = default!
+    )
     {
         return LogResult(result, LogEventLevel.Debug, memberName, sourceFilePath, sourceLineNumber);
     }
@@ -174,7 +180,8 @@ public static partial class ResultExtensions
         this Result result,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
+        [CallerLineNumber] int sourceLineNumber = default!
+    )
     {
         return LogResult(result, LogEventLevel.Information, memberName, sourceFilePath, sourceLineNumber);
     }
@@ -191,7 +198,8 @@ public static partial class ResultExtensions
         this Result result,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
+        [CallerLineNumber] int sourceLineNumber = default!
+    )
     {
         return LogResult(result, LogEventLevel.Warning, memberName, sourceFilePath, sourceLineNumber);
     }
@@ -208,7 +216,8 @@ public static partial class ResultExtensions
         this Result result,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
+        [CallerLineNumber] int sourceLineNumber = default!
+    )
     {
         return LogResult(result, LogEventLevel.Error, memberName, sourceFilePath, sourceLineNumber);
     }
@@ -225,7 +234,8 @@ public static partial class ResultExtensions
         this Result result,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
+        [CallerLineNumber] int sourceLineNumber = default!
+    )
     {
         return LogResult(result, LogEventLevel.Fatal, memberName, sourceFilePath, sourceLineNumber);
     }
@@ -247,7 +257,8 @@ public static partial class ResultExtensions
         this Result<T> result,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
+        [CallerLineNumber] int sourceLineNumber = default!
+    )
     {
         return LogResult(result, LogEventLevel.Verbose, memberName, sourceFilePath, sourceLineNumber);
     }
@@ -265,7 +276,8 @@ public static partial class ResultExtensions
         this Result<T> result,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
+        [CallerLineNumber] int sourceLineNumber = default!
+    )
     {
         return LogResult(result, LogEventLevel.Debug, memberName, sourceFilePath, sourceLineNumber);
     }
@@ -283,7 +295,8 @@ public static partial class ResultExtensions
         this Result<T> result,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
+        [CallerLineNumber] int sourceLineNumber = default!
+    )
     {
         return LogResult(result, LogEventLevel.Information, memberName, sourceFilePath, sourceLineNumber);
     }
@@ -301,7 +314,8 @@ public static partial class ResultExtensions
         this Result<T> result,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
+        [CallerLineNumber] int sourceLineNumber = default!
+    )
     {
         return LogResult(result, LogEventLevel.Warning, memberName, sourceFilePath, sourceLineNumber);
     }
@@ -319,7 +333,8 @@ public static partial class ResultExtensions
         this Result<T> result,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
+        [CallerLineNumber] int sourceLineNumber = default!
+    )
     {
         return LogResult(result, LogEventLevel.Error, memberName, sourceFilePath, sourceLineNumber).ToResult();
     }
@@ -337,7 +352,8 @@ public static partial class ResultExtensions
         this Result<T> result,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
+        [CallerLineNumber] int sourceLineNumber = default!
+    )
     {
         return LogResult(result, LogEventLevel.Fatal, memberName, sourceFilePath, sourceLineNumber).ToResult();
     }

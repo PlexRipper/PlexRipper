@@ -34,19 +34,26 @@ public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpoin
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexAccountDTO>))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexAccountDTO>))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(GetPlexAccountByIdEndpointRequest req, CancellationToken ct)
     {
-        var plexAccount = await _dbContext.PlexAccounts.IncludeServerAccess().IncludeLibraryAccess().GetAsync(req.PlexAccountId, ct);
+        var plexAccount = await _dbContext
+            .PlexAccounts.IncludeServerAccess()
+            .IncludeLibraryAccess()
+            .GetAsync(req.PlexAccountId, ct);
         if (plexAccount is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), req.PlexAccountId).LogWarning(), ct);
+            await SendFluentResult(
+                ResultExtensions.EntityNotFound(nameof(PlexAccount), req.PlexAccountId).LogWarning(),
+                ct
+            );
             return;
         }
 

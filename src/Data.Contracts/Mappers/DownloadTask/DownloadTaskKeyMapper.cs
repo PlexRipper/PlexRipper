@@ -6,8 +6,8 @@ public static partial class DownloadTaskKeyMapper
 {
     #region PlexMovie
 
-    public static IQueryable<DownloadTaskKey> ProjectToKey(this IQueryable<DownloadTaskMovie> downloadTaskMovie) => downloadTaskMovie.Select(x =>
-        new DownloadTaskKey
+    public static IQueryable<DownloadTaskKey> ProjectToKey(this IQueryable<DownloadTaskMovie> downloadTaskMovie) =>
+        downloadTaskMovie.Select(x => new DownloadTaskKey
         {
             Id = x.Id,
             PlexServerId = x.PlexServerId,
@@ -19,8 +19,10 @@ public static partial class DownloadTaskKeyMapper
 
     #region PlexMovieFile
 
-    public static IQueryable<DownloadTaskKey> ProjectToKey(this IQueryable<DownloadTaskMovieFile> downloadTaskMovieFile) => downloadTaskMovieFile.Select(x =>
-        new DownloadTaskKey
+    public static IQueryable<DownloadTaskKey> ProjectToKey(
+        this IQueryable<DownloadTaskMovieFile> downloadTaskMovieFile
+    ) =>
+        downloadTaskMovieFile.Select(x => new DownloadTaskKey
         {
             Id = x.Id,
             PlexServerId = x.PlexServerId,
@@ -28,8 +30,10 @@ public static partial class DownloadTaskKeyMapper
             Type = x.DownloadTaskType,
         });
 
-    public static IQueryable<DownloadTaskKey> ProjectToParentKey(this IQueryable<DownloadTaskMovieFile> downloadTaskMovieFile) => downloadTaskMovieFile.Select(
-        x => new DownloadTaskKey
+    public static IQueryable<DownloadTaskKey> ProjectToParentKey(
+        this IQueryable<DownloadTaskMovieFile> downloadTaskMovieFile
+    ) =>
+        downloadTaskMovieFile.Select(x => new DownloadTaskKey
         {
             Id = x.ParentId,
             PlexServerId = x.PlexServerId,
@@ -41,8 +45,8 @@ public static partial class DownloadTaskKeyMapper
 
     #region PlexTvShow
 
-    public static IQueryable<DownloadTaskKey> ProjectToKey(this IQueryable<DownloadTaskTvShow> downloadTaskTvShow) => downloadTaskTvShow.Select(x =>
-        new DownloadTaskKey
+    public static IQueryable<DownloadTaskKey> ProjectToKey(this IQueryable<DownloadTaskTvShow> downloadTaskTvShow) =>
+        downloadTaskTvShow.Select(x => new DownloadTaskKey
         {
             Id = x.Id,
             PlexServerId = x.PlexServerId,
@@ -54,7 +58,9 @@ public static partial class DownloadTaskKeyMapper
 
     #region PlexSeason
 
-    public static IQueryable<DownloadTaskKey> ProjectToKey(this IQueryable<DownloadTaskTvShowSeason> downloadTaskTvShowSeason) =>
+    public static IQueryable<DownloadTaskKey> ProjectToKey(
+        this IQueryable<DownloadTaskTvShowSeason> downloadTaskTvShowSeason
+    ) =>
         downloadTaskTvShowSeason.Select(x => new DownloadTaskKey
         {
             Id = x.Id,
@@ -67,7 +73,9 @@ public static partial class DownloadTaskKeyMapper
 
     #region PlexTvShowEpisode
 
-    public static IQueryable<DownloadTaskKey> ProjectToKey(this IQueryable<DownloadTaskTvShowEpisode> downloadTaskTvShowEpisode) =>
+    public static IQueryable<DownloadTaskKey> ProjectToKey(
+        this IQueryable<DownloadTaskTvShowEpisode> downloadTaskTvShowEpisode
+    ) =>
         downloadTaskTvShowEpisode.Select(x => new DownloadTaskKey
         {
             Id = x.Id,
@@ -80,7 +88,9 @@ public static partial class DownloadTaskKeyMapper
 
     #region PlexTvShowEpisodeFile
 
-    public static IQueryable<DownloadTaskKey> ProjectToKey(this IQueryable<DownloadTaskTvShowEpisodeFile> downloadTaskTvShowEpisodeFile) =>
+    public static IQueryable<DownloadTaskKey> ProjectToKey(
+        this IQueryable<DownloadTaskTvShowEpisodeFile> downloadTaskTvShowEpisodeFile
+    ) =>
         downloadTaskTvShowEpisodeFile.Select(x => new DownloadTaskKey
         {
             Id = x.Id,
@@ -89,7 +99,9 @@ public static partial class DownloadTaskKeyMapper
             Type = x.DownloadTaskType,
         });
 
-    public static IQueryable<DownloadTaskKey> ProjectToParentKey(this IQueryable<DownloadTaskTvShowEpisodeFile> downloadTaskTvShowEpisodeFile) =>
+    public static IQueryable<DownloadTaskKey> ProjectToParentKey(
+        this IQueryable<DownloadTaskTvShowEpisodeFile> downloadTaskTvShowEpisodeFile
+    ) =>
         downloadTaskTvShowEpisodeFile.Select(x => new DownloadTaskKey
         {
             Id = x.ParentId,

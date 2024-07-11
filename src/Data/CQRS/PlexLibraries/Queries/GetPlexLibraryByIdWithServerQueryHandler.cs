@@ -14,13 +14,21 @@ public class GetPlexLibraryByIdWithServerQueryValidator : AbstractValidator<GetP
     }
 }
 
-public class GetPlexLibraryByIdWithServerQueryHandler : BaseHandler, IRequestHandler<GetPlexLibraryByIdWithServerQuery, Result<PlexLibrary>>
+public class GetPlexLibraryByIdWithServerQueryHandler
+    : BaseHandler,
+        IRequestHandler<GetPlexLibraryByIdWithServerQuery, Result<PlexLibrary>>
 {
-    public GetPlexLibraryByIdWithServerQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public GetPlexLibraryByIdWithServerQueryHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
-    public async Task<Result<PlexLibrary>> Handle(GetPlexLibraryByIdWithServerQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PlexLibrary>> Handle(
+        GetPlexLibraryByIdWithServerQuery request,
+        CancellationToken cancellationToken
+    )
     {
-        var plexLibrary = await PlexLibraryQueryable.IncludePlexServer().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        var plexLibrary = await PlexLibraryQueryable
+            .IncludePlexServer()
+            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
         return ReturnResult(plexLibrary, request.Id);
     }

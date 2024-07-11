@@ -19,7 +19,6 @@ public class DownloadTaskTvShowConfiguration : IEntityTypeConfiguration<Download
             .HasConversion(x => x.ToDownloadStatusString(), x => x.ToDownloadStatus())
             .IsUnicode(false);
 
-        builder.Property(c => c.Title)
-            .UseCollation(OrderByNaturalExtensions.CollationName);
+        builder.Property(c => c.Title).UseCollation(OrderByNaturalExtensions.CollationName);
     }
 }

@@ -5,7 +5,8 @@ namespace Data.UnitTests.Extensions.DbContext.DbSetExtensions.DownloadTasks;
 
 public class GetDownloadTaskTypeAsync_UnitTests : BaseUnitTest
 {
-    public GetDownloadTaskTypeAsync_UnitTests(ITestOutputHelper output) : base(output) { }
+    public GetDownloadTaskTypeAsync_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldReturnDownloadTaskTypeMovie_WhenTheGuidIsOfTypeDownloadTaskMovie()

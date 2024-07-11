@@ -21,7 +21,8 @@ public class RefreshPlexServerConnectionsCommandValidator : AbstractValidator<Re
     }
 }
 
-public class RefreshPlexServerConnectionsCommandHandler : IRequestHandler<RefreshPlexServerConnectionsCommand, Result<PlexServer>>
+public class RefreshPlexServerConnectionsCommandHandler
+    : IRequestHandler<RefreshPlexServerConnectionsCommand, Result<PlexServer>>
 {
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IPlexApiService _plexServiceApi;
@@ -41,7 +42,10 @@ public class RefreshPlexServerConnectionsCommandHandler : IRequestHandler<Refres
         _addOrUpdatePlexAccountServersCommand = addOrUpdatePlexAccountServersCommand;
     }
 
-    public async Task<Result<PlexServer>> Handle(RefreshPlexServerConnectionsCommand request, CancellationToken cancellationToken)
+    public async Task<Result<PlexServer>> Handle(
+        RefreshPlexServerConnectionsCommand request,
+        CancellationToken cancellationToken
+    )
     {
         // Pick an account that has access to the PlexServer to connect with
         var plexAccountResult = await _dbContext.ChoosePlexAccountToConnect(request.PlexServerId, cancellationToken);
@@ -55,15 +59,17 @@ public class RefreshPlexServerConnectionsCommandHandler : IRequestHandler<Refres
 
         // Retrieve the PlexApi server data
         var tupleResult = await _plexServiceApi.GetAccessiblePlexServersAsync(plexAccount.Id);
-        var serverList = tupleResult.servers.Value
-            .FindAll(x => x.MachineIdentifier == plexServer.MachineIdentifier);
+        var serverList = tupleResult.servers.Value.FindAll(x => x.MachineIdentifier == plexServer.MachineIdentifier);
 
         // Check if we got the plex server we are looking for
         if (!serverList.Any())
-            return Result.Fail($"Could not retrieve the Plex server data with machine id: {plexServer.MachineIdentifier}").LogError();
+            return Result
+                .Fail($"Could not retrieve the Plex server data with machine id: {plexServer.MachineIdentifier}")
+                .LogError();
 
-        var serverAccessTokens = tupleResult.tokens.Value
-            .FindAll(x => x.MachineIdentifier == plexServer.MachineIdentifier);
+        var serverAccessTokens = tupleResult.tokens.Value.FindAll(x =>
+            x.MachineIdentifier == plexServer.MachineIdentifier
+        );
 
         // We only want to update one plexServer and discard the rest
         var updateResult = await _addOrUpdatePlexServersCommand.ExecuteAsync(serverList, cancellationToken);
@@ -71,11 +77,16 @@ public class RefreshPlexServerConnectionsCommandHandler : IRequestHandler<Refres
             return updateResult;
 
         // We only want to update tokens for the plexServer and discard the rest
-        var plexAccountTokensResult = await _addOrUpdatePlexAccountServersCommand.ExecuteAsync(plexAccount.Id, serverAccessTokens, cancellationToken);
+        var plexAccountTokensResult = await _addOrUpdatePlexAccountServersCommand.ExecuteAsync(
+            plexAccount.Id,
+            serverAccessTokens,
+            cancellationToken
+        );
         if (plexAccountTokensResult.IsFailed)
             return plexAccountTokensResult;
 
-        return _dbContext.PlexServers.AsNoTracking()
+        return _dbContext
+            .PlexServers.AsNoTracking()
             .Include(x => x.PlexServerConnections)
             .FirstOrDefault(x => x.Id == request.PlexServerId);
     }

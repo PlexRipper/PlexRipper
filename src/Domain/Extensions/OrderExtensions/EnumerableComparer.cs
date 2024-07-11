@@ -26,13 +26,17 @@ internal class EnumerableComparer<T> : IComparer<IEnumerable<T>>
                 var left = leftIt.MoveNext();
                 var right = rightIt.MoveNext();
 
-                if (!(left || right)) return 0;
+                if (!(left || right))
+                    return 0;
 
-                if (!left) return -1;
-                if (!right) return 1;
+                if (!left)
+                    return -1;
+                if (!right)
+                    return 1;
 
                 var itemResult = comp.Compare(leftIt.Current, rightIt.Current);
-                if (itemResult != 0) return itemResult;
+                if (itemResult != 0)
+                    return itemResult;
             }
         }
     }

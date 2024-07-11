@@ -14,18 +14,23 @@ public class GetPlexServerStatusByIdQueryValidator : AbstractValidator<GetPlexSe
     }
 }
 
-public class GetPlexServerStatusByIdQueryHandler : BaseHandler, IRequestHandler<GetPlexServerStatusByIdQuery, Result<PlexServerStatus>>
+public class GetPlexServerStatusByIdQueryHandler
+    : BaseHandler,
+        IRequestHandler<GetPlexServerStatusByIdQuery, Result<PlexServerStatus>>
 {
-    public GetPlexServerStatusByIdQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public GetPlexServerStatusByIdQueryHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
-    public async Task<Result<PlexServerStatus>> Handle(GetPlexServerStatusByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PlexServerStatus>> Handle(
+        GetPlexServerStatusByIdQuery request,
+        CancellationToken cancellationToken
+    )
     {
         var query = _dbContext.PlexServerStatuses.AsQueryable();
 
         if (request.IncludePlexServer)
         {
-            query = query
-                .Include(x => x.PlexServer);
+            query = query.Include(x => x.PlexServer);
         }
 
         var status = await query.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);

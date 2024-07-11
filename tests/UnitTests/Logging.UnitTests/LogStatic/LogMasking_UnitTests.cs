@@ -8,7 +8,8 @@ public class LogMasking_UnitTests : BaseUnitTest<LogMasking_UnitTests>
 {
     #region Setup/Teardown
 
-    public LogMasking_UnitTests(ITestOutputHelper output) : base(output, LogEventLevel.Verbose)
+    public LogMasking_UnitTests(ITestOutputHelper output)
+        : base(output, LogEventLevel.Verbose)
     {
         log = LogManager.CreateLogInstance<Log_UnitTests>(output, LogEventLevel.Verbose);
         logEmpty = LogManager.CreateLogInstance(output, LogEventLevel.Verbose);
@@ -28,7 +29,10 @@ public class LogMasking_UnitTests : BaseUnitTest<LogMasking_UnitTests>
             // Act
             log.Debug("Test e-mail: {Email}", "john.doe@hotmail.com");
             log.Debug("Test ip: {Ip}", "http://182.18.45.10:32400/");
-            log.Debug("Test ip url: {Url}", "http://182.18.45.10:32400/library/sections?X-Plex-Token=PzvkRw39mjZyz4SH8Qcj");
+            log.Debug(
+                "Test ip url: {Url}",
+                "http://182.18.45.10:32400/library/sections?X-Plex-Token=PzvkRw39mjZyz4SH8Qcj"
+            );
             log.Debug("Test domain name url: {Url}", "https://reykjavik.thetarsus.com/identity");
             log.Debug("Test PlexLibraryTitle property: {PlexLibraryName}", "FORBIDDEN");
             log.Debug("Test PlexAccountDisplayName property: {PlexAccountDisplayName}", "FORBIDDEN");

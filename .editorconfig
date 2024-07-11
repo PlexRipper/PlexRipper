@@ -5,7 +5,7 @@ trim_trailing_whitespace = false
 end_of_line = lf
 indent_style = space
 indent_size = 4
-max_line_length = 100
+max_line_length = 120
 
 [*.cs]
 

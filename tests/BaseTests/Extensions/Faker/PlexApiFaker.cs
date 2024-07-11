@@ -20,18 +20,9 @@ public class PlexApi : DataSet
         _faker = faker;
     }
 
-    private static readonly string[] Devices =
-    {
-        "Docker Container",
-        "SHIELD Android TV",
-        "PC",
-    };
+    private static readonly string[] Devices = { "Docker Container", "SHIELD Android TV", "PC", };
 
-    private static readonly string[] LibraryTypes =
-    {
-        "movie",
-        "show",
-    };
+    private static readonly string[] LibraryTypes = { "movie", "show", };
 
     private static readonly string[] PlexVersions =
     {

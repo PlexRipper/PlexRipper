@@ -75,19 +75,31 @@ public record LogMetaData
         _logger.BindMessageTemplate(MessageTemplate, PropertyValues, out var parsedTemplate, out var boundProperties);
         if (parsedTemplate is null)
         {
-            _logger.Error("LogExtensions.ToLogEvent() => Failed to parse {MessageTemplate} with {@PropertyValues}", MessageTemplate, PropertyValues);
-            return new LogEvent(dateTimeOffset, LogEventLevel.Error, null, Serilog.Events.MessageTemplate.Empty, new List<LogEventProperty>());
+            _logger.Error(
+                "LogExtensions.ToLogEvent() => Failed to parse {MessageTemplate} with {@PropertyValues}",
+                MessageTemplate,
+                PropertyValues
+            );
+            return new LogEvent(
+                dateTimeOffset,
+                LogEventLevel.Error,
+                null,
+                Serilog.Events.MessageTemplate.Empty,
+                new List<LogEventProperty>()
+            );
         }
 
         var properties = boundProperties?.ToList() ?? new List<LogEventProperty>();
 
-        properties.AddRange(new List<LogEventProperty>()
-        {
-            // This works when each file only has 1 class and is named the same
-            new(nameof(ClassName), new ScalarValue(ClassName)),
-            new(nameof(MethodName), new ScalarValue(MethodName)),
-            new(nameof(LineNumber), new ScalarValue(LineNumber)),
-        });
+        properties.AddRange(
+            new List<LogEventProperty>()
+            {
+                // This works when each file only has 1 class and is named the same
+                new(nameof(ClassName), new ScalarValue(ClassName)),
+                new(nameof(MethodName), new ScalarValue(MethodName)),
+                new(nameof(LineNumber), new ScalarValue(LineNumber)),
+            }
+        );
 
         return new LogEvent(dateTimeOffset, LogLevel, Exception, parsedTemplate, properties);
     }

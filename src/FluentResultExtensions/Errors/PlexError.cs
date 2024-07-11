@@ -7,7 +7,8 @@ public class PlexError : Error
 {
     #region Constructors
 
-    public PlexError(string message) : base(message) { }
+    public PlexError(string message)
+        : base(message) { }
 
     #endregion
 

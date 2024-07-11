@@ -18,7 +18,10 @@ public class MockPlexApiConfig
 
     #region Public
 
-    public static MockPlexApiConfig FromOptions(Action<MockPlexApiConfig> action = null, MockPlexApiConfig defaultValue = null)
+    public static MockPlexApiConfig FromOptions(
+        Action<MockPlexApiConfig> action = null,
+        MockPlexApiConfig defaultValue = null
+    )
     {
         var config = defaultValue ?? new MockPlexApiConfig();
         action?.Invoke(config);

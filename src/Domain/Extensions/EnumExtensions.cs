@@ -31,7 +31,12 @@ public static class EnumExtensions
 
         NotificationLevel DefaultException()
         {
-            _log.Here().Error("Failed to convert string {Value} to type {NameOfNotificationLevel}", value, nameof(NotificationLevel));
+            _log.Here()
+                .Error(
+                    "Failed to convert string {Value} to type {NameOfNotificationLevel}",
+                    value,
+                    nameof(NotificationLevel)
+                );
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -59,7 +64,12 @@ public static class EnumExtensions
 
         string DefaultException()
         {
-            _log.Here().Error("Failed to convert {Value} to string of type {NameOfNotificationLevel}", value, nameof(NotificationLevel));
+            _log.Here()
+                .Error(
+                    "Failed to convert {Value} to string of type {NameOfNotificationLevel}",
+                    value,
+                    nameof(NotificationLevel)
+                );
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -85,7 +95,8 @@ public static class EnumExtensions
 
         ViewMode DefaultException()
         {
-            _log.Here().Error("Failed to convert string {Value} to type {NameOfNotificationLevel}", value, nameof(ViewMode));
+            _log.Here()
+                .Error("Failed to convert string {Value} to type {NameOfNotificationLevel}", value, nameof(ViewMode));
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -145,7 +156,8 @@ public static class EnumExtensions
 
         PlexMediaType DefaultException()
         {
-            _log.Here().Error("Failed to convert string {Value} to type {NameOfPlexMediaType}", value, nameof(PlexMediaType));
+            _log.Here()
+                .Error("Failed to convert string {Value} to type {NameOfPlexMediaType}", value, nameof(PlexMediaType));
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -177,7 +189,12 @@ public static class EnumExtensions
 
         string DefaultException()
         {
-            _log.Here().Error("Failed to convert {Value} to string of type {NameOfPlexMediaType}", value, nameof(PlexMediaType));
+            _log.Here()
+                .Error(
+                    "Failed to convert {Value} to string of type {NameOfPlexMediaType}",
+                    value,
+                    nameof(PlexMediaType)
+                );
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -239,7 +256,8 @@ public static class EnumExtensions
 
         string DefaultException()
         {
-            _log.Here().Error("Failed to convert {Value} to string of type {NameOfFolderType}", value, nameof(FolderType));
+            _log.Here()
+                .Error("Failed to convert {Value} to string of type {NameOfFolderType}", value, nameof(FolderType));
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -274,7 +292,12 @@ public static class EnumExtensions
 
         DownloadStatus DefaultException()
         {
-            _log.Here().Error("Failed to convert string {Value} to type {NameOfDownloadStatus}", value, nameof(DownloadStatus));
+            _log.Here()
+                .Error(
+                    "Failed to convert string {Value} to type {NameOfDownloadStatus}",
+                    value,
+                    nameof(DownloadStatus)
+                );
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -305,7 +328,12 @@ public static class EnumExtensions
 
         string DefaultException()
         {
-            _log.Here().Error("Failed to convert {Value} to string of type {NameOfDownloadStatus}", value, nameof(DownloadStatus));
+            _log.Here()
+                .Error(
+                    "Failed to convert {Value} to string of type {NameOfDownloadStatus}",
+                    value,
+                    nameof(DownloadStatus)
+                );
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -333,7 +361,12 @@ public static class EnumExtensions
 
         FileSystemEntityType DefaultException()
         {
-            _log.Here().Error("Failed to convert string {Value} to type {NameOfFileSystemEntityType}", value, nameof(FileSystemEntityType));
+            _log.Here()
+                .Error(
+                    "Failed to convert string {Value} to type {NameOfFileSystemEntityType}",
+                    value,
+                    nameof(FileSystemEntityType)
+                );
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -357,7 +390,12 @@ public static class EnumExtensions
 
         string DefaultException()
         {
-            _log.Here().Error("Failed to convert {Value} to string of type {NameOfFileSystemEntityType}", value, nameof(FileSystemEntityType));
+            _log.Here()
+                .Error(
+                    "Failed to convert {Value} to string of type {NameOfFileSystemEntityType}",
+                    value,
+                    nameof(FileSystemEntityType)
+                );
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -390,7 +428,12 @@ public static class EnumExtensions
 
         DownloadTaskType DefaultException()
         {
-            _log.Here().Error("Failed to convert string {Value} to type {NameOfDownloadTaskType}", value, nameof(DownloadTaskType));
+            _log.Here()
+                .Error(
+                    "Failed to convert string {Value} to type {NameOfDownloadTaskType}",
+                    value,
+                    nameof(DownloadTaskType)
+                );
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
@@ -419,17 +462,32 @@ public static class EnumExtensions
 
         string DefaultException()
         {
-            _log.Here().Error("Failed to convert {Value} to string of type {NameOfDownloadTaskType}", value, nameof(DownloadTaskType));
+            _log.Here()
+                .Error(
+                    "Failed to convert {Value} to string of type {NameOfDownloadTaskType}",
+                    value,
+                    nameof(DownloadTaskType)
+                );
             throw new ArgumentOutOfRangeException(nameof(value), value, null);
         }
     }
 
-    public static bool IsDownloadable(this DownloadTaskType value) => value switch
-    {
-        DownloadTaskType.Movie or DownloadTaskType.TvShow or DownloadTaskType.Season or DownloadTaskType.Episode or DownloadTaskType.None => false,
-        DownloadTaskType.MovieData or DownloadTaskType.MoviePart or DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart => true,
-        var _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
-    };
+    public static bool IsDownloadable(this DownloadTaskType value) =>
+        value switch
+        {
+            DownloadTaskType.Movie
+            or DownloadTaskType.TvShow
+            or DownloadTaskType.Season
+            or DownloadTaskType.Episode
+            or DownloadTaskType.None
+                => false,
+            DownloadTaskType.MovieData
+            or DownloadTaskType.MoviePart
+            or DownloadTaskType.EpisodeData
+            or DownloadTaskType.EpisodePart
+                => true,
+            var _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+        };
 
     #endregion
 }

@@ -30,7 +30,8 @@ public class Boot : IBoot
         IHostApplicationLifetime appLifetime,
         IConfigManager configManager,
         ISchedulerService schedulerService,
-        IDownloadQueue downloadQueue)
+        IDownloadQueue downloadQueue
+    )
     {
         _log = log;
         _appLifetime = appLifetime;

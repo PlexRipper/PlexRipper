@@ -17,7 +17,8 @@ public static class LogManager
         string messageTemplate,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
+        [CallerLineNumber] int sourceLineNumber = default!
+    )
     {
         switch (messageTemplate)
         {
@@ -46,7 +47,8 @@ public static class LogManager
     /// Returns a new typed <see cref="ILog"/> instance.
     /// </summary>
     /// <returns></returns>
-    public static ILog<T> CreateLogInstance<T>(LogEventLevel logLevel = LogEventLevel.Debug) where T : class
+    public static ILog<T> CreateLogInstance<T>(LogEventLevel logLevel = LogEventLevel.Debug)
+        where T : class
     {
         return new Log<T>(LogConfig.GetLogger(logLevel));
     }
@@ -61,7 +63,8 @@ public static class LogManager
         return new Log(LogConfig.GetLogger(logLevel));
     }
 
-    public static ILog<T> CreateLogInstance<T>(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug) where T : class
+    public static ILog<T> CreateLogInstance<T>(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug)
+        where T : class
     {
         LogConfig.SetTestOutputHelper(output);
         return new Log<T>(LogConfig.GetLogger(logLevel));
@@ -76,7 +79,11 @@ public static class LogManager
         return new Log<Type>(LogConfig.GetLogger(logLevel), classType);
     }
 
-    public static ILog CreateLogInstance(ITestOutputHelper output, Type classType, LogEventLevel logLevel = LogEventLevel.Debug)
+    public static ILog CreateLogInstance(
+        ITestOutputHelper output,
+        Type classType,
+        LogEventLevel logLevel = LogEventLevel.Debug
+    )
     {
         LogConfig.SetTestOutputHelper(output);
         return new Log<Type>(LogConfig.GetLogger(logLevel), classType);

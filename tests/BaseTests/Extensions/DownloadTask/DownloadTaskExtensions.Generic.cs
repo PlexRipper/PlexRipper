@@ -2,7 +2,10 @@ namespace PlexRipper.BaseTests;
 
 public static partial class DownloadTaskExtensions
 {
-    public static DownloadTaskGeneric SetDownloadStatus(this DownloadTaskGeneric downloadTask, DownloadStatus downloadStatus)
+    public static DownloadTaskGeneric SetDownloadStatus(
+        this DownloadTaskGeneric downloadTask,
+        DownloadStatus downloadStatus
+    )
     {
         downloadTask.DownloadStatus = downloadStatus;
         if (downloadTask.Children is not null && downloadTask.Children.Any())
@@ -11,7 +14,10 @@ public static partial class DownloadTaskExtensions
         return downloadTask;
     }
 
-    public static List<DownloadTaskGeneric> SetDownloadStatus(this List<DownloadTaskGeneric> downloadTasks, DownloadStatus downloadStatus)
+    public static List<DownloadTaskGeneric> SetDownloadStatus(
+        this List<DownloadTaskGeneric> downloadTasks,
+        DownloadStatus downloadStatus
+    )
     {
         foreach (var downloadTask in downloadTasks)
         {

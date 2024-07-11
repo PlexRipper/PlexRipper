@@ -28,9 +28,7 @@ public static class PlexServerConnectionMapper
     public static List<PlexServerConnectionDTO> ToDTO(this List<PlexServerConnection> source) =>
         source.ConvertAll(ToDTO);
 
-    public static ServerConnectionCheckStatusProgressDTO ToDTO(
-        this ServerConnectionCheckStatusProgress source
-    ) =>
+    public static ServerConnectionCheckStatusProgressDTO ToDTO(this ServerConnectionCheckStatusProgress source) =>
         new()
         {
             PlexServerId = source.PlexServerId,
@@ -72,9 +70,7 @@ public static class PlexServerConnectionMapper
     public static List<PlexServerConnection> ToModel(this List<PlexServerConnectionDTO> source) =>
         source.ConvertAll(ToModel);
 
-    public static ServerConnectionCheckStatusProgress ToModel(
-        this ServerConnectionCheckStatusProgressDTO source
-    ) =>
+    public static ServerConnectionCheckStatusProgress ToModel(this ServerConnectionCheckStatusProgressDTO source) =>
         new()
         {
             RetryAttemptIndex = source.RetryAttemptIndex,

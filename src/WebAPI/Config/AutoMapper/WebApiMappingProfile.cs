@@ -10,8 +10,7 @@ public class WebApiMappingProfile : Profile
     {
         // Result -> ResultDTO
         CreateMap<Result, ResultDTO>(MemberList.None);
-        CreateMap<ResultDTO, Result>(MemberList.None)
-            .ConvertUsing<ResultDTOToResult>();
+        CreateMap<ResultDTO, Result>(MemberList.None).ConvertUsing<ResultDTOToResult>();
 
         // .ConvertUsing<ResultToResultDTO>();
         CreateMap(typeof(Result<>), typeof(ResultDTO<>), MemberList.Destination).ReverseMap();

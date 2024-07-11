@@ -19,7 +19,13 @@ public class PlexMediaDTOValidator : AbstractValidator<PlexMediaDTO>
         RuleFor(x => x.UpdatedAt).NotEmpty();
         RuleFor(x => x.PlexLibraryId).GreaterThanOrEqualTo(0);
         RuleFor(x => x.PlexServerId).GreaterThanOrEqualTo(0);
-        RuleFor(x => x.Type).Must(x => x == PlexMediaType.Movie || x == PlexMediaType.TvShow || x == PlexMediaType.Season || x == PlexMediaType.Episode);
+        RuleFor(x => x.Type)
+            .Must(x =>
+                x == PlexMediaType.Movie
+                || x == PlexMediaType.TvShow
+                || x == PlexMediaType.Season
+                || x == PlexMediaType.Episode
+            );
 
         RuleFor(x => x.Summary).NotEmpty();
         RuleFor(x => x.UpdatedAt).NotEmpty();

@@ -26,11 +26,14 @@ public class AddOrUpdatePlexLibrariesValidator : AbstractValidator<AddOrUpdatePl
     #endregion
 }
 
-public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result>
+public class AddOrUpdatePlexLibrariesCommandHandler
+    : BaseHandler,
+        IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result>
 {
     #region Constructors
 
-    public AddOrUpdatePlexLibrariesCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public AddOrUpdatePlexLibrariesCommandHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
     #endregion
 
@@ -45,7 +48,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
         var plexServerId = plexLibraries[0].PlexServerId;
 
         var plexAccount = await _dbContext.PlexAccounts.GetAsync(plexAccountId, cancellationToken);
-        var plexServer = await _dbContext.PlexServers.GetAsync(plexServerId,  cancellationToken);
+        var plexServer = await _dbContext.PlexServers.GetAsync(plexServerId, cancellationToken);
 
         if (plexAccount is null)
             return ResultExtensions.IsNull(nameof(plexAccount));
@@ -54,12 +57,17 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
             return ResultExtensions.IsNull(nameof(plexServer));
 
         // Add or update the PlexLibraries in the database
-        _log.Information("Starting the add or update process of the PlexLibraries for PlexServer: {PlexServerName}", plexServer.Name);
+        _log.Information(
+            "Starting the add or update process of the PlexLibraries for PlexServer: {PlexServerName}",
+            plexServer.Name
+        );
 
         foreach (var plexLibrary in plexLibraries)
         {
-            var plexLibraryDB = await _dbContext.PlexLibraries
-                .FirstOrDefaultAsync(x => x.PlexServer.Id == plexLibrary.PlexServerId && x.Uuid == plexLibrary.Uuid, cancellationToken);
+            var plexLibraryDB = await _dbContext.PlexLibraries.FirstOrDefaultAsync(
+                x => x.PlexServer.Id == plexLibrary.PlexServerId && x.Uuid == plexLibrary.Uuid,
+                cancellationToken
+            );
 
             plexLibrary.SetNull();
 
@@ -71,8 +79,11 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
             else
             {
                 // PlexServer already exists
-                _log.Debug("Updating PlexLibrary {PlexLibraryName} with id: {PlexLibraryId} in the database", plexLibrary.Title,
-                    plexLibrary.Id);
+                _log.Debug(
+                    "Updating PlexLibrary {PlexLibraryName} with id: {PlexLibraryId} in the database",
+                    plexLibrary.Title,
+                    plexLibrary.Id
+                );
 
                 plexLibrary.Id = plexLibraryDB.Id;
                 _dbContext.PlexLibraries.Update(plexLibrary);
@@ -82,16 +93,20 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Add or update the PlexAccount, PlexServer and PlexLibrary relationships
-        _log.Information("Adding or updating the PlexAccount ({PlexAccountDisplayName}) association with PlexLibraries now", plexAccount.DisplayName);
+        _log.Information(
+            "Adding or updating the PlexAccount ({PlexAccountDisplayName}) association with PlexLibraries now",
+            plexAccount.DisplayName
+        );
 
         foreach (var plexLibrary in plexLibraries)
         {
             // Check if this PlexAccount has been associated with the PlexLibrary already
             var plexAccountLibrary = await _dbContext
-                .PlexAccountLibraries
-                .Where(x => x.PlexAccountId == plexAccountId
-                            && x.PlexLibraryId == plexLibrary.Id
-                            && x.PlexServerId == plexLibrary.PlexServerId)
+                .PlexAccountLibraries.Where(x =>
+                    x.PlexAccountId == plexAccountId
+                    && x.PlexLibraryId == plexLibrary.Id
+                    && x.PlexServerId == plexLibrary.PlexServerId
+                )
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (plexAccountLibrary == null)
@@ -100,14 +115,20 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
                 _log.Here()
                     .Debug(
                         "PlexAccount: {PlexAccountDisplayName} does not have an association with PlexLibrary: {PlexLibraryName} of PlexServer: {PlexServerName} creating one with the authentication token now",
-                        plexAccount.DisplayName, plexLibrary.Name, plexServer.Name);
+                        plexAccount.DisplayName,
+                        plexLibrary.Name,
+                        plexServer.Name
+                    );
 
-                await _dbContext.PlexAccountLibraries.AddAsync(new PlexAccountLibrary
-                {
-                    PlexAccountId = plexAccountId,
-                    PlexLibraryId = plexLibrary.Id,
-                    PlexServerId = plexServerId,
-                }, cancellationToken);
+                await _dbContext.PlexAccountLibraries.AddAsync(
+                    new PlexAccountLibrary
+                    {
+                        PlexAccountId = plexAccountId,
+                        PlexLibraryId = plexLibrary.Id,
+                        PlexServerId = plexServerId,
+                    },
+                    cancellationToken
+                );
             }
             else
             {
@@ -115,7 +136,10 @@ public class AddOrUpdatePlexLibrariesCommandHandler : BaseHandler, IRequestHandl
                 _log.Here()
                     .Debug(
                         "PlexAccount: {PlexAccountDisplayName} already has an association with PlexLibrary: {PlexLibraryName} of PlexServer: {PlexServerName} skipping for now",
-                        plexAccount.DisplayName, plexLibrary.Name, plexServer.Name);
+                        plexAccount.DisplayName,
+                        plexLibrary.Name,
+                        plexServer.Name
+                    );
             }
         }
 

@@ -20,7 +20,10 @@ public interface IPlexApiService
     /// <param name="plexAccountId"></param>
     /// <returns>Returns the list of <see cref="PlexServer">PlexServers</see> this <see cref="PlexAccount"/> has access too
     /// and a separate list of tokens this account has to use to communicate with the <see cref="PlexServer"/></returns>
-    public Task<(Result<List<PlexServer>> servers, Result<List<ServerAccessTokenDTO>> tokens)> GetAccessiblePlexServersAsync(int plexAccountId);
+    public Task<(
+        Result<List<PlexServer>> servers,
+        Result<List<ServerAccessTokenDTO>> tokens
+    )> GetAccessiblePlexServersAsync(int plexAccountId);
 
     /// <summary>
     /// Retrieves all accessible <see cref="PlexLibrary"/> from this <see cref="PlexServer"/> by the given <see cref="PlexAccount"/>.
@@ -29,7 +32,11 @@ public interface IPlexApiService
     /// <param name="plexAccountId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns>List of accessible <see cref="PlexLibrary"/>.</returns>
-    Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(int plexServerId, int plexAccountId = 0, CancellationToken cancellationToken = default);
+    Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(
+        int plexServerId,
+        int plexAccountId = 0,
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Fetches the PlexLibrary container with either Movies, Series, Music or Photos media depending on the type.
@@ -39,7 +46,11 @@ public interface IPlexApiService
     /// <param name="plexAccount">The optional PlexAccount used to connect to the <see cref="PlexServer"/> </param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Result<PlexLibrary>> GetLibraryMediaAsync(PlexLibrary plexLibrary, PlexAccount plexAccount = null, CancellationToken cancellationToken = default);
+    Task<Result<PlexLibrary>> GetLibraryMediaAsync(
+        PlexLibrary plexLibrary,
+        PlexAccount plexAccount = null,
+        CancellationToken cancellationToken = default
+    );
 
     Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string metaDataUrl);
 
@@ -51,7 +62,10 @@ public interface IPlexApiService
     /// <param name="plexServerConnectionId">The <see cref="PlexServerConnection"/> to test for. </param>
     /// <param name="action">Progress action callback to notify of connection attempt progress.</param>
     /// <returns>The Result is successful if the <see cref="PlexServerStatus"/> was created successfully, regardless of whether the connection was successful.</returns>
-    Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(int plexServerConnectionId = 0, Action<PlexApiClientProgress> action = null);
+    Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(
+        int plexServerConnectionId = 0,
+        Action<PlexApiClientProgress> action = null
+    );
 
     Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow);
 
@@ -69,7 +83,8 @@ public interface IPlexApiService
         string thumbPath,
         int width = 0,
         int height = 0,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     #endregion
 
@@ -79,7 +94,10 @@ public interface IPlexApiService
     /// <param name="plexLibrary"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(PlexLibrary plexLibrary, CancellationToken cancellationToken = default);
+    Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(
+        PlexLibrary plexLibrary,
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Fetches all the <see cref="PlexTvShowEpisode">Plex TvShow Episodes</see> from the Plex api with the given <see cref="PlexLibrary"/>.
@@ -87,7 +105,10 @@ public interface IPlexApiService
     /// <param name="plexLibrary"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(PlexLibrary plexLibrary, CancellationToken cancellationToken = default);
+    Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(
+        PlexLibrary plexLibrary,
+        CancellationToken cancellationToken = default
+    );
 
     Task<Result<AuthPin>> Get2FAPin(string clientId);
 

@@ -12,6 +12,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="Autofac" Version="8.0.0" />
+		<PackageReference Include="CSharpier.MsBuild" Version="0.28.2">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>

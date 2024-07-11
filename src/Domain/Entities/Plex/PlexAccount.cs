@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PlexRipper.Domain;
 
@@ -19,6 +20,7 @@ public class PlexAccount : BaseEntity
     /// </summary>
     /// <param name="username">The username to use.</param>
     /// <param name="password">The password to use.</param>
+    [SetsRequiredMembers]
     public PlexAccount(string username, string password)
     {
         Username = username;
@@ -42,16 +44,16 @@ public class PlexAccount : BaseEntity
     public string DisplayName { get; set; }
 
     [Column(Order = 2)]
-    public string Username { get; set; }
+    public required string Username { get; set; }
 
     [Column(Order = 3)]
-    public string Password { get; set; }
+    public required string Password { get; set; }
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexAccount"/> is enabled and that it should be used for downloading media.
     /// </summary>
     [Column(Order = 4)]
-    public bool IsEnabled { get; set; }
+    public required bool IsEnabled { get; set; }
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexAccount"/> has been validated against the Plex API and contain valid credentials.

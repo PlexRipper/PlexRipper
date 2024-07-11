@@ -106,6 +106,8 @@ public class PlexApi
                 StatusMessage = statusMessage,
                 LastChecked = DateTime.UtcNow,
                 IsSuccessful = response.IsSuccess,
+                PlexServerId = 0,
+                PlexServerConnectionId = 0,
             }
         );
     }

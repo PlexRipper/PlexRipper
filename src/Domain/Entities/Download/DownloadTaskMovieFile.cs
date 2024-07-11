@@ -4,7 +4,7 @@ public class DownloadTaskMovieFile : DownloadTaskFileBase
 {
     #region Relationships
 
-    public required DownloadTaskMovie Parent { get; set; }
+    public required DownloadTaskMovie? Parent { get; set; }
 
     public required Guid ParentId { get; set; }
 

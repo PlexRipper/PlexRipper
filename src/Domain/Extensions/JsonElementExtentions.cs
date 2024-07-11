@@ -8,23 +8,18 @@ public static class JsonElementExtentions
 {
     public static object GetTypedValue(this JsonElement jsonElement, Type type)
     {
-        switch (type)
+        return type switch
         {
-            case { } t when t == typeof(int):
-                return jsonElement.GetInt32();
-            case { } t when t == typeof(bool):
-                return jsonElement.GetBoolean();
-            case { } t when t == typeof(string):
-                return jsonElement.GetString();
-            case { } t when t == typeof(ViewMode):
-                return jsonElement.GetString().ToViewMode();
-            case { } t when t == typeof(List<PlexServerSettingsModel>):
-                return JsonSerializer.Deserialize<List<PlexServerSettingsModel>>(
+            { } t when t == typeof(int) => jsonElement.GetInt32(),
+            { } t when t == typeof(bool) => jsonElement.GetBoolean(),
+            { } t when t == typeof(string) => jsonElement.GetString(),
+            { } t when t == typeof(ViewMode) => jsonElement.GetString().ToViewMode(),
+            { } t when t == typeof(List<PlexServerSettingsModel>)
+                => JsonSerializer.Deserialize<List<PlexServerSettingsModel>>(
                     jsonElement.GetRawText(),
                     DefaultJsonSerializerOptions.ConfigManagerOptions
-                );
-            default:
-                throw new ArgumentException($"Typename {type.FullName} of {type} is not supported when parsing");
-        }
+                ),
+            _ => throw new ArgumentException($"Typename {type.FullName} of {type} is not supported when parsing")
+        };
     }
 }

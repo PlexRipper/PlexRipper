@@ -43,7 +43,7 @@ public class PlexServerConnection : BaseEntity
 
     #region Relationships
 
-    public PlexServer PlexServer { get; set; }
+    public PlexServer? PlexServer { get; set; }
 
     public int PlexServerId { get; set; }
 

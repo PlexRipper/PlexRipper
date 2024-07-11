@@ -75,7 +75,7 @@ public class PlexLibrary : BaseEntity
     /// of various values that don't warrant their own database column.
     /// </summary>
     [Column(Order = 11)]
-    public PlexLibraryMetaData MetaData { get; set; }
+    public required PlexLibraryMetaData MetaData { get; set; }
 
     #endregion
 
@@ -219,39 +219,50 @@ public class PlexLibrary : BaseEntity
 
     public Result UpdateMetaData()
     {
-        MetaData ??= new PlexLibraryMetaData();
+        int movieCount = 0,
+            tvShowCount = 0,
+            tvShowSeasonCount = 0,
+            tvShowEpisodeCount = 0;
+        long mediaSize = 0;
 
-        if (Type == PlexMediaType.Movie && Movies?.Count > 0)
+        switch (Type)
         {
-            if (Movies?.Count > 0)
+            case PlexMediaType.Movie when Movies?.Count > 0:
             {
-                MetaData.MediaSize = Movies.Sum(x => x.MediaSize);
-                MetaData.MovieCount = Movies.Count;
-            }
-            else
-            {
-                return Result.Fail(
-                    "The PlexLibrary is of type Movie but has no Movies included to update the MetaData."
-                );
-            }
-        }
+                if (Movies?.Count > 0)
+                {
+                    mediaSize = Movies.Sum(x => x.MediaSize);
+                    movieCount = Movies.Count;
+                }
+                else
+                {
+                    return Result.Fail(
+                        "The PlexLibrary is of type Movie but has no Movies included to update the MetaData."
+                    );
+                }
 
-        if (Type == PlexMediaType.TvShow)
-        {
-            if (TvShows?.Count > 0)
-            {
-                MetaData.MediaSize = TvShows.Sum(x => x.MediaSize);
-                MetaData.TvShowCount = TvShows.Count;
-                MetaData.TvShowSeasonCount = TvShows.Sum(x => x.Seasons.Count);
-                MetaData.TvShowEpisodeCount = TvShows.Sum(x => x.Seasons.Sum(y => y.Episodes.Count));
+                break;
             }
-            else
-            {
+            case PlexMediaType.TvShow when TvShows?.Count > 0:
+                mediaSize = TvShows.Sum(x => x.MediaSize);
+                tvShowCount = TvShows.Count;
+                tvShowSeasonCount = TvShows.Sum(x => x.Seasons.Count);
+                tvShowEpisodeCount = TvShows.Sum(x => x.Seasons.Sum(y => y.Episodes.Count));
+                break;
+            case PlexMediaType.TvShow:
                 return Result.Fail(
                     "The PlexLibrary is of type TvShow but has no TvShows included to update the MetaData."
                 );
-            }
         }
+
+        MetaData = new PlexLibraryMetaData
+        {
+            TvShowCount = tvShowCount,
+            TvShowSeasonCount = tvShowSeasonCount,
+            TvShowEpisodeCount = tvShowEpisodeCount,
+            MovieCount = movieCount,
+            MediaSize = mediaSize,
+        };
 
         return Result.Ok();
     }

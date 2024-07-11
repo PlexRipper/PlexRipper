@@ -19,7 +19,23 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
             .Returns(Result.Fail("Failed Error"));
 
         var sut = mock.Create<DownloadWorker>(
-            new NamedParameter("downloadWorkerTask", new DownloadWorkerTask { Id = 999, })
+            new NamedParameter(
+                "downloadWorkerTask",
+                new DownloadWorkerTask
+                {
+                    Id = 999,
+                    StartByte = 0,
+                    EndByte = 0,
+                    DownloadStatus = DownloadStatus.Unknown,
+                    BytesReceived = 0,
+                    ElapsedTime = 0,
+                    FileLocationUrl = null,
+                    DownloadTaskId = default,
+                    PlexServer = null,
+                    PlexServerId = 0,
+                    DownloadWorkerTaskLogs = null,
+                }
+            )
         );
         DownloadWorkerTask downloadWorkerTaskResult = null;
         sut.DownloadWorkerTaskUpdate.Subscribe(task => downloadWorkerTaskResult = task);

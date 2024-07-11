@@ -2,7 +2,7 @@
 
 public class PlexGenre : BaseEntity
 {
-    public string Tag { get; set; }
+    public required string Tag { get; set; }
 
-    public virtual List<PlexMovieGenre> PlexMovies { get; set; }
+    public List<PlexMovieGenre> PlexMovies { get; set; } = new();
 }

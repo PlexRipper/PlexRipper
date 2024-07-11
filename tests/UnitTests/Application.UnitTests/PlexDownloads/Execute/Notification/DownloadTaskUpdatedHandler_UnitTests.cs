@@ -75,7 +75,25 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
 
         mock.Mock<IFileMergeScheduler>()
             .Setup(x => x.CreateFileTaskFromDownloadTask(It.IsAny<DownloadTaskKey>()))
-            .ReturnsAsync(Result.Ok(new FileTask()));
+            .ReturnsAsync(
+                Result.Ok(
+                    new FileTask
+                    {
+                        Id = 0,
+                        CreatedAt = default,
+                        DestinationDirectory = null,
+                        FilePathsCompressed = null,
+                        FileName = null,
+                        FileSize = 0,
+                        DownloadTaskId = default,
+                        DownloadTaskType = DownloadTaskType.None,
+                        PlexServer = null,
+                        PlexServerId = 0,
+                        PlexLibrary = null,
+                        PlexLibraryId = 0
+                    }
+                )
+            );
 
         mock.Mock<IFileMergeScheduler>().Setup(x => x.StartFileMergeJob(It.IsAny<int>())).ReturnsAsync(Result.Ok());
 

@@ -1,14 +1,14 @@
 ﻿namespace PlexRipper.Domain;
 
-public class PlexLibraryMetaData
+public record PlexLibraryMetaData
 {
-    public int TvShowCount { get; set; }
+    public required int TvShowCount { get; init; }
 
-    public int TvShowSeasonCount { get; set; }
+    public required int TvShowSeasonCount { get; init; }
 
-    public int TvShowEpisodeCount { get; set; }
+    public required int TvShowEpisodeCount { get; init; }
 
-    public int MovieCount { get; set; }
+    public required int MovieCount { get; init; }
 
-    public long MediaSize { get; set; }
+    public required long MediaSize { get; init; }
 }

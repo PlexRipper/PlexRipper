@@ -81,7 +81,7 @@ public class DownloadWorkerTask : BaseEntity
     public DownloadTaskFileBase DownloadTask { get; set; }
     public Guid DownloadTaskId { get; set; }
 
-    public PlexServer PlexServer { get; set; }
+    public PlexServer? PlexServer { get; set; }
 
     public int PlexServerId { get; set; }
 

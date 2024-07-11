@@ -36,13 +36,14 @@ public class FileTask : BaseEntity
     #endregion
 
     [NotMapped]
-    public DownloadTaskKey DownloadTaskKey => new()
-    {
-        Type = DownloadTaskType,
-        Id = DownloadTaskId,
-        PlexServerId = PlexServerId,
-        PlexLibraryId = PlexLibraryId,
-    };
+    public DownloadTaskKey DownloadTaskKey =>
+        new()
+        {
+            Type = DownloadTaskType,
+            Id = DownloadTaskId,
+            PlexServerId = PlexServerId,
+            PlexLibraryId = PlexLibraryId,
+        };
 
     #region Helpers
 

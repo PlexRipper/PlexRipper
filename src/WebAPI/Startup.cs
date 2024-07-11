@@ -64,10 +64,9 @@ public static class Startup
             c.Errors.ResponseBuilder = (failures, ctx, _) =>
             {
                 var result = ResultExtensions.Create400BadRequestResult($"Bad request: {ctx.Request.GetDisplayUrl()}");
-                var errors = failures.GroupBy(f => f.PropertyName)
-                    .ToDictionary(
-                        e => e.Key,
-                        e => e.Select(m => m.ErrorMessage).ToArray());
+                var errors = failures
+                    .GroupBy(f => f.PropertyName)
+                    .ToDictionary(e => e.Key, e => e.Select(m => m.ErrorMessage).ToArray());
                 foreach (var reason in errors)
                     result.Errors[0].Metadata.Add(reason.Key, reason.Value);
                 return result;
@@ -81,7 +80,10 @@ public static class Startup
         {
             // Used to deploy the front-end Nuxt client
             app.UseSpaStaticFiles();
-            app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "ClientApp";
+            });
         }
     }
 
@@ -103,11 +105,11 @@ public static class Startup
                     builder
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-
                         // The combo all origin is allowed with allow credentials is needed to make SignalR work from the client.
                         .SetIsOriginAllowed(_ => true)
                         .AllowCredentials();
-                });
+                }
+            );
         });
 
         services.AddOptions();
@@ -118,10 +120,7 @@ public static class Startup
         services.AddFastEndpoints(options =>
         {
             options.DisableAutoDiscovery = true;
-            options.Assemblies = new[]
-            {
-                Assembly.GetAssembly(typeof(BaseEndpoint<,>)),
-            };
+            options.Assemblies = new[] { Assembly.GetAssembly(typeof(BaseEndpoint<,>)), };
         });
 
         if (!EnvironmentExtensions.IsIntegrationTestMode())

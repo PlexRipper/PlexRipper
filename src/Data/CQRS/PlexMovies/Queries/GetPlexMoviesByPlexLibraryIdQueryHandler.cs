@@ -14,11 +14,17 @@ public class GetPlexMoviesByPlexLibraryIdValidator : AbstractValidator<GetPlexMo
     }
 }
 
-public class GetPlexMoviesByPlexLibraryIdHandler : BaseHandler, IRequestHandler<GetPlexMoviesByPlexLibraryId, Result<List<PlexMovie>>>
+public class GetPlexMoviesByPlexLibraryIdHandler
+    : BaseHandler,
+        IRequestHandler<GetPlexMoviesByPlexLibraryId, Result<List<PlexMovie>>>
 {
-    public GetPlexMoviesByPlexLibraryIdHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public GetPlexMoviesByPlexLibraryIdHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
-    public async Task<Result<List<PlexMovie>>> Handle(GetPlexMoviesByPlexLibraryId request, CancellationToken cancellationToken)
+    public async Task<Result<List<PlexMovie>>> Handle(
+        GetPlexMoviesByPlexLibraryId request,
+        CancellationToken cancellationToken
+    )
     {
         var plexMovies = await PlexMoviesQueryable
             .Where(x => x.PlexLibraryId == request.PlexLibraryId)

@@ -86,7 +86,12 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase
                 case DownloadTaskType.MovieData:
                     return Path.Combine(DirectoryMeta.DownloadRootPath, "Movies", DirectoryMeta.MovieFolder);
                 case DownloadTaskType.EpisodeData:
-                    return Path.Combine(DirectoryMeta.DownloadRootPath, "TvShows", DirectoryMeta.TvShowFolder, DirectoryMeta.SeasonFolder);
+                    return Path.Combine(
+                        DirectoryMeta.DownloadRootPath,
+                        "TvShows",
+                        DirectoryMeta.TvShowFolder,
+                        DirectoryMeta.SeasonFolder
+                    );
                 default:
                     Result.Fail<string>($"Invalid DownloadTaskType of type: {DownloadTaskType}").LogError();
                     return string.Empty;
@@ -110,7 +115,11 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase
                 case DownloadTaskType.MovieData:
                     return Path.Combine(DirectoryMeta.DestinationRootPath, DirectoryMeta.MovieFolder);
                 case DownloadTaskType.EpisodeData:
-                    return Path.Combine(DirectoryMeta.DestinationRootPath, DirectoryMeta.TvShowFolder, DirectoryMeta.SeasonFolder);
+                    return Path.Combine(
+                        DirectoryMeta.DestinationRootPath,
+                        DirectoryMeta.TvShowFolder,
+                        DirectoryMeta.SeasonFolder
+                    );
                 default:
                     Result.Fail<string>($"Invalid DownloadTaskType of type: {DownloadTaskType}").LogError();
                     return string.Empty;
@@ -122,7 +131,8 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase
     /// Gets a joined string of temp file paths of the <see cref="DownloadWorkerTasks"/> delimited by ";".
     /// </summary>
     [NotMapped]
-    public string GetFilePathsCompressed => string.Join(';', DownloadWorkerTasks.Select(x => x.DownloadFilePath).ToArray());
+    public string GetFilePathsCompressed =>
+        string.Join(';', DownloadWorkerTasks.Select(x => x.DownloadFilePath).ToArray());
 
     [NotMapped]
     public string DownloadSpeedFormatted => DataFormat.FormatSpeedString(DownloadSpeed);

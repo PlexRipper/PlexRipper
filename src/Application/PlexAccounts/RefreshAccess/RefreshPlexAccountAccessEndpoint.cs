@@ -37,18 +37,17 @@ public class RefreshPlexAccountAccessEndpoint : BaseEndpoint<RefreshPlexAccountA
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(RefreshPlexAccountAccessEndpointRequest req, CancellationToken ct)
     {
         var plexAccountIds = new List<int>();
 
-        var enabledAccounts = await _dbContext.PlexAccounts
-            .Where(x => x.IsEnabled)
-            .ToListAsync(ct);
+        var enabledAccounts = await _dbContext.PlexAccounts.Where(x => x.IsEnabled).ToListAsync(ct);
 
         if (!enabledAccounts.Any())
         {

@@ -47,13 +47,14 @@ public class FileMergeProgress
     /// </summary>
     public int PlexLibraryId { get; set; }
 
-    public DownloadTaskKey ToKey() => new()
-    {
-        Type = DownloadTaskType,
-        Id = DownloadTaskId,
-        PlexServerId = PlexServerId,
-        PlexLibraryId = PlexLibraryId,
-    };
+    public DownloadTaskKey ToKey() =>
+        new()
+        {
+            Type = DownloadTaskType,
+            Id = DownloadTaskId,
+            PlexServerId = PlexServerId,
+            PlexLibraryId = PlexLibraryId,
+        };
 
     public override string ToString() =>
         $"[FileMergeProgress {DownloadTaskId} - {Percentage}% - {DataFormat.FormatSpeedString(TransferSpeed)} - {DataFormat.FormatSizeString(BytesRemaining)} / {DataFormat.FormatSizeString(DataTotal)} - {DataFormat.FormatTimeSpanString(TimeSpan.FromSeconds(TimeRemaining))}]";

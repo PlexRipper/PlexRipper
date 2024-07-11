@@ -14,12 +14,7 @@ public class PlexErrorsResponseDTO
 
     public List<PlexError> ToResultErrors()
     {
-        return Errors.Select(x => new PlexError(x.Message)
-            {
-                Code = x.Code,
-                Status = x.Status,
-            })
-            .ToList();
+        return Errors.Select(x => new PlexError(x.Message) { Code = x.Code, Status = x.Status, }).ToList();
     }
 
     #endregion

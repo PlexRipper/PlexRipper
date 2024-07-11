@@ -4,13 +4,20 @@ namespace PlexApi.UnitTests.Mappers;
 
 public class PlexMetaDataMapper_UnitTests : BaseUnitTest
 {
-    public PlexMetaDataMapper_UnitTests(ITestOutputHelper output) : base(output) { }
+    public PlexMetaDataMapper_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public void Should_When()
     {
         // Arrange
-        var metaData = FakePlexApiData.GetLibraryMediaMetadata(PlexMediaType.Movie, config => { config.Seed = 2353; });
+        var metaData = FakePlexApiData.GetLibraryMediaMetadata(
+            PlexMediaType.Movie,
+            config =>
+            {
+                config.Seed = 2353;
+            }
+        );
         var source = metaData.Generate();
 
         // Act

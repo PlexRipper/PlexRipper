@@ -66,7 +66,10 @@ public class DirectorySystem : IDirectorySystem
 
             if (!directoryExistsResult.Value)
             {
-                _log.Debug("Directory: {Directory} does not exist so the files could not be deleted from it", directory);
+                _log.Debug(
+                    "Directory: {Directory} does not exist so the files could not be deleted from it",
+                    directory
+                );
                 return Result.Ok();
             }
 
@@ -132,10 +135,16 @@ public class DirectorySystem : IDirectorySystem
                 return directoryHasFiles.ToResult();
 
             // If the filePath is just an empty directory then delete that.
-            if (!string.IsNullOrEmpty(directoryResult.Value) && directoryExistsResult.Value && !directoryHasFiles.Value.Any())
+            if (
+                !string.IsNullOrEmpty(directoryResult.Value)
+                && directoryExistsResult.Value
+                && !directoryHasFiles.Value.Any()
+            )
                 Delete(directoryResult.Value);
             else
-                return Result.Fail($"Could not determine the directory name of path: {filePath} or the path contains files").LogError();
+                return Result
+                    .Fail($"Could not determine the directory name of path: {filePath} or the path contains files")
+                    .LogError();
         }
         catch (Exception e)
         {

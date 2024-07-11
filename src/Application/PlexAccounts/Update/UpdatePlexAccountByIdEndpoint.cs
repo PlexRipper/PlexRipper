@@ -45,16 +45,17 @@ public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdE
     {
         Put(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexAccountDTO>))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexAccountDTO>))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(UpdatePlexAccountByIdEndpointRequest req, CancellationToken ct)
     {
         var plexAccountDTO = req.PlexAccountDTO;
-        var accountInDb = await _dbContext.PlexAccounts
-            .AsTracking()
+        var accountInDb = await _dbContext
+            .PlexAccounts.AsTracking()
             .Include(x => x.PlexAccountServers)
             .ThenInclude(x => x.PlexServer)
             .GetAsync(plexAccountDTO.Id, ct);
@@ -70,10 +71,20 @@ public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdE
         await _dbContext.SaveChangesAsync(ct);
 
         // Re-validate if the credentials changed
-        if (req.Inspect || accountInDb.Username != plexAccountDTO.Username || accountInDb.Password != plexAccountDTO.Password)
+        if (
+            req.Inspect
+            || accountInDb.Username != plexAccountDTO.Username
+            || accountInDb.Password != plexAccountDTO.Password
+        )
         {
             await SendFluentResult(
-                Result.Fail("Account revalidation is not implemented yet when account is updated with a different username or password").LogError(), ct);
+                Result
+                    .Fail(
+                        "Account revalidation is not implemented yet when account is updated with a different username or password"
+                    )
+                    .LogError(),
+                ct
+            );
             return;
         }
 

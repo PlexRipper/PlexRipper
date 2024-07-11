@@ -19,9 +19,7 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
     public async Task<Result> StartDownloadTaskJob(DownloadTaskKey downloadTaskKey)
     {
         if (!downloadTaskKey.IsValid)
-            return ResultExtensions
-                .IsInvalidId(nameof(DownloadTaskKey), downloadTaskKey.Id)
-                .LogWarning();
+            return ResultExtensions.IsInvalidId(nameof(DownloadTaskKey), downloadTaskKey.Id).LogWarning();
 
         var jobKey = DownloadJob.GetJobKey(downloadTaskKey.Id);
         if (await _scheduler.IsJobRunning(jobKey))
@@ -29,18 +27,11 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
 
         var job = JobBuilder
             .Create<DownloadJob>()
-            .UsingJobData(
-                DownloadJob.DownloadTaskIdParameter,
-                JsonSerializer.Serialize(downloadTaskKey)
-            )
+            .UsingJobData(DownloadJob.DownloadTaskIdParameter, JsonSerializer.Serialize(downloadTaskKey))
             .WithIdentity(jobKey)
             .Build();
 
-        var trigger = TriggerBuilder
-            .Create()
-            .WithIdentity($"{jobKey.Name}_trigger", jobKey.Group)
-            .StartNow()
-            .Build();
+        var trigger = TriggerBuilder.Create().WithIdentity($"{jobKey.Name}_trigger", jobKey.Group).StartNow().Build();
 
         await _scheduler.ScheduleJob(job, trigger);
 
@@ -53,38 +44,26 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
     )
     {
         if (!downloadTaskKey.IsValid)
-            return ResultExtensions
-                .IsInvalidId(nameof(DownloadTaskKey), downloadTaskKey.Id)
-                .LogWarning();
+            return ResultExtensions.IsInvalidId(nameof(DownloadTaskKey), downloadTaskKey.Id).LogWarning();
 
-        _log.Information(
-            "Stopping DownloadClient for DownloadTaskId {DownloadTaskId}",
-            downloadTaskKey
-        );
+        _log.Information("Stopping DownloadClient for DownloadTaskId {DownloadTaskId}", downloadTaskKey);
 
         var jobKey = DownloadJob.GetJobKey(downloadTaskKey.Id);
         if (!await _scheduler.IsJobRunning(jobKey))
             return Result
-                .Fail(
-                    $"{nameof(DownloadJob)} with {jobKey} cannot be stopped because it is not running"
-                )
+                .Fail($"{nameof(DownloadJob)} with {jobKey} cannot be stopped because it is not running")
                 .LogWarning();
 
         var stopResult = await _scheduler.StopJob(jobKey);
         if (!stopResult)
-            return Result
-                .Fail($"Failed to stop {nameof(DownloadTaskGeneric)} with id {downloadTaskKey}")
-                .LogError();
+            return Result.Fail($"Failed to stop {nameof(DownloadTaskGeneric)} with id {downloadTaskKey}").LogError();
 
         await AwaitDownloadTaskJob(downloadTaskKey.Id, cancellationToken);
 
         return Result.Ok();
     }
 
-    public async Task AwaitDownloadTaskJob(
-        Guid downloadTaskId,
-        CancellationToken cancellationToken = default
-    )
+    public async Task AwaitDownloadTaskJob(Guid downloadTaskId, CancellationToken cancellationToken = default)
     {
         var jobKey = DownloadJob.GetJobKey(downloadTaskId);
         if (!await _scheduler.IsJobRunning(jobKey))
@@ -93,10 +72,7 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
         await _scheduler.AwaitJobRunning(jobKey, cancellationToken);
     }
 
-    public Task<bool> IsDownloading(
-        DownloadTaskKey downloadTaskKey,
-        CancellationToken cancellationToken = default
-    )
+    public Task<bool> IsDownloading(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)
     {
         var jobKey = DownloadJob.GetJobKey(downloadTaskKey.Id);
         return _scheduler.IsJobRunningAsync(jobKey, cancellationToken: cancellationToken);
@@ -105,9 +81,7 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
     public async Task<bool> IsServerDownloading(int plexServerId)
     {
         var data = await _scheduler.GetRunningJobDataMaps(typeof(DownloadJob));
-        return data.Select(x =>
-                x.GetJsonValue<DownloadTaskKey>(DownloadJob.DownloadTaskIdParameter).PlexServerId
-            )
+        return data.Select(x => x.GetJsonValue<DownloadTaskKey>(DownloadJob.DownloadTaskIdParameter).PlexServerId)
             .Any(x => x == plexServerId);
     }
 }

@@ -14,8 +14,7 @@ public static class FileSystemMapper
             Files = value.Files.ToDTO(),
         };
 
-    public static List<FileSystemDTO> ToDTO(this List<FileSystemResult> value) =>
-        value.ConvertAll(ToDTO);
+    public static List<FileSystemDTO> ToDTO(this List<FileSystemResult> value) => value.ConvertAll(ToDTO);
 
     public static FileSystemModelDTO ToDTO(this FileSystemModel value) =>
         new()
@@ -28,8 +27,7 @@ public static class FileSystemMapper
             LastModified = value.LastModified,
         };
 
-    public static List<FileSystemModelDTO> ToDTO(this List<FileSystemModel> value) =>
-        value.ConvertAll(ToDTO);
+    public static List<FileSystemModelDTO> ToDTO(this List<FileSystemModel> value) => value.ConvertAll(ToDTO);
 
     #endregion
 

@@ -20,16 +20,16 @@ public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<Li
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexServerConnectionDTO>>))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexServerConnectionDTO>>))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(CancellationToken ct)
     {
         var plexServerConnections = await _dbContext
-            .PlexServerConnections
-            .Include(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(5))
+            .PlexServerConnections.Include(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(5))
             .ToListAsync(ct);
 
         await SendFluentResult(Result.Ok(plexServerConnections), x => x.ToDTO(), ct);

@@ -5,8 +5,7 @@ using PlexRipper.Domain.Validators;
 
 namespace PlexRipper.Application.UnitTests;
 
-public class GenerateDownloadTaskMoviesCommandHandler_UnitTests
-    : BaseUnitTest<GenerateDownloadTaskMoviesCommandHandler>
+public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<GenerateDownloadTaskMoviesCommandHandler>
 {
     private DownloadTaskMovieValidator validator = new();
 

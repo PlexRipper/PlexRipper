@@ -28,16 +28,19 @@ public class QueueInspectPlexServerJobCommandHandler : IRequestHandler<QueueInsp
         var jobKey = InspectPlexServerJob.GetJobKey(plexServerId);
         if (await _scheduler.IsJobRunningAsync(jobKey, cancellationToken))
         {
-            return Result.Fail($"A {nameof(InspectPlexServerJob)} with {nameof(plexServerId)} {plexServerId} is already running")
+            return Result
+                .Fail($"A {nameof(InspectPlexServerJob)} with {nameof(plexServerId)} {plexServerId} is already running")
                 .LogWarning();
         }
 
-        var job = JobBuilder.Create<InspectPlexServerJob>()
+        var job = JobBuilder
+            .Create<InspectPlexServerJob>()
             .UsingJobData(InspectPlexServerJob.PlexServerIdParameter, plexServerId)
             .WithIdentity(jobKey)
             .Build();
 
-        var trigger = TriggerBuilder.Create()
+        var trigger = TriggerBuilder
+            .Create()
             .WithIdentity($"{jobKey.Name}_trigger", jobKey.Group)
             .ForJob(job)
             .StartNow()

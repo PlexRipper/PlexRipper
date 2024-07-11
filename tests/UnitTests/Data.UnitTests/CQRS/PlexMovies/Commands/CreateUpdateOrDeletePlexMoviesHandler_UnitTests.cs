@@ -5,7 +5,8 @@ namespace Data.UnitTests;
 
 public class CreateUpdateOrDeletePlexMoviesHandler_UnitTests : BaseUnitTest
 {
-    public CreateUpdateOrDeletePlexMoviesHandler_UnitTests(ITestOutputHelper output) : base(output) { }
+    public CreateUpdateOrDeletePlexMoviesHandler_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldCreateAllMovies_WhenNoneExistsYet()
@@ -30,9 +31,7 @@ public class CreateUpdateOrDeletePlexMoviesHandler_UnitTests : BaseUnitTest
         // Assert
         ResetDbContext();
         result.IsSuccess.ShouldBeTrue();
-        var plexMoviesDb = DbContext
-            .PlexMovies
-            .ToList();
+        var plexMoviesDb = DbContext.PlexMovies.ToList();
         plexMoviesDb.Count.ShouldBe(50);
     }
 
@@ -64,9 +63,7 @@ public class CreateUpdateOrDeletePlexMoviesHandler_UnitTests : BaseUnitTest
         // Assert
         ResetDbContext();
         result.IsSuccess.ShouldBeTrue();
-        var plexMoviesDb = DbContext
-            .PlexMovies
-            .ToList();
+        var plexMoviesDb = DbContext.PlexMovies.ToList();
         plexMoviesDb.Count.ShouldBe(30);
         foreach (var plexMovie in library.Movies)
             plexMoviesDb.Find(x => x.Key == plexMovie.Key).ShouldNotBeNull();
@@ -115,9 +112,7 @@ public class CreateUpdateOrDeletePlexMoviesHandler_UnitTests : BaseUnitTest
         // Assert
         ResetDbContext();
         result.IsSuccess.ShouldBeTrue();
-        var plexMoviesDb = DbContext
-            .PlexMovies
-            .ToList();
+        var plexMoviesDb = DbContext.PlexMovies.ToList();
         plexMoviesDb.Count.ShouldBe(40);
         foreach (var plexMovie in newMovies)
         {

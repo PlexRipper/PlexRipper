@@ -28,7 +28,8 @@ public class SignalRService : ISignalRService
         ILog log,
         IHubContext<ProgressHub, IProgressHub> progressHub,
         IHubContext<NotificationHub, INotificationHub> notificationHub,
-        IMapper mapper)
+        IMapper mapper
+    )
     {
         _log = log;
         _progressHub = progressHub;
@@ -46,7 +47,11 @@ public class SignalRService : ISignalRService
 
     #region DownloadProgress
 
-    public async Task SendDownloadProgressUpdateAsync(int plexServerId, List<DownloadTaskGeneric> downloadTasks, CancellationToken cancellationToken = default)
+    public async Task SendDownloadProgressUpdateAsync(
+        int plexServerId,
+        List<DownloadTaskGeneric> downloadTasks,
+        CancellationToken cancellationToken = default
+    )
     {
         var update = downloadTasks.ToServerDownloadProgressDTOList();
         if (!update.Any())
@@ -72,7 +77,10 @@ public class SignalRService : ISignalRService
     }
 
     /// <inheritdoc/>
-    public async Task SendFileMergeProgressUpdateAsync(FileMergeProgress fileMergeProgress, CancellationToken cancellationToken = default)
+    public async Task SendFileMergeProgressUpdateAsync(
+        FileMergeProgress fileMergeProgress,
+        CancellationToken cancellationToken = default
+    )
     {
         await _progressHub.Clients.All.FileMergeProgress(fileMergeProgress, cancellationToken);
     }

@@ -13,7 +13,12 @@ public class FileMergeProgressHandler : INotificationHandler<FileMergeProgressNo
     private readonly IPlexRipperDbContext _dbContext;
     private readonly ISignalRService _signalRService;
 
-    public FileMergeProgressHandler(ILog log, IMediator mediator, IPlexRipperDbContext dbContext, ISignalRService signalRService)
+    public FileMergeProgressHandler(
+        ILog log,
+        IMediator mediator,
+        IPlexRipperDbContext dbContext,
+        ISignalRService signalRService
+    )
     {
         _log = log;
         _mediator = mediator;
@@ -26,7 +31,9 @@ public class FileMergeProgressHandler : INotificationHandler<FileMergeProgressNo
         var downloadTask = await _dbContext.GetDownloadTaskAsync(notification.Progress.ToKey(), cancellationToken);
         if (downloadTask is null)
         {
-            ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), notification.Progress.DownloadTaskId).LogError();
+            ResultExtensions
+                .EntityNotFound(nameof(DownloadTaskGeneric), notification.Progress.DownloadTaskId)
+                .LogError();
             return;
         }
 

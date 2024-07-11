@@ -4,7 +4,8 @@ namespace Data.UnitTests.Extensions;
 
 public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests : BaseUnitTest
 {
-    public PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests(ITestOutputHelper output) : base(output) { }
+    public PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldHaveAllMovieDownloadTaskChildrenIncluded_WhenDbContainsNestedDownloadTasks()

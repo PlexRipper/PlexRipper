@@ -78,7 +78,9 @@ public class BaseUnitTest : IDisposable
     {
         if (!isDatabaseSetup)
         {
-            var logEvent = _log.ErrorLine("The test database has not been setup yet, run SetupDatabase() in the test first!");
+            var logEvent = _log.ErrorLine(
+                "The test database has not been setup yet, run SetupDatabase() in the test first!"
+            );
             throw new Exception(logEvent.ToLogString());
         }
 
@@ -102,7 +104,8 @@ public class BaseUnitTest : IDisposable
     }
 }
 
-public class BaseUnitTest<TUnitTestClass> : BaseUnitTest where TUnitTestClass : class
+public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
+    where TUnitTestClass : class
 {
     #region Fields
 
@@ -114,22 +117,25 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest where TUnitTestClass : 
 
     #region Constructors
 
-    protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Debug) : base(output, logEventLevel)
+    protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Debug)
+        : base(output, logEventLevel)
     {
         mock = AutoMock.GetStrict(builder =>
         {
-            builder.RegisterInstance(MapperSetup.CreateMapper())
-                .As<IMapper>()
-                .SingleInstance();
-            builder.Register<ILogger>((_, _) =>
-                {
-                    LogConfig.SetTestOutputHelper(output);
-                    return LogConfig.GetLogger(logEventLevel);
-                })
+            builder.RegisterInstance(MapperSetup.CreateMapper()).As<IMapper>().SingleInstance();
+            builder
+                .Register<ILogger>(
+                    (_, _) =>
+                    {
+                        LogConfig.SetTestOutputHelper(output);
+                        return LogConfig.GetLogger(logEventLevel);
+                    }
+                )
                 .SingleInstance();
 
             // Database context can be setup once and then retrieved by its DB name.
-            builder.Register((_, _) => GetDbContext())
+            builder
+                .Register((_, _) => GetDbContext())
                 .As<PlexRipperDbContext>() // Register as concrete type
                 .As<IPlexRipperDbContext>() // Also register as interface
                 .InstancePerDependency();
@@ -138,9 +144,7 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest where TUnitTestClass : 
             builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();
         });
 
-        mock.Mock<IHttpClientFactory>()
-            .Setup(x => x.CreateClient(It.IsAny<string>()))
-            .Returns(new HttpClient());
+        mock.Mock<IHttpClientFactory>().Setup(x => x.CreateClient(It.IsAny<string>())).Returns(new HttpClient());
     }
 
     #endregion

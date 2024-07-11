@@ -30,9 +30,10 @@ public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpoin
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexAccountDTO>>))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexAccountDTO>>))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(GetAllPlexAccountsEndpointRequest req, CancellationToken ct)

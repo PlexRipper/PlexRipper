@@ -13,7 +13,8 @@ public partial interface ILog
         string messageTemplate,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!);
+        [CallerLineNumber] int sourceLineNumber = default!
+    );
 
     [MessageTemplateFormatMethod("messageTemplate")]
     LogMetaData Fatal(
@@ -21,7 +22,8 @@ public partial interface ILog
         string messageTemplate,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!);
+        [CallerLineNumber] int sourceLineNumber = default!
+    );
 
     [MessageTemplateFormatMethod("messageTemplate")]
     LogMetaData Fatal<T>(
@@ -30,10 +32,16 @@ public partial interface ILog
         T propertyValue = default,
         string memberName = default,
         string sourceFilePath = default,
-        int sourceLineNumber = default);
+        int sourceLineNumber = default
+    );
 
     [MessageTemplateFormatMethod("messageTemplate")]
-    LogMetaData Fatal(Exception ex, string memberName = default, string sourceFilePath = default, int sourceLineNumber = default);
+    LogMetaData Fatal(
+        Exception ex,
+        string memberName = default,
+        string sourceFilePath = default,
+        int sourceLineNumber = default
+    );
 
     [MessageTemplateFormatMethod("messageTemplate")]
     LogMetaData Fatal<T>(
@@ -41,7 +49,8 @@ public partial interface ILog
         T propertyValue = default!,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!);
+        [CallerLineNumber] int sourceLineNumber = default!
+    );
 
     [MessageTemplateFormatMethod("messageTemplate")]
     LogMetaData Fatal<T0, T1>(
@@ -50,7 +59,8 @@ public partial interface ILog
         T1 propertyValue1,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!);
+        [CallerLineNumber] int sourceLineNumber = default!
+    );
 
     [MessageTemplateFormatMethod("messageTemplate")]
     LogMetaData Fatal<T0, T1, T2>(
@@ -60,7 +70,8 @@ public partial interface ILog
         T2 propertyValue2,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!);
+        [CallerLineNumber] int sourceLineNumber = default!
+    );
 
     [MessageTemplateFormatMethod("messageTemplate")]
     LogMetaData Fatal<T0, T1, T2, T3>(
@@ -71,7 +82,8 @@ public partial interface ILog
         T3 propertyValue3,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!);
+        [CallerLineNumber] int sourceLineNumber = default!
+    );
 
     [MessageTemplateFormatMethod("messageTemplate")]
     LogMetaData Fatal<T0, T1, T2, T3, T4>(
@@ -83,7 +95,8 @@ public partial interface ILog
         T4 propertyValue4,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!);
+        [CallerLineNumber] int sourceLineNumber = default!
+    );
 
     [MessageTemplateFormatMethod("messageTemplate")]
     LogMetaData Fatal<T0, T1, T2, T3, T4, T5>(
@@ -96,7 +109,8 @@ public partial interface ILog
         T5 propertyValue5,
         [CallerMemberName] string memberName = default!,
         [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!);
+        [CallerLineNumber] int sourceLineNumber = default!
+    );
 
     #endregion
 }

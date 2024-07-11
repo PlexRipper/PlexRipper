@@ -5,14 +5,18 @@ namespace IntegrationTests.DownloadManager.DownloadTaskScheduler;
 
 public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
 {
-    public StopDownloadJob_IntegrationTests(ITestOutputHelper output) : base(output) { }
+    public StopDownloadJob_IntegrationTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldStartAndStopDownloadJob_WhenDownloadTaskHasBeenStopped()
     {
         // Arrange
         Seed = 45644875;
-        var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
+        var serverUri = SpinUpPlexServer(config =>
+        {
+            config.DownloadFileSizeInMb = 50;
+        });
         await SetupDatabase(config =>
         {
             config.MockServerUris.Add(serverUri);
@@ -26,7 +30,10 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
 
         SetupMockPlexApi();
 
-        await CreateContainer(config => { config.DownloadSpeedLimitInKib = 5000; });
+        await CreateContainer(config =>
+        {
+            config.DownloadSpeedLimitInKib = 5000;
+        });
 
         var movieDownloadTasks = await DbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
 

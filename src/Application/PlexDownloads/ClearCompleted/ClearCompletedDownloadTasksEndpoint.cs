@@ -49,9 +49,7 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
         foreach (var downloadTaskId in downloadTaskIds)
         {
             var rowsDeleted = await _dbContext
-                .DownloadTaskMovie.Where(x =>
-                    x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed
-                )
+                .DownloadTaskMovie.Where(x => x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed)
                 .ExecuteDeleteAsync(ct);
 
             if (rowsDeleted > 0)
@@ -73,9 +71,7 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
             }
 
             rowsDeleted = await _dbContext
-                .DownloadTaskTvShow.Where(x =>
-                    x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed
-                )
+                .DownloadTaskTvShow.Where(x => x.Id == downloadTaskId && x.DownloadStatus == DownloadStatus.Completed)
                 .ExecuteDeleteAsync(ct);
 
             if (rowsDeleted > 0)

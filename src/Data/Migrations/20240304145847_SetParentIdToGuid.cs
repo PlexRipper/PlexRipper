@@ -13,58 +13,56 @@ namespace PlexRipper.Data.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTaskMovieFile_DownloadTaskMovie_ParentId1",
-                table: "DownloadTaskMovieFile");
+                table: "DownloadTaskMovieFile"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTaskTvShowEpisode_DownloadTaskTvShowSeason_DownloadTaskTvShowSeasonId",
-                table: "DownloadTaskTvShowEpisode");
+                table: "DownloadTaskTvShowEpisode"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTaskTvShowEpisodeFile_DownloadTaskTvShowEpisode_ParentId1",
-                table: "DownloadTaskTvShowEpisodeFile");
+                table: "DownloadTaskTvShowEpisodeFile"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTaskTvShowSeason_DownloadTaskTvShow_DownloadTaskTvShowId",
-                table: "DownloadTaskTvShowSeason");
+                table: "DownloadTaskTvShowSeason"
+            );
 
             migrationBuilder.DropIndex(
                 name: "IX_DownloadTaskTvShowSeason_DownloadTaskTvShowId",
-                table: "DownloadTaskTvShowSeason");
+                table: "DownloadTaskTvShowSeason"
+            );
 
             migrationBuilder.DropIndex(
                 name: "IX_DownloadTaskTvShowEpisodeFile_ParentId1",
-                table: "DownloadTaskTvShowEpisodeFile");
+                table: "DownloadTaskTvShowEpisodeFile"
+            );
 
             migrationBuilder.DropIndex(
                 name: "IX_DownloadTaskTvShowEpisode_DownloadTaskTvShowSeasonId",
-                table: "DownloadTaskTvShowEpisode");
+                table: "DownloadTaskTvShowEpisode"
+            );
 
-            migrationBuilder.DropIndex(
-                name: "IX_DownloadTaskMovieFile_ParentId1",
-                table: "DownloadTaskMovieFile");
+            migrationBuilder.DropIndex(name: "IX_DownloadTaskMovieFile_ParentId1", table: "DownloadTaskMovieFile");
 
-            migrationBuilder.DropColumn(
-                name: "DownloadTaskTvShowId",
-                table: "DownloadTaskTvShowSeason");
+            migrationBuilder.DropColumn(name: "DownloadTaskTvShowId", table: "DownloadTaskTvShowSeason");
 
-            migrationBuilder.DropColumn(
-                name: "ParentId1",
-                table: "DownloadTaskTvShowEpisodeFile");
+            migrationBuilder.DropColumn(name: "ParentId1", table: "DownloadTaskTvShowEpisodeFile");
 
-            migrationBuilder.DropColumn(
-                name: "DownloadTaskTvShowSeasonId",
-                table: "DownloadTaskTvShowEpisode");
+            migrationBuilder.DropColumn(name: "DownloadTaskTvShowSeasonId", table: "DownloadTaskTvShowEpisode");
 
-            migrationBuilder.DropColumn(
-                name: "ParentId1",
-                table: "DownloadTaskMovieFile");
+            migrationBuilder.DropColumn(name: "ParentId1", table: "DownloadTaskMovieFile");
 
             migrationBuilder.AddColumn<Guid>(
                 name: "ParentId",
                 table: "DownloadTaskTvShowSeason",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000")
+            );
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "ParentId",
@@ -72,14 +70,16 @@ namespace PlexRipper.Data.Migrations
                 type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AddColumn<Guid>(
                 name: "ParentId",
                 table: "DownloadTaskTvShowEpisode",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000")
+            );
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "ParentId",
@@ -87,27 +87,32 @@ namespace PlexRipper.Data.Migrations
                 type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskTvShowSeason_ParentId",
                 table: "DownloadTaskTvShowSeason",
-                column: "ParentId");
+                column: "ParentId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskTvShowEpisodeFile_ParentId",
                 table: "DownloadTaskTvShowEpisodeFile",
-                column: "ParentId");
+                column: "ParentId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskTvShowEpisode_ParentId",
                 table: "DownloadTaskTvShowEpisode",
-                column: "ParentId");
+                column: "ParentId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskMovieFile_ParentId",
                 table: "DownloadTaskMovieFile",
-                column: "ParentId");
+                column: "ParentId"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTaskMovieFile_DownloadTaskMovie_ParentId",
@@ -115,7 +120,8 @@ namespace PlexRipper.Data.Migrations
                 column: "ParentId",
                 principalTable: "DownloadTaskMovie",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTaskTvShowEpisode_DownloadTaskTvShowSeason_ParentId",
@@ -123,7 +129,8 @@ namespace PlexRipper.Data.Migrations
                 column: "ParentId",
                 principalTable: "DownloadTaskTvShowSeason",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTaskTvShowEpisodeFile_DownloadTaskTvShowEpisode_ParentId",
@@ -131,7 +138,8 @@ namespace PlexRipper.Data.Migrations
                 column: "ParentId",
                 principalTable: "DownloadTaskTvShowEpisode",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTaskTvShowSeason_DownloadTaskTvShow_ParentId",
@@ -139,7 +147,8 @@ namespace PlexRipper.Data.Migrations
                 column: "ParentId",
                 principalTable: "DownloadTaskTvShow",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
 
         /// <inheritdoc />
@@ -147,49 +156,48 @@ namespace PlexRipper.Data.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTaskMovieFile_DownloadTaskMovie_ParentId",
-                table: "DownloadTaskMovieFile");
+                table: "DownloadTaskMovieFile"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTaskTvShowEpisode_DownloadTaskTvShowSeason_ParentId",
-                table: "DownloadTaskTvShowEpisode");
+                table: "DownloadTaskTvShowEpisode"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTaskTvShowEpisodeFile_DownloadTaskTvShowEpisode_ParentId",
-                table: "DownloadTaskTvShowEpisodeFile");
+                table: "DownloadTaskTvShowEpisodeFile"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTaskTvShowSeason_DownloadTaskTvShow_ParentId",
-                table: "DownloadTaskTvShowSeason");
+                table: "DownloadTaskTvShowSeason"
+            );
 
-            migrationBuilder.DropIndex(
-                name: "IX_DownloadTaskTvShowSeason_ParentId",
-                table: "DownloadTaskTvShowSeason");
+            migrationBuilder.DropIndex(name: "IX_DownloadTaskTvShowSeason_ParentId", table: "DownloadTaskTvShowSeason");
 
             migrationBuilder.DropIndex(
                 name: "IX_DownloadTaskTvShowEpisodeFile_ParentId",
-                table: "DownloadTaskTvShowEpisodeFile");
+                table: "DownloadTaskTvShowEpisodeFile"
+            );
 
             migrationBuilder.DropIndex(
                 name: "IX_DownloadTaskTvShowEpisode_ParentId",
-                table: "DownloadTaskTvShowEpisode");
+                table: "DownloadTaskTvShowEpisode"
+            );
 
-            migrationBuilder.DropIndex(
-                name: "IX_DownloadTaskMovieFile_ParentId",
-                table: "DownloadTaskMovieFile");
+            migrationBuilder.DropIndex(name: "IX_DownloadTaskMovieFile_ParentId", table: "DownloadTaskMovieFile");
 
-            migrationBuilder.DropColumn(
-                name: "ParentId",
-                table: "DownloadTaskTvShowSeason");
+            migrationBuilder.DropColumn(name: "ParentId", table: "DownloadTaskTvShowSeason");
 
-            migrationBuilder.DropColumn(
-                name: "ParentId",
-                table: "DownloadTaskTvShowEpisode");
+            migrationBuilder.DropColumn(name: "ParentId", table: "DownloadTaskTvShowEpisode");
 
             migrationBuilder.AddColumn<Guid>(
                 name: "DownloadTaskTvShowId",
                 table: "DownloadTaskTvShowSeason",
                 type: "TEXT",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "ParentId",
@@ -197,19 +205,22 @@ namespace PlexRipper.Data.Migrations
                 type: "INTEGER",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AddColumn<Guid>(
                 name: "ParentId1",
                 table: "DownloadTaskTvShowEpisodeFile",
                 type: "TEXT",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AddColumn<Guid>(
                 name: "DownloadTaskTvShowSeasonId",
                 table: "DownloadTaskTvShowEpisode",
                 type: "TEXT",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "ParentId",
@@ -217,61 +228,71 @@ namespace PlexRipper.Data.Migrations
                 type: "INTEGER",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AddColumn<Guid>(
                 name: "ParentId1",
                 table: "DownloadTaskMovieFile",
                 type: "TEXT",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskTvShowSeason_DownloadTaskTvShowId",
                 table: "DownloadTaskTvShowSeason",
-                column: "DownloadTaskTvShowId");
+                column: "DownloadTaskTvShowId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskTvShowEpisodeFile_ParentId1",
                 table: "DownloadTaskTvShowEpisodeFile",
-                column: "ParentId1");
+                column: "ParentId1"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskTvShowEpisode_DownloadTaskTvShowSeasonId",
                 table: "DownloadTaskTvShowEpisode",
-                column: "DownloadTaskTvShowSeasonId");
+                column: "DownloadTaskTvShowSeasonId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskMovieFile_ParentId1",
                 table: "DownloadTaskMovieFile",
-                column: "ParentId1");
+                column: "ParentId1"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTaskMovieFile_DownloadTaskMovie_ParentId1",
                 table: "DownloadTaskMovieFile",
                 column: "ParentId1",
                 principalTable: "DownloadTaskMovie",
-                principalColumn: "Id");
+                principalColumn: "Id"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTaskTvShowEpisode_DownloadTaskTvShowSeason_DownloadTaskTvShowSeasonId",
                 table: "DownloadTaskTvShowEpisode",
                 column: "DownloadTaskTvShowSeasonId",
                 principalTable: "DownloadTaskTvShowSeason",
-                principalColumn: "Id");
+                principalColumn: "Id"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTaskTvShowEpisodeFile_DownloadTaskTvShowEpisode_ParentId1",
                 table: "DownloadTaskTvShowEpisodeFile",
                 column: "ParentId1",
                 principalTable: "DownloadTaskTvShowEpisode",
-                principalColumn: "Id");
+                principalColumn: "Id"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTaskTvShowSeason_DownloadTaskTvShow_DownloadTaskTvShowId",
                 table: "DownloadTaskTvShowSeason",
                 column: "DownloadTaskTvShowId",
                 principalTable: "DownloadTaskTvShow",
-                principalColumn: "Id");
+                principalColumn: "Id"
+            );
         }
     }
 }

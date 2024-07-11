@@ -4,7 +4,7 @@ using PlexRipper.PlexApi.Helpers;
 namespace PlexRipper.PlexApi.Models;
 
 /// <summary>
-/// 
+///
 /// </summary>
 public class Writer
 {

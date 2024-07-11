@@ -5,7 +5,8 @@ namespace PlexApi.UnitTests.Converters;
 
 public class StringToBool : BaseUnitTest
 {
-    public StringToBool(ITestOutputHelper output) : base(output) { }
+    public StringToBool(ITestOutputHelper output)
+        : base(output) { }
 
     [Theory]
     [InlineData("{\"x\": \"1\"}", true)]
@@ -15,7 +16,11 @@ public class StringToBool : BaseUnitTest
     {
         // Arrange
         var sut = new PlexRipper.PlexApi.Converters.StringToBool();
-        var utf8JsonReader = new Utf8JsonReader(Encoding.UTF8.GetBytes(json), false, new JsonReaderState(new JsonReaderOptions()));
+        var utf8JsonReader = new Utf8JsonReader(
+            Encoding.UTF8.GetBytes(json),
+            false,
+            new JsonReaderState(new JsonReaderOptions())
+        );
         while (utf8JsonReader.Read())
             if (utf8JsonReader.TokenType == JsonTokenType.String)
                 break;

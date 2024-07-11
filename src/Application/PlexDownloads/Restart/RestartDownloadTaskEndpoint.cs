@@ -25,10 +25,11 @@ public class RestartDownloadTaskEndpoint(IMediator mediator) : BaseEndpoint<Rest
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(RestartDownloadTaskEndpointRequest req, CancellationToken ct)

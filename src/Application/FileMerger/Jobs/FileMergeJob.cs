@@ -30,7 +30,8 @@ public class FileMergeJob : IJob
         IPlexRipperDbContext dbContext,
         IFileMergeSystem fileMergeSystem,
         INotificationsService notificationsService,
-        IFileMergeStreamProvider fileMergeStreamProvider)
+        IFileMergeStreamProvider fileMergeStreamProvider
+    )
     {
         _log = log;
         _mediator = mediator;
@@ -50,7 +51,12 @@ public class FileMergeJob : IJob
         var fileTaskId = dataMap.GetIntValue(FileTaskId);
         var token = context.CancellationToken;
         _log.Here()
-            .Debug("Executing job: {NameOfFileMergeJob} for {NameOfFileTaskId} with id: {FileTaskId}", nameof(FileMergeJob), nameof(fileTaskId), fileTaskId);
+            .Debug(
+                "Executing job: {NameOfFileMergeJob} for {NameOfFileTaskId} with id: {FileTaskId}",
+                nameof(FileMergeJob),
+                nameof(fileTaskId),
+                fileTaskId
+            );
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
@@ -59,12 +65,20 @@ public class FileMergeJob : IJob
             var fileTask = await _dbContext.FileTasks.GetAsync(fileTaskId, token);
             var downloadTask = await _dbContext.GetDownloadTaskAsync(fileTask.DownloadTaskKey, token);
 
-            _log.Information("Executing {NameOfFileMergeJob} with name {FileTaskFileName} and id {FileTaskId}", nameof(FileMergeJob), fileTask.FileName,
-                fileTaskId);
+            _log.Information(
+                "Executing {NameOfFileMergeJob} with name {FileTaskFileName} and id {FileTaskId}",
+                nameof(FileMergeJob),
+                fileTask.FileName,
+                fileTaskId
+            );
 
             if (!fileTask.FilePaths.Any())
             {
-                _log.Error("File task: {FileName} with id {FileTaskId} did not have any file paths to merge", fileTask.FileName, fileTask.Id);
+                _log.Error(
+                    "File task: {FileName} with id {FileTaskId} did not have any file paths to merge",
+                    fileTask.FileName,
+                    fileTask.Id
+                );
                 return;
             }
 
@@ -77,7 +91,8 @@ public class FileMergeJob : IJob
 
             await _dbContext.SetDownloadStatus(downloadTask.ToKey(), newDownloadStatus);
             var downloadWorkerIds = downloadTask.DownloadWorkerTasks.Select(x => x.Id).ToList();
-            await _dbContext.DownloadWorkerTasks.Where(x => downloadWorkerIds.Contains(x.Id))
+            await _dbContext
+                .DownloadWorkerTasks.Where(x => downloadWorkerIds.Contains(x.Id))
                 .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, newDownloadStatus), token);
 
             await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTask.ToKey()), token);
@@ -86,7 +101,9 @@ public class FileMergeJob : IJob
             foreach (var path in fileTask.FilePaths)
                 if (!_fileMergeSystem.FileExists(path))
                 {
-                    var result = Result.Fail($"Filepath: {path} does not exist and cannot be used to merge/move the file!").LogError();
+                    var result = Result
+                        .Fail($"Filepath: {path} does not exist and cannot be used to merge/move the file!")
+                        .LogError();
                     await _notificationsService.SendResult(result);
                     return;
                 }
@@ -110,7 +127,12 @@ public class FileMergeJob : IJob
                 if (EnvironmentExtensions.IsIntegrationTestMode())
                     outputStream = new ThrottledStream(streamResult.Value, 50000);
 
-                _log.Here().Debug("Starting file merge process for {FilePathsCount} parts into a file {FileName}", fileTask.FilePaths.Count, fileTask.FileName);
+                _log.Here()
+                    .Debug(
+                        "Starting file merge process for {FilePathsCount} parts into a file {FileName}",
+                        fileTask.FilePaths.Count,
+                        fileTask.FileName
+                    );
                 await _fileMergeStreamProvider.MergeFiles(fileTask, outputStream, _bytesReceivedProgress, token);
             }
             catch (Exception e)
@@ -127,7 +149,12 @@ public class FileMergeJob : IJob
             _bytesReceivedProgress.OnCompleted();
             await _progressCompletionSource.Task;
             _bytesReceivedProgress.Dispose();
-            _log.Here().Information("Finished combining {FilePathsCount} files into {FileTaskFileName}", fileTask.FilePaths.Count, fileTask.FileName);
+            _log.Here()
+                .Information(
+                    "Finished combining {FilePathsCount} files into {FileTaskFileName}",
+                    fileTask.FilePaths.Count,
+                    fileTask.FileName
+                );
 
             await _mediator.Publish(new FileMergeFinishedNotification(fileTaskId), token);
         }
@@ -158,7 +185,9 @@ public class FileMergeJob : IJob
                     TransferSpeed = DataFormat.GetTransferSpeed(dataTransferred, elapsedTime.TotalSeconds),
                 };
             })
-            .SelectMany(async data => await _mediator.Publish(new FileMergeProgressNotification(data), token).ToObservable())
+            .SelectMany(async data =>
+                await _mediator.Publish(new FileMergeProgressNotification(data), token).ToObservable()
+            )
             .Subscribe(
                 _ => { },
                 ex =>
@@ -170,6 +199,7 @@ public class FileMergeJob : IJob
                 {
                     _progressCompletionSource.SetResult(true);
                     timeContext.Dispose();
-                });
+                }
+            );
     }
 }

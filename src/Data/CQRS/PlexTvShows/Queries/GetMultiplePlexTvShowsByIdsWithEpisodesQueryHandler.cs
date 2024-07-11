@@ -6,7 +6,8 @@ using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.PlexTvShows;
 
-public class GetMultiplePlexTvShowsByIdsWithEpisodesQueryValidator : AbstractValidator<GetMultiplePlexTvShowsByIdsWithEpisodesQuery>
+public class GetMultiplePlexTvShowsByIdsWithEpisodesQueryValidator
+    : AbstractValidator<GetMultiplePlexTvShowsByIdsWithEpisodesQuery>
 {
     public GetMultiplePlexTvShowsByIdsWithEpisodesQueryValidator()
     {
@@ -14,12 +15,17 @@ public class GetMultiplePlexTvShowsByIdsWithEpisodesQueryValidator : AbstractVal
     }
 }
 
-public class GetMultiplePlexTvShowsByIdsWithEpisodesQueryHandler : BaseHandler,
-    IRequestHandler<GetMultiplePlexTvShowsByIdsWithEpisodesQuery, Result<List<PlexTvShow>>>
+public class GetMultiplePlexTvShowsByIdsWithEpisodesQueryHandler
+    : BaseHandler,
+        IRequestHandler<GetMultiplePlexTvShowsByIdsWithEpisodesQuery, Result<List<PlexTvShow>>>
 {
-    public GetMultiplePlexTvShowsByIdsWithEpisodesQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public GetMultiplePlexTvShowsByIdsWithEpisodesQueryHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
-    public async Task<Result<List<PlexTvShow>>> Handle(GetMultiplePlexTvShowsByIdsWithEpisodesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<PlexTvShow>>> Handle(
+        GetMultiplePlexTvShowsByIdsWithEpisodesQuery request,
+        CancellationToken cancellationToken
+    )
     {
         var query = PlexTvShowsQueryable;
 
@@ -31,13 +37,10 @@ public class GetMultiplePlexTvShowsByIdsWithEpisodesQueryHandler : BaseHandler,
 
         if (request.IncludeData)
         {
-            query = query.Include(x => x.Seasons)
-                .ThenInclude(x => x.Episodes);
+            query = query.Include(x => x.Seasons).ThenInclude(x => x.Episodes);
         }
 
-        var plexTvShow = await query
-            .Where(x => request.Ids.Contains(x.Id))
-            .ToListAsync(cancellationToken);
+        var plexTvShow = await query.Where(x => request.Ids.Contains(x.Id)).ToListAsync(cancellationToken);
 
         return Result.Ok(plexTvShow);
     }

@@ -18,11 +18,7 @@ public class SyncServerJob : IJob
 
     public static JobKey GetJobKey(int id) => new($"{PlexServerIdParameter}_{id}", nameof(SyncServerJob));
 
-    public SyncServerJob(
-        ILog log,
-        IMediator mediator,
-        IPlexRipperDbContext dbContext,
-        ISignalRService signalRService)
+    public SyncServerJob(ILog log, IMediator mediator, IPlexRipperDbContext dbContext, ISignalRService signalRService)
     {
         _log = log;
         _mediator = mediator;
@@ -36,7 +32,12 @@ public class SyncServerJob : IJob
         var plexServerId = dataMap.GetIntValue(PlexServerIdParameter);
         var forceSync = dataMap.GetBooleanValue(ForceSyncParameter);
 
-        _log.Debug("Executing job: {SyncServerJobName)} for {PlexServerName)}: {PlexServerId}", nameof(SyncServerJob), nameof(PlexServer), plexServerId);
+        _log.Debug(
+            "Executing job: {SyncServerJobName)} for {PlexServerName)}: {PlexServerId}",
+            nameof(SyncServerJob),
+            nameof(PlexServer),
+            plexServerId
+        );
 
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
@@ -53,13 +54,17 @@ public class SyncServerJob : IJob
 
             var plexLibraries = forceSync
                 ? plexServer.PlexLibraries
-                : plexServer.PlexLibraries.FindAll(
-                    x => x.Outdated
-                         && x.Type is PlexMediaType.Movie or PlexMediaType.TvShow);
+                : plexServer.PlexLibraries.FindAll(x =>
+                    x.Outdated && x.Type is PlexMediaType.Movie or PlexMediaType.TvShow
+                );
 
             if (!plexLibraries.Any())
             {
-                _log.Information("PlexServer {PlexServerName} with id {PlexServerId} has no libraries to sync", plexServer.Name, plexServer.Id);
+                _log.Information(
+                    "PlexServer {PlexServerName} with id {PlexServerId} has no libraries to sync",
+                    plexServer.Name,
+                    plexServer.Id
+                );
                 return;
             }
 
@@ -98,12 +103,19 @@ public class SyncServerJob : IJob
             if (results.Any())
             {
                 var failedResult = Result.Fail($"Some libraries failed to sync in PlexServer: {plexServer.Name}");
-                results.ForEach(x => { failedResult.AddNestedErrors(x.Errors); });
+                results.ForEach(x =>
+                {
+                    failedResult.AddNestedErrors(x.Errors);
+                });
                 failedResult.LogError();
                 return;
             }
 
-            _log.Information("Successfully synced server \"{PlexServerName}\" with id {PlexServerId} has no libraries to sync", plexServer.Name, plexServer.Id);
+            _log.Information(
+                "Successfully synced server \"{PlexServerName}\" with id {PlexServerId} has no libraries to sync",
+                plexServer.Name,
+                plexServer.Id
+            );
         }
         catch (Exception e)
         {

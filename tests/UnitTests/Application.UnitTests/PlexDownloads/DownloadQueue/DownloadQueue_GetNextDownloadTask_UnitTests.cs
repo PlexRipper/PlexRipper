@@ -4,13 +4,17 @@ namespace PlexRipper.Application.UnitTests.DownloadQueue;
 
 public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Application.DownloadQueue>
 {
-    public DownloadQueue_GetNextDownloadTask_UnitTests(ITestOutputHelper output) : base(output) { }
+    public DownloadQueue_GetNextDownloadTask_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldHaveNextDownloadTask_WhenAllAreQueued()
     {
         // Arrange
-        await SetupDatabase(config => { config.TvShowDownloadTasksCount = 5; });
+        await SetupDatabase(config =>
+        {
+            config.TvShowDownloadTasksCount = 5;
+        });
         var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync();
 
         // Act
@@ -26,7 +30,10 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
     public async Task ShouldHaveNextDownloadTask_WhenADownloadTaskHasBeenCompleted()
     {
         // Arrange
-        await SetupDatabase(config => { config.TvShowDownloadTasksCount = 5; });
+        await SetupDatabase(config =>
+        {
+            config.TvShowDownloadTasksCount = 5;
+        });
         var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
         await DbContext.SaveChangesAsync();
@@ -44,7 +51,10 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
     public async Task ShouldHaveNextQueuedDownloadTaskInDownloadingTask_WhenAParentDownloadTaskIsAlreadyDownloading()
     {
         // Arrange
-        await SetupDatabase(config => { config.TvShowDownloadTasksCount = 5; });
+        await SetupDatabase(config =>
+        {
+            config.TvShowDownloadTasksCount = 5;
+        });
 
         var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Downloading);
@@ -65,7 +75,10 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
     public async Task ShouldHaveNoDownloadTask_WhenADownloadTaskIsAlreadyDownloading()
     {
         // Arrange
-        await SetupDatabase(config => { config.TvShowDownloadTasksCount = 5; });
+        await SetupDatabase(config =>
+        {
+            config.TvShowDownloadTasksCount = 5;
+        });
 
         var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Downloading);
@@ -82,7 +95,10 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
     public async Task ShouldHaveNoNextDownloadTask_WhenMergingAndDownloadFinished()
     {
         // Arrange
-        await SetupDatabase(config => { config.MovieDownloadTasksCount = 5; });
+        await SetupDatabase(config =>
+        {
+            config.MovieDownloadTasksCount = 5;
+        });
 
         var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Merging);
@@ -103,7 +119,10 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
     public async Task ShouldHaveLastQueuedDownloadTask_WhenMergingQueuedAndDownloadFinished()
     {
         // Arrange
-        await SetupDatabase(config => { config.MovieDownloadTasksCount = 5; });
+        await SetupDatabase(config =>
+        {
+            config.MovieDownloadTasksCount = 5;
+        });
 
         var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Merging);

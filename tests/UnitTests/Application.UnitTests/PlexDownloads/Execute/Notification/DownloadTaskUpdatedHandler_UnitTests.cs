@@ -6,7 +6,8 @@ namespace PlexRipper.Application.UnitTests.Execute.Notification;
 
 public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpdatedHandler>
 {
-    public DownloadTaskUpdatedHandler_UnitTests(ITestOutputHelper output) : base(output) { }
+    public DownloadTaskUpdatedHandler_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldSendDownloadTasksWithSignalR_WhenDownloadTaskUpdatedHasBeenCalled()
@@ -23,7 +24,13 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
 
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
         mock.Mock<ISignalRService>()
-            .Setup(x => x.SendDownloadProgressUpdateAsync(It.IsAny<int>(), It.IsAny<List<DownloadTaskGeneric>>(), It.IsAny<CancellationToken>()))
+            .Setup(x =>
+                x.SendDownloadProgressUpdateAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<List<DownloadTaskGeneric>>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .Returns(Task.CompletedTask);
 
         // Act
@@ -32,30 +39,45 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
 
         // Assert
         mock.Mock<ISignalRService>()
-            .Verify(x => x.SendDownloadProgressUpdateAsync(It.IsAny<int>(), It.IsAny<List<DownloadTaskGeneric>>(), It.IsAny<CancellationToken>()), Times.Once);
+            .Verify(
+                x =>
+                    x.SendDownloadProgressUpdateAsync(
+                        It.IsAny<int>(),
+                        It.IsAny<List<DownloadTaskGeneric>>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
     }
 
     [Fact]
     public async Task ShouldStartFileMergeJobAndDownloadQueue_WhenDownloadTaskHasFinished()
     {
         // Arrange
-        await SetupDatabase(config => { config.MovieDownloadTasksCount = 5; });
+        await SetupDatabase(config =>
+        {
+            config.MovieDownloadTasksCount = 5;
+        });
 
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
         var updatedDownloadTask = downloadTasks[0].Children[0];
         await IDbContext.SetDownloadStatus(updatedDownloadTask.ToKey(), DownloadStatus.DownloadFinished);
 
         mock.Mock<ISignalRService>()
-            .Setup(x => x.SendDownloadProgressUpdateAsync(It.IsAny<int>(), It.IsAny<List<DownloadTaskGeneric>>(), It.IsAny<CancellationToken>()))
+            .Setup(x =>
+                x.SendDownloadProgressUpdateAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<List<DownloadTaskGeneric>>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .Returns(Task.CompletedTask);
 
         mock.Mock<IFileMergeScheduler>()
             .Setup(x => x.CreateFileTaskFromDownloadTask(It.IsAny<DownloadTaskKey>()))
             .ReturnsAsync(Result.Ok(new FileTask()));
 
-        mock.Mock<IFileMergeScheduler>()
-            .Setup(x => x.StartFileMergeJob(It.IsAny<int>()))
-            .ReturnsAsync(Result.Ok());
+        mock.Mock<IFileMergeScheduler>().Setup(x => x.StartFileMergeJob(It.IsAny<int>())).ReturnsAsync(Result.Ok());
 
         mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
@@ -65,7 +87,15 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
 
         // Assert
         mock.Mock<ISignalRService>()
-            .Verify(x => x.SendDownloadProgressUpdateAsync(It.IsAny<int>(), It.IsAny<List<DownloadTaskGeneric>>(), It.IsAny<CancellationToken>()), Times.Once);
+            .Verify(
+                x =>
+                    x.SendDownloadProgressUpdateAsync(
+                        It.IsAny<int>(),
+                        It.IsAny<List<DownloadTaskGeneric>>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
         mock.VerifyNotification(It.IsAny<CheckDownloadQueueNotification>, Times.Once);
     }
 }

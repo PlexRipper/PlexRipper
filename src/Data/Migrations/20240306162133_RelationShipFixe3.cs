@@ -12,11 +12,13 @@ namespace PlexRipper.Data.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadWorkerTasks_DownloadTaskMovieFile_DownloadTaskId",
-                table: "DownloadWorkerTasks");
+                table: "DownloadWorkerTasks"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadWorkerTasks_DownloadTaskTvShowEpisodeFile_DownloadTaskId",
-                table: "DownloadWorkerTasks");
+                table: "DownloadWorkerTasks"
+            );
         }
 
         /// <inheritdoc />
@@ -28,7 +30,8 @@ namespace PlexRipper.Data.Migrations
                 column: "DownloadTaskId",
                 principalTable: "DownloadTaskMovieFile",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadWorkerTasks_DownloadTaskTvShowEpisodeFile_DownloadTaskId",
@@ -36,7 +39,8 @@ namespace PlexRipper.Data.Migrations
                 column: "DownloadTaskId",
                 principalTable: "DownloadTaskTvShowEpisodeFile",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
     }
 }

@@ -31,10 +31,11 @@ public class GetDownloadPreviewEndpoint : BaseEndpoint<List<DownloadMediaDTO>, L
     {
         Post(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<DownloadPreviewDTO>>))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<DownloadPreviewDTO>>))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(List<DownloadMediaDTO> downloadMedias, CancellationToken ct)

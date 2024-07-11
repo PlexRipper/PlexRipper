@@ -2,10 +2,10 @@ using Humanizer.Bytes;
 
 namespace IntegrationTests.BaseTests.Setup;
 
-
 public class SpinUpPlexServer_IntegrationTests : BaseIntegrationTests
 {
-    public SpinUpPlexServer_IntegrationTests(ITestOutputHelper output) : base(output) { }
+    public SpinUpPlexServer_IntegrationTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public void ShouldSpinUpOneMockPlexServer_WhenGivenDefaultSettings()
@@ -48,11 +48,7 @@ public class SpinUpPlexServer_IntegrationTests : BaseIntegrationTests
             Query = "X-Plex-Token=EHRWERHAERHAERH",
         };
 
-        var request = new HttpRequestMessage
-        {
-            RequestUri = urlBuilder.Uri,
-            Method = HttpMethod.Get,
-        };
+        var request = new HttpRequestMessage { RequestUri = urlBuilder.Uri, Method = HttpMethod.Get, };
 
         // Act
         using var response = await SendAsync(request, HttpCompletionOption.ResponseHeadersRead);

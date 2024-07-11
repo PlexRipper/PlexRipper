@@ -33,7 +33,11 @@ public partial class BaseContainer : IDisposable
     /// <summary>
     /// Creates a Autofac container and sets up a test database.
     /// </summary>
-    private BaseContainer(string memoryDbName, Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
+    private BaseContainer(
+        string memoryDbName,
+        Action<UnitTestDataConfig> options = null,
+        MockPlexApi mockPlexApi = null
+    )
     {
         _factory = new PlexRipperWebApplicationFactory(memoryDbName, options, mockPlexApi);
         ApiClient = _factory.CreateDefaultClient();
@@ -46,7 +50,8 @@ public partial class BaseContainer : IDisposable
         ILog log,
         string memoryDbName,
         Action<UnitTestDataConfig> options = null,
-        MockPlexApi mockPlexApi = null)
+        MockPlexApi mockPlexApi = null
+    )
     {
         _log = log;
         var config = UnitTestDataConfig.FromOptions(options);

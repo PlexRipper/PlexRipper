@@ -19,8 +19,10 @@ public static class JsonElementExtentions
             case { } t when t == typeof(ViewMode):
                 return jsonElement.GetString().ToViewMode();
             case { } t when t == typeof(List<PlexServerSettingsModel>):
-                return JsonSerializer.Deserialize<List<PlexServerSettingsModel>>(jsonElement.GetRawText(),
-                    DefaultJsonSerializerOptions.ConfigManagerOptions);
+                return JsonSerializer.Deserialize<List<PlexServerSettingsModel>>(
+                    jsonElement.GetRawText(),
+                    DefaultJsonSerializerOptions.ConfigManagerOptions
+                );
             default:
                 throw new ArgumentException($"Typename {type.FullName} of {type} is not supported when parsing");
         }

@@ -25,7 +25,8 @@ public class DownloadWorkerTask : BaseEntity
         StartByte = startPosition;
         EndByte = endPosition;
         PlexServerId = downloadTask.PlexServerId;
-        FileName = $"{Path.GetFileNameWithoutExtension(downloadTask.FileName)}.part{partIndex}{Path.GetExtension(downloadTask.FileName)}";
+        FileName =
+            $"{Path.GetFileNameWithoutExtension(downloadTask.FileName)}.part{partIndex}{Path.GetExtension(downloadTask.FileName)}";
     }
 
     public DownloadWorkerTask() { }

@@ -59,7 +59,8 @@ public static class LogConfig
             });
         }
 
-        return config.Enrich.With<ExternalFrameworkEnricher>()
+        return config
+            .Enrich.With<ExternalFrameworkEnricher>()
             .WriteTo.Debug(outputTemplate: Template)
             .WriteTo.Console(theme: LogThemes.SystemColored, outputTemplate: Template);
     }
@@ -80,7 +81,8 @@ public static class LogConfig
                     LogEventLevel.Debug,
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true,
-                    retainedFileCountLimit: 7)
+                    retainedFileCountLimit: 7
+                )
                 .MinimumLevel.Is(minimumLogLevel)
                 .CreateLogger();
         }

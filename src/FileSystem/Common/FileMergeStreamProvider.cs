@@ -16,7 +16,12 @@ public class FileMergeStreamProvider : IFileMergeStreamProvider
 
     private const int _bufferSize = 524288;
 
-    public FileMergeStreamProvider(ILog log, IFileSystem fileSystem, INotificationsService notificationsService, IDirectorySystem directorySystem)
+    public FileMergeStreamProvider(
+        ILog log,
+        IFileSystem fileSystem,
+        INotificationsService notificationsService,
+        IDirectorySystem directorySystem
+    )
     {
         _log = log;
         _fileSystem = fileSystem;
@@ -41,7 +46,8 @@ public class FileMergeStreamProvider : IFileMergeStreamProvider
         FileTask fileTask,
         Stream destination,
         Subject<long> bytesReceivedProgress,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         long totalRead = 0;
         foreach (var filePath in fileTask.FilePaths)
@@ -67,7 +73,12 @@ public class FileMergeStreamProvider : IFileMergeStreamProvider
                 }
             }
 
-            _log.Debug("The file at {FilePath} has been merged into the single media file at {DestinationPath}", filePath, fileTask.DestinationFilePath, 0);
+            _log.Debug(
+                "The file at {FilePath} has been merged into the single media file at {DestinationPath}",
+                filePath,
+                fileTask.DestinationFilePath,
+                0
+            );
             _log.Debug("Deleting file {FilePath} since it has been merged already", filePath);
             _fileSystem.DeleteFile(filePath);
         }

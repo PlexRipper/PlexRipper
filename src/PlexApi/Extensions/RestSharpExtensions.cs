@@ -11,13 +11,14 @@ public static class RestSharpExtensions
 {
     #region Properties
 
-    public static JsonSerializerOptions SerializerOptions => new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        PropertyNameCaseInsensitive = true,
-        WriteIndented = true,
-        Converters = { new LongToDateTime() },
-    };
+    public static JsonSerializerOptions SerializerOptions =>
+        new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true,
+            WriteIndented = true,
+            Converters = { new LongToDateTime() },
+        };
 
     #endregion
 
@@ -40,25 +41,35 @@ public static class RestSharpExtensions
         RestRequest request,
         int retryCount = 2,
         Action<PlexApiClientProgress> action = null,
-        CancellationToken cancellationToken = default) where T : class
+        CancellationToken cancellationToken = default
+    )
+        where T : class
     {
         RestResponse<T> response = null;
         var retryIndex = 0;
         var policyResult = Policy
             .HandleResult<RestResponse>(x => !x.IsSuccessful)
-            .WaitAndRetryAsync(retryCount, retryAttempt =>
-            {
-                var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
-                _log.Warning("Request to: {Url} failed, waiting {TotalSeconds} seconds before retrying again ({RetryAttempt} of {RetryCount})",
-                    request.Resource, timeToWait.TotalSeconds, retryAttempt, retryCount);
+            .WaitAndRetryAsync(
+                retryCount,
+                retryAttempt =>
+                {
+                    var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
+                    _log.Warning(
+                        "Request to: {Url} failed, waiting {TotalSeconds} seconds before retrying again ({RetryAttempt} of {RetryCount})",
+                        request.Resource,
+                        timeToWait.TotalSeconds,
+                        retryAttempt,
+                        retryCount
+                    );
 
-                retryIndex = retryAttempt;
+                    retryIndex = retryAttempt;
 
-                // Send update
-                action?.Send(response, retryAttempt, retryCount, (int)timeToWait.TotalSeconds);
+                    // Send update
+                    action?.Send(response, retryAttempt, retryCount, (int)timeToWait.TotalSeconds);
 
-                return timeToWait;
-            });
+                    return timeToWait;
+                }
+            );
 
         var responseResult = await policyResult.ExecuteAndCaptureAsync(async () =>
         {
@@ -79,7 +90,8 @@ public static class RestSharpExtensions
     /// <param name="response"></param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public static Result<T> ToResponseResult<T>(this RestResponse<T> response) where T : class
+    public static Result<T> ToResponseResult<T>(this RestResponse<T> response)
+        where T : class
     {
         // In case of timeout
         if (response.ResponseStatus == ResponseStatus.TimedOut)
@@ -148,7 +160,9 @@ public static class RestSharpExtensions
             var content = response.Content;
             if (!string.IsNullOrEmpty(content))
             {
-                var errorsResponse = JsonSerializer.Deserialize<PlexErrorsResponseDTO>(content, SerializerOptions) ?? new PlexErrorsResponseDTO();
+                var errorsResponse =
+                    JsonSerializer.Deserialize<PlexErrorsResponseDTO>(content, SerializerOptions)
+                    ?? new PlexErrorsResponseDTO();
                 if (errorsResponse.Errors != null && errorsResponse.Errors.Any())
                     result.WithErrors(errorsResponse.ToResultErrors());
             }
@@ -161,28 +175,38 @@ public static class RestSharpExtensions
         return result.LogError();
     }
 
-    private static void Send(this Action<PlexApiClientProgress> action, RestResponse response, int retryAttempt, int retryCount, int timeToWaitSeconds = 0)
+    private static void Send(
+        this Action<PlexApiClientProgress> action,
+        RestResponse response,
+        int retryAttempt,
+        int retryCount,
+        int timeToWaitSeconds = 0
+    )
     {
         var request = response.Request;
         var msg = "Request successful!";
 
         if (!response.IsSuccessful && response.ResponseStatus != ResponseStatus.TimedOut)
-            msg = $"Request to: {request.Resource} failed, waiting {timeToWaitSeconds} seconds before retrying again ({retryAttempt} of {retryCount})";
+            msg =
+                $"Request to: {request.Resource} failed, waiting {timeToWaitSeconds} seconds before retrying again ({retryAttempt} of {retryCount})";
 
         if (!response.IsSuccessful && response.ResponseStatus == ResponseStatus.TimedOut)
-            msg = $"Request to: {request.Resource} timed-out, waiting {timeToWaitSeconds} seconds before retrying again ({retryAttempt} of {retryCount})";
+            msg =
+                $"Request to: {request.Resource} timed-out, waiting {timeToWaitSeconds} seconds before retrying again ({retryAttempt} of {retryCount})";
 
-        action?.Invoke(new PlexApiClientProgress
-        {
-            StatusCode = (int)response.StatusCode,
-            Message = msg,
-            RetryAttemptIndex = retryAttempt,
-            RetryAttemptCount = retryCount,
-            TimeToNextRetry = timeToWaitSeconds,
-            Completed = response.ResponseStatus == ResponseStatus.Completed || retryAttempt == retryCount,
-            ErrorMessage = response.ErrorMessage ?? "",
-            ConnectionSuccessful = response.IsSuccessful,
-        });
+        action?.Invoke(
+            new PlexApiClientProgress
+            {
+                StatusCode = (int)response.StatusCode,
+                Message = msg,
+                RetryAttemptIndex = retryAttempt,
+                RetryAttemptCount = retryCount,
+                TimeToNextRetry = timeToWaitSeconds,
+                Completed = response.ResponseStatus == ResponseStatus.Completed || retryAttempt == retryCount,
+                ErrorMessage = response.ErrorMessage ?? "",
+                ConnectionSuccessful = response.IsSuccessful,
+            }
+        );
     }
 
     #endregion

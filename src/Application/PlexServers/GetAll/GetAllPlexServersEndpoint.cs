@@ -27,20 +27,21 @@ public class GetAllPlexServersEndpoint : BaseEndpointWithoutRequest<List<PlexSer
         Summary(summary =>
         {
             summary.Summary = "Get All the PlexServers, without PlexLibraries but with all its connections.";
-            summary.Description = " Retrieves all the PlexServers, without PlexLibraries but with all its connections currently in the database.";
+            summary.Description =
+                " Retrieves all the PlexServers, without PlexLibraries but with all its connections currently in the database.";
         });
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexServerDTO>>))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexServerDTO>>))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        var plexServers = await _dbContext.PlexServers
-            .IncludeConnectionsWithStatus()
-            .ToListAsync(ct);
+        var plexServers = await _dbContext.PlexServers.IncludeConnectionsWithStatus().ToListAsync(ct);
 
-        plexServers = plexServers.OrderByDescending(x => x.Owned)
+        plexServers = plexServers
+            .OrderByDescending(x => x.Owned)
             .ThenBy(x => x.Name, StringComparison.OrdinalIgnoreCase.WithNaturalSort())
             .ToList();
 

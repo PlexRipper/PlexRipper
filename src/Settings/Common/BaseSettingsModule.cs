@@ -6,7 +6,8 @@ using Settings.Contracts;
 
 namespace PlexRipper.Settings;
 
-public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel> where TModel : class
+public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel>
+    where TModel : class
 {
     #region Fields
 
@@ -73,9 +74,12 @@ public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel> w
             else
             {
                 _log.Warning(
-                    "The userSettings, in module {Name}, was missing property {PropName}. " +
-                    $"Will revert to default value now, this is normal if you just updated PlexRipper as new settings might have been added.", Name, prop.Name,
-                    0);
+                    "The userSettings, in module {Name}, was missing property {PropName}. "
+                        + $"Will revert to default value now, this is normal if you just updated PlexRipper as new settings might have been added.",
+                    Name,
+                    prop.Name,
+                    0
+                );
                 var defaultValue = defaultValues.GetType().GetProperty(prop.Name).GetValue(defaultValues, null);
                 if (defaultValue != targetValue)
                     targetProp.SetValue(this, defaultValue);

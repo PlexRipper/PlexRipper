@@ -8,7 +8,14 @@ namespace PlexRipper.BaseTests;
 
 public static partial class FakeData
 {
-    private static readonly string[] ShortDateFormat = { "MMM dd yyyy", "dd MMM yyyy", "MM/dd/yyyy", "dd/MM/yyyy", "yyyy-MM-dd" };
+    private static readonly string[] ShortDateFormat =
+    {
+        "MMM dd yyyy",
+        "dd MMM yyyy",
+        "MM/dd/yyyy",
+        "dd/MM/yyyy",
+        "yyyy-MM-dd"
+    };
 
     private static readonly string[] LongDateFormat = { "EEEE, MMMM dd, yyyy", "EEEE, dd MMMM yyyy" };
 

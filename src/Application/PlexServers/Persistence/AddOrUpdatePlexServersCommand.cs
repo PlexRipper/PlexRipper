@@ -29,11 +29,10 @@ public class AddOrUpdatePlexServersCommand : IAddOrUpdatePlexServersCommand
         _log.Information("Adding or updating {PlexServersCount} PlexServers now", plexServers.Count);
         foreach (var plexServer in plexServers)
         {
-            var plexServerDB =
-                await _dbContext.PlexServers
-                    .Include(x => x.PlexServerConnections)
-                    .AsTracking()
-                    .FirstOrDefaultAsync(x => x.MachineIdentifier == plexServer.MachineIdentifier, cancellationToken);
+            var plexServerDB = await _dbContext
+                .PlexServers.Include(x => x.PlexServerConnections)
+                .AsTracking()
+                .FirstOrDefaultAsync(x => x.MachineIdentifier == plexServer.MachineIdentifier, cancellationToken);
 
             if (plexServerDB != null)
             {
@@ -53,8 +52,11 @@ public class AddOrUpdatePlexServersCommand : IAddOrUpdatePlexServersCommand
                 foreach (var plexServerConnection in plexServer.PlexServerConnections)
                 {
                     _log.Here()
-                        .Debug("Creating connection {PlexServerConnection} from {PlexServerName} in the database", plexServerConnection.ToString(),
-                            plexServer.Name);
+                        .Debug(
+                            "Creating connection {PlexServerConnection} from {PlexServerName} in the database",
+                            plexServerConnection.ToString(),
+                            plexServer.Name
+                        );
                     plexServerConnection.PlexServerId = plexServer.Id;
                 }
 
@@ -79,16 +81,22 @@ public class AddOrUpdatePlexServersCommand : IAddOrUpdatePlexServersCommand
             {
                 // Creating Connection
                 _log.Here()
-                    .Debug("Creating connection {PlexServerConnection} from {PlexServerName} in the database", plexServerConnection.ToString(),
-                        plexServerDB.Name);
+                    .Debug(
+                        "Creating connection {PlexServerConnection} from {PlexServerName} in the database",
+                        plexServerConnection.ToString(),
+                        plexServerDB.Name
+                    );
                 _dbContext.PlexServerConnections.Add(plexServerConnection);
             }
             else
             {
                 // Updating Connection
                 _log.Here()
-                    .Debug("Updating connection {PlexServerConnection} from {PlexServerName} in the database", plexServerConnection.ToString(),
-                        plexServerDB.Name);
+                    .Debug(
+                        "Updating connection {PlexServerConnection} from {PlexServerName} in the database",
+                        plexServerConnection.ToString(),
+                        plexServerDB.Name
+                    );
                 plexServerConnection.Id = connectionDb.Id;
                 _dbContext.Entry(connectionDb).CurrentValues.SetValues(plexServerConnection);
             }
@@ -102,8 +110,11 @@ public class AddOrUpdatePlexServersCommand : IAddOrUpdatePlexServersCommand
             if (connection is null)
             {
                 _log.Here()
-                    .Debug("Removing connection {PlexServerConnection} from {PlexServerName} in the database", plexServerConnectionDB.ToString(),
-                        plexServerDB.Name);
+                    .Debug(
+                        "Removing connection {PlexServerConnection} from {PlexServerName} in the database",
+                        plexServerConnectionDB.ToString(),
+                        plexServerDB.Name
+                    );
 
                 _dbContext.Entry(plexServerConnectionDB).State = EntityState.Deleted;
             }
@@ -120,7 +131,8 @@ public class AddOrUpdatePlexServersValidator : AbstractValidator<List<PlexServer
             .ChildRules(server =>
             {
                 server.RuleFor(x => x.PlexServerConnections).NotEmpty();
-                server.RuleForEach(x => x.PlexServerConnections)
+                server
+                    .RuleForEach(x => x.PlexServerConnections)
                     .ChildRules(connection =>
                     {
                         connection.RuleFor(x => x.Protocol).NotEmpty();

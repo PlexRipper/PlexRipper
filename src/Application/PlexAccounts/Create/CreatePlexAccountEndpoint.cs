@@ -47,10 +47,11 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
     {
         Post(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status201Created, typeof(ResultDTO<PlexAccountDTO>))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status201Created, typeof(ResultDTO<PlexAccountDTO>))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(CreatePlexAccountEndpointRequest req, CancellationToken ct)
@@ -86,8 +87,8 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
             return;
         }
 
-        var plexAccountDTO = await _dbContext.PlexAccounts
-            .IncludeServerAccess()
+        var plexAccountDTO = await _dbContext
+            .PlexAccounts.IncludeServerAccess()
             .IncludeLibraryAccess()
             .GetAsync(plexAccount.Id, ct);
 

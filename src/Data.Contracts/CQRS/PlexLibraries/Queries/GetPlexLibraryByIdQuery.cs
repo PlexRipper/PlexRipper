@@ -13,7 +13,12 @@ public class GetPlexLibraryByIdQuery : IRequest<Result<PlexLibrary>>
     /// <param name="includePlexServer"></param>
     /// <param name="includeMedia">Include all media, this must be true to use topLevelMediaOnly </param>
     /// <param name="topLevelMediaOnly">Will only retrieve the top level media, movies without movieData, tvShows without seasons and episodes.</param>
-    public GetPlexLibraryByIdQuery(int id, bool includePlexServer = false, bool includeMedia = false, bool topLevelMediaOnly = false)
+    public GetPlexLibraryByIdQuery(
+        int id,
+        bool includePlexServer = false,
+        bool includeMedia = false,
+        bool topLevelMediaOnly = false
+    )
     {
         Id = id;
         IncludePlexServer = includePlexServer;

@@ -14,11 +14,17 @@ public class GetPlexTvShowByIdWithSeasonsQueryValidator : AbstractValidator<GetP
     }
 }
 
-public class GetPlexTvShowByIdWithSeasonsQueryHandler : BaseHandler, IRequestHandler<GetPlexTvShowByIdWithSeasonsQuery, Result<PlexTvShow>>
+public class GetPlexTvShowByIdWithSeasonsQueryHandler
+    : BaseHandler,
+        IRequestHandler<GetPlexTvShowByIdWithSeasonsQuery, Result<PlexTvShow>>
 {
-    public GetPlexTvShowByIdWithSeasonsQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public GetPlexTvShowByIdWithSeasonsQueryHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
-    public async Task<Result<PlexTvShow>> Handle(GetPlexTvShowByIdWithSeasonsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PlexTvShow>> Handle(
+        GetPlexTvShowByIdWithSeasonsQuery request,
+        CancellationToken cancellationToken
+    )
     {
         var query = PlexTvShowsQueryable.IncludeSeasons();
 

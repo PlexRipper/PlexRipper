@@ -103,10 +103,7 @@ public static partial class FakeData
 
     #region Movie
 
-    public static Faker<DownloadTaskMovie> GetMovieDownloadTask(
-        int seed = 0,
-        Action<FakeDataConfig> options = null
-    )
+    public static Faker<DownloadTaskMovie> GetMovieDownloadTask(int seed = 0, Action<FakeDataConfig> options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
@@ -135,8 +132,7 @@ public static partial class FakeData
                     movie.Children.ForEach(movieFile =>
                     {
                         movieFile.Title = $"{movieFile.Title} {movieIndex++}";
-                        movieFile.FullTitle =
-                            $"{movie.FullTitle}/{movieIndex}-{movieFile.FileName}";
+                        movieFile.FullTitle = $"{movie.FullTitle}/{movieIndex}-{movieFile.FileName}";
                         movieFile.DirectoryMeta.MovieFolder = movie.Title;
                     });
                 }
@@ -169,10 +165,7 @@ public static partial class FakeData
 
     #region TvShow
 
-    public static Faker<DownloadTaskTvShow> GetDownloadTaskTvShow(
-        int seed = 0,
-        Action<FakeDataConfig> options = null
-    )
+    public static Faker<DownloadTaskTvShow> GetDownloadTaskTvShow(int seed = 0, Action<FakeDataConfig> options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
@@ -289,10 +282,7 @@ public static partial class FakeData
             .RuleFor(x => x.FullTitle, _ => "Episode")
             .RuleFor(x => x.MediaType, PlexMediaType.Episode)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Episode)
-            .RuleFor(
-                x => x.Children,
-                _ => GetDownloadTaskTvShowEpisodeFile(seed, options).Generate(1)
-            )
+            .RuleFor(x => x.Children, _ => GetDownloadTaskTvShowEpisodeFile(seed, options).Generate(1))
             .FinishWith(
                 (_, episode) =>
                 {
@@ -334,10 +324,7 @@ public static partial class FakeData
 
     #region DownloadWorkerTasks
 
-    public static Faker<DownloadWorkerTask> GetDownloadWorkerTask(
-        int seed = 0,
-        Action<FakeDataConfig> options = null
-    )
+    public static Faker<DownloadWorkerTask> GetDownloadWorkerTask(int seed = 0, Action<FakeDataConfig> options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 

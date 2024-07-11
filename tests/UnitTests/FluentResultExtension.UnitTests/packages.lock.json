@@ -8,6 +8,12 @@
         "resolved": "6.0.2",
         "contentHash": "bJShQ6uWRTQ100ZeyiMqcFlhP7WJ+bCuabUs885dJiBEzMsJMSFr7BOyeCw4rgvQokteGi5rKQTlkhfQPUXg2A=="
       },
+      "CSharpier.MsBuild": {
+        "type": "Direct",
+        "requested": "[0.28.2, )",
+        "resolved": "0.28.2",
+        "contentHash": "eMPtBF9ECE5sMBXX6fZw/phFZ9UeV62E43z78VPKIgCJMppojxDc03RD6ROpPgk8Vvde11vkcZf69NveW/T1rg=="
+      },
       "Microsoft.AspNetCore.SpaServices.Extensions": {
         "type": "Direct",
         "requested": "[8.0.3, )",

@@ -109,12 +109,22 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
     /// </summary>
     public bool HasBeenSetup { get; set; }
 
-    public async Task BulkInsertAsync<T>(IList<T> entities, BulkConfig bulkConfig = null, CancellationToken cancellationToken = default) where T : class
+    public async Task BulkInsertAsync<T>(
+        IList<T> entities,
+        BulkConfig bulkConfig = null,
+        CancellationToken cancellationToken = default
+    )
+        where T : class
     {
         await DbContextBulkExtensions.BulkInsertAsync(this, entities, bulkConfig, cancellationToken: cancellationToken);
     }
 
-    public async Task BulkUpdateAsync<T>(IList<T> entities, BulkConfig bulkConfig = null, CancellationToken cancellationToken = default) where T : class
+    public async Task BulkUpdateAsync<T>(
+        IList<T> entities,
+        BulkConfig bulkConfig = null,
+        CancellationToken cancellationToken = default
+    )
+        where T : class
     {
         await DbContextBulkExtensions.BulkUpdateAsync(this, entities, bulkConfig, cancellationToken: cancellationToken);
     }
@@ -135,7 +145,8 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
         ConfigDirectory = _pathProvider.ConfigDirectory;
     }
 
-    public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options, string databaseName = "") : base(options)
+    public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options, string databaseName = "")
+        : base(options)
     {
         DatabaseName = databaseName;
         Database.OpenConnection();
@@ -152,12 +163,18 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
         {
             // Source: https://github.com/tompazourek/NaturalSort.Extension
             SqliteConnection databaseConnection = new(PathProvider.DatabaseConnectionString);
-            databaseConnection.CreateCollation(OrderByNaturalExtensions.CollationName, (x, y) => NaturalComparer.Compare(x, y));
+            databaseConnection.CreateCollation(
+                OrderByNaturalExtensions.CollationName,
+                (x, y) => NaturalComparer.Compare(x, y)
+            );
 
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             optionsBuilder.LogTo(text => LogManager.DbContextLogger(text), LogLevel.Error);
             optionsBuilder.EnableDetailedErrors();
-            optionsBuilder.UseSqlite(databaseConnection, b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
+            optionsBuilder.UseSqlite(
+                databaseConnection,
+                b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName)
+            );
         }
     }
 
@@ -170,21 +187,13 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
 
         // NOTE: This has been added to PlexRipperDbContext.OnModelCreating
         // Based on: https://stackoverflow.com/a/63992731/8205497
-        builder.Entity<PlexMovie>()
-            .Property(x => x.MediaData)
-            .HasJsonValueConversion();
+        builder.Entity<PlexMovie>().Property(x => x.MediaData).HasJsonValueConversion();
 
-        builder.Entity<PlexTvShow>()
-            .Property(x => x.MediaData)
-            .HasJsonValueConversion();
+        builder.Entity<PlexTvShow>().Property(x => x.MediaData).HasJsonValueConversion();
 
-        builder.Entity<PlexTvShowSeason>()
-            .Property(x => x.MediaData)
-            .HasJsonValueConversion();
+        builder.Entity<PlexTvShowSeason>().Property(x => x.MediaData).HasJsonValueConversion();
 
-        builder.Entity<PlexTvShowEpisode>()
-            .Property(x => x.MediaData)
-            .HasJsonValueConversion();
+        builder.Entity<PlexTvShowEpisode>().Property(x => x.MediaData).HasJsonValueConversion();
 
         builder = PlexRipperDBContextSeed.SeedDatabase(builder);
 
@@ -263,7 +272,9 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
             Directory.CreateDirectory(dbBackUpPath);
 
             // Wait until the database is available.
-            StreamExtensions.WaitForFile(_pathProvider.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)?.Dispose();
+            StreamExtensions
+                .WaitForFile(_pathProvider.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)
+                ?.Dispose();
 
             foreach (var databaseFilePath in _pathProvider.DatabaseFiles)
             {
@@ -274,12 +285,20 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
                     {
                         File.Copy(databaseFilePath, destinationPath);
                         _log.Here()
-                            .Information("Successfully copied \"{DatabaseFilePath}\" to back-up location\"{DestinationPath}\"", databaseFilePath,
-                                destinationPath);
+                            .Information(
+                                "Successfully copied \"{DatabaseFilePath}\" to back-up location\"{DestinationPath}\"",
+                                databaseFilePath,
+                                destinationPath
+                            );
                     }
                     catch (Exception e)
                     {
-                        _log.Here().Error("Failed to copy {DatabaseFilePath} to back-up location {DestinationPath}", databaseFilePath, destinationPath);
+                        _log.Here()
+                            .Error(
+                                "Failed to copy {DatabaseFilePath} to back-up location {DestinationPath}",
+                                databaseFilePath,
+                                destinationPath
+                            );
                         _log.Error(e);
                     }
 

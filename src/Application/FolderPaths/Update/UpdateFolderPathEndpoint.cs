@@ -48,10 +48,7 @@ public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointReq
         );
     }
 
-    public override async Task HandleAsync(
-        UpdateFolderPathEndpointRequest req,
-        CancellationToken ct
-    )
+    public override async Task HandleAsync(UpdateFolderPathEndpointRequest req, CancellationToken ct)
     {
         // TODO Should prevent updating reserved folder paths with id < 10
         var folderPath = req.FolderPathDto.ToModel();
@@ -61,10 +58,7 @@ public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointReq
 
         if (folderPathDb is null)
         {
-            await SendFluentResult(
-                ResultExtensions.EntityNotFound(nameof(FolderPath), folderPath.Id),
-                ct
-            );
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(FolderPath), folderPath.Id), ct);
             return;
         }
 

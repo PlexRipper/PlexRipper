@@ -22,8 +22,7 @@ public class GetPlexLibraryMediaEndpointRequest
     public int Size { get; init; }
 }
 
-public class GetPlexLibraryMediaEndpointRequestValidator
-    : Validator<GetPlexLibraryMediaEndpointRequest>
+public class GetPlexLibraryMediaEndpointRequestValidator : Validator<GetPlexLibraryMediaEndpointRequest>
 {
     public GetPlexLibraryMediaEndpointRequestValidator()
     {
@@ -31,13 +30,11 @@ public class GetPlexLibraryMediaEndpointRequestValidator
     }
 }
 
-public class GetPlexLibraryMediaEndpoint
-    : BaseEndpoint<GetPlexLibraryMediaEndpointRequest, List<PlexMediaSlimDTO>>
+public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpointRequest, List<PlexMediaSlimDTO>>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
-    public override string EndpointPath =>
-        ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/media";
+    public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/media";
 
     public GetPlexLibraryMediaEndpoint(IPlexRipperDbContext dbContext)
     {
@@ -56,10 +53,7 @@ public class GetPlexLibraryMediaEndpoint
         );
     }
 
-    public override async Task HandleAsync(
-        GetPlexLibraryMediaEndpointRequest req,
-        CancellationToken ct
-    )
+    public override async Task HandleAsync(GetPlexLibraryMediaEndpointRequest req, CancellationToken ct)
     {
         var plexLibrary = await _dbContext
             .PlexLibraries.AsNoTracking()
@@ -67,10 +61,7 @@ public class GetPlexLibraryMediaEndpoint
             .GetAsync(req.PlexLibraryId, ct);
         if (plexLibrary is null)
         {
-            await SendFluentResult(
-                ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId),
-                ct
-            );
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexLibrary), req.PlexLibraryId), ct);
             return;
         }
 
@@ -105,10 +96,7 @@ public class GetPlexLibraryMediaEndpoint
                 foreach (var plexMovie in plexMovies)
                 {
                     if (plexMovie.HasThumb)
-                        plexMovie.SetFullThumbnailUrl(
-                            plexServerConnection.Value.Url,
-                            plexServerToken.Value
-                        );
+                        plexMovie.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value);
                     entities.Add(plexMovie.ToSlimDTO());
                 }
 
@@ -127,10 +115,7 @@ public class GetPlexLibraryMediaEndpoint
                 foreach (var tvShow in plexTvShow)
                 {
                     if (tvShow.HasThumb)
-                        tvShow.SetFullThumbnailUrl(
-                            plexServerConnection.Value.Url,
-                            plexServerToken.Value
-                        );
+                        tvShow.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value);
                     entities.Add(tvShow.ToSlimDTO());
                 }
 

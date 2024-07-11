@@ -9,19 +9,22 @@ public static partial class DbContextExtensions
     public static async Task<Result<List<PlexAccount>>> GetPlexAccountsWithAccessAsync(
         this IPlexRipperDbContext dbContext,
         int plexServerId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         if (plexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId).LogError();
 
-        var query = await dbContext.PlexAccountServers
-            .Include(x => x.PlexAccount)
+        var query = await dbContext
+            .PlexAccountServers.Include(x => x.PlexAccount)
             .Where(x => x.PlexServerId == plexServerId)
             .Select(x => x.PlexAccount)
             .ToListAsync(cancellationToken);
 
         if (!query.Any())
-            return Result.Fail($"There were no PlexAccounts that have access to PlexServer with id: {plexServerId}").LogError();
+            return Result
+                .Fail($"There were no PlexAccounts that have access to PlexServer with id: {plexServerId}")
+                .LogError();
 
         return Result.Ok(query);
     }
@@ -29,7 +32,8 @@ public static partial class DbContextExtensions
     public static async Task<Result<PlexAccount>> ChoosePlexAccountToConnect(
         this IPlexRipperDbContext dbContext,
         int plexServerId,
-        CancellationToken ct = default)
+        CancellationToken ct = default
+    )
     {
         if (plexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId);
@@ -40,7 +44,9 @@ public static partial class DbContextExtensions
 
         var plexAccounts = plexAccountsResult.Value.FindAll(x => x.IsEnabled);
         if (!plexAccounts.Any())
-            return Result.Fail($"There are no enabled accounts that can access PlexServer with id: {plexServerId}").LogError();
+            return Result
+                .Fail($"There are no enabled accounts that can access PlexServer with id: {plexServerId}")
+                .LogError();
 
         if (plexAccounts.Count == 1)
             return Result.Ok(plexAccounts.First());
@@ -60,9 +66,11 @@ public static partial class DbContextExtensions
     public static async Task<Result<List<PlexServer>>> GetAccessiblePlexServers(
         this IPlexRipperDbContext dbContext,
         int plexAccountId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
-        var plexAccount = await dbContext.PlexAccounts.AsNoTracking()
+        var plexAccount = await dbContext
+            .PlexAccounts.AsNoTracking()
             .Include(x => x.PlexAccountServers)
             .ThenInclude(x => x.PlexServer)
             .FirstOrDefaultAsync(x => x.Id == plexAccountId, cancellationToken);
@@ -76,9 +84,13 @@ public static partial class DbContextExtensions
     public static async Task<bool> IsUsernameAvailable(
         this IPlexRipperDbContext dbContext,
         string username,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
-        var plexAccount = await dbContext.PlexAccounts.FirstOrDefaultAsync(x => x.Username == username, cancellationToken);
+        var plexAccount = await dbContext.PlexAccounts.FirstOrDefaultAsync(
+            x => x.Username == username,
+            cancellationToken
+        );
         return plexAccount == null;
     }
 }

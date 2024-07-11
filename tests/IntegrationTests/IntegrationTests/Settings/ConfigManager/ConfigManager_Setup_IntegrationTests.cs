@@ -3,10 +3,10 @@ using PlexRipper.Settings.Modules;
 
 namespace IntegrationTests.Settings.ConfigManager;
 
-
 public class ConfigManager_Setup_IntegrationTests : BaseIntegrationTests
 {
-    public ConfigManager_Setup_IntegrationTests(ITestOutputHelper output) : base(output) { }
+    public ConfigManager_Setup_IntegrationTests(ITestOutputHelper output)
+        : base(output) { }
 
     private UserSettings CreateUserSettings()
     {
@@ -19,7 +19,8 @@ public class ConfigManager_Setup_IntegrationTests : BaseIntegrationTests
             new GeneralSettingsModule(),
             new DebugSettingsModule(),
             new LanguageSettingsModule(),
-            new ServerSettingsModule());
+            new ServerSettingsModule()
+        );
     }
 
     // [Fact]

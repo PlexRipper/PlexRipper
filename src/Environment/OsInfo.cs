@@ -28,9 +28,13 @@ public static class OsInfo
             case PlatformID.Unix:
             {
                 // Sometimes Mac OS reports itself as Unix
-                if (Directory.Exists("/System/Library/CoreServices/") &&
-                    (File.Exists("/System/Library/CoreServices/SystemVersion.plist") ||
-                     File.Exists("/System/Library/CoreServices/ServerVersion.plist")))
+                if (
+                    Directory.Exists("/System/Library/CoreServices/")
+                    && (
+                        File.Exists("/System/Library/CoreServices/SystemVersion.plist")
+                        || File.Exists("/System/Library/CoreServices/ServerVersion.plist")
+                    )
+                )
                     CurrentOS = OperatingSystemPlatform.Osx;
                 else
                     CurrentOS = OperatingSystemPlatform.Linux;

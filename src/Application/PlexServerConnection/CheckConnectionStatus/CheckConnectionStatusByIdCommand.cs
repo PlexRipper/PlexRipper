@@ -17,7 +17,8 @@ public class CheckConnectionStatusByIdCommandValidator : AbstractValidator<Check
     }
 }
 
-public class CheckConnectionStatusByIdCommandHandler : IRequestHandler<CheckConnectionStatusByIdCommand, Result<PlexServerStatus>>
+public class CheckConnectionStatusByIdCommandHandler
+    : IRequestHandler<CheckConnectionStatusByIdCommand, Result<PlexServerStatus>>
 {
     private readonly ILog _log;
     private readonly ISignalRService _signalRService;
@@ -29,7 +30,8 @@ public class CheckConnectionStatusByIdCommandHandler : IRequestHandler<CheckConn
         ILog log,
         IPlexRipperDbContext dbContext,
         ISignalRService signalRService,
-        IPlexApiService plexApiService)
+        IPlexApiService plexApiService
+    )
     {
         _log = log;
         _dbContext = dbContext;
@@ -37,9 +39,15 @@ public class CheckConnectionStatusByIdCommandHandler : IRequestHandler<CheckConn
         _plexApiService = plexApiService;
     }
 
-    public async Task<Result<PlexServerStatus>> Handle(CheckConnectionStatusByIdCommand command, CancellationToken cancellationToken)
+    public async Task<Result<PlexServerStatus>> Handle(
+        CheckConnectionStatusByIdCommand command,
+        CancellationToken cancellationToken
+    )
     {
-        _plexServerConnection = await _dbContext.PlexServerConnections.GetAsync(command.PlexServerConnectionId, cancellationToken);
+        _plexServerConnection = await _dbContext.PlexServerConnections.GetAsync(
+            command.PlexServerConnectionId,
+            cancellationToken
+        );
 
         // Request status
         var serverStatusResult = await _plexApiService.GetPlexServerStatusAsync(command.PlexServerConnectionId, Action);
@@ -67,8 +75,11 @@ public class CheckConnectionStatusByIdCommandHandler : IRequestHandler<CheckConn
 
     private async Task CreateStatus(PlexServerStatus plexServerStatus, CancellationToken cancellationToken)
     {
-        _log.Debug("Creating a new PlexServerStatus {@PlexServerStatus} in the database for {ServerId} ", plexServerStatus,
-            plexServerStatus.PlexServerId);
+        _log.Debug(
+            "Creating a new PlexServerStatus {@PlexServerStatus} in the database for {ServerId} ",
+            plexServerStatus,
+            plexServerStatus.PlexServerId
+        );
 
         plexServerStatus.PlexServer = null;
         plexServerStatus.PlexServerConnection = null;
@@ -83,8 +94,7 @@ public class CheckConnectionStatusByIdCommandHandler : IRequestHandler<CheckConn
             return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId);
 
         var serverStatusList = await _dbContext
-            .PlexServerStatuses
-            .AsTracking()
+            .PlexServerStatuses.AsTracking()
             .Where(x => x.PlexServerId == plexServerId)
             .ToListAsync(cancellationToken);
 

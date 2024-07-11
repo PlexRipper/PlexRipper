@@ -9,7 +9,8 @@ namespace Settings.UnitTests;
 
 public class ConfigManager_ResetConfig_UnitTests : BaseUnitTest<ConfigManager>
 {
-    public ConfigManager_ResetConfig_UnitTests(ITestOutputHelper output) : base(output) { }
+    public ConfigManager_ResetConfig_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public void ShouldReturnOkResult_WhenSettingsAreReset()
@@ -24,7 +25,8 @@ public class ConfigManager_ResetConfig_UnitTests : BaseUnitTest<ConfigManager>
             mock.Container.Resolve<IFileSystem>(),
             mock.Container.Resolve<IDirectorySystem>(),
             mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>());
+            mock.Container.Resolve<IUserSettings>()
+        );
         sut.Setup(x => x.SaveConfig()).Returns(Result.Ok);
 
         // Since ResetConfig is virtual we need to callBase here

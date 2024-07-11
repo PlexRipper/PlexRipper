@@ -7,7 +7,8 @@ namespace Settings.UnitTests.Modules;
 
 public class ConfirmationSettingsModule_SetFromJson_UnitTests : BaseUnitTest<ConfirmationSettingsModule>
 {
-    public ConfirmationSettingsModule_SetFromJson_UnitTests(ITestOutputHelper output) : base(output) { }
+    public ConfirmationSettingsModule_SetFromJson_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public void ShouldSetPropertiesFromJson_WhenValidJsonSettingsAreGiven()
@@ -24,7 +25,10 @@ public class ConfirmationSettingsModule_SetFromJson_UnitTests : BaseUnitTest<Con
             },
         };
         var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
-        var loadedSettings = JsonSerializer.Deserialize<JsonElement>(json, DefaultJsonSerializerOptions.ConfigCaptialized);
+        var loadedSettings = JsonSerializer.Deserialize<JsonElement>(
+            json,
+            DefaultJsonSerializerOptions.ConfigCaptialized
+        );
 
         // Act
         var result = _sut.SetFromJson(loadedSettings);
@@ -55,7 +59,10 @@ public class ConfirmationSettingsModule_SetFromJson_UnitTests : BaseUnitTest<Con
 
         // ** Remove property to make corrupted
         json = json.Replace("AskDownloadMovieConfirmation\":true,\"", "");
-        var loadedSettings = JsonSerializer.Deserialize<JsonElement>(json, DefaultJsonSerializerOptions.ConfigCaptialized);
+        var loadedSettings = JsonSerializer.Deserialize<JsonElement>(
+            json,
+            DefaultJsonSerializerOptions.ConfigCaptialized
+        );
 
         // Act
         var result = _sut.SetFromJson(loadedSettings);

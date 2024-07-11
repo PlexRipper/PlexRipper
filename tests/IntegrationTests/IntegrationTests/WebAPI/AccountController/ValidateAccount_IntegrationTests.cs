@@ -7,13 +7,17 @@ namespace IntegrationTests.WebAPI.AccountController;
 
 public class ValidateAccount_IntegrationTests : BaseIntegrationTests
 {
-    public ValidateAccount_IntegrationTests(ITestOutputHelper output) : base(output) { }
+    public ValidateAccount_IntegrationTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldValidatePlexAccount_WhenGivenValidCredentials()
     {
         // Arrange
-        SetupMockPlexApi(apiConfig => { apiConfig.SignInResponseIsValid = true; });
+        SetupMockPlexApi(apiConfig =>
+        {
+            apiConfig.SignInResponseIsValid = true;
+        });
 
         await CreateContainer();
 
@@ -21,7 +25,11 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
         var plexAccountDTO = plexAccount.ToDTO();
 
         // Act
-        var response = await Container.ApiClient.POSTAsync<ValidatePlexAccountEndpoint, PlexAccountDTO, ResultDTO<PlexAccountDTO>>(plexAccountDTO);
+        var response = await Container.ApiClient.POSTAsync<
+            ValidatePlexAccountEndpoint,
+            PlexAccountDTO,
+            ResultDTO<PlexAccountDTO>
+        >(plexAccountDTO);
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
         var result = response.Result;
 
@@ -34,14 +42,20 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
     {
         // Arrange
         Seed = 4347564;
-        SetupMockPlexApi(apiConfig => { apiConfig.SignInResponseIsValid = false; });
+        SetupMockPlexApi(apiConfig =>
+        {
+            apiConfig.SignInResponseIsValid = false;
+        });
         await CreateContainer();
 
         var plexAccount = FakeData.GetPlexAccount(4347564).Generate();
         var plexAccountDTO = plexAccount.ToDTO();
 
         // Act
-        var response = await Container.ApiClient.PostAsJsonAsync(ApiRoutes.PlexAccountController + "/validate", plexAccountDTO);
+        var response = await Container.ApiClient.PostAsJsonAsync(
+            ApiRoutes.PlexAccountController + "/validate",
+            plexAccountDTO
+        );
         var resultDTO = await response.Deserialize<PlexAccountDTO>();
         var result = resultDTO.ToResultModel();
 

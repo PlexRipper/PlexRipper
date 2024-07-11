@@ -14,7 +14,8 @@ namespace PlexRipper.Application;
 /// <param name="FolderPathId">The id of the <see cref="FolderPath"/> to set as the default destination.</param>
 public record SetPlexLibraryDefaultDestinationByIdEndpointRequest(int PlexLibraryId, int FolderPathId);
 
-public class SetPlexLibraryDefaultDestinationByIdEndpointRequestValidator : Validator<SetPlexLibraryDefaultDestinationByIdEndpointRequest>
+public class SetPlexLibraryDefaultDestinationByIdEndpointRequestValidator
+    : Validator<SetPlexLibraryDefaultDestinationByIdEndpointRequest>
 {
     public SetPlexLibraryDefaultDestinationByIdEndpointRequestValidator()
     {
@@ -23,11 +24,13 @@ public class SetPlexLibraryDefaultDestinationByIdEndpointRequestValidator : Vali
     }
 }
 
-public class SetPlexLibraryDefaultDestinationByIdEndpoint : BaseEndpoint<SetPlexLibraryDefaultDestinationByIdEndpointRequest, ResultDTO>
+public class SetPlexLibraryDefaultDestinationByIdEndpoint
+    : BaseEndpoint<SetPlexLibraryDefaultDestinationByIdEndpointRequest, ResultDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
-    public override string EndpointPath => ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/default/destination/{FolderPathId}";
+    public override string EndpointPath =>
+        ApiRoutes.PlexLibraryController + "/{PlexLibraryId}/default/destination/{FolderPathId}";
 
     public SetPlexLibraryDefaultDestinationByIdEndpoint(IPlexRipperDbContext dbContext)
     {
@@ -38,18 +41,28 @@ public class SetPlexLibraryDefaultDestinationByIdEndpoint : BaseEndpoint<SetPlex
     {
         Put(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
-    public override async Task HandleAsync(SetPlexLibraryDefaultDestinationByIdEndpointRequest req, CancellationToken ct)
+    public override async Task HandleAsync(
+        SetPlexLibraryDefaultDestinationByIdEndpointRequest req,
+        CancellationToken ct
+    )
     {
-        var plexLibraryDb = await _dbContext.PlexLibraries.Where(x => x.Id == req.PlexLibraryId)
+        var plexLibraryDb = await _dbContext
+            .PlexLibraries.Where(x => x.Id == req.PlexLibraryId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.DefaultDestinationId, req.FolderPathId), ct);
 
         if (plexLibraryDb == 0)
-            await SendFluentResult(Result.Fail($"No library found with id {req.PlexLibraryId} that could have its default folder destination updated"), ct);
+            await SendFluentResult(
+                Result.Fail(
+                    $"No library found with id {req.PlexLibraryId} that could have its default folder destination updated"
+                ),
+                ct
+            );
         else
             await SendFluentResult(Result.Ok(), ct);
     }

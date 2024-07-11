@@ -17,8 +17,7 @@ public static class FolderPathMapper
             IsValid = folderPaths.IsValid,
         };
 
-    public static List<FolderPathDTO> ToDTO(this List<FolderPath> folderPaths) =>
-        folderPaths.ConvertAll(ToDTO);
+    public static List<FolderPathDTO> ToDTO(this List<FolderPath> folderPaths) => folderPaths.ConvertAll(ToDTO);
 
     #endregion
 

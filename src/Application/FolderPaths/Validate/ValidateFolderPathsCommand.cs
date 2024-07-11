@@ -36,7 +36,9 @@ public class ValidateFolderPathsHandler : IRequestHandler<ValidateFolderPathsCom
         if (command.MediaType is PlexMediaType.None or PlexMediaType.Unknown)
             folderPaths = await _dbContext.FolderPaths.ToListAsync(cancellationToken);
         else
-            folderPaths = await _dbContext.FolderPaths.Where(x => x.MediaType == command.MediaType).ToListAsync(cancellationToken);
+            folderPaths = await _dbContext
+                .FolderPaths.Where(x => x.MediaType == command.MediaType)
+                .ToListAsync(cancellationToken);
 
         var errors = new List<IError>();
         foreach (var folderPath in folderPaths)

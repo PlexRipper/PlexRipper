@@ -71,8 +71,11 @@ public class BaseIntegrationTests : IAsyncLifetime
         if (Container is not null)
         {
             _log.Here()
-                .Error("{NameOfCreateContainer}() has already been called, cannot {NameOfSetupMockPlexApi}()", nameof(CreateContainer),
-                    nameof(SetupMockPlexApi));
+                .Error(
+                    "{NameOfCreateContainer}() has already been called, cannot {NameOfSetupMockPlexApi}()",
+                    nameof(CreateContainer),
+                    nameof(SetupMockPlexApi)
+                );
 
             // throw new Exception(msg);
         }
@@ -131,7 +134,8 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage httpRequestMessage,
-        HttpCompletionOption option = HttpCompletionOption.ResponseContentRead)
+        HttpCompletionOption option = HttpCompletionOption.ResponseContentRead
+    )
     {
         _client = _mockPlexApi is not null ? _mockPlexApi.CreateClient() : new HttpClient();
         try

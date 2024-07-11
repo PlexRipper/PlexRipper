@@ -4,7 +4,8 @@ namespace BaseTests.UnitTests.Data;
 
 public class InMemoryDatabase_UnitTests : BaseUnitTest
 {
-    public InMemoryDatabase_UnitTests(ITestOutputHelper output) : base(output) { }
+    public InMemoryDatabase_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldAddNotificationToInMemoryDatabase_WhenNotificationIsAdded()

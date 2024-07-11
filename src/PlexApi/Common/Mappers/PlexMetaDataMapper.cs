@@ -25,18 +25,15 @@ public static partial class PlexMetaDataMapper
     {
         var plexTvShowSeason = source.ToPlexMedia().ToPlexTvShowSeason();
         plexTvShowSeason.FullTitle = $"{source.ParentTitle}/{source.Title}";
-        plexTvShowSeason.ParentKey =
-            source.ParentRatingKey != null ? int.Parse(source.ParentRatingKey) : -1;
+        plexTvShowSeason.ParentKey = source.ParentRatingKey != null ? int.Parse(source.ParentRatingKey) : -1;
         return plexTvShowSeason;
     }
 
     public static PlexTvShowEpisode ToPlexTvShowEpisode(this Metadata source)
     {
         var plexTvShowSeason = source.ToPlexMedia().ToPlexTvShowEpisode();
-        plexTvShowSeason.FullTitle =
-            $"{source.GrandparentTitle}/{source.ParentTitle}/{source.Title}";
-        plexTvShowSeason.ParentKey =
-            source.ParentRatingKey != null ? int.Parse(source.ParentRatingKey) : -1;
+        plexTvShowSeason.FullTitle = $"{source.GrandparentTitle}/{source.ParentTitle}/{source.Title}";
+        plexTvShowSeason.ParentKey = source.ParentRatingKey != null ? int.Parse(source.ParentRatingKey) : -1;
         return plexTvShowSeason;
     }
 
@@ -82,11 +79,9 @@ public static partial class PlexMetaDataMapper
 
     #region List Conversions
 
-    public static List<PlexMovie> ToPlexMovies(this List<Metadata> source) =>
-        source.ConvertAll(ToPlexMovie);
+    public static List<PlexMovie> ToPlexMovies(this List<Metadata> source) => source.ConvertAll(ToPlexMovie);
 
-    public static List<PlexTvShow> ToPlexTvShows(this List<Metadata> source) =>
-        source.ConvertAll(ToPlexTvShow);
+    public static List<PlexTvShow> ToPlexTvShows(this List<Metadata> source) => source.ConvertAll(ToPlexTvShow);
 
     public static List<PlexTvShowSeason> ToPlexTvShowSeasons(this List<Metadata> source) =>
         source.ConvertAll(ToPlexTvShowSeason);

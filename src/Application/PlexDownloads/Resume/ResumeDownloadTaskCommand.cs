@@ -27,7 +27,12 @@ public class ResumeDownloadTaskCommandHandler : IRequestHandler<ResumeDownloadTa
     private readonly IMediator _mediator;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
-    public ResumeDownloadTaskCommandHandler(ILog log, IPlexRipperDbContext dbContext, IMediator mediator, IDownloadTaskScheduler downloadTaskScheduler)
+    public ResumeDownloadTaskCommandHandler(
+        ILog log,
+        IPlexRipperDbContext dbContext,
+        IMediator mediator,
+        IDownloadTaskScheduler downloadTaskScheduler
+    )
     {
         _log = log;
         _dbContext = dbContext;
@@ -37,7 +42,10 @@ public class ResumeDownloadTaskCommandHandler : IRequestHandler<ResumeDownloadTa
 
     public async Task<Result> Handle(ResumeDownloadTaskCommand command, CancellationToken cancellationToken)
     {
-        var downloadTask = await _dbContext.GetDownloadTaskAsync(command.DownloadTaskId, cancellationToken: cancellationToken);
+        var downloadTask = await _dbContext.GetDownloadTaskAsync(
+            command.DownloadTaskId,
+            cancellationToken: cancellationToken
+        );
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), command.DownloadTaskId).LogError();
 
@@ -48,7 +56,11 @@ public class ResumeDownloadTaskCommandHandler : IRequestHandler<ResumeDownloadTa
             if (plexServer is null)
                 return ResultExtensions.EntityNotFound(nameof(PlexServer), downloadTask.PlexServerId).LogError();
 
-            return Result.Fail($"PlexServer {plexServer.Name} already has a DownloadTask downloading so another one cannot be started").LogWarning();
+            return Result
+                .Fail(
+                    $"PlexServer {plexServer.Name} already has a DownloadTask downloading so another one cannot be started"
+                )
+                .LogWarning();
         }
 
         // TODO This here should pause other download tasks from the same server and start this one

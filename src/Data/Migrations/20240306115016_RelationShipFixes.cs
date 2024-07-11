@@ -13,74 +13,69 @@ namespace PlexRipper.Data.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTaskMovieFile_FolderPaths_DestinationFolderId",
-                table: "DownloadTaskMovieFile");
+                table: "DownloadTaskMovieFile"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTaskMovieFile_FolderPaths_DownloadFolderId",
-                table: "DownloadTaskMovieFile");
+                table: "DownloadTaskMovieFile"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTaskTvShowEpisodeFile_FolderPaths_DestinationFolderId",
-                table: "DownloadTaskTvShowEpisodeFile");
+                table: "DownloadTaskTvShowEpisodeFile"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTaskTvShowEpisodeFile_FolderPaths_DownloadFolderId",
-                table: "DownloadTaskTvShowEpisodeFile");
+                table: "DownloadTaskTvShowEpisodeFile"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadWorkerTasks_DownloadTasks_DownloadTaskId",
-                table: "DownloadWorkerTasks");
+                table: "DownloadWorkerTasks"
+            );
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_FileTasks_DownloadTasks_DownloadTaskId",
-                table: "FileTasks");
+            migrationBuilder.DropForeignKey(name: "FK_FileTasks_DownloadTasks_DownloadTaskId", table: "FileTasks");
 
-            migrationBuilder.DropTable(
-                name: "DownloadTasks");
+            migrationBuilder.DropTable(name: "DownloadTasks");
 
-            migrationBuilder.DropIndex(
-                name: "IX_FileTasks_DownloadTaskId",
-                table: "FileTasks");
+            migrationBuilder.DropIndex(name: "IX_FileTasks_DownloadTaskId", table: "FileTasks");
 
             migrationBuilder.DropIndex(
                 name: "IX_DownloadWorkerTasks_DownloadTaskFileBaseId",
-                table: "DownloadWorkerTasks");
+                table: "DownloadWorkerTasks"
+            );
 
             migrationBuilder.DropIndex(
                 name: "IX_DownloadTaskTvShowEpisodeFile_DestinationFolderId",
-                table: "DownloadTaskTvShowEpisodeFile");
+                table: "DownloadTaskTvShowEpisodeFile"
+            );
 
             migrationBuilder.DropIndex(
                 name: "IX_DownloadTaskTvShowEpisodeFile_DownloadFolderId",
-                table: "DownloadTaskTvShowEpisodeFile");
+                table: "DownloadTaskTvShowEpisodeFile"
+            );
 
             migrationBuilder.DropIndex(
                 name: "IX_DownloadTaskMovieFile_DestinationFolderId",
-                table: "DownloadTaskMovieFile");
+                table: "DownloadTaskMovieFile"
+            );
 
             migrationBuilder.DropIndex(
                 name: "IX_DownloadTaskMovieFile_DownloadFolderId",
-                table: "DownloadTaskMovieFile");
+                table: "DownloadTaskMovieFile"
+            );
 
-            migrationBuilder.DropColumn(
-                name: "DownloadTaskFileBaseId",
-                table: "DownloadWorkerTasks");
+            migrationBuilder.DropColumn(name: "DownloadTaskFileBaseId", table: "DownloadWorkerTasks");
 
-            migrationBuilder.DropColumn(
-                name: "DestinationFolderId",
-                table: "DownloadTaskTvShowEpisodeFile");
+            migrationBuilder.DropColumn(name: "DestinationFolderId", table: "DownloadTaskTvShowEpisodeFile");
 
-            migrationBuilder.DropColumn(
-                name: "DownloadFolderId",
-                table: "DownloadTaskTvShowEpisodeFile");
+            migrationBuilder.DropColumn(name: "DownloadFolderId", table: "DownloadTaskTvShowEpisodeFile");
 
-            migrationBuilder.DropColumn(
-                name: "DestinationFolderId",
-                table: "DownloadTaskMovieFile");
+            migrationBuilder.DropColumn(name: "DestinationFolderId", table: "DownloadTaskMovieFile");
 
-            migrationBuilder.DropColumn(
-                name: "DownloadFolderId",
-                table: "DownloadTaskMovieFile");
+            migrationBuilder.DropColumn(name: "DownloadFolderId", table: "DownloadTaskMovieFile");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "DownloadTaskId",
@@ -88,13 +83,15 @@ namespace PlexRipper.Data.Migrations
                 type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "DestinationDirectory",
                 table: "FileTasks",
                 type: "TEXT",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "DownloadTaskType",
@@ -103,34 +100,34 @@ namespace PlexRipper.Data.Migrations
                 unicode: false,
                 maxLength: 50,
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
 
-            migrationBuilder.AddColumn<string>(
-                name: "FileName",
-                table: "FileTasks",
-                type: "TEXT",
-                nullable: true);
+            migrationBuilder.AddColumn<string>(name: "FileName", table: "FileTasks", type: "TEXT", nullable: true);
 
             migrationBuilder.AddColumn<long>(
                 name: "FileSize",
                 table: "FileTasks",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0L);
+                defaultValue: 0L
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "PlexLibraryId",
                 table: "FileTasks",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "PlexServerId",
                 table: "FileTasks",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "DownloadTaskId",
@@ -138,7 +135,8 @@ namespace PlexRipper.Data.Migrations
                 type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Title",
@@ -148,7 +146,8 @@ namespace PlexRipper.Data.Migrations
                 collation: "NATURALSORT",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "DownloadStatus",
@@ -158,7 +157,8 @@ namespace PlexRipper.Data.Migrations
                 maxLength: 20,
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "FileName",
@@ -168,7 +168,8 @@ namespace PlexRipper.Data.Migrations
                 collation: "NATURALSORT",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "DownloadStatus",
@@ -178,7 +179,8 @@ namespace PlexRipper.Data.Migrations
                 maxLength: 20,
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Title",
@@ -188,7 +190,8 @@ namespace PlexRipper.Data.Migrations
                 collation: "NATURALSORT",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "DownloadStatus",
@@ -198,7 +201,8 @@ namespace PlexRipper.Data.Migrations
                 maxLength: 20,
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Title",
@@ -208,7 +212,8 @@ namespace PlexRipper.Data.Migrations
                 collation: "NATURALSORT",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "DownloadStatus",
@@ -218,7 +223,8 @@ namespace PlexRipper.Data.Migrations
                 maxLength: 20,
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "FileName",
@@ -228,7 +234,8 @@ namespace PlexRipper.Data.Migrations
                 collation: "NATURALSORT",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "DownloadStatus",
@@ -238,7 +245,8 @@ namespace PlexRipper.Data.Migrations
                 maxLength: 20,
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Title",
@@ -248,7 +256,8 @@ namespace PlexRipper.Data.Migrations
                 collation: "NATURALSORT",
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "DownloadStatus",
@@ -258,17 +267,16 @@ namespace PlexRipper.Data.Migrations
                 maxLength: 20,
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_FileTasks_PlexLibraryId",
                 table: "FileTasks",
-                column: "PlexLibraryId");
+                column: "PlexLibraryId"
+            );
 
-            migrationBuilder.CreateIndex(
-                name: "IX_FileTasks_PlexServerId",
-                table: "FileTasks",
-                column: "PlexServerId");
+            migrationBuilder.CreateIndex(name: "IX_FileTasks_PlexServerId", table: "FileTasks", column: "PlexServerId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadWorkerTasks_DownloadTaskMovieFile_DownloadTaskId",
@@ -276,7 +284,8 @@ namespace PlexRipper.Data.Migrations
                 column: "DownloadTaskId",
                 principalTable: "DownloadTaskMovieFile",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadWorkerTasks_DownloadTaskTvShowEpisodeFile_DownloadTaskId",
@@ -284,7 +293,8 @@ namespace PlexRipper.Data.Migrations
                 column: "DownloadTaskId",
                 principalTable: "DownloadTaskTvShowEpisodeFile",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_FileTasks_PlexLibraries_PlexLibraryId",
@@ -292,7 +302,8 @@ namespace PlexRipper.Data.Migrations
                 column: "PlexLibraryId",
                 principalTable: "PlexLibraries",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_FileTasks_PlexServers_PlexServerId",
@@ -300,7 +311,8 @@ namespace PlexRipper.Data.Migrations
                 column: "PlexServerId",
                 principalTable: "PlexServers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
 
         /// <inheritdoc />
@@ -308,51 +320,33 @@ namespace PlexRipper.Data.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadWorkerTasks_DownloadTaskMovieFile_DownloadTaskId",
-                table: "DownloadWorkerTasks");
+                table: "DownloadWorkerTasks"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadWorkerTasks_DownloadTaskTvShowEpisodeFile_DownloadTaskId",
-                table: "DownloadWorkerTasks");
+                table: "DownloadWorkerTasks"
+            );
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_FileTasks_PlexLibraries_PlexLibraryId",
-                table: "FileTasks");
+            migrationBuilder.DropForeignKey(name: "FK_FileTasks_PlexLibraries_PlexLibraryId", table: "FileTasks");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_FileTasks_PlexServers_PlexServerId",
-                table: "FileTasks");
+            migrationBuilder.DropForeignKey(name: "FK_FileTasks_PlexServers_PlexServerId", table: "FileTasks");
 
-            migrationBuilder.DropIndex(
-                name: "IX_FileTasks_PlexLibraryId",
-                table: "FileTasks");
+            migrationBuilder.DropIndex(name: "IX_FileTasks_PlexLibraryId", table: "FileTasks");
 
-            migrationBuilder.DropIndex(
-                name: "IX_FileTasks_PlexServerId",
-                table: "FileTasks");
+            migrationBuilder.DropIndex(name: "IX_FileTasks_PlexServerId", table: "FileTasks");
 
-            migrationBuilder.DropColumn(
-                name: "DestinationDirectory",
-                table: "FileTasks");
+            migrationBuilder.DropColumn(name: "DestinationDirectory", table: "FileTasks");
 
-            migrationBuilder.DropColumn(
-                name: "DownloadTaskType",
-                table: "FileTasks");
+            migrationBuilder.DropColumn(name: "DownloadTaskType", table: "FileTasks");
 
-            migrationBuilder.DropColumn(
-                name: "FileName",
-                table: "FileTasks");
+            migrationBuilder.DropColumn(name: "FileName", table: "FileTasks");
 
-            migrationBuilder.DropColumn(
-                name: "FileSize",
-                table: "FileTasks");
+            migrationBuilder.DropColumn(name: "FileSize", table: "FileTasks");
 
-            migrationBuilder.DropColumn(
-                name: "PlexLibraryId",
-                table: "FileTasks");
+            migrationBuilder.DropColumn(name: "PlexLibraryId", table: "FileTasks");
 
-            migrationBuilder.DropColumn(
-                name: "PlexServerId",
-                table: "FileTasks");
+            migrationBuilder.DropColumn(name: "PlexServerId", table: "FileTasks");
 
             migrationBuilder.AlterColumn<int>(
                 name: "DownloadTaskId",
@@ -360,7 +354,8 @@ namespace PlexRipper.Data.Migrations
                 type: "INTEGER",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "DownloadTaskId",
@@ -368,13 +363,15 @@ namespace PlexRipper.Data.Migrations
                 type: "INTEGER",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AddColumn<Guid>(
                 name: "DownloadTaskFileBaseId",
                 table: "DownloadWorkerTasks",
                 type: "TEXT",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Title",
@@ -384,7 +381,8 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldNullable: true,
-                oldCollation: "NATURALSORT");
+                oldCollation: "NATURALSORT"
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "DownloadStatus",
@@ -394,7 +392,8 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldUnicode: false,
-                oldMaxLength: 20);
+                oldMaxLength: 20
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "FileName",
@@ -404,7 +403,8 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldNullable: true,
-                oldCollation: "NATURALSORT");
+                oldCollation: "NATURALSORT"
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "DownloadStatus",
@@ -414,21 +414,24 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldUnicode: false,
-                oldMaxLength: 20);
+                oldMaxLength: 20
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "DestinationFolderId",
                 table: "DownloadTaskTvShowEpisodeFile",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "DownloadFolderId",
                 table: "DownloadTaskTvShowEpisodeFile",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Title",
@@ -438,7 +441,8 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldNullable: true,
-                oldCollation: "NATURALSORT");
+                oldCollation: "NATURALSORT"
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "DownloadStatus",
@@ -448,7 +452,8 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldUnicode: false,
-                oldMaxLength: 20);
+                oldMaxLength: 20
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Title",
@@ -458,7 +463,8 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldNullable: true,
-                oldCollation: "NATURALSORT");
+                oldCollation: "NATURALSORT"
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "DownloadStatus",
@@ -468,7 +474,8 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldUnicode: false,
-                oldMaxLength: 20);
+                oldMaxLength: 20
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "FileName",
@@ -478,7 +485,8 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldNullable: true,
-                oldCollation: "NATURALSORT");
+                oldCollation: "NATURALSORT"
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "DownloadStatus",
@@ -488,21 +496,24 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldUnicode: false,
-                oldMaxLength: 20);
+                oldMaxLength: 20
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "DestinationFolderId",
                 table: "DownloadTaskMovieFile",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "DownloadFolderId",
                 table: "DownloadTaskMovieFile",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.AlterColumn<string>(
                 name: "Title",
@@ -512,7 +523,8 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldNullable: true,
-                oldCollation: "NATURALSORT");
+                oldCollation: "NATURALSORT"
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "DownloadStatus",
@@ -522,14 +534,14 @@ namespace PlexRipper.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldUnicode: false,
-                oldMaxLength: 20);
+                oldMaxLength: 20
+            );
 
             migrationBuilder.CreateTable(
                 name: "DownloadTasks",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
                     Key = table.Column<int>(type: "INTEGER", nullable: false),
                     Title = table.Column<string>(type: "TEXT", nullable: true, collation: "NATURALSORT"),
                     Year = table.Column<int>(type: "INTEGER", nullable: false),
@@ -538,7 +550,12 @@ namespace PlexRipper.Data.Migrations
                     DataTotal = table.Column<long>(type: "INTEGER", nullable: false),
                     MediaType = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: false),
                     DownloadStatus = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: false),
-                    DownloadTaskType = table.Column<string>(type: "TEXT", unicode: false, maxLength: 50, nullable: false),
+                    DownloadTaskType = table.Column<string>(
+                        type: "TEXT",
+                        unicode: false,
+                        maxLength: 50,
+                        nullable: false
+                    ),
                     Created = table.Column<DateTime>(type: "TEXT", nullable: false),
                     FileName = table.Column<string>(type: "TEXT", nullable: true),
                     FileLocationUrl = table.Column<string>(type: "TEXT", nullable: true),
@@ -565,87 +582,100 @@ namespace PlexRipper.Data.Migrations
                         column: x => x.ParentId,
                         principalTable: "DownloadTasks",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_DownloadTasks_FolderPaths_DestinationFolderId",
                         column: x => x.DestinationFolderId,
                         principalTable: "FolderPaths",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_DownloadTasks_FolderPaths_DownloadFolderId",
                         column: x => x.DownloadFolderId,
                         principalTable: "FolderPaths",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_DownloadTasks_PlexLibraries_PlexLibraryId",
                         column: x => x.PlexLibraryId,
                         principalTable: "PlexLibraries",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Cascade
+                    );
                     table.ForeignKey(
                         name: "FK_DownloadTasks_PlexServers_PlexServerId",
                         column: x => x.PlexServerId,
                         principalTable: "PlexServers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_FileTasks_DownloadTaskId",
                 table: "FileTasks",
-                column: "DownloadTaskId");
+                column: "DownloadTaskId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadWorkerTasks_DownloadTaskFileBaseId",
                 table: "DownloadWorkerTasks",
-                column: "DownloadTaskFileBaseId");
+                column: "DownloadTaskFileBaseId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskTvShowEpisodeFile_DestinationFolderId",
                 table: "DownloadTaskTvShowEpisodeFile",
-                column: "DestinationFolderId");
+                column: "DestinationFolderId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskTvShowEpisodeFile_DownloadFolderId",
                 table: "DownloadTaskTvShowEpisodeFile",
-                column: "DownloadFolderId");
+                column: "DownloadFolderId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskMovieFile_DestinationFolderId",
                 table: "DownloadTaskMovieFile",
-                column: "DestinationFolderId");
+                column: "DestinationFolderId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskMovieFile_DownloadFolderId",
                 table: "DownloadTaskMovieFile",
-                column: "DownloadFolderId");
+                column: "DownloadFolderId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTasks_DestinationFolderId",
                 table: "DownloadTasks",
-                column: "DestinationFolderId");
+                column: "DestinationFolderId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTasks_DownloadFolderId",
                 table: "DownloadTasks",
-                column: "DownloadFolderId");
+                column: "DownloadFolderId"
+            );
 
-            migrationBuilder.CreateIndex(
-                name: "IX_DownloadTasks_ParentId",
-                table: "DownloadTasks",
-                column: "ParentId");
+            migrationBuilder.CreateIndex(name: "IX_DownloadTasks_ParentId", table: "DownloadTasks", column: "ParentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTasks_PlexLibraryId",
                 table: "DownloadTasks",
-                column: "PlexLibraryId");
+                column: "PlexLibraryId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTasks_PlexServerId",
                 table: "DownloadTasks",
-                column: "PlexServerId");
+                column: "PlexServerId"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTaskMovieFile_FolderPaths_DestinationFolderId",
@@ -653,7 +683,8 @@ namespace PlexRipper.Data.Migrations
                 column: "DestinationFolderId",
                 principalTable: "FolderPaths",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTaskMovieFile_FolderPaths_DownloadFolderId",
@@ -661,7 +692,8 @@ namespace PlexRipper.Data.Migrations
                 column: "DownloadFolderId",
                 principalTable: "FolderPaths",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTaskTvShowEpisodeFile_FolderPaths_DestinationFolderId",
@@ -669,7 +701,8 @@ namespace PlexRipper.Data.Migrations
                 column: "DestinationFolderId",
                 principalTable: "FolderPaths",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTaskTvShowEpisodeFile_FolderPaths_DownloadFolderId",
@@ -677,7 +710,8 @@ namespace PlexRipper.Data.Migrations
                 column: "DownloadFolderId",
                 principalTable: "FolderPaths",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadWorkerTasks_DownloadTasks_DownloadTaskId",
@@ -685,7 +719,8 @@ namespace PlexRipper.Data.Migrations
                 column: "DownloadTaskId",
                 principalTable: "DownloadTasks",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_FileTasks_DownloadTasks_DownloadTaskId",
@@ -693,7 +728,8 @@ namespace PlexRipper.Data.Migrations
                 column: "DownloadTaskId",
                 principalTable: "DownloadTasks",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
     }
 }

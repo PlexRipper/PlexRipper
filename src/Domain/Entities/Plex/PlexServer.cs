@@ -179,7 +179,11 @@ public class PlexServer : BaseEntity
     #region Equality
 
     /// <inheritdoc/>
-    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode", Justification = "Cannot be ReadOnly due to usage in Entity Framework as Entities")]
+    [SuppressMessage(
+        "ReSharper",
+        "NonReadonlyMemberInGetHashCode",
+        Justification = "Cannot be ReadOnly due to usage in Entity Framework as Entities"
+    )]
     public override int GetHashCode()
     {
         var hashCode = default(HashCode);
@@ -230,14 +234,30 @@ public class PlexServer : BaseEntity
     /// <returns>Returns whether these <see cref="PlexServer">PlexServers</see> are equal.</returns>
     protected bool Equals(PlexServer other)
     {
-        return Name == other.Name && OwnerId == other.OwnerId && PlexServerOwnerUsername == other.PlexServerOwnerUsername && Device == other.Device &&
-               Platform == other.Platform && PlatformVersion == other.PlatformVersion && Product == other.Product && ProductVersion == other.ProductVersion &&
-               Provides == other.Provides && CreatedAt.Equals(other.CreatedAt) && LastSeenAt.Equals(other.LastSeenAt) &&
-               MachineIdentifier == other.MachineIdentifier && PublicAddress == other.PublicAddress && PreferredConnectionId == other.PreferredConnectionId &&
-               Owned == other.Owned && Home == other.Home && Synced == other.Synced && Relay == other.Relay && Presence == other.Presence &&
-               HttpsRequired == other.HttpsRequired && PublicAddressMatches == other.PublicAddressMatches &&
-               DnsRebindingProtection == other.DnsRebindingProtection && NatLoopbackSupported == other.NatLoopbackSupported &&
-               ServerFixApplyDNSFix == other.ServerFixApplyDNSFix;
+        return Name == other.Name
+            && OwnerId == other.OwnerId
+            && PlexServerOwnerUsername == other.PlexServerOwnerUsername
+            && Device == other.Device
+            && Platform == other.Platform
+            && PlatformVersion == other.PlatformVersion
+            && Product == other.Product
+            && ProductVersion == other.ProductVersion
+            && Provides == other.Provides
+            && CreatedAt.Equals(other.CreatedAt)
+            && LastSeenAt.Equals(other.LastSeenAt)
+            && MachineIdentifier == other.MachineIdentifier
+            && PublicAddress == other.PublicAddress
+            && PreferredConnectionId == other.PreferredConnectionId
+            && Owned == other.Owned
+            && Home == other.Home
+            && Synced == other.Synced
+            && Relay == other.Relay
+            && Presence == other.Presence
+            && HttpsRequired == other.HttpsRequired
+            && PublicAddressMatches == other.PublicAddressMatches
+            && DnsRebindingProtection == other.DnsRebindingProtection
+            && NatLoopbackSupported == other.NatLoopbackSupported
+            && ServerFixApplyDNSFix == other.ServerFixApplyDNSFix;
     }
 
     #endregion

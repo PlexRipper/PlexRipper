@@ -32,10 +32,11 @@ public class Verify2FAPinEndpoint : BaseEndpoint<Verify2FAPinEndpointRequest, Au
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<AuthPin>))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<AuthPin>))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(Verify2FAPinEndpointRequest req, CancellationToken ct)

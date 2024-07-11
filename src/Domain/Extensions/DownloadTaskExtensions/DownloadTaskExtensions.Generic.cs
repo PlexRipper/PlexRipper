@@ -2,7 +2,10 @@ namespace PlexRipper.Domain;
 
 public static partial class DownloadTaskExtensions
 {
-    public static List<DownloadWorkerTask> GenerateDownloadWorkerTasks(this DownloadTaskFileBase downloadTask, int parts)
+    public static List<DownloadWorkerTask> GenerateDownloadWorkerTasks(
+        this DownloadTaskFileBase downloadTask,
+        int parts
+    )
     {
         // Create download worker tasks/segments/ranges
         var totalBytesToReceive = downloadTask.DataTotal;
@@ -38,8 +41,8 @@ public static partial class DownloadTaskExtensions
             CreatedAt = DateTime.UtcNow,
             FilePathsCompressed = string.Join(
                 ';',
-                downloadTask.DownloadWorkerTasks.Select(x => x.DownloadFilePath)
-                    .ToArray()),
+                downloadTask.DownloadWorkerTasks.Select(x => x.DownloadFilePath).ToArray()
+            ),
             FileName = downloadTask.FileName,
             FileSize = downloadTask.DataTotal,
             DownloadTaskId = downloadTask.Id,

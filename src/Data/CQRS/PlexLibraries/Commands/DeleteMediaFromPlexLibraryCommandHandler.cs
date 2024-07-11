@@ -14,16 +14,24 @@ public class DeleteMediaFromPlexLibraryCommandValidator : AbstractValidator<Dele
     }
 }
 
-public class DeleteMediaFromPlexLibraryCommandHandler : BaseHandler, IRequestHandler<DeleteMediaFromPlexLibraryCommand, Result<bool>>
+public class DeleteMediaFromPlexLibraryCommandHandler
+    : BaseHandler,
+        IRequestHandler<DeleteMediaFromPlexLibraryCommand, Result<bool>>
 {
-    public DeleteMediaFromPlexLibraryCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public DeleteMediaFromPlexLibraryCommandHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
-    public async Task<Result<bool>> Handle(DeleteMediaFromPlexLibraryCommand command, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(
+        DeleteMediaFromPlexLibraryCommand command,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             // First retrieve only the plexLibrary to determine the media type.
-            var entity = await _dbContext.PlexLibraries.AsNoTracking().FirstOrDefaultAsync(x => x.Id == command.PlexLibraryId, cancellationToken);
+            var entity = await _dbContext
+                .PlexLibraries.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == command.PlexLibraryId, cancellationToken);
             if (entity == null)
                 return ResultExtensions.EntityNotFound(nameof(PlexLibrary), command.PlexLibraryId);
 
@@ -32,7 +40,9 @@ public class DeleteMediaFromPlexLibraryCommandHandler : BaseHandler, IRequestHan
             var plexLibraryQuery = GetPlexLibraryQueryableByType(entity.Type, false, true);
 
             // We only want to delete the media and preserve the PlexLibrary entry in the Db.
-            var plexLibrary = await plexLibraryQuery.AsTracking().FirstOrDefaultAsync(x => x.Id == command.PlexLibraryId, cancellationToken);
+            var plexLibrary = await plexLibraryQuery
+                .AsTracking()
+                .FirstOrDefaultAsync(x => x.Id == command.PlexLibraryId, cancellationToken);
             switch (plexLibrary.Type)
             {
                 case PlexMediaType.Movie:
@@ -42,7 +52,9 @@ public class DeleteMediaFromPlexLibraryCommandHandler : BaseHandler, IRequestHan
                     _dbContext.PlexTvShows.RemoveRange(plexLibrary.TvShows);
                     break;
                 default:
-                    return Result.Fail($"PlexLibrary with Id {plexLibrary.Id} and MediaType {plexLibrary.Type} is currently not supported");
+                    return Result.Fail(
+                        $"PlexLibrary with Id {plexLibrary.Id} and MediaType {plexLibrary.Type} is currently not supported"
+                    );
             }
 
             await _dbContext.SaveChangesAsync(cancellationToken);

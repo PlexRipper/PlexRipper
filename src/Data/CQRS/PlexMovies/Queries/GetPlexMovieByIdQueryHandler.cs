@@ -16,7 +16,8 @@ public class GetPlexMovieByIdQueryValidator : AbstractValidator<GetPlexMovieById
 
 public class GetPlexMovieByIdQueryHandler : BaseHandler, IRequestHandler<GetPlexMovieByIdQuery, Result<PlexMovie>>
 {
-    public GetPlexMovieByIdQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public GetPlexMovieByIdQueryHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
     public async Task<Result<PlexMovie>> Handle(GetPlexMovieByIdQuery request, CancellationToken cancellationToken)
     {

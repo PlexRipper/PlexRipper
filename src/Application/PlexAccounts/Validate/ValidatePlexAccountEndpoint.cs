@@ -55,10 +55,11 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
     {
         Post(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexAccountDTO>))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexAccountDTO>))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(ValidatePlexAccountEndpointRequest req, CancellationToken ct)
@@ -71,7 +72,11 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
             return;
         }
 
-        await SendFluentResult(IsTwoFactorAuth(plexSignInResult) ? SignInTwoFactorAuth(plexAccount) : plexSignInResult, x => x.ToDTO(), ct);
+        await SendFluentResult(
+            IsTwoFactorAuth(plexSignInResult) ? SignInTwoFactorAuth(plexAccount) : plexSignInResult,
+            x => x.ToDTO(),
+            ct
+        );
     }
 
     private static Result<PlexAccount> SignInTwoFactorAuth(PlexAccount plexAccount)
@@ -80,11 +85,15 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
         return Result.Ok(plexAccount);
     }
 
-    private static bool IsTwoFactorAuth(Result<PlexAccount> plexSignInResult) => plexSignInResult.HasPlexErrorEnterVerificationCode();
+    private static bool IsTwoFactorAuth(Result<PlexAccount> plexSignInResult) =>
+        plexSignInResult.HasPlexErrorEnterVerificationCode();
 
     private Result<PlexAccount> SignInSuccess(PlexAccount plexAccount, Result<PlexAccount> plexSignInResult)
     {
-        _log.Debug("The PlexAccount with displayName {PlexAccountDisplayName} has been validated", plexAccount.DisplayName);
+        _log.Debug(
+            "The PlexAccount with displayName {PlexAccountDisplayName} has been validated",
+            plexAccount.DisplayName
+        );
         return plexSignInResult;
     }
 }

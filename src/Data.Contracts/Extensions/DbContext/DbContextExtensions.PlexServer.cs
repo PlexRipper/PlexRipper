@@ -11,11 +11,11 @@ public static partial class DbContextExtensions
         this IPlexRipperDbContext dbContext,
         IMapper mapper,
         int plexAccountId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         return dbContext
-            .PlexAccountServers
-            .Include(x => x.PlexServer)
+            .PlexAccountServers.Include(x => x.PlexServer)
             .ThenInclude(x => x.ServerStatus)
             .Include(x => x.PlexServer)
             .ThenInclude(x => x.PlexServerConnections)
@@ -25,10 +25,14 @@ public static partial class DbContextExtensions
             .ToListAsync(cancellationToken);
     }
 
-    public static async Task<string> GetPlexServerNameById(this IPlexRipperDbContext dbContext, int plexServerId, CancellationToken cancellationToken = default)
+    public static async Task<string> GetPlexServerNameById(
+        this IPlexRipperDbContext dbContext,
+        int plexServerId,
+        CancellationToken cancellationToken = default
+    )
     {
-        var plexServerName = await dbContext.PlexServers
-            .Where(x => x.Id == plexServerId)
+        var plexServerName = await dbContext
+            .PlexServers.Where(x => x.Id == plexServerId)
             .Select(x => x.Name)
             .FirstOrDefaultAsync(cancellationToken);
         return plexServerName ?? "Server Name Not Found";
@@ -37,7 +41,8 @@ public static partial class DbContextExtensions
     public static async Task<string> GetPlexServerMachineIdentifierById(
         this IPlexRipperDbContext dbContext,
         int plexServerId,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var plexServer = await dbContext.PlexServers.GetAsync(plexServerId, cancellationToken);
         return plexServer?.MachineIdentifier ?? string.Empty;

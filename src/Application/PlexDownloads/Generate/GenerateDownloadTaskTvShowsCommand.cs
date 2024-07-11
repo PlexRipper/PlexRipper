@@ -40,14 +40,15 @@ public class GenerateDownloadTaskTvShowsCommandHandler : IRequestHandler<Generat
         if (!plexTvShowList.Any())
             return ResultExtensions.IsEmpty(nameof(plexTvShowList)).LogWarning();
 
-        _log.Debug("Creating {PlexTvShowIdsCount} TvShow download tasks", plexTvShowList
-            .SelectMany(x => x.MediaIds)
-            .ToList()
-            .Count);
+        _log.Debug(
+            "Creating {PlexTvShowIdsCount} TvShow download tasks",
+            plexTvShowList.SelectMany(x => x.MediaIds).ToList().Count
+        );
 
         foreach (var downloadMediaDto in plexTvShowList)
         {
-            var plexTvShows = await _dbContext.PlexTvShows.IncludeSeasons()
+            var plexTvShows = await _dbContext
+                .PlexTvShows.IncludeSeasons()
                 .Where(x => downloadMediaDto.MediaIds.Contains(x.Id))
                 .ToListAsync(cancellationToken);
 
@@ -57,20 +58,26 @@ public class GenerateDownloadTaskTvShowsCommandHandler : IRequestHandler<Generat
             foreach (var tvShow in plexTvShows)
             {
                 // Check if the tvShowDownloadTask has already been created
-                var downloadTaskTvShow = await _dbContext.GetDownloadTaskTvShowByMediaKeyQuery(tvShow.PlexServerId, tvShow.Key, cancellationToken);
+                var downloadTaskTvShow = await _dbContext.GetDownloadTaskTvShowByMediaKeyQuery(
+                    tvShow.PlexServerId,
+                    tvShow.Key,
+                    cancellationToken
+                );
 
                 if (downloadTaskTvShow is null)
                 {
                     downloadTaskTvShow = tvShow.MapToDownloadTask();
 
                     tvShowsToInsert.Add(downloadTaskTvShow);
-                    seasonsIds.Add(new DownloadMediaDTO
-                    {
-                        MediaIds = tvShow.Seasons.Select(x => x.Id).ToList(),
-                        PlexLibraryId = tvShow.PlexLibraryId,
-                        PlexServerId = tvShow.PlexServerId,
-                        Type = PlexMediaType.Season,
-                    });
+                    seasonsIds.Add(
+                        new DownloadMediaDTO
+                        {
+                            MediaIds = tvShow.Seasons.Select(x => x.Id).ToList(),
+                            PlexLibraryId = tvShow.PlexLibraryId,
+                            PlexServerId = tvShow.PlexServerId,
+                            Type = PlexMediaType.Season,
+                        }
+                    );
                 }
             }
 

@@ -12,7 +12,12 @@ public class DownloadFileStream : IDownloadFileStream
 
     private readonly IDiskSystem _diskSystem;
 
-    public DownloadFileStream(IFileSystem fileSystem, IDirectorySystem directorySystem, IPathSystem pathSystem, IDiskSystem diskSystem)
+    public DownloadFileStream(
+        IFileSystem fileSystem,
+        IDirectorySystem directorySystem,
+        IPathSystem pathSystem,
+        IDiskSystem diskSystem
+    )
     {
         _fileSystem = fileSystem;
         _directorySystem = directorySystem;
@@ -43,7 +48,12 @@ public class DownloadFileStream : IDownloadFileStream
             Stream fileStream;
             if (_fileSystem.FileExists(filePath.Value))
             {
-                var openResult = _fileSystem.Open(filePath.Value, FileMode.Open, FileAccess.ReadWrite, FileShare.Delete);
+                var openResult = _fileSystem.Open(
+                    filePath.Value,
+                    FileMode.Open,
+                    FileAccess.ReadWrite,
+                    FileShare.Delete
+                );
                 if (openResult.IsFailed)
                     return openResult.ToResult().LogError();
 

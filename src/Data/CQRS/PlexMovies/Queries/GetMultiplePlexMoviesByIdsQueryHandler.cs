@@ -14,11 +14,17 @@ public class GetMultiplePlexMoviesByIdsQueryHandlerValidator : AbstractValidator
     }
 }
 
-public class GetMultiplePlexMoviesByIdsQueryHandlerHandler : BaseHandler, IRequestHandler<GetMultiplePlexMoviesByIdsQuery, Result<List<PlexMovie>>>
+public class GetMultiplePlexMoviesByIdsQueryHandlerHandler
+    : BaseHandler,
+        IRequestHandler<GetMultiplePlexMoviesByIdsQuery, Result<List<PlexMovie>>>
 {
-    public GetMultiplePlexMoviesByIdsQueryHandlerHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public GetMultiplePlexMoviesByIdsQueryHandlerHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
-    public async Task<Result<List<PlexMovie>>> Handle(GetMultiplePlexMoviesByIdsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<PlexMovie>>> Handle(
+        GetMultiplePlexMoviesByIdsQuery request,
+        CancellationToken cancellationToken
+    )
     {
         var query = PlexMoviesQueryable;
 

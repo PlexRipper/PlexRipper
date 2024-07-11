@@ -12,7 +12,10 @@ public interface ISignalRService
     /// </summary>
     /// <param name="fileMergeProgress">The <see cref="FileMergeProgress"/> object to send.</param>
     /// <param name="cancellationToken"></param>
-    Task SendFileMergeProgressUpdateAsync(FileMergeProgress fileMergeProgress, CancellationToken cancellationToken = default);
+    Task SendFileMergeProgressUpdateAsync(
+        FileMergeProgress fileMergeProgress,
+        CancellationToken cancellationToken = default
+    );
 
     Task SendNotificationAsync(Notification notification);
 
@@ -20,7 +23,11 @@ public interface ISignalRService
 
     Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress);
 
-    Task SendDownloadProgressUpdateAsync(int plexServerId, List<DownloadTaskGeneric> downloadTasks, CancellationToken cancellationToken = default);
+    Task SendDownloadProgressUpdateAsync(
+        int plexServerId,
+        List<DownloadTaskGeneric> downloadTasks,
+        CancellationToken cancellationToken = default
+    );
 
     Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress);
     Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate);

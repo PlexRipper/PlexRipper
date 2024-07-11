@@ -121,8 +121,13 @@ public class PlexServerConnection : BaseEntity
 
     protected bool Equals(PlexServerConnection other)
     {
-        return Protocol == other.Protocol && Address == other.Address && Port == other.Port && Local == other.Local && Relay == other.Relay &&
-               IPv6 == other.IPv6 && PlexServerId == other.PlexServerId;
+        return Protocol == other.Protocol
+            && Address == other.Address
+            && Port == other.Port
+            && Local == other.Local
+            && Relay == other.Relay
+            && IPv6 == other.IPv6
+            && PlexServerId == other.PlexServerId;
     }
 
     #endregion

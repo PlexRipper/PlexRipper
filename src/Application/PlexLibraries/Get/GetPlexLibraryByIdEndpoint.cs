@@ -42,11 +42,12 @@ public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpoin
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexLibraryDTO>))
-            .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-            .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexLibraryDTO>))
+                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(GetPlexLibraryByIdEndpointRequest req, CancellationToken ct)
@@ -60,7 +61,10 @@ public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpoin
 
         if (!plexLibrary.HasMedia)
         {
-            _log.Information("PlexLibrary with id {LibraryId} has no media, forcing refresh from the PlexApi", plexLibrary.Id);
+            _log.Information(
+                "PlexLibrary with id {LibraryId} has no media, forcing refresh from the PlexApi",
+                plexLibrary.Id
+            );
 
             var refreshResult = await _mediator.Send(new RefreshLibraryMediaCommand(plexLibrary.Id), ct);
             if (refreshResult.IsFailed)

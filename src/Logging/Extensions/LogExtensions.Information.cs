@@ -6,12 +6,8 @@ namespace Logging;
 
 public static partial class LogExtensions
 {
-
     [MessageTemplateFormatMethod("messageTemplate")]
-    public static LogMetaData Information<T0>(
-        this LogMetaData logMetaData,
-        string messageTemplate,
-        T0 propertyValue0)
+    public static LogMetaData Information<T0>(this LogMetaData logMetaData, string messageTemplate, T0 propertyValue0)
     {
         logMetaData.Update(LogEventLevel.Information, messageTemplate, propertyValue0).Write();
         return logMetaData;
@@ -22,7 +18,8 @@ public static partial class LogExtensions
         this LogMetaData logMetaData,
         string messageTemplate,
         T0 propertyValue0,
-        T1 propertyValue1)
+        T1 propertyValue1
+    )
     {
         logMetaData.Update(LogEventLevel.Information, messageTemplate, propertyValue0, propertyValue1).Write();
         return logMetaData;
@@ -34,9 +31,12 @@ public static partial class LogExtensions
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,
-        T2 propertyValue2)
+        T2 propertyValue2
+    )
     {
-        logMetaData.Update(LogEventLevel.Information, messageTemplate, propertyValue0, propertyValue1, propertyValue2).Write();
+        logMetaData
+            .Update(LogEventLevel.Information, messageTemplate, propertyValue0, propertyValue1, propertyValue2)
+            .Write();
         return logMetaData;
     }
 
@@ -47,9 +47,19 @@ public static partial class LogExtensions
         T0 propertyValue0,
         T1 propertyValue1,
         T2 propertyValue2,
-        T3 propertyValue3)
+        T3 propertyValue3
+    )
     {
-        logMetaData.Update(LogEventLevel.Information, messageTemplate, propertyValue0, propertyValue1, propertyValue2, propertyValue3).Write();
+        logMetaData
+            .Update(
+                LogEventLevel.Information,
+                messageTemplate,
+                propertyValue0,
+                propertyValue1,
+                propertyValue2,
+                propertyValue3
+            )
+            .Write();
         return logMetaData;
     }
 }

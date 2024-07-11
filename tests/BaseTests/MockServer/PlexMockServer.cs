@@ -21,21 +21,22 @@ public class PlexMockServer : IDisposable
 
     #region Constructor
 
-    public PlexMockServer(Action<PlexMockServerConfig> options = null) : this(PlexMockServerConfig.FromOptions(options))
-    {
-    }
+    public PlexMockServer(Action<PlexMockServerConfig> options = null)
+        : this(PlexMockServerConfig.FromOptions(options)) { }
 
     public PlexMockServer(PlexMockServerConfig options = null)
     {
         _config = options;
         _fakeDataConfig = _config?.FakeDataConfig;
 
-        Server = WireMockServer.Start(new WireMockServerSettings()
-        {
-            // TODO Migrate this option to the new version: https://github.com/WireMock-Net/WireMock.Net/issues/1086
-            //ThrowExceptionWhenMatcherFails = true,
-            HostingScheme = HostingScheme.HttpAndHttps,
-        });
+        Server = WireMockServer.Start(
+            new WireMockServerSettings()
+            {
+                // TODO Migrate this option to the new version: https://github.com/WireMock-Net/WireMock.Net/issues/1086
+                //ThrowExceptionWhenMatcherFails = true,
+                HostingScheme = HostingScheme.HttpAndHttps,
+            }
+        );
 
         ServerUri = new Uri(Server.Urls[0]);
         DownloadUri = new Uri($"{Server.Urls[0]}{PlexMockServerConfig.FileUrl}");
@@ -70,10 +71,13 @@ public class PlexMockServer : IDisposable
 
         Server
             .Given(Request.Create().WithPath(PlexApiPaths.LibrarySectionsPath).WithParam("X-Plex-Token").UsingGet())
-            .RespondWith(Response.Create()
-                .WithStatusCode(200)
-                .WithHeader("Content-Type", "application/json")
-                .WithBodyAsJson(librarySections));
+            .RespondWith(
+                Response
+                    .Create()
+                    .WithStatusCode(200)
+                    .WithHeader("Content-Type", "application/json")
+                    .WithBodyAsJson(librarySections)
+            );
 
         // Setup the media metadata for each library
         foreach (var librarySection in librarySections.MediaContainer.Directory)
@@ -83,10 +87,13 @@ public class PlexMockServer : IDisposable
             _log.Debug("Url registered: {Url}", url);
             Server
                 .Given(Request.Create().WithPath(url).WithParam("X-Plex-Token").UsingGet())
-                .RespondWith(Response.Create()
-                    .WithStatusCode(200)
-                    .WithHeader("Content-Type", "application/json")
-                    .WithBodyAsJson(libraryData));
+                .RespondWith(
+                    Response
+                        .Create()
+                        .WithStatusCode(200)
+                        .WithHeader("Content-Type", "application/json")
+                        .WithBodyAsJson(libraryData)
+                );
         }
 
         SetupDownloadableFile();
@@ -96,10 +103,13 @@ public class PlexMockServer : IDisposable
     {
         Server
             .Given(Request.Create().WithPath(PlexApiPaths.ServerIdentityPath).UsingGet())
-            .RespondWith(Response.Create()
-                .WithStatusCode(HttpStatusCode.OK)
-                .WithHeader("Content-Type", "application/json")
-                .WithBodyAsJson(FakePlexApiData.GetPlexServerIdentityResponse(_fakeDataConfig)));
+            .RespondWith(
+                Response
+                    .Create()
+                    .WithStatusCode(HttpStatusCode.OK)
+                    .WithHeader("Content-Type", "application/json")
+                    .WithBodyAsJson(FakePlexApiData.GetPlexServerIdentityResponse(_fakeDataConfig))
+            );
     }
 
     private void SetupDownloadableFile()
@@ -112,7 +122,8 @@ public class PlexMockServer : IDisposable
             Server
                 .Given(Request.Create().WithPath(PlexMockServerConfig.FileUrl).WithParam("X-Plex-Token").UsingGet())
                 .RespondWith(
-                    Response.Create()
+                    Response
+                        .Create()
                         .WithHeader("Content-Type", "application/octet-stream")
                         .WithHeader("Content-Length", downloadFile.LongLength.ToString())
                         .WithStatusCode(HttpStatusCode.OK)

@@ -24,7 +24,11 @@ public class StartDownloadTaskEndpoint : BaseEndpoint<StartDownloadTaskEndpointR
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/start/{DownloadTaskGuid}";
 
-    public StartDownloadTaskEndpoint(IPlexRipperDbContext dbContext, IMediator mediator, IDownloadTaskScheduler downloadTaskScheduler)
+    public StartDownloadTaskEndpoint(
+        IPlexRipperDbContext dbContext,
+        IMediator mediator,
+        IDownloadTaskScheduler downloadTaskScheduler
+    )
     {
         _dbContext = dbContext;
         _mediator = mediator;
@@ -35,9 +39,10 @@ public class StartDownloadTaskEndpoint : BaseEndpoint<StartDownloadTaskEndpointR
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(StartDownloadTaskEndpointRequest req, CancellationToken ct)
@@ -45,7 +50,10 @@ public class StartDownloadTaskEndpoint : BaseEndpoint<StartDownloadTaskEndpointR
         var downloadTask = await _dbContext.GetDownloadTaskAsync(req.DownloadTaskGuid, cancellationToken: ct);
         if (downloadTask is null)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), req.DownloadTaskGuid).LogWarning(), ct);
+            await SendFluentResult(
+                ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), req.DownloadTaskGuid).LogWarning(),
+                ct
+            );
             return;
         }
 
@@ -58,6 +66,9 @@ public class StartDownloadTaskEndpoint : BaseEndpoint<StartDownloadTaskEndpointR
             return;
         }
 
-        await SendFluentResult(Result.Fail($"Failed to start downloadTask {downloadTask.FullTitle}, it's not directly downloadable."), ct);
+        await SendFluentResult(
+            Result.Fail($"Failed to start downloadTask {downloadTask.FullTitle}, it's not directly downloadable."),
+            ct
+        );
     }
 }

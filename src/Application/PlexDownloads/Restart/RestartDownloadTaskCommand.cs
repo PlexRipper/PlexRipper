@@ -23,9 +23,7 @@ public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownload
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
 
-    public RestartDownloadTaskCommandHandler(
-        IPlexRipperDbContext dbContext,
-        IMediator mediator)
+    public RestartDownloadTaskCommandHandler(IPlexRipperDbContext dbContext, IMediator mediator)
     {
         _dbContext = dbContext;
         _mediator = mediator;
@@ -49,13 +47,17 @@ public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownload
                 return stopResult;
 
             // Reset progress of the downloadTask
-            await _dbContext.UpdateDownloadProgress(childKey, new DownloadTaskProgress
-            {
-                Percentage = 0,
-                DataReceived = 0,
-                DataTotal = downloadTask.DataTotal,
-                DownloadSpeed = 0,
-            }, cancellationToken);
+            await _dbContext.UpdateDownloadProgress(
+                childKey,
+                new DownloadTaskProgress
+                {
+                    Percentage = 0,
+                    DataReceived = 0,
+                    DataTotal = downloadTask.DataTotal,
+                    DownloadSpeed = 0,
+                },
+                cancellationToken
+            );
 
             await _dbContext.SetDownloadStatus(childKey, DownloadStatus.Queued);
 

@@ -25,8 +25,7 @@ public static class PlexMediaDataDTOMapper
             Parts = source.Parts.ConvertAll(ToDTO),
         };
 
-    public static List<PlexMediaDataDTO> ToDTO(this List<PlexMediaData> source) =>
-        source.ConvertAll(ToDTO);
+    public static List<PlexMediaDataDTO> ToDTO(this List<PlexMediaData> source) => source.ConvertAll(ToDTO);
 
     #endregion
 
@@ -40,8 +39,7 @@ public static class PlexMediaDataDTOMapper
             HashId = source.HashId,
         };
 
-    public static List<PlexMediaQualityDTO> ToDTO(this List<PlexMediaQuality> source) =>
-        source.ConvertAll(ToDTO);
+    public static List<PlexMediaQualityDTO> ToDTO(this List<PlexMediaQuality> source) => source.ConvertAll(ToDTO);
 
     #endregion
 
@@ -58,8 +56,7 @@ public static class PlexMediaDataDTOMapper
             VideoProfile = source.VideoProfile,
         };
 
-    public static List<PlexMediaDataPartDTO> ToDTO(this List<PlexMediaDataPart> source) =>
-        source.ConvertAll(ToDTO);
+    public static List<PlexMediaDataPartDTO> ToDTO(this List<PlexMediaDataPart> source) => source.ConvertAll(ToDTO);
 
     #endregion
 }

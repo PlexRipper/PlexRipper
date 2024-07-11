@@ -15,7 +15,8 @@ public class QueueInspectPlexServerJobEndpointRequestValidator : Validator<Queue
     }
 }
 
-public class QueueInspectPlexServerJobEndpoint : BaseEndpoint<QueueInspectPlexServerJobEndpointRequest, ResultDTO<PlexServerDTO>>
+public class QueueInspectPlexServerJobEndpoint
+    : BaseEndpoint<QueueInspectPlexServerJobEndpointRequest, ResultDTO<PlexServerDTO>>
 {
     private readonly IMediator _mediator;
 
@@ -30,10 +31,11 @@ public class QueueInspectPlexServerJobEndpoint : BaseEndpoint<QueueInspectPlexSe
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO))
-            .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
+                .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(QueueInspectPlexServerJobEndpointRequest req, CancellationToken ct)

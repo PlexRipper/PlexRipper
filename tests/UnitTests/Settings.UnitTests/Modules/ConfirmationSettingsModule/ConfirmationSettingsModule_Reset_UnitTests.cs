@@ -5,7 +5,8 @@ namespace Settings.UnitTests.Modules;
 
 public class ConfirmationSettingsModule_Reset_UnitTests : BaseUnitTest<ConfirmationSettingsModule>
 {
-    public ConfirmationSettingsModule_Reset_UnitTests(ITestOutputHelper output) : base(output) { }
+    public ConfirmationSettingsModule_Reset_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public void ShouldUpdateAndThenResetSettingsModule_WhenCallingResetAfterUpdate()

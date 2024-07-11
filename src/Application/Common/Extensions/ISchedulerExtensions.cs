@@ -4,14 +4,18 @@ namespace PlexRipper.Application;
 
 public static class ISchedulerExtensions
 {
-    public static Task<bool> IsJobRunningAsync(this IScheduler scheduler, JobKey key, CancellationToken cancellationToken = default) =>
-        scheduler.CheckExists(key, cancellationToken);
+    public static Task<bool> IsJobRunningAsync(
+        this IScheduler scheduler,
+        JobKey key,
+        CancellationToken cancellationToken = default
+    ) => scheduler.CheckExists(key, cancellationToken);
 
     public static async Task<Result> ScheduleJobAsync(
         this IScheduler scheduler,
         IJobDetail jobDetail,
         ITrigger trigger,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
@@ -24,7 +28,11 @@ public static class ISchedulerExtensions
         }
     }
 
-    public static async Task AwaitJobRunning(this IScheduler scheduler, JobKey key, CancellationToken cancellationToken = default)
+    public static async Task AwaitJobRunning(
+        this IScheduler scheduler,
+        JobKey key,
+        CancellationToken cancellationToken = default
+    )
     {
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -44,9 +52,6 @@ public static class ISchedulerExtensions
     public static async Task<List<JobDataMap>> GetRunningJobDataMaps(this IScheduler scheduler, Type jobType)
     {
         var jobs = await scheduler.GetCurrentlyExecutingJobs();
-        return jobs
-            .Where(x => x.JobInstance.GetType() == jobType)
-            .Select(x => x.JobDetail.JobDataMap)
-            .ToList();
+        return jobs.Where(x => x.JobInstance.GetType() == jobType).Select(x => x.JobDetail.JobDataMap).ToList();
     }
 }

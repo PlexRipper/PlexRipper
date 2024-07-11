@@ -10,7 +10,8 @@ public static partial class DbContextExtensions
         this IPlexRipperDbContext dbContext,
         int plexServerId,
         string fileLocationUrl,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var plexServerConnectionResult = await dbContext.GetValidPlexServerConnection(plexServerId, cancellationToken);
         if (plexServerConnectionResult.IsFailed)
@@ -33,7 +34,8 @@ public static partial class DbContextExtensions
     public static async Task<DownloadTaskKey?> GetDownloadTaskKeyAsync(
         this IPlexRipperDbContext dbContext,
         Guid guid,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         if (guid == Guid.Empty)
             return null;
@@ -61,7 +63,8 @@ public static partial class DbContextExtensions
     public static async Task<DownloadTaskType> GetDownloadTaskTypeAsync(
         this IPlexRipperDbContext dbContext,
         Guid guid,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         if (guid == Guid.Empty)
             return DownloadTaskType.None;
@@ -90,13 +93,15 @@ public static partial class DbContextExtensions
     public static Task<DownloadTaskGeneric?> GetDownloadTaskAsync(
         this IPlexRipperDbContext dbContext,
         DownloadTaskKey key,
-        CancellationToken cancellationToken = default) => dbContext.GetDownloadTaskAsync(key.Id, key.Type, cancellationToken);
+        CancellationToken cancellationToken = default
+    ) => dbContext.GetDownloadTaskAsync(key.Id, key.Type, cancellationToken);
 
     public static async Task<DownloadTaskGeneric?> GetDownloadTaskAsync(
         this IPlexRipperDbContext dbContext,
         Guid id,
         DownloadTaskType type = DownloadTaskType.None,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
@@ -110,16 +115,16 @@ public static partial class DbContextExtensions
             {
                 // DownloadTaskType.Movie
                 case DownloadTaskType.Movie:
-                    var downloadTaskMovie = await dbContext.DownloadTaskMovie
-                        .IncludeAll()
+                    var downloadTaskMovie = await dbContext
+                        .DownloadTaskMovie.IncludeAll()
                         .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
                     return downloadTaskMovie?.ToGeneric() ?? null;
 
                 // DownloadTaskType.MovieData
                 case DownloadTaskType.MovieData:
                 case DownloadTaskType.MoviePart:
-                    var downloadTaskMovieFile = await dbContext.DownloadTaskMovieFile
-                        .Include(x => x.PlexServer)
+                    var downloadTaskMovieFile = await dbContext
+                        .DownloadTaskMovieFile.Include(x => x.PlexServer)
                         .Include(x => x.PlexLibrary)
                         .Include(x => x.DownloadWorkerTasks)
                         .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
@@ -127,8 +132,8 @@ public static partial class DbContextExtensions
 
                 // DownloadTaskType.TvShow
                 case DownloadTaskType.TvShow:
-                    var downloadTaskTvShow = await dbContext.DownloadTaskTvShow
-                        .Include(x => x.PlexServer)
+                    var downloadTaskTvShow = await dbContext
+                        .DownloadTaskTvShow.Include(x => x.PlexServer)
                         .Include(x => x.PlexLibrary)
                         .Include(x => x.Children)
                         .ThenInclude(x => x.Children)
@@ -138,8 +143,8 @@ public static partial class DbContextExtensions
 
                 // DownloadTaskType.TvShowSeason
                 case DownloadTaskType.Season:
-                    var downloadTaskTvShowSeason = await dbContext.DownloadTaskTvShowSeason
-                        .Include(x => x.PlexServer)
+                    var downloadTaskTvShowSeason = await dbContext
+                        .DownloadTaskTvShowSeason.Include(x => x.PlexServer)
                         .Include(x => x.PlexLibrary)
                         .Include(x => x.Children)
                         .ThenInclude(x => x.Children)
@@ -148,8 +153,8 @@ public static partial class DbContextExtensions
 
                 // DownloadTaskType.Episode
                 case DownloadTaskType.Episode:
-                    var downloadTaskTvShowEpisode = await dbContext.DownloadTaskTvShowEpisode
-                        .Include(x => x.PlexServer)
+                    var downloadTaskTvShowEpisode = await dbContext
+                        .DownloadTaskTvShowEpisode.Include(x => x.PlexServer)
                         .Include(x => x.PlexLibrary)
                         .Include(x => x.Children)
                         .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
@@ -158,8 +163,8 @@ public static partial class DbContextExtensions
                 // DownloadTaskType.EpisodeData
                 case DownloadTaskType.EpisodeData:
                 case DownloadTaskType.EpisodePart:
-                    var downloadTaskTvShowEpisodeFile = await dbContext.DownloadTaskTvShowEpisodeFile
-                        .Include(x => x.PlexServer)
+                    var downloadTaskTvShowEpisodeFile = await dbContext
+                        .DownloadTaskTvShowEpisodeFile.Include(x => x.PlexServer)
                         .Include(x => x.PlexLibrary)
                         .Include(x => x.DownloadWorkerTasks)
                         .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
@@ -179,15 +184,16 @@ public static partial class DbContextExtensions
     public static async Task<DownloadTaskFileBase?> GetDownloadTaskFileAsync(
         this IPlexRipperDbContext dbContext,
         DownloadTaskKey key,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         switch (key.Type)
         {
             // DownloadTaskType.MovieData
             case DownloadTaskType.MovieData:
             case DownloadTaskType.MoviePart:
-                return await dbContext.DownloadTaskMovieFile
-                    .Include(x => x.PlexServer)
+                return await dbContext
+                    .DownloadTaskMovieFile.Include(x => x.PlexServer)
                     .Include(x => x.PlexLibrary)
                     .Include(x => x.DownloadWorkerTasks)
                     .FirstOrDefaultAsync(x => x.Id == key.Id, cancellationToken);
@@ -195,8 +201,8 @@ public static partial class DbContextExtensions
             // DownloadTaskType.EpisodeData
             case DownloadTaskType.EpisodeData:
             case DownloadTaskType.EpisodePart:
-                return await dbContext.DownloadTaskTvShowEpisodeFile
-                    .Include(x => x.PlexServer)
+                return await dbContext
+                    .DownloadTaskTvShowEpisodeFile.Include(x => x.PlexServer)
                     .Include(x => x.PlexLibrary)
                     .Include(x => x.DownloadWorkerTasks)
                     .FirstOrDefaultAsync(x => x.Id == key.Id, cancellationToken);
@@ -209,18 +215,23 @@ public static partial class DbContextExtensions
         this IPlexRipperDbContext dbContext,
         int plexServerId = 0,
         bool asTracking = false,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var downloadTasks = new List<DownloadTaskGeneric>();
 
-        var downloadTasksMovies = await dbContext.DownloadTaskMovie
-            .AsTracking(asTracking ? QueryTrackingBehavior.TrackAll : QueryTrackingBehavior.NoTracking)
+        var downloadTasksMovies = await dbContext
+            .DownloadTaskMovie.AsTracking(
+                asTracking ? QueryTrackingBehavior.TrackAll : QueryTrackingBehavior.NoTracking
+            )
             .IncludeAll()
             .Where(x => plexServerId <= 0 || x.PlexServerId == plexServerId)
             .ToListAsync(cancellationToken);
 
-        var downloadTasksTvShows = await dbContext.DownloadTaskTvShow
-            .AsTracking(asTracking ? QueryTrackingBehavior.TrackAll : QueryTrackingBehavior.NoTracking)
+        var downloadTasksTvShows = await dbContext
+            .DownloadTaskTvShow.AsTracking(
+                asTracking ? QueryTrackingBehavior.TrackAll : QueryTrackingBehavior.NoTracking
+            )
             .IncludeAll()
             .Where(x => plexServerId <= 0 || x.PlexServerId == plexServerId)
             .ToListAsync(cancellationToken);
@@ -238,10 +249,11 @@ public static partial class DbContextExtensions
         this IPlexRipperDbContext dbContext,
         int plexServerId,
         int mediaKey,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
-        return dbContext.DownloadTaskTvShow
-            .AsTracking()
+        return dbContext
+            .DownloadTaskTvShow.AsTracking()
             .IncludeAll()
             .FirstOrDefaultAsync(x => x.PlexServerId == plexServerId && x.Key == mediaKey, cancellationToken);
     }
@@ -250,31 +262,46 @@ public static partial class DbContextExtensions
         this IPlexRipperDbContext dbContext,
         DownloadTaskKey key,
         IDownloadTaskProgress progress,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         switch (key.Type)
         {
             case DownloadTaskType.MovieData:
-                await dbContext.DownloadTaskMovieFile.Where(x => x.Id == key.Id)
-                    .ExecuteUpdateAsync(p => p
-                        .SetProperty(x => x.Percentage, progress.Percentage)
-                        .SetProperty(x => x.DownloadSpeed, progress.DownloadSpeed)
-                        .SetProperty(x => x.DataReceived, progress.DataReceived)
-                        .SetProperty(x => x.DataTotal, progress.DataTotal), cancellationToken);
+                await dbContext
+                    .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
+                    .ExecuteUpdateAsync(
+                        p =>
+                            p.SetProperty(x => x.Percentage, progress.Percentage)
+                                .SetProperty(x => x.DownloadSpeed, progress.DownloadSpeed)
+                                .SetProperty(x => x.DataReceived, progress.DataReceived)
+                                .SetProperty(x => x.DataTotal, progress.DataTotal),
+                        cancellationToken
+                    );
                 break;
             case DownloadTaskType.EpisodeData:
-                await dbContext.DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
-                    .ExecuteUpdateAsync(p => p
-                        .SetProperty(x => x.Percentage, progress.Percentage)
-                        .SetProperty(x => x.DownloadSpeed, progress.DownloadSpeed)
-                        .SetProperty(x => x.DataReceived, progress.DataReceived)
-                        .SetProperty(x => x.DataTotal, progress.DataTotal), cancellationToken);
+                await dbContext
+                    .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
+                    .ExecuteUpdateAsync(
+                        p =>
+                            p.SetProperty(x => x.Percentage, progress.Percentage)
+                                .SetProperty(x => x.DownloadSpeed, progress.DownloadSpeed)
+                                .SetProperty(x => x.DataReceived, progress.DataReceived)
+                                .SetProperty(x => x.DataTotal, progress.DataTotal),
+                        cancellationToken
+                    );
                 break;
             case DownloadTaskType.Movie:
             case DownloadTaskType.TvShow:
             case DownloadTaskType.Season:
             case DownloadTaskType.Episode:
-                _log.Error("{Name} of type {Type} is not supported in {MethodName}", nameof(DownloadTaskType), key.Type, nameof(UpdateDownloadProgress), 0);
+                _log.Error(
+                    "{Name} of type {Type} is not supported in {MethodName}",
+                    nameof(DownloadTaskType),
+                    key.Type,
+                    nameof(UpdateDownloadProgress),
+                    0
+                );
                 return;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -284,7 +311,8 @@ public static partial class DbContextExtensions
     public static async Task<List<DownloadTaskKey>> GetDownloadableChildTaskKeys(
         this IPlexRipperDbContext dbContext,
         DownloadTaskKey key,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var downloadTask = await dbContext.GetDownloadTaskAsync(key, cancellationToken);
         if (downloadTask is null)

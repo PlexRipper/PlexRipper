@@ -12,6 +12,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="Autofac.Extras.Quartz" Version="10.0.0" />
+		<PackageReference Include="CSharpier.MsBuild" Version="0.28.2">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="FastEndpoints" Version="5.23.0" />
 		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.0" />
 		<PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="12.0.0" />

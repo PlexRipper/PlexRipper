@@ -9,16 +9,19 @@ public partial class FakePlexApiData
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
-        var mediaContainer =
-            new Faker<LibrariesResponseMediaContainer>()
-                .StrictMode(true)
-                .UseSeed(config.Seed)
-                .RuleFor(x => x.Size, _ => 0)
-                .RuleFor(x => x.AllowSync, f => f.Random.Bool())
-                .RuleFor(x => x.Title1, f => f.Company.CompanyName())
-                .RuleFor(x => x.Directory, _ => GetLibrariesResponseDirectory(options)
-                    .Generate(config.LibraryCount))
-                .FinishWith((_, container) => { container.Size = container.Directory.Count; });
+        var mediaContainer = new Faker<LibrariesResponseMediaContainer>()
+            .StrictMode(true)
+            .UseSeed(config.Seed)
+            .RuleFor(x => x.Size, _ => 0)
+            .RuleFor(x => x.AllowSync, f => f.Random.Bool())
+            .RuleFor(x => x.Title1, f => f.Company.CompanyName())
+            .RuleFor(x => x.Directory, _ => GetLibrariesResponseDirectory(options).Generate(config.LibraryCount))
+            .FinishWith(
+                (_, container) =>
+                {
+                    container.Size = container.Directory.Count;
+                }
+            );
 
         return new Faker<LibrariesResponse>()
             .StrictMode(true)
@@ -27,7 +30,9 @@ public partial class FakePlexApiData
             .Generate();
     }
 
-    private static Faker<LibrariesResponseDirectory> GetLibrariesResponseDirectory(Action<PlexApiDataConfig> options = null)
+    private static Faker<LibrariesResponseDirectory> GetLibrariesResponseDirectory(
+        Action<PlexApiDataConfig> options = null
+    )
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
@@ -54,16 +59,20 @@ public partial class FakePlexApiData
             .RuleFor(x => x.IsDirectory, f => f.Random.Bool())
             .RuleFor(x => x.ContentChangedAt, f => f.Date.Recent())
             .RuleFor(x => x.Hidden, _ => 0)
-            .RuleFor(x => x.Location, f => new List<LibrariesResponseLocation>()
-            {
+            .RuleFor(
+                x => x.Location,
+                f => new List<LibrariesResponseLocation>()
                 {
-                    new()
                     {
-                        Id = f.Random.Number(100000),
-                        Path = f.System.DirectoryPath(),
-                    }
-                },
-            })
-            .FinishWith((f, directory) => { directory.Composite = $"/library/sections/{directory.Key}/composite/{f.Random.Number(100000)}"; });
+                        new() { Id = f.Random.Number(100000), Path = f.System.DirectoryPath(), }
+                    },
+                }
+            )
+            .FinishWith(
+                (f, directory) =>
+                {
+                    directory.Composite = $"/library/sections/{directory.Key}/composite/{f.Random.Number(100000)}";
+                }
+            );
     }
 }

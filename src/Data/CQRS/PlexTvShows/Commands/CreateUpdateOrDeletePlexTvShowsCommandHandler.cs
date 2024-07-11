@@ -21,27 +21,37 @@ public class CreateUpdateOrDeletePlexTvShowsCommandValidator : AbstractValidator
             .ChildRules(plexTvShow =>
             {
                 plexTvShow.RuleFor(x => x.Key).GreaterThan(0);
-                plexTvShow.RuleForEach(x => x.Seasons).ChildRules(plexTvShowSeason => { plexTvShowSeason.RuleFor(x => x.Key).GreaterThan(0); });
+                plexTvShow
+                    .RuleForEach(x => x.Seasons)
+                    .ChildRules(plexTvShowSeason =>
+                    {
+                        plexTvShowSeason.RuleFor(x => x.Key).GreaterThan(0);
+                    });
             });
     }
 }
 
-public class CreateUpdateOrDeletePlexTvShowsCommandHandler : BaseHandler, IRequestHandler<CreateUpdateOrDeletePlexTvShowsCommand, Result<bool>>
+public class CreateUpdateOrDeletePlexTvShowsCommandHandler
+    : BaseHandler,
+        IRequestHandler<CreateUpdateOrDeletePlexTvShowsCommand, Result<bool>>
 {
-    private readonly BulkConfig _config = new()
-    {
-        SetOutputIdentity = true,
-        PreserveInsertOrder = true,
-    };
+    private readonly BulkConfig _config = new() { SetOutputIdentity = true, PreserveInsertOrder = true, };
 
-    public CreateUpdateOrDeletePlexTvShowsCommandHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public CreateUpdateOrDeletePlexTvShowsCommandHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
-    public async Task<Result<bool>> Handle(CreateUpdateOrDeletePlexTvShowsCommand command, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(
+        CreateUpdateOrDeletePlexTvShowsCommand command,
+        CancellationToken cancellationToken
+    )
     {
         var plexLibrary = command.PlexLibrary;
 
-        _log.Debug("Starting adding, updating or deleting of tv shows in library: {PlexLibraryName} with id:  {PlexLibraryId}", plexLibrary.Title,
-            plexLibrary.Id);
+        _log.Debug(
+            "Starting adding, updating or deleting of tv shows in library: {PlexLibraryName} with id:  {PlexLibraryId}",
+            plexLibrary.Title,
+            plexLibrary.Id
+        );
 
         var stopWatch = new Stopwatch();
         stopWatch.Start();
@@ -74,7 +84,8 @@ public class CreateUpdateOrDeletePlexTvShowsCommandHandler : BaseHandler, IReque
         });
 
         // Retrieve current tv shows
-        var tvShowsInDb = await PlexTvShowsQueryable.IncludeEpisodes()
+        var tvShowsInDb = await PlexTvShowsQueryable
+            .IncludeEpisodes()
             .Where(x => x.PlexLibraryId == plexLibrary.Id)
             .ToListAsync(cancellationToken);
 
@@ -83,9 +94,14 @@ public class CreateUpdateOrDeletePlexTvShowsCommandHandler : BaseHandler, IReque
         tvShowsInDb.ForEach(x => PlexTvShowDbDict.Add(x.Key, x));
 
         // Create dictionaries on how to update the database.
-        var addTvShowDict = plexTvShowsDict.Where(x => !PlexTvShowDbDict.ContainsKey(x.Key)).ToDictionary(k => k.Key, v => v.Value);
-        var deleteTvShowDict = PlexTvShowDbDict.Where(x => !plexTvShowsDict.ContainsKey(x.Key)).ToDictionary(k => k.Key, v => v.Value);
-        var updateTvShowDict = plexTvShowsDict.Where(x => !deleteTvShowDict.ContainsKey(x.Key) && !addTvShowDict.ContainsKey(x.Key))
+        var addTvShowDict = plexTvShowsDict
+            .Where(x => !PlexTvShowDbDict.ContainsKey(x.Key))
+            .ToDictionary(k => k.Key, v => v.Value);
+        var deleteTvShowDict = PlexTvShowDbDict
+            .Where(x => !plexTvShowsDict.ContainsKey(x.Key))
+            .ToDictionary(k => k.Key, v => v.Value);
+        var updateTvShowDict = plexTvShowsDict
+            .Where(x => !deleteTvShowDict.ContainsKey(x.Key) && !addTvShowDict.ContainsKey(x.Key))
             .ToDictionary(k => k.Key, v => v.Value);
 
         var addSeasonDict = new Dictionary<int, PlexTvShowSeason>();
@@ -166,29 +182,62 @@ public class CreateUpdateOrDeletePlexTvShowsCommandHandler : BaseHandler, IReque
             // Delete seasons
             var seasonHashSet = new HashSet<int>();
             newPlexTvShow.Seasons.ForEach(x => seasonHashSet.Add(x.Key));
-            seasonList.Where(seasonDb => !seasonHashSet.Contains(seasonDb.Key)).ToList().ForEach(x => deleteSeasonDict.Add(x.Key, x));
+            seasonList
+                .Where(seasonDb => !seasonHashSet.Contains(seasonDb.Key))
+                .ToList()
+                .ForEach(x => deleteSeasonDict.Add(x.Key, x));
 
             // Delete episodes
             var episodeHashSet = new HashSet<int>();
             newPlexTvShow.Seasons.ForEach(x => x.Episodes.ForEach(y => episodeHashSet.Add(y.Key)));
-            episodeList.Where(episodeDb => !episodeHashSet.Contains(episodeDb.Key)).ToList().ForEach(x => deleteEpisodeDict.Add(x.Key, x));
+            episodeList
+                .Where(episodeDb => !episodeHashSet.Contains(episodeDb.Key))
+                .ToList()
+                .ForEach(x => deleteEpisodeDict.Add(x.Key, x));
         }
 
         // Update database
         await BulkInsertTvShows(addTvShowDict, addSeasonDict, addEpisodeDict, cancellationToken);
 
-        await _dbContext.BulkUpdateAsync(updateTvShowDict.Select(x => x.Value).ToList(), _config, cancellationToken: cancellationToken);
-        await _dbContext.BulkUpdateAsync(updateSeasonDict.Select(x => x.Value).ToList(), _config, cancellationToken: cancellationToken);
-        await _dbContext.BulkUpdateAsync(updateEpisodeDict.Select(x => x.Value).ToList(), _config, cancellationToken: cancellationToken);
+        await _dbContext.BulkUpdateAsync(
+            updateTvShowDict.Select(x => x.Value).ToList(),
+            _config,
+            cancellationToken: cancellationToken
+        );
+        await _dbContext.BulkUpdateAsync(
+            updateSeasonDict.Select(x => x.Value).ToList(),
+            _config,
+            cancellationToken: cancellationToken
+        );
+        await _dbContext.BulkUpdateAsync(
+            updateEpisodeDict.Select(x => x.Value).ToList(),
+            _config,
+            cancellationToken: cancellationToken
+        );
 
-        await _dbContext.BulkDeleteAsync(deleteTvShowDict.Select(x => x.Value).ToList(), _config, cancellationToken: cancellationToken);
-        await _dbContext.BulkDeleteAsync(deleteSeasonDict.Select(x => x.Value).ToList(), _config, cancellationToken: cancellationToken);
-        await _dbContext.BulkDeleteAsync(deleteEpisodeDict.Select(x => x.Value).ToList(), _config, cancellationToken: cancellationToken);
+        await _dbContext.BulkDeleteAsync(
+            deleteTvShowDict.Select(x => x.Value).ToList(),
+            _config,
+            cancellationToken: cancellationToken
+        );
+        await _dbContext.BulkDeleteAsync(
+            deleteSeasonDict.Select(x => x.Value).ToList(),
+            _config,
+            cancellationToken: cancellationToken
+        );
+        await _dbContext.BulkDeleteAsync(
+            deleteEpisodeDict.Select(x => x.Value).ToList(),
+            _config,
+            cancellationToken: cancellationToken
+        );
 
         stopWatch.Stop();
         _log.Information(
-            "Finished updating plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalSeconds} seconds", plexLibrary.Title, plexLibrary.Id,
-            stopWatch.Elapsed.TotalSeconds);
+            "Finished updating plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalSeconds} seconds",
+            plexLibrary.Title,
+            plexLibrary.Id,
+            stopWatch.Elapsed.TotalSeconds
+        );
         return Result.Ok(true);
     }
 
@@ -196,7 +245,8 @@ public class CreateUpdateOrDeletePlexTvShowsCommandHandler : BaseHandler, IReque
         Dictionary<int, PlexTvShow> tvShowDict,
         Dictionary<int, PlexTvShowSeason> seasonDict,
         Dictionary<int, PlexTvShowEpisode> episodeDict,
-        CancellationToken token)
+        CancellationToken token
+    )
     {
         // Add tvShows to DB.
         var tvShowAddList = tvShowDict.Select(x => x.Value).ToList();
@@ -204,11 +254,13 @@ public class CreateUpdateOrDeletePlexTvShowsCommandHandler : BaseHandler, IReque
 
         // Add tvShowId to every season and episode and then insert seasons in DB.
         var tvShowSeasonAddList = seasonDict.Select(x => x.Value).ToList();
-        tvShowAddList.ForEach(tvShow => tvShow.Seasons.ForEach(season =>
-        {
-            season.TvShowId = tvShow.Id;
-            season.Episodes.ForEach(episode => episode.TvShowId = tvShow.Id);
-        }));
+        tvShowAddList.ForEach(tvShow =>
+            tvShow.Seasons.ForEach(season =>
+            {
+                season.TvShowId = tvShow.Id;
+                season.Episodes.ForEach(episode => episode.TvShowId = tvShow.Id);
+            })
+        );
         tvShowSeasonAddList.ForEach(season =>
         {
             season.TvShowId = season.TvShow.Id;

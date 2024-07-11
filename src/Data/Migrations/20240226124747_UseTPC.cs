@@ -12,82 +12,97 @@ namespace PlexRipper.Data.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadWorkerTasks_DownloadTaskMovieFile_DownloadTaskMovieFileId",
-                table: "DownloadWorkerTasks");
+                table: "DownloadWorkerTasks"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadWorkerTasks_DownloadTaskTvShowEpisodeFile_DownloadTaskTvShowEpisodeFileId",
-                table: "DownloadWorkerTasks");
+                table: "DownloadWorkerTasks"
+            );
 
             migrationBuilder.DropIndex(
                 name: "IX_DownloadWorkerTasks_DownloadTaskMovieFileId",
-                table: "DownloadWorkerTasks");
+                table: "DownloadWorkerTasks"
+            );
 
-            migrationBuilder.DropColumn(
-                name: "DownloadTaskMovieFileId",
-                table: "DownloadWorkerTasks");
+            migrationBuilder.DropColumn(name: "DownloadTaskMovieFileId", table: "DownloadWorkerTasks");
 
             migrationBuilder.RenameColumn(
                 name: "DownloadTaskTvShowEpisodeFileId",
                 table: "DownloadWorkerTasks",
-                newName: "DownloadTaskFileBaseId");
+                newName: "DownloadTaskFileBaseId"
+            );
 
             migrationBuilder.RenameIndex(
                 name: "IX_DownloadWorkerTasks_DownloadTaskTvShowEpisodeFileId",
                 table: "DownloadWorkerTasks",
-                newName: "IX_DownloadWorkerTasks_DownloadTaskFileBaseId");
+                newName: "IX_DownloadWorkerTasks_DownloadTaskFileBaseId"
+            );
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "DownloadTaskTvShowSeason",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "Id",
+                    table: "DownloadTaskTvShowSeason",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .OldAnnotation("Sqlite:Autoincrement", true);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "DownloadTaskTvShowEpisodeFile",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "Id",
+                    table: "DownloadTaskTvShowEpisodeFile",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .OldAnnotation("Sqlite:Autoincrement", true);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "DownloadTaskTvShowEpisode",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "Id",
+                    table: "DownloadTaskTvShowEpisode",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .OldAnnotation("Sqlite:Autoincrement", true);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "DownloadTaskTvShow",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "Id",
+                    table: "DownloadTaskTvShow",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .OldAnnotation("Sqlite:Autoincrement", true);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "DownloadTaskMovieFile",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "Id",
+                    table: "DownloadTaskMovieFile",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .OldAnnotation("Sqlite:Autoincrement", true);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "DownloadTaskMovie",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "Id",
+                    table: "DownloadTaskMovie",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .OldAnnotation("Sqlite:Autoincrement", true);
         }
 
@@ -97,91 +112,109 @@ namespace PlexRipper.Data.Migrations
             migrationBuilder.RenameColumn(
                 name: "DownloadTaskFileBaseId",
                 table: "DownloadWorkerTasks",
-                newName: "DownloadTaskTvShowEpisodeFileId");
+                newName: "DownloadTaskTvShowEpisodeFileId"
+            );
 
             migrationBuilder.RenameIndex(
                 name: "IX_DownloadWorkerTasks_DownloadTaskFileBaseId",
                 table: "DownloadWorkerTasks",
-                newName: "IX_DownloadWorkerTasks_DownloadTaskTvShowEpisodeFileId");
+                newName: "IX_DownloadWorkerTasks_DownloadTaskTvShowEpisodeFileId"
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "DownloadTaskMovieFileId",
                 table: "DownloadWorkerTasks",
                 type: "INTEGER",
-                nullable: true);
+                nullable: true
+            );
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "DownloadTaskTvShowSeason",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "Id",
+                    table: "DownloadTaskTvShowSeason",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Sqlite:Autoincrement", true);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "DownloadTaskTvShowEpisodeFile",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "Id",
+                    table: "DownloadTaskTvShowEpisodeFile",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Sqlite:Autoincrement", true);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "DownloadTaskTvShowEpisode",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "Id",
+                    table: "DownloadTaskTvShowEpisode",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Sqlite:Autoincrement", true);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "DownloadTaskTvShow",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "Id",
+                    table: "DownloadTaskTvShow",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Sqlite:Autoincrement", true);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "DownloadTaskMovieFile",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "Id",
+                    table: "DownloadTaskMovieFile",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Sqlite:Autoincrement", true);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "DownloadTaskMovie",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<int>(
+                    name: "Id",
+                    table: "DownloadTaskMovie",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(int),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Sqlite:Autoincrement", true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadWorkerTasks_DownloadTaskMovieFileId",
                 table: "DownloadWorkerTasks",
-                column: "DownloadTaskMovieFileId");
+                column: "DownloadTaskMovieFileId"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadWorkerTasks_DownloadTaskMovieFile_DownloadTaskMovieFileId",
                 table: "DownloadWorkerTasks",
                 column: "DownloadTaskMovieFileId",
                 principalTable: "DownloadTaskMovieFile",
-                principalColumn: "Id");
+                principalColumn: "Id"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadWorkerTasks_DownloadTaskTvShowEpisodeFile_DownloadTaskTvShowEpisodeFileId",
                 table: "DownloadWorkerTasks",
                 column: "DownloadTaskTvShowEpisodeFileId",
                 principalTable: "DownloadTaskTvShowEpisodeFile",
-                principalColumn: "Id");
+                principalColumn: "Id"
+            );
         }
     }
 }

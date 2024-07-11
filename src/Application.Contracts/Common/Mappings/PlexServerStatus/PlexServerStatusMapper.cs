@@ -18,8 +18,7 @@ public static class PlexServerStatusMapper
             PlexServerConnectionId = source.PlexServerConnectionId,
         };
 
-    public static List<PlexServerStatusDTO> ToDTO(this List<PlexServerStatus> source) =>
-        source.ConvertAll(ToDTO);
+    public static List<PlexServerStatusDTO> ToDTO(this List<PlexServerStatus> source) => source.ConvertAll(ToDTO);
 
     #endregion
 
@@ -39,8 +38,7 @@ public static class PlexServerStatusMapper
             PlexServerConnectionId = source.PlexServerConnectionId,
         };
 
-    public static List<PlexServerStatus> ToModel(this List<PlexServerStatusDTO> source) =>
-        source.ConvertAll(ToModel);
+    public static List<PlexServerStatus> ToModel(this List<PlexServerStatusDTO> source) => source.ConvertAll(ToModel);
 
     #endregion
 }

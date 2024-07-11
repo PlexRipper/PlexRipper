@@ -42,23 +42,23 @@ public class GenerateDownloadTaskMoviesCommandHandler : IRequestHandler<Generate
         if (!plexMoviesList.Any())
             return ResultExtensions.IsEmpty(nameof(plexMoviesList)).LogWarning();
 
-        _log.Debug("Creating {PlexMovieIdsCount} movie download tasks", plexMoviesList
-            .SelectMany(x => x.MediaIds)
-            .ToList()
-            .Count);
+        _log.Debug(
+            "Creating {PlexMovieIdsCount} movie download tasks",
+            plexMoviesList.SelectMany(x => x.MediaIds).ToList().Count
+        );
 
         // Create downloadTasks
         var downloadTasks = new List<DownloadTaskMovie>();
         foreach (var downloadMediaDto in plexMoviesList)
         {
-            var plexLibrary = await _dbContext.PlexLibraries
-                .Include(x => x.PlexServer)
+            var plexLibrary = await _dbContext
+                .PlexLibraries.Include(x => x.PlexServer)
                 .Include(x => x.DefaultDestination)
                 .GetAsync(downloadMediaDto.PlexLibraryId, cancellationToken);
             var plexServer = plexLibrary.PlexServer;
 
-            var plexMovies = await _dbContext.PlexMovies
-                .Where(x => downloadMediaDto.MediaIds.Contains(x.Id))
+            var plexMovies = await _dbContext
+                .PlexMovies.Where(x => downloadMediaDto.MediaIds.Contains(x.Id))
                 .ToListAsync(cancellationToken);
 
             foreach (var plexMovie in plexMovies)

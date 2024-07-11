@@ -14,7 +14,11 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
 
     private readonly UnitTestDataConfig _config;
 
-    public PlexRipperWebApplicationFactory(string memoryDbName, Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
+    public PlexRipperWebApplicationFactory(
+        string memoryDbName,
+        Action<UnitTestDataConfig> options = null,
+        MockPlexApi mockPlexApi = null
+    )
     {
         _memoryDbName = memoryDbName;
         _mockPlexApi = mockPlexApi;
@@ -23,16 +27,17 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override IHost CreateHost(IHostBuilder builder)
     {
-        builder
-            .ConfigureContainer<ContainerBuilder>(autoFacBuilder =>
-            {
-                autoFacBuilder.RegisterModule(new TestModule()
+        builder.ConfigureContainer<ContainerBuilder>(autoFacBuilder =>
+        {
+            autoFacBuilder.RegisterModule(
+                new TestModule()
                 {
                     MemoryDbName = _memoryDbName,
                     MockPlexApi = _mockPlexApi,
                     Config = _config,
-                });
-            });
+                }
+            );
+        });
         try
         {
             return base.CreateHost(builder);

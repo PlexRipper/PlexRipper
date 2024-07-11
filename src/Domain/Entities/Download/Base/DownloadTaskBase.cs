@@ -72,11 +72,12 @@ public abstract class DownloadTaskBase : BaseEntityGuid
 
     #endregion
 
-    public DownloadTaskKey ToKey() => new()
-    {
-        Type = DownloadTaskType,
-        Id = Id,
-        PlexServerId = PlexServerId,
-        PlexLibraryId = PlexLibraryId,
-    };
+    public DownloadTaskKey ToKey() =>
+        new()
+        {
+            Type = DownloadTaskType,
+            Id = Id,
+            PlexServerId = PlexServerId,
+            PlexLibraryId = PlexLibraryId,
+        };
 }

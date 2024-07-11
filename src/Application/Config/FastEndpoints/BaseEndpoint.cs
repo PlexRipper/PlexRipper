@@ -85,7 +85,11 @@ public abstract class BaseEndpointWithoutRequest<TResponse> : BaseEndpointWithou
 {
     public abstract string EndpointPath { get; }
 
-    protected async Task SendFluentResult<T>(Result<T> result, Func<T, TResponse> mapper, CancellationToken ct = default)
+    protected async Task SendFluentResult<T>(
+        Result<T> result,
+        Func<T, TResponse> mapper,
+        CancellationToken ct = default
+    )
     {
         if (result.IsSuccess)
         {

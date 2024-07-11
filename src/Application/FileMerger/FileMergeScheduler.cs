@@ -32,7 +32,12 @@ public class FileMergeScheduler : IFileMergeScheduler
         if (downloadTask is null)
             return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.Id);
 
-        _log.Here().Debug("Adding DownloadTask \"{DownloadTaskTitle}\" with id {Id} to a FileTask to be merged", downloadTask.FullTitle, downloadTask.Id);
+        _log.Here()
+            .Debug(
+                "Adding DownloadTask \"{DownloadTaskTitle}\" with id {Id} to a FileTask to be merged",
+                downloadTask.FullTitle,
+                downloadTask.Id
+            );
 
         await _dbContext.FileTasks.AddAsync(downloadTask.ToFileTask());
         _dbContext.SaveChanges();
@@ -49,15 +54,13 @@ public class FileMergeScheduler : IFileMergeScheduler
         if (await _scheduler.IsJobRunning(jobKey))
             return Result.Fail($"{nameof(FileMergeJob)} with {jobKey} already exists").LogWarning();
 
-        var job = JobBuilder.Create<FileMergeJob>()
+        var job = JobBuilder
+            .Create<FileMergeJob>()
             .UsingJobData(FileMergeJob.FileTaskId, fileTaskId)
             .WithIdentity(jobKey)
             .Build();
 
-        var trigger = TriggerBuilder.Create()
-            .WithIdentity($"{jobKey.Name}_trigger", jobKey.Group)
-            .StartNow()
-            .Build();
+        var trigger = TriggerBuilder.Create().WithIdentity($"{jobKey.Name}_trigger", jobKey.Group).StartNow().Build();
 
         await _scheduler.ScheduleJob(job, trigger);
 
@@ -69,11 +72,17 @@ public class FileMergeScheduler : IFileMergeScheduler
         if (fileTaskId <= 0)
             return ResultExtensions.IsInvalidId(nameof(fileTaskId), fileTaskId).LogWarning();
 
-        _log.Information("Stopping FileMergeJob for {NameOfDownloadFileTask)} with id: {FileTaskId}", nameof(FileTask), fileTaskId);
+        _log.Information(
+            "Stopping FileMergeJob for {NameOfDownloadFileTask)} with id: {FileTaskId}",
+            nameof(FileTask),
+            fileTaskId
+        );
 
         var jobKey = FileMergeJob.GetJobKey(fileTaskId);
         if (!await _scheduler.IsJobRunning(jobKey))
-            return Result.Fail($"{nameof(FileMergeJob)} with {jobKey} cannot be stopped because it is not running").LogWarning();
+            return Result
+                .Fail($"{nameof(FileMergeJob)} with {jobKey} cannot be stopped because it is not running")
+                .LogWarning();
 
         return Result.OkIf(await _scheduler.StopJob(jobKey), $"Failed to stop {nameof(FileTask)} with id {fileTaskId}");
     }

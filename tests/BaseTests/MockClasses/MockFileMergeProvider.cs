@@ -25,7 +25,8 @@ public class MockFileMergeStreamProvider : IFileMergeStreamProvider
         FileTask fileTask,
         Stream destination,
         Subject<long> bytesReceivedProgress,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var bytesDone = 1000 * 1024;
         foreach (var _ in fileTask.FilePaths)

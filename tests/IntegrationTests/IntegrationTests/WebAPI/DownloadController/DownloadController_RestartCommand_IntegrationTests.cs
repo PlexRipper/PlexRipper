@@ -7,14 +7,18 @@ namespace IntegrationTests.WebAPI.DownloadController;
 
 public class DownloadController_RestartCommand_IntegrationTests : BaseIntegrationTests
 {
-    public DownloadController_RestartCommand_IntegrationTests(ITestOutputHelper output) : base(output) { }
+    public DownloadController_RestartCommand_IntegrationTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldRestartCompletedMovieDownloadTaskOnRestartCommand_WhenTaskIsDoneDownloading()
     {
         // Arrange
         Seed = 5594564;
-        var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
+        var serverUri = SpinUpPlexServer(config =>
+        {
+            config.DownloadFileSizeInMb = 50;
+        });
 
         await SetupDatabase(config =>
         {
@@ -34,9 +38,11 @@ public class DownloadController_RestartCommand_IntegrationTests : BaseIntegratio
         await DbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.Completed);
 
         // Act
-        var response =
-            await Container.ApiClient.GETAsync<RestartDownloadTaskEndpoint, RestartDownloadTaskEndpointRequest, ResultDTO>(
-                new RestartDownloadTaskEndpointRequest(downloadTask.Id));
+        var response = await Container.ApiClient.GETAsync<
+            RestartDownloadTaskEndpoint,
+            RestartDownloadTaskEndpointRequest,
+            ResultDTO
+        >(new RestartDownloadTaskEndpointRequest(downloadTask.Id));
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         var downloadTaskDb = await DbContext.GetDownloadTaskAsync(downloadTask.Id);

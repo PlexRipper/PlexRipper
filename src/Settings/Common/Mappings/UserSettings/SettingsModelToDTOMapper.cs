@@ -51,8 +51,7 @@ public static class SettingsModelToDTOMapper
     public static DisplaySettings ToModel(this DisplaySettingsDTO dto) =>
         new() { TvShowViewMode = dto.TvShowViewMode, MovieViewMode = dto.MovieViewMode };
 
-    public static LanguageSettings ToModel(this LanguageSettingsDTO dto) =>
-        new() { Language = dto.Language };
+    public static LanguageSettings ToModel(this LanguageSettingsDTO dto) => new() { Language = dto.Language };
 
     public static DownloadManagerSettings ToModel(this DownloadManagerSettingsDTO dto) =>
         new() { DownloadSegments = dto.DownloadSegments };
@@ -115,8 +114,7 @@ public static class SettingsModelToDTOMapper
     public static DisplaySettingsDTO ToDTO(this DisplaySettings model) =>
         new() { TvShowViewMode = model.TvShowViewMode, MovieViewMode = model.MovieViewMode };
 
-    public static LanguageSettingsDTO ToDTO(this LanguageSettings model) =>
-        new() { Language = model.Language };
+    public static LanguageSettingsDTO ToDTO(this LanguageSettings model) => new() { Language = model.Language };
 
     public static DownloadManagerSettingsDTO ToDTO(this DownloadManagerSettings model) =>
         new() { DownloadSegments = model.DownloadSegments };
@@ -133,32 +131,25 @@ public static class SettingsModelToDTOMapper
 
     // Interfaces ToDTO
 
-    public static SettingsModelDTO ToDTO(this ISettingsModel model) =>
-        (model as SettingsModel).ToDTO();
+    public static SettingsModelDTO ToDTO(this ISettingsModel model) => (model as SettingsModel).ToDTO();
 
-    public static GeneralSettingsDTO ToDTO(this IGeneralSettings model) =>
-        (model as GeneralSettings).ToDTO();
+    public static GeneralSettingsDTO ToDTO(this IGeneralSettings model) => (model as GeneralSettings).ToDTO();
 
     public static ConfirmationSettingsDTO ToDTO(this IConfirmationSettings model) =>
         (model as ConfirmationSettings).ToDTO();
 
-    public static DateTimeSettingsDTO ToDTO(this IDateTimeSettings model) =>
-        (model as DateTimeSettings).ToDTO();
+    public static DateTimeSettingsDTO ToDTO(this IDateTimeSettings model) => (model as DateTimeSettings).ToDTO();
 
-    public static DisplaySettingsDTO ToDTO(this IDisplaySettings model) =>
-        (model as DisplaySettings).ToDTO();
+    public static DisplaySettingsDTO ToDTO(this IDisplaySettings model) => (model as DisplaySettings).ToDTO();
 
-    public static LanguageSettingsDTO ToDTO(this ILanguageSettings model) =>
-        (model as LanguageSettings).ToDTO();
+    public static LanguageSettingsDTO ToDTO(this ILanguageSettings model) => (model as LanguageSettings).ToDTO();
 
     public static DownloadManagerSettingsDTO ToDTO(this IDownloadManagerSettings model) =>
         (model as DownloadManagerSettings).ToDTO();
 
-    public static ServerSettingsDTO ToDTO(this IServerSettings model) =>
-        (model as ServerSettings).ToDTO();
+    public static ServerSettingsDTO ToDTO(this IServerSettings model) => (model as ServerSettings).ToDTO();
 
-    public static DebugSettingsDTO ToDTO(this IDebugSettings model) =>
-        (model as DebugSettings).ToDTO();
+    public static DebugSettingsDTO ToDTO(this IDebugSettings model) => (model as DebugSettings).ToDTO();
 
     #endregion
 }

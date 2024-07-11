@@ -25,7 +25,6 @@ public static partial class FakeData
             .RuleFor(x => x.OwnerId, f => f.Random.Int(1000, 100000))
             .RuleFor(x => x.PlexServerOwnerUsername, f => f.Name.LastName())
             .RuleFor(x => x.PublicAddress, f => f.Internet.Ip())
-
             // Server flags
             .RuleFor(x => x.Owned, f => f.Random.Bool())
             .RuleFor(x => x.Home, f => f.Random.Bool())
@@ -106,7 +105,8 @@ public static partial class FakeData
     public static List<PlexAccountServer> GetPlexAccountServer(
         PlexAccount plexAccount,
         List<PlexServer> plexServers,
-        int seed = 0)
+        int seed = 0
+    )
     {
         var index = 0;
         return new Faker<PlexAccountServer>()
@@ -124,7 +124,8 @@ public static partial class FakeData
     public static List<ServerAccessTokenDTO> GetServerAccessTokenDTO(
         PlexAccount plexAccount,
         List<PlexServer> plexServers,
-        int seed = 0)
+        int seed = 0
+    )
     {
         var index = 0;
         return new Faker<ServerAccessTokenDTO>()

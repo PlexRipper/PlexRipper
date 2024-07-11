@@ -13,7 +13,6 @@ public class DownloadTaskEpisodeFileConfiguration : IEntityTypeConfiguration<Dow
             .HasConversion(x => x.ToDownloadStatusString(), x => x.ToDownloadStatus())
             .IsUnicode(false);
 
-        builder.Property(c => c.FileName)
-            .UseCollation(OrderByNaturalExtensions.CollationName);
+        builder.Property(c => c.FileName).UseCollation(OrderByNaturalExtensions.CollationName);
     }
 }

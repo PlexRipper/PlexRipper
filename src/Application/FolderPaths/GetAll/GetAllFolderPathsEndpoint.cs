@@ -19,8 +19,7 @@ public class GetAllFolderPathsEndpoint : BaseEndpointWithoutRequest<List<FolderP
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<FolderPathDTO>>)));
+        Description(x => x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<FolderPathDTO>>)));
     }
 
     public override async Task HandleAsync(CancellationToken ct)

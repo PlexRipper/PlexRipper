@@ -5,7 +5,8 @@ namespace Data.UnitTests.PlexServers.Commands;
 
 public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTest
 {
-    public AddOrUpdatePlexAccountServersCommandHandler_UnitTests(ITestOutputHelper output) : base(output) { }
+    public AddOrUpdatePlexAccountServersCommandHandler_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldAddPlexAccountServerAssociations_WhenNoneExistsYet()
@@ -31,17 +32,16 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         // Assert
         ResetDbContext();
         result.IsSuccess.ShouldBeTrue();
-        var plexAccountServers = DbContext
-            .PlexAccountServers
-            .Include(x => x.PlexServer)
-            .ToList();
+        var plexAccountServers = DbContext.PlexAccountServers.Include(x => x.PlexServer).ToList();
         plexAccountServers.Count.ShouldBe(serverAccessTokens.Count);
 
         foreach (var serverAccessToken in serverAccessTokens)
             plexAccountServers
-                .Any(x => x.PlexServer.MachineIdentifier == serverAccessToken.MachineIdentifier
-                          && x.AuthToken == serverAccessToken.AccessToken
-                          && x.PlexAccountId == plexAccount.Id)
+                .Any(x =>
+                    x.PlexServer.MachineIdentifier == serverAccessToken.MachineIdentifier
+                    && x.AuthToken == serverAccessToken.AccessToken
+                    && x.PlexAccountId == plexAccount.Id
+                )
                 .ShouldBeTrue();
     }
 
@@ -73,17 +73,18 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         ResetDbContext();
         result.IsSuccess.ShouldBeTrue();
         var plexAccountServers2 = DbContext
-            .PlexAccountServers
-            .Include(x => x.PlexServer)
+            .PlexAccountServers.Include(x => x.PlexServer)
             .Include(x => x.PlexAccount)
             .ToList();
         plexAccountServers2.Count.ShouldBe(serverAccessTokens.Count);
 
         foreach (var serverAccessToken in serverAccessTokens)
             plexAccountServers2
-                .Any(x => x.PlexServer.MachineIdentifier == serverAccessToken.MachineIdentifier
-                          && x.AuthToken == "######"
-                          && x.PlexAccountId == plexAccount.Id)
+                .Any(x =>
+                    x.PlexServer.MachineIdentifier == serverAccessToken.MachineIdentifier
+                    && x.AuthToken == "######"
+                    && x.PlexAccountId == plexAccount.Id
+                )
                 .ShouldBeTrue();
     }
 }

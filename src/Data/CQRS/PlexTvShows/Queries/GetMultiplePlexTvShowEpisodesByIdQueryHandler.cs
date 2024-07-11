@@ -14,12 +14,17 @@ public class GetMultiplePlexTvShowEpisodesByIdQueryValidator : AbstractValidator
     }
 }
 
-public class GetMultiplePlexTvShowEpisodesByIdQueryHandler : BaseHandler,
-    IRequestHandler<GetMultiplePlexTvShowEpisodesByIdQuery, Result<List<PlexTvShowEpisode>>>
+public class GetMultiplePlexTvShowEpisodesByIdQueryHandler
+    : BaseHandler,
+        IRequestHandler<GetMultiplePlexTvShowEpisodesByIdQuery, Result<List<PlexTvShowEpisode>>>
 {
-    public GetMultiplePlexTvShowEpisodesByIdQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public GetMultiplePlexTvShowEpisodesByIdQueryHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
-    public async Task<Result<List<PlexTvShowEpisode>>> Handle(GetMultiplePlexTvShowEpisodesByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<PlexTvShowEpisode>>> Handle(
+        GetMultiplePlexTvShowEpisodesByIdQuery request,
+        CancellationToken cancellationToken
+    )
     {
         var query = PlexTvShowEpisodesQueryable;
 
@@ -31,14 +36,10 @@ public class GetMultiplePlexTvShowEpisodesByIdQueryHandler : BaseHandler,
 
         if (request.IncludeTvShowAndSeason)
         {
-            query = query
-                .Include(x => x.TvShowSeason)
-                .ThenInclude(x => x.TvShow);
+            query = query.Include(x => x.TvShowSeason).ThenInclude(x => x.TvShow);
         }
 
-        var plexTvShowEpisodes = await query
-            .Where(x => request.Ids.Contains(x.Id))
-            .ToListAsync(cancellationToken);
+        var plexTvShowEpisodes = await query.Where(x => request.Ids.Contains(x.Id)).ToListAsync(cancellationToken);
 
         return Result.Ok(plexTvShowEpisodes);
     }

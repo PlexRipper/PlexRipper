@@ -32,15 +32,16 @@ public class HideNotificationEndpoint : BaseEndpoint<HideNotificationEndpointReq
     {
         Put(EndpointPath);
         AllowAnonymous();
-        Description(x => x
-            .Produces(StatusCodes.Status200OK, typeof(ResultDTO))
-            .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO)));
+        Description(x =>
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+        );
     }
 
     public override async Task HandleAsync(HideNotificationEndpointRequest req, CancellationToken ct)
     {
-        await _dbContext.Notifications
-            .Where(x => x.Id == req.NotificationId)
+        await _dbContext
+            .Notifications.Where(x => x.Id == req.NotificationId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.Hidden, true), ct);
 
         await SendFluentResult(Result.Ok(), ct);

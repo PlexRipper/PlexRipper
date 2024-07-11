@@ -7,7 +7,8 @@ namespace Settings.UnitTests.Modules;
 
 public class DateTimeSettingsModule_SetFromJson_UnitTests : BaseUnitTest<DateTimeSettingsModule>
 {
-    public DateTimeSettingsModule_SetFromJson_UnitTests(ITestOutputHelper output) : base(output) { }
+    public DateTimeSettingsModule_SetFromJson_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public void ShouldSetPropertiesFromJson_WhenValidJsonSettingsAreGiven()
@@ -15,10 +16,18 @@ public class DateTimeSettingsModule_SetFromJson_UnitTests : BaseUnitTest<DateTim
         // Arrange
         var settingsModel = new SettingsModel
         {
-            DateTimeSettings = FakeData.GetDateTimeSettings(config => { config.Seed = 3246; }).Generate(),
+            DateTimeSettings = FakeData
+                .GetDateTimeSettings(config =>
+                {
+                    config.Seed = 3246;
+                })
+                .Generate(),
         };
         var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
-        var loadedSettings = JsonSerializer.Deserialize<JsonElement>(json, DefaultJsonSerializerOptions.ConfigCaptialized);
+        var loadedSettings = JsonSerializer.Deserialize<JsonElement>(
+            json,
+            DefaultJsonSerializerOptions.ConfigCaptialized
+        );
 
         // Act
         var updateResult = _sut.SetFromJson(loadedSettings);
@@ -39,13 +48,24 @@ public class DateTimeSettingsModule_SetFromJson_UnitTests : BaseUnitTest<DateTim
         // Arrange
         var settingsModel = new SettingsModel
         {
-            DateTimeSettings = FakeData.GetDateTimeSettings(config => { config.Seed = 234; }).Generate(),
+            DateTimeSettings = FakeData
+                .GetDateTimeSettings(config =>
+                {
+                    config.Seed = 234;
+                })
+                .Generate(),
         };
         var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
 
         // ** Remove property to make corrupted
-        json = json.Replace($"\"{nameof(DateTimeSettings.TimeFormat)}\":\"{settingsModel.DateTimeSettings.TimeFormat}\",", "");
-        var loadedSettings = JsonSerializer.Deserialize<JsonElement>(json, DefaultJsonSerializerOptions.ConfigCaptialized);
+        json = json.Replace(
+            $"\"{nameof(DateTimeSettings.TimeFormat)}\":\"{settingsModel.DateTimeSettings.TimeFormat}\",",
+            ""
+        );
+        var loadedSettings = JsonSerializer.Deserialize<JsonElement>(
+            json,
+            DefaultJsonSerializerOptions.ConfigCaptialized
+        );
 
         // Act
         var updateResult = _sut.SetFromJson(loadedSettings);

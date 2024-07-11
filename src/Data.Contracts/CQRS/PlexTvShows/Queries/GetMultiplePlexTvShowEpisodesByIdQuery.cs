@@ -6,7 +6,12 @@ namespace Data.Contracts;
 
 public class GetMultiplePlexTvShowEpisodesByIdQuery : IRequest<Result<List<PlexTvShowEpisode>>>
 {
-    public GetMultiplePlexTvShowEpisodesByIdQuery(List<int> ids, bool includeTvShowAndSeason = false, bool includeLibrary = false, bool includeServer = false)
+    public GetMultiplePlexTvShowEpisodesByIdQuery(
+        List<int> ids,
+        bool includeTvShowAndSeason = false,
+        bool includeLibrary = false,
+        bool includeServer = false
+    )
     {
         Ids = ids;
         IncludeTvShowAndSeason = includeTvShowAndSeason;

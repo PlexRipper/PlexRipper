@@ -13,19 +13,20 @@ namespace PlexRipper.Data.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTaskMovieFile_DownloadTaskMovie_ParentId",
-                table: "DownloadTaskMovieFile");
+                table: "DownloadTaskMovieFile"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTaskTvShowEpisodeFile_DownloadTaskTvShowEpisode_ParentId",
-                table: "DownloadTaskTvShowEpisodeFile");
+                table: "DownloadTaskTvShowEpisodeFile"
+            );
 
             migrationBuilder.DropIndex(
                 name: "IX_DownloadTaskTvShowEpisodeFile_ParentId",
-                table: "DownloadTaskTvShowEpisodeFile");
+                table: "DownloadTaskTvShowEpisodeFile"
+            );
 
-            migrationBuilder.DropIndex(
-                name: "IX_DownloadTaskMovieFile_ParentId",
-                table: "DownloadTaskMovieFile");
+            migrationBuilder.DropIndex(name: "IX_DownloadTaskMovieFile_ParentId", table: "DownloadTaskMovieFile");
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "DownloadTaskFileBaseId",
@@ -34,7 +35,8 @@ namespace PlexRipper.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "INTEGER",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "DownloadTaskTvShowId",
@@ -43,7 +45,8 @@ namespace PlexRipper.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "INTEGER",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "Id",
@@ -51,7 +54,8 @@ namespace PlexRipper.Data.Migrations
                 type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "Id",
@@ -59,13 +63,15 @@ namespace PlexRipper.Data.Migrations
                 type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AddColumn<Guid>(
                 name: "ParentId1",
                 table: "DownloadTaskTvShowEpisodeFile",
                 type: "TEXT",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "DownloadTaskTvShowSeasonId",
@@ -74,7 +80,8 @@ namespace PlexRipper.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "INTEGER",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "Id",
@@ -82,7 +89,8 @@ namespace PlexRipper.Data.Migrations
                 type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "Id",
@@ -90,7 +98,8 @@ namespace PlexRipper.Data.Migrations
                 type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "Id",
@@ -98,13 +107,15 @@ namespace PlexRipper.Data.Migrations
                 type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.AddColumn<Guid>(
                 name: "ParentId1",
                 table: "DownloadTaskMovieFile",
                 type: "TEXT",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "Id",
@@ -112,31 +123,36 @@ namespace PlexRipper.Data.Migrations
                 type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskTvShowEpisodeFile_ParentId1",
                 table: "DownloadTaskTvShowEpisodeFile",
-                column: "ParentId1");
+                column: "ParentId1"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskMovieFile_ParentId1",
                 table: "DownloadTaskMovieFile",
-                column: "ParentId1");
+                column: "ParentId1"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTaskMovieFile_DownloadTaskMovie_ParentId1",
                 table: "DownloadTaskMovieFile",
                 column: "ParentId1",
                 principalTable: "DownloadTaskMovie",
-                principalColumn: "Id");
+                principalColumn: "Id"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTaskTvShowEpisodeFile_DownloadTaskTvShowEpisode_ParentId1",
                 table: "DownloadTaskTvShowEpisodeFile",
                 column: "ParentId1",
                 principalTable: "DownloadTaskTvShowEpisode",
-                principalColumn: "Id");
+                principalColumn: "Id"
+            );
         }
 
         /// <inheritdoc />
@@ -144,27 +160,24 @@ namespace PlexRipper.Data.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTaskMovieFile_DownloadTaskMovie_ParentId1",
-                table: "DownloadTaskMovieFile");
+                table: "DownloadTaskMovieFile"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_DownloadTaskTvShowEpisodeFile_DownloadTaskTvShowEpisode_ParentId1",
-                table: "DownloadTaskTvShowEpisodeFile");
+                table: "DownloadTaskTvShowEpisodeFile"
+            );
 
             migrationBuilder.DropIndex(
                 name: "IX_DownloadTaskTvShowEpisodeFile_ParentId1",
-                table: "DownloadTaskTvShowEpisodeFile");
+                table: "DownloadTaskTvShowEpisodeFile"
+            );
 
-            migrationBuilder.DropIndex(
-                name: "IX_DownloadTaskMovieFile_ParentId1",
-                table: "DownloadTaskMovieFile");
+            migrationBuilder.DropIndex(name: "IX_DownloadTaskMovieFile_ParentId1", table: "DownloadTaskMovieFile");
 
-            migrationBuilder.DropColumn(
-                name: "ParentId1",
-                table: "DownloadTaskTvShowEpisodeFile");
+            migrationBuilder.DropColumn(name: "ParentId1", table: "DownloadTaskTvShowEpisodeFile");
 
-            migrationBuilder.DropColumn(
-                name: "ParentId1",
-                table: "DownloadTaskMovieFile");
+            migrationBuilder.DropColumn(name: "ParentId1", table: "DownloadTaskMovieFile");
 
             migrationBuilder.AlterColumn<int>(
                 name: "DownloadTaskFileBaseId",
@@ -173,7 +186,8 @@ namespace PlexRipper.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "DownloadTaskTvShowId",
@@ -182,7 +196,8 @@ namespace PlexRipper.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "Id",
@@ -190,7 +205,8 @@ namespace PlexRipper.Data.Migrations
                 type: "INTEGER",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "Id",
@@ -198,7 +214,8 @@ namespace PlexRipper.Data.Migrations
                 type: "INTEGER",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "DownloadTaskTvShowSeasonId",
@@ -207,7 +224,8 @@ namespace PlexRipper.Data.Migrations
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "Id",
@@ -215,7 +233,8 @@ namespace PlexRipper.Data.Migrations
                 type: "INTEGER",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "Id",
@@ -223,7 +242,8 @@ namespace PlexRipper.Data.Migrations
                 type: "INTEGER",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "Id",
@@ -231,7 +251,8 @@ namespace PlexRipper.Data.Migrations
                 type: "INTEGER",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<int>(
                 name: "Id",
@@ -239,17 +260,20 @@ namespace PlexRipper.Data.Migrations
                 type: "INTEGER",
                 nullable: false,
                 oldClrType: typeof(Guid),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskTvShowEpisodeFile_ParentId",
                 table: "DownloadTaskTvShowEpisodeFile",
-                column: "ParentId");
+                column: "ParentId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DownloadTaskMovieFile_ParentId",
                 table: "DownloadTaskMovieFile",
-                column: "ParentId");
+                column: "ParentId"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTaskMovieFile_DownloadTaskMovie_ParentId",
@@ -257,7 +281,8 @@ namespace PlexRipper.Data.Migrations
                 column: "ParentId",
                 principalTable: "DownloadTaskMovie",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DownloadTaskTvShowEpisodeFile_DownloadTaskTvShowEpisode_ParentId",
@@ -265,7 +290,8 @@ namespace PlexRipper.Data.Migrations
                 column: "ParentId",
                 principalTable: "DownloadTaskTvShowEpisode",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
     }
 }

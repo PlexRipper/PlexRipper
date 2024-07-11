@@ -27,10 +27,7 @@ public static class ResultDTOMapper
             Successes = result.Successes.ToSuccessDTOs(),
         };
 
-    public static ResultDTO<TDTO> ToResultDTO<T, TDTO>(
-        this Result<T> result,
-        Func<T, TDTO> mapper
-    ) =>
+    public static ResultDTO<TDTO> ToResultDTO<T, TDTO>(this Result<T> result, Func<T, TDTO> mapper) =>
         new()
         {
             Value = mapper(result.Value),

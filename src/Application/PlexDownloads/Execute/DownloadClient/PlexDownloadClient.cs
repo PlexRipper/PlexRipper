@@ -45,7 +45,8 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
         IMediator mediator,
         IPlexRipperDbContext dbContext,
         Func<DownloadWorkerTask, DownloadWorker> downloadWorkerFactory,
-        IServerSettingsModule serverSettings)
+        IServerSettingsModule serverSettings
+    )
     {
         _log = log;
         _mediator = mediator;
@@ -97,10 +98,13 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
             return ResultExtensions.IsNull(nameof(DownloadTaskGeneric)).LogWarning();
 
         if (!DownloadTask.DownloadWorkerTasks.Any())
-            return ResultExtensions.IsEmpty($"{nameof(DownloadTaskGeneric)}.{nameof(DownloadTask.DownloadWorkerTasks)}").LogWarning();
+            return ResultExtensions
+                .IsEmpty($"{nameof(DownloadTaskGeneric)}.{nameof(DownloadTask.DownloadWorkerTasks)}")
+                .LogWarning();
 
-        _downloadWorkers.AddRange(DownloadTask.DownloadWorkerTasks
-            .Select(downloadWorkerTask => _downloadWorkerFactory(downloadWorkerTask)));
+        _downloadWorkers.AddRange(
+            DownloadTask.DownloadWorkerTasks.Select(downloadWorkerTask => _downloadWorkerFactory(downloadWorkerTask))
+        );
 
         await SetupDownloadLimitWatcher(DownloadTask);
 
@@ -131,9 +135,17 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
                 results.Add(startResult);
             }
 
-            DownloadProcessTask = Task.WhenAll(_downloadWorkers
-                .Select(x => x.DownloadProcessTask)
-                .Concat(new Task[] { _downloadWorkerTaskUpdateCompletionSource.Task, _downloadWorkerLogCompletionSource.Task }));
+            DownloadProcessTask = Task.WhenAll(
+                _downloadWorkers
+                    .Select(x => x.DownloadProcessTask)
+                    .Concat(
+                        new Task[]
+                        {
+                            _downloadWorkerTaskUpdateCompletionSource.Task,
+                            _downloadWorkerLogCompletionSource.Task
+                        }
+                    )
+            );
 
             return results.Merge();
         }
@@ -168,7 +180,8 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
         _downloadSpeedLimitSubscription?.Dispose();
         _downloadWorkerTaskUpdate?.Dispose();
         if (DownloadTask is not null)
-            _log.Here().Warning("PlexDownloadClient for DownloadTask with Id: {DownloadTaskId} was disposed", DownloadTask.Id);
+            _log.Here()
+                .Warning("PlexDownloadClient for DownloadTask with Id: {DownloadTaskId} was disposed", DownloadTask.Id);
     }
 
     #endregion
@@ -192,7 +205,9 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
         DownloadTask.Percentage = downloadWorkerUpdates.Average(x => x.Percentage);
         DownloadTask.DownloadSpeed = downloadWorkerUpdates.Sum(x => x.DownloadSpeed);
 
-        var newDownloadStatus = DownloadTaskActions.Aggregate(downloadWorkerUpdates.Select(x => x.DownloadStatus).ToList());
+        var newDownloadStatus = DownloadTaskActions.Aggregate(
+            downloadWorkerUpdates.Select(x => x.DownloadStatus).ToList()
+        );
 
         DownloadStatus = newDownloadStatus;
 
@@ -246,7 +261,8 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
 
                     _downloadWorkerTaskUpdateCompletionSource.SetResult(true);
                 },
-                () => _downloadWorkerTaskUpdateCompletionSource.SetResult(true));
+                () => _downloadWorkerTaskUpdateCompletionSource.SetResult(true)
+            );
 
         // Download Worker Log subscription
         ListenToDownloadWorkerLog = _downloadWorkers
@@ -268,7 +284,8 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
 
                 _downloadWorkerLogCompletionSource.SetResult(true);
             },
-            () => _downloadWorkerLogCompletionSource.SetResult(true));
+            () => _downloadWorkerLogCompletionSource.SetResult(true)
+        );
     }
 
     #endregion

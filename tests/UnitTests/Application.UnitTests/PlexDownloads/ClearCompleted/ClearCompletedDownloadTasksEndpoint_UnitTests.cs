@@ -7,7 +7,8 @@ namespace PlexRipper.Application.UnitTests.ClearCompleted;
 
 public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearCompletedDownloadTasksEndpoint>
 {
-    public ClearCompletedDownloadTasksEndpoint_UnitTests(ITestOutputHelper output) : base(output) { }
+    public ClearCompletedDownloadTasksEndpoint_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldRemoveOnlySpecifiedCompletedDownloadTasks_WhenClearCompletedEndpointIsCalledWithGuidList()

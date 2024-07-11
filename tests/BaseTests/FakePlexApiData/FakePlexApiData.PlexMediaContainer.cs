@@ -8,7 +8,10 @@ namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
-    public static PlexMediaContainerDTO GetPlexLibrarySectionAllResponse(LibrariesResponseDirectory library, Action<PlexApiDataConfig> options = null)
+    public static PlexMediaContainerDTO GetPlexLibrarySectionAllResponse(
+        LibrariesResponseDirectory library,
+        Action<PlexApiDataConfig> options = null
+    )
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
@@ -33,14 +36,17 @@ public partial class FakePlexApiData
                 .RuleFor(x => x.ViewGroup, _ => library.Type)
                 .RuleFor(x => x.Nocache, f => f.Random.Bool())
                 .RuleFor(x => x.ViewMode, f => f.Random.Number(100000))
-                .RuleFor(x => x.Metadata, _ => GetLibraryMediaMetadata(library.Type.ToPlexMediaType(), options).Generate(config.LibraryMetaDataCount))
+                .RuleFor(
+                    x => x.Metadata,
+                    _ =>
+                        GetLibraryMediaMetadata(library.Type.ToPlexMediaType(), options)
+                            .Generate(config.LibraryMetaDataCount)
+                )
                 .Generate(),
         };
     }
 
-    public static Faker<Metadata> GetLibraryMediaMetadata(
-        PlexMediaType type,
-        Action<PlexApiDataConfig> options = null)
+    public static Faker<Metadata> GetLibraryMediaMetadata(PlexMediaType type, Action<PlexApiDataConfig> options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
@@ -86,21 +92,22 @@ public partial class FakePlexApiData
             .RuleFor(l => l.Media, _ => new List<Medium>() { GetPlexMedium(options).Generate() })
             .RuleFor(l => l.FlattenSeasons, f => f.Random.Bool())
             .RuleFor(l => l.ShowOrdering, f => f.Lorem.Word())
-            .FinishWith((f, metadata) =>
-            {
-                var metaDataKey = f.Random.Int(1);
-                metadata.Thumb = $"/library/metadata/{metadata.Key}/thumb/{metaDataKey}";
-                metadata.Art = $"/library/metadata/{metadata.Key}/art/{metaDataKey}";
-                metadata.Theme = $"/library/metadata/{metadata.Key}/theme/{metaDataKey}";
-                metadata.Banner = $"/library/metadata/{metadata.Key}/banner/{metaDataKey}";
+            .FinishWith(
+                (f, metadata) =>
+                {
+                    var metaDataKey = f.Random.Int(1);
+                    metadata.Thumb = $"/library/metadata/{metadata.Key}/thumb/{metaDataKey}";
+                    metadata.Art = $"/library/metadata/{metadata.Key}/art/{metaDataKey}";
+                    metadata.Theme = $"/library/metadata/{metadata.Key}/theme/{metaDataKey}";
+                    metadata.Banner = $"/library/metadata/{metadata.Key}/banner/{metaDataKey}";
 
-                metadata.Key = $"/library/metadata/{metadata.Key}";
-                metadata.TitleSort = metadata.TitleSort.ToLower();
-            });
+                    metadata.Key = $"/library/metadata/{metadata.Key}";
+                    metadata.TitleSort = metadata.TitleSort.ToLower();
+                }
+            );
     }
 
-    public static Faker<Medium> GetPlexMedium(
-        Action<PlexApiDataConfig> options = null)
+    public static Faker<Medium> GetPlexMedium(Action<PlexApiDataConfig> options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
@@ -128,8 +135,7 @@ public partial class FakePlexApiData
             .RuleFor(l => l.Part, _ => new[] { GetPlexPart(options).Generate() });
     }
 
-    public static Faker<Part> GetPlexPart(
-        Action<PlexApiDataConfig> options = null)
+    public static Faker<Part> GetPlexPart(Action<PlexApiDataConfig> options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 

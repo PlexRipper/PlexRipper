@@ -24,7 +24,7 @@ public class MockPlexApi
 
     #region Constructors
 
-    public MockPlexApi(ILog log,Action<MockPlexApiConfig> options = null, List<Uri> serverUris = null)
+    public MockPlexApi(ILog log, Action<MockPlexApiConfig> options = null, List<Uri> serverUris = null)
     {
         _log = log;
         _serverUris = serverUris;
@@ -39,24 +39,28 @@ public class MockPlexApi
             {
                 if (message.RequestUri != null && message.RequestUri.Host == "localhost")
                 {
-                    return _client.SendAsync(new HttpRequestMessage
-                    {
-                        RequestUri = message.RequestUri,
-                        Method = message.Method,
-                        Content = message.Content,
-                        Headers =
+                    return _client.SendAsync(
+                        new HttpRequestMessage
                         {
-                            UserAgent =
+                            RequestUri = message.RequestUri,
+                            Method = message.Method,
+                            Content = message.Content,
+                            Headers =
                             {
-                                new ProductInfoHeaderValue(
-                                    new ProductHeaderValue(nameof(MockPlexApi), "1.0")),
+                                UserAgent =
+                                {
+                                    new ProductInfoHeaderValue(new ProductHeaderValue(nameof(MockPlexApi), "1.0")),
+                                },
+                                Range = message.Headers.Range,
                             },
-                            Range = message.Headers.Range,
-                        },
-                    });
+                        }
+                    );
                 }
 
-                _log.Error("OnMissingRegistration was triggered on uri: {RequestUri} and not handled", message.RequestUri);
+                _log.Error(
+                    "OnMissingRegistration was triggered on uri: {RequestUri} and not handled",
+                    message.RequestUri
+                );
                 return null;
             },
         };
@@ -80,24 +84,16 @@ public class MockPlexApi
 
     private static HttpRequestInterceptionBuilder BaseRequest()
     {
-        return new HttpRequestInterceptionBuilder()
-            .Requests()
-            .ForHttps()
-            .ForHost(PlexApiPaths.Host);
+        return new HttpRequestInterceptionBuilder().Requests().ForHttps().ForHost(PlexApiPaths.Host);
     }
 
     private void SetupServerResources(MockPlexApiConfig config)
     {
-        var query = BaseRequest()
-            .ForGet()
-            .ForPath(PlexApiPaths.ServerResourcesPath.TrimStart('/'))
-            .IgnoringQuery();
+        var query = BaseRequest().ForGet().ForPath(PlexApiPaths.ServerResourcesPath.TrimStart('/')).IgnoringQuery();
 
         if (!config.UnauthorizedAccessiblePlexServers)
         {
-            var servers = FakePlexApiData
-                .GetServerResource()
-                .Generate(config.AccessiblePlexServers);
+            var servers = FakePlexApiData.GetServerResource().Generate(config.AccessiblePlexServers);
 
             for (var i = 0; i < _serverUris.Count; i++)
             {
@@ -112,15 +108,11 @@ public class MockPlexApi
                 }
             }
 
-            query.Responds()
-                .WithStatus(200)
-                .WithJsonContent(servers);
+            query.Responds().WithStatus(200).WithJsonContent(servers);
         }
         else
         {
-            query.Responds()
-                .WithStatus(401)
-                .WithJsonContent(FakePlexApiData.GetFailedServerResourceResponse());
+            query.Responds().WithStatus(401).WithJsonContent(FakePlexApiData.GetFailedServerResourceResponse());
         }
 
         query.RegisterWith(_clientOptions);
@@ -128,22 +120,18 @@ public class MockPlexApi
 
     private void SetupSignIn(MockPlexApiConfig config)
     {
-        var query = BaseRequest()
-            .ForPost()
-            .ForPath(PlexApiPaths.SignInPath)
-            .IgnoringQuery();
+        var query = BaseRequest().ForPost().ForPath(PlexApiPaths.SignInPath).IgnoringQuery();
 
         if (config.SignInResponseIsValid)
         {
-            query.Responds()
+            query
+                .Responds()
                 .WithStatus(201) // 201 is correct here, Plex for some reason gives this back on this request
                 .WithJsonContent(FakePlexApiData.GetPlexSignInResponse().Generate());
         }
         else
         {
-            query.Responds()
-                .WithStatus(401)
-                .WithJsonContent(FakePlexApiData.GetFailedPlexSignInResponse());
+            query.Responds().WithStatus(401).WithJsonContent(FakePlexApiData.GetFailedPlexSignInResponse());
         }
 
         query.RegisterWith(_clientOptions);

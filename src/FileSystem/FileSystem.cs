@@ -29,7 +29,8 @@ public class FileSystem : IFileSystem
         System.IO.Abstractions.IFileSystem abstractedFileSystem,
         IDiskProvider diskProvider,
         IDiskSystem diskSystem,
-        IDirectorySystem directorySystem)
+        IDirectorySystem directorySystem
+    )
     {
         _log = log;
         _pathProvider = pathProvider;
@@ -118,7 +119,11 @@ public class FileSystem : IFileSystem
         }
     }
 
-    public Result<FileSystemResult> LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes)
+    public Result<FileSystemResult> LookupContents(
+        string query,
+        bool includeFiles,
+        bool allowFoldersWithoutTrailingSlashes
+    )
     {
         _log.Debug("Looking up path: {Query}", query);
         var directoryExistsResult = _directorySystem.Exists(query);
@@ -128,10 +133,7 @@ public class FileSystem : IFileSystem
         // If path is invalid return root file system
         if (string.IsNullOrWhiteSpace(query) || !directoryExistsResult.Value)
         {
-            return Result.Ok(new FileSystemResult
-            {
-                Directories = GetDrives(),
-            });
+            return Result.Ok(new FileSystemResult { Directories = GetDrives(), });
         }
 
         if (allowFoldersWithoutTrailingSlashes)
@@ -148,7 +150,9 @@ public class FileSystem : IFileSystem
 
     public string ToAbsolutePath(string relativePath)
     {
-        return _abstractedFileSystem.Path.GetFullPath(_abstractedFileSystem.Path.Combine(_pathProvider.RootDirectory, relativePath));
+        return _abstractedFileSystem.Path.GetFullPath(
+            _abstractedFileSystem.Path.Combine(_pathProvider.RootDirectory, relativePath)
+        );
     }
 
     public Result FileMove(string sourceFileName, string destFileName, bool overwrite = true)
@@ -170,7 +174,8 @@ public class FileSystem : IFileSystem
 
     private List<FileSystemModel> GetDrives()
     {
-        return _diskProvider.GetMounts()
+        return _diskProvider
+            .GetMounts()
             .Select(d => new FileSystemModel
             {
                 Type = FileSystemEntityType.Drive,

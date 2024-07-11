@@ -11,14 +11,17 @@ public static partial class DbContextExtensions
         int plexMediaKey,
         int plexServerId,
         PlexMediaType mediaType,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         switch (mediaType)
         {
             case PlexMediaType.Movie:
             {
-                var entity = await dbContext.PlexMovies
-                    .FirstOrDefaultAsync(x => x.Key == plexMediaKey && x.PlexServerId == plexServerId, cancellationToken);
+                var entity = await dbContext.PlexMovies.FirstOrDefaultAsync(
+                    x => x.Key == plexMediaKey && x.PlexServerId == plexServerId,
+                    cancellationToken
+                );
                 if (entity is not null)
                     return Result.Ok(entity.Id);
 
@@ -26,8 +29,10 @@ public static partial class DbContextExtensions
             }
             case PlexMediaType.TvShow:
             {
-                var entity = await dbContext.PlexTvShows
-                    .FirstOrDefaultAsync(x => x.Key == plexMediaKey && x.PlexServerId == plexServerId, cancellationToken);
+                var entity = await dbContext.PlexTvShows.FirstOrDefaultAsync(
+                    x => x.Key == plexMediaKey && x.PlexServerId == plexServerId,
+                    cancellationToken
+                );
                 if (entity is not null)
                     return Result.Ok(entity.Id);
 
@@ -35,8 +40,10 @@ public static partial class DbContextExtensions
             }
             case PlexMediaType.Season:
             {
-                var entity = await dbContext.PlexTvShowSeason
-                    .FirstOrDefaultAsync(x => x.Key == plexMediaKey && x.PlexServerId == plexServerId, cancellationToken);
+                var entity = await dbContext.PlexTvShowSeason.FirstOrDefaultAsync(
+                    x => x.Key == plexMediaKey && x.PlexServerId == plexServerId,
+                    cancellationToken
+                );
                 if (entity is not null)
                     return Result.Ok(entity.Id);
 
@@ -44,8 +51,10 @@ public static partial class DbContextExtensions
             }
             case PlexMediaType.Episode:
             {
-                var entity = await dbContext.PlexTvShowEpisodes
-                    .FirstOrDefaultAsync(x => x.Key == plexMediaKey && x.PlexServerId == plexServerId, cancellationToken);
+                var entity = await dbContext.PlexTvShowEpisodes.FirstOrDefaultAsync(
+                    x => x.Key == plexMediaKey && x.PlexServerId == plexServerId,
+                    cancellationToken
+                );
                 if (entity is not null)
                     return Result.Ok(entity.Id);
 
@@ -55,6 +64,8 @@ public static partial class DbContextExtensions
                 return Result.Fail($"Type {mediaType} is not supported for retrieving the plexMediaId by key");
         }
 
-        return Result.Fail($"Couldn't find a plexMediaId with key {plexMediaKey}, plexServerId {plexServerId} with type {mediaType}");
+        return Result.Fail(
+            $"Couldn't find a plexMediaId with key {plexMediaKey}, plexServerId {plexServerId} with type {mediaType}"
+        );
     }
 }

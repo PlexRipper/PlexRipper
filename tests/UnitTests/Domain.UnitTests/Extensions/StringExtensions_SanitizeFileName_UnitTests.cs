@@ -2,7 +2,8 @@
 
 public class PathSystem_SanitizeFileName_UnitTests : BaseUnitTest
 {
-    public PathSystem_SanitizeFileName_UnitTests(ITestOutputHelper output) : base(output) { }
+    public PathSystem_SanitizeFileName_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Theory]
     [InlineData("Shaun het Schaap: De Film (2015)")]

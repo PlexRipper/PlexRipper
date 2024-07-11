@@ -18,12 +18,14 @@ public class GetPlexServersByIdsQueryValidator : AbstractValidator<GetPlexServer
     #endregion
 }
 
-public class GetPlexServersByIdsQueryHandler : BaseHandler,
-    IRequestHandler<GetPlexServersByIdsQuery, Result<List<PlexServer>>>
+public class GetPlexServersByIdsQueryHandler
+    : BaseHandler,
+        IRequestHandler<GetPlexServersByIdsQuery, Result<List<PlexServer>>>
 {
     #region Constructors
 
-    public GetPlexServersByIdsQueryHandler(ILog log, PlexRipperDbContext dbContext) : base(log, dbContext) { }
+    public GetPlexServersByIdsQueryHandler(ILog log, PlexRipperDbContext dbContext)
+        : base(log, dbContext) { }
 
     #endregion
 
@@ -31,20 +33,22 @@ public class GetPlexServersByIdsQueryHandler : BaseHandler,
 
     #region Public
 
-    public async Task<Result<List<PlexServer>>> Handle(GetPlexServersByIdsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<PlexServer>>> Handle(
+        GetPlexServersByIdsQuery request,
+        CancellationToken cancellationToken
+    )
     {
         var query = PlexServerQueryable.AsQueryable();
 
         if (request.IncludeConnections)
-            query = query.Include(x => x.PlexServerConnections).ThenInclude(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(1));
-
+            query = query
+                .Include(x => x.PlexServerConnections)
+                .ThenInclude(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(1));
 
         if (request.IncludeLibraries)
             query = query.Include(x => x.PlexLibraries);
 
-        var plexServers = await query
-            .Where(x => request.Ids.Contains(x.Id))
-            .ToListAsync(cancellationToken);
+        var plexServers = await query.Where(x => request.Ids.Contains(x.Id)).ToListAsync(cancellationToken);
 
         return Result.Ok(plexServers);
     }

@@ -10,19 +10,14 @@ namespace PlexRipper.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "DownloadUrl",
-                table: "DownloadTasks");
+            migrationBuilder.DropColumn(name: "DownloadUrl", table: "DownloadTasks");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "DownloadUrl",
-                table: "DownloadTasks",
-                type: "TEXT",
-                nullable: true)
+            migrationBuilder
+                .AddColumn<string>(name: "DownloadUrl", table: "DownloadTasks", type: "TEXT", nullable: true)
                 .Annotation("Relational:ColumnOrder", 13);
         }
     }

@@ -5,7 +5,11 @@ public static partial class DownloadTaskExtensions
     /// <summary>
     /// This will set the relationship ids for the download tasks and it's children.
     /// </summary>
-    public static void SetRelationshipIds(this List<DownloadTaskMovie> downloadTasks, int plexServerId, int plexLibraryId)
+    public static void SetRelationshipIds(
+        this List<DownloadTaskMovie> downloadTasks,
+        int plexServerId,
+        int plexLibraryId
+    )
     {
         if (downloadTasks is null)
             return;
@@ -25,7 +29,11 @@ public static partial class DownloadTaskExtensions
     /// <summary>
     /// This will set the relationship ids for the download tasks and it's children.
     /// </summary>
-    public static void SetRelationshipIds(this List<DownloadTaskTvShow> downloadTasks, int plexServerId, int plexLibraryId)
+    public static void SetRelationshipIds(
+        this List<DownloadTaskTvShow> downloadTasks,
+        int plexServerId,
+        int plexLibraryId
+    )
     {
         if (downloadTasks is null)
             return;
@@ -41,7 +49,11 @@ public static partial class DownloadTaskExtensions
     /// <summary>
     /// This will set the relationship ids for the download tasks and it's children.
     /// </summary>
-    public static void SetRelationshipIds(this List<DownloadTaskTvShowSeason> downloadTasks, int plexServerId, int plexLibraryId)
+    public static void SetRelationshipIds(
+        this List<DownloadTaskTvShowSeason> downloadTasks,
+        int plexServerId,
+        int plexLibraryId
+    )
     {
         if (downloadTasks is null)
             return;
@@ -57,7 +69,11 @@ public static partial class DownloadTaskExtensions
     /// <summary>
     /// This will set the relationship ids for the download tasks and it's children.
     /// </summary>
-    public static void SetRelationshipIds(this List<DownloadTaskTvShowEpisode> downloadTasks, int plexServerId, int plexLibraryId)
+    public static void SetRelationshipIds(
+        this List<DownloadTaskTvShowEpisode> downloadTasks,
+        int plexServerId,
+        int plexLibraryId
+    )
     {
         if (downloadTasks is null)
             return;

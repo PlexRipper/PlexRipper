@@ -10,7 +10,11 @@ public partial class Log : ILog
 {
     private readonly ILogger _logger;
 
-    protected Type ClassType;
+    /// <summary>
+    /// The class type for the logger. Defaults to <see cref="Log"/>.
+    /// Note: This is done this way due to static classes not passable as a type generic.
+    /// </summary>
+    protected Type ClassType = typeof(Log);
 
     public Log(ILogger logger)
     {

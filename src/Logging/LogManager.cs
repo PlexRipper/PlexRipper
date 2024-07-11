@@ -48,7 +48,7 @@ public static class LogManager
     /// </summary>
     /// <returns></returns>
     public static ILog<T> CreateLogInstance<T>(LogEventLevel logLevel = LogEventLevel.Debug)
-        where T : class => new Log<T>(LogConfig.GetLogger(logLevel));
+        where T : class => new Log<T>(LogConfig.GetLogger(logLevel), typeof(T));
 
     /// <summary>
     /// Returns a new typed <see cref="ILog"/> instance.
@@ -64,7 +64,7 @@ public static class LogManager
         where T : class
     {
         LogConfig.SetTestOutputHelper(output);
-        return new Log<T>(LogConfig.GetLogger(logLevel));
+        return new Log<T>(LogConfig.GetLogger(logLevel), typeof(T));
     }
 
     /// <summary>

@@ -8,6 +8,7 @@
 		<AssemblyName>PlexRipper.BaseTests</AssemblyName>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -93,6 +93,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Settings.Contracts", "src\S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.Contracts", "src\WebAPI.Contracts\WebAPI.Contracts.csproj", "{783E1C14-CCD6-48C2-8A97-F4DB50590895}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenPlexAPI", "src\OpenPlexAPI\OpenPlexAPI.csproj", "{A96C31D6-9C7E-4F61-941D-9988D4D47FC9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -211,6 +213,10 @@ Global
 		{783E1C14-CCD6-48C2-8A97-F4DB50590895}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{783E1C14-CCD6-48C2-8A97-F4DB50590895}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{783E1C14-CCD6-48C2-8A97-F4DB50590895}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A96C31D6-9C7E-4F61-941D-9988D4D47FC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A96C31D6-9C7E-4F61-941D-9988D4D47FC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A96C31D6-9C7E-4F61-941D-9988D4D47FC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A96C31D6-9C7E-4F61-941D-9988D4D47FC9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -250,6 +256,7 @@ Global
 		{0850F917-C0C1-47F9-BD2D-D50F22AE0ABB} = {ED9C0CB4-DD1F-4D4E-BABD-FAAEAF55F6D0}
 		{BF080B41-B224-443A-8C08-2C132C8478E9} = {ED9C0CB4-DD1F-4D4E-BABD-FAAEAF55F6D0}
 		{783E1C14-CCD6-48C2-8A97-F4DB50590895} = {3A45E7B9-88B6-41B4-BC14-1814F17ABCB7}
+		{A96C31D6-9C7E-4F61-941D-9988D4D47FC9} = {EE2CBDBB-0755-4561-8272-FB0F36AF6ACB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B4C02A51-7A0F-40AF-B559-20772614ED60}

@@ -15,9 +15,9 @@ public static class LogManager
     [MessageTemplateFormatMethod("messageTemplate")]
     public static void DbContextLogger(
         string messageTemplate,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
     )
     {
         switch (messageTemplate)
@@ -48,10 +48,7 @@ public static class LogManager
     /// </summary>
     /// <returns></returns>
     public static ILog<T> CreateLogInstance<T>(LogEventLevel logLevel = LogEventLevel.Debug)
-        where T : class
-    {
-        return new Log<T>(LogConfig.GetLogger(logLevel));
-    }
+        where T : class => new Log<T>(LogConfig.GetLogger(logLevel));
 
     /// <summary>
     /// Returns a new typed <see cref="ILog"/> instance.
@@ -74,10 +71,8 @@ public static class LogManager
     /// Returns a new typed <see cref="ILog"/> instance.
     /// </summary>
     /// <returns></returns>
-    public static ILog CreateLogInstance(Type classType, LogEventLevel logLevel = LogEventLevel.Debug)
-    {
-        return new Log<Type>(LogConfig.GetLogger(logLevel), classType);
-    }
+    public static ILog CreateLogInstance(Type classType, LogEventLevel logLevel = LogEventLevel.Debug) =>
+        new Log<Type>(LogConfig.GetLogger(logLevel), classType);
 
     public static ILog CreateLogInstance(
         ITestOutputHelper output,

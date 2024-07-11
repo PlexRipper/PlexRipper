@@ -24,7 +24,7 @@ public class UrlMaskingOperator : RegexMaskingOperator
             var token = HttpUtility.ParseQueryString(url.Query).Get("X-Plex-Token") ?? "None123";
             return $"{url.Scheme}://{mask}{url.PathAndQuery.Replace(token, mask)}";
         }
-        catch (Exception _)
+        catch (Exception)
         {
             return match.Value;
         }

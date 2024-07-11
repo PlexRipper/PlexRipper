@@ -17,15 +17,9 @@ public partial class Log : ILog
         _logger = logger;
     }
 
-    public ILogger GetLogger()
-    {
-        return _logger;
-    }
+    public ILogger GetLogger() => _logger;
 
-    public bool IsLogLevelEnabled(LogEventLevel logLevel = LogEventLevel.Debug)
-    {
-        return _logger.IsEnabled(logLevel);
-    }
+    public bool IsLogLevelEnabled(LogEventLevel logLevel = LogEventLevel.Debug) => _logger.IsEnabled(logLevel);
 
     private LogMetaData Write(
         LogEventLevel logLevel,
@@ -69,8 +63,5 @@ public partial class Log : ILog
         return logMetaData;
     }
 
-    private static string GetClassName(string sourceFilePath)
-    {
-        return Path.GetFileNameWithoutExtension(sourceFilePath);
-    }
+    private static string GetClassName(string sourceFilePath) => Path.GetFileNameWithoutExtension(sourceFilePath);
 }

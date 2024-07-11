@@ -33,7 +33,7 @@ public record LogMetaData
     public string MethodName { get; init; }
     public int LineNumber { get; init; }
 
-    public string MessageTemplate { get; set; }
+    public string MessageTemplate { get; set; } = string.Empty;
     public object?[]? PropertyValues { get; set; }
     public LogEventLevel LogLevel { get; set; }
     public Exception? Exception { get; set; }

@@ -25,11 +25,11 @@ public class FileTask : BaseEntity
 
     #region Relationships
 
-    public PlexServer PlexServer { get; set; }
+    public PlexServer? PlexServer { get; set; }
 
     public int PlexServerId { get; set; }
 
-    public PlexLibrary PlexLibrary { get; set; }
+    public PlexLibrary? PlexLibrary { get; set; }
 
     public int PlexLibraryId { get; set; }
 

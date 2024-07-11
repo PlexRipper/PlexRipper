@@ -33,38 +33,6 @@ public class DiskProvider : IDiskProvider
             "@eadir",
         };
 
-    public FileSystemResult GetResult(string path, bool includeFiles)
-    {
-        var result = new FileSystemResult();
-
-        try
-        {
-            result.Parent = GetParent(path);
-            result.Directories = GetDirectories(path);
-
-            if (includeFiles)
-                result.Files = GetFiles(path);
-        }
-        catch (DirectoryNotFoundException)
-        {
-            return new FileSystemResult { Parent = GetParent(path) };
-        }
-        catch (ArgumentException)
-        {
-            return new FileSystemResult();
-        }
-        catch (IOException)
-        {
-            return new FileSystemResult { Parent = GetParent(path) };
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return new FileSystemResult { Parent = GetParent(path) };
-        }
-
-        return result;
-    }
-
     public string GetParent(string path)
     {
         var di = new DirectoryInfo(path);

@@ -129,15 +129,10 @@ public class PlexApiService : IPlexApiService
     /// <inheritdoc />
     public async Task<Result<PlexLibrary>> GetLibraryMediaAsync(
         PlexLibrary plexLibrary,
-        PlexAccount plexAccount = null,
         CancellationToken cancellationToken = default
     )
     {
-        var tokenResult = await _dbContext.GetPlexServerTokenAsync(
-            plexLibrary.PlexServerId,
-            plexAccount?.Id ?? 0,
-            cancellationToken
-        );
+        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexLibrary.PlexServerId, cancellationToken);
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
@@ -248,7 +243,7 @@ public class PlexApiService : IPlexApiService
     /// <inheritdoc />
     public async Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(
         int plexServerConnectionId,
-        Action<PlexApiClientProgress> action = null
+        Action<PlexApiClientProgress>? action = null
     )
     {
         var connection = await _dbContext.PlexServerConnections.GetAsync(plexServerConnectionId);

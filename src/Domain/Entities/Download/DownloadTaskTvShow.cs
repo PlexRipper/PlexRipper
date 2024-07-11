@@ -18,7 +18,7 @@ public class DownloadTaskTvShow : DownloadTaskParentBase
 
     public override int Count => Children.Sum(x => x.Count) + 1;
 
-    public override DownloadTaskKey ToParentKey() => null;
+    public override DownloadTaskKey? ToParentKey() => null;
 
     #endregion
 }

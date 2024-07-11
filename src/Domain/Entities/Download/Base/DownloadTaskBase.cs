@@ -35,11 +35,11 @@ public abstract class DownloadTaskBase : BaseEntityGuid
 
     #region Relationships
 
-    public required PlexServer PlexServer { get; set; }
+    public required PlexServer? PlexServer { get; set; }
 
     public required int PlexServerId { get; set; }
 
-    public required PlexLibrary PlexLibrary { get; set; }
+    public required PlexLibrary? PlexLibrary { get; set; }
 
     public required int PlexLibraryId { get; set; }
 
@@ -59,6 +59,10 @@ public abstract class DownloadTaskBase : BaseEntityGuid
 
     public abstract int Count { get; }
 
+    /// <summary>
+    /// Returns the parent <see cref="DownloadTaskKey"/> of this <see cref="DownloadTaskBase"/>.
+    /// </summary>
+    /// <returns></returns>
     public abstract DownloadTaskKey? ToParentKey();
 
     #endregion

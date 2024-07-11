@@ -37,7 +37,7 @@ public class PlexMedia : PlexMediaSlim
     /// TODO, might be better to remove this and make a getter for it.
     /// </summary>
     [Column(Order = 21)]
-    public string FullTitle { get; set; }
+    public string FullTitle { get; set; } = string.Empty;
 
     #endregion
 

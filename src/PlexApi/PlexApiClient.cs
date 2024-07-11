@@ -24,7 +24,7 @@ public class PlexApiClient
     public PlexApiClient(ILog log, HttpClient httpClient)
     {
         _log = log;
-        var options = new RestClientOptions() { MaxTimeout = 60000, ThrowOnAnyError = false, };
+        var options = new RestClientOptions() { MaxTimeout = 60000, ThrowOnAnyError = false };
         _client = new RestClient(
             httpClient,
             options,
@@ -61,7 +61,7 @@ public class PlexApiClient
     public async Task<Result<T>> SendRequestAsync<T>(
         RestRequest request,
         int retryCount = 2,
-        Action<PlexApiClientProgress> action = null
+        Action<PlexApiClientProgress>? action = null
     )
         where T : class
     {

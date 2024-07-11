@@ -43,12 +43,10 @@ public interface IPlexApiService
     /// Id and PlexServerId are copied over from the input parameter.
     /// </summary>
     /// <param name="plexLibrary"></param>
-    /// <param name="plexAccount">The optional PlexAccount used to connect to the <see cref="PlexServer"/> </param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<Result<PlexLibrary>> GetLibraryMediaAsync(
         PlexLibrary plexLibrary,
-        PlexAccount plexAccount = null,
         CancellationToken cancellationToken = default
     );
 

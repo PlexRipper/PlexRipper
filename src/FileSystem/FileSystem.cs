@@ -127,9 +127,16 @@ public class FileSystem : IFileSystem
         if (directoryExistsResult.IsFailed)
             return directoryExistsResult.ToResult();
 
+        var defaultResult = new FileSystemResult
+        {
+            Directories = GetDrives(),
+            Files = new List<FileSystemModel>(),
+            Parent = "",
+        };
+
         // If path is invalid return root file system
         if (string.IsNullOrWhiteSpace(query) || !directoryExistsResult.Value)
-            return Result.Ok(new FileSystemResult { Directories = GetDrives() });
+            return Result.Ok(defaultResult);
 
         if (allowFoldersWithoutTrailingSlashes)
             return Result.Ok(GetResult(query, includeFiles));
@@ -140,7 +147,7 @@ public class FileSystem : IFileSystem
         if (lastSeparatorIndex != -1)
             return Result.Ok(GetResult(path, includeFiles));
 
-        return Result.Ok(new FileSystemResult());
+        return Result.Ok(defaultResult);
     }
 
     public string ToAbsolutePath(string relativePath) =>
@@ -183,7 +190,12 @@ public class FileSystem : IFileSystem
 
     private FileSystemResult GetResult(string path, bool includeFiles)
     {
-        var result = new FileSystemResult();
+        var result = new FileSystemResult()
+        {
+            Parent = _diskProvider.GetParent(path),
+            Directories = _diskProvider.GetDirectories(path),
+            Files = new List<FileSystemModel>(),
+        };
 
         try
         {
@@ -193,21 +205,9 @@ public class FileSystem : IFileSystem
             if (includeFiles)
                 result.Files = _diskProvider.GetFiles(path);
         }
-        catch (DirectoryNotFoundException)
+        catch (Exception)
         {
-            return new FileSystemResult { Parent = _diskProvider.GetParent(path) };
-        }
-        catch (ArgumentException)
-        {
-            return new FileSystemResult();
-        }
-        catch (IOException)
-        {
-            return new FileSystemResult { Parent = _diskProvider.GetParent(path) };
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return new FileSystemResult { Parent = _diskProvider.GetParent(path) };
+            return result;
         }
 
         return result;

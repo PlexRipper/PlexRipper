@@ -78,10 +78,10 @@ public class PlexApi
 
     public async Task<Result<PlexServerStatus>> GetServerStatusAsync(
         string serverBaseUrl,
-        Action<PlexApiClientProgress> action = null
+        Action<PlexApiClientProgress>? action = null
     )
     {
-        var request = new RestRequest(PlexApiPaths.ServerIdentity(serverBaseUrl)) { Timeout = 5000, };
+        var request = new RestRequest(PlexApiPaths.ServerIdentity(serverBaseUrl)) { Timeout = 5000 };
 
         _log.Debug("Requesting PlexServerStatus for {Url}", serverBaseUrl);
         var response = await _client.SendRequestAsync<ServerIdentityResponse>(request, 1, action);

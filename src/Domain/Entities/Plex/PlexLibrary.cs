@@ -84,7 +84,7 @@ public class PlexLibrary : BaseEntity
     /// <summary>
     /// Gets or sets the PlexServer this PlexLibrary belongs to.
     /// </summary>
-    public PlexServer PlexServer { get; set; }
+    public PlexServer? PlexServer { get; set; }
 
     /// <summary>
     /// Gets or sets the PlexServerId of the PlexServer this PlexLibrary belongs to.
@@ -94,7 +94,7 @@ public class PlexLibrary : BaseEntity
     /// <summary>
     /// Gets or sets the default download destination <see cref="FolderPath"/>.
     /// </summary>
-    public FolderPath DefaultDestination { get; set; }
+    public FolderPath? DefaultDestination { get; set; }
 
     /// <summary>
     /// Gets or sets the Id of the Default Destination <see cref="FolderPath"/>.
@@ -183,13 +183,6 @@ public class PlexLibrary : BaseEntity
     [NotMapped]
     public bool Outdated => SyncedAt < UpdatedAt;
 
-    public void ClearMedia()
-    {
-        // TODO Add here other types
-        Movies = null;
-        TvShows = null;
-    }
-
     /// <summary>
     /// Sort the containing media.
     /// </summary>
@@ -236,9 +229,11 @@ public class PlexLibrary : BaseEntity
                 MetaData.MovieCount = Movies.Count;
             }
             else
+            {
                 return Result.Fail(
                     "The PlexLibrary is of type Movie but has no Movies included to update the MetaData."
                 );
+            }
         }
 
         if (Type == PlexMediaType.TvShow)
@@ -251,9 +246,11 @@ public class PlexLibrary : BaseEntity
                 MetaData.TvShowEpisodeCount = TvShows.Sum(x => x.Seasons.Sum(y => y.Episodes.Count));
             }
             else
+            {
                 return Result.Fail(
                     "The PlexLibrary is of type TvShow but has no TvShows included to update the MetaData."
                 );
+            }
         }
 
         return Result.Ok();

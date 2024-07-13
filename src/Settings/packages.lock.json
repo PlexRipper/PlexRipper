@@ -17,14 +17,6 @@
         "resolved": "0.28.2",
         "contentHash": "eMPtBF9ECE5sMBXX6fZw/phFZ9UeV62E43z78VPKIgCJMppojxDc03RD6ROpPgk8Vvde11vkcZf69NveW/T1rg=="
       },
-      "AutoMapper": {
-        "type": "Transitive",
-        "resolved": "12.0.1",
-        "contentHash": "hvV62vl6Hp/WfQ24yzo3Co9+OPl8wH8hApwVtgWpiAynVJkUcs7xvehnSftawL8Pe8FrPffBRM3hwzLQqWDNjA==",
-        "dependencies": {
-          "Microsoft.CSharp": "4.7.0"
-        }
-      },
       "ByteSize": {
         "type": "Transitive",
         "resolved": "2.1.2",
@@ -62,11 +54,6 @@
         "type": "Transitive",
         "resolved": "2.0.1",
         "contentHash": "FYv95bNT4UwcNA+G/J1oX5OpRiSUxteXaUt2BJbRSdRNiIUNbggJF69wy6mnk2wYToaanpdXZdCwVylt96MpwQ=="
-      },
-      "Microsoft.CSharp": {
-        "type": "Transitive",
-        "resolved": "4.7.0",
-        "contentHash": "pTj+D3uJWyN3My70i2Hqo+OXixq3Os2D1nJ2x92FFo6sk8fYS1m1WLNTs0Dc1uPaViH0YvEEwvzddQ7y4rhXmA=="
       },
       "Microsoft.Extensions.DependencyInjection.Abstractions": {
         "type": "Transitive",
@@ -1118,7 +1105,6 @@
       "PlexRipper.Domain": {
         "type": "Project",
         "dependencies": {
-          "AutoMapper": "[12.0.1, )",
           "ByteSize": "[2.1.2, )",
           "FluentResultExtensions": "[1.0.0, )",
           "FluentValidation": "[11.9.0, )",

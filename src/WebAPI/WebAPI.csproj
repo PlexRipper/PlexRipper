@@ -23,7 +23,6 @@
 	<ItemGroup>
 		<InternalsVisibleTo Include="FluentResultExtension.UnitTests" />
 		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
-		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
 		<PackageReference Include="CSharpier.MsBuild" Version="0.28.2">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -49,7 +48,6 @@
 		<None Remove="WebAPI.csproj.DotSettings" />
 	</ItemGroup>
 	<ItemGroup>
-		<Folder Include="Common\Enums\" />
 		<Folder Include="Properties\" />
 		<Folder Include="TvShows\The Boondocks\Season 1\" />
 	</ItemGroup>

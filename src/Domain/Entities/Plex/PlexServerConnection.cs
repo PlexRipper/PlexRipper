@@ -11,25 +11,25 @@ public class PlexServerConnection : BaseEntity
     #region Properties
 
     [Column(Order = 1)]
-    public string Protocol { get; set; }
+    public required string Protocol { get; set; }
 
     [Column(Order = 2)]
-    public string Address { get; set; }
+    public required string Address { get; set; }
 
     [Column(Order = 3)]
-    public int Port { get; set; }
+    public required int Port { get; set; }
 
     [Column(Order = 4)]
-    public bool Local { get; set; }
+    public required bool Local { get; set; }
 
     [Column(Order = 5)]
-    public bool Relay { get; set; }
+    public required bool Relay { get; set; }
 
     [Column(Order = 6)]
-    public bool IPv4 { get; set; }
+    public required bool IPv4 { get; set; }
 
     [Column(Order = 7)]
-    public bool IPv6 { get; set; }
+    public required bool IPv6 { get; set; }
 
     /// <summary>
     /// The port fix is when we don't use the port when Address is a domain name.
@@ -37,7 +37,7 @@ public class PlexServerConnection : BaseEntity
     /// <remarks> This is set in the "PlexApiMappingProfile" when the data is received from the Plex API.</remarks>
     /// </summary>
     [Column(Order = 8)]
-    public bool PortFix { get; set; }
+    public required bool PortFix { get; set; }
 
     #endregion
 
@@ -45,7 +45,7 @@ public class PlexServerConnection : BaseEntity
 
     public PlexServer? PlexServer { get; set; }
 
-    public int PlexServerId { get; set; }
+    public required int PlexServerId { get; set; }
 
     public List<PlexServerStatus> PlexServerStatus { get; set; } = new();
 

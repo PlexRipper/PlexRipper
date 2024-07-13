@@ -7,85 +7,59 @@ namespace PlexRipper.Domain;
 /// </summary>
 public class DownloadWorkerTask : BaseEntity
 {
-    #region Constructors
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DownloadWorkerTask"/> class.
-    /// </summary>
-    /// <param name="downloadTask"></param>
-    /// <param name="partIndex"></param>
-    /// <param name="startPosition"></param>
-    /// <param name="endPosition"></param>
-    public DownloadWorkerTask(DownloadTaskFileBase downloadTask, int partIndex, long startPosition, long endPosition)
-    {
-        DownloadDirectory = downloadTask.DownloadDirectory;
-        FileLocationUrl = downloadTask.FileLocationUrl;
-        DownloadTaskId = downloadTask.Id;
-        PartIndex = partIndex;
-        StartByte = startPosition;
-        EndByte = endPosition;
-        PlexServerId = downloadTask.PlexServerId;
-        FileName =
-            $"{Path.GetFileNameWithoutExtension(downloadTask.FileName)}.part{partIndex}{Path.GetExtension(downloadTask.FileName)}";
-    }
-
-    public DownloadWorkerTask() { }
-
-    #endregion
-
     #region Properties
 
     /// <summary>
     /// The base filename of the media that will be downloaded.
     /// </summary>
     [Column(Order = 1)]
-    public string FileName { get; internal set; }
+    public required string FileName { get; init; }
 
     [Column(Order = 2)]
-    public int PartIndex { get; set; }
+    public required int PartIndex { get; init; }
 
     [Column(Order = 3)]
-    public long StartByte { get; set; }
+    public required long StartByte { get; init; }
 
     [Column(Order = 4)]
-    public long EndByte { get; set; }
+    public required long EndByte { get; init; }
 
     [Column(Order = 5)]
-    public DownloadStatus DownloadStatus { get; set; } = DownloadStatus.Queued;
+    public required DownloadStatus DownloadStatus { get; set; } = DownloadStatus.Queued;
 
     /// <summary>
     /// Gets the total bytes received so far.
     /// </summary>
     [Column(Order = 7)]
-    public long BytesReceived { get; set; }
+    public required long BytesReceived { get; set; }
 
     /// <summary>
     /// The download directory where the part is downloaded into.
     /// </summary>
     [Column(Order = 8)]
-    public string DownloadDirectory { get; internal set; }
+    public required string DownloadDirectory { get; init; }
 
     /// <summary>
     /// The elapsed time in milliseconds with an accuracy of 100 milliseconds.
     /// </summary>
     [Column(Order = 9)]
-    public long ElapsedTime { get; set; }
+    public required long ElapsedTime { get; set; }
 
     [Column(Order = 10)]
-    public string FileLocationUrl { get; set; }
+    public required string FileLocationUrl { get; init; }
 
     #endregion
 
     #region Relationships
 
-    public DownloadTaskFileBase DownloadTask { get; set; }
-    public Guid DownloadTaskId { get; set; }
+    public DownloadTaskFileBase? DownloadTask { get; set; }
+    public required Guid DownloadTaskId { get; init; }
 
-    public PlexServer? PlexServer { get; set; }
+    public PlexServer? PlexServer { get; init; }
 
-    public int PlexServerId { get; set; }
+    public required int PlexServerId { get; init; }
 
-    public ICollection<DownloadWorkerLog> DownloadWorkerTaskLogs { get; set; }
+    public ICollection<DownloadWorkerLog> DownloadWorkerTaskLogs { get; init; } = [];
 
     #endregion
 

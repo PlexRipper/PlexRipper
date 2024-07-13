@@ -169,26 +169,6 @@ public class PlexApi
         return await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
     }
 
-    public async Task<PlexMediaContainerDTO> GetMetadataAsync(string authToken, string plexFullHost, int metadataId)
-    {
-        var request = new RestRequest(new Uri($"{plexFullHost}/library/metadata/{metadataId}"));
-
-        request.AddToken(authToken);
-
-        var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
-        return result.ValueOrDefault;
-    }
-
-    public async Task<PlexMediaContainerDTO> GetMetadataAsync(string authToken, string metaDataUrl)
-    {
-        var request = new RestRequest(new Uri(metaDataUrl));
-
-        request.AddToken(authToken);
-
-        var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
-        return result.ValueOrDefault;
-    }
-
     public async Task<PlexMediaContainerDTO> GetSeasonsAsync(string authToken, string plexFullHost, int ratingKey)
     {
         var request = new RestRequest(new Uri($"{plexFullHost}/library/metadata/{ratingKey}/children"));

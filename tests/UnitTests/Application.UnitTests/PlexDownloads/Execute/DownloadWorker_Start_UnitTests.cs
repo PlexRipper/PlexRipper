@@ -33,7 +33,10 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
                     DownloadTaskId = default,
                     PlexServer = null,
                     PlexServerId = 0,
-                    DownloadWorkerTaskLogs = null,
+                    FileName = "test.part1.mp4",
+                    DownloadWorkerTaskLogs = [],
+                    PartIndex = 1,
+                    DownloadDirectory = "/",
                 }
             )
         );

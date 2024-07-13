@@ -88,11 +88,24 @@ public static partial class PlexAccountMapper
         new()
         {
             Id = plexAccount.Id,
+            IsMain = plexAccount.IsMain,
+            IsEnabled = plexAccount.IsEnabled,
             DisplayName = plexAccount.DisplayName,
             Username = plexAccount.Username,
             Password = plexAccount.Password,
-            IsEnabled = plexAccount.IsEnabled,
-            IsMain = plexAccount.IsMain,
+            IsValidated = false,
+            ValidatedAt = default,
+            PlexId = 0,
+            Uuid = string.Empty,
+            ClientId = string.Empty,
+            Title = string.Empty,
+            Email = string.Empty,
+            HasPassword = false,
+            AuthenticationToken = string.Empty,
+            PlexAccountServers = [],
+            PlexAccountLibraries = [],
+            Is2Fa = false,
+            VerificationCode = string.Empty,
         };
 
     #endregion

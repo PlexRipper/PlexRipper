@@ -2,7 +2,6 @@
 using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.Domain.Config.AutoMapper;
-using PlexRipper.PlexApi.Mappings;
 
 namespace PlexRipper.WebAPI;
 
@@ -16,7 +15,6 @@ public static class MapperSetup
             cfg.AddProfile(new ApplicationMappingProfile());
 
             // Infrastructure
-            cfg.AddProfile(new PlexApiMappingProfile());
             cfg.AddProfile(new DataMappingProfile());
 
             // Presentation

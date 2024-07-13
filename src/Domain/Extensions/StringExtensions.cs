@@ -70,4 +70,7 @@ public static class StringExtensions
         name = name.Replace(@"·", "-").Replace(": ", " ");
         return string.Join(" ", name.Split(invalids, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
     }
+
+    public static string AddPartIndexToFileName(this string fileName, int partIndex) =>
+        $"{Path.GetFileNameWithoutExtension(fileName)}.part{partIndex}{Path.GetExtension(fileName)}";
 }

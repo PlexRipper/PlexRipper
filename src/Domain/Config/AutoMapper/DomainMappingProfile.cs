@@ -26,15 +26,7 @@ public class DomainMappingProfile : Profile
         CreateMap<string, int>()
             .ConvertUsing(g => ToInt(g));
         CreateMap<int, string>().ConvertUsing(g => g.ToString());
-
-        // Entities
-        // PlexAccountServer => PlexServer
-        CreateMap<PlexAccountServer, PlexServer>(MemberList.Destination)
-            .ConvertUsing(source => source.PlexServer);
     }
 
-    private static int ToInt(string stringInt)
-    {
-        return int.TryParse(stringInt, out var x) ? x : 0;
-    }
+    private static int ToInt(string stringInt) => int.TryParse(stringInt, out var x) ? x : 0;
 }

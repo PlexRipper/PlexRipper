@@ -56,7 +56,7 @@ public class PlexLibrary : BaseEntity
     /// Gets or sets the DateTime this <see cref="PlexLibrary"/> was last synced with the PlexApi.
     /// </summary>
     [Column(Order = 8)]
-    public required DateTime SyncedAt { get; set; }
+    public DateTime? SyncedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the unique id of the <see cref="PlexLibrary"/>.

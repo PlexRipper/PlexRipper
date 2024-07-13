@@ -50,10 +50,6 @@ public interface IPlexApiService
         CancellationToken cancellationToken = default
     );
 
-    Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string metaDataUrl);
-
-    Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string plexFullHost, int ratingKey);
-
     /// <summary>
     /// Attempts to connect to a server by the given <see cref="PlexServerConnection"/> and returns the <see cref="PlexServerStatus"/> based on the result.
     /// </summary>

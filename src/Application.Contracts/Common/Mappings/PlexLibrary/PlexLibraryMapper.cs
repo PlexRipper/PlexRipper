@@ -50,9 +50,14 @@ public static class PlexLibraryMapper
             SyncedAt = plexLibrary.SyncedAt,
             Uuid = plexLibrary.Uuid,
             LibraryLocationId = plexLibrary.LibraryLocationId,
+            MetaData = null,
+            PlexServer = null,
             LibraryLocationPath = plexLibrary.LibraryLocationPath,
             DefaultDestination = plexLibrary.DefaultDestination.ToModel(),
             DefaultDestinationId = plexLibrary.DefaultDestinationId,
+            Movies = new List<PlexMovie>(),
+            TvShows = new List<PlexTvShow>(),
+            PlexAccountLibraries = new List<PlexAccountLibrary>(),
             PlexServerId = plexLibrary.PlexServerId,
         };
 

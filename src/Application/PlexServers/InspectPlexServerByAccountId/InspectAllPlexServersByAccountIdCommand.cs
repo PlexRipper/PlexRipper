@@ -145,14 +145,9 @@ public class InspectAllPlexServersByAccountIdCommandHandler
             plexAccountId
         );
 
-        var plexServersResult = await _mediator.Send(new GetAllPlexServersByPlexAccountIdQuery(plexAccountId));
-        if (plexServersResult.IsFailed)
-        {
-            plexServersResult.LogError();
-            return;
-        }
+        var plexServers = await _dbContext.GetAllPlexServersByPlexAccountIdQuery(plexAccountId);
 
-        var retrieveTasks = plexServersResult.Value.Select(async plexServer =>
+        var retrieveTasks = plexServers.Select(async plexServer =>
             await _mediator.Send(new RefreshLibraryAccessCommand(plexAccountId, plexServer.Id))
         );
 

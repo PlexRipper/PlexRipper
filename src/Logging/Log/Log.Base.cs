@@ -10,22 +10,20 @@ public partial class Log : ILog
 {
     private readonly ILogger _logger;
 
-    protected Type ClassType;
+    /// <summary>
+    /// The class type for the logger. Defaults to <see cref="Log"/>.
+    /// Note: This is done this way due to static classes not passable as a type generic.
+    /// </summary>
+    protected Type ClassType = typeof(Log);
 
     public Log(ILogger logger)
     {
         _logger = logger;
     }
 
-    public ILogger GetLogger()
-    {
-        return _logger;
-    }
+    public ILogger GetLogger() => _logger;
 
-    public bool IsLogLevelEnabled(LogEventLevel logLevel = LogEventLevel.Debug)
-    {
-        return _logger.IsEnabled(logLevel);
-    }
+    public bool IsLogLevelEnabled(LogEventLevel logLevel = LogEventLevel.Debug) => _logger.IsEnabled(logLevel);
 
     private LogMetaData Write(
         LogEventLevel logLevel,
@@ -69,8 +67,5 @@ public partial class Log : ILog
         return logMetaData;
     }
 
-    private static string GetClassName(string sourceFilePath)
-    {
-        return Path.GetFileNameWithoutExtension(sourceFilePath);
-    }
+    private static string GetClassName(string sourceFilePath) => Path.GetFileNameWithoutExtension(sourceFilePath);
 }

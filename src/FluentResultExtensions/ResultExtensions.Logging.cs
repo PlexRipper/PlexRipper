@@ -17,10 +17,44 @@ public static partial class ResultExtensions
     private static void LogByType(
         LogEventLevel logLevel,
         string messageTemplate,
-        Exception e = null,
-        string memberName = default!,
-        string sourceFilePath = default!,
-        int sourceLineNumber = default!
+        string memberName = "",
+        string sourceFilePath = "",
+        int sourceLineNumber = 0
+    )
+    {
+        switch (logLevel)
+        {
+            case LogEventLevel.Verbose:
+                _log.Verbose(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                return;
+            case LogEventLevel.Debug:
+                _log.Debug(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                break;
+            case LogEventLevel.Information:
+                _log.Information(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                break;
+            case LogEventLevel.Warning:
+                _log.Warning(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                break;
+            case LogEventLevel.Error:
+                _log.Error(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                break;
+            case LogEventLevel.Fatal:
+                _log.Fatal(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null);
+        }
+    }
+
+    [MessageTemplateFormatMethod("messageTemplate")]
+    private static void LogByType(
+        LogEventLevel logLevel,
+        string messageTemplate,
+        Exception e,
+        string memberName = "",
+        string sourceFilePath = "",
+        int sourceLineNumber = 0
     )
     {
         switch (logLevel)
@@ -43,15 +77,17 @@ public static partial class ResultExtensions
             case LogEventLevel.Fatal:
                 _log.Fatal(e, messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null);
         }
     }
 
     private static Result<T> LogResult<T>(
         this Result<T> result,
         LogEventLevel logLevel,
-        string memberName = default!,
-        string sourceFilePath = default!,
-        int sourceLineNumber = default!
+        string memberName = "",
+        string sourceFilePath = "",
+        int sourceLineNumber = 0
     )
     {
         LogReasons(result.ToResult(), logLevel, memberName, sourceFilePath, sourceLineNumber);
@@ -62,9 +98,9 @@ public static partial class ResultExtensions
     private static Result LogResult(
         this Result result,
         LogEventLevel logLevel,
-        string memberName = default!,
-        string sourceFilePath = default!,
-        int sourceLineNumber = default!
+        string memberName = "",
+        string sourceFilePath = "",
+        int sourceLineNumber = 0
     )
     {
         LogReasons(result, logLevel, memberName, sourceFilePath, sourceLineNumber);
@@ -75,9 +111,9 @@ public static partial class ResultExtensions
     private static void LogReasons(
         this Result result,
         LogEventLevel logLevel,
-        string memberName = default!,
-        string sourceFilePath = default!,
-        int sourceLineNumber = default!
+        string memberName = "",
+        string sourceFilePath = "",
+        int sourceLineNumber = 0
     )
     {
         foreach (var success in result.Successes)
@@ -142,13 +178,10 @@ public static partial class ResultExtensions
     /// <returns>The result unchanged.</returns>
     public static Result LogVerbose(
         this Result result,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!
-    )
-    {
-        return LogResult(result, LogEventLevel.Verbose, memberName, sourceFilePath, sourceLineNumber);
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) => LogResult(result, LogEventLevel.Verbose, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Debug().
@@ -160,13 +193,10 @@ public static partial class ResultExtensions
     /// <returns>The result unchanged.</returns>
     public static Result LogDebug(
         this Result result,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!
-    )
-    {
-        return LogResult(result, LogEventLevel.Debug, memberName, sourceFilePath, sourceLineNumber);
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) => LogResult(result, LogEventLevel.Debug, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Information().
@@ -178,13 +208,10 @@ public static partial class ResultExtensions
     /// <returns>The result unchanged.</returns>
     public static Result LogInformation(
         this Result result,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!
-    )
-    {
-        return LogResult(result, LogEventLevel.Information, memberName, sourceFilePath, sourceLineNumber);
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) => LogResult(result, LogEventLevel.Information, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Warning().
@@ -196,13 +223,10 @@ public static partial class ResultExtensions
     /// <returns>The result unchanged.</returns>
     public static Result LogWarning(
         this Result result,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!
-    )
-    {
-        return LogResult(result, LogEventLevel.Warning, memberName, sourceFilePath, sourceLineNumber);
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) => LogResult(result, LogEventLevel.Warning, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Error().
@@ -214,13 +238,10 @@ public static partial class ResultExtensions
     /// <returns>The result unchanged.</returns>
     public static Result LogError(
         this Result result,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!
-    )
-    {
-        return LogResult(result, LogEventLevel.Error, memberName, sourceFilePath, sourceLineNumber);
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) => LogResult(result, LogEventLevel.Error, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Fatal().
@@ -232,13 +253,10 @@ public static partial class ResultExtensions
     /// <returns>The result unchanged.</returns>
     public static Result LogFatal(
         this Result result,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!
-    )
-    {
-        return LogResult(result, LogEventLevel.Fatal, memberName, sourceFilePath, sourceLineNumber);
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) => LogResult(result, LogEventLevel.Fatal, memberName, sourceFilePath, sourceLineNumber);
 
     #endregion
 
@@ -255,13 +273,10 @@ public static partial class ResultExtensions
     /// <returns>The result unchanged.</returns>
     public static Result<T> LogVerbose<T>(
         this Result<T> result,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!
-    )
-    {
-        return LogResult(result, LogEventLevel.Verbose, memberName, sourceFilePath, sourceLineNumber);
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) => LogResult(result, LogEventLevel.Verbose, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Debug().
@@ -274,13 +289,10 @@ public static partial class ResultExtensions
     /// <returns>The result unchanged.</returns>
     public static Result<T> LogDebug<T>(
         this Result<T> result,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!
-    )
-    {
-        return LogResult(result, LogEventLevel.Debug, memberName, sourceFilePath, sourceLineNumber);
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) => LogResult(result, LogEventLevel.Debug, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Information().
@@ -293,13 +305,10 @@ public static partial class ResultExtensions
     /// <returns>The result unchanged.</returns>
     public static Result<T> LogInformation<T>(
         this Result<T> result,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!
-    )
-    {
-        return LogResult(result, LogEventLevel.Information, memberName, sourceFilePath, sourceLineNumber);
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) => LogResult(result, LogEventLevel.Information, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Warning().
@@ -312,13 +321,10 @@ public static partial class ResultExtensions
     /// <returns>The result unchanged.</returns>
     public static Result<T> LogWarning<T>(
         this Result<T> result,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!
-    )
-    {
-        return LogResult(result, LogEventLevel.Warning, memberName, sourceFilePath, sourceLineNumber);
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) => LogResult(result, LogEventLevel.Warning, memberName, sourceFilePath, sourceLineNumber);
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Error().
@@ -331,13 +337,10 @@ public static partial class ResultExtensions
     /// <returns>The result unchanged.</returns>
     public static Result LogError<T>(
         this Result<T> result,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!
-    )
-    {
-        return LogResult(result, LogEventLevel.Error, memberName, sourceFilePath, sourceLineNumber).ToResult();
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) => LogResult(result, LogEventLevel.Error, memberName, sourceFilePath, sourceLineNumber).ToResult();
 
     /// <summary>
     /// Logs all nested reasons and metadata on Log.Fatal().
@@ -350,13 +353,10 @@ public static partial class ResultExtensions
     /// <returns>The result unchanged.</returns>
     public static Result LogFatal<T>(
         this Result<T> result,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!
-    )
-    {
-        return LogResult(result, LogEventLevel.Fatal, memberName, sourceFilePath, sourceLineNumber).ToResult();
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) => LogResult(result, LogEventLevel.Fatal, memberName, sourceFilePath, sourceLineNumber).ToResult();
 
     #endregion
 }

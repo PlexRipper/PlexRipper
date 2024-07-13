@@ -52,8 +52,11 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             .PlexLibraries.Include(x => x.PlexServer)
             .FirstOrDefaultAsync(x => x.Id == command.PlexLibraryId, cancellationToken);
 
+        if (plexLibrary is null)
+            return ResultExtensions.EntityNotFound(nameof(plexLibrary), command.PlexLibraryId);
+
         // Retrieve overview of all media belonging to this PlexLibrary
-        var newPlexLibraryResult = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary);
+        var newPlexLibraryResult = await _plexServiceApi.GetLibraryMediaAsync(plexLibrary, cancellationToken);
         if (newPlexLibraryResult.IsFailed)
             return newPlexLibraryResult;
 

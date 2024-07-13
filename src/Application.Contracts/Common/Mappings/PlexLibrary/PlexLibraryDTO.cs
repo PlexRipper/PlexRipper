@@ -18,7 +18,7 @@ public record PlexLibraryDTO
 
     public required DateTime ScannedAt { get; set; }
 
-    public required DateTime SyncedAt { get; set; }
+    public required DateTime? SyncedAt { get; set; }
 
     public required bool Outdated { get; set; }
 

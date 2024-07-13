@@ -1,8 +1,8 @@
 namespace PlexRipper.Domain;
 
-public class PlexMediaQuality
+public record PlexMediaQuality
 {
-    public string Quality { get; set; }
+    public required string Quality { get; set; }
 
     public string DisplayQuality
     {
@@ -24,5 +24,5 @@ public class PlexMediaQuality
     }
 
     // TODO Pre-calculate this to avoid doing it every time, used to identify the different media files
-    public string HashId { get; set; }
+    public required string HashId { get; set; }
 }

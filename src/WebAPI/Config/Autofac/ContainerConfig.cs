@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using AutoMapper;
 using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.FileSystem.Config;
@@ -33,18 +32,5 @@ public static class ContainerConfig
 
         // Packages
         builder.RegisterModule<MediatrModule>();
-
-        // Auto Mapper
-        builder.Register(_ =>
-        {
-            var config = MapperSetup.Configuration;
-            config.AssertConfigurationIsValid();
-            return config;
-        });
-
-        builder
-            .Register(ctx => ctx.Resolve<MapperConfiguration>().CreateMapper())
-            .As<IMapper>()
-            .InstancePerLifetimeScope();
     }
 }

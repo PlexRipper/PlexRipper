@@ -1,5 +1,4 @@
 ﻿using Application.Contracts;
-using AutoMapper;
 using Data.Contracts;
 using Logging.Interface;
 using PlexApi.Contracts;
@@ -16,8 +15,6 @@ public class PlexApiService : IPlexApiService
 
     private readonly ILog _log;
 
-    private readonly IMapper _mapper;
-    private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly Api.PlexApi _plexApi;
 
@@ -25,18 +22,10 @@ public class PlexApiService : IPlexApiService
 
     #region Constructors
 
-    public PlexApiService(
-        ILog log,
-        Api.PlexApi plexApi,
-        IMapper mapper,
-        IMediator mediator,
-        IPlexRipperDbContext dbContext
-    )
+    public PlexApiService(ILog log, Api.PlexApi plexApi, IPlexRipperDbContext dbContext)
     {
         _log = log;
         _plexApi = plexApi;
-        _mapper = mapper;
-        _mediator = mediator;
         _dbContext = dbContext;
     }
 
@@ -129,15 +118,10 @@ public class PlexApiService : IPlexApiService
     /// <inheritdoc />
     public async Task<Result<PlexLibrary>> GetLibraryMediaAsync(
         PlexLibrary plexLibrary,
-        PlexAccount plexAccount = null,
         CancellationToken cancellationToken = default
     )
     {
-        var tokenResult = await _dbContext.GetPlexServerTokenAsync(
-            plexLibrary.PlexServerId,
-            plexAccount?.Id ?? 0,
-            cancellationToken
-        );
+        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexLibrary.PlexServerId, cancellationToken);
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
@@ -220,7 +204,37 @@ public class PlexApiService : IPlexApiService
 
         var directories = result.Value.MediaContainer.Directory;
 
-        var mappedLibraries = _mapper.Map<List<PlexLibrary>>(directories);
+        var mappedLibraries = directories
+            .Select(x => new PlexLibrary
+            {
+                Id = 0,
+                Type = x.Type.ToPlexMediaTypeFromPlexApi(),
+                Title = x.Title,
+                Key = x.Key,
+                LibraryLocationPath = x.Location.First().Path,
+                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt,
+                ScannedAt = x.ScannedAt,
+                SyncedAt = null,
+                Uuid = Guid.Parse(x.Uuid),
+                LibraryLocationId = x.Location.First().Id,
+                MetaData = new PlexLibraryMetaData
+                {
+                    TvShowCount = 0,
+                    TvShowSeasonCount = 0,
+                    TvShowEpisodeCount = 0,
+                    MovieCount = 0,
+                    MediaSize = 0,
+                },
+                PlexServer = null,
+                PlexServerId = 0,
+                DefaultDestination = null,
+                DefaultDestinationId = null,
+                Movies = [],
+                TvShows = [],
+                PlexAccountLibraries = [],
+            })
+            .ToList();
 
         // Ensure every library has the Plex server id set
         foreach (var mappedLibrary in mappedLibraries)
@@ -229,29 +243,16 @@ public class PlexApiService : IPlexApiService
         return Result.Ok(mappedLibraries);
     }
 
-    public async Task<PlexMediaMetaData> GetMediaMetaDataAsync(
-        string serverAuthToken,
-        string plexFullHost,
-        int ratingKey
-    )
-    {
-        var result = await _plexApi.GetMetadataAsync(serverAuthToken, plexFullHost, ratingKey);
-        return _mapper.Map<PlexMediaMetaData>(result);
-    }
-
-    public async Task<PlexMediaMetaData> GetMediaMetaDataAsync(string serverAuthToken, string metaDataUrl)
-    {
-        var result = await _plexApi.GetMetadataAsync(serverAuthToken, metaDataUrl);
-        return _mapper.Map<PlexMediaMetaData>(result);
-    }
-
     /// <inheritdoc />
     public async Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(
         int plexServerConnectionId,
-        Action<PlexApiClientProgress> action = null
+        Action<PlexApiClientProgress>? action = null
     )
     {
         var connection = await _dbContext.PlexServerConnections.GetAsync(plexServerConnectionId);
+        if (connection is null)
+            return ResultExtensions.EntityNotFound(nameof(PlexServerConnection), plexServerConnectionId);
+
         var serverStatusResult = await _plexApi.GetServerStatusAsync(connection.Url, action);
         if (serverStatusResult.IsFailed)
             return serverStatusResult;
@@ -298,18 +299,70 @@ public class PlexApiService : IPlexApiService
             return (result.ToResult(), result.ToResult());
         }
 
-        var mapServersResult = _mapper.Map<List<PlexServer>>(result.Value);
-        var mapAccessResult = _mapper.Map<List<ServerAccessTokenDTO>>(result.Value);
+        var plexServers = result
+            .Value.Select(x => new PlexServer
+            {
+                Id = 0,
+                Name = x.Name,
+                // The servers have an OwnerId of 0 when it belongs to the PlexAccount that was used to request it.
+                OwnerId = x.OwnerId ?? plexAccount.PlexId,
+                PlexServerOwnerUsername = x.SourceTitle,
+                Device = x.Device,
+                Platform = x.Platform,
+                PlatformVersion = x.PlatformVersion,
+                Product = x.Product,
+                ProductVersion = x.ProductVersion,
+                Provides = x.Provides,
+                CreatedAt = DateTime.Parse(x.CreatedAt),
+                LastSeenAt = DateTime.Parse(x.LastSeenAt),
+                MachineIdentifier = x.ClientIdentifier,
+                PublicAddress = x.PublicAddress,
+                PreferredConnectionId = 0,
+                Owned = x.Owned,
+                Home = x.Home,
+                Synced = x.Synced,
+                Relay = x.Relay,
+                Presence = x.Presence,
+                HttpsRequired = x.HttpsRequired,
+                PublicAddressMatches = x.PublicAddressMatches,
+                DnsRebindingProtection = x.DnsRebindingProtection,
+                NatLoopbackSupported = x.NatLoopbackSupported,
+                ServerFixApplyDNSFix = false,
+                PlexAccountServers = [],
+                PlexLibraries = [],
+                ServerStatus = [],
+                PlexServerConnections = x
+                    .Connections.Select(y => new PlexServerConnection
+                    {
+                        Id = 0,
+                        Protocol = y.Protocol,
+                        Address = y.Address,
+                        Port = y.Port,
+                        Local = y.Local,
+                        Relay = y.Relay,
+                        IPv4 = y.Address.IsIpAddress() && !y.IPv6,
+                        IPv6 = y.IPv6,
 
-        // The servers have an OwnerId of 0 when it belongs to the PlexAccount that was used to request it.
-        foreach (var plexServer in mapServersResult.Where(plexServer => plexServer.OwnerId == 0))
-            plexServer.OwnerId = plexAccount.PlexId;
+                        // The port fix is when we don't want to use the port when Address is a domain name
+                        PortFix = !y.Address.IsIpAddress() && !y.IPv6 && y.Address != "localhost",
+                        PlexServer = null,
+                        PlexServerId = 0,
+                        PlexServerStatus = [],
+                    })
+                    .ToList(),
+            })
+            .ToList();
 
-        // Ensure every token has the PlexAccountId assigned
-        foreach (var serverAccessTokenDto in mapAccessResult)
-            serverAccessTokenDto.PlexAccountId = plexAccountId;
+        var mapAccess = result
+            .Value.Select(x => new ServerAccessTokenDTO
+            {
+                PlexAccountId = plexAccountId,
+                MachineIdentifier = x.ClientIdentifier,
+                AccessToken = x.AccessToken,
+            })
+            .ToList();
 
-        return (Result.Ok(mapServersResult), Result.Ok(mapAccessResult));
+        return (Result.Ok(plexServers), Result.Ok(mapAccess));
     }
 
     #region Images
@@ -354,23 +407,35 @@ public class PlexApiService : IPlexApiService
         var result = await _plexApi.PlexSignInAsync(plexAccount);
         if (result.IsSuccess)
         {
-            var mapResult = _mapper.Map<PlexAccount>(result.Value);
-            mapResult.Id = plexAccount.Id;
-            mapResult.ClientId = plexAccount.ClientId;
-            mapResult.DisplayName = plexAccount.DisplayName;
-            mapResult.Username = plexAccount.Username;
-            mapResult.Password = plexAccount.Password;
-            mapResult.IsEnabled = plexAccount.IsEnabled;
-            mapResult.IsMain = plexAccount.IsMain;
-            mapResult.IsValidated = true;
-            mapResult.ValidatedAt = DateTime.UtcNow;
-            mapResult.VerificationCode = "";
+            var x = result.Value;
+            var refreshedAccount = new PlexAccount
+            {
+                Id = x.Id,
+                DisplayName = plexAccount.DisplayName,
+                Username = x.Username,
+                Password = plexAccount.Password,
+                IsEnabled = plexAccount.IsEnabled,
+                IsValidated = true,
+                ValidatedAt = DateTime.UtcNow,
+                PlexId = x.Id,
+                Uuid = x.Uuid,
+                ClientId = plexAccount.ClientId,
+                Title = x.Title,
+                Email = x.Email,
+                HasPassword = x.HasPassword,
+                AuthenticationToken = x.AuthToken,
+                IsMain = plexAccount.IsMain,
+                PlexAccountServers = [],
+                PlexAccountLibraries = [],
+                Is2Fa = x.TwoFactorEnabled,
+                VerificationCode = string.Empty,
+            };
 
             _log.Information(
                 "Successfully retrieved the PlexAccount data for user {PlexAccountDisplayName} from the PlexApi",
                 plexAccount.DisplayName
             );
-            return Result.Ok(mapResult);
+            return Result.Ok(refreshedAccount);
         }
 
         return result.ToResult();

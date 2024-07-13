@@ -9,6 +9,7 @@
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -27,6 +28,7 @@
 		<Compile Include="..\Domain\GlobalUsings.cs" />
 		<ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
 		<ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
+		<Compile Remove="Common\OpenPlexApiFactory.cs" />
 	</ItemGroup>
 
 </Project>

@@ -9,29 +9,29 @@ public class FileTask : BaseEntity
 {
     #region Properties
 
-    public DateTime CreatedAt { get; set; }
+    public required DateTime CreatedAt { get; set; }
 
-    public string DestinationDirectory { get; set; }
+    public required string DestinationDirectory { get; set; }
 
-    public string FilePathsCompressed { get; set; }
+    public required string FilePathsCompressed { get; set; }
 
-    public string FileName { get; set; }
+    public required string FileName { get; set; }
 
-    public long FileSize { get; set; }
+    public required long FileSize { get; set; }
 
-    public Guid DownloadTaskId { get; set; }
+    public required Guid DownloadTaskId { get; set; }
 
-    public DownloadTaskType DownloadTaskType { get; set; }
+    public required DownloadTaskType DownloadTaskType { get; set; }
 
     #region Relationships
 
-    public PlexServer PlexServer { get; set; }
+    public PlexServer? PlexServer { get; set; }
 
-    public int PlexServerId { get; set; }
+    public required int PlexServerId { get; set; }
 
-    public PlexLibrary PlexLibrary { get; set; }
+    public PlexLibrary? PlexLibrary { get; set; }
 
-    public int PlexLibraryId { get; set; }
+    public required int PlexLibraryId { get; set; }
 
     #endregion
 

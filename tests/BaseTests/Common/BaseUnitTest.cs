@@ -1,5 +1,4 @@
 using Autofac;
-using AutoMapper;
 using Data.Contracts;
 using Logging.Interface;
 using PlexRipper.Data;
@@ -122,7 +121,6 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
     {
         mock = AutoMock.GetStrict(builder =>
         {
-            builder.RegisterInstance(MapperSetup.CreateMapper()).As<IMapper>().SingleInstance();
             builder
                 .Register<ILogger>(
                     (_, _) =>

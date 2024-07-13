@@ -1,12 +1,12 @@
-﻿using AutoMapper;
+﻿using PlexRipper.Domain;
 
-namespace PlexRipper.Domain.AutoMapper.ValueConverters;
+namespace PlexApi.Contracts;
 
-public class StringToPlexMediaTypeConverter : IValueConverter<string, PlexMediaType>
+public static class StringToPlexMediaTypeConverter
 {
-    public PlexMediaType Convert(string sourceMember, ResolutionContext context)
+    public static PlexMediaType ToPlexMediaTypeFromPlexApi(this string source)
     {
-        return sourceMember.ToLower() switch
+        return source.ToLower() switch
         {
             "movie" => PlexMediaType.Movie,
             "show" => PlexMediaType.TvShow,

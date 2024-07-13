@@ -4,8 +4,6 @@ namespace FileSystem.Contracts;
 
 public interface IDiskProvider
 {
-    FileSystemResult GetResult(string path, bool includeFiles);
-
     string GetParent(string path);
 
     List<FileSystemModel> GetFiles(string path);

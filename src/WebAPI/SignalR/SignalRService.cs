@@ -1,5 +1,4 @@
 using Application.Contracts;
-using AutoMapper;
 using Logging.Interface;
 using Microsoft.AspNetCore.SignalR;
 using WebAPI.Contracts;
@@ -16,25 +15,20 @@ public class SignalRService : ISignalRService
 
     private readonly IHubContext<NotificationHub, INotificationHub> _notificationHub;
 
-    private readonly IMapper _mapper;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="SignalRService"/> class.
     /// </summary>
     /// <param name="progressHub">The <see cref="ProgressHub"/>.</param>
     /// <param name="notificationHub">The <see cref="NotificationHub"/>.</param>
-    /// <param name="mapper"></param>
     public SignalRService(
         ILog log,
         IHubContext<ProgressHub, IProgressHub> progressHub,
-        IHubContext<NotificationHub, INotificationHub> notificationHub,
-        IMapper mapper
+        IHubContext<NotificationHub, INotificationHub> notificationHub
     )
     {
         _log = log;
         _progressHub = progressHub;
         _notificationHub = notificationHub;
-        _mapper = mapper;
     }
 
     #region ProgressHub
@@ -67,7 +61,18 @@ public class SignalRService : ISignalRService
 
     public async Task SendServerInspectStatusProgressAsync(InspectServerProgress progress)
     {
-        var progressDTO = _mapper.Map<InspectServerProgressDTO>(progress);
+        var progressDTO = new InspectServerProgressDTO
+        {
+            PlexServerId = progress.PlexServerId,
+            RetryAttemptIndex = progress.RetryAttemptIndex,
+            RetryAttemptCount = progress.RetryAttemptCount,
+            TimeToNextRetry = progress.TimeToNextRetry,
+            StatusCode = progress.StatusCode,
+            ConnectionSuccessful = progress.ConnectionSuccessful,
+            Completed = progress.Completed,
+            Message = progress.Message,
+            PlexServerConnection = progress.PlexServerConnection.ToDTO(),
+        };
         await _progressHub.Clients.All.InspectServerProgress(progressDTO);
     }
 

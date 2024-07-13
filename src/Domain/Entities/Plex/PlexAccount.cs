@@ -39,67 +39,67 @@ public class PlexAccount : BaseEntity
     #region Properties
 
     [Column(Order = 1)]
-    public string DisplayName { get; set; }
+    public required string DisplayName { get; set; }
 
     [Column(Order = 2)]
-    public string Username { get; set; }
+    public required string Username { get; set; }
 
     [Column(Order = 3)]
-    public string Password { get; set; }
+    public required string Password { get; set; }
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexAccount"/> is enabled and that it should be used for downloading media.
     /// </summary>
     [Column(Order = 4)]
-    public bool IsEnabled { get; set; }
+    public required bool IsEnabled { get; set; }
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexAccount"/> has been validated against the Plex API and contain valid credentials.
     /// </summary>
     [Column(Order = 5)]
-    public bool IsValidated { get; set; }
+    public required bool IsValidated { get; set; }
 
     [Column(Order = 6)]
-    public DateTime ValidatedAt { get; set; }
+    public required DateTime ValidatedAt { get; set; }
 
     [Column(Order = 7)]
-    public long PlexId { get; set; }
+    public required long PlexId { get; set; }
 
     [Column(Order = 8)]
-    public string Uuid { get; set; }
+    public required string Uuid { get; set; }
 
     /// <summary>
     /// The unique client identifier used for all PlexApi communication.
     /// </summary>
     [Column(Order = 9)]
-    public string ClientId { get; set; }
+    public required string ClientId { get; set; }
 
     [Column(Order = 10)]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     [Column(Order = 11)]
-    public string Email { get; set; }
+    public required string Email { get; set; }
 
     [Column(Order = 12)]
-    public bool HasPassword { get; set; }
+    public required bool HasPassword { get; set; }
 
     /// <summary>
     /// The general plex authentication token used to retrieve account data such as the <see cref="PlexServer" />s the
     /// account has access to.
     /// </summary>
-    public string AuthenticationToken { get; set; }
+    public required string AuthenticationToken { get; set; }
 
     /// <summary>
     /// If this is a main account then it will get a lower priority when downloading media which a non-main account also has access to.
     /// </summary>
-    public bool IsMain { get; set; }
+    public required bool IsMain { get; set; }
 
     #region Relationships
 
     /// <summary>
     /// The associated <see cref="PlexServer"/> this <see cref="PlexAccount"/> has access to.
     /// </summary>
-    public List<PlexAccountServer> PlexAccountServers { get; set; }
+    public List<PlexAccountServer> PlexAccountServers { get; set; } = new();
 
     /// <summary>
     /// The associated <see cref="PlexLibrary"/> this <see cref="PlexAccount"/> has access to.
@@ -117,15 +117,39 @@ public class PlexAccount : BaseEntity
     /// Gets or sets whether this <see cref="PlexAccount"/> is 2FA protected.
     /// </summary>
     [NotMapped]
-    public bool Is2Fa { get; set; }
+    public required bool Is2Fa { get; set; }
 
     /// <summary>
     /// The verification code given by the user if 2FA is enabled.
     /// </summary>
     [NotMapped]
-    public string VerificationCode { get; set; }
+    public required string VerificationCode { get; set; }
 
     #endregion
 
     #endregion
+
+    public static PlexAccount Create(string username, string password) =>
+        new()
+        {
+            Id = 0,
+            DisplayName = string.Empty,
+            Username = username,
+            Password = password,
+            IsEnabled = false,
+            IsValidated = false,
+            ValidatedAt = default,
+            PlexId = 0,
+            Uuid = string.Empty,
+            ClientId = string.Empty,
+            Title = string.Empty,
+            Email = string.Empty,
+            HasPassword = false,
+            AuthenticationToken = string.Empty,
+            IsMain = false,
+            PlexAccountServers = [],
+            PlexAccountLibraries = [],
+            Is2Fa = false,
+            VerificationCode = string.Empty,
+        };
 }

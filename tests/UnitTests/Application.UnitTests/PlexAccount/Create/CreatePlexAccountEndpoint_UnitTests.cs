@@ -16,7 +16,7 @@ public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccoun
     {
         // Arrange
         await SetupDatabase();
-        var newAccount = new PlexAccount("TestUsername", "Password123");
+        var newAccount = PlexAccount.Create("TestUsername", "Password123");
 
         mock.SetupMediator(It.IsAny<InspectAllPlexServersByAccountIdCommand>).ReturnsAsync(Result.Ok());
 
@@ -30,7 +30,7 @@ public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccoun
             });
         });
 
-        var request = new CreatePlexAccountEndpointRequest() { PlexAccount = newAccount.ToDTO(), };
+        var request = new CreatePlexAccountEndpointRequest() { PlexAccount = newAccount.ToDTO() };
 
         // Act
         await ep.HandleAsync(request, default);
@@ -46,7 +46,9 @@ public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccoun
         // Arrange
         await SetupDatabase(config => config.PlexAccountCount = 1);
         var plexAccount = await IDbContext.PlexAccounts.GetAsync(1);
-        var newAccount = new PlexAccount(plexAccount.Username, "Password123");
+        plexAccount.ShouldNotBeNull();
+
+        var newAccount = PlexAccount.Create(plexAccount.Username, "Password123");
 
         mock.SetupMediator(It.IsAny<InspectAllPlexServersByAccountIdCommand>).ReturnsAsync(Result.Ok());
 
@@ -60,7 +62,7 @@ public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccoun
             });
         });
 
-        var request = new CreatePlexAccountEndpointRequest() { PlexAccount = newAccount.ToDTO(), };
+        var request = new CreatePlexAccountEndpointRequest() { PlexAccount = newAccount.ToDTO() };
 
         // Act
         await ep.HandleAsync(request, default);
@@ -75,7 +77,7 @@ public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccoun
     {
         // Arrange
         await SetupDatabase();
-        var newAccount = new PlexAccount("TestUsername", "Password123");
+        var newAccount = PlexAccount.Create("TestUsername", "Password123");
 
         mock.SetupMediator(It.IsAny<InspectAllPlexServersByAccountIdCommand>).ReturnsAsync(Result.Fail("Error #1"));
 
@@ -89,7 +91,7 @@ public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccoun
             });
         });
 
-        var request = new CreatePlexAccountEndpointRequest() { PlexAccount = newAccount.ToDTO(), };
+        var request = new CreatePlexAccountEndpointRequest() { PlexAccount = newAccount.ToDTO() };
 
         // Act
         await ep.HandleAsync(request, default);

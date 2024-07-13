@@ -9,88 +9,88 @@ public class PlexMediaSlim : BaseEntity
     /// e.g: 28550, 1723, 21898.
     /// </summary>
     [Column(Order = 1)]
-    public int Key { get; set; }
+    public required int Key { get; set; }
 
     [Column(Order = 2)]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     [Column(Order = 3)]
-    public int Year { get; set; }
+    public required int Year { get; set; }
 
     /// <summary>
     /// This can be empty, in that case it gets the value of <see cref="Title"/>.
     /// </summary>
     [Column(Order = 4)]
-    public string SortTitle { get; set; }
+    public required string SortTitle { get; set; }
 
     /// <summary>
     /// Gets or sets the duration in seconds of the (nested) media.
     /// </summary>
     [Column(Order = 5)]
-    public int Duration { get; set; }
+    public required int Duration { get; set; }
 
     /// <summary>
     /// Gets or sets the total filesize of the nested media.
     /// </summary>
     [Column(Order = 6)]
-    public long MediaSize { get; set; }
+    public required long MediaSize { get; set; }
 
     /// <summary>
     /// Gets or sets the key used to retrieve thumbnails, art or banners.
     /// E.g. /library/metadata/[Key]/art/[MetadataKey] =>  /library/metadata/529367/art/1593898227.
     /// </summary>
     [Column(Order = 7)]
-    public int MetaDataKey { get; set; }
+    public required int MetaDataKey { get; set; }
 
     /// <summary>
     /// Gets or sets the number of direct children
     /// E.G. if the type is tvShow, then this number would be the season count, if season then this would be the episode count.
     /// </summary>
     [Column(Order = 12)]
-    public int ChildCount { get; set; }
+    public required int ChildCount { get; set; }
 
     /// <summary>
     /// Gets or sets when this media was added to the Plex library.
     /// </summary>
     [Column(Order = 13)]
-    public DateTime AddedAt { get; set; }
+    public required DateTime AddedAt { get; set; }
 
     /// <summary>
     /// Gets or sets when this media was last updated in the Plex library.
     /// </summary>
     [Column(Order = 14)]
-    public DateTime UpdatedAt { get; set; }
+    public required DateTime UpdatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether this <see cref="PlexMedia"/> has a thumbnail.
     /// </summary>
     [Column(Order = 17)]
-    public bool HasThumb { get; set; }
+    public required bool HasThumb { get; set; }
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexMedia"/> has art.
     /// </summary>
     [Column(Order = 18)]
-    public bool HasArt { get; set; }
+    public required bool HasArt { get; set; }
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexMedia"/> has a banner.
     /// </summary>
     [Column(Order = 19)]
-    public bool HasBanner { get; set; }
+    public required bool HasBanner { get; set; }
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexMedia"/> has a theme.
     /// </summary>
     [Column(Order = 20)]
-    public bool HasTheme { get; set; }
+    public required bool HasTheme { get; set; }
 
     [Column(Order = 22)]
-    public PlexMediaContainer MediaData { get; set; } = new();
+    public required PlexMediaContainer MediaData { get; set; }
 
-    public int PlexLibraryId { get; set; }
+    public required int PlexLibraryId { get; set; }
 
-    public int PlexServerId { get; set; }
+    public required int PlexServerId { get; set; }
 
     [NotMapped]
     public virtual PlexMediaType Type { get; set; }
@@ -121,13 +121,13 @@ public class PlexMediaSlim : BaseEntity
     public string ThumbUrl => HasThumb ? $"{MetaDataUrl}/thumb/{MetaDataKey}" : string.Empty;
 
     [NotMapped]
-    public string FullThumbUrl { get; set; }
+    public string FullThumbUrl { get; set; } = string.Empty;
 
     [NotMapped]
     public string BannerUrl => HasBanner ? $"{MetaDataUrl}/banner/{MetaDataKey}" : string.Empty;
 
     [NotMapped]
-    public string FullBannerUrl { get; set; }
+    public string FullBannerUrl { get; set; } = string.Empty;
 
     [NotMapped]
     public string ArtUrl => HasArt ? $"{MetaDataUrl}/art/{MetaDataKey}" : string.Empty;

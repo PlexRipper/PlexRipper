@@ -68,8 +68,7 @@ public class CheckConnectionStatusByIdCommandHandler
     /// <param name="progress"></param>
     private async void Action(PlexApiClientProgress progress)
     {
-        var checkStatusProgress = progress.ToServerConnectionCheckStatusProgress();
-        checkStatusProgress.PlexServerConnection = _plexServerConnection;
+        var checkStatusProgress = progress.ToServerConnectionCheckStatusProgress(_plexServerConnection);
         await _signalRService.SendServerConnectionCheckStatusProgressAsync(checkStatusProgress);
     }
 

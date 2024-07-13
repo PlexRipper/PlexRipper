@@ -78,10 +78,10 @@ public class PlexApi
 
     public async Task<Result<PlexServerStatus>> GetServerStatusAsync(
         string serverBaseUrl,
-        Action<PlexApiClientProgress> action = null
+        Action<PlexApiClientProgress>? action = null
     )
     {
-        var request = new RestRequest(PlexApiPaths.ServerIdentity(serverBaseUrl)) { Timeout = 5000, };
+        var request = new RestRequest(PlexApiPaths.ServerIdentity(serverBaseUrl)) { Timeout = 5000 };
 
         _log.Debug("Requesting PlexServerStatus for {Url}", serverBaseUrl);
         var response = await _client.SendRequestAsync<ServerIdentityResponse>(request, 1, action);
@@ -106,6 +106,8 @@ public class PlexApi
                 StatusMessage = statusMessage,
                 LastChecked = DateTime.UtcNow,
                 IsSuccessful = response.IsSuccess,
+                PlexServerId = 0,
+                PlexServerConnectionId = 0,
             }
         );
     }
@@ -165,26 +167,6 @@ public class PlexApi
         request.AddQueryParameter("includeMeta", "1");
 
         return await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
-    }
-
-    public async Task<PlexMediaContainerDTO> GetMetadataAsync(string authToken, string plexFullHost, int metadataId)
-    {
-        var request = new RestRequest(new Uri($"{plexFullHost}/library/metadata/{metadataId}"));
-
-        request.AddToken(authToken);
-
-        var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
-        return result.ValueOrDefault;
-    }
-
-    public async Task<PlexMediaContainerDTO> GetMetadataAsync(string authToken, string metaDataUrl)
-    {
-        var request = new RestRequest(new Uri(metaDataUrl));
-
-        request.AddToken(authToken);
-
-        var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
-        return result.ValueOrDefault;
     }
 
     public async Task<PlexMediaContainerDTO> GetSeasonsAsync(string authToken, string plexFullHost, int ratingKey)

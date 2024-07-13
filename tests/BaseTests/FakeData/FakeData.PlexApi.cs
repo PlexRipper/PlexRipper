@@ -61,12 +61,22 @@ public static partial class FakeData
             .RuleFor(x => x.Uuid, _ => Guid.NewGuid())
             .RuleFor(x => x.LibraryLocationId, f => f.Random.Int(1, 10000))
             .RuleFor(x => x.LibraryLocationPath, f => f.System.DirectoryPath())
-            .RuleFor(x => x.MetaData, _ => new PlexLibraryMetaData())
+            .RuleFor(
+                x => x.MetaData,
+                _ => new PlexLibraryMetaData
+                {
+                    TvShowCount = 0,
+                    TvShowSeasonCount = 0,
+                    TvShowEpisodeCount = 0,
+                    MovieCount = 0,
+                    MediaSize = 0,
+                }
+            )
             .RuleFor(x => x.DefaultDestination, _ => null)
             .RuleFor(x => x.DefaultDestinationId, _ => null)
             .RuleFor(x => x.Movies, _ => new List<PlexMovie>())
             .RuleFor(x => x.TvShows, _ => new List<PlexTvShow>())
-            .RuleFor(x => x.PlexAccountLibraries, _ => null);
+            .RuleFor(x => x.PlexAccountLibraries, _ => new List<PlexAccountLibrary>());
     }
 
     public static Faker<FolderPath> GetFolderPaths(int seed = 0)

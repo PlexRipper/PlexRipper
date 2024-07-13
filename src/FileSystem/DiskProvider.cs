@@ -33,38 +33,6 @@ public class DiskProvider : IDiskProvider
             "@eadir",
         };
 
-    public FileSystemResult GetResult(string path, bool includeFiles)
-    {
-        var result = new FileSystemResult();
-
-        try
-        {
-            result.Parent = GetParent(path);
-            result.Directories = GetDirectories(path);
-
-            if (includeFiles)
-                result.Files = GetFiles(path);
-        }
-        catch (DirectoryNotFoundException)
-        {
-            return new FileSystemResult { Parent = GetParent(path) };
-        }
-        catch (ArgumentException)
-        {
-            return new FileSystemResult();
-        }
-        catch (IOException)
-        {
-            return new FileSystemResult { Parent = GetParent(path) };
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return new FileSystemResult { Parent = GetParent(path) };
-        }
-
-        return result;
-    }
-
     public string GetParent(string path)
     {
         var di = new DirectoryInfo(path);
@@ -111,6 +79,8 @@ public class DiskProvider : IDiskProvider
                 Path = GetDirectoryPath(d.FullName.GetActualCasing()),
                 LastModified = d.LastWriteTimeUtc,
                 Type = FileSystemEntityType.Folder,
+                Extension = d.Extension,
+                Size = 0, // TODO maybe calculating this is a bit expensive, see if needed
             })
             .ToList();
 
@@ -146,10 +116,7 @@ public class DiskProvider : IDiskProvider
         return GetAllMounts().Where(d => !IsSpecialMount(d)).ToList();
     }
 
-    protected virtual bool IsSpecialMount(IMount mount)
-    {
-        return false;
-    }
+    protected virtual bool IsSpecialMount(IMount mount) => false;
 
     protected virtual List<IMount> GetAllMounts()
     {

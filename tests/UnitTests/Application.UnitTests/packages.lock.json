@@ -94,23 +94,6 @@
           "Quartz": "[3.8.1, 4.0.0)"
         }
       },
-      "AutoMapper": {
-        "type": "Transitive",
-        "resolved": "12.0.1",
-        "contentHash": "hvV62vl6Hp/WfQ24yzo3Co9+OPl8wH8hApwVtgWpiAynVJkUcs7xvehnSftawL8Pe8FrPffBRM3hwzLQqWDNjA==",
-        "dependencies": {
-          "Microsoft.CSharp": "4.7.0"
-        }
-      },
-      "AutoMapper.Extensions.Microsoft.DependencyInjection": {
-        "type": "Transitive",
-        "resolved": "12.0.0",
-        "contentHash": "XCJ4E3oKrbRl1qY9Mr+7uyC0xZj1+bqQjmQRWTiTKiVuuXTny+7YFWHi20tPjwkMukLbicN6yGlDy5PZ4wyi1w==",
-        "dependencies": {
-          "AutoMapper": "12.0.0",
-          "Microsoft.Extensions.Options": "6.0.0"
-        }
-      },
       "Azure.Core": {
         "type": "Transitive",
         "resolved": "1.35.0",
@@ -3126,7 +3109,6 @@
       "PlexRipper.Domain": {
         "type": "Project",
         "dependencies": {
-          "AutoMapper": "[12.0.1, )",
           "ByteSize": "[2.1.2, )",
           "FluentResultExtensions": "[1.0.0, )",
           "FluentValidation": "[11.9.0, )",
@@ -3173,7 +3155,6 @@
       "PlexRipper.WebAPI": {
         "type": "Project",
         "dependencies": {
-          "AutoMapper.Extensions.Microsoft.DependencyInjection": "[12.0.0, )",
           "Autofac.Extensions.DependencyInjection": "[9.0.0, )",
           "FastEndpoints.Swagger": "[5.23.0, )",
           "FluentValidation.AspNetCore": "[11.3.0, )",

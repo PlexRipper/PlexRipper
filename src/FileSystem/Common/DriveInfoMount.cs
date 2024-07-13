@@ -8,15 +8,10 @@ public class DriveInfoMount : IMount
 
     private readonly DriveType _driveType;
 
-    public DriveInfoMount(
-        DriveInfo driveInfo,
-        DriveType driveType = DriveType.Unknown,
-        MountOptions mountOptions = null
-    )
+    public DriveInfoMount(DriveInfo driveInfo, DriveType driveType = DriveType.Unknown)
     {
         _driveInfo = driveInfo;
         _driveType = driveType;
-        MountOptions = mountOptions;
     }
 
     public long AvailableFreeSpace => _driveInfo.AvailableFreeSpace;
@@ -35,8 +30,6 @@ public class DriveInfoMount : IMount
     }
 
     public bool IsReady => _driveInfo.IsReady;
-
-    public MountOptions MountOptions { get; }
 
     public string Name => _driveInfo.Name;
 

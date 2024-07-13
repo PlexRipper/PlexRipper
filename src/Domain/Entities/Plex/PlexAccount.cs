@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 
 namespace PlexRipper.Domain;
 
@@ -20,7 +19,6 @@ public class PlexAccount : BaseEntity
     /// </summary>
     /// <param name="username">The username to use.</param>
     /// <param name="password">The password to use.</param>
-    [SetsRequiredMembers]
     public PlexAccount(string username, string password)
     {
         Username = username;
@@ -130,4 +128,28 @@ public class PlexAccount : BaseEntity
     #endregion
 
     #endregion
+
+    public static PlexAccount Create(string username, string password) =>
+        new()
+        {
+            Id = 0,
+            DisplayName = string.Empty,
+            Username = username,
+            Password = password,
+            IsEnabled = false,
+            IsValidated = false,
+            ValidatedAt = default,
+            PlexId = 0,
+            Uuid = string.Empty,
+            ClientId = string.Empty,
+            Title = string.Empty,
+            Email = string.Empty,
+            HasPassword = false,
+            AuthenticationToken = string.Empty,
+            IsMain = false,
+            PlexAccountServers = [],
+            PlexAccountLibraries = [],
+            Is2Fa = false,
+            VerificationCode = string.Empty,
+        };
 }

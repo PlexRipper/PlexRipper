@@ -20,16 +20,16 @@ public class Notification : BaseEntity
     #region Properties
 
     [Column(Order = 1)]
-    public NotificationLevel Level { get; set; }
+    public NotificationLevel Level { get; init; }
 
     [Column(Order = 2)]
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; init; }
 
     [Column(Order = 3)]
-    public string Message { get; set; }
+    public string Message { get; init; }
 
     [Column(Order = 4)]
-    public bool Hidden { get; set; }
+    public bool Hidden { get; init; }
 
     #endregion
 }

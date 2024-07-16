@@ -25,25 +25,25 @@ public class FolderPath : BaseEntity
     /// Gets or sets the display name of this <see cref="FolderPath"/>.
     /// </summary>
     [Column(Order = 1)]
-    public string DisplayName { get; set; } = string.Empty;
+    public string DisplayName { get; init; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the <see cref="FolderType"/> of this <see cref="FolderPath"/>.
     /// </summary>
     [Column(Order = 2)]
-    public FolderType FolderType { get; set; } = FolderType.Unknown;
+    public FolderType FolderType { get; init; } = FolderType.Unknown;
 
     /// <summary>
     /// Gets or sets the <see cref="PlexMediaType"/> associated with this <see cref="FolderPath"/>.
     /// </summary>
     [Column(Order = 3)]
-    public PlexMediaType MediaType { get; set; } = PlexMediaType.Unknown;
+    public PlexMediaType MediaType { get; init; } = PlexMediaType.Unknown;
 
     /// <summary>
     ///  Gets or sets the filesystem directory path of this <see cref="FolderPath"/>.
     /// </summary>
     [Column(Order = 4)]
-    public string DirectoryPath { get; set; } = string.Empty;
+    public string DirectoryPath { get; init; } = string.Empty;
 
     #endregion
 
@@ -52,7 +52,7 @@ public class FolderPath : BaseEntity
     /// <summary>
     /// Gets or sets the <see cref="PlexLibraries"/> that use this <see cref="FolderPath"/> as a download destination folder.
     /// </summary>
-    public List<PlexLibrary> PlexLibraries { get; set; } = new();
+    public List<PlexLibrary> PlexLibraries { get; init; } = new();
 
     #endregion
 

@@ -21,13 +21,13 @@ public class PlexMediaSlim : BaseEntity
     /// This can be empty, in that case it gets the value of <see cref="Title"/>.
     /// </summary>
     [Column(Order = 4)]
-    public required string SortTitle { get; set; }
+    public required string SortTitle { get; init; }
 
     /// <summary>
     /// Gets or sets the duration in seconds of the (nested) media.
     /// </summary>
     [Column(Order = 5)]
-    public required int Duration { get; set; }
+    public required int Duration { get; init; }
 
     /// <summary>
     /// Gets or sets the total filesize of the nested media.
@@ -40,7 +40,7 @@ public class PlexMediaSlim : BaseEntity
     /// E.g. /library/metadata/[Key]/art/[MetadataKey] =>  /library/metadata/529367/art/1593898227.
     /// </summary>
     [Column(Order = 7)]
-    public required int MetaDataKey { get; set; }
+    public required int MetaDataKey { get; init; }
 
     /// <summary>
     /// Gets or sets the number of direct children
@@ -53,7 +53,7 @@ public class PlexMediaSlim : BaseEntity
     /// Gets or sets when this media was added to the Plex library.
     /// </summary>
     [Column(Order = 13)]
-    public required DateTime AddedAt { get; set; }
+    public required DateTime AddedAt { get; init; }
 
     /// <summary>
     /// Gets or sets when this media was last updated in the Plex library.
@@ -71,29 +71,29 @@ public class PlexMediaSlim : BaseEntity
     /// Gets or sets whether this <see cref="PlexMedia"/> has art.
     /// </summary>
     [Column(Order = 18)]
-    public required bool HasArt { get; set; }
+    public required bool HasArt { get; init; }
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexMedia"/> has a banner.
     /// </summary>
     [Column(Order = 19)]
-    public required bool HasBanner { get; set; }
+    public required bool HasBanner { get; init; }
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexMedia"/> has a theme.
     /// </summary>
     [Column(Order = 20)]
-    public required bool HasTheme { get; set; }
+    public required bool HasTheme { get; init; }
 
     [Column(Order = 22)]
-    public required PlexMediaContainer MediaData { get; set; }
+    public required PlexMediaContainer MediaData { get; init; }
 
     public required int PlexLibraryId { get; set; }
 
     public required int PlexServerId { get; set; }
 
     [NotMapped]
-    public virtual PlexMediaType Type { get; set; }
+    public virtual PlexMediaType Type { get; init; }
 
     [NotMapped]
     public List<PlexMediaQuality> Qualities
@@ -127,7 +127,7 @@ public class PlexMediaSlim : BaseEntity
     public string BannerUrl => HasBanner ? $"{MetaDataUrl}/banner/{MetaDataKey}" : string.Empty;
 
     [NotMapped]
-    public string FullBannerUrl { get; set; } = string.Empty;
+    public string FullBannerUrl { get; init; } = string.Empty;
 
     [NotMapped]
     public string ArtUrl => HasArt ? $"{MetaDataUrl}/art/{MetaDataKey}" : string.Empty;

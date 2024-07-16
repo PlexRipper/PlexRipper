@@ -7,14 +7,14 @@ public class PlexAccountServer
     #region Relationships
 
     [Column(Order = 0)]
-    public required int PlexAccountId { get; set; }
+    public required int PlexAccountId { get; init; }
 
-    public virtual PlexAccount? PlexAccount { get; set; }
+    public PlexAccount? PlexAccount { get; init; }
 
     [Column(Order = 1)]
-    public required int PlexServerId { get; set; }
+    public required int PlexServerId { get; init; }
 
-    public virtual PlexServer? PlexServer { get; set; }
+    public PlexServer? PlexServer { get; init; }
 
     #endregion
 

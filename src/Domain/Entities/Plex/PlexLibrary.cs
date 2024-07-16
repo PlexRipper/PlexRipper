@@ -16,27 +16,27 @@ public class PlexLibrary : BaseEntity
     /// Gets or sets the display title of this <see cref="PlexLibrary"/>.
     /// </summary>
     [Column(Order = 2)]
-    public required string Title { get; set; }
+    public required string Title { get; init; }
 
     /// <summary>
     /// Gets or sets the Library Section Identifier used by Plex.
     /// </summary>
     [Column(Order = 3)]
-    public required string Key { get; set; }
+    public required string Key { get; init; }
 
     /// <summary>
     /// Gets or sets the relative path of the Library location on the hosted PlexServer,
     /// E.g: /AnimeSeries, Q:\[T.V SHOWS].
     /// </summary>
     [Column(Order = 4)]
-    public required string LibraryLocationPath { get; set; }
+    public required string LibraryLocationPath { get; init; }
 
     /// <summary>
     /// Gets or sets the creation date of this <see cref="PlexLibrary"/> on the <see cref="PlexServer"/> by the owner.
     /// Value is set by the PlexApi.
     /// </summary>
     [Column(Order = 5)]
-    public required DateTime CreatedAt { get; set; }
+    public required DateTime CreatedAt { get; init; }
 
     /// <summary>
     /// Gets or sets the last time this <see cref="PlexLibrary"/> was updated by the <see cref="PlexServer"/> owner.
@@ -50,7 +50,7 @@ public class PlexLibrary : BaseEntity
     /// Value is set by the PlexApi.
     /// </summary>
     [Column(Order = 7)]
-    public required DateTime ScannedAt { get; set; }
+    public required DateTime ScannedAt { get; init; }
 
     /// <summary>
     /// Gets or sets the DateTime this <see cref="PlexLibrary"/> was last synced with the PlexApi.
@@ -62,13 +62,13 @@ public class PlexLibrary : BaseEntity
     /// Gets or sets the unique id of the <see cref="PlexLibrary"/>.
     /// </summary>
     [Column(Order = 9)]
-    public required Guid Uuid { get; set; }
+    public required Guid Uuid { get; init; }
 
     /// <summary>
     /// Gets or sets this relative path Id of the Library location.
     /// </summary>
     [Column(Order = 10)]
-    public required int LibraryLocationId { get; set; }
+    public required int LibraryLocationId { get; init; }
 
     /// <summary>
     /// Gets or sets the <see cref="PlexLibraryMetaData"/>, this is a JSON field that contains a collection
@@ -84,7 +84,7 @@ public class PlexLibrary : BaseEntity
     /// <summary>
     /// Gets or sets the PlexServer this PlexLibrary belongs to.
     /// </summary>
-    public PlexServer? PlexServer { get; set; }
+    public PlexServer? PlexServer { get; init; }
 
     /// <summary>
     /// Gets or sets the PlexServerId of the PlexServer this PlexLibrary belongs to.
@@ -94,7 +94,7 @@ public class PlexLibrary : BaseEntity
     /// <summary>
     /// Gets or sets the default download destination <see cref="FolderPath"/>.
     /// </summary>
-    public FolderPath? DefaultDestination { get; set; }
+    public FolderPath? DefaultDestination { get; init; }
 
     /// <summary>
     /// Gets or sets the Id of the Default Destination <see cref="FolderPath"/>.
@@ -105,7 +105,7 @@ public class PlexLibrary : BaseEntity
 
     public List<PlexTvShow> TvShows { get; set; } = new();
 
-    public List<PlexAccountLibrary> PlexAccountLibraries { get; set; } = new();
+    public List<PlexAccountLibrary> PlexAccountLibraries { get; init; } = new();
 
     #endregion
 

@@ -226,7 +226,6 @@ public static partial class FakeData
             .UseSeed(seed)
             .StrictMode(true)
             .ApplyDownloadTaskParentBase(seed, options)
-            .RuleFor(x => x.Parent, _ => null)
             .RuleFor(x => x.ParentId, _ => Guid.Empty)
             .RuleFor(x => x.MediaType, PlexMediaType.Season)
             .RuleFor(x => x.Title, _ => "Season")

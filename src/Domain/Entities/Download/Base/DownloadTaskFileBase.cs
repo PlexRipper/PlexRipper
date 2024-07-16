@@ -47,16 +47,16 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase
     /// e.g: /library/parts/47660/156234666/file.mkv.
     /// </summary>
     [Column(Order = 12)]
-    public required string FileLocationUrl { get; set; }
+    public required string FileLocationUrl { get; init; }
 
     /// <summary>
     /// Gets or sets get or sets the media quality of this <see cref="DownloadTaskGeneric"/>.
     /// </summary>
     [Column(Order = 15)]
-    public required string Quality { get; set; }
+    public required string Quality { get; init; }
 
     [Column(Order = 16)]
-    public required DownloadTaskDirectory DirectoryMeta { get; set; }
+    public required DownloadTaskDirectory DirectoryMeta { get; init; }
 
     #region Relationships
 
@@ -78,7 +78,7 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase
     {
         get
         {
-            if (DirectoryMeta == null || DirectoryMeta.DownloadRootPath == string.Empty)
+            if (DirectoryMeta.DownloadRootPath == string.Empty)
                 return string.Empty;
 
             switch (DownloadTaskType)
@@ -107,7 +107,7 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase
     {
         get
         {
-            if (DirectoryMeta == null || DirectoryMeta.DestinationRootPath == string.Empty)
+            if (DirectoryMeta.DestinationRootPath == string.Empty)
                 return string.Empty;
 
             switch (DownloadTaskType)

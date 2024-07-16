@@ -2,7 +2,7 @@
 
 public record PlexServerSettingsModel
 {
-    public required string PlexServerName { get; set; }
+    public required string PlexServerName { get; init; }
 
     public required string MachineIdentifier { get; set; }
 

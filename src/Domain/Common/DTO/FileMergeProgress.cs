@@ -13,20 +13,20 @@ public class FileMergeProgress
     /// <summary>
     /// This is equal to the <see cref="DownloadTaskGeneric"/> Id the <see cref="FileTask"/> is currently handling.
     /// </summary>
-    public Guid DownloadTaskId { get; set; }
+    public Guid DownloadTaskId { get; init; }
 
     public DownloadTaskType DownloadTaskType { get; set; }
 
-    public long DataTransferred { get; set; }
+    public long DataTransferred { get; init; }
 
-    public long DataTotal { get; set; }
+    public long DataTotal { get; init; }
 
     public decimal Percentage => DataFormat.GetPercentage(DataTransferred, DataTotal);
 
     /// <summary>
     /// The transfer speed in bytes per second.
     /// </summary>
-    public int TransferSpeed { get; set; }
+    public int TransferSpeed { get; init; }
 
     /// <summary>
     /// The time remaining in seconds the <see cref="FileTask"/> to finish.
@@ -39,13 +39,13 @@ public class FileMergeProgress
     /// Gets or sets the <see cref="PlexServer"/> Id the <see cref="FileTask"/> is currently handling.
     /// Note: This is needed in the front-end to update the correct DownloadTask.
     /// </summary>
-    public int PlexServerId { get; set; }
+    public int PlexServerId { get; init; }
 
     /// <summary>
     /// Gets or sets the <see cref="PlexLibrary"/> Id the <see cref="FileTask"/> is currently handling.
     /// Note: This is needed in the front-end to update the correct DownloadTask.
     /// </summary>
-    public int PlexLibraryId { get; set; }
+    public int PlexLibraryId { get; init; }
 
     public DownloadTaskKey ToKey() =>
         new()

@@ -17,20 +17,24 @@ public static class DownloadTaskActions
     private const string StatusRestart = "restart";
 
     private static readonly List<DownloadStatus> AllStatuses =
-        new()
-        {
-            DownloadStatus.Queued,
-            DownloadStatus.Downloading,
-            DownloadStatus.DownloadFinished,
-            DownloadStatus.Completed,
-            DownloadStatus.Deleted,
-            DownloadStatus.Unknown,
-            DownloadStatus.Merging,
-            DownloadStatus.Moving,
-        };
+    [
+        DownloadStatus.Queued,
+        DownloadStatus.Downloading,
+        DownloadStatus.DownloadFinished,
+        DownloadStatus.Completed,
+        DownloadStatus.Deleted,
+        DownloadStatus.Unknown,
+        DownloadStatus.Merging,
+        DownloadStatus.Moving,
+    ];
 
     private static readonly List<DownloadStatus> AnyStatuses =
-        new() { DownloadStatus.Error, DownloadStatus.Downloading, DownloadStatus.Paused, DownloadStatus.Stopped, };
+    [
+        DownloadStatus.Error,
+        DownloadStatus.Downloading,
+        DownloadStatus.Paused,
+        DownloadStatus.Stopped
+    ];
 
     public static List<string> Convert(DownloadStatus downloadStatus)
     {

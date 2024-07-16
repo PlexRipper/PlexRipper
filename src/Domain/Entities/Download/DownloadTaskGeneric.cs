@@ -45,19 +45,19 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
     /// <summary>
     /// Gets or sets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
     /// </summary>
-    public required string DownloadDirectory { get; set; }
+    public required string DownloadDirectory { get; init; }
 
     public required string Quality { get; set; }
 
     /// <summary>
     /// Gets or sets the destination directory appended to the MediaPath e.g: [DestinationPath]/[TvShow]/[Season]/ or  [DestinationPath]/[Movie]/.
     /// </summary>
-    public required string DestinationDirectory { get; set; }
+    public required string DestinationDirectory { get; init; }
 
     /// <summary>
     /// The relative obfuscated URL of the media to be downloaded, e.g: /library/parts/47660/156234666/file.mkv.
     /// </summary>
-    public required string FileLocationUrl { get; set; }
+    public required string FileLocationUrl { get; init; }
 
     public required long DownloadSpeed { get; set; }
 
@@ -71,7 +71,7 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
     /// </summary>
     public required List<DownloadTaskGeneric> Children { get; set; } = new();
 
-    public required List<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = new();
+    public required List<DownloadWorkerTask> DownloadWorkerTasks { get; init; } = new();
 
     public required Guid ParentId { get; init; }
 

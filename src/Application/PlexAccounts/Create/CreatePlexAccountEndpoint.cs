@@ -4,6 +4,7 @@ using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
@@ -21,7 +22,6 @@ public class CreatePlexAccountEndpointRequestValidator : Validator<CreatePlexAcc
 {
     public CreatePlexAccountEndpointRequestValidator()
     {
-        RuleFor(x => x.PlexAccount.Id).Equal(0).WithMessage("The Id should be 0 when creating a new PlexAccount");
         RuleFor(x => x.PlexAccount.Username).NotEmpty().MinimumLength(5);
         RuleFor(x => x.PlexAccount.Password).NotEmpty().MinimumLength(5);
         RuleFor(x => x.PlexAccount.DisplayName).NotEmpty();
@@ -57,16 +57,28 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
     public override async Task HandleAsync(CreatePlexAccountEndpointRequest req, CancellationToken ct)
     {
         var plexAccount = req.PlexAccount.ToModel();
+        plexAccount.Id = 0;
 
         _log.Debug("Creating account with username {UserName}", plexAccount.Username);
 
+        // Check if account with the same username already exists
         var isAvailable = await _dbContext.IsUsernameAvailable(plexAccount.Username, ct);
-
         if (!isAvailable)
         {
             var msg =
                 $"Account with username {plexAccount.Username} cannot be created due to an account with the same username already existing";
             await SendFluentResult(Result.Fail(msg).LogError(), ct);
+            return;
+        }
+
+        // Check if account with the same UUID already exists
+        var uuidResult = await _dbContext.PlexAccounts.Where(x => x.Uuid == plexAccount.Uuid).FirstOrDefaultAsync(ct);
+        if (uuidResult is not null)
+        {
+            var badResult = ResultExtensions
+                .Create400BadRequestResult("Account with the same UUID {plexAccount.Uuid} already exists")
+                .LogWarning();
+            await SendFluentResult(badResult, ct);
             return;
         }
 
@@ -91,6 +103,12 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
             .PlexAccounts.IncludeServerAccess()
             .IncludeLibraryAccess()
             .GetAsync(plexAccount.Id, ct);
+
+        if (plexAccountDTO is null)
+        {
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccount.Id), ct);
+            return;
+        }
 
         var result = Result.Ok(plexAccountDTO).Add201CreatedRequestSuccess("PlexAccount created successfully.");
 

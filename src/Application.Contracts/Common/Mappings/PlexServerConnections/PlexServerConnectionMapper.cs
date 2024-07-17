@@ -21,7 +21,7 @@ public static class PlexServerConnectionMapper
             PlexServerId = source.PlexServerId,
             Url = source.Url,
             ServerStatusList = source.PlexServerStatus.ToDTO(),
-            LatestConnectionStatus = source.LatestConnectionStatus.ToDTO(),
+            LatestConnectionStatus = source.LatestConnectionStatus?.ToDTO(),
             Progress = default,
         };
 

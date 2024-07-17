@@ -33,7 +33,7 @@ public class PlexServerConnectionDTO
     /// <summary>
     /// Added as a progress container for the front-end
     /// </summary>
-    public required ServerConnectionCheckStatusProgressDTO Progress { get; set; }
+    public required ServerConnectionCheckStatusProgressDTO? Progress { get; set; }
 
     #endregion
 }

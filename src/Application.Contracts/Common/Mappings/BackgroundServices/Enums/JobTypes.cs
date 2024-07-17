@@ -28,7 +28,4 @@ public enum JobTypes
 
     [EnumMember(Value = nameof(DownloadProgressJobs))]
     DownloadProgressJobs = 6,
-
-    [EnumMember(Value = nameof(InspectPlexServerByPlexAccountIdJob))]
-    InspectPlexServerByPlexAccountIdJob = 7,
 }

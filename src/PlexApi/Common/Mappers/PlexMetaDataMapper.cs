@@ -44,7 +44,7 @@ public static partial class PlexMetaDataMapper
             Id = 0,
             Title = source.Title,
             Year = source.Year,
-            SortTitle = source.TitleSort,
+            SortTitle = source.TitleSort ?? string.Empty,
             Duration = source.Duration,
             MediaSize = source.Media.Sum(y => y.Part.Sum(z => z.Size)),
             ChildCount = source.ChildCount,
@@ -55,9 +55,9 @@ public static partial class PlexMetaDataMapper
             Type = PlexMediaType.None,
             Key = source.RatingKey != null ? int.Parse(source.RatingKey) : -1,
             MetaDataKey = RetrieveMetaDataKey(source),
-            Studio = source.Studio,
-            Summary = source.Summary,
-            ContentRating = source.ContentRating,
+            Studio = source.Studio ?? string.Empty,
+            Summary = source.Summary ?? string.Empty,
+            ContentRating = source.ContentRating ?? string.Empty,
             Rating = source.Rating,
             OriginallyAvailableAt = source.OriginallyAvailableAt.ToDateTime(),
             Index = source.Index,
@@ -67,13 +67,13 @@ public static partial class PlexMetaDataMapper
             HasTheme = !string.IsNullOrEmpty(source.Theme),
 
             // Ignore the following
-            FullTitle = default,
+            FullTitle = string.Empty,
             PlexLibrary = default,
             PlexServer = default,
             PlexLibraryId = default,
             PlexServerId = default,
-            FullThumbUrl = null,
-            FullBannerUrl = null,
+            FullThumbUrl = string.Empty,
+            FullBannerUrl = string.Empty,
         };
     }
 

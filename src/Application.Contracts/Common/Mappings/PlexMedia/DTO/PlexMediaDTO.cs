@@ -14,7 +14,7 @@ public class PlexMediaDTO : PlexMediaSlimDTO
 
     public required string Summary { get; set; }
 
-    public required string ContentRating { get; set; }
+    public required string? ContentRating { get; set; }
 
     public required double Rating { get; set; }
 

@@ -56,7 +56,7 @@ export interface CreateFolderPathEndpointRequest {
 }
 
 export interface CreatePlexAccountEndpointRequest {
-	plexAccount?: PlexAccountDTO | null;
+	plexAccount: PlexAccountDTO;
 }
 
 export interface DateTimeSettingsDTO {
@@ -357,7 +357,6 @@ export enum JobTypes {
 	SyncServerJob = 'SyncServerJob',
 	RefreshPlexServersAccessJob = 'RefreshPlexServersAccessJob',
 	DownloadProgressJobs = 'DownloadProgressJobs',
-	InspectPlexServerByPlexAccountIdJob = 'InspectPlexServerByPlexAccountIdJob',
 }
 
 export interface LanguageSettingsDTO {
@@ -476,7 +475,7 @@ export interface PlexLibraryDTO {
 	/** @format int32 */
 	seasonCount: number;
 	/** @format date-time */
-	syncedAt: string;
+	syncedAt?: string | null;
 	title: string;
 	type: PlexMediaType;
 	/** @format date-time */
@@ -491,7 +490,7 @@ export interface PlexMediaDTO {
 	/** @format int32 */
 	childCount: number;
 	children: PlexMediaDTO[];
-	contentRating: string;
+	contentRating?: string | null;
 	/** @format int32 */
 	duration: number;
 	fullThumbUrl: string;
@@ -636,7 +635,7 @@ export interface PlexServerConnectionDTO {
 	/** @format int32 */
 	port: number;
 	portFix: boolean;
-	progress: ServerConnectionCheckStatusProgressDTO;
+	progress?: ServerConnectionCheckStatusProgressDTO | null;
 	protocol: string;
 	relay: boolean;
 	serverStatusList: PlexServerStatusDTO[];
@@ -658,7 +657,7 @@ export interface PlexServerDTO {
 	name: string;
 	natLoopbackSupported: boolean;
 	owned: boolean;
-	/** @format int32 */
+	/** @format int64 */
 	ownerId: number;
 	platform: string;
 	platformVersion: string;
@@ -673,14 +672,15 @@ export interface PlexServerDTO {
 	publicAddress: string;
 	publicAddressMatches: boolean;
 	relay: boolean;
+	serverFixApplyDNSFix: boolean;
 	synced: boolean;
 }
 
 export interface PlexServerSettingsModel {
 	/** @format int32 */
 	downloadSpeedLimit: number;
-	machineIdentifier?: string | null;
-	plexServerName?: string | null;
+	machineIdentifier: string;
+	plexServerName: string;
 }
 
 export interface PlexServerStatusDTO {

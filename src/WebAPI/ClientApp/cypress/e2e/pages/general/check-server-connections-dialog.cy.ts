@@ -19,7 +19,7 @@ describe('Check server connections dialog', () => {
 					'progress',
 					MessageTypes.JobStatusUpdate,
 					generateJobStatusUpdate({
-						jobType: JobTypes.InspectPlexServerByPlexAccountIdJob,
+						jobType: JobTypes.RefreshPlexServersAccessJob,
 						jobStatus: JobStatus.Running,
 						primaryKey: 'plexAccountId',
 						primaryKeyValue: data.plexAccounts[0].id.toString(),

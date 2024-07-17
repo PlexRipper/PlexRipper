@@ -205,7 +205,7 @@ function isServer(node: IPlexServerNode): boolean {
 onMounted(() => {
 	useSubscription(
 		backgroundJobStore
-			.getJobStatusUpdate(JobTypes.InspectPlexServerByPlexAccountIdJob)
+			.getJobStatusUpdate(JobTypes.RefreshPlexServersAccessJob)
 			.pipe(
 				filter((update) => update.status === JobStatus.Running),
 				tap(() => useOpenControlDialog(name)),

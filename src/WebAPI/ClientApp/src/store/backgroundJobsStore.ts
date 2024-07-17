@@ -38,7 +38,6 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 	};
 
 	return {
-		...toRefs(readonly(state)),
 		...actions,
 		...getters,
 	};

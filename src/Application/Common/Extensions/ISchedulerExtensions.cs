@@ -36,6 +36,7 @@ public static class ISchedulerExtensions
     {
         while (!cancellationToken.IsCancellationRequested)
         {
+            // Give it some time to start, keep 500ms between checks
             await Task.Delay(500, cancellationToken);
             var jobs = await scheduler.GetCurrentlyExecutingJobs(cancellationToken);
             if (!jobs.Any(x => Equals(x.JobDetail.Key, key)))

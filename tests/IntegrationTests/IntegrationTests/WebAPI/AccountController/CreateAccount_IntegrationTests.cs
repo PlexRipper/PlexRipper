@@ -1,6 +1,7 @@
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
+using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 
 namespace IntegrationTests.WebAPI.AccountController;
@@ -49,7 +50,14 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         jobStatusList.ShouldContain(x => x.JobType == JobTypes.RefreshPlexServersAccessJob);
 
         // Ensure account has been created
-        var plexAccountDb = DbContext.PlexAccounts.IncludeServerAccess().IncludeLibraryAccess().FirstOrDefault();
+        var plexAccountDb = DbContext
+            .PlexAccounts.Include(x => x.PlexAccountLibraries)
+            .ThenInclude(x => x.PlexLibrary)
+            .Include(x => x.PlexAccountServers)
+            .ThenInclude(x => x.PlexServer)
+            .FirstOrDefault();
+
+        plexAccountDb.ShouldNotBeNull();
         plexAccountDb.IsValidated = true;
         plexAccountDb.PlexServers.Count.ShouldBe(1);
         plexAccountDb.DisplayName.ShouldBe(plexAccountDTO.DisplayName);
@@ -59,12 +67,32 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
 
         // Ensure PlexServer has been created
         DbContext.PlexServers.ToList().Count.ShouldBe(1);
-        var plexServersDb = DbContext.PlexServers.IncludeLibrariesWithMedia().FirstOrDefault();
+        var plexServersDb = DbContext
+            .PlexServers.Include(x => x.PlexLibraries)
+            .IncludeLibrariesWithMedia()
+            .FirstOrDefault();
+        plexServersDb.ShouldNotBeNull();
         plexServersDb.MachineIdentifier.ShouldNotBeEmpty();
         plexServersDb.PlexLibraries.Count.ShouldBe(libraryCount);
 
         // Ensure All PlexLibraries have been created with media
         var plexLibraries = plexServersDb.PlexLibraries;
         plexLibraries.ShouldAllBe(x => x.HasMedia);
+
+        // Ensure all jobs have sent notifications
+        var jobStatusUpdateList = Container.MockSignalRService.JobStatusUpdateList.ToList();
+
+        jobStatusUpdateList[0].JobType.ShouldBe(JobTypes.RefreshPlexServersAccessJob);
+        jobStatusUpdateList[0].Status.ShouldBe(JobStatus.Started);
+        jobStatusUpdateList[1].JobType.ShouldBe(JobTypes.RefreshPlexServersAccessJob);
+        jobStatusUpdateList[1].Status.ShouldBe(JobStatus.Completed);
+        jobStatusUpdateList[2].JobType.ShouldBe(JobTypes.CheckPlexServerConnectionsJob);
+        jobStatusUpdateList[2].Status.ShouldBe(JobStatus.Started);
+        jobStatusUpdateList[3].JobType.ShouldBe(JobTypes.CheckPlexServerConnectionsJob);
+        jobStatusUpdateList[3].Status.ShouldBe(JobStatus.Completed);
+        jobStatusUpdateList[4].JobType.ShouldBe(JobTypes.SyncServerJob);
+        jobStatusUpdateList[4].Status.ShouldBe(JobStatus.Started);
+        jobStatusUpdateList[5].JobType.ShouldBe(JobTypes.SyncServerJob);
+        jobStatusUpdateList[5].Status.ShouldBe(JobStatus.Completed);
     }
 }

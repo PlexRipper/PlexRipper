@@ -12,16 +12,23 @@ public class SchedulerService : ISchedulerService
     private readonly ILog<SchedulerService> _log;
     private readonly IScheduler _scheduler;
     private readonly IAllJobListener _allJobListener;
+    private readonly ISchedulerListener _schedulerListener;
 
     #endregion
 
     #region Constructors
 
-    public SchedulerService(ILog<SchedulerService> log, IScheduler scheduler, IAllJobListener allJobListener)
+    public SchedulerService(
+        ILog<SchedulerService> log,
+        IScheduler scheduler,
+        IAllJobListener allJobListener,
+        ISchedulerListener schedulerListener
+    )
     {
         _log = log;
         _scheduler = scheduler;
         _allJobListener = allJobListener;
+        _schedulerListener = schedulerListener;
     }
 
     #endregion
@@ -62,6 +69,7 @@ public class SchedulerService : ISchedulerService
     {
         _log.DebugLine("Setting up Quartz listeners");
         _scheduler.ListenerManager.AddJobListener(_allJobListener, GroupMatcher<JobKey>.AnyGroup());
+        _scheduler.ListenerManager.AddSchedulerListener(_schedulerListener);
     }
 
     public async Task AwaitScheduler(CancellationToken cancellationToken = default)

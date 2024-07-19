@@ -78,6 +78,9 @@ public static partial class DbContextExtensions
         if (plexAccount == null)
             return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountId);
 
+        if (!plexAccount.PlexServers.Any())
+            _log.Warning("No accessible PlexServers found for PlexAccount: {DisplayName}", plexAccount.DisplayName);
+
         return Result.Ok(plexAccount.PlexServers);
     }
 

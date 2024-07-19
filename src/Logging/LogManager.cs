@@ -41,6 +41,7 @@ public static class LogManager
     public static void SetupLogging(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
         Serilog.Log.Logger = LogConfig.GetLogger(minimumLogLevel);
+        _log.Information("Logging level set to {LogLevel}", minimumLogLevel);
     }
 
     /// <summary>

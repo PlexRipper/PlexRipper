@@ -59,23 +59,6 @@ public class SignalRService : ISignalRService
 
     #endregion
 
-    public async Task SendServerInspectStatusProgressAsync(InspectServerProgress progress)
-    {
-        var progressDTO = new InspectServerProgressDTO
-        {
-            PlexServerId = progress.PlexServerId,
-            RetryAttemptIndex = progress.RetryAttemptIndex,
-            RetryAttemptCount = progress.RetryAttemptCount,
-            TimeToNextRetry = progress.TimeToNextRetry,
-            StatusCode = progress.StatusCode,
-            ConnectionSuccessful = progress.ConnectionSuccessful,
-            Completed = progress.Completed,
-            Message = progress.Message,
-            PlexServerConnection = progress.PlexServerConnection.ToDTO(),
-        };
-        await _progressHub.Clients.All.InspectServerProgress(progressDTO);
-    }
-
     public async Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress)
     {
         await _progressHub.Clients.All.ServerConnectionCheckStatusProgress(progress.ToDTO());

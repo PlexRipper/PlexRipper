@@ -59,8 +59,8 @@ public class ApplicationModule : Module
         // Setup Quartz
         SetupQuartz(builder, assembly);
 
-        builder.RegisterType<SchedulerService>().As<ISchedulerService>().InstancePerDependency();
-        builder.RegisterType<AllJobListener>().As<IAllJobListener>().InstancePerDependency();
+        builder.RegisterType<SchedulerService>().As<ISchedulerService>().SingleInstance();
+        builder.RegisterType<AllJobListener>().As<IAllJobListener>().SingleInstance();
     }
 
     private void SetupQuartz(ContainerBuilder builder, Assembly assembly)
@@ -84,7 +84,7 @@ public class ApplicationModule : Module
         };
 
         // Register Quartz dependencies
-        builder.RegisterModule(new QuartzAutofacFactoryModule { ConfigurationProvider = _ => quartzProps, });
+        builder.RegisterModule(new QuartzAutofacFactoryModule { ConfigurationProvider = _ => quartzProps });
 
         // register all Quartz jobs
         builder.RegisterModule(new QuartzAutofacJobsModule(assembly));

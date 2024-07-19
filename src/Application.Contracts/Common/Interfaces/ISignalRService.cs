@@ -19,8 +19,6 @@ public interface ISignalRService
 
     Task SendNotificationAsync(Notification notification);
 
-    Task SendServerInspectStatusProgressAsync(InspectServerProgress progress);
-
     Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress);
 
     Task SendDownloadProgressUpdateAsync(

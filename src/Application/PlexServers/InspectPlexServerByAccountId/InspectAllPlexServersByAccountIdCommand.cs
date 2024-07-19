@@ -50,10 +50,12 @@ public class InspectAllPlexServersByAccountIdCommandHandler
         CancellationToken cancellationToken
     )
     {
+        var plexAccountId = command.PlexAccountId;
+
         if (!command.SkipRefreshAccessibleServers)
         {
             var refreshResult = await _mediator.Send(
-                new QueueRefreshPlexServerAccessJobCommand(command.PlexAccountId),
+                new QueueRefreshPlexServerAccessJobCommand(plexAccountId),
                 cancellationToken
             );
             if (refreshResult.IsFailed)
@@ -71,8 +73,14 @@ public class InspectAllPlexServersByAccountIdCommandHandler
                 );
         }
 
-        var plexAccount = await _dbContext.PlexAccounts.GetAsync(command.PlexAccountId, cancellationToken);
-        var plexServers = await _dbContext.GetAccessiblePlexServers(command.PlexAccountId, cancellationToken);
+        // Retrieve all accessible servers for the PlexAccount
+        var plexAccount = await _dbContext.PlexAccounts.GetAsync(plexAccountId, cancellationToken);
+        if (plexAccount is null)
+            return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountId).LogError();
+
+        var plexServers = await _dbContext.GetAccessiblePlexServers(plexAccountId, cancellationToken);
+        if (plexServers.IsFailed)
+            return plexServers.LogError();
 
         _log.Here()
             .Information(
@@ -91,10 +99,16 @@ public class InspectAllPlexServersByAccountIdCommandHandler
         }
 
         // Create connection check tasks for all connections
-        var checkResult = await CheckAllConnectionsOfPlexServersByAccountIdAsync(plexAccount.Id, cancellationToken);
-        if (checkResult.IsFailed)
-            return checkResult;
 
+        var plexServerIds = plexServers.Value.Select(x => x.Id).ToList();
+        var checkResult = await _mediator.Send(
+            new QueueCheckPlexServerConnectionsJobCommand(plexServerIds),
+            cancellationToken
+        );
+
+        await _scheduler.AwaitJobRunning(checkResult.Value, cancellationToken);
+
+        // Retrieve all accessible libraries
         await RetrieveAllAccessibleLibrariesAsync(plexAccount.Id);
 
         // Sync libraries
@@ -109,33 +123,6 @@ public class InspectAllPlexServersByAccountIdCommandHandler
             );
 
         return Result.Ok();
-    }
-
-    private async Task<Result> CheckAllConnectionsOfPlexServersByAccountIdAsync(
-        int plexAccountId,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var plexServersResult = await _dbContext.GetAccessiblePlexServers(plexAccountId, cancellationToken);
-        if (plexServersResult.IsFailed)
-        {
-            return plexServersResult
-                .WithError($"Could not retrieve any PlexAccount from database with id {plexAccountId}.")
-                .LogError();
-        }
-
-        var plexServers = plexServersResult.Value;
-        var serverTasks = plexServers.Select(async plexServer =>
-            await _mediator.Send(new CheckAllConnectionsStatusByPlexServerCommand(plexServer.Id), cancellationToken)
-        );
-
-        var tasksResult = await Task.WhenAll(serverTasks);
-        return Result
-            .OkIf(
-                tasksResult.Any(x => x.IsSuccess),
-                $"None of the servers that were checked for {nameof(PlexAccount)} with id {plexAccountId} were connectable"
-            )
-            .LogIfFailed();
     }
 
     private async Task RetrieveAllAccessibleLibrariesAsync(int plexAccountId)

@@ -106,14 +106,14 @@ public class InspectAllPlexServersByAccountIdCommandHandler
             cancellationToken
         );
 
-        await _scheduler.AwaitJobRunning(checkResult.Value, cancellationToken);
+        await _scheduler.AwaitJobRunning(checkResult.Value, CancellationToken.None);
 
         // Retrieve all accessible libraries
         await RetrieveAllAccessibleLibrariesAsync(plexAccount.Id);
 
         // Sync libraries
         foreach (var plexServer in plexServers.Value)
-            await _mediator.Send(new QueueSyncServerJobCommand(plexServer.Id, true), cancellationToken);
+            await _mediator.Send(new QueueSyncServerJobCommand(plexServer.Id, true), CancellationToken.None);
 
         _log.Here()
             .Information(

@@ -91,14 +91,6 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
         await _dbContext.SaveChangesAsync(ct);
         await _dbContext.Entry(plexAccount).GetDatabaseValuesAsync(ct);
 
-        var inspectResult = await _mediator.Send(new InspectAllPlexServersByAccountIdCommand(plexAccount.Id), ct);
-        if (inspectResult.IsFailed)
-        {
-            _log.Error("Failed to queue inspect server job for PlexAccount with id {PlexAccountId}", plexAccount.Id);
-            await SendFluentResult(inspectResult, ct);
-            return;
-        }
-
         var plexAccountDTO = await _dbContext
             .PlexAccounts.IncludeServerAccess()
             .IncludeLibraryAccess()
@@ -113,5 +105,10 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
         var result = Result.Ok(plexAccountDTO).Add201CreatedRequestSuccess("PlexAccount created successfully.");
 
         await SendFluentResult(result, model => model.ToDTO(), ct);
+
+        // Return the Ok result and then kick off the inspect job
+        var inspectResult = await _mediator.Send(new InspectAllPlexServersByAccountIdCommand(plexAccount.Id), ct);
+        if (inspectResult.IsFailed)
+            _log.Error("Failed to queue inspect server job for PlexAccount with id {PlexAccountId}", plexAccount.Id);
     }
 }

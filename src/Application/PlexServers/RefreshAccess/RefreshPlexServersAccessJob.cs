@@ -7,11 +7,9 @@ using Settings.Contracts;
 
 namespace PlexRipper.Application;
 
-// TODO This job might be unneeded due to the length of time it takes to refresh the Plex servers
 public class RefreshPlexServersAccessJob : IJob
 {
     private readonly ILog _log;
-    private readonly IAllJobListener _allJobListener;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IServerSettingsModule _serverSettingsModule;
     private readonly IAddOrUpdatePlexServersCommand _addOrUpdatePlexServersCommand;
@@ -25,7 +23,6 @@ public class RefreshPlexServersAccessJob : IJob
 
     public RefreshPlexServersAccessJob(
         ILog log,
-        IAllJobListener allJobListener,
         IPlexRipperDbContext dbContext,
         IServerSettingsModule serverSettingsModule,
         IAddOrUpdatePlexServersCommand addOrUpdatePlexServersCommand,
@@ -34,7 +31,6 @@ public class RefreshPlexServersAccessJob : IJob
     )
     {
         _log = log;
-        _allJobListener = allJobListener;
         _dbContext = dbContext;
         _serverSettingsModule = serverSettingsModule;
         _addOrUpdatePlexServersCommand = addOrUpdatePlexServersCommand;

@@ -413,7 +413,7 @@ public class PlexApiService : IPlexApiService
             {
                 Id = x.Id,
                 DisplayName = plexAccount.DisplayName,
-                Username = x.Username,
+                Username = plexAccount.Username,
                 Password = plexAccount.Password,
                 IsEnabled = plexAccount.IsEnabled,
                 IsValidated = true,

@@ -1,6 +1,6 @@
 import { route } from '@fixtures/baseE2E';
 import { generatePlexAccount, generateResultDTO } from '@mock';
-import type { PlexAccountDTO } from '@dto';
+import { PlexAccountDTO } from '@dto';
 import { PlexAccountPaths } from '@api-urls';
 
 describe('Add Plex account to PlexRipper', () => {
@@ -14,41 +14,46 @@ describe('Add Plex account to PlexRipper', () => {
 	});
 
 	it('Should create an Account when input is valid and close on save', () => {
-		const account: PlexAccountDTO = generatePlexAccount({
-			id: 99,
-			partialData: {
-				isValidated: false,
-			},
+		cy.getPageData().then((data) => {
+			const account: PlexAccountDTO = generatePlexAccount({
+				id: 99,
+				partialData: {
+					isValidated: false,
+				},
+			});
+
+			cy.getCy('account-overview-add-account').click();
+
+			// Fill in credentials
+			cy.getCy('account-form-display-name-input').type(account.displayName);
+			cy.getCy('account-form-username-input').type(account.username);
+			cy.getCy('account-form-password-input').type(account.password);
+
+			// Validate Action
+			cy.intercept('POST', PlexAccountPaths.validatePlexAccountEndpoint(), {
+				statusCode: 200,
+				body: generateResultDTO({ ...account, isValidated: true, is2Fa: false }),
+			});
+			cy.getCy('account-dialog-validate-button').click();
+
+			// Create Action
+			cy.intercept('POST', PlexAccountPaths.createPlexAccountEndpoint(), {
+				statusCode: 200,
+				body: generateResultDTO(account),
+			});
+
+			// Hide Account dialog
+			cy.intercept('GET', PlexAccountPaths.getPlexAccountByIdEndpoint(account.id), {
+				statusCode: 200,
+				body: generateResultDTO(account),
+			});
+
+			cy.getCy('account-dialog-save-button').click();
+
+			cy.hubPublishCheckPlexServerConnectionsJob(data.plexServers);
+
+			cy.getCy('account-dialog-form').should('not.exist');
 		});
-
-		cy.getCy('account-overview-add-account').click();
-
-		// Fill in credentials
-		cy.getCy('account-form-display-name-input').type(account.displayName);
-		cy.getCy('account-form-username-input').type(account.username);
-		cy.getCy('account-form-password-input').type(account.password);
-
-		// Validate Action
-		cy.intercept('POST', PlexAccountPaths.validatePlexAccountEndpoint(), {
-			statusCode: 200,
-			body: generateResultDTO({ ...account, isValidated: true, is2Fa: false }),
-		});
-		cy.getCy('account-dialog-validate-button').click();
-
-		// Create Action
-		cy.intercept('POST', PlexAccountPaths.createPlexAccountEndpoint(), {
-			statusCode: 200,
-			body: generateResultDTO(account),
-		});
-
-		// Hide Account dialog
-		cy.intercept('GET', PlexAccountPaths.getPlexAccountByIdEndpoint(account.id), {
-			statusCode: 200,
-			body: generateResultDTO(account),
-		});
-		cy.getCy('account-dialog-save-button').click();
-
-		cy.getCy('account-dialog-form').should('not.exist');
 	});
 
 	it('Should request a verification code when 2Fa is enabled for an Plex account', function () {
@@ -95,6 +100,9 @@ describe('Add Plex account to PlexRipper', () => {
 		});
 
 		cy.getCy('account-dialog-save-button').click();
+
+		cy.hubPublishCheckPlexServerConnectionsJob([]);
+
 		cy.getCy('account-dialog-form').should('not.exist');
 	});
 });

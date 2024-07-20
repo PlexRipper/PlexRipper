@@ -1,5 +1,6 @@
 import type { IBasePageSetupResult } from '@fixtures/baseE2E';
 import type { MockConfig } from '@mock';
+import { JobStatus, JobTypes, PlexServerDTO } from '@dto';
 
 declare global {
 	namespace Cypress {
@@ -20,6 +21,10 @@ declare global {
 				selector: string,
 				options?: Partial<Loggable & Timeoutable & Withinable & Shadow>,
 			): Chainable<JQuery<E>>;
+
+			hubPublishJobStatusUpdate(type: JobTypes, status: JobStatus, primaryKey: string, primaryKeyValue: string): Chainable;
+
+			hubPublishCheckPlexServerConnectionsJob(servers: PlexServerDTO[]): Chainable;
 		}
 	}
 }

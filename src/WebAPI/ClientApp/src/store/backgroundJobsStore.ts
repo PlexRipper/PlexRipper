@@ -1,8 +1,8 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { Observable, of, Subject } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
+import { filter, take, tap } from 'rxjs/operators';
 import type { ISetupResult } from '@interfaces';
-import { type JobStatusUpdateDTO, JobTypes } from '@dto';
+import { JobStatus, type JobStatusUpdateDTO, JobTypes } from '@dto';
 
 export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 	// State
@@ -14,9 +14,22 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 		jobStatusList: [],
 	});
 
+	const accountStore = useAccountStore();
+	const serverStore = useServerStore();
+	const settingsStore = useSettingsStore();
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
+			// Refresh accounts, servers, and settings on completion of the job
+			getters
+				.getJobStatusUpdate(JobTypes.RefreshPlexServersAccessJob, JobStatus.Completed)
+				.pipe(
+					tap(() => accountStore.refreshAccounts()),
+					tap(() => serverStore.refreshPlexServers()),
+					tap(() => settingsStore.refreshSettings()),
+				)
+				.subscribe();
+
 			return of({ name: useBackgroundJobsStore.name, isSuccess: true }).pipe(take(1));
 		},
 
@@ -33,8 +46,8 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 
 	// Getters
 	const getters = {
-		getJobStatusUpdate: (jobType: JobTypes): Observable<JobStatusUpdateDTO> =>
-			state.jobStatusObservable.pipe(filter((jobStatus) => jobStatus.jobType === jobType)),
+		getJobStatusUpdate: (jobType: JobTypes, status: JobStatus | null = null): Observable<JobStatusUpdateDTO> =>
+			state.jobStatusObservable.pipe(filter((x) => x.jobType === jobType && (status ? x.status === status : true))),
 	};
 
 	return {

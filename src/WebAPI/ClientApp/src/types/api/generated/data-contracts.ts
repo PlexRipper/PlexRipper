@@ -331,7 +331,6 @@ export interface InspectServerProgressDTO {
 
 export enum JobStatus {
 	Started = 'Started',
-	Running = 'Running',
 	Completed = 'Completed',
 }
 
@@ -351,7 +350,7 @@ export interface JobStatusUpdateDTO {
 
 export enum JobTypes {
 	Unknown = 'Unknown',
-	InspectPlexServerJob = 'InspectPlexServerJob',
+	CheckPlexServerConnectionsJob = 'CheckPlexServerConnectionsJob',
 	DownloadJob = 'DownloadJob',
 	DownloadProgressJob = 'DownloadProgressJob',
 	SyncServerJob = 'SyncServerJob',

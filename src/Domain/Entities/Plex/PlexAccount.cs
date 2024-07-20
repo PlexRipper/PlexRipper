@@ -111,7 +111,12 @@ public class PlexAccount : BaseEntity
     #region Helpers
 
     [NotMapped]
-    public List<PlexServer> PlexServers => PlexAccountServers.Select(x => x.PlexServer).ToList();
+    public List<PlexServer> PlexServers =>
+        PlexAccountServers.Where(x => x.PlexServer != null).Select(x => x.PlexServer!).ToList();
+
+    [NotMapped]
+    public List<PlexLibrary> PlexLibraries =>
+        PlexAccountLibraries.Where(x => x.PlexLibrary != null).Select(x => x.PlexLibrary!).ToList();
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexAccount"/> is 2FA protected.

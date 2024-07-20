@@ -164,14 +164,6 @@ public class PlexServer : BaseEntity
 
     #endregion
 
-    #region Operators
-
-    public static bool operator ==(PlexServer left, PlexServer right) => Equals(left, right);
-
-    public static bool operator !=(PlexServer left, PlexServer right) => !Equals(left, right);
-
-    #endregion
-
     #region Equality
 
     /// <inheritdoc/>

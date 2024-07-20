@@ -11,9 +11,6 @@ public enum JobStatus
     [EnumMember(Value = nameof(Started))]
     Started = 0,
 
-    [EnumMember(Value = nameof(Running))]
-    Running = 1,
-
     [EnumMember(Value = nameof(Completed))]
-    Completed = 2,
+    Completed = 1,
 }

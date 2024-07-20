@@ -3,35 +3,33 @@ using PlexRipper.FileSystem.Common;
 
 namespace PlexRipper.FileSystem;
 
-public class DiskProvider : IDiskProvider
+public sealed class DiskProvider : IDiskProvider
 {
     private readonly HashSet<string> _setToRemove =
-        new()
-        {
-            // Windows
-            "boot",
-            "bootmgr",
-            "cache",
-            "msocache",
-            "recovery",
-            "$recycle.bin",
-            "recycler",
-            "system volume information",
-            "temporary internet files",
-            "windows",
-            // OS X
-            ".fseventd",
-            ".spotlight",
-            ".trashes",
-            ".vol",
-            "cachedmessages",
-            "caches",
-            "trash",
-            // QNAP
-            ".@__thumb",
-            // Synology
-            "@eadir",
-        };
+    [
+        "boot",
+        "bootmgr",
+        "cache",
+        "msocache",
+        "recovery",
+        "$recycle.bin",
+        "recycler",
+        "system volume information",
+        "temporary internet files",
+        "windows",
+        // OS X
+        ".fseventd",
+        ".spotlight",
+        ".trashes",
+        ".vol",
+        "cachedmessages",
+        "caches",
+        "trash",
+        // QNAP
+        ".@__thumb",
+        // Synology
+        "@eadir",
+    ];
 
     public string GetParent(string path)
     {
@@ -50,13 +48,17 @@ public class DiskProvider : IDiskProvider
         if (!path.Equals("/"))
             return string.Empty;
 
-        return null;
+        return string.Empty;
     }
 
-    public List<FileSystemModel> GetFiles(string path)
+    public Result<List<FileSystemModel>> GetFiles(string path)
     {
-        return GetFileInfos(path)
-            .OrderBy(d => d.Name)
+        var files = GetFileInfos(path);
+        if (files.IsFailed)
+            return files.ToResult();
+
+        return files
+            .Value.OrderBy(d => d.Name)
             .Select(d => new FileSystemModel
             {
                 Name = d.Name,
@@ -69,10 +71,14 @@ public class DiskProvider : IDiskProvider
             .ToList();
     }
 
-    public List<FileSystemModel> GetDirectories(string path)
+    public Result<List<FileSystemModel>> GetDirectories(string path)
     {
-        var directories = GetDirectoryInfos(path)
-            .OrderBy(d => d.Name)
+        var directories = GetDirectoryInfos(path);
+        if (directories.IsFailed)
+            return directories.ToResult();
+
+        var list = directories
+            .Value.OrderBy(d => d.Name)
             .Select(d => new FileSystemModel
             {
                 Name = d.Name,
@@ -84,9 +90,9 @@ public class DiskProvider : IDiskProvider
             })
             .ToList();
 
-        directories.RemoveAll(d => _setToRemove.Contains(d.Name.ToLowerInvariant()));
+        list.RemoveAll(d => _setToRemove.Contains(d.Name.ToLowerInvariant()));
 
-        return directories;
+        return Result.Ok(list);
     }
 
     public string GetDirectoryPath(string path)
@@ -97,18 +103,32 @@ public class DiskProvider : IDiskProvider
         return path;
     }
 
-    public List<DirectoryInfo> GetDirectoryInfos(string path)
+    public Result<List<DirectoryInfo>> GetDirectoryInfos(string path)
     {
-        var di = new DirectoryInfo(path);
+        try
+        {
+            var di = new DirectoryInfo(path);
 
-        return di.GetDirectories().ToList();
+            return di.GetDirectories().ToList();
+        }
+        catch (Exception e)
+        {
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
     }
 
-    public List<FileInfo> GetFileInfos(string path)
+    public Result<List<FileInfo>> GetFileInfos(string path)
     {
-        var di = new DirectoryInfo(path);
+        try
+        {
+            var di = new DirectoryInfo(path);
 
-        return di.GetFiles().ToList();
+            return di.GetFiles().ToList();
+        }
+        catch (Exception e)
+        {
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
     }
 
     public List<IMount> GetMounts()
@@ -116,9 +136,9 @@ public class DiskProvider : IDiskProvider
         return GetAllMounts().Where(d => !IsSpecialMount(d)).ToList();
     }
 
-    protected virtual bool IsSpecialMount(IMount mount) => false;
+    private bool IsSpecialMount(IMount mount) => false;
 
-    protected virtual List<IMount> GetAllMounts()
+    private List<IMount> GetAllMounts()
     {
         return GetDriveInfoMounts()
             .Where(d =>
@@ -129,7 +149,7 @@ public class DiskProvider : IDiskProvider
             .ToList();
     }
 
-    protected List<DriveInfo> GetDriveInfoMounts()
+    private List<DriveInfo> GetDriveInfoMounts()
     {
         return DriveInfo.GetDrives().Where(d => d.IsReady).ToList();
     }

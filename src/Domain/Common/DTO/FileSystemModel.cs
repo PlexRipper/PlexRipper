@@ -13,4 +13,8 @@ public record FileSystemModel
     public required long Size { get; init; }
 
     public required DateTime? LastModified { get; init; }
+
+    public required bool HasReadPermission { get; init; }
+
+    public required bool HasWritePermission { get; init; }
 }

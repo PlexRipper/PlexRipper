@@ -1,5 +1,5 @@
 ﻿using FileSystem.Contracts;
-using PlexRipper.FileSystem.Common;
+using FileSystem.Contracts.Extensions;
 
 namespace PlexRipper.FileSystem;
 
@@ -67,6 +67,8 @@ public sealed class DiskProvider : IDiskProvider
                 Extension = d.Extension,
                 Size = d.Length,
                 Type = FileSystemEntityType.File,
+                HasReadPermission = d.IsReadOnly, // TODO: check if this is correct
+                HasWritePermission = !d.IsReadOnly,
             })
             .ToList();
     }
@@ -87,6 +89,8 @@ public sealed class DiskProvider : IDiskProvider
                 Type = FileSystemEntityType.Folder,
                 Extension = d.Extension,
                 Size = 0, // TODO maybe calculating this is a bit expensive, see if needed
+                HasReadPermission = d.CanRead(),
+                HasWritePermission = d.CanWrite(),
             })
             .ToList();
 
@@ -108,7 +112,6 @@ public sealed class DiskProvider : IDiskProvider
         try
         {
             var di = new DirectoryInfo(path);
-
             return di.GetDirectories().ToList();
         }
         catch (Exception e)
@@ -131,30 +134,15 @@ public sealed class DiskProvider : IDiskProvider
         }
     }
 
-    public List<IMount> GetMounts()
+    public List<DriveInfo> GetAllMounts()
     {
-        return GetAllMounts().Where(d => !IsSpecialMount(d)).ToList();
-    }
-
-    private bool IsSpecialMount(IMount mount) => false;
-
-    private List<IMount> GetAllMounts()
-    {
-        return GetDriveInfoMounts()
-            .Where(d =>
-                d.DriveType == DriveType.Fixed || d.DriveType == DriveType.Network || d.DriveType == DriveType.Removable
-            )
-            .Select(d => new DriveInfoMount(d))
-            .Cast<IMount>()
+        return DriveInfo
+            .GetDrives()
+            .Where(d => d is { IsReady: true, DriveType: DriveType.Fixed or DriveType.Network or DriveType.Removable })
             .ToList();
     }
 
-    private List<DriveInfo> GetDriveInfoMounts()
-    {
-        return DriveInfo.GetDrives().Where(d => d.IsReady).ToList();
-    }
-
-    public string GetVolumeName(IMount mountInfo)
+    public string GetVolumeName(DriveInfo mountInfo)
     {
         if (string.IsNullOrWhiteSpace(mountInfo.VolumeLabel))
             return mountInfo.Name;

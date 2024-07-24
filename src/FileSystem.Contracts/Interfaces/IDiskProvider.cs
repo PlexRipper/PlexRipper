@@ -15,7 +15,7 @@ public interface IDiskProvider
 
     Result<List<DirectoryInfo>> GetDirectoryInfos(string path);
 
-    List<IMount> GetMounts();
+    List<DriveInfo> GetAllMounts();
 
-    string GetVolumeName(IMount mountInfo);
+    string GetVolumeName(DriveInfo mountInfo);
 }

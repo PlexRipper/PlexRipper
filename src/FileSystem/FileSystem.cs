@@ -1,5 +1,6 @@
 ﻿using Environment;
 using FileSystem.Contracts;
+using FileSystem.Contracts.Extensions;
 using Logging.Interface;
 
 namespace PlexRipper.FileSystem;
@@ -123,9 +124,6 @@ public class FileSystem : IFileSystem
     )
     {
         _log.Debug("Looking up path: {Query}", query);
-        var directoryExistsResult = _directorySystem.Exists(query);
-        if (directoryExistsResult.IsFailed)
-            return directoryExistsResult.ToResult();
 
         var defaultResult = new FileSystemResult
         {
@@ -135,17 +133,21 @@ public class FileSystem : IFileSystem
         };
 
         // If path is invalid return root file system
-        if (string.IsNullOrWhiteSpace(query) || !directoryExistsResult.Value)
+        if (string.IsNullOrWhiteSpace(query))
+            return Result.Ok(defaultResult);
+
+        var directoryExistsResult = _directorySystem.Exists(query);
+        if (directoryExistsResult.IsFailed || !directoryExistsResult.Value)
             return Result.Ok(defaultResult);
 
         if (allowFoldersWithoutTrailingSlashes)
-            return GetResult(query, includeFiles);
+            return GetFileSystemResults(query, includeFiles);
 
         var lastSeparatorIndex = query.LastIndexOf(_abstractedFileSystem.Path.DirectorySeparatorChar);
         var path = query.Substring(0, lastSeparatorIndex + 1);
 
         if (lastSeparatorIndex != -1)
-            return GetResult(path, includeFiles);
+            return GetFileSystemResults(path, includeFiles);
 
         return Result.Ok(defaultResult);
     }
@@ -175,20 +177,22 @@ public class FileSystem : IFileSystem
     private List<FileSystemModel> GetDrives()
     {
         return _diskProvider
-            .GetMounts()
+            .GetAllMounts()
             .Select(d => new FileSystemModel
             {
                 Type = FileSystemEntityType.Drive,
                 Name = _diskProvider.GetVolumeName(d),
-                Path = d.RootDirectory,
-                LastModified = null,
+                Path = d.RootDirectory.FullName,
+                LastModified = d.RootDirectory.LastWriteTimeUtc,
                 Extension = string.Empty,
                 Size = d.TotalSize,
+                HasReadPermission = d.CanRead(),
+                HasWritePermission = d.CanWrite(),
             })
             .ToList();
     }
 
-    private Result<FileSystemResult> GetResult(string path, bool includeFiles)
+    private Result<FileSystemResult> GetFileSystemResults(string path, bool includeFiles)
     {
         try
         {

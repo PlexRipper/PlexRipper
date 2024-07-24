@@ -19,6 +19,9 @@ public class DirectorySystem : IDirectorySystem
     {
         try
         {
+            if (path == string.Empty)
+                return Result.Ok(false);
+
             var di = new DirectoryInfo(path);
             return Result.Ok(di.Exists);
         }
@@ -142,9 +145,11 @@ public class DirectorySystem : IDirectorySystem
             )
                 Delete(directoryResult.Value);
             else
+            {
                 return Result
                     .Fail($"Could not determine the directory name of path: {filePath} or the path contains files")
                     .LogError();
+            }
         }
         catch (Exception e)
         {

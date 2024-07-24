@@ -25,6 +25,8 @@ public static class FileSystemMapper
             Extension = value.Extension,
             Size = value.Size,
             LastModified = value.LastModified,
+            HasReadPermission = value.HasReadPermission,
+            HasWritePermission = value.HasWritePermission,
         };
 
     public static List<FileSystemModelDTO> ToDTO(this List<FileSystemModel> value) => value.ConvertAll(ToDTO);
@@ -53,6 +55,8 @@ public static class FileSystemMapper
             Extension = fileSystemModel.Extension,
             Size = fileSystemModel.Size,
             LastModified = fileSystemModel.LastModified,
+            HasReadPermission = fileSystemModel.HasReadPermission,
+            HasWritePermission = fileSystemModel.HasWritePermission,
         };
 
     public static List<FileSystemModel> ToModel(this List<FileSystemModelDTO> fileSystemModel) =>

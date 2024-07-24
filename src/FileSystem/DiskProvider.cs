@@ -1,5 +1,4 @@
 ﻿using FileSystem.Contracts;
-using FileSystem.Contracts.Extensions;
 
 namespace PlexRipper.FileSystem;
 
@@ -57,20 +56,7 @@ public sealed class DiskProvider : IDiskProvider
         if (files.IsFailed)
             return files.ToResult();
 
-        return files
-            .Value.OrderBy(d => d.Name)
-            .Select(d => new FileSystemModel
-            {
-                Name = d.Name,
-                Path = d.FullName.GetActualCasing(),
-                LastModified = d.LastWriteTimeUtc,
-                Extension = d.Extension,
-                Size = d.Length,
-                Type = FileSystemEntityType.File,
-                HasReadPermission = d.IsReadOnly, // TODO: check if this is correct
-                HasWritePermission = !d.IsReadOnly,
-            })
-            .ToList();
+        return files.Value.OrderBy(x => x.Name).Select(x => x.ToModel()).ToList();
     }
 
     public Result<List<FileSystemModel>> GetDirectories(string path)
@@ -79,32 +65,11 @@ public sealed class DiskProvider : IDiskProvider
         if (directories.IsFailed)
             return directories.ToResult();
 
-        var list = directories
-            .Value.OrderBy(d => d.Name)
-            .Select(d => new FileSystemModel
-            {
-                Name = d.Name,
-                Path = GetDirectoryPath(d.FullName.GetActualCasing()),
-                LastModified = d.LastWriteTimeUtc,
-                Type = FileSystemEntityType.Folder,
-                Extension = d.Extension,
-                Size = 0, // TODO maybe calculating this is a bit expensive, see if needed
-                HasReadPermission = d.CanRead(),
-                HasWritePermission = d.CanWrite(),
-            })
-            .ToList();
+        var list = directories.Value.OrderBy(x => x.Name).Select(x => x.ToModel()).ToList();
 
-        list.RemoveAll(d => _setToRemove.Contains(d.Name.ToLowerInvariant()));
+        list.RemoveAll(x => _setToRemove.Contains(x.Name.ToLowerInvariant()));
 
         return Result.Ok(list);
-    }
-
-    public string GetDirectoryPath(string path)
-    {
-        if (path.Last() != Path.DirectorySeparatorChar)
-            path += Path.DirectorySeparatorChar;
-
-        return path;
     }
 
     public Result<List<DirectoryInfo>> GetDirectoryInfos(string path)

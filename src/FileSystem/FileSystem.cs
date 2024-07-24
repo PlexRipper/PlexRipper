@@ -1,6 +1,5 @@
 ﻿using Environment;
 using FileSystem.Contracts;
-using FileSystem.Contracts.Extensions;
 using Logging.Interface;
 
 namespace PlexRipper.FileSystem;
@@ -128,8 +127,9 @@ public class FileSystem : IFileSystem
         var defaultResult = new FileSystemResult
         {
             Directories = GetDrives(),
-            Files = new List<FileSystemModel>(),
+            Files = [],
             Parent = "",
+            Current = null,
         };
 
         // If path is invalid return root file system
@@ -212,6 +212,7 @@ public class FileSystem : IFileSystem
                         Parent = _diskProvider.GetParent(path),
                         Directories = directoriesResult.Value,
                         Files = filesResult.Value,
+                        Current = new DirectoryInfo(path).ToModel(),
                     }
                 );
             }
@@ -222,6 +223,7 @@ public class FileSystem : IFileSystem
                     Parent = _diskProvider.GetParent(path),
                     Directories = directoriesResult.Value,
                     Files = [],
+                    Current = new DirectoryInfo(path).ToModel(),
                 }
             );
         }

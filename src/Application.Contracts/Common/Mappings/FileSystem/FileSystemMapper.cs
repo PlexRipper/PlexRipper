@@ -12,6 +12,7 @@ public static class FileSystemMapper
             Parent = value.Parent,
             Directories = value.Directories.ToDTO(),
             Files = value.Files.ToDTO(),
+            Current = value.Current?.ToDTO() ?? null,
         };
 
     public static List<FileSystemDTO> ToDTO(this List<FileSystemResult> value) => value.ConvertAll(ToDTO);
@@ -41,6 +42,7 @@ public static class FileSystemMapper
             Parent = fileSystemResult.Parent,
             Directories = fileSystemResult.Directories.ToModel(),
             Files = fileSystemResult.Files.ToModel(),
+            Current = fileSystemResult.Current?.ToModel() ?? null,
         };
 
     public static List<FileSystemResult> ToModel(this List<FileSystemDTO> fileSystemResult) =>

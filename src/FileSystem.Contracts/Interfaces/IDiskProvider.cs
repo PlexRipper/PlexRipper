@@ -11,8 +11,6 @@ public interface IDiskProvider
 
     Result<List<FileSystemModel>> GetDirectories(string path);
 
-    string GetDirectoryPath(string path);
-
     Result<List<DirectoryInfo>> GetDirectoryInfos(string path);
 
     List<DriveInfo> GetAllMounts();

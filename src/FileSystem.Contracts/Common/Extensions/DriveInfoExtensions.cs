@@ -1,4 +1,4 @@
-namespace FileSystem.Contracts.Extensions;
+namespace FileSystem.Contracts;
 
 public static class DirectoryInfoExtensions
 {

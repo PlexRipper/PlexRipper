@@ -2,9 +2,11 @@
 
 public class FileSystemDTO
 {
-    public required string Parent { get; set; } = string.Empty;
+    public required string Parent { get; init; } = string.Empty;
 
-    public required List<FileSystemModelDTO> Directories { get; set; }
+    public required List<FileSystemModelDTO> Directories { get; init; }
 
-    public required List<FileSystemModelDTO> Files { get; set; }
+    public required List<FileSystemModelDTO> Files { get; init; }
+
+    public required FileSystemModelDTO? Current { get; init; }
 }

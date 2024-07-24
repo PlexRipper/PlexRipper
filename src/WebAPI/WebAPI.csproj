@@ -46,11 +46,31 @@
 	</ItemGroup>
 	<ItemGroup>
 		<None Remove="WebAPI.csproj.DotSettings" />
+		<None Remove="ClientApp\**" />
 	</ItemGroup>
 	<ItemGroup>
 		<Folder Include="Properties\" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Include="..\Domain\GlobalUsings.cs" />
+		<Compile Remove="ClientApp\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <EmbeddedResource Remove="ClientApp\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Remove="ClientApp\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <_ContentIncludedByDefault Remove="ClientApp\.npm-upgrade.json" />
+	  <_ContentIncludedByDefault Remove="ClientApp\cypress\.eslintrc.json" />
+	  <_ContentIncludedByDefault Remove="ClientApp\cypress\tsconfig.json" />
+	  <_ContentIncludedByDefault Remove="ClientApp\package-lock.json" />
+	  <_ContentIncludedByDefault Remove="ClientApp\package-why.json" />
+	  <_ContentIncludedByDefault Remove="ClientApp\package.json" />
+	  <_ContentIncludedByDefault Remove="ClientApp\src\lang\de-DE.json" />
+	  <_ContentIncludedByDefault Remove="ClientApp\src\lang\en-US.json" />
+	  <_ContentIncludedByDefault Remove="ClientApp\src\lang\fr-FR.json" />
+	  <_ContentIncludedByDefault Remove="ClientApp\tsconfig.json" />
 	</ItemGroup>
 </Project>

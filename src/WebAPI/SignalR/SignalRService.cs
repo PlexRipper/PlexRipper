@@ -42,7 +42,6 @@ public class SignalRService : ISignalRService
     #region DownloadProgress
 
     public async Task SendDownloadProgressUpdateAsync(
-        int plexServerId,
         List<DownloadTaskGeneric> downloadTasks,
         CancellationToken cancellationToken = default
     )

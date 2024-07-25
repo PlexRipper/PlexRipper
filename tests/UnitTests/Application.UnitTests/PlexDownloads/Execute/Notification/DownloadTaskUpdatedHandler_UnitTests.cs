@@ -25,11 +25,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
         mock.Mock<ISignalRService>()
             .Setup(x =>
-                x.SendDownloadProgressUpdateAsync(
-                    It.IsAny<int>(),
-                    It.IsAny<List<DownloadTaskGeneric>>(),
-                    It.IsAny<CancellationToken>()
-                )
+                x.SendDownloadProgressUpdateAsync(It.IsAny<List<DownloadTaskGeneric>>(), It.IsAny<CancellationToken>())
             )
             .Returns(Task.CompletedTask);
 
@@ -42,7 +38,6 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
             .Verify(
                 x =>
                     x.SendDownloadProgressUpdateAsync(
-                        It.IsAny<int>(),
                         It.IsAny<List<DownloadTaskGeneric>>(),
                         It.IsAny<CancellationToken>()
                     ),
@@ -65,11 +60,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
 
         mock.Mock<ISignalRService>()
             .Setup(x =>
-                x.SendDownloadProgressUpdateAsync(
-                    It.IsAny<int>(),
-                    It.IsAny<List<DownloadTaskGeneric>>(),
-                    It.IsAny<CancellationToken>()
-                )
+                x.SendDownloadProgressUpdateAsync(It.IsAny<List<DownloadTaskGeneric>>(), It.IsAny<CancellationToken>())
             )
             .Returns(Task.CompletedTask);
 
@@ -90,7 +81,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
                         PlexServer = null,
                         PlexServerId = 0,
                         PlexLibrary = null,
-                        PlexLibraryId = 0
+                        PlexLibraryId = 0,
                     }
                 )
             );
@@ -108,7 +99,6 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
             .Verify(
                 x =>
                     x.SendDownloadProgressUpdateAsync(
-                        It.IsAny<int>(),
                         It.IsAny<List<DownloadTaskGeneric>>(),
                         It.IsAny<CancellationToken>()
                     ),

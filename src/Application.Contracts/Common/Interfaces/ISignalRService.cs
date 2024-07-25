@@ -22,7 +22,6 @@ public interface ISignalRService
     Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress);
 
     Task SendDownloadProgressUpdateAsync(
-        int plexServerId,
         List<DownloadTaskGeneric> downloadTasks,
         CancellationToken cancellationToken = default
     );

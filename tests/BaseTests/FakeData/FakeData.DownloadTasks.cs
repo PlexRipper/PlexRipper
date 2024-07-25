@@ -176,6 +176,7 @@ public static partial class FakeData
             .RuleFor(x => x.MediaType, PlexMediaType.TvShow)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.TvShow)
             .RuleFor(x => x.Title, f => "TvShow " + f.Random.Int(1, 10000))
+            .RuleFor(x => x.Title, f => "TvShow " + f.Random.Int(1, 10000))
             .RuleFor(
                 x => x.Children,
                 _ =>
@@ -231,6 +232,7 @@ public static partial class FakeData
             .RuleFor(x => x.Title, _ => "Season")
             .RuleFor(x => x.FullTitle, _ => "Season")
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Season)
+            .RuleFor(x => x.Parent, _ => null)
             .RuleFor(
                 x => x.Children,
                 _ =>

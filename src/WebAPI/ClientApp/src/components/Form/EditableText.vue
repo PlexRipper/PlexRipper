@@ -7,8 +7,9 @@
 				</q-sub-header>
 			</q-item-section>
 			<QPopupEdit v-slot="scope" :model-value="value" auto-save @save="$emit('save', $event)">
-				<q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set" />
+				<q-input v-model="scope.value" dense autofocus @keyup.enter="scope.set" />
 			</QPopupEdit>
+			<q-icon class="q-pt-sm" name="mdi-square-edit-outline" size="md" />
 		</q-item>
 	</q-list>
 </template>

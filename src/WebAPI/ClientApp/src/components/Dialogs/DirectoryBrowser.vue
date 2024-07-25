@@ -40,7 +40,8 @@
 						</th>
 					</tr>
 				</thead>
-				<tbody v-if="parentPath" class="scroll">
+				<!-- The return row -->
+				<tbody v-if="currentPathModel != null">
 					<tr @click="directoryNavigate(returnRow)">
 						<td class="text-left" style="width: 100px">
 							<q-icon size="md" :name="getIcon(returnRow.type)" />
@@ -91,7 +92,7 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import type { FileSystemDTO, FileSystemModelDTO, FolderPathDTO } from '@dto';
+import type { FileSystemModelDTO, FolderPathDTO } from '@dto';
 import { FileSystemEntityType } from '@dto';
 import { useCloseControlDialog } from '~/composables/event-bus';
 import { folderPathApi } from '@api';
@@ -176,9 +177,6 @@ function confirm(): void {
 }
 
 function requestDirectories(newPath: string): void {
-	if (newPath === '' || newPath === '/') {
-		set(isLoading, true);
-	}
 	if (path.value) {
 		// @ts-ignore
 		path.value.directory = newPath;

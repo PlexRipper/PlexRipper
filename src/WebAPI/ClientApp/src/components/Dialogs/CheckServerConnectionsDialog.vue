@@ -138,7 +138,7 @@ const plexServerNodes = computed((): IPlexServerNode[] => {
 		const serverResult: IPlexServerNode = {
 			id: server.id,
 			type: 'server',
-			title: server.name,
+			title: serverStore.getServerName(server.id),
 			completed: false,
 			index: uniqueIndex++,
 			connectionSuccessful: false,

@@ -1,7 +1,6 @@
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
-using FluentValidation;
 using Logging.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -12,10 +11,7 @@ public record RefreshPlexAccountAccessEndpointRequest(int PlexAccountId);
 
 public class RefreshPlexAccountAccessEndpointRequestValidator : Validator<RefreshPlexAccountAccessEndpointRequest>
 {
-    public RefreshPlexAccountAccessEndpointRequestValidator()
-    {
-        RuleFor(x => x.PlexAccountId).GreaterThan(0);
-    }
+    public RefreshPlexAccountAccessEndpointRequestValidator() { }
 }
 
 public class RefreshPlexAccountAccessEndpoint : BaseEndpoint<RefreshPlexAccountAccessEndpointRequest, ResultDTO>
@@ -45,21 +41,22 @@ public class RefreshPlexAccountAccessEndpoint : BaseEndpoint<RefreshPlexAccountA
 
     public override async Task HandleAsync(RefreshPlexAccountAccessEndpointRequest req, CancellationToken ct)
     {
-        var plexAccountIds = new List<int>();
-
-        var enabledAccounts = await _dbContext.PlexAccounts.Where(x => x.IsEnabled).ToListAsync(ct);
-
-        if (!enabledAccounts.Any())
+        if (req.PlexAccountId > 0)
+            await _mediator.Send(new QueueRefreshPlexServerAccessJobCommand(req.PlexAccountId), ct);
+        else
         {
-            _log.WarningLine("No enabled Plex accounts found to start the refresh PlexServer access job");
-            await SendFluentResult(Result.Ok(), ct);
-            return;
+            var enabledAccounts = await _dbContext.PlexAccounts.Where(x => x.IsEnabled).ToListAsync(ct);
+            if (!enabledAccounts.Any())
+            {
+                _log.WarningLine("No enabled Plex accounts found to start the refresh PlexServer access job");
+                await SendFluentResult(Result.Ok(), ct);
+                return;
+            }
+
+            var plexAccountIds = enabledAccounts.Select(x => x.Id).ToList();
+            foreach (var id in plexAccountIds)
+                await _mediator.Send(new QueueRefreshPlexServerAccessJobCommand(id), ct);
         }
-
-        plexAccountIds.AddRange(enabledAccounts.Select(x => x.Id));
-
-        foreach (var id in plexAccountIds)
-            await _mediator.Send(new QueueRefreshPlexServerAccessJobCommand(id), ct);
 
         await SendFluentResult(Result.Ok(), ct);
     }

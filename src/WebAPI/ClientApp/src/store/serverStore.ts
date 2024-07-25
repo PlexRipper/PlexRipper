@@ -43,6 +43,13 @@ export const useServerStore = defineStore('ServerStore', () => {
 				map(() => state.servers),
 			);
 		},
+		setServerAlias(serverId: number, serverAlias: string) {
+			return plexServerApi
+				.setServerAlias(serverId, {
+					serverAlias,
+				})
+				.pipe(switchMap(() => settingsStore.refreshSettings()));
+		},
 	};
 
 	// Getters
@@ -71,7 +78,17 @@ export const useServerStore = defineStore('ServerStore', () => {
 			if (settingsStore.shouldMaskServerNames) {
 				return '**MASKED**';
 			}
-			return getters.getServer(serverId)?.name ?? '';
+			const server = getters.getServer(serverId);
+			if (!server) {
+				return '**UNKNOWN**';
+			}
+
+			const serverSettings = settingsStore.getServerSettings(server.machineIdentifier);
+			if (serverSettings && serverSettings.plexServerName) {
+				return serverSettings.plexServerName;
+			}
+
+			return server.name;
 		},
 		getServerStatus: (plexServerId: number) =>
 			serverConnectionStore

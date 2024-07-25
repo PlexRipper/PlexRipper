@@ -10,11 +10,16 @@
 		@opened="open"
 		@closed="close">
 		<template #title>
-			{{
-				t('components.server-dialog.header', {
-					serverName: serverStore.getServerName(plexServer?.id ?? 0) ?? t('general.error.unknown'),
-				})
-			}}
+			<EditableText
+				size="h5"
+				bold="medium"
+				:display-text="
+					t('components.server-dialog.header', {
+						serverName: serverStore.getServerName(plexServer?.id ?? 0) ?? t('general.error.unknown'),
+					})
+				"
+				:value="serverStore.getServerName(plexServer?.id ?? 0)"
+				@save="onServerAliasSave" />
 		</template>
 		<template #default>
 			<q-row align="start" full-height>
@@ -105,7 +110,7 @@
 </template>
 
 <script setup lang="ts">
-import { set } from '@vueuse/core';
+import { set, get } from '@vueuse/core';
 import { ref, computed, useCloseControlDialog } from '#imports';
 import type { PlexServerDTO } from '@dto';
 
@@ -115,7 +120,7 @@ const libraryStore = useLibraryStore();
 const loading = ref(false);
 const tabIndex = ref<string>('server-data');
 const plexServer = ref<PlexServerDTO | null>(null);
-const plexServerId = ref(0);
+const plexServerId = ref<number>(0);
 
 const isVisible = computed((): boolean => plexServerId.value > 0);
 const { t } = useI18n();
@@ -132,11 +137,23 @@ function close(): void {
 	set(plexServerId, 0);
 	set(tabIndex, 'server-data');
 }
+
+function onServerAliasSave(serverAlias: string): void {
+	useSubscription(serverStore.setServerAlias(get(plexServerId), serverAlias).subscribe());
+}
 </script>
 <style lang="scss">
 @import '@/assets/scss/variables.scss';
+@import 'quasar/src/css/core/typography.sass';
 
 .tab-content {
 	max-height: calc(80vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;
+}
+
+.editable-text {
+	&-item {
+		padding-top: 0;
+		padding-bottom: 0;
+	}
 }
 </style>

@@ -117,6 +117,31 @@ export class PlexServer {
  * No description
  *
  * @tags Plexserver
+ * @name SetServerAlias
+ * @request GET:/api/PlexServer/{plexServerId}/set-server-alias
+
+ */
+	setServerAlias = (
+		plexServerId: number,
+		query: {
+			serverAlias: string;
+		},
+		params: RequestParams = {},
+	) =>
+		from(
+			Axios.request<ResultDTO>({
+				url: `/api/PlexServer/${plexServerId}/set-server-alias`,
+				method: 'GET',
+				params: query,
+				format: 'json',
+				...params,
+			}),
+		).pipe(apiCheckPipe<ResultDTO>);
+
+	/**
+ * No description
+ *
+ * @tags Plexserver
  * @name QueueSyncPlexServerJobEndpoint
  * @request GET:/api/PlexServer/{plexServerId}/sync
 
@@ -154,6 +179,13 @@ export class PlexServerPaths {
 
 	static refreshPlexServerConnectionsEndpoint = (plexServerId: number) =>
 		queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/refresh` });
+
+	static setServerAlias = (
+		plexServerId: number,
+		query: {
+			serverAlias: string;
+		},
+	) => queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/set-server-alias`, query });
 
 	static queueSyncPlexServerJobEndpoint = (
 		plexServerId: number,

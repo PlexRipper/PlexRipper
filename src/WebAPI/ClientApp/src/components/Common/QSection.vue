@@ -4,9 +4,9 @@
 			<!-- Header	-->
 			<q-row no-gutters>
 				<q-col>
-					<h2>
+					<QText size="h4" align="center" bold="medium">
 						<slot name="header" />
-					</h2>
+					</QText>
 					<q-separator />
 				</q-col>
 			</q-row>

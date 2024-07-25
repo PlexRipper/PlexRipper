@@ -1,53 +1,35 @@
 <template>
-	<div :class="['q-text-container', align]">
-		<span :class="['q-text', size]">
+	<div :class="divClasses">
+		<span :class="spanClasses">
 			<slot />
 		</span>
 	</div>
 </template>
 <script lang="ts" setup>
-withDefaults(
-	defineProps<{
-		size?: 'small' | 'normal' | 'large';
-		type?: 'primary' | 'success' | 'warning' | 'danger' | 'info';
-		align?: 'left' | 'center' | 'right';
-	}>(),
-	{
-		size: 'normal',
-		type: 'primary',
-		align: 'left',
-	},
-);
+import type { IQTextProps } from '@interfaces';
+
+const props = withDefaults(defineProps<IQTextProps>(), {
+	size: 'body1',
+	type: 'primary',
+	align: 'left',
+	bold: 'regular',
+});
+
+const divClasses = computed(() => ({
+	'q-text-container': true,
+	[`text-${props.align}`]: true,
+}));
+
+const spanClasses = computed(() => ({
+	'q-text': true,
+	[`text-${props.size}`]: true,
+	[`text-weight-${props.bold}`]: true,
+}));
 </script>
+
 <style lang="scss">
 .q-text-container {
 	width: 100%;
 	padding: 0.5rem 0;
-
-	&.left {
-		text-align: left;
-	}
-
-	&.center {
-		text-align: center;
-	}
-
-	&.right {
-		text-align: right;
-	}
-
-	.q-text {
-		&.small {
-			font-size: 0.8rem;
-		}
-
-		&.normal {
-			font-size: 1rem;
-		}
-
-		&.large {
-			font-size: 1.2rem;
-		}
-	}
 }
 </style>

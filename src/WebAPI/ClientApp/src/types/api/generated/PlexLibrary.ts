@@ -9,8 +9,9 @@
  * ---------------------------------------------------------------
  */
 
-import { PlexLibraryDTO, PlexMediaSlimDTO, ResultDTO } from './data-contracts';
-import { RequestParams } from './http-client';
+import type { RequestParams } from './http-client';
+
+import type { PlexLibraryDTO, PlexMediaSlimDTO, ResultDTO } from './data-contracts';
 
 import { apiCheckPipe } from '@api/base';
 import Axios from 'axios';

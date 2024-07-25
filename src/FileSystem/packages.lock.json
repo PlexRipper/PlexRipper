@@ -44,6 +44,22 @@
         "resolved": "17.0.18",
         "contentHash": "x0iIMdP+PCLIkz8h13xHCecaiysFgHPe9mM3FdyfSmkl5+MtMCmgFFIe38Aibkzd0UAY/OMoXMKGR2RK10rebQ=="
       },
+      "System.IO.FileSystem": {
+        "type": "Direct",
+        "requested": "[4.3.0, )",
+        "resolved": "4.3.0",
+        "contentHash": "3wEMARTnuio+ulnvi+hkRNROYwa1kylvYahhcLk4HSoVdl+xxTFVeVlYOfLwrDPImGls0mDqbMhrza8qnWPTdA==",
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0",
+          "Microsoft.NETCore.Targets": "1.1.0",
+          "System.IO": "4.3.0",
+          "System.IO.FileSystem.Primitives": "4.3.0",
+          "System.Runtime": "4.3.0",
+          "System.Runtime.Handles": "4.3.0",
+          "System.Text.Encoding": "4.3.0",
+          "System.Threading.Tasks": "4.3.0"
+        }
+      },
       "Azure.Core": {
         "type": "Transitive",
         "resolved": "1.35.0",
@@ -876,21 +892,6 @@
           "System.Text.Encoding": "4.3.0"
         }
       },
-      "System.IO.FileSystem": {
-        "type": "Transitive",
-        "resolved": "4.3.0",
-        "contentHash": "3wEMARTnuio+ulnvi+hkRNROYwa1kylvYahhcLk4HSoVdl+xxTFVeVlYOfLwrDPImGls0mDqbMhrza8qnWPTdA==",
-        "dependencies": {
-          "Microsoft.NETCore.Platforms": "1.1.0",
-          "Microsoft.NETCore.Targets": "1.1.0",
-          "System.IO": "4.3.0",
-          "System.IO.FileSystem.Primitives": "4.3.0",
-          "System.Runtime": "4.3.0",
-          "System.Runtime.Handles": "4.3.0",
-          "System.Text.Encoding": "4.3.0",
-          "System.Threading.Tasks": "4.3.0"
-        }
-      },
       "System.IO.FileSystem.AccessControl": {
         "type": "Transitive",
         "resolved": "5.0.0",
@@ -1540,7 +1541,9 @@
       "filesystem.contracts": {
         "type": "Project",
         "dependencies": {
-          "PlexRipper.Domain": "[1.0.0, )"
+          "PlexRipper.Domain": "[1.0.0, )",
+          "System.IO.Abstractions": "[17.0.18, )",
+          "System.IO.FileSystem": "[4.3.0, )"
         }
       },
       "fluentresultextensions": {

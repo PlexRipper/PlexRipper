@@ -8,6 +8,28 @@
         "resolved": "0.28.2",
         "contentHash": "eMPtBF9ECE5sMBXX6fZw/phFZ9UeV62E43z78VPKIgCJMppojxDc03RD6ROpPgk8Vvde11vkcZf69NveW/T1rg=="
       },
+      "System.IO.Abstractions": {
+        "type": "Direct",
+        "requested": "[17.0.18, )",
+        "resolved": "17.0.18",
+        "contentHash": "x0iIMdP+PCLIkz8h13xHCecaiysFgHPe9mM3FdyfSmkl5+MtMCmgFFIe38Aibkzd0UAY/OMoXMKGR2RK10rebQ=="
+      },
+      "System.IO.FileSystem": {
+        "type": "Direct",
+        "requested": "[4.3.0, )",
+        "resolved": "4.3.0",
+        "contentHash": "3wEMARTnuio+ulnvi+hkRNROYwa1kylvYahhcLk4HSoVdl+xxTFVeVlYOfLwrDPImGls0mDqbMhrza8qnWPTdA==",
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0",
+          "Microsoft.NETCore.Targets": "1.1.0",
+          "System.IO": "4.3.0",
+          "System.IO.FileSystem.Primitives": "4.3.0",
+          "System.Runtime": "4.3.0",
+          "System.Runtime.Handles": "4.3.0",
+          "System.Text.Encoding": "4.3.0",
+          "System.Threading.Tasks": "4.3.0"
+        }
+      },
       "Autofac": {
         "type": "Transitive",
         "resolved": "8.0.0",
@@ -496,21 +518,6 @@
           "System.Runtime": "4.3.0",
           "System.Runtime.Extensions": "4.3.0",
           "System.Text.Encoding": "4.3.0"
-        }
-      },
-      "System.IO.FileSystem": {
-        "type": "Transitive",
-        "resolved": "4.3.0",
-        "contentHash": "3wEMARTnuio+ulnvi+hkRNROYwa1kylvYahhcLk4HSoVdl+xxTFVeVlYOfLwrDPImGls0mDqbMhrza8qnWPTdA==",
-        "dependencies": {
-          "Microsoft.NETCore.Platforms": "1.1.0",
-          "Microsoft.NETCore.Targets": "1.1.0",
-          "System.IO": "4.3.0",
-          "System.IO.FileSystem.Primitives": "4.3.0",
-          "System.Runtime": "4.3.0",
-          "System.Runtime.Handles": "4.3.0",
-          "System.Text.Encoding": "4.3.0",
-          "System.Threading.Tasks": "4.3.0"
         }
       },
       "System.IO.FileSystem.Primitives": {

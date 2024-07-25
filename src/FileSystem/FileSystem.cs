@@ -15,8 +15,6 @@ public class FileSystem : IFileSystem
 
     private readonly IDiskProvider _diskProvider;
 
-    private readonly IDiskSystem _diskSystem;
-
     private readonly IDirectorySystem _directorySystem;
 
     #endregion
@@ -28,7 +26,6 @@ public class FileSystem : IFileSystem
         IPathProvider pathProvider,
         System.IO.Abstractions.IFileSystem abstractedFileSystem,
         IDiskProvider diskProvider,
-        IDiskSystem diskSystem,
         IDirectorySystem directorySystem
     )
     {
@@ -36,7 +33,6 @@ public class FileSystem : IFileSystem
         _pathProvider = pathProvider;
         _abstractedFileSystem = abstractedFileSystem;
         _diskProvider = diskProvider;
-        _diskSystem = diskSystem;
         _directorySystem = directorySystem;
     }
 

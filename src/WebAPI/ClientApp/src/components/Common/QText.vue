@@ -8,9 +8,9 @@
 <script lang="ts" setup>
 withDefaults(
 	defineProps<{
-		size: 'small' | 'normal' | 'large';
-		type: 'primary' | 'success' | 'warning' | 'danger' | 'info';
-		align: 'left' | 'center' | 'right';
+		size?: 'small' | 'normal' | 'large';
+		type?: 'primary' | 'success' | 'warning' | 'danger' | 'info';
+		align?: 'left' | 'center' | 'right';
 	}>(),
 	{
 		size: 'normal',

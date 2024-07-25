@@ -1,10 +1,9 @@
 <template>
-	<q-input v-model="model" :outlined="props.outlined" @keyup.enter="$emit('click:append')">
+	<q-input v-model="model" :outlined="props.outlined" :placeholder="placeholder" @keyup.enter="$emit('click:append')">
 		<template v-if="props.appendIcon" #append>
 			<q-btn :icon="appendIcon" flat @click="$emit('click:append')" />
 		</template>
 	</q-input>
-	{{ model }}
 </template>
 
 <script setup lang="ts">
@@ -13,10 +12,12 @@ const props = withDefaults(
 	defineProps<{
 		outlined?: boolean;
 		appendIcon?: string;
+		placeholder?: string;
 	}>(),
 	{
 		outlined: true,
 		appendIcon: '',
+		placeholder: '',
 	},
 );
 

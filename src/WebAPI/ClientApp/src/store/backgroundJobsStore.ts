@@ -1,6 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { Observable, of, Subject } from 'rxjs';
-import { filter, take, tap } from 'rxjs/operators';
+import { forkJoin, Observable, of, Subject } from 'rxjs';
+import { filter, take, switchMap } from 'rxjs/operators';
 import type { ISetupResult } from '@interfaces';
 import { JobStatus, type JobStatusUpdateDTO, JobTypes } from '@dto';
 
@@ -17,17 +17,28 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 	const accountStore = useAccountStore();
 	const serverStore = useServerStore();
 	const settingsStore = useSettingsStore();
+	const connectionStore = useServerConnectionStore();
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			// Refresh accounts, servers, and settings on completion of the job
+			// Refresh accounts, servers, and settings on completion of the RefreshPlexServersAccessJob
 			getters
 				.getJobStatusUpdate(JobTypes.RefreshPlexServersAccessJob, JobStatus.Completed)
 				.pipe(
-					tap(() => accountStore.refreshAccounts()),
-					tap(() => serverStore.refreshPlexServers()),
-					tap(() => settingsStore.refreshSettings()),
+					switchMap(() =>
+						forkJoin([
+							accountStore.refreshAccounts(),
+							serverStore.refreshPlexServers(),
+							settingsStore.refreshSettings(),
+						]),
+					),
 				)
+				.subscribe();
+
+			// Refresh the server connections on completion of the CheckPlexServerConnectionsJob
+			getters
+				.getJobStatusUpdate(JobTypes.CheckPlexServerConnectionsJob, JobStatus.Completed)
+				.pipe(switchMap(() => connectionStore.refreshPlexServerConnections()))
 				.subscribe();
 
 			return of({ name: useBackgroundJobsStore.name, isSuccess: true }).pipe(take(1));

@@ -43,7 +43,10 @@
             "path": "Pfad:",
             "select-path": "Wähle {pathName}",
             "type": "typ:",
-            "no-path": "Beginnen Sie mit der Eingabe oder wählen Sie unten einen Pfad aus."
+            "no-path": "Beginnen Sie mit der Eingabe oder wählen Sie unten einen Pfad aus.",
+            "has-no-read-permission": "Hat keine Leseberechtigung für diesen Ordner!",
+            "has-no-write-permission": "Hat keine Schreibberechtigung für diesen Ordner!",
+            "current-folder-has-no-write-permission": "Der aktuelle Ordner hat keine Schreibberechtigung! Wählen Sie einen Ordner mit Schreibberechtigung aus."
         },
         "download-confirmation": {
             "creating-tasks": "Erstelle download Aufgabe {current} von {total}",

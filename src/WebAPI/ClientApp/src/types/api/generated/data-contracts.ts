@@ -249,6 +249,7 @@ export interface FileMergeProgress {
 }
 
 export interface FileSystemDTO {
+	current?: FileSystemModelDTO | null;
 	directories: FileSystemModelDTO[];
 	files: FileSystemModelDTO[];
 	parent: string;
@@ -263,6 +264,8 @@ export enum FileSystemEntityType {
 
 export interface FileSystemModelDTO {
 	extension: string;
+	hasReadPermission: boolean;
+	hasWritePermission: boolean;
 	/** @format date-time */
 	lastModified?: string | null;
 	name: string;

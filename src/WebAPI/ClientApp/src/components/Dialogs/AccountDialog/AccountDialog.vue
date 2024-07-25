@@ -59,7 +59,7 @@
 		@confirm="validateAfterVerificationCode" />
 	<!--	Delete Confirmation Dialog	-->
 	<confirmation-dialog
-		:confirm-loading="true"
+		:confirm-loading="deleteLoading"
 		:name="confirmationDialogName"
 		class="q-mr-md"
 		text-id="delete-account"
@@ -103,6 +103,7 @@ const changedPlexAccount = ref<IPlexAccount>(getDefaultAccount());
 
 const validateLoading = ref(false);
 const savingLoading = ref(false);
+const deleteLoading = ref(false);
 
 function getDefaultAccount(): IPlexAccount {
 	return {
@@ -274,9 +275,12 @@ function saveAccount(close: any) {
 			}),
 		);
 	}
+
+	close();
 }
 
 function deleteAccount() {
+	set(deleteLoading, true);
 	useSubscription(
 		accountStore.deleteAccount(get(changedPlexAccount).id).subscribe(() => {
 			closeDialog();
@@ -294,6 +298,7 @@ function openDialog({ isNewAccountValue, account = null }: { isNewAccountValue: 
 
 function closeDialog() {
 	set(savingLoading, false);
+	set(deleteLoading, false);
 	closeVerificationDialog();
 	useCloseControlDialog(confirmationDialogName);
 	useCloseControlDialog(props.name);

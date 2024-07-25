@@ -70,7 +70,7 @@ function mapToTreeNodes(value: DownloadProgressDTO[]): IDownloadTableNode[] {
 	});
 }
 
-function tableAction(payload: { action: string; data: QTreeViewTableItem }) {
+function tableAction(payload: { action: string; data: IDownloadTableNode }) {
 	Log.info('command', payload);
 	emit('action', {
 		action: payload.action,

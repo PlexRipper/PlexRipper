@@ -5,5 +5,5 @@ namespace PlexRipper.Settings.Models;
 
 public class ServerSettings : IServerSettings
 {
-    public List<PlexServerSettingsModel> Data { get; set; }
+    public List<PlexServerSettingsModel> Data { get; init; } = [];
 }

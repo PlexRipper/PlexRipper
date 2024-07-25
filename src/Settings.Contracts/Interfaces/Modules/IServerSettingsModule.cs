@@ -1,24 +1,14 @@
-﻿using FluentResults;
-using PlexRipper.Domain;
-using PlexRipper.Domain.DownloadManager;
-
-namespace Settings.Contracts;
+﻿namespace Settings.Contracts;
 
 public interface IServerSettingsModule : IBaseSettingsModule<IServerSettings>, IServerSettings
 {
-    IObservable<PlexServerSettingsModel> ServerSettings(string machineIdentifier);
-
-    void SetServerSettings(PlexServerSettingsModel plexServerSettings);
-
-    PlexServerSettingsModel? GetPlexServerSettings(string machineIdentifier);
-
     int GetDownloadSpeedLimit(string machineIdentifier);
 
-    Result SetDownloadSpeedLimit(string machineIdentifier, int downloadSpeedLimit = 0);
-
-    Result<PlexServerSettingsModel> AddServerToSettings(PlexServerSettingsModel plexServerSettings);
+    void SetDownloadSpeedLimit(string machineIdentifier, int downloadSpeedLimit = 0);
 
     IObservable<int> GetDownloadSpeedLimitObservable(string machineIdentifier);
 
-    void EnsureAllServersHaveASettingsEntry(List<PlexServer> plexServers);
+    void SetServerName(string machineIdentifier, string serverName = "");
+
+    string GetServerNameAlias(string machineIdentifier);
 }

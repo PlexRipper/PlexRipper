@@ -2,9 +2,9 @@
 
 public record PlexServerSettingsModel
 {
-    public required string PlexServerName { get; init; }
+    public required string PlexServerName { get; set; } = string.Empty;
 
-    public required string MachineIdentifier { get; set; }
+    public required string MachineIdentifier { get; init; }
 
     public required int DownloadSpeedLimit { get; set; }
 }

@@ -41,10 +41,7 @@ public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel>
 
     public abstract TModel GetValues();
 
-    public TModel Reset()
-    {
-        return Update(DefaultValues());
-    }
+    public TModel Reset() => Update(DefaultValues());
 
     /// <inheritdoc/>
     public virtual Result SetFromJson(JsonElement jsonElement)
@@ -122,7 +119,7 @@ public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel>
 
     #region Private Methods
 
-    protected void EmitModuleHasChanged(TModel module)
+    protected virtual void EmitModuleHasChanged(TModel module)
     {
         _moduleUpdatedSubject.OnNext(module);
     }

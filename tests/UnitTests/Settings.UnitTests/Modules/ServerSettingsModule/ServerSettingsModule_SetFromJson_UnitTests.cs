@@ -36,7 +36,6 @@ public class ServerSettingsModule_SetFromJson_UnitTests : BaseUnitTest<ServerSet
             targetServerSettingsModel.ShouldNotBeNull(
                 $"PlexServer with {sourceServerSettingsModel.MachineIdentifier} was not parsed correctly"
             );
-            targetServerSettingsModel.MachineIdentifier = sourceServerSettingsModel.MachineIdentifier;
             targetServerSettingsModel.DownloadSpeedLimit = sourceServerSettingsModel.DownloadSpeedLimit;
         }
     }

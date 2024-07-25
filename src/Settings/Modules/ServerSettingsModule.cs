@@ -1,4 +1,3 @@
-#nullable enable
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using PlexRipper.Domain.DownloadManager;
@@ -19,141 +18,115 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
 
     public override string Name => "ServerSettings";
 
-    public List<PlexServerSettingsModel> Data { get; set; } = new();
+    public List<PlexServerSettingsModel> Data { get; init; } = [];
 
     #endregion
 
     #region Public Methods
 
-    public Result<PlexServerSettingsModel> AddServerToSettings(PlexServerSettingsModel plexServerSettings)
-    {
-        if (string.IsNullOrEmpty(plexServerSettings.MachineIdentifier))
-            return ResultExtensions.IsEmpty(nameof(plexServerSettings.MachineIdentifier));
-
-        var settings = GetPlexServerSettings(plexServerSettings.MachineIdentifier);
-        if (settings != null)
-        {
-            _log.Information(
-                "A Server setting with {MachineIdentifier} already exists, will update now",
-                plexServerSettings.MachineIdentifier
-            );
-            SetServerSettings(plexServerSettings);
-        }
-        else
-        {
-            Data.Add(plexServerSettings);
-            EmitModuleHasChanged(GetValues());
-            settings = plexServerSettings;
-        }
-
-        return Result.Ok(settings);
-    }
-
-    public override IServerSettings DefaultValues() =>
-        new ServerSettings { Data = CreateServerSettingsFromDb(new List<PlexServer>()) };
+    public override IServerSettings DefaultValues() => new ServerSettings { Data = [] };
 
     public IObservable<int> GetDownloadSpeedLimitObservable(string machineIdentifier)
     {
-        return ServerSettings(machineIdentifier).Select(x => x.DownloadSpeedLimit);
-    }
-
-    public PlexServerSettingsModel? GetPlexServerSettings(string machineIdentifier)
-    {
-        return machineIdentifier == string.Empty
-            ? null
-            : Data.FirstOrDefault(x => x.MachineIdentifier == machineIdentifier);
+        return _serverSettingsUpdated
+            .Where(x => x.MachineIdentifier == machineIdentifier)
+            .Select(x => x.DownloadSpeedLimit);
     }
 
     public int GetDownloadSpeedLimit(string machineIdentifier) =>
-        GetPlexServerSettings(machineIdentifier)?.DownloadSpeedLimit ?? 0;
+        FindOrAddServerSettingsModel(machineIdentifier)?.DownloadSpeedLimit ?? 0;
+
+    public string GetServerNameAlias(string machineIdentifier) =>
+        FindOrAddServerSettingsModel(machineIdentifier)?.PlexServerName ?? string.Empty;
 
     public override IServerSettings GetValues() => new ServerSettings { Data = Data };
 
-    public IObservable<PlexServerSettingsModel> ServerSettings(string machineIdentifier)
+    public void SetDownloadSpeedLimit(string machineIdentifier, int downloadSpeedLimit = 0)
     {
-        return _serverSettingsUpdated.AsObservable().Where(x => x.MachineIdentifier == machineIdentifier);
+        var model = FindOrAddServerSettingsModel(machineIdentifier);
+        if (model is null)
+            return;
+
+        if (model.DownloadSpeedLimit != downloadSpeedLimit)
+        {
+            model.DownloadSpeedLimit = downloadSpeedLimit;
+            EmitModuleHasChanged(GetValues());
+        }
     }
 
-    public Result SetDownloadSpeedLimit(string machineIdentifier, int downloadSpeedLimit = 0)
+    public void SetServerName(string machineIdentifier, string serverName = "")
     {
-        var index = Data.FindIndex(x => x.MachineIdentifier == machineIdentifier);
-        if (index > -1)
-        {
-            if (Data[index].DownloadSpeedLimit != downloadSpeedLimit)
-            {
-                Data[index].DownloadSpeedLimit = downloadSpeedLimit;
-                EmitModuleHasChanged(GetValues());
-                return Result.Ok();
-            }
-        }
+        var model = FindOrAddServerSettingsModel(machineIdentifier);
+        if (model is null)
+            return;
 
-        return Result.Fail(
-            $"PlexServer with machineIdentifier \"{machineIdentifier}\" has no entry in the {nameof(ServerSettings)}"
-        );
-    }
-
-    public void SetServerSettings(PlexServerSettingsModel plexServerSettings)
-    {
-        var index = Data.FindIndex(x => x.MachineIdentifier == plexServerSettings.MachineIdentifier);
-        if (index > -1)
+        if (model.PlexServerName != serverName)
         {
-            if (Data[index].DownloadSpeedLimit != plexServerSettings.DownloadSpeedLimit)
-            {
-                Data[index].DownloadSpeedLimit = plexServerSettings.DownloadSpeedLimit;
-                _serverSettingsUpdated.OnNext(Data[index]);
-            }
-        }
-        else
-        {
-            Data.Add(plexServerSettings);
-            _serverSettingsUpdated.OnNext(Data.Last());
+            model.PlexServerName = serverName;
+            EmitModuleHasChanged(GetValues());
         }
     }
 
     public override IServerSettings Update(IServerSettings sourceSettings)
     {
-        if (sourceSettings.Data == null)
-        {
-            _log.Warning("Can not update settings module {Name} with source settings null", Name);
+        if (!sourceSettings.Data.Any())
             return GetValues();
-        }
 
         foreach (var plexServerSettingsModel in sourceSettings.Data)
-            SetServerSettings(plexServerSettingsModel);
+        {
+            var model = FindOrAddServerSettingsModel(plexServerSettingsModel.MachineIdentifier);
+            if (model is null)
+                continue;
+
+            if (model.DownloadSpeedLimit != plexServerSettingsModel.DownloadSpeedLimit)
+                model.DownloadSpeedLimit = plexServerSettingsModel.DownloadSpeedLimit;
+
+            if (model.PlexServerName != plexServerSettingsModel.PlexServerName)
+                model.PlexServerName = plexServerSettingsModel.PlexServerName;
+        }
+
+        EmitModuleHasChanged(GetValues());
 
         return GetValues();
-    }
-
-    public void EnsureAllServersHaveASettingsEntry(List<PlexServer> plexServers)
-    {
-        Data = CreateServerSettingsFromDb(plexServers);
-        EmitModuleHasChanged(GetValues());
     }
 
     #endregion
 
     #region Private Methods
 
-    private List<PlexServerSettingsModel> CreateServerSettingsFromDb(List<PlexServer> plexServers)
+    private PlexServerSettingsModel? FindOrAddServerSettingsModel(string machineIdentifier)
     {
-        var newList = new List<PlexServerSettingsModel>();
-        foreach (var plexServer in plexServers)
+        if (machineIdentifier == string.Empty)
+            return null;
+
+        var index = Data.FindIndex(x => x.MachineIdentifier == machineIdentifier);
+        if (index > -1)
         {
-            var index = Data.FindIndex(x => x.MachineIdentifier == plexServer.MachineIdentifier);
-            if (index == -1)
-            {
-                newList.Add(
-                    new PlexServerSettingsModel
-                    {
-                        MachineIdentifier = plexServer.MachineIdentifier,
-                        DownloadSpeedLimit = 0,
-                        PlexServerName = plexServer.Name,
-                    }
-                );
-            }
+            _log.Information(
+                "Could not create a new ServerSettingModel for {MachineIdentifier} because it already exists",
+                machineIdentifier
+            );
+            return Data[index];
         }
 
-        return newList.Concat(Data).ToList();
+        Data.Add(
+            new PlexServerSettingsModel
+            {
+                MachineIdentifier = machineIdentifier,
+                DownloadSpeedLimit = 0,
+                PlexServerName = string.Empty,
+            }
+        );
+
+        EmitModuleHasChanged(GetValues());
+        return Data.Last();
+    }
+
+    protected override void EmitModuleHasChanged(IServerSettings module)
+    {
+        base.EmitModuleHasChanged(module);
+        foreach (var model in module.Data)
+            _serverSettingsUpdated.OnNext(model);
     }
 
     #endregion

@@ -14,7 +14,7 @@ public static partial class FakeData
         "dd MMM yyyy",
         "MM/dd/yyyy",
         "dd/MM/yyyy",
-        "yyyy-MM-dd"
+        "yyyy-MM-dd",
     };
 
     private static readonly string[] LongDateFormat = { "EEEE, MMMM dd, yyyy", "EEEE, dd MMMM yyyy" };
@@ -150,7 +150,7 @@ public static partial class FakeData
         return new Faker<PlexServerSettingsModel>()
             .StrictMode(true)
             .UseSeed(config.Seed)
-            .RuleFor(x => x.PlexServerName, f => f.Company.CompanyName())
+            .RuleFor(x => x.PlexServerName, _ => string.Empty)
             .RuleFor(x => x.DownloadSpeedLimit, _ => config.DownloadSpeedLimitInKib)
             .RuleFor(x => x.MachineIdentifier, f => f.Finance.BitcoinAddress());
     }

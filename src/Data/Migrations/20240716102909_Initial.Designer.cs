@@ -11,8 +11,8 @@ using PlexRipper.Data;
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    [Migration("20240329212135_asda")]
-    partial class asda
+    [Migration("20240716102909_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -484,6 +484,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(8);
 
                     b.Property<string>("FullTitle")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(14);
 
@@ -498,6 +499,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(2)
                         .UseCollation("NATURALSORT");
@@ -535,6 +537,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(3);
 
                     b.Property<string>("Message")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(2);
 
@@ -556,6 +559,11 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(7);
 
+                    b.Property<string>("DownloadDirectory")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnOrder(8);
+
                     b.Property<string>("DownloadStatus")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -575,10 +583,12 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(4);
 
                     b.Property<string>("FileLocationUrl")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(10);
 
                     b.Property<string>("FileName")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(1);
 
@@ -592,10 +602,6 @@ namespace PlexRipper.Data.Migrations
                     b.Property<long>("StartByte")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(3);
-
-                    b.Property<string>("TempDirectory")
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(8);
 
                     b.HasKey("Id");
 
@@ -617,6 +623,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DestinationDirectory")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("DownloadTaskId")
@@ -629,9 +636,11 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FileName")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FilePathsCompressed")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<long>("FileSize")
@@ -660,10 +669,12 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<string>("DirectoryPath")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(4);
 
                     b.Property<string>("DisplayName")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(1);
 
@@ -791,6 +802,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(1);
 
                     b.Property<string>("Message")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(3);
 
@@ -807,17 +819,21 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<string>("AuthenticationToken")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ClientId")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(9);
 
                     b.Property<string>("DisplayName")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(1);
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(11);
 
@@ -837,6 +853,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(5);
 
                     b.Property<string>("Password")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(3);
 
@@ -845,14 +862,17 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(7);
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(10);
 
                     b.Property<string>("Username")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(2);
 
                     b.Property<string>("Uuid")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(8);
 
@@ -896,6 +916,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(1);
 
                     b.Property<string>("AuthToken")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(2);
 
@@ -918,6 +939,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<string>("Tag")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -940,6 +962,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Key")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(3);
 
@@ -948,10 +971,12 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(10);
 
                     b.Property<string>("LibraryLocationPath")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(4);
 
                     b.Property<string>("MetaData")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(11);
 
@@ -962,11 +987,12 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(7);
 
-                    b.Property<DateTime>("SyncedAt")
+                    b.Property<DateTime?>("SyncedAt")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(8);
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(2)
                         .UseCollation("NATURALSORT");
@@ -1011,6 +1037,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(12);
 
                     b.Property<string>("ContentRating")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(10);
 
@@ -1019,6 +1046,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(5);
 
                     b.Property<string>("FullTitle")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(21);
 
@@ -1047,6 +1075,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(1);
 
                     b.Property<string>("MediaData")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(22);
 
@@ -1073,19 +1102,23 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(11);
 
                     b.Property<string>("SortTitle")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(4)
                         .UseCollation("NATURALSORT");
 
                     b.Property<string>("Studio")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(8);
 
                     b.Property<string>("Summary")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(9);
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(2);
 
@@ -1167,6 +1200,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<string>("Tag")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -1186,6 +1220,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(10);
 
                     b.Property<string>("Device")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(4);
 
@@ -1206,10 +1241,12 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(11);
 
                     b.Property<string>("MachineIdentifier")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(12);
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(1);
 
@@ -1226,14 +1263,17 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(2);
 
                     b.Property<string>("Platform")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(5);
 
                     b.Property<string>("PlatformVersion")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(6);
 
                     b.Property<string>("PlexServerOwnerUsername")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(3);
 
@@ -1246,18 +1286,22 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(19);
 
                     b.Property<string>("Product")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(7);
 
                     b.Property<string>("ProductVersion")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(8);
 
                     b.Property<string>("Provides")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(9);
 
                     b.Property<string>("PublicAddress")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(13);
 
@@ -1290,6 +1334,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<string>("Address")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(2);
 
@@ -1317,6 +1362,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(8);
 
                     b.Property<string>("Protocol")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(1);
 
@@ -1359,6 +1405,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(2);
 
                     b.Property<string>("StatusMessage")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(3);
 
@@ -1387,6 +1434,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(12);
 
                     b.Property<string>("ContentRating")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(10);
 
@@ -1395,6 +1443,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(5);
 
                     b.Property<string>("FullTitle")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(21);
 
@@ -1423,6 +1472,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(1);
 
                     b.Property<string>("MediaData")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(22);
 
@@ -1449,19 +1499,23 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(11);
 
                     b.Property<string>("SortTitle")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(4)
                         .UseCollation("NATURALSORT");
 
                     b.Property<string>("Studio")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(8);
 
                     b.Property<string>("Summary")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(9);
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(2);
 
@@ -1498,6 +1552,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(12);
 
                     b.Property<string>("ContentRating")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(10);
 
@@ -1506,6 +1561,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(5);
 
                     b.Property<string>("FullTitle")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(21);
 
@@ -1534,6 +1590,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(1);
 
                     b.Property<string>("MediaData")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(22);
 
@@ -1563,19 +1620,23 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(11);
 
                     b.Property<string>("SortTitle")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(4)
                         .UseCollation("NATURALSORT");
 
                     b.Property<string>("Studio")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(8);
 
                     b.Property<string>("Summary")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(9);
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(2);
 
@@ -1660,6 +1721,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(12);
 
                     b.Property<string>("ContentRating")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(10);
 
@@ -1668,6 +1730,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(5);
 
                     b.Property<string>("FullTitle")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(21);
 
@@ -1696,6 +1759,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(1);
 
                     b.Property<string>("MediaData")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(22);
 
@@ -1725,19 +1789,23 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(11);
 
                     b.Property<string>("SortTitle")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(4)
                         .UseCollation("NATURALSORT");
 
                     b.Property<string>("Studio")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(8);
 
                     b.Property<string>("Summary")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(9);
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(2);
 
@@ -1776,6 +1844,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(6);
 
                     b.Property<string>("DirectoryMeta")
+                        .IsRequired()
                         .IsUnicode(true)
                         .HasColumnType("TEXT")
                         .HasColumnOrder(16);
@@ -1785,10 +1854,12 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(18);
 
                     b.Property<string>("FileLocationUrl")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(12);
 
                     b.Property<string>("FileName")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(11)
                         .UseCollation("NATURALSORT");
@@ -1802,6 +1873,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnOrder(4);
 
                     b.Property<string>("Quality")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(15);
 

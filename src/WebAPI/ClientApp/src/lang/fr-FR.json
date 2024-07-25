@@ -43,7 +43,10 @@
             "path": "Chemin d'accès;",
             "select-path": "Sélectionner {pathName}",
             "type": "Type:",
-            "no-path": "Commencez à taper ou sélectionnez un chemin ci-dessous."
+            "no-path": "Commencez à taper ou sélectionnez un chemin ci-dessous.",
+            "has-no-read-permission": "N'a aucune autorisation de lecture pour ce dossier !",
+            "has-no-write-permission": "N'a aucune autorisation en écriture pour ce dossier !",
+            "current-folder-has-no-write-permission": "Le dossier actuel n'a aucune autorisation en écriture ! Sélectionnez-en un qui en a."
         },
         "download-confirmation": {
             "creating-tasks": "Création de tâches de téléchargement {current} de {total}",

@@ -13,39 +13,65 @@
 		</template>
 		<template #top-row>
 			<q-row>
+				<q-col v-if="!isCurrentWritable" cols="auto" class="q-px-md">
+					<q-icon color="red" size="sm" name="mdi-alert-circle">
+						<q-tooltip anchor="top middle" self="center middle">
+							<span>{{ t('components.directory-browser.has-no-write-permission') }}</span>
+						</q-tooltip>
+					</q-icon>
+				</q-col>
 				<q-col>
-					<p-text-field v-model="currentPath" outlined color="red" @update:model-value="requestDirectories" />
-					<q-text v-if="!(path?.directory ?? '')" size="large" align="center">
-						{{ t('components.directory-browser.no-path') }}
-					</q-text>
+					<p-text-field
+						v-model="currentPath"
+						outlined
+						color="red"
+						:placeholder="t('components.directory-browser.no-path')"
+						@update:model-value="requestDirectories" />
 				</q-col>
 			</q-row>
-			<q-row>
-				<q-col>
-					<q-markup-table>
-						<thead>
-							<tr>
-								<th class="text-left" style="width: 100px">
-									{{ t('components.directory-browser.type') }}
-								</th>
-								<th class="text-left">
-									{{ t('components.directory-browser.path') }}
-								</th>
-							</tr>
-						</thead>
-					</q-markup-table>
-				</q-col>
-			</q-row>
+			<q-markup-table class="q-pr-md">
+				<thead>
+					<tr>
+						<th class="text-left" style="width: 100px">
+							{{ t('components.directory-browser.type') }}
+						</th>
+						<th class="text-left">
+							{{ t('components.directory-browser.path') }}
+						</th>
+					</tr>
+				</thead>
+				<!-- The return row -->
+				<tbody v-if="currentPathModel != null">
+					<tr @click="directoryNavigate(returnRow)">
+						<td class="text-left" style="width: 100px">
+							<q-icon size="md" :name="getIcon(returnRow.type)" />
+						</td>
+						<td class="text-left">
+							{{ returnRow.name }}
+						</td>
+					</tr>
+				</tbody>
+			</q-markup-table>
 		</template>
 		<template #default>
 			<!--	Directory Browser	-->
 			<q-markup-table>
 				<tbody class="scroll">
-					<tr v-for="(row, index) in items" :key="index" @click="directoryNavigate(row)">
+					<tr
+						v-for="(row, index) in items"
+						:key="index"
+						:class="rowClass(!row.hasReadPermission)"
+						@click="directoryNavigate(row)">
 						<td class="text-left" style="width: 100px">
 							<q-icon size="md" :name="getIcon(row.type)" />
 						</td>
 						<td class="text-left">
+							<q-icon v-if="!row.hasReadPermission" color="red" size="sm" name="mdi-alert-circle">
+								<q-tooltip anchor="top middle" self="center middle">
+									<span>{{ t('components.directory-browser.has-no-read-permission') }}</span>
+								</q-tooltip>
+							</q-icon>
+
 							{{ row.name }}
 						</td>
 					</tr>
@@ -54,7 +80,10 @@
 		</template>
 		<template #actions>
 			<CancelButton @click="cancel()" />
-			<ConfirmButton @click="confirm()" />
+			<ConfirmButton
+				:disabled="!isCurrentWritable"
+				:tooltip-id="!isCurrentWritable ? 'components.directory-browser.current-folder-has-no-write-permission' : ''"
+				@click="confirm()" />
 		</template>
 	</QCardDialog>
 </template>
@@ -71,13 +100,40 @@ import { folderPathApi } from '@api';
 const { t } = useI18n();
 const path = ref<FolderPathDTO | null>(null);
 const currentPath = ref('');
+const currentPathModel = ref<FileSystemModelDTO | null>(null);
 const parentPath = ref('');
 const isLoading = ref(true);
 const items = ref<FileSystemModelDTO[]>([]);
+const returnRow = ref<FileSystemModelDTO>({
+	name: '...',
+	path: '..',
+	type: FileSystemEntityType.Parent,
+	extension: '',
+	size: 0,
+	lastModified: '',
+	hasReadPermission: true,
+	hasWritePermission: false,
+});
 
 const props = defineProps<{
 	name: string;
 }>();
+
+const emit = defineEmits<{
+	(e: 'confirm', path: FolderPathDTO): void;
+	(e: 'cancel'): void;
+}>();
+
+const isCurrentWritable = computed(() => {
+	return get(currentPathModel)?.hasWritePermission ?? false;
+});
+
+function rowClass(hasReadPermission: boolean) {
+	return {
+		'cursor-pointer': !hasReadPermission,
+		'q-tr--no-hover': hasReadPermission,
+	};
+}
 
 const getIcon = (type: FileSystemEntityType): string => {
 	switch (type) {
@@ -94,11 +150,6 @@ const getIcon = (type: FileSystemEntityType): string => {
 	}
 };
 
-const emit = defineEmits<{
-	(e: 'confirm', path: FolderPathDTO): void;
-	(e: 'cancel'): void;
-}>();
-
 const open = (selectedPath: FolderPathDTO): void => {
 	if (!selectedPath) {
 		Log.error('parameter was null when opening DirectoryBrowser');
@@ -109,6 +160,7 @@ const open = (selectedPath: FolderPathDTO): void => {
 	set(path, selectedPath);
 	set(currentPath, selectedPath.directory);
 };
+
 function cancel(): void {
 	emit('cancel');
 	useCloseControlDialog(props.name);
@@ -125,9 +177,6 @@ function confirm(): void {
 }
 
 function requestDirectories(newPath: string): void {
-	if (newPath === '' || newPath === '/') {
-		set(isLoading, true);
-	}
 	if (path.value) {
 		// @ts-ignore
 		path.value.directory = newPath;
@@ -141,26 +190,19 @@ function requestDirectories(newPath: string): void {
 			.subscribe(({ isSuccess, value }) => {
 				if (isSuccess && value) {
 					set(items, value?.directories);
-
-					// Don't add return row if in the root folder
-					if (newPath !== '') {
-						items.value.unshift({
-							name: '...',
-							path: '..',
-							type: FileSystemEntityType.Parent,
-							extension: '',
-							size: 0,
-							lastModified: '',
-						});
-					}
-					set(isLoading, false);
+					set(currentPathModel, value?.current ?? null);
 					set(parentPath, value?.parent);
+					set(isLoading, false);
 				}
 			}),
 	);
 }
 
 function directoryNavigate(dataRow: FileSystemModelDTO): void {
+	if (!dataRow.hasReadPermission) {
+		return;
+	}
+
 	if (dataRow.path === '..') {
 		requestDirectories(parentPath.value);
 		set(currentPath, parentPath.value);

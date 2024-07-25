@@ -7,7 +7,7 @@ public class DownloadTaskMovie : DownloadTaskParentBase
 {
     #region Relationships
 
-    public required List<DownloadTaskMovieFile> Children { get; set; } = new();
+    public required List<DownloadTaskMovieFile> Children { get; set; } = [];
 
     #endregion
 

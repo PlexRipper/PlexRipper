@@ -1,25 +1,61 @@
 <template>
-	<q-list>
-		<q-item v-ripple clickable>
-			<q-item-section>
-				<q-sub-header>
-					{{ value }}
-				</q-sub-header>
-			</q-item-section>
-			<QPopupEdit v-slot="scope" :model-value="value" auto-save @save="$emit('save', $event)">
-				<q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set" />
+	<q-list class="editable-text">
+		<q-item clickable class="editable-text-item">
+			<template v-if="!editMode">
+				<q-item-section>
+					<QText class="editable-text-display" :type="type" :size="size" :bold="bold" :align="align">
+						{{ displayText !== '' ? displayText : value }}
+					</QText>
+				</q-item-section>
+				<q-icon class="q-pt-sm" name="mdi-square-edit-outline" size="md" />
+			</template>
+			<QPopupEdit
+				v-slot="scope"
+				:model-value="value"
+				square
+				auto-save
+				@before-show="editMode = true"
+				@before-hide="editMode = false"
+				@save="$emit('save', $event)">
+				<q-input v-model="scope.value" dense autofocus :input-class="inputClasses" @keyup.enter="scope.set" />
 			</QPopupEdit>
 		</q-item>
 	</q-list>
 </template>
 
 <script setup lang="ts">
-defineProps<{
-	value: string;
-	disabled?: boolean;
-}>();
+import type { IQTextProps } from '@interfaces';
+
+const editMode = ref(false);
+
+const props = withDefaults(
+	defineProps<
+		IQTextProps & {
+			value: string;
+			displayText?: string;
+			disabled?: boolean;
+		}
+	>(),
+	{
+		disabled: false,
+		displayText: '',
+	},
+);
+
+const inputClasses = computed(() => ({
+	[`text-${props.size}`]: true,
+	[`text-weight-${props.bold}`]: true,
+}));
 
 defineEmits<{
 	(e: 'save', save: string): void;
 }>();
 </script>
+
+<style lang="scss">
+.q-popup-edit {
+	box-shadow: none !important;
+	background: transparent !important;
+	backdrop-filter: none !important;
+}
+</style>

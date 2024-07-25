@@ -3,10 +3,14 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace PlexRipper.Data.Migrations
 {
+    /// <inheritdoc />
     public partial class Initial : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -14,10 +18,10 @@ namespace PlexRipper.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
-                    DisplayName = table.Column<string>(type: "TEXT", nullable: true),
+                    DisplayName = table.Column<string>(type: "TEXT", nullable: false),
                     FolderType = table.Column<string>(type: "TEXT", unicode: false, maxLength: 50, nullable: false),
                     MediaType = table.Column<string>(type: "TEXT", unicode: false, maxLength: 50, nullable: false),
-                    DirectoryPath = table.Column<string>(type: "TEXT", nullable: true)
+                    DirectoryPath = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -32,7 +36,7 @@ namespace PlexRipper.Data.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
                     Level = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Message = table.Column<string>(type: "TEXT", nullable: true),
+                    Message = table.Column<string>(type: "TEXT", nullable: false),
                     Hidden = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -46,19 +50,19 @@ namespace PlexRipper.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
-                    DisplayName = table.Column<string>(type: "TEXT", nullable: true),
-                    Username = table.Column<string>(type: "TEXT", nullable: true),
-                    Password = table.Column<string>(type: "TEXT", nullable: true),
+                    DisplayName = table.Column<string>(type: "TEXT", nullable: false),
+                    Username = table.Column<string>(type: "TEXT", nullable: false),
+                    Password = table.Column<string>(type: "TEXT", nullable: false),
                     IsEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
                     IsValidated = table.Column<bool>(type: "INTEGER", nullable: false),
                     ValidatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     PlexId = table.Column<long>(type: "INTEGER", nullable: false),
-                    Uuid = table.Column<string>(type: "TEXT", nullable: true),
-                    ClientId = table.Column<string>(type: "TEXT", nullable: true),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
-                    Email = table.Column<string>(type: "TEXT", nullable: true),
+                    Uuid = table.Column<string>(type: "TEXT", nullable: false),
+                    ClientId = table.Column<string>(type: "TEXT", nullable: false),
+                    Title = table.Column<string>(type: "TEXT", nullable: false),
+                    Email = table.Column<string>(type: "TEXT", nullable: false),
                     HasPassword = table.Column<bool>(type: "INTEGER", nullable: false),
-                    AuthenticationToken = table.Column<string>(type: "TEXT", nullable: true),
+                    AuthenticationToken = table.Column<string>(type: "TEXT", nullable: false),
                     IsMain = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -72,7 +76,7 @@ namespace PlexRipper.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
-                    Tag = table.Column<string>(type: "TEXT", nullable: true)
+                    Tag = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -85,7 +89,7 @@ namespace PlexRipper.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
-                    Tag = table.Column<string>(type: "TEXT", nullable: true)
+                    Tag = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -98,19 +102,19 @@ namespace PlexRipper.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
                     OwnerId = table.Column<long>(type: "INTEGER", nullable: false),
-                    PlexServerOwnerUsername = table.Column<string>(type: "TEXT", nullable: true),
-                    Device = table.Column<string>(type: "TEXT", nullable: true),
-                    Platform = table.Column<string>(type: "TEXT", nullable: true),
-                    PlatformVersion = table.Column<string>(type: "TEXT", nullable: true),
-                    Product = table.Column<string>(type: "TEXT", nullable: true),
-                    ProductVersion = table.Column<string>(type: "TEXT", nullable: true),
-                    Provides = table.Column<string>(type: "TEXT", nullable: true),
+                    PlexServerOwnerUsername = table.Column<string>(type: "TEXT", nullable: false),
+                    Device = table.Column<string>(type: "TEXT", nullable: false),
+                    Platform = table.Column<string>(type: "TEXT", nullable: false),
+                    PlatformVersion = table.Column<string>(type: "TEXT", nullable: false),
+                    Product = table.Column<string>(type: "TEXT", nullable: false),
+                    ProductVersion = table.Column<string>(type: "TEXT", nullable: false),
+                    Provides = table.Column<string>(type: "TEXT", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     LastSeenAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    MachineIdentifier = table.Column<string>(type: "TEXT", nullable: true),
-                    PublicAddress = table.Column<string>(type: "TEXT", nullable: true),
+                    MachineIdentifier = table.Column<string>(type: "TEXT", nullable: false),
+                    PublicAddress = table.Column<string>(type: "TEXT", nullable: false),
                     PreferredConnectionId = table.Column<int>(type: "INTEGER", nullable: false),
                     Owned = table.Column<bool>(type: "INTEGER", nullable: false),
                     Home = table.Column<bool>(type: "INTEGER", nullable: false),
@@ -238,12 +242,42 @@ namespace PlexRipper.Data.Migrations
             );
 
             migrationBuilder.CreateTable(
+                name: "DownloadWorkerTasks",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
+                    FileName = table.Column<string>(type: "TEXT", nullable: false),
+                    PartIndex = table.Column<int>(type: "INTEGER", nullable: false),
+                    StartByte = table.Column<long>(type: "INTEGER", nullable: false),
+                    EndByte = table.Column<long>(type: "INTEGER", nullable: false),
+                    DownloadStatus = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: false),
+                    BytesReceived = table.Column<long>(type: "INTEGER", nullable: false),
+                    DownloadDirectory = table.Column<string>(type: "TEXT", nullable: false),
+                    ElapsedTime = table.Column<long>(type: "INTEGER", nullable: false),
+                    FileLocationUrl = table.Column<string>(type: "TEXT", nullable: false),
+                    DownloadTaskId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    PlexServerId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DownloadWorkerTasks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DownloadWorkerTasks_PlexServers_PlexServerId",
+                        column: x => x.PlexServerId,
+                        principalTable: "PlexServers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
+
+            migrationBuilder.CreateTable(
                 name: "PlexAccountServers",
                 columns: table => new
                 {
                     PlexAccountId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
-                    AuthToken = table.Column<string>(type: "TEXT", nullable: true),
+                    AuthToken = table.Column<string>(type: "TEXT", nullable: false),
                     AuthTokenCreationDate = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -272,16 +306,16 @@ namespace PlexRipper.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
                     Type = table.Column<string>(type: "TEXT", unicode: false, maxLength: 50, nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
-                    Key = table.Column<string>(type: "TEXT", nullable: true),
-                    LibraryLocationPath = table.Column<string>(type: "TEXT", nullable: true),
+                    Title = table.Column<string>(type: "TEXT", nullable: false, collation: "NATURALSORT"),
+                    Key = table.Column<string>(type: "TEXT", nullable: false),
+                    LibraryLocationPath = table.Column<string>(type: "TEXT", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     ScannedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    SyncedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    SyncedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
                     Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     LibraryLocationId = table.Column<int>(type: "INTEGER", nullable: false),
-                    MetaData = table.Column<string>(type: "TEXT", nullable: true),
+                    MetaData = table.Column<string>(type: "TEXT", nullable: false),
                     PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
                     DefaultDestinationId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
@@ -310,8 +344,8 @@ namespace PlexRipper.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
-                    Protocol = table.Column<string>(type: "TEXT", nullable: true),
-                    Address = table.Column<string>(type: "TEXT", nullable: true),
+                    Protocol = table.Column<string>(type: "TEXT", nullable: false),
+                    Address = table.Column<string>(type: "TEXT", nullable: false),
                     Port = table.Column<int>(type: "INTEGER", nullable: false),
                     Local = table.Column<bool>(type: "INTEGER", nullable: false),
                     Relay = table.Column<bool>(type: "INTEGER", nullable: false),
@@ -381,81 +415,128 @@ namespace PlexRipper.Data.Migrations
             );
 
             migrationBuilder.CreateTable(
-                name: "DownloadTasks",
+                name: "DownloadWorkerTasksLogs",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
-                    Key = table.Column<int>(type: "INTEGER", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
-                    Year = table.Column<int>(type: "INTEGER", nullable: false),
-                    Percentage = table.Column<decimal>(type: "TEXT", nullable: false),
-                    DataReceived = table.Column<long>(type: "INTEGER", nullable: false),
-                    DataTotal = table.Column<long>(type: "INTEGER", nullable: false),
-                    MediaType = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: false),
-                    DownloadStatus = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: false),
-                    DownloadTaskType = table.Column<string>(
-                        type: "TEXT",
-                        unicode: false,
-                        maxLength: 50,
-                        nullable: false
-                    ),
-                    Created = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    FileName = table.Column<string>(type: "TEXT", nullable: true),
-                    FileLocationUrl = table.Column<string>(type: "TEXT", nullable: true),
-                    DownloadUrl = table.Column<string>(type: "TEXT", nullable: true),
-                    FullTitle = table.Column<string>(type: "TEXT", nullable: true),
-                    Quality = table.Column<string>(type: "TEXT", nullable: true),
-                    DownloadDirectory = table.Column<string>(type: "TEXT", nullable: true),
-                    DestinationDirectory = table.Column<string>(type: "TEXT", nullable: true),
-                    DownloadSpeed = table.Column<int>(type: "INTEGER", nullable: false),
-                    ServerMachineIdentifier = table.Column<string>(type: "TEXT", nullable: true),
-                    Priority = table.Column<long>(type: "INTEGER", nullable: false),
-                    PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
-                    DestinationFolderId = table.Column<int>(type: "INTEGER", nullable: false),
-                    DownloadFolderId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ParentId = table.Column<int>(type: "INTEGER", nullable: true),
-                    RootDownloadTaskId = table.Column<int>(type: "INTEGER", nullable: true)
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Message = table.Column<string>(type: "TEXT", nullable: false),
+                    LogLevel = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: false),
+                    DownloadWorkerTaskId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DownloadTasks", x => x.Id);
+                    table.PrimaryKey("PK_DownloadWorkerTasksLogs", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_DownloadTasks_DownloadTasks_ParentId",
-                        column: x => x.ParentId,
-                        principalTable: "DownloadTasks",
+                        name: "FK_DownloadWorkerTasksLogs_DownloadWorkerTasks_DownloadWorkerTaskId",
+                        column: x => x.DownloadWorkerTaskId,
+                        principalTable: "DownloadWorkerTasks",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade
                     );
+                }
+            );
+
+            migrationBuilder.CreateTable(
+                name: "DownloadTaskMovie",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Key = table.Column<int>(type: "INTEGER", nullable: false),
+                    Title = table.Column<string>(type: "TEXT", nullable: false, collation: "NATURALSORT"),
+                    Year = table.Column<int>(type: "INTEGER", nullable: false),
+                    DownloadStatus = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    FullTitle = table.Column<string>(type: "TEXT", nullable: false),
+                    PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DownloadTaskMovie", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_DownloadTasks_DownloadTasks_RootDownloadTaskId",
-                        column: x => x.RootDownloadTaskId,
-                        principalTable: "DownloadTasks",
-                        principalColumn: "Id"
-                    );
-                    table.ForeignKey(
-                        name: "FK_DownloadTasks_FolderPaths_DestinationFolderId",
-                        column: x => x.DestinationFolderId,
-                        principalTable: "FolderPaths",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
-                    );
-                    table.ForeignKey(
-                        name: "FK_DownloadTasks_FolderPaths_DownloadFolderId",
-                        column: x => x.DownloadFolderId,
-                        principalTable: "FolderPaths",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
-                    );
-                    table.ForeignKey(
-                        name: "FK_DownloadTasks_PlexLibraries_PlexLibraryId",
+                        name: "FK_DownloadTaskMovie_PlexLibraries_PlexLibraryId",
                         column: x => x.PlexLibraryId,
                         principalTable: "PlexLibraries",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade
                     );
                     table.ForeignKey(
-                        name: "FK_DownloadTasks_PlexServers_PlexServerId",
+                        name: "FK_DownloadTaskMovie_PlexServers_PlexServerId",
+                        column: x => x.PlexServerId,
+                        principalTable: "PlexServers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
+
+            migrationBuilder.CreateTable(
+                name: "DownloadTaskTvShow",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Key = table.Column<int>(type: "INTEGER", nullable: false),
+                    Title = table.Column<string>(type: "TEXT", nullable: false, collation: "NATURALSORT"),
+                    Year = table.Column<int>(type: "INTEGER", nullable: false),
+                    DownloadStatus = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    FullTitle = table.Column<string>(type: "TEXT", nullable: false),
+                    PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DownloadTaskTvShow", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DownloadTaskTvShow_PlexLibraries_PlexLibraryId",
+                        column: x => x.PlexLibraryId,
+                        principalTable: "PlexLibraries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                    table.ForeignKey(
+                        name: "FK_DownloadTaskTvShow_PlexServers_PlexServerId",
+                        column: x => x.PlexServerId,
+                        principalTable: "PlexServers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
+
+            migrationBuilder.CreateTable(
+                name: "FileTasks",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DestinationDirectory = table.Column<string>(type: "TEXT", nullable: false),
+                    FilePathsCompressed = table.Column<string>(type: "TEXT", nullable: false),
+                    FileName = table.Column<string>(type: "TEXT", nullable: false),
+                    FileSize = table.Column<long>(type: "INTEGER", nullable: false),
+                    DownloadTaskId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    DownloadTaskType = table.Column<string>(
+                        type: "TEXT",
+                        unicode: false,
+                        maxLength: 50,
+                        nullable: false
+                    ),
+                    PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FileTasks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FileTasks_PlexLibraries_PlexLibraryId",
+                        column: x => x.PlexLibraryId,
+                        principalTable: "PlexLibraries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                    table.ForeignKey(
+                        name: "FK_FileTasks_PlexServers_PlexServerId",
                         column: x => x.PlexServerId,
                         principalTable: "PlexServers",
                         principalColumn: "Id",
@@ -513,15 +594,15 @@ namespace PlexRipper.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
                     Key = table.Column<int>(type: "INTEGER", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
+                    Title = table.Column<string>(type: "TEXT", nullable: false),
                     Year = table.Column<int>(type: "INTEGER", nullable: false),
-                    SortTitle = table.Column<string>(type: "TEXT", nullable: true),
+                    SortTitle = table.Column<string>(type: "TEXT", nullable: false, collation: "NATURALSORT"),
                     Duration = table.Column<int>(type: "INTEGER", nullable: false),
                     MediaSize = table.Column<long>(type: "INTEGER", nullable: false),
                     MetaDataKey = table.Column<int>(type: "INTEGER", nullable: false),
-                    Studio = table.Column<string>(type: "TEXT", nullable: true),
-                    Summary = table.Column<string>(type: "TEXT", nullable: true),
-                    ContentRating = table.Column<string>(type: "TEXT", nullable: true),
+                    Studio = table.Column<string>(type: "TEXT", nullable: false),
+                    Summary = table.Column<string>(type: "TEXT", nullable: false),
+                    ContentRating = table.Column<string>(type: "TEXT", nullable: false),
                     Rating = table.Column<double>(type: "REAL", nullable: false),
                     ChildCount = table.Column<int>(type: "INTEGER", nullable: false),
                     AddedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -532,8 +613,8 @@ namespace PlexRipper.Data.Migrations
                     HasArt = table.Column<bool>(type: "INTEGER", nullable: false),
                     HasBanner = table.Column<bool>(type: "INTEGER", nullable: false),
                     HasTheme = table.Column<bool>(type: "INTEGER", nullable: false),
-                    FullTitle = table.Column<string>(type: "TEXT", nullable: true),
-                    MediaData = table.Column<string>(type: "TEXT", nullable: true),
+                    FullTitle = table.Column<string>(type: "TEXT", nullable: false),
+                    MediaData = table.Column<string>(type: "TEXT", nullable: false),
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexServerId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
@@ -563,15 +644,15 @@ namespace PlexRipper.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
                     Key = table.Column<int>(type: "INTEGER", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
+                    Title = table.Column<string>(type: "TEXT", nullable: false),
                     Year = table.Column<int>(type: "INTEGER", nullable: false),
-                    SortTitle = table.Column<string>(type: "TEXT", nullable: true),
+                    SortTitle = table.Column<string>(type: "TEXT", nullable: false, collation: "NATURALSORT"),
                     Duration = table.Column<int>(type: "INTEGER", nullable: false),
                     MediaSize = table.Column<long>(type: "INTEGER", nullable: false),
                     MetaDataKey = table.Column<int>(type: "INTEGER", nullable: false),
-                    Studio = table.Column<string>(type: "TEXT", nullable: true),
-                    Summary = table.Column<string>(type: "TEXT", nullable: true),
-                    ContentRating = table.Column<string>(type: "TEXT", nullable: true),
+                    Studio = table.Column<string>(type: "TEXT", nullable: false),
+                    Summary = table.Column<string>(type: "TEXT", nullable: false),
+                    ContentRating = table.Column<string>(type: "TEXT", nullable: false),
                     Rating = table.Column<double>(type: "REAL", nullable: false),
                     ChildCount = table.Column<int>(type: "INTEGER", nullable: false),
                     AddedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -582,8 +663,8 @@ namespace PlexRipper.Data.Migrations
                     HasArt = table.Column<bool>(type: "INTEGER", nullable: false),
                     HasBanner = table.Column<bool>(type: "INTEGER", nullable: false),
                     HasTheme = table.Column<bool>(type: "INTEGER", nullable: false),
-                    FullTitle = table.Column<string>(type: "TEXT", nullable: true),
-                    MediaData = table.Column<string>(type: "TEXT", nullable: true),
+                    FullTitle = table.Column<string>(type: "TEXT", nullable: false),
+                    MediaData = table.Column<string>(type: "TEXT", nullable: false),
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexServerId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
@@ -614,7 +695,7 @@ namespace PlexRipper.Data.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
                     IsSuccessful = table.Column<bool>(type: "INTEGER", nullable: false),
                     StatusCode = table.Column<int>(type: "INTEGER", nullable: false),
-                    StatusMessage = table.Column<string>(type: "TEXT", nullable: true),
+                    StatusMessage = table.Column<string>(type: "TEXT", nullable: false),
                     LastChecked = table.Column<DateTime>(type: "TEXT", nullable: false),
                     PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexServerConnectionId = table.Column<int>(type: "INTEGER", nullable: false)
@@ -794,34 +875,47 @@ namespace PlexRipper.Data.Migrations
             );
 
             migrationBuilder.CreateTable(
-                name: "DownloadWorkerTasks",
+                name: "DownloadTaskMovieFile",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
-                    FileName = table.Column<string>(type: "TEXT", nullable: true),
-                    PartIndex = table.Column<int>(type: "INTEGER", nullable: false),
-                    StartByte = table.Column<long>(type: "INTEGER", nullable: false),
-                    EndByte = table.Column<long>(type: "INTEGER", nullable: false),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Key = table.Column<int>(type: "INTEGER", nullable: false),
+                    Title = table.Column<string>(type: "TEXT", nullable: false, collation: "NATURALSORT"),
+                    Percentage = table.Column<decimal>(type: "TEXT", nullable: false),
+                    DataReceived = table.Column<long>(type: "INTEGER", nullable: false),
+                    DataTotal = table.Column<long>(type: "INTEGER", nullable: false),
                     DownloadStatus = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: false),
-                    BytesReceived = table.Column<long>(type: "INTEGER", nullable: false),
-                    TempDirectory = table.Column<string>(type: "TEXT", nullable: true),
-                    ElapsedTime = table.Column<long>(type: "INTEGER", nullable: false),
-                    DownloadUrl = table.Column<string>(type: "TEXT", nullable: true),
-                    DownloadTaskId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlexServerId = table.Column<int>(type: "INTEGER", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    FileName = table.Column<string>(type: "TEXT", nullable: false, collation: "NATURALSORT"),
+                    FileLocationUrl = table.Column<string>(type: "TEXT", nullable: false),
+                    FullTitle = table.Column<string>(type: "TEXT", nullable: false),
+                    Quality = table.Column<string>(type: "TEXT", nullable: false),
+                    DirectoryMeta = table.Column<string>(type: "TEXT", nullable: false),
+                    DownloadSpeed = table.Column<long>(type: "INTEGER", nullable: false),
+                    FileTransferSpeed = table.Column<long>(type: "INTEGER", nullable: false),
+                    PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ParentId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DownloadWorkerTasks", x => x.Id);
+                    table.PrimaryKey("PK_DownloadTaskMovieFile", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_DownloadWorkerTasks_DownloadTasks_DownloadTaskId",
-                        column: x => x.DownloadTaskId,
-                        principalTable: "DownloadTasks",
+                        name: "FK_DownloadTaskMovieFile_DownloadTaskMovie_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "DownloadTaskMovie",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade
                     );
                     table.ForeignKey(
-                        name: "FK_DownloadWorkerTasks_PlexServers_PlexServerId",
+                        name: "FK_DownloadTaskMovieFile_PlexLibraries_PlexLibraryId",
+                        column: x => x.PlexLibraryId,
+                        principalTable: "PlexLibraries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                    table.ForeignKey(
+                        name: "FK_DownloadTaskMovieFile_PlexServers_PlexServerId",
                         column: x => x.PlexServerId,
                         principalTable: "PlexServers",
                         principalColumn: "Id",
@@ -831,21 +925,41 @@ namespace PlexRipper.Data.Migrations
             );
 
             migrationBuilder.CreateTable(
-                name: "FileTasks",
+                name: "DownloadTaskTvShowSeason",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Key = table.Column<int>(type: "INTEGER", nullable: false),
+                    Title = table.Column<string>(type: "TEXT", nullable: false, collation: "NATURALSORT"),
+                    Year = table.Column<int>(type: "INTEGER", nullable: false),
+                    DownloadStatus = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    FilePathsCompressed = table.Column<string>(type: "TEXT", nullable: true),
-                    DownloadTaskId = table.Column<int>(type: "INTEGER", nullable: false)
+                    FullTitle = table.Column<string>(type: "TEXT", nullable: false),
+                    PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ParentId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FileTasks", x => x.Id);
+                    table.PrimaryKey("PK_DownloadTaskTvShowSeason", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_FileTasks_DownloadTasks_DownloadTaskId",
-                        column: x => x.DownloadTaskId,
-                        principalTable: "DownloadTasks",
+                        name: "FK_DownloadTaskTvShowSeason_DownloadTaskTvShow_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "DownloadTaskTvShow",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                    table.ForeignKey(
+                        name: "FK_DownloadTaskTvShowSeason_PlexLibraries_PlexLibraryId",
+                        column: x => x.PlexLibraryId,
+                        principalTable: "PlexLibraries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                    table.ForeignKey(
+                        name: "FK_DownloadTaskTvShowSeason_PlexServers_PlexServerId",
+                        column: x => x.PlexServerId,
+                        principalTable: "PlexServers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade
                     );
@@ -977,15 +1091,15 @@ namespace PlexRipper.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
                     Key = table.Column<int>(type: "INTEGER", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
+                    Title = table.Column<string>(type: "TEXT", nullable: false),
                     Year = table.Column<int>(type: "INTEGER", nullable: false),
-                    SortTitle = table.Column<string>(type: "TEXT", nullable: true),
+                    SortTitle = table.Column<string>(type: "TEXT", nullable: false, collation: "NATURALSORT"),
                     Duration = table.Column<int>(type: "INTEGER", nullable: false),
                     MediaSize = table.Column<long>(type: "INTEGER", nullable: false),
                     MetaDataKey = table.Column<int>(type: "INTEGER", nullable: false),
-                    Studio = table.Column<string>(type: "TEXT", nullable: true),
-                    Summary = table.Column<string>(type: "TEXT", nullable: true),
-                    ContentRating = table.Column<string>(type: "TEXT", nullable: true),
+                    Studio = table.Column<string>(type: "TEXT", nullable: false),
+                    Summary = table.Column<string>(type: "TEXT", nullable: false),
+                    ContentRating = table.Column<string>(type: "TEXT", nullable: false),
                     Rating = table.Column<double>(type: "REAL", nullable: false),
                     ChildCount = table.Column<int>(type: "INTEGER", nullable: false),
                     AddedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -996,8 +1110,8 @@ namespace PlexRipper.Data.Migrations
                     HasArt = table.Column<bool>(type: "INTEGER", nullable: false),
                     HasBanner = table.Column<bool>(type: "INTEGER", nullable: false),
                     HasTheme = table.Column<bool>(type: "INTEGER", nullable: false),
-                    FullTitle = table.Column<string>(type: "TEXT", nullable: true),
-                    MediaData = table.Column<string>(type: "TEXT", nullable: true),
+                    FullTitle = table.Column<string>(type: "TEXT", nullable: false),
+                    MediaData = table.Column<string>(type: "TEXT", nullable: false),
                     ParentKey = table.Column<int>(type: "INTEGER", nullable: false),
                     TvShowId = table.Column<int>(type: "INTEGER", nullable: false),
                     PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
@@ -1031,22 +1145,41 @@ namespace PlexRipper.Data.Migrations
             );
 
             migrationBuilder.CreateTable(
-                name: "DownloadWorkerTasksLogs",
+                name: "DownloadTaskTvShowEpisode",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Key = table.Column<int>(type: "INTEGER", nullable: false),
+                    Title = table.Column<string>(type: "TEXT", nullable: false, collation: "NATURALSORT"),
+                    Year = table.Column<int>(type: "INTEGER", nullable: false),
+                    DownloadStatus = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Message = table.Column<string>(type: "TEXT", nullable: true),
-                    LogLevel = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: false),
-                    DownloadWorkerTaskId = table.Column<int>(type: "INTEGER", nullable: false)
+                    FullTitle = table.Column<string>(type: "TEXT", nullable: false),
+                    PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ParentId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DownloadWorkerTasksLogs", x => x.Id);
+                    table.PrimaryKey("PK_DownloadTaskTvShowEpisode", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_DownloadWorkerTasksLogs_DownloadWorkerTasks_DownloadWorkerTaskId",
-                        column: x => x.DownloadWorkerTaskId,
-                        principalTable: "DownloadWorkerTasks",
+                        name: "FK_DownloadTaskTvShowEpisode_DownloadTaskTvShowSeason_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "DownloadTaskTvShowSeason",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                    table.ForeignKey(
+                        name: "FK_DownloadTaskTvShowEpisode_PlexLibraries_PlexLibraryId",
+                        column: x => x.PlexLibraryId,
+                        principalTable: "PlexLibraries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                    table.ForeignKey(
+                        name: "FK_DownloadTaskTvShowEpisode_PlexServers_PlexServerId",
+                        column: x => x.PlexServerId,
+                        principalTable: "PlexServers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade
                     );
@@ -1059,15 +1192,15 @@ namespace PlexRipper.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false).Annotation("Sqlite:Autoincrement", true),
                     Key = table.Column<int>(type: "INTEGER", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
+                    Title = table.Column<string>(type: "TEXT", nullable: false),
                     Year = table.Column<int>(type: "INTEGER", nullable: false),
-                    SortTitle = table.Column<string>(type: "TEXT", nullable: true),
+                    SortTitle = table.Column<string>(type: "TEXT", nullable: false, collation: "NATURALSORT"),
                     Duration = table.Column<int>(type: "INTEGER", nullable: false),
                     MediaSize = table.Column<long>(type: "INTEGER", nullable: false),
                     MetaDataKey = table.Column<int>(type: "INTEGER", nullable: false),
-                    Studio = table.Column<string>(type: "TEXT", nullable: true),
-                    Summary = table.Column<string>(type: "TEXT", nullable: true),
-                    ContentRating = table.Column<string>(type: "TEXT", nullable: true),
+                    Studio = table.Column<string>(type: "TEXT", nullable: false),
+                    Summary = table.Column<string>(type: "TEXT", nullable: false),
+                    ContentRating = table.Column<string>(type: "TEXT", nullable: false),
                     Rating = table.Column<double>(type: "REAL", nullable: false),
                     ChildCount = table.Column<int>(type: "INTEGER", nullable: false),
                     AddedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -1078,8 +1211,8 @@ namespace PlexRipper.Data.Migrations
                     HasArt = table.Column<bool>(type: "INTEGER", nullable: false),
                     HasBanner = table.Column<bool>(type: "INTEGER", nullable: false),
                     HasTheme = table.Column<bool>(type: "INTEGER", nullable: false),
-                    FullTitle = table.Column<string>(type: "TEXT", nullable: true),
-                    MediaData = table.Column<string>(type: "TEXT", nullable: true),
+                    FullTitle = table.Column<string>(type: "TEXT", nullable: false),
+                    MediaData = table.Column<string>(type: "TEXT", nullable: false),
                     ParentKey = table.Column<int>(type: "INTEGER", nullable: false),
                     TvShowId = table.Column<int>(type: "INTEGER", nullable: false),
                     TvShowSeasonId = table.Column<int>(type: "INTEGER", nullable: false),
@@ -1104,119 +1237,184 @@ namespace PlexRipper.Data.Migrations
                         onDelete: ReferentialAction.Cascade
                     );
                     table.ForeignKey(
-                        name: "FK_PlexTvShowEpisodes_PlexTvShows_TvShowId",
-                        column: x => x.TvShowId,
-                        principalTable: "PlexTvShows",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade
-                    );
-                    table.ForeignKey(
                         name: "FK_PlexTvShowEpisodes_PlexTvShowSeason_TvShowSeasonId",
                         column: x => x.TvShowSeasonId,
                         principalTable: "PlexTvShowSeason",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade
                     );
+                    table.ForeignKey(
+                        name: "FK_PlexTvShowEpisodes_PlexTvShows_TvShowId",
+                        column: x => x.TvShowId,
+                        principalTable: "PlexTvShows",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
                 }
             );
 
-            migrationBuilder.InsertData(
-                table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
-                values: new object[] { 1, "/Downloads", "Download Path", "DownloadFolder", "None" }
-            );
-
-            migrationBuilder.InsertData(
-                table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
-                values: new object[] { 2, "/Movies", "Movie Destination Path", "MovieFolder", "Movie" }
-            );
-
-            migrationBuilder.InsertData(
-                table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
-                values: new object[] { 3, "/TvShows", "Tv Show Destination Path", "TvShowFolder", "TvShow" }
-            );
-
-            migrationBuilder.InsertData(
-                table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
-                values: new object[] { 4, "/Music", "Music Destination Path", "MusicFolder", "Music" }
-            );
-
-            migrationBuilder.InsertData(
-                table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
-                values: new object[] { 5, "/Photos", "Photos Destination Path", "PhotosFolder", "Photos" }
-            );
-
-            migrationBuilder.InsertData(
-                table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
-                values: new object[]
+            migrationBuilder.CreateTable(
+                name: "DownloadTaskTvShowEpisodeFile",
+                columns: table => new
                 {
-                    6,
-                    "/Other",
-                    "Other Videos Destination Path",
-                    "OtherVideosFolder",
-                    "OtherVideos"
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Key = table.Column<int>(type: "INTEGER", nullable: false),
+                    Title = table.Column<string>(type: "TEXT", nullable: false, collation: "NATURALSORT"),
+                    Percentage = table.Column<decimal>(type: "TEXT", nullable: false),
+                    DataReceived = table.Column<long>(type: "INTEGER", nullable: false),
+                    DataTotal = table.Column<long>(type: "INTEGER", nullable: false),
+                    DownloadStatus = table.Column<string>(type: "TEXT", unicode: false, maxLength: 20, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    FileName = table.Column<string>(type: "TEXT", nullable: false, collation: "NATURALSORT"),
+                    FileLocationUrl = table.Column<string>(type: "TEXT", nullable: false),
+                    FullTitle = table.Column<string>(type: "TEXT", nullable: false),
+                    Quality = table.Column<string>(type: "TEXT", nullable: false),
+                    DirectoryMeta = table.Column<string>(type: "TEXT", nullable: false),
+                    DownloadSpeed = table.Column<long>(type: "INTEGER", nullable: false),
+                    FileTransferSpeed = table.Column<long>(type: "INTEGER", nullable: false),
+                    PlexServerId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlexLibraryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ParentId = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DownloadTaskTvShowEpisodeFile", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DownloadTaskTvShowEpisodeFile_DownloadTaskTvShowEpisode_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "DownloadTaskTvShowEpisode",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                    table.ForeignKey(
+                        name: "FK_DownloadTaskTvShowEpisodeFile_PlexLibraries_PlexLibraryId",
+                        column: x => x.PlexLibraryId,
+                        principalTable: "PlexLibraries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
+                    table.ForeignKey(
+                        name: "FK_DownloadTaskTvShowEpisodeFile_PlexServers_PlexServerId",
+                        column: x => x.PlexServerId,
+                        principalTable: "PlexServers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
                 }
             );
 
             migrationBuilder.InsertData(
                 table: "FolderPaths",
                 columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
-                values: new object[] { 7, "/Games", "Games Videos Destination Path", "GamesVideosFolder", "Games" }
-            );
-
-            migrationBuilder.InsertData(
-                table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
-                values: new object[] { 8, "/", "Reserved #1 Destination Path", "None", "None" }
-            );
-
-            migrationBuilder.InsertData(
-                table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
-                values: new object[] { 9, "/", "Reserved #2 Destination Path", "None", "None" }
-            );
-
-            migrationBuilder.InsertData(
-                table: "FolderPaths",
-                columns: new[] { "Id", "DirectoryPath", "DisplayName", "FolderType", "MediaType" },
-                values: new object[] { 10, "/", "Reserved #3 Destination Path", "None", "None" }
+                values: new object[,]
+                {
+                    { 1, "/Downloads", "Download Path", "DownloadFolder", "None" },
+                    { 2, "/Movies", "Movie Destination Path", "MovieFolder", "Movie" },
+                    { 3, "/TvShows", "Tv Show Destination Path", "TvShowFolder", "TvShow" },
+                    { 4, "/Music", "Music Destination Path", "MusicFolder", "Music" },
+                    { 5, "/Photos", "Photos Destination Path", "PhotosFolder", "Photos" },
+                    { 6, "/Other", "Other Videos Destination Path", "OtherVideosFolder", "OtherVideos" },
+                    { 7, "/Games", "Games Videos Destination Path", "GamesVideosFolder", "Games" },
+                    { 8, "/", "Reserved #1 Destination Path", "None", "None" },
+                    { 9, "/", "Reserved #2 Destination Path", "None", "None" },
+                    { 10, "/", "Reserved #3 Destination Path", "None", "None" }
+                }
             );
 
             migrationBuilder.CreateIndex(
-                name: "IX_DownloadTasks_DestinationFolderId",
-                table: "DownloadTasks",
-                column: "DestinationFolderId"
-            );
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DownloadTasks_DownloadFolderId",
-                table: "DownloadTasks",
-                column: "DownloadFolderId"
-            );
-
-            migrationBuilder.CreateIndex(name: "IX_DownloadTasks_ParentId", table: "DownloadTasks", column: "ParentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DownloadTasks_PlexLibraryId",
-                table: "DownloadTasks",
+                name: "IX_DownloadTaskMovie_PlexLibraryId",
+                table: "DownloadTaskMovie",
                 column: "PlexLibraryId"
             );
 
             migrationBuilder.CreateIndex(
-                name: "IX_DownloadTasks_PlexServerId",
-                table: "DownloadTasks",
+                name: "IX_DownloadTaskMovie_PlexServerId",
+                table: "DownloadTaskMovie",
                 column: "PlexServerId"
             );
 
             migrationBuilder.CreateIndex(
-                name: "IX_DownloadTasks_RootDownloadTaskId",
-                table: "DownloadTasks",
-                column: "RootDownloadTaskId"
+                name: "IX_DownloadTaskMovieFile_ParentId",
+                table: "DownloadTaskMovieFile",
+                column: "ParentId"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskMovieFile_PlexLibraryId",
+                table: "DownloadTaskMovieFile",
+                column: "PlexLibraryId"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskMovieFile_PlexServerId",
+                table: "DownloadTaskMovieFile",
+                column: "PlexServerId"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShow_PlexLibraryId",
+                table: "DownloadTaskTvShow",
+                column: "PlexLibraryId"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShow_PlexServerId",
+                table: "DownloadTaskTvShow",
+                column: "PlexServerId"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShowEpisode_ParentId",
+                table: "DownloadTaskTvShowEpisode",
+                column: "ParentId"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShowEpisode_PlexLibraryId",
+                table: "DownloadTaskTvShowEpisode",
+                column: "PlexLibraryId"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShowEpisode_PlexServerId",
+                table: "DownloadTaskTvShowEpisode",
+                column: "PlexServerId"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShowEpisodeFile_ParentId",
+                table: "DownloadTaskTvShowEpisodeFile",
+                column: "ParentId"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShowEpisodeFile_PlexLibraryId",
+                table: "DownloadTaskTvShowEpisodeFile",
+                column: "PlexLibraryId"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShowEpisodeFile_PlexServerId",
+                table: "DownloadTaskTvShowEpisodeFile",
+                column: "PlexServerId"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShowSeason_ParentId",
+                table: "DownloadTaskTvShowSeason",
+                column: "ParentId"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShowSeason_PlexLibraryId",
+                table: "DownloadTaskTvShowSeason",
+                column: "PlexLibraryId"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadTaskTvShowSeason_PlexServerId",
+                table: "DownloadTaskTvShowSeason",
+                column: "PlexServerId"
             );
 
             migrationBuilder.CreateIndex(
@@ -1238,10 +1436,12 @@ namespace PlexRipper.Data.Migrations
             );
 
             migrationBuilder.CreateIndex(
-                name: "IX_FileTasks_DownloadTaskId",
+                name: "IX_FileTasks_PlexLibraryId",
                 table: "FileTasks",
-                column: "DownloadTaskId"
+                column: "PlexLibraryId"
             );
+
+            migrationBuilder.CreateIndex(name: "IX_FileTasks_PlexServerId", table: "FileTasks", column: "PlexServerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlexAccountLibraries_PlexLibraryId",
@@ -1464,8 +1664,13 @@ namespace PlexRipper.Data.Migrations
             );
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(name: "DownloadTaskMovieFile");
+
+            migrationBuilder.DropTable(name: "DownloadTaskTvShowEpisodeFile");
+
             migrationBuilder.DropTable(name: "DownloadWorkerTasksLogs");
 
             migrationBuilder.DropTable(name: "FileTasks");
@@ -1506,6 +1711,10 @@ namespace PlexRipper.Data.Migrations
 
             migrationBuilder.DropTable(name: "QRTZ_SIMPROP_TRIGGERS");
 
+            migrationBuilder.DropTable(name: "DownloadTaskMovie");
+
+            migrationBuilder.DropTable(name: "DownloadTaskTvShowEpisode");
+
             migrationBuilder.DropTable(name: "DownloadWorkerTasks");
 
             migrationBuilder.DropTable(name: "PlexAccounts");
@@ -1522,11 +1731,13 @@ namespace PlexRipper.Data.Migrations
 
             migrationBuilder.DropTable(name: "QRTZ_TRIGGERS");
 
-            migrationBuilder.DropTable(name: "DownloadTasks");
+            migrationBuilder.DropTable(name: "DownloadTaskTvShowSeason");
 
             migrationBuilder.DropTable(name: "PlexTvShows");
 
             migrationBuilder.DropTable(name: "QRTZ_JOB_DETAILS");
+
+            migrationBuilder.DropTable(name: "DownloadTaskTvShow");
 
             migrationBuilder.DropTable(name: "PlexLibraries");
 

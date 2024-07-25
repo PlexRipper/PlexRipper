@@ -11,65 +11,65 @@ public class PlexServer : BaseEntity
     /// Gets or sets the name of this <see cref="PlexServer"/>.
     /// </summary>
     [Column(Order = 1)]
-    public required string Name { get; set; }
+    public required string Name { get; init; }
 
     /// <summary>
     /// Gets or sets the id Plex has assigned to the PlexAccount.
     /// </summary>
     [Column(Order = 2)]
-    public required long OwnerId { get; set; }
+    public required long OwnerId { get; init; }
 
     /// <summary>
     /// Gets or sets what seems like the username of the Plex server owner.
     /// Mapped from "sourceTitle".
     /// </summary>
     [Column(Order = 3)]
-    public required string PlexServerOwnerUsername { get; set; }
+    public required string PlexServerOwnerUsername { get; init; }
 
     /// <summary>
     /// Gets or sets the type of hardware operating system this <see cref="PlexServer"/> is running.
     /// </summary>
     [Column(Order = 4)]
-    public required string Device { get; set; }
+    public required string Device { get; init; }
 
     /// <summary>
     /// Gets or sets the hardware operating system this <see cref="PlexServer"/> is running.
     /// </summary>
     [Column(Order = 5)]
-    public required string Platform { get; set; }
+    public required string Platform { get; init; }
 
     /// <summary>
     /// Gets or sets the hardware operating system version this <see cref="PlexServer"/> is running.
     /// </summary>
     [Column(Order = 6)]
-    public required string PlatformVersion { get; set; }
+    public required string PlatformVersion { get; init; }
 
     /// <summary>
     /// Gets or sets the Plex software this <see cref="PlexServer"/> is running.
     /// </summary>
     [Column(Order = 7)]
-    public required string Product { get; set; }
+    public required string Product { get; init; }
 
     /// <summary>
     /// Gets or sets the Plex software version this <see cref="PlexServer"/> is running.
     /// </summary>
     [Column(Order = 8)]
-    public required string ProductVersion { get; set; }
+    public required string ProductVersion { get; init; }
 
     /// <summary>
     /// Gets or sets the role this <see cref="PlexServer"/> provides, seems to be mostly "server".
     /// </summary>
     [Column(Order = 9)]
-    public required string Provides { get; set; }
+    public required string Provides { get; init; }
 
     [Column(Order = 10)]
-    public required DateTime CreatedAt { get; set; }
+    public required DateTime CreatedAt { get; init; }
 
     /// <summary>
     /// Gets or sets the last time this server has been online based on what Plex has seen.
     /// </summary>
     [Column(Order = 11)]
-    public required DateTime LastSeenAt { get; set; }
+    public required DateTime LastSeenAt { get; init; }
 
     /// <summary>
     /// Gets or sets the unique identifier for this server. This is mapped from the new Plex clientId.
@@ -78,54 +78,54 @@ public class PlexServer : BaseEntity
     public required string MachineIdentifier { get; set; }
 
     [Column(Order = 13)]
-    public required string PublicAddress { get; set; }
+    public required string PublicAddress { get; init; }
 
     [Column(Order = 14)]
     public required int PreferredConnectionId { get; set; }
 
     [Column(Order = 15)]
-    public required bool Owned { get; set; }
+    public required bool Owned { get; init; }
 
     [Column(Order = 16)]
-    public required bool Home { get; set; }
+    public required bool Home { get; init; }
 
     [Column(Order = 17)]
-    public required bool Synced { get; set; }
+    public required bool Synced { get; init; }
 
     [Column(Order = 18)]
-    public required bool Relay { get; set; }
+    public required bool Relay { get; init; }
 
     [Column(Order = 19)]
-    public required bool Presence { get; set; }
+    public required bool Presence { get; init; }
 
     [Column(Order = 20)]
-    public required bool HttpsRequired { get; set; }
+    public required bool HttpsRequired { get; init; }
 
     [Column(Order = 21)]
-    public required bool PublicAddressMatches { get; set; }
+    public required bool PublicAddressMatches { get; init; }
 
     [Column(Order = 22)]
-    public required bool DnsRebindingProtection { get; set; }
+    public required bool DnsRebindingProtection { get; init; }
 
     [Column(Order = 23)]
-    public required bool NatLoopbackSupported { get; set; }
+    public required bool NatLoopbackSupported { get; init; }
 
     /// <summary>
     /// Gets or sets a value indicating whether certain servers have protection or are misconfigured which is why we can apply certain fixes to facilitate server communication.
     /// This will attempt to connect on port 80 of the server.
     /// </summary>
     [Column(Order = 24)]
-    public required bool ServerFixApplyDNSFix { get; set; }
+    public required bool ServerFixApplyDNSFix { get; init; }
 
     #endregion
 
     #region Relationships
 
-    public required List<PlexAccountServer> PlexAccountServers { get; set; } = new();
+    public required List<PlexAccountServer> PlexAccountServers { get; init; } = new();
 
-    public required List<PlexLibrary> PlexLibraries { get; set; } = new();
+    public required List<PlexLibrary> PlexLibraries { get; init; } = new();
 
-    public required List<PlexServerStatus> ServerStatus { get; set; } = new();
+    public required List<PlexServerStatus> ServerStatus { get; init; } = new();
 
     /// <summary>
     /// Gets or sets the different connections that can be used to communicate with the <see cref="PlexServer"/>.
@@ -161,14 +161,6 @@ public class PlexServer : BaseEntity
             };
         }
     }
-
-    #endregion
-
-    #region Operators
-
-    public static bool operator ==(PlexServer left, PlexServer right) => Equals(left, right);
-
-    public static bool operator !=(PlexServer left, PlexServer right) => !Equals(left, right);
 
     #endregion
 

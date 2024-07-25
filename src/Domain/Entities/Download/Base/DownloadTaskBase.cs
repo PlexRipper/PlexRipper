@@ -9,7 +9,7 @@ public abstract class DownloadTaskBase : BaseEntityGuid
     /// This is only unique on that specific server.
     /// </summary>
     [Column(Order = 1)]
-    public required int Key { get; set; }
+    public required int Key { get; init; }
 
     /// <summary>
     /// Gets or sets the media display title.
@@ -24,7 +24,7 @@ public abstract class DownloadTaskBase : BaseEntityGuid
     public required DownloadStatus DownloadStatus { get; set; }
 
     [Column(Order = 10)]
-    public required DateTime CreatedAt { get; set; }
+    public required DateTime CreatedAt { get; init; }
 
     /// <summary>
     /// Gets or sets the full formatted media title, based on the <see cref="PlexMediaType"/>.
@@ -35,11 +35,11 @@ public abstract class DownloadTaskBase : BaseEntityGuid
 
     #region Relationships
 
-    public PlexServer? PlexServer { get; set; }
+    public PlexServer? PlexServer { get; init; }
 
     public required int PlexServerId { get; set; }
 
-    public PlexLibrary? PlexLibrary { get; set; }
+    public PlexLibrary? PlexLibrary { get; init; }
 
     public required int PlexLibraryId { get; set; }
 

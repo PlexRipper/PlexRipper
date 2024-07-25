@@ -9,41 +9,31 @@ public class FileTask : BaseEntity
 {
     #region Properties
 
-    public required DateTime CreatedAt { get; set; }
+    public required DateTime CreatedAt { get; init; }
 
-    public required string DestinationDirectory { get; set; }
+    public required string DestinationDirectory { get; init; }
 
-    public required string FilePathsCompressed { get; set; }
+    public required string FilePathsCompressed { get; init; }
 
-    public required string FileName { get; set; }
+    public required string FileName { get; init; }
 
-    public required long FileSize { get; set; }
+    public required long FileSize { get; init; }
 
-    public required Guid DownloadTaskId { get; set; }
+    public required Guid DownloadTaskId { get; init; }
 
-    public required DownloadTaskType DownloadTaskType { get; set; }
+    public required DownloadTaskType DownloadTaskType { get; init; }
 
     #region Relationships
 
-    public PlexServer? PlexServer { get; set; }
+    public PlexServer? PlexServer { get; init; }
 
-    public required int PlexServerId { get; set; }
+    public required int PlexServerId { get; init; }
 
-    public PlexLibrary? PlexLibrary { get; set; }
+    public PlexLibrary? PlexLibrary { get; init; }
 
-    public required int PlexLibraryId { get; set; }
+    public required int PlexLibraryId { get; init; }
 
     #endregion
-
-    [NotMapped]
-    public DownloadTaskKey DownloadTaskKey =>
-        new()
-        {
-            Type = DownloadTaskType,
-            Id = DownloadTaskId,
-            PlexServerId = PlexServerId,
-            PlexLibraryId = PlexLibraryId,
-        };
 
     #region Helpers
 
@@ -54,6 +44,16 @@ public class FileTask : BaseEntity
     /// </summary>
     [NotMapped]
     public List<string> FilePaths => FilePathsCompressed?.Split(';').ToList() ?? new List<string>();
+
+    [NotMapped]
+    public DownloadTaskKey DownloadTaskKey =>
+        new()
+        {
+            Type = DownloadTaskType,
+            Id = DownloadTaskId,
+            PlexServerId = PlexServerId,
+            PlexLibraryId = PlexLibraryId,
+        };
 
     #endregion
 

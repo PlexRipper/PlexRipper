@@ -2,11 +2,11 @@
 
 public class PlexTvShowGenre : BaseEntity
 {
-    public required int PlexGenreId { get; set; }
+    public required int PlexGenreId { get; init; }
 
-    public PlexGenre? PlexGenre { get; set; }
+    public PlexGenre? PlexGenre { get; init; }
 
-    public required int PlexTvShowId { get; set; }
+    public required int PlexTvShowId { get; init; }
 
-    public PlexTvShow? PlexTvShow { get; set; }
+    public PlexTvShow? PlexTvShow { get; init; }
 }

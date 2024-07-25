@@ -4,5 +4,5 @@ namespace Settings.Contracts;
 
 public class ServerSettingsDTO : IServerSettings
 {
-    public required List<PlexServerSettingsModel> Data { get; set; }
+    public required List<PlexServerSettingsModel> Data { get; init; }
 }

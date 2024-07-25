@@ -17,9 +17,7 @@ public class CreateFolderPathEndpointRequestValidator : Validator<CreateFolderPa
     public CreateFolderPathEndpointRequestValidator()
     {
         RuleFor(x => x.FolderPathDto).NotNull();
-        RuleFor(x => x.FolderPathDto.Id).GreaterThan(0);
         RuleFor(x => x.FolderPathDto.DisplayName).NotEmpty();
-        RuleFor(x => x.FolderPathDto.Directory).NotEmpty();
         RuleFor(x => x.FolderPathDto.FolderType).NotEqual(FolderType.None).NotEqual(FolderType.Unknown);
         RuleFor(x => x.FolderPathDto.MediaType).NotEqual(PlexMediaType.None).NotEqual(PlexMediaType.Unknown);
     }

@@ -11,8 +11,8 @@ public enum JobTypes
     [EnumMember(Value = "Unknown")]
     Unknown = 0,
 
-    [EnumMember(Value = nameof(InspectPlexServerJob))]
-    InspectPlexServerJob = 1,
+    [EnumMember(Value = nameof(CheckPlexServerConnectionsJob))]
+    CheckPlexServerConnectionsJob = 1,
 
     [EnumMember(Value = nameof(DownloadJob))]
     DownloadJob = 2,
@@ -28,7 +28,4 @@ public enum JobTypes
 
     [EnumMember(Value = nameof(DownloadProgressJobs))]
     DownloadProgressJobs = 6,
-
-    [EnumMember(Value = nameof(InspectPlexServerByPlexAccountIdJob))]
-    InspectPlexServerByPlexAccountIdJob = 7,
 }

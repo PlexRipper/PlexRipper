@@ -73,18 +73,6 @@
 					</q-row>
 				</template>
 			</q-tree>
-			<!-- No Server Warning	-->
-			<q-row v-else justify="center">
-				<q-col cols="auto">
-					<h2>
-						{{
-							t('components.check-server-connections-dialog.no-servers', {
-								displayName: account?.displayName ?? t('general.error.unknown'),
-							})
-						}}
-					</h2>
-				</q-col>
-			</q-row>
 		</template>
 		<template #actions="{ close }">
 			<q-row justify="end">
@@ -98,20 +86,19 @@
 
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
-import { filter, switchMap, tap } from 'rxjs/operators';
+import { filter, tap } from 'rxjs/operators';
 import { get, set } from '@vueuse/core';
-import { of } from 'rxjs';
-import { JobTypes, JobStatus } from '@dto';
-import type { JobStatusUpdateDTO, PlexAccountDTO, ServerConnectionCheckStatusProgressDTO } from '@dto';
+import Log from 'consola';
+import { JobTypes, JobStatus, PlexServerDTO } from '@dto';
+import type { ServerConnectionCheckStatusProgressDTO } from '@dto';
 import { useBackgroundJobsStore, useI18n, useOpenControlDialog, useServerStore, useSignalrStore } from '#imports';
 
 const { t } = useI18n();
 const serverStore = useServerStore();
-const accountStore = useAccountStore();
 const backgroundJobStore = useBackgroundJobsStore();
 const name = 'checkServerConnectionDialogName';
 const connectionProgress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
-const account = ref<PlexAccountDTO | null>(null);
+
 const expanded = ref<number[]>([]);
 const completedCount = computed(() => {
 	return get(plexServerNodes).filter((progress) => progress.completed).length;
@@ -124,14 +111,12 @@ const totalPercentage = computed(() => {
 	return clamp(Math.round((get(completedCount) / get(plexServerNodes).length) * 100), 0, 100);
 });
 
-const plexServers = computed(() => {
-	return serverStore.getServersByPlexAccountId(get(account)?.id ?? 0);
-});
+const plexServers = ref<PlexServerDTO[]>([]);
 
 const getProgressText = computed(() => {
 	if (get(plexServers).length === 0) {
 		return t('components.check-server-connections-dialog.fetching-servers', {
-			displayName: get(account)?.displayName ?? t('general.error.unknown'),
+			displayName: t('general.error.unknown'),
 		});
 	}
 	if (get(totalPercentage) === 100) {
@@ -153,7 +138,7 @@ const plexServerNodes = computed((): IPlexServerNode[] => {
 		const serverResult: IPlexServerNode = {
 			id: server.id,
 			type: 'server',
-			title: server.name,
+			title: serverStore.getServerName(server.id),
 			completed: false,
 			index: uniqueIndex++,
 			connectionSuccessful: false,
@@ -205,13 +190,15 @@ function isServer(node: IPlexServerNode): boolean {
 onMounted(() => {
 	useSubscription(
 		backgroundJobStore
-			.getJobStatusUpdate(JobTypes.InspectPlexServerByPlexAccountIdJob)
+			.getJobStatusUpdate(JobTypes.CheckPlexServerConnectionsJob)
 			.pipe(
-				filter((update) => update.status === JobStatus.Running),
+				filter((update) => update.status === JobStatus.Started),
+				tap((update) => {
+					Log.info('update.primaryKeyValue', update.primaryKeyValue);
+					const ids: number[] = JSON.parse(update.primaryKeyValue);
+					set(plexServers, serverStore.getServers(ids));
+				}),
 				tap(() => useOpenControlDialog(name)),
-				switchMap((update: JobStatusUpdateDTO) => of(accountStore.getAccount(+update.primaryKeyValue))),
-				tap((newAccount) => set(account, newAccount)),
-				switchMap(() => serverStore.refreshPlexServers()),
 			)
 			.subscribe(),
 	);

@@ -3040,7 +3040,9 @@
       "filesystem.contracts": {
         "type": "Project",
         "dependencies": {
-          "PlexRipper.Domain": "[1.0.0, )"
+          "PlexRipper.Domain": "[1.0.0, )",
+          "System.IO.Abstractions": "[17.0.18, )",
+          "System.IO.FileSystem": "[4.3.0, )"
         }
       },
       "fluentresultextensions": {
@@ -3127,7 +3129,8 @@
           "Data.Contracts": "[1.0.0, )",
           "FileSystem.Contracts": "[1.0.0, )",
           "MediatR.Extensions.Autofac.DependencyInjection": "[12.0.0, )",
-          "System.IO.Abstractions": "[17.0.18, )"
+          "System.IO.Abstractions": "[17.0.18, )",
+          "System.IO.FileSystem": "[4.3.0, )"
         }
       },
       "PlexRipper.PlexApi": {

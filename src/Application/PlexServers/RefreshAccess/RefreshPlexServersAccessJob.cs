@@ -3,16 +3,13 @@ using Data.Contracts;
 using Logging.Interface;
 using PlexApi.Contracts;
 using Quartz;
-using Settings.Contracts;
 
 namespace PlexRipper.Application;
 
-// TODO This job might be unneeded due to the length of time it takes to refresh the Plex servers
 public class RefreshPlexServersAccessJob : IJob
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IServerSettingsModule _serverSettingsModule;
     private readonly IAddOrUpdatePlexServersCommand _addOrUpdatePlexServersCommand;
     private readonly IAddOrUpdatePlexAccountServersCommand _addOrUpdatePlexAccountServersCommand;
     private readonly IPlexApiService _plexServiceApi;
@@ -25,7 +22,6 @@ public class RefreshPlexServersAccessJob : IJob
     public RefreshPlexServersAccessJob(
         ILog log,
         IPlexRipperDbContext dbContext,
-        IServerSettingsModule serverSettingsModule,
         IAddOrUpdatePlexServersCommand addOrUpdatePlexServersCommand,
         IAddOrUpdatePlexAccountServersCommand addOrUpdatePlexAccountServersCommand,
         IPlexApiService plexServiceApi
@@ -33,7 +29,6 @@ public class RefreshPlexServersAccessJob : IJob
     {
         _log = log;
         _dbContext = dbContext;
-        _serverSettingsModule = serverSettingsModule;
         _addOrUpdatePlexServersCommand = addOrUpdatePlexServersCommand;
         _addOrUpdatePlexAccountServersCommand = addOrUpdatePlexAccountServersCommand;
         _plexServiceApi = plexServiceApi;
@@ -91,9 +86,6 @@ public class RefreshPlexServersAccessJob : IJob
                 updateResult.LogError();
                 return;
             }
-
-            // Check if every server has a settings entry
-            _serverSettingsModule.EnsureAllServersHaveASettingsEntry(serverList);
 
             // Add or update the PlexAccount and PlexServer relationships
             var plexAccountTokensResult = await _addOrUpdatePlexAccountServersCommand.ExecuteAsync(

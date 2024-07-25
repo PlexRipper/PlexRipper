@@ -7,16 +7,16 @@ public class PlexServerStatus : BaseEntity
     #region Properties
 
     [Column(Order = 1)]
-    public required bool IsSuccessful { get; set; }
+    public required bool IsSuccessful { get; init; }
 
     [Column(Order = 2)]
-    public required int StatusCode { get; set; }
+    public required int StatusCode { get; init; }
 
     [Column(Order = 3)]
-    public required string StatusMessage { get; set; }
+    public required string StatusMessage { get; init; }
 
     [Column(Order = 4)]
-    public required DateTime LastChecked { get; set; }
+    public required DateTime LastChecked { get; init; }
 
     #endregion
 

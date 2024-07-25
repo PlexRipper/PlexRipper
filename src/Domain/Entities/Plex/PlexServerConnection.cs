@@ -20,16 +20,16 @@ public class PlexServerConnection : BaseEntity
     public required int Port { get; set; }
 
     [Column(Order = 4)]
-    public required bool Local { get; set; }
+    public required bool Local { get; init; }
 
     [Column(Order = 5)]
-    public required bool Relay { get; set; }
+    public required bool Relay { get; init; }
 
     [Column(Order = 6)]
-    public required bool IPv4 { get; set; }
+    public required bool IPv4 { get; init; }
 
     [Column(Order = 7)]
-    public required bool IPv6 { get; set; }
+    public required bool IPv6 { get; init; }
 
     /// <summary>
     /// The port fix is when we don't use the port when Address is a domain name.
@@ -37,17 +37,17 @@ public class PlexServerConnection : BaseEntity
     /// <remarks> This is set in the "PlexApiMappingProfile" when the data is received from the Plex API.</remarks>
     /// </summary>
     [Column(Order = 8)]
-    public required bool PortFix { get; set; }
+    public required bool PortFix { get; init; }
 
     #endregion
 
     #region Relationships
 
-    public PlexServer? PlexServer { get; set; }
+    public PlexServer? PlexServer { get; init; }
 
     public required int PlexServerId { get; set; }
 
-    public List<PlexServerStatus> PlexServerStatus { get; set; } = new();
+    public List<PlexServerStatus> PlexServerStatus { get; init; } = new();
 
     #endregion
 

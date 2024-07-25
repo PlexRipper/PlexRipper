@@ -39,19 +39,19 @@ public class PlexAccount : BaseEntity
     #region Properties
 
     [Column(Order = 1)]
-    public required string DisplayName { get; set; }
+    public required string DisplayName { get; init; }
 
     [Column(Order = 2)]
-    public required string Username { get; set; }
+    public required string Username { get; init; }
 
     [Column(Order = 3)]
-    public required string Password { get; set; }
+    public required string Password { get; init; }
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexAccount"/> is enabled and that it should be used for downloading media.
     /// </summary>
     [Column(Order = 4)]
-    public required bool IsEnabled { get; set; }
+    public required bool IsEnabled { get; init; }
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexAccount"/> has been validated against the Plex API and contain valid credentials.
@@ -60,13 +60,13 @@ public class PlexAccount : BaseEntity
     public required bool IsValidated { get; set; }
 
     [Column(Order = 6)]
-    public required DateTime ValidatedAt { get; set; }
+    public required DateTime ValidatedAt { get; init; }
 
     [Column(Order = 7)]
-    public required long PlexId { get; set; }
+    public required long PlexId { get; init; }
 
     [Column(Order = 8)]
-    public required string Uuid { get; set; }
+    public required string Uuid { get; init; }
 
     /// <summary>
     /// The unique client identifier used for all PlexApi communication.
@@ -75,43 +75,48 @@ public class PlexAccount : BaseEntity
     public required string ClientId { get; set; }
 
     [Column(Order = 10)]
-    public required string Title { get; set; }
+    public required string Title { get; init; }
 
     [Column(Order = 11)]
-    public required string Email { get; set; }
+    public required string Email { get; init; }
 
     [Column(Order = 12)]
-    public required bool HasPassword { get; set; }
+    public required bool HasPassword { get; init; }
 
     /// <summary>
     /// The general plex authentication token used to retrieve account data such as the <see cref="PlexServer" />s the
     /// account has access to.
     /// </summary>
-    public required string AuthenticationToken { get; set; }
+    public required string AuthenticationToken { get; init; }
 
     /// <summary>
     /// If this is a main account then it will get a lower priority when downloading media which a non-main account also has access to.
     /// </summary>
-    public required bool IsMain { get; set; }
+    public required bool IsMain { get; init; }
 
     #region Relationships
 
     /// <summary>
     /// The associated <see cref="PlexServer"/> this <see cref="PlexAccount"/> has access to.
     /// </summary>
-    public List<PlexAccountServer> PlexAccountServers { get; set; } = new();
+    public List<PlexAccountServer> PlexAccountServers { get; init; } = new();
 
     /// <summary>
     /// The associated <see cref="PlexLibrary"/> this <see cref="PlexAccount"/> has access to.
     /// </summary>
-    public List<PlexAccountLibrary> PlexAccountLibraries { get; set; } = new();
+    public List<PlexAccountLibrary> PlexAccountLibraries { get; init; } = new();
 
     #endregion
 
     #region Helpers
 
     [NotMapped]
-    public List<PlexServer> PlexServers => PlexAccountServers.Select(x => x.PlexServer).ToList();
+    public List<PlexServer> PlexServers =>
+        PlexAccountServers.Where(x => x.PlexServer != null).Select(x => x.PlexServer!).ToList();
+
+    [NotMapped]
+    public List<PlexLibrary> PlexLibraries =>
+        PlexAccountLibraries.Where(x => x.PlexLibrary != null).Select(x => x.PlexLibrary!).ToList();
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexAccount"/> is 2FA protected.
@@ -123,7 +128,7 @@ public class PlexAccount : BaseEntity
     /// The verification code given by the user if 2FA is enabled.
     /// </summary>
     [NotMapped]
-    public required string VerificationCode { get; set; }
+    public required string VerificationCode { get; init; }
 
     #endregion
 

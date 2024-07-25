@@ -8,7 +8,7 @@ public class DownloadTaskTvShowEpisode : DownloadTaskParentBase
 
     public required Guid ParentId { get; set; }
 
-    public required DownloadTaskTvShowSeason? Parent { get; set; }
+    public required DownloadTaskTvShowSeason? Parent { get; init; }
 
     #endregion
 

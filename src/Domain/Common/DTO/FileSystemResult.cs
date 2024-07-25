@@ -2,9 +2,11 @@
 
 public record FileSystemResult
 {
-    public required string Parent { get; set; }
+    public required string Parent { get; init; }
 
-    public required List<FileSystemModel> Directories { get; set; } = new();
+    public required List<FileSystemModel> Directories { get; init; } = new();
 
-    public required List<FileSystemModel> Files { get; set; } = new();
+    public required List<FileSystemModel> Files { get; init; } = new();
+
+    public required FileSystemModel? Current { get; init; }
 }

@@ -304,12 +304,13 @@ public class PlexApiService : IPlexApiService
             {
                 Id = 0,
                 Name = x.Name,
+
                 // The servers have an OwnerId of 0 when it belongs to the PlexAccount that was used to request it.
                 OwnerId = x.OwnerId ?? plexAccount.PlexId,
-                PlexServerOwnerUsername = x.SourceTitle,
-                Device = x.Device,
-                Platform = x.Platform,
-                PlatformVersion = x.PlatformVersion,
+                PlexServerOwnerUsername = x.SourceTitle ?? plexAccount.Username,
+                Device = x.Device ?? string.Empty,
+                Platform = x.Platform ?? string.Empty,
+                PlatformVersion = x.PlatformVersion ?? string.Empty,
                 Product = x.Product,
                 ProductVersion = x.ProductVersion,
                 Provides = x.Provides,
@@ -412,7 +413,7 @@ public class PlexApiService : IPlexApiService
             {
                 Id = x.Id,
                 DisplayName = plexAccount.DisplayName,
-                Username = x.Username,
+                Username = plexAccount.Username,
                 Password = plexAccount.Password,
                 IsEnabled = plexAccount.IsEnabled,
                 IsValidated = true,

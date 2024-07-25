@@ -1,10 +1,7 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace PlexRipper.Domain;
 
-public class DownloadTaskDirectory
+public record DownloadTaskDirectory
 {
-    [Required]
     public required string DownloadRootPath { get; set; }
 
     public required string DestinationRootPath { get; set; }

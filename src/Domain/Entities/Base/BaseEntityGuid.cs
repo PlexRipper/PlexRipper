@@ -7,5 +7,5 @@ public abstract class BaseEntityGuid
 {
     [Key]
     [Column(Order = 0)]
-    public required Guid Id { get; set; }
+    public required Guid Id { get; init; }
 }

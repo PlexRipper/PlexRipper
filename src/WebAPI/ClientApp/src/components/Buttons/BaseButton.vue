@@ -86,7 +86,7 @@ export default defineComponent({
 											return useI18n().t(props.tooltipId);
 										},
 									},
-							  )
+								)
 							: null,
 					],
 				],

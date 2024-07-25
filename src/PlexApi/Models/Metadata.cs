@@ -13,7 +13,7 @@ public class Metadata
     /// <summary>
     /// Gets or sets the unique identifier for this metadata
     /// </summary>
-    public string RatingKey { get; set; }
+    public string? RatingKey { get; set; }
 
     /// <summary>
     /// Gets or sets the unique identifier prefixed with the RatingKey for this metadata
@@ -27,15 +27,15 @@ public class Metadata
 
     public string LibrarySectionKey { get; set; }
 
-    public string Studio { get; set; }
+    public string? Studio { get; set; }
 
     public string Type { get; set; }
 
     public string Title { get; set; }
 
-    public string ContentRating { get; set; }
+    public string? ContentRating { get; set; }
 
-    public string Summary { get; set; }
+    public string? Summary { get; set; }
 
     public double Rating { get; set; }
 
@@ -111,11 +111,11 @@ public class Metadata
 
     #region Library Sections
 
-    public string TitleSort { get; set; }
+    public string? TitleSort { get; set; }
 
     public int Index { get; set; }
 
-    public string Banner { get; set; }
+    public string? Banner { get; set; }
 
     public int LeafCount { get; set; }
 
@@ -124,7 +124,7 @@ public class Metadata
     [JsonConverter(typeof(IntValueConverter))]
     public int ChildCount { get; set; }
 
-    public string Theme { get; set; }
+    public string? Theme { get; set; }
 
     [JsonConverter(typeof(StringToBool))]
     public bool FlattenSeasons { get; set; }

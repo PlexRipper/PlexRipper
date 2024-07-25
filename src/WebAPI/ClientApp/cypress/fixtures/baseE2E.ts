@@ -106,13 +106,13 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 	}
 
 	// PlexAccount call
-	const plexAccounts = generatePlexAccounts({ config, plexServers: result.plexServers, plexLibraries: result.plexLibraries });
+	result.plexAccounts = generatePlexAccounts({ config, plexServers: result.plexServers, plexLibraries: result.plexLibraries });
 	cy.intercept('GET', PlexAccountPaths.getAllPlexAccountsEndpoint(), {
 		statusCode: 200,
-		body: generateResultDTO(plexAccounts),
+		body: generateResultDTO(result.plexAccounts),
 	}).then(() => {
 		if (validConfig.debugDisplayData) {
-			cy.log('BasePageSetup -> plexAccounts', plexAccounts);
+			cy.log('BasePageSetup -> plexAccounts', result.plexAccounts);
 		}
 	});
 
@@ -158,13 +158,13 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 	}
 
 	// Settings call
-	const settings = generateSettingsModel({ plexServers: result.plexServers, config });
+	result.settings = generateSettingsModel({ plexServers: result.plexServers, config });
 	cy.intercept('GET', SettingsPaths.getUserSettingsEndpoint(), {
 		statusCode: 200,
-		body: generateResultDTO(settings),
+		body: generateResultDTO(result.settings),
 	}).then(() => {
 		if (validConfig.debugDisplayData) {
-			cy.log('BasePageSetup -> settings', settings);
+			cy.log('BasePageSetup -> settings', result.settings);
 		}
 	});
 
@@ -233,30 +233,3 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 export function route(path: string) {
 	return Cypress.env('BASE_URL') + path;
 }
-
-// export function apiRoute({
-// 	type,
-// 	path = '',
-// 	query = {},
-// 	wildcard = true,
-// 	excludeApiPrefix = false,
-// }: {
-// 	type: APIRoute;
-// 	path?: string;
-// 	query?: Record<string, string>;
-// 	wildcard?: boolean;
-// 	excludeApiPrefix?: boolean;
-// }): string {
-// 	const fullPath = `${!excludeApiPrefix ? '/api' : ''}${type}${path}`;
-// 	const urlBuilder = new URL(fullPath, 'http://localhost.com');
-//
-// 	for (const param of Object.keys(query).map((x) => [x, query[x]])) {
-// 		urlBuilder.searchParams.append(param[0], param[1]);
-// 	}
-//
-// 	let url = urlBuilder.toString().replace('http://localhost.com', '');
-// 	if (wildcard) {
-// 		url += '*';
-// 	}
-// 	return url;
-// }

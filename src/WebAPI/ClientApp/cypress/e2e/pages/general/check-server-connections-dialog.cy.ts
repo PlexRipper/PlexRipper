@@ -1,6 +1,5 @@
 import { route } from '@fixtures/baseE2E';
-import { JobStatus, JobTypes, MessageTypes, type ServerConnectionCheckStatusProgressDTO } from '@dto';
-import { generateJobStatusUpdate } from '@factories';
+import { MessageTypes, type ServerConnectionCheckStatusProgressDTO } from '@dto';
 
 describe('Check server connections dialog', () => {
 	before(() => {
@@ -13,22 +12,9 @@ describe('Check server connections dialog', () => {
 	});
 
 	it('Should display the check server connections dialog when given the back-end signal', function () {
-		cy.getPageData()
-			.then((data) => {
-				cy.hubPublish(
-					'progress',
-					MessageTypes.JobStatusUpdate,
-					generateJobStatusUpdate({
-						jobType: JobTypes.InspectPlexServerByPlexAccountIdJob,
-						jobStatus: JobStatus.Running,
-						primaryKey: 'plexAccountId',
-						primaryKeyValue: data.plexAccounts[0].id.toString(),
-					}),
-				);
-			})
-			.getCy('check-server-connection-dialog')
-			.should('exist')
-			.and('be.visible');
+		cy.getPageData().then((data) => {
+			cy.hubPublishCheckPlexServerConnectionsJob(data.plexServers);
+		});
 
 		cy.log('Should display the servers when the account has access to those Plex servers');
 

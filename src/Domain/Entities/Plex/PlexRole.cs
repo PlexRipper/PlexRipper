@@ -2,7 +2,7 @@
 
 public class PlexRole : BaseEntity
 {
-    public required string Tag { get; set; }
+    public required string Tag { get; init; }
 
-    public List<PlexMovieRole> PlexMovieRoles { get; set; } = new();
+    public List<PlexMovieRole> PlexMovieRoles { get; init; } = new();
 }

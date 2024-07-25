@@ -2,11 +2,11 @@
 
 public class PlexMovieRole : BaseEntity
 {
-    public required int PlexGenreId { get; set; }
+    public required int PlexGenreId { get; init; }
 
-    public PlexGenre? PlexGenre { get; set; }
+    public PlexGenre? PlexGenre { get; init; }
 
-    public required int PlexMoviesId { get; set; }
+    public required int PlexMoviesId { get; init; }
 
-    public PlexMovie? PlexMovie { get; set; }
+    public PlexMovie? PlexMovie { get; init; }
 }

@@ -15,8 +15,6 @@ public class FileSystem : IFileSystem
 
     private readonly IDiskProvider _diskProvider;
 
-    private readonly IDiskSystem _diskSystem;
-
     private readonly IDirectorySystem _directorySystem;
 
     #endregion
@@ -28,7 +26,6 @@ public class FileSystem : IFileSystem
         IPathProvider pathProvider,
         System.IO.Abstractions.IFileSystem abstractedFileSystem,
         IDiskProvider diskProvider,
-        IDiskSystem diskSystem,
         IDirectorySystem directorySystem
     )
     {
@@ -36,7 +33,6 @@ public class FileSystem : IFileSystem
         _pathProvider = pathProvider;
         _abstractedFileSystem = abstractedFileSystem;
         _diskProvider = diskProvider;
-        _diskSystem = diskSystem;
         _directorySystem = directorySystem;
     }
 
@@ -123,29 +119,31 @@ public class FileSystem : IFileSystem
     )
     {
         _log.Debug("Looking up path: {Query}", query);
-        var directoryExistsResult = _directorySystem.Exists(query);
-        if (directoryExistsResult.IsFailed)
-            return directoryExistsResult.ToResult();
 
         var defaultResult = new FileSystemResult
         {
             Directories = GetDrives(),
-            Files = new List<FileSystemModel>(),
+            Files = [],
             Parent = "",
+            Current = null,
         };
 
         // If path is invalid return root file system
-        if (string.IsNullOrWhiteSpace(query) || !directoryExistsResult.Value)
+        if (string.IsNullOrWhiteSpace(query))
+            return Result.Ok(defaultResult);
+
+        var directoryExistsResult = _directorySystem.Exists(query);
+        if (directoryExistsResult.IsFailed || !directoryExistsResult.Value)
             return Result.Ok(defaultResult);
 
         if (allowFoldersWithoutTrailingSlashes)
-            return Result.Ok(GetResult(query, includeFiles));
+            return GetFileSystemResults(query, includeFiles);
 
         var lastSeparatorIndex = query.LastIndexOf(_abstractedFileSystem.Path.DirectorySeparatorChar);
         var path = query.Substring(0, lastSeparatorIndex + 1);
 
         if (lastSeparatorIndex != -1)
-            return Result.Ok(GetResult(path, includeFiles));
+            return GetFileSystemResults(path, includeFiles);
 
         return Result.Ok(defaultResult);
     }
@@ -175,42 +173,60 @@ public class FileSystem : IFileSystem
     private List<FileSystemModel> GetDrives()
     {
         return _diskProvider
-            .GetMounts()
+            .GetAllMounts()
             .Select(d => new FileSystemModel
             {
                 Type = FileSystemEntityType.Drive,
                 Name = _diskProvider.GetVolumeName(d),
-                Path = d.RootDirectory,
-                LastModified = null,
+                Path = d.RootDirectory.FullName,
+                LastModified = d.RootDirectory.LastWriteTimeUtc,
                 Extension = string.Empty,
                 Size = d.TotalSize,
+                HasReadPermission = d.CanRead(),
+                HasWritePermission = d.CanWrite(),
             })
             .ToList();
     }
 
-    private FileSystemResult GetResult(string path, bool includeFiles)
+    private Result<FileSystemResult> GetFileSystemResults(string path, bool includeFiles)
     {
-        var result = new FileSystemResult()
-        {
-            Parent = _diskProvider.GetParent(path),
-            Directories = _diskProvider.GetDirectories(path),
-            Files = new List<FileSystemModel>(),
-        };
-
         try
         {
-            result.Parent = _diskProvider.GetParent(path);
-            result.Directories = _diskProvider.GetDirectories(path);
+            var directoriesResult = _diskProvider.GetDirectories(path);
+            if (directoriesResult.IsFailed)
+                return directoriesResult.ToResult();
 
             if (includeFiles)
-                result.Files = _diskProvider.GetFiles(path);
-        }
-        catch (Exception)
-        {
-            return result;
-        }
+            {
+                var filesResult = _diskProvider.GetFiles(path);
+                if (filesResult.IsFailed)
+                    return filesResult.ToResult();
 
-        return result;
+                return Result.Ok(
+                    new FileSystemResult()
+                    {
+                        Parent = _diskProvider.GetParent(path),
+                        Directories = directoriesResult.Value,
+                        Files = filesResult.Value,
+                        Current = new DirectoryInfo(path).ToModel(),
+                    }
+                );
+            }
+
+            return Result.Ok(
+                new FileSystemResult()
+                {
+                    Parent = _diskProvider.GetParent(path),
+                    Directories = directoriesResult.Value,
+                    Files = [],
+                    Current = new DirectoryInfo(path).ToModel(),
+                }
+            );
+        }
+        catch (Exception e)
+        {
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
     }
 
     #endregion

@@ -48,7 +48,7 @@ export function generateSettingsModel({
 			data: plexServers.map((x) => {
 				return {
 					machineIdentifier: x.machineIdentifier,
-					plexServerName: x.name,
+					plexServerName: '',
 					downloadSpeedLimit: 0,
 				};
 			}),

@@ -6,15 +6,15 @@
 /// </summary>
 public class PlexAccountLibrary
 {
-    public required int PlexAccountId { get; set; }
+    public required int PlexAccountId { get; init; }
 
-    public virtual PlexAccount? PlexAccount { get; set; }
+    public PlexAccount? PlexAccount { get; init; }
 
-    public required int PlexLibraryId { get; set; }
+    public required int PlexLibraryId { get; init; }
 
-    public virtual PlexLibrary? PlexLibrary { get; set; }
+    public PlexLibrary? PlexLibrary { get; init; }
 
-    public required int PlexServerId { get; set; }
+    public required int PlexServerId { get; init; }
 
-    public virtual PlexServer? PlexServer { get; set; }
+    public PlexServer? PlexServer { get; init; }
 }

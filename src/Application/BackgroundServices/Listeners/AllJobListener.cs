@@ -7,7 +7,7 @@ public class AllJobListener : IAllJobListener
 {
     private readonly ISignalRService _signalRService;
 
-    public string Name { get; } = nameof(AllJobListener);
+    public string Name => nameof(AllJobListener);
 
     public AllJobListener(ISignalRService signalRService)
     {
@@ -29,12 +29,9 @@ public class AllJobListener : IAllJobListener
         }
     }
 
-    public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = new()) =>
-        Task.CompletedTask;
-
     public async Task JobWasExecuted(
         IJobExecutionContext context,
-        JobExecutionException jobException,
+        JobExecutionException? jobException,
         CancellationToken cancellationToken = new()
     )
     {
@@ -50,4 +47,7 @@ public class AllJobListener : IAllJobListener
             Result.Fail(new ExceptionalError(e)).LogError();
         }
     }
+
+    public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = new()) =>
+        Task.CompletedTask;
 }

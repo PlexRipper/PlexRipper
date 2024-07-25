@@ -26,6 +26,7 @@
 		</PackageReference>
 		<PackageReference Include="MediatR.Extensions.Autofac.DependencyInjection" Version="12.0.0" />
 		<PackageReference Include="System.IO.Abstractions" Version="17.0.18" />
+		<PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>

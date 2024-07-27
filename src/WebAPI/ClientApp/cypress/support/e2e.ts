@@ -1,8 +1,8 @@
 import './commands';
 import Log from 'consola';
 import { basePageSetup, route, type IBasePageSetupResult } from '@fixtures/baseE2E';
-import { generateJobStatusUpdate, MockConfig } from '@mock';
-import { JobStatus, JobTypes, MessageTypes, PlexServerDTO } from '@dto';
+import { generateJobStatusUpdate, type MockConfig } from '@mock';
+import { JobStatus, JobTypes, MessageTypes, type PlexServerDTO } from '@dto';
 
 Cypress.Commands.add('basePageSetup', (config: Partial<MockConfig> = {}) => basePageSetup(config).as('pageData'));
 

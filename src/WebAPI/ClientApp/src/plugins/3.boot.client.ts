@@ -1,8 +1,8 @@
 import Log from 'consola';
 import Axios from 'axios';
+import { useGlobalStore } from '@store';
 import type IAppConfig from '@class/IAppConfig';
 import type { I18nObjectType } from '@interfaces';
-import { useGlobalStore } from '#imports';
 
 export default defineNuxtPlugin((nuxtApp) => {
 	const publicEnv = useRuntimeConfig().public;

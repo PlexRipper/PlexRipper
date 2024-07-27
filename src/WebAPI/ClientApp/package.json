@@ -38,7 +38,6 @@
 		"@microsoft/signalr": "^7.0.7",
 		"@pinia/nuxt": "^0.5.1",
 		"@primevue/themes": "^4.0.1",
-		"@vueuse/components": "^10.9.0",
 		"@vueuse/rxjs": "^10.11.0",
 		"axios": "^1.7.2",
 		"consola": "^3.2.3",
@@ -98,7 +97,6 @@
 		"vite-tsconfig-paths": "^4.3.2",
 		"vitest": "^2.0.4",
 		"vitest-environment-nuxt": "^1.0.0",
-		"vue-tsc": "^2.0.29",
-		"why": "^0.6.2"
+		"vue-tsc": "^2.0.29"
 	}
 }

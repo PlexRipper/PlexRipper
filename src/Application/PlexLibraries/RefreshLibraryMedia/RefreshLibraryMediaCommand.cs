@@ -78,14 +78,11 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         }
     }
 
-    private async Task<Result> RefreshPlexTvShowLibrary(
+    private async Task<Result<PlexLibrary>> RefreshPlexTvShowLibrary(
         PlexLibrary plexLibrary,
         Action<LibraryProgress> progressAction = null
     )
     {
-        if (plexLibrary == null)
-            return ResultExtensions.IsNull(nameof(plexLibrary)).LogError();
-
         if (plexLibrary.Type != PlexMediaType.TvShow)
             return Result.Fail("PlexLibrary is not of type TvShow").LogError();
 
@@ -191,17 +188,14 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             plexLibrary.Id
         );
 
-        return Result.Ok();
+        return Result.Ok(plexLibrary);
     }
 
-    private async Task<Result> RefreshPlexMovieLibrary(
+    private async Task<Result<PlexLibrary>> RefreshPlexMovieLibrary(
         PlexLibrary plexLibrary,
         Action<LibraryProgress> progressAction = null
     )
     {
-        if (plexLibrary == null)
-            return ResultExtensions.IsNull(nameof(plexLibrary));
-
         // Send progress
         void SendProgress(int index, int count)
         {
@@ -236,6 +230,6 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             plexLibrary.Id
         );
 
-        return Result.Ok();
+        return Result.Ok(plexLibrary);
     }
 }

@@ -136,12 +136,18 @@ public class PlexApiService : IPlexApiService
         var serverUrl = plexServerConnection.Value.Url;
 
         // Retrieve updated version of the PlexLibrary
-        var plexLibraries = await GetLibrarySectionsAsync(plexLibrary.PlexServerId);
+        var plexLibraries = await GetLibrarySectionsAsync(
+            plexLibrary.PlexServerId,
+            cancellationToken: cancellationToken
+        );
 
         if (plexLibraries.IsFailed)
             return plexLibraries.ToResult();
 
         var updatedPlexLibrary = plexLibraries.Value.Find(x => x.Key == plexLibrary.Key);
+        if (updatedPlexLibrary is null)
+            return ResultExtensions.IsNull(nameof(updatedPlexLibrary));
+
         updatedPlexLibrary.Id = plexLibrary.Id;
         updatedPlexLibrary.PlexServerId = plexLibrary.PlexServerId;
         updatedPlexLibrary.SyncedAt = DateTime.UtcNow;

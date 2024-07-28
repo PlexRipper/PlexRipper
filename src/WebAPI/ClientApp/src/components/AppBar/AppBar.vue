@@ -21,9 +21,6 @@
 				<!-- Background Animation Toggle -->
 				<BackgroundAnimationToggleButton />
 
-				<!-- DarkMode toggle -->
-				<DarkModeToggleButton />
-
 				<!-- Account Selector -->
 				<AccountSelector />
 

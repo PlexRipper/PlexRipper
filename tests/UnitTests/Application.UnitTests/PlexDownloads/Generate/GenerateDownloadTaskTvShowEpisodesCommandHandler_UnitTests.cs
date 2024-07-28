@@ -40,7 +40,11 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
             config.TvShowEpisodeCount = 5;
         });
 
-        var plexTvShows = await DbContext.PlexTvShows.IncludeAll().ToListAsync();
+        var plexTvShows = await IDbContext
+            .PlexTvShows.Include(x => x.Seasons)
+            .ThenInclude(x => x.Episodes)
+            .ToListAsync();
+
         var plexEpisodes = plexTvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).ToList();
         var downloadMediaDtos = new List<DownloadMediaDTO>
         {
@@ -59,7 +63,7 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
-        var downloadTaskTvShows = await DbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
+        var downloadTaskTvShows = await IDbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
         downloadTaskTvShows.Count.ShouldBe(5);
 
         var downloadTaskSeasons = downloadTaskTvShows.SelectMany(x => x.Children).ToList();
@@ -75,6 +79,7 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
         {
             downloadTaskTvShow.Calculate();
             var validationResult = await validator.ValidateAsync(downloadTaskTvShow);
+
             // Ignore DownloadDirectory and DestinationDirectory errors as these are set in the DownloadJob
             var validErrors = validationResult.Errors.FindAll(x =>
                 !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DownloadDirectory))
@@ -102,7 +107,6 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
         var createdTvShowDownloadTask = plexTvShows.First().MapToDownloadTask();
         dbContext.DownloadTaskTvShow.Add(createdTvShowDownloadTask);
         await dbContext.SaveChangesAsync(CancellationToken.None);
-        ResetDbContext();
 
         var downloadMediaDtos = new List<DownloadMediaDTO>
         {
@@ -121,7 +125,7 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
-        var downloadTaskTvShows = await DbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
+        var downloadTaskTvShows = await IDbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
         downloadTaskTvShows.Count.ShouldBe(5);
         downloadTaskTvShows.FirstOrDefault(x => x.Id == createdTvShowDownloadTask.Id).ShouldNotBeNull();
     }

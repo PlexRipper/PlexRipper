@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import type { VueStyleObjectProp } from 'quasar/dist/types/api';
+import type { VueStyleObjectProp } from 'quasar';
 
 const thumbStyle: VueStyleObjectProp = {
 	right: '4px',

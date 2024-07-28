@@ -75,9 +75,10 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
+        dbContext = IDbContext;
 
-        var downloadTasksDb = await IDbContext.DownloadTaskMovie.ToListAsync();
-        var downloadTasksFileDb = await IDbContext.DownloadTaskMovieFile.ToListAsync();
+        var downloadTasksDb = await dbContext.DownloadTaskMovie.ToListAsync();
+        var downloadTasksFileDb = await dbContext.DownloadTaskMovieFile.ToListAsync();
         downloadTasksDb.ShouldBeEmpty();
         downloadTasksFileDb.ShouldBeEmpty();
     }

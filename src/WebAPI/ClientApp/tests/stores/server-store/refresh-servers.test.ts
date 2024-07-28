@@ -3,7 +3,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { baseVars, subscribeSpyTo, baseSetup, getAxiosMock } from '@services-test-base';
 import { generatePlexServers, generateResultDTO } from '@mock';
 import { PlexServerPaths } from '@api/api-paths';
-import { useServerStore } from '#imports';
+import { useServerStore } from '@store';
 
 describe('ServerStore.refresh-servers()', () => {
 	let { mock } = baseVars();

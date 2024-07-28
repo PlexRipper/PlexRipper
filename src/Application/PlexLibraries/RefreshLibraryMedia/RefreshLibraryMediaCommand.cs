@@ -15,7 +15,7 @@ namespace PlexRipper.Application;
 /// <param name="PlexLibraryId">The id of the <see cref="PlexLibrary"/> to retrieve.</param>
 /// <param name="ProgressAction">The action to call for a progress update.</param>
 /// <returns>Returns the PlexLibrary with the containing media.</returns>
-public record RefreshLibraryMediaCommand(int PlexLibraryId, Action<LibraryProgress> ProgressAction = null)
+public record RefreshLibraryMediaCommand(int PlexLibraryId, Action<LibraryProgress>? ProgressAction = null)
     : IRequest<Result<PlexLibrary>>;
 
 public class RefreshLibraryMediaCommandValidator : AbstractValidator<RefreshLibraryMediaCommand> { }
@@ -78,14 +78,11 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         }
     }
 
-    private async Task<Result> RefreshPlexTvShowLibrary(
+    private async Task<Result<PlexLibrary>> RefreshPlexTvShowLibrary(
         PlexLibrary plexLibrary,
-        Action<LibraryProgress> progressAction = null
+        Action<LibraryProgress>? progressAction = null
     )
     {
-        if (plexLibrary == null)
-            return ResultExtensions.IsNull(nameof(plexLibrary)).LogError();
-
         if (plexLibrary.Type != PlexMediaType.TvShow)
             return Result.Fail("PlexLibrary is not of type TvShow").LogError();
 
@@ -102,6 +99,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         void SendProgress(int index, int count)
         {
             progressAction?.Invoke(new LibraryProgress(plexLibrary.Id, index, count));
+
             _signalRService.SendLibraryProgressUpdateAsync(plexLibrary.Id, index, count);
         }
 
@@ -167,9 +165,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         if (updateMetaDataResult.IsFailed)
             return updateMetaDataResult;
 
-        var updateResult = await _mediator.Send(new UpdatePlexLibraryByIdCommand(plexLibrary));
-        if (updateResult.IsFailed)
-            return updateResult.ToResult();
+        await _dbContext.UpdatePlexLibraryById(plexLibrary);
 
         var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
         if (createResult.IsFailed)
@@ -191,17 +187,14 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             plexLibrary.Id
         );
 
-        return Result.Ok();
+        return Result.Ok(plexLibrary);
     }
 
-    private async Task<Result> RefreshPlexMovieLibrary(
+    private async Task<Result<PlexLibrary>> RefreshPlexMovieLibrary(
         PlexLibrary plexLibrary,
-        Action<LibraryProgress> progressAction = null
+        Action<LibraryProgress>? progressAction = null
     )
     {
-        if (plexLibrary == null)
-            return ResultExtensions.IsNull(nameof(plexLibrary));
-
         // Send progress
         void SendProgress(int index, int count)
         {
@@ -218,9 +211,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
 
         SendProgress(1, 3);
 
-        var updateResult = await _mediator.Send(new UpdatePlexLibraryByIdCommand(plexLibrary));
-        if (updateResult.IsFailed)
-            return updateResult.ToResult();
+        await _dbContext.UpdatePlexLibraryById(plexLibrary);
 
         SendProgress(2, 3);
 
@@ -236,6 +227,6 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             plexLibrary.Id
         );
 
-        return Result.Ok();
+        return Result.Ok(plexLibrary);
     }
 }

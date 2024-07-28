@@ -101,7 +101,7 @@ public static partial class PlexMetaDataMapper
     /// <returns></returns>
     private static int RetrieveMetaDataKey(Metadata metadata)
     {
-        List<string> list = new() { metadata.Thumb, metadata.Banner, metadata.Art, metadata.Theme };
+        List<string> list = [metadata.Thumb, metadata.Banner, metadata.Art, metadata.Theme];
 
         foreach (var entry in list)
             if (!string.IsNullOrEmpty(entry))

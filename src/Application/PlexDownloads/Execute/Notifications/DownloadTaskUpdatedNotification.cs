@@ -39,7 +39,7 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdatedNot
         );
 
         // Update the front-end with the download progress
-        await _signalRService.SendDownloadProgressUpdateAsync(plexServerId, downloadTasks, cancellationToken);
+        await _signalRService.SendDownloadProgressUpdateAsync(downloadTasks, cancellationToken);
 
         // If the download task is finished, create a file task and start the file merge job
         var changedDownloadTask = await _dbContext.GetDownloadTaskAsync(notification.Key, cancellationToken);

@@ -9,8 +9,10 @@
  * ---------------------------------------------------------------
  */
 
-import { AuthPin, PlexAccountDTO, ResultDTO, UpdatePlexAccountDTO } from './data-contracts';
-import { ContentType, RequestParams } from './http-client';
+import type { RequestParams } from './http-client';
+import { ContentType } from './http-client';
+
+import type { AuthPin, PlexAccountDTO, ResultDTO, UpdatePlexAccountDTO } from './data-contracts';
 
 import { apiCheckPipe } from '@api/base';
 import Axios from 'axios';

@@ -20,7 +20,7 @@ public class DownloadJob_UnitTests : BaseUnitTest<DownloadJob>
         {
             config.MovieDownloadTasksCount = 5;
         });
-        var testDownloadTask = DbContext.DownloadTaskMovieFile.First();
+        var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
         mock.Mock<IDownloadManagerSettingsModule>().Setup(x => x.DownloadSegments).Returns(4);
         IDictionary<string, object> dict = new Dictionary<string, object>
         {
@@ -41,7 +41,7 @@ public class DownloadJob_UnitTests : BaseUnitTest<DownloadJob>
         await _sut.Execute(mock.Create<IJobExecutionContext>());
 
         // Assert
-        var downloadWorkerTasks = await DbContext.DownloadWorkerTasks.ToListAsync();
+        var downloadWorkerTasks = await IDbContext.DownloadWorkerTasks.ToListAsync();
         downloadWorkerTasks.Count.ShouldBe(4);
         downloadWorkerTasks.ShouldAllBe(x => x.DownloadTaskId == testDownloadTask.Id);
     }

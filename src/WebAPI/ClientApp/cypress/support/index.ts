@@ -1,6 +1,6 @@
 import type { IBasePageSetupResult } from '@fixtures/baseE2E';
 import type { MockConfig } from '@mock';
-import { JobStatus, JobTypes, PlexServerDTO } from '@dto';
+import { JobStatus, JobTypes, type PlexServerDTO } from '@dto';
 
 declare global {
 	namespace Cypress {

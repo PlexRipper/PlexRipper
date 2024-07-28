@@ -9,7 +9,10 @@
  * ---------------------------------------------------------------
  */
 
-import {
+import type { RequestParams } from './http-client';
+import { ContentType } from './http-client';
+
+import type {
 	DownloadMediaDTO,
 	DownloadPreviewDTO,
 	DownloadTaskDTO,
@@ -17,7 +20,6 @@ import {
 	ResultDTO,
 	ServerDownloadProgressDTO,
 } from './data-contracts';
-import { ContentType, RequestParams } from './http-client';
 
 import { apiCheckPipe } from '@api/base';
 import Axios from 'axios';

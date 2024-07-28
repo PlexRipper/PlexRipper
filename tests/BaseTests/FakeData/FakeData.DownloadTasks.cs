@@ -10,7 +10,7 @@ public static partial class FakeData
     private static Faker<T> ApplyDownloadTaskBase<T>(
         this Faker<T> faker,
         int seed = 0,
-        Action<FakeDataConfig> options = null
+        Action<FakeDataConfig>? options = null
     )
         where T : DownloadTaskBase
     {
@@ -18,7 +18,7 @@ public static partial class FakeData
             .StrictMode(true)
             .UseSeed(seed)
             .RuleFor(x => x.Id, _ => Guid.Empty)
-            .RuleFor(x => x.Key, _ => _random.Next(1, 10000))
+            .RuleFor(x => x.Key, _ => GetUniqueNumber())
             .RuleFor(x => x.Title, _ => "")
             .RuleFor(x => x.FullTitle, _ => "")
             .RuleFor(x => x.DownloadStatus, _ => DownloadStatus.Queued)
@@ -33,7 +33,7 @@ public static partial class FakeData
     public static Faker<T> ApplyDownloadTaskParentBase<T>(
         this Faker<T> faker,
         int seed = 0,
-        Action<FakeDataConfig> options = null
+        Action<FakeDataConfig>? options = null
     )
         where T : DownloadTaskParentBase
     {
@@ -61,7 +61,7 @@ public static partial class FakeData
     public static Faker<T> ApplyDownloadTaskFileBase<T>(
         this Faker<T> faker,
         int seed = 0,
-        Action<FakeDataConfig> options = null
+        Action<FakeDataConfig>? options = null
     )
         where T : DownloadTaskFileBase
     {
@@ -103,7 +103,7 @@ public static partial class FakeData
 
     #region Movie
 
-    public static Faker<DownloadTaskMovie> GetMovieDownloadTask(int seed = 0, Action<FakeDataConfig> options = null)
+    public static Faker<DownloadTaskMovie> GetMovieDownloadTask(int seed = 0, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
@@ -141,7 +141,7 @@ public static partial class FakeData
 
     public static Faker<DownloadTaskMovieFile> GetDownloadTaskMovieFile(
         int seed = 0,
-        Action<FakeDataConfig> options = null
+        Action<FakeDataConfig>? options = null
     )
     {
         return new Faker<DownloadTaskMovieFile>()
@@ -165,7 +165,7 @@ public static partial class FakeData
 
     #region TvShow
 
-    public static Faker<DownloadTaskTvShow> GetDownloadTaskTvShow(int seed = 0, Action<FakeDataConfig> options = null)
+    public static Faker<DownloadTaskTvShow> GetDownloadTaskTvShow(int seed = 0, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
@@ -213,12 +213,11 @@ public static partial class FakeData
                     });
                 }
             );
-        ;
     }
 
     public static Faker<DownloadTaskTvShowSeason> GetDownloadTaskTvShowSeason(
         int seed = 0,
-        Action<FakeDataConfig> options = null
+        Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
@@ -268,7 +267,7 @@ public static partial class FakeData
 
     public static Faker<DownloadTaskTvShowEpisode> GetDownloadTaskTvShowEpisode(
         int seed = 0,
-        Action<FakeDataConfig> options = null
+        Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
@@ -298,7 +297,7 @@ public static partial class FakeData
 
     public static Faker<DownloadTaskTvShowEpisodeFile> GetDownloadTaskTvShowEpisodeFile(
         int seed = 0,
-        Action<FakeDataConfig> options = null
+        Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
@@ -325,7 +324,7 @@ public static partial class FakeData
 
     #region DownloadWorkerTasks
 
-    public static Faker<DownloadWorkerTask> GetDownloadWorkerTask(int seed = 0, Action<FakeDataConfig> options = null)
+    public static Faker<DownloadWorkerTask> GetDownloadWorkerTask(int seed = 0, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 

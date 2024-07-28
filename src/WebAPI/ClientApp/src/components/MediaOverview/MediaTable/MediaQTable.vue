@@ -100,6 +100,7 @@ const getSelected = computed((): PlexMediaSlimDTO[] => {
 
 const qTableProps = computed((): QTableProps => {
 	return {
+		rows: [],
 		columns: mediaTableColumns.map((x) => {
 			return {
 				label: x.label,

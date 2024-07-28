@@ -1,5 +1,4 @@
-using Data.Contracts;
-using PlexRipper.Data.PlexLibraries;
+using PlexRipper.Application;
 
 namespace Data.UnitTests.PlexLibraries;
 
@@ -19,8 +18,8 @@ public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest
             config.PlexAccountCount = 1;
         });
 
-        var plexAccount = DbContext.PlexAccounts.FirstOrDefault();
-        var plexServer = DbContext.PlexServers.FirstOrDefault();
+        var plexAccount = IDbContext.PlexAccounts.FirstOrDefault();
+        var plexServer = IDbContext.PlexServers.FirstOrDefault();
 
         var plexLibraries = FakeData.GetPlexLibrary(656324).Generate(5);
         foreach (var plexLibrary in plexLibraries)
@@ -28,15 +27,14 @@ public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest
 
         // Act
         var request = new AddOrUpdatePlexLibrariesCommand(plexAccount.Id, plexLibraries);
-        var handler = new AddOrUpdatePlexLibrariesCommandHandler(_log, DbContext);
+        var handler = new AddOrUpdatePlexLibrariesCommandHandler(Log, IDbContext);
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
-        ResetDbContext();
         result.IsSuccess.ShouldBeTrue();
-        var plexLibrariesDb = DbContext.PlexLibraries.ToList();
+        var plexLibrariesDb = IDbContext.PlexLibraries.ToList();
         plexLibrariesDb.Count.ShouldBe(5);
-        var plexAccountLibrariesDb = DbContext.PlexAccountLibraries.ToList();
+        var plexAccountLibrariesDb = IDbContext.PlexAccountLibraries.ToList();
         plexAccountLibrariesDb.Count.ShouldBe(5);
 
         foreach (var expectedPlexLibrary in plexLibraries)
@@ -64,9 +62,11 @@ public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest
             config.PlexAccountCount = 1;
         });
 
-        var plexServer = DbContext.PlexServers.FirstOrDefault();
-        var plexLibraries = DbContext.PlexLibraries.ToList();
-        var plexAccount = DbContext.PlexAccounts.FirstOrDefault();
+        var dbContext = IDbContext;
+        var plexServer = dbContext.PlexServers.FirstOrDefault();
+        plexServer.ShouldNotBeNull();
+        var plexLibraries = dbContext.PlexLibraries.ToList();
+        var plexAccount = dbContext.PlexAccounts.FirstOrDefault();
         var updatedTime = DateTime.Now;
 
         // Mimic API data
@@ -80,15 +80,14 @@ public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest
 
         // Act
         var request = new AddOrUpdatePlexLibrariesCommand(plexAccount.Id, plexLibraries);
-        var handler = new AddOrUpdatePlexLibrariesCommandHandler(_log, GetDbContext());
+        var handler = new AddOrUpdatePlexLibrariesCommandHandler(Log, GetDbContext());
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
-        ResetDbContext();
         result.IsSuccess.ShouldBeTrue();
-        var plexLibrariesDb = DbContext.PlexLibraries.ToList();
+        var plexLibrariesDb = IDbContext.PlexLibraries.ToList();
         plexLibrariesDb.Count.ShouldBe(5);
-        var plexAccountLibrariesDb = DbContext.PlexAccountLibraries.ToList();
+        var plexAccountLibrariesDb = IDbContext.PlexAccountLibraries.ToList();
         plexAccountLibrariesDb.Count.ShouldBe(5);
 
         foreach (var expectedPlexLibrary in plexLibraries)

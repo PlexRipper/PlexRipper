@@ -14,22 +14,21 @@ public class NSwagAddExtraTypes : IDocumentProcessor
     public void Process(DocumentProcessorContext context)
     {
         List<Type> types =
-            new()
-            {
-                typeof(MessageTypes),
-                typeof(JobTypes),
-                typeof(JobStatus),
-                typeof(JobStatusUpdateDTO),
-                typeof(DownloadTaskCreationProgress),
-                typeof(LibraryProgress),
-                typeof(InspectServerProgressDTO),
-                typeof(FileMergeProgress),
-                typeof(NotificationDTO),
-                typeof(SyncServerProgress),
-                typeof(DownloadProgressDTO),
-                typeof(ServerDownloadProgressDTO),
-                typeof(ServerConnectionCheckStatusProgressDTO),
-            };
+        [
+            typeof(MessageTypes),
+            typeof(JobTypes),
+            typeof(JobStatus),
+            typeof(JobStatusUpdateDTO),
+            typeof(DownloadTaskCreationProgress),
+            typeof(LibraryProgress),
+            typeof(InspectServerProgressDTO),
+            typeof(FileMergeProgress),
+            typeof(NotificationDTO),
+            typeof(SyncServerProgress),
+            typeof(DownloadProgressDTO),
+            typeof(ServerDownloadProgressDTO),
+            typeof(ServerConnectionCheckStatusProgressDTO),
+        ];
 
         foreach (var type in types.Where(type => !context.SchemaResolver.HasSchema(type, false)))
             context.SchemaGenerator.Generate(type, context.SchemaResolver);

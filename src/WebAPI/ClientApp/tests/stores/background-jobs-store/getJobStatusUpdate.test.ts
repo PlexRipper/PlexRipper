@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, test } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { baseSetup, subscribeSpyTo } from '@services-test-base';
 import { useBackgroundJobsStore } from '#build/imports';
-import { JobStatus, JobStatusUpdateDTO, JobTypes } from '@dto';
+import { JobStatus, type JobStatusUpdateDTO, JobTypes } from '@dto';
 
 describe('BackgroundJobsStore.getJobStatusUpdate()', () => {
 	beforeAll(() => {

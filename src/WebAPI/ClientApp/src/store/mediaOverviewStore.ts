@@ -32,6 +32,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 
 	const actions = {
 		setMedia(items: PlexMediaSlimDTO[], mediaType: PlexMediaType) {
+			state.scrollDict = {};
 			state.items = items;
 			state.itemsLength = items.length;
 			state.mediaType = mediaType;

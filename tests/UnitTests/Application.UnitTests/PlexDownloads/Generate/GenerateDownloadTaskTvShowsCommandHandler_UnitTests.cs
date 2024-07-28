@@ -44,7 +44,6 @@ public class GenerateDownloadTaskTvShowsCommandHandler_UnitTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        ResetDbContext();
         var downloadTaskTvShows = await IDbContext.GetAllDownloadTasksByServerAsync();
 
         downloadTaskTvShows.Count.ShouldBe(5);

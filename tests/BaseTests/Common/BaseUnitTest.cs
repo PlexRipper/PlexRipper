@@ -2,7 +2,6 @@ using Autofac;
 using Data.Contracts;
 using Logging.Interface;
 using PlexRipper.Data;
-using PlexRipper.WebAPI;
 using Serilog;
 using Serilog.Events;
 using Log = Logging.Log;
@@ -14,10 +13,8 @@ public class BaseUnitTest : IDisposable
     #region Fields
 
     private string _databaseName;
-    protected PlexRipperDbContext DbContext;
-    private bool disableForeignKeyCheck;
-    private bool isDatabaseSetup;
-    protected ILog _log;
+    private bool _isDatabaseSetup;
+    protected readonly ILog Log;
 
     #endregion
 
@@ -33,7 +30,7 @@ public class BaseUnitTest : IDisposable
         LogConfig.SetTestOutputHelper(output);
         LogManager.SetupLogging(logEventLevel);
         BogusExtensions.Setup();
-        _log = LogManager.CreateLogInstance(output, typeof(BaseUnitTest), logEventLevel);
+        Log = LogManager.CreateLogInstance(output, typeof(BaseUnitTest), logEventLevel);
     }
 
     #endregion
@@ -49,57 +46,41 @@ public class BaseUnitTest : IDisposable
     // ReSharper disable once InconsistentNaming
     protected IPlexRipperDbContext IDbContext => GetDbContext();
 
-    #endregion
-
-    #region Methods
-
-    #region Public
-
-    public virtual void Dispose()
-    {
-        DbContext?.Dispose();
-    }
+    private List<PlexRipperDbContext> _dbContexts = new();
 
     #endregion
-
-    #endregion
-
-    /// <summary>
-    /// Create a new <see cref="PlexRipperDbContext"/> instance for the same in memory database and assign it to DbContext.
-    /// This is useful to recreate a DbContext that should not be reused between operations.
-    /// </summary>
-    protected void ResetDbContext()
-    {
-        DbContext = GetDbContext();
-    }
 
     protected PlexRipperDbContext GetDbContext()
     {
-        if (!isDatabaseSetup)
+        if (!_isDatabaseSetup)
         {
-            var logEvent = _log.ErrorLine(
+            var logEvent = Log.ErrorLine(
                 "The test database has not been setup yet, run SetupDatabase() in the test first!"
             );
             throw new Exception(logEvent.ToLogString());
         }
 
-        return MockDatabase.GetMemoryDbContext(_databaseName, disableForeignKeyCheck);
+        _dbContexts.Add(MockDatabase.GetMemoryDbContext(_databaseName));
+        return _dbContexts.Last();
     }
 
     /// <summary>
     /// Creates and maintains a unique in memory database <see cref="PlexRipperDbContext"/> for every test.
     /// </summary>
     /// <param name="options"></param>
-    protected async Task SetupDatabase(Action<FakeDataConfig> options = null)
+    protected async Task SetupDatabase(Action<FakeDataConfig>? options = null)
     {
-        isDatabaseSetup = true;
-
-        var config = FakeDataConfig.FromOptions(options);
-        disableForeignKeyCheck = config.DisableForeignKeyCheck;
-
         // Database context can be setup once and then retrieved by its DB name.
-        DbContext = await GetDbContext().Setup(Seed, options);
-        _databaseName = DbContext.DatabaseName;
+        var dbContext = await MockDatabase.GetMemoryDbContext().Setup(Seed, options);
+        _databaseName = dbContext.DatabaseName;
+        _dbContexts.Add(dbContext);
+        _isDatabaseSetup = true;
+    }
+
+    public virtual void Dispose()
+    {
+        if (_isDatabaseSetup)
+            _dbContexts.ForEach(x => x.Dispose());
     }
 }
 
@@ -151,10 +132,10 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
 
     #region Public
 
-    public override void Dispose()
+    public new virtual void Dispose()
     {
         base.Dispose();
-        mock?.Dispose();
+        mock.Dispose();
     }
 
     #endregion

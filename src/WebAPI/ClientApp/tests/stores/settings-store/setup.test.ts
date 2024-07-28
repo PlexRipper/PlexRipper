@@ -4,7 +4,7 @@ import { subscribeSpyTo, baseSetup, baseVars, getAxiosMock } from '@services-tes
 import { generateResultDTO, generateSettingsModel } from '@mock';
 import type { ISetupResult } from '@interfaces';
 import { SettingsPaths } from '@api-urls';
-import { useSettingsStore } from '#imports';
+import { useSettingsStore } from '@store';
 
 describe('SettingsStore.setup()', () => {
 	// eslint-disable-next-line prefer-const

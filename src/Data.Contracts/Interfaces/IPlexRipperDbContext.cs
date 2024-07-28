@@ -5,7 +5,7 @@ using PlexRipper.Domain;
 
 namespace Data.Contracts;
 
-public interface IPlexRipperDbContext
+public interface IPlexRipperDbContext : IDisposable
 {
     public DbSet<PlexAccount> PlexAccounts { get; set; }
     public DbSet<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
@@ -28,10 +28,15 @@ public interface IPlexRipperDbContext
     public DbSet<PlexServerStatus> PlexServerStatuses { get; set; }
     public DbSet<PlexAccountServer> PlexAccountServers { get; set; }
     public DbSet<PlexAccountLibrary> PlexAccountLibraries { get; set; }
+
     public DbSet<PlexMovieGenre> PlexMovieGenres { get; set; }
+
     public DbSet<PlexMovieRole> PlexMovieRoles { get; set; }
+
     public string DatabaseName { get; set; }
+
     public string DatabasePath { get; set; }
+
     public string ConfigDirectory { get; set; }
 
     public DbSet<DownloadTaskMovie> DownloadTaskMovie { get; set; }
@@ -48,14 +53,10 @@ public interface IPlexRipperDbContext
 
     public EntityEntry Entry(object entity);
 
-    /// <summary>
-    /// Determines if this <see cref="PlexRipperDbContext"/> has been setup already during integration or unit testing.
-    /// </summary>
-    public bool HasBeenSetup { get; set; }
-
     public int SaveChanges();
     public int SaveChanges(bool acceptAllChangesOnSuccess);
-    public Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
     public Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken);
 
     public Task BulkInsertAsync<T>(

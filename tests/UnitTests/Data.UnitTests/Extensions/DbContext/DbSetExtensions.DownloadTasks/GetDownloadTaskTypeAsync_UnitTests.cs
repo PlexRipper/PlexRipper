@@ -14,7 +14,6 @@ public class GetDownloadTaskTypeAsync_UnitTests : BaseUnitTest
         // Arrange
         await SetupDatabase(config =>
         {
-            config.DisableForeignKeyCheck = true;
             config.MovieDownloadTasksCount = 5;
         });
         var downloadTasks = await IDbContext.DownloadTaskMovie.ToListAsync();
@@ -33,7 +32,6 @@ public class GetDownloadTaskTypeAsync_UnitTests : BaseUnitTest
         // Arrange
         await SetupDatabase(config =>
         {
-            config.DisableForeignKeyCheck = true;
             config.TvShowDownloadTasksCount = 2;
         });
         var downloadTasks = await IDbContext.DownloadTaskTvShow.ToListAsync();
@@ -52,7 +50,6 @@ public class GetDownloadTaskTypeAsync_UnitTests : BaseUnitTest
         // Arrange
         await SetupDatabase(config =>
         {
-            config.DisableForeignKeyCheck = true;
             config.TvShowDownloadTasksCount = 3;
         });
         var downloadTasks = await IDbContext.DownloadTaskTvShowSeason.ToListAsync();
@@ -71,7 +68,6 @@ public class GetDownloadTaskTypeAsync_UnitTests : BaseUnitTest
         // Arrange
         await SetupDatabase(config =>
         {
-            config.DisableForeignKeyCheck = true;
             config.TvShowDownloadTasksCount = 2;
         });
         var downloadTasks = await IDbContext.DownloadTaskTvShowEpisode.ToListAsync();

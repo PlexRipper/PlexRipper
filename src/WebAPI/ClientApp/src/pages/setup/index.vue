@@ -147,9 +147,6 @@
 					<q-col align-self="stretch" cols="12">
 						<q-separator class="q-mb-md" />
 						<q-row align="center">
-							<q-col cols="auto" align-self="start" class="q-mx-md">
-								<DarkModeToggleButton />
-							</q-col>
 							<q-col>
 								<q-row justify="center">
 									<q-col v-if="!isNextDisabled" class="q-mx-md" cols="2">

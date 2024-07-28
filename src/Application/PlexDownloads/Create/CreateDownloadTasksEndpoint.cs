@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
-public class CreateDownloadTasksEndpointRequest
+public record CreateDownloadTasksEndpointRequest
 {
     [FromBody]
     public List<DownloadMediaDTO> DownloadMedias { get; init; }

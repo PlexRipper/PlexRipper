@@ -89,8 +89,7 @@ import { useSubscription } from '@vueuse/rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { get, set } from '@vueuse/core';
 import Log from 'consola';
-import { JobTypes, JobStatus, PlexServerDTO } from '@dto';
-import type { ServerConnectionCheckStatusProgressDTO } from '@dto';
+import { JobTypes, JobStatus, type PlexServerDTO, type ServerConnectionCheckStatusProgressDTO } from '@dto';
 import { useBackgroundJobsStore, useI18n, useOpenControlDialog, useServerStore, useSignalrStore } from '#imports';
 
 const { t } = useI18n();

@@ -6,7 +6,7 @@ public record CheckDownloadQueueNotification : INotification
 {
     public CheckDownloadQueueNotification(int plexServerId)
     {
-        PlexServerIds = new List<int>() { plexServerId };
+        PlexServerIds = [plexServerId];
     }
 
     public CheckDownloadQueueNotification(List<int> plexServerIds)

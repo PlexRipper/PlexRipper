@@ -16,7 +16,7 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
 
     public PlexRipperWebApplicationFactory(
         string memoryDbName,
-        Action<UnitTestDataConfig> options = null,
+        Action<UnitTestDataConfig>? options = null,
         MockPlexApi mockPlexApi = null
     )
     {

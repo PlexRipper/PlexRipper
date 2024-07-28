@@ -17,8 +17,8 @@ public class MockPlexApi
     private readonly MockPlexApiConfig _config;
     private readonly PlexApiDataConfig _fakeDataConfig;
     private readonly ILog _log;
-    private readonly List<Uri> _serverUris = new();
-    private readonly System.Net.Http.HttpClient _client = new();
+    private readonly List<Uri> _serverUris;
+    private readonly HttpClient _client = new();
 
     #endregion
 
@@ -82,10 +82,8 @@ public class MockPlexApi
         SetupTimeOutConnections();
     }
 
-    private static HttpRequestInterceptionBuilder BaseRequest()
-    {
-        return new HttpRequestInterceptionBuilder().Requests().ForHttps().ForHost(PlexApiPaths.Host);
-    }
+    private static HttpRequestInterceptionBuilder BaseRequest() =>
+        new HttpRequestInterceptionBuilder().Requests().ForHttps().ForHost(PlexApiPaths.Host);
 
     private void SetupServerResources(MockPlexApiConfig config)
     {
@@ -111,9 +109,7 @@ public class MockPlexApi
             query.Responds().WithStatus(200).WithJsonContent(servers);
         }
         else
-        {
             query.Responds().WithStatus(401).WithJsonContent(FakePlexApiData.GetFailedServerResourceResponse());
-        }
 
         query.RegisterWith(_clientOptions);
     }
@@ -130,9 +126,7 @@ public class MockPlexApi
                 .WithJsonContent(FakePlexApiData.GetPlexSignInResponse().Generate());
         }
         else
-        {
             query.Responds().WithStatus(401).WithJsonContent(FakePlexApiData.GetFailedPlexSignInResponse());
-        }
 
         query.RegisterWith(_clientOptions);
     }
@@ -155,10 +149,7 @@ public class MockPlexApi
 
     #region Public
 
-    public System.Net.Http.HttpClient CreateClient()
-    {
-        return _clientOptions.CreateHttpClient();
-    }
+    public HttpClient CreateClient() => _clientOptions.CreateHttpClient();
 
     #endregion
 

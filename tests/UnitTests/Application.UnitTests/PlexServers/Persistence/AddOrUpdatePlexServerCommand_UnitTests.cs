@@ -16,13 +16,12 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
         var expectedPlexServers = FakeData.GetPlexServer(Seed).Generate(5);
 
         // Act
-        var handler = new AddOrUpdatePlexServersCommand(_log, GetDbContext());
+        var handler = new AddOrUpdatePlexServersCommand(Log, GetDbContext());
         var result = await handler.ExecuteAsync(expectedPlexServers, CancellationToken.None);
 
         // Assert
-        ResetDbContext();
         result.IsSuccess.ShouldBeTrue();
-        var plexServersDbs = DbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
+        var plexServersDbs = IDbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
         plexServersDbs.Count.ShouldBe(5);
 
         foreach (var expectedPlexServer in expectedPlexServers)
@@ -41,7 +40,7 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
         // Arrange
         Seed = 23724;
         await SetupDatabase(config => config.PlexServerCount = 5);
-        var plexServers = DbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
+        var plexServers = IDbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
         plexServers.Count.ShouldBe(5);
 
         // Update data setup
@@ -61,13 +60,12 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
 
         // Act
         // Now update
-        var handler = new AddOrUpdatePlexServersCommand(_log, GetDbContext());
+        var handler = new AddOrUpdatePlexServersCommand(Log, GetDbContext());
         var updateResult = await handler.ExecuteAsync(updatedServers, CancellationToken.None);
-        ResetDbContext();
 
         // Assert
         updateResult.IsSuccess.ShouldBeTrue();
-        var plexServersDbs = DbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
+        var plexServersDbs = IDbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
         plexServersDbs.Count.ShouldBe(5);
 
         foreach (var expectedServer in updatedServers)
@@ -93,7 +91,7 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
         // Arrange
         Seed = 23724;
         await SetupDatabase(config => config.PlexServerCount = 5);
-        var plexServers = DbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
+        var plexServers = IDbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
         var changedPlexServers = FakeData.GetPlexServer(9236).Generate(3);
 
         var expectedPlexServers = new List<PlexServer>()
@@ -111,19 +109,17 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
 
         // Act
         // First add the 5 servers
-        var handler = new AddOrUpdatePlexServersCommand(_log, GetDbContext());
+        var handler = new AddOrUpdatePlexServersCommand(Log, GetDbContext());
         var addResult = await handler.ExecuteAsync(plexServers, CancellationToken.None);
 
         // Now update
-        ResetDbContext();
-        handler = new AddOrUpdatePlexServersCommand(_log, GetDbContext());
+        handler = new AddOrUpdatePlexServersCommand(Log, GetDbContext());
         var updateResult = await handler.ExecuteAsync(changedPlexServers, CancellationToken.None);
 
         // Assert
-        ResetDbContext();
         addResult.IsSuccess.ShouldBeTrue();
         updateResult.IsSuccess.ShouldBeTrue();
-        var plexServersDbs = DbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
+        var plexServersDbs = IDbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
         plexServersDbs.Count.ShouldBe(5);
 
         foreach (var expectedPlexServer in expectedPlexServers)

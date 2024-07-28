@@ -4,7 +4,7 @@ import { subscribeSpyTo, baseSetup, baseVars, getAxiosMock } from '@services-tes
 import { PlexServerPaths } from '@api/api-paths';
 import { generatePlexServers, generateResultDTO } from '@mock';
 import type { ISetupResult } from '@interfaces';
-import { useServerStore } from '#imports';
+import { useServerStore } from '@store';
 
 describe('ServerStore.setup()', () => {
 	let { mock, config } = baseVars();

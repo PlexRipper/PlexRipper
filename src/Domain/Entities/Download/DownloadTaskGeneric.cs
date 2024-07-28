@@ -40,7 +40,7 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
 
     public required bool IsDownloadable { get; init; }
 
-    public required long TimeRemaining { get; init; }
+    public required long TimeRemaining { get; set; }
 
     /// <summary>
     /// Gets or sets the download directory appended to the MediaPath e.g: [DownloadPath]/[TvShow]/[Season]/ or  [DownloadPath]/[Movie]/.
@@ -75,11 +75,11 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
 
     public required Guid ParentId { get; init; }
 
-    public required PlexServer PlexServer { get; init; }
+    public required PlexServer? PlexServer { get; init; }
 
     public required int PlexServerId { get; init; }
 
-    public required PlexLibrary PlexLibrary { get; init; }
+    public required PlexLibrary? PlexLibrary { get; init; }
 
     public required int PlexLibraryId { get; init; }
 

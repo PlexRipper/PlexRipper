@@ -1,5 +1,5 @@
 <template>
-	<IconButton :icon="icon" @click="toggleDarkMode" />
+	<IconButton :icon="icon" @click="toggleAnimationMode" />
 </template>
 
 <script setup lang="ts">
@@ -12,7 +12,7 @@ const icon = computed((): string => {
 	return settingsStore.generalSettings.disableAnimatedBackground ? 'mdi-play' : 'mdi-stop';
 });
 
-function toggleDarkMode(): void {
+function toggleAnimationMode(): void {
 	settingsStore.generalSettings.disableAnimatedBackground = !settingsStore.generalSettings.disableAnimatedBackground;
 }
 </script>

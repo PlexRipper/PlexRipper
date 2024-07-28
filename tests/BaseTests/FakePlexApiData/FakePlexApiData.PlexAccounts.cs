@@ -6,7 +6,7 @@ namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
-    public static Faker<SignInResponse> GetPlexSignInResponse(Action<UnitTestDataConfig> options = null)
+    public static Faker<SignInResponse> GetPlexSignInResponse(Action<UnitTestDataConfig>? options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
@@ -59,15 +59,15 @@ public partial class FakePlexApiData
     {
         return new PlexErrorsResponseDTO()
         {
-            Errors = new List<PlexErrorDTO>()
-            {
+            Errors =
+            [
                 new()
                 {
                     Code = 1001,
                     Message = "User could not be authenticated",
                     Status = 401,
                 },
-            },
+            ],
         };
     }
 }

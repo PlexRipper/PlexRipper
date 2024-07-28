@@ -10,14 +10,14 @@ public static partial class DbSetExtensions
         int id,
         CancellationToken cancellationToken = default
     )
-        where TEntity : class => await dbSet.FindAsync(new object[] { id }, cancellationToken);
+        where TEntity : class => await dbSet.FindAsync([id], cancellationToken);
 
     public static async Task<TEntity?> GetAsync<TEntity>(
         this DbSet<TEntity> dbSet,
         Guid guid,
         CancellationToken cancellationToken = default
     )
-        where TEntity : class => await dbSet.FindAsync(new object[] { guid }, cancellationToken);
+        where TEntity : class => await dbSet.FindAsync([guid], cancellationToken);
 
     public static async Task<TEntity?> GetAsync<TEntity>(
         this IQueryable<TEntity> queryable,

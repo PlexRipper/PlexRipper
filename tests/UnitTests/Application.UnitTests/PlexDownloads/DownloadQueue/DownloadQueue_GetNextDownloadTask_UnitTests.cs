@@ -15,7 +15,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
         {
             config.TvShowDownloadTasksCount = 5;
         });
-        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync();
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
 
         // Act
         var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
@@ -34,9 +34,9 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
         {
             config.TvShowDownloadTasksCount = 5;
         });
-        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
-        await DbContext.SaveChangesAsync();
+        await IDbContext.SaveChangesAsync();
 
         // Act
         var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
@@ -56,11 +56,11 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
             config.TvShowDownloadTasksCount = 5;
         });
 
-        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Downloading);
         foreach (var child in downloadTasks[0].Children)
             child.SetDownloadStatus(DownloadStatus.Queued);
-        await DbContext.SaveChangesAsync();
+        await IDbContext.SaveChangesAsync();
 
         // Act
         var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
@@ -80,9 +80,9 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
             config.TvShowDownloadTasksCount = 5;
         });
 
-        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Downloading);
-        await DbContext.SaveChangesAsync();
+        await IDbContext.SaveChangesAsync();
 
         // Act
         var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
@@ -100,13 +100,13 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
             config.MovieDownloadTasksCount = 5;
         });
 
-        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Merging);
         downloadTasks[1].SetDownloadStatus(DownloadStatus.DownloadFinished);
         downloadTasks[2].SetDownloadStatus(DownloadStatus.DownloadFinished);
         downloadTasks[3].SetDownloadStatus(DownloadStatus.DownloadFinished);
         downloadTasks[4].SetDownloadStatus(DownloadStatus.DownloadFinished);
-        await DbContext.SaveChangesAsync();
+        await IDbContext.SaveChangesAsync();
 
         // Act
         var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);
@@ -124,13 +124,13 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
             config.MovieDownloadTasksCount = 5;
         });
 
-        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Merging);
         downloadTasks[1].SetDownloadStatus(DownloadStatus.DownloadFinished);
         downloadTasks[2].SetDownloadStatus(DownloadStatus.DownloadFinished);
         downloadTasks[3].SetDownloadStatus(DownloadStatus.DownloadFinished);
         downloadTasks[4].SetDownloadStatus(DownloadStatus.Queued);
-        await DbContext.SaveChangesAsync();
+        await IDbContext.SaveChangesAsync();
 
         // Act
         var nextDownloadTask = _sut.GetNextDownloadTask(downloadTasks);

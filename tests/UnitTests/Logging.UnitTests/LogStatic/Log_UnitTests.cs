@@ -5,14 +5,14 @@ namespace Logging.UnitTests;
 
 public class Log_UnitTests : BaseUnitTest<Log_UnitTests>
 {
-    private ILog<Log_UnitTests> log;
-    private ILog logEmpty;
+    private readonly ILog<Log_UnitTests> _log;
+    private readonly ILog _logEmpty;
 
     public Log_UnitTests(ITestOutputHelper output)
         : base(output, LogEventLevel.Verbose)
     {
-        log = LogManager.CreateLogInstance<Log_UnitTests>(output, LogEventLevel.Verbose);
-        logEmpty = LogManager.CreateLogInstance(output, LogEventLevel.Verbose);
+        _log = LogManager.CreateLogInstance<Log_UnitTests>(output, LogEventLevel.Verbose);
+        _logEmpty = LogManager.CreateLogInstance(output, LogEventLevel.Verbose);
     }
 
     [Fact]
@@ -21,7 +21,7 @@ public class Log_UnitTests : BaseUnitTest<Log_UnitTests>
         // Arrange
 
         // Act
-        var logLevelSet = _log.IsLogLevelEnabled(LogEventLevel.Verbose);
+        var logLevelSet = Log.IsLogLevelEnabled(LogEventLevel.Verbose);
 
         // Assert
 
@@ -33,37 +33,37 @@ public class Log_UnitTests : BaseUnitTest<Log_UnitTests>
     {
         var position = new { Latitude = 25, Longitude = 134 };
 
-        var verboseLogEvent = log.Verbose(
+        var verboseLogEvent = _log.Verbose(
             "This is a verbose string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
             position,
             9999,
             true
         );
-        var debugLogEvent = log.Debug(
+        var debugLogEvent = _log.Debug(
             "This is a debug string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
             position,
             9999,
             true
         );
-        var warningLogEvent = log.Warning(
+        var warningLogEvent = _log.Warning(
             "This is a warning string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
             position,
             9999,
             true
         );
-        var informationLogEvent = log.Information(
+        var informationLogEvent = _log.Information(
             "This is an information string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
             position,
             9999,
             true
         );
-        var errorLogEvent = log.Error(
+        var errorLogEvent = _log.Error(
             "This is an error string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
             position,
             9999,
             true
         );
-        var fatalLogEvent = log.Fatal(
+        var fatalLogEvent = _log.Fatal(
             "This is a fatal string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
             position,
             9999,
@@ -83,37 +83,37 @@ public class Log_UnitTests : BaseUnitTest<Log_UnitTests>
     {
         var position = new { Latitude = 25, Longitude = 134 };
 
-        var verboseLogEvent = log.Verbose(
+        var verboseLogEvent = _log.Verbose(
             "This is a verbose string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
             position,
             9999,
             true
         );
-        var debugLogEvent = log.Debug(
+        var debugLogEvent = _log.Debug(
             "This is a debug string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
             position,
             9999,
             true
         );
-        var warningLogEvent = log.Warning(
+        var warningLogEvent = _log.Warning(
             "This is a warning string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
             position,
             9999,
             true
         );
-        var informationLogEvent = log.Information(
+        var informationLogEvent = _log.Information(
             "This is an information string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
             position,
             9999,
             true
         );
-        var errorLogEvent = log.Error(
+        var errorLogEvent = _log.Error(
             "This is an error string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
             position,
             9999,
             true
         );
-        var fatalLogEvent = log.Fatal(
+        var fatalLogEvent = _log.Fatal(
             "This is a fatal string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
             position,
             9999,
@@ -149,7 +149,7 @@ public class Log_UnitTests : BaseUnitTest<Log_UnitTests>
     {
         var position = new { Latitude = 25, Longitude = 134 };
 
-        var verboseLogEvent = logEmpty
+        var verboseLogEvent = _logEmpty
             .Here()
             .Verbose(
                 "This is a verbose string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
@@ -157,7 +157,7 @@ public class Log_UnitTests : BaseUnitTest<Log_UnitTests>
                 9999,
                 true
             );
-        var debugLogEvent = logEmpty
+        var debugLogEvent = _logEmpty
             .Here()
             .Debug(
                 "This is a debug string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
@@ -165,7 +165,7 @@ public class Log_UnitTests : BaseUnitTest<Log_UnitTests>
                 9999,
                 true
             );
-        var warningLogEvent = logEmpty
+        var warningLogEvent = _logEmpty
             .Here()
             .Warning(
                 "This is a warning string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
@@ -173,7 +173,7 @@ public class Log_UnitTests : BaseUnitTest<Log_UnitTests>
                 9999,
                 true
             );
-        var informationLogEvent = logEmpty
+        var informationLogEvent = _logEmpty
             .Here()
             .Information(
                 "This is an information string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
@@ -181,7 +181,7 @@ public class Log_UnitTests : BaseUnitTest<Log_UnitTests>
                 9999,
                 true
             );
-        var errorLogEvent = logEmpty
+        var errorLogEvent = _logEmpty
             .Here()
             .Error(
                 "This is an error string with a json object: {Position}, a number {Count}, a bool: {Boolean}",
@@ -189,7 +189,7 @@ public class Log_UnitTests : BaseUnitTest<Log_UnitTests>
                 9999,
                 true
             );
-        var fatalLogEvent = logEmpty
+        var fatalLogEvent = _logEmpty
             .Here()
             .Fatal(
                 "This is a fatal string with a json object: {Position}, a number {Count}, a bool: {Boolean}",

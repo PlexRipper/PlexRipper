@@ -104,14 +104,9 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
 
     public string ConfigDirectory { get; set; }
 
-    /// <summary>
-    /// Determines if this <see cref="PlexRipperDbContext"/> has been setup already during integration or unit testing.
-    /// </summary>
-    public bool HasBeenSetup { get; set; }
-
     public async Task BulkInsertAsync<T>(
         IList<T> entities,
-        BulkConfig bulkConfig = null,
+        BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
         where T : class
@@ -121,7 +116,7 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
 
     public async Task BulkUpdateAsync<T>(
         IList<T> entities,
-        BulkConfig bulkConfig = null,
+        BulkConfig? bulkConfig = null,
         CancellationToken cancellationToken = default
     )
         where T : class

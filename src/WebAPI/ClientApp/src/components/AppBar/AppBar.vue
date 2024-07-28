@@ -21,9 +21,6 @@
 				<!-- Background Animation Toggle -->
 				<BackgroundAnimationToggleButton />
 
-				<!-- DarkMode toggle -->
-				<DarkModeToggleButton />
-
 				<!-- Account Selector -->
 				<AccountSelector />
 
@@ -35,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { useGlobalStore } from '#imports';
+import { useGlobalStore } from '@store';
 
 const { t } = useI18n();
 const globalStore = useGlobalStore();

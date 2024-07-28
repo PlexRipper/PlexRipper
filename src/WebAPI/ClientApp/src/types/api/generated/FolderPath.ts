@@ -9,8 +9,10 @@
  * ---------------------------------------------------------------
  */
 
-import { FileSystemDTO, FolderPathDTO, ResultDTO } from './data-contracts';
-import { ContentType, RequestParams } from './http-client';
+import type { RequestParams } from './http-client';
+import { ContentType } from './http-client';
+
+import type { FileSystemDTO, FolderPathDTO, ResultDTO } from './data-contracts';
 
 import { apiCheckPipe } from '@api/base';
 import Axios from 'axios';

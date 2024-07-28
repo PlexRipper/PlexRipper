@@ -21,7 +21,7 @@ public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests : Base
         });
 
         // Act
-        var downloadTasks = DbContext.DownloadTaskMovie.IncludeAll().ToList();
+        var downloadTasks = IDbContext.DownloadTaskMovie.IncludeAll().ToList();
 
         // Assert
         downloadTasks.Count.ShouldBe(5);
@@ -50,7 +50,7 @@ public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests : Base
         });
 
         // Act
-        var downloadTasksDb = DbContext.DownloadTaskTvShow.IncludeAll().ToList();
+        var downloadTasksDb = IDbContext.DownloadTaskTvShow.IncludeAll().ToList();
 
         // Assert
         downloadTasksDb.Count.ShouldBe(5);
@@ -70,7 +70,7 @@ public class PlexRipperDbContextExtensions_IncludeDownloadTasks_UnitTests : Base
         });
 
         // Act
-        var downloadTaskTvShows = DbContext.DownloadTaskTvShow.IncludeAll().ToList();
+        var downloadTaskTvShows = IDbContext.DownloadTaskTvShow.IncludeAll().ToList();
 
         // Assert
         downloadTaskTvShows.Count.ShouldBe(5);

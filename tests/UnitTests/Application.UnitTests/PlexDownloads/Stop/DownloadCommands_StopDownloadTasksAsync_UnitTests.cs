@@ -14,7 +14,7 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
     public async Task ShouldHaveFailedResult_WhenGivenAnInvalidId()
     {
         // Arrange
-        await SetupDatabase(config => config.DisableForeignKeyCheck = true);
+        await SetupDatabase();
 
         // Act
         var result = await _sut.Handle(new StopDownloadTaskCommand(Guid.Empty), CancellationToken.None);
@@ -62,7 +62,7 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
         {
             config.MovieDownloadTasksCount = 2;
         });
-        var movieDownloadTasks = await DbContext.GetAllDownloadTasksByServerAsync();
+        var movieDownloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
 
         mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))

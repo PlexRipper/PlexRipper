@@ -39,11 +39,7 @@ public static class LogConfig
             config.Enrich.WithSensitiveDataMasking(options =>
             {
                 options.MaskingOperators.Clear();
-                options.MaskingOperators = new List<IMaskingOperator>()
-                {
-                    new EmailAddressMaskingOperator(),
-                    new UrlMaskingOperator(),
-                };
+                options.MaskingOperators = [new EmailAddressMaskingOperator(), new UrlMaskingOperator(),];
                 options.MaskProperties.Add("PlexLibraryTitle");
                 options.MaskProperties.Add("PlexAccountDisplayName");
                 options.MaskProperties.Add("PlexLibraryName");

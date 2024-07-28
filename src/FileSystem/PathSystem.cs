@@ -35,7 +35,7 @@ public class PathSystem : IPathSystem
     {
         try
         {
-            return Result.Ok(Path.GetDirectoryName(filePath));
+            return Result.Ok(Path.GetDirectoryName(filePath) ?? string.Empty);
         }
         catch (Exception e)
         {

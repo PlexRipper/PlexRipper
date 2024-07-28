@@ -9,8 +9,9 @@
  * ---------------------------------------------------------------
  */
 
-import { PlexServerConnectionDTO, PlexServerStatusDTO } from './data-contracts';
-import { RequestParams } from './http-client';
+import type { RequestParams } from './http-client';
+
+import type { PlexServerConnectionDTO, PlexServerStatusDTO } from './data-contracts';
 
 import { apiCheckPipe } from '@api/base';
 import Axios from 'axios';

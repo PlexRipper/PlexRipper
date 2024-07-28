@@ -32,9 +32,8 @@
 <script setup lang="ts">
 import Log from 'consola';
 import type { DownloadProgressDTO, PlexServerDTO } from '@dto';
-import type { QTreeViewTableItem } from '@props';
 import { getDownloadTableColumns } from '#imports';
-import { IDownloadTableNode, ISelection } from '@interfaces';
+import type { IDownloadTableNode, ISelection } from '@interfaces';
 import { useDownloadStore, useServerConnectionStore, useServerStore } from '~/store';
 
 const downloadStore = useDownloadStore();

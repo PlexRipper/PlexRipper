@@ -43,7 +43,6 @@ public class MockSignalRService : ISignalRService
     public Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress) => Task.CompletedTask;
 
     public Task SendDownloadProgressUpdateAsync(
-        int plexServerId,
         List<DownloadTaskGeneric> downloadTasks,
         CancellationToken cancellationToken = default
     )

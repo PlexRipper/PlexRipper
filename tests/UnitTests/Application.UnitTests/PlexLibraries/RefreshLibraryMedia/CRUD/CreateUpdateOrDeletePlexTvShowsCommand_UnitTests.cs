@@ -35,7 +35,7 @@ public class CreateUpdateOrDeletePlexTvShowsCommand_UnitTests : BaseUnitTest
 
         // Act
         var request = new CreateUpdateOrDeletePlexTvShowsCommand(library);
-        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(_log, IDbContext);
+        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(Log, IDbContext);
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
@@ -78,7 +78,7 @@ public class CreateUpdateOrDeletePlexTvShowsCommand_UnitTests : BaseUnitTest
 
         // Act
         var request = new CreateUpdateOrDeletePlexTvShowsCommand(library);
-        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(_log, IDbContext);
+        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(Log, IDbContext);
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
@@ -114,7 +114,7 @@ public class CreateUpdateOrDeletePlexTvShowsCommand_UnitTests : BaseUnitTest
 
         // Act
         var request = new CreateUpdateOrDeletePlexTvShowsCommand(library);
-        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(_log, IDbContext);
+        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(Log, IDbContext);
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
@@ -149,7 +149,7 @@ public class CreateUpdateOrDeletePlexTvShowsCommand_UnitTests : BaseUnitTest
 
         // Act
         var request = new CreateUpdateOrDeletePlexTvShowsCommand(library);
-        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(_log, IDbContext);
+        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(Log, IDbContext);
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
@@ -198,7 +198,7 @@ public class CreateUpdateOrDeletePlexTvShowsCommand_UnitTests : BaseUnitTest
 
         // Act
         var request = new CreateUpdateOrDeletePlexTvShowsCommand(library);
-        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(_log, IDbContext);
+        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(Log, IDbContext);
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert

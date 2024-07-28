@@ -14,8 +14,8 @@ public class BaseUnitTest : IDisposable
 
     private string _databaseName;
     protected PlexRipperDbContext DbContext;
-    private bool isDatabaseSetup;
-    protected ILog _log;
+    private bool _isDatabaseSetup;
+    protected readonly ILog Log;
 
     #endregion
 
@@ -31,7 +31,7 @@ public class BaseUnitTest : IDisposable
         LogConfig.SetTestOutputHelper(output);
         LogManager.SetupLogging(logEventLevel);
         BogusExtensions.Setup();
-        _log = LogManager.CreateLogInstance(output, typeof(BaseUnitTest), logEventLevel);
+        Log = LogManager.CreateLogInstance(output, typeof(BaseUnitTest), logEventLevel);
     }
 
     #endregion
@@ -73,9 +73,9 @@ public class BaseUnitTest : IDisposable
 
     protected PlexRipperDbContext GetDbContext()
     {
-        if (!isDatabaseSetup)
+        if (!_isDatabaseSetup)
         {
-            var logEvent = _log.ErrorLine(
+            var logEvent = Log.ErrorLine(
                 "The test database has not been setup yet, run SetupDatabase() in the test first!"
             );
             throw new Exception(logEvent.ToLogString());
@@ -90,7 +90,7 @@ public class BaseUnitTest : IDisposable
     /// <param name="options"></param>
     protected async Task SetupDatabase(Action<FakeDataConfig>? options = null)
     {
-        isDatabaseSetup = true;
+        _isDatabaseSetup = true;
 
         var config = FakeDataConfig.FromOptions(options);
 

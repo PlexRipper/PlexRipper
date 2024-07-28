@@ -10,7 +10,7 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
     public ResultExtensionsLoggingTests(ITestOutputHelper output)
         : base(output, LogEventLevel.Verbose)
     {
-        ResultExtensions.SetLogger(_log);
+        ResultExtensions.SetLogger(Log);
     }
 
     #endregion

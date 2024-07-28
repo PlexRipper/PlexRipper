@@ -16,7 +16,7 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
         var expectedPlexServers = FakeData.GetPlexServer(Seed).Generate(5);
 
         // Act
-        var handler = new AddOrUpdatePlexServersCommand(_log, GetDbContext());
+        var handler = new AddOrUpdatePlexServersCommand(Log, GetDbContext());
         var result = await handler.ExecuteAsync(expectedPlexServers, CancellationToken.None);
 
         // Assert
@@ -61,7 +61,7 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
 
         // Act
         // Now update
-        var handler = new AddOrUpdatePlexServersCommand(_log, GetDbContext());
+        var handler = new AddOrUpdatePlexServersCommand(Log, GetDbContext());
         var updateResult = await handler.ExecuteAsync(updatedServers, CancellationToken.None);
         ResetDbContext();
 
@@ -111,12 +111,12 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
 
         // Act
         // First add the 5 servers
-        var handler = new AddOrUpdatePlexServersCommand(_log, GetDbContext());
+        var handler = new AddOrUpdatePlexServersCommand(Log, GetDbContext());
         var addResult = await handler.ExecuteAsync(plexServers, CancellationToken.None);
 
         // Now update
         ResetDbContext();
-        handler = new AddOrUpdatePlexServersCommand(_log, GetDbContext());
+        handler = new AddOrUpdatePlexServersCommand(Log, GetDbContext());
         var updateResult = await handler.ExecuteAsync(changedPlexServers, CancellationToken.None);
 
         // Assert

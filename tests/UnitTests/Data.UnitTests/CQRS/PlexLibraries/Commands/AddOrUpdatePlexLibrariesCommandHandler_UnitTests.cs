@@ -28,7 +28,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest
 
         // Act
         var request = new AddOrUpdatePlexLibrariesCommand(plexAccount.Id, plexLibraries);
-        var handler = new AddOrUpdatePlexLibrariesCommandHandler(_log, DbContext);
+        var handler = new AddOrUpdatePlexLibrariesCommandHandler(Log, DbContext);
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
@@ -80,7 +80,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest
 
         // Act
         var request = new AddOrUpdatePlexLibrariesCommand(plexAccount.Id, plexLibraries);
-        var handler = new AddOrUpdatePlexLibrariesCommandHandler(_log, GetDbContext());
+        var handler = new AddOrUpdatePlexLibrariesCommandHandler(Log, GetDbContext());
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert

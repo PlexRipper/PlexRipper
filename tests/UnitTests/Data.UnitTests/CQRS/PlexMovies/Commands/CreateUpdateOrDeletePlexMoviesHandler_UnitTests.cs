@@ -24,7 +24,7 @@ public class CreateUpdateOrDeletePlexMoviesHandler_UnitTests : BaseUnitTest
 
         // Act
         var request = new CreateUpdateOrDeletePlexMoviesCommand(library);
-        var handler = new CreateUpdateOrDeletePlexMoviesHandler(_log, GetDbContext());
+        var handler = new CreateUpdateOrDeletePlexMoviesHandler(Log, GetDbContext());
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
@@ -56,7 +56,7 @@ public class CreateUpdateOrDeletePlexMoviesHandler_UnitTests : BaseUnitTest
 
         // Act
         var request = new CreateUpdateOrDeletePlexMoviesCommand(library);
-        var handler = new CreateUpdateOrDeletePlexMoviesHandler(_log, GetDbContext());
+        var handler = new CreateUpdateOrDeletePlexMoviesHandler(Log, GetDbContext());
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
@@ -105,7 +105,7 @@ public class CreateUpdateOrDeletePlexMoviesHandler_UnitTests : BaseUnitTest
 
         // Act
         var request = new CreateUpdateOrDeletePlexMoviesCommand(library);
-        var handler = new CreateUpdateOrDeletePlexMoviesHandler(_log, GetDbContext());
+        var handler = new CreateUpdateOrDeletePlexMoviesHandler(Log, GetDbContext());
         var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert

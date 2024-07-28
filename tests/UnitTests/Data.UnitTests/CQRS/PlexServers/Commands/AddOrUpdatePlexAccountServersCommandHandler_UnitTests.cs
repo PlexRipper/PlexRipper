@@ -20,13 +20,14 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         });
 
         var plexAccount = DbContext.PlexAccounts.FirstOrDefault();
+        plexAccount.ShouldNotBeNull();
         var plexServers = DbContext.PlexServers.ToList();
         var serverAccessTokens = FakeData.GetServerAccessTokenDTO(plexAccount, plexServers, Seed);
 
         ResetDbContext();
 
         // Act
-        var handler = new AddOrUpdatePlexAccountServersCommand(_log, DbContext);
+        var handler = new AddOrUpdatePlexAccountServersCommand(Log, DbContext);
         var result = await handler.ExecuteAsync(plexAccount.Id, serverAccessTokens, CancellationToken.None);
 
         // Assert
@@ -66,7 +67,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         serverAccessTokens.ForEach(x => x.AccessToken = "######");
 
         // Act
-        var handler = new AddOrUpdatePlexAccountServersCommand(_log, DbContext);
+        var handler = new AddOrUpdatePlexAccountServersCommand(Log, DbContext);
         var result = await handler.ExecuteAsync(plexAccount.Id, serverAccessTokens, CancellationToken.None);
 
         // Assert

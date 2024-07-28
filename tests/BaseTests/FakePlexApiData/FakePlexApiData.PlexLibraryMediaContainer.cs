@@ -59,15 +59,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.IsDirectory, f => f.Random.Bool())
             .RuleFor(x => x.ContentChangedAt, f => f.Date.Recent())
             .RuleFor(x => x.Hidden, _ => 0)
-            .RuleFor(
-                x => x.Location,
-                f => new List<LibrariesResponseLocation>()
-                {
-                    {
-                        new() { Id = f.Random.Number(100000), Path = f.System.DirectoryPath(), }
-                    },
-                }
-            )
+            .RuleFor(x => x.Location, f => [new() { Id = f.Random.Number(100000), Path = f.System.DirectoryPath(), },])
             .FinishWith(
                 (f, directory) =>
                 {

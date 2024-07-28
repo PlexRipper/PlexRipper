@@ -75,11 +75,11 @@ public record DownloadTaskGeneric : IDownloadTaskProgress
 
     public required Guid ParentId { get; init; }
 
-    public required PlexServer PlexServer { get; init; }
+    public required PlexServer? PlexServer { get; init; }
 
     public required int PlexServerId { get; init; }
 
-    public required PlexLibrary PlexLibrary { get; init; }
+    public required PlexLibrary? PlexLibrary { get; init; }
 
     public required int PlexLibraryId { get; init; }
 

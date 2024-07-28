@@ -19,26 +19,10 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
 
         var downloadMediaDtos = new List<DownloadMediaDTO>()
         {
-            new()
-            {
-                Type = PlexMediaType.Movie,
-                MediaIds = new List<int>() { 1, 2, 3 },
-            },
-            new()
-            {
-                Type = PlexMediaType.TvShow,
-                MediaIds = new List<int>() { 1, 2, 3 },
-            },
-            new()
-            {
-                Type = PlexMediaType.Season,
-                MediaIds = new List<int>() { 1, 2, 3 },
-            },
-            new()
-            {
-                Type = PlexMediaType.Episode,
-                MediaIds = new List<int>() { 1, 2, 3 },
-            },
+            new() { Type = PlexMediaType.Movie, MediaIds = [1, 2, 3], },
+            new() { Type = PlexMediaType.TvShow, MediaIds = [1, 2, 3], },
+            new() { Type = PlexMediaType.Season, MediaIds = [1, 2, 3], },
+            new() { Type = PlexMediaType.Episode, MediaIds = [1, 2, 3], },
         };
 
         // Act
@@ -67,16 +51,8 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
 
         var downloadMediaDtos = new List<DownloadMediaDTO>()
         {
-            new()
-            {
-                Type = PlexMediaType.TvShow,
-                MediaIds = new List<int>() { 1, 2, 3 },
-            },
-            new()
-            {
-                Type = PlexMediaType.Movie,
-                MediaIds = new List<int>() { 1, 2, 3 },
-            },
+            new() { Type = PlexMediaType.TvShow, MediaIds = [1, 2, 3], },
+            new() { Type = PlexMediaType.Movie, MediaIds = [1, 2, 3], },
         };
 
         // Act
@@ -104,7 +80,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
 
         // Act
-        var request = new CreateDownloadTasksCommand(new List<DownloadMediaDTO>());
+        var request = new CreateDownloadTasksCommand([]);
         var handler = mock.Create<CreateDownloadTasksCommandHandler>();
         var result = await handler.Handle(request, CancellationToken.None);
 

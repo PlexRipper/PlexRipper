@@ -101,11 +101,11 @@ public class PlexLibrary : BaseEntity
     /// </summary>
     public int? DefaultDestinationId { get; set; }
 
-    public List<PlexMovie> Movies { get; set; } = new();
+    public List<PlexMovie> Movies { get; set; } = [];
 
-    public List<PlexTvShow> TvShows { get; set; } = new();
+    public List<PlexTvShow> TvShows { get; set; } = [];
 
-    public List<PlexAccountLibrary> PlexAccountLibraries { get; init; } = new();
+    public List<PlexAccountLibrary> PlexAccountLibraries { get; init; } = [];
 
     #endregion
 
@@ -194,21 +194,18 @@ public class PlexLibrary : BaseEntity
             Movies = Movies.OrderByNatural(x => x.Title).ToList();
 
         // Sort TvShows
-        if (TvShows?.Count > 0)
+        if (TvShows.Count > 0)
         {
             TvShows = TvShows.OrderBy(x => x.Title).ThenBy(y => y.Key).ToList();
-            for (var i = 0; i < TvShows.Count; i++)
-                if (TvShows[i].Seasons?.Count > 0)
+            foreach (var t in TvShows)
+                if (t.Seasons.Count > 0)
                 {
-                    TvShows[i].Seasons = TvShows[i].Seasons.OrderByNatural(x => x.Title).ToList();
+                    t.Seasons = t.Seasons.OrderByNatural(x => x.Title).ToList();
 
-                    for (var j = 0; j < TvShows[i].Seasons.Count; j++)
-                        if (TvShows[i].Seasons[j].Episodes?.Count > 0)
+                    foreach (var t1 in t.Seasons)
+                        if (t1.Episodes.Count > 0)
                         {
-                            TvShows[i].Seasons[j].Episodes = TvShows[i]
-                                .Seasons[j]
-                                .Episodes.OrderBy(x => x.Key)
-                                .ToList();
+                            t1.Episodes = t1.Episodes.OrderBy(x => x.Key).ToList();
                         }
                 }
         }
@@ -227,9 +224,9 @@ public class PlexLibrary : BaseEntity
 
         switch (Type)
         {
-            case PlexMediaType.Movie when Movies?.Count > 0:
+            case PlexMediaType.Movie when Movies.Count > 0:
             {
-                if (Movies?.Count > 0)
+                if (Movies.Count > 0)
                 {
                     mediaSize = Movies.Sum(x => x.MediaSize);
                     movieCount = Movies.Count;
@@ -243,7 +240,7 @@ public class PlexLibrary : BaseEntity
 
                 break;
             }
-            case PlexMediaType.TvShow when TvShows?.Count > 0:
+            case PlexMediaType.TvShow when TvShows.Count > 0:
                 mediaSize = TvShows.Sum(x => x.MediaSize);
                 tvShowCount = TvShows.Count;
                 tvShowSeasonCount = TvShows.Sum(x => x.Seasons.Count);

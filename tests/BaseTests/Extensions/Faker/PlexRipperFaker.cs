@@ -20,7 +20,7 @@ public class PlexRipperData : DataSet
         _faker = faker;
     }
 
-    private static readonly List<PlexMediaType> LibraryTypes = new() { PlexMediaType.Movie, PlexMediaType.TvShow, };
+    private static readonly List<PlexMediaType> LibraryTypes = [PlexMediaType.Movie, PlexMediaType.TvShow];
 
     public PlexMediaType LibraryType => _faker.Random.ListItem(LibraryTypes);
 }

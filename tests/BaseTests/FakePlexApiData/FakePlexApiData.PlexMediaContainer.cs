@@ -89,7 +89,7 @@ public partial class FakePlexApiData
             .RuleFor(l => l.ViewCount, _ => default)
             .RuleFor(l => l.SkipCount, _ => default)
             .RuleFor(l => l.LastViewedAt, _ => default)
-            .RuleFor(l => l.Media, _ => new List<Medium>() { GetPlexMedium(options).Generate() })
+            .RuleFor(l => l.Media, _ => [GetPlexMedium(options).Generate()])
             .RuleFor(l => l.FlattenSeasons, f => f.Random.Bool())
             .RuleFor(l => l.ShowOrdering, f => f.Lorem.Word())
             .FinishWith(
@@ -132,7 +132,7 @@ public partial class FakePlexApiData
             .RuleFor(l => l.Protocol, f => f.Lorem.Word())
             .RuleFor(l => l.VideoResolution, f => f.Lorem.Word())
             .RuleFor(l => l.Selected, f => f.Random.Bool())
-            .RuleFor(l => l.Part, _ => new[] { GetPlexPart(options).Generate() });
+            .RuleFor(l => l.Part, _ => [GetPlexPart(options).Generate()]);
     }
 
     public static Faker<Part> GetPlexPart(Action<PlexApiDataConfig> options = null)
@@ -147,7 +147,7 @@ public partial class FakePlexApiData
             .RuleFor(l => l.Duration, f => f.Random.Int(1))
             .RuleFor(l => l.File, f => f.Lorem.Word())
             .RuleFor(l => l.Size, f => f.Random.Int(1))
-            .RuleFor(l => l.Stream, _ => new Stream[] { })
+            .RuleFor(l => l.Stream, _ => [])
             .RuleFor(l => l.HasChapterTextStream, f => f.Random.Bool())
             .RuleFor(l => l.HasThumbnail, f => f.Random.Bool().ToString())
             .RuleFor(l => l.AudioProfile, _ => "dts")

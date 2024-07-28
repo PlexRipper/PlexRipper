@@ -19,7 +19,7 @@ public class PlexMovie : PlexMedia
     public List<PlexMediaDataPart> MovieParts => MovieData.SelectMany(x => x.Parts).ToList();
 
     [NotMapped]
-    public List<PlexMediaData> MovieData => MediaData.MediaData ?? new List<PlexMediaData>();
+    public List<PlexMediaData> MovieData => MediaData.MediaData ?? [];
 
     [NotMapped]
     public override PlexMediaType Type => PlexMediaType.Movie;

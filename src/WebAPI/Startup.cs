@@ -18,7 +18,7 @@ namespace PlexRipper.WebAPI;
 
 public static class Startup
 {
-    public static readonly string CORSConfiguration = "CORS_Configuration";
+    public const string CORSConfiguration = "CORS_Configuration";
 
     private static readonly ILog _log = LogManager.CreateLogInstance(typeof(Startup));
 
@@ -120,7 +120,7 @@ public static class Startup
         services.AddFastEndpoints(options =>
         {
             options.DisableAutoDiscovery = true;
-            options.Assemblies = new[] { Assembly.GetAssembly(typeof(BaseEndpoint<,>)), };
+            options.Assemblies = [Assembly.GetAssembly(typeof(BaseEndpoint<,>))];
         });
 
         if (!EnvironmentExtensions.IsIntegrationTestMode())

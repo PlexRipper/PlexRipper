@@ -72,7 +72,7 @@ public static class DownloadTaskGenericMapper
             FileTransferSpeed = downloadTaskMovieFile.FileTransferSpeed,
             Children = [],
             Quality = string.Empty,
-            DownloadWorkerTasks = downloadTaskMovieFile.DownloadWorkerTasks ?? [],
+            DownloadWorkerTasks = downloadTaskMovieFile.DownloadWorkerTasks,
             ParentId = downloadTaskMovieFile.ParentId,
             PlexServer = downloadTaskMovieFile.PlexServer,
             PlexServerId = downloadTaskMovieFile.PlexServerId,

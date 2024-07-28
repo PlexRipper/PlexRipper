@@ -2,7 +2,6 @@ using Autofac;
 using Data.Contracts;
 using Logging.Interface;
 using PlexRipper.Data;
-using PlexRipper.WebAPI;
 using Serilog;
 using Serilog.Events;
 using Log = Logging.Log;
@@ -15,7 +14,6 @@ public class BaseUnitTest : IDisposable
 
     private string _databaseName;
     protected PlexRipperDbContext DbContext;
-    private bool disableForeignKeyCheck;
     private bool isDatabaseSetup;
     protected ILog _log;
 
@@ -83,7 +81,7 @@ public class BaseUnitTest : IDisposable
             throw new Exception(logEvent.ToLogString());
         }
 
-        return MockDatabase.GetMemoryDbContext(_databaseName, disableForeignKeyCheck);
+        return MockDatabase.GetMemoryDbContext(_databaseName);
     }
 
     /// <summary>
@@ -95,7 +93,6 @@ public class BaseUnitTest : IDisposable
         isDatabaseSetup = true;
 
         var config = FakeDataConfig.FromOptions(options);
-        disableForeignKeyCheck = config.DisableForeignKeyCheck;
 
         // Database context can be setup once and then retrieved by its DB name.
         DbContext = await GetDbContext().Setup(Seed, options);

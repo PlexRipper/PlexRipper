@@ -40,7 +40,11 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
             config.TvShowEpisodeCount = 5;
         });
 
-        var plexTvShows = await DbContext.PlexTvShows.IncludeAll().ToListAsync();
+        var plexTvShows = await DbContext
+            .PlexTvShows.Include(x => x.Seasons)
+            .ThenInclude(x => x.Episodes)
+            .ToListAsync();
+
         var plexEpisodes = plexTvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).ToList();
         var downloadMediaDtos = new List<DownloadMediaDTO>
         {
@@ -75,6 +79,7 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
         {
             downloadTaskTvShow.Calculate();
             var validationResult = await validator.ValidateAsync(downloadTaskTvShow);
+
             // Ignore DownloadDirectory and DestinationDirectory errors as these are set in the DownloadJob
             var validErrors = validationResult.Errors.FindAll(x =>
                 !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DownloadDirectory))

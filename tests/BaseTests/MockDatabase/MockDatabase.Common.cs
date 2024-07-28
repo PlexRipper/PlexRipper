@@ -193,16 +193,14 @@ public static partial class MockDatabase
     /// Passing in the same dbName will create a new context for the same database
     /// </summary>
     /// <param name="dbName">leave empty to generate a random one</param>
-    /// <param name="disableForeignKeyCheck">By default, don't enforce foreign key check for handling database data.</param>
     /// <returns>A <see cref="PlexRipperDbContext" /> in memory instance.</returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public static PlexRipperDbContext GetMemoryDbContext(string dbName = "", bool disableForeignKeyCheck = false)
+    public static PlexRipperDbContext GetMemoryDbContext(string dbName = "")
     {
-        // TODO Remove disableForeignKeyCheck as it is bad practice, even for unit tests
         var optionsBuilder = new DbContextOptionsBuilder<PlexRipperDbContext>();
         dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
 
-        var connectionString = DatabaseConnectionString(dbName, disableForeignKeyCheck);
+        var connectionString = DatabaseConnectionString(dbName);
         SqliteConnection databaseConnection = new(connectionString);
 
         databaseConnection.CreateCollation(
@@ -219,13 +217,13 @@ public static partial class MockDatabase
         return new PlexRipperDbContext(optionsBuilder.Options, dbName);
     }
 
-    public static string DatabaseConnectionString(string dbName = "", bool disableForeignKeyCheck = false) =>
+    public static string DatabaseConnectionString(string dbName = "") =>
         // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
         new SqliteConnectionStringBuilder
         {
             // Real file is used for testing due to otherwise flaky tests when doing in memory
             Mode = SqliteOpenMode.ReadWriteCreate,
-            ForeignKeys = !disableForeignKeyCheck,
+            ForeignKeys = true,
 
             // Database name
             DataSource = dbName,

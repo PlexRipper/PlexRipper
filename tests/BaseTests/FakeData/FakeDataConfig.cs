@@ -35,8 +35,6 @@ public class FakeDataConfig : BaseConfig<FakeDataConfig>
     public List<Uri> MockServerUris { get; set; } = new();
     public int DownloadFileSizeInMb { get; set; }
 
-    public bool DisableForeignKeyCheck { get; set; }
-
     public bool ShouldHavePlexServer => PlexServerCount > 0 || ShouldHavePlexLibrary;
 
     public bool ShouldHavePlexLibrary =>

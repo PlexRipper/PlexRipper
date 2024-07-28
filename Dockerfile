@@ -14,14 +14,9 @@ ENV NUXT_PORT=7000
 ENV API_PORT=7000
 ENV NUXT_PUBLIC_IS_DOCKER=true
 
-# Essential config files
-COPY ./src/WebAPI/ClientApp/package.json ./
-COPY ./src/WebAPI/ClientApp/bun.lockb ./
-COPY ./src/WebAPI/ClientApp/tsconfig.json ./
-COPY ./src/WebAPI/ClientApp/nuxt.config.ts ./
-RUN bun install --frozen-lockfile
-## Copy the rest of the project files
+## Copy the project files
 COPY ./src/WebAPI/ClientApp/ ./
+RUN bun install --frozen-lockfile
 RUN bun run generate --fail-on-error
 
 ## Setup .NET Core back-end

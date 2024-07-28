@@ -4,7 +4,7 @@ public static partial class FakePlexApiData
 {
     private static readonly Random _random = new();
 
-    private static int GetUniqueId(List<int> alreadyGenerated, Action<UnitTestDataConfig> options = null)
+    private static int GetUniqueId(List<int> alreadyGenerated, Action<UnitTestDataConfig>? options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 

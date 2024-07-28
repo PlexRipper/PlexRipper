@@ -50,7 +50,7 @@ public static partial class FakeData
             );
     }
 
-    public static Faker<PlexMediaData> GetPlexMediaData(int seed = 0, Action<FakeDataConfig> options = null)
+    public static Faker<PlexMediaData> GetPlexMediaData(int seed = 0, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
@@ -79,7 +79,7 @@ public static partial class FakeData
             );
     }
 
-    public static Faker<PlexMediaDataPart> GetPlexMediaPart(int seed = 0, Action<FakeDataConfig> options = null)
+    public static Faker<PlexMediaDataPart> GetPlexMediaPart(int seed = 0, Action<FakeDataConfig>? options = null)
     {
         return new Faker<PlexMediaDataPart>()
             .StrictMode(true)
@@ -100,7 +100,7 @@ public static partial class FakeData
 
     #region PlexMovies
 
-    public static Faker<PlexMovie> GetPlexMovies(int seed = 0, Action<FakeDataConfig> options = null)
+    public static Faker<PlexMovie> GetPlexMovies(int seed = 0, Action<FakeDataConfig>? options = null)
     {
         var movieIds = new List<int>();
         var movieKeys = new List<int>();
@@ -126,7 +126,7 @@ public static partial class FakeData
 
     #region PlexTvShows
 
-    public static Faker<PlexTvShow> GetPlexTvShows(int seed = 0, Action<FakeDataConfig> options = null)
+    public static Faker<PlexTvShow> GetPlexTvShows(int seed = 0, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
@@ -168,7 +168,7 @@ public static partial class FakeData
             );
     }
 
-    public static Faker<PlexTvShowSeason> GetPlexTvShowSeason(int seed = 0, Action<FakeDataConfig> options = null)
+    public static Faker<PlexTvShowSeason> GetPlexTvShowSeason(int seed = 0, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
@@ -190,7 +190,7 @@ public static partial class FakeData
             );
     }
 
-    public static Faker<PlexTvShowEpisode> GetPlexTvShowEpisode(int seed = 0, Action<FakeDataConfig> options = null)
+    public static Faker<PlexTvShowEpisode> GetPlexTvShowEpisode(int seed = 0, Action<FakeDataConfig>? options = null)
     {
         var episodeKeys = new List<int>();
         return new Faker<PlexTvShowEpisode>()

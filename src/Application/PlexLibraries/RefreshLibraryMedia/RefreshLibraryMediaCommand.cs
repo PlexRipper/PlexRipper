@@ -15,7 +15,7 @@ namespace PlexRipper.Application;
 /// <param name="PlexLibraryId">The id of the <see cref="PlexLibrary"/> to retrieve.</param>
 /// <param name="ProgressAction">The action to call for a progress update.</param>
 /// <returns>Returns the PlexLibrary with the containing media.</returns>
-public record RefreshLibraryMediaCommand(int PlexLibraryId, Action<LibraryProgress> ProgressAction = null)
+public record RefreshLibraryMediaCommand(int PlexLibraryId, Action<LibraryProgress>? ProgressAction = null)
     : IRequest<Result<PlexLibrary>>;
 
 public class RefreshLibraryMediaCommandValidator : AbstractValidator<RefreshLibraryMediaCommand> { }
@@ -80,7 +80,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
 
     private async Task<Result<PlexLibrary>> RefreshPlexTvShowLibrary(
         PlexLibrary plexLibrary,
-        Action<LibraryProgress> progressAction = null
+        Action<LibraryProgress>? progressAction = null
     )
     {
         if (plexLibrary.Type != PlexMediaType.TvShow)
@@ -99,6 +99,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         void SendProgress(int index, int count)
         {
             progressAction?.Invoke(new LibraryProgress(plexLibrary.Id, index, count));
+
             _signalRService.SendLibraryProgressUpdateAsync(plexLibrary.Id, index, count);
         }
 
@@ -193,7 +194,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
 
     private async Task<Result<PlexLibrary>> RefreshPlexMovieLibrary(
         PlexLibrary plexLibrary,
-        Action<LibraryProgress> progressAction = null
+        Action<LibraryProgress>? progressAction = null
     )
     {
         // Send progress

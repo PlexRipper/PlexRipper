@@ -46,7 +46,7 @@ public class CreateUpdateOrDeletePlexTvShowsCommandHandler
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
 
-    private readonly BulkConfig _config =
+    private readonly BulkConfig? _config =
         new()
         {
             SetOutputIdentity = true,

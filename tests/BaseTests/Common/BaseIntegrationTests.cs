@@ -57,7 +57,7 @@ public class BaseIntegrationTests : IAsyncLifetime
         await CreateContainer(config => config.Seed = seed);
     }
 
-    protected async Task CreateContainer(Action<UnitTestDataConfig> options = null)
+    protected async Task CreateContainer(Action<UnitTestDataConfig>? options = null)
     {
         Container = await BaseContainer.Create(_log, DatabaseName, options, _mockPlexApi);
     }
@@ -87,7 +87,7 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     #region SetupDatabase
 
-    protected async Task SetupDatabase(Action<FakeDataConfig> options = null)
+    protected async Task SetupDatabase(Action<FakeDataConfig>? options = null)
     {
         // Database context can be setup once and then retrieved by its DB name.
         await MockDatabase.GetMemoryDbContext(DatabaseName).Setup(Seed, options);

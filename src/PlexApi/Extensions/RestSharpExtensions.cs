@@ -40,12 +40,12 @@ public static class RestSharpExtensions
         this RestClient restClient,
         RestRequest request,
         int retryCount = 2,
-        Action<PlexApiClientProgress> action = null,
+        Action<PlexApiClientProgress>? action = null,
         CancellationToken cancellationToken = default
     )
         where T : class
     {
-        RestResponse<T> response = null;
+        RestResponse<T>? response = null;
         var retryIndex = 0;
         var policyResult = Policy
             .HandleResult<RestResponse>(x => !x.IsSuccessful)
@@ -115,6 +115,8 @@ public static class RestSharpExtensions
 
         if (response.ErrorMessage != null)
             statusDescription += $"ErrorMessage: {response.ErrorMessage}";
+
+        _log.ErrorLine(statusDescription);
 
         return ParsePlexErrors(response);
     }
@@ -187,12 +189,16 @@ public static class RestSharpExtensions
         var msg = "Request successful!";
 
         if (!response.IsSuccessful && response.ResponseStatus != ResponseStatus.TimedOut)
+        {
             msg =
                 $"Request to: {request.Resource} failed, waiting {timeToWaitSeconds} seconds before retrying again ({retryAttempt} of {retryCount})";
+        }
 
         if (!response.IsSuccessful && response.ResponseStatus == ResponseStatus.TimedOut)
+        {
             msg =
                 $"Request to: {request.Resource} timed-out, waiting {timeToWaitSeconds} seconds before retrying again ({retryAttempt} of {retryCount})";
+        }
 
         action?.Invoke(
             new PlexApiClientProgress

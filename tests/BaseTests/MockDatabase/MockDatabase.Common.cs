@@ -23,7 +23,7 @@ public static partial class MockDatabase
 
     private static async Task<PlexRipperDbContext> AddPlexServers(
         this PlexRipperDbContext context,
-        Action<FakeDataConfig> options = null
+        Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
@@ -64,7 +64,7 @@ public static partial class MockDatabase
 
     private static async Task<PlexRipperDbContext> AddPlexLibraries(
         this PlexRipperDbContext context,
-        Action<FakeDataConfig> options = null
+        Action<FakeDataConfig>? options = null
     )
     {
         var plexServers = await context.PlexServers.ToListAsync();
@@ -106,7 +106,7 @@ public static partial class MockDatabase
 
     private static async Task<PlexRipperDbContext> AddPlexAccount(
         this PlexRipperDbContext context,
-        Action<FakeDataConfig> options = null
+        Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
@@ -154,7 +154,7 @@ public static partial class MockDatabase
 
     private static async Task<PlexRipperDbContext> AddPlexAccountLibraries(
         this PlexRipperDbContext context,
-        Action<FakeDataConfig> options = null
+        Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
@@ -235,14 +235,12 @@ public static partial class MockDatabase
     public static async Task<PlexRipperDbContext> Setup(
         this PlexRipperDbContext context,
         int seed = 0,
-        Action<FakeDataConfig> options = null
+        Action<FakeDataConfig>? options = null
     )
     {
         _seed = seed;
 
         var config = FakeDataConfig.FromOptions(options);
-
-        context.HasBeenSetup = true;
 
         // PlexServers and Libraries added
         _log.Here()
@@ -287,7 +285,7 @@ public static partial class MockDatabase
 
     private static async Task<PlexRipperDbContext> AddPlexMovies(
         this PlexRipperDbContext context,
-        Action<FakeDataConfig> options = null
+        Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
@@ -323,7 +321,7 @@ public static partial class MockDatabase
 
     private static async Task<PlexRipperDbContext> AddPlexTvShows(
         this PlexRipperDbContext context,
-        Action<FakeDataConfig> options = null
+        Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);

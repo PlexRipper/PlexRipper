@@ -35,7 +35,7 @@ public partial class BaseContainer : IDisposable
     /// </summary>
     private BaseContainer(
         string memoryDbName,
-        Action<UnitTestDataConfig> options = null,
+        Action<UnitTestDataConfig>? options = null,
         MockPlexApi mockPlexApi = null
     )
     {
@@ -49,7 +49,7 @@ public partial class BaseContainer : IDisposable
     public static async Task<BaseContainer> Create(
         ILog log,
         string memoryDbName,
-        Action<UnitTestDataConfig> options = null,
+        Action<UnitTestDataConfig>? options = null,
         MockPlexApi mockPlexApi = null
     )
     {

@@ -6,7 +6,7 @@ namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
-    public static Faker<SignInResponse> GetPlexSignInResponse(Action<UnitTestDataConfig> options = null)
+    public static Faker<SignInResponse> GetPlexSignInResponse(Action<UnitTestDataConfig>? options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 

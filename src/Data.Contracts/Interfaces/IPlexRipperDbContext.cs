@@ -28,10 +28,15 @@ public interface IPlexRipperDbContext
     public DbSet<PlexServerStatus> PlexServerStatuses { get; set; }
     public DbSet<PlexAccountServer> PlexAccountServers { get; set; }
     public DbSet<PlexAccountLibrary> PlexAccountLibraries { get; set; }
+
     public DbSet<PlexMovieGenre> PlexMovieGenres { get; set; }
+
     public DbSet<PlexMovieRole> PlexMovieRoles { get; set; }
+
     public string DatabaseName { get; set; }
+
     public string DatabasePath { get; set; }
+
     public string ConfigDirectory { get; set; }
 
     public DbSet<DownloadTaskMovie> DownloadTaskMovie { get; set; }
@@ -47,11 +52,6 @@ public interface IPlexRipperDbContext
     public DbSet<DownloadTaskTvShowEpisodeFile> DownloadTaskTvShowEpisodeFile { get; set; }
 
     public EntityEntry Entry(object entity);
-
-    /// <summary>
-    /// Determines if this <see cref="PlexRipperDbContext"/> has been setup already during integration or unit testing.
-    /// </summary>
-    public bool HasBeenSetup { get; set; }
 
     public int SaveChanges();
     public int SaveChanges(bool acceptAllChangesOnSuccess);

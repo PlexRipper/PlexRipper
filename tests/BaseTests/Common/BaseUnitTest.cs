@@ -90,7 +90,7 @@ public class BaseUnitTest : IDisposable
     /// Creates and maintains a unique in memory database <see cref="PlexRipperDbContext"/> for every test.
     /// </summary>
     /// <param name="options"></param>
-    protected async Task SetupDatabase(Action<FakeDataConfig> options = null)
+    protected async Task SetupDatabase(Action<FakeDataConfig>? options = null)
     {
         isDatabaseSetup = true;
 

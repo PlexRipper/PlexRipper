@@ -7,7 +7,7 @@ public static partial class MockDatabase
 {
     private static async Task<PlexRipperDbContext> AddDownloadTaskMovies(
         this PlexRipperDbContext context,
-        Action<FakeDataConfig> options = null
+        Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
@@ -44,7 +44,7 @@ public static partial class MockDatabase
 
     private static async Task<PlexRipperDbContext> AddDownloadTaskTvShows(
         this PlexRipperDbContext context,
-        Action<FakeDataConfig> options = null
+        Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);

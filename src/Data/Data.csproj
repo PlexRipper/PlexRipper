@@ -33,7 +33,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="CQRS\PlexMovies\Commands\" />
 		<Folder Include="Migrations" />
 	</ItemGroup>
 

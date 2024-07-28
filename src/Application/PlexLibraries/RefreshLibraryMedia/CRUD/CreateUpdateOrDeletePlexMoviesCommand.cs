@@ -3,9 +3,18 @@ using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.PlexMovies.Commands;
+namespace PlexRipper.Application;
+
+public class CreateUpdateOrDeletePlexMoviesCommand : IRequest<Result>
+{
+    public CreateUpdateOrDeletePlexMoviesCommand(PlexLibrary plexLibrary)
+    {
+        PlexLibrary = plexLibrary;
+    }
+
+    public PlexLibrary PlexLibrary { get; }
+}
 
 public class CreateUpdateOrDeletePlexMoviesValidator : AbstractValidator<CreateUpdateOrDeletePlexMoviesCommand>
 {
@@ -24,12 +33,16 @@ public class CreateUpdateOrDeletePlexMoviesValidator : AbstractValidator<CreateU
     }
 }
 
-public class CreateUpdateOrDeletePlexMoviesHandler
-    : BaseHandler,
-        IRequestHandler<CreateUpdateOrDeletePlexMoviesCommand, Result>
+public class CreateUpdateOrDeletePlexMoviesHandler : IRequestHandler<CreateUpdateOrDeletePlexMoviesCommand, Result>
 {
-    public CreateUpdateOrDeletePlexMoviesHandler(ILog log, PlexRipperDbContext dbContext)
-        : base(log, dbContext) { }
+    private readonly ILog _log;
+    private readonly IPlexRipperDbContext _dbContext;
+
+    public CreateUpdateOrDeletePlexMoviesHandler(ILog log, IPlexRipperDbContext dbContext)
+    {
+        _log = log;
+        _dbContext = dbContext;
+    }
 
     public async Task<Result> Handle(CreateUpdateOrDeletePlexMoviesCommand command, CancellationToken cancellationToken)
     {
@@ -54,7 +67,7 @@ public class CreateUpdateOrDeletePlexMoviesHandler
         if (!plexMoviesInDb.Any())
         {
             _dbContext.PlexMovies.AddRange(apiPlexMovies);
-            await SaveChangesAsync(cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
             return Result.Ok();
         }
 
@@ -87,7 +100,7 @@ public class CreateUpdateOrDeletePlexMoviesHandler
             return Result.Ok();
         }
 
-        await SaveChangesAsync(cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         _log.Debug(
             "Finished syncing plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalSeconds} seconds",

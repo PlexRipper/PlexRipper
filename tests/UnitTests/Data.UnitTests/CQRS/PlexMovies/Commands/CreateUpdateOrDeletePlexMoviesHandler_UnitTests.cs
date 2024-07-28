@@ -1,5 +1,4 @@
-using Data.Contracts;
-using PlexRipper.Data.PlexMovies.Commands;
+using PlexRipper.Application;
 
 namespace Data.UnitTests;
 

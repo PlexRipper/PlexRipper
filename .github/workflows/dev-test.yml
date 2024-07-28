@@ -1,129 +1,123 @@
 name: Execute Tests
 
 on:
-  workflow_dispatch:
-  pull_request:
-    branches: [ dev ]
-    paths-ignore:
-      - '.github/**'
-      - '.idea/**'
-      - '.run/**'
-      - '.vscode/**'
+    workflow_dispatch:
+    pull_request:
+        branches: [ dev ]
+        paths-ignore:
+            - '.github/**'
+            - '.idea/**'
+            - '.run/**'
+            - '.vscode/**'
 jobs:
-  # Front-End-Type-Check:
-  Front-End-Type-Check:
-    defaults:
-      run:
-        working-directory: src/WebAPI/ClientApp/
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v3
-      - name: Setup Node.js v18.11
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.11
-          cache: "npm"
-          cache-dependency-path: "**/package-lock.json"
-      - name: Clean install npm modules
-        run: npm ci
-      - name: Run Typescript type check
-        run: npm run typecheck
-  # Front-End-Unit-Tests:
-  Front-End-Unit-Tests:
-    defaults:
-      run:
-        working-directory: src/WebAPI/ClientApp/
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v3
-      - name: Setup Node.js v18.11
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.11
-          cache: "npm"
-          cache-dependency-path: "**/package-lock.json"
-      - name: Clean install npm modules
-        run: npm ci
-      - name: Build front-end
-        run: npm run build --if-present
-      - name: Run Vitest tests
-        run: npm test
-  # Front-End-Integration-Tests:
-#  Front-End-Integration-Tests: TODO Tests keep randomly failing during CI, need to investigate
-#    defaults:
-#      run:
-#        working-directory: src/WebAPI/ClientApp/
-#    runs-on: ubuntu-latest
-#    strategy:
-#      fail-fast: false # https://github.com/cypress-io/github-action/issues/48
-#      matrix:
-#        containers: [1, 2] # Uses 2 parallel instances
-#    steps:
-#      - name: Checkout Source Code
-#        uses: actions/checkout@v3
-#      - name: Cypress tests
-#        uses: cypress-io/github-action@v5
-#        with:
-#          wait-on: 'http://localhost:3030'
-#          build: npm run build
-#          start: npm run cypress:ci
-#          command: npm run cypress:run
-#          record: true
-#          parallel: true
-#          browser: chrome
-#          headless: true
-#          timeout-minutes: 5
-#          working-directory: ./src/WebAPI/ClientApp/
-#        env:
-#          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-  # Back-End Unit Tests
-  Back-End-Unit-Tests:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v3
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 7.x.x
-          cache: true
-          cache-dependency-path: "**/package-lock.json"
-      - name: Restore dependencies
-        run: dotnet restore PlexRipper.sln --locked-mode
-      - name: Build
-        run: dotnet build PlexRipper.sln --no-restore
-      - name: Unit Tests
-        run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal
-  # Back-End Integration Tests
-  Back-End-Integration-Tests:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v3
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 7.x.x
-          cache: true
-          cache-dependency-path: "**/package-lock.json"
-      - name: Restore dependencies
-        run: dotnet restore PlexRipper.sln --locked-mode
-      - name: Build
-        run: dotnet build PlexRipper.sln --no-restore
-      - name: Integration Tests
-        run: dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal
-  # Ensure the Docker image can be built without errors
-  Test-Docker-Build:
-    needs: [ Front-End-Unit-Tests, Front-End-Type-Check, Back-End-Unit-Tests, Back-End-Integration-Tests ]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v3
-      - name: Test Docker Build
-        uses: elgohr/Publish-Docker-Github-Action@v5
-        with:
-          name: plexripper/plexripper
-          no_push: true
+    # Front-End-Type-Check:
+    Front-End-Type-Check:
+        defaults:
+            run:
+                working-directory: src/WebAPI/ClientApp/
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout Source Code
+                uses: actions/checkout@v3
+            -   uses: oven-sh/setup-bun@v2
+                with:
+                    bun-version: "latest"
+            -   name: Clean install node_modules
+                run: bun install
+            -   name: Run Typescript type check
+                run: bun run typecheck
+    # Front-End-Unit-Tests:
+    Front-End-Unit-Tests:
+        defaults:
+            run:
+                working-directory: src/WebAPI/ClientApp/
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout Source Code
+                uses: actions/checkout@v3
+            -   uses: oven-sh/setup-bun@v2
+                with:
+                    bun-version: "latest"
+            -   name: Clean install node_modules
+                run: bun install
+            -   name: Build front-end
+                run: npm run build --if-present
+            -   name: Run Vitest tests
+                run: npm test
+    # Front-End-Integration-Tests:
+    #  Front-End-Integration-Tests: TODO Tests keep randomly failing during CI, need to investigate
+    #    defaults:
+    #      run:
+    #        working-directory: src/WebAPI/ClientApp/
+    #    runs-on: ubuntu-latest
+    #    strategy:
+    #      fail-fast: false # https://github.com/cypress-io/github-action/issues/48
+    #      matrix:
+    #        containers: [1, 2] # Uses 2 parallel instances
+    #    steps:
+    #      - name: Checkout Source Code
+    #        uses: actions/checkout@v3
+    #      - name: Cypress tests
+    #        uses: cypress-io/github-action@v5
+    #        with:
+    #          wait-on: 'http://localhost:3030'
+    #          build: npm run build
+    #          start: npm run cypress:ci
+    #          command: npm run cypress:run
+    #          record: true
+    #          parallel: true
+    #          browser: chrome
+    #          headless: true
+    #          timeout-minutes: 5
+    #          working-directory: ./src/WebAPI/ClientApp/
+    #        env:
+    #          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+    #          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+    # Back-End Unit Tests
+    Back-End-Unit-Tests:
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout Source Code
+                uses: actions/checkout@v3
+            -   name: Setup .NET SDK
+                uses: actions/setup-dotnet@v3
+                with:
+                    dotnet-version: 8.x.x
+                    cache: true
+                    cache-dependency-path: "**/package-lock.json"
+            -   name: Restore dependencies
+                run: dotnet restore PlexRipper.sln --locked-mode
+            -   name: Build
+                run: dotnet build PlexRipper.sln --no-restore
+            -   name: Unit Tests
+                run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal
+    # Back-End Integration Tests
+    Back-End-Integration-Tests:
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout Source Code
+                uses: actions/checkout@v3
+            -   name: Setup .NET SDK
+                uses: actions/setup-dotnet@v3
+                with:
+                    dotnet-version: 8.x.x
+                    cache: true
+                    cache-dependency-path: "**/package-lock.json"
+            -   name: Restore dependencies
+                run: dotnet restore PlexRipper.sln --locked-mode
+            -   name: Build
+                run: dotnet build PlexRipper.sln --no-restore
+            -   name: Integration Tests
+                run: dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal
+    # Ensure the Docker image can be built without errors
+    Test-Docker-Build:
+        needs: [ Front-End-Unit-Tests, Front-End-Type-Check, Back-End-Unit-Tests, Back-End-Integration-Tests ]
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout Source Code
+                uses: actions/checkout@v3
+            -   name: Test Docker Build
+                uses: elgohr/Publish-Docker-Github-Action@v5
+                with:
+                    name: plexripper/plexripper
+                    no_push: true

@@ -73,4 +73,24 @@ public static class StringExtensions
 
     public static string AddPartIndexToFileName(this string fileName, int partIndex) =>
         $"{Path.GetFileNameWithoutExtension(fileName)}.part{partIndex}{Path.GetExtension(fileName)}";
+
+    /// <summary>
+    /// Converts a title to a sort title that can be used for sorting.
+    /// </summary>
+    /// <param name="title"></param>
+    /// <returns></returns>
+    public static string ToSortTitle(this string title)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            return string.Empty;
+
+        List<string> articles = ["A ", "An ", "The "];
+
+        title = title.Trim();
+        foreach (var article in articles)
+            if (title.StartsWith(article, StringComparison.OrdinalIgnoreCase))
+                return title.Substring(article.Length).Trim();
+
+        return title;
+    }
 }

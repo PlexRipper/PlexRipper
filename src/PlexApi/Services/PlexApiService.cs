@@ -160,6 +160,12 @@ public class PlexApiService : IPlexApiService
 
         var mediaList = result.Value.MediaContainer.Metadata;
 
+        // Set the TitleSort if it is empty
+        foreach (var metadata in mediaList)
+            metadata.TitleSort = !string.IsNullOrEmpty(metadata.TitleSort)
+                ? metadata.TitleSort
+                : metadata.Title.ToSortTitle();
+
         // Determine how to map based on the Library type.
         switch (result.Value.MediaContainer.ViewGroup)
         {

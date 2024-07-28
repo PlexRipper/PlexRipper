@@ -84,7 +84,9 @@ jobs:
                 with:
                     dotnet-version: 8.x.x
                     cache: true
-                    cache-dependency-path: "**/package-lock.json"
+                    cache-dependency-path: |
+                        **/*.csproj
+                        **/global.json
             -   name: Restore dependencies
                 run: dotnet restore PlexRipper.sln --locked-mode
             -   name: Build
@@ -102,7 +104,9 @@ jobs:
                 with:
                     dotnet-version: 8.x.x
                     cache: true
-                    cache-dependency-path: "**/package-lock.json"
+                    cache-dependency-path: |
+                        **/*.csproj
+                        **/global.json
             -   name: Restore dependencies
                 run: dotnet restore PlexRipper.sln --locked-mode
             -   name: Build

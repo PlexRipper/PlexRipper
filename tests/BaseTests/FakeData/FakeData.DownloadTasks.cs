@@ -18,7 +18,7 @@ public static partial class FakeData
             .StrictMode(true)
             .UseSeed(seed)
             .RuleFor(x => x.Id, _ => Guid.Empty)
-            .RuleFor(x => x.Key, _ => _random.Next(1, 10000))
+            .RuleFor(x => x.Key, _ => GetUniqueNumber())
             .RuleFor(x => x.Title, _ => "")
             .RuleFor(x => x.FullTitle, _ => "")
             .RuleFor(x => x.DownloadStatus, _ => DownloadStatus.Queued)

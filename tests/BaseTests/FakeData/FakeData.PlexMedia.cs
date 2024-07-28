@@ -17,7 +17,7 @@ public static partial class FakeData
             .StrictMode(true)
             .UseSeed(seed)
             .RuleFor(x => x.Id, _ => 0)
-            .RuleFor(x => x.Key, f => f.UniqueIndex * f.Random.Int(1, 1000000))
+            .RuleFor(x => x.Key, _ => GetUniqueNumber())
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
             .RuleFor(x => x.FullTitle, f => f.Company.CompanyName())
             .RuleFor(x => x.SortTitle, f => f.Company.CompanyName())
@@ -172,13 +172,12 @@ public static partial class FakeData
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        var seasonKeys = new List<int>();
         return new Faker<PlexTvShowSeason>()
             .StrictMode(true)
             .UseSeed(seed)
             .ApplyBasePlexMedia(seed, options)
             .RuleFor(x => x.Title, _ => "Season")
-            .RuleFor(x => x.ParentKey, _ => GetUniqueId(seasonKeys, seed))
+            .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
             .RuleFor(x => x.TvShowId, _ => 0)
             .RuleFor(x => x.TvShow, _ => null)
             .RuleFor(x => x.Episodes, _ => GetPlexTvShowEpisode(seed, options).Generate(config.TvShowEpisodeCount))
@@ -192,13 +191,12 @@ public static partial class FakeData
 
     public static Faker<PlexTvShowEpisode> GetPlexTvShowEpisode(int seed = 0, Action<FakeDataConfig>? options = null)
     {
-        var episodeKeys = new List<int>();
         return new Faker<PlexTvShowEpisode>()
             .StrictMode(true)
             .UseSeed(seed)
             .ApplyBasePlexMedia(seed, options)
             .RuleFor(x => x.Id, _ => 0)
-            .RuleFor(x => x.ParentKey, _ => GetUniqueId(episodeKeys, seed))
+            .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
             .RuleFor(x => x.TvShowId, _ => 0)
             .RuleFor(x => x.TvShow, _ => null)
             .RuleFor(x => x.TvShowSeasonId, _ => 0)

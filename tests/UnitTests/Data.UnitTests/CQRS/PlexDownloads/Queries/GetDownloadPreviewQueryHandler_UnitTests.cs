@@ -38,7 +38,7 @@ public class GetDownloadPreviewQueryHandler_UnitTests : BaseUnitTest<GetDownload
             config.TvShowEpisodeCount = 5;
         });
 
-        var tvShows = await DbContext
+        var tvShows = await IDbContext
             .PlexTvShows.Include(x => x.Seasons)
             .ThenInclude(x => x.Episodes)
             .AsNoTracking()

@@ -13,7 +13,6 @@ public class BaseUnitTest : IDisposable
     #region Fields
 
     private string _databaseName;
-    protected PlexRipperDbContext DbContext;
     private bool _isDatabaseSetup;
     protected readonly ILog Log;
 
@@ -49,28 +48,6 @@ public class BaseUnitTest : IDisposable
 
     #endregion
 
-    #region Methods
-
-    #region Public
-
-    public virtual void Dispose()
-    {
-        DbContext?.Dispose();
-    }
-
-    #endregion
-
-    #endregion
-
-    /// <summary>
-    /// Create a new <see cref="PlexRipperDbContext"/> instance for the same in memory database and assign it to DbContext.
-    /// This is useful to recreate a DbContext that should not be reused between operations.
-    /// </summary>
-    protected void ResetDbContext()
-    {
-        DbContext = GetDbContext();
-    }
-
     protected PlexRipperDbContext GetDbContext()
     {
         if (!_isDatabaseSetup)
@@ -90,13 +67,16 @@ public class BaseUnitTest : IDisposable
     /// <param name="options"></param>
     protected async Task SetupDatabase(Action<FakeDataConfig>? options = null)
     {
-        _isDatabaseSetup = true;
-
-        var config = FakeDataConfig.FromOptions(options);
-
         // Database context can be setup once and then retrieved by its DB name.
-        DbContext = await GetDbContext().Setup(Seed, options);
-        _databaseName = DbContext.DatabaseName;
+        var dbContext = await GetDbContext().Setup(Seed, options);
+        _databaseName = dbContext.DatabaseName;
+
+        _isDatabaseSetup = true;
+    }
+
+    public virtual void Dispose()
+    {
+        IDbContext.Dispose();
     }
 }
 
@@ -148,10 +128,10 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
 
     #region Public
 
-    public override void Dispose()
+    public new virtual void Dispose()
     {
         base.Dispose();
-        mock?.Dispose();
+        mock.Dispose();
     }
 
     #endregion

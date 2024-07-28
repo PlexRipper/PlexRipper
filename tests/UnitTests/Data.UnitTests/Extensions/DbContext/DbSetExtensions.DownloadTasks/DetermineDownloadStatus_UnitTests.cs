@@ -42,9 +42,9 @@ public class DetermineDownloadStatus_UnitTests : BaseUnitTest
         });
 
         var dbContext = IDbContext;
-        var downloadTasks = await dbContext.DownloadTaskTvShow.AsTracking().IncludeAll().ToListAsync();
+        var downloadTasks = await IDbContext.DownloadTaskTvShow.AsTracking().IncludeAll().ToListAsync();
         var downloadTaskTvShowEpisodeFile = downloadTasks[3].Children[2].Children[3].Children[0];
-        await dbContext.SetDownloadStatus(downloadTaskTvShowEpisodeFile.ToKey(), DownloadStatus.Error);
+        await IDbContext.SetDownloadStatus(downloadTaskTvShowEpisodeFile.ToKey(), DownloadStatus.Error);
 
         // Act
         await IDbContext.DetermineDownloadStatus(downloadTaskTvShowEpisodeFile.ToKey());

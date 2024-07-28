@@ -23,10 +23,10 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
 
         // Set download tasks to completed
         var dbContext = IDbContext;
-        var downloadTasks = await dbContext.DownloadTaskMovie.AsTracking().Include(x => x.Children).ToListAsync();
+        var downloadTasks = await IDbContext.DownloadTaskMovie.AsTracking().Include(x => x.Children).ToListAsync();
 
         downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
-        await dbContext.SaveChangesAsync(CancellationToken.None);
+        await IDbContext.SaveChangesAsync(CancellationToken.None);
 
         var ep = Factory.Create<ClearCompletedDownloadTasksEndpoint>(ctx =>
             ctx.AddTestServices(s => s.AddTransient(_ => mock.Create<IPlexRipperDbContext>()))
@@ -59,10 +59,10 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
 
         // Set download tasks to completed
         var dbContext = IDbContext;
-        var downloadTasks = await dbContext.DownloadTaskMovie.AsTracking().Include(x => x.Children).ToListAsync();
+        var downloadTasks = await IDbContext.DownloadTaskMovie.AsTracking().Include(x => x.Children).ToListAsync();
 
         downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
-        await dbContext.SaveChangesAsync(CancellationToken.None);
+        await IDbContext.SaveChangesAsync(CancellationToken.None);
 
         var ep = Factory.Create<ClearCompletedDownloadTasksEndpoint>(ctx =>
             ctx.AddTestServices(s => s.AddTransient(_ => mock.Create<IPlexRipperDbContext>()))

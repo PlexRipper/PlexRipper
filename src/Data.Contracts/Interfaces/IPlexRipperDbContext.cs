@@ -5,7 +5,7 @@ using PlexRipper.Domain;
 
 namespace Data.Contracts;
 
-public interface IPlexRipperDbContext
+public interface IPlexRipperDbContext : IDisposable
 {
     public DbSet<PlexAccount> PlexAccounts { get; set; }
     public DbSet<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
@@ -55,7 +55,7 @@ public interface IPlexRipperDbContext
 
     public int SaveChanges();
     public int SaveChanges(bool acceptAllChangesOnSuccess);
-    public Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     public Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken);
 
     public Task BulkInsertAsync<T>(

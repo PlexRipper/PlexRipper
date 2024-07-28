@@ -36,7 +36,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
             config.MovieDownloadTasksCount = 5;
         });
 
-        var downloadTasks = await DbContext
+        var downloadTasks = await IDbContext
             .DownloadTaskMovie.AsTracking()
             .Where(x => x.PlexServerId == 1)
             .IncludeAll()
@@ -45,7 +45,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
 
         var startedDownloadTask = downloadTasks[0];
         startedDownloadTask.SetDownloadStatus(DownloadStatus.Downloading);
-        await DbContext.SaveChangesAsync();
+        await IDbContext.SaveChangesAsync();
 
         // Act
         var result = await _sut.CheckDownloadQueueServer(1);
@@ -66,7 +66,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
             config.MovieDownloadTasksCount = 2;
         });
 
-        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync();
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
 
         // Act
@@ -91,9 +91,9 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
             config.MovieDownloadTasksCount = 5;
         });
 
-        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
-        await DbContext.SaveChangesAsync();
+        await IDbContext.SaveChangesAsync();
 
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
 
@@ -119,9 +119,9 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
             config.TvShowSeasonDownloadTasksCount = 2;
             config.TvShowEpisodeDownloadTasksCount = 2;
         });
-        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
+        var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
-        await DbContext.SaveChangesAsync();
+        await IDbContext.SaveChangesAsync();
 
         mock.Mock<IDownloadTaskScheduler>().Setup(x => x.StartDownloadTaskJob(It.IsAny<DownloadTaskKey>())).ReturnOk();
 

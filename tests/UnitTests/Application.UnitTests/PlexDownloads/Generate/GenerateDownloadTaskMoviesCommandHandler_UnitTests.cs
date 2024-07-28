@@ -41,7 +41,6 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        ResetDbContext();
         var plexDownloadTaskMovies = await IDbContext.DownloadTaskMovie.IncludeAll().ToListAsync();
 
         plexDownloadTaskMovies.Count.ShouldBe(5);
@@ -50,6 +49,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
         {
             downloadTaskMovie.Calculate();
             var validationResult = await validator.ValidateAsync(downloadTaskMovie);
+
             // Ignore DownloadDirectory and DestinationDirectory errors as these are set in the DownloadJob
             var validErrors = validationResult.Errors.FindAll(x =>
                 !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DownloadDirectory))
@@ -90,7 +90,6 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
         // Assert
         result.IsSuccess.ShouldBeTrue();
 
-        ResetDbContext();
         var plexDownloadTaskMovies = await IDbContext.DownloadTaskMovie.IncludeAll().ToListAsync();
 
         plexDownloadTaskMovies.Count.ShouldBe(2);
@@ -99,6 +98,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
         {
             downloadTaskMovie.Calculate();
             var validationResult = await validator.ValidateAsync(downloadTaskMovie);
+
             // Ignore DownloadDirectory and DestinationDirectory errors as these are set in the DownloadJob
             var validErrors = validationResult.Errors.FindAll(x =>
                 !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DownloadDirectory))

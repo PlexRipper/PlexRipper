@@ -2,9 +2,21 @@
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.Common;
 
-namespace PlexRipper.Data.PlexLibraries;
+namespace PlexRipper.Application;
+
+public record AddOrUpdatePlexLibrariesCommand : IRequest<Result>
+{
+    public int PlexAccountId { get; }
+
+    public List<PlexLibrary> PlexLibraries { get; }
+
+    public AddOrUpdatePlexLibrariesCommand(int plexAccountId, List<PlexLibrary> plexLibraries)
+    {
+        PlexAccountId = plexAccountId;
+        PlexLibraries = plexLibraries;
+    }
+}
 
 public class AddOrUpdatePlexLibrariesValidator : AbstractValidator<AddOrUpdatePlexLibrariesCommand>
 {
@@ -26,14 +38,18 @@ public class AddOrUpdatePlexLibrariesValidator : AbstractValidator<AddOrUpdatePl
     #endregion
 }
 
-public class AddOrUpdatePlexLibrariesCommandHandler
-    : BaseHandler,
-        IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result>
+public class AddOrUpdatePlexLibrariesCommandHandler : IRequestHandler<AddOrUpdatePlexLibrariesCommand, Result>
 {
+    private readonly ILog _log;
+    private readonly IPlexRipperDbContext _dbContext;
+
     #region Constructors
 
-    public AddOrUpdatePlexLibrariesCommandHandler(ILog log, PlexRipperDbContext dbContext)
-        : base(log, dbContext) { }
+    public AddOrUpdatePlexLibrariesCommandHandler(ILog log, IPlexRipperDbContext dbContext)
+    {
+        _log = log;
+        _dbContext = dbContext;
+    }
 
     #endregion
 

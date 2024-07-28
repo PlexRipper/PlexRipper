@@ -62,7 +62,7 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
         {
             config.MovieDownloadTasksCount = 2;
         });
-        var movieDownloadTasks = await DbContext.GetAllDownloadTasksByServerAsync();
+        var movieDownloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
 
         mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))

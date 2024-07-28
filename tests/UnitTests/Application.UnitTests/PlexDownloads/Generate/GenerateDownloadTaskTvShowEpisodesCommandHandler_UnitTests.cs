@@ -40,7 +40,7 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
             config.TvShowEpisodeCount = 5;
         });
 
-        var plexTvShows = await DbContext
+        var plexTvShows = await IDbContext
             .PlexTvShows.Include(x => x.Seasons)
             .ThenInclude(x => x.Episodes)
             .ToListAsync();
@@ -63,7 +63,7 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
-        var downloadTaskTvShows = await DbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
+        var downloadTaskTvShows = await IDbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
         downloadTaskTvShows.Count.ShouldBe(5);
 
         var downloadTaskSeasons = downloadTaskTvShows.SelectMany(x => x.Children).ToList();
@@ -100,14 +100,13 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
             config.TvShowEpisodeCount = 5;
         });
         var dbContext = IDbContext;
-        var plexTvShows = await dbContext.PlexTvShows.IncludeAll().ToListAsync();
+        var plexTvShows = await IDbContext.PlexTvShows.IncludeAll().ToListAsync();
         var plexEpisodes = plexTvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).ToList();
 
         // Create a download task for the tv show
         var createdTvShowDownloadTask = plexTvShows.First().MapToDownloadTask();
         dbContext.DownloadTaskTvShow.Add(createdTvShowDownloadTask);
-        await dbContext.SaveChangesAsync(CancellationToken.None);
-        ResetDbContext();
+        await IDbContext.SaveChangesAsync(CancellationToken.None);
 
         var downloadMediaDtos = new List<DownloadMediaDTO>
         {
@@ -126,7 +125,7 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
 
         // Assert
         result.IsSuccess.ShouldBeTrue(result.ToString());
-        var downloadTaskTvShows = await DbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
+        var downloadTaskTvShows = await IDbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
         downloadTaskTvShows.Count.ShouldBe(5);
         downloadTaskTvShows.FirstOrDefault(x => x.Id == createdTvShowDownloadTask.Id).ShouldNotBeNull();
     }

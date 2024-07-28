@@ -9,7 +9,7 @@ namespace PlexRipper.Application;
 public record CreateDownloadTasksEndpointRequest
 {
     [FromBody]
-    public List<DownloadMediaDTO> DownloadMedias { get; }
+    public List<DownloadMediaDTO> DownloadMedias { get; init; }
 }
 
 public class CreateDownloadTasksEndpointRequestValidator : Validator<CreateDownloadTasksEndpointRequest>

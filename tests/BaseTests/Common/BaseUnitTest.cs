@@ -46,6 +46,8 @@ public class BaseUnitTest : IDisposable
     // ReSharper disable once InconsistentNaming
     protected IPlexRipperDbContext IDbContext => GetDbContext();
 
+    private List<PlexRipperDbContext> _dbContexts = new();
+
     #endregion
 
     protected PlexRipperDbContext GetDbContext()
@@ -58,7 +60,8 @@ public class BaseUnitTest : IDisposable
             throw new Exception(logEvent.ToLogString());
         }
 
-        return MockDatabase.GetMemoryDbContext(_databaseName);
+        _dbContexts.Add(MockDatabase.GetMemoryDbContext(_databaseName));
+        return _dbContexts.Last();
     }
 
     /// <summary>
@@ -68,15 +71,16 @@ public class BaseUnitTest : IDisposable
     protected async Task SetupDatabase(Action<FakeDataConfig>? options = null)
     {
         // Database context can be setup once and then retrieved by its DB name.
-        var dbContext = await GetDbContext().Setup(Seed, options);
+        var dbContext = await MockDatabase.GetMemoryDbContext().Setup(Seed, options);
         _databaseName = dbContext.DatabaseName;
-
+        _dbContexts.Add(dbContext);
         _isDatabaseSetup = true;
     }
 
     public virtual void Dispose()
     {
-        IDbContext.Dispose();
+        if (_isDatabaseSetup)
+            _dbContexts.ForEach(x => x.Dispose());
     }
 }
 

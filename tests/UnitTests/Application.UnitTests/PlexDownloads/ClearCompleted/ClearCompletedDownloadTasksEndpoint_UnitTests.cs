@@ -23,10 +23,10 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
 
         // Set download tasks to completed
         var dbContext = IDbContext;
-        var downloadTasks = await IDbContext.DownloadTaskMovie.AsTracking().Include(x => x.Children).ToListAsync();
+        var downloadTasks = await dbContext.DownloadTaskMovie.AsTracking().Include(x => x.Children).ToListAsync();
 
         downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
-        await IDbContext.SaveChangesAsync(CancellationToken.None);
+        await dbContext.SaveChangesAsync(CancellationToken.None);
 
         var ep = Factory.Create<ClearCompletedDownloadTasksEndpoint>(ctx =>
             ctx.AddTestServices(s => s.AddTransient(_ => mock.Create<IPlexRipperDbContext>()))
@@ -59,10 +59,10 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
 
         // Set download tasks to completed
         var dbContext = IDbContext;
-        var downloadTasks = await IDbContext.DownloadTaskMovie.AsTracking().Include(x => x.Children).ToListAsync();
+        var downloadTasks = await dbContext.DownloadTaskMovie.AsTracking().Include(x => x.Children).ToListAsync();
 
         downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
-        await IDbContext.SaveChangesAsync(CancellationToken.None);
+        await dbContext.SaveChangesAsync(CancellationToken.None);
 
         var ep = Factory.Create<ClearCompletedDownloadTasksEndpoint>(ctx =>
             ctx.AddTestServices(s => s.AddTransient(_ => mock.Create<IPlexRipperDbContext>()))
@@ -75,9 +75,10 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
         // Assert
         result.ShouldNotBeNull();
         result.IsSuccess.ShouldBeTrue();
+        dbContext = IDbContext;
 
-        var downloadTasksDb = await IDbContext.DownloadTaskMovie.ToListAsync();
-        var downloadTasksFileDb = await IDbContext.DownloadTaskMovieFile.ToListAsync();
+        var downloadTasksDb = await dbContext.DownloadTaskMovie.ToListAsync();
+        var downloadTasksFileDb = await dbContext.DownloadTaskMovieFile.ToListAsync();
         downloadTasksDb.ShouldBeEmpty();
         downloadTasksFileDb.ShouldBeEmpty();
     }

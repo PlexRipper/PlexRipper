@@ -36,7 +36,8 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
             config.MovieDownloadTasksCount = 5;
         });
 
-        var downloadTasks = await IDbContext
+        var dbContext = IDbContext;
+        var downloadTasks = await dbContext
             .DownloadTaskMovie.AsTracking()
             .Where(x => x.PlexServerId == 1)
             .IncludeAll()
@@ -45,7 +46,7 @@ public class DownloadQueue_CheckDownloadQueue_UnitTests : BaseUnitTest<Applicati
 
         var startedDownloadTask = downloadTasks[0];
         startedDownloadTask.SetDownloadStatus(DownloadStatus.Downloading);
-        await IDbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
         // Act
         var result = await _sut.CheckDownloadQueueServer(1);

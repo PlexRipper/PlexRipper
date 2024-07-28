@@ -100,13 +100,13 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
             config.TvShowEpisodeCount = 5;
         });
         var dbContext = IDbContext;
-        var plexTvShows = await IDbContext.PlexTvShows.IncludeAll().ToListAsync();
+        var plexTvShows = await dbContext.PlexTvShows.IncludeAll().ToListAsync();
         var plexEpisodes = plexTvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).ToList();
 
         // Create a download task for the tv show
         var createdTvShowDownloadTask = plexTvShows.First().MapToDownloadTask();
         dbContext.DownloadTaskTvShow.Add(createdTvShowDownloadTask);
-        await IDbContext.SaveChangesAsync(CancellationToken.None);
+        await dbContext.SaveChangesAsync(CancellationToken.None);
 
         var downloadMediaDtos = new List<DownloadMediaDTO>
         {

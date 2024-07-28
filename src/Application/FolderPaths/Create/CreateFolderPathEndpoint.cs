@@ -9,7 +9,7 @@ namespace PlexRipper.Application;
 public record CreateFolderPathEndpointRequest
 {
     [FromBody]
-    public FolderPathDTO FolderPathDto { get; }
+    public FolderPathDTO FolderPathDto { get; init; }
 }
 
 public class CreateFolderPathEndpointRequestValidator : Validator<CreateFolderPathEndpointRequest>

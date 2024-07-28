@@ -1,12 +1,12 @@
 ﻿namespace PlexRipper.PlexApi;
 
-public class CredentialsDTO
+public record CredentialsDTO
 {
-    public string Login { get; set; }
+    public required string Login { get; init; }
 
-    public string Password { get; set; }
+    public required string Password { get; init; }
 
-    public bool RememberMe { get; set; }
+    public required bool RememberMe { get; init; }
 
     public string VerificationCode { get; set; }
 }

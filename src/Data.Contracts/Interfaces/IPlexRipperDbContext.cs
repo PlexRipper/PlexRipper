@@ -56,6 +56,7 @@ public interface IPlexRipperDbContext : IDisposable
     public int SaveChanges();
     public int SaveChanges(bool acceptAllChangesOnSuccess);
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
     public Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken);
 
     public Task BulkInsertAsync<T>(

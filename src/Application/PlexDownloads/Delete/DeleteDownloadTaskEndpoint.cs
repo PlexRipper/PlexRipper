@@ -7,10 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public class DeleteDownloadTaskEndpointRequest
+public record DeleteDownloadTaskEndpointRequest
 {
     [FromBody]
-    public List<Guid> DownloadTaskIds { get; init; }
+    public required List<Guid> DownloadTaskIds { get; init; }
 }
 
 public class DeleteDownloadTaskEndpointRequestValidator : Validator<DeleteDownloadTaskEndpointRequest>
@@ -56,7 +56,7 @@ public class DeleteDownloadTaskEndpoint : BaseEndpoint<DeleteDownloadTaskEndpoin
         foreach (var downloadTaskId in req.DownloadTaskIds)
         {
             var downloadTaskKey = await _dbContext.GetDownloadTaskKeyAsync(downloadTaskId, ct);
-            if (downloadTaskKey is not null && await _downloadTaskScheduler.IsDownloading(downloadTaskKey))
+            if (downloadTaskKey is not null && await _downloadTaskScheduler.IsDownloading(downloadTaskKey, ct))
                 await _mediator.Send(new StopDownloadTaskCommand(downloadTaskKey.Id), ct);
         }
 

@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
-public class CreateFolderPathEndpointRequest
+public record CreateFolderPathEndpointRequest
 {
     [FromBody]
-    public FolderPathDTO FolderPathDto { get; init; }
+    public FolderPathDTO FolderPathDto { get; }
 }
 
 public class CreateFolderPathEndpointRequestValidator : Validator<CreateFolderPathEndpointRequest>

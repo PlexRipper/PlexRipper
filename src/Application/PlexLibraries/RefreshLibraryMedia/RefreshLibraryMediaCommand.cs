@@ -165,9 +165,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         if (updateMetaDataResult.IsFailed)
             return updateMetaDataResult;
 
-        var updateResult = await _mediator.Send(new UpdatePlexLibraryByIdCommand(plexLibrary));
-        if (updateResult.IsFailed)
-            return updateResult.ToResult();
+        await _dbContext.UpdatePlexLibraryById(plexLibrary);
 
         var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
         if (createResult.IsFailed)
@@ -213,9 +211,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
 
         SendProgress(1, 3);
 
-        var updateResult = await _mediator.Send(new UpdatePlexLibraryByIdCommand(plexLibrary));
-        if (updateResult.IsFailed)
-            return updateResult.ToResult();
+        await _dbContext.UpdatePlexLibraryById(plexLibrary);
 
         SendProgress(2, 3);
 

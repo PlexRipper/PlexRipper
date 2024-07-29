@@ -15,12 +15,13 @@ jobs:
                 uses: actions/checkout@v4
                 with:
                     token: ${{ secrets.GH_TOKEN }}
-            -   name: GitHub Release
+            -   name: Setup Node.js
                 uses: actions/setup-node@v4
-                run: npx semantic-release
-                working-directory: src/WebAPI/ClientApp/
                 with:
                     node-version: 21
+            -   name: GitHub Release
+                run: npx semantic-release
+                working-directory: src/WebAPI/ClientApp/
                 env:
                     GH_TOKEN: ${{ secrets.GH_TOKEN }}
                     GIT_AUTHOR_NAME: ${{ vars.GIT_AUTHOR_NAME }}

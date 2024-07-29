@@ -4,7 +4,7 @@ using PlexRipper.Domain.DownloadManager;
 
 namespace PlexRipper.Domain;
 
-public static class JsonElementExtentions
+public static class JsonElementExtensions
 {
     public static object GetTypedValue(this JsonElement jsonElement, Type type)
     {

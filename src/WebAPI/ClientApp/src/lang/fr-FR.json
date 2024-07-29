@@ -178,6 +178,10 @@
             "title": "Êtes vous sûr ?",
             "warning": "Cela peut prendre environ 5 minutes ou plus, puis cette fenêtre se fermera d'elle-même!"
         },
+        "hide-server": {
+            "text": "Cela masquera le serveur de la vue. Vous pouvez afficher ce serveur en accédant aux paramètres -> UI -> Afficher les serveurs Plex",
+            "title": "Êtes vous sûr ?"
+        },
         "reset-db": {
             "text": "Ca va backuper votre base de donnée vers \"config/Database Backup/\" et en créer une nouvelle, après vous serrez redirigé vers la page de configuration. Ca ne réinitialisera pas les paramètres qui sont stocké dans \"config/PlexRipperSettings.json\"",
             "title": "Êtes vous sûr ?"
@@ -479,6 +483,9 @@
                 },
                 "general-settings": {
                     "header": "Général"
+                },
+                "un-hide-servers-section": {
+                    "header": "Afficher les serveurs Plex"
                 }
             }
         },

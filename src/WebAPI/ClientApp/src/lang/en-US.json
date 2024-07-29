@@ -178,6 +178,10 @@
             "title": "Are you sure?",
             "warning": "This might take around 5 minutes or longer and then this window will close on its own!"
         },
+        "hide-server": {
+            "text": "This will hide the server from view. You can unhide this server by going to settings -> UI -> Unhide Plex Servers",
+            "title": "Are you sure?"
+        },
         "reset-db": {
             "text": "This will back-up the current database to \"config/Database Backup/\" and create a new one, after which you will be redirected to the setup page. This will not reset settings since those are stored in \"config/PlexRipperSettings.json\"",
             "title": "Are you sure?"
@@ -479,6 +483,9 @@
                 },
                 "general-settings": {
                     "header": "General"
+                },
+                "un-hide-servers-section": {
+                    "header": "Unhide Plex Servers"
                 }
             }
         },

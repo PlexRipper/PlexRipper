@@ -178,6 +178,10 @@
             "title": "Sind Sie sicher?",
             "warning": "Dies wird ca.5 Minuten oder mehr benötigen. Wenn der Vorgang abgeschlossen ist schließt sich das Fenster selbstständig."
         },
+        "hide-server": {
+            "text": "Dadurch wird der Server ausgeblendet. Sie können diesen Server wieder einblenden, indem Sie zu Einstellungen -> Benutzeroberfläche -> Plex-Server einblenden gehen.",
+            "title": "Sind Sie sicher?"
+        },
         "reset-db": {
             "text": "Das erstellt ein Backup der Datenbank nach \"config/Database Backup/\" und erstellt eine neue. Danach werden Sie auf die Setup-Seite weitergeleitet. Einstellungen werden nicht zurückgesetzt. Diese befinden sich hier:  \"config/PlexRipperSettings.json\"",
             "title": "Sind Sie sicher?"
@@ -479,6 +483,9 @@
                 },
                 "general-settings": {
                     "header": "Allgemeines"
+                },
+                "un-hide-servers-section": {
+                    "header": "Plex-Server einblenden"
                 }
             }
         },

@@ -69,6 +69,9 @@ export const useServerStore = defineStore('ServerStore', () => {
 		getVisibleServers: computed((): PlexServerDTO[] =>
 			getters.getServers().filter((x) => settingsStore.isServerVisible(x.machineIdentifier)),
 		),
+		getHiddenServers: computed((): PlexServerDTO[] =>
+			getters.getServers().filter((x) => !settingsStore.isServerVisible(x.machineIdentifier)),
+		),
 		/**
 		 * Retrieves the accessible PlexServers for the given PlexAccount from the store
 		 */

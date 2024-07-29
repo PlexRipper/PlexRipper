@@ -19,6 +19,8 @@ jobs:
                 uses: actions/setup-node@v4
                 with:
                     node-version: 21
+            -   name: Client App Install
+                uses: ./.github/workflows/steps/client-app-install/          
             -   name: GitHub Release
                 run: npx --prefix src/WebAPI/ClientApp/ semantic-release
                 env:

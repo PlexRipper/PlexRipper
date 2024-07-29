@@ -1,7 +1,7 @@
 <template>
-	<template v-if="serverStore.getServers().length > 0">
+	<template v-if="serverStore.getVisibleServers.length > 0">
 		<q-expansion-item
-			v-for="(server, index) in serverStore.getServers()"
+			v-for="(server, index) in serverStore.getVisibleServers"
 			:key="index"
 			:label="serverStore.getServerName(server.id)"
 			expand-icon="mdi-chevron-down">

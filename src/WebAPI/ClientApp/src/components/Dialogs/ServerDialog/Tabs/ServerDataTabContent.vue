@@ -38,7 +38,7 @@
 			<tr>
 				<td>{{ t('components.server-dialog.tabs.server-data.current-status') }}:</td>
 				<td>
-					<q-status pulse :value="serverStore.getServerStatus(plexServer.id)" />
+					<q-status :value="serverStore.getServerStatus(plexServer.id)" />
 				</td>
 			</tr>
 			<!--	Check Server Action	-->
@@ -89,11 +89,10 @@
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import type { PlexServerDTO, ServerConnectionCheckStatusProgressDTO } from '@dto';
-import { useSignalrStore, useSettingsStore, useI18n } from '#imports';
+import { useSignalrStore, useI18n } from '#imports';
 
 const { t } = useI18n();
 const signalrStore = useSignalrStore();
-const settingsStore = useSettingsStore();
 
 const serverStore = useServerStore();
 const serverConnectionStore = useServerConnectionStore();

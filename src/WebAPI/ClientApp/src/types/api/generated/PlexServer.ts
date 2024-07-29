@@ -143,6 +143,31 @@ export class PlexServer {
  * No description
  *
  * @tags Plexserver
+ * @name SetServerHiddenRequestEndpoint
+ * @request GET:/api/PlexServer/{plexServerId}/set-server-hidden
+
+ */
+	setServerHiddenRequestEndpoint = (
+		plexServerId: number,
+		query: {
+			hidden: boolean;
+		},
+		params: RequestParams = {},
+	) =>
+		from(
+			Axios.request<ResultDTO>({
+				url: `/api/PlexServer/${plexServerId}/set-server-hidden`,
+				method: 'GET',
+				params: query,
+				format: 'json',
+				...params,
+			}),
+		).pipe(apiCheckPipe<ResultDTO>);
+
+	/**
+ * No description
+ *
+ * @tags Plexserver
  * @name QueueSyncPlexServerJobEndpoint
  * @request GET:/api/PlexServer/{plexServerId}/sync
 
@@ -187,6 +212,13 @@ export class PlexServerPaths {
 			serverAlias: string;
 		},
 	) => queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/set-server-alias`, query });
+
+	static setServerHiddenRequestEndpoint = (
+		plexServerId: number,
+		query: {
+			hidden: boolean;
+		},
+	) => queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/set-server-hidden`, query });
 
 	static queueSyncPlexServerJobEndpoint = (
 		plexServerId: number,

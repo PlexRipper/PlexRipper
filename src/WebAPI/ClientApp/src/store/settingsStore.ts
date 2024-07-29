@@ -111,6 +111,7 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 					machineIdentifier,
 					plexServerName: state.serverSettings.data[i].plexServerName,
 					downloadSpeedLimit: downloadLimit,
+					hidden: state.serverSettings.data[i].hidden,
 				});
 			}
 		},
@@ -126,15 +127,17 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 					Log.error('Could not set view mode for type' + type);
 			}
 		},
+		isServerVisible(machineIdentifier: string): boolean {
+			return !actions.getServerSettings(machineIdentifier)?.hidden ?? true;
+		},
+		getServerSettings: (machineIdentifier?: string) =>
+			machineIdentifier ? state.serverSettings.data.find((user) => user.machineIdentifier === machineIdentifier) : null,
 	};
 
 	// Getters
 	const getters = {
 		debugMode: computed((): boolean => state.debugSettings.debugModeEnabled),
-		getServerSettings: computed(
-			() => (machineIdentifier?: string) =>
-				machineIdentifier ? state.serverSettings.data.find((user) => user.machineIdentifier === machineIdentifier) : null,
-		),
+
 		shouldMaskServerNames: computed(
 			(): boolean => state.debugSettings.debugModeEnabled && state.debugSettings.maskServerNames,
 		),

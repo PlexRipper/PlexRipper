@@ -99,24 +99,44 @@
 			<!--			</q-card>-->
 		</template>
 		<template #actions>
-			<BaseButton
-				cy="server-dialog-close-btn"
-				flat
-				:label="t('general.commands.close')"
-				color="default"
-				@click="useCloseControlDialog(name)" />
+			<q-row justify="between">
+				<q-col cols="auto">
+					<HideButton @click="useOpenControlDialog(confirmationServerDialogName)" />
+				</q-col>
+				<q-col cols="auto">
+					<BaseButton
+						cy="server-dialog-close-btn"
+						flat
+						:label="t('general.commands.close')"
+						color="default"
+						@click="close" />
+				</q-col>
+			</q-row>
+			<!-- Hide Server Confirm Dialog -->
+			<confirmation-dialog
+				:confirm-loading="confirmHideDialog"
+				:name="confirmationServerDialogName"
+				class="q-mr-md"
+				text-id="hide-server"
+				@confirm="onServerHiddenSave" />
 		</template>
 	</QCardDialog>
 </template>
 
 <script setup lang="ts">
 import { set, get } from '@vueuse/core';
-import { ref, computed, useCloseControlDialog } from '#imports';
+import { tap } from 'rxjs/operators';
+import { ref, computed, useCloseControlDialog, useOpenControlDialog } from '#imports';
 import type { PlexServerDTO } from '@dto';
 
-defineProps<{ name: string }>();
+const props = defineProps<{ name: string }>();
+
 const serverStore = useServerStore();
 const libraryStore = useLibraryStore();
+
+const confirmationServerDialogName = 'confirmationServerDialogName';
+const confirmHideDialog = ref(false);
+
 const loading = ref(false);
 const tabIndex = ref<string>('server-data');
 const plexServer = ref<PlexServerDTO | null>(null);
@@ -134,12 +154,22 @@ function open(newPlexServerId: number): void {
 }
 
 function close(): void {
+	useCloseControlDialog(props.name);
 	set(plexServerId, 0);
 	set(tabIndex, 'server-data');
 }
 
 function onServerAliasSave(serverAlias: string): void {
 	useSubscription(serverStore.setServerAlias(get(plexServerId), serverAlias).subscribe());
+}
+
+function onServerHiddenSave(): void {
+	useSubscription(
+		serverStore
+			.setServerHidden(get(plexServerId), true)
+			.pipe(tap(() => close()))
+			.subscribe(),
+	);
 }
 </script>
 <style lang="scss">

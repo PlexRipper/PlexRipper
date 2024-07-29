@@ -59,13 +59,11 @@
 </template>
 
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
-import { set } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import { useOpenControlDialog } from '@composables/event-bus';
-import type { PlexAccountDTO, PlexMediaSlimDTO } from '@dto';
+import type { PlexAccountDTO } from '@dto';
 import { generateDefaultFolderPaths, generatePlexAccount } from '@factories';
-import { useAlertStore, useHelpStore, useMediaStore } from '~/store';
+import { useAlertStore, useHelpStore } from '~/store';
 
 const { t } = useI18n();
 const helpStore = useHelpStore();

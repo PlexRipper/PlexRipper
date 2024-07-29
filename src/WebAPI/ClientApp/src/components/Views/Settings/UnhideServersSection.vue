@@ -3,7 +3,7 @@
 		<template #header> {{ t('pages.settings.ui.un-hide-servers-section.header') }}</template>
 
 		<q-list bordered>
-			<q-item v-for="server in serverStore.getHiddenServers" :key="server.id" v-ripple class="q-mb-sm" clickable>
+			<q-item v-for="server in serverStore.getHiddenServers" :key="server.id" v-ripple clickable>
 				<q-item-section avatar>
 					<IconSquareButton icon="mdi-eye-check-outline" @click="onServerUnHide(server.id)" />
 				</q-item-section>

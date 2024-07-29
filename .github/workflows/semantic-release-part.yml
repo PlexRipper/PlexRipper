@@ -15,11 +15,12 @@ jobs:
                 uses: actions/checkout@v4
                 with:
                     token: ${{ secrets.GH_TOKEN }}
-            -   name: Client App Install
-                uses: ./.github/workflows/steps/client-app-install/
             -   name: GitHub Release
-                run: bunx semantic-release
+                uses: actions/setup-node@v4
+                run: npx semantic-release
                 working-directory: src/WebAPI/ClientApp/
+                with:
+                    node-version: 21
                 env:
                     GH_TOKEN: ${{ secrets.GH_TOKEN }}
                     GIT_AUTHOR_NAME: ${{ vars.GIT_AUTHOR_NAME }}

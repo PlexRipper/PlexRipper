@@ -15,10 +15,12 @@ jobs:
                 uses: actions/checkout@v4
                 with:
                     token: ${{ secrets.GH_TOKEN }}
+            # This is required to be able to run semantic-release
             -   name: Setup Node.js
                 uses: actions/setup-node@v4
                 with:
                     node-version: 21
+            # This is required to be able to run semantic-release plugins
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/          
             -   name: GitHub Release

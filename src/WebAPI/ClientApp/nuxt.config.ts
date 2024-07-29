@@ -202,15 +202,22 @@ export default defineNuxtConfig({
 	},
 	eslint: {
 		config: {
-			stylistic: true,
+			stylistic: {
+				indent: 'tab',
+				semi: true,
+				arrowParens: true,
+				blockSpacing: true,
+				braceStyle: '1tbs',
+				commaDangle: 'always-multiline',
+				quotes: 'single',
+				quoteProps: 'as-needed',
+			},
 		},
 	},
 	/*
 	 ** Doc: https://nuxtjs.org/docs/configuration-glossary/configuration-telemetry
 	 */
 	// loading: true, // TODO Maybe better to re-enable based on how it looks
-	telemetry: false /*
-	 ** Customize the progress-bar color
-	 */,
+	telemetry: false,
 	compatibilityDate: '2024-07-25',
 });

@@ -11,4 +11,6 @@ public interface IServerSettingsModule : IBaseSettingsModule<IServerSettings>, I
     void SetServerName(string machineIdentifier, string serverName = "");
 
     string GetServerNameAlias(string machineIdentifier);
+
+    void SetServerHiddenState(string machineIdentifier, bool isHidden);
 }

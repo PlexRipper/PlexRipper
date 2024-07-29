@@ -67,6 +67,19 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
         }
     }
 
+    public void SetServerHiddenState(string machineIdentifier, bool isHidden)
+    {
+        var model = FindOrAddServerSettingsModel(machineIdentifier);
+        if (model is null)
+            return;
+
+        if (model.Hidden != isHidden)
+        {
+            model.Hidden = isHidden;
+            EmitModuleHasChanged(GetValues());
+        }
+    }
+
     public override IServerSettings Update(IServerSettings sourceSettings)
     {
         if (!sourceSettings.Data.Any())
@@ -83,6 +96,9 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
 
             if (model.PlexServerName != plexServerSettingsModel.PlexServerName)
                 model.PlexServerName = plexServerSettingsModel.PlexServerName;
+
+            if (model.Hidden != plexServerSettingsModel.Hidden)
+                model.Hidden = plexServerSettingsModel.Hidden;
         }
 
         EmitModuleHasChanged(GetValues());
@@ -113,8 +129,9 @@ public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServer
             new PlexServerSettingsModel
             {
                 MachineIdentifier = machineIdentifier,
-                DownloadSpeedLimit = 0,
                 PlexServerName = string.Empty,
+                DownloadSpeedLimit = 0,
+                Hidden = false,
             }
         );
 

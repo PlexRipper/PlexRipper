@@ -150,8 +150,9 @@ public static partial class FakeData
         return new Faker<PlexServerSettingsModel>()
             .StrictMode(true)
             .UseSeed(config.Seed)
+            .RuleFor(x => x.MachineIdentifier, f => f.Finance.BitcoinAddress())
             .RuleFor(x => x.PlexServerName, _ => string.Empty)
             .RuleFor(x => x.DownloadSpeedLimit, _ => config.DownloadSpeedLimitInKib)
-            .RuleFor(x => x.MachineIdentifier, f => f.Finance.BitcoinAddress());
+            .RuleFor(x => x.Hidden, _ => false);
     }
 }

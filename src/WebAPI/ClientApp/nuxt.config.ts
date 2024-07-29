@@ -32,9 +32,9 @@ export default defineNuxtConfig({
 
 	modules: [
 		// Doc: https://github.com/Maiquu/nuxt-quasar
-		'nuxt-quasar-ui',
-		'@vueuse/nuxt', // Doc: https://primevue.org/nuxt/
-		'@primevue/nuxt-module', // Doc: https://i18n.nuxtjs.org/
+		'nuxt-quasar-ui', // Doc: https://primevue.org/nuxt/
+		'@vueuse/nuxt', // Doc: https://i18n.nuxtjs.org/
+		'@primevue/nuxt-module',
 		'@nuxtjs/i18n',
 		'nuxt-lodash',
 		'@nuxt/test-utils/module',
@@ -44,6 +44,7 @@ export default defineNuxtConfig({
 				autoImports: ['defineStore', 'acceptHMRUpdate'],
 			},
 		],
+		'@nuxt/eslint',
 	],
 
 	quasar: {
@@ -199,7 +200,11 @@ export default defineNuxtConfig({
 			});
 		},
 	},
-
+	eslint: {
+		config: {
+			stylistic: true,
+		},
+	},
 	/*
 	 ** Doc: https://nuxtjs.org/docs/configuration-glossary/configuration-telemetry
 	 */

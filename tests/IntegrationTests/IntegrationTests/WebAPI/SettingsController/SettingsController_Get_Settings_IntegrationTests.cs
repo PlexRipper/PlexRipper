@@ -28,10 +28,10 @@ public class SettingsController_Get_Settings_IntegrationTests : BaseIntegrationT
         var result = response.Result;
         result.IsSuccess.ShouldBeTrue();
         var settingsModel = result.Value.ToModel();
-        var responseSettings = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigBase);
+        var responseSettings = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCapitalized);
         var defaultSettings = JsonSerializer.Serialize(
             SettingsModel.DefaultSettings(),
-            DefaultJsonSerializerOptions.ConfigBase
+            DefaultJsonSerializerOptions.ConfigCapitalized
         );
 
         responseSettings.ShouldBe(defaultSettings);

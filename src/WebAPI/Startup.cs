@@ -135,7 +135,9 @@ public static class Startup
             // Setup SignalR
             services
                 .AddSignalR()
-                .AddJsonProtocol(options => options.PayloadSerializerOptions = DefaultJsonSerializerOptions.ConfigBase);
+                .AddJsonProtocol(options =>
+                    options.PayloadSerializerOptions = DefaultJsonSerializerOptions.ConfigStandard
+                );
 
             services.SwaggerDocument(options =>
             {
@@ -154,7 +156,7 @@ public static class Startup
 
                 options.SerializerSettings = serializerOptions =>
                 {
-                    var config = DefaultJsonSerializerOptions.ConfigBase;
+                    var config = DefaultJsonSerializerOptions.ConfigStandard;
                     serializerOptions.PropertyNameCaseInsensitive = config.PropertyNameCaseInsensitive;
                     serializerOptions.PropertyNamingPolicy = config.PropertyNamingPolicy;
                     serializerOptions.DefaultIgnoreCondition = config.DefaultIgnoreCondition;

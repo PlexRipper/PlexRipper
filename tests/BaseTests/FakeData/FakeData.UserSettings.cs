@@ -41,13 +41,13 @@ public static partial class FakeData
     public static string GetSettingsModelJson(Action<UnitTestDataConfig>? options = null)
     {
         var settings = GetSettingsModel(options).Generate();
-        return JsonSerializer.Serialize(settings, DefaultJsonSerializerOptions.ConfigCaptialized);
+        return JsonSerializer.Serialize(settings, DefaultJsonSerializerOptions.ConfigCapitalized);
     }
 
     public static JsonElement GetSettingsModelJsonElement(Action<UnitTestDataConfig>? options = null)
     {
         var settingsJson = GetSettingsModelJson(options);
-        return JsonSerializer.Deserialize<JsonElement>(settingsJson, DefaultJsonSerializerOptions.ConfigCaptialized);
+        return JsonSerializer.Deserialize<JsonElement>(settingsJson, DefaultJsonSerializerOptions.ConfigCapitalized);
     }
 
     public static Faker<GeneralSettings> GetGeneralSettings(Action<UnitTestDataConfig>? options = null)

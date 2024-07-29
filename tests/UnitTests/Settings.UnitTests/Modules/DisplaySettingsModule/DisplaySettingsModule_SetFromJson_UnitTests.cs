@@ -18,10 +18,10 @@ public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest<DisplayS
         {
             DisplaySettings = new DisplaySettings { MovieViewMode = ViewMode.Table, TvShowViewMode = ViewMode.Poster, },
         };
-        var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
+        var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCapitalized);
         var loadedSettings = JsonSerializer.Deserialize<JsonElement>(
             json,
-            DefaultJsonSerializerOptions.ConfigCaptialized
+            DefaultJsonSerializerOptions.ConfigCapitalized
         );
 
         // Act
@@ -46,13 +46,13 @@ public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest<DisplayS
                 })
                 .Generate(),
         };
-        var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
+        var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCapitalized);
 
         // ** Remove property to make corrupted
         json = json.Replace("\"TvShowViewMode\":\"Table\",", "");
         var loadedSettings = JsonSerializer.Deserialize<JsonElement>(
             json,
-            DefaultJsonSerializerOptions.ConfigCaptialized
+            DefaultJsonSerializerOptions.ConfigCapitalized
         );
 
         // Act

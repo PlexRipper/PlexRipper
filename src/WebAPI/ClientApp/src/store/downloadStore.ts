@@ -116,7 +116,7 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 			const allSelection: IPTreeTableSelectionKeys = flatMapDeep(downloads, getLeafs).reduce(
 				(a, v) => ({
 					...a,
-					[`${v.mediaType}-${v.id}`]: {
+					[v.id]: {
 						checked: true,
 						partialChecked: false,
 					},

@@ -8,6 +8,7 @@ public static class DefaultJsonSerializerOptions
 {
     /// <summary>
     /// Disable throwing exceptions when a required property is missing, this will be defaulted to the default value.
+    /// Otherwise, we need separate models for serialization/deserialization and DTO's.
     /// Source: https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/required-properties
     /// </summary>
     private static readonly DefaultJsonTypeInfoResolver DisableThrowingExceptionsWhenRequiredPropertyIsMissing =
@@ -59,14 +60,26 @@ public static class DefaultJsonSerializerOptions
         }
     }
 
-    public static JsonSerializerOptions ConfigIndented { get; } =
-        new()
+    public static JsonSerializerOptions ConfigIndented
+    {
+        get
         {
-            PropertyNameCaseInsensitive = true,
-            Converters = { new JsonStringEnumConverter() },
-            WriteIndented = true,
-            TypeInfoResolver = DisableThrowingExceptionsWhenRequiredPropertyIsMissing,
-        };
+            var options = ConfigBase;
+            options.WriteIndented = true;
+            return new JsonSerializerOptions(options);
+        }
+    }
 
-    public static JsonSerializerOptions ConfigManagerOptions => ConfigIndented;
+    /// <summary>
+    /// This is used for the ConfigManager to save the settings in a readable format.
+    /// </summary>
+    public static JsonSerializerOptions ConfigManagerOptions
+    {
+        get
+        {
+            var options = ConfigIndented;
+            options.PropertyNamingPolicy = null;
+            return new JsonSerializerOptions(options);
+        }
+    }
 }

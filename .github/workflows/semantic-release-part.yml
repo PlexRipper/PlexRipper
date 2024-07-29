@@ -20,8 +20,7 @@ jobs:
                 with:
                     node-version: 21
             -   name: GitHub Release
-                run: npx semantic-release
-                working-directory: src/WebAPI/ClientApp/
+                run: npx --prefix src/WebAPI/ClientApp/ semantic-release
                 env:
                     GH_TOKEN: ${{ secrets.GH_TOKEN }}
                     GIT_AUTHOR_NAME: ${{ vars.GIT_AUTHOR_NAME }}

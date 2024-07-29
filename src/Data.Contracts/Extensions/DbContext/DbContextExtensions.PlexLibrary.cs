@@ -17,7 +17,7 @@ public static partial class DbContextExtensions
 
         if (plexLibraryDb is null)
         {
-            _log.ErrorLine($"PlexLibrary with Id {plexLibrary.Id} not found in the database.");
+            _log.ErrorLine($"PlexLibrary with Id {plexLibrary.Id} not found in the database");
             return;
         }
 

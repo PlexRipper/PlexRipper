@@ -12,13 +12,13 @@ jobs:
       pull-requests: write # to be able to comment on released pull requests
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_TOKEN }}
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 21
       - name: Install dependencies
         run: npm --prefix src/WebAPI/ClientApp/ install
       - name: GitHub Release

@@ -12,38 +12,26 @@ on:
 jobs:
     # Front-End-Type-Check:
     Front-End-Type-Check:
-        defaults:
-            run:
-                working-directory: src/WebAPI/ClientApp/
         runs-on: ubuntu-latest
         steps:
-            -   name: Checkout Source Code
-                uses: actions/checkout@v3
-            -   uses: oven-sh/setup-bun@v2
-                with:
-                    bun-version: "latest"
-            -   name: Clean install node_modules
-                run: bun install
+            -   uses: actions/checkout@v4
+            -   name: Client App Install
+                uses: ./.github/workflows/steps/client-app-install/
             -   name: Run Typescript type check
                 run: bun run typecheck
+                working-directory: src/WebAPI/ClientApp/
     # Front-End-Unit-Tests:
     Front-End-Unit-Tests:
-        defaults:
-            run:
-                working-directory: src/WebAPI/ClientApp/
         runs-on: ubuntu-latest
         steps:
-            -   name: Checkout Source Code
-                uses: actions/checkout@v3
-            -   uses: oven-sh/setup-bun@v2
-                with:
-                    bun-version: "latest"
-            -   name: Clean install node_modules
-                run: bun install
-            -   name: Build front-end
-                run: npm run build --if-present
+            -   uses: actions/checkout@v4
+            -   name: Client App Install
+                uses: ./.github/workflows/steps/client-app-install/
+#            -   name: Build front-end
+#                run: npm run build --if-present
             -   name: Run Vitest tests
                 run: npm test
+                working-directory: src/WebAPI/ClientApp/
     # Front-End-Integration-Tests:
     #  Front-End-Integration-Tests: TODO Tests keep randomly failing during CI, need to investigate
     #    defaults:

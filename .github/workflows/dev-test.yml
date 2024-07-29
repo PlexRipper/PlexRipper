@@ -12,38 +12,24 @@ on:
 jobs:
     # Front-End-Type-Check:
     Front-End-Type-Check:
-        defaults:
-            run:
-                working-directory: src/WebAPI/ClientApp/
         runs-on: ubuntu-latest
         steps:
-            -   name: Checkout Source Code
-                uses: actions/checkout@v3
-            -   uses: oven-sh/setup-bun@v2
-                with:
-                    bun-version: "latest"
-            -   name: Clean install node_modules
-                run: bun install
+            -   uses: actions/checkout@v4
+            -   name: Client App Install
+                uses: ./.github/workflows/steps/client-app-install/
             -   name: Run Typescript type check
                 run: bun run typecheck
+                working-directory: src/WebAPI/ClientApp/
     # Front-End-Unit-Tests:
     Front-End-Unit-Tests:
-        defaults:
-            run:
-                working-directory: src/WebAPI/ClientApp/
         runs-on: ubuntu-latest
         steps:
-            -   name: Checkout Source Code
-                uses: actions/checkout@v3
-            -   uses: oven-sh/setup-bun@v2
-                with:
-                    bun-version: "latest"
-            -   name: Clean install node_modules
-                run: bun install
-            -   name: Build front-end
-                run: npm run build --if-present
+            -   uses: actions/checkout@v4
+            -   name: Client App Install
+                uses: ./.github/workflows/steps/client-app-install/
             -   name: Run Vitest tests
                 run: npm test
+                working-directory: src/WebAPI/ClientApp/
     # Front-End-Integration-Tests:
     #  Front-End-Integration-Tests: TODO Tests keep randomly failing during CI, need to investigate
     #    defaults:
@@ -78,19 +64,9 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout Source Code
-                uses: actions/checkout@v3
-            -   name: Setup .NET SDK
-                uses: actions/setup-dotnet@v3
-                with:
-                    dotnet-version: 8.x.x
-                    cache: true
-                    cache-dependency-path: |
-                        **/*.csproj
-                        **/global.json
-            -   name: Restore dependencies
-                run: dotnet restore PlexRipper.sln --locked-mode
-            -   name: Build
-                run: dotnet build PlexRipper.sln --no-restore
+                uses: actions/checkout@v4
+            -   name: Dotnet Setup
+                uses: ./.github/workflows/steps/dotnet-setup/
             -   name: Unit Tests
                 run: dotnet test tests/UnitTests/UnitTests.sln --no-build --verbosity normal
     # Back-End Integration Tests
@@ -98,19 +74,9 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout Source Code
-                uses: actions/checkout@v3
-            -   name: Setup .NET SDK
-                uses: actions/setup-dotnet@v3
-                with:
-                    dotnet-version: 8.x.x
-                    cache: true
-                    cache-dependency-path: |
-                        **/*.csproj
-                        **/global.json
-            -   name: Restore dependencies
-                run: dotnet restore PlexRipper.sln --locked-mode
-            -   name: Build
-                run: dotnet build PlexRipper.sln --no-restore
+                uses: actions/checkout@v4
+            -   name: Dotnet Setup
+                uses: ./.github/workflows/steps/dotnet-setup/
             -   name: Integration Tests
                 run: dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal
     # Ensure the Docker image can be built without errors
@@ -119,9 +85,11 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout Source Code
-                uses: actions/checkout@v3
+                uses: actions/checkout@v4
             -   name: Test Docker Build
                 uses: elgohr/Publish-Docker-Github-Action@v5
                 with:
                     name: plexripper/plexripper
+                    username: ${{ secrets.DOCKER_USERNAME }}
+                    password: ${{ secrets.DOCKER_PASSWORD }}
                     no_push: true

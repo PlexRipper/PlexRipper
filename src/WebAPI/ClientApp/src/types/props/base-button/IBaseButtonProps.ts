@@ -4,8 +4,7 @@ export interface IBaseButtonProps extends Record<string, unknown> {
 	// PlexRipper
 	cy: string;
 	type: ButtonType;
-	textId: string;
-	tooltipId: string;
+	tooltipText: string;
 	width: number;
 	height: number;
 	iconAlign: 'left' | 'right';

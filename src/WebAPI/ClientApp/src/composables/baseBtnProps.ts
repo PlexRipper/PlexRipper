@@ -12,14 +12,6 @@ export function baseBtnPropsDefault() {
 			type: String as PropType<ButtonType>,
 			default: ButtonType.None,
 		},
-		textId: {
-			type: String,
-			default: '',
-		},
-		tooltipId: {
-			type: String,
-			default: '',
-		},
 		width: {
 			type: Number,
 			default: 0,

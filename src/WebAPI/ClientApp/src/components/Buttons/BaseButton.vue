@@ -2,7 +2,7 @@
 import { defineComponent, h } from 'vue';
 import { QBtn, QTooltip } from 'quasar';
 import type { IBaseButtonProps } from '@props';
-import { useI18n, useRouter } from '#imports';
+import { useRouter } from '#imports';
 import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
 export default defineComponent({
@@ -21,11 +21,6 @@ export default defineComponent({
 			outline: props.outline,
 		};
 
-		let buttonText = props.label;
-		if (props.textId) {
-			buttonText = useI18n().t(`general.commands.${props.textId}`);
-		}
-
 		const classes = Object.assign(
 			{
 				'base-btn': true,
@@ -42,7 +37,7 @@ export default defineComponent({
 			QBtn,
 			{
 				class: classes,
-				label: buttonText,
+				label: props.label,
 				icon: props.iconAlign === 'left' ? props.icon : undefined,
 				iconRight: props.iconAlign === 'right' ? props.icon : undefined,
 				glossy: props.glossy,
@@ -70,7 +65,7 @@ export default defineComponent({
 				default: () => [
 					...(slots?.default?.() ?? []),
 					...[
-						props.tooltipId
+						props.tooltipText
 							? h(
 								QTooltip,
 								{
@@ -80,10 +75,10 @@ export default defineComponent({
 								},
 								{
 									default: () => {
-										if (!props.tooltipId) {
+										if (!props.tooltipText) {
 											return '';
 										}
-										return useI18n().t(props.tooltipId);
+										return props.tooltipText;
 									},
 								},
 							)

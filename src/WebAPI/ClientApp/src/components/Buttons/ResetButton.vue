@@ -3,6 +3,7 @@ import { defineComponent, h, mergeProps } from 'vue';
 import type { IBaseButtonProps } from '@props';
 import BaseButton from './BaseButton.vue';
 import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
+import { useI18n } from '#imports';
 
 export default defineComponent({
 	name: 'ResetButton',
@@ -12,7 +13,7 @@ export default defineComponent({
 			BaseButton,
 			{
 				...mergeProps(this.$props, {
-					textId: 'reset',
+					label: useI18n().t(`general.commands.reset`),
 					icon: 'mdi-restore',
 				} as IBaseButtonProps),
 			},

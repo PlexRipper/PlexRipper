@@ -46,7 +46,7 @@
 												index + 1 === stepPagesCount ? 'green' : stepIndex > index + 1 ? 'green' : 'red'
 											"
 											:complete="index + 1 === stepPagesCount ? stepIndex > index : stepIndex > index + 1"
-											:label="t(`pages.setup.${header}.header`)"
+											:label="header.name"
 											:data-cy="`setup-header-tab-${index + 1}`"
 											edit-icon="$complete"
 										/>
@@ -266,7 +266,11 @@ const stepIndex = ref(1);
 const stepPagesCount = ref(5);
 
 const confirmationDialogName = 'skip-setup-confirmation';
-const headers = ref(['intro', 'future-plans', 'paths', 'accounts', 'finished']);
+const headers = ref([{ name: t(`pages.setup.intro.header`) },
+	{ name: t(`pages.setup.future-plans.header`) },
+	{ name: t(`pages.setup.paths.header`) },
+	{ name: t(`pages.setup.accounts.header`) },
+	{ name: t(`pages.setup.finished.header`) }]);
 
 const links = ref([
 	'https://github.com/PlexRipper/PlexRipper/',

@@ -204,8 +204,19 @@ const validationStyle = computed((): { color: 'default' | 'positive' | 'warning'
 });
 
 const getDisplayName = computed(() => {
-	const title = t(`components.account-dialog.${isNewAccount.value ? 'add-account-title' : 'edit-account-title'}`).toString();
-	return get(changedPlexAccount)?.displayName !== '' ? `${title}: ${get(changedPlexAccount)?.displayName}` : title;
+	const displayName = get(changedPlexAccount).displayName;
+	let title = '';
+	if (get(isNewAccount)) {
+		title = t('components.account-dialog.add-account-title', {
+			name: get(changedPlexAccount).displayName,
+		});
+	} else {
+		title = t('components.account-dialog.edit-account-title', {
+			name: get(changedPlexAccount).displayName,
+		});
+	}
+	// Remove the colon if the display name is empty
+	return displayName ? title : title.replace(':', '');
 });
 
 function isInputValid(value: boolean) {

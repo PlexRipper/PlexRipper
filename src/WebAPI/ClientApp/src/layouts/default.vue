@@ -73,9 +73,9 @@ onMounted(() => {
 	);
 
 	useSubscription(
-		helpStore.getHelpDialog.subscribe((newHelpId) => {
-			if (newHelpId) {
-				useOpenControlDialog(helpDialogName, newHelpId);
+		helpStore.getHelpDialog.subscribe((newHelpObject) => {
+			if (newHelpObject) {
+				useOpenControlDialog(helpDialogName, newHelpObject);
 			}
 		}),
 	);

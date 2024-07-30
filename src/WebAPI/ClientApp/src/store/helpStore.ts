@@ -2,24 +2,27 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { Observable } from 'rxjs';
 import { of, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import type { ISetupResult } from '@interfaces';
+import type { IHelp, ISetupResult } from '@interfaces';
 
 export const useHelpStore = defineStore('HelpStore', () => {
-	const state = reactive<{ helpIdDialog: string; helpDialogObservable: Subject<string> }>({
-		helpIdDialog: '',
-		helpDialogObservable: new Subject<string>(),
+	const state = reactive<{ helpIdDialog: IHelp; helpDialogObservable: Subject<IHelp> }>({
+		helpIdDialog: { label: '', title: '', text: '' },
+		helpDialogObservable: new Subject<IHelp>(),
 	});
 	const actions = {
 		setup(): Observable<ISetupResult> {
 			return of({ name: useHelpStore.name, isSuccess: true });
 		},
-		openHelpDialog(helpId: string): void {
-			state.helpIdDialog = helpId;
-			state.helpDialogObservable.next(helpId);
+		openHelpDialog(help: IHelp): void {
+			if (!help) {
+				return;
+			}
+			state.helpIdDialog = help;
+			state.helpDialogObservable.next(help);
 		},
 	};
 	const getters = {
-		getHelpDialog: computed((): Observable<string> => state.helpDialogObservable.pipe(map((x) => x ?? ''))),
+		getHelpDialog: computed((): Observable<IHelp> => state.helpDialogObservable),
 	};
 	return {
 		...toRefs(state),

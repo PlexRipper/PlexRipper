@@ -1,14 +1,12 @@
 {
     "components": {
         "account-card": {
-            "clear-notifications": "Alle Benachrichtigungen löschen",
             "no-account-name": "Konto Anzeigenamen hinzufügen",
-            "no-notifications": "keine Benachrichtigungen verfügbar",
             "invalid-account": "Das Kontoobjekt war ungültig"
         },
         "account-dialog": {
-            "add-account-title": "Plex Konto hinzufügen",
-            "edit-account-title": "Plex Konto bearbeiten"
+            "add-account-title": "Plex Konto hinzufügen: {name}",
+            "edit-account-title": "Plex Konto bearbeiten: {name}"
         },
         "connection-progress-text": {
             "retry-connection": "Versuche Verbindung wieder aufzubauen, { attemptIndex } von { attemptCount } Versuch.",

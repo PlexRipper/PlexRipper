@@ -1,14 +1,12 @@
 {
     "components": {
         "account-card": {
-            "clear-notifications": "Effacer tout les notifications",
             "no-account-name": "Ajouter un surnom à ce compte",
-            "no-notifications": "Pas de notification disponible",
             "invalid-account": "L'objet de compte n'était pas valide"
         },
         "account-dialog": {
-            "add-account-title": "",
-            "edit-account-title": "Modifier le compte Plex"
+            "add-account-title": "Ajouter un compte Plex: {name}",
+            "edit-account-title": "Modifier le compte Plex: {name}"
         },
         "connection-progress-text": {
             "retry-connection": "Tentative de nouvelle tentative de connexion, { attemptIndex } dans { attemptCount } tentative.",

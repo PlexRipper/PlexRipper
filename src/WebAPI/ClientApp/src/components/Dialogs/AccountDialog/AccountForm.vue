@@ -1,5 +1,5 @@
 <template>
-	<QForm
+	<q-form
 		ref="accountForm"
 		greedy
 		autofocus
@@ -10,129 +10,104 @@
 		@validation-error="$emit('is-valid', false)"
 	>
 		<!-- Is account enabled -->
-		<QRow
-			no-gutters
-			align="center"
+		<HelpRow
+			:header-width="labelCol"
+			:label="$t('help.account-form.is-enabled.label')"
+			:title="$t('help.account-form.is-enabled.title')"
+			:text="$t('help.account-form.is-enabled.text')"
 		>
-			<QCol :cols="labelCol">
-				<HelpIcon help-id="help.account-form.is-enabled" />
-			</QCol>
-			<QCol>
-				<q-toggle
-					class="q-ma-sm pt-0"
-					:model-value="value.isEnabled"
-					color="red"
-					data-cy="account-form-is-enabled"
-					@update:model-value="inputChanged({ prop: 'isEnabled', value: $event })"
-				/>
-			</QCol>
-		</QRow>
+			<q-toggle
+				class="q-ma-sm pt-0"
+				:model-value="value.isEnabled"
+				color="red"
+				data-cy="account-form-is-enabled"
+				@update:model-value="inputChanged({ prop: 'isEnabled', value: $event })"
+			/>
+		</HelpRow>
+
 		<!-- Is main account -->
-		<QRow
-			no-gutters
-			align="center"
+		<HelpRow
+			:header-width="labelCol"
+			:label="$t('help.account-form.is-main.label')"
+			:title="$t('help.account-form.is-main.title')"
+			:text="$t('help.account-form.is-main.text')"
 		>
-			<QCol :cols="labelCol">
-				<HelpIcon help-id="help.account-form.is-main" />
-			</QCol>
-			<QCol>
-				<q-toggle
-					class="q-ma-sm pt-0"
-					:model-value="value.isMain"
-					color="red"
-					data-cy="account-form-is-main"
-					@update:model-value="inputChanged({ prop: 'isMain', value: $event })"
-				/>
-			</QCol>
-		</QRow>
+			<q-toggle
+				class="q-ma-sm pt-0"
+				:model-value="value.isMain"
+				color="red"
+				data-cy="account-form-is-main"
+				@update:model-value="inputChanged({ prop: 'isMain', value: $event })"
+			/>
+		</HelpRow>
+
 		<!-- Display Name -->
-		<QRow
-			no-gutters
-			align="center"
+		<HelpRow
+			:header-width="labelCol"
+			:label="$t('help.account-form.display-name.label')"
+			:title="$t('help.account-form.display-name.title')"
+			:text="$t('help.account-form.display-name.text')"
 		>
-			<QCol
-				:cols="labelCol"
-				class="q-mb-md"
-			>
-				<HelpIcon help-id="help.account-form.display-name" />
-			</QCol>
-			<QCol>
-				<q-input
-					:model-value="value.displayName"
-					:rules="getDisplayNameRules"
-					color="red"
-					full-width
-					outlined
-					required
-					data-cy="account-form-display-name-input"
-					@update:model-value="inputChanged({ prop: 'displayName', value: $event })"
-				/>
-			</QCol>
-		</QRow>
+			<q-input
+				:model-value="value.displayName"
+				:rules="getDisplayNameRules"
+				color="red"
+				full-width
+				outlined
+				required
+				data-cy="account-form-display-name-input"
+				@update:model-value="inputChanged({ prop: 'displayName', value: $event })"
+			/>
+		</HelpRow>
 
 		<!-- Username -->
-		<QRow
-			no-gutters
-			align="center"
-			class="q-mt-md"
+		<HelpRow
+			:header-width="labelCol"
+			:label="$t('help.account-form.username.label')"
+			:title="$t('help.account-form.username.title')"
+			:text="$t('help.account-form.username.text')"
 		>
-			<QCol
-				:cols="labelCol"
-				class="q-mb-md"
-			>
-				<HelpIcon help-id="help.account-form.username" />
-			</QCol>
-			<QCol>
-				<q-input
-					:model-value="value.username"
-					:rules="getUsernameRules"
-					color="red"
-					full-width
-					outlined
-					required
-					data-cy="account-form-username-input"
-					@update:model-value="inputChanged({ prop: 'username', value: $event })"
-				/>
-			</QCol>
-		</QRow>
+			<q-input
+				:model-value="value.username"
+				:rules="getUsernameRules"
+				color="red"
+				full-width
+				outlined
+				required
+				data-cy="account-form-username-input"
+				@update:model-value="inputChanged({ prop: 'username', value: $event })"
+			/>
+		</HelpRow>
 
 		<!-- Password -->
-		<QRow
-			no-gutters
-			align="center"
-			class="q-mt-md"
+		<HelpRow
+			:label="$t('help.account-form.password.label')"
+			:title="$t('help.account-form.password.title')"
+			:text="$t('help.account-form.password.text')"
 		>
-			<QCol
-				:cols="labelCol"
-				class="q-mb-md"
+			<q-input
+				:model-value="value.password"
+				:rules="getPasswordRules"
+				color="red"
+				full-width
+				outlined
+				required
+				data-cy="account-form-password-input"
+				:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+				:type="showPassword ? 'text' : 'password'"
+				@click:append="showPassword = !showPassword"
+				@update:model-value="inputChanged({ prop: 'password', value: $event })"
 			>
-				<HelpIcon help-id="help.account-form.password" />
-			</QCol>
-			<QCol>
-				<q-input
-					:model-value="value.password"
-					:rules="getPasswordRules"
-					color="red"
-					full-width
-					outlined
-					required
-					data-cy="account-form-password-input"
-					:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-					:type="showPassword ? 'text' : 'password'"
-					@click:append="showPassword = !showPassword"
-					@update:model-value="inputChanged({ prop: 'password', value: $event })"
-				>
-					<template #append>
-						<q-btn
-							flat
-							:icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-							@click="showPassword = !showPassword"
-						/>
-					</template>
-				</q-input>
-			</QCol>
-		</QRow>
-	</QForm>
+				<template #append>
+					<q-btn
+						flat
+						:icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+						@click="showPassword = !showPassword"
+					/>
+				</template>
+			</q-input>
+		</HelpRow>
+	</q-form>
 </template>
 
 <script setup lang="ts">
@@ -140,7 +115,7 @@ import { get, set } from '@vueuse/core';
 import type { PlexAccountDTO } from '@dto';
 import { QForm } from '#components';
 
-const labelCol = ref(3);
+const labelCol = ref(30);
 const showPassword = ref(false);
 const accountForm = ref<InstanceType<typeof QForm> | null>(null);
 

@@ -5,7 +5,7 @@ using PlexRipper.Settings.Modules;
 
 namespace Settings.UnitTests.Modules;
 
-public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest<DisplaySettingsModule>
+public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest
 {
     public DisplaySettingsModule_SetFromJson_UnitTests(ITestOutputHelper output)
         : base(output) { }
@@ -25,12 +25,13 @@ public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest<DisplayS
         );
 
         // Act
-        var result = _sut.SetFromJson(loadedSettings);
+        var sut = new DisplaySettingsModule();
+        var result = sut.SetFromJson(loadedSettings);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        _sut.MovieViewMode.ShouldBe(ViewMode.Table);
-        _sut.TvShowViewMode.ShouldBe(ViewMode.Poster);
+        sut.MovieViewMode.ShouldBe(ViewMode.Table);
+        sut.TvShowViewMode.ShouldBe(ViewMode.Poster);
     }
 
     [Fact]
@@ -56,11 +57,12 @@ public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest<DisplayS
         );
 
         // Act
-        var result = _sut.SetFromJson(loadedSettings);
+        var sut = new DisplaySettingsModule();
+        var result = sut.SetFromJson(loadedSettings);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        _sut.MovieViewMode.ShouldBe(ViewMode.Poster);
-        _sut.TvShowViewMode.ShouldBe(_sut.DefaultValues().TvShowViewMode);
+        sut.MovieViewMode.ShouldBe(ViewMode.Poster);
+        sut.TvShowViewMode.ShouldBe(sut.DefaultValues().TvShowViewMode);
     }
 }

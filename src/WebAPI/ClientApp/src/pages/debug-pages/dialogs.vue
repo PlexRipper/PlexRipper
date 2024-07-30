@@ -120,7 +120,10 @@ function openDownloadConfirmationDialog(): void {
 }
 
 function openHelpDialog(): void {
-	helpStore.openHelpDialog('help.settings.ui.language.language-selection');
+	helpStore.openHelpDialog({ label: t('help.settings.ui.language.language-selection.label'),
+		title: t('help.settings.ui.language.language-selection.title'),
+		text: t('help.settings.ui.language.language-selection.text'),
+	});
 }
 
 function openCheckServerConnectionsDialog(): void {

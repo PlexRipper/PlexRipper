@@ -21,7 +21,6 @@ import type {
 	DownloadTaskDTO,
 } from '@dto';
 import { PlexMediaType } from '@dto';
-import { toDownloadTaskType } from '@composables/conversion';
 import {
 	DownloadPaths,
 	FolderPathPaths,
@@ -33,6 +32,7 @@ import {
 	PlexServerPaths,
 	SettingsPaths,
 } from '@api/api-paths';
+import Convert from '@class/Convert';
 
 export interface IBasePageSetupResult {
 	plexServers: PlexServerDTO[];
@@ -145,7 +145,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 					id: downloadTask.id,
 					plexLibraryId: 1,
 					plexServerId: serverDownload.id,
-					type: toDownloadTaskType(downloadTask.mediaType),
+					type: Convert.toDownloadTaskType(downloadTask.mediaType),
 					// partial: downloadTask,
 				});
 				result.detailDownloadTasks.push(generatedDownloadTask);

@@ -1,17 +1,34 @@
 <template>
-	<QCardDialog persistent :name="name" max-width="800px" button-align="between" cy="confirmation-dialog" @opened="onOpen">
+	<QCardDialog
+		persistent
+		:name="name"
+		max-width="800px"
+		button-align="between"
+		cy="confirmation-dialog"
+		@opened="onOpen"
+	>
 		<template #title>
 			{{ confirmationText.title }}
 		</template>
 		<template #default>
 			<p>{{ confirmationText.text }}</p>
-			<p v-if="confirmationText.warning" class="text-center">
+			<p
+				v-if="confirmationText.warning"
+				class="text-center"
+			>
 				<b>{{ confirmationText.warning }}</b>
 			</p>
 		</template>
 		<template #actions>
-			<CancelButton cy="confirmation-dialog-cancel-button" @click="cancel" />
-			<ConfirmButton cy="confirmation-dialog-confirmation-button" :loading="loading" @click="confirm" />
+			<CancelButton
+				cy="confirmation-dialog-cancel-button"
+				@click="cancel"
+			/>
+			<ConfirmButton
+				cy="confirmation-dialog-confirmation-button"
+				:loading="loading"
+				@click="confirm"
+			/>
 		</template>
 	</QCardDialog>
 </template>
@@ -42,8 +59,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-	(e: 'confirm'): void;
-	(e: 'cancel'): void;
+	(e: 'confirm' | 'cancel'): void;
 }>();
 
 function onOpen() {

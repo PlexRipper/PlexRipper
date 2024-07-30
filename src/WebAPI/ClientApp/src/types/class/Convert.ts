@@ -1,8 +1,8 @@
 import { FolderType, PlexMediaType } from '@dto';
 import ButtonType from '@enums/buttonType';
 
-export default abstract class Convert {
-	public static buttonTypeToIcon(type: ButtonType): string {
+export const Convert = {
+	buttonTypeToIcon(type: ButtonType): string {
 		switch (type) {
 			case ButtonType.Download:
 				return 'mdi-download';
@@ -28,9 +28,9 @@ export default abstract class Convert {
 			default:
 				return '';
 		}
-	}
+	},
 
-	public static mediaTypeToIcon(mediaType: PlexMediaType): string {
+	mediaTypeToIcon(mediaType: PlexMediaType): string {
 		switch (mediaType) {
 			case PlexMediaType.TvShow:
 				return 'mdi-television-classic';
@@ -45,9 +45,9 @@ export default abstract class Convert {
 			default:
 				return 'mdi-help-circle-outline';
 		}
-	}
+	},
 
-	public static mediaTypeToFolderType(mediaType: PlexMediaType): FolderType {
+	mediaTypeToFolderType(mediaType: PlexMediaType): FolderType {
 		switch (mediaType) {
 			case PlexMediaType.TvShow:
 				return FolderType.TvShowFolder;
@@ -68,5 +68,7 @@ export default abstract class Convert {
 			default:
 				return FolderType.Unknown;
 		}
-	}
-}
+	},
+};
+
+export default Convert;

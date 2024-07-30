@@ -1,5 +1,11 @@
 <template>
-	<QCardDialog max-width="500px" :name="name" :loading="false" @opened="onOpen($event)" @closed="onClose">
+	<QCardDialog
+		max-width="500px"
+		:name="name"
+		:loading="false"
+		@opened="onOpen($event)"
+		@closed="onClose"
+	>
 		<template #title>
 			{{ helpTitle ? helpTitle : missingHelpTitle }}
 		</template>
@@ -12,7 +18,11 @@
 		<!--	Close action	-->
 		<template #actions="{ close }">
 			<q-space />
-			<q-btn flat :label="t('general.commands.close')" @click="close" />
+			<q-btn
+				flat
+				:label="t('general.commands.close')"
+				@click="close"
+			/>
 		</template>
 	</QCardDialog>
 </template>

@@ -1,13 +1,26 @@
 <template>
 	<q-list class="editable-text">
-		<q-item clickable class="editable-text-item">
+		<q-item
+			clickable
+			class="editable-text-item"
+		>
 			<template v-if="!editMode">
 				<q-item-section>
-					<QText class="editable-text-display" :type="type" :size="size" :bold="bold" :align="align">
+					<QText
+						class="editable-text-display"
+						:type="type"
+						:size="size"
+						:bold="bold"
+						:align="align"
+					>
 						{{ displayText !== '' ? displayText : value }}
 					</QText>
 				</q-item-section>
-				<q-icon class="q-pt-sm" name="mdi-square-edit-outline" size="md" />
+				<q-icon
+					class="q-pt-sm"
+					name="mdi-square-edit-outline"
+					size="md"
+				/>
 			</template>
 			<QPopupEdit
 				v-slot="scope"
@@ -16,8 +29,15 @@
 				auto-save
 				@before-show="editMode = true"
 				@before-hide="editMode = false"
-				@save="$emit('save', $event)">
-				<q-input v-model="scope.value" dense autofocus :input-class="inputClasses" @keyup.enter="scope.set" />
+				@save="$emit('save', $event)"
+			>
+				<q-input
+					v-model="scope.value"
+					dense
+					autofocus
+					:input-class="inputClasses"
+					@keyup.enter="scope.set"
+				/>
 			</QPopupEdit>
 		</q-item>
 	</q-list>

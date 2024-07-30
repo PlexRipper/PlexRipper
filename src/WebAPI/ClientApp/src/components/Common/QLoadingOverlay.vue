@@ -1,6 +1,9 @@
 <template>
 	<q-inner-loading :showing="loading">
-		<q-spinner-gears :size="`${size}px`" color="red" />
+		<q-spinner-gears
+			:size="`${size}px`"
+			color="red"
+		/>
 	</q-inner-loading>
 </template>
 

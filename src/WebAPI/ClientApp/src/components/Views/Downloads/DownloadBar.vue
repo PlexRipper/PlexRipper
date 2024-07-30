@@ -1,15 +1,23 @@
 <template>
 	<q-toolbar class="download-overview-bar">
 		<!-- Download Toolbar -->
-		<q-row no-gutters justify="end">
-			<!--Command buttons-->
-			<q-col v-for="(button, i) in buttons" :key="i" cols="auto">
+		<q-row
+			no-gutters
+			justify="end"
+		>
+			<!-- Command buttons -->
+			<q-col
+				v-for="(button, i) in buttons"
+				:key="i"
+				cols="auto"
+			>
 				<vertical-button
 					:icon="button.icon"
 					:label="button.name"
 					:disabled="button.disableOnNoSelected && !downloadStore.hasSelected"
 					:width="verticalButtonWidth"
-					@click="downloadStore.executeBatchDownloadCommand(button.value)" />
+					@click="downloadStore.executeBatchDownloadCommand(button.value)"
+				/>
 			</q-col>
 		</q-row>
 	</q-toolbar>

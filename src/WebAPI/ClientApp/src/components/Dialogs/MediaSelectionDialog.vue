@@ -1,5 +1,12 @@
 <template>
-	<QCardDialog min-width="50vw" max-width="50vw" :name="name" :loading="false" @opened="onOpen()" @closed="onClose">
+	<QCardDialog
+		min-width="50vw"
+		max-width="50vw"
+		:name="name"
+		:loading="false"
+		@opened="onOpen()"
+		@closed="onClose"
+	>
 		<template #title>
 			{{
 				$t('components.media-selection-dialog.title', {
@@ -10,8 +17,15 @@
 		</template>
 		<!--	Help text	-->
 		<template #default>
-			<q-row justify="center" align="center" class="q-pt-lg">
-				<q-col cols="11" class="q-my-md">
+			<q-row
+				justify="center"
+				align="center"
+				class="q-pt-lg"
+			>
+				<q-col
+					cols="11"
+					class="q-my-md"
+				>
 					<q-range
 						v-model="selectedRange"
 						:min="1"
@@ -21,23 +35,45 @@
 						thumb-size="35px"
 						label-always
 						drag-range
-						color="red" />
+						color="red"
+					/>
 				</q-col>
 			</q-row>
 			<q-row justify="between">
-				<q-col v-for="column in ['min', 'max']" :key="column" cols="auto" class="q-mx-xs">
+				<q-col
+					v-for="column in ['min', 'max']"
+					:key="column"
+					cols="auto"
+					class="q-mx-xs"
+				>
 					<table>
 						<tr>
 							<td colspan="2">
-								<q-input v-model.number="numberInput[column]" type="number" outlined style="max-width: 200px" />
+								<q-input
+									v-model.number="numberInput[column]"
+									type="number"
+									outlined
+									style="max-width: 200px"
+								/>
 							</td>
 						</tr>
-						<tr v-for="index in [1, 10, 100, 1000, 10000]" :key="index">
+						<tr
+							v-for="index in [1, 10, 100, 1000, 10000]"
+							:key="index"
+						>
 							<td>
-								<base-button :label="`-${index}`" block @click="adjustValue(column, -1 * index)" />
+								<base-button
+									:label="`-${index}`"
+									block
+									@click="adjustValue(column, -1 * index)"
+								/>
 							</td>
 							<td>
-								<base-button :label="`+${index}`" block @click="adjustValue(column, index)" />
+								<base-button
+									:label="`+${index}`"
+									block
+									@click="adjustValue(column, index)"
+								/>
 							</td>
 						</tr>
 					</table>
@@ -48,10 +84,19 @@
 		<template #actions="{ close }">
 			<q-row justify="between">
 				<q-col cols="2">
-					<base-button text-id="close" block @click="close" />
+					<base-button
+						text-id="close"
+						block
+						@click="close"
+					/>
 				</q-col>
 				<q-col cols="2">
-					<base-button text-id="set-selection" color="positive" block @click="setSelection" />
+					<base-button
+						text-id="set-selection"
+						color="positive"
+						block
+						@click="setSelection"
+					/>
 				</q-col>
 			</q-row>
 		</template>

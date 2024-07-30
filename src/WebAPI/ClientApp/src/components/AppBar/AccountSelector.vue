@@ -1,7 +1,14 @@
 <template>
-	<q-btn-dropdown stretch flat icon="mdi-account" dropdown-icon="mdi-arrow-down">
+	<q-btn-dropdown
+		stretch
+		flat
+		icon="mdi-account"
+		dropdown-icon="mdi-arrow-down"
+	>
 		<q-list v-if="accountsDisplay.length > 0">
-			<q-item-label header> {{ $t('components.account-selector.title') }}</q-item-label>
+			<q-item-label header>
+				{{ $t('components.account-selector.title') }}
+			</q-item-label>
 
 			<!--  Account Row  -->
 			<q-item
@@ -10,7 +17,8 @@
 				v-close-popup
 				clickable
 				tabindex="0"
-				@click="updateActiveAccountId(account.id)">
+				@click="updateActiveAccountId(account.id)"
+			>
 				<q-item-section>
 					<q-item-label>{{ account.displayName }}</q-item-label>
 					<q-item-label caption>
@@ -23,7 +31,8 @@
 						icon="mdi-refresh"
 						:loading="loading[0] || loading[index]"
 						:disabled="isLoading"
-						@click.stop="runReSyncAccount(account.id)" />
+						@click.stop="runReSyncAccount(account.id)"
+					/>
 				</q-item-section>
 			</q-item>
 		</q-list>
@@ -52,7 +61,7 @@ const accountsDisplay = computed(() => {
 			id: 0,
 			displayName: t('components.account-selector.all-accounts'),
 			loading: get(loading)[0],
-		} as any,
+		},
 		...accountStore.accounts
 			.filter((x) => x.isEnabled)
 			.map((x) => {

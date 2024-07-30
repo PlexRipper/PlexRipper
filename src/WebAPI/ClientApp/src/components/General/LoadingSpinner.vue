@@ -1,5 +1,9 @@
 <template>
-	<q-circular-progress size="xl" color="red" indeterminate />
+	<q-circular-progress
+		size="xl"
+		color="red"
+		indeterminate
+	/>
 </template>
 
 <script setup lang="ts">

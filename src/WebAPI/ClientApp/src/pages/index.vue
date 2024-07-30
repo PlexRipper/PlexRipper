@@ -5,10 +5,18 @@
 				<h2>{{ t('pages.home.setup-question') }}</h2>
 				<q-row justify="center">
 					<q-col cols="3">
-						<NavigationSkipSetupButton block @click="skipSetup()" />
+						<NavigationSkipSetupButton
+							block
+							@click="skipSetup()"
+						/>
 					</q-col>
 					<q-col cols="3">
-						<GoToButton text-id="go-to-setup-page" block to="/setup" color="positive" />
+						<GoToButton
+							text-id="go-to-setup-page"
+							block
+							to="/setup"
+							color="positive"
+						/>
 					</q-col>
 				</q-row>
 			</q-col>

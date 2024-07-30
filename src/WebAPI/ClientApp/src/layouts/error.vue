@@ -1,12 +1,18 @@
 <template>
-	<q-layout view="hHh lpR fFf" dark class="no-background">
+	<q-layout
+		view="hHh lpR fFf"
+		dark
+		class="no-background"
+	>
 		<q-page-container>
 			<q-page>
 				<q-row justify="center">
 					<q-col cols="auto">
 						<h1>{{ t('pages.error.header') }}</h1>
 						<h1 class="text-left">
-							<pre><code class="no-background">{{ errorFormatted }}</code></pre>
+							<pre>
+								<code class="no-background">{{ errorFormatted }}</code>
+							</pre>
 						</h1>
 					</q-col>
 				</q-row>
@@ -28,7 +34,7 @@
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
-const props = defineProps<{ error: any }>();
+const props = defineProps<{ error: Error }>();
 
 const errorFormatted = computed(() => {
 	return JSON.stringify(props.error, null, 4);

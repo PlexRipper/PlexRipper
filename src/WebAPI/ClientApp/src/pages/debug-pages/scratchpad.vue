@@ -3,7 +3,8 @@
 		<DownloadsTable
 			:plex-server="plexServer"
 			:download-rows="downloadStore.getDownloadsByServerId(plexServer.id)"
-			@action="commandSwitch($event)" />
+			@action="commandSwitch($event)"
+		/>
 		<download-details-dialog :name="dialogName" />
 	</q-page>
 </template>
@@ -12,6 +13,7 @@
 import { generateDownloadProgressTvShows, generatePlexServer } from '@factories';
 import type { DownloadProgressDTO } from '@dto';
 import { useOpenControlDialog } from '@composables/event-bus';
+
 const downloadStore = useDownloadStore();
 const dialogName = 'download-details-dialog';
 

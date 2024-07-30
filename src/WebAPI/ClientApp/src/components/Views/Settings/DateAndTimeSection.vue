@@ -5,9 +5,16 @@
 		</template>
 		<!--	Short Date Format Setting	-->
 		<help-row help-id="help.settings.ui.date-and-time.short-date-format">
-			<q-select v-model:model-value="shortDateFormat" :options="shortDateOptions" data-cy="short-date-format">
+			<q-select
+				v-model:model-value="shortDateFormat"
+				:options="shortDateOptions"
+				data-cy="short-date-format"
+			>
 				<template #option="scope">
-					<q-item v-bind="scope.itemProps" :data-cy="`option-${scope.opt.value}`">
+					<q-item
+						v-bind="scope.itemProps"
+						:data-cy="`option-${scope.opt.value}`"
+					>
 						<q-item-section>
 							<q-item-label> {{ scope.opt.label }}</q-item-label>
 						</q-item-section>
@@ -17,9 +24,16 @@
 		</help-row>
 		<!--	Long Date Format Setting	-->
 		<help-row help-id="help.settings.ui.date-and-time.long-date-format">
-			<q-select v-model:model-value="longDateFormat" :options="longDateOptions" data-cy="long-date-format">
+			<q-select
+				v-model:model-value="longDateFormat"
+				:options="longDateOptions"
+				data-cy="long-date-format"
+			>
 				<template #option="scope">
-					<q-item v-bind="scope.itemProps" :data-cy="`option-${scope.opt.value}`">
+					<q-item
+						v-bind="scope.itemProps"
+						:data-cy="`option-${scope.opt.value}`"
+					>
 						<q-item-section>
 							<q-item-label> {{ scope.opt.label }}</q-item-label>
 						</q-item-section>
@@ -29,9 +43,16 @@
 		</help-row>
 		<!--	Time Format Setting	-->
 		<help-row help-id="help.settings.ui.date-and-time.time-format">
-			<q-select v-model:model-value="timeFormat" :options="timeFormatOptions" data-cy="time-format">
+			<q-select
+				v-model:model-value="timeFormat"
+				:options="timeFormatOptions"
+				data-cy="time-format"
+			>
 				<template #option="scope">
-					<q-item v-bind="scope.itemProps" :data-cy="`option-${scope.opt.value}`">
+					<q-item
+						v-bind="scope.itemProps"
+						:data-cy="`option-${scope.opt.value}`"
+					>
 						<q-item-section>
 							<q-item-label> {{ scope.opt.label }}</q-item-label>
 						</q-item-section>
@@ -45,31 +66,31 @@
 				v-model:model-value="settingsStore.dateTimeSettings.showRelativeDates"
 				size="lg"
 				color="red"
-				data-cy="relative-date" />
+				data-cy="relative-date"
+			/>
 		</help-row>
 
-		<!--	TODO: Dealing with Timezones is 1 big cluster fuck, will go back to try again later-->
+		<!--	TODO: Dealing with Timezones is 1 big cluster fuck, will go back to try again later -->
 		<!--	Time Zone Setting	-->
-		<!--		<help-row help-id="help.settings.ui.date-and-time.time-zone">-->
-		<!--								<v-select-->
-		<!--									v-model="timeZone"-->
-		<!--									color="red"-->
-		<!--									filled-->
-		<!--									outlined-->
-		<!--									dense-->
-		<!--									class="my-3"-->
-		<!--									hide-details="auto"-->
-		<!--									:menu-props="getMenuProps"-->
-		<!--									:options="timeZoneOptions"-->
-		<!--								/>-->
-		<!--		</help-row>-->
+		<!--		<help-row help-id="help.settings.ui.date-and-time.time-zone"> -->
+		<!--								<v-select -->
+		<!--									v-model="timeZone" -->
+		<!--									color="red" -->
+		<!--									filled -->
+		<!--									outlined -->
+		<!--									dense -->
+		<!--									class="my-3" -->
+		<!--									hide-details="auto" -->
+		<!--									:menu-props="getMenuProps" -->
+		<!--									:options="timeZoneOptions" -->
+		<!--								/> -->
+		<!--		</help-row> -->
 	</q-section>
 </template>
 
 <script setup lang="ts">
-// eslint-disable-next-line import/no-duplicates
 import { format } from 'date-fns';
-// eslint-disable-next-line import/no-duplicates
+
 import { enUS, fr } from 'date-fns/locale';
 
 import { get } from '@vueuse/core';

@@ -1,27 +1,57 @@
 <template>
-	<QCardDialog max-width="900px" :name="name" persistent cy="account-dialog-form" @opened="openDialog" @closed="closeDialog">
+	<QCardDialog
+		max-width="900px"
+		:name="name"
+		persistent
+		cy="account-dialog-form"
+		@opened="openDialog"
+		@closed="closeDialog"
+	>
 		<!-- Dialog Header -->
 		<template #title>
 			{{ getDisplayName }}
 		</template>
 		<template #default>
-			<AccountForm ref="accountForm" :value="changedPlexAccount" @input="formChanged" @is-valid="isInputValid" />
+			<AccountForm
+				ref="accountForm"
+				:value="changedPlexAccount"
+				@input="formChanged"
+				@is-valid="isInputValid"
+			/>
 			<Print>{{ changedPlexAccount }}</Print>
 		</template>
 		<!-- Dialog Actions	-->
 		<template #actions="{ close }">
-			<q-row justify="between" gutter="md">
+			<q-row
+				justify="between"
+				gutter="md"
+			>
 				<!-- Delete account -->
 				<q-col v-if="!isNewAccount">
-					<DeleteButton class="mx-2" block cy="account-dialog-delete-button" @click="openConfirmationDialog" />
+					<DeleteButton
+						class="mx-2"
+						block
+						cy="account-dialog-delete-button"
+						@click="openConfirmationDialog"
+					/>
 				</q-col>
 				<!-- Cancel button -->
 				<q-col>
-					<CancelButton class="mx-2" block cy="account-dialog-cancel-button" @click="close" />
+					<CancelButton
+						class="mx-2"
+						block
+						cy="account-dialog-cancel-button"
+						@click="close"
+					/>
 				</q-col>
 				<!-- Reset Form -->
 				<q-col>
-					<ResetButton class="mx-2" block cy="account-dialog-reset-button" @click="reset" />
+					<ResetButton
+						class="mx-2"
+						block
+						cy="account-dialog-reset-button"
+						@click="reset"
+					/>
 				</q-col>
 				<!-- Validation button -->
 				<q-col>
@@ -34,7 +64,8 @@
 						block
 						cy="account-dialog-validate-button"
 						class="q-mx-md"
-						@click="validate" />
+						@click="validate"
+					/>
 				</q-col>
 				<!-- Save account -->
 				<q-col>
@@ -45,7 +76,8 @@
 						block
 						:loading="savingLoading"
 						class="q-mx-md"
-						@click="saveAccount(close)" />
+						@click="saveAccount(close)"
+					/>
 				</q-col>
 			</q-row>
 		</template>
@@ -56,14 +88,16 @@
 		:name="verificationCodeDialogName"
 		:account="changedPlexAccount"
 		@close="closeVerificationDialog"
-		@confirm="validateAfterVerificationCode" />
+		@confirm="validateAfterVerificationCode"
+	/>
 	<!--	Delete Confirmation Dialog	-->
 	<confirmation-dialog
 		:confirm-loading="deleteLoading"
 		:name="confirmationDialogName"
 		class="q-mr-md"
 		text-id="delete-account"
-		@confirm="deleteAccount" />
+		@confirm="deleteAccount"
+	/>
 </template>
 
 <script setup lang="ts">
@@ -71,10 +105,10 @@ import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import { take } from 'rxjs/operators';
-import { AccountForm } from '#components';
 import type { IError, PlexAccountDTO } from '@dto';
-import { useI18n, useOpenControlDialog, useCloseControlDialog, useAccountStore } from '#imports';
 import { plexAccountApi } from '@api';
+import { AccountForm } from '#components';
+import { useI18n, useOpenControlDialog, useCloseControlDialog, useAccountStore } from '#imports';
 
 const { t } = useI18n();
 const accountStore = useAccountStore();
@@ -140,8 +174,8 @@ const isAllowedToSave = computed(() => {
 const hasCredentialsChanged = computed(() => {
 	if (!isNewAccount.value) {
 		return (
-			originalPlexAccount.value?.username !== get(changedPlexAccount).username ||
-			originalPlexAccount.value?.password !== get(changedPlexAccount).password
+			originalPlexAccount.value?.username !== get(changedPlexAccount).username
+			|| originalPlexAccount.value?.password !== get(changedPlexAccount).password
 		);
 	}
 	return false;
@@ -247,7 +281,7 @@ const reset = () => {
 	accountForm.value?.onReset();
 };
 
-function saveAccount(close: any) {
+function saveAccount(close: () => void) {
 	set(savingLoading, true);
 
 	if (get(isNewAccount)) {

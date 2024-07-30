@@ -1,6 +1,11 @@
 <template>
 	<q-col class="q-py-sm">
-		<BaseButton flat :icon="getButtonIcon" :label="t(getButtonText)" @click.stop="changeStatus" />
+		<BaseButton
+			flat
+			:icon="getButtonIcon"
+			:label="t(getButtonText)"
+			@click.stop="changeStatus"
+		/>
 	</q-col>
 </template>
 

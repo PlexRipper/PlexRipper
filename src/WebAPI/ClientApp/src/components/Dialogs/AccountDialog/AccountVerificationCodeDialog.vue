@@ -1,5 +1,10 @@
 <template>
-	<QCardDialog :name="name" persistent max-width="700px" cy="2fa-code-verification-dialog">
+	<QCardDialog
+		:name="name"
+		persistent
+		max-width="700px"
+		cy="2fa-code-verification-dialog"
+	>
 		<template #title>
 			{{ t('components.account-verification-code-dialog.title') }}
 		</template>
@@ -20,10 +25,14 @@
 						inputmode="numeric"
 						data-cy="2fa-code-verification-input"
 						:conditional-class="['one', 'two', 'three', 'four', 'five', 'six']"
-						@on-complete="onComplete" />
+						@on-complete="onComplete"
+					/>
 				</q-col>
 			</q-row>
-			<q-row v-if="errors.length > 0" justify="center">
+			<q-row
+				v-if="errors.length > 0"
+				justify="center"
+			>
 				<q-col cols="auto">
 					<span style="color: red; font-weight: bold">{{
 						t('components.account-verification-code-dialog.error')
@@ -39,7 +48,11 @@
 				</q-col>
 				<!--	Confirm	-->
 				<q-col cols="auto">
-					<ConfirmButton :loading="loading" :disabled="codeValue.length < 6" @click="onComplete" />
+					<ConfirmButton
+						:loading="loading"
+						:disabled="codeValue.length < 6"
+						@click="onComplete"
+					/>
 				</q-col>
 			</q-row>
 		</template>
@@ -52,8 +65,8 @@ import VOtpInput from 'vue3-otp-input';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import type { IError, PlexAccountDTO } from '@dto';
-import { useCloseControlDialog } from '#imports';
 import { plexAccountApi } from '@api';
+import { useCloseControlDialog } from '#imports';
 
 const { t } = useI18n();
 

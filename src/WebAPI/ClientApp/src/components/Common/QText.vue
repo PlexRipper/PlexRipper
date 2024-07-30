@@ -5,6 +5,7 @@
 		</span>
 	</div>
 </template>
+
 <script lang="ts" setup>
 import type { IQTextProps } from '@interfaces';
 

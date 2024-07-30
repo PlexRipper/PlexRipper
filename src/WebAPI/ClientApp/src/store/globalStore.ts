@@ -1,9 +1,10 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { forkJoin, Observable, of, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { forkJoin, of, Subject } from 'rxjs';
 import Log from 'consola';
 import { switchMap, take, tap } from 'rxjs/operators';
 import type IAppConfig from '@class/IAppConfig';
-import type { I18nObjectType } from '@interfaces';
+import type { I18nObjectType, ISetupResult } from '@interfaces';
 import {
 	useServerStore,
 	useLibraryStore,
@@ -27,7 +28,7 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 		config: {} as IAppConfig,
 	});
 	const actions = {
-		setupServices({ config, i18n }: { config: IAppConfig; i18n?: I18nObjectType }): Observable<any> {
+		setupServices({ config, i18n }: { config: IAppConfig; i18n?: I18nObjectType }): Observable<ISetupResult[]> {
 			Log.info('Starting Setup Process');
 
 			state.config = config;

@@ -2,7 +2,10 @@
 	<q-item>
 		<!--	Status icon	-->
 		<q-item-section avatar>
-			<BooleanProgress :loading="!progress || !progress.completed" :success="progress && progress.connectionSuccessful" />
+			<BooleanProgress
+				:loading="!progress || !progress.completed"
+				:success="progress && progress.connectionSuccessful"
+			/>
 		</q-item-section>
 		<!--	Current Action	-->
 		<q-item-section>

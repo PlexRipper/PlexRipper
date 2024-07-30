@@ -4,7 +4,10 @@
 		<download-bar />
 
 		<!--	The Download Table	-->
-		<q-row v-if="downloadStore.getServersWithDownloads.length > 0" justify="center">
+		<q-row
+			v-if="downloadStore.getServersWithDownloads.length > 0"
+			justify="center"
+		>
 			<q-col cols="12">
 				<q-list>
 					<downloads-table
@@ -12,11 +15,15 @@
 						:key="plexServer.id"
 						:download-rows="downloads"
 						:plex-server="plexServer"
-						@action="commandSwitch($event)" />
+						@action="commandSwitch($event)"
+					/>
 				</q-list>
 			</q-col>
 		</q-row>
-		<q-row v-else justify="center">
+		<q-row
+			v-else
+			justify="center"
+		>
 			<q-col cols="auto">
 				<h2>{{ t('pages.downloads.no-downloads') }}</h2>
 			</q-col>

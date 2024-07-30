@@ -4,7 +4,10 @@
 		<q-item>
 			<q-row align="center">
 				<q-col cols="auto">
-					<q-checkbox :model-value="rootSelected" @update:model-value="rootSetSelected($event)" />
+					<q-checkbox
+						:model-value="rootSelected"
+						@update:model-value="rootSetSelected($event)"
+					/>
 				</q-col>
 				<q-col class="q-ml-md">
 					<q-sub-header bold>
@@ -12,7 +15,10 @@
 					</q-sub-header>
 				</q-col>
 				<!--	Total selected count	-->
-				<q-col v-if="selectedCount" cols="auto">
+				<q-col
+					v-if="selectedCount"
+					cols="auto"
+				>
 					<span class="text-weight-bold">
 						{{ t('components.media-list.selected-count', { selectedCount }) }}
 					</span>
@@ -29,14 +35,16 @@
 			:default-opened="defaultOpened"
 			:group="defaultOpened ? undefined : 'media-list'"
 			:label="child.title"
-			@update:model-value="itemExpanded[index] = $event">
+			@update:model-value="itemExpanded[index] = $event"
+		>
 			<!-- Header	-->
 			<template #header="{ expanded }">
 				<q-row align="center">
 					<q-col cols="auto">
 						<q-checkbox
 							:model-value="isSelected(child.id)"
-							@update:model-value="setSelected(child.id, child.children, $event)" />
+							@update:model-value="setSelected(child.id, child.children, $event)"
+						/>
 					</q-col>
 					<q-col class="q-ml-md">
 						<q-sub-header bold>
@@ -46,7 +54,10 @@
 							</span>
 						</q-sub-header>
 					</q-col>
-					<q-col v-if="getSelected(child.id)?.keys.length" cols="auto">
+					<q-col
+						v-if="getSelected(child.id)?.keys.length"
+						cols="auto"
+					>
 						<span class="text-weight-bold">
 							{{
 								t('components.media-list.selected-count', {
@@ -56,7 +67,10 @@
 						</span>
 					</q-col>
 					<q-col cols="auto">
-						<q-icon size="lg" :name="expanded ? 'mdi-chevron-up' : 'mdi-chevron-down'" />
+						<q-icon
+							size="lg"
+							:name="expanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+						/>
 					</q-col>
 				</q-row>
 			</template>
@@ -66,7 +80,8 @@
 					v-if="useQTable"
 					:rows="child.children"
 					:selection="getSelected(child.id)"
-					@selection="onSelection(child.id, $event)" />
+					@selection="onSelection(child.id, $event)"
+				/>
 				<MediaTable
 					v-else
 					:rows="child.children"
@@ -75,7 +90,8 @@
 					disable-hover-click
 					:disable-highlight="disableHighlight"
 					:disable-intersection="disableIntersection"
-					@selection="onSelection(child.id, $event)" />
+					@selection="onSelection(child.id, $event)"
+				/>
 			</template>
 		</q-expansion-item>
 	</q-list>
@@ -122,7 +138,7 @@ const selected = ref<ISelection[]>([]);
 const itemExpanded = ref<boolean[]>([]);
 
 const rootSelected = computed((): boolean | null => {
-	const allSelected = selected.value.map((x) => x.allSelected);
+	const allSelected = get(selected).map((x) => x.allSelected);
 	if (allSelected.every((x) => x === true)) {
 		return true;
 	}
@@ -137,7 +153,7 @@ const rootSelected = computed((): boolean | null => {
 // region Selection
 
 const selectedCount = computed((): number => {
-	return selected.value?.reduce((acc, x) => acc + x.keys?.length ?? 0, 0) ?? 0;
+	return get(selected)?.reduce((acc, x) => (x.keys?.length ?? 0) + acc, 0);
 });
 
 function rootSetSelected(value: boolean) {
@@ -147,10 +163,10 @@ function rootSetSelected(value: boolean) {
 }
 
 function isSelected(id: number): boolean | null {
-	if (selected.value.length === 0) {
+	if (get(selected).length === 0) {
 		return false;
 	}
-	const result = selected.value.find((x) => x.indexKey === id);
+	const result = get(selected).find((x) => x.indexKey === id);
 	if (result === undefined) {
 		return false;
 	}
@@ -158,10 +174,10 @@ function isSelected(id: number): boolean | null {
 }
 
 function getSelected(id: number): ISelection | null {
-	if (selected.value.length === 0) {
+	if (get(selected).length === 0) {
 		return null;
 	}
-	const result = selected.value.find((x) => x.indexKey === id);
+	const result = get(selected).find((x) => x.indexKey === id);
 	if (result === undefined) {
 		return null;
 	}
@@ -182,14 +198,14 @@ function setSelected(id: number, children: PlexMediaSlimDTO[], value: boolean) {
 }
 
 function onSelection(id: number, payload: ISelection) {
-	const i = selected.value.findIndex((x) => x.indexKey === id);
+	const i = get(selected).findIndex((x) => x.indexKey === id);
 	if (i === -1) {
-		selected.value.push({ indexKey: id, keys: payload.keys, allSelected: payload.allSelected });
+		get(selected).push({ indexKey: id, keys: payload.keys, allSelected: payload.allSelected });
 		return;
 	}
 
-	selected.value[i].allSelected = payload.allSelected;
-	selected.value[i].keys = payload.keys;
+	get(selected)[i].allSelected = payload.allSelected;
+	get(selected)[i].keys = payload.keys;
 }
 
 // endregion

@@ -4,7 +4,9 @@
 		<tbody v-if="plexServer">
 			<!-- Machine Identifier -->
 			<tr>
-				<td style="width: 30%">{{ t('components.server-dialog.tabs.server-data.machine-id') }}:</td>
+				<td style="width: 30%">
+					{{ t('components.server-dialog.tabs.server-data.machine-id') }}:
+				</td>
 				<td>{{ plexServer.machineIdentifier }}</td>
 			</tr>
 			<!-- Device -->
@@ -26,13 +28,19 @@
 			<tr>
 				<td>{{ t('components.server-dialog.tabs.server-data.created-on') }}:</td>
 				<td>
-					<q-date-time short-date :text="plexServer.createdAt" />
+					<q-date-time
+						short-date
+						:text="plexServer.createdAt"
+					/>
 				</td>
 			</tr>
 			<tr>
 				<td>{{ t('components.server-dialog.tabs.server-data.last-seen-at') }}:</td>
 				<td>
-					<q-date-time short-date :text="plexServer.lastSeenAt" />
+					<q-date-time
+						short-date
+						:text="plexServer.lastSeenAt"
+					/>
 				</td>
 			</tr>
 			<tr>
@@ -44,14 +52,27 @@
 			<!--	Check Server Action	-->
 			<tr>
 				<td>
-					<BaseButton text-id="check-server-status" :loading="checkServerStatusLoading" @click="checkServer" />
+					<BaseButton
+						text-id="check-server-status"
+						:loading="checkServerStatusLoading"
+						@click="checkServer"
+					/>
 				</td>
 				<td style="padding: 0">
-					<q-markup-table v-if="hasCheckedServerStatus" wrap-cells>
+					<q-markup-table
+						v-if="hasCheckedServerStatus"
+						wrap-cells
+					>
 						<tbody v-if="checkServerStatusLoading">
-							<tr v-for="(progressItem, index) in progress" :key="index">
+							<tr
+								v-for="(progressItem, index) in progress"
+								:key="index"
+							>
 								<td>
-									<q-status pulse :value="progressItem.connectionSuccessful" />
+									<q-status
+										pulse
+										:value="progressItem.connectionSuccessful"
+									/>
 								</td>
 								<td>{{ progressItem.message }}</td>
 							</tr>
@@ -59,7 +80,10 @@
 						<tbody v-else-if="progress.every((x) => x.completed)">
 							<tr>
 								<td>
-									<q-status pulse :value="progress.some((x) => x.connectionSuccessful)" />
+									<q-status
+										pulse
+										:value="progress.some((x) => x.connectionSuccessful)"
+									/>
 								</td>
 								<td>
 									{{ checkServerStatusMessage }}
@@ -69,13 +93,13 @@
 					</q-markup-table>
 				</td>
 			</tr>
-			<!--			<tr v-if="settingsStore.debugMode">-->
-			<!--				<td colspan="2">-->
-			<!--					<print>-->
-			<!--						{{ progress }}-->
-			<!--					</print>-->
-			<!--				</td>-->
-			<!--			</tr>-->
+			<!--			<tr v-if="settingsStore.debugMode"> -->
+			<!--				<td colspan="2"> -->
+			<!--					<print> -->
+			<!--						{{ progress }} -->
+			<!--					</print> -->
+			<!--				</td> -->
+			<!--			</tr> -->
 		</tbody>
 		<tbody v-else>
 			<tr>

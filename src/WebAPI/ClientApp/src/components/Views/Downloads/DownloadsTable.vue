@@ -1,18 +1,30 @@
 <template>
-	<q-expansion-item default-opened class="background-sm q-ma-md">
+	<q-expansion-item
+		default-opened
+		class="background-sm q-ma-md"
+	>
 		<template #header>
-			<q-row justify="between" align="center">
+			<q-row
+				justify="between"
+				align="center"
+			>
 				<!-- Download Server Settings -->
-				<q-col cols="auto" style="white-space: nowrap">
-					<server-download-status v-if="false" style="display: inline-block" />
+				<q-col
+					cols="auto"
+					style="white-space: nowrap"
+				>
+					<server-download-status
+						v-if="false"
+						style="display: inline-block"
+					/>
 				</q-col>
-				<q-col> </q-col>
+				<q-col />
 				<!-- Download Server Title -->
 				<q-col cols="auto">
 					<QStatus :value="serverConnectionStore.isServerConnected(plexServer.id)" />
 					<span class="title q-ml-md">{{ serverStore.getServerName(plexServer.id) }}</span>
 				</q-col>
-				<q-col class="q-py-none"></q-col>
+				<q-col class="q-py-none" />
 			</q-row>
 		</template>
 		<template #default>
@@ -24,7 +36,8 @@
 				:max-selection-count="downloadStore.getDownloadSelection(plexServer.id)?.maxSelectionCount"
 				@action="tableAction($event)"
 				@all-selected="downloadStore.setAllSelectedDownloadTasks(plexServer.id, $event)"
-				@selected="downloadStore.updateSelectedDownloadTasks(plexServer.id, $event)" />
+				@selected="downloadStore.updateSelectedDownloadTasks(plexServer.id, $event)"
+			/>
 		</template>
 	</q-expansion-item>
 </template>
@@ -32,8 +45,8 @@
 <script setup lang="ts">
 import Log from 'consola';
 import type { DownloadProgressDTO, PlexServerDTO } from '@dto';
-import { getDownloadTableColumns } from '#imports';
 import type { IDownloadTableNode, ISelection } from '@interfaces';
+import { getDownloadTableColumns } from '#imports';
 import { useDownloadStore, useServerConnectionStore, useServerStore } from '~/store';
 
 const downloadStore = useDownloadStore();

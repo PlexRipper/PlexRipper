@@ -1,12 +1,22 @@
 <template>
-	<q-row no-wrap align="center">
+	<q-row
+		no-wrap
+		align="center"
+	>
 		<q-col>
 			<q-sub-header>
 				{{ $t(`${helpId}.label`) }}
 			</q-sub-header>
 		</q-col>
-		<q-col v-if="hasHelpPage" cols="auto">
-			<IconButton icon="mdi-help-circle-outline" class="q-ma-sm" @click="helpStore.openHelpDialog(props.helpId)" />
+		<q-col
+			v-if="hasHelpPage"
+			cols="auto"
+		>
+			<IconButton
+				icon="mdi-help-circle-outline"
+				class="q-ma-sm"
+				@click="helpStore.openHelpDialog(props.helpId)"
+			/>
 		</q-col>
 	</q-row>
 </template>

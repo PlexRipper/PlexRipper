@@ -8,7 +8,8 @@
 			<q-toggle
 				v-model:model-value="settingsStore.generalSettings.disableAnimatedBackground"
 				size="lg"
-				data-cy="toggle-animated-background" />
+				data-cy="toggle-animated-background"
+			/>
 		</help-row>
 	</q-section>
 </template>

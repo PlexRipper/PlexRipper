@@ -7,9 +7,13 @@
 		spellcheck="false"
 		@reset="onReset"
 		@validation-success="$emit('is-valid', true)"
-		@validation-error="$emit('is-valid', false)">
+		@validation-error="$emit('is-valid', false)"
+	>
 		<!-- Is account enabled -->
-		<q-row no-gutters align="center">
+		<q-row
+			no-gutters
+			align="center"
+		>
 			<q-col :cols="labelCol">
 				<help-icon help-id="help.account-form.is-enabled" />
 			</q-col>
@@ -19,11 +23,15 @@
 					:model-value="value.isEnabled"
 					color="red"
 					data-cy="account-form-is-enabled"
-					@update:model-value="inputChanged({ prop: 'isEnabled', value: $event })" />
+					@update:model-value="inputChanged({ prop: 'isEnabled', value: $event })"
+				/>
 			</q-col>
 		</q-row>
 		<!-- Is main account -->
-		<q-row no-gutters align="center">
+		<q-row
+			no-gutters
+			align="center"
+		>
 			<q-col :cols="labelCol">
 				<help-icon help-id="help.account-form.is-main" />
 			</q-col>
@@ -33,12 +41,19 @@
 					:model-value="value.isMain"
 					color="red"
 					data-cy="account-form-is-main"
-					@update:model-value="inputChanged({ prop: 'isMain', value: $event })" />
+					@update:model-value="inputChanged({ prop: 'isMain', value: $event })"
+				/>
 			</q-col>
 		</q-row>
 		<!-- Display Name -->
-		<q-row no-gutters align="center">
-			<q-col :cols="labelCol" class="q-mb-md">
+		<q-row
+			no-gutters
+			align="center"
+		>
+			<q-col
+				:cols="labelCol"
+				class="q-mb-md"
+			>
 				<help-icon help-id="help.account-form.display-name" />
 			</q-col>
 			<q-col>
@@ -50,13 +65,21 @@
 					outlined
 					required
 					data-cy="account-form-display-name-input"
-					@update:model-value="inputChanged({ prop: 'displayName', value: $event })" />
+					@update:model-value="inputChanged({ prop: 'displayName', value: $event })"
+				/>
 			</q-col>
 		</q-row>
 
 		<!-- Username -->
-		<q-row no-gutters align="center" class="q-mt-md">
-			<q-col :cols="labelCol" class="q-mb-md">
+		<q-row
+			no-gutters
+			align="center"
+			class="q-mt-md"
+		>
+			<q-col
+				:cols="labelCol"
+				class="q-mb-md"
+			>
 				<help-icon help-id="help.account-form.username" />
 			</q-col>
 			<q-col>
@@ -68,13 +91,21 @@
 					outlined
 					required
 					data-cy="account-form-username-input"
-					@update:model-value="inputChanged({ prop: 'username', value: $event })" />
+					@update:model-value="inputChanged({ prop: 'username', value: $event })"
+				/>
 			</q-col>
 		</q-row>
 
 		<!-- Password -->
-		<q-row no-gutters align="center" class="q-mt-md">
-			<q-col :cols="labelCol" class="q-mb-md">
+		<q-row
+			no-gutters
+			align="center"
+			class="q-mt-md"
+		>
+			<q-col
+				:cols="labelCol"
+				class="q-mb-md"
+			>
 				<help-icon help-id="help.account-form.password" />
 			</q-col>
 			<q-col>
@@ -89,9 +120,14 @@
 					:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
 					:type="showPassword ? 'text' : 'password'"
 					@click:append="showPassword = !showPassword"
-					@update:model-value="inputChanged({ prop: 'password', value: $event })">
+					@update:model-value="inputChanged({ prop: 'password', value: $event })"
+				>
 					<template #append>
-						<q-btn flat :icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'" @click="showPassword = !showPassword" />
+						<q-btn
+							flat
+							:icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+							@click="showPassword = !showPassword"
+						/>
 					</template>
 				</q-input>
 			</q-col>

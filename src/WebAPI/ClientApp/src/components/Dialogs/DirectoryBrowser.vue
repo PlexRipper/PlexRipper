@@ -7,15 +7,27 @@
 		content-height="80"
 		:loading="isLoading"
 		button-align="between"
-		@opened="open">
+		@opened="open"
+	>
 		<template #title>
 			{{ t('components.directory-browser.select-path', { pathName: path?.displayName ?? '' }) }}
 		</template>
 		<template #top-row>
 			<q-row>
-				<q-col v-if="!isCurrentWritable" cols="auto" class="q-px-md">
-					<q-icon color="red" size="sm" name="mdi-alert-circle">
-						<q-tooltip anchor="top middle" self="center middle">
+				<q-col
+					v-if="!isCurrentWritable"
+					cols="auto"
+					class="q-px-md"
+				>
+					<q-icon
+						color="red"
+						size="sm"
+						name="mdi-alert-circle"
+					>
+						<q-tooltip
+							anchor="top middle"
+							self="center middle"
+						>
 							<span>{{ t('components.directory-browser.has-no-write-permission') }}</span>
 						</q-tooltip>
 					</q-icon>
@@ -26,13 +38,17 @@
 						outlined
 						color="red"
 						:placeholder="t('components.directory-browser.no-path')"
-						@update:model-value="requestDirectories" />
+						@update:model-value="requestDirectories"
+					/>
 				</q-col>
 			</q-row>
 			<q-markup-table class="q-pr-md">
 				<thead>
 					<tr>
-						<th class="text-left" style="width: 100px">
+						<th
+							class="text-left"
+							style="width: 100px"
+						>
 							{{ t('components.directory-browser.type') }}
 						</th>
 						<th class="text-left">
@@ -43,8 +59,14 @@
 				<!-- The return row -->
 				<tbody v-if="currentPathModel != null">
 					<tr @click="directoryNavigate(returnRow)">
-						<td class="text-left" style="width: 100px">
-							<q-icon size="md" :name="getIcon(returnRow.type)" />
+						<td
+							class="text-left"
+							style="width: 100px"
+						>
+							<q-icon
+								size="md"
+								:name="getIcon(returnRow.type)"
+							/>
 						</td>
 						<td class="text-left">
 							{{ returnRow.name }}
@@ -61,13 +83,28 @@
 						v-for="(row, index) in items"
 						:key="index"
 						:class="rowClass(!row.hasReadPermission)"
-						@click="directoryNavigate(row)">
-						<td class="text-left" style="width: 100px">
-							<q-icon size="md" :name="getIcon(row.type)" />
+						@click="directoryNavigate(row)"
+					>
+						<td
+							class="text-left"
+							style="width: 100px"
+						>
+							<q-icon
+								size="md"
+								:name="getIcon(row.type)"
+							/>
 						</td>
 						<td class="text-left">
-							<q-icon v-if="!row.hasReadPermission" color="red" size="sm" name="mdi-alert-circle">
-								<q-tooltip anchor="top middle" self="center middle">
+							<q-icon
+								v-if="!row.hasReadPermission"
+								color="red"
+								size="sm"
+								name="mdi-alert-circle"
+							>
+								<q-tooltip
+									anchor="top middle"
+									self="center middle"
+								>
 									<span>{{ t('components.directory-browser.has-no-read-permission') }}</span>
 								</q-tooltip>
 							</q-icon>
@@ -83,7 +120,8 @@
 			<ConfirmButton
 				:disabled="!isCurrentWritable"
 				:tooltip-id="!isCurrentWritable ? 'components.directory-browser.current-folder-has-no-write-permission' : ''"
-				@click="confirm()" />
+				@click="confirm()"
+			/>
 		</template>
 	</QCardDialog>
 </template>
@@ -94,8 +132,8 @@ import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import type { FileSystemModelDTO, FolderPathDTO } from '@dto';
 import { FileSystemEntityType } from '@dto';
-import { useCloseControlDialog } from '~/composables/event-bus';
 import { folderPathApi } from '@api';
+import { useCloseControlDialog } from '~/composables/event-bus';
 
 const { t } = useI18n();
 const path = ref<FolderPathDTO | null>(null);
@@ -178,7 +216,6 @@ function confirm(): void {
 
 function requestDirectories(newPath: string): void {
 	if (path.value) {
-		// @ts-ignore
 		path.value.directory = newPath;
 	}
 

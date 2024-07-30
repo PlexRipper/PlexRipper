@@ -33,7 +33,7 @@ export function baseSetup(): { ctx: Context; appConfig: IAppConfig } {
 		isDocker: false,
 	};
 	process.env.NODE_ENV = 'dev';
-	process.client = true;
+	import.meta.client = true;
 
 	// Minimum LogLevel displayed
 	Log.level = 2;
@@ -44,6 +44,5 @@ export function baseSetup(): { ctx: Context; appConfig: IAppConfig } {
 }
 
 export function getAxiosMock() {
-	// @ts-ignore
 	return new MockAdapter(Axios, { onNoMatch: 'throwException' });
 }

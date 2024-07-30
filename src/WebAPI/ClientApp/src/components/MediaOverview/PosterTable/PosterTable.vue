@@ -1,5 +1,5 @@
 <template>
-	<!-- Poster display-->
+	<!-- Poster display -->
 	<RecycleScroller
 		id="poster-table"
 		v-slot="{ item, index }"
@@ -11,12 +11,14 @@
 		:buffer="posterCardHeight * 5"
 		key-field="id"
 		data-cy="poster-table"
-		@resize="onResize">
+		@resize="onResize"
+	>
 		<media-poster
 			:index="index"
 			:media-item="item"
 			:data-scroll-index="index"
-			@download="sendMediaOverviewDownloadCommand($event)" />
+			@download="sendMediaOverviewDownloadCommand($event)"
+		/>
 	</RecycleScroller>
 </template>
 
@@ -26,9 +28,10 @@ import { RecycleScroller } from 'vue-virtual-scroller';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 
 import { get, set, useScroll } from '@vueuse/core';
-import { type PlexMediaSlimDTO, PlexMediaType } from '@dto';
+import type { PlexMediaType, PlexMediaSlimDTO } from '@dto';
 import { listenMediaOverviewScrollToCommand, sendMediaOverviewDownloadCommand } from '@composables/event-bus';
 import { triggerBoxHighlight } from '@composables/animations';
+
 const mediaOverviewStore = useMediaOverviewStore();
 
 const autoScrollEnabled = ref(false);
@@ -43,10 +46,6 @@ defineProps<{
 	mediaType: PlexMediaType;
 	libraryId: number;
 	items: PlexMediaSlimDTO[];
-}>();
-
-defineEmits<{
-	(e: 'load', payload: any): void;
 }>();
 
 function onResize() {
@@ -83,7 +82,7 @@ onMounted(() => {
 		const afterScroll = get(recycleScrollerRef)?.getScroll();
 
 		// No scroll happened, trigger highlight manually
-		if (beforeScroll?.end ?? afterScroll?.end === 0 ?? 0) {
+		if ((beforeScroll?.end ?? (afterScroll?.end ?? 0)) === 0) {
 			triggerBoxHighlight(getScrollTarget(index));
 		}
 	});
@@ -105,6 +104,7 @@ onMounted(() => {
 	});
 });
 </script>
+
 <style lang="scss">
 @import '@/assets/scss/variables.scss';
 

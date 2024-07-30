@@ -1,14 +1,34 @@
 <template>
-	<q-row class="media-table-row" full-height align="center" justify="between">
+	<q-row
+		class="media-table-row"
+		full-height
+		align="center"
+		justify="between"
+	>
 		<template v-if="row">
 			<!-- Checkbox -->
-			<q-col v-if="selectable" cols="auto" class="q-ml-md q-pl-sm">
-				<q-checkbox dense :model-value="selected" @update:model-value="$emit('selected', $event)" />
+			<q-col
+				v-if="selectable"
+				cols="auto"
+				class="q-ml-md q-pl-sm"
+			>
+				<q-checkbox
+					dense
+					:model-value="selected"
+					@update:model-value="$emit('selected', $event)"
+				/>
 			</q-col>
-			<template v-for="(column, i) in columns" :key="i">
+			<template
+				v-for="(column, i) in columns"
+				:key="i"
+			>
 				<!-- Index -->
 				<template v-if="column['type'] === 'index'">
-					<q-col cols="auto" style="min-width: 50px" class="media-table-row--column">
+					<q-col
+						cols="auto"
+						style="min-width: 50px"
+						class="media-table-row--column"
+					>
 						<span> #{{ row[column.field] }} </span>
 					</q-col>
 				</template>
@@ -20,7 +40,8 @@
 							'media-table-row--title',
 							!disableHoverClick ? 'media-table-row--title--hover' : '',
 						]"
-						@click.stop="!disableHoverClick ? onRowAction({ command: 'open-details' }) : () => {}">
+						@click.stop="!disableHoverClick ? onRowAction({ command: 'open-details' }) : () => {}"
+					>
 						<span>
 							{{ row[column.field] }}
 						</span>
@@ -28,41 +49,77 @@
 				</template>
 				<!-- Duration format -->
 				<template v-else-if="column['type'] === 'duration'">
-					<q-col cols="1" class="media-table-row--column">
-						<QDuration short :value="row[column.field]" />
+					<q-col
+						cols="1"
+						class="media-table-row--column"
+					>
+						<QDuration
+							short
+							:value="row[column.field]"
+						/>
 					</q-col>
 				</template>
 				<!-- Date format -->
 				<template v-else-if="column['type'] === 'date'">
-					<q-col cols="1" class="media-table-row--column">
-						<QDateTime short-date :text="row[column.field]" />
+					<q-col
+						cols="1"
+						class="media-table-row--column"
+					>
+						<QDateTime
+							short-date
+							:text="row[column.field]"
+						/>
 					</q-col>
 				</template>
 				<!-- Media size -->
 				<template v-else-if="column['type'] === 'file-size'">
-					<q-col cols="1" class="media-table-row--column">
+					<q-col
+						cols="1"
+						class="media-table-row--column"
+					>
 						<QFileSize :size="row[column.field]" />
 					</q-col>
 				</template>
 				<!-- Actions -->
 				<template v-else-if="column['type'] === 'actions'">
-					<q-col cols="auto" class="media-table-row--column">
+					<q-col
+						cols="auto"
+						class="media-table-row--column"
+					>
 						<q-btn
 							flat
 							:icon="Convert.buttonTypeToIcon(ButtonType.Download)"
-							@click.stop="onRowAction({ command: 'download' })" />
+							@click.stop="onRowAction({ command: 'download' })"
+						/>
 					</q-col>
 				</template>
 			</template>
 		</template>
 		<!-- No row -->
-		<q-col v-else>{{ t('components.q-tree-view-table-row.invalid-node') }}</q-col>
+		<q-col v-else>
+			{{ t('components.q-tree-view-table-row.invalid-node') }}
+		</q-col>
 		<!--	Highlight animation effect	-->
-		<svg v-if="!disableHighlight" class="glow-container">
-			<!--suppress HtmlUnknownAttribute -->
-			<rect pathLength="100" height="5" width="5" stroke-linecap="round" class="glow-blur" />
-			<!--suppress HtmlUnknownAttribute -->
-			<rect pathLength="100" height="5" width="5" stroke-linecap="round" class="glow-line" />
+		<svg
+			v-if="!disableHighlight"
+			class="glow-container"
+		>
+			<!-- suppress HtmlUnknownAttribute -->
+			<rect
+				pathLength="100"
+				height="5"
+				width="5"
+				stroke-linecap="round"
+				class="glow-blur"
+			/>
+			<!-- suppress HtmlUnknownAttribute -->
+			<rect
+				pathLength="100"
+				height="5"
+				width="5"
+				stroke-linecap="round"
+				class="glow-line"
+			/>
 		</svg>
 	</q-row>
 </template>

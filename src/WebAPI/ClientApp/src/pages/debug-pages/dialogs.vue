@@ -1,28 +1,40 @@
 <template>
 	<q-page>
 		<q-section>
-			<template #header> {{ t('pages.debug.dialogs.header') }}</template>
+			<template #header>
+				{{ t('pages.debug.dialogs.header') }}
+			</template>
 			<q-markup-table>
 				<q-tr>
 					<q-td>
-						<DebugButton :label="t('pages.debug.dialogs.buttons.server-dialog')" @click="openServerDialog" />
+						<DebugButton
+							:label="t('pages.debug.dialogs.buttons.server-dialog')"
+							@click="openServerDialog"
+						/>
 					</q-td>
 				</q-tr>
 				<q-tr>
 					<q-td>
 						<DebugButton
 							:label="t('pages.debug.dialogs.buttons.download-confirmation')"
-							@click="openDownloadConfirmationDialog" />
+							@click="openDownloadConfirmationDialog"
+						/>
 					</q-td>
 				</q-tr>
 				<q-tr>
 					<q-td>
-						<DebugButton :label="t('pages.debug.dialogs.buttons.help-dialog')" @click="openHelpDialog" />
+						<DebugButton
+							:label="t('pages.debug.dialogs.buttons.help-dialog')"
+							@click="openHelpDialog"
+						/>
 					</q-td>
 				</q-tr>
 				<q-tr>
 					<q-td>
-						<DebugButton text-id="add-alert" @click="addAlert" />
+						<DebugButton
+							text-id="add-alert"
+							@click="addAlert"
+						/>
 					</q-td>
 				</q-tr>
 				<q-tr>
@@ -30,7 +42,8 @@
 						<DebugButton
 							data-cy="check-server-connections-dialog-button"
 							:label="t('pages.debug.dialogs.buttons.check-server-connections-dialog')"
-							@click="openCheckServerConnectionsDialog" />
+							@click="openCheckServerConnectionsDialog"
+						/>
 					</q-td>
 				</q-tr>
 				<q-tr>
@@ -38,7 +51,8 @@
 						<DebugButton
 							data-cy="open-verification-dialog-button"
 							:label="t('pages.debug.dialogs.buttons.verification-dialog')"
-							@click="openVerificationDialog" />
+							@click="openVerificationDialog"
+						/>
 					</q-td>
 				</q-tr>
 				<q-tr>
@@ -46,13 +60,17 @@
 						<DebugButton
 							data-cy="directory-browser-dialog-button"
 							:label="t('pages.debug.dialogs.buttons.directory-browser')"
-							@click="openDirectoryBrowserDialog" />
+							@click="openDirectoryBrowserDialog"
+						/>
 					</q-td>
 				</q-tr>
 			</q-markup-table>
 			<ServerDialog :name="serverDialogName" />
 			<DownloadConfirmation :name="downloadConfirmationName" />
-			<AccountVerificationCodeDialog :name="verificationCodeDialogName" :account="account" />
+			<AccountVerificationCodeDialog
+				:name="verificationCodeDialogName"
+				:account="account"
+			/>
 			<DirectoryBrowser :name="directoryBrowserName" />
 		</q-section>
 	</q-page>

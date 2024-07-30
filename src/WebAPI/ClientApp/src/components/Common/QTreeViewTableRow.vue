@@ -5,15 +5,35 @@
 		align="center"
 		no-wrap
 		:class="{ 'q-tree-view-table-row': true, 'q-tree-view-table-row--header': isHeader }"
-		class="q-mb-xs">
+		class="q-mb-xs"
+	>
 		<!--	Title Column	-->
 		<q-col class="q-ml-sm">
-			<q-row align="center" justify="start">
-				<q-col v-if="isHeader && selectable" cols="auto" class="q-ml-md q-pl-sm">
-					<q-checkbox dense :model-value="selected" @update:model-value="$emit('selected', $event)" />
+			<q-row
+				align="center"
+				justify="start"
+			>
+				<q-col
+					v-if="isHeader && selectable"
+					cols="auto"
+					class="q-ml-md q-pl-sm"
+				>
+					<q-checkbox
+						dense
+						:model-value="selected"
+						@update:model-value="$emit('selected', $event)"
+					/>
 				</q-col>
-				<q-col v-if="columns[0]?.field" align-self="start" cols="auto" class="header-column">
-					<q-media-type-icon v-if="node['mediaType']" :media-type="node['mediaType']" />
+				<q-col
+					v-if="columns[0]?.field"
+					align-self="start"
+					cols="auto"
+					class="header-column"
+				>
+					<q-media-type-icon
+						v-if="node['mediaType']"
+						:media-type="node['mediaType']"
+					/>
 					<span :data-cy="`column-${columns[0]?.field}-${node.id}`">
 						{{ node[columns[0].field ?? ''] ?? 'unknown' }}
 					</span>
@@ -21,40 +41,82 @@
 			</q-row>
 		</q-col>
 		<!--	Rest of the Columns	-->
-		<q-col cols="auto" :style="{ 'max-width': `${getContainerWidth}px !important` }">
-			<q-row align="center" justify="end" no-wrap>
-				<template v-for="(column, i) in columns.slice(1)" :key="column.field">
+		<q-col
+			cols="auto"
+			:style="{ 'max-width': `${getContainerWidth}px !important` }"
+		>
+			<q-row
+				align="center"
+				justify="end"
+				no-wrap
+			>
+				<template
+					v-for="(column, i) in columns.slice(1)"
+					:key="column.field"
+				>
 					<!--	Table Header Row	-->
-					<q-col v-if="isHeader" cols="auto" :text-align="'center'" :width="column?.width ?? 0">
+					<q-col
+						v-if="isHeader"
+						cols="auto"
+						:text-align="'center'"
+						:width="column?.width ?? 0"
+					>
 						<span :data-cy="`column-${column.field}-${node.id}`">
 							{{ node[column.field] }}
 						</span>
 					</q-col>
 					<!--	Rest of the Columns	-->
-					<q-col v-else cols="auto" class="table-column" :width="column?.width ?? 0" :text-align="column.align">
+					<q-col
+						v-else
+						cols="auto"
+						class="table-column"
+						:width="column?.width ?? 0"
+						:text-align="column.align"
+					>
 						<!-- Duration format -->
 						<template v-if="column['type'] === 'duration'">
-							<QDuration short :data-cy="`column-${column.field}-${node.id}`" :value="node[column.field]" />
+							<QDuration
+								short
+								:data-cy="`column-${column.field}-${node.id}`"
+								:value="node[column.field]"
+							/>
 						</template>
 						<!-- Date format -->
 						<template v-else-if="column['type'] === 'date'">
-							<QDateTime short-date :data-cy="`column-${column.field}-${node.id}`" :text="node[column.field]" />
+							<QDateTime
+								short-date
+								:data-cy="`column-${column.field}-${node.id}`"
+								:text="node[column.field]"
+							/>
 						</template>
 						<!-- Filesize format -->
 						<template v-else-if="column['type'] === 'file-size'">
-							<QFileSize :data-cy="`column-${column.field}-${node.id}`" :size="node[column.field]" />
+							<QFileSize
+								:data-cy="`column-${column.field}-${node.id}`"
+								:size="node[column.field]"
+							/>
 						</template>
 						<!-- File Speed format -->
 						<template v-else-if="column['type'] === 'file-speed'">
-							<QFileSize :data-cy="`column-${column.field}-${node.id}`" :size="node[column.field]" speed />
+							<QFileSize
+								:data-cy="`column-${column.field}-${node.id}`"
+								:size="node[column.field]"
+								speed
+							/>
 						</template>
 						<!-- Percentage -->
 						<template v-else-if="column['type'] === 'percentage'">
-							<QProgressBar :data-cy="`column-${column.field}-${node.id}`" :value="node[column.field]" />
+							<QProgressBar
+								:data-cy="`column-${column.field}-${node.id}`"
+								:value="node[column.field]"
+							/>
 						</template>
 						<!-- Actions -->
 						<template v-else-if="column['type'] === 'actions'">
-							<q-row justify="start" no-wrap>
+							<q-row
+								justify="start"
+								no-wrap
+							>
 								<q-col cols="auto">
 									<!-- Item Actions -->
 									<IconSquareButton
@@ -68,7 +130,8 @@
 												action: action,
 												data: node,
 											})
-										" />
+										"
+									/>
 								</q-col>
 							</q-row>
 						</template>
@@ -116,6 +179,7 @@ const getContainerWidth = computed(() => {
 	}, 0);
 });
 </script>
+
 <style lang="scss">
 .q-tree-view-table-row {
 	height: 30px;

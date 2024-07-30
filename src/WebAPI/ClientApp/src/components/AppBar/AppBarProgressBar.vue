@@ -1,8 +1,20 @@
 <template>
 	<Transition>
 		<div v-if="showProgressBar">
-			<q-linear-progress dark stripe rounded size="20px" :value="getPercentage" color="red" class="q-mt-sm">
-				<q-tooltip anchor="bottom middle" self="top middle" :offset="[10, 10]">
+			<q-linear-progress
+				dark
+				stripe
+				rounded
+				size="20px"
+				:value="getPercentage"
+				color="red"
+				class="q-mt-sm"
+			>
+				<q-tooltip
+					anchor="bottom middle"
+					self="top middle"
+					:offset="[10, 10]"
+				>
 					<span>{{ getText }}</span>
 				</q-tooltip>
 			</q-linear-progress>
@@ -13,8 +25,8 @@
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
-import { useSignalrStore } from '~/store';
 import type { SyncServerProgress } from '@dto';
+import { useSignalrStore } from '~/store';
 
 const progressList = ref<SyncServerProgress[]>([]);
 

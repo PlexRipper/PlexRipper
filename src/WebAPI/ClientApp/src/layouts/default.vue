@@ -4,9 +4,15 @@
 	<q-layout view="hHh LpR lFf">
 		<!--	Use for everything else	-->
 		<template v-if="!isEmptyLayout">
-			<app-bar @show-navigation="toggleNavigationsDrawer" @show-notifications="toggleNotificationsDrawer" />
+			<app-bar
+				@show-navigation="toggleNavigationsDrawer"
+				@show-notifications="toggleNotificationsDrawer"
+			/>
 			<NavigationDrawer :show-drawer="showNavigationDrawerState" />
-			<NotificationsDrawer :show-drawer="showNotificationsDrawerState" @cleared="toggleNotificationsDrawer" />
+			<NotificationsDrawer
+				:show-drawer="showNotificationsDrawerState"
+				@cleared="toggleNotificationsDrawer"
+			/>
 		</template>
 		<!--	page-load-completed is only visible once the page is done loading. This is used for Cypress E2E	-->
 		<q-page-container data-cy="page-load-completed">
@@ -14,7 +20,12 @@
 		</q-page-container>
 		<!--	Dialogs	-->
 		<help-dialog :name="helpDialogName" />
-		<alert-dialog v-for="(alertItem, i) in alerts" :key="i" :name="`alert-dialog-${alertItem.id}`" :alert="alertItem" />
+		<alert-dialog
+			v-for="(alertItem, i) in alerts"
+			:key="i"
+			:name="`alert-dialog-${alertItem.id}`"
+			:alert="alertItem"
+		/>
 		<CheckServerConnectionsDialog />
 		<!--	Background	-->
 		<Background :hide-background="isEmptyLayout" />
@@ -25,8 +36,8 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import { useHelpStore, useAlertStore, useGlobalStore, useRoute } from '#imports';
 import type IAlert from '@interfaces/IAlert';
+import { useHelpStore, useAlertStore, useGlobalStore, useRoute } from '#imports';
 
 const route = useRoute();
 const helpStore = useHelpStore();

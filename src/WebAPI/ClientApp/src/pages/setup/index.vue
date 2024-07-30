@@ -1,23 +1,44 @@
 <template>
 	<q-page>
 		<!-- Logo	-->
-		<q-row justify="center" no-gutters no-wrap>
-			<q-col cols="auto" class="q-my-md">
+		<q-row
+			justify="center"
+			no-gutters
+			no-wrap
+		>
+			<q-col
+				cols="auto"
+				class="q-my-md"
+			>
 				<logo :size="128" />
 			</q-col>
 		</q-row>
 		<!--	Horizontal Container	-->
 		<q-row justify="center">
-			<q-col cols="12" lg="8">
+			<q-col
+				cols="12"
+				lg="8"
+			>
 				<!--	Vertical Container	-->
-				<q-row class="setup-card" column>
+				<q-row
+					class="setup-card"
+					column
+				>
 					<q-col align-self="stretch">
 						<!-- Tabs -->
 						<q-row align="start">
 							<q-col cols="auto">
-								<q-tabs v-model="stepIndex" vertical active-color="primary" indicator-color="primary">
+								<q-tabs
+									v-model="stepIndex"
+									vertical
+									active-color="primary"
+									indicator-color="primary"
+								>
 									<!-- Step headers	-->
-									<template v-for="(header, index) in headers" :key="index">
+									<template
+										v-for="(header, index) in headers"
+										:key="index"
+									>
 										<q-tab
 											class="setup-tab"
 											:name="index + 1"
@@ -27,8 +48,12 @@
 											:complete="index + 1 === stepPagesCount ? stepIndex > index : stepIndex > index + 1"
 											:label="t(`pages.setup.${header}.header`)"
 											:data-cy="`setup-header-tab-${index + 1}`"
-											edit-icon="$complete" />
-										<q-separator v-if="index < stepPagesCount - 1" :key="index + 100" />
+											edit-icon="$complete"
+										/>
+										<q-separator
+											v-if="index < stepPagesCount - 1"
+											:key="index + 100"
+										/>
 									</template>
 								</q-tabs>
 							</q-col>
@@ -38,7 +63,8 @@
 									animated
 									class="fit q-pa-md"
 									transition-prev="slide-down"
-									transition-next="slide-up">
+									transition-next="slide-up"
+								>
 									<!-- Introduction	-->
 									<q-tab-panel :name="1">
 										<q-row no-gutters>
@@ -49,7 +75,8 @@
 													<li>
 														{{ t('pages.setup.intro.list.item-1') }}
 														<ExternalLinkButton
-															href="https://github.com/PlexRipper/PlexRipper/issues" />
+															href="https://github.com/PlexRipper/PlexRipper/issues"
+														/>
 													</li>
 													<li>{{ t('pages.setup.intro.list.item-2') }}</li>
 													<li>{{ t('pages.setup.intro.list.item-3') }}</li>
@@ -63,7 +90,9 @@
 									<q-tab-panel :name="2">
 										<q-row no-gutters>
 											<q-col>
-												<h2 class="mt-2">{{ t('pages.setup.future-plans.title') }}</h2>
+												<h2 class="mt-2">
+													{{ t('pages.setup.future-plans.title') }}
+												</h2>
 											</q-col>
 										</q-row>
 										<q-row no-gutters>
@@ -90,7 +119,9 @@
 														</ul>
 													</li>
 												</ul>
-												<h2 class="text-center">{{ t('pages.setup.future-plans.text.p-2') }}</h2>
+												<h2 class="text-center">
+													{{ t('pages.setup.future-plans.text.p-2') }}
+												</h2>
 											</q-col>
 										</q-row>
 									</q-tab-panel>
@@ -107,21 +138,33 @@
 									</q-tab-panel>
 									<!-- Plex Accounts	-->
 									<q-tab-panel :name="4">
-										<h2 class="mt-2">{{ t('pages.setup.accounts.title') }}</h2>
+										<h2 class="mt-2">
+											{{ t('pages.setup.accounts.title') }}
+										</h2>
 										<account-overview />
 									</q-tab-panel>
 									<!-- Finished	-->
 									<q-tab-panel :name="5">
 										<q-row no-gutters>
 											<q-col>
-												<h2 class="mt-2">{{ t('pages.setup.finished.title') }}</h2>
+												<h2 class="mt-2">
+													{{ t('pages.setup.finished.title') }}
+												</h2>
 											</q-col>
 										</q-row>
 										<q-row no-gutters>
 											<q-col>
 												<p>{{ t('pages.setup.finished.text.p-1') }}</p>
-												<q-list dense class="no-background">
-													<q-item v-for="(link, i) in links" :key="i" :href="link" target="_blank">
+												<q-list
+													dense
+													class="no-background"
+												>
+													<q-item
+														v-for="(link, i) in links"
+														:key="i"
+														:href="link"
+														target="_blank"
+													>
 														<q-item-section avatar>
 															<ul>
 																<li>
@@ -144,34 +187,63 @@
 						</q-row>
 					</q-col>
 					<!-- Stepper navigation bar	-->
-					<q-col align-self="stretch" cols="12">
+					<q-col
+						align-self="stretch"
+						cols="12"
+					>
 						<q-separator class="q-mb-md" />
 						<q-row align="center">
 							<q-col>
 								<q-row justify="center">
-									<q-col v-if="!isNextDisabled" class="q-mx-md" cols="2">
+									<q-col
+										v-if="!isNextDisabled"
+										class="q-mx-md"
+										cols="2"
+									>
 										<NavigationPreviousButton
 											:disabled="isBackDisabled"
 											cy="setup-page-previous-button"
-											@click="back" />
+											@click="back"
+										/>
 									</q-col>
-									<q-col v-if="!isNextDisabled" class="q-mx-md" cols="2">
+									<q-col
+										v-if="!isNextDisabled"
+										class="q-mx-md"
+										cols="2"
+									>
 										<NavigationNextButton
 											:disabled="isNextDisabled"
 											cy="setup-page-next-button"
-											@click="next" />
+											@click="next"
+										/>
 									</q-col>
-									<q-col v-else class="q-mx-md q-mb-md" cols="auto">
-										<NavigationFinishSetupButton cy="setup-page-skip-setup-button" @click="finishSetup" />
+									<q-col
+										v-else
+										class="q-mx-md q-mb-md"
+										cols="auto"
+									>
+										<NavigationFinishSetupButton
+											cy="setup-page-skip-setup-button"
+											@click="finishSetup"
+										/>
 									</q-col>
 								</q-row>
 							</q-col>
 							<!--	Skip button	-->
-							<q-col v-if="!isNextDisabled" cols="auto" class="q-mx-md">
+							<q-col
+								v-if="!isNextDisabled"
+								cols="auto"
+								class="q-mx-md"
+							>
 								<NavigationSkipSetupButton
 									:disabled="isNextDisabled"
-									@click="useOpenControlDialog(confirmationDialogName)" />
-								<confirmation-dialog :name="confirmationDialogName" text-id="skip-setup" @confirm="finishSetup" />
+									@click="useOpenControlDialog(confirmationDialogName)"
+								/>
+								<confirmation-dialog
+									:name="confirmationDialogName"
+									text-id="skip-setup"
+									@confirm="finishSetup"
+								/>
 							</q-col>
 						</q-row>
 					</q-col>
@@ -232,6 +304,7 @@ const finishSetup = () => {
 	});
 };
 </script>
+
 <style lang="scss">
 @import '@/assets/scss/mixins.scss';
 

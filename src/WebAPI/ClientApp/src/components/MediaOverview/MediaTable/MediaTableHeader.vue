@@ -1,12 +1,32 @@
 <template>
-	<q-row align="center" justify="between" class="media-table-header">
-		<q-col v-if="selectable" cols="auto" class="media-table-header--column">
-			<q-checkbox dense :model-value="selected" class="q-ml-md" @update:model-value="$emit('selected', $event)" />
+	<q-row
+		align="center"
+		justify="between"
+		class="media-table-header"
+	>
+		<q-col
+			v-if="selectable"
+			cols="auto"
+			class="media-table-header--column"
+		>
+			<q-checkbox
+				dense
+				:model-value="selected"
+				class="q-ml-md"
+				@update:model-value="$emit('selected', $event)"
+			/>
 		</q-col>
-		<template v-for="(column, i) in columns" :key="i">
+		<template
+			v-for="(column, i) in columns"
+			:key="i"
+		>
 			<!-- Index -->
 			<template v-if="column['type'] === 'index'">
-				<q-col cols="auto" style="min-width: 45px" class="media-table-header--column">
+				<q-col
+					cols="auto"
+					style="min-width: 45px"
+					class="media-table-header--column"
+				>
 					<MediaTableHeaderColumn :column="column" />
 				</q-col>
 			</template>
@@ -18,25 +38,37 @@
 			</template>
 			<!-- Duration format -->
 			<template v-else-if="column['type'] === 'duration'">
-				<q-col cols="1" class="media-table-header--column">
+				<q-col
+					cols="1"
+					class="media-table-header--column"
+				>
 					<MediaTableHeaderColumn :column="column" />
 				</q-col>
 			</template>
 			<!-- Date format -->
 			<template v-else-if="column['type'] === 'date'">
-				<q-col cols="1" class="media-table-header--column">
+				<q-col
+					cols="1"
+					class="media-table-header--column"
+				>
 					<MediaTableHeaderColumn :column="column" />
 				</q-col>
 			</template>
 			<!-- Filesize format -->
 			<template v-else-if="column['type'] === 'file-size'">
-				<q-col cols="1" class="media-table-header--column">
+				<q-col
+					cols="1"
+					class="media-table-header--column"
+				>
 					<MediaTableHeaderColumn :column="column" />
 				</q-col>
 			</template>
 			<!-- Actions -->
 			<template v-else-if="column['type'] === 'actions'">
-				<q-col cols="auto" class="media-table-header--column">
+				<q-col
+					cols="auto"
+					class="media-table-header--column"
+				>
 					<MediaTableHeaderColumn :column="column" />
 				</q-col>
 			</template>
@@ -58,6 +90,7 @@ defineEmits<{
 	(e: 'action', payload: { action: string; data: QTreeViewTableItem }): void;
 }>();
 </script>
+
 <style lang="scss">
 @import '@/assets/scss/variables.scss';
 

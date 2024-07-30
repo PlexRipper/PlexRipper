@@ -1,5 +1,5 @@
-import { route } from '@fixtures/baseE2E';
-import { PlexMediaType } from '@dto';
+import { type IBasePageSetupResult, route } from '@fixtures/baseE2E';
+import { type PlexLibraryDTO, PlexMediaType } from '@dto';
 import { SettingsPaths } from '@api-urls';
 
 describe('Display media collection on the Library detail page', () => {
@@ -36,8 +36,7 @@ describe('Display media collection on the Library detail page', () => {
 	});
 
 	it('Should display and click on all the letters in the alphabet navigation when movies are available', function () {
-		// @ts-ignore
-		cy.get('@movieLibrary').then(({ movieLibrary, mediaData }) => {
+		cy.get('@movieLibrary').then(({ movieLibrary, mediaData }: IBasePageSetupResult & { movieLibrary: PlexLibraryDTO }) => {
 			const movies = mediaData.find((x) => x.libraryId === movieLibrary.id)?.media ?? [];
 			const sortTitles = movies.map((x) => x.sortTitle[0].toLowerCase());
 			for (const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase()) {

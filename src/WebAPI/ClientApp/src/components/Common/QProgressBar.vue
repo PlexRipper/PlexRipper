@@ -11,6 +11,7 @@ defineProps<{
 	value: number;
 }>();
 </script>
+
 <style lang="scss">
 .q-progress-bar-text {
 	font-size: 0.8rem;

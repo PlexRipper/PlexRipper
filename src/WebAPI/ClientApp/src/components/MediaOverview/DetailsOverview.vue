@@ -8,7 +8,8 @@
 		content-height="100"
 		:loading="loading"
 		@opened="openDetails"
-		@closed="closeDetails">
+		@closed="closeDetails"
+	>
 		<template #default>
 			<q-col>
 				<!--	Header	-->
@@ -16,19 +17,32 @@
 					<q-col cols="auto">
 						<q-card class="q-ma-md media-info-container">
 							<!--	Poster	-->
-							<q-img :src="imageUrl" fit="fill" :width="`${thumbWidth}px`" :height="`${thumbHeight}px`" ratio="2/3">
+							<q-img
+								:src="imageUrl"
+								fit="fill"
+								:width="`${thumbWidth}px`"
+								:height="`${thumbHeight}px`"
+								ratio="2/3"
+							>
 								<!--	Placeholder	-->
 								<template #loading>
 									<!--	Show fallback image	-->
-									<q-row align="center" justify="center" class="fill-height">
+									<q-row
+										align="center"
+										justify="center"
+										class="fill-height"
+									>
 										<q-col cols="auto">
 											<q-media-type-icon
 												:size="100"
 												class="mx-3"
-												:media-type="mediaItemDetail?.type ?? PlexMediaType.Unknown" />
+												:media-type="mediaItemDetail?.type ?? PlexMediaType.Unknown"
+											/>
 										</q-col>
 										<q-col cols="12">
-											<h4 class="text-center">{{ mediaItemDetail?.title ?? 'unknown' }}</h4>
+											<h4 class="text-center">
+												{{ mediaItemDetail?.title ?? 'unknown' }}
+											</h4>
 										</q-col>
 									</q-row>
 								</template>
@@ -36,13 +50,19 @@
 						</q-card>
 					</q-col>
 					<q-col>
-						<q-card class="q-ma-md media-info-container" :style="{ height: thumbHeight + 'px' }">
-							<!-- Media info-->
+						<q-card
+							class="q-ma-md media-info-container"
+							:style="{ height: thumbHeight + 'px' }"
+						>
+							<!-- Media info -->
 							<q-card-section>
 								<q-markup-table wrap-cells>
 									<tbody>
 										<tr class="q-tr--no-hover">
-											<td colspan="2" class="media-info-column media-title">
+											<td
+												colspan="2"
+												class="media-info-column media-title"
+											>
 												{{ mediaItemDetail?.title ?? 'unknown' }}
 											</td>
 										</tr>
@@ -58,13 +78,17 @@
 											<td class="media-info-column">
 												{{ t('components.details-overview.media-count-label') }}
 											</td>
-											<td class="media-info-column">{{ mediaCountFormatted }}</td>
+											<td class="media-info-column">
+												{{ mediaCountFormatted }}
+											</td>
 										</tr>
 										<tr>
 											<td class="media-info-column">
 												{{ t('components.details-overview.summary') }}
 											</td>
-											<td class="media-info-column">{{ mediaItemDetail?.summary ?? '' }}</td>
+											<td class="media-info-column">
+												{{ mediaItemDetail?.summary ?? '' }}
+											</td>
 										</tr>
 									</tbody>
 								</q-markup-table>
@@ -76,7 +100,12 @@
 				<!--	Media Table	-->
 				<q-row no-gutters>
 					<q-col>
-						<MediaList use-q-table :media-item="mediaItemDetail" disable-intersection disable-highlight />
+						<MediaList
+							use-q-table
+							:media-item="mediaItemDetail"
+							disable-intersection
+							disable-highlight
+						/>
 					</q-col>
 				</q-row>
 			</q-col>
@@ -160,6 +189,7 @@ function closeDetails() {
 	mediaOverviewStore.downloadButtonVisible = false;
 }
 </script>
+
 <style lang="scss">
 @import '@/assets/scss/variables.scss';
 

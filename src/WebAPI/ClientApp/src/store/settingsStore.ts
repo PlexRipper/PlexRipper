@@ -1,6 +1,7 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import Log from 'consola';
-import { Observable, of, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { debounceTime, switchMap, tap } from 'rxjs/operators';
 import type {
 	ConfirmationSettingsDTO,
@@ -128,7 +129,7 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			}
 		},
 		isServerVisible(machineIdentifier: string): boolean {
-			return !actions.getServerSettings(machineIdentifier)?.hidden ?? true;
+			return !(actions.getServerSettings(machineIdentifier)?.hidden ?? false);
 		},
 		getServerSettings: (machineIdentifier?: string) =>
 			machineIdentifier ? state.serverSettings.data.find((user) => user.machineIdentifier === machineIdentifier) : null,

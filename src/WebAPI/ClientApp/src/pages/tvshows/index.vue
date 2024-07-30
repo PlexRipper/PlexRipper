@@ -4,6 +4,7 @@
 		<p>{{ t('pages.tvshows.index.sub-header') }}</p>
 	</q-page>
 </template>
+
 <script setup lang="ts">
 const { t } = useI18n();
 </script>

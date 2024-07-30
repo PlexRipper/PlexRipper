@@ -1,7 +1,7 @@
 import { kebabCase } from 'lodash-es';
-import {
-	DownloadTaskType,
+import type {
 	FolderType,
+	DownloadTaskType,
 	PlexMediaType,
 	type DownloadMediaDTO,
 	type PlexMediaDTO,

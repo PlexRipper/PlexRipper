@@ -1,9 +1,9 @@
 <script lang="ts">
 import { defineComponent, h } from 'vue';
 import { QBtn, QTooltip } from 'quasar';
+import type { IBaseButtonProps } from '@props';
 import { useI18n, useRouter } from '#imports';
 import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
-import type { IBaseButtonProps } from '@props';
 
 export default defineComponent({
 	name: 'BaseButton',
@@ -72,21 +72,21 @@ export default defineComponent({
 					...[
 						props.tooltipId
 							? h(
-									QTooltip,
-									{
-										anchor: 'top middle',
-										self: 'bottom middle',
-										offset: [10, 10],
+								QTooltip,
+								{
+									anchor: 'top middle',
+									self: 'bottom middle',
+									offset: [10, 10],
+								},
+								{
+									default: () => {
+										if (!props.tooltipId) {
+											return '';
+										}
+										return useI18n().t(props.tooltipId);
 									},
-									{
-										default: () => {
-											if (!props.tooltipId) {
-												return '';
-											}
-											return useI18n().t(props.tooltipId);
-										},
-									},
-								)
+								},
+							)
 							: null,
 					],
 				],

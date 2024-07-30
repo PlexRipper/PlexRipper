@@ -1,14 +1,20 @@
 <template>
 	<div>
 		<HelpRow help-id="help.server-dialog.server-commands.inspect-server">
-			<BaseButton :disabled="syncLoading" :loading="inspectLoading" text-id="inspect-server" @click="inspectServer" />
+			<BaseButton
+				:disabled="syncLoading"
+				:loading="inspectLoading"
+				text-id="inspect-server"
+				@click="inspectServer"
+			/>
 		</HelpRow>
 		<HelpRow help-id="help.server-dialog.server-commands.sync-server-libraries">
 			<BaseButton
 				:disabled="inspectLoading"
 				:loading="syncLoading"
 				text-id="sync-server-libraries"
-				@click="syncServerLibraries" />
+				@click="syncServerLibraries"
+			/>
 		</HelpRow>
 	</div>
 </template>
@@ -16,9 +22,9 @@
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
-import { ref, onUnmounted } from '#imports';
 import type { PlexServerDTO } from '@dto';
 import { plexServerApi } from '@api';
+import { ref, onUnmounted } from '#imports';
 
 const props = defineProps<{
 	plexServer: PlexServerDTO | null;

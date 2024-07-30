@@ -1,7 +1,7 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { Observable, of, switchMap, throwError, type Observer } from 'rxjs';
 import { map, mergeMap, take } from 'rxjs/operators';
-import { PlexMediaType, type PlexMediaDTO, type PlexMediaSlimDTO } from '@dto';
+import type { PlexMediaType, type PlexMediaDTO, type PlexMediaSlimDTO } from '@dto';
 import type { ISetupResult, IObjectUrl } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
 
@@ -26,26 +26,26 @@ export const useMediaStore = defineStore('MediaStore', () => {
 					value !== ''
 						? of(value)
 						: plexMediaApi
-								.getThumbnailImageEndpoint(mediaId, {
-									mediaType,
-									width,
-									height,
-								})
-								.pipe(
-									switchMap((response) => {
-										if (response.value) {
-											// Convert imageUrl to objectUrl
-											const imageUrl: string = URL.createObjectURL(response.value);
-											if (imageUrl) {
-												actions.updateMediaUrl({ id: mediaId, type: mediaType, url: imageUrl });
-											}
-											return of(imageUrl);
+							.getThumbnailImageEndpoint(mediaId, {
+								mediaType,
+								width,
+								height,
+							})
+							.pipe(
+								switchMap((response) => {
+									if (response.value) {
+										// Convert imageUrl to objectUrl
+										const imageUrl: string = URL.createObjectURL(response.value);
+										if (imageUrl) {
+											actions.updateMediaUrl({ id: mediaId, type: mediaType, url: imageUrl });
 										}
-										return throwError(() => {
-											return new Error(`MediaType with ${mediaType} is not supported in getMediaDataById`);
-										});
-									}),
-								),
+										return of(imageUrl);
+									}
+									return throwError(() => {
+										return new Error(`MediaType with ${mediaType} is not supported in getMediaDataById`);
+									});
+								}),
+							),
 				),
 				take(1),
 			);

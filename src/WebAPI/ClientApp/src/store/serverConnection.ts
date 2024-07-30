@@ -1,11 +1,12 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { get } from '@vueuse/core';
 import type { PlexServerConnectionDTO, PlexServerStatusDTO } from '@dto';
-import { useServerStore } from '#build/imports';
 import type { ISetupResult } from '@interfaces';
 import { plexServerApi, plexServerConnectionApi } from '@api';
+import { useServerStore } from '#build/imports';
 
 export const useServerConnectionStore = defineStore('ServerConnection', () => {
 	const state = reactive<{ serverConnections: PlexServerConnectionDTO[] }>({

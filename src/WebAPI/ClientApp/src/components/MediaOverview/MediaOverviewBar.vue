@@ -2,24 +2,46 @@
 	<q-toolbar class="media-overview-bar">
 		<!--	Title	-->
 		<q-toolbar-title>
-			<q-row justify="start" align="center">
-				<Transition appear enter-active-class="animated fadeInLeft" leave-active-class="animated fadeOutLeft">
-					<q-col v-if="detailMode" cols="auto">
-						<q-btn flat icon="mdi-arrow-left" size="xl" @click="$emit('back')" />
+			<q-row
+				justify="start"
+				align="center"
+			>
+				<Transition
+					appear
+					enter-active-class="animated fadeInLeft"
+					leave-active-class="animated fadeOutLeft"
+				>
+					<q-col
+						v-if="detailMode"
+						cols="auto"
+					>
+						<q-btn
+							flat
+							icon="mdi-arrow-left"
+							size="xl"
+							@click="$emit('back')"
+						/>
 					</q-col>
 				</Transition>
 				<q-col cols="auto">
 					<q-list class="no-background">
 						<q-item>
 							<q-item-section avatar>
-								<q-media-type-icon class="mx-3" :size="36" :media-type="library?.type ?? PlexMediaType.None" />
+								<q-media-type-icon
+									class="mx-3"
+									:size="36"
+									:media-type="library?.type ?? PlexMediaType.None"
+								/>
 							</q-item-section>
 							<q-item-section>
 								<q-item-label>
 									{{ server ? serverStore.getServerName(server.id) : $t('general.commands.unknown') }} -
 									{{ library ? libraryStore.getLibraryName(library.id) : $t('general.commands.unknown') }}
 								</q-item-label>
-								<q-item-label v-if="library && !detailMode" caption>
+								<q-item-label
+									v-if="library && !detailMode"
+									caption
+								>
 									{{ libraryCountFormatted }} -
 									<q-file-size :size="library.mediaSize" />
 								</q-item-label>
@@ -37,7 +59,8 @@
 			label="Download"
 			:height="barHeight"
 			:width="verticalButtonWidth"
-			@click="download" />
+			@click="download"
+		/>
 
 		<!--	Selection Dialog Button	-->
 		<vertical-button
@@ -46,7 +69,8 @@
 			text-id="selection"
 			:height="barHeight"
 			:width="verticalButtonWidth"
-			@click="$emit('selection-dialog')" />
+			@click="$emit('selection-dialog')"
+		/>
 
 		<!--	Refresh library button	-->
 		<vertical-button
@@ -56,7 +80,8 @@
 			:height="barHeight"
 			cy="media-overview-refresh-library-btn"
 			:width="verticalButtonWidth"
-			@click="refreshLibrary" />
+			@click="refreshLibrary"
+		/>
 
 		<!--	View mode	-->
 		<vertical-button
@@ -65,8 +90,13 @@
 			label="View"
 			:height="barHeight"
 			:width="verticalButtonWidth"
-			cy="change-view-mode-btn">
-			<q-menu anchor="bottom left" self="top left" auto-close>
+			cy="change-view-mode-btn"
+		>
+			<q-menu
+				anchor="bottom left"
+				self="top left"
+				auto-close
+			>
 				<q-list>
 					<q-item
 						v-for="(viewOption, i) in viewOptions"
@@ -74,11 +104,15 @@
 						clickable
 						style="min-width: 200px"
 						:data-cy="`view-mode-${viewOption.viewMode.toLowerCase()}-btn`"
-						@click="changeView(viewOption.viewMode)">
+						@click="changeView(viewOption.viewMode)"
+					>
 						<!-- View mode options -->
 						<q-item-section avatar>
 							<q-avatar>
-								<q-icon v-if="isSelected(viewOption.viewMode)" name="mdi-check" />
+								<q-icon
+									v-if="isSelected(viewOption.viewMode)"
+									name="mdi-check"
+								/>
 							</q-avatar>
 						</q-item-section>
 						<!--	Is selected icon	-->
@@ -112,8 +146,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-	(e: 'back'): void;
-	(e: 'selection-dialog'): void;
+	(e: 'back' | 'selection-dialog'): void;
 	(e: 'refresh-library', libraryId: number): void;
 	(e: 'view-change', viewMode: ViewMode): void;
 }>();

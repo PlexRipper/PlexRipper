@@ -3,9 +3,22 @@
 		<q-row no-wrap>
 			<q-toolbar class="app-bar">
 				<q-toolbar-title>
-					<q-btn flat round dense icon="mdi-menu" class="q-mr-sm" @click.stop="showNavigationDrawer" />
-					<q-btn to="/" flat>
-						<logo :size="24" class="q-mr-md" />
+					<q-btn
+						flat
+						round
+						dense
+						icon="mdi-menu"
+						class="q-mr-sm"
+						@click.stop="showNavigationDrawer"
+					/>
+					<q-btn
+						to="/"
+						flat
+					>
+						<logo
+							:size="24"
+							class="q-mr-md"
+						/>
 						{{ t('general.name-version', { version: globalStore.getAppVersion }) }}
 					</q-btn>
 				</q-toolbar-title>
@@ -16,7 +29,12 @@
 
 				<q-space />
 
-				<q-btn icon="mdi-github" flat href="https://github.com/PlexRipper/PlexRipper" target="_blank" />
+				<q-btn
+					icon="mdi-github"
+					flat
+					href="https://github.com/PlexRipper/PlexRipper"
+					target="_blank"
+				/>
 
 				<!-- Background Animation Toggle -->
 				<BackgroundAnimationToggleButton />
@@ -38,8 +56,7 @@ const { t } = useI18n();
 const globalStore = useGlobalStore();
 
 const emit = defineEmits<{
-	(e: 'show-navigation'): void;
-	(e: 'show-notifications'): void;
+	(e: 'show-navigation' | 'show-notifications'): void;
 }>();
 
 function showNavigationDrawer(): void {

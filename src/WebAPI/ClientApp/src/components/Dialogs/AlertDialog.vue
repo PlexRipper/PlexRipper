@@ -9,7 +9,7 @@
 		</template>
 		<template #default>
 			<pre style="white-space: break-spaces">{{ alert.text }}</pre>
-			<span>Request data sent:</span>
+			<QText>{{ $t('components.alert-dialog.request-data-sent') }}</QText>
 			<pre
 				v-if="alert.result"
 				style="white-space: break-spaces"

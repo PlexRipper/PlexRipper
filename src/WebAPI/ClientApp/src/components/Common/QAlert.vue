@@ -73,6 +73,7 @@ const alertIcon = computed((): string => {
 
 		.q-alert-content {
 			flex: 1 1 auto;
+			padding: 0 1em;
 		}
 
 		.q-alert-dismissible {

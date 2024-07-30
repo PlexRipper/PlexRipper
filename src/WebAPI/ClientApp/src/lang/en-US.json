@@ -56,11 +56,11 @@
         },
         "download-details-dialog": {
             "overview": {
-                "destination-path": "Destination Path",
-                "download-path": "Download Path",
-                "download-url": "Download URL",
-                "file-name": "File Name",
-                "status": "Status"
+                "destination-path": "Destination Path:",
+                "download-path": "Download Path:",
+                "download-url": "Download URL:",
+                "file-name": "File Name:",
+                "status": "Status:"
             },
             "invalid-download-task": {
                 "body": "Error while retrieving the details for this download task:",
@@ -115,7 +115,8 @@
                 },
                 "server-config": {
                     "download-speed-limit": "Download Speed Limit",
-                    "header": "Server Configuration"
+                    "header": "Server Configuration",
+                    "plex-server-was-null": "Plex Server was null"
                 },
                 "server-connections": {
                     "download-speed-limit": "Download Speed Limit",
@@ -123,17 +124,23 @@
                     "section-header": "Select the preferred server connection:"
                 },
                 "server-data": {
-                    "created-on": "Created On",
-                    "current-status": "Current status",
+                    "headers": {
+                        "created-on": "Created On:",
+                        "current-status": "Current status:",
+                        "last-seen-at": "Last Seen At:",
+                        "machine-id": "Machine Identifier:",
+                        "plex-version": "Plex Version:",
+                        "device": "Device:",
+                        "platform": "Platform:",
+                        "platform-version": "Platform Version:"
+                    },
                     "header": "Server Data",
-                    "last-seen-at": "Last Seen At",
-                    "machine-id": "Machine Identifier",
-                    "plex-version": "Plex Version",
-                    "device": "Device",
-                    "platform": "Platform",
-                    "platform-version": "Platform Version",
                     "all-connections-failed": "All connections failed when used to connect to the server, the server is most likely offline...",
-                    "at-least-one-connection-successful": "At least one connection was successful, which means the server can be connected to!"
+                    "at-least-one-connection-successful": "At least one connection was successful, which means the server can be connected to!",
+                    "values": {
+                        "platform-version": "{platform} ({platformVersion})",
+                        "product-version": "{product} ({productVersion})"
+                    }
                 }
             },
             "no-servers-error": "PlexServer object was invalid"
@@ -170,6 +177,9 @@
         "q-status": {
             "server-connectable": "Server is online and connectable!",
             "server-unconnectable": "Server cannot be connected to and might be offline.."
+        },
+        "alert-dialog": {
+            "request-data-sent": "Request data sent:"
         }
     },
     "confirmation": {
@@ -245,6 +255,9 @@
         "error": {
             "unknown": "\"Unknown\"",
             "invalid-server": "Server object was invalid"
+        },
+        "delimiter": {
+            "dash": " - "
         }
     },
     "help": {
@@ -561,6 +574,46 @@
                 },
                 "header": "Debug Dialog Modals"
             }
+        },
+        "empty": {
+            "title": "Empty Page"
+        }
+    },
+    "debug": {
+        "button-labels": {
+            "amber": "Amber",
+            "black": "Black",
+            "brown5": "Brown 5",
+            "deep-orange": "Deep Orange",
+            "primary": "Primary",
+            "purple": "Purple",
+            "secondary": "Secondary",
+            "standard": "Standard"
+        },
+        "buttons": {
+            "account-validation-button": "AccountValidationButton",
+            "add-icon-button": "AddIconButton",
+            "base-button": "BaseButton",
+            "cancel-button": "CancelButton",
+            "check-connection-button": "CheckConnectionButton",
+            "confirm-button": "ConfirmButton",
+            "debug-button": "DebugButton",
+            "delete-button": "DeleteButton",
+            "delete-icon-button": "DeleteIconButton",
+            "external-link-button": "ExternalLinkButton",
+            "go-to-button": "GoToButton",
+            "help-button": "HelpButton",
+            "hide-button": "HideButton",
+            "navigation-finish-setup-button": "NavigationFinishSetupButton",
+            "navigation-next-button": "NavigationNextButton",
+            "navigation-previous-button": "NavigationPreviousButton",
+            "navigation-skip-setup-button": "NavigationSkipSetupButton",
+            "reset-button": "ResetButton",
+            "save-button": "SaveButton",
+            "warning-button": "WarningButton"
+        },
+        "general": {
+            "hello-world": "Hello World"
         }
     }
 }

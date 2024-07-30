@@ -28,32 +28,32 @@
 				<tbody>
 					<tr>
 						<td style="width: 25%">
-							{{ t('components.download-details-dialog.overview.status') }}:
+							{{ t('components.download-details-dialog.overview.status') }}
 						</td>
 						<td data-cy="download-details-dialog-status">
 							{{ downloadTask.status }}
 						</td>
 					</tr>
 					<tr v-if="downloadTask.fileName">
-						<td>{{ t('components.download-details-dialog.overview.file-name') }}:</td>
+						<td>{{ t('components.download-details-dialog.overview.file-name') }}</td>
 						<td data-cy="download-details-dialog-file-name">
 							{{ downloadTask.fileName }}
 						</td>
 					</tr>
 					<tr>
-						<td>{{ t('components.download-details-dialog.overview.download-path') }}:</td>
+						<td>{{ t('components.download-details-dialog.overview.download-path') }}</td>
 						<td data-cy="download-details-dialog-download-path">
 							{{ downloadTask.downloadDirectory }}
 						</td>
 					</tr>
 					<tr>
-						<td>{{ t('components.download-details-dialog.overview.destination-path') }}:</td>
+						<td>{{ t('components.download-details-dialog.overview.destination-path') }}</td>
 						<td data-cy="download-details-dialog-destination-path">
 							{{ downloadTask.destinationDirectory }}
 						</td>
 					</tr>
 					<tr v-if="downloadTask.downloadUrl">
-						<td>{{ t('components.download-details-dialog.overview.download-url') }}:</td>
+						<td>{{ t('components.download-details-dialog.overview.download-url') }}</td>
 						<td data-cy="download-details-dialog-download-url">
 							<QRow
 								no-gutters

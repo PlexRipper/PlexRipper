@@ -56,11 +56,11 @@
         },
         "download-details-dialog": {
             "overview": {
-                "destination-path": "Destination Pfad",
-                "download-path": "Download Pfad",
-                "download-url": "Download URL",
-                "file-name": "Datei Name",
-                "status": "Status"
+                "destination-path": "Destination Pfad:",
+                "download-path": "Download Pfad:",
+                "download-url": "Download URL:",
+                "file-name": "Datei Name:",
+                "status": "Status:"
             },
             "invalid-download-task": {
                 "body": "Fehler beim Abrufen der Details für diese Download-Aufgabe:",
@@ -115,7 +115,8 @@
                 },
                 "server-config": {
                     "download-speed-limit": "Geschwindigkeitsbegrenzung herunterladen",
-                    "header": "Serverkonfiguration"
+                    "header": "Serverkonfiguration",
+                    "plex-server-was-null": ""
                 },
                 "server-connections": {
                     "download-speed-limit": "Geschwindigkeitsbegrenzung herunterladen",
@@ -123,17 +124,23 @@
                     "section-header": "Wählen Sie die bevorzugte Serververbindung aus:"
                 },
                 "server-data": {
-                    "created-on": "erstellt am",
-                    "current-status": "aktueller Status",
+                    "headers": {
+                        "created-on": "erstellt am:",
+                        "current-status": "aktueller Status:",
+                        "last-seen-at": "Zuletzt gesehen bei:",
+                        "machine-id": "Machine Identifizierer:",
+                        "plex-version": "Plex Version:",
+                        "device": "Gerät:",
+                        "platform": "Plattform:",
+                        "platform-version": "Plattformversion:"
+                    },
                     "header": "Server Daten",
-                    "last-seen-at": "Zuletzt gesehen bei",
-                    "machine-id": "Machine Identifizierer",
-                    "plex-version": "Plex Version",
-                    "device": "Gerät",
-                    "platform": "Plattform",
-                    "platform-version": "Plattformversion",
                     "all-connections-failed": "Beim Herstellen einer Verbindung zum Server sind alle Verbindungen fehlgeschlagen. Der Server ist höchstwahrscheinlich offline ...",
-                    "at-least-one-connection-successful": "Mindestens eine Verbindung war erfolgreich, was bedeutet, dass mit dem Server eine Verbindung hergestellt werden kann!"
+                    "at-least-one-connection-successful": "Mindestens eine Verbindung war erfolgreich, was bedeutet, dass mit dem Server eine Verbindung hergestellt werden kann!",
+                    "values": {
+                        "platform-version": "",
+                        "product-version": ""
+                    }
                 }
             },
             "no-servers-error": ""
@@ -170,6 +177,9 @@
         "q-status": {
             "server-connectable": "Server ist online und verbindbar!",
             "server-unconnectable": "Es kann keine Verbindung zum Server hergestellt werden und er ist möglicherweise offline."
+        },
+        "alert-dialog": {
+            "request-data-sent": ""
         }
     },
     "confirmation": {
@@ -245,6 +255,9 @@
         "error": {
             "unknown": "\"Unbekannt\"",
             "invalid-server": "Das Serverobjekt war ungültig"
+        },
+        "delimiter": {
+            "dash": " - "
         }
     },
     "help": {
@@ -561,6 +574,46 @@
                 },
                 "header": "Debug-Dialogmodalitäten"
             }
+        },
+        "empty": {
+            "title": ""
+        }
+    },
+    "debug": {
+        "button-labels": {
+            "amber": "",
+            "black": "",
+            "brown5": "",
+            "deep-orange": "",
+            "primary": "",
+            "purple": "",
+            "secondary": "",
+            "standard": ""
+        },
+        "buttons": {
+            "account-validation-button": "",
+            "add-icon-button": "",
+            "base-button": "",
+            "cancel-button": "",
+            "check-connection-button": "",
+            "confirm-button": "",
+            "debug-button": "",
+            "delete-button": "",
+            "delete-icon-button": "",
+            "external-link-button": "",
+            "go-to-button": "",
+            "help-button": "",
+            "hide-button": "",
+            "navigation-finish-setup-button": "",
+            "navigation-next-button": "",
+            "navigation-previous-button": "",
+            "navigation-skip-setup-button": "",
+            "reset-button": "",
+            "save-button": "",
+            "warning-button": ""
+        },
+        "general": {
+            "hello-world": ""
         }
     }
 }

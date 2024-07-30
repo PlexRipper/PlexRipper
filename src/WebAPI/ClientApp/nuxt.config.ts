@@ -9,7 +9,7 @@ const { __dirname } = createCommonJS(import.meta.url);
 export default defineNuxtConfig({
 	ssr: false,
 	srcDir: 'src',
-
+	devtools: { enabled: true },
 	runtimeConfig: {
 		// Config within public will be also exposed to the client
 		public: {
@@ -139,7 +139,6 @@ export default defineNuxtConfig({
 	 *  Doc: https://github.com/nuxt/components
 	 */
 	components: {
-		loader: true,
 		dirs: [
 			// Components directory
 			{

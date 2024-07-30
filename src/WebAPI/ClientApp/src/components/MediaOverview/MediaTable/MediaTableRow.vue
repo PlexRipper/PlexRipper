@@ -1,20 +1,20 @@
 <template>
 	<QRow
+		align="center"
 		class="media-table-row"
 		full-height
-		align="center"
 		justify="between"
 	>
 		<template v-if="row">
 			<!-- Checkbox -->
 			<QCol
 				v-if="selectable"
-				cols="auto"
 				class="q-ml-md q-pl-sm"
+				cols="auto"
 			>
 				<q-checkbox
-					dense
 					:model-value="selected"
+					dense
 					@update:model-value="$emit('selected', $event)"
 				/>
 			</QCol>
@@ -25,11 +25,11 @@
 				<!-- Index -->
 				<template v-if="column['type'] === 'index'">
 					<QCol
+						class="media-table-row--column"
 						cols="auto"
 						style="min-width: 50px"
-						class="media-table-row--column"
 					>
-						<span> #{{ row[column.field] }} </span>
+						<QText>{{ `#${$n(row[column.field])}` }}</QText>
 					</QCol>
 				</template>
 				<!-- Title -->
@@ -50,32 +50,32 @@
 				<!-- Duration format -->
 				<template v-else-if="column['type'] === 'duration'">
 					<QCol
-						cols="1"
 						class="media-table-row--column"
+						cols="1"
 					>
 						<QDuration
-							short
 							:value="row[column.field]"
+							short
 						/>
 					</QCol>
 				</template>
 				<!-- Date format -->
 				<template v-else-if="column['type'] === 'date'">
 					<QCol
-						cols="1"
 						class="media-table-row--column"
+						cols="1"
 					>
 						<QDateTime
-							short-date
 							:text="row[column.field]"
+							short-date
 						/>
 					</QCol>
 				</template>
 				<!-- Media size -->
 				<template v-else-if="column['type'] === 'file-size'">
 					<QCol
-						cols="1"
 						class="media-table-row--column"
+						cols="1"
 					>
 						<QFileSize :size="row[column.field]" />
 					</QCol>
@@ -83,12 +83,12 @@
 				<!-- Actions -->
 				<template v-else-if="column['type'] === 'actions'">
 					<QCol
-						cols="auto"
 						class="media-table-row--column"
+						cols="auto"
 					>
 						<q-btn
-							flat
 							:icon="Convert.buttonTypeToIcon(ButtonType.Download)"
+							flat
 							@click.stop="onRowAction({ command: 'download' })"
 						/>
 					</QCol>
@@ -106,25 +106,25 @@
 		>
 			<!-- suppress HtmlUnknownAttribute -->
 			<rect
-				pathLength="100"
-				height="5"
-				width="5"
-				stroke-linecap="round"
 				class="glow-blur"
+				height="5"
+				pathLength="100"
+				stroke-linecap="round"
+				width="5"
 			/>
 			<!-- suppress HtmlUnknownAttribute -->
 			<rect
-				pathLength="100"
-				height="5"
-				width="5"
-				stroke-linecap="round"
 				class="glow-line"
+				height="5"
+				pathLength="100"
+				stroke-linecap="round"
+				width="5"
 			/>
 		</svg>
 	</QRow>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import type { QTreeViewTableHeader } from '@props';
 import type { PlexMediaSlimDTO } from '@dto';
 import Convert from '@class/Convert';

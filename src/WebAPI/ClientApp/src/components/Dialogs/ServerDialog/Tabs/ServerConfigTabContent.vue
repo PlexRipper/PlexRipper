@@ -1,12 +1,19 @@
 <template>
-	<HelpRow help-id="help.server-dialog.server-config.download-speed-limit">
+	<HelpRow
+		v-if="plexServer"
+		help-id="help.server-dialog.server-config.download-speed-limit"
+	>
 		<DownloadLimitInput
-			v-if="plexServer"
 			:download-speed-limit="settingsStore.getServerSettings(plexServer.machineIdentifier)?.downloadSpeedLimit ?? 0"
 			@change="settingsStore.updateDownloadLimit(plexServer.machineIdentifier, $event)"
 		/>
-		<span v-else> Plex Server was null </span>
 	</HelpRow>
+	<QAlert
+		v-else
+		type="error"
+	>
+		{{ $t('components.server-dialog.tabs.server-config.plex-server-was-null') }}
+	</QAlert>
 </template>
 
 <script setup lang="ts">

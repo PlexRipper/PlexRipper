@@ -35,14 +35,16 @@
 							</q-item-section>
 							<q-item-section>
 								<q-item-label>
-									{{ server ? serverStore.getServerName(server.id) : $t('general.commands.unknown') }} -
+									{{ server ? serverStore.getServerName(server.id) : $t('general.commands.unknown') }}
+									{{ $t('general.delimiter.dash') }}
 									{{ library ? libraryStore.getLibraryName(library.id) : $t('general.commands.unknown') }}
 								</q-item-label>
 								<q-item-label
 									v-if="library && !detailMode"
 									caption
 								>
-									{{ libraryCountFormatted }} -
+									{{ libraryCountFormatted }}
+									{{ $t('general.delimiter.dash') }}
 									<QFileSize :size="library.mediaSize" />
 								</q-item-label>
 							</q-item-section>

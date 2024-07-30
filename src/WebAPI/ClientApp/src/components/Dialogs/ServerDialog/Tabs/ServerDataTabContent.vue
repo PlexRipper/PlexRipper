@@ -5,28 +5,42 @@
 			<!-- Machine Identifier -->
 			<tr>
 				<td style="width: 30%">
-					{{ t('components.server-dialog.tabs.server-data.machine-id') }}:
+					{{ t('components.server-dialog.tabs.server-data.headers.machine-id') }}
 				</td>
 				<td>{{ plexServer.machineIdentifier }}</td>
 			</tr>
 			<!-- Device -->
 			<tr>
-				<td>{{ t('components.server-dialog.tabs.server-data.device') }}:</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.headers.device') }}</td>
 				<td>{{ plexServer.device }}</td>
 			</tr>
 			<!-- Platform and platform version -->
 			<tr>
-				<td>{{ t('components.server-dialog.tabs.server-data.platform') }}:</td>
-				<td>{{ plexServer.platform }} ({{ plexServer.platformVersion }})</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.headers.platform') }}</td>
+				<td>
+					{{
+						$t('components.server-dialog.tabs.server-data.values.platform-version', {
+							platform: plexServer.platform,
+							platformVersion: plexServer.platformVersion,
+						})
+					}}
+				</td>
 			</tr>
 			<!-- Product and version -->
 			<tr>
-				<td>{{ t('components.server-dialog.tabs.server-data.plex-version') }}:</td>
-				<td>{{ plexServer.product }} ({{ plexServer.productVersion }})</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.headers.plex-version') }}</td>
+				<td>
+					{{
+						$t('components.server-dialog.tabs.server-data.values.product-version', {
+							product: plexServer.product,
+							productVersion: plexServer.productVersion,
+						})
+					}}
+				</td>
 			</tr>
 			<!-- Created On -->
 			<tr>
-				<td>{{ t('components.server-dialog.tabs.server-data.created-on') }}:</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.headers.created-on') }}</td>
 				<td>
 					<QDateTime
 						short-date
@@ -35,7 +49,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td>{{ t('components.server-dialog.tabs.server-data.last-seen-at') }}:</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.headers.last-seen-at') }}</td>
 				<td>
 					<QDateTime
 						short-date
@@ -44,7 +58,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td>{{ t('components.server-dialog.tabs.server-data.current-status') }}:</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.headers.current-status') }}</td>
 				<td>
 					<QStatus :value="serverStore.getServerStatus(plexServer.id)" />
 				</td>

@@ -16,7 +16,7 @@ public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest
         // Arrange
         var settingsModel = new SettingsModel
         {
-            DisplaySettings = new DisplaySettings { MovieViewMode = ViewMode.Table, TvShowViewMode = ViewMode.Poster, },
+            DisplaySettings = new DisplaySettings { MovieViewMode = ViewMode.Table, TvShowViewMode = ViewMode.Poster },
         };
         var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCapitalized);
         var loadedSettings = JsonSerializer.Deserialize<JsonElement>(

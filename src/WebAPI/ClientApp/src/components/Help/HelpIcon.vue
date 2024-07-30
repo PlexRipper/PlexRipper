@@ -1,8 +1,7 @@
 <template>
 	<QRow
 		no-wrap
-		align="center"
-	>
+		align="center">
 		<QCol>
 			<QSubHeader>
 				{{ help.label }}
@@ -10,13 +9,11 @@
 		</QCol>
 		<QCol
 			v-if="hasHelpPage"
-			cols="auto"
-		>
+			cols="auto">
 			<IconButton
 				icon="mdi-help-circle-outline"
 				class="q-ma-sm"
-				@click="helpStore.openHelpDialog(help)"
-			/>
+				@click="helpStore.openHelpDialog(help)" />
 		</QCol>
 	</QRow>
 </template>

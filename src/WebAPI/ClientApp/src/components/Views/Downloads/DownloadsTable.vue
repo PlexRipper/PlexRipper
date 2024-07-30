@@ -1,22 +1,18 @@
 <template>
 	<q-expansion-item
 		default-opened
-		class="background-sm q-ma-md"
-	>
+		class="background-sm q-ma-md">
 		<template #header>
 			<QRow
 				justify="between"
-				align="center"
-			>
+				align="center">
 				<!-- Download Server Settings -->
 				<QCol
 					cols="auto"
-					style="white-space: nowrap"
-				>
+					style="white-space: nowrap">
 					<ServerDownloadStatus
 						v-if="false"
-						style="display: inline-block"
-					/>
+						style="display: inline-block" />
 				</QCol>
 				<QCol />
 				<!-- Download Server Title -->
@@ -36,8 +32,7 @@
 				:max-selection-count="downloadStore.getDownloadSelection(plexServer.id)?.maxSelectionCount"
 				@action="tableAction($event)"
 				@all-selected="downloadStore.setAllSelectedDownloadTasks(plexServer.id, $event)"
-				@selected="downloadStore.updateSelectedDownloadTasks(plexServer.id, $event)"
-			/>
+				@selected="downloadStore.updateSelectedDownloadTasks(plexServer.id, $event)" />
 		</template>
 	</q-expansion-item>
 </template>

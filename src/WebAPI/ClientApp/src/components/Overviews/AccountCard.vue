@@ -4,8 +4,7 @@
 		v-if="account"
 		class="account-card"
 		:data-cy="`account-card-id-${account.id}`"
-		@click="$emit('open-dialog', account)"
-	>
+		@click="$emit('open-dialog', account)">
 		<q-card-section v-if="!isNew">
 			{{ account ? account.displayName : t('components.account-card.no-account-name') }}
 		</q-card-section>
@@ -14,30 +13,26 @@
 			<q-chip
 				v-if="account?.isValidated"
 				color="green"
-				text-color="white"
-			>
+				text-color="white">
 				{{ t('general.commands.validated') }}
 			</q-chip>
 			<q-chip
 				v-else
 				color="red"
-				text-color="white"
-			>
+				text-color="white">
 				{{ t('general.commands.not-validated') }}
 			</q-chip>
 			<!-- IsEnabled Chip -->
 			<q-chip
 				v-if="account?.isEnabled"
 				color="green"
-				text-color="white"
-			>
+				text-color="white">
 				{{ t('general.commands.enabled') }}
 			</q-chip>
 			<q-chip
 				v-else
 				color="red"
-				text-color="white"
-			>
+				text-color="white">
 				{{ t('general.commands.disabled') }}
 			</q-chip>
 		</q-card-section>
@@ -47,16 +42,13 @@
 		v-else-if="isNew"
 		class="account-card"
 		data-cy="account-overview-add-account"
-		@click="$emit('open-dialog', null)"
-	>
+		@click="$emit('open-dialog', null)">
 		<q-card-section
 			v-if="isNew"
-			class="text-center"
-		>
+			class="text-center">
 			<q-icon
 				name="mdi-plus-box-outline"
-				style="font-size: 90px"
-			/>
+				style="font-size: 90px" />
 		</q-card-section>
 	</q-card>
 	<!-- Account was invalid -->

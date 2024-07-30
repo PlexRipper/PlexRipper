@@ -11,14 +11,12 @@
 		:buffer="posterCardHeight * 5"
 		key-field="id"
 		data-cy="poster-table"
-		@resize="onResize"
-	>
+		@resize="onResize">
 		<MediaPoster
 			:index="index"
 			:media-item="item"
 			:data-scroll-index="index"
-			@download="sendMediaOverviewDownloadCommand($event)"
-		/>
+			@download="sendMediaOverviewDownloadCommand($event)" />
 	</RecycleScroller>
 </template>
 

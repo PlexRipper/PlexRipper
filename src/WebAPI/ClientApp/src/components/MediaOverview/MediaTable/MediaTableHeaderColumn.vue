@@ -1,13 +1,11 @@
 <template>
 	<div
 		:class="{ 'media-table-header-column': true, 'sorted': sorted }"
-		@click="onClick"
-	>
+		@click="onClick">
 		<span> {{ column.label }} <q-icon
 			v-if="column.sortable"
 			:name="icon"
-			class="header-sort-icon"
-		/></span>
+			class="header-sort-icon" /></span>
 	</div>
 </template>
 

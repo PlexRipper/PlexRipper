@@ -3,8 +3,7 @@
 		stretch
 		flat
 		icon="mdi-account"
-		dropdown-icon="mdi-arrow-down"
-	>
+		dropdown-icon="mdi-arrow-down">
 		<q-list v-if="accountsDisplay.length > 0">
 			<q-item-label header>
 				{{ $t('components.account-selector.title') }}
@@ -17,14 +16,12 @@
 				v-close-popup
 				clickable
 				tabindex="0"
-				@click="updateActiveAccountId(account.id)"
-			>
+				@click="updateActiveAccountId(account.id)">
 				<q-item-section>
 					<q-item-label>{{ account.displayName }}</q-item-label>
 					<q-item-label
 						v-if="account.username"
-						caption
-					>
+						caption>
 						{{ account.username }}
 					</q-item-label>
 				</q-item-section>
@@ -34,8 +31,7 @@
 						icon="mdi-refresh"
 						:loading="loading[0] || loading[index]"
 						:disabled="isLoading"
-						@click.stop="runReSyncAccount(account.id)"
-					/>
+						@click.stop="runReSyncAccount(account.id)" />
 				</q-item-section>
 			</q-item>
 		</q-list>

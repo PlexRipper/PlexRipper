@@ -9,13 +9,11 @@
 				v-for="server in serverStore.getHiddenServers"
 				:key="server.id"
 				v-ripple
-				clickable
-			>
+				clickable>
 				<q-item-section avatar>
 					<IconSquareButton
 						icon="mdi-eye-check-outline"
-						@click="onServerUnHide(server.id)"
-					/>
+						@click="onServerUnHide(server.id)" />
 				</q-item-section>
 
 				<q-item-section>

@@ -4,12 +4,10 @@
 		<QRow
 			justify="center"
 			no-gutters
-			no-wrap
-		>
+			no-wrap>
 			<QCol
 				class="q-my-md"
-				cols="auto"
-			>
+				cols="auto">
 				<Logo :size="128" />
 			</QCol>
 		</QRow>
@@ -17,13 +15,11 @@
 		<QRow justify="center">
 			<QCol
 				cols="12"
-				lg="8"
-			>
+				lg="8">
 				<!--	Vertical Container	-->
 				<QRow
 					class="setup-card"
-					column
-				>
+					column>
 					<QCol align-self="stretch">
 						<!-- Tabs -->
 						<QRow align="start">
@@ -32,13 +28,11 @@
 									v-model="stepIndex"
 									active-color="primary"
 									indicator-color="primary"
-									vertical
-								>
+									vertical>
 									<!-- Step headers	-->
 									<template
 										v-for="(header, index) in headers"
-										:key="index"
-									>
+										:key="index">
 										<q-tab
 											:color="
 												index + 1 === stepPagesCount ? 'green' : stepIndex > index + 1 ? 'green' : 'red'
@@ -48,12 +42,10 @@
 											:label="header.name"
 											:name="index + 1"
 											class="setup-tab"
-											edit-icon="$complete"
-										/>
+											edit-icon="$complete" />
 										<q-separator
 											v-if="index < stepPagesCount - 1"
-											:key="index + 100"
-										/>
+											:key="index + 100" />
 									</template>
 								</q-tabs>
 							</QCol>
@@ -63,8 +55,7 @@
 									animated
 									class="fit q-pa-md"
 									transition-next="slide-up"
-									transition-prev="slide-down"
-								>
+									transition-prev="slide-down">
 									<!-- Introduction	-->
 									<q-tab-panel :name="1">
 										<QRow no-gutters>
@@ -75,8 +66,7 @@
 													<li>
 														{{ t('pages.setup.intro.list.item-1') }}
 														<ExternalLinkButton
-															href="https://github.com/PlexRipper/PlexRipper/issues"
-														/>
+															href="https://github.com/PlexRipper/PlexRipper/issues" />
 													</li>
 													<li>{{ t('pages.setup.intro.list.item-2') }}</li>
 													<li>{{ t('pages.setup.intro.list.item-3') }}</li>
@@ -157,14 +147,12 @@
 												<p>{{ t('pages.setup.finished.text.p-1') }}</p>
 												<q-list
 													class="no-background"
-													dense
-												>
+													dense>
 													<q-item
 														v-for="(link, i) in links"
 														:key="i"
 														:href="link.link"
-														target="_blank"
-													>
+														target="_blank">
 														<q-item-section avatar>
 															<ul>
 																<li>
@@ -189,8 +177,7 @@
 					<!-- Stepper navigation bar	-->
 					<QCol
 						align-self="stretch"
-						cols="12"
-					>
+						cols="12">
 						<q-separator class="q-mb-md" />
 						<QRow align="center">
 							<QCol>
@@ -198,34 +185,28 @@
 									<QCol
 										v-if="!isNextDisabled"
 										class="q-mx-md"
-										cols="2"
-									>
+										cols="2">
 										<NavigationPreviousButton
 											:disabled="isBackDisabled"
 											cy="setup-page-previous-button"
-											@click="back"
-										/>
+											@click="back" />
 									</QCol>
 									<QCol
 										v-if="!isNextDisabled"
 										class="q-mx-md"
-										cols="2"
-									>
+										cols="2">
 										<NavigationNextButton
 											:disabled="isNextDisabled"
 											cy="setup-page-next-button"
-											@click="next"
-										/>
+											@click="next" />
 									</QCol>
 									<QCol
 										v-else
 										class="q-mx-md q-mb-md"
-										cols="auto"
-									>
+										cols="auto">
 										<NavigationFinishSetupButton
 											cy="setup-page-skip-setup-button"
-											@click="finishSetup"
-										/>
+											@click="finishSetup" />
 									</QCol>
 								</QRow>
 							</QCol>
@@ -233,18 +214,15 @@
 							<QCol
 								v-if="!isNextDisabled"
 								class="q-mx-md"
-								cols="auto"
-							>
+								cols="auto">
 								<NavigationSkipSetupButton
 									:disabled="isNextDisabled"
-									@click="useOpenControlDialog(confirmationDialogName)"
-								/>
+									@click="useOpenControlDialog(confirmationDialogName)" />
 								<ConfirmationDialog
 									:name="confirmationDialogName"
 									:text="$t('confirmation.skip-setup.text')"
 									:title="$t('confirmation.skip-setup.title')"
-									@confirm="finishSetup"
-								/>
+									@confirm="finishSetup" />
 							</QCol>
 						</QRow>
 					</QCol>

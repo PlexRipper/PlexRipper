@@ -6,8 +6,7 @@
 		bordered
 		style="overflow-x: hidden"
 		@before-show="onShow"
-		@before-hide="onHide"
-	>
+		@before-hide="onHide">
 		<QCol class="server-drawer-container">
 			<q-scroll>
 				<!-- Server drawer -->

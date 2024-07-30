@@ -1,8 +1,7 @@
 <template>
 	<q-card
 		flat
-		class="media-poster media-poster--card highlight-border-box"
-	>
+		class="media-poster media-poster--card highlight-border-box">
 		<div>
 			<QHover>
 				<template #default="{ hover }">
@@ -13,19 +12,16 @@
 						fit="fill"
 						no-spinner
 						class="media-poster--image"
-						:alt="mediaItem.title"
-					>
+						:alt="mediaItem.title">
 						<!--	Overlay	-->
 						<div :class="['media-poster--overlay', hover ? 'on-hover' : '', 'white--text']">
 							<QRow
 								justify="center"
 								align="end"
-								style="height: 100%"
-							>
+								style="height: 100%">
 								<QCol
 									cols="12"
-									text-align="center"
-								>
+									text-align="center">
 									<span class="media-poster--title">
 										{{ mediaItem.title }}
 									</span>
@@ -37,16 +33,14 @@
 										size="xl"
 										flat
 										:outline="false"
-										@click="downloadMedia()"
-									/>
+										@click="downloadMedia()" />
 									<BaseButton
 										v-if="mediaType === PlexMediaType.TvShow"
 										icon="mdi-magnify"
 										:outline="false"
 										size="xl"
 										flat
-										@click="sendMediaOverviewOpenDetailsCommand(mediaItem.id)"
-									/>
+										@click="sendMediaOverviewOpenDetailsCommand(mediaItem.id)" />
 								</QCol>
 							</QRow>
 						</div>
@@ -57,14 +51,12 @@
 							column
 							align="center"
 							justify="between"
-							class="media-poster--fallback"
-						>
+							class="media-poster--fallback">
 							<QCol>
 								<QMediaTypeIcon
 									class="mx-3"
 									:size="90"
-									:media-type="mediaType"
-								/>
+									:media-type="mediaType" />
 							</QCol>
 							<QCol text-align="center">
 								<span class="media-poster--title">
@@ -79,16 +71,14 @@
 									:outline="false"
 									size="xl"
 									flat
-									@click="downloadMedia()"
-								/>
+									@click="downloadMedia()" />
 								<BaseButton
 									v-if="mediaType === PlexMediaType.TvShow"
 									icon="mdi-magnify"
 									:outline="false"
 									size="xl"
 									flat
-									@click="sendMediaOverviewOpenDetailsCommand(mediaItem.id)"
-								/>
+									@click="sendMediaOverviewOpenDetailsCommand(mediaItem.id)" />
 							</QCol>
 						</QRow>
 					</template>
@@ -98,14 +88,12 @@
 		<!--	Poster bar	-->
 		<div
 			v-if="qualities.length"
-			class="media-poster--quality-bar"
-		>
+			class="media-poster--quality-bar">
 			<q-chip
 				v-for="(quality, j) in qualities"
 				:key="j"
 				:color="getQualityColor(quality.quality)"
-				size="md"
-			>
+				size="md">
 				{{ quality.displayQuality }}
 			</q-chip>
 		</div>
@@ -118,16 +106,14 @@
 				height="5"
 				width="5"
 				stroke-linecap="round"
-				class="glow-blur"
-			/>
+				class="glow-blur" />
 			<!-- suppress HtmlUnknownAttribute -->
 			<rect
 				pathLength="100"
 				height="5"
 				width="5"
 				stroke-linecap="round"
-				class="glow-line"
-			/>
+				class="glow-line" />
 		</svg>
 	</q-card>
 </template>

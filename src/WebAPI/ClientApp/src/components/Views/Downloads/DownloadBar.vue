@@ -3,21 +3,18 @@
 		<!-- Download Toolbar -->
 		<QRow
 			no-gutters
-			justify="end"
-		>
+			justify="end">
 			<!-- Command buttons -->
 			<QCol
 				v-for="(button, i) in buttons"
 				:key="i"
-				cols="auto"
-			>
+				cols="auto">
 				<VerticalButton
 					:icon="button.icon"
 					:label="button.name"
 					:disabled="button.disableOnNoSelected && !downloadStore.hasSelected"
 					:width="verticalButtonWidth"
-					@click="downloadStore.executeBatchDownloadCommand(button.value)"
-				/>
+					@click="downloadStore.executeBatchDownloadCommand(button.value)" />
 			</QCol>
 		</QRow>
 	</q-toolbar>

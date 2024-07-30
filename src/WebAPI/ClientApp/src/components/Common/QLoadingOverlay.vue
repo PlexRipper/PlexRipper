@@ -2,8 +2,7 @@
 	<q-inner-loading :showing="loading">
 		<q-spinner-gears
 			:size="`${size}px`"
-			color="red"
-		/>
+			color="red" />
 	</q-inner-loading>
 </template>
 

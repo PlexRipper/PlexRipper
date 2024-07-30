@@ -9,16 +9,13 @@
 						dense
 						icon="mdi-menu"
 						class="q-mr-sm"
-						@click.stop="showNavigationDrawer"
-					/>
+						@click.stop="showNavigationDrawer" />
 					<q-btn
 						to="/"
-						flat
-					>
+						flat>
 						<Logo
 							:size="24"
-							class="q-mr-md"
-						/>
+							class="q-mr-md" />
 						{{ t('general.name-version', { version: globalStore.getAppVersion }) }}
 					</q-btn>
 				</q-toolbar-title>
@@ -33,8 +30,7 @@
 					icon="mdi-github"
 					flat
 					href="https://github.com/PlexRipper/PlexRipper"
-					target="_blank"
-				/>
+					target="_blank" />
 
 				<!-- Background Animation Toggle -->
 				<BackgroundAnimationToggleButton />

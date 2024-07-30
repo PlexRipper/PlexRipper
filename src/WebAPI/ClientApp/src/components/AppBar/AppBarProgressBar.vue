@@ -8,13 +8,11 @@
 				size="20px"
 				:value="getPercentage"
 				color="red"
-				class="q-mt-sm"
-			>
+				class="q-mt-sm">
 				<q-tooltip
 					anchor="bottom middle"
 					self="top middle"
-					:offset="[10, 10]"
-				>
+					:offset="[10, 10]">
 					<span>{{ getText }}</span>
 				</q-tooltip>
 			</q-linear-progress>

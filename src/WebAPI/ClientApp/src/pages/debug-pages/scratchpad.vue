@@ -3,8 +3,7 @@
 		<DownloadsTable
 			:plex-server="plexServer"
 			:download-rows="downloadStore.getDownloadsByServerId(plexServer.id)"
-			@action="commandSwitch($event)"
-		/>
+			@action="commandSwitch($event)" />
 		<DownloadDetailsDialog :name="dialogName" />
 	</QPage>
 </template>

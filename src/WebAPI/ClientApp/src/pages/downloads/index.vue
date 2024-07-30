@@ -6,8 +6,7 @@
 		<!--	The Download Table	-->
 		<QRow
 			v-if="downloadStore.getServersWithDownloads.length > 0"
-			justify="center"
-		>
+			justify="center">
 			<QCol cols="12">
 				<q-list>
 					<DownloadsTable
@@ -15,15 +14,13 @@
 						:key="plexServer.id"
 						:download-rows="downloads"
 						:plex-server="plexServer"
-						@action="commandSwitch($event)"
-					/>
+						@action="commandSwitch($event)" />
 				</q-list>
 			</QCol>
 		</QRow>
 		<QRow
 			v-else
-			justify="center"
-		>
+			justify="center">
 			<QCol cols="auto">
 				<h2>{{ t('pages.downloads.no-downloads') }}</h2>
 			</QCol>

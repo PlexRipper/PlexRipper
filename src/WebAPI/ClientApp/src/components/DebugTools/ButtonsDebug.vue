@@ -1,43 +1,34 @@
 <template>
 	<QRow
 		justify="between"
-		class="q-my-md"
-	>
+		class="q-my-md">
 		<q-btn
 			color="white"
 			text-color="black"
-			:label="$t('debug.button-labels.standard')"
-		/>
+			:label="$t('debug.button-labels.standard')" />
 		<q-btn
 			color="primary"
-			:label="$t('debug.button-labels.primary')"
-		/>
+			:label="$t('debug.button-labels.primary')" />
 		<q-btn
 			color="secondary"
-			:label="$t('debug.button-labels.secondary')"
-		/>
+			:label="$t('debug.button-labels.secondary')" />
 		<q-btn
 			color="amber"
 			glossy
-			:label="$t('debug.button-labels.amber')"
-		/>
+			:label="$t('debug.button-labels.amber')" />
 		<q-btn
 			color="brown-5"
-			:label="$t('debug.button-labels.brown5')"
-		/>
+			:label="$t('debug.button-labels.brown5')" />
 		<q-btn
 			color="deep-orange"
 			glossy
-			:label="$t('debug.button-labels.deep-orange')"
-		/>
+			:label="$t('debug.button-labels.deep-orange')" />
 		<q-btn
 			color="purple"
-			:label="$t('debug.button-labels.purple')"
-		/>
+			:label="$t('debug.button-labels.purple')" />
 		<q-btn
 			color="black"
-			:label="$t('debug.button-labels.black')"
-		/>
+			:label="$t('debug.button-labels.black')" />
 	</QRow>
 	<q-markup-table>
 		<tbody>
@@ -66,8 +57,7 @@
 				<td>
 					<CheckConnectionButton
 						:loading="checkConnectionButton"
-						@click="checkConnectionButton = !checkConnectionButton"
-					/>
+						@click="checkConnectionButton = !checkConnectionButton" />
 					{{ checkConnectionButton }}
 				</td>
 				<td>{{ $t('debug.buttons.save-button') }}</td>

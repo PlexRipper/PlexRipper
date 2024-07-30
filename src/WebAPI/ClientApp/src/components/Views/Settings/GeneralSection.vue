@@ -7,13 +7,11 @@
 		<HelpRow
 			:label="$t('help.settings.ui.general-settings.toggle-animated-background.label')"
 			:title="$t('help.settings.ui.general-settings.toggle-animated-background.title')"
-			:text="$t('help.settings.ui.general-settings.toggle-animated-background.text')"
-		>
+			:text="$t('help.settings.ui.general-settings.toggle-animated-background.text')">
 			<q-toggle
 				v-model:model-value="settingsStore.generalSettings.disableAnimatedBackground"
 				size="lg"
-				data-cy="toggle-animated-background"
-			/>
+				data-cy="toggle-animated-background" />
 		</HelpRow>
 	</QSection>
 </template>

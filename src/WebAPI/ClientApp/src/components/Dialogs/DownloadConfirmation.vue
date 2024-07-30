@@ -6,8 +6,7 @@
 		content-height="80"
 		:loading="loading"
 		@opened="openDialog"
-		@closed="closeDialog"
-	>
+		@closed="closeDialog">
 		<template #title>
 			{{ t('components.download-confirmation.header') }}
 		</template>
@@ -16,8 +15,7 @@
 			<span>{{ t('components.download-confirmation.total-size') }}</span>
 			<QFileSize
 				:size="totalSize"
-				class="q-ml-sm"
-			/>
+				class="q-ml-sm" />
 		</template>
 		<template #default>
 			<QTreeViewTable
@@ -25,8 +23,7 @@
 				:nodes="downloadPreview"
 				default-expand-all
 				connectors
-				not-selectable
-			/>
+				not-selectable />
 		</template>
 		<template #actions="{ close }">
 			<CancelButton @click="close()" />
@@ -37,8 +34,7 @@
 						close();
 						$emit('download', downloadMediaCommand);
 					}
-				"
-			/>
+				" />
 		</template>
 	</QCardDialog>
 </template>

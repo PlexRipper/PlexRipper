@@ -3,32 +3,27 @@
 		align="center"
 		class="media-table-row"
 		full-height
-		justify="between"
-	>
+		justify="between">
 		<template v-if="row">
 			<!-- Checkbox -->
 			<QCol
 				v-if="selectable"
 				class="q-ml-md q-pl-sm"
-				cols="auto"
-			>
+				cols="auto">
 				<q-checkbox
 					:model-value="selected"
 					dense
-					@update:model-value="$emit('selected', $event)"
-				/>
+					@update:model-value="$emit('selected', $event)" />
 			</QCol>
 			<template
 				v-for="(column, i) in columns"
-				:key="i"
-			>
+				:key="i">
 				<!-- Index -->
 				<template v-if="column['type'] === 'index'">
 					<QCol
 						class="media-table-row--column"
 						cols="auto"
-						style="min-width: 50px"
-					>
+						style="min-width: 50px">
 						<QText>{{ `#${$n(row[column.field])}` }}</QText>
 					</QCol>
 				</template>
@@ -40,8 +35,7 @@
 							'media-table-row--title',
 							!disableHoverClick ? 'media-table-row--title--hover' : '',
 						]"
-						@click.stop="!disableHoverClick ? onRowAction({ command: 'open-details' }) : () => {}"
-					>
+						@click.stop="!disableHoverClick ? onRowAction({ command: 'open-details' }) : () => {}">
 						<span>
 							{{ row[column.field] }}
 						</span>
@@ -51,32 +45,27 @@
 				<template v-else-if="column['type'] === 'duration'">
 					<QCol
 						class="media-table-row--column"
-						cols="1"
-					>
+						cols="1">
 						<QDuration
 							:value="row[column.field]"
-							short
-						/>
+							short />
 					</QCol>
 				</template>
 				<!-- Date format -->
 				<template v-else-if="column['type'] === 'date'">
 					<QCol
 						class="media-table-row--column"
-						cols="1"
-					>
+						cols="1">
 						<QDateTime
 							:text="row[column.field]"
-							short-date
-						/>
+							short-date />
 					</QCol>
 				</template>
 				<!-- Media size -->
 				<template v-else-if="column['type'] === 'file-size'">
 					<QCol
 						class="media-table-row--column"
-						cols="1"
-					>
+						cols="1">
 						<QFileSize :size="row[column.field]" />
 					</QCol>
 				</template>
@@ -84,13 +73,11 @@
 				<template v-else-if="column['type'] === 'actions'">
 					<QCol
 						class="media-table-row--column"
-						cols="auto"
-					>
+						cols="auto">
 						<q-btn
 							:icon="Convert.buttonTypeToIcon(ButtonType.Download)"
 							flat
-							@click.stop="onRowAction({ command: 'download' })"
-						/>
+							@click.stop="onRowAction({ command: 'download' })" />
 					</QCol>
 				</template>
 			</template>
@@ -102,24 +89,21 @@
 		<!--	Highlight animation effect	-->
 		<svg
 			v-if="!disableHighlight"
-			class="glow-container"
-		>
+			class="glow-container">
 			<!-- suppress HtmlUnknownAttribute -->
 			<rect
 				class="glow-blur"
 				height="5"
 				pathLength="100"
 				stroke-linecap="round"
-				width="5"
-			/>
+				width="5" />
 			<!-- suppress HtmlUnknownAttribute -->
 			<rect
 				class="glow-line"
 				height="5"
 				pathLength="100"
 				stroke-linecap="round"
-				width="5"
-			/>
+				width="5" />
 		</svg>
 	</QRow>
 </template>

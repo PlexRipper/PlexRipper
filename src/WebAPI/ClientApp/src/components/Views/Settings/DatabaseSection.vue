@@ -7,20 +7,17 @@
 		<HelpRow
 			:label="$t('help.settings.advanced.reset-db.label')"
 			:title="$t('help.settings.advanced.reset-db.title')"
-			:text="$t('help.settings.advanced.reset-db.text')"
-		>
+			:text="$t('help.settings.advanced.reset-db.text')">
 			<WarningButton
 				:width="400"
 				:label="$t('general.commands.reset-db')"
 				block
-				@click="useOpenControlDialog(confirmationDialogName)"
-			/>
+				@click="useOpenControlDialog(confirmationDialogName)" />
 			<ConfirmationDialog
 				:title="$t('confirmation.reset-db.title')"
 				:text="$t('confirmation.reset-db.text')"
 				:name="confirmationDialogName"
-				@confirm="resetDatabaseCommand"
-			/>
+				@confirm="resetDatabaseCommand" />
 		</HelpRow>
 	</QSection>
 </template>

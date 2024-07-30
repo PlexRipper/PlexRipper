@@ -4,8 +4,7 @@
 		:name="name"
 		:loading="false"
 		@opened="onOpen"
-		@closed="onClose"
-	>
+		@closed="onClose">
 		<template #title>
 			{{ helpTitle ? helpTitle : missingHelpTitle }}
 		</template>
@@ -21,8 +20,7 @@
 			<q-btn
 				flat
 				:label="t('general.commands.close')"
-				@click="close"
-			/>
+				@click="close" />
 		</template>
 	</QCardDialog>
 </template>

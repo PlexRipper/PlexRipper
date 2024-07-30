@@ -1,8 +1,7 @@
 <template>
 	<q-icon
 		:name="icon"
-		:size="size + 'px'"
-	/>
+		:size="size + 'px'" />
 </template>
 
 <script setup lang="ts">

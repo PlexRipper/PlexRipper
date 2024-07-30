@@ -5,25 +5,21 @@
 	<q-list>
 		<template
 			v-for="(connection, index) in serverConnectionStore.getServerConnectionsByServerId(plexServer?.id)"
-			:key="index"
-		>
+			:key="index">
 			<q-item>
 				<!-- Radio Button -->
 				<q-item-section
 					avatar
-					tag="label"
-				>
+					tag="label">
 					<q-radio
 						v-model="preferredConnectionId"
 						:val="connection.id"
-						color="red"
-					/>
+						color="red" />
 				</q-item-section>
 				<!-- Connection Icon -->
 				<q-item-section
 					avatar
-					tag="label"
-				>
+					tag="label">
 					<QConnectionIcon :local="connection.local" />
 				</q-item-section>
 				<!-- Connection Url -->
@@ -39,16 +35,14 @@
 					<CheckConnectionButton
 						:loading="isLoading(connection.id)"
 						:cy="`check-connection-btn-${index}`"
-						@click="checkPlexConnection(connection.id)"
-					/>
+						@click="checkPlexConnection(connection.id)" />
 				</q-item-section>
 			</q-item>
 			<CheckServerStatusProgressDisplay
 				v-if="isLoading(connection.id)"
 				:key="`progress-${index}`"
 				:plex-server="plexServer"
-				:progress="getProgress(connection.id)"
-			/>
+				:progress="getProgress(connection.id)" />
 		</template>
 	</q-list>
 </template>

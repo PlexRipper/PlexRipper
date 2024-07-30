@@ -7,22 +7,19 @@
 		spellcheck="false"
 		@reset="onReset"
 		@validation-success="$emit('is-valid', true)"
-		@validation-error="$emit('is-valid', false)"
-	>
+		@validation-error="$emit('is-valid', false)">
 		<!-- Is account enabled -->
 		<HelpRow
 			:header-width="labelCol"
 			:label="$t('help.account-form.is-enabled.label')"
 			:title="$t('help.account-form.is-enabled.title')"
-			:text="$t('help.account-form.is-enabled.text')"
-		>
+			:text="$t('help.account-form.is-enabled.text')">
 			<q-toggle
 				class="q-ma-sm pt-0"
 				:model-value="value.isEnabled"
 				color="red"
 				data-cy="account-form-is-enabled"
-				@update:model-value="inputChanged({ prop: 'isEnabled', value: $event })"
-			/>
+				@update:model-value="inputChanged({ prop: 'isEnabled', value: $event })" />
 		</HelpRow>
 
 		<!-- Is main account -->
@@ -30,15 +27,13 @@
 			:header-width="labelCol"
 			:label="$t('help.account-form.is-main.label')"
 			:title="$t('help.account-form.is-main.title')"
-			:text="$t('help.account-form.is-main.text')"
-		>
+			:text="$t('help.account-form.is-main.text')">
 			<q-toggle
 				class="q-ma-sm pt-0"
 				:model-value="value.isMain"
 				color="red"
 				data-cy="account-form-is-main"
-				@update:model-value="inputChanged({ prop: 'isMain', value: $event })"
-			/>
+				@update:model-value="inputChanged({ prop: 'isMain', value: $event })" />
 		</HelpRow>
 
 		<!-- Display Name -->
@@ -46,8 +41,7 @@
 			:header-width="labelCol"
 			:label="$t('help.account-form.display-name.label')"
 			:title="$t('help.account-form.display-name.title')"
-			:text="$t('help.account-form.display-name.text')"
-		>
+			:text="$t('help.account-form.display-name.text')">
 			<q-input
 				:model-value="value.displayName"
 				:rules="getDisplayNameRules"
@@ -56,8 +50,7 @@
 				outlined
 				required
 				data-cy="account-form-display-name-input"
-				@update:model-value="inputChanged({ prop: 'displayName', value: $event })"
-			/>
+				@update:model-value="inputChanged({ prop: 'displayName', value: $event })" />
 		</HelpRow>
 
 		<!-- Username -->
@@ -65,8 +58,7 @@
 			:header-width="labelCol"
 			:label="$t('help.account-form.username.label')"
 			:title="$t('help.account-form.username.title')"
-			:text="$t('help.account-form.username.text')"
-		>
+			:text="$t('help.account-form.username.text')">
 			<q-input
 				:model-value="value.username"
 				:rules="getUsernameRules"
@@ -75,16 +67,14 @@
 				outlined
 				required
 				data-cy="account-form-username-input"
-				@update:model-value="inputChanged({ prop: 'username', value: $event })"
-			/>
+				@update:model-value="inputChanged({ prop: 'username', value: $event })" />
 		</HelpRow>
 
 		<!-- Password -->
 		<HelpRow
 			:label="$t('help.account-form.password.label')"
 			:title="$t('help.account-form.password.title')"
-			:text="$t('help.account-form.password.text')"
-		>
+			:text="$t('help.account-form.password.text')">
 			<q-input
 				:model-value="value.password"
 				:rules="getPasswordRules"
@@ -96,14 +86,12 @@
 				:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
 				:type="showPassword ? 'text' : 'password'"
 				@click:append="showPassword = !showPassword"
-				@update:model-value="inputChanged({ prop: 'password', value: $event })"
-			>
+				@update:model-value="inputChanged({ prop: 'password', value: $event })">
 				<template #append>
 					<q-btn
 						flat
 						:icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-						@click="showPassword = !showPassword"
-					/>
+						@click="showPassword = !showPassword" />
 				</template>
 			</q-input>
 		</HelpRow>

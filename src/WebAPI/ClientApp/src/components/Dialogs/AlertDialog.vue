@@ -2,8 +2,7 @@
 	<QCardDialog
 		max-width="1000px"
 		:name="name"
-		@closed="alertStore.removeAlert(alert.id)"
-	>
+		@closed="alertStore.removeAlert(alert.id)">
 		<template #title>
 			{{ alert.title }}
 		</template>
@@ -12,14 +11,12 @@
 			<QText>{{ $t('components.alert-dialog.request-data-sent') }}</QText>
 			<pre
 				v-if="alert.result"
-				style="white-space: break-spaces"
-			>
+				style="white-space: break-spaces">
 				{{ alert.result }}
 			</pre>
 			<pre
 				v-if="errors"
-				style="white-space: break-spaces"
-			>
+				style="white-space: break-spaces">
 				{{ errors }}
 			</pre>
 		</template>
@@ -28,8 +25,7 @@
 			<!--	Close action	-->
 			<BaseButton
 				:label="$t('general.commands.close')"
-				@click="close"
-			/>
+				@click="close" />
 		</template>
 	</QCardDialog>
 </template>

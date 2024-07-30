@@ -7,16 +7,14 @@
 					<QCol cols="3">
 						<NavigationSkipSetupButton
 							block
-							@click="skipSetup()"
-						/>
+							@click="skipSetup()" />
 					</QCol>
 					<QCol cols="3">
 						<GoToButton
 							:label="$t('general.commands.go-to-setup-page')"
 							block
 							to="/setup"
-							color="positive"
-						/>
+							color="positive" />
 					</QCol>
 				</QRow>
 			</QCol>

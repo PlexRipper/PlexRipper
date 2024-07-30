@@ -5,8 +5,7 @@
 		is-header
 		:node="headerNode"
 		:columns="columns"
-		@selected="onSelected($event ? get(getAllLeafIds) : [])"
-	/>
+		@selected="onSelected($event ? get(getAllLeafIds) : [])" />
 	<q-separator />
 	<QTree
 		ref="qTreeViewTableTreeRef"
@@ -20,15 +19,13 @@
 		:accordion="false"
 		:default-expand-all="defaultExpandAll"
 		:label-key="labelKey"
-		@update:ticked="onSelected($event as number[])"
-	>
+		@update:ticked="onSelected($event as number[])">
 		<template #default-header="{ node }">
 			<QTreeViewTableRow
 				:columns="columns"
 				:selectable="!notSelectable"
 				:node="node"
-				@action="$emit('action', $event)"
-			/>
+				@action="$emit('action', $event)" />
 		</template>
 	</QTree>
 </template>

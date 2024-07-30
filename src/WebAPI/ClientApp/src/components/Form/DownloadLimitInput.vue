@@ -1,8 +1,7 @@
 <template>
 	<QRow
 		class="no-wrap"
-		justify="between"
-	>
+		justify="between">
 		<QCol :cols="8">
 			<q-slider
 				v-model:model-value="value"
@@ -12,8 +11,7 @@
 				snap
 				label
 				style="margin-top: 24px"
-				data-cy="download-speed-limit-slider"
-			/>
+				data-cy="download-speed-limit-slider" />
 		</QCol>
 		<QCol :cols="3">
 			<q-input
@@ -21,8 +19,7 @@
 				type="number"
 				debounce="1000"
 				suffix="kB/s"
-				data-cy="download-speed-limit-input"
-			/>
+				data-cy="download-speed-limit-input" />
 		</QCol>
 	</QRow>
 </template>

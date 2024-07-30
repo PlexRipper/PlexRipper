@@ -7,8 +7,7 @@
 		<HelpRow
 			:label="$t('help.settings.advanced.download-manager-section.download-segments.label')"
 			:title="$t('help.settings.advanced.download-manager-section.download-segments.title')"
-			:text="$t('help.settings.advanced.download-manager-section.download-segments.text')"
-		>
+			:text="$t('help.settings.advanced.download-manager-section.download-segments.text')">
 			<QSlider
 				:model-value="settingsStore.downloadManagerSettings.downloadSegments"
 				label
@@ -16,8 +15,7 @@
 				:min="1"
 				:max="8"
 				:step="1"
-				@change="settingsStore.downloadManagerSettings.downloadSegments = $event"
-			/>
+				@change="settingsStore.downloadManagerSettings.downloadSegments = $event" />
 		</HelpRow>
 	</QSection>
 </template>

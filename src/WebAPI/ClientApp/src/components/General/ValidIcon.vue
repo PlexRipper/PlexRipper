@@ -4,14 +4,12 @@
 		size="30px"
 		:color="valid ? 'green' : 'red'"
 		:name="getIcon"
-		style="margin: 10px"
-	>
+		style="margin: 10px">
 		<q-tooltip
 			anchor="top middle"
 			self="bottom middle"
 			:offset="[10, 10]"
-			:disabled="valid"
-		>
+			:disabled="valid">
 			<span>{{ valid ? validText : invalidText }}</span>
 		</q-tooltip>
 	</q-icon>

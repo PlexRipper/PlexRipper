@@ -2,19 +2,16 @@
 	<q-list
 		v-if="settingsStore.debugMode"
 		bordered
-		class="rounded-borders"
-	>
+		class="rounded-borders">
 		<q-expansion-item
 			switch-toggle-side
 			expand-separator
 			:label="title"
 			icon="mdi-debug"
-			:default-opened="expanded"
-		>
+			:default-opened="expanded">
 			<q-card
 				:style="{ maxHeight: height + 'px' }"
-				class="scroll"
-			>
+				class="scroll">
 				<q-card-section>
 					<pre><slot /></pre>
 				</q-card-section>

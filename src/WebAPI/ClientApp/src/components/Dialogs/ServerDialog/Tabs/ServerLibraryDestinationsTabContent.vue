@@ -2,19 +2,16 @@
 	<!--	Download Destinations	-->
 	<q-markup-table
 		separator="horizontal"
-		flat
-	>
+		flat>
 		<template v-if="plexLibraries.length">
 			<q-tr
 				v-for="library in plexLibraries"
 				:key="library.id"
-				style="margin: 4px 0"
-			>
+				style="margin: 4px 0">
 				<q-td>
 					<QMediaTypeIcon
 						:media-type="library.type"
-						class="mx-3"
-					/>
+						class="mx-3" />
 					{{ library.title }}
 				</q-td>
 				<q-td>
@@ -23,8 +20,7 @@
 						option-label="displayName"
 						option-value="id"
 						:options="folderPathStore.getFolderPathOptions(library.type)"
-						@update:model-value="libraryStore.updateDefaultDestination(library.id, $event.id)"
-					/>
+						@update:model-value="libraryStore.updateDefaultDestination(library.id, $event.id)" />
 				</q-td>
 			</q-tr>
 		</template>

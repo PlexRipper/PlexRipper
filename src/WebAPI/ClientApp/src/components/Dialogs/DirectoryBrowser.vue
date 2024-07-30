@@ -6,8 +6,7 @@
 		content-height="80"
 		:loading="isLoading"
 		button-align="between"
-		@opened="open"
-	>
+		@opened="open">
 		<template #title>
 			{{ t('components.directory-browser.select-path', { pathName: path?.displayName ?? '' }) }}
 		</template>
@@ -16,17 +15,14 @@
 				<QCol
 					v-if="!isCurrentWritable"
 					cols="auto"
-					class="q-px-md"
-				>
+					class="q-px-md">
 					<q-icon
 						color="red"
 						size="sm"
-						name="mdi-alert-circle"
-					>
+						name="mdi-alert-circle">
 						<q-tooltip
 							anchor="top middle"
-							self="center middle"
-						>
+							self="center middle">
 							<span>{{ t('components.directory-browser.has-no-write-permission') }}</span>
 						</q-tooltip>
 					</q-icon>
@@ -37,8 +33,7 @@
 						outlined
 						color="red"
 						:placeholder="t('components.directory-browser.no-path')"
-						@update:model-value="requestDirectories"
-					/>
+						@update:model-value="requestDirectories" />
 				</QCol>
 			</QRow>
 			<q-markup-table class="q-pr-md">
@@ -46,8 +41,7 @@
 					<tr>
 						<th
 							class="text-left"
-							style="width: 100px"
-						>
+							style="width: 100px">
 							{{ t('components.directory-browser.type') }}
 						</th>
 						<th class="text-left">
@@ -60,12 +54,10 @@
 					<tr @click="directoryNavigate(returnRow)">
 						<td
 							class="text-left"
-							style="width: 100px"
-						>
+							style="width: 100px">
 							<q-icon
 								size="md"
-								:name="getIcon(returnRow.type)"
-							/>
+								:name="getIcon(returnRow.type)" />
 						</td>
 						<td class="text-left">
 							{{ returnRow.name }}
@@ -82,28 +74,23 @@
 						v-for="(row, index) in items"
 						:key="index"
 						:class="rowClass(!row.hasReadPermission)"
-						@click="directoryNavigate(row)"
-					>
+						@click="directoryNavigate(row)">
 						<td
 							class="text-left"
-							style="width: 100px"
-						>
+							style="width: 100px">
 							<q-icon
 								size="md"
-								:name="getIcon(row.type)"
-							/>
+								:name="getIcon(row.type)" />
 						</td>
 						<td class="text-left">
 							<q-icon
 								v-if="!row.hasReadPermission"
 								color="red"
 								size="sm"
-								name="mdi-alert-circle"
-							>
+								name="mdi-alert-circle">
 								<q-tooltip
 									anchor="top middle"
-									self="center middle"
-								>
+									self="center middle">
 									<span>{{ t('components.directory-browser.has-no-read-permission') }}</span>
 								</q-tooltip>
 							</q-icon>
@@ -119,8 +106,7 @@
 			<ConfirmButton
 				:disabled="!isCurrentWritable"
 				:tooltip-text="!isCurrentWritable ? $t('components.directory-browser.current-folder-has-no-write-permission') : ''"
-				@click="confirm()"
-			/>
+				@click="confirm()" />
 		</template>
 	</QCardDialog>
 </template>

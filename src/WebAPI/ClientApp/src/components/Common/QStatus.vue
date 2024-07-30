@@ -6,13 +6,11 @@
 		v-if="pulse"
 		class="status-indicator"
 		:[status]="true"
-		pulse
-	/>
+		pulse />
 	<span
 		v-else
 		class="status-indicator"
-		:[status]="true"
-	/>
+		:[status]="true" />
 </template>
 
 <script setup lang="ts">

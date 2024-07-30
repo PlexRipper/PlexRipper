@@ -3,26 +3,22 @@
 		<HelpRow
 			:label="$t('help.server-dialog.server-commands.inspect-server.label')"
 			:title="$t('help.server-dialog.server-commands.inspect-server.title')"
-			:text="$t('help.server-dialog.server-commands.inspect-server.text')"
-		>
+			:text="$t('help.server-dialog.server-commands.inspect-server.text')">
 			<BaseButton
 				:disabled="syncLoading"
 				:loading="inspectLoading"
 				:label="$t('general.commands.inspect-server')"
-				@click="inspectServer"
-			/>
+				@click="inspectServer" />
 		</HelpRow>
 		<HelpRow
 			:label="$t('help.server-dialog.server-commands.sync-server-libraries.label')"
 			:title="$t('help.server-dialog.server-commands.sync-server-libraries.title')"
-			:text="$t('help.server-dialog.server-commands.sync-server-libraries.text')"
-		>
+			:text="$t('help.server-dialog.server-commands.sync-server-libraries.text')">
 			<BaseButton
 				:disabled="inspectLoading"
 				:loading="syncLoading"
 				:label="$t('general.commands.sync-server-libraries')"
-				@click="syncServerLibraries"
-			/>
+				@click="syncServerLibraries" />
 		</HelpRow>
 	</div>
 </template>

@@ -8,8 +8,7 @@
 		:rows-per-page-options="[0]"
 		hide-pagination
 		flat
-		@update:selected="updateSelected($event as PlexMediaSlimDTO[])"
-	>
+		@update:selected="updateSelected($event as PlexMediaSlimDTO[])">
 		<!-- Title -->
 		<template #body-cell-title="{ row }">
 			<q-td class="row-title text-eclipse">
@@ -29,8 +28,7 @@
 			<q-td class="text-center">
 				<QDuration
 					short
-					:value="row.duration"
-				/>
+					:value="row.duration" />
 			</q-td>
 		</template>
 		<!-- Media size -->
@@ -47,8 +45,7 @@
 				<span class="q-mr-md">
 					<QDateTime
 						:text="row.addedAt"
-						short-date
-					/>
+						short-date />
 				</span>
 			</q-td>
 		</template>
@@ -58,8 +55,7 @@
 				<span class="q-mr-md">
 					<QDateTime
 						:text="row.updatedAt"
-						short-date
-					/>
+						short-date />
 				</span>
 			</q-td>
 		</template>
@@ -69,8 +65,7 @@
 				<q-btn
 					flat
 					:icon="Convert.buttonTypeToIcon(ButtonType.Download)"
-					@click.stop="onRowAction(row, { command: 'download' })"
-				/>
+					@click.stop="onRowAction(row, { command: 'download' })" />
 			</q-td>
 		</template>
 	</QTable>

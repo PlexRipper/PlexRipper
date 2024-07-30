@@ -2,8 +2,7 @@
 	<q-circular-progress
 		size="xl"
 		color="red"
-		indeterminate
-	/>
+		indeterminate />
 </template>
 
 <script setup lang="ts">

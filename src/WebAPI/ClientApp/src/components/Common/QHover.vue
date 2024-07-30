@@ -1,8 +1,7 @@
 <template>
 	<div
 		@mouseover="hover = true"
-		@mouseleave="hover = false"
-	>
+		@mouseleave="hover = false">
 		<slot :hover="hover" />
 	</div>
 </template>

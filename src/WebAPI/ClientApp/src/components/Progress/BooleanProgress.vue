@@ -4,16 +4,13 @@
 		indeterminate
 		rounded
 		size="32px"
-		color="red"
-	/>
+		color="red" />
 	<q-icon
 		v-else-if="success"
-		name="mdi-check"
-	/>
+		name="mdi-check" />
 	<q-icon
 		v-else
-		name="mdi-close"
-	/>
+		name="mdi-close" />
 </template>
 
 <script setup lang="ts">

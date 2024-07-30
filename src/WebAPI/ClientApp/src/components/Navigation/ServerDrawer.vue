@@ -4,14 +4,12 @@
 			v-for="(server, index) in serverStore.getVisibleServers"
 			:key="index"
 			:label="serverStore.getServerName(server.id)"
-			expand-icon="mdi-chevron-down"
-		>
+			expand-icon="mdi-chevron-down">
 			<!-- Server header	-->
 			<template #header>
 				<q-item-section
 					side
-					no-wrap
-				>
+					no-wrap>
 					<QStatus :value="serverConnectionStore.isServerConnected(server.id)" />
 				</q-item-section>
 
@@ -21,8 +19,7 @@
 							v-if="server.owned"
 							name="mdi-home"
 							size="24px"
-							left
-						/>
+							left />
 						{{ serverStore.getServerName(server.id) }}
 					</div>
 				</q-item-section>
@@ -31,8 +28,7 @@
 						icon="mdi-cog"
 						flat
 						:data-cy="`server-dialog-${index}`"
-						@click.stop="openServerSettings(server.id)"
-					/>
+						@click.stop="openServerSettings(server.id)" />
 				</q-item-section>
 			</template>
 			<!-- Render libraries -->
@@ -43,8 +39,7 @@
 					v-ripple
 					clickable
 					active-class="text-orange"
-					@click="openMediaPage(library)"
-				>
+					@click="openMediaPage(library)">
 					<q-item-section avatar>
 						<QMediaTypeIcon :media-type="library.type" />
 					</q-item-section>

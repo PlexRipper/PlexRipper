@@ -4,8 +4,7 @@
 		color="red"
 		class="ma-3 pt-0"
 		hide-details
-		@click="handleInput()"
-	/>
+		@click="handleInput()" />
 </template>
 
 <script setup lang="ts">

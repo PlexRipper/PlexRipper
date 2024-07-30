@@ -2,21 +2,18 @@
 	<q-item
 		v-ripple
 		clickable
-		:class="classConfig"
-	>
+		:class="classConfig">
 		<div class="q-alert-wrapper">
 			<q-icon
 				:name="alertIcon"
-				size="24px"
-			/>
+				size="24px" />
 			<div class="q-alert-content">
 				<slot />
 			</div>
 			<div class="q-alert-dismissible">
 				<q-icon
 					name="mdi-close-circle"
-					size="24px"
-				/>
+					size="24px" />
 			</div>
 		</div>
 	</q-item>

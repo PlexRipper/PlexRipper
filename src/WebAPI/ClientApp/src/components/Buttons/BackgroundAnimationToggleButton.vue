@@ -1,8 +1,7 @@
 <template>
 	<IconButton
 		:icon="icon"
-		@click="toggleAnimationMode"
-	/>
+		@click="toggleAnimationMode" />
 </template>
 
 <script setup lang="ts">

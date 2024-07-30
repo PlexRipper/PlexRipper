@@ -2,8 +2,7 @@
 	<q-scroll-area
 		class="fit"
 		:thumb-style="thumbStyle"
-		:bar-style="barStyle"
-	>
+		:bar-style="barStyle">
 		<slot />
 	</q-scroll-area>
 </template>

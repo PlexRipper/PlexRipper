@@ -8,16 +8,14 @@
 				group="expansion"
 				:icon="item.icon"
 				:label="item.title"
-				expand-icon="mdi-chevron-down"
-			>
+				expand-icon="mdi-chevron-down">
 				<q-item
 					v-for="(child, j) in item.children"
 					:key="j"
 					v-ripple
 					clickable
 					:to="child.link"
-					active-class="text-red"
-				>
+					active-class="text-red">
 					<q-item-section avatar>
 						<q-icon :name="child.icon" />
 					</q-item-section>
@@ -30,8 +28,7 @@
 				:key="`false-${index}`"
 				v-ripple
 				clickable
-				:to="item.link"
-			>
+				:to="item.link">
 				<q-item-section avatar>
 					<q-icon :name="item.icon" />
 				</q-item-section>
@@ -39,14 +36,12 @@
 				<!-- Badge -->
 				<q-item-section
 					v-if="item && item.type === 'badge'"
-					side
-				>
+					side>
 					<q-chip
 						v-if="item.count && item.count > 0"
 						color="red"
 						text-color="white"
-						size="md"
-					>
+						size="md">
 						{{ item.count }}
 					</q-chip>
 				</q-item-section>

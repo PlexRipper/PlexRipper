@@ -1,8 +1,7 @@
 <template>
 	<IconButton
 		:icon="icon"
-		@click="toggleDarkMode"
-	/>
+		@click="toggleDarkMode" />
 </template>
 
 <script setup lang="ts">

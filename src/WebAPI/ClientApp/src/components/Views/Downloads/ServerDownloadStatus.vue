@@ -4,8 +4,7 @@
 			flat
 			:icon="getButtonIcon"
 			:label="getButtonText"
-			@click.stop="changeStatus"
-		/>
+			@click.stop="changeStatus" />
 	</QCol>
 </template>
 

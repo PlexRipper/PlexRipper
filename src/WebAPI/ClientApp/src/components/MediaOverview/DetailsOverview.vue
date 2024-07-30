@@ -8,8 +8,7 @@
 		content-height="100"
 		:loading="loading"
 		@opened="openDetails"
-		@closed="closeDetails"
-	>
+		@closed="closeDetails">
 		<template #default>
 			<QCol>
 				<!--	Header	-->
@@ -22,22 +21,19 @@
 								fit="fill"
 								:width="`${thumbWidth}px`"
 								:height="`${thumbHeight}px`"
-								ratio="2/3"
-							>
+								ratio="2/3">
 								<!--	Placeholder	-->
 								<template #loading>
 									<!--	Show fallback image	-->
 									<QRow
 										align="center"
 										justify="center"
-										class="fill-height"
-									>
+										class="fill-height">
 										<QCol cols="auto">
 											<QMediaTypeIcon
 												:size="100"
 												class="mx-3"
-												:media-type="mediaItemDetail?.type ?? PlexMediaType.Unknown"
-											/>
+												:media-type="mediaItemDetail?.type ?? PlexMediaType.Unknown" />
 										</QCol>
 										<QCol cols="12">
 											<h4 class="text-center">
@@ -52,8 +48,7 @@
 					<QCol>
 						<q-card
 							class="q-ma-md media-info-container"
-							:style="{ height: thumbHeight + 'px' }"
-						>
+							:style="{ height: thumbHeight + 'px' }">
 							<!-- Media info -->
 							<q-card-section>
 								<q-markup-table wrap-cells>
@@ -61,8 +56,7 @@
 										<tr class="q-tr--no-hover">
 											<td
 												colspan="2"
-												class="media-info-column media-title"
-											>
+												class="media-info-column media-title">
 												{{ mediaItemDetail?.title ?? 'unknown' }}
 											</td>
 										</tr>
@@ -104,8 +98,7 @@
 							use-q-table
 							:media-item="mediaItemDetail"
 							disable-intersection
-							disable-highlight
-						/>
+							disable-highlight />
 					</QCol>
 				</QRow>
 			</QCol>

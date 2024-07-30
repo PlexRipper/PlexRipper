@@ -4,8 +4,7 @@
 		:name="name"
 		max-width="800px"
 		button-align="between"
-		cy="confirmation-dialog"
-	>
+		cy="confirmation-dialog">
 		<template #title>
 			{{ confirmationText.title }}
 		</template>
@@ -13,21 +12,18 @@
 			<p>{{ confirmationText.text }}</p>
 			<p
 				v-if="confirmationText.warning"
-				class="text-center"
-			>
+				class="text-center">
 				<b>{{ confirmationText.warning }}</b>
 			</p>
 		</template>
 		<template #actions>
 			<CancelButton
 				cy="confirmation-dialog-cancel-button"
-				@click="cancel"
-			/>
+				@click="cancel" />
 			<ConfirmButton
 				cy="confirmation-dialog-confirmation-button"
 				:loading="loading"
-				@click="confirm"
-			/>
+				@click="confirm" />
 		</template>
 	</QCardDialog>
 </template>

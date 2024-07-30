@@ -5,35 +5,29 @@
 		align="center"
 		no-wrap
 		:class="{ 'q-tree-view-table-row': true, 'q-tree-view-table-row--header': isHeader }"
-		class="q-mb-xs"
-	>
+		class="q-mb-xs">
 		<!--	Title Column	-->
 		<QCol class="q-ml-sm">
 			<QRow
 				align="center"
-				justify="start"
-			>
+				justify="start">
 				<QCol
 					v-if="isHeader && selectable"
 					cols="auto"
-					class="q-ml-md q-pl-sm"
-				>
+					class="q-ml-md q-pl-sm">
 					<q-checkbox
 						dense
 						:model-value="selected"
-						@update:model-value="$emit('selected', $event)"
-					/>
+						@update:model-value="$emit('selected', $event)" />
 				</QCol>
 				<QCol
 					v-if="columns[0]?.field"
 					align-self="start"
 					cols="auto"
-					class="header-column"
-				>
+					class="header-column">
 					<QMediaTypeIcon
 						v-if="node['mediaType']"
-						:media-type="node['mediaType']"
-					/>
+						:media-type="node['mediaType']" />
 					<span :data-cy="`column-${columns[0]?.field}-${node.id}`">
 						{{ node[columns[0].field ?? ''] ?? 'unknown' }}
 					</span>
@@ -43,24 +37,20 @@
 		<!--	Rest of the Columns	-->
 		<QCol
 			cols="auto"
-			:style="{ 'max-width': `${getContainerWidth}px !important` }"
-		>
+			:style="{ 'max-width': `${getContainerWidth}px !important` }">
 			<QRow
 				align="center"
 				justify="end"
-				no-wrap
-			>
+				no-wrap>
 				<template
 					v-for="(column, i) in columns.slice(1)"
-					:key="column.field"
-				>
+					:key="column.field">
 					<!--	Table Header Row	-->
 					<QCol
 						v-if="isHeader"
 						cols="auto"
 						:text-align="'center'"
-						:width="column?.width ?? 0"
-					>
+						:width="column?.width ?? 0">
 						<span :data-cy="`column-${column.field}-${node.id}`">
 							{{ node[column.field] }}
 						</span>
@@ -71,52 +61,45 @@
 						cols="auto"
 						class="table-column"
 						:width="column?.width ?? 0"
-						:text-align="column.align"
-					>
+						:text-align="column.align">
 						<!-- Duration format -->
 						<template v-if="column['type'] === 'duration'">
 							<QDuration
 								short
 								:data-cy="`column-${column.field}-${node.id}`"
-								:value="node[column.field]"
-							/>
+								:value="node[column.field]" />
 						</template>
 						<!-- Date format -->
 						<template v-else-if="column['type'] === 'date'">
 							<QDateTime
 								short-date
 								:data-cy="`column-${column.field}-${node.id}`"
-								:text="node[column.field]"
-							/>
+								:text="node[column.field]" />
 						</template>
 						<!-- Filesize format -->
 						<template v-else-if="column['type'] === 'file-size'">
 							<QFileSize
 								:data-cy="`column-${column.field}-${node.id}`"
-								:size="node[column.field]"
-							/>
+								:size="node[column.field]" />
 						</template>
 						<!-- File Speed format -->
 						<template v-else-if="column['type'] === 'file-speed'">
 							<QFileSize
 								:data-cy="`column-${column.field}-${node.id}`"
 								:size="node[column.field]"
-								speed
-							/>
+								speed />
 						</template>
 						<!-- Percentage -->
 						<template v-else-if="column['type'] === 'percentage'">
 							<QProgressBar
 								:data-cy="`column-${column.field}-${node.id}`"
-								:value="node[column.field]"
-							/>
+								:value="node[column.field]" />
 						</template>
 						<!-- Actions -->
 						<template v-else-if="column['type'] === 'actions'">
 							<QRow
 								justify="start"
-								no-wrap
-							>
+								no-wrap>
 								<QCol cols="auto">
 									<!-- Item Actions -->
 									<IconSquareButton
@@ -130,8 +113,7 @@
 												action: action,
 												data: node,
 											})
-										"
-									/>
+										" />
 								</QCol>
 							</QRow>
 						</template>

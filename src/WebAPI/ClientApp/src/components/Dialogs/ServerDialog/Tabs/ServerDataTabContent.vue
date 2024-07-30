@@ -44,8 +44,7 @@
 				<td>
 					<QDateTime
 						short-date
-						:text="plexServer.createdAt"
-					/>
+						:text="plexServer.createdAt" />
 				</td>
 			</tr>
 			<tr>
@@ -53,8 +52,7 @@
 				<td>
 					<QDateTime
 						short-date
-						:text="plexServer.lastSeenAt"
-					/>
+						:text="plexServer.lastSeenAt" />
 				</td>
 			</tr>
 			<tr>
@@ -69,24 +67,20 @@
 					<BaseButton
 						:label="$t('general.commands.check-server-status')"
 						:loading="checkServerStatusLoading"
-						@click="checkServer"
-					/>
+						@click="checkServer" />
 				</td>
 				<td style="padding: 0">
 					<q-markup-table
 						v-if="hasCheckedServerStatus"
-						wrap-cells
-					>
+						wrap-cells>
 						<tbody v-if="checkServerStatusLoading">
 							<tr
 								v-for="(progressItem, index) in progress"
-								:key="index"
-							>
+								:key="index">
 								<td>
 									<QStatus
 										pulse
-										:value="progressItem.connectionSuccessful"
-									/>
+										:value="progressItem.connectionSuccessful" />
 								</td>
 								<td>{{ progressItem.message }}</td>
 							</tr>
@@ -96,8 +90,7 @@
 								<td>
 									<QStatus
 										pulse
-										:value="progress.some((x) => x.connectionSuccessful)"
-									/>
+										:value="progress.some((x) => x.connectionSuccessful)" />
 								</td>
 								<td>
 									{{ checkServerStatusMessage }}

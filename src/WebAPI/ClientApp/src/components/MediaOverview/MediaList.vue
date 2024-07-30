@@ -6,8 +6,7 @@
 				<QCol cols="auto">
 					<q-checkbox
 						:model-value="rootSelected"
-						@update:model-value="rootSetSelected($event)"
-					/>
+						@update:model-value="rootSetSelected($event)" />
 				</QCol>
 				<QCol class="q-ml-md">
 					<QSubHeader bold>
@@ -17,8 +16,7 @@
 				<!--	Total selected count	-->
 				<QCol
 					v-if="selectedCount"
-					cols="auto"
-				>
+					cols="auto">
 					<span class="text-weight-bold">
 						{{ t('components.media-list.selected-count', { selectedCount }) }}
 					</span>
@@ -35,16 +33,14 @@
 			:default-opened="defaultOpened"
 			:group="defaultOpened ? undefined : 'media-list'"
 			:label="child.title"
-			@update:model-value="itemExpanded[index] = $event"
-		>
+			@update:model-value="itemExpanded[index] = $event">
 			<!-- Header	-->
 			<template #header="{ expanded }">
 				<QRow align="center">
 					<QCol cols="auto">
 						<q-checkbox
 							:model-value="isSelected(child.id)"
-							@update:model-value="setSelected(child.id, child.children, $event)"
-						/>
+							@update:model-value="setSelected(child.id, child.children, $event)" />
 					</QCol>
 					<QCol class="q-ml-md">
 						<QSubHeader bold>
@@ -56,8 +52,7 @@
 					</QCol>
 					<QCol
 						v-if="getSelected(child.id)?.keys.length"
-						cols="auto"
-					>
+						cols="auto">
 						<span class="text-weight-bold">
 							{{
 								t('components.media-list.selected-count', {
@@ -69,8 +64,7 @@
 					<QCol cols="auto">
 						<q-icon
 							size="lg"
-							:name="expanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
-						/>
+							:name="expanded ? 'mdi-chevron-up' : 'mdi-chevron-down'" />
 					</QCol>
 				</QRow>
 			</template>
@@ -80,8 +74,7 @@
 					v-if="useQTable"
 					:rows="child.children"
 					:selection="getSelected(child.id)"
-					@selection="onSelection(child.id, $event)"
-				/>
+					@selection="onSelection(child.id, $event)" />
 				<MediaTable
 					v-else
 					:rows="child.children"
@@ -90,8 +83,7 @@
 					disable-hover-click
 					:disable-highlight="disableHighlight"
 					:disable-intersection="disableIntersection"
-					@selection="onSelection(child.id, $event)"
-				/>
+					@selection="onSelection(child.id, $event)" />
 			</template>
 		</q-expansion-item>
 	</q-list>

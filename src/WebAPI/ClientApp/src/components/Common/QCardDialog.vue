@@ -9,26 +9,22 @@
 		:transition-show="transitionShow"
 		:transition-hide="transitionHide"
 		@before-show="$emit('opened', dataValue)"
-		@before-hide="$emit('closed')"
-	>
+		@before-hide="$emit('closed')">
 		<QRow
 			column
 			:data-cy="cy"
 			:class="['q-card-dialog', 'q-card-dialog-background', noBackground ? 'no-background' : '']"
-			:style="styles"
-		>
+			:style="styles">
 			<!-- Dialog Title	-->
 			<QCol
 				v-if="$slots['title']"
 				cols="auto"
-				class="q-card-dialog-title"
-			>
+				class="q-card-dialog-title">
 				<div v-if="!loading">
 					<QCardTitle>
 						<slot
 							name="title"
-							:value="parentValue"
-						/>
+							:value="parentValue" />
 					</QCardTitle>
 				</div>
 			</QCol>
@@ -36,8 +32,7 @@
 			<QCol
 				v-if="$slots['top-row']"
 				cols="auto"
-				class="q-card-dialog-top-row"
-			>
+				class="q-card-dialog-top-row">
 				<div v-show="!loading">
 					<slot name="top-row" />
 				</div>
@@ -45,8 +40,7 @@
 			<QCol
 				v-if="$slots['default']"
 				:class="contentClasses"
-				align-self="stretch"
-			>
+				align-self="stretch">
 				<div v-if="!loading">
 					<slot :value="parentValue" />
 				</div>
@@ -55,8 +49,7 @@
 				v-if="$slots['actions']"
 				cols="auto"
 				align-self="stretch"
-				class="q-card-dialog-actions q-pa-md"
-			>
+				class="q-card-dialog-actions q-pa-md">
 				<div v-if="!loading">
 					<!--	Dialog Buttons		-->
 					<QCardActions :align="buttonAlign">
@@ -64,8 +57,7 @@
 							name="actions"
 							:close="closeDialog"
 							:open="openDialog"
-							:value="parentValue"
-						/>
+							:value="parentValue" />
 					</QCardActions>
 				</div>
 			</QCol>

@@ -9,32 +9,28 @@
 					<q-td>
 						<DebugButton
 							:label="t('pages.debug.dialogs.buttons.server-dialog')"
-							@click="openServerDialog"
-						/>
+							@click="openServerDialog" />
 					</q-td>
 				</q-tr>
 				<q-tr>
 					<q-td>
 						<DebugButton
 							:label="t('pages.debug.dialogs.buttons.download-confirmation')"
-							@click="openDownloadConfirmationDialog"
-						/>
+							@click="openDownloadConfirmationDialog" />
 					</q-td>
 				</q-tr>
 				<q-tr>
 					<q-td>
 						<DebugButton
 							:label="t('pages.debug.dialogs.buttons.help-dialog')"
-							@click="openHelpDialog"
-						/>
+							@click="openHelpDialog" />
 					</q-td>
 				</q-tr>
 				<q-tr>
 					<q-td>
 						<DebugButton
 							:label="$t('general.commands.add-alert')"
-							@click="addAlert"
-						/>
+							@click="addAlert" />
 					</q-td>
 				</q-tr>
 				<q-tr>
@@ -42,8 +38,7 @@
 						<DebugButton
 							data-cy="check-server-connections-dialog-button"
 							:label="t('pages.debug.dialogs.buttons.check-server-connections-dialog')"
-							@click="openCheckServerConnectionsDialog"
-						/>
+							@click="openCheckServerConnectionsDialog" />
 					</q-td>
 				</q-tr>
 				<q-tr>
@@ -51,8 +46,7 @@
 						<DebugButton
 							data-cy="open-verification-dialog-button"
 							:label="t('pages.debug.dialogs.buttons.verification-dialog')"
-							@click="openVerificationDialog"
-						/>
+							@click="openVerificationDialog" />
 					</q-td>
 				</q-tr>
 				<q-tr>
@@ -60,8 +54,7 @@
 						<DebugButton
 							data-cy="directory-browser-dialog-button"
 							:label="t('pages.debug.dialogs.buttons.directory-browser')"
-							@click="openDirectoryBrowserDialog"
-						/>
+							@click="openDirectoryBrowserDialog" />
 					</q-td>
 				</q-tr>
 			</q-markup-table>
@@ -69,8 +62,7 @@
 			<DownloadConfirmation :name="downloadConfirmationName" />
 			<AccountVerificationCodeDialog
 				:name="verificationCodeDialogName"
-				:account="account"
-			/>
+				:account="account" />
 			<DirectoryBrowser :name="directoryBrowserName" />
 		</QSection>
 	</QPage>

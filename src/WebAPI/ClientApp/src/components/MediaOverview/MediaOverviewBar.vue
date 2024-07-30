@@ -4,23 +4,19 @@
 		<q-toolbar-title>
 			<QRow
 				justify="start"
-				align="center"
-			>
+				align="center">
 				<Transition
 					appear
 					enter-active-class="animated fadeInLeft"
-					leave-active-class="animated fadeOutLeft"
-				>
+					leave-active-class="animated fadeOutLeft">
 					<QCol
 						v-if="detailMode"
-						cols="auto"
-					>
+						cols="auto">
 						<q-btn
 							flat
 							icon="mdi-arrow-left"
 							size="xl"
-							@click="$emit('back')"
-						/>
+							@click="$emit('back')" />
 					</QCol>
 				</Transition>
 				<QCol cols="auto">
@@ -30,8 +26,7 @@
 								<QMediaTypeIcon
 									class="mx-3"
 									:size="36"
-									:media-type="library?.type ?? PlexMediaType.None"
-								/>
+									:media-type="library?.type ?? PlexMediaType.None" />
 							</q-item-section>
 							<q-item-section>
 								<q-item-label>
@@ -41,8 +36,7 @@
 								</q-item-label>
 								<q-item-label
 									v-if="library && !detailMode"
-									caption
-								>
+									caption>
 									{{ libraryCountFormatted }}
 									{{ $t('general.delimiter.dash') }}
 									<QFileSize :size="library.mediaSize" />
@@ -61,8 +55,7 @@
 			:label="$t('general.commands.download')"
 			:height="barHeight"
 			:width="verticalButtonWidth"
-			@click="download"
-		/>
+			@click="download" />
 
 		<!--	Selection Dialog Button	-->
 		<VerticalButton
@@ -71,8 +64,7 @@
 			:label="$t('general.commands.selection')"
 			:height="barHeight"
 			:width="verticalButtonWidth"
-			@click="$emit('selection-dialog')"
-		/>
+			@click="$emit('selection-dialog')" />
 
 		<!--	Refresh library button	-->
 		<VerticalButton
@@ -82,8 +74,7 @@
 			:height="barHeight"
 			cy="media-overview-refresh-library-btn"
 			:width="verticalButtonWidth"
-			@click="refreshLibrary"
-		/>
+			@click="refreshLibrary" />
 
 		<!--	View mode	-->
 		<VerticalButton
@@ -92,13 +83,11 @@
 			:label="$t('general.commands.view')"
 			:height="barHeight"
 			:width="verticalButtonWidth"
-			cy="change-view-mode-btn"
-		>
+			cy="change-view-mode-btn">
 			<q-menu
 				anchor="bottom left"
 				self="top left"
-				auto-close
-			>
+				auto-close>
 				<q-list>
 					<q-item
 						v-for="(viewOption, i) in viewOptions"
@@ -106,15 +95,13 @@
 						clickable
 						style="min-width: 200px"
 						:data-cy="`view-mode-${viewOption.viewMode.toLowerCase()}-btn`"
-						@click="changeView(viewOption.viewMode)"
-					>
+						@click="changeView(viewOption.viewMode)">
 						<!-- View mode options -->
 						<q-item-section avatar>
 							<q-avatar>
 								<q-icon
 									v-if="isSelected(viewOption.viewMode)"
-									name="mdi-check"
-								/>
+									name="mdi-check" />
 							</q-avatar>
 						</q-item-section>
 						<!--	Is selected icon	-->

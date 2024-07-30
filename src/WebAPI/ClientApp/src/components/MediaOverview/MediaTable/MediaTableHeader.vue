@@ -2,31 +2,26 @@
 	<QRow
 		align="center"
 		justify="between"
-		class="media-table-header"
-	>
+		class="media-table-header">
 		<QCol
 			v-if="selectable"
 			cols="auto"
-			class="media-table-header--column"
-		>
+			class="media-table-header--column">
 			<q-checkbox
 				dense
 				:model-value="selected"
 				class="q-ml-md"
-				@update:model-value="$emit('selected', $event)"
-			/>
+				@update:model-value="$emit('selected', $event)" />
 		</QCol>
 		<template
 			v-for="(column, i) in columns"
-			:key="i"
-		>
+			:key="i">
 			<!-- Index -->
 			<template v-if="column['type'] === 'index'">
 				<QCol
 					cols="auto"
 					style="min-width: 45px"
-					class="media-table-header--column"
-				>
+					class="media-table-header--column">
 					<MediaTableHeaderColumn :column="column" />
 				</QCol>
 			</template>
@@ -40,8 +35,7 @@
 			<template v-else-if="column['type'] === 'duration'">
 				<QCol
 					cols="1"
-					class="media-table-header--column"
-				>
+					class="media-table-header--column">
 					<MediaTableHeaderColumn :column="column" />
 				</QCol>
 			</template>
@@ -49,8 +43,7 @@
 			<template v-else-if="column['type'] === 'date'">
 				<QCol
 					cols="1"
-					class="media-table-header--column"
-				>
+					class="media-table-header--column">
 					<MediaTableHeaderColumn :column="column" />
 				</QCol>
 			</template>
@@ -58,8 +51,7 @@
 			<template v-else-if="column['type'] === 'file-size'">
 				<QCol
 					cols="1"
-					class="media-table-header--column"
-				>
+					class="media-table-header--column">
 					<MediaTableHeaderColumn :column="column" />
 				</QCol>
 			</template>
@@ -67,8 +59,7 @@
 			<template v-else-if="column['type'] === 'actions'">
 				<QCol
 					cols="auto"
-					class="media-table-header--column"
-				>
+					class="media-table-header--column">
 					<MediaTableHeaderColumn :column="column" />
 				</QCol>
 			</template>

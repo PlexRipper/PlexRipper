@@ -9,8 +9,7 @@
 				flat
 				square
 				:data-cy="`letter-${letter}-alphabet-navigation-btn`"
-				@click="sendMediaOverviewScrollToCommand(letter)"
-			/>
+				@click="sendMediaOverviewScrollToCommand(letter)" />
 		</div>
 	</div>
 </template>

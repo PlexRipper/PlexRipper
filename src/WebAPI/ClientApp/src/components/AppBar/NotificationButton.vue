@@ -4,15 +4,13 @@
 		round
 		flat
 		icon="mdi-bell"
-		@click="toggleNotificationDrawer"
-	>
+		@click="toggleNotificationDrawer">
 		<q-badge
 			v-if="notificationsStore.getVisibleNotifications.length > 0"
 			color="green"
 			floating
 			transparent
-			:label="notificationsStore.getVisibleNotifications.length"
-		/>
+			:label="notificationsStore.getVisibleNotifications.length" />
 	</q-btn>
 </template>
 

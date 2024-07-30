@@ -6,13 +6,11 @@
 		<template v-if="!isEmptyLayout">
 			<AppBar
 				@show-navigation="toggleNavigationsDrawer"
-				@show-notifications="toggleNotificationsDrawer"
-			/>
+				@show-notifications="toggleNotificationsDrawer" />
 			<NavigationDrawer :show-drawer="showNavigationDrawerState" />
 			<NotificationsDrawer
 				:show-drawer="showNotificationsDrawerState"
-				@cleared="toggleNotificationsDrawer"
-			/>
+				@cleared="toggleNotificationsDrawer" />
 		</template>
 		<!--	page-load-completed is only visible once the page is done loading. This is used for Cypress E2E	-->
 		<q-page-container data-cy="page-load-completed">
@@ -24,8 +22,7 @@
 			v-for="(alertItem, i) in alerts"
 			:key="i"
 			:name="`alert-dialog-${alertItem.id}`"
-			:alert="alertItem"
-		/>
+			:alert="alertItem" />
 		<CheckServerConnectionsDialog />
 		<!--	Background	-->
 		<Background :hide-background="isEmptyLayout" />

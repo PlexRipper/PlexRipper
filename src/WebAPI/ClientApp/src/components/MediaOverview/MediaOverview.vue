@@ -5,17 +5,14 @@
 		justify="center"
 		align="center"
 		class="refresh-library-container"
-		cy="refresh-library-container"
-	>
+		cy="refresh-library-container">
 		<QCol
 			cols="8"
-			align-self="center"
-		>
+			align-self="center">
 			<ProgressComponent
 				circular-mode
 				:percentage="libraryProgress?.percentage ?? -1"
-				:text="refreshingText"
-			/>
+				:text="refreshingText" />
 		</QCol>
 	</QRow>
 	<!-- Media Overview -->
@@ -30,20 +27,17 @@
 					@back="closeDetailsOverview"
 					@view-change="changeView"
 					@selection-dialog="useOpenControlDialog(mediaSelectionDialogName)"
-					@refresh-library="refreshLibrary"
-				/>
+					@refresh-library="refreshLibrary" />
 				<!--	Data table display	-->
 				<QRow
 					id="media-container"
-					align="start"
-				>
+					align="start">
 					<QCol v-show="mediaOverviewStore.showMediaOverview">
 						<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
 							<MediaTable
 								:rows="mediaOverviewStore.items"
 								:disable-hover-click="mediaType !== PlexMediaType.TvShow"
-								is-scrollable
-							/>
+								is-scrollable />
 						</template>
 
 						<!-- Poster display -->
@@ -51,8 +45,7 @@
 							<PosterTable
 								:library-id="libraryId"
 								:media-type="mediaType"
-								:items="mediaOverviewStore.items"
-							/>
+								:items="mediaOverviewStore.items" />
 						</template>
 					</QCol>
 
@@ -80,8 +73,7 @@
 	<DownloadConfirmation
 		:name="downloadConfirmationName"
 		:items="mediaOverviewStore.items"
-		@download="downloadStore.downloadMedia($event)"
-	/>
+		@download="downloadStore.downloadMedia($event)" />
 </template>
 
 <script setup lang="ts">

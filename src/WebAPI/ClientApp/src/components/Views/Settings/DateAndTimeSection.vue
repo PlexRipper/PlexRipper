@@ -7,18 +7,15 @@
 		<HelpRow
 			:label="$t('help.settings.ui.date-and-time.short-date-format.label')"
 			:title="$t('help.settings.ui.date-and-time.short-date-format.title')"
-			:text="$t('help.settings.ui.date-and-time.short-date-format.text')"
-		>
+			:text="$t('help.settings.ui.date-and-time.short-date-format.text')">
 			<q-select
 				v-model:model-value="shortDateFormat"
 				:options="shortDateOptions"
-				data-cy="short-date-format"
-			>
+				data-cy="short-date-format">
 				<template #option="scope">
 					<q-item
 						v-bind="scope.itemProps"
-						:data-cy="`option-${scope.opt.value}`"
-					>
+						:data-cy="`option-${scope.opt.value}`">
 						<q-item-section>
 							<q-item-label> {{ scope.opt.label }}</q-item-label>
 						</q-item-section>
@@ -30,18 +27,15 @@
 		<HelpRow
 			:label="$t('help.settings.ui.date-and-time.long-date-format.label')"
 			:title="$t('help.settings.ui.date-and-time.long-date-format.title')"
-			:text="$t('help.settings.ui.date-and-time.long-date-format.text')"
-		>
+			:text="$t('help.settings.ui.date-and-time.long-date-format.text')">
 			<q-select
 				v-model:model-value="longDateFormat"
 				:options="longDateOptions"
-				data-cy="long-date-format"
-			>
+				data-cy="long-date-format">
 				<template #option="scope">
 					<q-item
 						v-bind="scope.itemProps"
-						:data-cy="`option-${scope.opt.value}`"
-					>
+						:data-cy="`option-${scope.opt.value}`">
 						<q-item-section>
 							<q-item-label> {{ scope.opt.label }}</q-item-label>
 						</q-item-section>
@@ -53,18 +47,15 @@
 		<HelpRow
 			:label="$t('help.settings.ui.date-and-time.time-format.label')"
 			:title="$t('help.settings.ui.date-and-time.time-format.title')"
-			:text="$t('help.settings.ui.date-and-time.time-format.text')"
-		>
+			:text="$t('help.settings.ui.date-and-time.time-format.text')">
 			<q-select
 				v-model:model-value="timeFormat"
 				:options="timeFormatOptions"
-				data-cy="time-format"
-			>
+				data-cy="time-format">
 				<template #option="scope">
 					<q-item
 						v-bind="scope.itemProps"
-						:data-cy="`option-${scope.opt.value}`"
-					>
+						:data-cy="`option-${scope.opt.value}`">
 						<q-item-section>
 							<q-item-label> {{ scope.opt.label }}</q-item-label>
 						</q-item-section>
@@ -76,14 +67,12 @@
 		<HelpRow
 			:label="$t('help.settings.ui.date-and-time.show-relative-dates.label')"
 			:title="$t('help.settings.ui.date-and-time.show-relative-dates.title')"
-			:text="$t('help.settings.ui.date-and-time.show-relative-dates.text')"
-		>
+			:text="$t('help.settings.ui.date-and-time.show-relative-dates.text')">
 			<q-toggle
 				v-model:model-value="settingsStore.dateTimeSettings.showRelativeDates"
 				size="lg"
 				color="red"
-				data-cy="relative-date"
-			/>
+				data-cy="relative-date" />
 		</HelpRow>
 
 		<!--	TODO: Dealing with Timezones is 1 big cluster fuck, will go back to try again later -->

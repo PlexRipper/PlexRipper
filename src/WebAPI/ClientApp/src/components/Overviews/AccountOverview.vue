@@ -8,12 +8,10 @@
 			cols="4"
 			md="6"
 			style="max-width: 395px"
-			xs="12"
-		>
+			xs="12">
 			<AccountCard
 				:account="account"
-				@open-dialog="openDialog(false, account)"
-			/>
+				@open-dialog="openDialog(false, account)" />
 		</QCol>
 		<!-- Add new Account card -->
 		<QCol
@@ -21,8 +19,7 @@
 			cols="4"
 			md="6"
 			style="max-width: 395px"
-			xs="12"
-		>
+			xs="12">
 			<AccountCard @open-dialog="openDialog(true, null)" />
 		</QCol>
 	</QRow>

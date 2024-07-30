@@ -6,8 +6,7 @@
 				<QRow
 					justify="center"
 					no-gutters
-					class="my-3"
-				>
+					class="my-3">
 					<QCol cols="auto">
 						<q-circular-progress
 							show-value
@@ -16,18 +15,15 @@
 							:width="15"
 							:value="getPercentage"
 							:indeterminate="indeterminate"
-							color="red"
-						>
+							color="red">
 							<template v-if="!indeterminate">
 								<span
 									v-if="getPercentage < 100"
-									class="text-bold"
-								> {{ $n(getPercentage, 'percent') }}</span>
+									class="text-bold"> {{ $n(getPercentage, 'percent') }}</span>
 								<q-icon
 									v-else
 									large
-									name="mdi-check"
-								/>
+									name="mdi-check" />
 							</template>
 						</q-circular-progress>
 					</QCol>
@@ -36,8 +32,7 @@
 				<QRow
 					v-if="text"
 					justify="center"
-					no-gutters
-				>
+					no-gutters>
 					<QCol>
 						<h3>{{ text }}</h3>
 					</QCol>
@@ -49,8 +44,7 @@
 				<QRow
 					v-if="text"
 					justify="center"
-					no-gutters
-				>
+					no-gutters>
 					<QCol cols="auto">
 						<h3>{{ text }}</h3>
 					</QCol>
@@ -59,8 +53,7 @@
 				<QRow
 					justify="center"
 					class="my-3"
-					no-gutters
-				>
+					no-gutters>
 					<QCol>
 						<q-linear-progress
 							:value="Math.min(getPercentage, 100)"
@@ -69,8 +62,7 @@
 							class="q-mx-sm"
 							striped
 							stream
-							color="red"
-						>
+							color="red">
 							<strong>{{ $n(getPercentage, 'percent') }}</strong>
 						</q-linear-progress>
 					</QCol>

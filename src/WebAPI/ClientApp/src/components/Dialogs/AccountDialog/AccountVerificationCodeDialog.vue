@@ -3,8 +3,7 @@
 		:name="name"
 		persistent
 		max-width="700px"
-		cy="2fa-code-verification-dialog"
-	>
+		cy="2fa-code-verification-dialog">
 		<template #title>
 			{{ t('components.account-verification-code-dialog.title') }}
 		</template>
@@ -25,14 +24,12 @@
 						inputmode="numeric"
 						data-cy="2fa-code-verification-input"
 						:conditional-class="['one', 'two', 'three', 'four', 'five', 'six']"
-						@on-complete="onComplete"
-					/>
+						@on-complete="onComplete" />
 				</QCol>
 			</QRow>
 			<QRow
 				v-if="errors.length > 0"
-				justify="center"
-			>
+				justify="center">
 				<QCol cols="auto">
 					<span style="color: red; font-weight: bold">{{
 						t('components.account-verification-code-dialog.error')
@@ -51,8 +48,7 @@
 					<ConfirmButton
 						:loading="loading"
 						:disabled="codeValue.length < 6"
-						@click="onComplete"
-					/>
+						@click="onComplete" />
 				</QCol>
 			</QRow>
 		</template>

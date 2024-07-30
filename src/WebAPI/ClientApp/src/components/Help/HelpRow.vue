@@ -6,8 +6,7 @@
 					<HelpIcon
 						:label="label"
 						:title="title"
-						:text="text"
-					/>
+						:text="text" />
 				</td>
 				<td>
 					<slot />

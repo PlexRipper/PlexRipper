@@ -5,8 +5,7 @@
 		persistent
 		cy="account-dialog-form"
 		@opened="openDialog"
-		@closed="closeDialog"
-	>
+		@closed="closeDialog">
 		<!-- Dialog Header -->
 		<template #title>
 			{{ getDisplayName }}
@@ -16,24 +15,21 @@
 				ref="accountForm"
 				:value="changedPlexAccount"
 				@input="formChanged"
-				@is-valid="isInputValid"
-			/>
+				@is-valid="isInputValid" />
 			<Print>{{ changedPlexAccount }}</Print>
 		</template>
 		<!-- Dialog Actions	-->
 		<template #actions="{ close }">
 			<QRow
 				justify="between"
-				gutter="md"
-			>
+				gutter="md">
 				<!-- Delete account -->
 				<QCol v-if="!isNewAccount">
 					<DeleteButton
 						class="mx-2"
 						block
 						cy="account-dialog-delete-button"
-						@click="openConfirmationDialog"
-					/>
+						@click="openConfirmationDialog" />
 				</QCol>
 				<!-- Cancel button -->
 				<QCol>
@@ -41,8 +37,7 @@
 						class="mx-2"
 						block
 						cy="account-dialog-cancel-button"
-						@click="close"
-					/>
+						@click="close" />
 				</QCol>
 				<!-- Reset Form -->
 				<QCol>
@@ -50,8 +45,7 @@
 						class="mx-2"
 						block
 						cy="account-dialog-reset-button"
-						@click="reset"
-					/>
+						@click="reset" />
 				</QCol>
 				<!-- Validation button -->
 				<QCol>
@@ -64,8 +58,7 @@
 						block
 						cy="account-dialog-validate-button"
 						class="q-mx-md"
-						@click="validate"
-					/>
+						@click="validate" />
 				</QCol>
 				<!-- Save account -->
 				<QCol>
@@ -76,8 +69,7 @@
 						block
 						:loading="savingLoading"
 						class="q-mx-md"
-						@click="saveAccount(close)"
-					/>
+						@click="saveAccount(close)" />
 				</QCol>
 			</QRow>
 		</template>
@@ -88,8 +80,7 @@
 		:name="verificationCodeDialogName"
 		:account="changedPlexAccount"
 		@close="closeVerificationDialog"
-		@confirm="validateAfterVerificationCode"
-	/>
+		@confirm="validateAfterVerificationCode" />
 	<!--	Delete Confirmation Dialog	-->
 	<ConfirmationDialog
 		class="q-mr-md"
@@ -98,8 +89,7 @@
 		:title="$t('confirmation.delete-account.title')"
 		:text="$t('confirmation.delete-account.text')"
 		:warning="$t('confirmation.delete-account.warning')"
-		@confirm="deleteAccount"
-	/>
+		@confirm="deleteAccount" />
 </template>
 
 <script setup lang="ts">

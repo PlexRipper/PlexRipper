@@ -3,8 +3,7 @@
 		<MediaOverview
 			:library-id="libraryId"
 			:media-id="mediaId"
-			:media-type="PlexMediaType.Movie"
-		/>
+			:media-type="PlexMediaType.Movie" />
 	</QPage>
 </template>
 

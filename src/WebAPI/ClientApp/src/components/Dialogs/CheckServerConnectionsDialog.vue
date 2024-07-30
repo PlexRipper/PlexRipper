@@ -3,8 +3,7 @@
 		max-width="1000px"
 		content-height="80"
 		:name="name"
-		cy="check-server-connection-dialog"
-	>
+		cy="check-server-connection-dialog">
 		<template #top-row>
 			<!-- The total progress -->
 			<ProgressComponent
@@ -13,8 +12,7 @@
 				:percentage="totalPercentage"
 				:completed="totalPercentage === 100"
 				:text="getProgressText"
-				:indeterminate="plexServerNodes.length === 0"
-			/>
+				:indeterminate="plexServerNodes.length === 0" />
 		</template>
 		<template #default>
 			<q-tree
@@ -22,13 +20,11 @@
 				v-model:expanded="expanded"
 				:nodes="plexServerNodes"
 				node-key="index"
-				default-expand-all
-			>
+				default-expand-all>
 				<template #default-header="{ node }: { node: IPlexServerNode }">
 					<QRow
 						justify="between"
-						align="center"
-					>
+						align="center">
 						<QCol cols="4">
 							<div :class="{ 'text-weight-bold': isServer(node) }">
 								<!--	Plex Server Connection Icon -->
@@ -36,12 +32,10 @@
 									v-if="isServer(node)"
 									name="mdi-server"
 									size="28px"
-									class="q-mr-sm"
-								/>
+									class="q-mr-sm" />
 								<QConnectionIcon
 									v-else
-									:local="node?.local ?? false"
-								/>
+									:local="node?.local ?? false" />
 								<!-- Plex Server Connection Url	-->
 								<span
 									:class="[
@@ -54,32 +48,27 @@
 										isServer(node)
 											? 'check-server-connections-dialog-server-title'
 											: 'check-server-connections-dialog-connection-title'
-									"
-								>
+									">
 									{{ node.title }}
 								</span>
 							</div>
 						</QCol>
 						<QCol
 							cols="8"
-							:style="{ 'max-width': `600px !important` }"
-						>
+							:style="{ 'max-width': `600px !important` }">
 							<QRow
 								justify-end
 								no-wrap
-								justify="end"
-							>
+								justify="end">
 								<!--	Plex Server Progress Status Icon -->
 								<QCol cols="3">
 									<QSpinnerRadio
 										v-if="!node.completed"
 										color="red"
-										size="2em"
-									/>
+										size="2em" />
 									<QStatus
 										v-else
-										:value="node.connectionSuccessful"
-									/>
+										:value="node.connectionSuccessful" />
 								</QCol>
 								<!-- Plex Server Connection Progress	-->
 								<QCol cols="9">
@@ -87,20 +76,17 @@
 										<!-- No Plex Server Connection -->
 										<span
 											v-if="node.noConnections"
-											:class="{ 'text-weight-bold': node.type === 'server' }"
-										>
+											:class="{ 'text-weight-bold': node.type === 'server' }">
 											{{ t('components.check-server-connections-dialog.no-connections') }}
 										</span>
 										<span
 											v-else-if="node.connectionSuccessful"
-											:class="{ 'text-weight-bold': node.type === 'server' }"
-										>
+											:class="{ 'text-weight-bold': node.type === 'server' }">
 											{{ t('components.check-server-connections-dialog.server-connectable') }}
 										</span>
 										<span
 											v-else
-											:class="{ 'text-weight-bold': node.type === 'server' }"
-										>
+											:class="{ 'text-weight-bold': node.type === 'server' }">
 											{{ t('components.check-server-connections-dialog.server-un-connectable') }}
 										</span>
 									</template>
@@ -119,8 +105,7 @@
 				<QCol cols="auto">
 					<HideButton
 						cy="check-server-connection-dialog-hide-btn"
-						@click="close"
-					/>
+						@click="close" />
 				</QCol>
 			</QRow>
 		</template>

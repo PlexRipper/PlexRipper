@@ -4,8 +4,7 @@
 		<q-item-section avatar>
 			<BooleanProgress
 				:loading="!progress || !progress.completed"
-				:success="progress && progress.connectionSuccessful"
-			/>
+				:success="progress && progress.connectionSuccessful" />
 		</q-item-section>
 		<!--	Current Action	-->
 		<q-item-section>

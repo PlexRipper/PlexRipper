@@ -6,14 +6,12 @@
 		<HelpRow
 			:label="$t('help.settings.ui.language.language-selection.label')"
 			:title="$t('help.settings.ui.language.language-selection.title')"
-			:text="$t('help.settings.ui.language.language-selection.text')"
-		>
+			:text="$t('help.settings.ui.language.language-selection.text')">
 			<q-select
 				v-model:model-value="language"
 				:dense="false"
 				:options="languageOptions"
-				data-cy="language-selector"
-			>
+				data-cy="language-selector">
 				<template #selected-item="scope">
 					<q-item>
 						<q-item-section avatar>
@@ -21,8 +19,7 @@
 								:src="scope.opt.img"
 								height="50"
 								:max-width="80"
-								:alt="scope.opt.text"
-							/>
+								:alt="scope.opt.text" />
 						</q-item-section>
 						<q-item-section>
 							<q-item-label> {{ scope.opt.text }}</q-item-label>
@@ -32,15 +29,13 @@
 				<template #option="scope">
 					<q-item
 						v-bind="scope.itemProps"
-						:data-cy="`option-${scope.opt.code}`"
-					>
+						:data-cy="`option-${scope.opt.code}`">
 						<q-item-section avatar>
 							<q-img
 								:src="scope.opt.img"
 								height="50"
 								:max-width="80"
-								:alt="scope.opt.text"
-							/>
+								:alt="scope.opt.text" />
 						</q-item-section>
 						<q-item-section>
 							<q-item-label> {{ scope.opt.text }}</q-item-label>

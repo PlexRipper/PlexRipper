@@ -1,8 +1,7 @@
 <template>
 	<QRow
 		no-gutters
-		style="width: 100%"
-	>
+		style="width: 100%">
 		<QCol cols="12">
 			<!-- Header	-->
 			<QRow no-gutters>
@@ -10,8 +9,7 @@
 					<QText
 						size="h4"
 						align="center"
-						bold="medium"
-					>
+						bold="medium">
 						<slot name="header" />
 					</QText>
 					<q-separator />

@@ -13,34 +13,29 @@
 		:row-hover="true"
 		size="small"
 		:rows-per-page-options="[10, 25, 50, 100]"
-		@update:selection-keys="onSelectionChange"
-	>
+		@update:selection-keys="onSelectionChange">
 		<Column
 			field="title"
 			header="Title"
-			expander
-		>
+			expander>
 			<template #header>
 				<QCheckbox
 					:model-value="headerSelected"
-					@update:model-value="$emit('all-selected', $event)"
-				/>
+					@update:model-value="$emit('all-selected', $event)" />
 			</template>
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
 				<QMediaTypeIcon
 					v-if="node.mediaType"
 					:size="26"
 					:media-type="node.mediaType"
-					class="q-mr-md"
-				/>
+					class="q-mr-md" />
 				<span :data-cy="`column-${column.field}-${node.id}`">{{ node.title }}</span>
 			</template>
 		</Column>
 		<Column
 			field="status"
 			header="Status"
-			style="max-width: 10rem"
-		>
+			style="max-width: 10rem">
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
 				<span :data-cy="`column-${column.field}-${node.id}`">
 					{{ node.status }}
@@ -50,75 +45,63 @@
 		<Column
 			field="dataReceived"
 			header="Received"
-			style="max-width: 10rem"
-		>
+			style="max-width: 10rem">
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
 				<QFileSize
 					:data-cy="`column-${column.field}-${node.id}`"
-					:size="node.dataReceived"
-				/>
+					:size="node.dataReceived" />
 			</template>
 		</Column>
 		<Column
 			field="dataTotal"
 			header="Size"
-			style="max-width: 10rem"
-		>
+			style="max-width: 10rem">
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
 				<QFileSize
 					:data-cy="`column-${column.field}-${node.id}`"
-					:size="node.dataTotal"
-				/>
+					:size="node.dataTotal" />
 			</template>
 		</Column>
 		<Column
 			field="downloadSpeed"
 			header="Speed"
-			style="max-width: 10rem"
-		>
+			style="max-width: 10rem">
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
 				<QFileSize
 					:data-cy="`column-${column.field}-${node.id}`"
 					:size="node.downloadSpeed"
-					speed
-				/>
+					speed />
 			</template>
 		</Column>
 		<Column
 			field="timeRemaining"
 			header="ETA"
-			style="max-width: 10rem"
-		>
+			style="max-width: 10rem">
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
 				<QDuration
 					short
 					:data-cy="`column-${column.field}-${node.id}`"
-					:value="node.timeRemaining"
-				/>
+					:value="node.timeRemaining" />
 			</template>
 		</Column>
 		<Column
 			field="percentage"
 			header="Percentage"
-			style="max-width: 10rem"
-		>
+			style="max-width: 10rem">
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
 				<QProgressBar
 					:data-cy="`column-${column.field}-${node.id}`"
-					:value="node.percentage"
-				/>
+					:value="node.percentage" />
 			</template>
 		</Column>
 		<Column
 			field="actions"
 			header="Actions"
-			style="max-width: 15rem"
-		>
+			style="max-width: 15rem">
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
 				<QRow
 					justify="start"
-					no-wrap
-				>
+					no-wrap>
 					<QCol cols="auto">
 						<!-- Item Actions -->
 						<IconSquareButton
@@ -132,8 +115,7 @@
 									action: action,
 									data: node,
 								})
-							"
-						/>
+							" />
 					</QCol>
 				</QRow>
 			</template>

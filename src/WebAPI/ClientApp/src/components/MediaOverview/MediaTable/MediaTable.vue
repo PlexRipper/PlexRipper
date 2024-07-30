@@ -1,21 +1,18 @@
 <template>
 	<div
 		class="media-table"
-		data-cy="media-table"
-	>
+		data-cy="media-table">
 		<MediaTableHeader
 			:columns="mediaTableColumns"
 			selectable
 			:selected="mediaOverviewStore.isRootSelected"
 			class="media-table--header"
-			@selected="mediaOverviewStore.setRootSelected($event)"
-		/>
+			@selected="mediaOverviewStore.setRootSelected($event)" />
 		<div
 			id="media-table-scroll"
 			ref="qTableRef"
 			:class="['media-table--content', isScrollable ? 'scroll' : '']"
-			data-cy="media-table-scroll"
-		>
+			data-cy="media-table-scroll">
 			<template v-if="disableIntersection">
 				<MediaTableRow
 					v-for="(row, index) in rows"
@@ -28,8 +25,7 @@
 					:selected="isSelected(row.id)"
 					:disable-highlight="disableHighlight"
 					:disable-hover-click="disableHoverClick"
-					@selected="updateSelectedRow(row.id, $event)"
-				/>
+					@selected="updateSelectedRow(row.id, $event)" />
 			</template>
 			<template v-else>
 				<q-intersection
@@ -37,8 +33,7 @@
 					:key="index"
 					:once="disableIntersection"
 					class="media-table--intersection highlight-border-box"
-					:data-scroll-index="index"
-				>
+					:data-scroll-index="index">
 					<MediaTableRow
 						:index="index"
 						:data-cy="`media-table-row-${index}`"
@@ -48,8 +43,7 @@
 						:selected="isSelected(row.id)"
 						:disable-highlight="disableHighlight"
 						:disable-hover-click="disableHoverClick"
-						@selected="updateSelectedRow(row.id, $event)"
-					/>
+						@selected="updateSelectedRow(row.id, $event)" />
 				</q-intersection>
 			</template>
 		</div>

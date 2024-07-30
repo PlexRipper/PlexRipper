@@ -4,14 +4,12 @@
 		:loading="loading"
 		content-height="60"
 		max-width="60vw"
-		@opened="onOpen"
-	>
+		@opened="onOpen">
 		<template #title>
 			<template v-if="downloadTask">
 				<QMediaTypeIcon
 					:size="36"
-					:media-type="downloadTask.mediaType"
-				/>
+					:media-type="downloadTask.mediaType" />
 				<span data-cy="download-details-dialog-title">
 					{{ downloadTask.fullTitle }}
 				</span>
@@ -23,8 +21,7 @@
 		<template #default>
 			<q-markup-table
 				v-if="downloadTask"
-				class="section-table"
-			>
+				class="section-table">
 				<tbody>
 					<tr>
 						<td style="width: 25%">
@@ -57,8 +54,7 @@
 						<td data-cy="download-details-dialog-download-url">
 							<QRow
 								no-gutters
-								class="no-wrap"
-							>
+								class="no-wrap">
 								<QCol>{{ downloadTask.downloadUrl }}</QCol>
 								<QCol cols="auto">
 									<ExternalLinkButton :href="downloadTask.downloadUrl" />
@@ -73,8 +69,7 @@
 				<ul>
 					<li
 						v-for="(error, index) in errors"
-						:key="index"
-					>
+						:key="index">
 						{{ error.message }}
 					</li>
 				</ul>

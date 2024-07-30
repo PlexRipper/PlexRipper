@@ -2,8 +2,7 @@
 	<q-layout
 		view="hHh lpR fFf"
 		dark
-		class="no-background"
-	>
+		class="no-background">
 		<q-page-container>
 			<QPage>
 				<QRow justify="center">

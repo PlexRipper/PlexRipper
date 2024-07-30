@@ -1,7 +1,7 @@
 <template>
-	<q-row justify="center">
+	<QRow justify="center">
 		<!-- Plex Accounts -->
-		<q-col
+		<QCol
 			v-for="(account, index) in accountStore.getAccounts"
 			:key="index"
 			class="q-pa-sm"
@@ -10,22 +10,22 @@
 			style="max-width: 395px"
 			xs="12"
 		>
-			<account-card
+			<AccountCard
 				:account="account"
 				@open-dialog="openDialog(false, account)"
 			/>
-		</q-col>
+		</QCol>
 		<!-- Add new Account card -->
-		<q-col
+		<QCol
 			class="q-pa-sm"
 			cols="4"
 			md="6"
 			style="max-width: 395px"
 			xs="12"
 		>
-			<account-card @open-dialog="openDialog(true, null)" />
-		</q-col>
-	</q-row>
+			<AccountCard @open-dialog="openDialog(true, null)" />
+		</QCol>
+	</QRow>
 	<!-- Account Dialog -->
 	<AccountDialog :name="accountDialogName" />
 </template>

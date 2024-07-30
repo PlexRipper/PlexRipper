@@ -1,5 +1,5 @@
 <template>
-	<q-row
+	<QRow
 		class="media-table-row"
 		full-height
 		align="center"
@@ -7,7 +7,7 @@
 	>
 		<template v-if="row">
 			<!-- Checkbox -->
-			<q-col
+			<QCol
 				v-if="selectable"
 				cols="auto"
 				class="q-ml-md q-pl-sm"
@@ -17,24 +17,24 @@
 					:model-value="selected"
 					@update:model-value="$emit('selected', $event)"
 				/>
-			</q-col>
+			</QCol>
 			<template
 				v-for="(column, i) in columns"
 				:key="i"
 			>
 				<!-- Index -->
 				<template v-if="column['type'] === 'index'">
-					<q-col
+					<QCol
 						cols="auto"
 						style="min-width: 50px"
 						class="media-table-row--column"
 					>
 						<span> #{{ row[column.field] }} </span>
-					</q-col>
+					</QCol>
 				</template>
 				<!-- Title -->
 				<template v-else-if="column['type'] === 'title'">
-					<q-col
+					<QCol
 						:class="[
 							'media-table-row--column',
 							'media-table-row--title',
@@ -45,11 +45,11 @@
 						<span>
 							{{ row[column.field] }}
 						</span>
-					</q-col>
+					</QCol>
 				</template>
 				<!-- Duration format -->
 				<template v-else-if="column['type'] === 'duration'">
-					<q-col
+					<QCol
 						cols="1"
 						class="media-table-row--column"
 					>
@@ -57,11 +57,11 @@
 							short
 							:value="row[column.field]"
 						/>
-					</q-col>
+					</QCol>
 				</template>
 				<!-- Date format -->
 				<template v-else-if="column['type'] === 'date'">
-					<q-col
+					<QCol
 						cols="1"
 						class="media-table-row--column"
 					>
@@ -69,20 +69,20 @@
 							short-date
 							:text="row[column.field]"
 						/>
-					</q-col>
+					</QCol>
 				</template>
 				<!-- Media size -->
 				<template v-else-if="column['type'] === 'file-size'">
-					<q-col
+					<QCol
 						cols="1"
 						class="media-table-row--column"
 					>
 						<QFileSize :size="row[column.field]" />
-					</q-col>
+					</QCol>
 				</template>
 				<!-- Actions -->
 				<template v-else-if="column['type'] === 'actions'">
-					<q-col
+					<QCol
 						cols="auto"
 						class="media-table-row--column"
 					>
@@ -91,14 +91,14 @@
 							:icon="Convert.buttonTypeToIcon(ButtonType.Download)"
 							@click.stop="onRowAction({ command: 'download' })"
 						/>
-					</q-col>
+					</QCol>
 				</template>
 			</template>
 		</template>
 		<!-- No row -->
-		<q-col v-else>
+		<QCol v-else>
 			{{ t('components.q-tree-view-table-row.invalid-node') }}
-		</q-col>
+		</QCol>
 		<!--	Highlight animation effect	-->
 		<svg
 			v-if="!disableHighlight"
@@ -121,7 +121,7 @@
 				class="glow-line"
 			/>
 		</svg>
-	</q-row>
+	</QRow>
 </template>
 
 <script setup lang="ts">

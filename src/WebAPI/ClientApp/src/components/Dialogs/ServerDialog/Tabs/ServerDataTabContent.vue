@@ -28,7 +28,7 @@
 			<tr>
 				<td>{{ t('components.server-dialog.tabs.server-data.created-on') }}:</td>
 				<td>
-					<q-date-time
+					<QDateTime
 						short-date
 						:text="plexServer.createdAt"
 					/>
@@ -37,7 +37,7 @@
 			<tr>
 				<td>{{ t('components.server-dialog.tabs.server-data.last-seen-at') }}:</td>
 				<td>
-					<q-date-time
+					<QDateTime
 						short-date
 						:text="plexServer.lastSeenAt"
 					/>
@@ -46,7 +46,7 @@
 			<tr>
 				<td>{{ t('components.server-dialog.tabs.server-data.current-status') }}:</td>
 				<td>
-					<q-status :value="serverStore.getServerStatus(plexServer.id)" />
+					<QStatus :value="serverStore.getServerStatus(plexServer.id)" />
 				</td>
 			</tr>
 			<!--	Check Server Action	-->
@@ -69,7 +69,7 @@
 								:key="index"
 							>
 								<td>
-									<q-status
+									<QStatus
 										pulse
 										:value="progressItem.connectionSuccessful"
 									/>
@@ -80,7 +80,7 @@
 						<tbody v-else-if="progress.every((x) => x.completed)">
 							<tr>
 								<td>
-									<q-status
+									<QStatus
 										pulse
 										:value="progress.some((x) => x.connectionSuccessful)"
 									/>

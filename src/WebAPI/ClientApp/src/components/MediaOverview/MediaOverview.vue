@@ -1,30 +1,30 @@
 <template>
 	<!--	Refresh Library Screen	-->
-	<q-row
+	<QRow
 		v-if="isRefreshing"
 		justify="center"
 		align="center"
 		class="refresh-library-container"
 		cy="refresh-library-container"
 	>
-		<q-col
+		<QCol
 			cols="8"
 			align-self="center"
 		>
-			<progress-component
+			<ProgressComponent
 				circular-mode
 				:percentage="libraryProgress?.percentage ?? -1"
 				:text="refreshingText"
 			/>
 			<!--				<h1 v-else>{{ t('components.media-overview.retrieving-library') }}</h1> -->
-		</q-col>
-	</q-row>
+		</QCol>
+	</QRow>
 	<!-- Media Overview -->
 	<template v-else-if="!loading && mediaOverviewStore.itemsLength">
-		<q-row no-gutters>
-			<q-col>
+		<QRow no-gutters>
+			<QCol>
 				<!--	Overview bar	-->
-				<media-overview-bar
+				<MediaOverviewBar
 					:server="libraryStore.getServerByLibraryId(props.libraryId)"
 					:library="libraryStore.getLibrary(props.libraryId)"
 					:detail-mode="!mediaOverviewStore.showMediaOverview"
@@ -34,11 +34,11 @@
 					@refresh-library="refreshLibrary"
 				/>
 				<!--	Data table display	-->
-				<q-row
+				<QRow
 					id="media-container"
 					align="start"
 				>
-					<q-col v-show="mediaOverviewStore.showMediaOverview">
+					<QCol v-show="mediaOverviewStore.showMediaOverview">
 						<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
 							<MediaTable
 								:rows="mediaOverviewStore.items"
@@ -49,27 +49,27 @@
 
 						<!-- Poster display -->
 						<template v-else>
-							<poster-table
+							<PosterTable
 								:library-id="libraryId"
 								:media-type="mediaType"
 								:items="mediaOverviewStore.items"
 							/>
 						</template>
-					</q-col>
+					</QCol>
 
 					<!-- Alphabet Navigation -->
-					<alphabet-navigation v-show="mediaOverviewStore.showMediaOverview" />
-				</q-row>
-			</q-col>
-		</q-row>
+					<AlphabetNavigation v-show="mediaOverviewStore.showMediaOverview" />
+				</QRow>
+			</QCol>
+		</QRow>
 	</template>
 	<!-- No Media Overview -->
 	<template v-else-if="!loading && mediaOverviewStore.itemsLength === 0">
-		<q-row justify="center">
-			<q-col cols="auto">
+		<QRow justify="center">
+			<QCol cols="auto">
 				<h1>{{ t('components.media-overview.no-data') }}</h1>
-			</q-col>
-		</q-row>
+			</QCol>
+		</QRow>
 	</template>
 	<!-- Media Details Display -->
 	<DetailsOverview :name="mediaDetailsDialogName" />

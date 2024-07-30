@@ -1,12 +1,12 @@
 <template>
-	<q-row
+	<QRow
 		no-gutters
 		style="width: 100%"
 	>
-		<q-col cols="12">
+		<QCol cols="12">
 			<!-- Header	-->
-			<q-row no-gutters>
-				<q-col>
+			<QRow no-gutters>
+				<QCol>
 					<QText
 						size="h4"
 						align="center"
@@ -15,12 +15,12 @@
 						<slot name="header" />
 					</QText>
 					<q-separator />
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 			<!--	Section Content	-->
 			<slot />
-		</q-col>
-	</q-row>
+		</QCol>
+	</QRow>
 </template>
 
 <script setup lang="ts"></script>

@@ -1,8 +1,8 @@
 <template>
 	<!--	Show warning when no allowed to edit	-->
 	<template v-if="!allowEditing">
-		<q-row>
-			<q-col>
+		<QRow>
+			<QCol>
 				<q-alert
 					border="bottom"
 					colored-border
@@ -11,11 +11,11 @@
 				>
 					{{ t('general.alerts.disabled-paths') }}
 				</q-alert>
-			</q-col>
-		</q-row>
+			</QCol>
+		</QRow>
 	</template>
 	<template v-else>
-		<q-section
+		<QSection
 			v-for="(folderGroup, i) in folderPathStore.getFolderPathsGroups(onlyDefaults)"
 			:key="i"
 		>
@@ -26,25 +26,25 @@
 				{{ folderGroup.header }}
 			</template>
 			<template v-if="folderGroup.paths.length > 0">
-				<q-row
+				<QRow
 					v-for="folderPath in folderGroup.paths"
 					:key="folderPath.id"
 					class="q-my-sm"
 				>
-					<q-col cols="3">
-						<editable-text
+					<QCol cols="3">
+						<EditableText
 							v-if="folderGroup.isFolderNameEditable"
 							:value="folderPath.displayName"
 							:disabled="!allowEditing"
 							@save="saveDisplayName(folderPath.id, $event)"
 						/>
-						<help-icon
+						<HelpIcon
 							v-else
 							:help-id="toTranslation(folderPath.folderType)"
 						/>
-					</q-col>
+					</QCol>
 					<!--	Folder Path Display	-->
-					<q-col cols="7">
+					<QCol cols="7">
 						<q-input
 							:model-value="folderPath.directory"
 							readonly
@@ -55,20 +55,20 @@
 								@click="openDirectoryBrowser(folderPath)"
 							/>
 						</q-input>
-					</q-col>
+					</QCol>
 					<!--	Is Valid Icon -->
-					<q-col
+					<QCol
 						cols="auto"
 						align-self="center"
 					>
-						<valid-icon
+						<ValidIcon
 							:valid="folderPath.isValid"
 							:valid-text="t('general.alerts.valid-directory')"
 							:invalid-text="t('general.alerts.invalid-directory')"
 						/>
-					</q-col>
+					</QCol>
 					<!--	Delete Button -->
-					<q-col
+					<QCol
 						v-if="folderGroup.IsFolderDeletable"
 						cols="auto"
 					>
@@ -76,34 +76,34 @@
 							:disabled="!allowEditing"
 							@click="deleteFolderPath(folderPath.id)"
 						/>
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 			</template>
 			<!--	No custom FolderPaths	Warning -->
 			<template v-else>
-				<q-row
+				<QRow
 					justify="center"
 					class="q-my-sm"
 				>
-					<q-col cols="auto">
+					<QCol cols="auto">
 						<h2>{{ t('components.folder-paths-overview.no-paths') }}</h2>
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 			</template>
 			<!--	Add Path Button	-->
-			<q-row
+			<QRow
 				v-if="folderGroup.isFolderAddable"
 				justify="center"
 				class="q-my-sm"
 			>
-				<q-col cols="auto">
+				<QCol cols="auto">
 					<AddIconButton
 						:disabled="!allowEditing"
 						@click="addFolderPath(folderGroup)"
 					/>
-				</q-col>
-			</q-row>
-		</q-section>
+				</QCol>
+			</QRow>
+		</QSection>
 	</template>
 
 	<!--	Directory Browser	-->

@@ -1,5 +1,5 @@
 <template>
-	<q-section>
+	<QSection>
 		<template #header>
 			{{ t('pages.settings.ui.un-hide-servers-section.header') }}
 		</template>
@@ -23,7 +23,7 @@
 				</q-item-section>
 			</q-item>
 		</q-list>
-	</q-section>
+	</QSection>
 </template>
 
 <script setup lang="ts">

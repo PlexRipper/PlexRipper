@@ -13,7 +13,7 @@
 		data-cy="poster-table"
 		@resize="onResize"
 	>
-		<media-poster
+		<MediaPoster
 			:index="index"
 			:media-item="item"
 			:data-scroll-index="index"

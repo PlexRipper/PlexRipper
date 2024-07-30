@@ -1,11 +1,11 @@
 <template>
-	<q-page>
-		<media-overview
+	<QPage>
+		<MediaOverview
 			:library-id="libraryId"
 			:media-id="mediaId"
 			:media-type="PlexMediaType.Movie"
 		/>
-	</q-page>
+	</QPage>
 </template>
 
 <script setup lang="ts">

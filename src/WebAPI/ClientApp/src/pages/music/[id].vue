@@ -1,11 +1,11 @@
 <template>
-	<q-page>
-		<q-row>
-			<q-col>
+	<QPage>
+		<QRow>
+			<QCol>
 				<h1>{{ t('pages.music._musicId.header') }}</h1>
-			</q-col>
-		</q-row>
-	</q-page>
+			</QCol>
+		</QRow>
+	</QPage>
 </template>
 
 <script setup lang="ts">

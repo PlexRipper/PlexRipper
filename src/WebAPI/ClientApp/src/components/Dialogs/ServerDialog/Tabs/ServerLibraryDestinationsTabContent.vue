@@ -11,7 +11,7 @@
 				style="margin: 4px 0"
 			>
 				<q-td>
-					<q-media-type-icon
+					<QMediaTypeIcon
 						:media-type="library.type"
 						class="mx-3"
 					/>

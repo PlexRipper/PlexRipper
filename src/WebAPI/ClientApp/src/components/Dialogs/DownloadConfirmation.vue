@@ -14,7 +14,7 @@
 		<template #top-row>
 			<span>{{ t('components.download-confirmation.description') }}</span> <br>
 			<span>{{ t('components.download-confirmation.total-size') }}</span>
-			<q-file-size
+			<QFileSize
 				:size="totalSize"
 				class="q-ml-sm"
 			/>

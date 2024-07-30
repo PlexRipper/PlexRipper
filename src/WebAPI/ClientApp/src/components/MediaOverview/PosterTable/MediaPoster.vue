@@ -4,7 +4,7 @@
 		class="media-poster media-poster--card highlight-border-box"
 	>
 		<div>
-			<q-hover>
+			<QHover>
 				<template #default="{ hover }">
 					<q-img
 						v-if="!defaultImage"
@@ -17,20 +17,20 @@
 					>
 						<!--	Overlay	-->
 						<div :class="['media-poster--overlay', hover ? 'on-hover' : '', 'white--text']">
-							<q-row
+							<QRow
 								justify="center"
 								align="end"
 								style="height: 100%"
 							>
-								<q-col
+								<QCol
 									cols="12"
 									text-align="center"
 								>
 									<span class="media-poster--title">
 										{{ mediaItem.title }}
 									</span>
-								</q-col>
-								<q-col cols="auto">
+								</QCol>
+								<QCol cols="auto">
 									<BaseButton
 										v-if="mediaType === PlexMediaType.Movie"
 										icon="mdi-download"
@@ -47,32 +47,32 @@
 										flat
 										@click="sendMediaOverviewOpenDetailsCommand(mediaItem.id)"
 									/>
-								</q-col>
-							</q-row>
+								</QCol>
+							</QRow>
 						</div>
 					</q-img>
 					<!--	Show fallback image	-->
 					<template v-else>
-						<q-row
+						<QRow
 							column
 							align="center"
 							justify="between"
 							class="media-poster--fallback"
 						>
-							<q-col>
-								<q-media-type-icon
+							<QCol>
+								<QMediaTypeIcon
 									class="mx-3"
 									:size="90"
 									:media-type="mediaType"
 								/>
-							</q-col>
-							<q-col text-align="center">
+							</QCol>
+							<QCol text-align="center">
 								<span class="media-poster--title">
 									{{ mediaItem.title }}
 								</span>
-							</q-col>
+							</QCol>
 
-							<q-col cols="auto">
+							<QCol cols="auto">
 								<BaseButton
 									v-if="mediaType === PlexMediaType.Movie"
 									icon="mdi-download"
@@ -89,11 +89,11 @@
 									flat
 									@click="sendMediaOverviewOpenDetailsCommand(mediaItem.id)"
 								/>
-							</q-col>
-						</q-row>
+							</QCol>
+						</QRow>
 					</template>
 				</template>
-			</q-hover>
+			</QHover>
 		</div>
 		<!--	Poster bar	-->
 		<div

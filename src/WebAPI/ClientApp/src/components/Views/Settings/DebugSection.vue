@@ -1,5 +1,5 @@
 <template>
-	<q-section>
+	<QSection>
 		<template #header>
 			{{ t('pages.settings.advanced.debug.header') }}
 		</template>
@@ -24,7 +24,7 @@
 				size="lg"
 			/>
 		</HelpRow>
-	</q-section>
+	</QSection>
 </template>
 
 <script setup lang="ts">

@@ -4,28 +4,28 @@
 		class="background-sm q-ma-md"
 	>
 		<template #header>
-			<q-row
+			<QRow
 				justify="between"
 				align="center"
 			>
 				<!-- Download Server Settings -->
-				<q-col
+				<QCol
 					cols="auto"
 					style="white-space: nowrap"
 				>
-					<server-download-status
+					<ServerDownloadStatus
 						v-if="false"
 						style="display: inline-block"
 					/>
-				</q-col>
-				<q-col />
+				</QCol>
+				<QCol />
 				<!-- Download Server Title -->
-				<q-col cols="auto">
+				<QCol cols="auto">
 					<QStatus :value="serverConnectionStore.isServerConnected(plexServer.id)" />
 					<span class="title q-ml-md">{{ serverStore.getServerName(plexServer.id) }}</span>
-				</q-col>
-				<q-col class="q-py-none" />
-			</q-row>
+				</QCol>
+				<QCol class="q-py-none" />
+			</QRow>
 		</template>
 		<template #default>
 			<PrimeTreeTable

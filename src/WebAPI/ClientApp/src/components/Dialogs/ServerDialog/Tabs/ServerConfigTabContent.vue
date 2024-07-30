@@ -1,6 +1,6 @@
 <template>
 	<HelpRow help-id="help.server-dialog.server-config.download-speed-limit">
-		<download-limit-input
+		<DownloadLimitInput
 			v-if="plexServer"
 			:download-speed-limit="settingsStore.getServerSettings(plexServer.machineIdentifier)?.downloadSpeedLimit ?? 0"
 			@change="settingsStore.updateDownloadLimit(plexServer.machineIdentifier, $event)"

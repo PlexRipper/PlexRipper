@@ -1,18 +1,18 @@
 <template>
-	<q-section>
+	<QSection>
 		<template #header>
 			{{ t('pages.settings.advanced.setup.header') }}
 		</template>
 		<!--	Reset Database	-->
-		<help-row help-id="help.settings.advanced.setup-section.go-to-setup-page">
+		<HelpRow help-id="help.settings.advanced.setup-section.go-to-setup-page">
 			<GoToButton
 				:width="400"
 				text-id="go-to-setup-page"
 				to="/setup"
 				block
 			/>
-		</help-row>
-	</q-section>
+		</HelpRow>
+	</QSection>
 </template>
 
 <script setup lang="ts">

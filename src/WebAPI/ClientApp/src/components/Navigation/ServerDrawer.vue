@@ -12,7 +12,7 @@
 					side
 					no-wrap
 				>
-					<q-status :value="serverConnectionStore.isServerConnected(server.id)" />
+					<QStatus :value="serverConnectionStore.isServerConnected(server.id)" />
 				</q-item-section>
 
 				<q-item-section>
@@ -46,7 +46,7 @@
 					@click="openMediaPage(library)"
 				>
 					<q-item-section avatar>
-						<q-media-type-icon :media-type="library.type" />
+						<QMediaTypeIcon :media-type="library.type" />
 					</q-item-section>
 					<q-item-section>{{ libraryStore.getLibraryName(library.id) }}</q-item-section>
 				</q-item>

@@ -1,6 +1,6 @@
 <template>
 	<q-header class="app-bar">
-		<q-row no-wrap>
+		<QRow no-wrap>
 			<q-toolbar class="app-bar">
 				<q-toolbar-title>
 					<q-btn
@@ -15,7 +15,7 @@
 						to="/"
 						flat
 					>
-						<logo
+						<Logo
 							:size="24"
 							class="q-mr-md"
 						/>
@@ -45,7 +45,7 @@
 				<!-- Notifications Selector -->
 				<NotificationButton @toggle="showNotificationsDrawer" />
 			</q-toolbar>
-		</q-row>
+		</QRow>
 	</q-header>
 </template>
 

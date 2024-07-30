@@ -6,7 +6,7 @@
 		overlay
 		class="no-background notification-drawer"
 	>
-		<q-col class="notification-container">
+		<QCol class="notification-container">
 			<q-scroll>
 				<!-- Render All Notifications	-->
 				<template v-if="notifications.length > 0">
@@ -44,9 +44,9 @@
 					</q-list>
 				</template>
 			</q-scroll>
-		</q-col>
+		</QCol>
 		<!-- Menu items -->
-		<q-col
+		<QCol
 			v-if="notifications.length > 0"
 			class="clear-notifications-container"
 		>
@@ -63,7 +63,7 @@
 					</q-item-section>
 				</q-item>
 			</q-list>
-		</q-col>
+		</QCol>
 	</q-drawer>
 </template>
 

@@ -11,10 +11,10 @@
 		@closed="closeDetails"
 	>
 		<template #default>
-			<q-col>
+			<QCol>
 				<!--	Header	-->
-				<q-row>
-					<q-col cols="auto">
+				<QRow>
+					<QCol cols="auto">
 						<q-card class="q-ma-md media-info-container">
 							<!--	Poster	-->
 							<q-img
@@ -27,29 +27,29 @@
 								<!--	Placeholder	-->
 								<template #loading>
 									<!--	Show fallback image	-->
-									<q-row
+									<QRow
 										align="center"
 										justify="center"
 										class="fill-height"
 									>
-										<q-col cols="auto">
-											<q-media-type-icon
+										<QCol cols="auto">
+											<QMediaTypeIcon
 												:size="100"
 												class="mx-3"
 												:media-type="mediaItemDetail?.type ?? PlexMediaType.Unknown"
 											/>
-										</q-col>
-										<q-col cols="12">
+										</QCol>
+										<QCol cols="12">
 											<h4 class="text-center">
 												{{ mediaItemDetail?.title ?? 'unknown' }}
 											</h4>
-										</q-col>
-									</q-row>
+										</QCol>
+									</QRow>
 								</template>
 							</q-img>
 						</q-card>
-					</q-col>
-					<q-col>
+					</QCol>
+					<QCol>
 						<q-card
 							class="q-ma-md media-info-container"
 							:style="{ height: thumbHeight + 'px' }"
@@ -71,7 +71,7 @@
 												{{ t('components.details-overview.total-duration') }}
 											</td>
 											<td class="media-info-column">
-												<q-duration :value="mediaItemDetail?.duration ?? -1" />
+												<QDuration :value="mediaItemDetail?.duration ?? -1" />
 											</td>
 										</tr>
 										<tr>
@@ -94,21 +94,21 @@
 								</q-markup-table>
 							</q-card-section>
 						</q-card>
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 
 				<!--	Media Table	-->
-				<q-row no-gutters>
-					<q-col>
+				<QRow no-gutters>
+					<QCol>
 						<MediaList
 							use-q-table
 							:media-item="mediaItemDetail"
 							disable-intersection
 							disable-highlight
 						/>
-					</q-col>
-				</q-row>
-			</q-col>
+					</QCol>
+				</QRow>
+			</QCol>
 		</template>
 	</QCardDialog>
 </template>

@@ -1,5 +1,5 @@
 <template>
-	<q-row
+	<QRow
 		v-if="node"
 		justify="between"
 		align="center"
@@ -8,12 +8,12 @@
 		class="q-mb-xs"
 	>
 		<!--	Title Column	-->
-		<q-col class="q-ml-sm">
-			<q-row
+		<QCol class="q-ml-sm">
+			<QRow
 				align="center"
 				justify="start"
 			>
-				<q-col
+				<QCol
 					v-if="isHeader && selectable"
 					cols="auto"
 					class="q-ml-md q-pl-sm"
@@ -23,29 +23,29 @@
 						:model-value="selected"
 						@update:model-value="$emit('selected', $event)"
 					/>
-				</q-col>
-				<q-col
+				</QCol>
+				<QCol
 					v-if="columns[0]?.field"
 					align-self="start"
 					cols="auto"
 					class="header-column"
 				>
-					<q-media-type-icon
+					<QMediaTypeIcon
 						v-if="node['mediaType']"
 						:media-type="node['mediaType']"
 					/>
 					<span :data-cy="`column-${columns[0]?.field}-${node.id}`">
 						{{ node[columns[0].field ?? ''] ?? 'unknown' }}
 					</span>
-				</q-col>
-			</q-row>
-		</q-col>
+				</QCol>
+			</QRow>
+		</QCol>
 		<!--	Rest of the Columns	-->
-		<q-col
+		<QCol
 			cols="auto"
 			:style="{ 'max-width': `${getContainerWidth}px !important` }"
 		>
-			<q-row
+			<QRow
 				align="center"
 				justify="end"
 				no-wrap
@@ -55,7 +55,7 @@
 					:key="column.field"
 				>
 					<!--	Table Header Row	-->
-					<q-col
+					<QCol
 						v-if="isHeader"
 						cols="auto"
 						:text-align="'center'"
@@ -64,9 +64,9 @@
 						<span :data-cy="`column-${column.field}-${node.id}`">
 							{{ node[column.field] }}
 						</span>
-					</q-col>
+					</QCol>
 					<!--	Rest of the Columns	-->
-					<q-col
+					<QCol
 						v-else
 						cols="auto"
 						class="table-column"
@@ -113,11 +113,11 @@
 						</template>
 						<!-- Actions -->
 						<template v-else-if="column['type'] === 'actions'">
-							<q-row
+							<QRow
 								justify="start"
 								no-wrap
 							>
-								<q-col cols="auto">
+								<QCol cols="auto">
 									<!-- Item Actions -->
 									<IconSquareButton
 										v-for="(action, y) in node[column.field]"
@@ -132,8 +132,8 @@
 											})
 										"
 									/>
-								</q-col>
-							</q-row>
+								</QCol>
+							</QRow>
 						</template>
 						<!-- Default format -->
 						<template v-else>
@@ -141,14 +141,14 @@
 								{{ node[column.field] }}
 							</span>
 						</template>
-					</q-col>
+					</QCol>
 				</template>
-			</q-row>
-		</q-col>
-	</q-row>
-	<q-row v-else>
-		<q-col>{{ t('components.q-tree-view-table-row.invalid-node') }}</q-col>
-	</q-row>
+			</QRow>
+		</QCol>
+	</QRow>
+	<QRow v-else>
+		<QCol>{{ t('components.q-tree-view-table-row.invalid-node') }}</QCol>
+	</QRow>
 </template>
 
 <script setup lang="ts">

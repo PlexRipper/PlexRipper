@@ -1,10 +1,10 @@
 <template>
-	<q-row
+	<QRow
 		align="center"
 		justify="between"
 		class="media-table-header"
 	>
-		<q-col
+		<QCol
 			v-if="selectable"
 			cols="auto"
 			class="media-table-header--column"
@@ -15,65 +15,65 @@
 				class="q-ml-md"
 				@update:model-value="$emit('selected', $event)"
 			/>
-		</q-col>
+		</QCol>
 		<template
 			v-for="(column, i) in columns"
 			:key="i"
 		>
 			<!-- Index -->
 			<template v-if="column['type'] === 'index'">
-				<q-col
+				<QCol
 					cols="auto"
 					style="min-width: 45px"
 					class="media-table-header--column"
 				>
 					<MediaTableHeaderColumn :column="column" />
-				</q-col>
+				</QCol>
 			</template>
 			<!-- Title -->
 			<template v-else-if="column['type'] === 'title'">
-				<q-col class="media-table-header--title media-table-header--column">
+				<QCol class="media-table-header--title media-table-header--column">
 					<MediaTableHeaderColumn :column="column" />
-				</q-col>
+				</QCol>
 			</template>
 			<!-- Duration format -->
 			<template v-else-if="column['type'] === 'duration'">
-				<q-col
+				<QCol
 					cols="1"
 					class="media-table-header--column"
 				>
 					<MediaTableHeaderColumn :column="column" />
-				</q-col>
+				</QCol>
 			</template>
 			<!-- Date format -->
 			<template v-else-if="column['type'] === 'date'">
-				<q-col
+				<QCol
 					cols="1"
 					class="media-table-header--column"
 				>
 					<MediaTableHeaderColumn :column="column" />
-				</q-col>
+				</QCol>
 			</template>
 			<!-- Filesize format -->
 			<template v-else-if="column['type'] === 'file-size'">
-				<q-col
+				<QCol
 					cols="1"
 					class="media-table-header--column"
 				>
 					<MediaTableHeaderColumn :column="column" />
-				</q-col>
+				</QCol>
 			</template>
 			<!-- Actions -->
 			<template v-else-if="column['type'] === 'actions'">
-				<q-col
+				<QCol
 					cols="auto"
 					class="media-table-header--column"
 				>
 					<MediaTableHeaderColumn :column="column" />
-				</q-col>
+				</QCol>
 			</template>
 		</template>
-	</q-row>
+	</QRow>
 </template>
 
 <script setup lang="ts">

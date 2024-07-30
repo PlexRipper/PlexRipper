@@ -24,11 +24,11 @@
 			/>
 		</template>
 		<template #default>
-			<q-row
+			<QRow
 				align="start"
 				full-height
 			>
-				<q-col
+				<QCol
 					cols="auto"
 					align-self="stretch"
 				>
@@ -74,8 +74,8 @@
 							:label="t('components.server-dialog.tabs.server-commands.header')"
 						/>
 					</q-tabs>
-				</q-col>
-				<q-col
+				</QCol>
+				<QCol
 					align-self="stretch"
 					class="tab-content inherit-all-height scroll"
 				>
@@ -114,7 +114,7 @@
 							name="server-config"
 							data-cy="server-dialog-tab-content-3"
 						>
-							<server-config-tab-content :plex-server="plexServer" />
+							<ServerConfigTabContent :plex-server="plexServer" />
 						</q-tab-panel>
 
 						<!--	Library Download Destinations	Tab Content -->
@@ -123,7 +123,7 @@
 							class="inherit-all-height"
 							data-cy="server-dialog-tab-content-4"
 						>
-							<server-library-destinations-tab-content
+							<ServerLibraryDestinationsTabContent
 								:plex-server="plexServer"
 								:plex-libraries="libraryStore.getLibrariesByServerId(plexServerId)"
 							/>
@@ -134,25 +134,25 @@
 							name="server-commands"
 							data-cy="server-dialog-tab-content-5"
 						>
-							<server-commands-tab-content
+							<ServerCommandsTabContent
 								:plex-server="plexServer"
 								:is-visible="isVisible"
 							/>
 						</q-tab-panel>
 					</q-tab-panels>
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 
 			<!--			<q-card v-else class="server-dialog-content"> -->
 			<!--				<h1>{{ t('components.server-dialog.no-servers-error') }}</h1> -->
 			<!--			</q-card> -->
 		</template>
 		<template #actions>
-			<q-row justify="between">
-				<q-col cols="auto">
+			<QRow justify="between">
+				<QCol cols="auto">
 					<HideButton @click="useOpenControlDialog(confirmationServerDialogName)" />
-				</q-col>
-				<q-col cols="auto">
+				</QCol>
+				<QCol cols="auto">
 					<BaseButton
 						cy="server-dialog-close-btn"
 						flat
@@ -160,10 +160,10 @@
 						color="default"
 						@click="close"
 					/>
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 			<!-- Hide Server Confirm Dialog -->
-			<confirmation-dialog
+			<ConfirmationDialog
 				:confirm-loading="confirmHideDialog"
 				:name="confirmationServerDialogName"
 				class="q-mr-md"

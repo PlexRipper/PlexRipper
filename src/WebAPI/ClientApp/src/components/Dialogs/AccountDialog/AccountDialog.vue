@@ -22,39 +22,39 @@
 		</template>
 		<!-- Dialog Actions	-->
 		<template #actions="{ close }">
-			<q-row
+			<QRow
 				justify="between"
 				gutter="md"
 			>
 				<!-- Delete account -->
-				<q-col v-if="!isNewAccount">
+				<QCol v-if="!isNewAccount">
 					<DeleteButton
 						class="mx-2"
 						block
 						cy="account-dialog-delete-button"
 						@click="openConfirmationDialog"
 					/>
-				</q-col>
+				</QCol>
 				<!-- Cancel button -->
-				<q-col>
+				<QCol>
 					<CancelButton
 						class="mx-2"
 						block
 						cy="account-dialog-cancel-button"
 						@click="close"
 					/>
-				</q-col>
+				</QCol>
 				<!-- Reset Form -->
-				<q-col>
+				<QCol>
 					<ResetButton
 						class="mx-2"
 						block
 						cy="account-dialog-reset-button"
 						@click="reset"
 					/>
-				</q-col>
+				</QCol>
 				<!-- Validation button -->
-				<q-col>
+				<QCol>
 					<AccountValidationButton
 						:color="validationStyle.color"
 						:disabled="validateLoading"
@@ -66,9 +66,9 @@
 						class="q-mx-md"
 						@click="validate"
 					/>
-				</q-col>
+				</QCol>
 				<!-- Save account -->
-				<q-col>
+				<QCol>
 					<SaveButton
 						:disabled="!isAllowedToSave"
 						:text-id="isNewAccount ? 'save' : 'update'"
@@ -78,8 +78,8 @@
 						class="q-mx-md"
 						@click="saveAccount(close)"
 					/>
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 		</template>
 	</QCardDialog>
 
@@ -91,7 +91,7 @@
 		@confirm="validateAfterVerificationCode"
 	/>
 	<!--	Delete Confirmation Dialog	-->
-	<confirmation-dialog
+	<ConfirmationDialog
 		:confirm-loading="deleteLoading"
 		:name="confirmationDialogName"
 		class="q-mr-md"

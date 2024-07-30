@@ -1,10 +1,10 @@
 <template>
-	<q-section>
+	<QSection>
 		<template #header>
 			{{ t('pages.settings.advanced.download-manager.header') }}
 		</template>
 		<!--	Max segmented downloads	-->
-		<help-row help-id="help.settings.advanced.download-manager-section.download-segments">
+		<HelpRow help-id="help.settings.advanced.download-manager-section.download-segments">
 			<QSlider
 				:model-value="settingsStore.downloadManagerSettings.downloadSegments"
 				label
@@ -14,8 +14,8 @@
 				:step="1"
 				@change="settingsStore.downloadManagerSettings.downloadSegments = $event"
 			/>
-		</help-row>
-	</q-section>
+		</HelpRow>
+	</QSection>
 </template>
 
 <script setup lang="ts">

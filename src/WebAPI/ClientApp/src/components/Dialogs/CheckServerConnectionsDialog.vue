@@ -7,7 +7,7 @@
 	>
 		<template #top-row>
 			<!-- The total progress -->
-			<progress-component
+			<ProgressComponent
 				class="q-ma-md"
 				circular-mode
 				:percentage="totalPercentage"
@@ -25,11 +25,11 @@
 				default-expand-all
 			>
 				<template #default-header="{ node }: { node: IPlexServerNode }">
-					<q-row
+					<QRow
 						justify="between"
 						align="center"
 					>
-						<q-col cols="4">
+						<QCol cols="4">
 							<div :class="{ 'text-weight-bold': isServer(node) }">
 								<!--	Plex Server Connection Icon -->
 								<q-icon
@@ -59,30 +59,30 @@
 									{{ node.title }}
 								</span>
 							</div>
-						</q-col>
-						<q-col
+						</QCol>
+						<QCol
 							cols="8"
 							:style="{ 'max-width': `600px !important` }"
 						>
-							<q-row
+							<QRow
 								justify-end
 								no-wrap
 								justify="end"
 							>
 								<!--	Plex Server Progress Status Icon -->
-								<q-col cols="3">
-									<q-spinner-radio
+								<QCol cols="3">
+									<QSpinnerRadio
 										v-if="!node.completed"
 										color="red"
 										size="2em"
 									/>
-									<q-status
+									<QStatus
 										v-else
 										:value="node.connectionSuccessful"
 									/>
-								</q-col>
+								</QCol>
 								<!-- Plex Server Connection Progress	-->
-								<q-col cols="9">
+								<QCol cols="9">
 									<template v-if="isServer(node) && node.completed">
 										<!-- No Plex Server Connection -->
 										<span
@@ -107,22 +107,22 @@
 									<template v-else-if="node.progress">
 										<ConnectionProgressText :progress="node.progress" />
 									</template>
-								</q-col>
-							</q-row>
-						</q-col>
-					</q-row>
+								</QCol>
+							</QRow>
+						</QCol>
+					</QRow>
 				</template>
 			</q-tree>
 		</template>
 		<template #actions="{ close }">
-			<q-row justify="end">
-				<q-col cols="auto">
+			<QRow justify="end">
+				<QCol cols="auto">
 					<HideButton
 						cy="check-server-connection-dialog-hide-btn"
 						@click="close"
 					/>
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 		</template>
 	</QCardDialog>
 </template>

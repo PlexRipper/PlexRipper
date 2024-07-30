@@ -2,28 +2,28 @@
 	<q-list v-if="mediaItem?.children?.length ?? -1 > 0">
 		<!--	Root item	-->
 		<q-item>
-			<q-row align="center">
-				<q-col cols="auto">
+			<QRow align="center">
+				<QCol cols="auto">
 					<q-checkbox
 						:model-value="rootSelected"
 						@update:model-value="rootSetSelected($event)"
 					/>
-				</q-col>
-				<q-col class="q-ml-md">
-					<q-sub-header bold>
+				</QCol>
+				<QCol class="q-ml-md">
+					<QSubHeader bold>
 						{{ mediaItem?.title ?? t('general.error.unknown') }}
-					</q-sub-header>
-				</q-col>
+					</QSubHeader>
+				</QCol>
 				<!--	Total selected count	-->
-				<q-col
+				<QCol
 					v-if="selectedCount"
 					cols="auto"
 				>
 					<span class="text-weight-bold">
 						{{ t('components.media-list.selected-count', { selectedCount }) }}
 					</span>
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 		</q-item>
 		<!-- Season display -->
 		<q-expansion-item
@@ -39,22 +39,22 @@
 		>
 			<!-- Header	-->
 			<template #header="{ expanded }">
-				<q-row align="center">
-					<q-col cols="auto">
+				<QRow align="center">
+					<QCol cols="auto">
 						<q-checkbox
 							:model-value="isSelected(child.id)"
 							@update:model-value="setSelected(child.id, child.children, $event)"
 						/>
-					</q-col>
-					<q-col class="q-ml-md">
-						<q-sub-header bold>
+					</QCol>
+					<QCol class="q-ml-md">
+						<QSubHeader bold>
 							{{ child.title }}
 							<span class="text-weight-light q-ml-md">
 								{{ t('components.media-list.episode-count', { episodeCount: child.childCount }) }}
 							</span>
-						</q-sub-header>
-					</q-col>
-					<q-col
+						</QSubHeader>
+					</QCol>
+					<QCol
 						v-if="getSelected(child.id)?.keys.length"
 						cols="auto"
 					>
@@ -65,14 +65,14 @@
 								})
 							}}
 						</span>
-					</q-col>
-					<q-col cols="auto">
+					</QCol>
+					<QCol cols="auto">
 						<q-icon
 							size="lg"
 							:name="expanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
 						/>
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 			</template>
 			<!-- Body	-->
 			<template #default>

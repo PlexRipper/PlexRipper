@@ -22,7 +22,7 @@
 		<template #actions="{ close }">
 			<q-space />
 			<!--	Close action	-->
-			<base-button
+			<BaseButton
 				text-id="close"
 				@click="close"
 			/>

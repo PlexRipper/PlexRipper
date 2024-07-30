@@ -1,14 +1,14 @@
 <template>
-	<q-row
+	<QRow
 		no-wrap
 		align="center"
 	>
-		<q-col>
-			<q-sub-header>
+		<QCol>
+			<QSubHeader>
 				{{ $t(`${helpId}.label`) }}
-			</q-sub-header>
-		</q-col>
-		<q-col
+			</QSubHeader>
+		</QCol>
+		<QCol
 			v-if="hasHelpPage"
 			cols="auto"
 		>
@@ -17,8 +17,8 @@
 				class="q-ma-sm"
 				@click="helpStore.openHelpDialog(props.helpId)"
 			/>
-		</q-col>
-	</q-row>
+		</QCol>
+	</QRow>
 </template>
 
 <script setup lang="ts">

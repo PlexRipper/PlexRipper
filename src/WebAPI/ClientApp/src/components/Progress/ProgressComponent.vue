@@ -1,14 +1,14 @@
 <template>
-	<q-row justify="center">
-		<q-col cols="11">
+	<QRow justify="center">
+		<QCol cols="11">
 			<!-- Circular Mode progress -->
 			<template v-if="circularMode">
-				<q-row
+				<QRow
 					justify="center"
 					no-gutters
 					class="my-3"
 				>
-					<q-col cols="auto">
+					<QCol cols="auto">
 						<q-circular-progress
 							show-value
 							size="100px"
@@ -30,38 +30,38 @@
 								/>
 							</template>
 						</q-circular-progress>
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 				<!-- Progress text -->
-				<q-row
+				<QRow
 					v-if="text"
 					justify="center"
 					no-gutters
 				>
-					<q-col>
+					<QCol>
 						<h3>{{ text }}</h3>
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 			</template>
 			<!-- Linear Mode Progress -->
 			<template v-else>
 				<!-- Progress text -->
-				<q-row
+				<QRow
 					v-if="text"
 					justify="center"
 					no-gutters
 				>
-					<q-col cols="auto">
+					<QCol cols="auto">
 						<h3>{{ text }}</h3>
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 				<!-- Progress bar -->
-				<q-row
+				<QRow
 					justify="center"
 					class="my-3"
 					no-gutters
 				>
-					<q-col>
+					<QCol>
 						<q-linear-progress
 							:value="Math.min(getPercentage, 100)"
 							show-value
@@ -73,11 +73,11 @@
 						>
 							<strong>{{ getPercentage }}%</strong>
 						</q-linear-progress>
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 			</template>
-		</q-col>
-	</q-row>
+		</QCol>
+	</QRow>
 </template>
 
 <script setup lang="ts">

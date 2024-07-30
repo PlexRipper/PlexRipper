@@ -3,7 +3,7 @@
 		<tbody>
 			<tr>
 				<td style="width: 30%">
-					<help-icon :help-id="helpId" />
+					<HelpIcon :help-id="helpId" />
 				</td>
 				<td>
 					<slot />

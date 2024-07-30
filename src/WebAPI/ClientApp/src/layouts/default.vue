@@ -4,7 +4,7 @@
 	<q-layout view="hHh LpR lFf">
 		<!--	Use for everything else	-->
 		<template v-if="!isEmptyLayout">
-			<app-bar
+			<AppBar
 				@show-navigation="toggleNavigationsDrawer"
 				@show-notifications="toggleNotificationsDrawer"
 			/>
@@ -19,8 +19,8 @@
 			<slot />
 		</q-page-container>
 		<!--	Dialogs	-->
-		<help-dialog :name="helpDialogName" />
-		<alert-dialog
+		<HelpDialog :name="helpDialogName" />
+		<AlertDialog
 			v-for="(alertItem, i) in alerts"
 			:key="i"
 			:name="`alert-dialog-${alertItem.id}`"

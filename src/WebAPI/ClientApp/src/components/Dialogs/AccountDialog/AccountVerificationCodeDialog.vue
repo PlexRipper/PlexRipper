@@ -9,12 +9,12 @@
 			{{ t('components.account-verification-code-dialog.title') }}
 		</template>
 		<template #top-row>
-			<q-sub-header>{{ t('components.account-verification-code-dialog.sub-title') }}</q-sub-header>
+			<QSubHeader>{{ t('components.account-verification-code-dialog.sub-title') }}</QSubHeader>
 		</template>
 		<template #default>
 			<!--	Verification Code input	-->
-			<q-row justify="center">
-				<q-col cols="auto">
+			<QRow justify="center">
+				<QCol cols="auto">
 					<VOtpInput
 						v-model:value="codeValue"
 						input-classes="otp-input"
@@ -27,34 +27,34 @@
 						:conditional-class="['one', 'two', 'three', 'four', 'five', 'six']"
 						@on-complete="onComplete"
 					/>
-				</q-col>
-			</q-row>
-			<q-row
+				</QCol>
+			</QRow>
+			<QRow
 				v-if="errors.length > 0"
 				justify="center"
 			>
-				<q-col cols="auto">
+				<QCol cols="auto">
 					<span style="color: red; font-weight: bold">{{
 						t('components.account-verification-code-dialog.error')
 					}}</span>
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 		</template>
 		<template #actions="{ close }">
-			<q-row justify="between">
+			<QRow justify="between">
 				<!-- Close	-->
-				<q-col cols="auto">
+				<QCol cols="auto">
 					<CancelButton @click="close" />
-				</q-col>
+				</QCol>
 				<!--	Confirm	-->
-				<q-col cols="auto">
+				<QCol cols="auto">
 					<ConfirmButton
 						:loading="loading"
 						:disabled="codeValue.length < 6"
 						@click="onComplete"
 					/>
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 		</template>
 	</QCardDialog>
 </template>

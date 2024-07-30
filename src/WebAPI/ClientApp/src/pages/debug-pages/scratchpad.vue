@@ -1,12 +1,12 @@
 <template>
-	<q-page>
+	<QPage>
 		<DownloadsTable
 			:plex-server="plexServer"
 			:download-rows="downloadStore.getDownloadsByServerId(plexServer.id)"
 			@action="commandSwitch($event)"
 		/>
-		<download-details-dialog :name="dialogName" />
-	</q-page>
+		<DownloadDetailsDialog :name="dialogName" />
+	</QPage>
 </template>
 
 <script setup lang="ts">

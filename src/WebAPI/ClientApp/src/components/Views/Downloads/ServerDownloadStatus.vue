@@ -1,12 +1,12 @@
 <template>
-	<q-col class="q-py-sm">
+	<QCol class="q-py-sm">
 		<BaseButton
 			flat
 			:icon="getButtonIcon"
 			:label="t(getButtonText)"
 			@click.stop="changeStatus"
 		/>
-	</q-col>
+	</QCol>
 </template>
 
 <script setup lang="ts">

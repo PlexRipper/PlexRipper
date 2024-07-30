@@ -1,16 +1,16 @@
 <template>
-	<q-page>
+	<QPage>
 		<!-- Download Toolbar -->
-		<download-bar />
+		<DownloadBar />
 
 		<!--	The Download Table	-->
-		<q-row
+		<QRow
 			v-if="downloadStore.getServersWithDownloads.length > 0"
 			justify="center"
 		>
-			<q-col cols="12">
+			<QCol cols="12">
 				<q-list>
-					<downloads-table
+					<DownloadsTable
 						v-for="{ plexServer, downloads } in downloadStore.getServersWithDownloads"
 						:key="plexServer.id"
 						:download-rows="downloads"
@@ -18,18 +18,18 @@
 						@action="commandSwitch($event)"
 					/>
 				</q-list>
-			</q-col>
-		</q-row>
-		<q-row
+			</QCol>
+		</QRow>
+		<QRow
 			v-else
 			justify="center"
 		>
-			<q-col cols="auto">
+			<QCol cols="auto">
 				<h2>{{ t('pages.downloads.no-downloads') }}</h2>
-			</q-col>
-		</q-row>
-		<download-details-dialog :name="dialogName" />
-	</q-page>
+			</QCol>
+		</QRow>
+		<DownloadDetailsDialog :name="dialogName" />
+	</QPage>
 </template>
 
 <script setup lang="ts">

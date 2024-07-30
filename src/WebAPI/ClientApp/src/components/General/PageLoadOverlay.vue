@@ -1,7 +1,7 @@
 <template>
 	<div class="q-pa-md">
 		<div class="logo-square">
-			<logo :size="256" />
+			<Logo :size="256" />
 		</div>
 	</div>
 </template>

@@ -8,17 +8,17 @@
 		@before-show="onShow"
 		@before-hide="onHide"
 	>
-		<q-col class="server-drawer-container">
+		<QCol class="server-drawer-container">
 			<q-scroll>
 				<!-- Server drawer -->
-				<server-drawer />
+				<ServerDrawer />
 			</q-scroll>
-		</q-col>
-		<q-col class="menu-items">
+		</QCol>
+		<QCol class="menu-items">
 			<q-separator />
 			<!-- Menu items -->
-			<q-expansion-list :items="getNavItems" />
-		</q-col>
+			<QExpansionList :items="getNavItems" />
+		</QCol>
 	</q-drawer>
 </template>
 

@@ -11,14 +11,14 @@
 		@before-show="$emit('opened', dataValue)"
 		@before-hide="$emit('closed')"
 	>
-		<q-row
+		<QRow
 			column
 			:data-cy="cy"
 			:class="['q-card-dialog', 'q-card-dialog-background', noBackground ? 'no-background' : '']"
 			:style="styles"
 		>
 			<!-- Dialog Title	-->
-			<q-col
+			<QCol
 				v-if="$slots['title']"
 				cols="auto"
 				class="q-card-dialog-title"
@@ -31,9 +31,9 @@
 						/>
 					</QCardTitle>
 				</div>
-			</q-col>
+			</QCol>
 			<!--	Dialog Top Row -->
-			<q-col
+			<QCol
 				v-if="$slots['top-row']"
 				cols="auto"
 				class="q-card-dialog-top-row"
@@ -41,8 +41,8 @@
 				<div v-show="!loading">
 					<slot name="top-row" />
 				</div>
-			</q-col>
-			<q-col
+			</QCol>
+			<QCol
 				v-if="$slots['default']"
 				:class="contentClasses"
 				align-self="stretch"
@@ -50,8 +50,8 @@
 				<div v-if="!loading">
 					<slot :value="parentValue" />
 				</div>
-			</q-col>
-			<q-col
+			</QCol>
+			<QCol
 				v-if="$slots['actions']"
 				cols="auto"
 				align-self="stretch"
@@ -59,19 +59,19 @@
 			>
 				<div v-if="!loading">
 					<!--	Dialog Buttons		-->
-					<q-card-actions :align="buttonAlign">
+					<QCardActions :align="buttonAlign">
 						<slot
 							name="actions"
 							:close="closeDialog"
 							:open="openDialog"
 							:value="parentValue"
 						/>
-					</q-card-actions>
+					</QCardActions>
 				</div>
-			</q-col>
+			</QCol>
 			<!--	Loading overlay	-->
 			<QLoadingOverlay :loading="loading" />
-		</q-row>
+		</QRow>
 	</q-dialog>
 </template>
 

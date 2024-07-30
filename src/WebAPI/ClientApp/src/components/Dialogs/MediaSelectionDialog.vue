@@ -17,12 +17,12 @@
 		</template>
 		<!--	Help text	-->
 		<template #default>
-			<q-row
+			<QRow
 				justify="center"
 				align="center"
 				class="q-pt-lg"
 			>
-				<q-col
+				<QCol
 					cols="11"
 					class="q-my-md"
 				>
@@ -37,10 +37,10 @@
 						drag-range
 						color="red"
 					/>
-				</q-col>
-			</q-row>
-			<q-row justify="between">
-				<q-col
+				</QCol>
+			</QRow>
+			<QRow justify="between">
+				<QCol
 					v-for="column in ['min', 'max']"
 					:key="column"
 					cols="auto"
@@ -62,14 +62,14 @@
 							:key="index"
 						>
 							<td>
-								<base-button
+								<BaseButton
 									:label="`-${index}`"
 									block
 									@click="adjustValue(column, -1 * index)"
 								/>
 							</td>
 							<td>
-								<base-button
+								<BaseButton
 									:label="`+${index}`"
 									block
 									@click="adjustValue(column, index)"
@@ -77,28 +77,28 @@
 							</td>
 						</tr>
 					</table>
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 		</template>
 		<!--	Close action	-->
 		<template #actions="{ close }">
-			<q-row justify="between">
-				<q-col cols="2">
-					<base-button
+			<QRow justify="between">
+				<QCol cols="2">
+					<BaseButton
 						text-id="close"
 						block
 						@click="close"
 					/>
-				</q-col>
-				<q-col cols="2">
-					<base-button
+				</QCol>
+				<QCol cols="2">
+					<BaseButton
 						text-id="set-selection"
 						color="positive"
 						block
 						@click="setSelection"
 					/>
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 		</template>
 	</QCardDialog>
 </template>

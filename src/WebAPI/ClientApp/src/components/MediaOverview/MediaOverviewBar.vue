@@ -2,7 +2,7 @@
 	<q-toolbar class="media-overview-bar">
 		<!--	Title	-->
 		<q-toolbar-title>
-			<q-row
+			<QRow
 				justify="start"
 				align="center"
 			>
@@ -11,7 +11,7 @@
 					enter-active-class="animated fadeInLeft"
 					leave-active-class="animated fadeOutLeft"
 				>
-					<q-col
+					<QCol
 						v-if="detailMode"
 						cols="auto"
 					>
@@ -21,13 +21,13 @@
 							size="xl"
 							@click="$emit('back')"
 						/>
-					</q-col>
+					</QCol>
 				</Transition>
-				<q-col cols="auto">
+				<QCol cols="auto">
 					<q-list class="no-background">
 						<q-item>
 							<q-item-section avatar>
-								<q-media-type-icon
+								<QMediaTypeIcon
 									class="mx-3"
 									:size="36"
 									:media-type="library?.type ?? PlexMediaType.None"
@@ -43,17 +43,17 @@
 									caption
 								>
 									{{ libraryCountFormatted }} -
-									<q-file-size :size="library.mediaSize" />
+									<QFileSize :size="library.mediaSize" />
 								</q-item-label>
 							</q-item-section>
 						</q-item>
 					</q-list>
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 		</q-toolbar-title>
 
 		<!--	Download button	-->
-		<vertical-button
+		<VerticalButton
 			v-if="mediaOverviewStore.showDownloadButton"
 			icon="mdi-download"
 			label="Download"
@@ -63,7 +63,7 @@
 		/>
 
 		<!--	Selection Dialog Button	-->
-		<vertical-button
+		<VerticalButton
 			v-if="mediaOverviewStore.showSelectionButton"
 			icon="mdi-select-marker"
 			text-id="selection"
@@ -73,7 +73,7 @@
 		/>
 
 		<!--	Refresh library button	-->
-		<vertical-button
+		<VerticalButton
 			v-if="!detailMode"
 			icon="mdi-refresh"
 			label="Refresh"
@@ -84,7 +84,7 @@
 		/>
 
 		<!--	View mode	-->
-		<vertical-button
+		<VerticalButton
 			v-if="!detailMode"
 			icon="mdi-eye"
 			label="View"
@@ -120,7 +120,7 @@
 					</q-item>
 				</q-list>
 			</q-menu>
-		</vertical-button>
+		</VerticalButton>
 	</q-toolbar>
 </template>
 

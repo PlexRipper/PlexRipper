@@ -33,7 +33,7 @@
 				<q-space />
 				<!-- Connection Status -->
 				<q-item-section side>
-					<q-status :value="connection.latestConnectionStatus?.isSuccessful ?? false" />
+					<QStatus :value="connection.latestConnectionStatus?.isSuccessful ?? false" />
 				</q-item-section>
 				<q-item-section side>
 					<CheckConnectionButton

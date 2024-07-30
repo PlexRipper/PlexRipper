@@ -8,7 +8,7 @@
 	>
 		<template #title>
 			<template v-if="downloadTask">
-				<q-media-type-icon
+				<QMediaTypeIcon
 					:size="36"
 					:media-type="downloadTask.mediaType"
 				/>
@@ -55,15 +55,15 @@
 					<tr v-if="downloadTask.downloadUrl">
 						<td>{{ t('components.download-details-dialog.overview.download-url') }}:</td>
 						<td data-cy="download-details-dialog-download-url">
-							<q-row
+							<QRow
 								no-gutters
 								class="no-wrap"
 							>
-								<q-col>{{ downloadTask.downloadUrl }}</q-col>
-								<q-col cols="auto">
+								<QCol>{{ downloadTask.downloadUrl }}</QCol>
+								<QCol cols="auto">
 									<ExternalLinkButton :href="downloadTask.downloadUrl" />
-								</q-col>
-							</q-row>
+								</QCol>
+							</QRow>
 						</td>
 					</tr>
 				</tbody>

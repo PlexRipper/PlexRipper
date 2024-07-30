@@ -1,9 +1,9 @@
 <template>
-	<q-section>
+	<QSection>
 		<template #header>
 			{{ $t('pages.settings.ui.language.header') }}
 		</template>
-		<help-row help-id="help.settings.ui.language.language-selection">
+		<HelpRow help-id="help.settings.ui.language.language-selection">
 			<q-select
 				v-model:model-value="language"
 				:dense="false"
@@ -44,8 +44,8 @@
 					</q-item>
 				</template>
 			</q-select>
-		</help-row>
-	</q-section>
+		</HelpRow>
+	</QSection>
 </template>
 
 <script setup lang="ts">

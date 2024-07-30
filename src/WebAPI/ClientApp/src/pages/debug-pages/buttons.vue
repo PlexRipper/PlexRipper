@@ -1,5 +1,5 @@
 <template>
-	<q-page>
+	<QPage>
 		<ButtonsDebug />
-	</q-page>
+	</QPage>
 </template>

@@ -1,5 +1,5 @@
 <template>
-	<q-row
+	<QRow
 		justify="between"
 		class="q-my-md"
 	>
@@ -38,7 +38,7 @@
 			color="black"
 			label="Black"
 		/>
-	</q-row>
+	</QRow>
 	<q-markup-table>
 		<tbody>
 			<tr>

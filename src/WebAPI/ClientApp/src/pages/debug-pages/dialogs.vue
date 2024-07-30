@@ -1,6 +1,6 @@
 <template>
-	<q-page>
-		<q-section>
+	<QPage>
+		<QSection>
 			<template #header>
 				{{ t('pages.debug.dialogs.header') }}
 			</template>
@@ -72,8 +72,8 @@
 				:account="account"
 			/>
 			<DirectoryBrowser :name="directoryBrowserName" />
-		</q-section>
-	</q-page>
+		</QSection>
+	</QPage>
 </template>
 
 <script setup lang="ts">

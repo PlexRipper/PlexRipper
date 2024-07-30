@@ -1,10 +1,10 @@
 <template>
-	<q-section>
+	<QSection>
 		<template #header>
 			{{ $t('pages.settings.ui.date-and-time.header') }}
 		</template>
 		<!--	Short Date Format Setting	-->
-		<help-row help-id="help.settings.ui.date-and-time.short-date-format">
+		<HelpRow help-id="help.settings.ui.date-and-time.short-date-format">
 			<q-select
 				v-model:model-value="shortDateFormat"
 				:options="shortDateOptions"
@@ -21,9 +21,9 @@
 					</q-item>
 				</template>
 			</q-select>
-		</help-row>
+		</HelpRow>
 		<!--	Long Date Format Setting	-->
-		<help-row help-id="help.settings.ui.date-and-time.long-date-format">
+		<HelpRow help-id="help.settings.ui.date-and-time.long-date-format">
 			<q-select
 				v-model:model-value="longDateFormat"
 				:options="longDateOptions"
@@ -40,9 +40,9 @@
 					</q-item>
 				</template>
 			</q-select>
-		</help-row>
+		</HelpRow>
 		<!--	Time Format Setting	-->
-		<help-row help-id="help.settings.ui.date-and-time.time-format">
+		<HelpRow help-id="help.settings.ui.date-and-time.time-format">
 			<q-select
 				v-model:model-value="timeFormat"
 				:options="timeFormatOptions"
@@ -59,16 +59,16 @@
 					</q-item>
 				</template>
 			</q-select>
-		</help-row>
+		</HelpRow>
 		<!--	Show Relative Dates Setting	-->
-		<help-row help-id="help.settings.ui.date-and-time.show-relative-dates">
+		<HelpRow help-id="help.settings.ui.date-and-time.show-relative-dates">
 			<q-toggle
 				v-model:model-value="settingsStore.dateTimeSettings.showRelativeDates"
 				size="lg"
 				color="red"
 				data-cy="relative-date"
 			/>
-		</help-row>
+		</HelpRow>
 
 		<!--	TODO: Dealing with Timezones is 1 big cluster fuck, will go back to try again later -->
 		<!--	Time Zone Setting	-->
@@ -85,7 +85,7 @@
 		<!--									:options="timeZoneOptions" -->
 		<!--								/> -->
 		<!--		</help-row> -->
-	</q-section>
+	</QSection>
 </template>
 
 <script setup lang="ts">

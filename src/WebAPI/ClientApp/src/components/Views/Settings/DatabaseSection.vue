@@ -1,23 +1,23 @@
 <template>
-	<q-section>
+	<QSection>
 		<template #header>
 			{{ t('pages.settings.advanced.database.header') }}
 		</template>
 		<!--	Reset Database	-->
-		<help-row help-id="help.settings.advanced.reset-db">
+		<HelpRow help-id="help.settings.advanced.reset-db">
 			<WarningButton
 				:width="400"
 				text-id="reset-db"
 				block
 				@click="useOpenControlDialog(confirmationDialogName)"
 			/>
-			<confirmation-dialog
+			<ConfirmationDialog
 				text-id="reset-db"
 				:name="confirmationDialogName"
 				@confirm="resetDatabaseCommand"
 			/>
-		</help-row>
-	</q-section>
+		</HelpRow>
+	</QSection>
 </template>
 
 <script setup lang="ts">

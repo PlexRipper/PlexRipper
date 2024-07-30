@@ -13,8 +13,8 @@
 			{{ t('components.directory-browser.select-path', { pathName: path?.displayName ?? '' }) }}
 		</template>
 		<template #top-row>
-			<q-row>
-				<q-col
+			<QRow>
+				<QCol
 					v-if="!isCurrentWritable"
 					cols="auto"
 					class="q-px-md"
@@ -31,17 +31,17 @@
 							<span>{{ t('components.directory-browser.has-no-write-permission') }}</span>
 						</q-tooltip>
 					</q-icon>
-				</q-col>
-				<q-col>
-					<p-text-field
+				</QCol>
+				<QCol>
+					<PTextField
 						v-model="currentPath"
 						outlined
 						color="red"
 						:placeholder="t('components.directory-browser.no-path')"
 						@update:model-value="requestDirectories"
 					/>
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 			<q-markup-table class="q-pr-md">
 				<thead>
 					<tr>

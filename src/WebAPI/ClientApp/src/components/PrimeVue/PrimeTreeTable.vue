@@ -27,7 +27,7 @@
 				/>
 			</template>
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
-				<q-media-type-icon
+				<QMediaTypeIcon
 					v-if="node.mediaType"
 					:size="26"
 					:media-type="node.mediaType"
@@ -115,11 +115,11 @@
 			style="max-width: 15rem"
 		>
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
-				<q-row
+				<QRow
 					justify="start"
 					no-wrap
 				>
-					<q-col cols="auto">
+					<QCol cols="auto">
 						<!-- Item Actions -->
 						<IconSquareButton
 							v-for="(action, y) in node.actions"
@@ -134,8 +134,8 @@
 								})
 							"
 						/>
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 			</template>
 		</Column>
 	</TreeTable>

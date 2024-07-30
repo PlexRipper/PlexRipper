@@ -1,33 +1,33 @@
 <template>
-	<q-page>
+	<QPage>
 		<!-- Logo	-->
-		<q-row
+		<QRow
 			justify="center"
 			no-gutters
 			no-wrap
 		>
-			<q-col
+			<QCol
 				cols="auto"
 				class="q-my-md"
 			>
-				<logo :size="128" />
-			</q-col>
-		</q-row>
+				<Logo :size="128" />
+			</QCol>
+		</QRow>
 		<!--	Horizontal Container	-->
-		<q-row justify="center">
-			<q-col
+		<QRow justify="center">
+			<QCol
 				cols="12"
 				lg="8"
 			>
 				<!--	Vertical Container	-->
-				<q-row
+				<QRow
 					class="setup-card"
 					column
 				>
-					<q-col align-self="stretch">
+					<QCol align-self="stretch">
 						<!-- Tabs -->
-						<q-row align="start">
-							<q-col cols="auto">
+						<QRow align="start">
+							<QCol cols="auto">
 								<q-tabs
 									v-model="stepIndex"
 									vertical
@@ -56,8 +56,8 @@
 										/>
 									</template>
 								</q-tabs>
-							</q-col>
-							<q-col>
+							</QCol>
+							<QCol>
 								<q-tab-panels
 									v-model="stepIndex"
 									animated
@@ -67,8 +67,8 @@
 								>
 									<!-- Introduction	-->
 									<q-tab-panel :name="1">
-										<q-row no-gutters>
-											<q-col>
+										<QRow no-gutters>
+											<QCol>
 												<h2>{{ t('pages.setup.intro.title') }}</h2>
 												<p>{{ t('pages.setup.intro.text.p-1') }}</p>
 												<ul>
@@ -83,20 +83,20 @@
 													<li>{{ t('pages.setup.intro.list.item-4') }}</li>
 													<li>{{ t('pages.setup.intro.list.item-5') }}</li>
 												</ul>
-											</q-col>
-										</q-row>
+											</QCol>
+										</QRow>
 									</q-tab-panel>
 									<!-- Future plans!	-->
 									<q-tab-panel :name="2">
-										<q-row no-gutters>
-											<q-col>
+										<QRow no-gutters>
+											<QCol>
 												<h2 class="mt-2">
 													{{ t('pages.setup.future-plans.title') }}
 												</h2>
-											</q-col>
-										</q-row>
-										<q-row no-gutters>
-											<q-col>
+											</QCol>
+										</QRow>
+										<QRow no-gutters>
+											<QCol>
 												<p>{{ t('pages.setup.future-plans.text.p-1') }}</p>
 												<ul>
 													<li>
@@ -122,38 +122,38 @@
 												<h2 class="text-center">
 													{{ t('pages.setup.future-plans.text.p-2') }}
 												</h2>
-											</q-col>
-										</q-row>
+											</QCol>
+										</QRow>
 									</q-tab-panel>
 									<!-- Checking paths	-->
 									<q-tab-panel :name="3">
 										<h2>
 											{{ t('pages.setup.paths.title') }}
 										</h2>
-										<q-row no-gutters>
-											<q-col align-self="stretch">
-												<folder-paths-overview only-defaults />
-											</q-col>
-										</q-row>
+										<QRow no-gutters>
+											<QCol align-self="stretch">
+												<FolderPathsOverview only-defaults />
+											</QCol>
+										</QRow>
 									</q-tab-panel>
 									<!-- Plex Accounts	-->
 									<q-tab-panel :name="4">
 										<h2 class="mt-2">
 											{{ t('pages.setup.accounts.title') }}
 										</h2>
-										<account-overview />
+										<AccountOverview />
 									</q-tab-panel>
 									<!-- Finished	-->
 									<q-tab-panel :name="5">
-										<q-row no-gutters>
-											<q-col>
+										<QRow no-gutters>
+											<QCol>
 												<h2 class="mt-2">
 													{{ t('pages.setup.finished.title') }}
 												</h2>
-											</q-col>
-										</q-row>
-										<q-row no-gutters>
-											<q-col>
+											</QCol>
+										</QRow>
+										<QRow no-gutters>
+											<QCol>
 												<p>{{ t('pages.setup.finished.text.p-1') }}</p>
 												<q-list
 													dense
@@ -179,23 +179,23 @@
 														</q-item-section>
 													</q-item>
 												</q-list>
-											</q-col>
-										</q-row>
+											</QCol>
+										</QRow>
 									</q-tab-panel>
 								</q-tab-panels>
-							</q-col>
-						</q-row>
-					</q-col>
+							</QCol>
+						</QRow>
+					</QCol>
 					<!-- Stepper navigation bar	-->
-					<q-col
+					<QCol
 						align-self="stretch"
 						cols="12"
 					>
 						<q-separator class="q-mb-md" />
-						<q-row align="center">
-							<q-col>
-								<q-row justify="center">
-									<q-col
+						<QRow align="center">
+							<QCol>
+								<QRow justify="center">
+									<QCol
 										v-if="!isNextDisabled"
 										class="q-mx-md"
 										cols="2"
@@ -205,8 +205,8 @@
 											cy="setup-page-previous-button"
 											@click="back"
 										/>
-									</q-col>
-									<q-col
+									</QCol>
+									<QCol
 										v-if="!isNextDisabled"
 										class="q-mx-md"
 										cols="2"
@@ -216,8 +216,8 @@
 											cy="setup-page-next-button"
 											@click="next"
 										/>
-									</q-col>
-									<q-col
+									</QCol>
+									<QCol
 										v-else
 										class="q-mx-md q-mb-md"
 										cols="auto"
@@ -226,11 +226,11 @@
 											cy="setup-page-skip-setup-button"
 											@click="finishSetup"
 										/>
-									</q-col>
-								</q-row>
-							</q-col>
+									</QCol>
+								</QRow>
+							</QCol>
 							<!--	Skip button	-->
-							<q-col
+							<QCol
 								v-if="!isNextDisabled"
 								cols="auto"
 								class="q-mx-md"
@@ -239,18 +239,18 @@
 									:disabled="isNextDisabled"
 									@click="useOpenControlDialog(confirmationDialogName)"
 								/>
-								<confirmation-dialog
+								<ConfirmationDialog
 									:name="confirmationDialogName"
 									text-id="skip-setup"
 									@confirm="finishSetup"
 								/>
-							</q-col>
-						</q-row>
-					</q-col>
-				</q-row>
-			</q-col>
-		</q-row>
-	</q-page>
+							</QCol>
+						</QRow>
+					</QCol>
+				</QRow>
+			</QCol>
+		</QRow>
+	</QPage>
 </template>
 
 <script setup lang="ts">

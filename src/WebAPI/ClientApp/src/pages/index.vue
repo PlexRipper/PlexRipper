@@ -12,7 +12,7 @@
 					</QCol>
 					<QCol cols="3">
 						<GoToButton
-							text-id="go-to-setup-page"
+							:label="$t('general.commands.go-to-setup-page')"
 							block
 							to="/setup"
 							color="positive"

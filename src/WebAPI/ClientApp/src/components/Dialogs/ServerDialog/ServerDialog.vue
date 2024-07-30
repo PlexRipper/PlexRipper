@@ -166,8 +166,9 @@
 			<ConfirmationDialog
 				:confirm-loading="confirmHideDialog"
 				:name="confirmationServerDialogName"
+				:title="$t('confirmation.hide-server.title')"
+				:text="$t('confirmation.hide-server.text')"
 				class="q-mr-md"
-				text-id="hide-server"
 				@confirm="onServerHiddenSave"
 			/>
 		</template>

@@ -85,14 +85,14 @@
 			<QRow justify="between">
 				<QCol cols="2">
 					<BaseButton
-						text-id="close"
+						:label="$t('general.commands.close')"
 						block
 						@click="close"
 					/>
 				</QCol>
 				<QCol cols="2">
 					<BaseButton
-						text-id="set-selection"
+						:label="$t('general.commands.set-selection')"
 						color="positive"
 						block
 						@click="setSelection"

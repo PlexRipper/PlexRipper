@@ -216,7 +216,7 @@ function getConnectionProgress(connectionId: number, serverId: number): ServerCo
 			plexServerId: serverId,
 			connectionSuccessful: false,
 			completed: false,
-			message: 'No progress yet',
+			message: t('components.check-server-connections-dialog.no-progress-yet'),
 			retryAttemptCount: 0,
 			retryAttemptIndex: 0,
 			statusCode: 0,

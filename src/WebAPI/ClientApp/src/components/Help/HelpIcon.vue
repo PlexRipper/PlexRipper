@@ -26,6 +26,7 @@ import { get } from '@vueuse/core';
 import { useHelpStore } from '@store';
 import type { IHelp } from '@interfaces';
 
+const { t } = useI18n();
 const helpStore = useHelpStore();
 
 const props = withDefaults(defineProps<Partial<IHelp> & { value?: IHelp }>(), {
@@ -35,7 +36,7 @@ const props = withDefaults(defineProps<Partial<IHelp> & { value?: IHelp }>(), {
 });
 
 const help = computed(() => props.value ?? {
-	label: props.label,
+	label: props.label !== '' ? props.label : t('help.default.label'),
 	title: props.title,
 	text: props.text,
 });

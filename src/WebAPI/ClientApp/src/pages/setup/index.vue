@@ -7,8 +7,8 @@
 			no-wrap
 		>
 			<QCol
-				cols="auto"
 				class="q-my-md"
+				cols="auto"
 			>
 				<Logo :size="128" />
 			</QCol>
@@ -30,9 +30,9 @@
 							<QCol cols="auto">
 								<q-tabs
 									v-model="stepIndex"
-									vertical
 									active-color="primary"
 									indicator-color="primary"
+									vertical
 								>
 									<!-- Step headers	-->
 									<template
@@ -40,14 +40,14 @@
 										:key="index"
 									>
 										<q-tab
-											class="setup-tab"
-											:name="index + 1"
 											:color="
 												index + 1 === stepPagesCount ? 'green' : stepIndex > index + 1 ? 'green' : 'red'
 											"
 											:complete="index + 1 === stepPagesCount ? stepIndex > index : stepIndex > index + 1"
-											:label="header.name"
 											:data-cy="`setup-header-tab-${index + 1}`"
+											:label="header.name"
+											:name="index + 1"
+											class="setup-tab"
 											edit-icon="$complete"
 										/>
 										<q-separator
@@ -62,8 +62,8 @@
 									v-model="stepIndex"
 									animated
 									class="fit q-pa-md"
-									transition-prev="slide-down"
 									transition-next="slide-up"
+									transition-prev="slide-down"
 								>
 									<!-- Introduction	-->
 									<q-tab-panel :name="1">
@@ -156,26 +156,26 @@
 											<QCol>
 												<p>{{ t('pages.setup.finished.text.p-1') }}</p>
 												<q-list
-													dense
 													class="no-background"
+													dense
 												>
 													<q-item
 														v-for="(link, i) in links"
 														:key="i"
-														:href="link"
+														:href="link.link"
 														target="_blank"
 													>
 														<q-item-section avatar>
 															<ul>
 																<li>
 																	<span style="font-weight: normal">
-																		{{ t(`pages.setup.finished.list.item-${i + 1}`) }}
+																		{{ link.text }}
 																	</span>
 																</li>
 															</ul>
 														</q-item-section>
 														<q-item-section side>
-															<ExternalLinkButton :href="link" />
+															<ExternalLinkButton :href="link.link" />
 														</q-item-section>
 													</q-item>
 												</q-list>
@@ -232,8 +232,8 @@
 							<!--	Skip button	-->
 							<QCol
 								v-if="!isNextDisabled"
-								cols="auto"
 								class="q-mx-md"
+								cols="auto"
 							>
 								<NavigationSkipSetupButton
 									:disabled="isNextDisabled"
@@ -241,7 +241,8 @@
 								/>
 								<ConfirmationDialog
 									:name="confirmationDialogName"
-									text-id="skip-setup"
+									:text="$t('confirmation.skip-setup.text')"
+									:title="$t('confirmation.skip-setup.title')"
 									@confirm="finishSetup"
 								/>
 							</QCol>
@@ -253,7 +254,7 @@
 	</QPage>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import Log from 'consola';
 import { useRouter, useOpenControlDialog } from '#imports';
 import { useSettingsStore } from '~/store';
@@ -272,11 +273,22 @@ const headers = ref([{ name: t(`pages.setup.intro.header`) },
 	{ name: t(`pages.setup.accounts.header`) },
 	{ name: t(`pages.setup.finished.header`) }]);
 
-const links = ref([
-	'https://github.com/PlexRipper/PlexRipper/',
-	'https://github.com/PlexRipper/PlexRipper/issues',
-	'https://www.plexripper.rocks/contributing/translating',
-	'https://github.com/PlexRipper/PlexRipper/',
+const links = ref([{
+	link: 'https://github.com/PlexRipper/PlexRipper/',
+	text: t('pages.setup.finished.list.item-1'),
+},
+{
+	link: 'https://github.com/PlexRipper/PlexRipper/issues',
+	text: t('pages.setup.finished.list.item-2'),
+},
+{
+	link: 'https://www.plexripper.rocks/contributing/translating',
+	text: t('pages.setup.finished.list.item-3'),
+},
+{
+	link: 'https://github.com/PlexRipper/PlexRipper/',
+	text: t('pages.setup.finished.list.item-4'),
+},
 ]);
 
 const isBackDisabled = computed(() => {

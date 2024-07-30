@@ -16,7 +16,6 @@
 				:percentage="libraryProgress?.percentage ?? -1"
 				:text="refreshingText"
 			/>
-			<!--				<h1 v-else>{{ t('components.media-overview.retrieving-library') }}</h1> -->
 		</QCol>
 	</QRow>
 	<!-- Media Overview -->

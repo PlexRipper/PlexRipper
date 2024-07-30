@@ -133,7 +133,7 @@
 				</td>
 				<td>{{ $t('debug.buttons.warning-button') }}</td>
 				<td>
-					<WarningButton text-id="reset-db" />
+					<WarningButton :label="$t('general.commands.reset-db')" />
 				</td>
 			</tr>
 			<tr>

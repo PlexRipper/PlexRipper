@@ -118,7 +118,7 @@
 			<CancelButton @click="cancel()" />
 			<ConfirmButton
 				:disabled="!isCurrentWritable"
-				:tooltip-id="!isCurrentWritable ? 'components.directory-browser.current-folder-has-no-write-permission' : ''"
+				:tooltip-text="!isCurrentWritable ? $t('components.directory-browser.current-folder-has-no-write-permission') : ''"
 				@click="confirm()"
 			/>
 		</template>

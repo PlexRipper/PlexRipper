@@ -1,18 +1,26 @@
 <template>
 	<div>
-		<HelpRow help-id="help.server-dialog.server-commands.inspect-server">
+		<HelpRow
+			:label="$t('help.server-dialog.server-commands.inspect-server.label')"
+			:title="$t('help.server-dialog.server-commands.inspect-server.title')"
+			:text="$t('help.server-dialog.server-commands.inspect-server.text')"
+		>
 			<BaseButton
 				:disabled="syncLoading"
 				:loading="inspectLoading"
-				text-id="inspect-server"
+				:label="$t('general.commands.inspect-server')"
 				@click="inspectServer"
 			/>
 		</HelpRow>
-		<HelpRow help-id="help.server-dialog.server-commands.sync-server-libraries">
+		<HelpRow
+			:label="$t('help.server-dialog.server-commands.sync-server-libraries.label')"
+			:title="$t('help.server-dialog.server-commands.sync-server-libraries.title')"
+			:text="$t('help.server-dialog.server-commands.sync-server-libraries.text')"
+		>
 			<BaseButton
 				:disabled="inspectLoading"
 				:loading="syncLoading"
-				text-id="sync-server-libraries"
+				:label="$t('general.commands.sync-server-libraries')"
 				@click="syncServerLibraries"
 			/>
 		</HelpRow>

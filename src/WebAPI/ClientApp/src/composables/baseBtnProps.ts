@@ -28,9 +28,13 @@ export function baseBtnPropsDefault() {
 			type: Boolean,
 			default: false,
 		},
+		tooltipText: {
+			type: String,
+			default: '',
+		},
 		// endregion
-		// region Quasar native
 
+		// region Quasar native
 		label: {
 			type: String,
 			default: '',

@@ -13,17 +13,21 @@
 			<pre
 				v-if="alert.result"
 				style="white-space: break-spaces"
-			>{{ alert.result }}</pre>
+			>
+				{{ alert.result }}
+			</pre>
 			<pre
 				v-if="errors"
 				style="white-space: break-spaces"
-			>{{ errors }}</pre>
+			>
+				{{ errors }}
+			</pre>
 		</template>
 		<template #actions="{ close }">
 			<q-space />
 			<!--	Close action	-->
 			<BaseButton
-				text-id="close"
+				:label="$t('general.commands.close')"
 				@click="close"
 			/>
 		</template>

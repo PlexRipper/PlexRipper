@@ -11,12 +11,13 @@
 		>
 			<WarningButton
 				:width="400"
-				text-id="reset-db"
+				:label="$t('general.commands.reset-db')"
 				block
 				@click="useOpenControlDialog(confirmationDialogName)"
 			/>
 			<ConfirmationDialog
-				text-id="reset-db"
+				:title="$t('confirmation.reset-db.title')"
+				:text="$t('confirmation.reset-db.text')"
 				:name="confirmationDialogName"
 				@confirm="resetDatabaseCommand"
 			/>

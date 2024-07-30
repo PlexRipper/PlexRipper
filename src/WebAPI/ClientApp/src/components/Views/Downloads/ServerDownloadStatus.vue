@@ -3,7 +3,7 @@
 		<BaseButton
 			flat
 			:icon="getButtonIcon"
-			:label="t(getButtonText)"
+			:label="getButtonText"
 			@click.stop="changeStatus"
 		/>
 	</QCol>
@@ -29,11 +29,11 @@ const getButtonIcon = computed(() => {
 
 const getButtonText = computed(() => {
 	if (serverStatus.value === DownloadStatus.Paused) {
-		return 'components.server-download-status.start';
+		return t('components.server-download-status.start');
 	}
 
 	if (serverStatus.value === DownloadStatus.Downloading) {
-		return 'components.server-download-status.pause';
+		return t('components.server-download-status.pause');
 	}
 	return '';
 });

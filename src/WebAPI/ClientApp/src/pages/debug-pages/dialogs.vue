@@ -32,7 +32,7 @@
 				<q-tr>
 					<q-td>
 						<DebugButton
-							text-id="add-alert"
+							:label="$t('general.commands.add-alert')"
 							@click="addAlert"
 						/>
 					</q-td>

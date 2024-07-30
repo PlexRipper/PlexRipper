@@ -21,7 +21,7 @@ export default withNuxt(
 			'@intlify/vue-i18n/no-unused-keys': [
 				'error',
 				{
-					extensions: ['.js', '.vue'],
+					extensions: ['.js', '.vue', '.ts'],
 				},
 			],
 		},

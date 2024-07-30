@@ -139,14 +139,14 @@ const mediaCountFormatted = computed(() => {
 	if (item) {
 		switch (item.type) {
 			case PlexMediaType.Movie:
-				return `1 Movie`;
+				return t('components.details-overview.one-movie-count');
 			case PlexMediaType.TvShow:
 				return t('components.details-overview.media-count', {
 					seasonCount: item.childCount,
 					episodeCount: sum(item.children?.map((x) => x.childCount)),
 				});
 			default:
-				return `Library type ${item.type} is not supported in the media count`;
+				throw new Error(`Library type ${item.type} is not supported in the media count`);
 		}
 	}
 

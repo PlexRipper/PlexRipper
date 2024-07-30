@@ -67,7 +67,7 @@
 			<tr>
 				<td>
 					<BaseButton
-						text-id="check-server-status"
+						:label="$t('general.commands.check-server-status')"
 						:loading="checkServerStatusLoading"
 						@click="checkServer"
 					/>

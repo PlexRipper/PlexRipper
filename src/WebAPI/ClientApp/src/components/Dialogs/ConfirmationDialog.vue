@@ -5,7 +5,6 @@
 		max-width="800px"
 		button-align="between"
 		cy="confirmation-dialog"
-		@opened="onOpen"
 	>
 		<template #title>
 			{{ confirmationText.title }}
@@ -37,56 +36,29 @@
 import { set } from '@vueuse/core';
 import { useI18n, useCloseControlDialog } from '#imports';
 
-const { t, te } = useI18n();
+const { t } = useI18n();
 
 const loading = ref(false);
 
-const confirmationText = ref<{
-	id?: string;
-	title?: string;
-	text?: string;
+const props = withDefaults(defineProps<{
+	title: string;
+	text: string;
 	warning?: string;
-}>({});
-
-const props = defineProps<{
-	/**
-	 * The Vue-i18n text id used for the confirmation window that pops-up.
-	 * @type {string}
-	 */
-	textId: string;
 	name: string;
 	confirmLoading?: boolean;
-}>();
+}>(), {
+	warning: '',
+});
 
 const emit = defineEmits<{
 	(e: 'confirm' | 'cancel'): void;
 }>();
 
-function onOpen() {
-	const textId = props.textId;
-	const result = {
-		id: textId,
-		warning: '',
-	} as IConfirmationResult;
-
-	if (te<string>(`confirmation.${textId}.title`)) {
-		result.title = t(`confirmation.${textId}.title`);
-	} else {
-		result.title = t(`confirmation.not-found.title`);
-	}
-
-	if (te<string>(`confirmation.${textId}.text`)) {
-		result.text = t(`confirmation.${textId}.text`);
-	} else {
-		result.text = t(`confirmation.not-found.text`);
-	}
-
-	if (te<string>(`confirmation.${textId}.warning`)) {
-		result.warning = t(`confirmation.${textId}.warning`);
-	}
-
-	set(confirmationText, result);
-}
+const confirmationText = computed(() => ({
+	title: props.title != '' ? props.title : t('confirmation.not-found.title'),
+	text: props.text != '' ? props.text : t('confirmation.not-found.text'),
+	warning: props.warning,
+}));
 
 function cancel() {
 	emit('cancel');
@@ -99,12 +71,5 @@ function confirm() {
 	if (props.confirmLoading) {
 		set(loading, true);
 	}
-}
-
-interface IConfirmationResult {
-	id: string;
-	title: string;
-	text: string;
-	warning: string;
 }
 </script>

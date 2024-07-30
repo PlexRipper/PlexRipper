@@ -18,9 +18,9 @@
             "server-un-connectable": "Impossible de joindre le serveur.",
             "checking-progress": "Vérification de {count}  des {total}  connexions aux serveurs Plex",
             "completed": "Inspection terminée de {length}  serveurs Plex!",
-            "no-servers": "Le compte {displayName} n'a aucun serveur auquel il peut accéder.",
             "fetching-servers": "Récupération des serveurs accessibles pour le compte Plex {displayName}",
-            "no-connections": "Aucune connexion n'a été trouvée pour ce serveur Plex !"
+            "no-connections": "Aucune connexion n'a été trouvée pour ce serveur Plex !",
+            "no-progress-yet": "Aucun progrès pour l'instant"
         },
         "account-verification-code-dialog": {
             "error": "",
@@ -31,11 +31,11 @@
             "no-accounts": "Pas de compte disponible"
         },
         "details-overview": {
-            "database-id": "identifiant de la base de donnée:",
             "total-duration": "Durée totale:",
             "media-count": "{seasonCount} Saison - {episodeCount} Épisodes",
             "media-count-label": "Nombre de médias :",
-            "summary": "Sommaire:"
+            "summary": "Sommaire:",
+            "one-movie-count": "1 film"
         },
         "directory-browser": {
             "path": "Chemin d'accès;",
@@ -47,7 +47,6 @@
             "current-folder-has-no-write-permission": "Le dossier actuel n'a aucune autorisation en écriture ! Sélectionnez-en un qui en a."
         },
         "download-confirmation": {
-            "creating-tasks": "Création de tâches de téléchargement {current} de {total}",
             "description": "PlexRipper va commencera à télécharger ce qui suit:",
             "header": "Êtes vous sûr?",
             "total-size": "Taille Total:"
@@ -67,8 +66,7 @@
         },
         "media-overview": {
             "is-refreshing": "Rafraîchir la bibliothèque \"{library}\" de donnée depuis le {server}",
-            "no-data": "Impossible de trouver une bibliothèque disponible.",
-            "retrieving-library": "Récupérer la bibliothèque de la base de données PlexRipper!"
+            "no-data": "Impossible de trouver une bibliothèque disponible."
         },
         "navigation-drawer": {
             "accounts": "Comptes",
@@ -107,17 +105,13 @@
                     "header": "Destination de téléchargement"
                 },
                 "server-commands": {
-                    "header": "Commands du serveur",
-                    "inspect-server": "Inspecter le serveur",
-                    "re-sync-server": "Resyncroniser les bibliothèques"
+                    "header": "Commands du serveur"
                 },
                 "server-config": {
-                    "download-speed-limit": "Télécharger la limite de vitesse",
                     "header": "Configuration du serveur",
                     "plex-server-was-null": ""
                 },
                 "server-connections": {
-                    "download-speed-limit": "Télécharger la limite de vitesse",
                     "header": "Connexions au serveur",
                     "section-header": "Sélectionnez la connexion serveur préférée :"
                 },
@@ -129,8 +123,7 @@
                         "machine-id": "Identifiant Machine:",
                         "plex-version": "Plex Version:",
                         "device": "Dispositif:",
-                        "platform": "Plate-forme:",
-                        "platform-version": "Version de la plate-forme:"
+                        "platform": "Plate-forme:"
                     },
                     "header": "Donnée Serveur",
                     "all-connections-failed": "Toutes les connexions ont échoué lorsqu'elles sont utilisées pour se connecter au serveur, le serveur est probablement hors ligne...",
@@ -140,8 +133,7 @@
                         "product-version": ""
                     }
                 }
-            },
-            "no-servers-error": ""
+            }
         },
         "server-drawer": {
             "no-libraries": "Pas de bibliothèques disponible",
@@ -216,11 +208,9 @@
             "check-server-status": "Vérifier le statut du serveur",
             "close": "Fermé",
             "confirm": "Confirmer",
-            "create": "Créer",
             "delete": "Supprimer",
             "disabled": "Désactiver",
             "enabled": "Activer",
-            "error": "Erreur",
             "finish-setup": "Terminer le configuration",
             "go-to-setup-page": "Aller à la page de configuration",
             "hide": "Cacher",
@@ -236,12 +226,13 @@
             "update": "Mettre à jour",
             "validate": "Valider",
             "validated": "Validaté",
-            "missing-text": "Texte manquant",
             "inspect-server": "Inspecter le serveur",
             "selection": "Sélection",
-            "set-selection": "Définir la sélection"
+            "set-selection": "Définir la sélection",
+            "download": "Télécharger",
+            "refresh": "Rafraîchir",
+            "view": "Voir"
         },
-        "name": "PlexRipper",
         "name-version": "PlexRipper - V{version}",
         "units": {
             "per-second": "/s"
@@ -411,11 +402,6 @@
                         "label": "Format de la date",
                         "text": "",
                         "title": ""
-                    },
-                    "time-zone": {
-                        "label": "Time Zone",
-                        "text": "",
-                        "title": ""
                     }
                 },
                 "language": {
@@ -447,12 +433,6 @@
             "header": "CA MARCHE !",
             "setup-question": ""
         },
-        "movies": {
-            "index": {
-                "header": "Aperçu des films",
-                "sub-header": "Sélectionnez une bibliothèque sur le côté droit"
-            }
-        },
         "music": {
             "_musicId": {
                 "header": "La bibliothèque Musique n'est malheureusement pas encore supporté :("
@@ -478,9 +458,6 @@
                 "setup": {
                     "header": "PlexRipper Configuration"
                 }
-            },
-            "debug": {
-                "header": "Debug"
             },
             "ui": {
                 "confirmation-settings": {
@@ -609,9 +586,6 @@
             "reset-button": "",
             "save-button": "",
             "warning-button": ""
-        },
-        "general": {
-            "hello-world": ""
         }
     }
 }

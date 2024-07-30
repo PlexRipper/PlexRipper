@@ -1,7 +1,9 @@
 <template>
 	<HelpRow
 		v-if="plexServer"
-		help-id="help.server-dialog.server-config.download-speed-limit"
+		:label="$t('help.server-dialog.server-config.download-speed-limit.label')"
+		:title="$t('help.server-dialog.server-config.download-speed-limit.title')"
+		:text="$t('help.server-dialog.server-config.download-speed-limit.text')"
 	>
 		<DownloadLimitInput
 			:download-speed-limit="settingsStore.getServerSettings(plexServer.machineIdentifier)?.downloadSpeedLimit ?? 0"

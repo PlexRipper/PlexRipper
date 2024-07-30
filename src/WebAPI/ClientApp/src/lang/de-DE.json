@@ -18,9 +18,9 @@
             "server-un-connectable": "Server ist nicht erreichbar.",
             "checking-progress": "Überprüfe {count} von {total} Plex-Serververbindungen",
             "completed": "Inspektion von {length} Plex-Servern abgeschlossen!",
-            "no-servers": "Konto {displayName} hat keine Server, auf die es zugreifen kann.",
             "fetching-servers": "Abrufen zugänglicher Server für das Plex-Konto {displayName}",
-            "no-connections": "Für diesen Plex-Server wurden keine Verbindungen gefunden!"
+            "no-connections": "Für diesen Plex-Server wurden keine Verbindungen gefunden!",
+            "no-progress-yet": "Noch keine Fortschritte"
         },
         "account-verification-code-dialog": {
             "error": "Der eingegebene Code ist ungültig, bitte versuchen Sie es erneut.",
@@ -31,11 +31,11 @@
             "no-accounts": "Keine Konten verfügbar"
         },
         "details-overview": {
-            "database-id": "Datenbank ID:",
             "total-duration": "Gesamtdauer:",
             "media-count": "{seasonCount} Staffel - {episodeCount} Folgen",
             "media-count-label": "Medienanzahl:",
-            "summary": "Zusammenfassung:"
+            "summary": "Zusammenfassung:",
+            "one-movie-count": "1 Film"
         },
         "directory-browser": {
             "path": "Pfad:",
@@ -47,7 +47,6 @@
             "current-folder-has-no-write-permission": "Der aktuelle Ordner hat keine Schreibberechtigung! Wählen Sie einen Ordner mit Schreibberechtigung aus."
         },
         "download-confirmation": {
-            "creating-tasks": "Erstelle download Aufgabe {current} von {total}",
             "description": "PlexRipper fängt an folgendes herunterzuladen:",
             "header": "Sind Sie sicher?",
             "total-size": "Gesamt größe:"
@@ -67,8 +66,7 @@
         },
         "media-overview": {
             "is-refreshing": "Mediathek \"{library}\" daten von {server} werden aktualisiert",
-            "no-data": "Kann die Mediathek nicht anzeigen",
-            "retrieving-library": "Empfange Mediathek aus PlexRipper Datenbank!"
+            "no-data": "Kann die Mediathek nicht anzeigen"
         },
         "navigation-drawer": {
             "accounts": "Konten",
@@ -107,17 +105,13 @@
                     "header": "Download Ziele"
                 },
                 "server-commands": {
-                    "header": "Server Befehle",
-                    "inspect-server": "Server untersuchen",
-                    "re-sync-server": "Re-sync Mediathekdaten"
+                    "header": "Server Befehle"
                 },
                 "server-config": {
-                    "download-speed-limit": "Geschwindigkeitsbegrenzung herunterladen",
                     "header": "Serverkonfiguration",
                     "plex-server-was-null": ""
                 },
                 "server-connections": {
-                    "download-speed-limit": "Geschwindigkeitsbegrenzung herunterladen",
                     "header": "Serververbindungen",
                     "section-header": "Wählen Sie die bevorzugte Serververbindung aus:"
                 },
@@ -129,8 +123,7 @@
                         "machine-id": "Machine Identifizierer:",
                         "plex-version": "Plex Version:",
                         "device": "Gerät:",
-                        "platform": "Plattform:",
-                        "platform-version": "Plattformversion:"
+                        "platform": "Plattform:"
                     },
                     "header": "Server Daten",
                     "all-connections-failed": "Beim Herstellen einer Verbindung zum Server sind alle Verbindungen fehlgeschlagen. Der Server ist höchstwahrscheinlich offline ...",
@@ -140,8 +133,7 @@
                         "product-version": ""
                     }
                 }
-            },
-            "no-servers-error": ""
+            }
         },
         "server-drawer": {
             "no-libraries": "Keine Mediatheken verfügbar",
@@ -216,11 +208,9 @@
             "check-server-status": "Server Status überprüfen",
             "close": "schließen",
             "confirm": "bestätigen",
-            "create": "erstellen",
             "delete": "löschen",
             "disabled": "inaktiv",
             "enabled": "aktiv",
-            "error": "fehler",
             "finish-setup": "Einrichtung Abschließen",
             "go-to-setup-page": "springe zur Einrichtungsseite",
             "hide": "verstecken",
@@ -236,12 +226,13 @@
             "update": "aktualisieren",
             "validate": "überprüfen",
             "validated": "überprüft",
-            "missing-text": "Fehlender Text",
             "inspect-server": "Server untersuchen",
             "selection": "Auswahl",
-            "set-selection": "Auswahl festlegen"
+            "set-selection": "Auswahl festlegen",
+            "download": "Herunterladen",
+            "refresh": "Aktualisierung",
+            "view": "Sicht"
         },
-        "name": "PlexRipper",
         "name-version": "PlexRipper - V{version}",
         "units": {
             "per-second": "/s"
@@ -411,11 +402,6 @@
                         "label": "Zeit Format",
                         "text": "",
                         "title": ""
-                    },
-                    "time-zone": {
-                        "label": "Zeitzone",
-                        "text": "",
-                        "title": ""
                     }
                 },
                 "language": {
@@ -447,12 +433,6 @@
             "header": "LÄUFT!",
             "setup-question": ""
         },
-        "movies": {
-            "index": {
-                "header": "Film Überischt",
-                "sub-header": "Wählen Sie eine Film-Mediathek auf der linken Seite"
-            }
-        },
         "music": {
             "_musicId": {
                 "header": "Musik Mediatheken sind leider noch nicht unterstützt :("
@@ -478,9 +458,6 @@
                 "setup": {
                     "header": "PlexRipper Setup"
                 }
-            },
-            "debug": {
-                "header": "Fehlersuche"
             },
             "ui": {
                 "confirmation-settings": {
@@ -609,9 +586,6 @@
             "reset-button": "",
             "save-button": "",
             "warning-button": ""
-        },
-        "general": {
-            "hello-world": ""
         }
     }
 }

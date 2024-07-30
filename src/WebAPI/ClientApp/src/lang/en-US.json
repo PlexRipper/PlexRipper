@@ -18,9 +18,9 @@
             "server-un-connectable": "Could not connect to server, it's most likely offline.",
             "checking-progress": "Checking {count} of {total} Plex servers connections",
             "completed": "Completed inspection of {length} Plex servers!",
-            "no-servers": "Account {displayName} has no servers which it can access.",
             "fetching-servers": "Retrieving accessible servers for Plex account {displayName}",
-            "no-connections": "No Connections were found for this Plex server!"
+            "no-connections": "No Connections were found for this Plex server!",
+            "no-progress-yet": "No progress yet"
         },
         "account-verification-code-dialog": {
             "error": "The verification code was invalid, please try again.",
@@ -31,11 +31,11 @@
             "no-accounts": "No Accounts available"
         },
         "details-overview": {
-            "database-id": "Database ID:",
             "total-duration": "Total duration:",
             "media-count": "{seasonCount} Season - {episodeCount} Episodes",
             "media-count-label": "Media count:",
-            "summary": "Summary:"
+            "summary": "Summary:",
+            "one-movie-count": "1 Movie"
         },
         "directory-browser": {
             "path": "Path:",
@@ -47,7 +47,6 @@
             "current-folder-has-no-write-permission": "The current folder has no write permission! Select one that has."
         },
         "download-confirmation": {
-            "creating-tasks": "Creating download tasks {current} of {total}",
             "description": "PlexRipper will start downloading the following:",
             "header": "Are you sure?",
             "total-size": "Total size:"
@@ -67,8 +66,7 @@
         },
         "media-overview": {
             "is-refreshing": "Refreshing library \"{library}\" data from {server}",
-            "no-data": "Could not display this library.",
-            "retrieving-library": "Retrieving library from PlexRipper database!"
+            "no-data": "Could not display this library."
         },
         "navigation-drawer": {
             "accounts": "Accounts",
@@ -107,17 +105,13 @@
                     "header": "Download Destinations"
                 },
                 "server-commands": {
-                    "header": "Server Commands",
-                    "inspect-server": "Inspect Server",
-                    "re-sync-server": "Re-sync Library media"
+                    "header": "Server Commands"
                 },
                 "server-config": {
-                    "download-speed-limit": "Download Speed Limit",
                     "header": "Server Configuration",
                     "plex-server-was-null": "Plex Server was null"
                 },
                 "server-connections": {
-                    "download-speed-limit": "Download Speed Limit",
                     "header": "Server Connections",
                     "section-header": "Select the preferred server connection:"
                 },
@@ -129,8 +123,7 @@
                         "machine-id": "Machine Identifier:",
                         "plex-version": "Plex Version:",
                         "device": "Device:",
-                        "platform": "Platform:",
-                        "platform-version": "Platform Version:"
+                        "platform": "Platform:"
                     },
                     "header": "Server Data",
                     "all-connections-failed": "All connections failed when used to connect to the server, the server is most likely offline...",
@@ -140,8 +133,7 @@
                         "product-version": "{product} ({productVersion})"
                     }
                 }
-            },
-            "no-servers-error": "PlexServer object was invalid"
+            }
         },
         "server-drawer": {
             "no-libraries": "No libraries available",
@@ -216,11 +208,9 @@
             "check-server-status": "Check server status",
             "close": "Close",
             "confirm": "Confirm",
-            "create": "Create",
             "delete": "Delete",
             "disabled": "Disabled",
             "enabled": "Enabled",
-            "error": "Error",
             "finish-setup": "Finish setup",
             "go-to-setup-page": "Go To Setup Page",
             "hide": "Hide",
@@ -236,12 +226,13 @@
             "update": "Update",
             "validate": "Validate",
             "validated": "Validated",
-            "missing-text": "Missing Text",
             "inspect-server": "Inspect Server",
             "selection": "Selection",
-            "set-selection": "Set Selection"
+            "set-selection": "Set Selection",
+            "download": "Download",
+            "refresh": "Refresh",
+            "view": "View"
         },
-        "name": "PlexRipper",
         "name-version": "PlexRipper - V{version}",
         "units": {
             "per-second": "/s"
@@ -411,11 +402,6 @@
                         "label": "Time Format",
                         "text": "",
                         "title": ""
-                    },
-                    "time-zone": {
-                        "label": "Time Zone",
-                        "text": "",
-                        "title": ""
                     }
                 },
                 "language": {
@@ -447,12 +433,6 @@
             "header": "WORKING!",
             "setup-question": "It looks like this is you're first time using PlexRipper, would you like to set it up?"
         },
-        "movies": {
-            "index": {
-                "header": "Movies Overview",
-                "sub-header": "Select a library from the left-hand side"
-            }
-        },
         "music": {
             "_musicId": {
                 "header": "Music Libraries are unfortunately not yet supported :("
@@ -478,9 +458,6 @@
                 "setup": {
                     "header": "PlexRipper Setup"
                 }
-            },
-            "debug": {
-                "header": "Debug"
             },
             "ui": {
                 "confirmation-settings": {
@@ -609,9 +586,6 @@
             "reset-button": "ResetButton",
             "save-button": "SaveButton",
             "warning-button": "WarningButton"
-        },
-        "general": {
-            "hello-world": "Hello World"
         }
     }
 }

@@ -59,7 +59,7 @@
 						:color="validationStyle.color"
 						:disabled="validateLoading"
 						:icon="validationStyle.icon"
-						:text-id="validationStyle.text"
+						:label="validationStyle.text"
 						:loading="validateLoading"
 						block
 						cy="account-dialog-validate-button"
@@ -71,7 +71,7 @@
 				<QCol>
 					<SaveButton
 						:disabled="!isAllowedToSave"
-						:text-id="isNewAccount ? 'save' : 'update'"
+						:label="isNewAccount ? $t('general.commands.save') : $t('general.commands.update')"
 						:cy="`account-dialog-${isNewAccount ? 'save' : 'update'}-button`"
 						block
 						:loading="savingLoading"
@@ -92,10 +92,12 @@
 	/>
 	<!--	Delete Confirmation Dialog	-->
 	<ConfirmationDialog
+		class="q-mr-md"
 		:confirm-loading="deleteLoading"
 		:name="confirmationDialogName"
-		class="q-mr-md"
-		text-id="delete-account"
+		:title="$t('confirmation.delete-account.title')"
+		:text="$t('confirmation.delete-account.text')"
+		:warning="$t('confirmation.delete-account.warning')"
 		@confirm="deleteAccount"
 	/>
 </template>
@@ -186,7 +188,7 @@ const validationStyle = computed((): { color: 'default' | 'positive' | 'warning'
 		return {
 			color: 'negative',
 			icon: 'mdi-alert-circle-outline',
-			text: 'validate',
+			text: t('general.commands.validate'),
 		};
 	}
 	if (get(changedPlexAccount).isValidated && !get(changedPlexAccount).hasValidationErrors) {
@@ -199,7 +201,7 @@ const validationStyle = computed((): { color: 'default' | 'positive' | 'warning'
 	return {
 		color: 'default',
 		icon: 'mdi-text-box-search-outline',
-		text: 'validate',
+		text: t('general.commands.validate'),
 	};
 });
 

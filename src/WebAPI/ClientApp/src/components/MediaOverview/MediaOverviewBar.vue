@@ -58,7 +58,7 @@
 		<VerticalButton
 			v-if="mediaOverviewStore.showDownloadButton"
 			icon="mdi-download"
-			label="Download"
+			:label="$t('general.commands.download')"
 			:height="barHeight"
 			:width="verticalButtonWidth"
 			@click="download"
@@ -68,7 +68,7 @@
 		<VerticalButton
 			v-if="mediaOverviewStore.showSelectionButton"
 			icon="mdi-select-marker"
-			text-id="selection"
+			:label="$t('general.commands.selection')"
 			:height="barHeight"
 			:width="verticalButtonWidth"
 			@click="$emit('selection-dialog')"
@@ -78,7 +78,7 @@
 		<VerticalButton
 			v-if="!detailMode"
 			icon="mdi-refresh"
-			label="Refresh"
+			:label="$t('general.commands.refresh')"
 			:height="barHeight"
 			cy="media-overview-refresh-library-btn"
 			:width="verticalButtonWidth"
@@ -89,7 +89,7 @@
 		<VerticalButton
 			v-if="!detailMode"
 			icon="mdi-eye"
-			label="View"
+			:label="$t('general.commands.view')"
 			:height="barHeight"
 			:width="verticalButtonWidth"
 			cy="change-view-mode-btn"

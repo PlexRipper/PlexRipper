@@ -11,7 +11,7 @@
 		>
 			<GoToButton
 				:width="400"
-				text-id="go-to-setup-page"
+				:label="$t('general.commands.go-to-setup-page')"
 				to="/setup"
 				block
 			/>

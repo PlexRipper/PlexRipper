@@ -434,7 +434,7 @@
             "setup-question": ""
         },
         "music": {
-            "_musicId": {
+            "music-id": {
                 "header": "La bibliothèque Musique n'est malheureusement pas encore supporté :("
             },
             "index": {

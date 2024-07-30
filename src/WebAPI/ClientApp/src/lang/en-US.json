@@ -434,7 +434,7 @@
             "setup-question": "It looks like this is you're first time using PlexRipper, would you like to set it up?"
         },
         "music": {
-            "_musicId": {
+            "music-id": {
                 "header": "Music Libraries are unfortunately not yet supported :("
             },
             "index": {

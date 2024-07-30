@@ -5705,7 +5705,7 @@
 								<name>music</name>
 								<children>
 									<folder_node>
-										<name>_musicId</name>
+										<name>index</name>
 										<children>
 											<concept_node>
 												<name>header</name>
@@ -5729,7 +5729,7 @@
 										</children>
 									</folder_node>
 									<folder_node>
-										<name>index</name>
+										<name>music-id</name>
 										<children>
 											<concept_node>
 												<name>header</name>

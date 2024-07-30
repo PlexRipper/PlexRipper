@@ -434,7 +434,7 @@
             "setup-question": ""
         },
         "music": {
-            "_musicId": {
+            "music-id": {
                 "header": "Musik Mediatheken sind leider noch nicht unterstützt :("
             },
             "index": {

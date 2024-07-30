@@ -2,7 +2,7 @@
 	<QPage>
 		<QRow>
 			<QCol>
-				<h1>{{ t('pages.music._musicId.header') }}</h1>
+				<h1>{{ t('pages.music.music-id.header') }}</h1>
 			</QCol>
 		</QRow>
 	</QPage>

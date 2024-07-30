@@ -1,7 +1,7 @@
 import type { PropType } from 'vue';
 import ButtonType from '@enums/buttonType';
 
-export function baseBtnPropsDefault(): Record<string, unknown> {
+export function baseBtnPropsDefault() {
 	return {
 		// region PlexRipper
 		cy: {

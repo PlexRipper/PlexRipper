@@ -196,7 +196,8 @@ const plexServerId = ref<number>(0);
 const isVisible = computed((): boolean => plexServerId.value > 0);
 const { t } = useI18n();
 
-function open(newPlexServerId: number): void {
+function open(event: unknown): void {
+	const newPlexServerId = event as number;
 	set(plexServerId, newPlexServerId);
 	set(loading, true);
 

@@ -33,37 +33,39 @@ const settingsStore = useSettingsStore();
 const downloadStore = useDownloadStore();
 const items = ref<object[]>([]);
 
+const { t } = useI18n();
+
 const getNavItems = computed((): QExpansionListProps[] => {
 	const mainItems: QExpansionListProps[] = [
 		{
-			title: 'components.navigation-drawer.downloads',
+			title: t('components.navigation-drawer.downloads'),
 			icon: 'mdi-download',
 			link: '/downloads',
 			type: 'badge',
 			count: downloadStore.getActiveDownloadList().length,
 		},
 		{
-			title: 'components.navigation-drawer.settings',
+			title: t('components.navigation-drawer.settings'),
 			icon: 'mdi-cog',
 			link: '/settings',
 			children: [
 				{
-					title: 'components.navigation-drawer.accounts',
+					title: t('components.navigation-drawer.accounts'),
 					icon: 'mdi-account',
 					link: '/settings/accounts',
 				},
 				{
-					title: 'components.navigation-drawer.paths',
+					title: t('components.navigation-drawer.paths'),
 					icon: 'mdi-folder',
 					link: '/settings/paths',
 				},
 				{
-					title: 'components.navigation-drawer.ui',
+					title: t('components.navigation-drawer.ui'),
 					icon: 'mdi-television-guide',
 					link: '/settings/ui',
 				},
 				{
-					title: 'components.navigation-drawer.advanced',
+					title: t('components.navigation-drawer.advanced'),
 					icon: 'mdi-wrench',
 					link: '/settings/advanced',
 				},
@@ -73,21 +75,21 @@ const getNavItems = computed((): QExpansionListProps[] => {
 
 	if (settingsStore.debugMode) {
 		mainItems.push({
-			title: 'components.navigation-drawer.debug',
+			title: t('components.navigation-drawer.debug'),
 			icon: 'mdi-bug-outline',
 			children: [
 				{
-					title: 'components.navigation-drawer.scratchpad',
+					title: t('components.navigation-drawer.scratchpad'),
 					icon: 'mdi-note-edit',
 					link: '/debug-pages/scratchpad',
 				},
 				{
-					title: 'components.navigation-drawer.dialogs',
+					title: t('components.navigation-drawer.dialogs'),
 					icon: 'mdi-dock-window',
 					link: '/debug-pages/dialogs',
 				},
 				{
-					title: 'components.navigation-drawer.buttons',
+					title: t('components.navigation-drawer.buttons'),
 					icon: 'mdi-button-pointer',
 					link: '/debug-pages/buttons',
 				},

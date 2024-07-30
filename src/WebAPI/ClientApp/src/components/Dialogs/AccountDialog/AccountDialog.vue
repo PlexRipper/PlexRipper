@@ -322,7 +322,8 @@ function deleteAccount() {
 	);
 }
 
-function openDialog({ isNewAccountValue, account = null }: { isNewAccountValue: boolean; account: PlexAccountDTO | null }) {
+function openDialog(event: unknown) {
+	const { isNewAccountValue, account } = event as { isNewAccountValue: boolean; account: PlexAccountDTO | null };
 	set(isNewAccount, isNewAccountValue);
 	// Setup values
 	if (account) {

@@ -21,7 +21,10 @@
 			>
 				<q-item-section>
 					<q-item-label>{{ account.displayName }}</q-item-label>
-					<q-item-label caption>
+					<q-item-label
+						v-if="account.username"
+						caption
+					>
 						{{ account.username }}
 					</q-item-label>
 				</q-item-section>
@@ -61,6 +64,7 @@ const accountsDisplay = computed(() => {
 			id: 0,
 			displayName: t('components.account-selector.all-accounts'),
 			loading: get(loading)[0],
+			username: '',
 		},
 		...accountStore.accounts
 			.filter((x) => x.isEnabled)
@@ -69,6 +73,7 @@ const accountsDisplay = computed(() => {
 					id: x.id,
 					displayName: x.displayName,
 					loading: get(loading)[x.id] ?? false,
+					username: x.username,
 				};
 			}),
 	];

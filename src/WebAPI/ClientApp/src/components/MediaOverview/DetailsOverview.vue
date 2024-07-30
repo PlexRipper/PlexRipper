@@ -159,7 +159,8 @@ const imageUrl = computed(() => {
 		: '';
 });
 
-function openDetails({ mediaId, type }: { mediaId: number; type: PlexMediaType }) {
+function openDetails(event: unknown) {
+	const { mediaId, type } = event as { mediaId: number; type: PlexMediaType };
 	set(loading, true);
 	Log.debug('MediaDetailsDialog', 'openDetails', { mediaId, type });
 	mediaOverviewStore.downloadButtonVisible = false;

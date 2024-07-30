@@ -1,7 +1,6 @@
 <template>
 	<QCardDialog
 		:name="name"
-		:value="path"
 		min-width="70vw"
 		max-width="70vw"
 		content-height="80"
@@ -188,7 +187,8 @@ const getIcon = (type: FileSystemEntityType): string => {
 	}
 };
 
-const open = (selectedPath: FolderPathDTO): void => {
+function open(event: unknown): void {
+	let selectedPath = event as FolderPathDTO;
 	if (!selectedPath) {
 		Log.error('parameter was null when opening DirectoryBrowser');
 		return;
@@ -197,7 +197,7 @@ const open = (selectedPath: FolderPathDTO): void => {
 	requestDirectories(selectedPath.directory);
 	set(path, selectedPath);
 	set(currentPath, selectedPath.directory);
-};
+}
 
 function cancel(): void {
 	emit('cancel');

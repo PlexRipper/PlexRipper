@@ -82,7 +82,7 @@ import { useControlDialog } from '#imports';
 const controlDialog = useControlDialog();
 
 const showDialog = ref(false);
-const dataValue = ref<unknown | null>(null);
+const dataValue = ref<unknown>(null);
 const props = withDefaults(
 	defineProps<{
 		name: string;
@@ -91,7 +91,6 @@ const props = withDefaults(
 		maxWidth?: string;
 		allWidth?: string;
 		contentHeight?: '100' | '80' | '60' | '40' | '20' | '0';
-		value?: unknown;
 		loading?: boolean;
 		scroll?: boolean;
 		persistent?: boolean;
@@ -112,7 +111,6 @@ const props = withDefaults(
 		maxWidth: '',
 		allWidth: '',
 		contentHeight: '0',
-		value: null,
 		loading: false,
 		scroll: true,
 		persistent: false,
@@ -134,9 +132,6 @@ defineEmits<{
 }>();
 
 const parentValue = computed(() => {
-	if (props.value) {
-		return props.value;
-	}
 	return get(dataValue);
 });
 

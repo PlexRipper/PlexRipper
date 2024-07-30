@@ -97,7 +97,8 @@ defineProps<{
 	name: string;
 }>();
 
-function onOpen(downloadTaskId: string) {
+function onOpen(event: unknown) {
+	const downloadTaskId = event as string;
 	set(loading, true);
 	downloadApi.getDownloadTaskByGuidEndpoint(downloadTaskId).subscribe((data) => {
 		if (data.isSuccess && data.value) {

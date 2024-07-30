@@ -3,7 +3,7 @@
 		max-width="500px"
 		:name="name"
 		:loading="false"
-		@opened="onOpen($event)"
+		@opened="onOpen"
 		@closed="onClose"
 	>
 		<template #title>
@@ -41,7 +41,8 @@ const helpText = ref('');
 const missingHelpTitle = ref(t('help.default.title'));
 const missingHelpText = ref(t('help.default.text'));
 
-function onOpen(value: string): void {
+function onOpen(event: unknown): void {
+	const value = event as string;
 	set(helpId, value);
 	if (get(helpId) === '') {
 		set(helpTitle, t('help.default.title'));

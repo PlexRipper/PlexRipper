@@ -65,7 +65,8 @@ const downloadMediaCommand = ref<DownloadMediaDTO[]>([]);
 const totalSize = ref(0);
 const columns: QTreeViewTableHeader[] = getDownloadPreviewTableColumns;
 
-function openDialog(data: DownloadMediaDTO[]): void {
+function openDialog(event: unknown): void {
+	const data = event as DownloadMediaDTO[];
 	set(loading, true);
 	set(downloadMediaCommand, data);
 	useSubscription(

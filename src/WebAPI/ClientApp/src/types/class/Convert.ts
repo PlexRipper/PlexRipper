@@ -1,4 +1,4 @@
-import { FolderType, PlexMediaType } from '@dto';
+import { DownloadTaskType, FolderType, PlexMediaType } from '@dto';
 import ButtonType from '@enums/buttonType';
 
 export const Convert = {
@@ -67,6 +67,34 @@ export const Convert = {
 				return FolderType.MusicFolder;
 			default:
 				return FolderType.Unknown;
+		}
+	},
+	toPlexMediaType(downloadType: DownloadTaskType) {
+		switch (downloadType) {
+			case DownloadTaskType.Movie:
+				return PlexMediaType.Movie;
+			case DownloadTaskType.TvShow:
+				return PlexMediaType.TvShow;
+			case DownloadTaskType.Season:
+				return PlexMediaType.Season;
+			case DownloadTaskType.Episode:
+				return PlexMediaType.Episode;
+			default:
+				return PlexMediaType.Unknown;
+		}
+	},
+	toDownloadTaskType(mediaType: PlexMediaType) {
+		switch (mediaType) {
+			case PlexMediaType.Movie:
+				return DownloadTaskType.Movie;
+			case PlexMediaType.TvShow:
+				return DownloadTaskType.TvShow;
+			case PlexMediaType.Season:
+				return DownloadTaskType.Season;
+			case PlexMediaType.Episode:
+				return DownloadTaskType.Episode;
+			default:
+				return DownloadTaskType.None;
 		}
 	},
 };

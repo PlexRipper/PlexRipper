@@ -4,7 +4,11 @@
 			{{ $t('pages.settings.ui.date-and-time.header') }}
 		</template>
 		<!--	Short Date Format Setting	-->
-		<HelpRow help-id="help.settings.ui.date-and-time.short-date-format">
+		<HelpRow
+			:label="$t('help.settings.ui.date-and-time.short-date-format.label')"
+			:title="$t('help.settings.ui.date-and-time.short-date-format.title')"
+			:text="$t('help.settings.ui.date-and-time.short-date-format.text')"
+		>
 			<q-select
 				v-model:model-value="shortDateFormat"
 				:options="shortDateOptions"
@@ -23,7 +27,11 @@
 			</q-select>
 		</HelpRow>
 		<!--	Long Date Format Setting	-->
-		<HelpRow help-id="help.settings.ui.date-and-time.long-date-format">
+		<HelpRow
+			:label="$t('help.settings.ui.date-and-time.long-date-format.label')"
+			:title="$t('help.settings.ui.date-and-time.long-date-format.title')"
+			:text="$t('help.settings.ui.date-and-time.long-date-format.text')"
+		>
 			<q-select
 				v-model:model-value="longDateFormat"
 				:options="longDateOptions"
@@ -42,7 +50,11 @@
 			</q-select>
 		</HelpRow>
 		<!--	Time Format Setting	-->
-		<HelpRow help-id="help.settings.ui.date-and-time.time-format">
+		<HelpRow
+			:label="$t('help.settings.ui.date-and-time.time-format.label')"
+			:title="$t('help.settings.ui.date-and-time.time-format.title')"
+			:text="$t('help.settings.ui.date-and-time.time-format.text')"
+		>
 			<q-select
 				v-model:model-value="timeFormat"
 				:options="timeFormatOptions"
@@ -61,7 +73,11 @@
 			</q-select>
 		</HelpRow>
 		<!--	Show Relative Dates Setting	-->
-		<HelpRow help-id="help.settings.ui.date-and-time.show-relative-dates">
+		<HelpRow
+			:label="$t('help.settings.ui.date-and-time.show-relative-dates.label')"
+			:title="$t('help.settings.ui.date-and-time.show-relative-dates.title')"
+			:text="$t('help.settings.ui.date-and-time.show-relative-dates.text')"
+		>
 			<q-toggle
 				v-model:model-value="settingsStore.dateTimeSettings.showRelativeDates"
 				size="lg"

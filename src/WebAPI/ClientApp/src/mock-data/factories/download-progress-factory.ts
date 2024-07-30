@@ -1,9 +1,9 @@
 import { randMovie, randUuid } from '@ngneat/falso';
 import { times } from 'lodash-es';
-import { toPlexMediaType } from '@composables/conversion';
 import type { MockConfig } from '@mock';
 import { DownloadStatus, DownloadTaskType, type DownloadProgressDTO, type ServerDownloadProgressDTO } from '@dto';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
+import Convert from '@class/Convert';
 
 export function generateServerDownloadProgress({
 	plexServerId,
@@ -70,7 +70,7 @@ export function generateDownloadProgressBase({
 		dataTotal: 1000000000, // 1 GB in bytes
 		downloadSpeed: 0,
 		fileTransferSpeed: 0,
-		mediaType: toPlexMediaType(type),
+		mediaType: Convert.toPlexMediaType(type),
 		percentage: 0,
 		status: DownloadStatus.Queued,
 		timeRemaining: 0,

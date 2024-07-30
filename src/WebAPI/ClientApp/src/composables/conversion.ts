@@ -1,14 +1,4 @@
-import { kebabCase } from 'lodash-es';
-import type {
-	DownloadMediaDTO,
-	PlexMediaDTO,
-	PlexMediaSlimDTO,
-	FolderType } from '@dto';
-
-import {
-	DownloadTaskType,
-	PlexMediaType,
-} from '@dto';
+import type {	DownloadMediaDTO,	PlexMediaDTO,	PlexMediaSlimDTO } from '@dto';
 
 export function toDownloadMedia(mediaItem: PlexMediaDTO | PlexMediaSlimDTO): DownloadMediaDTO[] {
 	return [
@@ -19,38 +9,4 @@ export function toDownloadMedia(mediaItem: PlexMediaDTO | PlexMediaSlimDTO): Dow
 			plexLibraryId: mediaItem.plexLibraryId,
 		},
 	];
-}
-
-export function toFolderPathStringId(folderType: FolderType) {
-	return kebabCase(folderType.toString().replace('Folder', ''));
-}
-
-export function toPlexMediaType(downloadType: DownloadTaskType) {
-	switch (downloadType) {
-		case DownloadTaskType.Movie:
-			return PlexMediaType.Movie;
-		case DownloadTaskType.TvShow:
-			return PlexMediaType.TvShow;
-		case DownloadTaskType.Season:
-			return PlexMediaType.Season;
-		case DownloadTaskType.Episode:
-			return PlexMediaType.Episode;
-		default:
-			return PlexMediaType.Unknown;
-	}
-}
-
-export function toDownloadTaskType(mediaType: PlexMediaType) {
-	switch (mediaType) {
-		case PlexMediaType.Movie:
-			return DownloadTaskType.Movie;
-		case PlexMediaType.TvShow:
-			return DownloadTaskType.TvShow;
-		case PlexMediaType.Season:
-			return DownloadTaskType.Season;
-		case PlexMediaType.Episode:
-			return DownloadTaskType.Episode;
-		default:
-			return DownloadTaskType.None;
-	}
 }

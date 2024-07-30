@@ -1,10 +1,14 @@
 <template>
 	<QSection>
 		<template #header>
-			{{ t('pages.settings.advanced.database.header') }}
+			{{ $t('pages.settings.advanced.database.header') }}
 		</template>
 		<!--	Reset Database	-->
-		<HelpRow help-id="help.settings.advanced.reset-db">
+		<HelpRow
+			:label="$t('help.settings.advanced.reset-db.label')"
+			:title="$t('help.settings.advanced.reset-db.title')"
+			:text="$t('help.settings.advanced.reset-db.text')"
+		>
 			<WarningButton
 				:width="400"
 				text-id="reset-db"
@@ -25,10 +29,9 @@ import { useSubscription } from '@vueuse/rxjs';
 import { settingsApi } from '@api';
 import { useOpenControlDialog } from '#imports';
 
-const { t } = useI18n();
-
 const router = useRouter();
 const confirmationDialogName = 'reset-database-confirmation-dialog';
+
 const resetDatabaseCommand = (): void => {
 	useSubscription(
 		settingsApi.resetDatabaseEndpoint().subscribe((value) => {

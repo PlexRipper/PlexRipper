@@ -1,7 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { Observable } from 'rxjs';
 import { of, Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
 import type { IHelp, ISetupResult } from '@interfaces';
 
 export const useHelpStore = defineStore('HelpStore', () => {

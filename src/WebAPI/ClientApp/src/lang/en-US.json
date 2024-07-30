@@ -372,22 +372,22 @@
                 "confirmation-settings": {
                     "download-episode-confirmation": {
                         "label": "Ask Download Episode Confirmation",
-                        "text": "",
+                        "text": "Should a confirmation pop-up be shown when an episode is about to be downloaded?",
                         "title": "Ask Download Episode Confirmation"
                     },
                     "download-movie-confirmation": {
                         "label": "Ask Download Movie Confirmation",
-                        "text": "",
+                        "text": "Should a confirmation pop-up be shown when a movie is about to be downloaded?",
                         "title": "Ask Download Movie Confirmation"
                     },
                     "download-season-confirmation": {
                         "label": "Ask Download Season Confirmation",
-                        "text": "",
+                        "text": "Should a confirmation pop-up be shown when a season is about to be downloaded?",
                         "title": "Ask Download Season Confirmation"
                     },
                     "download-tvshow-confirmation": {
                         "label": "Ask Download TvShow Confirmation",
-                        "text": "",
+                        "text": "Should a confirmation pop-up be shown when an tv show is about to be downloaded?",
                         "title": "Ask Download TvShow Confirmation"
                     }
                 },

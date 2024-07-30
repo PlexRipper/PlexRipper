@@ -3,7 +3,11 @@
 		<template #header>
 			{{ $t('pages.settings.ui.language.header') }}
 		</template>
-		<HelpRow help-id="help.settings.ui.language.language-selection">
+		<HelpRow
+			:label="$t('help.settings.ui.language.language-selection.label')"
+			:title="$t('help.settings.ui.language.language-selection.title')"
+			:text="$t('help.settings.ui.language.language-selection.text')"
+		>
 			<q-select
 				v-model:model-value="language"
 				:dense="false"

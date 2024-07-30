@@ -372,22 +372,22 @@
                 "confirmation-settings": {
                     "download-episode-confirmation": {
                         "label": "Frage nach Bestätigung für Folgen Download",
-                        "text": "",
+                        "text": "Soll vor dem Herunterladen einer Episode ein Bestätigungs-Popup angezeigt werden?",
                         "title": "Frage nach Bestätigung für Folgen Download"
                     },
                     "download-movie-confirmation": {
                         "label": "Frage nach Bestätigung für Filme Download",
-                        "text": "",
+                        "text": "Soll vor dem Herunterladen eines Films ein Bestätigungs-Popup angezeigt werden?",
                         "title": "Frage nach Bestätigung für Filme Download"
                     },
                     "download-season-confirmation": {
                         "label": "Frage nach Bestätigung für Staffel Download",
-                        "text": "",
+                        "text": "Soll vor dem Download einer Staffel ein Bestätigungs-Popup angezeigt werden?",
                         "title": "Frage nach Bestätigung für Staffel Download"
                     },
                     "download-tvshow-confirmation": {
                         "label": "Frage nach Bestätigung für Serien Download",
-                        "text": "",
+                        "text": "Soll vor dem Herunterladen einer Fernsehsendung ein Bestätigungs-Popup angezeigt werden?",
                         "title": "Frage nach Bestätigung für Serien Download"
                     }
                 },

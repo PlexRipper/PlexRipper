@@ -372,22 +372,22 @@
                 "confirmation-settings": {
                     "download-episode-confirmation": {
                         "label": "Demander confirmation du téléchargement de l'épisode",
-                        "text": "",
+                        "text": "Une fenêtre contextuelle de confirmation doit-elle s'afficher lorsqu'un épisode est sur le point d'être téléchargé ?",
                         "title": "Demander confirmation du téléchargement de l'épisode"
                     },
                     "download-movie-confirmation": {
                         "label": "Demander confirmation du téléchargement du film",
-                        "text": "",
+                        "text": "Une fenêtre contextuelle de confirmation doit-elle s'afficher lorsqu'un film est sur le point d'être téléchargé ?",
                         "title": "Demander confirmation du téléchargement du film"
                     },
                     "download-season-confirmation": {
                         "label": "Demander confirmation du téléchargement de la saison",
-                        "text": "",
+                        "text": "Une fenêtre contextuelle de confirmation doit-elle s'afficher lorsqu'une saison est sur le point d'être téléchargée ?",
                         "title": "Demander confirmation du téléchargement de la saison"
                     },
                     "download-tvshow-confirmation": {
                         "label": "Demander confirmation du téléchargement de la séries",
-                        "text": "",
+                        "text": "Une fenêtre contextuelle de confirmation doit-elle s'afficher lorsqu'une émission télévisée est sur le point d'être téléchargée ?",
                         "title": "Demander confirmation du téléchargement de la séries"
                     }
                 },

@@ -1,10 +1,14 @@
 <template>
 	<QSection>
 		<template #header>
-			{{ t('pages.settings.ui.confirmation-settings.header') }}
+			{{ $t('pages.settings.ui.confirmation-settings.header') }}
 		</template>
 		<!--	Ask Download Movie Confirmation	-->
-		<HelpRow help-id="help.settings.ui.confirmation-settings.download-movie-confirmation">
+		<HelpRow
+			:label="$t('help.settings.ui.confirmation-settings.download-movie-confirmation.label')"
+			:title="$t('help.settings.ui.confirmation-settings.download-movie-confirmation.title')"
+			:text="$t('help.settings.ui.confirmation-settings.download-movie-confirmation.text')"
+		>
 			<q-toggle
 				v-model:model-value="settingsStore.confirmationSettings.askDownloadMovieConfirmation"
 				size="lg"
@@ -12,7 +16,11 @@
 			/>
 		</HelpRow>
 		<!--	Ask Download TvShow Confirmation	-->
-		<HelpRow help-id="help.settings.ui.confirmation-settings.download-tvshow-confirmation">
+		<HelpRow
+			:label="$t('help.settings.ui.confirmation-settings.download-tvshow-confirmation.label')"
+			:title="$t('help.settings.ui.confirmation-settings.download-tvshow-confirmation.title')"
+			:text="$t('help.settings.ui.confirmation-settings.download-tvshow-confirmation.text')"
+		>
 			<q-toggle
 				v-model:model-value="settingsStore.confirmationSettings.askDownloadTvShowConfirmation"
 				size="lg"
@@ -20,7 +28,11 @@
 			/>
 		</HelpRow>
 		<!--	Ask Download Season Confirmation	-->
-		<HelpRow help-id="help.settings.ui.confirmation-settings.download-season-confirmation">
+		<HelpRow
+			:label="$t('help.settings.ui.confirmation-settings.download-season-confirmation.label')"
+			:title="$t('help.settings.ui.confirmation-settings.download-season-confirmation.title')"
+			:text="$t('help.settings.ui.confirmation-settings.download-season-confirmation.text')"
+		>
 			<q-toggle
 				v-model:model-value="settingsStore.confirmationSettings.askDownloadSeasonConfirmation"
 				size="lg"
@@ -28,7 +40,11 @@
 			/>
 		</HelpRow>
 		<!--	Ask Download Episode Confirmation	-->
-		<HelpRow help-id="help.settings.ui.confirmation-settings.download-episode-confirmation">
+		<HelpRow
+			:label="$t('help.settings.ui.confirmation-settings.download-episode-confirmation.label')"
+			:title="$t('help.settings.ui.confirmation-settings.download-episode-confirmation.title')"
+			:text="$t('help.settings.ui.confirmation-settings.download-episode-confirmation.text')"
+		>
 			<q-toggle
 				v-model:model-value="settingsStore.confirmationSettings.askDownloadEpisodeConfirmation"
 				size="lg"
@@ -39,8 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { useSettingsStore } from '~/store';
+import { useSettingsStore } from '@store';
 
-const { t } = useI18n();
 const settingsStore = useSettingsStore();
 </script>

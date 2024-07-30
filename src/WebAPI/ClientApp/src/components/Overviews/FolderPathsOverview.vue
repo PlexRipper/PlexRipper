@@ -117,11 +117,9 @@
 import { type FolderPathDTO, FolderType } from '@dto';
 import type IFolderPathGroup from '@interfaces/IFolderPathGroup';
 import type { IHelp } from '@interfaces';
-import { Exception } from 'sass';
 import {
 	useI18n,
 	useOpenControlDialog,
-	toFolderPathStringId,
 	useFolderPathStore,
 	useSubscription,
 	showErrorNotification,
@@ -155,11 +153,23 @@ const confirmDirectoryBrowser = (path: FolderPathDTO): void => {
 };
 
 function addFolderPath(folderGroup: IFolderPathGroup): void {
+	let displayName = '';
+	switch (folderGroup.folderType) {
+		case FolderType.MovieFolder:
+			displayName = t('components.folder-paths-overview.movie.default-name');
+			break;
+		case FolderType.TvShowFolder:
+			displayName = t('components.folder-paths-overview.tv-show.default-name');
+			break;
+		default:
+			throw new Error(`Unknown folder type: ${folderGroup.folderType}`);
+	}
+
 	useSubscription(
 		folderPathStore
 			.createFolderPath({
 				id: 0,
-				displayName: t(`components.folder-paths-overview.${toFolderPathStringId(folderGroup.folderType)}.default-name`),
+				displayName,
 				directory: '',
 				folderType: folderGroup.folderType,
 				mediaType: folderGroup.mediaType,

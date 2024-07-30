@@ -28,7 +28,16 @@ jobs:
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
             -   name: Run Vitest tests
-                run: npm test
+                run: bun run test
+                working-directory: src/WebAPI/ClientApp/
+    Front-End-Eslint-Check:
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@v4
+            -   name: Client App Install
+                uses: ./.github/workflows/steps/client-app-install/
+            -   name: Run eslint check
+                run: bun run lint
                 working-directory: src/WebAPI/ClientApp/
     # Front-End-Integration-Tests:
     #  Front-End-Integration-Tests: TODO Tests keep randomly failing during CI, need to investigate
@@ -81,7 +90,7 @@ jobs:
                 run: dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal
     # Ensure the Docker image can be built without errors
     Test-Docker-Build:
-        needs: [ Front-End-Unit-Tests, Front-End-Type-Check, Back-End-Unit-Tests, Back-End-Integration-Tests ]
+        needs: [ Front-End-Unit-Tests, Front-End-Type-Check, Front-End-Eslint-Check, Back-End-Unit-Tests, Back-End-Integration-Tests ]
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout Source Code

@@ -1,7 +1,9 @@
 <template>
-	<q-card flat class="media-poster media-poster--card highlight-border-box">
+	<q-card
+		flat
+		class="media-poster media-poster--card highlight-border-box">
 		<div>
-			<q-hover>
+			<QHover>
 				<template #default="{ hover }">
 					<q-img
 						v-if="!defaultImage"
@@ -13,13 +15,18 @@
 						:alt="mediaItem.title">
 						<!--	Overlay	-->
 						<div :class="['media-poster--overlay', hover ? 'on-hover' : '', 'white--text']">
-							<q-row justify="center" align="end" style="height: 100%">
-								<q-col cols="12" text-align="center">
+							<QRow
+								justify="center"
+								align="end"
+								style="height: 100%">
+								<QCol
+									cols="12"
+									text-align="center">
 									<span class="media-poster--title">
 										{{ mediaItem.title }}
 									</span>
-								</q-col>
-								<q-col cols="auto">
+								</QCol>
+								<QCol cols="auto">
 									<BaseButton
 										v-if="mediaType === PlexMediaType.Movie"
 										icon="mdi-download"
@@ -34,23 +41,30 @@
 										size="xl"
 										flat
 										@click="sendMediaOverviewOpenDetailsCommand(mediaItem.id)" />
-								</q-col>
-							</q-row>
+								</QCol>
+							</QRow>
 						</div>
 					</q-img>
 					<!--	Show fallback image	-->
 					<template v-else>
-						<q-row column align="center" justify="between" class="media-poster--fallback">
-							<q-col>
-								<q-media-type-icon class="mx-3" :size="90" :media-type="mediaType" />
-							</q-col>
-							<q-col text-align="center">
+						<QRow
+							column
+							align="center"
+							justify="between"
+							class="media-poster--fallback">
+							<QCol>
+								<QMediaTypeIcon
+									class="mx-3"
+									:size="90"
+									:media-type="mediaType" />
+							</QCol>
+							<QCol text-align="center">
 								<span class="media-poster--title">
 									{{ mediaItem.title }}
 								</span>
-							</q-col>
+							</QCol>
 
-							<q-col cols="auto">
+							<QCol cols="auto">
 								<BaseButton
 									v-if="mediaType === PlexMediaType.Movie"
 									icon="mdi-download"
@@ -65,25 +79,41 @@
 									size="xl"
 									flat
 									@click="sendMediaOverviewOpenDetailsCommand(mediaItem.id)" />
-							</q-col>
-						</q-row>
+							</QCol>
+						</QRow>
 					</template>
 				</template>
-			</q-hover>
+			</QHover>
 		</div>
 		<!--	Poster bar	-->
-		<div v-if="qualities.length" class="media-poster--quality-bar">
-			<q-chip v-for="(quality, j) in qualities" :key="j" :color="getQualityColor(quality.quality)" size="md">
+		<div
+			v-if="qualities.length"
+			class="media-poster--quality-bar">
+			<q-chip
+				v-for="(quality, j) in qualities"
+				:key="j"
+				:color="getQualityColor(quality.quality)"
+				size="md">
 				{{ quality.displayQuality }}
 			</q-chip>
 		</div>
 		<QLoadingOverlay :loading="loading" />
 		<!--	Highlight animation effect	-->
 		<svg class="glow-container">
-			<!--suppress HtmlUnknownAttribute -->
-			<rect pathLength="100" height="5" width="5" stroke-linecap="round" class="glow-blur" />
-			<!--suppress HtmlUnknownAttribute -->
-			<rect pathLength="100" height="5" width="5" stroke-linecap="round" class="glow-line" />
+			<!-- suppress HtmlUnknownAttribute -->
+			<rect
+				pathLength="100"
+				height="5"
+				width="5"
+				stroke-linecap="round"
+				class="glow-blur" />
+			<!-- suppress HtmlUnknownAttribute -->
+			<rect
+				pathLength="100"
+				height="5"
+				width="5"
+				stroke-linecap="round"
+				class="glow-line" />
 		</svg>
 	</q-card>
 </template>

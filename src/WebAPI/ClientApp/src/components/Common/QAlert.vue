@@ -1,12 +1,19 @@
 <template>
-	<q-item v-ripple clickable :class="classConfig">
+	<q-item
+		v-ripple
+		clickable
+		:class="classConfig">
 		<div class="q-alert-wrapper">
-			<q-icon :name="alertIcon" size="24px" />
+			<q-icon
+				:name="alertIcon"
+				size="24px" />
 			<div class="q-alert-content">
 				<slot />
 			</div>
 			<div class="q-alert-dismissible">
-				<q-icon name="mdi-close-circle" size="24px" />
+				<q-icon
+					name="mdi-close-circle"
+					size="24px" />
 			</div>
 		</div>
 	</q-item>
@@ -63,6 +70,7 @@ const alertIcon = computed((): string => {
 
 		.q-alert-content {
 			flex: 1 1 auto;
+			padding: 0 1em;
 		}
 
 		.q-alert-dismissible {

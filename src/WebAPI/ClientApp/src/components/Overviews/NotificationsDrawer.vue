@@ -1,6 +1,11 @@
 <template>
-	<q-drawer :model-value="showDrawer" :width="450" side="right" overlay class="no-background notification-drawer">
-		<q-col class="notification-container">
+	<q-drawer
+		:model-value="showDrawer"
+		:width="450"
+		side="right"
+		overlay
+		class="no-background notification-drawer">
+		<QCol class="notification-container">
 			<q-scroll>
 				<!-- Render All Notifications	-->
 				<template v-if="notifications.length > 0">
@@ -15,7 +20,9 @@
 						outlined
 						elevation="10"
 						@click="hideNotification(notification.id)">
-						<span class="text-wrap" style="overflow-wrap: anywhere">
+						<span
+							class="text-wrap"
+							style="overflow-wrap: anywhere">
 							{{ notification.message }}
 						</span>
 					</q-alert>
@@ -34,11 +41,15 @@
 					</q-list>
 				</template>
 			</q-scroll>
-		</q-col>
+		</QCol>
 		<!-- Menu items -->
-		<q-col v-if="notifications.length > 0" class="clear-notifications-container">
+		<QCol
+			v-if="notifications.length > 0"
+			class="clear-notifications-container">
 			<q-list>
-				<q-item clickable @click="clearAllNotifications">
+				<q-item
+					clickable
+					@click="clearAllNotifications">
 					<q-item-section avatar>
 						<q-icon name="mdi-close-circle" />
 					</q-item-section>
@@ -47,7 +58,7 @@
 					</q-item-section>
 				</q-item>
 			</q-list>
-		</q-col>
+		</QCol>
 	</q-drawer>
 </template>
 

@@ -1,10 +1,11 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
-import { Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import { switchMap, tap, map } from 'rxjs/operators';
 import type { PlexServerDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
-import { useAccountStore, useServerConnectionStore, useSettingsStore } from '#build/imports';
 import { plexServerApi } from '@api';
+import { useAccountStore, useServerConnectionStore, useSettingsStore } from '#build/imports';
 
 export const useServerStore = defineStore('ServerStore', () => {
 	const state = reactive<{ servers: PlexServerDTO[] }>({
@@ -50,6 +51,13 @@ export const useServerStore = defineStore('ServerStore', () => {
 				})
 				.pipe(switchMap(() => settingsStore.refreshSettings()));
 		},
+		setServerHidden(serverId: number, hidden: boolean) {
+			return plexServerApi
+				.setServerHiddenRequestEndpoint(serverId, {
+					hidden,
+				})
+				.pipe(switchMap(() => settingsStore.refreshSettings()));
+		},
 	};
 
 	// Getters
@@ -59,7 +67,12 @@ export const useServerStore = defineStore('ServerStore', () => {
 		},
 		getServers: (serverIds: number[] = []): PlexServerDTO[] =>
 			state.servers.filter((server) => !serverIds.length || serverIds.includes(server.id)),
-
+		getVisibleServers: computed((): PlexServerDTO[] =>
+			getters.getServers().filter((x) => settingsStore.isServerVisible(x.machineIdentifier)),
+		),
+		getHiddenServers: computed((): PlexServerDTO[] =>
+			getters.getServers().filter((x) => !settingsStore.isServerVisible(x.machineIdentifier)),
+		),
 		/**
 		 * Retrieves the accessible PlexServers for the given PlexAccount from the store
 		 */

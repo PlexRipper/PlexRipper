@@ -1,6 +1,11 @@
 <template>
-	<div :class="{ 'media-table-header-column': true, sorted: sorted }" @click="onClick">
-		<span> {{ column.label }} <q-icon v-if="column.sortable" :name="icon" class="header-sort-icon" /></span>
+	<div
+		:class="{ 'media-table-header-column': true, 'sorted': sorted }"
+		@click="onClick">
+		<span> {{ column.label }} <q-icon
+			v-if="column.sortable"
+			:name="icon"
+			class="header-sort-icon" /></span>
 	</div>
 </template>
 
@@ -68,6 +73,7 @@ onBeforeMount(() => {
 	});
 });
 </script>
+
 <style lang="scss">
 .media-table-header-column {
 	white-space: nowrap;

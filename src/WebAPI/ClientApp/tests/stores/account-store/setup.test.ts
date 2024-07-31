@@ -1,10 +1,10 @@
 import { describe, beforeAll, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
-import { useAccountStore } from '#build/imports';
 import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-test-base';
 import { PlexAccountPaths } from '@api/api-paths';
 import type { ISetupResult } from '@interfaces';
 import { generateResultDTO } from '@mock';
+import { useAccountStore } from '#build/imports';
 
 describe('AccountStore.setup()', () => {
 	let { mock } = baseVars();

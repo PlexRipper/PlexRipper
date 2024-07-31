@@ -1,8 +1,8 @@
 import { randDirectoryPath, randProductName } from '@ngneat/falso';
 import { times } from 'lodash-es';
 import { FolderType, PlexMediaType, type FolderPathDTO } from '@dto';
-import { checkConfig, type MockConfig } from '~/mock-data';
 import Convert from '@class/Convert';
+import { checkConfig, type MockConfig } from '~/mock-data';
 
 let folderPathIdIndex = 1;
 

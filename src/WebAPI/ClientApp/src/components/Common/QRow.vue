@@ -1,5 +1,7 @@
 <template>
-	<div :class="classes" :data-cy="cy">
+	<div
+		:class="classes"
+		:data-cy="cy">
 		<slot />
 	</div>
 </template>

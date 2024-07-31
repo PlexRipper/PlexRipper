@@ -1,7 +1,7 @@
 import type { PropType } from 'vue';
 import ButtonType from '@enums/buttonType';
 
-export function baseBtnPropsDefault(): Record<string, any> {
+export function baseBtnPropsDefault() {
 	return {
 		// region PlexRipper
 		cy: {
@@ -11,14 +11,6 @@ export function baseBtnPropsDefault(): Record<string, any> {
 		type: {
 			type: String as PropType<ButtonType>,
 			default: ButtonType.None,
-		},
-		textId: {
-			type: String,
-			default: '',
-		},
-		tooltipId: {
-			type: String,
-			default: '',
 		},
 		width: {
 			type: Number,
@@ -36,9 +28,13 @@ export function baseBtnPropsDefault(): Record<string, any> {
 			type: Boolean,
 			default: false,
 		},
+		tooltipText: {
+			type: String,
+			default: '',
+		},
 		// endregion
-		// region Quasar native
 
+		// region Quasar native
 		label: {
 			type: String,
 			default: '',

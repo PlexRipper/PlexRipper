@@ -1,23 +1,35 @@
 <template>
-	<q-section>
-		<template #header> {{ t('pages.settings.advanced.database.header') }}</template>
+	<QSection>
+		<template #header>
+			{{ $t('pages.settings.advanced.database.header') }}
+		</template>
 		<!--	Reset Database	-->
-		<help-row help-id="help.settings.advanced.reset-db">
-			<WarningButton :width="400" text-id="reset-db" block @click="useOpenControlDialog(confirmationDialogName)" />
-			<confirmation-dialog text-id="reset-db" :name="confirmationDialogName" @confirm="resetDatabaseCommand" />
-		</help-row>
-	</q-section>
+		<HelpRow
+			:label="$t('help.settings.advanced.reset-db.label')"
+			:title="$t('help.settings.advanced.reset-db.title')"
+			:text="$t('help.settings.advanced.reset-db.text')">
+			<WarningButton
+				:width="400"
+				:label="$t('general.commands.reset-db')"
+				block
+				@click="useOpenControlDialog(confirmationDialogName)" />
+			<ConfirmationDialog
+				:title="$t('confirmation.reset-db.title')"
+				:text="$t('confirmation.reset-db.text')"
+				:name="confirmationDialogName"
+				@confirm="resetDatabaseCommand" />
+		</HelpRow>
+	</QSection>
 </template>
 
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
-import { useOpenControlDialog } from '#imports';
 import { settingsApi } from '@api';
-
-const { t } = useI18n();
+import { useOpenControlDialog } from '#imports';
 
 const router = useRouter();
 const confirmationDialogName = 'reset-database-confirmation-dialog';
+
 const resetDatabaseCommand = (): void => {
 	useSubscription(
 		settingsApi.resetDatabaseEndpoint().subscribe((value) => {

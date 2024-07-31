@@ -1,7 +1,6 @@
 <template>
 	<QCardDialog
 		:name="name"
-		:value="path"
 		min-width="70vw"
 		max-width="70vw"
 		content-height="80"
@@ -12,27 +11,37 @@
 			{{ t('components.directory-browser.select-path', { pathName: path?.displayName ?? '' }) }}
 		</template>
 		<template #top-row>
-			<q-row>
-				<q-col v-if="!isCurrentWritable" cols="auto" class="q-px-md">
-					<q-icon color="red" size="sm" name="mdi-alert-circle">
-						<q-tooltip anchor="top middle" self="center middle">
+			<QRow>
+				<QCol
+					v-if="!isCurrentWritable"
+					cols="auto"
+					class="q-px-md">
+					<q-icon
+						color="red"
+						size="sm"
+						name="mdi-alert-circle">
+						<q-tooltip
+							anchor="top middle"
+							self="center middle">
 							<span>{{ t('components.directory-browser.has-no-write-permission') }}</span>
 						</q-tooltip>
 					</q-icon>
-				</q-col>
-				<q-col>
-					<p-text-field
+				</QCol>
+				<QCol>
+					<PTextField
 						v-model="currentPath"
 						outlined
 						color="red"
 						:placeholder="t('components.directory-browser.no-path')"
 						@update:model-value="requestDirectories" />
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 			<q-markup-table class="q-pr-md">
 				<thead>
 					<tr>
-						<th class="text-left" style="width: 100px">
+						<th
+							class="text-left"
+							style="width: 100px">
 							{{ t('components.directory-browser.type') }}
 						</th>
 						<th class="text-left">
@@ -43,8 +52,12 @@
 				<!-- The return row -->
 				<tbody v-if="currentPathModel != null">
 					<tr @click="directoryNavigate(returnRow)">
-						<td class="text-left" style="width: 100px">
-							<q-icon size="md" :name="getIcon(returnRow.type)" />
+						<td
+							class="text-left"
+							style="width: 100px">
+							<q-icon
+								size="md"
+								:name="getIcon(returnRow.type)" />
 						</td>
 						<td class="text-left">
 							{{ returnRow.name }}
@@ -62,12 +75,22 @@
 						:key="index"
 						:class="rowClass(!row.hasReadPermission)"
 						@click="directoryNavigate(row)">
-						<td class="text-left" style="width: 100px">
-							<q-icon size="md" :name="getIcon(row.type)" />
+						<td
+							class="text-left"
+							style="width: 100px">
+							<q-icon
+								size="md"
+								:name="getIcon(row.type)" />
 						</td>
 						<td class="text-left">
-							<q-icon v-if="!row.hasReadPermission" color="red" size="sm" name="mdi-alert-circle">
-								<q-tooltip anchor="top middle" self="center middle">
+							<q-icon
+								v-if="!row.hasReadPermission"
+								color="red"
+								size="sm"
+								name="mdi-alert-circle">
+								<q-tooltip
+									anchor="top middle"
+									self="center middle">
 									<span>{{ t('components.directory-browser.has-no-read-permission') }}</span>
 								</q-tooltip>
 							</q-icon>
@@ -82,7 +105,7 @@
 			<CancelButton @click="cancel()" />
 			<ConfirmButton
 				:disabled="!isCurrentWritable"
-				:tooltip-id="!isCurrentWritable ? 'components.directory-browser.current-folder-has-no-write-permission' : ''"
+				:tooltip-text="!isCurrentWritable ? $t('components.directory-browser.current-folder-has-no-write-permission') : ''"
 				@click="confirm()" />
 		</template>
 	</QCardDialog>
@@ -94,8 +117,8 @@ import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import type { FileSystemModelDTO, FolderPathDTO } from '@dto';
 import { FileSystemEntityType } from '@dto';
-import { useCloseControlDialog } from '~/composables/event-bus';
 import { folderPathApi } from '@api';
+import { useCloseControlDialog } from '~/composables/event-bus';
 
 const { t } = useI18n();
 const path = ref<FolderPathDTO | null>(null);
@@ -150,7 +173,8 @@ const getIcon = (type: FileSystemEntityType): string => {
 	}
 };
 
-const open = (selectedPath: FolderPathDTO): void => {
+function open(event: unknown): void {
+	let selectedPath = event as FolderPathDTO;
 	if (!selectedPath) {
 		Log.error('parameter was null when opening DirectoryBrowser');
 		return;
@@ -159,7 +183,7 @@ const open = (selectedPath: FolderPathDTO): void => {
 	requestDirectories(selectedPath.directory);
 	set(path, selectedPath);
 	set(currentPath, selectedPath.directory);
-};
+}
 
 function cancel(): void {
 	emit('cancel');
@@ -178,7 +202,6 @@ function confirm(): void {
 
 function requestDirectories(newPath: string): void {
 	if (path.value) {
-		// @ts-ignore
 		path.value.directory = newPath;
 	}
 

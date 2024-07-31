@@ -22,11 +22,18 @@
 				@save="onServerAliasSave" />
 		</template>
 		<template #default>
-			<q-row align="start" full-height>
-				<q-col cols="auto" align-self="stretch">
+			<QRow
+				align="start"
+				full-height>
+				<QCol
+					cols="auto"
+					align-self="stretch">
 					<!-- Tab Index -->
-					<q-tabs v-model="tabIndex" vertical active-color="red">
-						<!--	Server Data	Tab Header-->
+					<q-tabs
+						v-model="tabIndex"
+						vertical
+						active-color="red">
+						<!--	Server Data	Tab Header -->
 						<q-tab
 							name="server-data"
 							icon="mdi-server"
@@ -57,23 +64,40 @@
 							data-cy="server-dialog-tab-5"
 							:label="t('components.server-dialog.tabs.server-commands.header')" />
 					</q-tabs>
-				</q-col>
-				<q-col align-self="stretch" class="tab-content inherit-all-height scroll">
+				</QCol>
+				<QCol
+					align-self="stretch"
+					class="tab-content inherit-all-height scroll">
 					<!-- Tab Content -->
-					<q-tab-panels v-model="tabIndex" animated vertical transition-prev="slide-down" transition-next="slide-up">
+					<q-tab-panels
+						v-model="tabIndex"
+						animated
+						vertical
+						transition-prev="slide-down"
+						transition-next="slide-up">
 						<!-- Server Data Tab Content -->
-						<q-tab-panel name="server-data" data-cy="server-dialog-tab-content-1">
-							<ServerDataTabContent :plex-server="plexServer" :is-visible="isVisible" />
+						<q-tab-panel
+							name="server-data"
+							data-cy="server-dialog-tab-content-1">
+							<ServerDataTabContent
+								:plex-server="plexServer"
+								:is-visible="isVisible" />
 						</q-tab-panel>
 
 						<!-- Server Connections Tab Content	-->
-						<q-tab-panel name="server-connection" data-cy="server-dialog-tab-content-2">
-							<ServerConnectionsTabContent :plex-server-id="plexServerId" :is-visible="isVisible" />
+						<q-tab-panel
+							name="server-connection"
+							data-cy="server-dialog-tab-content-2">
+							<ServerConnectionsTabContent
+								:plex-server-id="plexServerId"
+								:is-visible="isVisible" />
 						</q-tab-panel>
 
 						<!--	Server Configuration Tab Content	-->
-						<q-tab-panel name="server-config" data-cy="server-dialog-tab-content-3">
-							<server-config-tab-content :plex-server="plexServer" />
+						<q-tab-panel
+							name="server-config"
+							data-cy="server-dialog-tab-content-3">
+							<ServerConfigTabContent :plex-server="plexServer" />
 						</q-tab-panel>
 
 						<!--	Library Download Destinations	Tab Content -->
@@ -81,42 +105,67 @@
 							name="download-destinations"
 							class="inherit-all-height"
 							data-cy="server-dialog-tab-content-4">
-							<server-library-destinations-tab-content
+							<ServerLibraryDestinationsTabContent
 								:plex-server="plexServer"
 								:plex-libraries="libraryStore.getLibrariesByServerId(plexServerId)" />
 						</q-tab-panel>
 
 						<!--	Server Commands -->
-						<q-tab-panel name="server-commands" data-cy="server-dialog-tab-content-5">
-							<server-commands-tab-content :plex-server="plexServer" :is-visible="isVisible" />
+						<q-tab-panel
+							name="server-commands"
+							data-cy="server-dialog-tab-content-5">
+							<ServerCommandsTabContent
+								:plex-server="plexServer"
+								:is-visible="isVisible" />
 						</q-tab-panel>
 					</q-tab-panels>
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 
-			<!--			<q-card v-else class="server-dialog-content">-->
-			<!--				<h1>{{ t('components.server-dialog.no-servers-error') }}</h1>-->
-			<!--			</q-card>-->
+			<!--			<q-card v-else class="server-dialog-content"> -->
+			<!--				<h1>{{ t('components.server-dialog.no-servers-error') }}</h1> -->
+			<!--			</q-card> -->
 		</template>
 		<template #actions>
-			<BaseButton
-				cy="server-dialog-close-btn"
-				flat
-				:label="t('general.commands.close')"
-				color="default"
-				@click="useCloseControlDialog(name)" />
+			<QRow justify="between">
+				<QCol cols="auto">
+					<HideButton @click="useOpenControlDialog(confirmationServerDialogName)" />
+				</QCol>
+				<QCol cols="auto">
+					<BaseButton
+						cy="server-dialog-close-btn"
+						flat
+						:label="t('general.commands.close')"
+						color="default"
+						@click="close" />
+				</QCol>
+			</QRow>
+			<!-- Hide Server Confirm Dialog -->
+			<ConfirmationDialog
+				:confirm-loading="confirmHideDialog"
+				:name="confirmationServerDialogName"
+				:title="$t('confirmation.hide-server.title')"
+				:text="$t('confirmation.hide-server.text')"
+				class="q-mr-md"
+				@confirm="onServerHiddenSave" />
 		</template>
 	</QCardDialog>
 </template>
 
 <script setup lang="ts">
 import { set, get } from '@vueuse/core';
-import { ref, computed, useCloseControlDialog } from '#imports';
+import { tap } from 'rxjs/operators';
 import type { PlexServerDTO } from '@dto';
+import { ref, computed, useCloseControlDialog, useOpenControlDialog } from '#imports';
 
-defineProps<{ name: string }>();
+const props = defineProps<{ name: string }>();
+
 const serverStore = useServerStore();
 const libraryStore = useLibraryStore();
+
+const confirmationServerDialogName = 'confirmationServerDialogName';
+const confirmHideDialog = ref(false);
+
 const loading = ref(false);
 const tabIndex = ref<string>('server-data');
 const plexServer = ref<PlexServerDTO | null>(null);
@@ -125,7 +174,8 @@ const plexServerId = ref<number>(0);
 const isVisible = computed((): boolean => plexServerId.value > 0);
 const { t } = useI18n();
 
-function open(newPlexServerId: number): void {
+function open(event: unknown): void {
+	const newPlexServerId = event as number;
 	set(plexServerId, newPlexServerId);
 	set(loading, true);
 
@@ -134,6 +184,7 @@ function open(newPlexServerId: number): void {
 }
 
 function close(): void {
+	useCloseControlDialog(props.name);
 	set(plexServerId, 0);
 	set(tabIndex, 'server-data');
 }
@@ -141,7 +192,17 @@ function close(): void {
 function onServerAliasSave(serverAlias: string): void {
 	useSubscription(serverStore.setServerAlias(get(plexServerId), serverAlias).subscribe());
 }
+
+function onServerHiddenSave(): void {
+	useSubscription(
+		serverStore
+			.setServerHidden(get(plexServerId), true)
+			.pipe(tap(() => close()))
+			.subscribe(),
+	);
+}
 </script>
+
 <style lang="scss">
 @import '@/assets/scss/variables.scss';
 @import 'quasar/src/css/core/typography.sass';

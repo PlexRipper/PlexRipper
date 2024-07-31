@@ -1,13 +1,13 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { Observable, of, Subject, from } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of, Subject, from } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
 import Log from 'consola';
-import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
-import type { IHttpConnectionOptions } from '@microsoft/signalr';
+import { HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
+import type { IHttpConnectionOptions, HubConnection } from '@microsoft/signalr';
 import { useCypressSignalRMock } from 'cypress-signalr-mock';
 import { isEqual } from 'lodash-es';
 import type { ISetupResult } from '@interfaces';
-import { useDownloadStore } from '~/store/downloadStore';
 import type {
 	FileMergeProgress,
 	InspectServerProgressDTO,
@@ -19,9 +19,10 @@ import type {
 	SyncServerProgress,
 } from '@dto';
 import { MessageTypes } from '@dto';
+import type IAppConfig from '@class/IAppConfig';
+import { useDownloadStore } from '~/store/downloadStore';
 import { useBackgroundJobsStore } from '~/store/backgroundJobsStore';
 import { useNotificationsStore } from '~/store/notificationsStore';
-import type IAppConfig from '@class/IAppConfig';
 
 export const useSignalrStore = defineStore('SignalrStore', () => {
 	interface ISignalRStoreState {
@@ -66,15 +67,15 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 						logger: LogLevel.Information,
 					};
 					// Setup Connections
-					progressHubConnection =
-						useCypressSignalRMock('progress', { enableForVitest: true }) ??
-						new HubConnectionBuilder()
+					progressHubConnection
+						= useCypressSignalRMock('progress', { enableForVitest: true })
+						?? new HubConnectionBuilder()
 							.withUrl(`${config.baseUrl}/progress`, options)
 							.withAutomaticReconnect()
 							.build();
-					notificationHubConnection =
-						useCypressSignalRMock('notifications', { enableForVitest: true }) ??
-						new HubConnectionBuilder()
+					notificationHubConnection
+						= useCypressSignalRMock('notifications', { enableForVitest: true })
+						?? new HubConnectionBuilder()
 							.withUrl(`${config.baseUrl}/notifications`, options)
 							.withAutomaticReconnect()
 							.build();

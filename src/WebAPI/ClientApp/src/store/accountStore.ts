@@ -1,10 +1,11 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { forkJoin, Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
 import type { PlexAccountDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
-import { useServerStore, useLibraryStore } from '#build/imports';
 import { plexAccountApi } from '@api';
+import { useServerStore, useLibraryStore } from '#build/imports';
 
 export const useAccountStore = defineStore('AccountStore', () => {
 	const state = reactive<{ accounts: PlexAccountDTO[] }>({

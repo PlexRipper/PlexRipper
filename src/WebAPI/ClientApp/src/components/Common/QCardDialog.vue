@@ -10,41 +10,60 @@
 		:transition-hide="transitionHide"
 		@before-show="$emit('opened', dataValue)"
 		@before-hide="$emit('closed')">
-		<q-row
+		<QRow
 			column
 			:data-cy="cy"
 			:class="['q-card-dialog', 'q-card-dialog-background', noBackground ? 'no-background' : '']"
 			:style="styles">
 			<!-- Dialog Title	-->
-			<q-col v-if="$slots['title']" cols="auto" class="q-card-dialog-title">
+			<QCol
+				v-if="$slots['title']"
+				cols="auto"
+				class="q-card-dialog-title">
 				<div v-if="!loading">
 					<QCardTitle>
-						<slot name="title" :value="parentValue" />
+						<slot
+							name="title"
+							:value="parentValue" />
 					</QCardTitle>
 				</div>
-			</q-col>
+			</QCol>
 			<!--	Dialog Top Row -->
-			<q-col v-if="$slots['top-row']" cols="auto" class="q-card-dialog-top-row">
+			<QCol
+				v-if="$slots['top-row']"
+				cols="auto"
+				class="q-card-dialog-top-row">
 				<div v-show="!loading">
 					<slot name="top-row" />
 				</div>
-			</q-col>
-			<q-col v-if="$slots['default']" :class="contentClasses" align-self="stretch">
+			</QCol>
+			<QCol
+				v-if="$slots['default']"
+				:class="contentClasses"
+				align-self="stretch">
 				<div v-if="!loading">
 					<slot :value="parentValue" />
 				</div>
-			</q-col>
-			<q-col v-if="$slots['actions']" cols="auto" align-self="stretch" class="q-card-dialog-actions q-pa-md">
+			</QCol>
+			<QCol
+				v-if="$slots['actions']"
+				cols="auto"
+				align-self="stretch"
+				class="q-card-dialog-actions q-pa-md">
 				<div v-if="!loading">
 					<!--	Dialog Buttons		-->
-					<q-card-actions :align="buttonAlign">
-						<slot name="actions" :close="closeDialog" :open="openDialog" :value="parentValue" />
-					</q-card-actions>
+					<QCardActions :align="buttonAlign">
+						<slot
+							name="actions"
+							:close="closeDialog"
+							:open="openDialog"
+							:value="parentValue" />
+					</QCardActions>
 				</div>
-			</q-col>
+			</QCol>
 			<!--	Loading overlay	-->
 			<QLoadingOverlay :loading="loading" />
-		</q-row>
+		</QRow>
 	</q-dialog>
 </template>
 
@@ -55,7 +74,7 @@ import { useControlDialog } from '#imports';
 const controlDialog = useControlDialog();
 
 const showDialog = ref(false);
-const dataValue = ref<any | null>(null);
+const dataValue = ref<unknown>(null);
 const props = withDefaults(
 	defineProps<{
 		name: string;
@@ -64,7 +83,6 @@ const props = withDefaults(
 		maxWidth?: string;
 		allWidth?: string;
 		contentHeight?: '100' | '80' | '60' | '40' | '20' | '0';
-		value?: any;
 		loading?: boolean;
 		scroll?: boolean;
 		persistent?: boolean;
@@ -85,7 +103,6 @@ const props = withDefaults(
 		maxWidth: '',
 		allWidth: '',
 		contentHeight: '0',
-		value: null,
 		loading: false,
 		scroll: true,
 		persistent: false,
@@ -102,14 +119,11 @@ const props = withDefaults(
 );
 
 defineEmits<{
-	(e: 'opened', value: any): void;
+	(e: 'opened', value: unknown): void;
 	(e: 'closed'): void;
 }>();
 
 const parentValue = computed(() => {
-	if (props.value) {
-		return props.value;
-	}
 	return get(dataValue);
 });
 
@@ -117,7 +131,7 @@ const contentClasses = computed(() => {
 	return ['q-card-dialog-content', `q-card-dialog-content-${props.contentHeight}`, props.scroll ? 'scroll' : ''];
 });
 
-function openDialog(value: any) {
+function openDialog(value: unknown) {
 	// Data value should always be set first before opening, since that value is emitted on open
 	set(dataValue, value);
 	set(showDialog, true);
@@ -157,6 +171,7 @@ controlDialog.on((data) => {
 	}
 });
 </script>
+
 <style lang="scss">
 @import '@/assets/scss/variables.scss';
 @import '@/assets/scss/_mixins.scss';

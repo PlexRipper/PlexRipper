@@ -1,7 +1,5 @@
 <template>
-	<q-page>
-		<h1>Empty Page</h1>
-	</q-page>
+	<QPage>
+		<h1>{{ $t('pages.empty.title') }}</h1>
+	</QPage>
 </template>
-
-<script setup lang="ts"></script>

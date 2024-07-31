@@ -1,6 +1,5 @@
 import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
-import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '~~/tests/_base/base';
 import { generatePlexServers, generateResultDTO, generateSettingsModel } from '@mock';
 import {
 	DownloadPaths,
@@ -12,6 +11,7 @@ import {
 	PlexServerPaths,
 	SettingsPaths,
 } from '@api/api-paths';
+import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '~~/tests/_base/base';
 
 describe('GlobalService.setup()', () => {
 	let { appConfig, mock, config } = baseVars();

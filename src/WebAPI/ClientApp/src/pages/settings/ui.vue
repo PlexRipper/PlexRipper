@@ -1,8 +1,9 @@
 <template>
-	<q-page>
+	<QPage>
 		<GeneralSection />
-		<language-section />
-		<date-and-time-section />
-		<confirmation-section />
-	</q-page>
+		<LanguageSection />
+		<DateAndTimeSection />
+		<ConfirmationSection />
+		<UnhideServersSection />
+	</QPage>
 </template>

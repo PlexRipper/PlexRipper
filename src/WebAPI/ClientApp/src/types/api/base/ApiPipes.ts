@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import type { AxiosResponse } from 'axios';
 import type { ResultDTO } from '@interfaces';

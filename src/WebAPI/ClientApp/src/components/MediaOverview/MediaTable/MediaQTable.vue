@@ -26,7 +26,9 @@
 		<!-- Duration -->
 		<template #body-cell-duration="{ row }">
 			<q-td class="text-center">
-				<QDuration short :value="row.duration" />
+				<QDuration
+					short
+					:value="row.duration" />
 			</q-td>
 		</template>
 		<!-- Media size -->
@@ -41,7 +43,9 @@
 		<template #body-cell-addedAt="{ row }">
 			<q-td class="text-center">
 				<span class="q-mr-md">
-					<QDateTime :text="row.addedAt" short-date />
+					<QDateTime
+						:text="row.addedAt"
+						short-date />
 				</span>
 			</q-td>
 		</template>
@@ -49,7 +53,9 @@
 		<template #body-cell-updatedAt="{ row }">
 			<q-td class="text-center">
 				<span class="q-mr-md">
-					<QDateTime :text="row.updatedAt" short-date />
+					<QDateTime
+						:text="row.updatedAt"
+						short-date />
 				</span>
 			</q-td>
 		</template>

@@ -9,7 +9,7 @@ const { __dirname } = createCommonJS(import.meta.url);
 export default defineNuxtConfig({
 	ssr: false,
 	srcDir: 'src',
-
+	devtools: { enabled: true },
 	runtimeConfig: {
 		// Config within public will be also exposed to the client
 		public: {
@@ -32,9 +32,9 @@ export default defineNuxtConfig({
 
 	modules: [
 		// Doc: https://github.com/Maiquu/nuxt-quasar
-		'nuxt-quasar-ui',
-		'@vueuse/nuxt', // Doc: https://primevue.org/nuxt/
-		'@primevue/nuxt-module', // Doc: https://i18n.nuxtjs.org/
+		'nuxt-quasar-ui', // Doc: https://primevue.org/nuxt/
+		'@vueuse/nuxt', // Doc: https://i18n.nuxtjs.org/
+		'@primevue/nuxt-module',
 		'@nuxtjs/i18n',
 		'nuxt-lodash',
 		'@nuxt/test-utils/module',
@@ -44,6 +44,7 @@ export default defineNuxtConfig({
 				autoImports: ['defineStore', 'acceptHMRUpdate'],
 			},
 		],
+		'@nuxt/eslint',
 	],
 
 	quasar: {
@@ -138,7 +139,6 @@ export default defineNuxtConfig({
 	 *  Doc: https://github.com/nuxt/components
 	 */
 	components: {
-		loader: true,
 		dirs: [
 			// Components directory
 			{
@@ -199,13 +199,24 @@ export default defineNuxtConfig({
 			});
 		},
 	},
-
+	eslint: {
+		config: {
+			stylistic: {
+				indent: 'tab',
+				semi: true,
+				arrowParens: true,
+				blockSpacing: true,
+				braceStyle: '1tbs',
+				commaDangle: 'always-multiline',
+				quotes: 'single',
+				quoteProps: 'as-needed',
+			},
+		},
+	},
 	/*
 	 ** Doc: https://nuxtjs.org/docs/configuration-glossary/configuration-telemetry
 	 */
 	// loading: true, // TODO Maybe better to re-enable based on how it looks
-	telemetry: false /*
-	 ** Customize the progress-bar color
-	 */,
+	telemetry: false,
 	compatibilityDate: '2024-07-25',
 });

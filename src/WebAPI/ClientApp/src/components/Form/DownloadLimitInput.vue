@@ -1,6 +1,8 @@
 <template>
-	<q-row class="no-wrap" justify="between">
-		<q-col :cols="8">
+	<QRow
+		class="no-wrap"
+		justify="between">
+		<QCol :cols="8">
 			<q-slider
 				v-model:model-value="value"
 				:min="0"
@@ -10,16 +12,16 @@
 				label
 				style="margin-top: 24px"
 				data-cy="download-speed-limit-slider" />
-		</q-col>
-		<q-col :cols="3">
+		</QCol>
+		<QCol :cols="3">
 			<q-input
 				v-model:model-value="value"
 				type="number"
 				debounce="1000"
 				suffix="kB/s"
 				data-cy="download-speed-limit-input" />
-		</q-col>
-	</q-row>
+		</QCol>
+	</QRow>
 </template>
 
 <script setup lang="ts">

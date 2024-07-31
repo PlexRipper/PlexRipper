@@ -7,11 +7,11 @@ export function useControlDialog() {
 	return useEventBus<{
 		name: string;
 		state: boolean;
-		value?: any;
+		value?: unknown;
 	}>('controlDialog');
 }
 
-export function useOpenControlDialog(name: string, value?: any) {
+export function useOpenControlDialog(name: string, value?: unknown) {
 	useControlDialog().emit({
 		name,
 		state: true,
@@ -35,7 +35,7 @@ export interface IMediaOverviewSort {
 	sort: 'asc' | 'desc' | 'no-sort';
 }
 
-export function useMediaOverviewSortBus(): UseEventBusReturn<IMediaOverviewSort, any> {
+export function useMediaOverviewSortBus(): UseEventBusReturn<IMediaOverviewSort, unknown> {
 	return useEventBus<IMediaOverviewSort>('mediaOverviewSort');
 }
 
@@ -51,7 +51,7 @@ export function resetMediaOverviewCommandsBus(): void {
 	return useMediaOverviewCommandsBus().reset();
 }
 
-export function useMediaOverviewCommandsBus(): UseEventBusReturn<IMediaOverviewCommands, any> {
+export function useMediaOverviewCommandsBus(): UseEventBusReturn<IMediaOverviewCommands, unknown> {
 	// Do not set this to a constant, it will cause issues with the event bus.
 	return useEventBus<IMediaOverviewCommands>('mediaOverViewCommands');
 }
@@ -80,7 +80,7 @@ export function listenMediaOverviewScrollToCommand(action: (letter: string) => v
 /**
  * This is used to send a command to from the MediaOverviewBar to trigger a download command.
  */
-export function useMediaOverviewBarDownloadCommandBus(): UseEventBusReturn<string, any> {
+export function useMediaOverviewBarDownloadCommandBus(): UseEventBusReturn<string, unknown> {
 	return useEventBus<string>('downloadCommand');
 }
 

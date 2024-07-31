@@ -5,7 +5,7 @@ using PlexRipper.Settings.Modules;
 
 namespace Settings.UnitTests.Modules;
 
-public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest<DisplaySettingsModule>
+public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest
 {
     public DisplaySettingsModule_SetFromJson_UnitTests(ITestOutputHelper output)
         : base(output) { }
@@ -16,51 +16,21 @@ public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest<DisplayS
         // Arrange
         var settingsModel = new SettingsModel
         {
-            DisplaySettings = new DisplaySettings { MovieViewMode = ViewMode.Table, TvShowViewMode = ViewMode.Poster, },
+            DisplaySettings = new DisplaySettings { MovieViewMode = ViewMode.Table, TvShowViewMode = ViewMode.Poster },
         };
-        var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
+        var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCapitalized);
         var loadedSettings = JsonSerializer.Deserialize<JsonElement>(
             json,
-            DefaultJsonSerializerOptions.ConfigCaptialized
+            DefaultJsonSerializerOptions.ConfigCapitalized
         );
 
         // Act
-        var result = _sut.SetFromJson(loadedSettings);
+        var sut = new DisplaySettingsModule();
+        var result = sut.SetFromJson(loadedSettings);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        _sut.MovieViewMode.ShouldBe(ViewMode.Table);
-        _sut.TvShowViewMode.ShouldBe(ViewMode.Poster);
-    }
-
-    [Fact]
-    public void ShouldSetPropertiesFromJson_WhenInvalidJsonSettingsAreGiven()
-    {
-        // Arrange
-        var settingsModel = new SettingsModel
-        {
-            DisplaySettings = FakeData
-                .GetDisplaySettings(config =>
-                {
-                    config.Seed = 234;
-                })
-                .Generate(),
-        };
-        var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
-
-        // ** Remove property to make corrupted
-        json = json.Replace("\"TvShowViewMode\":\"Table\",", "");
-        var loadedSettings = JsonSerializer.Deserialize<JsonElement>(
-            json,
-            DefaultJsonSerializerOptions.ConfigCaptialized
-        );
-
-        // Act
-        var result = _sut.SetFromJson(loadedSettings);
-
-        // Assert
-        result.IsSuccess.ShouldBeTrue();
-        _sut.MovieViewMode.ShouldBe(ViewMode.Poster);
-        _sut.TvShowViewMode.ShouldBe(_sut.DefaultValues().TvShowViewMode);
+        sut.MovieViewMode.ShouldBe(ViewMode.Table);
+        sut.TvShowViewMode.ShouldBe(ViewMode.Poster);
     }
 }

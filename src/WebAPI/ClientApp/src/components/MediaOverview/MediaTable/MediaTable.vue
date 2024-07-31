@@ -1,5 +1,7 @@
 <template>
-	<div class="media-table" data-cy="media-table">
+	<div
+		class="media-table"
+		data-cy="media-table">
 		<MediaTableHeader
 			:columns="mediaTableColumns"
 			selectable
@@ -51,10 +53,10 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { get, set, useScroll } from '@vueuse/core';
-import { triggerBoxHighlight, listenMediaOverviewScrollToCommand, useMediaOverviewStore } from '#imports';
-import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 import type { PlexMediaSlimDTO } from '@dto';
 import type { ISelection } from '@interfaces';
+import { triggerBoxHighlight, listenMediaOverviewScrollToCommand, useMediaOverviewStore } from '#imports';
+import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 
 const mediaOverviewStore = useMediaOverviewStore();
 const mediaTableColumns = getMediaTableColumns();

@@ -1,26 +1,44 @@
 <template>
-	<q-row no-wrap align="center">
-		<q-col>
-			<q-sub-header>
-				{{ $t(`${helpId}.label`) }}
-			</q-sub-header>
-		</q-col>
-		<q-col v-if="hasHelpPage" cols="auto">
-			<IconButton icon="mdi-help-circle-outline" class="q-ma-sm" @click="helpStore.openHelpDialog(props.helpId)" />
-		</q-col>
-	</q-row>
+	<QRow
+		no-wrap
+		align="center">
+		<QCol>
+			<QSubHeader>
+				{{ help.label }}
+			</QSubHeader>
+		</QCol>
+		<QCol
+			v-if="hasHelpPage"
+			cols="auto">
+			<IconButton
+				icon="mdi-help-circle-outline"
+				class="q-ma-sm"
+				@click="helpStore.openHelpDialog(help)" />
+		</QCol>
+	</QRow>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '#imports';
+import { get } from '@vueuse/core';
+import { useHelpStore } from '@store';
+import type { IHelp } from '@interfaces';
 
 const { t } = useI18n();
 const helpStore = useHelpStore();
-const props = defineProps<{
-	helpId: string;
-}>();
+
+const props = withDefaults(defineProps<Partial<IHelp> & { value?: IHelp }>(), {
+	label: '',
+	title: '',
+	text: '',
+});
+
+const help = computed(() => props.value ?? {
+	label: props.label !== '' ? props.label : t('help.default.label'),
+	title: props.title,
+	text: props.text,
+});
 
 const hasHelpPage = computed(() => {
-	return props.helpId && t(`${props.helpId}.title`) && t(`${props.helpId}.text`);
+	return get(help).title !== '' && get(help).text !== '';
 });
 </script>

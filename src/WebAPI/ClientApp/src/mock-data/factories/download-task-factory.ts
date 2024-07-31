@@ -1,9 +1,9 @@
 import { randMovie, randDirectoryPath, randUrl, randFileName, randNumber, randUuid } from '@ngneat/falso';
 import { times } from 'lodash-es';
-import { toPlexMediaType } from '@composables/conversion';
 import type { MockConfig } from '@mock';
 import { DownloadStatus, type DownloadTaskDTO, DownloadTaskType } from '@dto';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
+import Convert from '@class/Convert';
 
 export function generateDownloadTasks({
 	plexServerId,
@@ -56,7 +56,7 @@ export function generateDownloadTask({
 		downloadSpeed: 0,
 		fileTransferSpeed: 0,
 		percentage: 0,
-		mediaType: toPlexMediaType(type),
+		mediaType: Convert.toPlexMediaType(type),
 		status: DownloadStatus.Queued,
 		timeRemaining: 0,
 		actions: ['details'],

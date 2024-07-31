@@ -1,5 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { forkJoin, Observable, of, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { forkJoin, of, Subject } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
 import type { ISetupResult } from '@interfaces';
 import { JobStatus, type JobStatusUpdateDTO, JobTypes } from '@dto';

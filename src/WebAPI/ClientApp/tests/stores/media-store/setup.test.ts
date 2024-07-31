@@ -1,8 +1,8 @@
 import { describe, beforeAll, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
-import { subscribeSpyTo, baseSetup } from '~~/tests/_base/base';
 import type { ISetupResult } from '@interfaces';
 import { useMediaStore } from '@store';
+import { subscribeSpyTo, baseSetup } from '~~/tests/_base/base';
 
 describe('MediaStore.setup()', () => {
 	beforeAll(() => {

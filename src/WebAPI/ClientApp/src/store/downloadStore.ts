@@ -1,14 +1,15 @@
 import Log from 'consola';
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { map, switchMap, tap } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import { sum, merge, keyBy, values, flatMapDeep, clone } from 'lodash-es';
 import type { DownloadMediaDTO, DownloadPreviewDTO, DownloadProgressDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
-import { useServerStore } from '#build/imports';
 import type IDownloadsSelection from '@interfaces/IDownloadsSelection';
 import type IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
 import { downloadApi } from '@api';
+import { useServerStore } from '#build/imports';
 
 export const useDownloadStore = defineStore('DownloadStore', () => {
 	const state = reactive<{ serverDownloads: ServerDownloadProgressDTO[]; selected: IDownloadsSelection[] }>({
@@ -116,7 +117,7 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 			const allSelection: IPTreeTableSelectionKeys = flatMapDeep(downloads, getLeafs).reduce(
 				(a, v) => ({
 					...a,
-					[`${v.mediaType}-${v.id}`]: {
+					[v.id]: {
 						checked: true,
 						partialChecked: false,
 					},

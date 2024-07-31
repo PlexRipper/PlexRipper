@@ -77,8 +77,6 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
             plexServerConnection.ToResult().LogError();
 
         var plexServerToken = await _dbContext.GetPlexServerTokenAsync(plexServerId, ct);
-        if (plexServerToken.IsFailed)
-            plexServerToken.ToResult().LogError();
 
         var entities = new List<PlexMediaSlimDTO>();
         switch (plexLibrary.Type)
@@ -95,7 +93,7 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
 
                 foreach (var plexMovie in plexMovies)
                 {
-                    if (plexMovie.HasThumb)
+                    if (plexMovie.HasThumb && plexServerToken.IsSuccess)
                         plexMovie.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value);
                     entities.Add(plexMovie.ToSlimDTO());
                 }
@@ -114,7 +112,7 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
 
                 foreach (var tvShow in plexTvShow)
                 {
-                    if (tvShow.HasThumb)
+                    if (tvShow.HasThumb && plexServerToken.IsSuccess)
                         tvShow.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value);
                     entities.Add(tvShow.ToSlimDTO());
                 }

@@ -7,4 +7,6 @@ public record PlexServerSettingsModel
     public required string MachineIdentifier { get; init; }
 
     public required int DownloadSpeedLimit { get; set; }
+
+    public required bool Hidden { get; set; }
 }

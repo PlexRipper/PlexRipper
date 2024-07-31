@@ -11,13 +11,9 @@ public class DisplaySettingsModule : BaseSettingsModule<IDisplaySettings>, IDisp
 
     public override string Name => "DisplaySettings";
 
-    public override IDisplaySettings DefaultValues()
-    {
-        return new DisplaySettings { TvShowViewMode = ViewMode.Poster, MovieViewMode = ViewMode.Poster, };
-    }
+    public override IDisplaySettings DefaultValues() =>
+        new DisplaySettings { TvShowViewMode = ViewMode.Poster, MovieViewMode = ViewMode.Poster, };
 
-    public override IDisplaySettings GetValues()
-    {
-        return new DisplaySettings { MovieViewMode = MovieViewMode, TvShowViewMode = TvShowViewMode, };
-    }
+    public override IDisplaySettings GetValues() =>
+        new DisplaySettings { MovieViewMode = MovieViewMode, TvShowViewMode = TvShowViewMode, };
 }

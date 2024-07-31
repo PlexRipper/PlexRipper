@@ -1,8 +1,8 @@
-import { FolderType, PlexMediaType } from '@dto';
+import { DownloadTaskType, FolderType, PlexMediaType } from '@dto';
 import ButtonType from '@enums/buttonType';
 
-export default abstract class Convert {
-	public static buttonTypeToIcon(type: ButtonType): string {
+export const Convert = {
+	buttonTypeToIcon(type: ButtonType): string {
 		switch (type) {
 			case ButtonType.Download:
 				return 'mdi-download';
@@ -28,9 +28,9 @@ export default abstract class Convert {
 			default:
 				return '';
 		}
-	}
+	},
 
-	public static mediaTypeToIcon(mediaType: PlexMediaType): string {
+	mediaTypeToIcon(mediaType: PlexMediaType): string {
 		switch (mediaType) {
 			case PlexMediaType.TvShow:
 				return 'mdi-television-classic';
@@ -45,9 +45,9 @@ export default abstract class Convert {
 			default:
 				return 'mdi-help-circle-outline';
 		}
-	}
+	},
 
-	public static mediaTypeToFolderType(mediaType: PlexMediaType): FolderType {
+	mediaTypeToFolderType(mediaType: PlexMediaType): FolderType {
 		switch (mediaType) {
 			case PlexMediaType.TvShow:
 				return FolderType.TvShowFolder;
@@ -68,5 +68,35 @@ export default abstract class Convert {
 			default:
 				return FolderType.Unknown;
 		}
-	}
-}
+	},
+	toPlexMediaType(downloadType: DownloadTaskType) {
+		switch (downloadType) {
+			case DownloadTaskType.Movie:
+				return PlexMediaType.Movie;
+			case DownloadTaskType.TvShow:
+				return PlexMediaType.TvShow;
+			case DownloadTaskType.Season:
+				return PlexMediaType.Season;
+			case DownloadTaskType.Episode:
+				return PlexMediaType.Episode;
+			default:
+				return PlexMediaType.Unknown;
+		}
+	},
+	toDownloadTaskType(mediaType: PlexMediaType) {
+		switch (mediaType) {
+			case PlexMediaType.Movie:
+				return DownloadTaskType.Movie;
+			case PlexMediaType.TvShow:
+				return DownloadTaskType.TvShow;
+			case PlexMediaType.Season:
+				return DownloadTaskType.Season;
+			case PlexMediaType.Episode:
+				return DownloadTaskType.Episode;
+			default:
+				return DownloadTaskType.None;
+		}
+	},
+};
+
+export default Convert;

@@ -1,8 +1,12 @@
 <template>
-	<q-page>
-		<media-overview :library-id="libraryId" :media-id="mediaId" :media-type="PlexMediaType.Movie" />
-	</q-page>
+	<QPage>
+		<MediaOverview
+			:library-id="libraryId"
+			:media-id="mediaId"
+			:media-type="PlexMediaType.Movie" />
+	</QPage>
 </template>
+
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
 import { PlexMediaType } from '@dto';

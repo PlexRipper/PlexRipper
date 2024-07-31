@@ -1,6 +1,7 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { switchMap, tap } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import type { NotificationDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { notificationApi } from '@api';

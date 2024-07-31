@@ -1,11 +1,12 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { switchMap, tap, map } from 'rxjs/operators';
-import { Observable, of, throwError } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { type FolderPathDTO, FolderType, PlexMediaType } from '@dto';
-import { useI18n } from '#build/imports';
 import type IFolderPathGroup from '@interfaces/IFolderPathGroup';
 import type { ISetupResult } from '@interfaces';
 import { folderPathApi } from '@api';
+import { useI18n } from '#build/imports';
 
 export const useFolderPathStore = defineStore('FolderPathStore', () => {
 	const state = reactive<{ folderPaths: FolderPathDTO[] }>({

@@ -21,7 +21,11 @@
 		:label-key="labelKey"
 		@update:ticked="onSelected($event as number[])">
 		<template #default-header="{ node }">
-			<QTreeViewTableRow :columns="columns" :selectable="!notSelectable" :node="node" @action="$emit('action', $event)" />
+			<QTreeViewTableRow
+				:columns="columns"
+				:selectable="!notSelectable"
+				:node="node"
+				@action="$emit('action', $event)" />
 		</template>
 	</QTree>
 </template>
@@ -64,7 +68,6 @@ const props = withDefaults(
 const emits = defineEmits<{
 	(e: 'update:model-value', payload: boolean): void;
 	(e: 'action', payload: { action: string; data: QTreeViewTableItem }): void;
-	(e: 'selected', payload: number[]): void;
 	/**
 	 * Emitted when the user selects a group of items, e.g. by selecting the root node.
 	 * The payload is an aggregation of ids of the selected items.
@@ -72,7 +75,7 @@ const emits = defineEmits<{
 	 * @param e
 	 * @param payload
 	 */
-	(e: 'aggregate-selected', payload: number[]): void;
+	(e: 'selected' | 'aggregate-selected', payload: number[]): void;
 }>();
 
 const qTreeViewTableTreeRef = ref<InstanceType<typeof QTree> | null>(null);

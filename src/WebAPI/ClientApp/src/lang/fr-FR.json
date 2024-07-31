@@ -1,14 +1,12 @@
 {
     "components": {
         "account-card": {
-            "clear-notifications": "Effacer tout les notifications",
             "no-account-name": "Ajouter un surnom à ce compte",
-            "no-notifications": "Pas de notification disponible",
             "invalid-account": "L'objet de compte n'était pas valide"
         },
         "account-dialog": {
-            "add-account-title": "",
-            "edit-account-title": "Modifier le compte Plex"
+            "add-account-title": "Ajouter un compte Plex: {name}",
+            "edit-account-title": "Modifier le compte Plex: {name}"
         },
         "connection-progress-text": {
             "retry-connection": "Tentative de nouvelle tentative de connexion, { attemptIndex } dans { attemptCount } tentative.",
@@ -20,9 +18,9 @@
             "server-un-connectable": "Impossible de joindre le serveur.",
             "checking-progress": "Vérification de {count}  des {total}  connexions aux serveurs Plex",
             "completed": "Inspection terminée de {length}  serveurs Plex!",
-            "no-servers": "Le compte {displayName} n'a aucun serveur auquel il peut accéder.",
             "fetching-servers": "Récupération des serveurs accessibles pour le compte Plex {displayName}",
-            "no-connections": "Aucune connexion n'a été trouvée pour ce serveur Plex !"
+            "no-connections": "Aucune connexion n'a été trouvée pour ce serveur Plex !",
+            "no-progress-yet": "Aucun progrès pour l'instant"
         },
         "account-verification-code-dialog": {
             "error": "",
@@ -33,11 +31,11 @@
             "no-accounts": "Pas de compte disponible"
         },
         "details-overview": {
-            "database-id": "identifiant de la base de donnée:",
             "total-duration": "Durée totale:",
             "media-count": "{seasonCount} Saison - {episodeCount} Épisodes",
             "media-count-label": "Nombre de médias :",
-            "summary": "Sommaire:"
+            "summary": "Sommaire:",
+            "one-movie-count": "1 film"
         },
         "directory-browser": {
             "path": "Chemin d'accès;",
@@ -49,18 +47,17 @@
             "current-folder-has-no-write-permission": "Le dossier actuel n'a aucune autorisation en écriture ! Sélectionnez-en un qui en a."
         },
         "download-confirmation": {
-            "creating-tasks": "Création de tâches de téléchargement {current} de {total}",
             "description": "PlexRipper va commencera à télécharger ce qui suit:",
             "header": "Êtes vous sûr?",
             "total-size": "Taille Total:"
         },
         "download-details-dialog": {
             "overview": {
-                "destination-path": "Dossier de destination",
-                "download-path": "Dossier de téléchargement",
-                "download-url": "URL de téléchargement",
-                "file-name": "Nom du fichier",
-                "status": "Statut"
+                "destination-path": "Dossier de destination:",
+                "download-path": "Dossier de téléchargement:",
+                "download-url": "URL de téléchargement:",
+                "file-name": "Nom du fichier:",
+                "status": "Statut:"
             },
             "invalid-download-task": {
                 "body": "Erreur lors de la récupération des détails de cette tâche de téléchargement :",
@@ -69,8 +66,7 @@
         },
         "media-overview": {
             "is-refreshing": "Rafraîchir la bibliothèque \"{library}\" de donnée depuis le {server}",
-            "no-data": "Impossible de trouver une bibliothèque disponible.",
-            "retrieving-library": "Récupérer la bibliothèque de la base de données PlexRipper!"
+            "no-data": "Impossible de trouver une bibliothèque disponible."
         },
         "navigation-drawer": {
             "accounts": "Comptes",
@@ -109,34 +105,35 @@
                     "header": "Destination de téléchargement"
                 },
                 "server-commands": {
-                    "header": "Commands du serveur",
-                    "inspect-server": "Inspecter le serveur",
-                    "re-sync-server": "Resyncroniser les bibliothèques"
+                    "header": "Commands du serveur"
                 },
                 "server-config": {
-                    "download-speed-limit": "Télécharger la limite de vitesse",
-                    "header": "Configuration du serveur"
+                    "header": "Configuration du serveur",
+                    "plex-server-was-null": ""
                 },
                 "server-connections": {
-                    "download-speed-limit": "Télécharger la limite de vitesse",
                     "header": "Connexions au serveur",
                     "section-header": "Sélectionnez la connexion serveur préférée :"
                 },
                 "server-data": {
-                    "created-on": "Créer le",
-                    "current-status": "Statut actuel",
+                    "headers": {
+                        "created-on": "Créer le:",
+                        "current-status": "Statut actuel:",
+                        "last-seen-at": "Vu dernièrement à:",
+                        "machine-id": "Identifiant Machine:",
+                        "plex-version": "Plex Version:",
+                        "device": "Dispositif:",
+                        "platform": "Plate-forme:"
+                    },
                     "header": "Donnée Serveur",
-                    "last-seen-at": "Vu dernièrement à",
-                    "machine-id": "Identifiant Machine",
-                    "plex-version": "Plex Version",
-                    "device": "Dispositif",
-                    "platform": "Plate-forme",
-                    "platform-version": "Version de la plate-forme",
                     "all-connections-failed": "Toutes les connexions ont échoué lorsqu'elles sont utilisées pour se connecter au serveur, le serveur est probablement hors ligne...",
-                    "at-least-one-connection-successful": "Au moins une connexion a réussi, ce qui signifie que le serveur peut être connecté !"
+                    "at-least-one-connection-successful": "Au moins une connexion a réussi, ce qui signifie que le serveur peut être connecté !",
+                    "values": {
+                        "platform-version": "",
+                        "product-version": ""
+                    }
                 }
-            },
-            "no-servers-error": ""
+            }
         },
         "server-drawer": {
             "no-libraries": "Pas de bibliothèques disponible",
@@ -170,6 +167,9 @@
         "q-status": {
             "server-connectable": "Le serveur est en ligne et connectable !",
             "server-unconnectable": "Le serveur ne peut pas être connecté et peut être hors ligne."
+        },
+        "alert-dialog": {
+            "request-data-sent": ""
         }
     },
     "confirmation": {
@@ -177,6 +177,10 @@
             "text": "Cela supprimera ce compte Plex de PlexRipper !\n\nCela supprimera également tous les serveurs partagés Plex inaccessibles, les bibliothèques Plex et tous les médias qu'ils contiennent. Tous les téléchargements actifs démarrés ou mis en file d'attente avec ce compte seront annulés et supprimés. Les téléchargements terminés resteront intacts.",
             "title": "Êtes vous sûr ?",
             "warning": "Cela peut prendre environ 5 minutes ou plus, puis cette fenêtre se fermera d'elle-même!"
+        },
+        "hide-server": {
+            "text": "Cela masquera le serveur de la vue. Vous pouvez afficher ce serveur en accédant aux paramètres -> UI -> Afficher les serveurs Plex",
+            "title": "Êtes vous sûr ?"
         },
         "reset-db": {
             "text": "Ca va backuper votre base de donnée vers \"config/Database Backup/\" et en créer une nouvelle, après vous serrez redirigé vers la page de configuration. Ca ne réinitialisera pas les paramètres qui sont stocké dans \"config/PlexRipperSettings.json\"",
@@ -204,11 +208,9 @@
             "check-server-status": "Vérifier le statut du serveur",
             "close": "Fermé",
             "confirm": "Confirmer",
-            "create": "Créer",
             "delete": "Supprimer",
             "disabled": "Désactiver",
             "enabled": "Activer",
-            "error": "Erreur",
             "finish-setup": "Terminer le configuration",
             "go-to-setup-page": "Aller à la page de configuration",
             "hide": "Cacher",
@@ -224,12 +226,13 @@
             "update": "Mettre à jour",
             "validate": "Valider",
             "validated": "Validaté",
-            "missing-text": "Texte manquant",
             "inspect-server": "Inspecter le serveur",
             "selection": "Sélection",
-            "set-selection": "Définir la sélection"
+            "set-selection": "Définir la sélection",
+            "download": "Télécharger",
+            "refresh": "Rafraîchir",
+            "view": "Voir"
         },
-        "name": "PlexRipper",
         "name-version": "PlexRipper - V{version}",
         "units": {
             "per-second": "/s"
@@ -241,6 +244,9 @@
         "error": {
             "unknown": "\"Inconnu\"",
             "invalid-server": "L'objet serveur n'était pas valide"
+        },
+        "delimiter": {
+            "dash": " - "
         }
     },
     "help": {
@@ -357,22 +363,22 @@
                 "confirmation-settings": {
                     "download-episode-confirmation": {
                         "label": "Demander confirmation du téléchargement de l'épisode",
-                        "text": "",
+                        "text": "Une fenêtre contextuelle de confirmation doit-elle s'afficher lorsqu'un épisode est sur le point d'être téléchargé ?",
                         "title": "Demander confirmation du téléchargement de l'épisode"
                     },
                     "download-movie-confirmation": {
                         "label": "Demander confirmation du téléchargement du film",
-                        "text": "",
+                        "text": "Une fenêtre contextuelle de confirmation doit-elle s'afficher lorsqu'un film est sur le point d'être téléchargé ?",
                         "title": "Demander confirmation du téléchargement du film"
                     },
                     "download-season-confirmation": {
                         "label": "Demander confirmation du téléchargement de la saison",
-                        "text": "",
+                        "text": "Une fenêtre contextuelle de confirmation doit-elle s'afficher lorsqu'une saison est sur le point d'être téléchargée ?",
                         "title": "Demander confirmation du téléchargement de la saison"
                     },
                     "download-tvshow-confirmation": {
                         "label": "Demander confirmation du téléchargement de la séries",
-                        "text": "",
+                        "text": "Une fenêtre contextuelle de confirmation doit-elle s'afficher lorsqu'une émission télévisée est sur le point d'être téléchargée ?",
                         "title": "Demander confirmation du téléchargement de la séries"
                     }
                 },
@@ -394,11 +400,6 @@
                     },
                     "time-format": {
                         "label": "Format de la date",
-                        "text": "",
-                        "title": ""
-                    },
-                    "time-zone": {
-                        "label": "Time Zone",
                         "text": "",
                         "title": ""
                     }
@@ -432,14 +433,8 @@
             "header": "CA MARCHE !",
             "setup-question": ""
         },
-        "movies": {
-            "index": {
-                "header": "Aperçu des films",
-                "sub-header": "Sélectionnez une bibliothèque sur le côté droit"
-            }
-        },
         "music": {
-            "_musicId": {
+            "music-id": {
                 "header": "La bibliothèque Musique n'est malheureusement pas encore supporté :("
             },
             "index": {
@@ -464,9 +459,6 @@
                     "header": "PlexRipper Configuration"
                 }
             },
-            "debug": {
-                "header": "Debug"
-            },
             "ui": {
                 "confirmation-settings": {
                     "header": "Confirmation des Paramètres"
@@ -479,6 +471,9 @@
                 },
                 "general-settings": {
                     "header": "Général"
+                },
+                "un-hide-servers-section": {
+                    "header": "Afficher les serveurs Plex"
                 }
             }
         },
@@ -554,6 +549,43 @@
                 },
                 "header": "Modaux de dialogue de débogage"
             }
+        },
+        "empty": {
+            "title": ""
+        }
+    },
+    "debug": {
+        "button-labels": {
+            "amber": "",
+            "black": "",
+            "brown5": "",
+            "deep-orange": "",
+            "primary": "",
+            "purple": "",
+            "secondary": "",
+            "standard": ""
+        },
+        "buttons": {
+            "account-validation-button": "",
+            "add-icon-button": "",
+            "base-button": "",
+            "cancel-button": "",
+            "check-connection-button": "",
+            "confirm-button": "",
+            "debug-button": "",
+            "delete-button": "",
+            "delete-icon-button": "",
+            "external-link-button": "",
+            "go-to-button": "",
+            "help-button": "",
+            "hide-button": "",
+            "navigation-finish-setup-button": "",
+            "navigation-next-button": "",
+            "navigation-previous-button": "",
+            "navigation-skip-setup-button": "",
+            "reset-button": "",
+            "save-button": "",
+            "warning-button": ""
         }
     }
 }

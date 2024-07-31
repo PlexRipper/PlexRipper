@@ -23,10 +23,10 @@ public class DateTimeSettingsModule_SetFromJson_UnitTests : BaseUnitTest<DateTim
                 })
                 .Generate(),
         };
-        var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
+        var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCapitalized);
         var loadedSettings = JsonSerializer.Deserialize<JsonElement>(
             json,
-            DefaultJsonSerializerOptions.ConfigCaptialized
+            DefaultJsonSerializerOptions.ConfigCapitalized
         );
 
         // Act
@@ -55,7 +55,7 @@ public class DateTimeSettingsModule_SetFromJson_UnitTests : BaseUnitTest<DateTim
                 })
                 .Generate(),
         };
-        var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCaptialized);
+        var json = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCapitalized);
 
         // ** Remove property to make corrupted
         json = json.Replace(
@@ -64,7 +64,7 @@ public class DateTimeSettingsModule_SetFromJson_UnitTests : BaseUnitTest<DateTim
         );
         var loadedSettings = JsonSerializer.Deserialize<JsonElement>(
             json,
-            DefaultJsonSerializerOptions.ConfigCaptialized
+            DefaultJsonSerializerOptions.ConfigCapitalized
         );
 
         // Act

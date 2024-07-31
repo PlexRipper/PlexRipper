@@ -1,15 +1,19 @@
 <template>
-	<QCardDialog :name="name" persistent max-width="700px" cy="2fa-code-verification-dialog">
+	<QCardDialog
+		:name="name"
+		persistent
+		max-width="700px"
+		cy="2fa-code-verification-dialog">
 		<template #title>
 			{{ t('components.account-verification-code-dialog.title') }}
 		</template>
 		<template #top-row>
-			<q-sub-header>{{ t('components.account-verification-code-dialog.sub-title') }}</q-sub-header>
+			<QSubHeader>{{ t('components.account-verification-code-dialog.sub-title') }}</QSubHeader>
 		</template>
 		<template #default>
 			<!--	Verification Code input	-->
-			<q-row justify="center">
-				<q-col cols="auto">
+			<QRow justify="center">
+				<QCol cols="auto">
 					<VOtpInput
 						v-model:value="codeValue"
 						input-classes="otp-input"
@@ -21,27 +25,32 @@
 						data-cy="2fa-code-verification-input"
 						:conditional-class="['one', 'two', 'three', 'four', 'five', 'six']"
 						@on-complete="onComplete" />
-				</q-col>
-			</q-row>
-			<q-row v-if="errors.length > 0" justify="center">
-				<q-col cols="auto">
+				</QCol>
+			</QRow>
+			<QRow
+				v-if="errors.length > 0"
+				justify="center">
+				<QCol cols="auto">
 					<span style="color: red; font-weight: bold">{{
 						t('components.account-verification-code-dialog.error')
 					}}</span>
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 		</template>
 		<template #actions="{ close }">
-			<q-row justify="between">
+			<QRow justify="between">
 				<!-- Close	-->
-				<q-col cols="auto">
+				<QCol cols="auto">
 					<CancelButton @click="close" />
-				</q-col>
+				</QCol>
 				<!--	Confirm	-->
-				<q-col cols="auto">
-					<ConfirmButton :loading="loading" :disabled="codeValue.length < 6" @click="onComplete" />
-				</q-col>
-			</q-row>
+				<QCol cols="auto">
+					<ConfirmButton
+						:loading="loading"
+						:disabled="codeValue.length < 6"
+						@click="onComplete" />
+				</QCol>
+			</QRow>
 		</template>
 	</QCardDialog>
 </template>
@@ -52,8 +61,8 @@ import VOtpInput from 'vue3-otp-input';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import type { IError, PlexAccountDTO } from '@dto';
-import { useCloseControlDialog } from '#imports';
 import { plexAccountApi } from '@api';
+import { useCloseControlDialog } from '#imports';
 
 const { t } = useI18n();
 

@@ -1,12 +1,13 @@
 <template>
-	<q-page>
-		<q-row>
-			<q-col>
-				<h1>{{ t('pages.music._musicId.header') }}</h1>
-			</q-col>
-		</q-row>
-	</q-page>
+	<QPage>
+		<QRow>
+			<QCol>
+				<h1>{{ t('pages.music.music-id.header') }}</h1>
+			</QCol>
+		</QRow>
+	</QPage>
 </template>
+
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 

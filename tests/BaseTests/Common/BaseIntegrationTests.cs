@@ -122,7 +122,7 @@ public class BaseIntegrationTests : IAsyncLifetime
         {
             var response = await _client.GetAsync(requestUri);
             var x = await response.Content.ReadAsStringAsync();
-            return await response.Content.ReadFromJsonAsync<T>(DefaultJsonSerializerOptions.ConfigBase);
+            return await response.Content.ReadFromJsonAsync<T>(DefaultJsonSerializerOptions.ConfigStandard);
         }
         catch (Exception e)
         {

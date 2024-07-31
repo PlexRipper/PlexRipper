@@ -1,21 +1,23 @@
 <template>
-	<q-section>
+	<QSection>
 		<template #header>
-			{{ t('pages.settings.ui.general-settings.header') }}
+			{{ $t('pages.settings.ui.general-settings.header') }}
 		</template>
 		<!--	Toggle Animated Background	-->
-		<help-row help-id="help.settings.ui.general-settings.toggle-animated-background">
+		<HelpRow
+			:label="$t('help.settings.ui.general-settings.toggle-animated-background.label')"
+			:title="$t('help.settings.ui.general-settings.toggle-animated-background.title')"
+			:text="$t('help.settings.ui.general-settings.toggle-animated-background.text')">
 			<q-toggle
 				v-model:model-value="settingsStore.generalSettings.disableAnimatedBackground"
 				size="lg"
 				data-cy="toggle-animated-background" />
-		</help-row>
-	</q-section>
+		</HelpRow>
+	</QSection>
 </template>
 
 <script setup lang="ts">
 import { useSettingsStore } from '@store';
 
-const { t } = useI18n();
 const settingsStore = useSettingsStore();
 </script>

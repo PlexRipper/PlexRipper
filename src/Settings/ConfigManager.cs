@@ -158,10 +158,7 @@ public class ConfigManager : IConfigManager
         return Result.Ok().WithSuccess("UserSettings were saved successfully!").LogInformation();
     }
 
-    public virtual bool ConfigFileExists()
-    {
-        return _fileSystem.FileExists(_pathProvider.ConfigFileLocation);
-    }
+    public virtual bool ConfigFileExists() => _fileSystem.FileExists(_pathProvider.ConfigFileLocation);
 
     #endregion
 

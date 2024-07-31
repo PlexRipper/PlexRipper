@@ -1,11 +1,15 @@
 <template>
-	<q-page>
-		<q-section>
-			<template #header> {{ t('pages.debug.dialogs.header') }}</template>
+	<QPage>
+		<QSection>
+			<template #header>
+				{{ t('pages.debug.dialogs.header') }}
+			</template>
 			<q-markup-table>
 				<q-tr>
 					<q-td>
-						<DebugButton :label="t('pages.debug.dialogs.buttons.server-dialog')" @click="openServerDialog" />
+						<DebugButton
+							:label="t('pages.debug.dialogs.buttons.server-dialog')"
+							@click="openServerDialog" />
 					</q-td>
 				</q-tr>
 				<q-tr>
@@ -17,12 +21,16 @@
 				</q-tr>
 				<q-tr>
 					<q-td>
-						<DebugButton :label="t('pages.debug.dialogs.buttons.help-dialog')" @click="openHelpDialog" />
+						<DebugButton
+							:label="t('pages.debug.dialogs.buttons.help-dialog')"
+							@click="openHelpDialog" />
 					</q-td>
 				</q-tr>
 				<q-tr>
 					<q-td>
-						<DebugButton text-id="add-alert" @click="addAlert" />
+						<DebugButton
+							:label="$t('general.commands.add-alert')"
+							@click="addAlert" />
 					</q-td>
 				</q-tr>
 				<q-tr>
@@ -52,20 +60,20 @@
 			</q-markup-table>
 			<ServerDialog :name="serverDialogName" />
 			<DownloadConfirmation :name="downloadConfirmationName" />
-			<AccountVerificationCodeDialog :name="verificationCodeDialogName" :account="account" />
+			<AccountVerificationCodeDialog
+				:name="verificationCodeDialogName"
+				:account="account" />
 			<DirectoryBrowser :name="directoryBrowserName" />
-		</q-section>
-	</q-page>
+		</QSection>
+	</QPage>
 </template>
 
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
-import { set } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import { useOpenControlDialog } from '@composables/event-bus';
-import type { PlexAccountDTO, PlexMediaSlimDTO } from '@dto';
+import type { PlexAccountDTO } from '@dto';
 import { generateDefaultFolderPaths, generatePlexAccount } from '@factories';
-import { useAlertStore, useHelpStore, useMediaStore } from '~/store';
+import { useAlertStore, useHelpStore } from '~/store';
 
 const { t } = useI18n();
 const helpStore = useHelpStore();
@@ -104,7 +112,10 @@ function openDownloadConfirmationDialog(): void {
 }
 
 function openHelpDialog(): void {
-	helpStore.openHelpDialog('help.settings.ui.language.language-selection');
+	helpStore.openHelpDialog({ label: t('help.settings.ui.language.language-selection.label'),
+		title: t('help.settings.ui.language.language-selection.title'),
+		text: t('help.settings.ui.language.language-selection.text'),
+	});
 }
 
 function openCheckServerConnectionsDialog(): void {

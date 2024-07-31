@@ -8,11 +8,18 @@
 			:key="index">
 			<q-item>
 				<!-- Radio Button -->
-				<q-item-section avatar tag="label">
-					<q-radio v-model="preferredConnectionId" :val="connection.id" color="red" />
+				<q-item-section
+					avatar
+					tag="label">
+					<q-radio
+						v-model="preferredConnectionId"
+						:val="connection.id"
+						color="red" />
 				</q-item-section>
 				<!-- Connection Icon -->
-				<q-item-section avatar tag="label">
+				<q-item-section
+					avatar
+					tag="label">
 					<QConnectionIcon :local="connection.local" />
 				</q-item-section>
 				<!-- Connection Url -->
@@ -22,7 +29,7 @@
 				<q-space />
 				<!-- Connection Status -->
 				<q-item-section side>
-					<q-status :value="connection.latestConnectionStatus?.isSuccessful ?? false" />
+					<QStatus :value="connection.latestConnectionStatus?.isSuccessful ?? false" />
 				</q-item-section>
 				<q-item-section side>
 					<CheckConnectionButton

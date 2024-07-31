@@ -1,9 +1,9 @@
 <script lang="ts">
 import { defineComponent, h } from 'vue';
 import { QBtn, QTooltip } from 'quasar';
-import { useI18n, useRouter } from '#imports';
-import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 import type { IBaseButtonProps } from '@props';
+import { useRouter } from '#imports';
+import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
 
 export default defineComponent({
 	name: 'BaseButton',
@@ -21,11 +21,6 @@ export default defineComponent({
 			outline: props.outline,
 		};
 
-		let buttonText = props.label;
-		if (props.textId) {
-			buttonText = useI18n().t(`general.commands.${props.textId}`);
-		}
-
 		const classes = Object.assign(
 			{
 				'base-btn': true,
@@ -42,7 +37,7 @@ export default defineComponent({
 			QBtn,
 			{
 				class: classes,
-				label: buttonText,
+				label: props.label,
 				icon: props.iconAlign === 'left' ? props.icon : undefined,
 				iconRight: props.iconAlign === 'right' ? props.icon : undefined,
 				glossy: props.glossy,
@@ -70,23 +65,23 @@ export default defineComponent({
 				default: () => [
 					...(slots?.default?.() ?? []),
 					...[
-						props.tooltipId
+						props.tooltipText
 							? h(
-									QTooltip,
-									{
-										anchor: 'top middle',
-										self: 'bottom middle',
-										offset: [10, 10],
+								QTooltip,
+								{
+									anchor: 'top middle',
+									self: 'bottom middle',
+									offset: [10, 10],
+								},
+								{
+									default: () => {
+										if (!props.tooltipText) {
+											return '';
+										}
+										return props.tooltipText;
 									},
-									{
-										default: () => {
-											if (!props.tooltipId) {
-												return '';
-											}
-											return useI18n().t(props.tooltipId);
-										},
-									},
-								)
+								},
+							)
 							: null,
 					],
 				],

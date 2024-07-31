@@ -1,10 +1,13 @@
 <template>
-	<q-row justify="center">
-		<q-col cols="11">
+	<QRow justify="center">
+		<QCol cols="11">
 			<!-- Circular Mode progress -->
 			<template v-if="circularMode">
-				<q-row justify="center" no-gutters class="my-3">
-					<q-col cols="auto">
+				<QRow
+					justify="center"
+					no-gutters
+					class="my-3">
+					<QCol cols="auto">
 						<q-circular-progress
 							show-value
 							size="100px"
@@ -14,30 +17,44 @@
 							:indeterminate="indeterminate"
 							color="red">
 							<template v-if="!indeterminate">
-								<span v-if="getPercentage < 100" class="text-bold"> {{ getPercentage }}% </span>
-								<q-icon v-else large name="mdi-check" />
+								<span
+									v-if="getPercentage < 100"
+									class="text-bold"> {{ $n(getPercentage, 'percent') }}</span>
+								<q-icon
+									v-else
+									large
+									name="mdi-check" />
 							</template>
 						</q-circular-progress>
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 				<!-- Progress text -->
-				<q-row v-if="text" justify="center" no-gutters>
-					<q-col>
+				<QRow
+					v-if="text"
+					justify="center"
+					no-gutters>
+					<QCol>
 						<h3>{{ text }}</h3>
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 			</template>
 			<!-- Linear Mode Progress -->
 			<template v-else>
 				<!-- Progress text -->
-				<q-row v-if="text" justify="center" no-gutters>
-					<q-col cols="auto">
+				<QRow
+					v-if="text"
+					justify="center"
+					no-gutters>
+					<QCol cols="auto">
 						<h3>{{ text }}</h3>
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 				<!-- Progress bar -->
-				<q-row justify="center" class="my-3" no-gutters>
-					<q-col>
+				<QRow
+					justify="center"
+					class="my-3"
+					no-gutters>
+					<QCol>
 						<q-linear-progress
 							:value="Math.min(getPercentage, 100)"
 							show-value
@@ -46,13 +63,13 @@
 							striped
 							stream
 							color="red">
-							<strong>{{ getPercentage }}%</strong>
+							<strong>{{ $n(getPercentage, 'percent') }}</strong>
 						</q-linear-progress>
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 			</template>
-		</q-col>
-	</q-row>
+		</QCol>
+	</QRow>
 </template>
 
 <script setup lang="ts">

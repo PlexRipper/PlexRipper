@@ -1,24 +1,34 @@
 <template>
-	<template v-if="serverStore.getServers().length > 0">
+	<template v-if="serverStore.getVisibleServers.length > 0">
 		<q-expansion-item
-			v-for="(server, index) in serverStore.getServers()"
+			v-for="(server, index) in serverStore.getVisibleServers"
 			:key="index"
 			:label="serverStore.getServerName(server.id)"
 			expand-icon="mdi-chevron-down">
 			<!-- Server header	-->
 			<template #header>
-				<q-item-section side no-wrap>
-					<q-status :value="serverConnectionStore.isServerConnected(server.id)" />
+				<q-item-section
+					side
+					no-wrap>
+					<QStatus :value="serverConnectionStore.isServerConnected(server.id)" />
 				</q-item-section>
 
 				<q-item-section>
 					<div class="server-name">
-						<q-icon v-if="server.owned" name="mdi-home" size="24px" left />
+						<q-icon
+							v-if="server.owned"
+							name="mdi-home"
+							size="24px"
+							left />
 						{{ serverStore.getServerName(server.id) }}
 					</div>
 				</q-item-section>
 				<q-item-section side>
-					<q-btn icon="mdi-cog" flat :data-cy="`server-dialog-${index}`" @click.stop="openServerSettings(server.id)" />
+					<q-btn
+						icon="mdi-cog"
+						flat
+						:data-cy="`server-dialog-${index}`"
+						@click.stop="openServerSettings(server.id)" />
 				</q-item-section>
 			</template>
 			<!-- Render libraries -->
@@ -31,7 +41,7 @@
 					active-class="text-orange"
 					@click="openMediaPage(library)">
 					<q-item-section avatar>
-						<q-media-type-icon :media-type="library.type" />
+						<QMediaTypeIcon :media-type="library.type" />
 					</q-item-section>
 					<q-item-section>{{ libraryStore.getLibraryName(library.id) }}</q-item-section>
 				</q-item>
@@ -95,6 +105,7 @@ function openMediaPage(library: PlexLibraryDTO): void {
 	}
 }
 </script>
+
 <style lang="scss">
 .server-name {
 	width: 190px;

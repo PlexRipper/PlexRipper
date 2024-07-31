@@ -1,8 +1,12 @@
 <template>
-	<QCardDialog max-width="1000px" content-height="80" :name="name" cy="check-server-connection-dialog">
+	<QCardDialog
+		max-width="1000px"
+		content-height="80"
+		:name="name"
+		cy="check-server-connection-dialog">
 		<template #top-row>
 			<!-- The total progress -->
-			<progress-component
+			<ProgressComponent
 				class="q-ma-md"
 				circular-mode
 				:percentage="totalPercentage"
@@ -18,12 +22,20 @@
 				node-key="index"
 				default-expand-all>
 				<template #default-header="{ node }: { node: IPlexServerNode }">
-					<q-row justify="between" align="center">
-						<q-col cols="4">
+					<QRow
+						justify="between"
+						align="center">
+						<QCol cols="4">
 							<div :class="{ 'text-weight-bold': isServer(node) }">
 								<!--	Plex Server Connection Icon -->
-								<q-icon v-if="isServer(node)" name="mdi-server" size="28px" class="q-mr-sm" />
-								<QConnectionIcon v-else :local="node?.local ?? false" />
+								<q-icon
+									v-if="isServer(node)"
+									name="mdi-server"
+									size="28px"
+									class="q-mr-sm" />
+								<QConnectionIcon
+									v-else
+									:local="node?.local ?? false" />
 								<!-- Plex Server Connection Url	-->
 								<span
 									:class="[
@@ -40,19 +52,31 @@
 									{{ node.title }}
 								</span>
 							</div>
-						</q-col>
-						<q-col cols="8" :style="{ 'max-width': `600px !important` }">
-							<q-row justify-end no-wrap justify="end">
+						</QCol>
+						<QCol
+							cols="8"
+							:style="{ 'max-width': `600px !important` }">
+							<QRow
+								justify-end
+								no-wrap
+								justify="end">
 								<!--	Plex Server Progress Status Icon -->
-								<q-col cols="3">
-									<q-spinner-radio v-if="!node.completed" color="red" size="2em" />
-									<q-status v-else :value="node.connectionSuccessful" />
-								</q-col>
+								<QCol cols="3">
+									<QSpinnerRadio
+										v-if="!node.completed"
+										color="red"
+										size="2em" />
+									<QStatus
+										v-else
+										:value="node.connectionSuccessful" />
+								</QCol>
 								<!-- Plex Server Connection Progress	-->
-								<q-col cols="9">
+								<QCol cols="9">
 									<template v-if="isServer(node) && node.completed">
 										<!-- No Plex Server Connection -->
-										<span v-if="node.noConnections" :class="{ 'text-weight-bold': node.type === 'server' }">
+										<span
+											v-if="node.noConnections"
+											:class="{ 'text-weight-bold': node.type === 'server' }">
 											{{ t('components.check-server-connections-dialog.no-connections') }}
 										</span>
 										<span
@@ -60,26 +84,30 @@
 											:class="{ 'text-weight-bold': node.type === 'server' }">
 											{{ t('components.check-server-connections-dialog.server-connectable') }}
 										</span>
-										<span v-else :class="{ 'text-weight-bold': node.type === 'server' }">
+										<span
+											v-else
+											:class="{ 'text-weight-bold': node.type === 'server' }">
 											{{ t('components.check-server-connections-dialog.server-un-connectable') }}
 										</span>
 									</template>
 									<template v-else-if="node.progress">
 										<ConnectionProgressText :progress="node.progress" />
 									</template>
-								</q-col>
-							</q-row>
-						</q-col>
-					</q-row>
+								</QCol>
+							</QRow>
+						</QCol>
+					</QRow>
 				</template>
 			</q-tree>
 		</template>
 		<template #actions="{ close }">
-			<q-row justify="end">
-				<q-col cols="auto">
-					<HideButton cy="check-server-connection-dialog-hide-btn" @click="close" />
-				</q-col>
-			</q-row>
+			<QRow justify="end">
+				<QCol cols="auto">
+					<HideButton
+						cy="check-server-connection-dialog-hide-btn"
+						@click="close" />
+				</QCol>
+			</QRow>
 		</template>
 	</QCardDialog>
 </template>
@@ -173,7 +201,7 @@ function getConnectionProgress(connectionId: number, serverId: number): ServerCo
 			plexServerId: serverId,
 			connectionSuccessful: false,
 			completed: false,
-			message: 'No progress yet',
+			message: t('components.check-server-connections-dialog.no-progress-yet'),
 			retryAttemptCount: 0,
 			retryAttemptIndex: 0,
 			statusCode: 0,

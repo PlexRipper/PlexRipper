@@ -11,12 +11,19 @@
 			{{ t('components.download-confirmation.header') }}
 		</template>
 		<template #top-row>
-			<span>{{ t('components.download-confirmation.description') }}</span> <br />
+			<span>{{ t('components.download-confirmation.description') }}</span> <br>
 			<span>{{ t('components.download-confirmation.total-size') }}</span>
-			<q-file-size :size="totalSize" class="q-ml-sm" />
+			<QFileSize
+				:size="totalSize"
+				class="q-ml-sm" />
 		</template>
 		<template #default>
-			<QTreeViewTable :columns="columns" :nodes="downloadPreview" default-expand-all connectors not-selectable />
+			<QTreeViewTable
+				:columns="columns"
+				:nodes="downloadPreview"
+				default-expand-all
+				connectors
+				not-selectable />
 		</template>
 		<template #actions="{ close }">
 			<CancelButton @click="close()" />
@@ -54,7 +61,8 @@ const downloadMediaCommand = ref<DownloadMediaDTO[]>([]);
 const totalSize = ref(0);
 const columns: QTreeViewTableHeader[] = getDownloadPreviewTableColumns;
 
-function openDialog(data: DownloadMediaDTO[]): void {
+function openDialog(event: unknown): void {
+	const data = event as DownloadMediaDTO[];
 	set(loading, true);
 	set(downloadMediaCommand, data);
 	useSubscription(

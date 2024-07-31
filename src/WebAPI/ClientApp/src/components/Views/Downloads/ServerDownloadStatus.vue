@@ -1,7 +1,11 @@
 <template>
-	<q-col class="q-py-sm">
-		<BaseButton flat :icon="getButtonIcon" :label="t(getButtonText)" @click.stop="changeStatus" />
-	</q-col>
+	<QCol class="q-py-sm">
+		<BaseButton
+			flat
+			:icon="getButtonIcon"
+			:label="getButtonText"
+			@click.stop="changeStatus" />
+	</QCol>
 </template>
 
 <script setup lang="ts">
@@ -24,11 +28,11 @@ const getButtonIcon = computed(() => {
 
 const getButtonText = computed(() => {
 	if (serverStatus.value === DownloadStatus.Paused) {
-		return 'components.server-download-status.start';
+		return t('components.server-download-status.start');
 	}
 
 	if (serverStatus.value === DownloadStatus.Downloading) {
-		return 'components.server-download-status.pause';
+		return t('components.server-download-status.pause');
 	}
 	return '';
 });

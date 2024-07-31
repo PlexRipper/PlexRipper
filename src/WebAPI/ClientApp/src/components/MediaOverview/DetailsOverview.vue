@@ -10,39 +10,53 @@
 		@opened="openDetails"
 		@closed="closeDetails">
 		<template #default>
-			<q-col>
+			<QCol>
 				<!--	Header	-->
-				<q-row>
-					<q-col cols="auto">
+				<QRow>
+					<QCol cols="auto">
 						<q-card class="q-ma-md media-info-container">
 							<!--	Poster	-->
-							<q-img :src="imageUrl" fit="fill" :width="`${thumbWidth}px`" :height="`${thumbHeight}px`" ratio="2/3">
+							<q-img
+								:src="imageUrl"
+								fit="fill"
+								:width="`${thumbWidth}px`"
+								:height="`${thumbHeight}px`"
+								ratio="2/3">
 								<!--	Placeholder	-->
 								<template #loading>
 									<!--	Show fallback image	-->
-									<q-row align="center" justify="center" class="fill-height">
-										<q-col cols="auto">
-											<q-media-type-icon
+									<QRow
+										align="center"
+										justify="center"
+										class="fill-height">
+										<QCol cols="auto">
+											<QMediaTypeIcon
 												:size="100"
 												class="mx-3"
 												:media-type="mediaItemDetail?.type ?? PlexMediaType.Unknown" />
-										</q-col>
-										<q-col cols="12">
-											<h4 class="text-center">{{ mediaItemDetail?.title ?? 'unknown' }}</h4>
-										</q-col>
-									</q-row>
+										</QCol>
+										<QCol cols="12">
+											<h4 class="text-center">
+												{{ mediaItemDetail?.title ?? 'unknown' }}
+											</h4>
+										</QCol>
+									</QRow>
 								</template>
 							</q-img>
 						</q-card>
-					</q-col>
-					<q-col>
-						<q-card class="q-ma-md media-info-container" :style="{ height: thumbHeight + 'px' }">
-							<!-- Media info-->
+					</QCol>
+					<QCol>
+						<q-card
+							class="q-ma-md media-info-container"
+							:style="{ height: thumbHeight + 'px' }">
+							<!-- Media info -->
 							<q-card-section>
 								<q-markup-table wrap-cells>
 									<tbody>
 										<tr class="q-tr--no-hover">
-											<td colspan="2" class="media-info-column media-title">
+											<td
+												colspan="2"
+												class="media-info-column media-title">
 												{{ mediaItemDetail?.title ?? 'unknown' }}
 											</td>
 										</tr>
@@ -51,35 +65,43 @@
 												{{ t('components.details-overview.total-duration') }}
 											</td>
 											<td class="media-info-column">
-												<q-duration :value="mediaItemDetail?.duration ?? -1" />
+												<QDuration :value="mediaItemDetail?.duration ?? -1" />
 											</td>
 										</tr>
 										<tr>
 											<td class="media-info-column">
 												{{ t('components.details-overview.media-count-label') }}
 											</td>
-											<td class="media-info-column">{{ mediaCountFormatted }}</td>
+											<td class="media-info-column">
+												{{ mediaCountFormatted }}
+											</td>
 										</tr>
 										<tr>
 											<td class="media-info-column">
 												{{ t('components.details-overview.summary') }}
 											</td>
-											<td class="media-info-column">{{ mediaItemDetail?.summary ?? '' }}</td>
+											<td class="media-info-column">
+												{{ mediaItemDetail?.summary ?? '' }}
+											</td>
 										</tr>
 									</tbody>
 								</q-markup-table>
 							</q-card-section>
 						</q-card>
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 
 				<!--	Media Table	-->
-				<q-row no-gutters>
-					<q-col>
-						<MediaList use-q-table :media-item="mediaItemDetail" disable-intersection disable-highlight />
-					</q-col>
-				</q-row>
-			</q-col>
+				<QRow no-gutters>
+					<QCol>
+						<MediaList
+							use-q-table
+							:media-item="mediaItemDetail"
+							disable-intersection
+							disable-highlight />
+					</QCol>
+				</QRow>
+			</QCol>
 		</template>
 	</QCardDialog>
 </template>
@@ -110,14 +132,14 @@ const mediaCountFormatted = computed(() => {
 	if (item) {
 		switch (item.type) {
 			case PlexMediaType.Movie:
-				return `1 Movie`;
+				return t('components.details-overview.one-movie-count');
 			case PlexMediaType.TvShow:
 				return t('components.details-overview.media-count', {
 					seasonCount: item.childCount,
 					episodeCount: sum(item.children?.map((x) => x.childCount)),
 				});
 			default:
-				return `Library type ${item.type} is not supported in the media count`;
+				throw new Error(`Library type ${item.type} is not supported in the media count`);
 		}
 	}
 
@@ -130,7 +152,8 @@ const imageUrl = computed(() => {
 		: '';
 });
 
-function openDetails({ mediaId, type }: { mediaId: number; type: PlexMediaType }) {
+function openDetails(event: unknown) {
+	const { mediaId, type } = event as { mediaId: number; type: PlexMediaType };
 	set(loading, true);
 	Log.debug('MediaDetailsDialog', 'openDetails', { mediaId, type });
 	mediaOverviewStore.downloadButtonVisible = false;
@@ -160,6 +183,7 @@ function closeDetails() {
 	mediaOverviewStore.downloadButtonVisible = false;
 }
 </script>
+
 <style lang="scss">
 @import '@/assets/scss/variables.scss';
 

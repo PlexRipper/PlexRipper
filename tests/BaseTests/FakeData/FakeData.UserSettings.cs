@@ -41,13 +41,13 @@ public static partial class FakeData
     public static string GetSettingsModelJson(Action<UnitTestDataConfig>? options = null)
     {
         var settings = GetSettingsModel(options).Generate();
-        return JsonSerializer.Serialize(settings, DefaultJsonSerializerOptions.ConfigCaptialized);
+        return JsonSerializer.Serialize(settings, DefaultJsonSerializerOptions.ConfigCapitalized);
     }
 
     public static JsonElement GetSettingsModelJsonElement(Action<UnitTestDataConfig>? options = null)
     {
         var settingsJson = GetSettingsModelJson(options);
-        return JsonSerializer.Deserialize<JsonElement>(settingsJson, DefaultJsonSerializerOptions.ConfigCaptialized);
+        return JsonSerializer.Deserialize<JsonElement>(settingsJson, DefaultJsonSerializerOptions.ConfigCapitalized);
     }
 
     public static Faker<GeneralSettings> GetGeneralSettings(Action<UnitTestDataConfig>? options = null)
@@ -150,8 +150,9 @@ public static partial class FakeData
         return new Faker<PlexServerSettingsModel>()
             .StrictMode(true)
             .UseSeed(config.Seed)
+            .RuleFor(x => x.MachineIdentifier, f => f.Finance.BitcoinAddress())
             .RuleFor(x => x.PlexServerName, _ => string.Empty)
             .RuleFor(x => x.DownloadSpeedLimit, _ => config.DownloadSpeedLimitInKib)
-            .RuleFor(x => x.MachineIdentifier, f => f.Finance.BitcoinAddress());
+            .RuleFor(x => x.Hidden, _ => false);
     }
 }

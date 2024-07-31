@@ -1,5 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { Observable, of, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import type { ISetupResult } from '@interfaces';
 import type IAlert from '@interfaces/IAlert';
 

@@ -1,4 +1,4 @@
-import { JobStatus, JobTypes, type JobStatusUpdateDTO } from '@dto';
+import type { JobStatus, JobTypes, JobStatusUpdateDTO } from '@dto';
 import { incrementSeed } from '~/mock-data';
 
 let jobStatusIdIndex = 1;

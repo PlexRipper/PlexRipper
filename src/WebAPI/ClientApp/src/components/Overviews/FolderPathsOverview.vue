@@ -1,78 +1,113 @@
 <template>
 	<!--	Show warning when no allowed to edit	-->
 	<template v-if="!allowEditing">
-		<q-row>
-			<q-col>
-				<q-alert border="bottom" colored-border type="warning" elevation="2">
+		<QRow>
+			<QCol>
+				<q-alert
+					border="bottom"
+					colored-border
+					elevation="2"
+					type="warning">
 					{{ t('general.alerts.disabled-paths') }}
 				</q-alert>
-			</q-col>
-		</q-row>
+			</QCol>
+		</QRow>
 	</template>
 	<template v-else>
-		<q-section v-for="(folderGroup, i) in folderPathStore.getFolderPathsGroups(onlyDefaults)" :key="i">
-			<template v-if="!onlyDefaults" #header> {{ folderGroup.header }}</template>
-			<template v-if="folderGroup.paths.length > 0">
-				<q-row v-for="folderPath in folderGroup.paths" :key="folderPath.id" class="q-my-sm">
-					<q-col cols="3">
-						<editable-text
-							v-if="folderGroup.isFolderNameEditable"
-							:value="folderPath.displayName"
-							:disabled="!allowEditing"
-							@save="saveDisplayName(folderPath.id, $event)" />
-						<help-icon v-else :help-id="toTranslation(folderPath.folderType)" />
-					</q-col>
-					<!--	Folder Path Display	-->
-					<q-col cols="7">
-						<q-input :model-value="folderPath.directory" readonly class="folder-path-input">
-							<IconSquareButton icon="mdi-folder-open-outline" @click="openDirectoryBrowser(folderPath)" />
-						</q-input>
-					</q-col>
-					<!--	Is Valid Icon -->
-					<q-col cols="auto" align-self="center">
-						<valid-icon
-							:valid="folderPath.isValid"
-							:valid-text="t('general.alerts.valid-directory')"
-							:invalid-text="t('general.alerts.invalid-directory')" />
-					</q-col>
-					<!--	Delete Button -->
-					<q-col v-if="folderGroup.IsFolderDeletable" cols="auto">
-						<DeleteIconButton :disabled="!allowEditing" @click="deleteFolderPath(folderPath.id)" />
-					</q-col>
-				</q-row>
+		<QSection
+			v-for="(folderGroup, i) in folderPathStore.getFolderPathsGroups(onlyDefaults)"
+			:key="i">
+			<template
+				v-if="!onlyDefaults"
+				#header>
+				{{ folderGroup.header }}
 			</template>
-			<!--	No custom FolderPaths	Warning-->
+			<template v-if="folderGroup.paths.length > 0">
+				<QRow
+					v-for="folderPath in folderGroup.paths"
+					:key="folderPath.id"
+					class="q-my-sm">
+					<QCol cols="3">
+						<EditableText
+							v-if="folderGroup.isFolderNameEditable"
+							:disabled="!allowEditing"
+							:value="folderPath.displayName"
+							@save="saveDisplayName(folderPath.id, $event)" />
+						<HelpIcon
+							v-else
+							:value="toTranslation(folderPath.folderType)" />
+					</QCol>
+					<!--	Folder Path Display	-->
+					<QCol cols="7">
+						<q-input
+							:model-value="folderPath.directory"
+							class="folder-path-input"
+							readonly>
+							<IconSquareButton
+								icon="mdi-folder-open-outline"
+								@click="openDirectoryBrowser(folderPath)" />
+						</q-input>
+					</QCol>
+					<!--	Is Valid Icon -->
+					<QCol
+						align-self="center"
+						cols="auto">
+						<ValidIcon
+							:invalid-text="t('general.alerts.invalid-directory')"
+							:valid="folderPath.isValid"
+							:valid-text="t('general.alerts.valid-directory')" />
+					</QCol>
+					<!--	Delete Button -->
+					<QCol
+						v-if="folderGroup.IsFolderDeletable"
+						cols="auto">
+						<DeleteIconButton
+							:disabled="!allowEditing"
+							@click="deleteFolderPath(folderPath.id)" />
+					</QCol>
+				</QRow>
+			</template>
+			<!--	No custom FolderPaths	Warning -->
 			<template v-else>
-				<q-row justify="center" class="q-my-sm">
-					<q-col cols="auto">
+				<QRow
+					class="q-my-sm"
+					justify="center">
+					<QCol cols="auto">
 						<h2>{{ t('components.folder-paths-overview.no-paths') }}</h2>
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 			</template>
 			<!--	Add Path Button	-->
-			<q-row v-if="folderGroup.isFolderAddable" justify="center" class="q-my-sm">
-				<q-col cols="auto">
-					<AddIconButton :disabled="!allowEditing" @click="addFolderPath(folderGroup)" />
-				</q-col>
-			</q-row>
-		</q-section>
+			<QRow
+				v-if="folderGroup.isFolderAddable"
+				class="q-my-sm"
+				justify="center">
+				<QCol cols="auto">
+					<AddIconButton
+						:disabled="!allowEditing"
+						@click="addFolderPath(folderGroup)" />
+				</QCol>
+			</QRow>
+		</QSection>
 	</template>
 
 	<!--	Directory Browser	-->
-	<DirectoryBrowser :name="directoryBrowserName" @confirm="confirmDirectoryBrowser" />
+	<DirectoryBrowser
+		:name="directoryBrowserName"
+		@confirm="confirmDirectoryBrowser" />
 </template>
 
-<script setup lang="ts">
-import type { FolderPathDTO } from '@dto';
+<script lang="ts" setup>
+import { type FolderPathDTO, FolderType } from '@dto';
+import type IFolderPathGroup from '@interfaces/IFolderPathGroup';
+import type { IHelp } from '@interfaces';
 import {
 	useI18n,
 	useOpenControlDialog,
-	toFolderPathStringId,
 	useFolderPathStore,
 	useSubscription,
 	showErrorNotification,
 } from '#imports';
-import type IFolderPathGroup from '@interfaces/IFolderPathGroup';
 
 const { t } = useI18n();
 const folderPathStore = useFolderPathStore();
@@ -102,11 +137,23 @@ const confirmDirectoryBrowser = (path: FolderPathDTO): void => {
 };
 
 function addFolderPath(folderGroup: IFolderPathGroup): void {
+	let displayName = '';
+	switch (folderGroup.folderType) {
+		case FolderType.MovieFolder:
+			displayName = t('components.folder-paths-overview.movie.default-name');
+			break;
+		case FolderType.TvShowFolder:
+			displayName = t('components.folder-paths-overview.tv-show.default-name');
+			break;
+		default:
+			throw new Error(`Unknown folder type: ${folderGroup.folderType}`);
+	}
+
 	useSubscription(
 		folderPathStore
 			.createFolderPath({
 				id: 0,
-				displayName: t(`components.folder-paths-overview.${toFolderPathStringId(folderGroup.folderType)}.default-name`),
+				displayName,
 				directory: '',
 				folderType: folderGroup.folderType,
 				mediaType: folderGroup.mediaType,
@@ -120,8 +167,29 @@ function deleteFolderPath(id: number): void {
 	folderPathStore.deleteFolderPath(id).subscribe();
 }
 
-function toTranslation(type: string): string {
-	return `help.settings.paths.${kebabCase(type)}`;
+function toTranslation(type: FolderType): IHelp {
+	switch (type) {
+		case FolderType.DownloadFolder:
+			return {
+				label: t('help.settings.paths.download-folder.label'),
+				text: t('help.settings.paths.download-folder.text'),
+				title: t('help.settings.paths.download-folder.title'),
+			};
+		case FolderType.MovieFolder:
+			return {
+				label: t('help.settings.paths.movie-folder.label'),
+				text: t('help.settings.paths.movie-folder.text'),
+				title: t('help.settings.paths.movie-folder.title'),
+			};
+		case FolderType.TvShowFolder:
+			return {
+				label: t('help.settings.paths.tv-show-folder.label'),
+				text: t('help.settings.paths.tv-show-folder.text'),
+				title: t('help.settings.paths.tv-show-folder.title'),
+			};
+		default:
+			throw new Error('FolderType not supported');
+	}
 }
 
 const saveDisplayName = (id: number, value: string): void => {
@@ -134,6 +202,7 @@ const saveDisplayName = (id: number, value: string): void => {
 	);
 };
 </script>
+
 <style lang="scss">
 .folder-path-input {
 	.q-field__control {

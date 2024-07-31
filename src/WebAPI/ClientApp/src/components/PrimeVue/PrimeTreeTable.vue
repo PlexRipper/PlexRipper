@@ -14,51 +14,95 @@
 		size="small"
 		:rows-per-page-options="[10, 25, 50, 100]"
 		@update:selection-keys="onSelectionChange">
-		<Column field="title" header="Title" expander>
+		<Column
+			field="title"
+			header="Title"
+			expander>
 			<template #header>
-				<QCheckbox :model-value="headerSelected" @update:model-value="$emit('all-selected', $event)" />
+				<QCheckbox
+					:model-value="headerSelected"
+					@update:model-value="$emit('all-selected', $event)" />
 			</template>
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
-				<q-media-type-icon v-if="node.mediaType" :size="26" :media-type="node.mediaType" class="q-mr-md" />
+				<QMediaTypeIcon
+					v-if="node.mediaType"
+					:size="26"
+					:media-type="node.mediaType"
+					class="q-mr-md" />
 				<span :data-cy="`column-${column.field}-${node.id}`">{{ node.title }}</span>
 			</template>
 		</Column>
-		<Column field="status" header="Status" style="max-width: 10rem">
+		<Column
+			field="status"
+			header="Status"
+			style="max-width: 10rem">
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
 				<span :data-cy="`column-${column.field}-${node.id}`">
 					{{ node.status }}
 				</span>
 			</template>
 		</Column>
-		<Column field="dataReceived" header="Received" style="max-width: 10rem">
+		<Column
+			field="dataReceived"
+			header="Received"
+			style="max-width: 10rem">
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
-				<QFileSize :data-cy="`column-${column.field}-${node.id}`" :size="node.dataReceived" />
+				<QFileSize
+					:data-cy="`column-${column.field}-${node.id}`"
+					:size="node.dataReceived" />
 			</template>
 		</Column>
-		<Column field="dataTotal" header="Size" style="max-width: 10rem">
+		<Column
+			field="dataTotal"
+			header="Size"
+			style="max-width: 10rem">
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
-				<QFileSize :data-cy="`column-${column.field}-${node.id}`" :size="node.dataTotal" />
+				<QFileSize
+					:data-cy="`column-${column.field}-${node.id}`"
+					:size="node.dataTotal" />
 			</template>
 		</Column>
-		<Column field="downloadSpeed" header="Speed" style="max-width: 10rem">
+		<Column
+			field="downloadSpeed"
+			header="Speed"
+			style="max-width: 10rem">
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
-				<QFileSize :data-cy="`column-${column.field}-${node.id}`" :size="node.downloadSpeed" speed />
+				<QFileSize
+					:data-cy="`column-${column.field}-${node.id}`"
+					:size="node.downloadSpeed"
+					speed />
 			</template>
 		</Column>
-		<Column field="timeRemaining" header="ETA" style="max-width: 10rem">
+		<Column
+			field="timeRemaining"
+			header="ETA"
+			style="max-width: 10rem">
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
-				<QDuration short :data-cy="`column-${column.field}-${node.id}`" :value="node.timeRemaining" />
+				<QDuration
+					short
+					:data-cy="`column-${column.field}-${node.id}`"
+					:value="node.timeRemaining" />
 			</template>
 		</Column>
-		<Column field="percentage" header="Percentage" style="max-width: 10rem">
+		<Column
+			field="percentage"
+			header="Percentage"
+			style="max-width: 10rem">
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
-				<QProgressBar :data-cy="`column-${column.field}-${node.id}`" :value="node.percentage" />
+				<QProgressBar
+					:data-cy="`column-${column.field}-${node.id}`"
+					:value="node.percentage" />
 			</template>
 		</Column>
-		<Column field="actions" header="Actions" style="max-width: 15rem">
+		<Column
+			field="actions"
+			header="Actions"
+			style="max-width: 15rem">
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
-				<q-row justify="start" no-wrap>
-					<q-col cols="auto">
+				<QRow
+					justify="start"
+					no-wrap>
+					<QCol cols="auto">
 						<!-- Item Actions -->
 						<IconSquareButton
 							v-for="(action, y) in node.actions"
@@ -72,8 +116,8 @@
 									data: node,
 								})
 							" />
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 			</template>
 		</Column>
 	</TreeTable>
@@ -85,7 +129,7 @@ import type { QTreeViewTableHeader } from '@props';
 import type IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
 import type { IDownloadTableNode } from '@interfaces';
 import Convert from '@class/Convert';
-import ButtonType from '@enums/buttonType';
+import type ButtonType from '@enums/buttonType';
 
 defineProps<{
 	nodes: IDownloadTableNode[];
@@ -106,12 +150,12 @@ function onSelectionChange(keys: IPTreeTableSelectionKeys) {
 }
 
 const emits = defineEmits<{
-	(e: 'update:model-value', payload: boolean): void;
 	(e: 'selected', payload: TreeTableSelectionKeys): void;
-	(e: 'all-selected', payload: boolean): void;
+	(e: 'update:model-value' | 'all-selected', payload: boolean): void;
 	(e: 'action', payload: { action: string; data: IDownloadTableNode }): void;
 }>();
 </script>
+
 <style lang="scss">
 .p-treetable {
 	table {

@@ -4,7 +4,7 @@ using PlexRipper.Domain.DownloadManager;
 
 namespace PlexRipper.Domain;
 
-public static class JsonElementExtentions
+public static class JsonElementExtensions
 {
     public static object GetTypedValue(this JsonElement jsonElement, Type type)
     {
@@ -17,9 +17,9 @@ public static class JsonElementExtentions
             { } t when t == typeof(List<PlexServerSettingsModel>)
                 => JsonSerializer.Deserialize<List<PlexServerSettingsModel>>(
                     jsonElement.GetRawText(),
-                    DefaultJsonSerializerOptions.ConfigManagerOptions
+                    DefaultJsonSerializerOptions.ConfigCapitalized
                 ),
-            _ => throw new ArgumentException($"Typename {type.FullName} of {type} is not supported when parsing")
+            _ => throw new ArgumentException($"Typename {type.FullName} of {type} is not supported when parsing"),
         };
     }
 }

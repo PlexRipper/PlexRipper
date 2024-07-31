@@ -4,54 +4,83 @@
 		<tbody v-if="plexServer">
 			<!-- Machine Identifier -->
 			<tr>
-				<td style="width: 30%">{{ t('components.server-dialog.tabs.server-data.machine-id') }}:</td>
+				<td style="width: 30%">
+					{{ t('components.server-dialog.tabs.server-data.headers.machine-id') }}
+				</td>
 				<td>{{ plexServer.machineIdentifier }}</td>
 			</tr>
 			<!-- Device -->
 			<tr>
-				<td>{{ t('components.server-dialog.tabs.server-data.device') }}:</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.headers.device') }}</td>
 				<td>{{ plexServer.device }}</td>
 			</tr>
 			<!-- Platform and platform version -->
 			<tr>
-				<td>{{ t('components.server-dialog.tabs.server-data.platform') }}:</td>
-				<td>{{ plexServer.platform }} ({{ plexServer.platformVersion }})</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.headers.platform') }}</td>
+				<td>
+					{{
+						$t('components.server-dialog.tabs.server-data.values.platform-version', {
+							platform: plexServer.platform,
+							platformVersion: plexServer.platformVersion,
+						})
+					}}
+				</td>
 			</tr>
 			<!-- Product and version -->
 			<tr>
-				<td>{{ t('components.server-dialog.tabs.server-data.plex-version') }}:</td>
-				<td>{{ plexServer.product }} ({{ plexServer.productVersion }})</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.headers.plex-version') }}</td>
+				<td>
+					{{
+						$t('components.server-dialog.tabs.server-data.values.product-version', {
+							product: plexServer.product,
+							productVersion: plexServer.productVersion,
+						})
+					}}
+				</td>
 			</tr>
 			<!-- Created On -->
 			<tr>
-				<td>{{ t('components.server-dialog.tabs.server-data.created-on') }}:</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.headers.created-on') }}</td>
 				<td>
-					<q-date-time short-date :text="plexServer.createdAt" />
+					<QDateTime
+						short-date
+						:text="plexServer.createdAt" />
 				</td>
 			</tr>
 			<tr>
-				<td>{{ t('components.server-dialog.tabs.server-data.last-seen-at') }}:</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.headers.last-seen-at') }}</td>
 				<td>
-					<q-date-time short-date :text="plexServer.lastSeenAt" />
+					<QDateTime
+						short-date
+						:text="plexServer.lastSeenAt" />
 				</td>
 			</tr>
 			<tr>
-				<td>{{ t('components.server-dialog.tabs.server-data.current-status') }}:</td>
+				<td>{{ t('components.server-dialog.tabs.server-data.headers.current-status') }}</td>
 				<td>
-					<q-status pulse :value="serverStore.getServerStatus(plexServer.id)" />
+					<QStatus :value="serverStore.getServerStatus(plexServer.id)" />
 				</td>
 			</tr>
 			<!--	Check Server Action	-->
 			<tr>
 				<td>
-					<BaseButton text-id="check-server-status" :loading="checkServerStatusLoading" @click="checkServer" />
+					<BaseButton
+						:label="$t('general.commands.check-server-status')"
+						:loading="checkServerStatusLoading"
+						@click="checkServer" />
 				</td>
 				<td style="padding: 0">
-					<q-markup-table v-if="hasCheckedServerStatus" wrap-cells>
+					<q-markup-table
+						v-if="hasCheckedServerStatus"
+						wrap-cells>
 						<tbody v-if="checkServerStatusLoading">
-							<tr v-for="(progressItem, index) in progress" :key="index">
+							<tr
+								v-for="(progressItem, index) in progress"
+								:key="index">
 								<td>
-									<q-status pulse :value="progressItem.connectionSuccessful" />
+									<QStatus
+										pulse
+										:value="progressItem.connectionSuccessful" />
 								</td>
 								<td>{{ progressItem.message }}</td>
 							</tr>
@@ -59,7 +88,9 @@
 						<tbody v-else-if="progress.every((x) => x.completed)">
 							<tr>
 								<td>
-									<q-status pulse :value="progress.some((x) => x.connectionSuccessful)" />
+									<QStatus
+										pulse
+										:value="progress.some((x) => x.connectionSuccessful)" />
 								</td>
 								<td>
 									{{ checkServerStatusMessage }}
@@ -69,13 +100,13 @@
 					</q-markup-table>
 				</td>
 			</tr>
-			<!--			<tr v-if="settingsStore.debugMode">-->
-			<!--				<td colspan="2">-->
-			<!--					<print>-->
-			<!--						{{ progress }}-->
-			<!--					</print>-->
-			<!--				</td>-->
-			<!--			</tr>-->
+			<!--			<tr v-if="settingsStore.debugMode"> -->
+			<!--				<td colspan="2"> -->
+			<!--					<print> -->
+			<!--						{{ progress }} -->
+			<!--					</print> -->
+			<!--				</td> -->
+			<!--			</tr> -->
 		</tbody>
 		<tbody v-else>
 			<tr>
@@ -89,11 +120,10 @@
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import type { PlexServerDTO, ServerConnectionCheckStatusProgressDTO } from '@dto';
-import { useSignalrStore, useSettingsStore, useI18n } from '#imports';
+import { useSignalrStore, useI18n } from '#imports';
 
 const { t } = useI18n();
 const signalrStore = useSignalrStore();
-const settingsStore = useSettingsStore();
 
 const serverStore = useServerStore();
 const serverConnectionStore = useServerConnectionStore();

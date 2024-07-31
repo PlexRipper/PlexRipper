@@ -19,6 +19,7 @@ import { sendMediaOverviewScrollToCommand } from '@composables/event-bus';
 
 const mediaOverviewStore = useMediaOverviewStore();
 </script>
+
 <style lang="scss">
 @import '@/assets/scss/_mixins.scss';
 

@@ -1,17 +1,26 @@
 <template>
 	<!--	Refresh Library Screen	-->
-	<q-row v-if="isRefreshing" justify="center" align="center" class="refresh-library-container" cy="refresh-library-container">
-		<q-col cols="8" align-self="center">
-			<progress-component circular-mode :percentage="libraryProgress?.percentage ?? -1" :text="refreshingText" />
-			<!--				<h1 v-else>{{ t('components.media-overview.retrieving-library') }}</h1>-->
-		</q-col>
-	</q-row>
+	<QRow
+		v-if="isRefreshing"
+		justify="center"
+		align="center"
+		class="refresh-library-container"
+		cy="refresh-library-container">
+		<QCol
+			cols="8"
+			align-self="center">
+			<ProgressComponent
+				circular-mode
+				:percentage="libraryProgress?.percentage ?? -1"
+				:text="refreshingText" />
+		</QCol>
+	</QRow>
 	<!-- Media Overview -->
 	<template v-else-if="!loading && mediaOverviewStore.itemsLength">
-		<q-row no-gutters>
-			<q-col>
+		<QRow no-gutters>
+			<QCol>
 				<!--	Overview bar	-->
-				<media-overview-bar
+				<MediaOverviewBar
 					:server="libraryStore.getServerByLibraryId(props.libraryId)"
 					:library="libraryStore.getLibrary(props.libraryId)"
 					:detail-mode="!mediaOverviewStore.showMediaOverview"
@@ -20,8 +29,10 @@
 					@selection-dialog="useOpenControlDialog(mediaSelectionDialogName)"
 					@refresh-library="refreshLibrary" />
 				<!--	Data table display	-->
-				<q-row id="media-container" align="start">
-					<q-col v-show="mediaOverviewStore.showMediaOverview">
+				<QRow
+					id="media-container"
+					align="start">
+					<QCol v-show="mediaOverviewStore.showMediaOverview">
 						<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
 							<MediaTable
 								:rows="mediaOverviewStore.items"
@@ -29,29 +40,32 @@
 								is-scrollable />
 						</template>
 
-						<!-- Poster display-->
+						<!-- Poster display -->
 						<template v-else>
-							<poster-table :library-id="libraryId" :media-type="mediaType" :items="mediaOverviewStore.items" />
+							<PosterTable
+								:library-id="libraryId"
+								:media-type="mediaType"
+								:items="mediaOverviewStore.items" />
 						</template>
-					</q-col>
+					</QCol>
 
-					<!-- Alphabet Navigation-->
-					<alphabet-navigation v-show="mediaOverviewStore.showMediaOverview" />
-				</q-row>
-			</q-col>
-		</q-row>
+					<!-- Alphabet Navigation -->
+					<AlphabetNavigation v-show="mediaOverviewStore.showMediaOverview" />
+				</QRow>
+			</QCol>
+		</QRow>
 	</template>
 	<!-- No Media Overview -->
 	<template v-else-if="!loading && mediaOverviewStore.itemsLength === 0">
-		<q-row justify="center">
-			<q-col cols="auto">
+		<QRow justify="center">
+			<QCol cols="auto">
 				<h1>{{ t('components.media-overview.no-data') }}</h1>
-			</q-col>
-		</q-row>
+			</QCol>
+		</QRow>
 	</template>
-	<!-- Media Details Display-->
+	<!-- Media Details Display -->
 	<DetailsOverview :name="mediaDetailsDialogName" />
-	<!-- Media Selection Dialog-->
+	<!-- Media Selection Dialog -->
 	<MediaSelectionDialog :name="mediaSelectionDialogName" />
 	<!--	Loading overlay	-->
 	<QLoadingOverlay :loading="loading" />
@@ -68,6 +82,7 @@ import { set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRouter, type RouteLocationNormalized, type RouteLocationNormalizedLoaded } from 'vue-router';
 import { type DownloadMediaDTO, type LibraryProgress, PlexMediaType, ViewMode } from '@dto';
+import { listenMediaOverviewOpenDetailsCommand, sendMediaOverviewOpenDetailsCommand } from '@composables/event-bus';
 import {
 	useMediaOverviewBarDownloadCommandBus,
 	useMediaOverviewSortBus,
@@ -83,7 +98,6 @@ import {
 	useServerStore,
 	useI18n,
 } from '#imports';
-import { listenMediaOverviewOpenDetailsCommand, sendMediaOverviewOpenDetailsCommand } from '@composables/event-bus';
 
 // region SetupFields
 const { t } = useI18n();

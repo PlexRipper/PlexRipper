@@ -1,14 +1,12 @@
 {
     "components": {
         "account-card": {
-            "clear-notifications": "Clear All Notifications",
             "no-account-name": "Add Account Display Name",
-            "no-notifications": "No notifications available",
             "invalid-account": "Account object was invalid"
         },
         "account-dialog": {
-            "add-account-title": "Add Plex Account",
-            "edit-account-title": "Edit Plex Account"
+            "add-account-title": "Add Plex Account: {name}",
+            "edit-account-title": "Edit Plex Account: {name}"
         },
         "connection-progress-text": {
             "retry-connection": "Attempting to retry connection, { attemptIndex } of { attemptCount } attempt.",
@@ -20,9 +18,9 @@
             "server-un-connectable": "Could not connect to server, it's most likely offline.",
             "checking-progress": "Checking {count} of {total} Plex servers connections",
             "completed": "Completed inspection of {length} Plex servers!",
-            "no-servers": "Account {displayName} has no servers which it can access.",
             "fetching-servers": "Retrieving accessible servers for Plex account {displayName}",
-            "no-connections": "No Connections were found for this Plex server!"
+            "no-connections": "No Connections were found for this Plex server!",
+            "no-progress-yet": "No progress yet"
         },
         "account-verification-code-dialog": {
             "error": "The verification code was invalid, please try again.",
@@ -33,11 +31,11 @@
             "no-accounts": "No Accounts available"
         },
         "details-overview": {
-            "database-id": "Database ID:",
             "total-duration": "Total duration:",
             "media-count": "{seasonCount} Season - {episodeCount} Episodes",
             "media-count-label": "Media count:",
-            "summary": "Summary:"
+            "summary": "Summary:",
+            "one-movie-count": "1 Movie"
         },
         "directory-browser": {
             "path": "Path:",
@@ -49,18 +47,17 @@
             "current-folder-has-no-write-permission": "The current folder has no write permission! Select one that has."
         },
         "download-confirmation": {
-            "creating-tasks": "Creating download tasks {current} of {total}",
             "description": "PlexRipper will start downloading the following:",
             "header": "Are you sure?",
             "total-size": "Total size:"
         },
         "download-details-dialog": {
             "overview": {
-                "destination-path": "Destination Path",
-                "download-path": "Download Path",
-                "download-url": "Download URL",
-                "file-name": "File Name",
-                "status": "Status"
+                "destination-path": "Destination Path:",
+                "download-path": "Download Path:",
+                "download-url": "Download URL:",
+                "file-name": "File Name:",
+                "status": "Status:"
             },
             "invalid-download-task": {
                 "body": "Error while retrieving the details for this download task:",
@@ -69,8 +66,7 @@
         },
         "media-overview": {
             "is-refreshing": "Refreshing library \"{library}\" data from {server}",
-            "no-data": "Could not display this library.",
-            "retrieving-library": "Retrieving library from PlexRipper database!"
+            "no-data": "Could not display this library."
         },
         "navigation-drawer": {
             "accounts": "Accounts",
@@ -109,34 +105,35 @@
                     "header": "Download Destinations"
                 },
                 "server-commands": {
-                    "header": "Server Commands",
-                    "inspect-server": "Inspect Server",
-                    "re-sync-server": "Re-sync Library media"
+                    "header": "Server Commands"
                 },
                 "server-config": {
-                    "download-speed-limit": "Download Speed Limit",
-                    "header": "Server Configuration"
+                    "header": "Server Configuration",
+                    "plex-server-was-null": "Plex Server was null"
                 },
                 "server-connections": {
-                    "download-speed-limit": "Download Speed Limit",
                     "header": "Server Connections",
                     "section-header": "Select the preferred server connection:"
                 },
                 "server-data": {
-                    "created-on": "Created On",
-                    "current-status": "Current status",
+                    "headers": {
+                        "created-on": "Created On:",
+                        "current-status": "Current status:",
+                        "last-seen-at": "Last Seen At:",
+                        "machine-id": "Machine Identifier:",
+                        "plex-version": "Plex Version:",
+                        "device": "Device:",
+                        "platform": "Platform:"
+                    },
                     "header": "Server Data",
-                    "last-seen-at": "Last Seen At",
-                    "machine-id": "Machine Identifier",
-                    "plex-version": "Plex Version",
-                    "device": "Device",
-                    "platform": "Platform",
-                    "platform-version": "Platform Version",
                     "all-connections-failed": "All connections failed when used to connect to the server, the server is most likely offline...",
-                    "at-least-one-connection-successful": "At least one connection was successful, which means the server can be connected to!"
+                    "at-least-one-connection-successful": "At least one connection was successful, which means the server can be connected to!",
+                    "values": {
+                        "platform-version": "{platform} ({platformVersion})",
+                        "product-version": "{product} ({productVersion})"
+                    }
                 }
-            },
-            "no-servers-error": "PlexServer object was invalid"
+            }
         },
         "server-drawer": {
             "no-libraries": "No libraries available",
@@ -170,6 +167,9 @@
         "q-status": {
             "server-connectable": "Server is online and connectable!",
             "server-unconnectable": "Server cannot be connected to and might be offline.."
+        },
+        "alert-dialog": {
+            "request-data-sent": "Request data sent:"
         }
     },
     "confirmation": {
@@ -177,6 +177,10 @@
             "text": "This will delete this Plex account from PlexRipper! \n\nThis will also delete all inaccessible Plex shared servers, Plex libraries and all media that is contained within. Any active downloads that are started or queued with this account will be canceled and deleted. Completed downloads will remain untouched.",
             "title": "Are you sure?",
             "warning": "This might take around 5 minutes or longer and then this window will close on its own!"
+        },
+        "hide-server": {
+            "text": "This will hide the server from view. You can unhide this server by going to settings -> UI -> Unhide Plex Servers",
+            "title": "Are you sure?"
         },
         "reset-db": {
             "text": "This will back-up the current database to \"config/Database Backup/\" and create a new one, after which you will be redirected to the setup page. This will not reset settings since those are stored in \"config/PlexRipperSettings.json\"",
@@ -204,11 +208,9 @@
             "check-server-status": "Check server status",
             "close": "Close",
             "confirm": "Confirm",
-            "create": "Create",
             "delete": "Delete",
             "disabled": "Disabled",
             "enabled": "Enabled",
-            "error": "Error",
             "finish-setup": "Finish setup",
             "go-to-setup-page": "Go To Setup Page",
             "hide": "Hide",
@@ -224,12 +226,13 @@
             "update": "Update",
             "validate": "Validate",
             "validated": "Validated",
-            "missing-text": "Missing Text",
             "inspect-server": "Inspect Server",
             "selection": "Selection",
-            "set-selection": "Set Selection"
+            "set-selection": "Set Selection",
+            "download": "Download",
+            "refresh": "Refresh",
+            "view": "View"
         },
-        "name": "PlexRipper",
         "name-version": "PlexRipper - V{version}",
         "units": {
             "per-second": "/s"
@@ -241,6 +244,9 @@
         "error": {
             "unknown": "\"Unknown\"",
             "invalid-server": "Server object was invalid"
+        },
+        "delimiter": {
+            "dash": " - "
         }
     },
     "help": {
@@ -357,22 +363,22 @@
                 "confirmation-settings": {
                     "download-episode-confirmation": {
                         "label": "Ask Download Episode Confirmation",
-                        "text": "",
+                        "text": "Should a confirmation pop-up be shown when an episode is about to be downloaded?",
                         "title": "Ask Download Episode Confirmation"
                     },
                     "download-movie-confirmation": {
                         "label": "Ask Download Movie Confirmation",
-                        "text": "",
+                        "text": "Should a confirmation pop-up be shown when a movie is about to be downloaded?",
                         "title": "Ask Download Movie Confirmation"
                     },
                     "download-season-confirmation": {
                         "label": "Ask Download Season Confirmation",
-                        "text": "",
+                        "text": "Should a confirmation pop-up be shown when a season is about to be downloaded?",
                         "title": "Ask Download Season Confirmation"
                     },
                     "download-tvshow-confirmation": {
                         "label": "Ask Download TvShow Confirmation",
-                        "text": "",
+                        "text": "Should a confirmation pop-up be shown when an tv show is about to be downloaded?",
                         "title": "Ask Download TvShow Confirmation"
                     }
                 },
@@ -394,11 +400,6 @@
                     },
                     "time-format": {
                         "label": "Time Format",
-                        "text": "",
-                        "title": ""
-                    },
-                    "time-zone": {
-                        "label": "Time Zone",
                         "text": "",
                         "title": ""
                     }
@@ -432,14 +433,8 @@
             "header": "WORKING!",
             "setup-question": "It looks like this is you're first time using PlexRipper, would you like to set it up?"
         },
-        "movies": {
-            "index": {
-                "header": "Movies Overview",
-                "sub-header": "Select a library from the left-hand side"
-            }
-        },
         "music": {
-            "_musicId": {
+            "music-id": {
                 "header": "Music Libraries are unfortunately not yet supported :("
             },
             "index": {
@@ -464,9 +459,6 @@
                     "header": "PlexRipper Setup"
                 }
             },
-            "debug": {
-                "header": "Debug"
-            },
             "ui": {
                 "confirmation-settings": {
                     "header": "Confirmation Settings"
@@ -479,6 +471,9 @@
                 },
                 "general-settings": {
                     "header": "General"
+                },
+                "un-hide-servers-section": {
+                    "header": "Unhide Plex Servers"
                 }
             }
         },
@@ -554,6 +549,43 @@
                 },
                 "header": "Debug Dialog Modals"
             }
+        },
+        "empty": {
+            "title": "Empty Page"
+        }
+    },
+    "debug": {
+        "button-labels": {
+            "amber": "Amber",
+            "black": "Black",
+            "brown5": "Brown 5",
+            "deep-orange": "Deep Orange",
+            "primary": "Primary",
+            "purple": "Purple",
+            "secondary": "Secondary",
+            "standard": "Standard"
+        },
+        "buttons": {
+            "account-validation-button": "AccountValidationButton",
+            "add-icon-button": "AddIconButton",
+            "base-button": "BaseButton",
+            "cancel-button": "CancelButton",
+            "check-connection-button": "CheckConnectionButton",
+            "confirm-button": "ConfirmButton",
+            "debug-button": "DebugButton",
+            "delete-button": "DeleteButton",
+            "delete-icon-button": "DeleteIconButton",
+            "external-link-button": "ExternalLinkButton",
+            "go-to-button": "GoToButton",
+            "help-button": "HelpButton",
+            "hide-button": "HideButton",
+            "navigation-finish-setup-button": "NavigationFinishSetupButton",
+            "navigation-next-button": "NavigationNextButton",
+            "navigation-previous-button": "NavigationPreviousButton",
+            "navigation-skip-setup-button": "NavigationSkipSetupButton",
+            "reset-button": "ResetButton",
+            "save-button": "SaveButton",
+            "warning-button": "WarningButton"
         }
     }
 }

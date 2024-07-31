@@ -13,9 +13,9 @@ export function determineDownloadStatus(statuses: DownloadStatus[]): DownloadSta
 	} else if (statuses.includes(DownloadStatus.Merging) && !statuses.includes(DownloadStatus.Downloading)) {
 		return DownloadStatus.Merging;
 	} else if (
-		statuses.includes(DownloadStatus.Moving) &&
-		!statuses.includes(DownloadStatus.Downloading) &&
-		!statuses.includes(DownloadStatus.Merging)
+		statuses.includes(DownloadStatus.Moving)
+		&& !statuses.includes(DownloadStatus.Downloading)
+		&& !statuses.includes(DownloadStatus.Merging)
 	) {
 		return DownloadStatus.Merging;
 	} else if (statuses.includes(DownloadStatus.Error)) {

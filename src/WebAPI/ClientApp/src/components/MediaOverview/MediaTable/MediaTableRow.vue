@@ -1,20 +1,35 @@
 <template>
-	<q-row class="media-table-row" full-height align="center" justify="between">
+	<QRow
+		align="center"
+		class="media-table-row"
+		full-height
+		justify="between">
 		<template v-if="row">
 			<!-- Checkbox -->
-			<q-col v-if="selectable" cols="auto" class="q-ml-md q-pl-sm">
-				<q-checkbox dense :model-value="selected" @update:model-value="$emit('selected', $event)" />
-			</q-col>
-			<template v-for="(column, i) in columns" :key="i">
+			<QCol
+				v-if="selectable"
+				class="q-ml-md q-pl-sm"
+				cols="auto">
+				<q-checkbox
+					:model-value="selected"
+					dense
+					@update:model-value="$emit('selected', $event)" />
+			</QCol>
+			<template
+				v-for="(column, i) in columns"
+				:key="i">
 				<!-- Index -->
 				<template v-if="column['type'] === 'index'">
-					<q-col cols="auto" style="min-width: 50px" class="media-table-row--column">
-						<span> #{{ row[column.field] }} </span>
-					</q-col>
+					<QCol
+						class="media-table-row--column"
+						cols="auto"
+						style="min-width: 50px">
+						<QText>{{ `#${$n(row[column.field])}` }}</QText>
+					</QCol>
 				</template>
 				<!-- Title -->
 				<template v-else-if="column['type'] === 'title'">
-					<q-col
+					<QCol
 						:class="[
 							'media-table-row--column',
 							'media-table-row--title',
@@ -24,50 +39,76 @@
 						<span>
 							{{ row[column.field] }}
 						</span>
-					</q-col>
+					</QCol>
 				</template>
 				<!-- Duration format -->
 				<template v-else-if="column['type'] === 'duration'">
-					<q-col cols="1" class="media-table-row--column">
-						<QDuration short :value="row[column.field]" />
-					</q-col>
+					<QCol
+						class="media-table-row--column"
+						cols="1">
+						<QDuration
+							:value="row[column.field]"
+							short />
+					</QCol>
 				</template>
 				<!-- Date format -->
 				<template v-else-if="column['type'] === 'date'">
-					<q-col cols="1" class="media-table-row--column">
-						<QDateTime short-date :text="row[column.field]" />
-					</q-col>
+					<QCol
+						class="media-table-row--column"
+						cols="1">
+						<QDateTime
+							:text="row[column.field]"
+							short-date />
+					</QCol>
 				</template>
 				<!-- Media size -->
 				<template v-else-if="column['type'] === 'file-size'">
-					<q-col cols="1" class="media-table-row--column">
+					<QCol
+						class="media-table-row--column"
+						cols="1">
 						<QFileSize :size="row[column.field]" />
-					</q-col>
+					</QCol>
 				</template>
 				<!-- Actions -->
 				<template v-else-if="column['type'] === 'actions'">
-					<q-col cols="auto" class="media-table-row--column">
+					<QCol
+						class="media-table-row--column"
+						cols="auto">
 						<q-btn
-							flat
 							:icon="Convert.buttonTypeToIcon(ButtonType.Download)"
+							flat
 							@click.stop="onRowAction({ command: 'download' })" />
-					</q-col>
+					</QCol>
 				</template>
 			</template>
 		</template>
 		<!-- No row -->
-		<q-col v-else>{{ t('components.q-tree-view-table-row.invalid-node') }}</q-col>
+		<QCol v-else>
+			{{ t('components.q-tree-view-table-row.invalid-node') }}
+		</QCol>
 		<!--	Highlight animation effect	-->
-		<svg v-if="!disableHighlight" class="glow-container">
-			<!--suppress HtmlUnknownAttribute -->
-			<rect pathLength="100" height="5" width="5" stroke-linecap="round" class="glow-blur" />
-			<!--suppress HtmlUnknownAttribute -->
-			<rect pathLength="100" height="5" width="5" stroke-linecap="round" class="glow-line" />
+		<svg
+			v-if="!disableHighlight"
+			class="glow-container">
+			<!-- suppress HtmlUnknownAttribute -->
+			<rect
+				class="glow-blur"
+				height="5"
+				pathLength="100"
+				stroke-linecap="round"
+				width="5" />
+			<!-- suppress HtmlUnknownAttribute -->
+			<rect
+				class="glow-line"
+				height="5"
+				pathLength="100"
+				stroke-linecap="round"
+				width="5" />
 		</svg>
-	</q-row>
+	</QRow>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import type { QTreeViewTableHeader } from '@props';
 import type { PlexMediaSlimDTO } from '@dto';
 import Convert from '@class/Convert';

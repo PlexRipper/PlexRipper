@@ -1,10 +1,11 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import { get } from '@vueuse/core';
 import Log from 'consola';
 import { tap } from 'rxjs/operators';
-import { useSettingsStore } from './settingsStore';
 import type { ISetupResult, ILocaleConfig, I18nObjectType } from '@interfaces';
+import { useSettingsStore } from './settingsStore';
 
 export const useLocalizationStore = defineStore('LocalizationStore', () => {
 	// State
@@ -23,7 +24,8 @@ export const useLocalizationStore = defineStore('LocalizationStore', () => {
 				Log.error('i18n object is not defined');
 				return;
 			}
-			// @ts-ignore
+
+			// @ts-expect-error - This is a valid assignment, typescript is being retarted here.
 			state.i18nRef = i18n;
 			state.locales = get(i18n.locales).map((x) => {
 				return {

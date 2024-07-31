@@ -2,71 +2,92 @@
 	<q-toolbar class="media-overview-bar">
 		<!--	Title	-->
 		<q-toolbar-title>
-			<q-row justify="start" align="center">
-				<Transition appear enter-active-class="animated fadeInLeft" leave-active-class="animated fadeOutLeft">
-					<q-col v-if="detailMode" cols="auto">
-						<q-btn flat icon="mdi-arrow-left" size="xl" @click="$emit('back')" />
-					</q-col>
+			<QRow
+				justify="start"
+				align="center">
+				<Transition
+					appear
+					enter-active-class="animated fadeInLeft"
+					leave-active-class="animated fadeOutLeft">
+					<QCol
+						v-if="detailMode"
+						cols="auto">
+						<q-btn
+							flat
+							icon="mdi-arrow-left"
+							size="xl"
+							@click="$emit('back')" />
+					</QCol>
 				</Transition>
-				<q-col cols="auto">
+				<QCol cols="auto">
 					<q-list class="no-background">
 						<q-item>
 							<q-item-section avatar>
-								<q-media-type-icon class="mx-3" :size="36" :media-type="library?.type ?? PlexMediaType.None" />
+								<QMediaTypeIcon
+									class="mx-3"
+									:size="36"
+									:media-type="library?.type ?? PlexMediaType.None" />
 							</q-item-section>
 							<q-item-section>
 								<q-item-label>
-									{{ server ? serverStore.getServerName(server.id) : $t('general.commands.unknown') }} -
+									{{ server ? serverStore.getServerName(server.id) : $t('general.commands.unknown') }}
+									{{ $t('general.delimiter.dash') }}
 									{{ library ? libraryStore.getLibraryName(library.id) : $t('general.commands.unknown') }}
 								</q-item-label>
-								<q-item-label v-if="library && !detailMode" caption>
-									{{ libraryCountFormatted }} -
-									<q-file-size :size="library.mediaSize" />
+								<q-item-label
+									v-if="library && !detailMode"
+									caption>
+									{{ libraryCountFormatted }}
+									{{ $t('general.delimiter.dash') }}
+									<QFileSize :size="library.mediaSize" />
 								</q-item-label>
 							</q-item-section>
 						</q-item>
 					</q-list>
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 		</q-toolbar-title>
 
 		<!--	Download button	-->
-		<vertical-button
+		<VerticalButton
 			v-if="mediaOverviewStore.showDownloadButton"
 			icon="mdi-download"
-			label="Download"
+			:label="$t('general.commands.download')"
 			:height="barHeight"
 			:width="verticalButtonWidth"
 			@click="download" />
 
 		<!--	Selection Dialog Button	-->
-		<vertical-button
+		<VerticalButton
 			v-if="mediaOverviewStore.showSelectionButton"
 			icon="mdi-select-marker"
-			text-id="selection"
+			:label="$t('general.commands.selection')"
 			:height="barHeight"
 			:width="verticalButtonWidth"
 			@click="$emit('selection-dialog')" />
 
 		<!--	Refresh library button	-->
-		<vertical-button
+		<VerticalButton
 			v-if="!detailMode"
 			icon="mdi-refresh"
-			label="Refresh"
+			:label="$t('general.commands.refresh')"
 			:height="barHeight"
 			cy="media-overview-refresh-library-btn"
 			:width="verticalButtonWidth"
 			@click="refreshLibrary" />
 
 		<!--	View mode	-->
-		<vertical-button
+		<VerticalButton
 			v-if="!detailMode"
 			icon="mdi-eye"
-			label="View"
+			:label="$t('general.commands.view')"
 			:height="barHeight"
 			:width="verticalButtonWidth"
 			cy="change-view-mode-btn">
-			<q-menu anchor="bottom left" self="top left" auto-close>
+			<q-menu
+				anchor="bottom left"
+				self="top left"
+				auto-close>
 				<q-list>
 					<q-item
 						v-for="(viewOption, i) in viewOptions"
@@ -78,7 +99,9 @@
 						<!-- View mode options -->
 						<q-item-section avatar>
 							<q-avatar>
-								<q-icon v-if="isSelected(viewOption.viewMode)" name="mdi-check" />
+								<q-icon
+									v-if="isSelected(viewOption.viewMode)"
+									name="mdi-check" />
 							</q-avatar>
 						</q-item-section>
 						<!--	Is selected icon	-->
@@ -86,7 +109,7 @@
 					</q-item>
 				</q-list>
 			</q-menu>
-		</vertical-button>
+		</VerticalButton>
 	</q-toolbar>
 </template>
 
@@ -112,8 +135,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-	(e: 'back'): void;
-	(e: 'selection-dialog'): void;
+	(e: 'back' | 'selection-dialog'): void;
 	(e: 'refresh-library', libraryId: number): void;
 	(e: 'view-change', viewMode: ViewMode): void;
 }>();

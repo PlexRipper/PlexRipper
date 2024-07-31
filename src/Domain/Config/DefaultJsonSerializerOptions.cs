@@ -28,58 +28,50 @@ public static class DefaultJsonSerializerOptions
             },
         };
 
-    private static JsonSerializerOptions ConfigBase { get; } =
+    private static JsonSerializerOptions CreateBaseOptions() =>
         new()
         {
-            // PropertyNameCaseInsensitive is crucial otherwise empty objects are created with no values
             PropertyNameCaseInsensitive = true,
             Converters = { new JsonStringEnumConverter() },
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             TypeInfoResolver = DisableThrowingExceptionsWhenRequiredPropertyIsMissing,
         };
 
-    public static JsonSerializerOptions ConfigStandard
-    {
-        get
+    private static readonly Lazy<JsonSerializerOptions> ConfigStandardField =
+        new(() =>
         {
-            var options = ConfigBase;
+            var options = CreateBaseOptions();
             options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-            return new JsonSerializerOptions(options);
-        }
-    }
+            return options;
+        });
 
-    public static JsonSerializerOptions ConfigCapitalized
-    {
-        get
+    private static readonly Lazy<JsonSerializerOptions> ConfigCapitalizedField =
+        new(() =>
         {
-            var options = ConfigBase;
-
-            // PropertyNamingPolicy is null which will save as CapitalizedCaseForProperties
+            var options = CreateBaseOptions();
             options.PropertyNamingPolicy = null;
-            return new JsonSerializerOptions(options);
-        }
-    }
+            return options;
+        });
 
-    public static JsonSerializerOptions ConfigIndented
-    {
-        get
+    private static readonly Lazy<JsonSerializerOptions> ConfigIndentedField =
+        new(() =>
         {
-            var options = ConfigBase;
+            var options = CreateBaseOptions();
             options.WriteIndented = true;
-            return new JsonSerializerOptions(options);
-        }
-    }
+            return options;
+        });
 
-    /// <summary>
-    /// This is used for the ConfigManager to save the settings in a readable format.
-    /// </summary>
-    public static JsonSerializerOptions ConfigManagerOptions
-    {
-        get
+    private static readonly Lazy<JsonSerializerOptions> ConfigManagerOptionsField =
+        new(() =>
         {
-            var options = ConfigIndented;
+            var options = ConfigIndentedField.Value;
             options.PropertyNamingPolicy = null;
-            return new JsonSerializerOptions(options);
-        }
-    }
+            return options;
+        });
+
+    public static JsonSerializerOptions ConfigStandard => ConfigStandardField.Value;
+    public static JsonSerializerOptions ConfigCapitalized => ConfigCapitalizedField.Value;
+
+    public static JsonSerializerOptions ConfigIndented => ConfigIndentedField.Value;
+    public static JsonSerializerOptions ConfigManagerOptions => ConfigManagerOptionsField.Value;
 }

@@ -10,10 +10,13 @@ public record PlexServerSettingsModule : BaseSettingsModule<PlexServerSettingsMo
 
     public IObservable<int> GetDownloadSpeedLimitObservable(string machineIdentifier)
     {
+        FindOrAddServerSettingsModel(machineIdentifier);
+
         return HasChanged
             .SelectMany(x => x.Data)
             .Where(x => x.MachineIdentifier == machineIdentifier)
-            .Select(x => x.DownloadSpeedLimit);
+            .Select(x => x.DownloadSpeedLimit)
+            .DistinctUntilChanged();
     }
 
     public int GetDownloadSpeedLimit(string machineIdentifier) =>
@@ -29,7 +32,10 @@ public record PlexServerSettingsModule : BaseSettingsModule<PlexServerSettingsMo
             return;
 
         if (model.DownloadSpeedLimit != downloadSpeedLimit)
+        {
             model.DownloadSpeedLimit = downloadSpeedLimit;
+            OnPropertyChanged(nameof(model.DownloadSpeedLimit));
+        }
     }
 
     public void SetServerName(string machineIdentifier, string serverName = "")
@@ -38,7 +44,11 @@ public record PlexServerSettingsModule : BaseSettingsModule<PlexServerSettingsMo
         if (model is null)
             return;
 
-        model.PlexServerName = serverName;
+        if (model.PlexServerName != serverName)
+        {
+            model.PlexServerName = serverName;
+            OnPropertyChanged(nameof(model.PlexServerName));
+        }
     }
 
     public void SetServerHiddenState(string machineIdentifier, bool isHidden)
@@ -47,7 +57,11 @@ public record PlexServerSettingsModule : BaseSettingsModule<PlexServerSettingsMo
         if (model is null)
             return;
 
-        model.Hidden = isHidden;
+        if (model.Hidden != isHidden)
+        {
+            model.Hidden = isHidden;
+            OnPropertyChanged(nameof(model.Hidden));
+        }
     }
 
     #endregion
@@ -64,8 +78,6 @@ public record PlexServerSettingsModule : BaseSettingsModule<PlexServerSettingsMo
             return serverSettingsModel;
 
         Data.Add(new PlexServerSettingItemModule() { MachineIdentifier = machineIdentifier });
-
-        OnPropertyChanged(nameof(Data));
 
         return Data.Last();
     }

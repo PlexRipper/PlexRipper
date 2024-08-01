@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
@@ -6,22 +5,19 @@ using System.Text.Json.Serialization;
 
 namespace Settings.Contracts;
 
-public record BaseSettingsModule<TModel> : INotifyPropertyChanged
+public record BaseSettingsModule<TModel>
     where TModel : class
 {
-    private readonly Subject<TModel> _moduleUpdatedSubject = new();
-
-    public void Text()
+    protected BaseSettingsModule()
     {
-        Console.WriteLine("BaseSettingsModel");
+        _moduleUpdatedSubject = new BehaviorSubject<TModel>((this as TModel)!);
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
+    private readonly BehaviorSubject<TModel> _moduleUpdatedSubject;
 
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         _moduleUpdatedSubject.OnNext((this as TModel)!);
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     /// <summary>
@@ -31,13 +27,12 @@ public record BaseSettingsModule<TModel> : INotifyPropertyChanged
     [JsonIgnore]
     public IObservable<TModel> HasChanged => _moduleUpdatedSubject.AsObservable();
 
-    protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null!)
+    protected void SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null!)
     {
         if (Equals(field, value))
-            return false;
+            return;
 
         field = value;
         OnPropertyChanged(propertyName);
-        return true;
     }
 }

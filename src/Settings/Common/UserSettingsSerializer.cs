@@ -7,18 +7,18 @@ namespace PlexRipper.Settings;
 
 public static class UserSettingsSerializer
 {
-    private static ILog _log = LogManager.CreateLogInstance(typeof(ResultExtensions));
+    private static readonly ILog Log = LogManager.CreateLogInstance(typeof(ResultExtensions));
 
-    public static string Serialize(SettingsModel settingsModel)
+    public static string Serialize(IUserSettings userSettings)
     {
         try
         {
-            return JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigManagerOptions);
+            return JsonSerializer.Serialize(userSettings, DefaultJsonSerializerOptions.UserSettingsOptions);
         }
         catch (Exception e)
         {
-            _log.ErrorLine("Failed to serialize settings");
-            _log.Error(e);
+            Log.ErrorLine("Failed to serialize settings");
+            Log.Error(e);
         }
 
         return string.Empty;
@@ -26,26 +26,26 @@ public static class UserSettingsSerializer
 
     /// <summary>
     ///  Deserialize the user settings from a JSON string.
-    ///  If the deserialization fails, a new instance of the <see cref="SettingsModel"/> is returned.
+    ///  If the deserialization fails, a new instance of the <see cref="Settings.Contracts.UserSettings"/> is returned.
     /// </summary>
     /// <param name="json"> The JSON string to deserialize. </param>
-    /// <returns> The deserialized <see cref="SettingsModel"/>. </returns>
-    public static SettingsModel Deserialize(string json)
+    /// <returns> The deserialized <see cref="Settings.Contracts.UserSettings"/>. </returns>
+    public static UserSettings Deserialize(string json)
     {
         try
         {
             if (json == string.Empty)
-                return new SettingsModel();
+                return new UserSettings();
 
-            return JsonSerializer.Deserialize<SettingsModel>(json, DefaultJsonSerializerOptions.ConfigManagerOptions)
-                ?? new SettingsModel();
+            return JsonSerializer.Deserialize<UserSettings>(json, DefaultJsonSerializerOptions.UserSettingsOptions)
+                ?? new UserSettings();
         }
         catch (Exception e)
         {
-            _log.ErrorLine("Failed to deserialize settings");
-            _log.Error(e);
+            Log.ErrorLine("Failed to deserialize settings");
+            Log.Error(e);
         }
 
-        return new SettingsModel();
+        return new UserSettings();
     }
 }

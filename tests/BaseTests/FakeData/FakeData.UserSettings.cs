@@ -18,21 +18,21 @@ public static partial class FakeData
 
     private static readonly string[] TimeFormat = ["HH:mm:ss", "pp"];
 
-    public static Faker<SettingsModel> GetSettingsModel(Action<UnitTestDataConfig>? options = null)
+    public static Faker<UserSettings> GetSettingsModel(Action<UnitTestDataConfig>? options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
-        return new Faker<SettingsModel>()
+        return new Faker<UserSettings>()
             .StrictMode(true)
             .UseSeed(config.Seed)
-            .RuleFor(x => x.GeneralSettingsModel, _ => GetGeneralSettings(options).Generate())
-            .RuleFor(x => x.ConfirmationSettingsModel, _ => GetConfirmationSettings(options).Generate())
-            .RuleFor(x => x.DateTimeSettingsModel, _ => GetDateTimeSettings(options).Generate())
-            .RuleFor(x => x.DisplaySettingsModel, _ => GetDisplaySettings(options).Generate())
-            .RuleFor(x => x.DownloadManagerSettingsModel, _ => GetDownloadManagerSettings(options).Generate())
-            .RuleFor(x => x.LanguageSettingsModel, _ => GetLanguageSettings(options).Generate())
-            .RuleFor(x => x.DebugSettingsModel, _ => GetDebugSettings(options).Generate())
-            .RuleFor(x => x.ServerSettingsModel, _ => GetServerSettings(options).Generate());
+            .RuleFor(x => x.GeneralSettings, _ => GetGeneralSettings(options).Generate())
+            .RuleFor(x => x.ConfirmationSettings, _ => GetConfirmationSettings(options).Generate())
+            .RuleFor(x => x.DateTimeSettings, _ => GetDateTimeSettings(options).Generate())
+            .RuleFor(x => x.DisplaySettings, _ => GetDisplaySettings(options).Generate())
+            .RuleFor(x => x.DownloadManagerSettings, _ => GetDownloadManagerSettings(options).Generate())
+            .RuleFor(x => x.LanguageSettings, _ => GetLanguageSettings(options).Generate())
+            .RuleFor(x => x.DebugSettings, _ => GetDebugSettings(options).Generate())
+            .RuleFor(x => x.ServerSettings, _ => GetServerSettings(options).Generate());
     }
 
     public static Faker<GeneralSettingsModel> GetGeneralSettings(Action<UnitTestDataConfig>? options = null)

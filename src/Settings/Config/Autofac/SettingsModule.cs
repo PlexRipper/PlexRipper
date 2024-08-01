@@ -14,10 +14,12 @@ public class SettingsModule : Module
 
         var assembly = Assembly.GetExecutingAssembly();
 
+        builder.Register(c => c.Resolve<IUserSettings>().ServerSettings).As<IServerSettingsModule>().SingleInstance();
+
         // register all I*SettingsModule
         builder
             .RegisterAssemblyTypes(assembly)
-            .Where(t => t.Name.EndsWith("SettingsModule"))
+            .Where(t => t.Name.EndsWith("SettingsModel"))
             .AsImplementedInterfaces()
             .SingleInstance();
     }

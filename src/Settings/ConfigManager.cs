@@ -134,7 +134,7 @@ public class ConfigManager : IConfigManager
     {
         _log.InformationLine("Saving user config settings now");
 
-        var jsonSettings = UserSettingsSerializer.Serialize(_userSettings.GetSettingsModel());
+        var jsonSettings = UserSettingsSerializer.Serialize(_userSettings);
 
         var writeResult = WriteToConfigFile(jsonSettings);
         if (writeResult.IsFailed)

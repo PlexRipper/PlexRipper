@@ -1,4 +1,3 @@
-using PlexRipper.Settings;
 using Settings.Contracts;
 
 namespace Settings.UnitTests;
@@ -12,35 +11,35 @@ public class UserSettings_Reset_UnitTests : BaseUnitTest
     public void ShouldHaveDefaultSettingsValues_WhenResetHasBeenCalled()
     {
         // Arrange
-        UserSettings sut = new(Log);
+        UserSettings sut = new();
 
         // Act
-        var changedSettings = new SettingsModel
+        var changedSettings = new UserSettings
         {
-            DateTimeSettingsModel = new DateTimeSettingsModel()
+            DateTimeSettings = new DateTimeSettingsModel()
             {
                 TimeFormat = string.Empty,
                 TimeZone = string.Empty,
                 LongDateFormat = string.Empty,
                 ShortDateFormat = string.Empty,
             },
-            ConfirmationSettingsModel = new ConfirmationSettingsModel()
+            ConfirmationSettings = new ConfirmationSettingsModel()
             {
                 AskDownloadEpisodeConfirmation = false,
                 AskDownloadMovieConfirmation = false,
                 AskDownloadSeasonConfirmation = false,
                 AskDownloadTvShowConfirmation = false,
             },
-            LanguageSettingsModel = new LanguageSettingsModel() { Language = string.Empty },
-            DisplaySettingsModel = new DisplaySettingsModel(),
-            GeneralSettingsModel = new GeneralSettingsModel(),
-            ServerSettingsModel = new ServerSettingsModel(),
-            DownloadManagerSettingsModel = new DownloadManagerSettingsModel(),
+            LanguageSettings = new LanguageSettingsModel() { Language = string.Empty },
+            DisplaySettings = new DisplaySettingsModel(),
+            GeneralSettings = new GeneralSettingsModel(),
+            ServerSettings = new ServerSettingsModel(),
+            DownloadManagerSettings = new DownloadManagerSettingsModel(),
         };
         sut.UpdateSettings(changedSettings);
         sut.Reset();
 
         // Assert
-        sut.GetSettingsModel().ShouldBeEquivalentTo(new SettingsModel());
+        sut.ShouldBeEquivalentTo(new UserSettings());
     }
 }

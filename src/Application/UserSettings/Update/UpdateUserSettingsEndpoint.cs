@@ -56,8 +56,6 @@ public class UpdateUserSettingsEndpoint : BaseEndpoint<UpdateUserSettingsEndpoin
     {
         _userSettings.UpdateSettings(req.SettingsModelDto.ToModel());
 
-        var settings = _userSettings.GetSettingsModel();
-
-        await SendFluentResult(Result.Ok(settings), x => x.ToDTO(), ct);
+        await SendFluentResult(Result.Ok(_userSettings), x => x.ToDTO(), ct);
     }
 }

@@ -4,6 +4,7 @@ using FileSystem.Contracts;
 using Logging.Interface;
 using PlexRipper.Settings;
 using Settings.Contracts;
+using UserSettings = Settings.Contracts.UserSettings;
 
 namespace Settings.UnitTests;
 
@@ -25,7 +26,7 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
         mock.Mock<IFileSystem>()
             .Setup(x => x.FileReadAllText(It.IsAny<string>()))
             .Returns(() => Result.Ok(settingsJson));
-        mock.Mock<IUserSettings>().Setup(x => x.UpdateSettings(It.IsAny<SettingsModel>())).Returns(settingsModel);
+        mock.Mock<IUserSettings>().Setup(x => x.UpdateSettings(It.IsAny<UserSettings>())).Returns(settingsModel);
 
         // Act
         var loadResult = _sut.LoadConfig();

@@ -6,17 +6,17 @@ public static class SettingsModelToDTOMapper
 {
     #region ToModel
 
-    public static SettingsModel ToModel(this SettingsModelDTO dto) =>
+    public static UserSettings ToModel(this SettingsModelDTO dto) =>
         new()
         {
-            GeneralSettingsModel = dto.GeneralSettings.ToModel(),
-            ConfirmationSettingsModel = dto.ConfirmationSettings.ToModel(),
-            DateTimeSettingsModel = dto.DateTimeSettings.ToModel(),
-            DisplaySettingsModel = dto.DisplaySettings.ToModel(),
-            DownloadManagerSettingsModel = dto.DownloadManagerSettings.ToModel(),
-            LanguageSettingsModel = dto.LanguageSettings.ToModel(),
-            DebugSettingsModel = dto.DebugSettings.ToModel(),
-            ServerSettingsModel = dto.ServerSettings.ToModel(),
+            GeneralSettings = dto.GeneralSettings.ToModel(),
+            ConfirmationSettings = dto.ConfirmationSettings.ToModel(),
+            DateTimeSettings = dto.DateTimeSettings.ToModel(),
+            DisplaySettings = dto.DisplaySettings.ToModel(),
+            DownloadManagerSettings = dto.DownloadManagerSettings.ToModel(),
+            LanguageSettings = dto.LanguageSettings.ToModel(),
+            DebugSettings = dto.DebugSettings.ToModel(),
+            ServerSettings = dto.ServerSettings.ToModel(),
         };
 
     public static GeneralSettingsModel ToModel(this GeneralSettingsDTO dto) =>
@@ -69,17 +69,17 @@ public static class SettingsModelToDTOMapper
 
     #region ToDTO
 
-    public static SettingsModelDTO ToDTO(this SettingsModel model) =>
+    public static SettingsModelDTO ToDTO(this IUserSettings model) =>
         new()
         {
-            GeneralSettings = model.GeneralSettingsModel.ToDTO(),
-            DebugSettings = model.DebugSettingsModel.ToDTO(),
-            ConfirmationSettings = model.ConfirmationSettingsModel.ToDTO(),
-            DateTimeSettings = model.DateTimeSettingsModel.ToDTO(),
-            DisplaySettings = model.DisplaySettingsModel.ToDTO(),
-            DownloadManagerSettings = model.DownloadManagerSettingsModel.ToDTO(),
-            LanguageSettings = model.LanguageSettingsModel.ToDTO(),
-            ServerSettings = model.ServerSettingsModel.ToDTO(),
+            GeneralSettings = model.GeneralSettings.ToDTO(),
+            DebugSettings = model.DebugSettings.ToDTO(),
+            ConfirmationSettings = model.ConfirmationSettings.ToDTO(),
+            DateTimeSettings = model.DateTimeSettings.ToDTO(),
+            DisplaySettings = model.DisplaySettings.ToDTO(),
+            DownloadManagerSettings = model.DownloadManagerSettings.ToDTO(),
+            LanguageSettings = model.LanguageSettings.ToDTO(),
+            ServerSettings = model.ServerSettings.ToDTO(),
         };
 
     public static GeneralSettingsDTO ToDTO(this GeneralSettingsModel model) =>

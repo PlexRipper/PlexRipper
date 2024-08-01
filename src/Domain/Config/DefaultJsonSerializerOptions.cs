@@ -77,18 +77,10 @@ public static class DefaultJsonSerializerOptions
             return options;
         });
 
-    private static readonly Lazy<JsonSerializerOptions> ConfigIndentedField =
-        new(() =>
-        {
-            var options = CreateBaseOptions();
-            options.WriteIndented = true;
-            return options;
-        });
-
     private static readonly Lazy<JsonSerializerOptions> ConfigManagerOptionsField =
         new(() =>
         {
-            var options = ConfigIndentedField.Value;
+            var options = CreateBaseOptions();
 
             //If Model.property is collect and this config is Populate,then skip propertyInfo.Set
             options.PreferredObjectCreationHandling = JsonObjectCreationHandling.Populate;
@@ -100,7 +92,5 @@ public static class DefaultJsonSerializerOptions
 
     public static JsonSerializerOptions ConfigStandard => ConfigStandardField.Value;
     public static JsonSerializerOptions ConfigCapitalized => ConfigCapitalizedField.Value;
-
-    public static JsonSerializerOptions ConfigIndented => ConfigIndentedField.Value;
-    public static JsonSerializerOptions ConfigManagerOptions => ConfigManagerOptionsField.Value;
+    public static JsonSerializerOptions UserSettingsOptions => ConfigManagerOptionsField.Value;
 }

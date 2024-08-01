@@ -5,6 +5,7 @@ using PlexRipper.Application;
 using PlexRipper.Domain.Config;
 using PlexRipper.Settings;
 using Settings.Contracts;
+using UserSettings = Settings.Contracts.UserSettings;
 
 namespace IntegrationTests.WebAPI.SettingsController;
 
@@ -29,7 +30,7 @@ public class SettingsController_Get_Settings_IntegrationTests : BaseIntegrationT
         var settingsModel = result.Value.ToModel();
         var responseSettings = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCapitalized);
         var defaultSettings = JsonSerializer.Serialize(
-            new SettingsModel(),
+            new UserSettings(),
             DefaultJsonSerializerOptions.ConfigCapitalized
         );
 

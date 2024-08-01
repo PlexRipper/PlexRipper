@@ -12,15 +12,19 @@ public class SettingsModule : Module
         builder.RegisterType<UserSettings>().As<IUserSettings>().SingleInstance();
         builder.RegisterType<ConfigManager>().As<IConfigManager>().SingleInstance();
 
-        var assembly = Assembly.GetExecutingAssembly();
-
-        builder.Register(c => c.Resolve<IUserSettings>().ServerSettings).As<IServerSettingsModule>().SingleInstance();
-
-        // register all I*SettingsModule
+        builder.Register(c => c.Resolve<IUserSettings>().GeneralSettings).As<IGeneralSettings>().SingleInstance();
         builder
-            .RegisterAssemblyTypes(assembly)
-            .Where(t => t.Name.EndsWith("SettingsModel"))
-            .AsImplementedInterfaces()
+            .Register(c => c.Resolve<IUserSettings>().ConfirmationSettings)
+            .As<IConfirmationSettings>()
             .SingleInstance();
+        builder.Register(c => c.Resolve<IUserSettings>().DateTimeSettings).As<IDateTimeSettings>().SingleInstance();
+        builder.Register(c => c.Resolve<IUserSettings>().DisplaySettings).As<IDisplaySettings>().SingleInstance();
+        builder
+            .Register(c => c.Resolve<IUserSettings>().DownloadManagerSettings)
+            .As<IDownloadManagerSettings>()
+            .SingleInstance();
+        builder.Register(c => c.Resolve<IUserSettings>().LanguageSettings).As<ILanguageSettings>().SingleInstance();
+        builder.Register(c => c.Resolve<IUserSettings>().DebugSettings).As<IDebugSettings>().SingleInstance();
+        builder.Register(c => c.Resolve<IUserSettings>().ServerSettings).As<IServerSettingsModule>().SingleInstance();
     }
 }

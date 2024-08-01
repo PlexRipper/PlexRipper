@@ -5,7 +5,6 @@ using PlexRipper.Application;
 using PlexRipper.Domain.Config;
 using PlexRipper.Settings;
 using Settings.Contracts;
-using UserSettings = Settings.Contracts.UserSettings;
 
 namespace IntegrationTests.WebAPI.SettingsController;
 

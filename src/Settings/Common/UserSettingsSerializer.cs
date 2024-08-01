@@ -26,10 +26,10 @@ public static class UserSettingsSerializer
 
     /// <summary>
     ///  Deserialize the user settings from a JSON string.
-    ///  If the deserialization fails, a new instance of the <see cref="Settings.Contracts.UserSettings"/> is returned.
+    ///  If the deserialization fails, a new instance of the <see cref="UserSettings"/> is returned.
     /// </summary>
     /// <param name="json"> The JSON string to deserialize. </param>
-    /// <returns> The deserialized <see cref="Settings.Contracts.UserSettings"/>. </returns>
+    /// <returns> The deserialized <see cref="UserSettings"/>. </returns>
     public static UserSettings Deserialize(string json)
     {
         try

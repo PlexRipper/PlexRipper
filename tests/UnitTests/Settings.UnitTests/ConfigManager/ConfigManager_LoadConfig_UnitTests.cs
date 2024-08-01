@@ -4,7 +4,6 @@ using FileSystem.Contracts;
 using Logging.Interface;
 using PlexRipper.Settings;
 using Settings.Contracts;
-using UserSettings = Settings.Contracts.UserSettings;
 
 namespace Settings.UnitTests;
 

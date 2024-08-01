@@ -1,5 +1,5 @@
 using PlexRipper.Settings;
-using UserSettings = Settings.Contracts.UserSettings;
+using Settings.Contracts;
 
 namespace Settings.UnitTests.Common;
 

@@ -104,14 +104,14 @@ public class UserSettings : IUserSettings
 
     public UserSettings UpdateSettings(ISettingsModel sourceSettings)
     {
-        _confirmationSettings = sourceSettings.ConfirmationSettings;
-        _dateTimeSettings = sourceSettings.DateTimeSettings;
-        _displaySettings = sourceSettings.DisplaySettings;
-        _downloadManagerSettings = sourceSettings.DownloadManagerSettings;
-        _generalSettings = sourceSettings.GeneralSettings;
-        _debugSettings = sourceSettings.DebugSettings;
-        _languageSettings = sourceSettings.LanguageSettings;
-        _serverSettings = sourceSettings.ServerSettings;
+        _confirmationSettings.Update(sourceSettings.ConfirmationSettings);
+        _dateTimeSettings.Update(sourceSettings.DateTimeSettings);
+        _displaySettings.Update(sourceSettings.DisplaySettings);
+        _downloadManagerSettings.Update(sourceSettings.DownloadManagerSettings);
+        _generalSettings.Update(sourceSettings.GeneralSettings);
+        _debugSettings.Update(sourceSettings.DebugSettings);
+        _languageSettings.Update(sourceSettings.LanguageSettings);
+        _serverSettings.Update(sourceSettings.ServerSettings);
 
         return this;
     }

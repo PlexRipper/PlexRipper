@@ -79,6 +79,8 @@ public record PlexServerSettingsModule : BaseSettingsModule<PlexServerSettingsMo
 
         Data.Add(new PlexServerSettingItemModule() { MachineIdentifier = machineIdentifier });
 
+        OnPropertyChanged(nameof(Data));
+
         return Data.Last();
     }
 

@@ -35,4 +35,29 @@ public record BaseSettingsModule<TModel>
         field = value;
         OnPropertyChanged(propertyName);
     }
+
+    public virtual void Update(TModel sourceSettings)
+    {
+        var hasChanged = false;
+
+        foreach (var prop in typeof(TModel).GetProperties())
+        {
+            var sourceProp = sourceSettings.GetType().GetProperty(prop.Name);
+            var sourceValue = sourceProp?.GetValue(sourceSettings, null);
+            var targetProp = GetType().GetProperty(prop.Name);
+            var targetValue = targetProp?.GetValue(this, null);
+
+            if (prop.Name == nameof(HasChanged))
+                continue;
+
+            if (sourceValue != targetValue && targetProp is not null)
+            {
+                targetProp.SetValue(this, sourceValue);
+                hasChanged = true;
+            }
+        }
+
+        if (hasChanged)
+            OnPropertyChanged();
+    }
 }

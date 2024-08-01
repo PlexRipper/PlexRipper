@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Settings.Contracts;
 
 /// <summary>
@@ -18,5 +20,6 @@ public interface IUserSettings : ISettingsModel
     /// <param name="sourceUserSettings"> values to be used to set this UserSettings instance.</param>
     UserSettings UpdateSettings(ISettingsModel sourceUserSettings);
 
+    [JsonIgnore]
     IObservable<UserSettings> SettingsUpdated { get; }
 }

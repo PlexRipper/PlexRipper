@@ -2,15 +2,15 @@
 
 namespace PlexRipper.Settings;
 
-public class DateTimeSettings : IDateTimeSettings
+public record DateTimeSettings : IDateTimeSettings
 {
-    public string ShortDateFormat { get; set; }
+    public string ShortDateFormat { get; set; } = "dd/MM/yyyy";
 
-    public string LongDateFormat { get; set; }
+    public string LongDateFormat { get; set; } = "EEEE, dd MMMM yyyy";
 
-    public string TimeFormat { get; set; }
+    public string TimeFormat { get; set; } = "HH:mm:ss";
 
-    public string TimeZone { get; set; }
+    public string TimeZone { get; set; } = "UTC";
 
-    public bool ShowRelativeDates { get; set; }
+    public bool ShowRelativeDates { get; set; } = true;
 }

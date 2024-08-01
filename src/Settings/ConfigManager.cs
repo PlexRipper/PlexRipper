@@ -107,20 +107,19 @@ public class ConfigManager : IConfigManager
         try
         {
             var cleanedJson = readResult.Value.Replace("\r\n", "");
-            var loadedSettings = JsonSerializer.Deserialize<JsonElement>(
-                cleanedJson,
-                DefaultJsonSerializerOptions.ConfigManagerOptions
-            );
-            var setFromJsonResult = _userSettings.SetFromJsonObject(loadedSettings);
-            if (setFromJsonResult.IsFailed)
-            {
-                _log.WarningLine(
-                    "Certain properties were missing or had missing"
-                        + " or invalid values. Will correct those and re-save now!"
-                );
-                setFromJsonResult.LogWarning();
-                return ResetConfig();
-            }
+            var loadedSettings = UserSettingsSerializer.Deserialize(cleanedJson);
+
+            // TODO Renable this when UserSettingsSerializer is implemented
+            // var setFromJsonResult = _userSettings.SetFromJsonObject(loadedSettings);
+            // if (setFromJsonResult.IsFailed)
+            // {
+            //     _log.WarningLine(
+            //         "Certain properties were missing or had missing"
+            //             + " or invalid values. Will correct those and re-save now!"
+            //     );
+            //     setFromJsonResult.LogWarning();
+            //     return ResetConfig();
+            // }
 
             return Result.Ok().WithSuccess("UserSettings were loaded successfully!").LogInformation();
         }

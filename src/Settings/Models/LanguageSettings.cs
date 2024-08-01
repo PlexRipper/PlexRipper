@@ -2,7 +2,7 @@
 
 namespace PlexRipper.Settings;
 
-public class LanguageSettings : ILanguageSettings
+public record LanguageSettings : ILanguageSettings
 {
-    public string Language { get; set; }
+    public string Language { get; set; } = "en-US";
 }

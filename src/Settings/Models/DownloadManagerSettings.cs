@@ -2,7 +2,7 @@
 
 namespace PlexRipper.Settings;
 
-public class DownloadManagerSettings : IDownloadManagerSettings
+public record DownloadManagerSettings : IDownloadManagerSettings
 {
-    public int DownloadSegments { get; set; }
+    public int DownloadSegments { get; set; } = 4;
 }

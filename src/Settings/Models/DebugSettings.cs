@@ -2,15 +2,11 @@
 
 namespace PlexRipper.Settings;
 
-public class DebugSettings : IDebugSettings
+public record DebugSettings : IDebugSettings
 {
-    #region Properties
+    public bool DebugModeEnabled { get; set; } = false;
 
-    public bool DebugModeEnabled { get; set; }
+    public bool MaskServerNames { get; set; } = false;
 
-    public bool MaskServerNames { get; set; }
-
-    public bool MaskLibraryNames { get; set; }
-
-    #endregion
+    public bool MaskLibraryNames { get; set; } = false;
 }

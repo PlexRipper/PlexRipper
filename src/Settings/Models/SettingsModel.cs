@@ -7,21 +7,21 @@ public record SettingsModel
 {
     #region Properties
 
-    public required GeneralSettings GeneralSettings { get; set; }
+    public GeneralSettings GeneralSettings { get; init; } = new();
 
-    public required ConfirmationSettings ConfirmationSettings { get; set; }
+    public ConfirmationSettings ConfirmationSettings { get; init; } = new();
 
-    public required DateTimeSettings DateTimeSettings { get; set; }
+    public DateTimeSettings DateTimeSettings { get; init; } = new();
 
-    public required DisplaySettings DisplaySettings { get; set; }
+    public DisplaySettings DisplaySettings { get; init; } = new();
 
-    public required DownloadManagerSettings DownloadManagerSettings { get; set; }
+    public DownloadManagerSettings DownloadManagerSettings { get; init; } = new();
 
-    public required LanguageSettings LanguageSettings { get; set; }
+    public LanguageSettings LanguageSettings { get; init; } = new();
 
-    public required DebugSettings DebugSettings { get; set; }
+    public DebugSettings DebugSettings { get; init; } = new();
 
-    public required ServerSettings ServerSettings { get; set; }
+    public ServerSettings ServerSettings { get; init; } = new() { Data = [] };
 
     #endregion
 }

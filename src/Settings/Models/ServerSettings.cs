@@ -3,7 +3,7 @@ using Settings.Contracts;
 
 namespace PlexRipper.Settings;
 
-public class ServerSettings : IServerSettings
+public record ServerSettings : IServerSettings
 {
     public List<PlexServerSettingsModel> Data { get; init; } = [];
 }

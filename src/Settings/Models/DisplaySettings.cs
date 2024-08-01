@@ -2,9 +2,9 @@
 
 namespace PlexRipper.Settings;
 
-public class DisplaySettings : IDisplaySettings
+public record DisplaySettings : IDisplaySettings
 {
-    public ViewMode TvShowViewMode { get; set; }
+    public ViewMode TvShowViewMode { get; set; } = ViewMode.Poster;
 
-    public ViewMode MovieViewMode { get; set; }
+    public ViewMode MovieViewMode { get; set; } = ViewMode.Poster;
 }

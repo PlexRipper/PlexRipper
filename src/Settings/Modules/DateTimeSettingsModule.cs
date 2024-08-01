@@ -1,7 +1,6 @@
-﻿using PlexRipper.Settings.Models;
-using Settings.Contracts;
+﻿using Settings.Contracts;
 
-namespace PlexRipper.Settings.Modules;
+namespace PlexRipper.Settings;
 
 public class DateTimeSettingsModule : BaseSettingsModule<IDateTimeSettings>, IDateTimeSettingsModule
 {
@@ -19,9 +18,8 @@ public class DateTimeSettingsModule : BaseSettingsModule<IDateTimeSettings>, IDa
 
     public string TimeZone { get; set; }
 
-    public override IDateTimeSettings DefaultValues()
-    {
-        return new DateTimeSettings
+    public override IDateTimeSettings DefaultValues() =>
+        new DateTimeSettings
         {
             TimeFormat = "HH:mm:ss",
             TimeZone = "UTC",
@@ -29,15 +27,13 @@ public class DateTimeSettingsModule : BaseSettingsModule<IDateTimeSettings>, IDa
             ShortDateFormat = "dd/MM/yyyy",
             ShowRelativeDates = true,
         };
-    }
 
     #endregion
 
     #region Public Methods
 
-    public override IDateTimeSettings GetValues()
-    {
-        return new DateTimeSettings
+    public override IDateTimeSettings GetValues() =>
+        new DateTimeSettings
         {
             TimeFormat = TimeFormat,
             TimeZone = TimeZone,
@@ -45,7 +41,6 @@ public class DateTimeSettingsModule : BaseSettingsModule<IDateTimeSettings>, IDa
             ShortDateFormat = ShortDateFormat,
             ShowRelativeDates = ShowRelativeDates,
         };
-    }
 
     #endregion
 }

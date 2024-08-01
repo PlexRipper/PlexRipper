@@ -1,7 +1,6 @@
-﻿using PlexRipper.Settings.Models;
-using Settings.Contracts;
+﻿using Settings.Contracts;
 
-namespace PlexRipper.Settings.Modules;
+namespace PlexRipper.Settings;
 
 public class GeneralSettingsModule : BaseSettingsModule<IGeneralSettings>, IGeneralSettingsModule
 {

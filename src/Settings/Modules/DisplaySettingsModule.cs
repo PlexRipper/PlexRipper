@@ -1,7 +1,6 @@
-﻿using PlexRipper.Settings.Models;
-using Settings.Contracts;
+﻿using Settings.Contracts;
 
-namespace PlexRipper.Settings.Modules;
+namespace PlexRipper.Settings;
 
 public class DisplaySettingsModule : BaseSettingsModule<IDisplaySettings>, IDisplaySettingsModule
 {
@@ -12,8 +11,8 @@ public class DisplaySettingsModule : BaseSettingsModule<IDisplaySettings>, IDisp
     public override string Name => "DisplaySettings";
 
     public override IDisplaySettings DefaultValues() =>
-        new DisplaySettings { TvShowViewMode = ViewMode.Poster, MovieViewMode = ViewMode.Poster, };
+        new DisplaySettings { TvShowViewMode = ViewMode.Poster, MovieViewMode = ViewMode.Poster };
 
     public override IDisplaySettings GetValues() =>
-        new DisplaySettings { MovieViewMode = MovieViewMode, TvShowViewMode = TvShowViewMode, };
+        new DisplaySettings { MovieViewMode = MovieViewMode, TvShowViewMode = TvShowViewMode };
 }

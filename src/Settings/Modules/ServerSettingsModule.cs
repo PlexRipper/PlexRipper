@@ -1,10 +1,9 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using PlexRipper.Domain.DownloadManager;
-using PlexRipper.Settings.Models;
 using Settings.Contracts;
 
-namespace PlexRipper.Settings.Modules;
+namespace PlexRipper.Settings;
 
 public class ServerSettingsModule : BaseSettingsModule<IServerSettings>, IServerSettingsModule
 {

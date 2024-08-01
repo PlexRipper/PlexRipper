@@ -1,7 +1,6 @@
-﻿using PlexRipper.Settings.Models;
-using Settings.Contracts;
+﻿using Settings.Contracts;
 
-namespace PlexRipper.Settings.Modules;
+namespace PlexRipper.Settings;
 
 public sealed class ConfirmationSettingsModule : BaseSettingsModule<IConfirmationSettings>, IConfirmationSettingsModule
 {
@@ -9,16 +8,14 @@ public sealed class ConfirmationSettingsModule : BaseSettingsModule<IConfirmatio
 
     public override string Name => "ConfirmationSettings";
 
-    public override IConfirmationSettings DefaultValues()
-    {
-        return new ConfirmationSettings
+    public override IConfirmationSettings DefaultValues() =>
+        new ConfirmationSettings
         {
             AskDownloadEpisodeConfirmation = true,
             AskDownloadMovieConfirmation = true,
             AskDownloadSeasonConfirmation = true,
             AskDownloadTvShowConfirmation = true,
         };
-    }
 
     public bool AskDownloadMovieConfirmation { get; set; }
 
@@ -32,16 +29,14 @@ public sealed class ConfirmationSettingsModule : BaseSettingsModule<IConfirmatio
 
     #region Public Methods
 
-    public override IConfirmationSettings GetValues()
-    {
-        return new ConfirmationSettings
+    public override IConfirmationSettings GetValues() =>
+        new ConfirmationSettings
         {
             AskDownloadMovieConfirmation = AskDownloadMovieConfirmation,
             AskDownloadTvShowConfirmation = AskDownloadTvShowConfirmation,
             AskDownloadSeasonConfirmation = AskDownloadSeasonConfirmation,
             AskDownloadEpisodeConfirmation = AskDownloadEpisodeConfirmation,
         };
-    }
 
     #endregion
 }

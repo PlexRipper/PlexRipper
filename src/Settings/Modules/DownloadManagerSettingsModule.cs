@@ -1,7 +1,6 @@
-﻿using PlexRipper.Settings.Models;
-using Settings.Contracts;
+﻿using Settings.Contracts;
 
-namespace PlexRipper.Settings.Modules;
+namespace PlexRipper.Settings;
 
 public class DownloadManagerSettingsModule
     : BaseSettingsModule<IDownloadManagerSettings>,
@@ -11,13 +10,8 @@ public class DownloadManagerSettingsModule
 
     public override string Name => "DownloadManagerSettings";
 
-    public override IDownloadManagerSettings DefaultValues()
-    {
-        return new DownloadManagerSettings { DownloadSegments = 4, };
-    }
+    public override IDownloadManagerSettings DefaultValues() => new DownloadManagerSettings { DownloadSegments = 4 };
 
-    public override IDownloadManagerSettings GetValues()
-    {
-        return new DownloadManagerSettings { DownloadSegments = DownloadSegments, };
-    }
+    public override IDownloadManagerSettings GetValues() =>
+        new DownloadManagerSettings { DownloadSegments = DownloadSegments };
 }

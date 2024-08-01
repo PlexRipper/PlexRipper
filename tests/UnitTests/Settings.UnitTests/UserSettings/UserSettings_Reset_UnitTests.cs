@@ -1,6 +1,4 @@
 using PlexRipper.Settings;
-using PlexRipper.Settings.Models;
-using PlexRipper.Settings.Modules;
 
 namespace Settings.UnitTests;
 
@@ -29,7 +27,7 @@ public class UserSettings_Reset_UnitTests : BaseUnitTest
         var sut = CreateUserSettings();
 
         // Act
-        var changedSettings = new SettingsModel
+        var changedSettings = new SettingsModule
         {
             DateTimeSettings = new DateTimeSettings()
             {

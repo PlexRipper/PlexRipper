@@ -1,6 +1,6 @@
 ﻿using Settings.Contracts;
 
-namespace PlexRipper.Settings.Models;
+namespace PlexRipper.Settings;
 
 public class DebugSettings : IDebugSettings
 {

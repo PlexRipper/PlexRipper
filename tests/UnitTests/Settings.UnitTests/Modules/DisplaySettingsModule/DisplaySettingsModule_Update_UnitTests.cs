@@ -1,4 +1,4 @@
-﻿using PlexRipper.Settings.Modules;
+﻿using PlexRipper.Settings;
 
 namespace Settings.UnitTests.Modules;
 

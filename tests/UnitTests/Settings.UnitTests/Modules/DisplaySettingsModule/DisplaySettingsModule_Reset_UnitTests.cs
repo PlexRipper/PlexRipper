@@ -1,5 +1,4 @@
-﻿using PlexRipper.Settings.Models;
-using PlexRipper.Settings.Modules;
+﻿using PlexRipper.Settings;
 
 namespace Settings.UnitTests.Modules;
 
@@ -12,7 +11,7 @@ public class DisplaySettingsModule_Reset_UnitTests : BaseUnitTest<DisplaySetting
     public void ShouldUpdateAndThenResetSettingsModule_WhenCallingResetAfterUpdate()
     {
         // Arrange
-        var settings = new DisplaySettings { MovieViewMode = ViewMode.Table, TvShowViewMode = ViewMode.Table, };
+        var settings = new DisplaySettings { MovieViewMode = ViewMode.Table, TvShowViewMode = ViewMode.Table };
 
         // Act
         var updateResult = _sut.Update(settings);

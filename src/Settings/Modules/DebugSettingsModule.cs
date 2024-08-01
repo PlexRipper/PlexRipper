@@ -1,7 +1,6 @@
-﻿using PlexRipper.Settings.Models;
-using Settings.Contracts;
+﻿using Settings.Contracts;
 
-namespace PlexRipper.Settings.Modules;
+namespace PlexRipper.Settings;
 
 public class DebugSettingsModule : BaseSettingsModule<IDebugSettings>, IDebugSettingsModule
 {
@@ -21,15 +20,13 @@ public class DebugSettingsModule : BaseSettingsModule<IDebugSettings>, IDebugSet
 
     #region Public
 
-    public override IDebugSettings DefaultValues()
-    {
-        return new DebugSettings
+    public override IDebugSettings DefaultValues() =>
+        new DebugSettings
         {
             DebugModeEnabled = false,
             MaskServerNames = false,
             MaskLibraryNames = false,
         };
-    }
 
     public Result Update(IDebugSettingsModule sourceSettings)
     {
@@ -39,15 +36,13 @@ public class DebugSettingsModule : BaseSettingsModule<IDebugSettings>, IDebugSet
         return Result.Ok();
     }
 
-    public override IDebugSettings GetValues()
-    {
-        return new DebugSettings
+    public override IDebugSettings GetValues() =>
+        new DebugSettings
         {
             DebugModeEnabled = DebugModeEnabled,
             MaskServerNames = MaskServerNames,
             MaskLibraryNames = MaskLibraryNames,
         };
-    }
 
     #endregion
 

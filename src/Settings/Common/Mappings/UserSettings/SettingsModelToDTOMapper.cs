@@ -1,4 +1,3 @@
-using PlexRipper.Settings.Models;
 using Settings.Contracts;
 
 namespace PlexRipper.Settings;
@@ -7,7 +6,7 @@ public static class SettingsModelToDTOMapper
 {
     #region ToModel
 
-    public static SettingsModel ToModel(this SettingsModelDTO dto) =>
+    public static SettingsModule ToModel(this SettingsModelDTO dto) =>
         new()
         {
             GeneralSettings = dto.GeneralSettings.ToModel(),
@@ -70,17 +69,17 @@ public static class SettingsModelToDTOMapper
 
     #region ToDTO
 
-    public static SettingsModelDTO ToDTO(this SettingsModel model) =>
+    public static SettingsModelDTO ToDTO(this SettingsModule module) =>
         new()
         {
-            GeneralSettings = model.GeneralSettings.ToDTO(),
-            DebugSettings = model.DebugSettings.ToDTO(),
-            ConfirmationSettings = model.ConfirmationSettings.ToDTO(),
-            DateTimeSettings = model.DateTimeSettings.ToDTO(),
-            DisplaySettings = model.DisplaySettings.ToDTO(),
-            DownloadManagerSettings = model.DownloadManagerSettings.ToDTO(),
-            LanguageSettings = model.LanguageSettings.ToDTO(),
-            ServerSettings = model.ServerSettings.ToDTO(),
+            GeneralSettings = module.GeneralSettings.ToDTO(),
+            DebugSettings = module.DebugSettings.ToDTO(),
+            ConfirmationSettings = module.ConfirmationSettings.ToDTO(),
+            DateTimeSettings = module.DateTimeSettings.ToDTO(),
+            DisplaySettings = module.DisplaySettings.ToDTO(),
+            DownloadManagerSettings = module.DownloadManagerSettings.ToDTO(),
+            LanguageSettings = module.LanguageSettings.ToDTO(),
+            ServerSettings = module.ServerSettings.ToDTO(),
         };
 
     public static GeneralSettingsDTO ToDTO(this GeneralSettings model) =>
@@ -131,7 +130,7 @@ public static class SettingsModelToDTOMapper
 
     // Interfaces ToDTO
 
-    public static SettingsModelDTO ToDTO(this ISettingsModel model) => (model as SettingsModel).ToDTO();
+    public static SettingsModelDTO ToDTO(this ISettingsModel model) => (model as SettingsModule).ToDTO();
 
     public static GeneralSettingsDTO ToDTO(this IGeneralSettings model) => (model as GeneralSettings).ToDTO();
 

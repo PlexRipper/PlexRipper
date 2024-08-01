@@ -1,7 +1,6 @@
 ﻿using System.Text.Json;
 using PlexRipper.Domain.Config;
-using PlexRipper.Settings.Models;
-using PlexRipper.Settings.Modules;
+using PlexRipper.Settings;
 
 namespace Settings.UnitTests.Modules;
 
@@ -14,7 +13,7 @@ public class ConfirmationSettingsModule_SetFromJson_UnitTests : BaseUnitTest<Con
     public void ShouldSetPropertiesFromJson_WhenValidJsonSettingsAreGiven()
     {
         // Arrange
-        var settingsModel = new SettingsModel
+        var settingsModel = new SettingsModule
         {
             ConfirmationSettings = new ConfirmationSettings
             {
@@ -45,7 +44,7 @@ public class ConfirmationSettingsModule_SetFromJson_UnitTests : BaseUnitTest<Con
     public void ShouldSetPropertiesFromJson_WhenInvalidJsonSettingsAreGiven()
     {
         // Arrange
-        var settingsModel = new SettingsModel
+        var settingsModel = new SettingsModule
         {
             ConfirmationSettings = new ConfirmationSettings
             {

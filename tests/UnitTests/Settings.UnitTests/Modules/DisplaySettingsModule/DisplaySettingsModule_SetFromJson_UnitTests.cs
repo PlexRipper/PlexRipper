@@ -1,7 +1,6 @@
 ﻿using System.Text.Json;
 using PlexRipper.Domain.Config;
-using PlexRipper.Settings.Models;
-using PlexRipper.Settings.Modules;
+using PlexRipper.Settings;
 
 namespace Settings.UnitTests.Modules;
 
@@ -14,7 +13,7 @@ public class DisplaySettingsModule_SetFromJson_UnitTests : BaseUnitTest
     public void ShouldSetPropertiesFromJson_WhenValidJsonSettingsAreGiven()
     {
         // Arrange
-        var settingsModel = new SettingsModel
+        var settingsModel = new SettingsModule
         {
             DisplaySettings = new DisplaySettings { MovieViewMode = ViewMode.Table, TvShowViewMode = ViewMode.Poster },
         };

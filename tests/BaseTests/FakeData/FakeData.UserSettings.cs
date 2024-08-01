@@ -2,7 +2,7 @@
 using Bogus;
 using PlexRipper.Domain.Config;
 using PlexRipper.Domain.DownloadManager;
-using PlexRipper.Settings.Models;
+using PlexRipper.Settings;
 
 namespace PlexRipper.BaseTests;
 
@@ -21,11 +21,11 @@ public static partial class FakeData
 
     private static readonly string[] TimeFormat = ["HH:mm:ss", "pp"];
 
-    public static Faker<SettingsModel> GetSettingsModel(Action<UnitTestDataConfig>? options = null)
+    public static Faker<SettingsModule> GetSettingsModel(Action<UnitTestDataConfig>? options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
-        return new Faker<SettingsModel>()
+        return new Faker<SettingsModule>()
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(x => x.GeneralSettings, _ => GetGeneralSettings(options).Generate())

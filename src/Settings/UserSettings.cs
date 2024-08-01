@@ -2,7 +2,6 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text.Json;
 using Logging.Interface;
-using PlexRipper.Settings.Models;
 using Settings.Contracts;
 
 namespace PlexRipper.Settings;
@@ -13,6 +12,7 @@ public class UserSettings : IUserSettings
     #region Fields
 
     private readonly ILog _log;
+
     private readonly IConfirmationSettingsModule _confirmationSettingsModule;
 
     private readonly IDateTimeSettingsModule _dateTimeSettingsModule;
@@ -104,7 +104,7 @@ public class UserSettings : IUserSettings
 
     public Result<ISettingsModel> UpdateSettings(ISettingsModel sourceSettings)
     {
-        var settings = new SettingsModel
+        var settings = new SettingsModule
         {
             ConfirmationSettings = _confirmationSettingsModule.Update(sourceSettings.ConfirmationSettings),
             DateTimeSettings = _dateTimeSettingsModule.Update(sourceSettings.DateTimeSettings),
@@ -120,12 +120,11 @@ public class UserSettings : IUserSettings
     }
 
     /// <summary>
-    /// Creates a <see cref="SettingsModel"/> with all the current set values.
+    /// Creates a <see cref="SettingsModule"/> with all the current set values.
     /// </summary>
     /// <returns></returns>
-    public ISettingsModel GetSettingsModel()
-    {
-        return new SettingsModel
+    public ISettingsModel GetSettingsModel() =>
+        new SettingsModule
         {
             ConfirmationSettings = _confirmationSettingsModule.GetValues(),
             GeneralSettings = _generalSettingsModule.GetValues(),
@@ -136,15 +135,13 @@ public class UserSettings : IUserSettings
             DownloadManagerSettings = _downloadManagerSettingsModule.GetValues(),
             DebugSettings = _debugSettingsModule.GetValues(),
         };
-    }
 
     /// <summary>
-    /// Creates a <see cref="SettingsModel"/> with all the default values.
+    /// Creates a <see cref="SettingsModule"/> with all the default values.
     /// </summary>
     /// <returns></returns>
-    public ISettingsModel GetDefaultSettingsModel()
-    {
-        return new SettingsModel
+    public ISettingsModel GetDefaultSettingsModel() =>
+        new SettingsModule
         {
             ConfirmationSettings = _confirmationSettingsModule.DefaultValues(),
             GeneralSettings = _generalSettingsModule.DefaultValues(),
@@ -155,7 +152,6 @@ public class UserSettings : IUserSettings
             DownloadManagerSettings = _downloadManagerSettingsModule.DefaultValues(),
             DebugSettings = _debugSettingsModule.DefaultValues(),
         };
-    }
 
     public Result SetFromJsonObject(JsonElement settingsJsonElement)
     {
@@ -172,9 +168,11 @@ public class UserSettings : IUserSettings
         };
 
         if (results.Any(x => x.IsFailed))
+        {
             return Result
                 .Fail("Failed to set from json object")
                 .AddNestedErrors(results.SelectMany(x => x.Errors).ToList());
+        }
 
         return Result.Ok();
     }

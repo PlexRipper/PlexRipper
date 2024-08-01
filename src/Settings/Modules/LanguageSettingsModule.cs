@@ -1,7 +1,6 @@
-﻿using PlexRipper.Settings.Models;
-using Settings.Contracts;
+﻿using Settings.Contracts;
 
-namespace PlexRipper.Settings.Modules;
+namespace PlexRipper.Settings;
 
 public class LanguageSettingsModule : BaseSettingsModule<ILanguageSettings>, ILanguageSettingsModule
 {
@@ -11,19 +10,13 @@ public class LanguageSettingsModule : BaseSettingsModule<ILanguageSettings>, ILa
 
     public override string Name => "LanguageSettings";
 
-    public override ILanguageSettings DefaultValues()
-    {
-        return new LanguageSettings { Language = "en-US", };
-    }
+    public override ILanguageSettings DefaultValues() => new LanguageSettings { Language = "en-US" };
 
     #endregion
 
     #region Public Methods
 
-    public override ILanguageSettings GetValues()
-    {
-        return new LanguageSettings { Language = Language, };
-    }
+    public override ILanguageSettings GetValues() => new LanguageSettings { Language = Language };
 
     public Result Update(ILanguageSettingsModule sourceSettings)
     {

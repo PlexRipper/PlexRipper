@@ -1,3 +1,3 @@
 ﻿namespace Settings.Contracts;
 
-public interface IDateTimeSettingsModule : IBaseSettingsModule<IDateTimeSettings>, IDateTimeSettings { }
+public interface IDateTimeSettingsModel : IBaseSettingsModule<IDateTimeSettings>, IDateTimeSettings { }

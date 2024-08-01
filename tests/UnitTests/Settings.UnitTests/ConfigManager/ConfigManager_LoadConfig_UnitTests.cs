@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using Autofac;
+﻿using Autofac;
 using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;
@@ -24,7 +23,6 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
         mock.Mock<IFileSystem>()
             .Setup(x => x.FileReadAllText(It.IsAny<string>()))
             .Returns(() => Result.Ok(settingsModel));
-        mock.Mock<IUserSettings>().Setup(x => x.SetFromJsonObject(It.IsAny<JsonElement>())).Returns(Result.Ok);
 
         // Act
         var loadResult = _sut.LoadConfig();
@@ -32,7 +30,6 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
         // Assert
         loadResult.IsSuccess.ShouldBeTrue();
         mock.Mock<IUserSettings>().Verify(x => x.Reset(), Times.Never);
-        mock.Mock<IUserSettings>().Verify(x => x.SetFromJsonObject(It.IsAny<JsonElement>()), Times.Once);
     }
 
     [Fact]
@@ -72,7 +69,6 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
         mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(() => Result.Ok("{}"));
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
-        mock.Mock<IUserSettings>().Setup(x => x.SetFromJsonObject(It.IsAny<JsonElement>())).Returns(Result.Fail(""));
         mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here

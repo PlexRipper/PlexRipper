@@ -1,4 +1,5 @@
 using PlexRipper.Settings;
+using Settings.Contracts;
 
 namespace Settings.UnitTests;
 
@@ -7,52 +8,39 @@ public class UserSettings_Reset_UnitTests : BaseUnitTest
     public UserSettings_Reset_UnitTests(ITestOutputHelper output)
         : base(output) { }
 
-    private UserSettings CreateUserSettings() =>
-        new(
-            Log,
-            new ConfirmationSettingsModule(),
-            new DateTimeSettingsModule(),
-            new DisplaySettingsModule(),
-            new DownloadManagerSettingsModule(),
-            new GeneralSettingsModule(),
-            new DebugSettingsModule(),
-            new LanguageSettingsModule(),
-            new ServerSettingsModule()
-        );
-
     [Fact]
     public void ShouldHaveDefaultSettingsValues_WhenResetHasBeenCalled()
     {
         // Arrange
-        var sut = CreateUserSettings();
+        UserSettings sut = new(Log);
 
         // Act
-        var changedSettings = new SettingsModule
+        var changedSettings = new SettingsModel
         {
-            DateTimeSettings = new DateTimeSettings()
+            DateTimeSettingsModel = new DateTimeSettingsModel()
             {
                 TimeFormat = string.Empty,
                 TimeZone = string.Empty,
                 LongDateFormat = string.Empty,
                 ShortDateFormat = string.Empty,
             },
-            ConfirmationSettings = new ConfirmationSettings()
+            ConfirmationSettingsModel = new ConfirmationSettingsModel()
             {
                 AskDownloadEpisodeConfirmation = false,
                 AskDownloadMovieConfirmation = false,
                 AskDownloadSeasonConfirmation = false,
                 AskDownloadTvShowConfirmation = false,
             },
-            LanguageSettings = new LanguageSettings() { Language = string.Empty },
-            DisplaySettings = new DisplaySettings(),
-            GeneralSettings = new GeneralSettings(),
-            ServerSettings = new ServerSettings(),
-            DownloadManagerSettings = new DownloadManagerSettings(),
+            LanguageSettingsModel = new LanguageSettingsModel() { Language = string.Empty },
+            DisplaySettingsModel = new DisplaySettingsModel(),
+            GeneralSettingsModel = new GeneralSettingsModel(),
+            ServerSettingsModel = new ServerSettingsModel(),
+            DownloadManagerSettingsModel = new DownloadManagerSettingsModel(),
         };
         sut.UpdateSettings(changedSettings);
         sut.Reset();
 
         // Assert
-        sut.GetSettingsModel().ShouldBeEquivalentTo(sut.GetDefaultSettingsModel());
+        sut.GetSettingsModel().ShouldBeEquivalentTo(new SettingsModel());
     }
 }

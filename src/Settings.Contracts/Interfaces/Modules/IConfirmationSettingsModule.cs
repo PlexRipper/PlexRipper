@@ -1,3 +1,3 @@
 ﻿namespace Settings.Contracts;
 
-public interface IConfirmationSettingsModule : IBaseSettingsModule<IConfirmationSettings>, IConfirmationSettings { }
+public interface IConfirmationSettingsModel : IBaseSettingsModule<IConfirmationSettings>, IConfirmationSettings { }

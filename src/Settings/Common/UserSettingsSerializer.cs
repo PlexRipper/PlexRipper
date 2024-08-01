@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Logging.Interface;
 using PlexRipper.Domain.Config;
+using Settings.Contracts;
 
 namespace PlexRipper.Settings;
 
@@ -8,7 +9,7 @@ public static class UserSettingsSerializer
 {
     private static ILog _log = LogManager.CreateLogInstance(typeof(ResultExtensions));
 
-    public static string Serialize(SettingsModule settingsModule) =>
+    public static string Serialize(SettingsModel settingsModule) =>
         JsonSerializer.Serialize(settingsModule, DefaultJsonSerializerOptions.ConfigManagerOptions);
 
     /// <summary>

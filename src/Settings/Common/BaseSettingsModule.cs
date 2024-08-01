@@ -43,49 +43,6 @@ public abstract class BaseSettingsModule<TModel> : IBaseSettingsModule<TModel>
 
     public TModel Reset() => Update(DefaultValues());
 
-    /// <inheritdoc/>
-    public virtual Result SetFromJson(JsonElement jsonElement)
-    {
-        var jsonSettings = GetJsonSettingsModule(jsonElement);
-        if (jsonSettings.IsFailed)
-        {
-            Reset();
-            return jsonSettings.ToResult();
-        }
-
-        var defaultValues = DefaultValues();
-        var rootSettingsModule = jsonSettings.Value;
-        foreach (var prop in typeof(TModel).GetProperties())
-        {
-            var targetProp = GetType().GetProperty(prop.Name);
-            var targetPropType = targetProp.PropertyType;
-            var targetValue = targetProp.GetValue(this, null);
-
-            // Is settings value available in JSON? Else revert to default value
-            if (rootSettingsModule.TryGetProperty(prop.Name, out var jsonValueElement))
-            {
-                var sourceValue = jsonValueElement.GetTypedValue(targetPropType);
-                if (sourceValue != targetValue)
-                    targetProp.SetValue(this, sourceValue);
-            }
-            else
-            {
-                _log.Warning(
-                    "The userSettings, in module {Name}, was missing property {PropName}. "
-                        + $"Will revert to default value now, this is normal if you just updated PlexRipper as new settings might have been added.",
-                    Name,
-                    prop.Name,
-                    0
-                );
-                var defaultValue = defaultValues.GetType().GetProperty(prop.Name).GetValue(defaultValues, null);
-                if (defaultValue != targetValue)
-                    targetProp.SetValue(this, defaultValue);
-            }
-        }
-
-        return Result.Ok();
-    }
-
     public virtual TModel Update(TModel sourceSettings)
     {
         if (sourceSettings is null)

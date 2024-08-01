@@ -1,6 +1,3 @@
-using System.Text.Json;
-using FluentResults;
-
 namespace Settings.Contracts;
 
 /// <summary>
@@ -19,13 +16,8 @@ public interface IUserSettings
     /// instead of having a separate instance of the <see cref="ISettingsModel"/> in the UserSettings.
     /// </summary>
     /// <param name="sourceSettings">The values to be used to set this UserSettings instance.</param>
-    Result<ISettingsModel> UpdateSettings(ISettingsModel sourceSettings);
+    SettingsModel UpdateSettings(SettingsModel sourceSettings);
 
-    IObservable<ISettingsModel> SettingsUpdated { get; }
-
-    Result SetFromJsonObject(JsonElement settingsJsonElement);
-
-    ISettingsModel GetSettingsModel();
-
-    ISettingsModel GetDefaultSettingsModel();
+    IObservable<SettingsModel> SettingsUpdated { get; }
+    SettingsModel GetSettingsModel();
 }

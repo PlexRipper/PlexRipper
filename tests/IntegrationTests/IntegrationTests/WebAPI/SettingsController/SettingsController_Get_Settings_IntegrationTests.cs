@@ -29,7 +29,7 @@ public class SettingsController_Get_Settings_IntegrationTests : BaseIntegrationT
         var settingsModel = result.Value.ToModel();
         var responseSettings = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCapitalized);
         var defaultSettings = JsonSerializer.Serialize(
-            SettingsModule.DefaultSettings(),
+            new SettingsModel(),
             DefaultJsonSerializerOptions.ConfigCapitalized
         );
 

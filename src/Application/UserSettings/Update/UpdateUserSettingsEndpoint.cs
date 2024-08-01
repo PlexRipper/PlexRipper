@@ -54,12 +54,7 @@ public class UpdateUserSettingsEndpoint : BaseEndpoint<UpdateUserSettingsEndpoin
 
     public override async Task HandleAsync(UpdateUserSettingsEndpointRequest req, CancellationToken ct)
     {
-        var updateResult = _userSettings.UpdateSettings(req.SettingsModelDto.ToModel());
-        if (updateResult.IsFailed)
-        {
-            await SendFluentResult(updateResult.ToResult(), ct);
-            return;
-        }
+        _userSettings.UpdateSettings(req.SettingsModelDto.ToModel());
 
         var settings = _userSettings.GetSettingsModel();
 

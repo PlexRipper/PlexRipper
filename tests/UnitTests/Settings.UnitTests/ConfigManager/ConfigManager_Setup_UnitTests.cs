@@ -17,7 +17,7 @@ public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
     public void ShouldLoadConfigDuringSetup_WhenConfigFileAlreadyExists()
     {
         // Arrange
-        mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<ISettingsModel>());
+        mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<SettingsModel>());
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/TEST_PlexRipperSettings.json");
@@ -49,7 +49,7 @@ public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
     {
         // Arrange
         var settingsModel = FakeData.GetSettingsModel().Generate();
-        mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<ISettingsModel>());
+        mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<SettingsModel>());
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/TEST_PlexRipperSettings.json");

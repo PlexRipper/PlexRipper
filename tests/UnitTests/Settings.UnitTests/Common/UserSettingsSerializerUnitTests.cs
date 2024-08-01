@@ -1,4 +1,5 @@
 using PlexRipper.Settings;
+using Settings.Contracts;
 
 namespace Settings.UnitTests.Common;
 
@@ -19,13 +20,13 @@ public class UserSettingsSerializerUnitTests : BaseUnitTest
         result.ShouldNotBeNull();
 
         var defaultSettings = new SettingsModel();
-        result.GeneralSettings.ShouldBe(defaultSettings.GeneralSettings);
-        result.ConfirmationSettings.ShouldBe(defaultSettings.ConfirmationSettings);
-        result.DateTimeSettings.ShouldBe(defaultSettings.DateTimeSettings);
-        result.DisplaySettings.ShouldBe(defaultSettings.DisplaySettings);
-        result.DownloadManagerSettings.ShouldBe(defaultSettings.DownloadManagerSettings);
-        result.LanguageSettings.ShouldBe(defaultSettings.LanguageSettings);
-        result.DebugSettings.ShouldBe(defaultSettings.DebugSettings);
-        result.ServerSettings.Data.ShouldBeEmpty();
+        result.GeneralSettingsModel.ShouldBeEquivalentTo(defaultSettings.GeneralSettingsModel);
+        result.ConfirmationSettingsModel.ShouldBeEquivalentTo(defaultSettings.ConfirmationSettingsModel);
+        result.DateTimeSettingsModel.ShouldBeEquivalentTo(defaultSettings.DateTimeSettingsModel);
+        result.DisplaySettingsModel.ShouldBeEquivalentTo(defaultSettings.DisplaySettingsModel);
+        result.DownloadManagerSettingsModel.ShouldBeEquivalentTo(defaultSettings.DownloadManagerSettingsModel);
+        result.LanguageSettingsModel.ShouldBeEquivalentTo(defaultSettings.LanguageSettingsModel);
+        result.DebugSettingsModel.ShouldBeEquivalentTo(defaultSettings.DebugSettingsModel);
+        result.ServerSettingsModel.Data.ShouldBeEquivalentTo(defaultSettings.ServerSettingsModel.Data);
     }
 }

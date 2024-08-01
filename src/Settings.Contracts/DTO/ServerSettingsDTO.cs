@@ -1,8 +1,6 @@
-﻿using PlexRipper.Domain.DownloadManager;
+﻿namespace Settings.Contracts;
 
-namespace Settings.Contracts;
-
-public class ServerSettingsDTO : IServerSettings
+public class ServerSettingsDTO
 {
     public required List<PlexServerSettingsModel> Data { get; init; }
 }

@@ -1,6 +1,8 @@
 ﻿namespace Settings.Contracts;
 
-public record DownloadManagerSettingsModel : BaseSettingsModel<DownloadManagerSettingsModel>, IDownloadManagerSettings
+public record DownloadManagerSettingsModule
+    : BaseSettingsModule<DownloadManagerSettingsModule>,
+        IDownloadManagerSettings
 {
     private int _downloadSegments = 4;
 

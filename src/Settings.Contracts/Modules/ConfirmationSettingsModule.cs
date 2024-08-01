@@ -1,6 +1,6 @@
 ﻿namespace Settings.Contracts;
 
-public record ConfirmationSettingsModel : BaseSettingsModel<ConfirmationSettingsModel>, IConfirmationSettings
+public record ConfirmationSettingsModule : BaseSettingsModule<ConfirmationSettingsModule>, IConfirmationSettings
 {
     private bool _askDownloadMovieConfirmation = true;
     private bool _askDownloadTvShowConfirmation = true;

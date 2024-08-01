@@ -7,49 +7,49 @@ namespace Settings.Contracts;
 /// <inheritdoc cref="IUserSettings"/>
 public class UserSettings : IUserSettings
 {
-    public GeneralSettingsModel GeneralSettings
+    public GeneralSettingsModule GeneralSettings
     {
         get => _generalSettings;
         init => _generalSettings = value;
     }
 
-    public ConfirmationSettingsModel ConfirmationSettings
+    public ConfirmationSettingsModule ConfirmationSettings
     {
         get => _confirmationSettings;
         init => _confirmationSettings = value;
     }
 
-    public DateTimeSettingsModel DateTimeSettings
+    public DateTimeSettingsModule DateTimeSettings
     {
         get => _dateTimeSettings;
         init => _dateTimeSettings = value;
     }
 
-    public DisplaySettingsModel DisplaySettings
+    public DisplaySettingsModule DisplaySettings
     {
         get => _displaySettings;
         init => _displaySettings = value;
     }
 
-    public DownloadManagerSettingsModel DownloadManagerSettings
+    public DownloadManagerSettingsModule DownloadManagerSettings
     {
         get => _downloadManagerSettings;
         init => _downloadManagerSettings = value;
     }
 
-    public LanguageSettingsModel LanguageSettings
+    public LanguageSettingsModule LanguageSettings
     {
         get => _languageSettings;
         init => _languageSettings = value;
     }
 
-    public DebugSettingsModel DebugSettings
+    public DebugSettingsModule DebugSettings
     {
         get => _debugSettings;
         init => _debugSettings = value;
     }
 
-    public ServerSettingsModel ServerSettings
+    public PlexServerSettingsModule ServerSettings
     {
         get => _serverSettings;
         init => _serverSettings = value;
@@ -57,14 +57,14 @@ public class UserSettings : IUserSettings
 
     private readonly Subject<UserSettings> _settingsUpdated = new();
 
-    private GeneralSettingsModel _generalSettings = new();
-    private ConfirmationSettingsModel _confirmationSettings = new();
-    private DateTimeSettingsModel _dateTimeSettings = new();
-    private DisplaySettingsModel _displaySettings = new();
-    private DownloadManagerSettingsModel _downloadManagerSettings = new();
-    private LanguageSettingsModel _languageSettings = new();
-    private DebugSettingsModel _debugSettings = new();
-    private ServerSettingsModel _serverSettings = new() { Data = [] };
+    private GeneralSettingsModule _generalSettings = new();
+    private ConfirmationSettingsModule _confirmationSettings = new();
+    private DateTimeSettingsModule _dateTimeSettings = new();
+    private DisplaySettingsModule _displaySettings = new();
+    private DownloadManagerSettingsModule _downloadManagerSettings = new();
+    private LanguageSettingsModule _languageSettings = new();
+    private DebugSettingsModule _debugSettings = new();
+    private PlexServerSettingsModule _serverSettings = new() { Data = [] };
 
     /// <summary>
     /// The <see cref="UserSettings"/> class is a wrapper class for the individual Settings.
@@ -92,14 +92,14 @@ public class UserSettings : IUserSettings
 
     public void Reset()
     {
-        _confirmationSettings = new ConfirmationSettingsModel();
-        _dateTimeSettings = new DateTimeSettingsModel();
-        _displaySettings = new DisplaySettingsModel();
-        _downloadManagerSettings = new DownloadManagerSettingsModel();
-        _generalSettings = new GeneralSettingsModel();
-        _debugSettings = new DebugSettingsModel();
-        _languageSettings = new LanguageSettingsModel();
-        _serverSettings = new ServerSettingsModel();
+        _confirmationSettings = new ConfirmationSettingsModule();
+        _dateTimeSettings = new DateTimeSettingsModule();
+        _displaySettings = new DisplaySettingsModule();
+        _downloadManagerSettings = new DownloadManagerSettingsModule();
+        _generalSettings = new GeneralSettingsModule();
+        _debugSettings = new DebugSettingsModule();
+        _languageSettings = new LanguageSettingsModule();
+        _serverSettings = new PlexServerSettingsModule();
     }
 
     public UserSettings UpdateSettings(ISettingsModel sourceSettings)

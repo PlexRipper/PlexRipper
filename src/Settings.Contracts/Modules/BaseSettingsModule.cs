@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace Settings.Contracts;
 
-public record BaseSettingsModel<TModel> : INotifyPropertyChanged
+public record BaseSettingsModule<TModel> : INotifyPropertyChanged
     where TModel : class
 {
     private readonly Subject<TModel> _moduleUpdatedSubject = new();

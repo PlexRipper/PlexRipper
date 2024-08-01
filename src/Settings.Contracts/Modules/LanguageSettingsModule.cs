@@ -1,6 +1,6 @@
 ﻿namespace Settings.Contracts;
 
-public record LanguageSettingsModel : BaseSettingsModel<LanguageSettingsModel>, ILanguageSettings
+public record LanguageSettingsModule : BaseSettingsModule<LanguageSettingsModule>, ILanguageSettings
 {
     private string _language = "en-US";
 

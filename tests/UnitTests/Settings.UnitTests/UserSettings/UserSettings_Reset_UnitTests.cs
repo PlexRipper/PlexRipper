@@ -16,25 +16,25 @@ public class UserSettings_Reset_UnitTests : BaseUnitTest
         // Act
         var changedSettings = new UserSettings
         {
-            DateTimeSettings = new DateTimeSettingsModel()
+            DateTimeSettings = new DateTimeSettingsModule()
             {
                 TimeFormat = string.Empty,
                 TimeZone = string.Empty,
                 LongDateFormat = string.Empty,
                 ShortDateFormat = string.Empty,
             },
-            ConfirmationSettings = new ConfirmationSettingsModel()
+            ConfirmationSettings = new ConfirmationSettingsModule()
             {
                 AskDownloadEpisodeConfirmation = false,
                 AskDownloadMovieConfirmation = false,
                 AskDownloadSeasonConfirmation = false,
                 AskDownloadTvShowConfirmation = false,
             },
-            LanguageSettings = new LanguageSettingsModel() { Language = string.Empty },
-            DisplaySettings = new DisplaySettingsModel(),
-            GeneralSettings = new GeneralSettingsModel(),
-            ServerSettings = new ServerSettingsModel(),
-            DownloadManagerSettings = new DownloadManagerSettingsModel(),
+            LanguageSettings = new LanguageSettingsModule() { Language = string.Empty },
+            DisplaySettings = new DisplaySettingsModule(),
+            GeneralSettings = new GeneralSettingsModule(),
+            ServerSettings = new PlexServerSettingsModule(),
+            DownloadManagerSettings = new DownloadManagerSettingsModule(),
         };
         sut.UpdateSettings(changedSettings);
         sut.Reset();

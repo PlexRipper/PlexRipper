@@ -2,9 +2,9 @@
 
 namespace Settings.Contracts;
 
-public record ServerSettingsModel : BaseSettingsModel<ServerSettingsModel>, IServerSettingsModule
+public record PlexServerSettingsModule : BaseSettingsModule<PlexServerSettingsModule>, IServerSettingsModule
 {
-    public List<PlexServerSettingsModel> Data { get; init; } = [];
+    public List<PlexServerSettingItemModule> Data { get; init; } = [];
 
     #region Public Methods
 
@@ -54,7 +54,7 @@ public record ServerSettingsModel : BaseSettingsModel<ServerSettingsModel>, ISer
 
     #region Private Methods
 
-    private PlexServerSettingsModel? FindOrAddServerSettingsModel(string machineIdentifier)
+    private PlexServerSettingItemModule? FindOrAddServerSettingsModel(string machineIdentifier)
     {
         if (machineIdentifier == string.Empty)
             return null;
@@ -63,7 +63,7 @@ public record ServerSettingsModel : BaseSettingsModel<ServerSettingsModel>, ISer
         if (serverSettingsModel is not null)
             return serverSettingsModel;
 
-        Data.Add(new PlexServerSettingsModel() { MachineIdentifier = machineIdentifier });
+        Data.Add(new PlexServerSettingItemModule() { MachineIdentifier = machineIdentifier });
 
         OnPropertyChanged(nameof(Data));
 

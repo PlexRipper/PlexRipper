@@ -1,6 +1,6 @@
 ﻿namespace Settings.Contracts;
 
-public record DebugSettingsModel : BaseSettingsModel<DebugSettingsModel>, IDebugSettings
+public record DebugSettingsModule : BaseSettingsModule<DebugSettingsModule>, IDebugSettings
 {
     private bool _debugModeEnabled = false;
     private bool _maskServerNames = false;

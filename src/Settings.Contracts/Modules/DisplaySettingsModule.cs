@@ -2,7 +2,7 @@
 
 namespace Settings.Contracts;
 
-public record DisplaySettingsModel : BaseSettingsModel<DisplaySettingsModel>, IDisplaySettings
+public record DisplaySettingsModule : BaseSettingsModule<DisplaySettingsModule>, IDisplaySettings
 {
     private ViewMode _tvShowViewMode = ViewMode.Poster;
     private ViewMode _movieViewMode = ViewMode.Poster;

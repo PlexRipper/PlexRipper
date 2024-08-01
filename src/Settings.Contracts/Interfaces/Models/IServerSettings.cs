@@ -2,5 +2,5 @@
 
 public interface IServerSettings
 {
-    List<PlexServerSettingsModel> Data { get; init; }
+    List<PlexServerSettingItemModule> Data { get; init; }
 }

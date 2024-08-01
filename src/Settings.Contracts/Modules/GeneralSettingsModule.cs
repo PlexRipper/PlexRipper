@@ -1,6 +1,6 @@
 ﻿namespace Settings.Contracts;
 
-public record GeneralSettingsModel : BaseSettingsModel<GeneralSettingsModel>, IGeneralSettings
+public record GeneralSettingsModule : BaseSettingsModule<GeneralSettingsModule>, IGeneralSettings
 {
     private bool _firstTimeSetup = true;
     private int _activeAccountId = 0;

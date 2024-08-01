@@ -1,6 +1,6 @@
 ﻿namespace Settings.Contracts;
 
-public record DateTimeSettingsModel : BaseSettingsModel<DateTimeSettingsModel>, IDateTimeSettings
+public record DateTimeSettingsModule : BaseSettingsModule<DateTimeSettingsModule>, IDateTimeSettings
 {
     private string _shortDateFormat = "dd/MM/yyyy";
     private string _longDateFormat = "EEEE, dd MMMM yyyy";

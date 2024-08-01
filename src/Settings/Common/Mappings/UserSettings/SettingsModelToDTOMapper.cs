@@ -19,7 +19,7 @@ public static class SettingsModelToDTOMapper
             ServerSettings = dto.ServerSettings.ToModel(),
         };
 
-    public static GeneralSettingsModel ToModel(this GeneralSettingsDTO dto) =>
+    public static GeneralSettingsModule ToModel(this GeneralSettingsDTO dto) =>
         new()
         {
             FirstTimeSetup = dto.FirstTimeSetup,
@@ -28,7 +28,7 @@ public static class SettingsModelToDTOMapper
             DisableAnimatedBackground = dto.DisableAnimatedBackground,
         };
 
-    public static ConfirmationSettingsModel ToModel(this ConfirmationSettingsDTO dto) =>
+    public static ConfirmationSettingsModule ToModel(this ConfirmationSettingsDTO dto) =>
         new()
         {
             AskDownloadMovieConfirmation = dto.AskDownloadMovieConfirmation,
@@ -37,7 +37,7 @@ public static class SettingsModelToDTOMapper
             AskDownloadEpisodeConfirmation = dto.AskDownloadEpisodeConfirmation,
         };
 
-    public static DateTimeSettingsModel ToModel(this DateTimeSettingsDTO dto) =>
+    public static DateTimeSettingsModule ToModel(this DateTimeSettingsDTO dto) =>
         new()
         {
             ShortDateFormat = dto.ShortDateFormat,
@@ -47,17 +47,17 @@ public static class SettingsModelToDTOMapper
             ShowRelativeDates = dto.ShowRelativeDates,
         };
 
-    public static DisplaySettingsModel ToModel(this DisplaySettingsDTO dto) =>
+    public static DisplaySettingsModule ToModel(this DisplaySettingsDTO dto) =>
         new() { TvShowViewMode = dto.TvShowViewMode, MovieViewMode = dto.MovieViewMode };
 
-    public static LanguageSettingsModel ToModel(this LanguageSettingsDTO dto) => new() { Language = dto.Language };
+    public static LanguageSettingsModule ToModel(this LanguageSettingsDTO dto) => new() { Language = dto.Language };
 
-    public static DownloadManagerSettingsModel ToModel(this DownloadManagerSettingsDTO dto) =>
+    public static DownloadManagerSettingsModule ToModel(this DownloadManagerSettingsDTO dto) =>
         new() { DownloadSegments = dto.DownloadSegments };
 
-    public static ServerSettingsModel ToModel(this ServerSettingsDTO dto) => new() { Data = dto.Data };
+    public static PlexServerSettingsModule ToModel(this ServerSettingsDTO dto) => new() { Data = dto.Data };
 
-    public static DebugSettingsModel ToModel(this DebugSettingsDTO dto) =>
+    public static DebugSettingsModule ToModel(this DebugSettingsDTO dto) =>
         new()
         {
             DebugModeEnabled = dto.DebugModeEnabled,
@@ -82,50 +82,50 @@ public static class SettingsModelToDTOMapper
             ServerSettings = model.ServerSettings.ToDTO(),
         };
 
-    public static GeneralSettingsDTO ToDTO(this GeneralSettingsModel model) =>
+    public static GeneralSettingsDTO ToDTO(this GeneralSettingsModule module) =>
         new()
         {
-            FirstTimeSetup = model.FirstTimeSetup,
-            ActiveAccountId = model.ActiveAccountId,
-            DebugMode = model.DebugMode,
-            DisableAnimatedBackground = model.DisableAnimatedBackground,
+            FirstTimeSetup = module.FirstTimeSetup,
+            ActiveAccountId = module.ActiveAccountId,
+            DebugMode = module.DebugMode,
+            DisableAnimatedBackground = module.DisableAnimatedBackground,
         };
 
-    public static ConfirmationSettingsDTO ToDTO(this ConfirmationSettingsModel model) =>
+    public static ConfirmationSettingsDTO ToDTO(this ConfirmationSettingsModule module) =>
         new()
         {
-            AskDownloadMovieConfirmation = model.AskDownloadMovieConfirmation,
-            AskDownloadTvShowConfirmation = model.AskDownloadTvShowConfirmation,
-            AskDownloadSeasonConfirmation = model.AskDownloadSeasonConfirmation,
-            AskDownloadEpisodeConfirmation = model.AskDownloadEpisodeConfirmation,
+            AskDownloadMovieConfirmation = module.AskDownloadMovieConfirmation,
+            AskDownloadTvShowConfirmation = module.AskDownloadTvShowConfirmation,
+            AskDownloadSeasonConfirmation = module.AskDownloadSeasonConfirmation,
+            AskDownloadEpisodeConfirmation = module.AskDownloadEpisodeConfirmation,
         };
 
-    public static DateTimeSettingsDTO ToDTO(this DateTimeSettingsModel model) =>
+    public static DateTimeSettingsDTO ToDTO(this DateTimeSettingsModule module) =>
         new()
         {
-            ShortDateFormat = model.ShortDateFormat,
-            LongDateFormat = model.LongDateFormat,
-            TimeFormat = model.TimeFormat,
-            TimeZone = model.TimeZone,
-            ShowRelativeDates = model.ShowRelativeDates,
+            ShortDateFormat = module.ShortDateFormat,
+            LongDateFormat = module.LongDateFormat,
+            TimeFormat = module.TimeFormat,
+            TimeZone = module.TimeZone,
+            ShowRelativeDates = module.ShowRelativeDates,
         };
 
-    public static DisplaySettingsDTO ToDTO(this DisplaySettingsModel model) =>
-        new() { TvShowViewMode = model.TvShowViewMode, MovieViewMode = model.MovieViewMode };
+    public static DisplaySettingsDTO ToDTO(this DisplaySettingsModule module) =>
+        new() { TvShowViewMode = module.TvShowViewMode, MovieViewMode = module.MovieViewMode };
 
-    public static LanguageSettingsDTO ToDTO(this LanguageSettingsModel model) => new() { Language = model.Language };
+    public static LanguageSettingsDTO ToDTO(this LanguageSettingsModule module) => new() { Language = module.Language };
 
-    public static DownloadManagerSettingsDTO ToDTO(this DownloadManagerSettingsModel model) =>
-        new() { DownloadSegments = model.DownloadSegments };
+    public static DownloadManagerSettingsDTO ToDTO(this DownloadManagerSettingsModule module) =>
+        new() { DownloadSegments = module.DownloadSegments };
 
-    public static ServerSettingsDTO ToDTO(this ServerSettingsModel model) => new() { Data = model.Data };
+    public static ServerSettingsDTO ToDTO(this PlexServerSettingsModule module) => new() { Data = module.Data };
 
-    public static DebugSettingsDTO ToDTO(this DebugSettingsModel model) =>
+    public static DebugSettingsDTO ToDTO(this DebugSettingsModule module) =>
         new()
         {
-            DebugModeEnabled = model.DebugModeEnabled,
-            MaskServerNames = model.MaskServerNames,
-            MaskLibraryNames = model.MaskLibraryNames,
+            DebugModeEnabled = module.DebugModeEnabled,
+            MaskServerNames = module.MaskServerNames,
+            MaskLibraryNames = module.MaskLibraryNames,
         };
 
     #endregion

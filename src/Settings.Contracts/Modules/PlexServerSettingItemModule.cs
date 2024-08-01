@@ -1,6 +1,6 @@
 ﻿namespace Settings.Contracts;
 
-public record PlexServerSettingsModel : BaseSettingsModel<PlexServerSettingsModel>
+public record PlexServerSettingItemModule : BaseSettingsModule<PlexServerSettingItemModule>
 {
     private string _plexServerName = string.Empty;
     private int _downloadSpeedLimit = 0;

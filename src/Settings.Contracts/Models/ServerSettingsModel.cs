@@ -2,7 +2,7 @@
 
 namespace Settings.Contracts;
 
-public record ServerSettingsModel : BaseSettingsModel<ServerSettingsModel>, IServerSettings
+public record ServerSettingsModel : BaseSettingsModel<ServerSettingsModel>, IServerSettingsModule
 {
     public List<PlexServerSettingsModel> Data { get; init; } = [];
 

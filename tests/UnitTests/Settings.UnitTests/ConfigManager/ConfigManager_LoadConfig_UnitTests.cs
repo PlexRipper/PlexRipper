@@ -16,13 +16,16 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
     public void ShouldLoadSettingsAndSendToUserSettings_WhenSettingsCanBeReadFromFile()
     {
         // Arrange
-        var settingsModel = FakeData.GetSettingsModelJson();
+
+        var settingsModel = FakeData.GetSettingsModel().Generate();
+        var settingsJson = UserSettingsSerializer.Serialize(settingsModel);
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
         mock.Mock<IFileSystem>()
             .Setup(x => x.FileReadAllText(It.IsAny<string>()))
-            .Returns(() => Result.Ok(settingsModel));
+            .Returns(() => Result.Ok(settingsJson));
+        mock.Mock<IUserSettings>().Setup(x => x.UpdateSettings(It.IsAny<SettingsModel>())).Returns(settingsModel);
 
         // Act
         var loadResult = _sut.LoadConfig();

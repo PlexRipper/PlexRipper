@@ -1,6 +1,6 @@
 ﻿namespace Settings.Contracts;
 
-public interface IServerSettingsModule : IBaseSettingsModule<IServerSettings>, IServerSettings
+public interface IServerSettingsModule : IServerSettings
 {
     int GetDownloadSpeedLimit(string machineIdentifier);
 

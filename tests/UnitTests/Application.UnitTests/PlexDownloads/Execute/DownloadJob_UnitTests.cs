@@ -21,7 +21,7 @@ public class DownloadJob_UnitTests : BaseUnitTest<DownloadJob>
             config.MovieDownloadTasksCount = 5;
         });
         var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
-        mock.Mock<IDownloadManagerSettingsModule>().Setup(x => x.DownloadSegments).Returns(4);
+        mock.Mock<IDownloadManagerSettings>().Setup(x => x.DownloadSegments).Returns(4);
         IDictionary<string, object> dict = new Dictionary<string, object>
         {
             { DownloadJob.DownloadTaskIdParameter, JsonSerializer.Serialize(testDownloadTask.ToKey()) },
@@ -55,7 +55,7 @@ public class DownloadJob_UnitTests : BaseUnitTest<DownloadJob>
             config.MovieDownloadTasksCount = 2;
         });
         var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
-        mock.Mock<IDownloadManagerSettingsModule>().Setup(x => x.DownloadSegments).Returns(4);
+        mock.Mock<IDownloadManagerSettings>().Setup(x => x.DownloadSegments).Returns(4);
         IDictionary<string, object> dict = new Dictionary<string, object>
         {
             { DownloadJob.DownloadTaskIdParameter, JsonSerializer.Serialize(testDownloadTask.ToKey()) },

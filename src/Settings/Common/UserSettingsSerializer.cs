@@ -9,8 +9,20 @@ public static class UserSettingsSerializer
 {
     private static ILog _log = LogManager.CreateLogInstance(typeof(ResultExtensions));
 
-    public static string Serialize(SettingsModel settingsModule) =>
-        JsonSerializer.Serialize(settingsModule, DefaultJsonSerializerOptions.ConfigManagerOptions);
+    public static string Serialize(SettingsModel settingsModel)
+    {
+        try
+        {
+            return JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigManagerOptions);
+        }
+        catch (Exception e)
+        {
+            _log.ErrorLine("Failed to serialize settings");
+            _log.Error(e);
+        }
+
+        return string.Empty;
+    }
 
     /// <summary>
     ///  Deserialize the user settings from a JSON string.

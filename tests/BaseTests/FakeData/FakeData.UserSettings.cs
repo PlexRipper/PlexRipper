@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-using Bogus;
-using PlexRipper.Domain.Config;
+﻿using Bogus;
 using Settings.Contracts;
 
 namespace PlexRipper.BaseTests;
@@ -35,12 +33,6 @@ public static partial class FakeData
             .RuleFor(x => x.LanguageSettingsModel, _ => GetLanguageSettings(options).Generate())
             .RuleFor(x => x.DebugSettingsModel, _ => GetDebugSettings(options).Generate())
             .RuleFor(x => x.ServerSettingsModel, _ => GetServerSettings(options).Generate());
-    }
-
-    public static string GetSettingsModelJson(Action<UnitTestDataConfig>? options = null)
-    {
-        var settings = GetSettingsModel(options).Generate();
-        return JsonSerializer.Serialize(settings, DefaultJsonSerializerOptions.ConfigCapitalized);
     }
 
     public static Faker<GeneralSettingsModel> GetGeneralSettings(Action<UnitTestDataConfig>? options = null)

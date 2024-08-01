@@ -1,8 +1,6 @@
-﻿using System.Text.Json;
-using Environment;
+﻿using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;
-using PlexRipper.Domain.Config;
 using Settings.Contracts;
 
 namespace PlexRipper.Settings;
@@ -136,11 +134,9 @@ public class ConfigManager : IConfigManager
     {
         _log.InformationLine("Saving user config settings now");
 
-        var jsonSettings = GetJsonSettingsObject();
-        if (jsonSettings.IsFailed)
-            return jsonSettings.ToResult();
+        var jsonSettings = UserSettingsSerializer.Serialize(_userSettings.GetSettingsModel());
 
-        var writeResult = WriteToConfigFile(jsonSettings.Value);
+        var writeResult = WriteToConfigFile(jsonSettings);
         if (writeResult.IsFailed)
             return writeResult;
 
@@ -174,23 +170,6 @@ public class ConfigManager : IConfigManager
         }
 
         return readResult;
-    }
-
-    private Result<string> GetJsonSettingsObject()
-    {
-        try
-        {
-            return Result.Ok(
-                JsonSerializer.Serialize(
-                    _userSettings.GetSettingsModel(),
-                    DefaultJsonSerializerOptions.ConfigManagerOptions
-                )
-            );
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
     }
 
     #endregion

@@ -2,9 +2,9 @@ using Settings.Contracts;
 
 namespace Settings.UnitTests;
 
-public class UserSettings_Reset_UnitTests : BaseUnitTest
+public class UserSettings_SettingsUpdated_UnitTests : BaseUnitTest
 {
-    public UserSettings_Reset_UnitTests(ITestOutputHelper output)
+    public UserSettings_SettingsUpdated_UnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -14,6 +14,9 @@ public class UserSettings_Reset_UnitTests : BaseUnitTest
         UserSettings sut = new();
 
         // Act
+        List<UserSettings> settings = new();
+        sut.SettingsUpdated.Subscribe();
+
         var changedSettings = new UserSettings
         {
             DateTimeSettings = new DateTimeSettingsModule()

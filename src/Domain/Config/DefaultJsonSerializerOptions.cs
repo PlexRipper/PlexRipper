@@ -28,6 +28,30 @@ public static class DefaultJsonSerializerOptions
             },
         };
 
+    /// <summary>
+    /// If a property is missing, and would normally set null, then skip setting the property.
+    /// Source: https://stackoverflow.com/a/77520195/8205497
+    /// </summary>
+    /// <param name="typeInfo"></param>
+    private static void InterceptNullSetter(JsonTypeInfo typeInfo)
+    {
+        foreach (var propertyInfo in typeInfo.Properties)
+        {
+            var setProperty = propertyInfo.Set;
+            if (setProperty is not null)
+            {
+                propertyInfo.Set = (obj, value) =>
+                {
+                    if (value != null)
+                    {
+                        //value = ((Demo)obj).B + value;
+                        setProperty(obj, value);
+                    }
+                };
+            }
+        }
+    }
+
     private static JsonSerializerOptions CreateBaseOptions() =>
         new()
         {
@@ -53,25 +77,20 @@ public static class DefaultJsonSerializerOptions
             return options;
         });
 
-    private static readonly Lazy<JsonSerializerOptions> ConfigIndentedField =
-        new(() =>
-        {
-            var options = CreateBaseOptions();
-            options.WriteIndented = true;
-            return options;
-        });
-
     private static readonly Lazy<JsonSerializerOptions> ConfigManagerOptionsField =
         new(() =>
         {
-            var options = ConfigIndentedField.Value;
+            var options = CreateBaseOptions();
+
+            //If Model.property is collect and this config is Populate,then skip propertyInfo.Set
+            options.PreferredObjectCreationHandling = JsonObjectCreationHandling.Populate;
+            options.TypeInfoResolver = new DefaultJsonTypeInfoResolver { Modifiers = { InterceptNullSetter } };
+            options.WriteIndented = true;
             options.PropertyNamingPolicy = null;
             return options;
         });
 
     public static JsonSerializerOptions ConfigStandard => ConfigStandardField.Value;
     public static JsonSerializerOptions ConfigCapitalized => ConfigCapitalizedField.Value;
-
-    public static JsonSerializerOptions ConfigIndented => ConfigIndentedField.Value;
-    public static JsonSerializerOptions ConfigManagerOptions => ConfigManagerOptionsField.Value;
+    public static JsonSerializerOptions UserSettingsOptions => ConfigManagerOptionsField.Value;
 }

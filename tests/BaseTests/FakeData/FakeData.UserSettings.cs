@@ -1,8 +1,5 @@
-﻿using System.Text.Json;
-using Bogus;
-using PlexRipper.Domain.Config;
-using PlexRipper.Domain.DownloadManager;
-using PlexRipper.Settings.Models;
+﻿using Bogus;
+using Settings.Contracts;
 
 namespace PlexRipper.BaseTests;
 
@@ -21,11 +18,11 @@ public static partial class FakeData
 
     private static readonly string[] TimeFormat = ["HH:mm:ss", "pp"];
 
-    public static Faker<SettingsModel> GetSettingsModel(Action<UnitTestDataConfig>? options = null)
+    public static Faker<UserSettings> GetSettingsModel(Action<UnitTestDataConfig>? options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
-        return new Faker<SettingsModel>()
+        return new Faker<UserSettings>()
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(x => x.GeneralSettings, _ => GetGeneralSettings(options).Generate())
@@ -38,23 +35,11 @@ public static partial class FakeData
             .RuleFor(x => x.ServerSettings, _ => GetServerSettings(options).Generate());
     }
 
-    public static string GetSettingsModelJson(Action<UnitTestDataConfig>? options = null)
-    {
-        var settings = GetSettingsModel(options).Generate();
-        return JsonSerializer.Serialize(settings, DefaultJsonSerializerOptions.ConfigCapitalized);
-    }
-
-    public static JsonElement GetSettingsModelJsonElement(Action<UnitTestDataConfig>? options = null)
-    {
-        var settingsJson = GetSettingsModelJson(options);
-        return JsonSerializer.Deserialize<JsonElement>(settingsJson, DefaultJsonSerializerOptions.ConfigCapitalized);
-    }
-
-    public static Faker<GeneralSettings> GetGeneralSettings(Action<UnitTestDataConfig>? options = null)
+    public static Faker<GeneralSettingsModule> GetGeneralSettings(Action<UnitTestDataConfig>? options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
-        return new Faker<GeneralSettings>()
+        return new Faker<GeneralSettingsModule>()
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(x => x.FirstTimeSetup, f => f.Random.Bool())
@@ -63,11 +48,11 @@ public static partial class FakeData
             .RuleFor(x => x.ActiveAccountId, f => f.Random.Int(1, 10));
     }
 
-    public static Faker<ConfirmationSettings> GetConfirmationSettings(Action<UnitTestDataConfig>? options = null)
+    public static Faker<ConfirmationSettingsModule> GetConfirmationSettings(Action<UnitTestDataConfig>? options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
-        return new Faker<ConfirmationSettings>()
+        return new Faker<ConfirmationSettingsModule>()
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(x => x.AskDownloadMovieConfirmation, f => f.Random.Bool())
@@ -76,11 +61,11 @@ public static partial class FakeData
             .RuleFor(x => x.AskDownloadEpisodeConfirmation, f => f.Random.Bool());
     }
 
-    public static Faker<DateTimeSettings> GetDateTimeSettings(Action<UnitTestDataConfig>? options = null)
+    public static Faker<DateTimeSettingsModule> GetDateTimeSettings(Action<UnitTestDataConfig>? options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
-        return new Faker<DateTimeSettings>()
+        return new Faker<DateTimeSettingsModule>()
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(x => x.ShortDateFormat, f => f.PickRandom(ShortDateFormat))
@@ -90,42 +75,44 @@ public static partial class FakeData
             .RuleFor(x => x.ShowRelativeDates, f => f.Random.Bool());
     }
 
-    public static Faker<DisplaySettings> GetDisplaySettings(Action<UnitTestDataConfig>? options = null)
+    public static Faker<DisplaySettingsModule> GetDisplaySettings(Action<UnitTestDataConfig>? options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
-        return new Faker<DisplaySettings>()
+        return new Faker<DisplaySettingsModule>()
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(x => x.MovieViewMode, f => f.Random.Enum<ViewMode>())
             .RuleFor(x => x.TvShowViewMode, f => f.Random.Enum<ViewMode>());
     }
 
-    public static Faker<DownloadManagerSettings> GetDownloadManagerSettings(Action<UnitTestDataConfig>? options = null)
+    public static Faker<DownloadManagerSettingsModule> GetDownloadManagerSettings(
+        Action<UnitTestDataConfig>? options = null
+    )
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
-        return new Faker<DownloadManagerSettings>()
+        return new Faker<DownloadManagerSettingsModule>()
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(x => x.DownloadSegments, f => f.Random.Int(1, 3));
     }
 
-    public static Faker<LanguageSettings> GetLanguageSettings(Action<UnitTestDataConfig>? options = null)
+    public static Faker<LanguageSettingsModule> GetLanguageSettings(Action<UnitTestDataConfig>? options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
-        return new Faker<LanguageSettings>()
+        return new Faker<LanguageSettingsModule>()
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(x => x.Language, f => f.Random.String(2));
     }
 
-    public static Faker<DebugSettings> GetDebugSettings(Action<UnitTestDataConfig>? options = null)
+    public static Faker<DebugSettingsModule> GetDebugSettings(Action<UnitTestDataConfig>? options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
-        return new Faker<DebugSettings>()
+        return new Faker<DebugSettingsModule>()
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(x => x.DebugModeEnabled, f => f.Random.Bool())
@@ -133,21 +120,23 @@ public static partial class FakeData
             .RuleFor(x => x.MaskLibraryNames, f => f.Random.Bool());
     }
 
-    public static Faker<ServerSettings> GetServerSettings(Action<UnitTestDataConfig>? options = null)
+    public static Faker<PlexServerSettingsModule> GetServerSettings(Action<UnitTestDataConfig>? options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
-        return new Faker<ServerSettings>()
+        return new Faker<PlexServerSettingsModule>()
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(x => x.Data, _ => GetPlexServerSettingsModel(options).Generate(config.PlexServerSettingsCount));
     }
 
-    public static Faker<PlexServerSettingsModel> GetPlexServerSettingsModel(Action<UnitTestDataConfig>? options = null)
+    public static Faker<PlexServerSettingItemModule> GetPlexServerSettingsModel(
+        Action<UnitTestDataConfig>? options = null
+    )
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
-        return new Faker<PlexServerSettingsModel>()
+        return new Faker<PlexServerSettingItemModule>()
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(x => x.MachineIdentifier, f => f.Finance.BitcoinAddress())

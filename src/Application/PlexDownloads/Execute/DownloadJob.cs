@@ -14,14 +14,14 @@ public class DownloadJob : IJob, IDisposable
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly INotificationsService _notificationsService;
-    private readonly IDownloadManagerSettingsModule _downloadManagerSettings;
+    private readonly IDownloadManagerSettings _downloadManagerSettings;
     private readonly IPlexDownloadClient _plexDownloadClient;
 
     public DownloadJob(
         ILog log,
         IPlexRipperDbContext dbContext,
         INotificationsService notificationsService,
-        IDownloadManagerSettingsModule downloadManagerSettings,
+        IDownloadManagerSettings downloadManagerSettings,
         IPlexDownloadClient plexDownloadClient
     )
     {

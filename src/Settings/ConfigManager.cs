@@ -1,8 +1,6 @@
-﻿using System.Text.Json;
-using Environment;
+﻿using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;
-using PlexRipper.Domain.Config;
 using Settings.Contracts;
 
 namespace PlexRipper.Settings;
@@ -107,20 +105,9 @@ public class ConfigManager : IConfigManager
         try
         {
             var cleanedJson = readResult.Value.Replace("\r\n", "");
-            var loadedSettings = JsonSerializer.Deserialize<JsonElement>(
-                cleanedJson,
-                DefaultJsonSerializerOptions.ConfigManagerOptions
-            );
-            var setFromJsonResult = _userSettings.SetFromJsonObject(loadedSettings);
-            if (setFromJsonResult.IsFailed)
-            {
-                _log.WarningLine(
-                    "Certain properties were missing or had missing"
-                        + " or invalid values. Will correct those and re-save now!"
-                );
-                setFromJsonResult.LogWarning();
-                return ResetConfig();
-            }
+            var loadedSettings = UserSettingsSerializer.Deserialize(cleanedJson);
+
+            _userSettings.UpdateSettings(loadedSettings);
 
             return Result.Ok().WithSuccess("UserSettings were loaded successfully!").LogInformation();
         }
@@ -147,11 +134,9 @@ public class ConfigManager : IConfigManager
     {
         _log.InformationLine("Saving user config settings now");
 
-        var jsonSettings = GetJsonSettingsObject();
-        if (jsonSettings.IsFailed)
-            return jsonSettings.ToResult();
+        var jsonSettings = UserSettingsSerializer.Serialize(_userSettings);
 
-        var writeResult = WriteToConfigFile(jsonSettings.Value);
+        var writeResult = WriteToConfigFile(jsonSettings);
         if (writeResult.IsFailed)
             return writeResult;
 
@@ -185,23 +170,6 @@ public class ConfigManager : IConfigManager
         }
 
         return readResult;
-    }
-
-    private Result<string> GetJsonSettingsObject()
-    {
-        try
-        {
-            return Result.Ok(
-                JsonSerializer.Serialize(
-                    _userSettings.GetSettingsModel(),
-                    DefaultJsonSerializerOptions.ConfigManagerOptions
-                )
-            );
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
     }
 
     #endregion

@@ -30,4 +30,8 @@
 		<ProjectReference Include="..\FluentResultExtensions\FluentResultExtensions.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Common\DownloadManager\" />
+	</ItemGroup>
+
 </Project>

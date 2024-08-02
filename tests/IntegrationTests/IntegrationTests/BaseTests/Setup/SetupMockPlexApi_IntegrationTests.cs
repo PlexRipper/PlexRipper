@@ -3,10 +3,10 @@ using PlexRipper.PlexApi.Api;
 
 namespace IntegrationTests.BaseTests.Setup;
 
-
 public class SetupMockPlexApi_IntegrationTests : BaseIntegrationTests
 {
-    public SetupMockPlexApi_IntegrationTests(ITestOutputHelper output) : base(output) { }
+    public SetupMockPlexApi_IntegrationTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldSpinUpOneMockPlexServerWithPlexApi_WhenGivenDefaultSettings()
@@ -70,7 +70,9 @@ public class SetupMockPlexApi_IntegrationTests : BaseIntegrationTests
         var identityResponses = new List<ServerIdentityResponse>();
         foreach (var resource in response)
         {
-            var identityResponse = await GetAsync<ServerIdentityResponse>(PlexApiPaths.ServerIdentity(resource.Connections[0].Uri));
+            var identityResponse = await GetAsync<ServerIdentityResponse>(
+                PlexApiPaths.ServerIdentity(resource.Connections[0].Uri)
+            );
             identityResponses.Add(identityResponse);
         }
 

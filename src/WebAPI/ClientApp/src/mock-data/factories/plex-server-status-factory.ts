@@ -1,6 +1,7 @@
 import { randRecentDate } from '@ngneat/falso';
-import { PlexServerStatusDTO } from '@dto/mainApi';
-import { checkConfig, MockConfig } from '@mock';
+import { times } from 'lodash-es';
+import type { PlexServerStatusDTO } from '@dto';
+import { checkConfig, type MockConfig } from '@mock';
 
 let plexServerStatusIndexId = 1;
 
@@ -39,7 +40,7 @@ export function generatePlexServerStatuses({
 	config: Partial<MockConfig>;
 }): PlexServerStatusDTO[] {
 	const validConfig = checkConfig(config);
-	return Array(validConfig.plexServerStatusCount)
-		.fill(null)
-		.map(() => generatePlexServerStatus({ id: plexServerStatusIndexId++, plexServerId, plexServerConnectionId, config }));
+	return times(validConfig.plexServerStatusCount, () =>
+		generatePlexServerStatus({ id: plexServerStatusIndexId++, plexServerId, plexServerConnectionId, config }),
+	);
 }

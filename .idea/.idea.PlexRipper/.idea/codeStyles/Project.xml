@@ -1,7 +1,7 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
     <option name="LINE_SEPARATOR" value="&#10;" />
-    <option name="RIGHT_MARGIN" value="200" />
+    <option name="RIGHT_MARGIN" value="80" />
     <XML>
       <option name="XML_KEEP_BLANK_LINES" value="1" />
     </XML>

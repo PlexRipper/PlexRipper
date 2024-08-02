@@ -16,6 +16,7 @@ const classes = computed(() => {
 	};
 });
 </script>
+
 <style lang="scss">
 .q-sub-header {
 	align-items: center;

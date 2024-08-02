@@ -1,13 +1,18 @@
 <template>
-	<div :class="{ 'media-table-header-column': true, sorted: sorted }" @click="onClick">
-		<span> {{ column.label }} <q-icon v-if="column.sortable" :name="icon" class="header-sort-icon" /></span>
+	<div
+		:class="{ 'media-table-header-column': true, 'sorted': sorted }"
+		@click="onClick">
+		<span> {{ column.label }} <q-icon
+			v-if="column.sortable"
+			:name="icon"
+			class="header-sort-icon" /></span>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import { IMediaOverviewSort } from '@composables/event-bus';
-import { QTreeViewTableHeader } from '@props';
+import type { IMediaOverviewSort } from '@composables/event-bus';
+import type { QTreeViewTableHeader } from '@props';
 import { useMediaOverviewStore } from '~/store';
 
 const mediaOverviewStore = useMediaOverviewStore();
@@ -68,6 +73,7 @@ onBeforeMount(() => {
 	});
 });
 </script>
+
 <style lang="scss">
 .media-table-header-column {
 	white-space: nowrap;

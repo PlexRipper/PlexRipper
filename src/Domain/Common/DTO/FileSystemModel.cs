@@ -1,16 +1,20 @@
 ﻿namespace PlexRipper.Domain;
 
-public class FileSystemModel
+public record FileSystemModel
 {
-    public FileSystemEntityType Type { get; set; }
+    public required FileSystemEntityType Type { get; init; }
 
-    public string Name { get; set; }
+    public required string Name { get; init; }
 
-    public string Path { get; set; }
+    public required string Path { get; init; }
 
-    public string Extension { get; set; }
+    public required string Extension { get; init; }
 
-    public long Size { get; set; }
+    public required long Size { get; init; }
 
-    public DateTime? LastModified { get; set; }
+    public required DateTime? LastModified { get; init; }
+
+    public required bool HasReadPermission { get; init; }
+
+    public required bool HasWritePermission { get; init; }
 }

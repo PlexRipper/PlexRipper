@@ -1,4 +1,4 @@
-import ResultDTO from '@dto/ResultDTO';
+import type { ResultDTO } from '@interfaces';
 
 export default interface IAlert {
 	id: number;

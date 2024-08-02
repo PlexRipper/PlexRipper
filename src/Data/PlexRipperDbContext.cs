@@ -2,6 +2,8 @@ using System.Globalization;
 using System.Reflection;
 using AppAny.Quartz.EntityFrameworkCore.Migrations;
 using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
+using Data.Contracts;
+using EFCore.BulkExtensions;
 using Environment;
 using Logging.Interface;
 using Microsoft.Data.Sqlite;
@@ -12,7 +14,7 @@ using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data;
 
-public sealed class PlexRipperDbContext : DbContext, ISetup
+public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContext
 {
     private readonly IPathProvider _pathProvider;
 
@@ -24,15 +26,13 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
 
     public DbSet<PlexAccount> PlexAccounts { get; set; }
 
-    public DbSet<DownloadTask> DownloadTasks { get; set; }
-
     public DbSet<DownloadWorkerTask> DownloadWorkerTasks { get; set; }
 
     public DbSet<DownloadWorkerLog> DownloadWorkerTasksLogs { get; set; }
 
     public DbSet<FolderPath> FolderPaths { get; set; }
 
-    public DbSet<DownloadFileTask> FileTasks { get; set; }
+    public DbSet<FileTask> FileTasks { get; set; }
 
     public DbSet<Notification> Notifications { get; set; }
 
@@ -70,6 +70,22 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
 
     #endregion
 
+    #region DownloadTasks
+
+    public DbSet<DownloadTaskMovie> DownloadTaskMovie { get; set; }
+
+    public DbSet<DownloadTaskMovieFile> DownloadTaskMovieFile { get; set; }
+
+    public DbSet<DownloadTaskTvShow> DownloadTaskTvShow { get; set; }
+
+    public DbSet<DownloadTaskTvShowSeason> DownloadTaskTvShowSeason { get; set; }
+
+    public DbSet<DownloadTaskTvShowEpisode> DownloadTaskTvShowEpisode { get; set; }
+
+    public DbSet<DownloadTaskTvShowEpisodeFile> DownloadTaskTvShowEpisodeFile { get; set; }
+
+    #endregion
+
     #region JoinTables
 
     public DbSet<PlexAccountServer> PlexAccountServers { get; set; }
@@ -88,13 +104,27 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
 
     public string ConfigDirectory { get; set; }
 
-    /// <summary>
-    /// Determines if this <see cref="PlexRipperDbContext"/> has been setup already during integration or unit testing.
-    /// </summary>
-    public bool HasBeenSetup { get; set; }
+    public async Task BulkInsertAsync<T>(
+        IList<T> entities,
+        BulkConfig? bulkConfig = null,
+        CancellationToken cancellationToken = default
+    )
+        where T : class
+    {
+        await DbContextBulkExtensions.BulkInsertAsync(this, entities, bulkConfig, cancellationToken: cancellationToken);
+    }
+
+    public async Task BulkUpdateAsync<T>(
+        IList<T> entities,
+        BulkConfig? bulkConfig = null,
+        CancellationToken cancellationToken = default
+    )
+        where T : class
+    {
+        await DbContextBulkExtensions.BulkUpdateAsync(this, entities, bulkConfig, cancellationToken: cancellationToken);
+    }
 
     private static readonly NaturalSortComparer NaturalComparer = new(StringComparison.InvariantCultureIgnoreCase);
-
 
     #endregion Properties
 
@@ -110,7 +140,8 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
         ConfigDirectory = _pathProvider.ConfigDirectory;
     }
 
-    public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options, string databaseName = "") : base(options)
+    public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options, string databaseName = "")
+        : base(options)
     {
         DatabaseName = databaseName;
         Database.OpenConnection();
@@ -127,12 +158,18 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
         {
             // Source: https://github.com/tompazourek/NaturalSort.Extension
             SqliteConnection databaseConnection = new(PathProvider.DatabaseConnectionString);
-            databaseConnection.CreateCollation(OrderByNaturalExtensions.CollationName, (x, y) => NaturalComparer.Compare(x, y));
+            databaseConnection.CreateCollation(
+                OrderByNaturalExtensions.CollationName,
+                (x, y) => NaturalComparer.Compare(x, y)
+            );
 
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             optionsBuilder.LogTo(text => LogManager.DbContextLogger(text), LogLevel.Error);
             optionsBuilder.EnableDetailedErrors();
-            optionsBuilder.UseSqlite(databaseConnection, b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName));
+            optionsBuilder.UseSqlite(
+                databaseConnection,
+                b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName)
+            );
         }
     }
 
@@ -145,21 +182,13 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
 
         // NOTE: This has been added to PlexRipperDbContext.OnModelCreating
         // Based on: https://stackoverflow.com/a/63992731/8205497
-        builder.Entity<PlexMovie>()
-            .Property(x => x.MediaData)
-            .HasJsonValueConversion();
+        builder.Entity<PlexMovie>().Property(x => x.MediaData).HasJsonValueConversion();
 
-        builder.Entity<PlexTvShow>()
-            .Property(x => x.MediaData)
-            .HasJsonValueConversion();
+        builder.Entity<PlexTvShow>().Property(x => x.MediaData).HasJsonValueConversion();
 
-        builder.Entity<PlexTvShowSeason>()
-            .Property(x => x.MediaData)
-            .HasJsonValueConversion();
+        builder.Entity<PlexTvShowSeason>().Property(x => x.MediaData).HasJsonValueConversion();
 
-        builder.Entity<PlexTvShowEpisode>()
-            .Property(x => x.MediaData)
-            .HasJsonValueConversion();
+        builder.Entity<PlexTvShowEpisode>().Property(x => x.MediaData).HasJsonValueConversion();
 
         builder = PlexRipperDBContextSeed.SeedDatabase(builder);
 
@@ -238,7 +267,9 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
             Directory.CreateDirectory(dbBackUpPath);
 
             // Wait until the database is available.
-            StreamExtensions.WaitForFile(_pathProvider.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)?.Dispose();
+            StreamExtensions
+                .WaitForFile(_pathProvider.DatabasePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)
+                ?.Dispose();
 
             foreach (var databaseFilePath in _pathProvider.DatabaseFiles)
             {
@@ -249,12 +280,20 @@ public sealed class PlexRipperDbContext : DbContext, ISetup
                     {
                         File.Copy(databaseFilePath, destinationPath);
                         _log.Here()
-                            .Information("Successfully copied \"{DatabaseFilePath}\" to back-up location\"{DestinationPath}\"", databaseFilePath,
-                                destinationPath);
+                            .Information(
+                                "Successfully copied \"{DatabaseFilePath}\" to back-up location\"{DestinationPath}\"",
+                                databaseFilePath,
+                                destinationPath
+                            );
                     }
                     catch (Exception e)
                     {
-                        _log.Here().Error("Failed to copy {DatabaseFilePath} to back-up location {DestinationPath}", databaseFilePath, destinationPath);
+                        _log.Here()
+                            .Error(
+                                "Failed to copy {DatabaseFilePath} to back-up location {DestinationPath}",
+                                databaseFilePath,
+                                destinationPath
+                            );
                         _log.Error(e);
                     }
 

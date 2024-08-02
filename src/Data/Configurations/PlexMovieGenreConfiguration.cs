@@ -7,7 +7,6 @@ public class PlexMovieGenreConfiguration : IEntityTypeConfiguration<PlexMovieGen
 {
     public void Configure(EntityTypeBuilder<PlexMovieGenre> builder)
     {
-        builder
-            .HasKey(bc => new { bc.PlexMoviesId, bc.PlexGenreId });
+        builder.HasKey(bc => new { bc.PlexMoviesId, bc.PlexGenreId });
     }
 }

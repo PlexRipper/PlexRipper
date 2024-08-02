@@ -1,6 +1,5 @@
 using Application.Contracts;
 using Logging.Interface;
-using PlexApi.Contracts;
 using PlexRipper.PlexApi.Api.Users.SignIn;
 using PlexRipper.PlexApi.Helpers;
 using PlexRipper.PlexApi.Models;
@@ -77,10 +76,12 @@ public class PlexApi
         return Result.Fail("Result from RequestPlexSignInDataAsync() was null.").LogError();
     }
 
-    public async Task<Result<PlexServerStatus>> GetServerStatusAsync(string serverBaseUrl, Action<PlexApiClientProgress> action = null)
+    public async Task<Result<PlexServerStatus>> GetServerStatusAsync(
+        string serverBaseUrl,
+        Action<PlexApiClientProgress>? action = null
+    )
     {
-        var request = new RestRequest(PlexApiPaths.ServerIdentity(serverBaseUrl));
-        request.Timeout = 10000;
+        var request = new RestRequest(PlexApiPaths.ServerIdentity(serverBaseUrl)) { Timeout = 5000 };
 
         _log.Debug("Requesting PlexServerStatus for {Url}", serverBaseUrl);
         var response = await _client.SendRequestAsync<ServerIdentityResponse>(request, 1, action);
@@ -98,13 +99,17 @@ public class PlexApi
                 break;
         }
 
-        return Result.Ok(new PlexServerStatus
-        {
-            StatusCode = statusCode,
-            StatusMessage = statusMessage,
-            LastChecked = DateTime.UtcNow,
-            IsSuccessful = response.IsSuccess,
-        });
+        return Result.Ok(
+            new PlexServerStatus
+            {
+                StatusCode = statusCode,
+                StatusMessage = statusMessage,
+                LastChecked = DateTime.UtcNow,
+                IsSuccessful = response.IsSuccess,
+                PlexServerId = 0,
+                PlexServerConnectionId = 0,
+            }
+        );
     }
 
     /// <summary>
@@ -150,7 +155,11 @@ public class PlexApi
     /// <param name="plexServerBaseUrl"></param>
     /// <param name="libraryKey"></param>
     /// <returns></returns>
-    public async Task<Result<PlexMediaContainerDTO>> GetMetadataForLibraryAsync(string authToken, string plexServerBaseUrl, string libraryKey)
+    public async Task<Result<PlexMediaContainerDTO>> GetMetadataForLibraryAsync(
+        string authToken,
+        string plexServerBaseUrl,
+        string libraryKey
+    )
     {
         var request = new RestRequest(PlexApiPaths.GetLibrariesMetadata(plexServerBaseUrl, libraryKey));
 
@@ -158,26 +167,6 @@ public class PlexApi
         request.AddQueryParameter("includeMeta", "1");
 
         return await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
-    }
-
-    public async Task<PlexMediaContainerDTO> GetMetadataAsync(string authToken, string plexFullHost, int metadataId)
-    {
-        var request = new RestRequest(new Uri($"{plexFullHost}/library/metadata/{metadataId}"));
-
-        request.AddToken(authToken);
-
-        var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
-        return result.ValueOrDefault;
-    }
-
-    public async Task<PlexMediaContainerDTO> GetMetadataAsync(string authToken, string metaDataUrl)
-    {
-        var request = new RestRequest(new Uri(metaDataUrl));
-
-        request.AddToken(authToken);
-
-        var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
-        return result.ValueOrDefault;
     }
 
     public async Task<PlexMediaContainerDTO> GetSeasonsAsync(string authToken, string plexFullHost, int ratingKey)
@@ -197,7 +186,11 @@ public class PlexApi
     /// <param name="plexServerUrl">The <see cref="PlexServer" /> url.</param>
     /// <param name="plexLibraryKey">The rating key from the <see cref="PlexLibrary" />.</param>
     /// <returns></returns>
-    public async Task<PlexMediaContainerDTO> GetAllSeasonsAsync(string authToken, string plexServerUrl, string plexLibraryKey)
+    public async Task<PlexMediaContainerDTO> GetAllSeasonsAsync(
+        string authToken,
+        string plexServerUrl,
+        string plexLibraryKey
+    )
     {
         var request = new RestRequest(new Uri($"{plexServerUrl}/library/sections/{plexLibraryKey}/all"));
 
@@ -217,7 +210,13 @@ public class PlexApi
     /// <param name="from">The start range from which to request.</param>
     /// <param name="to">The end range to request for.</param>
     /// <returns></returns>
-    public async Task<PlexMediaContainerDTO> GetAllEpisodesAsync(string authToken, string plexServerUrl, string plexLibraryKey, int from, int to)
+    public async Task<PlexMediaContainerDTO> GetAllEpisodesAsync(
+        string authToken,
+        string plexServerUrl,
+        string plexLibraryKey,
+        int from,
+        int to
+    )
     {
         var request = new RestRequest(new Uri($"{plexServerUrl}/library/sections/{plexLibraryKey}/all"));
 
@@ -246,7 +245,12 @@ public class PlexApi
     /// <param name="width">The optional width of the banner, default is 680px.</param>
     /// <param name="height">The optional height of the banner, default is 1000px.</param>
     /// <returns>The raw image data in a <see cref="Result" /></returns>
-    public async Task<Result<byte[]>> GetPlexMediaImageAsync(string imageUrl, string authToken, int width = 0, int height = 0)
+    public async Task<Result<byte[]>> GetPlexMediaImageAsync(
+        string imageUrl,
+        string authToken,
+        int width = 0,
+        int height = 0
+    )
     {
         if (width > 0 && height > 0)
             imageUrl = $"{imageUrl}&width={width}&height={height}&minSize=1&upscale=1";

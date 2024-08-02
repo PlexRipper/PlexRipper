@@ -1,13 +1,14 @@
 <template>
-	<q-page>
-		<q-section>
+	<QPage>
+		<QSection>
 			<template #header>
 				{{ t('pages.settings.accounts.header') }}
 			</template>
-			<account-overview />
-		</q-section>
-	</q-page>
+			<AccountOverview />
+		</QSection>
+	</QPage>
 </template>
+
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 

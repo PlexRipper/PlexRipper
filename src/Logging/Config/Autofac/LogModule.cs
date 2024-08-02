@@ -13,6 +13,14 @@ public class LogModule : Module
     {
         builder.Register<ILogger>((_, _) => LogConfig.GetLogger()).SingleInstance();
         builder.RegisterType<Log>().As<ILog>().SingleInstance();
-        builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();
+
+        builder
+            .RegisterGeneric(typeof(Log<>))
+            .As(typeof(ILog<>))
+            .WithParameter(
+                (pi, _) => pi.ParameterType == typeof(Type),
+                (pi, _) => pi.Member.DeclaringType?.GetGenericArguments()[0]
+            )
+            .InstancePerDependency();
     }
 }

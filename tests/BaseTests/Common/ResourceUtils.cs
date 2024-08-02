@@ -46,5 +46,6 @@ public static class ResourceUtils
 
 public class ResourceUtilsException : Exception
 {
-    public ResourceUtilsException(string message) : base(message) { }
+    public ResourceUtilsException(string message)
+        : base(message) { }
 }

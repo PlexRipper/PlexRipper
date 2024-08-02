@@ -1,5 +1,5 @@
 <template>
-	<q-page>
-		<folder-paths-overview />
-	</q-page>
+	<QPage>
+		<FolderPathsOverview />
+	</QPage>
 </template>

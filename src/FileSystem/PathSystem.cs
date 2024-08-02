@@ -35,24 +35,11 @@ public class PathSystem : IPathSystem
     {
         try
         {
-            return Result.Ok(Path.GetDirectoryName(filePath));
+            return Result.Ok(Path.GetDirectoryName(filePath) ?? string.Empty);
         }
         catch (Exception e)
         {
             return Result.Fail(new ExceptionalError(e)).LogError();
         }
-    }
-
-    /// <summary>
-    /// Replaces invalid characters from a file or folder name
-    /// Source: https://stackoverflow.com/a/13617375/8205497
-    /// </summary>
-    /// <param name="name"></param>
-    /// <returns></returns>
-    public string SanitizePath(string name)
-    {
-        var invalids = Path.GetInvalidFileNameChars();
-        name = name.Replace(@"·", "-").Replace(": ", " ");
-        return string.Join(" ", name.Split(invalids, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
     }
 }

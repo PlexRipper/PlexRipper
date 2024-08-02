@@ -8,5 +8,4 @@ public class CustomSystemColored : ColoredSystemThemeTemplate
     protected override SystemConsoleThemeStyle TertiaryText { get; } = LogSystemTheme.Style(ConsoleColor.Magenta);
     protected override SystemConsoleThemeStyle Text => LogSystemTheme.Foreground(ConsoleColor.Black);
     protected override SystemConsoleThemeStyle SecondaryText => LogSystemTheme.Foreground(ConsoleColor.Gray);
-
 }

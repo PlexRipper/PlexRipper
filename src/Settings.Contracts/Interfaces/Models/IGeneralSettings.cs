@@ -7,4 +7,5 @@ public interface IGeneralSettings
     int ActiveAccountId { get; set; }
 
     bool DebugMode { get; set; }
+    bool DisableAnimatedBackground { get; set; }
 }

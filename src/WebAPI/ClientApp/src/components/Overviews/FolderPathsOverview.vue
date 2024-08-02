@@ -1,195 +1,208 @@
 <template>
 	<!--	Show warning when no allowed to edit	-->
 	<template v-if="!allowEditing">
-		<q-row>
-			<q-col>
-				<q-alert border="bottom" colored-border type="warning" elevation="2">
+		<QRow>
+			<QCol>
+				<q-alert
+					border="bottom"
+					colored-border
+					elevation="2"
+					type="warning">
 					{{ t('general.alerts.disabled-paths') }}
 				</q-alert>
-			</q-col>
-		</q-row>
+			</QCol>
+		</QRow>
 	</template>
 	<template v-else>
-		<q-section v-for="(folderGroup, i) in getFolderPathsGroups" :key="i">
-			<template v-if="!onlyDefaults" #header> {{ folderGroup.header }}</template>
-			<template v-if="folderGroup.paths.length > 0">
-				<q-row v-for="folderPath in folderGroup.paths" :key="folderPath.id" class="q-my-sm">
-					<q-col cols="3">
-						<editable-text
-							v-if="folderGroup.isFolderNameEditable"
-							:value="folderPath.displayName"
-							:disabled="!allowEditing"
-							@save="saveDisplayName(folderPath.id, $event)" />
-						<help-icon v-else :help-id="toTranslation(folderPath.folderType)" />
-					</q-col>
-					<!--	Folder Path Display	-->
-					<q-col cols="7">
-						<q-input :model-value="folderPath.directory" readonly class="folder-path-input">
-							<IconSquareButton icon="mdi-folder-open-outline" @click="openDirectoryBrowser(folderPath)" />
-						</q-input>
-					</q-col>
-					<!--	Is Valid Icon -->
-					<q-col cols="auto" align-self="center">
-						<valid-icon
-							:valid="folderPath.isValid"
-							:valid-text="t('general.alerts.valid-directory')"
-							:invalid-text="t('general.alerts.invalid-directory')" />
-					</q-col>
-					<!--	Delete Button -->
-					<q-col v-if="folderGroup.IsFolderDeletable" cols="auto">
-						<DeleteIconButton :disabled="!allowEditing" @click="deleteFolderPath(folderPath.id)" />
-					</q-col>
-				</q-row>
+		<QSection
+			v-for="(folderGroup, i) in folderPathStore.getFolderPathsGroups(onlyDefaults)"
+			:key="i">
+			<template
+				v-if="!onlyDefaults"
+				#header>
+				{{ folderGroup.header }}
 			</template>
-			<!--	No custom FolderPaths	Warning-->
+			<template v-if="folderGroup.paths.length > 0">
+				<QRow
+					v-for="folderPath in folderGroup.paths"
+					:key="folderPath.id"
+					class="q-my-sm">
+					<QCol cols="3">
+						<EditableText
+							v-if="folderGroup.isFolderNameEditable"
+							:disabled="!allowEditing"
+							:value="folderPath.displayName"
+							@save="saveDisplayName(folderPath.id, $event)" />
+						<HelpIcon
+							v-else
+							:value="toTranslation(folderPath.folderType)" />
+					</QCol>
+					<!--	Folder Path Display	-->
+					<QCol cols="7">
+						<q-input
+							:model-value="folderPath.directory"
+							class="folder-path-input"
+							readonly>
+							<IconSquareButton
+								icon="mdi-folder-open-outline"
+								@click="openDirectoryBrowser(folderPath)" />
+						</q-input>
+					</QCol>
+					<!--	Is Valid Icon -->
+					<QCol
+						align-self="center"
+						cols="auto">
+						<ValidIcon
+							:invalid-text="t('general.alerts.invalid-directory')"
+							:valid="folderPath.isValid"
+							:valid-text="t('general.alerts.valid-directory')" />
+					</QCol>
+					<!--	Delete Button -->
+					<QCol
+						v-if="folderGroup.IsFolderDeletable"
+						cols="auto">
+						<DeleteIconButton
+							:disabled="!allowEditing"
+							@click="deleteFolderPath(folderPath.id)" />
+					</QCol>
+				</QRow>
+			</template>
+			<!--	No custom FolderPaths	Warning -->
 			<template v-else>
-				<q-row justify="center" class="q-my-sm">
-					<q-col cols="auto">
+				<QRow
+					class="q-my-sm"
+					justify="center">
+					<QCol cols="auto">
 						<h2>{{ t('components.folder-paths-overview.no-paths') }}</h2>
-					</q-col>
-				</q-row>
+					</QCol>
+				</QRow>
 			</template>
 			<!--	Add Path Button	-->
-			<q-row v-if="folderGroup.isFolderAddable" justify="center" class="q-my-sm">
-				<q-col cols="1">
-					<AddIconButton :disabled="!allowEditing" @click="addFolderPath(folderGroup)" />
-				</q-col>
-			</q-row>
-		</q-section>
+			<QRow
+				v-if="folderGroup.isFolderAddable"
+				class="q-my-sm"
+				justify="center">
+				<QCol cols="auto">
+					<AddIconButton
+						:disabled="!allowEditing"
+						@click="addFolderPath(folderGroup)" />
+				</QCol>
+			</QRow>
+		</QSection>
 	</template>
 
 	<!--	Directory Browser	-->
-	<DirectoryBrowser :name="directoryBrowserName" @confirm="confirmDirectoryBrowser" />
+	<DirectoryBrowser
+		:name="directoryBrowserName"
+		@confirm="confirmDirectoryBrowser" />
 </template>
 
-<script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
-import { get } from '@vueuse/core';
-import { kebabCase } from 'lodash-es';
-import { FolderPathDTO, FolderType, PlexMediaType } from '@dto/mainApi';
-import { DownloadService, FolderPathService } from '@service';
-import { useI18n, useOpenControlDialog, toFolderPathStringId } from '#imports';
+<script lang="ts" setup>
+import { type FolderPathDTO, FolderType } from '@dto';
+import type IFolderPathGroup from '@interfaces/IFolderPathGroup';
+import type { IHelp } from '@interfaces';
+import {
+	useI18n,
+	useOpenControlDialog,
+	useFolderPathStore,
+	useSubscription,
+	showErrorNotification,
+} from '#imports';
 
 const { t } = useI18n();
-const props = withDefaults(defineProps<{ onlyDefaults?: boolean }>(), {
+const folderPathStore = useFolderPathStore();
+const downloadStore = useDownloadStore();
+withDefaults(defineProps<{ onlyDefaults?: boolean }>(), {
 	onlyDefaults: false,
 });
 
 const directoryBrowserName = 'customDirectoryBrowser';
-const folderPaths = ref<FolderPathDTO[]>([]);
-const allowEditing = ref(true);
-
-const getFolderPathsGroups = computed((): IFolderPathGroup[] => {
-	const folderPathGroups: IFolderPathGroup[] = [];
-	// Default Paths
-	folderPathGroups.push({
-		header: t('components.folder-paths-overview.main.header'),
-		// The first 3 folderPaths are always the default ones.
-		paths: get(folderPaths).filter((x) => x.id === 1 || x.id === 2 || x.id === 3),
-		mediaType: PlexMediaType.None,
-		folderType: FolderType.None,
-		IsFolderDeletable: false,
-		isFolderNameEditable: false,
-		isFolderAddable: false,
-	});
-
-	if (props.onlyDefaults) {
-		return folderPathGroups;
-	}
-
-	// Movie Paths
-	folderPathGroups.push({
-		header: t('components.folder-paths-overview.movie.header'),
-		paths: get(folderPaths).filter(
-			(x) => x.folderType === FolderType.MovieFolder && !folderPathGroups[0].paths.some((y) => y.id === x.id),
-		),
-		mediaType: PlexMediaType.Movie,
-		folderType: FolderType.MovieFolder,
-		IsFolderDeletable: true,
-		isFolderNameEditable: true,
-		isFolderAddable: true,
-	});
-
-	// TvShow Paths
-	folderPathGroups.push({
-		header: t('components.folder-paths-overview.tv-show.header'),
-		paths: get(folderPaths).filter(
-			(x) => x.folderType === FolderType.TvShowFolder && !folderPathGroups[0].paths.some((y) => y.id === x.id),
-		),
-		mediaType: PlexMediaType.TvShow,
-		folderType: FolderType.TvShowFolder,
-		IsFolderDeletable: true,
-		isFolderNameEditable: true,
-		isFolderAddable: true,
-	});
-
-	return folderPathGroups;
-});
 
 const openDirectoryBrowser = (path: FolderPathDTO): void => {
 	useOpenControlDialog(directoryBrowserName, path);
 };
 
+const allowEditing = computed(() => {
+	return downloadStore.getActiveDownloadList().length === 0;
+});
+
 const confirmDirectoryBrowser = (path: FolderPathDTO): void => {
-	const i = folderPaths.value.findIndex((x) => x.id === path.id);
-	if (i > -1) {
-		const folderPath = { ...folderPaths.value[i], directory: path.directory };
-		FolderPathService.updateFolderPath(folderPath);
+	useSubscription(
+		folderPathStore.setFolderPathDirectory(path.id, path.directory).subscribe({
+			error(err) {
+				showErrorNotification(err);
+			},
+		}),
+	);
+};
+
+function addFolderPath(folderGroup: IFolderPathGroup): void {
+	let displayName = '';
+	switch (folderGroup.folderType) {
+		case FolderType.MovieFolder:
+			displayName = t('components.folder-paths-overview.movie.default-name');
+			break;
+		case FolderType.TvShowFolder:
+			displayName = t('components.folder-paths-overview.tv-show.default-name');
+			break;
+		default:
+			throw new Error(`Unknown folder type: ${folderGroup.folderType}`);
 	}
-};
 
-const addFolderPath = (folderGroup: IFolderPathGroup): void => {
-	FolderPathService.createFolderPath({
-		id: 0,
-		displayName: t(`components.folder-paths-overview.${toFolderPathStringId(folderGroup.folderType)}.default-name`),
-		directory: '',
-		folderType: folderGroup.folderType,
-		mediaType: folderGroup.mediaType,
-		isValid: false,
-	});
-};
+	useSubscription(
+		folderPathStore
+			.createFolderPath({
+				id: 0,
+				displayName,
+				directory: '',
+				folderType: folderGroup.folderType,
+				mediaType: folderGroup.mediaType,
+				isValid: false,
+			})
+			.subscribe(),
+	);
+}
 
-const deleteFolderPath = (id: number): void => {
-	FolderPathService.deleteFolderPath(id);
-};
+function deleteFolderPath(id: number): void {
+	folderPathStore.deleteFolderPath(id).subscribe();
+}
 
-function toTranslation(type: string): string {
-	return `help.settings.paths.${kebabCase(type)}`;
+function toTranslation(type: FolderType): IHelp {
+	switch (type) {
+		case FolderType.DownloadFolder:
+			return {
+				label: t('help.settings.paths.download-folder.label'),
+				text: t('help.settings.paths.download-folder.text'),
+				title: t('help.settings.paths.download-folder.title'),
+			};
+		case FolderType.MovieFolder:
+			return {
+				label: t('help.settings.paths.movie-folder.label'),
+				text: t('help.settings.paths.movie-folder.text'),
+				title: t('help.settings.paths.movie-folder.title'),
+			};
+		case FolderType.TvShowFolder:
+			return {
+				label: t('help.settings.paths.tv-show-folder.label'),
+				text: t('help.settings.paths.tv-show-folder.text'),
+				title: t('help.settings.paths.tv-show-folder.title'),
+			};
+		default:
+			throw new Error('FolderType not supported');
+	}
 }
 
 const saveDisplayName = (id: number, value: string): void => {
-	const folderPathIndex = folderPaths.value.findIndex((x) => x.id === id);
-	if (folderPathIndex > -1) {
-		const folderPath = { ...folderPaths.value[folderPathIndex], displayName: value };
-		FolderPathService.updateFolderPath(folderPath);
-	}
+	useSubscription(
+		folderPathStore.setFolderPathDisplayName(id, value).subscribe({
+			error(err) {
+				showErrorNotification(err);
+			},
+		}),
+	);
 };
-
-onMounted(() => {
-	useSubscription(
-		FolderPathService.getFolderPaths().subscribe((data) => {
-			folderPaths.value = data ?? [];
-		}),
-	);
-
-	// Ensure there are no active downloads before being allowed to change.
-	useSubscription(
-		DownloadService.getActiveDownloadList().subscribe((data) => {
-			allowEditing.value = data?.length === 0 ?? false;
-		}),
-	);
-});
-
-interface IFolderPathGroup {
-	header: string;
-	paths: FolderPathDTO[];
-	mediaType: PlexMediaType;
-	folderType: FolderType;
-	isFolderNameEditable: boolean;
-	isFolderAddable: boolean;
-	IsFolderDeletable: boolean;
-}
 </script>
+
 <style lang="scss">
 .folder-path-input {
 	.q-field__control {

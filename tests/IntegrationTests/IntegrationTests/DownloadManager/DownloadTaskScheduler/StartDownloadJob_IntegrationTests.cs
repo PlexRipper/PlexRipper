@@ -1,18 +1,21 @@
-using PlexRipper.Data.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationTests.DownloadManager.DownloadTaskScheduler;
 
-
 public class StartDownloadJob_IntegrationTests : BaseIntegrationTests
 {
-    public StartDownloadJob_IntegrationTests(ITestOutputHelper output) : base(output) { }
+    public StartDownloadJob_IntegrationTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldSendOutDownloadTaskUpdates_WhenDownloadTaskIsInProgress()
     {
         // Arrange
 
-        var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
+        var serverUri = SpinUpPlexServer(config =>
+        {
+            config.DownloadFileSizeInMb = 50;
+        });
         await SetupDatabase(config =>
         {
             config.MockServerUris.Add(serverUri);
@@ -26,17 +29,15 @@ public class StartDownloadJob_IntegrationTests : BaseIntegrationTests
 
         SetupMockPlexApi();
 
-        await CreateContainer(config => { config.DownloadSpeedLimitInKib = 5000; });
-
-        var downloadTask = Container.PlexRipperDbContext
-            .DownloadTasks
-            .IncludeDownloadTasks()
-            .FirstOrDefault();
-        downloadTask.ShouldNotBeNull();
-        var childDownloadTask = downloadTask.Children[0];
+        await CreateContainer(config =>
+        {
+            config.DownloadSpeedLimitInKib = 5000;
+        });
+        var movieDownloadTasks = await DbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
+        var movieFileDownloadTask = movieDownloadTasks[0].Children[0];
 
         // Act
-        var startResult = await Container.DownloadTaskScheduler.StartDownloadTaskJob(childDownloadTask.Id, childDownloadTask.PlexServerId);
+        var startResult = await Container.DownloadTaskScheduler.StartDownloadTaskJob(movieFileDownloadTask.ToKey());
         await Container.SchedulerService.AwaitScheduler();
 
         // Assert

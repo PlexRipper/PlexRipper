@@ -1,4 +1,4 @@
-﻿using PlexRipper.DownloadManager;
+﻿using FileSystem.Contracts;
 
 namespace PlexRipper.BaseTests;
 

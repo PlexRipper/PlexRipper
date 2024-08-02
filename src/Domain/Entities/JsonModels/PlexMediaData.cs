@@ -1,40 +1,24 @@
 ﻿namespace PlexRipper.Domain;
 
-public class PlexMediaData
+public record PlexMediaData
 {
-    public string MediaFormat { get; set; }
-
-    public long Duration { get; set; }
-
-    public string VideoResolution { get; set; }
-
-    public int Width { get; set; }
-
-    public int Height { get; set; }
-
-    public int Bitrate { get; set; }
-
-    public string VideoCodec { get; set; }
-
-    public string VideoFrameRate { get; set; }
-
-    public double AspectRatio { get; set; }
-
-    public string VideoProfile { get; set; }
-
-    public string AudioProfile { get; set; }
-
-    public string AudioCodec { get; set; }
-
-    public int AudioChannels { get; set; }
-
-    public bool OptimizedForStreaming { get; set; }
-
-    public string Protocol { get; set; }
-
-    public bool Selected { get; set; }
-
-    public List<PlexMediaDataPart> Parts { get; set; }
+    public string MediaFormat { get; init; }
+    public long Duration { get; init; }
+    public string VideoResolution { get; init; }
+    public int Width { get; init; }
+    public int Height { get; init; }
+    public int Bitrate { get; init; }
+    public string VideoCodec { get; init; }
+    public string VideoFrameRate { get; init; }
+    public double AspectRatio { get; init; }
+    public string VideoProfile { get; init; }
+    public string AudioProfile { get; init; }
+    public string AudioCodec { get; init; }
+    public int AudioChannels { get; init; }
+    public bool OptimizedForStreaming { get; init; }
+    public string Protocol { get; init; }
+    public bool Selected { get; init; }
+    public List<PlexMediaDataPart> Parts { get; init; }
 
     public bool IsMultiPart => Parts.Count > 1;
 }

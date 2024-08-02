@@ -1,6 +1,5 @@
-import { randBoolean } from '@ngneat/falso';
-import { checkConfig, MockConfig } from '@mock';
-import { PlexServerDTO, SettingsModelDTO, ViewMode } from '@dto/mainApi';
+import { checkConfig, type MockConfig } from '@mock';
+import { type PlexServerDTO, type SettingsModelDTO, ViewMode } from '@dto';
 
 export function generateSettingsModel({
 	plexServers = [],
@@ -34,7 +33,6 @@ export function generateSettingsModel({
 		languageSettings: {
 			language: 'en-US',
 		},
-
 		generalSettings: {
 			firstTimeSetup: validConfig.firstTimeSetup,
 			debugMode: true,
@@ -50,7 +48,7 @@ export function generateSettingsModel({
 			data: plexServers.map((x) => {
 				return {
 					machineIdentifier: x.machineIdentifier,
-					plexServerName: x.name,
+					plexServerName: '',
 					downloadSpeedLimit: 0,
 				};
 			}),

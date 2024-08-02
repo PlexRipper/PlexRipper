@@ -13,7 +13,8 @@ public static class UriHelper
         if (val == null)
         {
             throw new ApplicationException(
-                "The URI is null, please check your settings to make sure you have configured the applications correctly.");
+                "The URI is null, please check your settings to make sure you have configured the applications correctly."
+            );
         }
 
         try
@@ -26,14 +27,18 @@ public static class UriHelper
             if (val.StartsWith("http://", StringComparison.Ordinal))
             {
                 var split = val.Split('/');
-                uri = split.Length >= 4 ? new UriBuilder(Http, split[2], port, "/" + split[3]) : new UriBuilder(new Uri($"{val}:{port}"));
+                uri =
+                    split.Length >= 4
+                        ? new UriBuilder(Http, split[2], port, "/" + split[3])
+                        : new UriBuilder(new Uri($"{val}:{port}"));
             }
             else if (val.StartsWith("https://", StringComparison.Ordinal))
             {
                 var split = val.Split('/');
-                uri = split.Length >= 4
-                    ? new UriBuilder(Https, split[2], port, "/" + split[3])
-                    : new UriBuilder(Https, split[2], port);
+                uri =
+                    split.Length >= 4
+                        ? new UriBuilder(Https, split[2], port, "/" + split[3])
+                        : new UriBuilder(Https, split[2], port);
             }
             else if (ssl)
                 uri = new UriBuilder(Https, val, port);

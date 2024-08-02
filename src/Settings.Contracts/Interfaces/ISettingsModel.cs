@@ -2,18 +2,19 @@ namespace Settings.Contracts;
 
 public interface ISettingsModel
 {
-    IGeneralSettings GeneralSettings { get; set; }
+    GeneralSettingsModule GeneralSettings { get; init; }
 
-    IConfirmationSettings ConfirmationSettings { get; set; }
+    ConfirmationSettingsModule ConfirmationSettings { get; init; }
 
-    IDateTimeSettings DateTimeSettings { get; set; }
+    DateTimeSettingsModule DateTimeSettings { get; init; }
 
-    IDisplaySettings DisplaySettings { get; set; }
+    DisplaySettingsModule DisplaySettings { get; init; }
 
-    IDownloadManagerSettings DownloadManagerSettings { get; set; }
+    DownloadManagerSettingsModule DownloadManagerSettings { get; init; }
 
-    ILanguageSettings LanguageSettings { get; set; }
+    LanguageSettingsModule LanguageSettings { get; init; }
 
-    IServerSettings ServerSettings { get; set; }
-    IDebugSettings DebugSettings { get; set; }
+    PlexServerSettingsModule ServerSettings { get; init; }
+
+    DebugSettingsModule DebugSettings { get; init; }
 }

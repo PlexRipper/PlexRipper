@@ -18,7 +18,11 @@ public class ValidationPipeline<TRequest, TResponse> : IPipelineBehavior<TReques
         _compositeValidator = compositeValidator;
     }
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(
+        TRequest request,
+        RequestHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken
+    )
     {
         var fluentValidationResult = await _compositeValidator.ValidateAsync(request, cancellationToken);
 

@@ -1,9 +1,0 @@
-{
-	"scripts": {
-		"build": "Description for `npm run build` command",
-		"dev": "Used to run the development server",
-		"generate": "Description for `npm run generate` command",
-		"preview": "Description for `npm run preview` command",
-		"postinstall": "Description for `npm run postinstall` command"
-	}
-}

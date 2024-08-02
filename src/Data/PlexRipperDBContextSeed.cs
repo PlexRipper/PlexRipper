@@ -17,7 +17,6 @@ public static class PlexRipperDBContextSeed
                 FolderType = FolderType.DownloadFolder,
                 MediaType = PlexMediaType.None,
             },
-
             new()
             {
                 Id = 2,
@@ -26,7 +25,6 @@ public static class PlexRipperDBContextSeed
                 FolderType = FolderType.MovieFolder,
                 MediaType = PlexMediaType.Movie,
             },
-
             new()
             {
                 Id = 3,
@@ -35,7 +33,6 @@ public static class PlexRipperDBContextSeed
                 FolderType = FolderType.TvShowFolder,
                 MediaType = PlexMediaType.TvShow,
             },
-
             new()
             {
                 Id = 4,
@@ -44,7 +41,6 @@ public static class PlexRipperDBContextSeed
                 FolderType = FolderType.MusicFolder,
                 MediaType = PlexMediaType.Music,
             },
-
             new()
             {
                 Id = 5,
@@ -53,7 +49,6 @@ public static class PlexRipperDBContextSeed
                 FolderType = FolderType.PhotosFolder,
                 MediaType = PlexMediaType.Photos,
             },
-
             new()
             {
                 Id = 6,
@@ -62,7 +57,6 @@ public static class PlexRipperDBContextSeed
                 FolderType = FolderType.OtherVideosFolder,
                 MediaType = PlexMediaType.OtherVideos,
             },
-
             new()
             {
                 Id = 7,
@@ -71,7 +65,6 @@ public static class PlexRipperDBContextSeed
                 FolderType = FolderType.GamesVideosFolder,
                 MediaType = PlexMediaType.Games,
             },
-
             new()
             {
                 Id = 8,
@@ -80,7 +73,6 @@ public static class PlexRipperDBContextSeed
                 FolderType = FolderType.None,
                 MediaType = PlexMediaType.None,
             },
-
             new()
             {
                 Id = 9,
@@ -89,7 +81,6 @@ public static class PlexRipperDBContextSeed
                 FolderType = FolderType.None,
                 MediaType = PlexMediaType.None,
             },
-
             new()
             {
                 Id = 10,

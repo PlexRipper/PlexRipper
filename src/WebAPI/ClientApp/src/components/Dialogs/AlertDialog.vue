@@ -1,25 +1,40 @@
 <template>
-	<QCardDialog max-width="1000px" :name="name" @closed="onClose">
+	<QCardDialog
+		max-width="1000px"
+		:name="name"
+		@closed="alertStore.removeAlert(alert.id)">
 		<template #title>
 			{{ alert.title }}
 		</template>
 		<template #default>
 			<pre style="white-space: break-spaces">{{ alert.text }}</pre>
-			<span>Request data sent:</span>
-			<pre v-if="alert.result" style="white-space: break-spaces">{{ alert.result }}</pre>
-			<pre v-if="errors" style="white-space: break-spaces">{{ errors }}</pre>
+			<QText>{{ $t('components.alert-dialog.request-data-sent') }}</QText>
+			<pre
+				v-if="alert.result"
+				style="white-space: break-spaces">
+				{{ alert.result }}
+			</pre>
+			<pre
+				v-if="errors"
+				style="white-space: break-spaces">
+				{{ errors }}
+			</pre>
 		</template>
 		<template #actions="{ close }">
 			<q-space />
 			<!--	Close action	-->
-			<base-button text-id="close" @click="close" />
+			<BaseButton
+				:label="$t('general.commands.close')"
+				@click="close" />
 		</template>
 	</QCardDialog>
 </template>
 
 <script setup lang="ts">
 import type IAlert from '@interfaces/IAlert';
-import { AlertService } from '@service';
+import { useAlertStore } from '~/store';
+
+const alertStore = useAlertStore();
 
 const props = defineProps<{ name: string; alert: IAlert }>();
 
@@ -29,8 +44,4 @@ const errors = computed(() => {
 	}
 	return null;
 });
-
-function onClose(): void {
-	AlertService.removeAlert(props.alert.id);
-}
 </script>

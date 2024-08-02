@@ -10,8 +10,6 @@ public interface IMount
 
     bool IsReady { get; }
 
-    MountOptions MountOptions { get; }
-
     string Name { get; }
 
     string RootDirectory { get; }

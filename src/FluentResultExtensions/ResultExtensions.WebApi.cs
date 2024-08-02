@@ -418,7 +418,7 @@ public static partial class ResultExtensions
 
     public static Result<T> Create204NoContentResult<T>(T value, string message = "")
     {
-        return CreateSuccessStatusCodeResult<T>(value, HttpCodes.Status204NoContent, message);
+        return CreateSuccessStatusCodeResult(value, HttpCodes.Status204NoContent, message);
     }
 
     #endregion

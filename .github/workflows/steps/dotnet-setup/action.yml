@@ -1,0 +1,19 @@
+name: 'Dotnet Setup'
+description: 'Setup .NET, restore dependencies and build'
+runs:
+    using: 'composite'
+    steps:
+        -   name: Setup .NET SDK
+            uses: actions/setup-dotnet@v4
+            with:
+                dotnet-version: 8.x.x
+                cache: true
+                cache-dependency-path: |
+                    **/*.csproj
+                    **/global.json
+        -   name: Restore dependencies
+            shell: bash
+            run: dotnet restore PlexRipper.sln --locked-mode
+        -   name: Build
+            shell: bash
+            run: dotnet build PlexRipper.sln --no-restore

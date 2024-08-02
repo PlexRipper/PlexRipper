@@ -31,12 +31,15 @@ public class FileSystemModule : Module
         builder.RegisterType<DiskProvider>().As<IDiskProvider>().SingleInstance();
         builder.RegisterType<FileMergeStreamProvider>().As<IFileMergeStreamProvider>().SingleInstance();
         builder.RegisterType<FileMergeSystem>().As<IFileMergeSystem>().SingleInstance();
-        builder.RegisterType<FileMergeScheduler>().As<IFileMergeScheduler>().SingleInstance();
+        builder.RegisterType<DownloadFileStream>().As<IDownloadFileStream>().SingleInstance();
 
         builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
 
         // System.IO.Abstractions
-        builder.RegisterType<System.IO.Abstractions.FileSystem>().As<System.IO.Abstractions.IFileSystem>().SingleInstance();
+        builder
+            .RegisterType<System.IO.Abstractions.FileSystem>()
+            .As<System.IO.Abstractions.IFileSystem>()
+            .SingleInstance();
         builder.RegisterType<PathWrapper>().As<IPath>().SingleInstance();
 
         // MediatR

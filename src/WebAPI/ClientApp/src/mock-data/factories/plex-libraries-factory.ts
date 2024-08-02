@@ -1,6 +1,7 @@
 import { randCompanyName, randDirectoryPath, randNumber, randRecentDate, randUuid } from '@ngneat/falso';
-import { checkConfig, incrementSeed, MockConfig } from '@mock';
-import { FolderPathDTO, PlexLibraryDTO, PlexMediaType } from '@dto/mainApi';
+import { times } from 'lodash-es';
+import { checkConfig, incrementSeed, type MockConfig } from '@mock';
+import { PlexMediaType, type FolderPathDTO, type PlexLibraryDTO, type PlexServerDTO } from '@dto';
 
 let plexLibraryIdIndex = 1;
 
@@ -67,7 +68,30 @@ export function generatePlexLibraries({
 		default:
 			throw new Error(`Invalid Plex media type: ${type}`);
 	}
-	return Array(count)
-		.fill(null)
-		.map(() => generatePlexLibrary({ id: plexLibraryIdIndex++, type, plexServerId, partialData }));
+	return times(count, () => generatePlexLibrary({ id: plexLibraryIdIndex++, type, plexServerId, partialData }));
+}
+
+export function generatePlexLibrariesFromPlexServers({
+	plexServers,
+	config = {},
+}: {
+	plexServers: PlexServerDTO[];
+	config?: Partial<MockConfig>;
+}): PlexLibraryDTO[] {
+	return plexServers
+		.map((x) => {
+			return [
+				...generatePlexLibraries({
+					type: PlexMediaType.Movie,
+					config,
+					plexServerId: x.id,
+				}),
+				...generatePlexLibraries({
+					type: PlexMediaType.TvShow,
+					config,
+					plexServerId: x.id,
+				}),
+			];
+		})
+		.flat();
 }

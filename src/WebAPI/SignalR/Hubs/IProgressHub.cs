@@ -1,10 +1,9 @@
-using PlexRipper.WebAPI.Common.DTO;
-using PlexRipper.WebAPI.SignalR.Common;
+using Application.Contracts;
 using SignalRSwaggerGen.Attributes;
 using SignalRSwaggerGen.Enums;
 using WebAPI.Contracts;
 
-namespace PlexRipper.WebAPI.SignalR.Hubs;
+namespace PlexRipper.WebAPI;
 
 [SignalRHub(autoDiscover: AutoDiscover.MethodsAndParams)]
 public interface IProgressHub
@@ -25,15 +24,22 @@ public interface IProgressHub
     [SignalRMethod(operation: Operation.Get, autoDiscover: AutoDiscover.None)]
     Task ServerConnectionCheckStatusProgress(
         ServerConnectionCheckStatusProgressDTO serverConnectionCheckStatusProgress,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default
+    );
 
     [return: SignalRReturn(typeof(Task<InspectServerProgressDTO>), 200, "Success")]
     [SignalRMethod(operation: Operation.Get, autoDiscover: AutoDiscover.None)]
-    Task InspectServerProgress(InspectServerProgressDTO InspectServerProgress, CancellationToken cancellationToken = default);
+    Task InspectServerProgress(
+        InspectServerProgressDTO InspectServerProgress,
+        CancellationToken cancellationToken = default
+    );
 
     [return: SignalRReturn(typeof(Task<ServerDownloadProgressDTO>), 200, "Success")]
     [SignalRMethod(operation: Operation.Get, autoDiscover: AutoDiscover.None)]
-    Task ServerDownloadProgress(ServerDownloadProgressDTO serverDownloadProgress, CancellationToken cancellationToken = default);
+    Task ServerDownloadProgress(
+        ServerDownloadProgressDTO serverDownloadProgress,
+        CancellationToken cancellationToken = default
+    );
 
     [return: SignalRReturn(typeof(Task<DownloadTaskDTO>), 200, "Success")]
     [SignalRMethod(operation: Operation.Get, autoDiscover: AutoDiscover.None)]

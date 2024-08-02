@@ -15,7 +15,8 @@ public class PlexApiDataConfig
 
     public static PlexApiDataConfig FromOptions(
         Action<PlexApiDataConfig> action = null,
-        PlexApiDataConfig defaultValue = null)
+        PlexApiDataConfig defaultValue = null
+    )
     {
         var config = defaultValue ?? new PlexApiDataConfig();
         action?.Invoke(config);

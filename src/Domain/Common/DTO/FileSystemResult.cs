@@ -1,10 +1,12 @@
 ﻿namespace PlexRipper.Domain;
 
-public class FileSystemResult
+public record FileSystemResult
 {
-    public string Parent { get; set; }
+    public required string Parent { get; init; }
 
-    public List<FileSystemModel> Directories { get; set; } = new();
+    public required List<FileSystemModel> Directories { get; init; } = new();
 
-    public List<FileSystemModel> Files { get; set; } = new();
+    public required List<FileSystemModel> Files { get; init; } = new();
+
+    public required FileSystemModel? Current { get; init; }
 }

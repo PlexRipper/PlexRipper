@@ -1,12 +1,11 @@
-using System.Text.Json;
-using FluentResults;
+using System.Text.Json.Serialization;
 
 namespace Settings.Contracts;
 
 /// <summary>
 /// Used to store and load settings from a json file.
 /// </summary>
-public interface IUserSettings
+public interface IUserSettings : ISettingsModel
 {
     /// <summary>
     /// Reverts all settings to their default value.
@@ -18,14 +17,9 @@ public interface IUserSettings
     /// The UserSettings also inherits from <see cref="ISettingsModel"/> such that we can simply do "userSettings.ApiKey"
     /// instead of having a separate instance of the <see cref="ISettingsModel"/> in the UserSettings.
     /// </summary>
-    /// <param name="sourceSettings">The values to be used to set this UserSettings instance.</param>
-    Result<ISettingsModel> UpdateSettings(ISettingsModel sourceSettings);
+    /// <param name="sourceUserSettings"> values to be used to set this UserSettings instance.</param>
+    UserSettings UpdateSettings(ISettingsModel sourceUserSettings);
 
-    IObservable<ISettingsModel> SettingsUpdated { get; }
-
-    Result SetFromJsonObject(JsonElement settingsJsonElement);
-
-    ISettingsModel GetSettingsModel();
-
-    ISettingsModel GetDefaultSettingsModel();
+    [JsonIgnore]
+    IObservable<UserSettings> SettingsUpdated { get; }
 }

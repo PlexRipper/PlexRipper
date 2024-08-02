@@ -1,11 +1,14 @@
 <template>
-	<q-scroll-area class="fit" :thumb-style="thumbStyle" :bar-style="barStyle">
+	<q-scroll-area
+		class="fit"
+		:thumb-style="thumbStyle"
+		:bar-style="barStyle">
 		<slot />
 	</q-scroll-area>
 </template>
 
 <script setup lang="ts">
-import { VueStyleObjectProp } from 'quasar/dist/types/api';
+import type { VueStyleObjectProp } from 'quasar';
 
 const thumbStyle: VueStyleObjectProp = {
 	right: '4px',

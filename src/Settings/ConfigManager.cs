@@ -1,8 +1,6 @@
-﻿using System.Text.Json;
-using Environment;
+﻿using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;
-using PlexRipper.Domain.Config;
 using Settings.Contracts;
 
 namespace PlexRipper.Settings;
@@ -24,7 +22,13 @@ public class ConfigManager : IConfigManager
 
     #region Constructor
 
-    public ConfigManager(ILog log, IFileSystem fileSystem, IDirectorySystem directorySystem, IPathProvider pathProvider, IUserSettings userSettings)
+    public ConfigManager(
+        ILog log,
+        IFileSystem fileSystem,
+        IDirectorySystem directorySystem,
+        IPathProvider pathProvider,
+        IUserSettings userSettings
+    )
     {
         _log = log;
         _fileSystem = fileSystem;
@@ -41,7 +45,12 @@ public class ConfigManager : IConfigManager
     {
         _userSettings.SettingsUpdated.Subscribe(_ => SaveConfig());
 
-        _log.Here().Information("Checking if {ConfigFileName} exists at {ConfigDirectory}", _pathProvider.ConfigFileName, _pathProvider.ConfigDirectory);
+        _log.Here()
+            .Information(
+                "Checking if {ConfigFileName} exists at {ConfigDirectory}",
+                _pathProvider.ConfigFileName,
+                _pathProvider.ConfigDirectory
+            );
 
         var configDirectoryExistsResult = _directorySystem.Exists(_pathProvider.ConfigDirectory);
         if (configDirectoryExistsResult.IsFailed)
@@ -51,7 +60,10 @@ public class ConfigManager : IConfigManager
             _log.Information("Config directory exists, will use {ConfigDirectory}", _pathProvider.ConfigDirectory);
         else
         {
-            _log.Information("Config directory does not exist, will create now at {ConfigDirectory}", _pathProvider.ConfigDirectory);
+            _log.Information(
+                "Config directory does not exist, will create now at {ConfigDirectory}",
+                _pathProvider.ConfigDirectory
+            );
             var createResult = _directorySystem.CreateDirectory(_pathProvider.ConfigDirectory);
             if (createResult.IsFailed)
             {
@@ -64,7 +76,12 @@ public class ConfigManager : IConfigManager
 
         if (!ConfigFileExists())
         {
-            _log.Here().Information("{ConfigFileName} doesn't exist, will create new one now in {ConfigDirectory}", _pathProvider.ConfigFileName, _pathProvider.ConfigDirectory);
+            _log.Here()
+                .Information(
+                    "{ConfigFileName} doesn't exist, will create new one now in {ConfigDirectory}",
+                    _pathProvider.ConfigFileName,
+                    _pathProvider.ConfigDirectory
+                );
             return SaveConfig();
         }
 
@@ -78,21 +95,19 @@ public class ConfigManager : IConfigManager
         var readResult = ReadFromConfigFile();
         if (readResult.IsFailed)
         {
-            _log.Information("Resetting {ConfigFileName} because it could not be loaded correctly", _pathProvider.ConfigFileName);
+            _log.Information(
+                "Resetting {ConfigFileName} because it could not be loaded correctly",
+                _pathProvider.ConfigFileName
+            );
             return ResetConfig();
         }
 
         try
         {
             var cleanedJson = readResult.Value.Replace("\r\n", "");
-            var loadedSettings = JsonSerializer.Deserialize<JsonElement>(cleanedJson, DefaultJsonSerializerOptions.ConfigManagerOptions);
-            var setFromJsonResult = _userSettings.SetFromJsonObject(loadedSettings);
-            if (setFromJsonResult.IsFailed)
-            {
-                _log.WarningLine("Certain properties were missing or had missing or invalid values. Will correct those and re-save now!");
-                setFromJsonResult.LogWarning();
-                return ResetConfig();
-            }
+            var loadedSettings = UserSettingsSerializer.Deserialize(cleanedJson);
+
+            _userSettings.UpdateSettings(loadedSettings);
 
             return Result.Ok().WithSuccess("UserSettings were loaded successfully!").LogInformation();
         }
@@ -119,21 +134,16 @@ public class ConfigManager : IConfigManager
     {
         _log.InformationLine("Saving user config settings now");
 
-        var jsonSettings = GetJsonSettingsObject();
-        if (jsonSettings.IsFailed)
-            return jsonSettings.ToResult();
+        var jsonSettings = UserSettingsSerializer.Serialize(_userSettings);
 
-        var writeResult = WriteToConfigFile(jsonSettings.Value);
+        var writeResult = WriteToConfigFile(jsonSettings);
         if (writeResult.IsFailed)
             return writeResult;
 
         return Result.Ok().WithSuccess("UserSettings were saved successfully!").LogInformation();
     }
 
-    public virtual bool ConfigFileExists()
-    {
-        return _fileSystem.FileExists(_pathProvider.ConfigFileLocation);
-    }
+    public virtual bool ConfigFileExists() => _fileSystem.FileExists(_pathProvider.ConfigFileLocation);
 
     #endregion
 
@@ -150,23 +160,16 @@ public class ConfigManager : IConfigManager
         var readResult = _fileSystem.FileReadAllText(_pathProvider.ConfigFileLocation);
         if (readResult.IsFailed)
         {
-            _log.Here().Error("Failed to read {ConfigFileName} from {ConfigDirectory}", _pathProvider.ConfigFileName, _pathProvider.ConfigDirectory);
+            _log.Here()
+                .Error(
+                    "Failed to read {ConfigFileName} from {ConfigDirectory}",
+                    _pathProvider.ConfigFileName,
+                    _pathProvider.ConfigDirectory
+                );
             readResult.LogError();
         }
 
         return readResult;
-    }
-
-    private Result<string> GetJsonSettingsObject()
-    {
-        try
-        {
-            return Result.Ok(JsonSerializer.Serialize(_userSettings.GetSettingsModel(), DefaultJsonSerializerOptions.ConfigManagerOptions));
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
     }
 
     #endregion

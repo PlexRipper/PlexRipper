@@ -1,6 +1,5 @@
 using System.Net;
-using BackgroundServices.Contracts;
-using DownloadManager.Contracts;
+using Application.Contracts;
 using Logging.Interface;
 using Settings.Contracts;
 
@@ -31,7 +30,8 @@ public class Boot : IBoot
         IHostApplicationLifetime appLifetime,
         IConfigManager configManager,
         ISchedulerService schedulerService,
-        IDownloadQueue downloadQueue)
+        IDownloadQueue downloadQueue
+    )
     {
         _log = log;
         _appLifetime = appLifetime;

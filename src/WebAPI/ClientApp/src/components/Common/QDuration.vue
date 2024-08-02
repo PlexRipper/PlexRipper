@@ -12,7 +12,7 @@ const props = defineProps<{
 
 const duration = computed(() => {
 	if (!props.value) {
-		return '0s';
+		return '-';
 	}
 
 	if (props.short) {

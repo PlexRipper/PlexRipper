@@ -7,9 +7,10 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
 {
     #region Setup/Teardown
 
-    public ResultExtensionsLoggingTests(ITestOutputHelper output) : base(output, LogEventLevel.Verbose)
+    public ResultExtensionsLoggingTests(ITestOutputHelper output)
+        : base(output, LogEventLevel.Verbose)
     {
-        ResultExtensions.SetLogger(_log);
+        ResultExtensions.SetLogger(Log);
     }
 
     #endregion
@@ -251,14 +252,14 @@ public class ResultExtensionsLoggingTests : BaseUnitTest
             var result = Result.Fail("Test Error #1");
 
             result.AddNestedErrors(
-                new List<IError>
-                {
+                [
                     new Error("Error #1"),
                     new Error("Error #2"),
                     new Error("Error #3"),
                     new Error("Error #4"),
                     new Error("Error #5"),
-                });
+                ]
+            );
 
             // Act
             result.LogError();

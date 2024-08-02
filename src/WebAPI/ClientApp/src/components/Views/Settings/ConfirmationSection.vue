@@ -1,40 +1,53 @@
 <template>
-	<q-section>
-		<template #header> {{ t('pages.settings.ui.confirmation-settings.header') }}</template>
+	<QSection>
+		<template #header>
+			{{ $t('pages.settings.ui.confirmation-settings.header') }}
+		</template>
 		<!--	Ask Download Movie Confirmation	-->
-		<help-row help-id="help.settings.ui.confirmation-settings.download-movie-confirmation">
+		<HelpRow
+			:label="$t('help.settings.ui.confirmation-settings.download-movie-confirmation.label')"
+			:title="$t('help.settings.ui.confirmation-settings.download-movie-confirmation.title')"
+			:text="$t('help.settings.ui.confirmation-settings.download-movie-confirmation.text')">
 			<q-toggle
 				v-model:model-value="settingsStore.confirmationSettings.askDownloadMovieConfirmation"
 				size="lg"
 				data-cy="ask-download-movie-confirmation" />
-		</help-row>
+		</HelpRow>
 		<!--	Ask Download TvShow Confirmation	-->
-		<help-row help-id="help.settings.ui.confirmation-settings.download-tvshow-confirmation">
+		<HelpRow
+			:label="$t('help.settings.ui.confirmation-settings.download-tvshow-confirmation.label')"
+			:title="$t('help.settings.ui.confirmation-settings.download-tvshow-confirmation.title')"
+			:text="$t('help.settings.ui.confirmation-settings.download-tvshow-confirmation.text')">
 			<q-toggle
 				v-model:model-value="settingsStore.confirmationSettings.askDownloadTvShowConfirmation"
 				size="lg"
 				data-cy="ask-download-tvshow-confirmation" />
-		</help-row>
+		</HelpRow>
 		<!--	Ask Download Season Confirmation	-->
-		<help-row help-id="help.settings.ui.confirmation-settings.download-season-confirmation">
+		<HelpRow
+			:label="$t('help.settings.ui.confirmation-settings.download-season-confirmation.label')"
+			:title="$t('help.settings.ui.confirmation-settings.download-season-confirmation.title')"
+			:text="$t('help.settings.ui.confirmation-settings.download-season-confirmation.text')">
 			<q-toggle
 				v-model:model-value="settingsStore.confirmationSettings.askDownloadSeasonConfirmation"
 				size="lg"
 				data-cy="ask-download-season-confirmation" />
-		</help-row>
+		</HelpRow>
 		<!--	Ask Download Episode Confirmation	-->
-		<help-row help-id="help.settings.ui.confirmation-settings.download-episode-confirmation">
+		<HelpRow
+			:label="$t('help.settings.ui.confirmation-settings.download-episode-confirmation.label')"
+			:title="$t('help.settings.ui.confirmation-settings.download-episode-confirmation.title')"
+			:text="$t('help.settings.ui.confirmation-settings.download-episode-confirmation.text')">
 			<q-toggle
 				v-model:model-value="settingsStore.confirmationSettings.askDownloadEpisodeConfirmation"
 				size="lg"
 				data-cy="ask-download-episode-confirmation" />
-		</help-row>
-	</q-section>
+		</HelpRow>
+	</QSection>
 </template>
 
 <script setup lang="ts">
-import { useSettingsStore } from '~/store';
+import { useSettingsStore } from '@store';
 
-const { t } = useI18n();
 const settingsStore = useSettingsStore();
 </script>

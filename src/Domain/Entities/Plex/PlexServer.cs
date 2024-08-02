@@ -11,142 +11,130 @@ public class PlexServer : BaseEntity
     /// Gets or sets the name of this <see cref="PlexServer"/>.
     /// </summary>
     [Column(Order = 1)]
-    public string Name { get; set; }
+    public required string Name { get; init; }
 
     /// <summary>
     /// Gets or sets the id Plex has assigned to the PlexAccount.
     /// </summary>
     [Column(Order = 2)]
-    public long OwnerId { get; set; }
+    public required long OwnerId { get; init; }
 
     /// <summary>
     /// Gets or sets what seems like the username of the Plex server owner.
     /// Mapped from "sourceTitle".
     /// </summary>
     [Column(Order = 3)]
-    public string PlexServerOwnerUsername { get; set; }
+    public required string PlexServerOwnerUsername { get; init; }
 
     /// <summary>
     /// Gets or sets the type of hardware operating system this <see cref="PlexServer"/> is running.
     /// </summary>
     [Column(Order = 4)]
-    public string Device { get; set; }
+    public required string Device { get; init; }
 
     /// <summary>
     /// Gets or sets the hardware operating system this <see cref="PlexServer"/> is running.
     /// </summary>
     [Column(Order = 5)]
-    public string Platform { get; set; }
+    public required string Platform { get; init; }
 
     /// <summary>
     /// Gets or sets the hardware operating system version this <see cref="PlexServer"/> is running.
     /// </summary>
     [Column(Order = 6)]
-    public string PlatformVersion { get; set; }
+    public required string PlatformVersion { get; init; }
 
     /// <summary>
     /// Gets or sets the Plex software this <see cref="PlexServer"/> is running.
     /// </summary>
     [Column(Order = 7)]
-    public string Product { get; set; }
+    public required string Product { get; init; }
 
     /// <summary>
     /// Gets or sets the Plex software version this <see cref="PlexServer"/> is running.
     /// </summary>
     [Column(Order = 8)]
-    public string ProductVersion { get; set; }
+    public required string ProductVersion { get; init; }
 
     /// <summary>
     /// Gets or sets the role this <see cref="PlexServer"/> provides, seems to be mostly "server".
     /// </summary>
     [Column(Order = 9)]
-    public string Provides { get; set; }
+    public required string Provides { get; init; }
 
     [Column(Order = 10)]
-    public DateTime CreatedAt { get; set; }
+    public required DateTime CreatedAt { get; init; }
 
     /// <summary>
     /// Gets or sets the last time this server has been online based on what Plex has seen.
     /// </summary>
     [Column(Order = 11)]
-    public DateTime LastSeenAt { get; set; }
+    public required DateTime LastSeenAt { get; init; }
 
     /// <summary>
     /// Gets or sets the unique identifier for this server. This is mapped from the new Plex clientId.
     /// </summary>
     [Column(Order = 12)]
-    public string MachineIdentifier { get; set; }
+    public required string MachineIdentifier { get; set; }
 
     [Column(Order = 13)]
-    public string PublicAddress { get; set; }
+    public required string PublicAddress { get; init; }
 
     [Column(Order = 14)]
-    public int PreferredConnectionId { get; set; }
+    public required int PreferredConnectionId { get; set; }
 
     [Column(Order = 15)]
-    public bool Owned { get; set; }
+    public required bool Owned { get; init; }
 
     [Column(Order = 16)]
-    public bool Home { get; set; }
+    public required bool Home { get; init; }
 
     [Column(Order = 17)]
-    public bool Synced { get; set; }
+    public required bool Synced { get; init; }
 
     [Column(Order = 18)]
-    public bool Relay { get; set; }
+    public required bool Relay { get; init; }
 
     [Column(Order = 19)]
-    public bool Presence { get; set; }
+    public required bool Presence { get; init; }
 
     [Column(Order = 20)]
-    public bool HttpsRequired { get; set; }
+    public required bool HttpsRequired { get; init; }
 
     [Column(Order = 21)]
-    public bool PublicAddressMatches { get; set; }
+    public required bool PublicAddressMatches { get; init; }
 
     [Column(Order = 22)]
-    public bool DnsRebindingProtection { get; set; }
+    public required bool DnsRebindingProtection { get; init; }
 
     [Column(Order = 23)]
-    public bool NatLoopbackSupported { get; set; }
+    public required bool NatLoopbackSupported { get; init; }
 
     /// <summary>
     /// Gets or sets a value indicating whether certain servers have protection or are misconfigured which is why we can apply certain fixes to facilitate server communication.
     /// This will attempt to connect on port 80 of the server.
     /// </summary>
     [Column(Order = 24)]
-    public bool ServerFixApplyDNSFix { get; set; }
+    public required bool ServerFixApplyDNSFix { get; init; }
 
     #endregion
 
     #region Relationships
 
-    public List<PlexAccountServer> PlexAccountServers { get; set; } = new();
+    public required List<PlexAccountServer> PlexAccountServers { get; init; } = new();
 
-    public List<PlexLibrary> PlexLibraries { get; set; } = new();
+    public required List<PlexLibrary> PlexLibraries { get; init; } = new();
 
-    public List<PlexServerStatus> ServerStatus { get; set; } = new();
+    public required List<PlexServerStatus> ServerStatus { get; init; } = new();
 
     /// <summary>
     /// Gets or sets the different connections that can be used to communicate with the <see cref="PlexServer"/>.
     /// </summary>
-    public List<PlexServerConnection> PlexServerConnections { get; set; } = new();
+    public required List<PlexServerConnection> PlexServerConnections { get; set; } = new();
 
     #endregion
 
     #region Helpers
-
-    /// <summary>
-    /// Gets a value indicating whether this <see cref="PlexServer"/> has any DownloadTasks in any nested <see cref="PlexLibrary"/>.
-    /// </summary>
-    [NotMapped]
-    public bool HasDownloadTasks => PlexLibraries?.Any(x => x.DownloadTasks?.Any() ?? false) ?? false;
-
-    /// <summary>
-    /// Gets a collection of all <see cref="DownloadTasks"/> included in the nested <see cref="PlexLibrary">PlexLibraries</see>.
-    /// </summary>
-    [NotMapped]
-    public List<DownloadTask> DownloadTasks => PlexLibraries?.SelectMany(x => x.DownloadTasks).ToList() ?? new List<DownloadTask>();
 
     /// <summary>
     /// Gets the last known server status.
@@ -168,22 +156,10 @@ public class PlexServer : BaseEntity
                 StatusMessage = "Not checked yet",
                 PlexServerId = Id,
                 StatusCode = 0,
+                LastChecked = default,
+                PlexServerConnectionId = 0,
             };
         }
-    }
-
-    #endregion
-
-    #region Operators
-
-    public static bool operator ==(PlexServer left, PlexServer right)
-    {
-        return Equals(left, right);
-    }
-
-    public static bool operator !=(PlexServer left, PlexServer right)
-    {
-        return !Equals(left, right);
     }
 
     #endregion
@@ -191,7 +167,11 @@ public class PlexServer : BaseEntity
     #region Equality
 
     /// <inheritdoc/>
-    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode", Justification = "Cannot be ReadOnly due to usage in Entity Framework as Entities")]
+    [SuppressMessage(
+        "ReSharper",
+        "NonReadonlyMemberInGetHashCode",
+        Justification = "Cannot be ReadOnly due to usage in Entity Framework as Entities"
+    )]
     public override int GetHashCode()
     {
         var hashCode = default(HashCode);
@@ -223,16 +203,15 @@ public class PlexServer : BaseEntity
     }
 
     /// <inheritdoc/>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (ReferenceEquals(null, obj))
             return false;
+
         if (ReferenceEquals(this, obj))
             return true;
-        if (obj.GetType() != GetType())
-            return false;
 
-        return Equals((PlexServer)obj);
+        return obj.GetType() == GetType() && Equals((PlexServer)obj);
     }
 
     /// <summary>
@@ -240,17 +219,31 @@ public class PlexServer : BaseEntity
     /// </summary>
     /// <param name="other">The other <see cref="PlexServer"/> to compare against.</param>
     /// <returns>Returns whether these <see cref="PlexServer">PlexServers</see> are equal.</returns>
-    protected bool Equals(PlexServer other)
-    {
-        return Name == other.Name && OwnerId == other.OwnerId && PlexServerOwnerUsername == other.PlexServerOwnerUsername && Device == other.Device &&
-               Platform == other.Platform && PlatformVersion == other.PlatformVersion && Product == other.Product && ProductVersion == other.ProductVersion &&
-               Provides == other.Provides && CreatedAt.Equals(other.CreatedAt) && LastSeenAt.Equals(other.LastSeenAt) &&
-               MachineIdentifier == other.MachineIdentifier && PublicAddress == other.PublicAddress && PreferredConnectionId == other.PreferredConnectionId &&
-               Owned == other.Owned && Home == other.Home && Synced == other.Synced && Relay == other.Relay && Presence == other.Presence &&
-               HttpsRequired == other.HttpsRequired && PublicAddressMatches == other.PublicAddressMatches &&
-               DnsRebindingProtection == other.DnsRebindingProtection && NatLoopbackSupported == other.NatLoopbackSupported &&
-               ServerFixApplyDNSFix == other.ServerFixApplyDNSFix;
-    }
+    protected bool Equals(PlexServer other) =>
+        Name == other.Name
+        && OwnerId == other.OwnerId
+        && PlexServerOwnerUsername == other.PlexServerOwnerUsername
+        && Device == other.Device
+        && Platform == other.Platform
+        && PlatformVersion == other.PlatformVersion
+        && Product == other.Product
+        && ProductVersion == other.ProductVersion
+        && Provides == other.Provides
+        && CreatedAt.Equals(other.CreatedAt)
+        && LastSeenAt.Equals(other.LastSeenAt)
+        && MachineIdentifier == other.MachineIdentifier
+        && PublicAddress == other.PublicAddress
+        && PreferredConnectionId == other.PreferredConnectionId
+        && Owned == other.Owned
+        && Home == other.Home
+        && Synced == other.Synced
+        && Relay == other.Relay
+        && Presence == other.Presence
+        && HttpsRequired == other.HttpsRequired
+        && PublicAddressMatches == other.PublicAddressMatches
+        && DnsRebindingProtection == other.DnsRebindingProtection
+        && NatLoopbackSupported == other.NatLoopbackSupported
+        && ServerFixApplyDNSFix == other.ServerFixApplyDNSFix;
 
     #endregion
 }

@@ -7,7 +7,6 @@ public class PlexAccountServerConfiguration : IEntityTypeConfiguration<PlexAccou
 {
     public void Configure(EntityTypeBuilder<PlexAccountServer> builder)
     {
-        builder
-            .HasKey(bc => new { bc.PlexAccountId, bc.PlexServerId });
+        builder.HasKey(bc => new { bc.PlexAccountId, bc.PlexServerId });
     }
 }

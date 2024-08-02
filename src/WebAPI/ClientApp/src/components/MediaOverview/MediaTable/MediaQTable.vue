@@ -26,7 +26,9 @@
 		<!-- Duration -->
 		<template #body-cell-duration="{ row }">
 			<q-td class="text-center">
-				<QDuration short :value="row.duration" />
+				<QDuration
+					short
+					:value="row.duration" />
 			</q-td>
 		</template>
 		<!-- Media size -->
@@ -41,7 +43,9 @@
 		<template #body-cell-addedAt="{ row }">
 			<q-td class="text-center">
 				<span class="q-mr-md">
-					<QDateTime :text="row.addedAt" short-date />
+					<QDateTime
+						:text="row.addedAt"
+						short-date />
 				</span>
 			</q-td>
 		</template>
@@ -49,7 +53,9 @@
 		<template #body-cell-updatedAt="{ row }">
 			<q-td class="text-center">
 				<span class="q-mr-md">
-					<QDateTime :text="row.updatedAt" short-date />
+					<QDateTime
+						:text="row.updatedAt"
+						short-date />
 				</span>
 			</q-td>
 		</template>
@@ -66,14 +72,14 @@
 </template>
 
 <script setup lang="ts">
-import { QTableProps } from 'quasar';
+import type { QTableProps } from 'quasar';
 import Convert from '@class/Convert';
 import ButtonType from '@enums/buttonType';
-import { PlexMediaSlimDTO } from '@dto/mainApi';
-import ISelection from '@interfaces/ISelection';
+import type { PlexMediaSlimDTO } from '@dto';
+import type { ISelection } from '@interfaces';
 import { getMediaTableColumns } from '@composables/mediaTableColumns';
 import {
-	IMediaOverviewCommands,
+	type IMediaOverviewCommands,
 	sendMediaOverviewDownloadCommand,
 	sendMediaOverviewOpenDetailsCommand,
 } from '@composables/event-bus';
@@ -100,6 +106,7 @@ const getSelected = computed((): PlexMediaSlimDTO[] => {
 
 const qTableProps = computed((): QTableProps => {
 	return {
+		rows: [],
 		columns: mediaTableColumns.map((x) => {
 			return {
 				label: x.label,

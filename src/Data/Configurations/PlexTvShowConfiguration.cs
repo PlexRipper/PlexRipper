@@ -13,7 +13,6 @@ public class PlexTvShowConfiguration : IEntityTypeConfiguration<PlexTvShow>
         //     .Property(x => x.MediaData)
         //     .HasJsonValueConversion();
 
-        builder.Property(c => c.SortTitle)
-            .UseCollation(OrderByNaturalExtensions.CollationName);
+        builder.Property(c => c.SortTitle).UseCollation(OrderByNaturalExtensions.CollationName);
     }
 }

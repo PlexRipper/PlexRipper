@@ -1,7 +1,6 @@
 <template>
 	<QCardDialog
 		:name="name"
-		:value="path"
 		min-width="70vw"
 		max-width="70vw"
 		content-height="80"
@@ -12,44 +11,91 @@
 			{{ t('components.directory-browser.select-path', { pathName: path?.displayName ?? '' }) }}
 		</template>
 		<template #top-row>
-			<q-row>
-				<q-col>
-					<p-text-field
-						:model-value="path?.directory ?? ''"
+			<QRow>
+				<QCol
+					v-if="!isCurrentWritable"
+					cols="auto"
+					class="q-px-md">
+					<q-icon
+						color="red"
+						size="sm"
+						name="mdi-alert-circle">
+						<q-tooltip
+							anchor="top middle"
+							self="center middle">
+							<span>{{ t('components.directory-browser.has-no-write-permission') }}</span>
+						</q-tooltip>
+					</q-icon>
+				</QCol>
+				<QCol>
+					<PTextField
+						v-model="currentPath"
 						outlined
 						color="red"
-						debounce="500"
-						placeholder="Start typing or select a path below"
+						:placeholder="t('components.directory-browser.no-path')"
 						@update:model-value="requestDirectories" />
-				</q-col>
-			</q-row>
-			<q-row>
-				<q-col>
-					<q-markup-table>
-						<thead>
-							<tr>
-								<th class="text-left" style="width: 100px">
-									{{ t('components.directory-browser.type') }}
-								</th>
-								<th class="text-left">
-									{{ t('components.directory-browser.path') }}
-								</th>
-							</tr>
-						</thead>
-					</q-markup-table>
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
+			<q-markup-table class="q-pr-md">
+				<thead>
+					<tr>
+						<th
+							class="text-left"
+							style="width: 100px">
+							{{ t('components.directory-browser.type') }}
+						</th>
+						<th class="text-left">
+							{{ t('components.directory-browser.path') }}
+						</th>
+					</tr>
+				</thead>
+				<!-- The return row -->
+				<tbody v-if="currentPathModel != null">
+					<tr @click="directoryNavigate(returnRow)">
+						<td
+							class="text-left"
+							style="width: 100px">
+							<q-icon
+								size="md"
+								:name="getIcon(returnRow.type)" />
+						</td>
+						<td class="text-left">
+							{{ returnRow.name }}
+						</td>
+					</tr>
+				</tbody>
+			</q-markup-table>
 		</template>
 		<template #default>
 			<!--	Directory Browser	-->
 			<q-markup-table>
 				<tbody class="scroll">
-					<tr v-for="(row, index) in items" :key="index" @click="directoryNavigate(row)">
-						<td class="text-left" style="width: 100px">
-							<q-icon size="md" :name="getIcon(row.type)" />
+					<tr
+						v-for="(row, index) in items"
+						:key="index"
+						:class="rowClass(!row.hasReadPermission)"
+						@click="directoryNavigate(row)">
+						<td
+							class="text-left"
+							style="width: 100px">
+							<q-icon
+								size="md"
+								:name="getIcon(row.type)" />
 						</td>
 						<td class="text-left">
-							{{ row.path }}
+							<q-icon
+								v-if="!row.hasReadPermission"
+								color="red"
+								size="sm"
+								name="mdi-alert-circle">
+								<q-tooltip
+									anchor="top middle"
+									self="center middle">
+									<span>{{ t('components.directory-browser.has-no-read-permission') }}</span>
+								</q-tooltip>
+							</q-icon>
+
+							{{ row.name }}
 						</td>
 					</tr>
 				</tbody>
@@ -57,7 +103,10 @@
 		</template>
 		<template #actions>
 			<CancelButton @click="cancel()" />
-			<ConfirmButton @click="confirm()" />
+			<ConfirmButton
+				:disabled="!isCurrentWritable"
+				:tooltip-text="!isCurrentWritable ? $t('components.directory-browser.current-folder-has-no-write-permission') : ''"
+				@click="confirm()" />
 		</template>
 	</QCardDialog>
 </template>
@@ -65,22 +114,49 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
-import { cloneDeep } from 'lodash-es';
 import { get, set } from '@vueuse/core';
-import { getDirectoryPath } from '@api/pathApi';
-import type { FileSystemModelDTO, FolderPathDTO } from '@dto/mainApi';
-import { FileSystemEntityType } from '@dto/mainApi';
+import type { FileSystemModelDTO, FolderPathDTO } from '@dto';
+import { FileSystemEntityType } from '@dto';
+import { folderPathApi } from '@api';
 import { useCloseControlDialog } from '~/composables/event-bus';
 
 const { t } = useI18n();
 const path = ref<FolderPathDTO | null>(null);
+const currentPath = ref('');
+const currentPathModel = ref<FileSystemModelDTO | null>(null);
 const parentPath = ref('');
 const isLoading = ref(true);
 const items = ref<FileSystemModelDTO[]>([]);
+const returnRow = ref<FileSystemModelDTO>({
+	name: '...',
+	path: '..',
+	type: FileSystemEntityType.Parent,
+	extension: '',
+	size: 0,
+	lastModified: '',
+	hasReadPermission: true,
+	hasWritePermission: false,
+});
 
 const props = defineProps<{
 	name: string;
 }>();
+
+const emit = defineEmits<{
+	(e: 'confirm', path: FolderPathDTO): void;
+	(e: 'cancel'): void;
+}>();
+
+const isCurrentWritable = computed(() => {
+	return get(currentPathModel)?.hasWritePermission ?? false;
+});
+
+function rowClass(hasReadPermission: boolean) {
+	return {
+		'cursor-pointer': !hasReadPermission,
+		'q-tr--no-hover': hasReadPermission,
+	};
+}
 
 const getIcon = (type: FileSystemEntityType): string => {
 	switch (type) {
@@ -97,12 +173,8 @@ const getIcon = (type: FileSystemEntityType): string => {
 	}
 };
 
-const emit = defineEmits<{
-	(e: 'confirm', path: FolderPathDTO): void;
-	(e: 'cancel'): void;
-}>();
-
-const open = (selectedPath: FolderPathDTO): void => {
+function open(event: unknown): void {
+	let selectedPath = event as FolderPathDTO;
 	if (!selectedPath) {
 		Log.error('parameter was null when opening DirectoryBrowser');
 		return;
@@ -110,7 +182,9 @@ const open = (selectedPath: FolderPathDTO): void => {
 	selectedPath = cloneDeep(selectedPath);
 	requestDirectories(selectedPath.directory);
 	set(path, selectedPath);
-};
+	set(currentPath, selectedPath.directory);
+}
+
 function cancel(): void {
 	emit('cancel');
 	useCloseControlDialog(props.name);
@@ -127,42 +201,37 @@ function confirm(): void {
 }
 
 function requestDirectories(newPath: string): void {
-	if (newPath === '' || newPath === '/') {
-		set(isLoading, true);
-	}
 	if (path.value) {
-		// @ts-ignore
 		path.value.directory = newPath;
 	}
 
 	useSubscription(
-		getDirectoryPath(newPath).subscribe(({ isSuccess, value }) => {
-			if (isSuccess && value) {
-				set(items, value?.directories);
-
-				// Don't add return row if in the root folder
-				if (newPath !== '') {
-					items.value.unshift({
-						name: '...',
-						path: '..',
-						type: FileSystemEntityType.Parent,
-						extension: '',
-						size: 0,
-						lastModified: '',
-					});
+		folderPathApi
+			.getFolderPathDirectoryEndpoint({
+				path: newPath,
+			})
+			.subscribe(({ isSuccess, value }) => {
+				if (isSuccess && value) {
+					set(items, value?.directories);
+					set(currentPathModel, value?.current ?? null);
+					set(parentPath, value?.parent);
+					set(isLoading, false);
 				}
-				set(isLoading, false);
-				set(parentPath, value?.parent);
-			}
-		}),
+			}),
 	);
 }
 
 function directoryNavigate(dataRow: FileSystemModelDTO): void {
+	if (!dataRow.hasReadPermission) {
+		return;
+	}
+
 	if (dataRow.path === '..') {
 		requestDirectories(parentPath.value);
+		set(currentPath, parentPath.value);
 	} else {
 		requestDirectories(dataRow.path);
+		set(currentPath, dataRow.path);
 	}
 }
 </script>

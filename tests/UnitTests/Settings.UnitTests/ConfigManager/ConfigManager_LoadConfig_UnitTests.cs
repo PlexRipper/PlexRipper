@@ -1,9 +1,7 @@
-﻿using System.Text.Json;
-using Autofac;
+﻿using Autofac;
 using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;
-using PlexRipper.Application;
 using PlexRipper.Settings;
 using Settings.Contracts;
 
@@ -11,18 +9,23 @@ namespace Settings.UnitTests;
 
 public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
 {
-    public ConfigManager_LoadConfig_UnitTests(ITestOutputHelper output) : base(output) { }
+    public ConfigManager_LoadConfig_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public void ShouldLoadSettingsAndSendToUserSettings_WhenSettingsCanBeReadFromFile()
     {
         // Arrange
-        var settingsModel = FakeData.GetSettingsModelJson();
+
+        var settingsModel = FakeData.GetSettingsModel().Generate();
+        var settingsJson = UserSettingsSerializer.Serialize(settingsModel);
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
-        mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(() => Result.Ok(settingsModel));
-        mock.Mock<IUserSettings>().Setup(x => x.SetFromJsonObject(It.IsAny<JsonElement>())).Returns(Result.Ok);
+        mock.Mock<IFileSystem>()
+            .Setup(x => x.FileReadAllText(It.IsAny<string>()))
+            .Returns(() => Result.Ok(settingsJson));
+        mock.Mock<IUserSettings>().Setup(x => x.UpdateSettings(It.IsAny<UserSettings>())).Returns(settingsModel);
 
         // Act
         var loadResult = _sut.LoadConfig();
@@ -30,7 +33,6 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
         // Assert
         loadResult.IsSuccess.ShouldBeTrue();
         mock.Mock<IUserSettings>().Verify(x => x.Reset(), Times.Never);
-        mock.Mock<IUserSettings>().Verify(x => x.SetFromJsonObject(It.IsAny<JsonElement>()), Times.Once);
     }
 
     [Fact]
@@ -50,7 +52,8 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
             mock.Container.Resolve<IFileSystem>(),
             mock.Container.Resolve<IDirectorySystem>(),
             mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>());
+            mock.Container.Resolve<IUserSettings>()
+        );
         sut.Setup(x => x.ResetConfig()).Returns(Result.Ok);
         sut.Setup(x => x.LoadConfig()).CallBase();
 
@@ -69,7 +72,6 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
         mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(() => Result.Ok("{}"));
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
-        mock.Mock<IUserSettings>().Setup(x => x.SetFromJsonObject(It.IsAny<JsonElement>())).Returns(Result.Fail(""));
         mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here
@@ -79,7 +81,8 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
             mock.Container.Resolve<IFileSystem>(),
             mock.Container.Resolve<IDirectorySystem>(),
             mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>());
+            mock.Container.Resolve<IUserSettings>()
+        );
         sut.Setup(x => x.ResetConfig()).Returns(Result.Ok);
         sut.Setup(x => x.LoadConfig()).CallBase();
 
@@ -107,7 +110,8 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
             mock.Container.Resolve<IFileSystem>(),
             mock.Container.Resolve<IDirectorySystem>(),
             mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>());
+            mock.Container.Resolve<IUserSettings>()
+        );
         sut.Setup(x => x.ResetConfig()).Returns(Result.Ok);
         sut.Setup(x => x.LoadConfig()).CallBase();
 

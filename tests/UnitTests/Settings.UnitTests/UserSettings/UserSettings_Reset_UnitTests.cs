@@ -1,63 +1,45 @@
-using PlexRipper.Settings;
-using PlexRipper.Settings.Models;
-using PlexRipper.Settings.Modules;
+using Settings.Contracts;
 
 namespace Settings.UnitTests;
 
 public class UserSettings_Reset_UnitTests : BaseUnitTest
 {
-    public UserSettings_Reset_UnitTests(ITestOutputHelper output) : base(output) { }
-
-    private UserSettings CreateUserSettings()
-    {
-        return new UserSettings(
-            _log,
-            new ConfirmationSettingsModule(),
-            new DateTimeSettingsModule(),
-            new DisplaySettingsModule(),
-            new DownloadManagerSettingsModule(),
-            new GeneralSettingsModule(),
-            new DebugSettingsModule(),
-            new LanguageSettingsModule(),
-            new ServerSettingsModule());
-    }
+    public UserSettings_Reset_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public void ShouldHaveDefaultSettingsValues_WhenResetHasBeenCalled()
     {
         // Arrange
-        var sut = CreateUserSettings();
+        UserSettings sut = new();
 
         // Act
-        var changedSettings = new SettingsModel
+        var changedSettings = new UserSettings
         {
-            DateTimeSettings = new DateTimeSettings()
+            DateTimeSettings = new DateTimeSettingsModule()
             {
                 TimeFormat = string.Empty,
                 TimeZone = string.Empty,
                 LongDateFormat = string.Empty,
                 ShortDateFormat = string.Empty,
             },
-            ConfirmationSettings = new ConfirmationSettings()
+            ConfirmationSettings = new ConfirmationSettingsModule()
             {
                 AskDownloadEpisodeConfirmation = false,
                 AskDownloadMovieConfirmation = false,
                 AskDownloadSeasonConfirmation = false,
                 AskDownloadTvShowConfirmation = false,
             },
-            LanguageSettings = new LanguageSettings()
-            {
-                Language = string.Empty,
-            },
-            DisplaySettings = new DisplaySettings(),
-            GeneralSettings = new GeneralSettings(),
-            ServerSettings = new ServerSettings(),
-            DownloadManagerSettings = new DownloadManagerSettings(),
+            LanguageSettings = new LanguageSettingsModule() { Language = string.Empty },
+            DisplaySettings = new DisplaySettingsModule(),
+            GeneralSettings = new GeneralSettingsModule(),
+            ServerSettings = new PlexServerSettingsModule(),
+            DownloadManagerSettings = new DownloadManagerSettingsModule(),
         };
         sut.UpdateSettings(changedSettings);
         sut.Reset();
 
         // Assert
-        sut.GetSettingsModel().ShouldBeEquivalentTo(sut.GetDefaultSettingsModel());
+        sut.ShouldBeEquivalentTo(new UserSettings());
     }
 }

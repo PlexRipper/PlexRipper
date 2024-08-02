@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Application.Contracts;
 using Logging.Interface;
 using PlexApi.Contracts;
 using Polly;
@@ -23,29 +24,33 @@ public class PlexApiClient
     public PlexApiClient(ILog log, HttpClient httpClient)
     {
         _log = log;
-        var options = new RestClientOptions()
-        {
-            MaxTimeout = 60000,
-            ThrowOnAnyError = false,
-        };
-        _client = new RestClient(httpClient, options);
+        var options = new RestClientOptions() { MaxTimeout = 60000, ThrowOnAnyError = false };
+        _client = new RestClient(
+            httpClient,
+            options,
+            configureSerialization: config =>
+            {
+                config.UseSystemTextJson(SerializerOptions);
+                config.UseDotNetXmlSerializer();
+            }
+        );
+
         // HTTPS connections expect an user agent to be set
         _client.AddDefaultHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64)");
-        _client.UseSystemTextJson(SerializerOptions);
-        _client.UseDotNetXmlSerializer();
     }
 
     #endregion
 
     #region Properties
 
-    public static JsonSerializerOptions SerializerOptions => new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        PropertyNameCaseInsensitive = true,
-        WriteIndented = true,
-        Converters = { new LongToDateTime() },
-    };
+    public static JsonSerializerOptions SerializerOptions =>
+        new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true,
+            WriteIndented = true,
+            Converters = { new LongToDateTime() },
+        };
 
     #endregion
 
@@ -53,7 +58,12 @@ public class PlexApiClient
 
     #region Public
 
-    public async Task<Result<T>> SendRequestAsync<T>(RestRequest request, int retryCount = 2, Action<PlexApiClientProgress> action = null) where T : class
+    public async Task<Result<T>> SendRequestAsync<T>(
+        RestRequest request,
+        int retryCount = 2,
+        Action<PlexApiClientProgress>? action = null
+    )
+        where T : class
     {
         _log.Debug("Sending request to: {Request}", _client.BuildUri(request));
 
@@ -72,7 +82,9 @@ public class PlexApiClient
         {
             var response = await Policy
                 .Handle<WebException>()
-                .WaitAndRetryAsync(1, retryAttempt =>
+                .WaitAndRetryAsync(
+                    1,
+                    retryAttempt =>
                     {
                         var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
                         _log.Warning("Waiting {TotalSeconds} seconds before retrying again", timeToWait.TotalSeconds);

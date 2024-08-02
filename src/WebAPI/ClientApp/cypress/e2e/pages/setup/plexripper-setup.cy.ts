@@ -1,4 +1,5 @@
-import { apiRoute, APIRoute, route } from '@fixtures/baseE2E';
+import { route } from '@fixtures/baseE2E';
+import { SettingsPaths } from '@api/api-paths';
 
 describe('PlexRipper new setup process', () => {
 	beforeEach(() => {
@@ -8,7 +9,7 @@ describe('PlexRipper new setup process', () => {
 		});
 
 		// Once the setup has been completed the settings are saved
-		cy.intercept('PUT', apiRoute({ type: APIRoute.Settings }), {
+		cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), {
 			statusCode: 200,
 		});
 

@@ -1,6 +1,6 @@
 import { seed as falsoSeed } from '@ngneat/falso';
-import { MockConfig } from '@mock/interfaces';
-import { PlexMediaType } from '@dto/mainApi';
+import type { MockConfig } from '@mock';
+import { PlexMediaType } from '@dto';
 
 let currentSeed = 0;
 
@@ -23,6 +23,7 @@ export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 		seasonDownloadTask: 5,
 		episodeDownloadTask: 5,
 		connectionHasProgress: false,
+		setDownloadDetails: false,
 		maxServerConnections: 5,
 		plexMovieLibraryCount: 0,
 		plexTvShowLibraryCount: 0,
@@ -33,7 +34,7 @@ export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 		folderPathCount: 0,
 	};
 
-	for (const configKey in config) {
+	for (const configKey in defaultConfig) {
 		if (!Object.hasOwn(config, configKey)) {
 			config[configKey] = defaultConfig[configKey];
 		}

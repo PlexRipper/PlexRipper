@@ -1,6 +1,6 @@
-import { PlexMediaType } from '@dto/mainApi';
+import type { PlexMediaType } from '@dto';
 
-export default interface IObjectUrl {
+export interface IObjectUrl {
 	id: number;
 	type: PlexMediaType;
 	url: string;

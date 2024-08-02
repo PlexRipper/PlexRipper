@@ -11,17 +11,17 @@ public static class EnumerableExtensions
     /// <returns></returns>
     public static IEnumerable<T> Flatten<T>(this IEnumerable<T> nodes, Func<T, IEnumerable<T>> selectChildren)
     {
-        if (nodes == null) yield break;
+        if (nodes == null)
+            yield break;
 
         foreach (var node in nodes)
         {
             yield return node;
 
-            var children = selectChildren == null
-                ? node as IEnumerable<T>
-                : selectChildren(node);
+            var children = selectChildren == null ? node as IEnumerable<T> : selectChildren(node);
 
-            if (children == null) continue;
+            if (children == null)
+                continue;
 
             foreach (var child in children.Flatten(selectChildren))
                 yield return child;

@@ -1,12 +1,12 @@
-using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Data.PlexServers;
+using PlexRipper.Application;
 
 namespace Data.UnitTests.PlexServers.Commands;
 
 public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTest
 {
-    public AddOrUpdatePlexAccountServersCommandHandler_UnitTests(ITestOutputHelper output) : base(output) { }
+    public AddOrUpdatePlexAccountServersCommandHandler_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldAddPlexAccountServerAssociations_WhenNoneExistsYet()
@@ -19,31 +19,27 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
             config.PlexAccountCount = 5;
         });
 
-        var plexAccount = DbContext.PlexAccounts.FirstOrDefault();
-        var plexServers = DbContext.PlexServers.ToList();
+        var plexAccount = IDbContext.PlexAccounts.FirstOrDefault();
+        plexAccount.ShouldNotBeNull();
+        var plexServers = IDbContext.PlexServers.ToList();
         var serverAccessTokens = FakeData.GetServerAccessTokenDTO(plexAccount, plexServers, Seed);
 
-        ResetDbContext();
-
         // Act
-        var request = new AddOrUpdatePlexAccountServersCommand(plexAccount, serverAccessTokens);
-        var handler = new AddOrUpdatePlexAccountServersCommandHandler(_log, DbContext);
-        var result = await handler.Handle(request, CancellationToken.None);
+        var handler = new AddOrUpdatePlexAccountServersCommand(Log, IDbContext);
+        var result = await handler.ExecuteAsync(plexAccount.Id, serverAccessTokens, CancellationToken.None);
 
         // Assert
-        ResetDbContext();
         result.IsSuccess.ShouldBeTrue();
-        var plexAccountServers = DbContext
-            .PlexAccountServers
-            .Include(x => x.PlexServer)
-            .ToList();
+        var plexAccountServers = IDbContext.PlexAccountServers.Include(x => x.PlexServer).ToList();
         plexAccountServers.Count.ShouldBe(serverAccessTokens.Count);
 
         foreach (var serverAccessToken in serverAccessTokens)
             plexAccountServers
-                .Any(x => x.PlexServer.MachineIdentifier == serverAccessToken.MachineIdentifier
-                          && x.AuthToken == serverAccessToken.AccessToken
-                          && x.PlexAccountId == plexAccount.Id)
+                .Any(x =>
+                    x.PlexServer.MachineIdentifier == serverAccessToken.MachineIdentifier
+                    && x.AuthToken == serverAccessToken.AccessToken
+                    && x.PlexAccountId == plexAccount.Id
+                )
                 .ShouldBeTrue();
     }
 
@@ -58,9 +54,8 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
             config.PlexAccountCount = 1;
         });
 
-        var plexAccount = DbContext.PlexAccounts.FirstOrDefault();
-        var plexServers = DbContext.PlexServers.ToList();
-        ResetDbContext();
+        var plexAccount = IDbContext.PlexAccounts.FirstOrDefault();
+        var plexServers = IDbContext.PlexServers.ToList();
 
         var serverAccessTokens = FakeData.GetServerAccessTokenDTO(plexAccount, plexServers, Seed);
 
@@ -68,25 +63,24 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         serverAccessTokens.ForEach(x => x.AccessToken = "######");
 
         // Act
-        var request = new AddOrUpdatePlexAccountServersCommand(plexAccount, serverAccessTokens);
-        var handler = new AddOrUpdatePlexAccountServersCommandHandler(_log, DbContext);
-        var result = await handler.Handle(request, CancellationToken.None);
+        var handler = new AddOrUpdatePlexAccountServersCommand(Log, IDbContext);
+        var result = await handler.ExecuteAsync(plexAccount.Id, serverAccessTokens, CancellationToken.None);
 
         // Assert
-        ResetDbContext();
         result.IsSuccess.ShouldBeTrue();
-        var plexAccountServers2 = DbContext
-            .PlexAccountServers
-            .Include(x => x.PlexServer)
+        var plexAccountServers2 = IDbContext
+            .PlexAccountServers.Include(x => x.PlexServer)
             .Include(x => x.PlexAccount)
             .ToList();
         plexAccountServers2.Count.ShouldBe(serverAccessTokens.Count);
 
         foreach (var serverAccessToken in serverAccessTokens)
             plexAccountServers2
-                .Any(x => x.PlexServer.MachineIdentifier == serverAccessToken.MachineIdentifier
-                          && x.AuthToken == "######"
-                          && x.PlexAccountId == plexAccount.Id)
+                .Any(x =>
+                    x.PlexServer.MachineIdentifier == serverAccessToken.MachineIdentifier
+                    && x.AuthToken == "######"
+                    && x.PlexAccountId == plexAccount.Id
+                )
                 .ShouldBeTrue();
     }
 }

@@ -7,67 +7,64 @@
 		style="overflow-x: hidden"
 		@before-show="onShow"
 		@before-hide="onHide">
-		<q-col class="server-drawer-container">
+		<QCol class="server-drawer-container">
 			<q-scroll>
 				<!-- Server drawer -->
-				<server-drawer />
+				<ServerDrawer />
 			</q-scroll>
-		</q-col>
-		<q-col class="menu-items">
+		</QCol>
+		<QCol class="menu-items">
 			<q-separator />
 			<!-- Menu items -->
-			<q-expansion-list :items="getNavItems" />
-		</q-col>
+			<QExpansionList :items="getNavItems" />
+		</QCol>
 	</q-drawer>
 </template>
 
 <script setup lang="ts">
-import { useSubscription } from '@vueuse/rxjs';
-import { set } from '@vueuse/core';
-import { DownloadService } from '@service';
-import { QExpansionListProps } from '@interfaces/components/QExpansionListProps';
+import type { QExpansionListProps } from '@interfaces/components/QExpansionListProps';
 import { useSettingsStore } from '~/store';
 
 withDefaults(defineProps<{ showDrawer: boolean }>(), {
 	showDrawer: false,
 });
 const settingsStore = useSettingsStore();
-
+const downloadStore = useDownloadStore();
 const items = ref<object[]>([]);
 
-const downloadTaskCount = ref(0);
+const { t } = useI18n();
 
 const getNavItems = computed((): QExpansionListProps[] => {
 	const mainItems: QExpansionListProps[] = [
 		{
-			title: 'components.navigation-drawer.downloads',
+			title: t('components.navigation-drawer.downloads'),
 			icon: 'mdi-download',
 			link: '/downloads',
 			type: 'badge',
-			count: downloadTaskCount.value,
+			count: downloadStore.getActiveDownloadList().length,
 		},
 		{
-			title: 'components.navigation-drawer.settings',
+			title: t('components.navigation-drawer.settings'),
 			icon: 'mdi-cog',
 			link: '/settings',
 			children: [
 				{
-					title: 'components.navigation-drawer.accounts',
+					title: t('components.navigation-drawer.accounts'),
 					icon: 'mdi-account',
 					link: '/settings/accounts',
 				},
 				{
-					title: 'components.navigation-drawer.paths',
+					title: t('components.navigation-drawer.paths'),
 					icon: 'mdi-folder',
 					link: '/settings/paths',
 				},
 				{
-					title: 'components.navigation-drawer.ui',
+					title: t('components.navigation-drawer.ui'),
 					icon: 'mdi-television-guide',
 					link: '/settings/ui',
 				},
 				{
-					title: 'components.navigation-drawer.advanced',
+					title: t('components.navigation-drawer.advanced'),
 					icon: 'mdi-wrench',
 					link: '/settings/advanced',
 				},
@@ -77,16 +74,21 @@ const getNavItems = computed((): QExpansionListProps[] => {
 
 	if (settingsStore.debugMode) {
 		mainItems.push({
-			title: 'components.navigation-drawer.debug',
+			title: t('components.navigation-drawer.debug'),
 			icon: 'mdi-bug-outline',
 			children: [
 				{
-					title: 'components.navigation-drawer.dialogs',
+					title: t('components.navigation-drawer.scratchpad'),
+					icon: 'mdi-note-edit',
+					link: '/debug-pages/scratchpad',
+				},
+				{
+					title: t('components.navigation-drawer.dialogs'),
 					icon: 'mdi-dock-window',
 					link: '/debug-pages/dialogs',
 				},
 				{
-					title: 'components.navigation-drawer.buttons',
+					title: t('components.navigation-drawer.buttons'),
 					icon: 'mdi-button-pointer',
 					link: '/debug-pages/buttons',
 				},
@@ -109,12 +111,6 @@ function onHide() {
 onMounted(() => {
 	items.value = getNavItems.value;
 	document.body.classList.add('navigation-drawer-opened');
-
-	useSubscription(
-		DownloadService.getTotalDownloadsCount().subscribe((count) => {
-			set(downloadTaskCount, count);
-		}),
-	);
 });
 </script>
 

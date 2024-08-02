@@ -7,8 +7,12 @@ public class PlexAccountLibrariesConfiguration : IEntityTypeConfiguration<PlexAc
 {
     public void Configure(EntityTypeBuilder<PlexAccountLibrary> builder)
     {
-        builder
-            .HasKey(bc => new { bc.PlexAccountId, bc.PlexLibraryId, bc.PlexServerId });
+        builder.HasKey(bc => new
+        {
+            bc.PlexAccountId,
+            bc.PlexLibraryId,
+            bc.PlexServerId
+        });
 
         builder.HasOne(x => x.PlexLibrary);
         builder.HasOne(x => x.PlexServer);

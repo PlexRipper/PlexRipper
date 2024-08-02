@@ -21,7 +21,8 @@ public class MediatrModule : Module
         builder.RegisterMediatR(configuration);
 
         // Register the Command's Validators (Validators based on FluentValidation library)
-        builder.RegisterAssemblyTypes(assembly)
+        builder
+            .RegisterAssemblyTypes(assembly)
             .Where(t => t.IsClosedTypeOf(typeof(IValidator<>)))
             .AsImplementedInterfaces()
             .InstancePerDependency();

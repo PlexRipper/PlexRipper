@@ -1,27 +1,37 @@
-using PlexRipper.WebAPI.Common;
-using PlexRipper.WebAPI.Common.DTO;
+using System.Net.Http.Json;
+using Application.Contracts;
+using FastEndpoints;
+using PlexRipper.Application;
 
 namespace IntegrationTests.WebAPI.AccountController;
 
-
 public class ValidateAccount_IntegrationTests : BaseIntegrationTests
 {
-    public ValidateAccount_IntegrationTests(ITestOutputHelper output) : base(output) { }
+    public ValidateAccount_IntegrationTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldValidatePlexAccount_WhenGivenValidCredentials()
     {
         // Arrange
-        SetupMockPlexApi(apiConfig => { apiConfig.SignInResponseIsValid = true; });
+        SetupMockPlexApi(apiConfig =>
+        {
+            apiConfig.SignInResponseIsValid = true;
+        });
 
         await CreateContainer();
 
         var plexAccount = FakeData.GetPlexAccount(26346).Generate();
-        var plexAccountDTO = Container.Mapper.Map<PlexAccountDTO>(plexAccount);
+        var plexAccountDTO = plexAccount.ToDTO();
 
         // Act
-        var response = await Container.ApiClient.PostAsJsonAsync(ApiRoutes.Account.PostValidate, plexAccountDTO);
-        var result = await response.Deserialize<PlexAccountDTO>();
+        var response = await Container.ApiClient.POSTAsync<
+            ValidatePlexAccountEndpoint,
+            PlexAccountDTO,
+            ResultDTO<PlexAccountDTO>
+        >(plexAccountDTO);
+        response.Response.IsSuccessStatusCode.ShouldBeTrue();
+        var result = response.Result;
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -32,16 +42,22 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
     {
         // Arrange
         Seed = 4347564;
-        SetupMockPlexApi(apiConfig => { apiConfig.SignInResponseIsValid = false; });
+        SetupMockPlexApi(apiConfig =>
+        {
+            apiConfig.SignInResponseIsValid = false;
+        });
         await CreateContainer();
 
         var plexAccount = FakeData.GetPlexAccount(4347564).Generate();
-        var plexAccountDTO = Container.Mapper.Map<PlexAccountDTO>(plexAccount);
+        var plexAccountDTO = plexAccount.ToDTO();
 
         // Act
-        var response = await Container.ApiClient.PostAsJsonAsync(ApiRoutes.Account.PostValidate, plexAccountDTO);
+        var response = await Container.ApiClient.PostAsJsonAsync(
+            ApiRoutes.PlexAccountController + "/validate",
+            plexAccountDTO
+        );
         var resultDTO = await response.Deserialize<PlexAccountDTO>();
-        var result = Container.Mapper.Map<Result>(resultDTO);
+        var result = resultDTO.ToResultModel();
 
         // Assert
         result.IsSuccess.ShouldBeFalse();

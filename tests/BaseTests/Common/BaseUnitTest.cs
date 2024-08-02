@@ -1,8 +1,7 @@
 using Autofac;
-using AutoMapper;
+using Data.Contracts;
 using Logging.Interface;
 using PlexRipper.Data;
-using PlexRipper.WebAPI;
 using Serilog;
 using Serilog.Events;
 using Log = Logging.Log;
@@ -14,10 +13,8 @@ public class BaseUnitTest : IDisposable
     #region Fields
 
     private string _databaseName;
-    protected PlexRipperDbContext DbContext;
-    private bool disableForeignKeyCheck;
-    private bool isDatabaseSetup;
-    protected ILog _log;
+    private bool _isDatabaseSetup;
+    protected readonly ILog Log;
 
     #endregion
 
@@ -33,7 +30,7 @@ public class BaseUnitTest : IDisposable
         LogConfig.SetTestOutputHelper(output);
         LogManager.SetupLogging(logEventLevel);
         BogusExtensions.Setup();
-        _log = LogManager.CreateLogInstance(output, typeof(BaseUnitTest), logEventLevel);
+        Log = LogManager.CreateLogInstance(output, typeof(BaseUnitTest), logEventLevel);
     }
 
     #endregion
@@ -42,64 +39,53 @@ public class BaseUnitTest : IDisposable
 
     protected int Seed { get; set; } = 0;
 
-    #endregion
-
-    #region Methods
-
-    #region Public
-
-    public virtual void Dispose()
-    {
-        DbContext?.Dispose();
-    }
-
-    #endregion
-
-    #endregion
-
     /// <summary>
-    /// Create a new <see cref="PlexRipperDbContext"/> instance for the same in memory database and assign it to DbContext.
-    /// This is useful to recreate a DbContext that should not be reused between operations.
+    /// Gets a new instance of <see cref="PlexRipperDbContext"/> for every time it is called.
     /// </summary>
-    protected void ResetDbContext()
-    {
-        DbContext = GetDbContext();
-    }
+
+    // ReSharper disable once InconsistentNaming
+    protected IPlexRipperDbContext IDbContext => GetDbContext();
+
+    private List<PlexRipperDbContext> _dbContexts = new();
+
+    #endregion
 
     protected PlexRipperDbContext GetDbContext()
     {
-        if (!isDatabaseSetup)
+        if (!_isDatabaseSetup)
         {
-            var logEvent = _log.ErrorLine("The test database has not been setup yet, run SetupDatabase() in the test first!");
+            var logEvent = Log.ErrorLine(
+                "The test database has not been setup yet, run SetupDatabase() in the test first!"
+            );
             throw new Exception(logEvent.ToLogString());
         }
 
-        return MockDatabase.GetMemoryDbContext(_databaseName, disableForeignKeyCheck);
+        _dbContexts.Add(MockDatabase.GetMemoryDbContext(_databaseName));
+        return _dbContexts.Last();
     }
 
     /// <summary>
     /// Creates and maintains a unique in memory database <see cref="PlexRipperDbContext"/> for every test.
     /// </summary>
     /// <param name="options"></param>
-    protected async Task SetupDatabase(Action<FakeDataConfig> options = null)
+    protected async Task SetupDatabase(Action<FakeDataConfig>? options = null)
     {
-        isDatabaseSetup = true;
-
-        var config = FakeDataConfig.FromOptions(options);
-        disableForeignKeyCheck = config.DisableForeignKeyCheck;
-
         // Database context can be setup once and then retrieved by its DB name.
-        DbContext = await GetDbContext().Setup(Seed, options);
-        _databaseName = DbContext.DatabaseName;
+        var dbContext = await MockDatabase.GetMemoryDbContext().Setup(Seed, options);
+        _databaseName = dbContext.DatabaseName;
+        _dbContexts.Add(dbContext);
+        _isDatabaseSetup = true;
     }
 
-    protected void SaveChanges()
+    public virtual void Dispose()
     {
-        DbContext.SaveChanges();
+        if (_isDatabaseSetup)
+            _dbContexts.ForEach(x => x.Dispose());
     }
 }
 
-public class BaseUnitTest<TUnitTestClass> : BaseUnitTest where TUnitTestClass : class
+public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
+    where TUnitTestClass : class
 {
     #region Fields
 
@@ -111,31 +97,33 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest where TUnitTestClass : 
 
     #region Constructors
 
-    protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Debug) : base(output, logEventLevel)
+    protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Debug)
+        : base(output, logEventLevel)
     {
         mock = AutoMock.GetStrict(builder =>
         {
-            builder.RegisterInstance(MapperSetup.CreateMapper())
-                .As<IMapper>()
-                .SingleInstance();
-            builder.Register<ILogger>((_, _) =>
-                {
-                    LogConfig.SetTestOutputHelper(output);
-                    return LogConfig.GetLogger(logEventLevel);
-                })
+            builder
+                .Register<ILogger>(
+                    (_, _) =>
+                    {
+                        LogConfig.SetTestOutputHelper(output);
+                        return LogConfig.GetLogger(logEventLevel);
+                    }
+                )
                 .SingleInstance();
 
             // Database context can be setup once and then retrieved by its DB name.
-            builder.Register((_, _) => GetDbContext())
-                .As<PlexRipperDbContext>()
+            builder
+                .Register((_, _) => GetDbContext())
+                .As<PlexRipperDbContext>() // Register as concrete type
+                .As<IPlexRipperDbContext>() // Also register as interface
                 .InstancePerDependency();
 
             builder.RegisterType<Log>().As<ILog>().SingleInstance();
             builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();
         });
-        mock.Mock<IHttpClientFactory>()
-            .Setup(x => x.CreateClient(It.IsAny<string>()))
-            .Returns(new HttpClient());
+
+        mock.Mock<IHttpClientFactory>().Setup(x => x.CreateClient(It.IsAny<string>())).Returns(new HttpClient());
     }
 
     #endregion
@@ -144,10 +132,10 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest where TUnitTestClass : 
 
     #region Public
 
-    public override void Dispose()
+    public new virtual void Dispose()
     {
         base.Dispose();
-        mock?.Dispose();
+        mock.Dispose();
     }
 
     #endregion

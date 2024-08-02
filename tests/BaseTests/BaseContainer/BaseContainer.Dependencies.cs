@@ -3,19 +3,14 @@
 using Application.Contracts;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using AutoMapper;
-using BackgroundServices.Contracts;
-using DownloadManager.Contracts;
+using Data.Contracts;
 using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;
-using Microsoft.AspNetCore.Mvc.Testing;
 using PlexApi.Contracts;
 using PlexRipper.Data;
-using PlexRipper.DownloadManager;
 using PlexRipper.WebAPI;
 using Settings.Contracts;
-using WebAPI.Contracts;
 
 #endregion
 
@@ -25,7 +20,7 @@ public partial class BaseContainer : IDisposable
 {
     #region Fields
 
-    private readonly WebApplicationFactory<Startup> _factory;
+    private readonly PlexRipperWebApplicationFactory _factory;
 
     private static ILog _log;
 
@@ -38,9 +33,13 @@ public partial class BaseContainer : IDisposable
     /// <summary>
     /// Creates a Autofac container and sets up a test database.
     /// </summary>
-    private BaseContainer(string memoryDbName, Action<UnitTestDataConfig> options = null, MockPlexApi mockPlexApi = null)
+    private BaseContainer(
+        string memoryDbName,
+        Action<UnitTestDataConfig>? options = null,
+        MockPlexApi mockPlexApi = null
+    )
     {
-        _factory = new PlexRipperWebApplicationFactory<Startup>(memoryDbName, options, mockPlexApi);
+        _factory = new PlexRipperWebApplicationFactory(memoryDbName, options, mockPlexApi);
         ApiClient = _factory.CreateDefaultClient();
 
         // Create a separate scope as not to interfere with tests running in parallel
@@ -50,8 +49,9 @@ public partial class BaseContainer : IDisposable
     public static async Task<BaseContainer> Create(
         ILog log,
         string memoryDbName,
-        Action<UnitTestDataConfig> options = null,
-        MockPlexApi mockPlexApi = null)
+        Action<UnitTestDataConfig>? options = null,
+        MockPlexApi mockPlexApi = null
+    )
     {
         _log = log;
         var config = UnitTestDataConfig.FromOptions(options);
@@ -78,23 +78,9 @@ public partial class BaseContainer : IDisposable
 
     public IFileSystem FileSystem => Resolve<IFileSystem>();
 
-    public IDownloadCommands GetDownloadCommands => Resolve<IDownloadCommands>();
-
     public IDownloadQueue GetDownloadQueue => Resolve<IDownloadQueue>();
 
-    public IDownloadTaskFactory GetDownloadTaskFactory => Resolve<IDownloadTaskFactory>();
-
-    public IDownloadTaskValidator GetDownloadTaskValidator => Resolve<IDownloadTaskValidator>();
-
-    public IFolderPathService GetFolderPathService => Resolve<IFolderPathService>();
-
-    public IPlexAccountService GetPlexAccountService => Resolve<IPlexAccountService>();
-
     public IPlexApiService GetPlexApiService => Resolve<IPlexApiService>();
-
-    public IPlexLibraryService GetPlexLibraryService => Resolve<IPlexLibraryService>();
-
-    public IPlexServerService GetPlexServerService => Resolve<IPlexServerService>();
 
     public IMediator Mediator => Resolve<IMediator>();
 
@@ -104,16 +90,17 @@ public partial class BaseContainer : IDisposable
 
     public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
 
+    public IPlexRipperDbContext IPlexRipperDbContext => Resolve<IPlexRipperDbContext>();
+
     public ISchedulerService SchedulerService => Resolve<ISchedulerService>();
 
     public IDownloadTaskScheduler DownloadTaskScheduler => Resolve<IDownloadTaskScheduler>();
 
     public IFileMergeScheduler FileMergeScheduler => Resolve<IFileMergeScheduler>();
+
     public MockSignalRService MockSignalRService => (MockSignalRService)Resolve<ISignalRService>();
 
     public TestLoggingClass TestLoggingClass => Resolve<TestLoggingClass>();
-
-    public IMapper Mapper => Resolve<IMapper>();
 
     public IBoot Boot => Resolve<IBoot>();
 
@@ -131,10 +118,7 @@ public partial class BaseContainer : IDisposable
 
     #region Public Methods
 
-    private T Resolve<T>()
-    {
-        return _lifeTimeScope.Resolve<T>();
-    }
+    private T Resolve<T>() => _lifeTimeScope.Resolve<T>();
 
     #endregion
 

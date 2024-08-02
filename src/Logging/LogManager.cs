@@ -15,9 +15,10 @@ public static class LogManager
     [MessageTemplateFormatMethod("messageTemplate")]
     public static void DbContextLogger(
         string messageTemplate,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    )
     {
         switch (messageTemplate)
         {
@@ -40,16 +41,15 @@ public static class LogManager
     public static void SetupLogging(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
         Serilog.Log.Logger = LogConfig.GetLogger(minimumLogLevel);
+        _log.Information("Logging level set to {LogLevel}", minimumLogLevel);
     }
 
     /// <summary>
     /// Returns a new typed <see cref="ILog"/> instance.
     /// </summary>
     /// <returns></returns>
-    public static ILog<T> CreateLogInstance<T>(LogEventLevel logLevel = LogEventLevel.Debug) where T : class
-    {
-        return new Log<T>(LogConfig.GetLogger(logLevel));
-    }
+    public static ILog<T> CreateLogInstance<T>(LogEventLevel logLevel = LogEventLevel.Debug)
+        where T : class => new Log<T>(LogConfig.GetLogger(logLevel), typeof(T));
 
     /// <summary>
     /// Returns a new typed <see cref="ILog"/> instance.
@@ -61,22 +61,25 @@ public static class LogManager
         return new Log(LogConfig.GetLogger(logLevel));
     }
 
-    public static ILog<T> CreateLogInstance<T>(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug) where T : class
+    public static ILog<T> CreateLogInstance<T>(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug)
+        where T : class
     {
         LogConfig.SetTestOutputHelper(output);
-        return new Log<T>(LogConfig.GetLogger(logLevel));
+        return new Log<T>(LogConfig.GetLogger(logLevel), typeof(T));
     }
 
     /// <summary>
     /// Returns a new typed <see cref="ILog"/> instance.
     /// </summary>
     /// <returns></returns>
-    public static ILog CreateLogInstance(Type classType, LogEventLevel logLevel = LogEventLevel.Debug)
-    {
-        return new Log<Type>(LogConfig.GetLogger(logLevel), classType);
-    }
+    public static ILog CreateLogInstance(Type classType, LogEventLevel logLevel = LogEventLevel.Debug) =>
+        new Log<Type>(LogConfig.GetLogger(logLevel), classType);
 
-    public static ILog CreateLogInstance(ITestOutputHelper output, Type classType, LogEventLevel logLevel = LogEventLevel.Debug)
+    public static ILog CreateLogInstance(
+        ITestOutputHelper output,
+        Type classType,
+        LogEventLevel logLevel = LogEventLevel.Debug
+    )
     {
         LogConfig.SetTestOutputHelper(output);
         return new Log<Type>(LogConfig.GetLogger(logLevel), classType);

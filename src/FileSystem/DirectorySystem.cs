@@ -1,21 +1,29 @@
 ﻿using FileSystem.Contracts;
+using Logging.Interface;
 
 namespace PlexRipper.FileSystem;
 
 public class DirectorySystem : IDirectorySystem
 {
+    private readonly ILog _log;
     private readonly IPathSystem _pathSystem;
 
-    public DirectorySystem(IPathSystem pathSystem)
+    public DirectorySystem(ILog<DirectorySystem> log, IPathSystem pathSystem)
     {
+        _log = log;
         _pathSystem = pathSystem;
     }
 
+    /// <inheritdoc />
     public Result<bool> Exists(string path)
     {
         try
         {
-            return Result.Ok(Directory.Exists(path));
+            if (path == string.Empty)
+                return Result.Ok(false);
+
+            var di = new DirectoryInfo(path);
+            return Result.Ok(di.Exists);
         }
         catch (Exception e)
         {
@@ -53,12 +61,21 @@ public class DirectorySystem : IDirectorySystem
     /// <inheritdoc />
     public Result DeleteAllFilesFromDirectory(string directory)
     {
-        var directoryExistsResult = Exists(directory);
-        if (directoryExistsResult.IsFailed)
-            return directoryExistsResult.ToResult();
-
-        if (directoryExistsResult.Value)
+        try
         {
+            var directoryExistsResult = Exists(directory);
+            if (directoryExistsResult.IsFailed)
+                return directoryExistsResult.ToResult();
+
+            if (!directoryExistsResult.Value)
+            {
+                _log.Debug(
+                    "Directory: {Directory} does not exist so the files could not be deleted from it",
+                    directory
+                );
+                return Result.Ok();
+            }
+
             var di = new DirectoryInfo(directory);
 
             foreach (var file in di.GetFiles())
@@ -69,8 +86,10 @@ public class DirectorySystem : IDirectorySystem
 
             return Result.Ok();
         }
-
-        return Result.Fail($"Directory: {directory} does not exist").LogError();
+        catch (Exception e)
+        {
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
     }
 
     public Result<string[]> GetFiles(string directoryPath)
@@ -119,10 +138,18 @@ public class DirectorySystem : IDirectorySystem
                 return directoryHasFiles.ToResult();
 
             // If the filePath is just an empty directory then delete that.
-            if (!string.IsNullOrEmpty(directoryResult.Value) && directoryExistsResult.Value && !directoryHasFiles.Value.Any())
+            if (
+                !string.IsNullOrEmpty(directoryResult.Value)
+                && directoryExistsResult.Value
+                && !directoryHasFiles.Value.Any()
+            )
                 Delete(directoryResult.Value);
             else
-                return Result.Fail($"Could not determine the directory name of path: {filePath} or the path contains files").LogError();
+            {
+                return Result
+                    .Fail($"Could not determine the directory name of path: {filePath} or the path contains files")
+                    .LogError();
+            }
         }
         catch (Exception e)
         {

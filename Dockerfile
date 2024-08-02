@@ -1,10 +1,10 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS base
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS base
 WORKDIR /app
 
 ## Setup Nuxt front-end
-FROM node:18.11.0-alpine AS client-build
+FROM oven/bun:alpine AS client-build
 WORKDIR /tmp/build/ClientApp
 
 ARG VERSION=0.0.0
@@ -14,17 +14,13 @@ ENV NUXT_PORT=7000
 ENV API_PORT=7000
 ENV NUXT_PUBLIC_IS_DOCKER=true
 
-# Essential config files
-COPY ./src/WebAPI/ClientApp/package*.json ./
-COPY ./src/WebAPI/ClientApp/tsconfig.json ./
-COPY ./src/WebAPI/ClientApp/nuxt.config.ts ./
-RUN npm install
-## Copy the rest of the project files
+## Copy the project files
 COPY ./src/WebAPI/ClientApp/ ./
-RUN npm run generate --fail-on-error
+RUN bun install --frozen-lockfile
+RUN bun run generate --fail-on-error
 
 ## Setup .NET Core back-end
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 ## Domain Projects
@@ -38,15 +34,9 @@ COPY ["src/Application/Application.csproj", "src/Application/"]
 COPY ["src/Application.Contracts/Application.Contracts.csproj", "src/Application.Contracts/"]
 
 ## Infrastructure Projects
-### Background Services
-COPY ["src/BackgroundServices/BackgroundServices.csproj", "src/BackgroundServices/"]
-COPY ["src/BackgroundServices.Contracts/BackgroundServices.Contracts.csproj", "src/BackgroundServices.Contracts/"]
 ### Data Access
 COPY ["src/Data/Data.csproj", "src/Data/"]
 COPY ["src/Data.Contracts/Data.Contracts.csproj", "src/Data.Contracts/"]
-### Download Manager
-COPY ["src/DownloadManager/DownloadManager.csproj", "src/DownloadManager/"]
-COPY ["src/DownloadManager.Contracts/DownloadManager.Contracts.csproj", "src/DownloadManager.Contracts/"]
 ### File System
 COPY ["src/FileSystem/FileSystem.csproj", "src/FileSystem/"]
 COPY ["src/FileSystem.Contracts/FileSystem.Contracts.csproj", "src/FileSystem.Contracts/"]
@@ -73,7 +63,7 @@ RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:AssemblyVersion
 
 ## Merge into one container
 FROM base AS final
-ENV DOTNET_ENVIRONMENT Production
+ENV DOTNET_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://+:7000
 ENV DOTNET_URLS=http://+:7000
 WORKDIR /app

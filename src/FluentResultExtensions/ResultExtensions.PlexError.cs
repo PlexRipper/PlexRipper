@@ -33,7 +33,8 @@ public static partial class ResultExtensions
 
     public static bool HasPlexErrorInvalidVerificationCode(this Result result)
     {
-        return result.HasPlexError() && result.GetPlexErrors().Any(x => x.Code == PlexErrorCodes.InvalidVerificationCode);
+        return result.HasPlexError()
+            && result.GetPlexErrors().Any(x => x.Code == PlexErrorCodes.InvalidVerificationCode);
     }
 
     public static bool HasPlexErrorInvalidVerificationCode<T>(this Result<T> result)

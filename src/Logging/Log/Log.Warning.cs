@@ -13,47 +13,48 @@ public partial class Log : ILog
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData WarningLine(
         string messageTemplate,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
-    {
-        return Write(LogEventLevel.Warning, messageTemplate, sourceFilePath, memberName, sourceLineNumber);
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) => Write(LogEventLevel.Warning, messageTemplate, sourceFilePath, memberName, sourceLineNumber);
 
     /// <inheritdoc/>
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Warning(
         Exception ex,
         string messageTemplate,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
-    {
-        return Write(LogEventLevel.Warning, ex, messageTemplate, sourceFilePath, memberName, sourceLineNumber);
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) => Write(LogEventLevel.Warning, ex, messageTemplate, sourceFilePath, memberName, sourceLineNumber);
 
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Warning<T>(
         string messageTemplate,
         T propertyValue = default!,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
-    {
-        return Write(LogEventLevel.Warning, messageTemplate, sourceFilePath, memberName, sourceLineNumber, propertyValue);
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) => Write(LogEventLevel.Warning, messageTemplate, sourceFilePath, memberName, sourceLineNumber, propertyValue);
 
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Warning<T0, T1>(
         string messageTemplate,
         T0 propertyValue0,
         T1 propertyValue1,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
-    {
-        return Write(LogEventLevel.Warning, messageTemplate, sourceFilePath, memberName, sourceLineNumber, propertyValue0, propertyValue1);
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) =>
+        Write(
+            LogEventLevel.Warning,
+            messageTemplate,
+            sourceFilePath,
+            memberName,
+            sourceLineNumber,
+            propertyValue0,
+            propertyValue1
+        );
 
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Warning<T0, T1, T2>(
@@ -61,13 +62,20 @@ public partial class Log : ILog
         T0 propertyValue0,
         T1 propertyValue1,
         T2 propertyValue2,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
-    {
-        return Write(LogEventLevel.Warning, messageTemplate, sourceFilePath, memberName, sourceLineNumber, propertyValue0, propertyValue1,
-            propertyValue2);
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) =>
+        Write(
+            LogEventLevel.Warning,
+            messageTemplate,
+            sourceFilePath,
+            memberName,
+            sourceLineNumber,
+            propertyValue0,
+            propertyValue1,
+            propertyValue2
+        );
 
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Warning<T0, T1, T2, T3>(
@@ -76,14 +84,21 @@ public partial class Log : ILog
         T1 propertyValue1,
         T2 propertyValue2,
         T3 propertyValue3,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
-    {
-        return Write(LogEventLevel.Warning, messageTemplate, sourceFilePath, memberName, sourceLineNumber, propertyValue0, propertyValue1,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) =>
+        Write(
+            LogEventLevel.Warning,
+            messageTemplate,
+            sourceFilePath,
+            memberName,
+            sourceLineNumber,
+            propertyValue0,
+            propertyValue1,
             propertyValue2,
-            propertyValue3);
-    }
+            propertyValue3
+        );
 
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Warning<T0, T1, T2, T3, T4>(
@@ -93,14 +108,22 @@ public partial class Log : ILog
         T2 propertyValue2,
         T3 propertyValue3,
         T4 propertyValue4,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
-    {
-        return Write(LogEventLevel.Warning, messageTemplate, sourceFilePath, memberName, sourceLineNumber, propertyValue0, propertyValue1,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) =>
+        Write(
+            LogEventLevel.Warning,
+            messageTemplate,
+            sourceFilePath,
+            memberName,
+            sourceLineNumber,
+            propertyValue0,
+            propertyValue1,
             propertyValue2,
-            propertyValue3, propertyValue4);
-    }
+            propertyValue3,
+            propertyValue4
+        );
 
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Warning<T0, T1, T2, T3, T4, T5>(
@@ -111,13 +134,23 @@ public partial class Log : ILog
         T3 propertyValue3,
         T4 propertyValue4,
         T5 propertyValue5,
-        [CallerMemberName] string memberName = default!,
-        [CallerFilePath] string sourceFilePath = default!,
-        [CallerLineNumber] int sourceLineNumber = default!)
-    {
-        return Write(LogEventLevel.Warning, messageTemplate, sourceFilePath, memberName, sourceLineNumber, propertyValue0, propertyValue1, propertyValue2,
-            propertyValue3, propertyValue4, propertyValue5);
-    }
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0
+    ) =>
+        Write(
+            LogEventLevel.Warning,
+            messageTemplate,
+            sourceFilePath,
+            memberName,
+            sourceLineNumber,
+            propertyValue0,
+            propertyValue1,
+            propertyValue2,
+            propertyValue3,
+            propertyValue4,
+            propertyValue5
+        );
 
     #endregion
 }

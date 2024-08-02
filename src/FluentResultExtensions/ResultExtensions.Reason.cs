@@ -12,6 +12,8 @@ public static partial class ResultExtensions
 
     public static string ErrorMessage(this IReason error)
     {
-        return error.HasMetadataKey(ErrorMessageName) ? error.Metadata[ErrorMessageName]?.ToString() : "Message not found";
+        return error.HasMetadataKey(ErrorMessageName)
+            ? error.Metadata[ErrorMessageName]?.ToString()
+            : "Message not found";
     }
 }

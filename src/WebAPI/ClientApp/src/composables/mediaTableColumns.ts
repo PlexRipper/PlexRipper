@@ -1,4 +1,4 @@
-import { QTreeViewTableHeader } from '@props';
+import type { QTreeViewTableHeader } from '@props';
 
 export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 	return [
@@ -69,6 +69,7 @@ export const getDownloadTableColumns: QTreeViewTableHeader[] = [
 	{
 		label: 'Title',
 		field: 'title',
+		type: 'title',
 	},
 	{
 		label: 'Status',

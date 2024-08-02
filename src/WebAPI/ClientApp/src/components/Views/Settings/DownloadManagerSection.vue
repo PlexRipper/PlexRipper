@@ -1,8 +1,13 @@
 <template>
-	<q-section>
-		<template #header> {{ t('pages.settings.advanced.download-manager.header') }}</template>
+	<QSection>
+		<template #header>
+			{{ $t('pages.settings.advanced.download-manager.header') }}
+		</template>
 		<!--	Max segmented downloads	-->
-		<help-row help-id="help.settings.advanced.download-manager-section.download-segments">
+		<HelpRow
+			:label="$t('help.settings.advanced.download-manager-section.download-segments.label')"
+			:title="$t('help.settings.advanced.download-manager-section.download-segments.title')"
+			:text="$t('help.settings.advanced.download-manager-section.download-segments.text')">
 			<QSlider
 				:model-value="settingsStore.downloadManagerSettings.downloadSegments"
 				label
@@ -11,13 +16,12 @@
 				:max="8"
 				:step="1"
 				@change="settingsStore.downloadManagerSettings.downloadSegments = $event" />
-		</help-row>
-	</q-section>
+		</HelpRow>
+	</QSection>
 </template>
 
 <script setup lang="ts">
 import { useSettingsStore } from '~/store';
 
-const { t } = useI18n();
 const settingsStore = useSettingsStore();
 </script>

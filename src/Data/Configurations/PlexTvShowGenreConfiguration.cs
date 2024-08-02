@@ -7,7 +7,6 @@ public class PlexTvShowGenreConfiguration : IEntityTypeConfiguration<PlexTvShowG
 {
     public void Configure(EntityTypeBuilder<PlexTvShowGenre> builder)
     {
-        builder
-            .HasKey(bc => new { bc.PlexTvShowId, bc.PlexGenreId });
+        builder.HasKey(bc => new { bc.PlexTvShowId, bc.PlexGenreId });
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace PlexRipper.WebAPI.SignalR.Common;
+namespace PlexRipper.WebAPI;
 
 public enum MessageTypes
 {

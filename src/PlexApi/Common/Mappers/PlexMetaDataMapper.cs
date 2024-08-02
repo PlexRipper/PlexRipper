@@ -1,9 +1,7 @@
 using PlexRipper.PlexApi.Models;
-using Riok.Mapperly.Abstractions;
 
 namespace PlexRipper.PlexApi;
 
-[Mapper]
 public static partial class PlexMetaDataMapper
 {
     #region Single Conversions
@@ -46,23 +44,20 @@ public static partial class PlexMetaDataMapper
             Id = 0,
             Title = source.Title,
             Year = source.Year,
-            SortTitle = source.TitleSort,
+            SortTitle = source.TitleSort ?? string.Empty,
             Duration = source.Duration,
             MediaSize = source.Media.Sum(y => y.Part.Sum(z => z.Size)),
             ChildCount = source.ChildCount,
             AddedAt = source.AddedAt,
             UpdatedAt = source.UpdatedAt,
-            MediaData = new PlexMediaContainer()
-            {
-                MediaData = source.Media.ToPlexMediaData(),
-            },
+            MediaData = new PlexMediaContainer() { MediaData = source.Media.ToPlexMediaData() },
 
             Type = PlexMediaType.None,
             Key = source.RatingKey != null ? int.Parse(source.RatingKey) : -1,
             MetaDataKey = RetrieveMetaDataKey(source),
-            Studio = source.Studio,
-            Summary = source.Summary,
-            ContentRating = source.ContentRating,
+            Studio = source.Studio ?? string.Empty,
+            Summary = source.Summary ?? string.Empty,
+            ContentRating = source.ContentRating ?? string.Empty,
             Rating = source.Rating,
             OriginallyAvailableAt = source.OriginallyAvailableAt.ToDateTime(),
             Index = source.Index,
@@ -72,11 +67,13 @@ public static partial class PlexMetaDataMapper
             HasTheme = !string.IsNullOrEmpty(source.Theme),
 
             // Ignore the following
-            FullTitle = "",
-            PlexLibrary = null,
-            PlexServer = null,
-            PlexLibraryId = 0,
-            PlexServerId = 0,
+            FullTitle = string.Empty,
+            PlexLibrary = default,
+            PlexServer = default,
+            PlexLibraryId = default,
+            PlexServerId = default,
+            FullThumbUrl = string.Empty,
+            FullBannerUrl = string.Empty,
         };
     }
 
@@ -84,25 +81,15 @@ public static partial class PlexMetaDataMapper
 
     #region List Conversions
 
-    public static List<PlexMovie> ToPlexMovies(this List<Metadata> source)
-    {
-        return source.Select(x => x.ToPlexMovie()).ToList();
-    }
+    public static List<PlexMovie> ToPlexMovies(this List<Metadata> source) => source.ConvertAll(ToPlexMovie);
 
-    public static List<PlexTvShow> ToPlexTvShows(this List<Metadata> source)
-    {
-        return source.Select(x => x.ToPlexTvShow()).ToList();
-    }
+    public static List<PlexTvShow> ToPlexTvShows(this List<Metadata> source) => source.ConvertAll(ToPlexTvShow);
 
-    public static List<PlexTvShowSeason> ToPlexTvShowSeasons(this List<Metadata> source)
-    {
-        return source.Select(x => x.ToPlexTvShowSeason()).ToList();
-    }
+    public static List<PlexTvShowSeason> ToPlexTvShowSeasons(this List<Metadata> source) =>
+        source.ConvertAll(ToPlexTvShowSeason);
 
-    public static List<PlexTvShowEpisode> ToPlexTvShowEpisodes(this List<Metadata> source)
-    {
-        return source.Select(x => x.ToPlexTvShowEpisode()).ToList();
-    }
+    public static List<PlexTvShowEpisode> ToPlexTvShowEpisodes(this List<Metadata> source) =>
+        source.ConvertAll(ToPlexTvShowEpisode);
 
     #endregion
 
@@ -114,13 +101,7 @@ public static partial class PlexMetaDataMapper
     /// <returns></returns>
     private static int RetrieveMetaDataKey(Metadata metadata)
     {
-        List<string> list = new()
-        {
-            metadata.Thumb,
-            metadata.Banner,
-            metadata.Art,
-            metadata.Theme,
-        };
+        List<string> list = [metadata.Thumb, metadata.Banner, metadata.Art, metadata.Theme];
 
         foreach (var entry in list)
             if (!string.IsNullOrEmpty(entry))

@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Buffers.Text;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -64,7 +65,7 @@ public class DoubleValueConverter : JsonConverter<double>
 
     public override void Write(Utf8JsonWriter writer, double value, JsonSerializerOptions options)
     {
-        writer.WriteStringValue(value.ToString());
+        writer.WriteStringValue(value.ToString(CultureInfo.DefaultThreadCurrentCulture));
     }
 }
 
@@ -100,8 +101,10 @@ public class BooleanValueConverter : JsonConverter<bool>
     {
         if (reader.TokenType == JsonTokenType.String)
         {
-            if (string.Equals("1", reader.GetString(), StringComparison.OrdinalIgnoreCase) ||
-                string.Equals("0", reader.GetString(), StringComparison.OrdinalIgnoreCase))
+            if (
+                string.Equals("1", reader.GetString(), StringComparison.OrdinalIgnoreCase)
+                || string.Equals("0", reader.GetString(), StringComparison.OrdinalIgnoreCase)
+            )
                 return Convert.ToBoolean(Convert.ToInt16(reader.GetString()));
 
             // try to parse number directly from bytes

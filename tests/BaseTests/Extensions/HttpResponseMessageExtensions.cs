@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
+using Application.Contracts;
 using PlexRipper.Domain.Config;
-using PlexRipper.WebAPI.Common.FluentResult;
 
 namespace PlexRipper.BaseTests;
 
@@ -9,24 +9,26 @@ public static class HttpResponseMessageExtensions
 {
     public static async Task<ResultDTO<T>> Deserialize<T>(this HttpResponseMessage response)
     {
-        var result = await response.Content.ReadFromJsonAsync<ResultDTO<T>>(DefaultJsonSerializerOptions.ConfigBase);
+        var result = await response.Content.ReadFromJsonAsync<ResultDTO<T>>(
+            DefaultJsonSerializerOptions.ConfigStandard
+        );
 
-        result.Reasons = result.Reasons.Select(x => new ReasonDTO
+        result.Reasons = result
+            .Reasons.Select(x => new ReasonDTO { Message = x.Message, Metadata = x.Metadata.ToTypedResultMetaData() })
+            .ToList();
+
+        result.Successes = result
+            .Successes.Select(x => new SuccessDTO()
             {
                 Message = x.Message,
                 Metadata = x.Metadata.ToTypedResultMetaData(),
             })
             .ToList();
 
-        result.Successes = result.Successes.Select(x => new SuccessDTO()
+        result.Errors = result
+            .Errors.Select(x => new ErrorDTO()
             {
-                Message = x.Message,
-                Metadata = x.Metadata.ToTypedResultMetaData(),
-            })
-            .ToList();
-
-        result.Errors = result.Errors.Select(x => new ErrorDTO()
-            {
+                Reasons = x.Reasons,
                 Message = x.Message,
                 Metadata = x.Metadata.ToTypedResultMetaData(),
             })

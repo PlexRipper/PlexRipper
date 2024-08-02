@@ -14,9 +14,7 @@ public class PlexLibraryConfiguration : IEntityTypeConfiguration<PlexLibrary>
             .HasConversion(x => x.ToPlexMediaTypeString(), x => x.ToPlexMediaType())
             .IsUnicode(false);
 
-        builder
-            .Property(x => x.MetaData)
-            .HasJsonValueConversion();
+        builder.Property(x => x.MetaData).HasJsonValueConversion();
 
         builder
             .HasOne(x => x.PlexServer)
@@ -43,18 +41,11 @@ public class PlexLibraryConfiguration : IEntityTypeConfiguration<PlexLibrary>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
-            .HasMany(x => x.DownloadTasks)
-            .WithOne(x => x.PlexLibrary)
-            .HasForeignKey(x => x.PlexLibraryId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder
             .HasOne(x => x.DefaultDestination)
             .WithMany(x => x.PlexLibraries)
             .HasForeignKey(x => x.DefaultDestinationId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        builder.Property(c => c.Title)
-            .UseCollation(OrderByNaturalExtensions.CollationName);
+        builder.Property(c => c.Title).UseCollation(OrderByNaturalExtensions.CollationName);
     }
 }

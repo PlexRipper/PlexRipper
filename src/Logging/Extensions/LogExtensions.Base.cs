@@ -10,7 +10,8 @@ public static partial class LogExtensions
         this ILog logger,
         [CallerFilePath] string sourceFilePath = "",
         [CallerMemberName] string memberName = "",
-        [CallerLineNumber] int sourceLineNumber = 0)
+        [CallerLineNumber] int sourceLineNumber = 0
+    )
     {
         var className = Path.GetFileNameWithoutExtension(sourceFilePath);
         return new LogMetaData(logger, className, memberName, sourceLineNumber);

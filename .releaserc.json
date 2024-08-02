@@ -4,8 +4,7 @@
       "name": "master"
     },
     {
-      "name": "dev",
-      "prerelease": true
+      "name": "dev"
     }
   ],
   "dryRun": false,

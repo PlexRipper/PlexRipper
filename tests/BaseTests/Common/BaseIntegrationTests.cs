@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using Data.Contracts;
 using Logging.Interface;
 using PlexRipper.Data;
 using PlexRipper.Domain.Config;
@@ -12,7 +13,7 @@ public class BaseIntegrationTests : IAsyncLifetime
     #region Fields
 
     private readonly List<PlexMockServer> _plexMockServers = new();
-    private System.Net.Http.HttpClient _client;
+    private HttpClient _client;
     private MockPlexApi _mockPlexApi;
     protected BaseContainer Container;
     protected readonly ILog _log;
@@ -56,7 +57,7 @@ public class BaseIntegrationTests : IAsyncLifetime
         await CreateContainer(config => config.Seed = seed);
     }
 
-    protected async Task CreateContainer(Action<UnitTestDataConfig> options = null)
+    protected async Task CreateContainer(Action<UnitTestDataConfig>? options = null)
     {
         Container = await BaseContainer.Create(_log, DatabaseName, options, _mockPlexApi);
     }
@@ -69,7 +70,12 @@ public class BaseIntegrationTests : IAsyncLifetime
     {
         if (Container is not null)
         {
-            _log.Here().Error("{NameOfCreateContainer}() has already been called, cannot {NameOfSetupMockPlexApi}()", nameof(CreateContainer), nameof(SetupMockPlexApi));
+            _log.Here()
+                .Error(
+                    "{NameOfCreateContainer}() has already been called, cannot {NameOfSetupMockPlexApi}()",
+                    nameof(CreateContainer),
+                    nameof(SetupMockPlexApi)
+                );
 
             // throw new Exception(msg);
         }
@@ -81,7 +87,7 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     #region SetupDatabase
 
-    protected async Task SetupDatabase(Action<FakeDataConfig> options = null)
+    protected async Task SetupDatabase(Action<FakeDataConfig>? options = null)
     {
         // Database context can be setup once and then retrieved by its DB name.
         await MockDatabase.GetMemoryDbContext(DatabaseName).Setup(Seed, options);
@@ -116,7 +122,7 @@ public class BaseIntegrationTests : IAsyncLifetime
         {
             var response = await _client.GetAsync(requestUri);
             var x = await response.Content.ReadAsStringAsync();
-            return await response.Content.ReadFromJsonAsync<T>(DefaultJsonSerializerOptions.ConfigBase);
+            return await response.Content.ReadFromJsonAsync<T>(DefaultJsonSerializerOptions.ConfigStandard);
         }
         catch (Exception e)
         {
@@ -128,9 +134,10 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage httpRequestMessage,
-        HttpCompletionOption option = HttpCompletionOption.ResponseContentRead)
+        HttpCompletionOption option = HttpCompletionOption.ResponseContentRead
+    )
     {
-        _client = _mockPlexApi is not null ? _mockPlexApi.CreateClient() : new System.Net.Http.HttpClient();
+        _client = _mockPlexApi is not null ? _mockPlexApi.CreateClient() : new HttpClient();
         try
         {
             return await _client.SendAsync(httpRequestMessage, option);
@@ -144,6 +151,8 @@ public class BaseIntegrationTests : IAsyncLifetime
     }
 
     protected PlexRipperDbContext DbContext => Container.PlexRipperDbContext;
+
+    protected IPlexRipperDbContext IDbContext => Container.IPlexRipperDbContext;
 
     #endregion
 

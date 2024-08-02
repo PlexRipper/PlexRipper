@@ -25,7 +25,6 @@ public static partial class FakeData
             .RuleFor(x => x.OwnerId, f => f.Random.Int(1000, 100000))
             .RuleFor(x => x.PlexServerOwnerUsername, f => f.Name.LastName())
             .RuleFor(x => x.PublicAddress, f => f.Internet.Ip())
-
             // Server flags
             .RuleFor(x => x.Owned, f => f.Random.Bool())
             .RuleFor(x => x.Home, f => f.Random.Bool())
@@ -50,10 +49,10 @@ public static partial class FakeData
             .StrictMode(true)
             .UseSeed(seed)
             .RuleFor(x => x.Id, _ => 0)
-            .RuleFor(x => x.Key, f => f.Random.Int(1, 10000).ToString())
+            .RuleFor(x => x.Key, _ => GetUniqueNumber().ToString())
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
             .RuleFor(x => x.Type, f => libraryType == PlexMediaType.None ? f.PlexRipper().LibraryType : libraryType)
-            .RuleFor(x => x.PlexServerId, f => f.Random.Int(1, 10000))
+            .RuleFor(x => x.PlexServerId, _ => GetUniqueNumber())
             .RuleFor(x => x.PlexServer, _ => null)
             .RuleFor(x => x.CreatedAt, f => f.Date.Past(4))
             .RuleFor(x => x.UpdatedAt, f => f.Date.Recent())
@@ -62,13 +61,22 @@ public static partial class FakeData
             .RuleFor(x => x.Uuid, _ => Guid.NewGuid())
             .RuleFor(x => x.LibraryLocationId, f => f.Random.Int(1, 10000))
             .RuleFor(x => x.LibraryLocationPath, f => f.System.DirectoryPath())
-            .RuleFor(x => x.MetaData, _ => new PlexLibraryMetaData())
+            .RuleFor(
+                x => x.MetaData,
+                _ => new PlexLibraryMetaData
+                {
+                    TvShowCount = 0,
+                    TvShowSeasonCount = 0,
+                    TvShowEpisodeCount = 0,
+                    MovieCount = 0,
+                    MediaSize = 0,
+                }
+            )
             .RuleFor(x => x.DefaultDestination, _ => null)
-            .RuleFor(x => x.DefaultDestinationId, f => f.Random.Int(1, 5))
+            .RuleFor(x => x.DefaultDestinationId, _ => null)
             .RuleFor(x => x.Movies, _ => new List<PlexMovie>())
             .RuleFor(x => x.TvShows, _ => new List<PlexTvShow>())
-            .RuleFor(x => x.PlexAccountLibraries, _ => null)
-            .RuleFor(x => x.DownloadTasks, _ => null);
+            .RuleFor(x => x.PlexAccountLibraries, _ => new List<PlexAccountLibrary>());
     }
 
     public static Faker<FolderPath> GetFolderPaths(int seed = 0)
@@ -107,7 +115,8 @@ public static partial class FakeData
     public static List<PlexAccountServer> GetPlexAccountServer(
         PlexAccount plexAccount,
         List<PlexServer> plexServers,
-        int seed = 0)
+        int seed = 0
+    )
     {
         var index = 0;
         return new Faker<PlexAccountServer>()
@@ -125,7 +134,8 @@ public static partial class FakeData
     public static List<ServerAccessTokenDTO> GetServerAccessTokenDTO(
         PlexAccount plexAccount,
         List<PlexServer> plexServers,
-        int seed = 0)
+        int seed = 0
+    )
     {
         var index = 0;
         return new Faker<ServerAccessTokenDTO>()

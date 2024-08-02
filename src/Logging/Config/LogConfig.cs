@@ -39,11 +39,7 @@ public static class LogConfig
             config.Enrich.WithSensitiveDataMasking(options =>
             {
                 options.MaskingOperators.Clear();
-                options.MaskingOperators = new List<IMaskingOperator>()
-                {
-                    new EmailAddressMaskingOperator(),
-                    new UrlMaskingOperator(),
-                };
+                options.MaskingOperators = [new EmailAddressMaskingOperator(), new UrlMaskingOperator(),];
                 options.MaskProperties.Add("PlexLibraryTitle");
                 options.MaskProperties.Add("PlexAccountDisplayName");
                 options.MaskProperties.Add("PlexLibraryName");
@@ -59,7 +55,8 @@ public static class LogConfig
             });
         }
 
-        return config.Enrich.With<ExternalFrameworkEnricher>()
+        return config
+            .Enrich.With<ExternalFrameworkEnricher>()
             .WriteTo.Debug(outputTemplate: Template)
             .WriteTo.Console(theme: LogThemes.SystemColored, outputTemplate: Template);
     }
@@ -80,7 +77,8 @@ public static class LogConfig
                     LogEventLevel.Debug,
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true,
-                    retainedFileCountLimit: 7)
+                    retainedFileCountLimit: 7
+                )
                 .MinimumLevel.Is(minimumLogLevel)
                 .CreateLogger();
         }
@@ -100,5 +98,5 @@ public static class LogConfig
     public static readonly string Template =
         $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(LogMetaData.ClassName)}}}.{{{nameof(LogMetaData.MethodName)}}}:{{{nameof(LogMetaData.LineNumber)}}}] => {{Message:lj}}{{NewLine}}{{Exception}}";
 
-    private static ITestOutputHelper _testOutput;
+    private static ITestOutputHelper _testOutput = null!;
 }

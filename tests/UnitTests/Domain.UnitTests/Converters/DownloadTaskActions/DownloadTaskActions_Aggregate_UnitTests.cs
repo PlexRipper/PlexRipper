@@ -2,7 +2,8 @@
 
 public class DownloadTaskActions_Aggregate_UnitTests : BaseUnitTest
 {
-    public DownloadTaskActions_Aggregate_UnitTests(ITestOutputHelper output) : base(output) { }
+    public DownloadTaskActions_Aggregate_UnitTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public void ShouldBeStatusDownloading_WhenSomeAreDownloadFinished()

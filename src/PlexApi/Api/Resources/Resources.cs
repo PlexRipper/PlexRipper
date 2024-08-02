@@ -12,11 +12,11 @@ public class ServerResource
 
     public string ProductVersion { get; set; }
 
-    public string Platform { get; set; }
+    public string? Platform { get; set; }
 
-    public string PlatformVersion { get; set; }
+    public string? PlatformVersion { get; set; }
 
-    public string Device { get; set; }
+    public string? Device { get; set; }
 
     public string ClientIdentifier { get; set; }
 
@@ -28,7 +28,7 @@ public class ServerResource
 
     public int? OwnerId { get; set; }
 
-    public string SourceTitle { get; set; }
+    public string? SourceTitle { get; set; }
 
     public string PublicAddress { get; set; }
 

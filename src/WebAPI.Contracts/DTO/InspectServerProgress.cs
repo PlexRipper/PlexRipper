@@ -18,7 +18,7 @@ public class InspectServerProgress
 
     public bool Completed { get; set; }
 
-    public string Message { get; set; }
+    public string Message { get; set; } = string.Empty;
 
     public bool AttemptingApplyDNSFix { get; set; }
 

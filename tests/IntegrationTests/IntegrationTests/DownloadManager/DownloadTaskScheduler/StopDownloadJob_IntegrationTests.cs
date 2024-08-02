@@ -1,18 +1,22 @@
-using PlexRipper.Data.Common;
+using Data.Contracts;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationTests.DownloadManager.DownloadTaskScheduler;
 
-
 public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
 {
-    public StopDownloadJob_IntegrationTests(ITestOutputHelper output) : base(output) { }
+    public StopDownloadJob_IntegrationTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldStartAndStopDownloadJob_WhenDownloadTaskHasBeenStopped()
     {
         // Arrange
         Seed = 45644875;
-        var serverUri = SpinUpPlexServer(config => { config.DownloadFileSizeInMb = 50; });
+        var serverUri = SpinUpPlexServer(config =>
+        {
+            config.DownloadFileSizeInMb = 50;
+        });
         await SetupDatabase(config =>
         {
             config.MockServerUris.Add(serverUri);
@@ -26,27 +30,25 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
 
         SetupMockPlexApi();
 
-        await CreateContainer(config => { config.DownloadSpeedLimitInKib = 5000; });
+        await CreateContainer(config =>
+        {
+            config.DownloadSpeedLimitInKib = 5000;
+        });
 
-        var downloadTask = DbContext
-            .DownloadTasks
-            .IncludeDownloadTasks()
-            .FirstOrDefault();
-        downloadTask.ShouldNotBeNull();
-        var childDownloadTask = downloadTask.Children[0];
+        var movieDownloadTasks = await DbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
+
+        var childDownloadTask = movieDownloadTasks[0].Children[0];
 
         // Act
-        var startResult = await Container.DownloadTaskScheduler.StartDownloadTaskJob(childDownloadTask.Id, childDownloadTask.PlexServerId);
-        await Task.Delay(2000);
-        var stopResult = await Container.DownloadTaskScheduler.StopDownloadTaskJob(childDownloadTask.Id);
+        var startResult = await Container.DownloadTaskScheduler.StartDownloadTaskJob(childDownloadTask.ToKey());
+        await Task.Delay(500);
+        var stopResult = await Container.DownloadTaskScheduler.StopDownloadTaskJob(childDownloadTask.ToKey());
         await Container.SchedulerService.AwaitScheduler();
 
         // Assert
-        startResult.IsSuccess.ShouldBeTrue();
-        stopResult.IsSuccess.ShouldBeTrue();
-        var downloadTaskDb = DbContext.DownloadTasks
-            .IncludeDownloadTasks()
-            .FirstOrDefault(x => x.Id == childDownloadTask.Id);
+        startResult.IsSuccess.ShouldBeTrue(startResult.ToString());
+        stopResult.IsSuccess.ShouldBeTrue(stopResult.ToString());
+        var downloadTaskDb = await IDbContext.GetDownloadTaskAsync(childDownloadTask.ToKey());
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
     }

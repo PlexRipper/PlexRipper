@@ -1,6 +1,5 @@
-import { defineNuxtPlugin } from '#app';
 import {
-	ComponentConstructor,
+	type ComponentConstructor,
 	QCircularProgress,
 	QLinearProgress,
 	QSelect,
@@ -12,6 +11,7 @@ import {
 	QChip,
 	QAvatar,
 } from 'quasar';
+import { defineNuxtPlugin } from '#imports';
 
 export default defineNuxtPlugin(() => {
 	setQuasarComponentDefaultPropValues(QInput, {

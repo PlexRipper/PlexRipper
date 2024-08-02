@@ -1,5 +1,5 @@
 ﻿using System.Reactive.Subjects;
-using PlexRipper.FileSystem.Common;
+using FileSystem.Contracts;
 
 namespace PlexRipper.BaseTests;
 
@@ -22,13 +22,14 @@ public class MockFileMergeStreamProvider : IFileMergeStreamProvider
 #pragma warning restore CS1998
 
     public async Task MergeFiles(
-        List<string> filePaths,
+        FileTask fileTask,
         Stream destination,
         Subject<long> bytesReceivedProgress,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         var bytesDone = 1000 * 1024;
-        foreach (var _ in filePaths)
+        foreach (var _ in fileTask.FilePaths)
             for (var i = 0; i < 10; i++)
             {
                 bytesReceivedProgress.OnNext(bytesDone += 1000 * 1024);

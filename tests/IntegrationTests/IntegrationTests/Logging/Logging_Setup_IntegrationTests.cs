@@ -1,9 +1,9 @@
 namespace IntegrationTests.Logging;
 
-
 public class Logging_Setup_IntegrationTests : BaseIntegrationTests
 {
-    public Logging_Setup_IntegrationTests(ITestOutputHelper output) : base(output) { }
+    public Logging_Setup_IntegrationTests(ITestOutputHelper output)
+        : base(output) { }
 
     [Fact]
     public async Task ShouldDownloadMultipleMovieDownloadTasks_WhenDownloadTasksAreCreated()

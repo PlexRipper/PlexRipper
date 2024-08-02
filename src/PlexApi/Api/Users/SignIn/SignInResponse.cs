@@ -6,7 +6,6 @@ namespace PlexRipper.PlexApi.Api.Users.SignIn;
 public class SignInResponse
 {
     [JsonConverter(typeof(IntValueConverter))]
-
     public int Id { get; set; }
 
     public string Uuid { get; set; }

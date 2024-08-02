@@ -1,6 +1,7 @@
 import { randMovie, randNumber, randRecentDate } from '@ngneat/falso';
-import { checkConfig, incrementSeed, MockConfig } from '@mock';
-import { PlexLibraryDTO, PlexMediaSlimDTO, PlexMediaType } from '@dto/mainApi';
+import { times } from 'lodash-es';
+import { checkConfig, incrementSeed, type MockConfig } from '@mock';
+import { PlexMediaType, type PlexLibraryDTO, type PlexMediaSlimDTO } from '@dto';
 
 let plexMediaIdIndex = 1;
 
@@ -39,7 +40,7 @@ export function generatePlexMedia({
 		index: 0,
 		children: [],
 		qualities: [],
-		thumbUrl: 'https://www.omdbapi.com/src/poster.jpg',
+		fullThumbUrl: 'https://www.omdbapi.com/src/poster.jpg',
 		...partialData,
 	};
 }
@@ -76,18 +77,16 @@ export function generatePlexMedias({
 			throw new Error(`Invalid PlexMediaType: ${type}`);
 	}
 	let index = 1;
-	return Array(count)
-		.fill(null)
-		.map(() =>
-			generatePlexMedia({
-				id: plexMediaIdIndex++,
-				plexServerId,
-				plexLibraryId,
-				type,
-				config,
-				partialData,
-			}),
-		)
+	return times(count, () =>
+		generatePlexMedia({
+			id: plexMediaIdIndex++,
+			plexServerId,
+			plexLibraryId,
+			type,
+			config,
+			partialData,
+		}),
+	)
 		.sort((a, b) => a.sortTitle.localeCompare(b.sortTitle))
 		.map((x) => {
 			return {

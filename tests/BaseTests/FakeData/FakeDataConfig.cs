@@ -35,5 +35,18 @@ public class FakeDataConfig : BaseConfig<FakeDataConfig>
     public List<Uri> MockServerUris { get; set; } = new();
     public int DownloadFileSizeInMb { get; set; }
 
-    public bool DisableForeignKeyCheck { get; set; }
+    public bool ShouldHavePlexServer => PlexServerCount > 0 || ShouldHavePlexLibrary;
+
+    public bool ShouldHavePlexLibrary =>
+        PlexLibraryCount > 0 || ShouldHaveMoviePlexLibrary || ShouldHaveTvShowPlexLibrary;
+
+    public bool ShouldHaveMoviePlexLibrary => MovieCount > 0 || MovieDownloadTasksCount > 0;
+
+    public bool ShouldHaveTvShowPlexLibrary =>
+        TvShowCount > 0
+        || TvShowSeasonCount > 0
+        || TvShowEpisodeCount > 0
+        || TvShowDownloadTasksCount > 0
+        || TvShowSeasonDownloadTasksCount > 0
+        || TvShowEpisodeDownloadTasksCount > 0;
 }

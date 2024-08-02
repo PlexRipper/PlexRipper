@@ -1,0 +1,13 @@
+name: 'Client App Install'
+description: 'Setup Bun and install dependencies'
+runs:
+    using: 'composite'
+    steps:
+        -   name: Setup Bun
+            uses: oven-sh/setup-bun@v2
+            with:
+                bun-version: "latest"
+        -   name: Clean install node_modules
+            shell: bash
+            run: bun install
+            working-directory: src/WebAPI/ClientApp/

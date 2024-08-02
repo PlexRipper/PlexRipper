@@ -1,11 +1,7 @@
 import { randIp, randPort } from '@ngneat/falso';
-import { checkConfig, incrementSeed, MockConfig } from '~/mock-data';
-import {
-	PlexServerConnectionDTO,
-	PlexServerDTO,
-	PlexServerStatusDTO,
-	ServerConnectionCheckStatusProgressDTO,
-} from '@dto/mainApi';
+import { times } from 'lodash-es';
+import type { PlexServerConnectionDTO, PlexServerDTO, PlexServerStatusDTO, ServerConnectionCheckStatusProgressDTO } from '@dto';
+import { checkConfig, incrementSeed, type MockConfig } from '~/mock-data';
 
 let plexServerConnectionIdIndex = 1;
 
@@ -52,7 +48,7 @@ export function generatePlexServerConnections({
 	partialData?: Partial<PlexServerDTO>;
 }): PlexServerConnectionDTO[] {
 	const validConfig = checkConfig(config);
-	return Array(validConfig.maxServerConnections)
-		.fill(null)
-		.map(() => generatePlexServerConnection({ id: plexServerConnectionIdIndex++, plexServerId, partialData }));
+	return times(validConfig.maxServerConnections, () =>
+		generatePlexServerConnection({ id: plexServerConnectionIdIndex++, plexServerId, partialData }),
+	);
 }

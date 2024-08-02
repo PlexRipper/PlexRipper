@@ -1,8 +1,18 @@
 <template>
 	<Transition>
 		<div v-if="showProgressBar">
-			<q-linear-progress dark stripe rounded size="20px" :value="getPercentage" color="red" class="q-mt-sm">
-				<q-tooltip anchor="bottom middle" self="top middle" :offset="[10, 10]">
+			<q-linear-progress
+				dark
+				stripe
+				rounded
+				size="20px"
+				:value="getPercentage"
+				color="red"
+				class="q-mt-sm">
+				<q-tooltip
+					anchor="bottom middle"
+					self="top middle"
+					:offset="[10, 10]">
 					<span>{{ getText }}</span>
 				</q-tooltip>
 			</q-linear-progress>
@@ -12,9 +22,9 @@
 
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
-import sum from 'lodash-es/sum';
-import { SignalrService } from '@service';
-import { SyncServerProgress } from '@dto/mainApi';
+import { set } from '@vueuse/core';
+import type { SyncServerProgress } from '@dto';
+import { useSignalrStore } from '~/store';
 
 const progressList = ref<SyncServerProgress[]>([]);
 
@@ -33,9 +43,11 @@ const getText = computed(() => {
 
 onMounted(() => {
 	useSubscription(
-		SignalrService.getAllSyncServerProgress().subscribe((progress) => {
-			progressList.value = progress;
-		}),
+		useSignalrStore()
+			.getAllSyncServerProgress()
+			.subscribe((progress) => {
+				set(progressList, progress);
+			}),
 	);
 
 	// useSubscription(SignalrService.getPlexAccountRefreshProgress(), (data) => {

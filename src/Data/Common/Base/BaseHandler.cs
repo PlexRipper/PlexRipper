@@ -1,3 +1,4 @@
+using Data.Contracts;
 using EFCore.BulkExtensions;
 using Logging.Interface;
 
@@ -11,11 +12,7 @@ public abstract class BaseHandler
 
     private protected readonly PlexRipperDbContext _dbContext;
 
-    private protected readonly BulkConfig _bulkConfig = new()
-    {
-        SetOutputIdentity = true,
-        PreserveInsertOrder = true,
-    };
+    private protected readonly BulkConfig _bulkConfig = new() { SetOutputIdentity = true, PreserveInsertOrder = true, };
 
     #endregion
 
@@ -32,8 +29,6 @@ public abstract class BaseHandler
     #region Properties
 
     protected IQueryable<PlexServer> PlexServerQueryable => _dbContext.PlexServers.AsQueryable();
-
-    protected IQueryable<DownloadTask> DownloadTasksQueryable => _dbContext.DownloadTasks.AsQueryable();
 
     protected IQueryable<PlexLibrary> PlexLibraryQueryable => _dbContext.PlexLibraries.AsQueryable();
 
@@ -73,7 +68,8 @@ public abstract class BaseHandler
         PlexMediaType type,
         bool includeServer = false,
         bool includeMedia = false,
-        bool topLevelMediaOnly = false)
+        bool topLevelMediaOnly = false
+    )
     {
         var plexLibraryQuery = PlexLibraryQueryable;
 
@@ -100,14 +96,16 @@ public abstract class BaseHandler
     protected Result<T> ReturnResult<T>(T value, int id = 0)
         where T : BaseEntity
     {
-        if (value != null) return Result.Ok(value);
+        if (value != null)
+            return Result.Ok(value);
 
         return Result.Fail(new Error($"Could not find an entity of {typeof(T)} with an id of {id}"));
     }
 
     protected Result<List<T>> ReturnResult<T>(List<T> value, int id = 0)
     {
-        if (value != null && value.Any()) return Result.Ok(value);
+        if (value != null && value.Any())
+            return Result.Ok(value);
 
         return Result.Fail(new Error($"Could not find entities of {typeof(T)} with an id of {id}"));
     }

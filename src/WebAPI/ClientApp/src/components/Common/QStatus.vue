@@ -1,6 +1,16 @@
 <template>
-	<span v-if="pulse" class="status-indicator" :[status]="true" pulse />
-	<span v-else class="status-indicator" :[status]="true" />
+	<q-tooltip>
+		{{ value ? $t('components.q-status.server-connectable') : $t('components.q-status.server-unconnectable') }}
+	</q-tooltip>
+	<span
+		v-if="pulse"
+		class="status-indicator"
+		:[status]="true"
+		pulse />
+	<span
+		v-else
+		class="status-indicator"
+		:[status]="true" />
 </template>
 
 <script setup lang="ts">
@@ -15,3 +25,9 @@ const pulse = computed(() => {
 	return props.value;
 });
 </script>
+
+<style lang="scss">
+.status-indicator {
+	margin-bottom: 2px;
+}
+</style>

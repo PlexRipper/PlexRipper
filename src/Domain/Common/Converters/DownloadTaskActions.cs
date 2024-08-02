@@ -16,8 +16,8 @@ public static class DownloadTaskActions
 
     private const string StatusRestart = "restart";
 
-    private static readonly List<DownloadStatus> AllStatuses = new()
-    {
+    private static readonly List<DownloadStatus> AllStatuses =
+    [
         DownloadStatus.Queued,
         DownloadStatus.Downloading,
         DownloadStatus.DownloadFinished,
@@ -26,22 +26,19 @@ public static class DownloadTaskActions
         DownloadStatus.Unknown,
         DownloadStatus.Merging,
         DownloadStatus.Moving,
-    };
+    ];
 
-    private static readonly List<DownloadStatus> AnyStatuses = new()
-    {
+    private static readonly List<DownloadStatus> AnyStatuses =
+    [
         DownloadStatus.Error,
         DownloadStatus.Downloading,
         DownloadStatus.Paused,
-        DownloadStatus.Stopped,
-    };
+        DownloadStatus.Stopped
+    ];
 
     public static List<string> Convert(DownloadStatus downloadStatus)
     {
-        var actions = new List<string>
-        {
-            StatusDetails,
-        };
+        var actions = new List<string> { StatusDetails, };
 
         switch (downloadStatus)
         {
@@ -100,16 +97,22 @@ public static class DownloadTaskActions
             return status;
         }
 
-        if (downloadStatusList.Any(x => x == DownloadStatus.DownloadFinished) &&
-            downloadStatusList.Any(x => x == DownloadStatus.Queued))
+        if (
+            downloadStatusList.Any(x => x == DownloadStatus.DownloadFinished)
+            && downloadStatusList.Any(x => x == DownloadStatus.Queued)
+        )
             return DownloadStatus.Downloading;
 
-        if (downloadStatusList.Any(x => x == DownloadStatus.DownloadFinished) &&
-            downloadStatusList.Any(x => x == DownloadStatus.Completed))
+        if (
+            downloadStatusList.Any(x => x == DownloadStatus.DownloadFinished)
+            && downloadStatusList.Any(x => x == DownloadStatus.Completed)
+        )
             return DownloadStatus.DownloadFinished;
 
-        if (downloadStatusList.Any(x => x == DownloadStatus.Queued) &&
-            downloadStatusList.Any(x => x == DownloadStatus.Queued))
+        if (
+            downloadStatusList.Any(x => x == DownloadStatus.Queued)
+            && downloadStatusList.Any(x => x == DownloadStatus.Queued)
+        )
             return DownloadStatus.Queued;
 
         return DownloadStatus.Unknown;

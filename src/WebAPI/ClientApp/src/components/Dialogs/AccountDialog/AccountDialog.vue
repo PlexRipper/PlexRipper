@@ -1,53 +1,77 @@
 <template>
-	<QCardDialog max-width="900px" :name="name" persistent cy="account-dialog-form" @opened="openDialog" @closed="closeDialog">
+	<QCardDialog
+		max-width="900px"
+		:name="name"
+		persistent
+		cy="account-dialog-form"
+		@opened="openDialog"
+		@closed="closeDialog">
 		<!-- Dialog Header -->
 		<template #title>
 			{{ getDisplayName }}
 		</template>
 		<template #default>
-			<AccountForm ref="accountForm" :value="changedPlexAccount" @input="formChanged" @is-valid="isInputValid" />
+			<AccountForm
+				ref="accountForm"
+				:value="changedPlexAccount"
+				@input="formChanged"
+				@is-valid="isInputValid" />
 			<Print>{{ changedPlexAccount }}</Print>
 		</template>
 		<!-- Dialog Actions	-->
 		<template #actions="{ close }">
-			<q-row justify="between" gutter="md">
+			<QRow
+				justify="between"
+				gutter="md">
 				<!-- Delete account -->
-				<q-col v-if="!isNewAccount">
-					<DeleteButton class="mx-2" block cy="account-dialog-delete-button" @click="openConfirmationDialog" />
-				</q-col>
+				<QCol v-if="!isNewAccount">
+					<DeleteButton
+						class="mx-2"
+						block
+						cy="account-dialog-delete-button"
+						@click="openConfirmationDialog" />
+				</QCol>
 				<!-- Cancel button -->
-				<q-col>
-					<CancelButton class="mx-2" block cy="account-dialog-cancel-button" @click="close" />
-				</q-col>
+				<QCol>
+					<CancelButton
+						class="mx-2"
+						block
+						cy="account-dialog-cancel-button"
+						@click="close" />
+				</QCol>
 				<!-- Reset Form -->
-				<q-col>
-					<ResetButton class="mx-2" block cy="account-dialog-reset-button" @click="reset" />
-				</q-col>
+				<QCol>
+					<ResetButton
+						class="mx-2"
+						block
+						cy="account-dialog-reset-button"
+						@click="reset" />
+				</QCol>
 				<!-- Validation button -->
-				<q-col>
+				<QCol>
 					<AccountValidationButton
 						:color="validationStyle.color"
 						:disabled="validateLoading"
 						:icon="validationStyle.icon"
-						:text-id="validationStyle.text"
+						:label="validationStyle.text"
 						:loading="validateLoading"
 						block
 						cy="account-dialog-validate-button"
 						class="q-mx-md"
 						@click="validate" />
-				</q-col>
+				</QCol>
 				<!-- Save account -->
-				<q-col>
+				<QCol>
 					<SaveButton
 						:disabled="!isAllowedToSave"
-						:text-id="isNewAccount ? 'save' : 'update'"
+						:label="isNewAccount ? $t('general.commands.save') : $t('general.commands.update')"
 						:cy="`account-dialog-${isNewAccount ? 'save' : 'update'}-button`"
 						block
 						:loading="savingLoading"
 						class="q-mx-md"
 						@click="saveAccount(close)" />
-				</q-col>
-			</q-row>
+				</QCol>
+			</QRow>
 		</template>
 	</QCardDialog>
 
@@ -58,11 +82,13 @@
 		@close="closeVerificationDialog"
 		@confirm="validateAfterVerificationCode" />
 	<!--	Delete Confirmation Dialog	-->
-	<confirmation-dialog
-		:confirm-loading="true"
-		:name="confirmationDialogName"
+	<ConfirmationDialog
 		class="q-mr-md"
-		text-id="delete-account"
+		:confirm-loading="deleteLoading"
+		:name="confirmationDialogName"
+		:title="$t('confirmation.delete-account.title')"
+		:text="$t('confirmation.delete-account.text')"
+		:warning="$t('confirmation.delete-account.warning')"
 		@confirm="deleteAccount" />
 </template>
 
@@ -70,17 +96,14 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import { cloneDeep } from 'lodash-es';
-import { merge } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { IError, PlexAccountDTO } from '@dto/mainApi';
-import { validateAccount } from '@api/accountApi';
-import { AccountService, LibraryService, ServerService } from '@service';
-import { useI18n, useOpenControlDialog, useCloseControlDialog } from '#imports';
-import type { AccountForm } from '#components';
+import type { IError, PlexAccountDTO } from '@dto';
+import { plexAccountApi } from '@api';
+import { AccountForm } from '#components';
+import { useI18n, useOpenControlDialog, useCloseControlDialog, useAccountStore } from '#imports';
 
 const { t } = useI18n();
-
+const accountStore = useAccountStore();
 interface IPlexAccount extends PlexAccountDTO {
 	isInputValid: boolean;
 	hasValidationErrors: boolean;
@@ -106,6 +129,7 @@ const changedPlexAccount = ref<IPlexAccount>(getDefaultAccount());
 
 const validateLoading = ref(false);
 const savingLoading = ref(false);
+const deleteLoading = ref(false);
 
 function getDefaultAccount(): IPlexAccount {
 	return {
@@ -142,8 +166,8 @@ const isAllowedToSave = computed(() => {
 const hasCredentialsChanged = computed(() => {
 	if (!isNewAccount.value) {
 		return (
-			originalPlexAccount.value?.username !== get(changedPlexAccount).username ||
-			originalPlexAccount.value?.password !== get(changedPlexAccount).password
+			originalPlexAccount.value?.username !== get(changedPlexAccount).username
+			|| originalPlexAccount.value?.password !== get(changedPlexAccount).password
 		);
 	}
 	return false;
@@ -154,7 +178,7 @@ const validationStyle = computed((): { color: 'default' | 'positive' | 'warning'
 		return {
 			color: 'negative',
 			icon: 'mdi-alert-circle-outline',
-			text: 'validate',
+			text: t('general.commands.validate'),
 		};
 	}
 	if (get(changedPlexAccount).isValidated && !get(changedPlexAccount).hasValidationErrors) {
@@ -167,13 +191,24 @@ const validationStyle = computed((): { color: 'default' | 'positive' | 'warning'
 	return {
 		color: 'default',
 		icon: 'mdi-text-box-search-outline',
-		text: 'validate',
+		text: t('general.commands.validate'),
 	};
 });
 
 const getDisplayName = computed(() => {
-	const title = t(`components.account-dialog.${isNewAccount.value ? 'add-account-title' : 'edit-account-title'}`).toString();
-	return get(changedPlexAccount)?.displayName !== '' ? `${title}: ${get(changedPlexAccount)?.displayName}` : title;
+	const displayName = get(changedPlexAccount).displayName;
+	let title = '';
+	if (get(isNewAccount)) {
+		title = t('components.account-dialog.add-account-title', {
+			name: get(changedPlexAccount).displayName,
+		});
+	} else {
+		title = t('components.account-dialog.edit-account-title', {
+			name: get(changedPlexAccount).displayName,
+		});
+	}
+	// Remove the colon if the display name is empty
+	return displayName ? title : title.replace(':', '');
 });
 
 function isInputValid(value: boolean) {
@@ -192,7 +227,8 @@ function validate() {
 	set(validateLoading, true);
 
 	useSubscription(
-		validateAccount(get(changedPlexAccount))
+		plexAccountApi
+			.validatePlexAccountEndpoint(get(changedPlexAccount))
 			.pipe(take(1))
 			.subscribe({
 				next: (data) => {
@@ -248,53 +284,49 @@ const reset = () => {
 	accountForm.value?.onReset();
 };
 
-function saveAccount(close: any) {
+function saveAccount(close: () => void) {
 	set(savingLoading, true);
 
 	if (get(isNewAccount)) {
 		useSubscription(
-			AccountService.createPlexAccount(get(changedPlexAccount)).subscribe((account) => {
+			accountStore.createPlexAccount(get(changedPlexAccount)).subscribe(() => {
+				set(savingLoading, false);
+				close();
+			}),
+		);
+	} else {
+		useSubscription(
+			accountStore.updatePlexAccount(get(changedPlexAccount), get(hasCredentialsChanged)).subscribe((account) => {
 				if (account) {
 					set(changedPlexAccount, {
 						...get(changedPlexAccount),
 						...account,
 					});
-					close();
+					if (!get(hasCredentialsChanged)) {
+						close();
+					}
 				} else {
-					Log.error('Result was invalid when saving a created account', account);
+					Log.error('Result was invalid when saving an updated account', account);
 					set(savingLoading, false);
 				}
 			}),
 		);
-		return;
 	}
+
+	close();
+}
+
+function deleteAccount() {
+	set(deleteLoading, true);
 	useSubscription(
-		AccountService.updatePlexAccount(get(changedPlexAccount), get(hasCredentialsChanged)).subscribe((account) => {
-			if (account) {
-				set(changedPlexAccount, {
-					...get(changedPlexAccount),
-					...account,
-				});
-				if (!hasCredentialsChanged.value) {
-					close();
-					refreshAccounts();
-				}
-			} else {
-				Log.error('Result was invalid when saving an updated account', account);
-				set(savingLoading, false);
-			}
+		accountStore.deleteAccount(get(changedPlexAccount).id).subscribe(() => {
+			closeDialog();
 		}),
 	);
 }
 
-function deleteAccount() {
-	AccountService.deleteAccount(get(changedPlexAccount).id).subscribe(() => {
-		closeDialog();
-		refreshAccounts();
-	});
-}
-
-function openDialog({ isNewAccountValue, account = null }: { isNewAccountValue: boolean; account: PlexAccountDTO | null }) {
+function openDialog(event: unknown) {
+	const { isNewAccountValue, account } = event as { isNewAccountValue: boolean; account: PlexAccountDTO | null };
 	set(isNewAccount, isNewAccountValue);
 	// Setup values
 	if (account) {
@@ -304,22 +336,12 @@ function openDialog({ isNewAccountValue, account = null }: { isNewAccountValue: 
 
 function closeDialog() {
 	set(savingLoading, false);
+	set(deleteLoading, false);
 	closeVerificationDialog();
 	useCloseControlDialog(confirmationDialogName);
 	useCloseControlDialog(props.name);
 
 	reset();
 }
-
-function refreshAccounts(): void {
-	useSubscription(
-		merge([
-			AccountService.refreshAccounts(),
-			ServerService.refreshPlexServers(),
-			LibraryService.refreshLibraries(),
-		]).subscribe(),
-	);
-}
-
 // endregion
 </script>

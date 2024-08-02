@@ -1,8 +1,12 @@
 <template>
-	<QCardDialog max-width="1000px" content-height="80" :name="name" cy="check-server-connection-dialog">
+	<QCardDialog
+		max-width="1000px"
+		content-height="80"
+		:name="name"
+		cy="check-server-connection-dialog">
 		<template #top-row>
 			<!-- The total progress -->
-			<progress-component
+			<ProgressComponent
 				class="q-ma-md"
 				circular-mode
 				:percentage="totalPercentage"
@@ -18,12 +22,20 @@
 				node-key="index"
 				default-expand-all>
 				<template #default-header="{ node }: { node: IPlexServerNode }">
-					<q-row justify="between" align="center">
-						<q-col cols="4">
+					<QRow
+						justify="between"
+						align="center">
+						<QCol cols="4">
 							<div :class="{ 'text-weight-bold': isServer(node) }">
 								<!--	Plex Server Connection Icon -->
-								<q-icon v-if="isServer(node)" name="mdi-server" size="28px" class="q-mr-sm" />
-								<QConnectionIcon v-else :local="node?.local ?? false" />
+								<q-icon
+									v-if="isServer(node)"
+									name="mdi-server"
+									size="28px"
+									class="q-mr-sm" />
+								<QConnectionIcon
+									v-else
+									:local="node?.local ?? false" />
 								<!-- Plex Server Connection Url	-->
 								<span
 									:class="[
@@ -40,19 +52,31 @@
 									{{ node.title }}
 								</span>
 							</div>
-						</q-col>
-						<q-col cols="8" :style="{ 'max-width': `600px !important` }">
-							<q-row justify-end no-wrap justify="end">
+						</QCol>
+						<QCol
+							cols="8"
+							:style="{ 'max-width': `600px !important` }">
+							<QRow
+								justify-end
+								no-wrap
+								justify="end">
 								<!--	Plex Server Progress Status Icon -->
-								<q-col cols="3">
-									<q-spinner-radio v-if="!node.completed" color="red" size="2em" />
-									<q-status v-else :value="node.connectionSuccessful" />
-								</q-col>
+								<QCol cols="3">
+									<QSpinnerRadio
+										v-if="!node.completed"
+										color="red"
+										size="2em" />
+									<QStatus
+										v-else
+										:value="node.connectionSuccessful" />
+								</QCol>
 								<!-- Plex Server Connection Progress	-->
-								<q-col cols="9">
+								<QCol cols="9">
 									<template v-if="isServer(node) && node.completed">
 										<!-- No Plex Server Connection -->
-										<span v-if="node.noConnections" :class="{ 'text-weight-bold': node.type === 'server' }">
+										<span
+											v-if="node.noConnections"
+											:class="{ 'text-weight-bold': node.type === 'server' }">
 											{{ t('components.check-server-connections-dialog.no-connections') }}
 										</span>
 										<span
@@ -60,57 +84,48 @@
 											:class="{ 'text-weight-bold': node.type === 'server' }">
 											{{ t('components.check-server-connections-dialog.server-connectable') }}
 										</span>
-										<span v-else :class="{ 'text-weight-bold': node.type === 'server' }">
+										<span
+											v-else
+											:class="{ 'text-weight-bold': node.type === 'server' }">
 											{{ t('components.check-server-connections-dialog.server-un-connectable') }}
 										</span>
 									</template>
 									<template v-else-if="node.progress">
 										<ConnectionProgressText :progress="node.progress" />
 									</template>
-								</q-col>
-							</q-row>
-						</q-col>
-					</q-row>
+								</QCol>
+							</QRow>
+						</QCol>
+					</QRow>
 				</template>
 			</q-tree>
-			<!-- No Server Warning	-->
-			<q-row v-else justify="center">
-				<q-col cols="auto">
-					<h2>
-						{{
-							t('components.check-server-connections-dialog.no-servers', {
-								displayName: account?.displayName ?? t('general.error.unknown'),
-							})
-						}}
-					</h2>
-				</q-col>
-			</q-row>
 		</template>
 		<template #actions="{ close }">
-			<q-row justify="end">
-				<q-col cols="auto">
-					<HideButton cy="check-server-connection-dialog-hide-btn" @click="close" />
-				</q-col>
-			</q-row>
+			<QRow justify="end">
+				<QCol cols="auto">
+					<HideButton
+						cy="check-server-connection-dialog-hide-btn"
+						@click="close" />
+				</QCol>
+			</QRow>
 		</template>
 	</QCardDialog>
 </template>
 
 <script setup lang="ts">
-import { clamp } from 'lodash-es';
 import { useSubscription } from '@vueuse/rxjs';
-import { filter, switchMap, tap } from 'rxjs/operators';
+import { filter, tap } from 'rxjs/operators';
 import { get, set } from '@vueuse/core';
-import type { JobStatusUpdateDTO, PlexAccountDTO, PlexServerDTO } from '@dto/mainApi';
-import { JobStatus, JobTypes, ServerConnectionCheckStatusProgressDTO } from '@dto/mainApi';
-import { AccountService, BackgroundJobsService, ServerService, SignalrService } from '@service';
-import { useI18n, useOpenControlDialog } from '#imports';
+import Log from 'consola';
+import { JobTypes, JobStatus, type PlexServerDTO, type ServerConnectionCheckStatusProgressDTO } from '@dto';
+import { useBackgroundJobsStore, useI18n, useOpenControlDialog, useServerStore, useSignalrStore } from '#imports';
 
 const { t } = useI18n();
+const serverStore = useServerStore();
+const backgroundJobStore = useBackgroundJobsStore();
 const name = 'checkServerConnectionDialogName';
-const plexServers = ref<PlexServerDTO[]>([]);
 const connectionProgress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
-const account = ref<PlexAccountDTO | null>(null);
+
 const expanded = ref<number[]>([]);
 const completedCount = computed(() => {
 	return get(plexServerNodes).filter((progress) => progress.completed).length;
@@ -123,10 +138,12 @@ const totalPercentage = computed(() => {
 	return clamp(Math.round((get(completedCount) / get(plexServerNodes).length) * 100), 0, 100);
 });
 
+const plexServers = ref<PlexServerDTO[]>([]);
+
 const getProgressText = computed(() => {
 	if (get(plexServers).length === 0) {
 		return t('components.check-server-connections-dialog.fetching-servers', {
-			displayName: get(account)?.displayName ?? t('general.error.unknown'),
+			displayName: t('general.error.unknown'),
 		});
 	}
 	if (get(totalPercentage) === 100) {
@@ -148,7 +165,7 @@ const plexServerNodes = computed((): IPlexServerNode[] => {
 		const serverResult: IPlexServerNode = {
 			id: server.id,
 			type: 'server',
-			title: server.name,
+			title: serverStore.getServerName(server.id),
 			completed: false,
 			index: uniqueIndex++,
 			connectionSuccessful: false,
@@ -184,7 +201,7 @@ function getConnectionProgress(connectionId: number, serverId: number): ServerCo
 			plexServerId: serverId,
 			connectionSuccessful: false,
 			completed: false,
-			message: 'No progress yet',
+			message: t('components.check-server-connections-dialog.no-progress-yet'),
 			retryAttemptCount: 0,
 			retryAttemptIndex: 0,
 			statusCode: 0,
@@ -199,24 +216,26 @@ function isServer(node: IPlexServerNode): boolean {
 
 onMounted(() => {
 	useSubscription(
-		BackgroundJobsService.getJobs(JobTypes.InspectPlexServerByPlexAccountIdJob)
+		backgroundJobStore
+			.getJobStatusUpdate(JobTypes.CheckPlexServerConnectionsJob)
 			.pipe(
-				filter((update) => update.status === JobStatus.Running),
+				filter((update) => update.status === JobStatus.Started),
+				tap((update) => {
+					Log.info('update.primaryKeyValue', update.primaryKeyValue);
+					const ids: number[] = JSON.parse(update.primaryKeyValue);
+					set(plexServers, serverStore.getServers(ids));
+				}),
 				tap(() => useOpenControlDialog(name)),
-				switchMap((update: JobStatusUpdateDTO) => AccountService.getAccount(update.primaryKeyValue)),
-				tap((newAccount) => set(account, newAccount)),
-				switchMap(() => ServerService.refreshPlexServers()),
-				switchMap(() => ServerService.getServersByPlexAccountId(get(account)?.id ?? 0)),
 			)
-			.subscribe((servers) => {
-				set(plexServers, servers);
-			}),
+			.subscribe(),
 	);
 
 	useSubscription(
-		SignalrService.getAllServerConnectionProgress().subscribe((connections) => {
-			set(connectionProgress, connections);
-		}),
+		useSignalrStore()
+			.getAllServerConnectionProgress()
+			.subscribe((connections) => {
+				set(connectionProgress, connections);
+			}),
 	);
 });
 

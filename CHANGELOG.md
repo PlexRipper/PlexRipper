@@ -1,5 +1,28 @@
 PlexRipper Changelog
 
+# [0.16.0](https://github.com/PlexRipper/PlexRipper/compare/v0.15.0...v0.16.0) (2024-08-02)
+
+
+### Bug Fixes
+
+* **Web-UI:** A server can now be hidden from the server sidebar by opening the server dialog and clicking hide ([8f45d65](https://github.com/PlexRipper/PlexRipper/commit/8f45d652f185dc022f80739dfa8fa412e5b5690f))
+* **WebAPI:** Fixed a bug where if a authtoken failed to be retrieved then it would crash the media call ([c8f8a44](https://github.com/PlexRipper/PlexRipper/commit/c8f8a44fc09b84acac11ebab00be75a59dfb14ff))
+* **WebAPI:** Fixed an issue where seperate injected settingsmodules were not reactive to the parent usersettings ([d54e5d9](https://github.com/PlexRipper/PlexRipper/commit/d54e5d9a9e7e6ef21f81f277321958924e397052))
+* **Web-UI:** Fixed the download table selectAll checkbox not selecting its children ([8dd200b](https://github.com/PlexRipper/PlexRipper/commit/8dd200b68de7e3acf5d4eef38fc4e1d25280383d))
+* **Web-UI:** Typecheck errors fix ([382bb9d](https://github.com/PlexRipper/PlexRipper/commit/382bb9d0fc5fc44cd9381624ceffbd308eb2864c))
+
+
+### Features
+
+* add hide/unhide server functionality in UI settings ([47b0862](https://github.com/PlexRipper/PlexRipper/commit/47b08626eda073855491838ff7692f4de841885c))
+* **WebAPI:** Added an endpoint to hide a server from view ([10c2149](https://github.com/PlexRipper/PlexRipper/commit/10c2149c15c97d45442ea2c6fafd4b122fa52ece))
+* **Web-UI:** Migrated prettier config to eslint ([63c7dce](https://github.com/PlexRipper/PlexRipper/commit/63c7dcec802855d495ddd92bba3c343a2fa5b699))
+
+
+### Performance Improvements
+
+* **WebAPI:** Made the instantiation of JsonSerializerOptions more performanat by reusing instances ([5780b39](https://github.com/PlexRipper/PlexRipper/commit/5780b39783d91ca5770725b4dfe1fe0566b4b1d4))
+
 # [0.15.0](https://github.com/PlexRipper/PlexRipper/compare/v0.14.0...v0.15.0) (2024-07-29)
 
 

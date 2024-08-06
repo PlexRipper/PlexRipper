@@ -27,7 +27,7 @@ public class PlexMediaSlim : BaseEntity
     /// Gets or sets the duration in seconds of the (nested) media.
     /// </summary>
     [Column(Order = 5)]
-    public required int Duration { get; init; }
+    public required int Duration { get; set; }
 
     /// <summary>
     /// Gets or sets the total filesize of the nested media.

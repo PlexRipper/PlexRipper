@@ -53,6 +53,9 @@ public class Metadata
 
     public string Art { get; set; }
 
+    /// <summary>
+    /// Duration is in milliseconds
+    /// </summary>
     public int Duration { get; set; }
 
     public string OriginallyAvailableAt { get; set; }

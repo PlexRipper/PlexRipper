@@ -45,7 +45,9 @@ public static partial class PlexMetaDataMapper
             Title = source.Title,
             Year = source.Year,
             SortTitle = source.TitleSort ?? string.Empty,
-            Duration = source.Duration,
+
+            // Duration is in milliseconds and we want seconds
+            Duration = source.Duration / 1000,
             MediaSize = source.Media.Sum(y => y.Part.Sum(z => z.Size)),
             ChildCount = source.ChildCount,
             AddedAt = source.AddedAt,

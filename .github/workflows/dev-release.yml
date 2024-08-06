@@ -14,7 +14,8 @@ on:
 
 jobs:
     # Build And Release Docker Image
-    CreateDockerDevRelease:
+    build-and-publish:
+        name: Build and Publish On Dev Tagged Docker Image
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout source code

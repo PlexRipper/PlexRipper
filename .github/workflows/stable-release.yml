@@ -40,10 +40,11 @@ jobs:
       new-release-version: ${{ steps.get-next-version.outputs.new-release-version }}
   
   # Build Docker Image
-  CreateDockerLatestAndTagRelease:
+  build-and-publish:
     if: needs.semantic-release.outputs.new-release-published == 'true'
     needs: [ semantic-release ]
     runs-on: ubuntu-latest
+    name: Build and Publish On Latest / Tagged Docker Image
     steps:
       - uses: actions/checkout@v4
       - run: echo "The new release version is v${{ needs.semantic-release.outputs.new-release-version }}"

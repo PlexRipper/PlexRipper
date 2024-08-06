@@ -51,8 +51,11 @@ jobs:
                 run: echo ${{ github.event.release.tag_name }}
             -   name: Publish to Docker with latest and version tag
                 uses: elgohr/Publish-Docker-Github-Action@v5
+                env:
+                    VERSION: ${{ github.event.release.tag_name }}
                 with:
                     name: plexripper/plexripper
                     username: ${{ secrets.DOCKER_USERNAME }}
                     password: ${{ secrets.DOCKER_PASSWORD }}
-                    tags: "latest,${{ steps.version.outputs.tag }}"
+                    buildargs: VERSION
+                    tags: "latest,${{ env.VERSION }}"

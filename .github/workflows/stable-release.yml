@@ -5,6 +5,7 @@ on:
 
 jobs:
     SemanticRelease:
+        if: github.ref_name == github.event.repository.default_branch
         runs-on: ubuntu-latest
         permissions:
             contents: write # to be able to publish a GitHub release
@@ -34,6 +35,7 @@ jobs:
 
     # Build Docker Image
     CreateDockerLatestAndTagRelease:
+        if: github.ref_name == github.event.repository.default_branch
         needs: [ SemanticRelease ]
         runs-on: ubuntu-latest
         steps:

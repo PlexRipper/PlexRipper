@@ -1,5 +1,12 @@
 PlexRipper Changelog
 
+# [0.17.0](https://github.com/PlexRipper/PlexRipper/compare/v0.16.0...v0.17.0) (2024-08-06)
+
+
+### Features
+
+* Added new PlexRipper logo with space around it ([8dbefaf](https://github.com/PlexRipper/PlexRipper/commit/8dbefaf9ac0c1285dda188710fb012693a8fde0f))
+
 # [0.16.0](https://github.com/PlexRipper/PlexRipper/compare/v0.15.0...v0.16.0) (2024-08-02)
 
 

@@ -81,6 +81,7 @@
 		"sass": "^1.77.8",
 		"sass-loader": "^15.0.0",
 		"semantic-release": "^24.0.0",
+		"semantic-release-export-data": "^1.1.0",
 		"start-server-and-test": "^2.0.4",
 		"swagger-typescript-api": "^13.0.13",
 		"typescript": "^5.5.4",

@@ -161,6 +161,45 @@ public class CreateUpdateOrDeletePlexTvShowsCommand_UnitTests : BaseUnitTest
     }
 
     [Fact]
+    public async Task ShouldNotCreateDuplicateKeys_WhenTheSameMediaIsCreated()
+    {
+        // Arrange
+        Seed = 4503253;
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexLibraryCount = 1;
+            config.PlexAccountCount = 1;
+            config.TvShowCount = 10;
+            config.TvShowSeasonCount = 2;
+            config.TvShowEpisodeCount = 5;
+        });
+
+        var library = IDbContext.PlexLibraries.First();
+        library.ShouldNotBeNull();
+        var newTvShows = IDbContext.PlexTvShows.Include(x => x.Seasons).ThenInclude(x => x.Episodes).ToList();
+
+        library.TvShows = newTvShows;
+
+        // Act
+        var request = new CreateUpdateOrDeletePlexTvShowsCommand(library);
+        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(Log, IDbContext);
+
+        var result = await handler.Handle(request, CancellationToken.None);
+        var result2 = await handler.Handle(request, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result2.IsSuccess.ShouldBeTrue();
+
+        var tvShowsDb = IDbContext.PlexTvShows.Select(x => x.Key).ToHashSet();
+        var seasonDb = IDbContext.PlexTvShowSeason.Select(x => x.Key).ToHashSet();
+        var episodesDb = IDbContext.PlexTvShowEpisodes.Select(x => x.Key).ToHashSet();
+
+        VerifyKeys(newTvShows);
+    }
+
+    [Fact]
     public async Task ShouldCreateUpdateAndDeleteMovies_WhenSomeExist()
     {
         // Arrange

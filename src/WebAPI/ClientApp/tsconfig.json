@@ -2,6 +2,8 @@
 	// https://nuxt.com/docs/guide/concepts/typescript
 	"extends": "./.nuxt/tsconfig.json",
 	"compilerOptions": {
+		// Fix: https://github.com/aleclarson/vite-tsconfig-paths/issues/123#issuecomment-2029702341
+		"baseUrl": "./.nuxt/",
 		"sourceMap": true,
 		// TODO This might be better to enable
 		"noImplicitAny": false,

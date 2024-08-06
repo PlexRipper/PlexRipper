@@ -27,12 +27,12 @@ jobs:
                 uses: WyriHaximus/github-action-get-previous-tag@v1
                 with:
                     prefix: v
-            -   name: Last tag_name
-                run: echo ${{ github.event.release.tag_name }}
+            -   name: Echo last version tag
+                run: echo ${{ steps.version.outputs.tag }}
             -   name: Publish to Registry with dev tag
                 uses: elgohr/Publish-Docker-Github-Action@v5
                 env:
-                    VERSION: ${{ github.event.release.tag_name }}
+                    VERSION: ${{ steps.version.outputs.tag }}
                 with:
                     name: plexripper/plexripper
                     username: ${{ secrets.DOCKER_USERNAME }}

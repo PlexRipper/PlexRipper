@@ -10,3 +10,4 @@ export * from './download-task-factory';
 export * from './download-progress-factory';
 export * from './plex-media-factory';
 export * from './folder-path-factory';
+export * from './sync-server-progress-factory';

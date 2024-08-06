@@ -141,17 +141,28 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 			return;
 		}
 
-		if (!newObject[idName]) {
-			Log.error(`Failed to find the correct id property in ${propertyName} with idName: ${idName}`, newObject);
-			return;
+		if (isArray(newObject)) {
+			for (const item of newObject) {
+				update(item);
+			}
+		} else {
+			update(newObject);
 		}
 
-		const i = (state[propertyName] as Array<T>).findIndex((x) => x[idName] === newObject[idName]);
-		if (i > -1) {
-			(state[propertyName] as Array<T>).splice(i, 1, newObject);
-		} else {
-			(state[propertyName] as Array<T>).push(newObject);
+		function update(item: T): void {
+			if (!item[idName]) {
+				Log.error(`Failed to find the correct id property in ${propertyName} with idName: ${idName}`, item);
+				return;
+			}
+
+			const i = (state[propertyName] as Array<T>).findIndex((x) => x[idName] === item[idName]);
+			if (i > -1) {
+				(state[propertyName] as Array<T>).splice(i, 1, item);
+			} else {
+				(state[propertyName] as Array<T>).push(item);
+			}
 		}
+
 		// Trigger Subject to send current state
 		(state[propertyName + 'Subject'] as Subject<Array<T>>).next(state[propertyName] as Array<T>);
 	}

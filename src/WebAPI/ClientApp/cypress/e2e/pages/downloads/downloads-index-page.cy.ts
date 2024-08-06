@@ -8,7 +8,7 @@ describe('Downloads page', () => {
 		cy.basePageSetup({
 			plexAccountCount: 1,
 			plexServerCount: 1,
-			plexLibraryCount: 5,
+			plexMovieLibraryCount: 5,
 			movieDownloadTask: 3,
 		});
 
@@ -55,7 +55,7 @@ describe('Downloads page', () => {
 		cy.basePageSetup({
 			plexAccountCount: 1,
 			plexServerCount: 1,
-			plexLibraryCount: 5,
+			plexMovieLibraryCount: 5,
 			tvShowDownloadTask: 100,
 		});
 		cy.visit(route('/downloads')).as('downloadsPage');
@@ -76,7 +76,7 @@ describe('Downloads page', () => {
 		cy.basePageSetup({
 			plexAccountCount: 1,
 			plexServerCount: 1,
-			plexLibraryCount: 5,
+			plexMovieLibraryCount: 5,
 			movieDownloadTask: 5,
 			setDownloadDetails: true,
 		});

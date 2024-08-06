@@ -1,68 +1,79 @@
 <template>
-	<Transition>
-		<div v-if="showProgressBar">
-			<q-linear-progress
-				dark
-				stripe
-				rounded
-				size="20px"
-				:value="getPercentage"
-				color="red"
-				class="q-mt-sm">
-				<q-tooltip
-					anchor="bottom middle"
-					self="top middle"
-					:offset="[10, 10]">
-					<span>{{ getText }}</span>
-				</q-tooltip>
-			</q-linear-progress>
-		</div>
-	</Transition>
+	<QCol
+		v-if="showProgressBar"
+		cols="grow">
+		<q-linear-progress
+			:value="getPercentage / 100"
+			class="q-mt-sm"
+			color="red"
+			dark
+			rounded
+			size="20px"
+			stripe>
+			<q-tooltip
+				:offset="[10, 10]"
+				anchor="bottom middle"
+				self="top middle">
+				<span>{{ getText }}</span>
+			</q-tooltip>
+		</q-linear-progress>
+	</QCol>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useSubscription } from '@vueuse/rxjs';
-import { set } from '@vueuse/core';
-import type { SyncServerProgress } from '@dto';
-import { useSignalrStore } from '~/store';
+import { get, set, watchDebounced } from '@vueuse/core';
+import { JobStatus, JobTypes, type SyncServerProgress } from '@dto';
+import { useBackgroundJobsStore, useSignalrStore } from '@store';
 
+const { t } = useI18n();
+const signalRStore = useSignalrStore();
+const backgroundJobsStore = useBackgroundJobsStore();
+
+const showProgressBar = ref(false);
 const progressList = ref<SyncServerProgress[]>([]);
 
 const getPercentage = computed(() => {
-	return sum(progressList.value.map((x) => x.percentage)) / progressList.value.length;
-});
-
-const showProgressBar = computed(() => {
-	return progressList.value.length > 0 && getPercentage.value <= 100;
+	return sum(get(progressList).map((x) => x.percentage)) / get(progressList).length;
 });
 
 const getText = computed(() => {
 	const finishedCount = progressList.value.filter((x) => x.percentage >= 100).length;
-	return `Syncing PlexServer ${finishedCount} of ${progressList.value.length}`;
+	return t('components.app-bar-progress-bar.tooltip-text', {
+		finishedCount,
+		totalCount: get(progressList).length,
+	});
 });
+
+watchDebounced(getPercentage, (value) => {
+	if (value === 100) {
+		set(progressList, []);
+	}
+}, { debounce: 500, maxWait: 1000 });
 
 onMounted(() => {
 	useSubscription(
-		useSignalrStore()
+		signalRStore
 			.getAllSyncServerProgress()
 			.subscribe((progress) => {
 				set(progressList, progress);
 			}),
 	);
 
-	// useSubscription(SignalrService.getPlexAccountRefreshProgress(), (data) => {
-	// 	if (data) {
-	// 		const index = this.accountRefreshProgress.findIndex((x) => x.plexAccountId === data.plexAccountId);
-	// 		if (index > -1) {
-	// 			if (!data.isComplete) {
-	// 				this.accountRefreshProgress.splice(index, 1, data);
-	// 			} else {
-	// 				this.accountRefreshProgress.splice(index, 1);
-	// 			}
-	// 		} else {
-	// 			this.accountRefreshProgress.push(data);
-	// 		}
-	// 	}
-	// });
+	useSubscription(
+		backgroundJobsStore.getJobStatusUpdate(JobTypes.SyncServerJob, JobStatus.Started)
+			.subscribe(() => {
+				set(showProgressBar, true);
+			}),
+	);
+
+	useSubscription(
+		backgroundJobsStore.getJobStatusUpdate(JobTypes.SyncServerJob, JobStatus.Completed)
+			.subscribe(() => {
+				setTimeout(() => {
+					set(showProgressBar, false);
+				}, 2000);
+			}),
+	);
 });
 </script>

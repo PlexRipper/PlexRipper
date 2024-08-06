@@ -170,6 +170,9 @@
         },
         "alert-dialog": {
             "request-data-sent": ""
+        },
+        "app-bar-progress-bar": {
+            "tooltip-text": "Synchronisation de PlexServer {finishedCount} sur {totalCount} !"
         }
     },
     "confirmation": {

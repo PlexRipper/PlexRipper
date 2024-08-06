@@ -17,8 +17,10 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 
 	const accountStore = useAccountStore();
 	const serverStore = useServerStore();
+	const libraryStore = useLibraryStore();
 	const settingsStore = useSettingsStore();
 	const connectionStore = useServerConnectionStore();
+
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
@@ -30,6 +32,7 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 						forkJoin([
 							accountStore.refreshAccounts(),
 							serverStore.refreshPlexServers(),
+							libraryStore.refreshLibraries(),
 							settingsStore.refreshSettings(),
 						]),
 					),

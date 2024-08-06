@@ -7,7 +7,7 @@ describe('PlexRipper Server Dialog', () => {
 		cy.basePageSetup({
 			plexAccountCount: 1,
 			plexServerCount: 5,
-			plexLibraryCount: 5,
+			plexMovieLibraryCount: 5,
 		});
 
 		cy.visitEmptyPage();

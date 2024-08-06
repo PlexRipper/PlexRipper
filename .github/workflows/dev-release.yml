@@ -1,33 +1,40 @@
 name: Create PlexRipper Dev Container Release
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - dev
-    paths-ignore:
-      - '.github/**'
-      - '.idea/**'
-      - '.run/**'
-      - '.vscode/**'
-      - '.releaserc.json'
+    workflow_dispatch:
+    push:
+        branches:
+            - dev
+        paths-ignore:
+            - '.github/**'
+            - '.idea/**'
+            - '.run/**'
+            - '.vscode/**'
+            - '.releaserc.json'
 
 jobs:
-  # Build And Release Docker Image
-  CreateDockerDevRelease:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-      - name: Publish to Registry with dev tag
-        uses: elgohr/Publish-Docker-Github-Action@v5
-        env:
-          VERSION: ${{ env.RELEASE_VERSION }}
-        with:
-          name: plexripper/plexripper
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          buildargs: VERSION
-          tags: "dev"
+    # Build And Release Docker Image
+    CreateDockerDevRelease:
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout source code
+                uses: actions/checkout@v4
+                with:
+                    token: ${{ secrets.GH_TOKEN }}
+            -   name: Get latest version tag
+                id: version
+                uses: WyriHaximus/github-action-get-previous-tag@v1
+                with:
+                    prefix: v
+            -   name: Last tag_name
+                run: echo ${{ github.event.release.tag_name }}
+            -   name: Publish to Registry with dev tag
+                uses: elgohr/Publish-Docker-Github-Action@v5
+                env:
+                    VERSION: ${{ github.event.release.tag_name }}
+                with:
+                    name: plexripper/plexripper
+                    username: ${{ secrets.DOCKER_USERNAME }}
+                    password: ${{ secrets.DOCKER_PASSWORD }}
+                    buildargs: VERSION
+                    tags: "dev"

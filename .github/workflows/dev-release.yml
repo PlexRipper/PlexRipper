@@ -39,3 +39,5 @@ jobs:
                     password: ${{ secrets.DOCKER_PASSWORD }}
                     buildargs: VERSION
                     tags: "dev"
+                    default_branch: dev
+

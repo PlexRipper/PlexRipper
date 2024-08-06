@@ -1,86 +1,83 @@
 {
-  "branches": [
-    {
-      "name": "dev"
-    }
-  ],
-  "dryRun": false,
-  "repositoryUrl": "https://github.com/PlexRipper/PlexRipper",
-  "preset": "angular",
-  "plugins": [
-    [
-      "@semantic-release/commit-analyzer",
-      {
-        "releaseRules": [
-          {
-            "type": "docs",
-            "scope": "README",
-            "release": "patch"
-          },
-          {
-            "type": "refactor",
-            "release": "patch"
-          },
-          {
-            "type": "style",
-            "release": "patch"
-          }
-        ],
-        "parserOpts": {
-          "noteKeywords": [
-            "BREAKING CHANGE",
-            "BREAKING CHANGES"
-          ]
+    "branches": [
+        {
+            "name": "dev"
         }
-      }
     ],
-    [
-      "@semantic-release/release-notes-generator",
-      {
-        "writerOpts": {
-          "commitsSort": [
-            "subject",
-            "scope"
-          ]
-        }
-      }
-    ],
-    [
-      "@semantic-release/changelog",
-      {
-        "changelogFile": "CHANGELOG.md",
-        "changelogTitle": "PlexRipper Changelog"
-      }
-    ],
-    [
-      "@semantic-release/npm",
-      {
-        "npmPublish": false,
-        "pkgRoot": "./src/WebAPI/ClientApp/"
-      }
-    ],
-    [
-      "@semantic-release/git",
-      {
-        "assets": [
-          "CHANGELOG.md",
-          "./src/WebAPI/ClientApp/package.json"
+    "dryRun": false,
+    "repositoryUrl": "https://github.com/PlexRipper/PlexRipper",
+    "preset": "angular",
+    "plugins": [
+        [
+            "@semantic-release/commit-analyzer",
+            {
+                "releaseRules": [
+                    {
+                        "type": "docs",
+                        "scope": "README",
+                        "release": "patch"
+                    },
+                    {
+                        "type": "refactor",
+                        "release": "patch"
+                    },
+                    {
+                        "type": "style",
+                        "release": "patch"
+                    }
+                ],
+                "parserOpts": {
+                    "noteKeywords": [
+                        "BREAKING CHANGE",
+                        "BREAKING CHANGES"
+                    ]
+                }
+            }
         ],
-        "message": "chore(release): Bump version to ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-      }
-    ],
-    [
-      "@semantic-release/github",
-      {
-        "successComment": false,
-        "failComment": false
-      }
-    ],
-    [
-      "@semantic-release/exec",
-      {
-        "verifyReleaseCmd": "echo RELEASE_VERSION=${nextRelease.version} >> $GITHUB_ENV"
-      }
+        [
+            "@semantic-release/release-notes-generator",
+            {
+                "writerOpts": {
+                    "commitsSort": [
+                        "subject",
+                        "scope"
+                    ]
+                }
+            }
+        ],
+        [
+            "@semantic-release/changelog",
+            {
+                "changelogFile": "CHANGELOG.md",
+                "changelogTitle": "PlexRipper Changelog"
+            }
+        ],
+        [
+            "@semantic-release/npm",
+            {
+                "npmPublish": false,
+                "pkgRoot": "./src/WebAPI/ClientApp/"
+            }
+        ],
+        [
+            "@semantic-release/git",
+            {
+                "assets": [
+                    "CHANGELOG.md",
+                    "./src/WebAPI/ClientApp/package.json"
+                ],
+                "message": "chore(release): Bump version to ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+            }
+        ],
+        [
+            "semantic-release-export-data"
+        ],
+        [
+            "@semantic-release/github",
+            {
+                "successComment": false,
+                "failComment": false
+            }
+        ]
     ]
-  ]
 }

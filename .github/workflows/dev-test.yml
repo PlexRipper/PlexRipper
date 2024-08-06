@@ -102,3 +102,5 @@ jobs:
                     username: ${{ secrets.DOCKER_USERNAME }}
                     password: ${{ secrets.DOCKER_PASSWORD }}
                     no_push: true
+                    default_branch: dev
+

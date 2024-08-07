@@ -12,6 +12,8 @@ public class InspectPlexServerJob : IJob
     private readonly ILog _log;
     private readonly IMediator _mediator;
 
+    public static JobKey GetJobKey(int id) => new($"{PlexServerIdParameter}_{id}", nameof(InspectPlexServerJob));
+
     public InspectPlexServerJob(ILog log, IMediator mediator, IPlexRipperDbContext dbContext)
     {
         _log = log;
@@ -72,10 +74,5 @@ public class InspectPlexServerJob : IJob
 
         foreach (var plexAccount in accountsResult.Value)
             await _mediator.Send(new RefreshLibraryAccessCommand(plexAccount.Id, plexServerId));
-    }
-
-    public static JobKey GetJobKey(int id)
-    {
-        return new JobKey($"{PlexServerIdParameter}_{id}", nameof(InspectPlexServerJob));
     }
 }

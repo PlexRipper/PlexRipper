@@ -26,9 +26,11 @@ public static partial class DbContextExtensions
 
         var plexServerConnections = plexServer.PlexServerConnections;
         if (!plexServerConnections.Any())
+        {
             return Result
                 .Fail($"PlexServer with id {plexServer.Id} and name {plexServer.Name} has no connections available!")
                 .LogError();
+        }
 
         // Find based on preference
         if (plexServer.PreferredConnectionId > 0)
@@ -68,7 +70,20 @@ public static partial class DbContextExtensions
             .Where(x => x.LatestConnectionStatus?.IsSuccessful ?? false)
             .ToList();
         if (successPlexServerConnections.Any())
+        {
+            // Give preference to non-PlexTv connections
+            var directConnections = successPlexServerConnections.Where(x => !x.IsPlexTvConnection).ToList();
+            if (directConnections.Any())
+            {
+                _log.Verbose(
+                    "Found a direct connection that was successful. We're gonna use that: {DirectConnection}",
+                    directConnections.First()
+                );
+                return Result.Ok(directConnections.First());
+            }
+
             return Result.Ok(successPlexServerConnections.First());
+        }
 
         // Find anything...
         _log.Verbose(

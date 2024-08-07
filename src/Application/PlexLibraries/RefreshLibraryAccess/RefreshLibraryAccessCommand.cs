@@ -11,13 +11,12 @@ namespace PlexRipper.Application;
 /// <param name="PlexAccountId">The id of the <see cref="PlexAccount"/> to retrieve the accessible <see cref="PlexLibrary">Plex Libraries</see> for.</param>
 /// <param name="PlexServerId">The id of the <see cref="PlexServer"/> to retrieve <see cref="PlexLibrary">Plex Libraries</see> for.</param>
 ///  <returns>If successful.</returns>
-public record RefreshLibraryAccessCommand(int PlexAccountId, int PlexServerId) : IRequest<Result>;
+public record RefreshLibraryAccessCommand(int PlexAccountId, int PlexServerId = 0) : IRequest<Result>;
 
 public class RefreshLibraryAccessValidator : AbstractValidator<RefreshLibraryAccessCommand>
 {
     public RefreshLibraryAccessValidator()
     {
-        RuleFor(x => x.PlexServerId).GreaterThan(0);
         RuleFor(x => x.PlexAccountId).GreaterThan(0);
     }
 }
@@ -26,12 +25,19 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
 {
     private readonly ILog _log;
     private readonly IMediator _mediator;
+    private readonly IPlexRipperDbContext _dbContext;
     private readonly IPlexApiService _plexServiceApi;
 
-    public RefreshLibraryAccessHandler(ILog log, IMediator mediator, IPlexApiService plexServiceApi)
+    public RefreshLibraryAccessHandler(
+        ILog log,
+        IMediator mediator,
+        IPlexRipperDbContext dbContext,
+        IPlexApiService plexServiceApi
+    )
     {
         _log = log;
         _mediator = mediator;
+        _dbContext = dbContext;
         _plexServiceApi = plexServiceApi;
     }
 
@@ -40,6 +46,41 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
         var plexAccountId = command.PlexAccountId;
         var plexServerId = command.PlexServerId;
 
+        var plexLibraries = new List<PlexLibrary>();
+        if (plexServerId == 0)
+        {
+            var plexServers = await _dbContext.GetAllPlexServersByPlexAccountIdQuery(plexAccountId, cancellationToken);
+
+            var libraryResults = await Task.WhenAll(
+                plexServers.Select(plexServer => RefreshLibrary(plexServer.Id, plexAccountId, cancellationToken))
+            );
+
+            if (libraryResults.All(x => x.IsFailed))
+                return Result.Merge(libraryResults).ToResult();
+
+            plexLibraries = libraryResults.Where(x => x.IsSuccess).SelectMany(x => x.Value).ToList();
+        }
+        else
+        {
+            var libraryResults = await RefreshLibrary(plexServerId, plexAccountId, cancellationToken);
+            if (libraryResults.IsFailed)
+                return libraryResults.ToResult();
+
+            plexLibraries.AddRange(libraryResults.Value);
+        }
+
+        return await _mediator.Send(
+            new AddOrUpdatePlexLibrariesCommand(plexAccountId, plexLibraries),
+            cancellationToken
+        );
+    }
+
+    private async Task<Result<List<PlexLibrary>>> RefreshLibrary(
+        int plexServerId,
+        int plexAccountId,
+        CancellationToken cancellationToken = default
+    )
+    {
         _log.Debug(
             "Retrieving accessible PlexLibraries for plexServer with id: {PlexServerId} by using Plex account with id {PlexAccountId}",
             plexServerId,
@@ -57,9 +98,6 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
             return Result.Fail(msg).LogWarning();
         }
 
-        return await _mediator.Send(
-            new AddOrUpdatePlexLibrariesCommand(plexAccountId, libraries.Value),
-            cancellationToken
-        );
+        return libraries;
     }
 }

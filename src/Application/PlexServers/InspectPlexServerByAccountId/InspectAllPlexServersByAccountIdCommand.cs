@@ -99,7 +99,6 @@ public class InspectAllPlexServersByAccountIdCommandHandler
         }
 
         // Create connection check tasks for all connections
-
         var plexServerIds = plexServers.Value.Select(x => x.Id).ToList();
         var checkResult = await _mediator.Send(
             new QueueCheckPlexServerConnectionsJobCommand(plexServerIds),
@@ -109,7 +108,7 @@ public class InspectAllPlexServersByAccountIdCommandHandler
         await _scheduler.AwaitJobRunning(checkResult.Value, CancellationToken.None);
 
         // Retrieve all accessible libraries
-        await RetrieveAllAccessibleLibrariesAsync(plexAccount.Id);
+        await _mediator.Send(new RefreshLibraryAccessCommand(plexAccountId), cancellationToken);
 
         // Sync libraries
         foreach (var plexServer in plexServers.Value)
@@ -123,21 +122,5 @@ public class InspectAllPlexServersByAccountIdCommandHandler
             );
 
         return Result.Ok();
-    }
-
-    private async Task RetrieveAllAccessibleLibrariesAsync(int plexAccountId)
-    {
-        _log.Information(
-            "Retrieving accessible Plex libraries for Plex account with id {PlexAccountId}",
-            plexAccountId
-        );
-
-        var plexServers = await _dbContext.GetAllPlexServersByPlexAccountIdQuery(plexAccountId);
-
-        var retrieveTasks = plexServers.Select(async plexServer =>
-            await _mediator.Send(new RefreshLibraryAccessCommand(plexAccountId, plexServer.Id))
-        );
-
-        await Task.WhenAll(retrieveTasks);
     }
 }

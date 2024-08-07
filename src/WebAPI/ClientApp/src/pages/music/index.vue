@@ -2,14 +2,12 @@
 	<QPage>
 		<QRow>
 			<QCol>
-				<h1>{{ t('pages.music.index.header') }}</h1>
+				<QText
+					size="h3"
+					align="center">
+					{{ $t('pages.music.index.header') }}
+				</QText>
 			</QCol>
 		</QRow>
 	</QPage>
 </template>
-
-<script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n();
-</script>

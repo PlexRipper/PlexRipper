@@ -7,21 +7,29 @@
 			<QPage>
 				<QRow justify="center">
 					<QCol cols="auto">
-						<h1>{{ t('pages.error.header') }}</h1>
-						<h1 class="text-left">
+						<QText
+							size="h3"
+							align="center">
+							{{ $t('pages.error.header') }}
+						</QText>
+						<QText
+							size="h3"
+							align="left">
 							<pre>
 								<code class="no-background">{{ errorFormatted }}</code>
 							</pre>
-						</h1>
+						</QText>
 					</QCol>
 				</QRow>
 				<QRow justify="center">
 					<QCol cols="auto">
-						<h1>
+						<QText
+							size="h3"
+							align="center">
 							<NuxtLink to="/">
-								{{ t('pages.error.return-link') }}
+								{{ $t('pages.error.return-link') }}
 							</NuxtLink>
-						</h1>
+						</QText>
 					</QCol>
 				</QRow>
 			</QPage>
@@ -30,9 +38,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n();
 const props = defineProps<{ error: Error }>();
 
 const errorFormatted = computed(() => {

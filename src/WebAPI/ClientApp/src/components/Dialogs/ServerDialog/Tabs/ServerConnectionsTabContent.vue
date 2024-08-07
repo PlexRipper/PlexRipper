@@ -1,7 +1,7 @@
 <template>
-	<div>
-		<h4>{{ t('components.server-dialog.tabs.server-connections.section-header') }}</h4>
-	</div>
+	<QText size="h5">
+		{{ $t('components.server-dialog.tabs.server-connections.section-header') }}
+	</QText>
 	<q-list>
 		<template
 			v-for="(connection, index) in serverConnectionStore.getServerConnectionsByServerId(plexServer?.id)"
@@ -52,8 +52,6 @@ import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import type { PlexServerDTO, ServerConnectionCheckStatusProgressDTO } from '@dto';
 import { useServerConnectionStore, useSignalrStore } from '~/store';
-
-const { t } = useI18n();
 
 const serverStore = useServerStore();
 const signalrStore = useSignalrStore();

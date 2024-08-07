@@ -90,7 +90,11 @@
 	<q-list v-else>
 		<q-item>
 			<q-item-section>
-				<h2>{{ t('components.media-list.no-media-found') }}</h2>
+				<QText
+					size="h4"
+					align="center">
+					{{ $t('components.media-list.no-media-found') }}
+				</QText>
 			</q-item-section>
 		</q-item>
 	</q-list>

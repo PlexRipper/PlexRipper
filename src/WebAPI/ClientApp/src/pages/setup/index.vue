@@ -60,7 +60,11 @@
 									<q-tab-panel :name="1">
 										<QRow no-gutters>
 											<QCol>
-												<h2>{{ t('pages.setup.intro.title') }}</h2>
+												<QText
+													size="h4"
+													align="center">
+													{{ t('pages.setup.intro.title') }}
+												</QText>
 												<p>{{ t('pages.setup.intro.text.p-1') }}</p>
 												<ul>
 													<li>
@@ -80,9 +84,12 @@
 									<q-tab-panel :name="2">
 										<QRow no-gutters>
 											<QCol>
-												<h2 class="mt-2">
+												<QText
+													size="h4"
+													align="center"
+													class="mt-2">
 													{{ t('pages.setup.future-plans.title') }}
-												</h2>
+												</QText>
 											</QCol>
 										</QRow>
 										<QRow no-gutters>
@@ -109,17 +116,21 @@
 														</ul>
 													</li>
 												</ul>
-												<h2 class="text-center">
+												<QText
+													size="h4"
+													align="center">
 													{{ t('pages.setup.future-plans.text.p-2') }}
-												</h2>
+												</QText>
 											</QCol>
 										</QRow>
 									</q-tab-panel>
 									<!-- Checking paths	-->
 									<q-tab-panel :name="3">
-										<h2>
+										<QText
+											size="h4"
+											align="center">
 											{{ t('pages.setup.paths.title') }}
-										</h2>
+										</QText>
 										<QRow no-gutters>
 											<QCol align-self="stretch">
 												<FolderPathsOverview only-defaults />
@@ -128,18 +139,24 @@
 									</q-tab-panel>
 									<!-- Plex Accounts	-->
 									<q-tab-panel :name="4">
-										<h2 class="mt-2">
+										<QText
+											size="h4"
+											align="center"
+											class="mt-2">
 											{{ t('pages.setup.accounts.title') }}
-										</h2>
+										</QText>
 										<AccountOverview />
 									</q-tab-panel>
 									<!-- Finished	-->
 									<q-tab-panel :name="5">
 										<QRow no-gutters>
 											<QCol>
-												<h2 class="mt-2">
+												<QText
+													size="h4"
+													align="center"
+													class="mt-2">
 													{{ t('pages.setup.finished.title') }}
-												</h2>
+												</QText>
 											</QCol>
 										</QRow>
 										<QRow no-gutters>

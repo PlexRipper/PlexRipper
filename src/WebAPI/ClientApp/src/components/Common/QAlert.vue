@@ -10,7 +10,9 @@
 			<div class="q-alert-content">
 				<slot />
 			</div>
-			<div class="q-alert-dismissible">
+			<div
+				v-if="dismissible"
+				class="q-alert-dismissible">
 				<q-icon
 					name="mdi-close-circle"
 					size="24px" />
@@ -20,9 +22,12 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{
+const props = withDefaults(defineProps<{
 	type: 'error' | 'warning' | 'info' | string;
-}>();
+	dismissible?: boolean;
+}>(), {
+	dismissible: false,
+});
 
 const classConfig = computed(() => {
 	return {
@@ -36,7 +41,7 @@ const alertIcon = computed((): string => {
 		case 'error':
 			return 'mdi-alert-circle-outline';
 		case 'warning':
-			return 'mdi-warning-amber';
+			return 'mdi-alert-outline';
 		case 'info':
 			return 'mdi-information-outline';
 		default:

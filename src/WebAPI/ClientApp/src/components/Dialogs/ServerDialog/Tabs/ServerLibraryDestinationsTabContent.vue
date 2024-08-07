@@ -27,9 +27,9 @@
 		<template v-else>
 			<q-tr>
 				<q-td>
-					<h3>
+					<QAlert type="warning">
 						{{ $t('components.server-library-destinations-tab-content.no-libraries') }}
-					</h3>
+					</QAlert>
 				</q-td>
 			</q-tr>
 		</template>

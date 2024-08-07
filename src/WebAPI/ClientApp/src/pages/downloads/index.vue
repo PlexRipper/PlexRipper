@@ -22,7 +22,9 @@
 			v-else
 			justify="center">
 			<QCol cols="auto">
-				<h2>{{ t('pages.downloads.no-downloads') }}</h2>
+				<QText size="h4">
+					{{ $t('pages.downloads.no-downloads') }}
+				</QText>
 			</QCol>
 		</QRow>
 		<DownloadDetailsDialog :name="dialogName" />
@@ -33,7 +35,6 @@
 import type { DownloadProgressDTO } from '@dto';
 import { useOpenControlDialog } from '#imports';
 
-const { t } = useI18n();
 const downloadStore = useDownloadStore();
 const dialogName = 'download-details-dialog';
 

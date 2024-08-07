@@ -16,8 +16,10 @@ public class PlexServerConnectionDTO
 
     public required bool Relay { get; set; }
 
+    // ReSharper disable once InconsistentNaming
     public required bool IPv4 { get; set; }
 
+    // ReSharper disable once InconsistentNaming
     public required bool IPv6 { get; set; }
 
     public required bool PortFix { get; set; }
@@ -25,6 +27,10 @@ public class PlexServerConnectionDTO
     public required int PlexServerId { get; set; }
 
     public required string Url { get; set; }
+
+    public required string Uri { get; set; }
+
+    public required bool IsPlexTvConnection { get; set; }
 
     public required List<PlexServerStatusDTO> ServerStatusList { get; set; }
 

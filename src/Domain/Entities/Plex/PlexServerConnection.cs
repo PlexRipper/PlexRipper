@@ -20,15 +20,18 @@ public class PlexServerConnection : BaseEntity
     public required int Port { get; set; }
 
     [Column(Order = 4)]
-    public required bool Local { get; init; }
+    public required string Uri { get; init; }
 
     [Column(Order = 5)]
-    public required bool Relay { get; init; }
+    public required bool Local { get; init; }
 
     [Column(Order = 6)]
-    public required bool IPv4 { get; init; }
+    public required bool Relay { get; init; }
 
     [Column(Order = 7)]
+    public required bool IPv4 { get; init; }
+
+    [Column(Order = 8)]
     public required bool IPv6 { get; init; }
 
     /// <summary>
@@ -36,7 +39,7 @@ public class PlexServerConnection : BaseEntity
     /// This seems to work in most cases where a domain name with the port appended will result in failed network requests.
     /// <remarks> This is set in the "PlexApiMappingProfile" when the data is received from the Plex API.</remarks>
     /// </summary>
-    [Column(Order = 8)]
+    [Column(Order = 9)]
     public required bool PortFix { get; init; }
 
     #endregion
@@ -70,6 +73,9 @@ public class PlexServerConnection : BaseEntity
 
     [NotMapped]
     public PlexServerStatus? LatestConnectionStatus => PlexServerStatus.FirstOrDefault();
+
+    [NotMapped]
+    public bool IsPlexTvConnection => Uri.Contains(".plex.direct");
 
     public string GetThumbUrl(string thumbPath)
     {

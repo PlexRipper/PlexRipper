@@ -355,6 +355,7 @@ public class PlexApiService : IPlexApiService
                         Relay = y.Relay,
                         IPv4 = y.Address.IsIpAddress() && !y.IPv6,
                         IPv6 = y.IPv6,
+                        Uri = y.Uri,
 
                         // The port fix is when we don't want to use the port when Address is a domain name
                         PortFix = !y.Address.IsIpAddress() && !y.IPv6 && y.Address != "localhost",

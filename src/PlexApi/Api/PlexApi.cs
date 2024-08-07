@@ -114,23 +114,62 @@ public class PlexApi
 
     /// <summary>
     ///     Retrieves all the accessible plex server based on the <see cref="PlexAccount" /> token
+    ///     Including the various connections to the server.
     ///     <remarks>https://plex.tv/api/v2/resources?X-Plex-Token={{AUTH_TOKEN}}</remarks>
     /// </summary>
     /// <param name="authToken">The Plex account authentication token.</param>
     /// <returns></returns>
     public async Task<Result<List<ServerResource>>> GetAccessibleServers(string authToken)
     {
-        var request = new RestRequest(PlexApiPaths.ServerResourcesUrl);
-        request.AddToken(authToken);
-        request.AddPlexClientIdentifier();
-        request.Timeout = 15000;
+        var directRequest = new RestRequest(PlexApiPaths.ServerResourcesUrl);
+        directRequest.AddToken(authToken);
+        directRequest.AddPlexClientIdentifier();
+        directRequest.Timeout = 15000;
 
-        var result = await _client.SendRequestAsync<List<ServerResource>>(request);
-        return result.IsFailed ? result.ToResult() : Result.Ok(result.Value);
+        var plexRelayRequest = new RestRequest(PlexApiPaths.ServerResourcesUrl);
+        plexRelayRequest.AddToken(authToken);
+        plexRelayRequest.AddPlexClientIdentifier();
+        plexRelayRequest.AddQueryParameter("includeHttps", "1");
+        plexRelayRequest.AddQueryParameter("includeRelay", "1");
+        plexRelayRequest.Timeout = 15000;
+
+        var result = await Task.WhenAll(
+            [
+                _client.SendRequestAsync<List<ServerResource>>(directRequest),
+                _client.SendRequestAsync<List<ServerResource>>(plexRelayRequest),
+            ]
+        );
+
+        if (result[0].IsFailed && result[1].IsFailed)
+            return result[0].WithReasons(result[1].Reasons);
+
+        if (result[0].IsFailed && result[1].IsSuccess)
+            return result[1];
+
+        if (result[0].IsSuccess && result[1].IsFailed)
+            return result[0];
+
+        var list = new List<ServerResource>();
+        list.AddRange(result[0].Value);
+
+        foreach (var serverResource in list)
+        {
+            var newServerResource = result[1]
+                .Value.FirstOrDefault(x => x.ClientIdentifier == serverResource.ClientIdentifier);
+            if (newServerResource is null || !newServerResource.Connections.Any())
+                continue;
+
+            serverResource.Connections = serverResource
+                .Connections.Concat(newServerResource.Connections)
+                .Distinct()
+                .ToList();
+        }
+
+        return Result.Ok(list);
     }
 
     /// <summary>
-    ///     Returns an detailed overview of the PlexLibraries in a PlexServer from the PlexAPI.
+    ///     Returns a detailed overview of the PlexLibraries in a PlexServer from the PlexAPI.
     ///     <remarks>{{SERVER_URL}}/library/sections?X-Plex-Token={{SERVER_TOKEN}}</remarks>
     /// </summary>
     /// <param name="plexAuthToken"></param>

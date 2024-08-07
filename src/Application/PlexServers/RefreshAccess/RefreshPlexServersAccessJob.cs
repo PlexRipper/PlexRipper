@@ -10,6 +10,7 @@ public class RefreshPlexServersAccessJob : IJob
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
+    private readonly IMediator _mediator;
     private readonly IAddOrUpdatePlexServersCommand _addOrUpdatePlexServersCommand;
     private readonly IAddOrUpdatePlexAccountServersCommand _addOrUpdatePlexAccountServersCommand;
     private readonly IPlexApiService _plexServiceApi;
@@ -22,6 +23,7 @@ public class RefreshPlexServersAccessJob : IJob
     public RefreshPlexServersAccessJob(
         ILog log,
         IPlexRipperDbContext dbContext,
+        IMediator mediator,
         IAddOrUpdatePlexServersCommand addOrUpdatePlexServersCommand,
         IAddOrUpdatePlexAccountServersCommand addOrUpdatePlexAccountServersCommand,
         IPlexApiService plexServiceApi
@@ -29,6 +31,7 @@ public class RefreshPlexServersAccessJob : IJob
     {
         _log = log;
         _dbContext = dbContext;
+        _mediator = mediator;
         _addOrUpdatePlexServersCommand = addOrUpdatePlexServersCommand;
         _addOrUpdatePlexAccountServersCommand = addOrUpdatePlexAccountServersCommand;
         _plexServiceApi = plexServiceApi;

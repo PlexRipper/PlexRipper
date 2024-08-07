@@ -76,6 +76,9 @@ public class PlexServerConnection : BaseEntity
     public PlexServerStatus? LatestConnectionStatus => PlexServerStatus.FirstOrDefault();
 
     [NotMapped]
+    public bool IsOnline => LatestConnectionStatus?.IsSuccessful ?? false;
+
+    [NotMapped]
     public bool IsPlexTvConnection => Uri.Contains(".plex.direct");
 
     public string GetThumbUrl(string thumbPath)

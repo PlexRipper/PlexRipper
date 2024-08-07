@@ -6,7 +6,7 @@ using Quartz;
 
 namespace PlexRipper.Application;
 
-public record QueueCheckPlexServerConnectionsJobCommand(List<int> PlexServerIds) : IRequest<Result<JobKey>>;
+public record QueueCheckPlexServerConnectionsJobCommand(List<int> PlexServerIds) : IRequest<JobKey>;
 
 public class QueueCheckPlexServerConnectionsJobCommandValidator
     : AbstractValidator<QueueCheckPlexServerConnectionsJobCommand>
@@ -18,7 +18,7 @@ public class QueueCheckPlexServerConnectionsJobCommandValidator
 }
 
 public class QueueCheckPlexServerConnectionsJobHandler
-    : IRequestHandler<QueueCheckPlexServerConnectionsJobCommand, Result<JobKey>>
+    : IRequestHandler<QueueCheckPlexServerConnectionsJobCommand, JobKey>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -31,7 +31,7 @@ public class QueueCheckPlexServerConnectionsJobHandler
         _scheduler = scheduler;
     }
 
-    public async Task<Result<JobKey>> Handle(
+    public async Task<JobKey> Handle(
         QueueCheckPlexServerConnectionsJobCommand command,
         CancellationToken cancellationToken
     )
@@ -54,6 +54,6 @@ public class QueueCheckPlexServerConnectionsJobHandler
 
         await _scheduler.ScheduleJob(job, trigger, cancellationToken);
 
-        return Result.Ok(key);
+        return key;
     }
 }

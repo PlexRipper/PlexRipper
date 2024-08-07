@@ -79,7 +79,6 @@
 								:key="index">
 								<td>
 									<QStatus
-										pulse
 										:value="progressItem.connectionSuccessful" />
 								</td>
 								<td>{{ progressItem.message }}</td>
@@ -89,7 +88,6 @@
 							<tr>
 								<td>
 									<QStatus
-										pulse
 										:value="progress.some((x) => x.connectionSuccessful)" />
 								</td>
 								<td>

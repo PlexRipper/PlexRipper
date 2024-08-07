@@ -150,7 +150,6 @@ public class PlexApiService : IPlexApiService
 
         updatedPlexLibrary.Id = plexLibrary.Id;
         updatedPlexLibrary.PlexServerId = plexLibrary.PlexServerId;
-        updatedPlexLibrary.SyncedAt = DateTime.UtcNow;
 
         // Retrieve the media for this library
         var result = await _plexApi.GetMetadataForLibraryAsync(tokenResult.Value, serverUrl, plexLibrary.Key);

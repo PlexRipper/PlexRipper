@@ -189,6 +189,12 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             plexLibrary.Id
         );
 
+        // Mark the library as synced
+        plexLibrary.SyncedAt = DateTime.UtcNow;
+        await _dbContext
+            .PlexLibraries.Where(x => x.Id == plexLibrary.Id)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.SyncedAt, plexLibrary.SyncedAt));
+
         return Result.Ok(plexLibrary);
     }
 
@@ -228,6 +234,12 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             plexLibrary.Title,
             plexLibrary.Id
         );
+
+        // Mark the library as synced
+        plexLibrary.SyncedAt = DateTime.UtcNow;
+        await _dbContext
+            .PlexLibraries.Where(x => x.Id == plexLibrary.Id)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.SyncedAt, plexLibrary.SyncedAt));
 
         return Result.Ok(plexLibrary);
     }

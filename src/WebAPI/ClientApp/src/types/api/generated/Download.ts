@@ -9,25 +9,25 @@
  * ---------------------------------------------------------------
  */
 
-import type { RequestParams } from './http-client';
-import { ContentType } from './http-client';
+import type { RequestParams } from "./http-client";
+import { ContentType } from "./http-client";
 
 import type {
-	DownloadMediaDTO,
-	DownloadPreviewDTO,
-	DownloadTaskDTO,
-	DownloadTaskType,
-	ResultDTO,
-	ServerDownloadProgressDTO,
-} from './data-contracts';
+  DownloadMediaDTO,
+  DownloadPreviewDTO,
+  DownloadTaskDTO,
+  DownloadTaskType,
+  ResultDTO,
+  ServerDownloadProgressDTO,
+} from "./data-contracts";
 
-import { apiCheckPipe } from '@api/base';
-import Axios from 'axios';
-import queryString from 'query-string';
-import { from } from 'rxjs';
+import { apiCheckPipe } from "@api/base";
+import Axios from "axios";
+import queryString from "query-string";
+import { from } from "rxjs";
 
 export class Download {
-	/**
+  /**
  * No description
  *
  * @tags Download
@@ -35,19 +35,19 @@ export class Download {
  * @request POST:/api/Download/clear
 
  */
-	clearCompletedDownloadTasksEndpoint = (data: string[], params: RequestParams = {}) =>
-		from(
-			Axios.request<number>({
-				url: `/api/Download/clear`,
-				method: 'POST',
-				data: data,
-				type: ContentType.Json,
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<number>);
+  clearCompletedDownloadTasksEndpoint = (data: string[], params: RequestParams = {}) =>
+    from(
+      Axios.request<number>({
+        url: `/api/Download/clear`,
+        method: "POST",
+        data: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<number>);
 
-	/**
+  /**
  * No description
  *
  * @tags Download
@@ -55,19 +55,19 @@ export class Download {
  * @request POST:/api/Download/download
 
  */
-	createDownloadTasksEndpoint = (data: DownloadMediaDTO[], params: RequestParams = {}) =>
-		from(
-			Axios.request<ResultDTO>({
-				url: `/api/Download/download`,
-				method: 'POST',
-				data: data,
-				type: ContentType.Json,
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<ResultDTO>);
+  createDownloadTasksEndpoint = (data: DownloadMediaDTO[], params: RequestParams = {}) =>
+    from(
+      Axios.request<ResultDTO>({
+        url: `/api/Download/download`,
+        method: "POST",
+        data: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<ResultDTO>);
 
-	/**
+  /**
  * No description
  *
  * @tags Download
@@ -75,19 +75,19 @@ export class Download {
  * @request DELETE:/api/Download/delete
 
  */
-	deleteDownloadTaskEndpoint = (data: string[], params: RequestParams = {}) =>
-		from(
-			Axios.request<ResultDTO>({
-				url: `/api/Download/delete`,
-				method: 'DELETE',
-				data: data,
-				type: ContentType.Json,
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<ResultDTO>);
+  deleteDownloadTaskEndpoint = (data: string[], params: RequestParams = {}) =>
+    from(
+      Axios.request<ResultDTO>({
+        url: `/api/Download/delete`,
+        method: "DELETE",
+        data: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<ResultDTO>);
 
-	/**
+  /**
  * No description
  *
  * @tags Download
@@ -95,25 +95,25 @@ export class Download {
  * @request GET:/api/Download/detail/{downloadTaskGuid}
 
  */
-	getDownloadTaskByGuidEndpoint = (
-		downloadTaskGuid: string,
-		query?: {
-			/** @default 0 */
-			type?: DownloadTaskType;
-		},
-		params: RequestParams = {},
-	) =>
-		from(
-			Axios.request<DownloadTaskDTO>({
-				url: `/api/Download/detail/${downloadTaskGuid}`,
-				method: 'GET',
-				params: query,
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<DownloadTaskDTO>);
+  getDownloadTaskByGuidEndpoint = (
+    downloadTaskGuid: string,
+    query?: {
+      /** @default 0 */
+      type?: DownloadTaskType;
+    },
+    params: RequestParams = {},
+  ) =>
+    from(
+      Axios.request<DownloadTaskDTO>({
+        url: `/api/Download/detail/${downloadTaskGuid}`,
+        method: "GET",
+        params: query,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<DownloadTaskDTO>);
 
-	/**
+  /**
  * No description
  *
  * @tags Download
@@ -121,17 +121,17 @@ export class Download {
  * @request GET:/api/Download
 
  */
-	getAllDownloadTasksEndpoint = (params: RequestParams = {}) =>
-		from(
-			Axios.request<ServerDownloadProgressDTO[]>({
-				url: `/api/Download`,
-				method: 'GET',
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<ServerDownloadProgressDTO[]>);
+  getAllDownloadTasksEndpoint = (params: RequestParams = {}) =>
+    from(
+      Axios.request<ServerDownloadProgressDTO[]>({
+        url: `/api/Download`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<ServerDownloadProgressDTO[]>);
 
-	/**
+  /**
  * No description
  *
  * @tags Download
@@ -139,17 +139,17 @@ export class Download {
  * @request GET:/api/Download/pause/{downloadTaskGuid}
 
  */
-	pauseDownloadTaskEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
-		from(
-			Axios.request<ResultDTO>({
-				url: `/api/Download/pause/${downloadTaskGuid}`,
-				method: 'GET',
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<ResultDTO>);
+  pauseDownloadTaskEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
+    from(
+      Axios.request<ResultDTO>({
+        url: `/api/Download/pause/${downloadTaskGuid}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<ResultDTO>);
 
-	/**
+  /**
  * No description
  *
  * @tags Download
@@ -157,19 +157,19 @@ export class Download {
  * @request POST:/api/Download/preview
 
  */
-	getDownloadPreviewEndpoint = (data: DownloadMediaDTO[], params: RequestParams = {}) =>
-		from(
-			Axios.request<DownloadPreviewDTO[]>({
-				url: `/api/Download/preview`,
-				method: 'POST',
-				data: data,
-				type: ContentType.Json,
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<DownloadPreviewDTO[]>);
+  getDownloadPreviewEndpoint = (data: DownloadMediaDTO[], params: RequestParams = {}) =>
+    from(
+      Axios.request<DownloadPreviewDTO[]>({
+        url: `/api/Download/preview`,
+        method: "POST",
+        data: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<DownloadPreviewDTO[]>);
 
-	/**
+  /**
  * No description
  *
  * @tags Download
@@ -177,17 +177,17 @@ export class Download {
  * @request GET:/api/Download/restart/{downloadTaskGuid}
 
  */
-	restartDownloadTaskEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
-		from(
-			Axios.request<ResultDTO>({
-				url: `/api/Download/restart/${downloadTaskGuid}`,
-				method: 'GET',
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<ResultDTO>);
+  restartDownloadTaskEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
+    from(
+      Axios.request<ResultDTO>({
+        url: `/api/Download/restart/${downloadTaskGuid}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<ResultDTO>);
 
-	/**
+  /**
  * No description
  *
  * @tags Download
@@ -195,17 +195,17 @@ export class Download {
  * @request GET:/api/Download/start/{downloadTaskGuid}
 
  */
-	startDownloadTaskEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
-		from(
-			Axios.request<ResultDTO>({
-				url: `/api/Download/start/${downloadTaskGuid}`,
-				method: 'GET',
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<ResultDTO>);
+  startDownloadTaskEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
+    from(
+      Axios.request<ResultDTO>({
+        url: `/api/Download/start/${downloadTaskGuid}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<ResultDTO>);
 
-	/**
+  /**
  * No description
  *
  * @tags Download
@@ -213,45 +213,45 @@ export class Download {
  * @request GET:/api/Download/stop/{downloadTaskGuid}
 
  */
-	stopDownloadTaskEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
-		from(
-			Axios.request<ResultDTO>({
-				url: `/api/Download/stop/${downloadTaskGuid}`,
-				method: 'GET',
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<ResultDTO>);
+  stopDownloadTaskEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
+    from(
+      Axios.request<ResultDTO>({
+        url: `/api/Download/stop/${downloadTaskGuid}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<ResultDTO>);
 }
 
 export class DownloadPaths {
-	static clearCompletedDownloadTasksEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/clear` });
+  static clearCompletedDownloadTasksEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/clear` });
 
-	static createDownloadTasksEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/download` });
+  static createDownloadTasksEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/download` });
 
-	static deleteDownloadTaskEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/delete` });
+  static deleteDownloadTaskEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/delete` });
 
-	static getDownloadTaskByGuidEndpoint = (
-		downloadTaskGuid: string,
-		query?: {
-			/** @default 0 */
-			type?: DownloadTaskType;
-		},
-	) => queryString.stringifyUrl({ url: `/api/Download/detail/${downloadTaskGuid}`, query });
+  static getDownloadTaskByGuidEndpoint = (
+    downloadTaskGuid: string,
+    query?: {
+      /** @default 0 */
+      type?: DownloadTaskType;
+    },
+  ) => queryString.stringifyUrl({ url: `/api/Download/detail/${downloadTaskGuid}`, query });
 
-	static getAllDownloadTasksEndpoint = () => queryString.stringifyUrl({ url: `/api/Download` });
+  static getAllDownloadTasksEndpoint = () => queryString.stringifyUrl({ url: `/api/Download` });
 
-	static pauseDownloadTaskEndpoint = (downloadTaskGuid: string) =>
-		queryString.stringifyUrl({ url: `/api/Download/pause/${downloadTaskGuid}` });
+  static pauseDownloadTaskEndpoint = (downloadTaskGuid: string) =>
+    queryString.stringifyUrl({ url: `/api/Download/pause/${downloadTaskGuid}` });
 
-	static getDownloadPreviewEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/preview` });
+  static getDownloadPreviewEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/preview` });
 
-	static restartDownloadTaskEndpoint = (downloadTaskGuid: string) =>
-		queryString.stringifyUrl({ url: `/api/Download/restart/${downloadTaskGuid}` });
+  static restartDownloadTaskEndpoint = (downloadTaskGuid: string) =>
+    queryString.stringifyUrl({ url: `/api/Download/restart/${downloadTaskGuid}` });
 
-	static startDownloadTaskEndpoint = (downloadTaskGuid: string) =>
-		queryString.stringifyUrl({ url: `/api/Download/start/${downloadTaskGuid}` });
+  static startDownloadTaskEndpoint = (downloadTaskGuid: string) =>
+    queryString.stringifyUrl({ url: `/api/Download/start/${downloadTaskGuid}` });
 
-	static stopDownloadTaskEndpoint = (downloadTaskGuid: string) =>
-		queryString.stringifyUrl({ url: `/api/Download/stop/${downloadTaskGuid}` });
+  static stopDownloadTaskEndpoint = (downloadTaskGuid: string) =>
+    queryString.stringifyUrl({ url: `/api/Download/stop/${downloadTaskGuid}` });
 }

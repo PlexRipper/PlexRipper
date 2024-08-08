@@ -3,9 +3,10 @@ import type { Observable } from 'rxjs';
 import { forkJoin, of } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
 import type { PlexAccountDTO } from '@dto';
+import { DataType } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexAccountApi } from '@api';
-import { useServerStore, useLibraryStore } from '#build/imports';
+import { useLibraryStore, useServerStore, useSignalrStore } from '#build/imports';
 
 export const useAccountStore = defineStore('AccountStore', () => {
 	const state = reactive<{ accounts: PlexAccountDTO[] }>({
@@ -14,9 +15,13 @@ export const useAccountStore = defineStore('AccountStore', () => {
 
 	const serverStore = useServerStore();
 	const libraryStore = useLibraryStore();
+	const signalRStore = useSignalrStore();
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
+			// Listen for refresh notifications
+			signalRStore.getRefreshNotification(DataType.PlexAccount).pipe(switchMap(() => actions.refreshAccounts())).subscribe();
+
 			return actions.refreshAccounts().pipe(switchMap(() => of({ name: useAccountStore.name, isSuccess: true })));
 		},
 		refreshAccounts() {
@@ -62,13 +67,7 @@ export const useAccountStore = defineStore('AccountStore', () => {
 				);
 		},
 		deleteAccount(accountId: number) {
-			return plexAccountApi
-				.deletePlexAccountByIdEndpoint(accountId)
-				.pipe(
-					switchMap(() =>
-						forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()]),
-					),
-				);
+			return plexAccountApi.deletePlexAccountByIdEndpoint(accountId);
 		},
 		getAccount(id: number): PlexAccountDTO | undefined {
 			return state.accounts.find((x) => x.id === id);

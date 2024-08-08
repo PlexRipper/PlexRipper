@@ -6,14 +6,21 @@ import { get } from '@vueuse/core';
 import type { PlexServerConnectionDTO, PlexServerStatusDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexServerApi, plexServerConnectionApi } from '@api';
-import { useServerStore } from '#build/imports';
+import { DataType } from '@dto';
+import { useServerStore, useSignalrStore } from '#build/imports';
 
 export const useServerConnectionStore = defineStore('ServerConnection', () => {
 	const state = reactive<{ serverConnections: PlexServerConnectionDTO[] }>({
 		serverConnections: [],
 	});
+
+	const signalRStore = useSignalrStore();
+
 	const actions = {
 		setup(): Observable<ISetupResult> {
+			// Listen for refresh notifications
+			signalRStore.getRefreshNotification(DataType.PlexServerConnection).pipe(switchMap(() => actions.refreshPlexServerConnections())).subscribe();
+
 			return actions
 				.refreshPlexServerConnections()
 				.pipe(switchMap(() => of({ name: useServerConnectionStore.name, isSuccess: true })));

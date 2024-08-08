@@ -12,4 +12,6 @@ public interface INotificationHub
     [return: SignalRReturn(typeof(Task<NotificationDTO>), 200, "Success")]
     [SignalRMethod(operation: Operation.Get, autoDiscover: AutoDiscover.None)]
     Task Notification(NotificationDTO notification, CancellationToken cancellationToken = default);
+
+    Task RefreshNotification(DataType dataType, CancellationToken cancellationToken = default);
 }

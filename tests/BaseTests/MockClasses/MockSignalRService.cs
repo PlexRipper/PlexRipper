@@ -16,6 +16,8 @@ public class MockSignalRService : ISignalRService
     public BlockingCollection<ServerDownloadProgressDTO> ServerDownloadProgressList { get; } = new();
     public BlockingCollection<JobStatusUpdateDTO> JobStatusUpdateList { get; } = new();
 
+    public BlockingCollection<DataType> RefreshNotificationList { get; } = new();
+
     public MockSignalRService(ILog<MockSignalRService> log)
     {
         _log = log;
@@ -62,6 +64,14 @@ public class MockSignalRService : ISignalRService
     {
         JobStatusUpdateList.Add(jobStatusUpdate.ToDTO());
         _log.Verbose("{ClassName} => {@JobStatusUpdate}", nameof(MockSignalRService), jobStatusUpdate);
+
+        return Task.CompletedTask;
+    }
+
+    public Task SendRefreshNotificationAsync(DataType dataType, CancellationToken cancellationToken = default)
+    {
+        RefreshNotificationList.Add(dataType);
+        _log.Verbose("{ClassName} => {@DataType}", nameof(MockSignalRService), dataType);
 
         return Task.CompletedTask;
     }

@@ -1,4 +1,5 @@
-﻿using Data.Contracts;
+﻿using Application.Contracts;
+using Data.Contracts;
 using FastEndpoints;
 using Logging.Interface;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,6 +37,7 @@ public class DeletePlexAccountByIdEndpoint_UnitTests : BaseUnitTest<CreatePlexAc
             {
                 s.AddTransient(_ => mock.Create<ILog>());
                 s.AddTransient(_ => mock.Create<IPlexRipperDbContext>());
+                s.AddTransient(_ => mock.Create<ISignalRService>());
             });
         });
 

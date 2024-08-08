@@ -1,3 +1,4 @@
+using Application.Contracts;
 using Autofac;
 using Data.Contracts;
 using Logging.Interface;
@@ -118,6 +119,8 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
                 .As<PlexRipperDbContext>() // Register as concrete type
                 .As<IPlexRipperDbContext>() // Also register as interface
                 .InstancePerDependency();
+
+            builder.RegisterType<MockSignalRService>().As<ISignalRService>().SingleInstance();
 
             builder.RegisterType<Log>().As<ILog>().SingleInstance();
             builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();

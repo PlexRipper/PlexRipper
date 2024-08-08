@@ -26,18 +26,21 @@ public class RefreshPlexServerConnectionsCommandHandler
 {
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IPlexApiService _plexServiceApi;
+    private readonly ISignalRService _signalRService;
     private readonly IAddOrUpdatePlexServersCommand _addOrUpdatePlexServersCommand;
     private readonly IAddOrUpdatePlexAccountServersCommand _addOrUpdatePlexAccountServersCommand;
 
     public RefreshPlexServerConnectionsCommandHandler(
         IPlexRipperDbContext dbContext,
         IPlexApiService plexServiceApi,
+        ISignalRService signalRService,
         IAddOrUpdatePlexServersCommand addOrUpdatePlexServersCommand,
         IAddOrUpdatePlexAccountServersCommand addOrUpdatePlexAccountServersCommand
     )
     {
         _dbContext = dbContext;
         _plexServiceApi = plexServiceApi;
+        _signalRService = signalRService;
         _addOrUpdatePlexServersCommand = addOrUpdatePlexServersCommand;
         _addOrUpdatePlexAccountServersCommand = addOrUpdatePlexAccountServersCommand;
     }
@@ -63,9 +66,11 @@ public class RefreshPlexServerConnectionsCommandHandler
 
         // Check if we got the plex server we are looking for
         if (!serverList.Any())
+        {
             return Result
                 .Fail($"Could not retrieve the Plex server data with machine id: {plexServer.MachineIdentifier}")
                 .LogError();
+        }
 
         var serverAccessTokens = tupleResult.tokens.Value.FindAll(x =>
             x.MachineIdentifier == plexServer.MachineIdentifier
@@ -85,9 +90,19 @@ public class RefreshPlexServerConnectionsCommandHandler
         if (plexAccountTokensResult.IsFailed)
             return plexAccountTokensResult;
 
-        return _dbContext
+        // Send notifications to the client to refresh the PlexServerConnection data
+        await _signalRService.SendRefreshNotificationAsync(
+            [DataType.PlexAccount, DataType.PlexServer, DataType.PlexServerConnection],
+            cancellationToken
+        );
+
+        var plexServerWithConnections = _dbContext
             .PlexServers.AsNoTracking()
             .Include(x => x.PlexServerConnections)
             .FirstOrDefault(x => x.Id == request.PlexServerId);
+
+        return plexServerWithConnections is null
+            ? ResultExtensions.EntityNotFound(nameof(PlexServer), request.PlexServerId)
+            : Result.Ok(plexServerWithConnections);
     }
 }

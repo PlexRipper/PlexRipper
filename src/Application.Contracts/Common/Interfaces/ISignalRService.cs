@@ -30,4 +30,5 @@ public interface ISignalRService
     Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate);
 
     Task SendRefreshNotificationAsync(DataType dataType, CancellationToken cancellationToken = default);
+    Task SendRefreshNotificationAsync(List<DataType> dataType, CancellationToken cancellationToken = default);
 }

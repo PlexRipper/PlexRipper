@@ -22,13 +22,15 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
+    private readonly ISignalRService _signalRService;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController + "/{PlexAccountId}";
 
-    public DeletePlexAccountByIdEndpoint(ILog log, IPlexRipperDbContext dbContext)
+    public DeletePlexAccountByIdEndpoint(ILog log, IPlexRipperDbContext dbContext, ISignalRService signalRService)
     {
         _log = log;
         _dbContext = dbContext;
+        _signalRService = signalRService;
     }
 
     public override void Configure()
@@ -76,6 +78,11 @@ public class DeletePlexAccountByIdEndpoint : BaseEndpoint<DeletePlexAccountByIdR
             req.PlexAccountId,
             deletedServersCount,
             deletedLibrariesCount
+        );
+
+        await _signalRService.SendRefreshNotificationAsync(
+            [DataType.PlexAccount, DataType.PlexServer, DataType.PlexServerConnection, DataType.PlexLibrary],
+            ct
         );
 
         await SendFluentResult(Result.Ok(), ct);

@@ -107,10 +107,12 @@ public class AddOrUpdatePlexAccountServersCommand : IAddOrUpdatePlexAccountServe
             }
         }
         else
+        {
             _log.Information(
                 "No Plex server access for {PlexAccountDisplayName} has been lost",
                 plexAccount.DisplayName
             );
+        }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 

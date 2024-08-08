@@ -1,4 +1,5 @@
-﻿using Data.Contracts;
+﻿using Application.Contracts;
+using Data.Contracts;
 using Logging.Interface;
 using Quartz;
 
@@ -10,17 +11,25 @@ public class InspectPlexServerJob : IJob
 
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IScheduler _scheduler;
+    private readonly ISignalRService _signalRService;
     private readonly ILog _log;
     private readonly IMediator _mediator;
 
     public static JobKey GetJobKey(int id) => new($"{PlexServerIdParameter}_{id}", nameof(InspectPlexServerJob));
 
-    public InspectPlexServerJob(ILog log, IMediator mediator, IPlexRipperDbContext dbContext, IScheduler scheduler)
+    public InspectPlexServerJob(
+        ILog log,
+        IMediator mediator,
+        IPlexRipperDbContext dbContext,
+        IScheduler scheduler,
+        ISignalRService signalRService
+    )
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
         _scheduler = scheduler;
+        _signalRService = signalRService;
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -61,6 +70,9 @@ public class InspectPlexServerJob : IJob
             await Task.WhenAll(
                 accountsResult.Value.Select(x => _mediator.Send(new RefreshLibraryAccessCommand(x.Id, plexServerId)))
             );
+
+            // Notify front-end
+            await _signalRService.SendRefreshNotificationAsync([DataType.PlexAccount, DataType.PlexLibrary]);
 
             // Sync library media
             await _mediator.Send(new QueueSyncServerJobCommand(plexServerId, true));

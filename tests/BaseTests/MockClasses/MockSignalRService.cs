@@ -75,4 +75,13 @@ public class MockSignalRService : ISignalRService
 
         return Task.CompletedTask;
     }
+
+    public async Task SendRefreshNotificationAsync(
+        List<DataType> dataTypes,
+        CancellationToken cancellationToken = default
+    )
+    {
+        foreach (var dataType in dataTypes)
+            await SendRefreshNotificationAsync(dataType, cancellationToken);
+    }
 }

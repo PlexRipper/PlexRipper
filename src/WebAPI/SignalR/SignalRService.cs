@@ -91,6 +91,15 @@ public class SignalRService : ISignalRService
         await _notificationHub.Clients.All.RefreshNotification(dataType, cancellationToken);
     }
 
+    public async Task SendRefreshNotificationAsync(
+        List<DataType> dataTypes,
+        CancellationToken cancellationToken = default
+    )
+    {
+        foreach (var dataType in dataTypes)
+            await SendRefreshNotificationAsync(dataType, cancellationToken);
+    }
+
     #endregion
 
     #region JobStateNotification

@@ -33,4 +33,7 @@ public enum MessageTypes
 
     [EnumMember(Value = nameof(JobStatusUpdate))]
     JobStatusUpdate = 9,
+
+    [EnumMember(Value = nameof(RefreshNotification))]
+    RefreshNotification = 10,
 }

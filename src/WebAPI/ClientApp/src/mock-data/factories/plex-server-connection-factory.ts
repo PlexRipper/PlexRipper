@@ -25,6 +25,8 @@ export function generatePlexServerConnection({
 		address: host,
 		port,
 		url: `${scheme}://${host}:${port}`,
+		uri: `${scheme}://${host}:${port}`,
+		isPlexTvConnection: false,
 		iPv4: true,
 		iPv6: false,
 		local: false,

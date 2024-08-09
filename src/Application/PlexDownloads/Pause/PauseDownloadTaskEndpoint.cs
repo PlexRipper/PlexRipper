@@ -69,7 +69,7 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
             return;
         }
 
-        var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey);
+        var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, ct);
         if (stopResult.IsFailed)
         {
             await SendFluentResult(stopResult, ct);

@@ -120,8 +120,6 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
                 .As<IPlexRipperDbContext>() // Also register as interface
                 .InstancePerDependency();
 
-            builder.RegisterType<MockSignalRService>().As<ISignalRService>().SingleInstance();
-
             builder.RegisterType<Log>().As<ILog>().SingleInstance();
             builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();
         });

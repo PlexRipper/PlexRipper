@@ -37,7 +37,7 @@ public class DeletePlexAccountByIdEndpoint_UnitTests : BaseUnitTest<CreatePlexAc
             {
                 s.AddTransient(_ => mock.Create<ILog>());
                 s.AddTransient(_ => mock.Create<IPlexRipperDbContext>());
-                s.AddTransient(_ => mock.Create<ISignalRService>());
+                s.AddTransient(_ => new Mock<ISignalRService>().Object);
             });
         });
 

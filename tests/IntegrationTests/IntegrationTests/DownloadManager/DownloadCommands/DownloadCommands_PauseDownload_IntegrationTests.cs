@@ -46,7 +46,7 @@ public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTe
         >(new StartDownloadTaskEndpointRequest(childDownloadTask.Id));
         var startResult = response.Result;
         response.Response.IsSuccessStatusCode.ShouldBeTrue(startResult.ToString());
-        await Task.Delay(2000);
+        await Task.Delay(500);
 
         response = await Container.ApiClient.GETAsync<
             PauseDownloadTaskEndpoint,
@@ -57,7 +57,6 @@ public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTe
         response.Response.IsSuccessStatusCode.ShouldBeTrue(pauseResult.ToString());
 
         await Container.SchedulerService.AwaitScheduler();
-        await Task.Delay(2000);
 
         // Assert
 

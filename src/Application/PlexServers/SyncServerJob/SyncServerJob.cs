@@ -100,6 +100,9 @@ public class SyncServerJob : IJob
                     results.Add(result.ToResult());
             }
 
+            // Send a refresh notification to all clients
+            await _signalRService.SendRefreshNotificationAsync(DataType.PlexLibrary);
+
             if (results.Any())
             {
                 var failedResult = Result.Fail($"Some libraries failed to sync in PlexServer: {plexServer.Name}");

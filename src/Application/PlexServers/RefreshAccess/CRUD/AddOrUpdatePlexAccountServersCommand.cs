@@ -1,27 +1,37 @@
-using Application.Contracts;
 using Data.Contracts;
+using FluentValidation;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public class AddOrUpdatePlexAccountServersCommand : IAddOrUpdatePlexAccountServersCommand
+public record AddOrUpdatePlexAccountServersCommand(int PlexAccountId, List<ServerAccessTokenDTO> ServerAccessTokens)
+    : IRequest<Result>;
+
+public class AddOrUpdatePlexAccountServersCommandValidator : AbstractValidator<AddOrUpdatePlexAccountServersCommand>
+{
+    public AddOrUpdatePlexAccountServersCommandValidator()
+    {
+        RuleFor(x => x.PlexAccountId).GreaterThan(0);
+    }
+}
+
+public class AddOrUpdatePlexAccountServersCommandHandler : IRequestHandler<AddOrUpdatePlexAccountServersCommand, Result>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
 
-    public AddOrUpdatePlexAccountServersCommand(ILog log, IPlexRipperDbContext dbContext)
+    public AddOrUpdatePlexAccountServersCommandHandler(ILog log, IPlexRipperDbContext dbContext)
     {
         _log = log;
         _dbContext = dbContext;
     }
 
-    public async Task<Result> ExecuteAsync(
-        int plexAccountId,
-        List<ServerAccessTokenDTO> serverAccessTokens,
-        CancellationToken cancellationToken = default
-    )
+    public async Task<Result> Handle(AddOrUpdatePlexAccountServersCommand command, CancellationToken cancellationToken)
     {
+        var plexAccountId = command.PlexAccountId;
+        var serverAccessTokens = command.ServerAccessTokens;
+
         var plexAccount = await _dbContext.PlexAccounts.GetAsync(plexAccountId, cancellationToken);
         if (plexAccount is null)
             return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountId);

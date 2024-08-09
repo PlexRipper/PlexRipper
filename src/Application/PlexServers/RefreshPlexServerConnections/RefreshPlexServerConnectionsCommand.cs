@@ -28,21 +28,18 @@ public class RefreshPlexServerConnectionsCommandHandler
     private readonly IMediator _mediator;
     private readonly IPlexApiService _plexServiceApi;
     private readonly ISignalRService _signalRService;
-    private readonly IAddOrUpdatePlexAccountServersCommand _addOrUpdatePlexAccountServersCommand;
 
     public RefreshPlexServerConnectionsCommandHandler(
         IPlexRipperDbContext dbContext,
         IMediator mediator,
         IPlexApiService plexServiceApi,
-        ISignalRService signalRService,
-        IAddOrUpdatePlexAccountServersCommand addOrUpdatePlexAccountServersCommand
+        ISignalRService signalRService
     )
     {
         _dbContext = dbContext;
         _mediator = mediator;
         _plexServiceApi = plexServiceApi;
         _signalRService = signalRService;
-        _addOrUpdatePlexAccountServersCommand = addOrUpdatePlexAccountServersCommand;
     }
 
     public async Task<Result<PlexServer>> Handle(
@@ -82,11 +79,11 @@ public class RefreshPlexServerConnectionsCommandHandler
             return updateResult;
 
         // We only want to update tokens for the plexServer and discard the rest
-        var plexAccountTokensResult = await _addOrUpdatePlexAccountServersCommand.ExecuteAsync(
-            plexAccount.Id,
-            serverAccessTokens,
+        var plexAccountTokensResult = await _mediator.Send(
+            new AddOrUpdatePlexAccountServersCommand(plexAccount.Id, serverAccessTokens),
             cancellationToken
         );
+
         if (plexAccountTokensResult.IsFailed)
             return plexAccountTokensResult;
 

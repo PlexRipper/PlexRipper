@@ -24,21 +24,21 @@ public class RefreshPlexServerAccessHandler : IRequestHandler<RefreshPlexServerA
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IAddOrUpdatePlexServersCommand _addOrUpdatePlexServersCommand;
+    private readonly IMediator _mediator;
     private readonly IAddOrUpdatePlexAccountServersCommand _addOrUpdatePlexAccountServersCommand;
     private readonly IPlexApiService _plexServiceApi;
 
     public RefreshPlexServerAccessHandler(
         ILog log,
         IPlexRipperDbContext dbContext,
-        IAddOrUpdatePlexServersCommand addOrUpdatePlexServersCommand,
+        IMediator mediator,
         IAddOrUpdatePlexAccountServersCommand addOrUpdatePlexAccountServersCommand,
         IPlexApiService plexServiceApi
     )
     {
         _log = log;
         _dbContext = dbContext;
-        _addOrUpdatePlexServersCommand = addOrUpdatePlexServersCommand;
+        _mediator = mediator;
         _addOrUpdatePlexAccountServersCommand = addOrUpdatePlexAccountServersCommand;
         _plexServiceApi = plexServiceApi;
     }
@@ -70,7 +70,7 @@ public class RefreshPlexServerAccessHandler : IRequestHandler<RefreshPlexServerA
         var serverAccessTokens = tokensResult.Value;
 
         // Add PlexServers and their PlexServerConnections
-        var updateResult = await _addOrUpdatePlexServersCommand.ExecuteAsync(serverList, cancellationToken);
+        var updateResult = await _mediator.Send(new AddOrUpdatePlexServersCommand(serverList), cancellationToken);
         if (updateResult.IsFailed)
             return updateResult.LogError();
 

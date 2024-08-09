@@ -25,23 +25,23 @@ public class RefreshPlexServerConnectionsCommandHandler
     : IRequestHandler<RefreshPlexServerConnectionsCommand, Result<PlexServer>>
 {
     private readonly IPlexRipperDbContext _dbContext;
+    private readonly IMediator _mediator;
     private readonly IPlexApiService _plexServiceApi;
     private readonly ISignalRService _signalRService;
-    private readonly IAddOrUpdatePlexServersCommand _addOrUpdatePlexServersCommand;
     private readonly IAddOrUpdatePlexAccountServersCommand _addOrUpdatePlexAccountServersCommand;
 
     public RefreshPlexServerConnectionsCommandHandler(
         IPlexRipperDbContext dbContext,
+        IMediator mediator,
         IPlexApiService plexServiceApi,
         ISignalRService signalRService,
-        IAddOrUpdatePlexServersCommand addOrUpdatePlexServersCommand,
         IAddOrUpdatePlexAccountServersCommand addOrUpdatePlexAccountServersCommand
     )
     {
         _dbContext = dbContext;
+        _mediator = mediator;
         _plexServiceApi = plexServiceApi;
         _signalRService = signalRService;
-        _addOrUpdatePlexServersCommand = addOrUpdatePlexServersCommand;
         _addOrUpdatePlexAccountServersCommand = addOrUpdatePlexAccountServersCommand;
     }
 
@@ -77,7 +77,7 @@ public class RefreshPlexServerConnectionsCommandHandler
         );
 
         // We only want to update one plexServer and discard the rest
-        var updateResult = await _addOrUpdatePlexServersCommand.ExecuteAsync(serverList, cancellationToken);
+        var updateResult = await _mediator.Send(new AddOrUpdatePlexServersCommand(serverList), cancellationToken);
         if (updateResult.IsFailed)
             return updateResult;
 

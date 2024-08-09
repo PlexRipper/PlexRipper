@@ -28,16 +28,23 @@ public class AddOrUpdatePlexAccountServersCommand : IAddOrUpdatePlexAccountServe
 
         // Add or update the PlexAccount and PlexServer relationships
         _log.InformationLine("Adding or updating the PlexAccount association with PlexServers now");
+
+        // Fetch all relevant PlexServers in one query
+        var machineIdentifiers = serverAccessTokens.Select(x => x.MachineIdentifier).ToList();
+        var plexServers = await _dbContext
+            .PlexServers.Where(x => machineIdentifiers.Contains(x.MachineIdentifier))
+            .ToDictionaryAsync(x => x.MachineIdentifier, cancellationToken);
+
+        var newAccountServers = new List<PlexAccountServer>();
         var accessiblePlexServers = new List<int>();
+
         foreach (var serverAccessToken in serverAccessTokens)
         {
-            var plexServer = _dbContext.PlexServers.FirstOrDefault(x =>
-                x.MachineIdentifier == serverAccessToken.MachineIdentifier
-            );
-            if (plexServer is null)
+            if (!plexServers.TryGetValue(serverAccessToken.MachineIdentifier, out var plexServer))
             {
                 _log.ErrorLine(
-                    "Server Access Token was given for a machine identifier that has no PlexServer in the database"
+                    "Server Access Token was given for a machine identifier that has no PlexServer in the database: {MachineIdentifier}",
+                    serverAccessToken.MachineIdentifier
                 );
                 continue;
             }
@@ -45,32 +52,31 @@ public class AddOrUpdatePlexAccountServersCommand : IAddOrUpdatePlexAccountServe
             accessiblePlexServers.Add(plexServer.Id);
 
             // Check if this PlexAccount has been associated with the plexServer already
-            var plexAccountServer = await _dbContext
-                .PlexAccountServers.Where(x => x.PlexAccountId == plexAccountId && x.PlexServerId == plexServer.Id)
-                .AsTracking()
-                .FirstOrDefaultAsync(cancellationToken);
+            var plexAccountServer = await _dbContext.PlexAccountServers.FirstOrDefaultAsync(
+                x => x.PlexAccountId == plexAccountId && x.PlexServerId == plexServer.Id,
+                cancellationToken
+            );
 
             if (plexAccountServer is null)
             {
-                // Create entry
                 _log.Here()
                     .Debug(
                         "PlexAccount {PlexAccountDisplayName} does not have an association with PlexServer: {PlexServerName}, creating one now with the authentication token",
                         plexAccount.DisplayName,
                         plexServer.Name
                     );
-                var accountServerEntry = new PlexAccountServer
-                {
-                    PlexAccountId = plexAccountId,
-                    PlexServerId = plexServer.Id,
-                    AuthToken = serverAccessToken.AccessToken,
-                    AuthTokenCreationDate = DateTime.UtcNow,
-                };
-                await _dbContext.PlexAccountServers.AddAsync(accountServerEntry, cancellationToken);
+                newAccountServers.Add(
+                    new PlexAccountServer
+                    {
+                        PlexAccountId = plexAccountId,
+                        PlexServerId = plexServer.Id,
+                        AuthToken = serverAccessToken.AccessToken,
+                        AuthTokenCreationDate = DateTime.UtcNow,
+                    }
+                );
             }
             else
             {
-                // Update entry
                 _log.Here()
                     .Debug(
                         "PlexAccount {PlexAccountDisplayName} already has an association with PlexServer: {PlexServerName}, updating authentication token now",
@@ -82,6 +88,12 @@ public class AddOrUpdatePlexAccountServersCommand : IAddOrUpdatePlexAccountServe
             }
         }
 
+        // Add new associations in bulk
+        if (newAccountServers.Any())
+            await _dbContext.PlexAccountServers.AddRangeAsync(newAccountServers, cancellationToken);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
         _log.InformationLine("Checking if there are any PlexServers this PlexAccount has no access to anymore");
 
         // The list of all past and current serverId's the plexAccount has access too
@@ -89,22 +101,22 @@ public class AddOrUpdatePlexAccountServersCommand : IAddOrUpdatePlexAccountServe
             .PlexAccountServers.Where(x =>
                 x.PlexAccountId == plexAccountId && !accessiblePlexServers.Contains(x.PlexServerId)
             )
-            .Include(x => x.PlexServer)
             .Include(x => x.PlexAccount)
+            .Include(x => x.PlexServer)
+            .AsTracking()
             .ToListAsync(cancellationToken);
 
         if (removalList.Any())
         {
             foreach (var plexAccountServer in removalList)
-            {
                 _log.Here()
                     .Warning(
                         "PlexAccount {PlexAccountDisplayName} has lost access to {PlexServerName}!",
-                        plexAccountServer.PlexAccount.DisplayName,
-                        plexAccountServer.PlexServer.Name
+                        plexAccountServer.PlexAccount!.DisplayName,
+                        plexAccountServer.PlexServer!.Name
                     );
-                _dbContext.Entry(plexAccountServer).State = EntityState.Deleted;
-            }
+            _dbContext.PlexAccountServers.RemoveRange(removalList);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
         else
         {
@@ -113,8 +125,6 @@ public class AddOrUpdatePlexAccountServersCommand : IAddOrUpdatePlexAccountServe
                 plexAccount.DisplayName
             );
         }
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

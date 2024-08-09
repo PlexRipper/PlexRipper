@@ -121,6 +121,9 @@ public class PlexApi
     /// <returns></returns>
     public async Task<Result<List<ServerResource>>> GetAccessibleServers(string authToken)
     {
+        if (string.IsNullOrEmpty(authToken))
+            return ResultExtensions.IsEmpty(nameof(authToken)).LogError();
+
         var directRequest = new RestRequest(PlexApiPaths.ServerResourcesUrl);
         directRequest.AddToken(authToken);
         directRequest.AddPlexClientIdentifier();
@@ -156,7 +159,11 @@ public class PlexApi
         {
             var newServerResource = result[1]
                 .Value.FirstOrDefault(x => x.ClientIdentifier == serverResource.ClientIdentifier);
-            if (newServerResource is null || !newServerResource.Connections.Any())
+            if (
+                newServerResource is null
+                || newServerResource.Connections is null
+                || !newServerResource.Connections.Any()
+            )
                 continue;
 
             serverResource.Connections = serverResource

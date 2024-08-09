@@ -42,7 +42,10 @@ public class RefreshPlexAccountAccessEndpoint : BaseEndpoint<RefreshPlexAccountA
     public override async Task HandleAsync(RefreshPlexAccountAccessEndpointRequest req, CancellationToken ct)
     {
         if (req.PlexAccountId > 0)
+        {
             await _mediator.Send(new RefreshPlexServerAccessCommand(req.PlexAccountId), ct);
+            await _mediator.Send(new RefreshLibraryAccessCommand(req.PlexAccountId), ct);
+        }
         else
         {
             var enabledAccounts = await _dbContext.PlexAccounts.Where(x => x.IsEnabled).ToListAsync(ct);
@@ -54,8 +57,11 @@ public class RefreshPlexAccountAccessEndpoint : BaseEndpoint<RefreshPlexAccountA
             }
 
             var plexAccountIds = enabledAccounts.Select(x => x.Id).ToList();
-            foreach (var id in plexAccountIds)
-                await _mediator.Send(new RefreshPlexServerAccessCommand(id), ct);
+            foreach (var plexAccountId in plexAccountIds)
+            {
+                await _mediator.Send(new RefreshPlexServerAccessCommand(plexAccountId), ct);
+                await _mediator.Send(new RefreshLibraryAccessCommand(plexAccountId), ct);
+            }
         }
 
         await SendFluentResult(Result.Ok(), ct);

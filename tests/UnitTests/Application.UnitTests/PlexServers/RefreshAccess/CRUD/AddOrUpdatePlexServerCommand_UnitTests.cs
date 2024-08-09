@@ -16,8 +16,9 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
         var expectedPlexServers = FakeData.GetPlexServer(Seed).Generate(5);
 
         // Act
-        var handler = new AddOrUpdatePlexServersCommand(Log, GetDbContext());
-        var result = await handler.ExecuteAsync(expectedPlexServers, CancellationToken.None);
+        var request = new AddOrUpdatePlexServersCommand(expectedPlexServers);
+        var handler = new AddOrUpdatePlexServersCommandHandler(Log, IDbContext);
+        var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -60,11 +61,12 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
 
         // Act
         // Now update
-        var handler = new AddOrUpdatePlexServersCommand(Log, GetDbContext());
-        var updateResult = await handler.ExecuteAsync(updatedServers, CancellationToken.None);
+        var request = new AddOrUpdatePlexServersCommand(updatedServers);
+        var handler = new AddOrUpdatePlexServersCommandHandler(Log, IDbContext);
+        var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
-        updateResult.IsSuccess.ShouldBeTrue();
+        result.IsSuccess.ShouldBeTrue();
         var plexServersDbs = IDbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
         plexServersDbs.Count.ShouldBe(5);
 
@@ -109,12 +111,14 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
 
         // Act
         // First add the 5 servers
-        var handler = new AddOrUpdatePlexServersCommand(Log, GetDbContext());
-        var addResult = await handler.ExecuteAsync(plexServers, CancellationToken.None);
+        var request = new AddOrUpdatePlexServersCommand(plexServers);
+        var handler = new AddOrUpdatePlexServersCommandHandler(Log, IDbContext);
+        var addResult = await handler.Handle(request, CancellationToken.None);
 
         // Now update
-        handler = new AddOrUpdatePlexServersCommand(Log, GetDbContext());
-        var updateResult = await handler.ExecuteAsync(changedPlexServers, CancellationToken.None);
+        request = new AddOrUpdatePlexServersCommand(changedPlexServers);
+        handler = new AddOrUpdatePlexServersCommandHandler(Log, IDbContext);
+        var updateResult = await handler.Handle(request, CancellationToken.None);
 
         // Assert
         addResult.IsSuccess.ShouldBeTrue();

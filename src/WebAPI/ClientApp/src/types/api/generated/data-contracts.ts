@@ -364,8 +364,8 @@ export enum JobTypes {
   DownloadJob = "DownloadJob",
   DownloadProgressJob = "DownloadProgressJob",
   SyncServerJob = "SyncServerJob",
-  RefreshPlexServersAccessJob = "RefreshPlexServersAccessJob",
   DownloadProgressJobs = "DownloadProgressJobs",
+  InspectPlexServerJob = "InspectPlexServerJob",
 }
 
 export interface LanguageSettingsDTO {

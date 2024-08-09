@@ -5,7 +5,8 @@ import { switchMap, tap, map } from 'rxjs/operators';
 import type { PlexServerDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexServerApi } from '@api';
-import { useAccountStore, useServerConnectionStore, useSettingsStore } from '#build/imports';
+import { DataType } from '@dto';
+import { useAccountStore, useServerConnectionStore, useSettingsStore, useSignalrStore } from '#build/imports';
 
 export const useServerStore = defineStore('ServerStore', () => {
 	const state = reactive<{ servers: PlexServerDTO[] }>({
@@ -14,9 +15,14 @@ export const useServerStore = defineStore('ServerStore', () => {
 	const accountStore = useAccountStore();
 	const serverConnectionStore = useServerConnectionStore();
 	const settingsStore = useSettingsStore();
+	const signalRStore = useSignalrStore();
+
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
+			// Listen for refresh notifications
+			signalRStore.getRefreshNotification(DataType.PlexServer).pipe(switchMap(() => actions.refreshPlexServers())).subscribe();
+
 			return actions.refreshPlexServers().pipe(switchMap(() => of({ name: useServerStore.name, isSuccess: true })));
 		},
 		refreshPlexServer(serverId: number) {

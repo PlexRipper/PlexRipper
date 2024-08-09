@@ -37,6 +37,7 @@ export function generateSettingsModel({
 			firstTimeSetup: validConfig.firstTimeSetup,
 			debugMode: true,
 			activeAccountId: 0,
+			disableAnimatedBackground: true,
 		},
 		confirmationSettings: {
 			askDownloadEpisodeConfirmation: true,

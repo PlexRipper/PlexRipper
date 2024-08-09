@@ -117,12 +117,12 @@ public class CreateUpdateOrDeletePlexTvShowsCommandHandler
             var deleteTvShowList = tvShowsInDb.Where(x => !rawTvShowsDict.ContainsKey(x.Key)).ToList();
 
             // Generate add dictionaries for seasons and episodes
-            var addSeasonList = rawSeasons.Where(x => rawTvShowsDict.ContainsKey(x.ParentKey)).ToList();
+            var addSeasonList = rawSeasons.Where(x => !_seasonKeyToIdsDict.ContainsKey(x.Key)).ToList();
             var updateSeasonList = rawSeasons.Where(x => x.Id > 0).ToList();
             var deleteSeasonList = seasonsInDb.Where(x => !rawSeasonsDict.ContainsKey(x.Key)).ToList();
 
             // Generate delete dictionaries for seasons and episodes
-            var addEpisodeList = rawEpisodes.Where(x => rawSeasonsDict.ContainsKey(x.ParentKey)).ToList();
+            var addEpisodeList = rawEpisodes.Where(x => !_episodeKeyToIdsDict.ContainsKey(x.Key)).ToList();
             var updateEpisodeList = rawEpisodes.Where(x => x.Id > 0).ToList();
             var deleteEpisodeList = episodesInDb.Where(x => !rawEpisodesDict.ContainsKey(x.Key)).ToList();
 

@@ -59,7 +59,9 @@
 	<template v-else-if="!loading && mediaOverviewStore.itemsLength === 0">
 		<QRow justify="center">
 			<QCol cols="auto">
-				<h1>{{ t('components.media-overview.no-data') }}</h1>
+				<QAlert type="warning">
+					{{ $t('components.media-overview.no-data') }}
+				</QAlert>
 			</QCol>
 		</QRow>
 	</template>

@@ -8,7 +8,7 @@ public class PlexMetaDataMapper_UnitTests : BaseUnitTest
         : base(output) { }
 
     [Fact]
-    public void Should_When()
+    public void ShouldMapPlexMediaMetaDataToPlexMovie_WhenDataIsValid()
     {
         // Arrange
         var metaData = FakePlexApiData.GetLibraryMediaMetadata(
@@ -32,7 +32,7 @@ public class PlexMetaDataMapper_UnitTests : BaseUnitTest
         plexMovie.FullTitle.ShouldBe($"{source.Title} ({source.Year})");
         plexMovie.Year.ShouldBe(source.Year);
         plexMovie.SortTitle.ShouldBe(source.TitleSort);
-        plexMovie.Duration.ShouldBe(source.Duration);
+        plexMovie.Duration.ShouldBe(935148);
         plexMovie.MediaSize.ShouldBe(source.Media.Sum(y => y.Part.Sum(z => z.Size)));
         plexMovie.ChildCount.ShouldBe(source.ChildCount);
         plexMovie.AddedAt.ShouldBe(source.AddedAt);

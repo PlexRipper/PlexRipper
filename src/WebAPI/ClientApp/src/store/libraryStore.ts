@@ -6,7 +6,8 @@ import { get } from '@vueuse/core';
 import type { PlexLibraryDTO, PlexServerDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexLibraryApi } from '@api';
-import { useServerStore, useSettingsStore } from '#build/imports';
+import { DataType } from '@dto';
+import { useServerStore, useSettingsStore, useSignalrStore } from '#build/imports';
 
 export const useLibraryStore = defineStore('LibraryStore', () => {
 	const state = reactive<{ libraries: PlexLibraryDTO[] }>({
@@ -15,9 +16,13 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 
 	const serverStore = useServerStore();
 	const settingsStore = useSettingsStore();
+	const signalRStore = useSignalrStore();
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
+			// Listen for refresh notifications
+			signalRStore.getRefreshNotification(DataType.PlexLibrary).pipe(switchMap(() => actions.refreshLibraries())).subscribe();
+
 			return actions.refreshLibraries().pipe(switchMap(() => of({ name: useLibraryStore.name, isSuccess: true })));
 		},
 		refreshLibraries(): Observable<PlexLibraryDTO[]> {

@@ -34,7 +34,11 @@
 					justify="center"
 					no-gutters>
 					<QCol>
-						<h3>{{ text }}</h3>
+						<QText
+							size="h4"
+							align="center">
+							{{ text }}
+						</QText>
 					</QCol>
 				</QRow>
 			</template>
@@ -46,7 +50,11 @@
 					justify="center"
 					no-gutters>
 					<QCol cols="auto">
-						<h3>{{ text }}</h3>
+						<QText
+							size="h4"
+							align="center">
+							{{ text }}
+						</QText>
 					</QCol>
 				</QRow>
 				<!-- Progress bar -->

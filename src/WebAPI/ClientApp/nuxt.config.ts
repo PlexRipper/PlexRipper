@@ -101,8 +101,8 @@ export default defineNuxtConfig({
 				bcp47Code: 'de',
 				file: 'de-DE.json',
 			},
-		], // TODO: This breaks npm run build in "@nuxtjs/i18n": "^8.0.0-beta.11", check again when out of beta
-		// vueI18n: './src/config/vueI18n.config.ts',
+		],
+		vueI18n: './src/config/vueI18n.config.ts',
 		strategy: 'no_prefix',
 	},
 

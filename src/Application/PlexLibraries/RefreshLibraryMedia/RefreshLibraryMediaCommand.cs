@@ -145,9 +145,11 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 // Set libraryId in each episode
                 plexTvShowSeason.Episodes.ForEach(x => x.PlexLibraryId = plexLibrary.Id);
                 plexTvShowSeason.MediaSize = plexTvShowSeason.Episodes.Sum(x => x.MediaSize);
+                plexTvShowSeason.Duration = plexTvShowSeason.Episodes.Sum(x => x.Duration);
             }
 
             plexTvShow.MediaSize = plexTvShow.Seasons.Sum(x => x.MediaSize);
+            plexTvShow.Duration = plexTvShow.Seasons.Sum(x => x.Duration);
         }
 
         // Phase 3 of 4: PlexLibrary media data was parsed successfully.
@@ -186,6 +188,12 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             plexLibrary.Title,
             plexLibrary.Id
         );
+
+        // Mark the library as synced
+        plexLibrary.SyncedAt = DateTime.UtcNow;
+        await _dbContext
+            .PlexLibraries.Where(x => x.Id == plexLibrary.Id)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.SyncedAt, plexLibrary.SyncedAt));
 
         return Result.Ok(plexLibrary);
     }
@@ -226,6 +234,12 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             plexLibrary.Title,
             plexLibrary.Id
         );
+
+        // Mark the library as synced
+        plexLibrary.SyncedAt = DateTime.UtcNow;
+        await _dbContext
+            .PlexLibraries.Where(x => x.Id == plexLibrary.Id)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.SyncedAt, plexLibrary.SyncedAt));
 
         return Result.Ok(plexLibrary);
     }

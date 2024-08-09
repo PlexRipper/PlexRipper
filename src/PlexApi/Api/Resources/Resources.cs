@@ -70,4 +70,22 @@ public class ServerResourceConnection
     public bool Relay { get; set; }
 
     public bool IPv6 { get; set; }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is ServerResourceConnection other)
+        {
+            return Protocol == other.Protocol
+                && Address == other.Address
+                && Port == other.Port
+                && Uri == other.Uri
+                && Local == other.Local
+                && Relay == other.Relay
+                && IPv6 == other.IPv6;
+        }
+
+        return false;
+    }
+
+    public override int GetHashCode() => HashCode.Combine(Protocol, Address, Port, Uri, Local, Relay, IPv6);
 }

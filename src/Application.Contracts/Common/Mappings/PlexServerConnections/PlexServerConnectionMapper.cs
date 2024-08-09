@@ -18,8 +18,10 @@ public static class PlexServerConnectionMapper
             IPv4 = source.IPv4,
             IPv6 = source.IPv6,
             PortFix = source.PortFix,
+            Uri = source.Uri,
             PlexServerId = source.PlexServerId,
             Url = source.Url,
+            IsPlexTvConnection = source.IsPlexTvConnection,
             ServerStatusList = source.PlexServerStatus.ToDTO(),
             LatestConnectionStatus = source.LatestConnectionStatus?.ToDTO(),
             Progress = default,
@@ -63,6 +65,7 @@ public static class PlexServerConnectionMapper
             IPv6 = source.IPv6,
             PortFix = source.PortFix,
             PlexServer = null,
+            Uri = source.Uri,
             PlexServerId = source.PlexServerId,
             PlexServerStatus = source.ServerStatusList.ToModel(),
         };

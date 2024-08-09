@@ -1,3 +1,4 @@
+using Application.Contracts;
 using Autofac;
 using Data.Contracts;
 using Logging.Interface;

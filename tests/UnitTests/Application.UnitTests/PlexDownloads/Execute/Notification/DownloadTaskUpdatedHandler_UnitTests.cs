@@ -23,6 +23,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
         });
 
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
+
         mock.Mock<ISignalRService>()
             .Setup(x =>
                 x.SendDownloadProgressUpdateAsync(It.IsAny<List<DownloadTaskGeneric>>(), It.IsAny<CancellationToken>())

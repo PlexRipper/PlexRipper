@@ -28,4 +28,7 @@ public interface ISignalRService
 
     Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress);
     Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate);
+
+    Task SendRefreshNotificationAsync(DataType dataType, CancellationToken cancellationToken = default);
+    Task SendRefreshNotificationAsync(List<DataType> dataType, CancellationToken cancellationToken = default);
 }

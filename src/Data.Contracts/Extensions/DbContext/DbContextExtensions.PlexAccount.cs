@@ -96,4 +96,16 @@ public static partial class DbContextExtensions
         );
         return plexAccount == null;
     }
+
+    public static async Task<string> GetPlexAccountDisplayName(
+        this IPlexRipperDbContext dbContext,
+        int plexAccountId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        return await dbContext
+                .PlexAccounts.Where(x => x.Id == plexAccountId)
+                .Select(x => x.DisplayName)
+                .FirstOrDefaultAsync(cancellationToken) ?? "MISSING DISPLAY NAME";
+    }
 }

@@ -26,9 +26,11 @@ public static partial class DbContextExtensions
 
         var plexServerConnections = plexServer.PlexServerConnections;
         if (!plexServerConnections.Any())
+        {
             return Result
                 .Fail($"PlexServer with id {plexServer.Id} and name {plexServer.Name} has no connections available!")
                 .LogError();
+        }
 
         // Find based on preference
         if (plexServer.PreferredConnectionId > 0)
@@ -52,23 +54,36 @@ public static partial class DbContextExtensions
                 plexServer.PublicAddress
             );
 
-        var publicConnection = plexServerConnections.Find(x => x.Address == plexServer.PublicAddress);
+        var publicConnection = plexServerConnections.FirstOrDefault(x =>
+            x.Address == plexServer.PublicAddress && x.IsOnline
+        );
         if (publicConnection is not null)
             return Result.Ok(publicConnection);
 
         _log.Here()
             .Verbose(
-                "Could not find connection based on public address: {PublicAddress} for server {PlexServerName}",
+                "Could not find a connection based on public address: {PublicAddress} for server {PlexServerName} that is online",
                 plexServer.PublicAddress,
                 plexServer.Name
             );
 
         // Find based on what's successful
-        var successPlexServerConnections = plexServerConnections
-            .Where(x => x.LatestConnectionStatus?.IsSuccessful ?? false)
-            .ToList();
+        var successPlexServerConnections = plexServerConnections.Where(x => x.IsOnline).ToList();
         if (successPlexServerConnections.Any())
+        {
+            // Give preference to non-PlexTv connections
+            var directConnections = successPlexServerConnections.Where(x => !x.IsPlexTvConnection).ToList();
+            if (directConnections.Any())
+            {
+                _log.Verbose(
+                    "Found a direct connection that was successful. We're gonna use that: {DirectConnection}",
+                    directConnections.First()
+                );
+                return Result.Ok(directConnections.First());
+            }
+
             return Result.Ok(successPlexServerConnections.First());
+        }
 
         // Find anything...
         _log.Verbose(

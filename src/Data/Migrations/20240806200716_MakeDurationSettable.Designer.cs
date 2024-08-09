@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Data;
 
@@ -10,9 +11,11 @@ using PlexRipper.Data;
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    partial class PlexRipperDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240806200716_MakeDurationSettable")]
+    partial class MakeDurationSettable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1337,15 +1340,15 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<bool>("IPv4")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(7);
+                        .HasColumnOrder(6);
 
                     b.Property<bool>("IPv6")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(8);
+                        .HasColumnOrder(7);
 
                     b.Property<bool>("Local")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(5);
+                        .HasColumnOrder(4);
 
                     b.Property<int>("PlexServerId")
                         .HasColumnType("INTEGER");
@@ -1356,7 +1359,7 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<bool>("PortFix")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(9);
+                        .HasColumnOrder(8);
 
                     b.Property<string>("Protocol")
                         .IsRequired()
@@ -1365,12 +1368,7 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<bool>("Relay")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(6);
-
-                    b.Property<string>("Uri")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(4);
+                        .HasColumnOrder(5);
 
                     b.HasKey("Id");
 

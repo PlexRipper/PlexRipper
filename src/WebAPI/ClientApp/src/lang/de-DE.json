@@ -170,6 +170,9 @@
         },
         "alert-dialog": {
             "request-data-sent": ""
+        },
+        "app-bar-progress-bar": {
+            "tooltip-text": "PlexServer {finishedCount} von {totalCount}wird synchronisiert!"
         }
     },
     "confirmation": {

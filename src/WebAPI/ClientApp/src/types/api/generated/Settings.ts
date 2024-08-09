@@ -9,18 +9,18 @@
  * ---------------------------------------------------------------
  */
 
-import type { RequestParams } from './http-client';
-import { ContentType } from './http-client';
+import type { RequestParams } from "./http-client";
+import { ContentType } from "./http-client";
 
-import type { ResultDTO, SettingsModelDTO } from './data-contracts';
+import type { ResultDTO, SettingsModelDTO } from "./data-contracts";
 
-import { apiCheckPipe } from '@api/base';
-import Axios from 'axios';
-import queryString from 'query-string';
-import { from } from 'rxjs';
+import { apiCheckPipe } from "@api/base";
+import Axios from "axios";
+import queryString from "query-string";
+import { from } from "rxjs";
 
 export class Settings {
-	/**
+  /**
  * No description
  *
  * @tags Settings
@@ -28,17 +28,17 @@ export class Settings {
  * @request GET:/api/Settings/
 
  */
-	getUserSettingsEndpoint = (params: RequestParams = {}) =>
-		from(
-			Axios.request<SettingsModelDTO>({
-				url: `/api/Settings/`,
-				method: 'GET',
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<SettingsModelDTO>);
+  getUserSettingsEndpoint = (params: RequestParams = {}) =>
+    from(
+      Axios.request<SettingsModelDTO>({
+        url: `/api/Settings/`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<SettingsModelDTO>);
 
-	/**
+  /**
  * No description
  *
  * @tags Settings
@@ -46,19 +46,19 @@ export class Settings {
  * @request PUT:/api/Settings/
 
  */
-	updateUserSettingsEndpoint = (data: SettingsModelDTO, params: RequestParams = {}) =>
-		from(
-			Axios.request<SettingsModelDTO>({
-				url: `/api/Settings/`,
-				method: 'PUT',
-				data: data,
-				type: ContentType.Json,
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<SettingsModelDTO>);
+  updateUserSettingsEndpoint = (data: SettingsModelDTO, params: RequestParams = {}) =>
+    from(
+      Axios.request<SettingsModelDTO>({
+        url: `/api/Settings/`,
+        method: "PUT",
+        data: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<SettingsModelDTO>);
 
-	/**
+  /**
  * No description
  *
  * @tags Settings
@@ -66,21 +66,21 @@ export class Settings {
  * @request GET:/api/Settings/resetdb
 
  */
-	resetDatabaseEndpoint = (params: RequestParams = {}) =>
-		from(
-			Axios.request<ResultDTO>({
-				url: `/api/Settings/resetdb`,
-				method: 'GET',
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<ResultDTO>);
+  resetDatabaseEndpoint = (params: RequestParams = {}) =>
+    from(
+      Axios.request<ResultDTO>({
+        url: `/api/Settings/resetdb`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<ResultDTO>);
 }
 
 export class SettingsPaths {
-	static getUserSettingsEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings/` });
+  static getUserSettingsEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings/` });
 
-	static updateUserSettingsEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings/` });
+  static updateUserSettingsEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings/` });
 
-	static resetDatabaseEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings/resetdb` });
+  static resetDatabaseEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings/resetdb` });
 }

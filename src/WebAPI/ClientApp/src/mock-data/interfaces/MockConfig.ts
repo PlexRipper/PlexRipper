@@ -9,7 +9,6 @@ export interface MockConfig {
 	plexServerStatusCount: number;
 	connectionHasProgress: boolean;
 	// endregion
-	plexLibraryCount: number;
 	plexMovieLibraryCount: number;
 	plexTvShowLibraryCount: number;
 	plexLibraryTypes: PlexMediaType[];

@@ -107,6 +107,7 @@ public static partial class FakeData
             .RuleFor(x => x.IPv4, _ => true)
             .RuleFor(x => x.IPv6, _ => false)
             .RuleFor(x => x.PortFix, _ => false)
+            .RuleFor(x => x.Uri, f => f.Internet.Url())
             .RuleFor(x => x.PlexServerStatus, _ => new List<PlexServerStatus>())
             .RuleFor(x => x.PlexServer, _ => null)
             .RuleFor(x => x.PlexServerId, _ => 0);

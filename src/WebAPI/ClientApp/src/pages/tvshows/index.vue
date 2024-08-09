@@ -1,10 +1,14 @@
 <template>
-	<QPage>
-		<h1>{{ t('pages.tvshows.index.header') }}</h1>
-		<p>{{ t('pages.tvshows.index.sub-header') }}</p>
+	<QPage padding>
+		<QText
+			size="h3"
+			align="center">
+			{{ $t('pages.tvshows.index.header') }}
+		</QText>
+		<QText
+			size="subtitle1"
+			align="center">
+			{{ $t('pages.tvshows.index.sub-header') }}
+		</QText>
 	</QPage>
 </template>
-
-<script setup lang="ts">
-const { t } = useI18n();
-</script>

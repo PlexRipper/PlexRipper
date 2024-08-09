@@ -9,17 +9,17 @@
  * ---------------------------------------------------------------
  */
 
-import type { RequestParams } from './http-client';
+import type { RequestParams } from "./http-client";
 
-import type { PlexServerDTO, ResultDTO } from './data-contracts';
+import type { PlexServerDTO, ResultDTO } from "./data-contracts";
 
-import { apiCheckPipe } from '@api/base';
-import Axios from 'axios';
-import queryString from 'query-string';
-import { from } from 'rxjs';
+import { apiCheckPipe } from "@api/base";
+import Axios from "axios";
+import queryString from "query-string";
+import { from } from "rxjs";
 
 export class PlexServer {
-	/**
+  /**
  * No description
  *
  * @tags Plexserver
@@ -27,21 +27,21 @@ export class PlexServer {
  * @request GET:/api/PlexServer/{plexServerId}/preferred-connection/{plexServerConnectionId}
 
  */
-	setPreferredPlexServerConnectionEndpoint = (
-		plexServerId: number,
-		plexServerConnectionId: number,
-		params: RequestParams = {},
-	) =>
-		from(
-			Axios.request<ResultDTO>({
-				url: `/api/PlexServer/${plexServerId}/preferred-connection/${plexServerConnectionId}`,
-				method: 'GET',
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<ResultDTO>);
+  setPreferredPlexServerConnectionEndpoint = (
+    plexServerId: number,
+    plexServerConnectionId: number,
+    params: RequestParams = {},
+  ) =>
+    from(
+      Axios.request<ResultDTO>({
+        url: `/api/PlexServer/${plexServerId}/preferred-connection/${plexServerConnectionId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<ResultDTO>);
 
-	/**
+  /**
  * No description
  *
  * @tags Plexserver
@@ -49,17 +49,17 @@ export class PlexServer {
  * @request GET:/api/PlexServer/{plexServerId}
 
  */
-	getPlexServerByIdEndpoint = (plexServerId: number, params: RequestParams = {}) =>
-		from(
-			Axios.request<PlexServerDTO>({
-				url: `/api/PlexServer/${plexServerId}`,
-				method: 'GET',
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<PlexServerDTO>);
+  getPlexServerByIdEndpoint = (plexServerId: number, params: RequestParams = {}) =>
+    from(
+      Axios.request<PlexServerDTO>({
+        url: `/api/PlexServer/${plexServerId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<PlexServerDTO>);
 
-	/**
+  /**
  * @description  Retrieves all the PlexServers, without PlexLibraries but with all its connections currently in the database.
  *
  * @tags Plexserver
@@ -68,17 +68,17 @@ export class PlexServer {
  * @request GET:/api/PlexServer/
 
  */
-	getAllPlexServersEndpoint = (params: RequestParams = {}) =>
-		from(
-			Axios.request<PlexServerDTO[]>({
-				url: `/api/PlexServer/`,
-				method: 'GET',
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<PlexServerDTO[]>);
+  getAllPlexServersEndpoint = (params: RequestParams = {}) =>
+    from(
+      Axios.request<PlexServerDTO[]>({
+        url: `/api/PlexServer/`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<PlexServerDTO[]>);
 
-	/**
+  /**
  * No description
  *
  * @tags Plexserver
@@ -86,17 +86,17 @@ export class PlexServer {
  * @request GET:/api/PlexServer/{plexServerId}/inspect
 
  */
-	queueInspectPlexServerJobEndpoint = (plexServerId: number, params: RequestParams = {}) =>
-		from(
-			Axios.request<ResultDTO>({
-				url: `/api/PlexServer/${plexServerId}/inspect`,
-				method: 'GET',
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<ResultDTO>);
+  queueInspectPlexServerJobEndpoint = (plexServerId: number, params: RequestParams = {}) =>
+    from(
+      Axios.request<ResultDTO>({
+        url: `/api/PlexServer/${plexServerId}/inspect`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<ResultDTO>);
 
-	/**
+  /**
  * No description
  *
  * @tags Plexserver
@@ -104,17 +104,17 @@ export class PlexServer {
  * @request GET:/api/PlexServer/{plexServerId}/refresh
 
  */
-	refreshPlexServerConnectionsEndpoint = (plexServerId: number, params: RequestParams = {}) =>
-		from(
-			Axios.request<PlexServerDTO>({
-				url: `/api/PlexServer/${plexServerId}/refresh`,
-				method: 'GET',
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<PlexServerDTO>);
+  refreshPlexServerConnectionsEndpoint = (plexServerId: number, params: RequestParams = {}) =>
+    from(
+      Axios.request<PlexServerDTO>({
+        url: `/api/PlexServer/${plexServerId}/refresh`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<PlexServerDTO>);
 
-	/**
+  /**
  * No description
  *
  * @tags Plexserver
@@ -122,24 +122,24 @@ export class PlexServer {
  * @request GET:/api/PlexServer/{plexServerId}/set-server-alias
 
  */
-	setServerAlias = (
-		plexServerId: number,
-		query: {
-			serverAlias: string;
-		},
-		params: RequestParams = {},
-	) =>
-		from(
-			Axios.request<ResultDTO>({
-				url: `/api/PlexServer/${plexServerId}/set-server-alias`,
-				method: 'GET',
-				params: query,
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<ResultDTO>);
+  setServerAlias = (
+    plexServerId: number,
+    query: {
+      serverAlias: string;
+    },
+    params: RequestParams = {},
+  ) =>
+    from(
+      Axios.request<ResultDTO>({
+        url: `/api/PlexServer/${plexServerId}/set-server-alias`,
+        method: "GET",
+        params: query,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<ResultDTO>);
 
-	/**
+  /**
  * No description
  *
  * @tags Plexserver
@@ -147,24 +147,24 @@ export class PlexServer {
  * @request GET:/api/PlexServer/{plexServerId}/set-server-hidden
 
  */
-	setServerHiddenRequestEndpoint = (
-		plexServerId: number,
-		query: {
-			hidden: boolean;
-		},
-		params: RequestParams = {},
-	) =>
-		from(
-			Axios.request<ResultDTO>({
-				url: `/api/PlexServer/${plexServerId}/set-server-hidden`,
-				method: 'GET',
-				params: query,
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<ResultDTO>);
+  setServerHiddenRequestEndpoint = (
+    plexServerId: number,
+    query: {
+      hidden: boolean;
+    },
+    params: RequestParams = {},
+  ) =>
+    from(
+      Axios.request<ResultDTO>({
+        url: `/api/PlexServer/${plexServerId}/set-server-hidden`,
+        method: "GET",
+        params: query,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<ResultDTO>);
 
-	/**
+  /**
  * No description
  *
  * @tags Plexserver
@@ -172,59 +172,59 @@ export class PlexServer {
  * @request GET:/api/PlexServer/{plexServerId}/sync
 
  */
-	queueSyncPlexServerJobEndpoint = (
-		plexServerId: number,
-		query?: {
-			/** @default false */
-			forceSync?: boolean;
-		},
-		params: RequestParams = {},
-	) =>
-		from(
-			Axios.request<ResultDTO>({
-				url: `/api/PlexServer/${plexServerId}/sync`,
-				method: 'GET',
-				params: query,
-				format: 'json',
-				...params,
-			}),
-		).pipe(apiCheckPipe<ResultDTO>);
+  queueSyncPlexServerJobEndpoint = (
+    plexServerId: number,
+    query?: {
+      /** @default false */
+      forceSync?: boolean;
+    },
+    params: RequestParams = {},
+  ) =>
+    from(
+      Axios.request<ResultDTO>({
+        url: `/api/PlexServer/${plexServerId}/sync`,
+        method: "GET",
+        params: query,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<ResultDTO>);
 }
 
 export class PlexServerPaths {
-	static setPreferredPlexServerConnectionEndpoint = (plexServerId: number, plexServerConnectionId: number) =>
-		queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/preferred-connection/${plexServerConnectionId}` });
+  static setPreferredPlexServerConnectionEndpoint = (plexServerId: number, plexServerConnectionId: number) =>
+    queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/preferred-connection/${plexServerConnectionId}` });
 
-	static getPlexServerByIdEndpoint = (plexServerId: number) =>
-		queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}` });
+  static getPlexServerByIdEndpoint = (plexServerId: number) =>
+    queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}` });
 
-	static getAllPlexServersEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexServer/` });
+  static getAllPlexServersEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexServer/` });
 
-	static queueInspectPlexServerJobEndpoint = (plexServerId: number) =>
-		queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/inspect` });
+  static queueInspectPlexServerJobEndpoint = (plexServerId: number) =>
+    queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/inspect` });
 
-	static refreshPlexServerConnectionsEndpoint = (plexServerId: number) =>
-		queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/refresh` });
+  static refreshPlexServerConnectionsEndpoint = (plexServerId: number) =>
+    queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/refresh` });
 
-	static setServerAlias = (
-		plexServerId: number,
-		query: {
-			serverAlias: string;
-		},
-	) => queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/set-server-alias`, query });
+  static setServerAlias = (
+    plexServerId: number,
+    query: {
+      serverAlias: string;
+    },
+  ) => queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/set-server-alias`, query });
 
-	static setServerHiddenRequestEndpoint = (
-		plexServerId: number,
-		query: {
-			hidden: boolean;
-		},
-	) => queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/set-server-hidden`, query });
+  static setServerHiddenRequestEndpoint = (
+    plexServerId: number,
+    query: {
+      hidden: boolean;
+    },
+  ) => queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/set-server-hidden`, query });
 
-	static queueSyncPlexServerJobEndpoint = (
-		plexServerId: number,
-		query?: {
-			/** @default false */
-			forceSync?: boolean;
-		},
-	) => queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/sync`, query });
+  static queueSyncPlexServerJobEndpoint = (
+    plexServerId: number,
+    query?: {
+      /** @default false */
+      forceSync?: boolean;
+    },
+  ) => queryString.stringifyUrl({ url: `/api/PlexServer/${plexServerId}/sync`, query });
 }

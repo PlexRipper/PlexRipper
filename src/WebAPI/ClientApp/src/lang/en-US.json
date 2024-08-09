@@ -170,6 +170,9 @@
         },
         "alert-dialog": {
             "request-data-sent": "Request data sent:"
+        },
+        "app-bar-progress-bar": {
+            "tooltip-text": "Syncing PlexServer {finishedCount} of {totalCount}!"
         }
     },
     "confirmation": {

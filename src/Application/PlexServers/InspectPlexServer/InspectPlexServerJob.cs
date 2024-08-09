@@ -1,4 +1,5 @@
-﻿using Data.Contracts;
+﻿using Application.Contracts;
+using Data.Contracts;
 using Logging.Interface;
 using Quartz;
 
@@ -9,14 +10,26 @@ public class InspectPlexServerJob : IJob
     public static string PlexServerIdParameter => "plexServerId";
 
     private readonly IPlexRipperDbContext _dbContext;
+    private readonly IScheduler _scheduler;
+    private readonly ISignalRService _signalRService;
     private readonly ILog _log;
     private readonly IMediator _mediator;
 
-    public InspectPlexServerJob(ILog log, IMediator mediator, IPlexRipperDbContext dbContext)
+    public static JobKey GetJobKey(int id) => new($"{PlexServerIdParameter}_{id}", nameof(InspectPlexServerJob));
+
+    public InspectPlexServerJob(
+        ILog log,
+        IMediator mediator,
+        IPlexRipperDbContext dbContext,
+        IScheduler scheduler,
+        ISignalRService signalRService
+    )
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
+        _scheduler = scheduler;
+        _signalRService = signalRService;
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -41,15 +54,27 @@ public class InspectPlexServerJob : IJob
                 return;
             }
 
-            var checkResult = await _mediator.Send(new CheckAllConnectionsStatusByPlexServerCommand(plexServerId));
-            if (checkResult.IsFailed)
-            {
-                checkResult.ToResult().LogError();
+            // Create connection check task for all connections
+            var checkJobKey = await _mediator.Send(
+                new QueueCheckPlexServerConnectionsJobCommand([plexServerId]),
+                CancellationToken.None
+            );
+
+            await _scheduler.AwaitJobRunning(checkJobKey, CancellationToken.None);
+
+            // Refresh accessible libraries
+            var accountsResult = await _dbContext.GetPlexAccountsWithAccessAsync(plexServerId);
+            if (accountsResult.IsFailed)
                 return;
-            }
 
-            await RefreshAccessibleLibraries(plexServerId);
+            await Task.WhenAll(
+                accountsResult.Value.Select(x => _mediator.Send(new RefreshLibraryAccessCommand(x.Id, plexServerId)))
+            );
 
+            // Notify front-end
+            await _signalRService.SendRefreshNotificationAsync([DataType.PlexAccount, DataType.PlexLibrary]);
+
+            // Sync library media
             await _mediator.Send(new QueueSyncServerJobCommand(plexServerId, true));
 
             _log.Information(
@@ -62,20 +87,5 @@ public class InspectPlexServerJob : IJob
         {
             _log.Error(e);
         }
-    }
-
-    private async Task RefreshAccessibleLibraries(int plexServerId)
-    {
-        var accountsResult = await _dbContext.GetPlexAccountsWithAccessAsync(plexServerId);
-        if (accountsResult.IsFailed)
-            return;
-
-        foreach (var plexAccount in accountsResult.Value)
-            await _mediator.Send(new RefreshLibraryAccessCommand(plexAccount.Id, plexServerId));
-    }
-
-    public static JobKey GetJobKey(int id)
-    {
-        return new JobKey($"{PlexServerIdParameter}_{id}", nameof(InspectPlexServerJob));
     }
 }

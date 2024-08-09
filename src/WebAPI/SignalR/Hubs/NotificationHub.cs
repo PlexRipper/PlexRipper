@@ -26,4 +26,10 @@ public class NotificationHub : Hub<INotificationHub>
         );
         await Clients.All.Notification(notification, cancellationToken);
     }
+
+    public async Task RefreshNotification(DataType dataType, CancellationToken cancellationToken = default)
+    {
+        _log.Debug("Sending refresh notification: {@DataType}", dataType);
+        await Clients.All.RefreshNotification(dataType, cancellationToken);
+    }
 }

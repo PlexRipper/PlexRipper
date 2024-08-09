@@ -73,7 +73,9 @@
 					class="q-my-sm"
 					justify="center">
 					<QCol cols="auto">
-						<h2>{{ t('components.folder-paths-overview.no-paths') }}</h2>
+						<QText size="h4">
+							{{ $t('components.folder-paths-overview.no-paths') }}
+						</QText>
 					</QCol>
 				</QRow>
 			</template>

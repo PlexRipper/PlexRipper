@@ -62,7 +62,7 @@ public class PlexServerConnection : BaseEntity
         get
         {
             if (!PortFix)
-                return Uri;
+                return Uri.TrimEnd('/');
 
             var urlBuilder = new UriBuilder(Protocol, Address) { Port = Port };
             return urlBuilder.ToString().TrimEnd('/');

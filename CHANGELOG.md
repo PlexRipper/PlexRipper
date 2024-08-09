@@ -1,5 +1,31 @@
 PlexRipper Changelog
 
+# [0.18.0](https://github.com/PlexRipper/PlexRipper/compare/v0.17.0...v0.18.0) (2024-08-09)
+
+
+### Bug Fixes
+
+* **Web-UI:** Cleanup the headers that were to big ([a576647](https://github.com/PlexRipper/PlexRipper/commit/a5766471ffe3587772642163ab22cb54d98a6752))
+* **WebAPI:** Fixed a crash during library syncing where dupplicate keys were created in media ([fe13f2b](https://github.com/PlexRipper/PlexRipper/commit/fe13f2bb61891ae1f7bd31eb3d1ea92d74818729))
+* **Web-UI:** Fixed broken percentage display due to missing translation ([9aa3167](https://github.com/PlexRipper/PlexRipper/commit/9aa3167e2c3056483a8d2403742a2efd7b1b284f))
+* **Web-UI:** Fixed Cypress pathing by re setting the baseUrl ([bafe90d](https://github.com/PlexRipper/PlexRipper/commit/bafe90d6bfd5ec1a886146bbd1c7132dddc9f140))
+* **Web-UI:** Fixed percentage that was 10000% ([58c0c15](https://github.com/PlexRipper/PlexRipper/commit/58c0c15b94e3040e41a4576f2ed6a5efc8b1cdb2))
+* Fixed the duration of media beind incorrectly displayed due to milliseconds being treated as seconds ([78989a8](https://github.com/PlexRipper/PlexRipper/commit/78989a8955887a4132a60b3e3eb6cdfec8df2ef7))
+* **WebAPI:** Fixed the library not being marked as synced, thus syncing media needlessly when there were no changes ([8a6cc00](https://github.com/PlexRipper/PlexRipper/commit/8a6cc00c6b85c981520c154ce363d565340db821))
+* **Web-UI:** Fixed the missing server media sync progress bar when media is syncing ([5338729](https://github.com/PlexRipper/PlexRipper/commit/533872962c20fd232b536f549c80e7912480c3fd))
+* **Web-UI:** Fixed warnings about unused props on QStatus ([dfae4b7](https://github.com/PlexRipper/PlexRipper/commit/dfae4b70e9e4771877968de5dae930b02d867125))
+
+
+### Features
+
+* **WebAPI:** Added places where a notification is sent to the front-end when data in the back-end is updated ([7c9bcda](https://github.com/PlexRipper/PlexRipper/commit/7c9bcdaa445f95355bc8027a590d2f8dd9ddd380))
+* **WebAPI:** Store additional connections per plex server to allow plex.direct connections when a server has limited connectivity ([4b2f13c](https://github.com/PlexRipper/PlexRipper/commit/4b2f13ce14af2958ac744809f72a79c9e48156fe))
+
+
+### Performance Improvements
+
+* **WebAPI:** Refactored the RefreshLibraryAccessCommand to do multiple servers in parrallel ([6925dec](https://github.com/PlexRipper/PlexRipper/commit/6925decc81da63803a4d3fff5353a7a3e1220eb8))
+
 # [0.17.0](https://github.com/PlexRipper/PlexRipper/compare/v0.16.0...v0.17.0) (2024-08-06)
 
 

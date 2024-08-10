@@ -2,7 +2,8 @@
 	<q-item
 		v-ripple
 		clickable
-		:class="classConfig">
+		:class="classConfig"
+		:data-cy="cy">
 		<div class="q-alert-wrapper">
 			<q-icon
 				:name="alertIcon"
@@ -25,8 +26,10 @@
 const props = withDefaults(defineProps<{
 	type: 'error' | 'warning' | 'info' | string;
 	dismissible?: boolean;
+	cy?: string;
 }>(), {
 	dismissible: false,
+	cy: '',
 });
 
 const classConfig = computed(() => {

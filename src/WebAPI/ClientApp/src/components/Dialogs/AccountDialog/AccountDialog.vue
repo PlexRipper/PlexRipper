@@ -116,12 +116,12 @@
 import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
-import { take } from 'rxjs/operators';
 import type { PlexAccountDTO } from '@dto';
 import type { IPlexAccount } from '@interfaces';
 import { plexAccountApi } from '@api';
 import type AccountForm from '@components/Dialogs/AccountDialog/AccountForm.vue';
 
+import type { AxiosResponse } from 'axios';
 import { useI18n, useOpenControlDialog, useCloseControlDialog, useAccountStore } from '#imports';
 
 const { t } = useI18n();
@@ -252,6 +252,8 @@ function validate() {
 				next: (data) => {
 					const account = data.isSuccess ? data?.value : null;
 
+					get(changedPlexAccount).hasValidationErrors = false;
+
 					if (account?.isValidated && account?.isAuthTokenMode) {
 						Log.info('Account is validated and was added by token');
 						set(changedPlexAccount, { ...get(changedPlexAccount), ...account });
@@ -284,6 +286,13 @@ function validate() {
 					if (!account?.isValidated && account?.is2Fa) {
 						Log.info('Account was valid and has 2FA enabled, this makes no sense and sounds like a bug');
 					}
+				},
+				error(err: AxiosResponse) {
+					Log.error('Error validating account', err);
+					get(changedPlexAccount).hasValidationErrors = true;
+					useOpenControlDialog(accountTokenValidateDialogName);
+
+					set(validateLoading, false);
 				},
 				complete: () => {
 					set(validateLoading, false);

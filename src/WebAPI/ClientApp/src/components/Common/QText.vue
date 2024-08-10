@@ -1,7 +1,8 @@
 <template>
 	<div :class="divClasses">
 		<span :class="spanClasses">
-			{{ value }} <slot />
+			{{ value }}
+			<slot />
 		</span>
 	</div>
 </template>

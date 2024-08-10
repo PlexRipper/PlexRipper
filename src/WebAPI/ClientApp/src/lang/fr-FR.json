@@ -180,6 +180,7 @@
                 "title": "Titre",
                 "username": "Nom d'utilisateur"
             },
+            "invalid-token": "Le jeton n'était pas valide et/ou a expiré.",
             "sub-header": "Le jeton : {authToken} appartient au compte Plex :",
             "title": "Validation du jeton d'authentification Plex.tv"
         }

@@ -8,10 +8,14 @@
 			{{ $t('components.account-token-validate-dialog.title') }}
 		</template>
 		<template #top-row>
-			<QSubHeader>{{ $t('components.account-token-validate-dialog.sub-header', { authToken: account.authenticationToken }) }}</QSubHeader>
+			<QSubHeader v-if="account.isValidated">
+				{{ $t('components.account-token-validate-dialog.sub-header', { authToken: account.authenticationToken }) }}
+			</QSubHeader>
 		</template>
 		<template #default>
-			<q-markup-table wrap-cells>
+			<q-markup-table
+				v-if="account.isValidated"
+				wrap-cells>
 				<tbody>
 					<tr>
 						<td>
@@ -39,13 +43,19 @@
 					</tr>
 				</tbody>
 			</q-markup-table>
+			<QAlert
+				v-else
+				cy="auth-token-validation-dialog-invalid-token-alert"
+				type="error">
+				{{ $t('components.account-token-validate-dialog.invalid-token') }}
+			</QAlert>
 		</template>
 		<template #actions="{ close }">
 			<QRow justify="end">
-				<!--	Confirm	-->
+				<!--	Hide	-->
 				<QCol cols="auto">
 					<HideButton
-						cy="auth-token-validation-dialog-confirm-button"
+						cy="auth-token-validation-dialog-hide-button"
 						@click="close" />
 				</QCol>
 			</QRow>

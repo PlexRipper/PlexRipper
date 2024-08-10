@@ -180,6 +180,7 @@
                 "title": "Title",
                 "username": "Username"
             },
+            "invalid-token": "The token was invalid and/or has expired.",
             "sub-header": "The token: {authToken} belongs to the Plex account:",
             "title": "Plex.tv Authentication Token Validation"
         }

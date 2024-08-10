@@ -1,5 +1,21 @@
 PlexRipper Changelog
 
+# [0.19.0](https://github.com/PlexRipper/PlexRipper/compare/v0.18.0...v0.19.0) (2024-08-10)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fixed 401 errors not being returned from api endpoints ([8e76e03](https://github.com/PlexRipper/PlexRipper/commit/8e76e03fa7655d21d0cba329e070926f88dd4c6e))
+* **WebAPI:** Fixed client devices being seen as a server, this is now checked and clients should not be added anymore ([9d576db](https://github.com/PlexRipper/PlexRipper/commit/9d576dbc1a8a77dc47f0d965c16cbdcc4de7cf17))
+* **WebAPI:** Fixed the library metadata not being updated when syncing media ([e285ede](https://github.com/PlexRipper/PlexRipper/commit/e285edeedbef71a36eae3556d9c11de9dc0f2089))
+* **Web-UI:** Made the url column for the check connections dialog wider ([286ca8a](https://github.com/PlexRipper/PlexRipper/commit/286ca8a91f66a9939dbfb7f7c22a7b233a485003))
+
+
+### Features
+
+* **Web-UI:** An plex.tv auth token can now be directly added in a account creation screen to avoid having to register with an username and password ([bff6ba4](https://github.com/PlexRipper/PlexRipper/commit/bff6ba4a0221d1839f166d5dc7ddc651b59d9672))
+* **Web-UI:** Display the invalid token dialog when an invalid token has been given ([5d258df](https://github.com/PlexRipper/PlexRipper/commit/5d258df88438721af8309f5518eb8945614e0d39))
+
 # [0.18.0](https://github.com/PlexRipper/PlexRipper/compare/v0.17.0...v0.18.0) (2024-08-09)
 
 

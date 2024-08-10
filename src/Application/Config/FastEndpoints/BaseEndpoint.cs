@@ -38,6 +38,12 @@ public abstract class BaseEndpoint<TRequest> : Endpoint<TRequest, ResultDTO>
             return;
         }
 
+        if (result.Has401UnauthorizedError())
+        {
+            await SendAsync(resultDTO, StatusCodes.Status401Unauthorized, ct);
+            return;
+        }
+
         if (result.Has404NotFoundError())
         {
             await SendAsync(resultDTO, StatusCodes.Status404NotFound, ct);

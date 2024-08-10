@@ -173,6 +173,16 @@
         },
         "app-bar-progress-bar": {
             "tooltip-text": "PlexServer {finishedCount} von {totalCount}wird synchronisiert!"
+        },
+        "account-token-validate-dialog": {
+            "column": {
+                "email": "Email",
+                "title": "Titel",
+                "username": "Nutzername"
+            },
+            "invalid-token": "Das Token war ungültig und/oder ist abgelaufen.",
+            "sub-header": "Das Token: {authToken} gehört zum Plex-Konto:",
+            "title": "Validierung des Plex.tv-Authentifizierungstokens"
         }
     },
     "confirmation": {
@@ -254,6 +264,11 @@
     },
     "help": {
         "account-form": {
+            "auth-token": {
+                "label": "Authentifizierungstoken",
+                "text": "Eine Möglichkeit, die Verwendung Ihres Benutzernamens und Passworts zu vermeiden und stattdessen ein Plex.tv-Authentifizierungstoken einzugeben",
+                "title": "Plex.tv-Authentifizierungstoken"
+            },
             "display-name": {
                 "label": "Anzeigename",
                 "text": "Der Name wird im Benutzerbereich angezeigt.",

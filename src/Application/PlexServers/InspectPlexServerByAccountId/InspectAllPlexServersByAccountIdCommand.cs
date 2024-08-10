@@ -50,15 +50,9 @@ public class InspectAllPlexServersByAccountIdCommandHandler
     {
         var plexAccountId = command.PlexAccountId;
 
-        var refreshResult = await _mediator.Send(
-            new QueueRefreshPlexServerAccessJobCommand(plexAccountId),
-            cancellationToken
-        );
+        var refreshResult = await _mediator.Send(new RefreshPlexServerAccessCommand(plexAccountId), cancellationToken);
         if (refreshResult.IsFailed)
             return refreshResult.LogError();
-
-        // Await job running
-        await _scheduler.AwaitJobRunning(refreshResult.Value, cancellationToken);
 
         // Retrieve all accessible servers for the PlexAccount
         var plexAccountDisplayName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);

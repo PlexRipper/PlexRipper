@@ -29,27 +29,28 @@ public static partial class PlexAccountMapper
         return dto;
     }
 
-    private static PlexAccountDTO ToDTOMapper(this PlexAccount plexAccount) =>
+    private static PlexAccountDTO ToDTOMapper(this PlexAccount source) =>
         new()
         {
-            Id = plexAccount.Id,
-            DisplayName = plexAccount.DisplayName,
-            Username = plexAccount.Username,
-            Password = plexAccount.Password,
-            IsEnabled = plexAccount.IsEnabled,
-            IsMain = plexAccount.IsMain,
-            IsValidated = plexAccount.IsValidated,
-            ValidatedAt = plexAccount.ValidatedAt,
-            Uuid = plexAccount.Uuid,
-            PlexId = plexAccount.PlexId,
-            Email = plexAccount.Email,
-            Title = plexAccount.Title,
-            HasPassword = plexAccount.HasPassword,
-            AuthenticationToken = plexAccount.AuthenticationToken,
-            ClientId = plexAccount.ClientId,
-            VerificationCode = plexAccount.VerificationCode,
-            Is2Fa = plexAccount.Is2Fa,
+            Id = source.Id,
+            DisplayName = source.DisplayName,
+            Username = source.Username,
+            Password = source.Password,
+            IsEnabled = source.IsEnabled,
+            IsMain = source.IsMain,
+            IsValidated = source.IsValidated,
+            ValidatedAt = source.ValidatedAt,
+            Uuid = source.Uuid,
+            PlexId = source.PlexId,
+            Email = source.Email,
+            Title = source.Title,
+            HasPassword = source.HasPassword,
+            AuthenticationToken = source.AuthenticationToken,
+            ClientId = source.ClientId,
+            VerificationCode = source.VerificationCode,
+            Is2Fa = source.Is2Fa,
             PlexServerAccess = [],
+            IsAuthTokenMode = source.IsAuthTokenMode,
         };
 
     public static List<PlexAccountDTO> ToDTO(this List<PlexAccount> plexAccounts) => plexAccounts.ConvertAll(ToDTO);
@@ -80,6 +81,7 @@ public static partial class PlexAccountMapper
             ClientId = source.ClientId,
             VerificationCode = source.VerificationCode,
             Is2Fa = source.Is2Fa,
+            IsAuthTokenMode = source.IsAuthTokenMode,
         };
 
     public static List<PlexAccount> ToModel(this List<PlexAccountDTO> source) => source.ConvertAll(ToModel);
@@ -106,6 +108,7 @@ public static partial class PlexAccountMapper
             PlexAccountLibraries = [],
             Is2Fa = false,
             VerificationCode = string.Empty,
+            IsAuthTokenMode = plexAccount.IsAuthTokenMode,
         };
 
     #endregion

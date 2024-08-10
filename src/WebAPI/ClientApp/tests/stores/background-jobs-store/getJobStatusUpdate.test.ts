@@ -21,7 +21,7 @@ describe('BackgroundJobsStore.getJobStatusUpdate()', () => {
 			id: 'NON_CLUSTERED638568037901159617',
 			jobName: 'plexAccountId_4',
 			jobGroup: 'RefreshPlexServersAccessJob',
-			jobType: JobTypes.RefreshPlexServersAccessJob,
+			jobType: JobTypes.InspectPlexServerJob,
 			jobRuntime: '00:00:00.0194365',
 			jobStartTime: '2024-07-17T09:03:10.1360007Z',
 			status: JobStatus.Started,
@@ -31,7 +31,7 @@ describe('BackgroundJobsStore.getJobStatusUpdate()', () => {
 
 		// Act
 		backgroundJobsStore.setup();
-		const result = subscribeSpyTo(backgroundJobsStore.getJobStatusUpdate(JobTypes.RefreshPlexServersAccessJob));
+		const result = subscribeSpyTo(backgroundJobsStore.getJobStatusUpdate(JobTypes.InspectPlexServerJob));
 
 		backgroundJobsStore.setStatusJobUpdate(testMsg);
 

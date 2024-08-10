@@ -311,7 +311,8 @@ public class PlexApiService : IPlexApiService
         }
 
         var plexServers = result
-            .Value.Select(x => new PlexServer
+            .Value.FindAll(x => x.Provides.Contains("server"))
+            .Select(x => new PlexServer
             {
                 Id = 0,
                 Name = x.Name,
@@ -442,6 +443,7 @@ public class PlexApiService : IPlexApiService
                 PlexAccountLibraries = [],
                 Is2Fa = x.TwoFactorEnabled,
                 VerificationCode = string.Empty,
+                IsAuthTokenMode = plexAccount.IsAuthTokenMode,
             };
 
             _log.Information(
@@ -457,6 +459,47 @@ public class PlexApiService : IPlexApiService
     public Task<Result<AuthPin>> Get2FAPin(string clientId) => _plexApi.Get2FAPin(clientId);
 
     public Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId) => _plexApi.Check2FAPin(pinId, clientId);
+
+    public async Task<Result<PlexAccount>> ValidatePlexToken(PlexAccount plexAccount)
+    {
+        var result = await _plexApi.ValidatePlexToken(plexAccount.AuthenticationToken);
+
+        if (result.IsSuccess)
+        {
+            var x = result.Value;
+            var refreshedAccount = new PlexAccount
+            {
+                Id = x.Id,
+                DisplayName = plexAccount.DisplayName,
+                Username = !string.IsNullOrEmpty(x.Email) ? x.Email : x.Username,
+                Password = plexAccount.Password,
+                IsEnabled = plexAccount.IsEnabled,
+                IsValidated = true,
+                ValidatedAt = DateTime.UtcNow,
+                PlexId = x.Id,
+                Uuid = x.Uuid,
+                ClientId = plexAccount.ClientId,
+                Title = x.Title,
+                Email = x.Email,
+                HasPassword = x.HasPassword,
+                AuthenticationToken = x.AuthToken,
+                IsMain = plexAccount.IsMain,
+                PlexAccountServers = [],
+                PlexAccountLibraries = [],
+                Is2Fa = x.TwoFactorEnabled,
+                VerificationCode = string.Empty,
+                IsAuthTokenMode = plexAccount.IsAuthTokenMode,
+            };
+
+            _log.Information(
+                "Successfully validated the PlexAccount Authentication Token for user {PlexAccountDisplayName} from the PlexApi",
+                plexAccount.DisplayName
+            );
+            return Result.Ok(refreshedAccount);
+        }
+
+        return result.ToResult();
+    }
 
     #endregion
 

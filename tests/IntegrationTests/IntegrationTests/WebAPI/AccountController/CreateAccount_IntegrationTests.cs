@@ -46,9 +46,6 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         result.IsSuccess.ShouldBeTrue();
         DbContext.PlexAccounts.ToList().Count.ShouldBe(1);
 
-        var jobStatusList = Container.MockSignalRService.JobStatusUpdateList;
-        jobStatusList.ShouldContain(x => x.JobType == JobTypes.RefreshPlexServersAccessJob);
-
         // Ensure account has been created
         var plexAccountDb = DbContext
             .PlexAccounts.Include(x => x.PlexAccountLibraries)
@@ -82,21 +79,17 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         // Ensure all jobs have sent notifications
         var jobStatusUpdateList = Container.MockSignalRService.JobStatusUpdateList.ToList();
 
-        jobStatusUpdateList[0].JobType.ShouldBe(JobTypes.RefreshPlexServersAccessJob);
+        jobStatusUpdateList[0].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
         jobStatusUpdateList[0].Status.ShouldBe(JobStatus.Started);
-        jobStatusUpdateList[1].JobType.ShouldBe(JobTypes.RefreshPlexServersAccessJob);
-        jobStatusUpdateList[1].Status.ShouldBe(JobStatus.Completed);
-        jobStatusUpdateList[2].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
-        jobStatusUpdateList[2].Status.ShouldBe(JobStatus.Started);
-        jobStatusUpdateList[3].JobType.ShouldBe(JobTypes.CheckPlexServerConnectionsJob);
-        jobStatusUpdateList[3].Status.ShouldBe(JobStatus.Started);
-        jobStatusUpdateList[4].JobType.ShouldBe(JobTypes.CheckPlexServerConnectionsJob);
-        jobStatusUpdateList[4].Status.ShouldBe(JobStatus.Completed);
-        jobStatusUpdateList[5].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
+        jobStatusUpdateList[1].JobType.ShouldBe(JobTypes.CheckPlexServerConnectionsJob);
+        jobStatusUpdateList[1].Status.ShouldBe(JobStatus.Started);
+        jobStatusUpdateList[2].JobType.ShouldBe(JobTypes.CheckPlexServerConnectionsJob);
+        jobStatusUpdateList[2].Status.ShouldBe(JobStatus.Completed);
+        jobStatusUpdateList[3].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
+        jobStatusUpdateList[3].Status.ShouldBe(JobStatus.Completed);
+        jobStatusUpdateList[4].JobType.ShouldBe(JobTypes.SyncServerJob);
+        jobStatusUpdateList[4].Status.ShouldBe(JobStatus.Started);
+        jobStatusUpdateList[5].JobType.ShouldBe(JobTypes.SyncServerJob);
         jobStatusUpdateList[5].Status.ShouldBe(JobStatus.Completed);
-        jobStatusUpdateList[6].JobType.ShouldBe(JobTypes.SyncServerJob);
-        jobStatusUpdateList[6].Status.ShouldBe(JobStatus.Started);
-        jobStatusUpdateList[7].JobType.ShouldBe(JobTypes.SyncServerJob);
-        jobStatusUpdateList[7].Status.ShouldBe(JobStatus.Completed);
     }
 }

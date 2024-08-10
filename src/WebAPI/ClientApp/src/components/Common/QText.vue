@@ -1,6 +1,7 @@
 <template>
 	<div :class="divClasses">
 		<span :class="spanClasses">
+			{{ value }}
 			<slot />
 		</span>
 	</div>
@@ -10,6 +11,7 @@
 import type { IQTextProps } from '@interfaces';
 
 const props = withDefaults(defineProps<IQTextProps>(), {
+	value: '',
 	size: 'body1',
 	type: 'primary',
 	align: 'left',

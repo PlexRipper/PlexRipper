@@ -13,4 +13,6 @@ public class UpdatePlexAccountDTO
     public required bool IsEnabled { get; set; }
 
     public required bool IsMain { get; set; }
+
+    public required bool IsAuthTokenMode { get; init; }
 }

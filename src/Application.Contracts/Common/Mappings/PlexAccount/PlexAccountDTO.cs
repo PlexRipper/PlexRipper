@@ -36,5 +36,7 @@ public class PlexAccountDTO
 
     public required bool Is2Fa { get; set; }
 
+    public required bool IsAuthTokenMode { get; init; }
+
     public required List<PlexServerAccessDTO> PlexServerAccess { get; set; }
 }

@@ -15,10 +15,10 @@ public class ValidatePlexAccountEndpointRequest
     /// <summary>
     /// Validates the <see cref="PlexAccount"/> by calling the PlexAPI and confirming the PlexAccount can be used to login.
     /// </summary>
-    /// <param name="PlexAccount">The <see cref="PlexAccount"/> to validate.</param>
-    public ValidatePlexAccountEndpointRequest(PlexAccountDTO PlexAccount)
+    /// <param name="plexAccount">The <see cref="PlexAccount"/> to validate.</param>
+    public ValidatePlexAccountEndpointRequest(PlexAccountDTO plexAccount)
     {
-        this.PlexAccount = PlexAccount;
+        PlexAccount = plexAccount;
     }
 
     /// <summary>
@@ -33,8 +33,9 @@ public class ValidatePlexAccountEndpointRequestValidator : Validator<ValidatePle
     public ValidatePlexAccountEndpointRequestValidator()
     {
         RuleFor(x => x.PlexAccount).NotNull();
-        RuleFor(x => x.PlexAccount.Username).NotEmpty();
-        RuleFor(x => x.PlexAccount.Password).NotEmpty();
+        RuleFor(x => x.PlexAccount.Username).NotEmpty().When(m => !m.PlexAccount.IsAuthTokenMode);
+        RuleFor(x => x.PlexAccount.Password).NotEmpty().When(m => !m.PlexAccount.IsAuthTokenMode);
+        RuleFor(x => x.PlexAccount.AuthenticationToken).NotEmpty().When(m => m.PlexAccount.IsAuthTokenMode);
     }
 }
 
@@ -58,6 +59,7 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexAccountDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status401Unauthorized, typeof(ResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
         );
     }
@@ -65,15 +67,27 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
     public override async Task HandleAsync(ValidatePlexAccountEndpointRequest req, CancellationToken ct)
     {
         var plexAccount = req.PlexAccount.ToModel();
-        var plexSignInResult = await _plexApiService.PlexSignInAsync(plexAccount);
-        if (plexSignInResult.IsSuccess)
+
+        Result<PlexAccount> validateResult;
+        if (plexAccount.IsAuthTokenMode)
+            validateResult = await _plexApiService.ValidatePlexToken(plexAccount);
+        else
+            validateResult = await _plexApiService.PlexSignInAsync(plexAccount);
+
+        if (validateResult.IsSuccess)
         {
-            await SendFluentResult(SignInSuccess(plexAccount, plexSignInResult), x => x.ToDTO(), ct);
+            await SendFluentResult(SignInSuccess(plexAccount, validateResult), x => x.ToDTO(), ct);
+            return;
+        }
+
+        if (validateResult.IsFailed)
+        {
+            await SendFluentResult(validateResult.ToResult(), ct);
             return;
         }
 
         await SendFluentResult(
-            IsTwoFactorAuth(plexSignInResult) ? SignInTwoFactorAuth(plexAccount) : plexSignInResult,
+            IsTwoFactorAuth(validateResult) ? SignInTwoFactorAuth(plexAccount) : validateResult,
             x => x.ToDTO(),
             ct
         );

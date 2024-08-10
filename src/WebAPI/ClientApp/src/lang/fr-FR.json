@@ -173,6 +173,16 @@
         },
         "app-bar-progress-bar": {
             "tooltip-text": "Synchronisation de PlexServer {finishedCount} sur {totalCount} !"
+        },
+        "account-token-validate-dialog": {
+            "column": {
+                "email": "E-mail",
+                "title": "Titre",
+                "username": "Nom d'utilisateur"
+            },
+            "invalid-token": "Le jeton n'était pas valide et/ou a expiré.",
+            "sub-header": "Le jeton : {authToken} appartient au compte Plex :",
+            "title": "Validation du jeton d'authentification Plex.tv"
         }
     },
     "confirmation": {
@@ -254,6 +264,11 @@
     },
     "help": {
         "account-form": {
+            "auth-token": {
+                "label": "Jeton d'authentification",
+                "text": "Un moyen d'éviter d'utiliser votre nom d'utilisateur et votre mot de passe et d'insérer à la place un jeton d'authentification Plex.tv",
+                "title": "Jeton d'authentification Plex.tv"
+            },
             "display-name": {
                 "label": "Nom affiché",
                 "text": "Le nom utilisé pour afficher ce compte sur l'interface.",

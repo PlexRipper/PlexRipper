@@ -10,9 +10,8 @@
 						:type="type"
 						:size="size"
 						:bold="bold"
-						:align="align">
-						{{ displayText !== '' ? displayText : value }}
-					</QText>
+						:value="displayText !== '' ? displayText : value"
+						:align="align" />
 				</q-item-section>
 				<q-icon
 					class="q-pt-sm"
@@ -46,7 +45,6 @@ const editMode = ref(false);
 const props = withDefaults(
 	defineProps<
 		IQTextProps & {
-			value: string;
 			displayText?: string;
 			disabled?: boolean;
 		}
@@ -54,6 +52,7 @@ const props = withDefaults(
 	{
 		disabled: false,
 		displayText: '',
+		value: '',
 	},
 );
 

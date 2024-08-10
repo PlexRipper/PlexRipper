@@ -87,12 +87,15 @@ public class PlexAccount : BaseEntity
     /// The general plex authentication token used to retrieve account data such as the <see cref="PlexServer" />s the
     /// account has access to.
     /// </summary>
+    [Column(Order = 13)]
     public required string AuthenticationToken { get; init; }
 
     /// <summary>
     /// If this is a main account then it will get a lower priority when downloading media which a non-main account also has access to.
     /// </summary>
     public required bool IsMain { get; init; }
+
+    public required bool IsAuthTokenMode { get; init; }
 
     #region Relationships
 
@@ -156,5 +159,6 @@ public class PlexAccount : BaseEntity
             PlexAccountLibraries = [],
             Is2Fa = false,
             VerificationCode = string.Empty,
+            IsAuthTokenMode = false,
         };
 }

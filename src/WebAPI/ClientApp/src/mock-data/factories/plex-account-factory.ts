@@ -31,7 +31,7 @@ export function generatePlexAccount({
 	checkConfig(config);
 	incrementSeed(id);
 
-	return {
+	return <PlexAccountDTO>{
 		id,
 		authenticationToken: randUuid(),
 		clientId: randUuid(),
@@ -49,6 +49,7 @@ export function generatePlexAccount({
 		uuid: randUuid(),
 		validatedAt: randRecentDate({ days: 60 }).toUTCString(),
 		verificationCode: '',
+		isAuthTokenMode: false,
 		plexServerAccess: plexServers.map((x) => {
 			return {
 				plexServerId: x.id,

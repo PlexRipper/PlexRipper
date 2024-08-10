@@ -3,7 +3,8 @@
 		max-width="1000px"
 		content-height="80"
 		:name="name"
-		cy="check-server-connection-dialog">
+		cy="check-server-connection-dialog"
+		@closed="onClosed">
 		<template #top-row>
 			<!-- The total progress -->
 			<ProgressComponent
@@ -25,7 +26,7 @@
 					<QRow
 						justify="between"
 						align="center">
-						<QCol cols="4">
+						<QCol cols="8">
 							<div :class="{ 'text-weight-bold': isServer(node) }">
 								<!--	Plex Server Connection Icon -->
 								<q-icon
@@ -54,7 +55,7 @@
 							</div>
 						</QCol>
 						<QCol
-							cols="8"
+							cols="4"
 							:style="{ 'max-width': `600px !important` }">
 							<QRow
 								justify-end
@@ -115,9 +116,10 @@
 <script setup lang="ts">
 import { useSubscription } from '@vueuse/rxjs';
 import { filter, tap } from 'rxjs/operators';
+import { merge } from 'rxjs';
 import { get, set } from '@vueuse/core';
+import { JobTypes, JobStatus, type ServerConnectionCheckStatusProgressDTO, type JobStatusUpdateDTO } from '@dto';
 import Log from 'consola';
-import { JobTypes, JobStatus, type PlexServerDTO, type ServerConnectionCheckStatusProgressDTO } from '@dto';
 import { useBackgroundJobsStore, useI18n, useOpenControlDialog, useServerStore, useSignalrStore } from '#imports';
 
 const { t } = useI18n();
@@ -127,6 +129,10 @@ const name = 'checkServerConnectionDialogName';
 const connectionProgress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
 
 const expanded = ref<number[]>([]);
+/**
+ * The plex server ids that are being checked
+ */
+const plexServerIds = ref<number[]>([]);
 const completedCount = computed(() => {
 	return get(plexServerNodes).filter((progress) => progress.completed).length;
 });
@@ -137,8 +143,7 @@ const totalPercentage = computed(() => {
 	}
 	return clamp(Math.round((get(completedCount) / get(plexServerNodes).length) * 100), 0, 100);
 });
-
-const plexServers = ref<PlexServerDTO[]>([]);
+const plexServers = computed(() => serverStore.getServers([...get(connectionProgress).map((x) => x.plexServerId), ...get(plexServerIds)].filter((x, i, a) => a.indexOf(x) == i)));
 
 const getProgressText = computed(() => {
 	if (get(plexServers).length === 0) {
@@ -214,28 +219,46 @@ function isServer(node: IPlexServerNode): boolean {
 	return node.type === 'server';
 }
 
-onMounted(() => {
-	useSubscription(
-		backgroundJobStore
-			.getJobStatusUpdate(JobTypes.CheckPlexServerConnectionsJob)
-			.pipe(
-				filter((update) => update.status === JobStatus.Started),
-				tap((update) => {
-					Log.info('update.primaryKeyValue', update.primaryKeyValue);
-					const ids: number[] = JSON.parse(update.primaryKeyValue);
-					set(plexServers, serverStore.getServers(ids));
-				}),
-				tap(() => useOpenControlDialog(name)),
-			)
-			.subscribe(),
-	);
+function onClosed(): void {
+	set(connectionProgress, []);
+	set(plexServerIds, []);
+}
 
+onMounted(() => {
 	useSubscription(
 		useSignalrStore()
 			.getAllServerConnectionProgress()
 			.subscribe((connections) => {
-				set(connectionProgress, connections);
+				for (const connection of connections) {
+					const i = get(connectionProgress).findIndex((x) => x.plexServerConnectionId === connection.plexServerConnectionId);
+					if (i === -1) {
+						get(connectionProgress).push(connection);
+					} else {
+						get(connectionProgress)[i] = connection;
+					}
+				}
 			}),
+	);
+
+	useSubscription(
+		merge(
+			backgroundJobStore.getJobStatusUpdate(JobTypes.InspectPlexServerJob),
+			backgroundJobStore.getJobStatusUpdate(JobTypes.CheckPlexServerConnectionsJob))
+			.pipe(
+				filter((update: JobStatusUpdateDTO) => update.status === JobStatus.Started),
+				tap((update) => {
+					const ids: number[] = JSON.parse(update.primaryKeyValue);
+					Log.debug('primaryKeyValue', ids);
+					if (isArray(ids)) {
+						get(plexServerIds).push(...ids);
+					}
+					if (isNumber(ids)) {
+						get(plexServerIds).push(ids);
+					}
+				}),
+				tap(() => useOpenControlDialog(name)),
+			)
+			.subscribe(),
 	);
 });
 

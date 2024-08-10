@@ -26,7 +26,7 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 		setup(): Observable<ISetupResult> {
 			// Refresh accounts, servers, and settings on completion of the RefreshPlexServersAccessJob
 			getters
-				.getJobStatusUpdate(JobTypes.RefreshPlexServersAccessJob, JobStatus.Completed)
+				.getJobStatusUpdate(JobTypes.InspectPlexServerJob, JobStatus.Completed)
 				.pipe(
 					switchMap(() =>
 						forkJoin([

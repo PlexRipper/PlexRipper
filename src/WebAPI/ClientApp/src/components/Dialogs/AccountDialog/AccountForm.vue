@@ -52,59 +52,89 @@
 				data-cy="account-form-display-name-input"
 				@update:model-value="inputChanged({ prop: 'displayName', value: $event })" />
 		</HelpRow>
+		<template v-if="!value.isAuthTokenMode">
+			<!-- Username -->
+			<HelpRow
+				:header-width="labelCol"
+				:label="$t('help.account-form.username.label')"
+				:title="$t('help.account-form.username.title')"
+				:text="$t('help.account-form.username.text')">
+				<q-input
+					:model-value="value.username"
+					:rules="getUsernameRules"
+					color="red"
+					full-width
+					outlined
+					required
+					data-cy="account-form-username-input"
+					@update:model-value="inputChanged({ prop: 'username', value: $event })" />
+			</HelpRow>
 
-		<!-- Username -->
-		<HelpRow
-			:header-width="labelCol"
-			:label="$t('help.account-form.username.label')"
-			:title="$t('help.account-form.username.title')"
-			:text="$t('help.account-form.username.text')">
-			<q-input
-				:model-value="value.username"
-				:rules="getUsernameRules"
-				color="red"
-				full-width
-				outlined
-				required
-				data-cy="account-form-username-input"
-				@update:model-value="inputChanged({ prop: 'username', value: $event })" />
-		</HelpRow>
-
-		<!-- Password -->
-		<HelpRow
-			:label="$t('help.account-form.password.label')"
-			:title="$t('help.account-form.password.title')"
-			:text="$t('help.account-form.password.text')">
-			<q-input
-				:model-value="value.password"
-				:rules="getPasswordRules"
-				color="red"
-				full-width
-				outlined
-				required
-				data-cy="account-form-password-input"
-				:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-				:type="showPassword ? 'text' : 'password'"
-				@click:append="showPassword = !showPassword"
-				@update:model-value="inputChanged({ prop: 'password', value: $event })">
-				<template #append>
-					<q-btn
-						flat
-						:icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-						@click="showPassword = !showPassword" />
-				</template>
-			</q-input>
-		</HelpRow>
+			<!-- Password -->
+			<HelpRow
+				:label="$t('help.account-form.password.label')"
+				:title="$t('help.account-form.password.title')"
+				:text="$t('help.account-form.password.text')">
+				<q-input
+					:model-value="value.password"
+					:rules="getPasswordRules"
+					color="red"
+					full-width
+					outlined
+					required
+					data-cy="account-form-password-input"
+					:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+					:type="showPassword ? 'text' : 'password'"
+					@click:append="showPassword = !showPassword"
+					@update:model-value="inputChanged({ prop: 'password', value: $event })">
+					<template #append>
+						<q-btn
+							flat
+							:icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+							@click="showPassword = !showPassword" />
+					</template>
+				</q-input>
+			</HelpRow>
+		</template>
+		<template v-else>
+			<!-- Plex Token -->
+			<HelpRow
+				:label="$t('help.account-form.auth-token.label')"
+				:title="$t('help.account-form.auth-token.title')"
+				:text="$t('help.account-form.auth-token.text')">
+				<q-input
+					:model-value="value.authenticationToken"
+					:rules="getPasswordRules"
+					color="red"
+					full-width
+					outlined
+					required
+					data-cy="account-form-auth-token-input"
+					:append-icon="showAuthToken ? 'mdi-eye' : 'mdi-eye-off'"
+					:type="showAuthToken ? 'text' : 'password'"
+					@click:append="showAuthToken = !showAuthToken"
+					@update:model-value="inputChanged({ prop: 'authenticationToken', value: $event })">
+					<template #append>
+						<q-btn
+							flat
+							:icon="showAuthToken ? 'mdi-eye-off' : 'mdi-eye'"
+							@click="showAuthToken = !showAuthToken" />
+					</template>
+				</q-input>
+			</HelpRow>
+		</template>
 	</q-form>
 </template>
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
 import type { PlexAccountDTO } from '@dto';
-import { QForm } from '#components';
+import type { IPlexAccount } from '@interfaces';
+import type { QForm } from 'quasar';
 
 const labelCol = ref(30);
 const showPassword = ref(false);
+const showAuthToken = ref(false);
 const accountForm = ref<InstanceType<typeof QForm> | null>(null);
 
 defineProps<{
@@ -112,7 +142,7 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-	(event: 'input', value: { prop: string; value: string | number | null }): void;
+	<K extends keyof IPlexAccount>(event: 'input', value: { prop: K; value: IPlexAccount[K] }): void;
 	(event: 'is-valid', valid: boolean): void;
 }>();
 
@@ -132,7 +162,7 @@ const getPasswordRules = computed(() => [
 
 // endregion
 
-function inputChanged({ prop, value }: { prop: string; value: string | number | null }): void {
+function inputChanged<K extends keyof IPlexAccount>({ prop, value }: { prop: K; value: IPlexAccount[K] }) {
 	emit('input', { prop, value });
 }
 

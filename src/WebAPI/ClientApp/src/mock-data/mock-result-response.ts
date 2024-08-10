@@ -14,3 +14,14 @@ export function generateResultDTO<T>(value: T, config: Partial<MockConfig> = {})
 		successes: [],
 	};
 }
+
+export function generateFailedResultDTO(partial: Partial<ResultDTO> = {}): ResultDTO {
+	return {
+		errors: [],
+		isSuccess: false,
+		isFailed: true,
+		reasons: [],
+		successes: [],
+		...partial,
+	};
+}

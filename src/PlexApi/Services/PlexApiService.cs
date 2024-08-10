@@ -311,7 +311,8 @@ public class PlexApiService : IPlexApiService
         }
 
         var plexServers = result
-            .Value.Select(x => new PlexServer
+            .Value.FindAll(x => x.Provides.Contains("server"))
+            .Select(x => new PlexServer
             {
                 Id = 0,
                 Name = x.Name,

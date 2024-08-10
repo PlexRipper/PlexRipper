@@ -8,3 +8,4 @@ export * from './i18nObjectType';
 export * from './components';
 export * from './ResultDTO';
 export * from './IHelp';
+export * from './IPlexAccount';

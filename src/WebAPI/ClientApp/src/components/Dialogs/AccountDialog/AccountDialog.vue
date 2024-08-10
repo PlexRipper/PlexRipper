@@ -8,7 +8,22 @@
 		@closed="closeDialog">
 		<!-- Dialog Header -->
 		<template #title>
-			{{ getDisplayName }}
+			<QRow>
+				<QCol>
+					<QText
+						size="h5"
+						bold="bold">
+						{{ getDisplayName }}
+					</QText>
+				</QCol>
+				<!-- Auth Token Mode -->
+				<QCol cols="auto">
+					<IconButton
+						icon="mdi-cloud-key-outline"
+						cy="account-dialog-auth-token-mode-button"
+						@click="changedPlexAccount.isAuthTokenMode = !changedPlexAccount.isAuthTokenMode" />
+				</QCol>
+			</QRow>
 		</template>
 		<template #default>
 			<AccountForm
@@ -81,6 +96,11 @@
 		:account="changedPlexAccount"
 		@close="closeVerificationDialog"
 		@confirm="validateAfterVerificationCode" />
+
+	<AccountTokenValidateDialog
+		:name="accountTokenValidateDialogName"
+		:account="changedPlexAccount" />
+
 	<!--	Delete Confirmation Dialog	-->
 	<ConfirmationDialog
 		class="q-mr-md"
@@ -97,18 +117,15 @@ import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import { take } from 'rxjs/operators';
-import type { IError, PlexAccountDTO } from '@dto';
+import type { PlexAccountDTO } from '@dto';
+import type { IPlexAccount } from '@interfaces';
 import { plexAccountApi } from '@api';
-import { AccountForm } from '#components';
+import type AccountForm from '@components/Dialogs/AccountDialog/AccountForm.vue';
+
 import { useI18n, useOpenControlDialog, useCloseControlDialog, useAccountStore } from '#imports';
 
 const { t } = useI18n();
 const accountStore = useAccountStore();
-interface IPlexAccount extends PlexAccountDTO {
-	isInputValid: boolean;
-	hasValidationErrors: boolean;
-	validationErrors: IError[];
-}
 
 const props = defineProps<{ name: string }>();
 
@@ -117,6 +134,7 @@ const isNewAccount = ref(false);
 const accountForm = ref<InstanceType<typeof AccountForm> | null>(null);
 const confirmationDialogName = 'confirmationAccountDialogName';
 const verificationCodeDialogName = 'verificationCodeDialogName';
+const accountTokenValidateDialogName = 'accountTokenValidateDialogName';
 /**
  * The plexAccount as it is currently saved
  */
@@ -150,6 +168,7 @@ function getDefaultAccount(): IPlexAccount {
 		authenticationToken: '',
 		email: '',
 		plexServerAccess: [],
+		isAuthTokenMode: false,
 		// Dialog properties
 
 		isValidated: false,
@@ -215,7 +234,7 @@ function isInputValid(value: boolean) {
 	get(changedPlexAccount).isInputValid = value;
 }
 
-function formChanged({ prop, value }: { prop: string; value: string | number | null }) {
+function formChanged<K extends keyof IPlexAccount>({ prop, value }: { prop: K; value: IPlexAccount[K] }) {
 	get(changedPlexAccount)[prop] = value;
 }
 
@@ -229,10 +248,17 @@ function validate() {
 	useSubscription(
 		plexAccountApi
 			.validatePlexAccountEndpoint(get(changedPlexAccount))
-			.pipe(take(1))
 			.subscribe({
 				next: (data) => {
 					const account = data.isSuccess ? data?.value : null;
+
+					if (account?.isValidated && account?.isAuthTokenMode) {
+						Log.info('Account is validated and was added by token');
+						set(changedPlexAccount, { ...get(changedPlexAccount), ...account });
+						useOpenControlDialog(accountTokenValidateDialogName);
+						return;
+					}
+
 					// Account has no 2FA and was valid
 					if (account?.isValidated && !account?.is2Fa) {
 						Log.info('Account has no 2FA and was valid');
@@ -287,16 +313,18 @@ const reset = () => {
 function saveAccount(close: () => void) {
 	set(savingLoading, true);
 
+	const accountData: PlexAccountDTO = omit(get(changedPlexAccount), ['isInputValid', 'hasValidationErrors', 'validationErrors']);
+
 	if (get(isNewAccount)) {
 		useSubscription(
-			accountStore.createPlexAccount(get(changedPlexAccount)).subscribe(() => {
+			accountStore.createPlexAccount(accountData).subscribe(() => {
 				set(savingLoading, false);
 				close();
 			}),
 		);
 	} else {
 		useSubscription(
-			accountStore.updatePlexAccount(get(changedPlexAccount), get(hasCredentialsChanged)).subscribe((account) => {
+			accountStore.updatePlexAccount(accountData, get(hasCredentialsChanged)).subscribe((account) => {
 				if (account) {
 					set(changedPlexAccount, {
 						...get(changedPlexAccount),

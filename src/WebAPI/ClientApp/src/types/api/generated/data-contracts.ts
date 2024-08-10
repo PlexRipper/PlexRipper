@@ -432,16 +432,17 @@ export interface PlexAccountDTO {
   hasPassword: boolean;
   /** @format int32 */
   id: number;
+  isAuthTokenMode: boolean;
   isEnabled: boolean;
   isMain: boolean;
   isValidated: boolean;
-  /** @minLength 1 */
+  /** @minLength 5 */
   password: string;
   /** @format int64 */
   plexId: number;
   plexServerAccess: PlexServerAccessDTO[];
   title: string;
-  /** @minLength 1 */
+  /** @minLength 5 */
   username: string;
   uuid: string;
   /** @format date-time */
@@ -1003,6 +1004,7 @@ export interface UpdatePlexAccountDTO {
    * @exclusiveMin true
    */
   id: number;
+  isAuthTokenMode: boolean;
   isEnabled: boolean;
   isMain: boolean;
   /** @minLength 5 */

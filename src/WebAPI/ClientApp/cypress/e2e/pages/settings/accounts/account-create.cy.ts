@@ -49,9 +49,6 @@ describe('Add Plex account to PlexRipper', () => {
 			});
 
 			cy.getCy('account-dialog-save-button').click();
-
-			cy.hubPublishCheckPlexServerConnectionsJob(data.plexServers);
-
 			cy.getCy('account-dialog-form').should('not.exist');
 		});
 	});
@@ -100,9 +97,56 @@ describe('Add Plex account to PlexRipper', () => {
 		});
 
 		cy.getCy('account-dialog-save-button').click();
-
-		cy.hubPublishCheckPlexServerConnectionsJob([]);
-
 		cy.getCy('account-dialog-form').should('not.exist');
+	});
+
+	it('Should create an Account when a token is added manually', () => {
+		cy.getPageData().then(() => {
+			const account: PlexAccountDTO = generatePlexAccount({
+				id: 99,
+				partialData: {
+					isValidated: false,
+					is2Fa: false,
+				},
+			});
+
+			cy.getCy('account-overview-add-account').click();
+
+			// Fill in credentials
+			cy.getCy('account-dialog-auth-token-mode-button').click();
+			cy.getCy('account-form-display-name-input').type(account.displayName);
+			cy.getCy('account-form-auth-token-input').type(account.authenticationToken);
+
+			const accountResponse = { ...account, isValidated: true, isAuthTokenMode: true };
+			// Validate Action
+			cy.intercept('POST', PlexAccountPaths.validatePlexAccountEndpoint(), {
+				statusCode: 200,
+				body: generateResultDTO(accountResponse),
+			});
+			cy.getCy('account-dialog-validate-button').click();
+
+			cy.getCy('auth-token-validation-dialog-confirm-button').click();
+			cy.getCy('auth-token-validation-dialog').should('not.exist');
+
+			// Create Action
+			cy.intercept('POST', PlexAccountPaths.createPlexAccountEndpoint(), {
+				statusCode: 200,
+				body: generateResultDTO(account),
+			}).as('createAccount');
+
+			// Hide Account dialog
+			cy.intercept('GET', PlexAccountPaths.getPlexAccountByIdEndpoint(account.id), {
+				statusCode: 200,
+				body: generateResultDTO(account),
+			});
+
+			cy.getCy('account-dialog-save-button').click();
+			cy.getCy('account-dialog-form').should('not.exist');
+
+			cy.wait('@createAccount').then((interception) => {
+				expect(interception.request.method).to.equal('POST');
+				expect(interception.request.body).to.deep.equal(accountResponse);
+			});
+		});
 	});
 });

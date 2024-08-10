@@ -41,7 +41,7 @@ Cypress.Commands.add(
 Cypress.Commands.add('hubPublishCheckPlexServerConnectionsJob', (servers: PlexServerDTO[]) =>
 	cy
 		.hubPublishJobStatusUpdate(
-			JobTypes.CheckPlexServerConnectionsJob,
+			JobTypes.InspectPlexServerJob,
 			JobStatus.Started,
 			'plexServerIds',
 			`[${servers.map((x) => x.id)}]`,

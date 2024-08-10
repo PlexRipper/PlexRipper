@@ -19,14 +19,14 @@ public class RefreshPlexServerAccessCommandValidator : AbstractValidator<Refresh
     }
 }
 
-public class RefreshPlexServerAccessHandler : IRequestHandler<RefreshPlexServerAccessCommand, Result>
+public class RefreshPlexServerAccessCommandHandler : IRequestHandler<RefreshPlexServerAccessCommand, Result>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
     private readonly IPlexApiService _plexServiceApi;
 
-    public RefreshPlexServerAccessHandler(
+    public RefreshPlexServerAccessCommandHandler(
         ILog log,
         IPlexRipperDbContext dbContext,
         IMediator mediator,
@@ -43,9 +43,7 @@ public class RefreshPlexServerAccessHandler : IRequestHandler<RefreshPlexServerA
     {
         var plexAccountId = command.PlexAccountId;
 
-        var plexAccount = await _dbContext.PlexAccounts.GetAsync(plexAccountId, cancellationToken);
-        if (plexAccount is null)
-            return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountId).LogError();
+        var plexAccountDisplayName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
 
         _log.Debug("Refreshing Plex servers for PlexAccount: {PlexAccountId}", plexAccountId);
 
@@ -81,7 +79,7 @@ public class RefreshPlexServerAccessHandler : IRequestHandler<RefreshPlexServerA
 
         _log.Information(
             "Successfully refreshed accessible Plex servers for account {PlexAccountDisplayName}",
-            plexAccount.DisplayName
+            plexAccountDisplayName
         );
 
         return Result.Ok();

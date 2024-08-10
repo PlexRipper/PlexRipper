@@ -32,6 +32,18 @@ public class AddOrUpdatePlexAccountServersCommandHandler : IRequestHandler<AddOr
         var plexAccountId = command.PlexAccountId;
         var serverAccessTokens = command.ServerAccessTokens;
 
+        // Ensure we don't have any empty access tokens
+        foreach (var serverAccessToken in serverAccessTokens)
+            if (string.IsNullOrWhiteSpace(serverAccessToken.AccessToken))
+            {
+                _log.ErrorLine(
+                    "Server Access Token was given with an empty access token for machine identifier: {MachineIdentifier}",
+                    serverAccessToken.MachineIdentifier
+                );
+            }
+
+        serverAccessTokens.RemoveAll(x => string.IsNullOrWhiteSpace(x.AccessToken));
+
         var plexAccount = await _dbContext.PlexAccounts.GetAsync(plexAccountId, cancellationToken);
         if (plexAccount is null)
             return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountId);

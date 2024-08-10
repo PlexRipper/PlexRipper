@@ -22,9 +22,12 @@ public class CreatePlexAccountEndpointRequestValidator : Validator<CreatePlexAcc
 {
     public CreatePlexAccountEndpointRequestValidator()
     {
-        RuleFor(x => x.PlexAccount.Username).NotEmpty().MinimumLength(5);
-        RuleFor(x => x.PlexAccount.Password).NotEmpty().MinimumLength(5);
+        RuleFor(x => x.PlexAccount).NotNull();
+        RuleFor(x => x.PlexAccount.IsValidated).Equal(true);
         RuleFor(x => x.PlexAccount.DisplayName).NotEmpty();
+        RuleFor(x => x.PlexAccount.Username).NotEmpty().MinimumLength(5).When(m => !m.PlexAccount.IsAuthTokenMode);
+        RuleFor(x => x.PlexAccount.Password).NotEmpty().MinimumLength(5).When(m => !m.PlexAccount.IsAuthTokenMode);
+        RuleFor(x => x.PlexAccount.AuthenticationToken).NotEmpty().When(m => m.PlexAccount.IsAuthTokenMode);
     }
 }
 
@@ -59,30 +62,33 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
         var plexAccount = req.PlexAccount.ToModel();
         plexAccount.Id = 0;
 
-        _log.Debug("Creating account with username {UserName}", plexAccount.Username);
-
-        // Check if account with the same username already exists
-        var isAvailable = await _dbContext.IsUsernameAvailable(plexAccount.Username, ct);
-        if (!isAvailable)
+        if (!plexAccount.IsAuthTokenMode)
         {
-            var msg =
-                $"Account with username {plexAccount.Username} cannot be created due to an account with the same username already existing";
-            await SendFluentResult(Result.Fail(msg).LogError(), ct);
-            return;
+            // Check if account with the same username already exists
+            var isAvailable = await _dbContext.IsUsernameAvailable(plexAccount.Username, ct);
+            if (!isAvailable)
+            {
+                var msg =
+                    $"Account with username {plexAccount.Username} cannot be created due to an account with the same username already existing";
+                await SendFluentResult(Result.Fail(msg).LogError(), ct);
+                return;
+            }
+
+            // Check if account with the same UUID already exists
+            var uuidResult = await _dbContext
+                .PlexAccounts.Where(x => x.Uuid == plexAccount.Uuid)
+                .FirstOrDefaultAsync(ct);
+            if (uuidResult is not null)
+            {
+                var badResult = ResultExtensions
+                    .Create400BadRequestResult("Account with the same UUID {plexAccount.Uuid} already exists")
+                    .LogWarning();
+                await SendFluentResult(badResult, ct);
+                return;
+            }
         }
 
-        // Check if account with the same UUID already exists
-        var uuidResult = await _dbContext.PlexAccounts.Where(x => x.Uuid == plexAccount.Uuid).FirstOrDefaultAsync(ct);
-        if (uuidResult is not null)
-        {
-            var badResult = ResultExtensions
-                .Create400BadRequestResult("Account with the same UUID {plexAccount.Uuid} already exists")
-                .LogWarning();
-            await SendFluentResult(badResult, ct);
-            return;
-        }
-
-        _log.DebugLine("Creating a new Account in DB");
+        _log.Debug("Creating account with username {DisplayName}", plexAccount.DisplayName);
 
         // Generate plexAccount clientId
         plexAccount.ClientId = StringExtensions.RandomString(24, true, true);

@@ -329,6 +329,19 @@ public class PlexApi
         return await _client.SendRequestAsync<AuthPin>(request);
     }
 
+    public async Task<Result<SignInResponse>> ValidatePlexToken(string authToken, string clientId = "")
+    {
+        var request = new RestRequest(new Uri($"{PlexApiPaths.ValidatePlexTokenUrl}"))
+        {
+            RequestFormat = DataFormat.Json,
+        };
+
+        request.AddToken(authToken);
+        request.AddPlexClientIdentifier(clientId);
+
+        return await _client.SendRequestAsync<SignInResponse>(request);
+    }
+
     #endregion
 
     #endregion

@@ -107,4 +107,6 @@ public interface IPlexApiService
     Task<Result<AuthPin>> Get2FAPin(string clientId);
 
     Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId);
+
+    Task<Result<PlexAccount>> ValidatePlexToken(PlexAccount plexAccount);
 }

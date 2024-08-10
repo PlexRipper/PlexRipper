@@ -10,13 +10,15 @@ namespace PlexRipper.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<string>(
-                name: "AuthenticationToken",
-                table: "PlexAccounts",
-                type: "TEXT",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "TEXT")
+            migrationBuilder
+                .AlterColumn<string>(
+                    name: "AuthenticationToken",
+                    table: "PlexAccounts",
+                    type: "TEXT",
+                    nullable: false,
+                    oldClrType: typeof(string),
+                    oldType: "TEXT"
+                )
                 .Annotation("Relational:ColumnOrder", 13);
 
             migrationBuilder.AddColumn<bool>(
@@ -24,23 +26,24 @@ namespace PlexRipper.Data.Migrations
                 table: "PlexAccounts",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: false
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "IsAuthTokenMode",
-                table: "PlexAccounts");
+            migrationBuilder.DropColumn(name: "IsAuthTokenMode", table: "PlexAccounts");
 
-            migrationBuilder.AlterColumn<string>(
-                name: "AuthenticationToken",
-                table: "PlexAccounts",
-                type: "TEXT",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "TEXT")
+            migrationBuilder
+                .AlterColumn<string>(
+                    name: "AuthenticationToken",
+                    table: "PlexAccounts",
+                    type: "TEXT",
+                    nullable: false,
+                    oldClrType: typeof(string),
+                    oldType: "TEXT"
+                )
                 .OldAnnotation("Relational:ColumnOrder", 13);
         }
     }

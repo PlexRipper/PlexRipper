@@ -6,10 +6,7 @@ public static class PlexApiPaths
 
     #region Private
 
-    private static string ServerUrl(string url)
-    {
-        return url.TrimEnd('/');
-    }
+    private static string ServerUrl(string url) => url.TrimEnd('/');
 
     #endregion
 
@@ -17,29 +14,18 @@ public static class PlexApiPaths
 
     #region Urls
 
-    public static string ServerIdentity(string serverUrl)
-    {
-        return $"{ServerUrl(serverUrl)}{ServerIdentityPath}";
-    }
+    public static string ServerIdentity(string serverUrl) => $"{ServerUrl(serverUrl)}{ServerIdentityPath}";
 
-    public static string GetLibraries(string serverUrl)
-    {
-        return $"{ServerUrl(serverUrl)}{LibrarySectionsPath}";
-    }
+    public static string GetLibraries(string serverUrl) => $"{ServerUrl(serverUrl)}{LibrarySectionsPath}";
 
-    public static string GetLibrariesMetadata(string serverUrl, string libraryKey)
-    {
-        return $"{ServerUrl(serverUrl)}{GetLibrariesSectionsPath(libraryKey)}";
-    }
+    public static string GetLibrariesMetadata(string serverUrl, string libraryKey) =>
+        $"{ServerUrl(serverUrl)}{GetLibrariesSectionsPath(libraryKey)}";
 
     #endregion
 
     #region Relative
 
-    public static string GetLibrariesSectionsPath(string libraryKey)
-    {
-        return $"{LibrarySectionsPath}/{libraryKey}/all";
-    }
+    public static string GetLibrariesSectionsPath(string libraryKey) => $"{LibrarySectionsPath}/{libraryKey}/all";
 
     #endregion
 
@@ -66,6 +52,7 @@ public static class PlexApiPaths
     public static string ServerIdentityPath => "/identity";
 
     public static string LibrarySectionsPath => "/library/sections";
+    public static string UserPath => "/api/v2/user";
 
     #endregion
 
@@ -76,6 +63,8 @@ public static class PlexApiPaths
     public static string ServerResourcesUrl => $"{PlexUrl}{ServerResourcesPath}";
 
     public static string PlexPinUrl => $"{PlexUrl}{AuthPinPath}";
+
+    public static string ValidatePlexTokenUrl => $"{PlexUrl}{UserPath}";
 
     #endregion
 }

@@ -25,6 +25,7 @@ public partial class FakeData
             .RuleFor(x => x.AuthenticationToken, f => f.Random.Guid().ToString())
             .RuleFor(x => x.IsMain, _ => true)
             .RuleFor(x => x.Is2Fa, _ => false)
+            .RuleFor(x => x.IsAuthTokenMode, _ => false)
             .RuleFor(x => x.VerificationCode, _ => "")
             .RuleFor(x => x.PlexAccountServers, _ => new List<PlexAccountServer>())
             .RuleFor(x => x.PlexAccountLibraries, _ => new List<PlexAccountLibrary>());

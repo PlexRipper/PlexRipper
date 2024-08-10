@@ -59,6 +59,7 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexAccountDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
+                .Produces(StatusCodes.Status401Unauthorized, typeof(ResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
         );
     }
@@ -76,6 +77,12 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
         if (validateResult.IsSuccess)
         {
             await SendFluentResult(SignInSuccess(plexAccount, validateResult), x => x.ToDTO(), ct);
+            return;
+        }
+
+        if (validateResult.IsFailed)
+        {
+            await SendFluentResult(validateResult.ToResult(), ct);
             return;
         }
 

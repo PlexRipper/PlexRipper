@@ -135,4 +135,49 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
             plexServerDb.PlexServerConnections.ShouldBe(expectedPlexServer.PlexServerConnections, true);
         }
     }
+
+    [Fact]
+    public async Task ShouldSyncConnectionsAndKeepTheSameServerConnectionIds_WhenSomeHaveConnectionHaveChanged()
+    {
+        // Arrange
+        Seed = 23724;
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexServerConnectionPerServerCount = 5;
+        });
+
+        var plexServer = IDbContext.PlexServers.Include(x => x.PlexServerConnections).FirstOrDefault();
+        plexServer.ShouldNotBeNull();
+        plexServer.PlexServerConnections.Count.ShouldBe(5);
+
+        // Update data setup
+        plexServer.PlexServerConnections.RemoveAt(0);
+        plexServer.PlexServerConnections.RemoveAt(0);
+        plexServer.PlexServerConnections.RemoveAt(0);
+        plexServer.PlexServerConnections.RemoveAt(0);
+
+        var newConnections = FakeData.GetPlexServerConnections().Generate(5);
+        plexServer.PlexServerConnections.AddRange(newConnections);
+
+        // Act
+        // Now update
+        var request = new AddOrUpdatePlexServersCommand([plexServer]);
+        var handler = new AddOrUpdatePlexServersCommandHandler(Log, IDbContext);
+        var result = await handler.Handle(request, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var plexServersDb = IDbContext.PlexServers.Include(x => x.PlexServerConnections).FirstOrDefault();
+        plexServersDb.ShouldNotBeNull();
+        plexServersDb.PlexServerConnections.Count.ShouldBe(6);
+
+        foreach (var plexServerConnection in plexServersDb.PlexServerConnections)
+        {
+            var expectedConnection = plexServer.PlexServerConnections.Find(x => x.Equals(plexServerConnection));
+            expectedConnection.ShouldNotBeNull();
+            plexServerConnection.Id.ShouldBe(expectedConnection.Id);
+            plexServerConnection.ShouldBe(expectedConnection);
+        }
+    }
 }

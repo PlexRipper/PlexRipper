@@ -137,8 +137,10 @@ public class AddOrUpdatePlexAccountServersCommandHandler : IRequestHandler<AddOr
                         plexAccountServer.PlexAccount!.DisplayName,
                         plexAccountServer.PlexServer!.Name
                     );
-            _dbContext.PlexAccountServers.RemoveRange(removalList);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            var removalIds = removalList.Select(x => x.PlexServerId).ToList();
+            await _dbContext
+                .PlexAccountServers.Where(x => removalIds.Contains(x.PlexServerId) && x.PlexAccountId == plexAccountId)
+                .ExecuteDeleteAsync(cancellationToken);
         }
         else
         {

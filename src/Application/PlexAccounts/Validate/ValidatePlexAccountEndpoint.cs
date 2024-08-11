@@ -76,7 +76,18 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
 
         if (validateResult.IsSuccess)
         {
-            await SendFluentResult(SignInSuccess(plexAccount, validateResult), x => x.ToDTO(), ct);
+            _log.Debug(
+                "The PlexAccount with displayName {PlexAccountDisplayName} has been validated",
+                plexAccount.DisplayName
+            );
+            await SendFluentResult(validateResult, x => x.ToDTO(), ct);
+            return;
+        }
+
+        if (validateResult.HasPlexErrorEnterVerificationCode())
+        {
+            plexAccount.Is2Fa = true;
+            await SendFluentResult(Result.Ok(plexAccount), x => x.ToDTO(), ct);
             return;
         }
 
@@ -86,28 +97,6 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
             return;
         }
 
-        await SendFluentResult(
-            IsTwoFactorAuth(validateResult) ? SignInTwoFactorAuth(plexAccount) : validateResult,
-            x => x.ToDTO(),
-            ct
-        );
-    }
-
-    private static Result<PlexAccount> SignInTwoFactorAuth(PlexAccount plexAccount)
-    {
-        plexAccount.Is2Fa = true;
-        return Result.Ok(plexAccount);
-    }
-
-    private static bool IsTwoFactorAuth(Result<PlexAccount> plexSignInResult) =>
-        plexSignInResult.HasPlexErrorEnterVerificationCode();
-
-    private Result<PlexAccount> SignInSuccess(PlexAccount plexAccount, Result<PlexAccount> plexSignInResult)
-    {
-        _log.Debug(
-            "The PlexAccount with displayName {PlexAccountDisplayName} has been validated",
-            plexAccount.DisplayName
-        );
-        return plexSignInResult;
+        await SendFluentResult(validateResult, x => x.ToDTO(), ct);
     }
 }

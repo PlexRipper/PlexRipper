@@ -42,8 +42,8 @@ public class PlexMedia : PlexMediaSlim
     /// E.g. tvShow/Season/Episode
     /// TODO, might be better to remove this and make a getter for it.
     /// </summary>
-    [NotMapped]
-    public string FullTitle = string.Empty;
+    [Column(Order = 22)]
+    public string FullTitle { get; set; } = string.Empty;
 
     #endregion
 

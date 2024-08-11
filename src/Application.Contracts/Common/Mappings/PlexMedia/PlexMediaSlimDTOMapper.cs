@@ -45,6 +45,9 @@ public static class PlexMediaSlimDTOMapper
         return dto;
     }
 
+    public static IQueryable<PlexMediaSlimDTO> ProjectToSlimDTO(this IQueryable<PlexTvShow> source) =>
+        source.Select(x => ToSlimDTOMapper(x));
+
     private static PlexMediaSlimDTO ToSlimDTOMapper(this PlexTvShow source) =>
         new()
         {

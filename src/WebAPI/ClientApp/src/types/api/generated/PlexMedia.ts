@@ -11,7 +11,7 @@
 
 import type { RequestParams } from "./http-client";
 
-import type { PlexMediaDTO, PlexMediaType } from "./data-contracts";
+import type { PlexMediaDTO, PlexMediaSlimDTO, PlexMediaType } from "./data-contracts";
 
 import { apiCheckPipe } from "@api/base";
 import Axios from "axios";
@@ -72,6 +72,30 @@ export class PlexMedia {
         ...params,
       }),
     ).pipe(apiCheckPipe<Blob>);
+
+  /**
+ * No description
+ *
+ * @tags Plexmedia
+ * @name SearchPlexMediaEndpoint
+ * @request GET:/api/PlexMedia/search
+
+ */
+  searchPlexMediaEndpoint = (
+    query: {
+      query: string;
+    },
+    params: RequestParams = {},
+  ) =>
+    from(
+      Axios.request<PlexMediaSlimDTO[]>({
+        url: `/api/PlexMedia/search`,
+        method: "GET",
+        params: query,
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<PlexMediaSlimDTO[]>);
 }
 
 export class PlexMediaPaths {
@@ -92,4 +116,7 @@ export class PlexMediaPaths {
       width: number;
     },
   ) => queryString.stringifyUrl({ url: `/api/PlexMedia/thumb/${mediaId}`, query });
+
+  static searchPlexMediaEndpoint = (query: { query: string }) =>
+    queryString.stringifyUrl({ url: `/api/PlexMedia/search`, query });
 }

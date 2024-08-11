@@ -34,7 +34,6 @@ public static class PlexServerMapper
             DnsRebindingProtection = source.DnsRebindingProtection,
             NatLoopbackSupported = source.NatLoopbackSupported,
             ServerFixApplyDNSFix = source.ServerFixApplyDNSFix,
-            PlexServerConnections = source.PlexServerConnections.ToDTO(),
         };
 
     public static List<PlexServerDTO> ToDTO(this List<PlexServer> source) => source.ConvertAll(ToDTO);
@@ -44,7 +43,7 @@ public static class PlexServerMapper
     #region PlexServerAccess
 
     public static PlexServerAccessDTO ToAccessDTO(this PlexServer source) =>
-        new() { PlexServerId = source.Id, PlexLibraryIds = source.PlexLibraries.Select(x => x.Id).ToList(), };
+        new() { PlexServerId = source.Id, PlexLibraryIds = source.PlexLibraries.Select(x => x.Id).ToList() };
 
     public static List<PlexServerAccessDTO> ToAccessDTO(this List<PlexServer> source) => source.ConvertAll(ToAccessDTO);
 
@@ -80,10 +79,10 @@ public static class PlexServerMapper
             DnsRebindingProtection = source.DnsRebindingProtection,
             NatLoopbackSupported = source.NatLoopbackSupported,
             ServerFixApplyDNSFix = source.ServerFixApplyDNSFix,
-            PlexAccountServers = new List<PlexAccountServer>(),
-            PlexLibraries = new List<PlexLibrary>(),
-            ServerStatus = new List<PlexServerStatus>(),
-            PlexServerConnections = source.PlexServerConnections.ToModel(),
+            PlexAccountServers = [],
+            PlexLibraries = [],
+            ServerStatus = [],
+            PlexServerConnections = [],
         };
 
     public static List<PlexServer> ToModel(this List<PlexServerDTO> source) => source.ConvertAll(ToModel);

@@ -51,6 +51,4 @@ public class PlexServerDTO
     public required bool NatLoopbackSupported { get; set; }
 
     public required bool ServerFixApplyDNSFix { get; set; }
-
-    public required List<PlexServerConnectionDTO> PlexServerConnections { get; set; } = new();
 }

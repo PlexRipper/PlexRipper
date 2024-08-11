@@ -40,7 +40,7 @@ public class GetPlexServerByIdEndpoint : BaseEndpoint<GetPlexServerByIdEndpointR
 
     public override async Task HandleAsync(GetPlexServerByIdEndpointRequest req, CancellationToken ct)
     {
-        var plexServer = await _dbContext.PlexServers.IncludeConnectionsWithStatus().GetAsync(req.PlexServerId, ct);
+        var plexServer = await _dbContext.PlexServers.GetAsync(req.PlexServerId, ct);
 
         if (plexServer is null)
         {

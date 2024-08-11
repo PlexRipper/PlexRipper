@@ -1,5 +1,12 @@
 PlexRipper Changelog
 
+## [0.19.1](https://github.com/PlexRipper/PlexRipper/compare/v0.19.0...v0.19.1) (2024-08-11)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fixed a bug where the verification of MFA enabled accounts did not pop-up ([aa3c62c](https://github.com/PlexRipper/PlexRipper/commit/aa3c62caa6e8b9edb8cef8bbb9bcf8ecf10757db))
+
 # [0.19.0](https://github.com/PlexRipper/PlexRipper/compare/v0.18.0...v0.19.0) (2024-08-10)
 
 

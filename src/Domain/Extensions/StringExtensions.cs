@@ -1,11 +1,33 @@
-﻿using System.Net;
+﻿using System.Globalization;
+using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
 using Environment;
 
 namespace PlexRipper.Domain;
 
-public static class StringExtensions
+public static partial class StringExtensions
 {
     private static Random random = new();
+
+    private static readonly HashSet<string> StopWords =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            "a",
+            "an",
+            "and",
+            "the",
+            "of",
+            "in",
+            "on",
+            "for",
+            "with",
+            "to",
+            "by",
+            "at",
+        };
+
+    private static readonly string[] Articles = ["a", "an", "the"];
 
     public static string GetActualCasing(this string path)
     {
@@ -84,13 +106,73 @@ public static class StringExtensions
         if (string.IsNullOrWhiteSpace(title))
             return string.Empty;
 
-        List<string> articles = ["A ", "An ", "The "];
+        if (string.IsNullOrWhiteSpace(title))
+            return string.Empty;
 
-        title = title.Trim();
-        foreach (var article in articles)
-            if (title.StartsWith(article, StringComparison.OrdinalIgnoreCase))
-                return title.Substring(article.Length).Trim();
+        // Convert to lowercase
+        var lowerTitle = title.ToLowerInvariant();
+
+        // Remove leading articles
+        var sortTitle = RemoveLeadingArticle(lowerTitle);
+
+        // Remove punctuation and diacritics
+        sortTitle = RemoveDiacritics(sortTitle);
+        sortTitle = RemoveWhiteSpaceRegex().Replace(sortTitle, "");
+
+        // Trim any leading or trailing whitespace
+        return sortTitle.Trim();
+    }
+
+    public static string ToSearchTitle(this string title)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            return string.Empty;
+
+        // Convert to lower case
+        var lowerTitle = title.ToLowerInvariant();
+
+        // Remove punctuation and diacritics
+        var normalizedTitle = RemoveDiacritics(lowerTitle);
+        normalizedTitle = RemoveWhiteSpaceRegex().Replace(normalizedTitle, "");
+
+        // Split title into words and remove stop words
+        var words = normalizedTitle
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Where(word => !StopWords.Contains(word));
+
+        // Join the words back into a string
+        var searchTitle = string.Join(" ", words);
+
+        return searchTitle;
+    }
+
+    private static string RemoveDiacritics(string text)
+    {
+        var normalizedString = text.Normalize(NormalizationForm.FormD);
+        var stringBuilder = new StringBuilder();
+
+        foreach (var c in normalizedString)
+        {
+            var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+            if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                stringBuilder.Append(c);
+        }
+
+        return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+    }
+
+    private static string RemoveLeadingArticle(string title)
+    {
+        foreach (var article in Articles)
+        {
+            var articleWithSpace = article + " ";
+            if (title.StartsWith(articleWithSpace, StringComparison.OrdinalIgnoreCase))
+                return title.Substring(articleWithSpace.Length);
+        }
 
         return title;
     }
+
+    [GeneratedRegex(@"[^\w\s]")]
+    private static partial Regex RemoveWhiteSpaceRegex();
 }

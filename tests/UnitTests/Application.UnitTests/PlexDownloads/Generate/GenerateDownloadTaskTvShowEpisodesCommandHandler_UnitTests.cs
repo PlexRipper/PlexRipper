@@ -1,7 +1,6 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain.PlexMediaExtensions;
 using PlexRipper.Domain.Validators;
 
 namespace PlexRipper.Application.UnitTests;

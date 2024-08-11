@@ -1596,6 +1596,12 @@
           "System.Text.Json": "[8.0.4, )"
         }
       },
+      "settings.contracts": {
+        "type": "Project",
+        "dependencies": {
+          "PlexRipper.Domain": "[1.0.0, )"
+        }
+      },
       "webapi.contracts": {
         "type": "Project",
         "dependencies": {

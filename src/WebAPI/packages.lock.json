@@ -2203,7 +2203,8 @@
           "Polly": "[8.3.1, )",
           "RestSharp": "[110.2.0, )",
           "RestSharp.Serializers.SystemTextJson": "[106.15.0, )",
-          "RestSharp.Serializers.Xml": "[110.2.0, )"
+          "RestSharp.Serializers.Xml": "[110.2.0, )",
+          "Settings.Contracts": "[1.0.0, )"
         }
       },
       "PlexRipper.Settings": {

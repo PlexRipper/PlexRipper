@@ -37,9 +37,9 @@ public class InspectPlexServerJob : IJob
         var dataMap = context.JobDetail.JobDataMap;
         var plexServerId = dataMap.GetIntValue(PlexServerIdParameter);
         _log.Debug(
-            "Executing job: {InspectPlexServerJobName)} for {plexServerIdName)} with id: {PlexServerId}",
+            "Executing job: {InspectPlexServerJobName} for server {plexServerIdName} with id: {PlexServerId}",
             nameof(InspectPlexServerJob),
-            nameof(plexServerId),
+            _dbContext.GetPlexServerNameById(plexServerId),
             plexServerId
         );
 
@@ -47,13 +47,6 @@ public class InspectPlexServerJob : IJob
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         try
         {
-            var refreshResult = await _mediator.Send(new RefreshPlexServerConnectionsCommand(plexServerId));
-            if (refreshResult.IsFailed)
-            {
-                refreshResult.LogError();
-                return;
-            }
-
             // Create connection check task for all connections
             var checkJobKey = await _mediator.Send(
                 new QueueCheckPlexServerConnectionsJobCommand([plexServerId]),

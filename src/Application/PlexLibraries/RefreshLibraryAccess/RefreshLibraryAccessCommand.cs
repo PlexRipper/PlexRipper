@@ -83,7 +83,7 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
     {
         _log.Debug(
             "Retrieving accessible PlexLibraries for plexServer with id: {PlexServerId} by using Plex account with id {PlexAccountId}",
-            plexServerId,
+            _dbContext.GetPlexServerNameById(plexServerId, cancellationToken),
             plexAccountId
         );
 

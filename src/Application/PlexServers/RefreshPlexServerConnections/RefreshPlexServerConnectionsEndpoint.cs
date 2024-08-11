@@ -1,4 +1,5 @@
 using Application.Contracts;
+using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -16,14 +17,15 @@ public class RefreshPlexServerConnectionsEndpointRequestValidator
     }
 }
 
-public class RefreshPlexServerConnectionsEndpoint
-    : BaseEndpoint<RefreshPlexServerConnectionsEndpointRequest, PlexServerDTO>
+public class RefreshPlexServerConnectionsEndpoint : BaseEndpoint<RefreshPlexServerConnectionsEndpointRequest>
 {
+    private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
     public override string EndpointPath => ApiRoutes.PlexServerController + "/{PlexServerId}/refresh";
 
-    public RefreshPlexServerConnectionsEndpoint(IMediator mediator)
+    public RefreshPlexServerConnectionsEndpoint(IPlexRipperDbContext dbContext, IMediator mediator)
     {
+        _dbContext = dbContext;
         _mediator = mediator;
     }
 
@@ -40,10 +42,14 @@ public class RefreshPlexServerConnectionsEndpoint
 
     public override async Task HandleAsync(RefreshPlexServerConnectionsEndpointRequest req, CancellationToken ct)
     {
-        var result = await _mediator.Send(new RefreshPlexServerConnectionsCommand(req.PlexServerId), ct);
-        if (result.IsFailed)
-            await SendFluentResult(result.ToResult(), ct);
-        else
-            await SendFluentResult(result, x => x.ToDTO(), ct);
+        // Pick an account that has access to the PlexServer to connect with
+        var plexAccountResult = await _dbContext.ChoosePlexAccountToConnect(req.PlexServerId, ct);
+        if (plexAccountResult.IsFailed)
+        {
+            await SendFluentResult(plexAccountResult.ToResult(), ct);
+            return;
+        }
+
+        await _mediator.Send(new RefreshPlexServerAccessCommand(plexAccountResult.Value.Id), ct);
     }
 }

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Application.Contracts;
 using Logging.Interface;
 using Quartz;
 
@@ -8,15 +9,17 @@ public class CheckPlexServerConnectionsJob : IJob
 {
     private readonly ILog _log;
     private readonly IMediator _mediator;
+    private readonly ISignalRService _signalRService;
 
     public static string PlexServerIdsParameter => "plexServerIds";
 
     public static JobKey GetJobKey() => new(Guid.NewGuid().ToString(), nameof(CheckPlexServerConnectionsJob));
 
-    public CheckPlexServerConnectionsJob(ILog log, IMediator mediator)
+    public CheckPlexServerConnectionsJob(ILog log, IMediator mediator, ISignalRService signalRService)
     {
         _log = log;
         _mediator = mediator;
+        _signalRService = signalRService;
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -45,6 +48,8 @@ public class CheckPlexServerConnectionsJob : IJob
             );
 
             await Task.WhenAll(serverTasks);
+
+            await _signalRService.SendRefreshNotificationAsync([DataType.PlexServerConnection], cancellationToken);
         }
         catch (Exception e)
         {

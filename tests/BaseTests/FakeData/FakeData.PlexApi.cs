@@ -27,6 +27,7 @@ public static partial class FakeData
             .RuleFor(x => x.OwnerId, f => f.Random.Int(1000, 100000))
             .RuleFor(x => x.PlexServerOwnerUsername, f => f.Name.LastName())
             .RuleFor(x => x.PublicAddress, f => f.Internet.Ip())
+            .RuleFor(x => x.IsEnabled, _ => true)
             // Server flags
             .RuleFor(x => x.Owned, f => f.Random.Bool())
             .RuleFor(x => x.Home, f => f.Random.Bool())

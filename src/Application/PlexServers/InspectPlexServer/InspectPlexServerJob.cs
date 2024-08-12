@@ -53,7 +53,10 @@ public class InspectPlexServerJob : IJob
                 CancellationToken.None
             );
 
-            await _scheduler.AwaitJobRunning(checkJobKey, CancellationToken.None);
+            if (checkJobKey.IsFailed)
+                return;
+
+            await _scheduler.AwaitJobRunning(checkJobKey.Value, CancellationToken.None);
 
             // Refresh accessible libraries
             var accountsResult = await _dbContext.GetPlexAccountsWithAccessAsync(plexServerId);

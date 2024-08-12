@@ -2,6 +2,7 @@
 using Data.Contracts;
 using Logging.Interface;
 using PlexApi.Contracts;
+using Settings.Contracts;
 
 namespace PlexRipper.PlexApi.Services;
 
@@ -16,17 +17,24 @@ public class PlexApiService : IPlexApiService
     private readonly ILog _log;
 
     private readonly IPlexRipperDbContext _dbContext;
+    private readonly IServerSettingsModule _serverSettingsModule;
     private readonly Api.PlexApi _plexApi;
 
     #endregion
 
     #region Constructors
 
-    public PlexApiService(ILog log, Api.PlexApi plexApi, IPlexRipperDbContext dbContext)
+    public PlexApiService(
+        ILog log,
+        IPlexRipperDbContext dbContext,
+        IServerSettingsModule serverSettingsModule,
+        Api.PlexApi plexApi
+    )
     {
         _log = log;
         _plexApi = plexApi;
         _dbContext = dbContext;
+        _serverSettingsModule = serverSettingsModule;
     }
 
     #endregion
@@ -331,6 +339,7 @@ public class PlexApiService : IPlexApiService
                 MachineIdentifier = x.ClientIdentifier,
                 PublicAddress = x.PublicAddress,
                 PreferredConnectionId = 0,
+                IsEnabled = !_serverSettingsModule.GetIsHidden(x.ClientIdentifier),
                 Owned = x.Owned,
                 Home = x.Home,
                 Synced = x.Synced,

@@ -3,6 +3,7 @@ using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Settings.Contracts;
 
 namespace PlexRipper.Application;
@@ -57,6 +58,10 @@ public class SetServerHiddenRequestEndpoint : BaseEndpoint<SetServerHiddenReques
         }
 
         _serverSettingsModule.SetServerHiddenState(machineIdentifier, req.Hidden);
+
+        await _dbContext
+            .PlexServers.Where(x => x.MachineIdentifier == machineIdentifier)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsEnabled, !req.Hidden), ct);
 
         await SendFluentResult(Result.Ok(), ct);
     }

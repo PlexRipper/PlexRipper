@@ -50,6 +50,13 @@ public class SyncServerJob : IJob
                 return;
             }
 
+            if (!plexServer.IsEnabled)
+            {
+                var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId);
+                ResultExtensions.ServerIsNotEnabled(plexServerName, plexServerId, nameof(SyncServerJob)).LogError();
+                return;
+            }
+
             var results = new List<Result>();
 
             var plexLibraries = forceSync

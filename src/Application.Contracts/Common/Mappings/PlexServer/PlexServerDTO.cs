@@ -36,6 +36,8 @@ public class PlexServerDTO
 
     public required bool Home { get; set; }
 
+    public required bool IsEnabled { get; set; }
+
     public required bool Synced { get; set; }
 
     public required bool Relay { get; set; }

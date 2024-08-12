@@ -87,7 +87,10 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
             plexAccountId
         );
 
-        var libraries = await _plexServiceApi.GetLibrarySectionsAsync(plexServerId, plexAccountId, cancellationToken);
+        var libraries = await _plexServiceApi.GetLibrarySectionsAsync(
+            plexServerId,
+            cancellationToken: cancellationToken
+        );
         if (libraries.IsFailed)
             return libraries.ToResult();
 

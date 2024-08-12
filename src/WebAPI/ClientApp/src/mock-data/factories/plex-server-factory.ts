@@ -42,7 +42,6 @@ export function generatePlexServer({
 		synced: randBoolean(),
 		machineIdentifier: randUuid(),
 		createdAt: randRecentDate({ days: 30 }).toUTCString(),
-		plexServerConnections: generatePlexServerConnections({ plexServerId: id, config }),
 		serverFixApplyDNSFix: randBoolean(),
 		...partialData,
 	};

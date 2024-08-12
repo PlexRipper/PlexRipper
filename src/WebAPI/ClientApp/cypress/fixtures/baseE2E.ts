@@ -6,7 +6,7 @@ import {
 	generateServerDownloadProgress,
 	generatePlexMedias,
 	generateDownloadTask,
-	generatePlexLibrariesFromPlexServers,
+	generatePlexLibrariesFromPlexServers, generatePlexServerConnections,
 } from '@mock';
 import { generateSettingsModel } from '@factories/settings-factory';
 import { generatePlexAccounts } from '@factories/plex-account-factory';
@@ -75,7 +75,9 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 	});
 
 	// PlexServerConnections call
-	result.plexServerConnections = result.plexServers.flatMap((x) => x.plexServerConnections);
+	for (const plexServer of result.plexServers) {
+		result.plexServerConnections.push(...generatePlexServerConnections({ plexServerId: plexServer.id, config }));
+	}
 	cy.intercept('GET', PlexServerConnectionPaths.getAllPlexServerConnectionsEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO(result.plexServerConnections),

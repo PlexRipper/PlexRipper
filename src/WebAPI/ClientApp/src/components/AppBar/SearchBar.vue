@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { get, set } from '@vueuse/core';
+import { set } from '@vueuse/core';
 import { plexMediaApi } from '@api';
 import type { PlexMediaSlimDTO } from '@dto';
 

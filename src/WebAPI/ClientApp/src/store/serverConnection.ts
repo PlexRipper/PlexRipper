@@ -7,6 +7,7 @@ import type { PlexServerConnectionDTO, PlexServerStatusDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexServerApi, plexServerConnectionApi } from '@api';
 import { DataType } from '@dto';
+import { sortPlexServerConnections } from '@composables/common';
 import { useServerStore, useSignalrStore } from '#build/imports';
 
 export const useServerConnectionStore = defineStore('ServerConnection', () => {
@@ -71,9 +72,9 @@ export const useServerConnectionStore = defineStore('ServerConnection', () => {
 	};
 	const getters = {
 		getServerConnectionsByServerId: (plexServerId = 0): PlexServerConnectionDTO[] => {
-			return state.serverConnections.filter((connection) =>
+			return sortPlexServerConnections(state.serverConnections.filter((connection) =>
 				plexServerId > 0 ? connection.plexServerId === plexServerId : false,
-			);
+			));
 		},
 		getServerConnections: computed((): PlexServerConnectionDTO[] => state.serverConnections),
 		isServerConnected: (plexServerId = 0) => {

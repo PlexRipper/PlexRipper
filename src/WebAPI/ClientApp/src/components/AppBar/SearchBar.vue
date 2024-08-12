@@ -33,7 +33,7 @@
 		<template #no-option>
 			<q-item>
 				<q-item-section class="text-grey">
-					No results
+					<QText :value="$t('components.search-bar.no-results')" />
 				</q-item-section>
 			</q-item>
 		</template>

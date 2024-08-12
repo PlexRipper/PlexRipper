@@ -1,6 +1,4 @@
 using FluentResults;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Contracts;
 
@@ -51,73 +49,4 @@ public static class ResultDTOMapper
 
     private static List<SuccessDTO> ToSuccessDTOs(this List<ISuccess> reasons) =>
         reasons.ConvertAll(x => new SuccessDTO { Message = x.Message, Metadata = x.Metadata });
-
-    public static IResult ToIResult(this Result result)
-    {
-        if (result.IsSuccess)
-        {
-            var resultDTO = result.ToResultDTO();
-            if (result.Has201CreatedRequestSuccess())
-            {
-                // Status code 201 Created
-                return TypedResults.Created(resultDTO.ToString(), resultDTO);
-            }
-
-            return TypedResults.Ok(resultDTO);
-        }
-
-        var failedResult = result.ToResultDTO();
-        if (result.Has400BadRequestError())
-            return TypedResults.BadRequest(failedResult);
-
-        if (result.Has404NotFoundError())
-            return TypedResults.NotFound(failedResult);
-
-        if (result.Has204NoContentRequestSuccess())
-            return TypedResults.NoContent();
-
-        // Status Code 500
-        return TypedResults.Problem(
-            new ProblemDetails()
-            {
-                Detail = failedResult.ToString(),
-                Status = StatusCodes.Status500InternalServerError,
-            }
-        );
-    }
-
-    public static IResult ToIResult<T>(this Result<T> result)
-    {
-        if (result.IsSuccess)
-        {
-            var resultDTO = result.ToResultDTO();
-            if (result.Has201CreatedRequestSuccess())
-            {
-                // Status code 201 Created
-                return TypedResults.Created("test", resultDTO);
-            }
-
-            return TypedResults.Ok(resultDTO);
-        }
-
-        // Ensure we first cast to result to avoid result.value being null
-        var failedResult = result.ToResult().ToResultDTO();
-        if (result.Has400BadRequestError())
-            return TypedResults.BadRequest(failedResult);
-
-        if (result.Has404NotFoundError())
-            return TypedResults.NotFound(failedResult);
-
-        if (result.Has204NoContentRequestSuccess())
-            return TypedResults.NoContent();
-
-        // Status Code 500
-        return TypedResults.Problem(
-            new ProblemDetails()
-            {
-                Detail = failedResult.ToString(),
-                Status = StatusCodes.Status500InternalServerError,
-            }
-        );
-    }
 }

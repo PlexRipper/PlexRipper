@@ -355,6 +355,16 @@ public static partial class ResultExtensions
 
     #endregion
 
+    #region 403
+
+    public static bool Has403ForbiddenError<T>(this Result<T> result) =>
+        result.HasStatusCode(HttpCodes.Status403Forbidden);
+
+    public static Result<T> Add403ForbiddenError<T>(this Result<T> result, string message = "Forbidden") =>
+        result.AddStatusCodeError(HttpCodes.Status403Forbidden, message);
+
+    #endregion
+
     #region 404
 
     public static bool Has404NotFoundError<T>(this Result<T> result) =>

@@ -1,5 +1,19 @@
 PlexRipper Changelog
 
+# [0.20.0](https://github.com/PlexRipper/PlexRipper/compare/v0.19.1...v0.20.0) (2024-08-12)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fixed an issue where connections to PlexServer where not synced correctly with the database ([5bbc1d0](https://github.com/PlexRipper/PlexRipper/commit/5bbc1d025b429c5bce318259888845e7317a07b3))
+* **Web-UI:** Fixed the percentages displayed being 100 times to high ([820b78a](https://github.com/PlexRipper/PlexRipper/commit/820b78a4fa3192ef4fbf14448585341c903b5e44))
+
+
+### Features
+
+* **Web-UI:** Better sort the Plex server connections when they are displayed ([bb031f8](https://github.com/PlexRipper/PlexRipper/commit/bb031f81681412f83745f275924f1f9249db9c2a))
+* **WebAPI:** Hiding a PlexServer will now also disable it from use when executing operations ([5ff8796](https://github.com/PlexRipper/PlexRipper/commit/5ff8796ad3e4127f67ec15347212dbf4389028af))
+
 ## [0.19.1](https://github.com/PlexRipper/PlexRipper/compare/v0.19.0...v0.19.1) (2024-08-11)
 
 

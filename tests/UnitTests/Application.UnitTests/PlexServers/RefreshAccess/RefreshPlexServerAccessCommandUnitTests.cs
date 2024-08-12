@@ -55,6 +55,7 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
 
         mock.SetupMediator(It.IsAny<AddOrUpdatePlexServersCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<AddOrUpdatePlexAccountServersCommand>).ReturnsAsync(Result.Ok());
+        mock.SendRefreshNotification();
 
         // Act
 

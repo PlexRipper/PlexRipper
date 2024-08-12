@@ -1,4 +1,6 @@
-namespace PlexRipper.Domain.PlexMediaExtensions;
+using PlexRipper.Domain;
+
+namespace Application.Contracts;
 
 public static class PlexMediaExtensions
 {
@@ -16,9 +18,8 @@ public static class PlexMediaExtensions
         )
             return;
 
-        var uri = new Uri(connectionUrl + plexMediaSlim.ThumbUrl);
         plexMediaSlim.FullThumbUrl =
-            $"{uri.Scheme}://{uri.Host}:{uri.Port}/photo/:/transcode?url={uri.AbsolutePath}&X-Plex-Token={plexServerToken}";
+            $"{connectionUrl}/photo/:/transcode?url={plexMediaSlim.ThumbUrl}&X-Plex-Token={plexServerToken}";
         plexMediaSlim.HasThumb = true;
     }
 

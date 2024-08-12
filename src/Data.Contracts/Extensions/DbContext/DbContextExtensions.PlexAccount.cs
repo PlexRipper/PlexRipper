@@ -22,9 +22,13 @@ public static partial class DbContextExtensions
             .ToListAsync(cancellationToken);
 
         if (!query.Any())
+        {
             return Result
-                .Fail($"There were no PlexAccounts that have access to PlexServer with id: {plexServerId}")
+                .Fail(
+                    $"There were no PlexAccounts that have access to PlexServer with id: {dbContext.GetPlexServerNameById(plexServerId, cancellationToken)}"
+                )
                 .LogError();
+        }
 
         return Result.Ok(query);
     }
@@ -44,9 +48,11 @@ public static partial class DbContextExtensions
 
         var plexAccounts = plexAccountsResult.Value.FindAll(x => x.IsEnabled);
         if (!plexAccounts.Any())
+        {
             return Result
                 .Fail($"There are no enabled accounts that can access PlexServer with id: {plexServerId}")
                 .LogError();
+        }
 
         if (plexAccounts.Count == 1)
             return Result.Ok(plexAccounts.First());

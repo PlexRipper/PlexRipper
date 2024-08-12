@@ -5,7 +5,6 @@ using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain.PlexMediaExtensions;
 
 namespace PlexRipper.Application;
 
@@ -86,7 +85,7 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
                 var plexMovies = await _dbContext
                     .PlexMovies.AsNoTracking()
                     .Where(x => x.PlexLibraryId == req.PlexLibraryId)
-                    .OrderBy(x => x.Title)
+                    .OrderBy(x => x.SortTitle)
                     .Skip(skip)
                     .Take(take)
                     .ToListAsync(ct);
@@ -105,7 +104,7 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
                 var plexTvShow = await _dbContext
                     .PlexTvShows.AsNoTracking()
                     .Where(x => x.PlexLibraryId == req.PlexLibraryId)
-                    .OrderBy(x => x.Title)
+                    .OrderBy(x => x.SortTitle)
                     .Skip(skip)
                     .Take(take)
                     .ToListAsync(ct);
@@ -129,6 +128,6 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
                 return;
         }
 
-        await SendFluentResult(Result.Ok(entities.SetIndex()), _ => _, ct);
+        await SendFluentResult(Result.Ok(entities.SetIndex()), ct);
     }
 }

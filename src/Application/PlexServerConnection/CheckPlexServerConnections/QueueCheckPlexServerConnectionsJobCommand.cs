@@ -6,7 +6,7 @@ using Quartz;
 
 namespace PlexRipper.Application;
 
-public record QueueCheckPlexServerConnectionsJobCommand(List<int> PlexServerIds) : IRequest<JobKey>;
+public record QueueCheckPlexServerConnectionsJobCommand(List<int> PlexServerIds) : IRequest<Result<JobKey>>;
 
 public class QueueCheckPlexServerConnectionsJobCommandValidator
     : AbstractValidator<QueueCheckPlexServerConnectionsJobCommand>
@@ -18,7 +18,7 @@ public class QueueCheckPlexServerConnectionsJobCommandValidator
 }
 
 public class QueueCheckPlexServerConnectionsJobHandler
-    : IRequestHandler<QueueCheckPlexServerConnectionsJobCommand, JobKey>
+    : IRequestHandler<QueueCheckPlexServerConnectionsJobCommand, Result<JobKey>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -31,12 +31,45 @@ public class QueueCheckPlexServerConnectionsJobHandler
         _scheduler = scheduler;
     }
 
-    public async Task<JobKey> Handle(
+    public async Task<Result<JobKey>> Handle(
         QueueCheckPlexServerConnectionsJobCommand command,
         CancellationToken cancellationToken
     )
     {
-        var ids = JsonSerializer.Serialize(command.PlexServerIds);
+        var plexServerIds = command.PlexServerIds;
+        var enabledIds = _dbContext
+            .PlexServers.Where(x => x.IsEnabled && plexServerIds.Contains(x.Id))
+            .Select(x => x.Id)
+            .ToList();
+
+        if (plexServerIds.Count != enabledIds.Count)
+        {
+            var failedResults = new List<Result>();
+            foreach (var disabledServerId in plexServerIds.Except(enabledIds))
+            {
+                var plexServerName = await _dbContext.GetPlexServerNameById(disabledServerId, cancellationToken);
+
+                failedResults.Add(
+                    ResultExtensions.ServerIsNotEnabled(
+                        plexServerName,
+                        disabledServerId,
+                        nameof(QueueCheckPlexServerConnectionsJobCommand)
+                    )
+                );
+            }
+
+            if (failedResults.Any())
+                return failedResults.Merge().LogError();
+        }
+
+        if (!enabledIds.Any())
+        {
+            return ResultExtensions.Create403ForbiddenResult(
+                $"None of the given PlexServerIds: {plexServerIds} are enabled"
+            );
+        }
+
+        var ids = JsonSerializer.Serialize(enabledIds);
         var key = CheckPlexServerConnectionsJob.GetJobKey();
 
         var job = JobBuilder

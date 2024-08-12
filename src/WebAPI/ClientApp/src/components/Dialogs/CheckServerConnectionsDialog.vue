@@ -114,16 +114,24 @@
 </template>
 
 <script setup lang="ts">
+import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { merge } from 'rxjs';
 import { get, set } from '@vueuse/core';
 import { JobTypes, JobStatus, type ServerConnectionCheckStatusProgressDTO, type JobStatusUpdateDTO } from '@dto';
-import Log from 'consola';
-import { useBackgroundJobsStore, useI18n, useOpenControlDialog, useServerStore, useSignalrStore } from '#imports';
+import {
+	useBackgroundJobsStore,
+	useI18n,
+	useOpenControlDialog,
+	useServerConnectionStore,
+	useServerStore,
+	useSignalrStore,
+} from '#imports';
 
 const { t } = useI18n();
 const serverStore = useServerStore();
+const connectionStore = useServerConnectionStore();
 const backgroundJobStore = useBackgroundJobsStore();
 const name = 'checkServerConnectionDialogName';
 const connectionProgress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
@@ -167,6 +175,7 @@ const getProgressText = computed(() => {
 const plexServerNodes = computed((): IPlexServerNode[] => {
 	let uniqueIndex = 0;
 	return get(plexServers).map((server) => {
+		const connections = connectionStore.getServerConnectionsByServerId(server.id);
 		const serverResult: IPlexServerNode = {
 			id: server.id,
 			type: 'server',
@@ -174,8 +183,8 @@ const plexServerNodes = computed((): IPlexServerNode[] => {
 			completed: false,
 			index: uniqueIndex++,
 			connectionSuccessful: false,
-			noConnections: server.plexServerConnections.length === 0,
-			children: server.plexServerConnections.map((connection) => {
+			noConnections: connections.length === 0,
+			children: connections.map((connection) => {
 				const progress = getConnectionProgress(connection.id, server.id);
 				return {
 					id: connection.id,

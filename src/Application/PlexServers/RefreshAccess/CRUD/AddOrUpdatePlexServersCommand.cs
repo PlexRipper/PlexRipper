@@ -95,12 +95,12 @@ public class AddOrUpdatePlexServersCommandHandler : IRequestHandler<AddOrUpdateP
     private void SyncPlexServerConnections(PlexServer plexServer, PlexServer existingServer)
     {
         // Create or Update PlexServerConnections
-        foreach (var plexServerConnection in plexServer.PlexServerConnections)
+        foreach (var newPlexServerConnection in plexServer.PlexServerConnections)
         {
-            plexServerConnection.PlexServerId = plexServer.Id;
+            newPlexServerConnection.PlexServerId = plexServer.Id;
 
-            var connectionDb = existingServer.PlexServerConnections.Find(x =>
-                x.Address == plexServerConnection.Address
+            var connectionDb = existingServer.PlexServerConnections.FirstOrDefault(x =>
+                x.Equals(newPlexServerConnection)
             );
             if (connectionDb is null)
             {
@@ -108,10 +108,10 @@ public class AddOrUpdatePlexServersCommandHandler : IRequestHandler<AddOrUpdateP
                 _log.Here()
                     .Debug(
                         "Creating connection {PlexServerConnection} from {PlexServerName} in the database",
-                        plexServerConnection.ToString(),
+                        newPlexServerConnection.ToString(),
                         existingServer.Name
                     );
-                _dbContext.PlexServerConnections.Add(plexServerConnection);
+                _dbContext.PlexServerConnections.Add(newPlexServerConnection);
             }
             else
             {
@@ -119,11 +119,11 @@ public class AddOrUpdatePlexServersCommandHandler : IRequestHandler<AddOrUpdateP
                 _log.Here()
                     .Debug(
                         "Updating connection {PlexServerConnection} from {PlexServerName} in the database",
-                        plexServerConnection.ToString(),
+                        newPlexServerConnection.ToString(),
                         existingServer.Name
                     );
-                plexServerConnection.Id = connectionDb.Id;
-                _dbContext.Entry(connectionDb).CurrentValues.SetValues(plexServerConnection);
+                newPlexServerConnection.Id = connectionDb.Id;
+                _dbContext.Entry(connectionDb).CurrentValues.SetValues(newPlexServerConnection);
             }
         }
 
@@ -131,7 +131,7 @@ public class AddOrUpdatePlexServersCommandHandler : IRequestHandler<AddOrUpdateP
         for (var i = existingServer.PlexServerConnections.Count - 1; i >= 0; i--)
         {
             var plexServerConnectionDB = existingServer.PlexServerConnections[i];
-            var connection = plexServer.PlexServerConnections.Find(x => x.Address == plexServerConnectionDB.Address);
+            var connection = plexServer.PlexServerConnections.FirstOrDefault(x => x.Equals(plexServerConnectionDB));
             if (connection is null)
             {
                 _log.Here()

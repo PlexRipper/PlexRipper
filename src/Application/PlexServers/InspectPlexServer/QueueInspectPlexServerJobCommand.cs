@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Data.Contracts;
+using FluentValidation;
 using Quartz;
 
 namespace PlexRipper.Application;
@@ -15,16 +16,30 @@ public class QueueInspectPlexServerJobCommandValidator : AbstractValidator<Queue
 
 public class QueueInspectPlexServerJobCommandHandler : IRequestHandler<QueueInspectPlexServerJobCommand, Result>
 {
+    private readonly IPlexRipperDbContext _dbContext;
     private readonly IScheduler _scheduler;
 
-    public QueueInspectPlexServerJobCommandHandler(IScheduler scheduler)
+    public QueueInspectPlexServerJobCommandHandler(IPlexRipperDbContext dbContext, IScheduler scheduler)
     {
+        _dbContext = dbContext;
         _scheduler = scheduler;
     }
 
     public async Task<Result> Handle(QueueInspectPlexServerJobCommand command, CancellationToken cancellationToken)
     {
         var plexServerId = command.PlexServerId;
+
+        var plexServer = await _dbContext.PlexServers.GetAsync(plexServerId, cancellationToken);
+        if (plexServer is null)
+            return ResultExtensions.EntityNotFound(nameof(PlexServer), plexServerId).LogError();
+
+        if (!plexServer.IsEnabled)
+        {
+            return ResultExtensions
+                .ServerIsNotEnabled(plexServer.Name, plexServerId, nameof(QueueInspectPlexServerJobCommand))
+                .LogError();
+        }
+
         var jobKey = InspectPlexServerJob.GetJobKey(plexServerId);
         if (await _scheduler.IsJobRunningAsync(jobKey, cancellationToken))
         {

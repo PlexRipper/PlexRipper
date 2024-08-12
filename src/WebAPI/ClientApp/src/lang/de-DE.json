@@ -183,6 +183,9 @@
             "invalid-token": "Das Token war ungültig und/oder ist abgelaufen.",
             "sub-header": "Das Token: {authToken} gehört zum Plex-Konto:",
             "title": "Validierung des Plex.tv-Authentifizierungstokens"
+        },
+        "search-bar": {
+            "no-results": "Keine Ergebnisse gefunden mit {query}"
         }
     },
     "confirmation": {
@@ -448,7 +451,6 @@
             "return-link": "zurück zur Startseite"
         },
         "home": {
-            "header": "LÄUFT!",
             "setup-question": ""
         },
         "music": {

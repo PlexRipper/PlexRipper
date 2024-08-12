@@ -27,11 +27,7 @@
 		</QRow>
 		<QRow v-else>
 			<QCol>
-				<QText
-					size="h3"
-					align="center">
-					{{ $t('pages.home.header') }}
-				</QText>
+				<!--				<SearchBar /> -->
 			</QCol>
 		</QRow>
 	</QPage>

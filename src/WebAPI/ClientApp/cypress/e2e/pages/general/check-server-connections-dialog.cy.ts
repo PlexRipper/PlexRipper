@@ -29,7 +29,8 @@ describe('Check server connections dialog', () => {
 						.should('exist')
 						.and('be.visible');
 					// Ensure the dialog is displaying the correct number of connections per server
-					for (const plexServerConnection of plexServer.plexServerConnections) {
+					const connections = data.plexServerConnections.filter((x) => x.plexServerId === plexServer.id);
+					for (const plexServerConnection of connections) {
 						cy.findByText(plexServerConnection.url, {
 							selector: '[data-cy="check-server-connections-dialog-connection-title"]',
 						})

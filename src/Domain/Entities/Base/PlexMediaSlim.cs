@@ -26,66 +26,66 @@ public class PlexMediaSlim : BaseEntity
     /// <summary>
     /// Gets or sets the duration in seconds of the (nested) media.
     /// </summary>
-    [Column(Order = 5)]
+    [Column(Order = 6)]
     public required int Duration { get; set; }
 
     /// <summary>
     /// Gets or sets the total filesize of the nested media.
     /// </summary>
-    [Column(Order = 6)]
+    [Column(Order = 7)]
     public required long MediaSize { get; set; }
 
     /// <summary>
     /// Gets or sets the key used to retrieve thumbnails, art or banners.
     /// E.g. /library/metadata/[Key]/art/[MetadataKey] =>  /library/metadata/529367/art/1593898227.
     /// </summary>
-    [Column(Order = 7)]
+    [Column(Order = 8)]
     public required int MetaDataKey { get; init; }
 
     /// <summary>
     /// Gets or sets the number of direct children
     /// E.G. if the type is tvShow, then this number would be the season count, if season then this would be the episode count.
     /// </summary>
-    [Column(Order = 12)]
+    [Column(Order = 13)]
     public required int ChildCount { get; set; }
 
     /// <summary>
     /// Gets or sets when this media was added to the Plex library.
     /// </summary>
-    [Column(Order = 13)]
+    [Column(Order = 14)]
     public required DateTime AddedAt { get; init; }
 
     /// <summary>
     /// Gets or sets when this media was last updated in the Plex library.
     /// </summary>
-    [Column(Order = 14)]
+    [Column(Order = 15)]
     public required DateTime UpdatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether this <see cref="PlexMedia"/> has a thumbnail.
     /// </summary>
-    [Column(Order = 17)]
+    [Column(Order = 18)]
     public required bool HasThumb { get; set; }
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexMedia"/> has art.
     /// </summary>
-    [Column(Order = 18)]
+    [Column(Order = 19)]
     public required bool HasArt { get; init; }
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexMedia"/> has a banner.
     /// </summary>
-    [Column(Order = 19)]
+    [Column(Order = 20)]
     public required bool HasBanner { get; init; }
 
     /// <summary>
     /// Gets or sets whether this <see cref="PlexMedia"/> has a theme.
     /// </summary>
-    [Column(Order = 20)]
+    [Column(Order = 21)]
     public required bool HasTheme { get; init; }
 
-    [Column(Order = 22)]
+    [Column(Order = 23)]
     public required PlexMediaContainer MediaData { get; init; }
 
     public required int PlexLibraryId { get; set; }

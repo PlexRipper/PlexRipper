@@ -1,3 +1,4 @@
+using Application.Contracts;
 using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
@@ -6,7 +7,7 @@ using PlexApi.Contracts;
 namespace PlexRipper.Application;
 
 /// <summary>
-/// Queue a job to retrieves the latest accessible <see cref="PlexServer">PlexServers</see> for this <see cref="PlexAccount"/> from the PlexAPI and stores it in the Database.
+/// Retrieve the latest accessible <see cref="PlexServer">PlexServers</see> for this <see cref="PlexAccount"/> from the PlexAPI and stores it in the Database.
 /// </summary>
 /// <param name="PlexAccountId">The id of the <see cref="PlexAccount"/> to check.</param>
 public record RefreshPlexServerAccessCommand(int PlexAccountId) : IRequest<Result>;
@@ -25,18 +26,21 @@ public class RefreshPlexServerAccessCommandHandler : IRequestHandler<RefreshPlex
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
     private readonly IPlexApiService _plexServiceApi;
+    private readonly ISignalRService _signalRService;
 
     public RefreshPlexServerAccessCommandHandler(
         ILog log,
         IPlexRipperDbContext dbContext,
         IMediator mediator,
-        IPlexApiService plexServiceApi
+        IPlexApiService plexServiceApi,
+        ISignalRService signalRService
     )
     {
         _log = log;
         _dbContext = dbContext;
         _mediator = mediator;
         _plexServiceApi = plexServiceApi;
+        _signalRService = signalRService;
     }
 
     public async Task<Result> Handle(RefreshPlexServerAccessCommand command, CancellationToken cancellationToken)
@@ -76,6 +80,12 @@ public class RefreshPlexServerAccessCommandHandler : IRequestHandler<RefreshPlex
 
         if (plexAccountTokensResult.IsFailed)
             return plexAccountTokensResult.LogError();
+
+        // Send notifications to the client to refresh the PlexServerConnection data
+        await _signalRService.SendRefreshNotificationAsync(
+            [DataType.PlexAccount, DataType.PlexServer, DataType.PlexServerConnection],
+            cancellationToken
+        );
 
         _log.Information(
             "Successfully refreshed accessible Plex servers for account {PlexAccountDisplayName}",

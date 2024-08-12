@@ -103,7 +103,7 @@ public class PlexServerConnection : BaseEntity
     #region Equality
 
     /// <inheritdoc/>
-    public override int GetHashCode() => HashCode.Combine(Protocol, Address, Port, Local, Relay, IPv6, PlexServerId);
+    public override int GetHashCode() => HashCode.Combine(Protocol, Address, Port, Uri, Local, Relay, IPv4, IPv6);
 
     /// <inheritdoc/>
     public override bool Equals(object? obj)
@@ -121,10 +121,10 @@ public class PlexServerConnection : BaseEntity
         Protocol == other.Protocol
         && Address == other.Address
         && Port == other.Port
+        && Uri == other.Uri
         && Local == other.Local
         && Relay == other.Relay
-        && IPv6 == other.IPv6
-        && PlexServerId == other.PlexServerId;
+        && IPv6 == other.IPv6;
 
     #endregion
 

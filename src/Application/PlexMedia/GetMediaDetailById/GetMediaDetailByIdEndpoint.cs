@@ -3,7 +3,6 @@ using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
-using PlexRipper.Domain.PlexMediaExtensions;
 
 namespace PlexRipper.Application;
 

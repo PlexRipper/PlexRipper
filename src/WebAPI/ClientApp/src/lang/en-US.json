@@ -183,6 +183,9 @@
             "invalid-token": "The token was invalid and/or has expired.",
             "sub-header": "The token: {authToken} belongs to the Plex account:",
             "title": "Plex.tv Authentication Token Validation"
+        },
+        "search-bar": {
+            "no-results": "No Results found with {query}"
         }
     },
     "confirmation": {
@@ -448,7 +451,6 @@
             "return-link": "Go back to home page"
         },
         "home": {
-            "header": "WORKING!",
             "setup-question": "It looks like this is you're first time using PlexRipper, would you like to set it up?"
         },
         "music": {

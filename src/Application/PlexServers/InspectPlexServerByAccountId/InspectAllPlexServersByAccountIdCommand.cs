@@ -54,9 +54,9 @@ public class InspectAllPlexServersByAccountIdCommandHandler
         if (refreshResult.IsFailed)
             return refreshResult.LogError();
 
-        // Retrieve all accessible servers for the PlexAccount
         var plexAccountDisplayName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
 
+        // Retrieve all accessible servers for the PlexAccount
         var plexServers = await _dbContext.GetAccessiblePlexServers(plexAccountId, cancellationToken);
         if (plexServers.IsFailed)
             return plexServers.LogError();

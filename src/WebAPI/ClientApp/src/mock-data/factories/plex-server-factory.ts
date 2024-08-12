@@ -1,7 +1,7 @@
 import { randBoolean, randBrand, randIp, randNumber, randRecentDate, randSemver, randUuid } from '@ngneat/falso';
 import { times } from 'lodash-es';
 import type { PlexServerConnectionDTO, PlexServerDTO } from '@dto';
-import { checkConfig, generatePlexServerConnections, incrementSeed, type MockConfig } from '@mock';
+import { checkConfig, incrementSeed, type MockConfig } from '@mock';
 
 let plexServerIdIndex = 1;
 
@@ -19,6 +19,7 @@ export function generatePlexServer({
 
 	return {
 		id,
+		isEnabled: true,
 		name: randBrand() + ' Server',
 		ownerId: randNumber({ max: 999999 }),
 		device: 'PC',
@@ -42,7 +43,6 @@ export function generatePlexServer({
 		synced: randBoolean(),
 		machineIdentifier: randUuid(),
 		createdAt: randRecentDate({ days: 30 }).toUTCString(),
-		plexServerConnections: generatePlexServerConnections({ plexServerId: id, config }),
 		serverFixApplyDNSFix: randBoolean(),
 		...partialData,
 	};

@@ -28,7 +28,7 @@ public static partial class MockDatabase
     {
         var config = FakeDataConfig.FromOptions(options);
         var plexServerCount = Math.Max(1, config.PlexServerCount);
-        var plexServers = FakeData.GetPlexServer(_seed).Generate(plexServerCount);
+        var plexServers = FakeData.GetPlexServer(_seed, options).Generate(plexServerCount);
 
         if (config.MockServerUris.Any())
         {

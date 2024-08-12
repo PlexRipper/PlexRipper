@@ -4,8 +4,10 @@ namespace PlexRipper.BaseTests;
 
 public static partial class FakeData
 {
-    public static Faker<PlexServer> GetPlexServer(int seed = 0)
+    public static Faker<PlexServer> GetPlexServer(int seed = 0, Action<FakeDataConfig>? options = null)
     {
+        var config = FakeDataConfig.FromOptions(options);
+
         // Note: Ensure all faker values are a lambda f => x,
         // otherwise Entity Framework will see differently generated values as the same object and mess up any database testing
         return new Faker<PlexServer>()
@@ -25,6 +27,7 @@ public static partial class FakeData
             .RuleFor(x => x.OwnerId, f => f.Random.Int(1000, 100000))
             .RuleFor(x => x.PlexServerOwnerUsername, f => f.Name.LastName())
             .RuleFor(x => x.PublicAddress, f => f.Internet.Ip())
+            .RuleFor(x => x.IsEnabled, _ => true)
             // Server flags
             .RuleFor(x => x.Owned, f => f.Random.Bool())
             .RuleFor(x => x.Home, f => f.Random.Bool())
@@ -36,11 +39,14 @@ public static partial class FakeData
             .RuleFor(x => x.DnsRebindingProtection, f => f.Random.Bool())
             .RuleFor(x => x.NatLoopbackSupported, f => f.Random.Bool())
             .RuleFor(x => x.PreferredConnectionId, _ => 0)
-            .RuleFor(x => x.PlexServerConnections, f => GetPlexServerConnections(seed).Generate(f.Random.Int(1, 4)))
-            .RuleFor(x => x.PlexLibraries, _ => new List<PlexLibrary>())
-            .RuleFor(x => x.ServerStatus, _ => new List<PlexServerStatus>())
+            .RuleFor(
+                x => x.PlexServerConnections,
+                _ => GetPlexServerConnections(seed).Generate(config.PlexServerConnectionPerServerCount)
+            )
+            .RuleFor(x => x.PlexLibraries, _ => [])
+            .RuleFor(x => x.ServerStatus, _ => [])
             .RuleFor(x => x.ServerFixApplyDNSFix, _ => false)
-            .RuleFor(x => x.PlexAccountServers, _ => new List<PlexAccountServer>());
+            .RuleFor(x => x.PlexAccountServers, _ => []);
     }
 
     public static Faker<PlexLibrary> GetPlexLibrary(int seed = 0, PlexMediaType libraryType = PlexMediaType.None)
@@ -74,9 +80,9 @@ public static partial class FakeData
             )
             .RuleFor(x => x.DefaultDestination, _ => null)
             .RuleFor(x => x.DefaultDestinationId, _ => null)
-            .RuleFor(x => x.Movies, _ => new List<PlexMovie>())
-            .RuleFor(x => x.TvShows, _ => new List<PlexTvShow>())
-            .RuleFor(x => x.PlexAccountLibraries, _ => new List<PlexAccountLibrary>());
+            .RuleFor(x => x.Movies, _ => [])
+            .RuleFor(x => x.TvShows, _ => [])
+            .RuleFor(x => x.PlexAccountLibraries, _ => []);
     }
 
     public static Faker<FolderPath> GetFolderPaths(int seed = 0)
@@ -90,7 +96,7 @@ public static partial class FakeData
             .RuleFor(x => x.FolderType, f => f.Random.Enum<FolderType>())
             .RuleFor(x => x.MediaType, f => f.Random.Enum<PlexMediaType>())
             .RuleFor(x => x.DirectoryPath, f => f.System.DirectoryPath())
-            .RuleFor(x => x.PlexLibraries, _ => new List<PlexLibrary>());
+            .RuleFor(x => x.PlexLibraries, _ => []);
     }
 
     public static Faker<PlexServerConnection> GetPlexServerConnections(int seed = 0)
@@ -108,7 +114,7 @@ public static partial class FakeData
             .RuleFor(x => x.IPv6, _ => false)
             .RuleFor(x => x.PortFix, _ => false)
             .RuleFor(x => x.Uri, f => f.Internet.Url())
-            .RuleFor(x => x.PlexServerStatus, _ => new List<PlexServerStatus>())
+            .RuleFor(x => x.PlexServerStatus, _ => [])
             .RuleFor(x => x.PlexServer, _ => null)
             .RuleFor(x => x.PlexServerId, _ => 0);
     }

@@ -10,25 +10,31 @@ public class PlexMedia : PlexMediaSlim
 {
     #region Properties
 
-    [Column(Order = 8)]
-    public string Studio { get; init; } = string.Empty;
+    /// <summary>
+    /// This can be empty, in that case it gets the value of <see cref="Title"/>.
+    /// </summary>
+    [Column(Order = 5)]
+    public required string SearchTitle { get; init; }
 
     [Column(Order = 9)]
-    public string Summary { get; init; } = string.Empty;
+    public string Studio { get; init; } = string.Empty;
 
     [Column(Order = 10)]
-    public string ContentRating { get; init; } = string.Empty;
+    public string Summary { get; init; } = string.Empty;
 
     [Column(Order = 11)]
+    public string ContentRating { get; init; } = string.Empty;
+
+    [Column(Order = 12)]
     public double Rating { get; init; } = 0.0;
 
     /// <summary>
     /// Gets or sets when this media was released/aired to the public.
     /// </summary>
-    [Column(Order = 15)]
+    [Column(Order = 16)]
     public DateTime? OriginallyAvailableAt { get; init; }
 
-    [Column(Order = 16)]
+    [Column(Order = 17)]
     public int Index { get; init; } = -1;
 
     /// <summary>
@@ -36,7 +42,7 @@ public class PlexMedia : PlexMediaSlim
     /// E.g. tvShow/Season/Episode
     /// TODO, might be better to remove this and make a getter for it.
     /// </summary>
-    [Column(Order = 21)]
+    [Column(Order = 22)]
     public string FullTitle { get; set; } = string.Empty;
 
     #endregion

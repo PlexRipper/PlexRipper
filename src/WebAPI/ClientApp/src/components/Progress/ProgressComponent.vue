@@ -19,7 +19,7 @@
 							<template v-if="!indeterminate">
 								<span
 									v-if="getPercentage < 100"
-									class="text-bold"> {{ $n(getPercentage, 'percent') }}</span>
+									class="text-bold"> {{ $n(getPercentage / 100, 'percent') }}</span>
 								<q-icon
 									v-else
 									large
@@ -71,7 +71,7 @@
 							striped
 							stream
 							color="red">
-							<strong>{{ $n(getPercentage, 'percent') }}</strong>
+							<strong>{{ $n(getPercentage / 100, 'percent') }}</strong>
 						</q-linear-progress>
 					</QCol>
 				</QRow>

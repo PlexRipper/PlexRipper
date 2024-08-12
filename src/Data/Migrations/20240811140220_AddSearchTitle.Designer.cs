@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlexRipper.Data;
 
@@ -10,9 +11,11 @@ using PlexRipper.Data;
 namespace PlexRipper.Data.Migrations
 {
     [DbContext(typeof(PlexRipperDbContext))]
-    partial class PlexRipperDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240811140220_AddSearchTitle")]
+    partial class AddSearchTitle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1232,19 +1235,15 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<bool>("DnsRebindingProtection")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(23);
+                        .HasColumnOrder(22);
 
                     b.Property<bool>("Home")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(17);
+                        .HasColumnOrder(16);
 
                     b.Property<bool>("HttpsRequired")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(21);
-
-                    b.Property<bool>("IsEnabled")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(15);
+                        .HasColumnOrder(20);
 
                     b.Property<DateTime>("LastSeenAt")
                         .HasColumnType("TEXT")
@@ -1262,11 +1261,11 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<bool>("NatLoopbackSupported")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(24);
+                        .HasColumnOrder(23);
 
                     b.Property<bool>("Owned")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(16);
+                        .HasColumnOrder(15);
 
                     b.Property<long>("OwnerId")
                         .HasColumnType("INTEGER")
@@ -1293,7 +1292,7 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<bool>("Presence")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(20);
+                        .HasColumnOrder(19);
 
                     b.Property<string>("Product")
                         .IsRequired()
@@ -1317,19 +1316,19 @@ namespace PlexRipper.Data.Migrations
 
                     b.Property<bool>("PublicAddressMatches")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(22);
+                        .HasColumnOrder(21);
 
                     b.Property<bool>("Relay")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(19);
+                        .HasColumnOrder(18);
 
                     b.Property<bool>("ServerFixApplyDNSFix")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(25);
+                        .HasColumnOrder(24);
 
                     b.Property<bool>("Synced")
                         .HasColumnType("INTEGER")
-                        .HasColumnOrder(18);
+                        .HasColumnOrder(17);
 
                     b.HasKey("Id");
 

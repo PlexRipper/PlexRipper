@@ -664,6 +664,7 @@ export interface PlexServerDTO {
   httpsRequired: boolean;
   /** @format int32 */
   id: number;
+  isEnabled: boolean;
   /** @format date-time */
   lastSeenAt: string;
   machineIdentifier: string;
@@ -674,7 +675,6 @@ export interface PlexServerDTO {
   ownerId: number;
   platform: string;
   platformVersion: string;
-  plexServerConnections: PlexServerConnectionDTO[];
   plexServerOwnerUsername: string;
   /** @format int32 */
   preferredConnectionId: number;

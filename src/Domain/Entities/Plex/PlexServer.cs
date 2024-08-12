@@ -84,37 +84,40 @@ public class PlexServer : BaseEntity
     public required int PreferredConnectionId { get; set; }
 
     [Column(Order = 15)]
-    public required bool Owned { get; init; }
+    public required bool IsEnabled { get; set; } = true;
 
     [Column(Order = 16)]
-    public required bool Home { get; init; }
+    public required bool Owned { get; init; }
 
     [Column(Order = 17)]
-    public required bool Synced { get; init; }
+    public required bool Home { get; init; }
 
     [Column(Order = 18)]
-    public required bool Relay { get; init; }
+    public required bool Synced { get; init; }
 
     [Column(Order = 19)]
-    public required bool Presence { get; init; }
+    public required bool Relay { get; init; }
 
     [Column(Order = 20)]
-    public required bool HttpsRequired { get; init; }
+    public required bool Presence { get; init; }
 
     [Column(Order = 21)]
-    public required bool PublicAddressMatches { get; init; }
+    public required bool HttpsRequired { get; init; }
 
     [Column(Order = 22)]
-    public required bool DnsRebindingProtection { get; init; }
+    public required bool PublicAddressMatches { get; init; }
 
     [Column(Order = 23)]
+    public required bool DnsRebindingProtection { get; init; }
+
+    [Column(Order = 24)]
     public required bool NatLoopbackSupported { get; init; }
 
     /// <summary>
     /// Gets or sets a value indicating whether certain servers have protection or are misconfigured which is why we can apply certain fixes to facilitate server communication.
     /// This will attempt to connect on port 80 of the server.
     /// </summary>
-    [Column(Order = 24)]
+    [Column(Order = 25)]
     public required bool ServerFixApplyDNSFix { get; init; }
 
     #endregion

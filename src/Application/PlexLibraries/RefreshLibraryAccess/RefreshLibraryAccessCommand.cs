@@ -83,11 +83,14 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
     {
         _log.Debug(
             "Retrieving accessible PlexLibraries for plexServer with id: {PlexServerId} by using Plex account with id {PlexAccountId}",
-            plexServerId,
+            _dbContext.GetPlexServerNameById(plexServerId, cancellationToken),
             plexAccountId
         );
 
-        var libraries = await _plexServiceApi.GetLibrarySectionsAsync(plexServerId, plexAccountId, cancellationToken);
+        var libraries = await _plexServiceApi.GetLibrarySectionsAsync(
+            plexServerId,
+            cancellationToken: cancellationToken
+        );
         if (libraries.IsFailed)
             return libraries.ToResult();
 

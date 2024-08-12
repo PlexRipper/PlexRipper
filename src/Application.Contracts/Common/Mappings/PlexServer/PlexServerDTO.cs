@@ -36,6 +36,8 @@ public class PlexServerDTO
 
     public required bool Home { get; set; }
 
+    public required bool IsEnabled { get; set; }
+
     public required bool Synced { get; set; }
 
     public required bool Relay { get; set; }
@@ -51,6 +53,4 @@ public class PlexServerDTO
     public required bool NatLoopbackSupported { get; set; }
 
     public required bool ServerFixApplyDNSFix { get; set; }
-
-    public required List<PlexServerConnectionDTO> PlexServerConnections { get; set; } = new();
 }

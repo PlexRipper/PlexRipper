@@ -38,12 +38,26 @@ public class CheckAllConnectionsStatusByPlexServerCommandHandler
         CancellationToken cancellationToken
     )
     {
+        var plexServerId = command.PlexServerId;
+
+        var plexServer = await _dbContext.PlexServers.GetAsync(plexServerId, cancellationToken);
+
+        if (plexServer == null)
+            return ResultExtensions.EntityNotFound(nameof(plexServerId), plexServerId).LogError();
+
+        if (!plexServer.IsEnabled)
+        {
+            return ResultExtensions
+                .ServerIsNotEnabled(plexServer.Name, plexServerId, nameof(CheckAllConnectionsStatusByPlexServerCommand))
+                .LogError();
+        }
+
         var connections = await _dbContext
-            .PlexServerConnections.Where(x => x.PlexServerId == command.PlexServerId)
+            .PlexServerConnections.Where(x => x.PlexServerId == plexServerId)
             .ToListAsync(cancellationToken);
 
         if (!connections.Any())
-            return Result.Fail($"No connections found for the given plex server id {command.PlexServerId}").LogError();
+            return Result.Fail($"No connections found for the given plex server id {plexServerId}").LogError();
 
         // Create connection check tasks for all connections
         var connectionTasks = connections.Select(async plexServerConnection =>
@@ -56,8 +70,6 @@ public class CheckAllConnectionsStatusByPlexServerCommandHandler
         if (tasksResult.Any(statusResult => statusResult.Value.IsSuccessful))
             return Result.Ok(combinedResults.Value.ToList());
 
-        return Result
-            .Fail($"All connections to plex server with id: {command.PlexServerId} failed to connect")
-            .LogError();
+        return Result.Fail($"All connections to plex server with id: {plexServerId} failed to connect").LogError();
     }
 }

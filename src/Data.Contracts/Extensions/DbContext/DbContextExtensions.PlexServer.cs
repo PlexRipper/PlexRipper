@@ -17,7 +17,7 @@ public static partial class DbContextExtensions
             .Include(x => x.PlexServer)
             .ThenInclude(x => x.PlexServerConnections)
             .ThenInclude(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(1))
-            .Where(x => x.PlexAccountId == plexAccountId)
+            .Where(x => x.PlexAccountId == plexAccountId && x.PlexServer!.IsEnabled)
             .Select(x => x.PlexServer)
             .ToListAsync(cancellationToken);
     }

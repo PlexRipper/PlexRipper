@@ -31,7 +31,7 @@ public class PlexMetaDataMapper_UnitTests : BaseUnitTest
         plexMovie.Title.ShouldBe(source.Title);
         plexMovie.FullTitle.ShouldBe($"{source.Title} ({source.Year})");
         plexMovie.Year.ShouldBe(source.Year);
-        plexMovie.SortTitle.ShouldBe(source.TitleSort);
+        plexMovie.SortTitle.ShouldBe(source.Title.ToSortTitle());
         plexMovie.Duration.ShouldBe(935148);
         plexMovie.MediaSize.ShouldBe(source.Media.Sum(y => y.Part.Sum(z => z.Size)));
         plexMovie.ChildCount.ShouldBe(source.ChildCount);

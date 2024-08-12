@@ -1,4 +1,4 @@
-﻿using Autofac;
+﻿using Application.Contracts;
 using Moq.Language.Flow;
 
 namespace PlexRipper.BaseTests;
@@ -13,6 +13,17 @@ public static class MoqExtensions
     )
     {
         var result = mock.Mock<IMediator>().Setup(m => m.Send(request.Invoke(), It.IsAny<CancellationToken>()));
+        if (isVerifiable)
+            result.Verifiable();
+        return result;
+    }
+
+    public static IReturnsResult<ISignalRService> SendRefreshNotification(this AutoMock mock, bool isVerifiable = false)
+    {
+        var result = mock.Mock<ISignalRService>()
+            .Setup(m => m.SendRefreshNotificationAsync(It.IsAny<List<DataType>>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
         if (isVerifiable)
             result.Verifiable();
         return result;

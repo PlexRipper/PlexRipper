@@ -25,6 +25,9 @@ public record PlexServerSettingsModule : BaseSettingsModule<PlexServerSettingsMo
     public string GetServerNameAlias(string machineIdentifier) =>
         FindOrAddServerSettingsModel(machineIdentifier)?.PlexServerName ?? string.Empty;
 
+    public bool GetIsHidden(string machineIdentifier) =>
+        FindOrAddServerSettingsModel(machineIdentifier)?.Hidden ?? false;
+
     public void SetDownloadSpeedLimit(string machineIdentifier, int downloadSpeedLimit = 0)
     {
         var model = FindOrAddServerSettingsModel(machineIdentifier);

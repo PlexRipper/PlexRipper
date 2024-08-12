@@ -27,7 +27,7 @@
 		</QRow>
 		<QRow v-else>
 			<QCol>
-				<SearchBar />
+				<!--				<SearchBar /> -->
 			</QCol>
 		</QRow>
 	</QPage>

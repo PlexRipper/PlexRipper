@@ -4,7 +4,7 @@ public class FakeDataConfig : BaseConfig<FakeDataConfig>
 {
     public int PlexServerCount { get; set; } = 0;
 
-    public int PlexServerConnectionPerServerCount { get; set; } = 0;
+    public int PlexServerConnectionPerServerCount { get; set; } = 4;
 
     public int PlexLibraryCount { get; set; } = 0;
 

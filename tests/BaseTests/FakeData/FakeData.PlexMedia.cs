@@ -13,14 +13,17 @@ public static partial class FakeData
     )
         where T : PlexMedia
     {
+        var title = new Faker().Company.CompanyName();
+
         return faker
             .StrictMode(true)
             .UseSeed(seed)
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.Key, _ => GetUniqueNumber())
-            .RuleFor(x => x.Title, f => f.Company.CompanyName())
-            .RuleFor(x => x.FullTitle, f => f.Company.CompanyName())
-            .RuleFor(x => x.SortTitle, f => f.Company.CompanyName())
+            .RuleFor(x => x.Title, _ => title)
+            .RuleFor(x => x.FullTitle, _ => title)
+            .RuleFor(x => x.SortTitle, _ => title.ToSortTitle())
+            .RuleFor(x => x.SearchTitle, _ => title.ToSearchTitle())
             .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
             .RuleFor(x => x.Duration, f => f.Random.Int(1000, 3000000))
             .RuleFor(x => x.MediaSize, f => f.Random.Long(1000, 30000000))

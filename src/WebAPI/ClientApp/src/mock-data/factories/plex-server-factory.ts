@@ -19,6 +19,7 @@ export function generatePlexServer({
 
 	return {
 		id,
+		isEnabled: true,
 		name: randBrand() + ' Server',
 		ownerId: randNumber({ max: 999999 }),
 		device: 'PC',

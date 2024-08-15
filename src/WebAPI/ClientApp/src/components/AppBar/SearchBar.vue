@@ -8,7 +8,8 @@
 		:options="options"
 		behavior="menu"
 		@filter="filterFn"
-		@filter-abort="abortFilterFn">
+		@filter-abort="abortFilterFn"
+		@input-value="input = $event">
 		<template #option="{ opt, itemProps } : {opt: PlexMediaSlimDTO, itemProps: any}">
 			<q-item v-bind="itemProps">
 				<q-item-section avatar>
@@ -31,9 +32,9 @@
 		</template>
 		<!-- No Option -->
 		<template #no-option>
-			<q-item>
+			<q-item v-if="query.length > 2">
 				<q-item-section class="text-grey">
-					<QText :value="$t('components.search-bar.no-results')" />
+					<QText :value="$t('components.search-bar.no-results', { query })" />
 				</q-item-section>
 			</q-item>
 		</template>
@@ -46,6 +47,7 @@ import { plexMediaApi } from '@api';
 import type { PlexMediaSlimDTO } from '@dto';
 
 const model = ref<PlexMediaSlimDTO | null>(null);
+const query = ref<string>('');
 
 const thumbWidth = ref(80);
 const thumbHeight = ref(120);

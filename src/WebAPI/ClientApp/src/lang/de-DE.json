@@ -159,7 +159,7 @@
         },
         "account-selector": {
             "all-accounts": "Alle Plex-Konten",
-            "title": "Aktive Konten"
+            "title": "Konten aktualisieren"
         },
         "media-selection-dialog": {
             "title": "Legen Sie den Indexbereich fest, um das Medium auszuwählen (#{min} - #{max})"

@@ -45,6 +45,9 @@ public class PlexMedia : PlexMediaSlim
     [Column(Order = 22)]
     public string FullTitle { get; set; } = string.Empty;
 
+    [Column(Order = 23)]
+    public string Guid { get; init; } = string.Empty;
+
     #endregion
 
     #region Relationships

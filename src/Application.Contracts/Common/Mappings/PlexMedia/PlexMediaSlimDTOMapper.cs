@@ -112,7 +112,7 @@ public static class PlexMediaSlimDTOMapper
         return dto;
     }
 
-    public static IQueryable<PlexMediaSlimDTO> ProjectToMediaSlim(this IQueryable<PlexTvShowSeason> source) =>
+    public static IQueryable<PlexMediaSlimDTO> ProjectToMediaSlimDTO(this IQueryable<PlexTvShowSeason> source) =>
         source.Select(x => ToSlimDTO(x));
 
     private static PlexMediaSlimDTO ToSlimDTOMapper(this PlexTvShowSeason source) =>
@@ -164,7 +164,7 @@ public static class PlexMediaSlimDTOMapper
             Children = new List<PlexMediaSlimDTO>(),
         };
 
-    public static IQueryable<PlexMediaSlimDTO> ProjectToMediaSlim(this IQueryable<PlexTvShowEpisode> source) =>
+    public static IQueryable<PlexMediaSlimDTO> ProjectToMediaSlimDTO(this IQueryable<PlexTvShowEpisode> source) =>
         source.Select(x => ToSlimDTO(x));
 
     #endregion

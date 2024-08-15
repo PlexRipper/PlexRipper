@@ -433,11 +433,12 @@ public class PlexApiService : IPlexApiService
             var x = result.Value;
             var refreshedAccount = new PlexAccount
             {
-                Id = x.Id,
+                Id = plexAccount.Id,
                 DisplayName = plexAccount.DisplayName,
                 Username = plexAccount.Username,
                 Password = plexAccount.Password,
                 IsEnabled = plexAccount.IsEnabled,
+                IsAuthTokenMode = plexAccount.IsAuthTokenMode,
                 IsValidated = true,
                 ValidatedAt = DateTime.UtcNow,
                 PlexId = x.Id,
@@ -452,7 +453,6 @@ public class PlexApiService : IPlexApiService
                 PlexAccountLibraries = [],
                 Is2Fa = x.TwoFactorEnabled,
                 VerificationCode = string.Empty,
-                IsAuthTokenMode = plexAccount.IsAuthTokenMode,
             };
 
             _log.Information(

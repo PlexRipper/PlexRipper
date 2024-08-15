@@ -19,6 +19,7 @@
 								:src="scope.opt.img"
 								height="50"
 								:max-width="80"
+								fit="fill"
 								:alt="scope.opt.text" />
 						</q-item-section>
 						<q-item-section>
@@ -35,6 +36,7 @@
 								:src="scope.opt.img"
 								height="50"
 								:max-width="80"
+								fit="fill"
 								:alt="scope.opt.text" />
 						</q-item-section>
 						<q-item-section>

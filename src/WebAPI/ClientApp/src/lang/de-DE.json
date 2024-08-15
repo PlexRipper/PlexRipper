@@ -40,7 +40,7 @@
         "directory-browser": {
             "path": "Pfad:",
             "select-path": "Wähle {pathName}",
-            "type": "typ:",
+            "type": "Typ:",
             "no-path": "Beginnen Sie mit der Eingabe oder wählen Sie unten einen Pfad aus.",
             "has-no-read-permission": "Hat keine Leseberechtigung für diesen Ordner!",
             "has-no-write-permission": "Hat keine Schreibberechtigung für diesen Ordner!",

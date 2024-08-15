@@ -95,7 +95,7 @@
             },
             "tv-show": {
                 "header": "Serien Pfad",
-                "default-name": ""
+                "default-name": "TV-Sendungs-Ordnerpfad"
             }
         },
         "server-dialog": {
@@ -109,7 +109,7 @@
                 },
                 "server-config": {
                     "header": "Serverkonfiguration",
-                    "plex-server-was-null": ""
+                    "plex-server-was-null": "Plex Server war null"
                 },
                 "server-connections": {
                     "header": "Serververbindungen",
@@ -129,8 +129,8 @@
                     "all-connections-failed": "Beim Herstellen einer Verbindung zum Server sind alle Verbindungen fehlgeschlagen. Der Server ist höchstwahrscheinlich offline ...",
                     "at-least-one-connection-successful": "Mindestens eine Verbindung war erfolgreich, was bedeutet, dass mit dem Server eine Verbindung hergestellt werden kann!",
                     "values": {
-                        "platform-version": "",
-                        "product-version": ""
+                        "platform-version": "{platform} ({platformVersion})",
+                        "product-version": "{product} ({productVersion})"
                     }
                 }
             }
@@ -143,8 +143,8 @@
             }
         },
         "media-list": {
-            "no-media-found": "",
-            "selected-count": "",
+            "no-media-found": "Keine Medien gefunden.",
+            "selected-count": "{selectedCount} ausgewählt",
             "episode-count": "{episodeCount} Folgen"
         },
         "server-download-status": {
@@ -169,7 +169,7 @@
             "server-unconnectable": "Es kann keine Verbindung zum Server hergestellt werden und er ist möglicherweise offline."
         },
         "alert-dialog": {
-            "request-data-sent": ""
+            "request-data-sent": "Anfragedaten gesendet:"
         },
         "app-bar-progress-bar": {
             "tooltip-text": "PlexServer {finishedCount} von {totalCount}wird synchronisiert!"
@@ -306,9 +306,9 @@
         "server-dialog": {
             "server-config": {
                 "download-speed-limit": {
-                    "label": "",
-                    "text": "",
-                    "title": ""
+                    "label": "Download-Geschwindigkeitsbegrenzung",
+                    "text": "Dadurch wird die Downloadgeschwindigkeit für diesen Plex-Server in Kilobyte pro Sekunde begrenzt. Wenn Sie diesen Wert auf 0 setzen, wird die Begrenzung deaktiviert.",
+                    "title": "Download-Geschwindigkeitsbegrenzung"
                 }
             },
             "server-commands": {
@@ -318,8 +318,8 @@
                     "label": "Server untersuchen"
                 },
                 "sync-server-libraries": {
-                    "text": "",
-                    "title": "",
+                    "text": "Dadurch wird die Downloadgeschwindigkeit für diesen Plex-Server in Kilobyte pro Sekunde begrenzt. Wenn Sie diesen Wert auf 0 setzen, wird die Begrenzung deaktiviert.",
+                    "title": "Download-Geschwindigkeitsbegrenzung",
                     "label": "Re-sync Mediathekdaten"
                 }
             }
@@ -451,7 +451,7 @@
             "return-link": "zurück zur Startseite"
         },
         "home": {
-            "setup-question": ""
+            "setup-question": "Es sieht so aus, als ob Sie PlexRipper zum ersten Mal verwenden. Möchten Sie es einrichten?"
         },
         "music": {
             "music-id": {
@@ -571,41 +571,41 @@
             }
         },
         "empty": {
-            "title": ""
+            "title": "Leere Seite"
         }
     },
     "debug": {
         "button-labels": {
-            "amber": "",
-            "black": "",
-            "brown5": "",
-            "deep-orange": "",
-            "primary": "",
-            "purple": "",
-            "secondary": "",
-            "standard": ""
+            "amber": "Bernstein",
+            "black": "Schwarz",
+            "brown5": "Braun 5",
+            "deep-orange": "Dunkelorange",
+            "primary": "Primär",
+            "purple": "Lila",
+            "secondary": "Sekundär",
+            "standard": "Standard"
         },
         "buttons": {
-            "account-validation-button": "",
-            "add-icon-button": "",
-            "base-button": "",
-            "cancel-button": "",
-            "check-connection-button": "",
-            "confirm-button": "",
-            "debug-button": "",
-            "delete-button": "",
-            "delete-icon-button": "",
-            "external-link-button": "",
-            "go-to-button": "",
-            "help-button": "",
-            "hide-button": "",
-            "navigation-finish-setup-button": "",
-            "navigation-next-button": "",
-            "navigation-previous-button": "",
-            "navigation-skip-setup-button": "",
-            "reset-button": "",
-            "save-button": "",
-            "warning-button": ""
+            "account-validation-button": "AccountValidationButton",
+            "add-icon-button": "Symbol hinzufügenSchaltfläche",
+            "base-button": "Basistaste",
+            "cancel-button": "AbbrechenButton",
+            "check-connection-button": "CheckConnectionButton",
+            "confirm-button": "Schaltfläche „Bestätigen“",
+            "debug-button": "Debug-Schaltfläche",
+            "delete-button": "DeleteButton",
+            "delete-icon-button": "Symbolschaltfläche löschen",
+            "external-link-button": "ExternalLinkButton",
+            "go-to-button": "Gehe zuButton",
+            "help-button": "HilfeButton",
+            "hide-button": "AusblendenButton",
+            "navigation-finish-setup-button": "NavigationFertigstellenSetupButton",
+            "navigation-next-button": "NavigationNextButton",
+            "navigation-previous-button": "NavigationZurückButton",
+            "navigation-skip-setup-button": "NavigationÜberspringenSetupButton",
+            "reset-button": "ResetButton",
+            "save-button": "Schaltfläche „Speichern“",
+            "warning-button": "Warntaste"
         }
     }
 }

@@ -42,6 +42,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -59,6 +63,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -85,6 +93,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -102,6 +114,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -128,6 +144,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -145,6 +165,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -174,6 +198,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -193,6 +221,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -210,6 +242,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -233,6 +269,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -252,6 +292,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -269,6 +313,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -295,6 +343,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -314,6 +366,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -331,6 +387,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -357,6 +417,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 								</children>
@@ -379,6 +443,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -405,6 +473,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 								</children>
@@ -429,6 +501,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -446,6 +522,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -467,6 +547,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -484,6 +568,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -505,6 +593,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -524,6 +616,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -541,6 +637,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -567,6 +667,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -586,6 +690,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -603,6 +711,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -629,6 +741,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -646,6 +762,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -667,6 +787,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -686,6 +810,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -703,6 +831,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -729,6 +861,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -746,6 +882,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -767,6 +907,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -784,6 +928,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -805,6 +953,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -824,6 +976,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -841,6 +997,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -867,6 +1027,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -886,6 +1050,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -903,6 +1071,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -932,6 +1104,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -949,6 +1125,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -975,6 +1155,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -992,6 +1176,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -1013,6 +1201,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -1032,6 +1224,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -1049,6 +1245,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -1080,6 +1280,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 										</children>
@@ -1104,6 +1308,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -1121,6 +1329,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -1142,6 +1354,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -1166,6 +1382,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -1183,6 +1403,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -1211,6 +1435,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -1230,6 +1458,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -1247,6 +1479,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -1273,6 +1509,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -1290,6 +1530,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -1316,6 +1560,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 								</children>
@@ -1340,6 +1588,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -1357,6 +1609,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -1378,6 +1634,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -1395,6 +1655,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -1416,6 +1680,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -1433,6 +1701,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -1454,6 +1726,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -1471,6 +1747,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -1492,6 +1772,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -1509,6 +1793,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -1535,6 +1823,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -1552,6 +1844,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -1578,6 +1874,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -1595,6 +1895,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -1621,6 +1925,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 								</children>
@@ -1645,6 +1953,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 								</children>
@@ -1667,6 +1979,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -1694,6 +2010,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 												</children>
@@ -1716,6 +2036,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -1742,6 +2066,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -1759,6 +2087,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -1785,6 +2117,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -1802,6 +2138,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -1828,6 +2168,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -1847,6 +2191,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -1864,6 +2212,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -1888,6 +2240,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -1905,6 +2261,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -1926,6 +2286,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -1943,6 +2307,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -1964,6 +2332,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -1983,6 +2355,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -2000,6 +2376,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -2026,6 +2406,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -2043,6 +2427,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -2075,6 +2463,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2092,6 +2484,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2118,6 +2514,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<folder_node>
@@ -2140,6 +2540,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -2157,6 +2561,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -2183,6 +2591,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2214,6 +2626,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2233,6 +2649,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2250,6 +2670,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2276,6 +2700,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2293,6 +2721,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2319,6 +2751,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2336,6 +2772,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2362,6 +2802,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2379,6 +2823,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2405,6 +2853,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2422,6 +2874,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2453,6 +2909,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2470,6 +2930,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2491,6 +2955,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2508,6 +2976,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2529,6 +3001,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2546,6 +3022,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2567,6 +3047,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2584,6 +3068,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2610,6 +3098,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2627,6 +3119,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2648,6 +3144,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2665,6 +3165,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2686,6 +3190,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2703,6 +3211,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2724,6 +3236,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2741,6 +3257,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2762,6 +3282,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2779,6 +3303,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2800,6 +3328,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2817,6 +3349,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2838,6 +3374,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2855,6 +3395,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2876,6 +3420,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2893,6 +3441,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2914,6 +3466,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2931,6 +3487,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -2952,6 +3512,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -2969,6 +3533,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3000,6 +3568,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3019,6 +3591,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3036,6 +3612,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3062,6 +3642,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3079,6 +3663,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3100,6 +3688,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3117,6 +3709,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3138,6 +3734,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3155,6 +3755,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3176,6 +3780,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3193,6 +3801,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3214,6 +3826,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3231,6 +3847,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3252,6 +3872,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3269,6 +3893,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3290,6 +3918,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3307,6 +3939,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3328,6 +3964,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3345,6 +3985,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3366,6 +4010,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3383,6 +4031,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3404,6 +4056,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3421,6 +4077,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3442,6 +4102,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3459,6 +4123,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3480,6 +4148,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3497,6 +4169,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3518,6 +4194,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3535,6 +4215,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3556,6 +4240,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3573,6 +4261,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3594,6 +4286,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3611,6 +4307,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3637,6 +4337,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 								</children>
@@ -3661,6 +4365,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3678,6 +4386,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3699,6 +4411,10 @@
 									</translation>
 									<translation>
 										<language>fr-FR</language>
+										<approved>false</approved>
+									</translation>
+									<translation>
+										<language>pl-PL</language>
 										<approved>false</approved>
 									</translation>
 								</translations>
@@ -3723,6 +4439,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -3740,6 +4460,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3764,6 +4488,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -3798,6 +4526,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -3817,6 +4549,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -3834,6 +4570,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -3860,6 +4600,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -3879,6 +4623,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -3896,6 +4644,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -3922,6 +4674,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -3941,6 +4697,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -3958,6 +4718,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -3984,6 +4748,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -4003,6 +4771,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -4020,6 +4792,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -4046,6 +4822,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -4065,6 +4845,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -4082,6 +4866,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -4108,6 +4896,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -4127,6 +4919,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -4144,6 +4940,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -4172,6 +4972,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -4191,6 +4995,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -4208,6 +5016,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -4240,6 +5052,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -4259,6 +5075,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -4276,6 +5096,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -4302,6 +5126,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -4321,6 +5149,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -4338,6 +5170,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -4369,6 +5205,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -4388,6 +5228,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -4405,6 +5249,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -4444,6 +5292,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -4463,6 +5315,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -4480,6 +5336,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -4506,6 +5366,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -4525,6 +5389,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -4542,6 +5410,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -4568,6 +5440,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -4587,6 +5463,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -4604,6 +5484,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -4635,6 +5519,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -4654,6 +5542,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -4671,6 +5563,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -4699,6 +5595,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -4718,6 +5618,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -4735,6 +5639,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -4764,6 +5672,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -4783,6 +5695,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -4800,6 +5716,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -4833,6 +5753,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -4852,6 +5776,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -4869,6 +5797,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -4895,6 +5827,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -4914,6 +5850,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -4931,6 +5871,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -4957,6 +5901,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -4976,6 +5924,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -4993,6 +5945,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -5027,6 +5983,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5046,6 +6006,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5063,6 +6027,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -5089,6 +6057,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5108,6 +6080,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5125,6 +6101,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -5151,6 +6131,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5170,6 +6154,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5187,6 +6175,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -5213,6 +6205,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5232,6 +6228,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5249,6 +6249,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -5280,6 +6284,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5299,6 +6307,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5316,6 +6328,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -5342,6 +6358,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5361,6 +6381,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5378,6 +6402,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -5404,6 +6432,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5423,6 +6455,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5440,6 +6476,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -5466,6 +6506,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5485,6 +6529,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5502,6 +6550,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -5533,6 +6585,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5552,6 +6608,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5569,6 +6629,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -5600,6 +6664,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5619,6 +6687,10 @@
 																		<language>fr-FR</language>
 																		<approved>false</approved>
 																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
+																		<approved>false</approved>
+																	</translation>
 																</translations>
 															</concept_node>
 															<concept_node>
@@ -5636,6 +6708,10 @@
 																	</translation>
 																	<translation>
 																		<language>fr-FR</language>
+																		<approved>false</approved>
+																	</translation>
+																	<translation>
+																		<language>pl-PL</language>
 																		<approved>false</approved>
 																	</translation>
 																</translations>
@@ -5679,6 +6755,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -5696,6 +6776,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -5717,6 +6801,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -5734,6 +6822,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -5755,6 +6847,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -5772,6 +6868,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -5793,6 +6893,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -5821,6 +6925,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 								</children>
@@ -5843,6 +6951,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -5869,6 +6981,10 @@
 												<language>fr-FR</language>
 												<approved>false</approved>
 											</translation>
+											<translation>
+												<language>pl-PL</language>
+												<approved>false</approved>
+											</translation>
 										</translations>
 									</concept_node>
 									<concept_node>
@@ -5886,6 +7002,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -5910,6 +7030,10 @@
 											</translation>
 											<translation>
 												<language>fr-FR</language>
+												<approved>false</approved>
+											</translation>
+											<translation>
+												<language>pl-PL</language>
 												<approved>false</approved>
 											</translation>
 										</translations>
@@ -5939,6 +7063,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 										</children>
@@ -5961,6 +7089,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -5992,6 +7124,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 										</children>
@@ -6019,6 +7155,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 												</children>
@@ -6041,6 +7181,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -6067,6 +7211,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 												</children>
@@ -6089,6 +7237,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -6120,6 +7272,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 												</children>
@@ -6142,6 +7298,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -6168,6 +7328,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 												</children>
@@ -6192,6 +7356,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 												</children>
@@ -6214,6 +7382,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -6247,6 +7419,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -6264,6 +7440,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -6290,6 +7470,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<folder_node>
@@ -6312,6 +7496,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -6329,6 +7517,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -6350,6 +7542,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -6367,6 +7563,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -6393,6 +7593,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 												</children>
@@ -6412,6 +7616,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -6438,6 +7646,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<folder_node>
@@ -6460,6 +7672,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -6477,6 +7693,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -6498,6 +7718,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -6515,6 +7739,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -6536,6 +7764,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -6555,6 +7787,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -6572,6 +7808,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -6598,6 +7838,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -6615,6 +7859,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -6636,6 +7884,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -6662,6 +7914,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<folder_node>
@@ -6684,6 +7940,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -6701,6 +7961,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -6722,6 +7986,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -6741,6 +8009,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 													<concept_node>
@@ -6758,6 +8030,10 @@
 															</translation>
 															<translation>
 																<language>fr-FR</language>
+																<approved>false</approved>
+															</translation>
+															<translation>
+																<language>pl-PL</language>
 																<approved>false</approved>
 															</translation>
 														</translations>
@@ -6784,6 +8060,10 @@
 																<language>fr-FR</language>
 																<approved>false</approved>
 															</translation>
+															<translation>
+																<language>pl-PL</language>
+																<approved>false</approved>
+															</translation>
 														</translations>
 													</concept_node>
 												</children>
@@ -6803,6 +8083,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -6829,6 +8113,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -6846,6 +8134,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -6877,6 +8169,10 @@
 														<language>fr-FR</language>
 														<approved>false</approved>
 													</translation>
+													<translation>
+														<language>pl-PL</language>
+														<approved>false</approved>
+													</translation>
 												</translations>
 											</concept_node>
 											<concept_node>
@@ -6894,6 +8190,10 @@
 													</translation>
 													<translation>
 														<language>fr-FR</language>
+														<approved>false</approved>
+													</translation>
+													<translation>
+														<language>pl-PL</language>
 														<approved>false</approved>
 													</translation>
 												</translations>
@@ -6919,6 +8219,9 @@
 		<language>
 			<code>fr-FR</code>
 		</language>
+		<language>
+			<code>pl-PL</code>
+		</language>
 	</languages>
 	<translation_packages>
 		<translation_package>
@@ -6935,6 +8238,10 @@
 				<translation_url>
 					<path>fr-FR.json</path>
 					<language>fr-FR</language>
+				</translation_url>
+				<translation_url>
+					<path>pl-PL.json</path>
+					<language>pl-PL</language>
 				</translation_url>
 			</translation_urls>
 		</translation_package>

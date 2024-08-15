@@ -101,6 +101,13 @@ export default defineNuxtConfig({
 				bcp47Code: 'de',
 				file: 'de-DE.json',
 			},
+			{
+				text: 'Polski',
+				code: 'pl-PL',
+				iso: 'pl-PL',
+				bcp47Code: 'pl',
+				file: 'pl-PL.json',
+			},
 		],
 		vueI18n: './src/config/vueI18n.config.ts',
 		strategy: 'no_prefix',

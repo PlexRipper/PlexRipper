@@ -23,9 +23,9 @@
             "no-progress-yet": "Aucun progrès pour l'instant"
         },
         "account-verification-code-dialog": {
-            "error": "",
-            "sub-title": "",
-            "title": ""
+            "error": "Le code de vérification n'était pas valide, veuillez réessayer.",
+            "sub-title": "L'authentification à deux facteurs est activée sur le compte.",
+            "title": "Code de vérification d'entrée"
         },
         "app-bar": {
             "no-accounts": "Pas de compte disponible"
@@ -95,7 +95,7 @@
             },
             "tv-show": {
                 "header": "Dossier séries",
-                "default-name": ""
+                "default-name": "Chemin du dossier de l'émission télévisée"
             }
         },
         "server-dialog": {
@@ -109,7 +109,7 @@
                 },
                 "server-config": {
                     "header": "Configuration du serveur",
-                    "plex-server-was-null": ""
+                    "plex-server-was-null": "Le serveur Plex était nul"
                 },
                 "server-connections": {
                     "header": "Connexions au serveur",
@@ -129,8 +129,8 @@
                     "all-connections-failed": "Toutes les connexions ont échoué lorsqu'elles sont utilisées pour se connecter au serveur, le serveur est probablement hors ligne...",
                     "at-least-one-connection-successful": "Au moins une connexion a réussi, ce qui signifie que le serveur peut être connecté !",
                     "values": {
-                        "platform-version": "",
-                        "product-version": ""
+                        "platform-version": "{platform} ({platformVersion})",
+                        "product-version": "{product} ({productVersion})"
                     }
                 }
             }
@@ -143,8 +143,8 @@
             }
         },
         "media-list": {
-            "no-media-found": "",
-            "selected-count": "",
+            "no-media-found": "Aucun média trouvé.",
+            "selected-count": "{selectedCount} sélectionné",
             "episode-count": "{episodeCount}  épisodes"
         },
         "server-download-status": {
@@ -169,7 +169,7 @@
             "server-unconnectable": "Le serveur ne peut pas être connecté et peut être hors ligne."
         },
         "alert-dialog": {
-            "request-data-sent": ""
+            "request-data-sent": "Données de demande envoyées :"
         },
         "app-bar-progress-bar": {
             "tooltip-text": "Synchronisation de PlexServer {finishedCount} sur {totalCount} !"
@@ -306,9 +306,9 @@
         "server-dialog": {
             "server-config": {
                 "download-speed-limit": {
-                    "label": "",
-                    "text": "",
-                    "title": ""
+                    "label": "Télécharger la limite de vitesse",
+                    "text": "Cela limitera la vitesse de téléchargement de ce serveur Plex en kilo-octets par seconde. La définition de cette valeur sur 0 désactivera la limite.",
+                    "title": "Télécharger la limite de vitesse"
                 }
             },
             "server-commands": {
@@ -318,8 +318,8 @@
                     "label": "Inspecter le serveur"
                 },
                 "sync-server-libraries": {
-                    "text": "",
-                    "title": "",
+                    "text": "Cela limitera la vitesse de téléchargement de ce serveur Plex en kilo-octets par seconde. La définition de cette valeur sur 0 désactivera la limite.",
+                    "title": "Télécharger la limite de vitesse",
                     "label": "Resyncroniser les bibliothèques"
                 }
             }
@@ -451,7 +451,7 @@
             "return-link": "Retourner à la page d'accueil"
         },
         "home": {
-            "setup-question": ""
+            "setup-question": "Il semble que ce soit la première fois que vous utilisez PlexRipper, souhaitez-vous le configurer ?"
         },
         "music": {
             "music-id": {
@@ -571,41 +571,41 @@
             }
         },
         "empty": {
-            "title": ""
+            "title": "Page vide"
         }
     },
     "debug": {
         "button-labels": {
-            "amber": "",
-            "black": "",
-            "brown5": "",
-            "deep-orange": "",
-            "primary": "",
-            "purple": "",
-            "secondary": "",
-            "standard": ""
+            "amber": "Ambre",
+            "black": "Noir",
+            "brown5": "Marron 5",
+            "deep-orange": "Orange foncé",
+            "primary": "Primaire",
+            "purple": "Violet",
+            "secondary": "Secondaire",
+            "standard": "Standard"
         },
         "buttons": {
-            "account-validation-button": "",
-            "add-icon-button": "",
-            "base-button": "",
-            "cancel-button": "",
-            "check-connection-button": "",
-            "confirm-button": "",
-            "debug-button": "",
-            "delete-button": "",
-            "delete-icon-button": "",
-            "external-link-button": "",
-            "go-to-button": "",
-            "help-button": "",
-            "hide-button": "",
-            "navigation-finish-setup-button": "",
-            "navigation-next-button": "",
-            "navigation-previous-button": "",
-            "navigation-skip-setup-button": "",
-            "reset-button": "",
-            "save-button": "",
-            "warning-button": ""
+            "account-validation-button": "Bouton de validation du compte",
+            "add-icon-button": "Bouton AjouterIcon",
+            "base-button": "Bouton de base",
+            "cancel-button": "Bouton Annuler",
+            "check-connection-button": "Bouton de vérification de la connexion",
+            "confirm-button": "Bouton de confirmation",
+            "debug-button": "Bouton de débogage",
+            "delete-button": "Bouton Supprimer",
+            "delete-icon-button": "Bouton d'icône de suppression",
+            "external-link-button": "Bouton de lien externe",
+            "go-to-button": "Bouton Aller à",
+            "help-button": "Bouton d'aide",
+            "hide-button": "Cacher le bouton",
+            "navigation-finish-setup-button": "NavigationTerminerConfigurationBouton",
+            "navigation-next-button": "NavigationNextButton",
+            "navigation-previous-button": "NavigationPrécédentBouton",
+            "navigation-skip-setup-button": "NavigationSauterBouton de configuration",
+            "reset-button": "Bouton de réinitialisation",
+            "save-button": "Bouton Enregistrer",
+            "warning-button": "Bouton d'avertissement"
         }
     }
 }

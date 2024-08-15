@@ -194,15 +194,28 @@
 					<!-- Stepper navigation bar	-->
 					<QCol
 						align-self="stretch"
-						cols="12">
+						cols="12"
+						style="max-height: 76px;">
 						<q-separator class="q-mb-md" />
-						<QRow align="center">
+						<QRow
+							justify="between"
+							align="center"
+							class="q-my-md">
+							<!-- Language Selector -->
+							<QCol cols="2">
+								<LanguageSelect
+									class="q-ml-md"
+									dense />
+							</QCol>
+							<!-- Navigation buttons -->
 							<QCol>
-								<QRow justify="center">
+								<QRow
+									justify="center"
+									align="center">
 									<QCol
 										v-if="!isNextDisabled"
 										class="q-mx-md"
-										cols="2">
+										cols="3">
 										<NavigationPreviousButton
 											:disabled="isBackDisabled"
 											cy="setup-page-previous-button"
@@ -211,7 +224,7 @@
 									<QCol
 										v-if="!isNextDisabled"
 										class="q-mx-md"
-										cols="2">
+										cols="3">
 										<NavigationNextButton
 											:disabled="isNextDisabled"
 											cy="setup-page-next-button"
@@ -219,7 +232,7 @@
 									</QCol>
 									<QCol
 										v-else
-										class="q-mx-md q-mb-md"
+										class="q-mx-md"
 										cols="auto">
 										<NavigationFinishSetupButton
 											cy="setup-page-skip-setup-button"

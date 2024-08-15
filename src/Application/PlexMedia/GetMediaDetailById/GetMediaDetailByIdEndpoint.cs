@@ -108,7 +108,7 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
 
     private async Task SetNestedMovieProperties(PlexMovie plexMovie, CancellationToken ct = default)
     {
-        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexMovie.PlexServerId, ct);
+        var plexServerConnection = await _dbContext.ChoosePlexServerConnection(plexMovie.PlexServerId, ct);
         if (plexServerConnection.IsFailed)
         {
             plexServerConnection.ToResult().LogError();
@@ -127,7 +127,7 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
 
     private async Task SetNestedTvShowProperties(PlexTvShow plexTvShow, CancellationToken ct = default)
     {
-        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexTvShow.PlexServerId, ct);
+        var plexServerConnection = await _dbContext.ChoosePlexServerConnection(plexTvShow.PlexServerId, ct);
         if (plexServerConnection.IsFailed)
         {
             plexServerConnection.ToResult().LogError();

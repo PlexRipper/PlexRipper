@@ -13,7 +13,7 @@ public static partial class DbContextExtensions
         CancellationToken cancellationToken = default
     )
     {
-        var plexServerConnectionResult = await dbContext.GetValidPlexServerConnection(plexServerId, cancellationToken);
+        var plexServerConnectionResult = await dbContext.ChoosePlexServerConnection(plexServerId, cancellationToken);
         if (plexServerConnectionResult.IsFailed)
             return plexServerConnectionResult.ToResult().LogError();
 

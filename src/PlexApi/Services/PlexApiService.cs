@@ -56,7 +56,7 @@ public class PlexApiService : IPlexApiService
         var authToken = tokenResult.Value;
         var plexLibraryKey = plexLibrary.Key;
 
-        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(
+        var plexServerConnection = await _dbContext.ChoosePlexServerConnection(
             plexLibrary.PlexServerId,
             cancellationToken
         );
@@ -106,7 +106,7 @@ public class PlexApiService : IPlexApiService
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(
+        var plexServerConnection = await _dbContext.ChoosePlexServerConnection(
             plexLibrary.PlexServerId,
             cancellationToken
         );
@@ -133,7 +133,7 @@ public class PlexApiService : IPlexApiService
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(
+        var plexServerConnection = await _dbContext.ChoosePlexServerConnection(
             plexLibrary.PlexServerId,
             cancellationToken
         );
@@ -198,7 +198,7 @@ public class PlexApiService : IPlexApiService
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexServerId, cancellationToken);
+        var plexServerConnection = await _dbContext.ChoosePlexServerConnection(plexServerId, cancellationToken);
         if (plexServerConnection.IsFailed)
             return plexServerConnection.ToResult();
 
@@ -403,7 +403,7 @@ public class PlexApiService : IPlexApiService
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var plexServerConnection = await _dbContext.GetValidPlexServerConnection(plexServer.Id, cancellationToken);
+        var plexServerConnection = await _dbContext.ChoosePlexServerConnection(plexServer.Id, cancellationToken);
         if (plexServerConnection.IsFailed)
             return plexServerConnection.ToResult();
 

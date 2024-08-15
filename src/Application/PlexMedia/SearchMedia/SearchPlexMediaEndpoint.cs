@@ -71,7 +71,7 @@ public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, Resu
             if (tokenResult.IsFailed)
                 continue;
 
-            var serverConnectionResult = await _dbContext.GetValidPlexServerConnection(plexServerId, ct);
+            var serverConnectionResult = await _dbContext.ChoosePlexServerConnection(plexServerId, ct);
             if (serverConnectionResult.IsFailed)
                 continue;
 

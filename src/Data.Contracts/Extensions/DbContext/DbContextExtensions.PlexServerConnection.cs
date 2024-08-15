@@ -10,7 +10,7 @@ public static partial class DbContextExtensions
 {
     private static readonly ILog _log = LogManager.CreateLogInstance(typeof(DbContextExtensions));
 
-    public static async Task<Result<PlexServerConnection>> GetValidPlexServerConnection(
+    public static async Task<Result<PlexServerConnection>> ChoosePlexServerConnection(
         this IPlexRipperDbContext dbContext,
         int plexServerId,
         CancellationToken cancellationToken = default

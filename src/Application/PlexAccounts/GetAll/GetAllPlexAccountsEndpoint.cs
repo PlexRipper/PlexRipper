@@ -38,7 +38,10 @@ public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpoin
 
     public override async Task HandleAsync(GetAllPlexAccountsEndpointRequest req, CancellationToken ct)
     {
-        var query = _dbContext.PlexAccounts.AsQueryable();
+        var query = _dbContext
+            .PlexAccounts.Include(x => x.PlexAccountServers)
+            .Include(x => x.PlexAccountLibraries)
+            .AsQueryable();
         if (req.EnabledOnly)
             query = query.Where(x => x.IsEnabled);
 

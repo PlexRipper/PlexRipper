@@ -98,8 +98,8 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
         await _dbContext.Entry(plexAccount).GetDatabaseValuesAsync(ct);
 
         var plexAccountDTO = await _dbContext
-            .PlexAccounts.IncludeServerAccess()
-            .IncludeLibraryAccess()
+            .PlexAccounts.Include(x => x.PlexAccountServers)
+            .Include(x => x.PlexAccountLibraries)
             .GetAsync(plexAccount.Id, ct);
 
         if (plexAccountDTO is null)

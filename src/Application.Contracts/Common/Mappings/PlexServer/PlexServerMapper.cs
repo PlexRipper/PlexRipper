@@ -41,15 +41,6 @@ public static class PlexServerMapper
 
     #endregion
 
-    #region PlexServerAccess
-
-    public static PlexServerAccessDTO ToAccessDTO(this PlexServer source) =>
-        new() { PlexServerId = source.Id, PlexLibraryIds = source.PlexLibraries.Select(x => x.Id).ToList() };
-
-    public static List<PlexServerAccessDTO> ToAccessDTO(this List<PlexServer> source) => source.ConvertAll(ToAccessDTO);
-
-    #endregion
-
     #region ToModel
 
     public static PlexServer ToModel(this PlexServerDTO source) =>

@@ -102,12 +102,12 @@ public class PlexAccount : BaseEntity
     /// <summary>
     /// The associated <see cref="PlexServer"/> this <see cref="PlexAccount"/> has access to.
     /// </summary>
-    public List<PlexAccountServer> PlexAccountServers { get; init; } = new();
+    public List<PlexAccountServer> PlexAccountServers { get; init; } = [];
 
     /// <summary>
     /// The associated <see cref="PlexLibrary"/> this <see cref="PlexAccount"/> has access to.
     /// </summary>
-    public List<PlexAccountLibrary> PlexAccountLibraries { get; init; } = new();
+    public List<PlexAccountLibrary> PlexAccountLibraries { get; init; } = [];
 
     #endregion
 

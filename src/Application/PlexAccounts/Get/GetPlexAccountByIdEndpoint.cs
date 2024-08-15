@@ -4,6 +4,7 @@ using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
@@ -45,8 +46,8 @@ public class GetPlexAccountByIdEndpoint : BaseEndpoint<GetPlexAccountByIdEndpoin
     public override async Task HandleAsync(GetPlexAccountByIdEndpointRequest req, CancellationToken ct)
     {
         var plexAccount = await _dbContext
-            .PlexAccounts.IncludeServerAccess()
-            .IncludeLibraryAccess()
+            .PlexAccounts.Include(x => x.PlexAccountServers)
+            .Include(x => x.PlexAccountLibraries)
             .GetAsync(req.PlexAccountId, ct);
         if (plexAccount is null)
         {

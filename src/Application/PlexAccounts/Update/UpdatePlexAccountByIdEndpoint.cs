@@ -54,7 +54,7 @@ public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdE
         var accountInDb = await _dbContext
             .PlexAccounts.AsTracking()
             .Include(x => x.PlexAccountServers)
-            .ThenInclude(x => x.PlexServer)
+            .Include(x => x.PlexAccountLibraries)
             .GetAsync(plexAccountDTO.Id, ct);
 
         if (accountInDb == null)

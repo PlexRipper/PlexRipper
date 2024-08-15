@@ -444,7 +444,8 @@ export interface PlexAccountDTO {
   password: string;
   /** @format int64 */
   plexId: number;
-  plexServerAccess: PlexServerAccessDTO[];
+  plexLibraryAccess: number[];
+  plexServerAccess: number[];
   title: string;
   /** @minLength 5 */
   username: string;
@@ -629,12 +630,6 @@ export enum PlexMediaType {
   OtherVideos = "OtherVideos",
   Games = "Games",
   Unknown = "Unknown",
-}
-
-export interface PlexServerAccessDTO {
-  plexLibraryIds: number[];
-  /** @format int32 */
-  plexServerId: number;
 }
 
 export interface PlexServerConnectionDTO {

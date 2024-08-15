@@ -168,6 +168,7 @@ function getDefaultAccount(): IPlexAccount {
 		authenticationToken: '',
 		email: '',
 		plexServerAccess: [],
+		plexLibraryAccess: [],
 		isAuthTokenMode: false,
 		// Dialog properties
 

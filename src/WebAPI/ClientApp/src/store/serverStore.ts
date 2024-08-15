@@ -74,25 +74,11 @@ export const useServerStore = defineStore('ServerStore', () => {
 		getServers: (serverIds: number[] = []): PlexServerDTO[] =>
 			state.servers.filter((server) => !serverIds.length || serverIds.includes(server.id)),
 		getVisibleServers: computed((): PlexServerDTO[] =>
-			getters.getServers().filter((x) => settingsStore.isServerVisible(x.machineIdentifier)),
+			getters.getServers().filter((x) => settingsStore.isServerVisible(x.machineIdentifier) && accountStore.getHasAccountServerAccess(x.id)),
 		),
 		getHiddenServers: computed((): PlexServerDTO[] =>
 			getters.getServers().filter((x) => !settingsStore.isServerVisible(x.machineIdentifier)),
 		),
-		/**
-		 * Retrieves the accessible PlexServers for the given PlexAccount from the store
-		 */
-		getServersByPlexAccountId: (plexAccountId: number): PlexServerDTO[] => {
-			if (plexAccountId === 0) {
-				return [];
-			}
-			const account = accountStore.getAccount(plexAccountId);
-			if (!account) {
-				return [];
-			}
-			const serverIds = account.plexServerAccess.map((x) => x.plexServerId);
-			return state.servers.filter((server) => serverIds.includes(server.id));
-		},
 		getServerName: (serverId: number): string => {
 			if (settingsStore.shouldMaskServerNames) {
 				return '**MASKED**';

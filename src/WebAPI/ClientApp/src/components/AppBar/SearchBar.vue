@@ -9,7 +9,7 @@
 		behavior="menu"
 		@filter="filterFn"
 		@filter-abort="abortFilterFn"
-		@input-value="input = $event">
+		@input-value="query = $event">
 		<template #option="{ opt, itemProps } : {opt: PlexMediaSlimDTO, itemProps: any}">
 			<q-item v-bind="itemProps">
 				<q-item-section avatar>

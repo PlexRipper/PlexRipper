@@ -81,26 +81,36 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
         CancellationToken cancellationToken = default
     )
     {
-        _log.Debug(
-            "Retrieving accessible PlexLibraries for plexServer with id: {PlexServerId} by using Plex account with id {PlexAccountId}",
-            _dbContext.GetPlexServerNameById(plexServerId, cancellationToken),
-            plexAccountId
-        );
-
-        var libraries = await _plexServiceApi.GetLibrarySectionsAsync(
-            plexServerId,
-            cancellationToken: cancellationToken
-        );
-        if (libraries.IsFailed)
-            return libraries.ToResult();
-
-        if (!libraries.Value.Any())
+        try
         {
-            var msg =
-                $"{nameof(PlexServer)} with Id {plexServerId} returned no Plex libraries for Plex account with id {plexAccountId}";
-            return Result.Fail(msg).LogWarning();
-        }
+            var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, cancellationToken);
+            var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
+            _log.Debug(
+                "Retrieving accessible PlexLibraries for plexServer with name: {PlexServerName} by using Plex account with id {PlexAccountName}",
+                plexServerName,
+                plexAccountName,
+                0
+            );
 
-        return libraries;
+            var libraries = await _plexServiceApi.GetLibrarySectionsAsync(
+                plexServerId,
+                cancellationToken: cancellationToken
+            );
+            if (libraries.IsFailed)
+                return libraries.ToResult();
+
+            if (!libraries.Value.Any())
+            {
+                var msg =
+                    $"{nameof(PlexServer)} with Id {plexServerId} returned no Plex libraries for Plex account with id {plexAccountId}";
+                return Result.Fail(msg).LogWarning();
+            }
+
+            return libraries;
+        }
+        catch (Exception e)
+        {
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
     }
 }

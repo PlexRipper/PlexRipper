@@ -333,7 +333,7 @@ function saveAccount(close: () => void) {
 		);
 	} else {
 		useSubscription(
-			accountStore.updatePlexAccount(accountData, get(hasCredentialsChanged)).subscribe((account) => {
+			accountStore.updatePlexAccount(accountData).subscribe((account) => {
 				if (account) {
 					set(changedPlexAccount, {
 						...get(changedPlexAccount),

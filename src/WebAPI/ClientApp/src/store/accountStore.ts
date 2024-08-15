@@ -51,14 +51,9 @@ export const useAccountStore = defineStore('AccountStore', () => {
 				switchMap(() => of(actions.getAccount(account.id))),
 			);
 		},
-		updatePlexAccount(account: PlexAccountDTO, inspect = false) {
+		updatePlexAccount(account: PlexAccountDTO) {
 			return plexAccountApi
-				.updatePlexAccountByIdEndpoint(
-					{
-						inspect,
-					},
-					account,
-				)
+				.updatePlexAccountByIdEndpoint(account)
 				.pipe(
 					switchMap(() =>
 						forkJoin([actions.refreshAccounts(), serverStore.refreshPlexServers(), libraryStore.refreshLibraries()]),

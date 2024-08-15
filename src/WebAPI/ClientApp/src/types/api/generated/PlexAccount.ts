@@ -12,7 +12,7 @@
 import type { RequestParams } from "./http-client";
 import { ContentType } from "./http-client";
 
-import type { AuthPin, PlexAccountDTO, ResultDTO, UpdatePlexAccountDTO } from "./data-contracts";
+import type { AuthPin, PlexAccountDTO, ResultDTO } from "./data-contracts";
 
 import { apiCheckPipe } from "@api/base";
 import Axios from "axios";
@@ -109,18 +109,11 @@ export class PlexAccount {
  * @request PUT:/api/PlexAccount
 
  */
-  updatePlexAccountByIdEndpoint = (
-    query: {
-      inspect: boolean;
-    },
-    data: UpdatePlexAccountDTO,
-    params: RequestParams = {},
-  ) =>
+  updatePlexAccountByIdEndpoint = (data: PlexAccountDTO, params: RequestParams = {}) =>
     from(
       Axios.request<PlexAccountDTO>({
         url: `/api/PlexAccount`,
         method: "PUT",
-        params: query,
         data: data,
         type: ContentType.Json,
         format: "json",
@@ -234,8 +227,7 @@ export class PlexAccountPaths {
     enabledOnly?: boolean;
   }) => queryString.stringifyUrl({ url: `/api/PlexAccount`, query });
 
-  static updatePlexAccountByIdEndpoint = (query: { inspect: boolean }) =>
-    queryString.stringifyUrl({ url: `/api/PlexAccount`, query });
+  static updatePlexAccountByIdEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexAccount` });
 
   static isUsernameAvailableEndpoint = (query: { username: string }) =>
     queryString.stringifyUrl({ url: `/api/PlexAccount/check`, query });

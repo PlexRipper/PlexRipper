@@ -430,7 +430,11 @@ export interface PlexAccountDTO {
   displayName: string;
   email: string;
   hasPassword: boolean;
-  /** @format int32 */
+  /**
+   * @format int32
+   * @min 0
+   * @exclusiveMin true
+   */
   id: number;
   isAuthTokenMode: boolean;
   isEnabled: boolean;
@@ -992,25 +996,7 @@ export interface UpdateFolderPathEndpointRequest {
 }
 
 export interface UpdatePlexAccountByIdEndpointRequest {
-  plexAccountDTO: UpdatePlexAccountDTO;
-}
-
-export interface UpdatePlexAccountDTO {
-  /** @minLength 1 */
-  displayName: string;
-  /**
-   * @format int32
-   * @min 0
-   * @exclusiveMin true
-   */
-  id: number;
-  isAuthTokenMode: boolean;
-  isEnabled: boolean;
-  isMain: boolean;
-  /** @minLength 5 */
-  password: string;
-  /** @minLength 5 */
-  username: string;
+  plexAccountDTO: PlexAccountDTO;
 }
 
 export interface UpdateUserSettingsEndpointRequest {

@@ -47,8 +47,21 @@ public static partial class MockDatabase
             }
         }
 
-        await context.PlexServers.AddRangeAsync(plexServers);
+        context.PlexServers.AddRange(plexServers);
+        await context.SaveChangesAsync();
 
+        // Add status to each connection
+        var plexConnections = plexServers.SelectMany(x => x.PlexServerConnections).ToList();
+        List<PlexServerStatus> plexServerStatus = [];
+        foreach (var connection in plexConnections)
+        {
+            var status = FakeData.GetPlexServerStatus().Generate();
+            status.PlexServerConnectionId = connection.Id;
+            status.PlexServerId = connection.PlexServerId;
+            plexServerStatus.Add(status);
+        }
+
+        await context.PlexServerStatuses.AddRangeAsync(plexServerStatus);
         await context.SaveChangesAsync();
 
         _log.Here()

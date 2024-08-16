@@ -125,6 +125,22 @@ public static partial class FakeData
             );
     }
 
+    public static Faker<PlexServerStatus> GetPlexServerStatus(int seed = 0)
+    {
+        return new Faker<PlexServerStatus>()
+            .StrictMode(true)
+            .UseSeed(seed)
+            .RuleFor(x => x.Id, _ => 0)
+            .RuleFor(x => x.IsSuccessful, _ => true)
+            .RuleFor(x => x.StatusCode, _ => 200)
+            .RuleFor(x => x.StatusMessage, f => f.Hacker.Phrase())
+            .RuleFor(x => x.LastChecked, f => f.Date.Recent())
+            .RuleFor(x => x.PlexServerConnection, _ => null)
+            .RuleFor(x => x.PlexServerConnectionId, _ => 0)
+            .RuleFor(x => x.PlexServer, _ => null)
+            .RuleFor(x => x.PlexServerId, _ => 0);
+    }
+
     public static List<PlexAccountServer> GetPlexAccountServer(
         PlexAccount plexAccount,
         List<PlexServer> plexServers,

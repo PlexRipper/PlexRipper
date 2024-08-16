@@ -35,7 +35,11 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
     public async Task ShouldReturnAFailedResult_WhenThereAreNoPlexConnections()
     {
         // Act
-        await SetupDatabase(config => config.PlexServerCount = 1);
+        await SetupDatabase(config =>
+        {
+            config.PlexServerCount = 1;
+            config.PlexServerConnectionPerServerCount = 0;
+        });
         var result = await IDbContext.ChoosePlexServerConnection(1);
 
         // Assert
@@ -100,6 +104,7 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
 
         var plexServer = await IDbContext.PlexServers.Include(x => x.PlexServerConnections).FirstOrDefaultAsync();
         plexServer.ShouldNotBeNull();
+        await IDbContext.PlexServerStatuses.ExecuteDeleteAsync();
 
         // Act
         var result = await IDbContext.ChoosePlexServerConnection(plexServer.Id);
@@ -115,10 +120,11 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
         await SetupDatabase(config =>
         {
             config.PlexServerCount = 1;
+            config.PlexServerConnectionPerServerCount = 0;
         });
 
         var dbContext = IDbContext;
-        var plexServer = await dbContext.PlexServers.Include(x => x.PlexServerConnections).FirstOrDefaultAsync();
+        var plexServer = await dbContext.PlexServers.FirstOrDefaultAsync();
         plexServer.ShouldNotBeNull();
 
         var plexServerConnections = FakeData.GetPlexServerConnections().Generate(5);
@@ -127,20 +133,10 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
         foreach (var plexServerConnection in plexServerConnections)
         {
             plexServerConnection.PlexServerId = plexServer.Id;
-            plexServerConnection.PlexServerStatus.Add(
-                new PlexServerStatus
-                {
-                    Id = 0,
-                    IsSuccessful = true,
-                    StatusCode = 200,
-                    StatusMessage = string.Empty,
-                    LastChecked = DateTime.UtcNow,
-                    PlexServer = null,
-                    PlexServerId = plexServer.Id,
-                    PlexServerConnection = null,
-                    PlexServerConnectionId = plexServerConnection.Id,
-                }
-            );
+            var status = FakeData.GetPlexServerStatus().Generate();
+            status.PlexServerId = plexServer.Id;
+            status.PlexServerConnectionId = plexServerConnection.Id;
+            plexServerConnection.PlexServerStatus.Add(status);
         }
 
         dbContext.PlexServerConnections.AddRange(plexServerConnections);

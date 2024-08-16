@@ -47,12 +47,17 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
         var plexServerId = command.PlexServerId;
 
         var plexLibraries = new List<PlexLibrary>();
+
         if (plexServerId == 0)
         {
-            var plexServers = await _dbContext.GetAllPlexServersByPlexAccountIdQuery(plexAccountId, cancellationToken);
+            var result = await _dbContext.GetAccessiblePlexServers(plexAccountId, cancellationToken);
+            if (result.IsFailed)
+                return result.ToResult();
+
+            var plexServers = result.Value;
 
             var libraryResults = await Task.WhenAll(
-                plexServers.Select(plexServer => RefreshLibrary(plexServer.Id, plexAccountId, cancellationToken))
+                plexServers.Select(x => RefreshLibrary(x.Id, plexAccountId, cancellationToken))
             );
 
             if (libraryResults.All(x => x.IsFailed))
@@ -94,7 +99,8 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
 
             var libraries = await _plexServiceApi.GetLibrarySectionsAsync(
                 plexServerId,
-                cancellationToken: cancellationToken
+                plexAccountId,
+                cancellationToken
             );
             if (libraries.IsFailed)
                 return libraries.ToResult();

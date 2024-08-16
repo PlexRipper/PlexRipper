@@ -1,27 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain;
 
 namespace Data.Contracts;
 
 public static partial class DbContextExtensions
 {
-    public static Task<List<PlexServer>> GetAllPlexServersByPlexAccountIdQuery(
-        this IPlexRipperDbContext dbContext,
-        int plexAccountId,
-        CancellationToken cancellationToken = default
-    )
-    {
-        return dbContext
-            .PlexAccountServers.Include(x => x.PlexServer)
-            .ThenInclude(x => x.ServerStatus)
-            .Include(x => x.PlexServer)
-            .ThenInclude(x => x.PlexServerConnections)
-            .ThenInclude(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(1))
-            .Where(x => x.PlexAccountId == plexAccountId && x.PlexServer!.IsEnabled)
-            .Select(x => x.PlexServer)
-            .ToListAsync(cancellationToken);
-    }
-
     public static async Task<string> GetPlexServerNameById(
         this IPlexRipperDbContext dbContext,
         int plexServerId,

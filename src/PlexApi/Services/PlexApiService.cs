@@ -208,7 +208,7 @@ public class PlexApiService : IPlexApiService
         if (plexServer is null)
             return ResultExtensions.EntityNotFound(nameof(PlexServer), plexServerId);
 
-        var result = await _plexApi.GetLibrarySectionsAsync(tokenResult.Value, serverUrl);
+        var result = await _plexApi.GetAccessibleLibraryInPlexServerAsync(tokenResult.Value, serverUrl);
         if (result.IsFailed)
         {
             _log.Warning("Plex server with name: {PlexServerName} returned no libraries", plexServer.Name);

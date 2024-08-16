@@ -183,7 +183,10 @@ public class PlexApi
     /// <param name="plexAuthToken"></param>
     /// <param name="plexFullHost"></param>
     /// <returns></returns>
-    public async Task<Result<LibrariesResponse>> GetLibrarySectionsAsync(string plexAuthToken, string plexFullHost)
+    public async Task<Result<LibrariesResponse>> GetAccessibleLibraryInPlexServerAsync(
+        string plexAuthToken,
+        string plexFullHost
+    )
     {
         var request = new RestRequest(PlexApiPaths.GetLibraries(plexFullHost));
 

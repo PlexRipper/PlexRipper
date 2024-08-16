@@ -10,32 +10,32 @@ namespace PlexRipper.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "LibraryLocationId",
-                table: "PlexLibraries");
+            migrationBuilder.DropColumn(name: "LibraryLocationId", table: "PlexLibraries");
 
-            migrationBuilder.DropColumn(
-                name: "LibraryLocationPath",
-                table: "PlexLibraries");
+            migrationBuilder.DropColumn(name: "LibraryLocationPath", table: "PlexLibraries");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "LibraryLocationId",
-                table: "PlexLibraries",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: 0)
+            migrationBuilder
+                .AddColumn<int>(
+                    name: "LibraryLocationId",
+                    table: "PlexLibraries",
+                    type: "INTEGER",
+                    nullable: false,
+                    defaultValue: 0
+                )
                 .Annotation("Relational:ColumnOrder", 10);
 
-            migrationBuilder.AddColumn<string>(
-                name: "LibraryLocationPath",
-                table: "PlexLibraries",
-                type: "TEXT",
-                nullable: false,
-                defaultValue: "")
+            migrationBuilder
+                .AddColumn<string>(
+                    name: "LibraryLocationPath",
+                    table: "PlexLibraries",
+                    type: "TEXT",
+                    nullable: false,
+                    defaultValue: ""
+                )
                 .Annotation("Relational:ColumnOrder", 4);
         }
     }

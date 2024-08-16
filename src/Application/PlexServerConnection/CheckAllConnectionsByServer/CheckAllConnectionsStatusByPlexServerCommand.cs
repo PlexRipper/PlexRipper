@@ -1,5 +1,6 @@
 using Data.Contracts;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
@@ -24,11 +25,17 @@ public class CheckAllConnectionsStatusByPlexServerCommandValidator
 public class CheckAllConnectionsStatusByPlexServerCommandHandler
     : IRequestHandler<CheckAllConnectionsStatusByPlexServerCommand, Result<List<PlexServerStatus>>>
 {
+    private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
 
-    public CheckAllConnectionsStatusByPlexServerCommandHandler(IPlexRipperDbContext dbContext, IMediator mediator)
+    public CheckAllConnectionsStatusByPlexServerCommandHandler(
+        ILog log,
+        IPlexRipperDbContext dbContext,
+        IMediator mediator
+    )
     {
+        _log = log;
         _dbContext = dbContext;
         _mediator = mediator;
     }
@@ -41,6 +48,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandHandler
         var plexServerId = command.PlexServerId;
 
         var plexServer = await _dbContext.PlexServers.GetAsync(plexServerId, cancellationToken);
+        var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, cancellationToken);
 
         if (plexServer == null)
             return ResultExtensions.EntityNotFound(nameof(plexServerId), plexServerId).LogError();
@@ -48,7 +56,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandHandler
         if (!plexServer.IsEnabled)
         {
             return ResultExtensions
-                .ServerIsNotEnabled(plexServer.Name, plexServerId, nameof(CheckAllConnectionsStatusByPlexServerCommand))
+                .ServerIsNotEnabled(plexServerName, plexServerId, nameof(CheckAllConnectionsStatusByPlexServerCommand))
                 .LogError();
         }
 
@@ -70,6 +78,13 @@ public class CheckAllConnectionsStatusByPlexServerCommandHandler
         if (tasksResult.Any(statusResult => statusResult.Value.IsSuccessful))
             return Result.Ok(combinedResults.Value.ToList());
 
-        return Result.Fail($"All connections to plex server with id: {plexServerId} failed to connect").LogError();
+        var msg = _log.Error(
+                "All connections to plex server with name: {PlexServerName} and id: {PlexServerId} failed to connect",
+                plexServerName,
+                plexServerId
+            )
+            .ToLogString();
+
+        return Result.Fail(msg);
     }
 }

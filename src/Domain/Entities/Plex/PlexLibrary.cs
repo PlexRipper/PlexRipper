@@ -25,13 +25,6 @@ public class PlexLibrary : BaseEntity
     public required string Key { get; init; }
 
     /// <summary>
-    /// Gets or sets the relative path of the Library location on the hosted PlexServer,
-    /// E.g: /AnimeSeries, Q:\[T.V SHOWS].
-    /// </summary>
-    [Column(Order = 4)]
-    public required string LibraryLocationPath { get; init; }
-
-    /// <summary>
     /// Gets or sets the creation date of this <see cref="PlexLibrary"/> on the <see cref="PlexServer"/> by the owner.
     /// Value is set by the PlexApi.
     /// </summary>
@@ -63,12 +56,6 @@ public class PlexLibrary : BaseEntity
     /// </summary>
     [Column(Order = 9)]
     public required Guid Uuid { get; init; }
-
-    /// <summary>
-    /// Gets or sets this relative path Id of the Library location.
-    /// </summary>
-    [Column(Order = 10)]
-    public required int LibraryLocationId { get; init; }
 
     /// <summary>
     /// Gets or sets the <see cref="PlexLibraryMetaData"/>, this is a JSON field that contains a collection

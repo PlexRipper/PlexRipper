@@ -50,6 +50,12 @@ public class CheckPlexServerConnectionsJob : IJob
             await Task.WhenAll(serverTasks);
 
             await _signalRService.SendRefreshNotificationAsync([DataType.PlexServerConnection], cancellationToken);
+
+            _log.Information(
+                "{JobName} for servers with ids: {PlexServerIds} completed",
+                nameof(CheckPlexServerConnectionsJob),
+                plexServerIds
+            );
         }
         catch (Exception e)
         {

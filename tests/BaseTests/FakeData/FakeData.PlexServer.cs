@@ -65,8 +65,6 @@ public static partial class FakeData
             .RuleFor(x => x.ScannedAt, f => f.Date.Recent())
             .RuleFor(x => x.SyncedAt, f => f.Date.Recent())
             .RuleFor(x => x.Uuid, _ => Guid.NewGuid())
-            .RuleFor(x => x.LibraryLocationId, f => f.Random.Int(1, 10000))
-            .RuleFor(x => x.LibraryLocationPath, f => f.System.DirectoryPath())
             .RuleFor(
                 x => x.MetaData,
                 _ => new PlexLibraryMetaData

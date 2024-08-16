@@ -116,7 +116,13 @@ public static partial class FakeData
             .RuleFor(x => x.Uri, f => f.Internet.Url())
             .RuleFor(x => x.PlexServerStatus, _ => [])
             .RuleFor(x => x.PlexServer, _ => null)
-            .RuleFor(x => x.PlexServerId, _ => 0);
+            .RuleFor(x => x.PlexServerId, _ => 0)
+            .FinishWith(
+                (_, connection) =>
+                {
+                    connection.Uri = $"{connection.Protocol}://{connection.Address}:{connection.Port}";
+                }
+            );
     }
 
     public static List<PlexAccountServer> GetPlexAccountServer(

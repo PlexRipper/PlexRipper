@@ -1,4 +1,3 @@
-using Application.Contracts;
 using Autofac;
 using Data.Contracts;
 using Logging.Interface;
@@ -46,6 +45,8 @@ public class BaseUnitTest : IDisposable
 
     // ReSharper disable once InconsistentNaming
     protected IPlexRipperDbContext IDbContext => GetDbContext();
+
+    protected Mock<IPlexRipperDbContext> MockIDbContext => new();
 
     private List<PlexRipperDbContext> _dbContexts = new();
 

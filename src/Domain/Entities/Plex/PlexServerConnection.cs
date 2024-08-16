@@ -20,7 +20,7 @@ public class PlexServerConnection : BaseEntity
     public required int Port { get; set; }
 
     [Column(Order = 4)]
-    public required string Uri { get; init; }
+    public required string Uri { get; set; }
 
     [Column(Order = 5)]
     public required bool Local { get; init; }

@@ -1,5 +1,6 @@
 using Application.Contracts;
 using Logging.Interface;
+using PlexRipper.PlexApi.Api.Media.Providers;
 using PlexRipper.PlexApi.Api.Users.SignIn;
 using PlexRipper.PlexApi.Helpers;
 using PlexRipper.PlexApi.Models;
@@ -191,6 +192,28 @@ public class PlexApi
 
         _log.Debug("GetLibrarySectionsAsync => {Url}", request.Resource);
         return await _client.SendRequestAsync<LibrariesResponse>(request);
+    }
+
+    /// <summary>
+    /// This returns the media providers that are available on the Plex server.
+    /// NOTE: This includes all the accessible Plex libraries.
+    /// </summary>
+    /// <param name="plexAuthToken"></param>
+    /// <param name="plexFullHost"></param>
+    /// <returns></returns>
+    public async Task<Result<MediaProvidersResponse>> GetServerProviderDataAsync(
+        string plexAuthToken,
+        string plexFullHost
+    )
+    {
+        var request = new RestRequest(PlexApiPaths.GetProviderData(plexFullHost));
+
+        request.AddToken(plexAuthToken);
+        request.AddPlexHeaders(plexAuthToken);
+        request.Timeout = 15000;
+
+        _log.Debug("GetLibrarySectionsAsync => {Url}", request.Resource);
+        return await _client.SendRequestAsync<MediaProvidersResponse>(request);
     }
 
     /// <summary>

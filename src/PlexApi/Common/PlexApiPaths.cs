@@ -18,6 +18,8 @@ public static class PlexApiPaths
 
     public static string GetLibraries(string serverUrl) => $"{ServerUrl(serverUrl)}{LibrarySectionsPath}";
 
+    public static string GetProviderData(string serverUrl) => $"{ServerUrl(serverUrl)}{ProvidersPath}";
+
     public static string GetLibrariesMetadata(string serverUrl, string libraryKey) =>
         $"{ServerUrl(serverUrl)}{GetLibrariesSectionsPath(libraryKey)}";
 
@@ -53,6 +55,8 @@ public static class PlexApiPaths
 
     public static string LibrarySectionsPath => "/library/sections";
     public static string UserPath => "/api/v2/user";
+
+    public static string ProvidersPath => "/media/providers";
 
     #endregion
 

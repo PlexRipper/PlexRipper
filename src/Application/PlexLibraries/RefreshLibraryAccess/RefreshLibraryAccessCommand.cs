@@ -86,7 +86,7 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
             var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, cancellationToken);
             var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
             _log.Debug(
-                "Retrieving accessible PlexLibraries for plexServer with name: {PlexServerName} by using Plex account with id {PlexAccountName}",
+                "Retrieving accessible PlexLibraries for plexServer with name: {PlexServerName} by using Plex account: {PlexAccountName}",
                 plexServerName,
                 plexAccountName,
                 0
@@ -101,9 +101,14 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
 
             if (!libraries.Value.Any())
             {
-                var msg =
-                    $"{nameof(PlexServer)} with Id {plexServerId} returned no Plex libraries for Plex account with id {plexAccountId}";
-                return Result.Fail(msg).LogWarning();
+                var msg = _log.Warning(
+                        "PlexServer with name {PlexServerName} returned no Plex libraries for Plex account {plexAccountName}",
+                        plexServerName,
+                        plexAccountName,
+                        0
+                    )
+                    .ToLogString();
+                return Result.Fail(msg);
             }
 
             return libraries;

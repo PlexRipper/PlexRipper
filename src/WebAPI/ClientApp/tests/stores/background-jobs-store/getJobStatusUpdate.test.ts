@@ -33,4 +33,27 @@ describe('BackgroundJobsStore.getJobStatusUpdate()', () => {
 		// Assert
 		expect(result.getFirstValue()).toEqual(testMsg);
 	});
+
+	test('Should return the statusJobUpdate when its filtered', () => {
+		// Arrange
+		const backgroundJobsStore = useBackgroundJobsStore();
+
+		const testMsg = generateJobStatusUpdate({
+			jobType: JobTypes.SyncServerMediaJob,
+			jobStatus: JobStatus.Started,
+			data: {
+				plexServerId: 1,
+				forceSync: false,
+			},
+		});
+
+		// Act
+		backgroundJobsStore.setup();
+		const result = subscribeSpyTo(backgroundJobsStore.getSyncServerMediaJobUpdate(JobStatus.Started));
+
+		backgroundJobsStore.setStatusJobUpdate(testMsg);
+
+		// Assert
+		expect(result.getFirstValue()).toEqual(testMsg);
+	});
 });

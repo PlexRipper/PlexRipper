@@ -248,18 +248,18 @@ onMounted(() => {
 
 	useSubscription(
 		backgroundJobStore.getCheckPlexServerConnectionsJobUpdate(JobStatus.Started)
-			.subscribe({ next: ({ data }) => {
+			.subscribe(({ data }) => {
 				get(plexServerIds).push(data.plexServerId);
 				useOpenControlDialog(name);
-			} }),
+			}),
 	);
 
 	useSubscription(
 		backgroundJobStore.getInspectPlexServerJobUpdate(JobStatus.Started)
-			.subscribe({ next: ({ data }) => {
+			.subscribe(({ data }) => {
 				get(plexServerIds).push(...data);
 				useOpenControlDialog(name);
-			} }),
+			}),
 	);
 });
 

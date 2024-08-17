@@ -363,11 +363,9 @@ export enum JobTypes {
   Unknown = "Unknown",
   CheckPlexServerConnectionsJob = "CheckPlexServerConnectionsJob",
   DownloadJob = "DownloadJob",
-  DownloadProgressJob = "DownloadProgressJob",
-  SyncServerJob = "SyncServerJob",
-  DownloadProgressJobs = "DownloadProgressJobs",
-  InspectPlexServerJob = "InspectPlexServerJob",
   FileMergeJob = "FileMergeJob",
+  SyncServerMediaJob = "SyncServerMediaJob",
+  InspectPlexServerJob = "InspectPlexServerJob",
 }
 
 export interface LanguageSettingsDTO {
@@ -397,7 +395,7 @@ export enum MessageTypes {
   InspectServerProgress = "InspectServerProgress",
   ServerConnectionCheckStatusProgress = "ServerConnectionCheckStatusProgress",
   FileMergeProgress = "FileMergeProgress",
-  SyncServerProgress = "SyncServerProgress",
+  SyncServerMediaProgress = "SyncServerMediaProgress",
   Notification = "Notification",
   JobStatusUpdate = "JobStatusUpdate",
   RefreshNotification = "RefreshNotification",
@@ -977,7 +975,13 @@ export interface SuccessDTO {
   metadata: Record<string, any>;
 }
 
-export interface SyncServerProgress {
+export interface SyncServerMediaJobUpdateDTO {
+  forceSync: boolean;
+  /** @format int32 */
+  plexServerId: number;
+}
+
+export interface SyncServerMediaProgress {
   /** @format int32 */
   id: number;
   libraryProgresses: LibraryProgress[];

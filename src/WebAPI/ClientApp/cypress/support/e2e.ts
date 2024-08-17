@@ -25,15 +25,16 @@ Cypress.Commands.add('getCy', (selector: string) => cy.get(`[data-cy="${selector
 Cypress.Commands.add(
 	'hubPublishJobStatusUpdate',
 	<T>(type: JobTypes, status: JobStatus, data: T) => {
+		const msg = generateJobStatusUpdate({
+			jobType: type,
+			jobStatus: status,
+			data,
+		});
 		cy.hubPublish(
 			'progress',
 			MessageTypes.JobStatusUpdate,
-			generateJobStatusUpdate({
-				jobType: type,
-				jobStatus: status,
-				data,
-			}),
-		);
+			msg,
+		).log('JobStatusUpdate', type, status, msg);
 	},
 );
 

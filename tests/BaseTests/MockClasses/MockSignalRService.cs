@@ -42,7 +42,8 @@ public class MockSignalRService : ISignalRService
 
     public Task SendNotificationAsync(Notification notification) => Task.CompletedTask;
 
-    public Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress) => Task.CompletedTask;
+    public Task SendServerSyncProgressUpdateAsync(SyncServerMediaProgress syncServerMediaProgress) =>
+        Task.CompletedTask;
 
     public Task SendDownloadProgressUpdateAsync(
         List<DownloadTaskGeneric> downloadTasks,

@@ -24,17 +24,17 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         await Clients.All.JobStatusUpdate(jobStatusUpdate, cancellationToken);
     }
 
-    public async Task SyncServerProgress(
-        SyncServerProgress syncServerProgress,
+    public async Task SyncServerMediaProgress(
+        SyncServerMediaProgress syncServerMediaProgress,
         CancellationToken cancellationToken = default
     )
     {
         _log.Debug(
             "Sending progress: {MessageTypesNotification} => {@SyncServerProgress}",
-            MessageTypes.SyncServerProgress.ToString(),
-            syncServerProgress
+            MessageTypes.SyncServerMediaProgress.ToString(),
+            syncServerMediaProgress
         );
-        await Clients.All.SyncServerProgress(syncServerProgress, cancellationToken);
+        await Clients.All.SyncServerMediaProgress(syncServerMediaProgress, cancellationToken);
     }
 
     public async Task FileMergeProgress(

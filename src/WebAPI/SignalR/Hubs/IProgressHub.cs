@@ -7,7 +7,10 @@ public interface IProgressHub
 {
     Task JobStatusUpdate(JobStatusUpdateDTO jobStatusUpdate, CancellationToken cancellationToken = default);
 
-    Task SyncServerProgress(SyncServerProgress SyncServerProgress, CancellationToken cancellationToken = default);
+    Task SyncServerMediaProgress(
+        SyncServerMediaProgress syncServerMediaProgress,
+        CancellationToken cancellationToken = default
+    );
 
     Task FileMergeProgress(FileMergeProgress fileMergeProgress, CancellationToken cancellationToken = default);
 

@@ -3,10 +3,10 @@ using PlexRipper.Domain;
 
 namespace WebAPI.Contracts;
 
-public class SyncServerProgress
+public class SyncServerMediaProgress
 {
     [SetsRequiredMembers]
-    public SyncServerProgress(int serverId, List<LibraryProgress> libraryProgresses)
+    public SyncServerMediaProgress(int serverId, List<LibraryProgress> libraryProgresses)
     {
         Id = serverId;
         LibraryProgresses = libraryProgresses;

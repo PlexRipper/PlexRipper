@@ -19,7 +19,7 @@ public interface ISignalRService
 
     Task SendNotificationAsync(Notification notification);
 
-    Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress);
+    Task SendServerSyncProgressUpdateAsync(SyncServerMediaProgress syncServerMediaProgress);
 
     Task SendDownloadProgressUpdateAsync(
         List<DownloadTaskGeneric> downloadTasks,

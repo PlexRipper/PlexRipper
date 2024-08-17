@@ -72,9 +72,9 @@ public class SignalRService : ISignalRService
         await _progressHub.Clients.All.FileMergeProgress(fileMergeProgress, cancellationToken);
     }
 
-    public async Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress)
+    public async Task SendServerSyncProgressUpdateAsync(SyncServerMediaProgress syncServerMediaProgress)
     {
-        await _progressHub.Clients.All.SyncServerProgress(syncServerProgress);
+        await _progressHub.Clients.All.SyncServerMediaProgress(syncServerMediaProgress);
     }
 
     #endregion

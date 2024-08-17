@@ -24,15 +24,14 @@ Cypress.Commands.add('getCy', (selector: string) => cy.get(`[data-cy="${selector
 
 Cypress.Commands.add(
 	'hubPublishJobStatusUpdate',
-	(type: JobTypes, status: JobStatus, primaryKey: string, primaryKeyValue: string) => {
+	<T>(type: JobTypes, status: JobStatus, data: T) => {
 		cy.hubPublish(
 			'progress',
 			MessageTypes.JobStatusUpdate,
 			generateJobStatusUpdate({
 				jobType: type,
 				jobStatus: status,
-				primaryKey,
-				primaryKeyValue,
+				data,
 			}),
 		);
 	},
@@ -43,8 +42,7 @@ Cypress.Commands.add('hubPublishCheckPlexServerConnectionsJob', (servers: PlexSe
 		.hubPublishJobStatusUpdate(
 			JobTypes.InspectPlexServerJob,
 			JobStatus.Started,
-			'plexServerIds',
-			`[${servers.map((x) => x.id)}]`,
+			servers.map((x) => x.id),
 		)
 		.getCy('check-server-connection-dialog')
 		.should('exist')

@@ -23,7 +23,7 @@ declare global {
 				options?: Partial<Loggable & Timeoutable & Withinable & Shadow>,
 			): Chainable<JQuery<E>>;
 
-			hubPublishJobStatusUpdate(type: JobTypes, status: JobStatus, primaryKey: string, primaryKeyValue: string): Chainable;
+			hubPublishJobStatusUpdate<T>(type: JobTypes, status: JobStatus, data: T): Chainable;
 
 			hubPublishCheckPlexServerConnectionsJob(servers: PlexServerDTO[]): Chainable;
 		}

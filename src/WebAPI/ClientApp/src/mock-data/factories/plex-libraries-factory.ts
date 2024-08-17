@@ -1,4 +1,4 @@
-import { randCompanyName, randDirectoryPath, randNumber, randRecentDate, randUuid } from '@ngneat/falso';
+import { randCompanyName, randNumber, randRecentDate, randUuid } from '@ngneat/falso';
 import { times } from 'lodash-es';
 import { checkConfig, incrementSeed, type MockConfig } from '@mock';
 import { PlexMediaType, type FolderPathDTO, type PlexLibraryDTO, type PlexServerDTO } from '@dto';
@@ -25,7 +25,6 @@ export function generatePlexLibrary({
 		type,
 		title: randCompanyName(),
 		key: '' + randNumber({ max: 999999 }),
-		libraryLocationPath: randDirectoryPath(),
 		defaultDestination: {} as FolderPathDTO,
 		createdAt: randRecentDate({ days: 60 }).toUTCString(),
 		updatedAt: randRecentDate({ days: 10 }).toUTCString(),
@@ -33,7 +32,6 @@ export function generatePlexLibrary({
 		syncedAt: randRecentDate({ days: 10 }).toUTCString(),
 		uuid: randUuid(),
 		count: 0,
-		libraryLocationId: 0,
 		defaultDestinationId: 0,
 		episodeCount: 0,
 		mediaSize: 0,

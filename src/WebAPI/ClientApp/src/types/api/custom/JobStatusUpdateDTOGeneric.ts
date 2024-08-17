@@ -1,5 +1,6 @@
 import type { JobStatusUpdateDTOOfObject } from '@dto';
 
-export interface JobStatusUpdateDTO<T = never> extends JobStatusUpdateDTOOfObject {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface JobStatusUpdateDTO<T = any> extends JobStatusUpdateDTOOfObject {
 	data: T;
 }

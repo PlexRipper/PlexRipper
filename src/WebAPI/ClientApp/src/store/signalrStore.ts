@@ -11,7 +11,6 @@ import type { ISetupResult } from '@interfaces';
 import type {
 	FileMergeProgress,
 	InspectServerProgressDTO,
-	JobStatusUpdateDTO,
 	LibraryProgress,
 	NotificationDTO,
 	ServerConnectionCheckStatusProgressDTO,
@@ -20,6 +19,7 @@ import type {
 	DataType } from '@dto';
 import { MessageTypes } from '@dto';
 import type IAppConfig from '@class/IAppConfig';
+import type { JobStatusUpdateDTO } from '@api';
 import { useDownloadStore } from '~/store/downloadStore';
 import { useBackgroundJobsStore } from '~/store/backgroundJobsStore';
 import { useNotificationsStore } from '~/store/notificationsStore';

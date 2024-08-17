@@ -114,12 +114,9 @@
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
-import { filter, tap } from 'rxjs/operators';
-import { merge } from 'rxjs';
 import { get, set } from '@vueuse/core';
-import { JobTypes, JobStatus, type ServerConnectionCheckStatusProgressDTO, type JobStatusUpdateDTO } from '@dto';
+import { JobStatus, type ServerConnectionCheckStatusProgressDTO } from '@dto';
 import {
 	useBackgroundJobsStore,
 	useI18n,

@@ -350,14 +350,6 @@ export enum JobStatus {
   Completed = "Completed",
 }
 
-export interface JobStatusUpdateDTO {
-  id: string;
-  /** @format date-time */
-  jobStartTime: string;
-  jobType: JobTypes;
-  status: JobStatus;
-}
-
 export interface JobStatusUpdateDTOOfObject {
   data?: any;
   id: string;

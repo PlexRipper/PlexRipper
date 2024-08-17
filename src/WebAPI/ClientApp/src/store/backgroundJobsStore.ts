@@ -49,7 +49,7 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 			return of({ name: useBackgroundJobsStore.name, isSuccess: true }).pipe(take(1));
 		},
 
-		setStatusJobUpdate(jobStatusUpdate: JobStatusUpdateDTO) {
+		setStatusJobUpdate<T>(jobStatusUpdate: JobStatusUpdateDTO<T>) {
 			const i = state.jobStatusList.findIndex((x) => x.id === jobStatusUpdate.id);
 			if (i > -1) {
 				state.jobStatusList.splice(i, 1, jobStatusUpdate);

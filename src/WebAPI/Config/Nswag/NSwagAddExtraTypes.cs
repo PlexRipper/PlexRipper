@@ -19,7 +19,6 @@ public class NSwagAddExtraTypes : IDocumentProcessor
             typeof(JobTypes),
             typeof(JobStatus),
             typeof(DataType),
-            typeof(JobStatusUpdateDTO),
             typeof(DownloadTaskCreationProgress),
             typeof(LibraryProgress),
             typeof(InspectServerProgressDTO),

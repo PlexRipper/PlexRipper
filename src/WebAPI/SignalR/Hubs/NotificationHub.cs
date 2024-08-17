@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace PlexRipper.WebAPI;
 
-public class NotificationHub : Hub<INotificationHub>
+public class NotificationHub : Hub<INotificationHub>, INotificationHub
 {
     private readonly ILog<NotificationHub> _log;
 

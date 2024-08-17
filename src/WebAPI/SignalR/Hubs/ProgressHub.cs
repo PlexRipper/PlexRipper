@@ -5,7 +5,7 @@ using WebAPI.Contracts;
 
 namespace PlexRipper.WebAPI;
 
-public class ProgressHub : Hub<IProgressHub>
+public class ProgressHub : Hub<IProgressHub>, IProgressHub
 {
     private readonly ILog<ProgressHub> _log;
 
@@ -15,20 +15,6 @@ public class ProgressHub : Hub<IProgressHub>
     }
 
     public async Task JobStatusUpdate(JobStatusUpdateDTO jobStatusUpdate, CancellationToken cancellationToken = default)
-    {
-        _log.Debug(
-            "Sending progress: {MessageTypesNotification} => {@JobStatusUpdateDto}",
-            MessageTypes.JobStatusUpdate.ToString(),
-            jobStatusUpdate
-        );
-        await Clients.All.JobStatusUpdate(jobStatusUpdate, cancellationToken);
-    }
-
-    public async Task JobStatusUpdate<T>(
-        JobStatusUpdateDTO<T> jobStatusUpdate,
-        CancellationToken cancellationToken = default
-    )
-        where T : class
     {
         _log.Debug(
             "Sending progress: {MessageTypesNotification} => {@JobStatusUpdateDto}",
@@ -75,6 +61,19 @@ public class ProgressHub : Hub<IProgressHub>
             serverConnectionCheckStatusProgress
         );
         await Clients.All.ServerConnectionCheckStatusProgress(serverConnectionCheckStatusProgress, cancellationToken);
+    }
+
+    public async Task InspectServerProgress(
+        InspectServerProgressDTO inspectServerProgress,
+        CancellationToken cancellationToken = default
+    )
+    {
+        _log.Debug(
+            "Sending progress: {MessageTypesNotification} => {@ServerDownloadProgress}",
+            MessageTypes.InspectServerProgress.ToString(),
+            inspectServerProgress
+        );
+        await Clients.All.InspectServerProgress(inspectServerProgress, cancellationToken);
     }
 
     public async Task ServerDownloadProgress(

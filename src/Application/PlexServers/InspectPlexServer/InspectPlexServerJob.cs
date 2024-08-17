@@ -83,7 +83,7 @@ public class InspectPlexServerJob : IJob
         );
 
         // Sync library media
-        await _mediator.Send(new QueueSyncServerJobCommand(plexServerId, true), CancellationToken.None);
+        await _mediator.Send(new QueueSyncServerMediaJobCommand(plexServerId, true), CancellationToken.None);
         return Result.Ok();
     }
 }

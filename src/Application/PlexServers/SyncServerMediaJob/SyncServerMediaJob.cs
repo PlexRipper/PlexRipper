@@ -6,7 +6,7 @@ using WebAPI.Contracts;
 
 namespace PlexRipper.Application;
 
-public class SyncServerJob : IJob
+public class SyncServerMediaJob : IJob
 {
     private readonly ILog _log;
     private readonly IMediator _mediator;
@@ -16,9 +16,14 @@ public class SyncServerJob : IJob
     public static string PlexServerIdParameter => "plexServerId";
     public static string ForceSyncParameter => "forceSync";
 
-    public static JobKey GetJobKey(int id) => new($"{PlexServerIdParameter}_{id}", nameof(SyncServerJob));
+    public static JobKey GetJobKey(int id) => new($"{PlexServerIdParameter}_{id}", nameof(SyncServerMediaJob));
 
-    public SyncServerJob(ILog log, IMediator mediator, IPlexRipperDbContext dbContext, ISignalRService signalRService)
+    public SyncServerMediaJob(
+        ILog log,
+        IMediator mediator,
+        IPlexRipperDbContext dbContext,
+        ISignalRService signalRService
+    )
     {
         _log = log;
         _mediator = mediator;
@@ -33,8 +38,8 @@ public class SyncServerJob : IJob
         var forceSync = dataMap.GetBooleanValue(ForceSyncParameter);
 
         _log.Debug(
-            "Executing job: {SyncServerJobName)} for {PlexServerName)}: {PlexServerId}",
-            nameof(SyncServerJob),
+            "Executing job: {SyncServerMediaJobName)} for {PlexServerName)}: {PlexServerId}",
+            nameof(SyncServerMediaJob),
             nameof(PlexServer),
             plexServerId
         );
@@ -53,7 +58,9 @@ public class SyncServerJob : IJob
             if (!plexServer.IsEnabled)
             {
                 var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId);
-                ResultExtensions.ServerIsNotEnabled(plexServerName, plexServerId, nameof(SyncServerJob)).LogError();
+                ResultExtensions
+                    .ServerIsNotEnabled(plexServerName, plexServerId, nameof(SyncServerMediaJob))
+                    .LogError();
                 return;
             }
 

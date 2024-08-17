@@ -72,14 +72,14 @@ public class AllJobListener : IAllJobListener
                     )
                 );
                 break;
-            case JobTypes.SyncServerJob:
+            case JobTypes.SyncServerMediaJob:
                 await _signalRService.SendJobStatusUpdateAsync(
-                    new JobStatusUpdate<SyncServerJobUpdateDTO>(
+                    new JobStatusUpdate<SyncServerMediaJobUpdateDTO>(
                         result,
-                        new SyncServerJobUpdateDTO()
+                        new SyncServerMediaJobUpdateDTO()
                         {
-                            PlexServerId = dataMap.GetIntValue(SyncServerJob.PlexServerIdParameter),
-                            ForceSync = dataMap.GetBooleanValue(SyncServerJob.ForceSyncParameter),
+                            PlexServerId = dataMap.GetIntValue(SyncServerMediaJob.PlexServerIdParameter),
+                            ForceSync = dataMap.GetBooleanValue(SyncServerMediaJob.ForceSyncParameter),
                         }
                     )
                 );

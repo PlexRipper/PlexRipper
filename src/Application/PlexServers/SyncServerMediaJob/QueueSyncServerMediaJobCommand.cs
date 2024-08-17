@@ -5,44 +5,46 @@ using Quartz;
 
 namespace PlexRipper.Application;
 
-public record QueueSyncServerJobCommand(int PlexServerId, bool ForceSync = false) : IRequest<Result>;
+public record QueueSyncServerMediaJobCommand(int PlexServerId, bool ForceSync = false) : IRequest<Result>;
 
-public class QueueSyncServerJobCommandValidator : Validator<QueueSyncServerJobCommand>
+public class QueueSyncServerMediaJobCommandValidator : Validator<QueueSyncServerMediaJobCommand>
 {
-    public QueueSyncServerJobCommandValidator()
+    public QueueSyncServerMediaJobCommandValidator()
     {
         RuleFor(x => x.PlexServerId).GreaterThan(0);
     }
 }
 
-public class QueueSyncServerJobCommandHandler : IRequestHandler<QueueSyncServerJobCommand, Result>
+public class QueueSyncServerMediaJobCommandHandler : IRequestHandler<QueueSyncServerMediaJobCommand, Result>
 {
     private readonly ILog _log;
     private readonly IScheduler _scheduler;
 
-    public QueueSyncServerJobCommandHandler(ILog log, IScheduler scheduler)
+    public QueueSyncServerMediaJobCommandHandler(ILog log, IScheduler scheduler)
     {
         _log = log;
         _scheduler = scheduler;
     }
 
-    public async Task<Result> Handle(QueueSyncServerJobCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(QueueSyncServerMediaJobCommand command, CancellationToken cancellationToken)
     {
         if (command.PlexServerId <= 0)
             return ResultExtensions.IsInvalidId(nameof(command.PlexServerId), command.PlexServerId);
 
-        var key = SyncServerJob.GetJobKey(command.PlexServerId);
+        var key = SyncServerMediaJob.GetJobKey(command.PlexServerId);
         if (await _scheduler.IsJobRunningAsync(key, cancellationToken))
         {
             return Result
-                .Fail($"A {nameof(SyncServerJob)} with {nameof(PlexServer)} {command.PlexServerId} is already running")
+                .Fail(
+                    $"A {nameof(SyncServerMediaJob)} with {nameof(PlexServer)} {command.PlexServerId} is already running"
+                )
                 .LogWarning();
         }
 
         var job = JobBuilder
-            .Create<SyncServerJob>()
-            .UsingJobData(SyncServerJob.PlexServerIdParameter, command.PlexServerId)
-            .UsingJobData(SyncServerJob.ForceSyncParameter, command.ForceSync)
+            .Create<SyncServerMediaJob>()
+            .UsingJobData(SyncServerMediaJob.PlexServerIdParameter, command.PlexServerId)
+            .UsingJobData(SyncServerMediaJob.ForceSyncParameter, command.ForceSync)
             .WithIdentity(key)
             .Build();
 

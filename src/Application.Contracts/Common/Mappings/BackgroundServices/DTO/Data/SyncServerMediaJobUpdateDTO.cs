@@ -1,6 +1,6 @@
 namespace Application.Contracts;
 
-public record SyncServerJobUpdateDTO()
+public record SyncServerMediaJobUpdateDTO()
 {
     public int PlexServerId { get; init; }
 

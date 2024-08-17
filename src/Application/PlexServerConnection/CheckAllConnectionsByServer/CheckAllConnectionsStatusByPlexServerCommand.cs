@@ -1,3 +1,4 @@
+using Application.Contracts;
 using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
@@ -28,16 +29,19 @@ public class CheckAllConnectionsStatusByPlexServerCommandHandler
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
+    private readonly ISignalRService _signalRService;
 
     public CheckAllConnectionsStatusByPlexServerCommandHandler(
         ILog log,
         IPlexRipperDbContext dbContext,
-        IMediator mediator
+        IMediator mediator,
+        ISignalRService signalRService
     )
     {
         _log = log;
         _dbContext = dbContext;
         _mediator = mediator;
+        _signalRService = signalRService;
     }
 
     public async Task<Result<List<PlexServerStatus>>> Handle(
@@ -67,6 +71,18 @@ public class CheckAllConnectionsStatusByPlexServerCommandHandler
         if (!connections.Any())
             return Result.Fail($"No connections found for the given plex server id {plexServerId}").LogError();
 
+        // Send start job status update
+        var update = new JobStatusUpdate<CheckAllConnectionStatusUpdateDTO>(
+            JobTypes.CheckPlexServerConnectionsJob,
+            JobStatus.Started,
+            new CheckAllConnectionStatusUpdateDTO
+            {
+                PlexServerId = plexServerId,
+                PlexServerConnectionIds = connections.Select(x => x.Id).ToList(),
+            }
+        );
+        await _signalRService.SendJobStatusUpdateAsync(update);
+
         // Create connection check tasks for all connections
         var connectionTasks = connections.Select(async plexServerConnection =>
             await _mediator.Send(new CheckConnectionStatusByIdCommand(plexServerConnection.Id), cancellationToken)
@@ -74,6 +90,10 @@ public class CheckAllConnectionsStatusByPlexServerCommandHandler
 
         var tasksResult = await Task.WhenAll(connectionTasks);
         var combinedResults = Result.Merge(tasksResult);
+
+        // Send completed job status update
+        update.Status = JobStatus.Completed;
+        await _signalRService.SendJobStatusUpdateAsync(update);
 
         if (tasksResult.Any(statusResult => statusResult.Value.IsSuccessful))
             return Result.Ok(combinedResults.Value.ToList());

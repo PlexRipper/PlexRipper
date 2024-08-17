@@ -109,5 +109,11 @@ public class SignalRService : ISignalRService
         await _progressHub.Clients.All.JobStatusUpdate(jobStatusUpdate.ToDTO());
     }
 
+    public async Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
+        where T : class
+    {
+        await _progressHub.Clients.All.JobStatusUpdate(jobStatusUpdate.ToDTO());
+    }
+
     #endregion
 }

@@ -12,6 +12,9 @@ public interface IProgressHub
     [SignalRMethod(operation: Operation.Get, autoDiscover: AutoDiscover.None)]
     Task JobStatusUpdate(JobStatusUpdateDTO jobStatusUpdate, CancellationToken cancellationToken = default);
 
+    Task JobStatusUpdate<T>(JobStatusUpdateDTO<T> jobStatusUpdate, CancellationToken cancellationToken = default)
+        where T : class;
+
     [return: SignalRReturn(typeof(Task<SyncServerProgress>), 200, "Success")]
     [SignalRMethod(operation: Operation.Get, autoDiscover: AutoDiscover.None)]
     Task SyncServerProgress(SyncServerProgress SyncServerProgress, CancellationToken cancellationToken = default);

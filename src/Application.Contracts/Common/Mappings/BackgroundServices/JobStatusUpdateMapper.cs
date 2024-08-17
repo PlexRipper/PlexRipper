@@ -11,18 +11,13 @@ public static class JobStatusUpdateMapper
         var key = context.JobDetail.Key;
         var data = context.JobDetail.JobDataMap.WrappedMap.FirstOrDefault();
 
-        return new JobStatusUpdate()
-        {
-            Id = context.FireInstanceId,
-            JobName = key.Name,
-            JobGroup = key.Group,
-            JobRuntime = context.JobRunTime,
-            JobStartTime = context.FireTimeUtc.UtcDateTime,
-            Status = jobStatus,
-            PrimaryKey = data.Key ?? string.Empty,
-            PrimaryKeyValue = data.Value?.ToString() ?? string.Empty,
-            JobType = ToJobType(key.Group),
-        };
+        return new JobStatusUpdate<string>(
+            ToJobType(key.Group),
+            jobStatus,
+            data.Value?.ToString() ?? string.Empty,
+            context.FireInstanceId,
+            context.FireTimeUtc.UtcDateTime
+        );
     }
 
     #endregion
@@ -33,18 +28,26 @@ public static class JobStatusUpdateMapper
         new()
         {
             Id = jobStatusUpdate.Id,
-            JobName = jobStatusUpdate.JobName,
-            JobGroup = jobStatusUpdate.JobGroup,
-            JobRuntime = jobStatusUpdate.JobRuntime,
             JobStartTime = jobStatusUpdate.JobStartTime,
             Status = jobStatusUpdate.Status,
-            PrimaryKey = jobStatusUpdate.PrimaryKey,
-            PrimaryKeyValue = jobStatusUpdate.PrimaryKeyValue,
             JobType = jobStatusUpdate.JobType,
+        };
+
+    public static JobStatusUpdateDTO<T> ToDTO<T>(this JobStatusUpdate<T> jobStatusUpdate)
+        where T : class =>
+        new()
+        {
+            Id = jobStatusUpdate.Id,
+            JobStartTime = jobStatusUpdate.JobStartTime,
+            Status = jobStatusUpdate.Status,
+            JobType = jobStatusUpdate.JobType,
+            Data = jobStatusUpdate.Data,
         };
 
     #endregion
 
     private static JobTypes ToJobType(string jobGroup) =>
-        Enum.TryParse<JobTypes>(jobGroup, out var jobType) ? jobType : JobTypes.Unknown;
+        Enum.TryParse<JobTypes>(jobGroup, out var jobType)
+            ? jobType
+            : throw new Exception($"ToJobType => Unknown job type: {jobGroup}");
 }

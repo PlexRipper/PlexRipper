@@ -68,6 +68,15 @@ public class MockSignalRService : ISignalRService
         return Task.CompletedTask;
     }
 
+    public Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
+        where T : class
+    {
+        JobStatusUpdateList.Add(jobStatusUpdate.ToDTO());
+        _log.Verbose("{ClassName} => {@JobStatusUpdate}", nameof(MockSignalRService), jobStatusUpdate);
+
+        return Task.CompletedTask;
+    }
+
     public Task SendRefreshNotificationAsync(DataType dataType, CancellationToken cancellationToken = default)
     {
         RefreshNotificationList.Add(dataType);

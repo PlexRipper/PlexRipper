@@ -18,6 +18,7 @@ public class RefreshLibraryAccessValidator : AbstractValidator<RefreshLibraryAcc
     public RefreshLibraryAccessValidator()
     {
         RuleFor(x => x.PlexAccountId).GreaterThan(0);
+        RuleFor(x => x.PlexServerId).GreaterThanOrEqualTo(0);
     }
 }
 
@@ -55,6 +56,12 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
                 return result.ToResult();
 
             var plexServers = result.Value;
+            if (!plexServers.Any())
+            {
+                var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
+                _log.Warning("No accessible Plex servers found for PlexAccount {PlexAccountName}", plexAccountName);
+                return Result.Ok();
+            }
 
             var libraryResults = await Task.WhenAll(
                 plexServers.Select(x => RefreshLibrary(x.Id, plexAccountId, cancellationToken))
@@ -103,7 +110,16 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
                 cancellationToken
             );
             if (libraries.IsFailed)
-                return libraries.ToResult();
+            {
+                _log.Error(
+                    "Failed to retrieve libraries for PlexServer {PlexServerName} and PlexAccount {PlexAccountName}",
+                    plexServerName,
+                    plexAccountName,
+                    0
+                );
+
+                return libraries.ToResult().LogError();
+            }
 
             if (!libraries.Value.Any())
             {

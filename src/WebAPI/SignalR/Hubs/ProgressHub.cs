@@ -28,6 +28,20 @@ public class ProgressHub : Hub<IProgressHub>
         await Clients.All.JobStatusUpdate(jobStatusUpdate, cancellationToken);
     }
 
+    public async Task JobStatusUpdate<T>(
+        JobStatusUpdateDTO<T> jobStatusUpdate,
+        CancellationToken cancellationToken = default
+    )
+        where T : class
+    {
+        _log.Debug(
+            "Sending progress: {MessageTypesNotification} => {@JobStatusUpdateDto}",
+            MessageTypes.JobStatusUpdate.ToString(),
+            jobStatusUpdate
+        );
+        await Clients.All.JobStatusUpdate(jobStatusUpdate, cancellationToken);
+    }
+
     public async Task SyncServerProgress(
         [SignalRParam(paramType: typeof(SyncServerProgress))] SyncServerProgress SyncServerProgress,
         [SignalRHidden] CancellationToken cancellationToken = default

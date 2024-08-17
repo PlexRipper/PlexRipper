@@ -39,6 +39,12 @@ export interface AuthPinLocation {
   timeZone: string;
 }
 
+export interface CheckAllConnectionStatusUpdateDTO {
+  plexServerConnectionIds: number[];
+  /** @format int32 */
+  plexServerId: number;
+}
+
 export interface ConfirmationSettingsDTO {
   askDownloadEpisodeConfirmation: boolean;
   askDownloadMovieConfirmation: boolean;
@@ -346,15 +352,18 @@ export enum JobStatus {
 
 export interface JobStatusUpdateDTO {
   id: string;
-  jobGroup: string;
-  jobName: string;
-  /** @format duration */
-  jobRuntime: string;
   /** @format date-time */
   jobStartTime: string;
   jobType: JobTypes;
-  primaryKey: string;
-  primaryKeyValue: string;
+  status: JobStatus;
+}
+
+export interface JobStatusUpdateDTOOfObject {
+  data?: any;
+  id: string;
+  /** @format date-time */
+  jobStartTime: string;
+  jobType: JobTypes;
   status: JobStatus;
 }
 
@@ -366,6 +375,7 @@ export enum JobTypes {
   SyncServerJob = "SyncServerJob",
   DownloadProgressJobs = "DownloadProgressJobs",
   InspectPlexServerJob = "InspectPlexServerJob",
+  FileMergeJob = "FileMergeJob",
 }
 
 export interface LanguageSettingsDTO {
@@ -478,9 +488,6 @@ export interface PlexLibraryDTO {
   /** @format int32 */
   id: number;
   key: string;
-  /** @format int32 */
-  libraryLocationId: number;
-  libraryLocationPath: string;
   /** @format int64 */
   mediaSize: number;
   outdated: boolean;

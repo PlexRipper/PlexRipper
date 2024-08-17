@@ -9,6 +9,7 @@ import { PlexServerConnection } from '@api/generated/PlexServerConnection';
 import { PlexAccount } from '@api/generated/PlexAccount';
 
 export * from './baseApi';
+export * from './custom';
 
 const downloadApi = new Download();
 const folderPathApi = new FolderPath();

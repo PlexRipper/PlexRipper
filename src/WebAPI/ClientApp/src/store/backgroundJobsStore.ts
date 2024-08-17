@@ -3,7 +3,8 @@ import type { Observable } from 'rxjs';
 import { forkJoin, of, Subject } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
 import type { ISetupResult } from '@interfaces';
-import { JobStatus, type JobStatusUpdateDTO, JobTypes } from '@dto';
+import { type CheckAllConnectionStatusUpdateDTO, JobStatus, JobTypes } from '@dto';
+import type { JobStatusUpdateDTO } from '@api';
 
 export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 	// State
@@ -63,6 +64,10 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 	const getters = {
 		getJobStatusUpdate: (jobType: JobTypes, status: JobStatus | null = null): Observable<JobStatusUpdateDTO> =>
 			state.jobStatusObservable.pipe(filter((x) => x.jobType === jobType && (status ? x.status === status : true))),
+		getCheckPlexServerConnectionsJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<CheckAllConnectionStatusUpdateDTO>> =>
+			getters.getJobStatusUpdate(JobTypes.CheckPlexServerConnectionsJob, status),
+		getInspectPlexServerJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<number[]>> =>
+			getters.getJobStatusUpdate(JobTypes.InspectPlexServerJob, status),
 	};
 
 	return {

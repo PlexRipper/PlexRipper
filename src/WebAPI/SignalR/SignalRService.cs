@@ -104,11 +104,6 @@ public class SignalRService : ISignalRService
 
     #region JobStateNotification
 
-    public async Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate)
-    {
-        await _progressHub.Clients.All.JobStatusUpdate(jobStatusUpdate.ToDTO());
-    }
-
     public async Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
         where T : class
     {

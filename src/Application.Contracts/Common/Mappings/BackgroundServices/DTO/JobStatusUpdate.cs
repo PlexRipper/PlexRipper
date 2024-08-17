@@ -10,7 +10,7 @@ public record JobStatusUpdate
 
     public JobStatus Status { get; set; }
 
-    protected JobStatusUpdate(JobTypes jobType, JobStatus status, string id = "", DateTime jobStartTime = default)
+    public JobStatusUpdate(JobTypes jobType, JobStatus status, string id = "", DateTime jobStartTime = default)
     {
         Id = id != string.Empty ? id : Guid.NewGuid().ToString();
         JobStartTime = jobStartTime != default ? jobStartTime : DateTime.UtcNow;
@@ -23,6 +23,12 @@ public record JobStatusUpdate<T> : JobStatusUpdate
     where T : class
 {
     public T Data { get; }
+
+    public JobStatusUpdate(JobStatusUpdate update, T data)
+        : base(update.JobType, update.Status, update.Id, update.JobStartTime)
+    {
+        Data = data;
+    }
 
     public JobStatusUpdate(JobTypes jobType, JobStatus status, T data, string id = "", DateTime jobStartTime = default)
         : base(jobType, status, id, jobStartTime)

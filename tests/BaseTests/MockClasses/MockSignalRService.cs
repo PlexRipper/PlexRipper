@@ -60,14 +60,6 @@ public class MockSignalRService : ISignalRService
     public Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress) =>
         Task.CompletedTask;
 
-    public Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate)
-    {
-        JobStatusUpdateList.Add(jobStatusUpdate.ToDTO());
-        _log.Verbose("{ClassName} => {@JobStatusUpdate}", nameof(MockSignalRService), jobStatusUpdate);
-
-        return Task.CompletedTask;
-    }
-
     public Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
         where T : class
     {

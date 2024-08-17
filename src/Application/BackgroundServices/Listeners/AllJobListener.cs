@@ -20,8 +20,7 @@ public class AllJobListener : IAllJobListener
         // Make sure your trigger and job listeners never throw an exception (use a try-catch) and that they can handle internal problems. Jobs can get stuck after Quartz is unable to determine whether required logic in listener was completed successfully when listener notification failed.
         try
         {
-            var update = context.ToUpdate(JobStatus.Started);
-            await _signalRService.SendJobStatusUpdateAsync(update);
+            await SendJobExecutionContextAsync(context, JobStatus.Started);
         }
         catch (Exception e)
         {
@@ -39,8 +38,7 @@ public class AllJobListener : IAllJobListener
         // Make sure your trigger and job listeners never throw an exception (use a try-catch) and that they can handle internal problems. Jobs can get stuck after Quartz is unable to determine whether required logic in listener was completed successfully when listener notification failed.
         try
         {
-            var update = context.ToUpdate(JobStatus.Completed);
-            await _signalRService.SendJobStatusUpdateAsync(update);
+            await SendJobExecutionContextAsync(context, JobStatus.Completed);
         }
         catch (Exception e)
         {
@@ -50,4 +48,42 @@ public class AllJobListener : IAllJobListener
 
     public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = new()) =>
         Task.CompletedTask;
+
+    public async Task SendJobExecutionContextAsync(IJobExecutionContext context, JobStatus status)
+    {
+        var key = context.JobDetail.Key;
+        var dataMap = context.JobDetail.JobDataMap;
+        var data = dataMap.WrappedMap.FirstOrDefault();
+
+        var jobType = JobStatusUpdateMapper.ToJobType(key.Group);
+
+        var result = new JobStatusUpdate(jobType, status, context.FireInstanceId, context.FireTimeUtc.UtcDateTime);
+
+        switch (jobType)
+        {
+            case JobTypes.CheckPlexServerConnectionsJob:
+                break;
+            case JobTypes.DownloadJob:
+                break;
+            case JobTypes.DownloadProgressJob:
+                break;
+            case JobTypes.SyncServerJob:
+                break;
+            case JobTypes.DownloadProgressJobs:
+                break;
+            case JobTypes.InspectPlexServerJob:
+                await _signalRService.SendJobStatusUpdateAsync(
+                    new JobStatusUpdate<List<int>>(
+                        result,
+                        dataMap.GetIntListValue(InspectPlexServerJob.PlexServerIdsParameter)
+                    )
+                );
+                return;
+            case JobTypes.FileMergeJob:
+                break;
+        }
+
+        var value = data.Value?.ToString() ?? string.Empty;
+        await _signalRService.SendJobStatusUpdateAsync(new JobStatusUpdate<string>(result, value));
+    }
 }

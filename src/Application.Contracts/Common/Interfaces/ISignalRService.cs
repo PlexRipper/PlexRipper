@@ -27,7 +27,6 @@ public interface ISignalRService
     );
 
     Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress);
-    Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate);
 
     Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
         where T : class;

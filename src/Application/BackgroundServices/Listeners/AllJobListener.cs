@@ -1,4 +1,5 @@
 using Application.Contracts;
+using PlexRipper.Application.Jobs;
 using Quartz;
 
 namespace PlexRipper.Application;
@@ -64,13 +65,25 @@ public class AllJobListener : IAllJobListener
             case JobTypes.CheckPlexServerConnectionsJob:
                 break;
             case JobTypes.DownloadJob:
-                break;
-            case JobTypes.DownloadProgressJob:
+                await _signalRService.SendJobStatusUpdateAsync(
+                    new JobStatusUpdate<DownloadTaskKey>(
+                        result,
+                        dataMap.GetJsonValue<DownloadTaskKey>(DownloadJob.DownloadTaskIdParameter)
+                    )
+                );
                 break;
             case JobTypes.SyncServerJob:
-                break;
-            case JobTypes.DownloadProgressJobs:
-                break;
+                await _signalRService.SendJobStatusUpdateAsync(
+                    new JobStatusUpdate<SyncServerJobUpdateDTO>(
+                        result,
+                        new SyncServerJobUpdateDTO()
+                        {
+                            PlexServerId = dataMap.GetIntValue(SyncServerJob.PlexServerIdParameter),
+                            ForceSync = dataMap.GetBooleanValue(SyncServerJob.ForceSyncParameter),
+                        }
+                    )
+                );
+                return;
             case JobTypes.InspectPlexServerJob:
                 await _signalRService.SendJobStatusUpdateAsync(
                     new JobStatusUpdate<List<int>>(
@@ -80,7 +93,12 @@ public class AllJobListener : IAllJobListener
                 );
                 return;
             case JobTypes.FileMergeJob:
-                break;
+                await _signalRService.SendJobStatusUpdateAsync(
+                    new JobStatusUpdate<List<int>>(result, [dataMap.GetIntValue(FileMergeJob.FileTaskId)])
+                );
+                return;
+            default:
+                throw new ArgumentOutOfRangeException($"Add a new case for the new job type {jobType}");
         }
 
         var value = data.Value?.ToString() ?? string.Empty;

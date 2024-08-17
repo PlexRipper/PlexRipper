@@ -17,18 +17,12 @@ public enum JobTypes
     [EnumMember(Value = nameof(DownloadJob))]
     DownloadJob = 2,
 
-    [EnumMember(Value = nameof(DownloadProgressJob))]
-    DownloadProgressJob = 3,
+    [EnumMember(Value = nameof(FileMergeJob))]
+    FileMergeJob = 3,
 
     [EnumMember(Value = nameof(SyncServerJob))]
     SyncServerJob = 4,
 
-    [EnumMember(Value = nameof(DownloadProgressJobs))]
-    DownloadProgressJobs = 5,
-
     [EnumMember(Value = nameof(InspectPlexServerJob))]
-    InspectPlexServerJob = 6,
-
-    [EnumMember(Value = nameof(FileMergeJob))]
-    FileMergeJob = 7,
+    InspectPlexServerJob = 5,
 }

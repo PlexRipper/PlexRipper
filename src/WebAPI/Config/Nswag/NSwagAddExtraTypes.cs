@@ -31,6 +31,7 @@ public class NSwagAddExtraTypes : IDocumentProcessor
             // Job status updates
             typeof(JobStatusUpdateDTO<object>),
             typeof(CheckAllConnectionStatusUpdateDTO),
+            typeof(SyncServerMediaJobUpdateDTO),
         ];
 
         foreach (var type in types.Where(type => !context.SchemaResolver.HasSchema(type, false)))

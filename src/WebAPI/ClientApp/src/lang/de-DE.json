@@ -172,7 +172,7 @@
             "request-data-sent": "Anfragedaten gesendet:"
         },
         "app-bar-progress-bar": {
-            "tooltip-text": "PlexServer {finishedCount} von {totalCount}wird synchronisiert!"
+            "tooltip-text": "Plex-Bibliotheken {finishedCount} von {totalCount}werden synchronisiert!"
         },
         "account-token-validate-dialog": {
             "column": {

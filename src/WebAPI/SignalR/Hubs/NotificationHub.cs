@@ -1,7 +1,6 @@
 ﻿using Application.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.SignalR;
-using SignalRSwaggerGen.Attributes;
 
 namespace PlexRipper.WebAPI;
 
@@ -14,10 +13,7 @@ public class NotificationHub : Hub<INotificationHub>
         _log = log;
     }
 
-    public async Task Notification(
-        [SignalRParam(paramType: typeof(NotificationDTO))] NotificationDTO notification,
-        [SignalRHidden] CancellationToken cancellationToken = default
-    )
+    public async Task Notification(NotificationDTO notification, CancellationToken cancellationToken = default)
     {
         _log.Debug(
             "Sending notification: {MessageTypesNotification} => {@NotificationDto}",

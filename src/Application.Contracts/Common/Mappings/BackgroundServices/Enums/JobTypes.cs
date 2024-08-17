@@ -28,4 +28,7 @@ public enum JobTypes
 
     [EnumMember(Value = nameof(InspectPlexServerJob))]
     InspectPlexServerJob = 6,
+
+    [EnumMember(Value = nameof(FileMergeJob))]
+    FileMergeJob = 7,
 }

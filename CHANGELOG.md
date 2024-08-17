@@ -1,5 +1,27 @@
 PlexRipper Changelog
 
+# [0.21.0](https://github.com/PlexRipper/PlexRipper/compare/v0.20.0...v0.21.0) (2024-08-17)
+
+
+### Bug Fixes
+
+* **WebAPI:** Added missing FileMergeJob Type to JobTypes ([d5daea5](https://github.com/PlexRipper/PlexRipper/commit/d5daea5144a0c5944cf7b04ba458e201a91714f7))
+* **Web-UI:** Fixed a PlexAccount not updating correctly in the UI ([e2b7abf](https://github.com/PlexRipper/PlexRipper/commit/e2b7abf9c96ecf12c2d3a33606f9cdedf156e21f))
+* **WebAPI:** Fixed incorrect method of creating a Guid ([0062c2b](https://github.com/PlexRipper/PlexRipper/commit/0062c2b9e9b2338380c7f0ff601978d1475e7539))
+* **WebAPI:** Fixed PlexLibraries incorrectly updating causing some to be missing ([3111183](https://github.com/PlexRipper/PlexRipper/commit/311118341f2714896bbffbf0752b4ce1ddbcbc30))
+* **Web-UI:** Fixed the language flags being inconsistent ([0eee59e](https://github.com/PlexRipper/PlexRipper/commit/0eee59ef2094d8d1c665f5c04632d3b066bf51ca))
+* **WebAPI:** Fixed the missing plexLibrary problem and the lack of Plexmedia ([1f64be2](https://github.com/PlexRipper/PlexRipper/commit/1f64be2db4f5654d5aad013167906e90a9c8676a))
+* **WebAPI:** Fixed the PlexAccountId getting lost when validating ([7b9bc16](https://github.com/PlexRipper/PlexRipper/commit/7b9bc1626be89913e4ec9731658e72f674994b0b))
+* **Web-UI:** Pre-translate missing translations for German and French ([fc1859c](https://github.com/PlexRipper/PlexRipper/commit/fc1859cdf299fdd9f997af3af3bd5d921fa92a35))
+
+
+### Features
+
+* **Web-UI:** Added Language Select to the setup page ([87d1287](https://github.com/PlexRipper/PlexRipper/commit/87d1287b396841adf3778b5e1db84b1e28efcc92))
+* **Web-UI:** Added Polish language into babel-edit save file ([4ad23c8](https://github.com/PlexRipper/PlexRipper/commit/4ad23c8344d2f3c2b6f3dcef812e2636996f96c6))
+* **Web-UI:** Added Polish language option ([d9ae110](https://github.com/PlexRipper/PlexRipper/commit/d9ae1108a0696b450293ca54d6f53049f41c739c))
+* **Web-UI:** Disabling a PlexAccount will no also hide PlexServers from the sidebar when there are no accounts that have access anymore ([6a9dec3](https://github.com/PlexRipper/PlexRipper/commit/6a9dec3bcc890c904dcc99f357068b68bf21d572))
+
 # [0.20.0](https://github.com/PlexRipper/PlexRipper/compare/v0.19.1...v0.20.0) (2024-08-12)
 
 

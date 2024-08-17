@@ -36,7 +36,7 @@ public static class PlexApiExtensions
         request.AddQueryParameter("X-Plex-Device-Name", "Chrome");
         request.AddQueryParameter("X-Plex-Device-Screen-Resolution", "1673x1297,2560x1440");
         request.AddQueryParameter("X-Plex-Language", "en");
-        request.AddQueryParameter("X-Plex-Session-Id", new Guid().ToString());
+        request.AddQueryParameter("X-Plex-Session-Id", Guid.NewGuid().ToString());
 
         return request;
     }

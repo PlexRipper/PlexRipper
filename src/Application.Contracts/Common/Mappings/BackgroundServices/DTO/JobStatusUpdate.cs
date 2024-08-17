@@ -12,7 +12,7 @@ public record JobStatusUpdate
 
     protected JobStatusUpdate(JobTypes jobType, JobStatus status, string id = "", DateTime jobStartTime = default)
     {
-        Id = id != string.Empty ? id : new Guid().ToString();
+        Id = id != string.Empty ? id : Guid.NewGuid().ToString();
         JobStartTime = jobStartTime != default ? jobStartTime : DateTime.UtcNow;
         JobType = jobType;
         Status = status;

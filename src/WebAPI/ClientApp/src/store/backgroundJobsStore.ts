@@ -3,7 +3,8 @@ import type { Observable } from 'rxjs';
 import { forkJoin, of, Subject } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
 import type { ISetupResult } from '@interfaces';
-import { JobStatus, type JobStatusUpdateDTO, JobTypes } from '@dto';
+import { type CheckAllConnectionStatusUpdateDTO, JobStatus, JobTypes, type SyncServerMediaJobUpdateDTO } from '@dto';
+import type { JobStatusUpdateDTO } from '@api';
 
 export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 	// State
@@ -48,7 +49,7 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 			return of({ name: useBackgroundJobsStore.name, isSuccess: true }).pipe(take(1));
 		},
 
-		setStatusJobUpdate(jobStatusUpdate: JobStatusUpdateDTO) {
+		setStatusJobUpdate<T>(jobStatusUpdate: JobStatusUpdateDTO<T>) {
 			const i = state.jobStatusList.findIndex((x) => x.id === jobStatusUpdate.id);
 			if (i > -1) {
 				state.jobStatusList.splice(i, 1, jobStatusUpdate);
@@ -63,6 +64,12 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 	const getters = {
 		getJobStatusUpdate: (jobType: JobTypes, status: JobStatus | null = null): Observable<JobStatusUpdateDTO> =>
 			state.jobStatusObservable.pipe(filter((x) => x.jobType === jobType && (status ? x.status === status : true))),
+		getCheckPlexServerConnectionsJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<CheckAllConnectionStatusUpdateDTO>> =>
+			getters.getJobStatusUpdate(JobTypes.CheckPlexServerConnectionsJob, status),
+		getInspectPlexServerJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<number[]>> =>
+			getters.getJobStatusUpdate(JobTypes.InspectPlexServerJob, status),
+		getSyncServerMediaJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<SyncServerMediaJobUpdateDTO>> =>
+			getters.getJobStatusUpdate(JobTypes.SyncServerMediaJob, status),
 	};
 
 	return {

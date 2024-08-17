@@ -39,7 +39,7 @@ public class QueueSyncPlexServerJobEndpoint : BaseEndpoint<QueueSyncPlexServerJo
 
     public override async Task HandleAsync(QueueSyncPlexServerJobEndpointRequest req, CancellationToken ct)
     {
-        var result = await _mediator.Send(new QueueSyncServerJobCommand(req.PlexServerId, req.ForceSync), ct);
+        var result = await _mediator.Send(new QueueSyncServerMediaJobCommand(req.PlexServerId, req.ForceSync), ct);
         await SendFluentResult(result, ct);
     }
 }

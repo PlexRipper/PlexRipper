@@ -1,31 +1,30 @@
-import type { JobStatus, JobTypes, JobStatusUpdateDTO } from '@dto';
+import type { JobStatus, JobTypes } from '@dto';
+import type { JobStatusUpdateDTO } from '@api';
+import { format } from 'date-fns';
 import { incrementSeed } from '~/mock-data';
 
 let jobStatusIdIndex = 1;
 
-export function generateJobStatusUpdate({
+export function generateJobStatusUpdate<T>({
 	jobType,
 	jobStatus,
-	primaryKey,
-	primaryKeyValue,
+	data,
+	partial,
 }: {
 	jobType: JobTypes;
 	jobStatus: JobStatus;
-	primaryKey: string;
-	primaryKeyValue: string;
-}): JobStatusUpdateDTO {
+	data: T;
+	partial?: Partial<JobStatusUpdateDTO<T>>;
+}): JobStatusUpdateDTO<T> {
 	const id = jobStatusIdIndex++;
 	incrementSeed(id);
 
 	return {
 		id: '' + id,
-		jobName: 'asdasd',
-		jobGroup: jobType,
-		jobRuntime: '0.0s',
-		jobStartTime: Date.now().toString(),
+		jobStartTime: format(new Date(), 'yyyy-MM-dd\'T\'HH:mm:ss.SSS'),
 		jobType,
-		primaryKey,
-		primaryKeyValue,
 		status: jobStatus,
+		data,
+		...partial,
 	};
 }

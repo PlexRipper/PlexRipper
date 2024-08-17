@@ -1,7 +1,8 @@
 import { beforeAll, describe, expect, test } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { baseSetup, subscribeSpyTo } from '@services-test-base';
-import { JobStatus, type JobStatusUpdateDTO, JobTypes } from '@dto';
+import { JobStatus, JobTypes } from '@dto';
+import { generateJobStatusUpdate } from '@factories';
 import { useBackgroundJobsStore } from '#build/imports';
 
 describe('BackgroundJobsStore.getJobStatusUpdate()', () => {
@@ -17,21 +18,38 @@ describe('BackgroundJobsStore.getJobStatusUpdate()', () => {
 		// Arrange
 		const backgroundJobsStore = useBackgroundJobsStore();
 
-		const testMsg: JobStatusUpdateDTO = {
-			id: 'NON_CLUSTERED638568037901159617',
-			jobName: 'plexAccountId_4',
-			jobGroup: 'RefreshPlexServersAccessJob',
+		const testMsg = generateJobStatusUpdate({
 			jobType: JobTypes.InspectPlexServerJob,
-			jobRuntime: '00:00:00.0194365',
-			jobStartTime: '2024-07-17T09:03:10.1360007Z',
-			status: JobStatus.Started,
-			primaryKey: 'plexAccountId',
-			primaryKeyValue: '4',
-		};
+			jobStatus: JobStatus.Started,
+			data: [4],
+		});
 
 		// Act
 		backgroundJobsStore.setup();
 		const result = subscribeSpyTo(backgroundJobsStore.getJobStatusUpdate(JobTypes.InspectPlexServerJob));
+
+		backgroundJobsStore.setStatusJobUpdate(testMsg);
+
+		// Assert
+		expect(result.getFirstValue()).toEqual(testMsg);
+	});
+
+	test('Should return the statusJobUpdate when its filtered', () => {
+		// Arrange
+		const backgroundJobsStore = useBackgroundJobsStore();
+
+		const testMsg = generateJobStatusUpdate({
+			jobType: JobTypes.SyncServerMediaJob,
+			jobStatus: JobStatus.Started,
+			data: {
+				plexServerId: 1,
+				forceSync: false,
+			},
+		});
+
+		// Act
+		backgroundJobsStore.setup();
+		const result = subscribeSpyTo(backgroundJobsStore.getSyncServerMediaJobUpdate(JobStatus.Started));
 
 		backgroundJobsStore.setStatusJobUpdate(testMsg);
 

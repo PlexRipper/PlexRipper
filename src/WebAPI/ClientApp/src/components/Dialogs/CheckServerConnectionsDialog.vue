@@ -114,12 +114,9 @@
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
 import { useSubscription } from '@vueuse/rxjs';
-import { filter, tap } from 'rxjs/operators';
-import { merge } from 'rxjs';
 import { get, set } from '@vueuse/core';
-import { JobTypes, JobStatus, type ServerConnectionCheckStatusProgressDTO, type JobStatusUpdateDTO } from '@dto';
+import { JobStatus, type ServerConnectionCheckStatusProgressDTO } from '@dto';
 import {
 	useBackgroundJobsStore,
 	useI18n,
@@ -250,24 +247,19 @@ onMounted(() => {
 	);
 
 	useSubscription(
-		merge(
-			backgroundJobStore.getJobStatusUpdate(JobTypes.InspectPlexServerJob),
-			backgroundJobStore.getJobStatusUpdate(JobTypes.CheckPlexServerConnectionsJob))
-			.pipe(
-				filter((update: JobStatusUpdateDTO) => update.status === JobStatus.Started),
-				tap((update) => {
-					const ids: number[] = JSON.parse(update.primaryKeyValue);
-					Log.debug('primaryKeyValue', ids);
-					if (isArray(ids)) {
-						get(plexServerIds).push(...ids);
-					}
-					if (isNumber(ids)) {
-						get(plexServerIds).push(ids);
-					}
-				}),
-				tap(() => useOpenControlDialog(name)),
-			)
-			.subscribe(),
+		backgroundJobStore.getCheckPlexServerConnectionsJobUpdate(JobStatus.Started)
+			.subscribe(({ data }) => {
+				get(plexServerIds).push(data.plexServerId);
+				useOpenControlDialog(name);
+			}),
+	);
+
+	useSubscription(
+		backgroundJobStore.getInspectPlexServerJobUpdate(JobStatus.Started)
+			.subscribe(({ data }) => {
+				get(plexServerIds).push(...data);
+				useOpenControlDialog(name);
+			}),
 	);
 });
 

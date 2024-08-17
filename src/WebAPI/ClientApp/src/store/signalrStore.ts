@@ -11,12 +11,11 @@ import type { ISetupResult } from '@interfaces';
 import type {
 	FileMergeProgress,
 	InspectServerProgressDTO,
-	JobStatusUpdateDTO,
 	LibraryProgress,
 	NotificationDTO,
 	ServerConnectionCheckStatusProgressDTO,
 	ServerDownloadProgressDTO,
-	SyncServerProgress,
+	SyncServerMediaProgress,
 	DataType } from '@dto';
 import { MessageTypes } from '@dto';
 import type IAppConfig from '@class/IAppConfig';
@@ -28,13 +27,13 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 	interface ISignalRStoreState {
 		// Data
 		libraryProgress: LibraryProgress[];
-		syncServerProgress: SyncServerProgress[];
+		syncServerMediaProgress: SyncServerMediaProgress[];
 		fileMergeProgress: FileMergeProgress[];
 		inspectServerProgress: InspectServerProgressDTO[];
 		serverConnectionCheckStatusProgress: ServerConnectionCheckStatusProgressDTO[];
 		// Subjects
 		libraryProgressSubject: Subject<LibraryProgress[]>;
-		syncServerProgressSubject: Subject<SyncServerProgress[]>;
+		syncServerMediaProgressSubject: Subject<SyncServerMediaProgress[]>;
 		fileMergeProgressSubject: Subject<FileMergeProgress[]>;
 		inspectServerProgressSubject: Subject<InspectServerProgressDTO[]>;
 		serverConnectionCheckStatusProgressSubject: Subject<ServerConnectionCheckStatusProgressDTO[]>;
@@ -43,13 +42,13 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 	const state = reactive<ISignalRStoreState>({
 		// Data
 		libraryProgress: [],
-		syncServerProgress: [],
+		syncServerMediaProgress: [],
 		fileMergeProgress: [],
 		inspectServerProgress: [],
 		serverConnectionCheckStatusProgress: [],
 		// Subjects
 		libraryProgressSubject: new Subject<LibraryProgress[]>(),
-		syncServerProgressSubject: new Subject<SyncServerProgress[]>(),
+		syncServerMediaProgressSubject: new Subject<SyncServerMediaProgress[]>(),
 		fileMergeProgressSubject: new Subject<FileMergeProgress[]>(),
 		inspectServerProgressSubject: new Subject<InspectServerProgressDTO[]>(),
 		serverConnectionCheckStatusProgressSubject: new Subject<ServerConnectionCheckStatusProgressDTO[]>(),
@@ -124,11 +123,11 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 			updateState<InspectServerProgressDTO>('inspectServerProgress', data, 'plexServerId'),
 		);
 
-		progressHubConnection?.on(MessageTypes.SyncServerProgress, (data: SyncServerProgress) =>
-			updateState<SyncServerProgress>('syncServerProgress', data),
+		progressHubConnection?.on(MessageTypes.SyncServerMediaProgress, (data: SyncServerMediaProgress) =>
+			updateState<SyncServerMediaProgress>('syncServerMediaProgress', data),
 		);
 
-		progressHubConnection?.on(MessageTypes.JobStatusUpdate, (data: JobStatusUpdateDTO) =>
+		progressHubConnection?.on(MessageTypes.JobStatusUpdate, (data) =>
 			backgroundStore.setStatusJobUpdate(data),
 		);
 
@@ -218,7 +217,7 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 	const getters = {
 		// region Array Progress
 		getAllLibraryProgress: (): Observable<LibraryProgress[]> => state.libraryProgressSubject.asObservable(),
-		getAllSyncServerProgress: (): Observable<SyncServerProgress[]> => state.syncServerProgressSubject.asObservable(),
+		getAllSyncServerMediaProgress: (): Observable<SyncServerMediaProgress[]> => state.syncServerMediaProgressSubject.asObservable(),
 		getAllFileMergeProgress: (): Observable<FileMergeProgress[]> => state.fileMergeProgressSubject.asObservable(),
 		getAllInspectServerProgress: (): Observable<InspectServerProgressDTO[]> =>
 			state.inspectServerProgressSubject.asObservable(),
@@ -235,8 +234,8 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 				distinctUntilChanged(isEqual),
 			);
 		},
-		getSyncServerProgress(plexServerId: number): Observable<SyncServerProgress | null> {
-			return getters.getAllSyncServerProgress().pipe(
+		getSyncServerMediaProgress(plexServerId: number): Observable<SyncServerMediaProgress | null> {
+			return getters.getAllSyncServerMediaProgress().pipe(
 				map((x) => x?.find((x) => x.id === plexServerId) ?? null),
 				filter((progress) => !!progress),
 				distinctUntilChanged(isEqual),

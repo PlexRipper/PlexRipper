@@ -36,7 +36,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler : IRequestHandler<AddOr
         foreach (var serverAccessToken in serverAccessTokens)
             if (string.IsNullOrWhiteSpace(serverAccessToken.AccessToken))
             {
-                _log.ErrorLine(
+                _log.Error(
                     "Server Access Token was given with an empty access token for machine identifier: {MachineIdentifier}",
                     serverAccessToken.MachineIdentifier
                 );

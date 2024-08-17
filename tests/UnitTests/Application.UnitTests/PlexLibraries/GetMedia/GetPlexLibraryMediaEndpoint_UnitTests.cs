@@ -21,6 +21,7 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
         await SetupDatabase(config =>
         {
             config.PlexServerCount = 1;
+            config.PlexServerConnectionPerServerCount = 1;
             config.PlexLibraryCount = 1;
             config.PlexAccountCount = 1;
             config.MovieCount = movieCount;

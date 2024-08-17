@@ -1,16 +1,9 @@
 using Application.Contracts;
-using SignalRSwaggerGen.Attributes;
-using SignalRSwaggerGen.Enums;
 
 namespace PlexRipper.WebAPI;
 
-[SignalRHub(autoDiscover: AutoDiscover.MethodsAndParams)]
 public interface INotificationHub
 {
-    // This is meant to add MessageTypes to the Swagger schema
-    [return: SignalRReturn(typeof(Task<MessageTypes>), 204)]
-    [return: SignalRReturn(typeof(Task<NotificationDTO>), 200, "Success")]
-    [SignalRMethod(operation: Operation.Get, autoDiscover: AutoDiscover.None)]
     Task Notification(NotificationDTO notification, CancellationToken cancellationToken = default);
 
     Task RefreshNotification(DataType dataType, CancellationToken cancellationToken = default);

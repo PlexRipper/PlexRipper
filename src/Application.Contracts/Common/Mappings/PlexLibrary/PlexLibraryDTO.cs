@@ -26,10 +26,6 @@ public record PlexLibraryDTO
 
     public required long MediaSize { get; set; }
 
-    public required int LibraryLocationId { get; set; }
-
-    public required string LibraryLocationPath { get; set; }
-
     public required FolderPathDTO? DefaultDestination { get; set; }
 
     public required int DefaultDestinationId { get; set; }

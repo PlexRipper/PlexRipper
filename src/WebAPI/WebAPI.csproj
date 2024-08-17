@@ -34,7 +34,6 @@
 		<PackageReference Include="Quartz.Extensions.Hosting" Version="3.8.1" />
 		<PackageReference Include="Quartz.Serialization.Json" Version="3.8.1" />
 		<PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
-		<PackageReference Include="SignalRSwaggerGen" Version="4.2.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Application\Application.csproj" />

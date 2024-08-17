@@ -19,7 +19,7 @@ public interface ISignalRService
 
     Task SendNotificationAsync(Notification notification);
 
-    Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress);
+    Task SendServerSyncProgressUpdateAsync(SyncServerMediaProgress syncServerMediaProgress);
 
     Task SendDownloadProgressUpdateAsync(
         List<DownloadTaskGeneric> downloadTasks,
@@ -27,7 +27,9 @@ public interface ISignalRService
     );
 
     Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress);
-    Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate);
+
+    Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
+        where T : class;
 
     Task SendRefreshNotificationAsync(DataType dataType, CancellationToken cancellationToken = default);
     Task SendRefreshNotificationAsync(List<DataType> dataType, CancellationToken cancellationToken = default);

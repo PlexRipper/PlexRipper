@@ -42,7 +42,8 @@ public class MockSignalRService : ISignalRService
 
     public Task SendNotificationAsync(Notification notification) => Task.CompletedTask;
 
-    public Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress) => Task.CompletedTask;
+    public Task SendServerSyncProgressUpdateAsync(SyncServerMediaProgress syncServerMediaProgress) =>
+        Task.CompletedTask;
 
     public Task SendDownloadProgressUpdateAsync(
         List<DownloadTaskGeneric> downloadTasks,
@@ -60,7 +61,8 @@ public class MockSignalRService : ISignalRService
     public Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress) =>
         Task.CompletedTask;
 
-    public Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate)
+    public Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
+        where T : class
     {
         JobStatusUpdateList.Add(jobStatusUpdate.ToDTO());
         _log.Verbose("{ClassName} => {@JobStatusUpdate}", nameof(MockSignalRService), jobStatusUpdate);

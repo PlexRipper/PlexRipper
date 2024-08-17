@@ -73,7 +73,7 @@ public static class DataFormat
 
         try
         {
-            return (decimal)Math.Round(bytesReceived / (double)totalBytes * 100, 2, MidpointRounding.AwayFromZero);
+            return (decimal)Math.Round((bytesReceived / (double)totalBytes) * 100, 2, MidpointRounding.AwayFromZero);
         }
         catch (Exception e)
         {

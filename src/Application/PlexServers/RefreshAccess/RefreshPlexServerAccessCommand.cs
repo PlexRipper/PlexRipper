@@ -60,7 +60,7 @@ public class RefreshPlexServerAccessCommandHandler : IRequestHandler<RefreshPlex
 
         if (!serversResult.Value.Any())
         {
-            _log.Warning("No Plex servers found for PlexAccount: {PlexAccountId}", plexAccountId);
+            _log.Warning("No Plex servers found for PlexAccount: {plexAccountName}", plexAccountDisplayName);
             return Result.Ok();
         }
 

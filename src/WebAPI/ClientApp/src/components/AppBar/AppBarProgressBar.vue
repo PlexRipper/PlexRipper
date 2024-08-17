@@ -23,7 +23,7 @@
 <script lang="ts" setup>
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set, watchDebounced } from '@vueuse/core';
-import { JobStatus, JobTypes, type SyncServerProgress } from '@dto';
+import { JobStatus, type SyncServerMediaProgress } from '@dto';
 import { useBackgroundJobsStore, useSignalrStore } from '@store';
 
 const { t } = useI18n();
@@ -31,7 +31,7 @@ const signalRStore = useSignalrStore();
 const backgroundJobsStore = useBackgroundJobsStore();
 
 const showProgressBar = ref(false);
-const progressList = ref<SyncServerProgress[]>([]);
+const progressList = ref<SyncServerMediaProgress[]>([]);
 
 const getPercentage = computed(() => {
 	return sum(get(progressList).map((x) => x.percentage)) / get(progressList).length;
@@ -41,7 +41,7 @@ const getText = computed(() => {
 	const finishedCount = progressList.value.filter((x) => x.percentage >= 100).length;
 	return t('components.app-bar-progress-bar.tooltip-text', {
 		finishedCount,
-		totalCount: get(progressList).length,
+		totalCount: get(progressList).flatMap((x) => x.libraryProgresses).length,
 	});
 });
 
@@ -54,21 +54,21 @@ watchDebounced(getPercentage, (value) => {
 onMounted(() => {
 	useSubscription(
 		signalRStore
-			.getAllSyncServerProgress()
+			.getAllSyncServerMediaProgress()
 			.subscribe((progress) => {
 				set(progressList, progress);
 			}),
 	);
 
 	useSubscription(
-		backgroundJobsStore.getJobStatusUpdate(JobTypes.SyncServerJob, JobStatus.Started)
+		backgroundJobsStore.getSyncServerMediaJobUpdate(JobStatus.Started)
 			.subscribe(() => {
 				set(showProgressBar, true);
 			}),
 	);
 
 	useSubscription(
-		backgroundJobsStore.getJobStatusUpdate(JobTypes.SyncServerJob, JobStatus.Completed)
+		backgroundJobsStore.getSyncServerMediaJobUpdate(JobStatus.Completed)
 			.subscribe(() => {
 				setTimeout(() => {
 					set(showProgressBar, false);

@@ -10,12 +10,15 @@ public static partial class DbContextExtensions
 {
     private static readonly ILog _log = LogManager.CreateLogInstance(typeof(DbContextExtensions));
 
-    public static async Task<Result<PlexServerConnection>> GetValidPlexServerConnection(
+    public static async Task<Result<PlexServerConnection>> ChoosePlexServerConnection(
         this IPlexRipperDbContext dbContext,
         int plexServerId,
         CancellationToken cancellationToken = default
     )
     {
+        if (plexServerId <= 0)
+            return ResultExtensions.IsInvalidId(nameof(PlexServer), plexServerId);
+
         var plexServer = await dbContext
             .PlexServers.Include(x => x.PlexServerConnections)
             .ThenInclude(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(5))
@@ -32,10 +35,24 @@ public static partial class DbContextExtensions
                 .LogError();
         }
 
+        if (plexServerConnections.All(x => !x.IsOnline))
+        {
+            var msg = _log.Here()
+                .Error(
+                    "PlexServer with id {plexServerId} and name {PlexServerName} has no online connections available!",
+                    plexServer.Id,
+                    plexServer.Name
+                )
+                .ToLogString();
+            return Result.Fail(msg);
+        }
+
+        var successPlexServerConnections = plexServerConnections.Where(x => x.IsOnline).ToList();
+
         // Find based on preference
         if (plexServer.PreferredConnectionId > 0)
         {
-            var connection = plexServerConnections.Find(x => x.Id == plexServer.PreferredConnectionId);
+            var connection = successPlexServerConnections.Find(x => x.Id == plexServer.PreferredConnectionId);
             if (connection is not null)
                 return Result.Ok(connection);
 
@@ -47,50 +64,39 @@ public static partial class DbContextExtensions
                 );
         }
 
+        // Find based on online local address, because that is the fastest
+        _log.Here()
+            .Verbose(
+                "Attempting to find a local PlexServerConnection that is online for server {PlexServerName}",
+                plexServer.Name
+            );
+
+        var localConnection = successPlexServerConnections.FirstOrDefault(x => x.Local);
+        if (localConnection is not null)
+            return Result.Ok(localConnection);
+
         // Find based on public address
         _log.Here()
             .Verbose(
                 "Attempting to find PlexServerConnection that matches the PlexServer public address: {PublicAddress}",
                 plexServer.PublicAddress
             );
-
-        var publicConnection = plexServerConnections.FirstOrDefault(x =>
-            x.Address == plexServer.PublicAddress && x.IsOnline
-        );
+        var publicConnection = successPlexServerConnections.FirstOrDefault(x => x.Address == plexServer.PublicAddress);
         if (publicConnection is not null)
             return Result.Ok(publicConnection);
 
-        _log.Here()
-            .Verbose(
-                "Could not find a connection based on public address: {PublicAddress} for server {PlexServerName} that is online",
-                plexServer.PublicAddress,
-                plexServer.Name
-            );
-
-        // Find based on what's successful
-        var successPlexServerConnections = plexServerConnections.Where(x => x.IsOnline).ToList();
-        if (successPlexServerConnections.Any())
+        // Give preference to non-PlexTv connections
+        var directConnections = successPlexServerConnections.Where(x => !x.IsPlexTvConnection).ToList();
+        if (directConnections.Any())
         {
-            // Give preference to non-PlexTv connections
-            var directConnections = successPlexServerConnections.Where(x => !x.IsPlexTvConnection).ToList();
-            if (directConnections.Any())
-            {
-                _log.Verbose(
-                    "Found a direct connection that was successful. We're gonna use that: {DirectConnection}",
-                    directConnections.First()
-                );
-                return Result.Ok(directConnections.First());
-            }
-
-            return Result.Ok(successPlexServerConnections.First());
+            _log.Verbose(
+                "Found a direct connection that was successful. We're gonna use that: {DirectConnection}",
+                directConnections.First()
+            );
+            return Result.Ok(directConnections.First());
         }
 
-        // Find anything...
-        _log.Verbose(
-            "Could not find a recent successful connection. We're just gonna YOLO this and pick the first connection: {PlexServerConnectionUrl}",
-            plexServerConnections.First()
-        );
-        return Result.Ok(plexServerConnections.First());
+        return Result.Ok(successPlexServerConnections.First());
     }
 
     /// <summary>

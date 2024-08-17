@@ -44,10 +44,19 @@ public class CheckConnectionStatusByIdCommandHandler
         CancellationToken cancellationToken
     )
     {
-        _plexServerConnection = await _dbContext.PlexServerConnections.GetAsync(
+        var plexServerConnection = await _dbContext.PlexServerConnections.GetAsync(
             command.PlexServerConnectionId,
             cancellationToken
         );
+
+        if (plexServerConnection is null)
+        {
+            return ResultExtensions
+                .EntityNotFound(nameof(PlexServerConnection), command.PlexServerConnectionId)
+                .LogError();
+        }
+
+        _plexServerConnection = plexServerConnection;
 
         // Request status
         var serverStatusResult = await _plexApiService.GetPlexServerStatusAsync(command.PlexServerConnectionId, Action);

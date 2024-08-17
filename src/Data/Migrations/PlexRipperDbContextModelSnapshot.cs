@@ -967,15 +967,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(3);
 
-                    b.Property<int>("LibraryLocationId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(10);
-
-                    b.Property<string>("LibraryLocationPath")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnOrder(4);
-
                     b.Property<string>("MetaData")
                         .IsRequired()
                         .HasColumnType("TEXT")

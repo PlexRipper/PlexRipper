@@ -25,8 +25,8 @@ public enum MessageTypes
     [EnumMember(Value = nameof(FileMergeProgress))]
     FileMergeProgress = 6,
 
-    [EnumMember(Value = nameof(SyncServerProgress))]
-    SyncServerProgress = 7,
+    [EnumMember(Value = nameof(SyncServerMediaProgress))]
+    SyncServerMediaProgress = 7,
 
     [EnumMember(Value = nameof(Notification))]
     Notification = 8,

@@ -1,22 +1,18 @@
 ﻿namespace Application.Contracts;
 
-public class JobStatusUpdateDTO
+public record JobStatusUpdateDTO
 {
-    public required string Id { get; set; }
+    public string Id { get; init; }
 
-    public required string JobName { get; set; }
+    public DateTime JobStartTime { get; init; }
 
-    public required string JobGroup { get; set; }
+    public JobTypes JobType { get; init; }
 
-    public required JobTypes JobType { get; set; }
+    public JobStatus Status { get; init; }
+}
 
-    public required TimeSpan JobRuntime { get; set; }
-
-    public required DateTime JobStartTime { get; set; }
-
-    public required JobStatus Status { get; set; }
-
-    public required string PrimaryKey { get; set; }
-
-    public required string PrimaryKeyValue { get; set; }
+public record JobStatusUpdateDTO<T> : JobStatusUpdateDTO
+    where T : class
+{
+    public T Data { get; init; }
 }

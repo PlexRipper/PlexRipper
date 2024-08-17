@@ -1,8 +1,8 @@
 import { randRecentDate } from '@ngneat/falso';
-import type { LibraryProgress, SyncServerProgress } from '@dto';
+import type { LibraryProgress, SyncServerMediaProgress } from '@dto';
 import { times, mean } from 'lodash-es';
 
-export function generateSyncServerProgress({
+export function generateSyncServerMediaProgress({
 	progressIndex = 0,
 	plexServerId,
 	plexLibraryIds,
@@ -13,7 +13,7 @@ export function generateSyncServerProgress({
 	progressIndex: number;
 	plexServerId: number;
 	plexLibraryIds: number[];
-}): SyncServerProgress {
+}): SyncServerMediaProgress {
 	const progress = times(plexLibraryIds.length, (i) => generateLibraryProgress({ libraryId: plexLibraryIds[i], received: progressIndex * 100, total: 1000 }));
 	return {
 		id: plexServerId,

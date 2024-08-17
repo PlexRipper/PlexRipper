@@ -39,6 +39,12 @@ export interface AuthPinLocation {
   timeZone: string;
 }
 
+export interface CheckAllConnectionStatusUpdateDTO {
+  plexServerConnectionIds: number[];
+  /** @format int32 */
+  plexServerId: number;
+}
+
 export interface ConfirmationSettingsDTO {
   askDownloadEpisodeConfirmation: boolean;
   askDownloadMovieConfirmation: boolean;
@@ -344,17 +350,12 @@ export enum JobStatus {
   Completed = "Completed",
 }
 
-export interface JobStatusUpdateDTO {
+export interface JobStatusUpdateDTOOfObject {
+  data?: any;
   id: string;
-  jobGroup: string;
-  jobName: string;
-  /** @format duration */
-  jobRuntime: string;
   /** @format date-time */
   jobStartTime: string;
   jobType: JobTypes;
-  primaryKey: string;
-  primaryKeyValue: string;
   status: JobStatus;
 }
 
@@ -362,9 +363,8 @@ export enum JobTypes {
   Unknown = "Unknown",
   CheckPlexServerConnectionsJob = "CheckPlexServerConnectionsJob",
   DownloadJob = "DownloadJob",
-  DownloadProgressJob = "DownloadProgressJob",
-  SyncServerJob = "SyncServerJob",
-  DownloadProgressJobs = "DownloadProgressJobs",
+  FileMergeJob = "FileMergeJob",
+  SyncServerMediaJob = "SyncServerMediaJob",
   InspectPlexServerJob = "InspectPlexServerJob",
 }
 
@@ -395,7 +395,7 @@ export enum MessageTypes {
   InspectServerProgress = "InspectServerProgress",
   ServerConnectionCheckStatusProgress = "ServerConnectionCheckStatusProgress",
   FileMergeProgress = "FileMergeProgress",
-  SyncServerProgress = "SyncServerProgress",
+  SyncServerMediaProgress = "SyncServerMediaProgress",
   Notification = "Notification",
   JobStatusUpdate = "JobStatusUpdate",
   RefreshNotification = "RefreshNotification",
@@ -430,7 +430,11 @@ export interface PlexAccountDTO {
   displayName: string;
   email: string;
   hasPassword: boolean;
-  /** @format int32 */
+  /**
+   * @format int32
+   * @min 0
+   * @exclusiveMin true
+   */
   id: number;
   isAuthTokenMode: boolean;
   isEnabled: boolean;
@@ -440,7 +444,8 @@ export interface PlexAccountDTO {
   password: string;
   /** @format int64 */
   plexId: number;
-  plexServerAccess: PlexServerAccessDTO[];
+  plexLibraryAccess: number[];
+  plexServerAccess: number[];
   title: string;
   /** @minLength 5 */
   username: string;
@@ -473,9 +478,6 @@ export interface PlexLibraryDTO {
   /** @format int32 */
   id: number;
   key: string;
-  /** @format int32 */
-  libraryLocationId: number;
-  libraryLocationPath: string;
   /** @format int64 */
   mediaSize: number;
   outdated: boolean;
@@ -625,12 +627,6 @@ export enum PlexMediaType {
   OtherVideos = "OtherVideos",
   Games = "Games",
   Unknown = "Unknown",
-}
-
-export interface PlexServerAccessDTO {
-  plexLibraryIds: number[];
-  /** @format int32 */
-  plexServerId: number;
 }
 
 export interface PlexServerConnectionDTO {
@@ -979,7 +975,13 @@ export interface SuccessDTO {
   metadata: Record<string, any>;
 }
 
-export interface SyncServerProgress {
+export interface SyncServerMediaJobUpdateDTO {
+  forceSync: boolean;
+  /** @format int32 */
+  plexServerId: number;
+}
+
+export interface SyncServerMediaProgress {
   /** @format int32 */
   id: number;
   libraryProgresses: LibraryProgress[];
@@ -992,25 +994,7 @@ export interface UpdateFolderPathEndpointRequest {
 }
 
 export interface UpdatePlexAccountByIdEndpointRequest {
-  plexAccountDTO: UpdatePlexAccountDTO;
-}
-
-export interface UpdatePlexAccountDTO {
-  /** @minLength 1 */
-  displayName: string;
-  /**
-   * @format int32
-   * @min 0
-   * @exclusiveMin true
-   */
-  id: number;
-  isAuthTokenMode: boolean;
-  isEnabled: boolean;
-  isMain: boolean;
-  /** @minLength 5 */
-  password: string;
-  /** @minLength 5 */
-  username: string;
+  plexAccountDTO: PlexAccountDTO;
 }
 
 export interface UpdateUserSettingsEndpointRequest {

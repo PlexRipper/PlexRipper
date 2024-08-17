@@ -1,12 +1,11 @@
 ﻿using Application.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.SignalR;
-using SignalRSwaggerGen.Attributes;
 using WebAPI.Contracts;
 
 namespace PlexRipper.WebAPI;
 
-public class ProgressHub : Hub<IProgressHub>
+public class ProgressHub : Hub<IProgressHub>, IProgressHub
 {
     private readonly ILog<ProgressHub> _log;
 
@@ -15,10 +14,7 @@ public class ProgressHub : Hub<IProgressHub>
         _log = log;
     }
 
-    public async Task JobStatusUpdate(
-        [SignalRParam(paramType: typeof(JobStatusUpdateDTO))] JobStatusUpdateDTO jobStatusUpdate,
-        [SignalRHidden] CancellationToken cancellationToken = default
-    )
+    public async Task JobStatusUpdate(JobStatusUpdateDTO jobStatusUpdate, CancellationToken cancellationToken = default)
     {
         _log.Debug(
             "Sending progress: {MessageTypesNotification} => {@JobStatusUpdateDto}",
@@ -28,22 +24,22 @@ public class ProgressHub : Hub<IProgressHub>
         await Clients.All.JobStatusUpdate(jobStatusUpdate, cancellationToken);
     }
 
-    public async Task SyncServerProgress(
-        [SignalRParam(paramType: typeof(SyncServerProgress))] SyncServerProgress SyncServerProgress,
-        [SignalRHidden] CancellationToken cancellationToken = default
+    public async Task SyncServerMediaProgress(
+        SyncServerMediaProgress syncServerMediaProgress,
+        CancellationToken cancellationToken = default
     )
     {
         _log.Debug(
             "Sending progress: {MessageTypesNotification} => {@SyncServerProgress}",
-            MessageTypes.SyncServerProgress.ToString(),
-            SyncServerProgress
+            MessageTypes.SyncServerMediaProgress.ToString(),
+            syncServerMediaProgress
         );
-        await Clients.All.SyncServerProgress(SyncServerProgress, cancellationToken);
+        await Clients.All.SyncServerMediaProgress(syncServerMediaProgress, cancellationToken);
     }
 
     public async Task FileMergeProgress(
-        [SignalRParam(paramType: typeof(FileMergeProgress))] FileMergeProgress fileMergeProgress,
-        [SignalRHidden] CancellationToken cancellationToken = default
+        FileMergeProgress fileMergeProgress,
+        CancellationToken cancellationToken = default
     )
     {
         _log.Debug(
@@ -55,9 +51,8 @@ public class ProgressHub : Hub<IProgressHub>
     }
 
     public async Task ServerConnectionCheckStatusProgress(
-        [SignalRParam(paramType: typeof(ServerConnectionCheckStatusProgressDTO))]
-            ServerConnectionCheckStatusProgressDTO serverConnectionCheckStatusProgress,
-        [SignalRHidden] CancellationToken cancellationToken = default
+        ServerConnectionCheckStatusProgressDTO serverConnectionCheckStatusProgress,
+        CancellationToken cancellationToken = default
     )
     {
         _log.Debug(
@@ -68,9 +63,22 @@ public class ProgressHub : Hub<IProgressHub>
         await Clients.All.ServerConnectionCheckStatusProgress(serverConnectionCheckStatusProgress, cancellationToken);
     }
 
+    public async Task InspectServerProgress(
+        InspectServerProgressDTO inspectServerProgress,
+        CancellationToken cancellationToken = default
+    )
+    {
+        _log.Debug(
+            "Sending progress: {MessageTypesNotification} => {@ServerDownloadProgress}",
+            MessageTypes.InspectServerProgress.ToString(),
+            inspectServerProgress
+        );
+        await Clients.All.InspectServerProgress(inspectServerProgress, cancellationToken);
+    }
+
     public async Task ServerDownloadProgress(
-        [SignalRParam(paramType: typeof(ServerDownloadProgressDTO))] ServerDownloadProgressDTO serverDownloadProgress,
-        [SignalRHidden] CancellationToken cancellationToken = default
+        ServerDownloadProgressDTO serverDownloadProgress,
+        CancellationToken cancellationToken = default
     )
     {
         _log.Debug(
@@ -81,10 +89,7 @@ public class ProgressHub : Hub<IProgressHub>
         await Clients.All.ServerDownloadProgress(serverDownloadProgress, cancellationToken);
     }
 
-    public async Task DownloadTaskUpdate(
-        [SignalRParam(paramType: typeof(DownloadTaskDTO))] DownloadTaskDTO downloadTask,
-        [SignalRHidden] CancellationToken cancellationToken = default
-    )
+    public async Task DownloadTaskUpdate(DownloadTaskDTO downloadTask, CancellationToken cancellationToken = default)
     {
         _log.Debug(
             "Sending progress: {MessageTypesNotification} => {@DownloadTaskUpdate}",
@@ -94,10 +99,7 @@ public class ProgressHub : Hub<IProgressHub>
         await Clients.All.DownloadTaskUpdate(downloadTask, cancellationToken);
     }
 
-    public async Task LibraryProgress(
-        [SignalRParam(paramType: typeof(LibraryProgress))] LibraryProgress libraryProgress,
-        [SignalRHidden] CancellationToken cancellationToken = default
-    )
+    public async Task LibraryProgress(LibraryProgress libraryProgress, CancellationToken cancellationToken = default)
     {
         _log.Debug(
             "Sending progress: {MessageTypesNotification} => {@LibraryProgress}",

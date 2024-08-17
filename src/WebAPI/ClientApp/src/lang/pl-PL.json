@@ -172,7 +172,7 @@
             "request-data-sent": "Wysłano dane żądania:"
         },
         "app-bar-progress-bar": {
-            "tooltip-text": "Synchronizowanie PlexServer {finishedCount} z {totalCount}!"
+            "tooltip-text": "Synchronizacja bibliotek Plex {finishedCount} z {totalCount}!"
         },
         "account-token-validate-dialog": {
             "column": {

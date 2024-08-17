@@ -6,6 +6,9 @@ public static class StringToPlexMediaTypeConverter
 {
     public static PlexMediaType ToPlexMediaTypeFromPlexApi(this string source)
     {
+        if (string.IsNullOrEmpty(source))
+            return PlexMediaType.Unknown;
+
         return source.ToLower() switch
         {
             "movie" => PlexMediaType.Movie,

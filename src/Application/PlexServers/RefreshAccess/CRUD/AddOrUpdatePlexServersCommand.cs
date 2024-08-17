@@ -30,6 +30,10 @@ public class AddOrUpdatePlexServersCommandValidator : AbstractValidator<AddOrUpd
                         connection.RuleFor(c => c.Address).NotEmpty().WithMessage("Address is required.");
 
                         connection.RuleFor(c => c.Port).NotEmpty().WithMessage("Port is required.");
+                        connection
+                            .RuleFor(c => c.PlexServerStatus)
+                            .Empty()
+                            .WithMessage("PlexServerStatus should be empty.");
                     });
             });
     }

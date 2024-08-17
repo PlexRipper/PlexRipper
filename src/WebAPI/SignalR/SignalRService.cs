@@ -72,9 +72,9 @@ public class SignalRService : ISignalRService
         await _progressHub.Clients.All.FileMergeProgress(fileMergeProgress, cancellationToken);
     }
 
-    public async Task SendServerSyncProgressUpdateAsync(SyncServerProgress syncServerProgress)
+    public async Task SendServerSyncProgressUpdateAsync(SyncServerMediaProgress syncServerMediaProgress)
     {
-        await _progressHub.Clients.All.SyncServerProgress(syncServerProgress);
+        await _progressHub.Clients.All.SyncServerMediaProgress(syncServerMediaProgress);
     }
 
     #endregion
@@ -104,7 +104,8 @@ public class SignalRService : ISignalRService
 
     #region JobStateNotification
 
-    public async Task SendJobStatusUpdateAsync(JobStatusUpdate jobStatusUpdate)
+    public async Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
+        where T : class
     {
         await _progressHub.Clients.All.JobStatusUpdate(jobStatusUpdate.ToDTO());
     }

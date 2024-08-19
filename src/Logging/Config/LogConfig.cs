@@ -30,7 +30,7 @@ public static class LogConfig
         var config = new LoggerConfiguration()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-            .MinimumLevel.Override("Quartz", LogEventLevel.Information)
+            .MinimumLevel.Override("Quartz", LogEventLevel.Warning)
             .Enrich.FromLogContext();
 
         // Do not mask data when debugging
@@ -39,7 +39,7 @@ public static class LogConfig
             config.Enrich.WithSensitiveDataMasking(options =>
             {
                 options.MaskingOperators.Clear();
-                options.MaskingOperators = [new EmailAddressMaskingOperator(), new UrlMaskingOperator(),];
+                options.MaskingOperators = [new EmailAddressMaskingOperator(), new UrlMaskingOperator()];
                 options.MaskProperties.Add("PlexLibraryTitle");
                 options.MaskProperties.Add("PlexAccountDisplayName");
                 options.MaskProperties.Add("PlexLibraryName");
@@ -66,15 +66,16 @@ public static class LogConfig
         _testOutput = output;
     }
 
-    public static Logger GetLogger(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
+    public static Logger GetLogger()
     {
+        var minimumLogLevel = LogManager.MinimumLogLevel;
         if (_testOutput is null)
         {
             return GetBaseConfiguration()
                 .WriteTo.File(
                     TemplateTextFormatter,
                     Path.Combine(PathProvider.LogsDirectory, "log.txt"),
-                    LogEventLevel.Debug,
+                    minimumLogLevel,
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true,
                     retainedFileCountLimit: 7

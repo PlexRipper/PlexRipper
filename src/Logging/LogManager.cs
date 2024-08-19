@@ -40,49 +40,45 @@ public static class LogManager
 
     public static void SetupLogging(LogEventLevel minimumLogLevel = LogEventLevel.Debug)
     {
-        Serilog.Log.Logger = LogConfig.GetLogger(minimumLogLevel);
-        _log.Information("Logging level set to {LogLevel}", minimumLogLevel);
+        MinimumLogLevel = minimumLogLevel;
+        Serilog.Log.Logger = LogConfig.GetLogger();
+        _log.Information("Logging level set to {LogLevel}", MinimumLogLevel);
     }
 
     /// <summary>
     /// Returns a new typed <see cref="ILog"/> instance.
     /// </summary>
     /// <returns></returns>
-    public static ILog<T> CreateLogInstance<T>(LogEventLevel logLevel = LogEventLevel.Debug)
-        where T : class => new Log<T>(LogConfig.GetLogger(logLevel), typeof(T));
+    public static ILog<T> CreateLogInstance<T>()
+        where T : class => new Log<T>(LogConfig.GetLogger(), typeof(T));
 
     /// <summary>
     /// Returns a new typed <see cref="ILog"/> instance.
     /// </summary>
     /// <returns></returns>
-    public static ILog CreateLogInstance(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug)
+    public static ILog CreateLogInstance(ITestOutputHelper output)
     {
         LogConfig.SetTestOutputHelper(output);
-        return new Log(LogConfig.GetLogger(logLevel));
+        return new Log(LogConfig.GetLogger());
     }
 
-    public static ILog<T> CreateLogInstance<T>(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug)
+    public static ILog<T> CreateLogInstance<T>(ITestOutputHelper output)
         where T : class
     {
         LogConfig.SetTestOutputHelper(output);
-        return new Log<T>(LogConfig.GetLogger(logLevel), typeof(T));
+        return new Log<T>(LogConfig.GetLogger(), typeof(T));
     }
 
     /// <summary>
     /// Returns a new typed <see cref="ILog"/> instance.
     /// </summary>
     /// <returns></returns>
-    public static ILog CreateLogInstance(Type classType, LogEventLevel logLevel = LogEventLevel.Debug) =>
-        new Log<Type>(LogConfig.GetLogger(logLevel), classType);
+    public static ILog CreateLogInstance(Type classType) => new Log<Type>(LogConfig.GetLogger(), classType);
 
-    public static ILog CreateLogInstance(
-        ITestOutputHelper output,
-        Type classType,
-        LogEventLevel logLevel = LogEventLevel.Debug
-    )
+    public static ILog CreateLogInstance(ITestOutputHelper output, Type classType)
     {
         LogConfig.SetTestOutputHelper(output);
-        return new Log<Type>(LogConfig.GetLogger(logLevel), classType);
+        return new Log<Type>(LogConfig.GetLogger(), classType);
     }
 
     public static void CloseAndFlush()
@@ -95,4 +91,5 @@ public static class LogManager
     #endregion
 
     private static readonly ILog _log = CreateLogInstance(typeof(LogManager));
+    public static LogEventLevel MinimumLogLevel { get; private set; } = LogEventLevel.Debug;
 }

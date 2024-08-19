@@ -11,8 +11,8 @@ public class Log_UnitTests : BaseUnitTest<Log_UnitTests>
     public Log_UnitTests(ITestOutputHelper output)
         : base(output, LogEventLevel.Verbose)
     {
-        _log = LogManager.CreateLogInstance<Log_UnitTests>(output, LogEventLevel.Verbose);
-        _logEmpty = LogManager.CreateLogInstance(output, LogEventLevel.Verbose);
+        _log = LogManager.CreateLogInstance<Log_UnitTests>(output);
+        _logEmpty = LogManager.CreateLogInstance(output);
     }
 
     [Fact]

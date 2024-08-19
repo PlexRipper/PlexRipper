@@ -11,8 +11,8 @@ public class LogMasking_UnitTests : BaseUnitTest<LogMasking_UnitTests>
     public LogMasking_UnitTests(ITestOutputHelper output)
         : base(output, LogEventLevel.Verbose)
     {
-        log = LogManager.CreateLogInstance<Log_UnitTests>(output, LogEventLevel.Verbose);
-        logEmpty = LogManager.CreateLogInstance(output, LogEventLevel.Verbose);
+        log = LogManager.CreateLogInstance<Log_UnitTests>(output);
+        logEmpty = LogManager.CreateLogInstance(output);
     }
 
     #endregion

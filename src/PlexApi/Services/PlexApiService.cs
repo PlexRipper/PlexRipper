@@ -167,6 +167,9 @@ public class PlexApiService : IPlexApiService
 
         var mediaList = result.Value.MediaContainer.Metadata;
 
+        if (mediaList is null)
+            return ResultExtensions.IsNull(nameof(mediaList));
+
         // Set the TitleSort if it is empty
         foreach (var metadata in mediaList)
             metadata.TitleSort = !string.IsNullOrEmpty(metadata.TitleSort)

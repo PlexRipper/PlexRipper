@@ -40,9 +40,15 @@ public static class EndpointExtensions
             // Status Code 403 Forbidden
             else if (result.Has403ForbiddenError())
                 await sendAsync(StatusCodes.Status403Forbidden);
-            // Status Code 403 Forbidden
+            // Status Code 404 Not Found
             else if (result.Has404NotFoundError())
                 await sendAsync(StatusCodes.Status404NotFound);
+            // Status Code 502 Bad Gateway
+            else if (result.Has502BadGatewayError())
+                await sendAsync(StatusCodes.Status502BadGateway);
+            // Status Code 504 Gateway Timeout
+            else if (result.Has504GatewayTimeoutError())
+                await sendAsync(StatusCodes.Status504GatewayTimeout);
             // Status Code 500 Internal Server Error
             else
                 await sendAsync(StatusCodes.Status500InternalServerError);

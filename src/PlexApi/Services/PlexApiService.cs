@@ -2,6 +2,7 @@
 using Data.Contracts;
 using Logging.Interface;
 using PlexApi.Contracts;
+using PlexRipper.PlexApi.Models;
 using Settings.Contracts;
 
 namespace PlexRipper.PlexApi.Services;
@@ -159,16 +160,43 @@ public class PlexApiService : IPlexApiService
         updatedPlexLibrary.Id = plexLibrary.Id;
         updatedPlexLibrary.PlexServerId = plexLibrary.PlexServerId;
 
-        // Retrieve the media for this library
-        var result = await _plexApi.GetMetadataForLibraryAsync(tokenResult.Value, serverUrl, plexLibrary.Key);
+        var mediaList = new List<Metadata>();
+        var index = 0;
+        var totalSize = 0;
+        var batchSize = 500;
+        var mediaType = string.Empty;
+        while (true)
+        {
+            // Retrieve the media for this library
+            var result = await _plexApi.GetMetadataForLibraryAsync(
+                tokenResult.Value,
+                serverUrl,
+                plexLibrary.Key,
+                index,
+                batchSize
+            );
 
-        if (result.IsFailed)
-            return result.ToResult().LogError();
+            if (result.IsFailed)
+                return result.ToResult().LogError();
 
-        var mediaList = result.Value.MediaContainer.Metadata;
+            var mediaContainer = result.Value.MediaContainer;
+            mediaList.AddRange(result.Value.MediaContainer.Metadata);
 
-        if (mediaList is null)
-            return ResultExtensions.IsNull(nameof(mediaList));
+            totalSize = mediaContainer.TotalSize;
+            index += mediaContainer.Size;
+
+            mediaType = mediaContainer.ViewGroup;
+
+            // If the size is less than the batch size, we have reached the end
+            if (mediaContainer.Size < batchSize)
+                break;
+
+            if (index >= totalSize)
+                break;
+        }
+
+        if (!mediaList.Any())
+            return ResultExtensions.IsEmpty(nameof(mediaList));
 
         // Set the TitleSort if it is empty
         foreach (var metadata in mediaList)
@@ -177,7 +205,7 @@ public class PlexApiService : IPlexApiService
                 : metadata.Title.ToSortTitle();
 
         // Determine how to map based on the Library type.
-        switch (result.Value.MediaContainer.ViewGroup)
+        switch (mediaType)
         {
             case "movie":
                 updatedPlexLibrary.Movies = mediaList.ToPlexMovies();

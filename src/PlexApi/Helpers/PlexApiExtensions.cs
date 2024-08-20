@@ -47,10 +47,10 @@ public static class PlexApiExtensions
         return request;
     }
 
-    public static RestRequest AddLimitHeaders(this RestRequest request, int from, int to)
+    public static RestRequest AddLimitHeaders(this RestRequest request, int startIndex, int batchSize)
     {
-        request.AddQueryParameter("X-Plex-Container-Start", from.ToString());
-        request.AddQueryParameter("X-Plex-Container-Size", to.ToString());
+        request.AddQueryParameter("X-Plex-Container-Start", startIndex.ToString());
+        request.AddQueryParameter("X-Plex-Container-Size", batchSize.ToString());
         return request;
     }
 }

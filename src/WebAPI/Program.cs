@@ -12,7 +12,13 @@ public class Program
     {
         try
         {
-            LogManager.SetupLogging(LogEventLevel.Verbose);
+            var success = Enum.TryParse<LogEventLevel>(
+                System.Environment.GetEnvironmentVariable("LOG_LEVEL"),
+                ignoreCase: true,
+                out var logLevel
+            );
+
+            LogManager.SetupLogging(success ? logLevel : LogEventLevel.Debug);
             _log.Information("Currently running on {CurrentOS}", OsInfo.CurrentOS);
 
             var builder = WebApplication.CreateBuilder(args);

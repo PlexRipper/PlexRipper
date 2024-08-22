@@ -15,48 +15,47 @@
 				:text="refreshingText" />
 		</QCol>
 	</QRow>
+
+	<!--	Overview bar	-->
+	<MediaOverviewBar
+		:server="libraryStore.getServerByLibraryId(props.libraryId)"
+		:library="libraryStore.getLibrary(props.libraryId)"
+		:detail-mode="!mediaOverviewStore.showMediaOverview"
+		@back="closeDetailsOverview"
+		@view-change="changeView"
+		@selection-dialog="useOpenControlDialog(mediaSelectionDialogName)"
+		@refresh-library="refreshLibrary" />
+
 	<!-- Media Overview -->
-	<template v-else-if="!loading && mediaOverviewStore.itemsLength">
-		<QRow no-gutters>
-			<QCol>
-				<!--	Overview bar	-->
-				<MediaOverviewBar
-					:server="libraryStore.getServerByLibraryId(props.libraryId)"
-					:library="libraryStore.getLibrary(props.libraryId)"
-					:detail-mode="!mediaOverviewStore.showMediaOverview"
-					@back="closeDetailsOverview"
-					@view-change="changeView"
-					@selection-dialog="useOpenControlDialog(mediaSelectionDialogName)"
-					@refresh-library="refreshLibrary" />
-				<!--	Data table display	-->
-				<QRow
-					id="media-container"
-					align="start">
-					<QCol v-show="mediaOverviewStore.showMediaOverview">
-						<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
-							<MediaTable
-								:rows="mediaOverviewStore.items"
-								:disable-hover-click="mediaType !== PlexMediaType.TvShow"
-								is-scrollable />
-						</template>
+	<template v-if="!loading && mediaOverviewStore.itemsLength">
+		<!--	Data table display	-->
+		<QRow
+			id="media-container"
+			align="start">
+			<QCol v-show="mediaOverviewStore.showMediaOverview">
+				<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
+					<MediaTable
+						:rows="mediaOverviewStore.items"
+						:disable-hover-click="mediaType !== PlexMediaType.TvShow"
+						is-scrollable />
+				</template>
 
-						<!-- Poster display -->
-						<template v-else>
-							<PosterTable
-								:library-id="libraryId"
-								:media-type="mediaType"
-								:items="mediaOverviewStore.items" />
-						</template>
-					</QCol>
-
-					<!-- Alphabet Navigation -->
-					<AlphabetNavigation v-show="mediaOverviewStore.showMediaOverview" />
-				</QRow>
+				<!-- Poster display -->
+				<template v-else>
+					<PosterTable
+						:library-id="libraryId"
+						:media-type="mediaType"
+						:items="mediaOverviewStore.items" />
+				</template>
 			</QCol>
+
+			<!-- Alphabet Navigation -->
+			<AlphabetNavigation v-show="mediaOverviewStore.showMediaOverview" />
 		</QRow>
 	</template>
+
 	<!-- No Media Overview -->
-	<template v-else-if="!loading && mediaOverviewStore.itemsLength === 0">
+	<template v-else>
 		<QRow justify="center">
 			<QCol cols="auto">
 				<QAlert type="warning">

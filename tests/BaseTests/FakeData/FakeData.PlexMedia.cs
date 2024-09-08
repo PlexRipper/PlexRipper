@@ -47,6 +47,7 @@ public static partial class FakeData
             .RuleFor(x => x.PlexLibrary, _ => null)
             .RuleFor(x => x.FullThumbUrl, _ => string.Empty)
             .RuleFor(x => x.FullBannerUrl, _ => string.Empty)
+            .RuleFor(x => x.Guid, _ => string.Empty)
             .RuleFor(
                 x => x.MediaData,
                 _ => new PlexMediaContainer { MediaData = GetPlexMediaData(seed, options).Generate(1) }

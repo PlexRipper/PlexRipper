@@ -17,6 +17,12 @@
         "resolved": "0.28.2",
         "contentHash": "eMPtBF9ECE5sMBXX6fZw/phFZ9UeV62E43z78VPKIgCJMppojxDc03RD6ROpPgk8Vvde11vkcZf69NveW/T1rg=="
       },
+      "HttpClientToCurl": {
+        "type": "Direct",
+        "requested": "[2.0.6, )",
+        "resolved": "2.0.6",
+        "contentHash": "IhFs+fmeSvm7Ac1LfQ8serUGzj5Up+gZAg7os/nGajizLTMW/+S/M7GbJlBNWotvQGaxEu/sDirjsgVSMoc31g=="
+      },
       "Polly": {
         "type": "Direct",
         "requested": "[8.3.1, )",
@@ -473,6 +479,19 @@
         "contentHash": "nT8ep51zgrTPEtRG+Cxeoi585uFlzmCmJz+xl35ima1xWCk4KuRuLtCEswy8RQkApmeaawAAfsTsa83sgmT4xw==",
         "dependencies": {
           "NetTopologySuite": "[2.0.0, 3.0.0-A)"
+        }
+      },
+      "Newtonsoft.Json": {
+        "type": "Transitive",
+        "resolved": "13.0.3",
+        "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
+      },
+      "NodaTime": {
+        "type": "Transitive",
+        "resolved": "3.1.9",
+        "contentHash": "EzjwDOtsETlXWBDE6qvTQqc3guP+9xrAOf9j1mHL++UD4VeZay+dbCPNnXyZhoQMkKAOZ/+hIOtz7STl0Rkknw==",
+        "dependencies": {
+          "System.Runtime.CompilerServices.Unsafe": "4.7.1"
         }
       },
       "Polly.Core": {
@@ -1573,6 +1592,13 @@
           "Serilog.Sinks.File": "[5.0.0, )",
           "Serilog.Sinks.TestCorrelator": "[3.2.0, )",
           "Serilog.Sinks.XUnit": "[3.0.5, )"
+        }
+      },
+      "lukehagar.plexapi.sdk": {
+        "type": "Project",
+        "dependencies": {
+          "newtonsoft.json": "[13.0.3, )",
+          "nodatime": "[3.1.9, )"
         }
       },
       "plexapi.contracts": {

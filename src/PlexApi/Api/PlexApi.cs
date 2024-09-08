@@ -1,23 +1,20 @@
 using Application.Contracts;
-using Logging.Interface;
+using LukeHagar.PlexAPI.SDK;
 using PlexRipper.PlexApi.Api.Media.Providers;
 using PlexRipper.PlexApi.Api.Users.SignIn;
 using PlexRipper.PlexApi.Helpers;
 using PlexRipper.PlexApi.Models;
 using RestSharp;
 using DataFormat = RestSharp.DataFormat;
+using ILog = Logging.Interface.ILog;
+
+// ReSharper disable ArrangeObjectCreationWhenTypeNotEvident
 
 namespace PlexRipper.PlexApi.Api;
 
 public class PlexApi
 {
-    #region Fields
-
     private readonly ILog _log;
-
-    #endregion
-
-    #region Constructors
 
     public PlexApi(ILog log, PlexApiClient client)
     {
@@ -25,44 +22,70 @@ public class PlexApi
         _client = client;
     }
 
-    #endregion
-
-    #region Properties
-
     private PlexApiClient _client { get; }
 
-    #endregion
+    public PlexAPI CreatePlexTvClient() => new(client: new NewPlexApiClient(_log));
 
-    #region Methods
-
-    #region Public
+    private string GetClientId => Guid.NewGuid().ToString();
 
     /// <summary>
-    ///     Sign into the Plex API
-    ///     This is for authenticating users credentials with Plex.
-    ///     <remarks>NOTE: Plex "Managed" users do not work.</remarks>
-    ///     <example>URL: https://plex.tv/api/v2/users/signin?X-Plex-Client-Identifier=Chrome</example>
+    /// Sign in user with username and password and return user data with Plex authentication token.
+    /// <remarks>NOTE: Plex "Managed" users do not work.</remarks>
+    /// <example>URL: https://plex.tv/api/v2/users/signin?X-Plex-Client-Identifier=Chrome</example>
     /// </summary>
     /// <returns></returns>
-    public async Task<Result<SignInResponse>> PlexSignInAsync(PlexAccount plexAccount)
+    public async Task<Result<PlexAccount>> PlexSignInAsync(PlexAccount plexAccount)
     {
         _log.Debug("Requesting PlexToken for account {UserName}", plexAccount.Username);
-        var credentials = new CredentialsDTO
+
+        var client = CreatePlexTvClient();
+
+        var response = await client.Authentication.PostUsersSignInDataAsync(
+            GetClientId,
+            new()
+            {
+                Login = plexAccount.Username,
+                Password = plexAccount.Password,
+                RememberMe = false,
+
+                // TODO Add verification code
+                // VerificationCode = plexAccount.Is2Fa ? plexAccount.VerificationCode : "";
+            }
+        );
+
+        var result = response.ToApiResult(x => new PlexAccount
         {
-            Login = plexAccount.Username,
+            Id = plexAccount.Id,
+            DisplayName = plexAccount.DisplayName,
+            Username = plexAccount.Username,
             Password = plexAccount.Password,
-            RememberMe = false,
-        };
+            IsEnabled = plexAccount.IsEnabled,
+            IsAuthTokenMode = plexAccount.IsAuthTokenMode,
+            IsValidated = true,
+            ValidatedAt = DateTime.UtcNow,
+            PlexId = x.UserPlexAccount!.Id,
+            Uuid = x.UserPlexAccount!.Uuid,
+            ClientId = plexAccount.ClientId,
+            Title = x.UserPlexAccount!.Title,
+            Email = x.UserPlexAccount!.Email,
+            HasPassword = x.UserPlexAccount!.HasPassword.GetValueOrDefault(),
+            AuthenticationToken = x.UserPlexAccount!.AuthToken,
+            IsMain = plexAccount.IsMain,
+            PlexAccountServers = [],
+            PlexAccountLibraries = [],
+            Is2Fa = x.UserPlexAccount!.TwoFactorEnabled.GetValueOrDefault(),
+            VerificationCode = string.Empty,
+        });
 
-        if (plexAccount.Is2Fa)
-            credentials.VerificationCode = plexAccount.VerificationCode;
+        if (result.IsSuccess)
+        {
+            _log.Information(
+                "Successfully retrieved the PlexAccount data for user {PlexAccountDisplayName} from the PlexApi",
+                plexAccount.DisplayName
+            );
+        }
 
-        var request = new RestRequest(new Uri(PlexApiPaths.SignInUrl), Method.Post)
-            .AddPlexHeaders(plexAccount.ClientId)
-            .AddJsonBody(credentials);
-        request.Timeout = 15000;
-
-        return await _client.SendRequestAsync<SignInResponse>(request, 0);
+        return result;
     }
 
     public async Task<Result<string>> RefreshPlexAuthTokenAsync(PlexAccount plexAccount)
@@ -70,8 +93,8 @@ public class PlexApi
         var result = await PlexSignInAsync(plexAccount);
         if (result.IsSuccess)
         {
-            _log.Debug("Returned token was: {AuthToken}", result.Value.AuthToken);
-            return result.Value.AuthToken;
+            _log.Debug("Returned token was: {AuthToken}", result.Value.AuthenticationToken);
+            return result.Value.AuthenticationToken;
         }
 
         return Result.Fail("Result from RequestPlexSignInDataAsync() was null.").LogError();
@@ -373,8 +396,4 @@ public class PlexApi
 
         return await _client.SendRequestAsync<SignInResponse>(request);
     }
-
-    #endregion
-
-    #endregion
 }

@@ -26,7 +26,7 @@ public static class PlexApiExtensions
 
         request.AddQueryParameter("X-Plex-Product", "Plex Web");
         request.AddQueryParameter("X-Plex-Version", "4.132.2");
-        request.AddPlexClientIdentifier();
+        request.AddPlexClientIdentifier(clientId);
         request.AddQueryParameter("X-Plex-Platform", "Chrome");
         request.AddQueryParameter("X-Plex-Platform-Version", "127.0");
         request.AddQueryParameter("X-Plex-Sync-Version", "2");

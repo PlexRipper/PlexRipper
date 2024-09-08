@@ -160,3 +160,6 @@ crashlytics-build.properties
 fabric.properties
 .idea/httpRequests
 .idea/caches/build_file_checksums.ser
+
+# Plex API SDK Manally added
+/src/SDK/

@@ -540,45 +540,7 @@ public class PlexApiService : IPlexApiService
 
     #region PlexSignIn
 
-    public async Task<Result<PlexAccount>> PlexSignInAsync(PlexAccount plexAccount)
-    {
-        var result = await _plexApi.PlexSignInAsync(plexAccount);
-        if (result.IsSuccess)
-        {
-            var x = result.Value;
-            var refreshedAccount = new PlexAccount
-            {
-                Id = plexAccount.Id,
-                DisplayName = plexAccount.DisplayName,
-                Username = plexAccount.Username,
-                Password = plexAccount.Password,
-                IsEnabled = plexAccount.IsEnabled,
-                IsAuthTokenMode = plexAccount.IsAuthTokenMode,
-                IsValidated = true,
-                ValidatedAt = DateTime.UtcNow,
-                PlexId = x.Id,
-                Uuid = x.Uuid,
-                ClientId = plexAccount.ClientId,
-                Title = x.Title,
-                Email = x.Email,
-                HasPassword = x.HasPassword,
-                AuthenticationToken = x.AuthToken,
-                IsMain = plexAccount.IsMain,
-                PlexAccountServers = [],
-                PlexAccountLibraries = [],
-                Is2Fa = x.TwoFactorEnabled,
-                VerificationCode = string.Empty,
-            };
-
-            _log.Information(
-                "Successfully retrieved the PlexAccount data for user {PlexAccountDisplayName} from the PlexApi",
-                plexAccount.DisplayName
-            );
-            return Result.Ok(refreshedAccount);
-        }
-
-        return result.ToResult();
-    }
+    public Task<Result<PlexAccount>> PlexSignInAsync(PlexAccount plexAccount) => _plexApi.PlexSignInAsync(plexAccount);
 
     public Task<Result<AuthPin>> Get2FAPin(string clientId) => _plexApi.Get2FAPin(clientId);
 

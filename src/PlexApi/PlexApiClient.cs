@@ -1,25 +1,19 @@
 using System.Net;
 using System.Text.Json;
 using Application.Contracts;
-using Logging.Interface;
 using PlexApi.Contracts;
 using Polly;
 using RestSharp;
 using RestSharp.Serializers.Json;
 using RestSharp.Serializers.Xml;
+using ILog = Logging.Interface.ILog;
 
 namespace PlexRipper.PlexApi;
 
 public class PlexApiClient
 {
-    #region Fields
-
     private readonly RestClient _client;
     private readonly ILog _log;
-
-    #endregion
-
-    #region Constructors
 
     public PlexApiClient(ILog log, HttpClient httpClient)
     {
@@ -39,10 +33,6 @@ public class PlexApiClient
         _client.AddDefaultHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64)");
     }
 
-    #endregion
-
-    #region Properties
-
     public static JsonSerializerOptions SerializerOptions =>
         new()
         {
@@ -51,12 +41,6 @@ public class PlexApiClient
             WriteIndented = true,
             Converters = { new LongToDateTime() },
         };
-
-    #endregion
-
-    #region Methods
-
-    #region Public
 
     public async Task<Result<T>> SendRequestAsync<T>(
         RestRequest request,
@@ -125,8 +109,4 @@ public class PlexApiClient
             return result;
         }
     }
-
-    #endregion
-
-    #endregion
 }

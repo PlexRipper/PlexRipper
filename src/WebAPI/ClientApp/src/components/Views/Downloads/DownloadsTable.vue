@@ -41,7 +41,7 @@
 import Log from 'consola';
 import type { DownloadProgressDTO, PlexServerDTO } from '@dto';
 import type { IDownloadTableNode, ISelection } from '@interfaces';
-import { getDownloadTableColumns } from '#imports';
+import type { QTreeViewTableHeader } from '@props';
 import { useDownloadStore, useServerConnectionStore, useServerStore } from '~/store';
 
 const downloadStore = useDownloadStore();
@@ -62,6 +62,63 @@ const nodes = computed((): IDownloadTableNode[] => {
 	// TODO: Move this to the back-end to increase performance
 	return mapToTreeNodes(downloadStore.getDownloadsByServerId(props.plexServer.id));
 });
+
+const getDownloadTableColumns: QTreeViewTableHeader[] = [
+	{
+		label: 'Title',
+		field: 'title',
+		type: 'title',
+	},
+	{
+		label: 'Status',
+		field: 'status',
+		align: 'right',
+		width: 120,
+	},
+	{
+		label: 'Received',
+		field: 'dataReceived',
+		type: 'file-size',
+		align: 'right',
+		width: 120,
+	},
+	{
+		label: 'Size',
+		field: 'dataTotal',
+		type: 'file-size',
+		width: 120,
+		align: 'right',
+	},
+	{
+		label: 'Speed',
+		field: 'downloadSpeed',
+		type: 'file-speed',
+		align: 'right',
+		width: 120,
+	},
+	{
+		label: 'ETA',
+		field: 'timeRemaining',
+		type: 'duration',
+		align: 'right',
+		width: 120,
+	},
+	{
+		label: 'Percentage',
+		field: 'percentage',
+		type: 'percentage',
+		align: 'center',
+		width: 120,
+	},
+	{
+		label: 'Actions',
+		field: 'actions',
+		type: 'actions',
+		width: 200,
+		align: 'center',
+		sortable: false,
+	},
+];
 
 function mapToTreeNodes(value: DownloadProgressDTO[]): IDownloadTableNode[] {
 	if (!value) {

@@ -49,7 +49,7 @@ interface ILanguageOption extends ILocaleConfig {
 	value: string;
 	img: string;
 }
-withDefaults(defineProps<{ dense: boolean }>(), {
+withDefaults(defineProps<{ dense?: boolean }>(), {
 	dense: false,
 });
 

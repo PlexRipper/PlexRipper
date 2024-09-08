@@ -46,6 +46,7 @@ public static partial class PlexMetaDataMapper
             Year = source.Year,
             SortTitle = source.Title.ToSortTitle(),
             SearchTitle = source.Title.ToSearchTitle(),
+            Guid = source.Guid,
 
             // Duration is in milliseconds and we want seconds
             Duration = source.Duration / 1000,

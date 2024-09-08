@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using Application.Contracts;
 using Logging.Interface;
@@ -154,12 +155,18 @@ public static class RestSharpExtensions
         var result = Result.Fail($"Request to {requestUrl} failed with status code: {statusCode} - {errorMessage}");
         try
         {
+            var content = response.Content;
+            if (response.StatusCode == HttpStatusCode.GatewayTimeout || content.Contains("504 Gateway Time-out"))
+            {
+                result.Add504GatewayTimeoutError("The server didn't respond in time.");
+                return result;
+            }
+
             if (!string.IsNullOrEmpty(response.ErrorMessage) && response.ErrorMessage.Contains("Timeout"))
                 result.Add408RequestTimeoutError(response.ErrorMessage);
             else
                 result.AddStatusCode(statusCode, errorMessage);
 
-            var content = response.Content;
             if (!string.IsNullOrEmpty(content))
             {
                 var errorsResponse =

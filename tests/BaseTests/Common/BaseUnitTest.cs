@@ -27,10 +27,10 @@ public class BaseUnitTest : IDisposable
     /// <param name="logEventLevel"></param>
     protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Debug)
     {
-        LogConfig.SetTestOutputHelper(output);
         LogManager.SetupLogging(logEventLevel);
+        LogConfig.SetTestOutputHelper(output);
         BogusExtensions.Setup();
-        Log = LogManager.CreateLogInstance(output, typeof(BaseUnitTest), logEventLevel);
+        Log = LogManager.CreateLogInstance(output, typeof(BaseUnitTest));
     }
 
     #endregion
@@ -108,8 +108,9 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
                 .Register<ILogger>(
                     (_, _) =>
                     {
+                        LogManager.SetupLogging(logEventLevel);
                         LogConfig.SetTestOutputHelper(output);
-                        return LogConfig.GetLogger(logEventLevel);
+                        return LogConfig.GetLogger();
                     }
                 )
                 .SingleInstance();

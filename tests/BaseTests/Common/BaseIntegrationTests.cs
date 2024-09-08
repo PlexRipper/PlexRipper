@@ -24,8 +24,9 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug)
     {
+        LogManager.SetupLogging(logLevel);
         LogConfig.SetTestOutputHelper(output);
-        _log = LogManager.CreateLogInstance(typeof(BaseIntegrationTests), logLevel);
+        _log = LogManager.CreateLogInstance(typeof(BaseIntegrationTests));
         _log.Information("Initialized integration test with database name: {DatabaseName}", DatabaseName);
         BogusExtensions.Setup();
     }

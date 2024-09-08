@@ -159,7 +159,7 @@
         },
         "account-selector": {
             "all-accounts": "Tous les comptes Plex",
-            "title": "Comptes actifs"
+            "title": "Actualiser les comptes"
         },
         "media-selection-dialog": {
             "title": "Définissez la plage d'index pour sélectionner le média (#{min} - #{max})"

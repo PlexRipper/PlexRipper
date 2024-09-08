@@ -9,13 +9,13 @@ public static class EndpointExtensions
     /// This will determine the status code to send based on the <see cref="Result"/>.
     /// </summary>
     /// <remarks>
-    /// NOTE: The callback is needed because using the <see cref="SendAsync"/> method from the <see cref="IEndpoint"/> will use the default serializer from FastEndpoints, which cannot be changed, and throw missing required property errors when serializing ResultDTO.
+    /// NOTE: The callback is needed because using the <see cref="SendResponseAsync"/> method from the <see cref="IEndpoint"/> will use the default serializer from FastEndpoints, which cannot be changed, and throw missing required property errors when serializing ResultDTO.
     /// See: https://fast-endpoints.com/docs/misc-conveniences#send-methods -> Limitations
     /// </remarks>
-    /// <param name="ep"></param>
+    /// <param name="_"></param>
     /// <param name="result"></param>
     /// <param name="sendAsync"> </param>
-    public static async Task SendResponseAsync(this IEndpoint ep, Result result, Func<int, Task> sendAsync)
+    public static async Task SendResponseAsync(this IEndpoint _, Result result, Func<int, Task> sendAsync)
     {
         if (result.IsSuccess)
         {
@@ -40,9 +40,15 @@ public static class EndpointExtensions
             // Status Code 403 Forbidden
             else if (result.Has403ForbiddenError())
                 await sendAsync(StatusCodes.Status403Forbidden);
-            // Status Code 403 Forbidden
+            // Status Code 404 Not Found
             else if (result.Has404NotFoundError())
                 await sendAsync(StatusCodes.Status404NotFound);
+            // Status Code 502 Bad Gateway
+            else if (result.Has502BadGatewayError())
+                await sendAsync(StatusCodes.Status502BadGateway);
+            // Status Code 504 Gateway Timeout
+            else if (result.Has504GatewayTimeoutError())
+                await sendAsync(StatusCodes.Status504GatewayTimeout);
             // Status Code 500 Internal Server Error
             else
                 await sendAsync(StatusCodes.Status500InternalServerError);

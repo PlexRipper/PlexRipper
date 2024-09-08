@@ -85,7 +85,6 @@ public class PlexMediaSlim : BaseEntity
     [Column(Order = 21)]
     public required bool HasTheme { get; init; }
 
-    [Column(Order = 23)]
     public required PlexMediaContainer MediaData { get; init; }
 
     public required int PlexLibraryId { get; set; }

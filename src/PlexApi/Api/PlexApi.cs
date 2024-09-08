@@ -226,18 +226,24 @@ public class PlexApi
     /// <param name="authToken"></param>
     /// <param name="plexServerBaseUrl"></param>
     /// <param name="libraryKey"></param>
+    /// <param name="startIndex"></param>
+    /// <param name="batchSize"></param>
     /// <returns></returns>
     public async Task<Result<PlexMediaContainerDTO>> GetMetadataForLibraryAsync(
         string authToken,
         string plexServerBaseUrl,
-        string libraryKey
+        string libraryKey,
+        int startIndex,
+        int batchSize
     )
     {
         var request = new RestRequest(PlexApiPaths.GetLibrariesMetadata(plexServerBaseUrl, libraryKey));
 
         request.AddToken(authToken);
-        request.AddQueryParameter("includeMeta", "1");
+        request.AddLimitHeaders(startIndex, batchSize);
 
+        // the Metadata is not needed for now
+        // request.AddQueryParameter("includeMeta", "1");
         return await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
     }
 

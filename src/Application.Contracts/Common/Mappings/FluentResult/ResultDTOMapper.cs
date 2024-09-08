@@ -28,7 +28,7 @@ public static class ResultDTOMapper
     public static ResultDTO<TDTO> ToResultDTO<T, TDTO>(this Result<T> result, Func<T, TDTO> mapper) =>
         new()
         {
-            Value = mapper(result.ValueOrDefault),
+            Value = result.ValueOrDefault != null ? mapper(result.ValueOrDefault) : default,
             IsFailed = result.IsFailed,
             IsSuccess = result.IsSuccess,
             Reasons = result.Reasons.ToReasonDTOs(),

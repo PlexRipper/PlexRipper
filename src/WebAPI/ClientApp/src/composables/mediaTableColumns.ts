@@ -65,63 +65,6 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 	];
 };
 
-export const getDownloadTableColumns: QTreeViewTableHeader[] = [
-	{
-		label: 'Title',
-		field: 'title',
-		type: 'title',
-	},
-	{
-		label: 'Status',
-		field: 'status',
-		align: 'right',
-		width: 120,
-	},
-	{
-		label: 'Received',
-		field: 'dataReceived',
-		type: 'file-size',
-		align: 'right',
-		width: 120,
-	},
-	{
-		label: 'Size',
-		field: 'dataTotal',
-		type: 'file-size',
-		width: 120,
-		align: 'right',
-	},
-	{
-		label: 'Speed',
-		field: 'downloadSpeed',
-		type: 'file-speed',
-		align: 'right',
-		width: 120,
-	},
-	{
-		label: 'ETA',
-		field: 'timeRemaining',
-		type: 'duration',
-		align: 'right',
-		width: 120,
-	},
-	{
-		label: 'Percentage',
-		field: 'percentage',
-		type: 'percentage',
-		align: 'center',
-		width: 120,
-	},
-	{
-		label: 'Actions',
-		field: 'actions',
-		type: 'actions',
-		width: 200,
-		align: 'center',
-		sortable: false,
-	},
-];
-
 export const getDownloadPreviewTableColumns: QTreeViewTableHeader[] = [
 	{
 		label: 'Title',

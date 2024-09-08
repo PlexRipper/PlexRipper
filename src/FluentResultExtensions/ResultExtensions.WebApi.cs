@@ -291,6 +291,21 @@ public static partial class ResultExtensions
 
     #endregion
 
+    #region 504
+
+    public static bool Has504GatewayTimeoutError(this Result result) =>
+        result.HasStatusCode(HttpCodes.Status504GatewayTimeout);
+
+    public static Result Add504GatewayTimeoutError(
+        this Result result,
+        string message = "The server didn't respond in time."
+    ) => result.AddStatusCodeError(HttpCodes.Status504GatewayTimeout, message);
+
+    public static Result Create504GatewayTimeoutResult(string message = "The server didn't respond in time.") =>
+        CreateErrorStatusCodeResult(HttpCodes.Status504GatewayTimeout, message);
+
+    #endregion
+
     #endregion
 
     #region Result<T> Signatures

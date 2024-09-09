@@ -28,6 +28,20 @@ public static class HttpClientExtensions
         return Result.Fail("Request failed").AddStatusCode(statusCode).LogDebug();
     }
 
+    public static Result<TResult> ToApiResult<TResult>(this HttpResponseMessage response)
+        where TResult : class
+    {
+        // In case of timeout
+        if (response.StatusCode == HttpStatusCode.RequestTimeout)
+            return Result.Fail("Request timed out").Add408RequestTimeoutError().LogError();
+
+        // Weird case where the status code is 200 but the content is "Bad Gateway"
+        if (response.IsSuccessStatusCode && response.Content.ToString()!.Contains("Bad Gateway"))
+            return Result.Fail("Server responded with Bad Gateway").Add502BadGatewayError();
+
+        return Result.Fail("Request failed").AddStatusCode((int)response.StatusCode).LogDebug();
+    }
+
     private static HttpResponseMessage GetHttpResponseMessage<T>(this T response) =>
         (
             typeof(T).GetProperty(nameof(PostUsersSignInDataResponse.RawResponse))!.GetValue(response)

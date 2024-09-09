@@ -1,5 +1,6 @@
 using Application.Contracts;
 using LukeHagar.PlexAPI.SDK;
+using LukeHagar.PlexAPI.SDK.Models.Errors;
 using PlexRipper.PlexApi.Api.Media.Providers;
 using PlexRipper.PlexApi.Api.Users.SignIn;
 using PlexRipper.PlexApi.Helpers;
@@ -15,18 +16,38 @@ namespace PlexRipper.PlexApi.Api;
 public class PlexApi
 {
     private readonly ILog _log;
+    private readonly Func<PlexApiClientOptions?, NewPlexApiClient> _clientFactory;
 
-    public PlexApi(ILog log, PlexApiClient client)
+    public PlexApi(ILog log, PlexApiClient client, Func<PlexApiClientOptions?, NewPlexApiClient> clientFactory)
     {
         _log = log;
         _client = client;
+        _clientFactory = clientFactory;
+
+        _plexTvClient = new PlexAPI(client: _clientFactory(null));
     }
 
     private PlexApiClient _client { get; }
 
-    public PlexAPI CreatePlexTvClient() => new(client: new NewPlexApiClient(_log));
-
     private string GetClientId => Guid.NewGuid().ToString();
+
+    private PlexAPI _plexTvClient { get; }
+
+    private PlexAPI CreateClient(PlexApiClientOptions options) =>
+        new(client: _clientFactory(options), serverUrl: options.Connection.Url, accessToken: options.AuthToken);
+
+    private async Task<Result<T>> ToResponse<T>(Task<T> operation)
+        where T : class
+    {
+        try
+        {
+            return Result.Ok(await operation);
+        }
+        catch (SDKException e)
+        {
+            return e.RawResponse.ToApiResult<T>();
+        }
+    }
 
     /// <summary>
     /// Sign in user with username and password and return user data with Plex authentication token.
@@ -38,9 +59,7 @@ public class PlexApi
     {
         _log.Debug("Requesting PlexToken for account {UserName}", plexAccount.Username);
 
-        var client = CreatePlexTvClient();
-
-        var response = await client.Authentication.PostUsersSignInDataAsync(
+        var response = await _plexTvClient.Authentication.PostUsersSignInDataAsync(
             GetClientId,
             new()
             {
@@ -101,18 +120,26 @@ public class PlexApi
     }
 
     public async Task<Result<PlexServerStatus>> GetServerStatusAsync(
-        string serverBaseUrl,
+        PlexServerConnection connection,
         Action<PlexApiClientProgress>? action = null
     )
     {
-        var request = new RestRequest(PlexApiPaths.ServerIdentity(serverBaseUrl)) { Timeout = 5000 };
+        _log.Debug("Requesting PlexServerStatus for {Url}", connection.Url);
 
-        _log.Debug("Requesting PlexServerStatus for {Url}", serverBaseUrl);
-        var response = await _client.SendRequestAsync<ServerIdentityResponse>(request, 1, action);
+        var client = CreateClient(
+            new PlexApiClientOptions
+            {
+                Connection = connection,
+                Action = action,
+                Timeout = 5,
+                AuthToken = string.Empty,
+            }
+        );
 
-        var statusCodeReason = response.GetStatusCodeReason();
-        var statusCode = statusCodeReason?.StatusCode() ?? 0;
-        var statusMessage = statusCodeReason?.ErrorMessage() ?? "";
+        var response = await ToResponse(client.Server.GetServerIdentityAsync());
+
+        var statusCode = response.IsSuccess ? response.Value.StatusCode : response.GetStatusCodeReason().StatusCode();
+        var statusMessage = "";
         switch (statusCode)
         {
             case 200:

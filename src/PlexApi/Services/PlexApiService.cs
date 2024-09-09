@@ -387,7 +387,8 @@ public class PlexApiService : IPlexApiService
 
         var plexServerName = await _dbContext.GetPlexServerNameById(connection.PlexServerId);
         _log.Debug("Getting PlexServerStatus for server: {PlexServerName}", plexServerName);
-        var serverStatusResult = await _plexApi.GetServerStatusAsync(connection.Url, action);
+
+        var serverStatusResult = await _plexApi.GetServerStatusAsync(connection, action);
         if (serverStatusResult.IsFailed)
             return serverStatusResult;
 

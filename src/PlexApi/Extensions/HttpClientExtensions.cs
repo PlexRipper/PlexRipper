@@ -6,29 +6,22 @@ namespace PlexRipper.PlexApi;
 public static class HttpClientExtensions
 {
     public static Result<TResult> ToApiResult<TResponse, TResult>(
-        this TResponse response,
+        this Result<TResponse> response,
         Func<TResponse, TResult> mapper
     )
         where TResponse : class
     {
-        var httpResponseMessage = response.GetHttpResponseMessage();
-        var statusCode = (int)httpResponseMessage.StatusCode;
+        if (response.IsSuccess)
+        {
+            var httpResponseMessage = response.GetHttpResponseMessage();
+            var statusCode = (int)httpResponseMessage.StatusCode;
+            return Result.Ok(mapper(response.Value)).AddStatusCode(statusCode);
+        }
 
-        if (httpResponseMessage.IsSuccessStatusCode)
-            return Result.Ok(mapper(response)).AddStatusCode(statusCode);
-
-        // In case of timeout
-        if (httpResponseMessage.StatusCode == HttpStatusCode.RequestTimeout)
-            return Result.Fail("Request timed out").Add408RequestTimeoutError().LogError();
-
-        // Weird case where the status code is 200 but the content is "Bad Gateway"
-        if (httpResponseMessage.IsSuccessStatusCode && httpResponseMessage.Content.ToString()!.Contains("Bad Gateway"))
-            return Result.Fail("Server responded with Bad Gateway").Add502BadGatewayError();
-
-        return Result.Fail("Request failed").AddStatusCode(statusCode).LogDebug();
+        return response.ToResult();
     }
 
-    public static Result<TResult> ToApiResult<TResult>(this HttpResponseMessage response)
+    public static Result<TResult> FromSdkExceptionToResult<TResult>(this HttpResponseMessage response)
         where TResult : class
     {
         // In case of timeout

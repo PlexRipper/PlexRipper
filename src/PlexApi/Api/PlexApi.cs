@@ -24,17 +24,17 @@ public class PlexApi
         _client = client;
         _clientFactory = clientFactory;
 
-        _plexTvClient = new PlexAPI(client: _clientFactory(null));
+        _plexTvClient = new PlexAPI(client: _clientFactory(new() { ConnectionUrl = "https://plex.tv/api/v2/" }));
     }
 
-    private PlexApiClient _client { get; }
+    private readonly PlexApiClient _client;
+
+    private readonly PlexAPI _plexTvClient;
 
     private string GetClientId => Guid.NewGuid().ToString();
 
-    private PlexAPI _plexTvClient { get; }
-
     private PlexAPI CreateClient(PlexApiClientOptions options) =>
-        new(client: _clientFactory(options), serverUrl: options.Connection.Url, accessToken: options.AuthToken);
+        new(client: _clientFactory(options), serverUrl: options.ConnectionUrl, accessToken: options.AuthToken);
 
     private async Task<Result<T>> ToResponse<T>(Task<T> operation)
         where T : class
@@ -45,7 +45,7 @@ public class PlexApi
         }
         catch (SDKException e)
         {
-            return e.RawResponse.ToApiResult<T>();
+            return e.RawResponse.FromSdkExceptionToResult<T>();
         }
     }
 
@@ -59,20 +59,20 @@ public class PlexApi
     {
         _log.Debug("Requesting PlexToken for account {UserName}", plexAccount.Username);
 
-        var response = await _plexTvClient.Authentication.PostUsersSignInDataAsync(
-            GetClientId,
-            new()
-            {
-                Login = plexAccount.Username,
-                Password = plexAccount.Password,
-                RememberMe = false,
-
-                // TODO Add verification code
-                // VerificationCode = plexAccount.Is2Fa ? plexAccount.VerificationCode : "";
-            }
+        var responseResult = await ToResponse(
+            _plexTvClient.Authentication.PostUsersSignInDataAsync(
+                GetClientId,
+                new()
+                {
+                    Login = plexAccount.Username,
+                    Password = plexAccount.Password,
+                    RememberMe = false,
+                    VerificationCode = plexAccount.Is2Fa ? plexAccount.VerificationCode : string.Empty,
+                }
+            )
         );
 
-        var result = response.ToApiResult(x => new PlexAccount
+        var result = responseResult.ToApiResult(x => new PlexAccount
         {
             Id = plexAccount.Id,
             DisplayName = plexAccount.DisplayName,
@@ -129,26 +129,23 @@ public class PlexApi
         var client = CreateClient(
             new PlexApiClientOptions
             {
-                Connection = connection,
+                ConnectionUrl = connection.Url,
                 Action = action,
                 Timeout = 5,
                 AuthToken = string.Empty,
             }
         );
 
-        var response = await ToResponse(client.Server.GetServerIdentityAsync());
+        var responseResult = await ToResponse(client.Server.GetServerIdentityAsync());
 
-        var statusCode = response.IsSuccess ? response.Value.StatusCode : response.GetStatusCodeReason().StatusCode();
-        var statusMessage = "";
-        switch (statusCode)
+        var statusCode = responseResult.IsSuccess
+            ? responseResult.Value.StatusCode
+            : responseResult.GetStatusCodeReason().StatusCode();
+        var statusMessage = statusCode switch
         {
-            case 200:
-                statusMessage = "The Plex server is online!";
-                break;
-            case 408:
-                statusMessage = "The Plex server could not be reached, most likely it's offline.";
-                break;
-        }
+            200 => "The Plex server is online!",
+            _ => "The Plex server could not be reached, most likely it's offline.",
+        };
 
         return Result.Ok(
             new PlexServerStatus
@@ -156,9 +153,9 @@ public class PlexApi
                 StatusCode = statusCode,
                 StatusMessage = statusMessage,
                 LastChecked = DateTime.UtcNow,
-                IsSuccessful = response.IsSuccess,
-                PlexServerId = 0,
-                PlexServerConnectionId = 0,
+                IsSuccessful = responseResult.IsSuccess,
+                PlexServerId = connection.PlexServerId,
+                PlexServerConnectionId = connection.Id,
             }
         );
     }

@@ -4,6 +4,7 @@ using Application.Contracts;
 using HttpClientToCurl;
 using LukeHagar.PlexAPI.SDK.Utils;
 using Polly;
+using Polly.Timeout;
 using Polly.Wrap;
 using Serilog.Events;
 using ILog = Logging.Interface.ILog;
@@ -12,7 +13,7 @@ namespace PlexRipper.PlexApi;
 
 public record PlexApiClientOptions
 {
-    public PlexServerConnection? Connection { get; init; }
+    public required string ConnectionUrl { get; init; }
 
     public string AuthToken { get; init; } = string.Empty;
 
@@ -35,15 +36,15 @@ public class NewPlexApiClient : ISpeakeasyHttpClient
     private readonly PlexApiClientOptions _options;
     private readonly AsyncPolicyWrap<HttpResponseMessage> _policyWrap;
 
-    public NewPlexApiClient(ILog log, IHttpClientFactory httpClientFactory, PlexApiClientOptions? options = null)
+    public NewPlexApiClient(ILog log, IHttpClientFactory httpClientFactory, PlexApiClientOptions options)
     {
         _log = log;
         _defaultClient = httpClientFactory.CreateClient();
         _defaultClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        _options = options ?? new PlexApiClientOptions();
+        _options = options;
 
-        _defaultClient.BaseAddress = new Uri(_options.Connection?.Url ?? "https://plex.tv/api/v2/");
+        _defaultClient.BaseAddress = new Uri(_options.ConnectionUrl);
         _defaultClient.Timeout = TimeSpan.FromSeconds(_options.Timeout);
 
         // Combine policies using Policy.WrapAsync
@@ -89,24 +90,58 @@ public class NewPlexApiClient : ISpeakeasyHttpClient
         else
             _log.Debug("Request: {RequestUrl}", request.RequestUri?.ToString());
 
-        HttpResponseMessage response = null;
-
+        HttpResponseMessage? response = null;
+        var requestUri = request.RequestUri?.ToString();
         try
         {
             response = await _policyWrap.ExecuteAsync(
                 async (context) =>
                 {
-                    context["RequestUri"] = request.RequestUri?.ToString();
+                    context["RequestUri"] = requestUri;
 
                     response = await _defaultClient.SendAsync(request);
                     return response;
                 },
-                new Context { { "RequestUri", request.RequestUri?.ToString() } }
+                new Context { { "RequestUri", requestUri } }
             );
+        }
+        catch (TimeoutRejectedException _)
+        {
+            _log.Error("Request to {Url} timed out.", requestUri);
+            response = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.GatewayTimeout,
+                Content = new StringContent("The gateway timed out while attempting to process the request."),
+                ReasonPhrase = "Gateway Timeout",
+                RequestMessage = request,
+            };
+        }
+        catch (HttpRequestException ex)
+        {
+            _log.Error(
+                "Exception Error ({ExceptionName}) sending request to {Url}",
+                nameof(HttpRequestException),
+                requestUri,
+                0
+            );
+            response = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.ServiceUnavailable,
+                Content = new StringContent(ex.Message),
+                ReasonPhrase = ex.HttpRequestError.ToString(),
+                RequestMessage = request,
+            };
         }
         catch (Exception ex)
         {
-            response = HandleTimeout(request);
+            _log.Error("Exception Error ({ExceptionName}) sending request to {Url}", nameof(ex.GetType), requestUri, 0);
+            response = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.InternalServerError,
+                Content = new StringContent(ex.Message),
+                ReasonPhrase = ex.Message,
+                RequestMessage = request,
+            };
         }
         finally
         {
@@ -134,13 +169,13 @@ public class NewPlexApiClient : ISpeakeasyHttpClient
         var url = request?.RequestUri?.ToString() ?? "Unknown";
         var msg = "Request successful!";
 
-        if (!response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.RequestTimeout)
+        if (response is { IsSuccessStatusCode: false, StatusCode: not HttpStatusCode.RequestTimeout })
         {
             msg =
                 $"Request to: {url} failed, waiting {timeToWaitSeconds} seconds before retrying again ({retryAttempt} of {retryCount})";
         }
 
-        if (!response.IsSuccessStatusCode && response.StatusCode == HttpStatusCode.RequestTimeout)
+        if (response is { IsSuccessStatusCode: false, StatusCode: HttpStatusCode.RequestTimeout })
         {
             msg =
                 $"Request to: {url} timed-out, waiting {timeToWaitSeconds} seconds before retrying again ({retryAttempt} of {retryCount})";
@@ -159,17 +194,5 @@ public class NewPlexApiClient : ISpeakeasyHttpClient
                 ConnectionSuccessful = response.IsSuccessStatusCode,
             }
         );
-    }
-
-    private HttpResponseMessage HandleTimeout(HttpRequestMessage request)
-    {
-        _log.Error("Request to {Url} timed out.", request.RequestUri?.ToString());
-        return new HttpResponseMessage
-        {
-            StatusCode = HttpStatusCode.GatewayTimeout,
-            RequestMessage = request,
-            Content = new StringContent("The gateway timed out while attempting to process the request."),
-            ReasonPhrase = "Gateway Timeout",
-        };
     }
 }

@@ -39,7 +39,7 @@
 				</q-item-section>
 			</q-item>
 			<CheckServerStatusProgressDisplay
-				v-if="isLoading(connection.id)"
+				v-if="getProgress(connection.id)"
 				:key="`progress-${index}`"
 				:plex-server="plexServer"
 				:progress="getProgress(connection.id)" />
@@ -58,7 +58,7 @@ const signalrStore = useSignalrStore();
 const serverConnectionStore = useServerConnectionStore();
 
 const loading = ref<number[]>([]);
-const progress = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
+const progressList = ref<ServerConnectionCheckStatusProgressDTO[]>([]);
 
 const props = defineProps<{
 	plexServerId: number;
@@ -75,7 +75,7 @@ const preferredConnectionId = computed<number>({
 });
 
 function getProgress(plexServerConnectionId: number): ServerConnectionCheckStatusProgressDTO | null {
-	return get(progress).find((x) => x.plexServerConnectionId === plexServerConnectionId) ?? null;
+	return get(progressList).find((x) => x.plexServerConnectionId === plexServerConnectionId) ?? null;
 }
 
 function isLoading(plexServerConnectionId: number): boolean {
@@ -84,6 +84,12 @@ function isLoading(plexServerConnectionId: number): boolean {
 
 function checkPlexConnection(plexServerConnectionId: number) {
 	get(loading).push(plexServerConnectionId);
+
+	const index = get(progressList).find((x) => x.plexServerConnectionId === plexServerConnectionId);
+	if (index) {
+		get(progressList).splice(index, 1);
+	}
+
 	useSubscription(
 		serverConnectionStore.checkServerConnection(plexServerConnectionId).subscribe(() => {
 			set(
@@ -98,7 +104,7 @@ function setup() {
 	useSubscription(
 		signalrStore
 			.getServerConnectionProgressByPlexServerId(props.plexServerId)
-			.subscribe((progressData) => set(progress, progressData)),
+			.subscribe((progressData) => set(progressList, progressData)),
 	);
 }
 
@@ -107,6 +113,6 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-	set(progress, []);
+	set(progressList, []);
 });
 </script>

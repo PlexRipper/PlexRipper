@@ -444,8 +444,8 @@ public class PlexApiService : IPlexApiService
                 Product = x.Product,
                 ProductVersion = x.ProductVersion,
                 Provides = x.Provides,
-                CreatedAt = DateTime.Parse(x.CreatedAt),
-                LastSeenAt = DateTime.Parse(x.LastSeenAt),
+                CreatedAt = x.CreatedAt,
+                LastSeenAt = x.LastSeenAt,
                 MachineIdentifier = x.ClientIdentifier,
                 PublicAddress = x.PublicAddress,
                 PreferredConnectionId = 0,
@@ -467,7 +467,7 @@ public class PlexApiService : IPlexApiService
                     .Connections.Select(y => new PlexServerConnection
                     {
                         Id = 0,
-                        Protocol = y.Protocol,
+                        Protocol = y.Protocol.ToString(),
                         Address = y.Address,
                         Port = y.Port,
                         Local = y.Local,

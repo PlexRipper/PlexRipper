@@ -1,6 +1,7 @@
 using Application.Contracts;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Errors;
+using LukeHagar.PlexAPI.SDK.Models.Requests;
 using PlexRipper.PlexApi.Api.Media.Providers;
 using PlexRipper.PlexApi.Api.Users.SignIn;
 using PlexRipper.PlexApi.Helpers;
@@ -23,18 +24,33 @@ public class PlexApi
         _log = log;
         _client = client;
         _clientFactory = clientFactory;
-
-        _plexTvClient = new PlexAPI(client: _clientFactory(new() { ConnectionUrl = "https://plex.tv/api/v2/" }));
     }
 
     private readonly PlexApiClient _client;
 
-    private readonly PlexAPI _plexTvClient;
-
     private string GetClientId => Guid.NewGuid().ToString();
 
-    private PlexAPI CreateClient(PlexApiClientOptions options) =>
-        new(client: _clientFactory(options), serverUrl: options.ConnectionUrl, accessToken: options.AuthToken);
+    private PlexAPI CreateClient(string authToken, PlexApiClientOptions options) =>
+        new(
+            client: _clientFactory(options),
+            xPlexClientIdentifier: GetClientId,
+            serverUrl: options.ConnectionUrl,
+            accessToken: authToken
+        );
+
+    private PlexAPI CreateTvClient(string authToken = "", PlexApiClientOptions? options = null)
+    {
+        options ??= new PlexApiClientOptions() { ConnectionUrl = "https://plex.tv/api/v2/" };
+
+        options.ConnectionUrl = "https://plex.tv/api/v2/";
+
+        return new PlexAPI(
+            client: _clientFactory(options),
+            xPlexClientIdentifier: GetClientId,
+            serverUrl: options.ConnectionUrl,
+            accessToken: authToken
+        );
+    }
 
     private async Task<Result<T>> ToResponse<T>(Task<T> operation)
         where T : class
@@ -59,9 +75,10 @@ public class PlexApi
     {
         _log.Debug("Requesting PlexToken for account {UserName}", plexAccount.Username);
 
+        var plexTvClient = CreateTvClient();
+
         var responseResult = await ToResponse(
-            _plexTvClient.Authentication.PostUsersSignInDataAsync(
-                GetClientId,
+            plexTvClient.Authentication.PostUsersSignInDataAsync(
                 new()
                 {
                     Login = plexAccount.Username,
@@ -127,12 +144,12 @@ public class PlexApi
         _log.Debug("Requesting PlexServerStatus for {Url}", connection.Url);
 
         var client = CreateClient(
+            string.Empty,
             new PlexApiClientOptions
             {
                 ConnectionUrl = connection.Url,
                 Action = action,
                 Timeout = 5,
-                AuthToken = string.Empty,
             }
         );
 
@@ -167,51 +184,48 @@ public class PlexApi
     /// </summary>
     /// <param name="authToken">The Plex account authentication token.</param>
     /// <returns></returns>
-    public async Task<Result<List<ServerResource>>> GetAccessibleServers(string authToken)
+    public async Task<Result<List<PlexDevice>>> GetAccessibleServers(string authToken)
     {
         if (string.IsNullOrEmpty(authToken))
             return ResultExtensions.IsEmpty(nameof(authToken)).LogError();
 
-        var directRequest = new RestRequest(PlexApiPaths.ServerResourcesUrl);
-        directRequest.AddToken(authToken);
-        directRequest.AddPlexClientIdentifier();
-        directRequest.Timeout = 15000;
-
-        var plexRelayRequest = new RestRequest(PlexApiPaths.ServerResourcesUrl);
-        plexRelayRequest.AddToken(authToken);
-        plexRelayRequest.AddPlexClientIdentifier();
-        plexRelayRequest.AddQueryParameter("includeHttps", "1");
-        plexRelayRequest.AddQueryParameter("includeRelay", "1");
-        plexRelayRequest.Timeout = 15000;
+        var plexTvClient = CreateTvClient(
+            authToken,
+            new PlexApiClientOptions() { ConnectionUrl = string.Empty, Timeout = 15 }
+        );
 
         var result = await Task.WhenAll(
             [
-                _client.SendRequestAsync<List<ServerResource>>(directRequest),
-                _client.SendRequestAsync<List<ServerResource>>(plexRelayRequest),
+                ToResponse(plexTvClient.Plex.GetServerResourcesAsync()),
+                ToResponse(
+                    plexTvClient.Plex.GetServerResourcesAsync(
+                        IncludeHttps.Enable,
+                        IncludeRelay.Enable,
+                        IncludeIPv6.Enable
+                    )
+                ),
             ]
         );
 
         if (result[0].IsFailed && result[1].IsFailed)
-            return result[0].WithReasons(result[1].Reasons);
+            return result[0].ToResult().WithReasons(result[1].Reasons);
 
         if (result[0].IsFailed && result[1].IsSuccess)
-            return result[1];
+            return result[1].ToApiResult(x => x.PlexDevices ?? []);
 
         if (result[0].IsSuccess && result[1].IsFailed)
-            return result[0];
+            return result[0].ToApiResult(x => x.PlexDevices ?? []);
 
-        var list = new List<ServerResource>();
-        list.AddRange(result[0].Value);
+        var list = new List<PlexDevice>();
+        list.AddRange(result[0].Value?.PlexDevices ?? []);
 
+        var result1Devices = result[1].Value?.PlexDevices ?? [];
         foreach (var serverResource in list)
         {
-            var newServerResource = result[1]
-                .Value.FirstOrDefault(x => x.ClientIdentifier == serverResource.ClientIdentifier);
-            if (
-                newServerResource is null
-                || newServerResource.Connections is null
-                || !newServerResource.Connections.Any()
-            )
+            var newServerResource = result1Devices.FirstOrDefault(x =>
+                x.ClientIdentifier == serverResource.ClientIdentifier
+            );
+            if (newServerResource is null || !newServerResource.Connections.Any())
                 continue;
 
             serverResource.Connections = serverResource

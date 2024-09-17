@@ -13,9 +13,7 @@ namespace PlexRipper.PlexApi;
 
 public record PlexApiClientOptions
 {
-    public required string ConnectionUrl { get; init; }
-
-    public string AuthToken { get; init; } = string.Empty;
+    public required string ConnectionUrl { get; set; }
 
     /// <summary>
     /// Request timeout in seconds.

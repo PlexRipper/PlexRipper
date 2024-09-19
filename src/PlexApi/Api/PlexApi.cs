@@ -3,10 +3,6 @@ using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Errors;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using PlexApi.Contracts;
-using PlexRipper.PlexApi.Api.Users.SignIn;
-using PlexRipper.PlexApi.Helpers;
-using RestSharp;
-using DataFormat = RestSharp.DataFormat;
 using ILog = Logging.Interface.ILog;
 using Type = LukeHagar.PlexAPI.SDK.Models.Requests.Type;
 
@@ -347,37 +343,34 @@ public class PlexApi
             : Result.Ok(value);
     }
 
-    public async Task<Result<AuthPin>> Get2FAPin(string clientId)
+    public async Task<Result<PlexAccount>> ValidatePlexToken(PlexAccount plexAccount, string authToken)
     {
-        var request = new RestRequest(new Uri(PlexApiPaths.PlexPinUrl), Method.Post);
+        var client = CreateTvClient(authToken);
 
-        request.AddPlexHeaders(clientId);
+        var response = await ToResponse(client.Authentication.GetTokenDetailsAsync());
 
-        return await _client.SendRequestAsync<AuthPin>(request);
-    }
-
-    public async Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId)
-    {
-        var request = new RestRequest(new Uri($"{PlexApiPaths.PlexPinUrl}/{pinId}"))
+        return response.ToApiResult(x => new PlexAccount
         {
-            RequestFormat = DataFormat.Json,
-        };
-
-        request.AddPlexHeaders(clientId);
-
-        return await _client.SendRequestAsync<AuthPin>(request);
-    }
-
-    public async Task<Result<SignInResponse>> ValidatePlexToken(string authToken, string clientId = "")
-    {
-        var request = new RestRequest(new Uri($"{PlexApiPaths.ValidatePlexTokenUrl}"))
-        {
-            RequestFormat = DataFormat.Json,
-        };
-
-        request.AddToken(authToken);
-        request.AddPlexClientIdentifier(clientId);
-
-        return await _client.SendRequestAsync<SignInResponse>(request);
+            Id = plexAccount.Id,
+            DisplayName = plexAccount.DisplayName,
+            Username = plexAccount.Username,
+            Password = plexAccount.Password,
+            IsEnabled = plexAccount.IsEnabled,
+            IsAuthTokenMode = plexAccount.IsAuthTokenMode,
+            IsValidated = true,
+            ValidatedAt = DateTime.UtcNow,
+            PlexId = x.UserPlexAccount!.Id,
+            Uuid = x.UserPlexAccount!.Uuid,
+            ClientId = plexAccount.ClientId,
+            Title = x.UserPlexAccount!.Title,
+            Email = x.UserPlexAccount!.Email,
+            HasPassword = x.UserPlexAccount!.HasPassword.GetValueOrDefault(),
+            AuthenticationToken = x.UserPlexAccount!.AuthToken,
+            IsMain = plexAccount.IsMain,
+            PlexAccountServers = [],
+            PlexAccountLibraries = [],
+            Is2Fa = x.UserPlexAccount!.TwoFactorEnabled.GetValueOrDefault(),
+            VerificationCode = string.Empty,
+        });
     }
 }

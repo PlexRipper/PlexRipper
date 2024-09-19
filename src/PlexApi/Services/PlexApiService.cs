@@ -4,6 +4,7 @@ using Logging.Interface;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 using PlexApi.Contracts;
 using Settings.Contracts;
+using Type = LukeHagar.PlexAPI.SDK.Models.Requests.Type;
 
 namespace PlexRipper.PlexApi.Services;
 
@@ -13,17 +14,11 @@ namespace PlexRipper.PlexApi.Services;
 /// </summary>
 public class PlexApiService : IPlexApiService
 {
-    #region Fields
-
     private readonly ILog _log;
 
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IServerSettingsModule _serverSettingsModule;
     private readonly Api.PlexApi _plexApi;
-
-    #endregion
-
-    #region Constructors
 
     public PlexApiService(
         ILog log,
@@ -38,91 +33,9 @@ public class PlexApiService : IPlexApiService
         _serverSettingsModule = serverSettingsModule;
     }
 
-    #endregion
-
     #region Methods
 
     #region Public
-
-    public async Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(
-        PlexLibrary plexLibrary,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexLibrary.PlexServerId, cancellationToken);
-        if (tokenResult.IsFailed)
-            return tokenResult.ToResult();
-
-        var stepSize = 5000;
-        var authToken = tokenResult.Value;
-        var plexLibraryKey = plexLibrary.Key;
-
-        var plexServerConnection = await _dbContext.ChoosePlexServerConnection(
-            plexLibrary.PlexServerId,
-            cancellationToken
-        );
-        if (plexServerConnection.IsFailed)
-            return plexServerConnection.ToResult();
-
-        var serverUrl = plexServerConnection.Value.Url;
-
-        var result = await _plexApi.GetAllEpisodesAsync(authToken, serverUrl, plexLibraryKey, 0, stepSize);
-        if (result != null)
-        {
-            var metaData = result.MediaContainer.Metadata;
-            var totalSize = result.MediaContainer.TotalSize;
-            if (totalSize > stepSize)
-            {
-                var loops = (int)Math.Ceiling(totalSize / (double)stepSize);
-
-                for (var i = 1; i < loops; i++)
-                {
-                    var rangeResult = await _plexApi.GetAllEpisodesAsync(
-                        authToken,
-                        serverUrl,
-                        plexLibraryKey,
-                        i * stepSize,
-                        stepSize
-                    );
-                    if (rangeResult?.MediaContainer?.Metadata?.Count > 0)
-                        metaData.AddRange(rangeResult.MediaContainer.Metadata);
-                }
-
-                var success = metaData.Count == totalSize;
-            }
-
-            return Result.Ok(metaData.ToPlexTvShowEpisodes());
-        }
-
-        return Result.Fail($"Failed to retrieve episodes for library with key {plexLibraryKey}");
-    }
-
-    /// <inheritdoc />
-    public async Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(
-        PlexLibrary plexLibrary,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexLibrary.PlexServerId, cancellationToken);
-        if (tokenResult.IsFailed)
-            return tokenResult.ToResult();
-
-        var plexServerConnection = await _dbContext.ChoosePlexServerConnection(
-            plexLibrary.PlexServerId,
-            cancellationToken
-        );
-
-        if (plexServerConnection.IsFailed)
-            return plexServerConnection.ToResult();
-
-        var serverUrl = plexServerConnection.Value.Url;
-
-        var result = await _plexApi.GetAllSeasonsAsync(tokenResult.Value, serverUrl, plexLibrary.Key);
-        if (result != null)
-            return Result.Ok(result.MediaContainer.Metadata.ToPlexTvShowSeasons());
-
-        return Result.Fail($"Failed to retrieve seasons for library with key {plexLibrary.Key}");
-    }
 
     /// <inheritdoc />
     public async Task<Result<PlexLibrary>> GetLibraryMediaAsync(
@@ -130,20 +43,6 @@ public class PlexApiService : IPlexApiService
         CancellationToken cancellationToken = default
     )
     {
-        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexLibrary.PlexServerId, cancellationToken);
-        if (tokenResult.IsFailed)
-            return tokenResult.ToResult();
-
-        var plexServerConnectionResult = await _dbContext.ChoosePlexServerConnection(
-            plexLibrary.PlexServerId,
-            cancellationToken
-        );
-
-        if (plexServerConnectionResult.IsFailed)
-            return plexServerConnectionResult.ToResult();
-
-        var plexServerConnection = plexServerConnectionResult.Value;
-
         // Retrieve updated version of the PlexLibrary
         var plexLibraries = await GetLibrarySectionsAsync(
             plexLibrary.PlexServerId,
@@ -160,53 +59,15 @@ public class PlexApiService : IPlexApiService
         updatedPlexLibrary.Id = plexLibrary.Id;
         updatedPlexLibrary.PlexServerId = plexLibrary.PlexServerId;
 
-        var mediaList = new List<GetLibraryItemsMetadata>();
-        var index = 0;
-        var totalSize = 0;
-        var batchSize = 500;
+        var mediaListResult = await SyncMedia(plexLibrary, cancellationToken: cancellationToken);
 
-        PlexMediaType mediaType;
-        while (true)
-        {
-            // Retrieve the media for this library
-            var result = await _plexApi.GetMetadataForLibraryAsync(
-                plexServerConnection,
-                tokenResult.Value,
-                plexLibrary.Key,
-                index,
-                batchSize
-            );
+        if (mediaListResult.IsFailed)
+            return mediaListResult.ToResult();
 
-            if (result.IsFailed)
-                return result.ToResult().LogError();
-
-            var mediaContainer = result.Value;
-            mediaList.AddRange(mediaContainer.Metadata);
-
-            totalSize = mediaContainer.TotalSize;
-            index += mediaContainer.Size;
-
-            mediaType = mediaContainer.ViewGroup.ToPlexMediaTypeFromPlexApi();
-
-            // If the size is less than the batch size, we have reached the end
-            if (mediaContainer.Size < batchSize)
-                break;
-
-            if (index >= totalSize)
-                break;
-        }
-
-        if (!mediaList.Any())
-            return ResultExtensions.IsEmpty(nameof(mediaList));
-
-        // Set the TitleSort if it is empty
-        foreach (var metadata in mediaList)
-            metadata.TitleSort = !string.IsNullOrEmpty(metadata.TitleSort)
-                ? metadata.TitleSort
-                : metadata.Title.ToSortTitle();
+        var mediaList = mediaListResult.Value;
 
         // Determine how to map based on the Library type.
-        switch (mediaType)
+        switch (updatedPlexLibrary.Type)
         {
             case PlexMediaType.Movie:
                 updatedPlexLibrary.Movies = mediaList.ToPlexMovies();
@@ -217,6 +78,35 @@ public class PlexApiService : IPlexApiService
         }
 
         return Result.Ok(updatedPlexLibrary);
+    }
+
+    /// <inheritdoc />
+    public async Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(
+        PlexLibrary plexLibrary,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var mediaListResult = await SyncMedia(plexLibrary, Type.Season, cancellationToken: cancellationToken);
+
+        if (mediaListResult.IsFailed)
+            return mediaListResult.ToResult();
+
+        var mediaList = mediaListResult.Value.ToPlexTvShowSeasons();
+        return Result.Ok(mediaList);
+    }
+
+    public async Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(
+        PlexLibrary plexLibrary,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var mediaListResult = await SyncMedia(plexLibrary, Type.Episode, 5000, cancellationToken);
+
+        if (mediaListResult.IsFailed)
+            return mediaListResult.ToResult();
+
+        var mediaList = mediaListResult.Value.ToPlexTvShowEpisodes();
+        return Result.Ok(mediaList);
     }
 
     /// <inheritdoc />
@@ -256,16 +146,6 @@ public class PlexApiService : IPlexApiService
         _log.Debug("Getting PlexServerStatus for server: {PlexServerName}", plexServerName);
 
         return await _plexApi.GetServerStatusAsync(connection, action);
-    }
-
-    public async Task<List<PlexTvShowSeason>> GetSeasonsAsync(
-        string serverAuthToken,
-        string plexFullHost,
-        PlexTvShow plexTvShow
-    )
-    {
-        var result = await _plexApi.GetSeasonsAsync(serverAuthToken, plexFullHost, plexTvShow.Key);
-        return result?.MediaContainer?.Metadata.ToPlexTvShowSeasons() ?? new List<PlexTvShowSeason>();
     }
 
     /// <inheritdoc />
@@ -365,35 +245,6 @@ public class PlexApiService : IPlexApiService
         return (Result.Ok(plexServers), Result.Ok(mapAccess));
     }
 
-    #region Images
-
-    /// <inheritdoc />
-    public async Task<Result<byte[]>> GetPlexMediaImageAsync(
-        PlexServer plexServer,
-        string thumbPath,
-        int width = 0,
-        int height = 0,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexServer.Id, cancellationToken);
-        if (tokenResult.IsFailed)
-            return tokenResult.ToResult();
-
-        var plexServerConnection = await _dbContext.ChoosePlexServerConnection(plexServer.Id, cancellationToken);
-        if (plexServerConnection.IsFailed)
-            return plexServerConnection.ToResult();
-
-        return await _plexApi.GetPlexMediaImageAsync(
-            plexServerConnection.Value.GetThumbUrl(thumbPath),
-            tokenResult.Value,
-            width,
-            height
-        );
-    }
-
-    #endregion
-
     #endregion
 
     #endregion
@@ -472,6 +323,78 @@ public class PlexApiService : IPlexApiService
         }
 
         return Result.Fail($"PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!").LogError();
+    }
+
+    private async Task<Result<List<GetLibraryItemsMetadata>>> SyncMedia(
+        PlexLibrary plexLibrary,
+        Type? plexType = null,
+        int batchSize = 500,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexLibrary.PlexServerId, cancellationToken);
+        if (tokenResult.IsFailed)
+            return tokenResult.ToResult();
+
+        var plexServerConnectionResult = await _dbContext.ChoosePlexServerConnection(
+            plexLibrary.PlexServerId,
+            cancellationToken
+        );
+
+        if (plexServerConnectionResult.IsFailed)
+            return plexServerConnectionResult.ToResult();
+
+        var plexServerConnection = plexServerConnectionResult.Value;
+
+        var mediaList = new List<GetLibraryItemsMetadata>();
+
+        plexType ??= plexLibrary.Type switch
+        {
+            PlexMediaType.Movie => Type.Movie,
+            PlexMediaType.TvShow => Type.TvShow,
+            var _ => null,
+        };
+
+        var index = 0;
+        while (true)
+        {
+            // Retrieve the media for this library
+            var result = await _plexApi.GetMetadataForLibraryAsync(
+                plexServerConnection,
+                tokenResult.Value,
+                plexLibrary.Key,
+                index,
+                batchSize,
+                plexType
+            );
+
+            if (result.IsFailed)
+                return result.ToResult().LogError();
+
+            var mediaContainer = result.Value;
+            mediaList.AddRange(mediaContainer.Metadata);
+
+            var totalSize = mediaContainer.TotalSize;
+            index += mediaContainer.Size;
+
+            // If the size is less than the batch size, we have reached the end
+            if (mediaContainer.Size < batchSize)
+                break;
+
+            if (index >= totalSize)
+                break;
+        }
+
+        if (!mediaList.Any())
+            return ResultExtensions.IsEmpty(nameof(mediaList));
+
+        // Set the TitleSort if it is empty
+        foreach (var metadata in mediaList)
+            metadata.TitleSort = !string.IsNullOrEmpty(metadata.TitleSort)
+                ? metadata.TitleSort
+                : metadata.Title.ToSortTitle();
+
+        return Result.Ok(mediaList);
     }
 
     #endregion

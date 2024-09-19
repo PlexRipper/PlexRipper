@@ -5,10 +5,10 @@ using LukeHagar.PlexAPI.SDK.Models.Requests;
 using PlexApi.Contracts;
 using PlexRipper.PlexApi.Api.Users.SignIn;
 using PlexRipper.PlexApi.Helpers;
-using PlexRipper.PlexApi.Models;
 using RestSharp;
 using DataFormat = RestSharp.DataFormat;
 using ILog = Logging.Interface.ILog;
+using Type = LukeHagar.PlexAPI.SDK.Models.Requests.Type;
 
 // ReSharper disable ArrangeObjectCreationWhenTypeNotEvident
 
@@ -306,13 +306,15 @@ public class PlexApi
     /// <param name="libraryKey"></param>
     /// <param name="startIndex"></param>
     /// <param name="batchSize"></param>
+    /// <param name="type"></param>
     /// <returns></returns>
     public async Task<Result<GetLibraryItemsMediaContainer>> GetMetadataForLibraryAsync(
         PlexServerConnection connection,
         string authToken,
         string libraryKey,
         int startIndex,
-        int batchSize
+        int batchSize,
+        Type? type = null
     )
     {
         if (!int.TryParse(libraryKey, out var libraryKeyInt))
@@ -324,6 +326,7 @@ public class PlexApi
             client.Library.GetLibraryItemsAsync(
                 new GetLibraryItemsRequest()
                 {
+                    Type = type,
                     SectionKey = libraryKeyInt,
                     Tag = Tag.All,
                     IncludeMeta = IncludeMeta.Disable,
@@ -342,89 +345,6 @@ public class PlexApi
         return value is null
             ? ResultExtensions.IsNull(nameof(response.Value.Object.MediaContainer)).LogError()
             : Result.Ok(value);
-    }
-
-    public async Task<PlexMediaContainerDTO> GetSeasonsAsync(string authToken, string plexFullHost, int ratingKey)
-    {
-        var request = new RestRequest(new Uri($"{plexFullHost}/library/metadata/{ratingKey}/children"));
-
-        request.AddToken(authToken);
-
-        var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
-        return result.ValueOrDefault;
-    }
-
-    /// <summary>
-    ///     Gets all seasons contained within a media container.
-    /// </summary>
-    /// <param name="authToken">The authentication token.</param>
-    /// <param name="plexServerUrl">The <see cref="PlexServer" /> url.</param>
-    /// <param name="plexLibraryKey">The rating key from the <see cref="PlexLibrary" />.</param>
-    /// <returns></returns>
-    public async Task<PlexMediaContainerDTO> GetAllSeasonsAsync(
-        string authToken,
-        string plexServerUrl,
-        string plexLibraryKey
-    )
-    {
-        var request = new RestRequest(new Uri($"{plexServerUrl}/library/sections/{plexLibraryKey}/all"));
-
-        request.AddToken(authToken);
-        request.AddQueryParameter("type", "3");
-
-        var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
-        return result.ValueOrDefault;
-    }
-
-    /// <summary>
-    ///     Gets all episodes within a media container.
-    /// </summary>
-    /// <param name="authToken">The authentication token.</param>
-    /// <param name="plexServerUrl"></param>
-    /// <param name="plexLibraryKey">The rating key from the <see cref="PlexLibrary" />.</param>
-    /// <param name="from">The start range from which to request.</param>
-    /// <param name="to">The end range to request for.</param>
-    /// <returns></returns>
-    public async Task<PlexMediaContainerDTO> GetAllEpisodesAsync(
-        string authToken,
-        string plexServerUrl,
-        string plexLibraryKey,
-        int from,
-        int to
-    )
-    {
-        var request = new RestRequest(new Uri($"{plexServerUrl}/library/sections/{plexLibraryKey}/all"));
-
-        request.AddToken(authToken).AddLimitHeaders(from, to);
-        request.AddQueryParameter("type", "4");
-
-        var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
-        return result.ValueOrDefault;
-    }
-
-    /// <summary>
-    ///     Retrieves the banner of <see cref="PlexMedia" />. Max size is width 680px and height 1000px;
-    /// </summary>
-    /// <param name="imageUrl">The absolute url of the banner, e.g. http://serverurl.com/library/metadata/22519/banner/252352</param>
-    /// <param name="authToken">The server authentication token.</param>
-    /// <param name="width">The optional width of the banner, default is 680px.</param>
-    /// <param name="height">The optional height of the banner, default is 1000px.</param>
-    /// <returns>The raw image data in a <see cref="Result" /></returns>
-    public async Task<Result<byte[]>> GetPlexMediaImageAsync(
-        string imageUrl,
-        string authToken,
-        int width = 0,
-        int height = 0
-    )
-    {
-        if (width > 0 && height > 0)
-            imageUrl = $"{imageUrl}&width={width}&height={height}&minSize=1&upscale=1";
-
-        var request = new RestRequest(new Uri(imageUrl));
-        request.AddToken(authToken);
-        request.Timeout = 10000;
-
-        return await _client.SendImageRequestAsync(request);
     }
 
     public async Task<Result<AuthPin>> Get2FAPin(string clientId)

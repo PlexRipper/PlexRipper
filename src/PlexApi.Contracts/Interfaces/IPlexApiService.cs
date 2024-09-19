@@ -6,8 +6,6 @@ namespace PlexApi.Contracts;
 
 public interface IPlexApiService
 {
-    #region Methods
-
     /// <summary>
     ///     Returns the <see cref="PlexAccount" /> after PlexApi validation.
     /// </summary>
@@ -60,27 +58,6 @@ public interface IPlexApiService
         int plexServerConnectionId = 0,
         Action<PlexApiClientProgress> action = null
     );
-
-    Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow);
-
-    /// <summary>
-    /// Retrieves the media image from the <see cref="PlexServer"/> with optional dimensions.
-    /// </summary>
-    /// <param name="plexServer">The <see cref="PlexServer"/> to request the media from.</param>
-    /// <param name="thumbPath">The relative media url</param>
-    /// <param name="width">The optional width of the image.</param>
-    /// <param name="height">The optional height of the image.</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    Task<Result<byte[]>> GetPlexMediaImageAsync(
-        PlexServer plexServer,
-        string thumbPath,
-        int width = 0,
-        int height = 0,
-        CancellationToken cancellationToken = default
-    );
-
-    #endregion
 
     /// <summary>
     /// Fetches all the <see cref="PlexTvShowSeason">Plex TvShow Seasons</see> from the Plex api with the given <see cref="PlexLibrary"/>.

@@ -34,9 +34,6 @@ public class PlexMedia : PlexMediaSlim
     [Column(Order = 16)]
     public DateTime? OriginallyAvailableAt { get; init; }
 
-    [Column(Order = 17)]
-    public int Index { get; init; } = -1;
-
     /// <summary>
     /// Gets or sets the full title path
     /// E.g. tvShow/Season/Episode

@@ -1,8 +1,8 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
 using Logging.Interface;
+using LukeHagar.PlexAPI.SDK.Models.Requests;
 using PlexApi.Contracts;
-using PlexRipper.PlexApi.Models;
 using Settings.Contracts;
 
 namespace PlexRipper.PlexApi.Services;
@@ -134,15 +134,15 @@ public class PlexApiService : IPlexApiService
         if (tokenResult.IsFailed)
             return tokenResult.ToResult();
 
-        var plexServerConnection = await _dbContext.ChoosePlexServerConnection(
+        var plexServerConnectionResult = await _dbContext.ChoosePlexServerConnection(
             plexLibrary.PlexServerId,
             cancellationToken
         );
 
-        if (plexServerConnection.IsFailed)
-            return plexServerConnection.ToResult();
+        if (plexServerConnectionResult.IsFailed)
+            return plexServerConnectionResult.ToResult();
 
-        var serverUrl = plexServerConnection.Value.Url;
+        var plexServerConnection = plexServerConnectionResult.Value;
 
         // Retrieve updated version of the PlexLibrary
         var plexLibraries = await GetLibrarySectionsAsync(
@@ -160,17 +160,18 @@ public class PlexApiService : IPlexApiService
         updatedPlexLibrary.Id = plexLibrary.Id;
         updatedPlexLibrary.PlexServerId = plexLibrary.PlexServerId;
 
-        var mediaList = new List<Metadata>();
+        var mediaList = new List<GetLibraryItemsMetadata>();
         var index = 0;
         var totalSize = 0;
         var batchSize = 500;
-        var mediaType = string.Empty;
+
+        PlexMediaType mediaType;
         while (true)
         {
             // Retrieve the media for this library
             var result = await _plexApi.GetMetadataForLibraryAsync(
+                plexServerConnection,
                 tokenResult.Value,
-                serverUrl,
                 plexLibrary.Key,
                 index,
                 batchSize
@@ -179,13 +180,13 @@ public class PlexApiService : IPlexApiService
             if (result.IsFailed)
                 return result.ToResult().LogError();
 
-            var mediaContainer = result.Value.MediaContainer;
-            mediaList.AddRange(result.Value.MediaContainer.Metadata);
+            var mediaContainer = result.Value;
+            mediaList.AddRange(mediaContainer.Metadata);
 
             totalSize = mediaContainer.TotalSize;
             index += mediaContainer.Size;
 
-            mediaType = mediaContainer.ViewGroup;
+            mediaType = mediaContainer.ViewGroup.ToPlexMediaTypeFromPlexApi();
 
             // If the size is less than the batch size, we have reached the end
             if (mediaContainer.Size < batchSize)
@@ -207,10 +208,10 @@ public class PlexApiService : IPlexApiService
         // Determine how to map based on the Library type.
         switch (mediaType)
         {
-            case "movie":
+            case PlexMediaType.Movie:
                 updatedPlexLibrary.Movies = mediaList.ToPlexMovies();
                 break;
-            case "show":
+            case PlexMediaType.TvShow:
                 updatedPlexLibrary.TvShows = mediaList.ToPlexTvShows();
                 break;
         }
@@ -233,146 +234,12 @@ public class PlexApiService : IPlexApiService
         if (plexServerConnection.IsFailed)
             return plexServerConnection.ToResult();
 
-        var serverUrl = plexServerConnection.Value.Url;
         var plexServer = plexServerConnection.Value.PlexServer;
 
         if (plexServer is null)
             return ResultExtensions.EntityNotFound(nameof(PlexServer), plexServerId);
 
-        var result = await _plexApi.GetAccessibleLibraryInPlexServerAsync(tokenResult.Value, serverUrl);
-        if (result.IsFailed)
-        {
-            _log.Warning("Plex server with name: {PlexServerName} returned no libraries", plexServer.Name);
-            return result.ToResult();
-        }
-
-        if (result.Value?.MediaContainer?.Directory is null)
-        {
-            _log.Error(
-                "Plex server: {PlexServerName} returned an empty response when libraries were requested",
-                plexServer.Name
-            );
-            return result.ToResult();
-        }
-
-        var directories = result.Value.MediaContainer.Directory;
-
-        var mappedLibraries = directories
-            .Select(x => new PlexLibrary
-            {
-                Id = 0,
-                Type = x.Type.ToPlexMediaTypeFromPlexApi(),
-                Title = x.Title,
-                Key = x.Key,
-                CreatedAt = x.CreatedAt,
-                UpdatedAt = x.UpdatedAt,
-                ScannedAt = x.ScannedAt,
-                SyncedAt = null,
-                Uuid = Guid.Parse(x.Uuid),
-                MetaData = new PlexLibraryMetaData
-                {
-                    TvShowCount = 0,
-                    TvShowSeasonCount = 0,
-                    TvShowEpisodeCount = 0,
-                    MovieCount = 0,
-                    MediaSize = 0,
-                },
-                PlexServer = null,
-                PlexServerId = 0,
-                DefaultDestination = null,
-                DefaultDestinationId = null,
-                Movies = [],
-                TvShows = [],
-                PlexAccountLibraries = [],
-            })
-            .ToList();
-
-        // Ensure every library has the Plex server id set
-        foreach (var mappedLibrary in mappedLibraries)
-            mappedLibrary.PlexServerId = plexServerId;
-
-        return Result.Ok(mappedLibraries);
-    }
-
-    public async Task<Result<List<PlexLibrary>>> GetLibrarySectionByPlexServerAsync(
-        int plexServerId,
-        int plexAccountId = 0,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var tokenResult = await _dbContext.GetPlexServerTokenAsync(plexServerId, plexAccountId, cancellationToken);
-        if (tokenResult.IsFailed)
-            return tokenResult.ToResult();
-
-        var plexServerConnection = await _dbContext.ChoosePlexServerConnection(plexServerId, cancellationToken);
-        if (plexServerConnection.IsFailed)
-            return plexServerConnection.ToResult();
-
-        var serverUrl = plexServerConnection.Value.Url;
-        var plexServer = plexServerConnection.Value.PlexServer;
-
-        if (plexServer is null)
-            return ResultExtensions.EntityNotFound(nameof(PlexServer), plexServerId);
-
-        var result = await _plexApi.GetServerProviderDataAsync(tokenResult.Value, serverUrl);
-        if (result.IsFailed)
-        {
-            _log.Warning("Plex server with name: {PlexServerName} returned no providers data", plexServer.Name);
-            return result.ToResult();
-        }
-
-        var mediaProvider = result.Value?.MediaContainer.MediaProvider;
-        var directories =
-            mediaProvider
-                ?.FirstOrDefault(x => x.Title == "Library")
-                ?.Feature.FirstOrDefault(x => x.Key == "/library/sections")
-                ?.Directory ?? [];
-
-        if (!directories.Any())
-        {
-            _log.Error(
-                "Plex server: {PlexServerName} returned an empty response when libraries were requested",
-                plexServer.Name
-            );
-            return result.ToResult();
-        }
-
-        var mappedLibraries = directories
-            .Where(x => x.Type?.ToPlexMediaTypeFromPlexApi() != PlexMediaType.Unknown)
-            .Select(x => new PlexLibrary
-            {
-                Id = 0,
-                Type = x.Type.ToPlexMediaTypeFromPlexApi(),
-                Title = x.Title,
-                Key = x.Key,
-                CreatedAt = DateTime.MinValue, // TODO See if we can get this data from the API
-                UpdatedAt = x.UpdatedAt,
-                ScannedAt = x.ScannedAt,
-                SyncedAt = null,
-                Uuid = Guid.Parse(x.Uuid),
-                MetaData = new PlexLibraryMetaData
-                {
-                    TvShowCount = 0,
-                    TvShowSeasonCount = 0,
-                    TvShowEpisodeCount = 0,
-                    MovieCount = 0,
-                    MediaSize = 0,
-                },
-                PlexServer = null,
-                PlexServerId = 0,
-                DefaultDestination = null,
-                DefaultDestinationId = null,
-                Movies = [],
-                TvShows = [],
-                PlexAccountLibraries = [],
-            })
-            .ToList();
-
-        // Ensure every library has the Plex server id set
-        foreach (var mappedLibrary in mappedLibraries)
-            mappedLibrary.PlexServerId = plexServerId;
-
-        return Result.Ok(mappedLibraries);
+        return await _plexApi.GetAccessibleLibraryInPlexServerAsync(tokenResult.Value, plexServerConnection.Value);
     }
 
     /// <inheritdoc />

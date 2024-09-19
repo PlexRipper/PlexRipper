@@ -63,6 +63,9 @@ public static partial class ResultExtensions
     public static Result IsInvalidId(string parameterName, int value = 0) =>
         Create400BadRequestResult($"The {parameterName} parameter has an invalid id of {value}");
 
+    public static Result IsInvalidId(string parameterName, string value = "") =>
+        Create400BadRequestResult($"The {parameterName} parameter has an invalid id of {value}");
+
     public static Result IsInvalidId(string parameterName, Guid value) =>
         Create400BadRequestResult($"The {parameterName} parameter has an invalid id of {value}");
 

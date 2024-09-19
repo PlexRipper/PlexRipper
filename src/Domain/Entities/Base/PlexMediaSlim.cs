@@ -59,7 +59,7 @@ public class PlexMediaSlim : BaseEntity
     /// Gets or sets when this media was last updated in the Plex library.
     /// </summary>
     [Column(Order = 15)]
-    public required DateTime UpdatedAt { get; set; }
+    public required DateTime? UpdatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether this <see cref="PlexMedia"/> has a thumbnail.

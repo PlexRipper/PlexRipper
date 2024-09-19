@@ -2,7 +2,7 @@ using Application.Contracts;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Errors;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using PlexRipper.PlexApi.Api.Media.Providers;
+using PlexApi.Contracts;
 using PlexRipper.PlexApi.Api.Users.SignIn;
 using PlexRipper.PlexApi.Helpers;
 using PlexRipper.PlexApi.Models;
@@ -33,7 +33,7 @@ public class PlexApi
     private PlexAPI CreateClient(string authToken, PlexApiClientOptions options) =>
         new(
             client: _clientFactory(options),
-            xPlexClientIdentifier: GetClientId,
+            clientID: GetClientId,
             serverUrl: options.ConnectionUrl,
             accessToken: authToken
         );
@@ -46,7 +46,7 @@ public class PlexApi
 
         return new PlexAPI(
             client: _clientFactory(options),
-            xPlexClientIdentifier: GetClientId,
+            clientID: GetClientId,
             serverUrl: options.ConnectionUrl,
             accessToken: authToken
         );
@@ -191,7 +191,7 @@ public class PlexApi
 
         var plexTvClient = CreateTvClient(
             authToken,
-            new PlexApiClientOptions() { ConnectionUrl = string.Empty, Timeout = 15 }
+            new PlexApiClientOptions { ConnectionUrl = string.Empty, Timeout = 15 }
         );
 
         var result = await Task.WhenAll(
@@ -242,70 +242,106 @@ public class PlexApi
     ///     <remarks>{{SERVER_URL}}/library/sections?X-Plex-Token={{SERVER_TOKEN}}</remarks>
     /// </summary>
     /// <param name="plexAuthToken"></param>
-    /// <param name="plexFullHost"></param>
+    /// <param name="connection"></param>
     /// <returns></returns>
-    public async Task<Result<LibrariesResponse>> GetAccessibleLibraryInPlexServerAsync(
+    public async Task<Result<List<PlexLibrary>>> GetAccessibleLibraryInPlexServerAsync(
         string plexAuthToken,
-        string plexFullHost
+        PlexServerConnection connection
     )
     {
-        var request = new RestRequest(PlexApiPaths.GetLibraries(plexFullHost));
+        var client = CreateClient(plexAuthToken, new PlexApiClientOptions { ConnectionUrl = connection.Url });
 
-        request.AddToken(plexAuthToken);
-        request.Timeout = 15000;
+        var response = await ToResponse(client.Library.GetAllLibrariesAsync());
 
-        _log.Debug("GetLibrarySectionsAsync => {Url}", request.Resource);
-        return await _client.SendRequestAsync<LibrariesResponse>(request);
+        if (response.Value.Object?.MediaContainer.Directory is null)
+        {
+            _log.Error(
+                "Plex server: {PlexServerName} returned an empty response when libraries were requested",
+                connection.PlexServer?.Name
+            );
+            return response.ToResult();
+        }
+
+        var directories = response.Value.Object.MediaContainer.Directory;
+
+        var mappedLibraries = directories
+            .Select(x => new PlexLibrary
+            {
+                Id = 0,
+                Type = x.Type.ToPlexMediaTypeFromPlexApi(),
+                Title = x.Title,
+                Key = x.Key,
+                CreatedAt = DateTimeExtensions.FromUnixTime(x.CreatedAt),
+                UpdatedAt = DateTimeExtensions.FromUnixTime(x.UpdatedAt),
+                ScannedAt = DateTimeExtensions.FromUnixTime(x.ScannedAt),
+                SyncedAt = null,
+                Uuid = Guid.Parse(x.Uuid),
+                MetaData = new PlexLibraryMetaData
+                {
+                    TvShowCount = 0,
+                    TvShowSeasonCount = 0,
+                    TvShowEpisodeCount = 0,
+                    MovieCount = 0,
+                    MediaSize = 0,
+                },
+                PlexServer = null,
+                PlexServerId = connection.PlexServerId,
+                DefaultDestination = null,
+                DefaultDestinationId = null,
+                Movies = [],
+                TvShows = [],
+                PlexAccountLibraries = [],
+            })
+            .ToList();
+
+        return Result.Ok(mappedLibraries);
     }
 
     /// <summary>
-    /// This returns the media providers that are available on the Plex server.
-    /// NOTE: This includes all the accessible Plex libraries.
+    /// Gets the all the root level media metadata contained in this Plex library. For movies its all movies, and for tv shows its all the shows without seasons and episodes.
+    /// <remarks>URL: {{SERVER_URL}}/library/sections/{{LIBRARY_KEY}}/all?X-Plex-Token={{SERVER_TOKEN}}</remarks>
     /// </summary>
-    /// <param name="plexAuthToken"></param>
-    /// <param name="plexFullHost"></param>
-    /// <returns></returns>
-    public async Task<Result<MediaProvidersResponse>> GetServerProviderDataAsync(
-        string plexAuthToken,
-        string plexFullHost
-    )
-    {
-        var request = new RestRequest(PlexApiPaths.GetProviderData(plexFullHost));
-
-        request.AddToken(plexAuthToken);
-        request.AddPlexHeaders(plexAuthToken);
-        request.Timeout = 15000;
-
-        _log.Debug("GetLibrarySectionsAsync => {Url}", request.Resource);
-        return await _client.SendRequestAsync<MediaProvidersResponse>(request);
-    }
-
-    /// <summary>
-    ///     Gets the all the root level media metadata contained in this Plex library. For movies its all movies, and for tv shows its all the shows without seasons and episodes.
-    ///     <remarks>URL: {{SERVER_URL}}/library/sections/{{LIBRARY_KEY}}/all?X-Plex-Token={{SERVER_TOKEN}}</remarks>
-    /// </summary>
+    /// <param name="connection"></param>
     /// <param name="authToken"></param>
-    /// <param name="plexServerBaseUrl"></param>
     /// <param name="libraryKey"></param>
     /// <param name="startIndex"></param>
     /// <param name="batchSize"></param>
     /// <returns></returns>
-    public async Task<Result<PlexMediaContainerDTO>> GetMetadataForLibraryAsync(
+    public async Task<Result<GetLibraryItemsMediaContainer>> GetMetadataForLibraryAsync(
+        PlexServerConnection connection,
         string authToken,
-        string plexServerBaseUrl,
         string libraryKey,
         int startIndex,
         int batchSize
     )
     {
-        var request = new RestRequest(PlexApiPaths.GetLibrariesMetadata(plexServerBaseUrl, libraryKey));
+        if (!int.TryParse(libraryKey, out var libraryKeyInt))
+            return ResultExtensions.IsInvalidId(nameof(libraryKey), libraryKey).LogError();
 
-        request.AddToken(authToken);
-        request.AddLimitHeaders(startIndex, batchSize);
+        var client = CreateClient(authToken, new PlexApiClientOptions() { ConnectionUrl = connection.Url });
 
-        // the Metadata is not needed for now
-        // request.AddQueryParameter("includeMeta", "1");
-        return await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
+        var response = await ToResponse(
+            client.Library.GetLibraryItemsAsync(
+                new GetLibraryItemsRequest()
+                {
+                    SectionKey = libraryKeyInt,
+                    Tag = Tag.All,
+                    IncludeMeta = IncludeMeta.Disable,
+                    IncludeGuids = IncludeGuids.Enable,
+                    XPlexContainerStart = startIndex,
+                    XPlexContainerSize = batchSize,
+                }
+            )
+        );
+
+        if (response.IsFailed)
+            return response.ToResult();
+
+        var value = response.Value?.Object?.MediaContainer ?? null;
+
+        return value is null
+            ? ResultExtensions.IsNull(nameof(response.Value.Object.MediaContainer)).LogError()
+            : Result.Ok(value);
     }
 
     public async Task<PlexMediaContainerDTO> GetSeasonsAsync(string authToken, string plexFullHost, int ratingKey)
@@ -361,16 +397,6 @@ public class PlexApi
 
         request.AddToken(authToken).AddLimitHeaders(from, to);
         request.AddQueryParameter("type", "4");
-
-        var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
-        return result.ValueOrDefault;
-    }
-
-    public async Task<PlexMediaContainerDTO> GetRecentlyAddedAsync(string authToken, string hostUrl, string sectionId)
-    {
-        var request = new RestRequest(new Uri($"{hostUrl}/library/sections/{sectionId}/recentlyAdded"));
-
-        request.AddToken(authToken).AddLimitHeaders(0, 50);
 
         var result = await _client.SendRequestAsync<PlexMediaContainerDTO>(request);
         return result.ValueOrDefault;

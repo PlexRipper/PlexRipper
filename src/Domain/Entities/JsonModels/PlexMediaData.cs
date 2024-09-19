@@ -15,10 +15,5 @@ public record PlexMediaData
     public string AudioProfile { get; init; }
     public string AudioCodec { get; init; }
     public int AudioChannels { get; init; }
-    public bool OptimizedForStreaming { get; init; }
-    public string Protocol { get; init; }
-    public bool Selected { get; init; }
     public List<PlexMediaDataPart> Parts { get; init; }
-
-    public bool IsMultiPart => Parts.Count > 1;
 }

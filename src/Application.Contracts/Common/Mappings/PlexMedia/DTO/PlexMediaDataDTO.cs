@@ -2,8 +2,6 @@
 
 public class PlexMediaDataDTO
 {
-    #region Properties
-
     public string MediaFormat { get; set; }
 
     public long Duration { get; set; }
@@ -31,6 +29,4 @@ public class PlexMediaDataDTO
     public int AudioChannels { get; set; }
 
     public List<PlexMediaDataPartDTO> Parts { get; set; }
-
-    #endregion
 }

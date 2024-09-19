@@ -6,7 +6,7 @@ public class PlexMediaSlimDTO
 {
     public required int Id { get; init; }
 
-    public required int Index { get; set; }
+    public int Index { get; set; }
 
     public required string Title { get; init; } = string.Empty;
 
@@ -22,7 +22,7 @@ public class PlexMediaSlimDTO
 
     public required DateTime AddedAt { get; init; }
 
-    public required DateTime UpdatedAt { get; init; }
+    public required DateTime? UpdatedAt { get; init; }
 
     public required int PlexLibraryId { get; init; }
 

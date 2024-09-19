@@ -1,4 +1,4 @@
-using PlexRipper.PlexApi.Models;
+using LukeHagar.PlexAPI.SDK.Models.Requests;
 
 namespace PlexRipper.PlexApi;
 
@@ -6,7 +6,7 @@ public static partial class PlexMetaDataMapper
 {
     #region Single Conversions
 
-    public static PlexMovie ToPlexMovie(this Metadata source)
+    public static PlexMovie ToPlexMovie(this GetLibraryItemsMetadata source)
     {
         var plexMovie = source.ToPlexMedia().ToPlexMovie();
 
@@ -14,14 +14,14 @@ public static partial class PlexMetaDataMapper
         return plexMovie;
     }
 
-    public static PlexTvShow ToPlexTvShow(this Metadata source)
+    public static PlexTvShow ToPlexTvShow(this GetLibraryItemsMetadata source)
     {
         var plexTvShow = source.ToPlexMedia().ToPlexTvShow();
         plexTvShow.FullTitle = source.Title;
         return plexTvShow;
     }
 
-    public static PlexTvShowSeason ToPlexTvShowSeason(this Metadata source)
+    public static PlexTvShowSeason ToPlexTvShowSeason(this GetLibraryItemsMetadata source)
     {
         var plexTvShowSeason = source.ToPlexMedia().ToPlexTvShowSeason();
         plexTvShowSeason.FullTitle = $"{source.ParentTitle}/{source.Title}";
@@ -29,7 +29,7 @@ public static partial class PlexMetaDataMapper
         return plexTvShowSeason;
     }
 
-    public static PlexTvShowEpisode ToPlexTvShowEpisode(this Metadata source)
+    public static PlexTvShowEpisode ToPlexTvShowEpisode(this GetLibraryItemsMetadata source)
     {
         var plexTvShowSeason = source.ToPlexMedia().ToPlexTvShowEpisode();
         plexTvShowSeason.FullTitle = $"{source.GrandparentTitle}/{source.ParentTitle}/{source.Title}";
@@ -37,7 +37,7 @@ public static partial class PlexMetaDataMapper
         return plexTvShowSeason;
     }
 
-    public static PlexMedia ToPlexMedia(this Metadata source)
+    public static PlexMedia ToPlexMedia(this GetLibraryItemsMetadata source)
     {
         return new PlexMedia
         {
@@ -51,20 +51,19 @@ public static partial class PlexMetaDataMapper
             // Duration is in milliseconds and we want seconds
             Duration = source.Duration / 1000,
             MediaSize = source.Media.Sum(y => y.Part.Sum(z => z.Size)),
-            ChildCount = source.ChildCount,
-            AddedAt = source.AddedAt,
-            UpdatedAt = source.UpdatedAt,
+            ChildCount = source.ChildCount ?? 0,
+            AddedAt = DateTimeExtensions.FromUnixTime(source.AddedAt),
+            UpdatedAt = DateTimeExtensions.FromUnixTime(source.UpdatedAt),
             MediaData = new PlexMediaContainer() { MediaData = source.Media.ToPlexMediaData() },
 
             Type = PlexMediaType.None,
-            Key = source.RatingKey != null ? int.Parse(source.RatingKey) : -1,
+            Key = int.Parse(source.RatingKey),
             MetaDataKey = RetrieveMetaDataKey(source),
             Studio = source.Studio ?? string.Empty,
             Summary = source.Summary ?? string.Empty,
             ContentRating = source.ContentRating ?? string.Empty,
-            Rating = source.Rating,
-            OriginallyAvailableAt = source.OriginallyAvailableAt.ToDateTime(),
-            Index = source.Index,
+            Rating = source.Rating ?? 0,
+            OriginallyAvailableAt = DateTime.Parse(source.OriginallyAvailableAt?.ToString() ?? string.Empty),
             HasThumb = !string.IsNullOrEmpty(source.Thumb),
             HasArt = !string.IsNullOrEmpty(source.Art),
             HasBanner = !string.IsNullOrEmpty(source.Banner),
@@ -85,14 +84,16 @@ public static partial class PlexMetaDataMapper
 
     #region List Conversions
 
-    public static List<PlexMovie> ToPlexMovies(this List<Metadata> source) => source.ConvertAll(ToPlexMovie);
+    public static List<PlexMovie> ToPlexMovies(this List<GetLibraryItemsMetadata> source) =>
+        source.ConvertAll(ToPlexMovie);
 
-    public static List<PlexTvShow> ToPlexTvShows(this List<Metadata> source) => source.ConvertAll(ToPlexTvShow);
+    public static List<PlexTvShow> ToPlexTvShows(this List<GetLibraryItemsMetadata> source) =>
+        source.ConvertAll(ToPlexTvShow);
 
-    public static List<PlexTvShowSeason> ToPlexTvShowSeasons(this List<Metadata> source) =>
+    public static List<PlexTvShowSeason> ToPlexTvShowSeasons(this List<GetLibraryItemsMetadata> source) =>
         source.ConvertAll(ToPlexTvShowSeason);
 
-    public static List<PlexTvShowEpisode> ToPlexTvShowEpisodes(this List<Metadata> source) =>
+    public static List<PlexTvShowEpisode> ToPlexTvShowEpisodes(this List<GetLibraryItemsMetadata> source) =>
         source.ConvertAll(ToPlexTvShowEpisode);
 
     #endregion
@@ -103,9 +104,9 @@ public static partial class PlexMetaDataMapper
     /// </summary>
     /// <param name="metadata"></param>
     /// <returns></returns>
-    private static int RetrieveMetaDataKey(Metadata metadata)
+    private static int RetrieveMetaDataKey(GetLibraryItemsMetadata metadata)
     {
-        List<string> list = [metadata.Thumb, metadata.Banner, metadata.Art, metadata.Theme];
+        List<string> list = [metadata.Thumb, metadata.Art, metadata.Theme];
 
         foreach (var entry in list)
             if (!string.IsNullOrEmpty(entry))

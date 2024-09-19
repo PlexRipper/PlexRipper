@@ -1,27 +1,23 @@
-using PlexRipper.PlexApi.Models;
+using LukeHagar.PlexAPI.SDK.Models.Requests;
 
 namespace PlexRipper.PlexApi;
 
 public static class PlexApiPartMapper
 {
-    public static PlexMediaDataPart ToPlexMediaDataPart(this Part source)
-    {
-        return new PlexMediaDataPart
+    public static PlexMediaDataPart ToPlexMediaDataPart(this GetLibraryItemsPart source) =>
+        new()
         {
             Duration = source.Duration,
             File = source.File,
             Size = source.Size,
-            AudioProfile = source.AudioProfile,
+            AudioProfile = source.AudioProfile ?? string.Empty,
             Container = source.Container,
-            HasThumbnail = source.HasThumbnail,
-            Indexes = source.Indexes,
-            HasChapterTextStream = source.HasChapterTextStream,
+            Indexes = source.Indexes ?? string.Empty,
             VideoProfile = source.VideoProfile,
             ObfuscatedFilePath = source.Key,
         };
-    }
 
-    public static List<PlexMediaDataPart> ToPlexMediaDataPart(this List<Part> source)
+    public static List<PlexMediaDataPart> ToPlexMediaDataPart(this List<GetLibraryItemsPart> source)
     {
         return source.Select(x => x.ToPlexMediaDataPart()).ToList();
     }

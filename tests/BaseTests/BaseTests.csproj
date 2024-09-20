@@ -41,6 +41,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\..\plexcsharp\LukeHagar\PlexAPI\SDK\LukeHagar.PlexAPI.SDK.csproj" />
 		<ProjectReference Include="..\..\src\WebAPI\WebAPI.csproj" />
 	</ItemGroup>
 

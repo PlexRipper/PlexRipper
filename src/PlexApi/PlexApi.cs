@@ -6,8 +6,6 @@ using PlexApi.Contracts;
 using ILog = Logging.Interface.ILog;
 using Type = LukeHagar.PlexAPI.SDK.Models.Requests.Type;
 
-// ReSharper disable ArrangeObjectCreationWhenTypeNotEvident
-
 namespace PlexRipper.PlexApi.Api;
 
 public class PlexApi
@@ -15,14 +13,11 @@ public class PlexApi
     private readonly ILog _log;
     private readonly Func<PlexApiClientOptions?, NewPlexApiClient> _clientFactory;
 
-    public PlexApi(ILog log, PlexApiClient client, Func<PlexApiClientOptions?, NewPlexApiClient> clientFactory)
+    public PlexApi(ILog log, Func<PlexApiClientOptions?, NewPlexApiClient> clientFactory)
     {
         _log = log;
-        _client = client;
         _clientFactory = clientFactory;
     }
-
-    private readonly PlexApiClient _client;
 
     private string GetClientId => Guid.NewGuid().ToString();
 
@@ -75,7 +70,7 @@ public class PlexApi
 
         var responseResult = await ToResponse(
             plexTvClient.Authentication.PostUsersSignInDataAsync(
-                new()
+                new PostUsersSignInDataRequestBody
                 {
                     Login = plexAccount.Username,
                     Password = plexAccount.Password,

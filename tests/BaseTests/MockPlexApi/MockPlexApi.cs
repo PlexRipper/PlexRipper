@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using JustEat.HttpClientInterception;
 using Logging.Interface;
+using LukeHagar.PlexAPI.SDK.Models.Requests;
 using PlexRipper.PlexApi;
 
 namespace PlexRipper.BaseTests;
@@ -99,7 +100,7 @@ public class MockPlexApi
                 if (i < servers.Count)
                 {
                     servers[i].Connections[0].Uri = uri.ToString();
-                    servers[i].Connections[0].Protocol = uri.Scheme;
+                    servers[i].Connections[0].Protocol = uri.Scheme == "https" ? Protocol.Https : Protocol.Http;
                     servers[i].Connections[0].Address = uri.Host;
                     servers[i].Connections[0].Port = uri.Port;
                     servers[i].Connections[0].Local = true;

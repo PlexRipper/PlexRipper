@@ -3087,6 +3087,7 @@
           "Bogus.Hollywood": "[35.5.1, )",
           "FastEndpoints.Testing": "[5.23.0, )",
           "JustEat.HttpClientInterception": "[4.2.1, )",
+          "LukeHagar.PlexAPI.SDK": "[0.7.18, )",
           "Microsoft.AspNetCore.Mvc.Testing": "[8.0.3, )",
           "Microsoft.AspNetCore.SpaServices.Extensions": "[8.0.3, )",
           "Microsoft.NET.Test.Sdk": "[17.9.0, )",

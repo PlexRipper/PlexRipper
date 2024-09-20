@@ -2,8 +2,6 @@
 
 public class PlexApiClientProgress
 {
-    #region Properties
-
     public required int RetryAttemptIndex { get; set; }
 
     public required int RetryAttemptCount { get; set; }
@@ -19,6 +17,4 @@ public class PlexApiClientProgress
     public required string Message { get; set; }
 
     public string ErrorMessage { get; set; }
-
-    #endregion
 }

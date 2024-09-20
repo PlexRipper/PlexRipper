@@ -33,10 +33,9 @@ public class SignalRService : ISignalRService
 
     #region ProgressHub
 
-    public async Task SendLibraryProgressUpdateAsync(int id, int received, int total, bool isRefreshing = true)
+    public async Task SendLibraryProgressUpdateAsync(LibraryProgress progress)
     {
-        var libraryProgress = new LibraryProgress(id, received, total, isRefreshing);
-        await _progressHub.Clients.All.LibraryProgress(libraryProgress);
+        await _progressHub.Clients.All.LibraryProgress(progress);
     }
 
     #region DownloadProgress

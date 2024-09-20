@@ -15,7 +15,6 @@ public class MockSignalRService : ISignalRService
 
     public BlockingCollection<ServerDownloadProgressDTO> ServerDownloadProgressList { get; } = new();
     public BlockingCollection<JobStatusUpdateDTO> JobStatusUpdateList { get; } = new();
-
     public BlockingCollection<DataType> RefreshNotificationList { get; } = new();
 
     public MockSignalRService(ILog<MockSignalRService> log)
@@ -23,7 +22,7 @@ public class MockSignalRService : ISignalRService
         _log = log;
     }
 
-    public void SendLibraryProgressUpdate(LibraryProgress libraryProgress) { }
+    public Task SendLibraryProgressUpdateAsync(LibraryProgress libraryProgress) => Task.CompletedTask;
 
     public Task SendLibraryProgressUpdateAsync(int id, int received, int total, bool isRefreshing = true) =>
         Task.CompletedTask;

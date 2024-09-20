@@ -45,6 +45,7 @@ public interface IPlexApiService
     /// <returns></returns>
     Task<Result<PlexLibrary>> GetLibraryMediaAsync(
         PlexLibrary plexLibrary,
+        Action<MediaSyncProgress> action = null,
         CancellationToken cancellationToken = default
     );
 
@@ -67,6 +68,7 @@ public interface IPlexApiService
     /// <returns></returns>
     Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(
         PlexLibrary plexLibrary,
+        Action<MediaSyncProgress> action = null,
         CancellationToken cancellationToken = default
     );
 
@@ -78,6 +80,7 @@ public interface IPlexApiService
     /// <returns></returns>
     Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(
         PlexLibrary plexLibrary,
+        Action<MediaSyncProgress> action = null,
         CancellationToken cancellationToken = default
     );
 

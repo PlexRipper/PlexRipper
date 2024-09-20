@@ -43,18 +43,18 @@ public static partial class PlexMetaDataMapper
         {
             Id = 0,
             Title = source.Title,
-            Year = source.Year,
+            Year = source.Year ?? 0,
             SortTitle = source.Title.ToSortTitle(),
             SearchTitle = source.Title.ToSearchTitle(),
             Guid = source.Guid,
 
             // Duration is in milliseconds and we want seconds
-            Duration = source.Duration / 1000,
-            MediaSize = source.Media.Sum(y => y.Part.Sum(z => z.Size)),
+            Duration = source.Duration.GetValueOrDefault() / 1000,
+            MediaSize = source.Media?.Sum(y => y.Part.Sum(z => z.Size)) ?? 0,
             ChildCount = source.ChildCount ?? 0,
             AddedAt = DateTimeExtensions.FromUnixTime(source.AddedAt),
             UpdatedAt = DateTimeExtensions.FromUnixTime(source.UpdatedAt),
-            MediaData = new PlexMediaContainer() { MediaData = source.Media.ToPlexMediaData() },
+            MediaData = new PlexMediaContainer() { MediaData = source.Media?.ToPlexMediaData() ?? [] },
 
             Type = PlexMediaType.None,
             Key = int.Parse(source.RatingKey),
@@ -63,7 +63,7 @@ public static partial class PlexMetaDataMapper
             Summary = source.Summary ?? string.Empty,
             ContentRating = source.ContentRating ?? string.Empty,
             Rating = source.Rating ?? 0,
-            OriginallyAvailableAt = DateTime.Parse(source.OriginallyAvailableAt?.ToString() ?? string.Empty),
+            OriginallyAvailableAt = source.OriginallyAvailableAt.ToDateTime(),
             HasThumb = !string.IsNullOrEmpty(source.Thumb),
             HasArt = !string.IsNullOrEmpty(source.Art),
             HasBanner = !string.IsNullOrEmpty(source.Banner),
@@ -106,7 +106,7 @@ public static partial class PlexMetaDataMapper
     /// <returns></returns>
     private static int RetrieveMetaDataKey(GetLibraryItemsMetadata metadata)
     {
-        List<string> list = [metadata.Thumb, metadata.Art, metadata.Theme];
+        List<string> list = [metadata.Thumb ?? "", metadata.Art ?? "", metadata.Theme ?? ""];
 
         foreach (var entry in list)
             if (!string.IsNullOrEmpty(entry))

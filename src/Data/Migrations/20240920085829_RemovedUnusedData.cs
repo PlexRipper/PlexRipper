@@ -11,21 +11,13 @@ namespace PlexRipper.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Index",
-                table: "PlexTvShowSeason");
+            migrationBuilder.DropColumn(name: "Index", table: "PlexTvShowSeason");
 
-            migrationBuilder.DropColumn(
-                name: "Index",
-                table: "PlexTvShows");
+            migrationBuilder.DropColumn(name: "Index", table: "PlexTvShows");
 
-            migrationBuilder.DropColumn(
-                name: "Index",
-                table: "PlexTvShowEpisodes");
+            migrationBuilder.DropColumn(name: "Index", table: "PlexTvShowEpisodes");
 
-            migrationBuilder.DropColumn(
-                name: "Index",
-                table: "PlexMovie");
+            migrationBuilder.DropColumn(name: "Index", table: "PlexMovie");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -33,7 +25,8 @@ namespace PlexRipper.Data.Migrations
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(DateTime),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -41,7 +34,8 @@ namespace PlexRipper.Data.Migrations
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(DateTime),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -49,7 +43,8 @@ namespace PlexRipper.Data.Migrations
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(DateTime),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -57,7 +52,8 @@ namespace PlexRipper.Data.Migrations
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(DateTime),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
         }
 
         /// <inheritdoc />
@@ -71,14 +67,17 @@ namespace PlexRipper.Data.Migrations
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
-            migrationBuilder.AddColumn<int>(
-                name: "Index",
-                table: "PlexTvShowSeason",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: 0)
+            migrationBuilder
+                .AddColumn<int>(
+                    name: "Index",
+                    table: "PlexTvShowSeason",
+                    type: "INTEGER",
+                    nullable: false,
+                    defaultValue: 0
+                )
                 .Annotation("Relational:ColumnOrder", 17);
 
             migrationBuilder.AlterColumn<DateTime>(
@@ -89,14 +88,11 @@ namespace PlexRipper.Data.Migrations
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
-            migrationBuilder.AddColumn<int>(
-                name: "Index",
-                table: "PlexTvShows",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: 0)
+            migrationBuilder
+                .AddColumn<int>(name: "Index", table: "PlexTvShows", type: "INTEGER", nullable: false, defaultValue: 0)
                 .Annotation("Relational:ColumnOrder", 17);
 
             migrationBuilder.AlterColumn<DateTime>(
@@ -107,14 +103,17 @@ namespace PlexRipper.Data.Migrations
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
-            migrationBuilder.AddColumn<int>(
-                name: "Index",
-                table: "PlexTvShowEpisodes",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: 0)
+            migrationBuilder
+                .AddColumn<int>(
+                    name: "Index",
+                    table: "PlexTvShowEpisodes",
+                    type: "INTEGER",
+                    nullable: false,
+                    defaultValue: 0
+                )
                 .Annotation("Relational:ColumnOrder", 17);
 
             migrationBuilder.AlterColumn<DateTime>(
@@ -125,14 +124,11 @@ namespace PlexRipper.Data.Migrations
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
 
-            migrationBuilder.AddColumn<int>(
-                name: "Index",
-                table: "PlexMovie",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: 0)
+            migrationBuilder
+                .AddColumn<int>(name: "Index", table: "PlexMovie", type: "INTEGER", nullable: false, defaultValue: 0)
                 .Annotation("Relational:ColumnOrder", 17);
         }
     }

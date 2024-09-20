@@ -10,4 +10,8 @@ public static class DateTimeExtensions
         unixTime != null ? DateTimeOffset.FromUnixTimeSeconds((long)unixTime).DateTime : null;
 
     public static LocalDate ToLocalDate(this DateTime dateTime) => LocalDate.FromDateTime(dateTime);
+
+    public static DateTime ToDateTime(this LocalDate localDate) => localDate.AtMidnight().ToDateTimeUnspecified();
+
+    public static DateTime? ToDateTime(this LocalDate? localDate) => localDate?.AtMidnight().ToDateTimeUnspecified();
 }

@@ -6,7 +6,7 @@ using PlexApi.Contracts;
 using Settings.Contracts;
 using Type = LukeHagar.PlexAPI.SDK.Models.Requests.Type;
 
-namespace PlexRipper.PlexApi.Services;
+namespace PlexRipper.PlexApi;
 
 /// <summary>
 /// This service is an extra layer of abstraction to convert incoming DTO's from the PlexAPI to workable entities.
@@ -36,6 +36,7 @@ public class PlexApiService : IPlexApiService
     /// <inheritdoc />
     public async Task<Result<PlexLibrary>> GetLibraryMediaAsync(
         PlexLibrary plexLibrary,
+        Action<MediaSyncProgress> action = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -55,7 +56,7 @@ public class PlexApiService : IPlexApiService
         updatedPlexLibrary.Id = plexLibrary.Id;
         updatedPlexLibrary.PlexServerId = plexLibrary.PlexServerId;
 
-        var mediaListResult = await SyncMedia(plexLibrary, cancellationToken: cancellationToken);
+        var mediaListResult = await SyncMedia(plexLibrary, action: action, cancellationToken: cancellationToken);
 
         if (mediaListResult.IsFailed)
             return mediaListResult.ToResult();
@@ -79,10 +80,16 @@ public class PlexApiService : IPlexApiService
     /// <inheritdoc />
     public async Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(
         PlexLibrary plexLibrary,
+        Action<MediaSyncProgress> action = null,
         CancellationToken cancellationToken = default
     )
     {
-        var mediaListResult = await SyncMedia(plexLibrary, Type.Season, cancellationToken: cancellationToken);
+        var mediaListResult = await SyncMedia(
+            plexLibrary,
+            Type.Season,
+            action: action,
+            cancellationToken: cancellationToken
+        );
 
         if (mediaListResult.IsFailed)
             return mediaListResult.ToResult();
@@ -93,10 +100,16 @@ public class PlexApiService : IPlexApiService
 
     public async Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(
         PlexLibrary plexLibrary,
+        Action<MediaSyncProgress> action = null,
         CancellationToken cancellationToken = default
     )
     {
-        var mediaListResult = await SyncMedia(plexLibrary, Type.Episode, 5000, cancellationToken);
+        var mediaListResult = await SyncMedia(
+            plexLibrary,
+            Type.Episode,
+            action: action,
+            cancellationToken: cancellationToken
+        );
 
         if (mediaListResult.IsFailed)
             return mediaListResult.ToResult();
@@ -284,7 +297,8 @@ public class PlexApiService : IPlexApiService
     private async Task<Result<List<GetLibraryItemsMetadata>>> SyncMedia(
         PlexLibrary plexLibrary,
         Type? plexType = null,
-        int batchSize = 500,
+        int batchSize = 100,
+        Action<MediaSyncProgress> action = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -310,8 +324,8 @@ public class PlexApiService : IPlexApiService
             PlexMediaType.TvShow => Type.TvShow,
             var _ => null,
         };
-
         var index = 0;
+
         while (true)
         {
             // Retrieve the media for this library
@@ -332,6 +346,16 @@ public class PlexApiService : IPlexApiService
 
             var totalSize = mediaContainer.TotalSize;
             index += mediaContainer.Size;
+
+            // Report progress
+            action?.Invoke(
+                new MediaSyncProgress
+                {
+                    Type = plexLibrary.Type,
+                    Received = index,
+                    Total = totalSize,
+                }
+            );
 
             // If the size is less than the batch size, we have reached the end
             if (mediaContainer.Size < batchSize)

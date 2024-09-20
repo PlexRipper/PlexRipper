@@ -9,7 +9,7 @@ public class PlexApiModule : Module
     {
         builder.RegisterType<PlexApiService>().As<IPlexApiService>();
 
-        builder.RegisterType<Api.PlexApi>();
+        builder.RegisterType<PlexApi>();
 
         builder.RegisterType<PlexApiClient>().InstancePerDependency();
     }

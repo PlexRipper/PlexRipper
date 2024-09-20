@@ -71,10 +71,7 @@ public class PlexApiClient : ISpeakeasyHttpClient
                             (int)timeSpan.TotalSeconds
                         );
                     }
-                ),
-            Policy
-                .HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
-                .CircuitBreakerAsync(1, TimeSpan.FromSeconds(_options.Timeout))
+                )
         );
     }
 
@@ -96,6 +93,12 @@ public class PlexApiClient : ISpeakeasyHttpClient
                 async (context) =>
                 {
                     context["RequestUri"] = requestUri;
+
+                    if (response != null)
+                    {
+                        // Clone the request to avoid issues with the content being disposed
+                        request = await CloneAsync(request);
+                    }
 
                     response = await _defaultClient.SendAsync(request);
                     return response;
@@ -150,7 +153,33 @@ public class PlexApiClient : ISpeakeasyHttpClient
         return response;
     }
 
-    public Task<HttpRequestMessage> CloneAsync(HttpRequestMessage request) => throw new NotImplementedException();
+    public async Task<HttpRequestMessage> CloneAsync(HttpRequestMessage request)
+    {
+        var clone = new HttpRequestMessage(request.Method, request.RequestUri);
+
+        // Copy the request's content (via a MemoryStream) into the cloned object
+        var ms = new MemoryStream();
+        if (request.Content != null)
+        {
+            await request.Content.CopyToAsync(ms).ConfigureAwait(false);
+            ms.Position = 0;
+            clone.Content = new StreamContent(ms);
+
+            // Copy the content headers
+            foreach (var h in request.Content.Headers)
+                clone.Content.Headers.Add(h.Key, h.Value);
+        }
+
+        clone.Version = request.Version;
+
+        foreach (var option in request.Options)
+            clone.Options.Set(new HttpRequestOptionsKey<object?>(option.Key), option.Value);
+
+        foreach (var header in request.Headers)
+            clone.Headers.TryAddWithoutValidation(header.Key, header.Value);
+
+        return clone;
+    }
 
     private void SendProgressUpdate(
         Action<PlexApiClientProgress>? action,

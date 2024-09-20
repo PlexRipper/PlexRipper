@@ -18,13 +18,13 @@ public class PlexApiService : IPlexApiService
 
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IServerSettingsModule _serverSettingsModule;
-    private readonly Api.PlexApi _plexApi;
+    private readonly PlexApi _plexApi;
 
     public PlexApiService(
         ILog log,
         IPlexRipperDbContext dbContext,
         IServerSettingsModule serverSettingsModule,
-        Api.PlexApi plexApi
+        PlexApi plexApi
     )
     {
         _log = log;

@@ -1,6 +1,5 @@
 using Bogus;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using PlexRipper.PlexApi.Api;
 
 namespace PlexRipper.BaseTests;
 

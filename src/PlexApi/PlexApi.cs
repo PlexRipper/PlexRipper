@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Application.Contracts;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Errors;
@@ -6,7 +7,7 @@ using PlexApi.Contracts;
 using ILog = Logging.Interface.ILog;
 using Type = LukeHagar.PlexAPI.SDK.Models.Requests.Type;
 
-namespace PlexRipper.PlexApi.Api;
+namespace PlexRipper.PlexApi;
 
 public class PlexApi
 {
@@ -53,6 +54,34 @@ public class PlexApi
         catch (SDKException e)
         {
             return e.RawResponse.FromSdkExceptionToResult<T>();
+        }
+        catch (Exception e)
+        {
+            var errorsProperty = e.GetType().GetProperty("Errors");
+            var rawResponseProperty = e.GetType().GetProperty("RawResponse");
+
+            if (errorsProperty != null && rawResponseProperty != null)
+            {
+                var rawResponse = rawResponseProperty.GetValue(e);
+                if (rawResponse is null)
+                    return Result.Fail(new ExceptionalError(e)).LogError();
+
+                var errors = errorsProperty.GetValue(e);
+                var parsedErrors = JsonSerializer.Deserialize<List<PlexError>>(JsonSerializer.Serialize(errors));
+
+                return ((HttpResponseMessage)rawResponse).FromSdkExceptionToResult<T>(parsedErrors);
+            }
+
+            if (rawResponseProperty != null)
+            {
+                var rawResponse = rawResponseProperty.GetValue(e);
+                if (rawResponse is null)
+                    return Result.Fail(new ExceptionalError(e)).LogError();
+
+                return ((HttpResponseMessage)rawResponse).FromSdkExceptionToResult<T>();
+            }
+
+            return Result.Fail(new ExceptionalError(e)).LogError();
         }
     }
 

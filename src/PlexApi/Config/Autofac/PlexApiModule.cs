@@ -12,6 +12,6 @@ public class PlexApiModule : Module
 
         builder.RegisterType<Api.PlexApi>();
 
-        builder.RegisterType<NewPlexApiClient>().InstancePerDependency();
+        builder.RegisterType<PlexApiClient>().InstancePerDependency();
     }
 }

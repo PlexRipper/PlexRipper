@@ -25,7 +25,7 @@ public record PlexApiClientOptions
     public Action<PlexApiClientProgress>? Action { get; init; } = null;
 }
 
-public class NewPlexApiClient : ISpeakeasyHttpClient
+public class PlexApiClient : ISpeakeasyHttpClient
 {
     private readonly ILog _log;
 
@@ -34,7 +34,7 @@ public class NewPlexApiClient : ISpeakeasyHttpClient
     private readonly PlexApiClientOptions _options;
     private readonly AsyncPolicyWrap<HttpResponseMessage> _policyWrap;
 
-    public NewPlexApiClient(ILog log, IHttpClientFactory httpClientFactory, PlexApiClientOptions options)
+    public PlexApiClient(ILog log, IHttpClientFactory httpClientFactory, PlexApiClientOptions options)
     {
         _log = log;
         _defaultClient = httpClientFactory.CreateClient();

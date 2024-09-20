@@ -11,9 +11,9 @@ namespace PlexRipper.PlexApi.Api;
 public class PlexApi
 {
     private readonly ILog _log;
-    private readonly Func<PlexApiClientOptions?, NewPlexApiClient> _clientFactory;
+    private readonly Func<PlexApiClientOptions?, PlexApiClient> _clientFactory;
 
-    public PlexApi(ILog log, Func<PlexApiClientOptions?, NewPlexApiClient> clientFactory)
+    public PlexApi(ILog log, Func<PlexApiClientOptions?, PlexApiClient> clientFactory)
     {
         _log = log;
         _clientFactory = clientFactory;

@@ -93,8 +93,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Settings.Contracts", "src\S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.Contracts", "src\WebAPI.Contracts\WebAPI.Contracts.csproj", "{783E1C14-CCD6-48C2-8A97-F4DB50590895}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LukeHagar.PlexAPI.SDK", "src\SDK\LukeHagar.PlexAPI.SDK.csproj", "{5860F77A-74D1-4697-A09E-320B5EC17C8E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -23,6 +23,16 @@
         "resolved": "2.0.6",
         "contentHash": "IhFs+fmeSvm7Ac1LfQ8serUGzj5Up+gZAg7os/nGajizLTMW/+S/M7GbJlBNWotvQGaxEu/sDirjsgVSMoc31g=="
       },
+      "LukeHagar.PlexAPI.SDK": {
+        "type": "Direct",
+        "requested": "[0.7.1, )",
+        "resolved": "0.7.1",
+        "contentHash": "ypaJKcwcAZlLzQpj98g3iukg3ylEpHG4wRe8f4ZnQt8nPxJgvaz/cp1O2Ho4bdQqP/YKTS2hIEus06HOGKef9g==",
+        "dependencies": {
+          "newtonsoft.json": "13.0.3",
+          "nodatime": "3.1.9"
+        }
+      },
       "Polly": {
         "type": "Direct",
         "requested": "[8.3.1, )",
@@ -1594,17 +1604,11 @@
           "Serilog.Sinks.XUnit": "[3.0.5, )"
         }
       },
-      "lukehagar.plexapi.sdk": {
-        "type": "Project",
-        "dependencies": {
-          "newtonsoft.json": "[13.0.3, )",
-          "nodatime": "[3.1.9, )"
-        }
-      },
       "plexapi.contracts": {
         "type": "Project",
         "dependencies": {
           "Application.Contracts": "[1.0.0, )",
+          "LukeHagar.PlexAPI.SDK": "[0.7.1, )",
           "PlexRipper.Domain": "[1.0.0, )"
         }
       },

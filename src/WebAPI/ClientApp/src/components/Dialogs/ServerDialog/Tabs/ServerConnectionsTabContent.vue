@@ -85,7 +85,7 @@ function isLoading(plexServerConnectionId: number): boolean {
 function checkPlexConnection(plexServerConnectionId: number) {
 	get(loading).push(plexServerConnectionId);
 
-	const index = get(progressList).find((x) => x.plexServerConnectionId === plexServerConnectionId);
+	const index = get(progressList).findIndex((x) => x.plexServerConnectionId === plexServerConnectionId);
 	if (index) {
 		get(progressList).splice(index, 1);
 	}

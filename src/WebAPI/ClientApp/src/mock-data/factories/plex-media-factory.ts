@@ -17,7 +17,7 @@ export function generatePlexMedia({
 	plexLibraryId: number;
 	plexServerId: number;
 	type: PlexMediaType;
-	partialData?: Partial<PlexLibraryDTO>;
+	partialData?: Partial<PlexMediaSlimDTO>;
 	config?: Partial<MockConfig>;
 }): PlexMediaSlimDTO {
 	checkConfig(config);

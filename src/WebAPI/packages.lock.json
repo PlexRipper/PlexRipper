@@ -2193,7 +2193,7 @@
           "Autofac": "[8.0.0, )",
           "Data.Contracts": "[1.0.0, )",
           "HttpClientToCurl": "[2.0.6, )",
-          "LukeHagar.PlexAPI.SDK": "[0.5.3, )",
+          "LukeHagar.PlexAPI.SDK": "[0.7.1, )",
           "PlexApi.Contracts": "[1.0.0, )",
           "Polly": "[8.3.1, )",
           "RestSharp": "[110.2.0, )",

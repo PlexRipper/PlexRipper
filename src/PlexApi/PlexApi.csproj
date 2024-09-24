@@ -31,7 +31,6 @@
 		<ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj" />
 		<ProjectReference Include="..\PlexApi.Contracts\PlexApi.Contracts.csproj" />
 		<Compile Remove="Common\OpenPlexApiFactory.cs" />
-		<ProjectReference Include="..\SDK\LukeHagar.PlexAPI.SDK.csproj" />
 		<ProjectReference Include="..\Settings.Contracts\Settings.Contracts.csproj" />
 	</ItemGroup>
 

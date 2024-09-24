@@ -28,7 +28,7 @@
 		<PackageReference Include="JustEat.HttpClientInterception" Version="4.2.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.3" />
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="8.0.3" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
 		<PackageReference Include="Moq" Version="4.20.70" />
 		<PackageReference Include="Shouldly" Version="4.2.1" />
 		<PackageReference Include="WireMock.Net" Version="1.5.51" />
@@ -41,7 +41,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\plexcsharp\LukeHagar\PlexAPI\SDK\LukeHagar.PlexAPI.SDK.csproj" />
 		<ProjectReference Include="..\..\src\WebAPI\WebAPI.csproj" />
 	</ItemGroup>
 

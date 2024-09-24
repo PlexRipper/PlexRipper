@@ -34,10 +34,10 @@ public class PlexApiClient : ISpeakeasyHttpClient
     private readonly PlexApiClientOptions _options;
     private readonly AsyncPolicyWrap<HttpResponseMessage> _policyWrap;
 
-    public PlexApiClient(ILog log, IHttpClientFactory httpClientFactory, PlexApiClientOptions options)
+    public PlexApiClient(ILog log, HttpClient httpClient, PlexApiClientOptions options)
     {
         _log = log;
-        _defaultClient = httpClientFactory.CreateClient();
+        _defaultClient = httpClient;
         _defaultClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
         _options = options;

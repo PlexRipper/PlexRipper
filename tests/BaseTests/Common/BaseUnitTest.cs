@@ -25,7 +25,7 @@ public class BaseUnitTest : IDisposable
     /// </summary>
     /// <param name="output">Sets up the logging system for logging during testing.</param>
     /// <param name="logEventLevel"></param>
-    protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Debug)
+    protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
     {
         LogManager.SetupLogging(logEventLevel);
         LogConfig.SetTestOutputHelper(output);
@@ -99,7 +99,7 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
 
     #region Constructors
 
-    protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Debug)
+    protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(output, logEventLevel)
     {
         mock = AutoMock.GetStrict(builder =>

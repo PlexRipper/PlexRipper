@@ -2,14 +2,13 @@ using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
 using PlexRipper.Application;
-using Serilog.Events;
 
 namespace IntegrationTests.DownloadManager.DownloadCommands;
 
 public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTests
 {
     public DownloadCommands_PauseDownload_IntegrationTests(ITestOutputHelper output)
-        : base(output, LogEventLevel.Verbose) { }
+        : base(output) { }
 
     [Fact]
     public async Task ShouldPauseADownloadTask_WhenDownloadTaskIsInProgressAndIsPaused()

@@ -15,15 +15,7 @@ namespace Logging;
 
 public static class LogConfig
 {
-    #region Properties
-
     public static MessageTemplateTextFormatter TemplateTextFormatter => new(Template);
-
-    #endregion
-
-    #region Methods
-
-    #region Public
 
     public static LoggerConfiguration GetBaseConfiguration()
     {
@@ -91,10 +83,6 @@ public static class LogConfig
             .MinimumLevel.Is(minimumLogLevel)
             .CreateLogger();
     }
-
-    #endregion
-
-    #endregion
 
     public static readonly string Template =
         $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(LogMetaData.ClassName)}}}.{{{nameof(LogMetaData.MethodName)}}}:{{{nameof(LogMetaData.LineNumber)}}}] => {{Message:lj}}{{NewLine}}{{Exception}}";

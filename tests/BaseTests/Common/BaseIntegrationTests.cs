@@ -10,30 +10,24 @@ namespace PlexRipper.BaseTests;
 [Collection("Sequential")]
 public class BaseIntegrationTests : IAsyncLifetime
 {
-    #region Fields
-
     private readonly List<PlexMockServer> _plexMockServers = new();
     private HttpClient _client;
     private MockPlexApi _mockPlexApi;
     protected BaseContainer Container;
     protected readonly ILog _log;
 
-    #endregion
-
-    #region Constructors
-
-    protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Debug)
+    protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Verbose)
     {
-        LogManager.SetupLogging(logLevel);
+        System.Environment.SetEnvironmentVariable("LOG_LEVEL", logLevel.ToString().ToUpper());
+
+        // Ensure that the test output helper is set first
         LogConfig.SetTestOutputHelper(output);
+
+        LogManager.SetupLogging(logLevel);
         _log = LogManager.CreateLogInstance(typeof(BaseIntegrationTests));
         _log.Information("Initialized integration test with database name: {DatabaseName}", DatabaseName);
         BogusExtensions.Setup();
     }
-
-    #endregion
-
-    #region Properties
 
     protected int MockPlexServerCount => _plexMockServers.Count;
 
@@ -45,14 +39,6 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected int Seed { get; set; } = Random.Shared.Next(int.MaxValue);
 
-    #endregion
-
-    #region Methods
-
-    #region Protected
-
-    #region SetupPlexRipper
-
     protected async Task CreateContainer(int seed)
     {
         await CreateContainer(config => config.Seed = seed);
@@ -62,10 +48,6 @@ public class BaseIntegrationTests : IAsyncLifetime
     {
         Container = await BaseContainer.Create(_log, DatabaseName, options, _mockPlexApi);
     }
-
-    #endregion
-
-    #region MockPlexApi
 
     protected void SetupMockPlexApi(Action<MockPlexApiConfig> options = null)
     {
@@ -84,19 +66,11 @@ public class BaseIntegrationTests : IAsyncLifetime
         _mockPlexApi = new MockPlexApi(_log, options, GetPlexServerUris);
     }
 
-    #endregion
-
-    #region SetupDatabase
-
     protected async Task SetupDatabase(Action<FakeDataConfig>? options = null)
     {
         // Database context can be setup once and then retrieved by its DB name.
         await MockDatabase.GetMemoryDbContext(DatabaseName).Setup(Seed, options);
     }
-
-    #endregion
-
-    #region MockPlexServer
 
     protected Uri SpinUpPlexServer(Action<PlexMockServerConfig> options = null)
     {
@@ -111,10 +85,6 @@ public class BaseIntegrationTests : IAsyncLifetime
         foreach (var serverConfig in config)
             _plexMockServers.Add(new PlexMockServer(serverConfig));
     }
-
-    #endregion
-
-    #region HttpClient
 
     protected async Task<T> GetAsync<T>(string requestUri)
     {
@@ -155,12 +125,6 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected IPlexRipperDbContext IDbContext => Container.IPlexRipperDbContext;
 
-    #endregion
-
-    #endregion
-
-    #region Public
-
     public Task InitializeAsync()
     {
         _log.InformationLine("Initialize Integration Test");
@@ -186,8 +150,4 @@ public class BaseIntegrationTests : IAsyncLifetime
 
         _log.FatalLine("Container disposed");
     }
-
-    #endregion
-
-    #endregion
 }

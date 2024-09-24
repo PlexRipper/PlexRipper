@@ -25,7 +25,7 @@ public partial class FakePlexApiData
                 .RuleFor(x => x.Identifier, _ => "com.plexapp.plugins.library")
                 .RuleFor(
                     x => x.LibrarySectionID,
-                    _ => new LibrarySectionID(LibrarySectionIDType.FromString(library.Key))
+                    _ => new LibrarySectionID(LibrarySectionIDType.Integer) { Str = library.Key }
                 )
                 .RuleFor(x => x.LibrarySectionTitle, _ => library.Title)
                 .RuleFor(x => x.LibrarySectionUUID, _ => library.Uuid)
@@ -134,6 +134,7 @@ public partial class FakePlexApiData
             .RuleFor(l => l.VideoFrameRate, _ => "24p")
             .RuleFor(l => l.AudioProfile, _ => "dts")
             .RuleFor(l => l.VideoProfile, _ => "high")
+            .RuleFor(l => l.HasVoiceActivity, f => f.Random.Bool())
             .RuleFor(l => l.Container, f => f.Lorem.Word())
             .RuleFor(l => l.VideoResolution, f => f.Lorem.Word())
             .RuleFor(l => l.Part, _ => [GetPlexPart(options).Generate()]);

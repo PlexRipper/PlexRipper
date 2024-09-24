@@ -52,6 +52,9 @@ public partial class FakePlexApiData
             .RuleFor(x => x.AdsConsent, _ => null)
             .RuleFor(x => x.AdsConsentSetAt, _ => null)
             .RuleFor(x => x.AdsConsentReminderAt, _ => null)
+            .RuleFor(x => x.Pin, _ => null)
+            .RuleFor(x => x.AttributionPartner, _ => null)
+            .RuleFor(x => x.Roles, _ => [""])
             .RuleFor(x => x.ExperimentalFeatures, f => f.Random.Bool())
             .RuleFor(x => x.TwoFactorEnabled, f => f.Random.Bool())
             .RuleFor(x => x.BackupCodesCreated, f => f.Random.Bool());

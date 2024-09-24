@@ -3,14 +3,13 @@ using Data.Contracts;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
-using Serilog.Events;
 
 namespace IntegrationTests.WebAPI.DownloadController;
 
 public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegrationTests
 {
     public DownloadController_DownloadMedia_IntegrationTests(ITestOutputHelper output)
-        : base(output, LogEventLevel.Verbose) { }
+        : base(output) { }
 
     [Fact]
     public async Task ShouldDownloadMultipleMovieDownloadTasks_WhenDownloadTasksAreCreated()

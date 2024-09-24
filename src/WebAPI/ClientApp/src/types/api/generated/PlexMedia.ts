@@ -48,35 +48,6 @@ export class PlexMedia {
  * No description
  *
  * @tags Plexmedia
- * @name GetThumbnailImageEndpoint
- * @request GET:/api/PlexMedia/thumb/{mediaId}
-
- */
-  getThumbnailImageEndpoint = (
-    mediaId: number,
-    query: {
-      /** @format int32 */
-      height: number;
-      mediaType: PlexMediaType;
-      /** @format int32 */
-      width: number;
-    },
-    params: RequestParams = {},
-  ) =>
-    from(
-      Axios.request<Blob>({
-        url: `/api/PlexMedia/thumb/${mediaId}`,
-        method: "GET",
-        params: query,
-        format: "blob",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<Blob>);
-
-  /**
- * No description
- *
- * @tags Plexmedia
  * @name SearchPlexMediaEndpoint
  * @request GET:/api/PlexMedia/search
 
@@ -105,17 +76,6 @@ export class PlexMediaPaths {
       type: PlexMediaType;
     },
   ) => queryString.stringifyUrl({ url: `/api/PlexMedia/detail/${plexMediaId}`, query });
-
-  static getThumbnailImageEndpoint = (
-    mediaId: number,
-    query: {
-      /** @format int32 */
-      height: number;
-      mediaType: PlexMediaType;
-      /** @format int32 */
-      width: number;
-    },
-  ) => queryString.stringifyUrl({ url: `/api/PlexMedia/thumb/${mediaId}`, query });
 
   static searchPlexMediaEndpoint = (query: { query: string }) =>
     queryString.stringifyUrl({ url: `/api/PlexMedia/search`, query });

@@ -12,7 +12,7 @@
 import type { RequestParams } from "./http-client";
 import { ContentType } from "./http-client";
 
-import type { AuthPin, PlexAccountDTO, ResultDTO } from "./data-contracts";
+import type { PlexAccountDTO, ResultDTO } from "./data-contracts";
 
 import { apiCheckPipe } from "@api/base";
 import Axios from "axios";
@@ -182,35 +182,6 @@ export class PlexAccount {
         ...params,
       }),
     ).pipe(apiCheckPipe<PlexAccountDTO>);
-
-  /**
- * No description
- *
- * @tags Plexaccount
- * @name Verify2FaPinEndpoint
- * @request GET:/api/PlexAccount/authpin
-
- */
-  verify2FaPinEndpoint = (
-    query: {
-      /**
-       * @format int32
-       * @default 0
-       */
-      authPinId?: number;
-      clientId: string;
-    },
-    params: RequestParams = {},
-  ) =>
-    from(
-      Axios.request<AuthPin>({
-        url: `/api/PlexAccount/authpin`,
-        method: "GET",
-        params: query,
-        format: "json",
-        ...params,
-      }),
-    ).pipe(apiCheckPipe<AuthPin>);
 }
 
 export class PlexAccountPaths {
@@ -236,13 +207,4 @@ export class PlexAccountPaths {
     queryString.stringifyUrl({ url: `/api/PlexAccount/refresh/${plexAccountId}` });
 
   static validatePlexAccountEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexAccount/validate` });
-
-  static verify2FaPinEndpoint = (query: {
-    /**
-     * @format int32
-     * @default 0
-     */
-    authPinId?: number;
-    clientId: string;
-  }) => queryString.stringifyUrl({ url: `/api/PlexAccount/authpin`, query });
 }

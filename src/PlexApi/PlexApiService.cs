@@ -18,17 +18,17 @@ public class PlexApiService : IPlexApiService
 
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IServerSettingsModule _serverSettingsModule;
-    private readonly PlexApi _plexApi;
+    private readonly PlexApiWrapper _plexApiWrapper;
 
     public PlexApiService(
         ILog log,
         IPlexRipperDbContext dbContext,
         IServerSettingsModule serverSettingsModule,
-        PlexApi plexApi
+        PlexApiWrapper plexApiWrapper
     )
     {
         _log = log;
-        _plexApi = plexApi;
+        _plexApiWrapper = plexApiWrapper;
         _dbContext = dbContext;
         _serverSettingsModule = serverSettingsModule;
     }
@@ -138,7 +138,10 @@ public class PlexApiService : IPlexApiService
         if (plexServer is null)
             return ResultExtensions.EntityNotFound(nameof(PlexServer), plexServerId);
 
-        return await _plexApi.GetAccessibleLibraryInPlexServerAsync(tokenResult.Value, plexServerConnection.Value);
+        return await _plexApiWrapper.GetAccessibleLibraryInPlexServerAsync(
+            tokenResult.Value,
+            plexServerConnection.Value
+        );
     }
 
     /// <inheritdoc />
@@ -154,7 +157,7 @@ public class PlexApiService : IPlexApiService
         var plexServerName = await _dbContext.GetPlexServerNameById(connection.PlexServerId);
         _log.Debug("Getting PlexServerStatus for server: {PlexServerName}", plexServerName);
 
-        return await _plexApi.GetServerStatusAsync(connection, action);
+        return await _plexApiWrapper.GetServerStatusAsync(connection, action);
     }
 
     /// <inheritdoc />
@@ -174,7 +177,7 @@ public class PlexApiService : IPlexApiService
         if (plexAccountToken.IsFailed)
             return (plexAccountToken.ToResult(), plexAccountToken.ToResult());
 
-        var result = await _plexApi.GetAccessibleServers(plexAccountToken.Value);
+        var result = await _plexApiWrapper.GetAccessibleServers(plexAccountToken.Value);
         if (result.IsFailed)
         {
             _log.Warning(
@@ -254,11 +257,12 @@ public class PlexApiService : IPlexApiService
         return (Result.Ok(plexServers), Result.Ok(mapAccess));
     }
 
-    public Task<Result<PlexAccount>> PlexSignInAsync(PlexAccount plexAccount) => _plexApi.PlexSignInAsync(plexAccount);
+    public Task<Result<PlexAccount>> PlexSignInAsync(PlexAccount plexAccount) =>
+        _plexApiWrapper.PlexSignInAsync(plexAccount);
 
     public async Task<Result<PlexAccount>> ValidatePlexToken(PlexAccount plexAccount)
     {
-        var result = await _plexApi.ValidatePlexToken(plexAccount, plexAccount.AuthenticationToken);
+        var result = await _plexApiWrapper.ValidatePlexToken(plexAccount, plexAccount.AuthenticationToken);
 
         if (result.IsSuccess)
         {
@@ -288,7 +292,7 @@ public class PlexApiService : IPlexApiService
             _log.InformationLine("Plex AuthToken has expired, refreshing Plex AuthToken now");
 
             // TODO Account for 2FA
-            return await _plexApi.RefreshPlexAuthTokenAsync(plexAccount);
+            return await _plexApiWrapper.RefreshPlexAuthTokenAsync(plexAccount);
         }
 
         return Result.Fail($"PlexAccount with Id: {plexAccount.Id} contained an empty AuthToken!").LogError();
@@ -329,7 +333,7 @@ public class PlexApiService : IPlexApiService
         while (true)
         {
             // Retrieve the media for this library
-            var result = await _plexApi.GetMetadataForLibraryAsync(
+            var result = await _plexApiWrapper.GetMetadataForLibraryAsync(
                 plexServerConnection,
                 tokenResult.Value,
                 plexLibrary.Key,

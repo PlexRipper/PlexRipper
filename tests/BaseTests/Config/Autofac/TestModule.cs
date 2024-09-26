@@ -48,9 +48,7 @@ public class TestModule : Module
     private void SetMockedDependencies(ContainerBuilder builder)
     {
         if (MockPlexApi is not null)
-        {
-            builder.RegisterInstance(MockPlexApi.CreateClient()).As<HttpClient>().SingleInstance();
-        }
+            builder.Register((_, _) => MockPlexApi.CreateClient()).As<HttpClient>().SingleInstance();
 
         if (Config.MockFileSystem is not null)
             builder.RegisterInstance(Config.MockFileSystem).As<IFileSystem>();
@@ -72,6 +70,6 @@ public class TestModule : Module
         };
 
         // Register Quartz dependencies
-        builder.RegisterModule(new QuartzAutofacFactoryModule { ConfigurationProvider = _ => testQuartzProps, });
+        builder.RegisterModule(new QuartzAutofacFactoryModule { ConfigurationProvider = _ => testQuartzProps });
     }
 }

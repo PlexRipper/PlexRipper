@@ -118,7 +118,7 @@ public partial class BaseContainer : IDisposable
 
     #region Public Methods
 
-    private T Resolve<T>() => _lifeTimeScope.Resolve<T>();
+    public T Resolve<T>() => _lifeTimeScope.Resolve<T>();
 
     #endregion
 

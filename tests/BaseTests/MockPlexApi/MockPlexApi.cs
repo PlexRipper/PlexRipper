@@ -12,18 +12,12 @@ namespace PlexRipper.BaseTests;
 /// </summary>
 public class MockPlexApi
 {
-    #region Fields
-
     private readonly HttpClientInterceptorOptions _clientOptions;
     private readonly MockPlexApiConfig _config;
     private readonly PlexApiDataConfig _fakeDataConfig;
     private readonly ILog _log;
     private readonly List<Uri> _serverUris;
     private readonly HttpClient _client = new();
-
-    #endregion
-
-    #region Constructors
 
     public MockPlexApi(ILog log, Action<MockPlexApiConfig> options = null, List<Uri> serverUris = null)
     {
@@ -36,6 +30,7 @@ public class MockPlexApi
         {
             // TODO https://github.com/justeat/httpclient-interception/issues/510
             ThrowOnMissingRegistration = true,
+
             OnMissingRegistration = message =>
             {
                 if (message.RequestUri != null && message.RequestUri.Host == "localhost")
@@ -69,12 +64,6 @@ public class MockPlexApi
         Setup();
         _log.Debug("{NameOfMockPlexApi} was set-up", nameof(MockPlexApi));
     }
-
-    #endregion
-
-    #region Methods
-
-    #region Private
 
     private void Setup()
     {
@@ -146,13 +135,5 @@ public class MockPlexApi
         _clientOptions.Register(builder);
     }
 
-    #endregion
-
-    #region Public
-
     public HttpClient CreateClient() => _clientOptions.CreateHttpClient();
-
-    #endregion
-
-    #endregion
 }

@@ -9,12 +9,12 @@ using Type = LukeHagar.PlexAPI.SDK.Models.Requests.Type;
 
 namespace PlexRipper.PlexApi;
 
-public class PlexApi
+public class PlexApiWrapper
 {
     private readonly ILog _log;
     private readonly Func<PlexApiClientOptions?, PlexApiClient> _clientFactory;
 
-    public PlexApi(ILog log, Func<PlexApiClientOptions?, PlexApiClient> clientFactory)
+    public PlexApiWrapper(ILog log, Func<PlexApiClientOptions?, PlexApiClient> clientFactory)
     {
         _log = log;
         _clientFactory = clientFactory;
@@ -99,7 +99,7 @@ public class PlexApi
 
         var responseResult = await ToResponse(
             plexTvClient.Authentication.PostUsersSignInDataAsync(
-                new PostUsersSignInDataRequestBody
+                new PostUsersSignInDataRequest
                 {
                     Login = plexAccount.Username,
                     Password = plexAccount.Password,

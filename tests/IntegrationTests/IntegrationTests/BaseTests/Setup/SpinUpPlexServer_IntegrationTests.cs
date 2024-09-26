@@ -48,7 +48,7 @@ public class SpinUpPlexServer_IntegrationTests : BaseIntegrationTests
             Query = "X-Plex-Token=EHRWERHAERHAERH",
         };
 
-        var request = new HttpRequestMessage { RequestUri = urlBuilder.Uri, Method = HttpMethod.Get, };
+        var request = new HttpRequestMessage { RequestUri = urlBuilder.Uri, Method = HttpMethod.Get };
 
         // Act
         using var response = await SendAsync(request, HttpCompletionOption.ResponseHeadersRead);

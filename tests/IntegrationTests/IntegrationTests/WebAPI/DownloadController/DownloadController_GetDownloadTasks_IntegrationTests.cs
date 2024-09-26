@@ -13,22 +13,27 @@ public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrat
     public async Task ShouldHaveAllDownloadTasksNested_WhenTasksAreAvailable()
     {
         // Arrange
-        Seed = 45485864;
-
         var tvShowDownloadTasksCount = 5;
         var tvShowSeasonDownloadTasksCount = 2;
         var tvShowEpisodeDownloadTasksCount = 3;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 2;
-            config.TvShowCount = 5;
-            config.TvShowDownloadTasksCount = tvShowDownloadTasksCount;
-            config.TvShowSeasonDownloadTasksCount = tvShowSeasonDownloadTasksCount;
-            config.TvShowEpisodeDownloadTasksCount = tvShowEpisodeDownloadTasksCount;
-        });
 
-        await CreateContainer();
+        await CreateContainer(config =>
+        {
+            config.Seed = 45485864;
+            config.DatabaseOptions = x =>
+            {
+                x.PlexServerCount = 1;
+                x.PlexLibraryCount = 2;
+                x.TvShowCount = 5;
+                x.TvShowDownloadTasksCount = tvShowDownloadTasksCount;
+                x.TvShowSeasonDownloadTasksCount = tvShowSeasonDownloadTasksCount;
+                x.TvShowEpisodeDownloadTasksCount = tvShowEpisodeDownloadTasksCount;
+            };
+            config.PlexMockApiOptions = x =>
+            {
+                x.MockServers.Add(new PlexMockServerConfig());
+            };
+        });
 
         // Act
         var response = await Container.ApiClient.GETAsync<

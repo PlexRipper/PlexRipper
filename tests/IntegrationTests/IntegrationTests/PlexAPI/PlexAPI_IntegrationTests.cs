@@ -12,8 +12,7 @@ public class PlexAPI_IntegrationTests : BaseIntegrationTests
     public async Task ShouldHaveTheInterceptedClientInjected_WhenPlexAPIIsRunningInTestingMode()
     {
         // Act
-        await CreateContainer(2135);
-        SpinUpPlexServer();
+        await CreateContainer();
 
         var wrapper = Container.Resolve<PlexApiWrapper>();
         var httpClient = Container.Resolve<HttpClient>();

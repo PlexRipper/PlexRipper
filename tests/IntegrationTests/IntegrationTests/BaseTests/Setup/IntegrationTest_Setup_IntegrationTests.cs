@@ -28,7 +28,7 @@ public class IntegrationTest_Setup : BaseIntegrationTests
     public async Task ShouldHaveUniqueInMemoryDatabase_WhenConfigFileIsGivenToContainer()
     {
         // Arrange
-        await CreateContainer(9999);
+        await CreateContainer(x => x.Seed = 9999);
 
         // Assert
         Container.ShouldNotBeNull();
@@ -41,8 +41,8 @@ public class IntegrationTest_Setup : BaseIntegrationTests
     public async Task ShouldAllowForMultipleContainersToBeCreated_WhenMultipleAreCalled()
     {
         // Arrange
-        await CreateContainer(3457);
-        await CreateContainer(9654);
+        await CreateContainer(x => x.Seed = 3457);
+        await CreateContainer(x => x.Seed = 9654);
 
         // Assert
         Container.ShouldNotBeNull();

@@ -12,10 +12,9 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
     public async Task ShouldStartAndStopDownloadJob_WhenDownloadTaskHasBeenStopped()
     {
         // Arrange
-        Seed = 45644875;
-
         await CreateContainer(config =>
         {
+            config.Seed = 45644875;
             config.DownloadSpeedLimitInKib = 5000;
             config.DatabaseOptions = x =>
             {
@@ -46,7 +45,7 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
         // Assert
         startResult.IsSuccess.ShouldBeTrue(startResult.ToString());
         stopResult.IsSuccess.ShouldBeTrue(stopResult.ToString());
-        var downloadTaskDb = await IDbContext.GetDownloadTaskAsync(childDownloadTask.ToKey());
+        var downloadTaskDb = await DbContext.GetDownloadTaskAsync(childDownloadTask.ToKey());
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
     }

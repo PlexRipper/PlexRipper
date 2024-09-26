@@ -1,6 +1,5 @@
 using Data.Contracts;
 using Logging.Interface;
-using PlexRipper.Data;
 using Serilog.Events;
 
 namespace PlexRipper.BaseTests;
@@ -32,34 +31,12 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected string DatabaseName { get; } = MockDatabase.GetMemoryDatabaseName();
 
-    protected int Seed { get; set; } = Random.Shared.Next(int.MaxValue);
-
-    protected async Task CreateContainer(int seed)
-    {
-        await CreateContainer(config => config.Seed = seed);
-    }
-
     protected async Task CreateContainer(Action<UnitTestDataConfig>? options = null)
     {
         Container = await BaseContainer.Create(_log, options);
     }
 
-    protected async Task SetupDatabase(Action<FakeDataConfig>? options = null)
-    {
-        // Database context can be setup once and then retrieved by its DB name.
-        await MockDatabase.GetMemoryDbContext(DatabaseName).Setup(Seed, options);
-    }
-
-    protected Uri SpinUpPlexServer(Action<PlexMockServerConfig> options = null)
-    {
-        var mockServer = new PlexMockServer(options);
-        _plexMockServers.Add(mockServer);
-        return mockServer.ServerUri;
-    }
-
-    protected PlexRipperDbContext DbContext => Container.PlexRipperDbContext;
-
-    protected IPlexRipperDbContext IDbContext => Container.IPlexRipperDbContext;
+    protected IPlexRipperDbContext DbContext => Container.Resolve<IPlexRipperDbContext>();
 
     public Task InitializeAsync()
     {

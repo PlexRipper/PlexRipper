@@ -16,16 +16,12 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
     {
         // Arrange
         var libraryCount = 3;
-        SpinUpPlexServer(config =>
-        {
-            config.FakeDataConfig = dataConfig =>
-            {
-                dataConfig.LibraryCount = libraryCount;
-            };
-        });
-
         await CreateContainer(config =>
         {
+            config.DatabaseOptions = x =>
+            {
+                x.PlexLibraryCount = libraryCount;
+            };
             config.PlexMockApiOptions = x =>
             {
                 x.AccessiblePlexServers = 1;

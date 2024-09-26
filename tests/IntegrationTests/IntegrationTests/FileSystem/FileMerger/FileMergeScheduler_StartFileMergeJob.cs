@@ -11,17 +11,17 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
     public async Task ShouldFinishMergingDownloadTaskAsFileTaskJobAndSetToCompleted_WhenDownloadTaskHasFinishedDownloading()
     {
         // Arrange
-
-        await SetupDatabase(config =>
+        await CreateContainer(config =>
         {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 3;
-            config.MovieCount = 1;
-            config.MovieDownloadTasksCount = 1;
-            config.DownloadFileSizeInMb = 10;
+            config.DatabaseOptions = x =>
+            {
+                x.PlexServerCount = 1;
+                x.PlexLibraryCount = 3;
+                x.MovieCount = 1;
+                x.MovieDownloadTasksCount = 1;
+                x.DownloadFileSizeInMb = 10;
+            };
         });
-
-        await CreateContainer();
         var dbContext = DbContext;
         var downloadTask = dbContext.DownloadTaskMovieFile.First();
         downloadTask.ShouldNotBeNull();

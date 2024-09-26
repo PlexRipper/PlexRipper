@@ -1,7 +1,6 @@
 ﻿using Application.Contracts;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Data.Contracts;
 using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;
@@ -43,8 +42,9 @@ public partial class BaseContainer : IDisposable
 
         var container = new BaseContainer(memoryDbName, options);
 
-        // TODO verifiy seed
-        await MockDatabase.GetMemoryDbContext(memoryDbName).Setup(0, config.DatabaseOptions, container.PlexMockServers);
+        await MockDatabase
+            .GetMemoryDbContext(memoryDbName)
+            .Setup(config.Seed, config.DatabaseOptions, container.PlexMockServers);
 
         if (config.DownloadSpeedLimitInKib > 0)
             await container.SetDownloadSpeedLimit(options);
@@ -65,8 +65,6 @@ public partial class BaseContainer : IDisposable
     public IPathProvider PathProvider => Resolve<IPathProvider>();
 
     public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
-
-    public IPlexRipperDbContext IPlexRipperDbContext => Resolve<IPlexRipperDbContext>();
 
     public ISchedulerService SchedulerService => Resolve<ISchedulerService>();
 

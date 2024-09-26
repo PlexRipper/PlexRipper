@@ -2,7 +2,7 @@ namespace PlexRipper.BaseTests;
 
 public class BaseConfig
 {
-    public int Seed { get; set; }
+    public int Seed { get; set; } = Random.Shared.Next(int.MaxValue);
 }
 
 public class BaseConfig<T> : BaseConfig

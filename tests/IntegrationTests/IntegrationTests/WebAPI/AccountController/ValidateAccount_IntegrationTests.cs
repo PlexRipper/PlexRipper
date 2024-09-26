@@ -42,9 +42,9 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
     public async Task ShouldInValidatePlexAccountWithErrors_WhenGivenInValidCredentials()
     {
         // Arrange
-        Seed = 4347564;
         await CreateContainer(config =>
         {
+            config.Seed = 4347564;
             config.PlexMockApiOptions = x =>
             {
                 x.SignInResponseIsValid = false;

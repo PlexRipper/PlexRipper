@@ -101,10 +101,13 @@ public class PlexApiWrapper
             plexTvClient.Authentication.PostUsersSignInDataAsync(
                 new PostUsersSignInDataRequest
                 {
-                    Login = plexAccount.Username,
-                    Password = plexAccount.Password,
-                    RememberMe = false,
-                    VerificationCode = plexAccount.Is2Fa ? plexAccount.VerificationCode : string.Empty,
+                    RequestBody = new PostUsersSignInDataRequestBody()
+                    {
+                        Login = plexAccount.Username,
+                        Password = plexAccount.Password,
+                        RememberMe = false,
+                        VerificationCode = plexAccount.Is2Fa ? plexAccount.VerificationCode : string.Empty,
+                    },
                 }
             )
         );
@@ -342,14 +345,23 @@ public class PlexApiWrapper
 
         var client = CreateClient(authToken, new PlexApiClientOptions() { ConnectionUrl = connection.Url });
 
+        GetLibraryItemsQueryParamType? apiType = type switch
+        {
+            Type.Movie => GetLibraryItemsQueryParamType.Movie,
+            Type.TvShow => GetLibraryItemsQueryParamType.TvShow,
+            Type.Season => GetLibraryItemsQueryParamType.Season,
+            Type.Episode => GetLibraryItemsQueryParamType.Episode,
+            _ => null,
+        };
+
         var response = await ToResponse(
             client.Library.GetLibraryItemsAsync(
                 new GetLibraryItemsRequest()
                 {
-                    Type = type,
+                    Type = apiType,
                     SectionKey = libraryKeyInt,
                     Tag = Tag.All,
-                    IncludeMeta = IncludeMeta.Disable,
+                    IncludeMeta = GetLibraryItemsQueryParamIncludeMeta.Disable,
                     IncludeGuids = IncludeGuids.Enable,
                     XPlexContainerStart = startIndex,
                     XPlexContainerSize = batchSize,

@@ -23,10 +23,7 @@ public partial class FakePlexApiData
                 .RuleFor(x => x.AllowSync, f => f.Random.Bool())
                 .RuleFor(x => x.Art, _ => $"/:/resources/{library.Type}-fanart.jpg")
                 .RuleFor(x => x.Identifier, _ => "com.plexapp.plugins.library")
-                .RuleFor(
-                    x => x.LibrarySectionID,
-                    _ => new LibrarySectionID(LibrarySectionIDType.Integer) { Str = library.Key }
-                )
+                .RuleFor(x => x.LibrarySectionID, _ => long.Parse(library.Key))
                 .RuleFor(x => x.LibrarySectionTitle, _ => library.Title)
                 .RuleFor(x => x.LibrarySectionUUID, _ => library.Uuid)
                 .RuleFor(x => x.MediaTagPrefix, _ => "/system/bundle/media/flags/")
@@ -55,14 +52,14 @@ public partial class FakePlexApiData
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
-        GetLibraryItemsType GetPlexMediaType() =>
+        GetLibraryItemsLibraryType GetPlexMediaType() =>
             type switch
             {
-                PlexMediaType.Movie => GetLibraryItemsType.Movie,
-                PlexMediaType.TvShow => GetLibraryItemsType.TvShow,
-                PlexMediaType.Season => GetLibraryItemsType.Season,
-                PlexMediaType.Episode => GetLibraryItemsType.Episode,
-                _ => GetLibraryItemsType.Movie,
+                PlexMediaType.Movie => GetLibraryItemsLibraryType.Movie,
+                PlexMediaType.TvShow => GetLibraryItemsLibraryType.TvShow,
+                PlexMediaType.Season => GetLibraryItemsLibraryType.Season,
+                PlexMediaType.Episode => GetLibraryItemsLibraryType.Episode,
+                _ => GetLibraryItemsLibraryType.Movie,
             };
 
         return new Faker<GetLibraryItemsMetadata>()
@@ -152,7 +149,10 @@ public partial class FakePlexApiData
             .RuleFor(l => l.Duration, f => f.Random.Int(1))
             .RuleFor(l => l.File, f => f.Lorem.Word())
             .RuleFor(l => l.Size, f => f.Random.Int(1))
-            .RuleFor(l => l.HasThumbnail, f => f.Random.Bool() ? HasThumbnail.True : HasThumbnail.False)
+            .RuleFor(
+                l => l.HasThumbnail,
+                f => f.Random.Bool() ? GetLibraryItemsHasThumbnail.True : GetLibraryItemsHasThumbnail.False
+            )
             .RuleFor(l => l.AudioProfile, _ => "dts")
             .RuleFor(l => l.Container, _ => "mkv")
             .RuleFor(l => l.Indexes, _ => "sd")

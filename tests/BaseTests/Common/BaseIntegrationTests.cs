@@ -7,10 +7,8 @@ namespace PlexRipper.BaseTests;
 [Collection("Sequential")]
 public class BaseIntegrationTests : IAsyncLifetime
 {
-    private readonly List<PlexMockServer> _plexMockServers = new();
-    private HttpClient _client;
-    protected BaseContainer Container;
-    protected readonly ILog _log;
+    protected BaseContainer Container = null!;
+    private readonly ILog _log;
 
     protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Verbose)
     {
@@ -21,15 +19,9 @@ public class BaseIntegrationTests : IAsyncLifetime
 
         LogManager.SetupLogging(logLevel);
         _log = LogManager.CreateLogInstance(typeof(BaseIntegrationTests));
-        _log.Information("Initialized integration test with database name: {DatabaseName}", DatabaseName);
+
         BogusExtensions.Setup();
     }
-
-    protected int MockPlexServerCount => _plexMockServers.Count;
-
-    protected bool AllMockPlexServersStarted => _plexMockServers.All(x => x.IsStarted);
-
-    protected string DatabaseName { get; } = MockDatabase.GetMemoryDatabaseName();
 
     protected async Task CreateContainer(Action<UnitTestDataConfig>? options = null)
     {
@@ -37,6 +29,8 @@ public class BaseIntegrationTests : IAsyncLifetime
     }
 
     protected IPlexRipperDbContext DbContext => Container.Resolve<IPlexRipperDbContext>();
+
+    protected string DatabaseName => Container.DatabaseName;
 
     public Task InitializeAsync()
     {
@@ -46,20 +40,10 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        _log.WarningLine("Integration Test has ended, Disposing!");
+        _log.Warning("Integration Test with DatabaseName: \"{DatabaseName}\" has ended, Disposing!", DatabaseName);
 
-        // Dispose HttpClient
-        _client?.Dispose();
-
-        // Dispose PlexMockServers
-        foreach (var plexMockServer in _plexMockServers)
-            plexMockServer.Dispose();
-
-        if (Container is not null)
-        {
-            await Container.Boot.StopAsync(CancellationToken.None);
-            Container.Dispose();
-        }
+        await Container.Boot.StopAsync(CancellationToken.None);
+        Container.Dispose();
 
         _log.FatalLine("Container disposed");
     }

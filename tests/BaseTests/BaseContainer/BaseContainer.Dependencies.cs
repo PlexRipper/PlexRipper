@@ -15,15 +15,21 @@ public partial class BaseContainer : IDisposable
 {
     private readonly PlexRipperWebApplicationFactory _factory;
 
-    private static ILog _log;
+    private readonly ILog _log;
 
     private readonly ILifetimeScope _lifeTimeScope;
 
+    public string DatabaseName => _factory.MemoryDbName;
+
     /// <summary>
-    /// Creates a Autofac container and sets up a test database.
+    /// Creates an Autofac container and sets up a test database.
     /// </summary>
-    private BaseContainer(string memoryDbName, Action<UnitTestDataConfig>? options = null)
+    private BaseContainer(ILog log, string memoryDbName, Action<UnitTestDataConfig>? options = null)
     {
+        _log = log;
+
+        _log.Information("Setting up BaseContainer with database: {MemoryDbName}", memoryDbName);
+
         _factory = new PlexRipperWebApplicationFactory(memoryDbName, options);
         ApiClient = _factory.CreateDefaultClient();
 
@@ -33,14 +39,14 @@ public partial class BaseContainer : IDisposable
 
     public static async Task<BaseContainer> Create(ILog log, Action<UnitTestDataConfig>? options = null)
     {
-        _log = log;
         var config = UnitTestDataConfig.FromOptions(options);
         EnvironmentExtensions.SetIntegrationTestMode(true);
 
         var memoryDbName = MockDatabase.GetMemoryDatabaseName();
-        _log.Information("Setting up BaseContainer with database: {MemoryDbName}", memoryDbName);
 
-        var container = new BaseContainer(memoryDbName, options);
+        log.Information("Initialized integration test with database name: {DatabaseName}", memoryDbName);
+
+        var container = new BaseContainer(log, memoryDbName, options);
 
         await MockDatabase
             .GetMemoryDbContext(memoryDbName)
@@ -73,8 +79,6 @@ public partial class BaseContainer : IDisposable
     public IFileMergeScheduler FileMergeScheduler => Resolve<IFileMergeScheduler>();
 
     public MockSignalRService MockSignalRService => (MockSignalRService)Resolve<ISignalRService>();
-
-    public TestLoggingClass TestLoggingClass => Resolve<TestLoggingClass>();
 
     public IBoot Boot => Resolve<IBoot>();
 

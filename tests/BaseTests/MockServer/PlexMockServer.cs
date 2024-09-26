@@ -10,7 +10,7 @@ using WireMock.Types;
 namespace PlexRipper.BaseTests;
 
 /// <summary>
-/// Used to mock a individual Plex server, this is not the same as the PlexApi which is a central server
+/// Used to mock an individual Plex server, this is not the same as the PlexApi which is a central server
 /// Source: https://github.com/WireMock-Net/WireMock.Net/
 /// </summary>
 public class PlexMockServer : IDisposable
@@ -19,15 +19,13 @@ public class PlexMockServer : IDisposable
     private readonly PlexMockServerConfig _config;
     private readonly Action<PlexApiDataConfig> _fakeDataConfig;
 
-    #region Constructor
-
-    public PlexMockServer(Action<PlexMockServerConfig> options = null)
+    public PlexMockServer(Action<PlexMockServerConfig>? options = null)
         : this(PlexMockServerConfig.FromOptions(options)) { }
 
-    public PlexMockServer(PlexMockServerConfig options = null)
+    public PlexMockServer(PlexMockServerConfig? options = null)
     {
-        _config = options;
-        _fakeDataConfig = _config?.FakeDataConfig;
+        _config = options ?? new PlexMockServerConfig();
+        _fakeDataConfig = _config.FakeDataConfig;
 
         Server = WireMockServer.Start(
             new WireMockServerSettings()
@@ -44,10 +42,6 @@ public class PlexMockServer : IDisposable
         _log.Debug("Created {NameOfPlexMockServer} with url: {ServerUri}", nameof(PlexMockServer), ServerUri);
     }
 
-    #endregion
-
-    #region Properties
-
     public WireMockServer Server { get; }
 
     public Uri DownloadUri { get; }
@@ -58,15 +52,11 @@ public class PlexMockServer : IDisposable
 
     public bool IsStarted => Server.IsStarted;
 
-    #endregion
-
-    #region Public Methods
-
     private void Setup()
     {
         SetupServerIdentity();
 
-        // Setup the Plex libraries
+        // Set up the Plex libraries
         var librarySections = FakePlexApiData.GetLibraryMediaContainer(_fakeDataConfig);
 
         Server
@@ -79,7 +69,7 @@ public class PlexMockServer : IDisposable
                     .WithBodyAsJson(librarySections)
             );
 
-        // Setup the media metadata for each library
+        // Set up the media metadata for each library
         foreach (var librarySection in librarySections.MediaContainer.Directory)
         {
             var libraryData = FakePlexApiData.GetPlexLibrarySectionAllResponse(librarySection, _fakeDataConfig);
@@ -132,11 +122,9 @@ public class PlexMockServer : IDisposable
         }
     }
 
-    #endregion
-
     public void Dispose()
     {
         Server.Stop();
-        Server?.Dispose();
+        Server.Dispose();
     }
 }

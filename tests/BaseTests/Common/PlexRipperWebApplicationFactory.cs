@@ -8,16 +8,17 @@ namespace PlexRipper.BaseTests;
 
 public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
 {
-    private readonly string _memoryDbName;
-    private MockPlexApi? _mockPlexApi;
+    public readonly string MemoryDbName;
+
     private static readonly ILog _log = LogManager.CreateLogInstance(typeof(PlexRipperWebApplicationFactory));
+    private MockPlexApi? _mockPlexApi;
     public readonly List<PlexMockServer> PlexMockServers = [];
 
     private readonly UnitTestDataConfig _config;
 
     public PlexRipperWebApplicationFactory(string memoryDbName, Action<UnitTestDataConfig>? options = null)
     {
-        _memoryDbName = memoryDbName;
+        MemoryDbName = memoryDbName;
         _config = UnitTestDataConfig.FromOptions(options);
         SetupPlexMockServers(_config);
     }
@@ -38,7 +39,7 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
             autoFacBuilder.RegisterModule(
                 new TestModule()
                 {
-                    MemoryDbName = _memoryDbName,
+                    MemoryDbName = MemoryDbName,
                     MockPlexApi = _mockPlexApi,
                     Config = _config,
                 }
@@ -54,5 +55,12 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
             _log.Fatal(e);
             throw;
         }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        PlexMockServers.ForEach(server => server.Dispose());
+
+        base.Dispose(disposing);
     }
 }

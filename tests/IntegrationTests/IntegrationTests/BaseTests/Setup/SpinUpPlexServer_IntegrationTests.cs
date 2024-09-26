@@ -28,8 +28,8 @@ public class SpinUpPlexServer_IntegrationTests : BaseIntegrationTests
         });
 
         // Assert
-        MockPlexServerCount.ShouldBe(5);
-        AllMockPlexServersStarted.ShouldBeTrue();
+        Container.PlexMockServers.Count.ShouldBe(5);
+        Container.PlexMockServers.Select(x => x.IsStarted).ToList().ShouldAllBe(x => x == true);
     }
 
     [Fact]

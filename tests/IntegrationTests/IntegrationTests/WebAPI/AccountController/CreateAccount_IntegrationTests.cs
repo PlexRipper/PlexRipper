@@ -23,8 +23,14 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
                 dataConfig.LibraryCount = libraryCount;
             };
         });
-        SetupMockPlexApi(config => config.AccessiblePlexServers = 1);
-        await CreateContainer();
+
+        await CreateContainer(config =>
+        {
+            config.PlexMockApiOptions = x =>
+            {
+                x.AccessiblePlexServers = 1;
+            };
+        });
 
         var plexAccount = FakeData.GetPlexAccount(4347564).Generate();
         var plexAccountDTO = plexAccount.ToDTO();

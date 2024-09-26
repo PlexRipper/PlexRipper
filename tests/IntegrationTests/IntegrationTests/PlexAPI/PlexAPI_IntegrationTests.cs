@@ -16,6 +16,7 @@ public class PlexAPI_IntegrationTests : BaseIntegrationTests
         SpinUpPlexServer();
 
         var wrapper = Container.Resolve<PlexApiWrapper>();
+        var httpClient = Container.Resolve<HttpClient>();
         var clientFactory = Container.Resolve<Func<PlexApiClientOptions?, PlexApiClient>>();
 
         var plexApi = new PlexAPI(

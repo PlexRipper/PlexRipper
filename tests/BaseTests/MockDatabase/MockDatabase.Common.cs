@@ -23,23 +23,25 @@ public static partial class MockDatabase
 
     private static async Task<PlexRipperDbContext> AddPlexServers(
         this PlexRipperDbContext context,
-        Action<FakeDataConfig>? options = null
+        Action<FakeDataConfig>? options = null,
+        List<PlexMockServer>? plexMockServers = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
         var plexServerCount = Math.Max(1, config.PlexServerCount);
         var plexServers = FakeData.GetPlexServer(_seed, options).Generate(plexServerCount);
 
-        if (config.MockServerUris.Any())
+        if (plexMockServers != null && plexMockServers.Any())
         {
-            config.MockServerUris.Count.ShouldBeGreaterThanOrEqualTo(
+            var mockServerUris = plexMockServers.Select(x => x.ServerUri).ToList();
+            mockServerUris.Count.ShouldBeGreaterThanOrEqualTo(
                 plexServers.Count,
-                $"The mocked plex server count ({config.MockServerUris.Count}) was lower than the generated {nameof(config.PlexServerCount)} ({plexServerCount})"
+                $"The mocked plex server count ({mockServerUris.Count}) was lower than the generated {nameof(config.PlexServerCount)} ({plexServerCount})"
             );
 
-            for (var i = 0; i < config.MockServerUris.Count; i++)
+            for (var i = 0; i < mockServerUris.Count; i++)
             {
-                var serverUri = config.MockServerUris[i];
+                var serverUri = mockServerUris[i];
                 var connection = plexServers[i].PlexServerConnections[0];
                 connection.Protocol = serverUri.Scheme;
                 connection.Address = serverUri.Host;
@@ -246,7 +248,8 @@ public static partial class MockDatabase
     public static async Task<PlexRipperDbContext> Setup(
         this PlexRipperDbContext context,
         int seed = 0,
-        Action<FakeDataConfig>? options = null
+        Action<FakeDataConfig>? options = null,
+        List<PlexMockServer>? plexMockServers = null
     )
     {
         _seed = seed;
@@ -262,7 +265,7 @@ public static partial class MockDatabase
             );
 
         if (config.ShouldHavePlexServer)
-            context = await context.AddPlexServers(options);
+            context = await context.AddPlexServers(options, plexMockServers);
 
         if (config.ShouldHavePlexLibrary)
             context = await context.AddPlexLibraries(options);

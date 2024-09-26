@@ -15,21 +15,24 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
     public async Task ShouldDownloadMultipleMovieDownloadTasks_WhenDownloadTasksAreCreated()
     {
         // Arrange
-        var serverUri = SpinUpPlexServer(config =>
-        {
-            config.DownloadFileSizeInMb = 50;
-        });
         var plexMovieCount = 3;
-        await SetupDatabase(config =>
+
+        await CreateContainer(config =>
         {
-            config.MockServerUris.Add(serverUri);
-            config.PlexAccountCount = 1;
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.MovieCount = plexMovieCount;
+            config.DownloadSpeedLimitInKib = 25000;
+            config.PlexMockApiOptions = x =>
+            {
+                x.MockServers.Add(new PlexMockServerConfig { DownloadFileSizeInMb = 50 });
+            };
+            config.DatabaseOptions = x =>
+            {
+                x.PlexAccountCount = 1;
+                x.PlexServerCount = 1;
+                x.PlexLibraryCount = 1;
+                x.MovieCount = plexMovieCount;
+            };
         });
 
-        await CreateContainer(config => config.DownloadSpeedLimitInKib = 25000);
         var plexMovies = await DbContext.PlexMovies.ToListAsync();
         plexMovies.Count.ShouldBe(
             plexMovieCount,

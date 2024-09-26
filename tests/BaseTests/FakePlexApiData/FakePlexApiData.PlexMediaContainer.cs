@@ -134,6 +134,14 @@ public partial class FakePlexApiData
             .RuleFor(l => l.HasVoiceActivity, f => f.Random.Bool())
             .RuleFor(l => l.Container, f => f.Lorem.Word())
             .RuleFor(l => l.VideoResolution, f => f.Lorem.Word())
+            .RuleFor(
+                l => l.OptimizedForStreaming,
+                f =>
+                    f.Random.Bool()
+                        ? GetLibraryItemsOptimizedForStreaming.Enable
+                        : GetLibraryItemsOptimizedForStreaming.Disable
+            )
+            .RuleFor(l => l.Has64bitOffsets, f => f.Random.Bool())
             .RuleFor(l => l.Part, _ => [GetPlexPart(options).Generate()]);
     }
 
@@ -153,9 +161,12 @@ public partial class FakePlexApiData
                 l => l.HasThumbnail,
                 f => f.Random.Bool() ? GetLibraryItemsHasThumbnail.True : GetLibraryItemsHasThumbnail.False
             )
+            .RuleFor(l => l.OptimizedForStreaming, f => f.Random.Bool())
+            .RuleFor(l => l.Has64bitOffsets, f => f.Random.Bool())
             .RuleFor(l => l.AudioProfile, _ => "dts")
             .RuleFor(l => l.Container, _ => "mkv")
             .RuleFor(l => l.Indexes, _ => "sd")
-            .RuleFor(l => l.VideoProfile, _ => "high");
+            .RuleFor(l => l.VideoProfile, _ => "high")
+            .RuleFor(l => l.Stream, _ => []);
     }
 }

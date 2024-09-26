@@ -9,20 +9,26 @@ namespace PlexRipper.BaseTests;
 public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
 {
     private readonly string _memoryDbName;
-    private readonly MockPlexApi _mockPlexApi;
+    private MockPlexApi? _mockPlexApi;
     private static readonly ILog _log = LogManager.CreateLogInstance(typeof(PlexRipperWebApplicationFactory));
+    public readonly List<PlexMockServer> PlexMockServers = [];
 
     private readonly UnitTestDataConfig _config;
 
-    public PlexRipperWebApplicationFactory(
-        string memoryDbName,
-        Action<UnitTestDataConfig>? options = null,
-        MockPlexApi mockPlexApi = null
-    )
+    public PlexRipperWebApplicationFactory(string memoryDbName, Action<UnitTestDataConfig>? options = null)
     {
         _memoryDbName = memoryDbName;
-        _mockPlexApi = mockPlexApi;
         _config = UnitTestDataConfig.FromOptions(options);
+        SetupPlexMockServers(_config);
+    }
+
+    private void SetupPlexMockServers(UnitTestDataConfig config)
+    {
+        var mockConfig = MockPlexApiConfig.FromOptions(config.PlexMockApiOptions);
+        _mockPlexApi = config.PlexMockApiOptions != null ? new MockPlexApi(_log, _config.PlexMockApiOptions) : null;
+
+        foreach (var serverConfig in mockConfig.MockServers)
+            PlexMockServers.Add(new PlexMockServer(serverConfig));
     }
 
     protected override IHost CreateHost(IHostBuilder builder)
@@ -38,6 +44,7 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
                 }
             );
         });
+
         try
         {
             return base.CreateHost(builder);

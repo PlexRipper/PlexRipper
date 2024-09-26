@@ -19,10 +19,10 @@ public class MockPlexApi
     private readonly List<Uri> _serverUris;
     private readonly HttpClient _client = new();
 
-    public MockPlexApi(ILog log, Action<MockPlexApiConfig> options = null, List<Uri> serverUris = null)
+    public MockPlexApi(ILog log, Action<MockPlexApiConfig>? options = null, List<Uri>? serverUris = null)
     {
         _log = log;
-        _serverUris = serverUris;
+        _serverUris = serverUris ?? [];
         _config = MockPlexApiConfig.FromOptions(options);
         _fakeDataConfig = _config.FakeDataConfig;
 
@@ -60,7 +60,6 @@ public class MockPlexApi
                 return null;
             },
         };
-
         Setup();
         _log.Debug("{NameOfMockPlexApi} was set-up", nameof(MockPlexApi));
     }
@@ -135,5 +134,10 @@ public class MockPlexApi
         _clientOptions.Register(builder);
     }
 
-    public HttpClient CreateClient() => _clientOptions.CreateHttpClient();
+    public HttpClient CreateClient()
+    {
+        var client = _clientOptions.CreateHttpClient();
+        client.DefaultRequestHeaders.Add("MockPlexApi", "true");
+        return client;
+    }
 }

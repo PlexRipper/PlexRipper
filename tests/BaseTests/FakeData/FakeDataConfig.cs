@@ -34,7 +34,6 @@ public class FakeDataConfig : BaseConfig<FakeDataConfig>
 
     public bool AccountHasAccessToAllLibraries { get; set; }
 
-    public List<Uri> MockServerUris { get; set; } = new();
     public int DownloadFileSizeInMb { get; set; }
 
     public bool ShouldHavePlexServer => PlexServerCount > 0 || ShouldHavePlexLibrary;

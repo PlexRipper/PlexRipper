@@ -1,8 +1,6 @@
-using System.Net.Http.Json;
 using Data.Contracts;
 using Logging.Interface;
 using PlexRipper.Data;
-using PlexRipper.Domain.Config;
 using Serilog.Events;
 
 namespace PlexRipper.BaseTests;
@@ -12,7 +10,6 @@ public class BaseIntegrationTests : IAsyncLifetime
 {
     private readonly List<PlexMockServer> _plexMockServers = new();
     private HttpClient _client;
-    private MockPlexApi _mockPlexApi;
     protected BaseContainer Container;
     protected readonly ILog _log;
 
@@ -33,8 +30,6 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected bool AllMockPlexServersStarted => _plexMockServers.All(x => x.IsStarted);
 
-    protected List<Uri> GetPlexServerUris => _plexMockServers.Select(x => x.ServerUri).ToList();
-
     protected string DatabaseName { get; } = MockDatabase.GetMemoryDatabaseName();
 
     protected int Seed { get; set; } = Random.Shared.Next(int.MaxValue);
@@ -46,24 +41,7 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected async Task CreateContainer(Action<UnitTestDataConfig>? options = null)
     {
-        Container = await BaseContainer.Create(_log, DatabaseName, options, _mockPlexApi);
-    }
-
-    protected void SetupMockPlexApi(Action<MockPlexApiConfig> options = null)
-    {
-        if (Container is not null)
-        {
-            _log.Here()
-                .Error(
-                    "{NameOfCreateContainer}() has already been called, cannot {NameOfSetupMockPlexApi}()",
-                    nameof(CreateContainer),
-                    nameof(SetupMockPlexApi)
-                );
-
-            // throw new Exception(msg);
-        }
-
-        _mockPlexApi = new MockPlexApi(_log, options, GetPlexServerUris);
+        Container = await BaseContainer.Create(_log, options);
     }
 
     protected async Task SetupDatabase(Action<FakeDataConfig>? options = null)
@@ -77,48 +55,6 @@ public class BaseIntegrationTests : IAsyncLifetime
         var mockServer = new PlexMockServer(options);
         _plexMockServers.Add(mockServer);
         return mockServer.ServerUri;
-    }
-
-    protected void SpinUpPlexServers(Action<List<PlexMockServerConfig>> options = null)
-    {
-        var config = PlexMockServerConfig.FromOptions(options);
-        foreach (var serverConfig in config)
-            _plexMockServers.Add(new PlexMockServer(serverConfig));
-    }
-
-    protected async Task<T> GetAsync<T>(string requestUri)
-    {
-        _client ??= _mockPlexApi.CreateClient();
-        try
-        {
-            var response = await _client.GetAsync(requestUri);
-            var x = await response.Content.ReadAsStringAsync();
-            return await response.Content.ReadFromJsonAsync<T>(DefaultJsonSerializerOptions.ConfigStandard);
-        }
-        catch (Exception e)
-        {
-            _log.Error("RequestURI: {RequestUri}", requestUri);
-            _log.Error(e);
-            throw;
-        }
-    }
-
-    protected async Task<HttpResponseMessage> SendAsync(
-        HttpRequestMessage httpRequestMessage,
-        HttpCompletionOption option = HttpCompletionOption.ResponseContentRead
-    )
-    {
-        _client = _mockPlexApi is not null ? _mockPlexApi.CreateClient() : new HttpClient();
-        try
-        {
-            return await _client.SendAsync(httpRequestMessage, option);
-        }
-        catch (Exception e)
-        {
-            _log.Error("RequestURI: {RequestUri}", httpRequestMessage.RequestUri);
-            _log.Error(e);
-            throw;
-        }
     }
 
     protected PlexRipperDbContext DbContext => Container.PlexRipperDbContext;

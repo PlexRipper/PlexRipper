@@ -32,9 +32,9 @@ public class PlexApiWrapper
 
     private PlexAPI CreateTvClient(string authToken = "", PlexApiClientOptions? options = null)
     {
-        options ??= new PlexApiClientOptions() { ConnectionUrl = "https://plex.tv/api/v2/" };
+        options ??= new PlexApiClientOptions() { ConnectionUrl = "https://plex.tv/api/v2" };
 
-        options.ConnectionUrl = "https://plex.tv/api/v2/";
+        options.ConnectionUrl = "https://plex.tv/api/v2";
 
         return new PlexAPI(
             client: _clientFactory(options),
@@ -99,12 +99,15 @@ public class PlexApiWrapper
 
         var responseResult = await ToResponse(
             plexTvClient.Authentication.PostUsersSignInDataAsync(
-                new PostUsersSignInDataRequestBody()
+                new PostUsersSignInDataRequest()
                 {
-                    Login = plexAccount.Username,
-                    Password = plexAccount.Password,
-                    RememberMe = false,
-                    VerificationCode = plexAccount.Is2Fa ? plexAccount.VerificationCode : string.Empty,
+                    RequestBody = new PostUsersSignInDataRequestBody()
+                    {
+                        Login = plexAccount.Username,
+                        Password = plexAccount.Password,
+                        RememberMe = false,
+                        VerificationCode = plexAccount.Is2Fa ? plexAccount.VerificationCode : string.Empty,
+                    },
                 }
             )
         );

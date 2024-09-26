@@ -13,7 +13,7 @@ public static class HttpClientExtensions
     {
         if (response.IsSuccess)
         {
-            var httpResponseMessage = response.GetHttpResponseMessage();
+            var httpResponseMessage = response.Value.GetHttpResponseMessage();
             var statusCode = (int)httpResponseMessage.StatusCode;
             return Result.Ok(mapper(response.Value)).AddStatusCode(statusCode);
         }

@@ -23,31 +23,44 @@ public static partial class MockDatabase
 
     private static async Task<PlexRipperDbContext> AddPlexServers(
         this PlexRipperDbContext context,
-        Action<FakeDataConfig>? options = null,
-        List<PlexMockServer>? plexMockServers = null
+        List<PlexMockServer> plexMockServers,
+        Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
-        var plexServerCount = Math.Max(1, config.PlexServerCount);
-        var plexServers = FakeData.GetPlexServer(_seed, options).Generate(plexServerCount);
 
-        if (plexMockServers != null && plexMockServers.Any())
+        var fakeServerGenerator = FakeData.GetPlexServer(_seed, options);
+        var plexServers = new List<PlexServer>();
+
+        // Generate working mock servers
+        foreach (var mockServer in plexMockServers)
         {
-            var mockServerUris = plexMockServers.Select(x => x.ServerUri).ToList();
-            mockServerUris.Count.ShouldBeGreaterThanOrEqualTo(
-                plexServers.Count,
-                $"The mocked plex server count ({mockServerUris.Count}) was lower than the generated {nameof(config.PlexServerCount)} ({plexServerCount})"
-            );
+            var plexServer = fakeServerGenerator.Generate();
 
-            for (var i = 0; i < mockServerUris.Count; i++)
-            {
-                var serverUri = mockServerUris[i];
-                var connection = plexServers[i].PlexServerConnections[0];
-                connection.Protocol = serverUri.Scheme;
-                connection.Address = serverUri.Host;
-                connection.Port = serverUri.Port;
-            }
+            plexServer.PlexServerConnections =
+            [
+                new PlexServerConnection
+                {
+                    Id = 0,
+                    Protocol = mockServer.ServerUri.Scheme,
+                    Address = mockServer.ServerUri.Host,
+                    Port = mockServer.ServerUri.Port,
+                    Local = true,
+                    Relay = false,
+                    IPv4 = true,
+                    IPv6 = false,
+                    PortFix = false,
+                    Uri = mockServer.ServerUri.ToString(),
+                    PlexServerId = 0,
+                },
+            ];
+
+            plexServers.Add(plexServer);
         }
+
+        // Generate fake servers
+        for (var i = 0; i < config.PlexServerCount - plexMockServers.Count; i++)
+            plexServers.Add(fakeServerGenerator.Generate());
 
         context.PlexServers.AddRange(plexServers);
         await context.SaveChangesAsync();
@@ -69,7 +82,7 @@ public static partial class MockDatabase
         _log.Here()
             .Debug(
                 "Added {PlexServerCount} {NameOfPlexServer}s to {NameOfPlexRipperDbContext}: {DatabaseName}",
-                plexServerCount,
+                config.PlexServerCount + plexMockServers.Count,
                 nameof(PlexServer),
                 nameof(PlexRipperDbContext),
                 context.DatabaseName
@@ -265,7 +278,7 @@ public static partial class MockDatabase
             );
 
         if (config.ShouldHavePlexServer)
-            context = await context.AddPlexServers(options, plexMockServers);
+            context = await context.AddPlexServers(plexMockServers ?? [], options);
 
         if (config.ShouldHavePlexLibrary)
             context = await context.AddPlexLibraries(options);

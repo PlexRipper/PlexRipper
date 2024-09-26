@@ -99,15 +99,12 @@ public class PlexApiWrapper
 
         var responseResult = await ToResponse(
             plexTvClient.Authentication.PostUsersSignInDataAsync(
-                new PostUsersSignInDataRequest
+                new PostUsersSignInDataRequestBody()
                 {
-                    RequestBody = new PostUsersSignInDataRequestBody()
-                    {
-                        Login = plexAccount.Username,
-                        Password = plexAccount.Password,
-                        RememberMe = false,
-                        VerificationCode = plexAccount.Is2Fa ? plexAccount.VerificationCode : string.Empty,
-                    },
+                    Login = plexAccount.Username,
+                    Password = plexAccount.Password,
+                    RememberMe = false,
+                    VerificationCode = plexAccount.Is2Fa ? plexAccount.VerificationCode : string.Empty,
                 }
             )
         );
@@ -253,7 +250,7 @@ public class PlexApiWrapper
 
             serverResource.Connections = serverResource
                 .Connections.Concat(newServerResource.Connections)
-                .Distinct()
+                .DistinctBy(x => x.Uri.ToString())
                 .ToList();
         }
 

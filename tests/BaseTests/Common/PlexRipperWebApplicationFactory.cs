@@ -14,6 +14,8 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
     private MockPlexApi? _mockPlexApi;
     public readonly List<PlexMockServer> PlexMockServers = [];
 
+    public List<Uri> PlexMockServerUris => PlexMockServers.Select(server => server.ServerUri).ToList();
+
     private readonly UnitTestDataConfig _config;
 
     public PlexRipperWebApplicationFactory(string memoryDbName, Action<UnitTestDataConfig>? options = null)
@@ -26,10 +28,14 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
     private void SetupPlexMockServers(UnitTestDataConfig config)
     {
         var mockConfig = MockPlexApiConfig.FromOptions(config.PlexMockApiOptions);
-        _mockPlexApi = config.PlexMockApiOptions != null ? new MockPlexApi(_log, _config.PlexMockApiOptions) : null;
 
         foreach (var serverConfig in mockConfig.MockServers)
             PlexMockServers.Add(new PlexMockServer(serverConfig));
+
+        _mockPlexApi =
+            config.PlexMockApiOptions != null
+                ? new MockPlexApi(_log, _config.PlexMockApiOptions, PlexMockServerUris)
+                : null;
     }
 
     protected override IHost CreateHost(IHostBuilder builder)

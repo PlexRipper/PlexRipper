@@ -14,7 +14,6 @@ public class MockPlexApi
 {
     private readonly HttpClientInterceptorOptions _clientOptions;
     private readonly MockPlexApiConfig _config;
-    private readonly PlexApiDataConfig _fakeDataConfig;
     private readonly ILog _log;
     private readonly List<Uri> _serverUris;
     private readonly HttpClient _client = new();
@@ -24,7 +23,6 @@ public class MockPlexApi
         _log = log;
         _serverUris = serverUris ?? [];
         _config = MockPlexApiConfig.FromOptions(options);
-        _fakeDataConfig = _config.FakeDataConfig;
 
         _clientOptions = new HttpClientInterceptorOptions
         {
@@ -80,20 +78,22 @@ public class MockPlexApi
 
         if (!config.UnauthorizedAccessiblePlexServers)
         {
-            var servers = FakePlexApiData.GetServerResource().Generate(config.AccessiblePlexServers);
+            var servers = FakePlexApiData.GetServerResource().Generate(_serverUris.Count);
 
             for (var i = 0; i < _serverUris.Count; i++)
-            {
-                var uri = _serverUris[i];
-                if (i < servers.Count)
-                {
-                    servers[i].Connections[0].Uri = uri.ToString();
-                    servers[i].Connections[0].Protocol = uri.Scheme == "https" ? Protocol.Https : Protocol.Http;
-                    servers[i].Connections[0].Address = uri.Host;
-                    servers[i].Connections[0].Port = uri.Port;
-                    servers[i].Connections[0].Local = true;
-                }
-            }
+                servers[i].Connections =
+                [
+                    new Connections
+                    {
+                        Protocol = "https",
+                        Address = _serverUris[i].Host,
+                        Port = _serverUris[i].Port,
+                        Uri = _serverUris[i].ToString(),
+                        Local = true,
+                        Relay = false,
+                        IPv6 = false,
+                    },
+                ];
 
             query.Responds().WithStatus(200).WithJsonContent(servers);
         }

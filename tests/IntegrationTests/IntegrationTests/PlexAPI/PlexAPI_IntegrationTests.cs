@@ -1,4 +1,3 @@
-using LukeHagar.PlexAPI.SDK;
 using PlexRipper.PlexApi;
 
 namespace IntegrationTests;
@@ -12,21 +11,21 @@ public class PlexAPI_IntegrationTests : BaseIntegrationTests
     public async Task ShouldHaveTheInterceptedClientInjected_WhenPlexAPIIsRunningInTestingMode()
     {
         // Act
-        await CreateContainer();
+        await CreateContainer(config =>
+        {
+            config.PlexMockApiOptions = x =>
+            {
+                x.MockServers.Add(new PlexMockServerConfig());
+            };
+        });
 
+        // Act
         var wrapper = Container.Resolve<PlexApiWrapper>();
-        var httpClient = Container.Resolve<HttpClient>();
-        var clientFactory = Container.Resolve<Func<PlexApiClientOptions?, PlexApiClient>>();
-
-        var plexApi = new PlexAPI(
-            client: clientFactory(new PlexApiClientOptions() { ConnectionUrl = "https://plex.tv/api/v2/" }),
-            clientID: "TESTCLIENTID",
-            serverUrl: "https://plex.tv/api/v2/",
-            accessToken: "TESTTOKEN"
-        );
-
         var response = await wrapper.GetAccessibleServers("asdasdas");
 
+        // Assert
         response.ShouldNotBeNull();
+        var server = response.Value.FirstOrDefault();
+        server?.Connections.Count.ShouldBe(1);
     }
 }

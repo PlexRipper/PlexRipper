@@ -19,9 +19,6 @@ public class PlexMockServer : IDisposable
     private readonly PlexMockServerConfig _config;
     private readonly Action<PlexApiDataConfig> _fakeDataConfig;
 
-    public PlexMockServer(Action<PlexMockServerConfig>? options = null)
-        : this(PlexMockServerConfig.FromOptions(options)) { }
-
     public PlexMockServer(PlexMockServerConfig? options = null)
     {
         _config = options ?? new PlexMockServerConfig();
@@ -74,7 +71,6 @@ public class PlexMockServer : IDisposable
         {
             var libraryData = FakePlexApiData.GetPlexLibrarySectionAllResponse(librarySection, _fakeDataConfig);
             var url = PlexApiPaths.GetLibrariesSectionsPath(librarySection.Key);
-            _log.Debug("Url registered: {Url}", url);
             Server
                 .Given(Request.Create().WithPath(url).WithParam("X-Plex-Token").UsingGet())
                 .RespondWith(

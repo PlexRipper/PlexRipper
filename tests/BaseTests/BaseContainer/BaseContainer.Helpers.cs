@@ -15,7 +15,8 @@ public partial class BaseContainer
             GetServerSettings.SetDownloadSpeedLimit(plexServer.MachineIdentifier, config.DownloadSpeedLimitInKib);
     }
 
-    public T Resolve<T>() => _lifeTimeScope.Resolve<T>();
+    public T Resolve<T>()
+        where T : notnull => _lifeTimeScope.Resolve<T>();
 
     public List<PlexMockServer> PlexMockServers => _factory.PlexMockServers;
 
@@ -24,7 +25,7 @@ public partial class BaseContainer
         _log.WarningLine("Disposing Container");
         PlexRipperDbContext.Database.EnsureDeleted();
         _lifeTimeScope.Dispose();
-        _factory?.Dispose();
-        ApiClient?.Dispose();
+        _factory.Dispose();
+        ApiClient.Dispose();
     }
 }

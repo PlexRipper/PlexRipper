@@ -14,9 +14,9 @@ namespace PlexRipper.BaseTests;
 /// </summary>
 public class TestModule : Module
 {
-    public string MemoryDbName { get; init; }
-    public MockPlexApi? MockPlexApi { get; init; }
-    public UnitTestDataConfig Config { get; init; }
+    public required string MemoryDbName { get; init; }
+    public required MockPlexApi? MockPlexApi { get; init; }
+    public required UnitTestDataConfig Config { get; init; }
 
     protected override void Load(ContainerBuilder builder)
     {

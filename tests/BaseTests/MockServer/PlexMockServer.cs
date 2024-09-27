@@ -27,8 +27,7 @@ public class PlexMockServer : IDisposable
         Server = WireMockServer.Start(
             new WireMockServerSettings()
             {
-                // TODO Migrate this option to the new version: https://github.com/WireMock-Net/WireMock.Net/issues/1086
-                //ThrowExceptionWhenMatcherFails = true,
+                Logger = new WiremockLogger(_log),
                 HostingScheme = HostingScheme.HttpAndHttps,
             }
         );
@@ -57,13 +56,13 @@ public class PlexMockServer : IDisposable
         var librarySections = FakePlexApiData.GetLibraryMediaContainer(_fakeDataConfig);
 
         Server
-            .Given(Request.Create().WithPath(PlexApiPaths.LibrarySectionsPath).WithParam("X-Plex-Token").UsingGet())
+            .Given(Request.Create().WithPath(PlexApiPaths.LibrarySectionsPath).UsingGet())
             .RespondWith(
                 Response
                     .Create()
                     .WithStatusCode(200)
                     .WithHeader("Content-Type", "application/json")
-                    .WithBodyAsJson(librarySections)
+                    .WithPlexSdkJsonContent(librarySections)
             );
 
         // Set up the media metadata for each library
@@ -72,13 +71,13 @@ public class PlexMockServer : IDisposable
             var libraryData = FakePlexApiData.GetPlexLibrarySectionAllResponse(librarySection, _fakeDataConfig);
             var url = PlexApiPaths.GetLibrariesSectionsPath(librarySection.Key);
             Server
-                .Given(Request.Create().WithPath(url).WithParam("X-Plex-Token").UsingGet())
+                .Given(Request.Create().WithPath(url).UsingGet())
                 .RespondWith(
                     Response
                         .Create()
                         .WithStatusCode(200)
                         .WithHeader("Content-Type", "application/json")
-                        .WithBodyAsJson(libraryData)
+                        .WithPlexSdkJsonContent(libraryData)
                 );
         }
 
@@ -94,7 +93,7 @@ public class PlexMockServer : IDisposable
                     .Create()
                     .WithStatusCode(HttpStatusCode.OK)
                     .WithHeader("Content-Type", "application/json")
-                    .WithBodyAsJson(FakePlexApiData.GetPlexServerIdentityResponse(_fakeDataConfig))
+                    .WithPlexSdkJsonContent(FakePlexApiData.GetPlexServerIdentityResponse(_fakeDataConfig))
             );
     }
 
@@ -106,7 +105,7 @@ public class PlexMockServer : IDisposable
 
             _log.Debug("Created file to be downloaded with length: {DownloadFileSize}", downloadFile.LongLength);
             Server
-                .Given(Request.Create().WithPath(PlexMockServerConfig.FileUrl).WithParam("X-Plex-Token").UsingGet())
+                .Given(Request.Create().WithPath(PlexMockServerConfig.FileUrl).UsingGet())
                 .RespondWith(
                     Response
                         .Create()

@@ -20,6 +20,7 @@ public class PlexAPI_IntegrationTests : BaseIntegrationTests
         });
 
         // Act
+        var client = Container.Resolve<HttpClient>();
         var wrapper = Container.Resolve<PlexApiWrapper>();
         var response = await wrapper.GetAccessibleServers("asdasdas");
 
@@ -27,5 +28,6 @@ public class PlexAPI_IntegrationTests : BaseIntegrationTests
         response.ShouldNotBeNull();
         var server = response.Value.FirstOrDefault();
         server?.Connections.Count.ShouldBe(1);
+        client.DefaultRequestHeaders.Contains("MockPlexApi").ShouldBeTrue();
     }
 }

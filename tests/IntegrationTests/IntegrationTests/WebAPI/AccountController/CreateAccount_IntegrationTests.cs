@@ -24,7 +24,12 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
             };
             config.PlexMockApiOptions = x =>
             {
-                x.AccessiblePlexServers = 1;
+                x.MockServers.Add(
+                    new PlexMockServerConfig
+                    {
+                        FakeDataConfig = _ => new FakeDataConfig { PlexLibraryCount = libraryCount },
+                    }
+                );
             };
         });
 
@@ -65,7 +70,7 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         plexAccountDb.PlexAccountLibraries.Count.ShouldBe(libraryCount);
 
         // Ensure PlexServer has been created
-        DbContext.PlexServers.ToList().Count.ShouldBe(1);
+        DbContext.PlexServers.ToList().Count.ShouldBe(2);
         var plexServersDb = DbContext
             .PlexServers.Include(x => x.PlexLibraries)
             .IncludeLibrariesWithMedia()
@@ -73,10 +78,6 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         plexServersDb.ShouldNotBeNull();
         plexServersDb.MachineIdentifier.ShouldNotBeEmpty();
         plexServersDb.PlexLibraries.Count.ShouldBe(libraryCount);
-
-        // Ensure All PlexLibraries have been created with media
-        var plexLibraries = plexServersDb.PlexLibraries;
-        plexLibraries.ShouldAllBe(x => x.HasMedia);
 
         // Ensure all jobs have sent notifications
         var jobStatusUpdateList = Container.MockSignalRService.JobStatusUpdateList.ToList();

@@ -49,7 +49,7 @@ public partial class FakePlexApiData
         return new Faker<Connections>()
             .StrictMode(true)
             .UseSeed(config.GetSeed())
-            .RuleFor(x => x.Protocol, _ => "http")
+            .RuleFor(x => x.Protocol, _ => Protocol.Http)
             // This has to be an ip otherwise the PortFix gets activated in PlexServerConnection
             .RuleFor(x => x.Address, _ => "240.0.0.0")
             .RuleFor(x => x.Port, f => f.Internet.Port())

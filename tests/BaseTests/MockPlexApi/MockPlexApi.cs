@@ -85,7 +85,7 @@ public class MockPlexApi
                 [
                     new Connections
                     {
-                        Protocol = "https",
+                        Protocol = Protocol.Https,
                         Address = _serverUris[i].Host,
                         Port = _serverUris[i].Port,
                         Uri = _serverUris[i].ToString(),
@@ -95,10 +95,10 @@ public class MockPlexApi
                     },
                 ];
 
-            query.Responds().WithStatus(200).WithJsonContent(servers);
+            query.Responds().WithStatus(200).WithPlexSdkJsonContent(servers);
         }
         else
-            query.Responds().WithStatus(401).WithJsonContent(FakePlexApiData.GetFailedServerResourceResponse());
+            query.Responds().WithStatus(401).WithPlexSdkJsonContent(FakePlexApiData.GetFailedServerResourceResponse());
 
         query.RegisterWith(_clientOptions);
     }
@@ -112,10 +112,10 @@ public class MockPlexApi
             query
                 .Responds()
                 .WithStatus(201) // 201 is correct here, Plex for some reason gives this back on this request
-                .WithJsonContent(FakePlexApiData.GetPlexSignInResponse().Generate());
+                .WithPlexSdkJsonContent(FakePlexApiData.GetPlexSignInResponse().Generate());
         }
         else
-            query.Responds().WithStatus(401).WithJsonContent(FakePlexApiData.GetFailedPlexSignInResponse());
+            query.Responds().WithStatus(401).WithPlexSdkJsonContent(FakePlexApiData.GetFailedPlexSignInResponse());
 
         query.RegisterWith(_clientOptions);
     }

@@ -276,6 +276,9 @@ public class PlexApiWrapper
 
         var response = await ToResponse(client.Library.GetAllLibrariesAsync());
 
+        if (response.IsFailed)
+            return response.ToResult();
+
         if (response.Value.Object?.MediaContainer.Directory is null)
         {
             _log.Error(

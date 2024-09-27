@@ -29,7 +29,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.Protected, f => f.Random.Bool())
             .RuleFor(x => x.Thumb, f => f.Internet.UrlWithPath())
             .RuleFor(x => x.AuthToken, f => f.Random.Guid().ToString())
-            .RuleFor(x => x.MailingListStatus, _ => "active")
+            .RuleFor(x => x.MailingListStatus, _ => PostUsersSignInDataMailingListStatus.Active)
             .RuleFor(x => x.MailingListActive, f => f.Random.Bool())
             .RuleFor(x => x.ScrobbleTypes, _ => "")
             .RuleFor(x => x.Country, _ => "EN")

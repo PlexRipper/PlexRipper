@@ -11,27 +11,22 @@ public class StartDownloadJob_IntegrationTests : BaseIntegrationTests
     public async Task ShouldSendOutDownloadTaskUpdates_WhenDownloadTaskIsInProgress()
     {
         // Arrange
-
-        var serverUri = SpinUpPlexServer(config =>
-        {
-            config.DownloadFileSizeInMb = 50;
-        });
-        await SetupDatabase(config =>
-        {
-            config.MockServerUris.Add(serverUri);
-            config.PlexAccountCount = 1;
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 3;
-            config.MovieCount = 1;
-            config.MovieDownloadTasksCount = 1;
-            config.DownloadFileSizeInMb = 50;
-        });
-
-        SetupMockPlexApi();
-
         await CreateContainer(config =>
         {
             config.DownloadSpeedLimitInKib = 5000;
+            config.DatabaseOptions = x =>
+            {
+                x.PlexAccountCount = 1;
+                x.PlexServerCount = 1;
+                x.PlexLibraryCount = 3;
+                x.MovieCount = 1;
+                x.MovieDownloadTasksCount = 1;
+                x.DownloadFileSizeInMb = 50;
+            };
+            config.PlexMockApiOptions = x =>
+            {
+                x.MockServers.Add(new PlexMockServerConfig { DownloadFileSizeInMb = 50 });
+            };
         });
         var movieDownloadTasks = await DbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
         var movieFileDownloadTask = movieDownloadTasks[0].Children[0];

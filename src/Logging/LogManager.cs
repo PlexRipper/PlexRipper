@@ -91,5 +91,5 @@ public static class LogManager
     #endregion
 
     private static readonly ILog _log = CreateLogInstance(typeof(LogManager));
-    public static LogEventLevel MinimumLogLevel { get; private set; } = LogEventLevel.Debug;
+    public static LogEventLevel MinimumLogLevel { get; private set; }
 }

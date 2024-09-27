@@ -2,8 +2,6 @@
 
 public class PlexMediaDataPartDTO
 {
-    #region Properties
-
     public required string ObfuscatedFilePath { get; init; }
 
     public required int Duration { get; init; }
@@ -15,6 +13,4 @@ public class PlexMediaDataPartDTO
     public required string Container { get; init; }
 
     public required string VideoProfile { get; init; }
-
-    #endregion
 }

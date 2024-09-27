@@ -17,7 +17,7 @@ public class SettingsController_Get_Settings_IntegrationTests : BaseIntegrationT
     public async Task ShouldHaveDefaultSettings_OnFirstTimeBoot()
     {
         // Arrange
-        await CreateContainer(4564);
+        await CreateContainer(x => x.Seed = 4564);
 
         // Act
         var response = await Container.ApiClient.GETAsync<GetUserSettingsEndpoint, ResultDTO<SettingsModelDTO>>();

@@ -1,7 +1,6 @@
 ﻿using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
-using Quartz;
 
 namespace PlexRipper.Application;
 
@@ -28,19 +27,12 @@ public class InspectAllPlexServersByAccountIdCommandHandler
     private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IScheduler _scheduler;
 
-    public InspectAllPlexServersByAccountIdCommandHandler(
-        ILog log,
-        IMediator mediator,
-        IPlexRipperDbContext dbContext,
-        IScheduler scheduler
-    )
+    public InspectAllPlexServersByAccountIdCommandHandler(ILog log, IMediator mediator, IPlexRipperDbContext dbContext)
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
-        _scheduler = scheduler;
     }
 
     public async Task<Result> Handle(

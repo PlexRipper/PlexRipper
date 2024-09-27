@@ -177,7 +177,13 @@ public static class Startup
             });
         }
 
-        services.AddHttpClient();
+        services
+            .AddHttpClient("")
+            .ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            {
+                // TODO: Disable SSL Check, might be bad
+                ServerCertificateCustomValidationCallback = (_, _, _, _) => true,
+            });
 
         // Removing all registered IHttpMessageHandlerBuilderFilter instances to disable built-in HttpClient logging
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();

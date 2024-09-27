@@ -6,8 +6,6 @@ namespace PlexApi.Contracts;
 
 public interface IPlexApiService
 {
-    #region Methods
-
     /// <summary>
     ///     Returns the <see cref="PlexAccount" /> after PlexApi validation.
     /// </summary>
@@ -47,6 +45,7 @@ public interface IPlexApiService
     /// <returns></returns>
     Task<Result<PlexLibrary>> GetLibraryMediaAsync(
         PlexLibrary plexLibrary,
+        Action<MediaSyncProgress> action = null,
         CancellationToken cancellationToken = default
     );
 
@@ -61,27 +60,6 @@ public interface IPlexApiService
         Action<PlexApiClientProgress> action = null
     );
 
-    Task<List<PlexTvShowSeason>> GetSeasonsAsync(string serverAuthToken, string plexFullHost, PlexTvShow plexTvShow);
-
-    /// <summary>
-    /// Retrieves the media image from the <see cref="PlexServer"/> with optional dimensions.
-    /// </summary>
-    /// <param name="plexServer">The <see cref="PlexServer"/> to request the media from.</param>
-    /// <param name="thumbPath">The relative media url</param>
-    /// <param name="width">The optional width of the image.</param>
-    /// <param name="height">The optional height of the image.</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    Task<Result<byte[]>> GetPlexMediaImageAsync(
-        PlexServer plexServer,
-        string thumbPath,
-        int width = 0,
-        int height = 0,
-        CancellationToken cancellationToken = default
-    );
-
-    #endregion
-
     /// <summary>
     /// Fetches all the <see cref="PlexTvShowSeason">Plex TvShow Seasons</see> from the Plex api with the given <see cref="PlexLibrary"/>.
     /// </summary>
@@ -90,6 +68,7 @@ public interface IPlexApiService
     /// <returns></returns>
     Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(
         PlexLibrary plexLibrary,
+        Action<MediaSyncProgress> action = null,
         CancellationToken cancellationToken = default
     );
 
@@ -101,12 +80,9 @@ public interface IPlexApiService
     /// <returns></returns>
     Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(
         PlexLibrary plexLibrary,
+        Action<MediaSyncProgress> action = null,
         CancellationToken cancellationToken = default
     );
-
-    Task<Result<AuthPin>> Get2FAPin(string clientId);
-
-    Task<Result<AuthPin>> Check2FAPin(int pinId, string clientId);
 
     Task<Result<PlexAccount>> ValidatePlexToken(PlexAccount plexAccount);
 }

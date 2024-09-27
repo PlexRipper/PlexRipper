@@ -9,14 +9,10 @@
 		<!--	Current Action	-->
 		<q-item-section>
 			<ConnectionProgressText :progress="progress" />
-		</q-item-section>
-		<!--	Error message	-->
-		<q-item-section>
-			<template v-if="progress && !progress.completed">
-				<span v-if="progress && progress.message">
-					{{ progress.message }}
-				</span>
-			</template>
+			<!--	Error message	-->
+			<span v-if="progress && !progress.connectionSuccessful">
+				{{ progress.message }}
+			</span>
 		</q-item-section>
 	</q-item>
 </template>

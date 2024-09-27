@@ -17,14 +17,16 @@ public class GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests : BaseIn
     public async Task ShouldHaveGeneratedAllTvShowsDownloadTasks_WhenGivenValidCommands()
     {
         // Arrange
-        await CreateContainer();
-        await SetupDatabase(config =>
+        await CreateContainer(config =>
         {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.TvShowCount = 5;
-            config.TvShowSeasonCount = 3;
-            config.TvShowEpisodeCount = 3;
+            config.DatabaseOptions = x =>
+            {
+                x.PlexServerCount = 1;
+                x.PlexLibraryCount = 1;
+                x.TvShowCount = 5;
+                x.TvShowSeasonCount = 3;
+                x.TvShowEpisodeCount = 3;
+            };
         });
 
         var plexTvShows = await DbContext.PlexTvShows.ToListAsync();
@@ -54,6 +56,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests : BaseIn
         {
             downloadTaskTvShow.Calculate();
             var validationResult = await validator.ValidateAsync(downloadTaskTvShow);
+
             // Ignore DownloadDirectory and DestinationDirectory errors as these are set in the DownloadJob
             var validErrors = validationResult.Errors.FindAll(x =>
                 !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DownloadDirectory))

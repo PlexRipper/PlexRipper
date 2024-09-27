@@ -9,6 +9,8 @@ public class WebApiModule : Module
     {
         builder.RegisterType<Boot>().As<IBoot>().SingleInstance();
 
+        builder.Register(c => c.Resolve<IHttpClientFactory>().CreateClient()).As<HttpClient>().InstancePerDependency();
+
         // This needs to be registered in order to fire Boot on Application startup
         builder.RegisterType<Boot>().As<IHostLifetime>().SingleInstance();
 

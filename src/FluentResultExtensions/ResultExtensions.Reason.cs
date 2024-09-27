@@ -5,15 +5,9 @@ namespace FluentResults;
 
 public static partial class ResultExtensions
 {
-    public static int StatusCode(this IReason error)
-    {
-        return error.HasMetadataKey(StatusCodeName) ? Convert.ToInt32(error.Metadata[StatusCodeName]) : 0;
-    }
+    public static int StatusCode(this IReason error) =>
+        error.HasMetadataKey(StatusCodeName) ? Convert.ToInt32(error.Metadata[StatusCodeName]) : 0;
 
-    public static string ErrorMessage(this IReason error)
-    {
-        return error.HasMetadataKey(ErrorMessageName)
-            ? error.Metadata[ErrorMessageName]?.ToString()
-            : "Message not found";
-    }
+    public static string ErrorMessage(this IReason error) =>
+        error.HasMetadataKey(ErrorMessageName) ? error.Metadata[ErrorMessageName]?.ToString() : "Message not found";
 }

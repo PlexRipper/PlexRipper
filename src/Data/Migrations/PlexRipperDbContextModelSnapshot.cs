@@ -1063,10 +1063,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(18);
 
-                    b.Property<int>("Index")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(17);
-
                     b.Property<int>("Key")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
@@ -1123,7 +1119,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(2);
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(15);
 
@@ -1478,10 +1474,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(18);
 
-                    b.Property<int>("Index")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(17);
-
                     b.Property<int>("Key")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
@@ -1538,7 +1530,7 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(2);
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(15);
 
@@ -1605,10 +1597,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(18);
 
-                    b.Property<int>("Index")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(17);
-
                     b.Property<int>("Key")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
@@ -1674,7 +1662,7 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int>("TvShowSeasonId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(15);
 
@@ -1783,10 +1771,6 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(18);
 
-                    b.Property<int>("Index")
-                        .HasColumnType("INTEGER")
-                        .HasColumnOrder(17);
-
                     b.Property<int>("Key")
                         .HasColumnType("INTEGER")
                         .HasColumnOrder(1);
@@ -1849,7 +1833,7 @@ namespace PlexRipper.Data.Migrations
                     b.Property<int>("TvShowId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(15);
 

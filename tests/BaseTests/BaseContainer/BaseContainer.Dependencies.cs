@@ -1,9 +1,6 @@
-﻿#region
-
-using Application.Contracts;
+﻿using Application.Contracts;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Data.Contracts;
 using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;
@@ -12,55 +9,48 @@ using PlexRipper.Data;
 using PlexRipper.WebAPI;
 using Settings.Contracts;
 
-#endregion
-
 namespace PlexRipper.BaseTests;
 
 public partial class BaseContainer : IDisposable
 {
-    #region Fields
-
     private readonly PlexRipperWebApplicationFactory _factory;
 
-    private static ILog _log;
+    private readonly ILog _log;
 
     private readonly ILifetimeScope _lifeTimeScope;
 
-    #endregion
-
-    #region Constructor
+    public string DatabaseName => _factory.MemoryDbName;
 
     /// <summary>
-    /// Creates a Autofac container and sets up a test database.
+    /// Creates an Autofac container and sets up a test database.
     /// </summary>
-    private BaseContainer(
-        string memoryDbName,
-        Action<UnitTestDataConfig>? options = null,
-        MockPlexApi mockPlexApi = null
-    )
+    private BaseContainer(ILog log, string memoryDbName, Action<UnitTestDataConfig>? options = null)
     {
-        _factory = new PlexRipperWebApplicationFactory(memoryDbName, options, mockPlexApi);
+        _log = log;
+
+        _log.Information("Setting up BaseContainer with database: {MemoryDbName}", memoryDbName);
+
+        _factory = new PlexRipperWebApplicationFactory(memoryDbName, options);
         ApiClient = _factory.CreateDefaultClient();
 
         // Create a separate scope as not to interfere with tests running in parallel
         _lifeTimeScope = _factory.Services.GetAutofacRoot().BeginLifetimeScope(memoryDbName);
     }
 
-    public static async Task<BaseContainer> Create(
-        ILog log,
-        string memoryDbName,
-        Action<UnitTestDataConfig>? options = null,
-        MockPlexApi mockPlexApi = null
-    )
+    public static async Task<BaseContainer> Create(ILog log, Action<UnitTestDataConfig>? options = null)
     {
-        _log = log;
         var config = UnitTestDataConfig.FromOptions(options);
-
-        _log.Information("Setting up BaseContainer with database: {MemoryDbName}", memoryDbName);
-
         EnvironmentExtensions.SetIntegrationTestMode(true);
 
-        var container = new BaseContainer(memoryDbName, options, mockPlexApi);
+        var memoryDbName = MockDatabase.GetMemoryDatabaseName();
+
+        log.Information("Initialized integration test with database name: {DatabaseName}", memoryDbName);
+
+        var container = new BaseContainer(log, memoryDbName, options);
+
+        await MockDatabase
+            .GetMemoryDbContext(memoryDbName)
+            .Setup(config.Seed, config.DatabaseOptions, container.PlexMockServers);
 
         if (config.DownloadSpeedLimitInKib > 0)
             await container.SetDownloadSpeedLimit(options);
@@ -68,13 +58,7 @@ public partial class BaseContainer : IDisposable
         return container;
     }
 
-    #endregion
-
-    #region Properties
-
     public HttpClient ApiClient { get; }
-
-    #region Autofac Resolve
 
     public IFileSystem FileSystem => Resolve<IFileSystem>();
 
@@ -86,11 +70,7 @@ public partial class BaseContainer : IDisposable
 
     public IPathProvider PathProvider => Resolve<IPathProvider>();
 
-    public ITestStreamTracker TestStreamTracker => Resolve<ITestStreamTracker>();
-
     public PlexRipperDbContext PlexRipperDbContext => Resolve<PlexRipperDbContext>();
-
-    public IPlexRipperDbContext IPlexRipperDbContext => Resolve<IPlexRipperDbContext>();
 
     public ISchedulerService SchedulerService => Resolve<ISchedulerService>();
 
@@ -100,34 +80,7 @@ public partial class BaseContainer : IDisposable
 
     public MockSignalRService MockSignalRService => (MockSignalRService)Resolve<ISignalRService>();
 
-    public TestLoggingClass TestLoggingClass => Resolve<TestLoggingClass>();
-
     public IBoot Boot => Resolve<IBoot>();
 
-    #region Settings
-
     public IServerSettingsModule GetServerSettings => Resolve<IServerSettingsModule>();
-
-    public IConfigManager ConfigManager => Resolve<IConfigManager>();
-
-    #endregion
-
-    #endregion
-
-    #endregion
-
-    #region Public Methods
-
-    private T Resolve<T>() => _lifeTimeScope.Resolve<T>();
-
-    #endregion
-
-    public void Dispose()
-    {
-        _log.WarningLine("Disposing Container");
-        PlexRipperDbContext.Database.EnsureDeleted();
-        _lifeTimeScope.Dispose();
-        _factory?.Dispose();
-        ApiClient?.Dispose();
-    }
 }

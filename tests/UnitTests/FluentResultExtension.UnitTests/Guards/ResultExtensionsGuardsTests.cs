@@ -59,7 +59,7 @@ public class ResultExtensionsGuardsTests
     public void ShouldHave400BadRequestError_WhenIsInvalidIdIsCalled()
     {
         // Arrange
-        var result = ResultExtensions.IsInvalidId("ParameterXYZ");
+        var result = ResultExtensions.IsInvalidId("parameter", "ParameterXYZ");
 
         // Act
         var has400BadRequestError = result.Has400BadRequestError();

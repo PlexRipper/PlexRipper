@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using PlexApi.Contracts;
-using PlexRipper.PlexApi.Services;
 
 namespace PlexRipper.PlexApi;
 
@@ -10,8 +9,8 @@ public class PlexApiModule : Module
     {
         builder.RegisterType<PlexApiService>().As<IPlexApiService>();
 
-        builder.RegisterType<Api.PlexApi>();
+        builder.RegisterType<PlexApiWrapper>();
 
-        builder.RegisterType<PlexApiClient>().SingleInstance();
+        builder.RegisterType<PlexApiClient>().InstancePerDependency();
     }
 }

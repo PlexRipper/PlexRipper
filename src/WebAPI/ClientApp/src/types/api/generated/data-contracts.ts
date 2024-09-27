@@ -9,36 +9,6 @@
  * ---------------------------------------------------------------
  */
 
-export interface AuthPin {
-  authToken: string;
-  clientIdentifier: string;
-  code: string;
-  /** @format date-time */
-  createdAt: string;
-  errors: PlexError[];
-  /** @format date-time */
-  expiresAt: string;
-  /** @format int32 */
-  expiresIn: number;
-  /** @format int32 */
-  id: number;
-  location: AuthPinLocation;
-  newRegistration: string;
-  trusted: boolean;
-}
-
-export interface AuthPinLocation {
-  city: string;
-  code: string;
-  continentCode: string;
-  coordinates: string;
-  country: string;
-  europeanUnionMember: boolean;
-  postalCode: string;
-  subdivisions: string;
-  timeZone: string;
-}
-
 export interface CheckAllConnectionStatusUpdateDTO {
   plexServerConnectionIds: number[];
   /** @format int32 */
@@ -455,16 +425,6 @@ export interface PlexAccountDTO {
   verificationCode: string;
 }
 
-export interface PlexError {
-  /** @format int32 */
-  code: number;
-  message?: string | null;
-  metadata?: Record<string, any>;
-  reasons?: IError[] | null;
-  /** @format int32 */
-  status: number;
-}
-
 export interface PlexLibraryDTO {
   /** @format int32 */
   count: number;
@@ -539,7 +499,7 @@ export interface PlexMediaDTO {
   tvShowSeasonId: number;
   type: PlexMediaType;
   /** @format date-time */
-  updatedAt: string;
+  updatedAt?: string | null;
   /** @format int32 */
   year: number;
 }
@@ -609,7 +569,7 @@ export interface PlexMediaSlimDTO {
   title: string;
   type: PlexMediaType;
   /** @format date-time */
-  updatedAt: string;
+  updatedAt?: string | null;
   /** @format int32 */
   year: number;
 }
@@ -719,15 +679,6 @@ export interface ResultDTO {
   isSuccess: boolean;
   reasons: ReasonDTO[];
   successes: SuccessDTO[];
-}
-
-export interface ResultDTOOfAuthPin {
-  errors: ErrorDTO[];
-  isFailed: boolean;
-  isSuccess: boolean;
-  reasons: ReasonDTO[];
-  successes: SuccessDTO[];
-  value?: AuthPin | null;
 }
 
 export interface ResultDTOOfBoolean {

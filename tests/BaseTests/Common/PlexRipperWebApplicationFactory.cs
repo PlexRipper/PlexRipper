@@ -8,21 +8,34 @@ namespace PlexRipper.BaseTests;
 
 public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
 {
-    private readonly string _memoryDbName;
-    private readonly MockPlexApi _mockPlexApi;
+    public readonly string MemoryDbName;
+
     private static readonly ILog _log = LogManager.CreateLogInstance(typeof(PlexRipperWebApplicationFactory));
+    private MockPlexApi? _mockPlexApi;
+    public readonly List<PlexMockServer> PlexMockServers = [];
+
+    public List<Uri> PlexMockServerUris => PlexMockServers.Select(server => server.ServerUri).ToList();
 
     private readonly UnitTestDataConfig _config;
 
-    public PlexRipperWebApplicationFactory(
-        string memoryDbName,
-        Action<UnitTestDataConfig>? options = null,
-        MockPlexApi mockPlexApi = null
-    )
+    public PlexRipperWebApplicationFactory(string memoryDbName, Action<UnitTestDataConfig>? options = null)
     {
-        _memoryDbName = memoryDbName;
-        _mockPlexApi = mockPlexApi;
+        MemoryDbName = memoryDbName;
         _config = UnitTestDataConfig.FromOptions(options);
+        SetupPlexMockServers(_config);
+    }
+
+    private void SetupPlexMockServers(UnitTestDataConfig config)
+    {
+        var mockConfig = MockPlexApiConfig.FromOptions(config.PlexMockApiOptions);
+
+        foreach (var serverConfig in mockConfig.MockServers)
+            PlexMockServers.Add(new PlexMockServer(serverConfig));
+
+        _mockPlexApi =
+            config.PlexMockApiOptions != null
+                ? new MockPlexApi(_log, _config.PlexMockApiOptions, PlexMockServerUris)
+                : null;
     }
 
     protected override IHost CreateHost(IHostBuilder builder)
@@ -32,12 +45,13 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
             autoFacBuilder.RegisterModule(
                 new TestModule()
                 {
-                    MemoryDbName = _memoryDbName,
+                    MemoryDbName = MemoryDbName,
                     MockPlexApi = _mockPlexApi,
                     Config = _config,
                 }
             );
         });
+
         try
         {
             return base.CreateHost(builder);
@@ -47,5 +61,12 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
             _log.Fatal(e);
             throw;
         }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        PlexMockServers.ForEach(server => server.Dispose());
+
+        base.Dispose(disposing);
     }
 }

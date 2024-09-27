@@ -1,15 +1,16 @@
 ﻿using Bogus;
-using PlexRipper.PlexApi.Api;
+using LukeHagar.PlexAPI.SDK.Models.Requests;
+using PlexRipper.PlexApi;
 
 namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
-    public static LibrariesResponse GetLibraryMediaContainer(Action<PlexApiDataConfig> options = null)
+    public static GetAllLibrariesResponseBody GetLibraryMediaContainer(Action<PlexApiDataConfig> options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
-        var mediaContainer = new Faker<LibrariesResponseMediaContainer>()
+        var mediaContainer = new Faker<GetAllLibrariesMediaContainer>()
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(x => x.Size, _ => 0)
@@ -23,20 +24,20 @@ public partial class FakePlexApiData
                 }
             );
 
-        return new Faker<LibrariesResponse>()
+        return new Faker<GetAllLibrariesResponseBody>()
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(x => x.MediaContainer, _ => mediaContainer.Generate())
             .Generate();
     }
 
-    private static Faker<LibrariesResponseDirectory> GetLibrariesResponseDirectory(
+    private static Faker<GetAllLibrariesDirectory> GetLibrariesResponseDirectory(
         Action<PlexApiDataConfig> options = null
     )
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
-        return new Faker<LibrariesResponseDirectory>()
+        return new Faker<GetAllLibrariesDirectory>()
             .StrictMode(true)
             .UseSeed(config.GetSeed())
             .RuleFor(x => x.AllowSync, f => f.Random.Bool())
@@ -52,14 +53,17 @@ public partial class FakePlexApiData
             .RuleFor(x => x.Scanner, _ => "Plex Movie")
             .RuleFor(x => x.Language, _ => "en-US")
             .RuleFor(x => x.Uuid, f => f.PlexApi().ClientId)
-            .RuleFor(x => x.UpdatedAt, f => f.Date.Recent())
-            .RuleFor(x => x.CreatedAt, f => f.Date.Past(4))
-            .RuleFor(x => x.ScannedAt, f => f.Date.Recent())
+            .RuleFor(x => x.UpdatedAt, f => f.Date.Recent().ToUnixLong())
+            .RuleFor(x => x.CreatedAt, f => f.Date.Past(4).ToUnixLong())
+            .RuleFor(x => x.ScannedAt, f => f.Date.Recent().ToUnixLong())
             .RuleFor(x => x.Content, f => f.Random.Bool())
-            .RuleFor(x => x.IsDirectory, f => f.Random.Bool())
-            .RuleFor(x => x.ContentChangedAt, f => f.Date.Recent())
+            .RuleFor(x => x.Directory, f => f.Random.Bool())
+            .RuleFor(x => x.ContentChangedAt, f => (int)f.Date.Recent().ToUnixLong())
             .RuleFor(x => x.Hidden, _ => 0)
-            .RuleFor(x => x.Location, f => [new() { Id = f.Random.Number(100000), Path = f.System.DirectoryPath(), },])
+            .RuleFor(
+                x => x.Location,
+                f => [new Location { Id = f.Random.Number(100000), Path = f.System.DirectoryPath() }]
+            )
             .FinishWith(
                 (f, directory) =>
                 {

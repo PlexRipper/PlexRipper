@@ -19,10 +19,7 @@
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Models\" />
+	  <PackageReference Include="LukeHagar.PlexAPI.SDK" Version="0.8.1" />
 	</ItemGroup>
 
 </Project>

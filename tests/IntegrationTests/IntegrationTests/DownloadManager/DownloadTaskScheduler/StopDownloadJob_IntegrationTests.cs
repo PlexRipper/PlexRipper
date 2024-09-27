@@ -12,27 +12,24 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
     public async Task ShouldStartAndStopDownloadJob_WhenDownloadTaskHasBeenStopped()
     {
         // Arrange
-        Seed = 45644875;
-        var serverUri = SpinUpPlexServer(config =>
-        {
-            config.DownloadFileSizeInMb = 50;
-        });
-        await SetupDatabase(config =>
-        {
-            config.MockServerUris.Add(serverUri);
-            config.PlexAccountCount = 1;
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 3;
-            config.MovieCount = 10;
-            config.MovieDownloadTasksCount = 1;
-            config.DownloadFileSizeInMb = 50;
-        });
-
-        SetupMockPlexApi();
-
         await CreateContainer(config =>
         {
+            config.Seed = 45644875;
             config.DownloadSpeedLimitInKib = 5000;
+            config.DatabaseOptions = x =>
+            {
+                x.PlexAccountCount = 1;
+                x.PlexServerCount = 1;
+                x.PlexLibraryCount = 3;
+                x.MovieCount = 10;
+                x.MovieDownloadTasksCount = 1;
+                x.DownloadFileSizeInMb = 50;
+            };
+            config.PlexMockApiOptions = x =>
+            {
+                x.MockServers = [new PlexMockServerConfig() { DownloadFileSizeInMb = 50 }];
+                x.SignInResponseIsValid = true;
+            };
         });
 
         var movieDownloadTasks = await DbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
@@ -48,7 +45,7 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
         // Assert
         startResult.IsSuccess.ShouldBeTrue(startResult.ToString());
         stopResult.IsSuccess.ShouldBeTrue(stopResult.ToString());
-        var downloadTaskDb = await IDbContext.GetDownloadTaskAsync(childDownloadTask.ToKey());
+        var downloadTaskDb = await DbContext.GetDownloadTaskAsync(childDownloadTask.ToKey());
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
     }

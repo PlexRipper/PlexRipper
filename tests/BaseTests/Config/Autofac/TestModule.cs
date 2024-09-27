@@ -14,9 +14,9 @@ namespace PlexRipper.BaseTests;
 /// </summary>
 public class TestModule : Module
 {
-    public string MemoryDbName { get; init; }
-    public MockPlexApi MockPlexApi { get; init; }
-    public UnitTestDataConfig Config { get; init; }
+    public required string MemoryDbName { get; init; }
+    public required MockPlexApi? MockPlexApi { get; init; }
+    public required UnitTestDataConfig Config { get; init; }
 
     protected override void Load(ContainerBuilder builder)
     {
@@ -48,9 +48,7 @@ public class TestModule : Module
     private void SetMockedDependencies(ContainerBuilder builder)
     {
         if (MockPlexApi is not null)
-        {
-            builder.RegisterInstance(MockPlexApi.CreateClient()).As<HttpClient>().SingleInstance();
-        }
+            builder.Register((_, _) => MockPlexApi.CreateClient()).As<HttpClient>().InstancePerDependency();
 
         if (Config.MockFileSystem is not null)
             builder.RegisterInstance(Config.MockFileSystem).As<IFileSystem>();
@@ -72,6 +70,6 @@ public class TestModule : Module
         };
 
         // Register Quartz dependencies
-        builder.RegisterModule(new QuartzAutofacFactoryModule { ConfigurationProvider = _ => testQuartzProps, });
+        builder.RegisterModule(new QuartzAutofacFactoryModule { ConfigurationProvider = _ => testQuartzProps });
     }
 }

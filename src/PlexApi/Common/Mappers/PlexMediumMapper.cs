@@ -1,12 +1,11 @@
-using PlexRipper.PlexApi.Models;
+using LukeHagar.PlexAPI.SDK.Models.Requests;
 
 namespace PlexRipper.PlexApi;
 
 public static class PlexMediumMapper
 {
-    public static PlexMediaData ToPlexMediaData(this Medium source)
-    {
-        return new PlexMediaData
+    public static PlexMediaData ToPlexMediaData(this GetLibraryItemsMedia source) =>
+        new()
         {
             Duration = source.Duration,
             Bitrate = source.Bitrate,
@@ -18,17 +17,13 @@ public static class PlexMediumMapper
             VideoCodec = source.VideoCodec,
             VideoResolution = source.VideoResolution,
             VideoFrameRate = source.VideoFrameRate,
-            AudioProfile = source.AudioProfile,
+            AudioProfile = source.AudioProfile ?? string.Empty,
             VideoProfile = source.VideoProfile,
-            Protocol = source.Protocol,
-            OptimizedForStreaming = source.OptimizedForStreaming == 1,
-            Selected = source.Selected,
             Parts = source.Part.ToList().ToPlexMediaDataPart(),
             MediaFormat = source.Container,
         };
-    }
 
-    public static List<PlexMediaData> ToPlexMediaData(this List<Medium> source)
+    public static List<PlexMediaData> ToPlexMediaData(this List<GetLibraryItemsMedia> source)
     {
         return source.Select(x => x.ToPlexMediaData()).ToList();
     }

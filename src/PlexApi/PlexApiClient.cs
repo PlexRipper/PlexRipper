@@ -1,132 +1,225 @@
 using System.Net;
-using System.Text.Json;
+using System.Net.Http.Headers;
 using Application.Contracts;
-using Logging.Interface;
-using PlexApi.Contracts;
+using HttpClientToCurl;
+using LukeHagar.PlexAPI.SDK.Utils;
 using Polly;
-using RestSharp;
-using RestSharp.Serializers.Json;
-using RestSharp.Serializers.Xml;
+using Polly.Timeout;
+using Polly.Wrap;
+using Serilog.Events;
+using ILog = Logging.Interface.ILog;
 
 namespace PlexRipper.PlexApi;
 
-public class PlexApiClient
+public record PlexApiClientOptions
 {
-    #region Fields
-
-    private readonly RestClient _client;
-    private readonly ILog _log;
-
-    #endregion
-
-    #region Constructors
-
-    public PlexApiClient(ILog log, HttpClient httpClient)
-    {
-        _log = log;
-        var options = new RestClientOptions() { MaxTimeout = 60000, ThrowOnAnyError = false };
-        _client = new RestClient(
-            httpClient,
-            options,
-            configureSerialization: config =>
-            {
-                config.UseSystemTextJson(SerializerOptions);
-                config.UseDotNetXmlSerializer();
-            }
-        );
-
-        // HTTPS connections expect an user agent to be set
-        _client.AddDefaultHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64)");
-    }
-
-    #endregion
-
-    #region Properties
-
-    public static JsonSerializerOptions SerializerOptions =>
-        new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true,
-            WriteIndented = true,
-            Converters = { new LongToDateTime() },
-        };
-
-    #endregion
-
-    #region Methods
-
-    #region Public
-
-    public async Task<Result<T>> SendRequestAsync<T>(
-        RestRequest request,
-        int retryCount = 2,
-        Action<PlexApiClientProgress>? action = null
-    )
-        where T : class
-    {
-        _log.Debug("Sending request to: {Request}", _client.BuildUri(request));
-
-        var response = await _client.SendRequestWithPolly<T>(request, retryCount, action);
-        return response.ToResponseResult();
-    }
+    public required string ConnectionUrl { get; set; }
 
     /// <summary>
-    /// This method is used to send a request to the Plex API and download the image.
+    /// Request timeout in seconds.
     /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
-    public async Task<Result<byte[]>> SendImageRequestAsync(RestRequest request)
+    public int Timeout { get; init; } = 10;
+
+    public int RetryCount { get; init; } = 1;
+
+    public Action<PlexApiClientProgress>? Action { get; init; } = null;
+}
+
+public class PlexApiClient : ISpeakeasyHttpClient
+{
+    private readonly ILog _log;
+
+    private readonly HttpClient _defaultClient;
+
+    private readonly PlexApiClientOptions _options;
+    private readonly AsyncPolicyWrap<HttpResponseMessage> _policyWrap;
+
+    public PlexApiClient(ILog log, HttpClient httpClient, PlexApiClientOptions options)
     {
-        try
-        {
-            var response = await Policy
-                .Handle<WebException>()
+        _log = log;
+        _defaultClient = httpClient;
+        _defaultClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+        _options = options;
+
+        _defaultClient.BaseAddress = new Uri(_options.ConnectionUrl);
+        _defaultClient.Timeout = TimeSpan.FromSeconds(_options.Timeout);
+
+        // Combine policies using Policy.WrapAsync
+        _policyWrap = Policy.WrapAsync(
+            Policy.TimeoutAsync<HttpResponseMessage>(_options.Timeout),
+            Policy
+                .HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
                 .WaitAndRetryAsync(
-                    1,
-                    retryAttempt =>
+                    _options.RetryCount,
+                    retryAttempt => TimeSpan.FromSeconds(retryAttempt),
+                    (response, timeSpan, retryAttempt, context) =>
                     {
-                        var timeToWait = TimeSpan.FromSeconds(retryAttempt * 1);
-                        _log.Warning("Waiting {TotalSeconds} seconds before retrying again", timeToWait.TotalSeconds);
-                        return timeToWait;
+                        _log.Warning(
+                            "Request to {Url} failed, retrying {RetryAttempt} of {RetryCount} in {Delay}s",
+                            context["RequestUri"],
+                            retryAttempt,
+                            _options.RetryCount,
+                            timeSpan.TotalSeconds
+                        );
+
+                        SendProgressUpdate(
+                            _options.Action,
+                            response.Result,
+                            retryAttempt,
+                            _options.RetryCount,
+                            (int)timeSpan.TotalSeconds
+                        );
                     }
                 )
-                .ExecuteAsync(async () =>
-                {
-                    try
-                    {
-                        return await _client.DownloadDataAsync(request);
-                    }
-                    catch (Exception e)
-                    {
-                        _log.Error(e);
-
-                        // Needs to throw to catch and retry again
-                        throw;
-                    }
-                });
-
-            if (response == null || response.Length < 200)
-            {
-                var errorMsg = $"Image response was empty - Url: {_client.BuildUri(request)}";
-                var result = Result.Fail(errorMsg);
-                result.Add408RequestTimeoutError(errorMsg).LogError();
-                return result;
-            }
-
-            return Result.Ok(response);
-        }
-        catch (Exception e)
-        {
-            var result = Result.Fail(new ExceptionalError(e));
-            if (e.Message.Contains("The operation has timed out"))
-                return result.Add408RequestTimeoutError().LogError();
-
-            return result;
-        }
+        );
     }
 
-    #endregion
+    public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
+    {
+        if (_log.IsLogLevelEnabled(LogEventLevel.Verbose))
+        {
+            var curl = _defaultClient.GenerateCurlInString(request);
+            _log.Verbose("Request CURL: {RequestUrl}", curl);
+        }
+        else
+            _log.Debug("Request: {RequestUrl}", request.RequestUri?.ToString());
 
-    #endregion
+        HttpResponseMessage? response = null;
+        var requestUri = request.RequestUri?.ToString();
+        try
+        {
+            response = await _policyWrap.ExecuteAsync(
+                async (context) =>
+                {
+                    context["RequestUri"] = requestUri;
+
+                    if (response != null)
+                    {
+                        // Clone the request to avoid issues with the content being disposed
+                        request = await CloneAsync(request);
+                    }
+
+                    response = await _defaultClient.SendAsync(request);
+                    return response;
+                },
+                new Context { { "RequestUri", requestUri } }
+            );
+        }
+        catch (TimeoutRejectedException _)
+        {
+            _log.Error("Request to {Url} timed out.", requestUri);
+            response = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.GatewayTimeout,
+                Content = new StringContent("The gateway timed out while attempting to process the request."),
+                ReasonPhrase = "Gateway Timeout",
+                RequestMessage = request,
+            };
+        }
+        catch (HttpRequestException ex)
+        {
+            _log.Error(
+                "Exception Error ({ExceptionName}) sending request to {Url}",
+                nameof(HttpRequestException),
+                requestUri,
+                0
+            );
+            response = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.ServiceUnavailable,
+                Content = new StringContent(ex.Message),
+                ReasonPhrase = ex.HttpRequestError.ToString(),
+                RequestMessage = request,
+            };
+        }
+        catch (Exception ex)
+        {
+            _log.Error("Exception Error ({ExceptionName}) sending request to {Url}", nameof(ex.GetType), requestUri, 0);
+            response = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.InternalServerError,
+                Content = new StringContent(ex.Message),
+                ReasonPhrase = ex.Message,
+                RequestMessage = request,
+            };
+        }
+        finally
+        {
+            // Send final progress update
+            SendProgressUpdate(_options.Action, response, _options.RetryCount, _options.RetryCount);
+        }
+
+        return response;
+    }
+
+    public async Task<HttpRequestMessage> CloneAsync(HttpRequestMessage request)
+    {
+        var clone = new HttpRequestMessage(request.Method, request.RequestUri);
+
+        // Copy the request's content (via a MemoryStream) into the cloned object
+        var ms = new MemoryStream();
+        if (request.Content != null)
+        {
+            await request.Content.CopyToAsync(ms).ConfigureAwait(false);
+            ms.Position = 0;
+            clone.Content = new StreamContent(ms);
+
+            // Copy the content headers
+            foreach (var h in request.Content.Headers)
+                clone.Content.Headers.Add(h.Key, h.Value);
+        }
+
+        clone.Version = request.Version;
+
+        foreach (var option in request.Options)
+            clone.Options.Set(new HttpRequestOptionsKey<object?>(option.Key), option.Value);
+
+        foreach (var header in request.Headers)
+            clone.Headers.TryAddWithoutValidation(header.Key, header.Value);
+
+        return clone;
+    }
+
+    private void SendProgressUpdate(
+        Action<PlexApiClientProgress>? action,
+        HttpResponseMessage? response,
+        int retryAttempt,
+        int retryCount,
+        int timeToWaitSeconds = 0
+    )
+    {
+        if (action == null || response == null)
+            return;
+
+        var request = response.RequestMessage;
+        var url = request?.RequestUri?.ToString() ?? "Unknown";
+        var msg = "Request successful!";
+
+        if (response is { IsSuccessStatusCode: false, StatusCode: not HttpStatusCode.RequestTimeout })
+        {
+            msg =
+                $"Request to: {url} failed, waiting {timeToWaitSeconds} seconds before retrying again ({retryAttempt} of {retryCount})";
+        }
+
+        if (response is { IsSuccessStatusCode: false, StatusCode: HttpStatusCode.RequestTimeout })
+        {
+            msg =
+                $"Request to: {url} timed-out, waiting {timeToWaitSeconds} seconds before retrying again ({retryAttempt} of {retryCount})";
+        }
+
+        action.Invoke(
+            new PlexApiClientProgress
+            {
+                StatusCode = (int)response.StatusCode,
+                Message = msg,
+                RetryAttemptIndex = retryAttempt,
+                RetryAttemptCount = retryCount,
+                TimeToNextRetry = timeToWaitSeconds,
+                Completed = response.IsSuccessStatusCode || retryAttempt == retryCount,
+                ErrorMessage = response.ReasonPhrase ?? "",
+                ConnectionSuccessful = response.IsSuccessStatusCode,
+            }
+        );
+    }
 }

@@ -14,23 +14,22 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
     public async Task ShouldStartQueuedMovieDownloadTaskOnStartCommand_WhenNoTasksAreDownloading()
     {
         // Arrange
-        Seed = 5594564;
-        var serverUri = SpinUpPlexServer(config =>
+        await CreateContainer(config =>
         {
-            config.DownloadFileSizeInMb = 50;
+            config.Seed = 5594564;
+            config.PlexMockApiOptions = x =>
+            {
+                x.MockServers.Add(new PlexMockServerConfig { DownloadFileSizeInMb = 50 });
+            };
+            config.DatabaseOptions = x =>
+            {
+                x.PlexAccountCount = 1;
+                x.PlexServerCount = 1;
+                x.PlexLibraryCount = 2;
+                x.MovieCount = 10;
+                x.MovieDownloadTasksCount = 1;
+            };
         });
-
-        await SetupDatabase(config =>
-        {
-            config.MockServerUris.Add(serverUri);
-            config.PlexAccountCount = 1;
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 2;
-            config.MovieCount = 10;
-            config.MovieDownloadTasksCount = 1;
-        });
-
-        await CreateContainer();
         var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync();
         downloadTasks.Count.ShouldBe(1);
         var downloadTask = downloadTasks[0].Children[0];

@@ -2,38 +2,37 @@ using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
 using PlexRipper.Application;
-using Serilog.Events;
 
 namespace IntegrationTests.DownloadManager.DownloadCommands;
 
 public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTests
 {
     public DownloadCommands_PauseDownload_IntegrationTests(ITestOutputHelper output)
-        : base(output, LogEventLevel.Verbose) { }
+        : base(output) { }
 
     [Fact]
     public async Task ShouldPauseADownloadTask_WhenDownloadTaskIsInProgressAndIsPaused()
     {
         // Arrange
 
-        var serverUri = SpinUpPlexServer(config =>
+        await CreateContainer(config =>
         {
-            config.DownloadFileSizeInMb = 50;
-        });
-        await SetupDatabase(config =>
-        {
-            config.MockServerUris.Add(serverUri);
-            config.PlexAccountCount = 1;
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.MovieCount = 1;
-            config.MovieDownloadTasksCount = 1;
-            config.DownloadFileSizeInMb = 50;
-        });
+            config.DownloadSpeedLimitInKib = 5000;
+            config.DatabaseOptions = x =>
+            {
+                x.PlexAccountCount = 1;
+                x.PlexServerCount = 1;
+                x.PlexLibraryCount = 1;
+                x.MovieCount = 1;
+                x.MovieDownloadTasksCount = 1;
+                x.DownloadFileSizeInMb = 50;
+            };
 
-        SetupMockPlexApi();
-
-        await CreateContainer(config => config.DownloadSpeedLimitInKib = 5000);
+            config.PlexMockApiOptions = x =>
+            {
+                x.MockServers.Add(new PlexMockServerConfig() { DownloadFileSizeInMb = 50 });
+            };
+        });
 
         var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync();
         var childDownloadTask = downloadTasks[0].Children[0];

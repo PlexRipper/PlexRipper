@@ -32,7 +32,6 @@ public static class PlexMediaSlimDTOMapper
         new()
         {
             Id = source.Id,
-            Index = source.Index,
             Title = source.Title,
             SortTitle = source.SortTitle,
             Year = source.Year,
@@ -77,7 +76,6 @@ public static class PlexMediaSlimDTOMapper
         new()
         {
             Id = source.Id,
-            Index = source.Index,
             Title = source.Title,
             SortTitle = source.SortTitle,
             Year = source.Year,
@@ -119,8 +117,6 @@ public static class PlexMediaSlimDTOMapper
         new()
         {
             Id = source.Id,
-
-            Index = source.Index,
             Title = source.Title,
             SortTitle = source.SortTitle,
             Year = source.Year,
@@ -146,7 +142,6 @@ public static class PlexMediaSlimDTOMapper
         new()
         {
             Id = source.Id,
-            Index = source.Index,
             Title = source.Title,
             SortTitle = source.SortTitle,
             Year = source.Year,

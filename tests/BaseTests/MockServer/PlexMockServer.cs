@@ -10,7 +10,7 @@ using WireMock.Types;
 namespace PlexRipper.BaseTests;
 
 /// <summary>
-/// Used to mock a individual Plex server, this is not the same as the PlexApi which is a central server
+/// Used to mock an individual Plex server, this is not the same as the PlexApi which is a central server
 /// Source: https://github.com/WireMock-Net/WireMock.Net/
 /// </summary>
 public class PlexMockServer : IDisposable
@@ -19,21 +19,15 @@ public class PlexMockServer : IDisposable
     private readonly PlexMockServerConfig _config;
     private readonly Action<PlexApiDataConfig> _fakeDataConfig;
 
-    #region Constructor
-
-    public PlexMockServer(Action<PlexMockServerConfig> options = null)
-        : this(PlexMockServerConfig.FromOptions(options)) { }
-
-    public PlexMockServer(PlexMockServerConfig options = null)
+    public PlexMockServer(PlexMockServerConfig? options = null)
     {
-        _config = options;
-        _fakeDataConfig = _config?.FakeDataConfig;
+        _config = options ?? new PlexMockServerConfig();
+        _fakeDataConfig = _config.FakeDataConfig;
 
         Server = WireMockServer.Start(
             new WireMockServerSettings()
             {
-                // TODO Migrate this option to the new version: https://github.com/WireMock-Net/WireMock.Net/issues/1086
-                //ThrowExceptionWhenMatcherFails = true,
+                Logger = new WiremockLogger(_log),
                 HostingScheme = HostingScheme.HttpAndHttps,
             }
         );
@@ -43,10 +37,6 @@ public class PlexMockServer : IDisposable
         Setup();
         _log.Debug("Created {NameOfPlexMockServer} with url: {ServerUri}", nameof(PlexMockServer), ServerUri);
     }
-
-    #endregion
-
-    #region Properties
 
     public WireMockServer Server { get; }
 
@@ -58,41 +48,36 @@ public class PlexMockServer : IDisposable
 
     public bool IsStarted => Server.IsStarted;
 
-    #endregion
-
-    #region Public Methods
-
     private void Setup()
     {
         SetupServerIdentity();
 
-        // Setup the Plex libraries
+        // Set up the Plex libraries
         var librarySections = FakePlexApiData.GetLibraryMediaContainer(_fakeDataConfig);
 
         Server
-            .Given(Request.Create().WithPath(PlexApiPaths.LibrarySectionsPath).WithParam("X-Plex-Token").UsingGet())
+            .Given(Request.Create().WithPath(PlexApiPaths.LibrarySectionsPath).UsingGet())
             .RespondWith(
                 Response
                     .Create()
                     .WithStatusCode(200)
                     .WithHeader("Content-Type", "application/json")
-                    .WithBodyAsJson(librarySections)
+                    .WithPlexSdkJsonContent(librarySections)
             );
 
-        // Setup the media metadata for each library
+        // Set up the media metadata for each library
         foreach (var librarySection in librarySections.MediaContainer.Directory)
         {
             var libraryData = FakePlexApiData.GetPlexLibrarySectionAllResponse(librarySection, _fakeDataConfig);
             var url = PlexApiPaths.GetLibrariesSectionsPath(librarySection.Key);
-            _log.Debug("Url registered: {Url}", url);
             Server
-                .Given(Request.Create().WithPath(url).WithParam("X-Plex-Token").UsingGet())
+                .Given(Request.Create().WithPath(url).UsingGet())
                 .RespondWith(
                     Response
                         .Create()
                         .WithStatusCode(200)
                         .WithHeader("Content-Type", "application/json")
-                        .WithBodyAsJson(libraryData)
+                        .WithPlexSdkJsonContent(libraryData)
                 );
         }
 
@@ -108,7 +93,7 @@ public class PlexMockServer : IDisposable
                     .Create()
                     .WithStatusCode(HttpStatusCode.OK)
                     .WithHeader("Content-Type", "application/json")
-                    .WithBodyAsJson(FakePlexApiData.GetPlexServerIdentityResponse(_fakeDataConfig))
+                    .WithPlexSdkJsonContent(FakePlexApiData.GetPlexServerIdentityResponse(_fakeDataConfig))
             );
     }
 
@@ -120,7 +105,7 @@ public class PlexMockServer : IDisposable
 
             _log.Debug("Created file to be downloaded with length: {DownloadFileSize}", downloadFile.LongLength);
             Server
-                .Given(Request.Create().WithPath(PlexMockServerConfig.FileUrl).WithParam("X-Plex-Token").UsingGet())
+                .Given(Request.Create().WithPath(PlexMockServerConfig.FileUrl).UsingGet())
                 .RespondWith(
                     Response
                         .Create()
@@ -132,11 +117,9 @@ public class PlexMockServer : IDisposable
         }
     }
 
-    #endregion
-
     public void Dispose()
     {
         Server.Stop();
-        Server?.Dispose();
+        Server.Dispose();
     }
 }

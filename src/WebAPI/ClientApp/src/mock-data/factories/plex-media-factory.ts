@@ -1,7 +1,7 @@
 import { randMovie, randNumber, randRecentDate } from '@ngneat/falso';
 import { times } from 'lodash-es';
 import { checkConfig, incrementSeed, type MockConfig } from '@mock';
-import { PlexMediaType, type PlexLibraryDTO, type PlexMediaSlimDTO } from '@dto';
+import { PlexMediaType, type PlexMediaSlimDTO } from '@dto';
 
 let plexMediaIdIndex = 1;
 
@@ -17,7 +17,7 @@ export function generatePlexMedia({
 	plexLibraryId: number;
 	plexServerId: number;
 	type: PlexMediaType;
-	partialData?: Partial<PlexLibraryDTO>;
+	partialData?: Partial<PlexMediaSlimDTO>;
 	config?: Partial<MockConfig>;
 }): PlexMediaSlimDTO {
 	checkConfig(config);

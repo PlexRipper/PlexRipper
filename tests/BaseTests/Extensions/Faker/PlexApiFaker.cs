@@ -5,17 +5,17 @@ namespace PlexRipper.BaseTests;
 
 public static class PlexApiFaker
 {
-    public static PlexApi PlexApi(this Faker faker)
+    public static PlexApiDataSet PlexApi(this Faker faker)
     {
-        return ContextHelper.GetOrSet(faker, () => new PlexApi(faker));
+        return ContextHelper.GetOrSet(faker, () => new PlexApiDataSet(faker));
     }
 }
 
-public class PlexApi : DataSet
+public class PlexApiDataSet : DataSet
 {
     private readonly Faker _faker;
 
-    public PlexApi(Faker faker)
+    public PlexApiDataSet(Faker faker)
     {
         _faker = faker;
     }

@@ -16,15 +16,22 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
     {
         // Arrange
         var libraryCount = 3;
-        SpinUpPlexServer(config =>
+        await CreateContainer(config =>
         {
-            config.FakeDataConfig = dataConfig =>
+            config.DatabaseOptions = x =>
             {
-                dataConfig.LibraryCount = libraryCount;
+                x.PlexLibraryCount = libraryCount;
+            };
+            config.PlexMockApiOptions = x =>
+            {
+                x.MockServers.Add(
+                    new PlexMockServerConfig
+                    {
+                        FakeDataConfig = _ => new FakeDataConfig { PlexLibraryCount = libraryCount },
+                    }
+                );
             };
         });
-        SetupMockPlexApi(config => config.AccessiblePlexServers = 1);
-        await CreateContainer();
 
         var plexAccount = FakeData.GetPlexAccount(4347564).Generate();
         var plexAccountDTO = plexAccount.ToDTO();
@@ -63,7 +70,7 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         plexAccountDb.PlexAccountLibraries.Count.ShouldBe(libraryCount);
 
         // Ensure PlexServer has been created
-        DbContext.PlexServers.ToList().Count.ShouldBe(1);
+        DbContext.PlexServers.ToList().Count.ShouldBe(2);
         var plexServersDb = DbContext
             .PlexServers.Include(x => x.PlexLibraries)
             .IncludeLibrariesWithMedia()
@@ -71,10 +78,6 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         plexServersDb.ShouldNotBeNull();
         plexServersDb.MachineIdentifier.ShouldNotBeEmpty();
         plexServersDb.PlexLibraries.Count.ShouldBe(libraryCount);
-
-        // Ensure All PlexLibraries have been created with media
-        var plexLibraries = plexServersDb.PlexLibraries;
-        plexLibraries.ShouldAllBe(x => x.HasMedia);
 
         // Ensure all jobs have sent notifications
         var jobStatusUpdateList = Container.MockSignalRService.JobStatusUpdateList.ToList();

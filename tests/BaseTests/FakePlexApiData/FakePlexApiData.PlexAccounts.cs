@@ -1,16 +1,18 @@
 ﻿using Bogus;
+using LukeHagar.PlexAPI.SDK.Models.Requests;
 using PlexRipper.PlexApi;
-using PlexRipper.PlexApi.Api.Users.SignIn;
 
 namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
-    public static Faker<SignInResponse> GetPlexSignInResponse(Action<UnitTestDataConfig>? options = null)
+    public static Faker<PostUsersSignInDataUserPlexAccount> GetPlexSignInResponse(
+        Action<UnitTestDataConfig>? options = null
+    )
     {
         var config = UnitTestDataConfig.FromOptions(options);
 
-        return new Faker<SignInResponse>()
+        return new Faker<PostUsersSignInDataUserPlexAccount>()
             .StrictMode(true)
             .UseSeed(config.Seed)
             .RuleFor(x => x.Id, f => f.Random.Number(99999999))
@@ -27,7 +29,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.Protected, f => f.Random.Bool())
             .RuleFor(x => x.Thumb, f => f.Internet.UrlWithPath())
             .RuleFor(x => x.AuthToken, f => f.Random.Guid().ToString())
-            .RuleFor(x => x.MailingListStatus, _ => "unsubscribed")
+            .RuleFor(x => x.MailingListStatus, _ => PostUsersSignInDataMailingListStatus.Active)
             .RuleFor(x => x.MailingListActive, f => f.Random.Bool())
             .RuleFor(x => x.ScrobbleTypes, _ => "")
             .RuleFor(x => x.Country, _ => "EN")
@@ -50,18 +52,20 @@ public partial class FakePlexApiData
             .RuleFor(x => x.AdsConsent, _ => null)
             .RuleFor(x => x.AdsConsentSetAt, _ => null)
             .RuleFor(x => x.AdsConsentReminderAt, _ => null)
+            .RuleFor(x => x.Pin, _ => null)
+            .RuleFor(x => x.AttributionPartner, _ => null)
+            .RuleFor(x => x.Roles, _ => [""])
             .RuleFor(x => x.ExperimentalFeatures, f => f.Random.Bool())
             .RuleFor(x => x.TwoFactorEnabled, f => f.Random.Bool())
             .RuleFor(x => x.BackupCodesCreated, f => f.Random.Bool());
     }
 
-    public static PlexErrorsResponseDTO GetFailedPlexSignInResponse()
-    {
-        return new PlexErrorsResponseDTO()
+    public static PlexErrorsResponseDTO GetFailedPlexSignInResponse() =>
+        new()
         {
             Errors =
             [
-                new()
+                new PlexErrorDTO
                 {
                     Code = 1001,
                     Message = "User could not be authenticated",
@@ -69,5 +73,4 @@ public partial class FakePlexApiData
                 },
             ],
         };
-    }
 }

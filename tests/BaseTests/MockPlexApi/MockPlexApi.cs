@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using JustEat.HttpClientInterception;
 using Logging.Interface;
+using LukeHagar.PlexAPI.SDK.Models.Requests;
 using PlexRipper.PlexApi;
 
 namespace PlexRipper.BaseTests;
@@ -11,30 +12,23 @@ namespace PlexRipper.BaseTests;
 /// </summary>
 public class MockPlexApi
 {
-    #region Fields
-
     private readonly HttpClientInterceptorOptions _clientOptions;
     private readonly MockPlexApiConfig _config;
-    private readonly PlexApiDataConfig _fakeDataConfig;
     private readonly ILog _log;
     private readonly List<Uri> _serverUris;
     private readonly HttpClient _client = new();
 
-    #endregion
-
-    #region Constructors
-
-    public MockPlexApi(ILog log, Action<MockPlexApiConfig> options = null, List<Uri> serverUris = null)
+    public MockPlexApi(ILog log, Action<MockPlexApiConfig>? options = null, List<Uri>? serverUris = null)
     {
         _log = log;
-        _serverUris = serverUris;
+        _serverUris = serverUris ?? [];
         _config = MockPlexApiConfig.FromOptions(options);
-        _fakeDataConfig = _config.FakeDataConfig;
 
         _clientOptions = new HttpClientInterceptorOptions
         {
             // TODO https://github.com/justeat/httpclient-interception/issues/510
             ThrowOnMissingRegistration = true,
+
             OnMissingRegistration = message =>
             {
                 if (message.RequestUri != null && message.RequestUri.Host == "localhost")
@@ -64,16 +58,9 @@ public class MockPlexApi
                 return null;
             },
         };
-
         Setup();
         _log.Debug("{NameOfMockPlexApi} was set-up", nameof(MockPlexApi));
     }
-
-    #endregion
-
-    #region Methods
-
-    #region Private
 
     private void Setup()
     {
@@ -91,25 +78,27 @@ public class MockPlexApi
 
         if (!config.UnauthorizedAccessiblePlexServers)
         {
-            var servers = FakePlexApiData.GetServerResource().Generate(config.AccessiblePlexServers);
+            var servers = FakePlexApiData.GetServerResource().Generate(_serverUris.Count);
 
             for (var i = 0; i < _serverUris.Count; i++)
-            {
-                var uri = _serverUris[i];
-                if (i < servers.Count)
-                {
-                    servers[i].Connections[0].Uri = uri.ToString();
-                    servers[i].Connections[0].Protocol = uri.Scheme;
-                    servers[i].Connections[0].Address = uri.Host;
-                    servers[i].Connections[0].Port = uri.Port;
-                    servers[i].Connections[0].Local = true;
-                }
-            }
+                servers[i].Connections =
+                [
+                    new Connections
+                    {
+                        Protocol = Protocol.Https,
+                        Address = _serverUris[i].Host,
+                        Port = _serverUris[i].Port,
+                        Uri = _serverUris[i].ToString(),
+                        Local = true,
+                        Relay = false,
+                        IPv6 = false,
+                    },
+                ];
 
-            query.Responds().WithStatus(200).WithJsonContent(servers);
+            query.Responds().WithStatus(200).WithPlexSdkJsonContent(servers);
         }
         else
-            query.Responds().WithStatus(401).WithJsonContent(FakePlexApiData.GetFailedServerResourceResponse());
+            query.Responds().WithStatus(401).WithPlexSdkJsonContent(FakePlexApiData.GetFailedServerResourceResponse());
 
         query.RegisterWith(_clientOptions);
     }
@@ -123,10 +112,10 @@ public class MockPlexApi
             query
                 .Responds()
                 .WithStatus(201) // 201 is correct here, Plex for some reason gives this back on this request
-                .WithJsonContent(FakePlexApiData.GetPlexSignInResponse().Generate());
+                .WithPlexSdkJsonContent(FakePlexApiData.GetPlexSignInResponse().Generate());
         }
         else
-            query.Responds().WithStatus(401).WithJsonContent(FakePlexApiData.GetFailedPlexSignInResponse());
+            query.Responds().WithStatus(401).WithPlexSdkJsonContent(FakePlexApiData.GetFailedPlexSignInResponse());
 
         query.RegisterWith(_clientOptions);
     }
@@ -145,13 +134,10 @@ public class MockPlexApi
         _clientOptions.Register(builder);
     }
 
-    #endregion
-
-    #region Public
-
-    public HttpClient CreateClient() => _clientOptions.CreateHttpClient();
-
-    #endregion
-
-    #endregion
+    public HttpClient CreateClient()
+    {
+        var client = _clientOptions.CreateHttpClient();
+        client.DefaultRequestHeaders.Add("MockPlexApi", "true");
+        return client;
+    }
 }

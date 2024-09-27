@@ -1,15 +1,15 @@
 using Bogus;
-using PlexRipper.PlexApi.Api;
+using LukeHagar.PlexAPI.SDK.Models.Requests;
 
 namespace PlexRipper.BaseTests;
 
 public static partial class FakePlexApiData
 {
-    public static ServerIdentityResponse GetPlexServerIdentityResponse(Action<PlexApiDataConfig> options = null)
+    public static GetServerIdentityResponseBody GetPlexServerIdentityResponse(Action<PlexApiDataConfig> options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
-        var container = new Faker<ServerIdentityResponseMediaContainer>()
+        var container = new Faker<GetServerIdentityMediaContainer>()
             .StrictMode(true)
             .UseSeed(config.GetSeed())
             .RuleFor(x => x.Size, _ => 0)
@@ -17,7 +17,7 @@ public static partial class FakePlexApiData
             .RuleFor(x => x.MachineIdentifier, f => f.PlexApi().MachineIdentifier)
             .RuleFor(x => x.Version, f => f.PlexApi().PlexVersion);
 
-        return new Faker<ServerIdentityResponse>()
+        return new Faker<GetServerIdentityResponseBody>()
             .StrictMode(true)
             .UseSeed(config.GetSeed())
             .RuleFor(x => x.MediaContainer, _ => container.Generate())

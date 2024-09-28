@@ -31,14 +31,10 @@ public class SignalRService : ISignalRService
         _notificationHub = notificationHub;
     }
 
-    #region ProgressHub
-
     public async Task SendLibraryProgressUpdateAsync(LibraryProgress progress)
     {
         await _progressHub.Clients.All.LibraryProgress(progress);
     }
-
-    #region DownloadProgress
 
     public async Task SendDownloadProgressUpdateAsync(
         List<DownloadTaskGeneric> downloadTasks,
@@ -54,8 +50,6 @@ public class SignalRService : ISignalRService
 
         await _progressHub.Clients.All.ServerDownloadProgress(update.First(), cancellationToken);
     }
-
-    #endregion
 
     public async Task SendServerConnectionCheckStatusProgressAsync(ServerConnectionCheckStatusProgress progress)
     {
@@ -76,10 +70,6 @@ public class SignalRService : ISignalRService
         await _progressHub.Clients.All.SyncServerMediaProgress(syncServerMediaProgress);
     }
 
-    #endregion
-
-    #region NotificationHub
-
     public async Task SendNotificationAsync(Notification notification)
     {
         await _notificationHub.Clients.All.Notification(notification.ToDTO());
@@ -99,15 +89,9 @@ public class SignalRService : ISignalRService
             await SendRefreshNotificationAsync(dataType, cancellationToken);
     }
 
-    #endregion
-
-    #region JobStateNotification
-
     public async Task SendJobStatusUpdateAsync<T>(JobStatusUpdate<T> jobStatusUpdate)
         where T : class
     {
         await _progressHub.Clients.All.JobStatusUpdate(jobStatusUpdate.ToDTO());
     }
-
-    #endregion
 }

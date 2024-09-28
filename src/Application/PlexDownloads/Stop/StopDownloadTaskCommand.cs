@@ -59,7 +59,7 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
 
         _log.Information("Stopping {DownloadTaskFullTitle} from downloading", downloadTask.FullTitle);
 
-        if (await _downloadTaskScheduler.IsDownloading(key))
+        if (await _downloadTaskScheduler.IsDownloading(key, cancellationToken))
         {
             var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(key, cancellationToken);
             if (stopResult.IsFailed)

@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using System.Net;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Environment;
@@ -176,4 +175,10 @@ public static partial class StringExtensions
 
     [GeneratedRegex(@"[^\w\s]")]
     private static partial Regex RemoveWhiteSpaceRegex();
+
+    public static string GetFileName(this string path)
+    {
+        path = path.Replace(@"\", "/");
+        return Path.GetFileName(path);
+    }
 }

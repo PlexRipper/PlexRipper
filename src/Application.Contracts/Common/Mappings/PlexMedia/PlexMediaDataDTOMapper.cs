@@ -50,7 +50,7 @@ public static class PlexMediaDataDTOMapper
         {
             ObfuscatedFilePath = source.ObfuscatedFilePath,
             Duration = source.Duration,
-            File = source.File,
+            File = source.File.GetFileName(),
             Size = source.Size,
             Container = source.Container,
             VideoProfile = source.VideoProfile,

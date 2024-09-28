@@ -275,7 +275,7 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
             {
                 if (File.Exists(databaseFilePath))
                 {
-                    var destinationPath = Path.Combine(dbBackUpPath, Path.GetFileName(databaseFilePath));
+                    var destinationPath = Path.Combine(dbBackUpPath, databaseFilePath.GetFileName());
                     try
                     {
                         File.Copy(databaseFilePath, destinationPath);

@@ -47,28 +47,8 @@ public class StartDownloadTaskEndpoint : BaseEndpoint<StartDownloadTaskEndpointR
 
     public override async Task HandleAsync(StartDownloadTaskEndpointRequest req, CancellationToken ct)
     {
-        var downloadTask = await _dbContext.GetDownloadTaskAsync(req.DownloadTaskGuid, cancellationToken: ct);
-        if (downloadTask is null)
-        {
-            await SendFluentResult(
-                ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), req.DownloadTaskGuid).LogWarning(),
-                ct
-            );
-            return;
-        }
+        var startResult = await _mediator.Send(new StartDownloadTaskCommand(req.DownloadTaskGuid), ct);
 
-        if (downloadTask.IsDownloadable)
-        {
-            var startResult = await _downloadTaskScheduler.StartDownloadTaskJob(downloadTask.ToKey());
-            await SendFluentResult(startResult, ct);
-
-            await _mediator.Publish(new CheckDownloadQueueNotification(downloadTask.PlexServerId), ct);
-            return;
-        }
-
-        await SendFluentResult(
-            Result.Fail($"Failed to start downloadTask {downloadTask.FullTitle}, it's not directly downloadable."),
-            ct
-        );
+        await SendFluentResult(startResult, ct);
     }
 }

@@ -56,7 +56,7 @@ public class PauseDownloadTaskCommandHandler : IRequestHandler<PauseDownloadTask
                 continue;
             }
 
-            _log.Information("Pausing DownloadTask with id {DownloadTaskGuid} from downloading", downloadTaskKey.Id);
+            _log.Information("Pausing DownloadTask with id {DownloadTaskTitle} from downloading", downloadTask.Title);
 
             if (await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken))
             {

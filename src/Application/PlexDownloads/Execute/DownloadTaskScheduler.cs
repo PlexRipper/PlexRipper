@@ -50,9 +50,11 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
 
         var jobKey = DownloadJob.GetJobKey(downloadTaskKey.Id);
         if (!await _scheduler.IsJobRunning(jobKey))
+        {
             return Result
                 .Fail($"{nameof(DownloadJob)} with {jobKey} cannot be stopped because it is not running")
                 .LogWarning();
+        }
 
         var stopResult = await _scheduler.StopJob(jobKey);
         if (!stopResult)
@@ -75,7 +77,7 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
     public Task<bool> IsDownloading(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)
     {
         var jobKey = DownloadJob.GetJobKey(downloadTaskKey.Id);
-        return _scheduler.IsJobRunningAsync(jobKey, cancellationToken: cancellationToken);
+        return _scheduler.IsJobRunningAsync(jobKey, cancellationToken);
     }
 
     public async Task<bool> IsServerDownloading(int plexServerId)
@@ -83,5 +85,13 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
         var data = await _scheduler.GetRunningJobDataMaps(typeof(DownloadJob));
         return data.Select(x => x.GetJsonValue<DownloadTaskKey>(DownloadJob.DownloadTaskIdParameter).PlexServerId)
             .Any(x => x == plexServerId);
+    }
+
+    public async Task<List<DownloadTaskKey>> GetCurrentlyDownloadingKeysByServer(int plexServerId)
+    {
+        var data = await _scheduler.GetRunningJobDataMaps(typeof(DownloadJob));
+        return data.Select(x => x.GetJsonValue<DownloadTaskKey>(DownloadJob.DownloadTaskIdParameter))
+            .Where(x => x.PlexServerId == plexServerId)
+            .ToList();
     }
 }

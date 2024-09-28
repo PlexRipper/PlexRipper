@@ -112,7 +112,7 @@ export class PlexLibrary {
  *
  * @tags Plexlibrary
  * @name SetPlexLibraryDefaultDestinationByIdEndpoint
- * @request PUT:/api/PlexLibrary/{plexLibraryId}/default/destination/{folderPathId}
+ * @request GET:/api/PlexLibrary/{plexLibraryId}/default/destination/{folderPathId}
 
  */
   setPlexLibraryDefaultDestinationByIdEndpoint = (
@@ -123,7 +123,7 @@ export class PlexLibrary {
     from(
       Axios.request<ResultDTO>({
         url: `/api/PlexLibrary/${plexLibraryId}/default/destination/${folderPathId}`,
-        method: "PUT",
+        method: "GET",
         format: "json",
         ...params,
       }),

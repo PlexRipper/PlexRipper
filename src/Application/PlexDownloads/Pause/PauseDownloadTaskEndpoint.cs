@@ -1,8 +1,6 @@
 using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
-using Logging.Interface;
 using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
@@ -24,24 +22,13 @@ public class PauseDownloadTaskEndpointRequestValidator : Validator<PauseDownload
 
 public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointRequest>
 {
-    private readonly ILog _log;
-    private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
-    private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/pause/{DownloadTaskGuid}";
 
-    public PauseDownloadTaskEndpoint(
-        ILog log,
-        IPlexRipperDbContext dbContext,
-        IMediator mediator,
-        IDownloadTaskScheduler downloadTaskScheduler
-    )
+    public PauseDownloadTaskEndpoint(IMediator mediator)
     {
-        _log = log;
-        _dbContext = dbContext;
         _mediator = mediator;
-        _downloadTaskScheduler = downloadTaskScheduler;
     }
 
     public override void Configure()
@@ -57,37 +44,8 @@ public class PauseDownloadTaskEndpoint : BaseEndpoint<PauseDownloadTaskEndpointR
 
     public override async Task HandleAsync(PauseDownloadTaskEndpointRequest req, CancellationToken ct)
     {
-        _log.Information("Pausing DownloadTask with id {DownloadTaskGuid} from downloading", req.DownloadTaskGuid);
+        var pauseResult = await _mediator.Send(new PauseDownloadTaskCommand(req.DownloadTaskGuid), ct);
 
-        var downloadTaskKey = await _dbContext.GetDownloadTaskKeyAsync(req.DownloadTaskGuid, ct);
-        if (downloadTaskKey is null)
-        {
-            await SendFluentResult(
-                ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), req.DownloadTaskGuid),
-                ct
-            );
-            return;
-        }
-
-        var stopResult = await _downloadTaskScheduler.StopDownloadTaskJob(downloadTaskKey, ct);
-        if (stopResult.IsFailed)
-        {
-            await SendFluentResult(stopResult, ct);
-            return;
-        }
-
-        await _downloadTaskScheduler.AwaitDownloadTaskJob(req.DownloadTaskGuid, ct);
-
-        _log.Debug(
-            "DownloadTask {DownloadTaskId} has been Paused, meaning no downloaded files have been deleted",
-            req.DownloadTaskGuid
-        );
-
-        // Update the download task status
-        await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
-
-        await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTaskKey), ct);
-
-        await SendFluentResult(Result.Ok(), ct);
+        await SendFluentResult(pauseResult, ct);
     }
 }

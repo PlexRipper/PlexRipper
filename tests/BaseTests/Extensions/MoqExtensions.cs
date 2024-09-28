@@ -48,6 +48,16 @@ public static class MoqExtensions
 
     #region Verify
 
+    public static void VerifyMediator(this AutoMock mock, Func<INotification> notification, Times times)
+    {
+        mock.Mock<IMediator>().Verify(x => x.Publish(notification.Invoke(), It.IsAny<CancellationToken>()), times);
+    }
+
+    public static void VerifyMediator(this AutoMock mock, Func<INotification> notification, Func<Times> times)
+    {
+        mock.Mock<IMediator>().Verify(x => x.Publish(notification.Invoke(), It.IsAny<CancellationToken>()), times);
+    }
+
     public static void VerifyMediator(this AutoMock mock, Func<IRequest> request, Times times)
     {
         mock.Mock<IMediator>().Verify(x => x.Send(request.Invoke(), It.IsAny<CancellationToken>()), times);

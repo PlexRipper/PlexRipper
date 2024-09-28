@@ -43,13 +43,16 @@ public class StartDownloadTaskCommandHandler : IRequestHandler<StartDownloadTask
 
         var downloadableChildTaskKeys = await _dbContext.GetDownloadableChildTaskKeys(key, cancellationToken);
 
+        var nextDownloadTaskKey = downloadableChildTaskKeys.FirstOrDefault();
+
         // Check if this server is already downloading something and then pause it
         var activeDownloadKeys = await _downloadTaskScheduler.GetCurrentlyDownloadingKeysByServer(key.PlexServerId);
         if (activeDownloadKeys.Any())
         {
             // avoid pausing if the download task is marked to be started
-            foreach (var downloadKey in activeDownloadKeys.Where(x => !downloadableChildTaskKeys.Contains(x)))
-                await _mediator.Send(new PauseDownloadTaskCommand(downloadKey.Id), cancellationToken);
+            foreach (var downloadKey in activeDownloadKeys)
+                if (downloadKey != nextDownloadTaskKey)
+                    await _mediator.Send(new PauseDownloadTaskCommand(downloadKey.Id), cancellationToken);
         }
 
         for (var i = 0; i < downloadableChildTaskKeys.Count; i++)
@@ -70,9 +73,9 @@ public class StartDownloadTaskCommandHandler : IRequestHandler<StartDownloadTask
             }
 
             // Start the download task
-            _log.Information("Starting DownloadTask with id: {DownloadTaskGuid}", downloadTaskKey.Id);
             if (!await _downloadTaskScheduler.IsDownloading(downloadTaskKey, cancellationToken))
             {
+                _log.Information("Starting DownloadTask with id: {DownloadTaskGuid}", downloadTaskKey.Id);
                 var startResult = await _downloadTaskScheduler.StartDownloadTaskJob(downloadTaskKey);
                 if (startResult.IsFailed)
                     return startResult.LogError();

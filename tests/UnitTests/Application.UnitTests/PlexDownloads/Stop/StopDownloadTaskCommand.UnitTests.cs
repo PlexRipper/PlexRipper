@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application.UnitTests.Stop;
 
-public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<StopDownloadTaskCommandHandler>
+public class StopDownloadTaskCommand_UnitTests : BaseUnitTest<StopDownloadTaskCommandHandler>
 {
-    public DownloadCommands_StopDownloadTasksAsync_UnitTests(ITestOutputHelper output)
+    public StopDownloadTaskCommand_UnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -29,7 +29,7 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
     {
         // Arrange
         await SetupDatabase(config => config.MovieDownloadTasksCount = 2);
-        var movieDownloadTasks = await GetDbContext().DownloadTaskMovie.ToListAsync();
+        var movieDownloadTasks = await IDbContext.DownloadTaskMovie.ToListAsync();
 
         mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))

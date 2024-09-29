@@ -54,7 +54,7 @@ public class GetDownloadTaskByGuidEndpoint : BaseEndpoint<GetDownloadTaskByGuidR
         }
 
         // Add DownloadUrl to DownloadTaskDTO
-        if (!downloadTask.IsDownloadable)
+        if (downloadTask.IsDownloadable)
         {
             var downloadUrl = await _dbContext.GetDownloadUrl(
                 downloadTask.PlexServerId,

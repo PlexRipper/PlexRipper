@@ -47,11 +47,6 @@ public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpoin
 
         var plexAccounts = await query.ToListAsync(ct);
 
-        if (!plexAccounts.Any() && req.EnabledOnly)
-            _log.WarningLine("Could not find any enabled accounts");
-        else
-            _log.Debug("Returned {PlexAccountCount} accounts", plexAccounts.Count);
-
         await SendFluentResult(Result.Ok(plexAccounts), x => x.ToDTO(), ct);
     }
 }

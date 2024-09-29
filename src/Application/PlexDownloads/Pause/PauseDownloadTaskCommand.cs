@@ -66,10 +66,10 @@ public class PauseDownloadTaskCommandHandler : IRequestHandler<PauseDownloadTask
                     // Since this command is done per server, we can abort since there will at most be 1 download task downloading at a time and if that fails we can't continue
                     return stopResult.LogError();
                 }
-            }
 
-            // Update the download task status
-            await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
+                // Update the download task status
+                await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
+            }
 
             _log.Debug(
                 "DownloadTask {DownloadTaskId} has been Paused, meaning no downloaded files have been deleted",
@@ -77,9 +77,9 @@ public class PauseDownloadTaskCommandHandler : IRequestHandler<PauseDownloadTask
             );
 
             // TODO delete file tasks but first check if already merging
-
-            await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTaskKey), cancellationToken);
         }
+
+        await _mediator.Send(new DownloadTaskUpdatedNotification(key), cancellationToken);
 
         return Result.Ok();
     }

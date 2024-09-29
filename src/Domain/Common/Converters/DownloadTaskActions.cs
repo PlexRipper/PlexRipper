@@ -16,29 +16,9 @@ public static class DownloadTaskActions
 
     private const string StatusRestart = "restart";
 
-    private static readonly List<DownloadStatus> AllStatuses =
-    [
-        DownloadStatus.Queued,
-        DownloadStatus.Downloading,
-        DownloadStatus.DownloadFinished,
-        DownloadStatus.Completed,
-        DownloadStatus.Deleted,
-        DownloadStatus.Unknown,
-        DownloadStatus.Merging,
-        DownloadStatus.Moving,
-    ];
-
-    private static readonly List<DownloadStatus> AnyStatuses =
-    [
-        DownloadStatus.Error,
-        DownloadStatus.Downloading,
-        DownloadStatus.Paused,
-        DownloadStatus.Stopped
-    ];
-
     public static List<string> Convert(DownloadStatus downloadStatus)
     {
-        var actions = new List<string> { StatusDetails, };
+        var actions = new List<string> { StatusDetails };
 
         switch (downloadStatus)
         {
@@ -87,15 +67,32 @@ public static class DownloadTaskActions
     /// <returns>The aggregated <see cref="DownloadStatus"/>.</returns>
     public static DownloadStatus Aggregate(List<DownloadStatus> downloadStatusList)
     {
-        foreach (var status in AnyStatuses.Where(status => downloadStatusList.Any(x => x == status)))
-        {
-            return status;
-        }
+        // If any of these statuses are present, return that status.
+        List<DownloadStatus> anyStatuses =
+        [
+            DownloadStatus.Error,
+            DownloadStatus.Downloading,
+            DownloadStatus.Paused,
+            DownloadStatus.Stopped,
+            DownloadStatus.Merging,
+            DownloadStatus.Moving,
+        ];
 
-        foreach (var status in AllStatuses.Where(status => downloadStatusList.All(x => x == status)))
-        {
+        foreach (var status in anyStatuses.Where(status => downloadStatusList.Any(x => x == status)))
             return status;
-        }
+
+        // Only return this status if all statuses are the same.
+        List<DownloadStatus> allStatuses =
+        [
+            DownloadStatus.Queued,
+            DownloadStatus.Downloading,
+            DownloadStatus.DownloadFinished,
+            DownloadStatus.Completed,
+            DownloadStatus.Deleted,
+            DownloadStatus.Unknown,
+        ];
+        foreach (var status in allStatuses.Where(status => downloadStatusList.All(x => x == status)))
+            return status;
 
         if (
             downloadStatusList.Any(x => x == DownloadStatus.DownloadFinished)

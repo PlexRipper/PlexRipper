@@ -123,10 +123,19 @@ public class DownloadCommands_PauseDownloadTasksAsync_UnitTests : BaseUnitTest<P
         result.IsSuccess.ShouldBeTrue();
         mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
-        mock.VerifyMediator(It.IsAny<DownloadTaskUpdatedNotification>, Times.Exactly(4));
+        mock.VerifyMediator(It.IsAny<DownloadTaskUpdatedNotification>, Times.Once);
 
         var downloadTasks = await IDbContext.GetDownloadableChildTasks(tvShowDownloadTasks.First().ToKey());
-        foreach (var downloadTaskDb in downloadTasks)
+        for (var index = 0; index < downloadTasks.Count; index++)
+        {
+            var downloadTaskDb = downloadTasks[index];
+            if (index > 0)
+            {
+                downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Queued);
+                continue;
+            }
+
             downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Paused);
+        }
     }
 }

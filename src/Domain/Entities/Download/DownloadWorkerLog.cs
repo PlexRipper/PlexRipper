@@ -41,5 +41,7 @@ public class DownloadWorkerLog : BaseEntity
     /// </summary>
     public required int DownloadWorkerTaskId { get; init; }
 
+    public required Guid DownloadTaskId { get; init; }
+
     #endregion
 }

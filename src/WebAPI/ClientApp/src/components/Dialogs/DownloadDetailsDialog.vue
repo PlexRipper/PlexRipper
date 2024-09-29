@@ -7,12 +7,15 @@
 		@opened="onOpen">
 		<template #title>
 			<template v-if="downloadTask">
-				<QMediaTypeIcon
-					:size="36"
-					:media-type="downloadTask.mediaType" />
-				<span data-cy="download-details-dialog-title">
-					{{ downloadTask.fullTitle }}
-				</span>
+				<QText
+					cy="download-details-dialog-title"
+					:value="downloadTask.fullTitle">
+					<template #prepend>
+						<QMediaTypeIcon
+							:size="36"
+							:media-type="downloadTask.mediaType" />
+					</template>
+				</QText>
 			</template>
 			<template v-else>
 				{{ $t('components.download-details-dialog.invalid-download-task.title') }}

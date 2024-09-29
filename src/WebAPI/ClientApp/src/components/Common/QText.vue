@@ -1,9 +1,14 @@
 <template>
 	<div :class="divClasses">
-		<span :class="spanClasses">
-			{{ value }}
-			<slot />
+		<slot name="prepend" />
+		<span
+			:class="spanClasses"
+			:data-cy="cy">
+			<slot name="default">
+				{{ value }}
+			</slot>
 		</span>
+		<slot name="append" />
 	</div>
 </template>
 
@@ -16,6 +21,7 @@ const props = withDefaults(defineProps<IQTextProps>(), {
 	type: 'primary',
 	align: 'left',
 	bold: 'regular',
+	cy: '',
 });
 
 const divClasses = computed(() => ({

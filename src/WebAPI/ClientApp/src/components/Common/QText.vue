@@ -39,6 +39,7 @@ const spanClasses = computed(() => ({
 <style lang="scss">
 .q-text-container {
 	width: 100%;
-	padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
 }
 </style>

@@ -8,10 +8,12 @@
 		<template #title>
 			<template v-if="downloadTask">
 				<QText
+					size="h6"
 					cy="download-details-dialog-title"
 					:value="downloadTask.fullTitle">
 					<template #prepend>
 						<QMediaTypeIcon
+							class="q-mr-sm"
 							:size="36"
 							:media-type="downloadTask.mediaType" />
 					</template>

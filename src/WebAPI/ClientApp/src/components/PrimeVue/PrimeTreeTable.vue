@@ -27,8 +27,7 @@
 				<QMediaTypeIcon
 					v-if="node.mediaType"
 					:size="26"
-					:media-type="node.mediaType"
-					class="q-mr-md" />
+					:media-type="node.mediaType" />
 				<span :data-cy="`column-${column.field}-${node.id}`">{{ node.title }}</span>
 			</template>
 		</Column>

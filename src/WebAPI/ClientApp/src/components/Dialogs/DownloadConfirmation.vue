@@ -19,7 +19,7 @@
 		</template>
 		<template #default>
 			<QTreeViewTable
-				:columns="columns"
+				:columns="getDownloadPreviewTableColumns()"
 				:nodes="downloadPreview"
 				default-expand-all
 				connectors
@@ -43,7 +43,6 @@
 import { useSubscription } from '@vueuse/rxjs';
 import { set } from '@vueuse/core';
 import type { DownloadMediaDTO, DownloadPreviewDTO } from '@dto';
-import type { QTreeViewTableHeader } from '@props';
 import { getDownloadPreviewTableColumns } from '#imports';
 
 const { t } = useI18n();
@@ -59,7 +58,6 @@ const loading = ref(true);
 const downloadPreview = ref<DownloadPreviewDTO[]>([]);
 const downloadMediaCommand = ref<DownloadMediaDTO[]>([]);
 const totalSize = ref(0);
-const columns: QTreeViewTableHeader[] = getDownloadPreviewTableColumns;
 
 function openDialog(event: unknown): void {
 	const data = event as DownloadMediaDTO[];

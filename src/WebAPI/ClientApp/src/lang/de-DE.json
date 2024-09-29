@@ -49,7 +49,11 @@
         "download-confirmation": {
             "description": "PlexRipper fängt an folgendes herunterzuladen:",
             "header": "Sind Sie sicher?",
-            "total-size": "Gesamt größe:"
+            "total-size": "Gesamt größe:",
+            "columns": {
+                "file-size": "Dateigröße",
+                "title": "Titel"
+            }
         },
         "download-details-dialog": {
             "overview": {
@@ -145,7 +149,17 @@
         "media-list": {
             "no-media-found": "Keine Medien gefunden.",
             "selected-count": "{selectedCount} ausgewählt",
-            "episode-count": "{episodeCount} Folgen"
+            "episode-count": "{episodeCount} Folgen",
+            "columns": {
+                "index": "#",
+                "title": "Titel",
+                "year": "Jahr",
+                "duration": "Dauer",
+                "media-size": "Größe",
+                "added-at": "Hinzugefügt am",
+                "updated-at": "Aktualisiert am",
+                "actions": "Aktionen"
+            }
         },
         "server-download-status": {
             "pause": "Pause",
@@ -186,6 +200,18 @@
         },
         "search-bar": {
             "no-results": "Keine Ergebnisse gefunden mit {query}"
+        },
+        "downloads-table": {
+            "columns": {
+                "actions": "Aktionen",
+                "data-received": "Erhalten",
+                "data-total": "Größe",
+                "percentage": "Prozentsatz",
+                "speed": "Geschwindigkeit",
+                "status": "Status",
+                "time-remaining": "Ankunftszeit",
+                "title": "Titel"
+            }
         }
     },
     "confirmation": {
@@ -263,6 +289,19 @@
         },
         "delimiter": {
             "dash": " - "
+        },
+        "download-status": {
+            "error": "Fehler",
+            "unknown": "Unbekannt",
+            "queued": "In der Warteschlange",
+            "downloading": "Wird heruntergeladen",
+            "download-finished": "Download abgeschlossen",
+            "paused": "Angehalten",
+            "stopped": "Gestoppt",
+            "deleted": "Gelöscht",
+            "merging": "Zusammenführen",
+            "moving": "Ziehen um",
+            "completed": "Vollendet"
         }
     },
     "help": {

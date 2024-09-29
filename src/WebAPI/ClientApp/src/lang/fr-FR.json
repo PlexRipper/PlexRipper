@@ -49,7 +49,11 @@
         "download-confirmation": {
             "description": "PlexRipper va commencera à télécharger ce qui suit:",
             "header": "Êtes vous sûr?",
-            "total-size": "Taille Total:"
+            "total-size": "Taille Total:",
+            "columns": {
+                "file-size": "Taille du fichier",
+                "title": "Titre"
+            }
         },
         "download-details-dialog": {
             "overview": {
@@ -145,7 +149,17 @@
         "media-list": {
             "no-media-found": "Aucun média trouvé.",
             "selected-count": "{selectedCount} sélectionné",
-            "episode-count": "{episodeCount}  épisodes"
+            "episode-count": "{episodeCount}  épisodes",
+            "columns": {
+                "index": "#",
+                "title": "Titre",
+                "year": "Année",
+                "duration": "Durée",
+                "media-size": "Taille",
+                "added-at": "Ajouté à",
+                "updated-at": "Mis à jour à",
+                "actions": "Actions"
+            }
         },
         "server-download-status": {
             "pause": "Pause",
@@ -186,6 +200,18 @@
         },
         "search-bar": {
             "no-results": "Aucun résultat trouvé avec {query}"
+        },
+        "downloads-table": {
+            "columns": {
+                "actions": "Actions",
+                "data-received": "Reçu",
+                "data-total": "Taille",
+                "percentage": "Pourcentage",
+                "speed": "Vitesse",
+                "status": "Statut",
+                "time-remaining": "ETA",
+                "title": "Titre"
+            }
         }
     },
     "confirmation": {
@@ -263,6 +289,19 @@
         },
         "delimiter": {
             "dash": " - "
+        },
+        "download-status": {
+            "error": "Erreur",
+            "unknown": "Inconnu",
+            "queued": "En file d'attente",
+            "downloading": "Téléchargement",
+            "download-finished": "Téléchargement terminé",
+            "paused": "En pause",
+            "stopped": "Arrêté",
+            "deleted": "Supprimé",
+            "merging": "Fusionner",
+            "moving": "En mouvement",
+            "completed": "Complété"
         }
     },
     "help": {

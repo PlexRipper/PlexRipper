@@ -29,7 +29,7 @@ public class DownloadWorker : IDisposable
 
     private readonly RestClient _httpClient;
 
-    private readonly Timer _timer = new(100) { AutoReset = true, };
+    private readonly Timer _timer = new(100) { AutoReset = true };
 
     private int _downloadSpeedLimit;
 
@@ -61,7 +61,7 @@ public class DownloadWorker : IDisposable
         _dbContext = dbContext;
         DownloadWorkerTask = downloadWorkerTask;
 
-        var options = new RestClientOptions() { MaxTimeout = 10000, ThrowOnAnyError = false, };
+        var options = new RestClientOptions() { MaxTimeout = 10000, ThrowOnAnyError = false };
 
         _httpClient = new RestClient(httpClientFactory.CreateClient(), options);
         _httpClient.AddDefaultHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64)");
@@ -189,7 +189,7 @@ public class DownloadWorker : IDisposable
             destinationStream.Position = DownloadWorkerTask.BytesReceived;
 
             // Create download client
-            var request = new RestRequest(downloadUrl) { CompletionOption = HttpCompletionOption.ResponseHeadersRead, };
+            var request = new RestRequest(downloadUrl) { CompletionOption = HttpCompletionOption.ResponseHeadersRead };
 
             request.AddHeader(
                 "Range",
@@ -285,6 +285,7 @@ public class DownloadWorker : IDisposable
                 LogLevel = logLevel,
                 CreatedAt = DateTime.UtcNow,
                 DownloadWorkerTaskId = DownloadWorkerTask.Id,
+                DownloadTaskId = DownloadWorkerTask.DownloadTaskId,
             }
         );
     }

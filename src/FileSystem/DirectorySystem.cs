@@ -48,6 +48,7 @@ public class DirectorySystem : IDirectorySystem
         if (string.IsNullOrEmpty(filePath) || string.IsNullOrWhiteSpace(filePath))
             return Result.Fail("Parameter filepath was empty");
 
+        // TODO this fails with: /mnt/DATA/PlexRipperCache/Downloads/TvShows/Reno 911!/Season 1/Reno 911! - S01E01 - How We Do It in Reno (Pilot) WEBDL-1080p.part1.mkv
         var directoryPathResult = _pathSystem.GetDirectoryName(filePath);
         if (directoryPathResult.IsFailed)
             return directoryPathResult.ToResult();

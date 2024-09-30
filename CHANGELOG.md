@@ -1,5 +1,46 @@
 PlexRipper Changelog
 
+# [0.22.0](https://github.com/PlexRipper/PlexRipper/compare/v0.21.0...v0.22.0) (2024-09-30)
+
+
+### Bug Fixes
+
+* **WebAPI:** Added ways to catch exceptions from Plex.SDK ([21b4e2d](https://github.com/PlexRipper/PlexRipper/commit/21b4e2dfe5e24bbc6047cac8343fcb8d06115535))
+* **Web-UI:** corrected spacing ([3e98ff4](https://github.com/PlexRipper/PlexRipper/commit/3e98ff4c0ddb783d8cc9665f20130472d5d78916))
+* **Web-UI:** corrected vertical alignment of the title and media icon in the details dialog ([7350f87](https://github.com/PlexRipper/PlexRipper/commit/7350f87107f8a42c228bf0fb099e7a74f9819ae4))
+* **WebAPI:** Fix full windows path names being used as a filename for media files ([a51d078](https://github.com/PlexRipper/PlexRipper/commit/a51d078baf2ba521dc39b6c7f464399d6e446f18))
+* **WebAPI:** Fix minimum logLevel in serilog not being honored ([c039973](https://github.com/PlexRipper/PlexRipper/commit/c039973670897af3ddb31ed096234b7df1ce6b35))
+* **WebAPI:** Fixed an issue where a PlexServer could time-out because PlexRipper requested too much data at once, this is now in batches of 500tv shows per request ([59e0e07](https://github.com/PlexRipper/PlexRipper/commit/59e0e07b4ea2ed32b5bfa3831225242cfaf9ca13))
+* **WebAPI:** Fixed default destination for libraries not being able to change from the UI ([a8aaea2](https://github.com/PlexRipper/PlexRipper/commit/a8aaea2145794843ee2bd78c8ffed5fda5168c48))
+* **WebAPI:** Fixed exceptions not catched correctly when interacting with the Plex API SDK ([c2c5e91](https://github.com/PlexRipper/PlexRipper/commit/c2c5e914542e4fd6629ddcdee320f3ada2e199d6))
+* **Web-UI:** fixed homepage alignment ([dde11ce](https://github.com/PlexRipper/PlexRipper/commit/dde11cef245f098b6df1f728e30f89e99113ccd1))
+* **WebAPI:** fixed missing destination and download path from the download task details dialog ([c0afb3f](https://github.com/PlexRipper/PlexRipper/commit/c0afb3f9a5b598e9a8d594205f46ec8d16768092))
+* **Web-UI:** Fixed missing translations for the download status and columns of various ui ([4567ed7](https://github.com/PlexRipper/PlexRipper/commit/4567ed720b91f29af8a6ff4fc89819464c490406))
+* **WebAPI:** fixed the downdload queue breaking when repeatly pausing and resuming ([a2d277d](https://github.com/PlexRipper/PlexRipper/commit/a2d277dba75a97aa63604042952aa1f56cc23b64))
+* **WebAPI:** Fixed the download commands not working when clicked on the parent, works for pause and stop now ([c5456bb](https://github.com/PlexRipper/PlexRipper/commit/c5456bbe55a049f52e45a01f35c8cd365aa85871))
+* **WebAPI:** Fixed the download commands not working when clicked on the parent, works for start and resume now ([7925f62](https://github.com/PlexRipper/PlexRipper/commit/7925f623683deb3544f8ae0f72041309fff957c7))
+* **WebAPI:** Fixed the download progress not resetting when a download task is stopped and the files are deleted ([87ad153](https://github.com/PlexRipper/PlexRipper/commit/87ad153afff9c95b81b706a9c77fb078e6600f45))
+* **WebAPI:** Fixed the incorrect and slow progress updates from refreshing a library ([eaa54de](https://github.com/PlexRipper/PlexRipper/commit/eaa54deb94c645fce29956886e68f4fad9664b58))
+* **Web-UI:** Fixed the incorrect display of connection text when testing a connection ([97e4d75](https://github.com/PlexRipper/PlexRipper/commit/97e4d75311632a0f2530a592c1df0c813839b1c2))
+* **Web-UI:** Fixed the library bar with the refresh button being hidden when the library is empty ([0d32285](https://github.com/PlexRipper/PlexRipper/commit/0d3228520d0319fe92adf2bbee01836621e7e81f))
+* **WebAPI:** Fixed the LOG_LEVEL env variablenot being respected for the backend logging ([238e50c](https://github.com/PlexRipper/PlexRipper/commit/238e50cf33fcaf28334a922000fb840e2bde799a))
+* **Web-UI:** Fixed type errors ([520c2d7](https://github.com/PlexRipper/PlexRipper/commit/520c2d7d2d8cb6851816c782c36802cd751458da))
+* **Web-UI:** Fixed type errors ([36b7131](https://github.com/PlexRipper/PlexRipper/commit/36b713187d6a14903429366f7cbe9b273f238c0b))
+* **Web-UI:** fixed typecheck test ([8356c71](https://github.com/PlexRipper/PlexRipper/commit/8356c7132fcaab2feedc79232b6e865ec56ff216))
+* **Web-UI:** fixed wrong translation in the download table column header ([b90be63](https://github.com/PlexRipper/PlexRipper/commit/b90be634ab6a6f1e6160103387def0e0e64dbe54))
+* **Web-UI:** Made the title inside the refresh accounts menu more clear ([f9614d0](https://github.com/PlexRipper/PlexRipper/commit/f9614d007b5e3eaa38f828db116c7d5160e535b4))
+
+
+### Features
+
+* **WebAPI:** Added download task log endpoint ([dfffc47](https://github.com/PlexRipper/PlexRipper/commit/dfffc4740e16f7bf3426b68a0bd0cd21b34624a3))
+* **Web-UI:** Added download task logs to the UI, see the details button on a download row and then click logs ([31edebd](https://github.com/PlexRipper/PlexRipper/commit/31edebda3c346fac5f5fe6a89eca728ef6d3ba63))
+
+
+### Reverts
+
+* **Web-UI:** hide search bar again until it's ready ([918fbc5](https://github.com/PlexRipper/PlexRipper/commit/918fbc5bac64a83f88f611b28832c8f5cb95a5ef))
+
 # [0.21.0](https://github.com/PlexRipper/PlexRipper/compare/v0.20.0...v0.21.0) (2024-08-17)
 
 

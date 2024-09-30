@@ -5,4 +5,5 @@ export interface IQTextProps {
 	bold?: 'thin' | 'light' | 'regular' | 'medium' | 'bold' | 'bolder';
 	align?: 'left' | 'center' | 'right';
 	cy?: string;
+	fullWidth?: boolean;
 }

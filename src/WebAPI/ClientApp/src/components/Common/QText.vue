@@ -22,24 +22,23 @@ const props = withDefaults(defineProps<IQTextProps>(), {
 	align: 'left',
 	bold: 'regular',
 	cy: '',
+	fullWidth: false,
 });
 
 const divClasses = computed(() => ({
 	'q-text-container': true,
 	[`text-${props.align}`]: true,
+	[`full-width`]: props.fullWidth,
 }));
 
 const spanClasses = computed(() => ({
 	'q-text': true,
 	[`text-${props.size}`]: true,
 	[`text-weight-${props.bold}`]: true,
+	[`full-width`]: props.fullWidth,
 }));
 </script>
 
 <style lang="scss">
-.q-text-container {
-	width: 100%;
-  display: flex;
-  align-items: center;
-}
+.q-text-container {}
 </style>

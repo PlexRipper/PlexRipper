@@ -4,7 +4,8 @@
 			<QCol cols="12">
 				<QText
 					align="center"
-					size="h5">
+					size="h5"
+					class="q-my-lg">
 					{{ $t('pages.home.setup-question') }}
 				</QText>
 				<QRow
@@ -25,11 +26,11 @@
 				</QRow>
 			</QCol>
 		</QRow>
-		<QRow v-else>
-			<QCol>
-				<SearchBar />
-			</QCol>
-		</QRow>
+		<!--		<QRow v-else> -->
+		<!--			<QCol> -->
+		<!--				<SearchBar /> -->
+		<!--			</QCol> -->
+		<!--		</QRow> -->
 	</QPage>
 </template>
 

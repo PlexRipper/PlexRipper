@@ -8,7 +8,7 @@ public static class PlexApiPartMapper
         new()
         {
             Duration = source.Duration,
-            File = source.File,
+            File = source.File.GetFileName(),
             Size = source.Size,
             AudioProfile = source.AudioProfile ?? string.Empty,
             Container = source.Container,

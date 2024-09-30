@@ -4,4 +4,6 @@ export interface IQTextProps {
 	type?: 'primary' | 'success' | 'warning' | 'danger' | 'info';
 	bold?: 'thin' | 'light' | 'regular' | 'medium' | 'bold' | 'bolder';
 	align?: 'left' | 'center' | 'right';
+	cy?: string;
+	fullWidth?: boolean;
 }

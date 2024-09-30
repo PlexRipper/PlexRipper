@@ -27,18 +27,18 @@
 				<QMediaTypeIcon
 					v-if="node.mediaType"
 					:size="26"
-					:media-type="node.mediaType"
-					class="q-mr-md" />
+					:media-type="node.mediaType" />
 				<span :data-cy="`column-${column.field}-${node.id}`">{{ node.title }}</span>
 			</template>
 		</Column>
+		<!-- Download Status -->
 		<Column
 			field="status"
 			header="Status"
 			style="max-width: 10rem">
 			<template #body="{ node, column }: { node: IDownloadTableNode; column: any }">
 				<span :data-cy="`column-${column.field}-${node.id}`">
-					{{ node.status }}
+					{{ translateStatus(node.status) }}
 				</span>
 			</template>
 		</Column>
@@ -130,6 +130,7 @@ import type IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys'
 import type { IDownloadTableNode } from '@interfaces';
 import Convert from '@class/Convert';
 import type ButtonType from '@enums/buttonType';
+import { DownloadStatus } from '@dto';
 
 defineProps<{
 	nodes: IDownloadTableNode[];
@@ -140,6 +141,8 @@ defineProps<{
 	notSelectable?: boolean;
 }>();
 
+const { t } = useI18n();
+
 function onSelectionChange(keys: IPTreeTableSelectionKeys) {
 	const filtered = Object.fromEntries(
 		Object.entries(keys).filter(
@@ -147,6 +150,35 @@ function onSelectionChange(keys: IPTreeTableSelectionKeys) {
 		),
 	);
 	emits('selected', filtered);
+}
+
+function translateStatus(status: DownloadStatus) {
+	switch (status) {
+		case DownloadStatus.Unknown:
+			return t('general.download-status.unknown');
+		case DownloadStatus.DownloadFinished:
+			return t('general.download-status.download-finished');
+		case DownloadStatus.Deleted:
+			return t('general.download-status.deleted');
+		case DownloadStatus.Merging:
+			return t('general.download-status.merging');
+		case DownloadStatus.Moving:
+			return t('general.download-status.moving');
+		case DownloadStatus.Completed:
+			return t('general.download-status.completed');
+		case DownloadStatus.Downloading:
+			return t('general.download-status.downloading');
+		case DownloadStatus.Error:
+			return t('general.download-status.error');
+		case DownloadStatus.Paused:
+			return t('general.download-status.paused');
+		case DownloadStatus.Queued:
+			return t('general.download-status.queued');
+		case DownloadStatus.Stopped:
+			return t('general.download-status.stopped');
+		default:
+			return t('general.error.unknown');
+	}
 }
 
 const emits = defineEmits<{

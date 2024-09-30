@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application.UnitTests.Stop;
 
-public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<StopDownloadTaskCommandHandler>
+public class StopDownloadTaskCommand_UnitTests : BaseUnitTest<StopDownloadTaskCommandHandler>
 {
-    public DownloadCommands_StopDownloadTasksAsync_UnitTests(ITestOutputHelper output)
+    public StopDownloadTaskCommand_UnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -29,7 +29,7 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
     {
         // Arrange
         await SetupDatabase(config => config.MovieDownloadTasksCount = 2);
-        var movieDownloadTasks = await GetDbContext().DownloadTaskMovie.ToListAsync();
+        var movieDownloadTasks = await IDbContext.DownloadTaskMovie.ToListAsync();
 
         mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
@@ -57,9 +57,9 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
     public async Task ShouldHaveSetDownloadTasksToStopped_WhenAtLeastOneValidIdIsGiven()
     {
         // Arrange
-        Seed = 9999;
         await SetupDatabase(config =>
         {
+            config.Seed = 9999;
             config.MovieDownloadTasksCount = 2;
         });
         var movieDownloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
@@ -86,8 +86,57 @@ public class DownloadCommands_StopDownloadTasksAsync_UnitTests : BaseUnitTest<St
         mock.Mock<IDownloadTaskScheduler>()
             .Verify(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
         mock.VerifyMediator(It.IsAny<DownloadTaskUpdatedNotification>, Times.Once);
-        var downloadTasksDb = await GetDbContext()
-            .DownloadTaskMovie.FirstOrDefaultAsync(x => x.Id == movieDownloadTasks.First().Id);
-        downloadTasksDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
+
+        var downloadTasks = await IDbContext.GetDownloadableChildTasks(movieDownloadTasks.First().ToKey());
+        foreach (var downloadTaskDb in downloadTasks)
+            downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
+    }
+
+    [Fact]
+    public async Task ShouldHaveSetTvShowDownloadTasksToStop_WhenAtLeastOneValidIdIsGiven()
+    {
+        // Arrange
+        await SetupDatabase(config =>
+        {
+            config.Seed = 9999;
+            config.TvShowDownloadTasksCount = 2;
+            config.TvShowSeasonDownloadTasksCount = 2;
+            config.TvShowEpisodeDownloadTasksCount = 2;
+        });
+        var tvShowDownloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
+        var testDownloadTask = tvShowDownloadTasks.First();
+        var downloadableTasks = await IDbContext.GetDownloadableChildTaskKeys(testDownloadTask.ToKey());
+
+        downloadableTasks.Count.ShouldBe(4);
+
+        mock.Mock<IDownloadTaskScheduler>()
+            .SetupSequence(x => x.IsDownloading(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true)
+            .ReturnsAsync(false)
+            .ReturnsAsync(false)
+            .ReturnsAsync(false);
+        mock.Mock<IDownloadTaskScheduler>()
+            .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
+            .ReturnOk();
+        mock.Mock<IDirectorySystem>()
+            .Setup(x => x.DeleteAllFilesFromDirectory(It.IsAny<string>()))
+            .Returns(Result.Ok());
+        mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _sut.Handle(
+            new StopDownloadTaskCommand(tvShowDownloadTasks.First().Id),
+            CancellationToken.None
+        );
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        mock.Mock<IDownloadTaskScheduler>()
+            .Verify(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()), Times.Once);
+        mock.VerifyMediator(It.IsAny<DownloadTaskUpdatedNotification>, Times.Exactly(4));
+
+        var downloadTasks = await IDbContext.GetDownloadableChildTasks(tvShowDownloadTasks.First().ToKey());
+        foreach (var downloadTaskDb in downloadTasks)
+            downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
     }
 }

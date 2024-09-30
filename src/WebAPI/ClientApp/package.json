@@ -38,6 +38,7 @@
 		"@primevue/themes": "^4.0.1",
 		"@vueuse/rxjs": "^10.11.0",
 		"axios": "^1.7.2",
+		"caniuse-lite": "^1.0.30001664",
 		"consola": "^3.2.3",
 		"date-fns": "^2.30.0",
 		"pinia": "^2.1.7",

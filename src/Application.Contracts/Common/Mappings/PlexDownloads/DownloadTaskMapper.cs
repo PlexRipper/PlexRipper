@@ -6,7 +6,7 @@ public static partial class DownloadTaskGenericToDTOMapper
 {
     #region ToDTO
 
-    public static DownloadTaskDTO ToDTO(this DownloadTaskGeneric downloadTask, string DownloadUrl = "") =>
+    public static DownloadTaskDTO ToDTO(this DownloadTaskGeneric downloadTask, string downloadUrl = "") =>
         new()
         {
             Id = downloadTask.Id,
@@ -27,13 +27,26 @@ public static partial class DownloadTaskGenericToDTOMapper
             FileLocationUrl = downloadTask.FileLocationUrl,
             DownloadSpeed = downloadTask.DownloadSpeed,
             FileTransferSpeed = downloadTask.FileTransferSpeed,
-            DownloadUrl = DownloadUrl,
+            DownloadUrl = downloadUrl,
             PlexServerId = downloadTask.PlexServerId,
             PlexLibraryId = downloadTask.PlexLibraryId,
             ParentId = downloadTask.ParentId,
-            Children = downloadTask.Children.Select(x => x.ToDTO(DownloadUrl)).ToList(),
+            Children = downloadTask.Children.Select(x => x.ToDTO(downloadUrl)).ToList(),
             Actions = DownloadTaskActions.Convert(downloadTask.DownloadStatus),
         };
+
+    public static DownloadWorkerLogDTO ToDTO(this DownloadWorkerLog downloadTask) =>
+        new()
+        {
+            CreatedAt = downloadTask.CreatedAt,
+            Message = downloadTask.Message,
+            LogLevel = downloadTask.LogLevel,
+            DownloadWorkerTaskId = downloadTask.DownloadWorkerTaskId,
+            DownloadTaskId = downloadTask.DownloadTaskId,
+        };
+
+    public static List<DownloadWorkerLogDTO> ToDTO(this List<DownloadWorkerLog> logs) =>
+        logs.Select(x => x.ToDTO()).ToList();
 
     #endregion
 

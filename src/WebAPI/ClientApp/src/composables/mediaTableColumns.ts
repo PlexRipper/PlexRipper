@@ -1,9 +1,12 @@
 import type { QTreeViewTableHeader } from '@props';
+import { useI18n } from '#build/imports';
 
 export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
-	return [
+	const { t } = useI18n();
+
+	return	[
 		{
-			label: '#',
+			label: t('components.media-list.columns.index'),
 			field: 'index',
 			align: 'left',
 			type: 'index',
@@ -11,9 +14,8 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 			sortable: true,
 		},
 		{
-			label: 'Title',
+			label: t('components.media-list.columns.title'),
 			field: 'title',
-			// The media is pre sorted with the index, using the index is more efficient to than sort on and ensures the same sorting is used as the back-end uses
 			sortField: 'index',
 			type: 'title',
 			align: 'left',
@@ -22,41 +24,41 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 			required: true,
 		},
 		{
-			label: 'Year',
+			label: t('components.media-list.columns.year'),
 			field: 'year',
 			align: 'center',
 			sortable: true,
 		},
 		{
-			label: 'Duration',
+			label: t('components.media-list.columns.duration'),
 			field: 'duration',
 			type: 'duration',
 			align: 'center',
 			sortable: true,
 		},
 		{
-			label: 'Size',
+			label: t('components.media-list.columns.media-size'),
 			field: 'mediaSize',
 			type: 'file-size',
 			align: 'center',
 			sortable: true,
 		},
 		{
-			label: 'Added At',
+			label: t('components.media-list.columns.added-at'),
 			field: 'addedAt',
 			type: 'date',
 			align: 'center',
 			sortable: true,
 		},
 		{
-			label: 'Updated At',
+			label: t('components.media-list.columns.updated-at'),
 			field: 'updatedAt',
 			type: 'date',
 			align: 'center',
 			sortable: true,
 		},
 		{
-			label: 'Actions',
+			label: t('components.media-list.columns.actions'),
 			field: 'actions',
 			align: 'center',
 			type: 'actions',
@@ -65,20 +67,23 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 	];
 };
 
-export const getDownloadPreviewTableColumns: QTreeViewTableHeader[] = [
-	{
-		label: 'Title',
-		field: 'title',
-		align: 'left',
-		sortOrder: 'asc',
-		sortable: true,
-		required: true,
-	},
-	{
-		label: 'Size',
-		field: 'size',
-		type: 'file-size',
-		width: 120,
-		align: 'right',
-	},
-];
+export const getDownloadPreviewTableColumns = (): QTreeViewTableHeader[] => {
+	const { t } = useI18n();
+	return [
+		{
+			label: t('components.download-confirmation.columns.title'),
+			field: 'title',
+			align: 'left',
+			sortOrder: 'asc',
+			sortable: true,
+			required: true,
+		},
+		{
+			label: t('components.download-confirmation.columns.file-size'),
+			field: 'size',
+			type: 'file-size',
+			width: 120,
+			align: 'right',
+		},
+	];
+};

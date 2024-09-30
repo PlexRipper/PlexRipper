@@ -190,6 +190,17 @@ export enum DownloadTaskType {
   EpisodePart = "EpisodePart",
 }
 
+export interface DownloadWorkerLogDTO {
+  /** @format date-time */
+  createdAt: string;
+  /** @format guid */
+  downloadTaskId: string;
+  /** @format int32 */
+  downloadWorkerTaskId: number;
+  logLevel: NotificationLevel;
+  message: string;
+}
+
 export interface ErrorDTO {
   message: string;
   metadata: Record<string, any>;
@@ -734,6 +745,15 @@ export interface ResultDTOOfListOfDownloadPreviewDTO {
   reasons: ReasonDTO[];
   successes: SuccessDTO[];
   value?: DownloadPreviewDTO[] | null;
+}
+
+export interface ResultDTOOfListOfDownloadWorkerLogDTO {
+  errors: ErrorDTO[];
+  isFailed: boolean;
+  isSuccess: boolean;
+  reasons: ReasonDTO[];
+  successes: SuccessDTO[];
+  value?: DownloadWorkerLogDTO[] | null;
 }
 
 export interface ResultDTOOfListOfFolderPathDTO {

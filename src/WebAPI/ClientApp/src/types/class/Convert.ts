@@ -1,4 +1,4 @@
-import { DownloadTaskType, FolderType, PlexMediaType } from '@dto';
+import { DownloadTaskType, FolderType, NotificationLevel, PlexMediaType } from '@dto';
 import ButtonType from '@enums/buttonType';
 
 export const Convert = {
@@ -27,6 +27,47 @@ export const Convert = {
 				return 'mdi-delete';
 			default:
 				return '';
+		}
+	},
+
+	logLevelToIcon(level: NotificationLevel): string {
+		switch (level) {
+			case NotificationLevel.Verbose:
+				return 'mdi-information-box-outline';
+			case NotificationLevel.Debug:
+				return 'mdi-bug-outline';
+			case NotificationLevel.Information:
+				return 'mdi-information-outline';
+			case NotificationLevel.Success:
+				return 'mdi-check-circle-outline';
+			case NotificationLevel.Warning:
+				return 'mdi-alert-outline';
+			case NotificationLevel.Error:
+				return 'mdi-alert-circle';
+			case NotificationLevel.Fatal:
+				return 'mdi-close-octagon-outline';
+			default:
+				return 'mdi-help-circle-outline';
+		}
+	},
+
+	logLevelToColor(level: NotificationLevel): string {
+		switch (level) {
+			case NotificationLevel.Verbose:
+				return 'gray';
+			case NotificationLevel.Debug:
+				return 'white';
+			case NotificationLevel.Information:
+				return 'white';
+			case NotificationLevel.Success:
+				return 'green';
+			case NotificationLevel.Warning:
+				return 'yellow';
+			case NotificationLevel.Error:
+			case NotificationLevel.Fatal:
+				return 'primary';
+			default:
+				return 'mdi-help-circle-outline';
 		}
 	},
 

@@ -39,7 +39,7 @@ public class SetPlexLibraryDefaultDestinationByIdEndpoint
 
     public override void Configure()
     {
-        Put(EndpointPath);
+        Get(EndpointPath);
         AllowAnonymous();
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))

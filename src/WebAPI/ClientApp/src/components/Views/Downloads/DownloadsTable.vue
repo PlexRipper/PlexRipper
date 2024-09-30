@@ -38,15 +38,17 @@
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
 import type { DownloadProgressDTO, PlexServerDTO } from '@dto';
 import type { IDownloadTableNode, ISelection } from '@interfaces';
 import type { QTreeViewTableHeader } from '@props';
-import { useDownloadStore, useServerConnectionStore, useServerStore } from '~/store';
+import { useDownloadStore, useServerConnectionStore, useServerStore } from '@store';
 
 const downloadStore = useDownloadStore();
 const serverConnectionStore = useServerConnectionStore();
 const serverStore = useServerStore();
+
+const { t } = useI18n();
+
 const props = defineProps<{
 	loading?: boolean;
 	plexServer: PlexServerDTO;
@@ -65,53 +67,53 @@ const nodes = computed((): IDownloadTableNode[] => {
 
 const getDownloadTableColumns: QTreeViewTableHeader[] = [
 	{
-		label: 'Title',
+		label: t('components.downloads-table.columns.title'),
 		field: 'title',
 		type: 'title',
 	},
 	{
-		label: 'Status',
+		label: t('components.downloads-table.columns.status'),
 		field: 'status',
 		align: 'right',
 		width: 120,
 	},
 	{
-		label: 'Received',
+		label: t('components.downloads-table.columns.data-received'),
 		field: 'dataReceived',
 		type: 'file-size',
 		align: 'right',
 		width: 120,
 	},
 	{
-		label: 'Size',
+		label: t('components.downloads-table.columns.data-total'),
 		field: 'dataTotal',
 		type: 'file-size',
 		width: 120,
 		align: 'right',
 	},
 	{
-		label: 'Speed',
+		label: t('components.downloads-table.columns.speed'),
 		field: 'downloadSpeed',
 		type: 'file-speed',
 		align: 'right',
 		width: 120,
 	},
 	{
-		label: 'ETA',
+		label: t('components.downloads-table.columns.time-remaining'),
 		field: 'timeRemaining',
 		type: 'duration',
 		align: 'right',
 		width: 120,
 	},
 	{
-		label: 'Percentage',
+		label: t('components.downloads-table.columns.percentage'),
 		field: 'percentage',
 		type: 'percentage',
 		align: 'center',
 		width: 120,
 	},
 	{
-		label: 'Actions',
+		label: t('components.downloads-table.columns.actions'),
 		field: 'actions',
 		type: 'actions',
 		width: 200,
@@ -135,7 +137,6 @@ function mapToTreeNodes(value: DownloadProgressDTO[]): IDownloadTableNode[] {
 }
 
 function tableAction(payload: { action: string; data: IDownloadTableNode }) {
-	Log.info('command', payload);
 	emit('action', {
 		action: payload.action,
 		item: payload.data as unknown as DownloadProgressDTO,

@@ -339,4 +339,17 @@ public static partial class DbContextExtensions
             }
         }
     }
+
+    public static async Task<List<DownloadTaskGeneric>> GetDownloadableChildTasks(
+        this IPlexRipperDbContext dbContext,
+        DownloadTaskKey key,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var keys = await dbContext.GetDownloadableChildTaskKeys(key, cancellationToken);
+
+        var results = await Task.WhenAll(keys.Select(x => dbContext.GetDownloadTaskAsync(x, cancellationToken)));
+
+        return results.Where(x => x != null).ToList()!;
+    }
 }

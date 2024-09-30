@@ -1,9 +1,14 @@
 <template>
 	<div :class="divClasses">
-		<span :class="spanClasses">
-			{{ value }}
-			<slot />
+		<slot name="prepend" />
+		<span
+			:class="spanClasses"
+			:data-cy="cy">
+			<slot name="default">
+				{{ value }}
+			</slot>
 		</span>
+		<slot name="append" />
 	</div>
 </template>
 
@@ -16,23 +21,24 @@ const props = withDefaults(defineProps<IQTextProps>(), {
 	type: 'primary',
 	align: 'left',
 	bold: 'regular',
+	cy: '',
+	fullWidth: false,
 });
 
 const divClasses = computed(() => ({
 	'q-text-container': true,
 	[`text-${props.align}`]: true,
+	[`full-width`]: props.fullWidth,
 }));
 
 const spanClasses = computed(() => ({
 	'q-text': true,
 	[`text-${props.size}`]: true,
 	[`text-weight-${props.bold}`]: true,
+	[`full-width`]: props.fullWidth,
 }));
 </script>
 
 <style lang="scss">
-.q-text-container {
-	width: 100%;
-	padding: 0.5rem 0;
-}
+.q-text-container {}
 </style>

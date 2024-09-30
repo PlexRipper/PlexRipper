@@ -47,9 +47,13 @@
             "current-folder-has-no-write-permission": "The current folder has no write permission! Select one that has."
         },
         "download-confirmation": {
-            "description": "PlexRipper will start downloading the following:",
+            "description": "PlexRipper will start inging the following:",
             "header": "Are you sure?",
-            "total-size": "Total size:"
+            "total-size": "Total size:",
+            "columns": {
+                "file-size": "File size",
+                "title": "Title"
+            }
         },
         "download-details-dialog": {
             "overview": {
@@ -145,7 +149,17 @@
         "media-list": {
             "no-media-found": "No media found.",
             "selected-count": "{selectedCount}  selected",
-            "episode-count": "{episodeCount} Episodes"
+            "episode-count": "{episodeCount} Episodes",
+            "columns": {
+                "index": "#",
+                "title": "Title",
+                "year": "Year",
+                "duration": "Duration",
+                "media-size": "Size",
+                "added-at": "Added At",
+                "updated-at": "Updated At",
+                "actions": "Actions"
+            }
         },
         "server-download-status": {
             "pause": "Pause",
@@ -186,6 +200,18 @@
         },
         "search-bar": {
             "no-results": "No Results found with {query}"
+        },
+        "downloads-table": {
+            "columns": {
+                "actions": "Actions",
+                "data-received": "Received",
+                "data-total": "Size",
+                "percentage": "Percentage",
+                "speed": "Speed",
+                "status": "Status",
+                "time-remaining": "ETA",
+                "title": "Title"
+            }
         }
     },
     "confirmation": {
@@ -263,6 +289,19 @@
         },
         "delimiter": {
             "dash": " - "
+        },
+        "download-status": {
+            "error": "Error",
+            "unknown": "Unknown",
+            "queued": "Queued",
+            "downloading": "Downloading",
+            "download-finished": "Download Finished",
+            "paused": "Paused",
+            "stopped": "Stopped",
+            "deleted": "Deleted",
+            "merging": "Merging",
+            "moving": "Moving",
+            "completed": "Completed"
         }
     },
     "help": {

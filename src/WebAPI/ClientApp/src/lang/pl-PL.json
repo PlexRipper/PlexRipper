@@ -49,7 +49,11 @@
         "download-confirmation": {
             "description": "PlexRipper rozpocznie pobieranie następujących elementów:",
             "header": "Czy jesteś pewny?",
-            "total-size": "Całkowity rozmiar:"
+            "total-size": "Całkowity rozmiar:",
+            "columns": {
+                "file-size": "Rozmiar pliku",
+                "title": "Tytuł"
+            }
         },
         "download-details-dialog": {
             "overview": {
@@ -145,7 +149,17 @@
         "media-list": {
             "no-media-found": "Nie znaleziono mediów.",
             "selected-count": "{selectedCount} wybranych",
-            "episode-count": "{episodeCount} Odcinków"
+            "episode-count": "{episodeCount} Odcinków",
+            "columns": {
+                "index": "#",
+                "title": "Tytuł",
+                "year": "Rok",
+                "duration": "Czas trwania",
+                "media-size": "Rozmiar",
+                "added-at": "Dodano w",
+                "updated-at": "Zaktualizowano w",
+                "actions": "Działania"
+            }
         },
         "server-download-status": {
             "pause": "Pauza",
@@ -186,6 +200,18 @@
         },
         "search-bar": {
             "no-results": "Nie znaleziono wyników dla {query}"
+        },
+        "downloads-table": {
+            "columns": {
+                "actions": "Działania",
+                "data-received": "Otrzymane",
+                "data-total": "Rozmiar",
+                "percentage": "Procent",
+                "speed": "Prędkość",
+                "status": "Status",
+                "time-remaining": "Szacowany czas przybycia",
+                "title": "Tytuł"
+            }
         }
     },
     "confirmation": {
@@ -263,6 +289,19 @@
         },
         "delimiter": {
             "dash": " -"
+        },
+        "download-status": {
+            "error": "Błąd",
+            "unknown": "Nieznany",
+            "queued": "W kolejce",
+            "downloading": "Ściąganie",
+            "download-finished": "Pobierz ukończone",
+            "paused": "Wstrzymano",
+            "stopped": "Zatrzymany",
+            "deleted": "Usunięto",
+            "merging": "Łączenie",
+            "moving": "Poruszający",
+            "completed": "Zakończony"
         }
     },
     "help": {

@@ -53,6 +53,7 @@ const props = withDefaults(
 		disabled: false,
 		displayText: '',
 		value: '',
+		cy: '',
 	},
 );
 

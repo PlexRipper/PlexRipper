@@ -8,6 +8,11 @@ public static class DownloadTaskGenericMapper
 
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskMovie downloadTaskMovie)
     {
+        var children = downloadTaskMovie.Children.Select(x => x.ToGeneric()).ToList();
+        var child = children.FirstOrDefault();
+
+        // TODO calculate destination and download directory for parents instead of relying on children because those are not always retrieved
+
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskMovie.Id,
@@ -24,13 +29,13 @@ public static class DownloadTaskGenericMapper
             FileName = string.Empty,
             IsDownloadable = downloadTaskMovie.IsDownloadable,
             TimeRemaining = downloadTaskMovie.TimeRemaining,
-            DownloadDirectory = string.Empty,
-            DestinationDirectory = string.Empty,
+            DownloadDirectory = child?.DownloadDirectory ?? string.Empty,
+            DestinationDirectory = child?.DestinationDirectory ?? string.Empty,
             Quality = string.Empty,
             FileLocationUrl = string.Empty,
             DownloadSpeed = downloadTaskMovie.DownloadSpeed,
             FileTransferSpeed = downloadTaskMovie.FileTransferSpeed,
-            Children = downloadTaskMovie.Children?.Select(x => x.ToGeneric()).ToList() ?? [],
+            Children = children,
             DownloadWorkerTasks = [],
             ParentId = Guid.Empty,
             PlexServer = downloadTaskMovie.PlexServer,
@@ -86,6 +91,9 @@ public static class DownloadTaskGenericMapper
 
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskTvShow downloadTaskTvShow)
     {
+        var children = downloadTaskTvShow.Children.Select(x => x.ToGeneric()).ToList();
+        var child = children.FirstOrDefault();
+
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskTvShow.Id,
@@ -103,12 +111,12 @@ public static class DownloadTaskGenericMapper
             Quality = string.Empty,
             IsDownloadable = downloadTaskTvShow.IsDownloadable,
             TimeRemaining = downloadTaskTvShow.TimeRemaining,
-            DownloadDirectory = string.Empty,
-            DestinationDirectory = string.Empty,
+            DownloadDirectory = Path.GetDirectoryName(child?.DownloadDirectory) ?? string.Empty,
+            DestinationDirectory = Path.GetDirectoryName(child?.DestinationDirectory) ?? string.Empty,
             FileLocationUrl = string.Empty,
             DownloadSpeed = downloadTaskTvShow.DownloadSpeed,
             FileTransferSpeed = downloadTaskTvShow.FileTransferSpeed,
-            Children = downloadTaskTvShow.Children?.Select(x => x.ToGeneric()).ToList() ?? [],
+            Children = children,
             DownloadWorkerTasks = [],
             ParentId = Guid.Empty,
             PlexServer = downloadTaskTvShow.PlexServer,
@@ -128,6 +136,9 @@ public static class DownloadTaskGenericMapper
 
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskTvShowSeason downloadTaskTvShowSeason)
     {
+        var children = downloadTaskTvShowSeason.Children.Select(x => x.ToGeneric()).ToList();
+        var child = children.FirstOrDefault();
+
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskTvShowSeason.Id,
@@ -144,13 +155,13 @@ public static class DownloadTaskGenericMapper
             FileName = string.Empty,
             IsDownloadable = downloadTaskTvShowSeason.IsDownloadable,
             TimeRemaining = downloadTaskTvShowSeason.TimeRemaining,
-            DownloadDirectory = string.Empty,
-            DestinationDirectory = string.Empty,
+            DownloadDirectory = child?.DownloadDirectory ?? string.Empty,
+            DestinationDirectory = child?.DestinationDirectory ?? string.Empty,
             FileLocationUrl = string.Empty,
             Quality = string.Empty,
             DownloadSpeed = downloadTaskTvShowSeason.DownloadSpeed,
             FileTransferSpeed = downloadTaskTvShowSeason.FileTransferSpeed,
-            Children = downloadTaskTvShowSeason.Children?.Select(x => x.ToGeneric()).ToList() ?? [],
+            Children = children,
             DownloadWorkerTasks = [],
             ParentId = downloadTaskTvShowSeason.ParentId,
             PlexServer = downloadTaskTvShowSeason.PlexServer,
@@ -170,6 +181,9 @@ public static class DownloadTaskGenericMapper
 
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskTvShowEpisode downloadTaskTvShowEpisode)
     {
+        var children = downloadTaskTvShowEpisode.Children.Select(x => x.ToGeneric()).ToList();
+        var child = children.FirstOrDefault();
+
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskTvShowEpisode.Id,
@@ -187,12 +201,12 @@ public static class DownloadTaskGenericMapper
             Quality = string.Empty,
             IsDownloadable = downloadTaskTvShowEpisode.IsDownloadable,
             TimeRemaining = downloadTaskTvShowEpisode.TimeRemaining,
-            DownloadDirectory = string.Empty,
-            DestinationDirectory = string.Empty,
+            DownloadDirectory = child?.DownloadDirectory ?? string.Empty,
+            DestinationDirectory = child?.DestinationDirectory ?? string.Empty,
             FileLocationUrl = string.Empty,
             DownloadSpeed = downloadTaskTvShowEpisode.DownloadSpeed,
             FileTransferSpeed = downloadTaskTvShowEpisode.FileTransferSpeed,
-            Children = downloadTaskTvShowEpisode.Children?.Select(x => x.ToGeneric()).ToList() ?? [],
+            Children = children,
             DownloadWorkerTasks = [],
             ParentId = downloadTaskTvShowEpisode.ParentId,
             PlexServer = downloadTaskTvShowEpisode.PlexServer,

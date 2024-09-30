@@ -18,12 +18,14 @@
 				class="q-ml-sm" />
 		</template>
 		<template #default>
-			<QTreeViewTable
-				:columns="getDownloadPreviewTableColumns()"
-				:nodes="downloadPreview"
-				default-expand-all
-				connectors
-				not-selectable />
+			<div>
+				<QTreeViewTable
+					:columns="getDownloadPreviewTableColumns()"
+					:nodes="downloadPreview"
+					default-expand-all
+					connectors
+					not-selectable />
+			</div>
 		</template>
 		<template #actions="{ close }">
 			<CancelButton @click="close()" />

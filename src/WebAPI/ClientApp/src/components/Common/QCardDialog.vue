@@ -41,9 +41,9 @@
 				v-if="$slots['default']"
 				:class="contentClasses"
 				align-self="stretch">
-				<div v-if="!loading">
-					<slot :value="parentValue" />
-				</div>
+				<slot
+					v-if="!loading"
+					:value="parentValue" />
 			</QCol>
 			<QCol
 				v-if="$slots['actions']"
@@ -199,7 +199,10 @@ body {
 		&-content {
 			@extend .q-pt-none;
 			@extend .q-px-md;
-
+      display: flex;
+      > div {
+        flex-grow: 1;
+      }
 			&-0 {
 				min-height: inherit;
 				height: inherit;

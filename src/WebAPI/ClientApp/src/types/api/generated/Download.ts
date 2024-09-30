@@ -17,6 +17,7 @@ import type {
   DownloadPreviewDTO,
   DownloadTaskDTO,
   DownloadTaskType,
+  DownloadWorkerLogDTO,
   ResultDTO,
   ServerDownloadProgressDTO,
 } from "./data-contracts";
@@ -135,6 +136,24 @@ export class Download {
  * No description
  *
  * @tags Download
+ * @name GetDownloadTaskLogsByDownloadTaskIdEndpoint
+ * @request GET:/api/Download/logs/{downloadTaskGuid}/
+
+ */
+  getDownloadTaskLogsByDownloadTaskIdEndpoint = (downloadTaskGuid: string, params: RequestParams = {}) =>
+    from(
+      Axios.request<DownloadWorkerLogDTO[]>({
+        url: `/api/Download/logs/${downloadTaskGuid}/`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+    ).pipe(apiCheckPipe<DownloadWorkerLogDTO[]>);
+
+  /**
+ * No description
+ *
+ * @tags Download
  * @name PauseDownloadTaskEndpoint
  * @request GET:/api/Download/pause/{downloadTaskGuid}
 
@@ -240,6 +259,9 @@ export class DownloadPaths {
   ) => queryString.stringifyUrl({ url: `/api/Download/detail/${downloadTaskGuid}`, query });
 
   static getAllDownloadTasksEndpoint = () => queryString.stringifyUrl({ url: `/api/Download` });
+
+  static getDownloadTaskLogsByDownloadTaskIdEndpoint = (downloadTaskGuid: string) =>
+    queryString.stringifyUrl({ url: `/api/Download/logs/${downloadTaskGuid}/` });
 
   static pauseDownloadTaskEndpoint = (downloadTaskGuid: string) =>
     queryString.stringifyUrl({ url: `/api/Download/pause/${downloadTaskGuid}` });

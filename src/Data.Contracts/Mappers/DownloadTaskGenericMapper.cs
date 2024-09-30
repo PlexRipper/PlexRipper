@@ -11,6 +11,8 @@ public static class DownloadTaskGenericMapper
         var children = downloadTaskMovie.Children.Select(x => x.ToGeneric()).ToList();
         var child = children.FirstOrDefault();
 
+        // TODO calculate destination and download directory for parents instead of relying on children because those are not always retrieved
+
         var generic = new DownloadTaskGeneric
         {
             Id = downloadTaskMovie.Id,
@@ -90,7 +92,7 @@ public static class DownloadTaskGenericMapper
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskTvShow downloadTaskTvShow)
     {
         var children = downloadTaskTvShow.Children.Select(x => x.ToGeneric()).ToList();
-        var child = children.FirstOrDefault();
+        var child = children.First();
 
         var generic = new DownloadTaskGeneric
         {

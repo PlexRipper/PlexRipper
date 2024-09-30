@@ -72,7 +72,7 @@ const getDownloadTableColumns: QTreeViewTableHeader[] = [
 		type: 'title',
 	},
 	{
-		label: t('components.downloads-table.columns.title'),
+		label: t('components.downloads-table.columns.status'),
 		field: 'status',
 		align: 'right',
 		width: 120,

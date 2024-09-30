@@ -167,7 +167,7 @@
 
 <script lang="ts" setup>
 import { set, get } from '@vueuse/core';
-import { type DownloadTaskDTO, type DownloadWorkerLogDTO, NotificationLevel, type ReasonDTO } from '@dto';
+import { type DownloadTaskDTO, type DownloadWorkerLogDTO, type ReasonDTO } from '@dto';
 import { downloadApi } from '@api';
 import Convert from '@class/Convert';
 
@@ -180,48 +180,6 @@ const logsLoading = ref(false);
 const downloadTaskId = ref<string>('');
 const downloadTask = ref<DownloadTaskDTO>();
 const logs = ref<DownloadWorkerLogDTO[]>([]);
-const testLogs = [
-	{
-		logLevel: NotificationLevel.None,
-		message: 'No notifications available.',
-		createdAt: new Date(),
-	},
-	{
-		logLevel: NotificationLevel.Verbose,
-		message: 'Detailed logs are being collected...',
-		createdAt: new Date(),
-	},
-	{
-		logLevel: NotificationLevel.Debug,
-		message: 'Debugging information displayed here...',
-		createdAt: new Date(),
-	},
-	{
-		logLevel: NotificationLevel.Information,
-		message: 'This is an informational message.',
-		createdAt: new Date(),
-	},
-	{
-		logLevel: NotificationLevel.Success,
-		message: 'Operation completed successfully!',
-		createdAt: new Date(),
-	},
-	{
-		logLevel: NotificationLevel.Warning,
-		message: 'Warning! Check the system for potential issues.',
-		createdAt: new Date(),
-	},
-	{
-		logLevel: NotificationLevel.Error,
-		message: 'An error occurred during the process.',
-		createdAt: new Date(),
-	},
-	{
-		logLevel: NotificationLevel.Fatal,
-		message: 'A critical failure occurred!',
-		createdAt: new Date(),
-	},
-];
 const logRefreshTimer = useIntervalFn(() => refreshLogs(), 1000);
 
 const errors = ref<ReasonDTO[]>([]);

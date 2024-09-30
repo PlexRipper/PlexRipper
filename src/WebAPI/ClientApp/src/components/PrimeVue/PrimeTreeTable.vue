@@ -174,8 +174,6 @@ function translateStatus(status: DownloadStatus) {
 			return t('general.download-status.paused');
 		case DownloadStatus.Queued:
 			return t('general.download-status.queued');
-		case DownloadStatus.Seeding:
-			return t('general.download-status.seeding');
 		case DownloadStatus.Stopped:
 			return t('general.download-status.stopped');
 		default:

@@ -163,7 +163,6 @@ export interface DownloadTaskDTO {
   id: string;
   /** @format int32 */
   key: number;
-  logs: DownloadWorkerLogDTO[];
   mediaType: PlexMediaType;
   /** @format guid */
   parentId: string;

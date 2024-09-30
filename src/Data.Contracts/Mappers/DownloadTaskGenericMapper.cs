@@ -92,7 +92,7 @@ public static class DownloadTaskGenericMapper
     public static DownloadTaskGeneric ToGeneric(this DownloadTaskTvShow downloadTaskTvShow)
     {
         var children = downloadTaskTvShow.Children.Select(x => x.ToGeneric()).ToList();
-        var child = children.First();
+        var child = children.FirstOrDefault();
 
         var generic = new DownloadTaskGeneric
         {

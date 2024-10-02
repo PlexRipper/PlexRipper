@@ -43,7 +43,7 @@ const scrolledIndex = ref(0);
 defineProps<{
 	mediaType: PlexMediaType;
 	libraryId: number;
-	items: PlexMediaSlimDTO[];
+	items: Readonly<PlexMediaSlimDTO[]>;
 }>();
 
 function onResize() {

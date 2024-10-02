@@ -19,13 +19,15 @@
 					index: libraryProgress?.step,
 					total: 5,
 				})" />
-			<QCountdown :value="libraryProgress?.timeRemaining" />
+			<QCountdown
+				:value="libraryProgress?.timeRemaining ?? ''" />
 		</QCol>
 	</QRow>
 	<template v-else>
 		<!--	Overview bar	-->
 		<MediaOverviewBar
-			:server="libraryStore.getServerByLibraryId(props.libraryId)"
+			:server="
+				libraryStore.getServerByLibraryId(props.libraryId)"
 			:library="library"
 			:detail-mode="!mediaOverviewStore.showMediaOverview"
 			@back="closeDetailsOverview"
@@ -162,7 +164,7 @@ const isConfirmationEnabled = computed(() => {
 const refreshingText = computed(() => {
 	const server = libraryStore.getServerByLibraryId(props.libraryId);
 	return t('components.media-overview.is-refreshing', {
-		library: get(library) ? libraryStore.getLibraryName(get(library).id) : t('general.commands.unknown'),
+		library: get(library) ? libraryStore.getLibraryName(props.libraryId) : t('general.commands.unknown'),
 		server: server ? serverStore.getServerName(server.id) : t('general.commands.unknown'),
 	});
 });
@@ -182,6 +184,8 @@ function resetProgress(isRefreshingValue: boolean) {
 		isRefreshing: isRefreshingValue,
 		isComplete: false,
 		timeStamp: '',
+		timeRemaining: '',
+		step: 0,
 	});
 }
 

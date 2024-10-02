@@ -301,7 +301,7 @@ public class PlexApiService : IPlexApiService
     private async Task<Result<List<GetLibraryItemsMetadata>>> SyncMedia(
         PlexLibrary plexLibrary,
         Type? plexType = null,
-        int batchSize = 100,
+        int batchSize = 1000,
         Action<MediaSyncProgress> action = null,
         CancellationToken cancellationToken = default
     )
@@ -329,6 +329,8 @@ public class PlexApiService : IPlexApiService
             var _ => null,
         };
         var index = 0;
+
+        var startTime = DateTime.UtcNow; // Start time for estimation
 
         while (true)
         {
@@ -361,6 +363,12 @@ public class PlexApiService : IPlexApiService
             var totalSize = mediaContainer.TotalSize;
             index += mediaContainer.Size;
 
+            // Estimate remaining time
+            var elapsedTime = DateTime.UtcNow - startTime;
+            var progress = (double)index / totalSize;
+            var estimatedTotalTime = elapsedTime.TotalSeconds / progress;
+            var remainingTime = TimeSpan.FromSeconds(estimatedTotalTime - elapsedTime.TotalSeconds);
+
             // Report progress
             action?.Invoke(
                 new MediaSyncProgress
@@ -368,6 +376,7 @@ public class PlexApiService : IPlexApiService
                     Type = plexLibrary.Type,
                     Received = index,
                     Total = totalSize,
+                    TimeRemaining = remainingTime,
                 }
             );
 
@@ -387,6 +396,8 @@ public class PlexApiService : IPlexApiService
             metadata.TitleSort = !string.IsNullOrEmpty(metadata.TitleSort)
                 ? metadata.TitleSort
                 : metadata.Title.ToSortTitle();
+
+        _log.Information("Finished syncing {Name} library with {MediaCount} items", plexLibrary.Name, mediaList.Count);
 
         return Result.Ok(mediaList);
     }

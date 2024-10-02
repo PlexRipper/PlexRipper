@@ -7,7 +7,7 @@ public static class PlexApiPartMapper
     public static PlexMediaDataPart ToPlexMediaDataPart(this GetLibraryItemsPart source) =>
         new()
         {
-            Duration = source.Duration,
+            Duration = source.Duration ?? 0,
             File = source.File.GetFileName(),
             Size = source.Size,
             AudioProfile = source.AudioProfile ?? string.Empty,

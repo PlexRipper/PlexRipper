@@ -392,7 +392,7 @@ public class PlexApiWrapper
         {
             Id = plexAccount.Id,
             DisplayName = plexAccount.DisplayName,
-            Username = plexAccount.Username,
+            Username = x.UserPlexAccount!.Username,
             Password = plexAccount.Password,
             IsEnabled = plexAccount.IsEnabled,
             IsAuthTokenMode = plexAccount.IsAuthTokenMode,

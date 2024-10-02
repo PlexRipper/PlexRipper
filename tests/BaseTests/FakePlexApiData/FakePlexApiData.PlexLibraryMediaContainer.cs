@@ -62,7 +62,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.Hidden, _ => 0)
             .RuleFor(
                 x => x.Location,
-                f => [new Location { Id = f.Random.Number(100000), Path = f.System.DirectoryPath() }]
+                f => [new GetAllLibrariesLocation { Id = f.Random.Number(100000), Path = f.System.DirectoryPath() }]
             )
             .FinishWith(
                 (f, directory) =>

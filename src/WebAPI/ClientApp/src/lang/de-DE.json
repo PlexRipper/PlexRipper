@@ -72,7 +72,8 @@
             "is-refreshing": "Mediathek \"{library}\" daten von {server} werden aktualisiert",
             "could-not-display": "Kann die Mediathek nicht anzeigen",
             "no-data": "Die Bibliothek wurde synchronisiert, enthält aber keine Medien.",
-            "library-not-yet-synced": "Die Mediendaten der Bibliothek wurden noch nicht synchronisiert. Bitte warten Sie oder aktualisieren Sie jetzt."
+            "library-not-yet-synced": "Die Mediendaten der Bibliothek wurden noch nicht synchronisiert. Bitte warten Sie oder aktualisieren Sie jetzt.",
+            "refresh-time-remaining-minutes-seconds": ""
         },
         "navigation-drawer": {
             "accounts": "Konten",
@@ -214,6 +215,11 @@
                 "time-remaining": "Ankunftszeit",
                 "title": "Titel"
             }
+        },
+        "q-countdown": {
+            "hours-minute-seconds": "{hours} Stunden, {minutes} Minuten und {seconds} Sekunden verbleiben",
+            "minutes-seconds": "{minutes} Minuten und {seconds} Sekunden verbleiben",
+            "seconds": "{seconds} Sekunden verbleiben"
         }
     },
     "confirmation": {

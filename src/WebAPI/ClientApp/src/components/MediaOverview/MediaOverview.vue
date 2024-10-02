@@ -2,28 +2,28 @@
 	<!--	Refresh Library Screen	-->
 	<QRow
 		v-if="isRefreshing"
-		justify="center"
+		justify="around"
 		align="center"
-		wrap
+		column
+		full-height
 		class="refresh-library-container"
 		cy="refresh-library-container">
 		<QCol
 			cols="8"
-			align-self="center">
+			align-self="center"
+			text-align="center">
 			<ProgressComponent
 				circular-mode
 				:percentage="libraryProgress?.percentage ?? -1"
 				:text="refreshingText" />
-		</QCol>
-		<QCol cols="auto">
-			<QDateTime :text="libraryProgress?.timeStamp" />
+			<QCountdown :value="libraryProgress?.timeRemaining" />
 		</QCol>
 	</QRow>
 	<template v-else>
 		<!--	Overview bar	-->
 		<MediaOverviewBar
 			:server="libraryStore.getServerByLibraryId(props.libraryId)"
-			:library="libraryStore.getLibrary(props.libraryId)"
+			:library="library"
 			:detail-mode="!mediaOverviewStore.showMediaOverview"
 			@back="closeDetailsOverview"
 			@view-change="changeView"
@@ -92,12 +92,11 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { set } from '@vueuse/core';
+import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRouter, type RouteLocationNormalized, type RouteLocationNormalizedLoaded } from 'vue-router';
 import { type DownloadMediaDTO, type LibraryProgress, PlexMediaType, ViewMode } from '@dto';
 import { listenMediaOverviewOpenDetailsCommand, sendMediaOverviewOpenDetailsCommand } from '@composables/event-bus';
-import QDateTime from '@components/Common/QDateTime.vue';
 import {
 	useMediaOverviewBarDownloadCommandBus,
 	useMediaOverviewSortBus,
@@ -132,7 +131,7 @@ const isRefreshing = ref(false);
 
 const libraryProgress = ref<LibraryProgress | null>(null);
 
-const loading = ref(true);
+const loading = ref(false);
 
 const props = defineProps<{
 	libraryId: number;
@@ -158,10 +157,9 @@ const isConfirmationEnabled = computed(() => {
 });
 
 const refreshingText = computed(() => {
-	const library = libraryStore.getLibrary(props.libraryId);
 	const server = libraryStore.getServerByLibraryId(props.libraryId);
 	return t('components.media-overview.is-refreshing', {
-		library: library ? libraryStore.getLibraryName(library.id) : t('general.commands.unknown'),
+		library: get(library) ? libraryStore.getLibraryName(get(library).id) : t('general.commands.unknown'),
 		server: server ? serverStore.getServerName(server.id) : t('general.commands.unknown'),
 	});
 });
@@ -197,6 +195,11 @@ function refreshLibrary() {
 }
 
 function onRequestMedia({ page = 0, size = 0 }: { page: number; size: number }) {
+	if (get(loading)) {
+		return;
+	}
+	set(loading, true);
+
 	useSubscription(
 		useMediaStore()
 			.getMediaData(props.libraryId, page, size)
@@ -391,10 +394,6 @@ onMounted(() => {
 
 <style lang="scss">
 @import '@/assets/scss/variables.scss';
-
-.refresh-library-container {
-	height: calc(100vh - $app-bar-height);
-}
 
 #media-container,
 .media-table-container,

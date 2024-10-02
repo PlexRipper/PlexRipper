@@ -72,7 +72,8 @@
             "is-refreshing": "Refreshing library \"{library}\" data from {server}",
             "could-not-display": "Could not display this library.",
             "no-data": "The library has been synced but contains no media.",
-            "library-not-yet-synced": "The library media data has not yet been synced. Please wait or refresh now."
+            "library-not-yet-synced": "The library media data has not yet been synced. Please wait or refresh now.",
+            "refresh-time-remaining-minutes-seconds": "{minute} minutes and "
         },
         "navigation-drawer": {
             "accounts": "Accounts",
@@ -214,6 +215,11 @@
                 "time-remaining": "ETA",
                 "title": "Title"
             }
+        },
+        "q-countdown": {
+            "hours-minute-seconds": "{hours} hours, {minutes} minutes and {seconds} seconds remaining",
+            "minutes-seconds": "{minutes} minutes and {seconds} seconds remaining",
+            "seconds": "{seconds} seconds remaining"
         }
     },
     "confirmation": {

@@ -72,7 +72,8 @@
             "is-refreshing": "Odświeżanie danych biblioteki \"{library}\" z {server}",
             "could-not-display": "Nie można wyświetlić tej biblioteki.",
             "no-data": "Biblioteka została zsynchronizowana, ale nie zawiera żadnych multimediów.",
-            "library-not-yet-synced": "Dane multimediów bibliotecznych nie zostały jeszcze zsynchronizowane. Proszę czekać lub odświeżyć teraz."
+            "library-not-yet-synced": "Dane multimediów bibliotecznych nie zostały jeszcze zsynchronizowane. Proszę czekać lub odświeżyć teraz.",
+            "refresh-time-remaining-minutes-seconds": ""
         },
         "navigation-drawer": {
             "accounts": "Konta",
@@ -214,6 +215,11 @@
                 "time-remaining": "Szacowany czas przybycia",
                 "title": "Tytuł"
             }
+        },
+        "q-countdown": {
+            "hours-minute-seconds": "Pozostało{hours} godzin, {minutes} minut i {seconds} sekund",
+            "minutes-seconds": "Pozostało{minutes} minut i {seconds} sekund",
+            "seconds": "Pozostało{seconds} sekund"
         }
     },
     "confirmation": {

@@ -343,9 +343,19 @@ public class PlexApiService : IPlexApiService
             );
 
             if (result.IsFailed)
-                return result.ToResult().LogError();
+            {
+                result.ToResult().LogError();
+                break;
+            }
 
             var mediaContainer = result.Value;
+
+            if (mediaContainer.Metadata is null)
+            {
+                ResultExtensions.IsNull(nameof(mediaContainer.Metadata));
+                break;
+            }
+
             mediaList.AddRange(mediaContainer.Metadata);
 
             var totalSize = mediaContainer.TotalSize;

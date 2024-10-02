@@ -3,6 +3,7 @@ using Application.Contracts;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Errors;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
+using LukeHagar.PlexAPI.SDK.Utils.Retries;
 using PlexApi.Contracts;
 using ILog = Logging.Interface.ILog;
 using Type = LukeHagar.PlexAPI.SDK.Models.Requests.Type;
@@ -27,7 +28,8 @@ public class PlexApiWrapper
             client: _clientFactory(options),
             clientID: GetClientId,
             serverUrl: options.ConnectionUrl,
-            accessToken: authToken
+            accessToken: authToken,
+            retryConfig: new RetryConfig(RetryConfig.RetryStrategy.NONE, retryConnectionErrors: false)
         );
 
     private PlexAPI CreateTvClient(string authToken = "", PlexApiClientOptions? options = null)
@@ -40,7 +42,8 @@ public class PlexApiWrapper
             client: _clientFactory(options),
             clientID: GetClientId,
             serverUrl: options.ConnectionUrl,
-            accessToken: authToken
+            accessToken: authToken,
+            retryConfig: new RetryConfig(RetryConfig.RetryStrategy.BACKOFF, retryConnectionErrors: true)
         );
     }
 
@@ -346,7 +349,15 @@ public class PlexApiWrapper
         if (!int.TryParse(libraryKey, out var libraryKeyInt))
             return ResultExtensions.IsInvalidId(nameof(libraryKey), libraryKey).LogError();
 
-        var client = CreateClient(authToken, new PlexApiClientOptions() { ConnectionUrl = connection.Url });
+        var client = CreateClient(
+            authToken,
+            new PlexApiClientOptions()
+            {
+                ConnectionUrl = connection.Url,
+                Timeout = 30,
+                RetryCount = 3,
+            }
+        );
 
         GetLibraryItemsQueryParamType? apiType = type switch
         {

@@ -77,6 +77,9 @@ public class PlexApiClient : ISpeakeasyHttpClient
 
     public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
     {
+        // Remove the auto-generated user-agent header from Plex SDK
+        request.Headers.Remove("user-agent");
+
         if (_log.IsLogLevelEnabled(LogEventLevel.Verbose))
         {
             var curl = _defaultClient.GenerateCurlInString(request);

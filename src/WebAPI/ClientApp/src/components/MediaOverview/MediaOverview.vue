@@ -2,20 +2,23 @@
 	<!--	Refresh Library Screen	-->
 	<QRow
 		v-if="isRefreshing"
-		justify="around"
-		align="center"
-		column
 		full-height
-		class="refresh-library-container"
+		align="start"
+		class="q-pt-xl"
 		cy="refresh-library-container">
 		<QCol
-			cols="8"
-			align-self="center"
 			text-align="center">
 			<ProgressComponent
 				circular-mode
+				class="q-my-lg"
 				:percentage="libraryProgress?.percentage ?? -1"
 				:text="refreshingText" />
+			<QText
+				align="center"
+				:value="$t('components.media-overview.steps-remaining', {
+					index: libraryProgress?.step,
+					total: 5,
+				})" />
 			<QCountdown :value="libraryProgress?.timeRemaining" />
 		</QCol>
 	</QRow>

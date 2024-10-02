@@ -73,7 +73,7 @@
             "could-not-display": "Could not display this library.",
             "no-data": "The library has been synced but contains no media.",
             "library-not-yet-synced": "The library media data has not yet been synced. Please wait or refresh now.",
-            "refresh-time-remaining-minutes-seconds": "{minute} minutes and "
+            "steps-remaining": "Step {index} of {total}:"
         },
         "navigation-drawer": {
             "accounts": "Accounts",

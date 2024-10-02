@@ -2019,7 +2019,7 @@
 										</translations>
 									</concept_node>
 									<concept_node>
-										<name>refresh-time-remaining-minutes-seconds</name>
+										<name>steps-remaining</name>
 										<description/>
 										<comment/>
 										<translations>

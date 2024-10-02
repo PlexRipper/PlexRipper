@@ -73,7 +73,7 @@
             "could-not-display": "Nie można wyświetlić tej biblioteki.",
             "no-data": "Biblioteka została zsynchronizowana, ale nie zawiera żadnych multimediów.",
             "library-not-yet-synced": "Dane multimediów bibliotecznych nie zostały jeszcze zsynchronizowane. Proszę czekać lub odświeżyć teraz.",
-            "refresh-time-remaining-minutes-seconds": ""
+            "steps-remaining": ""
         },
         "navigation-drawer": {
             "accounts": "Konta",

@@ -96,81 +96,75 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         if (plexLibrary.Type != PlexMediaType.TvShow)
             return Result.Fail("PlexLibrary is not of type TvShow").LogError();
 
-        if (plexLibrary.TvShows.Count == 0)
+        if (plexLibrary.TvShows.Any())
         {
-            return Result
-                .Fail(
-                    $"PlexLibrary {plexLibrary.Name} with id {plexLibrary.Id} does not contain any TvShows and thus cannot request the corresponding media"
-                )
-                .LogError();
+            var timer = new Stopwatch();
+            timer.Start();
+
+            // Phase 2 of 5: Season data was retrieved successfully.
+            var rawSeasonDataResult = await _plexServiceApi.GetAllSeasonsAsync(
+                plexLibrary,
+                progress => SendProgress(2, progress.Percentage, progress.TimeRemaining)
+            );
+
+            if (rawSeasonDataResult.IsFailed)
+                return rawSeasonDataResult.ToResult();
+
+            // Phase 3 of 5: Episode data was retrieved successfully.
+            var rawEpisodesDataResult = await _plexServiceApi.GetAllEpisodesAsync(
+                plexLibrary,
+                progress => SendProgress(3, progress.Percentage, progress.TimeRemaining)
+            );
+            if (rawEpisodesDataResult.IsFailed)
+                return rawEpisodesDataResult.ToResult();
+
+            _log.Information("Merging all data received from PlexApi for library {PlexLibraryName}", plexLibrary.Name);
+
+            // Phase 4 of 5: PlexLibrary media data was parsed successfully.
+            _log.Here()
+                .Debug(
+                    "Finished retrieving all media for library {PlexLibraryName} in {Elapsed:000} seconds",
+                    plexLibrary.Title,
+                    timer.Elapsed.TotalSeconds
+                );
+            timer.Restart();
+
+            // Phase 4 of 5: PlexLibrary media data was parsed successfully.
+            BuildTvShowTree(plexLibrary, rawSeasonDataResult.Value, rawEpisodesDataResult.Value);
+
+            // Update the MetaData of this library
+            var updateMetaDataResult = plexLibrary.UpdateMetaData();
+            if (updateMetaDataResult.IsFailed)
+                return updateMetaDataResult;
+
+            await _dbContext.UpdatePlexLibraryById(plexLibrary);
+
+            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
+            if (createResult.IsFailed)
+                return createResult.ToResult();
+
+            _log.Here()
+                .Debug(
+                    "Finished updating all media in the database for library {PlexLibraryName} in {Elapsed:000} seconds",
+                    plexLibrary.Title,
+                    timer.Elapsed.TotalSeconds
+                );
+
+            // Phase 5 of 5: Database has been successfully updated with new library data.
+            SendProgress(5, 1);
         }
-
-        var timer = new Stopwatch();
-        timer.Start();
-
-        // Phase 2 of 5: Season data was retrieved successfully.
-        var rawSeasonDataResult = await _plexServiceApi.GetAllSeasonsAsync(
-            plexLibrary,
-            progress => SendProgress(2, progress.Percentage, progress.TimeRemaining)
-        );
-
-        if (rawSeasonDataResult.IsFailed)
-            return rawSeasonDataResult.ToResult();
-
-        // Phase 3 of 5: Episode data was retrieved successfully.
-        var rawEpisodesDataResult = await _plexServiceApi.GetAllEpisodesAsync(
-            plexLibrary,
-            progress => SendProgress(3, progress.Percentage, progress.TimeRemaining)
-        );
-        if (rawEpisodesDataResult.IsFailed)
-            return rawEpisodesDataResult.ToResult();
-
-        _log.Information("Merging all data received from PlexApi for library {PlexLibraryName}", plexLibrary.Name);
-
-        // Phase 4 of 5: PlexLibrary media data was parsed successfully.
-        _log.Here()
-            .Debug(
-                "Finished retrieving all media for library {PlexLibraryName} in {Elapsed:000} seconds",
-                plexLibrary.Title,
-                timer.Elapsed.TotalSeconds
-            );
-        timer.Restart();
-
-        // Phase 4 of 5: PlexLibrary media data was parsed successfully.
-        BuildTvShowTree(plexLibrary, rawSeasonDataResult.Value, rawEpisodesDataResult.Value);
-
-        // Update the MetaData of this library
-        var updateMetaDataResult = plexLibrary.UpdateMetaData();
-        if (updateMetaDataResult.IsFailed)
-            return updateMetaDataResult;
-
-        await _dbContext.UpdatePlexLibraryById(plexLibrary);
-
-        var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
-        if (createResult.IsFailed)
-            return createResult.ToResult();
-
-        _log.Here()
-            .Debug(
-                "Finished updating all media in the database for library {PlexLibraryName} in {Elapsed:000} seconds",
-                plexLibrary.Title,
-                timer.Elapsed.TotalSeconds
-            );
-
-        // Phase 5 of 5: Database has been successfully updated with new library data.
-        SendProgress(5, 1);
-
-        _log.Information(
-            "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
-            plexLibrary.Title,
-            plexLibrary.Id
-        );
 
         // Mark the library as synced
         plexLibrary.SyncedAt = DateTime.UtcNow;
         await _dbContext
             .PlexLibraries.Where(x => x.Id == plexLibrary.Id)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.SyncedAt, plexLibrary.SyncedAt));
+
+        _log.Information(
+            "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
+            plexLibrary.Title,
+            plexLibrary.Id
+        );
 
         return Result.Ok(plexLibrary);
     }
@@ -193,9 +187,15 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         // Phase 4 of 5: PlexLibrary media data was parsed successfully.
         SendProgress(4, 1);
 
-        var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
-        if (createResult.IsFailed)
-            return createResult;
+        if (plexLibrary.HasMedia)
+        {
+            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
+            if (createResult.IsFailed)
+            {
+                SendProgress(5, 1);
+                return createResult;
+            }
+        }
 
         // Phase 5 of 5: Movies have been successfully updated in the database.
         SendProgress(5, 1);

@@ -72,6 +72,8 @@ public class PlexApiService : IPlexApiService
             case PlexMediaType.TvShow:
                 updatedPlexLibrary.TvShows = mediaList.ToPlexTvShows();
                 break;
+            default:
+                return Result.Fail($"Unknown PlexLibrary type: {updatedPlexLibrary.Type}").LogError();
         }
 
         return Result.Ok(updatedPlexLibrary);
@@ -351,17 +353,22 @@ public class PlexApiService : IPlexApiService
             }
 
             var mediaContainer = result.Value;
+            var totalSize = mediaContainer.TotalSize;
+            index += mediaContainer.Size;
+
+            if (mediaContainer.TotalSize == 0)
+            {
+                _log.Warning("The library with name: {Name} contains no media to sync", plexLibrary.Name);
+                return Result.Ok(new List<GetLibraryItemsMetadata>());
+            }
 
             if (mediaContainer.Metadata is null)
             {
-                ResultExtensions.IsNull(nameof(mediaContainer.Metadata));
+                ResultExtensions.IsNull(nameof(mediaContainer.Metadata)).LogError();
                 break;
             }
 
             mediaList.AddRange(mediaContainer.Metadata);
-
-            var totalSize = mediaContainer.TotalSize;
-            index += mediaContainer.Size;
 
             // Estimate remaining time
             var elapsedTime = DateTime.UtcNow - startTime;

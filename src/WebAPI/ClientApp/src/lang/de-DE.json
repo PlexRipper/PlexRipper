@@ -70,7 +70,9 @@
         },
         "media-overview": {
             "is-refreshing": "Mediathek \"{library}\" daten von {server} werden aktualisiert",
-            "no-data": "Kann die Mediathek nicht anzeigen"
+            "could-not-display": "Kann die Mediathek nicht anzeigen",
+            "no-data": "Die Bibliothek wurde synchronisiert, enthält aber keine Medien.",
+            "library-not-yet-synced": "Die Mediendaten der Bibliothek wurden noch nicht synchronisiert. Bitte warten Sie oder aktualisieren Sie jetzt."
         },
         "navigation-drawer": {
             "accounts": "Konten",

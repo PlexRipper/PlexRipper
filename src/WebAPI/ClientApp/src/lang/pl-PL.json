@@ -70,7 +70,9 @@
         },
         "media-overview": {
             "is-refreshing": "Odświeżanie danych biblioteki \"{library}\" z {server}",
-            "no-data": "Nie można wyświetlić tej biblioteki."
+            "could-not-display": "Nie można wyświetlić tej biblioteki.",
+            "no-data": "Biblioteka została zsynchronizowana, ale nie zawiera żadnych multimediów.",
+            "library-not-yet-synced": "Dane multimediów bibliotecznych nie zostały jeszcze zsynchronizowane. Proszę czekać lub odświeżyć teraz."
         },
         "navigation-drawer": {
             "accounts": "Konta",

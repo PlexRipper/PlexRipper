@@ -70,7 +70,9 @@
         },
         "media-overview": {
             "is-refreshing": "Rafraîchir la bibliothèque \"{library}\" de donnée depuis le {server}",
-            "no-data": "Impossible de trouver une bibliothèque disponible."
+            "could-not-display": "Impossible de trouver une bibliothèque disponible.",
+            "no-data": "La bibliothèque a été synchronisée mais ne contient aucun média.",
+            "library-not-yet-synced": "Les données multimédias de la bibliothèque n'ont pas encore été synchronisées. Veuillez patienter ou actualiser maintenant."
         },
         "navigation-drawer": {
             "accounts": "Comptes",

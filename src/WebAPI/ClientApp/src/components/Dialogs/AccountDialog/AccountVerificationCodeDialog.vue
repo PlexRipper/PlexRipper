@@ -11,31 +11,33 @@
 			<QSubHeader>{{ t('components.account-verification-code-dialog.sub-title') }}</QSubHeader>
 		</template>
 		<template #default>
-			<!--	Verification Code input	-->
-			<QRow justify="center">
-				<QCol cols="auto">
-					<VOtpInput
-						v-model:value="codeValue"
-						input-classes="otp-input"
-						separator=""
-						:num-inputs="6"
-						:should-auto-focus="true"
-						input-type="number"
-						inputmode="numeric"
-						data-cy="2fa-code-verification-input"
-						:conditional-class="['one', 'two', 'three', 'four', 'five', 'six']"
-						@on-complete="onComplete" />
-				</QCol>
-			</QRow>
-			<QRow
-				v-if="errors.length > 0"
-				justify="center">
-				<QCol cols="auto">
-					<span style="color: red; font-weight: bold">{{
-						t('components.account-verification-code-dialog.error')
-					}}</span>
-				</QCol>
-			</QRow>
+			<div>
+				<!--	Verification Code input	-->
+				<QRow justify="center">
+					<QCol cols="auto">
+						<VOtpInput
+							v-model:value="codeValue"
+							input-classes="otp-input"
+							separator=""
+							:num-inputs="6"
+							:should-auto-focus="true"
+							input-type="number"
+							inputmode="numeric"
+							data-cy="2fa-code-verification-input"
+							:conditional-class="['one', 'two', 'three', 'four', 'five', 'six']"
+							@on-complete="onComplete" />
+					</QCol>
+				</QRow>
+				<QRow
+					v-if="errors.length > 0"
+					justify="center">
+					<QCol cols="auto">
+						<span style="color: red; font-weight: bold">{{
+							t('components.account-verification-code-dialog.error')
+						}}</span>
+					</QCol>
+				</QRow>
+			</div>
 		</template>
 		<template #actions="{ close }">
 			<QRow justify="between">

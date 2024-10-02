@@ -7,7 +7,8 @@
 			<QRow no-gutters>
 				<QCol>
 					<QText
-						size="h4"
+						size="h5"
+						class="q-my-sm"
 						align="center"
 						bold="medium">
 						<slot name="header" />

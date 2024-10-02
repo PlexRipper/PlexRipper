@@ -7,18 +7,20 @@
 			{{ alert.title }}
 		</template>
 		<template #default>
-			<pre style="white-space: break-spaces">{{ alert.text }}</pre>
-			<QText>{{ $t('components.alert-dialog.request-data-sent') }}</QText>
-			<pre
-				v-if="alert.result"
-				style="white-space: break-spaces">
+			<div>
+				<pre style="white-space: break-spaces">{{ alert.text }}</pre>
+				<QText>{{ $t('components.alert-dialog.request-data-sent') }}</QText>
+				<pre
+					v-if="alert.result"
+					style="white-space: break-spaces">
 				{{ alert.result }}
 			</pre>
-			<pre
-				v-if="errors"
-				style="white-space: break-spaces">
+				<pre
+					v-if="errors"
+					style="white-space: break-spaces">
 				{{ errors }}
 			</pre>
+			</div>
 		</template>
 		<template #actions="{ close }">
 			<q-space />

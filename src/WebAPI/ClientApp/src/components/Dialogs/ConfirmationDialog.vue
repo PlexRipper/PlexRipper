@@ -9,12 +9,14 @@
 			{{ confirmationText.title }}
 		</template>
 		<template #default>
-			<p>{{ confirmationText.text }}</p>
-			<p
-				v-if="confirmationText.warning"
-				class="text-center">
-				<b>{{ confirmationText.warning }}</b>
-			</p>
+			<div>
+				<p>{{ confirmationText.text }}</p>
+				<p
+					v-if="confirmationText.warning"
+					class="text-center">
+					<b>{{ confirmationText.warning }}</b>
+				</p>
+			</div>
 		</template>
 		<template #actions>
 			<CancelButton

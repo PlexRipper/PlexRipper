@@ -26,12 +26,14 @@
 			</QRow>
 		</template>
 		<template #default>
-			<AccountForm
-				ref="accountForm"
-				:value="changedPlexAccount"
-				@input="formChanged"
-				@is-valid="isInputValid" />
-			<Print>{{ changedPlexAccount }}</Print>
+			<div>
+				<AccountForm
+					ref="accountForm"
+					:value="changedPlexAccount"
+					@input="formChanged"
+					@is-valid="isInputValid" />
+				<Print>{{ changedPlexAccount }}</Print>
+			</div>
 		</template>
 		<!-- Dialog Actions	-->
 		<template #actions="{ close }">

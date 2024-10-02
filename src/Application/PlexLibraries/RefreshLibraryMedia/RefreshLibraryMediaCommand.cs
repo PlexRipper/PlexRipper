@@ -228,7 +228,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             Step = step,
             Received = (int)Math.Floor(index),
             Total = _baseCountProgress,
-            IsRefreshing = false,
+            IsRefreshing = step != _totalProgressSteps,
         };
 
         _progressAction?.Invoke(progress);

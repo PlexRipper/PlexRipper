@@ -49,7 +49,8 @@ public class PlexApiClient : ISpeakeasyHttpClient
         _policyWrap = Policy.WrapAsync(
             Policy.TimeoutAsync<HttpResponseMessage>(_options.Timeout),
             Policy
-                .HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
+                .Handle<TimeoutRejectedException>()
+                .OrResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
                 .WaitAndRetryAsync(
                     _options.RetryCount,
                     retryAttempt => TimeSpan.FromSeconds(retryAttempt),

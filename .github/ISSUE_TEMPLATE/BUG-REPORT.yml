@@ -18,7 +18,7 @@ body:
     id: version
     attributes:
       label: "PlexRipper version"
-      description: Please enter the version of PlexRipper this bug occurred on.
+      description: Please enter the version of PlexRipper this bug occurred on. If you write "latest" the issue will be closed immediately.
       placeholder: ex. v0.10.0
     validations:
       required: true

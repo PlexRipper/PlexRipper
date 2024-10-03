@@ -29,8 +29,8 @@
 		</PackageReference>
 		<PackageReference Include="FastEndpoints.Swagger" Version="5.23.0" />
 		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
-		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="8.0.3" />
-		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="8.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.8" />
 		<PackageReference Include="Quartz.Extensions.Hosting" Version="3.8.1" />
 		<PackageReference Include="Quartz.Serialization.Json" Version="3.8.1" />
 		<PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />

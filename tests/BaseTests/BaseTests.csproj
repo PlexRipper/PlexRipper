@@ -26,8 +26,8 @@
 		</PackageReference>
 		<PackageReference Include="FastEndpoints.Testing" Version="5.23.0" />
 		<PackageReference Include="JustEat.HttpClientInterception" Version="4.2.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="8.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="8.0.8" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
 		<PackageReference Include="Moq" Version="4.20.70" />
 		<PackageReference Include="Shouldly" Version="4.2.1" />

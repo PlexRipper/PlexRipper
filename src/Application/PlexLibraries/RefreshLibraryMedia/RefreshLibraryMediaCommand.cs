@@ -129,19 +129,30 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 );
             timer.Restart();
 
+            var rawSeasonData = rawSeasonDataResult.Value;
+            var rawEpisodesData = rawEpisodesDataResult.Value;
+
             // Phase 4 of 5: PlexLibrary media data was parsed successfully.
-            BuildTvShowTree(plexLibrary, rawSeasonDataResult.Value, rawEpisodesDataResult.Value);
+            var tvShows = BuildTvShowTree(plexLibrary, plexLibrary.TvShows, rawSeasonData, rawEpisodesData);
 
             // Update the MetaData of this library
-            var updateMetaDataResult = plexLibrary.UpdateMetaData();
-            if (updateMetaDataResult.IsFailed)
-                return updateMetaDataResult;
+            var syncResult = await _mediator.Send(new SyncPlexTvShowsCommand(tvShows));
+            if (syncResult.IsFailed)
+            {
+                SendProgress(5, 1);
+                return syncResult.ToResult().LogError();
+            }
+
+            plexLibrary.MetaData = new PlexLibraryMetaData()
+            {
+                MovieCount = 0,
+                TvShowCount = plexLibrary.TvShows.Count,
+                TvShowSeasonCount = rawSeasonData.Count,
+                TvShowEpisodeCount = rawEpisodesData.Count,
+                MediaSize = tvShows.Sum(x => x.MediaSize),
+            };
 
             await _dbContext.UpdatePlexLibraryById(plexLibrary);
-
-            var createResult = await _mediator.Send(new SyncPlexTvShowsCommand(plexLibrary.TvShows));
-            if (createResult.IsFailed)
-                return createResult.ToResult();
 
             _log.Here()
                 .Debug(
@@ -174,11 +185,6 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         // Phase 2 of 5: Season data was retrieved successfully.
         SendProgress(2, 1);
 
-        // Update the MetaData of this library
-        var updateMetaDataResult = plexLibrary.UpdateMetaData();
-        if (updateMetaDataResult.IsFailed)
-            return updateMetaDataResult;
-
         // Phase 3 of 5: Meta-data was updated successfully.
         SendProgress(3, 1);
 
@@ -196,6 +202,15 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 return createResult;
             }
         }
+
+        plexLibrary.MetaData = new PlexLibraryMetaData()
+        {
+            MovieCount = plexLibrary.Movies.Count,
+            TvShowCount = 0,
+            TvShowSeasonCount = 0,
+            TvShowEpisodeCount = 0,
+            MediaSize = plexLibrary.Movies.Sum(x => x.MediaSize),
+        };
 
         // Phase 5 of 5: Movies have been successfully updated in the database.
         SendProgress(5, 1);
@@ -236,23 +251,22 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         _signalRService.SendLibraryProgressUpdateAsync(progress);
     }
 
-    private void BuildTvShowTree(
+    private List<PlexTvShow> BuildTvShowTree(
         PlexLibrary plexLibrary,
-        List<PlexTvShowSeason> rawSeasonDataResult,
-        List<PlexTvShowEpisode> rawEpisodesDataResult
+        List<PlexTvShow> rawTvShowData,
+        List<PlexTvShowSeason> rawSeasonData,
+        List<PlexTvShowEpisode> rawEpisodesData
     )
     {
         // Group seasons and episodes by parent key upfront
-        var seasonsByTvShowKey = rawSeasonDataResult
-            .GroupBy(x => x.ParentKey)
-            .ToDictionary(g => g.Key, g => g.ToList());
-        var episodesBySeasonKey = rawEpisodesDataResult
-            .GroupBy(x => x.ParentKey)
-            .ToDictionary(g => g.Key, g => g.ToList());
+        var seasonsByTvShowKey = rawSeasonData.GroupBy(x => x.ParentKey).ToDictionary(g => g.Key, g => g.ToList());
+        var episodesBySeasonKey = rawEpisodesData.GroupBy(x => x.ParentKey).ToDictionary(g => g.Key, g => g.ToList());
 
-        for (var i = 0; i < plexLibrary.TvShows.Count; i++)
+        for (var i = 0; i < rawTvShowData.Count; i++)
         {
-            var plexTvShow = plexLibrary.TvShows[i];
+            var plexTvShow = rawTvShowData[i];
+            plexTvShow.PlexLibraryId = plexLibrary.Id;
+            plexTvShow.PlexServerId = plexLibrary.PlexServerId;
 
             // Retrieve and assign seasons for this TV show
             if (seasonsByTvShowKey.TryGetValue(plexTvShow.Key, out var seasons))
@@ -274,6 +288,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 if (episodesBySeasonKey.TryGetValue(plexTvShowSeason.Key, out var episodes))
                 {
                     // Set library ID in each episode
+                    episodes ??= [];
                     episodes.ForEach(x =>
                     {
                         x.PlexLibraryId = plexLibrary.Id;
@@ -297,7 +312,9 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
 
             plexTvShow.MediaSize = plexTvShow.Seasons.Sum(x => x.MediaSize);
             plexTvShow.Duration = plexTvShow.Seasons.Sum(x => x.Duration);
-            SendProgress(4, DataFormat.GetPercentage(i, plexLibrary.TvShows.Count));
+            SendProgress(4, DataFormat.GetPercentage(i, rawTvShowData.Count));
         }
+
+        return rawTvShowData;
     }
 }

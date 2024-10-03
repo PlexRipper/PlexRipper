@@ -24,6 +24,8 @@ public class SyncPlexTvShowsCommandValidator : AbstractValidator<SyncPlexTvShows
                 tvShow.RuleFor(y => y.PlexLibraryId).GreaterThan(0);
                 tvShow.RuleFor(y => y.PlexServerId).GreaterThan(0);
                 tvShow.RuleForEach(y => y.Seasons).NotNull();
+                tvShow.RuleForEach(a => a.Seasons).NotEmpty();
+
                 tvShow
                     .RuleForEach(y => y.Seasons)
                     .ChildRules(season =>
@@ -34,6 +36,7 @@ public class SyncPlexTvShowsCommandValidator : AbstractValidator<SyncPlexTvShows
                         season.RuleFor(y => y.PlexServerId).GreaterThan(0);
 
                         season.RuleForEach(a => a.Episodes).NotNull();
+                        season.RuleForEach(a => a.Episodes).NotEmpty();
                         season
                             .RuleForEach(a => a.Episodes)
                             .ChildRules(episode =>

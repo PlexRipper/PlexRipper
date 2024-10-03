@@ -8,8 +8,6 @@
       <env name="ASPNETCORE_ENVIRONMENT" value="Development" />
       <env name="ASPNETCORE_URLS" value="http://+:5000" />
       <env name="DEVELOPMENT_ROOT_PATH" value="$PROJECT_DIR$/../../DATA/PlexRipperCache/" />
-      <env name="DOTNET_ENVIRONMENT" value="Development" />
-      <env name="DOTNET_URLS" value="http://+:5000" />
       <env name="LOG_LEVEL" value="VERBOSE" />
     </envs>
     <option name="USE_EXTERNAL_CONSOLE" value="0" />

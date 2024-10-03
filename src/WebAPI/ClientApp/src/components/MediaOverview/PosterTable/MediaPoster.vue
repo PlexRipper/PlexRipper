@@ -185,12 +185,10 @@ function downloadMedia() {
 	@extend .background-sm;
 
 	width: 200px;
-	height: 340px;
 	margin: 32px;
 
 	&--card {
 		width: 200px;
-		height: 340px;
 	}
 
 	&--image,

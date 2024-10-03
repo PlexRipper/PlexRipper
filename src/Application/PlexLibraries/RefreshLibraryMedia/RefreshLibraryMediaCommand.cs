@@ -139,13 +139,13 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
 
             await _dbContext.UpdatePlexLibraryById(plexLibrary);
 
-            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexTvShowsCommand(plexLibrary));
+            var createResult = await _mediator.Send(new SyncPlexTvShowsCommand(plexLibrary.TvShows));
             if (createResult.IsFailed)
                 return createResult.ToResult();
 
             _log.Here()
                 .Debug(
-                    "Finished updating all media in the database for library {PlexLibraryName} in {Elapsed:000} seconds",
+                    "Finished updating all media in the database for library {PlexLibraryName} in {Elapsed:0} seconds",
                     plexLibrary.Title,
                     timer.Elapsed.TotalSeconds
                 );
@@ -242,9 +242,6 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         List<PlexTvShowEpisode> rawEpisodesDataResult
     )
     {
-        var timer = new Stopwatch();
-        timer.Start();
-
         // Group seasons and episodes by parent key upfront
         var seasonsByTvShowKey = rawSeasonDataResult
             .GroupBy(x => x.ParentKey)
@@ -270,14 +267,18 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             foreach (var plexTvShowSeason in plexTvShow.Seasons)
             {
                 plexTvShowSeason.PlexLibraryId = plexLibrary.Id;
-                plexTvShowSeason.PlexLibrary = plexLibrary;
+                plexTvShowSeason.PlexServerId = plexLibrary.PlexServerId;
                 plexTvShowSeason.TvShow = plexTvShow;
 
                 // Retrieve and assign episodes for this season
                 if (episodesBySeasonKey.TryGetValue(plexTvShowSeason.Key, out var episodes))
                 {
                     // Set library ID in each episode
-                    episodes.ForEach(x => x.PlexLibraryId = plexLibrary.Id);
+                    episodes.ForEach(x =>
+                    {
+                        x.PlexLibraryId = plexLibrary.Id;
+                        x.PlexServerId = plexLibrary.PlexServerId;
+                    });
 
                     plexTvShowSeason.Episodes = episodes;
                     plexTvShowSeason.ChildCount = episodes.Count;
@@ -298,13 +299,5 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             plexTvShow.Duration = plexTvShow.Seasons.Sum(x => x.Duration);
             SendProgress(4, DataFormat.GetPercentage(i, plexLibrary.TvShows.Count));
         }
-
-        timer.Stop();
-        _log.Here()
-            .Debug(
-                "Finished merging all media for library {PlexLibraryName} in {Elapsed:000} seconds",
-                plexLibrary.Title,
-                timer.Elapsed.TotalSeconds
-            );
     }
 }

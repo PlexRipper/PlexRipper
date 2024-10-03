@@ -29,7 +29,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
     private readonly IPlexApiService _plexServiceApi;
 
     private readonly int _baseCountProgress = 1000;
-    private readonly int _totalProgressSteps = 5;
+    private int _totalProgressSteps;
 
     private int _plexLibraryId;
     private Action<LibraryProgress>? _progressAction;
@@ -64,7 +64,14 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         _plexLibraryId = plexLibrary.Id;
         _progressAction = command.ProgressAction;
 
-        // Phase 1 of 5:  Retrieve overview of all media belonging to this PlexLibrary
+        _totalProgressSteps = plexLibrary.Type switch
+        {
+            PlexMediaType.TvShow => 5,
+            PlexMediaType.Movie => 3,
+            _ => _totalProgressSteps,
+        };
+
+        // Phase 1:  Retrieve overview of all media belonging to this PlexLibrary
         var newPlexLibraryResult = await _plexServiceApi.GetLibraryMediaAsync(
             plexLibrary,
             progress => SendProgress(1, progress.Percentage, progress.TimeRemaining),
@@ -182,26 +189,24 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
 
     private async Task<Result<PlexLibrary>> RefreshPlexMovieLibrary(PlexLibrary plexLibrary)
     {
-        // Phase 2 of 5: Season data was retrieved successfully.
-        SendProgress(2, 1);
-
-        // Phase 3 of 5: Meta-data was updated successfully.
-        SendProgress(3, 1);
-
-        await _dbContext.UpdatePlexLibraryById(plexLibrary);
-
-        // Phase 4 of 5: PlexLibrary media data was parsed successfully.
-        SendProgress(4, 1);
-
-        if (plexLibrary.HasMedia)
+        if (plexLibrary.Movies.Any())
         {
-            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
+            foreach (var plexTvShow in plexLibrary.Movies)
+            {
+                plexTvShow.PlexLibraryId = plexLibrary.Id;
+                plexTvShow.PlexServerId = plexLibrary.PlexServerId;
+            }
+
+            var createResult = await _mediator.Send(new SyncPlexMoviesCommand(plexLibrary.Movies));
             if (createResult.IsFailed)
             {
-                SendProgress(5, 1);
-                return createResult;
+                SendProgress(_totalProgressSteps, 1);
+                return createResult.ToResult().LogError();
             }
         }
+
+        // Phase 2 of 3: PlexLibrary media data was parsed successfully.
+        SendProgress(2, 1);
 
         plexLibrary.MetaData = new PlexLibraryMetaData()
         {
@@ -212,8 +217,10 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             MediaSize = plexLibrary.Movies.Sum(x => x.MediaSize),
         };
 
-        // Phase 5 of 5: Movies have been successfully updated in the database.
-        SendProgress(5, 1);
+        // Mark the library as synced
+        plexLibrary.SyncedAt = DateTime.UtcNow;
+
+        await _dbContext.UpdatePlexLibraryById(plexLibrary);
 
         _log.Information(
             "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
@@ -221,11 +228,8 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             plexLibrary.Id
         );
 
-        // Mark the library as synced
-        plexLibrary.SyncedAt = DateTime.UtcNow;
-        await _dbContext
-            .PlexLibraries.Where(x => x.Id == plexLibrary.Id)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.SyncedAt, plexLibrary.SyncedAt));
+        // Phase 3 of 3: Movies have been successfully updated in the database.
+        SendProgress(_totalProgressSteps, 1);
 
         return Result.Ok(plexLibrary);
     }
@@ -243,7 +247,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             Step = step,
             Received = (int)Math.Floor(index),
             Total = _baseCountProgress,
-            IsRefreshing = step != _totalProgressSteps,
+            TotalSteps = _totalProgressSteps,
         };
 
         _progressAction?.Invoke(progress);

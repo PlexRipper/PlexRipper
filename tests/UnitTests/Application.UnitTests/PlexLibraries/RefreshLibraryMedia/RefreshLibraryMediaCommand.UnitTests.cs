@@ -36,7 +36,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
         mock.Mock<ISignalRService>()
             .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibraryProgress>()))
             .Returns(Task.CompletedTask);
-        mock.SetupMediator(It.IsAny<CreateUpdateOrDeletePlexMoviesCommand>).ReturnOk();
+        mock.SetupMediator(It.IsAny<SyncPlexMoviesCommand>).ReturnsAsync(Result.Ok(new CrudMoviesReport()));
 
         // Act
         var request = new RefreshLibraryMediaCommand(updatedPlexLibrary.Id);

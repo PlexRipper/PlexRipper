@@ -51,8 +51,10 @@ public class SyncPlexTvShowsCommandValidator : AbstractValidator<SyncPlexTvShows
 
         stopWatch.Stop();
         log.Debug(
-            "Finished validating SyncPlexTvShowsCommand in {TotalMilliseconds} milliseconds",
-            stopWatch.Elapsed.TotalMilliseconds
+            "Finished validating {ClassName} in {TotalMilliseconds} milliseconds",
+            nameof(SyncPlexTvShowsCommandValidator),
+            stopWatch.Elapsed.TotalMilliseconds,
+            0
         );
     }
 }

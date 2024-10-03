@@ -1,5 +1,19 @@
 PlexRipper Changelog
 
+## [0.23.2](https://github.com/PlexRipper/PlexRipper/compare/v0.23.1...v0.23.2) (2024-10-03)
+
+
+### Bug Fixes
+
+* **WebAPI:** added retry on timeout to the Plex api client ([baed12d](https://github.com/PlexRipper/PlexRipper/commit/baed12d5796e89f070c9c36cf4158f1849ae6b09))
+* **WebAPI:** remove database transactions when writing media data, this might have been causing locks to the database ([cf641ec](https://github.com/PlexRipper/PlexRipper/commit/cf641ec748a09f7178b47024575eb0ff7205da44))
+
+
+### Performance Improvements
+
+* **WebAPI:** Enable sqlite connection pooling and increase the busy time-out to hopefully solve database locks ([1deb3b5](https://github.com/PlexRipper/PlexRipper/commit/1deb3b57d241cbdf18557528dad9d2551e69ba49))
+* **WebAPI:** Greatly increased performance of opening a TvShow ([2567b98](https://github.com/PlexRipper/PlexRipper/commit/2567b98e7a4a5bc8710271076e515d2203236e0f))
+
 ## [0.23.1](https://github.com/PlexRipper/PlexRipper/compare/v0.23.0...v0.23.1) (2024-10-03)
 
 

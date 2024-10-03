@@ -479,13 +479,11 @@ public static class EnumExtensions
             or DownloadTaskType.TvShow
             or DownloadTaskType.Season
             or DownloadTaskType.Episode
-            or DownloadTaskType.None
-                => false,
+            or DownloadTaskType.None => false,
             DownloadTaskType.MovieData
             or DownloadTaskType.MoviePart
             or DownloadTaskType.EpisodeData
-            or DownloadTaskType.EpisodePart
-                => true,
+            or DownloadTaskType.EpisodePart => true,
             var _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
         };
 

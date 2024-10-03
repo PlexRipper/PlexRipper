@@ -11,7 +11,7 @@ public class PlexAccountLibrariesConfiguration : IEntityTypeConfiguration<PlexAc
         {
             bc.PlexAccountId,
             bc.PlexLibraryId,
-            bc.PlexServerId
+            bc.PlexServerId,
         });
 
         builder.HasOne(x => x.PlexLibrary);

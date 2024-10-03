@@ -142,7 +142,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
                         new Task[]
                         {
                             _downloadWorkerTaskUpdateCompletionSource.Task,
-                            _downloadWorkerLogCompletionSource.Task
+                            _downloadWorkerLogCompletionSource.Task,
                         }
                     )
             );

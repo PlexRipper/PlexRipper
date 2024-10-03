@@ -161,7 +161,7 @@ public sealed class PlexRipperDbContext : DbContext, ISetup, IPlexRipperDbContex
         if (!optionsBuilder.IsConfigured)
         {
             // Source: https://github.com/tompazourek/NaturalSort.Extension
-            SqliteConnection databaseConnection = new(PathProvider.DatabaseConnectionString);
+            SqliteConnection databaseConnection = new(DbContextConnections.ConnectionString);
             databaseConnection.CreateCollation(
                 OrderByNaturalExtensions.CollationName,
                 (x, y) => NaturalComparer.Compare(x, y)

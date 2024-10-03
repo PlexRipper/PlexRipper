@@ -358,7 +358,10 @@ public class PlexApiService : IPlexApiService
 
             if (mediaContainer.TotalSize == 0)
             {
-                _log.Warning("The library with name: {Name} contains no media to sync", plexLibrary.Name);
+                _log.Warning(
+                    "The library with name: {PlexLibraryName} contains no media to retrieve",
+                    plexLibrary.Name
+                );
                 return Result.Ok(new List<GetLibraryItemsMetadata>());
             }
 
@@ -404,7 +407,12 @@ public class PlexApiService : IPlexApiService
                 ? metadata.TitleSort
                 : metadata.Title.ToSortTitle();
 
-        _log.Information("Finished syncing {Name} library with {MediaCount} items", plexLibrary.Name, mediaList.Count);
+        _log.Information(
+            "Finished getting {MediaCount} media items from library with name {PlexLibraryName}  ",
+            mediaList.Count,
+            plexLibrary.Name,
+            0
+        );
 
         return Result.Ok(mediaList);
     }

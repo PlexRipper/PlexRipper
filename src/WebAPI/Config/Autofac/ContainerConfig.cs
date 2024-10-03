@@ -30,6 +30,7 @@ public static class ContainerConfig
         builder.RegisterModule<WebApiModule>();
 
         // Packages
+        builder.RegisterModule<QuartzModule>();
         builder.RegisterModule<MediatrModule>();
     }
 }

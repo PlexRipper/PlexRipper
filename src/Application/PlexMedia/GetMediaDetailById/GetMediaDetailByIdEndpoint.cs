@@ -64,46 +64,51 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
 
     public override async Task HandleAsync(GetMediaDetailByIdEndpointRequest req, CancellationToken ct)
     {
-        PlexMediaDTO plexMediaDTO = null;
-        switch (req.Type)
+        if (req.Type == PlexMediaType.Movie)
         {
-            case PlexMediaType.Movie:
+            var plexMovie = await _dbContext.PlexMovies.GetAsync(req.PlexMediaId, ct);
+            if (plexMovie is null)
             {
-                var plexMovie = await _dbContext.PlexMovies.GetAsync(req.PlexMediaId, ct);
-                if (plexMovie is null)
-                    break;
-
-                await SetNestedMovieProperties(plexMovie, ct);
-
-                plexMediaDTO = plexMovie.ToDTO();
-                break;
-            }
-            case PlexMediaType.TvShow:
-            {
-                var plexTvShow = await _dbContext.PlexTvShows.IncludeEpisodes().GetAsync(req.PlexMediaId, ct);
-                if (plexTvShow is null)
-                    break;
-
-                plexTvShow.Seasons = plexTvShow.Seasons.OrderByNatural(x => x.Title).ToList();
-                await SetNestedTvShowProperties(plexTvShow, ct);
-                plexMediaDTO = plexTvShow.ToDTO();
-                break;
-            }
-            default:
-                await SendFluentResult(
-                    ResultExtensions.Create400BadRequestResult($"Type {req.Type} is not allowed"),
-                    ct
-                );
+                await SendFluentResult(ResultExtensions.EntityNotFound(nameof(req.Type.GetType), req.PlexMediaId), ct);
                 return;
-        }
+            }
 
-        if (plexMediaDTO is null)
+            await SetNestedMovieProperties(plexMovie, ct);
+
+            await SendFluentResult(Result.Ok(plexMovie), x => x.ToDTO(), ct);
+        }
+        else if (req.Type == PlexMediaType.TvShow)
         {
-            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(req.Type.GetType), req.PlexMediaId), ct);
-            return;
+            var plexTvShow = await GetPlexTvShow(req.PlexMediaId, ct);
+            await SendFluentResult(plexTvShow, x => x.ToDTO(), ct);
         }
+        else
+            await SendFluentResult(ResultExtensions.Create400BadRequestResult($"Type {req.Type} is not allowed"), ct);
+    }
 
-        await SendFluentResult(Result.Ok(plexMediaDTO), x => x, ct);
+    private async Task<Result<PlexTvShow>> GetPlexTvShow(int plexTvShowId, CancellationToken ct)
+    {
+        var plexTvShow = _dbContext.PlexTvShows.FirstOrDefault(x => x.Id == plexTvShowId);
+
+        if (plexTvShow is null)
+            return ResultExtensions.EntityNotFound(nameof(PlexTvShow), plexTvShowId).LogError();
+
+        plexTvShow.Seasons = _dbContext
+            .PlexTvShowSeason.Where(x => x.TvShowId == plexTvShowId)
+            .Take(plexTvShow!.ChildCount)
+            .ToList();
+
+        plexTvShow.Seasons.OrderByNatural(x => x.SortTitle);
+
+        foreach (var season in plexTvShow.Seasons)
+            season.Episodes = _dbContext
+                .PlexTvShowEpisodes.Where(x => x.TvShowSeasonId == season.Id)
+                .Take(season.ChildCount)
+                .ToList();
+
+        await SetNestedTvShowProperties(plexTvShow, ct);
+
+        return Result.Ok(plexTvShow);
     }
 
     private async Task SetNestedMovieProperties(PlexMovie plexMovie, CancellationToken ct = default)

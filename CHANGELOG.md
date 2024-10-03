@@ -1,5 +1,16 @@
 PlexRipper Changelog
 
+## [0.23.1](https://github.com/PlexRipper/PlexRipper/compare/v0.23.0...v0.23.1) (2024-10-03)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fixed exception when syncing certain libraries ([c716bae](https://github.com/PlexRipper/PlexRipper/commit/c716baeb142475a41ca84ca437266cecf25fbed2))
+* **WebAPI:** Fixed movie libraries not syncing ([4eb55f0](https://github.com/PlexRipper/PlexRipper/commit/4eb55f027fe03fd64b2dd75be30392474b4ab257))
+* **Web-UI:** fixed the total steps displayed when refreshing a library to be the correct number based on the library type ([99c1fcd](https://github.com/PlexRipper/PlexRipper/commit/99c1fcd6fbc332242010a7dbb860ec2711c68da3))
+* **Web-UI:** fixed the ugly empty space underneath tv-show posters ([1c7d2bf](https://github.com/PlexRipper/PlexRipper/commit/1c7d2bf1439378ee2b2743d375d0943a7cb6aa0f))
+* **Web-UI:** fixed typecheck errors ([8961da5](https://github.com/PlexRipper/PlexRipper/commit/8961da54f2205f233d64d13c31c6971889cf0a5a))
+
 # [0.23.0](https://github.com/PlexRipper/PlexRipper/compare/v0.22.0...v0.23.0) (2024-10-03)
 
 

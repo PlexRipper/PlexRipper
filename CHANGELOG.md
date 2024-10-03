@@ -1,5 +1,33 @@
 PlexRipper Changelog
 
+# [0.23.0](https://github.com/PlexRipper/PlexRipper/compare/v0.22.0...v0.23.0) (2024-10-03)
+
+
+### Bug Fixes
+
+* **Web-UI:** Added better error messages to the refreshing library page ([3029e5d](https://github.com/PlexRipper/PlexRipper/commit/3029e5deafa463a41585b5e80cc1960a2639575a))
+* **WebAPI:** Fixed an issue where certain users could not log in due to serialization issues ([4f3019d](https://github.com/PlexRipper/PlexRipper/commit/4f3019df20b47fea14cce1a0cd2afffd517f11b3))
+* **WebAPI:** Fixed empty PlexLibraries causing errors, being empty is valid ([a69a6e7](https://github.com/PlexRipper/PlexRipper/commit/a69a6e73c4d8d9bd0a17b3648935d3da46a223bf))
+* **WebAPI:** fixed isRefresh always being false when sent in the library progress ([df54fdd](https://github.com/PlexRipper/PlexRipper/commit/df54fddf8cd76c675f5d4bfe89b3ff9e709816a9))
+* **Web-UI:** fixed layout issue in dialogs ([4e1d56f](https://github.com/PlexRipper/PlexRipper/commit/4e1d56fa0e17f41bbb2bed9a47cc6aab11c5697a))
+* **WebAPI:** Fixed several exceptions due to invalid json parse ([0b74ecc](https://github.com/PlexRipper/PlexRipper/commit/0b74ecc3e0ba53d53225fcc02d5a9407d6ddb9f2))
+* **Web-UI:** Fixed typescript errors ([78948b1](https://github.com/PlexRipper/PlexRipper/commit/78948b15207fcde9c7f3f9c9a6e83dc7fff72fa6))
+
+
+### Features
+
+* **WebAPI:** Added a time remaining to sync data from the Plex API ([1b3923f](https://github.com/PlexRipper/PlexRipper/commit/1b3923f84db357e66458b89a125d240813d3152b))
+* **Web-UI:** Added countdown to the library refresh page ([551ef8b](https://github.com/PlexRipper/PlexRipper/commit/551ef8bb6573596f0e893f78a5b6c256413777ee))
+* **Web-UI:** Added the steps of the refresh process to the time remaining ([2b8057b](https://github.com/PlexRipper/PlexRipper/commit/2b8057b8edda53fdc7a90e83cfc125a4ce3465f4))
+
+
+### Performance Improvements
+
+* **WebAPI:** Big performance improvement on the merging of media data coming from the Plex API ([6154a22](https://github.com/PlexRipper/PlexRipper/commit/6154a22ed21ddb009369e80f367f243d68d12454))
+* **Web-UI:** Huge performance improvement when loading huge libraries, no more crashing UI! ([6c0e7f7](https://github.com/PlexRipper/PlexRipper/commit/6c0e7f712c98e33d225f34fba1b821bcfc862358))
+* **WebAPI:** Major performance improvement of writing tv shows to the database, 20min -> 2 seconds ([00be9d5](https://github.com/PlexRipper/PlexRipper/commit/00be9d59b7590673af6d8a934a988247fa0741f7))
+* **WebAPI:** Start syncing media data  when all connections fora server have been tested ([afc0e21](https://github.com/PlexRipper/PlexRipper/commit/afc0e210d9b0db0b21c55684b8942505c9297c6a))
+
 # [0.22.0](https://github.com/PlexRipper/PlexRipper/compare/v0.21.0...v0.22.0) (2024-09-30)
 
 

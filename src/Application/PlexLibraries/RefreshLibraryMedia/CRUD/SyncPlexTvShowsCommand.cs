@@ -86,9 +86,6 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
         CancellationToken cancellationToken
     )
     {
-        // Start a transaction to ensure that all data is inserted or none at all.
-        await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
-
         try
         {
             var plexLibraryId = command.PlexTvShows.First().PlexLibraryId;
@@ -142,8 +139,6 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
             await _dbContext.BulkInsertAsync(plexEpisodes, _config, cancellationToken);
             _report.CreatedEpisodes = plexEpisodes.Count;
 
-            await transaction.CommitAsync(cancellationToken);
-
             stopWatch.Stop();
 
             _log.Information(
@@ -159,8 +154,6 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
         }
         catch (Exception e)
         {
-            await transaction.RollbackAsync(cancellationToken);
-
             return Result.Fail(new ExceptionalError(e)).LogError();
         }
     }

@@ -1,7 +1,6 @@
 using Autofac;
 using Data.Contracts;
 using Logging.Interface;
-using PlexRipper.Application;
 using PlexRipper.Data;
 using Serilog;
 using Serilog.Events;
@@ -98,10 +97,6 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
                 )
                 .SingleInstance();
 
-            // Register the Mediatr module if the class is a handler.
-            if (typeof(TUnitTestClass).Name.Contains("Handler"))
-                builder.RegisterModule<MediatrModule>();
-
             // Database context can be setup once and then retrieved by its DB name.
             builder
                 .Register((_, _) => GetDbContext())
@@ -115,16 +110,6 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
 
         mock.Mock<IHttpClientFactory>().Setup(x => x.CreateClient(It.IsAny<string>())).Returns(new HttpClient());
     }
-
-    /// <summary>
-    /// Sends a Mediatr request to the handler through the various pipelines.
-    /// This ensures its as close to production as possible.
-    /// </summary>
-    /// <param name="request"> The request to send to the handler. </param>
-    /// <typeparam name="TResponse"> The response type of the request. </typeparam>
-    /// <returns> The response from the handler. </returns>
-    protected Task<TResponse> SendMediatr<TResponse>(IRequest<TResponse> request) =>
-        mock.Create<IMediator>().Send(request);
 
     public new virtual void Dispose()
     {

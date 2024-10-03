@@ -93,7 +93,7 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
                 .FirstOrDefault();
 
             _log.Debug(
-                "Starting adding, updating or deleting of tv shows in library: {PlexLibraryName} with id:  {PlexLibraryId}",
+                "Starting syncing of tv shows in library: {PlexLibraryName} with id:  {PlexLibraryId} by first removing all media and then reinserting it",
                 plexLibraryName,
                 plexLibraryId
             );
@@ -140,8 +140,9 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
             await transaction.CommitAsync(cancellationToken);
 
             stopWatch.Stop();
+
             _log.Information(
-                "Finished syncing plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalMilliseconds} milliseconds",
+                "Finished media syncing plexLibrary: {PlexLibraryName} with id: {PlexLibraryId} in {TotalMilliseconds} milliseconds",
                 plexLibraryName,
                 plexLibraryId,
                 stopWatch.Elapsed.TotalMilliseconds

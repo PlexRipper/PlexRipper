@@ -127,8 +127,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             .Setup(x => x.SendLibraryProgressUpdateAsync(It.IsAny<LibraryProgress>()))
             .Returns(Task.CompletedTask);
 
-        mock.SetupMediator(It.IsAny<CreateUpdateOrDeletePlexTvShowsCommand>)
-            .ReturnsAsync(Result.Ok(new CrudTvShowsReport()));
+        mock.SetupMediator(It.IsAny<SyncPlexTvShowsCommand>).ReturnsAsync(Result.Ok(new CrudTvShowsReport()));
 
         // Act
         var request = new RefreshLibraryMediaCommand(updatedPlexLibrary.Id);
@@ -145,12 +144,12 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
         libraryDb.SyncedAt.ShouldNotBeNull();
 
         // Verify that the merge was successful
-        Func<PlexLibrary, bool> isValid = library =>
+        Func<List<PlexTvShow>, bool> isValid = tvShows =>
         {
-            library.ShouldNotBeNull();
-            library.TvShows.Count.ShouldBe(10);
-            library.TvShows.SelectMany(x => x.Seasons).Count().ShouldBe(100);
-            library.TvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).Count().ShouldBe(1000);
+            tvShows.ShouldNotBeNull();
+            tvShows.Count.ShouldBe(10);
+            tvShows.SelectMany(x => x.Seasons).Count().ShouldBe(100);
+            tvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).Count().ShouldBe(1000);
             return true;
         };
 
@@ -158,7 +157,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             .Verify(
                 x =>
                     x.Send(
-                        It.Is<CreateUpdateOrDeletePlexTvShowsCommand>(command => isValid(command.PlexLibrary)),
+                        It.Is<SyncPlexTvShowsCommand>(command => isValid(command.PlexTvShows)),
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Once

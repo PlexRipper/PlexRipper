@@ -2,9 +2,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application.UnitTests;
 
-public class CreateUpdateOrDeletePlexTvShowsCommand_UnitTests : BaseUnitTest
+public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsCommandHandler>
 {
-    public CreateUpdateOrDeletePlexTvShowsCommand_UnitTests(ITestOutputHelper output)
+    private SyncPlexTvShowsCommandValidator _validator =
+        new(LogManager.CreateLogInstance<SyncPlexTvShowsCommandValidator>());
+
+    public SyncPlexTvShowsCommand_UnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -31,15 +34,14 @@ public class CreateUpdateOrDeletePlexTvShowsCommand_UnitTests : BaseUnitTest
             )
             .Generate(10);
 
-        library.TvShows = newTvShows;
+        SetIds(library, newTvShows);
 
         // Act
-        var request = new CreateUpdateOrDeletePlexTvShowsCommand(library);
-        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(Log, IDbContext);
-        var result = await handler.Handle(request, CancellationToken.None);
+        var request = new SyncPlexTvShowsCommand(newTvShows);
+        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
+        var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
-
         result.IsSuccess.ShouldBeTrue();
         var dbPlexTvShows = IDbContext.PlexTvShows.Include(x => x.Seasons).ThenInclude(x => x.Episodes).ToList();
 
@@ -76,10 +78,12 @@ public class CreateUpdateOrDeletePlexTvShowsCommand_UnitTests : BaseUnitTest
         foreach (var x in library.TvShows)
             x.FullTitle = "TEST";
 
+        var newTvShows = library.TvShows;
+        SetIds(library, newTvShows);
+
         // Act
-        var request = new CreateUpdateOrDeletePlexTvShowsCommand(library);
-        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(Log, IDbContext);
-        var result = await handler.Handle(request, CancellationToken.None);
+        var request = new SyncPlexTvShowsCommand(newTvShows);
+        var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -110,12 +114,13 @@ public class CreateUpdateOrDeletePlexTvShowsCommand_UnitTests : BaseUnitTest
         tvShows.ShouldNotBeNull();
 
         var newTvShows = tvShows.GetRange(0, 30);
-        library.TvShows = newTvShows;
+
+        SetIds(library, newTvShows);
 
         // Act
-        var request = new CreateUpdateOrDeletePlexTvShowsCommand(library);
-        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(Log, IDbContext);
-        var result = await handler.Handle(request, CancellationToken.None);
+        var request = new SyncPlexTvShowsCommand(newTvShows);
+        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
+        var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -145,12 +150,12 @@ public class CreateUpdateOrDeletePlexTvShowsCommand_UnitTests : BaseUnitTest
         foreach (var tvShow in newTvShows)
             tvShow.Seasons.AddRange(FakeData.GetPlexTvShowSeason().Generate(3));
 
-        library.TvShows = newTvShows;
+        SetIds(library, newTvShows);
 
         // Act
-        var request = new CreateUpdateOrDeletePlexTvShowsCommand(library);
-        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(Log, IDbContext);
-        var result = await handler.Handle(request, CancellationToken.None);
+        var request = new SyncPlexTvShowsCommand(newTvShows);
+        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
+        var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -179,14 +184,14 @@ public class CreateUpdateOrDeletePlexTvShowsCommand_UnitTests : BaseUnitTest
         library.ShouldNotBeNull();
         var newTvShows = IDbContext.PlexTvShows.Include(x => x.Seasons).ThenInclude(x => x.Episodes).ToList();
 
-        library.TvShows = newTvShows;
+        SetIds(library, newTvShows);
 
         // Act
-        var request = new CreateUpdateOrDeletePlexTvShowsCommand(library);
-        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(Log, IDbContext);
+        var request = new SyncPlexTvShowsCommand(newTvShows);
 
-        var result = await handler.Handle(request, CancellationToken.None);
-        var result2 = await handler.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken.None);
+        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
+        var result2 = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -233,12 +238,12 @@ public class CreateUpdateOrDeletePlexTvShowsCommand_UnitTests : BaseUnitTest
             newTvShows[i].Title = $"TEST - {newTvShows[i].Title}";
         }
 
-        library.TvShows = newTvShows;
+        SetIds(library, newTvShows);
 
         // Act
-        var request = new CreateUpdateOrDeletePlexTvShowsCommand(library);
-        var handler = new CreateUpdateOrDeletePlexTvShowsCommandHandler(Log, IDbContext);
-        var result = await handler.Handle(request, CancellationToken.None);
+        var request = new SyncPlexTvShowsCommand(newTvShows);
+        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
+        var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -270,5 +275,25 @@ public class CreateUpdateOrDeletePlexTvShowsCommand_UnitTests : BaseUnitTest
         dbEpisodes
             .All(x => newTvShows.SelectMany(y => y.Seasons.SelectMany(z => z.Episodes)).Any(y => y.Key == x.Key))
             .ShouldBeTrue();
+    }
+
+    private void SetIds(PlexLibrary library, List<PlexTvShow> newTvShows)
+    {
+        foreach (var plexTvShow in newTvShows)
+        {
+            plexTvShow.PlexLibraryId = library.Id;
+            plexTvShow.PlexServerId = library.PlexServerId;
+            foreach (var season in plexTvShow.Seasons)
+            {
+                season.PlexLibraryId = library.Id;
+                season.PlexServerId = library.PlexServerId;
+
+                foreach (var episode in season.Episodes)
+                {
+                    episode.PlexLibraryId = library.Id;
+                    episode.PlexServerId = library.PlexServerId;
+                }
+            }
+        }
     }
 }

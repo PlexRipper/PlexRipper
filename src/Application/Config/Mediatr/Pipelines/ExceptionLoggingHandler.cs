@@ -1,7 +1,7 @@
 using Logging.Interface;
 using MediatR.Pipeline;
 
-namespace PlexRipper.WebAPI;
+namespace PlexRipper.Application;
 
 public class ExceptionLoggingHandler<TRequest, TResponse, TException>
     : IRequestExceptionHandler<TRequest, TResponse, TException>

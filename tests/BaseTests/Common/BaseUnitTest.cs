@@ -1,6 +1,7 @@
 using Autofac;
 using Data.Contracts;
 using Logging.Interface;
+using PlexRipper.Application;
 using PlexRipper.Data;
 using Serilog;
 using Serilog.Events;
@@ -10,15 +11,9 @@ namespace PlexRipper.BaseTests;
 
 public class BaseUnitTest : IDisposable
 {
-    #region Fields
-
     private string _databaseName;
     private bool _isDatabaseSetup;
     protected readonly ILog Log;
-
-    #endregion
-
-    #region Constructors
 
     /// <summary>
     /// This constructor is run before every test
@@ -33,10 +28,6 @@ public class BaseUnitTest : IDisposable
         Log = LogManager.CreateLogInstance(output, typeof(BaseUnitTest));
     }
 
-    #endregion
-
-    #region Properties
-
     protected int Seed { get; set; } = 0;
 
     /// <summary>
@@ -49,8 +40,6 @@ public class BaseUnitTest : IDisposable
     protected Mock<IPlexRipperDbContext> MockIDbContext => new();
 
     private List<PlexRipperDbContext> _dbContexts = new();
-
-    #endregion
 
     protected PlexRipperDbContext GetDbContext()
     {
@@ -89,15 +78,9 @@ public class BaseUnitTest : IDisposable
 public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
     where TUnitTestClass : class
 {
-    #region Fields
-
     protected TUnitTestClass _sut => mock.Create<TUnitTestClass>();
 
     protected readonly AutoMock mock;
-
-    #endregion
-
-    #region Constructors
 
     protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(output, logEventLevel)
@@ -115,6 +98,10 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
                 )
                 .SingleInstance();
 
+            // Register the Mediatr module if the class is a handler.
+            if (typeof(TUnitTestClass).Name.Contains("Handler"))
+                builder.RegisterModule<MediatrModule>();
+
             // Database context can be setup once and then retrieved by its DB name.
             builder
                 .Register((_, _) => GetDbContext())
@@ -129,19 +116,19 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
         mock.Mock<IHttpClientFactory>().Setup(x => x.CreateClient(It.IsAny<string>())).Returns(new HttpClient());
     }
 
-    #endregion
-
-    #region Methods
-
-    #region Public
+    /// <summary>
+    /// Sends a Mediatr request to the handler through the various pipelines.
+    /// This ensures its as close to production as possible.
+    /// </summary>
+    /// <param name="request"> The request to send to the handler. </param>
+    /// <typeparam name="TResponse"> The response type of the request. </typeparam>
+    /// <returns> The response from the handler. </returns>
+    protected Task<TResponse> SendMediatr<TResponse>(IRequest<TResponse> request) =>
+        mock.Create<IMediator>().Send(request);
 
     public new virtual void Dispose()
     {
         base.Dispose();
         mock.Dispose();
     }
-
-    #endregion
-
-    #endregion
 }

@@ -49,13 +49,14 @@ watchDebounced(getPercentage, (value) => {
 	if (value === 100) {
 		set(progressList, []);
 	}
-}, { debounce: 500, maxWait: 1000 });
+}, { debounce: 500, maxWait: 10000 });
 
 onMounted(() => {
 	useSubscription(
 		signalRStore
 			.getAllSyncServerMediaProgress()
 			.subscribe((progress) => {
+				set(showProgressBar, true);
 				set(progressList, progress);
 			}),
 	);

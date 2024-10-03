@@ -17,7 +17,7 @@
 				align="center"
 				:value="$t('components.media-overview.steps-remaining', {
 					index: libraryProgress?.step,
-					total: 5,
+					total: libraryProgress?.totalSteps,
 				})" />
 			<QCountdown
 				:value="libraryProgress?.timeRemaining ?? ''" />

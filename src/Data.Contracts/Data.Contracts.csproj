@@ -14,11 +14,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="CSharpier.MsBuild" Version="0.28.2">
+	  <PackageReference Include="CSharpier.MsBuild" Version="0.29.2">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="EFCore.BulkExtensions.SQLite" Version="8.0.2" />
+	  <PackageReference Include="EFCore.BulkExtensions.SQLite" Version="8.1.1" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
 	</ItemGroup>
 

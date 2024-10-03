@@ -23,7 +23,7 @@
 	<ItemGroup>
 		<InternalsVisibleTo Include="FluentResultExtension.UnitTests" />
 		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
-		<PackageReference Include="CSharpier.MsBuild" Version="0.28.2">
+		<PackageReference Include="CSharpier.MsBuild" Version="0.29.2">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>

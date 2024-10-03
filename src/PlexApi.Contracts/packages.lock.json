@@ -4,9 +4,9 @@
     "net8.0": {
       "CSharpier.MsBuild": {
         "type": "Direct",
-        "requested": "[0.28.2, )",
-        "resolved": "0.28.2",
-        "contentHash": "eMPtBF9ECE5sMBXX6fZw/phFZ9UeV62E43z78VPKIgCJMppojxDc03RD6ROpPgk8Vvde11vkcZf69NveW/T1rg=="
+        "requested": "[0.29.2, )",
+        "resolved": "0.29.2",
+        "contentHash": "Pa7xUpo9Z6qWUTk+gAN1sRlEVqG/tgqK6+OvE/JXUfL3m1euNw5/RGj3bdQF/EyagSTyLDpqi0I8xRi1jzGq3A=="
       },
       "LukeHagar.PlexAPI.SDK": {
         "type": "Direct",
@@ -47,8 +47,8 @@
       },
       "JetBrains.Annotations": {
         "type": "Transitive",
-        "resolved": "2023.3.0",
-        "contentHash": "PHfnvdBUdGaTVG9bR/GEfxgTwWM0Z97Y6X3710wiljELBISipSfF5okn/vz+C2gfO+ihoEyVPjaJwn8ZalVukA=="
+        "resolved": "2024.2.0",
+        "contentHash": "GNnqCFW/163p1fOehKx0CnAqjmpPrUSqrgfHM6qca+P+RN39C9rhlfZHQpJhxmQG/dkOYe/b3Z0P8b6Kv5m1qw=="
       },
       "MediatR": {
         "type": "Transitive",
@@ -101,8 +101,8 @@
       },
       "NaturalSort.Extension": {
         "type": "Transitive",
-        "resolved": "4.2.0",
-        "contentHash": "6aGueMxAOjclKlJ7NsuewASgPOc1Pl7Wtaz83BMUIWf8MgKWkTfcsHSnyy4xTZxzLWyfr8f6SngJdp9rmw50Jw=="
+        "resolved": "4.3.0",
+        "contentHash": "NGr3z/Izk16yxEcXKsopZvfYH8hh3iY7mmLJlT8iWVWBlidqGHeq2ykoy2JposrdM6aGvqjMfso9l0N8FzxAUw=="
       },
       "NETStandard.Library": {
         "type": "Transitive",
@@ -1195,9 +1195,9 @@
           "ByteSize": "[2.1.2, )",
           "FluentResultExtensions": "[1.0.0, )",
           "FluentValidation": "[11.9.0, )",
-          "JetBrains.Annotations": "[2023.3.0, )",
+          "JetBrains.Annotations": "[2024.2.0, )",
           "MediatR": "[12.2.0, )",
-          "NaturalSort.Extension": "[4.2.0, )",
+          "NaturalSort.Extension": "[4.3.0, )",
           "System.ComponentModel.Annotations": "[5.0.0, )",
           "System.Reactive": "[5.0.0, )",
           "System.Text.Json": "[8.0.4, )"

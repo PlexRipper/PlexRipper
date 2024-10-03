@@ -148,6 +148,8 @@ public class SyncPlexTvShowsCommandHandler : IRequestHandler<SyncPlexTvShowsComm
                 stopWatch.Elapsed.TotalMilliseconds
             );
 
+            _log.DebugLine(_report.ToString());
+
             return Result.Ok(_report);
         }
         catch (Exception e)

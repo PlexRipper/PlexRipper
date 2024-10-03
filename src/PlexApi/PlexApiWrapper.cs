@@ -28,8 +28,7 @@ public class PlexApiWrapper
             client: _clientFactory(options),
             clientID: GetClientId,
             serverUrl: options.ConnectionUrl,
-            accessToken: authToken,
-            retryConfig: new RetryConfig(RetryConfig.RetryStrategy.NONE, retryConnectionErrors: false)
+            accessToken: authToken
         );
 
     private PlexAPI CreateTvClient(string authToken = "", PlexApiClientOptions? options = null)
@@ -42,8 +41,7 @@ public class PlexApiWrapper
             client: _clientFactory(options),
             clientID: GetClientId,
             serverUrl: options.ConnectionUrl,
-            accessToken: authToken,
-            retryConfig: new RetryConfig(RetryConfig.RetryStrategy.BACKOFF, retryConnectionErrors: true)
+            accessToken: authToken
         );
     }
 

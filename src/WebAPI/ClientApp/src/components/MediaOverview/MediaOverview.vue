@@ -2,84 +2,102 @@
 	<!--	Refresh Library Screen	-->
 	<QRow
 		v-if="isRefreshing"
-		justify="center"
-		align="center"
-		class="refresh-library-container"
+		full-height
+		align="start"
+		class="q-pt-xl"
 		cy="refresh-library-container">
 		<QCol
-			cols="8"
-			align-self="center">
+			text-align="center">
 			<ProgressComponent
 				circular-mode
+				class="q-my-lg"
 				:percentage="libraryProgress?.percentage ?? -1"
 				:text="refreshingText" />
+			<QText
+				align="center"
+				:value="$t('components.media-overview.steps-remaining', {
+					index: libraryProgress?.step,
+					total: 5,
+				})" />
+			<QCountdown
+				:value="libraryProgress?.timeRemaining ?? ''" />
 		</QCol>
 	</QRow>
-
-	<!--	Overview bar	-->
-	<MediaOverviewBar
-		:server="libraryStore.getServerByLibraryId(props.libraryId)"
-		:library="libraryStore.getLibrary(props.libraryId)"
-		:detail-mode="!mediaOverviewStore.showMediaOverview"
-		@back="closeDetailsOverview"
-		@view-change="changeView"
-		@selection-dialog="useOpenControlDialog(mediaSelectionDialogName)"
-		@refresh-library="refreshLibrary" />
-
-	<!-- Media Overview -->
-	<template v-if="!loading && mediaOverviewStore.itemsLength">
-		<!--	Data table display	-->
-		<QRow
-			id="media-container"
-			align="start">
-			<QCol v-show="mediaOverviewStore.showMediaOverview">
-				<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
-					<MediaTable
-						:rows="mediaOverviewStore.items"
-						:disable-hover-click="mediaType !== PlexMediaType.TvShow"
-						is-scrollable />
-				</template>
-
-				<!-- Poster display -->
-				<template v-else>
-					<PosterTable
-						:library-id="libraryId"
-						:media-type="mediaType"
-						:items="mediaOverviewStore.items" />
-				</template>
-			</QCol>
-
-			<!-- Alphabet Navigation -->
-			<AlphabetNavigation v-show="mediaOverviewStore.showMediaOverview" />
-		</QRow>
-	</template>
-
-	<!-- No Media Overview -->
 	<template v-else>
-		<QRow justify="center">
-			<QCol cols="auto">
-				<QAlert type="warning">
-					{{ $t('components.media-overview.no-data') }}
-				</QAlert>
-			</QCol>
-		</QRow>
+		<!--	Overview bar	-->
+		<MediaOverviewBar
+			:server="
+				libraryStore.getServerByLibraryId(props.libraryId)"
+			:library="library"
+			:detail-mode="!mediaOverviewStore.showMediaOverview"
+			@back="closeDetailsOverview"
+			@view-change="changeView"
+			@selection-dialog="useOpenControlDialog(mediaSelectionDialogName)"
+			@refresh-library="refreshLibrary" />
+
+		<!-- Media Overview -->
+		<template v-if="!loading && mediaOverviewStore.itemsLength">
+			<!--	Data table display	-->
+			<QRow
+				id="media-container"
+				align="start">
+				<QCol v-show="mediaOverviewStore.showMediaOverview">
+					<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
+						<MediaTable
+							:rows="mediaOverviewStore.items"
+							:disable-hover-click="mediaType !== PlexMediaType.TvShow"
+							is-scrollable />
+					</template>
+
+					<!-- Poster display -->
+					<template v-else>
+						<PosterTable
+							:library-id="libraryId"
+							:media-type="mediaType"
+							:items="mediaOverviewStore.items" />
+					</template>
+				</QCol>
+
+				<!-- Alphabet Navigation -->
+				<AlphabetNavigation v-show="mediaOverviewStore.showMediaOverview" />
+			</QRow>
+		</template>
+
+		<!-- No Media Overview -->
+		<template v-else-if="!loading">
+			<QRow justify="center">
+				<QCol cols="auto">
+					<QAlert type="warning">
+						<template v-if="library?.syncedAt === null">
+							{{ $t('components.media-overview.library-not-yet-synced') }}
+						</template>
+						<template v-else-if="!mediaOverviewStore.itemsLength">
+							{{ $t('components.media-overview.no-data') }}
+						</template>
+						<template v-else>
+							{{ $t('components.media-overview.could-not-display') }}
+						</template>
+					</QAlert>
+				</QCol>
+			</QRow>
+		</template>
+		<!-- Media Details Display -->
+		<DetailsOverview :name="mediaDetailsDialogName" />
+		<!-- Media Selection Dialog -->
+		<MediaSelectionDialog :name="mediaSelectionDialogName" />
+		<!--	Loading overlay	-->
+		<QLoadingOverlay :loading="!isRefreshing && loading" />
+		<!--		Download confirmation dialog	-->
+		<DownloadConfirmation
+			:name="downloadConfirmationName"
+			:items="mediaOverviewStore.items"
+			@download="downloadStore.downloadMedia($event)" />
 	</template>
-	<!-- Media Details Display -->
-	<DetailsOverview :name="mediaDetailsDialogName" />
-	<!-- Media Selection Dialog -->
-	<MediaSelectionDialog :name="mediaSelectionDialogName" />
-	<!--	Loading overlay	-->
-	<QLoadingOverlay :loading="loading" />
-	<!--		Download confirmation dialog	-->
-	<DownloadConfirmation
-		:name="downloadConfirmationName"
-		:items="mediaOverviewStore.items"
-		@download="downloadStore.downloadMedia($event)" />
 </template>
 
 <script setup lang="ts">
 import Log from 'consola';
-import { set } from '@vueuse/core';
+import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { useRouter, type RouteLocationNormalized, type RouteLocationNormalizedLoaded } from 'vue-router';
 import { type DownloadMediaDTO, type LibraryProgress, PlexMediaType, ViewMode } from '@dto';
@@ -118,13 +136,15 @@ const isRefreshing = ref(false);
 
 const libraryProgress = ref<LibraryProgress | null>(null);
 
-const loading = ref(true);
+const loading = ref(false);
 
 const props = defineProps<{
 	libraryId: number;
 	mediaId: number;
 	mediaType: PlexMediaType;
 }>();
+
+const library = computed(() => libraryStore.getLibrary(props.libraryId));
 
 const isConfirmationEnabled = computed(() => {
 	switch (props.mediaType) {
@@ -142,10 +162,9 @@ const isConfirmationEnabled = computed(() => {
 });
 
 const refreshingText = computed(() => {
-	const library = libraryStore.getLibrary(props.libraryId);
 	const server = libraryStore.getServerByLibraryId(props.libraryId);
 	return t('components.media-overview.is-refreshing', {
-		library: library ? libraryStore.getLibraryName(library.id) : t('general.commands.unknown'),
+		library: get(library) ? libraryStore.getLibraryName(props.libraryId) : t('general.commands.unknown'),
 		server: server ? serverStore.getServerName(server.id) : t('general.commands.unknown'),
 	});
 });
@@ -165,6 +184,8 @@ function resetProgress(isRefreshingValue: boolean) {
 		isRefreshing: isRefreshingValue,
 		isComplete: false,
 		timeStamp: '',
+		timeRemaining: '',
+		step: 0,
 	});
 }
 
@@ -172,13 +193,20 @@ function refreshLibrary() {
 	set(isRefreshing, true);
 	resetProgress(true);
 	useSubscription(
-		libraryStore.reSyncLibrary(props.libraryId).subscribe(() => {
-			set(isRefreshing, false);
+		libraryStore.reSyncLibrary(props.libraryId).subscribe({
+			complete: () => {
+				set(isRefreshing, false);
+			},
 		}),
 	);
 }
 
 function onRequestMedia({ page = 0, size = 0 }: { page: number; size: number }) {
+	if (get(loading)) {
+		return;
+	}
+	set(loading, true);
+
 	useSubscription(
 		useMediaStore()
 			.getMediaData(props.libraryId, page, size)
@@ -373,10 +401,6 @@ onMounted(() => {
 
 <style lang="scss">
 @import '@/assets/scss/variables.scss';
-
-.refresh-library-container {
-	height: calc(100vh - $app-bar-height);
-}
 
 #media-container,
 .media-table-container,

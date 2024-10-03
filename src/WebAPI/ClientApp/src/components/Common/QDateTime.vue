@@ -8,7 +8,7 @@ import { useSettingsStore } from '~/store';
 
 const settingsStore = useSettingsStore();
 
-const props = withDefaults(defineProps<{ text: string; shortDate?: boolean; longDate?: boolean; time?: boolean }>(), {
+const props = withDefaults(defineProps<{ text?: string; shortDate?: boolean; longDate?: boolean; time?: boolean }>(), {
 	text: '',
 	shortDate: false,
 	longDate: false,

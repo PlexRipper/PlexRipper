@@ -70,7 +70,10 @@
         },
         "media-overview": {
             "is-refreshing": "Odświeżanie danych biblioteki \"{library}\" z {server}",
-            "no-data": "Nie można wyświetlić tej biblioteki."
+            "could-not-display": "Nie można wyświetlić tej biblioteki.",
+            "no-data": "Biblioteka została zsynchronizowana, ale nie zawiera żadnych multimediów.",
+            "library-not-yet-synced": "Dane multimediów bibliotecznych nie zostały jeszcze zsynchronizowane. Proszę czekać lub odświeżyć teraz.",
+            "steps-remaining": ""
         },
         "navigation-drawer": {
             "accounts": "Konta",
@@ -89,7 +92,6 @@
             "no-notifications": "Brak dostępnych powiadomień"
         },
         "folder-paths-overview": {
-            "no-paths": "Nie ustawiono żadnych ścieżek",
             "main": {
                 "header": "Domyślne ścieżki"
             },
@@ -212,6 +214,11 @@
                 "time-remaining": "Szacowany czas przybycia",
                 "title": "Tytuł"
             }
+        },
+        "q-countdown": {
+            "hours-minute-seconds": "Pozostało{hours} godzin, {minutes} minut i {seconds} sekund",
+            "minutes-seconds": "Pozostało{minutes} minut i {seconds} sekund",
+            "seconds": "Pozostało{seconds} sekund"
         }
     },
     "confirmation": {

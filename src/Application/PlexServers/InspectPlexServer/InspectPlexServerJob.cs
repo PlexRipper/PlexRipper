@@ -42,26 +42,26 @@ public class InspectPlexServerJob : IJob
             plexServerIds.Count
         );
 
-        // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
-        // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         try
         {
-            // Check all Plex Server Connections
             var serverTasks = plexServerIds.Select(async plexServerId =>
-                await _mediator.Send(new CheckAllConnectionsStatusByPlexServerCommand(plexServerId), cancellationToken)
-            );
+            {
+                // Check all Plex Server Connections
+                await _mediator.Send(new CheckAllConnectionsStatusByPlexServerCommand(plexServerId), cancellationToken);
+                await _signalRService.SendRefreshNotificationAsync([DataType.PlexServerConnection], cancellationToken);
+
+                // Refresh and sync libraries
+                await RefreshAndSyncLibraries(plexServerId, cancellationToken);
+            });
 
             await Task.WhenAll(serverTasks);
-
-            await _signalRService.SendRefreshNotificationAsync([DataType.PlexServerConnection], cancellationToken);
-
-            // Refresh and sync libraries
-            await Task.WhenAll(plexServerIds.Select(x => RefreshAndSyncLibraries(x, cancellationToken)));
 
             _log.Information("Successfully finished the inspection of {Count}", plexServerIds.Count, 0);
         }
         catch (Exception e)
         {
+            // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
+            // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
             _log.Error(e);
         }
     }

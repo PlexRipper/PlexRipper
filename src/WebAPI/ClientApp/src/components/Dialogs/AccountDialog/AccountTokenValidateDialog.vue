@@ -13,42 +13,45 @@
 			</QSubHeader>
 		</template>
 		<template #default>
-			<q-markup-table
-				v-if="account.isValidated"
-				wrap-cells>
-				<tbody>
-					<tr>
-						<td>
-							<QText :value="$t('components.account-token-validate-dialog.column.title')" />
-						</td>
-						<td>
-							<QText :value="account.title" />
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<QText :value="$t('components.account-token-validate-dialog.column.username')" />
-						</td>
-						<td>
-							<QText :value="account.username" />
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<QText :value="$t('components.account-token-validate-dialog.column.email')" />
-						</td>
-						<td>
-							<QText :value="account.email" />
-						</td>
-					</tr>
-				</tbody>
-			</q-markup-table>
-			<QAlert
-				v-else
-				cy="auth-token-validation-dialog-invalid-token-alert"
-				type="error">
-				{{ $t('components.account-token-validate-dialog.invalid-token') }}
-			</QAlert>
+			<div>
+				<q-markup-table
+					v-if="account.isValidated"
+					wrap-cells>
+					<tbody>
+						<tr>
+							<td>
+								<QText :value="$t('components.account-token-validate-dialog.column.title')" />
+							</td>
+							<td>
+								<QText :value="account.title" />
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<QText :value="$t('components.account-token-validate-dialog.column.username')" />
+							</td>
+							<td>
+								<QText :value="account.username" />
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<QText :value="$t('components.account-token-validate-dialog.column.email')" />
+							</td>
+							<td>
+								<QText :value="account.email" />
+							</td>
+						</tr>
+					</tbody>
+				</q-markup-table>
+
+				<QAlert
+					v-else
+					cy="auth-token-validation-dialog-invalid-token-alert"
+					type="error">
+					{{ $t('components.account-token-validate-dialog.invalid-token') }}
+				</QAlert>
+			</div>
 		</template>
 		<template #actions="{ close }">
 			<QRow justify="end">

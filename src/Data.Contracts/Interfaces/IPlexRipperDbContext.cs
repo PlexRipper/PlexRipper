@@ -1,6 +1,7 @@
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage;
 using PlexRipper.Domain;
 
 namespace Data.Contracts;
@@ -72,4 +73,6 @@ public interface IPlexRipperDbContext : IDisposable
         CancellationToken cancellationToken = default
     )
         where T : class;
+
+    Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
 }

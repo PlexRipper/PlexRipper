@@ -362,6 +362,10 @@ export interface LibraryProgress {
   percentage: number;
   /** @format int32 */
   received: number;
+  /** @format int32 */
+  step: number;
+  /** @format duration */
+  timeRemaining: string;
   /** @format date-time */
   timeStamp: string;
   /** @format int32 */

@@ -68,17 +68,17 @@
 				</QRow>
 			</template>
 			<!--	No custom FolderPaths	Warning -->
-			<template v-else>
-				<QRow
-					class="q-my-sm"
-					justify="center">
-					<QCol cols="auto">
-						<QText size="h4">
-							{{ $t('components.folder-paths-overview.no-paths') }}
-						</QText>
-					</QCol>
-				</QRow>
-			</template>
+			<!--			<template v-else> -->
+			<!--				<QRow -->
+			<!--					class="q-my-sm" -->
+			<!--					justify="center"> -->
+			<!--					<QCol cols="auto"> -->
+			<!--						<QText size="h4"> -->
+			<!--							{{ $t('components.folder-paths-overview.no-paths') }} -->
+			<!--						</QText> -->
+			<!--					</QCol> -->
+			<!--				</QRow> -->
+			<!--			</template> -->
 			<!--	Add Path Button	-->
 			<QRow
 				v-if="folderGroup.isFolderAddable"

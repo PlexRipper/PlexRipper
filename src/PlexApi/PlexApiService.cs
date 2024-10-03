@@ -72,6 +72,8 @@ public class PlexApiService : IPlexApiService
             case PlexMediaType.TvShow:
                 updatedPlexLibrary.TvShows = mediaList.ToPlexTvShows();
                 break;
+            default:
+                return Result.Fail($"Unknown PlexLibrary type: {updatedPlexLibrary.Type}").LogError();
         }
 
         return Result.Ok(updatedPlexLibrary);
@@ -301,7 +303,7 @@ public class PlexApiService : IPlexApiService
     private async Task<Result<List<GetLibraryItemsMetadata>>> SyncMedia(
         PlexLibrary plexLibrary,
         Type? plexType = null,
-        int batchSize = 100,
+        int batchSize = 1000,
         Action<MediaSyncProgress> action = null,
         CancellationToken cancellationToken = default
     )
@@ -330,6 +332,8 @@ public class PlexApiService : IPlexApiService
         };
         var index = 0;
 
+        var startTime = DateTime.UtcNow; // Start time for estimation
+
         while (true)
         {
             // Retrieve the media for this library
@@ -343,13 +347,34 @@ public class PlexApiService : IPlexApiService
             );
 
             if (result.IsFailed)
-                return result.ToResult().LogError();
+            {
+                result.ToResult().LogError();
+                break;
+            }
 
             var mediaContainer = result.Value;
-            mediaList.AddRange(mediaContainer.Metadata);
-
             var totalSize = mediaContainer.TotalSize;
             index += mediaContainer.Size;
+
+            if (mediaContainer.TotalSize == 0)
+            {
+                _log.Warning("The library with name: {Name} contains no media to sync", plexLibrary.Name);
+                return Result.Ok(new List<GetLibraryItemsMetadata>());
+            }
+
+            if (mediaContainer.Metadata is null)
+            {
+                ResultExtensions.IsNull(nameof(mediaContainer.Metadata)).LogError();
+                break;
+            }
+
+            mediaList.AddRange(mediaContainer.Metadata);
+
+            // Estimate remaining time
+            var elapsedTime = DateTime.UtcNow - startTime;
+            var progress = (double)index / totalSize;
+            var estimatedTotalTime = elapsedTime.TotalSeconds / progress;
+            var remainingTime = TimeSpan.FromSeconds(estimatedTotalTime - elapsedTime.TotalSeconds);
 
             // Report progress
             action?.Invoke(
@@ -358,6 +383,7 @@ public class PlexApiService : IPlexApiService
                     Type = plexLibrary.Type,
                     Received = index,
                     Total = totalSize,
+                    TimeRemaining = remainingTime,
                 }
             );
 
@@ -377,6 +403,8 @@ public class PlexApiService : IPlexApiService
             metadata.TitleSort = !string.IsNullOrEmpty(metadata.TitleSort)
                 ? metadata.TitleSort
                 : metadata.Title.ToSortTitle();
+
+        _log.Information("Finished syncing {Name} library with {MediaCount} items", plexLibrary.Name, mediaList.Count);
 
         return Result.Ok(mediaList);
     }

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace PlexRipper.WebAPI;
+namespace PlexRipper.Application;
 
 public class ValidationPipeline<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>

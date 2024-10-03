@@ -25,7 +25,6 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
             .ReturnsAsync((new List<PlexServer>(), new List<ServerAccessTokenDTO>()));
 
         // Act
-
         var request = new RefreshPlexServerAccessCommand(plexAccount.Id);
         var handler = mock.Create<RefreshPlexServerAccessCommandHandler>();
         var result = await handler.Handle(request, CancellationToken.None);

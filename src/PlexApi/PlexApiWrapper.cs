@@ -3,6 +3,7 @@ using Application.Contracts;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Errors;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
+using LukeHagar.PlexAPI.SDK.Utils.Retries;
 using PlexApi.Contracts;
 using ILog = Logging.Interface.ILog;
 using Type = LukeHagar.PlexAPI.SDK.Models.Requests.Type;
@@ -346,7 +347,15 @@ public class PlexApiWrapper
         if (!int.TryParse(libraryKey, out var libraryKeyInt))
             return ResultExtensions.IsInvalidId(nameof(libraryKey), libraryKey).LogError();
 
-        var client = CreateClient(authToken, new PlexApiClientOptions() { ConnectionUrl = connection.Url });
+        var client = CreateClient(
+            authToken,
+            new PlexApiClientOptions()
+            {
+                ConnectionUrl = connection.Url,
+                Timeout = 30,
+                RetryCount = 3,
+            }
+        );
 
         GetLibraryItemsQueryParamType? apiType = type switch
         {
@@ -392,7 +401,7 @@ public class PlexApiWrapper
         {
             Id = plexAccount.Id,
             DisplayName = plexAccount.DisplayName,
-            Username = plexAccount.Username,
+            Username = x.UserPlexAccount!.Username,
             Password = plexAccount.Password,
             IsEnabled = plexAccount.IsEnabled,
             IsAuthTokenMode = plexAccount.IsAuthTokenMode,

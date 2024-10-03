@@ -10,15 +10,9 @@ namespace PlexRipper.BaseTests;
 
 public class BaseUnitTest : IDisposable
 {
-    #region Fields
-
     private string _databaseName;
     private bool _isDatabaseSetup;
     protected readonly ILog Log;
-
-    #endregion
-
-    #region Constructors
 
     /// <summary>
     /// This constructor is run before every test
@@ -33,10 +27,6 @@ public class BaseUnitTest : IDisposable
         Log = LogManager.CreateLogInstance(output, typeof(BaseUnitTest));
     }
 
-    #endregion
-
-    #region Properties
-
     protected int Seed { get; set; } = 0;
 
     /// <summary>
@@ -49,8 +39,6 @@ public class BaseUnitTest : IDisposable
     protected Mock<IPlexRipperDbContext> MockIDbContext => new();
 
     private List<PlexRipperDbContext> _dbContexts = new();
-
-    #endregion
 
     protected PlexRipperDbContext GetDbContext()
     {
@@ -89,15 +77,9 @@ public class BaseUnitTest : IDisposable
 public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
     where TUnitTestClass : class
 {
-    #region Fields
-
     protected TUnitTestClass _sut => mock.Create<TUnitTestClass>();
 
     protected readonly AutoMock mock;
-
-    #endregion
-
-    #region Constructors
 
     protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(output, logEventLevel)
@@ -129,19 +111,9 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
         mock.Mock<IHttpClientFactory>().Setup(x => x.CreateClient(It.IsAny<string>())).Returns(new HttpClient());
     }
 
-    #endregion
-
-    #region Methods
-
-    #region Public
-
     public new virtual void Dispose()
     {
         base.Dispose();
         mock.Dispose();
     }
-
-    #endregion
-
-    #endregion
 }

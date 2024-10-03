@@ -32,6 +32,7 @@
 				<QRow
 					v-if="text"
 					justify="center"
+					class="q-mt-lg"
 					no-gutters>
 					<QCol>
 						<QText

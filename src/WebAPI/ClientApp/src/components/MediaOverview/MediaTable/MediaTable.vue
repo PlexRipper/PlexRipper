@@ -66,7 +66,7 @@ const autoScrollEnabled = ref(false);
 
 withDefaults(
 	defineProps<{
-		rows: PlexMediaSlimDTO[];
+		rows: Readonly<PlexMediaSlimDTO[]>;
 		disableHoverClick?: boolean;
 		disableHighlight?: boolean;
 		disableIntersection?: boolean;
@@ -77,7 +77,6 @@ withDefaults(
 		disableHighlight: false,
 		disableIntersection: false,
 		isScrollable: true,
-		rows: () => [],
 	},
 );
 

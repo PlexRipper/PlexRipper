@@ -8,7 +8,7 @@ import { useSettingsStore } from '#build/imports';
 
 export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 	const state = reactive<{
-		items: PlexMediaSlimDTO[];
+		items: Readonly<PlexMediaSlimDTO[]>;
 		itemsLength: number;
 		sortedState: IMediaOverviewSort[];
 		scrollDict: Record<string, number>;
@@ -34,8 +34,8 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 	const actions = {
 		setMedia(items: PlexMediaSlimDTO[], mediaType: PlexMediaType) {
 			state.scrollDict = {};
-			state.items = items;
-			state.itemsLength = items.length;
+			state.items = Object.freeze(items);
+			state.itemsLength = state.items.length;
 			state.mediaType = mediaType;
 			// Create scroll indexes for each letter
 			state.scrollDict['#'] = 0;

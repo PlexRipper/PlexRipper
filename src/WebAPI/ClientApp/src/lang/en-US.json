@@ -70,7 +70,10 @@
         },
         "media-overview": {
             "is-refreshing": "Refreshing library \"{library}\" data from {server}",
-            "no-data": "Could not display this library."
+            "could-not-display": "Could not display this library.",
+            "no-data": "The library has been synced but contains no media.",
+            "library-not-yet-synced": "The library media data has not yet been synced. Please wait or refresh now.",
+            "steps-remaining": "Step {index} of {total}:"
         },
         "navigation-drawer": {
             "accounts": "Accounts",
@@ -89,7 +92,6 @@
             "no-notifications": "No notifications available"
         },
         "folder-paths-overview": {
-            "no-paths": "No paths are set",
             "main": {
                 "header": "Default Paths"
             },
@@ -212,6 +214,11 @@
                 "time-remaining": "ETA",
                 "title": "Title"
             }
+        },
+        "q-countdown": {
+            "hours-minute-seconds": "{hours} hours, {minutes} minutes and {seconds} seconds remaining",
+            "minutes-seconds": "{minutes} minutes and {seconds} seconds remaining",
+            "seconds": "{seconds} seconds remaining"
         }
     },
     "confirmation": {

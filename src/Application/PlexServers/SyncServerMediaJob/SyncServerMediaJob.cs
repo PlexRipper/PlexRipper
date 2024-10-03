@@ -86,7 +86,19 @@ public class SyncServerMediaJob : IJob
             var progressList = new List<LibraryProgress>();
 
             // Initialize list
-            plexLibraries.ForEach(x => progressList.Add(new LibraryProgress(x.Id, 0, x.MediaCount)));
+            plexLibraries.ForEach(x =>
+                progressList.Add(
+                    new LibraryProgress()
+                    {
+                        Id = x.Id,
+                        Step = 0,
+                        Received = 0,
+                        Total = x.MediaCount,
+                        IsRefreshing = false,
+                        TimeRemaining = default,
+                    }
+                )
+            );
 
             var progress = new Action<LibraryProgress>(libraryProgress =>
             {

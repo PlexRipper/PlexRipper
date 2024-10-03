@@ -5,9 +5,6 @@ using Autofac;
 using Autofac.Extras.Quartz;
 using Environment;
 using FileSystem.Contracts;
-using FluentValidation;
-using MediatR.Extensions.Autofac.DependencyInjection;
-using MediatR.Extensions.Autofac.DependencyInjection.Builder;
 using PlexRipper.Domain.Autofac;
 using Module = Autofac.Module;
 
@@ -29,26 +26,6 @@ public class ApplicationModule : Module
             .Where(t => t.Name.EndsWith("Service"))
             .AsImplementedInterfaces()
             .SingleInstance();
-
-        // MediatR
-        var configuration = MediatRConfigurationBuilder
-            .Create(assembly)
-            .WithAllOpenGenericHandlerTypesRegistered()
-            .Build();
-        builder.RegisterMediatR(configuration);
-
-        // register all I*Commands
-        builder
-            .RegisterAssemblyTypes(assembly)
-            .Where(t => t.Name.EndsWith("Command"))
-            .AsImplementedInterfaces()
-            .SingleInstance();
-
-        // register all FluentValidators
-        builder
-            .RegisterAssemblyTypes(assembly)
-            .Where(t => t.IsClosedTypeOf(typeof(IValidator<>)))
-            .AsImplementedInterfaces();
 
         builder.RegisterType<DownloadQueue>().As<IDownloadQueue>().SingleInstance();
         builder.RegisterType<DownloadTaskScheduler>().As<IDownloadTaskScheduler>().SingleInstance();

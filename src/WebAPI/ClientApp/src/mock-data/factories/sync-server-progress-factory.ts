@@ -39,5 +39,7 @@ export function generateLibraryProgress({
 		isRefreshing: received !== total,
 		timeStamp: randRecentDate().toISOString(),
 		percentage: Math.round((received / total) * 100) / 100,
+		timeRemaining: '00:13:21.8148051',
+		step: 1,
 	};
 }

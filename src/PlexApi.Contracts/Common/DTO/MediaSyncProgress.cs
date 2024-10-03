@@ -15,4 +15,6 @@ public record MediaSyncProgress
     /// E.g: 0.5 = 50%
     /// </summary>
     public decimal Percentage => DataFormat.GetPercentage(Received, Total) / 100;
+
+    public required TimeSpan TimeRemaining { get; init; } = TimeSpan.Zero;
 }

@@ -70,7 +70,10 @@
         },
         "media-overview": {
             "is-refreshing": "Mediathek \"{library}\" daten von {server} werden aktualisiert",
-            "no-data": "Kann die Mediathek nicht anzeigen"
+            "could-not-display": "Kann die Mediathek nicht anzeigen",
+            "no-data": "Die Bibliothek wurde synchronisiert, enthält aber keine Medien.",
+            "library-not-yet-synced": "Die Mediendaten der Bibliothek wurden noch nicht synchronisiert. Bitte warten Sie oder aktualisieren Sie jetzt.",
+            "steps-remaining": ""
         },
         "navigation-drawer": {
             "accounts": "Konten",
@@ -89,7 +92,6 @@
             "no-notifications": "keine Benachrichtigungen verfügbar"
         },
         "folder-paths-overview": {
-            "no-paths": "Keine Pfade festgelegt",
             "main": {
                 "header": "Standart Pfad"
             },
@@ -212,6 +214,11 @@
                 "time-remaining": "Ankunftszeit",
                 "title": "Titel"
             }
+        },
+        "q-countdown": {
+            "hours-minute-seconds": "{hours} Stunden, {minutes} Minuten und {seconds} Sekunden verbleiben",
+            "minutes-seconds": "{minutes} Minuten und {seconds} Sekunden verbleiben",
+            "seconds": "{seconds} Sekunden verbleiben"
         }
     },
     "confirmation": {

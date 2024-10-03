@@ -1,10 +1,11 @@
-using PlexRipper.Application;
+namespace PlexRipper.Application.UnitTests;
 
-namespace Data.UnitTests;
-
-public class CreateUpdateOrDeletePlexMoviesHandler_UnitTests : BaseUnitTest
+public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMoviesCommandHandler>
 {
-    public CreateUpdateOrDeletePlexMoviesHandler_UnitTests(ITestOutputHelper output)
+    private SyncPlexMoviesCommandValidator _validator =
+        new(LogManager.CreateLogInstance<SyncPlexMoviesCommandValidator>());
+
+    public SyncPlexMoviesCommandHandler_UnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -20,12 +21,16 @@ public class CreateUpdateOrDeletePlexMoviesHandler_UnitTests : BaseUnitTest
 
         var library = IDbContext.PlexLibraries.First();
         library.ShouldNotBeNull();
-        library.Movies = FakeData.GetPlexMovies(Seed).Generate(50);
+
+        var movies = FakeData.GetPlexMovies(Seed).Generate(50);
+        SetIds(library, movies);
+
+        library.Movies = movies;
 
         // Act
-        var request = new CreateUpdateOrDeletePlexMoviesCommand(library);
-        var handler = new CreateUpdateOrDeletePlexMoviesHandler(Log, GetDbContext());
-        var result = await handler.Handle(request, CancellationToken.None);
+        var request = new SyncPlexMoviesCommand(movies);
+        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
+        var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -51,12 +56,15 @@ public class CreateUpdateOrDeletePlexMoviesHandler_UnitTests : BaseUnitTest
         var moviesDb = IDbContext.PlexMovies.ToList();
         moviesDb.ShouldNotBeNull();
 
-        library.Movies = moviesDb.GetRange(0, 30);
+        var movies = moviesDb.GetRange(0, 30);
+        SetIds(library, movies);
+
+        library.Movies = movies;
 
         // Act
-        var request = new CreateUpdateOrDeletePlexMoviesCommand(library);
-        var handler = new CreateUpdateOrDeletePlexMoviesHandler(Log, GetDbContext());
-        var result = await handler.Handle(request, CancellationToken.None);
+        var request = new SyncPlexMoviesCommand(movies);
+        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
+        var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -99,12 +107,14 @@ public class CreateUpdateOrDeletePlexMoviesHandler_UnitTests : BaseUnitTest
             newMovies[i].Title = $"TEST - {newMovies[i].Title}";
         }
 
+        SetIds(library, newMovies);
+
         library.Movies = newMovies;
 
         // Act
-        var request = new CreateUpdateOrDeletePlexMoviesCommand(library);
-        var handler = new CreateUpdateOrDeletePlexMoviesHandler(Log, GetDbContext());
-        var result = await handler.Handle(request, CancellationToken.None);
+        var request = new SyncPlexMoviesCommand(newMovies);
+        (await _validator.ValidateAsync(request)).IsValid.ShouldBeTrue();
+        var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -115,6 +125,15 @@ public class CreateUpdateOrDeletePlexMoviesHandler_UnitTests : BaseUnitTest
             var findResult = plexMoviesDb.Find(x => x.Key == plexMovie.Key);
             findResult.ShouldNotBeNull();
             findResult.Title.Contains("TEST").ShouldBeTrue();
+        }
+    }
+
+    private void SetIds(PlexLibrary library, List<PlexMovie> newPlexMovies)
+    {
+        foreach (var plexMovie in newPlexMovies)
+        {
+            plexMovie.PlexLibraryId = library.Id;
+            plexMovie.PlexServerId = library.PlexServerId;
         }
     }
 }

@@ -370,6 +370,8 @@ export interface LibraryProgress {
   timeStamp: string;
   /** @format int32 */
   total: number;
+  /** @format int32 */
+  totalSteps: number;
 }
 
 export enum MessageTypes {

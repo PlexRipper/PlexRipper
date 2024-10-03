@@ -29,7 +29,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
     private readonly IPlexApiService _plexServiceApi;
 
     private readonly int _baseCountProgress = 1000;
-    private readonly int _totalProgressSteps = 5;
+    private int _totalProgressSteps;
 
     private int _plexLibraryId;
     private Action<LibraryProgress>? _progressAction;
@@ -64,7 +64,14 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         _plexLibraryId = plexLibrary.Id;
         _progressAction = command.ProgressAction;
 
-        // Phase 1 of 5:  Retrieve overview of all media belonging to this PlexLibrary
+        _totalProgressSteps = plexLibrary.Type switch
+        {
+            PlexMediaType.TvShow => 5,
+            PlexMediaType.Movie => 3,
+            _ => _totalProgressSteps,
+        };
+
+        // Phase 1:  Retrieve overview of all media belonging to this PlexLibrary
         var newPlexLibraryResult = await _plexServiceApi.GetLibraryMediaAsync(
             plexLibrary,
             progress => SendProgress(1, progress.Percentage, progress.TimeRemaining),
@@ -129,19 +136,30 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 );
             timer.Restart();
 
+            var rawSeasonData = rawSeasonDataResult.Value;
+            var rawEpisodesData = rawEpisodesDataResult.Value;
+
             // Phase 4 of 5: PlexLibrary media data was parsed successfully.
-            BuildTvShowTree(plexLibrary, rawSeasonDataResult.Value, rawEpisodesDataResult.Value);
+            var tvShows = BuildTvShowTree(plexLibrary, plexLibrary.TvShows, rawSeasonData, rawEpisodesData);
 
             // Update the MetaData of this library
-            var updateMetaDataResult = plexLibrary.UpdateMetaData();
-            if (updateMetaDataResult.IsFailed)
-                return updateMetaDataResult;
+            var syncResult = await _mediator.Send(new SyncPlexTvShowsCommand(tvShows));
+            if (syncResult.IsFailed)
+            {
+                SendProgress(5, 1);
+                return syncResult.ToResult().LogError();
+            }
+
+            plexLibrary.MetaData = new PlexLibraryMetaData()
+            {
+                MovieCount = 0,
+                TvShowCount = plexLibrary.TvShows.Count,
+                TvShowSeasonCount = rawSeasonData.Count,
+                TvShowEpisodeCount = rawEpisodesData.Count,
+                MediaSize = tvShows.Sum(x => x.MediaSize),
+            };
 
             await _dbContext.UpdatePlexLibraryById(plexLibrary);
-
-            var createResult = await _mediator.Send(new SyncPlexTvShowsCommand(plexLibrary.TvShows));
-            if (createResult.IsFailed)
-                return createResult.ToResult();
 
             _log.Here()
                 .Debug(
@@ -171,34 +189,38 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
 
     private async Task<Result<PlexLibrary>> RefreshPlexMovieLibrary(PlexLibrary plexLibrary)
     {
-        // Phase 2 of 5: Season data was retrieved successfully.
-        SendProgress(2, 1);
-
-        // Update the MetaData of this library
-        var updateMetaDataResult = plexLibrary.UpdateMetaData();
-        if (updateMetaDataResult.IsFailed)
-            return updateMetaDataResult;
-
-        // Phase 3 of 5: Meta-data was updated successfully.
-        SendProgress(3, 1);
-
-        await _dbContext.UpdatePlexLibraryById(plexLibrary);
-
-        // Phase 4 of 5: PlexLibrary media data was parsed successfully.
-        SendProgress(4, 1);
-
-        if (plexLibrary.HasMedia)
+        if (plexLibrary.Movies.Any())
         {
-            var createResult = await _mediator.Send(new CreateUpdateOrDeletePlexMoviesCommand(plexLibrary));
+            foreach (var plexTvShow in plexLibrary.Movies)
+            {
+                plexTvShow.PlexLibraryId = plexLibrary.Id;
+                plexTvShow.PlexServerId = plexLibrary.PlexServerId;
+            }
+
+            var createResult = await _mediator.Send(new SyncPlexMoviesCommand(plexLibrary.Movies));
             if (createResult.IsFailed)
             {
-                SendProgress(5, 1);
-                return createResult;
+                SendProgress(_totalProgressSteps, 1);
+                return createResult.ToResult().LogError();
             }
         }
 
-        // Phase 5 of 5: Movies have been successfully updated in the database.
-        SendProgress(5, 1);
+        // Phase 2 of 3: PlexLibrary media data was parsed successfully.
+        SendProgress(2, 1);
+
+        plexLibrary.MetaData = new PlexLibraryMetaData()
+        {
+            MovieCount = plexLibrary.Movies.Count,
+            TvShowCount = 0,
+            TvShowSeasonCount = 0,
+            TvShowEpisodeCount = 0,
+            MediaSize = plexLibrary.Movies.Sum(x => x.MediaSize),
+        };
+
+        // Mark the library as synced
+        plexLibrary.SyncedAt = DateTime.UtcNow;
+
+        await _dbContext.UpdatePlexLibraryById(plexLibrary);
 
         _log.Information(
             "Successfully refreshed library {PlexLibraryName} with id: {PlexLibraryId}",
@@ -206,11 +228,8 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             plexLibrary.Id
         );
 
-        // Mark the library as synced
-        plexLibrary.SyncedAt = DateTime.UtcNow;
-        await _dbContext
-            .PlexLibraries.Where(x => x.Id == plexLibrary.Id)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.SyncedAt, plexLibrary.SyncedAt));
+        // Phase 3 of 3: Movies have been successfully updated in the database.
+        SendProgress(_totalProgressSteps, 1);
 
         return Result.Ok(plexLibrary);
     }
@@ -228,7 +247,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             Step = step,
             Received = (int)Math.Floor(index),
             Total = _baseCountProgress,
-            IsRefreshing = step != _totalProgressSteps,
+            TotalSteps = _totalProgressSteps,
         };
 
         _progressAction?.Invoke(progress);
@@ -236,23 +255,22 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         _signalRService.SendLibraryProgressUpdateAsync(progress);
     }
 
-    private void BuildTvShowTree(
+    private List<PlexTvShow> BuildTvShowTree(
         PlexLibrary plexLibrary,
-        List<PlexTvShowSeason> rawSeasonDataResult,
-        List<PlexTvShowEpisode> rawEpisodesDataResult
+        List<PlexTvShow> rawTvShowData,
+        List<PlexTvShowSeason> rawSeasonData,
+        List<PlexTvShowEpisode> rawEpisodesData
     )
     {
         // Group seasons and episodes by parent key upfront
-        var seasonsByTvShowKey = rawSeasonDataResult
-            .GroupBy(x => x.ParentKey)
-            .ToDictionary(g => g.Key, g => g.ToList());
-        var episodesBySeasonKey = rawEpisodesDataResult
-            .GroupBy(x => x.ParentKey)
-            .ToDictionary(g => g.Key, g => g.ToList());
+        var seasonsByTvShowKey = rawSeasonData.GroupBy(x => x.ParentKey).ToDictionary(g => g.Key, g => g.ToList());
+        var episodesBySeasonKey = rawEpisodesData.GroupBy(x => x.ParentKey).ToDictionary(g => g.Key, g => g.ToList());
 
-        for (var i = 0; i < plexLibrary.TvShows.Count; i++)
+        for (var i = 0; i < rawTvShowData.Count; i++)
         {
-            var plexTvShow = plexLibrary.TvShows[i];
+            var plexTvShow = rawTvShowData[i];
+            plexTvShow.PlexLibraryId = plexLibrary.Id;
+            plexTvShow.PlexServerId = plexLibrary.PlexServerId;
 
             // Retrieve and assign seasons for this TV show
             if (seasonsByTvShowKey.TryGetValue(plexTvShow.Key, out var seasons))
@@ -274,6 +292,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 if (episodesBySeasonKey.TryGetValue(plexTvShowSeason.Key, out var episodes))
                 {
                     // Set library ID in each episode
+                    episodes ??= [];
                     episodes.ForEach(x =>
                     {
                         x.PlexLibraryId = plexLibrary.Id;
@@ -297,7 +316,9 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
 
             plexTvShow.MediaSize = plexTvShow.Seasons.Sum(x => x.MediaSize);
             plexTvShow.Duration = plexTvShow.Seasons.Sum(x => x.Duration);
-            SendProgress(4, DataFormat.GetPercentage(i, plexLibrary.TvShows.Count));
+            SendProgress(4, DataFormat.GetPercentage(i, rawTvShowData.Count));
         }
+
+        return rawTvShowData;
     }
 }

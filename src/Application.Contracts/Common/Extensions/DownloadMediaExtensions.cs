@@ -39,7 +39,7 @@ public static class DownloadMediaExtensions
             {
                 x.PlexServerId,
                 x.PlexLibraryId,
-                x.Type
+                x.Type,
             })
             .Select(group => new DownloadMediaDTO
             {

@@ -92,7 +92,6 @@
             "no-notifications": "Brak dostępnych powiadomień"
         },
         "folder-paths-overview": {
-            "no-paths": "Nie ustawiono żadnych ścieżek",
             "main": {
                 "header": "Domyślne ścieżki"
             },

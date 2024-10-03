@@ -92,7 +92,6 @@
             "no-notifications": "No notifications available"
         },
         "folder-paths-overview": {
-            "no-paths": "No paths are set",
             "main": {
                 "header": "Default Paths"
             },

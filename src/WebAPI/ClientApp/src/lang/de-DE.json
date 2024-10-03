@@ -92,7 +92,6 @@
             "no-notifications": "keine Benachrichtigungen verfügbar"
         },
         "folder-paths-overview": {
-            "no-paths": "Keine Pfade festgelegt",
             "main": {
                 "header": "Standart Pfad"
             },

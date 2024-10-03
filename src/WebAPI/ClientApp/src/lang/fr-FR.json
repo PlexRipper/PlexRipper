@@ -92,7 +92,6 @@
             "no-notifications": "Pas de notification disponible"
         },
         "folder-paths-overview": {
-            "no-paths": "Chemin d'accès invalide",
             "main": {
                 "header": "Chemin d'accès par défaut"
             },

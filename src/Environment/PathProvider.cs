@@ -73,7 +73,7 @@ public class PathProvider : IPathProvider
         }
     }
 
-    public static string DatabaseConnectionString => $"Data Source={DatabasePath}";
+    public static string DatabaseConnectionString => $"Data Source={DatabasePath};Cache=Shared;";
 
     #region Interface Implementations
 

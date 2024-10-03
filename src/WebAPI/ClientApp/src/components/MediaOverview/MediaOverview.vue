@@ -186,6 +186,7 @@ function resetProgress(isRefreshingValue: boolean) {
 		timeStamp: '',
 		timeRemaining: '',
 		step: 0,
+		totalSteps: 0,
 	});
 }
 

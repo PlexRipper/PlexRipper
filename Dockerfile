@@ -119,6 +119,9 @@ WORKDIR /app
 COPY --from=back-end /app/publish .
 COPY --from=client-build /tmp/ClientApp/.output/public /app/wwwroot
 
+## Copy the s6-overlay config files
+COPY docker/ /
+
 ## set version label
 LABEL company="PlexRipper"
 LABEL maintainer="plexripper@protonmail.com"

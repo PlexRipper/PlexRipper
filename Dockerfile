@@ -1,26 +1,32 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS base
-WORKDIR /app
-
-## Setup Nuxt front-end
-FROM oven/bun:alpine AS client-build
-WORKDIR /tmp/build/ClientApp
-
 ARG VERSION=0.0.0
+ARG PORT=7000
+ARG TARGETPLATFORM=linux/amd64
+ARG BUILDPLATFORM=linux/amd64
+
+# Stage 1 - Build the Nuxt front-end
+FROM oven/bun:alpine AS client-build
+
+ARG PORT
 
 ENV NUXT_HOST=0.0.0.0
-ENV NUXT_PORT=7000
-ENV API_PORT=7000
+ENV NUXT_PORT=${PORT}
+ENV NUXT_PUBLIC_API_PORT=${PORT}
 ENV NUXT_PUBLIC_IS_DOCKER=true
+
+WORKDIR /tmp/ClientApp
+## Copy the package.json and install the dependencies
+COPY ./src/WebAPI/ClientApp/package.json ./src/WebAPI/ClientApp/bun.lockb ./
+RUN bun install --frozen-lockfile
 
 ## Copy the project files
 COPY ./src/WebAPI/ClientApp/ ./
-RUN bun install --frozen-lockfile
 RUN bun run generate --fail-on-error
+    
+# Stage 2 Build the .NET back-end
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS back-end
 
-## Setup .NET Core back-end
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG VERSION
+
 WORKDIR /src
 
 ## Domain Projects
@@ -58,84 +64,66 @@ COPY . .
 WORKDIR "/src/src/WebAPI"
 RUN dotnet build "WebAPI.csproj" -c Release -o /app/build /p:AssemblyVersion=$VERSION --no-restore
 
-FROM build AS publish
 RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:AssemblyVersion=$VERSION
 
-## Merge into one container
-FROM base AS final
-ENV DOTNET_ENVIRONMENT=Production
-ENV ASPNETCORE_URLS=http://+:7000
-ENV DOTNET_URLS=http://+:7000
-
-
 # Stage 3 - Build runtime image
-FROM ghcr.io/linuxserver/baseimage-alpine:3.20
-ARG TARGETPLATFORM
-ENV TARGETPLATFORM=${TARGETPLATFORM:-linux/amd64}
-ARG BUILDPLATFORM
-ENV BUILDPLATFORM=${BUILDPLATFORM:-linux/amd64}
+FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
 
-# set version label
-ARG BUILD_DATE
 ARG VERSION
-LABEL build_version="Linuxserver.io extended version:- ${VERSION} Build-date:- ${BUILD_DATE}"
-LABEL maintainer="ravensorb"
+ARG PORT
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
 
-# set environment variables
-ARG DEBIAN_FRONTEND="noninteractive"
-ENV XDG_CONFIG_HOME="/config/xdg"
-ENV RDTCLIENT_BRANCH="main"
+## set environment variables
+ENV PORT=${PORT}
+ENV VERSION=${VERSION}
+ENV TARGETPLATFORM=${TARGETPLATFORM}
+ENV BUILDPLATFORM=${BUILDPLATFORM}
+ENV DOTNET_ENVIRONMENT=Production
+ENV DOTNET_URLS=http://+:${PORT}
+ENV ASPNETCORE_URLS=http://+:${PORT}
 
+## Install dotnet runtime
 RUN \
-   mkdir -p /data/downloads /data/db || true && \
    echo "**** Updating package information ****" && \
    apk update && \
    echo "**** Install pre-reqs ****" && \
-   apk add bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib && \
+   apk add --no-cache bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib && \
    echo "**** Installing dotnet ****" && \
-   mkdir -p /usr/share/dotnet
-
-RUN \
-   if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then \
-   wget https://download.visualstudio.microsoft.com/download/pr/c3bf3103-efdb-42e0-af55-bbf861a4215b/dc22eda8877933b8c6569e3823f18d21/aspnetcore-runtime-8.0.0-linux-musl-arm64.tar.gz && \
-   tar zxf aspnetcore-runtime-8.0.0-linux-musl-arm64.tar.gz -C /usr/share/dotnet ; \
+   mkdir -p /usr/share/dotnet && \
+   wget https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh && \
+   chmod +x /tmp/dotnet-install.sh && \
+   if  [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then \
+   /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm ; \
    elif [ "$TARGETPLATFORM" = "linux/arm64" ] ; then \
-   wget https://download.visualstudio.microsoft.com/download/pr/c3bf3103-efdb-42e0-af55-bbf861a4215b/dc22eda8877933b8c6569e3823f18d21/aspnetcore-runtime-8.0.0-linux-musl-arm64.tar.gz && \
-   tar zxf aspnetcore-runtime-8.0.0-linux-musl-arm64.tar.gz -C /usr/share/dotnet ; \
+   /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm64 ; \
    else \
-   wget https://download.visualstudio.microsoft.com/download/pr/7aa33fc7-07fe-48c2-8e44-a4bfb4928535/3b96ec50970eee414895ef3a5b188bcd/aspnetcore-runtime-8.0.0-linux-musl-x64.tar.gz && \
-   tar zxf aspnetcore-runtime-8.0.0-linux-musl-x64.tar.gz -C /usr/share/dotnet ; \
+   /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture x64 ; \
    fi
 
-RUN \
-   echo "**** Setting permissions ****" && \
-   chown -R abc:abc /data && \
-   rm -rf \
-   /tmp/* \
-   /var/cache/apk/* \
-   /var/tmp/* || true
-
+# Make dotnet command available
 ENV PATH "$PATH:/usr/share/dotnet"
 
-# Define the s6 service for the dotnet app
-RUN mkdir -p /etc/services.d/dotnet-webapi
+# Define the s6 service for the plexripper app
+RUN mkdir -p /etc/services.d/plexripper
 
-# Create the run script that will start the dotnet app
-RUN echo '#!/bin/sh' > /etc/services.d/dotnet-webapi/run && \
-    echo 'exec dotnet /app/PlexRipper.WebAPI.dll' >> /etc/services.d/dotnet-webapi/run
+# Create the run script that will start the plexripper app
+RUN echo '#!/usr/bin/with-contenv sh' > /etc/services.d/plexripper/run && \
+    echo 'exec dotnet /app/PlexRipper.WebAPI.dll' >> /etc/services.d/plexripper/run
 
 # Make the script executable
-RUN chmod +x /etc/services.d/dotnet-webapi/run
+RUN chmod +x /etc/services.d/plexripper/run
 
+## Copy to final image
 WORKDIR /app
+COPY --from=back-end /app/publish .
+COPY --from=client-build /tmp/ClientApp/.output/public /app/wwwroot
 
-COPY --from=publish /app/publish .
-COPY --from=client-build /tmp/build/ClientApp/dist /app/wwwroot
-
+## set version label
 LABEL company="PlexRipper"
 LABEL maintainer="plexripper@protonmail.com"
 
-EXPOSE 7000
+EXPOSE ${PORT}
 VOLUME /Config /Downloads /Movies /TvShows
 
 # Set the entrypoint to use s6-overlay

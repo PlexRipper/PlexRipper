@@ -45,6 +45,9 @@ public static class Startup
     {
         _log.Information("Currently running in {Environment} mode", env.EnvironmentName);
 
+        _log.Information("Running location: {Location}",
+            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+
         app.UseRouting();
 
         app.UseCors(CORSConfiguration);
@@ -83,10 +86,7 @@ public static class Startup
         {
             // Used to deploy the front-end Nuxt client
             app.UseSpaStaticFiles();
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = "ClientApp";
-            });
+            app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
         }
     }
 
@@ -108,6 +108,7 @@ public static class Startup
                     builder
                         .AllowAnyHeader()
                         .AllowAnyMethod()
+
                         // The combo all origin is allowed with allow credentials is needed to make SignalR work from the client.
                         .SetIsOriginAllowed(_ => true)
                         .AllowCredentials();
@@ -123,14 +124,18 @@ public static class Startup
         services.AddFastEndpoints(options =>
         {
             options.DisableAutoDiscovery = true;
-            options.Assemblies = [Assembly.GetAssembly(typeof(BaseEndpoint<,>))];
+            options.Assemblies = [Assembly.GetAssembly(typeof(BaseEndpoint<,>))!];
         });
 
         if (!EnvironmentExtensions.IsIntegrationTestMode())
         {
             // Used to deploy the front-end Nuxt client
             if (env.IsProduction())
-                services.AddSpaStaticFiles(configuration => configuration.RootPath = "wwwroot");
+            {
+                services.AddSpaStaticFiles(configuration =>
+                    configuration.RootPath =
+                        Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", "wwwroot"));
+            }
 
             if (env.IsDevelopment())
                 services.AddSpaStaticFiles(configuration => configuration.RootPath = "ClientApp");

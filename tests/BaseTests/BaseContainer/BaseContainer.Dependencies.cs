@@ -80,7 +80,7 @@ public partial class BaseContainer : IDisposable
 
     public MockSignalRService MockSignalRService => (MockSignalRService)Resolve<ISignalRService>();
 
-    public IBoot Boot => Resolve<IBoot>();
+    public Boot Boot => Resolve<Boot>();
 
     public IServerSettingsModule GetServerSettings => Resolve<IServerSettingsModule>();
 }

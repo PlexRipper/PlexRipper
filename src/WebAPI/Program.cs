@@ -14,7 +14,7 @@ public class Program
         {
             var success = Enum.TryParse<LogEventLevel>(
                 System.Environment.GetEnvironmentVariable("LOG_LEVEL"),
-                ignoreCase: true,
+                true,
                 out var logLevel
             );
 

@@ -8,7 +8,7 @@ namespace PlexRipper.WebAPI;
 /// <summary>
 /// The Boot class is used to sequentially start various processes needed to start PlexRipper.
 /// </summary>
-public class Boot : IBoot
+public class Boot : IHostedService
 {
     #region Fields
 
@@ -38,19 +38,17 @@ public class Boot : IBoot
         _configManager = configManager;
         _schedulerService = schedulerService;
         _downloadQueue = downloadQueue;
+
+        _appLifetime.ApplicationStarted.Register(OnStarted);
+        _appLifetime.ApplicationStopping.Register(OnStopping);
+        _appLifetime.ApplicationStopped.Register(OnStopped);
     }
 
     #endregion
 
     #region Public Methods
 
-    public async Task StopAsync(CancellationToken cancellationToken)
-    {
-        _log.InformationLine("Shutting down the container");
-        await _schedulerService.StopAsync();
-    }
-
-    public async Task WaitForStartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         _log.InformationLine("Initiating boot process");
         ServicePointManager.DefaultConnectionLimit = 1000;
@@ -59,11 +57,13 @@ public class Boot : IBoot
         _downloadQueue.Setup();
         await _schedulerService.SetupAsync();
 
-        _appLifetime.ApplicationStarted.Register(OnStarted);
-        _appLifetime.ApplicationStopping.Register(OnStopping);
-        _appLifetime.ApplicationStopped.Register(OnStopped);
-
         _log.InformationLine("Finished Initiating boot process");
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        _log.InformationLine("Shutting down the container");
+        await _schedulerService.StopAsync();
     }
 
     #endregion
@@ -77,18 +77,18 @@ public class Boot : IBoot
         // Perform post-startup activities here
     }
 
-    private void OnStopped()
-    {
-        _log.InformationLine("Boot.OnStopped has been called");
-
-        // Perform post-stopped activities here
-    }
-
     private void OnStopping()
     {
         _log.InformationLine("Boot.OnStopping has been called");
 
         // Perform on-stopping activities here
+    }
+
+    private void OnStopped()
+    {
+        _log.InformationLine("Boot.OnStopped has been called");
+
+        // Perform post-stopped activities here
     }
 
     #endregion

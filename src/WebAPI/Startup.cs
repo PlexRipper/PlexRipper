@@ -45,8 +45,10 @@ public static class Startup
     {
         _log.Information("Currently running in {Environment} mode", env.EnvironmentName);
 
-        _log.Information("Running location: {Location}",
-            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+        _log.Information(
+            "Running location: {Location}",
+            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+        );
 
         app.UseRouting();
 
@@ -86,7 +88,10 @@ public static class Startup
         {
             // Used to deploy the front-end Nuxt client
             app.UseSpaStaticFiles();
-            app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "ClientApp";
+            });
         }
     }
 
@@ -108,7 +113,6 @@ public static class Startup
                     builder
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-
                         // The combo all origin is allowed with allow credentials is needed to make SignalR work from the client.
                         .SetIsOriginAllowed(_ => true)
                         .AllowCredentials();
@@ -133,8 +137,11 @@ public static class Startup
             if (env.IsProduction())
             {
                 services.AddSpaStaticFiles(configuration =>
-                    configuration.RootPath =
-                        Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", "wwwroot"));
+                    configuration.RootPath = Path.Combine(
+                        Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "",
+                        "wwwroot"
+                    )
+                );
             }
 
             if (env.IsDevelopment())

@@ -39,9 +39,12 @@ public static class Startup
     /// <summary>
     /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     /// </summary>
-    /// <param name="app">The <see cref="IApplicationBuilder"/> instance to configure.</param>
+    /// <param name="app"> The <see cref="IApplicationBuilder"/> instance to configure.</param>
+    /// <param name="env"> The <see cref="IWebHostEnvironment"/> instance to configure.</param>
     public static void ConfigureApplication(this WebApplication app, IWebHostEnvironment env)
     {
+        _log.Information("Currently running in {Environment} mode", env.EnvironmentName);
+
         app.UseRouting();
 
         app.UseCors(CORSConfiguration);

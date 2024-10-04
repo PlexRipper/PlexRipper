@@ -5,8 +5,8 @@
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/WebAPI" />
     <option name="PASS_PARENT_ENVS" value="1" />
     <envs>
-      <env name="ASPNETCORE_ENVIRONMENT" value="Development" />
-      <env name="ASPNETCORE_URLS" value="http://+:5000" />
+      <env name="DOTNET_ENVIRONMENT" value="Development" />
+      <env name="DOTNET_HTTP_PORTS" value="5000" />
       <env name="DEVELOPMENT_ROOT_PATH" value="$PROJECT_DIR$/../../DATA/PlexRipperCache/" />
       <env name="LOG_LEVEL" value="VERBOSE" />
     </envs>

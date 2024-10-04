@@ -11,8 +11,4 @@
     <None Include=".dockerignore" />
     <None Include="Dockerfile" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="cypress-e2e-compose.yml" />
-    <Content Include="cypress.dockerfile" />
-  </ItemGroup>
 </Project>

@@ -104,16 +104,6 @@ RUN \
 # Make dotnet command available
 ENV PATH "$PATH:/usr/share/dotnet"
 
-# Define the s6 service for the plexripper app
-RUN mkdir -p /etc/services.d/plexripper
-
-# Create the run script that will start the plexripper app
-RUN echo '#!/usr/bin/with-contenv sh' > /etc/services.d/plexripper/run && \
-    echo 'exec dotnet /app/PlexRipper.WebAPI.dll' >> /etc/services.d/plexripper/run
-
-# Make the script executable
-RUN chmod +x /etc/services.d/plexripper/run
-
 ## Copy to final image
 WORKDIR /app
 COPY --from=back-end /app/publish .

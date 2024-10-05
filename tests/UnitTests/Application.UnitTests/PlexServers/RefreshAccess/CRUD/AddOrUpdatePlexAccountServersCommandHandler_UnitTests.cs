@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace PlexRipper.Application.UnitTests;
 
 public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTest

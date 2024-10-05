@@ -4,6 +4,7 @@ using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 

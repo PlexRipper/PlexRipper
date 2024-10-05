@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Application.Contracts;
 using Data.Contracts;
+using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Settings.Contracts;
 

@@ -3,6 +3,7 @@ using System.Reactive.Threading.Tasks;
 using Application.Contracts;
 using Data.Contracts;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Settings.Contracts;
 

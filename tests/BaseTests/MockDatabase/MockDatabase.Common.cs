@@ -2,6 +2,7 @@
 
 using Logging.Interface;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NaturalSort.Extension;
 using PlexRipper.Data;

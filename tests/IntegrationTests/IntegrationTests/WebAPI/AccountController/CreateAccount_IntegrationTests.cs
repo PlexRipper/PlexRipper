@@ -1,6 +1,7 @@
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
+using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 
 namespace IntegrationTests.WebAPI.AccountController;

@@ -7,6 +7,7 @@ using Data.Contracts;
 using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Notifications;
 using Quartz;
 

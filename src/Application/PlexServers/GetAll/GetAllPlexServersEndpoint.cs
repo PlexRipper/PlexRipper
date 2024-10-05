@@ -1,6 +1,7 @@
 using Application.Contracts;
 using Data.Contracts;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using NaturalSort.Extension;
 
 namespace PlexRipper.Application;

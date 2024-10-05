@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace BaseTests.UnitTests.Data;
 
 public class InMemoryDatabase_UnitTests : BaseUnitTest

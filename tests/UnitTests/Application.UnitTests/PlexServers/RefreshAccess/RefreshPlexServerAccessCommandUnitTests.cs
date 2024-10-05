@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
 
 namespace PlexRipper.Application.UnitTests;

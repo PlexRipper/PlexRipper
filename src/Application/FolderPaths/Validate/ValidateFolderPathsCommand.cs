@@ -2,6 +2,7 @@ using Data.Contracts;
 using FileSystem.Contracts;
 using FluentValidation;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 

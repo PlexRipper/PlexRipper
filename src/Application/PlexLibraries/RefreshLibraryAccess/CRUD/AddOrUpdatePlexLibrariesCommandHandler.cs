@@ -1,6 +1,7 @@
 ﻿using Data.Contracts;
 using FluentValidation;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 

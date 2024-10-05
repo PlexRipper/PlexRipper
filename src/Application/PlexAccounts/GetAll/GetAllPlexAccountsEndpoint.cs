@@ -2,6 +2,7 @@ using Application.Contracts;
 using Data.Contracts;
 using Logging.Interface;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 

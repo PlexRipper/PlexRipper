@@ -1,4 +1,5 @@
 using Data.Contracts;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationTests.DownloadManager.DownloadTaskScheduler;
 

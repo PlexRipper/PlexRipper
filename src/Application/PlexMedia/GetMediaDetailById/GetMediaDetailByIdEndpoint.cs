@@ -95,7 +95,7 @@ public class GetMediaDetailByIdEndpoint : BaseEndpoint<GetMediaDetailByIdEndpoin
 
         plexTvShow.Seasons = _dbContext
             .PlexTvShowSeason.Where(x => x.TvShowId == plexTvShowId)
-            .Take(plexTvShow!.ChildCount)
+            .Take(plexTvShow.ChildCount)
             .ToList();
 
         plexTvShow.Seasons.OrderByNatural(x => x.SortTitle);

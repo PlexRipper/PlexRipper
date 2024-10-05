@@ -6,7 +6,6 @@ using FileSystem.Contracts;
 using Logging.Interface;
 using PlexApi.Contracts;
 using PlexRipper.Data;
-using PlexRipper.WebAPI;
 using Settings.Contracts;
 
 namespace PlexRipper.BaseTests;
@@ -79,8 +78,6 @@ public partial class BaseContainer : IDisposable
     public IFileMergeScheduler FileMergeScheduler => Resolve<IFileMergeScheduler>();
 
     public MockSignalRService MockSignalRService => (MockSignalRService)Resolve<ISignalRService>();
-
-    public IBoot Boot => Resolve<IBoot>();
 
     public IServerSettingsModule GetServerSettings => Resolve<IServerSettingsModule>();
 }

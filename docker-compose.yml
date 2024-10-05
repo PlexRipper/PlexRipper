@@ -2,7 +2,7 @@ version: '3.4'
 services:
   plexripper:
     container_name: PlexRipper
-    image: plexripper/plexripper
+    image: plexripper/plexripper:latest
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -10,6 +10,9 @@ services:
       # Web UI & Web API
       - '7000:7000'
     restart: unless-stopped
+    environment:
+        - PUID=1000
+        - PGID=1000
     volumes:
       - /mnt/PROJECTS/PlexRipperCache/Config:/Config
       - /mnt/PROJECTS/PlexRipperCache/Downloads:/Downloads

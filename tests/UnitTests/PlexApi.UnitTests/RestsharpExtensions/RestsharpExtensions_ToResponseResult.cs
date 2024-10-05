@@ -14,7 +14,7 @@ public class RestsharpExtensions_ToResponseResult : BaseUnitTest<RestsharpExtens
 
     #endregion
 
-    private RestRequest CreateRestRequest() => new() { Resource = "test", };
+    private RestRequest CreateRestRequest() => new() { Resource = "test" };
 
     [Fact]
     public void ShouldHaveAFailedResult_WhenOkResponseContainsBadGateway()

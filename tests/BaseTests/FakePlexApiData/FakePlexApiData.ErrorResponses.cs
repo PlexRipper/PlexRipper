@@ -57,7 +57,7 @@ public partial class FakePlexApiData
 
     private static PlexErrorsResponseDTO GetErrorResponse()
     {
-        return new PlexErrorsResponseDTO() { Errors = new List<PlexErrorDTO>(), };
+        return new PlexErrorsResponseDTO() { Errors = new List<PlexErrorDTO>() };
     }
 
     #endregion

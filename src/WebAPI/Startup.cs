@@ -39,9 +39,17 @@ public static class Startup
     /// <summary>
     /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     /// </summary>
-    /// <param name="app">The <see cref="IApplicationBuilder"/> instance to configure.</param>
+    /// <param name="app"> The <see cref="IApplicationBuilder"/> instance to configure.</param>
+    /// <param name="env"> The <see cref="IWebHostEnvironment"/> instance to configure.</param>
     public static void ConfigureApplication(this WebApplication app, IWebHostEnvironment env)
     {
+        _log.Information("Currently running in {Environment} mode", env.EnvironmentName);
+
+        _log.Information(
+            "Running location: {Location}",
+            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+        );
+
         app.UseRouting();
 
         app.UseCors(CORSConfiguration);
@@ -120,14 +128,21 @@ public static class Startup
         services.AddFastEndpoints(options =>
         {
             options.DisableAutoDiscovery = true;
-            options.Assemblies = [Assembly.GetAssembly(typeof(BaseEndpoint<,>))];
+            options.Assemblies = [Assembly.GetAssembly(typeof(BaseEndpoint<,>))!];
         });
 
         if (!EnvironmentExtensions.IsIntegrationTestMode())
         {
             // Used to deploy the front-end Nuxt client
             if (env.IsProduction())
-                services.AddSpaStaticFiles(configuration => configuration.RootPath = "wwwroot");
+            {
+                services.AddSpaStaticFiles(configuration =>
+                    configuration.RootPath = Path.Combine(
+                        Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "",
+                        "wwwroot"
+                    )
+                );
+            }
 
             if (env.IsDevelopment())
                 services.AddSpaStaticFiles(configuration => configuration.RootPath = "ClientApp");

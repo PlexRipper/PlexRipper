@@ -1,26 +1,32 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS base
-WORKDIR /app
-
-## Setup Nuxt front-end
-FROM oven/bun:alpine AS client-build
-WORKDIR /tmp/build/ClientApp
-
 ARG VERSION=0.0.0
+ARG PORT=7000
+ARG TARGETPLATFORM=linux/amd64
+ARG BUILDPLATFORM=linux/amd64
+
+# Stage 1 - Build the Nuxt front-end
+FROM oven/bun:alpine AS client-build
+
+ARG PORT
 
 ENV NUXT_HOST=0.0.0.0
-ENV NUXT_PORT=7000
-ENV API_PORT=7000
+ENV NUXT_PORT=${PORT}
+ENV NUXT_PUBLIC_API_PORT=${PORT}
 ENV NUXT_PUBLIC_IS_DOCKER=true
+
+WORKDIR /tmp/ClientApp
+## Copy the package.json and install the dependencies
+COPY ./src/WebAPI/ClientApp/package.json ./src/WebAPI/ClientApp/bun.lockb ./
+RUN bun install --frozen-lockfile
 
 ## Copy the project files
 COPY ./src/WebAPI/ClientApp/ ./
-RUN bun install --frozen-lockfile
 RUN bun run generate --fail-on-error
+    
+# Stage 2 Build the .NET back-end
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS back-end
 
-## Setup .NET Core back-end
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG VERSION
+
 WORKDIR /src
 
 ## Domain Projects
@@ -58,23 +64,61 @@ COPY . .
 WORKDIR "/src/src/WebAPI"
 RUN dotnet build "WebAPI.csproj" -c Release -o /app/build /p:AssemblyVersion=$VERSION --no-restore
 
-FROM build AS publish
 RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:AssemblyVersion=$VERSION
 
-## Merge into one container
-FROM base AS final
+# Stage 3 - Build runtime image
+FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
+
+ARG VERSION
+ARG PORT
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+## set environment variables
+ENV PORT=${PORT}
+ENV VERSION=${VERSION}
+ENV TARGETPLATFORM=${TARGETPLATFORM}
+ENV BUILDPLATFORM=${BUILDPLATFORM}
 ENV DOTNET_ENVIRONMENT=Production
-ENV ASPNETCORE_URLS=http://+:7000
-ENV DOTNET_URLS=http://+:7000
+ENV DOTNET_URLS=http://+:${PORT}
+ENV ASPNETCORE_URLS=http://+:${PORT}
+ENV S6_SERVICES_GRACETIME=15000
+
+## Install dotnet runtime
+RUN \
+   echo "**** Updating package information ****" && \
+   apk update && \
+   echo "**** Install pre-reqs ****" && \
+   apk add --no-cache bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib && \
+   echo "**** Installing dotnet ****" && \
+   mkdir -p /usr/share/dotnet && \
+   wget https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh && \
+   chmod +x /tmp/dotnet-install.sh && \
+   if  [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then \
+   /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm ; \
+   elif [ "$TARGETPLATFORM" = "linux/arm64" ] ; then \
+   /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm64 ; \
+   else \
+   /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture x64 ; \
+   fi
+
+# Make dotnet command available
+ENV PATH "$PATH:/usr/share/dotnet"
+
+## Copy to final image
 WORKDIR /app
+COPY --from=back-end /app/publish .
+COPY --from=client-build /tmp/ClientApp/.output/public /app/wwwroot
 
-COPY --from=publish /app/publish .
-COPY --from=client-build /tmp/build/ClientApp/dist /app/wwwroot
+## Copy the s6-overlay config files
+COPY docker/ /
 
+## set version label
 LABEL company="PlexRipper"
 LABEL maintainer="plexripper@protonmail.com"
 
-EXPOSE 7000
+EXPOSE ${PORT}
 VOLUME /Config /Downloads /Movies /TvShows
 
-ENTRYPOINT ["dotnet", "PlexRipper.WebAPI.dll"]
+# Set the entrypoint to use s6-overlay
+ENTRYPOINT ["/init"]

@@ -137,7 +137,6 @@ public static partial class MockDatabase
         Action<FakeDataConfig>? options = null
     )
     {
-        var config = FakeDataConfig.FromOptions(options);
         var plexServers = context.PlexServers.Include(x => x.PlexLibraries).ToList();
 
         var plexAccount = FakeData.GetPlexAccount(_seed).Generate();
@@ -185,8 +184,6 @@ public static partial class MockDatabase
         Action<FakeDataConfig>? options = null
     )
     {
-        var config = FakeDataConfig.FromOptions(options);
-
         var plexLibraries = await context.PlexLibraries.ToListAsync();
         var plexAccounts = await context.PlexAccounts.ToListAsync();
         plexAccounts.ShouldNotBeEmpty();

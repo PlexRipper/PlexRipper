@@ -14,7 +14,6 @@ public class UserSettings_SettingsUpdated_UnitTests : BaseUnitTest
         UserSettings sut = new();
 
         // Act
-        List<UserSettings> settings = new();
         sut.SettingsUpdated.Subscribe();
 
         var changedSettings = new UserSettings

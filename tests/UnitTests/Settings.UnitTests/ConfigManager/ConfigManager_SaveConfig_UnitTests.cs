@@ -17,7 +17,6 @@ public class ConfigManager_SaveConfig_UnitTests : BaseUnitTest<ConfigManager>
     public void ShouldLoadConfigDuringSetup_WhenConfigFileAlreadyExists()
     {
         // Arrange
-        var settingsModel = FakeData.GetSettingsModel().Generate();
         mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");

@@ -41,7 +41,6 @@ public class DetermineDownloadStatus_UnitTests : BaseUnitTest
             config.TvShowEpisodeCount = 5;
         });
 
-        var dbContext = IDbContext;
         var downloadTasks = await IDbContext.DownloadTaskTvShow.AsTracking().IncludeAll().ToListAsync();
         var downloadTaskTvShowEpisodeFile = downloadTasks[3].Children[2].Children[3].Children[0];
         await IDbContext.SetDownloadStatus(downloadTaskTvShowEpisodeFile.ToKey(), DownloadStatus.Error);

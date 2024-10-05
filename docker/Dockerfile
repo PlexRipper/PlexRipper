@@ -4,7 +4,7 @@ ARG TARGETPLATFORM=linux/amd64
 ARG BUILDPLATFORM=linux/amd64
 
 # Stage 1 - Build the Nuxt front-end
-FROM oven/bun:alpine AS client-build
+FROM --platform=$BUILDPLATFORM oven/bun:alpine AS client-build
 
 ARG PORT
 
@@ -14,6 +14,7 @@ ENV NUXT_PUBLIC_API_PORT=${PORT}
 ENV NUXT_PUBLIC_IS_DOCKER=true
 
 WORKDIR /tmp/ClientApp
+
 ## Copy the package.json and install the dependencies
 COPY ./src/WebAPI/ClientApp/package.json ./src/WebAPI/ClientApp/bun.lockb ./
 RUN bun install --frozen-lockfile
@@ -22,8 +23,8 @@ RUN bun install --frozen-lockfile
 COPY ./src/WebAPI/ClientApp/ ./
 RUN bun run generate --fail-on-error
     
-# Stage 2 Build the .NET back-end
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS back-end
+# Stage 2 - Build the .NET back-end
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS back-end
 
 ARG VERSION
 
@@ -53,32 +54,30 @@ COPY ["src/PlexApi.Contracts/PlexApi.Contracts.csproj", "src/PlexApi.Contracts/"
 COPY ["src/Settings/Settings.csproj", "src/Settings/"]
 COPY ["src/Settings.Contracts/Settings.Contracts.csproj", "src/Settings.Contracts/"]
 
-## Presentation projects
-### WebAPI
+## WebAPI Projects
 COPY ["src/WebAPI/WebAPI.csproj", "src/WebAPI/"]
 COPY ["src/WebAPI.Contracts/WebAPI.Contracts.csproj", "src/WebAPI.Contracts/"]
 
 ## Restore Projects
 RUN dotnet restore "src/WebAPI/WebAPI.csproj" --locked-mode
+
 COPY . .
 WORKDIR "/src/src/WebAPI"
-RUN dotnet build "WebAPI.csproj" -c Release -o /app/build /p:AssemblyVersion=$VERSION --no-restore
 
+## Build and Publish
+RUN dotnet build "WebAPI.csproj" -c Release -o /app/build /p:AssemblyVersion=$VERSION --no-restore
 RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:AssemblyVersion=$VERSION
 
-# Stage 3 - Build runtime image
-FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
+# Stage 3 - Runtime Image
+FROM --platform=$TARGETPLATFORM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
 
 ARG VERSION
 ARG PORT
 ARG TARGETPLATFORM
-ARG BUILDPLATFORM
 
-## set environment variables
+## Set environment variables
 ENV PORT=${PORT}
 ENV VERSION=${VERSION}
-ENV TARGETPLATFORM=${TARGETPLATFORM}
-ENV BUILDPLATFORM=${BUILDPLATFORM}
 ENV DOTNET_ENVIRONMENT=Production
 ENV DOTNET_URLS=http://+:${PORT}
 ENV ASPNETCORE_URLS=http://+:${PORT}
@@ -90,19 +89,19 @@ RUN \
    apk update && \
    echo "**** Install pre-reqs ****" && \
    apk add --no-cache bash icu-libs krb5-libs libgcc libintl libssl3 libstdc++ zlib && \
-   echo "**** Installing dotnet ****" && \
+   echo "**** Installing dotnet runtime for $TARGETPLATFORM ****" && \
    mkdir -p /usr/share/dotnet && \
    wget https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh && \
    chmod +x /tmp/dotnet-install.sh && \
    if  [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then \
-   /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm ; \
+       /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm ; \
    elif [ "$TARGETPLATFORM" = "linux/arm64" ] ; then \
-   /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm64 ; \
+       /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm64 ; \
    else \
-   /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture x64 ; \
+       /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture x64 ; \
    fi
 
-# Make dotnet command available
+## Make dotnet command available
 ENV PATH "$PATH:/usr/share/dotnet"
 
 ## Copy to final image
@@ -111,9 +110,9 @@ COPY --from=back-end /app/publish .
 COPY --from=client-build /tmp/ClientApp/.output/public /app/wwwroot
 
 ## Copy the s6-overlay config files
-COPY docker/ /
+COPY docker/etc/ /etc/
 
-## set version label
+## Set version label
 LABEL company="PlexRipper"
 LABEL maintainer="plexripper@protonmail.com"
 

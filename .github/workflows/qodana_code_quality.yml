@@ -25,3 +25,4 @@ jobs:
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_896341823 }}
           QODANA_ENDPOINT: 'https://qodana.cloud'
+          QODANA_NET_SOLUTION: 'PlexRipper.sln' 

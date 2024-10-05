@@ -1,12 +1,6 @@
-#-------------------------------------------------------------------------------#
-#               Qodana analysis is configured by qodana.yaml file               #
-#             https://www.jetbrains.com/help/qodana/qodana-yaml.html            #
-#-------------------------------------------------------------------------------#
 version: "1.0"
-#Specify IDE code to run analysis without container (Applied in CI/CD pipeline)
-ide: QDNET
-#Specify inspection profile for code analysis
+linter: jetbrains/qodana-dotnet:2024.1
 profile:
-  name: qodana.starter
-exclude:
-  - name: ConvertToPrimaryConstructor
+  name: qodana.recommended
+include:
+  - name: CheckDependencyLicenses

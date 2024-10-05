@@ -60,6 +60,8 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         var plexAccount = IDbContext.PlexAccounts.FirstOrDefault();
         var plexServers = IDbContext.PlexServers.ToList();
 
+        plexAccount.ShouldNotBeNull();
+
         var serverAccessTokens = FakeData.GetServerAccessTokenDTO(plexAccount, plexServers, Seed);
 
         serverAccessTokens.RemoveRange(1, 2);

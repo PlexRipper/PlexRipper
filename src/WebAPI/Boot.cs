@@ -63,9 +63,11 @@ public class Boot : IHostedService
         _log.InformationLine("Initiating boot process");
         ServicePointManager.DefaultConnectionLimit = 1000;
 
-        _dbContextManager.Setup();
+        LogIdentity();
 
         _configManager.Setup();
+
+        _dbContextManager.Setup();
 
         _downloadQueue.Setup();
 
@@ -86,38 +88,34 @@ public class Boot : IHostedService
 
     private void OnStarted()
     {
-        _log.InformationLine("Boot.OnStarted has been called");
-
-        // Retrieve PUID and PGID from environment variables
-        var puid = System.Environment.GetEnvironmentVariable("PUID");
-        var pgid = System.Environment.GetEnvironmentVariable("PGID");
-        Console.WriteLine($"PUID from env: {puid}");
-        Console.WriteLine($"PGID from env: {pgid}");
-
-        // Get the current user's UID and GID from the system
-        var uid = getuid();
-        var gid = getgid();
-        Console.WriteLine($"Current UID: {uid}");
-        Console.WriteLine($"Current GID: {gid}");
-
-        // Get current username
-        Console.WriteLine($"Current Username: {System.Environment.UserName}");
+        _log.DebugLine("Boot.OnStarted has been called");
 
         // Perform post-startup activities here
     }
 
     private void OnStopping()
     {
-        _log.InformationLine("Boot.OnStopping has been called");
+        _log.DebugLine("Boot.OnStopping has been called");
 
         // Perform on-stopping activities here
     }
 
     private void OnStopped()
     {
-        _log.InformationLine("Boot.OnStopped has been called");
+        _log.DebugLine("Boot.OnStopped has been called");
 
         // Perform post-stopped activities here
+    }
+
+    private void LogIdentity()
+    {
+        // Retrieve PUID and PGID from environment variables
+        var puid = System.Environment.GetEnvironmentVariable("PUID");
+        var pgid = System.Environment.GetEnvironmentVariable("PGID");
+
+        _log.Debug("PUID from env: {PUID} and from the system: {PUID}", puid ?? "-1", getuid());
+        _log.Debug("PGID from env: {PGID} and from the system: {PGID}", pgid ?? "-1", getgid());
+        _log.Debug("Current system Username: {UserName}", System.Environment.UserName);
     }
 
     #endregion

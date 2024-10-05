@@ -22,6 +22,6 @@ public interface IFileSystem
     Result FileMove(string sourceFileName, string destFileName, bool overwrite = true);
 
     Result DeleteFile(string filePath);
-    
+
     Result Copy(string sourceFileName, string destFileName);
 }

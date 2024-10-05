@@ -57,8 +57,10 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
             }
             else
             {
-                _log.Error("Database at {DatabasePath} could not be connected to, resetting database now",
-                    DatabasePath);
+                _log.Error(
+                    "Database at {DatabasePath} could not be connected to, resetting database now",
+                    DatabasePath
+                );
                 return ResetDatabase();
             }
         }

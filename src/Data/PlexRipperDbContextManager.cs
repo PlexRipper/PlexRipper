@@ -45,32 +45,25 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
             // Check if database can be connected to.
             if (_dbContextDatabase.CanConnect())
             {
-                if (!EnvironmentExtensions.IsIntegrationTestMode())
-                {
-                    _log.InformationLine("Database was successfully connected!");
-                    _log.Information("Database connected at: {DatabasePath}", DatabasePath);
-                }
+                _log.InformationLine("Database was successfully connected!");
+                _log.Information("Database connected at: {DatabasePath}", DatabasePath);
 
                 MigrateDatabase();
 
                 return Result.Ok();
             }
-            else
-            {
-                _log.Error(
-                    "Database at {DatabasePath} could not be connected to, resetting database now",
-                    DatabasePath
-                );
-                return ResetDatabase();
-            }
-        }
-        else
-        {
-            _log.WarningLine("Database does not exist, creating a new one now");
 
-            _dbContextDatabase.EnsureCreated();
-            return MigrateDatabase();
+            _log.Error(
+                "Database exists at {DatabasePath} but could not be connected to, resetting database now",
+                DatabasePath
+            );
+            return ResetDatabase();
         }
+
+        _log.WarningLine("Database does not exist, creating a new one now");
+
+        _dbContextDatabase.EnsureCreated();
+        return MigrateDatabase();
     }
 
     public Result ResetDatabase()
@@ -80,13 +73,20 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
             _log.InformationLine("Resetting PlexRipper database now");
             _dbContextDatabase.CloseConnection();
             BackUpDatabase();
-            _dbContextDatabase.EnsureDeleted();
-            _dbContextDatabase.EnsureCreated();
+
+            var deletedResult = _dbContextDatabase.EnsureDeleted();
+            if (deletedResult.IsFailed)
+                return deletedResult.LogError();
+
+            var createdResult = _dbContextDatabase.EnsureCreated();
+            if (createdResult.IsFailed)
+            {
+                _log.ErrorLine("Database could not be created at {DatabasePath}", DatabasePath);
+                return createdResult.LogError();
+            }
+
             MigrateDatabase();
             return Result.Ok();
-
-            _log.ErrorLine("Database could not be created and or migrated");
-            return Result.Fail($"Could not create database {DatabaseName} in {ConfigDirectory}").LogError();
         }
         catch (Exception e)
         {

@@ -67,7 +67,9 @@ public class Boot : IHostedService
 
         _configManager.Setup();
 
-        _dbContextManager.Setup();
+        var databaseSetupResult = _dbContextManager.Setup();
+        if (databaseSetupResult.IsFailed)
+            await StopAsync(cancellationToken);
 
         _downloadQueue.Setup();
 
@@ -76,6 +78,7 @@ public class Boot : IHostedService
         _log.InformationLine("Finished Initiating boot process");
     }
 
+    /// <inheritdoc/>
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         _log.InformationLine("Shutting down the container");

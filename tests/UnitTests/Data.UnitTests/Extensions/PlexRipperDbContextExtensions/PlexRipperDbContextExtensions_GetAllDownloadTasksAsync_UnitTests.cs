@@ -66,7 +66,7 @@ public class PlexRipperDbContextExtensions_GetAllDownloadTasksAsync_UnitTests : 
         // Assert
         downloadTasks.ShouldNotBeEmpty();
 
-        void ValidateDownloadTasks(List<DownloadTaskGeneric> shouldDownloadTasks)
+        void ValidateDownloadTasks(List<DownloadTaskGeneric>? shouldDownloadTasks)
         {
             if (shouldDownloadTasks is null)
                 return;

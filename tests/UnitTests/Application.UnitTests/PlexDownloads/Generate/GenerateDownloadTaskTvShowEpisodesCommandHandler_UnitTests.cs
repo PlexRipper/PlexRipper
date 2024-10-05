@@ -18,7 +18,7 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
     {
         // Arrange
         await SetupDatabase();
-        var downloadMediaDtos = new List<DownloadMediaDTO> { };
+        var downloadMediaDtos = new List<DownloadMediaDTO>();
 
         // Act
         var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);

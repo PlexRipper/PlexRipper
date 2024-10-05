@@ -23,13 +23,14 @@ jobs:
                 with:
                     token: ${{ secrets.GH_TOKEN }}
                     fetch-depth: 0 # Required due to the way Git works, without it this action won't be able to find any or the correct tags
+           
             -   name: Get latest version tag
                 id: version
                 uses: WyriHaximus/github-action-get-previous-tag@v1
-                with:
-                    prefix: v
+                    
             -   name: Echo last version tag
                 run: echo ${{ steps.version.outputs.tag }}
+                
             -   name: Publish to Registry with dev tag
                 uses: elgohr/Publish-Docker-Github-Action@v5
                 env:

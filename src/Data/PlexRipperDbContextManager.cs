@@ -82,14 +82,17 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
             var deletedResult = _dbContextDatabase.EnsureDeleted();
             if (deletedResult.IsFailed)
             {
-                _log.ErrorLine("Database could not be deleted at {DatabasePath}", DatabasePath);
+                _log.Error("Database could not be deleted at {DatabasePath}", DatabasePath);
                 return deletedResult.LogError();
             }
+
+            if (deletedResult.Value)
+                _log.Warning("Database was successfully deleted at: {DatabasePath}", DatabasePath);
 
             var createdResult = CreateDatabase();
             if (createdResult.IsFailed)
             {
-                _log.ErrorLine("Database could not be created at {DatabasePath}", DatabasePath);
+                _log.Error("Database could not be created at {DatabasePath}", DatabasePath);
                 return createdResult.LogError();
             }
 
@@ -109,6 +112,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         {
             // Create the database while applying any pending migrations.
             _dbContextDatabase.Migrate();
+            _log.Information("Database was successfully created at: {DatabasePath}", DatabasePath);
             return Result.Ok();
         }
         catch (Exception e)

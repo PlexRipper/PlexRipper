@@ -51,9 +51,9 @@ jobs:
                     name: plexripper/plexripper
                     username: ${{ secrets.DOCKER_USERNAME }}
                     password: ${{ secrets.DOCKER_PASSWORD }}
+                    platforms: linux/amd64,linux/arm64,linux/arm/v7
                     buildargs: VERSION
                     tags: "dev"
                     default_branch: dev
-                    platforms: linux/amd64,linux/arm64,linux/arm/v7
 
 

@@ -55,10 +55,7 @@ public partial class FakePlexApiData
 
     #region Private
 
-    private static PlexErrorsResponseDTO GetErrorResponse()
-    {
-        return new PlexErrorsResponseDTO() { Errors = new List<PlexErrorDTO>() };
-    }
+    private static PlexErrorsResponseDTO GetErrorResponse() => new() { Errors = [] };
 
     #endregion
 

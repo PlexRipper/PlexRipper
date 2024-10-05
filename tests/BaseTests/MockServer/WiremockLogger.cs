@@ -26,6 +26,7 @@ public class WiremockLogger : IWireMockLogger
     public void Warn(string formatString, params object[] args)
     {
         _log.Warning(formatString, args);
+
         // TODO see https://github.com/WireMock-Net/WireMock.Net/pull/1182
         if (formatString.Contains("No matching mapping found"))
             throw new Exception(formatString);

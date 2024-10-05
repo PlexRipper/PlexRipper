@@ -22,8 +22,10 @@ public class StringToBool : BaseUnitTest
             new JsonReaderState(new JsonReaderOptions())
         );
         while (utf8JsonReader.Read())
+        {
             if (utf8JsonReader.TokenType == JsonTokenType.String)
                 break;
+        }
 
         // Act
         var deserializedBoolean = sut.Read(ref utf8JsonReader, typeof(string), new JsonSerializerOptions());

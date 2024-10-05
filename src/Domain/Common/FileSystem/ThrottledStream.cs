@@ -87,10 +87,7 @@ public class ThrottledStream : Stream
     }
 
     /// <inheritdoc/>
-    public override long Seek(long offset, SeekOrigin origin)
-    {
-        return _inputStream.Seek(offset, origin);
-    }
+    public override long Seek(long offset, SeekOrigin origin) => _inputStream.Seek(offset, origin);
 
     /// <inheritdoc/>
     public override void SetLength(long value) { }
@@ -107,10 +104,7 @@ public class ThrottledStream : Stream
 
     #region Private Methods
 
-    private int GetBytesToReturn(int count)
-    {
-        return GetBytesToReturnAsync(count).Result;
-    }
+    private int GetBytesToReturn(int count) => GetBytesToReturnAsync(count).Result;
 
     private async Task<int> GetBytesToReturnAsync(int count)
     {

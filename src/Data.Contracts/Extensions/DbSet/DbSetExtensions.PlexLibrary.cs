@@ -11,9 +11,7 @@ public static partial class DbSetExtensions
     )
     {
         if (topLevelOnly)
-        {
             return plexLibrary.Include(x => x.TvShows);
-        }
 
         return plexLibrary.Include(x => x.TvShows).ThenInclude(x => x.Seasons).ThenInclude(x => x.Episodes);
     }

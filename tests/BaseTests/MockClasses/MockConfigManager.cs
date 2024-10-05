@@ -21,10 +21,7 @@ public class MockConfigManager : IConfigManager
         return Result.Ok();
     }
 
-    public Result SaveConfig()
-    {
-        return Result.Ok();
-    }
+    public Result SaveConfig() => Result.Ok();
 
     public Result ResetConfig()
     {
@@ -32,13 +29,7 @@ public class MockConfigManager : IConfigManager
         return Result.Ok();
     }
 
-    public Result LoadConfig()
-    {
-        return Result.Ok();
-    }
+    public Result LoadConfig() => Result.Ok();
 
-    public bool ConfigFileExists()
-    {
-        return false;
-    }
+    public bool ConfigFileExists() => false;
 }

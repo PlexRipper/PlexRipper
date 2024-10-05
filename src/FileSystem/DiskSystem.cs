@@ -32,9 +32,7 @@ public class DiskSystem : IDiskSystem
             return availableSpaceResult.ToResult().LogError();
 
         if (availableSpaceResult.Value < fileSize)
-        {
             return Result.Fail($"There is not enough space available in root directory {directory}");
-        }
 
         return Result.Ok();
     }

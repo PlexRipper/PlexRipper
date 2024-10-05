@@ -98,9 +98,11 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
             return ResultExtensions.IsNull(nameof(DownloadTaskGeneric)).LogWarning();
 
         if (!DownloadTask.DownloadWorkerTasks.Any())
+        {
             return ResultExtensions
                 .IsEmpty($"{nameof(DownloadTaskGeneric)}.{nameof(DownloadTask.DownloadWorkerTasks)}")
                 .LogWarning();
+        }
 
         _downloadWorkers.AddRange(
             DownloadTask.DownloadWorkerTasks.Select(downloadWorkerTask => _downloadWorkerFactory(downloadWorkerTask))
@@ -180,8 +182,10 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
         _downloadSpeedLimitSubscription?.Dispose();
         _downloadWorkerTaskUpdate?.Dispose();
         if (DownloadTask is not null)
+        {
             _log.Here()
                 .Warning("PlexDownloadClient for DownloadTask with Id: {DownloadTaskId} was disposed", DownloadTask.Id);
+        }
     }
 
     #endregion

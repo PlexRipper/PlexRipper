@@ -104,10 +104,8 @@ public static class DataFormat
     /// <param name="bytesReceived"></param>
     /// <param name="elapsedTimeInSeconds"></param>
     /// <returns></returns>
-    public static int GetTransferSpeed(long bytesReceived, double elapsedTimeInSeconds)
-    {
-        return elapsedTimeInSeconds <= 0 ? 0 : (int)Math.Round(bytesReceived / elapsedTimeInSeconds, 2);
-    }
+    public static int GetTransferSpeed(long bytesReceived, double elapsedTimeInSeconds) =>
+        elapsedTimeInSeconds <= 0 ? 0 : (int)Math.Round(bytesReceived / elapsedTimeInSeconds, 2);
 
     public static long GetTimeRemaining(long BytesRemaining, double downloadSpeed)
     {
@@ -121,10 +119,7 @@ public static class DataFormat
     /// Returns a random priority based on the Date of creation.
     /// </summary>
     /// <returns></returns>
-    public static long GetPriority()
-    {
-        return Convert.ToInt64((DateTime.UtcNow - DateTime.UnixEpoch).TotalSeconds);
-    }
+    public static long GetPriority() => Convert.ToInt64((DateTime.UtcNow - DateTime.UnixEpoch).TotalSeconds);
 
     /// <summary>
     /// Returns a list of priorities based on the Date of creation.

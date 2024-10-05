@@ -80,9 +80,11 @@ public class FileMergeScheduler : IFileMergeScheduler
 
         var jobKey = FileMergeJob.GetJobKey(fileTaskId);
         if (!await _scheduler.IsJobRunning(jobKey))
+        {
             return Result
                 .Fail($"{nameof(FileMergeJob)} with {jobKey} cannot be stopped because it is not running")
                 .LogWarning();
+        }
 
         return Result.OkIf(await _scheduler.StopJob(jobKey), $"Failed to stop {nameof(FileTask)} with id {fileTaskId}");
     }

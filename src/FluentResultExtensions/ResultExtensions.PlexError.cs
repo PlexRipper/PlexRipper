@@ -10,20 +10,11 @@ public static partial class ResultExtensions
 
     #region Public
 
-    public static bool HasPlexError<T>(this Result<T> result)
-    {
-        return result?.ToResult()?.HasPlexError() ?? false;
-    }
+    public static bool HasPlexError<T>(this Result<T> result) => result?.ToResult()?.HasPlexError() ?? false;
 
-    public static bool HasPlexError(this Result result)
-    {
-        return result.HasError<PlexError>();
-    }
+    public static bool HasPlexError(this Result result) => result.HasError<PlexError>();
 
-    public static List<PlexError> GetPlexErrors(this Result result)
-    {
-        return result.Errors.OfType<PlexError>().ToList();
-    }
+    public static List<PlexError> GetPlexErrors(this Result result) => result.Errors.OfType<PlexError>().ToList();
 
     #endregion
 
@@ -37,10 +28,8 @@ public static partial class ResultExtensions
             && result.GetPlexErrors().Any(x => x.Code == PlexErrorCodes.InvalidVerificationCode);
     }
 
-    public static bool HasPlexErrorInvalidVerificationCode<T>(this Result<T> result)
-    {
-        return result.ToResult().HasPlexErrorInvalidVerificationCode();
-    }
+    public static bool HasPlexErrorInvalidVerificationCode<T>(this Result<T> result) =>
+        result.ToResult().HasPlexErrorInvalidVerificationCode();
 
     #region EnterVerificationCode
 
@@ -49,10 +38,8 @@ public static partial class ResultExtensions
         return result.HasPlexError() && result.GetPlexErrors().Any(x => x.Code == PlexErrorCodes.EnterVerificationCode);
     }
 
-    public static bool HasPlexErrorEnterVerificationCode<T>(this Result<T> result)
-    {
-        return result.ToResult().HasPlexErrorEnterVerificationCode();
-    }
+    public static bool HasPlexErrorEnterVerificationCode<T>(this Result<T> result) =>
+        result.ToResult().HasPlexErrorEnterVerificationCode();
 
     #endregion
 

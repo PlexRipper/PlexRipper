@@ -6,7 +6,6 @@ public static class StreamExtensions
     {
         FileStream? fs = null;
         for (var numTries = 0; numTries < 10; numTries++)
-        {
             try
             {
                 fs = new FileStream(fullPath, mode, access, share);
@@ -19,7 +18,6 @@ public static class StreamExtensions
 
                 Thread.Sleep(50);
             }
-        }
 
         return null;
     }

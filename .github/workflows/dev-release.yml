@@ -47,7 +47,7 @@ jobs:
                 env:
                     VERSION: ${{ env.VERSION_NO_V }}
                 with:
-                    dockerfile: /docker/Dockerfile
+                    dockerfile: docker/Dockerfile
                     name: plexripper/plexripper
                     username: ${{ secrets.DOCKER_USERNAME }}
                     password: ${{ secrets.DOCKER_PASSWORD }}

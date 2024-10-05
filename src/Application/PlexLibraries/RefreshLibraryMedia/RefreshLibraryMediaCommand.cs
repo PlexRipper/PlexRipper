@@ -18,7 +18,13 @@ namespace PlexRipper.Application;
 public record RefreshLibraryMediaCommand(int PlexLibraryId, Action<LibraryProgress>? ProgressAction = null)
     : IRequest<Result<PlexLibrary>>;
 
-public class RefreshLibraryMediaCommandValidator : AbstractValidator<RefreshLibraryMediaCommand> { }
+public class RefreshLibraryMediaCommandValidator : AbstractValidator<RefreshLibraryMediaCommand>
+{
+    public RefreshLibraryMediaCommandValidator()
+    {
+        RuleFor(x => x.PlexLibraryId).GreaterThan(0);
+    }
+}
 
 public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryMediaCommand, Result<PlexLibrary>>
 {

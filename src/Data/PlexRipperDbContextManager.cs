@@ -40,6 +40,12 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
 
     public Result Setup()
     {
+        if (EnvironmentExtensions.IsIntegrationTestMode())
+        {
+            _log.InformationLine("Integration test mode detected, skipping database setup");
+            return Result.Ok();
+        }
+
         if (_fileSystem.FileExists(DatabasePath))
         {
             // Check if database can be connected to.

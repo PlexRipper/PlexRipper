@@ -125,7 +125,7 @@ const openDirectoryBrowser = (path: FolderPathDTO): void => {
 };
 
 const allowEditing = computed(() => {
-	return downloadStore.getActiveDownloadList().length === 0;
+	return true;
 });
 
 const confirmDirectoryBrowser = (path: FolderPathDTO): void => {

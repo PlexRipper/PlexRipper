@@ -22,6 +22,7 @@ jobs:
         uses: JetBrains/qodana-action@v2024.1
         with:
           pr-mode: false
+          args: --property, qodana.net.solution=PlexRipper.sln
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_896341823 }}
           QODANA_ENDPOINT: 'https://qodana.cloud'

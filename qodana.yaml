@@ -4,3 +4,5 @@ profile:
   name: qodana.recommended
 include:
   - name: CheckDependencyLicenses
+dot-net:
+    solution: PlexRipper.sln

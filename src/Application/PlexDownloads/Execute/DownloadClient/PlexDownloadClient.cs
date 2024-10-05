@@ -89,13 +89,11 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
     /// <returns></returns>
     public async Task<Result> Setup(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)
     {
-        if (downloadTaskKey is null)
-            return ResultExtensions.IsNull(nameof(downloadTaskKey)).LogError();
-
-        DownloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskKey, cancellationToken);
-
-        if (DownloadTask is null)
+        var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskKey, cancellationToken);
+        if (downloadTask is null)
             return ResultExtensions.IsNull(nameof(DownloadTaskGeneric)).LogWarning();
+
+        DownloadTask = downloadTask;
 
         if (!DownloadTask.DownloadWorkerTasks.Any())
         {

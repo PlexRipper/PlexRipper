@@ -13,7 +13,7 @@ public static class PlexApiPartMapper
             AudioProfile = source.AudioProfile ?? string.Empty,
             Container = source.Container,
             Indexes = source.Indexes ?? string.Empty,
-            VideoProfile = source.VideoProfile,
+            VideoProfile = source.VideoProfile ?? string.Empty,
             ObfuscatedFilePath = source.Key,
         };
 

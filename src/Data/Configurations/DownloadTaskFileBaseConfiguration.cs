@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using PlexRipper.Domain.Config;
 
 namespace PlexRipper.Data.Configurations;
 
@@ -20,8 +21,8 @@ public class DownloadTaskFileBaseConfiguration : IEntityTypeConfiguration<Downlo
         builder
             .Property(b => b.DirectoryMeta)
             .HasConversion(
-                x => JsonSerializer.Serialize(x, JsonSerializerOptions.Default),
-                x => JsonSerializer.Deserialize<DownloadTaskDirectory>(x, JsonSerializerOptions.Default)
+                x => JsonSerializer.Serialize(x, DefaultJsonSerializerOptions.ConfigStandard),
+                x => JsonSerializer.Deserialize<DownloadTaskDirectory>(x, DefaultJsonSerializerOptions.ConfigStandard)!
             )
             .IsUnicode();
     }

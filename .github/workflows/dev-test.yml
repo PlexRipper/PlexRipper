@@ -98,9 +98,11 @@ jobs:
             -   name: Test Docker Build
                 uses: elgohr/Publish-Docker-Github-Action@v5
                 with:
+                    dockerfile: /docker/Dockerfile
                     name: plexripper/plexripper
                     username: ${{ secrets.DOCKER_USERNAME }}
                     password: ${{ secrets.DOCKER_PASSWORD }}
+                    platforms: linux/amd64,linux/arm64,linux/arm/v7
                     no_push: true
                     default_branch: dev
 

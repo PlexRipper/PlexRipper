@@ -17,11 +17,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
     private readonly IFileSystem _fileSystem;
 
     private readonly IDirectorySystem _directorySystem;
-
-    private string DatabaseName => _pathProvider.DatabaseName;
     private string DatabasePath => _pathProvider.DatabasePath;
-
-    private string ConfigDirectory => _pathProvider.ConfigDirectory;
 
     public PlexRipperDbContextManager(
         ILog<PlexRipperDbContextManager> log,
@@ -77,6 +73,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         {
             _log.InformationLine("Resetting PlexRipper database now");
             _dbContextDatabase.CloseConnection();
+
             BackUpDatabase();
 
             var deletedResult = _dbContextDatabase.EnsureDeleted();

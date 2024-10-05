@@ -27,11 +27,9 @@ public class QuartzModule : Module
             { "quartz.jobStore.lockHandler.type", "Quartz.Impl.AdoJobStore.UpdateLockRowSemaphore, Quartz" },
             { "quartz.jobStore.dataSource", "default" },
             { "quartz.jobStore.tablePrefix", QuartzDatabaseConfig.Prefix },
-
             // { "quartz.jobStore.useProperties", "true" },
             { "quartz.jobStore.driverDelegateType", "Quartz.Impl.AdoJobStore.SQLiteDelegate, Quartz" },
             { "quartz.dataSource.default.provider", "SQLite-Microsoft" },
-
             // False because we are first setting up autofac, and then the database. When the database is set up, the schema is already validated.
             { "quartz.jobStore.performSchemaValidation", "false" },
             { "quartz.dataSource.default.connectionString", DbContextConnections.ConnectionString },

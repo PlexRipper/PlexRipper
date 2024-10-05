@@ -213,25 +213,23 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
         }
         catch (Exception e)
         {
-            return Result.Fail<bool>(new ExceptionalError(e));
+            return Result.Fail(new ExceptionalError(e));
         }
     }
 
     /// <inheritdoc/>
-    public Result<bool> EnsureCreated()
+    public Result Migrate()
     {
         try
         {
-            return Result.Ok(Database.EnsureCreated());
+            Database.Migrate();
+            return Result.Ok();
         }
         catch (Exception e)
         {
-            return Result.Fail<bool>(new ExceptionalError(e));
+            return Result.Fail(new ExceptionalError(e));
         }
     }
-
-    /// <inheritdoc/>
-    public void Migrate() => Database.Migrate();
 
     /// <inheritdoc/>
     public IEnumerable<string> GetPendingMigrations() => Database.GetPendingMigrations();

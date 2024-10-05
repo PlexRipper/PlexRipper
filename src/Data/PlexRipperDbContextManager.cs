@@ -68,8 +68,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
 
         _log.WarningLine("Database does not exist, creating a new one now");
 
-        _dbContextDatabase.EnsureCreated();
-        return MigrateDatabase();
+        return CreateDatabase();
     }
 
     public Result ResetDatabase()
@@ -82,16 +81,18 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
 
             var deletedResult = _dbContextDatabase.EnsureDeleted();
             if (deletedResult.IsFailed)
+            {
+                _log.ErrorLine("Database could not be deleted at {DatabasePath}", DatabasePath);
                 return deletedResult.LogError();
+            }
 
-            var createdResult = _dbContextDatabase.EnsureCreated();
+            var createdResult = CreateDatabase();
             if (createdResult.IsFailed)
             {
                 _log.ErrorLine("Database could not be created at {DatabasePath}", DatabasePath);
                 return createdResult.LogError();
             }
 
-            MigrateDatabase();
             return Result.Ok();
         }
         catch (Exception e)
@@ -102,13 +103,31 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         }
     }
 
+    private Result CreateDatabase()
+    {
+        try
+        {
+            // Create the database while applying any pending migrations.
+            _dbContextDatabase.Migrate();
+            return Result.Ok();
+        }
+        catch (Exception e)
+        {
+            _log.ErrorLine("Failed to create the database");
+            _log.Error(e);
+
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
+    }
+
     private Result MigrateDatabase()
     {
         try
         {
             // Don't migrate when running in memory, this causes error:
             // "Relational-specific methods can only be used when the context is using a relational database provider."
-            if (!_dbContextDatabase.IsInMemory() && _dbContextDatabase.GetPendingMigrations().Any())
+            var pendingMigrations = _dbContextDatabase.GetPendingMigrations();
+            if (!_dbContextDatabase.IsInMemory() && pendingMigrations.Any())
             {
                 _log.InformationLine("Attempting to migrate database");
                 _dbContextDatabase.Migrate();
@@ -122,7 +141,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
             _log.ErrorLine("Failed to migrate the database or the database is corrupted");
             _log.Error(e);
 
-            return Result.Fail(new ExceptionalError(e)).LogFatal();
+            return ResetDatabase();
         }
     }
 

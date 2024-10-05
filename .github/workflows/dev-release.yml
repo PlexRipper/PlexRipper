@@ -31,11 +31,13 @@ jobs:
             -   name: Echo last version tag
                 run: echo ${{ steps.version.outputs.tag }}
 
-            -   name: Strip 'v' from version
-                run: |
-                    # Strip the 'v' prefix from the version tag
-                    VERSION_NO_V="${{ steps.version.outputs.tag#v }}"
-                    echo "VERSION_NO_V=$VERSION_NO_V" >> $GITHUB_ENV
+            - name: Strip 'v' from version
+              id: strip_v
+              run: |
+                  # Strip the 'v' prefix from the version tag
+                  VERSION_NO_V="${{ steps.version.outputs.tag }}"
+                  VERSION_NO_V="${VERSION_NO_V#v}"
+                  echo "VERSION_NO_V=$VERSION_NO_V" >> $GITHUB_ENV
                 
             -   name: Publish to Registry with dev tag
                 uses: elgohr/Publish-Docker-Github-Action@v5

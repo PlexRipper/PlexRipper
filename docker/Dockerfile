@@ -110,7 +110,7 @@ COPY --from=back-end /app/publish .
 COPY --from=client-build /tmp/ClientApp/.output/public /app/wwwroot
 
 ## Copy the s6-overlay config files
-COPY docker/ /
+COPY docker/etc/ /etc/
 
 ## Set version label
 LABEL company="PlexRipper"

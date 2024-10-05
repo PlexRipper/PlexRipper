@@ -24,9 +24,17 @@ public class Boot : IHostedService
 
     private readonly IDownloadQueue _downloadQueue;
 
+    /// <summary>
+    ///  Get the real user ID of the calling process.
+    /// </summary>
+    /// <returns></returns>
     [DllImport("libc")]
     public static extern uint getuid();
 
+    /// <summary>
+    ///  Get the real group ID of the calling process.
+    /// </summary>
+    /// <returns></returns>
     [DllImport("libc")]
     public static extern uint getgid();
 
@@ -34,6 +42,15 @@ public class Boot : IHostedService
 
     #region Constructor
 
+    /// <summary>
+    /// The Boot class is used to sequentially start various processes needed to start PlexRipper.
+    /// </summary>
+    /// <param name="log"></param>
+    /// <param name="dbContextManagerManager"></param>
+    /// <param name="appLifetime"></param>
+    /// <param name="configManager"></param>
+    /// <param name="schedulerService"></param>
+    /// <param name="downloadQueue"></param>
     public Boot(
         ILog log,
         IPlexRipperDbContextManager dbContextManagerManager,
@@ -58,6 +75,7 @@ public class Boot : IHostedService
 
     #region Public Methods
 
+    /// <inheritdoc />
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         _log.InformationLine("Initiating boot process");

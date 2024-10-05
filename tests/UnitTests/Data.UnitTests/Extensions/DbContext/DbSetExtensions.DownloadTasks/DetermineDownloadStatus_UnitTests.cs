@@ -1,7 +1,7 @@
 using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data.UnitTests.Extensions.DbContext.DbSetExtensions.DownloadTasks;
+namespace Data.UnitTests;
 
 public class DetermineDownloadStatus_UnitTests : BaseUnitTest
 {

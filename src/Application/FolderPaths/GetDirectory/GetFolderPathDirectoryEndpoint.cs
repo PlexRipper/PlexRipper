@@ -1,6 +1,7 @@
 using Application.Contracts;
 using FastEndpoints;
 using FileSystem.Contracts;
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
@@ -13,7 +14,10 @@ public class GetFolderPathDirectoryRequest
 
 public class GetFolderPathDirectoryRequestValidator : Validator<GetFolderPathDirectoryRequest>
 {
-    public GetFolderPathDirectoryRequestValidator() { }
+    public GetFolderPathDirectoryRequestValidator()
+    {
+        RuleFor(x => x.Path).NotNull();
+    }
 }
 
 public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirectoryRequest, FileSystemDTO>

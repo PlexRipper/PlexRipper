@@ -137,8 +137,11 @@ public class ConfigManager : IConfigManager
         var jsonSettings = UserSettingsSerializer.Serialize(_userSettings);
 
         var writeResult = WriteToConfigFile(jsonSettings);
+
         if (writeResult.IsFailed)
             return writeResult;
+
+        _log.DebugLine("UserSettings were saved successfully!");
 
         return Result.Ok().WithSuccess("UserSettings were saved successfully!").LogInformation();
     }

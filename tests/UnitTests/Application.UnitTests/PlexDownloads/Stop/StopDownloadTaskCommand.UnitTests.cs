@@ -3,7 +3,7 @@ using Data.Contracts;
 using FileSystem.Contracts;
 using Microsoft.EntityFrameworkCore;
 
-namespace PlexRipper.Application.UnitTests.Stop;
+namespace PlexRipper.Application.UnitTests;
 
 public class StopDownloadTaskCommand_UnitTests : BaseUnitTest<StopDownloadTaskCommandHandler>
 {

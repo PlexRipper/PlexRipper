@@ -9,8 +9,8 @@ public class DataModule : Module
     {
         builder.RegisterType<PlexRipperDbContext>().As<IPlexRipperDbContext>().AsSelf().InstancePerDependency();
 
-        builder.RegisterType<PlexRipperDbContext>().As<IPlexRipperDbContextDatabase>().InstancePerLifetimeScope();
+        builder.RegisterType<PlexRipperDbContext>().As<IPlexRipperDbContextDatabase>().InstancePerDependency();
 
-        builder.RegisterType<PlexRipperDbContextManager>().As<IPlexRipperDbContextManager>().SingleInstance();
+        builder.RegisterType<PlexRipperDbContextManager>().As<IPlexRipperDbContextManager>().InstancePerDependency();
     }
 }

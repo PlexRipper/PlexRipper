@@ -1,3 +1,8 @@
+using System.Data.Common;
+using FluentResults;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+
 namespace Data.Contracts;
 
 public interface IPlexRipperDbContextDatabase
@@ -74,7 +79,7 @@ public interface IPlexRipperDbContextDatabase
     ///     </para>
     /// </remarks>
     /// <returns><see langword="true" /> if the database is deleted, <see langword="false" /> if it did not exist.</returns>
-    bool EnsureDeleted();
+    Result<bool> EnsureDeleted();
 
     /// <summary>
     ///     Applies any pending migrations for the context to the database. Will create the database
@@ -143,5 +148,5 @@ public interface IPlexRipperDbContextDatabase
     ///     </para>
     /// </remarks>
     /// <returns><see langword="true" /> if the database is created, <see langword="false" /> if it already existed.</returns>
-    bool EnsureCreated();
+    Result<bool> EnsureCreated();
 }

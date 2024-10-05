@@ -99,15 +99,12 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
                 )
                 .SingleInstance();
 
-            if (IsDatabaseSetup)
-            {
-                // Database context can be setup once and then retrieved by its DB name.
-                builder
-                    .Register((_, _) => GetDbContext())
-                    .As<PlexRipperDbContext>()
-                    .As<IPlexRipperDbContext>()
-                    .InstancePerDependency();
-            }
+            // Database context can be setup once and then retrieved by its DB name.
+            builder
+                .Register((_, _) => GetDbContext())
+                .As<PlexRipperDbContext>()
+                .As<IPlexRipperDbContext>()
+                .InstancePerDependency();
 
             builder.RegisterType<Log>().As<ILog>().SingleInstance();
             builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();

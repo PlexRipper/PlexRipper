@@ -69,9 +69,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
             _log.WarningLine("Database does not exist, creating a new one now");
 
             _dbContextDatabase.EnsureCreated();
-            MigrateDatabase();
-
-            return ResetDatabase();
+            return MigrateDatabase();
         }
     }
 
@@ -117,8 +115,6 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         {
             _log.ErrorLine("Failed to migrate the database or the database is corrupted");
             _log.Error(e);
-
-            ResetDatabase();
 
             return Result.Fail(new ExceptionalError(e)).LogFatal();
         }

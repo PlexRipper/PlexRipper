@@ -4,6 +4,7 @@ using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using Data.Contracts;
 using EFCore.BulkExtensions;
 using Environment;
+using Logging.Interface;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -15,6 +16,8 @@ namespace PlexRipper.Data;
 
 public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlexRipperDbContextDatabase
 {
+    private readonly ILog<PlexRipperDbContext> _log;
+
     #region Properties
 
     #region Tables
@@ -93,7 +96,7 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     #endregion
 
-    public string DatabaseName { get; set; } = string.Empty;
+    public string DatabaseName { get; }
 
     public async Task BulkInsertAsync<T>(
         IList<T> entities,
@@ -124,15 +127,21 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     #region Constructors
 
-    public PlexRipperDbContext(IPathProvider pathProvider)
+    public PlexRipperDbContext(ILog<PlexRipperDbContext> log, IPathProvider pathProvider)
     {
+        _log = log;
         DatabaseName = pathProvider.DatabaseName;
     }
 
-    public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options, string databaseName)
+    public PlexRipperDbContext(
+        ILog<PlexRipperDbContext> log,
+        DbContextOptions<PlexRipperDbContext> options,
+        string databaseName
+    )
         : base(options)
     {
         DatabaseName = databaseName;
+        _log = log;
         Database.OpenConnection();
         Database.EnsureCreated();
     }
@@ -196,10 +205,30 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
     public void CloseConnection() => Database.CloseConnection();
 
     /// <inheritdoc/>
-    public bool EnsureDeleted() => Database.EnsureDeleted();
+    public Result<bool> EnsureDeleted()
+    {
+        try
+        {
+            return Result.Ok(Database.EnsureDeleted());
+        }
+        catch (Exception e)
+        {
+            return Result.Fail<bool>(new ExceptionalError(e));
+        }
+    }
 
     /// <inheritdoc/>
-    public bool EnsureCreated() => Database.EnsureCreated();
+    public Result<bool> EnsureCreated()
+    {
+        try
+        {
+            return Result.Ok(Database.EnsureCreated());
+        }
+        catch (Exception e)
+        {
+            return Result.Fail<bool>(new ExceptionalError(e));
+        }
+    }
 
     /// <inheritdoc/>
     public void Migrate() => Database.Migrate();

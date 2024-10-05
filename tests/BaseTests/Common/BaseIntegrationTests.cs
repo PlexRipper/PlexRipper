@@ -30,8 +30,6 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     protected IPlexRipperDbContext DbContext => Container.Resolve<IPlexRipperDbContext>();
 
-    protected string DatabaseName => Container.DatabaseName;
-
     public Task InitializeAsync()
     {
         _log.InformationLine("Initialize Integration Test");
@@ -40,7 +38,10 @@ public class BaseIntegrationTests : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        _log.Warning("Integration Test with DatabaseName: \"{DatabaseName}\" has ended, Disposing!", DatabaseName);
+        _log.Warning(
+            "Integration Test with DatabaseName: \"{DatabaseName}\" has ended, Disposing!",
+            DbContext.DatabaseName
+        );
 
         Container.Dispose();
 

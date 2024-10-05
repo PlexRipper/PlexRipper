@@ -23,8 +23,6 @@ public class Program
 
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.ConfigureDatabase();
-
             builder.Host.ConfigureHostBuilder();
 
             builder.Services.ConfigureServices(builder.Environment);

@@ -67,6 +67,19 @@ public class FileSystem : IFileSystem
         }
     }
 
+    public Result Copy(string sourceFileName, string destFileName)
+    {
+        try
+        {
+            _abstractedFileSystem.File.Copy(sourceFileName, destFileName);
+            return Result.Ok();
+        }
+        catch (Exception e)
+        {
+            return Result.Fail(new ExceptionalError(e)).LogError();
+        }
+    }
+
     public Result<string> FileReadAllText(string path)
     {
         if (string.IsNullOrEmpty(path))

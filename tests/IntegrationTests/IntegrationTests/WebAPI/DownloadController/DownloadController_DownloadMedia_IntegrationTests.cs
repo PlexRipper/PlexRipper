@@ -36,7 +36,7 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
         var plexMovies = await DbContext.PlexMovies.ToListAsync();
         plexMovies.Count.ShouldBe(
             plexMovieCount,
-            $"PlexMovies count should be 10 failed with database name: {DatabaseName}"
+            $"PlexMovies count should be 10 failed with database name: {DbContext.DatabaseName}"
         );
 
         var dtoList = new List<DownloadMediaDTO>()

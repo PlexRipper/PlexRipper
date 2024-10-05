@@ -62,7 +62,7 @@ public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccoun
             });
         });
 
-        var request = new CreatePlexAccountEndpointRequest() { PlexAccount = newAccount.ToDTO() };
+        var request = new CreatePlexAccountEndpointRequest { PlexAccount = newAccount.ToDTO() };
 
         // Act
         await ep.HandleAsync(request, default);

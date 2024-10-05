@@ -11,7 +11,9 @@ namespace PlexRipper.BaseTests;
 public class BaseUnitTest : IDisposable
 {
     private string _databaseName;
-    private bool _isDatabaseSetup;
+
+    protected bool IsDatabaseSetup;
+
     protected readonly ILog Log;
 
     /// <summary>
@@ -42,7 +44,7 @@ public class BaseUnitTest : IDisposable
 
     protected PlexRipperDbContext GetDbContext()
     {
-        if (!_isDatabaseSetup)
+        if (!IsDatabaseSetup)
         {
             var logEvent = Log.ErrorLine(
                 "The test database has not been setup yet, run SetupDatabase() in the test first!"
@@ -64,12 +66,12 @@ public class BaseUnitTest : IDisposable
         var dbContext = await MockDatabase.GetMemoryDbContext().Setup(Seed, options);
         _databaseName = dbContext.DatabaseName;
         _dbContexts.Add(dbContext);
-        _isDatabaseSetup = true;
+        IsDatabaseSetup = true;
     }
 
     public virtual void Dispose()
     {
-        if (_isDatabaseSetup)
+        if (IsDatabaseSetup)
             _dbContexts.ForEach(x => x.Dispose());
     }
 }
@@ -100,8 +102,8 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
             // Database context can be setup once and then retrieved by its DB name.
             builder
                 .Register((_, _) => GetDbContext())
-                .As<PlexRipperDbContext>() // Register as concrete type
-                .As<IPlexRipperDbContext>() // Also register as interface
+                .As<PlexRipperDbContext>()
+                .As<IPlexRipperDbContext>()
                 .InstancePerDependency();
 
             builder.RegisterType<Log>().As<ILog>().SingleInstance();

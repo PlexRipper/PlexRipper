@@ -1,6 +1,7 @@
 using System.Net;
 using System.Runtime.InteropServices;
 using Application.Contracts;
+using Data.Contracts;
 using Logging.Interface;
 using Settings.Contracts;
 
@@ -14,7 +15,8 @@ public class Boot : IHostedService
     #region Fields
 
     private readonly ILog _log;
-    private readonly IHostApplicationLifetime _appLifetime;
+
+    private readonly IPlexRipperDbContextManager _dbContextManager;
 
     private readonly IConfigManager _configManager;
 
@@ -34,6 +36,7 @@ public class Boot : IHostedService
 
     public Boot(
         ILog log,
+        IPlexRipperDbContextManager dbContextManagerManager,
         IHostApplicationLifetime appLifetime,
         IConfigManager configManager,
         ISchedulerService schedulerService,
@@ -41,14 +44,14 @@ public class Boot : IHostedService
     )
     {
         _log = log;
-        _appLifetime = appLifetime;
+        _dbContextManager = dbContextManagerManager;
         _configManager = configManager;
         _schedulerService = schedulerService;
         _downloadQueue = downloadQueue;
 
-        _appLifetime.ApplicationStarted.Register(OnStarted);
-        _appLifetime.ApplicationStopping.Register(OnStopping);
-        _appLifetime.ApplicationStopped.Register(OnStopped);
+        appLifetime.ApplicationStarted.Register(OnStarted);
+        appLifetime.ApplicationStopping.Register(OnStopping);
+        appLifetime.ApplicationStopped.Register(OnStopped);
     }
 
     #endregion
@@ -60,13 +63,22 @@ public class Boot : IHostedService
         _log.InformationLine("Initiating boot process");
         ServicePointManager.DefaultConnectionLimit = 1000;
 
+        LogIdentity();
+
         _configManager.Setup();
+
+        var databaseSetupResult = _dbContextManager.Setup();
+        if (databaseSetupResult.IsFailed)
+            await StopAsync(cancellationToken);
+
         _downloadQueue.Setup();
+
         await _schedulerService.SetupAsync();
 
         _log.InformationLine("Finished Initiating boot process");
     }
 
+    /// <inheritdoc/>
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         _log.InformationLine("Shutting down the container");
@@ -79,38 +91,34 @@ public class Boot : IHostedService
 
     private void OnStarted()
     {
-        _log.InformationLine("Boot.OnStarted has been called");
-
-        // Retrieve PUID and PGID from environment variables
-        var puid = System.Environment.GetEnvironmentVariable("PUID");
-        var pgid = System.Environment.GetEnvironmentVariable("PGID");
-        Console.WriteLine($"PUID from env: {puid}");
-        Console.WriteLine($"PGID from env: {pgid}");
-
-        // Get the current user's UID and GID from the system
-        var uid = getuid();
-        var gid = getgid();
-        Console.WriteLine($"Current UID: {uid}");
-        Console.WriteLine($"Current GID: {gid}");
-
-        // Get current username
-        Console.WriteLine($"Current Username: {System.Environment.UserName}");
+        _log.DebugLine("Boot.OnStarted has been called");
 
         // Perform post-startup activities here
     }
 
     private void OnStopping()
     {
-        _log.InformationLine("Boot.OnStopping has been called");
+        _log.DebugLine("Boot.OnStopping has been called");
 
         // Perform on-stopping activities here
     }
 
     private void OnStopped()
     {
-        _log.InformationLine("Boot.OnStopped has been called");
+        _log.DebugLine("Boot.OnStopped has been called");
 
         // Perform post-stopped activities here
+    }
+
+    private void LogIdentity()
+    {
+        // Retrieve PUID and PGID from environment variables
+        var puid = System.Environment.GetEnvironmentVariable("PUID");
+        var pgid = System.Environment.GetEnvironmentVariable("PGID");
+
+        _log.Debug("PUID from env: {PUID} and from the system: {PUID}", puid ?? "-1", getuid());
+        _log.Debug("PGID from env: {PGID} and from the system: {PGID}", pgid ?? "-1", getgid());
+        _log.Debug("Current system Username: {UserName}", System.Environment.UserName);
     }
 
     #endregion

@@ -3,7 +3,6 @@ using Data.Contracts;
 using EFCore.BulkExtensions;
 using FluentValidation;
 using Logging.Interface;
-using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 

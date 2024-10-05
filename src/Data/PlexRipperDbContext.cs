@@ -6,7 +6,6 @@ using EFCore.BulkExtensions;
 using Environment;
 using Logging.Interface;
 using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using NaturalSort.Extension;

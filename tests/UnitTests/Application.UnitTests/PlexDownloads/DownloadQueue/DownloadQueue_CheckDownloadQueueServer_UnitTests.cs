@@ -1,6 +1,5 @@
 using Application.Contracts;
 using Data.Contracts;
-using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application.UnitTests.DownloadQueue;
 

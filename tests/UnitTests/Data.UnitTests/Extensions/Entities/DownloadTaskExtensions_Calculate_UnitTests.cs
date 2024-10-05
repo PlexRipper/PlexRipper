@@ -1,5 +1,4 @@
 using Data.Contracts;
-using Microsoft.EntityFrameworkCore;
 
 namespace Data.UnitTests.Entities;
 

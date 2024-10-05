@@ -3,7 +3,6 @@ using Data.Contracts;
 using FastEndpoints;
 using Logging.Interface;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 

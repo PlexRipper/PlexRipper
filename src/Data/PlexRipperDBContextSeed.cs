@@ -1,5 +1,4 @@
 ﻿using Environment;
-using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Data;
 

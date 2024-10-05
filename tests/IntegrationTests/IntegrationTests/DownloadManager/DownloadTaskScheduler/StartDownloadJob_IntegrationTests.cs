@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace IntegrationTests.DownloadManager.DownloadTaskScheduler;
 
 public class StartDownloadJob_IntegrationTests : BaseIntegrationTests

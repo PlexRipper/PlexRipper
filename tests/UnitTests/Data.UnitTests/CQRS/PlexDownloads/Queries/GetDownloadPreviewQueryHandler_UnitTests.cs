@@ -1,5 +1,4 @@
 using Application.Contracts;
-using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 
 namespace Data.UnitTests;

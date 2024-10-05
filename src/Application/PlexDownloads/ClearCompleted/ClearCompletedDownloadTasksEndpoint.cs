@@ -2,7 +2,6 @@ using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 

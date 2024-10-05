@@ -1,2 +1,2 @@
 #!/usr/bin/with-contenv sh
-exec dotnet /app/PlexRipper.WebAPI.dll
+exec s6-setuidgid abc dotnet /app/PlexRipper.WebAPI.dll

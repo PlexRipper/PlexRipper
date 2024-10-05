@@ -1,4 +1,5 @@
 using System.Net;
+using System.Runtime.InteropServices;
 using Application.Contracts;
 using Logging.Interface;
 using Settings.Contracts;
@@ -20,6 +21,12 @@ public class Boot : IHostedService
     private readonly ISchedulerService _schedulerService;
 
     private readonly IDownloadQueue _downloadQueue;
+
+    [DllImport("libc")]
+    public static extern uint getuid();
+
+    [DllImport("libc")]
+    public static extern uint getgid();
 
     #endregion
 
@@ -73,6 +80,21 @@ public class Boot : IHostedService
     private void OnStarted()
     {
         _log.InformationLine("Boot.OnStarted has been called");
+
+        // Retrieve PUID and PGID from environment variables
+        var puid = System.Environment.GetEnvironmentVariable("PUID");
+        var pgid = System.Environment.GetEnvironmentVariable("PGID");
+        Console.WriteLine($"PUID from env: {puid}");
+        Console.WriteLine($"PGID from env: {pgid}");
+
+        // Get the current user's UID and GID from the system
+        var uid = getuid();
+        var gid = getgid();
+        Console.WriteLine($"Current UID: {uid}");
+        Console.WriteLine($"Current GID: {gid}");
+
+        // Get current username
+        Console.WriteLine($"Current Username: {System.Environment.UserName}");
 
         // Perform post-startup activities here
     }

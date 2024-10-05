@@ -1,6 +1,7 @@
 using System.Net;
 using System.Runtime.InteropServices;
 using Application.Contracts;
+using Data.Contracts;
 using Logging.Interface;
 using Settings.Contracts;
 
@@ -14,7 +15,8 @@ public class Boot : IHostedService
     #region Fields
 
     private readonly ILog _log;
-    private readonly IHostApplicationLifetime _appLifetime;
+
+    private readonly IPlexRipperDbContextManager _dbContextManager;
 
     private readonly IConfigManager _configManager;
 
@@ -34,6 +36,7 @@ public class Boot : IHostedService
 
     public Boot(
         ILog log,
+        IPlexRipperDbContextManager dbContextManagerManager,
         IHostApplicationLifetime appLifetime,
         IConfigManager configManager,
         ISchedulerService schedulerService,
@@ -41,14 +44,14 @@ public class Boot : IHostedService
     )
     {
         _log = log;
-        _appLifetime = appLifetime;
+        _dbContextManager = dbContextManagerManager;
         _configManager = configManager;
         _schedulerService = schedulerService;
         _downloadQueue = downloadQueue;
 
-        _appLifetime.ApplicationStarted.Register(OnStarted);
-        _appLifetime.ApplicationStopping.Register(OnStopping);
-        _appLifetime.ApplicationStopped.Register(OnStopped);
+        appLifetime.ApplicationStarted.Register(OnStarted);
+        appLifetime.ApplicationStopping.Register(OnStopping);
+        appLifetime.ApplicationStopped.Register(OnStopped);
     }
 
     #endregion
@@ -60,8 +63,12 @@ public class Boot : IHostedService
         _log.InformationLine("Initiating boot process");
         ServicePointManager.DefaultConnectionLimit = 1000;
 
+        _dbContextManager.Setup();
+
         _configManager.Setup();
+
         _downloadQueue.Setup();
+
         await _schedulerService.SetupAsync();
 
         _log.InformationLine("Finished Initiating boot process");

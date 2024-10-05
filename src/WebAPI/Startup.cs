@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using PlexRipper.Application;
-using PlexRipper.Data;
 using PlexRipper.Domain.Config;
 using Serilog;
 
@@ -202,11 +201,5 @@ public static class Startup
 
         // Removing all registered IHttpMessageHandlerBuilderFilter instances to disable built-in HttpClient logging
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
-    }
-
-    public static void ConfigureDatabase(this WebApplicationBuilder builder)
-    {
-        var dbContext = new PlexRipperDbContext(new PathProvider());
-        dbContext.Setup();
     }
 }

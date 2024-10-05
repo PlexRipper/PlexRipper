@@ -36,10 +36,6 @@ public interface IPlexRipperDbContext : IDisposable
 
     public string DatabaseName { get; set; }
 
-    public string DatabasePath { get; set; }
-
-    public string ConfigDirectory { get; set; }
-
     public DbSet<DownloadTaskMovie> DownloadTaskMovie { get; set; }
 
     public DbSet<DownloadTaskMovieFile> DownloadTaskMovieFile { get; set; }
@@ -55,6 +51,7 @@ public interface IPlexRipperDbContext : IDisposable
     public EntityEntry Entry(object entity);
 
     public int SaveChanges();
+
     public int SaveChanges(bool acceptAllChangesOnSuccess);
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 

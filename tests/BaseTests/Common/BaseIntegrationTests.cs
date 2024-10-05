@@ -42,9 +42,10 @@ public class BaseIntegrationTests : IAsyncLifetime
     {
         _log.Warning("Integration Test with DatabaseName: \"{DatabaseName}\" has ended, Disposing!", DatabaseName);
 
-        await Container.Boot.StopAsync(CancellationToken.None);
         Container.Dispose();
 
         _log.FatalLine("Container disposed");
+
+        await Task.CompletedTask;
     }
 }

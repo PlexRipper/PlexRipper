@@ -1,6 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Nuxt Debug JavaScript" type="JavascriptDebugType" uri="http://localhost:3001/" useFirstLineBreakpoints="true">
-    <mapping url="http://localhost:3001" local-file="$PROJECT_DIR$" />
-    <method v="2" />
-  </configuration>
-</component>

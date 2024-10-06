@@ -2,7 +2,7 @@ using Application.Contracts;
 
 namespace PlexRipper.Application;
 
-// TODO Delete this
+// TODO Delete this and replace with mediatr.publish
 public class NotificationsService : INotificationsService
 {
     private readonly ISignalRService _signalRService;

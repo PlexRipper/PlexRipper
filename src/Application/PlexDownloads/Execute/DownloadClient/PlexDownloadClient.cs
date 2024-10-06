@@ -92,7 +92,8 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
         var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskKey, cancellationToken);
         if (downloadTask is null)
         {
-            return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.ToString())
+            return ResultExtensions
+                .EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.ToString())
                 .LogWarning();
         }
 

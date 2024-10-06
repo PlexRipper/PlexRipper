@@ -27,10 +27,12 @@ public record DownloadTaskKey
             return true;
 
         return Type == other.Type
-            && Id.Equals(other.Id)
-            && PlexServerId == other.PlexServerId
-            && PlexLibraryId == other.PlexLibraryId;
+               && Id.Equals(other.Id)
+               && PlexServerId == other.PlexServerId
+               && PlexLibraryId == other.PlexLibraryId;
     }
 
     public override int GetHashCode() => HashCode.Combine((int)Type, Id, PlexServerId, PlexLibraryId);
+
+    public override string ToString() => $"{Type} Id: {Id}, Server: {PlexServerId}, Library: {PlexLibraryId}";
 }

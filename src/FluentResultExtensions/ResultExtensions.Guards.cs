@@ -78,6 +78,9 @@ public static partial class ResultExtensions
     public static Result EntityNotFound(string entityType, int id) =>
         Create404NotFoundResult($"The entity of type {entityType} with id {id} could not be found");
 
+    public static Result EntityNotFound(string entityType, string data) =>
+        Create404NotFoundResult($"The entity of type {entityType} with data {data} could not be found");
+
     public static Result EntityNotFound(string entityType, Guid guid) =>
         Create404NotFoundResult($"The entity of type {entityType} with id {guid} could not be found");
 

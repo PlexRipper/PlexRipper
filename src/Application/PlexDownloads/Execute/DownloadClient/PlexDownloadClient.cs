@@ -91,7 +91,10 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
     {
         var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskKey, cancellationToken);
         if (downloadTask is null)
-            return ResultExtensions.IsNull(nameof(DownloadTaskGeneric)).LogWarning();
+        {
+            return ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.ToString())
+                .LogWarning();
+        }
 
         DownloadTask = downloadTask;
 
@@ -117,7 +120,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
     /// Starts the download workers for the <see cref="DownloadTaskGeneric"/> given during setup.
     /// </summary>
     /// <returns>Is successful.</returns>
-    public Result Start(CancellationToken cancellationToken = default)
+    public Result Start()
     {
         if (_downloadWorkers.Any(x => x.DownloadWorkerTask.DownloadStatus == DownloadStatus.Downloading))
             return Result.Fail("The PlexDownloadClient is already downloading and can not be started.").LogWarning();

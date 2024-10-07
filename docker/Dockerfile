@@ -69,7 +69,10 @@ RUN dotnet build "WebAPI.csproj" -c Release -o /app/build /p:AssemblyVersion=$VE
 RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:AssemblyVersion=$VERSION
 
 # Stage 3 - Runtime Image
-FROM --platform=$TARGETPLATFORM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
+FROM ghcr.io/linuxserver/baseimage-alpine:3.20 AS base_amd64
+FROM ghcr.io/linuxserver/baseimage-alpine:arm64v8-3.20 AS base_arm64
+
+FROM ${TARGETPLATFORM} == "linux/arm64" ? base_arm64 : base_amd64 AS final
 
 ARG VERSION
 ARG PORT

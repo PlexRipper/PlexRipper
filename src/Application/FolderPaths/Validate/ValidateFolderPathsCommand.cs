@@ -18,13 +18,11 @@ public class ValidateFolderPathsValidator : AbstractValidator<ValidateFolderPath
 
 public class ValidateFolderPathsHandler : IRequestHandler<ValidateFolderPathsCommand, Result>
 {
-    private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IDirectorySystem _directorySystem;
 
-    public ValidateFolderPathsHandler(ILog log, IPlexRipperDbContext dbContext, IDirectorySystem directorySystem)
+    public ValidateFolderPathsHandler(IPlexRipperDbContext dbContext, IDirectorySystem directorySystem)
     {
-        _log = log;
         _dbContext = dbContext;
         _directorySystem = directorySystem;
     }

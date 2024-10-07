@@ -1,4 +1,3 @@
-#nullable enable
 using Logging.Common;
 using Logging.Interface;
 using Serilog;
@@ -47,7 +46,7 @@ public partial class Log : ILog
 
     private LogMetaData Write(
         LogEventLevel logLevel,
-        Exception exception,
+        Exception? exception,
         string messageTemplate,
         string sourceFilePath = "",
         string memberName = "",

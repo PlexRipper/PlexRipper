@@ -1,6 +1,7 @@
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
+using FluentValidation;
 using Logging.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,10 @@ public record RefreshPlexAccountAccessEndpointRequest(int PlexAccountId);
 
 public class RefreshPlexAccountAccessEndpointRequestValidator : Validator<RefreshPlexAccountAccessEndpointRequest>
 {
-    public RefreshPlexAccountAccessEndpointRequestValidator() { }
+    public RefreshPlexAccountAccessEndpointRequestValidator()
+    {
+        RuleFor(x => x.PlexAccountId).GreaterThanOrEqualTo(0);
+    }
 }
 
 public class RefreshPlexAccountAccessEndpoint : BaseEndpoint<RefreshPlexAccountAccessEndpointRequest, ResultDTO>

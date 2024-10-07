@@ -33,7 +33,7 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
     {
         var hasDownloadTaskIds = downloadTaskIds.Any();
 
-        var totalRowsDeleted = 0;
+        int totalRowsDeleted;
         if (hasDownloadTaskIds)
             totalRowsDeleted = await ClearByGuids(downloadTaskIds, ct);
         else

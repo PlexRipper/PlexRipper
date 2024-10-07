@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Data.Contracts;
 using FluentValidation;
-using Logging.Interface;
 using Quartz;
 
 namespace PlexRipper.Application;
@@ -20,13 +19,11 @@ public class QueueCheckPlexServerConnectionsJobCommandValidator
 public class QueueCheckPlexServerConnectionsJobHandler
     : IRequestHandler<QueueCheckPlexServerConnectionsJobCommand, Result<JobKey>>
 {
-    private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IScheduler _scheduler;
 
-    public QueueCheckPlexServerConnectionsJobHandler(ILog log, IPlexRipperDbContext dbContext, IScheduler scheduler)
+    public QueueCheckPlexServerConnectionsJobHandler(IPlexRipperDbContext dbContext, IScheduler scheduler)
     {
-        _log = log;
         _dbContext = dbContext;
         _scheduler = scheduler;
     }

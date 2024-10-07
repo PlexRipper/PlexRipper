@@ -1,19 +1,11 @@
 using Application.Contracts;
-using Data.Contracts;
 using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
 public class ResetDatabaseEndpoint : BaseEndpointWithoutRequest<ResultDTO>
 {
-    private readonly IPlexRipperDbContext _dbContext;
-
     public override string EndpointPath => ApiRoutes.SettingsController + "/resetdb";
-
-    public ResetDatabaseEndpoint(IPlexRipperDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
 
     public override void Configure()
     {

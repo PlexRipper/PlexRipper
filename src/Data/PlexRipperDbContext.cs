@@ -16,8 +16,6 @@ namespace PlexRipper.Data;
 
 public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlexRipperDbContextDatabase
 {
-    private readonly ILog<PlexRipperDbContext> _log;
-
     #region Properties
 
     #region Tables
@@ -129,19 +127,13 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     public PlexRipperDbContext(ILog<PlexRipperDbContext> log, IPathProvider pathProvider)
     {
-        _log = log;
         DatabaseName = pathProvider.DatabaseName;
     }
 
-    public PlexRipperDbContext(
-        ILog<PlexRipperDbContext> log,
-        DbContextOptions<PlexRipperDbContext> options,
-        string databaseName
-    )
+    public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options, string databaseName)
         : base(options)
     {
         DatabaseName = databaseName;
-        _log = log;
         Database.OpenConnection();
         Database.EnsureCreated();
     }

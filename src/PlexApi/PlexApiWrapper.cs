@@ -180,7 +180,7 @@ public class PlexApiWrapper
 
         var statusCode = responseResult.IsSuccess
             ? responseResult.Value.StatusCode
-            : responseResult.GetStatusCodeReason().StatusCode();
+            : responseResult.GetStatusCodeReason().GetStatusCode();
         var statusMessage = statusCode switch
         {
             200 => "The Plex server is online!",

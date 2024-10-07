@@ -6,7 +6,7 @@ namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
-    public static GetAllLibrariesResponseBody GetLibraryMediaContainer(Action<PlexApiDataConfig> options = null)
+    public static GetAllLibrariesResponseBody GetLibraryMediaContainer(Action<PlexApiDataConfig>? options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
@@ -32,7 +32,7 @@ public partial class FakePlexApiData
     }
 
     private static Faker<GetAllLibrariesDirectory> GetLibrariesResponseDirectory(
-        Action<PlexApiDataConfig> options = null
+        Action<PlexApiDataConfig>? options = null
     )
     {
         var config = PlexApiDataConfig.FromOptions(options);

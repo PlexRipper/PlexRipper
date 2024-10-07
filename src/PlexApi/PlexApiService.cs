@@ -36,7 +36,7 @@ public class PlexApiService : IPlexApiService
     /// <inheritdoc />
     public async Task<Result<PlexLibrary>> GetLibraryMediaAsync(
         PlexLibrary plexLibrary,
-        Action<MediaSyncProgress> action = null,
+        Action<MediaSyncProgress>? action = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -82,7 +82,7 @@ public class PlexApiService : IPlexApiService
     /// <inheritdoc />
     public async Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(
         PlexLibrary plexLibrary,
-        Action<MediaSyncProgress> action = null,
+        Action<MediaSyncProgress>? action = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -102,7 +102,7 @@ public class PlexApiService : IPlexApiService
 
     public async Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(
         PlexLibrary plexLibrary,
-        Action<MediaSyncProgress> action = null,
+        Action<MediaSyncProgress>? action = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -304,7 +304,7 @@ public class PlexApiService : IPlexApiService
         PlexLibrary plexLibrary,
         Type? plexType = null,
         int batchSize = 1000,
-        Action<MediaSyncProgress> action = null,
+        Action<MediaSyncProgress>? action = null,
         CancellationToken cancellationToken = default
     )
     {

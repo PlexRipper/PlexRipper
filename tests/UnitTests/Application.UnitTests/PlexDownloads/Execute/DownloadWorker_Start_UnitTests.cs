@@ -29,7 +29,7 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
                     DownloadStatus = DownloadStatus.Unknown,
                     BytesReceived = 0,
                     ElapsedTime = 0,
-                    FileLocationUrl = null,
+                    FileLocationUrl = string.Empty,
                     DownloadTaskId = default,
                     PlexServer = null,
                     PlexServerId = 0,
@@ -40,7 +40,7 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
                 }
             )
         );
-        DownloadWorkerTask downloadWorkerTaskResult = null;
+        DownloadWorkerTask? downloadWorkerTaskResult = null;
         sut.DownloadWorkerTaskUpdate.Subscribe(task => downloadWorkerTaskResult = task);
 
         // Act

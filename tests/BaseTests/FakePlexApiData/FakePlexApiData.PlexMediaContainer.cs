@@ -9,7 +9,7 @@ public partial class FakePlexApiData
 {
     public static GetLibraryItemsResponseBody GetPlexLibrarySectionAllResponse(
         GetAllLibrariesDirectory library,
-        Action<PlexApiDataConfig> options = null
+        Action<PlexApiDataConfig>? options = null
     )
     {
         var config = PlexApiDataConfig.FromOptions(options);
@@ -47,7 +47,7 @@ public partial class FakePlexApiData
 
     public static Faker<GetLibraryItemsMetadata> GetLibraryMediaMetadata(
         PlexMediaType type,
-        Action<PlexApiDataConfig> options = null
+        Action<PlexApiDataConfig>? options = null
     )
     {
         var config = PlexApiDataConfig.FromOptions(options);
@@ -111,7 +111,7 @@ public partial class FakePlexApiData
             );
     }
 
-    public static Faker<GetLibraryItemsMedia> GetPlexMedium(Action<PlexApiDataConfig> options = null)
+    public static Faker<GetLibraryItemsMedia> GetPlexMedium(Action<PlexApiDataConfig>? options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
@@ -145,7 +145,7 @@ public partial class FakePlexApiData
             .RuleFor(l => l.Part, _ => [GetPlexPart(options).Generate()]);
     }
 
-    public static Faker<GetLibraryItemsPart> GetPlexPart(Action<PlexApiDataConfig> options = null)
+    public static Faker<GetLibraryItemsPart> GetPlexPart(Action<PlexApiDataConfig>? options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 

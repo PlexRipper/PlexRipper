@@ -45,7 +45,7 @@ public interface IPlexApiService
     /// <returns></returns>
     Task<Result<PlexLibrary>> GetLibraryMediaAsync(
         PlexLibrary plexLibrary,
-        Action<MediaSyncProgress> action = null,
+        Action<MediaSyncProgress>? action = null,
         CancellationToken cancellationToken = default
     );
 
@@ -57,7 +57,7 @@ public interface IPlexApiService
     /// <returns>The Result is successful if the <see cref="PlexServerStatus"/> was created successfully, regardless of whether the connection was successful.</returns>
     Task<Result<PlexServerStatus>> GetPlexServerStatusAsync(
         int plexServerConnectionId = 0,
-        Action<PlexApiClientProgress> action = null
+        Action<PlexApiClientProgress>? action = null
     );
 
     /// <summary>
@@ -68,7 +68,7 @@ public interface IPlexApiService
     /// <returns></returns>
     Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(
         PlexLibrary plexLibrary,
-        Action<MediaSyncProgress> action = null,
+        Action<MediaSyncProgress>? action = null,
         CancellationToken cancellationToken = default
     );
 
@@ -80,7 +80,7 @@ public interface IPlexApiService
     /// <returns></returns>
     Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(
         PlexLibrary plexLibrary,
-        Action<MediaSyncProgress> action = null,
+        Action<MediaSyncProgress>? action = null,
         CancellationToken cancellationToken = default
     );
 

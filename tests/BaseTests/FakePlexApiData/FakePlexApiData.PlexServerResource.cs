@@ -9,7 +9,7 @@ public partial class FakePlexApiData
 
     #region Public
 
-    public static Faker<PlexDevice> GetServerResource(Action<PlexApiDataConfig> options = null)
+    public static Faker<PlexDevice> GetServerResource(Action<PlexApiDataConfig>? options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
@@ -42,7 +42,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.Connections, f => GetPlexServerResourceConnections(options).Generate(f.Random.Int(1, 4)));
     }
 
-    public static Faker<Connections> GetPlexServerResourceConnections(Action<PlexApiDataConfig> options = null)
+    public static Faker<Connections> GetPlexServerResourceConnections(Action<PlexApiDataConfig>? options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 

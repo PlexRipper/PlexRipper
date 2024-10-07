@@ -73,9 +73,9 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
                     {
                         Id = 0,
                         CreatedAt = default,
-                        DestinationDirectory = null,
-                        FilePathsCompressed = null,
-                        FileName = null,
+                        DestinationDirectory = string.Empty,
+                        FilePathsCompressed = string.Empty,
+                        FileName = string.Empty,
                         FileSize = 0,
                         DownloadTaskId = default,
                         DownloadTaskType = DownloadTaskType.None,

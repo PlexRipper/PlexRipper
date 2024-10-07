@@ -14,13 +14,11 @@ public class MockPlexApi
 {
     private readonly HttpClientInterceptorOptions _clientOptions;
     private readonly MockPlexApiConfig _config;
-    private readonly ILog _log;
     private readonly List<Uri> _serverUris;
     private readonly HttpClient _client = new();
 
     public MockPlexApi(ILog log, Action<MockPlexApiConfig>? options = null, List<Uri>? serverUris = null)
     {
-        _log = log;
         _serverUris = serverUris ?? [];
         _config = MockPlexApiConfig.FromOptions(options);
 
@@ -51,7 +49,7 @@ public class MockPlexApi
                     );
                 }
 
-                _log.Error(
+                log.Error(
                     "OnMissingRegistration was triggered on uri: {RequestUri} and not handled",
                     message.RequestUri
                 );
@@ -59,7 +57,7 @@ public class MockPlexApi
             },
         };
         Setup();
-        _log.Debug("{NameOfMockPlexApi} was set-up", nameof(MockPlexApi));
+        log.Debug("{NameOfMockPlexApi} was set-up", nameof(MockPlexApi));
     }
 
     private void Setup()

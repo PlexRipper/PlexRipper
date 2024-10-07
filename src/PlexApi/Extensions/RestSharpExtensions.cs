@@ -158,7 +158,7 @@ public static class RestSharpExtensions
             var content = response.Content;
             if (response.StatusCode == HttpStatusCode.GatewayTimeout || content.Contains("504 Gateway Time-out"))
             {
-                result.Add504GatewayTimeoutError("The server didn't respond in time.");
+                result.Add504GatewayTimeoutError();
                 return result;
             }
 

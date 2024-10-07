@@ -9,7 +9,7 @@ public class Log_UnitTests : BaseUnitTest<Log_UnitTests>
     private readonly ILog _logEmpty;
 
     public Log_UnitTests(ITestOutputHelper output)
-        : base(output, LogEventLevel.Verbose)
+        : base(output)
     {
         _log = LogManager.CreateLogInstance<Log_UnitTests>(output);
         _logEmpty = LogManager.CreateLogInstance(output);

@@ -42,7 +42,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.HomeSize, f => f.Random.Number(20))
             .RuleFor(x => x.HomeAdmin, f => f.Random.Bool())
             .RuleFor(x => x.MaxHomeSize, f => f.Random.Number(20))
-            .RuleFor(x => x.RememberExpiresAt, f => f.Date.Future(1).Ticks)
+            .RuleFor(x => x.RememberExpiresAt, f => f.Date.Future().Ticks)
             .RuleFor(x => x.Profile, _ => null)
             .RuleFor(x => x.Entitlements, _ => null)
             .RuleFor(x => x.Subscriptions, _ => null)

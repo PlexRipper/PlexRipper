@@ -11,7 +11,7 @@ public class PlexTvShowSeason : PlexMedia
 
     #region Relationships
 
-    public PlexTvShow TvShow { get; set; }
+    public PlexTvShow? TvShow { get; set; }
 
     public int TvShowId { get; set; }
 

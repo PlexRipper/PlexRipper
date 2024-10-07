@@ -239,11 +239,7 @@ public static partial class MockDatabase
         optionsBuilder.EnableSensitiveDataLogging();
         optionsBuilder.EnableDetailedErrors();
         optionsBuilder.LogTo(text => LogManager.DbContextLogger(text), LogLevel.Warning);
-        return new PlexRipperDbContext(
-            LogManager.CreateLogInstance<PlexRipperDbContext>(),
-            optionsBuilder.Options,
-            dbName
-        );
+        return new PlexRipperDbContext(optionsBuilder.Options, dbName);
     }
 
     public static string DatabaseConnectionString(string dbName = "") =>

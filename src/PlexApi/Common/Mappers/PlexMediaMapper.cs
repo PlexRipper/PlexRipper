@@ -33,8 +33,6 @@ public static class PlexMediaMapper
         FullTitle = source.FullTitle,
         PlexLibrary = source.PlexLibrary,
         PlexServer = source.PlexServer,
-        PlexMovieGenres = [],
-        PlexMovieRoles = [],
         Type = source.Type,
     };
 

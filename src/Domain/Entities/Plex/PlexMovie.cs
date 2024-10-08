@@ -5,14 +5,6 @@ namespace PlexRipper.Domain;
 [Table("PlexMovie")]
 public class PlexMovie : PlexMedia
 {
-    #region Relationships
-
-    public List<PlexMovieGenre> PlexMovieGenres { get; init; }
-
-    public List<PlexMovieRole> PlexMovieRoles { get; init; }
-
-    #endregion
-
     #region Helpers
 
     [NotMapped]

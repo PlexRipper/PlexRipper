@@ -32,8 +32,6 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     public DbSet<Notification> Notifications { get; set; }
 
-    public DbSet<PlexGenre> PlexGenres { get; set; }
-
     public DbSet<PlexLibrary> PlexLibraries { get; set; }
 
     #region PlexMovie
@@ -51,8 +49,6 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
     public DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; set; }
 
     #endregion
-
-    public DbSet<PlexRole> PlexRoles { get; set; }
 
     #region PlexServers
 
@@ -87,10 +83,6 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
     public DbSet<PlexAccountServer> PlexAccountServers { get; set; }
 
     public DbSet<PlexAccountLibrary> PlexAccountLibraries { get; set; }
-
-    public DbSet<PlexMovieGenre> PlexMovieGenres { get; set; }
-
-    public DbSet<PlexMovieRole> PlexMovieRoles { get; set; }
 
     #endregion
 

@@ -76,14 +76,10 @@ public class ThrottledStream : Stream
     public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
     {
         var newCount = await GetBytesToReturnAsync(count);
-        if (_inputStream != null)
-        {
-            var read = await _inputStream.ReadAsync(buffer, offset, newCount, cancellationToken);
-            Interlocked.Add(ref _totalBytesRead, read);
-            return read;
-        }
 
-        return 0;
+        var read = await _inputStream.ReadAsync(buffer, offset, newCount, cancellationToken);
+        Interlocked.Add(ref _totalBytesRead, read);
+        return read;
     }
 
     /// <inheritdoc/>

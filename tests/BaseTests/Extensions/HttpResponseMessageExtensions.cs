@@ -11,7 +11,15 @@ public static class HttpResponseMessageExtensions
     {
         var result = await response.Content.ReadFromJsonAsync<ResultDTO<T>>(
             DefaultJsonSerializerOptions.ConfigStandard
-        );
+        ) ?? new ResultDTO<T>
+        {
+            IsFailed = false,
+            IsSuccess = false,
+            Reasons = [],
+            Errors = [],
+            Successes = [],
+            Value = default,
+        };
 
         result.Reasons = result
             .Reasons.Select(x => new ReasonDTO { Message = x.Message, Metadata = x.Metadata.ToTypedResultMetaData() })

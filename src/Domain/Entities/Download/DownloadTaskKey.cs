@@ -1,7 +1,7 @@
 namespace PlexRipper.Domain;
 
 /// <summary>
-/// The key to identify various types of <see cref="DownloadTask"/>s.
+/// The key to identify various types of <see cref="DownloadTaskGeneric">DownloadTasks</see>.
 /// </summary>
 public record DownloadTaskKey
 {
@@ -27,9 +27,9 @@ public record DownloadTaskKey
             return true;
 
         return Type == other.Type
-            && Id.Equals(other.Id)
-            && PlexServerId == other.PlexServerId
-            && PlexLibraryId == other.PlexLibraryId;
+               && Id.Equals(other.Id)
+               && PlexServerId == other.PlexServerId
+               && PlexLibraryId == other.PlexLibraryId;
     }
 
     public override int GetHashCode() => HashCode.Combine((int)Type, Id, PlexServerId, PlexLibraryId);

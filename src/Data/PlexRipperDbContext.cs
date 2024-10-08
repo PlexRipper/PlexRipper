@@ -10,6 +10,8 @@ using Microsoft.Extensions.Logging;
 using NaturalSort.Extension;
 using PlexRipper.Data.Common;
 
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+
 namespace PlexRipper.Data;
 
 public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlexRipperDbContextDatabase

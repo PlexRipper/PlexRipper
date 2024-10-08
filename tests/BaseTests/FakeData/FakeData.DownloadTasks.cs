@@ -9,8 +9,7 @@ public static partial class FakeData
 
     private static Faker<T> ApplyDownloadTaskBase<T>(
         this Faker<T> faker,
-        int seed = 0,
-        Action<FakeDataConfig>? options = null
+        int seed = 0
     )
         where T : DownloadTaskBase
     {
@@ -42,7 +41,7 @@ public static partial class FakeData
         return faker
             .StrictMode(true)
             .UseSeed(seed)
-            .ApplyDownloadTaskBase(seed, options)
+            .ApplyDownloadTaskBase(seed)
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
             .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
             .RuleFor(x => x.FileTransferSpeed, _ => 0)
@@ -70,7 +69,7 @@ public static partial class FakeData
         return faker
             .StrictMode(true)
             .UseSeed(seed)
-            .ApplyDownloadTaskBase(seed, options)
+            .ApplyDownloadTaskBase(seed)
             .RuleFor(x => x.Percentage, _ => 0)
             .RuleFor(x => x.DataReceived, _ => 0)
             .RuleFor(

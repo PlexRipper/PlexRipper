@@ -6,7 +6,7 @@ public static partial class DownloadTaskExtensions
     /// This will set the relationship ids for the download tasks and it's children.
     /// </summary>
     public static void SetRelationshipIds(
-        this List<DownloadTaskMovie> downloadTasks,
+        this List<DownloadTaskMovie>? downloadTasks,
         int plexServerId,
         int plexLibraryId
     )

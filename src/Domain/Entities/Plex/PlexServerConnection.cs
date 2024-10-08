@@ -11,16 +11,16 @@ public class PlexServerConnection : BaseEntity
     #region Properties
 
     [Column(Order = 1)]
-    public required string Protocol { get; set; }
+    public required string Protocol { get; init; }
 
     [Column(Order = 2)]
-    public required string Address { get; set; }
+    public required string Address { get; init; }
 
     [Column(Order = 3)]
-    public required int Port { get; set; }
+    public required int Port { get; init; }
 
     [Column(Order = 4)]
-    public required string Uri { get; set; }
+    public required string Uri { get; init; }
 
     [Column(Order = 5)]
     public required bool Local { get; init; }
@@ -50,7 +50,7 @@ public class PlexServerConnection : BaseEntity
 
     public required int PlexServerId { get; set; }
 
-    public List<PlexServerStatus> PlexServerStatus { get; init; } = new();
+    public List<PlexServerStatus> PlexServerStatus { get; init; } = [];
 
     #endregion
 
@@ -117,14 +117,13 @@ public class PlexServerConnection : BaseEntity
         return obj.GetType() == GetType() && Equals((PlexServerConnection)obj);
     }
 
-    protected bool Equals(PlexServerConnection other) =>
-        Protocol == other.Protocol
-        && Address == other.Address
-        && Port == other.Port
-        && Uri == other.Uri
-        && Local == other.Local
-        && Relay == other.Relay
-        && IPv6 == other.IPv6;
+    protected bool Equals(PlexServerConnection other) => Protocol == other.Protocol
+                                                         && Address == other.Address
+                                                         && Port == other.Port
+                                                         && Uri == other.Uri
+                                                         && Local == other.Local
+                                                         && Relay == other.Relay
+                                                         && IPv6 == other.IPv6;
 
     #endregion
 

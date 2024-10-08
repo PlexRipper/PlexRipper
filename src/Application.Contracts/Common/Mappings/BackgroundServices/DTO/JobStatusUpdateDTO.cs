@@ -14,5 +14,5 @@ public record JobStatusUpdateDTO
 public record JobStatusUpdateDTO<T> : JobStatusUpdateDTO
     where T : class
 {
-    public required T Data { get; init; }
+    public required T? Data { get; init; }
 }

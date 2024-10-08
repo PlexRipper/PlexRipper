@@ -80,6 +80,7 @@ public static partial class DbContextExtensions
                     case DownloadTaskType.MovieData:
                     {
                         parentKey = await dbContext
+                            // ReSharper disable once AccessToModifiedClosure
                             .DownloadTaskMovieFile.Where(x => x.Id == parentKey.Id)
                             .ProjectToParentKey()
                             .FirstOrDefaultAsync(cancellationToken);
@@ -90,6 +91,7 @@ public static partial class DbContextExtensions
                     case DownloadTaskType.EpisodeData:
                     {
                         parentKey = await dbContext
+                            // ReSharper disable once AccessToModifiedClosure
                             .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == parentKey.Id)
                             .ProjectToParentKey()
                             .FirstOrDefaultAsync(cancellationToken);

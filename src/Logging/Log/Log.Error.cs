@@ -21,7 +21,7 @@ public partial class Log
     /// <inheritdoc/>
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Error(
-        Exception ex,
+        Exception? ex,
         string messageTemplate,
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",

@@ -53,6 +53,12 @@ public class DownloadJob : IJob, IDisposable
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
         try
         {
+            if (downloadTaskKey is null)
+            {
+                ResultExtensions.IsNull(nameof(DownloadTaskKey)).LogError();
+                return;
+            }
+
             // Create the multiple download worker tasks which will split up the work
             var downloadTask = await _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, token);
             if (downloadTask is null)

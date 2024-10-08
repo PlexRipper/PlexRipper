@@ -20,9 +20,6 @@ public static partial class ResultExtensions
 
     public static bool HasStatusCode(this Result result, int statusCode = 0)
     {
-        if (result is null)
-            return false;
-
         foreach (var reason in result.Reasons)
         foreach (var (key, metaData) in reason.Metadata)
             if (key == StatusCodeName && (statusCode == 0 || (int)metaData == statusCode))
@@ -32,7 +29,7 @@ public static partial class ResultExtensions
     }
 
     public static bool HasStatusCode<T>(this Result<T> result, int statusCode) =>
-        result?.ToResult()?.HasStatusCode(statusCode) ?? false;
+        result.ToResult()?.HasStatusCode(statusCode) ?? false;
 
     #endregion
 
@@ -88,9 +85,6 @@ public static partial class ResultExtensions
 
     public static int FindStatusCode(this Result result)
     {
-        if (result is null)
-            return 0;
-
         foreach (var reason in result.Reasons)
         foreach (var (key, metaData) in reason.Metadata)
             if (key == StatusCodeName)
@@ -100,7 +94,7 @@ public static partial class ResultExtensions
     }
 
     public static bool FindStatusCode<T>(this Result<T> result, int statusCode) =>
-        result?.ToResult()?.HasStatusCode(statusCode) ?? false;
+        result.ToResult()?.HasStatusCode(statusCode) ?? false;
 
     #endregion
 

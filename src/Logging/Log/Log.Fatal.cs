@@ -21,7 +21,7 @@ public partial class Log
     /// <inheritdoc/>
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Fatal(
-        Exception ex,
+        Exception? ex,
         string messageTemplate,
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
@@ -31,7 +31,7 @@ public partial class Log
     /// <inheritdoc/>
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Fatal<T>(
-        Exception ex,
+        Exception? ex,
         string messageTemplate,
         T propertyValue,
         string memberName = "",

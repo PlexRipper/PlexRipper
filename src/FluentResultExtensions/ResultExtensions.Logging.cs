@@ -17,40 +17,6 @@ public static partial class ResultExtensions
     private static void LogByType(
         LogEventLevel logLevel,
         string messageTemplate,
-        string memberName = "",
-        string sourceFilePath = "",
-        int sourceLineNumber = 0
-    )
-    {
-        switch (logLevel)
-        {
-            case LogEventLevel.Verbose:
-                _log.Verbose(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
-                return;
-            case LogEventLevel.Debug:
-                _log.Debug(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
-                break;
-            case LogEventLevel.Information:
-                _log.Information(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
-                break;
-            case LogEventLevel.Warning:
-                _log.Warning(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
-                break;
-            case LogEventLevel.Error:
-                _log.Error(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
-                break;
-            case LogEventLevel.Fatal:
-                _log.Fatal(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null);
-        }
-    }
-
-    [MessageTemplateFormatMethod("messageTemplate")]
-    private static void LogByType(
-        LogEventLevel logLevel,
-        string messageTemplate,
         Exception? e,
         string memberName = "",
         string sourceFilePath = "",

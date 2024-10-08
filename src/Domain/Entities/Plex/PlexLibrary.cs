@@ -58,12 +58,34 @@ public class PlexLibrary : BaseEntity
     public required Guid Uuid { get; init; }
 
     /// <summary>
-    /// Gets or sets the <see cref="PlexLibraryMetaData"/>, this is a JSON field that contains a collection
-    /// of various values that don't warrant their own database column.
+    /// Gets the total file size of the nested media.
     /// </summary>
-    /// TODO Just spread it out over the columns.
+    [Column(Order = 10)]
+    public long MediaSize { get; private set; } = 0;
+
+    /// <summary>
+    /// Gets the total <see cref="PlexMovie"/> count.
+    /// </summary>
     [Column(Order = 11)]
-    public required PlexLibraryMetaData MetaData { get; set; }
+    public int MovieCount { get; private set; } = 0;
+
+    /// <summary>
+    /// Gets the total <see cref="PlexTvShow"/> count.
+    /// </summary>
+    [Column(Order = 12)]
+    public int TvShowCount { get; private set; } = 0;
+
+    /// <summary>
+    /// Gets the total <see cref="PlexTvShowSeason"/> count of all <see cref="PlexTvShow">PlexTvShows</see> in this library.
+    /// </summary>
+    [Column(Order = 13)]
+    public int SeasonCount { get; private set; } = 0;
+
+    /// <summary>
+    /// Gets the total <see cref="PlexTvShowEpisode"/> count of all <see cref="PlexTvShow">PlexTvShows</see> in this library.
+    /// </summary>
+    [Column(Order = 14)]
+    public int EpisodeCount { get; private set; } = 0;
 
     #endregion
 
@@ -99,11 +121,8 @@ public class PlexLibrary : BaseEntity
 
     #region Helpers
 
-    /// <summary>
-    /// Gets whether this <see cref="PlexLibrary"/> has any media assigned.
-    /// </summary>
     [NotMapped]
-    public bool HasMedia => MediaCount > 0;
+    public string Name => Title;
 
     [NotMapped]
     public int MediaCount
@@ -120,56 +139,30 @@ public class PlexLibrary : BaseEntity
     }
 
     /// <summary>
-    /// Gets the total filesize of the nested media.
-    /// Will return -1 when MetaData is invalid.
-    /// </summary>
-    [NotMapped]
-    public long MediaSize => MetaData?.MediaSize ?? -1;
-
-    /// <summary>
-    /// Gets the current <see cref="PlexMovie"/> count.
-    /// Will return -1 if the <see cref="PlexMediaType"/> of this library does not match the count requested,
-    /// or if MetaData is invalid.
-    /// E.g. There will be a -1 when this library is of type TvShow.
-    /// </summary>
-    [NotMapped]
-    public int MovieCount => Type == PlexMediaType.Movie ? MetaData?.MovieCount ?? -1 : -1;
-
-    /// <summary>
-    /// Gets the current <see cref="PlexTvShow"/> count.
-    /// Will return -1 if the <see cref="PlexMediaType"/> of this library does not match the count requested,
-    /// or if MetaData is invalid.
-    /// E.g. There will be a -1 when this library is of type Movie.
-    /// </summary>
-    [NotMapped]
-    public int TvShowCount => Type == PlexMediaType.TvShow ? MetaData?.TvShowCount ?? -1 : -1;
-
-    /// <summary>
-    /// Gets the current <see cref="PlexTvShowSeason"/> count.
-    /// Will return -1 if the <see cref="PlexMediaType"/> of this library does not match the count requested.
-    /// or if MetaData is invalid.
-    /// E.g. There will be a -1 when this library is of type Movie.
-    /// </summary>
-    [NotMapped]
-    public int SeasonCount => Type == PlexMediaType.TvShow ? MetaData?.TvShowSeasonCount ?? -1 : -1;
-
-    /// <summary>
-    /// Gets the current <see cref="PlexTvShowEpisode"/> count.
-    /// Will return -1 if the <see cref="PlexMediaType"/> of this library does not match the count requested.
-    /// or if MetaData is invalid.
-    /// E.g. There will be a -1 when this library is of type Movie.
-    /// </summary>
-    [NotMapped]
-    public int EpisodeCount => Type == PlexMediaType.TvShow ? MetaData?.TvShowEpisodeCount ?? -1 : -1;
-
-    [NotMapped]
-    public string Name => Title;
-
-    /// <summary>
     /// Gets a value indicating whether this <see cref="PlexLibrary"/> has been updated since it was last synced with PlexRipper.
     /// </summary>
     [NotMapped]
     public bool Outdated => SyncedAt < UpdatedAt;
+
+    public void SetMovieMetaData(int movieCount, long mediaSize)
+    {
+        MovieCount = movieCount;
+        MediaSize = mediaSize;
+
+        TvShowCount = 0;
+        SeasonCount = 0;
+        EpisodeCount = 0;
+    }
+
+    public void SetTvShowMetaData(int tvShowCount, int seasonCount, int episodeCount, long mediaSize)
+    {
+        TvShowCount = tvShowCount;
+        SeasonCount = seasonCount;
+        EpisodeCount = episodeCount;
+        MediaSize = mediaSize;
+
+        MovieCount = 0;
+    }
 
     #endregion
 }

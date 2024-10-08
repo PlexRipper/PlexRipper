@@ -65,17 +65,6 @@ public static partial class FakeData
             .RuleFor(x => x.ScannedAt, f => f.Date.Recent())
             .RuleFor(x => x.SyncedAt, f => f.Date.Recent())
             .RuleFor(x => x.Uuid, _ => Guid.NewGuid())
-            .RuleFor(
-                x => x.MetaData,
-                _ => new PlexLibraryMetaData
-                {
-                    TvShowCount = 0,
-                    TvShowSeasonCount = 0,
-                    TvShowEpisodeCount = 0,
-                    MovieCount = 0,
-                    MediaSize = 0,
-                }
-            )
             .RuleFor(x => x.DefaultDestination, _ => null)
             .RuleFor(x => x.DefaultDestinationId, _ => null)
             .RuleFor(x => x.Movies, _ => [])

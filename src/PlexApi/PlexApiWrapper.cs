@@ -301,14 +301,6 @@ public class PlexApiWrapper
                 ScannedAt = DateTimeExtensions.FromUnixTime(x.ScannedAt),
                 SyncedAt = null,
                 Uuid = Guid.Parse(x.Uuid),
-                MetaData = new PlexLibraryMetaData
-                {
-                    TvShowCount = 0,
-                    TvShowSeasonCount = 0,
-                    TvShowEpisodeCount = 0,
-                    MovieCount = 0,
-                    MediaSize = 0,
-                },
                 PlexServer = null,
                 PlexServerId = connection.PlexServerId,
                 DefaultDestination = null,

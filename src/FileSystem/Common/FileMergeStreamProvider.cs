@@ -8,9 +8,8 @@ namespace PlexRipper.FileSystem.Common;
 public class FileMergeStreamProvider : IFileMergeStreamProvider
 {
     private readonly ILog _log;
+    private readonly IMediator _mediator;
     private readonly IFileSystem _fileSystem;
-
-    private readonly INotificationsService _notificationsService;
 
     private readonly IDirectorySystem _directorySystem;
 
@@ -18,14 +17,14 @@ public class FileMergeStreamProvider : IFileMergeStreamProvider
 
     public FileMergeStreamProvider(
         ILog log,
+        IMediator mediator,
         IFileSystem fileSystem,
-        INotificationsService notificationsService,
         IDirectorySystem directorySystem
     )
     {
         _log = log;
+        _mediator = mediator;
         _fileSystem = fileSystem;
-        _notificationsService = notificationsService;
         _directorySystem = directorySystem;
     }
 
@@ -35,7 +34,7 @@ public class FileMergeStreamProvider : IFileMergeStreamProvider
         var result = _directorySystem.CreateDirectoryFromFilePath(fileDestinationPath);
         if (result.IsFailed)
         {
-            await _notificationsService.SendResult(result);
+            await _mediator.SendNotificationAsync(result);
             return result.LogError();
         }
 

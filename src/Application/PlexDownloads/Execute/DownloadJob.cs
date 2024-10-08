@@ -13,21 +13,21 @@ public class DownloadJob : IJob, IDisposable
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly INotificationsService _notificationsService;
+    private readonly IMediator _mediator;
     private readonly IDownloadManagerSettings _downloadManagerSettings;
     private readonly IPlexDownloadClient _plexDownloadClient;
 
     public DownloadJob(
         ILog log,
         IPlexRipperDbContext dbContext,
-        INotificationsService notificationsService,
+        IMediator mediator,
         IDownloadManagerSettings downloadManagerSettings,
         IPlexDownloadClient plexDownloadClient
     )
     {
         _log = log;
         _dbContext = dbContext;
-        _notificationsService = notificationsService;
+        _mediator = mediator;
         _downloadManagerSettings = downloadManagerSettings;
         _plexDownloadClient = plexDownloadClient;
     }
@@ -101,7 +101,10 @@ public class DownloadJob : IJob, IDisposable
 
             var startResult = _plexDownloadClient.Start();
             if (startResult.IsFailed)
-                await _notificationsService.SendResult(startResult);
+            {
+                await _mediator.SendNotificationAsync(startResult);
+                return;
+            }
 
             try
             {
@@ -154,7 +157,7 @@ public class DownloadJob : IJob, IDisposable
 
     private async Task CreateLog(IList<DownloadWorkerLog> logs)
     {
-        if (logs is null || !logs.Any())
+        if (!logs.Any())
             return;
 
         try
@@ -172,6 +175,9 @@ public class DownloadJob : IJob, IDisposable
     {
         var downloadFolder = await _dbContext.GetDownloadFolder();
         var destinationFolder = await _dbContext.GetDestinationFolder(downloadTask.PlexLibraryId);
+
+        if (destinationFolder is null)
+            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), downloadTask.PlexLibraryId).LogError();
 
         downloadTask.DirectoryMeta.DownloadRootPath = downloadFolder.DirectoryPath;
         downloadTask.DirectoryMeta.DestinationRootPath = destinationFolder.DirectoryPath;

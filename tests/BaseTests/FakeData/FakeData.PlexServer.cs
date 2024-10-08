@@ -65,19 +65,13 @@ public static partial class FakeData
             .RuleFor(x => x.ScannedAt, f => f.Date.Recent())
             .RuleFor(x => x.SyncedAt, f => f.Date.Recent())
             .RuleFor(x => x.Uuid, _ => Guid.NewGuid())
-            .RuleFor(
-                x => x.MetaData,
-                _ => new PlexLibraryMetaData
-                {
-                    TvShowCount = 0,
-                    TvShowSeasonCount = 0,
-                    TvShowEpisodeCount = 0,
-                    MovieCount = 0,
-                    MediaSize = 0,
-                }
-            )
             .RuleFor(x => x.DefaultDestination, _ => null)
             .RuleFor(x => x.DefaultDestinationId, _ => null)
+            .RuleFor(x => x.MediaSize, _ => 0)
+            .RuleFor(x => x.MovieCount, _ => 0)
+            .RuleFor(x => x.TvShowCount, _ => 0)
+            .RuleFor(x => x.SeasonCount, _ => 0)
+            .RuleFor(x => x.EpisodeCount, _ => 0)
             .RuleFor(x => x.Movies, _ => [])
             .RuleFor(x => x.TvShows, _ => [])
             .RuleFor(x => x.PlexAccountLibraries, _ => []);
@@ -111,16 +105,10 @@ public static partial class FakeData
             .RuleFor(x => x.IPv4, _ => true)
             .RuleFor(x => x.IPv6, _ => false)
             .RuleFor(x => x.PortFix, _ => false)
-            .RuleFor(x => x.Uri, f => f.Internet.Url())
+            .RuleFor(x => x.Uri, (_, x) => $"{x.Protocol}://{x.Address}:{x.Port}")
             .RuleFor(x => x.PlexServerStatus, _ => [])
             .RuleFor(x => x.PlexServer, _ => null)
-            .RuleFor(x => x.PlexServerId, _ => 0)
-            .FinishWith(
-                (_, connection) =>
-                {
-                    connection.Uri = $"{connection.Protocol}://{connection.Address}:{connection.Port}";
-                }
-            );
+            .RuleFor(x => x.PlexServerId, _ => 0);
     }
 
     public static Faker<PlexServerStatus> GetPlexServerStatus(int seed = 0)

@@ -32,15 +32,6 @@
           "Polly.Core": "8.3.1"
         }
       },
-      "RestSharp": {
-        "type": "Direct",
-        "requested": "[110.2.0, )",
-        "resolved": "110.2.0",
-        "contentHash": "FXGw0IMcqY7yO/hzS9QrD3iNswNgb9UxJnxWmfOxmGs4kRlZWqdtBoGPLuhlbgsDzX1RFo4WKui8TGGKXWKalw==",
-        "dependencies": {
-          "System.Text.Json": "7.0.2"
-        }
-      },
       "RestSharp.Serializers.SystemTextJson": {
         "type": "Direct",
         "requested": "[106.15.0, )",
@@ -49,15 +40,6 @@
         "dependencies": {
           "RestSharp": "106.15.0",
           "System.Text.Json": "5.0.2"
-        }
-      },
-      "RestSharp.Serializers.Xml": {
-        "type": "Direct",
-        "requested": "[110.2.0, )",
-        "resolved": "110.2.0",
-        "contentHash": "/2K0hKZZfgFFuL0v+i+jOxd3Qa5nqw7PRcC447GdpMpuPFnJ61XOK+TFJNGNb/yG4oh4+w50Tz4HANgha6FRkQ==",
-        "dependencies": {
-          "RestSharp": "110.2.0"
         }
       },
       "ByteSize": {
@@ -379,6 +361,11 @@
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "2.1.1"
         }
+      },
+      "RestSharp": {
+        "type": "Transitive",
+        "resolved": "106.15.0",
+        "contentHash": "HM7ohR6AscxedNenrrl93DSZG6hvdnA7O+NHyCl/6ZKTfn8psQ9rRmUpcb9eWr+140vmfxoVemql0bUoeGEW3A=="
       },
       "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
         "type": "Transitive",

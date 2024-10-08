@@ -248,7 +248,7 @@ public static class DownloadTaskGenericMapper
             FileTransferSpeed = downloadTaskTvShowEpisodeFile.FileTransferSpeed,
             Children = [],
             Quality = string.Empty,
-            DownloadWorkerTasks = downloadTaskTvShowEpisodeFile.DownloadWorkerTasks ?? [],
+            DownloadWorkerTasks = downloadTaskTvShowEpisodeFile.DownloadWorkerTasks,
             ParentId = downloadTaskTvShowEpisodeFile.ParentId,
             PlexServer = downloadTaskTvShowEpisodeFile.PlexServer,
             PlexServerId = downloadTaskTvShowEpisodeFile.PlexServerId,

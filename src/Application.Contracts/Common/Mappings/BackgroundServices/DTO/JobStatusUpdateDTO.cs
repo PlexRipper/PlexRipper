@@ -2,17 +2,17 @@
 
 public record JobStatusUpdateDTO
 {
-    public string Id { get; init; }
+    public required string Id { get; init; }
 
-    public DateTime JobStartTime { get; init; }
+    public required DateTime JobStartTime { get; init; }
 
-    public JobTypes JobType { get; init; }
+    public required JobTypes JobType { get; init; }
 
-    public JobStatus Status { get; init; }
+    public required JobStatus Status { get; init; }
 }
 
 public record JobStatusUpdateDTO<T> : JobStatusUpdateDTO
     where T : class
 {
-    public T Data { get; init; }
+    public required T? Data { get; init; }
 }

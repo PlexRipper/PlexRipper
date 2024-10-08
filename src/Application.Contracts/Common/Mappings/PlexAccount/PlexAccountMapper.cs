@@ -2,7 +2,7 @@ using PlexRipper.Domain;
 
 namespace Application.Contracts;
 
-public static partial class PlexAccountMapper
+public static class PlexAccountMapper
 {
     #region ToDTO
 
@@ -61,8 +61,6 @@ public static partial class PlexAccountMapper
             Is2Fa = source.Is2Fa,
             IsAuthTokenMode = source.IsAuthTokenMode,
         };
-
-    public static List<PlexAccount> ToModel(this List<PlexAccountDTO> source) => source.ConvertAll(ToModel);
 
     #endregion
 }

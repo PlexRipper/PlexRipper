@@ -56,7 +56,7 @@ public class InspectPlexServerJob : IJob
 
             await Task.WhenAll(serverTasks);
 
-            _log.Information("Successfully finished the inspection of {Count}", plexServerIds.Count, 0);
+            _log.Information("Successfully finished the inspection of {Count}", plexServerIds.Count);
         }
         catch (Exception e)
         {

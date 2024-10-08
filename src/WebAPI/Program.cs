@@ -4,10 +4,17 @@ using Serilog.Events;
 
 namespace PlexRipper.WebAPI;
 
+/// <summary>
+///  The main class entry point for the application.
+/// </summary>
 public class Program
 {
     private static readonly ILog _log = LogManager.CreateLogInstance(typeof(Program));
 
+    /// <summary>
+    ///  The main method entry point for the application.
+    /// </summary>
+    /// <param name="args"></param>
     public static void Main(string[] args)
     {
         try

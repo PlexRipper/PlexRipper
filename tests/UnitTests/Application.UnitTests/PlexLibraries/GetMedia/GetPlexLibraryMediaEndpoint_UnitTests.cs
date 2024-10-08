@@ -43,6 +43,7 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
 
         // Assert
         result.ShouldNotBeNull();
+        result.Value.ShouldNotBeNull();
         result.Value.Count.ShouldBe(movieCount);
         foreach (var plexMediaSlimDto in result.Value)
         {
@@ -83,6 +84,7 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
 
         // Assert
         result.ShouldNotBeNull();
+        result.Value.ShouldNotBeNull();
         result.Value.Count.ShouldBe(100);
         foreach (var plexMediaSlimDto in result.Value)
         {

@@ -7,6 +7,9 @@ using PlexRipper.Settings.Config;
 
 namespace PlexRipper.WebAPI;
 
+/// <summary>
+///  The ContainerConfig class contains all the Autofac modules.
+/// </summary>
 public static class ContainerConfig
 {
     /// <summary>

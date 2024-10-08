@@ -4,8 +4,6 @@ using Logging.Interface;
 
 namespace PlexRipper.Application;
 
-public record SendNotificationResult(Result Result) : INotification;
-
 public class SendNotificationResultHandler : INotificationHandler<SendNotificationResult>
 {
     private readonly ILog _log;

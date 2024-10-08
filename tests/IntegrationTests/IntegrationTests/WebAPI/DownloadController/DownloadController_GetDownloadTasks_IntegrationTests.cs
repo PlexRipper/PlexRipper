@@ -45,6 +45,8 @@ public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrat
         // Assert
         var result = response.Result;
         result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+
         var plexServer = result.Value.First();
         plexServer.ShouldNotBeNull();
         plexServer.Downloads.Count.ShouldBe(tvShowDownloadTasksCount);

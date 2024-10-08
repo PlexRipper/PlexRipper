@@ -10,7 +10,7 @@ namespace PlexRipper.Application;
 public record SearchPlexMediaRequest
 {
     [QueryParam]
-    public string Query { get; init; }
+    public string Query { get; init; } = string.Empty;
 }
 
 public class SearchPlexMediaRequestValidator : Validator<SearchPlexMediaRequest>

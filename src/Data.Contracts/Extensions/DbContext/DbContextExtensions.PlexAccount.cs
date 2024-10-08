@@ -19,6 +19,7 @@ public static partial class DbContextExtensions
             .PlexAccountServers.Include(x => x.PlexAccount)
             .Where(x => x.PlexServerId == plexServerId)
             .Select(x => x.PlexAccount)
+            .OfType<PlexAccount>()
             .ToListAsync(cancellationToken);
 
         if (!query.Any())

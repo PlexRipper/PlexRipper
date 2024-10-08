@@ -54,7 +54,13 @@ public class GenerateDownloadTaskMoviesCommandHandler : IRequestHandler<Generate
                 .PlexLibraries.Include(x => x.PlexServer)
                 .Include(x => x.DefaultDestination)
                 .GetAsync(downloadMediaDto.PlexLibraryId, cancellationToken);
-            var plexServer = plexLibrary.PlexServer;
+            if (plexLibrary is null)
+            {
+                ResultExtensions.EntityNotFound(nameof(PlexLibrary), downloadMediaDto.PlexLibraryId).LogError();
+                continue;
+            }
+
+            var plexServer = plexLibrary.PlexServer!;
 
             var plexMovies = await _dbContext
                 .PlexMovies.Where(x => downloadMediaDto.MediaIds.Contains(x.Id))

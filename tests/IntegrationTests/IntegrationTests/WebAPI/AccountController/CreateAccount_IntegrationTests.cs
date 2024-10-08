@@ -27,7 +27,10 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
                 x.MockServers.Add(
                     new PlexMockServerConfig
                     {
-                        FakeDataConfig = _ => new FakeDataConfig { PlexLibraryCount = libraryCount },
+                        FakeDataConfig = apiConfig =>
+                        {
+                            apiConfig.LibraryCount = libraryCount;
+                        },
                     }
                 );
             };

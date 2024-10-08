@@ -67,7 +67,6 @@ public class PauseDownloadTaskCommandHandler : IRequestHandler<PauseDownloadTask
                     return stopResult.LogError();
                 }
 
-                // Update the download task status
                 await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
             }
 

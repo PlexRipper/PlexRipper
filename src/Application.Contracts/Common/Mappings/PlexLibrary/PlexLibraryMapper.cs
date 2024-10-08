@@ -32,33 +32,4 @@ public static class PlexLibraryMapper
         plexLibraries.Select(ToDTO).ToList();
 
     #endregion
-
-    #region ToModel
-
-    public static PlexLibrary ToModel(this PlexLibraryDTO plexLibrary) =>
-        new()
-        {
-            Id = plexLibrary.Id,
-            Key = plexLibrary.Key,
-            Title = plexLibrary.Title,
-            Type = plexLibrary.Type,
-            UpdatedAt = plexLibrary.UpdatedAt,
-            CreatedAt = plexLibrary.CreatedAt,
-            ScannedAt = plexLibrary.ScannedAt,
-            SyncedAt = plexLibrary.SyncedAt,
-            Uuid = plexLibrary.Uuid,
-            MetaData = null,
-            PlexServer = null,
-            DefaultDestination = plexLibrary.DefaultDestination?.ToModel() ?? null,
-            DefaultDestinationId = plexLibrary.DefaultDestinationId,
-            Movies = [],
-            TvShows = [],
-            PlexAccountLibraries = [],
-            PlexServerId = plexLibrary.PlexServerId,
-        };
-
-    public static List<PlexLibrary> ToModel(this List<PlexLibraryDTO> plexLibraries) =>
-        plexLibraries.Select(ToModel).ToList();
-
-    #endregion
 }

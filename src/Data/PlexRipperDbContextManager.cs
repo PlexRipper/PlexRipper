@@ -17,11 +17,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
     private readonly IFileSystem _fileSystem;
 
     private readonly IDirectorySystem _directorySystem;
-
-    private string DatabaseName => _pathProvider.DatabaseName;
     private string DatabasePath => _pathProvider.DatabasePath;
-
-    private string ConfigDirectory => _pathProvider.ConfigDirectory;
 
     public PlexRipperDbContextManager(
         ILog<PlexRipperDbContextManager> log,
@@ -54,9 +50,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
                 _log.InformationLine("Database was successfully connected!");
                 _log.Information("Database connected at: {DatabasePath}", DatabasePath);
 
-                MigrateDatabase();
-
-                return Result.Ok();
+                return MigrateDatabase();
             }
 
             _log.Error(
@@ -77,19 +71,28 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         {
             _log.InformationLine("Resetting PlexRipper database now");
             _dbContextDatabase.CloseConnection();
-            BackUpDatabase();
+
+            var backUpResult = BackUpDatabase();
+            if (backUpResult.IsFailed)
+            {
+                _log.ErrorLine("Failed to back-up database");
+                return backUpResult.LogError();
+            }
 
             var deletedResult = _dbContextDatabase.EnsureDeleted();
             if (deletedResult.IsFailed)
             {
-                _log.ErrorLine("Database could not be deleted at {DatabasePath}", DatabasePath);
+                _log.Error("Database could not be deleted at {DatabasePath}", DatabasePath);
                 return deletedResult.LogError();
             }
+
+            if (deletedResult.Value)
+                _log.Warning("Database was successfully deleted at: {DatabasePath}", DatabasePath);
 
             var createdResult = CreateDatabase();
             if (createdResult.IsFailed)
             {
-                _log.ErrorLine("Database could not be created at {DatabasePath}", DatabasePath);
+                _log.Error("Database could not be created at {DatabasePath}", DatabasePath);
                 return createdResult.LogError();
             }
 
@@ -109,6 +112,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         {
             // Create the database while applying any pending migrations.
             _dbContextDatabase.Migrate();
+            _log.Information("Database was successfully created at: {DatabasePath}", DatabasePath);
             return Result.Ok();
         }
         catch (Exception e)

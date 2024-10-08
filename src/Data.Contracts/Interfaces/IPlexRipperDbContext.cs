@@ -16,23 +16,17 @@ public interface IPlexRipperDbContext : IDisposable
     public DbSet<FileTask> FileTasks { get; }
     public DbSet<Notification> Notifications { get; }
 
-    public DbSet<PlexGenre> PlexGenres { get; }
     public DbSet<PlexLibrary> PlexLibraries { get; }
     public DbSet<PlexMovie> PlexMovies { get; }
     public DbSet<PlexTvShow> PlexTvShows { get; }
     public DbSet<PlexTvShowSeason> PlexTvShowSeason { get; }
     public DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; }
 
-    public DbSet<PlexRole> PlexRoles { get; }
     public DbSet<PlexServer> PlexServers { get; }
     public DbSet<PlexServerConnection> PlexServerConnections { get; }
     public DbSet<PlexServerStatus> PlexServerStatuses { get; }
     public DbSet<PlexAccountServer> PlexAccountServers { get; }
     public DbSet<PlexAccountLibrary> PlexAccountLibraries { get; }
-
-    public DbSet<PlexMovieGenre> PlexMovieGenres { get; }
-
-    public DbSet<PlexMovieRole> PlexMovieRoles { get; }
 
     public string DatabaseName { get; }
 

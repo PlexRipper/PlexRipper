@@ -6,7 +6,6 @@ using Environment;
 using FileSystem.Contracts;
 using MediatR.Extensions.Autofac.DependencyInjection;
 using MediatR.Extensions.Autofac.DependencyInjection.Builder;
-using PlexRipper.FileSystem.Common;
 using IFileSystem = FileSystem.Contracts.IFileSystem;
 using Module = Autofac.Module;
 

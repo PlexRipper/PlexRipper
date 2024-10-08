@@ -4,19 +4,19 @@ namespace Application.Contracts;
 
 public class DownloadPreview
 {
-    public int Id { get; set; }
+    public int Id { get; init; }
 
-    public string Title { get; set; }
+    public string Title { get; init; } = string.Empty;
 
     public long Size { get; set; }
 
     public int ChildCount { get; set; }
 
-    public PlexMediaType MediaType { get; set; } = PlexMediaType.Unknown;
+    public PlexMediaType MediaType { get; init; } = PlexMediaType.Unknown;
 
-    public int TvShowId { get; set; }
+    public int TvShowId { get; init; }
 
-    public int SeasonId { get; set; }
+    public int SeasonId { get; init; }
 
-    public List<DownloadPreview> Children { get; set; } = new();
+    public List<DownloadPreview> Children { get; init; } = [];
 }

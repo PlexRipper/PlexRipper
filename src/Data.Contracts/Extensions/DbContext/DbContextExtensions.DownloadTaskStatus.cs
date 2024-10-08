@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Logging;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Domain;
 
@@ -79,6 +80,7 @@ public static partial class DbContextExtensions
                     case DownloadTaskType.MovieData:
                     {
                         parentKey = await dbContext
+                            // ReSharper disable once AccessToModifiedClosure
                             .DownloadTaskMovieFile.Where(x => x.Id == parentKey.Id)
                             .ProjectToParentKey()
                             .FirstOrDefaultAsync(cancellationToken);
@@ -89,18 +91,19 @@ public static partial class DbContextExtensions
                     case DownloadTaskType.EpisodeData:
                     {
                         parentKey = await dbContext
+                            // ReSharper disable once AccessToModifiedClosure
                             .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == parentKey.Id)
                             .ProjectToParentKey()
                             .FirstOrDefaultAsync(cancellationToken);
                         break;
                     }
                     default:
-                        _log.Error(
-                            "DownloadTaskType {DownloadTaskType} is not supported in {DetermineDownloadStatus}",
-                            parentKey.Type,
-                            nameof(DetermineDownloadStatus),
-                            0
-                        );
+                        _log.Here()
+                            .Error(
+                                "DownloadTaskType {DownloadTaskType} is not supported in {DetermineDownloadStatus}",
+                                parentKey.Type,
+                                nameof(DetermineDownloadStatus)
+                            );
                         break;
                 }
             }
@@ -113,11 +116,11 @@ public static partial class DbContextExtensions
             {
                 if (downloadTaskBase == null)
                 {
-                    _log.Error(
-                        "DownloadTaskBase is null in {DetermineDownloadStatus}",
-                        nameof(DetermineDownloadStatus),
-                        0
-                    );
+                    _log.Here()
+                        .Error(
+                            "DownloadTaskBase is null in {DetermineDownloadStatus}",
+                            nameof(DetermineDownloadStatus)
+                        );
                     return;
                 }
 

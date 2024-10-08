@@ -2,7 +2,7 @@ using PlexRipper.Domain;
 
 namespace Application.Contracts;
 
-public static partial class DownloadTaskGenericToDTOMapper
+public static class DownloadTaskGenericToDTOMapper
 {
     #region ToDTO
 

@@ -40,6 +40,11 @@ public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownload
         foreach (var childKey in childKeys)
         {
             var downloadTask = await _dbContext.GetDownloadTaskAsync(childKey, cancellationToken);
+            if (downloadTask is null)
+            {
+                ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), childKey.Id).LogError();
+                continue;
+            }
 
             var stopResult = await _mediator.Send(new StopDownloadTaskCommand(childKey.Id), cancellationToken);
 

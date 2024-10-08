@@ -25,6 +25,7 @@ public static class DownloadMediaExtensions
                         .SelectMany(x => x.MediaIds)
                         .ToList(),
                     PlexServerId = plexServerId,
+                    PlexLibraryId = 0, // TODO - Fix this
                     Type = type,
                 }
             );

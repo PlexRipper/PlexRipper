@@ -44,7 +44,6 @@ public interface IPlexRipperDbContextDatabase
     ///         examples.
     ///     </para>
     /// </remarks>
-    /// <param name="database">The facade from <see cref="DbContext.Database" />.</param>
     /// <returns><see langword="true" /> if the in-memory database is being used.</returns>
     bool IsInMemory();
 
@@ -54,7 +53,6 @@ public interface IPlexRipperDbContextDatabase
     /// <remarks>
     ///     See <see href="https://aka.ms/efcore-docs-connections">Connections and connection strings</see> for more information and examples.
     /// </remarks>
-    /// <param name="databaseFacade">The <see cref="DatabaseFacade" /> for the context.</param>
     void CloseConnection();
 
     /// <summary>
@@ -69,7 +67,7 @@ public interface IPlexRipperDbContextDatabase
     /// </summary>
     /// <remarks>
     ///     <para>
-    ///         It is common to use <see cref="EnsureCreated" /> immediately following <see cref="EnsureDeleted" /> when
+    ///         It is common to use EnsureCreated immediately following EnsureDeleted when
     ///         testing or prototyping using Entity Framework. This ensures that the database is in a clean state before each
     ///         execution of the test/prototype. Note, however, that data in the database is not preserved.
     ///     </para>
@@ -94,7 +92,6 @@ public interface IPlexRipperDbContextDatabase
     ///         See <see href="https://aka.ms/efcore-docs-migrations">Database migrations</see> for more information and examples.
     ///     </para>
     /// </remarks>
-    /// <param name="databaseFacade">The <see cref="DatabaseFacade" /> for the context.</param>
     Result Migrate();
 
     /// <summary>
@@ -103,7 +100,6 @@ public interface IPlexRipperDbContextDatabase
     /// <remarks>
     ///     See <see href="https://aka.ms/efcore-docs-migrations">Database migrations</see> for more information and examples.
     /// </remarks>
-    /// <param name="databaseFacade">The <see cref="DatabaseFacade" /> for the context.</param>
     /// <returns>The list of migrations.</returns>
     IEnumerable<string> GetPendingMigrations();
 }

@@ -43,6 +43,12 @@ public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
     public override async Task HandleAsync(GetDownloadTaskLogsByDownloadTaskIdRequest req, CancellationToken ct)
     {
         var key = await _dbContext.GetDownloadTaskKeyAsync(req.DownloadTaskGuid, ct);
+        if (key is null)
+        {
+            var result = ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), req.DownloadTaskGuid);
+            await SendFluentResult(result, ct);
+            return;
+        }
 
         var childTasks = await _dbContext.GetDownloadableChildTasks(key, ct);
 

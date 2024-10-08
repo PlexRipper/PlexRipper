@@ -2,7 +2,7 @@ using PlexRipper.Domain;
 
 namespace Data.Contracts;
 
-public static partial class DownloadTaskKeyMapper
+public static class DownloadTaskKeyMapper
 {
     #region PlexMovie
 

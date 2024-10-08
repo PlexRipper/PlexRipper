@@ -132,10 +132,7 @@ public static partial class MockDatabase
         return context;
     }
 
-    private static async Task<PlexRipperDbContext> AddPlexAccount(
-        this PlexRipperDbContext context,
-        Action<FakeDataConfig>? options = null
-    )
+    private static async Task<PlexRipperDbContext> AddPlexAccount(this PlexRipperDbContext context)
     {
         var plexServers = context.PlexServers.Include(x => x.PlexLibraries).ToList();
 
@@ -179,10 +176,7 @@ public static partial class MockDatabase
         return context;
     }
 
-    private static async Task<PlexRipperDbContext> AddPlexAccountLibraries(
-        this PlexRipperDbContext context,
-        Action<FakeDataConfig>? options = null
-    )
+    private static async Task<PlexRipperDbContext> AddPlexAccountLibraries(this PlexRipperDbContext context)
     {
         var plexLibraries = await context.PlexLibraries.ToListAsync();
         var plexAccounts = await context.PlexAccounts.ToListAsync();
@@ -281,7 +275,7 @@ public static partial class MockDatabase
             context = await context.AddPlexLibraries(options);
 
         if (config.PlexAccountCount > 0)
-            context = await context.AddPlexAccount(options);
+            context = await context.AddPlexAccount();
 
         if (config.MovieCount > 0)
             context = await context.AddPlexMovies(options);
@@ -296,7 +290,7 @@ public static partial class MockDatabase
             context = await context.AddDownloadTaskTvShows(options);
 
         if (config.AccountHasAccessToAllLibraries)
-            context = await context.AddPlexAccountLibraries(options);
+            context = await context.AddPlexAccountLibraries();
 
         return context;
     }

@@ -52,6 +52,8 @@ public class PathProvider : IPathProvider
 
     public static string LogsDirectory => Path.Combine(RootDirectory, _configFolder, _logsFolder);
 
+    public List<string> DatabaseFiles => [DatabasePath, Database_SHM_Path, Database_WAL_Path];
+
     public static string RootDirectory
     {
         get
@@ -87,15 +89,9 @@ public class PathProvider : IPathProvider
 
     string IPathProvider.DatabasePath => DatabasePath;
 
-    string IPathProvider.Database_SHM_Path => Database_SHM_Path;
-
-    string IPathProvider.Database_WAL_Path => Database_WAL_Path;
-
     string IPathProvider.LogsDirectory => LogsDirectory;
 
     string IPathProvider.ConfigDirectory => ConfigDirectory;
-
-    public List<string> DatabaseFiles => [DatabasePath, Database_SHM_Path, Database_WAL_Path];
 
     #endregion
 

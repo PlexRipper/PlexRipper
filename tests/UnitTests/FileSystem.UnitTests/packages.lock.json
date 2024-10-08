@@ -1806,11 +1806,8 @@
       },
       "RestSharp": {
         "type": "Transitive",
-        "resolved": "110.2.0",
-        "contentHash": "FXGw0IMcqY7yO/hzS9QrD3iNswNgb9UxJnxWmfOxmGs4kRlZWqdtBoGPLuhlbgsDzX1RFo4WKui8TGGKXWKalw==",
-        "dependencies": {
-          "System.Text.Json": "7.0.2"
-        }
+        "resolved": "112.1.0",
+        "contentHash": "bOUGNZqhhv/QeCXHTKEUil846yBjwWXpzPKjO67kFvaAOoF361z7jLY5BMnuZ6WD2WQRA750sNMcK7MSPCQ5Mg=="
       },
       "RestSharp.Serializers.SystemTextJson": {
         "type": "Transitive",
@@ -1819,14 +1816,6 @@
         "dependencies": {
           "RestSharp": "106.15.0",
           "System.Text.Json": "5.0.2"
-        }
-      },
-      "RestSharp.Serializers.Xml": {
-        "type": "Transitive",
-        "resolved": "110.2.0",
-        "contentHash": "/2K0hKZZfgFFuL0v+i+jOxd3Qa5nqw7PRcC447GdpMpuPFnJ61XOK+TFJNGNb/yG4oh4+w50Tz4HANgha6FRkQ==",
-        "dependencies": {
-          "RestSharp": "110.2.0"
         }
       },
       "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
@@ -2967,7 +2956,7 @@
           "PlexApi.Contracts": "[1.0.0, )",
           "PlexRipper.Domain": "[1.0.0, )",
           "PlexRipper.Settings": "[1.0.0, )",
-          "RestSharp": "[110.2.0, )",
+          "RestSharp": "[112.1.0, )",
           "Settings.Contracts": "[1.0.0, )",
           "WebAPI.Contracts": "[1.0.0, )"
         }
@@ -3040,9 +3029,7 @@
           "HttpClientToCurl": "[2.0.6, )",
           "PlexApi.Contracts": "[1.0.0, )",
           "Polly": "[8.3.1, )",
-          "RestSharp": "[110.2.0, )",
           "RestSharp.Serializers.SystemTextJson": "[106.15.0, )",
-          "RestSharp.Serializers.Xml": "[110.2.0, )",
           "Settings.Contracts": "[1.0.0, )"
         }
       },

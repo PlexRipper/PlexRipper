@@ -6,7 +6,7 @@ using Logging.Interface;
 namespace PlexRipper.Application;
 
 /// <summary>
-/// The DownloadQueue is responsible for deciding which downloadTask is handled by the <see cref="DownloadManager"/>.
+/// The DownloadQueue is responsible for deciding which downloadTask is handled.
 /// </summary>
 public class DownloadQueue : IDownloadQueue
 {
@@ -19,8 +19,6 @@ public class DownloadQueue : IDownloadQueue
     private readonly Channel<int> _plexServersToCheckChannel = Channel.CreateUnbounded<int>();
 
     private readonly CancellationToken _token = new();
-
-    private Task<Task> _copyTask;
 
     #endregion
 
@@ -45,8 +43,8 @@ public class DownloadQueue : IDownloadQueue
 
     public Result Setup()
     {
-        _copyTask = Task.Factory.StartNew(ExecuteDownloadQueueCheck, TaskCreationOptions.LongRunning);
-        return _copyTask.IsFaulted ? Result.Fail("ExecuteFileTasks failed due to an error").LogError() : Result.Ok();
+        var copyTask = Task.Factory.StartNew(ExecuteDownloadQueueCheck, TaskCreationOptions.LongRunning);
+        return copyTask.IsFaulted ? Result.Fail("ExecuteFileTasks failed due to an error").LogError() : Result.Ok();
     }
 
     /// <summary>
@@ -118,7 +116,7 @@ public class DownloadQueue : IDownloadQueue
         if (nextDownloadTask is not null)
         {
             // Should we check deeper for any nested queued tasks inside downloading tasks
-            if (nextDownloadTask.Children is not null && nextDownloadTask.Children.Any())
+            if (nextDownloadTask.Children.Any())
             {
                 var children = nextDownloadTask.Children;
                 return GetNextDownloadTask(children);
@@ -131,7 +129,7 @@ public class DownloadQueue : IDownloadQueue
         nextDownloadTask = downloadTasks.FirstOrDefault(x => x.DownloadStatus == DownloadStatus.Queued);
         if (nextDownloadTask is not null)
         {
-            if (nextDownloadTask.Children is not null && nextDownloadTask.Children.Any())
+            if (nextDownloadTask.Children.Any())
             {
                 var children = nextDownloadTask.Children;
                 return GetNextDownloadTask(children);

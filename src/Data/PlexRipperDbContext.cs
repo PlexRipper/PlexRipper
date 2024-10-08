@@ -11,6 +11,8 @@ using Microsoft.Extensions.Logging;
 using NaturalSort.Extension;
 using PlexRipper.Data.Common;
 
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+
 namespace PlexRipper.Data;
 
 public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlexRipperDbContextDatabase
@@ -31,8 +33,6 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     public DbSet<Notification> Notifications { get; set; }
 
-    public DbSet<PlexGenre> PlexGenres { get; set; }
-
     public DbSet<PlexLibrary> PlexLibraries { get; set; }
 
     #region PlexMovie
@@ -50,8 +50,6 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
     public DbSet<PlexTvShowEpisode> PlexTvShowEpisodes { get; set; }
 
     #endregion
-
-    public DbSet<PlexRole> PlexRoles { get; set; }
 
     #region PlexServers
 
@@ -87,10 +85,6 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     public DbSet<PlexAccountLibrary> PlexAccountLibraries { get; set; }
 
-    public DbSet<PlexMovieGenre> PlexMovieGenres { get; set; }
-
-    public DbSet<PlexMovieRole> PlexMovieRoles { get; set; }
-
     #endregion
 
     public string DatabaseName { get; }
@@ -124,10 +118,13 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     #region Constructors
 
-    public PlexRipperDbContext(IPathProvider pathProvider)
+    public PlexRipperDbContext(string databaseName)
     {
-        DatabaseName = pathProvider.DatabaseName;
+        DatabaseName = databaseName;
     }
+
+    public PlexRipperDbContext(IPathProvider pathProvider)
+        : this(pathProvider.DatabaseName) { }
 
     public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options, string databaseName)
         : base(options)

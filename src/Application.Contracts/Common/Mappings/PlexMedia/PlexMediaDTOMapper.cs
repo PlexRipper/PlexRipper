@@ -36,7 +36,7 @@ public static class PlexMediaDTOMapper
             ContentRating = source.ContentRating,
             Rating = source.Rating,
             OriginallyAvailableAt = source.OriginallyAvailableAt,
-            Children = new List<PlexMediaDTO>(),
+            Children = [],
         };
 
     #endregion
@@ -46,12 +46,10 @@ public static class PlexMediaDTOMapper
     public static PlexMediaDTO ToDTO(this PlexTvShow plexTvShow)
     {
         var dto = plexTvShow.ToDTOMapper();
-        dto.Children = new List<PlexMediaDTO>();
-        if (plexTvShow.Seasons is not null)
-        {
-            foreach (var tvShowSeason in plexTvShow.Seasons)
-                dto.Children.Add(tvShowSeason.ToDTO());
-        }
+        dto.Children = [];
+
+        foreach (var tvShowSeason in plexTvShow.Seasons)
+            dto.Children.Add(tvShowSeason.ToDTO());
 
         return dto;
     }
@@ -62,7 +60,7 @@ public static class PlexMediaDTOMapper
             Id = source.Id,
             TvShowId = source.Id,
             TvShowSeasonId = default,
-            MediaData = new List<PlexMediaDataDTO>(),
+            MediaData = [],
             Title = source.Title,
             SortTitle = source.SortTitle,
             Year = source.Year,
@@ -96,12 +94,10 @@ public static class PlexMediaDTOMapper
     public static PlexMediaDTO ToDTO(this PlexTvShowSeason plexTvShowSeason)
     {
         var dto = plexTvShowSeason.ToDTOMapper();
-        dto.Children = new List<PlexMediaDTO>();
-        if (plexTvShowSeason.Episodes is not null)
-        {
-            foreach (var episode in plexTvShowSeason.Episodes)
-                dto.Children.Add(episode.ToDTO());
-        }
+        dto.Children = [];
+
+        foreach (var episode in plexTvShowSeason.Episodes)
+            dto.Children.Add(episode.ToDTO());
 
         return dto;
     }
@@ -112,7 +108,7 @@ public static class PlexMediaDTOMapper
             Id = source.Id,
             TvShowId = source.TvShowId,
             TvShowSeasonId = source.Id,
-            MediaData = new List<PlexMediaDataDTO>(),
+            MediaData = [],
             Title = source.Title,
             SortTitle = source.SortTitle,
             Year = source.Year,
@@ -173,7 +169,7 @@ public static class PlexMediaDTOMapper
             ContentRating = source.ContentRating,
             Rating = source.Rating,
             OriginallyAvailableAt = source.OriginallyAvailableAt,
-            Children = new List<PlexMediaDTO>(),
+            Children = [],
         };
 
     #endregion

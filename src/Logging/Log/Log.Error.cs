@@ -1,12 +1,11 @@
 using System.Runtime.CompilerServices;
 using Logging.Common;
-using Logging.Interface;
 using Serilog.Core;
 using Serilog.Events;
 
 namespace Logging;
 
-public partial class Log : ILog
+public partial class Log
 {
     #region Error
 
@@ -22,7 +21,7 @@ public partial class Log : ILog
     /// <inheritdoc/>
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Error(
-        Exception ex,
+        Exception? ex,
         string messageTemplate,
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",

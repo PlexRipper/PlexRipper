@@ -9,7 +9,7 @@ namespace PlexRipper.Application;
 public class GetFolderPathDirectoryRequest
 {
     [QueryParam]
-    public string Path { get; init; }
+    public string? Path { get; init; }
 }
 
 public class GetFolderPathDirectoryRequestValidator : Validator<GetFolderPathDirectoryRequest>
@@ -48,7 +48,8 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
 
     public override async Task HandleAsync(GetFolderPathDirectoryRequest req, CancellationToken ct)
     {
-        var result = _fileSystem.LookupContents(req.Path, false, true);
+        var path = req.Path!;
+        var result = _fileSystem.LookupContents(path, false, true);
         await SendFluentResult(result, x => x.ToDTO(), ct);
     }
 }

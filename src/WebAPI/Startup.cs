@@ -15,12 +15,22 @@ using Serilog;
 
 namespace PlexRipper.WebAPI;
 
+/// <summary>
+///  The Startup class configures the application services and the HTTP request pipeline.
+/// </summary>
 public static class Startup
 {
+    /// <summary>
+    ///  The CORS Configuration name.
+    /// </summary>
     public const string CORSConfiguration = "CORS_Configuration";
 
     private static readonly ILog _log = LogManager.CreateLogInstance(typeof(Startup));
 
+    /// <summary>
+    ///  This method gets called by the runtime. Use this method to add services to the container.
+    /// </summary>
+    /// <param name="builder"></param>
     public static void ConfigureHostBuilder(this IHostBuilder builder)
     {
         // Use Autofac as the DI container
@@ -97,7 +107,8 @@ public static class Startup
     /// <summary>
     /// This method gets called by the runtime. Use this method to add services to the container.
     /// </summary>
-    /// <param name="services"></param>
+    /// <param name="services"> The <see cref="IServiceCollection"/> instance to configure.</param>
+    /// <param name="env"> The <see cref="IWebHostEnvironment"/> instance to configure.</param>
     public static void ConfigureServices(this IServiceCollection services, IWebHostEnvironment env)
     {
         // Set CORS Configuration

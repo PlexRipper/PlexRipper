@@ -277,7 +277,7 @@ public class PlexApiService : IPlexApiService
         return result;
     }
 
-    private async Task<Result<string>> GetPlexApiTokenAsync(PlexAccount plexAccount)
+    private async Task<Result<string>> GetPlexApiTokenAsync(PlexAccount? plexAccount)
     {
         if (plexAccount == null)
             return ResultExtensions.IsNull(nameof(plexAccount));
@@ -407,12 +407,12 @@ public class PlexApiService : IPlexApiService
                 ? metadata.TitleSort
                 : metadata.Title.ToSortTitle();
 
-        _log.Information(
-            "Finished getting {MediaCount} media items from library with name {PlexLibraryName}  ",
-            mediaList.Count,
-            plexLibrary.Name,
-            0
-        );
+        _log.Here()
+            .Information(
+                "Finished getting {MediaCount} media items from library with name {PlexLibraryName}  ",
+                mediaList.Count,
+                plexLibrary.Name
+            );
 
         return Result.Ok(mediaList);
     }

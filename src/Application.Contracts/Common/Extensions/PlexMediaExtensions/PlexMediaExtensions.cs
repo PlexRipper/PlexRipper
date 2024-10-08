@@ -158,6 +158,11 @@ public static class PlexMediaExtensions
         PlexTvShowEpisode plexTvShowEpisode
     )
     {
+        if (plexTvShowEpisode.TvShow is null || plexTvShowEpisode.TvShowSeason is null)
+        {
+            throw new NullReferenceException("PlexTvShowEpisode.TvShow or PlexTvShowEpisode.TvShowSeason is null");
+        }
+
         return plexMediaData
             .Parts.Select(part => new DownloadTaskTvShowEpisodeFile
             {
@@ -185,7 +190,7 @@ public static class PlexMediaExtensions
                     TvShowFolder = plexTvShowEpisode.TvShow.Title.SanitizeFolderName(),
                     SeasonFolder = plexTvShowEpisode.TvShowSeason.Title.SanitizeFolderName(),
                 },
-                DownloadWorkerTasks = new List<DownloadWorkerTask>(),
+                DownloadWorkerTasks = [],
                 Parent = null,
                 ParentId = default,
                 FullTitle = $"{plexTvShowEpisode.FullTitle}/{part.File.GetFileName()}",

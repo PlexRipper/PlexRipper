@@ -15,7 +15,7 @@ namespace PlexRipper.Application;
 public class CreatePlexAccountEndpointRequest
 {
     [FromBody]
-    public PlexAccountDTO PlexAccount { get; init; }
+    public PlexAccountDTO? PlexAccount { get; init; }
 }
 
 public class CreatePlexAccountEndpointRequestValidator : Validator<CreatePlexAccountEndpointRequest>
@@ -23,11 +23,11 @@ public class CreatePlexAccountEndpointRequestValidator : Validator<CreatePlexAcc
     public CreatePlexAccountEndpointRequestValidator()
     {
         RuleFor(x => x.PlexAccount).NotNull();
-        RuleFor(x => x.PlexAccount.IsValidated).Equal(true);
-        RuleFor(x => x.PlexAccount.DisplayName).NotEmpty();
-        RuleFor(x => x.PlexAccount.Username).NotEmpty().MinimumLength(5).When(m => !m.PlexAccount.IsAuthTokenMode);
-        RuleFor(x => x.PlexAccount.Password).NotEmpty().MinimumLength(5).When(m => !m.PlexAccount.IsAuthTokenMode);
-        RuleFor(x => x.PlexAccount.AuthenticationToken).NotEmpty().When(m => m.PlexAccount.IsAuthTokenMode);
+        RuleFor(x => x.PlexAccount!.IsValidated).Equal(true);
+        RuleFor(x => x.PlexAccount!.DisplayName).NotEmpty();
+        RuleFor(x => x.PlexAccount!.Username).NotEmpty().MinimumLength(5).When(m => !m.PlexAccount!.IsAuthTokenMode);
+        RuleFor(x => x.PlexAccount!.Password).NotEmpty().MinimumLength(5).When(m => !m.PlexAccount!.IsAuthTokenMode);
+        RuleFor(x => x.PlexAccount!.AuthenticationToken).NotEmpty().When(m => m.PlexAccount!.IsAuthTokenMode);
     }
 }
 
@@ -59,7 +59,7 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
 
     public override async Task HandleAsync(CreatePlexAccountEndpointRequest req, CancellationToken ct)
     {
-        var plexAccount = req.PlexAccount.ToModel();
+        var plexAccount = req.PlexAccount!.ToModel();
         plexAccount.Id = 0;
 
         if (!plexAccount.IsAuthTokenMode)

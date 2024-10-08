@@ -56,7 +56,7 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
     {
         var plexLibrary = await _dbContext
             .PlexLibraries.AsNoTracking()
-            .IncludePlexServer()
+            .Include(x => x.PlexServer)
             .GetAsync(req.PlexLibraryId, ct);
         if (plexLibrary is null)
         {

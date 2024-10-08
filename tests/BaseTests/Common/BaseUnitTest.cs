@@ -10,7 +10,7 @@ namespace PlexRipper.BaseTests;
 
 public class BaseUnitTest : IDisposable
 {
-    private string _databaseName;
+    private string _databaseName = string.Empty;
 
     protected bool IsDatabaseSetup;
 

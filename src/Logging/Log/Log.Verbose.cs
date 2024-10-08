@@ -1,12 +1,11 @@
 using System.Runtime.CompilerServices;
 using Logging.Common;
-using Logging.Interface;
 using Serilog.Core;
 using Serilog.Events;
 
 namespace Logging;
 
-public partial class Log : ILog
+public partial class Log
 {
     #region Verbose
 

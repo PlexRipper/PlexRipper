@@ -3,9 +3,9 @@
 public record GeneralSettingsModule : BaseSettingsModule<GeneralSettingsModule>, IGeneralSettings
 {
     private bool _firstTimeSetup = true;
-    private int _activeAccountId = 0;
-    private bool _debugMode = false;
-    private bool _disableAnimatedBackground = false;
+    private int _activeAccountId;
+    private bool _debugMode;
+    private bool _disableAnimatedBackground;
 
     public bool FirstTimeSetup
     {

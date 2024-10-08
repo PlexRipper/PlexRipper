@@ -18,7 +18,7 @@ public partial interface ILog
 
     [MessageTemplateFormatMethod("messageTemplate")]
     LogMetaData Fatal(
-        Exception ex,
+        Exception? ex,
         string messageTemplate,
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
@@ -27,7 +27,7 @@ public partial interface ILog
 
     [MessageTemplateFormatMethod("messageTemplate")]
     LogMetaData Fatal<T>(
-        Exception ex,
+        Exception? ex,
         string messageTemplate,
         T propertyValue,
         string memberName = "",

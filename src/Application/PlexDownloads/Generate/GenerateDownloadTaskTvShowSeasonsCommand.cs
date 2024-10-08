@@ -58,7 +58,13 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
                 .PlexLibraries.Include(x => x.PlexServer)
                 .Include(x => x.DefaultDestination)
                 .GetAsync(downloadMediaDto.PlexLibraryId, cancellationToken);
-            var plexServer = plexLibrary.PlexServer;
+            if (plexLibrary is null)
+            {
+                ResultExtensions.EntityNotFound(nameof(PlexLibrary), downloadMediaDto.PlexLibraryId).LogError();
+                continue;
+            }
+
+            var plexServer = plexLibrary.PlexServer!;
 
             var plexTvShowSeasons = await _dbContext
                 .PlexTvShowSeason.IncludeAll()
@@ -70,7 +76,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
                 // Check if the tvShowDownloadTask has already been created
                 var downloadTaskTvShow = await _dbContext.GetDownloadTaskTvShowByMediaKeyQuery(
                     season.PlexServerId,
-                    season.TvShow.Key,
+                    season.TvShow!.Key,
                     cancellationToken
                 );
                 if (downloadTaskTvShow is null)

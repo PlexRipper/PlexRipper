@@ -20,7 +20,7 @@ public partial interface ILog
 
     [MessageTemplateFormatMethod("messageTemplate")]
     LogMetaData Warning(
-        Exception ex,
+        Exception? ex,
         string messageTemplate,
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",

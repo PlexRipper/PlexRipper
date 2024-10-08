@@ -11,9 +11,6 @@ public static partial class DownloadTaskExtensions
         int plexLibraryId
     )
     {
-        if (downloadTasks is null)
-            return;
-
         foreach (var downloadTaskMovie in downloadTasks)
         {
             downloadTaskMovie.PlexLibraryId = plexLibraryId;
@@ -35,9 +32,6 @@ public static partial class DownloadTaskExtensions
         int plexLibraryId
     )
     {
-        if (downloadTasks is null)
-            return;
-
         foreach (var downloadTaskTvShow in downloadTasks)
         {
             downloadTaskTvShow.PlexLibraryId = plexLibraryId;
@@ -55,9 +49,6 @@ public static partial class DownloadTaskExtensions
         int plexLibraryId
     )
     {
-        if (downloadTasks is null)
-            return;
-
         foreach (var downloadTaskTvShowSeason in downloadTasks)
         {
             downloadTaskTvShowSeason.PlexLibraryId = plexLibraryId;
@@ -75,9 +66,6 @@ public static partial class DownloadTaskExtensions
         int plexLibraryId
     )
     {
-        if (downloadTasks is null)
-            return;
-
         foreach (var downloadTaskTvShowEpisode in downloadTasks)
         {
             downloadTaskTvShowEpisode.PlexLibraryId = plexLibraryId;

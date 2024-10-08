@@ -156,14 +156,12 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 return syncResult.ToResult().LogError();
             }
 
-            plexLibrary.MetaData = new PlexLibraryMetaData()
-            {
-                MovieCount = 0,
-                TvShowCount = plexLibrary.TvShows.Count,
-                TvShowSeasonCount = rawSeasonData.Count,
-                TvShowEpisodeCount = rawEpisodesData.Count,
-                MediaSize = tvShows.Sum(x => x.MediaSize),
-            };
+            plexLibrary.SetTvShowMetaData(
+                plexLibrary.TvShows.Count,
+                rawSeasonData.Count,
+                rawEpisodesData.Count,
+                tvShows.Sum(x => x.MediaSize)
+            );
 
             await _dbContext.UpdatePlexLibraryById(plexLibrary);
 
@@ -214,14 +212,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         // Phase 2 of 3: PlexLibrary media data was parsed successfully.
         SendProgress(2, 1);
 
-        plexLibrary.MetaData = new PlexLibraryMetaData()
-        {
-            MovieCount = plexLibrary.Movies.Count,
-            TvShowCount = 0,
-            TvShowSeasonCount = 0,
-            TvShowEpisodeCount = 0,
-            MediaSize = plexLibrary.Movies.Sum(x => x.MediaSize),
-        };
+        plexLibrary.SetMovieMetaData(plexLibrary.Movies.Count, plexLibrary.Movies.Sum(x => x.MediaSize));
 
         // Mark the library as synced
         plexLibrary.SyncedAt = DateTime.UtcNow;
@@ -295,29 +286,28 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 plexTvShowSeason.TvShow = plexTvShow;
 
                 // Retrieve and assign episodes for this season
-                if (episodesBySeasonKey.TryGetValue(plexTvShowSeason.Key, out var episodes))
+                if (!episodesBySeasonKey.TryGetValue(plexTvShowSeason.Key, out var episodes))
+                    continue;
+
+                // Set library ID in each episode
+                episodes.ForEach(x =>
                 {
-                    // Set library ID in each episode
-                    episodes ??= [];
-                    episodes.ForEach(x =>
-                    {
-                        x.PlexLibraryId = plexLibrary.Id;
-                        x.PlexServerId = plexLibrary.PlexServerId;
-                    });
+                    x.PlexLibraryId = plexLibrary.Id;
+                    x.PlexServerId = plexLibrary.PlexServerId;
+                });
 
-                    plexTvShowSeason.Episodes = episodes;
-                    plexTvShowSeason.ChildCount = episodes.Count;
+                plexTvShowSeason.Episodes = episodes;
+                plexTvShowSeason.ChildCount = episodes.Count;
 
-                    // Remove episodes that have been assigned
-                    episodesBySeasonKey.Remove(plexTvShowSeason.Key);
+                // Remove episodes that have been assigned
+                episodesBySeasonKey.Remove(plexTvShowSeason.Key);
 
-                    // Set the season's year based on the first episode's year
-                    if (plexTvShowSeason.Year == 0 && episodes.Any())
-                        plexTvShowSeason.Year = episodes.First().Year;
+                // Set the season's year based on the first episode's year
+                if (plexTvShowSeason.Year == 0 && episodes.Any())
+                    plexTvShowSeason.Year = episodes.First().Year;
 
-                    plexTvShowSeason.MediaSize = episodes.Sum(x => x.MediaSize);
-                    plexTvShowSeason.Duration = episodes.Sum(x => x.Duration);
-                }
+                plexTvShowSeason.MediaSize = episodes.Sum(x => x.MediaSize);
+                plexTvShowSeason.Duration = episodes.Sum(x => x.Duration);
             }
 
             plexTvShow.MediaSize = plexTvShow.Seasons.Sum(x => x.MediaSize);

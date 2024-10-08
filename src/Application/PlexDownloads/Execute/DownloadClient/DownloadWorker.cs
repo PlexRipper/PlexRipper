@@ -43,7 +43,6 @@ public class DownloadWorker : IDisposable
     /// Initializes a new instance of the <see cref="DownloadWorker"/> class.
     /// </summary>
     /// <param name="log"></param>
-    /// <param name="mediator"></param>
     /// <param name="dbContext"></param>
     /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
     /// <param name="downloadFileSystem">The filesystem used to store the downloaded data.</param>
@@ -61,7 +60,7 @@ public class DownloadWorker : IDisposable
         _dbContext = dbContext;
         DownloadWorkerTask = downloadWorkerTask;
 
-        var options = new RestClientOptions() { MaxTimeout = 10000, ThrowOnAnyError = false };
+        var options = new RestClientOptions() { Timeout = TimeSpan.FromSeconds(10000), ThrowOnAnyError = false };
 
         _httpClient = new RestClient(httpClientFactory.CreateClient(), options);
         _httpClient.AddDefaultHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64)");
@@ -76,7 +75,7 @@ public class DownloadWorker : IDisposable
 
     #region Properties
 
-    public Task<Result> DownloadProcessTask { get; internal set; }
+    public Task<Result> DownloadProcessTask { get; internal set; } = new(Result.Ok);
 
     public IObservable<DownloadWorkerLog> DownloadWorkerLog => _downloadWorkerLog.AsObservable();
 
@@ -116,8 +115,7 @@ public class DownloadWorker : IDisposable
         _isDownloading = false;
 
         // Wait for it to gracefully end.
-        if (DownloadProcessTask is not null)
-            await DownloadProcessTask;
+        await DownloadProcessTask;
 
         SetDownloadWorkerTaskChanged(DownloadStatus.Stopped);
         Shutdown();
@@ -132,7 +130,7 @@ public class DownloadWorker : IDisposable
     public void Dispose()
     {
         _timer.Dispose();
-        _httpClient?.Dispose();
+        _httpClient.Dispose();
         _downloadWorkerUpdate.Dispose();
         _downloadWorkerLog.Dispose();
     }
@@ -143,9 +141,9 @@ public class DownloadWorker : IDisposable
 
     private async Task<Result> DownloadProcessAsync(CancellationToken cancellationToken = default)
     {
-        ThrottledStream throttledStream = null;
-        Stream destinationStream = null;
-        Stream responseStream = null;
+        ThrottledStream? throttledStream = null;
+        Stream? destinationStream = null;
+        Stream? responseStream = null;
         try
         {
             // Retrieve Download URL
@@ -166,24 +164,24 @@ public class DownloadWorker : IDisposable
             _log.Debug("Downloading from url: {DownloadUrl}", downloadUrl);
 
             // Prepare destination stream
-            var _fileStreamResult = _downloadFileSystem.CreateDownloadFileStream(
+            var fileStreamResult = _downloadFileSystem.CreateDownloadFileStream(
                 DownloadWorkerTask.DownloadDirectory,
                 FileName,
                 DownloadWorkerTask.DataTotal
             );
-            if (_fileStreamResult.IsFailed)
+            if (fileStreamResult.IsFailed)
             {
                 var result = Result.Fail(
                     new Error(
                         $"Could not create a download destination filestream for DownloadWorker with id {DownloadWorkerTask.Id}"
                     )
                 );
-                result.Errors.AddRange(_fileStreamResult.Errors);
+                result.Errors.AddRange(fileStreamResult.Errors);
                 SendDownloadWorkerError(result);
                 return result;
             }
 
-            destinationStream = _fileStreamResult.Value;
+            destinationStream = fileStreamResult.Value;
 
             // Is 0 when starting new and > 0 when resuming.
             destinationStream.Position = DownloadWorkerTask.BytesReceived;
@@ -197,6 +195,8 @@ public class DownloadWorker : IDisposable
             );
 
             responseStream = await _httpClient.DownloadStreamAsync(request, cancellationToken);
+            if (responseStream is null)
+                throw new Exception("Response stream is null", new Exception(request.ToString()));
 
             // Throttle the stream to enable download speed limiting
             throttledStream = new ThrottledStream(responseStream, _downloadSpeedLimit);

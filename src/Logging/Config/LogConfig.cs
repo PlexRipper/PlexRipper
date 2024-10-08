@@ -61,25 +61,25 @@ public static class LogConfig
     public static Logger GetLogger()
     {
         var minimumLogLevel = LogManager.MinimumLogLevel;
-        if (_testOutput is null)
+        if (_testOutput is not null)
         {
+            // Test Logger
             return GetBaseConfiguration()
-                .WriteTo.File(
-                    TemplateTextFormatter,
-                    Path.Combine(PathProvider.LogsDirectory, "log.txt"),
-                    minimumLogLevel,
-                    rollingInterval: RollingInterval.Day,
-                    rollOnFileSizeLimit: true,
-                    retainedFileCountLimit: 7
-                )
+                .WriteTo.TestOutput(_testOutput, TemplateTextFormatter, minimumLogLevel)
+                .WriteTo.TestCorrelator(minimumLogLevel)
                 .MinimumLevel.Is(minimumLogLevel)
                 .CreateLogger();
         }
 
-        // Test Logger
         return GetBaseConfiguration()
-            .WriteTo.TestOutput(_testOutput, TemplateTextFormatter, minimumLogLevel)
-            .WriteTo.TestCorrelator(minimumLogLevel)
+            .WriteTo.File(
+                TemplateTextFormatter,
+                Path.Combine(PathProvider.LogsDirectory, "log.txt"),
+                minimumLogLevel,
+                rollingInterval: RollingInterval.Day,
+                rollOnFileSizeLimit: true,
+                retainedFileCountLimit: 7
+            )
             .MinimumLevel.Is(minimumLogLevel)
             .CreateLogger();
     }
@@ -87,5 +87,5 @@ public static class LogConfig
     public static readonly string Template =
         $"{{NewLine}}{{Timestamp:HH:mm:ss}} [{{Level}}] [{{{nameof(LogMetaData.ClassName)}}}.{{{nameof(LogMetaData.MethodName)}}}:{{{nameof(LogMetaData.LineNumber)}}}] => {{Message:lj}}{{NewLine}}{{Exception}}";
 
-    private static ITestOutputHelper _testOutput = null!;
+    private static ITestOutputHelper? _testOutput;
 }

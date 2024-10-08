@@ -4,7 +4,7 @@ public class PlexApiDataConfig : BaseConfig<PlexApiDataConfig>
 {
     public int GetSeed() => ++Seed;
 
-    public int LibraryCount { get; init; } = 3;
+    public int LibraryCount { get; set; } = 3;
 
-    public int LibraryMetaDataCount { get; init; } = 50;
+    public int LibraryMetaDataCount { get; set; } = 50;
 }

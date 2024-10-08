@@ -59,7 +59,7 @@ public class GetPlexLibraryByIdEndpoint : BaseEndpoint<GetPlexLibraryByIdEndpoin
             return;
         }
 
-        if (!plexLibrary.HasMedia)
+        if (plexLibrary.MediaCount == 0)
         {
             _log.Information(
                 "PlexLibrary with id {LibraryId} has no media, forcing refresh from the PlexApi",

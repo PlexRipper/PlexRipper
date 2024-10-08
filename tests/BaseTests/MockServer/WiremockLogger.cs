@@ -46,6 +46,6 @@ public class WiremockLogger : IWireMockLogger
 
     public void DebugRequestResponse(LogEntryModel logEntryModel, bool isAdminRequest)
     {
-        _log.DebugLine(logEntryModel.ToString());
+        _log.DebugLine(logEntryModel.ToString() ?? string.Empty);
     }
 }

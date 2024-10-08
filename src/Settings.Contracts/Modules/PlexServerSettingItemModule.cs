@@ -3,8 +3,8 @@
 public record PlexServerSettingItemModule : BaseSettingsModule<PlexServerSettingItemModule>
 {
     private string _plexServerName = string.Empty;
-    private int _downloadSpeedLimit = 0;
-    private bool _hidden = false;
+    private int _downloadSpeedLimit;
+    private bool _hidden;
 
     public string PlexServerName
     {

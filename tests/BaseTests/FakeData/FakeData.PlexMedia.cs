@@ -104,8 +104,6 @@ public static partial class FakeData
             .ApplyBasePlexMedia(seed, options)
             .StrictMode(true)
             .UseSeed(seed)
-            .RuleFor(x => x.PlexMovieGenres, _ => new List<PlexMovieGenre>())
-            .RuleFor(x => x.PlexMovieRoles, _ => new List<PlexMovieRole>())
             .FinishWith(
                 (_, movie) =>
                 {
@@ -129,8 +127,6 @@ public static partial class FakeData
             .StrictMode(true)
             .UseSeed(seed)
             .ApplyBasePlexMedia(seed, options)
-            .RuleFor(x => x.PlexTvShowGenres, _ => new List<PlexTvShowGenre>())
-            .RuleFor(x => x.PlexTvShowRoles, _ => new List<PlexTvShowRole>())
             .RuleFor(x => x.Seasons, _ => GetPlexTvShowSeason(seed, options).Generate(config.TvShowSeasonCount))
             .FinishWith(
                 (_, tvShow) =>

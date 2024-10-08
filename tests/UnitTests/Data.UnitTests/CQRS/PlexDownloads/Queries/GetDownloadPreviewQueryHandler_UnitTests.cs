@@ -56,6 +56,7 @@ public class GetDownloadPreviewQueryHandler_UnitTests : BaseUnitTest<GetDownload
                 MediaIds = tvShows.GetRange(0, 2).Select(x => x.Id).ToList(),
                 Type = PlexMediaType.TvShow,
                 PlexServerId = 1,
+                PlexLibraryId = 1,
             }
         );
 
@@ -65,6 +66,7 @@ public class GetDownloadPreviewQueryHandler_UnitTests : BaseUnitTest<GetDownload
                 MediaIds = tvShows[3].Seasons.GetRange(0, 3).Select(x => x.Id).ToList(),
                 Type = PlexMediaType.Season,
                 PlexServerId = 1,
+                PlexLibraryId = 1,
             }
         );
 
@@ -74,6 +76,7 @@ public class GetDownloadPreviewQueryHandler_UnitTests : BaseUnitTest<GetDownload
                 MediaIds = tvShows[4].Seasons[2].Episodes.GetRange(1, 4).Select(x => x.Id).ToList(),
                 Type = PlexMediaType.Episode,
                 PlexServerId = 1,
+                PlexLibraryId = 1,
             }
         );
 

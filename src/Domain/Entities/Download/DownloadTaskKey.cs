@@ -1,7 +1,7 @@
 namespace PlexRipper.Domain;
 
 /// <summary>
-/// The key to identify various types of <see cref="DownloadTask"/>s.
+/// The key to identify various types of <see cref="DownloadTaskGeneric">DownloadTasks</see>.
 /// </summary>
 public record DownloadTaskKey
 {

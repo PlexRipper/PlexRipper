@@ -5,6 +5,9 @@ using WebAPI.Contracts;
 
 namespace PlexRipper.WebAPI;
 
+/// <summary>
+///  Adds extra types to the Swagger client that are not automatically added.
+/// </summary>
 public class NSwagAddExtraTypes : IDocumentProcessor
 {
     /// <summary>
@@ -19,9 +22,7 @@ public class NSwagAddExtraTypes : IDocumentProcessor
             typeof(JobTypes),
             typeof(JobStatus),
             typeof(DataType),
-            typeof(DownloadTaskCreationProgress),
             typeof(LibraryProgress),
-            typeof(InspectServerProgressDTO),
             typeof(FileMergeProgress),
             typeof(NotificationDTO),
             typeof(SyncServerMediaProgress),

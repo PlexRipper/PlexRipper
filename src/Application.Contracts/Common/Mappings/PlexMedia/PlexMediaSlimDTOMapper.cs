@@ -23,7 +23,7 @@ public static class PlexMediaSlimDTOMapper
             HasThumb = source.HasThumb,
             FullThumbUrl = source.FullThumbUrl,
             Qualities = source.Qualities.ToDTO(),
-            Children = new List<PlexMediaSlimDTO>(),
+            Children = [],
         };
 
     #region PlexMovie
@@ -46,7 +46,7 @@ public static class PlexMediaSlimDTOMapper
             HasThumb = source.HasThumb,
             FullThumbUrl = source.FullThumbUrl,
             Qualities = source.Qualities.ToDTO(),
-            Children = new List<PlexMediaSlimDTO>(),
+            Children = [],
         };
 
     public static IQueryable<PlexMediaSlimDTO> ProjectToMediaSlimDTO(this IQueryable<PlexMovie> source) =>
@@ -59,12 +59,10 @@ public static class PlexMediaSlimDTOMapper
     public static PlexMediaSlimDTO ToSlimDTO(this PlexTvShow plexTvShow)
     {
         var dto = plexTvShow.ToSlimDTOMapper();
-        dto.Children = new List<PlexMediaSlimDTO>();
-        if (plexTvShow.Seasons is not null)
-        {
-            foreach (var tvShowSeason in plexTvShow.Seasons)
-                dto.Children.Add(tvShowSeason.ToSlimDTO());
-        }
+        dto.Children = [];
+
+        foreach (var tvShowSeason in plexTvShow.Seasons)
+            dto.Children.Add(tvShowSeason.ToSlimDTO());
 
         return dto;
     }
@@ -90,7 +88,7 @@ public static class PlexMediaSlimDTOMapper
             HasThumb = source.HasThumb,
             FullThumbUrl = source.FullThumbUrl,
             Qualities = source.Qualities.ToDTO(),
-            Children = source.Seasons?.ConvertAll(ToSlimDTO) ?? new List<PlexMediaSlimDTO>(),
+            Children = source.Seasons.ConvertAll(ToSlimDTO),
         };
 
     #endregion
@@ -100,12 +98,10 @@ public static class PlexMediaSlimDTOMapper
     public static PlexMediaSlimDTO ToSlimDTO(this PlexTvShowSeason source)
     {
         var dto = source.ToSlimDTOMapper();
-        dto.Children = new List<PlexMediaSlimDTO>();
-        if (source.Episodes is not null)
-        {
-            foreach (var episode in source.Episodes)
-                dto.Children.Add(episode.ToSlimDTO());
-        }
+        dto.Children = [];
+
+        foreach (var episode in source.Episodes)
+            dto.Children.Add(episode.ToSlimDTO());
 
         return dto;
     }

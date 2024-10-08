@@ -10,7 +10,7 @@ namespace PlexRipper.Application;
 public class UpdateUserSettingsEndpointRequest
 {
     [FromBody]
-    public SettingsModelDTO SettingsModelDto { get; set; }
+    public SettingsModelDTO? SettingsModelDto { get; set; }
 }
 
 public class UpdateUserSettingsEndpointRequestValidator : Validator<UpdateUserSettingsEndpointRequest>
@@ -19,14 +19,14 @@ public class UpdateUserSettingsEndpointRequestValidator : Validator<UpdateUserSe
     {
         RuleFor(x => x).NotNull();
         RuleFor(x => x.SettingsModelDto).NotNull();
-        RuleFor(x => x.SettingsModelDto.ConfirmationSettings).NotNull();
-        RuleFor(x => x.SettingsModelDto.DateTimeSettings).NotNull();
-        RuleFor(x => x.SettingsModelDto.DebugSettings).NotNull();
-        RuleFor(x => x.SettingsModelDto.DisplaySettings).NotNull();
-        RuleFor(x => x.SettingsModelDto.DownloadManagerSettings).NotNull();
-        RuleFor(x => x.SettingsModelDto.GeneralSettings).NotNull();
-        RuleFor(x => x.SettingsModelDto.LanguageSettings).NotNull();
-        RuleFor(x => x.SettingsModelDto.ServerSettings).NotNull();
+        RuleFor(x => x.SettingsModelDto!.ConfirmationSettings).NotNull();
+        RuleFor(x => x.SettingsModelDto!.DateTimeSettings).NotNull();
+        RuleFor(x => x.SettingsModelDto!.DebugSettings).NotNull();
+        RuleFor(x => x.SettingsModelDto!.DisplaySettings).NotNull();
+        RuleFor(x => x.SettingsModelDto!.DownloadManagerSettings).NotNull();
+        RuleFor(x => x.SettingsModelDto!.GeneralSettings).NotNull();
+        RuleFor(x => x.SettingsModelDto!.LanguageSettings).NotNull();
+        RuleFor(x => x.SettingsModelDto!.ServerSettings).NotNull();
     }
 }
 
@@ -54,7 +54,7 @@ public class UpdateUserSettingsEndpoint : BaseEndpoint<UpdateUserSettingsEndpoin
 
     public override async Task HandleAsync(UpdateUserSettingsEndpointRequest req, CancellationToken ct)
     {
-        _userSettings.UpdateSettings(req.SettingsModelDto.ToModel());
+        _userSettings.UpdateSettings(req.SettingsModelDto!.ToModel());
 
         await SendFluentResult(Result.Ok(_userSettings), x => x.ToDTO(), ct);
     }

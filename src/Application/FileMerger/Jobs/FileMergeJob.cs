@@ -19,7 +19,6 @@ public class FileMergeJob : IJob
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IFileMergeSystem _fileMergeSystem;
-    private readonly INotificationsService _notificationsService;
     private readonly IFileMergeStreamProvider _fileMergeStreamProvider;
     private readonly Subject<long> _bytesReceivedProgress = new();
     private readonly TaskCompletionSource<object> _progressCompletionSource = new();
@@ -29,7 +28,6 @@ public class FileMergeJob : IJob
         IMediator mediator,
         IPlexRipperDbContext dbContext,
         IFileMergeSystem fileMergeSystem,
-        INotificationsService notificationsService,
         IFileMergeStreamProvider fileMergeStreamProvider
     )
     {
@@ -37,7 +35,6 @@ public class FileMergeJob : IJob
         _mediator = mediator;
         _dbContext = dbContext;
         _fileMergeSystem = fileMergeSystem;
-        _notificationsService = notificationsService;
         _fileMergeStreamProvider = fileMergeStreamProvider;
     }
 
@@ -115,7 +112,7 @@ public class FileMergeJob : IJob
                     var result = Result
                         .Fail($"Filepath: {path} does not exist and cannot be used to merge/move the file!")
                         .LogError();
-                    await _notificationsService.SendResult(result);
+                    await _mediator.SendNotificationAsync(result);
                     return;
                 }
 
@@ -148,7 +145,7 @@ public class FileMergeJob : IJob
             }
             catch (Exception e)
             {
-                await _notificationsService.SendResult(Result.Fail(new ExceptionalError(e)).LogError());
+                await _mediator.SendNotificationAsync(Result.Fail(new ExceptionalError(e)).LogError());
             }
             finally
             {

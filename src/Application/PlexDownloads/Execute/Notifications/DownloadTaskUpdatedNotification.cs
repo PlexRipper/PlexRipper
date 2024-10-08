@@ -30,7 +30,7 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdatedNot
     {
         var plexServerId = notification.Key.PlexServerId;
 
-        // Ensure the up to date download status is written to the database as the DownloadQueue depends on that status to pick a new DownloadTask
+        // Ensure the up-to-date download status is written to the database as the DownloadQueue depends on that status to pick a new DownloadTask
         await _dbContext.DetermineDownloadStatus(notification.Key, cancellationToken);
 
         var downloadTasks = await _dbContext.GetAllDownloadTasksByServerAsync(
@@ -43,6 +43,12 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdatedNot
 
         // If the download task is finished, create a file task and start the file merge job
         var changedDownloadTask = await _dbContext.GetDownloadTaskAsync(notification.Key, cancellationToken);
+        if (changedDownloadTask is null)
+        {
+            ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), notification.Key.ToString()).LogError();
+            return;
+        }
+
         if (changedDownloadTask.DownloadStatus == DownloadStatus.DownloadFinished)
         {
             var addFileTaskResult = await _fileMergeScheduler.CreateFileTaskFromDownloadTask(notification.Key);

@@ -1,6 +1,6 @@
 namespace PlexRipper.PlexApi;
 
-public static partial class PlexMediaMapper
+public static class PlexMediaMapper
 {
     public static PlexMovie ToPlexMovie(this PlexMedia source) =>
         new()
@@ -34,8 +34,6 @@ public static partial class PlexMediaMapper
             FullTitle = source.FullTitle,
             PlexLibrary = source.PlexLibrary,
             PlexServer = source.PlexServer,
-            PlexMovieGenres = [],
-            PlexMovieRoles = [],
             Type = source.Type,
         };
 

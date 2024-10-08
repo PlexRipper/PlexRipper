@@ -22,15 +22,15 @@ public record JobStatusUpdate
 public record JobStatusUpdate<T> : JobStatusUpdate
     where T : class
 {
-    public T Data { get; }
+    public T? Data { get; }
 
-    public JobStatusUpdate(JobStatusUpdate update, T data)
+    public JobStatusUpdate(JobStatusUpdate update, T? data)
         : base(update.JobType, update.Status, update.Id, update.JobStartTime)
     {
         Data = data;
     }
 
-    public JobStatusUpdate(JobTypes jobType, JobStatus status, T data, string id = "", DateTime jobStartTime = default)
+    public JobStatusUpdate(JobTypes jobType, JobStatus status, T? data, string id = "", DateTime jobStartTime = default)
         : base(jobType, status, id, jobStartTime)
     {
         Data = data;

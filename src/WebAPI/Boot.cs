@@ -136,7 +136,7 @@ public class Boot : IHostedService
 
         _log.Debug("PUID from env: {PUID} and from the system: {PUID}", puid ?? "-1", getuid());
         _log.Debug("PGID from env: {PGID} and from the system: {PGID}", pgid ?? "-1", getgid());
-        _log.Debug("Current system Username: {UserName}", System.Environment.UserName);
+        _log.Debug("Current system Username: {SystemPUIDName}", System.Environment.UserName);
     }
 
     #endregion

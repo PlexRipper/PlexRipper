@@ -180,7 +180,7 @@ public class PlexApiWrapper
 
         var statusCode = responseResult.IsSuccess
             ? responseResult.Value.StatusCode
-            : responseResult.GetStatusCodeReason().GetStatusCode();
+            : responseResult.GetStatusCodeReason()?.GetStatusCode();
         var statusMessage = statusCode switch
         {
             200 => "The Plex server is online!",
@@ -190,7 +190,7 @@ public class PlexApiWrapper
         return Result.Ok(
             new PlexServerStatus
             {
-                StatusCode = statusCode,
+                StatusCode = statusCode ?? -1,
                 StatusMessage = statusMessage,
                 LastChecked = DateTime.UtcNow,
                 IsSuccessful = responseResult.IsSuccess,
@@ -302,14 +302,6 @@ public class PlexApiWrapper
                 ScannedAt = DateTimeExtensions.FromUnixTime(x.ScannedAt),
                 SyncedAt = null,
                 Uuid = Guid.Parse(x.Uuid),
-                MetaData = new PlexLibraryMetaData
-                {
-                    TvShowCount = 0,
-                    TvShowSeasonCount = 0,
-                    TvShowEpisodeCount = 0,
-                    MovieCount = 0,
-                    MediaSize = 0,
-                },
                 PlexServer = null,
                 PlexServerId = connection.PlexServerId,
                 DefaultDestination = null,

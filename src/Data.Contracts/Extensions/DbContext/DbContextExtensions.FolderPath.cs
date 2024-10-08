@@ -6,9 +6,10 @@ namespace Data.Contracts;
 
 public static partial class DbContextExtensions
 {
-    public static async Task<FolderPath?> GetDownloadFolder(this IPlexRipperDbContext dbContext)
+    public static async Task<FolderPath> GetDownloadFolder(this IPlexRipperDbContext dbContext)
     {
-        return await dbContext.FolderPaths.FirstOrDefaultAsync(x => x.FolderType == FolderType.DownloadFolder);
+        // This is the default download folder, which always exists in the database
+        return (await dbContext.FolderPaths.FirstOrDefaultAsync(x => x.FolderType == FolderType.DownloadFolder))!;
     }
 
     public static async Task<FolderPath?> GetDestinationFolder(this IPlexRipperDbContext dbContext, int plexLibraryId)

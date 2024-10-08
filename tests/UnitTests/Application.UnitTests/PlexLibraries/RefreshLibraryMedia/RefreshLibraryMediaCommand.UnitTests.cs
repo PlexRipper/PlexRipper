@@ -181,7 +181,6 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             ScannedAt = mockPlexLibrary.ScannedAt,
             SyncedAt = null,
             Uuid = mockPlexLibrary.Uuid,
-            MetaData = mockPlexLibrary.MetaData,
             PlexServer = mockPlexLibrary.PlexServer,
             PlexServerId = plexLibrary.PlexServerId,
             DefaultDestination = mockPlexLibrary.DefaultDestination,

@@ -10,9 +10,6 @@ public class PlexMedia : PlexMediaSlim
 {
     #region Properties
 
-    /// <summary>
-    /// This can be empty, in that case it gets the value of <see cref="Title"/>.
-    /// </summary>
     [Column(Order = 5)]
     public required string SearchTitle { get; init; }
 

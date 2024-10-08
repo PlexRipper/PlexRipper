@@ -2,19 +2,19 @@
 
 public class PlexApiClientProgress
 {
-    public required int RetryAttemptIndex { get; set; }
+    public required int RetryAttemptIndex { get; init; }
 
-    public required int RetryAttemptCount { get; set; }
+    public required int RetryAttemptCount { get; init; }
 
-    public required int TimeToNextRetry { get; set; }
+    public required int TimeToNextRetry { get; init; }
 
-    public required int StatusCode { get; set; }
+    public required int StatusCode { get; init; }
 
-    public required bool ConnectionSuccessful { get; set; }
+    public required bool ConnectionSuccessful { get; init; }
 
-    public required bool Completed { get; set; }
+    public required bool Completed { get; init; }
 
-    public required string Message { get; set; }
+    public required string Message { get; init; }
 
-    public string ErrorMessage { get; set; }
+    public required string ErrorMessage { get; set; }
 }

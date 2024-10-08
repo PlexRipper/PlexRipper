@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using PlexRipper.Data.Common;
 
 namespace PlexRipper.Data.Configurations;
 
@@ -13,8 +12,6 @@ public class PlexLibraryConfiguration : IEntityTypeConfiguration<PlexLibrary>
             .HasMaxLength(50)
             .HasConversion(x => x.ToPlexMediaTypeString(), x => x.ToPlexMediaType())
             .IsUnicode(false);
-
-        builder.Property(x => x.MetaData).HasJsonValueConversion();
 
         builder
             .HasOne(x => x.PlexServer)

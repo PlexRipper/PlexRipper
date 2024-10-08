@@ -113,7 +113,6 @@ import {
 
 const { t } = useI18n();
 const folderPathStore = useFolderPathStore();
-const downloadStore = useDownloadStore();
 withDefaults(defineProps<{ onlyDefaults?: boolean }>(), {
 	onlyDefaults: false,
 });
@@ -125,7 +124,7 @@ const openDirectoryBrowser = (path: FolderPathDTO): void => {
 };
 
 const allowEditing = computed(() => {
-	return downloadStore.getActiveDownloadList().length === 0;
+	return true;
 });
 
 const confirmDirectoryBrowser = (path: FolderPathDTO): void => {

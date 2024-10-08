@@ -80,18 +80,17 @@ public class DownloadTaskScheduler : IDownloadTaskScheduler
         return _scheduler.IsJobRunningAsync(jobKey, cancellationToken);
     }
 
-    public async Task<bool> IsServerDownloading(int plexServerId)
-    {
-        var data = await _scheduler.GetRunningJobDataMaps(typeof(DownloadJob));
-        return data.Select(x => x.GetJsonValue<DownloadTaskKey>(DownloadJob.DownloadTaskIdParameter).PlexServerId)
-            .Any(x => x == plexServerId);
-    }
-
     public async Task<List<DownloadTaskKey>> GetCurrentlyDownloadingKeysByServer(int plexServerId)
     {
         var data = await _scheduler.GetRunningJobDataMaps(typeof(DownloadJob));
         return data.Select(x => x.GetJsonValue<DownloadTaskKey>(DownloadJob.DownloadTaskIdParameter))
+            .OfType<DownloadTaskKey>()
             .Where(x => x.PlexServerId == plexServerId)
             .ToList();
+    }
+
+    public async Task<bool> IsServerDownloading(int plexServerId)
+    {
+        return (await GetCurrentlyDownloadingKeysByServer(plexServerId)).Any(x => x.PlexServerId == plexServerId);
     }
 }

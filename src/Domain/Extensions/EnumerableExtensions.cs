@@ -9,7 +9,7 @@ public static class EnumerableExtensions
     /// <param name="selectChildren"></param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public static IEnumerable<T> Flatten<T>(this IEnumerable<T> nodes, Func<T, IEnumerable<T>> selectChildren)
+    public static IEnumerable<T> Flatten<T>(this IEnumerable<T>? nodes, Func<T, IEnumerable<T>> selectChildren)
     {
         if (nodes == null)
             yield break;
@@ -23,8 +23,11 @@ public static class EnumerableExtensions
             if (children == null)
                 continue;
 
-            foreach (var child in children.Flatten(selectChildren))
-                yield return child;
+            if (selectChildren != null)
+            {
+                foreach (var child in children.Flatten(selectChildren))
+                    yield return child;
+            }
         }
     }
 }

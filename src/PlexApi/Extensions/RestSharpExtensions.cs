@@ -12,14 +12,13 @@ public static class RestSharpExtensions
 {
     #region Properties
 
-    public static JsonSerializerOptions SerializerOptions =>
-        new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true,
-            WriteIndented = true,
-            Converters = { new LongToDateTime() },
-        };
+    public static JsonSerializerOptions SerializerOptions => new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+        WriteIndented = true,
+        Converters = { new LongToDateTime() },
+    };
 
     #endregion
 
@@ -185,7 +184,7 @@ public static class RestSharpExtensions
     }
 
     private static void Send(
-        this Action<PlexApiClientProgress> action,
+        this Action<PlexApiClientProgress>? action,
         RestResponse response,
         int retryAttempt,
         int retryCount,
@@ -201,7 +200,7 @@ public static class RestSharpExtensions
                 $"Request to: {request.Resource} failed, waiting {timeToWaitSeconds} seconds before retrying again ({retryAttempt} of {retryCount})";
         }
 
-        if (!response.IsSuccessful && response.ResponseStatus == ResponseStatus.TimedOut)
+        if (response is { IsSuccessful: false, ResponseStatus: ResponseStatus.TimedOut })
         {
             msg =
                 $"Request to: {request.Resource} timed-out, waiting {timeToWaitSeconds} seconds before retrying again ({retryAttempt} of {retryCount})";

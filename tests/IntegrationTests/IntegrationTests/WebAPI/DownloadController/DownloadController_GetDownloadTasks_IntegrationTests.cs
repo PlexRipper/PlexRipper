@@ -29,10 +29,7 @@ public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrat
                 x.TvShowSeasonDownloadTasksCount = tvShowSeasonDownloadTasksCount;
                 x.TvShowEpisodeDownloadTasksCount = tvShowEpisodeDownloadTasksCount;
             };
-            config.PlexMockApiOptions = x =>
-            {
-                x.MockServers.Add(new PlexMockServerConfig());
-            };
+            config.PlexMockApiOptions = x => { x.MockServers.Add(new PlexMockServerConfig()); };
         });
 
         // Act
@@ -45,6 +42,8 @@ public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrat
         // Assert
         var result = response.Result;
         result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+
         var plexServer = result.Value.First();
         plexServer.ShouldNotBeNull();
         plexServer.Downloads.Count.ShouldBe(tvShowDownloadTasksCount);

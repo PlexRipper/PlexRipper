@@ -33,7 +33,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.MailingListActive, f => f.Random.Bool())
             .RuleFor(x => x.ScrobbleTypes, _ => "")
             .RuleFor(x => x.Country, _ => "EN")
-            .RuleFor(x => x.Subscription, _ => null)
+            .RuleFor(x => x.Subscription, _ => new PostUsersSignInDataSubscription())
             .RuleFor(x => x.SubscriptionDescription, _ => null)
             .RuleFor(x => x.Restricted, f => f.Random.Bool())
             .RuleFor(x => x.Anonymous, _ => null)
@@ -43,16 +43,18 @@ public partial class FakePlexApiData
             .RuleFor(x => x.HomeAdmin, f => f.Random.Bool())
             .RuleFor(x => x.MaxHomeSize, f => f.Random.Number(20))
             .RuleFor(x => x.RememberExpiresAt, f => f.Date.Future().Ticks)
-            .RuleFor(x => x.Profile, _ => null)
-            .RuleFor(x => x.Entitlements, _ => null)
-            .RuleFor(x => x.Subscriptions, _ => null)
-            .RuleFor(x => x.PastSubscriptions, _ => null)
-            .RuleFor(x => x.Trials, _ => null)
-            .RuleFor(x => x.Services, _ => null)
+            .RuleFor(x => x.Profile, _ => new PostUsersSignInDataUserProfile())
+            .RuleFor(x => x.Entitlements, _ => [])
+            .RuleFor(x => x.Subscriptions, _ => [])
+            .RuleFor(x => x.PastSubscriptions, _ => [])
+            .RuleFor(x => x.Trials, _ => [])
+            .RuleFor(x => x.Services, _ => [])
             .RuleFor(x => x.AdsConsent, _ => null)
             .RuleFor(x => x.AdsConsentSetAt, _ => null)
             .RuleFor(x => x.AdsConsentReminderAt, _ => null)
-            .RuleFor(x => x.Pin, _ => null)
+#pragma warning disable CS0618 // Type or member is obsolete
+            .RuleFor(x => x.Pin, _ => string.Empty)
+#pragma warning restore CS0618 // Type or member is obsolete
             .RuleFor(x => x.AttributionPartner, _ => null)
             .RuleFor(x => x.Roles, _ => [""])
             .RuleFor(x => x.ExperimentalFeatures, f => f.Random.Bool())
@@ -60,17 +62,16 @@ public partial class FakePlexApiData
             .RuleFor(x => x.BackupCodesCreated, f => f.Random.Bool());
     }
 
-    public static PlexErrorsResponseDTO GetFailedPlexSignInResponse() =>
-        new()
-        {
-            Errors =
-            [
-                new PlexErrorDTO
-                {
-                    Code = 1001,
-                    Message = "User could not be authenticated",
-                    Status = 401,
-                },
-            ],
-        };
+    public static PlexErrorsResponseDTO GetFailedPlexSignInResponse() => new()
+    {
+        Errors =
+        [
+            new PlexErrorDTO
+            {
+                Code = 1001,
+                Message = "User could not be authenticated",
+                Status = 401,
+            },
+        ],
+    };
 }

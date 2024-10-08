@@ -100,16 +100,10 @@ public static partial class FakeData
             .RuleFor(x => x.IPv4, _ => true)
             .RuleFor(x => x.IPv6, _ => false)
             .RuleFor(x => x.PortFix, _ => false)
-            .RuleFor(x => x.Uri, f => f.Internet.Url())
+            .RuleFor(x => x.Uri, (_, x) => $"{x.Protocol}://{x.Address}:{x.Port}")
             .RuleFor(x => x.PlexServerStatus, _ => [])
             .RuleFor(x => x.PlexServer, _ => null)
-            .RuleFor(x => x.PlexServerId, _ => 0)
-            .FinishWith(
-                (_, connection) =>
-                {
-                    connection.Uri = $"{connection.Protocol}://{connection.Address}:{connection.Port}";
-                }
-            );
+            .RuleFor(x => x.PlexServerId, _ => 0);
     }
 
     public static Faker<PlexServerStatus> GetPlexServerStatus(int seed = 0)

@@ -103,8 +103,7 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
     }
 
     [Fact]
-    public async Task
-        ShouldUpdateSomeAndSyncServersWithConnections_WhenSomeServerConnectionsHaveChangedAndSomeExistInTheDatabase()
+    public async Task ShouldUpdateSomeAndSyncServersWithConnections_WhenSomeServerConnectionsHaveChangedAndSomeExistInTheDatabase()
     {
         // Arrange
         Seed = 23724;

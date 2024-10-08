@@ -128,7 +128,22 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
         plexServer.ShouldNotBeNull();
 
         var plexServerConnections = FakeData.GetPlexServerConnections().Generate(5);
-        plexServerConnections[2].Address = plexServer.PublicAddress;
+        plexServerConnections[2] = new PlexServerConnection
+        {
+            Id = plexServerConnections[2].Id,
+            Protocol = plexServerConnections[2].Protocol,
+            Port = plexServerConnections[2].Port,
+            Address = plexServer.PublicAddress,
+            Uri = plexServerConnections[2].Uri,
+            Local = plexServerConnections[2].Local,
+            Relay = plexServerConnections[2].Relay,
+            IPv4 = plexServerConnections[2].IPv4,
+            IPv6 = plexServerConnections[2].IPv6,
+            PortFix = plexServerConnections[2].PortFix,
+            PlexServer = plexServerConnections[2].PlexServer,
+            PlexServerId = plexServerConnections[2].PlexServerId,
+            PlexServerStatus = plexServerConnections[2].PlexServerStatus,
+        };
 
         foreach (var plexServerConnection in plexServerConnections)
         {

@@ -19,10 +19,34 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
 
         var downloadMediaDtos = new List<DownloadMediaDTO>()
         {
-            new() { Type = PlexMediaType.Movie, MediaIds = [1, 2, 3] },
-            new() { Type = PlexMediaType.TvShow, MediaIds = [1, 2, 3] },
-            new() { Type = PlexMediaType.Season, MediaIds = [1, 2, 3] },
-            new() { Type = PlexMediaType.Episode, MediaIds = [1, 2, 3] },
+            new()
+            {
+                Type = PlexMediaType.Movie,
+                MediaIds = [1, 2, 3],
+                PlexServerId = 1,
+                PlexLibraryId = 1,
+            },
+            new()
+            {
+                Type = PlexMediaType.TvShow,
+                MediaIds = [1, 2, 3],
+                PlexServerId = 1,
+                PlexLibraryId = 1,
+            },
+            new()
+            {
+                Type = PlexMediaType.Season,
+                MediaIds = [1, 2, 3],
+                PlexServerId = 1,
+                PlexLibraryId = 1,
+            },
+            new()
+            {
+                Type = PlexMediaType.Episode,
+                MediaIds = [1, 2, 3],
+                PlexServerId = 1,
+                PlexLibraryId = 1,
+            },
         };
 
         // Act
@@ -51,8 +75,20 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
 
         var downloadMediaDtos = new List<DownloadMediaDTO>()
         {
-            new() { Type = PlexMediaType.TvShow, MediaIds = [1, 2, 3] },
-            new() { Type = PlexMediaType.Movie, MediaIds = [1, 2, 3] },
+            new()
+            {
+                Type = PlexMediaType.TvShow,
+                MediaIds = [1, 2, 3],
+                PlexServerId = 1,
+                PlexLibraryId = 1,
+            },
+            new()
+            {
+                Type = PlexMediaType.Movie,
+                MediaIds = [1, 2, 3],
+                PlexServerId = 1,
+                PlexLibraryId = 1,
+            },
         };
 
         // Act

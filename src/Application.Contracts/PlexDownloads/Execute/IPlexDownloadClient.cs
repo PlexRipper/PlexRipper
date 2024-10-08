@@ -12,7 +12,7 @@ public interface IPlexDownloadClient
     /// <summary>
     /// Gets the Task that completes when all download workers have finished.
     /// </summary>
-    Task DownloadProcessTask { get; }
+    Task? DownloadProcessTask { get; }
 
     /// <summary>
     /// Setup this PlexDownloadClient to prepare for the download process.

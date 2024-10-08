@@ -4,11 +4,11 @@ namespace Application.Contracts;
 
 public class DownloadMediaDTO
 {
-    public List<int> MediaIds { get; set; }
+    public required List<int> MediaIds { get; init; } = [];
 
-    public PlexMediaType Type { get; set; }
+    public required PlexMediaType Type { get; init; }
 
-    public int PlexServerId { get; set; }
+    public required int PlexServerId { get; init; }
 
-    public int PlexLibraryId { get; set; }
+    public required int PlexLibraryId { get; init; }
 }

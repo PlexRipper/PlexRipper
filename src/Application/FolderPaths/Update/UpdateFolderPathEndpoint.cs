@@ -10,7 +10,7 @@ namespace PlexRipper.Application;
 public class UpdateFolderPathEndpointRequest
 {
     [FromBody]
-    public FolderPathDTO FolderPathDto { get; init; }
+    public FolderPathDTO? FolderPathDto { get; init; }
 }
 
 public class UpdateFolderPathEndpointRequestValidator : Validator<UpdateFolderPathEndpointRequest>
@@ -18,11 +18,11 @@ public class UpdateFolderPathEndpointRequestValidator : Validator<UpdateFolderPa
     public UpdateFolderPathEndpointRequestValidator()
     {
         RuleFor(x => x.FolderPathDto).NotNull();
-        RuleFor(x => x.FolderPathDto.Id).GreaterThan(0);
-        RuleFor(x => x.FolderPathDto.DisplayName).NotEmpty();
-        RuleFor(x => x.FolderPathDto.Directory).NotEmpty();
-        RuleFor(x => x.FolderPathDto.FolderType).NotEqual(FolderType.Unknown);
-        RuleFor(x => x.FolderPathDto.MediaType).NotEqual(PlexMediaType.Unknown);
+        RuleFor(x => x.FolderPathDto!.Id).GreaterThan(0);
+        RuleFor(x => x.FolderPathDto!.DisplayName).NotEmpty();
+        RuleFor(x => x.FolderPathDto!.Directory).NotEmpty();
+        RuleFor(x => x.FolderPathDto!.FolderType).NotEqual(FolderType.Unknown);
+        RuleFor(x => x.FolderPathDto!.MediaType).NotEqual(PlexMediaType.Unknown);
     }
 }
 
@@ -51,7 +51,7 @@ public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointReq
     public override async Task HandleAsync(UpdateFolderPathEndpointRequest req, CancellationToken ct)
     {
         // TODO Should prevent updating reserved folder paths with id < 10
-        var folderPath = req.FolderPathDto.ToModel();
+        var folderPath = req.FolderPathDto!.ToModel();
         var folderPathDb = await _dbContext
             .FolderPaths.AsTracking()
             .FirstOrDefaultAsync(x => x.Id == folderPath.Id, ct);

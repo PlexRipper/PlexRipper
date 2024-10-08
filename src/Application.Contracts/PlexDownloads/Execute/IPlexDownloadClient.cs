@@ -15,7 +15,7 @@ public interface IPlexDownloadClient
     Task DownloadProcessTask { get; }
 
     /// <summary>
-    /// Setup this <see cref="PlexDownloadClient"/> to prepare for the download process.
+    /// Setup this PlexDownloadClient to prepare for the download process.
     /// This needs to be called before any other action can be taken.
     /// Note: adding this in the constructor prevents us from returning a <see cref="Result"/>.
     /// </summary>

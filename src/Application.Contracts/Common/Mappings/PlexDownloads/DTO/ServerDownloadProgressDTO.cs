@@ -2,9 +2,9 @@
 
 public record ServerDownloadProgressDTO
 {
-    public int Id { get; set; }
+    public required int Id { get; set; }
 
-    public int DownloadableTasksCount { get; set; }
+    public required int DownloadableTasksCount { get; set; }
 
-    public List<DownloadProgressDTO> Downloads { get; set; }
+    public required List<DownloadProgressDTO> Downloads { get; init; } = [];
 }

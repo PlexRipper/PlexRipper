@@ -95,12 +95,10 @@ public static class PlexMediaSlimDTOMapper
     public static PlexMediaSlimDTO ToSlimDTO(this PlexTvShowSeason source)
     {
         var dto = source.ToSlimDTOMapper();
-        dto.Children = new List<PlexMediaSlimDTO>();
-        if (source.Episodes is not null)
-        {
-            foreach (var episode in source.Episodes)
-                dto.Children.Add(episode.ToSlimDTO());
-        }
+        dto.Children = [];
+
+        foreach (var episode in source.Episodes)
+            dto.Children.Add(episode.ToSlimDTO());
 
         return dto;
     }

@@ -35,10 +35,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
     {
         Get(EndpointPath);
         AllowAnonymous();
-        Summary(x =>
-        {
-            x.Summary = "Get all the FolderPaths entities in the database";
-        });
+        Summary(x => { x.Summary = "Get all the FolderPaths entities in the database"; });
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<FileSystemDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
@@ -48,7 +45,8 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
 
     public override async Task HandleAsync(GetFolderPathDirectoryRequest req, CancellationToken ct)
     {
-        var result = _fileSystem.LookupContents(req.Path, false, true);
+        var path = req.Path!;
+        var result = _fileSystem.LookupContents(path, false, true);
         await SendFluentResult(result, x => x.ToDTO(), ct);
     }
 }

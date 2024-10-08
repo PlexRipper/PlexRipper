@@ -1,22 +1,22 @@
 ﻿namespace Application.Contracts;
 
-public class ServerConnectionCheckStatusProgressDTO
+public record ServerConnectionCheckStatusProgressDTO
 {
-    public int PlexServerId { get; set; }
+    public required int PlexServerId { get; set; }
 
-    public int PlexServerConnectionId { get; set; }
+    public required int PlexServerConnectionId { get; set; }
 
-    public int RetryAttemptIndex { get; init; }
+    public required int RetryAttemptIndex { get; init; }
 
-    public int RetryAttemptCount { get; init; }
+    public required int RetryAttemptCount { get; init; }
 
-    public int TimeToNextRetry { get; init; }
+    public required int TimeToNextRetry { get; init; }
 
-    public int StatusCode { get; init; }
+    public required int StatusCode { get; init; }
 
-    public bool ConnectionSuccessful { get; init; }
+    public required bool ConnectionSuccessful { get; init; }
 
-    public bool Completed { get; init; }
+    public required bool Completed { get; init; }
 
-    public string Message { get; init; }
+    public required string Message { get; init; }
 }

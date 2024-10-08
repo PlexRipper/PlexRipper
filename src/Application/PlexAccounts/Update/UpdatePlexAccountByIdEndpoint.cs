@@ -10,7 +10,7 @@ namespace PlexRipper.Application;
 public class UpdatePlexAccountByIdEndpointRequest
 {
     [FromBody]
-    public PlexAccountDTO PlexAccountDTO { get; init; }
+    public PlexAccountDTO? PlexAccountDTO { get; init; }
 }
 
 public class UpdatePlexAccountByIdEndpointRequestValidator : Validator<UpdatePlexAccountByIdEndpointRequest>
@@ -18,12 +18,12 @@ public class UpdatePlexAccountByIdEndpointRequestValidator : Validator<UpdatePle
     public UpdatePlexAccountByIdEndpointRequestValidator()
     {
         RuleFor(x => x.PlexAccountDTO).NotNull();
-        RuleFor(x => x.PlexAccountDTO.Id).GreaterThan(0);
-        RuleFor(x => x.PlexAccountDTO.DisplayName).NotEmpty();
-        RuleFor(x => x.PlexAccountDTO.Username).NotEmpty().MinimumLength(5);
-        RuleFor(x => x.PlexAccountDTO.Password).NotEmpty().MinimumLength(5);
-        RuleFor(x => x.PlexAccountDTO.IsEnabled).NotNull();
-        RuleFor(x => x.PlexAccountDTO.IsMain).NotNull();
+        RuleFor(x => x.PlexAccountDTO!.Id).GreaterThan(0);
+        RuleFor(x => x.PlexAccountDTO!.DisplayName).NotEmpty();
+        RuleFor(x => x.PlexAccountDTO!.Username).NotEmpty().MinimumLength(5);
+        RuleFor(x => x.PlexAccountDTO!.Password).NotEmpty().MinimumLength(5);
+        RuleFor(x => x.PlexAccountDTO!.IsEnabled).NotNull();
+        RuleFor(x => x.PlexAccountDTO!.IsMain).NotNull();
     }
 }
 
@@ -50,7 +50,7 @@ public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdE
 
     public override async Task HandleAsync(UpdatePlexAccountByIdEndpointRequest req, CancellationToken ct)
     {
-        var plexAccountDTO = req.PlexAccountDTO;
+        var plexAccountDTO = req.PlexAccountDTO!;
         var accountInDb = await _dbContext
             .PlexAccounts.AsTracking()
             .Include(x => x.PlexAccountServers)

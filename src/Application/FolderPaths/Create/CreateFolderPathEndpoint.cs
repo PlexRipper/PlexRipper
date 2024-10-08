@@ -9,7 +9,7 @@ namespace PlexRipper.Application;
 public record CreateFolderPathEndpointRequest
 {
     [FromBody]
-    public FolderPathDTO FolderPathDto { get; init; }
+    public FolderPathDTO? FolderPathDto { get; init; }
 }
 
 public class CreateFolderPathEndpointRequestValidator : Validator<CreateFolderPathEndpointRequest>
@@ -17,9 +17,9 @@ public class CreateFolderPathEndpointRequestValidator : Validator<CreateFolderPa
     public CreateFolderPathEndpointRequestValidator()
     {
         RuleFor(x => x.FolderPathDto).NotNull();
-        RuleFor(x => x.FolderPathDto.DisplayName).NotEmpty();
-        RuleFor(x => x.FolderPathDto.FolderType).NotEqual(FolderType.None).NotEqual(FolderType.Unknown);
-        RuleFor(x => x.FolderPathDto.MediaType).NotEqual(PlexMediaType.None).NotEqual(PlexMediaType.Unknown);
+        RuleFor(x => x.FolderPathDto!.DisplayName).NotEmpty();
+        RuleFor(x => x.FolderPathDto!.FolderType).NotEqual(FolderType.None).NotEqual(FolderType.Unknown);
+        RuleFor(x => x.FolderPathDto!.MediaType).NotEqual(PlexMediaType.None).NotEqual(PlexMediaType.Unknown);
     }
 }
 
@@ -47,7 +47,7 @@ public class CreateFolderPathEndpoint : BaseEndpoint<CreateFolderPathEndpointReq
 
     public override async Task HandleAsync(CreateFolderPathEndpointRequest req, CancellationToken ct)
     {
-        var folderPath = req.FolderPathDto.ToModel();
+        var folderPath = req.FolderPathDto!.ToModel();
         await _dbContext.FolderPaths.AddAsync(folderPath, ct);
         await _dbContext.SaveChangesAsync(ct);
 

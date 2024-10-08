@@ -6,7 +6,7 @@ public class DownloadPreviewDTO
 {
     public int Id { get; set; }
 
-    public string Title { get; set; }
+    public string Title { get; set; } = string.Empty;
 
     public long Size { get; set; }
 
@@ -14,5 +14,5 @@ public class DownloadPreviewDTO
 
     public PlexMediaType MediaType { get; set; }
 
-    public List<DownloadPreviewDTO> Children { get; set; } = new();
+    public List<DownloadPreviewDTO> Children { get; set; } = [];
 }

@@ -113,7 +113,6 @@ import {
 
 const { t } = useI18n();
 const folderPathStore = useFolderPathStore();
-const downloadStore = useDownloadStore();
 withDefaults(defineProps<{ onlyDefaults?: boolean }>(), {
 	onlyDefaults: false,
 });

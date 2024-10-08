@@ -48,9 +48,6 @@
 		<None Remove="ClientApp\**" />
 	</ItemGroup>
 	<ItemGroup>
-		<Folder Include="Properties\" />
-	</ItemGroup>
-	<ItemGroup>
 		<Compile Include="..\Domain\GlobalUsings.cs" />
 		<Compile Remove="ClientApp\**" />
 	</ItemGroup>

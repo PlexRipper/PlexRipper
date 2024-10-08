@@ -1,6 +1,6 @@
 ﻿using FileSystem.Contracts;
 
-namespace PlexRipper.FileSystem.Common;
+namespace PlexRipper.FileSystem;
 
 /// <summary>
 /// This is used to mock all I/O dependencies for the <see cref="FileMerger"/> class.

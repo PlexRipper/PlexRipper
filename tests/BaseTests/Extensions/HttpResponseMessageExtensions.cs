@@ -80,7 +80,8 @@ public static class HttpResponseMessageExtensions
                 }
             }
 
-            dict[keyValuePair.Key] = value;
+            if (value is not null)
+                dict[keyValuePair.Key] = value;
         }
 
         return dict;

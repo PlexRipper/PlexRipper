@@ -38,12 +38,12 @@ public static partial class ResultExtensions
 
     #region GetStatusCodeError
 
-    public static IReason GetStatusCodeReason(this Result result)
+    public static IReason? GetStatusCodeReason(this Result result)
     {
         return result.Reasons.Find(x => x.HasMetadataKey(StatusCodeName));
     }
 
-    public static IReason GetStatusCodeReason<T>(this Result<T> result)
+    public static IReason? GetStatusCodeReason<T>(this Result<T> result)
     {
         return result.Reasons.Find(x => x.HasMetadataKey(StatusCodeName));
     }

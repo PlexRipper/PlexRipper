@@ -22,13 +22,12 @@ public class PlexApiWrapper
 
     private string GetClientId => Guid.NewGuid().ToString();
 
-    private PlexAPI CreateClient(string authToken, PlexApiClientOptions options) =>
-        new(
-            client: _clientFactory(options),
-            clientID: GetClientId,
-            serverUrl: options.ConnectionUrl,
-            accessToken: authToken
-        );
+    private PlexAPI CreateClient(string authToken, PlexApiClientOptions options) => new(
+        client: _clientFactory(options),
+        clientID: GetClientId,
+        serverUrl: options.ConnectionUrl,
+        accessToken: authToken
+    );
 
     private PlexAPI CreateTvClient(string authToken = "", PlexApiClientOptions? options = null)
     {
@@ -180,7 +179,7 @@ public class PlexApiWrapper
 
         var statusCode = responseResult.IsSuccess
             ? responseResult.Value.StatusCode
-            : responseResult.GetStatusCodeReason().GetStatusCode();
+            : responseResult.GetStatusCodeReason()?.GetStatusCode();
         var statusMessage = statusCode switch
         {
             200 => "The Plex server is online!",
@@ -190,7 +189,7 @@ public class PlexApiWrapper
         return Result.Ok(
             new PlexServerStatus
             {
-                StatusCode = statusCode,
+                StatusCode = statusCode ?? -1,
                 StatusMessage = statusMessage,
                 LastChecked = DateTime.UtcNow,
                 IsSuccessful = responseResult.IsSuccess,

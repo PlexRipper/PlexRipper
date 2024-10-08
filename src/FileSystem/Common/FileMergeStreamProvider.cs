@@ -3,7 +3,7 @@ using Application.Contracts;
 using FileSystem.Contracts;
 using Logging.Interface;
 
-namespace PlexRipper.FileSystem.Common;
+namespace PlexRipper.FileSystem;
 
 public class FileMergeStreamProvider : IFileMergeStreamProvider
 {

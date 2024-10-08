@@ -96,12 +96,12 @@ public static partial class DbContextExtensions
                         break;
                     }
                     default:
-                        _log.Error(
-                            "DownloadTaskType {DownloadTaskType} is not supported in {DetermineDownloadStatus}",
-                            parentKey.Type,
-                            nameof(DetermineDownloadStatus),
-                            0
-                        );
+                        _log.Here()
+                            .Error(
+                                "DownloadTaskType {DownloadTaskType} is not supported in {DetermineDownloadStatus}",
+                                parentKey.Type,
+                                nameof(DetermineDownloadStatus)
+                            );
                         break;
                 }
             }

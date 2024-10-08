@@ -63,8 +63,11 @@ public static partial class StringExtensions
 
     public static bool IsIpAddress(this string ipAddress) => IPAddress.TryParse(ipAddress, out var _);
 
-    private static string GetProperCapitalization(DirectoryInfo dirInfo)
+    private static string GetProperCapitalization(DirectoryInfo? dirInfo)
     {
+        if (dirInfo == null)
+            return string.Empty;
+
         var parentDirInfo = dirInfo.Parent;
         if (parentDirInfo == null)
         {

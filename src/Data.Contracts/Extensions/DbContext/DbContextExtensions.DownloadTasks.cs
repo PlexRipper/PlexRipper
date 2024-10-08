@@ -1,4 +1,5 @@
 using FluentResults;
+using Logging;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Domain;
 
@@ -295,13 +296,13 @@ public static partial class DbContextExtensions
             case DownloadTaskType.TvShow:
             case DownloadTaskType.Season:
             case DownloadTaskType.Episode:
-                _log.Error(
-                    "{Name} of type {Type} is not supported in {MethodName}",
-                    nameof(DownloadTaskType),
-                    key.Type,
-                    nameof(UpdateDownloadProgress),
-                    0
-                );
+                _log.Here()
+                    .Error(
+                        "{Name} of type {Type} is not supported in {MethodName}",
+                        nameof(DownloadTaskType),
+                        key.Type,
+                        nameof(UpdateDownloadProgress)
+                    );
                 return;
             default:
                 throw new ArgumentOutOfRangeException();

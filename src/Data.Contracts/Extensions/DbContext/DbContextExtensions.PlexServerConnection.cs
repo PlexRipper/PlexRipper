@@ -103,6 +103,7 @@ public static partial class DbContextExtensions
     /// Returns an authentication token needed to authenticate communication with the <see cref="PlexServer" />.
     /// Note: An PlexAccountId of 0 can be passed to automatically retrieve first a non-main account token, and if not found a main account server token.
     /// </summary>
+    /// <param name="dbContext"> The <see cref="IPlexRipperDbContext" /> to retrieve the token from.</param>
     /// <param name="plexServerId">The id of the <see cref="PlexServer" /> to retrieve a token for.</param>
     /// <param name="cancellationToken"> The cancellation token to cancel operation.</param>
     public static Task<Result<string>> GetPlexServerTokenAsync(
@@ -131,7 +132,7 @@ public static partial class DbContextExtensions
         {
             var nonMainServerToken = await dbContext
                 .PlexAccountServers.Include(x => x.PlexAccount)
-                .FirstOrDefaultAsync(x => x.PlexServerId == plexServerId && !x.PlexAccount.IsMain, cancellationToken);
+                .FirstOrDefaultAsync(x => x.PlexServerId == plexServerId && !x.PlexAccount!.IsMain, cancellationToken);
 
             // Check if we have access with a non-main account
             if (nonMainServerToken != null)

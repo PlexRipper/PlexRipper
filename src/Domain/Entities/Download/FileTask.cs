@@ -43,7 +43,7 @@ public class FileTask : BaseEntity
     /// Gets a list of file paths that need to be merged and/or moved.
     /// </summary>
     [NotMapped]
-    public List<string> FilePaths => FilePathsCompressed?.Split(';').ToList() ?? new List<string>();
+    public List<string> FilePaths => FilePathsCompressed.Split(';').ToList();
 
     [NotMapped]
     public DownloadTaskKey DownloadTaskKey =>

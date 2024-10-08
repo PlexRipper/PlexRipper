@@ -1,6 +1,4 @@
-﻿using FluentValidation.Results;
-
-// ReSharper disable once CheckNamespace
+﻿// ReSharper disable once CheckNamespace
 // Needs to be in the same namespace as the FluentResults package
 namespace FluentResults;
 
@@ -20,23 +18,6 @@ public static partial class ResultExtensions
             result.Errors.First().Reasons.AddRange(errors);
 
         return result;
-    }
-
-    public static Result ToFluentResult(this ValidationResult validationResult)
-    {
-        if (validationResult is null)
-            return Result.Fail("Validation result was null");
-
-        if (validationResult.IsValid)
-            return Result.Ok();
-
-        var error = new Error("Validation Error");
-        foreach (var validationError in validationResult.Errors)
-            error.Reasons.Add(
-                new Error(validationError.ErrorMessage).WithMetadata(validationError.ErrorCode, validationError)
-            );
-
-        return Result.Fail(error);
     }
 
     #endregion

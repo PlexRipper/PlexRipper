@@ -43,16 +43,6 @@ public interface IProgressHub
     );
 
     /// <summary>
-    ///  Sends a notification to the front-end.
-    /// </summary>
-    /// <param name="inspectServerProgress"></param>
-    /// <param name="cancellationToken"></param>
-    Task InspectServerProgress(
-        InspectServerProgressDTO inspectServerProgress,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
     ///  Sends a server download progress update to the front-end.
     /// </summary>
     /// <param name="serverDownloadProgress"></param>

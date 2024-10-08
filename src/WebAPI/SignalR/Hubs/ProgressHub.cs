@@ -75,20 +75,6 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
     }
 
     /// <inheritdoc/>
-    public async Task InspectServerProgress(
-        InspectServerProgressDTO inspectServerProgress,
-        CancellationToken cancellationToken = default
-    )
-    {
-        _log.Debug(
-            "Sending progress: {MessageTypesNotification} => {@ServerDownloadProgress}",
-            MessageTypes.InspectServerProgress.ToString(),
-            inspectServerProgress
-        );
-        await Clients.All.InspectServerProgress(inspectServerProgress, cancellationToken);
-    }
-
-    /// <inheritdoc/>
     public async Task ServerDownloadProgress(
         ServerDownloadProgressDTO serverDownloadProgress,
         CancellationToken cancellationToken = default

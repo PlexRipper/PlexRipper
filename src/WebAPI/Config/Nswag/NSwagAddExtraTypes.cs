@@ -19,15 +19,14 @@ public class NSwagAddExtraTypes : IDocumentProcessor
             typeof(JobTypes),
             typeof(JobStatus),
             typeof(DataType),
-            typeof(DownloadTaskCreationProgress),
             typeof(LibraryProgress),
-            typeof(InspectServerProgressDTO),
             typeof(FileMergeProgress),
             typeof(NotificationDTO),
             typeof(SyncServerMediaProgress),
             typeof(DownloadProgressDTO),
             typeof(ServerDownloadProgressDTO),
             typeof(ServerConnectionCheckStatusProgressDTO),
+
             // Job status updates
             typeof(JobStatusUpdateDTO<object>),
             typeof(CheckAllConnectionStatusUpdateDTO),

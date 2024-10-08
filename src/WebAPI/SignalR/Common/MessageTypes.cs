@@ -16,9 +16,6 @@ public enum MessageTypes
     [EnumMember(Value = nameof(ServerDownloadProgress))]
     ServerDownloadProgress = 3,
 
-    [EnumMember(Value = nameof(InspectServerProgress))]
-    InspectServerProgress = 4,
-
     [EnumMember(Value = nameof(ServerConnectionCheckStatusProgress))]
     ServerConnectionCheckStatusProgress = 5,
 

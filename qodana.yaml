@@ -1,10 +1,13 @@
 version: "1.0"
 linter: jetbrains/qodana-dotnet:2024.1
 profile:
-  name: qodana.recommended
+    name: qodana.recommended
 include:
-  - name: CheckDependencyLicenses
+    - name: CheckDependencyLicenses
 exclude:
-  - name: RedundantUsingDirective.Global
+    - name: RedundantUsingDirective.Global
+    - name: All
+      patterns:
+          - "file:**/*.DotSettings"
 dot-net:
     solution: PlexRipper.sln

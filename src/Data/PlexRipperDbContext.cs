@@ -3,7 +3,6 @@ using AppAny.Quartz.EntityFrameworkCore.Migrations;
 using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using Data.Contracts;
 using EFCore.BulkExtensions;
-using Environment;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -124,9 +123,9 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     #region Constructors
 
-    public PlexRipperDbContext(IPathProvider pathProvider)
+    public PlexRipperDbContext(string databaseName)
     {
-        DatabaseName = pathProvider.DatabaseName;
+        DatabaseName = databaseName;
     }
 
     public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options, string databaseName)

@@ -60,7 +60,7 @@ public class DownloadWorker : IDisposable
         _dbContext = dbContext;
         DownloadWorkerTask = downloadWorkerTask;
 
-        var options = new RestClientOptions() { MaxTimeout = 10000, ThrowOnAnyError = false };
+        var options = new RestClientOptions() { Timeout = TimeSpan.FromSeconds(10000), ThrowOnAnyError = false };
 
         _httpClient = new RestClient(httpClientFactory.CreateClient(), options);
         _httpClient.AddDefaultHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64)");

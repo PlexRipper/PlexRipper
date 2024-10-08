@@ -2,9 +2,9 @@
 
 public record DebugSettingsModule : BaseSettingsModule<DebugSettingsModule>, IDebugSettings
 {
-    private bool _debugModeEnabled = false;
-    private bool _maskServerNames = false;
-    private bool _maskLibraryNames = false;
+    private bool _debugModeEnabled;
+    private bool _maskServerNames;
+    private bool _maskLibraryNames;
 
     public bool DebugModeEnabled
     {

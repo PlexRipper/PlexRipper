@@ -21,14 +21,14 @@ public interface IPlexApiService
     public Task<(
         Result<List<PlexServer>> servers,
         Result<List<ServerAccessTokenDTO>> tokens
-    )> GetAccessiblePlexServersAsync(int plexAccountId);
+        )> GetAccessiblePlexServersAsync(int plexAccountId);
 
     /// <summary>
     /// Retrieves all accessible <see cref="PlexLibrary"/> from this <see cref="PlexServer"/> by the given <see cref="PlexAccount"/>.
     /// </summary>
     /// <param name="plexServerId"></param>
     /// <param name="plexAccountId"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <returns>List of accessible <see cref="PlexLibrary"/>.</returns>
     Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(
         int plexServerId,
@@ -41,7 +41,7 @@ public interface IPlexApiService
     /// Id and PlexServerId are copied over from the input parameter.
     /// </summary>
     /// <param name="plexLibrary"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <returns></returns>
     Task<Result<PlexLibrary>> GetLibraryMediaAsync(
         PlexLibrary plexLibrary,
@@ -64,7 +64,7 @@ public interface IPlexApiService
     /// Fetches all the <see cref="PlexTvShowSeason">Plex TvShow Seasons</see> from the Plex api with the given <see cref="PlexLibrary"/>.
     /// </summary>
     /// <param name="plexLibrary"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <returns></returns>
     Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(
         PlexLibrary plexLibrary,
@@ -76,7 +76,7 @@ public interface IPlexApiService
     /// Fetches all the <see cref="PlexTvShowEpisode">Plex TvShow Episodes</see> from the Plex api with the given <see cref="PlexLibrary"/>.
     /// </summary>
     /// <param name="plexLibrary"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <returns></returns>
     Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(
         PlexLibrary plexLibrary,

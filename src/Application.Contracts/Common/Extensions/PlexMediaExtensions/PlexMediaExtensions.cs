@@ -23,97 +23,93 @@ public static class PlexMediaExtensions
         plexMediaSlim.HasThumb = true;
     }
 
-    public static DownloadTaskMovie MapToDownloadTask(this PlexMovie plexMovie) =>
-        new()
-        {
-            Id = default,
-            Key = plexMovie.Key,
-            DataTotal = 0,
-            DownloadStatus = DownloadStatus.Queued,
-            CreatedAt = DateTime.UtcNow,
-            PlexServer = null,
-            PlexServerId = plexMovie.PlexServerId,
-            PlexLibrary = null,
-            PlexLibraryId = plexMovie.PlexLibraryId,
-            Title = plexMovie.Title,
-            Year = plexMovie.Year,
-            FullTitle = plexMovie.FullTitle,
-            Percentage = 0,
-            DataReceived = 0,
-            DownloadSpeed = 0,
-            FileTransferSpeed = 0,
-            Children = new List<DownloadTaskMovieFile>(),
-        };
+    public static DownloadTaskMovie MapToDownloadTask(this PlexMovie plexMovie) => new()
+    {
+        Id = default,
+        Key = plexMovie.Key,
+        DataTotal = 0,
+        DownloadStatus = DownloadStatus.Queued,
+        CreatedAt = DateTime.UtcNow,
+        PlexServer = null,
+        PlexServerId = plexMovie.PlexServerId,
+        PlexLibrary = null,
+        PlexLibraryId = plexMovie.PlexLibraryId,
+        Title = plexMovie.Title,
+        Year = plexMovie.Year,
+        FullTitle = plexMovie.FullTitle,
+        Percentage = 0,
+        DataReceived = 0,
+        DownloadSpeed = 0,
+        FileTransferSpeed = 0,
+        Children = new List<DownloadTaskMovieFile>(),
+    };
 
-    public static DownloadTaskTvShow MapToDownloadTask(this PlexTvShow plexTvShow) =>
-        new()
-        {
-            Id = default,
-            Key = plexTvShow.Key,
-            DataTotal = 0,
-            DownloadStatus = DownloadStatus.Queued,
-            CreatedAt = DateTime.UtcNow,
-            PlexServer = null,
-            PlexServerId = plexTvShow.PlexServerId,
-            PlexLibrary = null,
-            PlexLibraryId = plexTvShow.PlexLibraryId,
-            Title = plexTvShow.Title,
-            Year = plexTvShow.Year,
-            FullTitle = plexTvShow.FullTitle,
-            Percentage = 0,
-            DataReceived = 0,
-            DownloadSpeed = 0,
-            Children = new List<DownloadTaskTvShowSeason>(),
-            FileTransferSpeed = 0,
-        };
+    public static DownloadTaskTvShow MapToDownloadTask(this PlexTvShow plexTvShow) => new()
+    {
+        Id = default,
+        Key = plexTvShow.Key,
+        DataTotal = 0,
+        DownloadStatus = DownloadStatus.Queued,
+        CreatedAt = DateTime.UtcNow,
+        PlexServer = null,
+        PlexServerId = plexTvShow.PlexServerId,
+        PlexLibrary = null,
+        PlexLibraryId = plexTvShow.PlexLibraryId,
+        Title = plexTvShow.Title,
+        Year = plexTvShow.Year,
+        FullTitle = plexTvShow.FullTitle,
+        Percentage = 0,
+        DataReceived = 0,
+        DownloadSpeed = 0,
+        Children = new List<DownloadTaskTvShowSeason>(),
+        FileTransferSpeed = 0,
+    };
 
-    public static DownloadTaskTvShowSeason MapToDownloadTask(this PlexTvShowSeason plexTvShowSeason) =>
-        new()
-        {
-            Id = default,
-            Key = plexTvShowSeason.Key,
-            DataTotal = 0,
-            DownloadStatus = DownloadStatus.Queued,
-            CreatedAt = DateTime.UtcNow,
-            PlexServer = null,
-            PlexServerId = plexTvShowSeason.PlexServerId,
-            PlexLibrary = null,
-            PlexLibraryId = plexTvShowSeason.PlexLibraryId,
-            Title = plexTvShowSeason.Title,
-            Year = plexTvShowSeason.Year,
-            FullTitle = plexTvShowSeason.FullTitle,
-            Percentage = 0,
-            DataReceived = 0,
-            DownloadSpeed = 0,
-            Children = new List<DownloadTaskTvShowEpisode>(),
-            ParentId = default,
-            Parent = null,
-            FileTransferSpeed = 0,
-        };
+    public static DownloadTaskTvShowSeason MapToDownloadTask(this PlexTvShowSeason plexTvShowSeason) => new()
+    {
+        Id = default,
+        Key = plexTvShowSeason.Key,
+        DataTotal = 0,
+        DownloadStatus = DownloadStatus.Queued,
+        CreatedAt = DateTime.UtcNow,
+        PlexServer = null,
+        PlexServerId = plexTvShowSeason.PlexServerId,
+        PlexLibrary = null,
+        PlexLibraryId = plexTvShowSeason.PlexLibraryId,
+        Title = plexTvShowSeason.Title,
+        Year = plexTvShowSeason.Year,
+        FullTitle = plexTvShowSeason.FullTitle,
+        Percentage = 0,
+        DataReceived = 0,
+        DownloadSpeed = 0,
+        Children = new List<DownloadTaskTvShowEpisode>(),
+        ParentId = default,
+        Parent = null,
+        FileTransferSpeed = 0,
+    };
 
-    public static DownloadTaskTvShowEpisode MapToDownloadTask(this PlexTvShowEpisode plexTvShowEpisode) =>
-        new()
-        {
-            Id = default,
-            Key = plexTvShowEpisode.Key,
-            DataTotal = 0,
-            DownloadStatus = DownloadStatus.Queued,
-            CreatedAt = DateTime.UtcNow,
-            PlexServer = null,
-            PlexServerId = plexTvShowEpisode.PlexServerId,
-            PlexLibrary = null,
-            PlexLibraryId = plexTvShowEpisode.PlexLibraryId,
-            Title = plexTvShowEpisode.Title,
-            Year = plexTvShowEpisode.Year,
-            FullTitle = plexTvShowEpisode.FullTitle,
-            Percentage = 0,
-            DataReceived = 0,
-            DownloadSpeed = 0,
-            Children = new List<DownloadTaskTvShowEpisodeFile>(),
-            ParentId = default,
-            Parent = null,
-            FileTransferSpeed = 0,
-        };
+    public static DownloadTaskTvShowEpisode MapToDownloadTask(this PlexTvShowEpisode plexTvShowEpisode) => new()
+    {
+        Id = default,
+        Key = plexTvShowEpisode.Key,
+        DataTotal = 0,
+        DownloadStatus = DownloadStatus.Queued,
+        CreatedAt = DateTime.UtcNow,
+        PlexServer = null,
+        PlexServerId = plexTvShowEpisode.PlexServerId,
+        PlexLibrary = null,
+        PlexLibraryId = plexTvShowEpisode.PlexLibraryId,
+        Title = plexTvShowEpisode.Title,
+        Year = plexTvShowEpisode.Year,
+        FullTitle = plexTvShowEpisode.FullTitle,
+        Percentage = 0,
+        DataReceived = 0,
+        DownloadSpeed = 0,
+        Children = new List<DownloadTaskTvShowEpisodeFile>(),
+        ParentId = default,
+        Parent = null,
+        FileTransferSpeed = 0,
+    };
 
     public static List<DownloadTaskMovieFile> MapToDownloadTask(this PlexMediaData plexMediaData, PlexMovie plexMovie)
     {
@@ -182,10 +178,10 @@ public static class PlexMediaExtensions
                     DownloadRootPath = string.Empty,
                     DestinationRootPath = string.Empty,
                     MovieFolder = string.Empty,
-                    TvShowFolder = plexTvShowEpisode.TvShow.Title.SanitizeFolderName(),
-                    SeasonFolder = plexTvShowEpisode.TvShowSeason.Title.SanitizeFolderName(),
+                    TvShowFolder = plexTvShowEpisode.TvShow?.Title.SanitizeFolderName(),
+                    SeasonFolder = plexTvShowEpisode.TvShowSeason?.Title.SanitizeFolderName(),
                 },
-                DownloadWorkerTasks = new List<DownloadWorkerTask>(),
+                DownloadWorkerTasks = [],
                 Parent = null,
                 ParentId = default,
                 FullTitle = $"{plexTvShowEpisode.FullTitle}/{part.File.GetFileName()}",

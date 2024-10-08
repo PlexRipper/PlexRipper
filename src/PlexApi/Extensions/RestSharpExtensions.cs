@@ -12,14 +12,13 @@ public static class RestSharpExtensions
 {
     #region Properties
 
-    public static JsonSerializerOptions SerializerOptions =>
-        new()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true,
-            WriteIndented = true,
-            Converters = { new LongToDateTime() },
-        };
+    public static JsonSerializerOptions SerializerOptions => new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+        WriteIndented = true,
+        Converters = { new LongToDateTime() },
+    };
 
     #endregion
 
@@ -34,7 +33,7 @@ public static class RestSharpExtensions
     /// <param name="request">The <see cref="RestRequest"/> to send.</param>
     /// <param name="retryCount">How many times should the request be attempted before giving up.</param>
     /// <param name="action"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <typeparam name="T">The parsed type of the response when successful.</typeparam>
     /// <returns>Returns Result.Ok() whether the response was successful or failed, on unhandled exception will return Result.Fail()</returns>
     public static async Task<RestResponse<T>> SendRequestWithPolly<T>(

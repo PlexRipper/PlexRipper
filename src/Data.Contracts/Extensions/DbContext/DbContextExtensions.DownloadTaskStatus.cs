@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Logging;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Domain;
 
@@ -113,11 +114,11 @@ public static partial class DbContextExtensions
             {
                 if (downloadTaskBase == null)
                 {
-                    _log.Error(
-                        "DownloadTaskBase is null in {DetermineDownloadStatus}",
-                        nameof(DetermineDownloadStatus),
-                        0
-                    );
+                    _log.Here()
+                        .Error(
+                            "DownloadTaskBase is null in {DetermineDownloadStatus}",
+                            nameof(DetermineDownloadStatus)
+                        );
                     return;
                 }
 

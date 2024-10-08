@@ -72,12 +72,12 @@ public class FileMergeStreamProvider : IFileMergeStreamProvider
                 }
             }
 
-            _log.Debug(
-                "The file at {FilePath} has been merged into the single media file at {DestinationPath}",
-                filePath,
-                fileTask.DestinationFilePath,
-                0
-            );
+            _log.Here()
+                .Debug(
+                    "The file at {FilePath} has been merged into the single media file at {DestinationPath}",
+                    filePath,
+                    fileTask.DestinationFilePath
+                );
             _log.Debug("Deleting file {FilePath} since it has been merged already", filePath);
             _fileSystem.DeleteFile(filePath);
         }

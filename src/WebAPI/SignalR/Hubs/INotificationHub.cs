@@ -11,7 +11,7 @@ public interface INotificationHub
     ///  Sends a notification to the front-end.
     /// </summary>
     /// <param name="notification"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <returns></returns>
     Task Notification(NotificationDTO notification, CancellationToken cancellationToken = default);
 
@@ -19,7 +19,7 @@ public interface INotificationHub
     ///  Refreshes the notification.
     /// </summary>
     /// <param name="dataType"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <returns></returns>
     Task RefreshNotification(DataType dataType, CancellationToken cancellationToken = default);
 }

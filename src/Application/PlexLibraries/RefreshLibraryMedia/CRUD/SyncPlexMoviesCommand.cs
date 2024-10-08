@@ -26,12 +26,12 @@ public class SyncPlexMoviesCommandValidator : AbstractValidator<SyncPlexMoviesCo
             });
 
         stopWatch.Stop();
-        log.Debug(
-            "Finished validating {ClassName} in {TotalMilliseconds} milliseconds",
-            nameof(SyncPlexMoviesCommandValidator),
-            stopWatch.Elapsed.TotalMilliseconds,
-            0
-        );
+        log.Here()
+            .Debug(
+                "Finished validating {ClassName} in {TotalMilliseconds} milliseconds",
+                nameof(SyncPlexMoviesCommandValidator),
+                stopWatch.Elapsed.TotalMilliseconds
+            );
     }
 }
 
@@ -121,8 +121,7 @@ public record CrudMoviesReport
 
     public int DeletedMovies { get; set; }
 
-    public override string ToString() =>
-        $@"
+    public override string ToString() => $@"
         CreatedMovies: {CreatedMovies}
         UpdatedMovies: {UpdatedMovies}
         DeletedMovies: {DeletedMovies}";

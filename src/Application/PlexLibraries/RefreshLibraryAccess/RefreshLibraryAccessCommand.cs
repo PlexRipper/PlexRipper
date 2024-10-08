@@ -97,12 +97,12 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
         {
             var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, cancellationToken);
             var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
-            _log.Debug(
-                "Retrieving accessible PlexLibraries for plexServer with name: {PlexServerName} by using Plex account: {PlexAccountName}",
-                plexServerName,
-                plexAccountName,
-                0
-            );
+            _log.Here()
+                .Debug(
+                    "Retrieving accessible PlexLibraries for plexServer with name: {PlexServerName} by using Plex account: {PlexAccountName}",
+                    plexServerName,
+                    plexAccountName
+                );
 
             var libraries = await _plexServiceApi.GetLibrarySectionsAsync(
                 plexServerId,
@@ -111,23 +111,23 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
             );
             if (libraries.IsFailed)
             {
-                _log.Error(
-                    "Failed to retrieve libraries for PlexServer {PlexServerName} and PlexAccount {PlexAccountName}",
-                    plexServerName,
-                    plexAccountName,
-                    0
-                );
+                _log.Here()
+                    .Error(
+                        "Failed to retrieve libraries for PlexServer {PlexServerName} and PlexAccount {PlexAccountName}",
+                        plexServerName,
+                        plexAccountName
+                    );
 
                 return libraries.ToResult().LogError();
             }
 
             if (!libraries.Value.Any())
             {
-                var msg = _log.Warning(
+                var msg = _log.Here()
+                    .Warning(
                         "PlexServer with name {PlexServerName} returned no Plex libraries for Plex account {plexAccountName}",
                         plexServerName,
-                        plexAccountName,
-                        0
+                        plexAccountName
                     )
                     .ToLogString();
                 return Result.Fail(msg);

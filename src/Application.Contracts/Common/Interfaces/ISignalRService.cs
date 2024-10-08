@@ -16,7 +16,7 @@ public interface ISignalRService
     /// Sends a <see cref="FileMergeProgress"/> object to the SignalR client in the front-end.
     /// </summary>
     /// <param name="fileMergeProgress">The <see cref="FileMergeProgress"/> object to send.</param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     Task SendFileMergeProgressUpdateAsync(
         FileMergeProgress fileMergeProgress,
         CancellationToken cancellationToken = default
@@ -40,7 +40,7 @@ public interface ISignalRService
     ///  Sends a download progress update to the front-end.
     /// </summary>
     /// <param name="downloadTasks"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <returns></returns>
     Task SendDownloadProgressUpdateAsync(
         List<DownloadTaskGeneric> downloadTasks,
@@ -67,7 +67,7 @@ public interface ISignalRService
     ///  Sends a refresh notification to the front-end.
     /// </summary>
     /// <param name="dataType"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <returns></returns>
     Task SendRefreshNotificationAsync(DataType dataType, CancellationToken cancellationToken = default);
 

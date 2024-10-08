@@ -61,31 +61,31 @@ public class PlexLibrary : BaseEntity
     /// Gets the total file size of the nested media.
     /// </summary>
     [Column(Order = 10)]
-    public long MediaSize { get; private set; } = 0;
+    public long MediaSize { get; private set; }
 
     /// <summary>
     /// Gets the total <see cref="PlexMovie"/> count.
     /// </summary>
     [Column(Order = 11)]
-    public int MovieCount { get; private set; } = 0;
+    public int MovieCount { get; private set; }
 
     /// <summary>
     /// Gets the total <see cref="PlexTvShow"/> count.
     /// </summary>
     [Column(Order = 12)]
-    public int TvShowCount { get; private set; } = 0;
+    public int TvShowCount { get; private set; }
 
     /// <summary>
     /// Gets the total <see cref="PlexTvShowSeason"/> count of all <see cref="PlexTvShow">PlexTvShows</see> in this library.
     /// </summary>
     [Column(Order = 13)]
-    public int SeasonCount { get; private set; } = 0;
+    public int SeasonCount { get; private set; }
 
     /// <summary>
     /// Gets the total <see cref="PlexTvShowEpisode"/> count of all <see cref="PlexTvShow">PlexTvShows</see> in this library.
     /// </summary>
     [Column(Order = 14)]
-    public int EpisodeCount { get; private set; } = 0;
+    public int EpisodeCount { get; private set; }
 
     #endregion
 

@@ -2,7 +2,7 @@ using LukeHagar.PlexAPI.SDK.Models.Requests;
 
 namespace PlexRipper.PlexApi;
 
-public static partial class PlexMetaDataMapper
+public static class PlexMetaDataMapper
 {
     #region Single Conversions
 

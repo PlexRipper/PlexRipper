@@ -51,7 +51,7 @@ public static partial class ResultExtensions
     private static void LogByType(
         LogEventLevel logLevel,
         string messageTemplate,
-        Exception e,
+        Exception? e,
         string memberName = "",
         string sourceFilePath = "",
         int sourceLineNumber = 0

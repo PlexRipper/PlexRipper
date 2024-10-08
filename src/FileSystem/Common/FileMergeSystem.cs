@@ -17,18 +17,10 @@ public class FileMergeSystem : IFileMergeSystem
         _directorySystem = directorySystem;
     }
 
-    public bool FileExists(string path)
-    {
-        return _fileSystem.FileExists(path);
-    }
+    public bool FileExists(string path) => _fileSystem.FileExists(path);
 
-    public Result DeleteDirectoryFromFilePath(string path)
-    {
-        return _directorySystem.DeleteDirectoryFromFilePath(path);
-    }
+    public Result DeleteDirectoryFromFilePath(string path) => _directorySystem.DeleteDirectoryFromFilePath(path);
 
-    public Result DeleteAllFilesFromDirectory(string directory)
-    {
-        return _directorySystem.DeleteAllFilesFromDirectory(directory);
-    }
+    public Result DeleteAllFilesFromDirectory(string directory) =>
+        _directorySystem.DeleteAllFilesFromDirectory(directory);
 }

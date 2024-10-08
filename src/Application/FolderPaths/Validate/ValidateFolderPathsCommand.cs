@@ -18,13 +18,11 @@ public class ValidateFolderPathsValidator : AbstractValidator<ValidateFolderPath
 
 public class ValidateFolderPathsHandler : IRequestHandler<ValidateFolderPathsCommand, Result>
 {
-    private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IDirectorySystem _directorySystem;
 
-    public ValidateFolderPathsHandler(ILog log, IPlexRipperDbContext dbContext, IDirectorySystem directorySystem)
+    public ValidateFolderPathsHandler(IPlexRipperDbContext dbContext, IDirectorySystem directorySystem)
     {
-        _log = log;
         _dbContext = dbContext;
         _directorySystem = directorySystem;
     }
@@ -36,9 +34,11 @@ public class ValidateFolderPathsHandler : IRequestHandler<ValidateFolderPathsCom
         if (command.MediaType is PlexMediaType.None or PlexMediaType.Unknown)
             folderPaths = await _dbContext.FolderPaths.ToListAsync(cancellationToken);
         else
+        {
             folderPaths = await _dbContext
                 .FolderPaths.Where(x => x.MediaType == command.MediaType)
                 .ToListAsync(cancellationToken);
+        }
 
         var errors = new List<IError>();
         foreach (var folderPath in folderPaths)

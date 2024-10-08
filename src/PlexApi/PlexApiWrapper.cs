@@ -3,7 +3,6 @@ using Application.Contracts;
 using LukeHagar.PlexAPI.SDK;
 using LukeHagar.PlexAPI.SDK.Models.Errors;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
-using LukeHagar.PlexAPI.SDK.Utils.Retries;
 using PlexApi.Contracts;
 using ILog = Logging.Interface.ILog;
 using Type = LukeHagar.PlexAPI.SDK.Models.Requests.Type;
@@ -181,7 +180,7 @@ public class PlexApiWrapper
 
         var statusCode = responseResult.IsSuccess
             ? responseResult.Value.StatusCode
-            : responseResult.GetStatusCodeReason().StatusCode();
+            : responseResult.GetStatusCodeReason().GetStatusCode();
         var statusMessage = statusCode switch
         {
             200 => "The Plex server is online!",

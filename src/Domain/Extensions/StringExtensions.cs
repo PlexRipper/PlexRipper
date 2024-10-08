@@ -61,7 +61,7 @@ public static partial class StringExtensions
         return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
     }
 
-    public static bool IsIpAddress(this string ipAddress) => IPAddress.TryParse(ipAddress, out var parsedIp);
+    public static bool IsIpAddress(this string ipAddress) => IPAddress.TryParse(ipAddress, out var _);
 
     private static string GetProperCapitalization(DirectoryInfo dirInfo)
     {

@@ -48,7 +48,6 @@ public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
     public void ShouldCreateConfigFile_WhenConfigFileDoesNotExists()
     {
         // Arrange
-        var settingsModel = FakeData.GetSettingsModel().Generate();
         mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/");

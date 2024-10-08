@@ -63,7 +63,18 @@ public class FileMergeJob : IJob
         try
         {
             var fileTask = await _dbContext.FileTasks.GetAsync(fileTaskId, token);
+            if (fileTask == null)
+            {
+                ResultExtensions.EntityNotFound(nameof(FileTask), fileTaskId).LogError();
+                return;
+            }
+
             var downloadTask = await _dbContext.GetDownloadTaskAsync(fileTask.DownloadTaskKey, token);
+            if (downloadTask is null)
+            {
+                ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), fileTaskId).LogError();
+                return;
+            }
 
             _log.Information(
                 "Executing {NameOfFileMergeJob} with name {FileTaskFileName} and id {FileTaskId}",
@@ -108,7 +119,7 @@ public class FileMergeJob : IJob
                     return;
                 }
 
-            Stream outputStream = null;
+            Stream? outputStream = null;
 
             try
             {

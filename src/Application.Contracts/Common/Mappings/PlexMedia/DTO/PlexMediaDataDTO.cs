@@ -1,32 +1,32 @@
 ﻿namespace Application.Contracts;
 
-public class PlexMediaDataDTO
+public record PlexMediaDataDTO
 {
-    public string MediaFormat { get; set; }
+    public required string MediaFormat { get; init; }
 
-    public long Duration { get; set; }
+    public required long Duration { get; init; }
 
-    public string VideoResolution { get; set; }
+    public required string VideoResolution { get; init; }
 
-    public int Width { get; set; }
+    public required int Width { get; init; }
 
-    public int Height { get; set; }
+    public required int Height { get; init; }
 
-    public int Bitrate { get; set; }
+    public required int Bitrate { get; init; }
 
-    public string VideoCodec { get; set; }
+    public required string VideoCodec { get; init; }
 
-    public string VideoFrameRate { get; set; }
+    public required string VideoFrameRate { get; init; }
 
-    public double AspectRatio { get; set; }
+    public required double AspectRatio { get; init; }
 
-    public string VideoProfile { get; set; }
+    public required string VideoProfile { get; init; }
 
-    public string AudioProfile { get; set; }
+    public required string AudioProfile { get; init; }
 
-    public string AudioCodec { get; set; }
+    public required string AudioCodec { get; init; }
 
-    public int AudioChannels { get; set; }
+    public required int AudioChannels { get; init; }
 
-    public List<PlexMediaDataPartDTO> Parts { get; set; }
+    public required List<PlexMediaDataPartDTO> Parts { get; init; }
 }

@@ -1,10 +1,10 @@
 namespace PlexRipper.PlexApi;
 
-public class PlexErrorDTO
+public record PlexErrorDTO
 {
-    public int Code { get; set; }
+    public required int Code { get; init; }
 
-    public string Message { get; set; }
+    public required string Message { get; init; }
 
-    public int Status { get; set; }
+    public required int Status { get; init; }
 }

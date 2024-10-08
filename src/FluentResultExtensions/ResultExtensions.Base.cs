@@ -4,6 +4,7 @@
 using Logging;
 using Logging.Interface;
 
+// ReSharper disable once CheckNamespace
 namespace FluentResults;
 
 public static partial class ResultExtensions

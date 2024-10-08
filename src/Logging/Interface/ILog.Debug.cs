@@ -41,7 +41,7 @@ public partial interface ILog
     /// </example>
     [MessageTemplateFormatMethod("messageTemplate")]
     LogMetaData Debug(
-        Exception exception,
+        Exception? exception,
         string messageTemplate,
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",

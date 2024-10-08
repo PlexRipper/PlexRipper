@@ -1,7 +1,7 @@
 using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data.UnitTests.Extensions.DbContext.DbSetExtensions.DownloadTasks;
+namespace Data.UnitTests;
 
 public class DetermineDownloadStatus_UnitTests : BaseUnitTest
 {
@@ -41,7 +41,6 @@ public class DetermineDownloadStatus_UnitTests : BaseUnitTest
             config.TvShowEpisodeCount = 5;
         });
 
-        var dbContext = IDbContext;
         var downloadTasks = await IDbContext.DownloadTaskTvShow.AsTracking().IncludeAll().ToListAsync();
         var downloadTaskTvShowEpisodeFile = downloadTasks[3].Children[2].Children[3].Children[0];
         await IDbContext.SetDownloadStatus(downloadTaskTvShowEpisodeFile.ToKey(), DownloadStatus.Error);

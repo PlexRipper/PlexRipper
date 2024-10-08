@@ -33,4 +33,6 @@ public record DownloadTaskKey
     }
 
     public override int GetHashCode() => HashCode.Combine((int)Type, Id, PlexServerId, PlexLibraryId);
+
+    public override string ToString() => $"{Type} Id: {Id}, Server: {PlexServerId}, Library: {PlexLibraryId}";
 }

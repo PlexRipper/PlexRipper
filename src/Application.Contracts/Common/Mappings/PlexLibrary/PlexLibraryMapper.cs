@@ -49,11 +49,11 @@ public static class PlexLibraryMapper
             Uuid = plexLibrary.Uuid,
             MetaData = null,
             PlexServer = null,
-            DefaultDestination = plexLibrary.DefaultDestination.ToModel(),
+            DefaultDestination = plexLibrary.DefaultDestination?.ToModel() ?? null,
             DefaultDestinationId = plexLibrary.DefaultDestinationId,
-            Movies = new List<PlexMovie>(),
-            TvShows = new List<PlexTvShow>(),
-            PlexAccountLibraries = new List<PlexAccountLibrary>(),
+            Movies = [],
+            TvShows = [],
+            PlexAccountLibraries = [],
             PlexServerId = plexLibrary.PlexServerId,
         };
 

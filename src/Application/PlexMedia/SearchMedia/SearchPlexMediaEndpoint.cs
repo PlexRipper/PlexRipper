@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record SearchPlexMediaRequest()
+public record SearchPlexMediaRequest
 {
     [QueryParam]
     public string Query { get; init; }

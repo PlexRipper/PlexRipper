@@ -11,11 +11,11 @@ public class PlexTvShowEpisode : PlexMedia
 
     #region Relationships
 
-    public PlexTvShow TvShow { get; set; }
+    public PlexTvShow? TvShow { get; set; }
 
     public int TvShowId { get; set; }
 
-    public PlexTvShowSeason TvShowSeason { get; set; }
+    public PlexTvShowSeason? TvShowSeason { get; set; }
 
     public int TvShowSeasonId { get; set; }
 
@@ -24,7 +24,7 @@ public class PlexTvShowEpisode : PlexMedia
     #region Helpers
 
     [NotMapped]
-    public List<PlexMediaData> EpisodeData => MediaData.MediaData ?? new List<PlexMediaData>();
+    public List<PlexMediaData> EpisodeData => MediaData.MediaData;
 
     [NotMapped]
     public override PlexMediaType Type => PlexMediaType.Episode;

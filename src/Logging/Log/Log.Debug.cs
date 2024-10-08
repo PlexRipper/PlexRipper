@@ -22,7 +22,7 @@ public partial class Log : ILog
     /// <inheritdoc/>
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Debug(
-        Exception ex,
+        Exception? ex,
         string messageTemplate,
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",

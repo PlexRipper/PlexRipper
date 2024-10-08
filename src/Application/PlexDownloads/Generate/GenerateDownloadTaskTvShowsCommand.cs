@@ -47,7 +47,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler : IRequestHandler<Generat
         foreach (var downloadMediaDto in plexTvShowList)
         {
             var plexTvShows = await _dbContext
-                .PlexTvShows.IncludeSeasons()
+                .PlexTvShows.Include(x => x.Seasons)
                 .Where(x => downloadMediaDto.MediaIds.Contains(x.Id))
                 .ToListAsync(cancellationToken);
 

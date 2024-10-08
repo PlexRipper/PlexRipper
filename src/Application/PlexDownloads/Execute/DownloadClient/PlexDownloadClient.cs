@@ -89,18 +89,22 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
     /// <returns></returns>
     public async Task<Result> Setup(DownloadTaskKey downloadTaskKey, CancellationToken cancellationToken = default)
     {
-        if (downloadTaskKey is null)
-            return ResultExtensions.IsNull(nameof(downloadTaskKey)).LogError();
+        var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskKey, cancellationToken);
+        if (downloadTask is null)
+        {
+            return ResultExtensions
+                .EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.ToString())
+                .LogWarning();
+        }
 
-        DownloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskKey, cancellationToken);
-
-        if (DownloadTask is null)
-            return ResultExtensions.IsNull(nameof(DownloadTaskGeneric)).LogWarning();
+        DownloadTask = downloadTask;
 
         if (!DownloadTask.DownloadWorkerTasks.Any())
+        {
             return ResultExtensions
                 .IsEmpty($"{nameof(DownloadTaskGeneric)}.{nameof(DownloadTask.DownloadWorkerTasks)}")
                 .LogWarning();
+        }
 
         _downloadWorkers.AddRange(
             DownloadTask.DownloadWorkerTasks.Select(downloadWorkerTask => _downloadWorkerFactory(downloadWorkerTask))
@@ -117,7 +121,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
     /// Starts the download workers for the <see cref="DownloadTaskGeneric"/> given during setup.
     /// </summary>
     /// <returns>Is successful.</returns>
-    public Result Start(CancellationToken cancellationToken = default)
+    public Result Start()
     {
         if (_downloadWorkers.Any(x => x.DownloadWorkerTask.DownloadStatus == DownloadStatus.Downloading))
             return Result.Fail("The PlexDownloadClient is already downloading and can not be started.").LogWarning();
@@ -180,8 +184,10 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
         _downloadSpeedLimitSubscription?.Dispose();
         _downloadWorkerTaskUpdate?.Dispose();
         if (DownloadTask is not null)
+        {
             _log.Here()
                 .Warning("PlexDownloadClient for DownloadTask with Id: {DownloadTaskId} was disposed", DownloadTask.Id);
+        }
     }
 
     #endregion

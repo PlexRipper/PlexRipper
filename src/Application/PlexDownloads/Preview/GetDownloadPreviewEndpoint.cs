@@ -1,5 +1,4 @@
 using Application.Contracts;
-using Data.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -16,14 +15,12 @@ public class GetDownloadPreviewEndpointRequestValidator : Validator<List<Downloa
 
 public class GetDownloadPreviewEndpoint : BaseEndpoint<List<DownloadMediaDTO>, List<DownloadPreviewDTO>>
 {
-    private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
 
     public override string EndpointPath => ApiRoutes.DownloadController + "/preview";
 
-    public GetDownloadPreviewEndpoint(IPlexRipperDbContext dbContext, IMediator mediator)
+    public GetDownloadPreviewEndpoint(IMediator mediator)
     {
-        _dbContext = dbContext;
         _mediator = mediator;
     }
 

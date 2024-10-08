@@ -1,4 +1,3 @@
-#nullable enable
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlexRipper.Domain;

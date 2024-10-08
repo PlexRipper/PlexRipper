@@ -47,15 +47,14 @@ public class GetPlexServerConnectionByIdEndpoint
             .PlexServerConnections.Include(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(5))
             .FirstOrDefaultAsync(x => x.Id == req.PlexServerConnectionId, ct);
 
-        if (plexServerConnection == null)
+        if (plexServerConnection is null)
         {
             await SendFluentResult(
                 ResultExtensions.EntityNotFound(nameof(PlexServerConnection), req.PlexServerConnectionId),
                 ct
             );
-            return;
         }
-
-        await SendFluentResult(Result.Ok(plexServerConnection), x => x.ToDTO(), ct);
+        else
+            await SendFluentResult(Result.Ok(plexServerConnection), x => x.ToDTO(), ct);
     }
 }

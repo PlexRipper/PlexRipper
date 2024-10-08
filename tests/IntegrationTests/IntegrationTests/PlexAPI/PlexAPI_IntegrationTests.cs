@@ -1,6 +1,6 @@
 using PlexRipper.PlexApi;
 
-namespace IntegrationTests;
+namespace IntegrationTests.PlexAPI;
 
 public class PlexAPI_IntegrationTests : BaseIntegrationTests
 {

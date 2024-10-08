@@ -1,6 +1,5 @@
 using Application.Contracts;
 using Data.Contracts;
-using Logging.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,14 +14,12 @@ public record GetAllPlexAccountsEndpointRequest(bool EnabledOnly = false);
 
 public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpointRequest, List<PlexAccountDTO>>
 {
-    private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
 
     public override string EndpointPath => ApiRoutes.PlexAccountController;
 
-    public GetAllPlexAccountsEndpoint(ILog log, IPlexRipperDbContext dbContext)
+    public GetAllPlexAccountsEndpoint(IPlexRipperDbContext dbContext)
     {
-        _log = log;
         _dbContext = dbContext;
     }
 

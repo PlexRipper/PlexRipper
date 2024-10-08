@@ -12,7 +12,15 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
         await SetupDatabase();
 
         // Act
-        var result = await _sut.Setup(null);
+        var result = await _sut.Setup(
+            new DownloadTaskKey
+            {
+                Type = DownloadTaskType.None,
+                Id = default,
+                PlexServerId = 0,
+                PlexLibraryId = 0,
+            }
+        );
 
         // Assert
         result.IsFailed.ShouldBeTrue();

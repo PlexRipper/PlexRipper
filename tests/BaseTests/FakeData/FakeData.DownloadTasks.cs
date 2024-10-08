@@ -270,8 +270,6 @@ public static partial class FakeData
         Action<FakeDataConfig>? options = null
     )
     {
-        var config = FakeDataConfig.FromOptions(options);
-
         return new Faker<DownloadTaskTvShowEpisode>()
             .UseSeed(seed)
             .StrictMode(true)
@@ -300,8 +298,6 @@ public static partial class FakeData
         Action<FakeDataConfig>? options = null
     )
     {
-        var config = FakeDataConfig.FromOptions(options);
-
         return new Faker<DownloadTaskTvShowEpisodeFile>()
             .UseSeed(seed)
             .StrictMode(true)
@@ -326,7 +322,7 @@ public static partial class FakeData
 
     public static Faker<DownloadWorkerTask> GetDownloadWorkerTask(int seed = 0, Action<FakeDataConfig>? options = null)
     {
-        var config = FakeDataConfig.FromOptions(options);
+        FakeDataConfig.FromOptions(options);
 
         var partIndex = 1;
         return new Faker<DownloadWorkerTask>()

@@ -1,5 +1,4 @@
 ﻿using Logging.Interface;
-using Serilog.Events;
 using Serilog.Sinks.TestCorrelator;
 
 namespace Logging.UnitTests;
@@ -9,16 +8,14 @@ public class LogMasking_UnitTests : BaseUnitTest<LogMasking_UnitTests>
     #region Setup/Teardown
 
     public LogMasking_UnitTests(ITestOutputHelper output)
-        : base(output, LogEventLevel.Verbose)
+        : base(output)
     {
         log = LogManager.CreateLogInstance<Log_UnitTests>(output);
-        logEmpty = LogManager.CreateLogInstance(output);
     }
 
     #endregion
 
     private ILog<Log_UnitTests> log;
-    private ILog logEmpty;
 
     [Fact]
     public void ShouldHaveMaskedData_WhenLogPropertyIsConfiguredToBeMasked()

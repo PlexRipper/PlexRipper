@@ -4,7 +4,6 @@ using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using Data.Contracts;
 using EFCore.BulkExtensions;
 using Environment;
-using Logging.Interface;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -16,8 +15,6 @@ namespace PlexRipper.Data;
 
 public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlexRipperDbContextDatabase
 {
-    private readonly ILog<PlexRipperDbContext> _log;
-
     #region Properties
 
     #region Tables
@@ -127,21 +124,15 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
 
     #region Constructors
 
-    public PlexRipperDbContext(ILog<PlexRipperDbContext> log, IPathProvider pathProvider)
+    public PlexRipperDbContext(IPathProvider pathProvider)
     {
-        _log = log;
         DatabaseName = pathProvider.DatabaseName;
     }
 
-    public PlexRipperDbContext(
-        ILog<PlexRipperDbContext> log,
-        DbContextOptions<PlexRipperDbContext> options,
-        string databaseName
-    )
+    public PlexRipperDbContext(DbContextOptions<PlexRipperDbContext> options, string databaseName)
         : base(options)
     {
         DatabaseName = databaseName;
-        _log = log;
         Database.OpenConnection();
         Database.EnsureCreated();
     }

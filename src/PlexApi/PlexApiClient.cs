@@ -110,7 +110,7 @@ public class PlexApiClient : ISpeakeasyHttpClient
                 new Context { { "RequestUri", requestUri } }
             );
         }
-        catch (TimeoutRejectedException _)
+        catch (TimeoutRejectedException)
         {
             _log.Error("Request to {Url} timed out.", requestUri);
             response = new HttpResponseMessage

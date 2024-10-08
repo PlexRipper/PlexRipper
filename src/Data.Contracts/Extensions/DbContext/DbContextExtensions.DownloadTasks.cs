@@ -23,7 +23,7 @@ public static partial class DbContextExtensions
         var tokenResult = await dbContext.GetPlexServerTokenAsync(plexServerId, cancellationToken);
         if (tokenResult.IsFailed)
         {
-            _log.Error("Could not find a valid token for server {ServerName}", plexServer.Name);
+            _log.Error("Could not find a valid token for server {ServerName}", plexServer?.Name ?? "Unknown");
             return tokenResult.ToResult();
         }
 

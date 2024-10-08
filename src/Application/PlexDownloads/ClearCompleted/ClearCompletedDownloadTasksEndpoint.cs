@@ -31,9 +31,9 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
 
     public override async Task HandleAsync(List<Guid> downloadTaskIds, CancellationToken ct)
     {
-        var hasDownloadTaskIds = downloadTaskIds != null && downloadTaskIds.Any();
+        var hasDownloadTaskIds = downloadTaskIds.Any();
 
-        var totalRowsDeleted = 0;
+        int totalRowsDeleted;
         if (hasDownloadTaskIds)
             totalRowsDeleted = await ClearByGuids(downloadTaskIds, ct);
         else

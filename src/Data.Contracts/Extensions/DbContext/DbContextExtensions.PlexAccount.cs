@@ -66,6 +66,8 @@ public static partial class DbContextExtensions
         if (mainAccount is not null)
             return Result.Ok(mainAccount);
 
+        _log.Warning("No account could be chosen to connect to PlexServer with id: {PlexServerId}", plexServerId);
+
         return Result.Fail($"No account could be chosen to connect to PlexServer with id: {plexServerId}").LogError();
     }
 

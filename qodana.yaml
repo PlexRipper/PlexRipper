@@ -4,5 +4,7 @@ profile:
   name: qodana.recommended
 include:
   - name: CheckDependencyLicenses
+exclude:
+  - name: RedundantUsingDirective.Global
 dot-net:
     solution: PlexRipper.sln

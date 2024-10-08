@@ -18,14 +18,14 @@ public static class DataFormat
         var kiloByteSize = byteSize / 1024D;
         var megaByteSize = kiloByteSize / 1024D;
         var gigaByteSize = megaByteSize / 1024D;
-        if (byteSize < 1024)
-            return string.Format(NumberFormat, "{0} B", byteSize);
-        if (byteSize < 1048576)
-            return string.Format(NumberFormat, "{0:0.00} kB", kiloByteSize);
-        if (byteSize < 1073741824)
-            return string.Format(NumberFormat, "{0:0.00} MB", megaByteSize);
-
-        return string.Format(NumberFormat, "{0:0.00} GB", gigaByteSize);
+        return byteSize switch
+        {
+            < 1024 => string.Format(NumberFormat, "{0} B", byteSize),
+            < 1048576 => string.Format(NumberFormat, "{0:0.00} kB", kiloByteSize),
+            var _ => byteSize < 1073741824
+                ? string.Format(NumberFormat, "{0:0.00} MB", megaByteSize)
+                : string.Format(NumberFormat, "{0:0.00} GB", gigaByteSize),
+        };
     }
 
     /// <summary>
@@ -73,7 +73,7 @@ public static class DataFormat
 
         try
         {
-            return (decimal)Math.Round((bytesReceived / (double)totalBytes) * 100, 2, MidpointRounding.AwayFromZero);
+            return (decimal)Math.Round(bytesReceived / (double)totalBytes * 100, 2, MidpointRounding.AwayFromZero);
         }
         catch (Exception e)
         {
@@ -104,38 +104,9 @@ public static class DataFormat
     /// <param name="bytesReceived"></param>
     /// <param name="elapsedTimeInSeconds"></param>
     /// <returns></returns>
-    public static int GetTransferSpeed(long bytesReceived, double elapsedTimeInSeconds)
-    {
-        return elapsedTimeInSeconds <= 0 ? 0 : (int)Math.Round(bytesReceived / elapsedTimeInSeconds, 2);
-    }
+    public static int GetTransferSpeed(long bytesReceived, double elapsedTimeInSeconds) =>
+        elapsedTimeInSeconds <= 0 ? 0 : (int)Math.Round(bytesReceived / elapsedTimeInSeconds, 2);
 
-    public static long GetTimeRemaining(long BytesRemaining, double downloadSpeed)
-    {
-        if (downloadSpeed <= 0)
-            return 0;
-
-        return Convert.ToInt64(Math.Floor(BytesRemaining / downloadSpeed));
-    }
-
-    /// <summary>
-    /// Returns a random priority based on the Date of creation.
-    /// </summary>
-    /// <returns></returns>
-    public static long GetPriority()
-    {
-        return Convert.ToInt64((DateTime.UtcNow - DateTime.UnixEpoch).TotalSeconds);
-    }
-
-    /// <summary>
-    /// Returns a list of priorities based on the Date of creation.
-    /// </summary>
-    /// <returns></returns>
-    public static List<long> GetPriority(int count)
-    {
-        var list = new List<long>();
-        for (var i = 0; i < count; i++)
-            list.Add(Convert.ToInt64((DateTime.UtcNow - DateTime.UnixEpoch).TotalSeconds) + i);
-
-        return list;
-    }
+    public static long GetTimeRemaining(long bytesRemaining, double downloadSpeed) =>
+        downloadSpeed <= 0 ? 0 : Convert.ToInt64(Math.Floor(bytesRemaining / downloadSpeed));
 }

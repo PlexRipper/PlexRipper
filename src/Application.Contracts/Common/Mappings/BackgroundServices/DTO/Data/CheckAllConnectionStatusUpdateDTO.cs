@@ -1,6 +1,6 @@
 namespace Application.Contracts;
 
-public record CheckAllConnectionStatusUpdateDTO()
+public record CheckAllConnectionStatusUpdateDTO
 {
     public int PlexServerId { get; init; }
 

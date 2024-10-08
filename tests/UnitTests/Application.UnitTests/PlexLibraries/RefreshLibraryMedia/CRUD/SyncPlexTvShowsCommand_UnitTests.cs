@@ -197,10 +197,6 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
         result.IsSuccess.ShouldBeTrue();
         result2.IsSuccess.ShouldBeTrue();
 
-        var tvShowsDb = IDbContext.PlexTvShows.Select(x => x.Key).ToHashSet();
-        var seasonDb = IDbContext.PlexTvShowSeason.Select(x => x.Key).ToHashSet();
-        var episodesDb = IDbContext.PlexTvShowEpisodes.Select(x => x.Key).ToHashSet();
-
         VerifyKeys(newTvShows);
     }
 

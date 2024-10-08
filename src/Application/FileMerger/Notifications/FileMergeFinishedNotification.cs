@@ -26,6 +26,11 @@ public class FileMergeFinishedHandler : INotificationHandler<FileMergeFinishedNo
     public async Task Handle(FileMergeFinishedNotification notification, CancellationToken cancellationToken)
     {
         var fileTask = await _dbContext.FileTasks.GetAsync(notification.FileTaskId, cancellationToken);
+        if (fileTask is null)
+        {
+            ResultExtensions.EntityNotFound(nameof(FileTask), notification.FileTaskId).LogError();
+            return;
+        }
 
         var downloadTask = await _dbContext.GetDownloadTaskAsync(
             fileTask.DownloadTaskId,

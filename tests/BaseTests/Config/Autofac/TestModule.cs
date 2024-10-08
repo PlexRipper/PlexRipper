@@ -37,8 +37,6 @@ public class TestModule : Module
         builder.RegisterType<MockFileMergeSystem>().As<IFileMergeSystem>().SingleInstance();
         builder.RegisterType<MockConfigManager>().As<IConfigManager>().SingleInstance();
 
-        builder.RegisterType<TestLoggingClass>().SingleInstance();
-
         builder.RegisterType<MockSignalRService>().As<ISignalRService>().SingleInstance();
 
         SetMockedDependencies(builder);

@@ -51,7 +51,10 @@ public class CreateFolderPathEndpoint : BaseEndpoint<CreateFolderPathEndpointReq
         await _dbContext.FolderPaths.AddAsync(folderPath, ct);
         await _dbContext.SaveChangesAsync(ct);
 
-        folderPath = await _dbContext.FolderPaths.GetAsync(folderPath.Id, ct);
-        await SendFluentResult(Result.Ok(folderPath), path => path.ToDTO(), ct);
+        var folderPathDb = await _dbContext.FolderPaths.GetAsync(folderPath.Id, ct);
+        if (folderPathDb is null)
+            await SendFluentResult(ResultExtensions.EntityNotFound(nameof(FolderPath), folderPath.Id), ct);
+        else
+            await SendFluentResult(Result.Ok(folderPathDb), x => x.ToDTO(), ct);
     }
 }

@@ -100,9 +100,6 @@ public static partial class FakeData
 
     public static Faker<PlexMovie> GetPlexMovies(int seed = 0, Action<FakeDataConfig>? options = null)
     {
-        var movieIds = new List<int>();
-        var movieKeys = new List<int>();
-
         return new Faker<PlexMovie>()
             .ApplyBasePlexMedia(seed, options)
             .StrictMode(true)

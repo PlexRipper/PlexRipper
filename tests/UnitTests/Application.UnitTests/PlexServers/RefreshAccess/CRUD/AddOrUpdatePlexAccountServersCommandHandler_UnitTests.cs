@@ -39,7 +39,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         foreach (var serverAccessToken in serverAccessTokens)
             plexAccountServers
                 .Any(x =>
-                    x.PlexServer.MachineIdentifier == serverAccessToken.MachineIdentifier
+                    x.PlexServer?.MachineIdentifier == serverAccessToken.MachineIdentifier
                     && x.AuthToken == serverAccessToken.AccessToken
                     && x.PlexAccountId == plexAccount.Id
                 )
@@ -86,7 +86,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         foreach (var serverAccessToken in serverAccessTokens)
             plexAccountServers
                 .Any(x =>
-                    x.PlexServer.MachineIdentifier == serverAccessToken.MachineIdentifier
+                    x.PlexServer?.MachineIdentifier == serverAccessToken.MachineIdentifier
                     && x.AuthToken == "######"
                     && x.PlexAccountId == plexAccount.Id
                 )
@@ -128,7 +128,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
         foreach (var serverAccessToken in serverAccessTokens)
             plexAccountServers
                 .Any(x =>
-                    x.PlexServer.MachineIdentifier == serverAccessToken.MachineIdentifier
+                    x.PlexServer?.MachineIdentifier == serverAccessToken.MachineIdentifier
                     && x.PlexAccountId == plexAccount.Id
                 )
                 .ShouldBeTrue();

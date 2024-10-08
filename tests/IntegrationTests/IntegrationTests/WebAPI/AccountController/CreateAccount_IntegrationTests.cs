@@ -18,16 +18,13 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         var libraryCount = 3;
         await CreateContainer(config =>
         {
-            config.DatabaseOptions = x =>
-            {
-                x.PlexLibraryCount = libraryCount;
-            };
+            config.DatabaseOptions = x => { x.PlexLibraryCount = libraryCount; };
             config.PlexMockApiOptions = x =>
             {
                 x.MockServers.Add(
                     new PlexMockServerConfig
                     {
-                        FakeDataConfig = _ => new FakeDataConfig { PlexLibraryCount = libraryCount },
+                        FakeDataConfig = apiConfig => { apiConfig.LibraryCount = libraryCount; },
                     }
                 );
             };

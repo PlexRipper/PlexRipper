@@ -26,6 +26,7 @@ public class SettingsController_Get_Settings_IntegrationTests : BaseIntegrationT
         // Assert
         var result = response.Result;
         result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
         var settingsModel = result.Value.ToModel();
         var responseSettings = JsonSerializer.Serialize(settingsModel, DefaultJsonSerializerOptions.ConfigCapitalized);
         var defaultSettings = JsonSerializer.Serialize(

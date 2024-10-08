@@ -6,10 +6,7 @@ public enum MessageTypes
 {
     [EnumMember(Value = nameof(LibraryProgress))]
     LibraryProgress = 0,
-
-    [EnumMember(Value = nameof(DownloadTaskCreationProgress))]
-    DownloadTaskCreationProgress = 1,
-
+    
     [EnumMember(Value = nameof(DownloadTaskUpdate))]
     DownloadTaskUpdate = 2,
 

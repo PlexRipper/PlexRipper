@@ -19,7 +19,9 @@ public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest
         });
 
         var plexAccount = IDbContext.PlexAccounts.FirstOrDefault();
+        plexAccount.ShouldNotBeNull();
         var plexServer = IDbContext.PlexServers.FirstOrDefault();
+        plexServer.ShouldNotBeNull();
 
         var plexLibraries = FakeData.GetPlexLibrary(656324).Generate(5);
         foreach (var plexLibrary in plexLibraries)
@@ -67,6 +69,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest
         plexServer.ShouldNotBeNull();
         var plexLibraries = dbContext.PlexLibraries.ToList();
         var plexAccount = dbContext.PlexAccounts.FirstOrDefault();
+        plexAccount.ShouldNotBeNull();
         var updatedTime = DateTime.Now;
 
         // Mimic API data

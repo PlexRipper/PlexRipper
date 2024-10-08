@@ -1,15 +1,12 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Domain.Validators;
 
 namespace PlexRipper.Application.UnitTests;
 
 public class GenerateDownloadTaskTvShowsCommandHandler_UnitTests
     : BaseUnitTest<GenerateDownloadTaskTvShowsCommandHandler>
 {
-    private DownloadTaskTvShowValidator validator = new();
-
     public GenerateDownloadTaskTvShowsCommandHandler_UnitTests(ITestOutputHelper output)
         : base(output) { }
 

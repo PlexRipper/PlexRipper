@@ -17,7 +17,7 @@ public class PlexMockServer : IDisposable
 {
     private readonly ILog _log = LogManager.CreateLogInstance<PlexMockServer>();
     private readonly PlexMockServerConfig _config;
-    private readonly Action<PlexApiDataConfig> _fakeDataConfig;
+    private readonly Action<PlexApiDataConfig>? _fakeDataConfig;
 
     public PlexMockServer(PlexMockServerConfig? options = null)
     {
@@ -33,18 +33,13 @@ public class PlexMockServer : IDisposable
         );
 
         ServerUri = new Uri(Server.Urls[0]);
-        DownloadUri = new Uri($"{Server.Urls[0]}{PlexMockServerConfig.FileUrl}");
         Setup();
         _log.Debug("Created {NameOfPlexMockServer} with url: {ServerUri}", nameof(PlexMockServer), ServerUri);
     }
 
     public WireMockServer Server { get; }
 
-    public Uri DownloadUri { get; }
-
     public Uri ServerUri { get; }
-
-    public long DownloadFileSizeInBytes => _config.DownloadFileSizeInMb * 1024;
 
     public bool IsStarted => Server.IsStarted;
 

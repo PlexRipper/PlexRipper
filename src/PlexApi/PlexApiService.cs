@@ -407,11 +407,10 @@ public class PlexApiService : IPlexApiService
                 ? metadata.TitleSort
                 : metadata.Title.ToSortTitle();
 
-        _log.Information(
+        _log.Here().Information(
             "Finished getting {MediaCount} media items from library with name {PlexLibraryName}  ",
             mediaList.Count,
-            plexLibrary.Name,
-            0
+            plexLibrary.Name
         );
 
         return Result.Ok(mediaList);

@@ -50,12 +50,12 @@ public class SyncPlexTvShowsCommandValidator : AbstractValidator<SyncPlexTvShows
             });
 
         stopWatch.Stop();
-        log.Debug(
-            "Finished validating {ClassName} in {TotalMilliseconds} milliseconds",
-            nameof(SyncPlexTvShowsCommandValidator),
-            stopWatch.Elapsed.TotalMilliseconds,
-            0
-        );
+        log.Here()
+            .Debug(
+                "Finished validating {ClassName} in {TotalMilliseconds} milliseconds",
+                nameof(SyncPlexTvShowsCommandValidator),
+                stopWatch.Elapsed.TotalMilliseconds
+            );
     }
 }
 
@@ -194,8 +194,7 @@ public record CrudTvShowsReport
 
     public int DeletedEpisodes { get; set; }
 
-    public override string ToString() =>
-        $@"
+    public override string ToString() => $@"
         CreatedTvShows: {CreatedTvShows}
         UpdatedTvShows: {UpdatedTvShows}
         DeletedTvShows: {DeletedTvShows}

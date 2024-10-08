@@ -50,9 +50,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
                 _log.InformationLine("Database was successfully connected!");
                 _log.Information("Database connected at: {DatabasePath}", DatabasePath);
 
-                MigrateDatabase();
-
-                return Result.Ok();
+                return MigrateDatabase();
             }
 
             _log.Error(
@@ -74,7 +72,12 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
             _log.InformationLine("Resetting PlexRipper database now");
             _dbContextDatabase.CloseConnection();
 
-            BackUpDatabase();
+            var backUpResult = BackUpDatabase();
+            if (backUpResult.IsFailed)
+            {
+                _log.ErrorLine("Failed to back-up database");
+                return backUpResult.LogError();
+            }
 
             var deletedResult = _dbContextDatabase.EnsureDeleted();
             if (deletedResult.IsFailed)

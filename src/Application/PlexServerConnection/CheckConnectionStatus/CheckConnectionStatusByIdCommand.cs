@@ -24,7 +24,7 @@ public class CheckConnectionStatusByIdCommandHandler
     private readonly ISignalRService _signalRService;
     private readonly IPlexApiService _plexApiService;
     private readonly IPlexRipperDbContext _dbContext;
-    private PlexServerConnection _plexServerConnection;
+    private PlexServerConnection? _plexServerConnection;
 
     public CheckConnectionStatusByIdCommandHandler(
         ILog log,
@@ -66,7 +66,9 @@ public class CheckConnectionStatusByIdCommandHandler
         // Add plexServer status to DB, the PlexServerStatus table functions as a server log.
         await CreateStatus(serverStatusResult.Value, cancellationToken);
 
-        await StatusTrim(_plexServerConnection.PlexServerId, cancellationToken);
+        var statusTrim = await StatusTrim(_plexServerConnection.PlexServerId, cancellationToken);
+        if (statusTrim.IsFailed)
+            return statusTrim;
 
         return serverStatusResult.Value;
     }
@@ -77,8 +79,11 @@ public class CheckConnectionStatusByIdCommandHandler
     /// <param name="progress"></param>
     private async void Action(PlexApiClientProgress progress)
     {
-        var checkStatusProgress = progress.ToServerConnectionCheckStatusProgress(_plexServerConnection);
-        await _signalRService.SendServerConnectionCheckStatusProgressAsync(checkStatusProgress);
+        if (_plexServerConnection is not null)
+        {
+            var checkStatusProgress = progress.ToServerConnectionCheckStatusProgress(_plexServerConnection);
+            await _signalRService.SendServerConnectionCheckStatusProgressAsync(checkStatusProgress);
+        }
     }
 
     private async Task CreateStatus(PlexServerStatus plexServerStatus, CancellationToken cancellationToken)
@@ -106,13 +111,13 @@ public class CheckConnectionStatusByIdCommandHandler
             .Where(x => x.PlexServerId == plexServerId)
             .ToListAsync(cancellationToken);
 
-        if (serverStatusList.Count > 100)
-        {
-            // All server status are stored chronologically, which means instead of sorting by LastChecked we can do sort by Id.
-            serverStatusList = serverStatusList.OrderByDescending(x => x.Id).ToList();
-            _dbContext.PlexServerStatuses.RemoveRange(serverStatusList.Skip(100));
-            await _dbContext.SaveChangesAsync(cancellationToken);
-        }
+        if (serverStatusList.Count <= 100)
+            return Result.Ok();
+
+        // All server status are stored chronologically, which means instead of sorting by LastChecked we can do sort by id.
+        serverStatusList = serverStatusList.OrderByDescending(x => x.Id).ToList();
+        _dbContext.PlexServerStatuses.RemoveRange(serverStatusList.Skip(100));
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

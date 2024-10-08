@@ -6,7 +6,7 @@ public static class DownloadTaskExtensions
 {
     public static IDownloadTaskProgress Calculate(this DownloadTaskGeneric downloadTask)
     {
-        if (downloadTask.Children is null || !downloadTask.Children.Any())
+        if (!downloadTask.Children.Any())
             return downloadTask;
 
         downloadTask.Children.ForEach(x => x.Calculate());
@@ -26,7 +26,7 @@ public static class DownloadTaskExtensions
 
     public static IDownloadTaskProgress Calculate(this DownloadTaskMovie downloadTask)
     {
-        if (downloadTask.Children is null || !downloadTask.Children.Any())
+        if (!downloadTask.Children.Any())
             return downloadTask;
 
         downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Sum();
@@ -46,7 +46,7 @@ public static class DownloadTaskExtensions
     /// </summary>
     public static IDownloadTaskProgress Calculate(this DownloadTaskTvShow downloadTask)
     {
-        if (downloadTask.Children is null || !downloadTask.Children.Any())
+        if (!downloadTask.Children.Any())
             return downloadTask;
 
         downloadTask.Children.ForEach(x => x.Calculate());
@@ -68,7 +68,7 @@ public static class DownloadTaskExtensions
     /// </summary>
     public static IDownloadTaskProgress Calculate(this DownloadTaskTvShowSeason downloadTask)
     {
-        if (downloadTask.Children is null || !downloadTask.Children.Any())
+        if (!downloadTask.Children.Any())
             return downloadTask;
 
         downloadTask.Children.ForEach(x => x.Calculate());
@@ -90,7 +90,7 @@ public static class DownloadTaskExtensions
     /// </summary>
     public static IDownloadTaskProgress Calculate(this DownloadTaskTvShowEpisode downloadTask)
     {
-        if (downloadTask.Children is null || !downloadTask.Children.Any())
+        if (!downloadTask.Children.Any())
             return downloadTask;
 
         downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Sum();

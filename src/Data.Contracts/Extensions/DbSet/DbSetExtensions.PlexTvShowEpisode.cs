@@ -20,11 +20,5 @@ public static partial class DbSetExtensions
 
     public static IQueryable<PlexTvShowEpisode> IncludePlexServer(
         this IQueryable<PlexTvShowEpisode> plexTvShowEpisode
-    ) => plexTvShowEpisode.Include(x => x.PlexServer).ThenInclude(x => x.PlexServerConnections);
-
-    public static IQueryable<PlexTvShowEpisode> IncludeTvShow(this IQueryable<PlexTvShowEpisode> plexTvShowEpisodes) =>
-        plexTvShowEpisodes.Include(x => x.TvShow);
-
-    public static IQueryable<PlexTvShowEpisode> IncludeSeason(this IQueryable<PlexTvShowEpisode> plexTvShowEpisodes) =>
-        plexTvShowEpisodes.Include(x => x.TvShowSeason);
+    ) => plexTvShowEpisode.Include(x => x.PlexServer).ThenInclude(x => x!.PlexServerConnections);
 }

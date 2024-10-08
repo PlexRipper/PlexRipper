@@ -26,8 +26,8 @@ public interface IPlexApiService
     /// <summary>
     /// Retrieves all accessible <see cref="PlexLibrary"/> from this <see cref="PlexServer"/> by the given <see cref="PlexAccount"/>.
     /// </summary>
-    /// <param name="plexServerId"></param>
-    /// <param name="plexAccountId"></param>
+    /// <param name="plexServerId"> The <see cref="PlexServer"/> to use.</param>
+    /// <param name="plexAccountId"> The <see cref="PlexAccount"/> to use.</param>
     /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <returns>List of accessible <see cref="PlexLibrary"/>.</returns>
     Task<Result<List<PlexLibrary>>> GetLibrarySectionsAsync(
@@ -40,7 +40,8 @@ public interface IPlexApiService
     /// Fetches the PlexLibrary container with either Movies, Series, Music or Photos media depending on the type.
     /// Id and PlexServerId are copied over from the input parameter.
     /// </summary>
-    /// <param name="plexLibrary"></param>
+    /// <param name="plexLibrary"> The <see cref="PlexLibrary"/> to fetch the media from.</param>
+    /// <param name="action"> Progress action callback to notify of connection attempt progress.</param>
     /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <returns></returns>
     Task<Result<PlexLibrary>> GetLibraryMediaAsync(
@@ -63,7 +64,8 @@ public interface IPlexApiService
     /// <summary>
     /// Fetches all the <see cref="PlexTvShowSeason">Plex TvShow Seasons</see> from the Plex api with the given <see cref="PlexLibrary"/>.
     /// </summary>
-    /// <param name="plexLibrary"></param>
+    /// <param name="plexLibrary"> The <see cref="PlexLibrary"/> to fetch the seasons from.</param>
+    /// <param name="action"> Progress action callback to notify of connection attempt progress.</param>
     /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <returns></returns>
     Task<Result<List<PlexTvShowSeason>>> GetAllSeasonsAsync(
@@ -75,7 +77,8 @@ public interface IPlexApiService
     /// <summary>
     /// Fetches all the <see cref="PlexTvShowEpisode">Plex TvShow Episodes</see> from the Plex api with the given <see cref="PlexLibrary"/>.
     /// </summary>
-    /// <param name="plexLibrary"></param>
+    /// <param name="plexLibrary"> The <see cref="PlexLibrary"/> to fetch the episodes from.</param>
+    /// <param name="action"> Progress action callback to notify of connection attempt progress.</param>
     /// <param name="cancellationToken"> The <see cref="CancellationToken"/> to use.</param>
     /// <returns></returns>
     Task<Result<List<PlexTvShowEpisode>>> GetAllEpisodesAsync(

@@ -12,13 +12,14 @@ public static class RestSharpExtensions
 {
     #region Properties
 
-    public static JsonSerializerOptions SerializerOptions => new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        PropertyNameCaseInsensitive = true,
-        WriteIndented = true,
-        Converters = { new LongToDateTime() },
-    };
+    public static JsonSerializerOptions SerializerOptions =>
+        new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true,
+            WriteIndented = true,
+            Converters = { new LongToDateTime() },
+        };
 
     #endregion
 

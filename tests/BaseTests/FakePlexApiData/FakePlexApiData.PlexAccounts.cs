@@ -62,16 +62,17 @@ public partial class FakePlexApiData
             .RuleFor(x => x.BackupCodesCreated, f => f.Random.Bool());
     }
 
-    public static PlexErrorsResponseDTO GetFailedPlexSignInResponse() => new()
-    {
-        Errors =
-        [
-            new PlexErrorDTO
-            {
-                Code = 1001,
-                Message = "User could not be authenticated",
-                Status = 401,
-            },
-        ],
-    };
+    public static PlexErrorsResponseDTO GetFailedPlexSignInResponse() =>
+        new()
+        {
+            Errors =
+            [
+                new PlexErrorDTO
+                {
+                    Code = 1001,
+                    Message = "User could not be authenticated",
+                    Status = 401,
+                },
+            ],
+        };
 }

@@ -110,5 +110,4 @@ public class PlexRipperDbContextManager_UnitTests : BaseUnitTest<PlexRipperDbCon
         mockDbContext.Verify(x => x.EnsureDeleted(), Times.Once); // Database is reset
         mockDbContext.Verify(x => x.Migrate(), Times.Once); // Database is recreated after reset
     }
-
 }

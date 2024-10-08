@@ -65,7 +65,10 @@ public class DownloadWorker : IDisposable
         _httpClient = new RestClient(httpClientFactory.CreateClient(), options);
         _httpClient.AddDefaultHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64)");
 
-        _timer.Elapsed += (_, _) => { DownloadWorkerTask.ElapsedTime += (long)_timer.Interval; };
+        _timer.Elapsed += (_, _) =>
+        {
+            DownloadWorkerTask.ElapsedTime += (long)_timer.Interval;
+        };
     }
 
     #endregion

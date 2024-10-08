@@ -29,7 +29,10 @@ public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrat
                 x.TvShowSeasonDownloadTasksCount = tvShowSeasonDownloadTasksCount;
                 x.TvShowEpisodeDownloadTasksCount = tvShowEpisodeDownloadTasksCount;
             };
-            config.PlexMockApiOptions = x => { x.MockServers.Add(new PlexMockServerConfig()); };
+            config.PlexMockApiOptions = x =>
+            {
+                x.MockServers.Add(new PlexMockServerConfig());
+            };
         });
 
         // Act

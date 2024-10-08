@@ -54,7 +54,8 @@ public class MockPlexApi
                     message.RequestUri
                 );
                 throw new Exception(
-                    $"OnMissingRegistration was triggered on uri: {message.RequestUri} and not handled");
+                    $"OnMissingRegistration was triggered on uri: {message.RequestUri} and not handled"
+                );
             },
         };
         Setup();

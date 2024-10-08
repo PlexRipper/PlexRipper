@@ -156,8 +156,12 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 return syncResult.ToResult().LogError();
             }
 
-            plexLibrary.SetTvShowMetaData(plexLibrary.TvShows.Count, rawSeasonData.Count, rawEpisodesData.Count,
-                tvShows.Sum(x => x.MediaSize));
+            plexLibrary.SetTvShowMetaData(
+                plexLibrary.TvShows.Count,
+                rawSeasonData.Count,
+                rawEpisodesData.Count,
+                tvShows.Sum(x => x.MediaSize)
+            );
 
             await _dbContext.UpdatePlexLibraryById(plexLibrary);
 

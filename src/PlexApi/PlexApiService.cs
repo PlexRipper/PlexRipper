@@ -166,7 +166,7 @@ public class PlexApiService : IPlexApiService
     public async Task<(
         Result<List<PlexServer>> servers,
         Result<List<ServerAccessTokenDTO>> tokens
-    )> GetAccessiblePlexServersAsync(int plexAccountId)
+        )> GetAccessiblePlexServersAsync(int plexAccountId)
     {
         var plexAccount = await _dbContext.PlexAccounts.GetAsync(plexAccountId);
         if (plexAccount is null)
@@ -277,7 +277,7 @@ public class PlexApiService : IPlexApiService
         return result;
     }
 
-    private async Task<Result<string>> GetPlexApiTokenAsync(PlexAccount plexAccount)
+    private async Task<Result<string>> GetPlexApiTokenAsync(PlexAccount? plexAccount)
     {
         if (plexAccount == null)
             return ResultExtensions.IsNull(nameof(plexAccount));
@@ -407,11 +407,12 @@ public class PlexApiService : IPlexApiService
                 ? metadata.TitleSort
                 : metadata.Title.ToSortTitle();
 
-        _log.Here().Information(
-            "Finished getting {MediaCount} media items from library with name {PlexLibraryName}  ",
-            mediaList.Count,
-            plexLibrary.Name
-        );
+        _log.Here()
+            .Information(
+                "Finished getting {MediaCount} media items from library with name {PlexLibraryName}  ",
+                mediaList.Count,
+                plexLibrary.Name
+            );
 
         return Result.Ok(mediaList);
     }

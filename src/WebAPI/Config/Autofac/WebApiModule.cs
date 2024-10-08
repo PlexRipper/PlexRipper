@@ -3,8 +3,12 @@ using Autofac;
 
 namespace PlexRipper.WebAPI;
 
+/// <summary>
+///  Autofac module for the WebAPI project.
+/// </summary>
 public class WebApiModule : Module
 {
+    /// <inheritdoc/>
     protected override void Load(ContainerBuilder builder)
     {
         builder.Register(c => c.Resolve<IHttpClientFactory>().CreateClient()).As<HttpClient>().InstancePerDependency();

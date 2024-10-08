@@ -19,7 +19,7 @@ public class DownloadTaskWorkerLogNotificationHandler : INotificationHandler<Dow
     public async Task Handle(DownloadTaskWorkerLogNotification logNotification, CancellationToken cancellationToken)
     {
         var logs = logNotification.logs;
-        if (logs is null || !logs.Any())
+        if (!logs.Any())
             return;
 
         try

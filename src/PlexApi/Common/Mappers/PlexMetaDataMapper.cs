@@ -60,7 +60,7 @@ public static class PlexMetaDataMapper
             Key = int.Parse(source.RatingKey),
             MetaDataKey = RetrieveMetaDataKey(source),
             Studio = source.Studio ?? string.Empty,
-            Summary = source.Summary ?? string.Empty,
+            Summary = source.Summary,
             ContentRating = source.ContentRating ?? string.Empty,
             Rating = source.Rating ?? 0,
             OriginallyAvailableAt = source.OriginallyAvailableAt.ToDateTime(),

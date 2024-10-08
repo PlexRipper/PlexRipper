@@ -134,12 +134,12 @@ public static class RestSharpExtensions
             else
                 _log.VerboseLine("Response was empty");
 
-            return response.Result as RestResponse<T>;
+            return response.Result as RestResponse<T> ?? throw new InvalidOperationException();
         }
 
-        return response.FinalHandledResult as RestResponse<T>;
+        return response.FinalHandledResult as RestResponse<T> ?? throw new InvalidOperationException();
     }
-
+    
     /// <summary>
     /// Parses the Plex errors and returns a <see cref="Result{T}"/>
     /// </summary>

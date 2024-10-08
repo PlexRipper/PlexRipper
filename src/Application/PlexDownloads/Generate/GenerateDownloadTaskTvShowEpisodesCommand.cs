@@ -66,8 +66,8 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
 
                 foreach (var tvShowEpisode in plexEpisodes)
                 {
-                    var plexTvShow = tvShowEpisode.TvShow;
-                    var plexSeason = tvShowEpisode.TvShowSeason;
+                    var plexTvShow = tvShowEpisode.TvShow!;
+                    var plexSeason = tvShowEpisode.TvShowSeason!;
 
                     // Check if the tvShowDownloadTask has already been created this run
                     var downloadTaskTvShow = tvShowDownloads.FirstOrDefault(x => x.Key == plexTvShow.Key);

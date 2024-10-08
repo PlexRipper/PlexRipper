@@ -123,12 +123,12 @@ public class PlexApiClient : ISpeakeasyHttpClient
         }
         catch (HttpRequestException ex)
         {
-            _log.Error(
-                "Exception Error ({ExceptionName}) sending request to {Url}",
-                nameof(HttpRequestException),
-                requestUri,
-                0
-            );
+            _log.Here()
+                .Error(
+                    "Exception Error ({ExceptionName}) sending request to {Url}",
+                    nameof(HttpRequestException),
+                    requestUri
+                );
             response = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.ServiceUnavailable,
@@ -139,7 +139,8 @@ public class PlexApiClient : ISpeakeasyHttpClient
         }
         catch (Exception ex)
         {
-            _log.Error("Exception Error ({ExceptionName}) sending request to {Url}", nameof(ex.GetType), requestUri, 0);
+            _log.Here()
+                .Error("Exception Error ({ExceptionName}) sending request to {Url}", nameof(ex.GetType), requestUri);
             response = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.InternalServerError,

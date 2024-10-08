@@ -8,7 +8,7 @@ public static partial class DownloadTaskExtensions
     )
     {
         downloadTask.DownloadStatus = downloadStatus;
-        if (downloadTask.Children is not null && downloadTask.Children.Any())
+        if (downloadTask.Children.Any())
             downloadTask.Children = downloadTask.Children.SetDownloadStatus(downloadStatus);
 
         return downloadTask;
@@ -22,7 +22,7 @@ public static partial class DownloadTaskExtensions
         foreach (var downloadTask in downloadTasks)
         {
             downloadTask.DownloadStatus = downloadStatus;
-            if (downloadTask.Children is not null && downloadTask.Children.Any())
+            if (downloadTask.Children.Any())
                 downloadTask.Children = downloadTask.Children.SetDownloadStatus(downloadStatus);
         }
 

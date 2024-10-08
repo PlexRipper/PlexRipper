@@ -5,15 +5,23 @@ using WebAPI.Contracts;
 
 namespace PlexRipper.WebAPI;
 
+/// <summary>
+///  The ProgressHub class is a SignalR hub that sends progress updates to the front-end.
+/// </summary>
 public class ProgressHub : Hub<IProgressHub>, IProgressHub
 {
     private readonly ILog<ProgressHub> _log;
 
+    /// <summary>
+    ///  Initializes a new instance of the <see cref="ProgressHub"/> class.
+    /// </summary>
+    /// <param name="log"> The <see cref="ILog{ProgressHub}"/> instance to use for logging.</param>
     public ProgressHub(ILog<ProgressHub> log)
     {
         _log = log;
     }
 
+    /// <inheritdoc/>
     public async Task JobStatusUpdate(JobStatusUpdateDTO jobStatusUpdate, CancellationToken cancellationToken = default)
     {
         _log.Debug(
@@ -24,6 +32,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         await Clients.All.JobStatusUpdate(jobStatusUpdate, cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task SyncServerMediaProgress(
         SyncServerMediaProgress syncServerMediaProgress,
         CancellationToken cancellationToken = default
@@ -37,6 +46,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         await Clients.All.SyncServerMediaProgress(syncServerMediaProgress, cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task FileMergeProgress(
         FileMergeProgress fileMergeProgress,
         CancellationToken cancellationToken = default
@@ -50,6 +60,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         await Clients.All.FileMergeProgress(fileMergeProgress, cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task ServerConnectionCheckStatusProgress(
         ServerConnectionCheckStatusProgressDTO serverConnectionCheckStatusProgress,
         CancellationToken cancellationToken = default
@@ -63,6 +74,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         await Clients.All.ServerConnectionCheckStatusProgress(serverConnectionCheckStatusProgress, cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task InspectServerProgress(
         InspectServerProgressDTO inspectServerProgress,
         CancellationToken cancellationToken = default
@@ -76,6 +88,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         await Clients.All.InspectServerProgress(inspectServerProgress, cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task ServerDownloadProgress(
         ServerDownloadProgressDTO serverDownloadProgress,
         CancellationToken cancellationToken = default
@@ -89,6 +102,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         await Clients.All.ServerDownloadProgress(serverDownloadProgress, cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task DownloadTaskUpdate(DownloadTaskDTO downloadTask, CancellationToken cancellationToken = default)
     {
         _log.Debug(
@@ -99,6 +113,7 @@ public class ProgressHub : Hub<IProgressHub>, IProgressHub
         await Clients.All.DownloadTaskUpdate(downloadTask, cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task LibraryProgress(LibraryProgress libraryProgress, CancellationToken cancellationToken = default)
     {
         _log.Debug(

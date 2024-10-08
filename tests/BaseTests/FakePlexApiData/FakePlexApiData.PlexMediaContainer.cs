@@ -52,15 +52,14 @@ public partial class FakePlexApiData
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
-        GetLibraryItemsLibraryType GetPlexMediaType() =>
-            type switch
-            {
-                PlexMediaType.Movie => GetLibraryItemsLibraryType.Movie,
-                PlexMediaType.TvShow => GetLibraryItemsLibraryType.TvShow,
-                PlexMediaType.Season => GetLibraryItemsLibraryType.Season,
-                PlexMediaType.Episode => GetLibraryItemsLibraryType.Episode,
-                _ => GetLibraryItemsLibraryType.Movie,
-            };
+        GetLibraryItemsLibraryType GetPlexMediaType() => type switch
+        {
+            PlexMediaType.Movie => GetLibraryItemsLibraryType.Movie,
+            PlexMediaType.TvShow => GetLibraryItemsLibraryType.TvShow,
+            PlexMediaType.Season => GetLibraryItemsLibraryType.Season,
+            PlexMediaType.Episode => GetLibraryItemsLibraryType.Episode,
+            _ => GetLibraryItemsLibraryType.Movie,
+        };
 
         return new Faker<GetLibraryItemsMetadata>()
             .StrictMode(false)
@@ -79,7 +78,7 @@ public partial class FakePlexApiData
             .RuleFor(l => l.ViewOffset, f => f.Random.Int(1))
             .RuleFor(l => l.LastViewedAt, _ => 0)
             .RuleFor(l => l.Year, f => f.Random.Int(0, 2023))
-            .RuleFor(l => l.Thumb, __ => "")
+            .RuleFor(l => l.Thumb, _ => "")
             .RuleFor(l => l.Banner, _ => "")
             .RuleFor(l => l.Theme, _ => "")
             .RuleFor(l => l.Art, _ => "")
@@ -106,7 +105,7 @@ public partial class FakePlexApiData
                     metadata.Banner = $"/library/metadata/{metadata.Key}/banner/{metaDataKey}";
 
                     metadata.Key = $"/library/metadata/{metadata.Key}";
-                    metadata.TitleSort = metadata.TitleSort.ToLower();
+                    metadata.TitleSort = metadata.TitleSort?.ToLower();
                 }
             );
     }

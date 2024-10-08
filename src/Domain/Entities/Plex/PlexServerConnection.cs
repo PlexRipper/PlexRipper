@@ -117,13 +117,14 @@ public class PlexServerConnection : BaseEntity
         return obj.GetType() == GetType() && Equals((PlexServerConnection)obj);
     }
 
-    protected bool Equals(PlexServerConnection other) => Protocol == other.Protocol
-                                                         && Address == other.Address
-                                                         && Port == other.Port
-                                                         && Uri == other.Uri
-                                                         && Local == other.Local
-                                                         && Relay == other.Relay
-                                                         && IPv6 == other.IPv6;
+    protected bool Equals(PlexServerConnection other) =>
+        Protocol == other.Protocol
+        && Address == other.Address
+        && Port == other.Port
+        && Uri == other.Uri
+        && Local == other.Local
+        && Relay == other.Relay
+        && IPv6 == other.IPv6;
 
     #endregion
 

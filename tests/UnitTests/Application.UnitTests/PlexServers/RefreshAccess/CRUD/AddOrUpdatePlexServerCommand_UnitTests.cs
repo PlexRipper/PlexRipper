@@ -54,7 +54,22 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
             var connectionCount = updatedServer.PlexServerConnections.Count;
             var updatedConnections = FakeData.GetPlexServerConnections().Generate(connectionCount);
             for (var i = 0; i < connectionCount; i++)
-                updatedConnections[i].Address = updatedServer.PlexServerConnections[i].Address;
+                updatedConnections[i] = new PlexServerConnection
+                {
+                    Id = updatedConnections[i].Id,
+                    Protocol = updatedConnections[i].Protocol,
+                    Address = updatedServer.PlexServerConnections[i].Address,
+                    Port = updatedConnections[i].Port,
+                    Uri = updatedConnections[i].Uri,
+                    Local = updatedConnections[i].Local,
+                    Relay = updatedConnections[i].Relay,
+                    IPv4 = updatedConnections[i].IPv4,
+                    IPv6 = updatedConnections[i].IPv6,
+                    PortFix = updatedConnections[i].PortFix,
+                    PlexServer = updatedConnections[i].PlexServer,
+                    PlexServerId = updatedConnections[i].PlexServerId,
+                    PlexServerStatus = updatedConnections[i].PlexServerStatus,
+                };
 
             updatedServer.PlexServerConnections = updatedConnections;
         }
@@ -88,7 +103,8 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
     }
 
     [Fact]
-    public async Task ShouldUpdateSomeAndSyncServersWithConnections_WhenSomeServerConnectionsHaveChangedAndSomeExistInTheDatabase()
+    public async Task
+        ShouldUpdateSomeAndSyncServersWithConnections_WhenSomeServerConnectionsHaveChangedAndSomeExistInTheDatabase()
     {
         // Arrange
         Seed = 23724;

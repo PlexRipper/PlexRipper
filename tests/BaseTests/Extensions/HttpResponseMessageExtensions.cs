@@ -9,17 +9,17 @@ public static class HttpResponseMessageExtensions
 {
     public static async Task<ResultDTO<T>> Deserialize<T>(this HttpResponseMessage response)
     {
-        var result = await response.Content.ReadFromJsonAsync<ResultDTO<T>>(
-            DefaultJsonSerializerOptions.ConfigStandard
-        ) ?? new ResultDTO<T>
-        {
-            IsFailed = false,
-            IsSuccess = false,
-            Reasons = [],
-            Errors = [],
-            Successes = [],
-            Value = default,
-        };
+        var result =
+            await response.Content.ReadFromJsonAsync<ResultDTO<T>>(DefaultJsonSerializerOptions.ConfigStandard)
+            ?? new ResultDTO<T>
+            {
+                IsFailed = false,
+                IsSuccess = false,
+                Reasons = [],
+                Errors = [],
+                Successes = [],
+                Value = default,
+            };
 
         result.Reasons = result
             .Reasons.Select(x => new ReasonDTO { Message = x.Message, Metadata = x.Metadata.ToTypedResultMetaData() })

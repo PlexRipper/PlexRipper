@@ -47,15 +47,16 @@ public partial class Log
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => Write(
-        LogEventLevel.Information,
-        messageTemplate,
-        sourceFilePath,
-        memberName,
-        sourceLineNumber,
-        propertyValue0,
-        propertyValue1
-    );
+    ) =>
+        Write(
+            LogEventLevel.Information,
+            messageTemplate,
+            sourceFilePath,
+            memberName,
+            sourceLineNumber,
+            propertyValue0,
+            propertyValue1
+        );
 
     /// <inheritdoc/>
     [MessageTemplateFormatMethod("messageTemplate")]
@@ -67,16 +68,17 @@ public partial class Log
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => Write(
-        LogEventLevel.Information,
-        messageTemplate,
-        sourceFilePath,
-        memberName,
-        sourceLineNumber,
-        propertyValue0,
-        propertyValue1,
-        propertyValue2
-    );
+    ) =>
+        Write(
+            LogEventLevel.Information,
+            messageTemplate,
+            sourceFilePath,
+            memberName,
+            sourceLineNumber,
+            propertyValue0,
+            propertyValue1,
+            propertyValue2
+        );
 
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Information<T0, T1, T2, T3>(
@@ -88,17 +90,18 @@ public partial class Log
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => Write(
-        LogEventLevel.Information,
-        messageTemplate,
-        sourceFilePath,
-        memberName,
-        sourceLineNumber,
-        propertyValue0,
-        propertyValue1,
-        propertyValue2,
-        propertyValue3
-    );
+    ) =>
+        Write(
+            LogEventLevel.Information,
+            messageTemplate,
+            sourceFilePath,
+            memberName,
+            sourceLineNumber,
+            propertyValue0,
+            propertyValue1,
+            propertyValue2,
+            propertyValue3
+        );
 
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Information<T0, T1, T2, T3, T4>(
@@ -111,18 +114,19 @@ public partial class Log
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => Write(
-        LogEventLevel.Information,
-        messageTemplate,
-        sourceFilePath,
-        memberName,
-        sourceLineNumber,
-        propertyValue0,
-        propertyValue1,
-        propertyValue2,
-        propertyValue3,
-        propertyValue4
-    );
+    ) =>
+        Write(
+            LogEventLevel.Information,
+            messageTemplate,
+            sourceFilePath,
+            memberName,
+            sourceLineNumber,
+            propertyValue0,
+            propertyValue1,
+            propertyValue2,
+            propertyValue3,
+            propertyValue4
+        );
 
     [MessageTemplateFormatMethod("messageTemplate")]
     public LogMetaData Information<T0, T1, T2, T3, T4, T5>(
@@ -136,19 +140,20 @@ public partial class Log
         [CallerMemberName] string memberName = "",
         [CallerFilePath] string sourceFilePath = "",
         [CallerLineNumber] int sourceLineNumber = 0
-    ) => Write(
-        LogEventLevel.Information,
-        messageTemplate,
-        sourceFilePath,
-        memberName,
-        sourceLineNumber,
-        propertyValue0,
-        propertyValue1,
-        propertyValue2,
-        propertyValue3,
-        propertyValue4,
-        propertyValue5
-    );
+    ) =>
+        Write(
+            LogEventLevel.Information,
+            messageTemplate,
+            sourceFilePath,
+            memberName,
+            sourceLineNumber,
+            propertyValue0,
+            propertyValue1,
+            propertyValue2,
+            propertyValue3,
+            propertyValue4,
+            propertyValue5
+        );
 
     #endregion
 }

@@ -113,8 +113,8 @@ public static partial class DbContextExtensions
     )
     {
         return await dbContext
-            .PlexAccounts.Where(x => x.Id == plexAccountId)
-            .Select(x => x.DisplayName)
-            .FirstOrDefaultAsync(cancellationToken) ?? "MISSING DISPLAY NAME";
+                .PlexAccounts.Where(x => x.Id == plexAccountId)
+                .Select(x => x.DisplayName)
+                .FirstOrDefaultAsync(cancellationToken) ?? "MISSING DISPLAY NAME";
     }
 }

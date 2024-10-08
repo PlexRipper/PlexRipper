@@ -21,7 +21,7 @@ public interface IPlexApiService
     public Task<(
         Result<List<PlexServer>> servers,
         Result<List<ServerAccessTokenDTO>> tokens
-        )> GetAccessiblePlexServersAsync(int plexAccountId);
+    )> GetAccessiblePlexServersAsync(int plexAccountId);
 
     /// <summary>
     /// Retrieves all accessible <see cref="PlexLibrary"/> from this <see cref="PlexServer"/> by the given <see cref="PlexAccount"/>.

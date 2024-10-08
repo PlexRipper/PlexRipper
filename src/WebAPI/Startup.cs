@@ -97,7 +97,10 @@ public static class Startup
         {
             // Used to deploy the front-end Nuxt client
             app.UseSpaStaticFiles();
-            app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "ClientApp";
+            });
         }
     }
 
@@ -120,7 +123,6 @@ public static class Startup
                     builder
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-
                         // The combo all origin is allowed with allow credentials is needed to make SignalR work from the client.
                         .SetIsOriginAllowed(_ => true)
                         .AllowCredentials();

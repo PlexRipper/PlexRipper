@@ -6,42 +6,44 @@ public static class DownloadTaskGenericToDTOMapper
 {
     #region ToDTO
 
-    public static DownloadTaskDTO ToDTO(this DownloadTaskGeneric downloadTask, string downloadUrl = "") => new()
-    {
-        Id = downloadTask.Id,
-        Key = downloadTask.MediaKey,
-        Title = downloadTask.Title,
-        FullTitle = downloadTask.FullTitle,
-        MediaType = downloadTask.MediaType,
-        DownloadTaskType = downloadTask.DownloadTaskType,
-        Status = downloadTask.DownloadStatus,
-        Percentage = downloadTask.Percentage,
-        DataReceived = downloadTask.DataReceived,
-        DataTotal = downloadTask.DataTotal,
-        CreatedAt = downloadTask.CreatedAt,
-        FileName = downloadTask.FileName,
-        TimeRemaining = downloadTask.TimeRemaining,
-        DownloadDirectory = downloadTask.DownloadDirectory,
-        DestinationDirectory = downloadTask.DestinationDirectory,
-        FileLocationUrl = downloadTask.FileLocationUrl,
-        DownloadSpeed = downloadTask.DownloadSpeed,
-        FileTransferSpeed = downloadTask.FileTransferSpeed,
-        DownloadUrl = downloadUrl,
-        PlexServerId = downloadTask.PlexServerId,
-        PlexLibraryId = downloadTask.PlexLibraryId,
-        ParentId = downloadTask.ParentId,
-        Children = downloadTask.Children.Select(x => x.ToDTO(downloadUrl)).ToList(),
-        Actions = DownloadTaskActions.Convert(downloadTask.DownloadStatus),
-    };
+    public static DownloadTaskDTO ToDTO(this DownloadTaskGeneric downloadTask, string downloadUrl = "") =>
+        new()
+        {
+            Id = downloadTask.Id,
+            Key = downloadTask.MediaKey,
+            Title = downloadTask.Title,
+            FullTitle = downloadTask.FullTitle,
+            MediaType = downloadTask.MediaType,
+            DownloadTaskType = downloadTask.DownloadTaskType,
+            Status = downloadTask.DownloadStatus,
+            Percentage = downloadTask.Percentage,
+            DataReceived = downloadTask.DataReceived,
+            DataTotal = downloadTask.DataTotal,
+            CreatedAt = downloadTask.CreatedAt,
+            FileName = downloadTask.FileName,
+            TimeRemaining = downloadTask.TimeRemaining,
+            DownloadDirectory = downloadTask.DownloadDirectory,
+            DestinationDirectory = downloadTask.DestinationDirectory,
+            FileLocationUrl = downloadTask.FileLocationUrl,
+            DownloadSpeed = downloadTask.DownloadSpeed,
+            FileTransferSpeed = downloadTask.FileTransferSpeed,
+            DownloadUrl = downloadUrl,
+            PlexServerId = downloadTask.PlexServerId,
+            PlexLibraryId = downloadTask.PlexLibraryId,
+            ParentId = downloadTask.ParentId,
+            Children = downloadTask.Children.Select(x => x.ToDTO(downloadUrl)).ToList(),
+            Actions = DownloadTaskActions.Convert(downloadTask.DownloadStatus),
+        };
 
-    public static DownloadWorkerLogDTO ToDTO(this DownloadWorkerLog downloadTask) => new()
-    {
-        CreatedAt = downloadTask.CreatedAt,
-        Message = downloadTask.Message,
-        LogLevel = downloadTask.LogLevel,
-        DownloadWorkerTaskId = downloadTask.DownloadWorkerTaskId,
-        DownloadTaskId = downloadTask.DownloadTaskId,
-    };
+    public static DownloadWorkerLogDTO ToDTO(this DownloadWorkerLog downloadTask) =>
+        new()
+        {
+            CreatedAt = downloadTask.CreatedAt,
+            Message = downloadTask.Message,
+            LogLevel = downloadTask.LogLevel,
+            DownloadWorkerTaskId = downloadTask.DownloadWorkerTaskId,
+            DownloadTaskId = downloadTask.DownloadTaskId,
+        };
 
     public static List<DownloadWorkerLogDTO> ToDTO(this List<DownloadWorkerLog> logs) =>
         logs.Select(x => x.ToDTO()).ToList();

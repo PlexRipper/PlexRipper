@@ -121,7 +121,8 @@ public record CrudMoviesReport
 
     public int DeletedMovies { get; set; }
 
-    public override string ToString() => $@"
+    public override string ToString() =>
+        $@"
         CreatedMovies: {CreatedMovies}
         UpdatedMovies: {UpdatedMovies}
         DeletedMovies: {DeletedMovies}";

@@ -166,7 +166,7 @@ public class PlexApiService : IPlexApiService
     public async Task<(
         Result<List<PlexServer>> servers,
         Result<List<ServerAccessTokenDTO>> tokens
-        )> GetAccessiblePlexServersAsync(int plexAccountId)
+    )> GetAccessiblePlexServersAsync(int plexAccountId)
     {
         var plexAccount = await _dbContext.PlexAccounts.GetAsync(plexAccountId);
         if (plexAccount is null)

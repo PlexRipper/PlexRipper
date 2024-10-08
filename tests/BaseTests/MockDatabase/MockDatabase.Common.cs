@@ -132,9 +132,7 @@ public static partial class MockDatabase
         return context;
     }
 
-    private static async Task<PlexRipperDbContext> AddPlexAccount(
-        this PlexRipperDbContext context
-    )
+    private static async Task<PlexRipperDbContext> AddPlexAccount(this PlexRipperDbContext context)
     {
         var plexServers = context.PlexServers.Include(x => x.PlexLibraries).ToList();
 
@@ -178,9 +176,7 @@ public static partial class MockDatabase
         return context;
     }
 
-    private static async Task<PlexRipperDbContext> AddPlexAccountLibraries(
-        this PlexRipperDbContext context
-    )
+    private static async Task<PlexRipperDbContext> AddPlexAccountLibraries(this PlexRipperDbContext context)
     {
         var plexLibraries = await context.PlexLibraries.ToListAsync();
         var plexAccounts = await context.PlexAccounts.ToListAsync();
@@ -241,7 +237,6 @@ public static partial class MockDatabase
     }
 
     public static string DatabaseConnectionString(string dbName = "") =>
-
         // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
         new SqliteConnectionStringBuilder
         {

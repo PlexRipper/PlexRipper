@@ -7,10 +7,7 @@ public static partial class FakeData
 {
     #region Base
 
-    private static Faker<T> ApplyDownloadTaskBase<T>(
-        this Faker<T> faker,
-        int seed = 0
-    )
+    private static Faker<T> ApplyDownloadTaskBase<T>(this Faker<T> faker, int seed = 0)
         where T : DownloadTaskBase
     {
         return faker

@@ -194,7 +194,8 @@ public record CrudTvShowsReport
 
     public int DeletedEpisodes { get; set; }
 
-    public override string ToString() => $@"
+    public override string ToString() =>
+        $@"
         CreatedTvShows: {CreatedTvShows}
         UpdatedTvShows: {UpdatedTvShows}
         DeletedTvShows: {DeletedTvShows}

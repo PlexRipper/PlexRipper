@@ -52,14 +52,15 @@ public partial class FakePlexApiData
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
-        GetLibraryItemsLibraryType GetPlexMediaType() => type switch
-        {
-            PlexMediaType.Movie => GetLibraryItemsLibraryType.Movie,
-            PlexMediaType.TvShow => GetLibraryItemsLibraryType.TvShow,
-            PlexMediaType.Season => GetLibraryItemsLibraryType.Season,
-            PlexMediaType.Episode => GetLibraryItemsLibraryType.Episode,
-            _ => GetLibraryItemsLibraryType.Movie,
-        };
+        GetLibraryItemsLibraryType GetPlexMediaType() =>
+            type switch
+            {
+                PlexMediaType.Movie => GetLibraryItemsLibraryType.Movie,
+                PlexMediaType.TvShow => GetLibraryItemsLibraryType.TvShow,
+                PlexMediaType.Season => GetLibraryItemsLibraryType.Season,
+                PlexMediaType.Episode => GetLibraryItemsLibraryType.Episode,
+                _ => GetLibraryItemsLibraryType.Movie,
+            };
 
         return new Faker<GetLibraryItemsMetadata>()
             .StrictMode(false)

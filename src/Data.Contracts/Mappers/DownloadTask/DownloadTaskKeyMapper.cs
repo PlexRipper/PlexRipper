@@ -21,23 +21,25 @@ public static class DownloadTaskKeyMapper
 
     public static IQueryable<DownloadTaskKey> ProjectToKey(
         this IQueryable<DownloadTaskMovieFile> downloadTaskMovieFile
-    ) => downloadTaskMovieFile.Select(x => new DownloadTaskKey
-    {
-        Id = x.Id,
-        PlexServerId = x.PlexServerId,
-        PlexLibraryId = x.PlexLibraryId,
-        Type = x.DownloadTaskType,
-    });
+    ) =>
+        downloadTaskMovieFile.Select(x => new DownloadTaskKey
+        {
+            Id = x.Id,
+            PlexServerId = x.PlexServerId,
+            PlexLibraryId = x.PlexLibraryId,
+            Type = x.DownloadTaskType,
+        });
 
     public static IQueryable<DownloadTaskKey> ProjectToParentKey(
         this IQueryable<DownloadTaskMovieFile> downloadTaskMovieFile
-    ) => downloadTaskMovieFile.Select(x => new DownloadTaskKey
-    {
-        Id = x.ParentId,
-        PlexServerId = x.PlexServerId,
-        PlexLibraryId = x.PlexLibraryId,
-        Type = DownloadTaskType.Movie,
-    });
+    ) =>
+        downloadTaskMovieFile.Select(x => new DownloadTaskKey
+        {
+            Id = x.ParentId,
+            PlexServerId = x.PlexServerId,
+            PlexLibraryId = x.PlexLibraryId,
+            Type = DownloadTaskType.Movie,
+        });
 
     #endregion
 
@@ -58,13 +60,14 @@ public static class DownloadTaskKeyMapper
 
     public static IQueryable<DownloadTaskKey> ProjectToKey(
         this IQueryable<DownloadTaskTvShowSeason> downloadTaskTvShowSeason
-    ) => downloadTaskTvShowSeason.Select(x => new DownloadTaskKey
-    {
-        Id = x.Id,
-        PlexServerId = x.PlexServerId,
-        PlexLibraryId = x.PlexLibraryId,
-        Type = x.DownloadTaskType,
-    });
+    ) =>
+        downloadTaskTvShowSeason.Select(x => new DownloadTaskKey
+        {
+            Id = x.Id,
+            PlexServerId = x.PlexServerId,
+            PlexLibraryId = x.PlexLibraryId,
+            Type = x.DownloadTaskType,
+        });
 
     #endregion
 
@@ -72,13 +75,14 @@ public static class DownloadTaskKeyMapper
 
     public static IQueryable<DownloadTaskKey> ProjectToKey(
         this IQueryable<DownloadTaskTvShowEpisode> downloadTaskTvShowEpisode
-    ) => downloadTaskTvShowEpisode.Select(x => new DownloadTaskKey
-    {
-        Id = x.Id,
-        PlexServerId = x.PlexServerId,
-        PlexLibraryId = x.PlexLibraryId,
-        Type = x.DownloadTaskType,
-    });
+    ) =>
+        downloadTaskTvShowEpisode.Select(x => new DownloadTaskKey
+        {
+            Id = x.Id,
+            PlexServerId = x.PlexServerId,
+            PlexLibraryId = x.PlexLibraryId,
+            Type = x.DownloadTaskType,
+        });
 
     #endregion
 
@@ -86,23 +90,25 @@ public static class DownloadTaskKeyMapper
 
     public static IQueryable<DownloadTaskKey> ProjectToKey(
         this IQueryable<DownloadTaskTvShowEpisodeFile> downloadTaskTvShowEpisodeFile
-    ) => downloadTaskTvShowEpisodeFile.Select(x => new DownloadTaskKey
-    {
-        Id = x.Id,
-        PlexServerId = x.PlexServerId,
-        PlexLibraryId = x.PlexLibraryId,
-        Type = x.DownloadTaskType,
-    });
+    ) =>
+        downloadTaskTvShowEpisodeFile.Select(x => new DownloadTaskKey
+        {
+            Id = x.Id,
+            PlexServerId = x.PlexServerId,
+            PlexLibraryId = x.PlexLibraryId,
+            Type = x.DownloadTaskType,
+        });
 
     public static IQueryable<DownloadTaskKey> ProjectToParentKey(
         this IQueryable<DownloadTaskTvShowEpisodeFile> downloadTaskTvShowEpisodeFile
-    ) => downloadTaskTvShowEpisodeFile.Select(x => new DownloadTaskKey
-    {
-        Id = x.ParentId,
-        PlexServerId = x.PlexServerId,
-        PlexLibraryId = x.PlexLibraryId,
-        Type = DownloadTaskType.Episode,
-    });
+    ) =>
+        downloadTaskTvShowEpisodeFile.Select(x => new DownloadTaskKey
+        {
+            Id = x.ParentId,
+            PlexServerId = x.PlexServerId,
+            PlexLibraryId = x.PlexLibraryId,
+            Type = DownloadTaskType.Episode,
+        });
 
     #endregion
 }

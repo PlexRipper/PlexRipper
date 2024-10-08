@@ -173,7 +173,10 @@ public static partial class FakeData
             .RuleFor(x => x.TvShow, _ => null)
             .RuleFor(x => x.Episodes, _ => GetPlexTvShowEpisode(seed, options).Generate(config.TvShowEpisodeCount))
             .FinishWith(
-                (_, tvShowSeason) => { tvShowSeason.MediaSize = tvShowSeason.Episodes.Select(x => x.MediaSize).Sum(); }
+                (_, tvShowSeason) =>
+                {
+                    tvShowSeason.MediaSize = tvShowSeason.Episodes.Select(x => x.MediaSize).Sum();
+                }
             );
     }
 

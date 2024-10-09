@@ -6,7 +6,7 @@
 			<QHover>
 				<template #default="{ hover }">
 					<q-img
-						v-if="!defaultImage"
+						v-if="mediaItem.hasThumb"
 						loading="eager"
 						:src="imageUrl"
 						fit="fill"

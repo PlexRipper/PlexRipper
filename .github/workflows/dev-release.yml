@@ -39,9 +39,6 @@ jobs:
                   VERSION_NO_V="${VERSION_NO_V#v}"
                   echo "VERSION_NO_V=$VERSION_NO_V" >> $GITHUB_ENV
 
-            - name: Set up QEMU
-              uses: docker/setup-qemu-action@v3
-
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
 
@@ -56,7 +53,7 @@ jobs:
               env:
                   VERSION: ${{ env.VERSION_NO_V }}
               with:
-                  platforms: linux/amd64,linux/arm64,linux/arm/v7
+                  platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
                   push: true
                   tags: plexripper/plexripper:dev
                   build-args: VERSION

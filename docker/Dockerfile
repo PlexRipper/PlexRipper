@@ -59,14 +59,14 @@ COPY ["src/WebAPI/WebAPI.csproj", "src/WebAPI/"]
 COPY ["src/WebAPI.Contracts/WebAPI.Contracts.csproj", "src/WebAPI.Contracts/"]
 
 ## Restore Projects
-RUN dotnet restore "src/WebAPI/WebAPI.csproj" --locked-mode
+RUN dotnet restore -a $TARGETARCH "src/WebAPI/WebAPI.csproj" --locked-mode
 
 COPY . .
 WORKDIR "/src/src/WebAPI"
 
 ## Build and Publish
-RUN dotnet build "WebAPI.csproj" -c Release -o /app/build /p:AssemblyVersion=$VERSION --no-restore
-RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:AssemblyVersion=$VERSION
+RUN dotnet build -a $TARGETARCH "WebAPI.csproj" -c Release -o /app/build /p:AssemblyVersion=$VERSION --no-restore
+RUN dotnet publish -a $TARGETARCH "WebAPI.csproj" -c Release -o /app/publish /p:AssemblyVersion=$VERSION
 
 # Stage 3 - Runtime Image
 FROM --platform=$TARGETPLATFORM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
@@ -95,7 +95,7 @@ RUN \
    chmod +x /tmp/dotnet-install.sh && \
    if  [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then \
        /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm ; \
-   elif [ "$TARGETPLATFORM" = "linux/arm64" ] ; then \
+   elif [ "$TARGETPLATFORM" = "linux/arm64/v8" ] ; then \
        /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm64 ; \
    else \
        /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture x64 ; \

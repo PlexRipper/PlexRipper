@@ -113,8 +113,11 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		hasSelectedMedia: computed((): boolean => {
 			return state.selection.keys.length > 0;
 		}),
+		hasNoSearchResults: computed((): boolean => {
+			return state.filterQuery != '' && getters.getMediaItems.value.length === 0;
+		}),
 		getMediaItems: computed((): Readonly<PlexMediaSlimDTO[]> => {
-			let items;
+			let items: PlexMediaSlimDTO[];
 			// Currently sorting
 			if (state.sortedState.length > 0) {
 				items = state.sortedItems;
@@ -123,7 +126,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			}
 
 			if (state.filterQuery != '') {
-				return Object.freeze(items.filter((x) => x.sortTitle.includes(state.filterQuery.toLowerCase())));
+				return Object.freeze(items.filter((x) => x.title.includes(state.filterQuery.toLowerCase())));
 			}
 			return items;
 		}),

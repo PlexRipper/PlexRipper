@@ -37,30 +37,36 @@
 
 		<!-- Media Overview -->
 		<template v-if="!loading && mediaOverviewStore.itemsLength">
-			<!--	Data table display	-->
-			<QRow
-				id="media-container"
-				align="start">
-				<QCol v-show="mediaOverviewStore.showMediaOverview">
-					<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
-						<MediaTable
-							:rows="mediaOverviewStore.getMediaItems"
-							:disable-hover-click="mediaType !== PlexMediaType.TvShow"
-							is-scrollable />
-					</template>
+			<template v-if="mediaOverviewStore.hasNoSearchResults">
+				<QAlert type="warning">
+					<QText :value="t('components.media-overview.no-search-results', { query: mediaOverviewStore.filterQuery })" />
+				</QAlert>
+			</template>
+			<template v-else>
+				<!--	Data table display	-->
+				<QRow
+					id="media-container"
+					align="start">
+					<QCol v-show="mediaOverviewStore.showMediaOverview">
+						<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
+							<MediaTable
+								:rows="mediaOverviewStore.getMediaItems"
+								:disable-hover-click="mediaType !== PlexMediaType.TvShow"
+								is-scrollable />
+						</template>
 
-					<!-- Poster display -->
-					<template v-else>
-						<PosterTable
-							:library-id="libraryId"
-							:media-type="mediaType"
-							:items="mediaOverviewStore.getMediaItems" />
-					</template>
-				</QCol>
-
+						<!-- Poster display -->
+						<template v-else>
+							<PosterTable
+								:library-id="libraryId"
+								:media-type="mediaType"
+								:items="mediaOverviewStore.getMediaItems" />
+						</template>
+					</QCol>
+				</QRow>
 				<!-- Alphabet Navigation -->
 				<AlphabetNavigation v-show="mediaOverviewStore.showMediaOverview" />
-			</QRow>
+			</template>
 		</template>
 
 		<!-- No Media Overview -->

@@ -44,7 +44,9 @@ public static class PlexMetaDataMapper
             Id = 0,
             Title = source.Title,
             Year = source.Year ?? 0,
-            SortIndex = index,
+
+            // Start with 1 instead of 0 since this is displayed to the user
+            SortIndex = index + 1,
             SearchTitle = source.Title.ToSearchTitle(),
             Guid = source.Guid,
 

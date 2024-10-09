@@ -8,6 +8,8 @@ public class PlexMediaSlimDTO
 
     public required string Title { get; init; } = string.Empty;
 
+    public required string SearchTitle { get; init; } = string.Empty;
+
     public required int SortIndex { get; init; }
 
     public required int Year { get; init; }

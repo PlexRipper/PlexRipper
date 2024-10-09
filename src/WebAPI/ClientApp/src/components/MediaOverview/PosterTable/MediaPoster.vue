@@ -134,7 +134,6 @@ const emit = defineEmits<{
 const thumbWidth = ref(200);
 const thumbHeight = ref(300);
 
-const defaultImage = ref(false);
 const loading = ref(false);
 const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown);
 const qualities = computed(() => props.mediaItem?.qualities ?? []);

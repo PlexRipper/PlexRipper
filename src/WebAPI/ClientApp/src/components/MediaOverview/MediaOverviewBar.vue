@@ -3,8 +3,8 @@
 		<!--	Title	-->
 		<q-toolbar-title>
 			<QRow
-				justify="start"
-				align="center">
+				align="center"
+				justify="start">
 				<Transition
 					appear
 					enter-active-class="animated fadeInLeft"
@@ -24,9 +24,9 @@
 						<q-item>
 							<q-item-section avatar>
 								<QMediaTypeIcon
-									class="mx-3"
+									:media-type="library?.type ?? PlexMediaType.None"
 									:size="36"
-									:media-type="library?.type ?? PlexMediaType.None" />
+									class="mx-3" />
 							</q-item-section>
 							<q-item-section>
 								<q-item-label>
@@ -45,56 +45,77 @@
 						</q-item>
 					</q-list>
 				</QCol>
+				<QCol align-self="center">
+					<q-input
+						v-model="mediaOverviewStore.filterQuery"
+						:debounce="300"
+						outlined
+						input-style="font-size: 1.25rem"
+						rounded>
+						<template #prepend>
+							<q-icon
+								name="mdi-magnify"
+								class="q-ml-sm" />
+						</template>
+						<template #append>
+							<q-icon
+								v-if="mediaOverviewStore.filterQuery !== ''"
+								name="mdi-close"
+								class="cursor-pointer q-mr-sm"
+								@click="mediaOverviewStore.filterQuery = ''" />
+						</template>
+					</q-input>
+				</QCol>
 			</QRow>
 		</q-toolbar-title>
 
 		<!--	Download button	-->
 		<VerticalButton
 			v-if="mediaOverviewStore.showDownloadButton"
-			icon="mdi-download"
-			:label="$t('general.commands.download')"
 			:height="barHeight"
+			:label="$t('general.commands.download')"
 			:width="verticalButtonWidth"
+			icon="mdi-download"
 			@click="download" />
 
 		<!--	Selection Dialog Button	-->
 		<VerticalButton
 			v-if="mediaOverviewStore.showSelectionButton"
-			icon="mdi-select-marker"
-			:label="$t('general.commands.selection')"
 			:height="barHeight"
+			:label="$t('general.commands.selection')"
 			:width="verticalButtonWidth"
+			icon="mdi-select-marker"
 			@click="$emit('selection-dialog')" />
 
 		<!--	Refresh library button	-->
 		<VerticalButton
 			v-if="!detailMode"
-			icon="mdi-refresh"
-			:label="$t('general.commands.refresh')"
 			:height="barHeight"
-			cy="media-overview-refresh-library-btn"
+			:label="$t('general.commands.refresh')"
 			:width="verticalButtonWidth"
+			cy="media-overview-refresh-library-btn"
+			icon="mdi-refresh"
 			@click="refreshLibrary" />
 
 		<!--	View mode	-->
 		<VerticalButton
 			v-if="!detailMode"
-			icon="mdi-eye"
-			:label="$t('general.commands.view')"
 			:height="barHeight"
+			:label="$t('general.commands.view')"
 			:width="verticalButtonWidth"
-			cy="change-view-mode-btn">
+			cy="change-view-mode-btn"
+			icon="mdi-eye">
 			<q-menu
 				anchor="bottom left"
-				self="top left"
-				auto-close>
+				auto-close
+				self="top left">
 				<q-list>
 					<q-item
 						v-for="(viewOption, i) in viewOptions"
 						:key="i"
+						:data-cy="`view-mode-${viewOption.viewMode.toLowerCase()}-btn`"
 						clickable
 						style="min-width: 200px"
-						:data-cy="`view-mode-${viewOption.viewMode.toLowerCase()}-btn`"
 						@click="changeView(viewOption.viewMode)">
 						<!-- View mode options -->
 						<q-item-section avatar>
@@ -113,10 +134,15 @@
 	</q-toolbar>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import type { PlexLibraryDTO, PlexServerDTO } from '@dto';
 import { PlexMediaType, ViewMode } from '@dto';
-import { useLibraryStore, useMediaOverviewBarDownloadCommandBus, useMediaOverviewStore, useServerStore } from '#imports';
+import {
+	useLibraryStore,
+	useMediaOverviewBarDownloadCommandBus,
+	useMediaOverviewStore,
+	useServerStore,
+} from '#imports';
 
 const libraryStore = useLibraryStore();
 const serverStore = useServerStore();

@@ -44,7 +44,7 @@
 				<QCol v-show="mediaOverviewStore.showMediaOverview">
 					<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
 						<MediaTable
-							:rows="mediaOverviewStore.items"
+							:rows="mediaOverviewStore.getMediaItems"
 							:disable-hover-click="mediaType !== PlexMediaType.TvShow"
 							is-scrollable />
 					</template>
@@ -54,7 +54,7 @@
 						<PosterTable
 							:library-id="libraryId"
 							:media-type="mediaType"
-							:items="mediaOverviewStore.items" />
+							:items="mediaOverviewStore.getMediaItems" />
 					</template>
 				</QCol>
 

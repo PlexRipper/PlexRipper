@@ -17,6 +17,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		downloadButtonVisible: boolean;
 		showMediaOverview: boolean;
 		mediaType: PlexMediaType;
+		filterQuery: string;
 	}>({
 		items: [],
 		itemsLength: 0,
@@ -27,6 +28,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		downloadButtonVisible: false,
 		showMediaOverview: true,
 		mediaType: PlexMediaType.None,
+		filterQuery: '',
 	});
 
 	const settingsStore = useSettingsStore();
@@ -96,9 +98,16 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			state.sortedState = newSortedState;
 		},
 	};
+
 	const getters = {
 		hasSelectedMedia: computed((): boolean => {
 			return state.selection.keys.length > 0;
+		}),
+		getMediaItems: computed((): Readonly<PlexMediaSlimDTO[]> => {
+			if (state.filterQuery != '') {
+				return state.items.filter((x) => x.sortTitle.includes(state.filterQuery.toLowerCase()));
+			}
+			return state.items;
 		}),
 		getMediaViewMode: computed((): ViewMode => {
 			switch (state.mediaType) {

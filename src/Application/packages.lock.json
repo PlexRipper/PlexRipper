@@ -64,6 +64,15 @@
           "Microsoft.Extensions.Options": "8.0.0"
         }
       },
+      "Quartz.Serialization.SystemTextJson": {
+        "type": "Direct",
+        "requested": "[3.13.0, )",
+        "resolved": "3.13.0",
+        "contentHash": "e7ofQ7PYifDNf5OmXtWpPBIgDMdYIKXwF6AgJ9AeDp2mzOHF+6KOyOvIeWUFZwksX7Z6RYkpm/YWkSz9JJ0rGQ==",
+        "dependencies": {
+          "Quartz": "3.13.0"
+        }
+      },
       "RestSharp": {
         "type": "Direct",
         "requested": "[112.1.0, )",

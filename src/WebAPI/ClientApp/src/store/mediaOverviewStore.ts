@@ -37,18 +37,17 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 
 	const actions = {
 		setMedia(items: PlexMediaSlimDTO[], mediaType: PlexMediaType) {
-			state.scrollDict = {};
 			state.items = Object.freeze(items);
 			state.itemsLength = state.items.length;
 			state.mediaType = mediaType;
-			actions.setFirstLetterIndex();
+			state.filterQuery = '';
 		},
 		setFirstLetterIndex() {
 			// Create scroll indexes for each letter
 			state.scrollDict = {};
 			state.scrollDict['#'] = 0;
 			// Check for occurrence of title with alphabetic character
-			const sortTitles = getters.getMediaItems.value.map((x) => x.title[0]?.toLowerCase() ?? '#');
+			const sortTitles = get(getters.getMediaItems).map((x) => x.title[0]?.toLowerCase() ?? '#');
 			let lastIndex = 0;
 			const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase();
 
@@ -66,7 +65,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		setSelectionRange(min: number, max: number) {
 			actions.setSelection({
 				indexKey: state.selection.indexKey,
-				keys: getters.getMediaItems.value.filter((x) => x.index >= min && x.index <= max).map((x) => x.id),
+				keys: get(getters.getMediaItems).filter((x) => x.sortIndex >= min && x.sortIndex <= max).map((x) => x.id),
 				allSelected: false,
 			} as ISelection);
 		},
@@ -79,6 +78,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		},
 		clearSort() {
 			state.sortedState = [];
+			state.sortedItems = [];
 		},
 		sortMedia(event: IMediaOverviewSort) {
 			const newSortedState = [...state.sortedState];
@@ -114,21 +114,22 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			return state.selection.keys.length > 0;
 		}),
 		hasNoSearchResults: computed((): boolean => {
-			return state.filterQuery != '' && getters.getMediaItems.value.length === 0;
+			return state.filterQuery != '' && get(getters.getMediaItems).length === 0;
 		}),
 		getMediaItems: computed((): Readonly<PlexMediaSlimDTO[]> => {
-			let items: PlexMediaSlimDTO[];
 			// Currently sorting
+			const query = state.filterQuery.toLowerCase();
 			if (state.sortedState.length > 0) {
-				items = state.sortedItems;
+				if (state.filterQuery != '') {
+					return state.sortedItems.filter((x) => x.searchTitle.includes(query));
+				}
+				return state.sortedItems;
 			} else {
-				items = state.items;
+				if (state.filterQuery != '') {
+					return state.items.filter((x) => x.searchTitle.includes(query));
+				}
+				return state.items;
 			}
-
-			if (state.filterQuery != '') {
-				return Object.freeze(items.filter((x) => x.title.includes(state.filterQuery.toLowerCase())));
-			}
-			return items;
 		}),
 		getMediaViewMode: computed((): ViewMode => {
 			switch (state.mediaType) {

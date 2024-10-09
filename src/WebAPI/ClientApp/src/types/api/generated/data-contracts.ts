@@ -478,6 +478,7 @@ export interface PlexMediaDTO {
   qualities: PlexMediaQualityDTO[];
   /** @format double */
   rating: number;
+  searchTitle: string;
   /** @format int32 */
   sortIndex: number;
   studio: string;
@@ -553,6 +554,7 @@ export interface PlexMediaSlimDTO {
   /** @format int32 */
   plexServerId: number;
   qualities: PlexMediaQualityDTO[];
+  searchTitle: string;
   /** @format int32 */
   sortIndex: number;
   title: string;

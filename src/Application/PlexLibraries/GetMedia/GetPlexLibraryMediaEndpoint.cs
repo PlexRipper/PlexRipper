@@ -128,6 +128,6 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
                 return;
         }
 
-        await SendFluentResult(Result.Ok(entities.SetIndex()), ct);
+        await SendFluentResult(Result.Ok(entities), ct);
     }
 }

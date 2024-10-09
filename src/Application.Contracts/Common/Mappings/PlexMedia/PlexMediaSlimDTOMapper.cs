@@ -8,7 +8,6 @@ public static class PlexMediaSlimDTOMapper
         new()
         {
             Id = source.Id,
-            Index = 0,
             Title = source.Title,
             SortIndex = source.SortIndex,
             Year = source.Year,

@@ -88,6 +88,6 @@ public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, Resu
             entities.Add(media.ToSlimDTO());
         }
 
-        await SendFluentResult(Result.Ok(entities.SetIndex()), ct);
+        await SendFluentResult(Result.Ok(entities), ct);
     }
 }

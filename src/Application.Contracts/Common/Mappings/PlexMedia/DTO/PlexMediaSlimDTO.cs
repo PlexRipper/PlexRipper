@@ -6,8 +6,6 @@ public class PlexMediaSlimDTO
 {
     public required int Id { get; init; }
 
-    public int Index { get; set; }
-
     public required string Title { get; init; } = string.Empty;
 
     public required int SortIndex { get; init; }

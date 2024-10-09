@@ -8,7 +8,6 @@ public class PlexMediaSlimDTOValidator : AbstractValidator<PlexMediaSlimDTO>
     public PlexMediaSlimDTOValidator()
     {
         RuleFor(x => x.Id).GreaterThanOrEqualTo(0);
-        RuleFor(x => x.Index).GreaterThanOrEqualTo(0);
         RuleFor(x => x.Title).NotEmpty();
         RuleFor(x => x.SortIndex).NotEmpty();
         RuleFor(x => x.Year).GreaterThanOrEqualTo(0);

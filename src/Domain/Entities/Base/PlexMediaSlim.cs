@@ -18,10 +18,10 @@ public class PlexMediaSlim : BaseEntity
     public required int Year { get; set; }
 
     /// <summary>
-    /// This can be empty, in that case it gets the value of <see cref="Title"/>.
+    /// Gets or sets the sort index of the media based on the abc sort order. This makes sorting much quicker as it can sort on this index which is unique within a <see cref="PlexLibrary"/>.
     /// </summary>
     [Column(Order = 4)]
-    public required string SortTitle { get; init; }
+    public required int SortIndex { get; init; }
 
     /// <summary>
     /// Gets or sets the duration in seconds of the (nested) media.

@@ -61,7 +61,8 @@ public class PlexApiService : IPlexApiService
         if (mediaListResult.IsFailed)
             return mediaListResult.ToResult();
 
-        var mediaList = mediaListResult.Value;
+        // Pre sort the media list
+        var mediaList = mediaListResult.Value.OrderByNatural(x => x.Title.ToSortTitle()).ToList();
 
         // Determine how to map based on the Library type.
         switch (updatedPlexLibrary.Type)
@@ -166,7 +167,7 @@ public class PlexApiService : IPlexApiService
     public async Task<(
         Result<List<PlexServer>> servers,
         Result<List<ServerAccessTokenDTO>> tokens
-    )> GetAccessiblePlexServersAsync(int plexAccountId)
+        )> GetAccessiblePlexServersAsync(int plexAccountId)
     {
         var plexAccount = await _dbContext.PlexAccounts.GetAsync(plexAccountId);
         if (plexAccount is null)

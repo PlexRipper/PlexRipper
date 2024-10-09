@@ -85,7 +85,7 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
                 var plexMovies = await _dbContext
                     .PlexMovies.AsNoTracking()
                     .Where(x => x.PlexLibraryId == req.PlexLibraryId)
-                    .OrderBy(x => x.SortTitle)
+                    .OrderBy(x => x.SortIndex)
                     .Skip(skip)
                     .Take(take)
                     .ToListAsync(ct);
@@ -104,7 +104,7 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
                 var plexTvShow = await _dbContext
                     .PlexTvShows.AsNoTracking()
                     .Where(x => x.PlexLibraryId == req.PlexLibraryId)
-                    .OrderBy(x => x.SortTitle)
+                    .OrderBy(x => x.SortIndex)
                     .Skip(skip)
                     .Take(take)
                     .ToListAsync(ct);

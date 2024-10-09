@@ -10,7 +10,6 @@ public class PlexMediaDTOValidator : AbstractValidator<PlexMediaDTO>
         RuleFor(x => x.Id).GreaterThanOrEqualTo(0);
         RuleFor(x => x.Index).GreaterThanOrEqualTo(0);
         RuleFor(x => x.Title).NotEmpty();
-        RuleFor(x => x.SortTitle).NotEmpty();
         RuleFor(x => x.Year).GreaterThanOrEqualTo(0);
         RuleFor(x => x.Duration).GreaterThanOrEqualTo(0);
         RuleFor(x => x.MediaSize).GreaterThanOrEqualTo(0);

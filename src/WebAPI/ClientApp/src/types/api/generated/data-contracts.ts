@@ -465,8 +465,6 @@ export interface PlexMediaDTO {
   /** @format int32 */
   id: number;
   /** @format int32 */
-  index: number;
-  /** @format int32 */
   key: number;
   mediaData: PlexMediaDataDTO[];
   /** @format int64 */
@@ -548,8 +546,6 @@ export interface PlexMediaSlimDTO {
   hasThumb: boolean;
   /** @format int32 */
   id: number;
-  /** @format int32 */
-  index: number;
   /** @format int64 */
   mediaSize: number;
   /** @format int32 */

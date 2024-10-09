@@ -16,60 +16,62 @@
 		</template>
 		<!--	Help text	-->
 		<template #default>
-			<QRow
-				justify="center"
-				align="center"
-				class="q-pt-lg">
-				<QCol
-					cols="11"
-					class="q-my-md">
-					<q-range
-						v-model="selectedRange"
-						:min="1"
-						:max="mediaOverviewStore.itemsLength"
-						:step="1"
-						track-size="5px"
-						thumb-size="35px"
-						label-always
-						drag-range
-						color="red" />
-				</QCol>
-			</QRow>
-			<QRow justify="between">
-				<QCol
-					v-for="column in ['min', 'max']"
-					:key="column"
-					cols="auto"
-					class="q-mx-xs">
-					<table>
-						<tr>
-							<td colspan="2">
-								<q-input
-									v-model.number="numberInput[column]"
-									type="number"
-									outlined
-									style="max-width: 200px" />
-							</td>
-						</tr>
-						<tr
-							v-for="index in [1, 10, 100, 1000, 10000]"
-							:key="index">
-							<td>
-								<BaseButton
-									:label="`-${index}`"
-									block
-									@click="adjustValue(column, -1 * index)" />
-							</td>
-							<td>
-								<BaseButton
-									:label="`+${index}`"
-									block
-									@click="adjustValue(column, index)" />
-							</td>
-						</tr>
-					</table>
-				</QCol>
-			</QRow>
+			<div>
+				<QRow
+					justify="center"
+					align="center"
+					class="q-pt-lg">
+					<QCol
+						cols="11"
+						class="q-my-md">
+						<q-range
+							v-model="selectedRange"
+							:min="1"
+							:max="mediaOverviewStore.itemsLength"
+							:step="1"
+							track-size="5px"
+							thumb-size="35px"
+							label-always
+							drag-range
+							color="red" />
+					</QCol>
+				</QRow>
+				<QRow justify="between">
+					<QCol
+						v-for="column in ['min', 'max']"
+						:key="column"
+						cols="auto"
+						class="q-mx-xs">
+						<table>
+							<tr>
+								<td colspan="2">
+									<q-input
+										v-model.number="numberInput[column]"
+										type="number"
+										outlined
+										style="max-width: 200px" />
+								</td>
+							</tr>
+							<tr
+								v-for="index in [1, 10, 100, 1000, 10000]"
+								:key="index">
+								<td>
+									<BaseButton
+										:label="`-${index}`"
+										block
+										@click="adjustValue(column, -1 * index)" />
+								</td>
+								<td>
+									<BaseButton
+										:label="`+${index}`"
+										block
+										@click="adjustValue(column, index)" />
+								</td>
+							</tr>
+						</table>
+					</QCol>
+				</QRow>
+			</div>
 		</template>
 		<!--	Close action	-->
 		<template #actions="{ close }">

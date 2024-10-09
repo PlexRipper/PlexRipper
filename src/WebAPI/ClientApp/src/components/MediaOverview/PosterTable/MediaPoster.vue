@@ -28,7 +28,6 @@
 								</QCol>
 								<QCol cols="auto">
 									<BaseButton
-										v-if="mediaType === PlexMediaType.Movie"
 										icon="mdi-download"
 										size="xl"
 										flat
@@ -66,7 +65,6 @@
 
 							<QCol cols="auto">
 								<BaseButton
-									v-if="mediaType === PlexMediaType.Movie"
 									icon="mdi-download"
 									:outline="false"
 									size="xl"

@@ -24,10 +24,11 @@
 
 <script setup lang="ts">
 const props = withDefaults(defineProps<{
-	type: 'error' | 'warning' | 'info' | string;
+	type?: 'error' | 'warning' | 'info' | string;
 	dismissible?: boolean;
 	cy?: string;
 }>(), {
+	type: '',
 	dismissible: false,
 	cy: '',
 });

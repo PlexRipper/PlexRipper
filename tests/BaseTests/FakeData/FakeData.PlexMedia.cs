@@ -22,7 +22,7 @@ public static partial class FakeData
             .RuleFor(x => x.Key, _ => GetUniqueNumber())
             .RuleFor(x => x.Title, _ => title)
             .RuleFor(x => x.FullTitle, _ => title)
-            .RuleFor(x => x.SortTitle, _ => title.ToSortTitle())
+            .RuleFor(x => x.SortIndex, _ => 0)
             .RuleFor(x => x.SearchTitle, _ => title.ToSearchTitle())
             .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
             .RuleFor(x => x.Duration, f => f.Random.Int(1000, 3000000))

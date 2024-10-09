@@ -28,8 +28,9 @@ export function generatePlexMedia({
 		childCount: 0,
 		duration: randNumber({ min: 1900, max: 2023 }),
 		plexLibraryId,
-		sortTitle: title.toLowerCase(),
+		sortIndex: 0,
 		title,
+		searchTitle: title.toLowerCase(),
 		year: randNumber({ min: 1900, max: 2023 }),
 		type,
 		plexServerId,
@@ -37,7 +38,6 @@ export function generatePlexMedia({
 		mediaSize: randNumber({ min: 10000, max: 1000000 }),
 		addedAt: randRecentDate({ days: 120 }).toUTCString(),
 		updatedAt: randRecentDate({ days: 60 }).toUTCString(),
-		index: 0,
 		children: [],
 		qualities: [],
 		fullThumbUrl: 'https://www.omdbapi.com/src/poster.jpg',
@@ -87,7 +87,7 @@ export function generatePlexMedias({
 			partialData,
 		}),
 	)
-		.sort((a, b) => a.sortTitle.localeCompare(b.sortTitle))
+		.sort((a, b) => a.sortIndex.toString().localeCompare(b.sortIndex.toString()))
 		.map((x) => {
 			return {
 				...x,

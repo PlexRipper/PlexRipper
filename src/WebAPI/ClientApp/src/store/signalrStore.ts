@@ -10,7 +10,6 @@ import { isEqual } from 'lodash-es';
 import type { ISetupResult } from '@interfaces';
 import type {
 	FileMergeProgress,
-	InspectServerProgressDTO,
 	LibraryProgress,
 	NotificationDTO,
 	ServerConnectionCheckStatusProgressDTO,
@@ -29,13 +28,11 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		libraryProgress: LibraryProgress[];
 		syncServerMediaProgress: SyncServerMediaProgress[];
 		fileMergeProgress: FileMergeProgress[];
-		inspectServerProgress: InspectServerProgressDTO[];
 		serverConnectionCheckStatusProgress: ServerConnectionCheckStatusProgressDTO[];
 		// Subjects
 		libraryProgressSubject: Subject<LibraryProgress[]>;
 		syncServerMediaProgressSubject: Subject<SyncServerMediaProgress[]>;
 		fileMergeProgressSubject: Subject<FileMergeProgress[]>;
-		inspectServerProgressSubject: Subject<InspectServerProgressDTO[]>;
 		serverConnectionCheckStatusProgressSubject: Subject<ServerConnectionCheckStatusProgressDTO[]>;
 		refreshDataNotificationSubject: Subject<DataType>;
 	}
@@ -44,13 +41,11 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		libraryProgress: [],
 		syncServerMediaProgress: [],
 		fileMergeProgress: [],
-		inspectServerProgress: [],
 		serverConnectionCheckStatusProgress: [],
 		// Subjects
 		libraryProgressSubject: new Subject<LibraryProgress[]>(),
 		syncServerMediaProgressSubject: new Subject<SyncServerMediaProgress[]>(),
 		fileMergeProgressSubject: new Subject<FileMergeProgress[]>(),
-		inspectServerProgressSubject: new Subject<InspectServerProgressDTO[]>(),
 		serverConnectionCheckStatusProgressSubject: new Subject<ServerConnectionCheckStatusProgressDTO[]>(),
 		refreshDataNotificationSubject: new Subject<DataType>(),
 	});
@@ -117,10 +112,6 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 					data,
 					'plexServerConnectionId',
 				),
-		);
-
-		progressHubConnection?.on(MessageTypes.InspectServerProgress, (data: InspectServerProgressDTO) =>
-			updateState<InspectServerProgressDTO>('inspectServerProgress', data, 'plexServerId'),
 		);
 
 		progressHubConnection?.on(MessageTypes.SyncServerMediaProgress, (data: SyncServerMediaProgress) =>
@@ -218,9 +209,6 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		// region Array Progress
 		getAllLibraryProgress: (): Observable<LibraryProgress[]> => state.libraryProgressSubject.asObservable(),
 		getAllSyncServerMediaProgress: (): Observable<SyncServerMediaProgress[]> => state.syncServerMediaProgressSubject.asObservable(),
-		getAllFileMergeProgress: (): Observable<FileMergeProgress[]> => state.fileMergeProgressSubject.asObservable(),
-		getAllInspectServerProgress: (): Observable<InspectServerProgressDTO[]> =>
-			state.inspectServerProgressSubject.asObservable(),
 		getAllServerConnectionProgress: (): Observable<ServerConnectionCheckStatusProgressDTO[]> =>
 			state.serverConnectionCheckStatusProgressSubject.asObservable(),
 		// endregion
@@ -230,27 +218,6 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		getLibraryProgress(libraryId: number): Observable<LibraryProgress> {
 			return getters.getAllLibraryProgress().pipe(
 				map((x) => x?.find((x) => x.id === libraryId) ?? null),
-				filter((progress) => !!progress),
-				distinctUntilChanged(isEqual),
-			);
-		},
-		getSyncServerMediaProgress(plexServerId: number): Observable<SyncServerMediaProgress | null> {
-			return getters.getAllSyncServerMediaProgress().pipe(
-				map((x) => x?.find((x) => x.id === plexServerId) ?? null),
-				filter((progress) => !!progress),
-				distinctUntilChanged(isEqual),
-			);
-		},
-		getFileMergeProgress(id: number): Observable<FileMergeProgress | null> {
-			return getters.getAllFileMergeProgress().pipe(
-				map((x) => x?.find((x) => x.id === id) ?? null),
-				filter((progress) => !!progress),
-				distinctUntilChanged(isEqual),
-			);
-		},
-		getInspectServerProgress(plexServerId: number): Observable<InspectServerProgressDTO | null> {
-			return getters.getAllInspectServerProgress().pipe(
-				map((x) => x?.find((x) => x.plexServerId === plexServerId) ?? null),
 				filter((progress) => !!progress),
 				distinctUntilChanged(isEqual),
 			);

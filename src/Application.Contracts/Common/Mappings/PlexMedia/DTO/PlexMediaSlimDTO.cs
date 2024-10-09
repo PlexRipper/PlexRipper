@@ -6,11 +6,11 @@ public class PlexMediaSlimDTO
 {
     public required int Id { get; init; }
 
-    public int Index { get; set; }
-
     public required string Title { get; init; } = string.Empty;
 
-    public required string SortTitle { get; init; } = string.Empty;
+    public required string SearchTitle { get; init; } = string.Empty;
+
+    public required int SortIndex { get; init; }
 
     public required int Year { get; init; }
 
@@ -34,7 +34,7 @@ public class PlexMediaSlimDTO
 
     public required string FullThumbUrl { get; init; } = string.Empty;
 
-    public required List<PlexMediaQualityDTO> Qualities { get; init; } = new();
+    public required List<PlexMediaQualityDTO> Qualities { get; init; } = [];
 
-    public List<PlexMediaSlimDTO> Children { get; set; } = new();
+    public List<PlexMediaSlimDTO> Children { get; set; } = [];
 }

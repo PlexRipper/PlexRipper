@@ -6,7 +6,7 @@
 			<QHover>
 				<template #default="{ hover }">
 					<q-img
-						v-if="!defaultImage"
+						v-if="mediaItem.hasThumb"
 						loading="eager"
 						:src="imageUrl"
 						fit="fill"
@@ -28,7 +28,6 @@
 								</QCol>
 								<QCol cols="auto">
 									<BaseButton
-										v-if="mediaType === PlexMediaType.Movie"
 										icon="mdi-download"
 										size="xl"
 										flat
@@ -66,7 +65,6 @@
 
 							<QCol cols="auto">
 								<BaseButton
-									v-if="mediaType === PlexMediaType.Movie"
 									icon="mdi-download"
 									:outline="false"
 									size="xl"
@@ -136,7 +134,6 @@ const emit = defineEmits<{
 const thumbWidth = ref(200);
 const thumbHeight = ref(300);
 
-const defaultImage = ref(false);
 const loading = ref(false);
 const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown);
 const qualities = computed(() => props.mediaItem?.qualities ?? []);

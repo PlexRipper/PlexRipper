@@ -73,7 +73,8 @@
             "could-not-display": "Kann die Mediathek nicht anzeigen",
             "no-data": "Die Bibliothek wurde synchronisiert, enthält aber keine Medien.",
             "library-not-yet-synced": "Die Mediendaten der Bibliothek wurden noch nicht synchronisiert. Bitte warten Sie oder aktualisieren Sie jetzt.",
-            "steps-remaining": ""
+            "steps-remaining": "Schritt {index} von {total}:",
+            "no-search-results": "Es wurden keine Medien gefunden, die \"{query}\" enthalten."
         },
         "navigation-drawer": {
             "accounts": "Konten",

@@ -1,33 +1,32 @@
 <template>
 	<QPage>
-		<!-- Download Toolbar -->
-		<DownloadBar />
+		<template v-if="downloadStore.getServersWithDownloads.length > 0">
+			<!-- Download Toolbar -->
+			<DownloadBar />
 
-		<!--	The Download Table	-->
-		<QRow
-			v-if="downloadStore.getServersWithDownloads.length > 0"
-			justify="center">
-			<QCol cols="12">
-				<q-list>
-					<DownloadsTable
-						v-for="{ plexServer, downloads } in downloadStore.getServersWithDownloads"
-						:key="plexServer.id"
-						:download-rows="downloads"
-						:plex-server="plexServer"
-						@action="commandSwitch($event)" />
-				</q-list>
-			</QCol>
-		</QRow>
+			<!--	The Download Table	-->
+			<QRow
+				justify="center">
+				<QCol cols="12">
+					<q-list>
+						<DownloadsTable
+							v-for="{ plexServer, downloads } in downloadStore.getServersWithDownloads"
+							:key="plexServer.id"
+							:download-rows="downloads"
+							:plex-server="plexServer"
+							@action="commandSwitch($event)" />
+					</q-list>
+				</QCol>
+			</QRow>
+			<DownloadDetailsDialog :name="dialogName" />
+		</template>
 		<QRow
 			v-else
 			justify="center">
-			<QCol cols="auto">
-				<QText size="h4">
-					{{ $t('pages.downloads.no-downloads') }}
-				</QText>
-			</QCol>
+			<QAlert>
+				{{ $t('pages.downloads.no-downloads') }}
+			</QAlert>
 		</QRow>
-		<DownloadDetailsDialog :name="dialogName" />
 	</QPage>
 </template>
 

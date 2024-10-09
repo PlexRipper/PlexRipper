@@ -107,7 +107,7 @@ onMounted(() => {
 		}
 
 		// We have to revert to normal title sort otherwise the index will be wrong
-		mediaOverviewStore.sortMedia({ sort: 'asc', field: 'title' });
+		mediaOverviewStore.clearSort();
 		const index = mediaOverviewStore.scrollDict[letter] ? mediaOverviewStore.scrollDict[letter] : 0;
 		// noinspection TypeScriptValidateTypes
 		const element: HTMLElement | null = get(qTableRef)?.querySelector(`[data-scroll-index="${index}"]`) ?? null;

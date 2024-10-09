@@ -12,6 +12,19 @@
           </list>
         </option>
         <option name="containerName" value="PlexRipperDev" />
+        <option name="contextFolderPath" value="." />
+        <option name="envVars">
+          <list>
+            <DockerEnvVarImpl>
+              <option name="name" value="PUID" />
+              <option name="value" value="1000" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="PGID" />
+              <option name="value" value="1000" />
+            </DockerEnvVarImpl>
+          </list>
+        </option>
         <option name="portBindings">
           <list>
             <DockerPortBindingImpl>
@@ -20,7 +33,7 @@
             </DockerPortBindingImpl>
           </list>
         </option>
-        <option name="sourceFilePath" value="/docker/Dockerfile" />
+        <option name="sourceFilePath" value="docker/Dockerfile" />
         <option name="volumeBindings">
           <list>
             <DockerVolumeBindingImpl>

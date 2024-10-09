@@ -1,5 +1,5 @@
 import { useEventBus, type UseEventBusReturn } from '@vueuse/core';
-import type { DownloadMediaDTO } from '@dto';
+import type { DownloadMediaDTO, PlexMediaSlimDTO } from '@dto';
 
 // region Dialog Controls
 
@@ -31,7 +31,7 @@ export function useCloseControlDialog(name: string) {
 // region MediaOverview
 
 export interface IMediaOverviewSort {
-	field: string;
+	field: keyof PlexMediaSlimDTO;
 	sort: 'asc' | 'desc' | 'no-sort';
 }
 

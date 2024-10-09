@@ -8,9 +8,8 @@ public static class PlexMediaSlimDTOMapper
         new()
         {
             Id = source.Id,
-            Index = 0,
             Title = source.Title,
-            SortTitle = source.SortTitle,
+            SortIndex = source.SortIndex,
             Year = source.Year,
             Duration = source.Duration,
             MediaSize = source.MediaSize,
@@ -24,6 +23,7 @@ public static class PlexMediaSlimDTOMapper
             FullThumbUrl = source.FullThumbUrl,
             Qualities = source.Qualities.ToDTO(),
             Children = [],
+            SearchTitle = string.Empty, // TODO Missing in PlexMediaSlim
         };
 
     #region PlexMovie
@@ -33,8 +33,9 @@ public static class PlexMediaSlimDTOMapper
         {
             Id = source.Id,
             Title = source.Title,
-            SortTitle = source.SortTitle,
+            SortIndex = source.SortIndex,
             Year = source.Year,
+            SearchTitle = source.SearchTitle,
             Duration = source.Duration,
             MediaSize = source.MediaSize,
             ChildCount = source.ChildCount,
@@ -75,7 +76,8 @@ public static class PlexMediaSlimDTOMapper
         {
             Id = source.Id,
             Title = source.Title,
-            SortTitle = source.SortTitle,
+            SearchTitle = source.SearchTitle,
+            SortIndex = source.SortIndex,
             Year = source.Year,
             Duration = source.Duration,
             MediaSize = source.MediaSize,
@@ -114,7 +116,8 @@ public static class PlexMediaSlimDTOMapper
         {
             Id = source.Id,
             Title = source.Title,
-            SortTitle = source.SortTitle,
+            SearchTitle = source.SearchTitle,
+            SortIndex = source.SortIndex,
             Year = source.Year,
             Duration = source.Duration,
             MediaSize = source.MediaSize,
@@ -139,7 +142,8 @@ public static class PlexMediaSlimDTOMapper
         {
             Id = source.Id,
             Title = source.Title,
-            SortTitle = source.SortTitle,
+            SearchTitle = source.SearchTitle,
+            SortIndex = source.SortIndex,
             Year = source.Year,
             Duration = source.Duration,
             MediaSize = source.MediaSize,

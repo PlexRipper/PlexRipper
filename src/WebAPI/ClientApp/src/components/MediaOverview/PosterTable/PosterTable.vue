@@ -25,10 +25,11 @@ import Log from 'consola';
 import { RecycleScroller } from 'vue-virtual-scroller';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
 
-import { get, set, useScroll } from '@vueuse/core';
+import { get, set } from '@vueuse/core';
 import type { PlexMediaType, PlexMediaSlimDTO } from '@dto';
 import { listenMediaOverviewScrollToCommand, sendMediaOverviewDownloadCommand } from '@composables/event-bus';
 import { triggerBoxHighlight } from '@composables/animations';
+import { waitForElement } from '@composables';
 
 const mediaOverviewStore = useMediaOverviewStore();
 
@@ -51,16 +52,6 @@ function onResize() {
 	set(gridItems, Math.floor(get(width) / get(posterCardWidth)));
 }
 
-function getScrollTarget(index: number): HTMLElement | null {
-	// noinspection TypeScriptValidateTypes
-	const element: HTMLElement | null = get(posterTableRef)?.querySelector(`[data-scroll-index="${index}"]`) ?? null;
-	if (!element) {
-		Log.error(`Could not find scroll target element for letter with index ${index}`, `[data-scroll-index="${index}"]`);
-		return null;
-	}
-	return element;
-}
-
 onMounted(() => {
 	// Listen for scroll to letter command
 	listenMediaOverviewScrollToCommand((letter) => {
@@ -69,36 +60,28 @@ onMounted(() => {
 			return;
 		}
 		// We have to revert to normal title sort otherwise the index will be wrong
-		mediaOverviewStore.sortMedia({ sort: 'asc', field: 'title' });
+		mediaOverviewStore.clearSort();
+
 		const index = mediaOverviewStore.scrollDict[letter] ?? 0;
 		set(scrolledIndex, index);
 		set(autoScrollEnabled, true);
 
-		// Scroll to item first, otherwise the target element won't exist in dom to highlight
-		const beforeScroll = get(recycleScrollerRef)?.getScroll();
-		get(recycleScrollerRef)?.scrollToItem(index);
-		const afterScroll = get(recycleScrollerRef)?.getScroll();
-
-		// No scroll happened, trigger highlight manually
-		if ((beforeScroll?.end ?? (afterScroll?.end ?? 0)) === 0) {
-			triggerBoxHighlight(getScrollTarget(index));
+		const scrollRef = get(recycleScrollerRef);
+		if (!scrollRef) {
+			Log.error('Could not find recycle scroller reference: ', scrollRef);
+			return;
 		}
-	});
 
-	// Setup stopped scrolling event listener
-	useScroll(get(posterTableRef), {
-		onStop() {
-			// Don't highlight if the user scrolls manually
-			if (!get(autoScrollEnabled)) {
-				return;
-			}
-			set(autoScrollEnabled, false);
+		// Scroll to item first, otherwise the target element won't exist in dom to highlight
+		scrollRef.scrollToItem(index);
 
-			// noinspection TypeScriptValidateTypes
-			const element: HTMLElement | null = getScrollTarget(get(scrolledIndex));
-
-			triggerBoxHighlight(element);
-		},
+		// Wait for the element to be rendered before highlighting
+		waitForElement(get(posterTableRef), `[data-scroll-index="${index}"]`).then((element) => {
+			// Highlight the element after a short delay due to render hang
+			setTimeout(() => {
+				triggerBoxHighlight(element);
+			}, 400);
+		});
 	});
 });
 </script>

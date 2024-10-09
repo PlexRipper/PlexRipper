@@ -61,7 +61,8 @@ public class PlexApiService : IPlexApiService
         if (mediaListResult.IsFailed)
             return mediaListResult.ToResult();
 
-        var mediaList = mediaListResult.Value;
+        // Pre sort the media list
+        var mediaList = mediaListResult.Value.OrderByNatural(x => x.Title.ToSortTitle()).ToList();
 
         // Determine how to map based on the Library type.
         switch (updatedPlexLibrary.Type)

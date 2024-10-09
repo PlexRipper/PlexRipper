@@ -59,14 +59,14 @@ COPY ["src/WebAPI/WebAPI.csproj", "src/WebAPI/"]
 COPY ["src/WebAPI.Contracts/WebAPI.Contracts.csproj", "src/WebAPI.Contracts/"]
 
 ## Restore Projects
-RUN dotnet restore "src/WebAPI/WebAPI.csproj" --runtime $TARGETPLATFORM --locked-mode
+RUN dotnet restore "src/WebAPI/WebAPI.csproj" --locked-mode
 
 COPY . .
 WORKDIR "/src/src/WebAPI"
 
 ## Build and Publish
-RUN dotnet build "WebAPI.csproj" --runtime $TARGETPLATFORM -c Release -o /app/build /p:AssemblyVersion=$VERSION --no-restore
-RUN dotnet publish "WebAPI.csproj" -a $TARGETARCH -c Release -o /app/publish /p:AssemblyVersion=$VERSION
+RUN dotnet build "WebAPI.csproj" -c Release -o /app/build /p:AssemblyVersion=$VERSION --no-restore
+RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:AssemblyVersion=$VERSION
 
 # Stage 3 - Runtime Image
 FROM --platform=$TARGETPLATFORM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final

@@ -26,7 +26,7 @@ public static class LogConfig
             .Enrich.FromLogContext();
 
         // Do not mask data when debugging
-        if (!Debugger.IsAttached)
+        if (!Debugger.IsAttached || !EnvironmentExtensions.IsUnmasked())
         {
             config.Enrich.WithSensitiveDataMasking(options =>
             {

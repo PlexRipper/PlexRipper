@@ -1,20 +1,22 @@
 version: '3.4'
 services:
-  plexripper:
-    container_name: PlexRipper
-    image: plexripper/plexripper:latest
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    ports:
-      # Web UI & Web API
-      - '7000:7000'
-    restart: unless-stopped
-    environment:
-        - PUID=1000
-        - PGID=1000
-    volumes:
-      - /mnt/PROJECTS/PlexRipperCache/Config:/Config
-      - /mnt/PROJECTS/PlexRipperCache/Downloads:/Downloads
-      - /mnt/PROJECTS/PlexRipperCache/Movies:/Movies
-      - /mnt/PROJECTS/PlexRipperCache/TvShows:/TvShows
+    plexripper:
+        container_name: PlexRipper
+        image: plexripper/plexripper:latest
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        ports:
+            # Web UI & Web API
+            - '7000:7000'
+        restart: unless-stopped
+        environment:
+            - PUID=1000
+            - PGID=1000
+            - TZ=America/New_York
+            - UNMASKED=false # Unmask sensitive data in logs if true
+        volumes:
+            - /mnt/PROJECTS/PlexRipperCache/Config:/Config
+            - /mnt/PROJECTS/PlexRipperCache/Downloads:/Downloads
+            - /mnt/PROJECTS/PlexRipperCache/Movies:/Movies
+            - /mnt/PROJECTS/PlexRipperCache/TvShows:/TvShows

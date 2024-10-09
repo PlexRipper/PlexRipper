@@ -63,9 +63,9 @@
 								:items="mediaOverviewStore.getMediaItems" />
 						</template>
 					</QCol>
+					<!-- Alphabet Navigation -->
+					<AlphabetNavigation v-show="mediaOverviewStore.showMediaOverview" />
 				</QRow>
-				<!-- Alphabet Navigation -->
-				<AlphabetNavigation v-show="mediaOverviewStore.showMediaOverview" />
 			</template>
 		</template>
 

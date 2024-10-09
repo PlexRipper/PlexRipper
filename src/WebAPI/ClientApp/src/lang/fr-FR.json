@@ -74,7 +74,7 @@
             "no-data": "La bibliothèque a été synchronisée mais ne contient aucun média.",
             "library-not-yet-synced": "Les données multimédias de la bibliothèque n'ont pas encore été synchronisées. Veuillez patienter ou actualiser maintenant.",
             "steps-remaining": "Étape {index} sur {total}:",
-            "no-search-results": "Aucun média contenant \"{query\" n'a été trouvé"
+            "no-search-results": "Aucun média contenant \"{query}\" n'a été trouvé"
         },
         "navigation-drawer": {
             "accounts": "Comptes",

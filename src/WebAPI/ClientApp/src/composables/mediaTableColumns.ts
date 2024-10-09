@@ -16,7 +16,7 @@ export const getMediaTableColumns = (): QTreeViewTableHeader[] => {
 		{
 			label: t('components.media-list.columns.title'),
 			field: 'title',
-			sortField: 'index',
+			sortField: 'sortIndex',
 			type: 'title',
 			align: 'left',
 			sortOrder: 'asc',

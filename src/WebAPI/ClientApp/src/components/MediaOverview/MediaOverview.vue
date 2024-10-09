@@ -90,7 +90,6 @@
 		<!--		Download confirmation dialog	-->
 		<DownloadConfirmation
 			:name="downloadConfirmationName"
-			:items="mediaOverviewStore.items"
 			@download="downloadStore.downloadMedia($event)" />
 	</template>
 </template>
@@ -170,6 +169,7 @@ const refreshingText = computed(() => {
 });
 
 function changeView(viewMode: ViewMode) {
+	mediaOverviewStore.clearSort();
 	settingsStore.updateDisplayMode(props.mediaType, viewMode);
 }
 

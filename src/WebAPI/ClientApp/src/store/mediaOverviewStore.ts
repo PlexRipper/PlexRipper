@@ -9,6 +9,7 @@ import { useSettingsStore } from '#build/imports';
 export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 	const state = reactive<{
 		items: Readonly<PlexMediaSlimDTO[]>;
+		sortedItems: Readonly<PlexMediaSlimDTO[]>;
 		itemsLength: number;
 		sortedState: IMediaOverviewSort[];
 		scrollDict: Record<string, number>;
@@ -20,6 +21,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		filterQuery: string;
 	}>({
 		items: [],
+		sortedItems: [],
 		itemsLength: 0,
 		sortedState: [],
 		scrollDict: { '#': 0 },
@@ -39,16 +41,21 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			state.items = Object.freeze(items);
 			state.itemsLength = state.items.length;
 			state.mediaType = mediaType;
+			actions.setFirstLetterIndex();
+		},
+		setFirstLetterIndex() {
 			// Create scroll indexes for each letter
+			state.scrollDict = {};
 			state.scrollDict['#'] = 0;
 			// Check for occurrence of title with alphabetic character
-			const sortTitles = state.items.map((x) => x.sortTitle[0]?.toLowerCase() ?? '#');
+			const sortTitles = getters.getMediaItems.value.map((x) => x.title[0]?.toLowerCase() ?? '#');
 			let lastIndex = 0;
-			for (const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase()) {
-				const index = sortTitles.indexOf(letter, lastIndex);
-				if (index > -1) {
-					state.scrollDict[letter] = index;
-					lastIndex = index;
+			const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase();
+
+			for (const letter of alphabet) {
+				lastIndex = sortTitles.findIndex((x, idx) => idx >= lastIndex && x === letter);
+				if (lastIndex > -1) {
+					state.scrollDict[letter] = lastIndex;
 				}
 			}
 			state.scrollAlphabet = Object.keys(state.scrollDict);
@@ -59,7 +66,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		setSelectionRange(min: number, max: number) {
 			actions.setSelection({
 				indexKey: state.selection.indexKey,
-				keys: state.items.filter((x) => x.index >= min && x.index <= max).map((x) => x.id),
+				keys: getters.getMediaItems.value.filter((x) => x.index >= min && x.index <= max).map((x) => x.id),
 				allSelected: false,
 			} as ISelection);
 		},
@@ -69,6 +76,9 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 				keys: value ? state.items.map((x) => x.id) : [],
 				allSelected: value,
 			} as ISelection);
+		},
+		clearSort() {
+			state.sortedState = [];
 		},
 		sortMedia(event: IMediaOverviewSort) {
 			const newSortedState = [...state.sortedState];
@@ -90,11 +100,11 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 					sort: x.sort !== 'no-sort' ? x.sort : false,
 				};
 			});
-			state.items = orderBy(
+			state.sortedItems = Object.freeze(orderBy(
 				state.items, // Items to sort
 				lodashFormat.map((x) => x.field), // Sort by field
 				lodashFormat.map((x) => x.sort), // Sort by sort, asc or desc
-			);
+			));
 			state.sortedState = newSortedState;
 		},
 	};
@@ -104,10 +114,18 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			return state.selection.keys.length > 0;
 		}),
 		getMediaItems: computed((): Readonly<PlexMediaSlimDTO[]> => {
-			if (state.filterQuery != '') {
-				return state.items.filter((x) => x.sortTitle.includes(state.filterQuery.toLowerCase()));
+			let items;
+			// Currently sorting
+			if (state.sortedState.length > 0) {
+				items = state.sortedItems;
+			} else {
+				items = state.items;
 			}
-			return state.items;
+
+			if (state.filterQuery != '') {
+				return Object.freeze(items.filter((x) => x.sortTitle.includes(state.filterQuery.toLowerCase())));
+			}
+			return items;
 		}),
 		getMediaViewMode: computed((): ViewMode => {
 			switch (state.mediaType) {
@@ -137,6 +155,9 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			return null;
 		}),
 	};
+
+	watch(getters.getMediaItems, () => actions.setFirstLetterIndex());
+
 	return {
 		...toRefs(state),
 		...actions,

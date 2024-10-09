@@ -25,7 +25,7 @@
 				<q-item-section>
 					<q-item-label>{{ opt.title }}</q-item-label>
 					<q-item-label caption>
-						{{ opt.sortTitle }}
+						{{ opt.title }}
 					</q-item-label>
 				</q-item-section>
 			</q-item>

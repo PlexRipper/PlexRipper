@@ -28,7 +28,7 @@ export function generatePlexMedia({
 		childCount: 0,
 		duration: randNumber({ min: 1900, max: 2023 }),
 		plexLibraryId,
-		sortTitle: title.toLowerCase(),
+		sortIndex: 0,
 		title,
 		year: randNumber({ min: 1900, max: 2023 }),
 		type,
@@ -87,7 +87,7 @@ export function generatePlexMedias({
 			partialData,
 		}),
 	)
-		.sort((a, b) => a.sortTitle.localeCompare(b.sortTitle))
+		.sort((a, b) => a.sortIndex.toString().localeCompare(b.sortIndex.toString()))
 		.map((x) => {
 			return {
 				...x,

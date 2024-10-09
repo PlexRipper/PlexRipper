@@ -13,6 +13,7 @@
 import { get, set } from '@vueuse/core';
 import type { IMediaOverviewSort } from '@composables/event-bus';
 import type { QTreeViewTableHeader } from '@props';
+import type { PlexMediaSlimDTO } from '@dto';
 import { useMediaOverviewStore } from '~/store';
 
 const mediaOverviewStore = useMediaOverviewStore();
@@ -23,7 +24,7 @@ const props = defineProps<{
 
 const sorted = ref<IMediaOverviewSort>({
 	sort: props.column.sortOrder ?? 'no-sort',
-	field: props.column.sortField ?? props.column.field,
+	field: (props.column.sortField ?? props.column.field) as keyof PlexMediaSlimDTO,
 });
 
 defineEmits<{
@@ -46,7 +47,7 @@ const icon = computed(() => {
 function onClick() {
 	const newSort: IMediaOverviewSort = {
 		sort: get(sorted)?.sort ?? 'no-sort',
-		field: props.column.sortField ?? props.column.field,
+		field: (props.column.sortField ?? props.column.field) as keyof PlexMediaSlimDTO,
 	};
 	switch (newSort.sort) {
 		case 'asc':

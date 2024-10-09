@@ -69,7 +69,8 @@ onMounted(() => {
 			return;
 		}
 		// We have to revert to normal title sort otherwise the index will be wrong
-		mediaOverviewStore.sortMedia({ sort: 'asc', field: 'title' });
+		mediaOverviewStore.clearSort();
+
 		const index = mediaOverviewStore.scrollDict[letter] ?? 0;
 		set(scrolledIndex, index);
 		set(autoScrollEnabled, true);

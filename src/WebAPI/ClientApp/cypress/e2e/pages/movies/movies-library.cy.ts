@@ -42,7 +42,7 @@ describe('Display media collection on the Library detail page', () => {
 				cy.visit(route(`/movies/${movieLibrary.id}`));
 
 				const movies = data.mediaData.find((x) => x.libraryId === movieLibrary.id)?.media ?? [];
-				const sortTitles = movies.map((x) => x.sortTitle[0].toLowerCase());
+				const sortTitles = movies.map((x) => x.title[0]?.toLowerCase() ?? '#');
 				for (const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase()) {
 					const index = sortTitles.indexOf(letter);
 					if (index > -1) {

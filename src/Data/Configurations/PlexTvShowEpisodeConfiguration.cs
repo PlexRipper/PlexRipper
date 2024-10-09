@@ -7,5 +7,6 @@ public class PlexTvShowEpisodeConfiguration : IEntityTypeConfiguration<PlexTvSho
 {
     public void Configure(EntityTypeBuilder<PlexTvShowEpisode> builder)
     {
+        builder.HasIndex(x => x.SortIndex);
     }
 }

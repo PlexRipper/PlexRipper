@@ -7,5 +7,6 @@ public class PlexMovieConfiguration : IEntityTypeConfiguration<PlexMovie>
 {
     public void Configure(EntityTypeBuilder<PlexMovie> builder)
     {
+        builder.HasIndex(x => x.SortIndex);
     }
 }

@@ -128,17 +128,6 @@ export enum DownloadStatus {
   Completed = "Completed",
 }
 
-export interface DownloadTaskCreationProgress {
-  /** @format int32 */
-  current: number;
-  /** Has the library finished refreshing. */
-  isComplete: boolean;
-  /** @format decimal */
-  percentage: number;
-  /** @format int32 */
-  total: number;
-}
-
 export interface DownloadTaskDTO {
   actions: string[];
   children: DownloadTaskDTO[];
@@ -309,23 +298,6 @@ export interface IError {
   reasons?: IError[] | null;
 }
 
-export interface InspectServerProgressDTO {
-  completed: boolean;
-  connectionSuccessful: boolean;
-  message: string;
-  plexServerConnection: PlexServerConnectionDTO;
-  /** @format int32 */
-  plexServerId: number;
-  /** @format int32 */
-  retryAttemptCount: number;
-  /** @format int32 */
-  retryAttemptIndex: number;
-  /** @format int32 */
-  statusCode: number;
-  /** @format int32 */
-  timeToNextRetry: number;
-}
-
 export enum JobStatus {
   Started = "Started",
   Completed = "Completed",
@@ -374,12 +346,14 @@ export interface LibraryProgress {
   totalSteps: number;
 }
 
+/**
+ * Message types for SignalR communication from server to client.
+ *
+ */
 export enum MessageTypes {
   LibraryProgress = "LibraryProgress",
-  DownloadTaskCreationProgress = "DownloadTaskCreationProgress",
   DownloadTaskUpdate = "DownloadTaskUpdate",
   ServerDownloadProgress = "ServerDownloadProgress",
-  InspectServerProgress = "InspectServerProgress",
   ServerConnectionCheckStatusProgress = "ServerConnectionCheckStatusProgress",
   FileMergeProgress = "FileMergeProgress",
   SyncServerMediaProgress = "SyncServerMediaProgress",
@@ -506,7 +480,8 @@ export interface PlexMediaDTO {
   qualities: PlexMediaQualityDTO[];
   /** @format double */
   rating: number;
-  sortTitle: string;
+  /** @format int32 */
+  sortIndex: number;
   studio: string;
   summary: string;
   title: string;
@@ -582,7 +557,8 @@ export interface PlexMediaSlimDTO {
   /** @format int32 */
   plexServerId: number;
   qualities: PlexMediaQualityDTO[];
-  sortTitle: string;
+  /** @format int32 */
+  sortIndex: number;
   title: string;
   type: PlexMediaType;
   /** @format date-time */

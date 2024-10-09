@@ -68,6 +68,12 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
         var take = req.Size <= 0 ? -1 : req.Size;
         var skip = req.Page * req.Size;
 
+        if (take == 0)
+        {
+            // Take everything, but stop searching when the media count is reached
+            take = plexLibrary.MediaCount;
+        }
+
         var plexServerId = plexLibrary.PlexServerId;
 
         // Do continue, even if the connection is invalid, worst case is that the thumbnail will not work

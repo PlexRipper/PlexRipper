@@ -301,7 +301,7 @@ public class PlexApiWrapper
                 UpdatedAt = DateTimeExtensions.FromUnixTime(x.UpdatedAt),
                 ScannedAt = DateTimeExtensions.FromUnixTime(x.ScannedAt),
                 SyncedAt = null,
-                Uuid = Guid.Parse(x.Uuid),
+                Uuid = x.Uuid,
                 PlexServer = null,
                 PlexServerId = connection.PlexServerId,
                 DefaultDestination = null,

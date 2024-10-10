@@ -49,7 +49,7 @@ public class RestartDownloadTaskCommandHandler : IRequestHandler<RestartDownload
             var stopResult = await _mediator.Send(new StopDownloadTaskCommand(childKey.Id), cancellationToken);
 
             if (stopResult.IsFailed)
-                return stopResult;
+                return stopResult.LogError();
 
             // Reset progress of the downloadTask
             await _dbContext.UpdateDownloadProgress(

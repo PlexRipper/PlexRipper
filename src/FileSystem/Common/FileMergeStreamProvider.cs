@@ -79,7 +79,12 @@ public class FileMergeStreamProvider : IFileMergeStreamProvider
                     fileTask.DestinationFilePath
                 );
             _log.Debug("Deleting file {FilePath} since it has been merged already", filePath);
-            _fileSystem.DeleteFile(filePath);
+            var deleteResult = _fileSystem.DeleteFile(filePath);
+            if (deleteResult.IsFailed)
+            {
+                await _mediator.SendNotificationAsync(deleteResult);
+                deleteResult.LogError();
+            }
         }
 
         bytesReceivedProgress.OnNext(totalRead);

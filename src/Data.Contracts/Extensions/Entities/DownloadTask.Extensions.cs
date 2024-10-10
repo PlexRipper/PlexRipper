@@ -11,8 +11,8 @@ public static class DownloadTaskExtensions
 
         downloadTask.Children.ForEach(x => x.Calculate());
 
-        downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Sum();
-        downloadTask.FileTransferSpeed = downloadTask.Children.Select(x => x.FileTransferSpeed).Sum();
+        downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Max();
+        downloadTask.FileTransferSpeed = downloadTask.Children.Select(x => x.FileTransferSpeed).Max();
         downloadTask.DataReceived = downloadTask.Children.Select(x => x.DataReceived).Sum();
         downloadTask.DataTotal = downloadTask.Children.Select(x => x.DataTotal).Sum();
         downloadTask.Percentage = DataFormat.GetPercentage(downloadTask.DataReceived, downloadTask.DataTotal);
@@ -29,8 +29,8 @@ public static class DownloadTaskExtensions
         if (!downloadTask.Children.Any())
             return downloadTask;
 
-        downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Sum();
-        downloadTask.FileTransferSpeed = downloadTask.Children.Select(x => x.FileTransferSpeed).Sum();
+        downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Max();
+        downloadTask.FileTransferSpeed = downloadTask.Children.Select(x => x.FileTransferSpeed).Max();
         downloadTask.DataReceived = downloadTask.Children.Select(x => x.DataReceived).Sum();
         downloadTask.DataTotal = downloadTask.Children.Select(x => x.DataTotal).Sum();
         downloadTask.Percentage = DataFormat.GetPercentage(downloadTask.DataReceived, downloadTask.DataTotal);
@@ -51,8 +51,8 @@ public static class DownloadTaskExtensions
 
         downloadTask.Children.ForEach(x => x.Calculate());
 
-        downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Sum();
-        downloadTask.FileTransferSpeed = downloadTask.Children.Select(x => x.FileTransferSpeed).Sum();
+        downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Max();
+        downloadTask.FileTransferSpeed = downloadTask.Children.Select(x => x.FileTransferSpeed).Max();
         downloadTask.DataReceived = downloadTask.Children.Select(x => x.DataReceived).Sum();
         downloadTask.DataTotal = downloadTask.Children.Select(x => x.DataTotal).Sum();
         downloadTask.Percentage = DataFormat.GetPercentage(downloadTask.DataReceived, downloadTask.DataTotal);
@@ -73,8 +73,8 @@ public static class DownloadTaskExtensions
 
         downloadTask.Children.ForEach(x => x.Calculate());
 
-        downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Sum();
-        downloadTask.FileTransferSpeed = downloadTask.Children.Select(x => x.FileTransferSpeed).Sum();
+        downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Max();
+        downloadTask.FileTransferSpeed = downloadTask.Children.Select(x => x.FileTransferSpeed).Max();
         downloadTask.DataReceived = downloadTask.Children.Select(x => x.DataReceived).Sum();
         downloadTask.DataTotal = downloadTask.Children.Select(x => x.DataTotal).Sum();
         downloadTask.Percentage = DataFormat.GetPercentage(downloadTask.DataReceived, downloadTask.DataTotal);
@@ -93,8 +93,8 @@ public static class DownloadTaskExtensions
         if (!downloadTask.Children.Any())
             return downloadTask;
 
-        downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Sum();
-        downloadTask.FileTransferSpeed = downloadTask.Children.Select(x => x.FileTransferSpeed).Sum();
+        downloadTask.DownloadSpeed = downloadTask.Children.Select(x => x.DownloadSpeed).Max();
+        downloadTask.FileTransferSpeed = downloadTask.Children.Select(x => x.FileTransferSpeed).Max();
         downloadTask.DataReceived = downloadTask.Children.Select(x => x.DataReceived).Sum();
         downloadTask.DataTotal = downloadTask.Children.Select(x => x.DataTotal).Sum();
         downloadTask.Percentage = DataFormat.GetPercentage(downloadTask.DataReceived, downloadTask.DataTotal);

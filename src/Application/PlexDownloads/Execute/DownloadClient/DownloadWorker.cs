@@ -196,7 +196,9 @@ public class DownloadWorker : IDisposable
 
             responseStream = await _httpClient.DownloadStreamAsync(request, cancellationToken);
             if (responseStream is null)
-                throw new Exception("Response stream is null", new Exception(request.ToString()));
+            {
+                return SendDownloadWorkerError(Result.Fail(new ExceptionalError(new Exception(request.ToString()))));
+            }
 
             // Throttle the stream to enable download speed limiting
             throttledStream = new ThrottledStream(responseStream, _downloadSpeedLimit);
@@ -231,9 +233,7 @@ public class DownloadWorker : IDisposable
         }
         catch (Exception e)
         {
-            var result = Result.Fail(new ExceptionalError(e)).LogError();
-            SendDownloadWorkerError(result);
-            return result;
+            return SendDownloadWorkerError(Result.Fail(new ExceptionalError(e)));
         }
         finally
         {
@@ -256,7 +256,7 @@ public class DownloadWorker : IDisposable
         }
     }
 
-    private void SendDownloadWorkerError(Result errorResult)
+    private Result SendDownloadWorkerError(Result errorResult)
     {
         if (errorResult.Errors.Any() && !errorResult.Errors[0].Metadata.ContainsKey(nameof(DownloadWorker) + "Id"))
             errorResult.Errors[0].Metadata.Add(nameof(DownloadWorker) + "Id", Id);
@@ -267,6 +267,8 @@ public class DownloadWorker : IDisposable
         SendDownloadWorkerUpdate();
         SendDownloadWorkerLog(NotificationLevel.Error, errorResult.ToString());
         Shutdown();
+
+        return errorResult;
     }
 
     private void SendDownloadFinished()

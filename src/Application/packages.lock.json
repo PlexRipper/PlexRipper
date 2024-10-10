@@ -64,6 +64,15 @@
           "Microsoft.Extensions.Options": "8.0.0"
         }
       },
+      "Quartz.Serialization.SystemTextJson": {
+        "type": "Direct",
+        "requested": "[3.13.0, )",
+        "resolved": "3.13.0",
+        "contentHash": "e7ofQ7PYifDNf5OmXtWpPBIgDMdYIKXwF6AgJ9AeDp2mzOHF+6KOyOvIeWUFZwksX7Z6RYkpm/YWkSz9JJ0rGQ==",
+        "dependencies": {
+          "Quartz": "3.13.0"
+        }
+      },
       "RestSharp": {
         "type": "Direct",
         "requested": "[112.1.0, )",
@@ -1292,11 +1301,8 @@
       },
       "System.Text.Json": {
         "type": "Transitive",
-        "resolved": "8.0.4",
-        "contentHash": "bAkhgDJ88XTsqczoxEMliSrpijKZHhbJQldhAmObj/RbrN3sU5dcokuXmWJWsdQAhiMJ9bTayWsL1C9fbbCRhw==",
-        "dependencies": {
-          "System.Text.Encodings.Web": "8.0.0"
-        }
+        "resolved": "8.0.5",
+        "contentHash": "0f1B50Ss7rqxXiaBJyzUu9bWFOO2/zSlifZ/UNMdiIpDYe4cY4LQQicP4nirK1OS31I43rn062UIJ1Q9bpmHpg=="
       },
       "System.Text.RegularExpressions": {
         "type": "Transitive",
@@ -1473,7 +1479,7 @@
           "NaturalSort.Extension": "[4.3.0, )",
           "System.ComponentModel.Annotations": "[5.0.0, )",
           "System.Reactive": "[5.0.0, )",
-          "System.Text.Json": "[8.0.4, )"
+          "System.Text.Json": "[8.0.5, )"
         }
       },
       "PlexRipper.Settings": {

@@ -2,19 +2,19 @@
 
 public static class EnvironmentExtensions
 {
-    #region Fields
-
     public const string IntegrationTestModeKey = "IntegrationTestMode";
 
     public const string DevelopmentRootPathKey = "DEVELOPMENT_ROOT_PATH";
 
     private static readonly string TrueValue = Convert.ToString(true);
 
-    #endregion
-
-    #region Public Methods
-
-    #region Get
+    /// <summary>
+    /// Determines if the value is true.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    private static bool IsTrue(string? value) =>
+        value == Convert.ToString(true) || value == "1" || value == "true" || value == "TRUE";
 
     public static bool IsIntegrationTestMode() =>
         System.Environment.GetEnvironmentVariable(IntegrationTestModeKey) == TrueValue;
@@ -25,16 +25,10 @@ public static class EnvironmentExtensions
     /// <returns></returns>
     public static string? GetDevelopmentRootPath() => System.Environment.GetEnvironmentVariable(DevelopmentRootPathKey);
 
-    #endregion
-
-    #region Set
+    public static bool IsUnmasked() => IsTrue(System.Environment.GetEnvironmentVariable("UNMASKED"));
 
     public static void SetIntegrationTestMode(bool state = false)
     {
         System.Environment.SetEnvironmentVariable(IntegrationTestModeKey, state.ToString());
     }
-
-    #endregion
-
-    #endregion
 }

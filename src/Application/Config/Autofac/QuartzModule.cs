@@ -19,7 +19,7 @@ public class QuartzModule : Module
         var quartzProps = new NameValueCollection
         {
             { "quartz.scheduler.instanceName", "PlexRipper Scheduler" },
-            { "quartz.serializer.type", "json" },
+            { "quartz.serializer.type", "stj" },
             { "quartz.threadPool.type", "Quartz.Simpl.SimpleThreadPool, Quartz" },
             { "quartz.threadPool.threadCount", "10" },
             { "quartz.jobStore.type", "Quartz.Impl.AdoJobStore.JobStoreTX, Quartz" },
@@ -44,4 +44,15 @@ public class QuartzModule : Module
         // Source: https://github.com/alphacloud/Autofac.Extras.Quartz/blob/develop/src/Samples/Shared/Bootstrap.cs
         builder.Register(_ => new ScopedDependency("global")).AsImplementedInterfaces().SingleInstance();
     }
+
+    public static NameValueCollection TestQuartzConfiguration() =>
+        // During integration testing, we cannot use a real JobStore so we revert to default
+        new()
+        {
+            { "quartz.scheduler.instanceName", "TestPlexRipper Scheduler" },
+            { "quartz.serializer.type", "stj" },
+            { "quartz.threadPool.type", "Quartz.Simpl.SimpleThreadPool, Quartz" },
+            { "quartz.threadPool.threadCount", "10" },
+            { "quartz.jobStore.misfireThreshold", "60000" },
+        };
 }

@@ -195,10 +195,12 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
     {
         if (plexLibrary.Movies.Any())
         {
-            foreach (var plexTvShow in plexLibrary.Movies)
+            for (var i = 0; i < plexLibrary.Movies.Count; i++)
             {
-                plexTvShow.PlexLibraryId = plexLibrary.Id;
-                plexTvShow.PlexServerId = plexLibrary.PlexServerId;
+                var plexMovie = plexLibrary.Movies[i];
+                plexMovie.PlexLibraryId = plexLibrary.Id;
+                plexMovie.PlexServerId = plexLibrary.PlexServerId;
+                plexMovie.SortIndex = i + 1;
             }
 
             var createResult = await _mediator.Send(new SyncPlexMoviesCommand(plexLibrary.Movies));
@@ -279,8 +281,10 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 seasonsByTvShowKey.Remove(plexTvShow.Key);
             }
 
-            foreach (var plexTvShowSeason in plexTvShow.Seasons)
+            for (var seasonIndex = 0; seasonIndex < plexTvShow.Seasons.Count; seasonIndex++)
             {
+                var plexTvShowSeason = plexTvShow.Seasons[seasonIndex];
+                plexTvShowSeason.SortIndex = seasonIndex + 1;
                 plexTvShowSeason.PlexLibraryId = plexLibrary.Id;
                 plexTvShowSeason.PlexServerId = plexLibrary.PlexServerId;
                 plexTvShowSeason.TvShow = plexTvShow;
@@ -290,11 +294,15 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                     continue;
 
                 // Set library ID in each episode
-                episodes.ForEach(x =>
-                {
-                    x.PlexLibraryId = plexLibrary.Id;
-                    x.PlexServerId = plexLibrary.PlexServerId;
-                });
+                var episodeIndex = 1;
+                episodes.ForEach(
+                    (x) =>
+                    {
+                        x.PlexLibraryId = plexLibrary.Id;
+                        x.PlexServerId = plexLibrary.PlexServerId;
+                        x.SortIndex = episodeIndex++;
+                    }
+                );
 
                 plexTvShowSeason.Episodes = episodes;
                 plexTvShowSeason.ChildCount = episodes.Count;

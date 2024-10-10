@@ -6,38 +6,38 @@ public static class PlexMetaDataMapper
 {
     #region Single Conversions
 
-    public static PlexMovie ToPlexMovie(this GetLibraryItemsMetadata source, int index)
+    public static PlexMovie ToPlexMovie(this GetLibraryItemsMetadata source)
     {
-        var plexMovie = source.ToPlexMedia(index).ToPlexMovie();
+        var plexMovie = source.ToPlexMedia().ToPlexMovie();
 
         plexMovie.FullTitle = $"{source.Title} ({source.Year})";
         return plexMovie;
     }
 
-    public static PlexTvShow ToPlexTvShow(this GetLibraryItemsMetadata source, int index)
+    public static PlexTvShow ToPlexTvShow(this GetLibraryItemsMetadata source)
     {
-        var plexTvShow = source.ToPlexMedia(index).ToPlexTvShow();
+        var plexTvShow = source.ToPlexMedia().ToPlexTvShow();
         plexTvShow.FullTitle = source.Title;
         return plexTvShow;
     }
 
-    public static PlexTvShowSeason ToPlexTvShowSeason(this GetLibraryItemsMetadata source, int index)
+    public static PlexTvShowSeason ToPlexTvShowSeason(this GetLibraryItemsMetadata source)
     {
-        var plexTvShowSeason = source.ToPlexMedia(index).ToPlexTvShowSeason();
+        var plexTvShowSeason = source.ToPlexMedia().ToPlexTvShowSeason();
         plexTvShowSeason.FullTitle = $"{source.ParentTitle}/{source.Title}";
         plexTvShowSeason.ParentKey = source.ParentRatingKey != null ? int.Parse(source.ParentRatingKey) : -1;
         return plexTvShowSeason;
     }
 
-    public static PlexTvShowEpisode ToPlexTvShowEpisode(this GetLibraryItemsMetadata source, int index)
+    public static PlexTvShowEpisode ToPlexTvShowEpisode(this GetLibraryItemsMetadata source)
     {
-        var plexTvShowSeason = source.ToPlexMedia(index).ToPlexTvShowEpisode();
+        var plexTvShowSeason = source.ToPlexMedia().ToPlexTvShowEpisode();
         plexTvShowSeason.FullTitle = $"{source.GrandparentTitle}/{source.ParentTitle}/{source.Title}";
         plexTvShowSeason.ParentKey = source.ParentRatingKey != null ? int.Parse(source.ParentRatingKey) : -1;
         return plexTvShowSeason;
     }
 
-    public static PlexMedia ToPlexMedia(this GetLibraryItemsMetadata source, int index)
+    public static PlexMedia ToPlexMedia(this GetLibraryItemsMetadata source)
     {
         return new PlexMedia
         {
@@ -45,8 +45,8 @@ public static class PlexMetaDataMapper
             Title = source.Title,
             Year = source.Year ?? 0,
 
-            // Start with 1 instead of 0 since this is displayed to the user
-            SortIndex = index + 1,
+            // This is set later on
+            SortIndex = 0,
             SearchTitle = source.Title.ToSearchTitle(),
             Guid = source.Guid,
 
@@ -87,16 +87,16 @@ public static class PlexMetaDataMapper
     #region List Conversions
 
     public static List<PlexMovie> ToPlexMovies(this List<GetLibraryItemsMetadata> source) =>
-        source.Select((value, index) => value.ToPlexMovie(index)).ToList();
+        source.Select(value => value.ToPlexMovie()).ToList();
 
     public static List<PlexTvShow> ToPlexTvShows(this List<GetLibraryItemsMetadata> source) =>
-        source.Select((value, index) => value.ToPlexTvShow(index)).ToList();
+        source.Select(value => value.ToPlexTvShow()).ToList();
 
     public static List<PlexTvShowSeason> ToPlexTvShowSeasons(this List<GetLibraryItemsMetadata> source) =>
-        source.Select((value, index) => value.ToPlexTvShowSeason(index)).ToList();
+        source.Select(value => value.ToPlexTvShowSeason()).ToList();
 
     public static List<PlexTvShowEpisode> ToPlexTvShowEpisodes(this List<GetLibraryItemsMetadata> source) =>
-        source.Select((value, index) => value.ToPlexTvShowEpisode(index)).ToList();
+        source.Select(value => value.ToPlexTvShowEpisode()).ToList();
 
     #endregion
 

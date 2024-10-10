@@ -68,16 +68,6 @@
           "Quartz.Extensions.DependencyInjection": "3.13.0"
         }
       },
-      "Quartz.Serialization.Json": {
-        "type": "Direct",
-        "requested": "[3.13.0, )",
-        "resolved": "3.13.0",
-        "contentHash": "Nm8klDppHsttLLfbchWOAOb2bB5mgwbuALpNY+a8Yd+C4kx6RiTvmwbM2l/8qifMOcJxyFvfWTWyoB69ubwTWw==",
-        "dependencies": {
-          "Newtonsoft.Json": "13.0.1",
-          "Quartz": "3.13.0"
-        }
-      },
       "Serilog.AspNetCore": {
         "type": "Direct",
         "requested": "[8.0.1, )",
@@ -813,6 +803,14 @@
         "dependencies": {
           "Microsoft.Extensions.Configuration.Abstractions": "8.0.0",
           "Microsoft.Extensions.Options": "8.0.0",
+          "Quartz": "3.13.0"
+        }
+      },
+      "Quartz.Serialization.SystemTextJson": {
+        "type": "Transitive",
+        "resolved": "3.13.0",
+        "contentHash": "e7ofQ7PYifDNf5OmXtWpPBIgDMdYIKXwF6AgJ9AeDp2mzOHF+6KOyOvIeWUFZwksX7Z6RYkpm/YWkSz9JJ0rGQ==",
+        "dependencies": {
           "Quartz": "3.13.0"
         }
       },
@@ -1752,11 +1750,8 @@
       },
       "System.Text.Json": {
         "type": "Transitive",
-        "resolved": "8.0.4",
-        "contentHash": "bAkhgDJ88XTsqczoxEMliSrpijKZHhbJQldhAmObj/RbrN3sU5dcokuXmWJWsdQAhiMJ9bTayWsL1C9fbbCRhw==",
-        "dependencies": {
-          "System.Text.Encodings.Web": "8.0.0"
-        }
+        "resolved": "8.0.5",
+        "contentHash": "0f1B50Ss7rqxXiaBJyzUu9bWFOO2/zSlifZ/UNMdiIpDYe4cY4LQQicP4nirK1OS31I43rn062UIJ1Q9bpmHpg=="
       },
       "System.Text.RegularExpressions": {
         "type": "Transitive",
@@ -1941,6 +1936,7 @@
           "PlexApi.Contracts": "[1.0.0, )",
           "PlexRipper.Domain": "[1.0.0, )",
           "PlexRipper.Settings": "[1.0.0, )",
+          "Quartz.Serialization.SystemTextJson": "[3.13.0, )",
           "RestSharp": "[112.1.0, )",
           "Settings.Contracts": "[1.0.0, )",
           "WebAPI.Contracts": "[1.0.0, )"
@@ -1970,7 +1966,7 @@
           "NaturalSort.Extension": "[4.3.0, )",
           "System.ComponentModel.Annotations": "[5.0.0, )",
           "System.Reactive": "[5.0.0, )",
-          "System.Text.Json": "[8.0.4, )"
+          "System.Text.Json": "[8.0.5, )"
         }
       },
       "PlexRipper.FileSystem": {

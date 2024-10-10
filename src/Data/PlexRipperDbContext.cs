@@ -154,7 +154,12 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
             optionsBuilder.EnableDetailedErrors();
             optionsBuilder.UseSqlite(
                 databaseConnection,
-                b => b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName)
+                b =>
+                {
+                    // Wait as long as needed for the database to be unlocked
+                    b.CommandTimeout(300);
+                    b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName);
+                }
             );
         }
     }

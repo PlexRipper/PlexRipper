@@ -13,6 +13,8 @@ services:
         environment:
             - PUID=1000
             - PGID=1000
+            - TZ=America/New_York
+            - UNMASKED=false # Unmask sensitive data in logs if true
         volumes:
             - /mnt/PROJECTS/PlexRipperCache/Config:/Config
             - /mnt/PROJECTS/PlexRipperCache/Downloads:/Downloads

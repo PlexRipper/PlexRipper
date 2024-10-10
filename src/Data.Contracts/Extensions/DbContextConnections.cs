@@ -14,6 +14,8 @@ public static class DbContextConnections
         Cache = SqliteCacheMode.Default,
         Mode = SqliteOpenMode.ReadWriteCreate,
         Pooling = true,
-        DefaultTimeout = 60,
+        // Do not set the default timeout as it conflicts with the command timeout.
+        // Source: https://stackoverflow.com/q/6232633/8205497
+        // DefaultTimeout = 60,
     }.ToString();
 }

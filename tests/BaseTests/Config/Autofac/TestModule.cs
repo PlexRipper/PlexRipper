@@ -4,6 +4,7 @@ using Autofac;
 using Autofac.Extras.Quartz;
 using Data.Contracts;
 using FileSystem.Contracts;
+using PlexRipper.Application;
 using PlexRipper.Data;
 using Settings.Contracts;
 
@@ -40,7 +41,11 @@ public class TestModule : Module
         builder.RegisterType<MockSignalRService>().As<ISignalRService>().SingleInstance();
 
         SetMockedDependencies(builder);
-        RegisterBackgroundScheduler(builder);
+
+        // Register Quartz dependencies
+        builder.RegisterModule(
+            new QuartzAutofacFactoryModule { ConfigurationProvider = _ => QuartzModule.TestQuartzConfiguration() }
+        );
     }
 
     private void SetMockedDependencies(ContainerBuilder builder)
@@ -53,21 +58,5 @@ public class TestModule : Module
 
         if (Config.MockConfigManager is not null)
             builder.RegisterInstance(Config.MockConfigManager).As<IConfigManager>();
-    }
-
-    private void RegisterBackgroundScheduler(ContainerBuilder builder)
-    {
-        // During integration testing, we cannot use a real JobStore so we revert to default
-        var testQuartzProps = new NameValueCollection
-        {
-            { "quartz.scheduler.instanceName", "TestPlexRipper Scheduler" },
-            { "quartz.serializer.type", "json" },
-            { "quartz.threadPool.type", "Quartz.Simpl.SimpleThreadPool, Quartz" },
-            { "quartz.threadPool.threadCount", "10" },
-            { "quartz.jobStore.misfireThreshold", "60000" },
-        };
-
-        // Register Quartz dependencies
-        builder.RegisterModule(new QuartzAutofacFactoryModule { ConfigurationProvider = _ => testQuartzProps });
     }
 }

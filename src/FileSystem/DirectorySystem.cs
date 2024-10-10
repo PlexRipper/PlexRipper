@@ -105,7 +105,7 @@ public class DirectorySystem : IDirectorySystem
         }
     }
 
-    public Result Delete(string directoryPath)
+    public Result DirectoryDelete(string directoryPath)
     {
         try
         {
@@ -134,21 +134,28 @@ public class DirectorySystem : IDirectorySystem
             if (directoryExistsResult.IsFailed)
                 return directoryExistsResult.ToResult();
 
+            if (!directoryExistsResult.Value)
+            {
+                return Result.Ok();
+            }
+
             var directoryHasFiles = GetFiles(directoryResult.Value);
             if (directoryHasFiles.IsFailed)
                 return directoryHasFiles.ToResult();
 
             // If the filePath is just an empty directory then delete that.
-            if (
-                !string.IsNullOrEmpty(directoryResult.Value)
-                && directoryExistsResult.Value
-                && !directoryHasFiles.Value.Any()
-            )
-                Delete(directoryResult.Value);
+
+            if (string.IsNullOrEmpty(directoryResult.Value))
+            {
+                return ResultExtensions.IsEmpty(nameof(filePath)).LogError();
+            }
+
+            if (!directoryHasFiles.Value.Any())
+                DirectoryDelete(directoryResult.Value);
             else
             {
                 return Result
-                    .Fail($"Could not determine the directory name of path: {filePath} or the path contains files")
+                    .Fail($"Could not delete directory path: {filePath} because the path contains files")
                     .LogError();
             }
         }

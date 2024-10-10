@@ -24,7 +24,7 @@ public interface IDirectorySystem
 
     Result<string[]> GetFiles(string directoryPath);
 
-    Result Delete(string directoryPath);
+    Result DirectoryDelete(string directoryPath);
 
     /// <summary>
     /// Deletes the last folder in the file path.

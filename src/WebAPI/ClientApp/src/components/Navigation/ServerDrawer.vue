@@ -118,8 +118,12 @@ function openMediaPage(library: PlexLibraryDTO): void {
 		case PlexMediaType.Music:
 			router.push(`/music/${library.id}`);
 			break;
+		case PlexMediaType.Photos:
+			router.push(`/photos/${library.id}`);
+			break;
 		default:
 			Log.error(library.type + ' was neither a movie, tvshow or music library');
+			router.push(`/unknown/${library.id}`);
 	}
 }
 

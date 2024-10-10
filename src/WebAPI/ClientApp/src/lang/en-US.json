@@ -508,6 +508,14 @@
                 "header": "Music Libraries are unfortunately not yet supported :("
             }
         },
+        "photos": {
+            "photo-id": {
+                "header": "Photo Libraries are unfortunately not yet supported :("
+            },
+            "index": {
+                "header": "Photo Libraries are unfortunately not yet supported :("
+            }
+        },
         "settings": {
             "accounts": {
                 "header": "Plex Accounts"
@@ -619,6 +627,11 @@
         },
         "empty": {
             "title": "Empty Page"
+        },
+        "unknown": {
+            "index": {
+                "header": "Library {libraryName} is of an unknown type"
+            }
         }
     },
     "debug": {

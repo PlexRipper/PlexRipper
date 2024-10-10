@@ -41,7 +41,10 @@
 					active-class="text-orange"
 					@click="openMediaPage(library)">
 					<q-item-section avatar>
-						<QMediaTypeIcon :media-type="library.type" />
+						<QMediaTypeIcon
+							:active="library.syncedAt != null"
+							:loading="isLibrarySyncing(library.id)"
+							:media-type="library.type" />
 					</q-item-section>
 					<q-item-section>{{ libraryStore.getLibraryName(library.id) }}</q-item-section>
 				</q-item>
@@ -71,15 +74,26 @@
 
 <script setup lang="ts">
 import Log from 'consola';
-import { type PlexLibraryDTO, PlexMediaType } from '@dto';
-import { useOpenControlDialog } from '#imports';
+import { type LibraryProgress, type PlexLibraryDTO, PlexMediaType } from '@dto';
+import { useSubscription } from '@vueuse/rxjs';
+import { get, set } from '@vueuse/core';
+import {
+	useOpenControlDialog,
+	useLibraryStore,
+	useServerStore,
+	useSignalrStore,
+	useI18n,
+} from '#imports';
 
 const { t } = useI18n();
 const router = useRouter();
 const serverStore = useServerStore();
 const libraryStore = useLibraryStore();
 const serverConnectionStore = useServerConnectionStore();
+const signalRStore = useSignalrStore();
+
 const serverDialogName = 'serverDialog';
+const libraryProgress = ref<LibraryProgress[]>([]);
 
 function filterLibraries(plexServerId: number): PlexLibraryDTO[] {
 	return libraryStore.getLibraries.filter((x) => x.plexServerId === plexServerId);
@@ -87,6 +101,10 @@ function filterLibraries(plexServerId: number): PlexLibraryDTO[] {
 
 function openServerSettings(serverId: number): void {
 	useOpenControlDialog(serverDialogName, serverId);
+}
+
+function isLibrarySyncing(plexLibraryId: number): boolean {
+	return get(libraryProgress).some((x) => x.id === plexLibraryId && !x.isComplete);
 }
 
 function openMediaPage(library: PlexLibraryDTO): void {
@@ -104,6 +122,16 @@ function openMediaPage(library: PlexLibraryDTO): void {
 			Log.error(library.type + ' was neither a movie, tvshow or music library');
 	}
 }
+
+onMounted(() => {
+	useSubscription(
+		signalRStore
+			.getAllLibraryProgress()
+			.subscribe((data) => {
+				set(libraryProgress, data);
+			}),
+	);
+});
 </script>
 
 <style lang="scss">

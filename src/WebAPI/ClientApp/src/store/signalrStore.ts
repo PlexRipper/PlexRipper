@@ -1,21 +1,22 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { Observable } from 'rxjs';
-import { of, Subject, from } from 'rxjs';
+import { from, of, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap, take } from 'rxjs/operators';
 import Log from 'consola';
-import { HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
-import type { IHttpConnectionOptions, HubConnection } from '@microsoft/signalr';
+import type { HubConnection, IHttpConnectionOptions } from '@microsoft/signalr';
+import { HttpTransportType, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
 import { useCypressSignalRMock } from 'cypress-signalr-mock';
 import { isEqual } from 'lodash-es';
 import type { ISetupResult } from '@interfaces';
 import type {
+	DataType,
 	FileMergeProgress,
 	LibraryProgress,
 	NotificationDTO,
 	ServerConnectionCheckStatusProgressDTO,
 	ServerDownloadProgressDTO,
 	SyncServerMediaProgress,
-	DataType } from '@dto';
+} from '@dto';
 import { MessageTypes } from '@dto';
 import type IAppConfig from '@class/IAppConfig';
 import { useDownloadStore } from '~/store/downloadStore';
@@ -61,19 +62,25 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 					Log.debug('Setting up SignalR Service');
 					const options: IHttpConnectionOptions = {
 						logger: LogLevel.Information,
+						skipNegotiation: true,
+						transport: HttpTransportType.WebSockets,
 					};
+
+					const retryPolicy = {
+						nextRetryDelayInMilliseconds: () => {
+							return 2000;
+						},
+					};
+
 					// Setup Connections
 					progressHubConnection
 						= useCypressSignalRMock('progress', { enableForVitest: true })
-						?? new HubConnectionBuilder()
-							.withUrl(`${config.baseUrl}/progress`, options)
-							.withAutomaticReconnect()
-							.build();
+						?? new HubConnectionBuilder().withUrl(`${config.baseUrl}/progress`, options).withAutomaticReconnect(retryPolicy).build();
 					notificationHubConnection
 						= useCypressSignalRMock('notifications', { enableForVitest: true })
 						?? new HubConnectionBuilder()
 							.withUrl(`${config.baseUrl}/notifications`, options)
-							.withAutomaticReconnect()
+							.withAutomaticReconnect(retryPolicy)
 							.build();
 
 					setupSubscriptions();
@@ -104,27 +111,17 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 			updateState<LibraryProgress>('libraryProgress', data);
 		});
 
-		progressHubConnection?.on(
-			MessageTypes.ServerConnectionCheckStatusProgress,
-			(data: ServerConnectionCheckStatusProgressDTO) =>
-				updateState<ServerConnectionCheckStatusProgressDTO>(
-					'serverConnectionCheckStatusProgress',
-					data,
-					'plexServerConnectionId',
-				),
+		progressHubConnection?.on(MessageTypes.ServerConnectionCheckStatusProgress, (data: ServerConnectionCheckStatusProgressDTO) =>
+			updateState<ServerConnectionCheckStatusProgressDTO>('serverConnectionCheckStatusProgress', data, 'plexServerConnectionId'),
 		);
 
 		progressHubConnection?.on(MessageTypes.SyncServerMediaProgress, (data: SyncServerMediaProgress) =>
 			updateState<SyncServerMediaProgress>('syncServerMediaProgress', data),
 		);
 
-		progressHubConnection?.on(MessageTypes.JobStatusUpdate, (data) =>
-			backgroundStore.setStatusJobUpdate(data),
-		);
+		progressHubConnection?.on(MessageTypes.JobStatusUpdate, (data) => backgroundStore.setStatusJobUpdate(data));
 
-		notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) =>
-			notificationsStore.setNotification(data),
-		);
+		notificationHubConnection?.on(MessageTypes.Notification, (data: NotificationDTO) => notificationsStore.setNotification(data));
 
 		notificationHubConnection?.on(MessageTypes.RefreshNotification, (data: DataType) => {
 			state.refreshDataNotificationSubject.next(data);
@@ -208,7 +205,8 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 	const getters = {
 		// region Array Progress
 		getAllLibraryProgress: (): Observable<LibraryProgress[]> => state.libraryProgressSubject.asObservable(),
-		getAllSyncServerMediaProgress: (): Observable<SyncServerMediaProgress[]> => state.syncServerMediaProgressSubject.asObservable(),
+		getAllSyncServerMediaProgress: (): Observable<SyncServerMediaProgress[]> =>
+			state.syncServerMediaProgressSubject.asObservable(),
 		getAllServerConnectionProgress: (): Observable<ServerConnectionCheckStatusProgressDTO[]> =>
 			state.serverConnectionCheckStatusProgressSubject.asObservable(),
 		// endregion

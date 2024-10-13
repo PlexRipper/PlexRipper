@@ -71,9 +71,9 @@ public class CheckConnectionStatusByIdCommandHandler
             plexServerStatus.PlexServerId
         );
 
-        await _dbContext.PlexServerStatuses.Upsert(plexServerStatus)
-            .On(x => new { x.PlexServerId, x.PlexServerConnectionId })
-            .WhenMatched(x => plexServerStatus)
+        await _dbContext
+            .PlexServerStatuses.Upsert(plexServerStatus)
+            .On(x => new { x.PlexServerConnectionId })
             .RunAsync(cancellationToken);
 
         return serverStatusResult.Value;

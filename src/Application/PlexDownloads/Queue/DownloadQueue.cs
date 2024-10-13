@@ -79,7 +79,8 @@ public class DownloadQueue : IDownloadQueue
         {
             var msg = _log.Warning(
                 "PlexServer with name: {PlexServerName} is not online, cannot continue checking the DownloadQueue to pick the following download",
-                plexServerName);
+                plexServerName
+            );
             return Result.Fail(msg.ToLogString());
         }
 

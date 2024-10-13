@@ -33,7 +33,8 @@ public static partial class DbContextExtensions
         CancellationToken cancellationToken = default
     )
     {
-        return await dbContext.PlexServerStatuses.Where(x => x.PlexServerId == plexServerId)
+        return await dbContext
+            .PlexServerStatuses.Where(x => x.PlexServerId == plexServerId)
             .Select(x => x.IsSuccessful)
             .FirstOrDefaultAsync(cancellationToken);
     }

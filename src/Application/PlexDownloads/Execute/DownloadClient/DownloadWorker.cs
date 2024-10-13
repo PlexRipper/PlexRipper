@@ -140,8 +140,6 @@ public class DownloadWorker : IDisposable
 
             var downloadUrl = downloadUrlResult.Value;
 
-            _log.Debug("Downloading from url: {DownloadUrl}", downloadUrl);
-
             // Prepare destination stream
             var fileStreamResult = _downloadFileSystem.CreateDownloadFileStream(
                 DownloadWorkerTask.DownloadDirectory,
@@ -150,11 +148,9 @@ public class DownloadWorker : IDisposable
             );
             if (fileStreamResult.IsFailed)
             {
-                var result = Result.Fail(
-                    new Error(
-                        $"Could not create a download destination filestream for DownloadWorker with id {DownloadWorkerTask.Id}"
-                    )
-                );
+                var result = _log.Here()
+                    .Error("Could not create a download destination filestream for DownloadWorker with id: {Id}", Id)
+                    .ToResult();
                 result.Errors.AddRange(fileStreamResult.Errors);
                 SendDownloadWorkerError(result);
                 return result;
@@ -187,7 +183,7 @@ public class DownloadWorker : IDisposable
             _timer.Start();
 
             SetDownloadWorkerTaskChanged(DownloadStatus.Downloading);
-
+            var loopIndex = 0;
             while (_isDownloading)
             {
                 throttledStream.SetThrottleSpeed(_downloadSpeedLimit);
@@ -195,10 +191,25 @@ public class DownloadWorker : IDisposable
                 if (bytesRead > 0)
                     bytesRead = (int)Math.Min(DownloadWorkerTask.DataRemaining, bytesRead);
 
-                if (bytesRead <= 0)
+                // We have at least downloaded something
+                if (loopIndex > 0 && bytesRead <= 0)
                 {
                     await DisposeResources();
                     SendDownloadFinished();
+                    break;
+                }
+
+                if (loopIndex == 0 && bytesRead <= 0)
+                {
+                    SendDownloadWorkerError(
+                        _log.Here()
+                            .Error(
+                                "Download worker with id: {Id} and filename: {FileName} had and empty download stream on start",
+                                Id,
+                                FileName
+                            )
+                            .ToResult()
+                    );
                     break;
                 }
 
@@ -207,6 +218,7 @@ public class DownloadWorker : IDisposable
 
                 DownloadWorkerTask.BytesReceived += bytesRead;
                 SendDownloadWorkerUpdate();
+                loopIndex++;
             }
         }
         catch (Exception e)

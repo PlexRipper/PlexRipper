@@ -5,6 +5,7 @@ using ByteSizeLib;
 using Data.Contracts;
 using FileSystem.Contracts;
 using Logging.Interface;
+using PlexApi.Contracts;
 using PlexRipper.PlexApi;
 using Timer = System.Timers.Timer;
 
@@ -16,8 +17,6 @@ namespace PlexRipper.Application;
 /// </summary>
 public class DownloadWorker : IDisposable
 {
-    #region Fields
-
     private readonly Subject<DownloadWorkerLog> _downloadWorkerLog = new();
 
     private readonly Subject<DownloadWorkerTask> _downloadWorkerUpdate = new();
@@ -35,10 +34,6 @@ public class DownloadWorker : IDisposable
 
     private bool _isDownloading = true;
 
-    #endregion
-
-    #region Constructor
-
     /// <summary>
     /// Initializes a new instance of the <see cref="DownloadWorker"/> class.
     /// </summary>
@@ -51,7 +46,7 @@ public class DownloadWorker : IDisposable
         IPlexRipperDbContext dbContext,
         DownloadWorkerTask downloadWorkerTask,
         IDownloadFileStream downloadFileSystem,
-        IPlexApiClient plexApiClient
+        Func<PlexApiClientOptions?, IPlexApiClient> clientFactory
     )
     {
         _log = log;
@@ -59,17 +54,13 @@ public class DownloadWorker : IDisposable
         _dbContext = dbContext;
         DownloadWorkerTask = downloadWorkerTask;
 
-        _httpClient = plexApiClient;
+        _httpClient = clientFactory(new PlexApiClientOptions() { ConnectionUrl = string.Empty });
 
         _timer.Elapsed += (_, _) =>
         {
             DownloadWorkerTask.ElapsedTime += (long)_timer.Interval;
         };
     }
-
-    #endregion
-
-    #region Properties
 
     public Task<Result> DownloadProcessTask { get; private set; } = new(Result.Ok);
 
@@ -88,10 +79,6 @@ public class DownloadWorker : IDisposable
     /// The download worker id, which is the same as the <see cref="DownloadWorkerTask"/> Id.
     /// </summary>
     public int Id => DownloadWorkerTask.Id;
-
-    #endregion
-
-    #region Public Methods
 
     public Result Start()
     {
@@ -130,10 +117,6 @@ public class DownloadWorker : IDisposable
         _downloadWorkerUpdate.Dispose();
         _downloadWorkerLog.Dispose();
     }
-
-    #endregion
-
-    #region Private Methods
 
     private async Task<Result> DownloadProcessAsync(CancellationToken cancellationToken = default)
     {
@@ -318,6 +301,4 @@ public class DownloadWorker : IDisposable
         _downloadWorkerLog.OnCompleted();
         _downloadWorkerUpdate.OnCompleted();
     }
-
-    #endregion
 }

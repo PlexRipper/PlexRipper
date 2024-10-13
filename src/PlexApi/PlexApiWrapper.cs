@@ -32,7 +32,7 @@ public class PlexApiWrapper
 
     private PlexAPI CreateTvClient(string authToken = "", PlexApiClientOptions? options = null)
     {
-        options ??= new PlexApiClientOptions() { ConnectionUrl = "https://plex.tv/api/v2" };
+        options ??= new PlexApiClientOptions { ConnectionUrl = "https://plex.tv/api/v2" };
 
         options.ConnectionUrl = "https://plex.tv/api/v2";
 

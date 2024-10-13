@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using Application.Contracts;
 using HttpClientToCurl;
 using LukeHagar.PlexAPI.SDK.Utils;
+using PlexApi.Contracts;
 using Polly;
 using Polly.Timeout;
 using Polly.Wrap;
@@ -10,20 +11,6 @@ using Serilog.Events;
 using ILog = Logging.Interface.ILog;
 
 namespace PlexRipper.PlexApi;
-
-public record PlexApiClientOptions
-{
-    public required string ConnectionUrl { get; set; }
-
-    /// <summary>
-    /// Request timeout in seconds.
-    /// </summary>
-    public int Timeout { get; init; } = 10;
-
-    public int RetryCount { get; init; } = 1;
-
-    public Action<PlexApiClientProgress>? Action { get; init; }
-}
 
 public class PlexApiClient : IPlexApiClient
 {
@@ -42,7 +29,11 @@ public class PlexApiClient : IPlexApiClient
 
         _options = options;
 
-        _defaultClient.BaseAddress = new Uri(_options.ConnectionUrl);
+        if (_options.ConnectionUrl != string.Empty)
+        {
+            _defaultClient.BaseAddress = new Uri(_options.ConnectionUrl);
+        }
+
         _defaultClient.Timeout = TimeSpan.FromSeconds(_options.Timeout);
 
         // Combine policies using Policy.WrapAsync

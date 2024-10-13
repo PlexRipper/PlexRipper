@@ -26,4 +26,15 @@ public static partial class DbContextExtensions
         var plexServer = await dbContext.PlexServers.GetAsync(plexServerId, cancellationToken);
         return plexServer?.MachineIdentifier ?? string.Empty;
     }
+
+    public static async Task<bool> IsServerOnline(
+        this IPlexRipperDbContext dbContext,
+        int plexServerId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        return await dbContext.PlexServerStatuses.Where(x => x.PlexServerId == plexServerId)
+            .Select(x => x.IsSuccessful)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
 }

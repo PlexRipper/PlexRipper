@@ -73,6 +73,16 @@ public class DownloadQueue : IDownloadQueue
             return ResultExtensions.IsInvalidId(nameof(plexServerId), plexServerId).LogWarning();
 
         var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, _token);
+
+        // Check if the server is online
+        if (!await _dbContext.IsServerOnline(plexServerId, cancellationToken: _token))
+        {
+            var msg = _log.Warning(
+                "PlexServer with name: {PlexServerName} is not online, cannot continue checking the DownloadQueue to pick the following download",
+                plexServerName);
+            return Result.Fail(msg.ToLogString());
+        }
+
         var downloadTasks = await _dbContext.GetAllDownloadTasksByServerAsync(plexServerId, cancellationToken: _token);
 
         _log.Here()

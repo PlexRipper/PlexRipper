@@ -164,15 +164,14 @@ public class PlexApiWrapper
         Action<PlexApiClientProgress>? action = null
     )
     {
-        _log.Debug("Requesting PlexServerStatus for {Url}", connection.Url);
-
         var client = CreateClient(
             string.Empty,
             new PlexApiClientOptions
             {
                 ConnectionUrl = connection.Url,
                 Action = action,
-                Timeout = 5,
+                Timeout = 10,
+                RetryCount = 0,
             }
         );
 
@@ -184,6 +183,7 @@ public class PlexApiWrapper
         var statusMessage = statusCode switch
         {
             200 => "The Plex server is online!",
+            401 => "The Plex token has expired and needs to be refreshed.",
             _ => "The Plex server could not be reached, most likely it's offline.",
         };
 

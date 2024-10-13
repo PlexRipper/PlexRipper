@@ -1,5 +1,4 @@
 using Application.Contracts;
-using PlexRipper.Application.Jobs;
 using Quartz;
 
 namespace PlexRipper.Application;

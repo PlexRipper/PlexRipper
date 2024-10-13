@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application.Notifications;
 using Quartz;
 
-namespace PlexRipper.Application.Jobs;
+namespace PlexRipper.Application;
 
 public class FileMergeJob : IJob
 {

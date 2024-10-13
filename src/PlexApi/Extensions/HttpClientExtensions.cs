@@ -29,17 +29,13 @@ public static class HttpClientExtensions
     {
         // In case of timeout
         if (response.StatusCode == HttpStatusCode.RequestTimeout)
-            return Result.Fail("Request timed out").Add408RequestTimeoutError().WithErrors(errors ?? []).LogError();
+            return Result.Fail("Request timed out").Add408RequestTimeoutError().WithErrors(errors ?? []);
 
         // Weird case where the status code is 200 but the content is "Bad Gateway"
         if (response.IsSuccessStatusCode && response.Content.ToString()!.Contains("Bad Gateway"))
             return Result.Fail("Server responded with Bad Gateway").Add502BadGatewayError().WithErrors(errors ?? []);
 
-        return Result
-            .Fail("Request failed")
-            .AddStatusCode((int)response.StatusCode)
-            .WithErrors(errors ?? [])
-            .LogDebug();
+        return Result.Fail("Request failed").AddStatusCode((int)response.StatusCode).WithErrors(errors ?? []);
     }
 
     private static HttpResponseMessage GetHttpResponseMessage<T>(this T response) =>

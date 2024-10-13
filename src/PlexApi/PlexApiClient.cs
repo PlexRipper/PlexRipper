@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Headers;
 using Application.Contracts;
 using HttpClientToCurl;
-using LukeHagar.PlexAPI.SDK.Utils;
 using PlexApi.Contracts;
 using Polly;
 using Polly.Timeout;
@@ -99,17 +98,29 @@ public class PlexApiClient : IPlexApiClient
                     }
                     catch (TaskCanceledException e)
                     {
-                        _log.Here().Warning("{message} to {Url}", e.Message, requestUri);
+                        if (ShouldLog(request))
+                        {
+                            _log.Here().Warning("{message} to {Url}", e.Message, requestUri);
+                        }
+
                         return new HttpResponseMessage(HttpStatusCode.RequestTimeout);
                     }
                     catch (HttpRequestException e)
                     {
-                        _log.Here().Warning("{message} to {Url}", e.Message, requestUri);
+                        if (ShouldLog(request))
+                        {
+                            _log.Here().Warning("{message} to {Url}", e.Message, requestUri);
+                        }
+
                         return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
                     }
                     catch (Exception e)
                     {
-                        Result.Fail(new ExceptionalError(e)).LogError();
+                        if (ShouldLog(request))
+                        {
+                            Result.Fail(new ExceptionalError(e)).LogError();
+                        }
+
                         return new HttpResponseMessage(HttpStatusCode.InternalServerError);
                     }
                 },
@@ -238,6 +249,12 @@ public class PlexApiClient : IPlexApiClient
                 ConnectionSuccessful = response.IsSuccessStatusCode,
             }
         );
+    }
+
+    private bool ShouldLog(HttpRequestMessage request)
+    {
+        // Don't log identity requests
+        return !request.RequestUri?.PathAndQuery.Contains("identity", StringComparison.OrdinalIgnoreCase) ?? true;
     }
 
     public void Dispose()

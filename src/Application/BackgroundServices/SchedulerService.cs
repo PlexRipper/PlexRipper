@@ -85,16 +85,21 @@ public class SchedulerService : ISchedulerService
     {
         var key = CheckAllConnectionsStatusByPlexServerJob.GetJobKey();
 
+        if (await _scheduler.CheckExists(key, CancellationToken.None))
+        {
+            return;
+        }
+
         var job = JobBuilder.Create<CheckAllConnectionsStatusByPlexServerJob>().WithIdentity(key).Build();
 
         var trigger = TriggerBuilder
             .Create()
             .WithIdentity($"{key.Name}_trigger", key.Group)
             .ForJob(job)
-            .StartNow()
-            .WithSimpleSchedule(x => x.WithIntervalInMinutes(5).RepeatForever());
+            .WithSimpleSchedule(x => x.WithIntervalInMinutes(10).RepeatForever())
+            .Build();
 
-        await _scheduler.ScheduleJob(job, trigger.Build(), cancellationToken);
+        await _scheduler.ScheduleJob(job, trigger, cancellationToken);
     }
 
     #endregion

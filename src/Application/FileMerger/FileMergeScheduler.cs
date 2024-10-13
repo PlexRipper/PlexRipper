@@ -2,7 +2,6 @@ using Data.Contracts;
 using FileSystem.Contracts;
 using Logging.Interface;
 using Microsoft.EntityFrameworkCore;
-using PlexRipper.Application.Jobs;
 using Quartz;
 
 namespace PlexRipper.Application;

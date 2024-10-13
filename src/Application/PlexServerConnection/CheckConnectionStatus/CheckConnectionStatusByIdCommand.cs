@@ -65,11 +65,6 @@ public class CheckConnectionStatusByIdCommandHandler
 
         // Add plexServer status to DB, the PlexServerStatus table functions as a server log.
         var plexServerStatus = serverStatusResult.Value;
-        _log.Debug(
-            "Creating a new PlexServerStatus {@PlexServerStatus} in the database for {ServerId} ",
-            plexServerStatus,
-            plexServerStatus.PlexServerId
-        );
 
         await _dbContext
             .PlexServerStatuses.Upsert(plexServerStatus)

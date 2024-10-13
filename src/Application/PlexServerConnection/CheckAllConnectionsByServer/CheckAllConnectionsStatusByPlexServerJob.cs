@@ -4,6 +4,7 @@ using Quartz;
 
 namespace PlexRipper.Application;
 
+[DisallowConcurrentExecution]
 public class CheckAllConnectionsStatusByPlexServerJob : IJob
 {
     private readonly ILog _log;
@@ -11,7 +12,7 @@ public class CheckAllConnectionsStatusByPlexServerJob : IJob
     private readonly IMediator _mediator;
 
     public static JobKey GetJobKey() =>
-        new(Guid.NewGuid().ToString(), nameof(CheckAllConnectionsStatusByPlexServerJob));
+        new(nameof(CheckAllConnectionsStatusByPlexServerJob), nameof(CheckAllConnectionsStatusByPlexServerJob));
 
     public CheckAllConnectionsStatusByPlexServerJob(ILog log, IPlexRipperDbContext dbContext, IMediator mediator)
     {

@@ -21,7 +21,7 @@ public static partial class DbContextExtensions
 
         var plexServer = await dbContext
             .PlexServers.Include(x => x.PlexServerConnections)
-            .ThenInclude(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(5))
+            .ThenInclude(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(1))
             .FirstOrDefaultAsync(x => x.Id == plexServerId, cancellationToken);
 
         if (plexServer is null)

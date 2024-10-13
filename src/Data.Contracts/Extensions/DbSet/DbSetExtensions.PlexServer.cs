@@ -19,10 +19,4 @@ public static partial class DbSetExtensions
 
     public static IQueryable<PlexServer> IncludeConnections(this IQueryable<PlexServer> plexServer) =>
         plexServer.Include(x => x.PlexServerConnections).AsQueryable();
-
-    public static IQueryable<PlexServer> IncludeConnectionsWithStatus(this IQueryable<PlexServer> plexServer) =>
-        plexServer
-            .Include(x => x.PlexServerConnections)
-            .ThenInclude(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(1))
-            .AsQueryable();
 }

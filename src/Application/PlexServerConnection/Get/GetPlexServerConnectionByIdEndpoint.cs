@@ -44,7 +44,7 @@ public class GetPlexServerConnectionByIdEndpoint
     public override async Task HandleAsync(GetPlexServerConnectionByIdEndpointRequest req, CancellationToken ct)
     {
         var plexServerConnection = await _dbContext
-            .PlexServerConnections.Include(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(5))
+            .PlexServerConnections.Include(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(1))
             .FirstOrDefaultAsync(x => x.Id == req.PlexServerConnectionId, ct);
 
         if (plexServerConnection is null)

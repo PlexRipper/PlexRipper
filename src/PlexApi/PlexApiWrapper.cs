@@ -12,9 +12,9 @@ namespace PlexRipper.PlexApi;
 public class PlexApiWrapper
 {
     private readonly ILog _log;
-    private readonly Func<PlexApiClientOptions?, PlexApiClient> _clientFactory;
+    private readonly Func<PlexApiClientOptions?, IPlexApiClient> _clientFactory;
 
-    public PlexApiWrapper(ILog log, Func<PlexApiClientOptions?, PlexApiClient> clientFactory)
+    public PlexApiWrapper(ILog log, Func<PlexApiClientOptions?, IPlexApiClient> clientFactory)
     {
         _log = log;
         _clientFactory = clientFactory;

@@ -22,10 +22,10 @@ public record PlexApiClientOptions
 
     public int RetryCount { get; init; } = 1;
 
-    public Action<PlexApiClientProgress>? Action { get; init; } = null;
+    public Action<PlexApiClientProgress>? Action { get; init; }
 }
 
-public class PlexApiClient : ISpeakeasyHttpClient
+public class PlexApiClient : IPlexApiClient
 {
     private readonly ILog _log;
 
@@ -98,14 +98,29 @@ public class PlexApiClient : ISpeakeasyHttpClient
                 {
                     context["RequestUri"] = requestUri;
 
-                    if (response != null)
-                    {
-                        // Clone the request to avoid issues with the content being disposed
-                        request = await CloneAsync(request);
-                    }
+                    // Clone the request to avoid issues with the content being disposed
+                    request = await CloneAsync(request);
 
-                    response = await _defaultClient.SendAsync(request);
-                    return response;
+                    try
+                    {
+                        response = await _defaultClient.SendAsync(request);
+                        return response;
+                    }
+                    catch (TaskCanceledException e)
+                    {
+                        _log.Here().Warning("{message} to {Url}", e.Message, requestUri);
+                        return new HttpResponseMessage(HttpStatusCode.RequestTimeout);
+                    }
+                    catch (HttpRequestException e)
+                    {
+                        _log.Here().Warning("{message} to {Url}", e.Message, requestUri);
+                        return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+                    }
+                    catch (Exception e)
+                    {
+                        Result.Fail(new ExceptionalError(e)).LogError();
+                        return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                    }
                 },
                 new Context { { "RequestUri", requestUri } }
             );

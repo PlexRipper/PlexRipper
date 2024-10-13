@@ -214,6 +214,14 @@
           "Xunit.Priority": "1.1.6"
         }
       },
+      "FlexLabs.EntityFrameworkCore.Upsert": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "Z7KFJhVEuhLQMK763gXTaqfYFd3MknU0Du9IngXEtFXaEP4rKMxRlaWYntv58z3DEj1/UqBjLxojKMrUEDwNcw==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Relational": "8.0.0"
+        }
+      },
       "FluentResults": {
         "type": "Transitive",
         "resolved": "3.16.0",
@@ -2879,6 +2887,7 @@
         "type": "Project",
         "dependencies": {
           "EFCore.BulkExtensions.SQLite": "[8.1.1, )",
+          "FlexLabs.EntityFrameworkCore.Upsert": "[8.0.0, )",
           "Microsoft.EntityFrameworkCore": "[8.0.8, )",
           "PlexRipper.Domain": "[1.0.0, )"
         }

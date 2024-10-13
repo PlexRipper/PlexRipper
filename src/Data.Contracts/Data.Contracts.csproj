@@ -1,25 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<LangVersion>12</LangVersion>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <LangVersion>12</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\Domain\Domain.csproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Domain\Domain.csproj"/>
+    </ItemGroup>
 
-	<ItemGroup>
-	  <PackageReference Include="CSharpier.MsBuild" Version="0.29.2">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
-	  <PackageReference Include="EFCore.BulkExtensions.SQLite" Version="8.1.1" />
-	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="CSharpier.MsBuild" Version="0.29.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="EFCore.BulkExtensions.SQLite" Version="8.1.1"/>
+        <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8"/>
+    </ItemGroup>
 
 </Project>

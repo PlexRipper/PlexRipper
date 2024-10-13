@@ -103,7 +103,7 @@ public class PlexApiClient : IPlexApiClient
 
                     try
                     {
-                        response = await _defaultClient.SendAsync(request);
+                        response = await _defaultClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
                         return response;
                     }
                     catch (TaskCanceledException e)
@@ -171,6 +171,12 @@ public class PlexApiClient : IPlexApiClient
         }
 
         return response;
+    }
+
+    public async Task<Stream?> DownloadStreamAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        var response = await SendAsync(request);
+        return await response.Content.ReadAsStreamAsync(cancellationToken);
     }
 
     public async Task<HttpRequestMessage> CloneAsync(HttpRequestMessage request)
@@ -241,5 +247,10 @@ public class PlexApiClient : IPlexApiClient
                 ConnectionSuccessful = response.IsSuccessStatusCode,
             }
         );
+    }
+
+    public void Dispose()
+    {
+        _defaultClient.Dispose();
     }
 }

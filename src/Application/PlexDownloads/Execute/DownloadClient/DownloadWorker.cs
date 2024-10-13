@@ -5,7 +5,7 @@ using ByteSizeLib;
 using Data.Contracts;
 using FileSystem.Contracts;
 using Logging.Interface;
-using RestSharp;
+using PlexRipper.PlexApi;
 using Timer = System.Timers.Timer;
 
 namespace PlexRipper.Application;
@@ -27,7 +27,7 @@ public class DownloadWorker : IDisposable
     private readonly IDownloadFileStream _downloadFileSystem;
     private readonly IPlexRipperDbContext _dbContext;
 
-    private readonly RestClient _httpClient;
+    private readonly IPlexApiClient _httpClient;
 
     private readonly Timer _timer = new(100) { AutoReset = true };
 
@@ -46,13 +46,12 @@ public class DownloadWorker : IDisposable
     /// <param name="dbContext"></param>
     /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
     /// <param name="downloadFileSystem">The filesystem used to store the downloaded data.</param>
-    /// <param name="httpClientFactory"></param>
     public DownloadWorker(
         ILog<DownloadWorker> log,
         IPlexRipperDbContext dbContext,
         DownloadWorkerTask downloadWorkerTask,
         IDownloadFileStream downloadFileSystem,
-        IHttpClientFactory httpClientFactory
+        IPlexApiClient plexApiClient
     )
     {
         _log = log;
@@ -60,10 +59,7 @@ public class DownloadWorker : IDisposable
         _dbContext = dbContext;
         DownloadWorkerTask = downloadWorkerTask;
 
-        var options = new RestClientOptions() { Timeout = TimeSpan.FromSeconds(10000), ThrowOnAnyError = false };
-
-        _httpClient = new RestClient(httpClientFactory.CreateClient(), options);
-        _httpClient.AddDefaultHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64)");
+        _httpClient = plexApiClient;
 
         _timer.Elapsed += (_, _) =>
         {
@@ -75,7 +71,7 @@ public class DownloadWorker : IDisposable
 
     #region Properties
 
-    public Task<Result> DownloadProcessTask { get; internal set; } = new(Result.Ok);
+    public Task<Result> DownloadProcessTask { get; private set; } = new(Result.Ok);
 
     public IObservable<DownloadWorkerLog> DownloadWorkerLog => _downloadWorkerLog.AsObservable();
 
@@ -187,9 +183,8 @@ public class DownloadWorker : IDisposable
             destinationStream.Position = DownloadWorkerTask.BytesReceived;
 
             // Create download client
-            var request = new RestRequest(downloadUrl) { CompletionOption = HttpCompletionOption.ResponseHeadersRead };
-
-            request.AddHeader(
+            var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
+            request.Headers.Add(
                 "Range",
                 new RangeHeaderValue(DownloadWorkerTask.CurrentByte, DownloadWorkerTask.EndByte).ToString()
             );

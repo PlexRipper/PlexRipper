@@ -11,8 +11,8 @@ public enum JobTypes
     [EnumMember(Value = "Unknown")]
     Unknown = 0,
 
-    [EnumMember(Value = nameof(CheckPlexServerConnectionsJob))]
-    CheckPlexServerConnectionsJob = 1,
+    [EnumMember(Value = nameof(CheckAllConnectionsStatusByPlexServerJob))]
+    CheckAllConnectionsStatusByPlexServerJob = 1,
 
     [EnumMember(Value = nameof(DownloadJob))]
     DownloadJob = 2,

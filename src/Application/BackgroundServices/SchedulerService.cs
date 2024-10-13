@@ -43,6 +43,8 @@ public class SchedulerService : ISchedulerService
             await _scheduler.Start();
         }
 
+        await SetupPlexServerStatusCheckJob(CancellationToken.None);
+
         return _scheduler.IsStarted
             ? Result.Ok()
             : Result.Fail($"Could not start Scheduler {_scheduler.SchedulerName}").LogError();
@@ -77,6 +79,22 @@ public class SchedulerService : ISchedulerService
         }
 
         await Task.Delay(1000, cancellationToken);
+    }
+
+    public async Task SetupPlexServerStatusCheckJob(CancellationToken cancellationToken)
+    {
+        var key = CheckAllConnectionsStatusByPlexServerJob.GetJobKey();
+
+        var job = JobBuilder.Create<CheckAllConnectionsStatusByPlexServerJob>().WithIdentity(key).Build();
+
+        var trigger = TriggerBuilder
+            .Create()
+            .WithIdentity($"{key.Name}_trigger", key.Group)
+            .ForJob(job)
+            .StartNow()
+            .WithSimpleSchedule(x => x.WithIntervalInMinutes(5).RepeatForever());
+
+        await _scheduler.ScheduleJob(job, trigger.Build(), cancellationToken);
     }
 
     #endregion

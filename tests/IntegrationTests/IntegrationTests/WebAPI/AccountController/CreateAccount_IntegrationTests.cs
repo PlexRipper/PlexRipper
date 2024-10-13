@@ -87,9 +87,9 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
 
         jobStatusUpdateList[0].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
         jobStatusUpdateList[0].Status.ShouldBe(JobStatus.Started);
-        jobStatusUpdateList[1].JobType.ShouldBe(JobTypes.CheckPlexServerConnectionsJob);
+        jobStatusUpdateList[1].JobType.ShouldBe(JobTypes.CheckAllConnectionsStatusByPlexServerJob);
         jobStatusUpdateList[1].Status.ShouldBe(JobStatus.Started);
-        jobStatusUpdateList[2].JobType.ShouldBe(JobTypes.CheckPlexServerConnectionsJob);
+        jobStatusUpdateList[2].JobType.ShouldBe(JobTypes.CheckAllConnectionsStatusByPlexServerJob);
         jobStatusUpdateList[2].Status.ShouldBe(JobStatus.Completed);
         jobStatusUpdateList[3].JobType.ShouldBe(JobTypes.InspectPlexServerJob);
         jobStatusUpdateList[3].Status.ShouldBe(JobStatus.Completed);

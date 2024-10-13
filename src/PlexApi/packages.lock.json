@@ -32,16 +32,6 @@
           "Polly.Core": "8.3.1"
         }
       },
-      "RestSharp.Serializers.SystemTextJson": {
-        "type": "Direct",
-        "requested": "[106.15.0, )",
-        "resolved": "106.15.0",
-        "contentHash": "EX4tp4YZ4WoNoYmTXIzVnYkGBWk0E5eicJhc1cUQ7SUyFUQbBWs9mQ86/WNPZiC6xlKQni5MXs9ecJ5/ySiORA==",
-        "dependencies": {
-          "RestSharp": "106.15.0",
-          "System.Text.Json": "5.0.2"
-        }
-      },
       "ByteSize": {
         "type": "Transitive",
         "resolved": "2.1.2",
@@ -361,11 +351,6 @@
         "dependencies": {
           "Microsoft.Extensions.Logging.Abstractions": "2.1.1"
         }
-      },
-      "RestSharp": {
-        "type": "Transitive",
-        "resolved": "106.15.0",
-        "contentHash": "HM7ohR6AscxedNenrrl93DSZG6hvdnA7O+NHyCl/6ZKTfn8psQ9rRmUpcb9eWr+140vmfxoVemql0bUoeGEW3A=="
       },
       "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
         "type": "Transitive",

@@ -814,20 +814,6 @@
           "Quartz": "3.13.0"
         }
       },
-      "RestSharp": {
-        "type": "Transitive",
-        "resolved": "112.1.0",
-        "contentHash": "bOUGNZqhhv/QeCXHTKEUil846yBjwWXpzPKjO67kFvaAOoF361z7jLY5BMnuZ6WD2WQRA750sNMcK7MSPCQ5Mg=="
-      },
-      "RestSharp.Serializers.SystemTextJson": {
-        "type": "Transitive",
-        "resolved": "106.15.0",
-        "contentHash": "EX4tp4YZ4WoNoYmTXIzVnYkGBWk0E5eicJhc1cUQ7SUyFUQbBWs9mQ86/WNPZiC6xlKQni5MXs9ecJ5/ySiORA==",
-        "dependencies": {
-          "RestSharp": "106.15.0",
-          "System.Text.Json": "5.0.2"
-        }
-      },
       "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
         "type": "Transitive",
         "resolved": "4.3.0",
@@ -1937,7 +1923,6 @@
           "PlexRipper.Domain": "[1.0.0, )",
           "PlexRipper.Settings": "[1.0.0, )",
           "Quartz.Serialization.SystemTextJson": "[3.13.0, )",
-          "RestSharp": "[112.1.0, )",
           "Settings.Contracts": "[1.0.0, )",
           "WebAPI.Contracts": "[1.0.0, )"
         }
@@ -1990,7 +1975,6 @@
           "HttpClientToCurl": "[2.0.6, )",
           "PlexApi.Contracts": "[1.0.0, )",
           "Polly": "[8.3.1, )",
-          "RestSharp.Serializers.SystemTextJson": "[106.15.0, )",
           "Settings.Contracts": "[1.0.0, )"
         }
       },

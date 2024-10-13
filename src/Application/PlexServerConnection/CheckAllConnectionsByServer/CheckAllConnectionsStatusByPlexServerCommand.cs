@@ -95,7 +95,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandHandler
         update.Status = JobStatus.Completed;
         await _signalRService.SendJobStatusUpdateAsync(update);
 
-        if (tasksResult.Any(statusResult => statusResult.Value.IsSuccessful))
+        if (tasksResult.Any(statusResult => statusResult.ValueOrDefault?.IsSuccessful != null))
             return Result.Ok(combinedResults.Value.ToList());
 
         var msg = _log.Error(

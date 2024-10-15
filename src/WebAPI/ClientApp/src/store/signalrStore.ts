@@ -19,6 +19,7 @@ import type {
 } from '@dto';
 import { MessageTypes } from '@dto';
 import type IAppConfig from '@class/IAppConfig';
+import type { IRetryPolicy } from '@microsoft/signalr/src/IRetryPolicy';
 import { useDownloadStore } from '~/store/downloadStore';
 import { useBackgroundJobsStore } from '~/store/backgroundJobsStore';
 import { useNotificationsStore } from '~/store/notificationsStore';
@@ -61,24 +62,28 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 				(async () => {
 					Log.debug('Setting up SignalR Service');
 					const options: IHttpConnectionOptions = {
-						logger: LogLevel.Information,
+						logMessageContent: false,
 						skipNegotiation: true,
+						logger: LogLevel.None,
 						transport: HttpTransportType.WebSockets,
 					};
 
-					const retryPolicy = {
-						nextRetryDelayInMilliseconds: () => {
-							return 2000;
-						},
+					const retryPolicy: IRetryPolicy = {
+						nextRetryDelayInMilliseconds: () => 2000,
 					};
 
 					// Setup Connections
 					progressHubConnection
 						= useCypressSignalRMock('progress', { enableForVitest: true })
-						?? new HubConnectionBuilder().withUrl(`${config.baseUrl}/progress`, options).withAutomaticReconnect(retryPolicy).build();
+						?? new HubConnectionBuilder()
+							.configureLogging(LogLevel.None)
+							.withUrl(`${config.baseUrl}/progress`, options)
+							.withAutomaticReconnect(retryPolicy)
+							.build();
 					notificationHubConnection
 						= useCypressSignalRMock('notifications', { enableForVitest: true })
 						?? new HubConnectionBuilder()
+							.configureLogging(LogLevel.None)
 							.withUrl(`${config.baseUrl}/notifications`, options)
 							.withAutomaticReconnect(retryPolicy)
 							.build();

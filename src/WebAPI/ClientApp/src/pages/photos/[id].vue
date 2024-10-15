@@ -6,7 +6,7 @@
 					<QText
 						size="h4"
 						align="center">
-						{{ $t('pages.photos.index.header') }}
+						{{ $t('pages.photos.photo-id.header') }}
 					</QText>
 				</QAlert>
 			</QCol>

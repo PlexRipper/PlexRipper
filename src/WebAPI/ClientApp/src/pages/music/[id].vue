@@ -6,7 +6,7 @@
 					<QText
 						size="h4"
 						align="center">
-						{{ $t('pages.music.index.header') }}
+						{{ $t('pages.music.music-id.header') }}
 					</QText>
 				</QAlert>
 			</QCol>

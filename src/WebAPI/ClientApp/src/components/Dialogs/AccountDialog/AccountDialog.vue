@@ -122,7 +122,6 @@ import type { IPlexAccount } from '@interfaces';
 import { plexAccountApi } from '@api';
 import type AccountForm from '@components/Dialogs/AccountDialog/AccountForm.vue';
 
-import type { AxiosResponse } from 'axios';
 import { useI18n, useOpenControlDialog, useCloseControlDialog, useAccountStore } from '#imports';
 
 const { t } = useI18n();

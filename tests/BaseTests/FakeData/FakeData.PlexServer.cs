@@ -64,7 +64,7 @@ public static partial class FakeData
             .RuleFor(x => x.UpdatedAt, f => f.Date.Recent())
             .RuleFor(x => x.ScannedAt, f => f.Date.Recent())
             .RuleFor(x => x.SyncedAt, f => f.Date.Recent())
-            .RuleFor(x => x.Uuid, _ => Guid.NewGuid())
+            .RuleFor(x => x.Uuid, _ => Guid.NewGuid().ToString())
             .RuleFor(x => x.DefaultDestination, _ => null)
             .RuleFor(x => x.DefaultDestinationId, _ => null)
             .RuleFor(x => x.MediaSize, _ => 0)

@@ -29,7 +29,7 @@ public class GetAllPlexServerConnectionsEndpoint : BaseEndpointWithoutRequest<Li
     public override async Task HandleAsync(CancellationToken ct)
     {
         var plexServerConnections = await _dbContext
-            .PlexServerConnections.Include(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(5))
+            .PlexServerConnections.Include(x => x.PlexServerStatus.OrderByDescending(y => y.LastChecked).Take(1))
             .ToListAsync(ct);
 
         await SendFluentResult(Result.Ok(plexServerConnections), x => x.ToDTO(), ct);

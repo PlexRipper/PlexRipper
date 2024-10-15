@@ -157,9 +157,6 @@ public class PlexApiService : IPlexApiService
         if (connection is null)
             return ResultExtensions.EntityNotFound(nameof(PlexServerConnection), plexServerConnectionId);
 
-        var plexServerName = await _dbContext.GetPlexServerNameById(connection.PlexServerId);
-        _log.Debug("Getting PlexServerStatus for server: {PlexServerName}", plexServerName);
-
         return await _plexApiWrapper.GetServerStatusAsync(connection, action);
     }
 

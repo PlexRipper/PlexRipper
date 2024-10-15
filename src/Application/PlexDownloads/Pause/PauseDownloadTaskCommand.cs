@@ -66,7 +66,10 @@ public class PauseDownloadTaskCommandHandler : IRequestHandler<PauseDownloadTask
                     // Since this command is done per server, we can abort since there will at most be 1 download task downloading at a time and if that fails we can't continue
                     return stopResult.LogError();
                 }
+            }
 
+            if (downloadTask.DownloadStatus is DownloadStatus.Downloading or DownloadStatus.Merging)
+            {
                 await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Paused);
             }
 

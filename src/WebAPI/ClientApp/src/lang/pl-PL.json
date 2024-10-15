@@ -508,6 +508,14 @@
                 "header": "Biblioteki muzyczne niestety nie są jeszcze obsługiwane :("
             }
         },
+        "photos": {
+            "photo-id": {
+                "header": "Biblioteki zdjęć niestety nie są jeszcze obsługiwane :("
+            },
+            "index": {
+                "header": "Biblioteki zdjęć niestety nie są jeszcze obsługiwane :("
+            }
+        },
         "settings": {
             "accounts": {
                 "header": "Konta Plex"
@@ -619,6 +627,11 @@
         },
         "empty": {
             "title": "Pusta Strona"
+        },
+        "unknown": {
+            "index": {
+                "header": "Biblioteka {libraryName} jest nieznanego typu"
+            }
         }
     },
     "debug": {

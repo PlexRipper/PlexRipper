@@ -1,38 +1,39 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<LangVersion>12</LangVersion>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<IsPackable>false</IsPackable>
-		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-		<Nullable>enable</Nullable>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <LangVersion>12</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <IsPackable>false</IsPackable>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="coverlet.collector" Version="6.0.2">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="CSharpier.MsBuild" Version="0.29.2">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
-		<PackageReference Include="xunit" Version="2.9.2" />
-		<PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" Version="6.0.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="CSharpier.MsBuild" Version="0.29.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
+        <PackageReference Include="Moq.Contrib.HttpClient" Version="1.4.0"/>
+        <PackageReference Include="xunit" Version="2.9.2"/>
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\..\BaseTests\BaseTests.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<Compile Include="..\..\..\src\Domain\GlobalUsings.cs" />
-		<Compile Include="..\..\BaseTests\GlobalTestsUsings.cs" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\BaseTests\BaseTests.csproj"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\..\..\src\Domain\GlobalUsings.cs"/>
+        <Compile Include="..\..\BaseTests\GlobalTestsUsings.cs"/>
+    </ItemGroup>
 
 </Project>

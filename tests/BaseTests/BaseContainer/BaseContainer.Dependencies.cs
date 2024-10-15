@@ -30,7 +30,6 @@ public partial class BaseContainer : IDisposable
         _log.Information("Setting up BaseContainer with database: {MemoryDbName}", memoryDbName);
 
         _factory = new PlexRipperWebApplicationFactory(memoryDbName, options);
-        ApiClient = _factory.CreateDefaultClient();
 
         // Create a separate scope as not to interfere with tests running in parallel
         _lifeTimeScope = _factory.Services.GetAutofacRoot().BeginLifetimeScope(memoryDbName);
@@ -57,7 +56,7 @@ public partial class BaseContainer : IDisposable
         return container;
     }
 
-    public HttpClient ApiClient { get; }
+    public HttpClient ApiClient => _factory.CreateDefaultClient();
 
     public IFileSystem FileSystem => Resolve<IFileSystem>();
 

@@ -1,6 +1,7 @@
 using Autofac;
 using Data.Contracts;
 using Logging.Interface;
+using PlexApi.Contracts;
 using PlexRipper.Data;
 using Serilog;
 using Serilog.Events;
@@ -10,6 +11,9 @@ namespace PlexRipper.BaseTests;
 
 public class BaseUnitTest : IDisposable
 {
+    protected readonly ITestOutputHelper _output;
+    protected readonly LogEventLevel _logEventLevel;
+
     private string _databaseName = string.Empty;
 
     protected bool IsDatabaseSetup;
@@ -23,6 +27,9 @@ public class BaseUnitTest : IDisposable
     /// <param name="logEventLevel"></param>
     protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
     {
+        _output = output;
+        _logEventLevel = logEventLevel;
+
         LogManager.SetupLogging(logEventLevel);
         LogConfig.SetTestOutputHelper(output);
         BogusExtensions.Setup();
@@ -79,41 +86,67 @@ public class BaseUnitTest : IDisposable
 public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
     where TUnitTestClass : class
 {
+    protected Mock<HttpMessageHandler> HttpHandlerMock;
+
     protected TUnitTestClass _sut => mock.Create<TUnitTestClass>();
 
-    protected readonly AutoMock mock;
+    protected AutoMock mock { get; private set; }
 
     protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(output, logEventLevel)
     {
-        mock = AutoMock.GetStrict(builder =>
-        {
-            builder
-                .Register<ILogger>(
-                    (_, _) =>
-                    {
-                        LogManager.SetupLogging(logEventLevel);
-                        LogConfig.SetTestOutputHelper(output);
-                        return LogConfig.GetLogger();
-                    }
-                )
-                .SingleInstance();
-
-            // Database context can be setup once and then retrieved by its DB name.
-            builder
-                .Register((_, _) => GetDbContext())
-                .As<PlexRipperDbContext>()
-                .As<IPlexRipperDbContext>()
-                .InstancePerDependency();
-
-            builder.RegisterType<Log>().As<ILog>().SingleInstance();
-            builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();
-        });
-
-        mock.Mock<IHttpClientFactory>().Setup(x => x.CreateClient(It.IsAny<string>())).Returns(new HttpClient());
+        mock = AutoMock.GetStrict(SetDefaultBuilder);
     }
 
-    public new virtual void Dispose()
+    private void SetDefaultBuilder(ContainerBuilder builder)
+    {
+        builder
+            .Register<ILogger>(
+                (_, _) =>
+                {
+                    LogManager.SetupLogging(_logEventLevel);
+                    LogConfig.SetTestOutputHelper(_output);
+                    return LogConfig.GetLogger();
+                }
+            )
+            .SingleInstance();
+
+        // Database context can be setup once and then retrieved by its DB name.
+        builder
+            .Register((_, _) => GetDbContext())
+            .As<PlexRipperDbContext>()
+            .As<IPlexRipperDbContext>()
+            .InstancePerDependency();
+
+        builder.RegisterType<Log>().As<ILog>().SingleInstance();
+        builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();
+    }
+
+    protected void SetupHttpClient(Action<Mock<HttpMessageHandler>?>? action = null)
+    {
+        mock = AutoMock.GetStrict(builder =>
+        {
+            SetDefaultBuilder(builder);
+
+            builder
+                .Register(_ =>
+                {
+                    // Use loose behavior here to avoid Dispose() not mocked exception
+                    HttpHandlerMock = new Mock<HttpMessageHandler>(MockBehavior.Loose);
+
+                    action?.Invoke(HttpHandlerMock);
+
+                    return new HttpClient(HttpHandlerMock.Object) { BaseAddress = new Uri("http://localhost:1234") };
+                })
+                .As<HttpClient>()
+                .SingleInstance();
+        });
+
+        // Mock to avoid HttpClient.Dispose() not mocked exception
+        mock.Mock<IPlexApiClient>().Setup(x => x.Dispose());
+    }
+
+    public override void Dispose()
     {
         base.Dispose();
         mock.Dispose();

@@ -73,7 +73,7 @@ public class CheckAllConnectionsStatusByPlexServerCommandHandler
 
         // Send start job status update
         var update = new JobStatusUpdate<CheckAllConnectionStatusUpdateDTO>(
-            JobTypes.CheckPlexServerConnectionsJob,
+            JobTypes.CheckAllConnectionsStatusByPlexServerJob,
             JobStatus.Started,
             new CheckAllConnectionStatusUpdateDTO
             {
@@ -91,11 +91,13 @@ public class CheckAllConnectionsStatusByPlexServerCommandHandler
         var tasksResult = await Task.WhenAll(connectionTasks);
         var combinedResults = Result.Merge(tasksResult);
 
+        await _signalRService.SendRefreshNotificationAsync([DataType.PlexServerConnection], cancellationToken);
+
         // Send completed job status update
         update.Status = JobStatus.Completed;
         await _signalRService.SendJobStatusUpdateAsync(update);
 
-        if (tasksResult.Any(statusResult => statusResult.Value.IsSuccessful))
+        if (tasksResult.Any(statusResult => statusResult.ValueOrDefault?.IsSuccessful != null))
             return Result.Ok(combinedResults.Value.ToList());
 
         var msg = _log.Error(

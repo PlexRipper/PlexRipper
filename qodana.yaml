@@ -12,5 +12,7 @@ exclude:
           - "file:src/Data/Migrations/*.cs"
     - name: ArrangeTrailingCommaInMultilineLists
     - name: SuggestDiscardDeclarationVarStyle
+    -   name: XmlHighlighting
+    -   name: ExplicitCallerInfoArgument
 dot-net:
     solution: PlexRipper.sln

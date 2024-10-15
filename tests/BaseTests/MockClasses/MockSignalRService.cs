@@ -71,7 +71,7 @@ public class MockSignalRService : ISignalRService
 
     public Task SendRefreshNotificationAsync(DataType dataType, CancellationToken cancellationToken = default)
     {
-        RefreshNotificationList.Add(dataType);
+        RefreshNotificationList.Add(dataType, cancellationToken);
         _log.Verbose("{ClassName} => {@DataType}", nameof(MockSignalRService), dataType);
 
         return Task.CompletedTask;

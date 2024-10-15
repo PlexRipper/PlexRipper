@@ -53,9 +53,10 @@ public class PlexLibrary : BaseEntity
 
     /// <summary>
     /// Gets or sets the unique id of the <see cref="PlexLibrary"/>.
+    /// Can be a valid GUID or a Plex generated UUID.
     /// </summary>
     [Column(Order = 9)]
-    public required Guid Uuid { get; init; }
+    public required string Uuid { get; init; }
 
     /// <summary>
     /// Gets the total file size of the nested media.

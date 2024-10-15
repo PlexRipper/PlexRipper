@@ -20,10 +20,15 @@ public class UpdatePlexAccountByIdEndpointRequestValidator : Validator<UpdatePle
         RuleFor(x => x.PlexAccountDTO).NotNull();
         RuleFor(x => x.PlexAccountDTO!.Id).GreaterThan(0);
         RuleFor(x => x.PlexAccountDTO!.DisplayName).NotEmpty();
-        RuleFor(x => x.PlexAccountDTO!.Username).NotEmpty().MinimumLength(5);
-        RuleFor(x => x.PlexAccountDTO!.Password).NotEmpty().MinimumLength(5);
-        RuleFor(x => x.PlexAccountDTO!.IsEnabled).NotNull();
-        RuleFor(x => x.PlexAccountDTO!.IsMain).NotNull();
+        RuleFor(x => x.PlexAccountDTO!.Username)
+            .NotEmpty()
+            .MinimumLength(5)
+            .When(m => !m.PlexAccountDTO!.IsAuthTokenMode);
+        RuleFor(x => x.PlexAccountDTO!.Password)
+            .NotEmpty()
+            .MinimumLength(5)
+            .When(m => !m.PlexAccountDTO!.IsAuthTokenMode);
+        RuleFor(x => x.PlexAccountDTO!.AuthenticationToken).NotEmpty().When(m => m.PlexAccountDTO!.IsAuthTokenMode);
     }
 }
 

@@ -1,8 +1,11 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 using Application.Contracts;
 using HttpClientToCurl;
-using LukeHagar.PlexAPI.SDK.Utils;
+using PlexApi.Contracts;
+using PlexRipper.Domain.Config;
 using Polly;
 using Polly.Timeout;
 using Polly.Wrap;
@@ -11,21 +14,7 @@ using ILog = Logging.Interface.ILog;
 
 namespace PlexRipper.PlexApi;
 
-public record PlexApiClientOptions
-{
-    public required string ConnectionUrl { get; set; }
-
-    /// <summary>
-    /// Request timeout in seconds.
-    /// </summary>
-    public int Timeout { get; init; } = 10;
-
-    public int RetryCount { get; init; } = 1;
-
-    public Action<PlexApiClientProgress>? Action { get; init; } = null;
-}
-
-public class PlexApiClient : ISpeakeasyHttpClient
+public class PlexApiClient : IPlexApiClient
 {
     private readonly ILog _log;
 
@@ -42,7 +31,11 @@ public class PlexApiClient : ISpeakeasyHttpClient
 
         _options = options;
 
-        _defaultClient.BaseAddress = new Uri(_options.ConnectionUrl);
+        if (_options.ConnectionUrl != string.Empty)
+        {
+            _defaultClient.BaseAddress = new Uri(_options.ConnectionUrl);
+        }
+
         _defaultClient.Timeout = TimeSpan.FromSeconds(_options.Timeout);
 
         // Combine policies using Policy.WrapAsync
@@ -50,7 +43,14 @@ public class PlexApiClient : ISpeakeasyHttpClient
             Policy.TimeoutAsync<HttpResponseMessage>(_options.Timeout),
             Policy
                 .Handle<TimeoutRejectedException>()
-                .OrResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
+                .Or<HttpRequestException>(e => e.InnerException is TimeoutException) // Retry on request-level timeout
+                .OrResult<HttpResponseMessage>(r =>
+                    r.StatusCode
+                        is HttpStatusCode.RequestTimeout
+                            or HttpStatusCode.GatewayTimeout
+                            or HttpStatusCode.ServiceUnavailable
+                            or HttpStatusCode.InternalServerError
+                )
                 .WaitAndRetryAsync(
                     _options.RetryCount,
                     retryAttempt => TimeSpan.FromSeconds(retryAttempt),
@@ -98,14 +98,47 @@ public class PlexApiClient : ISpeakeasyHttpClient
                 {
                     context["RequestUri"] = requestUri;
 
-                    if (response != null)
-                    {
-                        // Clone the request to avoid issues with the content being disposed
-                        request = await CloneAsync(request);
-                    }
+                    // Clone the request to avoid issues with the content being disposed
+                    request = await CloneAsync(request);
 
-                    response = await _defaultClient.SendAsync(request);
-                    return response;
+                    try
+                    {
+                        response = await _defaultClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            response.Content = ToJsonResponse(response);
+                        }
+
+                        return response;
+                    }
+                    catch (TaskCanceledException e)
+                    {
+                        if (ShouldLog(request))
+                        {
+                            _log.Here().Warning("{message} to {Url}", e.Message, requestUri);
+                        }
+
+                        return new HttpResponseMessage(HttpStatusCode.RequestTimeout);
+                    }
+                    catch (HttpRequestException e)
+                    {
+                        if (ShouldLog(request))
+                        {
+                            _log.Here().Warning("{message} to {Url}", e.Message, requestUri);
+                        }
+
+                        return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+                    }
+                    catch (Exception e)
+                    {
+                        if (ShouldLog(request))
+                        {
+                            Result.Fail(new ExceptionalError(e)).LogError();
+                        }
+
+                        return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                    }
                 },
                 new Context { { "RequestUri", requestUri } }
             );
@@ -156,6 +189,12 @@ public class PlexApiClient : ISpeakeasyHttpClient
         }
 
         return response;
+    }
+
+    public async Task<Stream?> DownloadStreamAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        var response = await SendAsync(request);
+        return await response.Content.ReadAsStreamAsync(cancellationToken);
     }
 
     public async Task<HttpRequestMessage> CloneAsync(HttpRequestMessage request)
@@ -226,5 +265,37 @@ public class PlexApiClient : ISpeakeasyHttpClient
                 ConnectionSuccessful = response.IsSuccessStatusCode,
             }
         );
+    }
+
+    private bool ShouldLog(HttpRequestMessage request)
+    {
+        // Don't log identity requests
+        return !request.RequestUri?.PathAndQuery.Contains("identity", StringComparison.OrdinalIgnoreCase) ?? true;
+    }
+
+    private HttpContent ToJsonResponse(HttpResponseMessage message)
+    {
+        if (message.Content.Headers.ContentType?.MediaType != "text/html")
+        {
+            return message.Content;
+        }
+
+        return new StringContent(
+            JsonSerializer.Serialize(
+                new PlexError(message.ReasonPhrase ?? "Unknown Reason")
+                {
+                    Code = (int)message.StatusCode,
+                    Status = (int)message.StatusCode,
+                },
+                DefaultJsonSerializerOptions.ConfigStandard
+            ),
+            Encoding.UTF8,
+            "application/json"
+        );
+    }
+
+    public void Dispose()
+    {
+        _defaultClient.Dispose();
     }
 }

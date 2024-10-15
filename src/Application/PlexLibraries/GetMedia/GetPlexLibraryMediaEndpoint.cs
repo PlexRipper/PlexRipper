@@ -98,7 +98,7 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
 
                 foreach (var plexMovie in plexMovies)
                 {
-                    if (plexMovie.HasThumb && plexServerToken.IsSuccess)
+                    if (plexServerConnection.IsSuccess && plexMovie.HasThumb && plexServerToken.IsSuccess)
                         plexMovie.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value);
                     entities.Add(plexMovie.ToSlimDTO());
                 }
@@ -117,7 +117,7 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
 
                 foreach (var tvShow in plexTvShow)
                 {
-                    if (tvShow.HasThumb && plexServerToken.IsSuccess)
+                    if (plexServerConnection.IsSuccess && tvShow.HasThumb && plexServerToken.IsSuccess)
                         tvShow.SetFullThumbnailUrl(plexServerConnection.Value.Url, plexServerToken.Value);
                     entities.Add(tvShow.ToSlimDTO());
                 }

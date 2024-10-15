@@ -6,7 +6,6 @@
 			<QHover>
 				<template #default="{ hover }">
 					<q-img
-						v-if="mediaItem.hasThumb"
 						loading="eager"
 						:src="imageUrl"
 						fit="fill"
@@ -43,43 +42,43 @@
 								</QCol>
 							</QRow>
 						</div>
-					</q-img>
-					<!--	Show fallback image	-->
-					<template v-else>
-						<QRow
-							column
-							align="center"
-							justify="between"
-							class="media-poster--fallback">
-							<QCol>
-								<QMediaTypeIcon
-									class="mx-3"
-									:size="90"
-									:media-type="mediaType" />
-							</QCol>
-							<QCol text-align="center">
-								<span class="media-poster--title">
-									{{ mediaItem.title }}
-								</span>
-							</QCol>
+						<!--	Show fallback image	-->
+						<template #error>
+							<QRow
+								column
+								align="center"
+								justify="between"
+								class="media-poster--fallback">
+								<QCol>
+									<QMediaTypeIcon
+										class="mx-3"
+										:size="90"
+										:media-type="mediaType" />
+								</QCol>
+								<QCol text-align="center">
+									<span class="media-poster--title">
+										{{ mediaItem.title }}
+									</span>
+								</QCol>
 
-							<QCol cols="auto">
-								<BaseButton
-									icon="mdi-download"
-									:outline="false"
-									size="xl"
-									flat
-									@click="downloadMedia()" />
-								<BaseButton
-									v-if="mediaType === PlexMediaType.TvShow"
-									icon="mdi-magnify"
-									:outline="false"
-									size="xl"
-									flat
-									@click="sendMediaOverviewOpenDetailsCommand(mediaItem.id)" />
-							</QCol>
-						</QRow>
-					</template>
+								<QCol cols="auto">
+									<BaseButton
+										icon="mdi-download"
+										:outline="false"
+										size="xl"
+										flat
+										@click="downloadMedia()" />
+									<BaseButton
+										v-if="mediaType === PlexMediaType.TvShow"
+										icon="mdi-magnify"
+										:outline="false"
+										size="xl"
+										flat
+										@click="sendMediaOverviewOpenDetailsCommand(mediaItem.id)" />
+								</QCol>
+							</QRow>
+						</template>
+					</q-img>
 				</template>
 			</QHover>
 		</div>
@@ -195,6 +194,8 @@ function downloadMedia() {
 	}
 
 	&--fallback {
+      background-color: transparent !important;
+
 		& > div {
 			margin: 16px 0;
 		}

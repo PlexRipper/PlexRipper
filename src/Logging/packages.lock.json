@@ -17,6 +17,16 @@
         "resolved": "0.29.2",
         "contentHash": "Pa7xUpo9Z6qWUTk+gAN1sRlEVqG/tgqK6+OvE/JXUfL3m1euNw5/RGj3bdQF/EyagSTyLDpqi0I8xRi1jzGq3A=="
       },
+      "FluentResults": {
+        "type": "Direct",
+        "requested": "[3.16.0, )",
+        "resolved": "3.16.0",
+        "contentHash": "VWacGzOyN9k7LOKqiNLnFvqTDLbFvepHlINdM3pPTD0YWI+a+VW/Q9gcx4gmJDpDZ32cAsczz5vmRjLCL5UOhA==",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "2.1.1",
+          "System.Threading.Tasks.Extensions": "4.5.4"
+        }
+      },
       "Serilog": {
         "type": "Direct",
         "requested": "[3.1.1, )",
@@ -87,6 +97,11 @@
           "xunit.extensibility.core": "2.4.2",
           "xunit.extensibility.execution": "2.4.2"
         }
+      },
+      "Microsoft.Extensions.Logging.Abstractions": {
+        "type": "Transitive",
+        "resolved": "2.1.1",
+        "contentHash": "XRzK7ZF+O6FzdfWrlFTi1Rgj2080ZDsd46vzOjadHUB0Cz5kOvDG8vI7caa5YFrsHQpcfn0DxtjS4E46N4FZsA=="
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
@@ -942,8 +957,8 @@
       },
       "System.Threading.Tasks.Extensions": {
         "type": "Transitive",
-        "resolved": "4.5.1",
-        "contentHash": "WSKUTtLhPR8gllzIWO2x6l4lmAIfbyMAiTlyXAis4QBDonXK4b4S6F8zGARX4/P8wH3DH+sLdhamCiHn+fTU1A=="
+        "resolved": "4.5.4",
+        "contentHash": "zteT+G8xuGu6mS+mzDzYXbzS7rd3K6Fjb9RiZlYlJPam2/hU7JCBZBVEcywNuR+oZ1ncTvc/cq0faRr3P01OVg=="
       },
       "System.Threading.Timer": {
         "type": "Transitive",

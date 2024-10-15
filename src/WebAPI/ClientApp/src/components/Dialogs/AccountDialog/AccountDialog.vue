@@ -80,7 +80,6 @@
 				<!-- Save account -->
 				<QCol>
 					<SaveButton
-						:disabled="!isAllowedToSave"
 						:label="isNewAccount ? $t('general.commands.save') : $t('general.commands.update')"
 						:cy="`account-dialog-${isNewAccount ? 'save' : 'update'}-button`"
 						block
@@ -123,7 +122,6 @@ import type { IPlexAccount } from '@interfaces';
 import { plexAccountApi } from '@api';
 import type AccountForm from '@components/Dialogs/AccountDialog/AccountForm.vue';
 
-import type { AxiosResponse } from 'axios';
 import { useI18n, useOpenControlDialog, useCloseControlDialog, useAccountStore } from '#imports';
 
 const { t } = useI18n();
@@ -180,10 +178,6 @@ function getDefaultAccount(): IPlexAccount {
 		validationErrors: [],
 	};
 }
-
-const isAllowedToSave = computed(() => {
-	return !savingLoading.value && get(changedPlexAccount).isValidated;
-});
 
 const hasCredentialsChanged = computed(() => {
 	if (!isNewAccount.value) {
@@ -290,8 +284,8 @@ function validate() {
 						Log.info('Account was valid and has 2FA enabled, this makes no sense and sounds like a bug');
 					}
 				},
-				error(err: AxiosResponse) {
-					Log.error('Error validating account', err);
+				error() {
+					get(changedPlexAccount).isValidated = false;
 					get(changedPlexAccount).hasValidationErrors = true;
 					useOpenControlDialog(accountTokenValidateDialogName);
 

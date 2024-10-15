@@ -22,7 +22,7 @@ public record PlexLibraryDTO
 
     public required bool Outdated { get; set; }
 
-    public required Guid Uuid { get; set; }
+    public required string Uuid { get; set; }
 
     public required long MediaSize { get; set; }
 

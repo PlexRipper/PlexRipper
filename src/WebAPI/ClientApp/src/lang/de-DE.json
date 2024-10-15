@@ -508,6 +508,14 @@
                 "header": "Musik Mediatheken sind leider noch nicht unterstützt :("
             }
         },
+        "photos": {
+            "photo-id": {
+                "header": "Fotobibliotheken werden leider noch nicht unterstützt :("
+            },
+            "index": {
+                "header": "Fotobibliotheken werden leider noch nicht unterstützt :("
+            }
+        },
         "settings": {
             "accounts": {
                 "header": "Plex Konten"
@@ -619,6 +627,11 @@
         },
         "empty": {
             "title": "Leere Seite"
+        },
+        "unknown": {
+            "index": {
+                "header": "Der Typ der Bibliothek {libraryName} ist unbekannt"
+            }
         }
     },
     "debug": {

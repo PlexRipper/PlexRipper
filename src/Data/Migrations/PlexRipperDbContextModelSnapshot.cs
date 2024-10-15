@@ -1002,7 +1002,8 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(6);
 
-                    b.Property<Guid>("Uuid")
+                    b.Property<string>("Uuid")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnOrder(9);
 
@@ -1350,7 +1351,8 @@ namespace PlexRipper.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlexServerConnectionId");
+                    b.HasIndex("PlexServerConnectionId")
+                        .IsUnique();
 
                     b.HasIndex("PlexServerId");
 

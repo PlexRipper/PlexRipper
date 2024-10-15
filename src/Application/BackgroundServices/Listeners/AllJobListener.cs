@@ -1,5 +1,4 @@
 using Application.Contracts;
-using PlexRipper.Application.Jobs;
 using Quartz;
 
 namespace PlexRipper.Application;
@@ -62,7 +61,7 @@ public class AllJobListener : IAllJobListener
 
         switch (jobType)
         {
-            case JobTypes.CheckPlexServerConnectionsJob:
+            case JobTypes.CheckAllConnectionsStatusByPlexServerJob:
                 break;
             case JobTypes.DownloadJob:
                 await _signalRService.SendJobStatusUpdateAsync(

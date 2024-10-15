@@ -12,9 +12,9 @@ namespace PlexRipper.PlexApi;
 public class PlexApiWrapper
 {
     private readonly ILog _log;
-    private readonly Func<PlexApiClientOptions?, PlexApiClient> _clientFactory;
+    private readonly Func<PlexApiClientOptions?, IPlexApiClient> _clientFactory;
 
-    public PlexApiWrapper(ILog log, Func<PlexApiClientOptions?, PlexApiClient> clientFactory)
+    public PlexApiWrapper(ILog log, Func<PlexApiClientOptions?, IPlexApiClient> clientFactory)
     {
         _log = log;
         _clientFactory = clientFactory;
@@ -32,7 +32,7 @@ public class PlexApiWrapper
 
     private PlexAPI CreateTvClient(string authToken = "", PlexApiClientOptions? options = null)
     {
-        options ??= new PlexApiClientOptions() { ConnectionUrl = "https://plex.tv/api/v2" };
+        options ??= new PlexApiClientOptions { ConnectionUrl = "https://plex.tv/api/v2" };
 
         options.ConnectionUrl = "https://plex.tv/api/v2";
 
@@ -164,15 +164,14 @@ public class PlexApiWrapper
         Action<PlexApiClientProgress>? action = null
     )
     {
-        _log.Debug("Requesting PlexServerStatus for {Url}", connection.Url);
-
         var client = CreateClient(
             string.Empty,
             new PlexApiClientOptions
             {
                 ConnectionUrl = connection.Url,
                 Action = action,
-                Timeout = 5,
+                Timeout = 10,
+                RetryCount = 0,
             }
         );
 
@@ -184,6 +183,7 @@ public class PlexApiWrapper
         var statusMessage = statusCode switch
         {
             200 => "The Plex server is online!",
+            401 => "The Plex token has expired and needs to be refreshed.",
             _ => "The Plex server could not be reached, most likely it's offline.",
         };
 
@@ -301,7 +301,7 @@ public class PlexApiWrapper
                 UpdatedAt = DateTimeExtensions.FromUnixTime(x.UpdatedAt),
                 ScannedAt = DateTimeExtensions.FromUnixTime(x.ScannedAt),
                 SyncedAt = null,
-                Uuid = Guid.Parse(x.Uuid),
+                Uuid = x.Uuid,
                 PlexServer = null,
                 PlexServerId = connection.PlexServerId,
                 DefaultDestination = null,

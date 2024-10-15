@@ -2,11 +2,13 @@
 	<QPage>
 		<QRow>
 			<QCol>
-				<QText
-					size="h3"
-					align="center">
-					{{ $t('pages.music.music-id.header') }}
-				</QText>
+				<QAlert type="error">
+					<QText
+						size="h4"
+						align="center">
+						{{ $t('pages.music.music-id.header') }}
+					</QText>
+				</QAlert>
 			</QCol>
 		</QRow>
 	</QPage>

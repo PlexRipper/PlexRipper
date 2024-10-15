@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using FluentResults;
 using Logging.Common;
 using Logging.Interface;
 
@@ -16,4 +17,6 @@ public static partial class LogExtensions
         var className = Path.GetFileNameWithoutExtension(sourceFilePath);
         return new LogMetaData(logger, className, memberName, sourceLineNumber);
     }
+
+    public static Result ToResult(this LogMetaData logMetaData) => Result.Fail(logMetaData.ToLogString());
 }

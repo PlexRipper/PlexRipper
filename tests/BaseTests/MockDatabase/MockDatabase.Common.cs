@@ -67,17 +67,15 @@ public static partial class MockDatabase
 
         // Add status to each connection
         var plexConnections = plexServers.SelectMany(x => x.PlexServerConnections).ToList();
-        List<PlexServerStatus> plexServerStatus = [];
+
         foreach (var connection in plexConnections)
         {
             var status = FakeData.GetPlexServerStatus().Generate();
             status.PlexServerConnectionId = connection.Id;
             status.PlexServerId = connection.PlexServerId;
-            plexServerStatus.Add(status);
-        }
 
-        await context.PlexServerStatuses.AddRangeAsync(plexServerStatus);
-        await context.SaveChangesAsync();
+            await context.PlexServerStatuses.Upsert(status).On(x => new { x.PlexServerConnectionId }).RunAsync();
+        }
 
         _log.Here()
             .Debug(

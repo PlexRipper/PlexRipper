@@ -20,6 +20,12 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
 
     public PlexRipperWebApplicationFactory(string memoryDbName, Action<UnitTestDataConfig>? options = null)
     {
+        this.WithWebHostBuilder(builder =>
+        {
+            // Disable caching by using custom configurations
+            builder.UseSetting("cacheEnabled", "false");
+        });
+
         MemoryDbName = memoryDbName;
         _config = UnitTestDataConfig.FromOptions(options);
         SetupPlexMockServers(_config);

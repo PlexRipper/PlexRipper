@@ -66,22 +66,6 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
         plexServer.PreferredConnectionId = preferredConnection.Id;
 
         // Add status to all connections
-        foreach (var plexServerConnection in plexServer.PlexServerConnections)
-            dbContext.PlexServerStatuses.Add(
-                new PlexServerStatus
-                {
-                    Id = 0,
-                    IsSuccessful = true,
-                    StatusCode = 200,
-                    StatusMessage = string.Empty,
-                    LastChecked = DateTime.UtcNow,
-                    PlexServer = null,
-                    PlexServerId = plexServerConnection.PlexServerId,
-                    PlexServerConnection = null,
-                    PlexServerConnectionId = plexServerConnection.Id,
-                }
-            );
-
         await dbContext.SaveChangesAsync();
 
         // Act

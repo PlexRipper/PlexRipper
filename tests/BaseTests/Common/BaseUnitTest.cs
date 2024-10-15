@@ -1,6 +1,7 @@
 using Autofac;
 using Data.Contracts;
 using Logging.Interface;
+using PlexApi.Contracts;
 using PlexRipper.Data;
 using Serilog;
 using Serilog.Events;
@@ -121,7 +122,7 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
         builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();
     }
 
-    protected void SetupHttpClient(Action<Mock<HttpMessageHandler>?> action)
+    protected void SetupHttpClient(Action<Mock<HttpMessageHandler>?>? action = null)
     {
         mock = AutoMock.GetStrict(builder =>
         {
@@ -133,13 +134,16 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
                     // Use loose behavior here to avoid Dispose() not mocked exception
                     HttpHandlerMock = new Mock<HttpMessageHandler>(MockBehavior.Loose);
 
-                    action(HttpHandlerMock);
+                    action?.Invoke(HttpHandlerMock);
 
                     return new HttpClient(HttpHandlerMock.Object) { BaseAddress = new Uri("http://localhost:1234") };
                 })
                 .As<HttpClient>()
                 .SingleInstance();
         });
+
+        // Mock to avoid HttpClient.Dispose() not mocked exception
+        mock.Mock<IPlexApiClient>().Setup(x => x.Dispose());
     }
 
     public override void Dispose()

@@ -20,6 +20,8 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
             config.PlexAccountCount = 1;
         });
 
+        SetupHttpClient();
+
         var plexServer = IDbContext.PlexServers.First();
         await IDbContext.PlexServerStatuses.Where(x => x.Id > 0).ExecuteDeleteAsync();
 
@@ -72,6 +74,8 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
             config.PlexServerCount = 1;
             config.PlexAccountCount = 1;
         });
+
+        SetupHttpClient();
 
         var plexServer = IDbContext.PlexServers.First();
 

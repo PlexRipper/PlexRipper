@@ -38,14 +38,14 @@ public class DownloadTaskExtensions_Calculate_UnitTests : BaseUnitTest
             downloadTaskTvShow.Calculate();
 
         // Assert
-        downloadTasks.ShouldAllBe(x => x.DownloadSpeed == 500);
-        downloadTasks.ShouldAllBe(x => x.FileTransferSpeed == 2500);
+        downloadTasks.ShouldAllBe(x => x.DownloadSpeed == 20);
+        downloadTasks.ShouldAllBe(x => x.FileTransferSpeed == 100);
         downloadTasks.ShouldAllBe(x => x.DataReceived == 125000);
         downloadTasks.ShouldAllBe(x => x.DataTotal == 250000);
         downloadTasks.ShouldAllBe(x => x.Percentage == 50);
 
-        downloadTasks.SelectMany(x => x.Children).ShouldAllBe(x => x.DownloadSpeed == 100);
-        downloadTasks.SelectMany(x => x.Children).ShouldAllBe(x => x.FileTransferSpeed == 500);
+        downloadTasks.SelectMany(x => x.Children).ShouldAllBe(x => x.DownloadSpeed == 20);
+        downloadTasks.SelectMany(x => x.Children).ShouldAllBe(x => x.FileTransferSpeed == 100);
         downloadTasks.SelectMany(x => x.Children).ShouldAllBe(x => x.DataReceived == 25000);
         downloadTasks.SelectMany(x => x.Children).ShouldAllBe(x => x.DataTotal == 50000);
         downloadTasks.SelectMany(x => x.Children).ShouldAllBe(x => x.Percentage == 50);

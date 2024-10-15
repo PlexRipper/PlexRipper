@@ -1,8 +1,11 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 using Application.Contracts;
 using HttpClientToCurl;
 using PlexApi.Contracts;
+using PlexRipper.Domain.Config;
 using Polly;
 using Polly.Timeout;
 using Polly.Wrap;
@@ -40,7 +43,14 @@ public class PlexApiClient : IPlexApiClient
             Policy.TimeoutAsync<HttpResponseMessage>(_options.Timeout),
             Policy
                 .Handle<TimeoutRejectedException>()
-                .OrResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
+                .Or<HttpRequestException>(e => e.InnerException is TimeoutException) // Retry on request-level timeout
+                .OrResult<HttpResponseMessage>(r =>
+                    r.StatusCode
+                        is HttpStatusCode.RequestTimeout
+                            or HttpStatusCode.GatewayTimeout
+                            or HttpStatusCode.ServiceUnavailable
+                            or HttpStatusCode.InternalServerError
+                )
                 .WaitAndRetryAsync(
                     _options.RetryCount,
                     retryAttempt => TimeSpan.FromSeconds(retryAttempt),
@@ -94,6 +104,21 @@ public class PlexApiClient : IPlexApiClient
                     try
                     {
                         response = await _defaultClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                            {
+                                response.Content = ToJsonResponse(
+                                    new PlexError("Unauthorized")
+                                    {
+                                        Code = (int)response.StatusCode,
+                                        Status = (int)response.StatusCode,
+                                    }
+                                );
+                            }
+                        }
+
                         return response;
                     }
                     catch (TaskCanceledException e)
@@ -256,6 +281,13 @@ public class PlexApiClient : IPlexApiClient
         // Don't log identity requests
         return !request.RequestUri?.PathAndQuery.Contains("identity", StringComparison.OrdinalIgnoreCase) ?? true;
     }
+
+    private StringContent ToJsonResponse(PlexError plexError) =>
+        new(
+            JsonSerializer.Serialize(plexError, DefaultJsonSerializerOptions.ConfigStandard),
+            Encoding.UTF8,
+            "application/json"
+        );
 
     public void Dispose()
     {

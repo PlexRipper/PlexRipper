@@ -6,7 +6,6 @@ using Data.Contracts;
 using FileSystem.Contracts;
 using Logging.Interface;
 using PlexApi.Contracts;
-using PlexRipper.PlexApi;
 using Timer = System.Timers.Timer;
 
 namespace PlexRipper.Application;

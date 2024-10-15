@@ -5,18 +5,10 @@ namespace FluentResults;
 
 public class PlexError : Error
 {
-    #region Constructors
-
     public PlexError(string message)
         : base(message) { }
-
-    #endregion
-
-    #region Properties
 
     public int Code { get; set; }
 
     public int Status { get; set; }
-
-    #endregion
 }

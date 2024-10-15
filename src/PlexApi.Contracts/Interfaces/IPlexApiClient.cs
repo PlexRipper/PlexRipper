@@ -1,6 +1,6 @@
 using LukeHagar.PlexAPI.SDK.Utils;
 
-namespace PlexRipper.PlexApi;
+namespace PlexApi.Contracts;
 
 public interface IPlexApiClient : IDisposable, ISpeakeasyHttpClient
 {

@@ -85,6 +85,8 @@ public class BaseUnitTest : IDisposable
 public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
     where TUnitTestClass : class
 {
+    protected Mock<HttpMessageHandler> HttpHandlerMock;
+
     protected TUnitTestClass _sut => mock.Create<TUnitTestClass>();
 
     protected AutoMock mock { get; private set; }
@@ -126,16 +128,15 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
             SetDefaultBuilder(builder);
 
             builder
-                .Register(
-                    (_, _) =>
-                    {
-                        var handlerMock = mock.Mock<HttpMessageHandler>();
+                .Register(_ =>
+                {
+                    // Use loose behavior here to avoid Dispose() not mocked exception
+                    HttpHandlerMock = new Mock<HttpMessageHandler>(MockBehavior.Loose);
 
-                        action(handlerMock);
+                    action(HttpHandlerMock);
 
-                        return new HttpClient(handlerMock.Object) { BaseAddress = new Uri("http://localhost:1234") };
-                    }
-                )
+                    return new HttpClient(HttpHandlerMock.Object) { BaseAddress = new Uri("http://localhost:1234") };
+                })
                 .As<HttpClient>()
                 .SingleInstance();
         });

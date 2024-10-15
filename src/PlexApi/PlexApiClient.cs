@@ -107,16 +107,7 @@ public class PlexApiClient : IPlexApiClient
 
                         if (!response.IsSuccessStatusCode)
                         {
-                            if (response.StatusCode == HttpStatusCode.Unauthorized)
-                            {
-                                response.Content = ToJsonResponse(
-                                    new PlexError("Unauthorized")
-                                    {
-                                        Code = (int)response.StatusCode,
-                                        Status = (int)response.StatusCode,
-                                    }
-                                );
-                            }
+                            response.Content = ToJsonResponse(response);
                         }
 
                         return response;
@@ -282,12 +273,26 @@ public class PlexApiClient : IPlexApiClient
         return !request.RequestUri?.PathAndQuery.Contains("identity", StringComparison.OrdinalIgnoreCase) ?? true;
     }
 
-    private StringContent ToJsonResponse(PlexError plexError) =>
-        new(
-            JsonSerializer.Serialize(plexError, DefaultJsonSerializerOptions.ConfigStandard),
+    private HttpContent ToJsonResponse(HttpResponseMessage message)
+    {
+        if (message.Content.Headers.ContentType?.MediaType != "text/html")
+        {
+            return message.Content;
+        }
+
+        return new StringContent(
+            JsonSerializer.Serialize(
+                new PlexError(message.ReasonPhrase ?? "Unknown Reason")
+                {
+                    Code = (int)message.StatusCode,
+                    Status = (int)message.StatusCode,
+                },
+                DefaultJsonSerializerOptions.ConfigStandard
+            ),
             Encoding.UTF8,
             "application/json"
         );
+    }
 
     public void Dispose()
     {

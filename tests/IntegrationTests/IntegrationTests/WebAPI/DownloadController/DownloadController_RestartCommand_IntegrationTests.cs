@@ -42,7 +42,7 @@ public class DownloadController_RestartCommand_IntegrationTests : BaseIntegratio
             RestartDownloadTaskEndpointRequest,
             ResultDTO
         >(new RestartDownloadTaskEndpointRequest(downloadTask.Id));
-        response.Response.IsSuccessStatusCode.ShouldBeTrue();
+        response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.Content.ReadAsStringAsync().Result);
 
         var downloadTaskDb = await Container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();

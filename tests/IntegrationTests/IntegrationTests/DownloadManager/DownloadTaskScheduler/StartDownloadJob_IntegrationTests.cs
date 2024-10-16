@@ -11,7 +11,7 @@ public class StartDownloadJob_IntegrationTests : BaseIntegrationTests
     public async Task ShouldSendOutDownloadTaskUpdates_WhenDownloadTaskIsInProgress()
     {
         // Arrange
-        await CreateContainer(config =>
+        using var Container = await CreateContainer(config =>
         {
             config.DownloadSpeedLimitInKib = 5000;
             config.DatabaseOptions = x =>
@@ -28,7 +28,7 @@ public class StartDownloadJob_IntegrationTests : BaseIntegrationTests
                 x.MockServers.Add(new PlexMockServerConfig { DownloadFileSizeInMb = 50 });
             };
         });
-        var movieDownloadTasks = await DbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
+        var movieDownloadTasks = await Container.DbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
         var movieFileDownloadTask = movieDownloadTasks[0].Children[0];
 
         // Act

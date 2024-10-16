@@ -11,7 +11,7 @@ public class PlexAPI_IntegrationTests : BaseIntegrationTests
     public async Task ShouldHaveTheInterceptedClientInjected_WhenPlexAPIIsRunningInTestingMode()
     {
         // Act
-        await CreateContainer(config =>
+        using var Container = await CreateContainer(config =>
         {
             config.PlexMockApiOptions = x =>
             {

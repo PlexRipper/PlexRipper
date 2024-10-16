@@ -11,7 +11,7 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
     public async Task ShouldFinishMergingDownloadTaskAsFileTaskJobAndSetToCompleted_WhenDownloadTaskHasFinishedDownloading()
     {
         // Arrange
-        await CreateContainer(config =>
+        using var Container = await CreateContainer(config =>
         {
             config.DatabaseOptions = x =>
             {
@@ -22,7 +22,7 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
                 x.DownloadFileSizeInMb = 10;
             };
         });
-        var dbContext = DbContext;
+        var dbContext = Container.DbContext;
         var downloadTask = dbContext.DownloadTaskMovieFile.First();
         downloadTask.ShouldNotBeNull();
 
@@ -39,7 +39,7 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
 
-        var downloadTaskDb = await DbContext.GetDownloadTaskAsync(downloadTask.Id);
+        var downloadTaskDb = await Container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
 

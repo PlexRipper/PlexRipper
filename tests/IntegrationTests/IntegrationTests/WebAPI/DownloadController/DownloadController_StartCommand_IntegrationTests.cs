@@ -14,7 +14,7 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
     public async Task ShouldStartQueuedMovieDownloadTaskOnStartCommand_WhenNoTasksAreDownloading()
     {
         // Arrange
-        await CreateContainer(config =>
+        using var Container = await CreateContainer(config =>
         {
             config.Seed = 5594564;
             config.PlexMockApiOptions = x =>
@@ -30,7 +30,7 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
                 x.MovieDownloadTasksCount = 1;
             };
         });
-        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync();
+        var downloadTasks = await Container.DbContext.GetAllDownloadTasksByServerAsync();
         downloadTasks.Count.ShouldBe(1);
         var downloadTask = downloadTasks[0].Children[0];
 
@@ -48,7 +48,7 @@ public class DownloadController_StartCommand_IntegrationTests : BaseIntegrationT
         // Assert
         var result = response.Result;
         result.IsSuccess.ShouldBeTrue();
-        var downloadTaskDb = await DbContext.GetDownloadTaskAsync(downloadTask.Id);
+        var downloadTaskDb = await Container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
     }

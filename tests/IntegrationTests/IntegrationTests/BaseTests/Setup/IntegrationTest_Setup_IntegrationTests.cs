@@ -8,44 +8,44 @@ public class IntegrationTest_Setup : BaseIntegrationTests
     [Fact]
     public async Task ShouldHaveValidApiHttpClient_WhenStartingAnIntegrationTest()
     {
-        await CreateContainer();
+        using var Container = await CreateContainer();
         Container.ApiClient.ShouldNotBeNull();
     }
 
     [Fact]
     public async Task ShouldHaveAllResolvePropertiesValid_WhenStartingAnIntegrationTest()
     {
-        await CreateContainer();
+        using var Container = await CreateContainer();
         Container.FileSystem.ShouldNotBeNull();
         Container.GetDownloadQueue.ShouldNotBeNull();
         Container.GetPlexApiService.ShouldNotBeNull();
         Container.Mediator.ShouldNotBeNull();
         Container.PathProvider.ShouldNotBeNull();
-        DbContext.ShouldNotBeNull();
+        Container.DbContext.ShouldNotBeNull();
     }
 
     [Fact]
     public async Task ShouldHaveUniqueInMemoryDatabase_WhenConfigFileIsGivenToContainer()
     {
         // Arrange
-        await CreateContainer(x => x.Seed = 9999);
+        using var Container = await CreateContainer(x => x.Seed = 9999);
 
         // Assert
         Container.ShouldNotBeNull();
-        DbContext.ShouldNotBeNull();
-        DbContext.DatabaseName.ShouldNotBeEmpty();
-        DbContext.DatabaseName.ShouldContain("memory_database");
+        Container.DbContext.ShouldNotBeNull();
+        Container.DbContext.DatabaseName.ShouldNotBeEmpty();
+        Container.DbContext.DatabaseName.ShouldContain("memory_database");
     }
 
     [Fact]
     public async Task ShouldAllowForMultipleContainersToBeCreated_WhenMultipleAreCalled()
     {
         // Arrange
-        await CreateContainer(x => x.Seed = 3457);
-        await CreateContainer(x => x.Seed = 9654);
+        using var container = await CreateContainer(x => x.Seed = 3457);
+        using var container2 = await CreateContainer(x => x.Seed = 9654);
 
         // Assert
-        Container.ShouldNotBeNull();
-        DbContext.ShouldNotBeNull();
+        container2.ShouldNotBeNull();
+        container.DbContext.ShouldNotBeNull();
     }
 }

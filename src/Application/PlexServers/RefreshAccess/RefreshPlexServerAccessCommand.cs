@@ -51,21 +51,33 @@ public class RefreshPlexServerAccessCommandHandler : IRequestHandler<RefreshPlex
 
         _log.Debug("Refreshing Plex servers for PlexAccount: {PlexAccountId}", plexAccountId);
 
-        var tupleResult = await _plexServiceApi.GetAccessiblePlexServersAsync(plexAccountId);
-        var serversResult = tupleResult.servers;
-        var tokensResult = tupleResult.tokens;
+        var result = await _plexServiceApi.GetAccessiblePlexServersAsync(plexAccountId);
 
-        if (serversResult.IsFailed || tokensResult.IsFailed)
-            return serversResult.LogError();
+        if (result.Has401UnauthorizedError())
+        {
+            _log.Warning(
+                "Plex API returned 401 Unauthorized for PlexAccount: {PlexAccountDisplayName}",
+                plexAccountDisplayName
+            );
+            _log.Warning(
+                "Removing PlexServerAccess and LibraryAccess for PlexAccount: {PlexAccountDisplayName}",
+                plexAccountDisplayName
+            );
 
-        if (!serversResult.Value.Any())
+            // TODO: Remove PlexServerAccess and LibraryAccess for this PlexAccount
+        }
+
+        if (result.IsFailed)
+            return result.LogError();
+
+        if (!result.Value.Any())
         {
             _log.Warning("No Plex servers found for PlexAccount: {plexAccountName}", plexAccountDisplayName);
             return Result.Ok();
         }
 
-        var serverList = serversResult.Value;
-        var serverAccessTokens = tokensResult.Value;
+        var serverList = result.Value.Select(x => x.PlexServer).ToList();
+        var serverAccessTokens = result.Value.Select(x => x.AccessToken).ToList();
 
         // Add PlexServers and their PlexServerConnections
         var updateResult = await _mediator.Send(new AddOrUpdatePlexServersCommand(serverList), cancellationToken);

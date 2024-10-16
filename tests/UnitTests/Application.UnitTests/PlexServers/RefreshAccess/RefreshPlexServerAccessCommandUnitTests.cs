@@ -22,7 +22,7 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
 
         mock.Mock<IPlexApiService>()
             .Setup(x => x.GetAccessiblePlexServersAsync(It.IsAny<int>()))
-            .ReturnsAsync((new List<PlexServer>(), new List<ServerAccessTokenDTO>()));
+            .ReturnsAsync(new List<PlexServerAccessDTO>());
 
         // Act
         var request = new RefreshPlexServerAccessCommand(plexAccount.Id);
@@ -48,9 +48,17 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
         var plexServers = FakeData.GetPlexServer().Generate(10);
         var serverAccessTokens = FakeData.GetServerAccessTokenDTO(plexAccount, plexServers);
 
+        var list = plexServers
+            .Select(x => new PlexServerAccessDTO
+            {
+                PlexServer = x,
+                AccessToken = serverAccessTokens.FirstOrDefault(y => y.MachineIdentifier == x.MachineIdentifier)!,
+            })
+            .ToList();
+
         mock.Mock<IPlexApiService>()
             .Setup(x => x.GetAccessiblePlexServersAsync(It.IsAny<int>()))
-            .ReturnsAsync((Result.Ok(plexServers), Result.Ok(serverAccessTokens)));
+            .ReturnsAsync(Result.Ok(list));
 
         mock.SetupMediator(It.IsAny<AddOrUpdatePlexServersCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<AddOrUpdatePlexAccountServersCommand>).ReturnsAsync(Result.Ok());

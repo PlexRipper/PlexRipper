@@ -161,21 +161,17 @@ public class PlexApiService : IPlexApiService
     }
 
     /// <inheritdoc />
-    public async Task<(
-        Result<List<PlexServer>> servers,
-        Result<List<ServerAccessTokenDTO>> tokens
-    )> GetAccessiblePlexServersAsync(int plexAccountId)
+    public async Task<Result<List<PlexServerAccessDTO>>> GetAccessiblePlexServersAsync(int plexAccountId)
     {
         var plexAccount = await _dbContext.PlexAccounts.GetAsync(plexAccountId);
         if (plexAccount is null)
         {
-            var failedResult = ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountId);
-            return (failedResult, failedResult);
+            return ResultExtensions.EntityNotFound(nameof(PlexAccount), plexAccountId);
         }
 
         var plexAccountToken = await GetPlexApiTokenAsync(plexAccount);
         if (plexAccountToken.IsFailed)
-            return (plexAccountToken.ToResult(), plexAccountToken.ToResult());
+            return plexAccountToken.ToResult();
 
         var result = await _plexApiWrapper.GetAccessibleServers(plexAccountToken.Value);
         if (result.IsFailed)
@@ -184,77 +180,77 @@ public class PlexApiService : IPlexApiService
                 "Failed to retrieve PlexServers for PlexAccount: {PlexAccountDisplayName}",
                 plexAccount.DisplayName
             );
-            return (result.ToResult(), result.ToResult());
+            return result.ToResult();
         }
 
         var plexServers = result
             .Value.FindAll(x => x.Provides.Contains("server"))
-            .Select(x => new PlexServer
+            .Select(x => new PlexServerAccessDTO
             {
-                Id = 0,
-                Name = x.Name,
+                AccessToken = new ServerAccessTokenDTO
+                {
+                    PlexAccountId = plexAccountId,
+                    MachineIdentifier = x.ClientIdentifier,
+                    AccessToken = x.AccessToken,
+                },
+                PlexServer = new PlexServer
+                {
+                    Id = 0,
+                    Name = x.Name,
 
-                // The servers have an OwnerId of 0 when it belongs to the PlexAccount that was used to request it.
-                OwnerId = x.OwnerId ?? plexAccount.PlexId,
-                PlexServerOwnerUsername = x.SourceTitle ?? plexAccount.Username,
-                Device = x.Device ?? string.Empty,
-                Platform = x.Platform ?? string.Empty,
-                PlatformVersion = x.PlatformVersion ?? string.Empty,
-                Product = x.Product,
-                ProductVersion = x.ProductVersion,
-                Provides = x.Provides,
-                CreatedAt = x.CreatedAt,
-                LastSeenAt = x.LastSeenAt,
-                MachineIdentifier = x.ClientIdentifier,
-                PublicAddress = x.PublicAddress,
-                PreferredConnectionId = 0,
-                IsEnabled = !_serverSettingsModule.GetIsHidden(x.ClientIdentifier),
-                Owned = x.Owned,
-                Home = x.Home,
-                Synced = x.Synced,
-                Relay = x.Relay,
-                Presence = x.Presence,
-                HttpsRequired = x.HttpsRequired,
-                PublicAddressMatches = x.PublicAddressMatches,
-                DnsRebindingProtection = x.DnsRebindingProtection,
-                NatLoopbackSupported = x.NatLoopbackSupported,
-                ServerFixApplyDNSFix = false,
-                PlexAccountServers = [],
-                PlexLibraries = [],
-                ServerStatus = [],
-                PlexServerConnections = x
-                    .Connections.Select(y => new PlexServerConnection
-                    {
-                        Id = 0,
-                        Protocol = y.Protocol.ToString(),
-                        Address = y.Address,
-                        Port = y.Port,
-                        Local = y.Local,
-                        Relay = y.Relay,
-                        IPv4 = y.Address.IsIpAddress() && !y.IPv6,
-                        IPv6 = y.IPv6,
-                        Uri = y.Uri,
+                    // The servers have an OwnerId of 0 when it belongs to the PlexAccount that was used to request it.
+                    OwnerId = x.OwnerId ?? plexAccount.PlexId,
+                    PlexServerOwnerUsername = x.SourceTitle ?? plexAccount.Username,
+                    Device = x.Device ?? string.Empty,
+                    Platform = x.Platform ?? string.Empty,
+                    PlatformVersion = x.PlatformVersion ?? string.Empty,
+                    Product = x.Product,
+                    ProductVersion = x.ProductVersion,
+                    Provides = x.Provides,
+                    CreatedAt = x.CreatedAt,
+                    LastSeenAt = x.LastSeenAt,
+                    MachineIdentifier = x.ClientIdentifier,
+                    PublicAddress = x.PublicAddress,
+                    PreferredConnectionId = 0,
+                    IsEnabled = !_serverSettingsModule.GetIsHidden(x.ClientIdentifier),
+                    Owned = x.Owned,
+                    Home = x.Home,
+                    Synced = x.Synced,
+                    Relay = x.Relay,
+                    Presence = x.Presence,
+                    HttpsRequired = x.HttpsRequired,
+                    PublicAddressMatches = x.PublicAddressMatches,
+                    DnsRebindingProtection = x.DnsRebindingProtection,
+                    NatLoopbackSupported = x.NatLoopbackSupported,
+                    ServerFixApplyDNSFix = false,
+                    PlexAccountServers = [],
+                    PlexLibraries = [],
+                    ServerStatus = [],
+                    PlexServerConnections = x
+                        .Connections.Select(y => new PlexServerConnection
+                        {
+                            Id = 0,
+                            Protocol = y.Protocol.ToString(),
+                            Address = y.Address,
+                            Port = y.Port,
+                            Local = y.Local,
+                            Relay = y.Relay,
+                            IPv4 = y.Address.IsIpAddress() && !y.IPv6,
+                            IPv6 = y.IPv6,
+                            Uri = y.Uri,
 
-                        // The port fix is when we don't want to use the port when Address is a domain name
-                        PortFix = !y.Address.IsIpAddress() && !y.IPv6 && y.Address != "localhost",
-                        PlexServer = null,
-                        PlexServerId = 0,
-                        PlexServerStatus = [],
-                    })
-                    .ToList(),
+                            // The port fix is when we don't want to use the port when Address is a domain name
+                            PortFix = !y.Address.IsIpAddress() && !y.IPv6 && y.Address != "localhost",
+                            PlexServer = null,
+                            PlexServerId = 0,
+                            PlexServerStatus = [],
+                        })
+                        .ToList(),
+                },
             })
             .ToList();
 
-        var mapAccess = result
-            .Value.Select(x => new ServerAccessTokenDTO
-            {
-                PlexAccountId = plexAccountId,
-                MachineIdentifier = x.ClientIdentifier,
-                AccessToken = x.AccessToken,
-            })
-            .ToList();
-
-        return (Result.Ok(plexServers), Result.Ok(mapAccess));
+        return Result.Ok(plexServers);
     }
 
     public Task<Result<PlexAccount>> PlexSignInAsync(PlexAccount plexAccount) =>

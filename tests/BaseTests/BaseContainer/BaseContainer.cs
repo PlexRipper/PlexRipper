@@ -12,7 +12,7 @@ using Settings.Contracts;
 
 namespace PlexRipper.BaseTests;
 
-public partial class BaseContainer : IDisposable
+public class BaseContainer : IDisposable
 {
     private readonly PlexRipperWebApplicationFactory _factory;
 

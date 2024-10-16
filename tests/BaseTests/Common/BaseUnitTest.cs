@@ -79,7 +79,13 @@ public class BaseUnitTest : IDisposable
     public virtual void Dispose()
     {
         if (IsDatabaseSetup)
-            _dbContexts.ForEach(x => x.Dispose());
+        {
+            foreach (var x in _dbContexts)
+            {
+                x.EnsureDeleted();
+                x.Dispose();
+            }
+        }
     }
 }
 

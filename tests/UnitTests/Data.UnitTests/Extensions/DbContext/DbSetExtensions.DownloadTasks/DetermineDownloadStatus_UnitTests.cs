@@ -36,6 +36,7 @@ public class DetermineDownloadStatus_UnitTests : BaseUnitTest
         // Arrange
         await SetupDatabase(config =>
         {
+            config.Seed = 124;
             config.TvShowDownloadTasksCount = 5;
             config.TvShowSeasonCount = 5;
             config.TvShowEpisodeCount = 5;

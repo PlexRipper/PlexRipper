@@ -121,8 +121,6 @@ public partial class BaseContainer : IDisposable
                 );
         }
 
-        // Dispose of the HttpClient and factory before the lifetime scope
-        ApiClient.Dispose();
         _factory.Dispose();
 
         // Dispose of the lifetime scope as the last step

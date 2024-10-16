@@ -22,15 +22,15 @@ public class PlexApiWrapper
 
     private string GetClientId => Guid.NewGuid().ToString();
 
-    private PlexAPI CreateClient(string authToken, PlexApiClientOptions options) =>
-        new(
+    private IPlexAPI CreateClient(string authToken, PlexApiClientOptions options) =>
+        new PlexAPI(
             client: _clientFactory(options),
             clientID: GetClientId,
             serverUrl: options.ConnectionUrl,
             accessToken: authToken
         );
 
-    private PlexAPI CreateTvClient(string authToken = "", PlexApiClientOptions? options = null)
+    private IPlexAPI CreateTvClient(string authToken = "", PlexApiClientOptions? options = null)
     {
         options ??= new PlexApiClientOptions { ConnectionUrl = "https://plex.tv/api/v2" };
 

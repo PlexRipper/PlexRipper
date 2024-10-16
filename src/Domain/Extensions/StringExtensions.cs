@@ -184,4 +184,7 @@ public static partial class StringExtensions
         path = path.Replace(@"\", "/");
         return Path.GetFileName(path);
     }
+
+    public static StringContent ToStringContent(this string json) =>
+        new(json, Encoding.UTF8, ContentType.ApplicationJson);
 }

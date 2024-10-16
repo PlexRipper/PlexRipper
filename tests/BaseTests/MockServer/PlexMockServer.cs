@@ -56,7 +56,7 @@ public class PlexMockServer : IDisposable
                 Response
                     .Create()
                     .WithStatusCode(200)
-                    .WithHeader("Content-Type", "application/json")
+                    .WithHeader("Content-Type", ContentType.ApplicationJson)
                     .WithPlexSdkJsonContent(librarySections)
             );
 
@@ -71,7 +71,7 @@ public class PlexMockServer : IDisposable
                     Response
                         .Create()
                         .WithStatusCode(200)
-                        .WithHeader("Content-Type", "application/json")
+                        .WithHeader("Content-Type", ContentType.ApplicationJson)
                         .WithPlexSdkJsonContent(libraryData)
                 );
         }
@@ -87,7 +87,7 @@ public class PlexMockServer : IDisposable
                 Response
                     .Create()
                     .WithStatusCode(HttpStatusCode.OK)
-                    .WithHeader("Content-Type", "application/json")
+                    .WithHeader("Content-Type", ContentType.ApplicationJson)
                     .WithPlexSdkJsonContent(FakePlexApiData.GetPlexServerIdentityResponse(_fakeDataConfig))
             );
     }

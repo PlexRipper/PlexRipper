@@ -27,7 +27,7 @@ public class PlexApiClient : IPlexApiClient
     {
         _log = log;
         _defaultClient = httpClient;
-        _defaultClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        _defaultClient.DefaultRequestHeaders.Accept.Add(ContentType.ApplicationJsonHeaderValue);
 
         _options = options;
 
@@ -275,23 +275,21 @@ public class PlexApiClient : IPlexApiClient
 
     private HttpContent ToJsonResponse(HttpResponseMessage message)
     {
-        if (message.Content.Headers.ContentType?.MediaType != "text/html")
+        if (message.Content.Headers.ContentType?.MediaType != ContentType.TextHtml)
         {
             return message.Content;
         }
 
-        return new StringContent(
-            JsonSerializer.Serialize(
+        return JsonSerializer
+            .Serialize(
                 new PlexError(message.ReasonPhrase ?? "Unknown Reason")
                 {
                     Code = (int)message.StatusCode,
                     Status = (int)message.StatusCode,
                 },
                 DefaultJsonSerializerOptions.ConfigStandard
-            ),
-            Encoding.UTF8,
-            "application/json"
-        );
+            )
+            .ToStringContent();
     }
 
     public void Dispose()

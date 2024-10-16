@@ -17,7 +17,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests : BaseIn
     public async Task ShouldHaveGeneratedAllTvShowsDownloadTasks_WhenGivenValidCommands()
     {
         // Arrange
-        await CreateContainer(config =>
+        using var container = await CreateContainer(config =>
         {
             config.DatabaseOptions = x =>
             {
@@ -29,7 +29,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests : BaseIn
             };
         });
 
-        var plexTvShows = await DbContext.PlexTvShows.ToListAsync();
+        var plexTvShows = await container.DbContext.PlexTvShows.ToListAsync();
 
         var tvShows = new List<DownloadMediaDTO>
         {
@@ -43,11 +43,11 @@ public class GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests : BaseIn
         };
 
         // Act
-        var mediatr = Container.Mediator;
+        var mediatr = container.Mediator;
         var result = await mediatr.Send(new GenerateDownloadTaskTvShowsCommand(tvShows));
 
         // Assert
-        var downloadTaskTvShows = await DbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
+        var downloadTaskTvShows = await container.DbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
 
         downloadTaskTvShows.Count.ShouldBe(5);
         result.IsSuccess.ShouldBeTrue();

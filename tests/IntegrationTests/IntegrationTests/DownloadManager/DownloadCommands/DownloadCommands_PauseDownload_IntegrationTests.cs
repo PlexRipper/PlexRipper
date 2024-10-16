@@ -15,7 +15,7 @@ public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTe
     {
         // Arrange
 
-        await CreateContainer(config =>
+        using var Container = await CreateContainer(config =>
         {
             config.DownloadSpeedLimitInKib = 5000;
             config.DatabaseOptions = x =>
@@ -34,7 +34,7 @@ public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTe
             };
         });
 
-        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync();
+        var downloadTasks = await Container.DbContext.GetAllDownloadTasksByServerAsync();
         var childDownloadTask = downloadTasks[0].Children[0];
 
         // Act
@@ -61,7 +61,9 @@ public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTe
 
         startResult.IsSuccess.ShouldBeTrue();
         pauseResult.IsSuccess.ShouldBeTrue();
-        var downloadTaskDb = DbContext.DownloadTaskMovieFile.FirstOrDefault(x => x.Id == childDownloadTask.Id);
+        var downloadTaskDb = Container.DbContext.DownloadTaskMovieFile.FirstOrDefault(x =>
+            x.Id == childDownloadTask.Id
+        );
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Paused);
     }

@@ -14,7 +14,7 @@ public class DownloadController_RestartCommand_IntegrationTests : BaseIntegratio
     public async Task ShouldRestartCompletedMovieDownloadTaskOnRestartCommand_WhenTaskIsDoneDownloading()
     {
         // Arrange
-        await CreateContainer(config =>
+        using var Container = await CreateContainer(config =>
         {
             config.Seed = 5594564;
             config.PlexMockApiOptions = x =>
@@ -30,11 +30,11 @@ public class DownloadController_RestartCommand_IntegrationTests : BaseIntegratio
                 x.MovieDownloadTasksCount = 1;
             };
         });
-        var downloadTasks = await DbContext.GetAllDownloadTasksByServerAsync();
+        var downloadTasks = await Container.DbContext.GetAllDownloadTasksByServerAsync();
         downloadTasks.Count.ShouldBe(1);
         var downloadTask = downloadTasks[0].Children[0];
 
-        await DbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.Completed);
+        await Container.DbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.Completed);
 
         // Act
         var response = await Container.ApiClient.GETAsync<
@@ -42,9 +42,9 @@ public class DownloadController_RestartCommand_IntegrationTests : BaseIntegratio
             RestartDownloadTaskEndpointRequest,
             ResultDTO
         >(new RestartDownloadTaskEndpointRequest(downloadTask.Id));
-        response.Response.IsSuccessStatusCode.ShouldBeTrue();
+        response.Response.IsSuccessStatusCode.ShouldBeTrue(response.Response.Content.ReadAsStringAsync().Result);
 
-        var downloadTaskDb = await DbContext.GetDownloadTaskAsync(downloadTask.Id);
+        var downloadTaskDb = await Container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Queued);
 
@@ -54,7 +54,7 @@ public class DownloadController_RestartCommand_IntegrationTests : BaseIntegratio
         // Assert
         var result = response.Result;
         result.IsSuccess.ShouldBeTrue();
-        downloadTaskDb = await DbContext.GetDownloadTaskAsync(downloadTask.Id);
+        downloadTaskDb = await Container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
     }

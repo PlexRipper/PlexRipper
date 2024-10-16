@@ -4,10 +4,8 @@ using Serilog.Events;
 
 namespace PlexRipper.BaseTests;
 
-[Collection("Sequential")]
-public class BaseIntegrationTests : IAsyncLifetime
+public class BaseIntegrationTests
 {
-    protected BaseContainer Container = null!;
     private readonly ILog _log;
 
     protected BaseIntegrationTests(ITestOutputHelper output, LogEventLevel logLevel = LogEventLevel.Verbose)
@@ -23,30 +21,6 @@ public class BaseIntegrationTests : IAsyncLifetime
         BogusExtensions.Setup();
     }
 
-    protected async Task CreateContainer(Action<UnitTestDataConfig>? options = null)
-    {
-        Container = await BaseContainer.Create(_log, options);
-    }
-
-    protected IPlexRipperDbContext DbContext => Container.Resolve<IPlexRipperDbContext>();
-
-    public Task InitializeAsync()
-    {
-        _log.InformationLine("Initialize Integration Test");
-        return Task.CompletedTask;
-    }
-
-    public async Task DisposeAsync()
-    {
-        _log.Warning(
-            "Integration Test with DatabaseName: \"{DatabaseName}\" has ended, Disposing!",
-            DbContext.DatabaseName
-        );
-
-        Container.Dispose();
-
-        _log.FatalLine("Container disposed");
-
-        await Task.CompletedTask;
-    }
+    protected Task<BaseContainer> CreateContainer(Action<UnitTestDataConfig>? options = null) =>
+        BaseContainer.Create(_log, options);
 }

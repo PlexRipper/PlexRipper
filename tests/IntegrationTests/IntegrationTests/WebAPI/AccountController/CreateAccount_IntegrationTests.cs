@@ -16,7 +16,7 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
     {
         // Arrange
         var libraryCount = 3;
-        await CreateContainer(config =>
+        using var Container = await CreateContainer(config =>
         {
             config.DatabaseOptions = x =>
             {
@@ -54,11 +54,11 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        DbContext.PlexAccounts.ToList().Count.ShouldBe(1);
+        Container.DbContext.PlexAccounts.ToList().Count.ShouldBe(1);
 
         // Ensure account has been created
-        var plexAccountDb = DbContext
-            .PlexAccounts.Include(x => x.PlexAccountLibraries)
+        var plexAccountDb = Container
+            .DbContext.PlexAccounts.Include(x => x.PlexAccountLibraries)
             .ThenInclude(x => x.PlexLibrary)
             .Include(x => x.PlexAccountServers)
             .ThenInclude(x => x.PlexServer)
@@ -73,9 +73,9 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         plexAccountDb.PlexAccountLibraries.Count.ShouldBe(libraryCount);
 
         // Ensure PlexServer has been created
-        DbContext.PlexServers.ToList().Count.ShouldBe(2);
-        var plexServersDb = DbContext
-            .PlexServers.Include(x => x.PlexLibraries)
+        Container.DbContext.PlexServers.ToList().Count.ShouldBe(2);
+        var plexServersDb = Container
+            .DbContext.PlexServers.Include(x => x.PlexLibraries)
             .IncludeLibrariesWithMedia()
             .FirstOrDefault();
         plexServersDb.ShouldNotBeNull();

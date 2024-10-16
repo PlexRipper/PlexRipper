@@ -1,9 +1,11 @@
 ﻿using Application.Contracts;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Data.Contracts;
 using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
 using PlexRipper.Data;
 using Settings.Contracts;
@@ -32,7 +34,7 @@ public partial class BaseContainer : IDisposable
         _factory = new PlexRipperWebApplicationFactory(memoryDbName, options);
 
         // Create a separate scope as not to interfere with tests running in parallel
-        _lifeTimeScope = _factory.Services.GetAutofacRoot().BeginLifetimeScope(memoryDbName);
+        _lifeTimeScope = _factory.Services.GetAutofacRoot().BeginLifetimeScope();
     }
 
     public static async Task<BaseContainer> Create(ILog log, Action<UnitTestDataConfig>? options = null)
@@ -79,4 +81,51 @@ public partial class BaseContainer : IDisposable
     public MockSignalRService MockSignalRService => (MockSignalRService)Resolve<ISignalRService>();
 
     public IServerSettingsModule GetServerSettings => Resolve<IServerSettingsModule>();
+
+    public IPlexRipperDbContext DbContext => Resolve<IPlexRipperDbContext>();
+
+    public async Task SetDownloadSpeedLimit(Action<UnitTestDataConfig>? options = null)
+    {
+        var config = new UnitTestDataConfig();
+        options?.Invoke(config);
+
+        var plexServers = await PlexRipperDbContext.PlexServers.ToListAsync();
+        foreach (var plexServer in plexServers)
+            GetServerSettings.SetDownloadSpeedLimit(plexServer.MachineIdentifier, config.DownloadSpeedLimitInKib);
+    }
+
+    public T Resolve<T>()
+        where T : notnull => _lifeTimeScope.Resolve<T>();
+
+    public List<PlexMockServer> PlexMockServers => _factory.PlexMockServers;
+
+    public void Dispose()
+    {
+        _log.Warning(
+            "Integration Test with DatabaseName: \"{DatabaseName}\" has ended, Disposing!",
+            DbContext.DatabaseName
+        );
+
+        try
+        {
+            // Ensure the database is deleted
+            PlexRipperDbContext.Database.EnsureDeleted();
+        }
+        catch (Exception ex)
+        {
+            _log.Here()
+                .Error(
+                    "Failed to delete database: {DatabaseName}, Error: {ExceptionMessage}",
+                    DatabaseName,
+                    ex.Message
+                );
+        }
+
+        _factory.Dispose();
+
+        // Dispose of the lifetime scope as the last step
+        _lifeTimeScope.Dispose();
+
+        _log.FatalLine("Container disposed");
+    }
 }

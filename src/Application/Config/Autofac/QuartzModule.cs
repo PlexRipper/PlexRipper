@@ -49,8 +49,11 @@ public class QuartzModule : Module
         // During integration testing, we cannot use a real JobStore so we revert to default
         new()
         {
-            { "quartz.scheduler.instanceName", "TestPlexRipper Scheduler" },
+            // The unique identifier for the scheduler is needed to prevent conflicts when running multiple schedulers in integration tests
+            { "quartz.scheduler.instanceName", "TestPlexRipper_Scheduler" + Guid.NewGuid() },
+            { "quartz.scheduler.instanceId", Guid.NewGuid().ToString() },
             { "quartz.serializer.type", "stj" },
+            { "quartz.jobStore.type", "Quartz.Simpl.RAMJobStore, Quartz" },
             { "quartz.threadPool.type", "Quartz.Simpl.SimpleThreadPool, Quartz" },
             { "quartz.threadPool.threadCount", "10" },
             { "quartz.jobStore.misfireThreshold", "60000" },

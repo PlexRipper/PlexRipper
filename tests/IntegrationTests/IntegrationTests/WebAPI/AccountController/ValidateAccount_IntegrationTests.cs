@@ -14,7 +14,7 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
     public async Task ShouldValidatePlexAccount_WhenGivenValidCredentials()
     {
         // Arrange
-        await CreateContainer(config =>
+        using var Container = await CreateContainer(config =>
         {
             config.PlexMockApiOptions = x =>
             {
@@ -42,7 +42,7 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
     public async Task ShouldInValidatePlexAccountWithErrors_WhenGivenInValidCredentials()
     {
         // Arrange
-        await CreateContainer(config =>
+        using var Container = await CreateContainer(config =>
         {
             config.Seed = 4347564;
             config.PlexMockApiOptions = x =>

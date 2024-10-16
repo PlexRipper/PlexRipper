@@ -12,7 +12,7 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
     public async Task ShouldStartAndStopDownloadJob_WhenDownloadTaskHasBeenStopped()
     {
         // Arrange
-        await CreateContainer(config =>
+        using var Container = await CreateContainer(config =>
         {
             config.Seed = 45644875;
             config.DownloadSpeedLimitInKib = 5000;
@@ -32,7 +32,7 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
             };
         });
 
-        var movieDownloadTasks = await DbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
+        var movieDownloadTasks = await Container.DbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
 
         var childDownloadTask = movieDownloadTasks[0].Children[0];
 
@@ -45,7 +45,7 @@ public class StopDownloadJob_IntegrationTests : BaseIntegrationTests
         // Assert
         startResult.IsSuccess.ShouldBeTrue(startResult.ToString());
         stopResult.IsSuccess.ShouldBeTrue(stopResult.ToString());
-        var downloadTaskDb = await DbContext.GetDownloadTaskAsync(childDownloadTask.ToKey());
+        var downloadTaskDb = await Container.DbContext.GetDownloadTaskAsync(childDownloadTask.ToKey());
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Stopped);
     }

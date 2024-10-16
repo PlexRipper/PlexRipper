@@ -17,7 +17,7 @@ public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrat
         var tvShowSeasonDownloadTasksCount = 2;
         var tvShowEpisodeDownloadTasksCount = 3;
 
-        await CreateContainer(config =>
+        using var Container = await CreateContainer(config =>
         {
             config.Seed = 45485864;
             config.DatabaseOptions = x =>

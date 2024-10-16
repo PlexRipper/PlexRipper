@@ -65,6 +65,7 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
         // Arrange
         await SetupDatabase(config =>
         {
+            config.Seed = 9999;
             config.PlexServerCount = 1;
             config.PlexLibraryCount = 1;
             config.MovieCount = 2;

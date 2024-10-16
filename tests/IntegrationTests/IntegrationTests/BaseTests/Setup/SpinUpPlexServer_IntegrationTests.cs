@@ -11,7 +11,7 @@ public class SpinUpPlexServer_IntegrationTests : BaseIntegrationTests
     public async Task ShouldSpinUpFiveMockPlexServers_WhenGivenDefaultSettings()
     {
         // Arrange
-        await CreateContainer(config =>
+        using var Container = await CreateContainer(config =>
         {
             config.PlexMockApiOptions = x =>
             {
@@ -37,7 +37,7 @@ public class SpinUpPlexServer_IntegrationTests : BaseIntegrationTests
     {
         // Arrange
         var mbSize = 50;
-        await CreateContainer(config =>
+        using var Container = await CreateContainer(config =>
         {
             config.PlexMockApiOptions = x =>
             {

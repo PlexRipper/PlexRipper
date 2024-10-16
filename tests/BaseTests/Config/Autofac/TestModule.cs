@@ -6,6 +6,7 @@ using Data.Contracts;
 using FileSystem.Contracts;
 using PlexRipper.Application;
 using PlexRipper.Data;
+using Quartz;
 using Settings.Contracts;
 
 namespace PlexRipper.BaseTests;

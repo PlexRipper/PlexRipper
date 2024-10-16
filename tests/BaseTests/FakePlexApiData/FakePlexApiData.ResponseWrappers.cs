@@ -8,8 +8,9 @@ namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
-    public static Faker<GetServerResourcesResponse> GetServerResourcesResponse(
+    public static GetServerResourcesResponse GetServerResourcesResponse(
         HttpStatusCode statusCode,
+        Seed seed,
         Action<PlexApiDataConfig>? options = null
     )
     {
@@ -17,11 +18,12 @@ public partial class FakePlexApiData
 
         return new Faker<GetServerResourcesResponse>()
             .StrictMode(true)
-            .UseSeed(config.Seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.StatusCode, _ => (int)statusCode)
             .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
-            .RuleFor(x => x.PlexDevices, _ => GetServerResource(options).Generate(config.PlexServerAccessCount))
-            .RuleFor(x => x.RawResponse, (f, res) => GetHttpResponseMessage(statusCode, res.PlexDevices, null));
+            .RuleFor(x => x.PlexDevices, _ => GetServerResource(seed, options).Generate(config.PlexServerAccessCount))
+            .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.PlexDevices, null))
+            .Generate();
     }
 
     public static HttpResponseMessage GetHttpResponseMessage<T>(

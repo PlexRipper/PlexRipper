@@ -78,7 +78,7 @@ public class MockPlexApi
 
         if (!config.UnauthorizedAccessiblePlexServers)
         {
-            var servers = FakePlexApiData.GetServerResource().Generate(_serverUris.Count);
+            var servers = FakePlexApiData.GetServerResource(new Seed()).Generate(_serverUris.Count);
 
             for (var i = 0; i < _serverUris.Count; i++)
                 servers[i].Connections =

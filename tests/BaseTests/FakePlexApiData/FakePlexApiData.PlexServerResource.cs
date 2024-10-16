@@ -9,13 +9,13 @@ public partial class FakePlexApiData
 
     #region Public
 
-    public static Faker<PlexDevice> GetServerResource(Action<PlexApiDataConfig>? options = null)
+    public static Faker<PlexDevice> GetServerResource(Seed seed, Action<PlexApiDataConfig>? options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
         return new Faker<PlexDevice>()
             .StrictMode(true)
-            .UseSeed(config.Seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.Name, f => f.Company.CompanyName())
             .RuleFor(x => x.Product, _ => "Plex Media Server")
             .RuleFor(x => x.ProductVersion, f => f.System.Semver())
@@ -41,18 +41,21 @@ public partial class FakePlexApiData
             .RuleFor(x => x.NatLoopbackSupported, f => f.Random.Bool())
             .RuleFor(
                 x => x.Connections,
-                _ => GetPlexServerResourceConnections(options).Generate(config.PlexServerAccessConnectionsCount)
+                _ => GetPlexServerResourceConnections(seed, options).Generate(config.PlexServerAccessConnectionsCount)
             );
     }
 
-    public static Faker<Connections> GetPlexServerResourceConnections(Action<PlexApiDataConfig>? options = null)
+    public static Faker<Connections> GetPlexServerResourceConnections(
+        Seed seed,
+        Action<PlexApiDataConfig>? options = null
+    )
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
         var https = config.PlexServerAccessConnectionsIncludeHttps;
         return new Faker<Connections>()
             .StrictMode(true)
-            .UseSeed(config.GetSeed())
+            .UseSeed(seed.Next())
             .RuleFor(x => x.Protocol, _ => !https ? Protocol.Http : Protocol.Https)
             .RuleFor(x => x.Address, f => f.Internet.Ip())
             .RuleFor(x => x.Port, f => f.Internet.Port())

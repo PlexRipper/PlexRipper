@@ -25,6 +25,10 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
             seed.Next(),
             config =>
             {
+                config.DatabaseOptions = x =>
+                {
+                    x.PlexLibraryCount = libraryCount;
+                };
                 config.HttpClientOptions = x =>
                 {
                     var response1 = FakePlexApiData.GetServerResourcesResponse(
@@ -61,13 +65,7 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
 
                     foreach (var connection in response1.PlexDevices.SelectMany(device => device.Connections))
                     {
-                        x.SetupRequest(connection.Uri + "identity")
-                            .ReturnsAsync(
-                                (HttpRequestMessage req, CancellationToken _) =>
-                                    FakePlexApiData
-                                        .GetPlexServerIdentityResponse(HttpStatusCode.OK, seed, req)
-                                        .RawResponse
-                            );
+                        x.SetupIdentityRequest(seed, connection.Uri);
 
                         x.SetupRequest(connection.Uri + "library/sections")
                             .ReturnsAsync(
@@ -75,22 +73,6 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
                                     FakePlexApiData.GetAllLibrariesResponse(HttpStatusCode.OK, seed, req).RawResponse
                             );
                     }
-                };
-                config.DatabaseOptions = x =>
-                {
-                    x.PlexLibraryCount = libraryCount;
-                };
-                config.PlexMockApiOptions = x =>
-                {
-                    x.MockServers.Add(
-                        new PlexMockServerConfig
-                        {
-                            FakeDataConfig = apiConfig =>
-                            {
-                                apiConfig.LibraryCount = libraryCount;
-                            },
-                        }
-                    );
                 };
             }
         );

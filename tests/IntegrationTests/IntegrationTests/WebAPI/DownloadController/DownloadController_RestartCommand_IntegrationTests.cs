@@ -14,14 +14,17 @@ public class DownloadControllerRestartCommandIntegrationTests : BaseIntegrationT
     public async Task ShouldRestartCompletedMovieDownloadTaskOnRestartCommand_WhenTaskIsDoneDownloading()
     {
         // Arrange
+        var seed = new Seed(5594564);
         using var container = await CreateContainer(
             5594564,
             config =>
             {
-                config.PlexMockApiOptions = x =>
+                config.HttpClientOptions = x =>
                 {
-                    x.MockServers.Add(new PlexMockServerConfig { DownloadFileSizeInMb = 50 });
+                    x.SetupIdentityRequest(seed);
+                    x.SetupDownloadFile(10);
                 };
+
                 config.DatabaseOptions = x =>
                 {
                     x.PlexAccountCount = 1;

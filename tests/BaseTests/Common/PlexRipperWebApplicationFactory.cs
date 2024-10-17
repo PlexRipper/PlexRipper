@@ -13,9 +13,6 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
     public readonly string MemoryDbName;
 
     private static readonly ILog _log = LogManager.CreateLogInstance(typeof(PlexRipperWebApplicationFactory));
-    public readonly List<PlexMockServer> PlexMockServers = [];
-
-    public List<Uri> PlexMockServerUris => PlexMockServers.Select(server => server.ServerUri).ToList();
 
     private readonly UnitTestDataConfig _config;
 
@@ -31,15 +28,6 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
 
         MemoryDbName = memoryDbName;
         _config = UnitTestDataConfig.FromOptions(options);
-        SetupPlexMockServers(seed, _config);
-    }
-
-    private void SetupPlexMockServers(Seed seed, UnitTestDataConfig config)
-    {
-        var mockConfig = MockPlexApiConfig.FromOptions(config.PlexMockApiOptions);
-
-        foreach (var serverConfig in mockConfig.MockServers)
-            PlexMockServers.Add(new PlexMockServer(seed, serverConfig));
     }
 
     protected override IHost CreateHost(IHostBuilder builder)
@@ -57,12 +45,5 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
             _log.Fatal(e);
             throw;
         }
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        PlexMockServers.ForEach(server => server.Dispose());
-
-        base.Dispose(disposing);
     }
 }

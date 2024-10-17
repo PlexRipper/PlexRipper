@@ -22,5 +22,8 @@ public class BaseIntegrationTests
     }
 
     protected Task<BaseContainer> CreateContainer(int seed, Action<UnitTestDataConfig>? options = null) =>
-        BaseContainer.Create(_log, new Seed(seed), options);
+        CreateContainer(new Seed(seed), options);
+
+    protected Task<BaseContainer> CreateContainer(Seed seed, Action<UnitTestDataConfig>? options = null) =>
+        BaseContainer.Create(_log, seed, options);
 }

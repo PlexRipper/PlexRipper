@@ -8,6 +8,41 @@ namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
+    /// <summary>
+    /// Allows you to generate a fake response for the PostUsersSignInData operation
+    /// Works with HttpStatusCode.Created and HttpStatusCode.Unauthorized
+    /// </summary>
+    /// <param name="statusCode"> The status code to return </param>
+    /// <param name="seed"> The seed to use for the faker data </param>
+    /// <param name="request"> The request message that was sent </param>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    public static PostUsersSignInDataResponse PostUsersSignInDataResponse(
+        HttpStatusCode statusCode,
+        Seed seed,
+        HttpRequestMessage? request = null,
+        Action<PlexApiDataConfig>? options = null
+    )
+    {
+        return new Faker<PostUsersSignInDataResponse>()
+            .StrictMode(true)
+            .UseSeed(seed.Next())
+            .RuleFor(x => x.StatusCode, _ => (int)statusCode)
+            .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
+            .RuleFor(
+                x => x.UserPlexAccount,
+                _ => statusCode == HttpStatusCode.Created ? GetPlexSignInResponse(seed, options).Generate() : null
+            )
+            .RuleFor(
+                x => x.RawResponse,
+                (_, res) =>
+                    statusCode == HttpStatusCode.Created
+                        ? GetHttpResponseMessage(statusCode, res.UserPlexAccount, request)
+                        : GetHttpResponseMessage(statusCode, GetFailedPlexSignInResponse(), request)
+            )
+            .Generate();
+    }
+
     public static GetServerResourcesResponse GetServerResourcesResponse(
         HttpStatusCode statusCode,
         Seed seed,
@@ -84,12 +119,7 @@ public partial class FakePlexApiData
     )
         where T : class?
     {
-        var json = JsonSerializer.Serialize(data, DefaultJsonSerializerOptions.ConfigStandard);
-
-        // Fix casing of protocol to match the actual API response, which is lowercase
-        // Fixes retarted enum conversion in PlexApi.SDK
-        json = json.Replace("\"protocol\":\"Http\"", "\"protocol\":\"http\"");
-        json = json.Replace("\"protocol\":\"Https\"", "\"protocol\":\"https\"");
+        var json = JsonSerializer.Serialize(data, DefaultJsonSerializerOptions.PlexApiSerialization);
 
         return new HttpResponseMessage
         {

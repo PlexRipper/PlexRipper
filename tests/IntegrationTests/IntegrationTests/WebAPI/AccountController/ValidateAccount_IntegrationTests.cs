@@ -1,6 +1,8 @@
+using System.Net;
 using System.Net.Http.Json;
 using Application.Contracts;
 using FastEndpoints;
+using Moq.Contrib.HttpClient;
 using PlexRipper.Application;
 
 namespace IntegrationTests.WebAPI.AccountController;
@@ -14,13 +16,20 @@ public class ValidateAccountIntegrationTests : BaseIntegrationTests
     public async Task ShouldValidatePlexAccount_WhenGivenValidCredentials()
     {
         // Arrange
+        var seed = new Seed(22453);
         using var container = await CreateContainer(
-            22453,
+            seed,
             config =>
             {
-                config.PlexMockApiOptions = x =>
+                config.HttpClientOptions = x =>
                 {
-                    x.SignInResponseIsValid = true;
+                    x.SetupRequest(HttpMethod.Post, "https://plex.tv/api/v2/users/signin")
+                        .ReturnsAsync(
+                            (HttpRequestMessage req, CancellationToken _) =>
+                                FakePlexApiData
+                                    .PostUsersSignInDataResponse(HttpStatusCode.Created, seed, req)
+                                    .RawResponse
+                        );
                 };
             }
         );
@@ -45,15 +54,20 @@ public class ValidateAccountIntegrationTests : BaseIntegrationTests
     public async Task ShouldInValidatePlexAccountWithErrors_WhenGivenInValidCredentials()
     {
         // Arrange
+        var seed = new Seed(4347564);
         using var container = await CreateContainer(
-            4347564,
+            seed,
             config =>
-            {
-                config.PlexMockApiOptions = x =>
+                config.HttpClientOptions = x =>
                 {
-                    x.SignInResponseIsValid = false;
-                };
-            }
+                    x.SetupRequest(HttpMethod.Post, "https://plex.tv/api/v2/users/signin")
+                        .ReturnsAsync(
+                            (HttpRequestMessage req, CancellationToken _) =>
+                                FakePlexApiData
+                                    .PostUsersSignInDataResponse(HttpStatusCode.Unauthorized, seed, req)
+                                    .RawResponse
+                        );
+                }
         );
 
         var plexAccount = FakeData.GetPlexAccount(4347564).Generate();

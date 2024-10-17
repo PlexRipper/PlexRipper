@@ -15,17 +15,17 @@ public class WiremockLogger : IWireMockLogger
 
     public void Debug(string formatString, params object[] args)
     {
-        _log.Debug(formatString, args);
+        // _log.Debug(formatString, args);
     }
 
     public void Info(string formatString, params object[] args)
     {
-        _log.Information(formatString, args);
+        //  _log.Information(formatString, args);
     }
 
     public void Warn(string formatString, params object[] args)
     {
-        _log.Warning(formatString, args);
+        //  _log.Warning(formatString, args);
 
         // TODO see https://github.com/WireMock-Net/WireMock.Net/pull/1182
         if (formatString.Contains("No matching mapping found"))
@@ -34,7 +34,7 @@ public class WiremockLogger : IWireMockLogger
 
     public void Error(string formatString, params object[] args)
     {
-        _log.Error(formatString, args);
+        //   _log.Error(formatString, args);
         throw new Exception(formatString);
     }
 
@@ -46,6 +46,6 @@ public class WiremockLogger : IWireMockLogger
 
     public void DebugRequestResponse(LogEntryModel logEntryModel, bool isAdminRequest)
     {
-        _log.DebugLine(logEntryModel.ToString() ?? string.Empty);
+        //  _log.DebugLine(logEntryModel.ToString() ?? string.Empty);
     }
 }

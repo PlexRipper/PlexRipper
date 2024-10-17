@@ -8,10 +8,10 @@ public partial class FakePlexApiData
 {
     public static Faker<PostUsersSignInDataUserPlexAccount> GetPlexSignInResponse(
         Seed seed,
-        Action<UnitTestDataConfig>? options = null
+        Action<PlexApiDataConfig>? options = null
     )
     {
-        var config = UnitTestDataConfig.FromOptions(options);
+        var config = PlexApiDataConfig.FromOptions(options);
 
         return new Faker<PostUsersSignInDataUserPlexAccount>()
             .StrictMode(true)
@@ -44,7 +44,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.HomeAdmin, f => f.Random.Bool())
             .RuleFor(x => x.MaxHomeSize, f => f.Random.Number(20))
             .RuleFor(x => x.RememberExpiresAt, f => f.Date.Future().Ticks)
-            .RuleFor(x => x.Profile, _ => new PostUsersSignInDataUserProfile())
+            .RuleFor(x => x.Profile, _ => null) // keep null, causes enum conversion exceptions in PlexAPI.SDK
             .RuleFor(x => x.Entitlements, _ => [])
             .RuleFor(x => x.Subscriptions, _ => [])
             .RuleFor(x => x.PastSubscriptions, _ => [])

@@ -14,14 +14,17 @@ public class DownloadControllerStartCommandIntegrationTests : BaseIntegrationTes
     public async Task ShouldStartQueuedMovieDownloadTaskOnStartCommand_WhenNoTasksAreDownloading()
     {
         // Arrange
+        var seed = new Seed(8932);
         using var container = await CreateContainer(
-            5594564,
+            seed,
             config =>
             {
-                config.PlexMockApiOptions = x =>
+                config.HttpClientOptions = x =>
                 {
-                    x.MockServers.Add(new PlexMockServerConfig { DownloadFileSizeInMb = 50 });
+                    x.SetupIdentityRequest(seed);
+                    x.SetupDownloadFile(10);
                 };
+
                 config.DatabaseOptions = x =>
                 {
                     x.PlexAccountCount = 1;

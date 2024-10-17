@@ -30,9 +30,9 @@ public class DownloadCommandsPauseDownloadIntegrationTests : BaseIntegrationTest
                     x.DownloadFileSizeInMb = 50;
                 };
 
-                config.PlexMockApiOptions = x =>
+                config.HttpClientOptions = x =>
                 {
-                    x.MockServers.Add(new PlexMockServerConfig { DownloadFileSizeInMb = 50 });
+                    x.SetupDownloadFile(50);
                 };
             }
         );

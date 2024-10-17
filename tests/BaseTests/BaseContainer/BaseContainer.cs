@@ -50,9 +50,7 @@ public class BaseContainer : IDisposable
 
         var container = new BaseContainer(log, seed, memoryDbName, options);
 
-        await MockDatabase
-            .GetMemoryDbContext(memoryDbName)
-            .Setup(seed, config.DatabaseOptions, container.PlexMockServers);
+        await MockDatabase.GetMemoryDbContext(memoryDbName).Setup(seed, config.DatabaseOptions);
 
         if (config.DownloadSpeedLimitInKib > 0)
             await container.SetDownloadSpeedLimit(options);
@@ -98,8 +96,6 @@ public class BaseContainer : IDisposable
 
     public T Resolve<T>()
         where T : notnull => _lifeTimeScope.Resolve<T>();
-
-    public List<PlexMockServer> PlexMockServers => _factory.PlexMockServers;
 
     public void Dispose()
     {

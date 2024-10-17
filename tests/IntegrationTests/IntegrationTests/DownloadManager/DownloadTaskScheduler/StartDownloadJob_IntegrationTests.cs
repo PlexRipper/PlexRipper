@@ -11,8 +11,9 @@ public class StartDownloadJobIntegrationTests : BaseIntegrationTests
     public async Task ShouldSendOutDownloadTaskUpdates_WhenDownloadTaskIsInProgress()
     {
         // Arrange
+        var seed = new Seed(68);
         using var container = await CreateContainer(
-            68,
+            seed,
             config =>
             {
                 config.DownloadSpeedLimitInKib = 5000;
@@ -25,9 +26,11 @@ public class StartDownloadJobIntegrationTests : BaseIntegrationTests
                     x.MovieDownloadTasksCount = 1;
                     x.DownloadFileSizeInMb = 50;
                 };
-                config.PlexMockApiOptions = x =>
+
+                config.HttpClientOptions = x =>
                 {
-                    x.MockServers.Add(new PlexMockServerConfig { DownloadFileSizeInMb = 50 });
+                    x.SetupIdentityRequest(seed);
+                    x.SetupDownloadFile(10);
                 };
             }
         );

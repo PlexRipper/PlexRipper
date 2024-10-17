@@ -1,4 +1,6 @@
-﻿using Application.Contracts;
+﻿using System.Net;
+using Application.Contracts;
+using Moq.Contrib.HttpClient;
 using Moq.Language.Flow;
 
 namespace PlexRipper.BaseTests;
@@ -102,4 +104,49 @@ public static class MoqExtensions
 
     public static IReturnsResult<IMediator> ReturnOk(this IReturnsThrows<IMediator, Task<Result>> mock) =>
         mock.ReturnsAsync(Result.Ok());
+
+    public static void SetupIdentityRequest(this Mock<HttpMessageHandler> mock, Seed seed, string uri = "")
+    {
+        if (string.IsNullOrEmpty(uri))
+        {
+            mock.SetupRequest(r => r.RequestUri!.AbsoluteUri.Contains("identity"))
+                .ReturnsAsync(
+                    (HttpRequestMessage req, CancellationToken _) =>
+                        FakePlexApiData.GetPlexServerIdentityResponse(HttpStatusCode.OK, seed, req).RawResponse
+                );
+            return;
+        }
+
+        mock.SetupRequest(uri.TrimEnd('/') + "/identity")
+            .ReturnsAsync(
+                (HttpRequestMessage req, CancellationToken _) =>
+                    FakePlexApiData.GetPlexServerIdentityResponse(HttpStatusCode.OK, seed, req).RawResponse
+            );
+    }
+
+    public static void SetupDownloadFile(this Mock<HttpMessageHandler> mock, int fileSizeInMb)
+    {
+        mock.SetupRequest(r => r.RequestUri!.AbsoluteUri.Contains("file.mp4"))
+            .ReturnsAsync(
+                (HttpRequestMessage _, CancellationToken _) =>
+                {
+                    var downloadFile = FakeData.GetDownloadFile(fileSizeInMb);
+                    var fileContent = new ByteArrayContent(downloadFile); // example byte array
+
+                    // Simulate headers for a file download
+                    fileContent.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue(
+                        "attachment"
+                    )
+                    {
+                        FileName = "file.mp4",
+                    };
+
+                    fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(
+                        "application/octet-stream"
+                    );
+
+                    return new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = fileContent };
+                }
+            );
+    }
 }

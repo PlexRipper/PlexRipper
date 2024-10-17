@@ -1,3 +1,4 @@
+using System.Net;
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
@@ -17,21 +18,23 @@ public class DownloadControllerDownloadMediaIntegrationTests : BaseIntegrationTe
         // Arrange
         var plexMovieCount = 3;
 
+        var seed = new Seed(231156);
         using var container = await CreateContainer(
-            231156,
+            seed,
             config =>
             {
                 config.DownloadSpeedLimitInKib = 25000;
-                config.PlexMockApiOptions = x =>
-                {
-                    x.MockServers.Add(new PlexMockServerConfig { DownloadFileSizeInMb = 50 });
-                };
                 config.DatabaseOptions = x =>
                 {
                     x.PlexAccountCount = 1;
                     x.PlexServerCount = 1;
                     x.PlexLibraryCount = 1;
                     x.MovieCount = plexMovieCount;
+                };
+                config.HttpClientOptions = x =>
+                {
+                    x.SetupIdentityRequest(seed);
+                    x.SetupDownloadFile(10);
                 };
             }
         );

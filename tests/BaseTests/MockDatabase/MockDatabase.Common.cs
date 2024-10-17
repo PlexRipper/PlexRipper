@@ -23,7 +23,6 @@ public static partial class MockDatabase
     private static async Task<PlexRipperDbContext> AddPlexServers(
         this PlexRipperDbContext context,
         Seed seed,
-        List<PlexMockServer> plexMockServers,
         Action<FakeDataConfig>? options = null
     )
     {
@@ -32,34 +31,8 @@ public static partial class MockDatabase
         var fakeServerGenerator = FakeData.GetPlexServer(seed, options);
         var plexServers = new List<PlexServer>();
 
-        // Generate working mock servers
-        foreach (var mockServer in plexMockServers)
-        {
-            var plexServer = fakeServerGenerator.Generate();
-
-            plexServer.PlexServerConnections =
-            [
-                new PlexServerConnection
-                {
-                    Id = 0,
-                    Protocol = mockServer.ServerUri.Scheme,
-                    Address = mockServer.ServerUri.Host,
-                    Port = mockServer.ServerUri.Port,
-                    Local = true,
-                    Relay = false,
-                    IPv4 = true,
-                    IPv6 = false,
-                    PortFix = false,
-                    Uri = mockServer.ServerUri.ToString(),
-                    PlexServerId = 0,
-                },
-            ];
-
-            plexServers.Add(plexServer);
-        }
-
         // Generate fake servers
-        for (var i = 0; i < config.PlexServerCount - plexMockServers.Count; i++)
+        for (var i = 0; i < config.PlexServerCount; i++)
             plexServers.Add(fakeServerGenerator.Generate());
 
         context.PlexServers.AddRange(plexServers);
@@ -80,7 +53,7 @@ public static partial class MockDatabase
         _log.Here()
             .Debug(
                 "Added {PlexServerCount} {NameOfPlexServer}s to {NameOfPlexRipperDbContext}: {DatabaseName}",
-                config.PlexServerCount + plexMockServers.Count,
+                config.PlexServerCount,
                 nameof(PlexServer),
                 nameof(PlexRipperDbContext),
                 context.DatabaseName
@@ -251,8 +224,7 @@ public static partial class MockDatabase
     public static async Task<PlexRipperDbContext> Setup(
         this PlexRipperDbContext context,
         Seed seed,
-        Action<FakeDataConfig>? options = null,
-        List<PlexMockServer>? plexMockServers = null
+        Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
@@ -266,7 +238,7 @@ public static partial class MockDatabase
             );
 
         if (config.ShouldHavePlexServer)
-            context = await context.AddPlexServers(seed, plexMockServers ?? [], options);
+            context = await context.AddPlexServers(seed, options);
 
         if (config.ShouldHavePlexLibrary)
             context = await context.AddPlexLibraries(seed, options);

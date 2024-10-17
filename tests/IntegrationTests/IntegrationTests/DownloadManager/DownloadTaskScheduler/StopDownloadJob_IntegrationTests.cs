@@ -26,10 +26,10 @@ public class StopDownloadJobIntegrationTests : BaseIntegrationTests
                     x.MovieDownloadTasksCount = 1;
                     x.DownloadFileSizeInMb = 50;
                 };
-                config.PlexMockApiOptions = x =>
+
+                config.HttpClientOptions = x =>
                 {
-                    x.MockServers = [new PlexMockServerConfig() { DownloadFileSizeInMb = 50 }];
-                    x.SignInResponseIsValid = true;
+                    x.SetupDownloadFile(50);
                 };
             }
         );

@@ -30,6 +30,7 @@
         <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="8.0.8"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
         <PackageReference Include="Moq" Version="4.20.70"/>
+        <PackageReference Include="Moq.Contrib.HttpClient" Version="1.4.0"/>
         <PackageReference Include="Shouldly" Version="4.2.1"/>
         <PackageReference Include="WireMock.Net" Version="1.6.6"/>
         <PackageReference Include="xunit" Version="2.9.2"/>

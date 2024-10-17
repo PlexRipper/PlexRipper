@@ -1555,6 +1555,16 @@
           "Castle.Core": "5.1.1"
         }
       },
+      "Moq.Contrib.HttpClient": {
+        "type": "Transitive",
+        "resolved": "1.4.0",
+        "contentHash": "lekCcCXO6dwH/Ef9h9vPLVE8y0401dwI/x67+oFkcx+DSgi10DlPL5GUBwK8XEr2PMIsQpptVteJOH51kxnqfQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Http": "2.1.1",
+          "Moq": "[4.8.0, 5.0.0)",
+          "System.Net.Http.Json": "6.0.0"
+        }
+      },
       "Namotion.Reflection": {
         "type": "Transitive",
         "resolved": "3.1.1",
@@ -2346,6 +2356,14 @@
         "resolved": "4.5.4",
         "contentHash": "1MbJTHS1lZ4bS4FmsJjnuGJOu88ZzTT2rLvrhW7Ygic+pC0NWA+3hgAen0HRdsocuQXCkUTdFn9yHJJhsijDXw=="
       },
+      "System.Net.Http.Json": {
+        "type": "Transitive",
+        "resolved": "6.0.0",
+        "contentHash": "GbIV4y344kGOKjshAKCIDCMUTTW/hyUC42wV0Y5SXEdIbaKBIHBUxZ2MOe4/ZiV2svUAGfQ0c8LGtUExpOI8tg==",
+        "dependencies": {
+          "System.Text.Json": "6.0.0"
+        }
+      },
       "System.Reactive": {
         "type": "Transitive",
         "resolved": "5.0.0",
@@ -2960,6 +2978,7 @@
           "Microsoft.AspNetCore.SpaServices.Extensions": "[8.0.8, )",
           "Microsoft.NET.Test.Sdk": "[17.11.1, )",
           "Moq": "[4.20.70, )",
+          "Moq.Contrib.HttpClient": "[1.4.0, )",
           "PlexRipper.WebAPI": "[1.0.0, )",
           "Shouldly": "[4.2.1, )",
           "WireMock.Net": "[1.6.6, )",

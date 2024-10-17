@@ -20,6 +20,8 @@ public class BaseContainer : IDisposable
 
     private readonly ILifetimeScope _lifeTimeScope;
 
+    public Seed Seed => _factory.Seed;
+
     public string DatabaseName => _factory.MemoryDbName;
 
     /// <summary>

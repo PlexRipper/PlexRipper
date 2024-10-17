@@ -26,6 +26,44 @@ public partial class FakePlexApiData
             .Generate();
     }
 
+    public static GetAllLibrariesResponse GetAllLibrariesResponse(
+        HttpStatusCode statusCode,
+        Seed seed,
+        Action<PlexApiDataConfig>? options = null
+    )
+    {
+        var config = PlexApiDataConfig.FromOptions(options);
+
+        return new Faker<GetAllLibrariesResponse>()
+            .StrictMode(true)
+            .UseSeed(seed.Next())
+            .RuleFor(x => x.StatusCode, _ => (int)statusCode)
+            .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
+            .RuleFor(x => x.Object, _ => GetAllLibrariesResponseBody(seed, options))
+            .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.Object, null))
+            .Generate();
+    }
+
+    public static GetServerIdentityResponseBody GetPlexServerIdentityResponse(
+        Seed seed,
+        Action<PlexApiDataConfig>? options = null
+    )
+    {
+        var container = new Faker<GetServerIdentityMediaContainer>()
+            .StrictMode(true)
+            .UseSeed(seed.Next())
+            .RuleFor(x => x.Size, _ => 0)
+            .RuleFor(x => x.Claimed, f => f.Random.Bool())
+            .RuleFor(x => x.MachineIdentifier, f => f.PlexApi().MachineIdentifier)
+            .RuleFor(x => x.Version, f => f.PlexApi().PlexVersion);
+
+        return new Faker<GetServerIdentityResponseBody>()
+            .StrictMode(true)
+            .UseSeed(seed.Next())
+            .RuleFor(x => x.MediaContainer, _ => container.Generate())
+            .Generate();
+    }
+
     public static HttpResponseMessage GetHttpResponseMessage<T>(
         HttpStatusCode statusCode,
         T data,

@@ -48,7 +48,7 @@ public class PlexMockServer : IDisposable
         SetupServerIdentity(seed);
 
         // Set up the Plex libraries
-        var librarySections = FakePlexApiData.GetLibraryMediaContainer(seed, _fakeDataConfig);
+        var librarySections = FakePlexApiData.GetAllLibrariesResponseBody(seed, _fakeDataConfig);
 
         Server
             .Given(Request.Create().WithPath(PlexApiPaths.LibrarySectionsPath).UsingGet())

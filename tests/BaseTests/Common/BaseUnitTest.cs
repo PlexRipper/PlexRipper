@@ -148,7 +148,7 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
                 {
                     action?.Invoke(HttpHandlerMock);
 
-                    return new HttpClient(HttpHandlerMock.Object) { BaseAddress = new Uri("http://localhost:1234") };
+                    return new HttpClient(HttpHandlerMock.Object);
                 })
                 .As<HttpClient>()
                 .SingleInstance();

@@ -16,4 +16,6 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
     public int DownloadSpeedLimitInKib { get; set; } = 0;
 
     public int PlexServerSettingsCount { get; set; } = 5;
+
+    public Action<Mock<HttpMessageHandler>?>? HttpClientOptions { get; set; }
 }

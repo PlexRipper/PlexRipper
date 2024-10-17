@@ -6,6 +6,7 @@ public class Seed
 
     public Seed(int seed)
     {
+        seed.ShouldBeGreaterThan(0);
         Value = seed;
     }
 

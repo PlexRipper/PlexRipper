@@ -6,7 +6,7 @@ namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
-    public static GetAllLibrariesResponseBody GetLibraryMediaContainer(
+    public static GetAllLibrariesResponseBody GetAllLibrariesResponseBody(
         Seed seed,
         Action<PlexApiDataConfig>? options = null
     )
@@ -16,16 +16,10 @@ public partial class FakePlexApiData
         var mediaContainer = new Faker<GetAllLibrariesMediaContainer>()
             .StrictMode(true)
             .UseSeed(seed.Next())
-            .RuleFor(x => x.Size, _ => 0)
             .RuleFor(x => x.AllowSync, f => f.Random.Bool())
             .RuleFor(x => x.Title1, f => f.Company.CompanyName())
             .RuleFor(x => x.Directory, _ => GetLibrariesResponseDirectory(seed, options).Generate(config.LibraryCount))
-            .FinishWith(
-                (_, container) =>
-                {
-                    container.Size = container.Directory.Count;
-                }
-            );
+            .RuleFor(x => x.Size, (_, res) => res.Directory.Count);
 
         return new Faker<GetAllLibrariesResponseBody>()
             .StrictMode(true)

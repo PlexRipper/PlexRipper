@@ -17,7 +17,6 @@ namespace PlexRipper.BaseTests;
 public class TestModule : Module
 {
     public required string MemoryDbName { get; init; }
-    public required MockPlexApi? MockPlexApi { get; init; }
     public required UnitTestDataConfig Config { get; init; }
 
     protected override void Load(ContainerBuilder builder)
@@ -51,8 +50,20 @@ public class TestModule : Module
 
     private void SetMockedDependencies(ContainerBuilder builder)
     {
-        if (MockPlexApi is not null)
-            builder.Register((_, _) => MockPlexApi.CreateClient()).As<HttpClient>().InstancePerDependency();
+        if (Config.HttpClientOptions is not null)
+        {
+            builder
+                .Register(_ =>
+                {
+                    var handler = new Mock<HttpMessageHandler>();
+                    Config.HttpClientOptions.Invoke(handler);
+                    var client = new HttpClient(handler.Object);
+                    client.DefaultRequestHeaders.Add("User-Agent", "MockHttpClient");
+                    return client;
+                })
+                .As<HttpClient>()
+                .InstancePerDependency();
+        }
 
         if (Config.MockFileSystem is not null)
             builder.RegisterInstance(Config.MockFileSystem).As<IFileSystem>();

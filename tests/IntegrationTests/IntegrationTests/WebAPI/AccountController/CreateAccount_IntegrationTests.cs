@@ -1,7 +1,9 @@
+using System.Net;
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
+using Moq.Contrib.HttpClient;
 using PlexRipper.Application;
 
 namespace IntegrationTests.WebAPI.AccountController;
@@ -15,11 +17,69 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
     public async Task ShouldCreateAndInspectAccessibleServers_WhenPlexAccountIsValid()
     {
         // Arrange
-        var libraryCount = 3;
-        using var container = await CreateContainer(
-            236234,
+        var serverCount = 1;
+        var response1 = FakePlexApiData.GetServerResourcesResponse(
+            HttpStatusCode.OK,
+            new Seed(939),
             config =>
             {
+                config.PlexServerAccessCount = serverCount;
+            }
+        );
+
+        var response2 = FakePlexApiData.GetServerResourcesResponse(
+            HttpStatusCode.OK,
+            new Seed(940),
+            config =>
+            {
+                config.PlexServerAccessCount = serverCount;
+                config.PlexServerAccessConnectionsIncludeHttps = true;
+            }
+        );
+
+        var libraryCount = 3;
+        var seed = new Seed(236234);
+
+        using var container = await CreateContainer(
+            seed.Next(),
+            config =>
+            {
+                config.HttpClientOptions = x =>
+                {
+                    x.SetupRequest(HttpMethod.Get, "https://plex.tv/api/v2/resources")
+                        .ReturnsAsync(
+                            (HttpRequestMessage req, CancellationToken _) =>
+                                FakePlexApiData.GetHttpResponseMessage(HttpStatusCode.OK, response1.PlexDevices, req)
+                        );
+
+                    x.SetupRequest(
+                            HttpMethod.Get,
+                            "https://plex.tv/api/v2/resources?includeHttps=1&includeRelay=1&includeIPv6=1"
+                        )
+                        .ReturnsAsync(
+                            (HttpRequestMessage req, CancellationToken _) =>
+                                FakePlexApiData.GetHttpResponseMessage(HttpStatusCode.OK, response2.PlexDevices, req)
+                        );
+
+                    foreach (var connection in response1.PlexDevices.SelectMany(device => device.Connections))
+                    {
+                        x.SetupRequest(connection.Uri + "identity")
+                            .ReturnsAsync(
+                                (HttpRequestMessage req, CancellationToken _) =>
+                                    FakePlexApiData.GetHttpResponseMessage(
+                                        HttpStatusCode.OK,
+                                        FakePlexApiData.GetPlexServerIdentityResponse(seed).MediaContainer,
+                                        req
+                                    )
+                            );
+                        var data = FakePlexApiData.GetAllLibrariesResponse(HttpStatusCode.OK, seed);
+                        x.SetupRequest(connection.Uri + "library/sections")
+                            .ReturnsAsync(
+                                (HttpRequestMessage req, CancellationToken _) =>
+                                    FakePlexApiData.GetHttpResponseMessage(HttpStatusCode.OK, data.Object, req)
+                            );
+                    }
+                };
                 config.DatabaseOptions = x =>
                 {
                     x.PlexLibraryCount = libraryCount;

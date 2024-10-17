@@ -12,17 +12,20 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
     public async Task ShouldReturnOkResult_WhenThereAreNoAccessiblePlexServers()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            66197,
+            config =>
+            {
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync();
         plexAccount.ShouldNotBeNull();
 
         mock.Mock<IPlexApiService>()
             .Setup(x => x.GetAccessiblePlexServersAsync(It.IsAny<int>()))
-            .ReturnsAsync((new List<PlexServer>(), new List<ServerAccessTokenDTO>()));
+            .ReturnsAsync(new List<PlexServerAccessDTO>());
 
         // Act
         var request = new RefreshPlexServerAccessCommand(plexAccount.Id);
@@ -37,20 +40,31 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
     public async Task ShouldReturnOkResult_WhenThereAreAccessiblePlexServers()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexAccountCount = 1;
-        });
+        var seed = await SetupDatabase(
+            65148,
+            config =>
+            {
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync();
         plexAccount.ShouldNotBeNull();
 
-        var plexServers = FakeData.GetPlexServer().Generate(10);
-        var serverAccessTokens = FakeData.GetServerAccessTokenDTO(plexAccount, plexServers);
+        var plexServers = FakeData.GetPlexServer(seed).Generate(10);
+        var serverAccessTokens = FakeData.GetServerAccessTokenDTO(seed, plexAccount, plexServers);
+
+        var list = plexServers
+            .Select(x => new PlexServerAccessDTO
+            {
+                PlexServer = x,
+                AccessToken = serverAccessTokens.FirstOrDefault(y => y.MachineIdentifier == x.MachineIdentifier)!,
+            })
+            .ToList();
 
         mock.Mock<IPlexApiService>()
             .Setup(x => x.GetAccessiblePlexServersAsync(It.IsAny<int>()))
-            .ReturnsAsync((Result.Ok(plexServers), Result.Ok(serverAccessTokens)));
+            .ReturnsAsync(Result.Ok(list));
 
         mock.SetupMediator(It.IsAny<AddOrUpdatePlexServersCommand>).ReturnsAsync(Result.Ok());
         mock.SetupMediator(It.IsAny<AddOrUpdatePlexAccountServersCommand>).ReturnsAsync(Result.Ok());

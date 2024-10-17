@@ -8,7 +8,7 @@ public static partial class FakeData
 
     private static Faker<T> ApplyBasePlexMedia<T>(
         this Faker<T> faker,
-        int seed = 0,
+        Seed seed,
         Action<FakeDataConfig>? options = null
     )
         where T : PlexMedia
@@ -17,7 +17,7 @@ public static partial class FakeData
 
         return faker
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.Key, _ => GetUniqueNumber())
             .RuleFor(x => x.Title, _ => title)
@@ -53,13 +53,13 @@ public static partial class FakeData
             );
     }
 
-    public static Faker<PlexMediaData> GetPlexMediaData(int seed = 0, Action<FakeDataConfig>? options = null)
+    public static Faker<PlexMediaData> GetPlexMediaData(Seed seed, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<PlexMediaData>()
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.Bitrate, f => f.Random.Int(1900, 2030))
             .RuleFor(x => x.MediaFormat, f => f.System.FileExt("video/mp4"))
             .RuleFor(x => x.Width, f => f.Random.Int(240, 10000))
@@ -79,11 +79,11 @@ public static partial class FakeData
             );
     }
 
-    public static Faker<PlexMediaDataPart> GetPlexMediaPart(int seed = 0, Action<FakeDataConfig>? options = null)
+    public static Faker<PlexMediaDataPart> GetPlexMediaPart(Seed seed, Action<FakeDataConfig>? options = null)
     {
         return new Faker<PlexMediaDataPart>()
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.ObfuscatedFilePath, _ => PlexMockServerConfig.FileUrl)
             .RuleFor(x => x.Duration, f => f.Random.Int(50000, 5512400))
             .RuleFor(x => x.AudioProfile, _ => "dts")
@@ -98,12 +98,12 @@ public static partial class FakeData
 
     #region PlexMovies
 
-    public static Faker<PlexMovie> GetPlexMovies(int seed = 0, Action<FakeDataConfig>? options = null)
+    public static Faker<PlexMovie> GetPlexMovies(Seed seed, Action<FakeDataConfig>? options = null)
     {
         return new Faker<PlexMovie>()
             .ApplyBasePlexMedia(seed, options)
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .FinishWith(
                 (_, movie) =>
                 {
@@ -119,13 +119,13 @@ public static partial class FakeData
 
     #region PlexTvShows
 
-    public static Faker<PlexTvShow> GetPlexTvShows(int seed = 0, Action<FakeDataConfig>? options = null)
+    public static Faker<PlexTvShow> GetPlexTvShows(Seed seed, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<PlexTvShow>()
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .ApplyBasePlexMedia(seed, options)
             .RuleFor(x => x.Seasons, _ => GetPlexTvShowSeason(seed, options).Generate(config.TvShowSeasonCount))
             .FinishWith(
@@ -159,13 +159,13 @@ public static partial class FakeData
             );
     }
 
-    public static Faker<PlexTvShowSeason> GetPlexTvShowSeason(int seed = 0, Action<FakeDataConfig>? options = null)
+    public static Faker<PlexTvShowSeason> GetPlexTvShowSeason(Seed seed, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<PlexTvShowSeason>()
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .ApplyBasePlexMedia(seed, options)
             .RuleFor(x => x.Title, _ => "Season")
             .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
@@ -180,11 +180,11 @@ public static partial class FakeData
             );
     }
 
-    public static Faker<PlexTvShowEpisode> GetPlexTvShowEpisode(int seed = 0, Action<FakeDataConfig>? options = null)
+    public static Faker<PlexTvShowEpisode> GetPlexTvShowEpisode(Seed seed, Action<FakeDataConfig>? options = null)
     {
         return new Faker<PlexTvShowEpisode>()
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .ApplyBasePlexMedia(seed, options)
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())

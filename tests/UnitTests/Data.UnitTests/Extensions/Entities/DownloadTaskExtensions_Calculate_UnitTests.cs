@@ -12,12 +12,15 @@ public class DownloadTaskExtensions_Calculate_UnitTests : BaseUnitTest
     public async Task ShouldUpdateDownloadProgressAcrossAllLayers_WhenCallingCalculateOnRootDownloadTask()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.TvShowDownloadTasksCount = 5;
-            config.TvShowSeasonDownloadTasksCount = 5;
-            config.TvShowEpisodeDownloadTasksCount = 5;
-        });
+        await SetupDatabase(
+            72869,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 5;
+                config.TvShowSeasonDownloadTasksCount = 5;
+                config.TvShowEpisodeDownloadTasksCount = 5;
+            }
+        );
 
         var downloadTasks = await IDbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
 

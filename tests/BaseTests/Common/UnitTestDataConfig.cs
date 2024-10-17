@@ -5,8 +5,6 @@ namespace PlexRipper.BaseTests;
 
 public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
 {
-    public Action<MockPlexApiConfig>? PlexMockApiOptions { get; set; } = null;
-
     public Action<FakeDataConfig>? DatabaseOptions { get; set; } = null;
 
     public IFileSystem? MockFileSystem { get; set; }
@@ -16,4 +14,6 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
     public int DownloadSpeedLimitInKib { get; set; } = 0;
 
     public int PlexServerSettingsCount { get; set; } = 5;
+
+    public Action<Mock<HttpMessageHandler>>? HttpClientOptions { get; set; }
 }

@@ -18,14 +18,17 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
     {
         // Arrange
         var movieCount = 100;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexServerConnectionPerServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.MovieCount = movieCount;
-        });
+        await SetupDatabase(
+            39919,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexServerConnectionPerServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieCount = movieCount;
+            }
+        );
         var ep = Factory.Create<GetPlexLibraryMediaEndpoint>(ctx =>
             ctx.AddTestServices(s => s.AddTransient(_ => mock.Create<IPlexRipperDbContext>()))
         );
@@ -57,15 +60,18 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
     public async Task ShouldHaveAllThePlexLibraryMedia_WhenPageAndSizeAreNotSetAndMediaIsTvShows()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.TvShowCount = 100;
-            config.TvShowSeasonCount = 3;
-            config.TvShowEpisodeCount = 5;
-        });
+        await SetupDatabase(
+            69592,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.TvShowCount = 100;
+                config.TvShowSeasonCount = 3;
+                config.TvShowEpisodeCount = 5;
+            }
+        );
 
         var ep = Factory.Create<GetPlexLibraryMediaEndpoint>(ctx =>
             ctx.AddTestServices(s => s.AddTransient(_ => mock.Create<IPlexRipperDbContext>()))

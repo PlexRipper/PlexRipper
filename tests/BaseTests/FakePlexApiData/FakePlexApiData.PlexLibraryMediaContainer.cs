@@ -6,32 +6,30 @@ namespace PlexRipper.BaseTests;
 
 public partial class FakePlexApiData
 {
-    public static GetAllLibrariesResponseBody GetLibraryMediaContainer(Action<PlexApiDataConfig>? options = null)
+    public static GetAllLibrariesResponseBody GetAllLibrariesResponseBody(
+        Seed seed,
+        Action<PlexApiDataConfig>? options = null
+    )
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
         var mediaContainer = new Faker<GetAllLibrariesMediaContainer>()
             .StrictMode(true)
-            .UseSeed(config.Seed)
-            .RuleFor(x => x.Size, _ => 0)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.AllowSync, f => f.Random.Bool())
             .RuleFor(x => x.Title1, f => f.Company.CompanyName())
-            .RuleFor(x => x.Directory, _ => GetLibrariesResponseDirectory(options).Generate(config.LibraryCount))
-            .FinishWith(
-                (_, container) =>
-                {
-                    container.Size = container.Directory.Count;
-                }
-            );
+            .RuleFor(x => x.Directory, _ => GetLibrariesResponseDirectory(seed, options).Generate(config.LibraryCount))
+            .RuleFor(x => x.Size, (_, res) => res.Directory.Count);
 
         return new Faker<GetAllLibrariesResponseBody>()
             .StrictMode(true)
-            .UseSeed(config.Seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.MediaContainer, _ => mediaContainer.Generate())
             .Generate();
     }
 
     private static Faker<GetAllLibrariesDirectory> GetLibrariesResponseDirectory(
+        Seed seed,
         Action<PlexApiDataConfig>? options = null
     )
     {
@@ -39,7 +37,7 @@ public partial class FakePlexApiData
 
         return new Faker<GetAllLibrariesDirectory>()
             .StrictMode(true)
-            .UseSeed(config.GetSeed())
+            .UseSeed(seed.Next())
             .RuleFor(x => x.AllowSync, f => f.Random.Bool())
             .RuleFor(x => x.Art, _ => "/:/resources/movie-fanart.jpg")
             .RuleFor(x => x.Composite, _ => "/library/sections/7/composite/9999999")

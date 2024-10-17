@@ -16,10 +16,13 @@ public class DownloadJob_UnitTests : BaseUnitTest<DownloadJob>
     public async Task ShouldCreateDownloadWorkers_WhenDownloadWorkerTasksDoNotExist()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.MovieDownloadTasksCount = 5;
-        });
+        await SetupDatabase(
+            7973,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 5;
+            }
+        );
         var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
         mock.Mock<IDownloadManagerSettings>().Setup(x => x.DownloadSegments).Returns(4);
         IDictionary<string, object> dict = new Dictionary<string, object>
@@ -50,10 +53,13 @@ public class DownloadJob_UnitTests : BaseUnitTest<DownloadJob>
     public async Task ShouldSetDownloadAndDestinationPath_WhenDownloadTaskIsStarted()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.MovieDownloadTasksCount = 2;
-        });
+        await SetupDatabase(
+            39394,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 2;
+            }
+        );
         var testDownloadTask = IDbContext.DownloadTaskMovieFile.First();
         mock.Mock<IDownloadManagerSettings>().Setup(x => x.DownloadSegments).Returns(4);
         IDictionary<string, object> dict = new Dictionary<string, object>

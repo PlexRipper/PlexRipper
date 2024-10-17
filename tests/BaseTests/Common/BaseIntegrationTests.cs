@@ -21,6 +21,9 @@ public class BaseIntegrationTests
         BogusExtensions.Setup();
     }
 
-    protected Task<BaseContainer> CreateContainer(Action<UnitTestDataConfig>? options = null) =>
-        BaseContainer.Create(_log, options);
+    protected Task<BaseContainer> CreateContainer(int seed, Action<UnitTestDataConfig>? options = null) =>
+        CreateContainer(new Seed(seed), options);
+
+    protected Task<BaseContainer> CreateContainer(Seed seed, Action<UnitTestDataConfig>? options = null) =>
+        BaseContainer.Create(_log, seed, options);
 }

@@ -13,7 +13,7 @@ public class DownloadCommands_PauseDownloadTasksAsync_UnitTests : BaseUnitTest<P
     public async Task ShouldHaveFailedResult_WhenGivenAnInvalidId()
     {
         // Arrange
-        await SetupDatabase();
+        await SetupDatabase(34006);
 
         // Act
         var result = await _sut.Handle(new PauseDownloadTaskCommand(Guid.Empty), CancellationToken.None);
@@ -27,7 +27,7 @@ public class DownloadCommands_PauseDownloadTasksAsync_UnitTests : BaseUnitTest<P
     public async Task ShouldHaveFailedResult_WhenTheDownloadTaskCouldNotBeStopped()
     {
         // Arrange
-        await SetupDatabase(config => config.MovieDownloadTasksCount = 2);
+        await SetupDatabase(30082, config => config.MovieDownloadTasksCount = 2);
         var movieDownloadTasks = await GetDbContext().DownloadTaskMovie.ToListAsync();
 
         mock.Mock<IDownloadTaskScheduler>()
@@ -53,11 +53,7 @@ public class DownloadCommands_PauseDownloadTasksAsync_UnitTests : BaseUnitTest<P
     public async Task ShouldHaveSetMovieDownloadTasksToPaused_WhenAtLeastOneValidIdIsGiven()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.Seed = 9999;
-            config.MovieDownloadTasksCount = 2;
-        });
+        await SetupDatabase(9999, config => config.MovieDownloadTasksCount = 2);
         var movieDownloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
         var testDownloadTask = movieDownloadTasks.First().ToKey();
 
@@ -101,13 +97,15 @@ public class DownloadCommands_PauseDownloadTasksAsync_UnitTests : BaseUnitTest<P
     public async Task ShouldHaveSetTvShowDownloadTasksToPaused_WhenAtLeastOneValidIdIsGiven()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.Seed = 9999;
-            config.TvShowDownloadTasksCount = 2;
-            config.TvShowSeasonDownloadTasksCount = 2;
-            config.TvShowEpisodeDownloadTasksCount = 2;
-        });
+        await SetupDatabase(
+            19965,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 2;
+                config.TvShowSeasonDownloadTasksCount = 2;
+                config.TvShowEpisodeDownloadTasksCount = 2;
+            }
+        );
         var tvShowDownloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
         var testDownloadTask = tvShowDownloadTasks.First().ToKey();
         var downloadableTasks = await IDbContext.GetDownloadableChildTaskKeys(testDownloadTask);

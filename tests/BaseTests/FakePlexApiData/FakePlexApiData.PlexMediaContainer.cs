@@ -8,6 +8,7 @@ namespace PlexRipper.BaseTests;
 public partial class FakePlexApiData
 {
     public static GetLibraryItemsResponseBody GetPlexLibrarySectionAllResponse(
+        Seed seed,
         GetAllLibrariesDirectory library,
         Action<PlexApiDataConfig>? options = null
     )
@@ -18,7 +19,7 @@ public partial class FakePlexApiData
         {
             MediaContainer = new Faker<GetLibraryItemsMediaContainer>()
                 .StrictMode(false)
-                .UseSeed(config.Seed)
+                .UseSeed(seed.Next())
                 .RuleFor(x => x.Size, _ => config.LibraryMetaDataCount)
                 .RuleFor(x => x.AllowSync, f => f.Random.Bool())
                 .RuleFor(x => x.Art, _ => $"/:/resources/{library.Type}-fanart.jpg")
@@ -38,7 +39,7 @@ public partial class FakePlexApiData
                 .RuleFor(
                     x => x.Metadata,
                     _ =>
-                        GetLibraryMediaMetadata(library.Type.ToPlexMediaType(), options)
+                        GetLibraryMediaMetadata(seed, library.Type.ToPlexMediaType(), options)
                             .Generate(config.LibraryMetaDataCount)
                 )
                 .Generate(),
@@ -46,6 +47,7 @@ public partial class FakePlexApiData
     }
 
     public static Faker<GetLibraryItemsMetadata> GetLibraryMediaMetadata(
+        Seed seed,
         PlexMediaType type,
         Action<PlexApiDataConfig>? options = null
     )
@@ -64,7 +66,7 @@ public partial class FakePlexApiData
 
         return new Faker<GetLibraryItemsMetadata>()
             .StrictMode(false)
-            .UseSeed(config.Seed)
+            .UseSeed(seed.Next())
             .RuleFor(l => l.RatingKey, f => f.Random.Number(100000).ToString())
             .RuleFor(l => l.Key, _ => "")
             .RuleFor(l => l.Guid, f => $"plex://{type.ToPlexMediaTypeString().ToLower()}/{f.Random.Guid()}")
@@ -95,7 +97,7 @@ public partial class FakePlexApiData
             .RuleFor(l => l.ViewCount, _ => default)
             .RuleFor(l => l.SkipCount, _ => default)
             .RuleFor(l => l.LastViewedAt, _ => default)
-            .RuleFor(l => l.Media, _ => [GetPlexMedium(options).Generate()])
+            .RuleFor(l => l.Media, _ => [GetPlexMedium(seed, options).Generate()])
             .FinishWith(
                 (f, metadata) =>
                 {
@@ -111,13 +113,11 @@ public partial class FakePlexApiData
             );
     }
 
-    public static Faker<GetLibraryItemsMedia> GetPlexMedium(Action<PlexApiDataConfig>? options = null)
+    public static Faker<GetLibraryItemsMedia> GetPlexMedium(Seed seed, Action<PlexApiDataConfig>? options = null)
     {
-        var config = PlexApiDataConfig.FromOptions(options);
-
         return new Faker<GetLibraryItemsMedia>()
             .StrictMode(true)
-            .UseSeed(config.Seed)
+            .UseSeed(seed.Next())
             .RuleFor(l => l.Id, f => f.Random.Number(100000))
             .RuleFor(l => l.Duration, f => f.Random.Int(1))
             .RuleFor(l => l.Bitrate, f => f.Random.Int(1))
@@ -142,16 +142,14 @@ public partial class FakePlexApiData
                         : GetLibraryItemsOptimizedForStreaming.Disable
             )
             .RuleFor(l => l.Has64bitOffsets, f => f.Random.Bool())
-            .RuleFor(l => l.Part, _ => [GetPlexPart(options).Generate()]);
+            .RuleFor(l => l.Part, _ => [GetPlexPart(seed, options).Generate()]);
     }
 
-    public static Faker<GetLibraryItemsPart> GetPlexPart(Action<PlexApiDataConfig>? options = null)
+    public static Faker<GetLibraryItemsPart> GetPlexPart(Seed seed, Action<PlexApiDataConfig>? options = null)
     {
-        var config = PlexApiDataConfig.FromOptions(options);
-
         return new Faker<GetLibraryItemsPart>()
             .StrictMode(true)
-            .UseSeed(config.Seed)
+            .UseSeed(seed.Next())
             .RuleFor(l => l.Id, f => f.Random.Number(100000))
             .RuleFor(l => l.Key, f => f.Random.Uuid().ToString())
             .RuleFor(l => l.Duration, f => f.Random.Int(1))

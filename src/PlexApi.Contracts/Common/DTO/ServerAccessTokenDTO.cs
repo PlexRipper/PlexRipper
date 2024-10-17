@@ -1,4 +1,4 @@
-namespace PlexRipper.Domain;
+namespace PlexApi.Contracts;
 
 public record ServerAccessTokenDTO
 {

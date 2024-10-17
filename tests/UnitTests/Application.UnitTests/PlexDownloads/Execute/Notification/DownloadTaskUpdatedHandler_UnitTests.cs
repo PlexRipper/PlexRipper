@@ -13,14 +13,17 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
     public async Task ShouldSendDownloadTasksWithSignalR_WhenDownloadTaskUpdatedHasBeenCalled()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.TvShowDownloadTasksCount = 5;
-            config.TvShowSeasonDownloadTasksCount = 5;
-            config.TvShowEpisodeDownloadTasksCount = 5;
-        });
+        await SetupDatabase(
+            34292,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.TvShowDownloadTasksCount = 5;
+                config.TvShowSeasonDownloadTasksCount = 5;
+                config.TvShowEpisodeDownloadTasksCount = 5;
+            }
+        );
 
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
 
@@ -50,10 +53,7 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
     public async Task ShouldStartFileMergeJobAndDownloadQueue_WhenDownloadTaskHasFinished()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.MovieDownloadTasksCount = 5;
-        });
+        await SetupDatabase(81983, config => config.MovieDownloadTasksCount = 5);
 
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
         var updatedDownloadTask = downloadTasks[0].Children[0];

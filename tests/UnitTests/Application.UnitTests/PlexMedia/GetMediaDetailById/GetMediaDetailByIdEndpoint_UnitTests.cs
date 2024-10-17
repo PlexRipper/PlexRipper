@@ -18,13 +18,16 @@ public class GetMediaDetailByIdEndpoint_UnitTests : BaseUnitTest<GetMediaDetailB
     {
         // Arrange
         var movieCount = 10;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.MovieCount = movieCount;
-        });
+        await SetupDatabase(
+            45588,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieCount = movieCount;
+            }
+        );
 
         var testMovie = IDbContext.PlexMovies.FirstOrDefault(x => x.HasThumb);
         testMovie.ShouldNotBeNull();
@@ -52,15 +55,18 @@ public class GetMediaDetailByIdEndpoint_UnitTests : BaseUnitTest<GetMediaDetailB
     public async Task ShouldHavePlexMediaData_WhenValidMediaIdAndPlexMediaTypeTvShowIsRequested()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.TvShowCount = 10;
-            config.TvShowSeasonCount = 3;
-            config.TvShowEpisodeCount = 5;
-        });
+        await SetupDatabase(
+            53442,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.TvShowCount = 10;
+                config.TvShowSeasonCount = 3;
+                config.TvShowEpisodeCount = 5;
+            }
+        );
 
         var testTvShow = IDbContext.PlexTvShows.FirstOrDefault(x => x.HasThumb);
         testTvShow.ShouldNotBeNull();

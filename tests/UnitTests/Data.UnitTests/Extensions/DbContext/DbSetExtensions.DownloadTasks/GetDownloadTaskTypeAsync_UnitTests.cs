@@ -12,10 +12,7 @@ public class GetDownloadTaskTypeAsync_UnitTests : BaseUnitTest
     public async Task ShouldReturnDownloadTaskTypeMovie_WhenTheGuidIsOfTypeDownloadTaskMovie()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.MovieDownloadTasksCount = 5;
-        });
+        await SetupDatabase(81434, config => config.MovieDownloadTasksCount = 5);
         var downloadTasks = await IDbContext.DownloadTaskMovie.ToListAsync();
         var testDownloadTask = downloadTasks[2];
 
@@ -30,10 +27,7 @@ public class GetDownloadTaskTypeAsync_UnitTests : BaseUnitTest
     public async Task ShouldReturnDownloadTaskTypeTvShow_WhenTheGuidIsOfTypeDownloadTaskTvShow()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.TvShowDownloadTasksCount = 2;
-        });
+        await SetupDatabase(91671, config => config.TvShowDownloadTasksCount = 2);
         var downloadTasks = await IDbContext.DownloadTaskTvShow.ToListAsync();
         var testDownloadTask = downloadTasks[1];
 
@@ -48,10 +42,7 @@ public class GetDownloadTaskTypeAsync_UnitTests : BaseUnitTest
     public async Task ShouldReturnDownloadTaskTypeSeason_WhenTheGuidIsOfTypeDownloadTaskTvShowSeason()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.TvShowDownloadTasksCount = 3;
-        });
+        await SetupDatabase(48398, config => config.TvShowDownloadTasksCount = 3);
         var downloadTasks = await IDbContext.DownloadTaskTvShowSeason.ToListAsync();
         var testDownloadTask = downloadTasks[2];
 
@@ -66,10 +57,7 @@ public class GetDownloadTaskTypeAsync_UnitTests : BaseUnitTest
     public async Task ShouldReturnDownloadTaskTypeEpisode_WhenTheGuidIsOfTypeDownloadTaskTvShowEpisode()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.TvShowDownloadTasksCount = 2;
-        });
+        await SetupDatabase(74950, config => config.TvShowDownloadTasksCount = 2);
         var downloadTasks = await IDbContext.DownloadTaskTvShowEpisode.ToListAsync();
         var testDownloadTask = downloadTasks[0];
 

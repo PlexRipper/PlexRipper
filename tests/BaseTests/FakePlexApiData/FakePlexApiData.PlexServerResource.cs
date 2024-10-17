@@ -9,13 +9,13 @@ public partial class FakePlexApiData
 
     #region Public
 
-    public static Faker<PlexDevice> GetServerResource(Action<PlexApiDataConfig>? options = null)
+    public static Faker<PlexDevice> GetServerResource(Seed seed, Action<PlexApiDataConfig>? options = null)
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
         return new Faker<PlexDevice>()
             .StrictMode(true)
-            .UseSeed(config.Seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.Name, f => f.Company.CompanyName())
             .RuleFor(x => x.Product, _ => "Plex Media Server")
             .RuleFor(x => x.ProductVersion, f => f.System.Semver())
@@ -39,34 +39,42 @@ public partial class FakePlexApiData
             .RuleFor(x => x.PublicAddressMatches, f => f.Random.Bool())
             .RuleFor(x => x.DnsRebindingProtection, f => f.Random.Bool())
             .RuleFor(x => x.NatLoopbackSupported, f => f.Random.Bool())
-            .RuleFor(x => x.Connections, f => GetPlexServerResourceConnections(options).Generate(f.Random.Int(1, 4)));
+            .RuleFor(
+                x => x.Connections,
+                _ => GetPlexServerResourceConnections(seed, options).Generate(config.PlexServerAccessConnectionsCount)
+            );
     }
 
-    public static Faker<Connections> GetPlexServerResourceConnections(Action<PlexApiDataConfig>? options = null)
+    public static Faker<Connections> GetPlexServerResourceConnections(
+        Seed seed,
+        Action<PlexApiDataConfig>? options = null
+    )
     {
         var config = PlexApiDataConfig.FromOptions(options);
 
+        var https = config.PlexServerAccessConnectionsIncludeHttps;
         return new Faker<Connections>()
             .StrictMode(true)
-            .UseSeed(config.GetSeed())
-            .RuleFor(x => x.Protocol, _ => Protocol.Http)
-            // This has to be an ip otherwise the PortFix gets activated in PlexServerConnection
-            .RuleFor(x => x.Address, _ => "240.0.0.0")
+            .UseSeed(seed.Next())
+            .RuleFor(x => x.Protocol, _ => !https ? Protocol.Http : Protocol.Https)
+            .RuleFor(x => x.Address, f => f.Internet.Ip())
             .RuleFor(x => x.Port, f => f.Internet.Port())
-            .RuleFor(x => x.Uri, _ => "")
+            .RuleFor(
+                x => x.Uri,
+                (f, connection) =>
+                {
+                    if (https)
+                    {
+                        var address = connection.Address.Replace('.', '-');
+                        return $"https://{address}.{f.Random.Hexadecimal(32, string.Empty).ToLower()}.plex.direct:{connection.Port}";
+                    }
+
+                    return new UriBuilder("http", connection.Address, connection.Port).ToString();
+                }
+            )
             .RuleFor(x => x.Local, _ => false)
             .RuleFor(x => x.Relay, _ => false)
-            .RuleFor(x => x.IPv6, _ => false)
-            .FinishWith(
-                (_, connection) =>
-                {
-                    connection.Uri = new UriBuilder(
-                        connection.Protocol.ToString(),
-                        connection.Address,
-                        connection.Port
-                    ).ToString();
-                }
-            );
+            .RuleFor(x => x.IPv6, _ => false);
     }
 
     #endregion

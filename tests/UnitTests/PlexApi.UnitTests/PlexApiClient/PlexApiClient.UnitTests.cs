@@ -27,7 +27,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
                         x.Content = new StringContent(
                             "<html><head><title>Unauthorized</title></head><body><h1>401 Unauthorized</h1></body></html>",
                             Encoding.UTF8,
-                            "text/html"
+                            ContentType.TextHtml
                         );
                     }
                 );
@@ -42,7 +42,9 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         // Assert
         responseMessage.ShouldNotBeNull();
         responseMessage
-            .Content.Headers.Any(x => x.Key == "Content-Type" && x.Value.Any(y => y.Contains("application/json")))
+            .Content.Headers.Any(x =>
+                x.Key == "Content-Type" && x.Value.Any(y => y.Contains(ContentType.ApplicationJson))
+            )
             .ShouldBeTrue();
         var json = await responseMessage.Content.ReadAsStringAsync();
         json.ShouldNotBeNullOrEmpty();
@@ -91,7 +93,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
                         x.Content = new StringContent(
                             "<html><head><title>Internal Server Error</title></head><body><h1>500 Internal Server Error</h1></body></html>",
                             Encoding.UTF8,
-                            "text/html"
+                            ContentType.TextHtml
                         );
                     }
                 );
@@ -123,11 +125,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
         {
             config
                 .SetupAnyRequest()
-                .ReturnsResponse(
-                    HttpStatusCode.OK,
-                    x =>
-                        x.Content = new StringContent("{ \"message\": \"Success\" }", Encoding.UTF8, "application/json")
-                );
+                .ReturnsResponse(HttpStatusCode.OK, x => x.Content = "{ \"message\": \"Success\" }".ToStringContent());
         });
 
         // Arrange
@@ -153,7 +151,7 @@ public class PlexApiClientUnitTests : BaseUnitTest<Func<PlexApiClientOptions?, P
                 .SetupRequestSequence("http://localhost/")
                 .ReturnsResponse(HttpStatusCode.ServiceUnavailable) // First retry
                 .ReturnsResponse(HttpStatusCode.ServiceUnavailable) // Second retry
-                .ReturnsResponse(HttpStatusCode.OK, "{ \"message\": \"Success\" }"); // Successful after retries
+                .ReturnsResponse(HttpStatusCode.OK, "{ \"message\": \"Success\" }".ToStringContent()); // Successful after retries
         });
 
         // Arrange

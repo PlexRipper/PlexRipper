@@ -5,9 +5,9 @@ using PlexRipper.Application;
 
 namespace IntegrationTests.DownloadManager.DownloadCommands;
 
-public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTests
+public class DownloadCommandsPauseDownloadIntegrationTests : BaseIntegrationTests
 {
-    public DownloadCommands_PauseDownload_IntegrationTests(ITestOutputHelper output)
+    public DownloadCommandsPauseDownloadIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -15,30 +15,33 @@ public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTe
     {
         // Arrange
 
-        using var Container = await CreateContainer(config =>
-        {
-            config.DownloadSpeedLimitInKib = 5000;
-            config.DatabaseOptions = x =>
+        using var container = await CreateContainer(
+            21345,
+            config =>
             {
-                x.PlexAccountCount = 1;
-                x.PlexServerCount = 1;
-                x.PlexLibraryCount = 1;
-                x.MovieCount = 1;
-                x.MovieDownloadTasksCount = 1;
-                x.DownloadFileSizeInMb = 50;
-            };
+                config.DownloadSpeedLimitInKib = 5000;
+                config.DatabaseOptions = x =>
+                {
+                    x.PlexAccountCount = 1;
+                    x.PlexServerCount = 1;
+                    x.PlexLibraryCount = 1;
+                    x.MovieCount = 1;
+                    x.MovieDownloadTasksCount = 1;
+                    x.DownloadFileSizeInMb = 50;
+                };
 
-            config.PlexMockApiOptions = x =>
-            {
-                x.MockServers.Add(new PlexMockServerConfig() { DownloadFileSizeInMb = 50 });
-            };
-        });
+                config.HttpClientOptions = x =>
+                {
+                    x.SetupDownloadFile(50);
+                };
+            }
+        );
 
-        var downloadTasks = await Container.DbContext.GetAllDownloadTasksByServerAsync();
+        var downloadTasks = await container.DbContext.GetAllDownloadTasksByServerAsync();
         var childDownloadTask = downloadTasks[0].Children[0];
 
         // Act
-        var response = await Container.ApiClient.GETAsync<
+        var response = await container.ApiClient.GETAsync<
             StartDownloadTaskEndpoint,
             StartDownloadTaskEndpointRequest,
             ResultDTO
@@ -47,7 +50,7 @@ public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTe
         response.Response.IsSuccessStatusCode.ShouldBeTrue(startResult.ToString());
         await Task.Delay(500);
 
-        response = await Container.ApiClient.GETAsync<
+        response = await container.ApiClient.GETAsync<
             PauseDownloadTaskEndpoint,
             PauseDownloadTaskEndpointRequest,
             ResultDTO
@@ -55,13 +58,13 @@ public class DownloadCommands_PauseDownload_IntegrationTests : BaseIntegrationTe
         var pauseResult = response.Result;
         response.Response.IsSuccessStatusCode.ShouldBeTrue(pauseResult.ToString());
 
-        await Container.SchedulerService.AwaitScheduler();
+        await container.SchedulerService.AwaitScheduler();
 
         // Assert
 
         startResult.IsSuccess.ShouldBeTrue();
         pauseResult.IsSuccess.ShouldBeTrue();
-        var downloadTaskDb = Container.DbContext.DownloadTaskMovieFile.FirstOrDefault(x =>
+        var downloadTaskDb = container.DbContext.DownloadTaskMovieFile.FirstOrDefault(x =>
             x.Id == childDownloadTask.Id
         );
         downloadTaskDb.ShouldNotBeNull();

@@ -14,12 +14,15 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
     public async Task ShouldRemoveOnlySpecifiedCompletedDownloadTasks_WhenClearCompletedEndpointIsCalledWithGuidList()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.MovieDownloadTasksCount = 10;
-        });
+        await SetupDatabase(
+            213132,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.MovieDownloadTasksCount = 10;
+            }
+        );
 
         // Set download tasks to completed
         var dbContext = IDbContext;
@@ -50,12 +53,15 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
     public async Task ShouldRemoveAllCompletedDownloadTasks_WhenClearCompletedEndpointIsCalled()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.MovieDownloadTasksCount = 10;
-        });
+        await SetupDatabase(
+            34036,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.MovieDownloadTasksCount = 10;
+            }
+        );
 
         // Set download tasks to completed
         var dbContext = IDbContext;

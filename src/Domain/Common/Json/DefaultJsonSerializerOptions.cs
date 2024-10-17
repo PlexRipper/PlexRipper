@@ -77,6 +77,15 @@ public static class DefaultJsonSerializerOptions
             return options;
         });
 
+    private static readonly Lazy<JsonSerializerOptions> ConfigPlexApiSerializationField =
+        new(() =>
+        {
+            var options = CreateBaseOptions();
+            options.Converters.Clear();
+            options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.KebabCaseLower));
+            return options;
+        });
+
     private static readonly Lazy<JsonSerializerOptions> ConfigManagerOptionsField =
         new(() =>
         {
@@ -91,6 +100,10 @@ public static class DefaultJsonSerializerOptions
         });
 
     public static JsonSerializerOptions ConfigStandard => ConfigStandardField.Value;
+
     public static JsonSerializerOptions ConfigCapitalized => ConfigCapitalizedField.Value;
+
     public static JsonSerializerOptions UserSettingsOptions => ConfigManagerOptionsField.Value;
+
+    public static JsonSerializerOptions PlexApiSerialization => ConfigPlexApiSerializationField.Value;
 }

@@ -22,15 +22,15 @@ public class PlexApiWrapper
 
     private string GetClientId => Guid.NewGuid().ToString();
 
-    private PlexAPI CreateClient(string authToken, PlexApiClientOptions options) =>
-        new(
+    private IPlexAPI CreateClient(string authToken, PlexApiClientOptions options) =>
+        new PlexAPI(
             client: _clientFactory(options),
             clientID: GetClientId,
             serverUrl: options.ConnectionUrl,
             accessToken: authToken
         );
 
-    private PlexAPI CreateTvClient(string authToken = "", PlexApiClientOptions? options = null)
+    private IPlexAPI CreateTvClient(string authToken = "", PlexApiClientOptions? options = null)
     {
         options ??= new PlexApiClientOptions { ConnectionUrl = "https://plex.tv/api/v2" };
 
@@ -202,11 +202,11 @@ public class PlexApiWrapper
 
     /// <summary>
     ///     Retrieves all the accessible plex server based on the <see cref="PlexAccount" /> token
-    ///     Including the various connections to the server.
+    ///     Including the various unique connections to each the server.
     ///     <remarks>https://plex.tv/api/v2/resources?X-Plex-Token={{AUTH_TOKEN}}</remarks>
     /// </summary>
     /// <param name="authToken">The Plex account authentication token.</param>
-    /// <returns></returns>
+    /// <returns> A list of <see cref="PlexDevice" /> with all the connections to the servers.</returns>
     public async Task<Result<List<PlexDevice>>> GetAccessibleServers(string authToken)
     {
         if (string.IsNullOrEmpty(authToken))
@@ -218,20 +218,14 @@ public class PlexApiWrapper
         );
 
         var result = await Task.WhenAll(
-            [
-                ToResponse(plexTvClient.Plex.GetServerResourcesAsync()),
-                ToResponse(
-                    plexTvClient.Plex.GetServerResourcesAsync(
-                        IncludeHttps.Enable,
-                        IncludeRelay.Enable,
-                        IncludeIPv6.Enable
-                    )
-                ),
-            ]
+            ToResponse(plexTvClient.Plex.GetServerResourcesAsync()),
+            ToResponse(
+                plexTvClient.Plex.GetServerResourcesAsync(IncludeHttps.Enable, IncludeRelay.Enable, IncludeIPv6.Enable)
+            )
         );
 
         if (result[0].IsFailed && result[1].IsFailed)
-            return result[0].ToResult().WithReasons(result[1].Reasons);
+            return Result.Merge(result[0].ToResult(), result[1].ToResult());
 
         if (result[0].IsFailed && result[1].IsSuccess)
             return result[1].ToApiResult(x => x.PlexDevices ?? []);
@@ -239,25 +233,36 @@ public class PlexApiWrapper
         if (result[0].IsSuccess && result[1].IsFailed)
             return result[0].ToApiResult(x => x.PlexDevices ?? []);
 
-        var list = new List<PlexDevice>();
-        list.AddRange(result[0].Value?.PlexDevices ?? []);
+        var deviceList1 = result[0].Value?.PlexDevices ?? [];
+        var deviceList2 = result[1].Value?.PlexDevices ?? [];
 
-        var result1Devices = result[1].Value?.PlexDevices ?? [];
-        foreach (var serverResource in list)
+        // Combine connections from both lists
+        var combinedConnections = new List<Connections>();
+        combinedConnections.AddRange(deviceList1.SelectMany(x => x.Connections));
+        combinedConnections.AddRange(deviceList2.SelectMany(x => x.Connections));
+
+        // Find duplicate connections and remove them all later.
+        // This avoids the same connection going to different servers.
+        var duplicateConnectionUris = combinedConnections
+            .GroupBy(x => x.Uri)
+            .Where(g => g.Count() > 1) // Find URIs that appear more than once
+            .Select(g => g.Key) // Get the URI of the duplicates
+            .ToHashSet();
+
+        foreach (var device1 in deviceList1)
         {
-            var newServerResource = result1Devices.FirstOrDefault(x =>
-                x.ClientIdentifier == serverResource.ClientIdentifier
-            );
-            if (newServerResource is null || !newServerResource.Connections.Any())
+            var device2 = deviceList2.FirstOrDefault(x => x.ClientIdentifier == device1.ClientIdentifier);
+            if (device2 is null || !device2.Connections.Any())
                 continue;
 
-            serverResource.Connections = serverResource
-                .Connections.Concat(newServerResource.Connections)
-                .DistinctBy(x => x.Uri.ToString())
-                .ToList();
+            var serverConnections = device1.Connections.Concat(device2.Connections).ToList();
+
+            serverConnections.RemoveAll(x => duplicateConnectionUris.Contains(x.Uri));
+
+            device1.Connections = serverConnections;
         }
 
-        return Result.Ok(list);
+        return Result.Ok(deviceList1);
     }
 
     /// <summary>

@@ -7,14 +7,15 @@ namespace PlexRipper.BaseTests;
 public partial class FakePlexApiData
 {
     public static Faker<PostUsersSignInDataUserPlexAccount> GetPlexSignInResponse(
-        Action<UnitTestDataConfig>? options = null
+        Seed seed,
+        Action<PlexApiDataConfig>? options = null
     )
     {
-        var config = UnitTestDataConfig.FromOptions(options);
+        var config = PlexApiDataConfig.FromOptions(options);
 
         return new Faker<PostUsersSignInDataUserPlexAccount>()
             .StrictMode(true)
-            .UseSeed(config.Seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.Id, f => f.Random.Number(99999999))
             .RuleFor(x => x.Uuid, f => f.Random.Guid().ToString())
             .RuleFor(x => x.Username, f => f.Internet.UserName())
@@ -43,7 +44,7 @@ public partial class FakePlexApiData
             .RuleFor(x => x.HomeAdmin, f => f.Random.Bool())
             .RuleFor(x => x.MaxHomeSize, f => f.Random.Number(20))
             .RuleFor(x => x.RememberExpiresAt, f => f.Date.Future().Ticks)
-            .RuleFor(x => x.Profile, _ => new PostUsersSignInDataUserProfile())
+            .RuleFor(x => x.Profile, _ => null) // keep null, causes enum conversion exceptions in PlexAPI.SDK
             .RuleFor(x => x.Entitlements, _ => [])
             .RuleFor(x => x.Subscriptions, _ => [])
             .RuleFor(x => x.PastSubscriptions, _ => [])

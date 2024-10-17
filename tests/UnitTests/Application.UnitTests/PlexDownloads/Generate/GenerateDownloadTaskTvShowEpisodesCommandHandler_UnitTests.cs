@@ -17,7 +17,7 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
     public async Task ShouldHaveFailedResult_WhenPlexTvShowsAreEmpty()
     {
         // Arrange
-        await SetupDatabase();
+        await SetupDatabase(84901);
         var downloadMediaDtos = new List<DownloadMediaDTO>();
 
         // Act
@@ -32,12 +32,15 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
     public async Task ShouldGenerateValidTvShowDownloadTaskWithEpisodeDownloadTask_WhenNoDownloadTasksExist()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.TvShowCount = 5;
-            config.TvShowSeasonCount = 5;
-            config.TvShowEpisodeCount = 5;
-        });
+        await SetupDatabase(
+            47893,
+            config =>
+            {
+                config.TvShowCount = 5;
+                config.TvShowSeasonCount = 5;
+                config.TvShowEpisodeCount = 5;
+            }
+        );
 
         var plexTvShows = await IDbContext
             .PlexTvShows.Include(x => x.Seasons)
@@ -92,12 +95,15 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
     public async Task ShouldGenerateValidEpisodeDownloadTask_WhenTvShowParentDownloadTaskAlreadyExist()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.TvShowCount = 5;
-            config.TvShowSeasonCount = 5;
-            config.TvShowEpisodeCount = 5;
-        });
+        await SetupDatabase(
+            52051,
+            config =>
+            {
+                config.TvShowCount = 5;
+                config.TvShowSeasonCount = 5;
+                config.TvShowEpisodeCount = 5;
+            }
+        );
         var dbContext = IDbContext;
         var plexTvShows = await dbContext.PlexTvShows.IncludeAll().ToListAsync();
         var plexEpisodes = plexTvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).ToList();

@@ -2,27 +2,30 @@ using Data.Contracts;
 
 namespace IntegrationTests.FileSystem.FileMerger;
 
-public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegrationTests
+public class FileMergeSchedulerStartFileMergeJobIntegrationTests : BaseIntegrationTests
 {
-    public FileMergeScheduler_StartFileMergeJob_IntegrationTests(ITestOutputHelper output)
+    public FileMergeSchedulerStartFileMergeJobIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
     public async Task ShouldFinishMergingDownloadTaskAsFileTaskJobAndSetToCompleted_WhenDownloadTaskHasFinishedDownloading()
     {
         // Arrange
-        using var Container = await CreateContainer(config =>
-        {
-            config.DatabaseOptions = x =>
+        using var container = await CreateContainer(
+            235689,
+            config =>
             {
-                x.PlexServerCount = 1;
-                x.PlexLibraryCount = 3;
-                x.MovieCount = 1;
-                x.MovieDownloadTasksCount = 1;
-                x.DownloadFileSizeInMb = 10;
-            };
-        });
-        var dbContext = Container.DbContext;
+                config.DatabaseOptions = x =>
+                {
+                    x.PlexServerCount = 1;
+                    x.PlexLibraryCount = 3;
+                    x.MovieCount = 1;
+                    x.MovieDownloadTasksCount = 1;
+                    x.DownloadFileSizeInMb = 10;
+                };
+            }
+        );
+        var dbContext = container.DbContext;
         var downloadTask = dbContext.DownloadTaskMovieFile.First();
         downloadTask.ShouldNotBeNull();
 
@@ -31,18 +34,18 @@ public class FileMergeScheduler_StartFileMergeJob_IntegrationTests : BaseIntegra
         dbContext.DownloadWorkerTasks.AddRange(downloadWorkerTasks);
         await dbContext.SaveChangesAsync();
 
-        var createResult = await Container.FileMergeScheduler.CreateFileTaskFromDownloadTask(downloadTask.ToKey());
+        var createResult = await container.FileMergeScheduler.CreateFileTaskFromDownloadTask(downloadTask.ToKey());
         createResult.IsSuccess.ShouldBeTrue();
-        var startResult = await Container.FileMergeScheduler.StartFileMergeJob(createResult.Value.Id);
-        await Container.SchedulerService.AwaitScheduler();
+        var startResult = await container.FileMergeScheduler.StartFileMergeJob(createResult.Value.Id);
+        await container.SchedulerService.AwaitScheduler();
 
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
 
-        var downloadTaskDb = await Container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
+        var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
 
-        Container.MockSignalRService.FileMergeProgressList.Count.ShouldBeGreaterThan(10);
+        container.MockSignalRService.FileMergeProgressList.Count.ShouldBeGreaterThan(10);
     }
 }

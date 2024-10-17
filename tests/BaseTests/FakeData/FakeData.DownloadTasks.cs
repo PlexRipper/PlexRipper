@@ -7,12 +7,12 @@ public static partial class FakeData
 {
     #region Base
 
-    private static Faker<T> ApplyDownloadTaskBase<T>(this Faker<T> faker, int seed = 0)
+    private static Faker<T> ApplyDownloadTaskBase<T>(this Faker<T> faker, Seed seed)
         where T : DownloadTaskBase
     {
         return faker
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.Id, _ => Guid.Empty)
             .RuleFor(x => x.Key, _ => GetUniqueNumber())
             .RuleFor(x => x.Title, _ => "")
@@ -26,9 +26,9 @@ public static partial class FakeData
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.None);
     }
 
-    public static Faker<T> ApplyDownloadTaskParentBase<T>(
+    private static Faker<T> ApplyDownloadTaskParentBase<T>(
         this Faker<T> faker,
-        int seed = 0,
+        Seed seed,
         Action<FakeDataConfig>? options = null
     )
         where T : DownloadTaskParentBase
@@ -37,7 +37,7 @@ public static partial class FakeData
 
         return faker
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .ApplyDownloadTaskBase(seed)
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
             .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
@@ -54,9 +54,9 @@ public static partial class FakeData
             );
     }
 
-    public static Faker<T> ApplyDownloadTaskFileBase<T>(
+    private static Faker<T> ApplyDownloadTaskFileBase<T>(
         this Faker<T> faker,
-        int seed = 0,
+        Seed seed,
         Action<FakeDataConfig>? options = null
     )
         where T : DownloadTaskFileBase
@@ -65,7 +65,7 @@ public static partial class FakeData
 
         return faker
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .ApplyDownloadTaskBase(seed)
             .RuleFor(x => x.Percentage, _ => 0)
             .RuleFor(x => x.DataReceived, _ => 0)
@@ -99,13 +99,13 @@ public static partial class FakeData
 
     #region Movie
 
-    public static Faker<DownloadTaskMovie> GetMovieDownloadTask(int seed = 0, Action<FakeDataConfig>? options = null)
+    public static Faker<DownloadTaskMovie> GetMovieDownloadTask(Seed seed, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<DownloadTaskMovie>()
             .ApplyDownloadTaskParentBase(seed, options)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.MediaType, PlexMediaType.Movie)
             .RuleFor(x => x.DownloadTaskType, _ => DownloadTaskType.Movie)
             .RuleFor(x => x.DownloadStatus, _ => DownloadStatus.Queued)
@@ -136,13 +136,13 @@ public static partial class FakeData
     }
 
     public static Faker<DownloadTaskMovieFile> GetDownloadTaskMovieFile(
-        int seed = 0,
+        Seed seed,
         Action<FakeDataConfig>? options = null
     )
     {
         return new Faker<DownloadTaskMovieFile>()
             .ApplyDownloadTaskFileBase(seed, options)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.Parent, _ => null)
             .RuleFor(x => x.ParentId, _ => Guid.Empty)
             .RuleFor(x => x.MediaType, PlexMediaType.Movie)
@@ -161,12 +161,12 @@ public static partial class FakeData
 
     #region TvShow
 
-    public static Faker<DownloadTaskTvShow> GetDownloadTaskTvShow(int seed = 0, Action<FakeDataConfig>? options = null)
+    public static Faker<DownloadTaskTvShow> GetDownloadTaskTvShow(Seed seed, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<DownloadTaskTvShow>()
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .StrictMode(true)
             .ApplyDownloadTaskParentBase(seed, options)
             .RuleFor(x => x.MediaType, PlexMediaType.TvShow)
@@ -212,14 +212,14 @@ public static partial class FakeData
     }
 
     public static Faker<DownloadTaskTvShowSeason> GetDownloadTaskTvShowSeason(
-        int seed = 0,
+        Seed seed,
         Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
 
         return new Faker<DownloadTaskTvShowSeason>()
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .StrictMode(true)
             .ApplyDownloadTaskParentBase(seed, options)
             .RuleFor(x => x.ParentId, _ => Guid.Empty)
@@ -262,12 +262,12 @@ public static partial class FakeData
     }
 
     public static Faker<DownloadTaskTvShowEpisode> GetDownloadTaskTvShowEpisode(
-        int seed = 0,
+        Seed seed,
         Action<FakeDataConfig>? options = null
     )
     {
         return new Faker<DownloadTaskTvShowEpisode>()
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .StrictMode(true)
             .ApplyDownloadTaskParentBase(seed, options)
             .RuleFor(x => x.Parent, _ => null)
@@ -290,12 +290,12 @@ public static partial class FakeData
     }
 
     public static Faker<DownloadTaskTvShowEpisodeFile> GetDownloadTaskTvShowEpisodeFile(
-        int seed = 0,
+        Seed seed,
         Action<FakeDataConfig>? options = null
     )
     {
         return new Faker<DownloadTaskTvShowEpisodeFile>()
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .StrictMode(true)
             .ApplyDownloadTaskFileBase(seed, options)
             .RuleFor(x => x.Parent, _ => null)
@@ -316,14 +316,14 @@ public static partial class FakeData
 
     #region DownloadWorkerTasks
 
-    public static Faker<DownloadWorkerTask> GetDownloadWorkerTask(int seed = 0, Action<FakeDataConfig>? options = null)
+    public static Faker<DownloadWorkerTask> GetDownloadWorkerTask(Seed seed, Action<FakeDataConfig>? options = null)
     {
         FakeDataConfig.FromOptions(options);
 
         var partIndex = 1;
         return new Faker<DownloadWorkerTask>()
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.FileName, f => f.System.FileName() + ".mp4")
             .RuleFor(x => x.StartByte, _ => 0)

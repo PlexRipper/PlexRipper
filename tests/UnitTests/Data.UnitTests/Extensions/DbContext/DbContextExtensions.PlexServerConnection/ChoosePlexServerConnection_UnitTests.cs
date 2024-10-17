@@ -23,7 +23,7 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
     public async Task ShouldReturnAFailedResult_WhenThePlexServerIdCannotBeFound()
     {
         // Act
-        await SetupDatabase();
+        await SetupDatabase(47893);
         var result = await IDbContext.ChoosePlexServerConnection(999);
 
         // Assert
@@ -35,11 +35,14 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
     public async Task ShouldReturnAFailedResult_WhenThereAreNoPlexConnections()
     {
         // Act
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexServerConnectionPerServerCount = 0;
-        });
+        await SetupDatabase(
+            10437,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexServerConnectionPerServerCount = 0;
+            }
+        );
         var result = await IDbContext.ChoosePlexServerConnection(1);
 
         // Assert
@@ -50,11 +53,14 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
     public async Task ShouldReturnThePreferredConnection_WhenAPlexServerHasOne()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexServerConnectionPerServerCount = 5;
-        });
+        await SetupDatabase(
+            35881,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexServerConnectionPerServerCount = 5;
+            }
+        );
 
         var dbContext = IDbContext;
         var plexServer = await dbContext
@@ -80,11 +86,14 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
     public async Task ShouldReturnAFailedResult_WhenThereAreOnlyConnectionsWithoutStatus()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexServerConnectionPerServerCount = 1;
-        });
+        await SetupDatabase(
+            71032,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexServerConnectionPerServerCount = 1;
+            }
+        );
 
         var plexServer = await IDbContext.PlexServers.Include(x => x.PlexServerConnections).FirstOrDefaultAsync();
         plexServer.ShouldNotBeNull();
@@ -101,17 +110,20 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
     public async Task ShouldReturnTheConnectionWithPublicAddress_WhenThereIsAValidPublicAddressConnectionsWithStatus()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexServerConnectionPerServerCount = 0;
-        });
+        var seed = await SetupDatabase(
+            17710,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexServerConnectionPerServerCount = 0;
+            }
+        );
 
         var dbContext = IDbContext;
         var plexServer = await dbContext.PlexServers.FirstOrDefaultAsync();
         plexServer.ShouldNotBeNull();
 
-        var plexServerConnections = FakeData.GetPlexServerConnections().Generate(5);
+        var plexServerConnections = FakeData.GetPlexServerConnections(seed).Generate(5);
         plexServerConnections[2] = new PlexServerConnection
         {
             Id = plexServerConnections[2].Id,
@@ -132,7 +144,7 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
         foreach (var plexServerConnection in plexServerConnections)
         {
             plexServerConnection.PlexServerId = plexServer.Id;
-            var status = FakeData.GetPlexServerStatus().Generate();
+            var status = FakeData.GetPlexServerStatus(seed).Generate();
             status.PlexServerId = plexServer.Id;
             status.PlexServerConnectionId = plexServerConnection.Id;
             plexServerConnection.PlexServerStatus.Add(status);

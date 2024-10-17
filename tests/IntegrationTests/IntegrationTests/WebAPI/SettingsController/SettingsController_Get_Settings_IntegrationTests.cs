@@ -8,19 +8,19 @@ using Settings.Contracts;
 
 namespace IntegrationTests.WebAPI.SettingsController;
 
-public class SettingsController_Get_Settings_IntegrationTests : BaseIntegrationTests
+public class SettingsControllerGetSettingsIntegrationTests : BaseIntegrationTests
 {
-    public SettingsController_Get_Settings_IntegrationTests(ITestOutputHelper output)
+    public SettingsControllerGetSettingsIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
     public async Task ShouldHaveDefaultSettings_OnFirstTimeBoot()
     {
         // Arrange
-        using var Container = await CreateContainer(x => x.Seed = 4564);
+        using var container = await CreateContainer(4564);
 
         // Act
-        var response = await Container.ApiClient.GETAsync<GetUserSettingsEndpoint, ResultDTO<SettingsModelDTO>>();
+        var response = await container.ApiClient.GETAsync<GetUserSettingsEndpoint, ResultDTO<SettingsModelDTO>>();
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         // Assert

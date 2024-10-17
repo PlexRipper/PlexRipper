@@ -6,9 +6,9 @@ using PlexRipper.Application;
 
 namespace IntegrationTests.WebAPI.AccountController;
 
-public class CreateAccount_IntegrationTests : BaseIntegrationTests
+public class CreateAccountIntegrationTests : BaseIntegrationTests
 {
-    public CreateAccount_IntegrationTests(ITestOutputHelper output)
+    public CreateAccountIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -16,31 +16,34 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
     {
         // Arrange
         var libraryCount = 3;
-        using var Container = await CreateContainer(config =>
-        {
-            config.DatabaseOptions = x =>
+        using var container = await CreateContainer(
+            236234,
+            config =>
             {
-                x.PlexLibraryCount = libraryCount;
-            };
-            config.PlexMockApiOptions = x =>
-            {
-                x.MockServers.Add(
-                    new PlexMockServerConfig
-                    {
-                        FakeDataConfig = apiConfig =>
+                config.DatabaseOptions = x =>
+                {
+                    x.PlexLibraryCount = libraryCount;
+                };
+                config.PlexMockApiOptions = x =>
+                {
+                    x.MockServers.Add(
+                        new PlexMockServerConfig
                         {
-                            apiConfig.LibraryCount = libraryCount;
-                        },
-                    }
-                );
-            };
-        });
+                            FakeDataConfig = apiConfig =>
+                            {
+                                apiConfig.LibraryCount = libraryCount;
+                            },
+                        }
+                    );
+                };
+            }
+        );
 
         var plexAccount = FakeData.GetPlexAccount(4347564).Generate();
         var plexAccountDTO = plexAccount.ToDTO();
 
         // Act
-        var response = await Container.ApiClient.POSTAsync<
+        var response = await container.ApiClient.POSTAsync<
             CreatePlexAccountEndpoint,
             PlexAccountDTO,
             ResultDTO<PlexAccount>
@@ -50,14 +53,14 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         var resultDTO = response.Result;
         resultDTO.IsSuccess.ShouldBeTrue();
         var result = resultDTO.ToResultModel();
-        await Container.SchedulerService.AwaitScheduler();
+        await container.SchedulerService.AwaitScheduler();
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        Container.DbContext.PlexAccounts.ToList().Count.ShouldBe(1);
+        container.DbContext.PlexAccounts.ToList().Count.ShouldBe(1);
 
         // Ensure account has been created
-        var plexAccountDb = Container
+        var plexAccountDb = container
             .DbContext.PlexAccounts.Include(x => x.PlexAccountLibraries)
             .ThenInclude(x => x.PlexLibrary)
             .Include(x => x.PlexAccountServers)
@@ -73,8 +76,8 @@ public class CreateAccount_IntegrationTests : BaseIntegrationTests
         plexAccountDb.PlexAccountLibraries.Count.ShouldBe(libraryCount);
 
         // Ensure PlexServer has been created
-        Container.DbContext.PlexServers.ToList().Count.ShouldBe(2);
-        var plexServersDb = Container
+        container.DbContext.PlexServers.ToList().Count.ShouldBe(2);
+        var plexServersDb = container
             .DbContext.PlexServers.Include(x => x.PlexLibraries)
             .IncludeLibrariesWithMedia()
             .FirstOrDefault();

@@ -6,9 +6,9 @@ using PlexRipper.Application;
 
 namespace IntegrationTests.WebAPI.DownloadController;
 
-public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegrationTests
+public class DownloadControllerDownloadMediaIntegrationTests : BaseIntegrationTests
 {
-    public DownloadController_DownloadMedia_IntegrationTests(ITestOutputHelper output)
+    public DownloadControllerDownloadMediaIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -17,26 +17,29 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
         // Arrange
         var plexMovieCount = 3;
 
-        using var Container = await CreateContainer(config =>
-        {
-            config.DownloadSpeedLimitInKib = 25000;
-            config.PlexMockApiOptions = x =>
+        using var container = await CreateContainer(
+            231156,
+            config =>
             {
-                x.MockServers.Add(new PlexMockServerConfig { DownloadFileSizeInMb = 50 });
-            };
-            config.DatabaseOptions = x =>
-            {
-                x.PlexAccountCount = 1;
-                x.PlexServerCount = 1;
-                x.PlexLibraryCount = 1;
-                x.MovieCount = plexMovieCount;
-            };
-        });
+                config.DownloadSpeedLimitInKib = 25000;
+                config.PlexMockApiOptions = x =>
+                {
+                    x.MockServers.Add(new PlexMockServerConfig { DownloadFileSizeInMb = 50 });
+                };
+                config.DatabaseOptions = x =>
+                {
+                    x.PlexAccountCount = 1;
+                    x.PlexServerCount = 1;
+                    x.PlexLibraryCount = 1;
+                    x.MovieCount = plexMovieCount;
+                };
+            }
+        );
 
-        var plexMovies = await Container.DbContext.PlexMovies.ToListAsync();
+        var plexMovies = await container.DbContext.PlexMovies.ToListAsync();
         plexMovies.Count.ShouldBe(
             plexMovieCount,
-            $"PlexMovies count should be 10 failed with database name: {Container.DbContext.DatabaseName}"
+            $"PlexMovies count should be 10 failed with database name: {container.DbContext.DatabaseName}"
         );
 
         var dtoList = new List<DownloadMediaDTO>()
@@ -51,20 +54,20 @@ public class DownloadController_DownloadMedia_IntegrationTests : BaseIntegration
         };
 
         // Act
-        var response = await Container.ApiClient.POSTAsync<
+        var response = await container.ApiClient.POSTAsync<
             CreateDownloadTasksEndpoint,
             List<DownloadMediaDTO>,
             ResultDTO
         >(dtoList);
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
         await Task.Delay(2000);
-        await Container.SchedulerService.AwaitScheduler();
+        await container.SchedulerService.AwaitScheduler();
         await Task.Delay(2000);
 
         // Assert
         var result = response.Result;
         result.IsSuccess.ShouldBeTrue();
-        var downloadTasksDb = await Container.DbContext.GetAllDownloadTasksByServerAsync();
+        var downloadTasksDb = await container.DbContext.GetAllDownloadTasksByServerAsync();
         downloadTasksDb.ShouldNotBeNull();
         downloadTasksDb.ShouldNotBeEmpty();
         downloadTasksDb.Count.ShouldBe(plexMovieCount);

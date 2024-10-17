@@ -15,7 +15,7 @@ public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccoun
     public async Task CreatePlexAccountAsync_ShouldSuccessResult_WhenAccountIsValid()
     {
         // Arrange
-        await SetupDatabase();
+        await SetupDatabase(352);
         var newAccount = PlexAccount.Create("TestUsername", "Password123");
 
         mock.SetupMediator(It.IsAny<InspectAllPlexServersByAccountIdCommand>).ReturnsAsync(Result.Ok());
@@ -44,7 +44,7 @@ public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccoun
     public async Task CreatePlexAccountAsync_ShouldFailedResult_WhenAccountUsernameExistenceCheckFailed()
     {
         // Arrange
-        await SetupDatabase(config => config.PlexAccountCount = 1);
+        await SetupDatabase(234, config => config.PlexAccountCount = 1);
         var plexAccount = await IDbContext.PlexAccounts.GetAsync(1);
         plexAccount.ShouldNotBeNull();
 

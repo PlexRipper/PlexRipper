@@ -36,8 +36,6 @@ public class BaseUnitTest : IDisposable
         Log = LogManager.CreateLogInstance(output, typeof(BaseUnitTest));
     }
 
-    protected int Seed { get; set; } = 0;
-
     /// <summary>
     /// Gets a new instance of <see cref="PlexRipperDbContext"/> for every time it is called.
     /// </summary>
@@ -66,14 +64,24 @@ public class BaseUnitTest : IDisposable
     /// <summary>
     /// Creates and maintains a unique in memory database <see cref="PlexRipperDbContext"/> for every test.
     /// </summary>
-    /// <param name="options"></param>
-    protected async Task SetupDatabase(Action<FakeDataConfig>? options = null)
+    /// <param name="seed"> The fake data seed to use for the database setup.</param>
+    /// <param name="options"> The options to use for the fake data setup.</param>
+    protected Task<Seed> SetupDatabase(int seed, Action<FakeDataConfig>? options = null) =>
+        SetupDatabase(new Seed(seed), options);
+
+    /// <summary>
+    /// Creates and maintains a unique in memory database <see cref="PlexRipperDbContext"/> for every test.
+    /// </summary>
+    /// <param name="seed"> The fake data seed to use for the database setup.</param>
+    /// <param name="options"> The options to use for the fake data setup.</param>
+    protected async Task<Seed> SetupDatabase(Seed seed, Action<FakeDataConfig>? options = null)
     {
         // Database context can be setup once and then retrieved by its DB name.
-        var dbContext = await MockDatabase.GetMemoryDbContext().Setup(Seed, options);
+        var dbContext = await MockDatabase.GetMemoryDbContext().Setup(seed, options);
         _databaseName = dbContext.DatabaseName;
         _dbContexts.Add(dbContext);
         IsDatabaseSetup = true;
+        return seed;
     }
 
     public virtual void Dispose()
@@ -92,7 +100,8 @@ public class BaseUnitTest : IDisposable
 public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
     where TUnitTestClass : class
 {
-    protected Mock<HttpMessageHandler> HttpHandlerMock;
+    // Use loose behavior here to avoid Dispose() not mocked exception
+    protected Mock<HttpMessageHandler> HttpHandlerMock = new(MockBehavior.Loose);
 
     protected TUnitTestClass _sut => mock.Create<TUnitTestClass>();
 
@@ -137,9 +146,6 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
             builder
                 .Register(_ =>
                 {
-                    // Use loose behavior here to avoid Dispose() not mocked exception
-                    HttpHandlerMock = new Mock<HttpMessageHandler>(MockBehavior.Loose);
-
                     action?.Invoke(HttpHandlerMock);
 
                     return new HttpClient(HttpHandlerMock.Object) { BaseAddress = new Uri("http://localhost:1234") };

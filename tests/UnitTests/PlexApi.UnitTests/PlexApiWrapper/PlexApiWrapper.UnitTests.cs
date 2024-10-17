@@ -64,8 +64,11 @@ public class PlexApiWrapperUnitTests : BaseUnitTest<PlexApiWrapper>
             }
         );
 
+        response1.PlexDevices.ShouldNotBeNull();
+
         var testConnection = response1.PlexDevices[0].Connections[0];
 
+        testConnection.ShouldNotBeNull();
         foreach (var plexDevice in response1.PlexDevices)
         {
             plexDevice.Connections.Add(testConnection);

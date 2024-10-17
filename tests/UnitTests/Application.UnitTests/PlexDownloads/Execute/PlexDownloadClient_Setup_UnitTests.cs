@@ -9,7 +9,7 @@ public class PlexDownloadClient_Setup_UnitTests : BaseUnitTest<PlexDownloadClien
     public async Task ShouldReturnFailedResult_WhenNullDownloadTaskIsGiven()
     {
         //Arrange
-        await SetupDatabase();
+        await SetupDatabase(82345);
 
         // Act
         var result = await _sut.Setup(

@@ -7,11 +7,12 @@ public static partial class MockDatabase
 {
     private static async Task<PlexRipperDbContext> AddDownloadTaskMovies(
         this PlexRipperDbContext context,
+        Seed seed,
         Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
-        var downloadTasks = FakeData.GetMovieDownloadTask(_seed, options).Generate(config.MovieDownloadTasksCount);
+        var downloadTasks = FakeData.GetMovieDownloadTask(seed, options).Generate(config.MovieDownloadTasksCount);
 
         var plexLibrary = context.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.Movie);
         plexLibrary.ShouldNotBeNull(
@@ -39,11 +40,12 @@ public static partial class MockDatabase
 
     private static async Task<PlexRipperDbContext> AddDownloadTaskTvShows(
         this PlexRipperDbContext context,
+        Seed seed,
         Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
-        var downloadTasks = FakeData.GetDownloadTaskTvShow(_seed, options).Generate(config.TvShowDownloadTasksCount);
+        var downloadTasks = FakeData.GetDownloadTaskTvShow(seed, options).Generate(config.TvShowDownloadTasksCount);
 
         var plexLibrary = context.PlexLibraries.FirstOrDefault(x => x.Type == PlexMediaType.TvShow);
         plexLibrary.ShouldNotBeNull(

@@ -12,10 +12,13 @@ public class DetermineDownloadStatus_UnitTests : BaseUnitTest
     public async Task ShouldSetTheDownloadTaskParentOfTypeMovieDataToDownloadFinished_WhenTheMovieDataIsDownloadStatusIsDownloadFinished()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.MovieDownloadTasksCount = 5;
-        });
+        await SetupDatabase(
+            77674,
+            config =>
+            {
+                config.MovieDownloadTasksCount = 5;
+            }
+        );
 
         var downloadTasks = await IDbContext.DownloadTaskMovie.Include(x => x.Children).ToListAsync();
         var testDownloadTask = downloadTasks[0].Children[0];
@@ -34,15 +37,18 @@ public class DetermineDownloadStatus_UnitTests : BaseUnitTest
     public async Task ShouldSetTheDownloadTaskParentOfTypeEpisodeDataToError_WhenTheEpisodeDataIsDownloadStatusIsError()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.Seed = 124;
-            config.TvShowDownloadTasksCount = 5;
-            config.TvShowSeasonCount = 5;
-            config.TvShowEpisodeCount = 5;
-        });
+        await SetupDatabase(
+            864828,
+            config =>
+            {
+                config.TvShowDownloadTasksCount = 5;
+                config.TvShowSeasonDownloadTasksCount = 5;
+                config.TvShowEpisodeDownloadTasksCount = 5;
+            }
+        );
 
-        var downloadTasks = await IDbContext.DownloadTaskTvShow.AsTracking().IncludeAll().ToListAsync();
+        var downloadTasks = await IDbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();
+
         var downloadTaskTvShowEpisodeFile = downloadTasks[3].Children[2].Children[3].Children[0];
         await IDbContext.SetDownloadStatus(downloadTaskTvShowEpisodeFile.ToKey(), DownloadStatus.Error);
 

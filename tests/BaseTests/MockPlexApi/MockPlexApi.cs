@@ -17,7 +17,7 @@ public class MockPlexApi
     private readonly List<Uri> _serverUris;
     private readonly HttpClient _client = new();
 
-    public MockPlexApi(ILog log, Action<MockPlexApiConfig>? options = null, List<Uri>? serverUris = null)
+    public MockPlexApi(ILog log, Seed seed, Action<MockPlexApiConfig>? options = null, List<Uri>? serverUris = null)
     {
         _serverUris = serverUris ?? [];
         _config = MockPlexApiConfig.FromOptions(options);
@@ -58,27 +58,27 @@ public class MockPlexApi
                 );
             },
         };
-        Setup();
+        Setup(seed);
         log.Debug("{NameOfMockPlexApi} was set-up", nameof(MockPlexApi));
     }
 
-    private void Setup()
+    private void Setup(Seed seed)
     {
-        SetupSignIn(_config);
-        SetupServerResources(_config);
+        SetupSignIn(seed, _config);
+        SetupServerResources(seed, _config);
         SetupTimeOutConnections();
     }
 
     private static HttpRequestInterceptionBuilder BaseRequest() =>
         new HttpRequestInterceptionBuilder().Requests().ForHttps().ForHost(PlexApiPaths.Host);
 
-    private void SetupServerResources(MockPlexApiConfig config)
+    private void SetupServerResources(Seed seed, MockPlexApiConfig config)
     {
         var query = BaseRequest().ForGet().ForPath(PlexApiPaths.ServerResourcesPath.TrimStart('/')).IgnoringQuery();
 
         if (!config.UnauthorizedAccessiblePlexServers)
         {
-            var servers = FakePlexApiData.GetServerResource(new Seed()).Generate(_serverUris.Count);
+            var servers = FakePlexApiData.GetServerResource(seed).Generate(_serverUris.Count);
 
             for (var i = 0; i < _serverUris.Count; i++)
                 servers[i].Connections =
@@ -103,7 +103,7 @@ public class MockPlexApi
         query.RegisterWith(_clientOptions);
     }
 
-    private void SetupSignIn(MockPlexApiConfig config)
+    private void SetupSignIn(Seed seed, MockPlexApiConfig config)
     {
         var query = BaseRequest().ForPost().ForPath(PlexApiPaths.SignInPath).IgnoringQuery();
 
@@ -112,7 +112,7 @@ public class MockPlexApi
             query
                 .Responds()
                 .WithStatus(201) // 201 is correct here, Plex for some reason gives this back on this request
-                .WithPlexSdkJsonContent(FakePlexApiData.GetPlexSignInResponse().Generate());
+                .WithPlexSdkJsonContent(FakePlexApiData.GetPlexSignInResponse(seed).Generate());
         }
         else
             query.Responds().WithStatus(401).WithPlexSdkJsonContent(FakePlexApiData.GetFailedPlexSignInResponse());

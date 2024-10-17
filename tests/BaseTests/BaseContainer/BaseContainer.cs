@@ -25,19 +25,19 @@ public class BaseContainer : IDisposable
     /// <summary>
     /// Creates an Autofac container and sets up a test database.
     /// </summary>
-    private BaseContainer(ILog log, string memoryDbName, Action<UnitTestDataConfig>? options = null)
+    private BaseContainer(ILog log, Seed seed, string memoryDbName, Action<UnitTestDataConfig>? options = null)
     {
         _log = log;
 
         _log.Information("Setting up BaseContainer with database: {MemoryDbName}", memoryDbName);
 
-        _factory = new PlexRipperWebApplicationFactory(memoryDbName, options);
+        _factory = new PlexRipperWebApplicationFactory(seed, memoryDbName, options);
 
         // Create a separate scope as not to interfere with tests running in parallel
         _lifeTimeScope = _factory.Services.GetAutofacRoot().BeginLifetimeScope();
     }
 
-    public static async Task<BaseContainer> Create(ILog log, Action<UnitTestDataConfig>? options = null)
+    public static async Task<BaseContainer> Create(ILog log, Seed seed, Action<UnitTestDataConfig>? options = null)
     {
         var config = UnitTestDataConfig.FromOptions(options);
         EnvironmentExtensions.SetIntegrationTestMode(true);
@@ -46,11 +46,11 @@ public class BaseContainer : IDisposable
 
         log.Information("Initialized integration test with database name: {DatabaseName}", memoryDbName);
 
-        var container = new BaseContainer(log, memoryDbName, options);
+        var container = new BaseContainer(log, seed, memoryDbName, options);
 
         await MockDatabase
             .GetMemoryDbContext(memoryDbName)
-            .Setup(config.Seed, config.DatabaseOptions, container.PlexMockServers);
+            .Setup(seed, config.DatabaseOptions, container.PlexMockServers);
 
         if (config.DownloadSpeedLimitInKib > 0)
             await container.SetDownloadSpeedLimit(options);

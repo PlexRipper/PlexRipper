@@ -11,9 +11,8 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
     public async Task ShouldAddAllServers_WhenNoneExistInTheDatabase()
     {
         // Arrange
-        Seed = 45832543;
-        await SetupDatabase();
-        var expectedPlexServers = FakeData.GetPlexServer(Seed).Generate(5);
+        var seed = await SetupDatabase(45832543, config => config.PlexServerCount = 0);
+        var expectedPlexServers = FakeData.GetPlexServer(seed).Generate(5);
 
         // Act
         var request = new AddOrUpdatePlexServersCommand(expectedPlexServers);
@@ -39,8 +38,7 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
     public async Task ShouldKeepTheSameServerConnectionIds_WhenOnlyTheConnectionPropertiesHaveChanged()
     {
         // Arrange
-        Seed = 23724;
-        await SetupDatabase(config => config.PlexServerCount = 5);
+        var seed = await SetupDatabase(23724, config => config.PlexServerCount = 5);
         var plexServers = IDbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
         plexServers.Count.ShouldBe(5);
 
@@ -52,7 +50,7 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
         foreach (var updatedServer in updatedServers)
         {
             var connectionCount = updatedServer.PlexServerConnections.Count;
-            var updatedConnections = FakeData.GetPlexServerConnections().Generate(connectionCount);
+            var updatedConnections = FakeData.GetPlexServerConnections(seed).Generate(connectionCount);
             for (var i = 0; i < connectionCount; i++)
                 updatedConnections[i] = new PlexServerConnection
                 {
@@ -106,10 +104,9 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
     public async Task ShouldUpdateSomeAndSyncServersWithConnections_WhenSomeServerConnectionsHaveChangedAndSomeExistInTheDatabase()
     {
         // Arrange
-        Seed = 23724;
-        await SetupDatabase(config => config.PlexServerCount = 5);
+        var seed = await SetupDatabase(23724, config => config.PlexServerCount = 5);
         var plexServers = IDbContext.PlexServers.Include(x => x.PlexServerConnections).ToList();
-        var changedPlexServers = FakeData.GetPlexServer(9236).Generate(3);
+        var changedPlexServers = FakeData.GetPlexServer(seed).Generate(3);
 
         var expectedPlexServers = new List<PlexServer>()
         {
@@ -155,12 +152,14 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
     public async Task ShouldSyncConnectionsAndKeepTheSameServerConnectionIds_WhenSomeHaveConnectionHaveChanged()
     {
         // Arrange
-        Seed = 23724;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexServerConnectionPerServerCount = 5;
-        });
+        var seed = await SetupDatabase(
+            23724,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexServerConnectionPerServerCount = 5;
+            }
+        );
 
         var plexServer = IDbContext.PlexServers.Include(x => x.PlexServerConnections).FirstOrDefault();
         plexServer.ShouldNotBeNull();
@@ -172,7 +171,7 @@ public class AddOrUpdatePlexServerCommand_UnitTests : BaseUnitTest
         plexServer.PlexServerConnections.RemoveAt(0);
         plexServer.PlexServerConnections.RemoveAt(0);
 
-        var newConnections = FakeData.GetPlexServerConnections().Generate(5);
+        var newConnections = FakeData.GetPlexServerConnections(seed).Generate(5);
         plexServer.PlexServerConnections.AddRange(newConnections);
 
         // Act

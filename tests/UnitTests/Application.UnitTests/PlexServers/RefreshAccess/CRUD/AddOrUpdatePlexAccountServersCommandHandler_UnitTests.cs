@@ -11,17 +11,19 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
     public async Task ShouldAddPlexAccountServerAssociations_WhenNoneExistsYet()
     {
         // Arrange
-        Seed = 45832543;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexAccountCount = 5;
-        });
+        var seed = await SetupDatabase(
+            583,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 5;
+            }
+        );
 
         var plexAccount = IDbContext.PlexAccounts.FirstOrDefault();
         plexAccount.ShouldNotBeNull();
         var plexServers = IDbContext.PlexServers.ToList();
-        var serverAccessTokens = FakeData.GetServerAccessTokenDTO(plexAccount, plexServers, Seed);
+        var serverAccessTokens = FakeData.GetServerAccessTokenDTO(seed, plexAccount, plexServers);
 
         // Remove all associations
         await IDbContext.PlexAccountServers.ExecuteDeleteAsync();
@@ -50,19 +52,21 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
     public async Task ShouldUpdateAndDeletePlexAccountServerAssociations_WhenTheyAreNotGiven()
     {
         // Arrange
-        Seed = 194732;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 5;
-            config.PlexAccountCount = 1;
-        });
+        var seed = await SetupDatabase(
+            194732,
+            config =>
+            {
+                config.PlexServerCount = 5;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var plexAccount = IDbContext.PlexAccounts.FirstOrDefault();
         var plexServers = IDbContext.PlexServers.ToList();
 
         plexAccount.ShouldNotBeNull();
 
-        var serverAccessTokens = FakeData.GetServerAccessTokenDTO(plexAccount, plexServers, Seed);
+        var serverAccessTokens = FakeData.GetServerAccessTokenDTO(seed, plexAccount, plexServers);
 
         serverAccessTokens.RemoveRange(1, 2);
         serverAccessTokens.ForEach(x => x.AccessToken = "######");
@@ -97,17 +101,19 @@ public class AddOrUpdatePlexAccountServersCommandHandler_UnitTests : BaseUnitTes
     public async Task ShouldNotAddPlexAccountServerAssociations_WhenAuthTokenIsEmpty()
     {
         // Arrange
-        Seed = 45832543;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 5;
-            config.PlexAccountCount = 1;
-        });
+        var seed = await SetupDatabase(
+            33382,
+            config =>
+            {
+                config.PlexServerCount = 5;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var plexAccount = IDbContext.PlexAccounts.FirstOrDefault();
         plexAccount.ShouldNotBeNull();
         var plexServers = IDbContext.PlexServers.ToList();
-        var serverAccessTokens = FakeData.GetServerAccessTokenDTO(plexAccount, plexServers, Seed);
+        var serverAccessTokens = FakeData.GetServerAccessTokenDTO(seed, plexAccount, plexServers);
 
         serverAccessTokens[0].AccessToken = string.Empty;
         serverAccessTokens[1].AccessToken = string.Empty;

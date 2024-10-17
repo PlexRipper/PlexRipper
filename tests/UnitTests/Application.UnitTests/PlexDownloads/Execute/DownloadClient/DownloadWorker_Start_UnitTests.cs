@@ -14,11 +14,14 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
     public async Task ShouldStopDownloadAndCallErrorState_WhenPlexServerIsOfflineAndStarting()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        var seed = await SetupDatabase(
+            26586,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         SetupHttpClient();
 
@@ -29,7 +32,7 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
             .Setup(x => x.CreateDownloadFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
             .Returns(Result.Fail("Failed Error"));
 
-        var task = FakeData.GetDownloadWorkerTask().Generate();
+        var task = FakeData.GetDownloadWorkerTask(seed).Generate();
 
         var sut = mock.Create<DownloadWorker>(
             new NamedParameter(
@@ -69,11 +72,14 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
     public async Task ShouldBeInErrorState_DownloadStreamReturnsEmptyStream()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        var seed = await SetupDatabase(
+            37820,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         SetupHttpClient();
 
@@ -86,7 +92,7 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
             .Setup(x => x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MemoryStream());
 
-        var task = FakeData.GetDownloadWorkerTask().Generate();
+        var task = FakeData.GetDownloadWorkerTask(seed).Generate();
 
         var sut = mock.Create<DownloadWorker>(
             new NamedParameter(

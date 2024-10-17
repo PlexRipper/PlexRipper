@@ -16,13 +16,16 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
     public async Task ShouldMarkTheLibraryAsSynced_WhenThereIsNoMediaReturned(PlexMediaType libraryType)
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 3;
-        });
+        var seed = await SetupDatabase(
+            44258,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 3;
+            }
+        );
 
-        var updatedPlexLibrary = await GetUpdatedLibrary(libraryType);
+        var updatedPlexLibrary = await GetUpdatedLibrary(seed, libraryType);
 
         mock.Mock<IPlexApiService>()
             .Setup(x =>
@@ -58,17 +61,20 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
     public async Task ShouldSyncTvShowLibrarySuccessfully_WhenMediaDataIsReturnedFromTheAPI()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 3;
-        });
+        var seed = await SetupDatabase(
+            31368,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 3;
+            }
+        );
 
-        var updatedPlexLibrary = await GetUpdatedLibrary(PlexMediaType.TvShow);
+        var updatedPlexLibrary = await GetUpdatedLibrary(seed, PlexMediaType.TvShow);
 
-        var rawTvShowData = FakeData.GetPlexTvShows().Generate(10);
-        var rawSeasonData = FakeData.GetPlexTvShowSeason().Generate(100);
-        var rawEpisodesData = FakeData.GetPlexTvShowEpisode().Generate(1000);
+        var rawTvShowData = FakeData.GetPlexTvShows(seed).Generate(10);
+        var rawSeasonData = FakeData.GetPlexTvShowSeason(seed).Generate(100);
+        var rawEpisodesData = FakeData.GetPlexTvShowEpisode(seed).Generate(1000);
 
         updatedPlexLibrary.TvShows = rawTvShowData;
 
@@ -164,12 +170,12 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             );
     }
 
-    private async Task<PlexLibrary> GetUpdatedLibrary(PlexMediaType type)
+    private async Task<PlexLibrary> GetUpdatedLibrary(Seed seed, PlexMediaType type)
     {
         var plexLibrary = await IDbContext.PlexLibraries.Where(x => x.Type == type).FirstOrDefaultAsync();
         plexLibrary.ShouldNotBeNull();
 
-        var mockPlexLibrary = FakeData.GetPlexLibrary(libraryType: type).Generate();
+        var mockPlexLibrary = FakeData.GetPlexLibrary(seed, libraryType: type).Generate();
         return new PlexLibrary
         {
             Id = plexLibrary.Id,

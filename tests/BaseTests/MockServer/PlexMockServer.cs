@@ -19,7 +19,7 @@ public class PlexMockServer : IDisposable
     private readonly PlexMockServerConfig _config;
     private readonly Action<PlexApiDataConfig>? _fakeDataConfig;
 
-    public PlexMockServer(PlexMockServerConfig? options = null)
+    public PlexMockServer(Seed seed, PlexMockServerConfig? options = null)
     {
         _config = options ?? new PlexMockServerConfig();
         _fakeDataConfig = _config.FakeDataConfig;
@@ -33,7 +33,7 @@ public class PlexMockServer : IDisposable
         );
 
         ServerUri = new Uri(Server.Urls[0]);
-        Setup();
+        Setup(seed);
         _log.Debug("Created {NameOfPlexMockServer} with url: {ServerUri}", nameof(PlexMockServer), ServerUri);
     }
 
@@ -43,12 +43,12 @@ public class PlexMockServer : IDisposable
 
     public bool IsStarted => Server.IsStarted;
 
-    private void Setup()
+    private void Setup(Seed seed)
     {
-        SetupServerIdentity();
+        SetupServerIdentity(seed);
 
         // Set up the Plex libraries
-        var librarySections = FakePlexApiData.GetLibraryMediaContainer(_fakeDataConfig);
+        var librarySections = FakePlexApiData.GetLibraryMediaContainer(seed, _fakeDataConfig);
 
         Server
             .Given(Request.Create().WithPath(PlexApiPaths.LibrarySectionsPath).UsingGet())
@@ -63,7 +63,7 @@ public class PlexMockServer : IDisposable
         // Set up the media metadata for each library
         foreach (var librarySection in librarySections.MediaContainer.Directory)
         {
-            var libraryData = FakePlexApiData.GetPlexLibrarySectionAllResponse(librarySection, _fakeDataConfig);
+            var libraryData = FakePlexApiData.GetPlexLibrarySectionAllResponse(seed, librarySection, _fakeDataConfig);
             var url = PlexApiPaths.GetLibrariesSectionsPath(librarySection.Key);
             Server
                 .Given(Request.Create().WithPath(url).UsingGet())
@@ -79,7 +79,7 @@ public class PlexMockServer : IDisposable
         SetupDownloadableFile();
     }
 
-    private void SetupServerIdentity()
+    private void SetupServerIdentity(Seed seed)
     {
         Server
             .Given(Request.Create().WithPath(PlexApiPaths.ServerIdentityPath).UsingGet())
@@ -88,7 +88,7 @@ public class PlexMockServer : IDisposable
                     .Create()
                     .WithStatusCode(HttpStatusCode.OK)
                     .WithHeader("Content-Type", ContentType.ApplicationJson)
-                    .WithPlexSdkJsonContent(FakePlexApiData.GetPlexServerIdentityResponse(_fakeDataConfig))
+                    .WithPlexSdkJsonContent(FakePlexApiData.GetPlexServerIdentityResponse(seed, _fakeDataConfig))
             );
     }
 

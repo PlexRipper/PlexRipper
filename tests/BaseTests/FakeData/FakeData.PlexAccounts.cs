@@ -4,11 +4,13 @@ namespace PlexRipper.BaseTests;
 
 public partial class FakeData
 {
-    public static Faker<PlexAccount> GetPlexAccount(int seed = 0)
+    public static Faker<PlexAccount> GetPlexAccount(int seed) => GetPlexAccount(new Seed(seed));
+
+    public static Faker<PlexAccount> GetPlexAccount(Seed seed)
     {
         return new Faker<PlexAccount>()
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.DisplayName, f => f.Internet.UserName())
             .RuleFor(x => x.Username, f => f.Internet.UserName())

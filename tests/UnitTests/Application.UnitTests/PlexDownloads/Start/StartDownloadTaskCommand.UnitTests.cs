@@ -13,7 +13,7 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
     public async Task ShouldHaveFailedResult_WhenGivenAnInvalidId()
     {
         // Arrange
-        await SetupDatabase();
+        await SetupDatabase(63209);
 
         // Act
         var result = await _sut.Handle(new StartDownloadTaskCommand(Guid.Empty), CancellationToken.None);
@@ -27,12 +27,15 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
     public async Task ShouldReturnFailedResult_WhenNoDownloadTasksCanBeStarted()
     {
         // Arrange
-        await SetupDatabase(x =>
-        {
-            x.TvShowDownloadTasksCount = 5;
-            x.TvShowSeasonDownloadTasksCount = 2;
-            x.TvShowEpisodeCount = 2;
-        });
+        await SetupDatabase(
+            96318,
+            x =>
+            {
+                x.TvShowDownloadTasksCount = 5;
+                x.TvShowSeasonDownloadTasksCount = 2;
+                x.TvShowEpisodeCount = 2;
+            }
+        );
 
         var dbContext = IDbContext;
         var tvShowDownloadTasks = await dbContext
@@ -87,12 +90,15 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
     public async Task ShouldNotPauseTheActiveDownloads_WhenThatActiveDownloadTaskIsStarted()
     {
         // Arrange
-        await SetupDatabase(x =>
-        {
-            x.TvShowDownloadTasksCount = 5;
-            x.TvShowSeasonDownloadTasksCount = 2;
-            x.TvShowEpisodeCount = 2;
-        });
+        await SetupDatabase(
+            31917,
+            x =>
+            {
+                x.TvShowDownloadTasksCount = 5;
+                x.TvShowSeasonDownloadTasksCount = 2;
+                x.TvShowEpisodeCount = 2;
+            }
+        );
 
         var dbContext = IDbContext;
         var tvShowDownloadTasks = await dbContext
@@ -153,12 +159,15 @@ public class StartDownloadTaskCommandUnitTests : BaseUnitTest<StartDownloadTaskC
     public async Task ShouldPauseTheActiveDownloads_WhenAnotherDownloadTaskIsStarted()
     {
         // Arrange
-        await SetupDatabase(x =>
-        {
-            x.TvShowDownloadTasksCount = 5;
-            x.TvShowSeasonDownloadTasksCount = 2;
-            x.TvShowEpisodeCount = 2;
-        });
+        await SetupDatabase(
+            76276,
+            x =>
+            {
+                x.TvShowDownloadTasksCount = 5;
+                x.TvShowSeasonDownloadTasksCount = 2;
+                x.TvShowEpisodeCount = 2;
+            }
+        );
 
         var dbContext = IDbContext;
         var tvShowDownloadTasks = await dbContext

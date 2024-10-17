@@ -5,7 +5,7 @@ namespace PlexRipper.BaseTests;
 
 public static partial class FakeData
 {
-    public static Faker<PlexServer> GetPlexServer(int seed = 0, Action<FakeDataConfig>? options = null)
+    public static Faker<PlexServer> GetPlexServer(Seed seed, Action<FakeDataConfig>? options = null)
     {
         var config = FakeDataConfig.FromOptions(options);
 
@@ -13,7 +13,7 @@ public static partial class FakeData
         // otherwise Entity Framework will see differently generated values as the same object and mess up any database testing
         return new Faker<PlexServer>()
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .RuleFor(p => p.Id, _ => 0)
             .RuleFor(x => x.Name, f => f.Company.CompanyName())
             .RuleFor(x => x.Product, _ => "Plex Media Server")
@@ -50,11 +50,11 @@ public static partial class FakeData
             .RuleFor(x => x.PlexAccountServers, _ => []);
     }
 
-    public static Faker<PlexLibrary> GetPlexLibrary(int seed = 0, PlexMediaType libraryType = PlexMediaType.None)
+    public static Faker<PlexLibrary> GetPlexLibrary(Seed seed, PlexMediaType libraryType = PlexMediaType.None)
     {
         return new Faker<PlexLibrary>()
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.Key, _ => GetUniqueNumber().ToString())
             .RuleFor(x => x.Title, f => f.Company.CompanyName())
@@ -78,12 +78,12 @@ public static partial class FakeData
             .RuleFor(x => x.PlexAccountLibraries, _ => []);
     }
 
-    public static Faker<FolderPath> GetFolderPaths(int seed = 0)
+    public static Faker<FolderPath> GetFolderPaths(Seed seed)
     {
         var ids = 0;
         return new Faker<FolderPath>()
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.Id, _ => ids++)
             .RuleFor(x => x.DisplayName, f => f.Random.Word())
             .RuleFor(x => x.FolderType, f => f.Random.Enum<FolderType>())
@@ -92,11 +92,11 @@ public static partial class FakeData
             .RuleFor(x => x.PlexLibraries, _ => []);
     }
 
-    public static Faker<PlexServerConnection> GetPlexServerConnections(int seed = 0)
+    public static Faker<PlexServerConnection> GetPlexServerConnections(Seed seed)
     {
         return new Faker<PlexServerConnection>()
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.Protocol, f => f.Internet.Protocol())
             .RuleFor(x => x.Address, f => f.Internet.Ip())
@@ -112,11 +112,11 @@ public static partial class FakeData
             .RuleFor(x => x.PlexServerId, _ => 0);
     }
 
-    public static Faker<PlexServerStatus> GetPlexServerStatus(int seed = 0)
+    public static Faker<PlexServerStatus> GetPlexServerStatus(Seed seed)
     {
         return new Faker<PlexServerStatus>()
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.IsSuccessful, _ => true)
             .RuleFor(x => x.StatusCode, _ => 200)
@@ -129,15 +129,15 @@ public static partial class FakeData
     }
 
     public static List<PlexAccountServer> GetPlexAccountServer(
+        Seed seed,
         PlexAccount plexAccount,
-        List<PlexServer> plexServers,
-        int seed = 0
+        List<PlexServer> plexServers
     )
     {
         var index = 0;
         return new Faker<PlexAccountServer>()
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.PlexAccountId, _ => plexAccount.Id)
             .RuleFor(x => x.PlexAccount, _ => null)
             .RuleFor(x => x.PlexServerId, _ => plexServers[index++].Id)
@@ -148,15 +148,15 @@ public static partial class FakeData
     }
 
     public static List<ServerAccessTokenDTO> GetServerAccessTokenDTO(
+        Seed seed,
         PlexAccount plexAccount,
-        List<PlexServer> plexServers,
-        int seed = 0
+        List<PlexServer> plexServers
     )
     {
         var index = 0;
         return new Faker<ServerAccessTokenDTO>()
             .StrictMode(true)
-            .UseSeed(seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.PlexAccountId, _ => plexAccount.Id)
             .RuleFor(x => x.MachineIdentifier, _ => plexServers[index++].MachineIdentifier)
             .RuleFor(x => x.AccessToken, f => f.Random.Uuid().ToString())

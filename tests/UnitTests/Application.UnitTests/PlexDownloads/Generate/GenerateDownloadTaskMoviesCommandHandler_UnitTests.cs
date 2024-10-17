@@ -16,12 +16,15 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
     public async Task ShouldHaveInsertedValidDownloadTaskMoviesInDatabase_WhenGivenValidPlexMovies()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.MovieCount = 5;
-        });
+        await SetupDatabase(
+            18022,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.MovieCount = 5;
+            }
+        );
 
         var plexMovies = await IDbContext.PlexMovies.ToListAsync();
         var movies = new List<DownloadMediaDTO>
@@ -63,14 +66,16 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
     public async Task ShouldHaveMultipleDownloadTaskMovieFile_WhenPlexMovieHasMultiParts()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.Seed = 9999;
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.MovieCount = 2;
-            config.IncludeMultiPartMovies = true;
-        });
+        await SetupDatabase(
+            9999,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.MovieCount = 2;
+                config.IncludeMultiPartMovies = true;
+            }
+        );
 
         var plexMovies = await IDbContext.PlexMovies.ToListAsync();
         var movies = new List<DownloadMediaDTO>

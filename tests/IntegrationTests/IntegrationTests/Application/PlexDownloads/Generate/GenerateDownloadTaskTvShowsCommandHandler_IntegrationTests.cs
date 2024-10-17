@@ -6,28 +6,31 @@ using PlexRipper.Domain.Validators;
 
 namespace IntegrationTests;
 
-public class GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests : BaseIntegrationTests
+public class GenerateDownloadTaskTvShowsCommandHandlerIntegrationTests : BaseIntegrationTests
 {
-    private DownloadTaskTvShowValidator validator = new();
+    private DownloadTaskTvShowValidator _validator = new();
 
-    public GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests(ITestOutputHelper output)
+    public GenerateDownloadTaskTvShowsCommandHandlerIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
     public async Task ShouldHaveGeneratedAllTvShowsDownloadTasks_WhenGivenValidCommands()
     {
         // Arrange
-        using var container = await CreateContainer(config =>
-        {
-            config.DatabaseOptions = x =>
+        using var container = await CreateContainer(
+            2653,
+            config =>
             {
-                x.PlexServerCount = 1;
-                x.PlexLibraryCount = 1;
-                x.TvShowCount = 5;
-                x.TvShowSeasonCount = 3;
-                x.TvShowEpisodeCount = 3;
-            };
-        });
+                config.DatabaseOptions = x =>
+                {
+                    x.PlexServerCount = 1;
+                    x.PlexLibraryCount = 1;
+                    x.TvShowCount = 5;
+                    x.TvShowSeasonCount = 3;
+                    x.TvShowEpisodeCount = 3;
+                };
+            }
+        );
 
         var plexTvShows = await container.DbContext.PlexTvShows.ToListAsync();
 
@@ -55,7 +58,7 @@ public class GenerateDownloadTaskTvShowsCommandHandler_IntegrationTests : BaseIn
         foreach (var downloadTaskTvShow in downloadTaskTvShows)
         {
             downloadTaskTvShow.Calculate();
-            var validationResult = await validator.ValidateAsync(downloadTaskTvShow);
+            var validationResult = await _validator.ValidateAsync(downloadTaskTvShow);
 
             // Ignore DownloadDirectory and DestinationDirectory errors as these are set in the DownloadJob
             var validErrors = validationResult.Errors.FindAll(x =>

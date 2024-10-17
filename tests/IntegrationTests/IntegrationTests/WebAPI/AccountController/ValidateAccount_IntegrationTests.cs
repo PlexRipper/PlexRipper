@@ -5,28 +5,31 @@ using PlexRipper.Application;
 
 namespace IntegrationTests.WebAPI.AccountController;
 
-public class ValidateAccount_IntegrationTests : BaseIntegrationTests
+public class ValidateAccountIntegrationTests : BaseIntegrationTests
 {
-    public ValidateAccount_IntegrationTests(ITestOutputHelper output)
+    public ValidateAccountIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
     public async Task ShouldValidatePlexAccount_WhenGivenValidCredentials()
     {
         // Arrange
-        using var Container = await CreateContainer(config =>
-        {
-            config.PlexMockApiOptions = x =>
+        using var container = await CreateContainer(
+            22453,
+            config =>
             {
-                x.SignInResponseIsValid = true;
-            };
-        });
+                config.PlexMockApiOptions = x =>
+                {
+                    x.SignInResponseIsValid = true;
+                };
+            }
+        );
 
         var plexAccount = FakeData.GetPlexAccount(26346).Generate();
         var plexAccountDTO = plexAccount.ToDTO();
 
         // Act
-        var response = await Container.ApiClient.POSTAsync<
+        var response = await container.ApiClient.POSTAsync<
             ValidatePlexAccountEndpoint,
             PlexAccountDTO,
             ResultDTO<PlexAccountDTO>
@@ -42,20 +45,22 @@ public class ValidateAccount_IntegrationTests : BaseIntegrationTests
     public async Task ShouldInValidatePlexAccountWithErrors_WhenGivenInValidCredentials()
     {
         // Arrange
-        using var Container = await CreateContainer(config =>
-        {
-            config.Seed = 4347564;
-            config.PlexMockApiOptions = x =>
+        using var container = await CreateContainer(
+            4347564,
+            config =>
             {
-                x.SignInResponseIsValid = false;
-            };
-        });
+                config.PlexMockApiOptions = x =>
+                {
+                    x.SignInResponseIsValid = false;
+                };
+            }
+        );
 
         var plexAccount = FakeData.GetPlexAccount(4347564).Generate();
         var plexAccountDTO = plexAccount.ToDTO();
 
         // Act
-        var response = await Container.ApiClient.PostAsJsonAsync(
+        var response = await container.ApiClient.PostAsJsonAsync(
             ApiRoutes.PlexAccountController + "/validate",
             plexAccountDTO
         );

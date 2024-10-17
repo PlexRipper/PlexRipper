@@ -11,19 +11,21 @@ public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest
     public async Task ShouldAddAllPlexLibraries_WhenNoneExistInTheDatabase()
     {
         // Arrange
-        Seed = 353234;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexAccountCount = 1;
-        });
+        var seed = await SetupDatabase(
+            32,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var plexAccount = IDbContext.PlexAccounts.FirstOrDefault();
         plexAccount.ShouldNotBeNull();
         var plexServer = IDbContext.PlexServers.FirstOrDefault();
         plexServer.ShouldNotBeNull();
 
-        var plexLibraries = FakeData.GetPlexLibrary(656324).Generate(5);
+        var plexLibraries = FakeData.GetPlexLibrary(seed).Generate(5);
         foreach (var plexLibrary in plexLibraries)
             plexLibrary.PlexServerId = plexServer.Id;
 
@@ -56,13 +58,15 @@ public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest
     public async Task ShouldUpdatePlexLibraries_WhenTheyExistInTheDatabase()
     {
         // Arrange
-        Seed = 656324;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 5;
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            656324,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 5;
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var dbContext = IDbContext;
         var plexServer = dbContext.PlexServers.FirstOrDefault();

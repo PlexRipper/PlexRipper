@@ -13,7 +13,6 @@ namespace PlexRipper.BaseTests;
 
 public static partial class MockDatabase
 {
-    private static int _seed;
     private static readonly ILog _log = LogManager.CreateLogInstance(typeof(MockDatabase));
     private static readonly NaturalSortComparer NaturalComparer = new(StringComparison.InvariantCultureIgnoreCase);
 
@@ -23,13 +22,14 @@ public static partial class MockDatabase
 
     private static async Task<PlexRipperDbContext> AddPlexServers(
         this PlexRipperDbContext context,
+        Seed seed,
         List<PlexMockServer> plexMockServers,
         Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
 
-        var fakeServerGenerator = FakeData.GetPlexServer(_seed, options);
+        var fakeServerGenerator = FakeData.GetPlexServer(seed, options);
         var plexServers = new List<PlexServer>();
 
         // Generate working mock servers
@@ -70,7 +70,7 @@ public static partial class MockDatabase
 
         foreach (var connection in plexConnections)
         {
-            var status = FakeData.GetPlexServerStatus().Generate();
+            var status = FakeData.GetPlexServerStatus(seed).Generate();
             status.PlexServerConnectionId = connection.Id;
             status.PlexServerId = connection.PlexServerId;
 
@@ -90,6 +90,7 @@ public static partial class MockDatabase
 
     private static async Task<PlexRipperDbContext> AddPlexLibraries(
         this PlexRipperDbContext context,
+        Seed seed,
         Action<FakeDataConfig>? options = null
     )
     {
@@ -111,13 +112,13 @@ public static partial class MockDatabase
         {
             var plexLibraries = new List<PlexLibrary>();
             if (config.ShouldHaveMoviePlexLibrary)
-                plexLibraries.Add(FakeData.GetPlexLibrary(_seed, PlexMediaType.Movie).Generate());
+                plexLibraries.Add(FakeData.GetPlexLibrary(seed, PlexMediaType.Movie).Generate());
 
             if (config.ShouldHaveTvShowPlexLibrary)
-                plexLibraries.Add(FakeData.GetPlexLibrary(_seed, PlexMediaType.TvShow).Generate());
+                plexLibraries.Add(FakeData.GetPlexLibrary(seed, PlexMediaType.TvShow).Generate());
 
             if (plexLibraryCount > 0)
-                plexLibraries.AddRange(FakeData.GetPlexLibrary(_seed).Generate(plexLibraryCount));
+                plexLibraries.AddRange(FakeData.GetPlexLibrary(seed).Generate(plexLibraryCount));
 
             foreach (var plexLibrary in plexLibraries)
                 plexLibrary.PlexServerId = plexServer.Id;
@@ -130,11 +131,11 @@ public static partial class MockDatabase
         return context;
     }
 
-    private static async Task<PlexRipperDbContext> AddPlexAccount(this PlexRipperDbContext context)
+    private static async Task<PlexRipperDbContext> AddPlexAccount(this PlexRipperDbContext context, Seed seed)
     {
         var plexServers = context.PlexServers.Include(x => x.PlexLibraries).ToList();
 
-        var plexAccount = FakeData.GetPlexAccount(_seed).Generate();
+        var plexAccount = FakeData.GetPlexAccount(seed).Generate();
 
         await context.PlexAccounts.AddAsync(plexAccount);
         await context.SaveChangesAsync();
@@ -249,13 +250,11 @@ public static partial class MockDatabase
 
     public static async Task<PlexRipperDbContext> Setup(
         this PlexRipperDbContext context,
-        int seed = 0,
+        Seed seed,
         Action<FakeDataConfig>? options = null,
         List<PlexMockServer>? plexMockServers = null
     )
     {
-        _seed = seed;
-
         var config = FakeDataConfig.FromOptions(options);
 
         // PlexServers and Libraries added
@@ -267,25 +266,25 @@ public static partial class MockDatabase
             );
 
         if (config.ShouldHavePlexServer)
-            context = await context.AddPlexServers(plexMockServers ?? [], options);
+            context = await context.AddPlexServers(seed, plexMockServers ?? [], options);
 
         if (config.ShouldHavePlexLibrary)
-            context = await context.AddPlexLibraries(options);
+            context = await context.AddPlexLibraries(seed, options);
 
         if (config.PlexAccountCount > 0)
-            context = await context.AddPlexAccount();
+            context = await context.AddPlexAccount(seed);
 
         if (config.MovieCount > 0)
-            context = await context.AddPlexMovies(options);
+            context = await context.AddPlexMovies(seed, options);
 
         if (config.TvShowCount > 0)
-            context = await context.AddPlexTvShows(options);
+            context = await context.AddPlexTvShows(seed, options);
 
         if (config.MovieDownloadTasksCount > 0)
-            context = await context.AddDownloadTaskMovies(options);
+            context = await context.AddDownloadTaskMovies(seed, options);
 
         if (config.TvShowDownloadTasksCount > 0)
-            context = await context.AddDownloadTaskTvShows(options);
+            context = await context.AddDownloadTaskTvShows(seed, options);
 
         if (config.AccountHasAccessToAllLibraries)
             context = await context.AddPlexAccountLibraries();
@@ -301,6 +300,7 @@ public static partial class MockDatabase
 
     private static async Task<PlexRipperDbContext> AddPlexMovies(
         this PlexRipperDbContext context,
+        Seed seed,
         Action<FakeDataConfig>? options = null
     )
     {
@@ -311,7 +311,7 @@ public static partial class MockDatabase
 
         foreach (var plexLibrary in plexLibraries)
         {
-            var movies = FakeData.GetPlexMovies(_seed, options).Generate(config.MovieCount);
+            var movies = FakeData.GetPlexMovies(seed, options).Generate(config.MovieCount);
 
             foreach (var movie in movies)
             {
@@ -337,6 +337,7 @@ public static partial class MockDatabase
 
     private static async Task<PlexRipperDbContext> AddPlexTvShows(
         this PlexRipperDbContext context,
+        Seed seed,
         Action<FakeDataConfig>? options = null
     )
     {
@@ -347,7 +348,7 @@ public static partial class MockDatabase
 
         foreach (var plexLibrary in plexLibraries)
         {
-            var tvShows = FakeData.GetPlexTvShows(_seed, options).Generate(config.TvShowCount);
+            var tvShows = FakeData.GetPlexTvShows(seed, options).Generate(config.TvShowCount);
 
             foreach (var tvShow in tvShows)
             {

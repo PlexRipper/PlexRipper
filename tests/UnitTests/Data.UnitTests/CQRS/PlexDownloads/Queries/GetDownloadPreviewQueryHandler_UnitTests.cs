@@ -13,7 +13,7 @@ public class GetDownloadPreviewQueryHandler_UnitTests : BaseUnitTest<GetDownload
     public async Task ShouldReturnNoDownloadPreview_WhenEmptyListIsGiven()
     {
         // Arrange
-        await SetupDatabase();
+        await SetupDatabase(15140);
 
         var request = new GetDownloadPreviewQuery(new List<DownloadMediaDTO>());
 
@@ -29,14 +29,17 @@ public class GetDownloadPreviewQueryHandler_UnitTests : BaseUnitTest<GetDownload
     public async Task ShouldReturnTheCorrectDownloadPreview_WhenMixedMediaTypes()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.TvShowCount = 5;
-            config.TvShowSeasonCount = 5;
-            config.TvShowEpisodeCount = 5;
-        });
+        await SetupDatabase(
+            47561,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.TvShowCount = 5;
+                config.TvShowSeasonCount = 5;
+                config.TvShowEpisodeCount = 5;
+            }
+        );
 
         var tvShows = await IDbContext
             .PlexTvShows.Include(x => x.Seasons)

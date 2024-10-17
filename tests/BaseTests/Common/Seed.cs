@@ -4,7 +4,7 @@ public class Seed
 {
     public int Value { get; private set; }
 
-    public Seed(int seed = 0)
+    public Seed(int seed)
     {
         Value = seed;
     }

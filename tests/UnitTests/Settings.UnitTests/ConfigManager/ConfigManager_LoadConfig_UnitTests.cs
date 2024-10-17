@@ -16,8 +16,7 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
     public void ShouldLoadSettingsAndSendToUserSettings_WhenSettingsCanBeReadFromFile()
     {
         // Arrange
-
-        var settingsModel = FakeData.GetSettingsModel().Generate();
+        var settingsModel = FakeData.GetSettingsModel(new Seed(89944)).Generate();
         var settingsJson = UserSettingsSerializer.Serialize(settingsModel);
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "");

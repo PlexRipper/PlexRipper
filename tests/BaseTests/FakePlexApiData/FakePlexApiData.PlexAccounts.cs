@@ -7,6 +7,7 @@ namespace PlexRipper.BaseTests;
 public partial class FakePlexApiData
 {
     public static Faker<PostUsersSignInDataUserPlexAccount> GetPlexSignInResponse(
+        Seed seed,
         Action<UnitTestDataConfig>? options = null
     )
     {
@@ -14,7 +15,7 @@ public partial class FakePlexApiData
 
         return new Faker<PostUsersSignInDataUserPlexAccount>()
             .StrictMode(true)
-            .UseSeed(config.Seed)
+            .UseSeed(seed.Next())
             .RuleFor(x => x.Id, f => f.Random.Number(99999999))
             .RuleFor(x => x.Uuid, f => f.Random.Guid().ToString())
             .RuleFor(x => x.Username, f => f.Internet.UserName())

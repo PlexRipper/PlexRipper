@@ -4,9 +4,9 @@ using PlexRipper.Application;
 
 namespace IntegrationTests.WebAPI.DownloadController;
 
-public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrationTests
+public class DownloadControllerGetDownloadTasksIntegrationTests : BaseIntegrationTests
 {
-    public DownloadController_GetDownloadTasks_IntegrationTests(ITestOutputHelper output)
+    public DownloadControllerGetDownloadTasksIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -17,26 +17,28 @@ public class DownloadController_GetDownloadTasks_IntegrationTests : BaseIntegrat
         var tvShowSeasonDownloadTasksCount = 2;
         var tvShowEpisodeDownloadTasksCount = 3;
 
-        using var Container = await CreateContainer(config =>
-        {
-            config.Seed = 45485864;
-            config.DatabaseOptions = x =>
+        using var container = await CreateContainer(
+            45485864,
+            config =>
             {
-                x.PlexServerCount = 1;
-                x.PlexLibraryCount = 2;
-                x.TvShowCount = 5;
-                x.TvShowDownloadTasksCount = tvShowDownloadTasksCount;
-                x.TvShowSeasonDownloadTasksCount = tvShowSeasonDownloadTasksCount;
-                x.TvShowEpisodeDownloadTasksCount = tvShowEpisodeDownloadTasksCount;
-            };
-            config.PlexMockApiOptions = x =>
-            {
-                x.MockServers.Add(new PlexMockServerConfig());
-            };
-        });
+                config.DatabaseOptions = x =>
+                {
+                    x.PlexServerCount = 1;
+                    x.PlexLibraryCount = 2;
+                    x.TvShowCount = 5;
+                    x.TvShowDownloadTasksCount = tvShowDownloadTasksCount;
+                    x.TvShowSeasonDownloadTasksCount = tvShowSeasonDownloadTasksCount;
+                    x.TvShowEpisodeDownloadTasksCount = tvShowEpisodeDownloadTasksCount;
+                };
+                config.PlexMockApiOptions = x =>
+                {
+                    x.MockServers.Add(new PlexMockServerConfig());
+                };
+            }
+        );
 
         // Act
-        var response = await Container.ApiClient.GETAsync<
+        var response = await container.ApiClient.GETAsync<
             GetAllDownloadTasksEndpoint,
             ResultDTO<List<ServerDownloadProgressDTO>>
         >();

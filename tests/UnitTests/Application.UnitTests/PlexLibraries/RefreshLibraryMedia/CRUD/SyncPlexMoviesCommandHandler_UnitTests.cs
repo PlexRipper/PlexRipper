@@ -12,17 +12,19 @@ public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMovie
     public async Task ShouldCreateAllMovies_WhenNoneExistsYet()
     {
         // Arrange
-        Seed = 451253;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-        });
+        var seed = await SetupDatabase(
+            451253,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+            }
+        );
 
         var library = IDbContext.PlexLibraries.First();
         library.ShouldNotBeNull();
 
-        var movies = FakeData.GetPlexMovies(Seed).Generate(50);
+        var movies = FakeData.GetPlexMovies(seed).Generate(50);
         SetIds(library, movies);
 
         library.Movies = movies;
@@ -42,14 +44,16 @@ public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMovie
     public async Task ShouldDeleteTwentyMovies_WhenSomeExist()
     {
         // Arrange
-        Seed = 4503253;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.MovieCount = 50;
-        });
+        await SetupDatabase(
+            4503253,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieCount = 50;
+            }
+        );
 
         var library = IDbContext.PlexLibraries.First();
         library.ShouldNotBeNull();
@@ -78,21 +82,23 @@ public class SyncPlexMoviesCommandHandler_UnitTests : BaseUnitTest<SyncPlexMovie
     public async Task ShouldCreateUpdateAndDeleteMovies_WhenSomeExist()
     {
         // Arrange
-        Seed = 4903259;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.MovieCount = 50;
-        });
+        var seed = await SetupDatabase(
+            4903259,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.MovieCount = 50;
+            }
+        );
 
         var library = IDbContext.PlexLibraries.First();
         var moviesDb = IDbContext.PlexMovies.ToList();
         library.ShouldNotBeNull();
         var newMovies = new List<PlexMovie>();
         newMovies.AddRange(moviesDb.GetRange(0, 10));
-        newMovies.AddRange(FakeData.GetPlexMovies(45845).Generate(30));
+        newMovies.AddRange(FakeData.GetPlexMovies(seed).Generate(30));
 
         for (var i = 0; i < newMovies.Count; i++)
         {

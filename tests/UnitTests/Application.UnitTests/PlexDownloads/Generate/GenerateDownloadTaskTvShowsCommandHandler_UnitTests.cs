@@ -14,12 +14,15 @@ public class GenerateDownloadTaskTvShowsCommandHandler_UnitTests
     public async Task ShouldHaveInsertedValidDownloadTaskTvShowsInDatabase_WhenGivenValidPlexTvShows()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.TvShowCount = 5;
-            config.TvShowSeasonCount = 3;
-            config.TvShowEpisodeCount = 3;
-        });
+        await SetupDatabase(
+            5954,
+            config =>
+            {
+                config.TvShowCount = 5;
+                config.TvShowSeasonCount = 3;
+                config.TvShowEpisodeCount = 3;
+            }
+        );
         var plexTvShows = await IDbContext.PlexTvShows.IncludeAll().ToListAsync();
 
         var tvShows = new List<DownloadMediaDTO>

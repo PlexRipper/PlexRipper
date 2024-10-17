@@ -11,7 +11,7 @@ public class PlexRipperDbContextExtensions_GetAllDownloadTasksAsync_UnitTests : 
     public async Task ShouldReturnNoDownloadTasks_WhenNoDownloadTasksAreInDb()
     {
         // Arrange
-        await SetupDatabase();
+        await SetupDatabase(50574);
 
         // Act
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
@@ -24,14 +24,16 @@ public class PlexRipperDbContextExtensions_GetAllDownloadTasksAsync_UnitTests : 
     public async Task ShouldReturnMovieDownloadTasks_WhenMovieDownloadTasksAreInDB()
     {
         // Arrange
-        Seed = 21467;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 2;
-            config.MovieCount = 20;
-            config.MovieDownloadTasksCount = 10;
-        });
+        await SetupDatabase(
+            21467,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 2;
+                config.MovieCount = 20;
+                config.MovieDownloadTasksCount = 10;
+            }
+        );
 
         // Act
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
@@ -49,16 +51,18 @@ public class PlexRipperDbContextExtensions_GetAllDownloadTasksAsync_UnitTests : 
     public async Task ShouldAllTvShowDownloadTasksWithAllIncludes_WhenTvShowDownloadTasksAreInDB()
     {
         // Arrange
-        Seed = 2767;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 2;
-            config.TvShowCount = 20;
-            config.TvShowDownloadTasksCount = 5;
-            config.TvShowSeasonDownloadTasksCount = 5;
-            config.TvShowEpisodeDownloadTasksCount = 5;
-        });
+        await SetupDatabase(
+            2767,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 2;
+                config.TvShowCount = 20;
+                config.TvShowDownloadTasksCount = 5;
+                config.TvShowSeasonDownloadTasksCount = 5;
+                config.TvShowEpisodeDownloadTasksCount = 5;
+            }
+        );
 
         // Act
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();

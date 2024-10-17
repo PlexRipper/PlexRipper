@@ -11,10 +11,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
     public async Task ShouldHaveNextDownloadTask_WhenAllAreQueued()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.TvShowDownloadTasksCount = 5;
-        });
+        await SetupDatabase(69402, config => config.TvShowDownloadTasksCount = 5);
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync();
 
         // Act
@@ -30,10 +27,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
     public async Task ShouldHaveNextDownloadTask_WhenADownloadTaskHasBeenCompleted()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.TvShowDownloadTasksCount = 5;
-        });
+        await SetupDatabase(92673, config => config.TvShowDownloadTasksCount = 5);
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Completed);
         await IDbContext.SaveChangesAsync();
@@ -51,10 +45,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
     public async Task ShouldHaveNextQueuedDownloadTaskInDownloadingTask_WhenAParentDownloadTaskIsAlreadyDownloading()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.TvShowDownloadTasksCount = 5;
-        });
+        await SetupDatabase(48899, config => config.TvShowDownloadTasksCount = 5);
 
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Downloading);
@@ -75,10 +66,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
     public async Task ShouldHaveNoDownloadTask_WhenADownloadTaskIsAlreadyDownloading()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.TvShowDownloadTasksCount = 5;
-        });
+        await SetupDatabase(69598, config => config.TvShowDownloadTasksCount = 5);
 
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Downloading);
@@ -95,10 +83,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
     public async Task ShouldHaveNoNextDownloadTask_WhenMergingAndDownloadFinished()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.MovieDownloadTasksCount = 5;
-        });
+        await SetupDatabase(61612, config => config.MovieDownloadTasksCount = 5);
 
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Merging);
@@ -119,10 +104,7 @@ public class DownloadQueue_GetNextDownloadTask_UnitTests : BaseUnitTest<Applicat
     public async Task ShouldHaveLastQueuedDownloadTask_WhenMergingQueuedAndDownloadFinished()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.MovieDownloadTasksCount = 5;
-        });
+        await SetupDatabase(13297, config => config.MovieDownloadTasksCount = 5);
 
         var downloadTasks = await IDbContext.GetAllDownloadTasksByServerAsync(asTracking: true);
         downloadTasks[0].SetDownloadStatus(DownloadStatus.Merging);

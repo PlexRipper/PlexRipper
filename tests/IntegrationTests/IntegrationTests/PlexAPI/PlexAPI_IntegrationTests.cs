@@ -2,26 +2,29 @@ using PlexRipper.PlexApi;
 
 namespace IntegrationTests.PlexAPI;
 
-public class PlexAPI_IntegrationTests : BaseIntegrationTests
+public class PlexApiIntegrationTests : BaseIntegrationTests
 {
-    public PlexAPI_IntegrationTests(ITestOutputHelper output)
+    public PlexApiIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
     public async Task ShouldHaveTheInterceptedClientInjected_WhenPlexAPIIsRunningInTestingMode()
     {
         // Act
-        using var Container = await CreateContainer(config =>
-        {
-            config.PlexMockApiOptions = x =>
+        using var container = await CreateContainer(
+            2363,
+            config =>
             {
-                x.MockServers.Add(new PlexMockServerConfig());
-            };
-        });
+                config.PlexMockApiOptions = x =>
+                {
+                    x.MockServers.Add(new PlexMockServerConfig());
+                };
+            }
+        );
 
         // Act
-        var client = Container.Resolve<HttpClient>();
-        var wrapper = Container.Resolve<PlexApiWrapper>();
+        var client = container.Resolve<HttpClient>();
+        var wrapper = container.Resolve<PlexApiWrapper>();
         var response = await wrapper.GetAccessibleServers("asdasdas");
 
         // Assert

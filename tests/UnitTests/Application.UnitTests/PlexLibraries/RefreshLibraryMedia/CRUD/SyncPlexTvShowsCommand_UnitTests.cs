@@ -14,18 +14,21 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
     public async Task ShouldCreateAllTvShows_WhenNoneExists()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-        });
+        var seed = await SetupDatabase(
+            11865,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+            }
+        );
 
         var library = IDbContext.PlexLibraries.First();
         library.ShouldNotBeNull();
 
         var newTvShows = FakeData
             .GetPlexTvShows(
-                45845,
+                seed,
                 config =>
                 {
                     config.TvShowSeasonCount = 2;
@@ -59,14 +62,17 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
     public async Task ShouldUpdateAllTvShows_WhenAllExists()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.TvShowCount = 10;
-            config.TvShowSeasonCount = 2;
-            config.TvShowEpisodeCount = 5;
-        });
+        await SetupDatabase(
+            48674,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.TvShowCount = 10;
+                config.TvShowSeasonCount = 2;
+                config.TvShowEpisodeCount = 5;
+            }
+        );
 
         var library = IDbContext
             .PlexLibraries.Include(x => x.TvShows)
@@ -99,14 +105,16 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
     public async Task ShouldDeleteTwentyTvShows_WhenSomeExist()
     {
         // Arrange
-        Seed = 4503253;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.TvShowCount = 50;
-        });
+        await SetupDatabase(
+            4503253,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.TvShowCount = 50;
+            }
+        );
 
         var library = IDbContext.PlexLibraries.First();
         library.ShouldNotBeNull();
@@ -132,23 +140,25 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
     public async Task ShouldInsertSeasonsWithExistingTvShows_WhenSomeSeasonsAlreadyExist()
     {
         // Arrange
-        Seed = 4503253;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.TvShowCount = 10;
-            config.TvShowSeasonCount = 2;
-            config.TvShowEpisodeCount = 5;
-        });
+        var seed = await SetupDatabase(
+            34284,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.TvShowCount = 10;
+                config.TvShowSeasonCount = 2;
+                config.TvShowEpisodeCount = 5;
+            }
+        );
 
         var library = IDbContext.PlexLibraries.First();
         library.ShouldNotBeNull();
         var newTvShows = IDbContext.PlexTvShows.Include(x => x.Seasons).ThenInclude(x => x.Episodes).ToList();
 
         foreach (var tvShow in newTvShows)
-            tvShow.Seasons.AddRange(FakeData.GetPlexTvShowSeason().Generate(3));
+            tvShow.Seasons.AddRange(FakeData.GetPlexTvShowSeason(seed).Generate(3));
 
         SetIds(library, newTvShows);
 
@@ -169,16 +179,18 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
     public async Task ShouldNotCreateDuplicateKeys_WhenTheSameMediaIsCreated()
     {
         // Arrange
-        Seed = 4503253;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.TvShowCount = 10;
-            config.TvShowSeasonCount = 2;
-            config.TvShowEpisodeCount = 5;
-        });
+        await SetupDatabase(
+            16344,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.TvShowCount = 10;
+                config.TvShowSeasonCount = 2;
+                config.TvShowEpisodeCount = 5;
+            }
+        );
 
         var library = IDbContext.PlexLibraries.First();
         library.ShouldNotBeNull();
@@ -204,14 +216,16 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
     public async Task ShouldCreateUpdateAndDeleteMovies_WhenSomeExist()
     {
         // Arrange
-        Seed = 4903259;
-        await SetupDatabase(config =>
-        {
-            config.PlexServerCount = 1;
-            config.PlexLibraryCount = 1;
-            config.PlexAccountCount = 1;
-            config.TvShowCount = 50;
-        });
+        var seed = await SetupDatabase(
+            85746,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.PlexAccountCount = 1;
+                config.TvShowCount = 50;
+            }
+        );
 
         var library = IDbContext.PlexLibraries.First();
         var tvShowsDb = IDbContext.PlexTvShows.ToList();
@@ -219,7 +233,7 @@ public class SyncPlexTvShowsCommand_UnitTests : BaseUnitTest<SyncPlexTvShowsComm
 
         var newTvShows = new List<PlexTvShow>();
         newTvShows.AddRange(tvShowsDb.GetRange(0, 10));
-        newTvShows.AddRange(FakeData.GetPlexTvShows(45845).Generate(30));
+        newTvShows.AddRange(FakeData.GetPlexTvShows(seed).Generate(30));
 
         for (var i = 0; i < newTvShows.Count; i++)
         {

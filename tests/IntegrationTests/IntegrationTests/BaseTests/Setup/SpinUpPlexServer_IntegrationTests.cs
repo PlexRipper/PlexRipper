@@ -2,34 +2,37 @@ using Humanizer.Bytes;
 
 namespace IntegrationTests.BaseTests.Setup;
 
-public class SpinUpPlexServer_IntegrationTests : BaseIntegrationTests
+public class SpinUpPlexServerIntegrationTests : BaseIntegrationTests
 {
-    public SpinUpPlexServer_IntegrationTests(ITestOutputHelper output)
+    public SpinUpPlexServerIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
     public async Task ShouldSpinUpFiveMockPlexServers_WhenGivenDefaultSettings()
     {
         // Arrange
-        using var Container = await CreateContainer(config =>
-        {
-            config.PlexMockApiOptions = x =>
+        using var container = await CreateContainer(
+            213651,
+            config =>
             {
-                x.MockServers.AddRange(
-                    [
-                        new PlexMockServerConfig(),
-                        new PlexMockServerConfig(),
-                        new PlexMockServerConfig(),
-                        new PlexMockServerConfig(),
-                        new PlexMockServerConfig(),
-                    ]
-                );
-            };
-        });
+                config.PlexMockApiOptions = x =>
+                {
+                    x.MockServers.AddRange(
+                        [
+                            new PlexMockServerConfig(),
+                            new PlexMockServerConfig(),
+                            new PlexMockServerConfig(),
+                            new PlexMockServerConfig(),
+                            new PlexMockServerConfig(),
+                        ]
+                    );
+                };
+            }
+        );
 
         // Assert
-        Container.PlexMockServers.Count.ShouldBe(5);
-        Container.PlexMockServers.Select(x => x.IsStarted).ToList().ShouldAllBe(x => x == true);
+        container.PlexMockServers.Count.ShouldBe(5);
+        container.PlexMockServers.Select(x => x.IsStarted).ToList().ShouldAllBe(x => x == true);
     }
 
     [Fact]
@@ -37,17 +40,20 @@ public class SpinUpPlexServer_IntegrationTests : BaseIntegrationTests
     {
         // Arrange
         var mbSize = 50;
-        using var Container = await CreateContainer(config =>
-        {
-            config.PlexMockApiOptions = x =>
+        using var container = await CreateContainer(
+            235253,
+            config =>
             {
-                x.MockServers.AddRange([new PlexMockServerConfig() { DownloadFileSizeInMb = mbSize }]);
-            };
-        });
+                config.PlexMockApiOptions = x =>
+                {
+                    x.MockServers.AddRange([new PlexMockServerConfig() { DownloadFileSizeInMb = mbSize }]);
+                };
+            }
+        );
 
-        Container.PlexMockServers.Count.ShouldBe(1);
+        container.PlexMockServers.Count.ShouldBe(1);
 
-        var uri = Container.PlexMockServers.First().ServerUri;
+        var uri = container.PlexMockServers.First().ServerUri;
         var urlBuilder = new UriBuilder(uri)
         {
             Path = PlexMockServerConfig.FileUrl,
@@ -57,7 +63,7 @@ public class SpinUpPlexServer_IntegrationTests : BaseIntegrationTests
         var request = new HttpRequestMessage { RequestUri = urlBuilder.Uri, Method = HttpMethod.Get };
 
         // Act
-        using var client = Container.Resolve<HttpClient>();
+        using var client = container.Resolve<HttpClient>();
         var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         var stream = await response.Content.ReadAsByteArrayAsync();
 

@@ -12,10 +12,13 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
     public async Task ShouldReturnOkResult_WhenThereAreNoAccessiblePlexServers()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexAccountCount = 1;
-        });
+        await SetupDatabase(
+            66197,
+            config =>
+            {
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync();
         plexAccount.ShouldNotBeNull();
@@ -37,16 +40,19 @@ public class RefreshPlexServerAccessCommandUnitTests : BaseUnitTest<RefreshPlexS
     public async Task ShouldReturnOkResult_WhenThereAreAccessiblePlexServers()
     {
         // Arrange
-        await SetupDatabase(config =>
-        {
-            config.PlexAccountCount = 1;
-        });
+        var seed = await SetupDatabase(
+            65148,
+            config =>
+            {
+                config.PlexAccountCount = 1;
+            }
+        );
 
         var plexAccount = await IDbContext.PlexAccounts.FirstOrDefaultAsync();
         plexAccount.ShouldNotBeNull();
 
-        var plexServers = FakeData.GetPlexServer().Generate(10);
-        var serverAccessTokens = FakeData.GetServerAccessTokenDTO(plexAccount, plexServers);
+        var plexServers = FakeData.GetPlexServer(seed).Generate(10);
+        var serverAccessTokens = FakeData.GetServerAccessTokenDTO(seed, plexAccount, plexServers);
 
         var list = plexServers
             .Select(x => new PlexServerAccessDTO

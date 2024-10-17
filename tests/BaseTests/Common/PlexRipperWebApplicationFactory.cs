@@ -18,7 +18,7 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
 
     private readonly UnitTestDataConfig _config;
 
-    public PlexRipperWebApplicationFactory(string memoryDbName, Action<UnitTestDataConfig>? options = null)
+    public PlexRipperWebApplicationFactory(Seed seed, string memoryDbName, Action<UnitTestDataConfig>? options = null)
     {
         this.WithWebHostBuilder(builder =>
         {
@@ -28,19 +28,19 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
 
         MemoryDbName = memoryDbName;
         _config = UnitTestDataConfig.FromOptions(options);
-        SetupPlexMockServers(_config);
+        SetupPlexMockServers(seed, _config);
     }
 
-    private void SetupPlexMockServers(UnitTestDataConfig config)
+    private void SetupPlexMockServers(Seed seed, UnitTestDataConfig config)
     {
         var mockConfig = MockPlexApiConfig.FromOptions(config.PlexMockApiOptions);
 
         foreach (var serverConfig in mockConfig.MockServers)
-            PlexMockServers.Add(new PlexMockServer(serverConfig));
+            PlexMockServers.Add(new PlexMockServer(seed, serverConfig));
 
         _mockPlexApi =
             config.PlexMockApiOptions != null
-                ? new MockPlexApi(_log, _config.PlexMockApiOptions, PlexMockServerUris)
+                ? new MockPlexApi(_log, seed, _config.PlexMockApiOptions, PlexMockServerUris)
                 : null;
     }
 

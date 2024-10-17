@@ -11,6 +11,7 @@ public partial class FakePlexApiData
     public static GetServerResourcesResponse GetServerResourcesResponse(
         HttpStatusCode statusCode,
         Seed seed,
+        HttpRequestMessage? request = null,
         Action<PlexApiDataConfig>? options = null
     )
     {
@@ -22,13 +23,14 @@ public partial class FakePlexApiData
             .RuleFor(x => x.StatusCode, _ => (int)statusCode)
             .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
             .RuleFor(x => x.PlexDevices, _ => GetServerResource(seed, options).Generate(config.PlexServerAccessCount))
-            .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.PlexDevices, null))
+            .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.PlexDevices, request))
             .Generate();
     }
 
     public static GetAllLibrariesResponse GetAllLibrariesResponse(
         HttpStatusCode statusCode,
         Seed seed,
+        HttpRequestMessage? request = null,
         Action<PlexApiDataConfig>? options = null
     )
     {
@@ -40,12 +42,14 @@ public partial class FakePlexApiData
             .RuleFor(x => x.StatusCode, _ => (int)statusCode)
             .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
             .RuleFor(x => x.Object, _ => GetAllLibrariesResponseBody(seed, options))
-            .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.Object, null))
+            .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.Object, request))
             .Generate();
     }
 
-    public static GetServerIdentityResponseBody GetPlexServerIdentityResponse(
+    public static GetServerIdentityResponse GetPlexServerIdentityResponse(
+        HttpStatusCode statusCode,
         Seed seed,
+        HttpRequestMessage? request = null,
         Action<PlexApiDataConfig>? options = null
     )
     {
@@ -57,10 +61,19 @@ public partial class FakePlexApiData
             .RuleFor(x => x.MachineIdentifier, f => f.PlexApi().MachineIdentifier)
             .RuleFor(x => x.Version, f => f.PlexApi().PlexVersion);
 
-        return new Faker<GetServerIdentityResponseBody>()
+        var body = new Faker<GetServerIdentityResponseBody>()
             .StrictMode(true)
             .UseSeed(seed.Next())
             .RuleFor(x => x.MediaContainer, _ => container.Generate())
+            .Generate();
+
+        return new Faker<GetServerIdentityResponse>()
+            .StrictMode(true)
+            .UseSeed(seed.Next())
+            .RuleFor(x => x.StatusCode, _ => (int)statusCode)
+            .RuleFor(x => x.ContentType, _ => ContentType.ApplicationJson)
+            .RuleFor(x => x.Object, _ => body)
+            .RuleFor(x => x.RawResponse, (_, res) => GetHttpResponseMessage(statusCode, res.Object, request))
             .Generate();
     }
 

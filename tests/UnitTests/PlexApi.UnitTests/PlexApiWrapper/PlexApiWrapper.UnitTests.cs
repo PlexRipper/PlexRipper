@@ -48,6 +48,7 @@ public class PlexApiWrapperUnitTests : BaseUnitTest<PlexApiWrapper>
         var response1 = FakePlexApiData.GetServerResourcesResponse(
             HttpStatusCode.OK,
             new Seed(939),
+            null,
             config =>
             {
                 config.PlexServerAccessCount = serverCount;
@@ -57,6 +58,7 @@ public class PlexApiWrapperUnitTests : BaseUnitTest<PlexApiWrapper>
         var response2 = FakePlexApiData.GetServerResourcesResponse(
             HttpStatusCode.OK,
             new Seed(939),
+            null,
             config =>
             {
                 config.PlexServerAccessCount = serverCount;
@@ -143,15 +145,6 @@ public class PlexApiWrapperUnitTests : BaseUnitTest<PlexApiWrapper>
     {
         // Arrange
         var serverCount = 2;
-        var response2 = FakePlexApiData.GetServerResourcesResponse(
-            HttpStatusCode.OK,
-            new Seed(939),
-            config =>
-            {
-                config.PlexServerAccessCount = serverCount;
-                config.PlexServerAccessConnectionsIncludeHttps = true;
-            }
-        );
 
         mock.Mock<IPlexApiClient>()
             .Setup(x => x.SendAsync(It.IsAny<HttpRequestMessage>()))
@@ -163,7 +156,18 @@ public class PlexApiWrapperUnitTests : BaseUnitTest<PlexApiWrapper>
                             null,
                             request
                         )
-                        : FakePlexApiData.GetHttpResponseMessage(HttpStatusCode.OK, response2.PlexDevices, request)
+                        : FakePlexApiData
+                            .GetServerResourcesResponse(
+                                HttpStatusCode.OK,
+                                new Seed(939),
+                                null,
+                                config =>
+                                {
+                                    config.PlexServerAccessCount = serverCount;
+                                    config.PlexServerAccessConnectionsIncludeHttps = true;
+                                }
+                            )
+                            .RawResponse
             );
 
         // Act
@@ -179,32 +183,35 @@ public class PlexApiWrapperUnitTests : BaseUnitTest<PlexApiWrapper>
     {
         // Arrange
         var serverCount = 5;
-        var response1 = FakePlexApiData.GetServerResourcesResponse(
-            HttpStatusCode.OK,
-            new Seed(939),
-            config =>
-            {
-                config.PlexServerAccessCount = serverCount;
-            }
-        );
-
-        var response2 = FakePlexApiData.GetServerResourcesResponse(
-            HttpStatusCode.OK,
-            new Seed(940),
-            config =>
-            {
-                config.PlexServerAccessCount = serverCount;
-                config.PlexServerAccessConnectionsIncludeHttps = true;
-            }
-        );
 
         mock.Mock<IPlexApiClient>()
             .Setup(x => x.SendAsync(It.IsAny<HttpRequestMessage>()))
             .ReturnsAsync(
                 (HttpRequestMessage request) =>
                     !request.RequestUri!.Query.Contains("includeHttps=1")
-                        ? FakePlexApiData.GetHttpResponseMessage(HttpStatusCode.OK, response1.PlexDevices, request)
-                        : FakePlexApiData.GetHttpResponseMessage(HttpStatusCode.OK, response2.PlexDevices, request)
+                        ? FakePlexApiData
+                            .GetServerResourcesResponse(
+                                HttpStatusCode.OK,
+                                new Seed(939),
+                                null,
+                                config =>
+                                {
+                                    config.PlexServerAccessCount = serverCount;
+                                }
+                            )
+                            .RawResponse
+                        : FakePlexApiData
+                            .GetServerResourcesResponse(
+                                HttpStatusCode.OK,
+                                new Seed(940),
+                                null,
+                                config =>
+                                {
+                                    config.PlexServerAccessCount = serverCount;
+                                    config.PlexServerAccessConnectionsIncludeHttps = true;
+                                }
+                            )
+                            .RawResponse
             );
 
         // Act

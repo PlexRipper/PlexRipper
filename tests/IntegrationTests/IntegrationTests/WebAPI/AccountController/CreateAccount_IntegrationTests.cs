@@ -17,28 +17,9 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
     public async Task ShouldCreateAndInspectAccessibleServers_WhenPlexAccountIsValid()
     {
         // Arrange
-        var serverCount = 1;
-        var response1 = FakePlexApiData.GetServerResourcesResponse(
-            HttpStatusCode.OK,
-            new Seed(939),
-            config =>
-            {
-                config.PlexServerAccessCount = serverCount;
-            }
-        );
-
-        var response2 = FakePlexApiData.GetServerResourcesResponse(
-            HttpStatusCode.OK,
-            new Seed(940),
-            config =>
-            {
-                config.PlexServerAccessCount = serverCount;
-                config.PlexServerAccessConnectionsIncludeHttps = true;
-            }
-        );
-
-        var libraryCount = 3;
         var seed = new Seed(236234);
+        var serverCount = 1;
+        var libraryCount = 3;
 
         using var container = await CreateContainer(
             seed.Next(),
@@ -46,11 +27,15 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
             {
                 config.HttpClientOptions = x =>
                 {
+                    var response1 = FakePlexApiData.GetServerResourcesResponse(
+                        HttpStatusCode.OK,
+                        new Seed(939),
+                        null,
+                        y => y.PlexServerAccessCount = serverCount
+                    );
+
                     x.SetupRequest(HttpMethod.Get, "https://plex.tv/api/v2/resources")
-                        .ReturnsAsync(
-                            (HttpRequestMessage req, CancellationToken _) =>
-                                FakePlexApiData.GetHttpResponseMessage(HttpStatusCode.OK, response1.PlexDevices, req)
-                        );
+                        .ReturnsAsync(response1.RawResponse);
 
                     x.SetupRequest(
                             HttpMethod.Get,
@@ -58,25 +43,36 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
                         )
                         .ReturnsAsync(
                             (HttpRequestMessage req, CancellationToken _) =>
-                                FakePlexApiData.GetHttpResponseMessage(HttpStatusCode.OK, response2.PlexDevices, req)
+                                FakePlexApiData
+                                    .GetServerResourcesResponse(
+                                        HttpStatusCode.OK,
+                                        new Seed(940),
+                                        req,
+                                        y =>
+                                        {
+                                            y.PlexServerAccessCount = serverCount;
+                                            y.PlexServerAccessConnectionsIncludeHttps = true;
+                                        }
+                                    )
+                                    .RawResponse
                         );
+
+                    response1.PlexDevices.ShouldNotBeNull();
 
                     foreach (var connection in response1.PlexDevices.SelectMany(device => device.Connections))
                     {
                         x.SetupRequest(connection.Uri + "identity")
                             .ReturnsAsync(
                                 (HttpRequestMessage req, CancellationToken _) =>
-                                    FakePlexApiData.GetHttpResponseMessage(
-                                        HttpStatusCode.OK,
-                                        FakePlexApiData.GetPlexServerIdentityResponse(seed).MediaContainer,
-                                        req
-                                    )
+                                    FakePlexApiData
+                                        .GetPlexServerIdentityResponse(HttpStatusCode.OK, seed, req)
+                                        .RawResponse
                             );
-                        var data = FakePlexApiData.GetAllLibrariesResponse(HttpStatusCode.OK, seed);
+
                         x.SetupRequest(connection.Uri + "library/sections")
                             .ReturnsAsync(
                                 (HttpRequestMessage req, CancellationToken _) =>
-                                    FakePlexApiData.GetHttpResponseMessage(HttpStatusCode.OK, data.Object, req)
+                                    FakePlexApiData.GetAllLibrariesResponse(HttpStatusCode.OK, seed, req).RawResponse
                             );
                     }
                 };

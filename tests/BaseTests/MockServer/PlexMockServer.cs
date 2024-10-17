@@ -45,8 +45,6 @@ public class PlexMockServer : IDisposable
 
     private void Setup(Seed seed)
     {
-        SetupServerIdentity(seed);
-
         // Set up the Plex libraries
         var librarySections = FakePlexApiData.GetAllLibrariesResponseBody(seed, _fakeDataConfig);
 
@@ -77,19 +75,6 @@ public class PlexMockServer : IDisposable
         }
 
         SetupDownloadableFile();
-    }
-
-    private void SetupServerIdentity(Seed seed)
-    {
-        Server
-            .Given(Request.Create().WithPath(PlexApiPaths.ServerIdentityPath).UsingGet())
-            .RespondWith(
-                Response
-                    .Create()
-                    .WithStatusCode(HttpStatusCode.OK)
-                    .WithHeader("Content-Type", ContentType.ApplicationJson)
-                    .WithPlexSdkJsonContent(FakePlexApiData.GetPlexServerIdentityResponse(seed, _fakeDataConfig))
-            );
     }
 
     private void SetupDownloadableFile()

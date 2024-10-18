@@ -53,10 +53,4 @@
         <Compile Include="..\..\src\Domain\GlobalUsings.cs"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Reference Include="Moq.Contrib.HttpClient">
-            <HintPath>..\..\..\..\..\home\jason\.nuget\packages\moq.contrib.httpclient\1.4.0\lib\netstandard2.0\Moq.Contrib.HttpClient.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-
 </Project>

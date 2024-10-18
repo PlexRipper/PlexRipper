@@ -17,12 +17,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="Quartz">
-            <HintPath>..\..\..\..\..\home\jason\.nuget\packages\quartz\3.8.1\lib\net6.0\Quartz.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
         <PackageReference Include="CSharpier.MsBuild" Version="0.29.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

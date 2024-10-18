@@ -1,71 +1,71 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<LangVersion>12</LangVersion>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<RootNamespace>PlexRipper.WebAPI</RootNamespace>
-		<AssemblyName>PlexRipper.WebAPI</AssemblyName>
-		<UserSecretsId>0732cfe0-5874-40d5-99f7-8794dfabd959</UserSecretsId>
-		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-		<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-		<TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
-		<IsPackable>false</IsPackable>
-		<DockerComposeProjectPath>..\..\docker\docker-compose.dcproj</DockerComposeProjectPath>
-		<DockerfileFile>..\..\docker\Dockerfile</DockerfileFile>
-		<DockerfileContext>.</DockerfileContext>
-		<SpaRoot>ClientApp\</SpaRoot>
-		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-		<Nullable>enable</Nullable>
-	</PropertyGroup>
-	<ItemGroup>
-		<InternalsVisibleTo Include="FluentResultExtension.UnitTests" />
-		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
-		<PackageReference Include="CSharpier.MsBuild" Version="0.29.2">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="FastEndpoints.Swagger" Version="5.23.0" />
-		<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
-		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="8.0.8" />
-		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.8" />
-		<PackageReference Include="Quartz.Extensions.Hosting" Version="3.13.0" />
-		<PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
-	</ItemGroup>
-	<ItemGroup>
-		<ProjectReference Include="..\Application\Application.csproj" />
-		<ProjectReference Include="..\Data\Data.csproj" />
-		<ProjectReference Include="..\FileSystem\FileSystem.csproj" />
-		<ProjectReference Include="..\PlexApi\PlexApi.csproj" />
-		<ProjectReference Include="..\Settings\Settings.csproj" />
-		<ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<None Remove="WebAPI.csproj.DotSettings" />
-		<None Remove="ClientApp\**" />
-	</ItemGroup>
-	<ItemGroup>
-		<Compile Include="..\Domain\GlobalUsings.cs" />
-		<Compile Remove="ClientApp\**" />
-	</ItemGroup>
-	<ItemGroup>
-	  <EmbeddedResource Remove="ClientApp\**" />
-	</ItemGroup>
-	<ItemGroup>
-	  <Content Remove="ClientApp\**" />
-	</ItemGroup>
-	<ItemGroup>
-	  <_ContentIncludedByDefault Remove="ClientApp\.npm-upgrade.json" />
-	  <_ContentIncludedByDefault Remove="ClientApp\cypress\.eslintrc.json" />
-	  <_ContentIncludedByDefault Remove="ClientApp\cypress\tsconfig.json" />
-	  <_ContentIncludedByDefault Remove="ClientApp\package-lock.json" />
-	  <_ContentIncludedByDefault Remove="ClientApp\package-why.json" />
-	  <_ContentIncludedByDefault Remove="ClientApp\package.json" />
-	  <_ContentIncludedByDefault Remove="ClientApp\src\lang\de-DE.json" />
-	  <_ContentIncludedByDefault Remove="ClientApp\src\lang\en-US.json" />
-	  <_ContentIncludedByDefault Remove="ClientApp\src\lang\fr-FR.json" />
-	  <_ContentIncludedByDefault Remove="ClientApp\tsconfig.json" />
-	</ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <LangVersion>12</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>PlexRipper.WebAPI</RootNamespace>
+        <AssemblyName>PlexRipper.WebAPI</AssemblyName>
+        <UserSecretsId>0732cfe0-5874-40d5-99f7-8794dfabd959</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+        <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
+        <IsPackable>false</IsPackable>
+        <DockerComposeProjectPath>..\..\docker\docker-compose.dcproj</DockerComposeProjectPath>
+        <DockerfileFile>..\..\docker\Dockerfile</DockerfileFile>
+        <DockerfileContext>.</DockerfileContext>
+        <SpaRoot>ClientApp\</SpaRoot>
+        <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="FluentResultExtension.UnitTests"/>
+        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0"/>
+        <PackageReference Include="CSharpier.MsBuild" Version="0.29.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="FastEndpoints.Swagger" Version="5.23.0"/>
+        <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="8.0.10"/>
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.10"/>
+        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.13.0"/>
+        <PackageReference Include="Serilog.AspNetCore" Version="8.0.1"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Application\Application.csproj"/>
+        <ProjectReference Include="..\Data\Data.csproj"/>
+        <ProjectReference Include="..\FileSystem\FileSystem.csproj"/>
+        <ProjectReference Include="..\PlexApi\PlexApi.csproj"/>
+        <ProjectReference Include="..\Settings\Settings.csproj"/>
+        <ProjectReference Include="..\WebAPI.Contracts\WebAPI.Contracts.csproj"/>
+    </ItemGroup>
+    <ItemGroup>
+        <None Remove="WebAPI.csproj.DotSettings"/>
+        <None Remove="ClientApp\**"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\Domain\GlobalUsings.cs"/>
+        <Compile Remove="ClientApp\**"/>
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Remove="ClientApp\**"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Remove="ClientApp\**"/>
+    </ItemGroup>
+    <ItemGroup>
+        <_ContentIncludedByDefault Remove="ClientApp\.npm-upgrade.json"/>
+        <_ContentIncludedByDefault Remove="ClientApp\cypress\.eslintrc.json"/>
+        <_ContentIncludedByDefault Remove="ClientApp\cypress\tsconfig.json"/>
+        <_ContentIncludedByDefault Remove="ClientApp\package-lock.json"/>
+        <_ContentIncludedByDefault Remove="ClientApp\package-why.json"/>
+        <_ContentIncludedByDefault Remove="ClientApp\package.json"/>
+        <_ContentIncludedByDefault Remove="ClientApp\src\lang\de-DE.json"/>
+        <_ContentIncludedByDefault Remove="ClientApp\src\lang\en-US.json"/>
+        <_ContentIncludedByDefault Remove="ClientApp\src\lang\fr-FR.json"/>
+        <_ContentIncludedByDefault Remove="ClientApp\tsconfig.json"/>
+    </ItemGroup>
 </Project>

@@ -25,8 +25,8 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="FastEndpoints.Testing" Version="5.23.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.8"/>
-        <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="8.0.8"/>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.10"/>
+        <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="8.0.10"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
         <PackageReference Include="Moq" Version="4.20.70"/>
         <PackageReference Include="Moq.Contrib.HttpClient" Version="1.4.0"/>
@@ -51,12 +51,6 @@
 
     <ItemGroup>
         <Compile Include="..\..\src\Domain\GlobalUsings.cs"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Reference Include="Moq.Contrib.HttpClient">
-            <HintPath>..\..\..\..\..\home\jason\.nuget\packages\moq.contrib.httpclient\1.4.0\lib\netstandard2.0\Moq.Contrib.HttpClient.dll</HintPath>
-        </Reference>
     </ItemGroup>
 
 </Project>

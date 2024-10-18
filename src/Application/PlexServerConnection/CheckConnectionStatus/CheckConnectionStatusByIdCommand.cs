@@ -20,20 +20,17 @@ public class CheckConnectionStatusByIdCommandValidator : AbstractValidator<Check
 public class CheckConnectionStatusByIdCommandHandler
     : IRequestHandler<CheckConnectionStatusByIdCommand, Result<PlexServerStatus>>
 {
-    private readonly ILog _log;
     private readonly ISignalRService _signalRService;
     private readonly IPlexApiService _plexApiService;
     private readonly IPlexRipperDbContext _dbContext;
     private PlexServerConnection? _plexServerConnection;
 
     public CheckConnectionStatusByIdCommandHandler(
-        ILog log,
         IPlexRipperDbContext dbContext,
         ISignalRService signalRService,
         IPlexApiService plexApiService
     )
     {
-        _log = log;
         _dbContext = dbContext;
         _signalRService = signalRService;
         _plexApiService = plexApiService;

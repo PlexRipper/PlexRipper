@@ -12,4 +12,9 @@
     <None Include="Dockerfile" />
     <None Include="Dockerfile.aarch64" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\.dockerignore">
+      <Link>.dockerignore</Link>
+    </Content>
+  </ItemGroup>
 </Project>

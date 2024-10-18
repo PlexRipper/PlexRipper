@@ -58,6 +58,7 @@ COPY ["src/Settings.Contracts/Settings.Contracts.csproj", "src/Settings.Contract
 COPY ["src/WebAPI/WebAPI.csproj", "src/WebAPI/"]
 COPY ["src/WebAPI.Contracts/WebAPI.Contracts.csproj", "src/WebAPI.Contracts/"]
 
+
 ## Restore Projects
 RUN dotnet restore "src/WebAPI/WebAPI.csproj" --locked-mode
 
@@ -94,15 +95,15 @@ RUN \
    wget https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh && \
    chmod +x /tmp/dotnet-install.sh && \
    if  [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then \
-       /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm ; \
+       /tmp/dotnet-install.sh --version 8.0.10 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm ; \
    elif [ "$TARGETPLATFORM" = "linux/arm64/v8" ] ; then \
-       /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm64 ; \
+       /tmp/dotnet-install.sh --version 8.0.10 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture arm64 ; \
    else \
-       /tmp/dotnet-install.sh --version 8.0.8 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture x64 ; \
+       /tmp/dotnet-install.sh --version 8.0.10 --runtime aspnetcore --install-dir /usr/share/dotnet --architecture x64 ; \
    fi
 
 ## Make dotnet command available
-ENV PATH "$PATH:/usr/share/dotnet"
+ENV PATH="$PATH:/usr/share/dotnet"
 
 ## Copy to final image
 WORKDIR /app

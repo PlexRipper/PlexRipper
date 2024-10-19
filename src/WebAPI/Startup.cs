@@ -118,13 +118,10 @@ public static class Startup
                 CORSConfiguration,
                 builder =>
                 {
-                    // TODO CORS disabled, otherwise its not working when deployed in a docker container
-                    // Solution?
                     builder
+                        .SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-                        // The combo all origin is allowed with allow credentials is needed to make SignalR work from the client.
-                        .SetIsOriginAllowed(_ => true)
                         .AllowCredentials();
                 }
             );

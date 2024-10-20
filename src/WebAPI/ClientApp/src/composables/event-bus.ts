@@ -103,23 +103,4 @@ export function listenMediaOverviewDownloadCommand(action: (downloadMediaCommand
 
 // endregion
 
-// region Open Details
-
-export function sendMediaOverviewOpenDetailsCommand(mediaId: number): void {
-	useMediaOverviewCommandsBus().emit({
-		command: 'open-details',
-		mediaId,
-	});
-}
-
-export function listenMediaOverviewOpenDetailsCommand(action: (mediaId: number) => void): void {
-	useMediaOverviewCommandsBus().on(({ command, mediaId }) => {
-		if (command === 'open-details') {
-			action(mediaId ?? -1);
-		}
-	});
-}
-
-// endregion
-
 // endregion

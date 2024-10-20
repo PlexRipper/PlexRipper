@@ -147,6 +147,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
 
             // Phase 4 of 5: PlexLibrary media data was parsed successfully.
             var tvShows = BuildTvShowTree(plexLibrary, plexLibrary.TvShows, rawSeasonData, rawEpisodesData);
+            SendProgress(4, 1);
 
             // Update the MetaData of this library
             var syncResult = await _mediator.Send(new SyncPlexTvShowsCommand(tvShows));
@@ -156,12 +157,22 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 return syncResult.ToResult().LogError();
             }
 
+            var mediaSize = tvShows.Sum(x => x.MediaSize);
             plexLibrary.SetTvShowMetaData(
                 plexLibrary.TvShows.Count,
                 rawSeasonData.Count,
                 rawEpisodesData.Count,
-                tvShows.Sum(x => x.MediaSize)
+                mediaSize
             );
+
+            if (mediaSize == 0)
+            {
+                _log.Error(
+                    "No media size was found for library {PlexLibraryName} with id: {PlexLibraryId}",
+                    plexLibrary.Title,
+                    plexLibrary.Id
+                );
+            }
 
             await _dbContext.UpdatePlexLibraryById(plexLibrary);
 
@@ -214,7 +225,17 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         // Phase 2 of 3: PlexLibrary media data was parsed successfully.
         SendProgress(2, 1);
 
-        plexLibrary.SetMovieMetaData(plexLibrary.Movies.Count, plexLibrary.Movies.Sum(x => x.MediaSize));
+        var mediaSize = plexLibrary.Movies.Sum(x => x.MediaSize);
+        plexLibrary.SetMovieMetaData(plexLibrary.Movies.Count, mediaSize);
+
+        if (mediaSize == 0)
+        {
+            _log.Error(
+                "No media size was found for library {PlexLibraryName} with id: {PlexLibraryId}",
+                plexLibrary.Title,
+                plexLibrary.Id
+            );
+        }
 
         // Mark the library as synced
         plexLibrary.SyncedAt = DateTime.UtcNow;
@@ -270,6 +291,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             var plexTvShow = rawTvShowData[i];
             plexTvShow.PlexLibraryId = plexLibrary.Id;
             plexTvShow.PlexServerId = plexLibrary.PlexServerId;
+            plexTvShow.SortIndex = i + 1;
 
             // Retrieve and assign seasons for this TV show
             if (seasonsByTvShowKey.TryGetValue(plexTvShow.Key, out var seasons))
@@ -320,7 +342,6 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
 
             plexTvShow.MediaSize = plexTvShow.Seasons.Sum(x => x.MediaSize);
             plexTvShow.Duration = plexTvShow.Seasons.Sum(x => x.Duration);
-            SendProgress(4, DataFormat.GetPercentage(i, rawTvShowData.Count));
         }
 
         return rawTvShowData;

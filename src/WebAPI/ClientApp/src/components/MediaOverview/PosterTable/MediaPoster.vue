@@ -38,7 +38,7 @@
 										:outline="false"
 										size="xl"
 										flat
-										@click="sendMediaOverviewOpenDetailsCommand(mediaItem.id)" />
+										@click="$emit('open-media-details', mediaItem)" />
 								</QCol>
 							</QRow>
 						</div>
@@ -74,7 +74,7 @@
 										:outline="false"
 										size="xl"
 										flat
-										@click="sendMediaOverviewOpenDetailsCommand(mediaItem.id)" />
+										@click="$emit('open-media-details', mediaItem)" />
 								</QCol>
 							</QRow>
 						</template>
@@ -119,7 +119,6 @@
 import { get } from '@vueuse/core';
 import Log from 'consola';
 import { type DownloadMediaDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto';
-import { sendMediaOverviewOpenDetailsCommand } from '@composables/event-bus';
 
 const props = defineProps<{
 	mediaItem: PlexMediaSlimDTO;
@@ -128,6 +127,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
 	(e: 'download', downloadMediaCommands: DownloadMediaDTO[]): void;
+	(e: 'open-media-details', payload: PlexMediaSlimDTO): void;
 }>();
 
 const thumbWidth = ref(200);

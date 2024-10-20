@@ -2,7 +2,6 @@
 	<QPage>
 		<MediaOverview
 			:library-id="libraryId"
-			:media-id="mediaId"
 			:media-type="PlexMediaType.TvShow" />
 	</QPage>
 </template>
@@ -18,6 +17,5 @@ definePageMeta({
 
 const route = useRoute();
 
-const mediaId = +route.params.tvShowId;
 const libraryId = +route.params.libraryId;
 </script>

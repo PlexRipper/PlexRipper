@@ -150,24 +150,57 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
         libraryDb.SyncedAt.ShouldNotBeNull();
 
         // Verify that the merge was successful
-        Func<List<PlexTvShow>, bool> isValid = tvShows =>
-        {
-            tvShows.ShouldNotBeNull();
-            tvShows.Count.ShouldBe(10);
-            tvShows.SelectMany(x => x.Seasons).Count().ShouldBe(100);
-            tvShows.SelectMany(x => x.Seasons).SelectMany(x => x.Episodes).Count().ShouldBe(1000);
-            return true;
-        };
-
         mock.Mock<IMediator>()
             .Verify(
                 x =>
                     x.Send(
-                        It.Is<SyncPlexTvShowsCommand>(command => isValid(command.PlexTvShows)),
+                        It.Is<SyncPlexTvShowsCommand>(command => IsValid(command.PlexTvShows)),
                         It.IsAny<CancellationToken>()
                     ),
                 Times.Once
             );
+    }
+
+    private static Func<List<PlexTvShow>, bool> IsValid
+    {
+        get
+        {
+            Func<List<PlexTvShow>, bool> isValid = tvShows =>
+            {
+                tvShows.ShouldNotBeNull();
+                tvShows.Count.ShouldBe(10);
+
+                tvShows.ShouldAllBe(x => x.SortIndex > 0);
+                tvShows.ShouldAllBe(x => x.PlexLibraryId > 0);
+                tvShows.ShouldAllBe(x => x.PlexServerId > 0);
+                tvShows.ShouldAllBe(x => x.ChildCount > 0);
+                tvShows.ShouldAllBe(x => x.Year > 0);
+                tvShows.ShouldAllBe(x => x.Duration > 0);
+                tvShows.ShouldAllBe(x => x.MediaSize > 0);
+
+                var seasons = tvShows.SelectMany(x => x.Seasons).ToList();
+                seasons.Count.ShouldBe(100);
+                seasons.ShouldAllBe(x => x.SortIndex > 0);
+                seasons.ShouldAllBe(x => x.PlexLibraryId > 0);
+                seasons.ShouldAllBe(x => x.PlexServerId > 0);
+                seasons.ShouldAllBe(x => x.ChildCount > 0);
+                seasons.ShouldAllBe(x => x.Year > 0);
+                seasons.ShouldAllBe(x => x.Duration > 0);
+                seasons.ShouldAllBe(x => x.MediaSize > 0);
+
+                var episodes = seasons.SelectMany(x => x.Episodes).ToList();
+                episodes.Count.ShouldBe(1000);
+                episodes.ShouldAllBe(x => x.SortIndex > 0);
+                episodes.ShouldAllBe(x => x.PlexLibraryId > 0);
+                episodes.ShouldAllBe(x => x.PlexServerId > 0);
+                episodes.ShouldAllBe(x => x.Year > 0);
+                episodes.ShouldAllBe(x => x.Duration > 0);
+                episodes.ShouldAllBe(x => x.MediaSize > 0);
+
+                return true;
+            };
+            return isValid;
+        }
     }
 
     private async Task<PlexLibrary> GetUpdatedLibrary(Seed seed, PlexMediaType type)

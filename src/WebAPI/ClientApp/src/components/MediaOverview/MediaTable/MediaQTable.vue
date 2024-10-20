@@ -81,11 +81,11 @@ import { getMediaTableColumns } from '@composables/mediaTableColumns';
 import {
 	type IMediaOverviewCommands,
 	sendMediaOverviewDownloadCommand,
-	sendMediaOverviewOpenDetailsCommand,
 } from '@composables/event-bus';
 import { toDownloadMedia } from '@composables/conversion';
 
 const mediaTableColumns = getMediaTableColumns();
+const router = useRouter();
 
 const props = defineProps<{
 	rows: PlexMediaSlimDTO[];
@@ -126,7 +126,13 @@ function onRowAction(row: PlexMediaSlimDTO, action: IMediaOverviewCommands) {
 			sendMediaOverviewDownloadCommand(toDownloadMedia(row));
 			break;
 		case 'open-details':
-			sendMediaOverviewOpenDetailsCommand(row.id);
+			router.push({
+				name: 'tvshows-libraryId-details-tvShowId',
+				params: {
+					libraryId: row.plexLibraryId.toString(),
+					tvShowId: row.id.toString(),
+				},
+			});
 			break;
 		default:
 			throw new Error(`Unknown action: ${action.command} in MediaQTable.vue`);

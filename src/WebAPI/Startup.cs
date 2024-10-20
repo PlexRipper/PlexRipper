@@ -59,9 +59,10 @@ public static class Startup
             Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
         );
 
-        app.UseRouting();
-
+        // This has to always be first
         app.UseCors(CORSConfiguration);
+
+        app.UseRouting();
 
         app.UseAuthorization();
 
@@ -111,7 +112,7 @@ public static class Startup
     /// <param name="env"> The <see cref="IWebHostEnvironment"/> instance to configure.</param>
     public static void ConfigureServices(this IServiceCollection services, IWebHostEnvironment env)
     {
-        // Set CORS Configuration
+        // This has to always be first
         services.AddCors(options =>
         {
             options.AddPolicy(

@@ -57,9 +57,10 @@ function onResize() {
 }
 
 function onPageReady() {
-	if (get(mediaOverviewStore.lastMediaItemViewed)?.sortIndex > 0) {
+	const lastMediaItemViewed = get(mediaOverviewStore.lastMediaItemViewed);
+	if (lastMediaItemViewed && lastMediaItemViewed.sortIndex > 0) {
 		// If we have a last viewed media item, scroll to it
-		scrollToIndex(get(mediaOverviewStore.lastMediaItemViewed)?.sortIndex - 1);
+		scrollToIndex(lastMediaItemViewed.sortIndex - 1);
 	}
 }
 

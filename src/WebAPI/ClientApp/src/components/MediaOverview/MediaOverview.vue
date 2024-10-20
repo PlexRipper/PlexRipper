@@ -30,7 +30,6 @@
 				libraryStore.getServerByLibraryId(libraryId)"
 			:library="library"
 			:detail-mode="false"
-			@back="closeDetailsOverview"
 			@view-change="changeView"
 			@selection-dialog="useOpenControlDialog(mediaSelectionDialogName)"
 			@refresh-library="refreshLibrary" />
@@ -103,7 +102,6 @@ import Log from 'consola';
 import { get, set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import { type DownloadMediaDTO, type LibraryProgress, PlexMediaType, ViewMode } from '@dto';
-import { sendMediaOverviewOpenDetailsCommand } from '@composables/event-bus';
 import {
 	useMediaOverviewBarDownloadCommandBus,
 	useMediaOverviewSortBus,
@@ -287,12 +285,6 @@ onMounted(() => {
 				}
 			}),
 	);
-
-	if (props.mediaId) {
-		nextTick(() => {
-			sendMediaOverviewOpenDetailsCommand(props.mediaId);
-		});
-	}
 });
 </script>
 

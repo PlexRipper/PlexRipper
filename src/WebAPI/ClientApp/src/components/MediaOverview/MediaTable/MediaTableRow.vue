@@ -116,7 +116,6 @@ import ButtonType from '@enums/buttonType';
 import {
 	type IMediaOverviewCommands,
 	sendMediaOverviewDownloadCommand,
-	sendMediaOverviewOpenDetailsCommand,
 } from '@composables/event-bus';
 import { toDownloadMedia } from '@composables/conversion';
 
@@ -139,6 +138,8 @@ const props = withDefaults(
 	},
 );
 
+const router = useRouter();
+
 defineEmits<{
 	(e: 'selected', state: boolean): void;
 }>();
@@ -149,7 +150,13 @@ function onRowAction(action: IMediaOverviewCommands) {
 			sendMediaOverviewDownloadCommand(toDownloadMedia(props.row));
 			break;
 		case 'open-details':
-			sendMediaOverviewOpenDetailsCommand(props.row.id);
+			router.push({
+				name: 'tvshows-libraryId-details-tvShowId',
+				params: {
+					libraryId: props.row.plexLibraryId.toString(),
+					tvShowId: props.row.id.toString(),
+				},
+			});
 			break;
 		default:
 			throw new Error(`Unknown action: ${action.command} in MediaTableRow.vue`);

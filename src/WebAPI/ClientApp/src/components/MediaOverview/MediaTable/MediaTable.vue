@@ -55,7 +55,11 @@ import Log from 'consola';
 import { get, set, useScroll } from '@vueuse/core';
 import type { PlexMediaSlimDTO } from '@dto';
 import type { ISelection } from '@interfaces';
-import { triggerBoxHighlight, listenMediaOverviewScrollToCommand, useMediaOverviewStore } from '#imports';
+import {
+	triggerBoxHighlight,
+	listenMediaOverviewScrollToCommand,
+	useMediaOverviewStore,
+} from '#imports';
 import { getMediaTableColumns } from '~/composables/mediaTableColumns';
 
 const mediaOverviewStore = useMediaOverviewStore();
@@ -98,7 +102,36 @@ function updateSelectedRow(mediaId: number, state: boolean) {
 	} as ISelection);
 }
 
+function scrollToIndex(index: number) {
+	// noinspection TypeScriptValidateTypes
+	const element: HTMLElement | null = get(qTableRef)?.querySelector(`[data-scroll-index="${index}"]`) ?? null;
+	if (!element) {
+		Log.error(`Could not find scroll target element`, `[data-scroll-index="${index}"]`);
+		return;
+	}
+
+	set(scrollTargetElement, element);
+	set(autoScrollEnabled, true);
+
+	const elementRect = get(scrollTargetElement)?.getBoundingClientRect();
+	// Scroll if not visible
+	if ((elementRect?.bottom ?? 0) >= 0 && (elementRect?.top ?? 0) <= window.innerHeight) {
+		triggerBoxHighlight(element);
+	} else {
+		get(scrollTargetElement)?.scrollIntoView({
+			block: 'start',
+			behavior: 'smooth',
+		});
+	}
+}
+
 onMounted(() => {
+	const lastMediaItemViewed = get(mediaOverviewStore.lastMediaItemViewed);
+	if (lastMediaItemViewed && lastMediaItemViewed.sortIndex > 0) {
+		// If we have a last viewed media item, scroll to it
+		scrollToIndex(lastMediaItemViewed.sortIndex - 1);
+	}
+
 	// Listen for scroll to letter command
 	listenMediaOverviewScrollToCommand((letter) => {
 		if (!get(qTableRef)) {
@@ -109,26 +142,8 @@ onMounted(() => {
 		// We have to revert to normal title sort otherwise the index will be wrong
 		mediaOverviewStore.clearSort();
 		const index = mediaOverviewStore.scrollDict[letter] ? mediaOverviewStore.scrollDict[letter] : 0;
-		// noinspection TypeScriptValidateTypes
-		const element: HTMLElement | null = get(qTableRef)?.querySelector(`[data-scroll-index="${index}"]`) ?? null;
-		if (!element) {
-			Log.error(`Could not find scroll target element for letter ${letter}`, `[data-scroll-index="${index}"]`);
-			return;
-		}
 
-		set(scrollTargetElement, element);
-		set(autoScrollEnabled, true);
-
-		const elementRect = get(scrollTargetElement)?.getBoundingClientRect();
-		// Scroll if not visible
-		if ((elementRect?.bottom ?? 0) >= 0 && (elementRect?.top ?? 0) <= window.innerHeight) {
-			triggerBoxHighlight(element);
-		} else {
-			get(scrollTargetElement)?.scrollIntoView({
-				block: 'start',
-				behavior: 'smooth',
-			});
-		}
+		scrollToIndex(index);
 	});
 	// Setup stopped scrolling event listener
 	useScroll(get(qTableRef), {

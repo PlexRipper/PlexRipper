@@ -16,9 +16,9 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		scrollAlphabet: string[];
 		selection: ISelection;
 		downloadButtonVisible: boolean;
-		showMediaOverview: boolean;
 		mediaType: PlexMediaType;
 		filterQuery: string;
+		lastMediaItemViewed: PlexMediaSlimDTO | null;
 	}>({
 		items: [],
 		sortedItems: [],
@@ -28,9 +28,9 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		scrollAlphabet: [],
 		selection: { keys: [], allSelected: false, indexKey: 0 },
 		downloadButtonVisible: false,
-		showMediaOverview: true,
 		mediaType: PlexMediaType.None,
 		filterQuery: '',
+		lastMediaItemViewed: null,
 	});
 
 	const settingsStore = useSettingsStore();
@@ -107,6 +107,9 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			));
 			state.sortedState = newSortedState;
 		},
+		waitForPosterTableRef(selector: string): Promise<HTMLElement | null> {
+			return waitForElement(document.getElementById('poster-table'), selector);
+		},
 	};
 
 	const getters = {
@@ -142,7 +145,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			}
 		}),
 		showSelectionButton: computed((): boolean => {
-			return state.showMediaOverview && get(getters.getMediaViewMode) === ViewMode.Table;
+			return get(getters.getMediaViewMode) === ViewMode.Table;
 		}),
 		showDownloadButton: computed((): boolean => {
 			return state.downloadButtonVisible || (getters.hasSelectedMedia && get(getters.getMediaViewMode) === ViewMode.Table);
@@ -158,6 +161,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 
 			return null;
 		}),
+
 	};
 
 	watch(getters.getMediaItems, () => actions.setFirstLetterIndex());

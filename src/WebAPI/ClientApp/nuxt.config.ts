@@ -178,34 +178,6 @@ export default defineNuxtConfig({
 		transpile: ['primevue'],
 	},
 
-	hooks: {
-		'pages:extend'(pages) {
-			pages.push({
-				name: 'media-overview',
-				path: '/tvshows/:libraryId',
-				file: resolve(__dirname, 'src/pages/tvshows/[libraryId].vue'),
-				meta: {
-					scrollPos: {
-						top: 0,
-						left: 0,
-					},
-				},
-				children: [
-					{
-						name: 'details-overview',
-						path: 'details/:tvShowId',
-						file: resolve(__dirname, 'src/pages/tvshows/[libraryId].vue'),
-						meta: {
-							scrollPos: {
-								top: 0,
-								left: 0,
-							},
-						},
-					},
-				],
-			});
-		},
-	},
 	eslint: {
 		config: {
 			stylistic: {

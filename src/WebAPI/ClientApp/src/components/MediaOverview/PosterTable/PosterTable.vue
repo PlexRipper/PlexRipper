@@ -16,7 +16,8 @@
 			:index="index"
 			:media-item="item"
 			:data-scroll-index="index"
-			@download="sendMediaOverviewDownloadCommand($event)" />
+			@download="sendMediaOverviewDownloadCommand($event)"
+			@open-media-details="onOpenMediaDetails" />
 	</RecycleScroller>
 </template>
 
@@ -40,6 +41,7 @@ const posterCardWidth = ref(200 + 32);
 const posterCardHeight = ref(340 + 32);
 const gridItems = ref(0);
 const scrolledIndex = ref(0);
+const router = useRouter();
 
 defineProps<{
 	mediaType: PlexMediaType;
@@ -50,6 +52,46 @@ defineProps<{
 function onResize() {
 	const { width } = useElementBounding(posterTableRef);
 	set(gridItems, Math.floor(get(width) / get(posterCardWidth)));
+	// This is the last step of the lifecycle, so we can safely scroll to the last viewed item
+	nextTick(() => onPageReady());
+}
+
+function onPageReady() {
+	if (get(mediaOverviewStore.lastMediaItemViewed)?.sortIndex > 0) {
+		// If we have a last viewed media item, scroll to it
+		scrollToIndex(get(mediaOverviewStore.lastMediaItemViewed)?.sortIndex - 1);
+	}
+}
+
+function onOpenMediaDetails(mediaItem: PlexMediaSlimDTO) {
+	router.push({
+		name: 'tvshows-libraryId-details-tvShowId',
+		params: {
+			libraryId: mediaItem.plexLibraryId.toString(),
+			tvShowId: mediaItem.id.toString(),
+		},
+	});
+}
+
+function scrollToIndex(index: number) {
+	const scrollRef = get(recycleScrollerRef);
+	if (!scrollRef) {
+		Log.error('Could not find recycle scroller reference: ', scrollRef);
+		return;
+	}
+
+	Log.debug('Scrolling to index:', index);
+
+	// Scroll to item first, otherwise the target element won't exist in dom to highlight
+	scrollRef.scrollToItem(index);
+
+	// Wait for the element to be rendered before highlighting
+	waitForElement(get(posterTableRef), `[data-scroll-index="${index}"]`).then((element) => {
+		// Highlight the element after a short delay due to render hang
+		setTimeout(() => {
+			triggerBoxHighlight(element);
+		}, 400);
+	});
 }
 
 onMounted(() => {
@@ -66,22 +108,7 @@ onMounted(() => {
 		set(scrolledIndex, index);
 		set(autoScrollEnabled, true);
 
-		const scrollRef = get(recycleScrollerRef);
-		if (!scrollRef) {
-			Log.error('Could not find recycle scroller reference: ', scrollRef);
-			return;
-		}
-
-		// Scroll to item first, otherwise the target element won't exist in dom to highlight
-		scrollRef.scrollToItem(index);
-
-		// Wait for the element to be rendered before highlighting
-		waitForElement(get(posterTableRef), `[data-scroll-index="${index}"]`).then((element) => {
-			// Highlight the element after a short delay due to render hang
-			setTimeout(() => {
-				triggerBoxHighlight(element);
-			}, 400);
-		});
+		scrollToIndex(index);
 	});
 });
 </script>

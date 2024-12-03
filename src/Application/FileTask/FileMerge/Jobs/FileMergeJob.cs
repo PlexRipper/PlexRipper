@@ -1,6 +1,7 @@
 using Data.Contracts;
 using FileSystem.Contracts;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 using Quartz;
 
 namespace PlexRipper.Application;
@@ -60,8 +61,7 @@ public class FileMergeJob : IJob
 
             if (downloadTask!.DownloadStatus is DownloadStatus.MoveFinished or DownloadStatus.MergeFinished)
             {
-                // TODO: - Delete the directory of the tv-show
-                _directorySystem.DeleteDirectoryFromFilePath(downloadTask.FilePaths.First());
+                CleanUpTempFolders(downloadTask);
 
                 await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Completed);
 
@@ -71,6 +71,24 @@ public class FileMergeJob : IJob
         catch (Exception e)
         {
             _log.Error(e);
+        }
+    }
+
+    private void CleanUpTempFolders(DownloadTaskFileBase downloadTask)
+    {
+        if (downloadTask.DownloadTaskType == DownloadTaskType.EpisodeData)
+        {
+            // This deletes the Season folder
+            _directorySystem.DeleteDirectoryFromFilePath(downloadTask.FilePaths.First());
+
+            // This deletes the TvShow folder
+            _directorySystem.DeleteDirectoryFromFilePath(downloadTask.DownloadDirectory);
+        }
+
+        if (downloadTask.DownloadTaskType == DownloadTaskType.MovieData)
+        {
+            // This deletes the Season folder
+            _directorySystem.DeleteDirectoryFromFilePath(downloadTask.FilePaths.First());
         }
     }
 }

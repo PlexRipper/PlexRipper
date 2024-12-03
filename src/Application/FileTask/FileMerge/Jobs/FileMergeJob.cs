@@ -65,6 +65,11 @@ public class FileMergeJob : IJob
 
                 await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Completed);
 
+                // Clean up the DownloadWorkerTasks
+                await _dbContext
+                    .DownloadWorkerTasks.Where(x => x.DownloadTaskId == downloadTask.Id)
+                    .ExecuteDeleteAsync();
+
                 await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTaskKey));
             }
         }

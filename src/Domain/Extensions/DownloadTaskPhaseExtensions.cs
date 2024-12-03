@@ -52,7 +52,6 @@ public static class DownloadTaskPhaseExtensions
                 fileTransferProgress.FileDataTransferred,
                 downloadTaskProgress.DataTotal
             ),
-            DownloadTaskPhase.Completed => 0,
             _ => DataFormat.GetPercentage(downloadTaskProgress.DataReceived, downloadTaskProgress.DataTotal),
         };
 

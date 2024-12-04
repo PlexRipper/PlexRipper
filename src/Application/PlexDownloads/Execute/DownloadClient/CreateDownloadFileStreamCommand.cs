@@ -1,21 +1,45 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using FileSystem.Contracts;
+using FluentValidation;
+using Logging.Interface;
 
-namespace PlexRipper.FileSystem;
+public record CreateDownloadFileStreamCommand(string Directory, string FileName, long FileSize)
+    : IRequest<Result<Stream>>;
 
-public class DownloadFileStream : IDownloadFileStream
+public class CreateDownloadFileStreamCommandValidator : AbstractValidator<CreateDownloadFileStreamCommand>
+{
+    public CreateDownloadFileStreamCommandValidator()
+    {
+        RuleFor(x => x.Directory).NotEmpty().WithMessage("Directory cannot be empty.");
+        RuleFor(x => x.FileName).NotEmpty().WithMessage("File name cannot be empty.");
+        RuleFor(x => x.FileSize).GreaterThan(0).WithMessage("File size must be greater than zero.");
+    }
+}
+
+public class CreateDownloadFileStreamCommandHandler : IRequestHandler<CreateDownloadFileStreamCommand, Result<Stream>>
 {
     private readonly IFileSystem _abstractedFileSystem;
+    private readonly ILog _log;
 
-    public DownloadFileStream(IFileSystem abstractedFileSystem)
+    public CreateDownloadFileStreamCommandHandler(IFileSystem abstractedFileSystem, ILog log)
     {
         _abstractedFileSystem = abstractedFileSystem;
+        _log = log;
     }
 
-    public Result<Stream> CreateDownloadFileStream(string directory, string fileName, long fileSize)
+    public async Task<Result<Stream>> Handle(
+        CreateDownloadFileStreamCommand command,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
+            await Task.CompletedTask;
+
+            var directory = command.Directory;
+            var fileName = command.FileName;
+            var fileSize = command.FileSize;
+
             var createDirectoryResult = Result.Try(() => _abstractedFileSystem.Directory.CreateDirectory(directory));
             if (createDirectoryResult.IsFailed)
                 return createDirectoryResult.ToResult();
@@ -26,7 +50,7 @@ public class DownloadFileStream : IDownloadFileStream
                 return availableSpace.ToResult();
 
             if (availableSpace.Value < fileSize)
-                return Result.Fail($"There is not enough space available in root directory {directory}");
+                return Result.Fail($"There is not enough space available in root directory {directory}").LogError();
 
             var combineResult = Result.Try((() => _abstractedFileSystem.Path.Combine(directory, fileName)));
             if (combineResult.IsFailed)

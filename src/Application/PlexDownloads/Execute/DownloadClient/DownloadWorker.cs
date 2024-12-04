@@ -26,7 +26,7 @@ public class DownloadWorker : IDisposable
 
     private readonly ILog<DownloadWorker> _log;
 
-    private readonly IDownloadFileStream _downloadFileSystem;
+    private readonly IMediator _mediator;
 
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -42,20 +42,20 @@ public class DownloadWorker : IDisposable
     /// Initializes a new instance of the <see cref="DownloadWorker"/> class.
     /// </summary>
     /// <param name="log"></param>
+    /// <param name="mediator"></param>
     /// <param name="dbContext"></param>
     /// <param name="downloadWorkerTask">The download task this worker will execute.</param>
-    /// <param name="downloadFileSystem">The filesystem used to store the downloaded data.</param>
     /// <param name="clientFactory">The factory to create a new <see cref="IPlexApiClient"/>.</param>
     public DownloadWorker(
         ILog<DownloadWorker> log,
+        IMediator mediator,
         IPlexRipperDbContext dbContext,
         DownloadWorkerTask downloadWorkerTask,
-        IDownloadFileStream downloadFileSystem,
         Func<PlexApiClientOptions?, IPlexApiClient> clientFactory
     )
     {
         _log = log;
-        _downloadFileSystem = downloadFileSystem;
+        _mediator = mediator;
         _dbContext = dbContext;
         DownloadWorkerTask = downloadWorkerTask;
 
@@ -147,10 +147,13 @@ public class DownloadWorker : IDisposable
             var downloadUrl = downloadUrlResult.Value;
 
             // Prepare destination stream
-            var fileStreamResult = _downloadFileSystem.CreateDownloadFileStream(
-                DownloadWorkerTask.DownloadDirectory,
-                FileName,
-                DownloadWorkerTask.DataTotal
+            var fileStreamResult = await _mediator.Send(
+                new CreateDownloadFileStreamCommand(
+                    DownloadWorkerTask.DownloadDirectory,
+                    FileName,
+                    DownloadWorkerTask.DataTotal
+                ),
+                CancellationToken.None
             );
             if (fileStreamResult.IsFailed)
             {

@@ -33,7 +33,6 @@ public class TestModule : Module
             .InstancePerDependency();
 
         builder.RegisterType<TestStreamTracker>().As<ITestStreamTracker>().SingleInstance();
-        builder.RegisterType<MockDownloadFileStream>().As<IDownloadFileStream>().SingleInstance();
         builder.RegisterType<MockConfigManager>().As<IConfigManager>().SingleInstance();
         builder.RegisterType<MockDirectorySystem>().As<IDirectorySystem>().SingleInstance();
         builder.RegisterType<MockIFileResultSystem>().As<IFileResultSystem>().SingleInstance();

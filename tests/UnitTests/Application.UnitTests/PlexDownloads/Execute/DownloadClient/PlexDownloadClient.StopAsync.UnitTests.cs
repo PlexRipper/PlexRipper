@@ -68,9 +68,8 @@ public class PlexDownloadClientStopAsyncUnitTests : BaseUnitTest<PlexDownloadCli
 
         // DownloadWorkerMocks
         var destinationStream = new MemoryStream();
-        mock.Mock<IDownloadFileStream>()
-            .Setup(x => x.CreateDownloadFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
-            .Returns(Result.Ok<Stream>(destinationStream))
+        mock.SetupMediator(It.IsAny<CreateDownloadFileStreamCommand>)
+            .ReturnsAsync(Result.Ok<Stream>(destinationStream))
             .Verifiable(Times.Once);
 
         var downloadStream = new ThrottledStream(new MemoryStream(new byte[(int)ByteSize.FromMebiBytes(10).Bytes]));

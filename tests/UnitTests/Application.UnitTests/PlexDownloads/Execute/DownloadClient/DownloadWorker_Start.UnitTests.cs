@@ -29,9 +29,8 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
         var plexServer = IDbContext.PlexServers.First();
 
         var destinationStream = new MemoryStream();
-        mock.Mock<IDownloadFileStream>()
-            .Setup(x => x.CreateDownloadFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
-            .Returns(Result.Ok<Stream>(destinationStream))
+        mock.SetupMediator(It.IsAny<CreateDownloadFileStreamCommand>)
+            .ReturnsAsync(Result.Ok<Stream>(destinationStream))
             .Verifiable(Times.Once);
 
         var downloadStream = new ThrottledStream(new MemoryStream(new byte[(int)ByteSize.FromMebiBytes(10).Bytes]));
@@ -112,10 +111,10 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
 
         var plexServer = IDbContext.PlexServers.First();
 
-        mock.Mock<IDownloadFileStream>()
-            .Setup(x => x.CreateDownloadFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
-            .Returns(Result.Ok<Stream>(new MemoryStream()))
+        mock.SetupMediator(It.IsAny<CreateDownloadFileStreamCommand>)
+            .ReturnsAsync(Result.Ok<Stream>(new MemoryStream()))
             .Verifiable(Times.Once);
+
         mock.Mock<IPlexApiClient>()
             .Setup(x =>
                 x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
@@ -155,9 +154,8 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
 
         var plexServer = IDbContext.PlexServers.First();
 
-        mock.Mock<IDownloadFileStream>()
-            .Setup(x => x.CreateDownloadFileStream(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
-            .Returns(Result.Ok<Stream>(new MemoryStream()))
+        mock.SetupMediator(It.IsAny<CreateDownloadFileStreamCommand>)
+            .ReturnsAsync(Result.Ok<Stream>(new MemoryStream()))
             .Verifiable(Times.Once);
 
         var mockStream = new Mock<Stream>();

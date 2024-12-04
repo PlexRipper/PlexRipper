@@ -21,9 +21,7 @@ public class ConfigManager_SaveConfig_UnitTests : BaseUnitTest<ConfigManager>
         mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
-        mock.Mock<IFileResultSystem>()
-            .Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>()))
-            .Returns(Result.Ok);
+        mock.Mock<IFile>().Setup(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>())).Verifiable(Times.Once);
 
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here
         var sut = new Mock<ConfigManager>(
@@ -43,7 +41,5 @@ public class ConfigManager_SaveConfig_UnitTests : BaseUnitTest<ConfigManager>
 
         // Assert
         resetResult.IsSuccess.ShouldBeTrue();
-        mock.Mock<IFileResultSystem>()
-            .Verify(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
     }
 }

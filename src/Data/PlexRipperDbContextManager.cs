@@ -15,24 +15,23 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
 
     private readonly IPathProvider _pathProvider;
 
-    private readonly IFileResultSystem _iFileResultSystem;
-
     private readonly IDirectory _directory;
+    private readonly IFile _file;
     private string DatabasePath => _pathProvider.DatabasePath;
 
     public PlexRipperDbContextManager(
         ILog<PlexRipperDbContextManager> log,
         IPlexRipperDbContextDatabase dbContextDatabaseDatabase,
         IPathProvider pathProvider,
-        IFileResultSystem iFileResultSystem,
-        IDirectory directory
+        IDirectory directory,
+        IFile file
     )
     {
         _log = log;
         _dbContextDatabase = dbContextDatabaseDatabase;
         _pathProvider = pathProvider;
-        _iFileResultSystem = iFileResultSystem;
         _directory = directory;
+        _file = file;
     }
 
     public Result Setup()
@@ -43,7 +42,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
             return Result.Ok();
         }
 
-        if (_iFileResultSystem.FileExists(DatabasePath))
+        if (_file.Exists(DatabasePath))
         {
             // Check if database can be connected to.
             if (_dbContextDatabase.CanConnect())
@@ -153,7 +152,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
     private Result BackUpDatabase()
     {
         _log.InformationLine("Attempting to back-up the PlexRipper database");
-        if (!_iFileResultSystem.FileExists(_pathProvider.DatabasePath))
+        if (!_file.Exists(_pathProvider.DatabasePath))
         {
             _log.InformationLine("Database does not exist, cannot continue to back-up");
             return Result.Ok();
@@ -173,12 +172,12 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
 
             foreach (var databaseFilePath in _pathProvider.DatabaseFiles)
             {
-                if (_iFileResultSystem.FileExists(databaseFilePath))
+                if (_file.Exists(databaseFilePath))
                 {
                     var destinationPath = Path.Combine(dbBackUpPath, databaseFilePath.GetFileName());
                     try
                     {
-                        _iFileResultSystem.Copy(databaseFilePath, destinationPath);
+                        _file.Copy(databaseFilePath, destinationPath);
                         _log.Here()
                             .Information(
                                 "Successfully copied \"{DatabaseFilePath}\" to back-up location\"{DestinationPath}\"",

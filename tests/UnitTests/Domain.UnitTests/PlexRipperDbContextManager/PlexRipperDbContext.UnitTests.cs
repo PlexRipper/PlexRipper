@@ -19,7 +19,7 @@ public class PlexRipperDbContextManager_UnitTests : BaseUnitTest<PlexRipperDbCon
         // Arrange
 
         mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IFileResultSystem>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(true);
+        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
@@ -39,7 +39,7 @@ public class PlexRipperDbContextManager_UnitTests : BaseUnitTest<PlexRipperDbCon
     {
         // Arrange
         mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IFileResultSystem>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(false);
+        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false).Verifiable(Times.Once);
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
 
         // Act
@@ -48,7 +48,6 @@ public class PlexRipperDbContextManager_UnitTests : BaseUnitTest<PlexRipperDbCon
         // Assert
         result.IsSuccess.ShouldBeTrue();
         mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.Migrate(), Times.Once); // Database creation involves migration
-        mock.Mock<IFileResultSystem>().Verify(x => x.FileExists(It.IsAny<string>()), Times.Once);
     }
 
     [Fact]
@@ -56,7 +55,7 @@ public class PlexRipperDbContextManager_UnitTests : BaseUnitTest<PlexRipperDbCon
     {
         // Arrange
         mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IFileResultSystem>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(false);
+        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
 
         // Act
@@ -71,7 +70,7 @@ public class PlexRipperDbContextManager_UnitTests : BaseUnitTest<PlexRipperDbCon
     {
         // Arrange
         mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IFileResultSystem>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(false);
+        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Throws(new Exception("Test Exception"));
 
         // Act
@@ -90,8 +89,8 @@ public class PlexRipperDbContextManager_UnitTests : BaseUnitTest<PlexRipperDbCon
         mock.Mock<IPathProvider>()
             .Setup(x => x.DatabaseFiles)
             .Returns(() => [PathProvider.DatabasePath, PathProvider.Database_SHM_Path, PathProvider.Database_WAL_Path]);
-        mock.Mock<IFileResultSystem>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(true);
-        mock.Mock<IFileResultSystem>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
+        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+        mock.Mock<IFile>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>())).Verifiable(Times.Exactly(3));
         mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
@@ -106,7 +105,6 @@ public class PlexRipperDbContextManager_UnitTests : BaseUnitTest<PlexRipperDbCon
         // Assert
         result.IsSuccess.ShouldBeTrue();
         var mockDbContext = mock.Mock<IPlexRipperDbContextDatabase>();
-        mock.Mock<IFileResultSystem>().Verify(x => x.Copy(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(3));
         mockDbContext.Verify(x => x.CanConnect(), Times.Once);
         mockDbContext.Verify(x => x.EnsureDeleted(), Times.Once); // Database is reset
         mockDbContext.Verify(x => x.Migrate(), Times.Once); // Database is recreated after reset

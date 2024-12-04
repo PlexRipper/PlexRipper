@@ -20,8 +20,6 @@ public class FileSystemModule : Module
     {
         var assembly = Assembly.GetExecutingAssembly();
 
-        builder.RegisterType<FileResultSystem>().As<IFileResultSystem>().SingleInstance();
-
         builder.RegisterType<PathProvider>().As<IPathProvider>().SingleInstance();
         builder.RegisterType<DiskProvider>().As<IDiskProvider>().SingleInstance();
 

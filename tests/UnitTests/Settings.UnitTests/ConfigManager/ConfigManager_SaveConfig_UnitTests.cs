@@ -27,10 +27,10 @@ public class ConfigManager_SaveConfig_UnitTests : BaseUnitTest<ConfigManager>
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
             mock.Container.Resolve<ILog>(),
-            mock.Container.Resolve<IFileResultSystem>(),
-            mock.Container.Resolve<IDirectory>(),
             mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>()
+            mock.Container.Resolve<IUserSettings>(),
+            mock.Container.Resolve<IFile>(),
+            mock.Container.Resolve<IDirectory>()
         );
         sut.Setup(x => x.SaveConfig()).CallBase();
         sut.Setup(x => x.ConfigFileExists()).Returns(true);

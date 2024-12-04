@@ -47,10 +47,10 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
             mock.Container.Resolve<ILog>(),
-            mock.Container.Resolve<IFile>(),
-            mock.Container.Resolve<IDirectory>(),
             mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>()
+            mock.Container.Resolve<IUserSettings>(),
+            mock.Container.Resolve<IFile>(),
+            mock.Container.Resolve<IDirectory>()
         );
         sut.Setup(x => x.ResetConfig()).Returns(Result.Ok);
         sut.Setup(x => x.LoadConfig()).CallBase();
@@ -76,10 +76,10 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
             mock.Container.Resolve<ILog>(),
-            mock.Container.Resolve<IFile>(),
-            mock.Container.Resolve<IDirectory>(),
             mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>()
+            mock.Container.Resolve<IUserSettings>(),
+            mock.Container.Resolve<IFile>(),
+            mock.Container.Resolve<IDirectory>()
         );
         sut.Setup(x => x.ResetConfig()).Returns(Result.Ok);
         sut.Setup(x => x.LoadConfig()).CallBase();
@@ -105,10 +105,10 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
             mock.Container.Resolve<ILog>(),
-            mock.Container.Resolve<IFile>(),
-            mock.Container.Resolve<IDirectory>(),
             mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>()
+            mock.Container.Resolve<IUserSettings>(),
+            mock.Container.Resolve<IFile>(),
+            mock.Container.Resolve<IDirectory>()
         );
         sut.Setup(x => x.ResetConfig()).Returns(Result.Ok);
         sut.Setup(x => x.LoadConfig()).CallBase();

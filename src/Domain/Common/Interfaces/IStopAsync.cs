@@ -2,5 +2,5 @@
 
 public interface IStopAsync
 {
-    public Task<Result> StopAsync(bool gracefully = true);
+    public Task<Result> StopAsync();
 }

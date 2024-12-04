@@ -25,21 +25,18 @@ public class PauseDownloadTaskCommandHandler : IRequestHandler<PauseDownloadTask
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
     private readonly IFileMergeScheduler _fileMergeScheduler;
 
     public PauseDownloadTaskCommandHandler(
         ILog log,
         IPlexRipperDbContext dbContext,
-        IMediator mediator,
         IDownloadTaskScheduler downloadTaskScheduler,
         IFileMergeScheduler fileMergeScheduler
     )
     {
         _log = log;
         _dbContext = dbContext;
-        _mediator = mediator;
         _downloadTaskScheduler = downloadTaskScheduler;
         _fileMergeScheduler = fileMergeScheduler;
     }

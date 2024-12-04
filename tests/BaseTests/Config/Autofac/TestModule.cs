@@ -36,7 +36,7 @@ public class TestModule : Module
         builder.RegisterType<MockDownloadFileStream>().As<IDownloadFileStream>().SingleInstance();
         builder.RegisterType<MockConfigManager>().As<IConfigManager>().SingleInstance();
         builder.RegisterType<MockDirectorySystem>().As<IDirectorySystem>().SingleInstance();
-        builder.RegisterType<MockFileSystem>().As<IFileSystem>().SingleInstance();
+        builder.RegisterType<MockIFileResultSystem>().As<IFileResultSystem>().SingleInstance();
         builder.RegisterType<MockSignalRService>().As<ISignalRService>().SingleInstance();
 
         SetMockedDependencies(builder);
@@ -65,7 +65,7 @@ public class TestModule : Module
         }
 
         if (Config.MockFileSystem is not null)
-            builder.RegisterInstance(Config.MockFileSystem).As<IFileSystem>();
+            builder.RegisterInstance(Config.MockFileSystem).As<IFileResultSystem>();
 
         if (Config.MockConfigManager is not null)
             builder.RegisterInstance(Config.MockConfigManager).As<IConfigManager>();

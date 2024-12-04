@@ -28,7 +28,7 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
     private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IFileSystem _fileSystem;
+    private readonly IFileResultSystem _iFileResultSystem;
     private readonly IDirectorySystem _directorySystem;
 
     private Stream? _readStream;
@@ -44,14 +44,14 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
         ILog log,
         IMediator mediator,
         IPlexRipperDbContext dbContext,
-        IFileSystem fileSystem,
+        IFileResultSystem iFileResultSystem,
         IDirectorySystem directorySystem
     )
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
-        _fileSystem = fileSystem;
+        _iFileResultSystem = iFileResultSystem;
         _directorySystem = directorySystem;
     }
 
@@ -81,7 +81,7 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
             if (createDirectoryResult.IsFailed)
                 return (await ErrorDownloadTask(downloadTask, createDirectoryResult)).LogError();
 
-            var writeStreamResult = _fileSystem.Create(
+            var writeStreamResult = _iFileResultSystem.Create(
                 downloadTask.DestinationFilePath,
                 _bufferSize,
                 FileOptions.SequentialScan
@@ -108,7 +108,7 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
             {
                 var filePath = sourceFilePaths[index];
 
-                if (!_fileSystem.FileExists(filePath))
+                if (!_iFileResultSystem.FileExists(filePath))
                 {
                     var result = Result
                         .Fail($"Filepath: {filePath} does not exist and cannot be used to merge/move the file!")
@@ -117,7 +117,12 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
                     return (await ErrorDownloadTask(downloadTask, result)).LogError();
                 }
 
-                var inputStreamResult = _fileSystem.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                var inputStreamResult = _iFileResultSystem.Open(
+                    filePath,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.Read
+                );
                 if (inputStreamResult.IsFailed)
                     return (await ErrorDownloadTask(downloadTask, inputStreamResult.ToResult())).LogError();
 
@@ -180,7 +185,7 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
                 await _readStream.DisposeAsync();
                 _readStream = null;
 
-                var deleteResult = _fileSystem.DeleteFile(filePath);
+                var deleteResult = _iFileResultSystem.DeleteFile(filePath);
                 if (deleteResult.IsFailed)
                     return (await ErrorDownloadTask(downloadTask, deleteResult)).LogError();
             }

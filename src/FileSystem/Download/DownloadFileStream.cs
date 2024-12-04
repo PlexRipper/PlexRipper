@@ -4,7 +4,7 @@ namespace PlexRipper.FileSystem;
 
 public class DownloadFileStream : IDownloadFileStream
 {
-    private readonly IFileSystem _fileSystem;
+    private readonly IFileResultSystem _iFileResultSystem;
 
     private readonly IDirectorySystem _directorySystem;
 
@@ -13,13 +13,13 @@ public class DownloadFileStream : IDownloadFileStream
     private readonly IDiskSystem _diskSystem;
 
     public DownloadFileStream(
-        IFileSystem fileSystem,
+        IFileResultSystem iFileResultSystem,
         IDirectorySystem directorySystem,
         IPathSystem pathSystem,
         IDiskSystem diskSystem
     )
     {
-        _fileSystem = fileSystem;
+        _iFileResultSystem = iFileResultSystem;
         _directorySystem = directorySystem;
         _pathSystem = pathSystem;
         _diskSystem = diskSystem;
@@ -46,9 +46,9 @@ public class DownloadFileStream : IDownloadFileStream
                 return filePath.ToResult();
 
             Stream fileStream;
-            if (_fileSystem.FileExists(filePath.Value))
+            if (_iFileResultSystem.FileExists(filePath.Value))
             {
-                var openResult = _fileSystem.Open(
+                var openResult = _iFileResultSystem.Open(
                     filePath.Value,
                     FileMode.Open,
                     FileAccess.ReadWrite,
@@ -61,7 +61,7 @@ public class DownloadFileStream : IDownloadFileStream
             }
             else
             {
-                var createResult = _fileSystem.Create(filePath.Value, 2048, FileOptions.Asynchronous);
+                var createResult = _iFileResultSystem.Create(filePath.Value, 2048, FileOptions.Asynchronous);
                 if (createResult.IsFailed)
                     return createResult.ToResult().LogError();
 

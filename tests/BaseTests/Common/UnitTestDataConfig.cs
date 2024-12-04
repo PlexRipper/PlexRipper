@@ -7,7 +7,7 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
 {
     public Action<FakeDataConfig>? DatabaseOptions { get; set; } = null;
 
-    public IFileSystem? MockFileSystem { get; set; }
+    public IFileResultSystem? MockFileSystem { get; set; }
 
     public IConfigManager? MockConfigManager { get; set; }
 

@@ -59,7 +59,7 @@ public class BaseContainer : IDisposable
 
     public HttpClient ApiClient => _factory.CreateDefaultClient();
 
-    public IFileSystem FileSystem => Resolve<IFileSystem>();
+    public IFileResultSystem IFileResultSystem => Resolve<IFileResultSystem>();
 
     public IDownloadQueue GetDownloadQueue => Resolve<IDownloadQueue>();
 

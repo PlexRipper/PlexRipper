@@ -126,10 +126,10 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         var progressList = new List<IDownloadFileTransferProgress>();
         progress.AsObservable().Subscribe(x => progressList.Add(x));
 
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<FileOptions>()))
             .Returns(() => Result.Ok<Stream>(writeStream));
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.Open(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()))
             .Returns(() =>
             {
@@ -137,7 +137,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
                 return Result.Ok<Stream>(readStreams.Last());
             })
             .Verifiable(Times.Exactly(downloadFileTask.FilePaths.Count));
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.DeleteFile(It.IsAny<string>()))
             .Returns(Result.Ok())
             .Verifiable(Times.Exactly(downloadFileTask.FilePaths.Count));
@@ -145,7 +145,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
             .Setup(x => x.CreateDirectoryFromFilePath(It.IsAny<string>()))
             .Returns(Result.Ok())
             .Verifiable(Times.Exactly(1));
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.FileExists(It.IsAny<string>()))
             .Returns(true)
             .Verifiable(Times.Exactly(4));
@@ -220,17 +220,17 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
                 }
             });
 
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<FileOptions>()))
             .Returns(() => Result.Ok<Stream>(writeStream));
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.Open(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()))
             .Returns(() =>
             {
                 readStreams.Add(FakeData.GetFileStream(fileSizeInMb));
                 return Result.Ok<Stream>(readStreams.Last());
             });
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.DeleteFile(It.IsAny<string>()))
             .Returns(Result.Ok())
             .Verifiable(Times.AtLeastOnce());
@@ -245,7 +245,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>)
             .Returns(Task.CompletedTask)
             .Verifiable(Times.AtLeastOnce);
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.FileExists(It.IsAny<string>()))
             .Returns(true)
             .Verifiable(Times.AtLeastOnce);
@@ -307,17 +307,17 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         var progressList = new List<IDownloadFileTransferProgress>();
         progress.AsObservable().Subscribe(x => progressList.Add(x));
 
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<FileOptions>()))
             .Returns(() => Result.Ok<Stream>(writeStream));
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.Open(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()))
             .Returns(() =>
             {
                 readStreams.Add(FakeData.GetFileStream(fileSizeInMb));
                 return Result.Ok<Stream>(readStreams.Last());
             });
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.DeleteFile(It.IsAny<string>()))
             .Returns(Result.Ok())
             .Verifiable(Times.Exactly(2));
@@ -332,7 +332,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>)
             .Returns(Task.CompletedTask)
             .Verifiable(Times.AtLeastOnce);
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.FileExists(It.IsAny<string>()))
             .Returns(true)
             .Verifiable(Times.Exactly(2));
@@ -391,17 +391,17 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         var progressList = new List<IDownloadFileTransferProgress>();
         progress.AsObservable().Subscribe(x => progressList.Add(x));
 
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<FileOptions>()))
             .Returns(() => Result.Ok<Stream>(writeStream));
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.Open(It.IsAny<string>(), It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()))
             .Returns(() =>
             {
                 readStreams.Add(FakeData.GetFileStream(decimal.ToDouble(decimal.Divide(fileSizeInMb, fileParts))));
                 return Result.Ok<Stream>(readStreams.Last());
             });
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.DeleteFile(It.IsAny<string>()))
             .Returns(Result.Ok())
             .Verifiable(Times.Exactly(4));
@@ -416,7 +416,7 @@ public class MergeFilesFromFileTaskCommandUnitTests : BaseUnitTest<MergeFilesFro
         mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>)
             .Returns(Task.CompletedTask)
             .Verifiable(Times.AtLeastOnce);
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.FileExists(It.IsAny<string>()))
             .Returns(true)
             .Verifiable(Times.Exactly(4));

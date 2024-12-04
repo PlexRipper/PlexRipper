@@ -2,7 +2,7 @@
 
 namespace PlexRipper.BaseTests;
 
-public class MockFileSystem : IFileSystem
+public class MockIFileResultSystem : IFileResultSystem
 {
     public Result Setup() => Result.Ok();
 

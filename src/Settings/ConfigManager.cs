@@ -10,7 +10,7 @@ public class ConfigManager : IConfigManager
     #region Fields
 
     private readonly ILog _log;
-    private readonly IFileSystem _fileSystem;
+    private readonly IFileResultSystem _iFileResultSystem;
 
     private readonly IDirectorySystem _directorySystem;
 
@@ -24,14 +24,14 @@ public class ConfigManager : IConfigManager
 
     public ConfigManager(
         ILog log,
-        IFileSystem fileSystem,
+        IFileResultSystem iFileResultSystem,
         IDirectorySystem directorySystem,
         IPathProvider pathProvider,
         IUserSettings userSettings
     )
     {
         _log = log;
-        _fileSystem = fileSystem;
+        _iFileResultSystem = iFileResultSystem;
         _directorySystem = directorySystem;
         _pathProvider = pathProvider;
         _userSettings = userSettings;
@@ -146,7 +146,7 @@ public class ConfigManager : IConfigManager
         return Result.Ok().WithSuccess("UserSettings were saved successfully!").LogInformation();
     }
 
-    public virtual bool ConfigFileExists() => _fileSystem.FileExists(_pathProvider.ConfigFileLocation);
+    public virtual bool ConfigFileExists() => _iFileResultSystem.FileExists(_pathProvider.ConfigFileLocation);
 
     #endregion
 
@@ -154,13 +154,13 @@ public class ConfigManager : IConfigManager
 
     private Result WriteToConfigFile(string jsonSettingsString)
     {
-        var writeResult = _fileSystem.FileWriteAllText(_pathProvider.ConfigFileLocation, jsonSettingsString);
+        var writeResult = _iFileResultSystem.FileWriteAllText(_pathProvider.ConfigFileLocation, jsonSettingsString);
         return writeResult.IsFailed ? writeResult.WithError("Failed to write config settings").LogError() : Result.Ok();
     }
 
     private Result<string> ReadFromConfigFile()
     {
-        var readResult = _fileSystem.FileReadAllText(_pathProvider.ConfigFileLocation);
+        var readResult = _iFileResultSystem.FileReadAllText(_pathProvider.ConfigFileLocation);
         if (readResult.IsFailed)
         {
             _log.Here()

@@ -27,7 +27,7 @@ public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
             mock.Container.Resolve<ILog>(),
-            mock.Container.Resolve<IFileSystem>(),
+            mock.Container.Resolve<IFileResultSystem>(),
             mock.Container.Resolve<IDirectorySystem>(),
             mock.Container.Resolve<IPathProvider>(),
             mock.Container.Resolve<IUserSettings>()
@@ -52,7 +52,7 @@ public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/TEST_PlexRipperSettings.json");
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(Result.Ok);
         mock.Mock<IDirectorySystem>().Setup(x => x.Exists(It.IsAny<string>())).Returns(Result.Ok(false));
@@ -62,7 +62,7 @@ public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
             mock.Container.Resolve<ILog>(),
-            mock.Container.Resolve<IFileSystem>(),
+            mock.Container.Resolve<IFileResultSystem>(),
             mock.Container.Resolve<IDirectorySystem>(),
             mock.Container.Resolve<IPathProvider>(),
             mock.Container.Resolve<IUserSettings>()

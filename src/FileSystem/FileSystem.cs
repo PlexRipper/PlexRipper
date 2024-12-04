@@ -5,7 +5,7 @@ using Logging.Interface;
 namespace PlexRipper.FileSystem;
 
 /// <inheritdoc/>
-public class FileSystem : IFileSystem
+public class FileResultSystem : IFileResultSystem
 {
     #region Fields
 
@@ -21,7 +21,7 @@ public class FileSystem : IFileSystem
 
     #region Constructor
 
-    public FileSystem(
+    public FileResultSystem(
         ILog log,
         System.IO.Abstractions.IFileSystem abstractedFileSystem,
         IDiskProvider diskProvider,

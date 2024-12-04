@@ -20,7 +20,7 @@ public class ConfigManager_SaveConfig_UnitTests : BaseUnitTest<ConfigManager>
         mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(Result.Ok);
 
@@ -28,7 +28,7 @@ public class ConfigManager_SaveConfig_UnitTests : BaseUnitTest<ConfigManager>
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
             mock.Container.Resolve<ILog>(),
-            mock.Container.Resolve<IFileSystem>(),
+            mock.Container.Resolve<IFileResultSystem>(),
             mock.Container.Resolve<IDirectorySystem>(),
             mock.Container.Resolve<IPathProvider>(),
             mock.Container.Resolve<IUserSettings>()
@@ -42,6 +42,7 @@ public class ConfigManager_SaveConfig_UnitTests : BaseUnitTest<ConfigManager>
 
         // Assert
         resetResult.IsSuccess.ShouldBeTrue();
-        mock.Mock<IFileSystem>().Verify(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        mock.Mock<IFileResultSystem>()
+            .Verify(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
     }
 }

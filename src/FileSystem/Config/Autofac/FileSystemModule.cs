@@ -6,7 +6,6 @@ using Environment;
 using FileSystem.Contracts;
 using MediatR.Extensions.Autofac.DependencyInjection;
 using MediatR.Extensions.Autofac.DependencyInjection.Builder;
-using IFileSystem = FileSystem.Contracts.IFileSystem;
 using Module = Autofac.Module;
 
 namespace PlexRipper.FileSystem.Config;
@@ -21,7 +20,7 @@ public class FileSystemModule : Module
     {
         var assembly = Assembly.GetExecutingAssembly();
 
-        builder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();
+        builder.RegisterType<IFileResultSystem>().As<IFileResultSystem>().SingleInstance();
         builder.RegisterType<PathSystem>().As<IPathSystem>().SingleInstance();
         builder.RegisterType<DiskSystem>().As<IDiskSystem>().SingleInstance();
         builder.RegisterType<DirectorySystem>().As<IDirectorySystem>().SingleInstance();

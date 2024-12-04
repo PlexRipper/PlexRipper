@@ -21,7 +21,7 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
-        mock.Mock<IFileSystem>()
+        mock.Mock<IFileResultSystem>()
             .Setup(x => x.FileReadAllText(It.IsAny<string>()))
             .Returns(() => Result.Ok(settingsJson));
         mock.Mock<IUserSettings>().Setup(x => x.UpdateSettings(It.IsAny<UserSettings>())).Returns(settingsModel);
@@ -41,14 +41,14 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "");
-        mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(() => Result.Fail(""));
+        mock.Mock<IFileResultSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(() => Result.Fail(""));
         mock.Mock<IUserSettings>().Setup(x => x.Reset());
 
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
             mock.Container.Resolve<ILog>(),
-            mock.Container.Resolve<IFileSystem>(),
+            mock.Container.Resolve<IFileResultSystem>(),
             mock.Container.Resolve<IDirectorySystem>(),
             mock.Container.Resolve<IPathProvider>(),
             mock.Container.Resolve<IUserSettings>()
@@ -68,7 +68,9 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
     public void ShouldResetSettingsWhenUserSettingsCouldNotBeSetFromJsonSerialization_WhenReadingInvalidParsedJsonSettings()
     {
         // Arrange
-        mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(() => Result.Ok("{}"));
+        mock.Mock<IFileResultSystem>()
+            .Setup(x => x.FileReadAllText(It.IsAny<string>()))
+            .Returns(() => Result.Ok("{}"));
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
         mock.Mock<IUserSettings>().Setup(x => x.Reset());
@@ -77,7 +79,7 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
             mock.Container.Resolve<ILog>(),
-            mock.Container.Resolve<IFileSystem>(),
+            mock.Container.Resolve<IFileResultSystem>(),
             mock.Container.Resolve<IDirectorySystem>(),
             mock.Container.Resolve<IPathProvider>(),
             mock.Container.Resolve<IUserSettings>()
@@ -97,7 +99,9 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
     public void ShouldResetSettingsWhenSerializationThrowsException_WhenReadingInvalidJsonSettings()
     {
         // Arrange
-        mock.Mock<IFileSystem>().Setup(x => x.FileReadAllText(It.IsAny<string>())).Returns(() => Result.Ok("@#$%^&"));
+        mock.Mock<IFileResultSystem>()
+            .Setup(x => x.FileReadAllText(It.IsAny<string>()))
+            .Returns(() => Result.Ok("@#$%^&"));
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "");
         mock.Mock<IUserSettings>().Setup(x => x.Reset());
@@ -106,7 +110,7 @@ public class ConfigManager_LoadConfig_UnitTests : BaseUnitTest<ConfigManager>
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
             mock.Container.Resolve<ILog>(),
-            mock.Container.Resolve<IFileSystem>(),
+            mock.Container.Resolve<IFileResultSystem>(),
             mock.Container.Resolve<IDirectorySystem>(),
             mock.Container.Resolve<IPathProvider>(),
             mock.Container.Resolve<IUserSettings>()

@@ -6,7 +6,7 @@ namespace FileSystem.Contracts;
 /// <summary>
 /// This is a wrapper class for the System.IO.Abstractions.FileSystem class to wrap all file system operations in Result objects.
 /// </summary>
-public interface IFileSystem
+public interface IFileResultSystem
 {
     Result<FileSystemResult> LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes);
 

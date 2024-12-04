@@ -22,13 +22,13 @@ public class GetFolderPathDirectoryRequestValidator : Validator<GetFolderPathDir
 
 public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirectoryRequest, FileSystemDTO>
 {
-    private readonly IFileSystem _fileSystem;
+    private readonly IFileResultSystem _iFileResultSystem;
 
     public override string EndpointPath => ApiRoutes.FolderPathController + "/directory";
 
-    public GetFolderPathDirectoryEndpoint(IFileSystem fileSystem)
+    public GetFolderPathDirectoryEndpoint(IFileResultSystem iFileResultSystem)
     {
-        _fileSystem = fileSystem;
+        _iFileResultSystem = iFileResultSystem;
     }
 
     public override void Configure()
@@ -49,7 +49,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
     public override async Task HandleAsync(GetFolderPathDirectoryRequest req, CancellationToken ct)
     {
         var path = req.Path!;
-        var result = _fileSystem.LookupContents(path, false, true);
+        var result = _iFileResultSystem.LookupContents(path, false, true);
         await SendFluentResult(result, x => x.ToDTO(), ct);
     }
 }

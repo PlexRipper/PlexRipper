@@ -121,6 +121,16 @@
           "EmptyFiles": "4.4.0"
         }
       },
+      "TestableIO.System.IO.Abstractions.TestingHelpers": {
+        "type": "Direct",
+        "requested": "[21.1.7, )",
+        "resolved": "21.1.7",
+        "contentHash": "2ul9Dpl7GF7OAQUZUWWqjU0tug5h+yMQXRhtcqeFm0oCPtbhMBaBczWu/majJoRAq3ZGbRmPj1+9zLmldjzA5w==",
+        "dependencies": {
+          "TestableIO.System.IO.Abstractions": "21.1.7",
+          "TestableIO.System.IO.Abstractions.Wrappers": "21.1.7"
+        }
+      },
       "xunit": {
         "type": "Direct",
         "requested": "[2.9.2, )",

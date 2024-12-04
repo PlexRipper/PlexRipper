@@ -30,16 +30,4 @@ public class DiskSystem : IDiskSystem
             return Result.Fail(new ExceptionalError(e)).LogError();
         }
     }
-
-    public Result HasDirectoryEnoughAvailableSpace(string directory, long fileSize)
-    {
-        var availableSpaceResult = GetAvailableSpaceByDirectory(directory);
-        if (availableSpaceResult.IsFailed)
-            return availableSpaceResult.ToResult().LogError();
-
-        if (availableSpaceResult.Value < fileSize)
-            return Result.Fail($"There is not enough space available in root directory {directory}");
-
-        return Result.Ok();
-    }
 }

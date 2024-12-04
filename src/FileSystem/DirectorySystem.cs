@@ -8,13 +8,13 @@ public class DirectorySystem : IDirectorySystem
 {
     private readonly ILog _log;
     private readonly IPathSystem _pathSystem;
-    private readonly IDirectory _directory;
+    private readonly IFileSystem _abstractedFileSystem;
 
-    public DirectorySystem(ILog<DirectorySystem> log, IPathSystem pathSystem, IDirectory directory)
+    public DirectorySystem(ILog<DirectorySystem> log, IPathSystem pathSystem, IFileSystem abstractedFileSystem)
     {
         _log = log;
         _pathSystem = pathSystem;
-        _directory = directory;
+        _abstractedFileSystem = abstractedFileSystem;
     }
 
     /// <inheritdoc />
@@ -38,7 +38,7 @@ public class DirectorySystem : IDirectorySystem
     {
         try
         {
-            return Result.Ok(_directory.CreateDirectory(path));
+            return Result.Ok(_abstractedFileSystem.Directory.CreateDirectory(path));
         }
         catch (Exception e)
         {
@@ -58,7 +58,9 @@ public class DirectorySystem : IDirectorySystem
         if (string.IsNullOrEmpty(directoryPathResult.Value))
             return Result.Fail($"Could not determine the directory name of path: {filePath}");
 
-        return Result.Try((() => _directory.CreateDirectory(directoryPathResult.Value))).ToResult();
+        return Result
+            .Try((() => _abstractedFileSystem.Directory.CreateDirectory(directoryPathResult.Value)))
+            .ToResult();
     }
 
     /// <inheritdoc />

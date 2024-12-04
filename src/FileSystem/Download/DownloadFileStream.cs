@@ -1,28 +1,25 @@
-﻿using FileSystem.Contracts;
+﻿using System.IO.Abstractions;
+using FileSystem.Contracts;
 
 namespace PlexRipper.FileSystem;
 
 public class DownloadFileStream : IDownloadFileStream
 {
-    private readonly IFileResultSystem _iFileResultSystem;
-
     private readonly IDirectorySystem _directorySystem;
-
-    private readonly IPathSystem _pathSystem;
 
     private readonly IDiskSystem _diskSystem;
 
+    private readonly IFileSystem _abstractedFileSystem;
+
     public DownloadFileStream(
-        IFileResultSystem iFileResultSystem,
         IDirectorySystem directorySystem,
-        IPathSystem pathSystem,
-        IDiskSystem diskSystem
+        IDiskSystem diskSystem,
+        IFileSystem abstractedFileSystem
     )
     {
-        _iFileResultSystem = iFileResultSystem;
         _directorySystem = directorySystem;
-        _pathSystem = pathSystem;
         _diskSystem = diskSystem;
+        _abstractedFileSystem = abstractedFileSystem;
     }
 
     public Result<Stream> CreateDownloadFileStream(string directory, string fileName, long fileSize)
@@ -41,18 +38,17 @@ public class DownloadFileStream : IDownloadFileStream
             if (availableSpace.Value < fileSize)
                 return Result.Fail($"There is not enough space available in root directory {directory}");
 
-            var filePath = _pathSystem.Combine(directory, fileName);
-            if (filePath.IsFailed)
-                return filePath.ToResult();
+            var combineResult = Result.Try((() => _abstractedFileSystem.Path.Combine(directory, fileName)));
+            if (combineResult.IsFailed)
+                return combineResult.ToResult();
 
+            var filePath = combineResult.Value;
             Stream fileStream;
-            if (_iFileResultSystem.FileExists(filePath.Value))
+            if (_abstractedFileSystem.File.Exists(filePath))
             {
-                var openResult = _iFileResultSystem.Open(
-                    filePath.Value,
-                    FileMode.Open,
-                    FileAccess.ReadWrite,
-                    FileShare.Delete
+                var openResult = Result.Try(
+                    () =>
+                        _abstractedFileSystem.File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Delete)
                 );
                 if (openResult.IsFailed)
                     return openResult.ToResult().LogError();
@@ -61,7 +57,9 @@ public class DownloadFileStream : IDownloadFileStream
             }
             else
             {
-                var createResult = _iFileResultSystem.Create(filePath.Value, 2048, FileOptions.Asynchronous);
+                var createResult = Result.Try(
+                    () => _abstractedFileSystem.File.Create(filePath, 2048, FileOptions.Asynchronous)
+                );
                 if (createResult.IsFailed)
                     return createResult.ToResult().LogError();
 

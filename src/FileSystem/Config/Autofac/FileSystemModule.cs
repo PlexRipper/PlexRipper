@@ -20,7 +20,7 @@ public class FileSystemModule : Module
     {
         var assembly = Assembly.GetExecutingAssembly();
 
-        builder.RegisterType<IFileResultSystem>().As<IFileResultSystem>().SingleInstance();
+        builder.RegisterType<FileResultSystem>().As<IFileResultSystem>().SingleInstance();
         builder.RegisterType<PathSystem>().As<IPathSystem>().SingleInstance();
         builder.RegisterType<DiskSystem>().As<IDiskSystem>().SingleInstance();
         builder.RegisterType<DirectorySystem>().As<IDirectorySystem>().SingleInstance();
@@ -32,10 +32,7 @@ public class FileSystemModule : Module
         builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
 
         // System.IO.Abstractions
-        builder
-            .RegisterType<System.IO.Abstractions.FileSystem>()
-            .As<System.IO.Abstractions.IFileSystem>()
-            .SingleInstance();
+        builder.RegisterType<System.IO.Abstractions.FileSystem>().As<IFileSystem>().SingleInstance();
         builder.RegisterType<PathWrapper>().As<IPath>().SingleInstance();
 
         // MediatR

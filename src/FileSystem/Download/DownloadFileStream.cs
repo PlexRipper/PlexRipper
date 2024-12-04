@@ -5,20 +5,10 @@ namespace PlexRipper.FileSystem;
 
 public class DownloadFileStream : IDownloadFileStream
 {
-    private readonly IDirectorySystem _directorySystem;
-
-    private readonly IDiskSystem _diskSystem;
-
     private readonly IFileSystem _abstractedFileSystem;
 
-    public DownloadFileStream(
-        IDirectorySystem directorySystem,
-        IDiskSystem diskSystem,
-        IFileSystem abstractedFileSystem
-    )
+    public DownloadFileStream(IFileSystem abstractedFileSystem)
     {
-        _directorySystem = directorySystem;
-        _diskSystem = diskSystem;
         _abstractedFileSystem = abstractedFileSystem;
     }
 
@@ -26,12 +16,12 @@ public class DownloadFileStream : IDownloadFileStream
     {
         try
         {
-            var createDirectoryResult = _directorySystem.CreateDirectory(directory);
+            var createDirectoryResult = Result.Try(() => _abstractedFileSystem.Directory.CreateDirectory(directory));
             if (createDirectoryResult.IsFailed)
                 return createDirectoryResult.ToResult();
 
             // TODO:This might need to be determined sooner, like when adding downloadTasks
-            var availableSpace = _diskSystem.GetAvailableSpaceByDirectory(directory);
+            var availableSpace = _abstractedFileSystem.GetAvailableSpaceByDirectory(directory);
             if (availableSpace.IsFailed)
                 return availableSpace.ToResult();
 

@@ -22,7 +22,6 @@ public class FileSystemModule : Module
 
         builder.RegisterType<FileResultSystem>().As<IFileResultSystem>().SingleInstance();
         builder.RegisterType<PathSystem>().As<IPathSystem>().SingleInstance();
-        builder.RegisterType<DiskSystem>().As<IDiskSystem>().SingleInstance();
         builder.RegisterType<DirectorySystem>().As<IDirectorySystem>().SingleInstance();
 
         builder.RegisterType<PathProvider>().As<IPathProvider>().SingleInstance();

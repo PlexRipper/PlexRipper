@@ -7,8 +7,6 @@ public class UnitTestDataConfig : BaseConfig<UnitTestDataConfig>
 {
     public Action<FakeDataConfig>? DatabaseOptions { get; set; } = null;
 
-    public IFileResultSystem? MockFileSystem { get; set; }
-
     public IConfigManager? MockConfigManager { get; set; }
 
     public int DownloadSpeedLimitInKib { get; set; } = 0;

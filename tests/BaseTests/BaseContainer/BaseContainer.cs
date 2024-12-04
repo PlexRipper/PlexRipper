@@ -59,8 +59,6 @@ public class BaseContainer : IDisposable
 
     public HttpClient ApiClient => _factory.CreateDefaultClient();
 
-    public IFileResultSystem IFileResultSystem => Resolve<IFileResultSystem>();
-
     public IDownloadQueue GetDownloadQueue => Resolve<IDownloadQueue>();
 
     public IPlexApiService GetPlexApiService => Resolve<IPlexApiService>();

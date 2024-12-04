@@ -8,8 +8,6 @@ namespace FileSystem.Contracts;
 /// </summary>
 public interface IFileResultSystem
 {
-    Result<FileSystemResult> LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes);
-
     bool FileExists(string path);
 
     Result<string> FileReadAllText(string path);

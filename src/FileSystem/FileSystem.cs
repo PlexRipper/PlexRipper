@@ -123,42 +123,6 @@ public class FileResultSystem : IFileResultSystem
         }
     }
 
-    public Result<FileSystemResult> LookupContents(
-        string query,
-        bool includeFiles,
-        bool allowFoldersWithoutTrailingSlashes
-    )
-    {
-        _log.Debug("Looking up path: {Query}", query);
-
-        var defaultResult = new FileSystemResult
-        {
-            Directories = GetDrives(),
-            Files = [],
-            Parent = "",
-            Current = null,
-        };
-
-        // If path is invalid return root file system
-        if (string.IsNullOrWhiteSpace(query))
-            return Result.Ok(defaultResult);
-
-        var directoryExists = _directory.Exists(query);
-        if (!directoryExists)
-            return Result.Ok(defaultResult);
-
-        if (allowFoldersWithoutTrailingSlashes)
-            return GetFileSystemResults(query, includeFiles);
-
-        var lastSeparatorIndex = query.LastIndexOf(_abstractedFileSystem.Path.DirectorySeparatorChar);
-        var path = query.Substring(0, lastSeparatorIndex + 1);
-
-        if (lastSeparatorIndex != -1)
-            return GetFileSystemResults(path, includeFiles);
-
-        return Result.Ok(defaultResult);
-    }
-
     public Result FileMove(string sourceFileName, string destFileName, bool overwrite = true)
     {
         try
@@ -175,65 +139,6 @@ public class FileResultSystem : IFileResultSystem
     #endregion
 
     #region Private Methods
-
-    private List<FileSystemModel> GetDrives()
-    {
-        return _diskProvider
-            .GetAllMounts()
-            .Select(d => new FileSystemModel
-            {
-                Type = FileSystemEntityType.Drive,
-                Name = _diskProvider.GetVolumeName(d),
-                Path = d.RootDirectory.FullName,
-                LastModified = d.RootDirectory.LastWriteTimeUtc,
-                Extension = string.Empty,
-                Size = d.TotalSize,
-                HasReadPermission = d.CanRead(),
-                HasWritePermission = d.CanWrite(),
-            })
-            .ToList();
-    }
-
-    private Result<FileSystemResult> GetFileSystemResults(string path, bool includeFiles)
-    {
-        try
-        {
-            var directoriesResult = _diskProvider.GetDirectories(path);
-            if (directoriesResult.IsFailed)
-                return directoriesResult.ToResult();
-
-            if (includeFiles)
-            {
-                var filesResult = _diskProvider.GetFiles(path);
-                if (filesResult.IsFailed)
-                    return filesResult.ToResult();
-
-                return Result.Ok(
-                    new FileSystemResult()
-                    {
-                        Parent = _diskProvider.GetParent(path),
-                        Directories = directoriesResult.Value,
-                        Files = filesResult.Value,
-                        Current = new DirectoryInfo(path).ToModel(),
-                    }
-                );
-            }
-
-            return Result.Ok(
-                new FileSystemResult()
-                {
-                    Parent = _diskProvider.GetParent(path),
-                    Directories = directoriesResult.Value,
-                    Files = [],
-                    Current = new DirectoryInfo(path).ToModel(),
-                }
-            );
-        }
-        catch (Exception e)
-        {
-            return Result.Fail(new ExceptionalError(e)).LogError();
-        }
-    }
 
     #endregion
 }

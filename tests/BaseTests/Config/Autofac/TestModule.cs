@@ -34,7 +34,6 @@ public class TestModule : Module
 
         builder.RegisterType<TestStreamTracker>().As<ITestStreamTracker>().SingleInstance();
         builder.RegisterType<MockConfigManager>().As<IConfigManager>().SingleInstance();
-        builder.RegisterType<MockIFileResultSystem>().As<IFileResultSystem>().SingleInstance();
         builder.RegisterType<MockSignalRService>().As<ISignalRService>().SingleInstance();
 
         SetMockedDependencies(builder);
@@ -61,9 +60,6 @@ public class TestModule : Module
                 .As<HttpClient>()
                 .InstancePerDependency();
         }
-
-        if (Config.MockFileSystem is not null)
-            builder.RegisterInstance(Config.MockFileSystem).As<IFileResultSystem>();
 
         if (Config.MockConfigManager is not null)
             builder.RegisterInstance(Config.MockConfigManager).As<IConfigManager>();

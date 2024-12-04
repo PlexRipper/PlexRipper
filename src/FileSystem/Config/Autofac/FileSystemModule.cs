@@ -21,7 +21,6 @@ public class FileSystemModule : Module
         var assembly = Assembly.GetExecutingAssembly();
 
         builder.RegisterType<FileResultSystem>().As<IFileResultSystem>().SingleInstance();
-        builder.RegisterType<PathSystem>().As<IPathSystem>().SingleInstance();
         builder.RegisterType<DirectorySystem>().As<IDirectorySystem>().SingleInstance();
 
         builder.RegisterType<PathProvider>().As<IPathProvider>().SingleInstance();

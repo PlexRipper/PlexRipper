@@ -7,13 +7,11 @@ namespace PlexRipper.FileSystem;
 public class DirectorySystem : IDirectorySystem
 {
     private readonly ILog _log;
-    private readonly IPathSystem _pathSystem;
     private readonly IFileSystem _abstractedFileSystem;
 
-    public DirectorySystem(ILog<DirectorySystem> log, IPathSystem pathSystem, IFileSystem abstractedFileSystem)
+    public DirectorySystem(ILog<DirectorySystem> log, IFileSystem abstractedFileSystem)
     {
         _log = log;
-        _pathSystem = pathSystem;
         _abstractedFileSystem = abstractedFileSystem;
     }
 
@@ -51,7 +49,7 @@ public class DirectorySystem : IDirectorySystem
         if (string.IsNullOrEmpty(filePath) || string.IsNullOrWhiteSpace(filePath))
             return ResultExtensions.IsEmpty(nameof(filePath));
 
-        var directoryPathResult = _pathSystem.GetDirectoryName(filePath);
+        var directoryPathResult = Result.Try(() => _abstractedFileSystem.Path.GetDirectoryName(filePath));
         if (directoryPathResult.IsFailed)
             return directoryPathResult.ToResult();
 
@@ -130,11 +128,15 @@ public class DirectorySystem : IDirectorySystem
 
         try
         {
-            var directoryResult = _pathSystem.GetDirectoryName(filePath);
-            if (directoryResult.IsFailed)
-                return directoryResult.ToResult();
+            var directoryNameResult = Result.Try(() => _abstractedFileSystem.Path.GetDirectoryName(filePath));
+            if (directoryNameResult.IsFailed)
+                return directoryNameResult.ToResult();
 
-            var directoryExistsResult = Exists(directoryResult.Value);
+            if (string.IsNullOrEmpty(directoryNameResult.Value))
+                return ResultExtensions.IsEmpty(nameof(directoryNameResult.Value)).LogError();
+
+            var directoryName = directoryNameResult.Value;
+            var directoryExistsResult = Exists(directoryName);
             if (directoryExistsResult.IsFailed)
                 return directoryExistsResult.ToResult();
 
@@ -143,19 +145,19 @@ public class DirectorySystem : IDirectorySystem
                 return Result.Ok();
             }
 
-            var directoryHasFiles = GetFiles(directoryResult.Value);
+            var directoryHasFiles = GetFiles(directoryName);
             if (directoryHasFiles.IsFailed)
                 return directoryHasFiles.ToResult();
 
             // If the filePath is just an empty directory then delete that.
 
-            if (string.IsNullOrEmpty(directoryResult.Value))
+            if (string.IsNullOrEmpty(directoryName))
             {
                 return ResultExtensions.IsEmpty(nameof(filePath)).LogError();
             }
 
             if (!directoryHasFiles.Value.Any())
-                DirectoryDelete(directoryResult.Value);
+                DirectoryDelete(directoryName);
             else
             {
                 return Result

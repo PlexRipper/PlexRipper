@@ -32,9 +32,6 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<PlexRipper.File
             new Dictionary<string, MockFileData> { { filePath, new MockFileData("Testing is meh.") } }
         );
 
-        mock.Mock<IPathSystem>()
-            .Setup(x => x.GetDirectoryName(It.IsAny<string>()))
-            .Returns(Result.Ok("/mnt/DATA/PlexRipperCache/Downloads/TvShows/Reno 911!/Season 1"));
         mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns((string path) => fileSystem.Directory.CreateDirectory(path));
@@ -54,9 +51,6 @@ public class CreateDirectoryFromFilePathUnitTests : BaseUnitTest<PlexRipper.File
         var filePath =
             "/mnt/DATA/PlexRipperCache/Downloads/TvShows/Reno 911!/Season 1/Reno 911! - S01E01 - How We Do It in Reno (Pilot) WEBDL-1080p.part1.mkv";
 
-        mock.Mock<IPathSystem>()
-            .Setup(x => x.GetDirectoryName(It.IsAny<string>()))
-            .Returns(Result.Ok("/mnt/DATA/PlexRipperCache/Downloads/TvShows/Reno 911!/Season 1"));
         mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Throws(new UnauthorizedAccessException());

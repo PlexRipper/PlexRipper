@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using Data.Contracts;
 using FileSystem.Contracts;
 using Logging.Interface;
@@ -11,14 +12,12 @@ public class FileMergeJob : IJob
     private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IDirectorySystem _directorySystem;
 
-    public FileMergeJob(ILog log, IMediator mediator, IPlexRipperDbContext dbContext, IDirectorySystem directorySystem)
+    public FileMergeJob(ILog log, IMediator mediator, IPlexRipperDbContext dbContext)
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
-        _directorySystem = directorySystem;
     }
 
     public static string DownloadTaskIdParameter => "DownloadTaskId";
@@ -61,11 +60,11 @@ public class FileMergeJob : IJob
 
             if (downloadTask!.DownloadStatus is DownloadStatus.MoveFinished or DownloadStatus.MergeFinished)
             {
-                CleanUpTempFolders(downloadTask);
-
                 await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Completed);
 
                 // Clean up the DownloadWorkerTasks
+                await _mediator.Send(new CleanUpDownloadTaskFoldersCommand(downloadTaskKey));
+
                 await _dbContext
                     .DownloadWorkerTasks.Where(x => x.DownloadTaskId == downloadTask.Id)
                     .ExecuteDeleteAsync();
@@ -76,24 +75,6 @@ public class FileMergeJob : IJob
         catch (Exception e)
         {
             _log.Error(e);
-        }
-    }
-
-    private void CleanUpTempFolders(DownloadTaskFileBase downloadTask)
-    {
-        if (downloadTask.DownloadTaskType == DownloadTaskType.EpisodeData)
-        {
-            // This deletes the Season folder
-            _directorySystem.DeleteDirectoryFromFilePath(downloadTask.FilePaths.First());
-
-            // This deletes the TvShow folder
-            _directorySystem.DeleteDirectoryFromFilePath(downloadTask.DownloadDirectory);
-        }
-
-        if (downloadTask.DownloadTaskType == DownloadTaskType.MovieData)
-        {
-            // This deletes the Season folder
-            _directorySystem.DeleteDirectoryFromFilePath(downloadTask.FilePaths.First());
         }
     }
 }

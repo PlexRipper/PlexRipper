@@ -1,4 +1,5 @@
-﻿using System.Reactive.Subjects;
+﻿using System.IO.Abstractions;
+using System.Reactive.Subjects;
 using Autofac;
 using Environment;
 using FileSystem.Contracts;
@@ -29,7 +30,7 @@ public class ConfigManager_SaveConfig_UnitTests : BaseUnitTest<ConfigManager>
             MockBehavior.Strict,
             mock.Container.Resolve<ILog>(),
             mock.Container.Resolve<IFileResultSystem>(),
-            mock.Container.Resolve<IDirectorySystem>(),
+            mock.Container.Resolve<IDirectory>(),
             mock.Container.Resolve<IPathProvider>(),
             mock.Container.Resolve<IUserSettings>()
         );

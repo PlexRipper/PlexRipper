@@ -1,4 +1,4 @@
-﻿using Environment;
+﻿using System.IO.Abstractions;
 using FileSystem.Contracts;
 using Logging.Interface;
 
@@ -11,11 +11,10 @@ public class FileResultSystem : IFileResultSystem
 
     private readonly ILog _log;
 
-    private readonly System.IO.Abstractions.IFileSystem _abstractedFileSystem;
+    private readonly IFileSystem _abstractedFileSystem;
 
     private readonly IDiskProvider _diskProvider;
-
-    private readonly IDirectorySystem _directorySystem;
+    private readonly IDirectory _directory;
 
     #endregion
 
@@ -23,15 +22,15 @@ public class FileResultSystem : IFileResultSystem
 
     public FileResultSystem(
         ILog log,
-        System.IO.Abstractions.IFileSystem abstractedFileSystem,
+        IFileSystem abstractedFileSystem,
         IDiskProvider diskProvider,
-        IDirectorySystem directorySystem
+        IDirectory directory
     )
     {
         _log = log;
         _abstractedFileSystem = abstractedFileSystem;
         _diskProvider = diskProvider;
-        _directorySystem = directorySystem;
+        _directory = directory;
     }
 
     #endregion
@@ -144,8 +143,8 @@ public class FileResultSystem : IFileResultSystem
         if (string.IsNullOrWhiteSpace(query))
             return Result.Ok(defaultResult);
 
-        var directoryExistsResult = _directorySystem.Exists(query);
-        if (directoryExistsResult.IsFailed || !directoryExistsResult.Value)
+        var directoryExists = _directory.Exists(query);
+        if (!directoryExists)
             return Result.Ok(defaultResult);
 
         if (allowFoldersWithoutTrailingSlashes)

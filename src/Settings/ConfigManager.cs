@@ -1,5 +1,5 @@
-﻿using Environment;
-using FileSystem.Contracts;
+﻿using System.IO.Abstractions;
+using Environment;
 using Logging.Interface;
 using Settings.Contracts;
 
@@ -10,13 +10,11 @@ public class ConfigManager : IConfigManager
     #region Fields
 
     private readonly ILog _log;
-    private readonly IFileResultSystem _iFileResultSystem;
-
-    private readonly IDirectorySystem _directorySystem;
-
     private readonly IPathProvider _pathProvider;
 
     private readonly IUserSettings _userSettings;
+    private readonly IFile _file;
+    private readonly IDirectory _directory;
 
     #endregion
 
@@ -24,17 +22,17 @@ public class ConfigManager : IConfigManager
 
     public ConfigManager(
         ILog log,
-        IFileResultSystem iFileResultSystem,
-        IDirectorySystem directorySystem,
         IPathProvider pathProvider,
-        IUserSettings userSettings
+        IUserSettings userSettings,
+        IFile file,
+        IDirectory directory
     )
     {
         _log = log;
-        _iFileResultSystem = iFileResultSystem;
-        _directorySystem = directorySystem;
         _pathProvider = pathProvider;
         _userSettings = userSettings;
+        _file = file;
+        _directory = directory;
     }
 
     #endregion
@@ -52,7 +50,7 @@ public class ConfigManager : IConfigManager
                 _pathProvider.ConfigDirectory
             );
 
-        var configDirectoryExistsResult = _directorySystem.Exists(_pathProvider.ConfigDirectory);
+        var configDirectoryExistsResult = Result.Try(() => _directory.Exists(_pathProvider.ConfigDirectory));
         if (configDirectoryExistsResult.IsFailed)
             return configDirectoryExistsResult.LogFatal();
 
@@ -64,7 +62,7 @@ public class ConfigManager : IConfigManager
                 "Config directory does not exist, will create now at {ConfigDirectory}",
                 _pathProvider.ConfigDirectory
             );
-            var createResult = _directorySystem.CreateDirectory(_pathProvider.ConfigDirectory);
+            var createResult = Result.Try(() => _directory.CreateDirectory(_pathProvider.ConfigDirectory));
             if (createResult.IsFailed)
             {
                 _log.Fatal("Failed to create config directory at {ConfigDirectory}", _pathProvider.ConfigDirectory);
@@ -146,7 +144,7 @@ public class ConfigManager : IConfigManager
         return Result.Ok().WithSuccess("UserSettings were saved successfully!").LogInformation();
     }
 
-    public virtual bool ConfigFileExists() => _iFileResultSystem.FileExists(_pathProvider.ConfigFileLocation);
+    public virtual bool ConfigFileExists() => _file.Exists(_pathProvider.ConfigFileLocation);
 
     #endregion
 
@@ -154,13 +152,13 @@ public class ConfigManager : IConfigManager
 
     private Result WriteToConfigFile(string jsonSettingsString)
     {
-        var writeResult = _iFileResultSystem.FileWriteAllText(_pathProvider.ConfigFileLocation, jsonSettingsString);
+        var writeResult = Result.Try(() => _file.WriteAllText(_pathProvider.ConfigFileLocation, jsonSettingsString));
         return writeResult.IsFailed ? writeResult.WithError("Failed to write config settings").LogError() : Result.Ok();
     }
 
     private Result<string> ReadFromConfigFile()
     {
-        var readResult = _iFileResultSystem.FileReadAllText(_pathProvider.ConfigFileLocation);
+        var readResult = Result.Try(() => _file.ReadAllText(_pathProvider.ConfigFileLocation));
         if (readResult.IsFailed)
         {
             _log.Here()

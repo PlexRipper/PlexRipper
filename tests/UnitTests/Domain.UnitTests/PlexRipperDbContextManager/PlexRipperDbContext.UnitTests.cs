@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using Data.Contracts;
 using Environment;
 using FileSystem.Contracts;
@@ -91,7 +92,9 @@ public class PlexRipperDbContextManager_UnitTests : BaseUnitTest<PlexRipperDbCon
             .Returns(() => [PathProvider.DatabasePath, PathProvider.Database_SHM_Path, PathProvider.Database_WAL_Path]);
         mock.Mock<IFileResultSystem>().Setup(x => x.FileExists(It.IsAny<string>())).Returns(true);
         mock.Mock<IFileResultSystem>().Setup(x => x.Copy(It.IsAny<string>(), It.IsAny<string>())).Returns(Result.Ok());
-        mock.Mock<IDirectorySystem>().Setup(x => x.CreateDirectory(It.IsAny<string>())).Returns(new Result());
+        mock.Mock<IDirectory>()
+            .Setup(x => x.CreateDirectory(It.IsAny<string>()))
+            .Returns(new Mock<IDirectoryInfo>().Object);
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));

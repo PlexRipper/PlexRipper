@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using Application.Contracts;
 using Data.Contracts;
 using FileSystem.Contracts;
@@ -26,22 +27,22 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IDirectorySystem _directorySystem;
     private readonly IMediator _mediator;
+    private readonly IFile _file;
     private readonly IDownloadTaskScheduler _downloadTaskScheduler;
 
     public StopDownloadTaskCommandHandler(
         ILog log,
         IPlexRipperDbContext dbContext,
-        IDirectorySystem directorySystem,
         IMediator mediator,
+        IFile file,
         IDownloadTaskScheduler downloadTaskScheduler
     )
     {
         _log = log;
         _dbContext = dbContext;
-        _directorySystem = directorySystem;
         _mediator = mediator;
+        _file = file;
         _downloadTaskScheduler = downloadTaskScheduler;
     }
 
@@ -55,7 +56,7 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
 
         foreach (var downloadTaskKey in downloadTasks)
         {
-            var downloadTask = await _dbContext.GetDownloadTaskAsync(downloadTaskKey, cancellationToken);
+            var downloadTask = await _dbContext.GetDownloadTaskFileAsync(downloadTaskKey, cancellationToken);
             if (downloadTask is null)
             {
                 ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), downloadTaskKey.Id).LogError();
@@ -76,9 +77,10 @@ public class StopDownloadTaskCommandHandler : IRequestHandler<StopDownloadTaskCo
 
             _log.Debug("Deleting partially downloaded files of {DownloadTaskFullTitle}", downloadTask.FullTitle);
 
-            var removeTempResult = _directorySystem.DeleteAllFilesFromDirectory(downloadTask.DownloadDirectory);
-            if (removeTempResult.IsFailed)
-                return removeTempResult;
+            foreach (var filePath in downloadTask.FilePaths)
+            {
+                Result.Try(() => _file.Delete(filePath)).LogIfFailed();
+            }
 
             // Delete all worker tasks
             await _dbContext

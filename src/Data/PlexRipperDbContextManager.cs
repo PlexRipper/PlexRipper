@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.IO.Abstractions;
 using Data.Contracts;
 using Environment;
 using FileSystem.Contracts;
@@ -16,7 +17,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
 
     private readonly IFileResultSystem _iFileResultSystem;
 
-    private readonly IDirectorySystem _directorySystem;
+    private readonly IDirectory _directory;
     private string DatabasePath => _pathProvider.DatabasePath;
 
     public PlexRipperDbContextManager(
@@ -24,14 +25,14 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         IPlexRipperDbContextDatabase dbContextDatabaseDatabase,
         IPathProvider pathProvider,
         IFileResultSystem iFileResultSystem,
-        IDirectorySystem directorySystem
+        IDirectory directory
     )
     {
         _log = log;
         _dbContextDatabase = dbContextDatabaseDatabase;
         _pathProvider = pathProvider;
         _iFileResultSystem = iFileResultSystem;
-        _directorySystem = directorySystem;
+        _directory = directory;
     }
 
     public Result Setup()
@@ -163,7 +164,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
 
         try
         {
-            _directorySystem.CreateDirectory(dbBackUpPath);
+            _directory.CreateDirectory(dbBackUpPath);
 
             // Wait until the database is available.
             StreamExtensions

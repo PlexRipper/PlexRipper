@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using System.Reactive.Subjects;
 using Autofac;
 using Environment;
@@ -21,14 +22,14 @@ public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigDirectory).Returns(() => "/TEST_PlexRipperSettings.json");
-        mock.Mock<IDirectorySystem>().Setup(x => x.Exists(It.IsAny<string>())).Returns(Result.Ok(true));
+        mock.Mock<IDirectory>().Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
 
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
             mock.Container.Resolve<ILog>(),
             mock.Container.Resolve<IFileResultSystem>(),
-            mock.Container.Resolve<IDirectorySystem>(),
+            mock.Container.Resolve<IDirectory>(),
             mock.Container.Resolve<IPathProvider>(),
             mock.Container.Resolve<IUserSettings>()
         );
@@ -55,15 +56,17 @@ public class ConfigManager_Setup_UnitTests : BaseUnitTest<ConfigManager>
         mock.Mock<IFileResultSystem>()
             .Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(Result.Ok);
-        mock.Mock<IDirectorySystem>().Setup(x => x.Exists(It.IsAny<string>())).Returns(Result.Ok(false));
-        mock.Mock<IDirectorySystem>().Setup(x => x.CreateDirectory(It.IsAny<string>())).Returns(Result.Ok());
+        mock.Mock<IDirectory>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
+        mock.Mock<IDirectory>()
+            .Setup(x => x.CreateDirectory(It.IsAny<string>()))
+            .Returns(new Mock<IDirectoryInfo>().Object);
 
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
             mock.Container.Resolve<ILog>(),
             mock.Container.Resolve<IFileResultSystem>(),
-            mock.Container.Resolve<IDirectorySystem>(),
+            mock.Container.Resolve<IDirectory>(),
             mock.Container.Resolve<IPathProvider>(),
             mock.Container.Resolve<IUserSettings>()
         );

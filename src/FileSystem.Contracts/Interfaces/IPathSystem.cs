@@ -6,8 +6,6 @@ public interface IPathSystem
 {
     Result<string> Combine(params string[] paths);
 
-    string GetPathRoot(string directory);
-
     /// <summary>
     /// Returns the directory portion of a file path. This method effectively
     /// removes the last segment of the given file path, i.e. it returns a

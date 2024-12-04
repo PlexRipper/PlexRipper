@@ -1,4 +1,5 @@
-﻿using FileSystem.Contracts;
+﻿using System.IO.Abstractions;
+using FileSystem.Contracts;
 using Logging.Interface;
 
 namespace PlexRipper.FileSystem;
@@ -7,11 +8,13 @@ public class DirectorySystem : IDirectorySystem
 {
     private readonly ILog _log;
     private readonly IPathSystem _pathSystem;
+    private readonly IDirectory _directory;
 
-    public DirectorySystem(ILog<DirectorySystem> log, IPathSystem pathSystem)
+    public DirectorySystem(ILog<DirectorySystem> log, IPathSystem pathSystem, IDirectory directory)
     {
         _log = log;
         _pathSystem = pathSystem;
+        _directory = directory;
     }
 
     /// <inheritdoc />
@@ -31,11 +34,11 @@ public class DirectorySystem : IDirectorySystem
         }
     }
 
-    public Result<DirectoryInfo> CreateDirectory(string path)
+    public Result<IDirectoryInfo> CreateDirectory(string path)
     {
         try
         {
-            return Result.Ok(Directory.CreateDirectory(path));
+            return Result.Ok(_directory.CreateDirectory(path));
         }
         catch (Exception e)
         {
@@ -46,9 +49,8 @@ public class DirectorySystem : IDirectorySystem
     public Result CreateDirectoryFromFilePath(string filePath)
     {
         if (string.IsNullOrEmpty(filePath) || string.IsNullOrWhiteSpace(filePath))
-            return Result.Fail("Parameter filepath was empty");
+            return ResultExtensions.IsEmpty(nameof(filePath));
 
-        // TODO:this fails with: /mnt/DATA/PlexRipperCache/Downloads/TvShows/Reno 911!/Season 1/Reno 911! - S01E01 - How We Do It in Reno (Pilot) WEBDL-1080p.part1.mkv
         var directoryPathResult = _pathSystem.GetDirectoryName(filePath);
         if (directoryPathResult.IsFailed)
             return directoryPathResult.ToResult();
@@ -56,7 +58,7 @@ public class DirectorySystem : IDirectorySystem
         if (string.IsNullOrEmpty(directoryPathResult.Value))
             return Result.Fail($"Could not determine the directory name of path: {filePath}");
 
-        return CreateDirectory(directoryPathResult.Value).ToResult();
+        return Result.Try((() => _directory.CreateDirectory(directoryPathResult.Value))).ToResult();
     }
 
     /// <inheritdoc />

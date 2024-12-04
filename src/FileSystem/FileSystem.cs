@@ -4,12 +4,12 @@ using Logging.Interface;
 
 namespace PlexRipper.FileSystem;
 
+/// <inheritdoc/>
 public class FileSystem : IFileSystem
 {
     #region Fields
 
     private readonly ILog _log;
-    private readonly IPathProvider _pathProvider;
 
     private readonly System.IO.Abstractions.IFileSystem _abstractedFileSystem;
 
@@ -23,14 +23,12 @@ public class FileSystem : IFileSystem
 
     public FileSystem(
         ILog log,
-        IPathProvider pathProvider,
         System.IO.Abstractions.IFileSystem abstractedFileSystem,
         IDiskProvider diskProvider,
         IDirectorySystem directorySystem
     )
     {
         _log = log;
-        _pathProvider = pathProvider;
         _abstractedFileSystem = abstractedFileSystem;
         _diskProvider = diskProvider;
         _directorySystem = directorySystem;
@@ -46,7 +44,8 @@ public class FileSystem : IFileSystem
     {
         try
         {
-            return Result.Ok(_abstractedFileSystem.File.Open(path, mode, access, share));
+            Stream openStream = _abstractedFileSystem.File.Open(path, mode, access, share);
+            return Result.Ok(openStream);
         }
         catch (Exception e)
         {
@@ -58,8 +57,8 @@ public class FileSystem : IFileSystem
     {
         try
         {
-            var createResult = _abstractedFileSystem.File.Create(path, bufferSize, options);
-            return Result.Ok(createResult);
+            Stream createStream = _abstractedFileSystem.File.Create(path, bufferSize, options);
+            return Result.Ok(createStream);
         }
         catch (Exception e)
         {
@@ -160,11 +159,6 @@ public class FileSystem : IFileSystem
 
         return Result.Ok(defaultResult);
     }
-
-    public string ToAbsolutePath(string relativePath) =>
-        _abstractedFileSystem.Path.GetFullPath(
-            _abstractedFileSystem.Path.Combine(_pathProvider.RootDirectory, relativePath)
-        );
 
     public Result FileMove(string sourceFileName, string destFileName, bool overwrite = true)
     {

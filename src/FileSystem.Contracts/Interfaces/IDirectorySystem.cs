@@ -1,4 +1,5 @@
-﻿using FluentResults;
+﻿using System.IO.Abstractions;
+using FluentResults;
 
 namespace FileSystem.Contracts;
 
@@ -11,7 +12,7 @@ public interface IDirectorySystem
     /// <returns> <b>true</b> if path refers to an existing directory; <b>false</b> if the directory does not exist </returns>
     Result<bool> Exists(string path);
 
-    Result<DirectoryInfo> CreateDirectory(string path);
+    Result<IDirectoryInfo> CreateDirectory(string path);
 
     Result CreateDirectoryFromFilePath(string filePath);
 

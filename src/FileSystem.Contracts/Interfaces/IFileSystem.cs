@@ -3,10 +3,11 @@ using PlexRipper.Domain;
 
 namespace FileSystem.Contracts;
 
+/// <summary>
+/// This is a wrapper class for the System.IO.Abstractions.FileSystem class to wrap all file system operations in Result objects.
+/// </summary>
 public interface IFileSystem
 {
-    string ToAbsolutePath(string relativePath);
-
     Result<FileSystemResult> LookupContents(string query, bool includeFiles, bool allowFoldersWithoutTrailingSlashes);
 
     bool FileExists(string path);

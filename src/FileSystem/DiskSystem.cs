@@ -1,21 +1,27 @@
-﻿using FileSystem.Contracts;
+﻿using System.IO.Abstractions;
+using FileSystem.Contracts;
 
 namespace PlexRipper.FileSystem;
 
 public class DiskSystem : IDiskSystem
 {
-    private readonly IPathSystem _pathSystem;
+    private readonly IPath _path;
 
-    public DiskSystem(IPathSystem pathSystem)
+    public DiskSystem(IPath path)
     {
-        _pathSystem = pathSystem;
+        _path = path;
     }
 
     public Result<long> GetAvailableSpaceByDirectory(string directory)
     {
         try
         {
-            var root = _pathSystem.GetPathRoot(directory);
+            var f = new FileInfo(directory);
+
+            var root = _path.GetPathRoot(f.FullName);
+            if (string.IsNullOrEmpty(root))
+                return Result.Fail($"Could not determine root directory of {directory}");
+
             var drive = new DriveInfo(root);
             return Result.Ok(drive.AvailableFreeSpace);
         }

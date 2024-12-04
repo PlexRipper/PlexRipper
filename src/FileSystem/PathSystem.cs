@@ -24,18 +24,12 @@ public class PathSystem : IPathSystem
         }
     }
 
-    public string GetPathRoot(string directory)
-    {
-        var f = new FileInfo(directory);
-        return _path.GetPathRoot(f.FullName);
-    }
-
     /// <inheritdoc/>
     public Result<string> GetDirectoryName(string filePath)
     {
         try
         {
-            return Result.Ok(Path.GetDirectoryName(filePath) ?? string.Empty);
+            return Result.Ok(_path.GetDirectoryName(filePath) ?? string.Empty);
         }
         catch (Exception e)
         {

@@ -27,7 +27,9 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
     private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IFileSystem _abstractedFileSystem;
+    private readonly IFile _file;
+    private readonly IDirectory _directory;
+    private readonly IPath _path;
 
     private Stream? _readStream;
     private Stream? _writeStream;
@@ -42,13 +44,17 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
         ILog log,
         IMediator mediator,
         IPlexRipperDbContext dbContext,
-        IFileSystem abstractedFileSystem
+        IFile file,
+        IDirectory directory,
+        IPath path
     )
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
-        _abstractedFileSystem = abstractedFileSystem;
+        _file = file;
+        _directory = directory;
+        _path = path;
     }
 
     public async Task<Result> Handle(MergeFilesFromFileTaskCommand command, CancellationToken cancellationToken)
@@ -72,9 +78,7 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
 
         try
         {
-            var directoryPathResult = Result.Try(
-                () => _abstractedFileSystem.Path.GetDirectoryName(downloadTask.DestinationFilePath)
-            );
+            var directoryPathResult = Result.Try(() => _path.GetDirectoryName(downloadTask.DestinationFilePath));
             if (directoryPathResult.IsFailed)
                 return directoryPathResult.ToResult();
 
@@ -83,20 +87,13 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
 
             // Ensure destination directory exists and is otherwise created.
             var createDirectoryResult = Result
-                .Try((() => _abstractedFileSystem.Directory.CreateDirectory(directoryPathResult.Value)))
+                .Try((() => _directory.CreateDirectory(directoryPathResult.Value)))
                 .ToResult();
             if (createDirectoryResult.IsFailed)
                 return (await ErrorDownloadTask(downloadTask, createDirectoryResult)).LogError();
 
             var writeStreamResult = Result.Try(
-                (
-                    () =>
-                        _abstractedFileSystem.File.Create(
-                            downloadTask.DestinationFilePath,
-                            _bufferSize,
-                            FileOptions.SequentialScan
-                        )
-                )
+                (() => _file.Create(downloadTask.DestinationFilePath, _bufferSize, FileOptions.SequentialScan))
             );
             if (writeStreamResult.IsFailed)
                 return (await ErrorDownloadTask(downloadTask, writeStreamResult.ToResult())).LogError();
@@ -120,7 +117,7 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
             {
                 var filePath = sourceFilePaths[index];
 
-                if (!_abstractedFileSystem.File.Exists(filePath))
+                if (!_file.Exists(filePath))
                 {
                     var result = Result
                         .Fail($"Filepath: {filePath} does not exist and cannot be used to merge/move the file!")
@@ -130,7 +127,7 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
                 }
 
                 var inputStreamResult = Result.Try(
-                    (() => _abstractedFileSystem.File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    (() => _file.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                 );
                 if (inputStreamResult.IsFailed)
                     return (await ErrorDownloadTask(downloadTask, inputStreamResult.ToResult())).LogError();
@@ -194,7 +191,7 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
                 await _readStream.DisposeAsync();
                 _readStream = null;
 
-                var deleteResult = Result.Try((() => _abstractedFileSystem.File.Delete(filePath)));
+                var deleteResult = Result.Try((() => _file.Delete(filePath)));
                 if (deleteResult.IsFailed)
                     return (await ErrorDownloadTask(downloadTask, deleteResult)).LogError();
             }

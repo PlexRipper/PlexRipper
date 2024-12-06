@@ -5,13 +5,13 @@ namespace FileSystem.Contracts;
 
 public static class IFileSystemExtensions
 {
-    public static Result<long> GetAvailableSpaceByDirectory(this IFileSystem fileSystem, string directory)
+    public static Result<long> GetAvailableSpaceByDirectory(this IPath path, string directory)
     {
         try
         {
             var f = new FileInfo(directory);
 
-            var root = fileSystem.Path.GetPathRoot(f.FullName);
+            var root = path.GetPathRoot(f.FullName);
             if (string.IsNullOrEmpty(root))
                 return Result.Fail($"Could not determine root directory of {directory}");
 

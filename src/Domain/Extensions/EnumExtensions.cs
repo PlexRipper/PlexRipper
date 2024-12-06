@@ -452,6 +452,20 @@ public static class EnumExtensions
         }
     }
 
+    public static PlexMediaType ToPlexMediaType(this DownloadTaskType value)
+    {
+        return value switch
+        {
+            DownloadTaskType.Movie or DownloadTaskType.MovieData or DownloadTaskType.MoviePart => PlexMediaType.Movie,
+            DownloadTaskType.TvShow => PlexMediaType.TvShow,
+            DownloadTaskType.Season => PlexMediaType.Season,
+            DownloadTaskType.Episode or DownloadTaskType.EpisodeData or DownloadTaskType.EpisodePart =>
+                PlexMediaType.Episode,
+            DownloadTaskType.None => PlexMediaType.None,
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+        };
+    }
+
     /// <summary>
     /// Converts <see cref="DownloadTaskType"/> to string by a fast method.
     /// </summary>

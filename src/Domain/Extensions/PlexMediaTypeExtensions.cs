@@ -1,4 +1,6 @@
-﻿namespace PlexRipper.Domain;
+﻿using Environment;
+
+namespace PlexRipper.Domain;
 
 public static class PlexMediaTypeExtensions
 {
@@ -13,6 +15,26 @@ public static class PlexMediaTypeExtensions
             PlexMediaType.OtherVideos => 6,
             PlexMediaType.Games => 7,
             _ => 1,
+        };
+    }
+
+    public static string ToDefaultDestinationLocation(this PlexMediaType type)
+    {
+        return type switch
+        {
+            PlexMediaType.None => PathProvider.DefaultDownloadsDestinationFolder,
+            PlexMediaType.Movie => PathProvider.DefaultMovieDestinationFolder,
+            PlexMediaType.TvShow => PathProvider.DefaultTvShowsDestinationFolder,
+            PlexMediaType.Season => PathProvider.DefaultTvShowsDestinationFolder,
+            PlexMediaType.Episode => PathProvider.DefaultTvShowsDestinationFolder,
+            PlexMediaType.Music => PathProvider.DefaultMusicDestinationFolder,
+            PlexMediaType.Album => PathProvider.DefaultMusicDestinationFolder,
+            PlexMediaType.Song => PathProvider.DefaultMusicDestinationFolder,
+            PlexMediaType.Photos => PathProvider.DefaultPhotosDestinationFolder,
+            PlexMediaType.OtherVideos => PathProvider.DefaultOtherDestinationFolder,
+            PlexMediaType.Games => PathProvider.DefaultGamesDestinationFolder,
+            PlexMediaType.Unknown => PathProvider.DefaultDownloadsDestinationFolder,
+            _ => PathProvider.DefaultDownloadsDestinationFolder,
         };
     }
 }

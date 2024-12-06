@@ -47,9 +47,9 @@ public class BaseContainer : IDisposable
 
         log.Information("Initialized integration test with database name: {DatabaseName}", memoryDbName);
 
-        var container = new BaseContainer(log, seed, memoryDbName, options);
-
         await MockDatabase.GetMemoryDbContext(memoryDbName).Setup(seed, config.DatabaseOptions);
+
+        var container = new BaseContainer(log, seed, memoryDbName, options);
 
         if (config.DownloadSpeedLimitInKib > 0)
             await container.SetDownloadSpeedLimit(options);

@@ -3,6 +3,7 @@ using System.IO.Abstractions.TestingHelpers;
 using Application.Contracts;
 using Autofac;
 using Autofac.Extras.Quartz;
+using ByteSizeLib;
 using Data.Contracts;
 using Environment;
 using PlexRipper.Application;
@@ -69,6 +70,15 @@ public class TestModule : Module
         builder
             .Register<MockFileSystem>(ctx =>
             {
+                fileSystem.AddDrive(
+                    "/",
+                    new MockDriveData()
+                    {
+                        IsReady = true,
+                        DriveType = DriveType.Fixed,
+                        AvailableFreeSpace = (long)ByteSize.FromGigaBytes(1000).Bytes,
+                    }
+                );
                 fileSystem.AddDirectory(PathProvider.ConfigDirectory);
                 fileSystem.AddDirectory(PathProvider.DefaultDownloadsDestinationFolder);
                 fileSystem.AddDirectory(PathProvider.DefaultMovieDestinationFolder);

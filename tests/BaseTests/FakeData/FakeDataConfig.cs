@@ -36,7 +36,7 @@ public class FakeDataConfig : BaseConfig<FakeDataConfig>
 
     public bool AccountHasAccessToAllLibraries { get; set; }
 
-    public int DownloadFileSizeInMb { get; set; }
+    public int DownloadFileSizeInMb { get; set; } = 10;
 
     public bool ShouldHavePlexServer => PlexServerCount > 0 || ShouldHavePlexLibrary;
 

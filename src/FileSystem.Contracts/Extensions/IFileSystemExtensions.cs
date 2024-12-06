@@ -15,7 +15,7 @@ public static class IFileSystemExtensions
             if (string.IsNullOrEmpty(root))
                 return Result.Fail($"Could not determine root directory of {directory}");
 
-            var drive = new DriveInfo(root);
+            var drive = path.FileSystem.DriveInfo.New(root);
             return Result.Ok(drive.AvailableFreeSpace);
         }
         catch (Exception e)

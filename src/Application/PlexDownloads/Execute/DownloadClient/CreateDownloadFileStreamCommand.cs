@@ -22,7 +22,7 @@ public class CreateDownloadFileStreamCommandHandler : IRequestHandler<CreateDown
     private readonly IDirectory _directory;
     private readonly IFile _file;
 
-    public CreateDownloadFileStreamCommandHandler( IPath path, IDirectory directory, IFile file)
+    public CreateDownloadFileStreamCommandHandler(IPath path, IDirectory directory, IFile file)
     {
         _path = path;
         _directory = directory;

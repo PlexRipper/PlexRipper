@@ -27,9 +27,9 @@ public class FileSystemModule : Module
 
         // System.IO.Abstractions
         builder.RegisterType<System.IO.Abstractions.FileSystem>().As<IFileSystem>().SingleInstance();
-        builder.RegisterType<PathWrapper>().As<IPath>().SingleInstance();
-        builder.RegisterType<FileWrapper>().As<IFile>().SingleInstance();
-        builder.RegisterType<DirectoryWrapper>().As<IDirectory>().SingleInstance();
+        builder.Register(ctx => ctx.Resolve<IFileSystem>().Path).As<IPath>().SingleInstance();
+        builder.Register(ctx => ctx.Resolve<IFileSystem>().File).As<IFile>().SingleInstance();
+        builder.Register(ctx => ctx.Resolve<IFileSystem>().Directory).As<IDirectory>().SingleInstance();
 
         // MediatR
         var configuration = MediatRConfigurationBuilder

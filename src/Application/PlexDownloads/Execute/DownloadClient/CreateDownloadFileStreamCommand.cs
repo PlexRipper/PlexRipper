@@ -18,13 +18,15 @@ public class CreateDownloadFileStreamCommandValidator : AbstractValidator<Create
 
 public class CreateDownloadFileStreamCommandHandler : IRequestHandler<CreateDownloadFileStreamCommand, Result<Stream>>
 {
-    private readonly IFileSystem _abstractedFileSystem;
-    private readonly ILog _log;
+    private readonly IPath _path;
+    private readonly IDirectory _directory;
+    private readonly IFile _file;
 
-    public CreateDownloadFileStreamCommandHandler(IFileSystem abstractedFileSystem, ILog log)
+    public CreateDownloadFileStreamCommandHandler( IPath path, IDirectory directory, IFile file)
     {
-        _abstractedFileSystem = abstractedFileSystem;
-        _log = log;
+        _path = path;
+        _directory = directory;
+        _file = file;
     }
 
     public async Task<Result<Stream>> Handle(
@@ -40,29 +42,27 @@ public class CreateDownloadFileStreamCommandHandler : IRequestHandler<CreateDown
             var fileName = command.FileName;
             var fileSize = command.FileSize;
 
-            var createDirectoryResult = Result.Try(() => _abstractedFileSystem.Directory.CreateDirectory(directory));
+            var createDirectoryResult = Result.Try(() => _directory.CreateDirectory(directory));
             if (createDirectoryResult.IsFailed)
                 return createDirectoryResult.ToResult();
 
-            // TODO:This might need to be determined sooner, like when adding downloadTasks
-            var availableSpace = _abstractedFileSystem.GetAvailableSpaceByDirectory(directory);
+            var availableSpace = _path.GetAvailableSpaceByDirectory(directory);
             if (availableSpace.IsFailed)
                 return availableSpace.ToResult();
 
             if (availableSpace.Value < fileSize)
                 return Result.Fail($"There is not enough space available in root directory {directory}").LogError();
 
-            var combineResult = Result.Try((() => _abstractedFileSystem.Path.Combine(directory, fileName)));
+            var combineResult = Result.Try((() => _path.Combine(directory, fileName)));
             if (combineResult.IsFailed)
                 return combineResult.ToResult();
 
             var filePath = combineResult.Value;
             Stream fileStream;
-            if (_abstractedFileSystem.File.Exists(filePath))
+            if (_file.Exists(filePath))
             {
                 var openResult = Result.Try(
-                    () =>
-                        _abstractedFileSystem.File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Delete)
+                    () => _file.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Delete)
                 );
                 if (openResult.IsFailed)
                     return openResult.ToResult().LogError();
@@ -71,9 +71,7 @@ public class CreateDownloadFileStreamCommandHandler : IRequestHandler<CreateDown
             }
             else
             {
-                var createResult = Result.Try(
-                    () => _abstractedFileSystem.File.Create(filePath, 2048, FileOptions.Asynchronous)
-                );
+                var createResult = Result.Try(() => _file.Create(filePath, 2048, FileOptions.Asynchronous));
                 if (createResult.IsFailed)
                     return createResult.ToResult().LogError();
 

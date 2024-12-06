@@ -1,12 +1,12 @@
-﻿using System.Collections.Specialized;
+﻿using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using Application.Contracts;
 using Autofac;
 using Autofac.Extras.Quartz;
 using Data.Contracts;
-using FileSystem.Contracts;
+using Environment;
 using PlexRipper.Application;
 using PlexRipper.Data;
-using Quartz;
 using Settings.Contracts;
 
 namespace PlexRipper.BaseTests;
@@ -63,5 +63,30 @@ public class TestModule : Module
 
         if (Config.MockConfigManager is not null)
             builder.RegisterInstance(Config.MockConfigManager).As<IConfigManager>();
+
+        // Note: This has to stay outside of scope otherwise Config.FileSystemOptions is not applied when dependency injected
+        var fileSystem = new MockFileSystem();
+        builder
+            .Register<MockFileSystem>(ctx =>
+            {
+                fileSystem.AddDirectory(PathProvider.ConfigDirectory);
+                fileSystem.AddDirectory(PathProvider.DefaultDownloadsDestinationFolder);
+                fileSystem.AddDirectory(PathProvider.DefaultMovieDestinationFolder);
+                fileSystem.AddDirectory(PathProvider.DefaultTvShowsDestinationFolder);
+                fileSystem.AddDirectory(PathProvider.DefaultMusicDestinationFolder);
+                fileSystem.AddDirectory(PathProvider.DefaultPhotosDestinationFolder);
+                fileSystem.AddDirectory(PathProvider.DefaultOtherDestinationFolder);
+                fileSystem.AddDirectory(PathProvider.DefaultGamesDestinationFolder);
+
+                var dbContext = ctx.Resolve<IPlexRipperDbContext>();
+                if (Config.FileSystemOptions is not null)
+                {
+                    Config.FileSystemOptions.Invoke(fileSystem, dbContext);
+                }
+
+                return fileSystem;
+            })
+            .As<IFileSystem>()
+            .SingleInstance();
     }
 }

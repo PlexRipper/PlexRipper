@@ -7,6 +7,9 @@ public static partial class DownloadTaskExtensions
         int parts
     )
     {
+        if (parts <= 0)
+            return [];
+
         // Create download worker tasks/segments/ranges
         var totalBytesToReceive = downloadTask.DataTotal;
         var partSize = totalBytesToReceive / parts;

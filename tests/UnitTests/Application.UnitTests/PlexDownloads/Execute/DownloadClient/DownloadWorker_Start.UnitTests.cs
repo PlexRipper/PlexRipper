@@ -15,18 +15,19 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
     public async Task ShouldDownloadFileSuccessfully_WhenNoErrorsHappen()
     {
         // Arrange
-        var seed = await SetupDatabase(
+        await SetupDatabase(
             37820,
             config =>
             {
                 config.PlexServerCount = 1;
                 config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+                config.DownloadWorkerTasks = 1;
+                config.DownloadFileSizeInMb = 10;
             }
         );
 
         SetupHttpClient();
-
-        var plexServer = IDbContext.PlexServers.First();
 
         var destinationStream = new MemoryStream();
         mock.SetupMediator(It.IsAny<CreateDownloadFileStreamCommand>)
@@ -41,7 +42,7 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
             .ReturnsAsync(downloadStream)
             .Verifiable(Times.Once);
 
-        var downloadWorkerTask = GetDownloadWorkerTask(seed, 1, plexServer.Id, downloadStream.Length);
+        var downloadWorkerTask = IDbContext.DownloadWorkerTasks.First();
 
         var sut = mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", downloadWorkerTask));
 
@@ -72,17 +73,18 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
             {
                 config.PlexServerCount = 1;
                 config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+                config.DownloadWorkerTasks = 1;
+                config.DownloadFileSizeInMb = 10;
             }
         );
 
         SetupHttpClient();
 
-        var plexServer = IDbContext.PlexServers.First();
         await IDbContext.PlexServerStatuses.Where(x => x.Id > 0).ExecuteDeleteAsync();
+        var downloadWorkerTask = IDbContext.DownloadWorkerTasks.First();
 
-        var sut = mock.Create<DownloadWorker>(
-            new NamedParameter("downloadWorkerTask", FakeData.GetDownloadWorkerTask(seed, 1, plexServer.Id).Generate())
-        );
+        var sut = mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", downloadWorkerTask));
         var updateList = new List<DownloadWorkerTaskProgress>();
         sut.DownloadWorkerTaskUpdate.Subscribe(x => updateList.Add(x));
 
@@ -98,18 +100,19 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
     public async Task ShouldBeInErrorState_WhenDownloadStreamReturnsEmptyStream()
     {
         // Arrange
-        var seed = await SetupDatabase(
+        await SetupDatabase(
             37820,
             config =>
             {
                 config.PlexServerCount = 1;
                 config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+                config.DownloadWorkerTasks = 1;
+                config.DownloadFileSizeInMb = 10;
             }
         );
 
         SetupHttpClient();
-
-        var plexServer = IDbContext.PlexServers.First();
 
         mock.SetupMediator(It.IsAny<CreateDownloadFileStreamCommand>)
             .ReturnsAsync(Result.Ok<Stream>(new MemoryStream()))
@@ -122,9 +125,8 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
             .ReturnsAsync(() => null)
             .Verifiable(Times.Once);
 
-        var sut = mock.Create<DownloadWorker>(
-            new NamedParameter("downloadWorkerTask", FakeData.GetDownloadWorkerTask(seed, 1, plexServer.Id).Generate())
-        );
+        var downloadWorkerTask = IDbContext.DownloadWorkerTasks.First();
+        var sut = mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", downloadWorkerTask));
 
         var updateList = new List<DownloadWorkerTaskProgress>();
         sut.DownloadWorkerTaskUpdate.Subscribe(x => updateList.Add(x));
@@ -141,18 +143,19 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
     public async Task ShouldRetryDownloadStream_WhenPrematureHttpIOExceptionIsThrown()
     {
         // Arrange
-        var seed = await SetupDatabase(
+        await SetupDatabase(
             37820,
             config =>
             {
                 config.PlexServerCount = 1;
                 config.PlexAccountCount = 1;
+                config.MovieDownloadTasksCount = 1;
+                config.DownloadWorkerTasks = 1;
+                config.DownloadFileSizeInMb = 10;
             }
         );
 
         SetupHttpClient();
-
-        var plexServer = IDbContext.PlexServers.First();
 
         mock.SetupMediator(It.IsAny<CreateDownloadFileStreamCommand>)
             .ReturnsAsync(Result.Ok<Stream>(new MemoryStream()))
@@ -189,7 +192,7 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
             .ReturnsAsync(new ThrottledStream(realStream))
             .Verifiable(Times.Once);
 
-        var downloadWorkerTask = GetDownloadWorkerTask(seed, 1, plexServer.Id, realStream.Length);
+        var downloadWorkerTask = IDbContext.DownloadWorkerTasks.First();
 
         var sut = mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", downloadWorkerTask));
 
@@ -207,28 +210,5 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
             updateList[i].Status.ShouldBe(DownloadStatus.Downloading);
 
         updateList.Last().Status.ShouldBe(DownloadStatus.DownloadFinished);
-    }
-
-    private DownloadWorkerTask GetDownloadWorkerTask(Seed seed, int id = 0, int plexServerId = 0, long totalSize = 0)
-    {
-        var task = FakeData.GetDownloadWorkerTask(seed, id, plexServerId).Generate();
-
-        return new DownloadWorkerTask
-        {
-            Id = task.Id,
-            StartByte = task.StartByte,
-            EndByte = totalSize,
-            DownloadStatus = task.DownloadStatus,
-            BytesReceived = task.BytesReceived,
-            ElapsedTime = task.ElapsedTime,
-            FileLocationUrl = task.FileLocationUrl,
-            DownloadTaskId = task.DownloadTaskId,
-            PlexServer = task.PlexServer,
-            PlexServerId = task.PlexServerId,
-            FileName = task.FileName,
-            DownloadWorkerTaskLogs = task.DownloadWorkerTaskLogs,
-            PartIndex = task.PartIndex,
-            DownloadDirectory = task.DownloadDirectory,
-        };
     }
 }

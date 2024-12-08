@@ -27,6 +27,7 @@ public class DownloadCommandsPauseDownloadIntegrationTests : BaseIntegrationTest
                     x.PlexLibraryCount = 1;
                     x.MovieCount = 1;
                     x.MovieDownloadTasksCount = 1;
+                    x.DownloadWorkerTasks = 4;
                     x.DownloadFileSizeInMb = 50;
                 };
 

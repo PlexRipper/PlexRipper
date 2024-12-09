@@ -14,9 +14,9 @@ public class DownloadCommandsPauseDownloadIntegrationTests : BaseIntegrationTest
     public async Task ShouldPauseADownloadTask_WhenDownloadTaskIsInProgressAndIsPaused()
     {
         // Arrange
-
+        var seed = new Seed(21345);
         using var container = await CreateContainer(
-            21345,
+            seed,
             config =>
             {
                 config.DownloadSpeedLimitInKib = 5000;
@@ -33,6 +33,7 @@ public class DownloadCommandsPauseDownloadIntegrationTests : BaseIntegrationTest
 
                 config.HttpClientOptions = x =>
                 {
+                    x.SetupIdentityRequest(seed);
                     x.SetupDownloadFile(50);
                 };
             }

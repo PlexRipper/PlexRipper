@@ -23,20 +23,13 @@ public class PlexMediaDataSet : DataSet
 
     public string MediaTitle(PlexMediaType type)
     {
-        if (type == PlexMediaType.Movie)
+        var index = _faker.Random.Int(0, 1000 - 1);
+        return type switch
         {
-            return MovieTitle;
-        }
-
-        if (type == PlexMediaType.TvShow)
-        {
-            return TvShowTitle;
-        }
-
-        throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown PlexMediaType");
+            PlexMediaType.Movie => PlexMovieShowTitlesDataset.PlexMovieTitles.GetByIndex(index),
+            PlexMediaType.TvShow => PlexTvShowTitlesDataset.PlexTVShowTitles.GetByIndex(index),
+            PlexMediaType.Episode => PlexEpisodeShowTitlesDataset.PlexEpisodeTitles.GetByIndex(index),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, "PlexMediaType not supported."),
+        };
     }
-
-    public string MovieTitle => PlexMovieShowTitlesDataset.PlexMovieTitles.GetByIndex(_faker.Random.Int(0, 1000 - 1));
-
-    public string TvShowTitle => PlexTvShowTitlesDataset.PlexTVShowTitles.GetByIndex(_faker.Random.Int(0, 1000 - 1));
 }

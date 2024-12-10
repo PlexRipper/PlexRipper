@@ -10,12 +10,17 @@ namespace PlexRipper.Application;
 public record GetAllUniqueMediaTitlesEndpointRequest
 {
     [FromQuery]
-    public PlexMediaType Type { get; init; }
+    public PlexMediaType Type { get; init; } = PlexMediaType.TvShow;
+
+    [FromQuery]
+    public int Count { get; init; } = 0;
 }
 
 public class GetAllUniqueMediaTitlesEndpoint : BaseEndpoint<GetAllUniqueMediaTitlesEndpointRequest, List<string>>
 {
     private readonly IPlexRipperDbContext _dbContext;
+
+    private readonly Random _random = new();
 
     public override string EndpointPath => ApiRoutes.DebugController + "/unique-media-titles";
 
@@ -51,7 +56,35 @@ public class GetAllUniqueMediaTitlesEndpoint : BaseEndpoint<GetAllUniqueMediaTit
             .Select(x => x.Trim())
             .ToList();
 
-        var json = Regex.Unescape(JsonSerializer.Serialize(result, DefaultJsonSerializerOptions.ConfigStandard));
+        var resultCount = result.Count;
+        string json;
+
+        if (req.Count > 0)
+        {
+            var takenList = new HashSet<string>();
+            for (var i = 0; i < req.Count; i++)
+            {
+                string selected;
+                do
+                {
+                    var index = _random.Next(0, resultCount);
+                    selected = result[index];
+                }
+                // Retry if the value is already in the list
+                while (takenList.Contains(selected));
+
+                // Add the unique result to the HashSet
+                takenList.Add(selected);
+            }
+
+            var orderedList = takenList.OrderByNatural(x => x).ToList();
+            json = Regex.Unescape(JsonSerializer.Serialize(orderedList, DefaultJsonSerializerOptions.ConfigStandard));
+        }
+        else
+        {
+            json = Regex.Unescape(JsonSerializer.Serialize(result, DefaultJsonSerializerOptions.ConfigStandard));
+        }
+
         await SendStringAsync(json, cancellation: ct);
     }
 }

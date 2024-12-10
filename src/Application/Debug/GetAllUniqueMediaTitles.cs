@@ -45,6 +45,8 @@ public class GetAllUniqueMediaTitlesEndpoint : BaseEndpoint<GetAllUniqueMediaTit
         {
             PlexMediaType.Movie => _dbContext.PlexMovies.Select(x => x.Title),
             PlexMediaType.TvShow => _dbContext.PlexTvShows.Select(x => x.Title),
+            PlexMediaType.Season => _dbContext.PlexTvShowSeason.Select(x => x.Title),
+            PlexMediaType.Episode => _dbContext.PlexTvShowEpisodes.Select(x => x.Title),
             _ => throw new NotSupportedException($"Type {req.Type} is not supported."),
         };
 

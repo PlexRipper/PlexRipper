@@ -53,6 +53,7 @@ public class FileMergeJob : IJob
 
             if (result.IsFailed)
             {
+                _log.Error("Failed to merge all files for {DownloadTaskKey}", downloadTaskKey);
                 return;
             }
 

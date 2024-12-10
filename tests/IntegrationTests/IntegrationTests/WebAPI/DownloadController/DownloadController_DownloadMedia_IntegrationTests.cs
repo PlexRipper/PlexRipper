@@ -31,6 +31,7 @@ public class DownloadControllerDownloadMediaIntegrationTests : BaseIntegrationTe
                     x.PlexLibraryCount = 1;
                     x.MovieCount = plexMovieCount;
                 };
+
                 config.HttpClientOptions = x =>
                 {
                     x.SetupIdentityRequest(seed);

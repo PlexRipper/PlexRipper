@@ -86,3 +86,11 @@ jobs:
                     tags: plexripper/plexripper:latest,plexripper/plexripper:${{ env.VERSION_NO_V }}
                     build-args: VERSION
                     file: docker/Dockerfile
+
+            -   name: Notify Discord of Stable Release
+                uses: ./.github/workflows/steps/discord-dev-release-notification/
+                with:
+                    webhook: ${{ secrets.DISCORD_RELEASES_CHANNEL_WEBHOOK }}
+                    version: ${{ env.VERSION_NO_V }}
+                    is-dev: false
+                    changelog-url: "https://github.com/PlexRipper/PlexRipper/releases/tag/v${{ env.VERSION_NO_V }}"

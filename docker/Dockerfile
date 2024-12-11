@@ -28,6 +28,7 @@ RUN bun run generate --fail-on-error
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS back-end
 
 ARG VERSION
+ARG INFORMATIONAL_VERSION
 
 WORKDIR /src
 

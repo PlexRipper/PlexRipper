@@ -15,7 +15,9 @@ services:
             - PGID=1000
             - TZ=America/New_York
             - UNMASKED=false # Unmask sensitive data in logs if true
+            # - LOG_LEVEL=DEBUG # Set the logging level in the docker logging
         volumes:
+            # The paths /mnt/PROJECTS/PlexRipperCache/ are examples and you will need valid paths on your device with write permission.
             - /mnt/PROJECTS/PlexRipperCache/Config:/Config
             - /mnt/PROJECTS/PlexRipperCache/Downloads:/Downloads
             - /mnt/PROJECTS/PlexRipperCache/Movies:/Movies

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.IO.Abstractions;
 using Data.Contracts;
 using Environment;
 using FileSystem.Contracts;
@@ -14,24 +15,23 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
 
     private readonly IPathProvider _pathProvider;
 
-    private readonly IFileSystem _fileSystem;
-
-    private readonly IDirectorySystem _directorySystem;
+    private readonly IDirectory _directory;
+    private readonly IFile _file;
     private string DatabasePath => _pathProvider.DatabasePath;
 
     public PlexRipperDbContextManager(
         ILog<PlexRipperDbContextManager> log,
         IPlexRipperDbContextDatabase dbContextDatabaseDatabase,
         IPathProvider pathProvider,
-        IFileSystem fileSystem,
-        IDirectorySystem directorySystem
+        IDirectory directory,
+        IFile file
     )
     {
         _log = log;
         _dbContextDatabase = dbContextDatabaseDatabase;
         _pathProvider = pathProvider;
-        _fileSystem = fileSystem;
-        _directorySystem = directorySystem;
+        _directory = directory;
+        _file = file;
     }
 
     public Result Setup()
@@ -42,7 +42,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
             return Result.Ok();
         }
 
-        if (_fileSystem.FileExists(DatabasePath))
+        if (_file.Exists(DatabasePath))
         {
             // Check if database can be connected to.
             if (_dbContextDatabase.CanConnect())
@@ -152,7 +152,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
     private Result BackUpDatabase()
     {
         _log.InformationLine("Attempting to back-up the PlexRipper database");
-        if (!_fileSystem.FileExists(_pathProvider.DatabasePath))
+        if (!_file.Exists(_pathProvider.DatabasePath))
         {
             _log.InformationLine("Database does not exist, cannot continue to back-up");
             return Result.Ok();
@@ -163,7 +163,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
 
         try
         {
-            _directorySystem.CreateDirectory(dbBackUpPath);
+            _directory.CreateDirectory(dbBackUpPath);
 
             // Wait until the database is available.
             StreamExtensions
@@ -172,12 +172,12 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
 
             foreach (var databaseFilePath in _pathProvider.DatabaseFiles)
             {
-                if (_fileSystem.FileExists(databaseFilePath))
+                if (_file.Exists(databaseFilePath))
                 {
                     var destinationPath = Path.Combine(dbBackUpPath, databaseFilePath.GetFileName());
                     try
                     {
-                        _fileSystem.Copy(databaseFilePath, destinationPath);
+                        _file.Copy(databaseFilePath, destinationPath);
                         _log.Here()
                             .Information(
                                 "Successfully copied \"{DatabaseFilePath}\" to back-up location\"{DestinationPath}\"",

@@ -1,12 +1,13 @@
-﻿using System.Collections.Specialized;
+﻿using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using Application.Contracts;
 using Autofac;
 using Autofac.Extras.Quartz;
+using ByteSizeLib;
 using Data.Contracts;
-using FileSystem.Contracts;
+using Environment;
 using PlexRipper.Application;
 using PlexRipper.Data;
-using Quartz;
 using Settings.Contracts;
 
 namespace PlexRipper.BaseTests;
@@ -33,10 +34,7 @@ public class TestModule : Module
             .InstancePerDependency();
 
         builder.RegisterType<TestStreamTracker>().As<ITestStreamTracker>().SingleInstance();
-        builder.RegisterType<MockDownloadFileStream>().As<IDownloadFileStream>().SingleInstance();
         builder.RegisterType<MockConfigManager>().As<IConfigManager>().SingleInstance();
-        builder.RegisterType<MockDirectorySystem>().As<IDirectorySystem>().SingleInstance();
-        builder.RegisterType<MockFileSystem>().As<IFileSystem>().SingleInstance();
         builder.RegisterType<MockSignalRService>().As<ISignalRService>().SingleInstance();
 
         SetMockedDependencies(builder);
@@ -64,10 +62,41 @@ public class TestModule : Module
                 .InstancePerDependency();
         }
 
-        if (Config.MockFileSystem is not null)
-            builder.RegisterInstance(Config.MockFileSystem).As<IFileSystem>();
-
         if (Config.MockConfigManager is not null)
             builder.RegisterInstance(Config.MockConfigManager).As<IConfigManager>();
+
+        // Note: This has to stay outside of scope otherwise Config.FileSystemOptions is not applied when dependency injected
+        var fileSystem = new MockFileSystem();
+        builder
+            .Register<MockFileSystem>(ctx =>
+            {
+                fileSystem.AddDrive(
+                    "/",
+                    new MockDriveData()
+                    {
+                        IsReady = true,
+                        DriveType = DriveType.Fixed,
+                        AvailableFreeSpace = (long)ByteSize.FromGigaBytes(1000).Bytes,
+                    }
+                );
+                fileSystem.AddDirectory(PathProvider.ConfigDirectory);
+                fileSystem.AddDirectory(PathProvider.DefaultDownloadsDestinationFolder);
+                fileSystem.AddDirectory(PathProvider.DefaultMovieDestinationFolder);
+                fileSystem.AddDirectory(PathProvider.DefaultTvShowsDestinationFolder);
+                fileSystem.AddDirectory(PathProvider.DefaultMusicDestinationFolder);
+                fileSystem.AddDirectory(PathProvider.DefaultPhotosDestinationFolder);
+                fileSystem.AddDirectory(PathProvider.DefaultOtherDestinationFolder);
+                fileSystem.AddDirectory(PathProvider.DefaultGamesDestinationFolder);
+
+                var dbContext = ctx.Resolve<IPlexRipperDbContext>();
+                if (Config.FileSystemOptions is not null)
+                {
+                    Config.FileSystemOptions.Invoke(fileSystem, dbContext);
+                }
+
+                return fileSystem;
+            })
+            .As<IFileSystem>()
+            .SingleInstance();
     }
 }

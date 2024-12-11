@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using System.IO.Abstractions;
+using Autofac;
 using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;
@@ -22,10 +23,10 @@ public class ConfigManager_ResetConfig_UnitTests : BaseUnitTest<ConfigManager>
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
             mock.Container.Resolve<ILog>(),
-            mock.Container.Resolve<IFileSystem>(),
-            mock.Container.Resolve<IDirectorySystem>(),
             mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>()
+            mock.Container.Resolve<IUserSettings>(),
+            mock.Container.Resolve<IFile>(),
+            mock.Container.Resolve<IDirectory>()
         );
         sut.Setup(x => x.SaveConfig()).Returns(Result.Ok);
 

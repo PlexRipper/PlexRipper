@@ -1,7 +1,12 @@
-﻿namespace PlexRipper.Domain;
+﻿using Logging.Interface;
+
+namespace PlexRipper.Domain;
 
 public static class DownloadTaskActions
 {
+    // ReSharper disable once InconsistentNaming
+    private static readonly ILog _log = LogManager.CreateLogInstance(typeof(DownloadTaskActions));
+
     private const string StatusDetails = "details";
 
     private const string StatusDelete = "delete";
@@ -34,6 +39,8 @@ public static class DownloadTaskActions
                 actions.Add(StatusStop);
                 break;
             case DownloadStatus.DownloadFinished:
+            case DownloadStatus.MergeFinished:
+            case DownloadStatus.MoveFinished:
                 actions.Add(StatusDelete);
                 break;
             case DownloadStatus.Paused:
@@ -66,6 +73,9 @@ public static class DownloadTaskActions
                 actions.Add(StatusStart);
                 actions.Add(StatusDelete);
                 break;
+            default:
+                _log.Error("Unknown download status {DownloadStatus}", downloadStatus);
+                break;
         }
 
         return actions;
@@ -83,6 +93,8 @@ public static class DownloadTaskActions
         [
             DownloadStatus.ServerUnreachable,
             DownloadStatus.Error,
+            DownloadStatus.MoveError,
+            DownloadStatus.MergeError,
             DownloadStatus.Downloading,
             DownloadStatus.Paused,
             DownloadStatus.Stopped,
@@ -101,6 +113,8 @@ public static class DownloadTaskActions
             DownloadStatus.DownloadFinished,
             DownloadStatus.Completed,
             DownloadStatus.Deleted,
+            DownloadStatus.MergeFinished,
+            DownloadStatus.MoveFinished,
             DownloadStatus.Unknown,
         ];
         foreach (var status in allStatuses.Where(status => downloadStatusList.All(x => x == status)))
@@ -123,6 +137,8 @@ public static class DownloadTaskActions
             && downloadStatusList.Any(x => x == DownloadStatus.Queued)
         )
             return DownloadStatus.Queued;
+
+        _log.Error("Unable to determine the aggregate status of the download tasks. {StatusList}", downloadStatusList);
 
         return DownloadStatus.Unknown;
     }

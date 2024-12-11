@@ -6,7 +6,6 @@ using Environment;
 using FileSystem.Contracts;
 using MediatR.Extensions.Autofac.DependencyInjection;
 using MediatR.Extensions.Autofac.DependencyInjection.Builder;
-using IFileSystem = FileSystem.Contracts.IFileSystem;
 using Module = Autofac.Module;
 
 namespace PlexRipper.FileSystem.Config;
@@ -21,23 +20,16 @@ public class FileSystemModule : Module
     {
         var assembly = Assembly.GetExecutingAssembly();
 
-        builder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();
-        builder.RegisterType<PathSystem>().As<IPathSystem>().SingleInstance();
-        builder.RegisterType<DiskSystem>().As<IDiskSystem>().SingleInstance();
-        builder.RegisterType<DirectorySystem>().As<IDirectorySystem>().SingleInstance();
-
         builder.RegisterType<PathProvider>().As<IPathProvider>().SingleInstance();
         builder.RegisterType<DiskProvider>().As<IDiskProvider>().SingleInstance();
-        builder.RegisterType<DownloadFileStream>().As<IDownloadFileStream>().SingleInstance();
 
         builder.RegisterModule(new QuartzAutofacJobsModule(assembly));
 
         // System.IO.Abstractions
-        builder
-            .RegisterType<System.IO.Abstractions.FileSystem>()
-            .As<System.IO.Abstractions.IFileSystem>()
-            .SingleInstance();
-        builder.RegisterType<PathWrapper>().As<IPath>().SingleInstance();
+        builder.RegisterType<System.IO.Abstractions.FileSystem>().As<IFileSystem>().SingleInstance();
+        builder.Register(ctx => ctx.Resolve<IFileSystem>().Path).As<IPath>().SingleInstance();
+        builder.Register(ctx => ctx.Resolve<IFileSystem>().File).As<IFile>().SingleInstance();
+        builder.Register(ctx => ctx.Resolve<IFileSystem>().Directory).As<IDirectory>().SingleInstance();
 
         // MediatR
         var configuration = MediatRConfigurationBuilder

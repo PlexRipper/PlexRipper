@@ -126,6 +126,7 @@ public class Boot : IHostedService
         _log.DebugLine("Boot.OnStopped has been called");
 
         // Perform post-stopped activities here
+        _log.InformationLine("PlexRipper has been shutdown! R.I.P.");
     }
 
     private void LogIdentity()

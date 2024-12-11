@@ -40,7 +40,7 @@ public class MockSignalRService : ISignalRService
         var update = downloadTasks.ToServerDownloadProgressDTOList();
 
         ServerDownloadProgressList.Add(update.First(), cancellationToken);
-        _log.Verbose("{ClassName} => {@DownloadTaskDto}", nameof(MockSignalRService), update);
+        _log.Verbose("{ClassName} => {@DownloadTaskDto}", nameof(MockSignalRService), update.First());
 
         return Task.CompletedTask;
     }

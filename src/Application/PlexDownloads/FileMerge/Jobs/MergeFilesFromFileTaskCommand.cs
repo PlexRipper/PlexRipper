@@ -1,11 +1,10 @@
 using System.Diagnostics;
+using System.IO.Abstractions;
 using System.Reactive.Subjects;
 using Application.Contracts;
 using Data.Contracts;
-using FileSystem.Contracts;
 using FluentValidation;
 using Logging.Interface;
-using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
@@ -28,8 +27,9 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
     private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IFileSystem _fileSystem;
-    private readonly IDirectorySystem _directorySystem;
+    private readonly IFile _file;
+    private readonly IDirectory _directory;
+    private readonly IPath _path;
 
     private Stream? _readStream;
     private Stream? _writeStream;
@@ -44,15 +44,17 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
         ILog log,
         IMediator mediator,
         IPlexRipperDbContext dbContext,
-        IFileSystem fileSystem,
-        IDirectorySystem directorySystem
+        IFile file,
+        IDirectory directory,
+        IPath path
     )
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
-        _fileSystem = fileSystem;
-        _directorySystem = directorySystem;
+        _file = file;
+        _directory = directory;
+        _path = path;
     }
 
     public async Task<Result> Handle(MergeFilesFromFileTaskCommand command, CancellationToken cancellationToken)
@@ -76,15 +78,22 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
 
         try
         {
+            var directoryPathResult = Result.Try(() => _path.GetDirectoryName(downloadTask.DestinationFilePath));
+            if (directoryPathResult.IsFailed)
+                return directoryPathResult.ToResult();
+
+            if (string.IsNullOrEmpty(directoryPathResult.Value))
+                return Result.Fail($"Could not determine the directory name of path: {directoryPathResult.Value}");
+
             // Ensure destination directory exists and is otherwise created.
-            var createDirectoryResult = _directorySystem.CreateDirectoryFromFilePath(downloadTask.DestinationFilePath);
+            var createDirectoryResult = Result
+                .Try((() => _directory.CreateDirectory(directoryPathResult.Value)))
+                .ToResult();
             if (createDirectoryResult.IsFailed)
                 return (await ErrorDownloadTask(downloadTask, createDirectoryResult)).LogError();
 
-            var writeStreamResult = _fileSystem.Create(
-                downloadTask.DestinationFilePath,
-                _bufferSize,
-                FileOptions.SequentialScan
+            var writeStreamResult = Result.Try(
+                (() => _file.Create(downloadTask.DestinationFilePath, _bufferSize, FileOptions.SequentialScan))
             );
             if (writeStreamResult.IsFailed)
                 return (await ErrorDownloadTask(downloadTask, writeStreamResult.ToResult())).LogError();
@@ -108,7 +117,7 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
             {
                 var filePath = sourceFilePaths[index];
 
-                if (!_fileSystem.FileExists(filePath))
+                if (!_file.Exists(filePath))
                 {
                     var result = Result
                         .Fail($"Filepath: {filePath} does not exist and cannot be used to merge/move the file!")
@@ -117,7 +126,9 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
                     return (await ErrorDownloadTask(downloadTask, result)).LogError();
                 }
 
-                var inputStreamResult = _fileSystem.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                var inputStreamResult = Result.Try(
+                    (() => _file.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                );
                 if (inputStreamResult.IsFailed)
                     return (await ErrorDownloadTask(downloadTask, inputStreamResult.ToResult())).LogError();
 
@@ -180,7 +191,7 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
                 await _readStream.DisposeAsync();
                 _readStream = null;
 
-                var deleteResult = _fileSystem.DeleteFile(filePath);
+                var deleteResult = Result.Try((() => _file.Delete(filePath)));
                 if (deleteResult.IsFailed)
                     return (await ErrorDownloadTask(downloadTask, deleteResult)).LogError();
             }
@@ -244,11 +255,6 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
     private async Task UpdateDownloadTaskStatus(DownloadTaskFileBase downloadTask)
     {
         await _dbContext.SetDownloadStatus(downloadTask.ToKey(), downloadTask.DownloadStatus);
-
-        // TODO: This might not be needed
-        await _dbContext
-            .DownloadWorkerTasks.Where(x => x.DownloadTaskId == downloadTask.Id)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.DownloadStatus, downloadTask.DownloadStatus));
 
         await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTask.ToKey()));
     }

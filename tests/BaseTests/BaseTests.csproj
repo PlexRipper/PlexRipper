@@ -31,6 +31,7 @@
         <PackageReference Include="Moq" Version="4.20.70"/>
         <PackageReference Include="Moq.Contrib.HttpClient" Version="1.4.0"/>
         <PackageReference Include="Shouldly" Version="4.2.1"/>
+        <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="21.1.7" />
         <PackageReference Include="xunit" Version="2.9.2"/>
         <PackageReference Include="xunit.abstractions" Version="2.0.3"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">

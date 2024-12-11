@@ -1,6 +1,7 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
+using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 
 namespace IntegrationTests.WebAPI.DownloadController;
@@ -32,6 +33,17 @@ public class DownloadControllerStartCommandIntegrationTests : BaseIntegrationTes
                     x.PlexLibraryCount = 2;
                     x.MovieCount = 10;
                     x.MovieDownloadTasksCount = 1;
+                    x.DownloadWorkerTasks = 4;
+                };
+
+                config.FileSystemOptions = (system, dbContext) =>
+                {
+                    var downloadTask = dbContext.DownloadTaskMovieFile.Include(x => x.DownloadWorkerTasks).First();
+                    downloadTask.FilePaths.Count.ShouldBeGreaterThan(0);
+                    foreach (var filePath in downloadTask.FilePaths)
+                    {
+                        system.AddFile(filePath, FakeData.GetFileMockData(10, 4));
+                    }
                 };
             }
         );

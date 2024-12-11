@@ -1,3 +1,5 @@
+using Data.Contracts;
+
 namespace PlexRipper.BaseTests;
 
 public static partial class DownloadTaskExtensions
@@ -26,6 +28,8 @@ public static partial class DownloadTaskExtensions
         if (downloadTask.Children.Any())
             downloadTask.Children = downloadTask.Children.SetDownloadStatus(downloadStatus);
 
+        downloadTask.Calculate();
+
         return downloadTask;
     }
 
@@ -37,6 +41,8 @@ public static partial class DownloadTaskExtensions
         downloadTask.DownloadStatus = downloadStatus;
         if (downloadTask.Children.Any())
             downloadTask.Children = downloadTask.Children.SetDownloadStatus(downloadStatus);
+
+        downloadTask.Calculate();
 
         return downloadTask;
     }
@@ -62,6 +68,7 @@ public static partial class DownloadTaskExtensions
             downloadTask.DownloadStatus = downloadStatus;
             if (downloadTask.Children.Any())
                 downloadTask.Children = downloadTask.Children.SetDownloadStatus(downloadStatus);
+            downloadTask.Calculate();
         }
 
         return downloadTasks;

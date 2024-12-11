@@ -1,4 +1,5 @@
-﻿using System.Reactive.Subjects;
+﻿using System.IO.Abstractions;
+using System.Reactive.Subjects;
 using Autofac;
 using Environment;
 using FileSystem.Contracts;
@@ -20,18 +21,16 @@ public class ConfigManager_SaveConfig_UnitTests : BaseUnitTest<ConfigManager>
         mock.Mock<IUserSettings>().SetupGet(x => x.SettingsUpdated).Returns(new Subject<UserSettings>());
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileName).Returns(() => "TEST_PlexRipperSettings.json");
         mock.Mock<IPathProvider>().SetupGet(x => x.ConfigFileLocation).Returns(() => "/");
-        mock.Mock<IFileSystem>()
-            .Setup(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>()))
-            .Returns(Result.Ok);
+        mock.Mock<IFile>().Setup(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>())).Verifiable(Times.Once);
 
         // Were mocking other methods from ConfigManager, that's why we need to mock it manually here
         var sut = new Mock<ConfigManager>(
             MockBehavior.Strict,
             mock.Container.Resolve<ILog>(),
-            mock.Container.Resolve<IFileSystem>(),
-            mock.Container.Resolve<IDirectorySystem>(),
             mock.Container.Resolve<IPathProvider>(),
-            mock.Container.Resolve<IUserSettings>()
+            mock.Container.Resolve<IUserSettings>(),
+            mock.Container.Resolve<IFile>(),
+            mock.Container.Resolve<IDirectory>()
         );
         sut.Setup(x => x.SaveConfig()).CallBase();
         sut.Setup(x => x.ConfigFileExists()).Returns(true);
@@ -42,6 +41,5 @@ public class ConfigManager_SaveConfig_UnitTests : BaseUnitTest<ConfigManager>
 
         // Assert
         resetResult.IsSuccess.ShouldBeTrue();
-        mock.Mock<IFileSystem>().Verify(x => x.FileWriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
     }
 }

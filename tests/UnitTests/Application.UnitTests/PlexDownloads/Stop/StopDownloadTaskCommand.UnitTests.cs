@@ -1,6 +1,6 @@
-﻿using Application.Contracts;
+﻿using System.IO.Abstractions;
+using Application.Contracts;
 using Data.Contracts;
-using FileSystem.Contracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application.UnitTests;
@@ -37,9 +37,7 @@ public class StopDownloadTaskCommand_UnitTests : BaseUnitTest<StopDownloadTaskCo
         mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Fail("Error"));
-        mock.Mock<IDirectorySystem>()
-            .Setup(x => x.DeleteAllFilesFromDirectory(It.IsAny<string>()))
-            .Returns(Result.Ok());
+        mock.Mock<IFile>().Setup(x => x.Delete(It.IsAny<string>()));
         mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>).Returns(Task.CompletedTask);
 
         // Act
@@ -66,9 +64,7 @@ public class StopDownloadTaskCommand_UnitTests : BaseUnitTest<StopDownloadTaskCo
         mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnOk();
-        mock.Mock<IDirectorySystem>()
-            .Setup(x => x.DeleteAllFilesFromDirectory(It.IsAny<string>()))
-            .Returns(Result.Ok());
+        mock.Mock<IFile>().Setup(x => x.Delete(It.IsAny<string>()));
         mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>).Returns(Task.CompletedTask);
 
         // Act
@@ -116,9 +112,7 @@ public class StopDownloadTaskCommand_UnitTests : BaseUnitTest<StopDownloadTaskCo
         mock.Mock<IDownloadTaskScheduler>()
             .Setup(x => x.StopDownloadTaskJob(It.IsAny<DownloadTaskKey>(), It.IsAny<CancellationToken>()))
             .ReturnOk();
-        mock.Mock<IDirectorySystem>()
-            .Setup(x => x.DeleteAllFilesFromDirectory(It.IsAny<string>()))
-            .Returns(Result.Ok());
+        mock.Mock<IFile>().Setup(x => x.Delete(It.IsAny<string>()));
         mock.SetupMediator(It.IsAny<DownloadTaskUpdatedNotification>).Returns(Task.CompletedTask);
 
         // Act

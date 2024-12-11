@@ -1,6 +1,8 @@
+using System.IO.Abstractions;
 using Data.Contracts;
 using FileSystem.Contracts;
 using Logging.Interface;
+using Microsoft.EntityFrameworkCore;
 using Quartz;
 
 namespace PlexRipper.Application;
@@ -10,14 +12,12 @@ public class FileMergeJob : IJob
     private readonly ILog _log;
     private readonly IMediator _mediator;
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IDirectorySystem _directorySystem;
 
-    public FileMergeJob(ILog log, IMediator mediator, IPlexRipperDbContext dbContext, IDirectorySystem directorySystem)
+    public FileMergeJob(ILog log, IMediator mediator, IPlexRipperDbContext dbContext)
     {
         _log = log;
         _mediator = mediator;
         _dbContext = dbContext;
-        _directorySystem = directorySystem;
     }
 
     public static string DownloadTaskIdParameter => "DownloadTaskId";
@@ -53,6 +53,7 @@ public class FileMergeJob : IJob
 
             if (result.IsFailed)
             {
+                _log.Error("Failed to merge all files for {DownloadTaskKey}", downloadTaskKey);
                 return;
             }
 
@@ -60,10 +61,14 @@ public class FileMergeJob : IJob
 
             if (downloadTask!.DownloadStatus is DownloadStatus.MoveFinished or DownloadStatus.MergeFinished)
             {
-                // TODO: - Delete the directory of the tv-show
-                _directorySystem.DeleteDirectoryFromFilePath(downloadTask.FilePaths.First());
-
                 await _dbContext.SetDownloadStatus(downloadTaskKey, DownloadStatus.Completed);
+
+                // Clean up the DownloadWorkerTasks
+                await _mediator.Send(new CleanUpDownloadTaskFoldersCommand(downloadTaskKey));
+
+                await _dbContext
+                    .DownloadWorkerTasks.Where(x => x.DownloadTaskId == downloadTask.Id)
+                    .ExecuteDeleteAsync();
 
                 await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTaskKey));
             }

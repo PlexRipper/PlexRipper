@@ -28,6 +28,9 @@ public class FakeDataConfig : BaseConfig<FakeDataConfig>
 
     public int TvShowEpisodeDownloadTasksCount { get; set; } = 0;
 
+    /// <summary>
+    /// NOTE: Setting this number to default to anything other than 0 will cause the unit test to fail/become inconclusive.
+    /// </summary>
     public int DownloadWorkerTasks { get; set; } = 0;
 
     #endregion
@@ -36,7 +39,7 @@ public class FakeDataConfig : BaseConfig<FakeDataConfig>
 
     public bool AccountHasAccessToAllLibraries { get; set; }
 
-    public int DownloadFileSizeInMb { get; set; }
+    public int DownloadFileSizeInMb { get; set; } = 10;
 
     public bool ShouldHavePlexServer => PlexServerCount > 0 || ShouldHavePlexLibrary;
 

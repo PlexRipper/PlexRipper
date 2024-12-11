@@ -9,22 +9,21 @@ public static partial class FakeData
     private static Faker<T> ApplyBasePlexMedia<T>(
         this Faker<T> faker,
         Seed seed,
+        PlexMediaType mediaType,
         Action<FakeDataConfig>? options = null
     )
         where T : PlexMedia
     {
-        var title = new Faker().Company.CompanyName();
-
         return faker
             .StrictMode(true)
             .UseSeed(seed.Next())
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.Key, _ => GetUniqueNumber())
-            .RuleFor(x => x.Title, _ => title)
-            .RuleFor(x => x.FullTitle, _ => title)
-            .RuleFor(x => x.SortIndex, _ => 0)
-            .RuleFor(x => x.SearchTitle, _ => title.ToSearchTitle())
+            .RuleFor(x => x.Title, f => f.PlexMedia().MediaTitle(mediaType))
             .RuleFor(x => x.Year, f => f.Random.Int(1900, 2030))
+            .RuleFor(x => x.FullTitle, (_, x) => $"{x.Title} ({x.Year})")
+            .RuleFor(x => x.SortIndex, _ => 0)
+            .RuleFor(x => x.SearchTitle, (_, x) => x.Title.ToSearchTitle())
             .RuleFor(x => x.Duration, f => f.Random.Int(1000, 3000000))
             .RuleFor(x => x.MediaSize, f => f.Random.Long(1000, 30000000))
             .RuleFor(x => x.MetaDataKey, f => f.Random.Int(1, 10000))
@@ -103,7 +102,7 @@ public static partial class FakeData
     public static Faker<PlexMovie> GetPlexMovies(Seed seed, Action<FakeDataConfig>? options = null)
     {
         return new Faker<PlexMovie>()
-            .ApplyBasePlexMedia(seed, options)
+            .ApplyBasePlexMedia(seed, PlexMediaType.Movie, options)
             .StrictMode(true)
             .UseSeed(seed.Next())
             .FinishWith(
@@ -128,7 +127,7 @@ public static partial class FakeData
         return new Faker<PlexTvShow>()
             .StrictMode(true)
             .UseSeed(seed.Next())
-            .ApplyBasePlexMedia(seed, options)
+            .ApplyBasePlexMedia(seed, PlexMediaType.TvShow, options)
             .RuleFor(x => x.Seasons, _ => GetPlexTvShowSeason(seed, options).Generate(config.TvShowSeasonCount))
             .RuleFor(x => x.ChildCount, _ => config.TvShowSeasonCount)
             .RuleFor(x => x.GrandChildCount, _ => config.TvShowSeasonCount * config.TvShowEpisodeCount)
@@ -170,7 +169,7 @@ public static partial class FakeData
         return new Faker<PlexTvShowSeason>()
             .StrictMode(true)
             .UseSeed(seed.Next())
-            .ApplyBasePlexMedia(seed, options)
+            .ApplyBasePlexMedia(seed, PlexMediaType.Season, options)
             .RuleFor(x => x.Title, _ => "Season")
             .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
             .RuleFor(x => x.TvShowId, _ => 0)
@@ -189,7 +188,7 @@ public static partial class FakeData
         return new Faker<PlexTvShowEpisode>()
             .StrictMode(true)
             .UseSeed(seed.Next())
-            .ApplyBasePlexMedia(seed, options)
+            .ApplyBasePlexMedia(seed, PlexMediaType.Episode, options)
             .RuleFor(x => x.Id, _ => 0)
             .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
             .RuleFor(x => x.TvShowId, _ => 0)

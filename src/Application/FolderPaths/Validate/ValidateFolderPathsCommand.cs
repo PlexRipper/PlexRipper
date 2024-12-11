@@ -1,5 +1,5 @@
+using System.IO.Abstractions;
 using Data.Contracts;
-using FileSystem.Contracts;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,12 +18,12 @@ public class ValidateFolderPathsValidator : AbstractValidator<ValidateFolderPath
 public class ValidateFolderPathsHandler : IRequestHandler<ValidateFolderPathsCommand, Result>
 {
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IDirectorySystem _directorySystem;
+    private readonly IDirectory _directory;
 
-    public ValidateFolderPathsHandler(IPlexRipperDbContext dbContext, IDirectorySystem directorySystem)
+    public ValidateFolderPathsHandler(IPlexRipperDbContext dbContext, IDirectory directory)
     {
         _dbContext = dbContext;
-        _directorySystem = directorySystem;
+        _directory = directory;
     }
 
     public async Task<Result> Handle(ValidateFolderPathsCommand command, CancellationToken cancellationToken)
@@ -42,14 +42,13 @@ public class ValidateFolderPathsHandler : IRequestHandler<ValidateFolderPathsCom
         var errors = new List<IError>();
         foreach (var folderPath in folderPaths)
         {
-            var folderPathExitsResult = _directorySystem.Exists(folderPath.DirectoryPath);
-            if (folderPathExitsResult.IsFailed)
+            var directoryExists = _directory.Exists(folderPath.DirectoryPath);
+            if (!directoryExists)
             {
-                errors.AddRange(folderPathExitsResult.Errors);
                 continue;
             }
 
-            if (folderPath.MediaType == command.MediaType && !folderPathExitsResult.Value)
+            if (folderPath.MediaType == command.MediaType && !directoryExists)
                 errors.Add(new Error($"The {folderPath.DisplayName} is not a valid or existing directory"));
         }
 

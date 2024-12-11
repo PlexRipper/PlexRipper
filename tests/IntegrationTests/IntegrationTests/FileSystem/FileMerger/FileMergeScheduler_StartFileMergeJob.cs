@@ -1,4 +1,5 @@
 using Data.Contracts;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationTests.FileSystem.FileMerger;
 
@@ -21,19 +22,35 @@ public class FileMergeSchedulerStartFileMergeJobIntegrationTests : BaseIntegrati
                     x.PlexLibraryCount = 3;
                     x.MovieCount = 1;
                     x.MovieDownloadTasksCount = 1;
+                    x.DownloadWorkerTasks = 4;
                     x.DownloadFileSizeInMb = 10;
+                };
+
+                config.FileSystemOptions = (system, dbContext) =>
+                {
+                    var downloadTask = dbContext.DownloadTaskMovieFile.Include(x => x.DownloadWorkerTasks).First();
+                    downloadTask.FilePaths.Count.ShouldBeGreaterThan(0);
+                    foreach (var filePath in downloadTask.FilePaths)
+                    {
+                        system.AddFile(filePath, FakeData.GetFileMockData(10, 4));
+                    }
                 };
             }
         );
         var dbContext = container.DbContext;
-        var downloadTask = dbContext.DownloadTaskMovieFile.First();
-        downloadTask.ShouldNotBeNull();
+        var downloadTasks = dbContext
+            .DownloadTaskMovie.AsTracking()
+            .Include(x => x.Children)
+            .ThenInclude(x => x.DownloadWorkerTasks)
+            .ToList();
+        downloadTasks.ShouldNotBeNull();
 
-        // Act
-        var downloadWorkerTasks = downloadTask.GenerateDownloadWorkerTasks(4);
-        dbContext.DownloadWorkerTasks.AddRange(downloadWorkerTasks);
+        downloadTasks.SetDownloadStatus(DownloadStatus.DownloadFinished);
         await dbContext.SaveChangesAsync();
 
+        var downloadTask = container.DbContext.DownloadTaskMovieFile.First();
+
+        // Act
         var startResult = await container.FileMergeScheduler.StartFileMergeJob(downloadTask.ToKey());
         await container.SchedulerService.AwaitScheduler();
 

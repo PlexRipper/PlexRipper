@@ -1,4 +1,6 @@
-﻿using ByteSizeLib;
+﻿using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
+using ByteSizeLib;
 
 namespace PlexRipper.BaseTests;
 
@@ -14,4 +16,22 @@ public static partial class FakeData
 
     public static MemoryStream GetFileStream(double sizeInMib = 0) =>
         sizeInMib > 0 ? new MemoryStream(GetDownloadFile(sizeInMib)) : new MemoryStream();
+
+    public static MockFileData GetFileMockData(double sizeInMib = 0) =>
+        sizeInMib > 0 ? new MockFileData(GetDownloadFile(sizeInMib)) : new MockFileData(string.Empty);
+
+    public static MockFileData GetFileMockData(decimal sizeInMib = 0, int parts = 1) =>
+        GetFileMockData(decimal.ToDouble(decimal.Divide(sizeInMib, parts)));
+
+    public static FileSystemStream GetFileSystemStream(double sizeInMib = 0)
+    {
+        var filePath = "/test.txt";
+        var fs = new MockFileSystem();
+        fs.AddFile(
+            filePath,
+            sizeInMib > 0 ? new MockFileData(GetDownloadFile(sizeInMib)) : new MockFileData(string.Empty)
+        );
+
+        return fs.File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+    }
 }

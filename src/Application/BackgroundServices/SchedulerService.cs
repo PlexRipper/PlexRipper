@@ -50,10 +50,21 @@ public class SchedulerService : ISchedulerService
             : Result.Fail($"Could not start Scheduler {_scheduler.SchedulerName}").LogError();
     }
 
-    public async Task<Result> StopAsync(bool graceFully = true)
+    public async Task<Result> StopAsync()
     {
         if (!_scheduler.IsShutdown)
-            await _scheduler.Shutdown(graceFully).WaitAsync(TimeSpan.FromSeconds(15));
+        {
+            _log.InformationLine("Shutting down Quartz Scheduler");
+
+            foreach (var runningJob in await _scheduler.GetCurrentlyExecutingJobs())
+            {
+                _log.WarningLine("Stopping running job {JobKey}", runningJob.JobDetail.Key.ToString());
+                await _scheduler.Interrupt(runningJob.JobDetail.Key);
+            }
+
+            // Jobs can be interrupted and later resume from where the left off
+            await _scheduler.Shutdown(true).WaitAsync(TimeSpan.FromSeconds(15));
+        }
 
         return _scheduler.IsStarted ? Result.Ok() : Result.Fail("Could not shutdown Scheduler").LogError();
     }

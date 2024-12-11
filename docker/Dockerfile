@@ -1,4 +1,5 @@
 ARG VERSION=0.0.0
+ARG INFORMATIONAL_VERSION=0.0.0
 ARG PORT=7000
 ARG TARGETPLATFORM=linux/amd64
 ARG BUILDPLATFORM=linux/amd64
@@ -66,19 +67,21 @@ COPY . .
 WORKDIR "/src/src/WebAPI"
 
 ## Build and Publish
-RUN dotnet build "WebAPI.csproj" -c Release -o /app/build /p:AssemblyVersion=$VERSION --no-restore
-RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:AssemblyVersion=$VERSION
+RUN dotnet build "WebAPI.csproj" -c Release -o /app/build /p:AssemblyVersion=$VERSION  /p:InformationalVersion=$INFORMATIONAL_VERSION --no-restore
+RUN dotnet publish "WebAPI.csproj" -c Release -o /app/publish /p:AssemblyVersion=$VERSION  /p:InformationalVersion=$INFORMATIONAL_VERSION
 
 # Stage 3 - Runtime Image
 FROM --platform=$TARGETPLATFORM ghcr.io/linuxserver/baseimage-alpine:3.20 AS final
 
 ARG VERSION
+ARG INFORMATIONAL_VERSION
 ARG PORT
 ARG TARGETPLATFORM
 
 ## Set environment variables
 ENV PORT=${PORT}
 ENV VERSION=${VERSION}
+ENV INFORMATIONAL_VERSION=${INFORMATIONAL_VERSION}
 ENV DOTNET_ENVIRONMENT=Production
 ENV DOTNET_URLS=http://+:${PORT}
 ENV ASPNETCORE_URLS=http://+:${PORT}

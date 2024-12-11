@@ -80,11 +80,14 @@ jobs:
                 uses: docker/build-push-action@v6
                 env:
                     VERSION: ${{ env.VERSION_NO_V }}
+                    INFORMATIONAL_VERSION: ${{ env.VERSION_NO_V }}
                 with:
                     platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
                     push: true
                     tags: plexripper/plexripper:latest,plexripper/plexripper:${{ env.VERSION_NO_V }}
-                    build-args: VERSION
+                    build-args: |
+                        VERSION=${{ env.VERSION_NO_V }}
+                        INFORMATIONAL_VERSION=${{ env.VERSION_NO_V }}
                     file: docker/Dockerfile
 
             -   name: Notify Discord of Stable Release

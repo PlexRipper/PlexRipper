@@ -1,0 +1,17 @@
+name: Test discord notification
+
+on:
+    workflow_dispatch:
+
+jobs:
+    test-notification:
+        name: Test discord notification
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout source code
+                uses: actions/checkout@v4
+
+            -   name: Notify Discord of Dev Release
+                uses: ./.github/workflows/steps/discord-dev-release-notification/
+                with:
+                    webhook: ${{ secrets.DISCORD_RELEASES_CHANNEL_WEBHOOK }}

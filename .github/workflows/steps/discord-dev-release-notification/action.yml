@@ -1,0 +1,21 @@
+name: 'Notify Discord of build status'
+inputs:
+    webhook:
+        description: 'The Discord webhook URL.'
+        required: true
+runs:
+    using: 'composite'
+    steps:
+        -   name: Notify Discord of build status
+            uses: sarisia/actions-status-discord@v1
+            if: always()
+            with:
+                webhook: ${{ inputs.webhook }}
+                nodetail: true
+                title: "New PlexRipper development version has been released!"
+                description: |
+                    New development version on Docker has been released!
+                    Click [here](https://hub.docker.com/repository/docker/plexripper/plexripper/tags) to download!
+                username: PlexRipper
+                avatar_url: "https://raw.githubusercontent.com/PlexRipper/PlexRipper/refs/heads/dev/export/plexripper/logo/full/full-logo-512.png"
+

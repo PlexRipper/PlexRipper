@@ -3,19 +3,49 @@ inputs:
     webhook:
         description: 'The Discord webhook URL.'
         required: true
+    version:
+        description: 'The version of the release.'
+        required: true
+    is-dev:
+        description: 'Whether the release is a development release.'
+        required: false
+        default: 'false'
+    changelog-url:
+        description: 'The URL to the development changelog.'
+        required: false
+        default: ''
+
 runs:
     using: 'composite'
     steps:
-        -   name: Notify Discord of build status
+        -   name: Notify Discord of build status (Dev)
+            if: ${{ inputs.is-dev == 'true' }}
             uses: sarisia/actions-status-discord@v1
-            if: always()
             with:
                 webhook: ${{ inputs.webhook }}
                 nodetail: true
                 title: "New PlexRipper development version has been released!"
+                color: "#0200ff" # Blue
                 description: |
-                    New development version on Docker has been released!
-                    Click [here](https://hub.docker.com/repository/docker/plexripper/plexripper/tags) to download!
+                    A new **development** version `${{ inputs.version }}` of PlexRipper is now available on Docker!
+                    [Development changelog](${{ inputs.changelog-url }})
+                    Click [here](https://hub.docker.com/repository/docker/plexripper/plexripper/tags) to download the development version!
                 username: PlexRipper
+                url: ${{ inputs.changelog-url }}
                 avatar_url: "https://raw.githubusercontent.com/PlexRipper/PlexRipper/refs/heads/dev/export/plexripper/logo/full/full-logo-512.png"
 
+        -   name: Notify Discord of build status (Stable)
+            if: ${{ inputs.is-dev != 'true' }}
+            uses: sarisia/actions-status-discord@v1
+            with:
+                webhook: ${{ inputs.webhook }}
+                nodetail: true
+                title: "New PlexRipper version has been released!"
+                color: "#ff0000" # Red
+                description: |
+                    A new **stable** version `${{ inputs.version }}` of PlexRipper is now available on Docker!
+                    [Release changelog](${{ inputs.changelog-url }})
+                    Click [here](https://hub.docker.com/repository/docker/plexripper/plexripper/tags) to download the stable version!
+                username: PlexRipper
+                url: ${{ inputs.changelog-url }}
+                avatar_url: "https://raw.githubusercontent.com/PlexRipper/PlexRipper/refs/heads/dev/export/plexripper/logo/full/full-logo-512.png"

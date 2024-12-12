@@ -28,18 +28,18 @@ public class FileMergeJob : IJob
     {
         // Jobs should swallow exceptions as otherwise Quartz will keep re-executing it
         // https://www.quartz-scheduler.net/documentation/best-practices.html#throwing-exceptions
+        var dataMap = context.JobDetail.JobDataMap;
+        var downloadTaskKey = dataMap.GetJsonValue<DownloadTaskKey>(DownloadTaskIdParameter);
+        if (downloadTaskKey is null)
+        {
+            ResultExtensions.IsNull(nameof(DownloadTaskKey)).LogError();
+            return;
+        }
+
         try
         {
-            var dataMap = context.JobDetail.JobDataMap;
-            var downloadTaskKey = dataMap.GetJsonValue<DownloadTaskKey>(DownloadTaskIdParameter);
-            if (downloadTaskKey is null)
-            {
-                ResultExtensions.IsNull(nameof(DownloadTaskKey)).LogError();
-                return;
-            }
-
             _log.Here()
-                .Debug(
+                .Information(
                     "Executing job: {NameOfFileMergeJob} for {NameOfFileTaskId} with id: {FileTaskId}",
                     nameof(FileMergeJob),
                     nameof(downloadTaskKey),
@@ -72,6 +72,10 @@ public class FileMergeJob : IJob
 
                 await _mediator.Send(new DownloadTaskUpdatedNotification(downloadTaskKey));
             }
+        }
+        catch (TaskCanceledException)
+        {
+            _log.Warning("{JobName} for {DownloadTaskKey} was cancelled", nameof(FileMergeJob), downloadTaskKey);
         }
         catch (Exception e)
         {

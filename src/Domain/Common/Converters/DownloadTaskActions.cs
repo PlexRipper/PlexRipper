@@ -44,6 +44,8 @@ public static class DownloadTaskActions
                 actions.Add(StatusDelete);
                 break;
             case DownloadStatus.Paused:
+            case DownloadStatus.MergePaused:
+            case DownloadStatus.MovePaused:
                 actions.Add(StatusStart);
                 actions.Add(StatusStop);
                 actions.Add(StatusDelete);
@@ -115,6 +117,8 @@ public static class DownloadTaskActions
             DownloadStatus.Deleted,
             DownloadStatus.MergeFinished,
             DownloadStatus.MoveFinished,
+            DownloadStatus.MergePaused,
+            DownloadStatus.MovePaused,
             DownloadStatus.Unknown,
         ];
         foreach (var status in allStatuses.Where(status => downloadStatusList.All(x => x == status)))

@@ -93,28 +93,13 @@ const mediaMetaData = computed(() => {
 		});
 	}
 
-	const libraryValue = get(library);
-	if (libraryValue) {
-		return formatted({
-			movieCount: libraryValue.count,
-			tvShowCount: libraryValue.count,
-			seasonCount: libraryValue.seasonCount,
-			episodeCount: libraryValue.episodeCount,
-			fileSize: libraryValue.mediaSize,
-		});
-	}
-
-	if (props.allMediaMode) {
-		return formatted({
-			movieCount: mediaOverviewStore.allMovieCount,
-			tvShowCount: mediaOverviewStore.allTvShowCount,
-			seasonCount: mediaOverviewStore.allSeasonCount,
-			episodeCount: mediaOverviewStore.allEpisodeCount,
-			fileSize: mediaOverviewStore.allFileSize,
-		});
-	}
-
-	return t('general.commands.unknown');
+	return formatted({
+		movieCount: mediaOverviewStore.allMovieCount,
+		tvShowCount: mediaOverviewStore.allTvShowCount,
+		seasonCount: mediaOverviewStore.allSeasonCount,
+		episodeCount: mediaOverviewStore.allEpisodeCount,
+		fileSize: mediaOverviewStore.allFileSize,
+	});
 });
 
 function formatted({ movieCount, tvShowCount, seasonCount, episodeCount, fileSize }: {
@@ -157,7 +142,3 @@ function mediaTypeToAllText(mediaType: PlexMediaType): string {
 	}
 }
 </script>
-
-<style lang="scss">
-
-</style>

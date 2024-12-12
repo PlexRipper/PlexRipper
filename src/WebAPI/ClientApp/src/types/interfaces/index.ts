@@ -10,3 +10,4 @@ export * from './components';
 export * from './ResultDTO';
 export * from './IHelp';
 export * from './IPlexAccount';
+export * from './IFolderPathGroup';

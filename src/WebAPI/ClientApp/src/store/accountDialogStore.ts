@@ -7,7 +7,8 @@ import { plexAccountApi } from '@api';
 import type { IError, PlexAccountDTO } from '@dto';
 import type { IAccountDialog, ResultDTO } from '@interfaces';
 import type { Observable } from 'rxjs';
-import { cloneDeep, useAccountStore, useDialogStore } from '#imports';
+import { useAccountStore, useDialogStore } from '@store';
+import { cloneDeep } from 'lodash-es';
 
 interface IAccountDialogStore extends PlexAccountDTO {
 	isAuthTokenMode: boolean;

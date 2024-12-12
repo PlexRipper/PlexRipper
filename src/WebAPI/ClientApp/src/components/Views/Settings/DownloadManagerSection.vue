@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { useSettingsStore } from '#imports';
+import { useSettingsStore } from '@store';
 
 const settingsStore = useSettingsStore();
 </script>

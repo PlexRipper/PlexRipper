@@ -11,7 +11,7 @@
 <script setup lang="ts">
 import { generateDownloadProgressTvShows, generatePlexServer } from '@factories';
 import type { DownloadProgressDTO } from '@dto';
-import { useDownloadStore, useDialogStore } from '#imports';
+import { useDownloadStore, useDialogStore } from '@store';
 
 const downloadStore = useDownloadStore();
 const dialogStore = useDialogStore();

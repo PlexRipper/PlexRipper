@@ -20,7 +20,7 @@
 import Log from 'consola';
 import { get } from '@vueuse/core';
 import { type DownloadMediaDTO, type PlexMediaSlimDTO, PlexMediaType } from '@dto';
-import { useMediaOverviewStore } from '#imports';
+import { useMediaOverviewStore } from '@store';
 
 const mediaOverviewStore = useMediaOverviewStore();
 

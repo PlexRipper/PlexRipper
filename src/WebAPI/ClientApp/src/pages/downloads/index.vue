@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 import type { DownloadProgressDTO } from '@dto';
-import { useDownloadStore, useDialogStore } from '#imports';
+import { useDownloadStore, useDialogStore } from '@store';
 
 const dialogStore = useDialogStore();
 const downloadStore = useDownloadStore();

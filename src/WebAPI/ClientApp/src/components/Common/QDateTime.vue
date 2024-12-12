@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { format } from 'date-fns';
-import { useSettingsStore } from '~/store';
+import { useSettingsStore } from '@store';
 
 const settingsStore = useSettingsStore();
 

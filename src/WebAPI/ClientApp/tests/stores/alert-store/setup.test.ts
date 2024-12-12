@@ -2,7 +2,7 @@ import { describe, beforeAll, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { subscribeSpyTo, baseSetup, baseVars } from '@services-test-base';
 import type { ISetupResult } from '@interfaces';
-import { useAlertStore } from '#build/imports';
+import { useAlertStore } from '@store';
 
 describe('AlertStore.setup()', () => {
 	baseVars();

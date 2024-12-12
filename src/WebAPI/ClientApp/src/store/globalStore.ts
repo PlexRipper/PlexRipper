@@ -21,7 +21,7 @@ import {
 	useMediaStore,
 	useSignalrStore,
 	useDialogStore,
-} from '#imports';
+} from '@store';
 
 export const useGlobalStore = defineStore('GlobalStore', () => {
 	const state = reactive<{ config: IAppConfig; pageReadyObservable: Subject<boolean> }>({

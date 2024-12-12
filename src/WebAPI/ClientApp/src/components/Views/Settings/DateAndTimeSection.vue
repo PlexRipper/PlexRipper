@@ -96,12 +96,10 @@
 
 <script setup lang="ts">
 import { format } from 'date-fns';
-
 import { enUS, fr } from 'date-fns/locale';
-
 import { get } from '@vueuse/core';
-import HelpGroup from '@components/Help/HelpGroup.vue';
-import { useSettingsStore } from '~/store';
+import { useSettingsStore } from '@store';
+import { useI18n } from 'vue-i18n';
 
 const i18n = useI18n();
 const settingsStore = useSettingsStore();

@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { useSettingsStore } from '#imports';
+import { useSettingsStore } from '@store';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();

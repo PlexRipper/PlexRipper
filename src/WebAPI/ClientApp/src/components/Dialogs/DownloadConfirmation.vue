@@ -44,7 +44,8 @@ import { set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
 import type { DownloadMediaDTO, DownloadPreviewDTO } from '@dto';
 import { DialogType } from '@enums';
-import { useI18n, useDownloadStore } from '#imports';
+import { useI18n } from 'vue-i18n';
+import { useDownloadStore } from '@store';
 
 const { t } = useI18n();
 const downloadStore = useDownloadStore();

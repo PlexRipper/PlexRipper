@@ -3,10 +3,9 @@ import { switchMap, tap, map } from 'rxjs/operators';
 import type { Observable } from 'rxjs';
 import { of, throwError } from 'rxjs';
 import { type FolderPathDTO, FolderType, PlexMediaType } from '@dto';
-import type IFolderPathGroup from '@interfaces/IFolderPathGroup';
-import type { ISetupResult } from '@interfaces';
+import type { ISetupResult, IFolderPathGroup } from '@interfaces';
 import { folderPathApi } from '@api';
-import { useI18n } from '#build/imports';
+import { useI18n } from 'vue-i18n';
 
 export const useFolderPathStore = defineStore('FolderPathStore', () => {
 	const state = reactive<{ folderPaths: FolderPathDTO[] }>({

@@ -23,7 +23,8 @@
 
 <script setup lang="ts">
 import type { QExpansionListProps } from '@interfaces/components/QExpansionListProps';
-import { useSettingsStore } from '~/store';
+import { useSettingsStore, useDownloadStore } from '@store';
+import { useI18n } from 'vue-i18n';
 
 withDefaults(defineProps<{ showDrawer: boolean }>(), {
 	showDrawer: false,

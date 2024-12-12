@@ -150,7 +150,7 @@ import { get, set } from '@vueuse/core';
 import { tap } from 'rxjs/operators';
 import type { PlexServerDTO } from '@dto';
 import { DialogType } from '@enums';
-import { useServerStore, useLibraryStore, useDialogStore } from '#imports';
+import { useServerStore, useLibraryStore, useDialogStore } from '@store';
 
 const serverStore = useServerStore();
 const libraryStore = useLibraryStore();

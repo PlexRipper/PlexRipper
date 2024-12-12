@@ -7,7 +7,7 @@ import type { PlexLibraryDTO, PlexServerDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexLibraryApi } from '@api';
 import { DataType } from '@dto';
-import { useServerStore, useSettingsStore, useSignalrStore } from '#build/imports';
+import { useServerStore, useSettingsStore, useSignalrStore } from '@store';
 
 export const useLibraryStore = defineStore('LibraryStore', () => {
 	const state = reactive<{ libraries: PlexLibraryDTO[] }>({
@@ -50,9 +50,9 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 			);
 		},
 		/**
-		 * Re-syncs a library by re-requesting all media from the Plex server.
-		 * @param libraryId
-		 */
+     * Re-syncs a library by re-requesting all media from the Plex server.
+     * @param libraryId
+     */
 		reSyncLibrary(libraryId: number): Observable<PlexLibraryDTO | null> {
 			return plexLibraryApi.refreshLibraryMediaEndpoint(libraryId).pipe(
 				tap((library) => {

@@ -6,7 +6,8 @@ import type { PlexServerDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexServerApi } from '@api';
 import { DataType } from '@dto';
-import { useAccountStore, useServerConnectionStore, useSettingsStore, useSignalrStore, orderBy } from '#build/imports';
+import { orderBy } from 'lodash-es';
+import { useAccountStore, useServerConnectionStore, useSettingsStore, useSignalrStore } from '@store';
 
 export const useServerStore = defineStore('ServerStore', () => {
 	const state = reactive<{ servers: PlexServerDTO[] }>({

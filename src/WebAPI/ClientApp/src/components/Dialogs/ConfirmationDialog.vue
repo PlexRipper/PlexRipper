@@ -31,9 +31,10 @@
 </template>
 
 <script setup lang="ts">
-import { set } from '@vueuse/core';
 import type { DialogType } from '@enums';
-import { useI18n, useDialogStore } from '#imports';
+import { set } from '@vueuse/core';
+import { useI18n } from 'vue-i18n';
+import { useDialogStore } from '@store';
 
 const { t } = useI18n();
 

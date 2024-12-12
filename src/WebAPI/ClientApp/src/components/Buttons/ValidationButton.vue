@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { get, set, watchOnce } from '@vueuse/core';
-import { useI18n } from '#imports';
+import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 

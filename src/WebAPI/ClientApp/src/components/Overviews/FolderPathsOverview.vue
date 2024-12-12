@@ -99,8 +99,7 @@
 
 <script lang="ts" setup>
 import { type FolderPathDTO, FolderType } from '@dto';
-import type IFolderPathGroup from '@interfaces/IFolderPathGroup';
-import type { IHelp } from '@interfaces';
+import type { IHelp, IFolderPathGroup } from '@interfaces';
 import { ValidationLevel } from '@enums';
 import { showErrorNotification, useDialogStore, useFolderPathStore, useI18n, useSubscription } from '#imports';
 

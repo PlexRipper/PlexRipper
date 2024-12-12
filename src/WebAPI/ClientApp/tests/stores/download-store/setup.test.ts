@@ -4,7 +4,7 @@ import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-tes
 import { generateResultDTO } from '@mock';
 import { DownloadPaths } from '@api/api-paths';
 import type { ISetupResult } from '@interfaces';
-import { useDownloadStore } from '#build/imports';
+import { useDownloadStore } from '@store';
 
 describe('DownloadStore.setup()', () => {
 	let { mock } = baseVars();

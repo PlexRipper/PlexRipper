@@ -32,7 +32,7 @@
 <script setup lang="ts">
 import ServerConnectionDisplayRow from '@components/Dialogs/ServerDialog/Tabs/ServerConnectionDisplayRow.vue';
 import type { PlexServerConnectionDTO } from '@dto';
-import { useServerConnectionStore, useDialogStore } from '#imports';
+import { useServerConnectionStore, useDialogStore } from '@store';
 
 const dialogStore = useDialogStore();
 const serverConnectionStore = useServerConnectionStore();

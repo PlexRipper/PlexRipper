@@ -18,7 +18,7 @@
 
 <script lang="ts" setup>
 import { useRoute } from 'vue-router';
-import { useLibraryStore } from '#imports';
+import { useLibraryStore } from '@store';
 
 const route = useRoute();
 const libraryStore = useLibraryStore();

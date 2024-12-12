@@ -69,6 +69,9 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 				take(1),
 			);
 		},
+		setAppVersion(version: string): void {
+			state.config.version = version;
+		},
 	};
 	const getters = {
 		getPageSetupReady: computed((): Observable<boolean> => state.pageReadyObservable.asObservable()),

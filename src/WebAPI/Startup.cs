@@ -122,7 +122,8 @@ public static class Startup
                         .SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-                        .AllowCredentials();
+                        .AllowCredentials()
+                        .WithExposedHeaders("X-PlexRipper-Version");
                 }
             );
         });

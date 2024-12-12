@@ -58,7 +58,7 @@ public static class EndpointExtensions
 
     public static void AddResponseHeaders(this HttpContext httpContext)
     {
-        // NOTE: Update "NSwagGlobalHeaders" when adding/updating headers
+        // NOTE: Update "NSwagGlobalHeaders" when adding/updating headers and add to "CORS WithExposedHeaders" in ConfigureServices
         httpContext.Response.Headers["X-PlexRipper-Version"] = EnvironmentExtensions.GetVersion();
     }
 }

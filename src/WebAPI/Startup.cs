@@ -195,6 +195,7 @@ public static class Startup
                     s.MarkNonNullablePropsAsRequired();
                     s.RequireParametersWithoutDefault = true;
                     s.DocumentProcessors.Add(new NSwagAddExtraTypes());
+                    s.OperationProcessors.Add(new NSwagGlobalHeaders());
                 };
             });
         }

@@ -1,3 +1,4 @@
+using Environment;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
@@ -53,5 +54,11 @@ public static class EndpointExtensions
             else
                 await sendAsync(StatusCodes.Status500InternalServerError);
         }
+    }
+
+    public static void AddResponseHeaders(this HttpContext httpContext)
+    {
+        // NOTE: Update "NSwagGlobalHeaders" when adding/updating headers
+        httpContext.Response.Headers["X-PlexRipper-Version"] = EnvironmentExtensions.GetVersion();
     }
 }

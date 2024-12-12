@@ -6,7 +6,7 @@ import type { PlexServerDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexServerApi } from '@api';
 import { DataType } from '@dto';
-import { useAccountStore, useServerConnectionStore, useSettingsStore, useSignalrStore } from '#build/imports';
+import { useAccountStore, useServerConnectionStore, useSettingsStore, useSignalrStore, orderBy } from '#build/imports';
 
 export const useServerStore = defineStore('ServerStore', () => {
 	const state = reactive<{ servers: PlexServerDTO[] }>({
@@ -38,8 +38,8 @@ export const useServerStore = defineStore('ServerStore', () => {
 			);
 		},
 		/**
-		 * Forces a refresh of all the PlexServers currently in store by fetching it from the API.
-		 */
+     * Forces a refresh of all the PlexServers currently in store by fetching it from the API.
+     */
 		refreshPlexServers(): Observable<PlexServerDTO[]> {
 			return plexServerApi.getAllPlexServersEndpoint().pipe(
 				tap((plexServers) => {
@@ -69,28 +69,35 @@ export const useServerStore = defineStore('ServerStore', () => {
 	// Getters
 	const getters = {
 		getServer: (serverId: number): PlexServerDTO | null => {
-			return state.servers.find((x) => x.id === serverId) ?? null;
+			const server = state.servers.find((x) => x.id === serverId);
+			if (!server) {
+				return null;
+			}
+
+			const customName = settingsStore.getServerName(server.machineIdentifier);
+			if (customName !== '') {
+				server.name = customName;
+			}
+			return server;
 		},
-		getServers: (serverIds: number[] = []): PlexServerDTO[] =>
-			state.servers.filter((server) => !serverIds.length || serverIds.includes(server.id)),
-		getVisibleServers: computed((): PlexServerDTO[] =>
-			getters.getServers().filter((x) => settingsStore.isServerVisible(x.machineIdentifier) && accountStore.getHasAccountServerAccess(x.id)),
-		),
+		getServers: (serverIds: number[] = []): PlexServerDTO[] => {
+			if (serverIds.length === 0) {
+				return state.servers.map((x) => getters.getServer(x.id)).filter((x) => !!x);
+			}
+			return serverIds.map((x) => getters.getServer(x)).filter((x) => !!x);
+		},
+		getVisibleServers: computed((): PlexServerDTO[] => {
+			const servers = getters.getServers().filter((x) => settingsStore.isServerVisible(x.machineIdentifier) && accountStore.getHasAccountServerAccess(x.id));
+			console.log(servers);
+			return orderBy(servers, [(x) => x.owned, (x) => x.name.toLocaleLowerCase()], ['desc', 'asc']);
+		}),
 		getHiddenServers: computed((): PlexServerDTO[] =>
 			getters.getServers().filter((x) => !settingsStore.isServerVisible(x.machineIdentifier)),
 		),
 		getServerName: (serverId: number): string => {
-			if (settingsStore.shouldMaskServerNames) {
-				return '**MASKED**';
-			}
 			const server = getters.getServer(serverId);
 			if (!server) {
 				return '**UNKNOWN**';
-			}
-
-			const serverSettings = settingsStore.getServerSettings(server.machineIdentifier);
-			if (serverSettings && serverSettings.plexServerName) {
-				return serverSettings.plexServerName;
 			}
 
 			return server.name;

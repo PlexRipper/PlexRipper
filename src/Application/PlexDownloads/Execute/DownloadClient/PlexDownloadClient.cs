@@ -193,7 +193,7 @@ public class PlexDownloadClient : IAsyncDisposable, IPlexDownloadClient
 
         await _mediator.Send(new DownloadTaskUpdatedNotification(DownloadTask.ToKey()));
 
-        _log.Debug("{@DownloadTask}", DownloadTask.ToString());
+        _log.Verbose("{@DownloadTask}", DownloadTask.ToString());
     }
 
     private async Task SetupDownloadLimitWatcher(DownloadTaskGeneric downloadTask)

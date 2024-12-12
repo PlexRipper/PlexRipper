@@ -156,7 +156,7 @@ public class MergeFilesFromFileTaskCommandHandler : IRequestHandler<MergeFilesFr
                     previousDataTransferred += bytesRead;
 
                     downloadTask.FileTransferSpeed = DataFormat.GetTransferSpeed(
-                        downloadTask.FileDataTransferred - previousDataTransferred,
+                        previousDataTransferred,
                         stopwatch.Elapsed.TotalSeconds
                     );
 

@@ -58,6 +58,7 @@
 import { get, set } from '@vueuse/core';
 import { JobStatus, JobTypes } from '@dto';
 import { useSubscription } from '@vueuse/rxjs';
+import { DialogType } from '@enums';
 import { useBackgroundJobsStore, useDialogStore, useI18n } from '#imports';
 
 const size = 32;
@@ -66,12 +67,17 @@ const { t } = useI18n();
 const backgroundJobStore = useBackgroundJobsStore();
 const dialogStore = useDialogStore();
 const checkPlexServerConnections = ref<Record<string, number[]>>({});
+const syncPlexServerMedia = ref<number[]>([]);
 
-const loading = computed(() => get(checkPlexServerConnections) && Object.keys(get(checkPlexServerConnections)).length > 0);
+const loading = computed(() => get(activeCount) > 0);
 
 const activeCount = computed(() => {
 	let count = 0;
 	if (Object.keys(get(checkPlexServerConnections)).length > 0) {
+		count++;
+	}
+
+	if (get(syncPlexServerMedia).length > 0) {
 		count++;
 	}
 
@@ -95,6 +101,15 @@ const menuItems = computed(() => {
 		});
 	}
 
+	if (get(syncPlexServerMedia) && Object.keys(get(syncPlexServerMedia)).length > 0) {
+		items.push({
+			label: t('components.background-activity-toggle-button.checking-plex-server-connections'),
+			icon: 'mdi-server-network',
+			cy: JobTypes.SyncServerMediaJob + 'activity-button',
+			action: () => dialogStore.openDialog(DialogType.SyncServerMediaDialog),
+		});
+	}
+
 	if (items.length === 0) {
 		items.push({
 			label: t('components.background-activity-toggle-button.no-active-background-activity'),
@@ -115,10 +130,24 @@ onMounted(() => {
 	);
 
 	useSubscription(
+		backgroundJobStore.getSyncServerMediaJobUpdate(JobStatus.Started)
+			.subscribe(({ data }) => {
+				get(syncPlexServerMedia).push(data.plexServerId);
+			}),
+	);
+
+	useSubscription(
 		backgroundJobStore.getCheckPlexServerConnectionsJobUpdate(JobStatus.Completed)
 			.subscribe(() => {
 				// Clear
 				set(checkPlexServerConnections, {});
+			}),
+	);
+
+	useSubscription(
+		backgroundJobStore.getSyncServerMediaJobUpdate(JobStatus.Completed)
+			.subscribe(({ data }) => {
+				set(syncPlexServerMedia, get(syncPlexServerMedia).filter((x) => x !== data.plexServerId));
 			}),
 	);
 });

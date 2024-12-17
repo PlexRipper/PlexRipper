@@ -4,7 +4,7 @@ import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-tes
 import { generateResultDTO } from '@mock';
 import { FolderPathPaths } from '@api/api-paths';
 import type { ISetupResult } from '@interfaces';
-import { useFolderPathStore } from '#build/imports';
+import { useFolderPathStore } from '@store';
 
 describe('FolderPathStore.setup()', () => {
 	let { mock } = baseVars();

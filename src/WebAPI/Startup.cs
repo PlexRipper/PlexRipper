@@ -122,7 +122,8 @@ public static class Startup
                         .SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-                        .AllowCredentials();
+                        .AllowCredentials()
+                        .WithExposedHeaders("X-PlexRipper-Version");
                 }
             );
         });
@@ -195,6 +196,7 @@ public static class Startup
                     s.MarkNonNullablePropsAsRequired();
                     s.RequireParametersWithoutDefault = true;
                     s.DocumentProcessors.Add(new NSwagAddExtraTypes());
+                    s.OperationProcessors.Add(new NSwagGlobalHeaders());
                 };
             });
         }

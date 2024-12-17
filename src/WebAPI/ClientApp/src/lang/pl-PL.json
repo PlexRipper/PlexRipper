@@ -192,9 +192,6 @@
         "alert-dialog": {
             "request-data-sent": "Wysłano dane żądania:"
         },
-        "app-bar-progress-bar": {
-            "tooltip-text": "Synchronizacja bibliotek Plex {finishedCount} z {totalCount}!"
-        },
         "account-token-validate-dialog": {
             "column": {
                 "email": "E-mail",
@@ -275,6 +272,11 @@
                 "reason-4": "Weź udział w dyskusjach na temat nowych funkcji i wydań!",
                 "reason-5": "Uzyskaj dostęp do ekskluzywnych aktualizacji i ogłoszeń dotyczących PlexRipper!"
             }
+        },
+        "sync-server-media-dialog": {
+            "completed": "Wszystkie media zostały zsynchronizowane!",
+            "checking-progress": "Synchronizacja {count} z {total} biblioteki Plex",
+            "fetching-servers": "Pobieranie dostępnych serwerów do synchronizacji multimediów"
         }
     },
     "confirmation": {
@@ -698,7 +700,8 @@
                     "check-server-connections-dialog": "Sprawdź połączenia serwera",
                     "directory-browser": "Okno przeglądarki katalogów",
                     "verification-dialog": "Dialog weryfikacji 2FA",
-                    "discord-invite": "Zaproszenie na Discord"
+                    "discord-invite": "Zaproszenie na Discord",
+                    "sync-server-media-dialog": "Okno dialogowe Synchronizuj serwer multimediów"
                 },
                 "header": "Moduły dialogowe debugowania",
                 "account-dialog-header": "Okno dialogowe konta",

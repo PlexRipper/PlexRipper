@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import prettyBytes from 'pretty-bytes';
-import { useLocalizationStore } from '~/store';
+import { useLocalizationStore } from '@store';
 
 const { t } = useI18n();
 const localizationStore = useLocalizationStore();

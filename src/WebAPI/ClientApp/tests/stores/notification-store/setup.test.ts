@@ -4,7 +4,7 @@ import { subscribeSpyTo, baseSetup, getAxiosMock, baseVars } from '@services-tes
 import { generateResultDTO } from '@mock';
 import { NotificationPaths } from '@api/api-paths';
 import type { ISetupResult } from '@interfaces';
-import { useNotificationsStore } from '~/store';
+import { useNotificationsStore } from '@store';
 
 describe('NotificationService.setup()', () => {
 	let { mock } = baseVars();

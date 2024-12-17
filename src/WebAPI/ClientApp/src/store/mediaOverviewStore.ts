@@ -7,7 +7,7 @@ import type { ISelection } from '@interfaces';
 import { plexLibraryApi, plexMediaApi } from '@api';
 import { map, tap } from 'rxjs/operators';
 import { iif, defer, type Observable, of } from 'rxjs';
-import { useSettingsStore, useLibraryStore } from '#imports';
+import { useSettingsStore, useLibraryStore } from '@store';
 
 export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 	const state = reactive<{
@@ -56,8 +56,8 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 	const actions = {
 		requestMedia({
 			mediaType,
-			page = 0,
-			size = 0,
+                   page = 0,
+                   size = 0,
 		}: {
 			mediaType: PlexMediaType;
 			page: number;

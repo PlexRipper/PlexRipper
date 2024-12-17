@@ -30,7 +30,7 @@
 import { get, set } from '@vueuse/core';
 import type { IHelp } from '@interfaces';
 import { DialogType } from '@enums';
-import { useI18n } from '#imports';
+import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 const helpTitle = ref('');

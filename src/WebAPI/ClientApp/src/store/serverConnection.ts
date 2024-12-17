@@ -13,7 +13,7 @@ import type { ISetupResult } from '@interfaces';
 import { plexServerApi, plexServerConnectionApi } from '@api';
 import { DataType } from '@dto';
 import { sortPlexServerConnections } from '@composables/common';
-import { useServerStore, useSignalrStore } from '#build/imports';
+import { useServerStore, useSignalrStore } from '@store';
 
 export const useServerConnectionStore = defineStore('ServerConnection', () => {
 	const state = reactive<{ serverConnections: PlexServerConnectionDTO[] }>({
@@ -64,9 +64,9 @@ export const useServerConnectionStore = defineStore('ServerConnection', () => {
 			);
 		},
 		/**
-		 * Forces a recheck of all the server connections for the given server id
-		 * @param plexServerId
-		 */
+     * Forces a recheck of all the server connections for the given server id
+     * @param plexServerId
+     */
 		checkServerStatus(plexServerId: number) {
 			return plexServerConnectionApi.checkAllConnectionsStatusByPlexServerEndpoint(plexServerId).pipe(
 				map((x) => x?.value ?? []),

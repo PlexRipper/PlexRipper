@@ -44,7 +44,7 @@
 
 <script setup lang="ts">
 import { get } from '@vueuse/core';
-import { useSettingsStore, useAccountStore } from '~/store';
+import { useSettingsStore, useAccountStore } from '@store';
 import { useSubscription } from '#imports';
 
 const { t } = useI18n();

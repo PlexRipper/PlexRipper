@@ -14,7 +14,7 @@ import { get, set } from '@vueuse/core';
 import type { IMediaOverviewSort } from '@composables/event-bus';
 import type { QTreeViewTableHeader } from '@props';
 import type { PlexMediaSlimDTO } from '@dto';
-import { useMediaOverviewStore } from '~/store';
+import { useMediaOverviewStore } from '@store';
 
 const mediaOverviewStore = useMediaOverviewStore();
 
@@ -77,21 +77,21 @@ onBeforeMount(() => {
 
 <style lang="scss">
 .media-table-header-column {
-	white-space: nowrap;
-	font-weight: bold;
+  white-space: nowrap;
+  font-weight: bold;
 
-	.header-sort-icon {
-		opacity: 0;
-		transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
-	}
+  .header-sort-icon {
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+  }
 
-	&:hover,
-	&.sorted {
-		cursor: pointer;
+  &:hover,
+  &.sorted {
+    cursor: pointer;
 
-		.header-sort-icon {
-			opacity: 1;
-		}
-	}
+    .header-sort-icon {
+      opacity: 1;
+    }
+  }
 }
 </style>

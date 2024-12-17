@@ -12,6 +12,8 @@ public static class EnvironmentExtensions
 
     public const string VersionKey = "VERSION";
 
+    public const string InformationalVersionKey = "INFORMATIONAL_VERSION";
+
     public const string DevelopmentRootPathKey = "DEVELOPMENT_ROOT_PATH";
 
     private static readonly string TrueValue = Convert.ToString(true);
@@ -49,7 +51,10 @@ public static class EnvironmentExtensions
         return success ? logLevel : LogEventLevel.Debug;
     }
 
-    public static string GetVersion() => System.Environment.GetEnvironmentVariable(VersionKey) ?? "0.0.0";
+    public static string GetVersion() =>
+        System.Environment.GetEnvironmentVariable(InformationalVersionKey)
+        ?? System.Environment.GetEnvironmentVariable(VersionKey)
+        ?? "0.0.0";
 
     public static void SetLogLevel(LogEventLevel logLevel)
     {

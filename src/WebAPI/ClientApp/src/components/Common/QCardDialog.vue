@@ -64,7 +64,7 @@
 
 <script setup lang="ts" generic="T">
 import { get, set } from '@vueuse/core';
-import { useDialogStore } from '#imports';
+import { useDialogStore } from '@store';
 
 const dialogStore = useDialogStore();
 

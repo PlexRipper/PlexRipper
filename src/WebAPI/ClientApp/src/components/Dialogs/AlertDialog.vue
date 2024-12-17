@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import type { IAlert } from '@interfaces';
 import { DialogType } from '@enums';
-import { useAlertStore } from '#imports';
+import { useAlertStore } from '@store';
 
 const alertStore = useAlertStore();
 

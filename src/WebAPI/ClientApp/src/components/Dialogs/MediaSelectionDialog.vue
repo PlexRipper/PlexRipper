@@ -96,7 +96,7 @@
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
 import { DialogType } from '@enums';
-import { useMediaOverviewStore } from '#imports';
+import { useMediaOverviewStore } from '@store';
 
 const mediaOverviewStore = useMediaOverviewStore();
 

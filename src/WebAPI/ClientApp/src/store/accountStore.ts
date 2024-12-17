@@ -6,7 +6,7 @@ import type { PlexAccountDTO } from '@dto';
 import { DataType } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexAccountApi } from '@api';
-import { useLibraryStore, useServerStore, useSignalrStore } from '#build/imports';
+import { useLibraryStore, useServerStore, useSignalrStore } from '@store';
 
 export const useAccountStore = defineStore('AccountStore', () => {
 	const state = reactive<{ accounts: PlexAccountDTO[] }>({
@@ -40,9 +40,9 @@ export const useAccountStore = defineStore('AccountStore', () => {
 			);
 		},
 		/**
-		 * Creates a PlexAccount in the database, returns the new accountId and then also refreshes all the Plex Servers that are accessible
-		 * @param {PlexAccountDTO} account
-		 */
+     * Creates a PlexAccount in the database, returns the new accountId and then also refreshes all the Plex Servers that are accessible
+     * @param {PlexAccountDTO} account
+     */
 		createPlexAccount(account: PlexAccountDTO): Observable<PlexAccountDTO | undefined> {
 			return plexAccountApi.createPlexAccountEndpoint(account).pipe(
 				switchMap(() =>
@@ -68,10 +68,10 @@ export const useAccountStore = defineStore('AccountStore', () => {
 			return state.accounts.find((x) => x.id === id);
 		},
 		/**
-		 * Checks if there is any account that has access to the server
-		 * NOTE: This will only check enabled accounts
-		 * @param plexServerId
-		 */
+     * Checks if there is any account that has access to the server
+     * NOTE: This will only check enabled accounts
+     * @param plexServerId
+     */
 		getHasAccountServerAccess(plexServerId: number): boolean {
 			for (const account of state.accounts.filter((x) => x.isEnabled)) {
 				if (account.plexServerAccess.includes(plexServerId)) {

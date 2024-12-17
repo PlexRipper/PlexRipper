@@ -232,32 +232,6 @@ export interface ErrorResponse {
   statusCode: number;
 }
 
-export interface FileMergeProgress {
-  /** @format int64 */
-  bytesRemaining: number;
-  /** @format int32 */
-  currentFilePathIndex: number;
-  /** @format int64 */
-  dataTotal: number;
-  /** @format int64 */
-  dataTransferred: number;
-  /** @format guid */
-  downloadTaskId: string;
-  downloadTaskType: DownloadTaskType;
-  /** @format int32 */
-  id: number;
-  /** @format decimal */
-  percentage: number;
-  /** @format int32 */
-  plexLibraryId: number;
-  /** @format int32 */
-  plexServerId: number;
-  /** @format int64 */
-  timeRemaining: number;
-  /** @format int32 */
-  transferSpeed: number;
-}
-
 export interface FileSystemDTO {
   current?: FileSystemModelDTO | null;
   directories: FileSystemModelDTO[];

@@ -26,7 +26,7 @@
 <script setup lang="ts">
 import Log from 'consola';
 import { DialogType } from '@enums';
-import { useSettingsStore } from '#imports';
+import { useSettingsStore } from '@store';
 
 const settingsStore = useSettingsStore();
 

@@ -48,7 +48,7 @@
 
 <script setup lang="ts">
 import { DialogType } from '@enums';
-import { useSettingsStore } from '#imports';
+import { useSettingsStore } from '@store';
 
 const settingsStore = useSettingsStore();
 const originalValues: Record<string, boolean> = {};

@@ -82,6 +82,16 @@
 						<DirectoryBrowser />
 					</q-td>
 				</q-tr>
+
+				<q-tr>
+					<q-td>
+						<DebugButton
+							data-cy="sync-server-media-dialog-button"
+							:label="$t('pages.debug.dialogs.buttons.sync-server-media-dialog')"
+							@click="dialogStore.openDialog(DialogType.SyncServerMediaDialog)" />
+						<DirectoryBrowser />
+					</q-td>
+				</q-tr>
 			</q-markup-table>
 		</QSection>
 		<!-- Account Dialogs -->
@@ -182,7 +192,7 @@ import { useI18n } from 'vue-i18n';
 import { type DownloadMediaDTO, PlexMediaType } from '@dto';
 import { generateDefaultFolderPaths } from '@factories';
 import { DialogType } from '@enums';
-import { useAlertStore, useHelpStore, useDialogStore } from '#imports';
+import { useAlertStore, useHelpStore, useDialogStore } from '@store';
 
 const { t } = useI18n();
 const helpStore = useHelpStore();

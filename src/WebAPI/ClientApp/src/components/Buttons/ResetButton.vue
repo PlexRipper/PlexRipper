@@ -1,9 +1,9 @@
 <script lang="ts">
 import { defineComponent, h, mergeProps } from 'vue';
 import type { IBaseButtonProps } from '@props';
+import { useI18n } from 'vue-i18n';
 import BaseButton from './BaseButton.vue';
 import { baseBtnPropsDefault } from '~/composables/baseBtnProps';
-import { useI18n } from '#imports';
 
 export default defineComponent({
 	name: 'ResetButton',

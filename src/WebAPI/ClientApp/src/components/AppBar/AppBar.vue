@@ -20,12 +20,6 @@
 					</q-btn>
 				</q-toolbar-title>
 
-				<q-space />
-
-				<AppBarProgressBar />
-
-				<q-space />
-
 				<q-btn
 					icon="mdi-github"
 					flat

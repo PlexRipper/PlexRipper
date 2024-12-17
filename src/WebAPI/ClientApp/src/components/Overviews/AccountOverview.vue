@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAccountStore, useDialogStore } from '~/store';
+import { useAccountStore, useDialogStore } from '@store';
 
 const accountStore = useAccountStore();
 const dialogStore = useDialogStore();

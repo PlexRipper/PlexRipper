@@ -21,9 +21,11 @@ public class Program
         {
             LogManager.SetupLogging(EnvironmentExtensions.GetLogLevel());
 
+            var version = EnvironmentExtensions.GetVersion();
             _log.Information(
-                "Currently running version {Version} on {CurrentOS}",
-                EnvironmentExtensions.GetVersion(),
+                "Currently running {Channel} version {Version} on {CurrentOS}",
+                version.Contains("dev") ? "DEVELOPMENT" : "STABLE",
+                version,
                 OsInfo.CurrentOS
             );
 

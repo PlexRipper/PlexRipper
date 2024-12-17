@@ -5,7 +5,7 @@ import type { ResultDTO } from '@interfaces';
 
 export function apiCheckPipe<T>(source$: Observable<AxiosResponse<T>>): Observable<ResultDTO<T>> {
 	return source$.pipe(
-		map((response) => response.data as ResultDTO<T>),
+		map((res) => res.data as ResultDTO<T>),
 		map((res): ResultDTO<T> => {
 			return {
 				isSuccess: res.isSuccess,

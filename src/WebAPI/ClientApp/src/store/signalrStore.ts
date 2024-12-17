@@ -10,7 +10,6 @@ import { isEqual } from 'lodash-es';
 import type { ISetupResult } from '@interfaces';
 import type {
 	DataType,
-	FileMergeProgress,
 	LibraryProgress,
 	NotificationDTO,
 	ServerConnectionCheckStatusProgressDTO,
@@ -20,9 +19,7 @@ import type {
 import { MessageTypes } from '@dto';
 import type IAppConfig from '@class/IAppConfig';
 import type { IRetryPolicy } from '@microsoft/signalr/src/IRetryPolicy';
-import { useDownloadStore } from '~/store/downloadStore';
-import { useBackgroundJobsStore } from '~/store/backgroundJobsStore';
-import { useNotificationsStore } from '~/store/notificationsStore';
+import { useDownloadStore, useBackgroundJobsStore, useNotificationsStore } from '@store';
 
 export const useSignalrStore = defineStore('SignalrStore', () => {
 	interface ISignalRStoreState {
@@ -33,7 +30,6 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		// Subjects
 		libraryProgressSubject: Subject<LibraryProgress[]>;
 		syncServerMediaProgressSubject: Subject<SyncServerMediaProgress[]>;
-		fileMergeProgressSubject: Subject<FileMergeProgress[]>;
 		serverConnectionCheckStatusProgressSubject: Subject<ServerConnectionCheckStatusProgressDTO[]>;
 		refreshDataNotificationSubject: Subject<DataType>;
 	}
@@ -42,11 +38,9 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		// Data
 		libraryProgress: [],
 		syncServerMediaProgress: [],
-		serverConnectionCheckStatusProgress: [],
-		// Subjects
+		serverConnectionCheckStatusProgress: [], // Subjects
 		libraryProgressSubject: new Subject<LibraryProgress[]>(),
 		syncServerMediaProgressSubject: new Subject<SyncServerMediaProgress[]>(),
-		fileMergeProgressSubject: new Subject<FileMergeProgress[]>(),
 		serverConnectionCheckStatusProgressSubject: new Subject<ServerConnectionCheckStatusProgressDTO[]>(),
 		refreshDataNotificationSubject: new Subject<DataType>(),
 	});
@@ -57,44 +51,36 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 
 	const actions = {
 		setup(config: IAppConfig): Observable<ISetupResult> {
-			return from(
-				(async () => {
-					Log.debug('Setting up SignalR Service');
-					const options: IHttpConnectionOptions = {
-						logMessageContent: false,
-						skipNegotiation: true,
-						logger: LogLevel.None,
-						transport: HttpTransportType.WebSockets,
-					};
+			return from((async () => {
+				Log.debug('Setting up SignalR Service');
+				const options: IHttpConnectionOptions = {
+					logMessageContent: false,
+					skipNegotiation: true,
+					logger: LogLevel.None,
+					transport: HttpTransportType.WebSockets,
+				};
 
-					const retryPolicy: IRetryPolicy = {
-						nextRetryDelayInMilliseconds: () => 2000,
-					};
+				const retryPolicy: IRetryPolicy = {
+					nextRetryDelayInMilliseconds: () => 2000,
+				};
 
-					// Setup Connections
-					progressHubConnection
-						= useCypressSignalRMock('progress', { enableForVitest: true })
-						?? new HubConnectionBuilder()
-							.configureLogging(LogLevel.None)
-							.withUrl(`${config.baseUrl}/progress`, options)
-							.withAutomaticReconnect(retryPolicy)
-							.build();
-					notificationHubConnection
-						= useCypressSignalRMock('notifications', { enableForVitest: true })
-						?? new HubConnectionBuilder()
-							.configureLogging(LogLevel.None)
-							.withUrl(`${config.baseUrl}/notifications`, options)
-							.withAutomaticReconnect(retryPolicy)
-							.build();
+				// Setup Connections
+				progressHubConnection = useCypressSignalRMock('progress', { enableForVitest: true }) ?? new HubConnectionBuilder()
+					.configureLogging(LogLevel.None)
+					.withUrl(`${config.baseUrl}/progress`, options)
+					.withAutomaticReconnect(retryPolicy)
+					.build();
 
-					setupSubscriptions();
-					await startProgressHubConnection();
-					await startNotificationHubConnection();
-				})(),
-			).pipe(
-				switchMap(() => of({ name: useSignalrStore.name, isSuccess: true })),
-				take(1),
-			);
+				notificationHubConnection = useCypressSignalRMock('notifications', { enableForVitest: true }) ?? new HubConnectionBuilder()
+					.configureLogging(LogLevel.None)
+					.withUrl(`${config.baseUrl}/notifications`, options)
+					.withAutomaticReconnect(retryPolicy)
+					.build();
+
+				setupSubscriptions();
+				await startProgressHubConnection();
+				await startNotificationHubConnection();
+			})()).pipe(switchMap(() => of({ name: useSignalrStore.name, isSuccess: true })), take(1));
 		},
 	};
 
@@ -103,21 +89,15 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		const backgroundStore = useBackgroundJobsStore();
 		const notificationsStore = useNotificationsStore();
 
-		progressHubConnection?.on(MessageTypes.ServerDownloadProgress, (data: ServerDownloadProgressDTO) =>
-			downloadStore.updateServerDownloadProgress(data),
-		);
+		progressHubConnection?.on(MessageTypes.ServerDownloadProgress, (data: ServerDownloadProgressDTO) => downloadStore.updateServerDownloadProgress(data));
 
 		progressHubConnection?.on(MessageTypes.LibraryProgress, (data: LibraryProgress) => {
 			updateState<LibraryProgress>('libraryProgress', data);
 		});
 
-		progressHubConnection?.on(MessageTypes.ServerConnectionCheckStatusProgress, (data: ServerConnectionCheckStatusProgressDTO) =>
-			updateState<ServerConnectionCheckStatusProgressDTO>('serverConnectionCheckStatusProgress', data, 'plexServerConnectionId'),
-		);
+		progressHubConnection?.on(MessageTypes.ServerConnectionCheckStatusProgress, (data: ServerConnectionCheckStatusProgressDTO) => updateState<ServerConnectionCheckStatusProgressDTO>('serverConnectionCheckStatusProgress', data, 'plexServerConnectionId'));
 
-		progressHubConnection?.on(MessageTypes.SyncServerMediaProgress, (data: SyncServerMediaProgress) =>
-			updateState<SyncServerMediaProgress>('syncServerMediaProgress', data),
-		);
+		progressHubConnection?.on(MessageTypes.SyncServerMediaProgress, (data: SyncServerMediaProgress) => updateState<SyncServerMediaProgress>('syncServerMediaProgress', data));
 
 		progressHubConnection?.on(MessageTypes.JobStatusUpdate, (data) => backgroundStore.setStatusJobUpdate(data));
 
@@ -205,36 +185,23 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 	const getters = {
 		// region Array Progress
 		getAllLibraryProgress: (): Observable<LibraryProgress[]> => state.libraryProgressSubject.asObservable(),
-		getAllSyncServerMediaProgress: (): Observable<SyncServerMediaProgress[]> =>
-			state.syncServerMediaProgressSubject.asObservable(),
-		getAllServerConnectionProgress: (): Observable<ServerConnectionCheckStatusProgressDTO[]> =>
-			state.serverConnectionCheckStatusProgressSubject.asObservable(),
-		// endregion
+		getAllSyncServerMediaProgress: (): Observable<SyncServerMediaProgress[]> => state.syncServerMediaProgressSubject.asObservable(),
+		getAllServerConnectionProgress: (): Observable<ServerConnectionCheckStatusProgressDTO[]> => state.serverConnectionCheckStatusProgressSubject.asObservable(), // endregion
 
 		// region Single Progress
 
 		getLibraryProgress(libraryId: number): Observable<LibraryProgress> {
-			return getters.getAllLibraryProgress().pipe(
-				map((x) => x?.find((x) => x.id === libraryId) ?? null),
-				filter((progress) => !!progress),
-				distinctUntilChanged(isEqual),
-			);
+			return getters.getAllLibraryProgress().pipe(map((x) => x?.find((x) => x.id === libraryId) ?? null), filter((progress) => !!progress), distinctUntilChanged(isEqual));
 		},
 		getServerConnectionProgressByPlexServerId(plexServerId: number): Observable<ServerConnectionCheckStatusProgressDTO[]> {
-			return getters.getAllServerConnectionProgress().pipe(
-				map((x) => x?.filter((y) => y.plexServerId === plexServerId)),
-				distinctUntilChanged(isEqual),
-			);
+			return getters.getAllServerConnectionProgress().pipe(map((x) => x?.filter((y) => y.plexServerId === plexServerId)), distinctUntilChanged(isEqual));
 		},
 		getRefreshNotification(filterOn: DataType): Observable<DataType> {
 			return state.refreshDataNotificationSubject.asObservable().pipe(filter((x) => x === filterOn));
-		},
-		// endregion
+		}, // endregion
 	};
 	return {
-		...toRefs(state),
-		...actions,
-		...getters,
+		...toRefs(state), ...actions, ...getters,
 	};
 });
 

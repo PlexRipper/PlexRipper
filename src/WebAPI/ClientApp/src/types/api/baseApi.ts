@@ -5,7 +5,7 @@
 // import { catchError, of } from 'rxjs';
 // import type { AxiosError, AxiosResponse } from 'axios';
 // import type { ResultDTO } from '@interfaces';
-// import { useAlertStore } from '~/store';
+// import { useAlertStore } from '@store';
 //
 // export function checkForError<T = any>(
 // 	logText?: string,

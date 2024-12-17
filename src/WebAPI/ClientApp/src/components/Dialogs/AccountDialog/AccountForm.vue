@@ -152,8 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import HelpGroup from '@components/Help/HelpGroup.vue';
-import { useAccountDialogStore } from '#imports';
+import { useAccountDialogStore } from '@store';
 
 const labelCol = ref(30);
 

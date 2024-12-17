@@ -59,12 +59,19 @@ public class DownloadWorker : IDisposable
         _dbContext = dbContext;
         DownloadWorkerTask = downloadWorkerTask;
 
-        _httpClient = clientFactory(new PlexApiClientOptions { ConnectionUrl = string.Empty });
+        _httpClient = clientFactory(
+            new PlexApiClientOptions
+            {
+                Timeout = 20,
+                RetryCount = 3,
+                ConnectionUrl = string.Empty,
+            }
+        );
 
         _retryPolicy = Policy
             .Handle<HttpIOException>()
             .WaitAndRetryAsync(
-                retryCount: 3, // Number of retry attempts
+                retryCount: 3,
                 sleepDurationProvider: attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
                 onRetry: (exception, timeSpan, retryCount, context) =>
                 {

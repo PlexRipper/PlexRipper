@@ -4,12 +4,18 @@ import { map, switchMap, tap } from 'rxjs/operators';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { sum, merge, keyBy, values, flatMapDeep, clone } from 'lodash-es';
-import type { DownloadMediaDTO, DownloadPreviewDTO, DownloadProgressDTO, PlexServerDTO, ServerDownloadProgressDTO } from '@dto';
+import type {
+	DownloadMediaDTO,
+	DownloadPreviewDTO,
+	DownloadProgressDTO,
+	PlexServerDTO,
+	ServerDownloadProgressDTO,
+} from '@dto';
 import type { ISetupResult } from '@interfaces';
 import type IDownloadsSelection from '@interfaces/IDownloadsSelection';
 import type IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
 import { downloadApi } from '@api';
-import { useServerStore } from '#build/imports';
+import { useServerStore } from '@store';
 
 export const useDownloadStore = defineStore('DownloadStore', () => {
 	const state = reactive<{ serverDownloads: ServerDownloadProgressDTO[]; selected: IDownloadsSelection[] }>({
@@ -25,8 +31,8 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 			return actions.fetchDownloadList().pipe(switchMap(() => of({ name: useDownloadStore.name, isSuccess: true })));
 		},
 		/**
-		 * Fetch the download list from the API.
-		 */
+     * Fetch the download list from the API.
+     */
 		fetchDownloadList() {
 			return downloadApi.getAllDownloadTasksEndpoint().pipe(
 				tap((downloads) => {
@@ -180,8 +186,8 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 			return getters.getDownloadsByServerId(serverId);
 		},
 		/**
-		 * Get the total number of download tasks that are downloadable in the download list.
-		 */
+     * Get the total number of download tasks that are downloadable in the download list.
+     */
 		getTotalDownloadsCount: computed((): number => {
 			return sum(state.serverDownloads.flatMap((x) => x.downloadableTasksCount));
 		}),

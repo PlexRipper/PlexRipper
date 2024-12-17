@@ -3,7 +3,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { baseSetup, subscribeSpyTo } from '@services-test-base';
 import { JobStatus, JobTypes } from '@dto';
 import { generateJobStatusUpdate } from '@factories';
-import { useBackgroundJobsStore } from '#build/imports';
+import { useBackgroundJobsStore } from '@store';
 
 describe('BackgroundJobsStore.getJobStatusUpdate()', () => {
 	beforeAll(() => {

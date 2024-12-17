@@ -2,8 +2,13 @@ import { describe, beforeAll, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { PlexAccountPaths, PlexLibraryPaths, PlexServerPaths } from '@api-urls';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '@services-test-base';
-import { generatePlexAccount, generatePlexLibrariesFromPlexServers, generatePlexServers, generateResultDTO } from '@mock';
-import { useAccountStore, useServerStore } from '#build/imports';
+import {
+	generatePlexAccount,
+	generatePlexLibrariesFromPlexServers,
+	generatePlexServers,
+	generateResultDTO,
+} from '@mock';
+import { useAccountStore, useServerStore } from '@store';
 
 describe('AccountService.createPlexAccount()', () => {
 	let { mock, config } = baseVars();

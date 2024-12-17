@@ -1,9 +1,9 @@
 <template>
 	<QPage>
-		<QText
-			size="h3"
-			align="center">
-			{{ $t('pages.empty.title') }}
-		</QText>
+		<QSection>
+			<template #header>
+				{{ $t('pages.empty.title') }}
+			</template>
+		</QSection>
 	</QPage>
 </template>

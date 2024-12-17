@@ -70,7 +70,7 @@
 
 <script setup lang="ts">
 import { DialogType } from '@enums';
-import { useAccountDialogStore } from '#imports';
+import { useAccountDialogStore } from '@store';
 
 const accountDialogStore = useAccountDialogStore();
 </script>

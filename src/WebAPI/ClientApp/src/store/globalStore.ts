@@ -21,7 +21,7 @@ import {
 	useMediaStore,
 	useSignalrStore,
 	useDialogStore,
-} from '#imports';
+} from '@store';
 
 export const useGlobalStore = defineStore('GlobalStore', () => {
 	const state = reactive<{ config: IAppConfig; pageReadyObservable: Subject<boolean> }>({
@@ -68,6 +68,9 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 				}),
 				take(1),
 			);
+		},
+		setAppVersion(version: string): void {
+			state.config.version = version;
 		},
 	};
 	const getters = {

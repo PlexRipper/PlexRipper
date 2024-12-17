@@ -118,7 +118,8 @@
 import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import type { PlexServerDTO, ServerConnectionCheckStatusProgressDTO } from '@dto';
-import { useSignalrStore, useI18n } from '#imports';
+import { useI18n } from 'vue-i18n';
+import { useSignalrStore } from '@store';
 
 const { t } = useI18n();
 const signalrStore = useSignalrStore();

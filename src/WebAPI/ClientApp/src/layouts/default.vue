@@ -25,6 +25,7 @@
 		<CheckServerConnectionsDialog />
 		<FirstTimeSetupDialog />
 		<DiscordInviteDialog />
+		<SyncServerMediaDialog />
 		<!--	Background	-->
 		<Background :hide-background="isEmptyLayout" />
 	</q-layout>

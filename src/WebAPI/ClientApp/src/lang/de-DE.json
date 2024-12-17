@@ -192,9 +192,6 @@
         "alert-dialog": {
             "request-data-sent": "Anfragedaten gesendet:"
         },
-        "app-bar-progress-bar": {
-            "tooltip-text": "Plex-Bibliotheken {finishedCount} von {totalCount}werden synchronisiert!"
-        },
         "account-token-validate-dialog": {
             "column": {
                 "email": "Email",
@@ -703,7 +700,8 @@
                     "check-server-connections-dialog": "Dialogfeld \"Serververbindungen prüfen\".",
                     "directory-browser": "Dialogfeld „Verzeichnisbrowser“.",
                     "verification-dialog": "2FA-Verifizierungsdialog",
-                    "discord-invite": "Discord-Einladung"
+                    "discord-invite": "Discord-Einladung",
+                    "sync-server-media-dialog": "Dialogfeld „Servermedien synchronisieren“"
                 },
                 "header": "Debug-Dialogmodalitäten",
                 "account-dialog-header": "Dialogfeld „Konto“",

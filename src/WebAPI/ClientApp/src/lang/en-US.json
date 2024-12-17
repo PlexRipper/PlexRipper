@@ -192,9 +192,6 @@
         "alert-dialog": {
             "request-data-sent": "Request data sent:"
         },
-        "app-bar-progress-bar": {
-            "tooltip-text": "Syncing Plex Libraries {finishedCount} of {totalCount}!"
-        },
         "account-token-validate-dialog": {
             "column": {
                 "email": "E-mail",
@@ -703,7 +700,8 @@
                     "check-server-connections-dialog": "Check Server Connections Dialog",
                     "directory-browser": "Directory Browser Dialog",
                     "verification-dialog": "2FA Verification Dialog",
-                    "discord-invite": "Discord Invite"
+                    "discord-invite": "Discord Invite",
+                    "sync-server-media-dialog": "Sync Server Media Dialog"
                 },
                 "header": "Debug Dialog Modals",
                 "account-dialog-header": "Account Dialog",

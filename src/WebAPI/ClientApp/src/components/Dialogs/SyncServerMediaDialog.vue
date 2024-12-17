@@ -112,12 +112,9 @@ import type {
 	SyncServerMediaProgress,
 	PlexMediaType,
 } from '@dto';
-import { JobStatus } from '@dto';
 import { DialogType } from '@enums';
 import {
-	useBackgroundJobsStore,
 	useI18n,
-	useDialogStore,
 	useServerStore,
 	useSignalrStore,
 	useLibraryStore,
@@ -126,8 +123,6 @@ import {
 const { t } = useI18n();
 const serverStore = useServerStore();
 const libraryStore = useLibraryStore();
-const dialogStore = useDialogStore();
-const backgroundJobStore = useBackgroundJobsStore();
 const syncProgressList = ref<SyncServerMediaProgress[]>([]);
 
 const expanded = ref<number[]>([]);

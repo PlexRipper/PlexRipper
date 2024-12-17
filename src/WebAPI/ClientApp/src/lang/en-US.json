@@ -275,6 +275,11 @@
                 "reason-4": "Participate in discussions about new features and releases!",
                 "reason-5": "Access exclusive updates and announcements about PlexRipper!"
             }
+        },
+        "sync-server-media-dialog": {
+            "completed": "All media has been synced!",
+            "checking-progress": "Syncing {count} of {total} Plex library",
+            "fetching-servers": "Retrieving accessible servers for syncing media"
         }
     },
     "confirmation": {

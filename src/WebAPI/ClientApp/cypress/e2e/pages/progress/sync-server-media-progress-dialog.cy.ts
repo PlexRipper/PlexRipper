@@ -1,7 +1,7 @@
 import { JobStatus, JobTypes, MessageTypes, type SyncServerMediaProgress } from '@dto';
 import { generateSyncServerMediaProgress } from '@factories';
 
-describe('Display the progress bar in the app bar', () => {
+describe('SyncServerMediaDialog', () => {
 	beforeEach(() => {
 		cy.basePageSetup({
 			plexAccountCount: 1,
@@ -11,12 +11,17 @@ describe('Display the progress bar in the app bar', () => {
 		cy.visitEmptyPage();
 	});
 
-	it('Should navigate the server dialog tabs when the navigation tabs are used and then close again', () => {
+	it('Should display the SyncServerMediaDialog when opening from the background activity button', () => {
 		cy.getPageData().then((data) => {
 			cy.hubPublishJobStatusUpdate(JobTypes.SyncServerMediaJob, JobStatus.Started, {
 				plexServerId: data.plexServers[0].id,
 				forceSync: false,
 			});
+
+			cy.getCy('background-activity-button').click();
+
+			cy.getCy(JobTypes.SyncServerMediaJob + 'activity-button').click();
+			cy.getCy('sync-server-media-dialog').should('exist').and('be.visible');
 
 			for (let i = 0; i <= 10; i++) {
 				const progress: SyncServerMediaProgress[] = [];
@@ -39,6 +44,9 @@ describe('Display the progress bar in the app bar', () => {
 				plexServerId: data.plexServers[0].id,
 				forceSync: false,
 			});
+
+			cy.getCy('sync-server-media-dialog-hide-btn').click();
+			cy.getCy('sync-server-media-dialog').should('not.exist');
 		});
 	});
 });

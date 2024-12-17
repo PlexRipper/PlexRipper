@@ -36,6 +36,12 @@ import {
 } from '@api/api-paths';
 import Convert from '@class/Convert';
 
+const headers = {
+	headers: {
+		'x-plexripper-version': '1.0.0',
+	},
+};
+
 export interface IBasePageSetupResult {
 	plexServers: PlexServerDTO[];
 	plexServerConnections: PlexServerConnectionDTO[];
@@ -82,6 +88,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 	cy.intercept('GET', PlexServerPaths.getAllPlexServersEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO(result.plexServers),
+		...headers,
 	}).then(() => {
 		if (validConfig.debugDisplayData) {
 			cy.log('BasePageSetup -> plexServers', result.plexServers);
@@ -96,6 +103,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 	cy.intercept('GET', PlexServerConnectionPaths.getAllPlexServerConnectionsEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO(result.plexServerConnections),
+		...headers,
 	}).then(() => {
 		if (validConfig.debugDisplayData) {
 			cy.log('BasePageSetup -> plexServerConnections', result.plexServerConnections);
@@ -108,6 +116,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 	cy.intercept('GET', PlexLibraryPaths.getAllPlexLibrariesEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO(result.plexLibraries),
+		...headers,
 	}).then(() => {
 		if (validConfig.debugDisplayData) {
 			cy.log('BasePageSetup -> plexLibraries', result.plexLibraries);
@@ -119,6 +128,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 		cy.intercept('GET', PlexLibraryPaths.getPlexLibraryByIdEndpoint(library.id), {
 			statusCode: 200,
 			body: generateResultDTO(library),
+			...headers,
 		});
 	}
 
@@ -132,6 +142,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 	cy.intercept('GET', PlexAccountPaths.getAllPlexAccountsEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO(result.plexAccounts),
+		...headers,
 	}).then(() => {
 		if (validConfig.debugDisplayData) {
 			cy.log('BasePageSetup -> plexAccounts', result.plexAccounts);
@@ -152,6 +163,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 	cy.intercept('GET', DownloadPaths.getAllDownloadTasksEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO(result.serverDownloadProgress),
+		...headers,
 	}).then(() => {
 		if (validConfig.debugDisplayData) {
 			cy.log('BasePageSetup -> downloadTasks', result.serverDownloadProgress);
@@ -175,6 +187,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 				cy.intercept('GET', DownloadPaths.getDownloadTaskByGuidEndpoint(downloadTask.id), {
 					statusCode: 200,
 					body: generateResultDTO(generatedDownloadTask),
+					...headers,
 				});
 			}
 		}
@@ -186,6 +199,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 	cy.intercept('GET', SettingsPaths.getUserSettingsEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO(result.settings),
+		...headers,
 	}).then(() => {
 		if (validConfig.debugDisplayData) {
 			cy.log('BasePageSetup -> settings', result.settings);
@@ -218,6 +232,8 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 				{
 					statusCode: 200,
 					body: generateResultDTO(mediaList),
+					...headers,
+
 				},
 			);
 
@@ -240,6 +256,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 								},
 							}),
 						),
+						...headers,
 					},
 				);
 			}
@@ -261,6 +278,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 				body: generateResultDTO(
 					result.mediaData.filter((x) => x.media.some((y) => y.type === mediaType)).flatMap((x) => x.media),
 				),
+				...headers,
 			},
 		);
 	}
@@ -268,21 +286,25 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 	cy.intercept('GET', FolderPathPaths.getAllFolderPathsEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO([]),
+		...headers,
 	});
 
 	cy.intercept('GET', NotificationPaths.getAllNotificationsEndpoint(), {
 		statusCode: 200,
 		body: generateResultDTO([]),
+		...headers,
 	});
 
 	cy.intercept('GET', '/progress', {
 		statusCode: 200,
 		body: {},
+		...headers,
 	});
 
 	cy.intercept('GET', '/notifications', {
 		statusCode: 200,
 		body: {},
+		...headers,
 	});
 
 	// Correct library data

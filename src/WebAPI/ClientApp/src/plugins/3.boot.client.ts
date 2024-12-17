@@ -41,6 +41,8 @@ function setupAxios(appConfig: IAppConfig) {
 	// Source: https://github.com/axios/axios/issues/41#issuecomment-386762576
 	Axios.interceptors.response.use(
 		(config) => {
+			useGlobalStore().setAppVersion(config.headers['x-plexripper-version']);
+			console.log('config', config);
 			return config;
 		},
 		(error) => {

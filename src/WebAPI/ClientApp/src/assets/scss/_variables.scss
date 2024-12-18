@@ -1,6 +1,3 @@
-@import 'quasar/src/css/variables.sass';
-
-
 $dark-sm-background-color: rgba(0, 0, 0, 0.4);
 $light-sm-background-color: rgba(255, 255, 255, 0.4);
 
@@ -40,9 +37,6 @@ $default-light-btn-color: #000000;
 $warning-light-btn-color: #ffd300;
 $positive-light-btn-color: #4caf50;
 $negative-light-btn-color: #ff0000;
-
-$button-light-shadow-active: $shadow-5;
-$button-dark-shadow-active: $dark-shadow-5;
 
 $tooltip-color: #ffffff;
 $tooltip-background: $dark-md-background-color;

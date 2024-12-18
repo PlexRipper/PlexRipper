@@ -1,11 +1,11 @@
-@import 'variables';
-@import 'lib/q-status';
-@import 'lib/q-overwrite';
-@import 'lib/q-components';
-@import 'typography';
-@import 'mixins';
-@import 'animations.scss';
-@import './primevue/overwrite.scss';
+@use 'variables';
+@use 'lib/q-status';
+@use 'lib/q-overwrite';
+@use 'lib/q-components';
+@use 'typography';
+@use 'mixins';
+@use 'animations.scss';
+@use 'primevue/overwrite.scss';
 
 /*
 default
@@ -37,15 +37,15 @@ SectionTable
 Layout
  */
 .max-height-page-height-minus-app-bar {
-  max-height: $page-height-minus-app-bar;
+  max-height: variables.$page-height-minus-app-bar;
 }
 
 .page-content-minus-media-overview-bar {
-  max-height: $page-height-minus-app-bar-minus-media-overview-bar;
+  max-height: variables.$page-height-minus-app-bar-minus-media-overview-bar;
 }
 
 .page-content-minus-download-bar {
-  max-height: $page-height-minus-app-bar-minus-download-bar;
+  max-height: variables.$page-height-minus-app-bar-minus-download-bar;
 }
 
 

@@ -1,5 +1,7 @@
-@import '../mixins';
-@import "quasar/src/css/core/size.sass";
+@use '../mixins';
+@use "../variables";
+@use "quasar/dist/quasar.sass" as quasar;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // * Notification Drawer
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -8,14 +10,14 @@ body {
   &.body--dark {
     .notification-drawer {
       @extend .blur;
-      background-color: $dark-sm-background-color;
+      background-color: variables.$dark-sm-background-color;
     }
   }
 
   &.body--light {
     .notification-drawer {
       @extend .blur;
-      background-color: $light-sm-background-color;
+      background-color: variables.$light-sm-background-color;
     }
   }
 }
@@ -27,13 +29,13 @@ body {
 body {
   &.body--dark {
     .background-overlay {
-      background-color: $dark-xl-background-color;
+      background-color: variables.$dark-xl-background-color;
     }
   }
 
   &.body--light {
     .background-overlay {
-      background-color: $light-xl-background-color;
+      background-color: variables.$light-xl-background-color;
     }
   }
 }
@@ -82,7 +84,7 @@ body {
 .body--dark {
   .q-tree-view-table {
     .q-tree__node {
-      border-bottom-color: $separator-dark-color;
+      border-bottom-color: quasar.$separator-dark-color;
     }
   }
 }
@@ -90,7 +92,7 @@ body {
 .body--light {
   .q-tree-view-table {
     .q-tree__node {
-      border-bottom-color: $separator-color;
+      border-bottom-color: quasar.$separator-color;
     }
   }
 }
@@ -133,23 +135,23 @@ body {
   &.body--dark {
     .base-btn {
       &-positive {
-        color: $positive-dark-btn-color;
-        border-color: $positive-dark-btn-color;
+        color: variables.$positive-dark-btn-color;
+        border-color: variables.$positive-dark-btn-color;
       }
 
       &-default {
-        color: $default-dark-btn-color;
-        border-color: $default-dark-btn-color;
+        color: variables.$default-dark-btn-color;
+        border-color: variables.$default-dark-btn-color;
       }
 
       &-warning {
-        color: $warning-dark-btn-color;
-        border-color: $warning-dark-btn-color
+        color: variables.$warning-dark-btn-color;
+        border-color: variables.$warning-dark-btn-color
       }
 
       &-negative {
-        color: $negative-dark-btn-color;
-        border-color: $negative-dark-btn-color;
+        color: variables.$negative-dark-btn-color;
+        border-color: variables.$negative-dark-btn-color;
       }
     }
   }
@@ -157,23 +159,23 @@ body {
   &.body--light {
     .base-btn {
       &-positive {
-        color: $positive-light-btn-color;
-        border-color: $positive-light-btn-color;
+        color: variables.$positive-light-btn-color;
+        border-color: variables.$positive-light-btn-color;
       }
 
       &-default {
-        color: $default-light-btn-color;
-        border-color: $default-light-btn-color;
+        color: variables.$default-light-btn-color;
+        border-color: variables.$default-light-btn-color;
       }
 
       &-warning {
-        color: $warning-light-btn-color;
-        border-color: $warning-light-btn-color
+        color: variables.$warning-light-btn-color;
+        border-color: variables.$warning-light-btn-color
       }
 
       &-negative {
-        color: $negative-light-btn-color;
-        border-color: $negative-light-btn-color;
+        color: variables.$negative-light-btn-color;
+        border-color: variables.$negative-light-btn-color;
       }
     }
   }

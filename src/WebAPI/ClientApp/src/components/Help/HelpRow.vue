@@ -14,7 +14,7 @@
 			@click="helpStore.openHelpDialog(help)" />
 	</div>
 	<!-- Default Form Slot -->
-	<div :class="{ 'help-row-default-slot': true, 'flex': centerSlot, 'justify-center': centerSlot } ">
+	<div :class="{ 'help-row-default-slot': true, 'q-py-sm': true, 'flex': centerSlot, 'justify-center': centerSlot } ">
 		<slot />
 	</div>
 </template>

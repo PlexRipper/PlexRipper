@@ -194,7 +194,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/_mixins.scss';
+@use '@/assets/scss/_mixins.scss';
 
 .media-info-container {
   @extend .background-sm;

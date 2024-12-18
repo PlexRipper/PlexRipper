@@ -55,40 +55,40 @@ const alertIcon = computed((): string => {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/variables.scss';
+@use '@/assets/scss/variables.scss' as *;
 
 .q-alert {
-	&--error {
-		border-color: $error-color;
-		color: $error-color;
-	}
+  &--error {
+    border-color: $error-color;
+    color: $error-color;
+  }
 
-	&--warning {
-		border-color: #fff8e1;
-		color: #ff6f00;
-	}
+  &--warning {
+    border-color: #fff8e1;
+    color: #ff6f00;
+  }
 
-	&--info {
-		border-color: #e8f5e9;
-		color: #1b5e20;
-	}
+  &--info {
+    border-color: #e8f5e9;
+    color: #1b5e20;
+  }
 
-	.q-alert-wrapper {
-		align-items: center;
-		display: flex;
+  .q-alert-wrapper {
+    align-items: center;
+    display: flex;
 
-		.q-alert-content {
-			flex: 1 1 auto;
-			padding: 0 1em;
-		}
+    .q-alert-content {
+      flex: 1 1 auto;
+      padding: 0 1em;
+    }
 
-		.q-alert-dismissible {
-			margin: -16px -8px -16px 8px;
-		}
-	}
+    .q-alert-dismissible {
+      margin: -16px -8px -16px 8px;
+    }
+  }
 
-	&:hover {
-		cursor: pointer;
-	}
+  &:hover {
+    cursor: pointer;
+  }
 }
 </style>

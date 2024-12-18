@@ -46,7 +46,7 @@ const hasHelpPage = computed(() => {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/variables.scss';
+@use '@/assets/scss/variables' as *;
 
 .help-row {
 

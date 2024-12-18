@@ -83,35 +83,36 @@ defineEmits<{
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/variables.scss';
+@use '@/assets/scss/variables.scss' as *;
+@use "quasar/dist/quasar.sass" as quasar;
 
 .media-table-header {
-	border-bottom: 1px solid;
+  border-bottom: 1px solid;
 
-	&--column {
-		text-align: center;
-		margin: auto 8px;
-	}
+  &--column {
+    text-align: center;
+    margin: auto 8px;
+  }
 
-	&--title {
-		font-weight: bold;
-		text-align: left;
-		display: inline-block;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		overflow: hidden;
-	}
+  &--title {
+    font-weight: bold;
+    text-align: left;
+    display: inline-block;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
 }
 
 .body--dark {
-	.media-table-header {
-		border-bottom-color: $separator-dark-color;
-	}
+  .media-table-header {
+    border-bottom-color: quasar.$separator-dark-color;
+  }
 }
 
 .body--light {
-	.media-table-header {
-		border-bottom-color: $separator-color;
-	}
+  .media-table-header {
+    border-bottom-color: quasar.$separator-color;
+  }
 }
 </style>

@@ -21,50 +21,50 @@ const mediaOverviewStore = useMediaOverviewStore();
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/_mixins.scss';
+@use '@/assets/scss/_mixins.scss';
 
 .alphabet-navigation-container {
-	display: flex;
-	align-content: stretch;
-	align-items: stretch;
-	align-self: stretch;
-	justify-content: center;
-	flex: 0 0 30px;
+  display: flex;
+  align-content: stretch;
+  align-items: stretch;
+  align-self: stretch;
+  justify-content: center;
+  flex: 0 0 30px;
 
-	.alphabet-navigation {
-		display: flex;
-		justify-content: space-around;
-		flex: 0 0 100%;
-		flex-direction: column;
-		overflow: hidden;
+  .alphabet-navigation {
+    display: flex;
+    justify-content: space-around;
+    flex: 0 0 100%;
+    flex-direction: column;
+    overflow: hidden;
 
-		.navigation-btn {
-			@extend .fade-out-border;
-			flex: 1 1 25px;
-			text-align: center;
-			font-weight: bold;
-			background: transparent !important;
+    .navigation-btn {
+      @extend .fade-out-border;
+      flex: 1 1 25px;
+      text-align: center;
+      font-weight: bold;
+      background: transparent !important;
 
-			&:hover {
-				&::before {
-					opacity: 0.2 !important;
-				}
-			}
-		}
-	}
+      &:hover {
+        &::before {
+          opacity: 0.2 !important;
+        }
+      }
+    }
+  }
 }
 
 body {
-	&.body--dark {
-		.navigation-btn {
-			color: red;
-		}
-	}
+  &.body--dark {
+    .navigation-btn {
+      color: red;
+    }
+  }
 
-	&.body--light {
-		.navigation-btn {
-			color: darkred;
-		}
-	}
+  &.body--light {
+    .navigation-btn {
+      color: darkred;
+    }
+  }
 }
 </style>

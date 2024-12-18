@@ -184,7 +184,8 @@ function changeView(viewMode: ViewMode) {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/_mixins.scss';
+@use '@/assets/scss/mixins';
+@use '@/assets/scss/variables' as *;
 
 .media-overview-bar {
   @extend .default-border;

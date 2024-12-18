@@ -78,7 +78,7 @@ const buttons = computed<
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/_mixins.scss';
+@use '@/assets/scss/variables' as *;
 
 .download-overview-bar {
   @extend .default-border;

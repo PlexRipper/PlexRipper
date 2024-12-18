@@ -334,7 +334,7 @@ const finishSetup = () => {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/mixins.scss';
+@use '@/assets/scss/variables' as *;
 
 .setup-card {
   @extend .default-border;

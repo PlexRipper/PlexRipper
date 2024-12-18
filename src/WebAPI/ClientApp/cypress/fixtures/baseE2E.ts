@@ -8,6 +8,7 @@ import {
 	generatePlexServers,
 	generateResultDTO,
 	generateServerDownloadProgress,
+	Seed,
 	type MockConfig,
 } from '@mock';
 import { generateSettingsModel } from '@factories/settings-factory';
@@ -70,6 +71,8 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 		plexServers: [],
 		detailDownloadTasks: [],
 	};
+
+	const seed = new Seed(validConfig.seed);
 
 	if (
 		config.override === undefined
@@ -156,6 +159,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 				plexServerId: x.id,
 				plexLibraryId: -1,
 				config,
+				seed,
 			}),
 		)
 		.flat();

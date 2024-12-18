@@ -12,8 +12,9 @@ describe('Downloads page', () => {
 			movieDownloadTask: 3,
 		});
 
-		cy.visit(route('/downloads')).as('downloadsPage');
+		cy.visit(route('/downloads'));
 		cy.url().should('eq', route('/downloads'));
+
 		cy.getPageData().then((data) => {
 			const downloadTasks = data.serverDownloadProgress[0].downloads;
 			Cypress._.times(downloadTasks.length, (downloadTaskIndex) => {
@@ -58,12 +59,12 @@ describe('Downloads page', () => {
 			plexMovieLibraryCount: 5,
 			tvShowDownloadTask: 100,
 		});
-		cy.visit(route('/downloads')).as('downloadsPage');
+		cy.visit(route('/downloads'));
 		cy.url().should('eq', route('/downloads'));
 		cy.getPageData().then((data) => {
 			const downloads = data.serverDownloadProgress[0].downloads;
 			Cypress._.times(10, (i) => {
-				cy.get(`:nth-child(1) > .p-paginator > .p-paginator-pages > [aria-label="${i + 1}"]`).click();
+				cy.get(`:nth-child(1) > .p-paginator > .p-paginator-content > .p-paginator-pages > [aria-label="Page ${i + 1}"]`).click();
 				// Ensure the table content changes by checking the first row title
 				cy.getCy(`column-title-${downloads[i * 10 + 1].id}`).should('have.text', downloads[i * 10 + 1].title);
 			});
@@ -80,7 +81,7 @@ describe('Downloads page', () => {
 			movieDownloadTask: 5,
 			setDownloadDetails: true,
 		});
-		cy.visit(route('/downloads')).as('downloadsPage');
+		cy.visit(route('/downloads'));
 		cy.url().should('eq', route('/downloads'));
 		cy.getPageData().then((data) => {
 			const downloadTask = data.detailDownloadTasks[0];

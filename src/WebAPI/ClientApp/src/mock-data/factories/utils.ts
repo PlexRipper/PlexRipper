@@ -1,4 +1,4 @@
-import { rand, randNumber } from '@ngneat/falso';
+import { rand, randNumber, seed } from '@ngneat/falso';
 import { PlexMediaType } from '@dto';
 
 export function randPlexMediaType(): PlexMediaType {
@@ -10,4 +10,18 @@ export function randId(): number {
 		min: 1,
 		max: 100000000,
 	});
+}
+
+export class Seed {
+	private seed = 1;
+
+	constructor(seed: number) {
+		this.seed = seed;
+	}
+
+	next(): number {
+		this.seed++;
+		seed(this.seed + '');
+		return this.seed;
+	}
 }

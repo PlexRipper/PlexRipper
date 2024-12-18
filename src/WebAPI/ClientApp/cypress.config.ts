@@ -12,6 +12,9 @@ export default defineConfig({
 	e2e: {
 		viewportHeight: 1080,
 		viewportWidth: 1920,
+		// Will prevent navigating to about:blank.
+		// All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.
+		testIsolation: false,
 		setupNodeEvents(on) {
 			on(
 				'file:preprocessor',

@@ -2,6 +2,8 @@ import { resolve } from 'path';
 import { defineConfig } from 'cypress';
 import vitePreprocessor from 'cypress-vite';
 
+const __dirname = import.meta.dirname;
+
 export default defineConfig({
 	projectId: 'qo5tth',
 	env: {
@@ -12,9 +14,6 @@ export default defineConfig({
 	e2e: {
 		viewportHeight: 1080,
 		viewportWidth: 1920,
-		// Will prevent navigating to about:blank.
-		// All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.
-		testIsolation: false,
 		setupNodeEvents(on) {
 			on(
 				'file:preprocessor',

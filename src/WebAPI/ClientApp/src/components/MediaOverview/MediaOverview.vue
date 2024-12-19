@@ -254,6 +254,7 @@ onMounted(() => {
 
 	mediaOverviewStore.libraryId = props.libraryId;
 	mediaOverviewStore.mediaType = props.mediaType;
+	mediaOverviewStore.isDetailView = false;
 
 	// Initial data load
 	useSubscription(

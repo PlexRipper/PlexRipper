@@ -164,6 +164,7 @@ onMounted(() => {
 	const type = PlexMediaType.TvShow;
 
 	mediaOverviewStore.downloadButtonVisible = false;
+	mediaOverviewStore.isDetailView = true;
 
 	useSubscription(
 		forkJoin({

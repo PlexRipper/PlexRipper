@@ -45,7 +45,7 @@
 								v-if="mediaOverviewStore.filterQuery !== ''"
 								name="mdi-close"
 								class="cursor-pointer q-mr-sm"
-								@click="mediaOverviewStore.filterQuery = ''" />
+								@click="mediaOverviewStore.clearFilter()" />
 						</template>
 					</q-input>
 				</QCol>
@@ -184,8 +184,8 @@ function changeView(viewMode: ViewMode) {
 </script>
 
 <style lang="scss">
-@use '@/assets/scss/mixins';
 @use '@/assets/scss/variables' as *;
+@use '@/assets/scss/mixins';
 
 .media-overview-bar {
   @extend .default-border;

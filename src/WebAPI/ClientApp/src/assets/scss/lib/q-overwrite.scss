@@ -1,8 +1,8 @@
-@use '../variables';
+@use '../variables' as *;
 @use '../mixins';
 
 .q-dark {
-  background-color: transparent;
+  background-color: transparent !important;
 }
 
 body.body--dark {
@@ -22,11 +22,11 @@ body.body--dark {
     @extend .default-border-radius;
     @extend .blur;
 
-    background-color: variables.$light-sm-background-color;
+    background-color: $light-sm-background-color;
     transition: 0.1s cubic-bezier(0.25, 0.8, 0.25, 1);
 
     &.q-card--dark {
-      background-color: variables.$dark-sm-background-color;
+      background-color: $dark-sm-background-color;
     }
 
     &--bordered {
@@ -43,14 +43,14 @@ body {
 
     .q-menu {
       @extend .blur;
-      background-color: variables.$dark-sm-background-color;
+      background-color: $dark-sm-background-color;
     }
   }
 
   &.body--light {
     .q-menu {
       @extend .blur;
-      background-color: variables.$light-sm-background-color;
+      background-color: $light-sm-background-color;
     }
   }
 }
@@ -88,7 +88,7 @@ body {
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 .q-page {
   // We need a set height so we calculate the remaining content space by subtracting other component heights
-  height: variables.$page-height-minus-app-bar;
+  height: $page-height-minus-app-bar;
   width: 100%;
 }
 

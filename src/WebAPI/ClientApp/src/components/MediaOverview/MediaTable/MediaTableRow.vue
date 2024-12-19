@@ -166,7 +166,6 @@ function onRowAction(action: IMediaOverviewCommands) {
 
 <style lang="scss">
 @use '@/assets/scss/variables.scss' as *;
-@use "quasar/dist/quasar.sass" as quasar;
 
 .media-table-row-container,
 .media-table-row-container > div {
@@ -202,13 +201,13 @@ function onRowAction(action: IMediaOverviewCommands) {
 
 .body--dark {
   .media-table-row {
-    border-bottom-color: quasar.$separator-dark-color;
+    border-bottom-color: $separator-dark-color;
   }
 }
 
 .body--light {
   .media-table-row {
-    border-bottom-color: quasar.$separator-color;
+    border-bottom-color: $separator-color;
   }
 }
 </style>

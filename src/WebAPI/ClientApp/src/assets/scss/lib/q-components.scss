@@ -1,6 +1,5 @@
 @use '../mixins';
 @use "../variables";
-@use "quasar/dist/quasar.sass" as quasar;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // * Notification Drawer
@@ -84,7 +83,7 @@ body {
 .body--dark {
   .q-tree-view-table {
     .q-tree__node {
-      border-bottom-color: quasar.$separator-dark-color;
+      border-bottom-color: variables.$separator-dark-color;
     }
   }
 }
@@ -92,7 +91,7 @@ body {
 .body--light {
   .q-tree-view-table {
     .q-tree__node {
-      border-bottom-color: quasar.$separator-color;
+      border-bottom-color: variables.$separator-color;
     }
   }
 }

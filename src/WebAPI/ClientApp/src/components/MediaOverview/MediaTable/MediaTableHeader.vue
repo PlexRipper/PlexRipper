@@ -84,7 +84,6 @@ defineEmits<{
 
 <style lang="scss">
 @use '@/assets/scss/variables.scss' as *;
-@use "quasar/dist/quasar.sass" as quasar;
 
 .media-table-header {
   border-bottom: 1px solid;
@@ -106,13 +105,13 @@ defineEmits<{
 
 .body--dark {
   .media-table-header {
-    border-bottom-color: quasar.$separator-dark-color;
+    border-bottom-color: $separator-dark-color;
   }
 }
 
 .body--light {
   .media-table-header {
-    border-bottom-color: quasar.$separator-color;
+    border-bottom-color: $separator-color;
   }
 }
 </style>

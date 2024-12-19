@@ -166,7 +166,7 @@
 
 <script lang="ts" setup>
 import { set, get } from '@vueuse/core';
-import { type DownloadTaskDTO, type DownloadWorkerLogDTO, type ReasonDTO } from '@dto';
+import type { DownloadTaskDTO, DownloadWorkerLogDTO, ReasonDTO } from '@dto';
 import { downloadApi } from '@api';
 import Convert from '@class/Convert';
 import { DialogType } from '@enums';

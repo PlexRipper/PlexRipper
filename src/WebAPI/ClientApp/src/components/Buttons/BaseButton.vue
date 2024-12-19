@@ -67,21 +67,21 @@ export default defineComponent({
 					...[
 						props.tooltipText
 							? h(
-								QTooltip,
-								{
-									anchor: 'top middle',
-									self: 'bottom middle',
-									offset: [10, 10],
-								},
-								{
-									default: () => {
-										if (!props.tooltipText) {
-											return '';
-										}
-										return props.tooltipText;
+									QTooltip,
+									{
+										anchor: 'top middle',
+										self: 'bottom middle',
+										offset: [10, 10],
 									},
-								},
-							)
+									{
+										default: () => {
+											if (!props.tooltipText) {
+												return '';
+											}
+											return props.tooltipText;
+										},
+									},
+								)
 							: null,
 					],
 				],

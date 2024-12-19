@@ -128,6 +128,9 @@ function formatted({ movieCount, tvShowCount, seasonCount, episodeCount, fileSiz
 }
 
 function toFileSize(size: number): string {
+	if (!size) {
+		return '-';
+	}
 	return prettyBytes(size, { locale: localizationStore.getLanguageLocale.bcp47Code });
 }
 

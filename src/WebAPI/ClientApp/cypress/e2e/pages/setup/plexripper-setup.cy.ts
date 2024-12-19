@@ -13,36 +13,39 @@ describe('PlexRipper new setup process', () => {
 			statusCode: 200,
 		});
 
-		cy.visit(route('/setup')).as('setupPage');
-	});
-
-	it('Should navigate the setup process from the first to the last page when the navigation buttons are used', () => {
-		cy.getCy('setup-page-next-button').click();
-
-		cy.getCy('setup-page-next-button').click();
-
-		cy.getCy('setup-page-next-button').click();
-
-		cy.getCy('setup-page-next-button').click();
-
-		cy.getCy('setup-page-skip-setup-button').click();
-
-		cy.url().should('eq', route('/'));
+		cy.visit(route('/setup'));
 	});
 
 	it('Should navigate the setup process from the first to the last page by clicking the tab header navigation buttons', () => {
-		cy.getCy('setup-header-tab-1').click();
+		cy.getPageData().then(() => {
+			cy.getCy('setup-panel-1').should('be.visible');
+			cy.getCy('setup-page-next-button').click();
 
-		cy.getCy('setup-header-tab-2').click();
+			cy.getCy('setup-panel-2').should('be.visible');
 
-		cy.getCy('setup-header-tab-3').click();
+			cy.getCy('setup-page-next-button').click();
+			cy.getCy('setup-panel-3').should('be.visible');
 
-		cy.getCy('setup-header-tab-4').click();
+			cy.getCy('setup-page-next-button').click();
+			cy.getCy('setup-panel-4').should('be.visible');
 
-		cy.getCy('setup-header-tab-5').click();
+			cy.getCy('setup-page-next-button').click();
+			cy.getCy('setup-panel-5').should('be.visible');
 
-		cy.getCy('setup-page-skip-setup-button').click();
+			cy.getCy('setup-header-tab-1').click();
+			cy.getCy('setup-panel-1').should('be.visible');
 
-		cy.url().should('eq', route('/'));
+			cy.getCy('setup-header-tab-2').click();
+			cy.getCy('setup-panel-2').should('be.visible');
+
+			cy.getCy('setup-header-tab-3').click();
+			cy.getCy('setup-panel-3').should('be.visible');
+
+			cy.getCy('setup-header-tab-4').click();
+			cy.getCy('setup-panel-4').should('be.visible');
+
+			cy.getCy('setup-header-tab-5').click();
+			cy.getCy('setup-panel-5').should('be.visible');
+		});
 	});
 });

@@ -35,22 +35,21 @@ describe('PlexRipper Server Dialog', () => {
 			cy.getCy('server-dialog-tab-3').click();
 			cy.getCy('server-dialog-tab-content-3').should('exist').and('be.visible');
 
-			cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), {
-				statusCode: 200,
-				body: generateResultDTO(pageData.settings),
-			}).as('settingsUpdate');
-
-			cy.getCy('download-speed-limit-slider').click();
-
-			cy.wait('@settingsUpdate').then((interception) => {
-				const newSettings = interception.request.body as SettingsModelDTO;
+			cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), (req) => {
+				const newSettings = req.body as SettingsModelDTO;
 
 				const serverSettings = newSettings.serverSettings.data.find(
 					(x) => x.machineIdentifier === plexServer.machineIdentifier,
 				);
-
 				expect(serverSettings?.downloadSpeedLimit).to.eq(50000);
+
+				req.reply({
+					statusCode: 200,
+					body: generateResultDTO(pageData.settings),
+				});
 			});
+
+			cy.getCy('download-speed-limit-slider').click();
 		});
 	});
 });

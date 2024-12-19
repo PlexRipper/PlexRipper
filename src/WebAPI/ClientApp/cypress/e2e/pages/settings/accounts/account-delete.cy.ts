@@ -37,7 +37,7 @@ describe('Remove Plex account from PlexRipper', () => {
 
 			cy.getCy('account-dialog-form').should('not.be.visible');
 
-			cy.getCy(`account-card-id-${plexAccount.id}`).should('not.be.visible');
+			cy.getCy(`account-card-id-${plexAccount.id}`).should('not.exist');
 		});
 	});
 

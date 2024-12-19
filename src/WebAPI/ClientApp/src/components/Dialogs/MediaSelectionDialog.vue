@@ -42,31 +42,33 @@
 						cols="auto"
 						class="q-mx-xs">
 						<table>
-							<tr>
-								<td colspan="2">
-									<q-input
-										v-model.number="numberInput[column]"
-										type="number"
-										outlined
-										style="max-width: 200px" />
-								</td>
-							</tr>
-							<tr
-								v-for="index in [1, 10, 100, 1000, 10000]"
-								:key="index">
-								<td>
-									<BaseButton
-										:label="`-${index}`"
-										block
-										@click="adjustValue(column, -1 * index)" />
-								</td>
-								<td>
-									<BaseButton
-										:label="`+${index}`"
-										block
-										@click="adjustValue(column, index)" />
-								</td>
-							</tr>
+							<tbody>
+								<tr>
+									<td colspan="2">
+										<q-input
+											v-model.number="numberInput[column]"
+											type="number"
+											outlined
+											style="max-width: 200px" />
+									</td>
+								</tr>
+								<tr
+									v-for="index in [1, 10, 100, 1000, 10000]"
+									:key="index">
+									<td>
+										<BaseButton
+											:label="`-${index}`"
+											block
+											@click="adjustValue(column, -1 * index)" />
+									</td>
+									<td>
+										<BaseButton
+											:label="`+${index}`"
+											block
+											@click="adjustValue(column, index)" />
+									</td>
+								</tr>
+							</tbody>
 						</table>
 					</QCol>
 				</QRow>

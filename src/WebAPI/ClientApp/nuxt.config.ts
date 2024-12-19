@@ -23,9 +23,9 @@ export default defineNuxtConfig({
 	ssr: false,
 
 	/*
-                                                           ** Auto-import components
-                                                           *  Doc: https://github.com/nuxt/components
-                                                           */
+                                                                 ** Auto-import components
+                                                                 *  Doc: https://github.com/nuxt/components
+                                                                 */
 	components: {
 		dirs: [
 			// Components directory
@@ -102,7 +102,8 @@ export default defineNuxtConfig({
 		css: {
 			preprocessorOptions: {
 				scss: {
-					silenceDeprecations: ['legacy-js-api'],
+					// TODO remove import when https://github.com/Maiquu/nuxt-quasar/pull/106 is merged
+					silenceDeprecations: ['import', 'global-builtin', 'legacy-js-api'],
 				},
 			},
 		},

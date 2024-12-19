@@ -1,3 +1,5 @@
+@use '../mixins';
+
 .p-dropdown-items, .p-select-list-container {
-	@extend .blur;
+  @extend .blur;
 }

@@ -117,7 +117,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/variables.scss';
+@use '@/assets/scss/variables.scss' as *;
 
 #poster-table {
   overflow-y: auto;

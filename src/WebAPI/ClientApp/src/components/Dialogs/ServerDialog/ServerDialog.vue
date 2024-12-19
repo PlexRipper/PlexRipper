@@ -195,8 +195,7 @@ function onServerHiddenSave(): void {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/variables.scss';
-@import 'quasar/src/css/core/typography.sass';
+@use '@/assets/scss/variables.scss' as *;
 
 .tab-content {
   max-height: calc(80vh - $q-card-dialog-title-height - $q-card-dialog-actions-height) !important;

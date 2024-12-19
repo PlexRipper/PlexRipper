@@ -10,7 +10,6 @@
 		<HelpGroup>
 			<!-- Is account enabled -->
 			<HelpRow
-				:header-width="labelCol"
 				:label="$t('help.account-form.is-enabled.label')"
 				:title="$t('help.account-form.is-enabled.title')"
 				:text="$t('help.account-form.is-enabled.text')">
@@ -23,7 +22,6 @@
 
 			<!-- Is main account -->
 			<HelpRow
-				:header-width="labelCol"
 				:label="$t('help.account-form.is-main.label')"
 				:title="$t('help.account-form.is-main.title')"
 				:text="$t('help.account-form.is-main.text')">
@@ -36,7 +34,6 @@
 
 			<!-- Display Name -->
 			<HelpRow
-				:header-width="labelCol"
 				:label="$t('help.account-form.display-name.label')"
 				:title="$t('help.account-form.display-name.title')"
 				:text="$t('help.account-form.display-name.text')">
@@ -73,7 +70,6 @@
 				<HelpGroup>
 					<!-- Username -->
 					<HelpRow
-						:header-width="labelCol"
 						:label="$t('help.account-form.username.label')"
 						:title="$t('help.account-form.username.title')"
 						:text="$t('help.account-form.username.text')">
@@ -153,8 +149,6 @@
 
 <script setup lang="ts">
 import { useAccountDialogStore } from '@store';
-
-const labelCol = ref(30);
 
 const tokenTab = 'token';
 const credentialsTab = 'credentials';

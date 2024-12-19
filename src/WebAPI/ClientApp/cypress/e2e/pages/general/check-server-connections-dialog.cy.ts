@@ -39,7 +39,7 @@ describe('Check server connections dialog', () => {
 
 		cy.getCy('check-server-connection-dialog').should('exist').and('be.visible');
 
-		cy.get('.q-card-dialog-content')
+		cy.getCy('check-server-connection-dialog')
 			.getPageData()
 			.then(({ plexServers, plexServerConnections }) => {
 				// Ensure the dialog is displaying the correct number of servers

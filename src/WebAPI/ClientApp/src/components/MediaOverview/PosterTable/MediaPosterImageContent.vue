@@ -84,7 +84,7 @@ const mediaType = computed(() => props.mediaItem?.type ?? PlexMediaType.Unknown)
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/_mixins.scss';
+@use '@/assets/scss/_mixins.scss';
 
 .media-poster {
   &--fallback {

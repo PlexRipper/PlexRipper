@@ -116,7 +116,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/variables.scss';
+@use '@/assets/scss/variables.scss';
 
 .navigation-drawer {
   display: flex;

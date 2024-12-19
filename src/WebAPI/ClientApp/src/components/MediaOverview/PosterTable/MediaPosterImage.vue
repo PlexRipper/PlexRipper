@@ -98,7 +98,7 @@ const imageUrl = computed((): string => {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/_mixins.scss';
+@use '@/assets/scss/_mixins.scss';
 
 .q-img__content > div {
   padding: 0;

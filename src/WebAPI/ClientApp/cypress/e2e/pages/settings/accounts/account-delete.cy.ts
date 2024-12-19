@@ -2,14 +2,14 @@ import { route } from '@fixtures/baseE2E';
 import { generateResultDTO } from '@mock';
 import { PlexAccountPaths } from '@api-urls';
 
-describe('Delete Plex account from PlexRipper', () => {
+describe('Remove Plex account from PlexRipper', () => {
 	beforeEach(() => {
 		cy.basePageSetup({
 			plexAccountCount: 2,
 			plexServerCount: 5,
 		});
 
-		cy.visit(route('/settings/accounts')).as('setupPage');
+		cy.visit(route('/settings/accounts'));
 	});
 
 	it('Should delete a Plex account when the delete button is clicked and confirmed', () => {
@@ -37,7 +37,7 @@ describe('Delete Plex account from PlexRipper', () => {
 
 			cy.getCy('account-dialog-form').should('not.be.visible');
 
-			cy.getCy(`account-card-id-${plexAccount.id}`).should('not.be.visible');
+			cy.getCy(`account-card-id-${plexAccount.id}`).should('not.exist');
 		});
 	});
 

@@ -165,7 +165,7 @@ function onRowAction(action: IMediaOverviewCommands) {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/variables.scss';
+@use '@/assets/scss/variables.scss' as *;
 
 .media-table-row-container,
 .media-table-row-container > div {

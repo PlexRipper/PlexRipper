@@ -1,6 +1,6 @@
 import { randMovie, randUuid } from '@ngneat/falso';
 import { times } from 'lodash-es';
-import type { MockConfig } from '@mock';
+import type { Seed, MockConfig } from '@mock';
 import { DownloadStatus, DownloadTaskType, type DownloadProgressDTO, type ServerDownloadProgressDTO } from '@dto';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
 import Convert from '@class/Convert';
@@ -9,12 +9,14 @@ export function generateServerDownloadProgress({
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	seed,
 }: {
 	plexServerId: number;
 	plexLibraryId: number;
 	config: Partial<MockConfig>;
+	seed: Seed;
 }): ServerDownloadProgressDTO {
-	const downloadTasks: DownloadProgressDTO[] = generateDownloadProgress({ plexServerId, plexLibraryId, config });
+	const downloadTasks: DownloadProgressDTO[] = generateDownloadProgress({ plexServerId, plexLibraryId, config, seed });
 
 	return {
 		id: plexServerId,
@@ -27,45 +29,44 @@ export function generateDownloadProgress({
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	seed,
 }: {
 	plexServerId: number;
 	plexLibraryId: number;
 	config: Partial<MockConfig>;
+	seed: Seed;
 }): DownloadProgressDTO[] {
 	const validConfig = checkConfig(config);
 
 	const downloadTasks: DownloadProgressDTO[] = [];
 	if (validConfig.movieDownloadTask > 0) {
-		downloadTasks.push(...generateDownloadProgressMovies({ plexServerId, plexLibraryId, config }));
+		downloadTasks.push(...generateDownloadProgressMovies({ plexServerId, plexLibraryId, config, seed }));
 	}
 
 	if (validConfig.tvShowDownloadTask > 0) {
-		downloadTasks.push(...generateDownloadProgressTvShows({ plexServerId, plexLibraryId, config }));
+		downloadTasks.push(...generateDownloadProgressTvShows({ plexServerId, plexLibraryId, config, seed }));
 	}
 
 	return downloadTasks;
 }
 
 export function generateDownloadProgressBase({
-	id,
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	plexServerId,
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	plexLibraryId,
 	type,
 	config = {},
+	seed,
 }: {
-	id: string;
 	plexServerId: number;
 	plexLibraryId: number;
 	type: DownloadTaskType;
 	config: Partial<MockConfig>;
+	seed: Seed;
 }): DownloadProgressDTO {
 	checkConfig(config);
-	incrementSeed();
+
+	seed.next();
 
 	return {
-		id,
+		id: randUuid(),
 		dataReceived: 0,
 		dataTotal: 1000000000, // 1 GB in bytes
 		downloadSpeed: 0,
@@ -80,45 +81,45 @@ export function generateDownloadProgressBase({
 }
 
 export function generateDownloadProgressTvShow({
-	id,
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	seed,
 }: {
-	id: string;
 	plexServerId: number;
 	plexLibraryId: number;
 	config: Partial<MockConfig>;
+	seed: Seed;
 }): DownloadProgressDTO {
 	return {
 		...generateDownloadProgressBase({
-			id,
 			plexServerId,
 			plexLibraryId,
 			type: DownloadTaskType.TvShow,
 			config,
+			seed,
 		}),
-		children: generateDownloadProgressTvShowSeasons({ plexServerId, plexLibraryId, config }),
+		children: generateDownloadProgressTvShowSeasons({ plexServerId, plexLibraryId, config, seed }),
 	};
 }
 
 export function generateDownloadProgressMovie({
-	id,
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	seed,
 }: {
-	id: string;
 	plexServerId: number;
 	plexLibraryId: number;
 	config: Partial<MockConfig>;
+	seed: Seed;
 }): DownloadProgressDTO {
 	return generateDownloadProgressBase({
-		id,
 		plexServerId,
 		plexLibraryId,
 		type: DownloadTaskType.Movie,
 		config,
+		seed,
 	});
 }
 
@@ -126,19 +127,21 @@ export function generateDownloadProgressMovies({
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	seed,
 }: {
 	plexServerId: number;
 	plexLibraryId: number;
 	config: Partial<MockConfig>;
+	seed: Seed;
 }): DownloadProgressDTO[] {
 	const validConfig = checkConfig(config);
 
 	return times(validConfig.movieDownloadTask, () =>
 		generateDownloadProgressMovie({
-			id: randUuid(),
 			plexServerId,
 			plexLibraryId,
 			config,
+			seed,
 		}),
 	);
 }
@@ -147,44 +150,47 @@ export function generateDownloadProgressTvShows({
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	seed,
 }: {
 	plexServerId: number;
 	plexLibraryId: number;
 	config?: Partial<MockConfig>;
+	seed: Seed;
 }): DownloadProgressDTO[] {
 	const validConfig = checkConfig(config);
 	return times(validConfig.tvShowDownloadTask, () =>
 		generateDownloadProgressTvShow({
-			id: randUuid(),
 			plexServerId,
 			plexLibraryId,
 			config,
+			seed,
 		}),
 	);
 }
 
 export function generateDownloadProgressTvShowSeason({
-	id,
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	seed,
 }: {
 	id: string;
 	plexServerId: number;
 	plexLibraryId: number;
 	config?: Partial<MockConfig>;
+	seed: Seed;
 }): DownloadProgressDTO {
 	incrementSeed();
 
 	return {
 		...generateDownloadProgressBase({
-			id,
 			plexServerId,
 			plexLibraryId,
 			type: DownloadTaskType.Season,
 			config,
+			seed,
 		}),
-		children: generateDownloadProgressTvShowEpisodes({ plexServerId, plexLibraryId, config }),
+		children: generateDownloadProgressTvShowEpisodes({ plexServerId, plexLibraryId, config, seed }),
 	};
 }
 
@@ -192,10 +198,12 @@ export function generateDownloadProgressTvShowSeasons({
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	seed,
 }: {
 	plexServerId: number;
 	plexLibraryId: number;
 	config?: Partial<MockConfig>;
+	seed: Seed;
 }): DownloadProgressDTO[] {
 	const validConfig = checkConfig(config);
 
@@ -206,6 +214,7 @@ export function generateDownloadProgressTvShowSeasons({
 			plexServerId,
 			plexLibraryId,
 			config,
+			seed,
 		});
 		season.title = `Season ${seasonIndex++}`;
 		return season;
@@ -213,26 +222,34 @@ export function generateDownloadProgressTvShowSeasons({
 }
 
 export function generateDownloadProgressTvShowEpisode({
-	id,
 	plexServerId,
 	plexLibraryId,
 	config = {},
+	seed,
 }: {
-	id: string;
 	plexServerId: number;
 	plexLibraryId: number;
 	config?: Partial<MockConfig>;
+	seed: Seed;
 }): DownloadProgressDTO {
-	return generateDownloadProgressBase({ id, plexServerId, plexLibraryId, type: DownloadTaskType.Episode, config });
+	return generateDownloadProgressBase({
+		plexServerId,
+		plexLibraryId,
+		type: DownloadTaskType.Episode,
+		config,
+		seed,
+	});
 }
 
 export function generateDownloadProgressTvShowEpisodes({
 	plexServerId,
 	plexLibraryId,
+	seed,
 	config = {},
 }: {
 	plexServerId: number;
 	plexLibraryId: number;
+	seed: Seed;
 	config?: Partial<MockConfig>;
 }): DownloadProgressDTO[] {
 	const validConfig = checkConfig(config);
@@ -240,10 +257,10 @@ export function generateDownloadProgressTvShowEpisodes({
 
 	return times(validConfig.episodeDownloadTask, () => {
 		const episode = generateDownloadProgressTvShowEpisode({
-			id: randUuid(),
 			plexServerId,
 			plexLibraryId,
 			config,
+			seed,
 		});
 		episode.title = `Episode ${episodeIndex++} - ${episode.title}`;
 		return episode;

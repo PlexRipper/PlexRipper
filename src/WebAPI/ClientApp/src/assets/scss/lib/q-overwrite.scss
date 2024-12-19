@@ -1,6 +1,7 @@
-@import '../variables';
-@import '../mixins';
+@use '../variables' as *;
+@use '../mixins';
 
+// Removes the default dark gray backgrounds of Quasar components
 .q-dark {
   background-color: transparent;
 }

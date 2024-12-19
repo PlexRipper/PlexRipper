@@ -59,7 +59,7 @@ function onAction(event: 'download' | 'open-media-details') {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/_mixins.scss';
+@use '@/assets/scss/_mixins.scss';
 
 .media-poster-quality-bar {
   @extend .background-sm;

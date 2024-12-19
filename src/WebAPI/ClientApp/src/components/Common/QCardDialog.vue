@@ -143,9 +143,8 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/variables.scss';
-@import '@/assets/scss/_mixins.scss';
-@import 'quasar/src/css/core/size.sass';
+@use '@/assets/scss/variables.scss' as *;
+@use '@/assets/scss/_mixins.scss';
 
 body {
   .dialog-container {

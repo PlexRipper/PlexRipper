@@ -254,6 +254,7 @@ onMounted(() => {
 
 	mediaOverviewStore.libraryId = props.libraryId;
 	mediaOverviewStore.mediaType = props.mediaType;
+	mediaOverviewStore.isDetailView = false;
 
 	// Initial data load
 	useSubscription(
@@ -287,7 +288,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/variables.scss';
+@use '@/assets/scss/variables.scss' as *;
 
 #media-container,
 .media-table-container,

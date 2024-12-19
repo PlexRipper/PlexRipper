@@ -83,7 +83,7 @@ function clearAllNotifications() {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/variables.scss';
+@use '@/assets/scss/variables.scss' as *;
 
 .notification-drawer {
   height: $page-height-minus-app-bar;

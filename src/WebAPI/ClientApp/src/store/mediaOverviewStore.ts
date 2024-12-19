@@ -24,6 +24,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		filterQuery: string;
 		lastMediaItemViewed: PlexMediaSlimDTO | null;
 		loading: boolean;
+		isDetailView: boolean;
 		allMovieCount: number;
 		allTvShowCount: number;
 		allSeasonCount: number;
@@ -43,6 +44,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		filterQuery: '',
 		lastMediaItemViewed: null,
 		loading: false,
+		isDetailView: false,
 		allMovieCount: 0,
 		allTvShowCount: 0,
 		allSeasonCount: 0,
@@ -54,11 +56,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 	const libraryStore = useLibraryStore();
 
 	const actions = {
-		requestMedia({
-			mediaType,
-                   page = 0,
-                   size = 0,
-		}: {
+		requestMedia({ mediaType, page = 0, size = 0 }: {
 			mediaType: PlexMediaType;
 			page: number;
 			size: number;
@@ -169,6 +167,9 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			state.sortedState = [];
 			state.sortedItems = [];
 		},
+		clearFilter() {
+			state.filterQuery = '';
+		},
 		sortMedia(event: IMediaOverviewSort) {
 			const newSortedState = [...state.sortedState];
 			const index = newSortedState.findIndex((x) => x.field === event.field);
@@ -235,10 +236,10 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			}
 		}),
 		showSelectionButton: computed((): boolean => {
-			return get(getters.getMediaViewMode) === ViewMode.Table;
+			return get(getters.getMediaViewMode) === ViewMode.Table && !state.isDetailView;
 		}),
 		showDownloadButton: computed((): boolean => {
-			return state.downloadButtonVisible || (getters.hasSelectedMedia && get(getters.getMediaViewMode) === ViewMode.Table);
+			return state.downloadButtonVisible || (get(getters.hasSelectedMedia) && get(getters.getMediaViewMode) === ViewMode.Table);
 		}),
 		isRootSelected: computed((): boolean | null => {
 			if (state.selection?.keys.length === state.itemsLength) {

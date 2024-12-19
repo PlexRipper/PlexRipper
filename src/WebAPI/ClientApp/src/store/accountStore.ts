@@ -62,7 +62,7 @@ export const useAccountStore = defineStore('AccountStore', () => {
 				);
 		},
 		deleteAccount(accountId: number) {
-			return plexAccountApi.deletePlexAccountByIdEndpoint(accountId);
+			return plexAccountApi.deletePlexAccountByIdEndpoint(accountId).pipe(switchMap(() => actions.refreshAccounts()));
 		},
 		getAccount(id: number): PlexAccountDTO | undefined {
 			return state.accounts.find((x) => x.id === id);

@@ -8,6 +8,7 @@ import {
 	generatePlexServers,
 	generateResultDTO,
 	generateServerDownloadProgress,
+	Seed,
 	type MockConfig,
 } from '@mock';
 import { generateSettingsModel } from '@factories/settings-factory';
@@ -17,6 +18,7 @@ import {
 	type PlexAccountDTO,
 	type PlexLibraryDTO,
 	type PlexMediaSlimDTO,
+	type PlexMediaStatisticsDTO,
 	PlexMediaType,
 	type PlexServerConnectionDTO,
 	type PlexServerDTO,
@@ -70,6 +72,8 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 		plexServers: [],
 		detailDownloadTasks: [],
 	};
+
+	const seed = new Seed(validConfig.seed);
 
 	if (
 		config.override === undefined
@@ -156,6 +160,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 				plexServerId: x.id,
 				plexLibraryId: -1,
 				config,
+				seed,
 			}),
 		)
 		.flat();
@@ -222,21 +227,30 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 			media: mediaList,
 		});
 
+		const mediaStatisticsDTO: PlexMediaStatisticsDTO = {
+			movieCount: library.type === PlexMediaType.Movie ? mediaList.length : 0,
+			tvShowCount: library.type === PlexMediaType.TvShow ? mediaList.length : 0,
+			seasonCount: library.type === PlexMediaType.TvShow ? mediaList.reduce((acc, x) => acc + x.childCount, 0) : 0,
+			episodeCount: library.type === PlexMediaType.TvShow ? mediaList.reduce((acc, x) => acc + x.grandChildCount, 0) : 0,
+			mediaSize: mediaList.reduce((acc, x) => acc + x.mediaSize, 0),
+			mediaCount: mediaList.length,
+			mediaList,
+		};
+
+		cy.intercept(
+			'GET',
+			PlexLibraryPaths.getPlexLibraryMediaEndpoint(library.id, {
+				page: 0,
+				size: 0,
+			}),
+			{
+				statusCode: 200,
+				body: generateResultDTO(mediaStatisticsDTO),
+				...headers,
+			},
+		);
+
 		for (const mediaItem of mediaList) {
-			cy.intercept(
-				'GET',
-				PlexLibraryPaths.getPlexLibraryMediaEndpoint(library.id, {
-					page: 0,
-					size: 0,
-				}),
-				{
-					statusCode: 200,
-					body: generateResultDTO(mediaList),
-					...headers,
-
-				},
-			);
-
 			if (mediaItem.type === PlexMediaType.TvShow) {
 				cy.intercept(
 					'GET',

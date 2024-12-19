@@ -147,8 +147,8 @@ const response = ref<ServerIdentityDTO | null>(null);
 const parsedUrl = computed((): URL | null => {
 	try {
 		return new URL(get(url));
-	} catch (_) {
-		return null;
+	} catch (e) {
+		return e === 'TypeError' ? null : null;
 	}
 });
 

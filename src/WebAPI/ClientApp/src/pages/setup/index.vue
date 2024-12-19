@@ -57,7 +57,9 @@
 									transition-next="slide-up"
 									transition-prev="slide-down">
 									<!-- Introduction	-->
-									<q-tab-panel :name="1">
+									<q-tab-panel
+										:name="1"
+										data-cy="setup-panel-1">
 										<QSection>
 											<template #header>
 												<QText
@@ -83,7 +85,9 @@
 										</QSection>
 									</q-tab-panel>
 									<!-- Future plans!	-->
-									<q-tab-panel :name="2">
+									<q-tab-panel
+										:name="2"
+										data-cy="setup-panel-2">
 										<QSection>
 											<template #header>
 												<QText
@@ -123,7 +127,9 @@
 										</QSection>
 									</q-tab-panel>
 									<!-- Checking paths	-->
-									<q-tab-panel :name="3">
+									<q-tab-panel
+										:name="3"
+										data-cy="setup-panel-3">
 										<QSection>
 											<template #header>
 												<QText
@@ -138,7 +144,9 @@
 										</QSection>
 									</q-tab-panel>
 									<!-- Plex Accounts	-->
-									<q-tab-panel :name="4">
+									<q-tab-panel
+										:name="4"
+										data-cy="setup-panel-4">
 										<QSection>
 											<template #header>
 												<QText
@@ -154,7 +162,9 @@
 										</QSection>
 									</q-tab-panel>
 									<!-- Finished	-->
-									<q-tab-panel :name="5">
+									<q-tab-panel
+										:name="5"
+										data-cy="setup-panel-5">
 										<QSection>
 											<template #header>
 												<QText
@@ -334,7 +344,8 @@ const finishSetup = () => {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/mixins.scss';
+@use '@/assets/scss/variables' as *;
+@use '@/assets/scss/_mixins.scss';
 
 .setup-card {
   @extend .default-border;

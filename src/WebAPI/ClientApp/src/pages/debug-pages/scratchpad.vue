@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { generateDownloadProgressTvShows, generatePlexServer } from '@factories';
+import { generateDownloadProgressTvShows, generatePlexServer, Seed } from '@factories';
 import type { DownloadProgressDTO } from '@dto';
 import { useDownloadStore, useDialogStore } from '@store';
 
@@ -40,6 +40,7 @@ const downloadTasks = generateDownloadProgressTvShows({
 		seasonDownloadTask: 2,
 		episodeDownloadTask: 2,
 	},
+	seed: new Seed(1),
 });
 
 downloadStore.updateServerDownloadProgress({

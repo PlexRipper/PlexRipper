@@ -90,7 +90,7 @@ function onComplete() {
 </script>
 
 <style lang="scss">
-@import '@/assets/scss/mixins.scss';
+@use '@/assets/scss/mixins.scss';
 
 .otp-input {
   @extend .default-border;

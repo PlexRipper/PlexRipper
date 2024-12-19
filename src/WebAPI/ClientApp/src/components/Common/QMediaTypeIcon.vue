@@ -11,10 +11,15 @@
 
 <script setup lang="ts">
 import Convert from '@class/Convert';
-import type { PlexMediaType } from '@dto';
+import { PlexMediaType } from '@dto';
 
-const props = withDefaults(defineProps<{ mediaType: string; size?: number; active?: boolean; loading?: boolean }>(), {
-	mediaType: '',
+const props = withDefaults(defineProps<{
+	mediaType?: PlexMediaType;
+	size?: number;
+	active?: boolean;
+	loading?: boolean;
+}>(), {
+	mediaType: PlexMediaType.None,
 	size: 24,
 	active: true,
 	loading: false,
@@ -27,7 +32,7 @@ const icon = computed((): string => {
 
 <style lang="scss">
 .q-media-type-icon {
-    opacity: 1;
+  opacity: 1;
 
   &--inactive {
     opacity: 0.5;

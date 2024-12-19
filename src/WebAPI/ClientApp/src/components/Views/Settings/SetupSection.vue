@@ -4,7 +4,7 @@
 			{{ $t('pages.settings.advanced.setup.header') }}
 		</template>
 		<HelpGroup>
-			<!--	Reset Database	-->
+			<!--	Go To Setup Page	-->
 			<HelpRow
 				:label="$t('help.settings.advanced.setup-section.go-to-setup-page.label')"
 				:title="$t('help.settings.advanced.setup-section.go-to-setup-page.title')"

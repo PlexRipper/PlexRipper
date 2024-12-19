@@ -2,6 +2,8 @@ import { resolve } from 'path';
 import { defineConfig } from 'cypress';
 import vitePreprocessor from 'cypress-vite';
 
+const __dirname = import.meta.dirname;
+
 export default defineConfig({
 	projectId: 'qo5tth',
 	env: {

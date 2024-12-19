@@ -1,5 +1,51 @@
 PlexRipper Changelog
 
+# [0.27.0](https://github.com/PlexRipper/PlexRipper/compare/v0.26.0...v0.27.0) (2024-12-19)
+
+
+### Bug Fixes
+
+* **Web-UI:** Added a bit of padding around elements in the HelpRows ([22f7977](https://github.com/PlexRipper/PlexRipper/commit/22f7977e64b24a11d6acdc817e1db26024fee5e3))
+* **Web-UI:** Added a more reliable way of displaying the library metadata by going of the media api call instead of the library call ([76a4194](https://github.com/PlexRipper/PlexRipper/commit/76a41946771f46406fdda294e81b9f59224f4dee))
+* **WebAPI:** Added missing new download status to the aggregation method ([4d5cccf](https://github.com/PlexRipper/PlexRipper/commit/4d5cccf06b3aa38b372f81eb30676c746da000d0))
+* **WebAPI:** Allow more retries when downloading a file before erroring out ([3e67bc4](https://github.com/PlexRipper/PlexRipper/commit/3e67bc4ce0dd15259fbcdb33d755177cb8fe719b))
+* **WebAPI:** Allow TaskCanceledException for FileMergeJob when pausing the job ([b5ac742](https://github.com/PlexRipper/PlexRipper/commit/b5ac742265dc4bb6ab511ed73b5e4106450f5831))
+* **WebAPI:** Allow X-PlexRipper-Version header in the CORS ([b69fc95](https://github.com/PlexRipper/PlexRipper/commit/b69fc95485c2e25d58dc1d350727914c3e2f2140))
+* **WebAPI:** Calculate progress when manually updating the download task status during testing ([0cc8fca](https://github.com/PlexRipper/PlexRipper/commit/0cc8fcac825bd12d6278cfff303e1275c8d9284d))
+* **Web-UI:** Clicking the discord button will now open the discord invite dialog and not the invite link directly ([56ae561](https://github.com/PlexRipper/PlexRipper/commit/56ae561a224dce2231a83ea9e538c5ab1d7a2d52))
+* **WebAPI:** Display the dev version in the boot log correctly ([f275e1d](https://github.com/PlexRipper/PlexRipper/commit/f275e1dd7c209981863a30f3c927136a4e49706c))
+* **WebAPI:** Fixed 0% percentage when downloadtask is completed ([9ba99de](https://github.com/PlexRipper/PlexRipper/commit/9ba99de686d576203401279fec38afa7979262e5))
+* **WebAPI:** Fixed incorrect error message hiding the exception when a download is being retried ([c6d9840](https://github.com/PlexRipper/PlexRipper/commit/c6d9840aed87c931a78e50d495a695908e013ed9))
+* **Web-UI:** Fixed incorrect server sorting in the server drawer, it's now all owned servers and then alphabetically ([ebbbbe2](https://github.com/PlexRipper/PlexRipper/commit/ebbbbe2a944fa0f990ed51630020e4e884f2f07c))
+* **WebAPI:** Fixed merge/move progress miscalculating the transfer speed  and therefore the time remaining ([ade2109](https://github.com/PlexRipper/PlexRipper/commit/ade210969fe17d776c923492984516aa9841e967))
+* **WebAPI:** Fixed missing mergePaused and movePaused status from DownloadTask parent tree status calculation ([41325e8](https://github.com/PlexRipper/PlexRipper/commit/41325e8d08d661b72474ba82275b555921ac7d79))
+* **Web-UI:** Fixed Plex Accounts not refreshing when 1 is deleted ([f76b1c5](https://github.com/PlexRipper/PlexRipper/commit/f76b1c5184f17d8f747cda30919c1274e2ac46bb))
+* **Web-UI:** Fixed the download button appearing without anything selected to download ([5e5dca1](https://github.com/PlexRipper/PlexRipper/commit/5e5dca1315b1999378f558966b400b57c48d4667))
+* **WebAPI:** Fixed the DownloadWorkerTasks not being cleaned up after the download task is done ([c7c4044](https://github.com/PlexRipper/PlexRipper/commit/c7c4044ff06d1c7b583e10f142ed236a2e0230f5))
+* **WebAPI:** Fixed the incorrect time remaining on the TvShow level, now it displays it based on the speed of the download and the remaining total data to be downloaded ([f1758f4](https://github.com/PlexRipper/PlexRipper/commit/f1758f485c9a4e917f29f60831a131f3d809ed07))
+* **WebAPI:** Fixed tvshow folder being left behind after it has been moved/merged from the download folder ([21a9d32](https://github.com/PlexRipper/PlexRipper/commit/21a9d32a2acbdd03796b7eb3a9dac2482b759d6f))
+* **Web-UI:** fixed typecheck and eslint errors ([5397b0d](https://github.com/PlexRipper/PlexRipper/commit/5397b0d91019c0011342ebaf8287a28895d35b09))
+* **WebAPI:** Generate Test Database first before setting up Autofac container ([243dd0b](https://github.com/PlexRipper/PlexRipper/commit/243dd0b18a587fbf1e8cd6a5450b59bd2688c691))
+* **WebAPI:** possible fix for inaccurate download speed calculation ([42ef74a](https://github.com/PlexRipper/PlexRipper/commit/42ef74ab0466e8d79663975fa46d603377fd02d2))
+* **WebAPI:** Remove unneeded update of updating the DownloadWorkerTasks when merging files ([c9246a2](https://github.com/PlexRipper/PlexRipper/commit/c9246a29bb1e7cdb708561fe432a357931d2afb5))
+
+
+### Features
+
+* **Web-UI:** Added a new background activity dialog when the Plex library media is syncing ([c5269bd](https://github.com/PlexRipper/PlexRipper/commit/c5269bda84b38630759c7f99a2acbc83d4977e2b))
+* **Web-UI:** Display a different version in the WebUI when using the development build ([9d50ab2](https://github.com/PlexRipper/PlexRipper/commit/9d50ab214afb5ae6f11e739b9684e3774ec4976d))
+* **WebAPI:** Shutting down the docker container will pause the active downloads ([2e8a788](https://github.com/PlexRipper/PlexRipper/commit/2e8a78813924fadee8bea025e62778b32a136c4b))
+
+
+### Performance Improvements
+
+* **Web-UI:** fixed a memory leak that was creating way to many routes for Cypress to work ([3c725c8](https://github.com/PlexRipper/PlexRipper/commit/3c725c85671b2915ed6bc41b3db667ed69e8a3de))
+
+
+### Reverts
+
+* **Web-UI:** revert setting transparent background to !important as it messes up other coloring ([8c8c599](https://github.com/PlexRipper/PlexRipper/commit/8c8c5997069e9fae437b88f2be6dbd7afe9261f5))
+
 # [0.26.0](https://github.com/PlexRipper/PlexRipper/compare/v0.25.0...v0.26.0) (2024-11-26)
 
 

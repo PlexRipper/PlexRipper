@@ -29,12 +29,11 @@ describe('Test the refreshing of a PlexLibrary', () => {
 		cy.getPageData().then((data) => {
 			const movieLibrary = data.plexLibraries.find((x) => x.type === PlexMediaType.Movie)!;
 
-			cy.intercept('POST', PlexLibraryPaths.refreshLibraryMediaEndpoint(movieLibrary.id), (req) => {
-				expect(req.body).to.eql({ plexLibraryId: movieLibrary?.id ?? -1 });
+			cy.intercept('GET', PlexLibraryPaths.refreshLibraryMediaEndpoint(movieLibrary.id), (req) => {
 				req.reply({
 					statusCode: 200,
 				});
-			}).as('refreshLibrary');
+			});
 			cy.getCy(`media-overview-refresh-library-btn`).click();
 
 			for (let i = 0; i < 5; i++) {

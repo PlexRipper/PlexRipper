@@ -335,6 +335,7 @@ const finishSetup = () => {
 
 <style lang="scss">
 @use '@/assets/scss/variables' as *;
+@use '@/assets/scss/_mixins.scss';
 
 .setup-card {
   @extend .default-border;

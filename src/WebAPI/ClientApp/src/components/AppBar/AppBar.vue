@@ -74,7 +74,6 @@ function showNotificationsDrawer(): void {
 @use '@/assets/scss/variables' as *;
 
 .app-bar {
-  // @extend .glossy;
   height: $app-bar-height;
 }
 

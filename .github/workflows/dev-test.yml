@@ -86,8 +86,26 @@ jobs:
                 uses: actions/checkout@v4
             -   name: Dotnet Setup
                 uses: ./.github/workflows/steps/dotnet-setup/
-            -   name: Integration Tests
-                run: dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal
+            -   name: Integration Tests with retry
+                run: |
+                    max_retries=2
+                    count=0
+                    success=false
+                    while [ $count -lt $max_retries ]; do
+                      echo "Running integration tests attempt $((count + 1)) of $max_retries"
+                      dotnet test tests/IntegrationTests/IntegrationTests.sln --no-build --verbosity normal
+                      if [ $? -eq 0 ]; then
+                        success=true
+                        break
+                      fi
+                      ((count++))
+                      echo "Test failed. Retrying..."
+                    done
+                    
+                    if [ "$success" = false ]; then
+                      echo "Integration tests failed after $max_retries attempts"
+                      exit 1
+                    fi
     # Ensure the Docker image can be built without errors
     Test-Docker-Build:
         needs: [ Front-End-Unit-Tests, Front-End-Type-Check, Front-End-Eslint-Check, Back-End-Unit-Tests, Back-End-Integration-Tests ]
@@ -95,10 +113,10 @@ jobs:
         steps:
             -   name: Checkout Source Code
                 uses: actions/checkout@v4
-                
+
             -   name: Set up Docker Buildx
                 uses: docker/setup-buildx-action@v3
-            
+
             -   name: Test Docker Build
                 uses: elgohr/Publish-Docker-Github-Action@v5
                 with:

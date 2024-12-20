@@ -128,6 +128,7 @@ public static class PlexMediaExtensions
                 DownloadWorkerTasks = [],
                 Parent = null,
                 ParentId = default,
+                DestinationFolderPathId = null,
                 FullTitle = $"{plexMovie.FullTitle}/{part.File.GetFileName()}",
                 Title = part.File.GetFileName(),
             })
@@ -174,6 +175,7 @@ public static class PlexMediaExtensions
                 DownloadWorkerTasks = [],
                 Parent = null,
                 ParentId = default,
+                DestinationFolderPathId = null,
                 FullTitle = $"{plexTvShowEpisode.FullTitle}/{part.File.GetFileName()}",
                 Title = part.File.GetFileName(),
             })

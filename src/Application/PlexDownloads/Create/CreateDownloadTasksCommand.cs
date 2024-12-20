@@ -7,14 +7,27 @@ namespace PlexRipper.Application;
 /// Generates a nested list of <see cref="DownloadTaskGeneric"/> and adds to the download queue.
 /// </summary>
 /// <returns>Returns true if all downloadTasks were added successfully.</returns>
-public record CreateDownloadTasksCommand(List<DownloadMediaDTO> DownloadMediaDtos) : IRequest<Result>;
+public record CreateDownloadTasksCommand : IRequest<Result>
+{
+    public CreateDownloadTasksCommand(CreateDownloadTasksRequest request)
+    {
+        Request = request;
+    }
+
+    public CreateDownloadTasksCommand(List<DownloadMediaDTO> downloadMediaDtos)
+    {
+        Request = new CreateDownloadTasksRequest(downloadMediaDtos);
+    }
+
+    public CreateDownloadTasksRequest Request { get; }
+}
 
 public class CreateDownloadTasksCommandValidator : AbstractValidator<CreateDownloadTasksCommand>
 {
     public CreateDownloadTasksCommandValidator()
     {
         RuleFor(x => x).NotNull();
-        RuleFor(x => x).NotEmpty();
+        RuleFor(x => x.Request.DownloadMedias).NotEmpty();
     }
 }
 
@@ -30,40 +43,35 @@ public class CreateDownloadTasksCommandHandler : IRequestHandler<CreateDownloadT
 
     public async Task<Result> Handle(CreateDownloadTasksCommand command, CancellationToken cancellationToken)
     {
-        if (command.DownloadMediaDtos.Any(x => x.Type == PlexMediaType.Movie))
+        var request = command.Request;
+        var downloadMedias = command.Request.DownloadMedias;
+        var folderPathDestinationId = command.Request.DestinationFolderPathId;
+
+        if (downloadMedias.Any(x => x.Type == PlexMediaType.Movie))
         {
-            var result = await _mediator.Send(
-                new GenerateDownloadTaskMoviesCommand(command.DownloadMediaDtos),
-                cancellationToken
-            );
+            var result = await _mediator.Send(new GenerateDownloadTaskMoviesCommand(request), cancellationToken);
             result.LogIfFailed();
             _generatedTasks = true;
         }
 
-        if (command.DownloadMediaDtos.Any(x => x.Type == PlexMediaType.TvShow))
+        if (downloadMedias.Any(x => x.Type == PlexMediaType.TvShow))
         {
-            var result = await _mediator.Send(
-                new GenerateDownloadTaskTvShowsCommand(command.DownloadMediaDtos),
-                cancellationToken
-            );
+            var result = await _mediator.Send(new GenerateDownloadTaskTvShowsCommand(request), cancellationToken);
             result.LogIfFailed();
             _generatedTasks = true;
         }
 
-        if (command.DownloadMediaDtos.Any(x => x.Type == PlexMediaType.Season))
+        if (downloadMedias.Any(x => x.Type == PlexMediaType.Season))
         {
-            var result = await _mediator.Send(
-                new GenerateDownloadTaskTvShowSeasonsCommand(command.DownloadMediaDtos),
-                cancellationToken
-            );
+            var result = await _mediator.Send(new GenerateDownloadTaskTvShowSeasonsCommand(request), cancellationToken);
             result.LogIfFailed();
             _generatedTasks = true;
         }
 
-        if (command.DownloadMediaDtos.Any(x => x.Type == PlexMediaType.Episode))
+        if (downloadMedias.Any(x => x.Type == PlexMediaType.Episode))
         {
             var result = await _mediator.Send(
-                new GenerateDownloadTaskTvShowEpisodesCommand(command.DownloadMediaDtos),
+                new GenerateDownloadTaskTvShowEpisodesCommand(request),
                 cancellationToken
             );
             result.LogIfFailed();
@@ -73,11 +81,12 @@ public class CreateDownloadTasksCommandHandler : IRequestHandler<CreateDownloadT
         if (_generatedTasks)
         {
             // Notify the DownloadQueue to check for new tasks in the PlexSevers with new DownloadTasks
-            var uniquePlexServers = command
-                .DownloadMediaDtos.MergeAndGroupList()
+            var uniquePlexServers = request
+                .DownloadMedias.MergeAndGroupList()
                 .Select(x => x.PlexServerId)
                 .Distinct()
                 .ToList();
+
             await _mediator.Publish(new CheckDownloadQueueNotification(uniquePlexServers), cancellationToken);
         }
 

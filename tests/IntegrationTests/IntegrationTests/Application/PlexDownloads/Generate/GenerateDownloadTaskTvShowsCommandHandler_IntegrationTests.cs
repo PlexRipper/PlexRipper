@@ -47,7 +47,9 @@ public class GenerateDownloadTaskTvShowsCommandHandlerIntegrationTests : BaseInt
 
         // Act
         var mediatr = container.Mediator;
-        var result = await mediatr.Send(new GenerateDownloadTaskTvShowsCommand(tvShows));
+        var result = await mediatr.Send(
+            new GenerateDownloadTaskTvShowsCommand(new CreateDownloadTasksRequest(tvShows))
+        );
 
         // Assert
         var downloadTaskTvShows = await container.DbContext.DownloadTaskTvShow.IncludeAll().ToListAsync();

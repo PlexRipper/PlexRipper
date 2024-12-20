@@ -9,15 +9,7 @@ namespace PlexRipper.Application;
 public record CreateDownloadTasksEndpointRequest
 {
     [FromBody]
-    public List<DownloadMediaDTO> DownloadMedias { get; init; } = [];
-}
-
-public class CreateDownloadTasksEndpointRequestValidator : Validator<CreateDownloadTasksEndpointRequest>
-{
-    public CreateDownloadTasksEndpointRequestValidator()
-    {
-        RuleFor(x => x.DownloadMedias).NotEmpty();
-    }
+    public CreateDownloadTasksRequest Request { get; set; }
 }
 
 public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpointRequest>
@@ -25,7 +17,7 @@ public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpo
     private readonly ILog _log;
     private readonly IMediator _mediator;
 
-    public override string EndpointPath => ApiRoutes.DownloadController + "/download";
+    public override string EndpointPath => ApiRoutes.DownloadController + "/create";
 
     public CreateDownloadTasksEndpoint(ILog log, IMediator mediator)
     {
@@ -47,10 +39,10 @@ public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpo
     public override async Task HandleAsync(CreateDownloadTasksEndpointRequest req, CancellationToken ct)
     {
         _log.DebugLine("Attempting to add download task orders: ");
-        foreach (var downloadMediaDto in req.DownloadMedias)
+        foreach (var downloadMediaDto in req.Request.DownloadMedias)
             _log.Debug("DownloadMediaDTO: {@DownloadMediaDto} ", downloadMediaDto);
 
-        var result = await _mediator.Send(new CreateDownloadTasksCommand(req.DownloadMedias), ct);
+        var result = await _mediator.Send(new CreateDownloadTasksCommand(req.Request), ct);
 
         await SendFluentResult(result, ct);
     }

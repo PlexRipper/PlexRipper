@@ -7,16 +7,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record GenerateDownloadTaskTvShowSeasonsCommand(List<DownloadMediaDTO> DownloadMedias) : IRequest<Result>;
+public record GenerateDownloadTaskTvShowSeasonsCommand(CreateDownloadTasksRequest Request) : IRequest<Result>;
 
 public class GenerateDownloadTaskTvShowSeasonsCommandValidator
     : AbstractValidator<GenerateDownloadTaskTvShowSeasonsCommand>
 {
     public GenerateDownloadTaskTvShowSeasonsCommandValidator()
     {
-        RuleFor(x => x.DownloadMedias).NotNull();
-        RuleFor(x => x.DownloadMedias).NotEmpty();
-        RuleForEach(x => x.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
+        RuleFor(x => x.Request.DownloadMedias).NotNull();
+        RuleFor(x => x.Request.DownloadMedias).NotEmpty();
+        RuleForEach(x => x.Request.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
     }
 }
 
@@ -39,7 +39,7 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
         CancellationToken cancellationToken
     )
     {
-        var groupedList = command.DownloadMedias.MergeAndGroupList();
+        var groupedList = command.Request.DownloadMedias.MergeAndGroupList();
         var plexSeasonList = groupedList.FindAll(x => x.Type == PlexMediaType.Season);
         if (!plexSeasonList.Any())
             return ResultExtensions.IsEmpty(nameof(plexSeasonList)).LogWarning();
@@ -114,7 +114,12 @@ public class GenerateDownloadTaskTvShowSeasonsCommandHandler
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Create episodes downloadTasks
-        await _mediator.Send(new GenerateDownloadTaskTvShowEpisodesCommand(episodesIds), cancellationToken);
+        await _mediator.Send(
+            new GenerateDownloadTaskTvShowEpisodesCommand(
+                new CreateDownloadTasksRequest(episodesIds, command.Request.DestinationFolderPathId)
+            ),
+            cancellationToken
+        );
 
         return Result.Ok();
     }

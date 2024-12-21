@@ -63,6 +63,52 @@ public class GenerateDownloadTaskMoviesCommandHandler_UnitTests : BaseUnitTest<G
     }
 
     [Fact]
+    public async Task ShouldHaveDestinationFolderPathIdSet_WhenRequestContainsTheDestinationFolderPathIdSet()
+    {
+        // Arrange
+        await SetupDatabase(
+            18022,
+            config =>
+            {
+                config.PlexServerCount = 1;
+                config.PlexLibraryCount = 1;
+                config.MovieCount = 5;
+            }
+        );
+
+        var plexMovies = await IDbContext.PlexMovies.ToListAsync();
+        var movies = new List<DownloadMediaDTO>
+        {
+            new()
+            {
+                Type = PlexMediaType.Movie,
+                MediaIds = plexMovies.Select(x => x.Id).ToList(),
+                PlexServerId = 1,
+                PlexLibraryId = 1,
+            },
+        };
+
+        // Act
+        var request = new CreateDownloadTasksRequest(movies, 99);
+        var command = new GenerateDownloadTaskMoviesCommand(request);
+        var result = await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        var plexDownloadTaskMovies = await IDbContext.DownloadTaskMovie.IncludeAll().ToListAsync();
+
+        plexDownloadTaskMovies.Count.ShouldBe(5);
+
+        foreach (var downloadTaskMovie in plexDownloadTaskMovies)
+        {
+            foreach (var child in downloadTaskMovie.Children)
+            {
+                child.DestinationFolderPathId.ShouldBe(99);
+            }
+        }
+    }
+
+    [Fact]
     public async Task ShouldHaveMultipleDownloadTaskMovieFile_WhenPlexMovieHasMultiParts()
     {
         // Arrange

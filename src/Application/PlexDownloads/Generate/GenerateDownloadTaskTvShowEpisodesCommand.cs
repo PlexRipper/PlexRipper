@@ -53,6 +53,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
         try
         {
             var groupedList = command.Request.DownloadMedias.MergeAndGroupList();
+            var request = command.Request;
             var plexEpisodeList = groupedList.FindAll(x => x.Type == PlexMediaType.Episode);
             if (!plexEpisodeList.Any())
                 return ResultExtensions.IsEmpty(nameof(plexEpisodeList)).LogWarning();
@@ -132,7 +133,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                     var episodeData = tvShowEpisode.EpisodeData.First();
 
                     // Map movieData to DownloadTaskMovieFile and add to movieDownloadTask
-                    var downloadFiles = episodeData.MapToDownloadTask(tvShowEpisode);
+                    var downloadFiles = episodeData.MapToDownloadTask(tvShowEpisode, request);
                     episodeDownloadTask.Children.AddRange(downloadFiles);
                     _dbContext.DownloadTaskTvShowEpisodeFile.AddRange(downloadFiles);
                 }

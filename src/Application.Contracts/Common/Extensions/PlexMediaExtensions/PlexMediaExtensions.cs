@@ -96,7 +96,11 @@ public static class PlexMediaExtensions
             FileDataTransferred = 0,
         };
 
-    public static List<DownloadTaskMovieFile> MapToDownloadTask(this PlexMediaData plexMediaData, PlexMovie plexMovie)
+    public static List<DownloadTaskMovieFile> MapToDownloadTask(
+        this PlexMediaData plexMediaData,
+        PlexMovie plexMovie,
+        CreateDownloadTasksRequest request
+    )
     {
         return plexMediaData
             .Parts.Select(part => new DownloadTaskMovieFile
@@ -128,7 +132,7 @@ public static class PlexMediaExtensions
                 DownloadWorkerTasks = [],
                 Parent = null,
                 ParentId = default,
-                DestinationFolderPathId = null,
+                DestinationFolderPathId = request.DestinationFolderPathId,
                 FullTitle = $"{plexMovie.FullTitle}/{part.File.GetFileName()}",
                 Title = part.File.GetFileName(),
             })
@@ -137,7 +141,8 @@ public static class PlexMediaExtensions
 
     public static List<DownloadTaskTvShowEpisodeFile> MapToDownloadTask(
         this PlexMediaData plexMediaData,
-        PlexTvShowEpisode plexTvShowEpisode
+        PlexTvShowEpisode plexTvShowEpisode,
+        CreateDownloadTasksRequest request
     )
     {
         if (plexTvShowEpisode.TvShow is null || plexTvShowEpisode.TvShowSeason is null)
@@ -175,7 +180,7 @@ public static class PlexMediaExtensions
                 DownloadWorkerTasks = [],
                 Parent = null,
                 ParentId = default,
-                DestinationFolderPathId = null,
+                DestinationFolderPathId = request.DestinationFolderPathId,
                 FullTitle = $"{plexTvShowEpisode.FullTitle}/{part.File.GetFileName()}",
                 Title = part.File.GetFileName(),
             })

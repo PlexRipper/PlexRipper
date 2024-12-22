@@ -1,5 +1,12 @@
 PlexRipper Changelog
 
+# [0.28.0](https://github.com/PlexRipper/PlexRipper/compare/v0.27.0...v0.28.0) (2024-12-22)
+
+
+### Features
+
+* **Web-UI:** In the DownloadConfirmation window, you can now select the destination for the media you're about to download ([35d3411](https://github.com/PlexRipper/PlexRipper/commit/35d3411915433ea89aabbf6fd23186695393288e))
+
 # [0.27.0](https://github.com/PlexRipper/PlexRipper/compare/v0.26.0...v0.27.0) (2024-12-19)
 
 

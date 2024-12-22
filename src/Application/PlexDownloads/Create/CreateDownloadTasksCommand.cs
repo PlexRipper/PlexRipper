@@ -45,7 +45,6 @@ public class CreateDownloadTasksCommandHandler : IRequestHandler<CreateDownloadT
     {
         var request = command.Request;
         var downloadMedias = command.Request.DownloadMedias;
-        var folderPathDestinationId = command.Request.DestinationFolderPathId;
 
         if (downloadMedias.Any(x => x.Type == PlexMediaType.Movie))
         {

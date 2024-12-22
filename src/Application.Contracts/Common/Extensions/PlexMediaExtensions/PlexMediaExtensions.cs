@@ -124,7 +124,7 @@ public static class PlexMediaExtensions
                 DirectoryMeta = new DownloadTaskDirectory()
                 {
                     DownloadRootPath = string.Empty,
-                    DestinationRootPath = string.Empty,
+                    DestinationRootPath = request.CustomDestinationFolderPath,
                     MovieFolder = plexMovie.Title.SanitizeFolderName(),
                     TvShowFolder = string.Empty,
                     SeasonFolder = string.Empty,
@@ -172,7 +172,7 @@ public static class PlexMediaExtensions
                 DirectoryMeta = new DownloadTaskDirectory()
                 {
                     DownloadRootPath = string.Empty,
-                    DestinationRootPath = string.Empty,
+                    DestinationRootPath = request.CustomDestinationFolderPath,
                     MovieFolder = string.Empty,
                     TvShowFolder = plexTvShowEpisode.TvShow.Title.SanitizeFolderName(),
                     SeasonFolder = plexTvShowEpisode.TvShowSeason.Title.SanitizeFolderName(),

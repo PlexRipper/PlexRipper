@@ -13,6 +13,7 @@ import type { RequestParams } from "./http-client";
 import { ContentType } from "./http-client";
 
 import type {
+  CreateDownloadTasksRequest,
   DownloadMediaDTO,
   DownloadPreviewDTO,
   DownloadTaskDTO,
@@ -53,13 +54,13 @@ export class Download {
  *
  * @tags Download
  * @name CreateDownloadTasksEndpoint
- * @request POST:/api/Download/download
+ * @request POST:/api/Download/create
 
  */
-  createDownloadTasksEndpoint = (data: DownloadMediaDTO[], params: RequestParams = {}) =>
+  createDownloadTasksEndpoint = (data: CreateDownloadTasksRequest, params: RequestParams = {}) =>
     from(
       Axios.request<ResultDTO>({
-        url: `/api/Download/download`,
+        url: `/api/Download/create`,
         method: "POST",
         data: data,
         type: ContentType.Json,
@@ -246,7 +247,7 @@ export class Download {
 export class DownloadPaths {
   static clearCompletedDownloadTasksEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/clear` });
 
-  static createDownloadTasksEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/download` });
+  static createDownloadTasksEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/create` });
 
   static deleteDownloadTaskEndpoint = () => queryString.stringifyUrl({ url: `/api/Download/delete` });
 

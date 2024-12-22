@@ -5,6 +5,7 @@ import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { sum, merge, keyBy, values, flatMapDeep, clone } from 'lodash-es';
 import type {
+	CreateDownloadTasksRequest,
 	DownloadMediaDTO,
 	DownloadPreviewDTO,
 	DownloadProgressDTO,
@@ -105,9 +106,9 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 				}),
 			);
 		},
-		downloadMedia(downloadMediaCommand: DownloadMediaDTO[]): void {
+		downloadMedia(request: CreateDownloadTasksRequest): void {
 			downloadApi
-				.createDownloadTasksEndpoint(downloadMediaCommand)
+				.createDownloadTasksEndpoint(request)
 				.pipe(switchMap(() => actions.fetchDownloadList()))
 				.subscribe();
 		},

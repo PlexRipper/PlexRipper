@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -21,7 +22,13 @@ export interface ConfirmationSettingsDTO {
 }
 
 export interface CreateDownloadTasksEndpointRequest {
-  /** @minLength 1 */
+  request: CreateDownloadTasksRequest;
+}
+
+export interface CreateDownloadTasksRequest {
+  customDestinationFolderPath: string;
+  /** @format int32 */
+  destinationFolderPathId?: number | null;
   downloadMedias: DownloadMediaDTO[];
 }
 
@@ -55,10 +62,10 @@ export interface CreatePlexServerConnectionEndpointRequest {
 }
 
 export enum DataType {
-  PlexAccount = "PlexAccount",
-  PlexServer = "PlexServer",
-  PlexLibrary = "PlexLibrary",
-  PlexServerConnection = "PlexServerConnection",
+  PlexAccount = 'PlexAccount',
+  PlexServer = 'PlexServer',
+  PlexLibrary = 'PlexLibrary',
+  PlexServerConnection = 'PlexServerConnection',
 }
 
 export interface DateTimeSettingsDTO {
@@ -133,24 +140,24 @@ export interface DownloadProgressDTO {
 }
 
 export enum DownloadStatus {
-  Unknown = "Unknown",
-  Error = "Error",
-  Queued = "Queued",
-  Downloading = "Downloading",
-  DownloadFinished = "DownloadFinished",
-  Paused = "Paused",
-  Stopped = "Stopped",
-  Deleted = "Deleted",
-  Merging = "Merging",
-  Moving = "Moving",
-  MergePaused = "MergePaused",
-  MovePaused = "MovePaused",
-  MergeFinished = "MergeFinished",
-  MoveFinished = "MoveFinished",
-  Completed = "Completed",
-  ServerUnreachable = "ServerUnreachable",
-  MoveError = "MoveError",
-  MergeError = "MergeError",
+  Unknown = 'Unknown',
+  Error = 'Error',
+  Queued = 'Queued',
+  Downloading = 'Downloading',
+  DownloadFinished = 'DownloadFinished',
+  Paused = 'Paused',
+  Stopped = 'Stopped',
+  Deleted = 'Deleted',
+  Merging = 'Merging',
+  Moving = 'Moving',
+  MergePaused = 'MergePaused',
+  MovePaused = 'MovePaused',
+  MergeFinished = 'MergeFinished',
+  MoveFinished = 'MoveFinished',
+  Completed = 'Completed',
+  ServerUnreachable = 'ServerUnreachable',
+  MoveError = 'MoveError',
+  MergeError = 'MergeError',
 }
 
 export interface DownloadTaskDTO {
@@ -193,15 +200,15 @@ export interface DownloadTaskDTO {
 }
 
 export enum DownloadTaskType {
-  None = "None",
-  Movie = "Movie",
-  MovieData = "MovieData",
-  MoviePart = "MoviePart",
-  TvShow = "TvShow",
-  Season = "Season",
-  Episode = "Episode",
-  EpisodeData = "EpisodeData",
-  EpisodePart = "EpisodePart",
+  None = 'None',
+  Movie = 'Movie',
+  MovieData = 'MovieData',
+  MoviePart = 'MoviePart',
+  TvShow = 'TvShow',
+  Season = 'Season',
+  Episode = 'Episode',
+  EpisodeData = 'EpisodeData',
+  EpisodePart = 'EpisodePart',
 }
 
 export interface DownloadWorkerLogDTO {
@@ -240,10 +247,10 @@ export interface FileSystemDTO {
 }
 
 export enum FileSystemEntityType {
-  Parent = "Parent",
-  Drive = "Drive",
-  Folder = "Folder",
-  File = "File",
+  Parent = 'Parent',
+  Drive = 'Drive',
+  Folder = 'Folder',
+  File = 'File',
 }
 
 export interface FileSystemModelDTO {
@@ -276,15 +283,15 @@ export interface FolderPathDTO {
 }
 
 export enum FolderType {
-  None = "None",
-  DownloadFolder = "DownloadFolder",
-  MovieFolder = "MovieFolder",
-  TvShowFolder = "TvShowFolder",
-  MusicFolder = "MusicFolder",
-  PhotosFolder = "PhotosFolder",
-  OtherVideosFolder = "OtherVideosFolder",
-  GamesVideosFolder = "GamesVideosFolder",
-  Unknown = "Unknown",
+  None = 'None',
+  DownloadFolder = 'DownloadFolder',
+  MovieFolder = 'MovieFolder',
+  TvShowFolder = 'TvShowFolder',
+  MusicFolder = 'MusicFolder',
+  PhotosFolder = 'PhotosFolder',
+  OtherVideosFolder = 'OtherVideosFolder',
+  GamesVideosFolder = 'GamesVideosFolder',
+  Unknown = 'Unknown',
 }
 
 export interface GeneralSettingsDTO {
@@ -303,8 +310,8 @@ export interface IError {
 }
 
 export enum JobStatus {
-  Started = "Started",
-  Completed = "Completed",
+  Started = 'Started',
+  Completed = 'Completed',
 }
 
 export interface JobStatusUpdateDTOOfObject {
@@ -317,12 +324,12 @@ export interface JobStatusUpdateDTOOfObject {
 }
 
 export enum JobTypes {
-  Unknown = "Unknown",
-  CheckAllConnectionsStatusByPlexServerJob = "CheckAllConnectionsStatusByPlexServerJob",
-  DownloadJob = "DownloadJob",
-  FileMergeJob = "FileMergeJob",
-  SyncServerMediaJob = "SyncServerMediaJob",
-  InspectPlexServerJob = "InspectPlexServerJob",
+  Unknown = 'Unknown',
+  CheckAllConnectionsStatusByPlexServerJob = 'CheckAllConnectionsStatusByPlexServerJob',
+  DownloadJob = 'DownloadJob',
+  FileMergeJob = 'FileMergeJob',
+  SyncServerMediaJob = 'SyncServerMediaJob',
+  InspectPlexServerJob = 'InspectPlexServerJob',
 }
 
 export interface LanguageSettingsDTO {
@@ -355,15 +362,15 @@ export interface LibraryProgress {
  *
  */
 export enum MessageTypes {
-  LibraryProgress = "LibraryProgress",
-  DownloadTaskUpdate = "DownloadTaskUpdate",
-  ServerDownloadProgress = "ServerDownloadProgress",
-  ServerConnectionCheckStatusProgress = "ServerConnectionCheckStatusProgress",
-  FileMergeProgress = "FileMergeProgress",
-  SyncServerMediaProgress = "SyncServerMediaProgress",
-  Notification = "Notification",
-  JobStatusUpdate = "JobStatusUpdate",
-  RefreshNotification = "RefreshNotification",
+  LibraryProgress = 'LibraryProgress',
+  DownloadTaskUpdate = 'DownloadTaskUpdate',
+  ServerDownloadProgress = 'ServerDownloadProgress',
+  ServerConnectionCheckStatusProgress = 'ServerConnectionCheckStatusProgress',
+  FileMergeProgress = 'FileMergeProgress',
+  SyncServerMediaProgress = 'SyncServerMediaProgress',
+  Notification = 'Notification',
+  JobStatusUpdate = 'JobStatusUpdate',
+  RefreshNotification = 'RefreshNotification',
 }
 
 export interface NotificationDTO {
@@ -377,14 +384,14 @@ export interface NotificationDTO {
 }
 
 export enum NotificationLevel {
-  None = "None",
-  Verbose = "Verbose",
-  Debug = "Debug",
-  Information = "Information",
-  Success = "Success",
-  Warning = "Warning",
-  Error = "Error",
-  Fatal = "Fatal",
+  None = 'None',
+  Verbose = 'Verbose',
+  Debug = 'Debug',
+  Information = 'Information',
+  Success = 'Success',
+  Warning = 'Warning',
+  Error = 'Error',
+  Fatal = 'Fatal',
 }
 
 export interface PlexAccountDTO {
@@ -593,18 +600,18 @@ export interface PlexMediaStatisticsDTO {
 }
 
 export enum PlexMediaType {
-  None = "None",
-  Movie = "Movie",
-  TvShow = "TvShow",
-  Season = "Season",
-  Episode = "Episode",
-  Music = "Music",
-  Album = "Album",
-  Song = "Song",
-  Photos = "Photos",
-  OtherVideos = "OtherVideos",
-  Games = "Games",
-  Unknown = "Unknown",
+  None = 'None',
+  Movie = 'Movie',
+  TvShow = 'TvShow',
+  Season = 'Season',
+  Episode = 'Episode',
+  Music = 'Music',
+  Album = 'Album',
+  Song = 'Song',
+  Photos = 'Photos',
+  OtherVideos = 'OtherVideos',
+  Games = 'Games',
+  Unknown = 'Unknown',
 }
 
 export interface PlexServerConnectionDTO {
@@ -1057,6 +1064,6 @@ export interface ValidatePlexServerConnectionEndpointRequest {
 }
 
 export enum ViewMode {
-  Poster = "Poster",
-  Table = "Table",
+  Poster = 'Poster',
+  Table = 'Table',
 }

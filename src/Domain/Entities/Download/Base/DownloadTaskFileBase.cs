@@ -75,6 +75,12 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
 
     public required List<DownloadWorkerTask> DownloadWorkerTasks { get; set; } = [];
 
+    /// <summary>
+    /// Gets or sets the destination folder path id of the <see cref="DownloadTaskFileBase"/>.
+    /// This allows the user to pick a destination folder for the download, where the path is copied over once downloading begins.
+    /// </summary>
+    public required int? DestinationFolderPathId { get; set; }
+
     #endregion
 
     #region Helpers

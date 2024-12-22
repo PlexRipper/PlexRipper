@@ -60,7 +60,8 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
         };
 
         // Act
-        var command = new GenerateDownloadTaskTvShowEpisodesCommand(downloadMediaDtos);
+        var request = new CreateDownloadTasksRequest(downloadMediaDtos, 99);
+        var command = new GenerateDownloadTaskTvShowEpisodesCommand(request);
         var result = await _sut.Handle(command, CancellationToken.None);
 
         // Assert
@@ -88,6 +89,11 @@ public class DownloadTaskFactory_GenerateTvShowEpisodesDownloadTasksAsync_UnitTe
                 && !x.PropertyName.Contains(nameof(DownloadTaskFileBase.DestinationDirectory))
             );
             validErrors.ShouldBeEmpty();
+        }
+
+        foreach (var episodeFile in downloadTaskEpisodeFiles)
+        {
+            episodeFile.DestinationFolderPathId.ShouldBe(99);
         }
     }
 

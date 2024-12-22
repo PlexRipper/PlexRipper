@@ -182,13 +182,24 @@ public class DownloadJob : IJob, IDisposable
     private async Task<Result<DownloadTaskFileBase>> SetDownloadAndDestination(DownloadTaskFileBase downloadTask)
     {
         var downloadFolder = await _dbContext.GetDownloadFolder();
-        var destinationFolder = await _dbContext.GetDestinationFolder(downloadTask.PlexLibraryId);
-
-        if (destinationFolder is null)
-            return ResultExtensions.EntityNotFound(nameof(PlexLibrary), downloadTask.PlexLibraryId).LogError();
-
         downloadTask.DirectoryMeta.DownloadRootPath = downloadFolder.DirectoryPath;
-        downloadTask.DirectoryMeta.DestinationRootPath = destinationFolder.DirectoryPath;
+
+        // A custom destination folder can have been set during creation
+        if (string.IsNullOrEmpty(downloadTask.DirectoryMeta.DestinationRootPath))
+        {
+            FolderPath? destinationFolder = null;
+            if (downloadTask.DestinationFolderPathId is not null && downloadTask.DestinationFolderPathId > 0)
+            {
+                destinationFolder = await _dbContext.FolderPaths.GetAsync((int)downloadTask.DestinationFolderPathId);
+            }
+
+            destinationFolder ??= await _dbContext.GetDestinationFolder(downloadTask.PlexLibraryId);
+
+            if (destinationFolder is null)
+                return ResultExtensions.EntityNotFound(nameof(PlexLibrary), downloadTask.PlexLibraryId).LogError();
+
+            downloadTask.DirectoryMeta.DestinationRootPath = destinationFolder.DirectoryPath;
+        }
 
         switch (downloadTask.DownloadTaskType)
         {

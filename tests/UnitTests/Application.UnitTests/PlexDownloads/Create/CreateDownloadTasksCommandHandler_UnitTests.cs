@@ -92,7 +92,7 @@ public class CreateDownloadTasksCommandHandler_UnitTests : BaseUnitTest<CreateDo
         };
 
         // Act
-        var request = new CreateDownloadTasksCommand(downloadMediaDtos);
+        var request = new CreateDownloadTasksCommand(new CreateDownloadTasksRequest(downloadMediaDtos));
         var handler = mock.Create<CreateDownloadTasksCommandHandler>();
         var result = await handler.Handle(request, CancellationToken.None);
 

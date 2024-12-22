@@ -60,9 +60,9 @@ public class DownloadControllerDownloadMediaIntegrationTests : BaseIntegrationTe
         // Act
         var response = await container.ApiClient.POSTAsync<
             CreateDownloadTasksEndpoint,
-            List<DownloadMediaDTO>,
+            CreateDownloadTasksRequest,
             ResultDTO
-        >(dtoList);
+        >(new CreateDownloadTasksRequest(dtoList));
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
         await Task.Delay(2000);
         await container.SchedulerService.AwaitScheduler();

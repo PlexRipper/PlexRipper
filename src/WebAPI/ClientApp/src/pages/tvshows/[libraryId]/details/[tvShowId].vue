@@ -156,7 +156,11 @@ listenMediaOverviewDownloadCommand((command) => {
 	if (settingsStore.isConfirmationEnabled(type)) {
 		dialogStore.openMediaConfirmationDownloadDialog(command);
 	} else {
-		downloadStore.downloadMedia(command);
+		downloadStore.downloadMedia({
+			downloadMedias: command,
+			customDestinationFolderPath: '',
+			destinationFolderPathId: null,
+		});
 	}
 });
 

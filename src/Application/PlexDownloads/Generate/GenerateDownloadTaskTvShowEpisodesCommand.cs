@@ -7,16 +7,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record GenerateDownloadTaskTvShowEpisodesCommand(List<DownloadMediaDTO> DownloadMedias) : IRequest<Result>;
+public record GenerateDownloadTaskTvShowEpisodesCommand : IRequest<Result>
+{
+    public GenerateDownloadTaskTvShowEpisodesCommand(CreateDownloadTasksRequest request)
+    {
+        Request = request;
+    }
+
+    public GenerateDownloadTaskTvShowEpisodesCommand(List<DownloadMediaDTO> downloadMediaDtos)
+    {
+        Request = new CreateDownloadTasksRequest(downloadMediaDtos);
+    }
+
+    public CreateDownloadTasksRequest Request { get; }
+}
 
 public class GenerateDownloadTaskTvShowEpisodesCommandValidator
     : AbstractValidator<GenerateDownloadTaskTvShowEpisodesCommand>
 {
     public GenerateDownloadTaskTvShowEpisodesCommandValidator()
     {
-        RuleFor(x => x.DownloadMedias).NotNull();
-        RuleFor(x => x.DownloadMedias).NotEmpty();
-        RuleForEach(x => x.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
+        RuleFor(x => x.Request.DownloadMedias).NotNull();
+        RuleFor(x => x.Request.DownloadMedias).NotEmpty();
+        RuleForEach(x => x.Request.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
     }
 }
 
@@ -39,7 +52,8 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
     {
         try
         {
-            var groupedList = command.DownloadMedias.MergeAndGroupList();
+            var groupedList = command.Request.DownloadMedias.MergeAndGroupList();
+            var request = command.Request;
             var plexEpisodeList = groupedList.FindAll(x => x.Type == PlexMediaType.Episode);
             if (!plexEpisodeList.Any())
                 return ResultExtensions.IsEmpty(nameof(plexEpisodeList)).LogWarning();
@@ -119,7 +133,7 @@ public class GenerateDownloadTaskTvShowEpisodesCommandHandler
                     var episodeData = tvShowEpisode.EpisodeData.First();
 
                     // Map movieData to DownloadTaskMovieFile and add to movieDownloadTask
-                    var downloadFiles = episodeData.MapToDownloadTask(tvShowEpisode);
+                    var downloadFiles = episodeData.MapToDownloadTask(tvShowEpisode, request);
                     episodeDownloadTask.Children.AddRange(downloadFiles);
                     _dbContext.DownloadTaskTvShowEpisodeFile.AddRange(downloadFiles);
                 }

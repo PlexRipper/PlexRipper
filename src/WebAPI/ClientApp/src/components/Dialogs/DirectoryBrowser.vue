@@ -4,6 +4,7 @@
 		full-height
 		:loading="isLoading"
 		button-align="between"
+		:type="{} as FolderPathDTO"
 		@opened="open">
 		<template #title>
 			{{ t('components.directory-browser.select-path', { pathName: path?.displayName ?? '' }) }}
@@ -170,8 +171,8 @@ const getIcon = (type: FileSystemEntityType): string => {
 	}
 };
 
-function open(event: unknown): void {
-	let selectedPath = event as FolderPathDTO;
+function open(data: FolderPathDTO): void {
+	let selectedPath = data as FolderPathDTO;
 	if (!selectedPath) {
 		Log.error('parameter was null when opening DirectoryBrowser');
 		return;

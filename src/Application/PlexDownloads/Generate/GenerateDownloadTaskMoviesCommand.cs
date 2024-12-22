@@ -11,15 +11,28 @@ namespace PlexRipper.Application;
 /// Creates <see cref="DownloadTaskMovie">DownloadTaskMovies</see> from <see cref="PlexMovie">PlexMovies</see> and inserts it into Database.
 /// </summary>
 /// <returns>The created <see cref="DownloadTaskGeneric"/>.</returns>
-public record GenerateDownloadTaskMoviesCommand(List<DownloadMediaDTO> DownloadMedias) : IRequest<Result>;
+public record GenerateDownloadTaskMoviesCommand : IRequest<Result>
+{
+    public GenerateDownloadTaskMoviesCommand(CreateDownloadTasksRequest request)
+    {
+        Request = request;
+    }
+
+    public GenerateDownloadTaskMoviesCommand(List<DownloadMediaDTO> downloadMediaDtos)
+    {
+        Request = new CreateDownloadTasksRequest(downloadMediaDtos);
+    }
+
+    public CreateDownloadTasksRequest Request { get; }
+}
 
 public class GenerateDownloadTaskMoviesCommandValidator : AbstractValidator<GenerateDownloadTaskMoviesCommand>
 {
     public GenerateDownloadTaskMoviesCommandValidator()
     {
-        RuleFor(x => x.DownloadMedias).NotNull();
-        RuleFor(x => x.DownloadMedias).NotEmpty();
-        RuleForEach(x => x.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
+        RuleFor(x => x.Request.DownloadMedias).NotNull();
+        RuleFor(x => x.Request.DownloadMedias).NotEmpty();
+        RuleForEach(x => x.Request.DownloadMedias).SetValidator(new DownloadMediaDTOValidator());
     }
 }
 
@@ -36,7 +49,8 @@ public class GenerateDownloadTaskMoviesCommandHandler : IRequestHandler<Generate
 
     public async Task<Result> Handle(GenerateDownloadTaskMoviesCommand command, CancellationToken cancellationToken)
     {
-        var groupedList = command.DownloadMedias.MergeAndGroupList();
+        var groupedList = command.Request.DownloadMedias.MergeAndGroupList();
+        var request = command.Request;
         var plexMoviesList = groupedList.FindAll(x => x.Type == PlexMediaType.Movie);
         if (!plexMoviesList.Any())
             return ResultExtensions.IsEmpty(nameof(plexMoviesList)).LogWarning();
@@ -75,7 +89,7 @@ public class GenerateDownloadTaskMoviesCommandHandler : IRequestHandler<Generate
                 var movieData = plexMovie.MovieData.First();
 
                 // Map movieData to DownloadTaskMovieFile and add to movieDownloadTask
-                movieDownloadTask.Children.AddRange(movieData.MapToDownloadTask(plexMovie));
+                movieDownloadTask.Children.AddRange(movieData.MapToDownloadTask(plexMovie, request));
 
                 movieDownloadTask.Calculate();
 

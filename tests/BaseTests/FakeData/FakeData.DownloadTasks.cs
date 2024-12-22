@@ -95,6 +95,7 @@ public static partial class FakeData
             .RuleFor(x => x.FileDataTransferred, _ => 0)
             .RuleFor(x => x.CurrentFileTransferPathIndex, _ => 0)
             .RuleFor(x => x.CurrentFileTransferBytesOffset, _ => 0)
+            .RuleFor(x => x.DestinationFolderPathId, _ => null)
             .RuleFor(x => x.Quality, f => f.PickRandom("sd", "720p", "1080p", "2160p"))
             .RuleFor(
                 x => x.FileName,

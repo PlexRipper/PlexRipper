@@ -4,12 +4,18 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Environment;
 using FastEndpoints;
+using FastEndpoints.Security;
 using FastEndpoints.Swagger;
 using Logging.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using PlexRipper.Application;
+using PlexRipper.Data;
+using PlexRipper.Identity;
+using PlexRipper.Identity.Contracts;
 using Serilog;
 
 namespace PlexRipper.WebAPI;
@@ -63,8 +69,6 @@ public static class Startup
 
         app.UseRouting();
 
-        app.UseAuthorization();
-
         if (!EnvironmentExtensions.IsIntegrationTestMode())
         {
             // SignalR configuration
@@ -72,27 +76,31 @@ public static class Startup
             app.MapHub<NotificationHub>("/notifications");
         }
 
+        // Add authentication and authorization
+        app.UseAuthentication().UseAuthorization();
+
         // Setup FastEndpoints
         app.UseFastEndpoints(c =>
-        {
-            // https://fast-endpoints.com/docs/swagger-support#short-endpoint-names
-            c.Endpoints.ShortNames = true;
-
-            c.Errors.ResponseBuilder = (failures, ctx, _) =>
             {
-                var result = ResultExtensions.Create400BadRequestResult($"Bad request: {ctx.Request.GetDisplayUrl()}");
-                var errors = failures
-                    .GroupBy(f => f.PropertyName)
-                    .ToDictionary(e => e.Key, e => e.Select(m => m.ErrorMessage).ToArray());
-                foreach (var reason in errors)
-                    result.Errors[0].Metadata.Add(reason.Key, reason.Value);
-                return result;
-            };
-        });
+                // https://fast-endpoints.com/docs/swagger-support#short-endpoint-names
+                c.Endpoints.ShortNames = true;
+
+                c.Errors.ResponseBuilder = (failures, ctx, _) =>
+                {
+                    var result = ResultExtensions.Create400BadRequestResult(
+                        $"Bad request: {ctx.Request.GetDisplayUrl()}"
+                    );
+                    var errors = failures
+                        .GroupBy(f => f.PropertyName)
+                        .ToDictionary(e => e.Key, e => e.Select(m => m.ErrorMessage).ToArray());
+                    foreach (var reason in errors)
+                        result.Errors[0].Metadata.Add(reason.Key, reason.Value);
+                    return result;
+                };
+            })
+            .UseSwaggerGen();
 
         // Setup FastEndpoints Swagger
-        app.UseSwaggerGen();
-
         if (!EnvironmentExtensions.IsIntegrationTestMode() && env.IsProduction())
         {
             // Used to deploy the front-end Nuxt client
@@ -130,7 +138,55 @@ public static class Startup
 
         services.AddOptions();
 
-        services.AddAuthorization();
+        services.AddHttpContextAccessor();
+
+        services
+            .AddIdentity<AppUser, IdentityRole>()
+            .AddEntityFrameworkStores<AuthDbContext>()
+            .AddSignInManager<SignInManager<AppUser>>();
+
+        services.AddAuthenticationCookie(validFor: TimeSpan.FromDays(7));
+
+        //override the behavior or cookie auth scheme so that 401/403 will be returned.
+        services.ConfigureApplicationCookie(c =>
+        {
+            c.LoginPath = "/api/login";
+            c.AccessDeniedPath = "/api/access-denied";
+
+            c.Events.OnRedirectToLogin = ctx =>
+            {
+                if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
+                    ctx.Response.StatusCode = 401;
+
+                return Task.CompletedTask;
+            };
+            c.Events.OnRedirectToAccessDenied = ctx =>
+            {
+                if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
+                    ctx.Response.StatusCode = 403;
+
+                return Task.CompletedTask;
+            };
+        });
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AuthenticatedUsers", x => x.RequireRole("Admin"));
+
+            // Set a default policy that requires authentication
+            options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+
+            options.AddPolicy(
+                "AllowSwagger",
+                policy =>
+                {
+                    policy.RequireAssertion(context =>
+                        context.Resource is HttpContext httpContext
+                        && httpContext.Request.Path.StartsWithSegments("/swagger")
+                    );
+                }
+            );
+        });
 
         // Setup FastEndpoints
         services.AddFastEndpoints(options =>
@@ -138,7 +194,6 @@ public static class Startup
             options.DisableAutoDiscovery = true;
             options.Assemblies = [Assembly.GetAssembly(typeof(BaseEndpoint<,>))!];
         });
-
         if (!EnvironmentExtensions.IsIntegrationTestMode())
         {
             // Used to deploy the front-end Nuxt client
@@ -169,6 +224,8 @@ public static class Startup
 
                 // https://fast-endpoints.com/docs/swagger-support#short-schema-names
                 options.ShortSchemaNames = true;
+
+                options.EnableJWTBearerAuth = false;
 
                 // https://fast-endpoints.com/docs/swagger-support#removing-empty-schema
                 options.RemoveEmptyRequestSchema = true;

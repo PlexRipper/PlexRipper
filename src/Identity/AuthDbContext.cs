@@ -9,7 +9,7 @@ using PlexRipper.Identity.Contracts;
 
 namespace PlexRipper.Identity;
 
-public class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContextDatabase
+public class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, IAuthDbContextDatabase
 {
     public AuthDbContext() { }
 

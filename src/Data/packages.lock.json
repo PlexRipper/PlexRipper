@@ -1627,6 +1627,13 @@
           "System.Text.Json": "[8.0.5, )"
         }
       },
+      "PlexRipper.Identity.Contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Data.Contracts": "[1.0.0, )",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[8.0.10, )"
+        }
+      },
       "webapi.contracts": {
         "type": "Project",
         "dependencies": {

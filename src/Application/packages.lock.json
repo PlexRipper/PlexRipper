@@ -1566,6 +1566,7 @@
       "PlexRipper.Identity.Contracts": {
         "type": "Project",
         "dependencies": {
+          "Data.Contracts": "[1.0.0, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[8.0.10, )"
         }
       },

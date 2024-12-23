@@ -27,14 +27,15 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.10"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.10"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.10">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj"/>
         <ProjectReference Include="..\FileSystem.Contracts\FileSystem.Contracts.csproj"/>
+        <ProjectReference Include="..\Identity.Contracts\Identity.Contracts.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

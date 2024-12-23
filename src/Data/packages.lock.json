@@ -1612,7 +1612,6 @@
           "FluentValidation": "[11.9.0, )",
           "JetBrains.Annotations": "[2024.2.0, )",
           "MediatR": "[12.2.0, )",
-          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[8.0.10, )",
           "NaturalSort.Extension": "[4.3.0, )",
           "System.ComponentModel.Annotations": "[5.0.0, )",
           "System.Reactive": "[5.0.0, )",

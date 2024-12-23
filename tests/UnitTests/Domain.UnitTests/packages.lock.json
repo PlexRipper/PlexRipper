@@ -1920,7 +1920,6 @@
           "FluentValidation": "[11.9.0, )",
           "JetBrains.Annotations": "[2024.2.0, )",
           "MediatR": "[12.2.0, )",
-          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[8.0.10, )",
           "NaturalSort.Extension": "[4.3.0, )",
           "System.ComponentModel.Annotations": "[5.0.0, )",
           "System.Reactive": "[5.0.0, )",
@@ -1938,6 +1937,21 @@
           "MediatR.Extensions.Autofac.DependencyInjection": "[12.0.0, )",
           "System.IO.Abstractions": "[21.1.7, )",
           "System.IO.FileSystem": "[4.3.0, )"
+        }
+      },
+      "PlexRipper.Identity": {
+        "type": "Project",
+        "dependencies": {
+          "Data.Contracts": "[1.0.0, )",
+          "Logging": "[1.0.0, )",
+          "Microsoft.EntityFrameworkCore.Sqlite": "[8.0.10, )",
+          "PlexRipper.Identity.Contracts": "[1.0.0, )"
+        }
+      },
+      "PlexRipper.Identity.Contracts": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[8.0.10, )"
         }
       },
       "PlexRipper.PlexApi": {
@@ -1971,6 +1985,7 @@
           "PlexRipper.Application": "[1.0.0, )",
           "PlexRipper.Data": "[1.0.0, )",
           "PlexRipper.FileSystem": "[1.0.0, )",
+          "PlexRipper.Identity": "[1.0.0, )",
           "PlexRipper.PlexApi": "[1.0.0, )",
           "PlexRipper.Settings": "[1.0.0, )",
           "Quartz.Extensions.Hosting": "[3.13.0, )",

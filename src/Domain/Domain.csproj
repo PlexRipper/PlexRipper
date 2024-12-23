@@ -20,7 +20,6 @@
         <PackageReference Include="FluentValidation" Version="11.9.0"/>
         <PackageReference Include="JetBrains.Annotations" Version="2024.2.0"/>
         <PackageReference Include="MediatR" Version="12.2.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10"/>
         <PackageReference Include="NaturalSort.Extension" Version="4.3.0"/>
         <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0"/>
         <PackageReference Include="System.Reactive" Version="5.0.0"/>

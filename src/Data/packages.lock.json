@@ -78,6 +78,15 @@
           "SQLitePCLRaw.bundle_e_sqlite3": "2.1.6"
         }
       },
+      "Microsoft.EntityFrameworkCore.Tools": {
+        "type": "Direct",
+        "requested": "[8.0.10, )",
+        "resolved": "8.0.10",
+        "contentHash": "aaimNUjkJDHdZb2hxd6hjwz7OdeankbQHPx8/b+qCfVfaEpOAIW0LTBge4qG+AUKacKfcoK7GJq6ACjenEvPLQ==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Design": "8.0.10"
+        }
+      },
       "AppAny.Quartz.EntityFrameworkCore.Migrations": {
         "type": "Transitive",
         "resolved": "0.5.1",

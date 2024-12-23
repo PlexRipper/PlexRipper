@@ -74,6 +74,8 @@ public static class Startup
             // SignalR configuration
             app.MapHub<ProgressHub>("/progress");
             app.MapHub<NotificationHub>("/notifications");
+            // Place this before app.UseAuthentication().UseAuthorization(); to allow it as anonymous
+            app.UseSwaggerGen();
         }
 
         // Add authentication and authorization
@@ -81,24 +83,21 @@ public static class Startup
 
         // Setup FastEndpoints
         app.UseFastEndpoints(c =>
-            {
-                // https://fast-endpoints.com/docs/swagger-support#short-endpoint-names
-                c.Endpoints.ShortNames = true;
+        {
+            // https://fast-endpoints.com/docs/swagger-support#short-endpoint-names
+            c.Endpoints.ShortNames = true;
 
-                c.Errors.ResponseBuilder = (failures, ctx, _) =>
-                {
-                    var result = ResultExtensions.Create400BadRequestResult(
-                        $"Bad request: {ctx.Request.GetDisplayUrl()}"
-                    );
-                    var errors = failures
-                        .GroupBy(f => f.PropertyName)
-                        .ToDictionary(e => e.Key, e => e.Select(m => m.ErrorMessage).ToArray());
-                    foreach (var reason in errors)
-                        result.Errors[0].Metadata.Add(reason.Key, reason.Value);
-                    return result;
-                };
-            })
-            .UseSwaggerGen();
+            c.Errors.ResponseBuilder = (failures, ctx, _) =>
+            {
+                var result = ResultExtensions.Create400BadRequestResult($"Bad request: {ctx.Request.GetDisplayUrl()}");
+                var errors = failures
+                    .GroupBy(f => f.PropertyName)
+                    .ToDictionary(e => e.Key, e => e.Select(m => m.ErrorMessage).ToArray());
+                foreach (var reason in errors)
+                    result.Errors[0].Metadata.Add(reason.Key, reason.Value);
+                return result;
+            };
+        });
 
         // Setup FastEndpoints Swagger
         if (!EnvironmentExtensions.IsIntegrationTestMode() && env.IsProduction())
@@ -175,17 +174,6 @@ public static class Startup
 
             // Set a default policy that requires authentication
             options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-
-            options.AddPolicy(
-                "AllowSwagger",
-                policy =>
-                {
-                    policy.RequireAssertion(context =>
-                        context.Resource is HttpContext httpContext
-                        && httpContext.Request.Path.StartsWithSegments("/swagger")
-                    );
-                }
-            );
         });
 
         // Setup FastEndpoints

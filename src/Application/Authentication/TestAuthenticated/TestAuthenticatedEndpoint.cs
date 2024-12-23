@@ -1,4 +1,5 @@
 using FastEndpoints;
+using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using PlexRipper.Identity.Contracts;
@@ -19,12 +20,14 @@ public class TestAuthenticatedEndpoint : EndpointWithoutRequest
     public override void Configure()
     {
         Get(EndpointPath);
+
         Description(x =>
-            x.WithTags("Authentication")
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status401Unauthorized)
-                .Produces(StatusCodes.Status500InternalServerError)
-        );
+        {
+            x.AutoTagOverride("Authentication");
+            x.Produces(StatusCodes.Status200OK);
+            x.Produces(StatusCodes.Status401Unauthorized);
+            x.Produces(StatusCodes.Status500InternalServerError);
+        });
     }
 
     public override async Task HandleAsync(CancellationToken ct)

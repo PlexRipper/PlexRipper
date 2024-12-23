@@ -38,7 +38,7 @@ public class CreateDefaultAppUserCommandHandler : IRequestHandler<CreateDefaultA
     public async Task<Result> Handle(CreateDefaultAppUserCommand command, CancellationToken cancellationToken)
     {
         // Create default roles if they don't exist
-        var adminRole = "Admin";
+        var adminRole = DefaultUserAppCredentials.DefaultAdminRole;
         var defaultRoles = new[] { adminRole, "User" };
         foreach (var role in defaultRoles)
         {
@@ -49,8 +49,8 @@ public class CreateDefaultAppUserCommandHandler : IRequestHandler<CreateDefaultA
         }
 
         // Create default user
-        var defaultUsername = "PlexRipperRocks";
-        var defaultPassword = "Pl€XR!ℙℙ€R69";
+        var defaultUsername = DefaultUserAppCredentials.DefaultUsername;
+        var defaultPassword = DefaultUserAppCredentials.DefaultPassword;
         var defaultUser = new AppUser
         {
             UserName = defaultUsername,

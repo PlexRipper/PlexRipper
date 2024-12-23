@@ -1,5 +1,8 @@
+using System.ComponentModel;
+using Application.Contracts;
 using FastEndpoints;
 using FastEndpoints.Security;
+using FastEndpoints.Swagger;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -9,9 +12,18 @@ namespace PlexRipper.Application;
 
 public record AppUserLoginEndpointRequest()
 {
-    public required string Username { get; set; }
+    /// <summary>
+    ///  The username of the <see cref="AppUser"/>.
+    /// </summary>
+    [DefaultValue(DefaultUserAppCredentials.DefaultUsername)]
+    public required string Username { get; init; }
 
-    public required string Password { get; set; }
+    /// <summary>
+    ///  The password of the <see cref="AppUser"/>.
+    ///  <para> The default password is <see cref="DefaultUserAppCredentials.DefaultPassword"/>. </para>
+    /// </summary>
+    [DefaultValue(DefaultUserAppCredentials.DefaultPassword)]
+    public required string Password { get; init; }
 };
 
 public class AppUserLoginEndpointRequestValidator : Validator<AppUserLoginEndpointRequest>
@@ -39,12 +51,24 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
         Post(EndpointPath);
         AllowAnonymous();
         AllowFormData();
+        Summary(s =>
+        {
+            s.Summary = "User Login";
+            s.Description = "Logs in a user.";
+            s.ExampleRequest = new AppUserLoginEndpointRequest
+            {
+                Username = DefaultUserAppCredentials.DefaultUsername,
+                Password = DefaultUserAppCredentials.DefaultPassword,
+            };
+        });
+
         Description(x =>
-            x.WithTags("Authentication")
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status400BadRequest)
-                .Produces(StatusCodes.Status500InternalServerError)
-        );
+        {
+            x.AutoTagOverride("Authentication");
+            x.Produces(StatusCodes.Status200OK);
+            x.Produces(StatusCodes.Status401Unauthorized);
+            x.Produces(StatusCodes.Status500InternalServerError);
+        });
     }
 
     public override async Task HandleAsync(AppUserLoginEndpointRequest req, CancellationToken ct)
@@ -59,12 +83,7 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 
         if (result.Succeeded)
         {
-            await CookieAuth.SignInAsync(u =>
-            {
-                u.Roles.Add("Admin");
-                u.Permissions.AddRange(new[] { "Create_Item", "Delete_Item" });
-                u.Claims.Add(new("Address", "123 Street"));
-            });
+            await CookieAuth.SignInAsync(u => u.Roles.Add(DefaultUserAppCredentials.DefaultAdminRole));
 
             await SendOkAsync(ct);
         }

@@ -1,4 +1,5 @@
 using FastEndpoints.Security;
+using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using PlexRipper.Identity.Contracts;
@@ -19,7 +20,11 @@ public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest
     public override void Configure()
     {
         Post(EndpointPath);
-        Description(x => x.WithTags("Authentication").Produces(StatusCodes.Status200OK));
+        Description(x =>
+        {
+            x.AutoTagOverride("Authentication");
+            x.Produces(StatusCodes.Status200OK);
+        });
     }
 
     public override async Task HandleAsync(CancellationToken ct)

@@ -19,7 +19,6 @@ public class TestAuthenticatedEndpoint : EndpointWithoutRequest
     public override void Configure()
     {
         Get(EndpointPath);
-        Policies("AuthenticatedUsers");
         Description(x =>
             x.WithTags("Authentication")
                 .Produces(StatusCodes.Status200OK)

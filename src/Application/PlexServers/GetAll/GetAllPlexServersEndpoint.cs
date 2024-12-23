@@ -23,7 +23,7 @@ public class GetAllPlexServersEndpoint : BaseEndpointWithoutRequest<List<PlexSer
     public override void Configure()
     {
         Get(EndpointPath);
-        AllowAnonymous();
+
         Summary(summary =>
         {
             summary.Summary = "Get All the PlexServers, without PlexLibraries but with all its connections.";

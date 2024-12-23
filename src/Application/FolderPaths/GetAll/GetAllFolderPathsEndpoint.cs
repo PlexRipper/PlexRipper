@@ -18,7 +18,7 @@ public class GetAllFolderPathsEndpoint : BaseEndpointWithoutRequest<List<FolderP
     public override void Configure()
     {
         Get(EndpointPath);
-        AllowAnonymous();
+
         Description(x => x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<FolderPathDTO>>)));
     }
 

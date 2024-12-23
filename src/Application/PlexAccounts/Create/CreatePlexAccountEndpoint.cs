@@ -55,7 +55,7 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
     public override void Configure()
     {
         Post(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status201Created, typeof(ResultDTO<PlexAccountDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

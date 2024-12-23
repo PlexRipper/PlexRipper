@@ -45,7 +45,7 @@ public class GetPlexLibraryMediaEndpoint : BaseEndpoint<GetPlexLibraryMediaEndpo
     public override void Configure()
     {
         Get(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexMediaStatisticsDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

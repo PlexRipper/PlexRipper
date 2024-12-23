@@ -19,7 +19,7 @@ public class GetAllNotificationsEndpoint : BaseEndpointWithoutRequest<List<Notif
     public override void Configure()
     {
         Get(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<NotificationDTO>>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))

@@ -37,7 +37,7 @@ public class CreateFolderPathEndpoint : BaseEndpoint<CreateFolderPathEndpointReq
     public override void Configure()
     {
         Post(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<FolderPathDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

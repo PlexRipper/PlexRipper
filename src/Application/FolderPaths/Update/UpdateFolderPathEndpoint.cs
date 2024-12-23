@@ -40,7 +40,7 @@ public class UpdateFolderPathEndpoint : BaseEndpoint<UpdateFolderPathEndpointReq
     public override void Configure()
     {
         Put(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<FolderPathDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

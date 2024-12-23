@@ -61,7 +61,7 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
     public override void Configure()
     {
         Post(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexAccountDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

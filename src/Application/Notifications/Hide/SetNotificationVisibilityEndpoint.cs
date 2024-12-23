@@ -37,7 +37,7 @@ public class SetNotificationVisibilityEndpoint : BaseEndpoint<SetNotificationVis
     public override void Configure()
     {
         Patch(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))

@@ -48,7 +48,7 @@ public class CreatePlexServerConnectionEndpoint
     public override void Configure()
     {
         Post(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.ClearDefaultProduces()
                 .Produces(StatusCodes.Status201Created, typeof(ResultDTO<PlexServerConnectionDTO>))

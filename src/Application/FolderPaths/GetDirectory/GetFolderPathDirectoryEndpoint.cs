@@ -42,7 +42,7 @@ public class GetFolderPathDirectoryEndpoint : BaseEndpoint<GetFolderPathDirector
     public override void Configure()
     {
         Get(EndpointPath);
-        AllowAnonymous();
+
         Summary(x =>
         {
             x.Summary = "Get all the FolderPaths entities in the database";

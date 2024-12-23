@@ -26,7 +26,7 @@ public class GetAllPlexAccountsEndpoint : BaseEndpoint<GetAllPlexAccountsEndpoin
     public override void Configure()
     {
         Get(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexAccountDTO>>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))

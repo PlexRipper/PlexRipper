@@ -27,7 +27,7 @@ public class GetDownloadPreviewEndpoint : BaseEndpoint<List<DownloadMediaDTO>, L
     public override void Configure()
     {
         Post(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<DownloadPreviewDTO>>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

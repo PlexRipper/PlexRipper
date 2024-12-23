@@ -28,7 +28,7 @@ public class QueueSyncPlexServerJobEndpoint : BaseEndpoint<QueueSyncPlexServerJo
     public override void Configure()
     {
         Get(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

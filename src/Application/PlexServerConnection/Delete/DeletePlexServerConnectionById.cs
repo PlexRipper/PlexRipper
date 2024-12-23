@@ -31,7 +31,7 @@ public class DeletePlexServerConnectionById : BaseEndpoint<DeletePlexServerConne
     public override void Configure()
     {
         Delete(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

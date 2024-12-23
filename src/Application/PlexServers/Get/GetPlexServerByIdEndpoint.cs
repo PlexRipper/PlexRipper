@@ -31,7 +31,7 @@ public class GetPlexServerByIdEndpoint : BaseEndpoint<GetPlexServerByIdEndpointR
     public override void Configure()
     {
         Get(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerDTO>))
                 .Produces(StatusCodes.Status404NotFound, typeof(ResultDTO))

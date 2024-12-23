@@ -44,7 +44,7 @@ public class UpdateUserSettingsEndpoint : BaseEndpoint<UpdateUserSettingsEndpoin
     public override void Configure()
     {
         Put(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<SettingsModelDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

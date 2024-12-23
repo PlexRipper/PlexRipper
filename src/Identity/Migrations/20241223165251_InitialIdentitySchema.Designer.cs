@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace PlexRipper.Identity.Migrations
 {
-    [DbContext(typeof(AppUserDbContext))]
+    [DbContext(typeof(AuthDbContext))]
     [Migration("20241223165251_InitialIdentitySchema")]
     partial class InitialIdentitySchema
     {

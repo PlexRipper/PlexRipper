@@ -2,8 +2,8 @@ using System.Globalization;
 using System.IO.Abstractions;
 using Data.Contracts;
 using Environment;
-using FileSystem.Contracts;
 using Logging.Interface;
+using PlexRipper.Identity.Contracts;
 
 namespace PlexRipper.Data;
 
@@ -12,6 +12,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
     private readonly ILog<PlexRipperDbContextManager> _log;
 
     private readonly IPlexRipperDbContextDatabase _dbContextDatabase;
+    private readonly IAuthDbContextDatabase _authDbContextDatabase;
 
     private readonly IPathProvider _pathProvider;
 
@@ -22,6 +23,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
     public PlexRipperDbContextManager(
         ILog<PlexRipperDbContextManager> log,
         IPlexRipperDbContextDatabase dbContextDatabaseDatabase,
+        IAuthDbContextDatabase authDbContextDatabase,
         IPathProvider pathProvider,
         IDirectory directory,
         IFile file
@@ -29,6 +31,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
     {
         _log = log;
         _dbContextDatabase = dbContextDatabaseDatabase;
+        _authDbContextDatabase = authDbContextDatabase;
         _pathProvider = pathProvider;
         _directory = directory;
         _file = file;
@@ -136,6 +139,14 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
                 _log.InformationLine("Attempting to migrate database");
                 _dbContextDatabase.Migrate();
                 _log.InformationLine("Database migration successful!");
+            }
+
+            pendingMigrations = _authDbContextDatabase.GetPendingMigrations();
+            if (!_authDbContextDatabase.IsInMemory() && pendingMigrations.Any())
+            {
+                _log.InformationLine("Attempting to migrate Authentication tables database");
+                _authDbContextDatabase.Migrate();
+                _log.InformationLine("Authentication tables migration successful!");
             }
 
             return Result.Ok();

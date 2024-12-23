@@ -1872,6 +1872,7 @@
           "Microsoft.Extensions.Http": "[8.0.1, )",
           "PlexApi.Contracts": "[1.0.0, )",
           "PlexRipper.Domain": "[1.0.0, )",
+          "PlexRipper.Identity.Contracts": "[1.0.0, )",
           "PlexRipper.Settings": "[1.0.0, )",
           "Polly": "[8.3.1, )",
           "Polly.Core": "[8.4.2, )",

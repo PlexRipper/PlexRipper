@@ -2,6 +2,8 @@ namespace Application.Contracts;
 
 public static class DefaultUserAppCredentials
 {
+    public const string DefaultCookieName = "PlexRipperCookie";
+
     public const string DefaultUsername = "PlexRipperRocks";
 
     public const string DefaultPassword = "Pl€XR!ℙℙ€R69";

@@ -8,6 +8,8 @@ using Data.Contracts;
 using Environment;
 using PlexRipper.Application;
 using PlexRipper.Data;
+using PlexRipper.Identity;
+using PlexRipper.Identity.Contracts;
 using Settings.Contracts;
 
 namespace PlexRipper.BaseTests;
@@ -24,13 +26,23 @@ public class TestModule : Module
     {
         // Database context can be setup once and then retrieved by its DB name.
         builder
-            .Register((_, _) => MockDatabase.GetMemoryDbContext(MemoryDbName))
+            .Register((_, _) => MockDatabase.GetMemoryPlexRipperDbContext(MemoryDbName))
             .As<PlexRipperDbContext>()
             .InstancePerDependency();
 
         builder
-            .Register((_, _) => MockDatabase.GetMemoryDbContext(MemoryDbName))
+            .Register((_, _) => MockDatabase.GetMemoryPlexRipperDbContext(MemoryDbName))
             .As<IPlexRipperDbContext>()
+            .InstancePerDependency();
+
+        builder
+            .Register((_, _) => MockDatabase.GetMemoryAuthDbContext(MemoryDbName))
+            .As<AuthDbContext>()
+            .InstancePerDependency();
+
+        builder
+            .Register((_, _) => MockDatabase.GetMemoryAuthDbContext(MemoryDbName))
+            .As<IAuthDbContext>()
             .InstancePerDependency();
 
         builder.RegisterType<TestStreamTracker>().As<ITestStreamTracker>().SingleInstance();

@@ -4,6 +4,8 @@ using Environment;
 using Logging.Interface;
 using PlexApi.Contracts;
 using PlexRipper.Data;
+using PlexRipper.Identity;
+using PlexRipper.Identity.Contracts;
 using Serilog;
 using Serilog.Events;
 using Log = Logging.Log;
@@ -51,13 +53,15 @@ public class BaseUnitTest : IDisposable
     /// </summary>
 
     // ReSharper disable once InconsistentNaming
-    protected IPlexRipperDbContext IDbContext => GetDbContext();
+    protected IPlexRipperDbContext IDbContext => GetDbContext().Item1;
+
+    protected IAuthDbContext IAuthDbContext => GetDbContext().Item2;
 
     protected Mock<IPlexRipperDbContext> MockIDbContext => new();
 
-    private List<PlexRipperDbContext> _dbContexts = new();
+    private List<(PlexRipperDbContext, AuthDbContext)> _dbContexts = new();
 
-    protected PlexRipperDbContext GetDbContext()
+    private (PlexRipperDbContext, AuthDbContext) GetDbContext()
     {
         if (!IsDatabaseSetup)
         {
@@ -88,7 +92,8 @@ public class BaseUnitTest : IDisposable
     {
         // Database context can be setup once and then retrieved by its DB name.
         var dbContext = await MockDatabase.GetMemoryDbContext().Setup(seed, options);
-        _databaseName = dbContext.DatabaseName;
+        var (plexRipperContext, _) = dbContext;
+        _databaseName = plexRipperContext.DatabaseName;
         _dbContexts.Add(dbContext);
         IsDatabaseSetup = true;
         return seed;
@@ -145,8 +150,11 @@ public class BaseUnitTest : IDisposable
         {
             foreach (var x in _dbContexts)
             {
-                x.EnsureDeleted();
-                x.Dispose();
+                var (plexRipperContext, authContext) = x;
+                plexRipperContext.EnsureDeleted();
+                plexRipperContext.Dispose();
+                authContext.EnsureDeleted();
+                authContext.Dispose();
             }
         }
     }

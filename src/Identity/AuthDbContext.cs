@@ -11,10 +11,25 @@ namespace PlexRipper.Identity;
 
 public class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, IAuthDbContextDatabase
 {
+    public string DatabaseName { get; }
+
     public AuthDbContext() { }
+
+    public AuthDbContext(string databaseName)
+    {
+        DatabaseName = databaseName;
+    }
 
     public AuthDbContext(DbContextOptions<AuthDbContext> options)
         : base(options) { }
+
+    public AuthDbContext(DbContextOptions<AuthDbContext> options, string databaseName)
+        : base(options)
+    {
+        DatabaseName = databaseName;
+        Database.OpenConnection();
+        Database.EnsureCreated();
+    }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

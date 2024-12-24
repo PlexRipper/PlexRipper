@@ -2,7 +2,7 @@ using PlexRipper.Application;
 
 namespace Data.UnitTests.PlexLibraries;
 
-public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest
+public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest<AddOrUpdatePlexLibrariesCommandHandler>
 {
     public AddOrUpdatePlexLibrariesCommandHandler_UnitTests(ITestOutputHelper output)
         : base(output) { }
@@ -31,8 +31,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest
 
         // Act
         var request = new AddOrUpdatePlexLibrariesCommand(plexAccount.Id, plexLibraries);
-        var handler = new AddOrUpdatePlexLibrariesCommandHandler(Log, IDbContext);
-        var result = await handler.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -87,8 +86,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler_UnitTests : BaseUnitTest
 
         // Act
         var request = new AddOrUpdatePlexLibrariesCommand(plexAccount.Id, plexLibraries);
-        var handler = new AddOrUpdatePlexLibrariesCommandHandler(Log, GetDbContext());
-        var result = await handler.Handle(request, CancellationToken.None);
+        var result = await _sut.Handle(request, CancellationToken.None);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

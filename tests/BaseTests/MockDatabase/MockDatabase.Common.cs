@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NaturalSort.Extension;
 using PlexRipper.Data;
+using PlexRipper.Identity;
 
 #endregion
 
@@ -189,7 +190,11 @@ public static partial class MockDatabase
     /// <param name="dbName">leave empty to generate a random one</param>
     /// <returns>A <see cref="PlexRipperDbContext" /> in memory instance.</returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public static PlexRipperDbContext GetMemoryDbContext(string dbName = "")
+    ///
+    public static (PlexRipperDbContext, AuthDbContext) GetMemoryDbContext(string dbName = "") =>
+        (GetMemoryPlexRipperDbContext(dbName), GetMemoryAuthDbContext(dbName));
+
+    public static PlexRipperDbContext GetMemoryPlexRipperDbContext(string dbName = "")
     {
         var optionsBuilder = new DbContextOptionsBuilder<PlexRipperDbContext>();
         dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
@@ -210,6 +215,27 @@ public static partial class MockDatabase
         return new PlexRipperDbContext(optionsBuilder.Options, dbName);
     }
 
+    public static AuthDbContext GetMemoryAuthDbContext(string dbName = "")
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<AuthDbContext>();
+        dbName = string.IsNullOrEmpty(dbName) ? GetMemoryDatabaseName() : dbName;
+
+        SqliteConnection databaseConnection = new(DatabaseConnectionString(dbName));
+
+        databaseConnection.CreateCollation(
+            OrderByNaturalExtensions.CollationName,
+            (x, y) => NaturalComparer.Compare(x, y)
+        );
+
+        optionsBuilder.UseSqlite(databaseConnection);
+
+        optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        optionsBuilder.EnableSensitiveDataLogging();
+        optionsBuilder.EnableDetailedErrors();
+        optionsBuilder.LogTo(text => LogManager.DbContextLogger(text), LogLevel.Warning);
+        return new AuthDbContext(optionsBuilder.Options, dbName);
+    }
+
     public static string DatabaseConnectionString(string dbName = "") =>
         // https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases
         new SqliteConnectionStringBuilder
@@ -223,45 +249,49 @@ public static partial class MockDatabase
             Cache = SqliteCacheMode.Shared,
         }.ToString();
 
-    public static async Task<PlexRipperDbContext> Setup(
-        this PlexRipperDbContext context,
+    public static async Task<(PlexRipperDbContext, AuthDbContext)> Setup(
+        this (PlexRipperDbContext, AuthDbContext) context,
         Seed seed,
         Action<FakeDataConfig>? options = null
     )
     {
         var config = FakeDataConfig.FromOptions(options);
 
+        var (plexRipperContext, authContext) = context;
+
+        authContext.Migrate();
+
         // PlexServers and Libraries added
         _log.Here()
             .Debug(
                 "Setting up {NameOfPlexRipperDbContext} for {DatabaseName}",
                 nameof(PlexRipperDbContext),
-                context.DatabaseName
+                plexRipperContext.DatabaseName
             );
 
         if (config.ShouldHavePlexServer)
-            context = await context.AddPlexServers(seed, options);
+            plexRipperContext = await plexRipperContext.AddPlexServers(seed, options);
 
         if (config.ShouldHavePlexLibrary)
-            context = await context.AddPlexLibraries(seed, options);
+            plexRipperContext = await plexRipperContext.AddPlexLibraries(seed, options);
 
         if (config.PlexAccountCount > 0)
-            context = await context.AddPlexAccount(seed);
+            plexRipperContext = await plexRipperContext.AddPlexAccount(seed);
 
         if (config.MovieCount > 0)
-            context = await context.AddPlexMovies(seed, options);
+            plexRipperContext = await plexRipperContext.AddPlexMovies(seed, options);
 
         if (config.TvShowCount > 0)
-            context = await context.AddPlexTvShows(seed, options);
+            plexRipperContext = await plexRipperContext.AddPlexTvShows(seed, options);
 
         if (config.MovieDownloadTasksCount > 0)
-            context = await context.AddDownloadTaskMovies(seed, options);
+            plexRipperContext = await plexRipperContext.AddDownloadTaskMovies(seed, options);
 
         if (config.TvShowDownloadTasksCount > 0)
-            context = await context.AddDownloadTaskTvShows(seed, options);
+            plexRipperContext = await plexRipperContext.AddDownloadTaskTvShows(seed, options);
 
         if (config.AccountHasAccessToAllLibraries)
-            context = await context.AddPlexAccountLibraries();
+            plexRipperContext = await plexRipperContext.AddPlexAccountLibraries();
 
         return context;
     }

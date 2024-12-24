@@ -1,4 +1,5 @@
 ﻿using Application.Contracts;
+using Environment;
 using Logging.Interface;
 using Quartz;
 using Quartz.Impl.Matchers;
@@ -43,7 +44,10 @@ public class SchedulerService : ISchedulerService
             await _scheduler.Start();
         }
 
-        await SetupPlexServerStatusCheckJob(CancellationToken.None);
+        if (!EnvironmentExtensions.IsIntegrationTestMode())
+        {
+            await SetupPlexServerStatusCheckJob(CancellationToken.None);
+        }
 
         return _scheduler.IsStarted
             ? Result.Ok()

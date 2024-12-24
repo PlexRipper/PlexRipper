@@ -1,10 +1,12 @@
-﻿using Application.Contracts;
+﻿using System.Net.Http.Headers;
+using Application.Contracts;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Data.Contracts;
 using Environment;
 using FileSystem.Contracts;
 using Logging.Interface;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
 using PlexRipper.Data;
@@ -57,7 +59,12 @@ public class BaseContainer : IDisposable
         return container;
     }
 
-    public HttpClient ApiClient => _factory.CreateDefaultClient();
+    public HttpClient GetApiClient()
+    {
+        var client = _factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(scheme: "TestScheme");
+        return client;
+    }
 
     public IDownloadQueue GetDownloadQueue => Resolve<IDownloadQueue>();
 

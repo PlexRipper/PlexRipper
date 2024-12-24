@@ -19,7 +19,10 @@ public class SettingsControllerGetSettingsIntegrationTests : BaseIntegrationTest
         using var container = await CreateContainer(4564);
 
         // Act
-        var response = await container.ApiClient.GETAsync<GetUserSettingsEndpoint, ResultDTO<SettingsModelDTO>>();
+        var client = container.GetApiClient();
+        await client.SignIn();
+
+        var response = await client.GETAsync<GetUserSettingsEndpoint, ResultDTO<SettingsModelDTO>>();
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         // Assert

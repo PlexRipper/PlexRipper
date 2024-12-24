@@ -43,22 +43,21 @@ public class DownloadCommandsPauseDownloadIntegrationTests : BaseIntegrationTest
         var childDownloadTask = downloadTasks[0].Children[0];
 
         // Act
-        var response = await container.ApiClient.GETAsync<
-            StartDownloadTaskEndpoint,
-            StartDownloadTaskEndpointRequest,
-            ResultDTO
-        >(new StartDownloadTaskEndpointRequest(childDownloadTask.Id));
-        var startResult = response.Result;
-        response.Response.IsSuccessStatusCode.ShouldBeTrue(startResult.ToString());
-        await Task.Delay(500);
+        var client = container.GetApiClient();
+        await client.SignIn();
 
-        response = await container.ApiClient.GETAsync<
-            PauseDownloadTaskEndpoint,
-            PauseDownloadTaskEndpointRequest,
-            ResultDTO
-        >(new PauseDownloadTaskEndpointRequest(childDownloadTask.Id));
-        var pauseResult = response.Result;
-        response.Response.IsSuccessStatusCode.ShouldBeTrue(pauseResult.ToString());
+        var testResult = await client.GETAsync<StartDownloadTaskEndpoint, StartDownloadTaskEndpointRequest, ResultDTO>(
+            new StartDownloadTaskEndpointRequest(childDownloadTask.Id)
+        );
+        var startResult = testResult.Result;
+        testResult.Response.IsSuccessStatusCode.ShouldBeTrue(startResult.ToString());
+        await Task.Delay(100);
+
+        testResult = await client.GETAsync<PauseDownloadTaskEndpoint, PauseDownloadTaskEndpointRequest, ResultDTO>(
+            new PauseDownloadTaskEndpointRequest(childDownloadTask.Id)
+        );
+        var pauseResult = testResult.Result;
+        testResult.Response.IsSuccessStatusCode.ShouldBeTrue(pauseResult.ToString());
 
         await container.SchedulerService.AwaitScheduler();
 

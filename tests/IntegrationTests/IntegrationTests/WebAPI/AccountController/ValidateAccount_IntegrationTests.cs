@@ -38,11 +38,14 @@ public class ValidateAccountIntegrationTests : BaseIntegrationTests
         var plexAccountDTO = plexAccount.ToDTO();
 
         // Act
-        var response = await container.ApiClient.POSTAsync<
+        var client = container.GetApiClient();
+        await client.SignIn();
+
+        var response = await client.POSTAsync<
             ValidatePlexAccountEndpoint,
-            PlexAccountDTO,
+            ValidatePlexAccountEndpointRequest,
             ResultDTO<PlexAccountDTO>
-        >(plexAccountDTO);
+        >(new ValidatePlexAccountEndpointRequest(plexAccountDTO));
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
         var result = response.Result;
 
@@ -74,16 +77,20 @@ public class ValidateAccountIntegrationTests : BaseIntegrationTests
         var plexAccountDTO = plexAccount.ToDTO();
 
         // Act
-        var response = await container.ApiClient.PostAsJsonAsync(
-            ApiRoutes.PlexAccountController + "/validate",
-            plexAccountDTO
-        );
-        var resultDTO = await response.Deserialize<PlexAccountDTO>();
-        var result = resultDTO.ToResultModel();
+        var client = container.GetApiClient();
+        await client.SignIn();
+
+        var response = await client.POSTAsync<
+            ValidatePlexAccountEndpoint,
+            ValidatePlexAccountEndpointRequest,
+            ResultDTO<PlexAccountDTO>
+        >(new ValidatePlexAccountEndpointRequest(plexAccountDTO));
+        response.Response.IsSuccessStatusCode.ShouldBeFalse();
+        var result = response.Result;
 
         // Assert
         result.IsSuccess.ShouldBeFalse();
         result.Errors.Count.ShouldBe(2);
-        result.Has401UnauthorizedError().ShouldBeTrue();
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 }

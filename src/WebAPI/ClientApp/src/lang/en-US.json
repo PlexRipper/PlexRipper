@@ -54,6 +54,10 @@
             "columns": {
                 "file-size": "File size",
                 "title": "Title"
+            },
+            "destination": {
+                "custom-destination-option": "Custom",
+                "header": "Download Destination:"
             }
         },
         "download-details-dialog": {

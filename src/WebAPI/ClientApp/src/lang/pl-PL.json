@@ -54,6 +54,10 @@
             "columns": {
                 "file-size": "Rozmiar pliku",
                 "title": "Tytuł"
+            },
+            "destination": {
+                "custom-destination-option": "Zwyczaj",
+                "header": "Miejsce docelowe pobierania:"
             }
         },
         "download-details-dialog": {

@@ -20,21 +20,7 @@ public class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, IAuthDb
     {
         if (!optionsBuilder.IsConfigured)
         {
-            // Source: https://github.com/tompazourek/NaturalSort.Extension
-            SqliteConnection databaseConnection = new(DbContextConnections.ConnectionString);
-
-            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            optionsBuilder.LogTo(text => LogManager.DbContextLogger(text), LogLevel.Error);
-            optionsBuilder.EnableDetailedErrors();
-            optionsBuilder.UseSqlite(
-                databaseConnection,
-                b =>
-                {
-                    // Wait as long as needed for the database to be unlocked
-                    b.CommandTimeout(300);
-                    b.MigrationsAssembly(typeof(AuthDbContext).Assembly.FullName);
-                }
-            );
+            optionsBuilder.DefaultConfiguration(typeof(AuthDbContext));
         }
     }
 

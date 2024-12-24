@@ -110,8 +110,6 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
     public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default) =>
         Database.BeginTransactionAsync(cancellationToken);
 
-    private static readonly NaturalSortComparer NaturalComparer = new(StringComparison.InvariantCultureIgnoreCase);
-
     #endregion Properties
 
     #region Constructors
@@ -140,25 +138,7 @@ public sealed class PlexRipperDbContext : DbContext, IPlexRipperDbContext, IPlex
     {
         if (!optionsBuilder.IsConfigured)
         {
-            // Source: https://github.com/tompazourek/NaturalSort.Extension
-            SqliteConnection databaseConnection = new(DbContextConnections.ConnectionString);
-            databaseConnection.CreateCollation(
-                OrderByNaturalExtensions.CollationName,
-                (x, y) => NaturalComparer.Compare(x, y)
-            );
-
-            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            optionsBuilder.LogTo(text => LogManager.DbContextLogger(text), LogLevel.Error);
-            optionsBuilder.EnableDetailedErrors();
-            optionsBuilder.UseSqlite(
-                databaseConnection,
-                b =>
-                {
-                    // Wait as long as needed for the database to be unlocked
-                    b.CommandTimeout(300);
-                    b.MigrationsAssembly(typeof(PlexRipperDbContext).Assembly.FullName);
-                }
-            );
+            optionsBuilder.DefaultConfiguration(typeof(PlexRipperDbContext));
         }
     }
 

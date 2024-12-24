@@ -5,6 +5,7 @@ using PlexRipper.Application;
 
 namespace IntegrationTests.DownloadManager.DownloadCommands;
 
+[CollectionDefinition("Non-Parallel Tests", DisableParallelization = true)]
 public class DownloadCommandsPauseDownloadIntegrationTests : BaseIntegrationTests
 {
     public DownloadCommandsPauseDownloadIntegrationTests(ITestOutputHelper output)

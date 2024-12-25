@@ -1,23 +1,22 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 
-namespace IntegrationTests.WebAPI.DownloadController;
+namespace IntegrationTests;
 
-public class DownloadControllerStartCommandIntegrationTests : BaseIntegrationTests
+public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 {
-    public DownloadControllerStartCommandIntegrationTests(ITestOutputHelper output)
+    public RestartDownloadTaskEndpointIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
-    public async Task ShouldStartQueuedMovieDownloadTaskOnStartCommand_WhenNoTasksAreDownloading()
+    public async Task ShouldRestartCompletedMovieDownloadTaskOnRestartCommand_WhenTaskIsDoneDownloading()
     {
         // Arrange
-        var seed = new Seed(8932);
+        var seed = new Seed(5594564);
         using var container = await CreateContainer(
-            seed,
+            5594564,
             config =>
             {
                 config.HttpClientOptions = x =>
@@ -33,17 +32,6 @@ public class DownloadControllerStartCommandIntegrationTests : BaseIntegrationTes
                     x.PlexLibraryCount = 2;
                     x.MovieCount = 10;
                     x.MovieDownloadTasksCount = 1;
-                    x.DownloadWorkerTasks = 4;
-                };
-
-                config.FileSystemOptions = (system, dbContext) =>
-                {
-                    var downloadTask = dbContext.DownloadTaskMovieFile.Include(x => x.DownloadWorkerTasks).First();
-                    downloadTask.FilePaths.Count.ShouldBeGreaterThan(0);
-                    foreach (var filePath in downloadTask.FilePaths)
-                    {
-                        system.AddFile(filePath, FakeData.GetFileMockData(10, 4));
-                    }
                 };
             }
         );
@@ -51,14 +39,21 @@ public class DownloadControllerStartCommandIntegrationTests : BaseIntegrationTes
         downloadTasks.Count.ShouldBe(1);
         var downloadTask = downloadTasks[0].Children[0];
 
+        await container.DbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.Completed);
+
         // Act
         var client = container.GetApiClient();
         await client.SignIn();
+        var testResult = await client.GETAsync<
+            RestartDownloadTaskEndpoint,
+            RestartDownloadTaskEndpointRequest,
+            ResultDTO
+        >(new RestartDownloadTaskEndpointRequest(downloadTask.Id));
+        testResult.Response.IsSuccessStatusCode.ShouldBeTrue(await testResult.Response.Content.ReadAsStringAsync());
 
-        var testResult = await client.GETAsync<StartDownloadTaskEndpoint, StartDownloadTaskEndpointRequest, ResultDTO>(
-            new StartDownloadTaskEndpointRequest(downloadTask.Id)
-        );
-        testResult.Response.IsSuccessStatusCode.ShouldBeTrue();
+        var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
+        downloadTaskDb.ShouldNotBeNull();
+        downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Queued);
 
         await container.SchedulerService.AwaitScheduler();
         await Task.Delay(2000);
@@ -66,7 +61,7 @@ public class DownloadControllerStartCommandIntegrationTests : BaseIntegrationTes
         // Assert
         var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
-        var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
+        downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Completed);
     }

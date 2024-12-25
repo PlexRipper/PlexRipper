@@ -2,11 +2,11 @@
 using FastEndpoints;
 using PlexRipper.Application;
 
-namespace IntegrationTests.WebAPI.DownloadController;
+namespace IntegrationTests;
 
-public class DownloadControllerGetDownloadTasksIntegrationTests : BaseIntegrationTests
+public class GetAllDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
 {
-    public DownloadControllerGetDownloadTasksIntegrationTests(ITestOutputHelper output)
+    public GetAllDownloadTasksEndpointIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

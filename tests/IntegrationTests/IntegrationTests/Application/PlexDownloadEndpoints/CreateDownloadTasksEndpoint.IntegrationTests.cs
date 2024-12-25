@@ -1,15 +1,14 @@
-using System.Net;
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 
-namespace IntegrationTests.WebAPI.DownloadController;
+namespace IntegrationTests;
 
-public class DownloadControllerDownloadMediaIntegrationTests : BaseIntegrationTests
+public class CreateDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
 {
-    public DownloadControllerDownloadMediaIntegrationTests(ITestOutputHelper output)
+    public CreateDownloadTasksEndpointIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

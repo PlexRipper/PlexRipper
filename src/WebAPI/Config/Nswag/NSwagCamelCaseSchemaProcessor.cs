@@ -2,8 +2,14 @@ using NJsonSchema;
 using NSwag.Generation.Processors;
 using NSwag.Generation.Processors.Contexts;
 
+namespace PlexRipper.WebAPI;
+
+/// <summary>
+/// A schema processor that converts all schema property names from snake_case to camelCase.
+/// </summary>
 public class NSwagCamelCaseSchemaProcessor : IDocumentProcessor
 {
+    /// <inheritdoc />
     public void Process(DocumentProcessorContext context)
     {
         var schemas = context.Document.Components.Schemas;

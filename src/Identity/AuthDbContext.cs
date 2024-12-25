@@ -11,7 +11,7 @@ namespace PlexRipper.Identity;
 
 public class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, IAuthDbContextDatabase
 {
-    public string DatabaseName { get; }
+    public string DatabaseName { get; } = string.Empty;
 
     public AuthDbContext() { }
 

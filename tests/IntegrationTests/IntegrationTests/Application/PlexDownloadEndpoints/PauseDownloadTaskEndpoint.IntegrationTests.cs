@@ -3,12 +3,12 @@ using Data.Contracts;
 using FastEndpoints;
 using PlexRipper.Application;
 
-namespace IntegrationTests.DownloadManager.DownloadCommands;
+namespace IntegrationTests;
 
 [CollectionDefinition("Non-Parallel Tests", DisableParallelization = true)]
-public class DownloadCommandsPauseDownloadIntegrationTests : BaseIntegrationTests
+public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 {
-    public DownloadCommandsPauseDownloadIntegrationTests(ITestOutputHelper output)
+    public PauseDownloadTaskEndpointIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

@@ -13,7 +13,7 @@ public static class TestHttpClientExtensions
             { new StringContent(DefaultUserAppCredentials.DefaultPassword), "Password" },
         };
 
-        var response = await client.PostAsync(ApiRoutes.LoginController, formData);
+        var response = await client.PostAsync(ApiRoutes.LoginEndpoint, formData);
 
         response.IsSuccessStatusCode.ShouldBeTrue();
     }

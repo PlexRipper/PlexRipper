@@ -37,7 +37,7 @@ public class AppUserLoginEndpointRequestValidator : Validator<AppUserLoginEndpoi
 
 public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 {
-    public override string EndpointPath => ApiRoutes.LoginController;
+    public override string EndpointPath => ApiRoutes.LoginEndpoint;
 
     private readonly SignInManager<AppUser> _signInManager;
 
@@ -64,7 +64,6 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 
         Description(x =>
         {
-            x.AutoTagOverride("Authentication");
             x.Produces(StatusCodes.Status200OK);
             x.Produces(StatusCodes.Status401Unauthorized);
             x.Produces(StatusCodes.Status500InternalServerError);

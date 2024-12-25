@@ -8,7 +8,7 @@ namespace PlexRipper.Application;
 
 public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest
 {
-    public override string EndpointPath => ApiRoutes.LogOutController;
+    public override string EndpointPath => ApiRoutes.LogOutEndpoint;
 
     private readonly SignInManager<AppUser> _signInManager;
 
@@ -22,8 +22,8 @@ public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest
         Post(EndpointPath);
         Description(x =>
         {
-            x.AutoTagOverride("Authentication");
             x.Produces(StatusCodes.Status200OK);
+            x.Produces(StatusCodes.Status401Unauthorized);
         });
     }
 

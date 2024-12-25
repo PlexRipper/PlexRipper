@@ -75,6 +75,7 @@ public static class Startup
             // SignalR configuration
             app.MapHub<ProgressHub>("/progress");
             app.MapHub<NotificationHub>("/notifications");
+
             // Place this before app.UseAuthentication().UseAuthorization(); to allow it as anonymous
             app.UseSwaggerGen();
         }
@@ -254,8 +255,8 @@ public static class Startup
         services.ConfigureApplicationCookie(c =>
         {
             c.Cookie.Name = DefaultUserAppCredentials.DefaultCookieName;
-            c.LoginPath = "/api/login";
-            c.LogoutPath = "/api/logout";
+            c.LoginPath = ApiRoutes.LoginEndpoint;
+            c.LogoutPath = ApiRoutes.LogOutEndpoint;
             c.AccessDeniedPath = "/api/access-denied";
 
             c.Events.OnRedirectToLogin = ctx =>

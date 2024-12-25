@@ -1,21 +1,11 @@
-using FastEndpoints;
-using FastEndpoints.Swagger;
+using Application.Contracts;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using PlexRipper.Identity.Contracts;
 
 namespace PlexRipper.Application;
 
-public class TestAuthenticatedEndpoint : EndpointWithoutRequest
+public class TestAuthenticatedEndpoint : BaseEndpointWithoutRequest<UserClaimsDTO>
 {
-    public string EndpointPath => ApiRoutes.TestAuthenticatedController;
-
-    private readonly SignInManager<AppUser> _signInManager;
-
-    public TestAuthenticatedEndpoint(SignInManager<AppUser> signInManager)
-    {
-        _signInManager = signInManager;
-    }
+    public override string EndpointPath => ApiRoutes.AuthenticatedController + "/auth-test";
 
     public override void Configure()
     {
@@ -23,9 +13,9 @@ public class TestAuthenticatedEndpoint : EndpointWithoutRequest
 
         Description(x =>
         {
-            x.AutoTagOverride("Authentication");
-            x.Produces(StatusCodes.Status200OK);
-            x.Produces(StatusCodes.Status401Unauthorized);
+            // x.AutoTagOverride("Authentication");
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<UserClaimsDTO>));
+            x.Produces(StatusCodes.Status401Unauthorized, typeof(ResultDTO));
             x.Produces(StatusCodes.Status500InternalServerError);
         });
     }
@@ -35,19 +25,19 @@ public class TestAuthenticatedEndpoint : EndpointWithoutRequest
         // Check if the user is authenticated
         if (User.Identity?.IsAuthenticated == true)
         {
-            await SendOkAsync(
-                new
+            var result = Result.Ok(
+                new UserClaimsDTO()
                 {
                     IsLoggedIn = true,
                     UserName = User.Identity.Name,
                     Claims = User.Claims.Select(c => new { c.Type, c.Value }),
-                },
-                ct
+                }
             );
+            await SendFluentResult(result, x => x, ct);
         }
         else
         {
-            await SendUnauthorizedAsync(ct);
+            await SendFluentResult(ResultExtensions.Create401UnauthorizedResult(), ct);
         }
     }
 }

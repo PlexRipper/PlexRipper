@@ -25,7 +25,7 @@ public class ClearCompletedDownloadTasksEndpoint : BaseEndpoint<List<Guid>, Resu
     {
         Verbs(Http.POST);
         Post(EndpointPath);
-        AllowAnonymous();
+
         Description(x => x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<int>)));
     }
 

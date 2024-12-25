@@ -43,7 +43,7 @@ public class ValidatePlexServerConnectionEndpoint
     public override void Configure()
     {
         Post(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<ServerIdentityDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

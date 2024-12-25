@@ -81,11 +81,13 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
         var plexAccountDTO = plexAccount.ToDTO();
 
         // Act
-        var response = await container.ApiClient.POSTAsync<
+        var client = container.GetApiClient();
+        await client.SignIn();
+        var response = await client.POSTAsync<
             CreatePlexAccountEndpoint,
-            PlexAccountDTO,
+            CreatePlexAccountEndpointRequest,
             ResultDTO<PlexAccount>
-        >(plexAccountDTO);
+        >(new CreatePlexAccountEndpointRequest() { PlexAccount = plexAccountDTO });
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         var resultDTO = response.Result;

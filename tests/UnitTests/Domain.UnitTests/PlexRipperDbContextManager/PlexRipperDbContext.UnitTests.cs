@@ -3,6 +3,7 @@ using Data.Contracts;
 using Environment;
 using FileSystem.Contracts;
 using PlexRipper.Data;
+using PlexRipper.Identity.Contracts;
 
 namespace Domain.UnitTests;
 
@@ -23,6 +24,9 @@ public class PlexRipperDbContextManager_UnitTests : BaseUnitTest<PlexRipperDbCon
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
+        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.CanConnect()).Returns(true);
+        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.IsInMemory()).Returns(false);
+        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.GetPendingMigrations()).Returns([]);
 
         // Act
         var result = _sut.Setup();
@@ -31,7 +35,10 @@ public class PlexRipperDbContextManager_UnitTests : BaseUnitTest<PlexRipperDbCon
         result.IsSuccess.ShouldBeTrue();
         mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.CanConnect(), Times.Once);
         mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.GetPendingMigrations(), Times.Once);
-        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.Migrate(), Times.Never); // No migrations to apply
+        mock.Mock<IPlexRipperDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
+        mock.Mock<IAuthDbContextDatabase>().Verify(x => x.CanConnect(), Times.Never);
+        mock.Mock<IAuthDbContextDatabase>().Verify(x => x.GetPendingMigrations(), Times.Once);
+        mock.Mock<IAuthDbContextDatabase>().Verify(x => x.Migrate(), Times.Never);
     }
 
     [Fact]

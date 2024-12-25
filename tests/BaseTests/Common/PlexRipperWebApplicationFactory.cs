@@ -1,6 +1,9 @@
 using Autofac;
 using Logging.Interface;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PlexRipper.WebAPI;
 
@@ -22,6 +25,14 @@ public class PlexRipperWebApplicationFactory : WebApplicationFactory<Program>
         {
             // Disable caching by using custom configurations
             builder.UseSetting("cacheEnabled", "false");
+
+            builder.ConfigureTestServices(services =>
+            {
+                // https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-9.0#mock-authentication
+                services
+                    .AddAuthentication(defaultScheme: "TestScheme")
+                    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("TestScheme", _ => { });
+            });
         });
 
         Seed = seed;

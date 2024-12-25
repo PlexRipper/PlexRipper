@@ -23,7 +23,7 @@ public class ClearAllNotificationsEndpoint : BaseEndpointWithoutRequest<int>
     public override void Configure()
     {
         Delete(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<int>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))

@@ -2,6 +2,7 @@
 using PlexRipper.Application;
 using PlexRipper.Data;
 using PlexRipper.FileSystem.Config;
+using PlexRipper.Identity;
 using PlexRipper.PlexApi;
 using PlexRipper.Settings.Config;
 
@@ -25,6 +26,7 @@ public static class ContainerConfig
 
         // Infrastructure
         builder.RegisterModule<DataModule>();
+        builder.RegisterModule<IdentityModule>();
         builder.RegisterModule<FileSystemModule>();
         builder.RegisterModule<PlexApiModule>();
         builder.RegisterModule<SettingsModule>();

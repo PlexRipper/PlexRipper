@@ -49,7 +49,7 @@ public class IsUsernameAvailableEndpoint : BaseEndpoint<IsUsernameAvailableEndpo
     public override void Configure()
     {
         Get(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<bool>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))

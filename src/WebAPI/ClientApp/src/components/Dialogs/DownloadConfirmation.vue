@@ -39,7 +39,7 @@
 				<QRow>
 					<QCol>
 						<QText size="h6">
-							Download Destination:
+							{{ $t('components.download-confirmation.destination.header') }}
 						</QText>
 
 						<q-scroll-area style="height: 200px; width: 400px; max-width: 400px">
@@ -72,7 +72,9 @@
 											:val="customDirectory" />
 									</q-item-section>
 									<q-item-section>
-										<q-item-label>Custom</q-item-label>
+										<q-item-label>
+											{{ $t('components.download-confirmation.destination.custom-destination-option') }}
+										</q-item-label>
 										<q-item-label caption>
 											{{ customDirectory.directory }}
 										</q-item-label>

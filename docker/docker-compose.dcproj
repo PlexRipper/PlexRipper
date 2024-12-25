@@ -8,7 +8,6 @@
   <ItemGroup>
     <None Include="docker-compose.debug.yml" />
     <None Include="docker-compose.yml" />
-    <None Include=".dockerignore" />
     <None Include="Dockerfile" />
     <None Include="Dockerfile.aarch64" />
   </ItemGroup>

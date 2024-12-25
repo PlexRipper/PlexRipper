@@ -46,7 +46,7 @@ public class UpdatePlexAccountByIdEndpoint : BaseEndpoint<UpdatePlexAccountByIdE
     public override void Configure()
     {
         Put(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexAccountDTO>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))

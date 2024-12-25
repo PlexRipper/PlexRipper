@@ -15,7 +15,7 @@ namespace PlexRipper.Application;
 public class CreatePlexAccountEndpointRequest
 {
     [FromBody]
-    public PlexAccountDTO? PlexAccount { get; init; }
+    public required PlexAccountDTO? PlexAccount { get; init; }
 }
 
 public class CreatePlexAccountEndpointRequestValidator : Validator<CreatePlexAccountEndpointRequest>
@@ -55,7 +55,7 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
     public override void Configure()
     {
         Post(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status201Created, typeof(ResultDTO<PlexAccountDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

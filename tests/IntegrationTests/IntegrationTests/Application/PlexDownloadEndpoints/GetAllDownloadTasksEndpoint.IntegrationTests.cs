@@ -2,11 +2,11 @@
 using FastEndpoints;
 using PlexRipper.Application;
 
-namespace IntegrationTests.WebAPI.DownloadController;
+namespace IntegrationTests;
 
-public class DownloadControllerGetDownloadTasksIntegrationTests : BaseIntegrationTests
+public class GetAllDownloadTasksEndpointIntegrationTests : BaseIntegrationTests
 {
-    public DownloadControllerGetDownloadTasksIntegrationTests(ITestOutputHelper output)
+    public GetAllDownloadTasksEndpointIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -34,14 +34,16 @@ public class DownloadControllerGetDownloadTasksIntegrationTests : BaseIntegratio
         );
 
         // Act
-        var response = await container.ApiClient.GETAsync<
+        var client = container.GetApiClient();
+        await client.SignIn();
+        var testResult = await client.GETAsync<
             GetAllDownloadTasksEndpoint,
             ResultDTO<List<ServerDownloadProgressDTO>>
         >();
-        response.Response.IsSuccessStatusCode.ShouldBeTrue();
+        testResult.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         // Assert
-        var result = response.Result;
+        var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotBeNull();
 

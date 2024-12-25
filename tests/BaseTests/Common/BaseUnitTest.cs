@@ -4,6 +4,8 @@ using Environment;
 using Logging.Interface;
 using PlexApi.Contracts;
 using PlexRipper.Data;
+using PlexRipper.Identity;
+using PlexRipper.Identity.Contracts;
 using Serilog;
 using Serilog.Events;
 using Log = Logging.Log;
@@ -51,25 +53,39 @@ public class BaseUnitTest : IDisposable
     /// </summary>
 
     // ReSharper disable once InconsistentNaming
-    protected IPlexRipperDbContext IDbContext => GetDbContext();
+    protected IPlexRipperDbContext IDbContext
+    {
+        get
+        {
+            if (!IsDatabaseSetup)
+            {
+                var logEvent = Log.ErrorLine(
+                    "The test database has not been setup yet, run SetupDatabase() in the test first!"
+                );
+                throw new Exception(logEvent.ToLogString());
+            }
+
+            return MockDatabase.GetMemoryPlexRipperDbContext(_databaseName);
+        }
+    }
+
+    protected IAuthDbContext IAuthDbContext
+    {
+        get
+        {
+            if (!IsDatabaseSetup)
+            {
+                var logEvent = Log.ErrorLine(
+                    "The test database has not been setup yet, run SetupDatabase() in the test first!"
+                );
+                throw new Exception(logEvent.ToLogString());
+            }
+
+            return MockDatabase.GetMemoryAuthDbContext(_databaseName);
+        }
+    }
 
     protected Mock<IPlexRipperDbContext> MockIDbContext => new();
-
-    private List<PlexRipperDbContext> _dbContexts = new();
-
-    protected PlexRipperDbContext GetDbContext()
-    {
-        if (!IsDatabaseSetup)
-        {
-            var logEvent = Log.ErrorLine(
-                "The test database has not been setup yet, run SetupDatabase() in the test first!"
-            );
-            throw new Exception(logEvent.ToLogString());
-        }
-
-        _dbContexts.Add(MockDatabase.GetMemoryDbContext(_databaseName));
-        return _dbContexts.Last();
-    }
 
     /// <summary>
     /// Creates and maintains a unique in memory database <see cref="PlexRipperDbContext"/> for every test.
@@ -87,9 +103,8 @@ public class BaseUnitTest : IDisposable
     protected async Task<Seed> SetupDatabase(Seed seed, Action<FakeDataConfig>? options = null)
     {
         // Database context can be setup once and then retrieved by its DB name.
-        var dbContext = await MockDatabase.GetMemoryDbContext().Setup(seed, options);
-        _databaseName = dbContext.DatabaseName;
-        _dbContexts.Add(dbContext);
+        _databaseName = MockDatabase.GetMemoryDatabaseName();
+        await MockDatabase.GetMemoryDbContext(_databaseName).Setup(seed, options);
         IsDatabaseSetup = true;
         return seed;
     }
@@ -109,9 +124,23 @@ public class BaseUnitTest : IDisposable
 
         // Database context can be setup once and then retrieved by its DB name.
         builder
-            .Register((_, _) => GetDbContext())
+            .Register((_, _) => MockDatabase.GetMemoryPlexRipperDbContext(_databaseName))
             .As<PlexRipperDbContext>()
+            .InstancePerDependency();
+
+        builder
+            .Register((_, _) => MockDatabase.GetMemoryPlexRipperDbContext(_databaseName))
             .As<IPlexRipperDbContext>()
+            .InstancePerDependency();
+
+        builder
+            .Register((_, _) => MockDatabase.GetMemoryAuthDbContext(_databaseName))
+            .As<AuthDbContext>()
+            .InstancePerDependency();
+
+        builder
+            .Register((_, _) => MockDatabase.GetMemoryAuthDbContext(_databaseName))
+            .As<IAuthDbContext>()
             .InstancePerDependency();
 
         builder.RegisterType<Log>().As<ILog>().SingleInstance();
@@ -143,11 +172,7 @@ public class BaseUnitTest : IDisposable
     {
         if (IsDatabaseSetup)
         {
-            foreach (var x in _dbContexts)
-            {
-                x.EnsureDeleted();
-                x.Dispose();
-            }
+            MockDatabase.GetMemoryPlexRipperDbContext(_databaseName).EnsureDeleted();
         }
     }
 }

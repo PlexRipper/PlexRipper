@@ -27,7 +27,7 @@ public class ResetDownloadTaskProgressUnitTests : BaseUnitTest
             }
         );
 
-        var dbContext = GetDbContext();
+        var dbContext = IDbContext;
         DownloadTaskKey? key;
         switch (type)
         {
@@ -62,7 +62,7 @@ public class ResetDownloadTaskProgressUnitTests : BaseUnitTest
     {
         // Arrange
         await SetupDatabase(43481, config => config.MovieDownloadTasksCount = 5);
-        var dbContext = GetDbContext();
+        var dbContext = IDbContext;
         var downloadTasks = await dbContext.DownloadTaskMovieFile.AsTracking().ToListAsync();
         var testDownloadTask = downloadTasks[2];
 
@@ -117,7 +117,7 @@ public class ResetDownloadTaskProgressUnitTests : BaseUnitTest
                 config.TvShowEpisodeDownloadTasksCount = 2;
             }
         );
-        var dbContext = GetDbContext();
+        var dbContext = IDbContext;
         var downloadTasks = await dbContext.DownloadTaskTvShowEpisodeFile.AsTracking().ToListAsync();
         var testDownloadTask = downloadTasks[4];
 

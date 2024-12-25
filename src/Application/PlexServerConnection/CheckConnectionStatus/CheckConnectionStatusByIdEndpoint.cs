@@ -29,7 +29,7 @@ public class CheckConnectionStatusByIdEndpoint : BaseEndpoint<CheckConnectionSta
     public override void Configure()
     {
         Get(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerStatusDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

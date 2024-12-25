@@ -4,11 +4,11 @@ using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Application;
 
-namespace IntegrationTests.WebAPI.DownloadController;
+namespace IntegrationTests;
 
-public class DownloadControllerStartCommandIntegrationTests : BaseIntegrationTests
+public class StartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 {
-    public DownloadControllerStartCommandIntegrationTests(ITestOutputHelper output)
+    public StartDownloadTaskEndpointIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -52,18 +52,19 @@ public class DownloadControllerStartCommandIntegrationTests : BaseIntegrationTes
         var downloadTask = downloadTasks[0].Children[0];
 
         // Act
-        var response = await container.ApiClient.GETAsync<
-            StartDownloadTaskEndpoint,
-            StartDownloadTaskEndpointRequest,
-            ResultDTO
-        >(new StartDownloadTaskEndpointRequest(downloadTask.Id));
-        response.Response.IsSuccessStatusCode.ShouldBeTrue();
+        var client = container.GetApiClient();
+        await client.SignIn();
+
+        var testResult = await client.GETAsync<StartDownloadTaskEndpoint, StartDownloadTaskEndpointRequest, ResultDTO>(
+            new StartDownloadTaskEndpointRequest(downloadTask.Id)
+        );
+        testResult.Response.IsSuccessStatusCode.ShouldBeTrue();
 
         await container.SchedulerService.AwaitScheduler();
         await Task.Delay(2000);
 
         // Assert
-        var result = response.Result;
+        var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
         var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();

@@ -3,11 +3,12 @@ using Data.Contracts;
 using FastEndpoints;
 using PlexRipper.Application;
 
-namespace IntegrationTests.DownloadManager.DownloadCommands;
+namespace IntegrationTests;
 
-public class DownloadCommandsPauseDownloadIntegrationTests : BaseIntegrationTests
+[CollectionDefinition("Non-Parallel Tests", DisableParallelization = true)]
+public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 {
-    public DownloadCommandsPauseDownloadIntegrationTests(ITestOutputHelper output)
+    public PauseDownloadTaskEndpointIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -43,31 +44,28 @@ public class DownloadCommandsPauseDownloadIntegrationTests : BaseIntegrationTest
         var childDownloadTask = downloadTasks[0].Children[0];
 
         // Act
-        var response = await container.ApiClient.GETAsync<
-            StartDownloadTaskEndpoint,
-            StartDownloadTaskEndpointRequest,
-            ResultDTO
-        >(new StartDownloadTaskEndpointRequest(childDownloadTask.Id));
-        var startResult = response.Result;
-        response.Response.IsSuccessStatusCode.ShouldBeTrue(startResult.ToString());
+        var client = container.GetApiClient();
+        await client.SignIn();
+
+        var testResult = await client.GETAsync<StartDownloadTaskEndpoint, StartDownloadTaskEndpointRequest, ResultDTO>(
+            new StartDownloadTaskEndpointRequest(childDownloadTask.Id)
+        );
+        var startResult = testResult.Result;
+        testResult.Response.IsSuccessStatusCode.ShouldBeTrue(startResult.ToString());
         await Task.Delay(500);
 
-        response = await container.ApiClient.GETAsync<
-            PauseDownloadTaskEndpoint,
-            PauseDownloadTaskEndpointRequest,
-            ResultDTO
-        >(new PauseDownloadTaskEndpointRequest(childDownloadTask.Id));
-        var pauseResult = response.Result;
-        response.Response.IsSuccessStatusCode.ShouldBeTrue(pauseResult.ToString());
+        testResult = await client.GETAsync<PauseDownloadTaskEndpoint, PauseDownloadTaskEndpointRequest, ResultDTO>(
+            new PauseDownloadTaskEndpointRequest(childDownloadTask.Id)
+        );
+        var pauseResult = testResult.Result;
+        testResult.Response.IsSuccessStatusCode.ShouldBeTrue(pauseResult.ToString());
 
         await container.SchedulerService.AwaitScheduler();
 
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
         pauseResult.IsSuccess.ShouldBeTrue();
-        var downloadTaskDb = container.DbContext.DownloadTaskMovieFile.FirstOrDefault(x =>
-            x.Id == childDownloadTask.Id
-        );
+        var downloadTaskDb = await container.DbContext.DownloadTaskMovieFile.GetAsync(childDownloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Paused);
     }

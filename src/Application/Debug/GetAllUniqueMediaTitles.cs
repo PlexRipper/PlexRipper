@@ -32,7 +32,7 @@ public class GetAllUniqueMediaTitlesEndpoint : BaseEndpoint<GetAllUniqueMediaTit
     public override void Configure()
     {
         Get(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(List<string>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))

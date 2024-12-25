@@ -11,7 +11,8 @@ public class InMemoryDatabase_UnitTests : BaseUnitTest
     public async Task ShouldAddNotificationToInMemoryDatabase_WhenNotificationIsAdded()
     {
         // Arrange
-        await using var context = MockDatabase.GetMemoryDbContext();
+        var dbContext = MockDatabase.GetMemoryDbContext();
+        var (plexRipperContext, _) = dbContext;
         var notification = new Notification()
         {
             Hidden = false,
@@ -21,9 +22,9 @@ public class InMemoryDatabase_UnitTests : BaseUnitTest
         };
 
         // Act
-        context.Notifications.Add(notification);
-        await context.SaveChangesAsync(CancellationToken.None);
-        var notifications = await context.Notifications.ToListAsync(CancellationToken.None);
+        plexRipperContext.Notifications.Add(notification);
+        await plexRipperContext.SaveChangesAsync(CancellationToken.None);
+        var notifications = await plexRipperContext.Notifications.ToListAsync(CancellationToken.None);
 
         // Assert
         notifications.Count.ShouldBe(1);
@@ -33,7 +34,8 @@ public class InMemoryDatabase_UnitTests : BaseUnitTest
     public async Task ShouldAddAndRemoveNotificationToInMemoryDatabase_WhenNotificationIsAddedAndRemoved()
     {
         // Arrange
-        await using var context = MockDatabase.GetMemoryDbContext();
+        var dbContext = MockDatabase.GetMemoryDbContext();
+        var (plexRipperContext, _) = dbContext;
         var notification = new Notification()
         {
             Hidden = false,
@@ -43,11 +45,11 @@ public class InMemoryDatabase_UnitTests : BaseUnitTest
         };
 
         // Act
-        context.Notifications.Add(notification);
-        await context.SaveChangesAsync(CancellationToken.None);
-        context.Notifications.Remove(notification);
-        await context.SaveChangesAsync(CancellationToken.None);
-        var notifications = await context.Notifications.ToListAsync(CancellationToken.None);
+        plexRipperContext.Notifications.Add(notification);
+        await plexRipperContext.SaveChangesAsync(CancellationToken.None);
+        plexRipperContext.Notifications.Remove(notification);
+        await plexRipperContext.SaveChangesAsync(CancellationToken.None);
+        var notifications = await plexRipperContext.Notifications.ToListAsync(CancellationToken.None);
 
         // Assert
         notifications.Count.ShouldBe(0);

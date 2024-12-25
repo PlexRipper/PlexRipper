@@ -22,7 +22,7 @@ public class GetAllPlexLibrariesEndpoint : BaseEndpointWithoutRequest<List<PlexL
     public override void Configure()
     {
         Get(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexLibraryDTO>>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))

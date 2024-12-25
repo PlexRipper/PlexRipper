@@ -3,11 +3,11 @@ using Data.Contracts;
 using FastEndpoints;
 using PlexRipper.Application;
 
-namespace IntegrationTests.WebAPI.DownloadController;
+namespace IntegrationTests;
 
-public class DownloadControllerRestartCommandIntegrationTests : BaseIntegrationTests
+public class RestartDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
 {
-    public DownloadControllerRestartCommandIntegrationTests(ITestOutputHelper output)
+    public RestartDownloadTaskEndpointIntegrationTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -42,12 +42,14 @@ public class DownloadControllerRestartCommandIntegrationTests : BaseIntegrationT
         await container.DbContext.SetDownloadStatus(downloadTask.ToKey(), DownloadStatus.Completed);
 
         // Act
-        var response = await container.ApiClient.GETAsync<
+        var client = container.GetApiClient();
+        await client.SignIn();
+        var testResult = await client.GETAsync<
             RestartDownloadTaskEndpoint,
             RestartDownloadTaskEndpointRequest,
             ResultDTO
         >(new RestartDownloadTaskEndpointRequest(downloadTask.Id));
-        response.Response.IsSuccessStatusCode.ShouldBeTrue(await response.Response.Content.ReadAsStringAsync());
+        testResult.Response.IsSuccessStatusCode.ShouldBeTrue(await testResult.Response.Content.ReadAsStringAsync());
 
         var downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
@@ -57,7 +59,7 @@ public class DownloadControllerRestartCommandIntegrationTests : BaseIntegrationT
         await Task.Delay(2000);
 
         // Assert
-        var result = response.Result;
+        var result = testResult.Result;
         result.IsSuccess.ShouldBeTrue();
         downloadTaskDb = await container.DbContext.GetDownloadTaskAsync(downloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();

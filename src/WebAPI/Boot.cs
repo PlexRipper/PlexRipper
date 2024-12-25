@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using Application.Contracts;
 using Data.Contracts;
 using Logging.Interface;
+using PlexRipper.Application;
 using Settings.Contracts;
 
 namespace PlexRipper.WebAPI;
@@ -15,6 +16,7 @@ public class Boot : IHostedService
     #region Fields
 
     private readonly ILog _log;
+    private readonly IMediator _mediator;
 
     private readonly IPlexRipperDbContextManager _dbContextManager;
 
@@ -53,6 +55,7 @@ public class Boot : IHostedService
     /// <param name="downloadQueue"></param>
     public Boot(
         ILog log,
+        IMediator mediator,
         IPlexRipperDbContextManager dbContextManagerManager,
         IHostApplicationLifetime appLifetime,
         IConfigManager configManager,
@@ -61,6 +64,7 @@ public class Boot : IHostedService
     )
     {
         _log = log;
+        _mediator = mediator;
         _dbContextManager = dbContextManagerManager;
         _configManager = configManager;
         _schedulerService = schedulerService;
@@ -84,6 +88,8 @@ public class Boot : IHostedService
         LogIdentity();
 
         _configManager.Setup();
+
+        await CreateDefaultAppUser();
 
         var databaseSetupResult = _dbContextManager.Setup();
         if (databaseSetupResult.IsFailed)
@@ -138,6 +144,11 @@ public class Boot : IHostedService
         _log.Debug("PUID from env: {PUID} and from the system: {PUID}", puid ?? "-1", getuid());
         _log.Debug("PGID from env: {PGID} and from the system: {PGID}", pgid ?? "-1", getgid());
         _log.Debug("Current system Username: {SystemPUIDName}", System.Environment.UserName);
+    }
+
+    private async Task CreateDefaultAppUser()
+    {
+        await _mediator.Send(new CreateDefaultAppUserCommand());
     }
 
     #endregion

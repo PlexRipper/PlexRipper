@@ -33,7 +33,7 @@ public class GetDownloadTaskLogsByDownloadTaskIdEndpoint
     public override void Configure()
     {
         Get(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<DownloadWorkerLogDTO>>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))

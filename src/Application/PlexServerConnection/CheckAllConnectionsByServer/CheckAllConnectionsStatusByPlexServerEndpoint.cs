@@ -31,7 +31,7 @@ public class CheckAllConnectionsStatusByPlexServerEndpoint
     public override void Configure()
     {
         Get(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<PlexServerStatusDTO>>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

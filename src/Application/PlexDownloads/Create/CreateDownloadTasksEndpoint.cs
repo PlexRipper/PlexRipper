@@ -9,7 +9,15 @@ namespace PlexRipper.Application;
 public record CreateDownloadTasksEndpointRequest
 {
     [FromBody]
-    public CreateDownloadTasksRequest Request { get; set; }
+    public required CreateDownloadTasksRequest Request { get; set; }
+}
+
+public class CreateDownloadTasksEndpointRequestValidator : Validator<CreateDownloadTasksEndpointRequest>
+{
+    public CreateDownloadTasksEndpointRequestValidator()
+    {
+        RuleFor(x => x.Request).NotNull();
+    }
 }
 
 public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpointRequest>
@@ -28,7 +36,7 @@ public class CreateDownloadTasksEndpoint : BaseEndpoint<CreateDownloadTasksEndpo
     public override void Configure()
     {
         Post(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

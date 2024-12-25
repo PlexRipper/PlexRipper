@@ -1,5 +1,10 @@
 using Environment;
+using Logging;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using NaturalSort.Extension;
+using PlexRipper.Domain;
 
 namespace Data.Contracts;
 
@@ -14,8 +19,35 @@ public static class DbContextConnections
         Cache = SqliteCacheMode.Default,
         Mode = SqliteOpenMode.ReadWriteCreate,
         Pooling = true,
+
         // Do not set the default timeout as it conflicts with the command timeout.
         // Source: https://stackoverflow.com/q/6232633/8205497
         // DefaultTimeout = 60,
     }.ToString();
+
+    public static void DefaultConfiguration(this DbContextOptionsBuilder optionsBuilder, Type contextType)
+    {
+        // Source: https://github.com/tompazourek/NaturalSort.Extension
+        SqliteConnection databaseConnection = new(ConnectionString);
+        databaseConnection.CreateCollation(
+            OrderByNaturalExtensions.CollationName,
+            (x, y) => NaturalComparer.Compare(x, y)
+        );
+
+        optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        optionsBuilder.LogTo(text => LogManager.DbContextLogger(text), LogLevel.Error);
+        optionsBuilder.EnableDetailedErrors();
+
+        optionsBuilder.UseSqlite(
+            databaseConnection,
+            b =>
+            {
+                // Wait as long as needed for the database to be unlocked
+                b.CommandTimeout(300);
+                b.MigrationsAssembly(contextType.Assembly.FullName);
+            }
+        );
+    }
+
+    private static readonly NaturalSortComparer NaturalComparer = new(StringComparison.InvariantCultureIgnoreCase);
 }

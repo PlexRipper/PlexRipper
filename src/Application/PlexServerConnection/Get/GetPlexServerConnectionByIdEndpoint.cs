@@ -32,7 +32,7 @@ public class GetPlexServerConnectionByIdEndpoint
     public override void Configure()
     {
         Get(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexServerConnectionDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

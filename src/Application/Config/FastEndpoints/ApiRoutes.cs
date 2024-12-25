@@ -23,4 +23,10 @@ public static class ApiRoutes
     public static string SettingsController => Base + "/" + "Settings";
 
     public static string PlexMediaController => Base + "/" + "PlexMedia";
+
+    public static string LoginController => Base + "/" + "login";
+
+    public static string LogOutController => Base + "/" + "logout";
+
+    public static string TestAuthenticatedController => Base + "/" + "auth-test";
 }

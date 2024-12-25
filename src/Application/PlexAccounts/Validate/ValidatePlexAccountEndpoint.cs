@@ -36,12 +36,12 @@ public class ValidatePlexAccountEndpointRequestValidator : Validator<ValidatePle
         RuleFor(x => x.PlexAccount.Username)
             .NotEmpty()
             .MinimumLength(5)
-            .When(m => string.IsNullOrEmpty(m.PlexAccount.AuthenticationToken));
+            .When(m => string.IsNullOrEmpty(m.PlexAccount?.AuthenticationToken));
 
         RuleFor(x => x.PlexAccount.Password)
             .NotEmpty()
             .MinimumLength(5)
-            .When(m => string.IsNullOrEmpty(m.PlexAccount.AuthenticationToken));
+            .When(m => string.IsNullOrEmpty(m.PlexAccount?.AuthenticationToken));
     }
 }
 
@@ -61,7 +61,7 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
     public override void Configure()
     {
         Post(EndpointPath);
-        AllowAnonymous();
+
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexAccountDTO>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))

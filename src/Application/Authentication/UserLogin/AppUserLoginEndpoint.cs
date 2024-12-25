@@ -2,8 +2,8 @@ using System.ComponentModel;
 using Application.Contracts;
 using FastEndpoints;
 using FastEndpoints.Security;
-using FastEndpoints.Swagger;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using PlexRipper.Identity.Contracts;
@@ -39,10 +39,12 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 {
     public override string EndpointPath => ApiRoutes.LoginEndpoint;
 
+    private readonly ILog _log;
     private readonly SignInManager<AppUser> _signInManager;
 
-    public AppUserLoginEndpoint(SignInManager<AppUser> signInManager)
+    public AppUserLoginEndpoint(ILog log, SignInManager<AppUser> signInManager)
     {
+        _log = log;
         _signInManager = signInManager;
     }
 
@@ -51,10 +53,12 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
         Post(EndpointPath);
         AllowAnonymous();
         AllowFormData();
+
         Summary(s =>
         {
             s.Summary = "User Login";
             s.Description = "Logs in a user.";
+
             s.ExampleRequest = new AppUserLoginEndpointRequest
             {
                 Username = DefaultUserAppCredentials.DefaultUsername,
@@ -72,26 +76,35 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 
     public override async Task HandleAsync(AppUserLoginEndpointRequest req, CancellationToken ct)
     {
+        var username = req.Username;
+        var password = req.Password;
+
+        _log.Information("Attempting to sign in user {Username}.", username);
+
         // Attempt to sign in the user
         var result = await _signInManager.PasswordSignInAsync(
-            req.Username,
-            req.Password,
+            username,
+            password,
             isPersistent: false,
             lockoutOnFailure: false
         );
 
         if (result.Succeeded)
         {
+            _log.Information("User {Username} signed in successfully.", username);
+
             await CookieAuth.SignInAsync(u => u.Roles.Add(DefaultUserAppCredentials.DefaultAdminRole));
 
             await SendOkAsync(ct);
         }
         else if (result.IsLockedOut)
         {
+            _log.Warning("User {Username} is locked out.", username);
             await SendForbiddenAsync(ct);
         }
         else
         {
+            _log.Warning("Failed to sign in user {Username}.", username);
             await SendUnauthorizedAsync(ct);
         }
     }

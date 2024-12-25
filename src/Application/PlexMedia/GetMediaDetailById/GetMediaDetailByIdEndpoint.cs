@@ -26,7 +26,7 @@ public class GetMediaDetailByIdEndpointRequest
     public int PlexMediaId { get; init; }
 
     /// <summary> The <see cref="PlexMediaType">Type</see> of the PlexMedia.</summary>
-    [QueryParam]
+    [QueryParam, BindFrom("type")]
     public PlexMediaType Type { get; init; }
 }
 

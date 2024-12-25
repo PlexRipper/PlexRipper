@@ -6,7 +6,18 @@ using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
-public record GetDownloadTaskByGuidRequest(Guid DownloadTaskGuid, DownloadTaskType Type = DownloadTaskType.None);
+public record GetDownloadTaskByGuidRequest
+{
+    public GetDownloadTaskByGuidRequest(DownloadTaskType type = DownloadTaskType.None)
+    {
+        Type = type;
+    }
+
+    public required Guid DownloadTaskGuid { get; init; }
+
+    [QueryParam, BindFrom("type")]
+    public DownloadTaskType Type { get; init; }
+}
 
 public class GetDownloadTaskByGuidRequestValidator : Validator<GetDownloadTaskByGuidRequest>
 {

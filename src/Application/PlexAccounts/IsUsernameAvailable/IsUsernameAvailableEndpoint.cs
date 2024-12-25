@@ -12,18 +12,8 @@ namespace PlexRipper.Application;
 /// <returns>true if the username is available.</returns>
 public class IsUsernameAvailableEndpointRequest
 {
-    /// <summary>
-    /// Checks if an <see cref="PlexAccount"/> with the same username already exists.
-    /// </summary>
-    /// <param name="username">The username to check for.</param>
-    /// <returns>true if the username is available.</returns>
-    public IsUsernameAvailableEndpointRequest(string username)
-    {
-        Username = username;
-    }
-
-    [QueryParam]
-    public string Username { get; init; }
+    [QueryParam, BindFrom("username")]
+    public required string Username { get; init; }
 }
 
 public class IsUsernameAvailableEndpointRequestValidator : Validator<IsUsernameAvailableEndpointRequest>

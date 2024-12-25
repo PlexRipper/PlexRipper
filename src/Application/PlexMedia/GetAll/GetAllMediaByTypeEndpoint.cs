@@ -9,20 +9,21 @@ namespace PlexRipper.Application;
 
 public record GetAllMediaByTypeRequest
 {
+    [QueryParam, BindFrom("mediaType")]
     public PlexMediaType MediaType { get; init; }
 
-    [QueryParam]
+    [QueryParam, BindFrom("page")]
     [DefaultValue(0)]
     public int Page { get; init; }
 
-    [QueryParam]
+    [QueryParam, BindFrom("size")]
     [DefaultValue(0)]
     public int Size { get; init; }
 
-    [QueryParam]
+    [QueryParam, BindFrom("filterOfflineMedia")]
     public bool FilterOfflineMedia { get; init; }
 
-    [QueryParam]
+    [QueryParam, BindFrom("filterOwnedMedia")]
     public bool FilterOwnedMedia { get; init; }
 }
 

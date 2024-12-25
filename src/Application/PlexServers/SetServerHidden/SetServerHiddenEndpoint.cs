@@ -12,7 +12,7 @@ public record SetServerHiddenRequest
 {
     public int PlexServerId { get; init; }
 
-    [QueryParam]
+    [QueryParam, BindFrom("hidden")]
     public bool Hidden { get; init; } = false;
 }
 

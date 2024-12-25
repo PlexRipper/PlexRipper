@@ -7,7 +7,18 @@ using PlexApi.Contracts;
 
 namespace PlexRipper.Application;
 
-public record GeneratePlexTokenEndpointRequest(int PlexAccountId, string VerificationCode = "");
+public record GeneratePlexTokenEndpointRequest
+{
+    public GeneratePlexTokenEndpointRequest(string verificationCode = "")
+    {
+        VerificationCode = verificationCode;
+    }
+
+    public required int PlexAccountId { get; init; }
+
+    [QueryParam, BindFrom("verificationCode")]
+    public string VerificationCode { get; init; }
+}
 
 public class GeneratePlexTokenEndpointRequestValidator : Validator<GeneratePlexTokenEndpointRequest>
 {

@@ -9,10 +9,10 @@ namespace PlexRipper.Application;
 
 public record SetServerAliasRequest
 {
-    public int PlexServerId { get; init; }
+    public required int PlexServerId { get; init; }
 
-    [QueryParam]
-    public string ServerAlias { get; init; } = string.Empty;
+    [QueryParam, BindFrom("serverAlias")]
+    public required string ServerAlias { get; init; }
 }
 
 public class SetServerAliasRequestValidator : Validator<SetServerAliasRequest>

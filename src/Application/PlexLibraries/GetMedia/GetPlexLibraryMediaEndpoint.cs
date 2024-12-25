@@ -12,11 +12,11 @@ public class GetPlexLibraryMediaEndpointRequest
 {
     public int PlexLibraryId { get; init; }
 
-    [QueryParam]
+    [QueryParam, BindFrom("page")]
     [DefaultValue(0)]
     public int Page { get; init; }
 
-    [QueryParam]
+    [QueryParam, BindFrom("size")]
     [DefaultValue(0)]
     public int Size { get; init; }
 }

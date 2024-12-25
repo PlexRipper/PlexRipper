@@ -80,9 +80,7 @@ public static class Startup
             app.UseSwaggerGen();
         }
 
-        // Add authentication and authorization
-        app.UseAuthentication();
-        app.UseAuthorization();
+        app.ConfigureAuthenticationApplication();
 
         // Setup FastEndpoints
         app.UseFastEndpoints(c =>
@@ -240,16 +238,26 @@ public static class Startup
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
     }
 
+    private static void ConfigureAuthenticationApplication(this WebApplication app)
+    {
+        app.UseAuthentication();
+        app.UseAuthorization();
+    }
+
     private static void ConfigureAuthenticationServices(this IServiceCollection services)
     {
-        services
-            .AddIdentity<AppUser, IdentityRole>()
-            .AddEntityFrameworkStores<AuthDbContext>()
-            .AddSignInManager<SignInManager<AppUser>>();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AuthenticatedUsers", x => x.RequireRole("Admin"));
 
-        //override the behavior or cookie auth scheme so that 401/403 will be returned.
+            // Set a default policy that requires authentication
+            options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+        });
+
+        services.AddIdentityApiEndpoints<AppUser>().AddRoles<IdentityRole>().AddEntityFrameworkStores<AuthDbContext>();
+
         services.AddAuthenticationCookie(
-            validFor: TimeSpan.FromDays(7),
+            validFor: TimeSpan.FromMinutes(10),
             c =>
             {
                 c.Cookie.Name = DefaultUserAppCredentials.DefaultCookieName;
@@ -273,13 +281,5 @@ public static class Startup
                 };
             }
         );
-
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy("AuthenticatedUsers", x => x.RequireRole("Admin"));
-
-            // Set a default policy that requires authentication
-            options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-        });
     }
 }

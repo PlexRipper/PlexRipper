@@ -65,9 +65,7 @@ public class PauseDownloadTaskEndpointIntegrationTests : BaseIntegrationTests
         // Assert
         startResult.IsSuccess.ShouldBeTrue();
         pauseResult.IsSuccess.ShouldBeTrue();
-        var downloadTaskDb = container.DbContext.DownloadTaskMovieFile.FirstOrDefault(x =>
-            x.Id == childDownloadTask.Id
-        );
+        var downloadTaskDb = await container.DbContext.DownloadTaskMovieFile.GetAsync(childDownloadTask.Id);
         downloadTaskDb.ShouldNotBeNull();
         downloadTaskDb.DownloadStatus.ShouldBe(DownloadStatus.Paused);
     }

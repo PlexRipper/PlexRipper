@@ -81,7 +81,8 @@ public static class Startup
         }
 
         // Add authentication and authorization
-        app.UseAuthentication().UseAuthorization();
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         // Setup FastEndpoints
         app.UseFastEndpoints(c =>
@@ -249,31 +250,32 @@ public static class Startup
             .AddEntityFrameworkStores<AuthDbContext>()
             .AddSignInManager<SignInManager<AppUser>>();
 
-        services.AddAuthenticationCookie(validFor: TimeSpan.FromDays(7));
-
         //override the behavior or cookie auth scheme so that 401/403 will be returned.
-        services.ConfigureApplicationCookie(c =>
-        {
-            c.Cookie.Name = DefaultUserAppCredentials.DefaultCookieName;
-            c.LoginPath = ApiRoutes.LoginEndpoint;
-            c.LogoutPath = ApiRoutes.LogOutEndpoint;
-            c.AccessDeniedPath = "/api/access-denied";
-
-            c.Events.OnRedirectToLogin = ctx =>
+        services.AddAuthenticationCookie(
+            validFor: TimeSpan.FromDays(7),
+            c =>
             {
-                if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
-                    ctx.Response.StatusCode = 401;
+                c.Cookie.Name = DefaultUserAppCredentials.DefaultCookieName;
+                c.LoginPath = ApiRoutes.LoginEndpoint;
+                c.LogoutPath = ApiRoutes.LogOutEndpoint;
+                c.AccessDeniedPath = "/api/access-denied";
 
-                return Task.CompletedTask;
-            };
-            c.Events.OnRedirectToAccessDenied = ctx =>
-            {
-                if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
-                    ctx.Response.StatusCode = 403;
+                c.Events.OnRedirectToLogin = ctx =>
+                {
+                    if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
+                        ctx.Response.StatusCode = 401;
 
-                return Task.CompletedTask;
-            };
-        });
+                    return Task.CompletedTask;
+                };
+                c.Events.OnRedirectToAccessDenied = ctx =>
+                {
+                    if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
+                        ctx.Response.StatusCode = 403;
+
+                    return Task.CompletedTask;
+                };
+            }
+        );
 
         services.AddAuthorization(options =>
         {

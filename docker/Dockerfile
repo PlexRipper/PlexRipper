@@ -46,6 +46,9 @@ COPY ["src/Application.Contracts/Application.Contracts.csproj", "src/Application
 ### Data Access
 COPY ["src/Data/Data.csproj", "src/Data/"]
 COPY ["src/Data.Contracts/Data.Contracts.csproj", "src/Data.Contracts/"]
+### Data Identity Access
+COPY ["src/Identity/Identity.csproj", "src/Identity/"]
+COPY ["src/Identity.Contracts/Identity.Contracts.csproj", "src/Identity.Contracts/"]
 ### File System
 COPY ["src/FileSystem/FileSystem.csproj", "src/FileSystem/"]
 COPY ["src/FileSystem.Contracts/FileSystem.Contracts.csproj", "src/FileSystem.Contracts/"]

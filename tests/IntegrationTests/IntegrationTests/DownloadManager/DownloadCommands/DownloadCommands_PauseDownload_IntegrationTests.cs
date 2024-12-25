@@ -52,7 +52,7 @@ public class DownloadCommandsPauseDownloadIntegrationTests : BaseIntegrationTest
         );
         var startResult = testResult.Result;
         testResult.Response.IsSuccessStatusCode.ShouldBeTrue(startResult.ToString());
-        await Task.Delay(100);
+        await Task.Delay(500);
 
         testResult = await client.GETAsync<PauseDownloadTaskEndpoint, PauseDownloadTaskEndpointRequest, ResultDTO>(
             new PauseDownloadTaskEndpointRequest(childDownloadTask.Id)

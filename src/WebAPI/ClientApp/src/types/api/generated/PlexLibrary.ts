@@ -20,49 +20,48 @@ import { from } from "rxjs";
 
 export class PlexLibrary {
   /**
- * No description
- *
- * @tags Plexlibrary
- * @name GetPlexLibraryByIdEndpoint
- * @request GET:/api/PlexLibrary/{plexLibraryId}
-
- */
+   * No description
+   * * @tags Plexlibrary
+   * @name GetPlexLibraryByIdEndpoint
+   * @request GET:/api/PlexLibrary/{PlexLibraryId}
+   * @secure
+   */
   getPlexLibraryByIdEndpoint = (plexLibraryId: number, params: RequestParams = {}) =>
     from(
       Axios.request<PlexLibraryDTO>({
         url: `/api/PlexLibrary/${plexLibraryId}`,
         method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),
     ).pipe(apiCheckPipe<PlexLibraryDTO>);
 
   /**
- * No description
- *
- * @tags Plexlibrary
- * @name GetAllPlexLibrariesEndpoint
- * @request GET:/api/PlexLibrary/
-
- */
+   * No description
+   * * @tags Plexlibrary
+   * @name GetAllPlexLibrariesEndpoint
+   * @request GET:/api/PlexLibrary
+   * @secure
+   */
   getAllPlexLibrariesEndpoint = (params: RequestParams = {}) =>
     from(
       Axios.request<PlexLibraryDTO[]>({
-        url: `/api/PlexLibrary/`,
+        url: `/api/PlexLibrary`,
         method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),
     ).pipe(apiCheckPipe<PlexLibraryDTO[]>);
 
   /**
- * No description
- *
- * @tags Plexlibrary
- * @name GetPlexLibraryMediaEndpoint
- * @request GET:/api/PlexLibrary/{plexLibraryId}/media
-
- */
+   * No description
+   * * @tags Plexlibrary
+   * @name GetPlexLibraryMediaEndpoint
+   * @request GET:/api/PlexLibrary/{PlexLibraryId}/media
+   * @secure
+   */
   getPlexLibraryMediaEndpoint = (
     plexLibraryId: number,
     query: {
@@ -84,37 +83,37 @@ export class PlexLibrary {
         url: `/api/PlexLibrary/${plexLibraryId}/media`,
         method: "GET",
         params: query,
+        secure: true,
         format: "json",
         ...params,
       }),
     ).pipe(apiCheckPipe<PlexMediaStatisticsDTO>);
 
   /**
- * No description
- *
- * @tags Plexlibrary
- * @name RefreshLibraryMediaEndpoint
- * @request GET:/api/PlexLibrary/refresh/{plexLibraryId}
-
- */
+   * No description
+   * * @tags Plexlibrary
+   * @name RefreshLibraryMediaEndpoint
+   * @request GET:/api/PlexLibrary/refresh/{PlexLibraryId}
+   * @secure
+   */
   refreshLibraryMediaEndpoint = (plexLibraryId: number, params: RequestParams = {}) =>
     from(
       Axios.request<PlexLibraryDTO>({
         url: `/api/PlexLibrary/refresh/${plexLibraryId}`,
         method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),
     ).pipe(apiCheckPipe<PlexLibraryDTO>);
 
   /**
- * No description
- *
- * @tags Plexlibrary
- * @name SetPlexLibraryDefaultDestinationByIdEndpoint
- * @request GET:/api/PlexLibrary/{plexLibraryId}/default/destination/{folderPathId}
-
- */
+   * No description
+   * * @tags Plexlibrary
+   * @name SetPlexLibraryDefaultDestinationByIdEndpoint
+   * @request GET:/api/PlexLibrary/{PlexLibraryId}/default/destination/{FolderPathId}
+   * @secure
+   */
   setPlexLibraryDefaultDestinationByIdEndpoint = (
     plexLibraryId: number,
     folderPathId: number,
@@ -124,6 +123,7 @@ export class PlexLibrary {
       Axios.request<ResultDTO>({
         url: `/api/PlexLibrary/${plexLibraryId}/default/destination/${folderPathId}`,
         method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -134,7 +134,7 @@ export class PlexLibraryPaths {
   static getPlexLibraryByIdEndpoint = (plexLibraryId: number) =>
     queryString.stringifyUrl({ url: `/api/PlexLibrary/${plexLibraryId}` });
 
-  static getAllPlexLibrariesEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexLibrary/` });
+  static getAllPlexLibrariesEndpoint = () => queryString.stringifyUrl({ url: `/api/PlexLibrary` });
 
   static getPlexLibraryMediaEndpoint = (
     plexLibraryId: number,

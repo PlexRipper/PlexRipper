@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -9,6 +8,20 @@
  * ## SOURCE: https://github.com/acacode/swagger-typescript-api ##
  * ---------------------------------------------------------------
  */
+
+/** @example {"username":"PlexRipperRocks","password":"Pl€XR!ℙℙ€R69"} */
+export interface AppUserLoginEndpointRequest {
+  /**
+   * @minLength 1
+   * @default "Pl€XR!ℙℙ€R69"
+   */
+  password: string;
+  /**
+   * @minLength 1
+   * @default "PlexRipperRocks"
+   */
+  username: string;
+}
 
 export interface CheckAllConnectionStatusUpdateDTO {
   plexServersWithConnectionIds: Record<string, number[]>;
@@ -21,23 +34,11 @@ export interface ConfirmationSettingsDTO {
   askDownloadTvShowConfirmation: boolean;
 }
 
-export interface CreateDownloadTasksEndpointRequest {
-  request: CreateDownloadTasksRequest;
-}
-
 export interface CreateDownloadTasksRequest {
   customDestinationFolderPath: string;
   /** @format int32 */
   destinationFolderPathId?: number | null;
   downloadMedias: DownloadMediaDTO[];
-}
-
-export interface CreateFolderPathEndpointRequest {
-  folderPathDto: FolderPathDTO;
-}
-
-export interface CreatePlexAccountEndpointRequest {
-  plexAccount: PlexAccountDTO;
 }
 
 export interface CreatePlexServerConnectionEndpointRequest {
@@ -62,10 +63,10 @@ export interface CreatePlexServerConnectionEndpointRequest {
 }
 
 export enum DataType {
-  PlexAccount = 'PlexAccount',
-  PlexServer = 'PlexServer',
-  PlexLibrary = 'PlexLibrary',
-  PlexServerConnection = 'PlexServerConnection',
+  PlexAccount = "PlexAccount",
+  PlexServer = "PlexServer",
+  PlexLibrary = "PlexLibrary",
+  PlexServerConnection = "PlexServerConnection",
 }
 
 export interface DateTimeSettingsDTO {
@@ -80,11 +81,6 @@ export interface DebugSettingsDTO {
   debugModeEnabled: boolean;
   maskLibraryNames: boolean;
   maskServerNames: boolean;
-}
-
-export interface DeleteDownloadTaskEndpointRequest {
-  /** @minLength 1 */
-  downloadTaskIds: string[];
 }
 
 export interface DisplaySettingsDTO {
@@ -140,24 +136,24 @@ export interface DownloadProgressDTO {
 }
 
 export enum DownloadStatus {
-  Unknown = 'Unknown',
-  Error = 'Error',
-  Queued = 'Queued',
-  Downloading = 'Downloading',
-  DownloadFinished = 'DownloadFinished',
-  Paused = 'Paused',
-  Stopped = 'Stopped',
-  Deleted = 'Deleted',
-  Merging = 'Merging',
-  Moving = 'Moving',
-  MergePaused = 'MergePaused',
-  MovePaused = 'MovePaused',
-  MergeFinished = 'MergeFinished',
-  MoveFinished = 'MoveFinished',
-  Completed = 'Completed',
-  ServerUnreachable = 'ServerUnreachable',
-  MoveError = 'MoveError',
-  MergeError = 'MergeError',
+  Unknown = "Unknown",
+  Error = "Error",
+  Queued = "Queued",
+  Downloading = "Downloading",
+  DownloadFinished = "DownloadFinished",
+  Paused = "Paused",
+  Stopped = "Stopped",
+  Deleted = "Deleted",
+  Merging = "Merging",
+  Moving = "Moving",
+  MergePaused = "MergePaused",
+  MovePaused = "MovePaused",
+  MergeFinished = "MergeFinished",
+  MoveFinished = "MoveFinished",
+  Completed = "Completed",
+  ServerUnreachable = "ServerUnreachable",
+  MoveError = "MoveError",
+  MergeError = "MergeError",
 }
 
 export interface DownloadTaskDTO {
@@ -200,15 +196,15 @@ export interface DownloadTaskDTO {
 }
 
 export enum DownloadTaskType {
-  None = 'None',
-  Movie = 'Movie',
-  MovieData = 'MovieData',
-  MoviePart = 'MoviePart',
-  TvShow = 'TvShow',
-  Season = 'Season',
-  Episode = 'Episode',
-  EpisodeData = 'EpisodeData',
-  EpisodePart = 'EpisodePart',
+  None = "None",
+  Movie = "Movie",
+  MovieData = "MovieData",
+  MoviePart = "MoviePart",
+  TvShow = "TvShow",
+  Season = "Season",
+  Episode = "Episode",
+  EpisodeData = "EpisodeData",
+  EpisodePart = "EpisodePart",
 }
 
 export interface DownloadWorkerLogDTO {
@@ -247,10 +243,10 @@ export interface FileSystemDTO {
 }
 
 export enum FileSystemEntityType {
-  Parent = 'Parent',
-  Drive = 'Drive',
-  Folder = 'Folder',
-  File = 'File',
+  Parent = "Parent",
+  Drive = "Drive",
+  Folder = "Folder",
+  File = "File",
 }
 
 export interface FileSystemModelDTO {
@@ -267,31 +263,25 @@ export interface FileSystemModelDTO {
 }
 
 export interface FolderPathDTO {
-  /** @minLength 1 */
   directory: string;
-  /** @minLength 1 */
   displayName: string;
   folderType: FolderType;
-  /**
-   * @format int32
-   * @min 0
-   * @exclusiveMin true
-   */
+  /** @format int32 */
   id: number;
   isValid: boolean;
   mediaType: PlexMediaType;
 }
 
 export enum FolderType {
-  None = 'None',
-  DownloadFolder = 'DownloadFolder',
-  MovieFolder = 'MovieFolder',
-  TvShowFolder = 'TvShowFolder',
-  MusicFolder = 'MusicFolder',
-  PhotosFolder = 'PhotosFolder',
-  OtherVideosFolder = 'OtherVideosFolder',
-  GamesVideosFolder = 'GamesVideosFolder',
-  Unknown = 'Unknown',
+  None = "None",
+  DownloadFolder = "DownloadFolder",
+  MovieFolder = "MovieFolder",
+  TvShowFolder = "TvShowFolder",
+  MusicFolder = "MusicFolder",
+  PhotosFolder = "PhotosFolder",
+  OtherVideosFolder = "OtherVideosFolder",
+  GamesVideosFolder = "GamesVideosFolder",
+  Unknown = "Unknown",
 }
 
 export interface GeneralSettingsDTO {
@@ -310,8 +300,8 @@ export interface IError {
 }
 
 export enum JobStatus {
-  Started = 'Started',
-  Completed = 'Completed',
+  Started = "Started",
+  Completed = "Completed",
 }
 
 export interface JobStatusUpdateDTOOfObject {
@@ -324,12 +314,12 @@ export interface JobStatusUpdateDTOOfObject {
 }
 
 export enum JobTypes {
-  Unknown = 'Unknown',
-  CheckAllConnectionsStatusByPlexServerJob = 'CheckAllConnectionsStatusByPlexServerJob',
-  DownloadJob = 'DownloadJob',
-  FileMergeJob = 'FileMergeJob',
-  SyncServerMediaJob = 'SyncServerMediaJob',
-  InspectPlexServerJob = 'InspectPlexServerJob',
+  Unknown = "Unknown",
+  CheckAllConnectionsStatusByPlexServerJob = "CheckAllConnectionsStatusByPlexServerJob",
+  DownloadJob = "DownloadJob",
+  FileMergeJob = "FileMergeJob",
+  SyncServerMediaJob = "SyncServerMediaJob",
+  InspectPlexServerJob = "InspectPlexServerJob",
 }
 
 export interface LanguageSettingsDTO {
@@ -362,15 +352,15 @@ export interface LibraryProgress {
  *
  */
 export enum MessageTypes {
-  LibraryProgress = 'LibraryProgress',
-  DownloadTaskUpdate = 'DownloadTaskUpdate',
-  ServerDownloadProgress = 'ServerDownloadProgress',
-  ServerConnectionCheckStatusProgress = 'ServerConnectionCheckStatusProgress',
-  FileMergeProgress = 'FileMergeProgress',
-  SyncServerMediaProgress = 'SyncServerMediaProgress',
-  Notification = 'Notification',
-  JobStatusUpdate = 'JobStatusUpdate',
-  RefreshNotification = 'RefreshNotification',
+  LibraryProgress = "LibraryProgress",
+  DownloadTaskUpdate = "DownloadTaskUpdate",
+  ServerDownloadProgress = "ServerDownloadProgress",
+  ServerConnectionCheckStatusProgress = "ServerConnectionCheckStatusProgress",
+  FileMergeProgress = "FileMergeProgress",
+  SyncServerMediaProgress = "SyncServerMediaProgress",
+  Notification = "Notification",
+  JobStatusUpdate = "JobStatusUpdate",
+  RefreshNotification = "RefreshNotification",
 }
 
 export interface NotificationDTO {
@@ -384,41 +374,34 @@ export interface NotificationDTO {
 }
 
 export enum NotificationLevel {
-  None = 'None',
-  Verbose = 'Verbose',
-  Debug = 'Debug',
-  Information = 'Information',
-  Success = 'Success',
-  Warning = 'Warning',
-  Error = 'Error',
-  Fatal = 'Fatal',
+  None = "None",
+  Verbose = "Verbose",
+  Debug = "Debug",
+  Information = "Information",
+  Success = "Success",
+  Warning = "Warning",
+  Error = "Error",
+  Fatal = "Fatal",
 }
 
 export interface PlexAccountDTO {
   is2Fa: boolean;
   authenticationToken: string;
   clientId: string;
-  /** @minLength 1 */
   displayName: string;
   email: string;
   hasPassword: boolean;
-  /**
-   * @format int32
-   * @min 0
-   * @exclusiveMin true
-   */
+  /** @format int32 */
   id: number;
   isEnabled: boolean;
   isMain: boolean;
   isValidated: boolean;
-  /** @minLength 5 */
   password: string;
   /** @format int64 */
   plexId: number;
   plexLibraryAccess: number[];
   plexServerAccess: number[];
   title: string;
-  /** @minLength 5 */
   username: string;
   uuid: string;
   /** @format date-time */
@@ -600,18 +583,18 @@ export interface PlexMediaStatisticsDTO {
 }
 
 export enum PlexMediaType {
-  None = 'None',
-  Movie = 'Movie',
-  TvShow = 'TvShow',
-  Season = 'Season',
-  Episode = 'Episode',
-  Music = 'Music',
-  Album = 'Album',
-  Song = 'Song',
-  Photos = 'Photos',
-  OtherVideos = 'OtherVideos',
-  Games = 'Games',
-  Unknown = 'Unknown',
+  None = "None",
+  Movie = "Movie",
+  TvShow = "TvShow",
+  Season = "Season",
+  Episode = "Episode",
+  Music = "Music",
+  Album = "Album",
+  Song = "Song",
+  Photos = "Photos",
+  OtherVideos = "OtherVideos",
+  Games = "Games",
+  Unknown = "Unknown",
 }
 
 export interface PlexServerConnectionDTO {
@@ -939,6 +922,15 @@ export interface ResultDTOOfString {
   value?: string | null;
 }
 
+export interface ResultDTOOfUserClaimsDTO {
+  errors: ErrorDTO[];
+  isFailed: boolean;
+  isSuccess: boolean;
+  reasons: ReasonDTO[];
+  successes: SuccessDTO[];
+  value?: UserClaimsDTO | null;
+}
+
 export interface ServerConnectionCheckStatusProgressDTO {
   completed: boolean;
   connectionSuccessful: boolean;
@@ -1015,14 +1007,6 @@ export interface SyncServerMediaProgress {
   percentage: number;
 }
 
-export interface UpdateFolderPathEndpointRequest {
-  folderPathDto: FolderPathDTO;
-}
-
-export interface UpdatePlexAccountByIdEndpointRequest {
-  plexAccountDTO: PlexAccountDTO;
-}
-
 export interface UpdatePlexServerConnectionEndpointRequest {
   /** @minLength 1 */
   address: string;
@@ -1050,12 +1034,10 @@ export interface UpdatePlexServerConnectionEndpointRequest {
   url: string;
 }
 
-export interface UpdateUserSettingsEndpointRequest {
-  settingsModelDto: SettingsModelDTO;
-}
-
-export interface ValidatePlexAccountEndpointRequest {
-  plexAccount: PlexAccountDTO;
+export interface UserClaimsDTO {
+  claims: any[];
+  isLoggedIn: boolean;
+  userName: string;
 }
 
 export interface ValidatePlexServerConnectionEndpointRequest {
@@ -1064,6 +1046,6 @@ export interface ValidatePlexServerConnectionEndpointRequest {
 }
 
 export enum ViewMode {
-  Poster = 'Poster',
-  Table = 'Table',
+  Poster = "Poster",
+  Table = "Table",
 }

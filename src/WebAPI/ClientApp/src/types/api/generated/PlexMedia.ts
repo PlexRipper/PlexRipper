@@ -20,13 +20,12 @@ import { from } from "rxjs";
 
 export class PlexMedia {
   /**
- * No description
- *
- * @tags Plexmedia
- * @name GetAllMediaByTypeEndpoint
- * @request GET:/api/PlexMedia
-
- */
+   * No description
+   * * @tags Plexmedia
+   * @name GetAllMediaByTypeEndpoint
+   * @request GET:/api/PlexMedia
+   * @secure
+   */
   getAllMediaByTypeEndpoint = (
     query: {
       filterOfflineMedia: boolean;
@@ -50,19 +49,19 @@ export class PlexMedia {
         url: `/api/PlexMedia`,
         method: "GET",
         params: query,
+        secure: true,
         format: "json",
         ...params,
       }),
     ).pipe(apiCheckPipe<PlexMediaStatisticsDTO>);
 
   /**
- * No description
- *
- * @tags Plexmedia
- * @name GetMediaDetailByIdEndpoint
- * @request GET:/api/PlexMedia/detail/{plexMediaId}
-
- */
+   * No description
+   * * @tags Plexmedia
+   * @name GetMediaDetailByIdEndpoint
+   * @request GET:/api/PlexMedia/detail/{PlexMediaId}
+   * @secure
+   */
   getMediaDetailByIdEndpoint = (
     plexMediaId: number,
     query: {
@@ -75,19 +74,19 @@ export class PlexMedia {
         url: `/api/PlexMedia/detail/${plexMediaId}`,
         method: "GET",
         params: query,
+        secure: true,
         format: "json",
         ...params,
       }),
     ).pipe(apiCheckPipe<PlexMediaDTO>);
 
   /**
- * No description
- *
- * @tags Plexmedia
- * @name SearchPlexMediaEndpoint
- * @request GET:/api/PlexMedia/search
-
- */
+   * No description
+   * * @tags Plexmedia
+   * @name SearchPlexMediaEndpoint
+   * @request GET:/api/PlexMedia/search
+   * @secure
+   */
   searchPlexMediaEndpoint = (
     query: {
       query: string;
@@ -99,6 +98,7 @@ export class PlexMedia {
         url: `/api/PlexMedia/search`,
         method: "GET",
         params: query,
+        secure: true,
         format: "json",
         ...params,
       }),

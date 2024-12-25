@@ -21,19 +21,19 @@ import { from } from "rxjs";
 
 export class FolderPath {
   /**
- * No description
- *
- * @tags Folderpath
- * @name CreateFolderPathEndpoint
- * @request POST:/api/FolderPath/
-
- */
+   * No description
+   * * @tags Folderpath
+   * @name CreateFolderPathEndpoint
+   * @request POST:/api/FolderPath
+   * @secure
+   */
   createFolderPathEndpoint = (data: FolderPathDTO, params: RequestParams = {}) =>
     from(
       Axios.request<FolderPathDTO>({
-        url: `/api/FolderPath/`,
+        url: `/api/FolderPath`,
         method: "POST",
         data: data,
+        secure: true,
         type: ContentType.Json,
         format: "json",
         ...params,
@@ -41,37 +41,37 @@ export class FolderPath {
     ).pipe(apiCheckPipe<FolderPathDTO>);
 
   /**
- * No description
- *
- * @tags Folderpath
- * @name GetAllFolderPathsEndpoint
- * @request GET:/api/FolderPath/
-
- */
+   * No description
+   * * @tags Folderpath
+   * @name GetAllFolderPathsEndpoint
+   * @request GET:/api/FolderPath
+   * @secure
+   */
   getAllFolderPathsEndpoint = (params: RequestParams = {}) =>
     from(
       Axios.request<FolderPathDTO[]>({
-        url: `/api/FolderPath/`,
+        url: `/api/FolderPath`,
         method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),
     ).pipe(apiCheckPipe<FolderPathDTO[]>);
 
   /**
- * No description
- *
- * @tags Folderpath
- * @name UpdateFolderPathEndpoint
- * @request PUT:/api/FolderPath/
-
- */
+   * No description
+   * * @tags Folderpath
+   * @name UpdateFolderPathEndpoint
+   * @request PUT:/api/FolderPath
+   * @secure
+   */
   updateFolderPathEndpoint = (data: FolderPathDTO, params: RequestParams = {}) =>
     from(
       Axios.request<FolderPathDTO>({
-        url: `/api/FolderPath/`,
+        url: `/api/FolderPath`,
         method: "PUT",
         data: data,
+        secure: true,
         type: ContentType.Json,
         format: "json",
         ...params,
@@ -79,32 +79,31 @@ export class FolderPath {
     ).pipe(apiCheckPipe<FolderPathDTO>);
 
   /**
- * No description
- *
- * @tags Folderpath
- * @name DeleteFolderPathEndpoint
- * @request DELETE:/api/FolderPath/{id}
-
- */
+   * No description
+   * * @tags Folderpath
+   * @name DeleteFolderPathEndpoint
+   * @request DELETE:/api/FolderPath/{Id}
+   * @secure
+   */
   deleteFolderPathEndpoint = (id: number, params: RequestParams = {}) =>
     from(
       Axios.request<ResultDTO>({
         url: `/api/FolderPath/${id}`,
         method: "DELETE",
+        secure: true,
         format: "json",
         ...params,
       }),
     ).pipe(apiCheckPipe<ResultDTO>);
 
   /**
- * No description
- *
- * @tags Folderpath
- * @name GetFolderPathDirectoryEndpoint
- * @summary Get all the FolderPaths entities in the database
- * @request GET:/api/FolderPath/directory
-
- */
+   * No description
+   * * @tags Folderpath
+   * @name GetFolderPathDirectoryEndpoint
+   * @summary Get all the FolderPaths entities in the database
+   * @request GET:/api/FolderPath/directory
+   * @secure
+   */
   getFolderPathDirectoryEndpoint = (
     query?: {
       path?: string | null;
@@ -116,6 +115,7 @@ export class FolderPath {
         url: `/api/FolderPath/directory`,
         method: "GET",
         params: query,
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -123,11 +123,11 @@ export class FolderPath {
 }
 
 export class FolderPathPaths {
-  static createFolderPathEndpoint = () => queryString.stringifyUrl({ url: `/api/FolderPath/` });
+  static createFolderPathEndpoint = () => queryString.stringifyUrl({ url: `/api/FolderPath` });
 
-  static getAllFolderPathsEndpoint = () => queryString.stringifyUrl({ url: `/api/FolderPath/` });
+  static getAllFolderPathsEndpoint = () => queryString.stringifyUrl({ url: `/api/FolderPath` });
 
-  static updateFolderPathEndpoint = () => queryString.stringifyUrl({ url: `/api/FolderPath/` });
+  static updateFolderPathEndpoint = () => queryString.stringifyUrl({ url: `/api/FolderPath` });
 
   static deleteFolderPathEndpoint = (id: number) => queryString.stringifyUrl({ url: `/api/FolderPath/${id}` });
 

@@ -20,13 +20,12 @@ import { from } from "rxjs";
 
 export class Debug {
   /**
- * No description
- *
- * @tags Debug
- * @name GetAllUniqueMediaTitlesEndpoint
- * @request GET:/api/Debug/unique-media-titles
-
- */
+   * No description
+   * * @tags Debug
+   * @name GetAllUniqueMediaTitlesEndpoint
+   * @request GET:/api/Debug/unique-media-titles
+   * @secure
+   */
   getAllUniqueMediaTitlesEndpoint = (
     query: {
       /** @format int32 */
@@ -40,6 +39,7 @@ export class Debug {
         url: `/api/Debug/unique-media-titles`,
         method: "GET",
         params: query,
+        secure: true,
         format: "json",
         ...params,
       }),

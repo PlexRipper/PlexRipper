@@ -207,14 +207,11 @@ public static class Startup
                 {
                     s.Title = "PlexRipper Internal API  (NOT FOR EXTERNAL USE)";
                     s.Version = "v1";
+
                     s.MarkNonNullablePropsAsRequired();
-                    s.RequireParametersWithoutDefault = true;
+
                     s.DocumentProcessors.Add(new NSwagAddExtraTypes());
                     s.OperationProcessors.Add(new NSwagGlobalHeaders());
-
-                    // Fixes for FastEndpoints 5.23+
-                    s.OperationProcessors.Add(new NSwagQueryCamelCase());
-                    s.DocumentProcessors.Add(new NSwagCamelCaseSchemaProcessor());
 
                     // Add cookie-based authentication
                     s.AddAuth(

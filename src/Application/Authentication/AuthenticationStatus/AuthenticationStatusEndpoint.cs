@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
-public class TestAuthenticatedEndpoint : BaseEndpointWithoutRequest<UserClaimsDTO>
+public class AuthenticationStatusEndpoint : BaseEndpointWithoutRequest<UserClaimsDTO>
 {
-    public override string EndpointPath => ApiRoutes.AuthenticatedController + "/auth-test";
+    public override string EndpointPath => ApiRoutes.AuthenticatedController + "/status";
 
     public override void Configure()
     {
@@ -29,7 +29,7 @@ public class TestAuthenticatedEndpoint : BaseEndpointWithoutRequest<UserClaimsDT
                 new UserClaimsDTO()
                 {
                     IsLoggedIn = true,
-                    UserName = User.Identity.Name,
+                    UserName = User.Identity.Name ?? "UNKNOWN USERNAME",
                     Claims = User.Claims.Select(c => new { c.Type, c.Value }),
                 }
             );

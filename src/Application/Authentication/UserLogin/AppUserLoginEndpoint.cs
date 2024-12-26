@@ -68,9 +68,10 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 
         Description(x =>
         {
-            x.Produces(StatusCodes.Status200OK);
-            x.Produces(StatusCodes.Status401Unauthorized);
-            x.Produces(StatusCodes.Status500InternalServerError);
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO));
+            x.Produces(StatusCodes.Status401Unauthorized, typeof(ResultDTO));
+            x.Produces(StatusCodes.Status403Forbidden, typeof(ResultDTO));
+            x.Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO));
         });
     }
 
@@ -82,30 +83,34 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
         _log.Information("Attempting to sign in user {Username}.", username);
 
         // Attempt to sign in the user
-        var result = await _signInManager.PasswordSignInAsync(
+        var signInResult = await _signInManager.PasswordSignInAsync(
             username,
             password,
             isPersistent: false,
             lockoutOnFailure: false
         );
 
-        if (result.Succeeded)
+        if (signInResult.Succeeded)
         {
             _log.Information("User {Username} signed in successfully.", username);
 
             await CookieAuth.SignInAsync(u => u.Roles.Add(DefaultUserAppCredentials.DefaultAdminRole));
 
-            await SendOkAsync(ct);
+            await SendFluentResult(Result.Ok(), ct);
         }
-        else if (result.IsLockedOut)
+        else if (signInResult.IsLockedOut)
         {
-            _log.Warning("User {Username} is locked out.", username);
-            await SendForbiddenAsync(ct);
+            var result = _log.Warning("User {Username} is locked out.", username).ToResult();
+            result.Add403ForbiddenError();
+
+            await SendFluentResult(result, ct);
         }
         else
         {
-            _log.Warning("Failed to sign in user {Username}.", username);
-            await SendUnauthorizedAsync(ct);
+            var result = _log.Warning("Failed to sign in user {Username}.", username).ToResult();
+            result.Add401UnauthorizedError();
+
+            await SendFluentResult(result, ct);
         }
     }
 }

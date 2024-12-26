@@ -257,12 +257,13 @@ public static class Startup
         services.AddIdentityApiEndpoints<AppUser>().AddRoles<IdentityRole>().AddEntityFrameworkStores<AuthDbContext>();
 
         services.AddAuthenticationCookie(
-            validFor: TimeSpan.FromMinutes(10),
+            validFor: TimeSpan.FromHours(6),
             c =>
             {
                 c.Cookie.Name = DefaultUserAppCredentials.DefaultCookieName;
                 c.LoginPath = ApiRoutes.LoginEndpoint;
                 c.LogoutPath = ApiRoutes.LogOutEndpoint;
+                c.SlidingExpiration = true;
                 c.AccessDeniedPath = "/api/access-denied";
 
                 c.Events.OnRedirectToLogin = ctx =>

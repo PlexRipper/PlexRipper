@@ -132,15 +132,17 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			// Create scroll indexes for each letter
 			state.scrollDict = {};
 			state.scrollDict['#'] = 0;
-			// Check for occurrence of title with alphabetic character
-			const sortTitles = get(getters.getMediaItems).map((x) => x.title[0]?.toLowerCase() ?? '#');
-			let lastIndex = 0;
-			const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase();
+			if (get(getters.getMediaItems).length === 0) {
+				// Check for occurrence of title with alphabetic character
+				const sortTitles = get(getters.getMediaItems).map((x) => x.title[0]?.toLowerCase() ?? '#');
+				let lastIndex = 0;
+				const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase();
 
-			for (const letter of alphabet) {
-				lastIndex = sortTitles.findIndex((x, idx) => idx >= lastIndex && x === letter);
-				if (lastIndex > -1) {
-					state.scrollDict[letter] = lastIndex;
+				for (const letter of alphabet) {
+					lastIndex = sortTitles.findIndex((x, idx) => idx >= lastIndex && x === letter);
+					if (lastIndex > -1) {
+						state.scrollDict[letter] = lastIndex;
+					}
 				}
 			}
 			state.scrollAlphabet = Object.keys(state.scrollDict);
@@ -218,6 +220,9 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		allMediaMode: computed(() => state.libraryId === 0),
 		library: computed(() => libraryStore.getLibrary(state.libraryId)),
 		getMediaItems: computed((): Readonly<PlexMediaSlimDTO[]> => {
+			if (!state.items) {
+				return [];
+			}
 			// Currently sorting
 			const query = state.filterQuery.toLowerCase();
 			if (state.sortedState.length > 0) {

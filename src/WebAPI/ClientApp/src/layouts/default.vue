@@ -72,15 +72,19 @@ function toggleNotificationsDrawer() {
 onMounted(() => {
 	useSubscription(
 		useGlobalStore().getPageSetupReady.subscribe({
-			next: () => {
-				Log.debug('Loading has finished, displaying page now');
-				setTimeout(() => {
-					if (settingsStore.generalSettings.firstTimeSetup) {
-						dialogStore.openDialog(DialogType.FirstTimeSetupDialog);
-					} else if (!settingsStore.generalSettings.hasBeenInvitedToDiscord) {
-						dialogStore.openDialog(DialogType.DiscordServerInviteDialog);
-					}
-				}, 1000);
+			next: (ready) => {
+				if (ready) {
+					Log.debug('Loading has finished, displaying page now');
+					setTimeout(() => {
+						if (settingsStore.generalSettings.firstTimeSetup) {
+							dialogStore.openDialog(DialogType.FirstTimeSetupDialog);
+						} else if (!settingsStore.generalSettings.hasBeenInvitedToDiscord) {
+							dialogStore.openDialog(DialogType.DiscordServerInviteDialog);
+						}
+					}, 1000);
+				} else {
+					// TODO: Display loading
+				}
 			},
 			error: (err) => {
 				Log.error('Error while loading page', err);

@@ -16,7 +16,7 @@
 						<Logo
 							:size="24"
 							class="q-mr-md" />
-						{{ t('general.name-version', { version: globalStore.getAppVersion }) }}
+						{{ t('general.name-version', { version: globalStore.version }) }}
 					</q-btn>
 				</q-toolbar-title>
 
@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { useGlobalStore } from '@store';
+import { useGlobalStore, useDialogStore } from '@store';
 import { DialogType } from '@enums';
 
 const { t } = useI18n();

@@ -80,7 +80,6 @@ const imageUrl = computed((): string => {
 
 	const connection = connectionStore.chooseServerConnection(props.mediaItem.plexServerId);
 	if (!connection) {
-		Log.error('No connection found for plexServerId in media item', props.mediaItem.plexServerId);
 		return '';
 	}
 

@@ -17,9 +17,9 @@ import type {
 	SyncServerMediaProgress,
 } from '@dto';
 import { MessageTypes } from '@dto';
-import type IAppConfig from '@class/IAppConfig';
 import type { IRetryPolicy } from '@microsoft/signalr/src/IRetryPolicy';
 import { useDownloadStore, useBackgroundJobsStore, useNotificationsStore } from '@store';
+import Axios from 'axios';
 
 export const useSignalrStore = defineStore('SignalrStore', () => {
 	interface ISignalRStoreState {
@@ -54,7 +54,7 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 	let notificationHubConnection: HubConnection | null;
 
 	const actions = {
-		setup(config: IAppConfig): Observable<ISetupResult> {
+		setup(): Observable<ISetupResult> {
 			return from((async () => {
 				Log.debug('Setting up SignalR Service');
 				const options: IHttpConnectionOptions = {
@@ -69,16 +69,17 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 					nextRetryDelayInMilliseconds: () => 2000,
 				};
 
+				const baseApiUrl = Axios.defaults.baseURL;
 				// Setup Connections
 				progressHubConnection = useCypressSignalRMock('progress', { enableForVitest: true }) ?? new HubConnectionBuilder()
 					.configureLogging(LogLevel.None)
-					.withUrl(`${config.baseUrl}/progress`, options)
+					.withUrl(`${baseApiUrl}/progress`, options)
 					.withAutomaticReconnect(retryPolicy)
 					.build();
 
 				notificationHubConnection = useCypressSignalRMock('notifications', { enableForVitest: true }) ?? new HubConnectionBuilder()
 					.configureLogging(LogLevel.None)
-					.withUrl(`${config.baseUrl}/notifications`, options)
+					.withUrl(`${baseApiUrl}/notifications`, options)
 					.withAutomaticReconnect(retryPolicy)
 					.build();
 

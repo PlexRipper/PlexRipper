@@ -1,11 +1,10 @@
+import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { get } from '@vueuse/core';
-import Log from 'consola';
-import { tap } from 'rxjs/operators';
 import type { ISetupResult, ILocaleConfig, I18nObjectType } from '@interfaces';
-import { useSettingsStore } from './settingsStore';
+import { useSettingsStore } from '@store';
 
 interface ILocalizationStoreState {
 	i18nRef: I18nObjectType;
@@ -23,8 +22,8 @@ export const useLocalizationStore = defineStore('LocalizationStore', () => {
 
 	// Actions
 	const actions = {
-		setup(i18n?: I18nObjectType): Observable<ISetupResult> {
-			return of({ name: useHelpStore.name, isSuccess: true }).pipe(tap(() => actions.setI18nObject(i18n)));
+		setup(): Observable<ISetupResult> {
+			return of({ name: useLocalizationStore.name, isSuccess: true });
 		},
 		setI18nObject(i18n?: I18nObjectType) {
 			if (!i18n) {
@@ -52,14 +51,16 @@ export const useLocalizationStore = defineStore('LocalizationStore', () => {
 				Log.info('Localization has been set to:', isoCode);
 			});
 		},
-		$reset() {
-			Object.assign(state, cloneDeep(defaultState));
+		$reset: () => {
 		},
 	};
 
 	// Getters
 	const getters = {
-		getLanguageLocale: computed((): ILocaleConfig => {
+		getLanguageLocale: computed((): ILocaleConfig | null => {
+			if (!state.i18nRef) {
+				return null;
+			}
 			return state.locales.find((locale) => locale.code === state.i18nRef.locale) as ILocaleConfig;
 		}),
 		getLanguageLocaleOptions: computed((): ILocaleConfig[] => {

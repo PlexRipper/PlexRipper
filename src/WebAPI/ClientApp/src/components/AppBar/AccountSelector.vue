@@ -107,8 +107,6 @@ function runReSyncAccount(accountId = 0): void {
 }
 
 function onLogOut(): void {
-	useSubscription(authStore.logout().subscribe(() =>
-		router.push('/login').then(() => router.go(0)),
-	));
+	useSubscription(authStore.logout().subscribe());
 }
 </script>

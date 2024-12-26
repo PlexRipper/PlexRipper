@@ -99,7 +99,6 @@ export const useServerStore = defineStore('ServerStore', () => {
 		},
 		getVisibleServers: computed((): PlexServerDTO[] => {
 			const servers = getters.getServers().filter((x) => settingsStore.isServerVisible(x.machineIdentifier) && accountStore.getHasAccountServerAccess(x.id));
-			console.log(servers);
 			return orderBy(servers, [(x) => x.owned, (x) => x.name.toLocaleLowerCase()], ['desc', 'asc']);
 		}),
 		getHiddenServers: computed((): PlexServerDTO[] =>

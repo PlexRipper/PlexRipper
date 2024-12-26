@@ -52,14 +52,11 @@ import { useAuthenticationStore } from '@store';
 import { useSubscription } from '@vueuse/rxjs';
 
 const authStore = useAuthenticationStore();
-const router = useRouter();
 const username = ref('PlexRipperRocks');
 const password = ref('Pl€XR!ℙℙ€R69');
 
 function onLogin() {
-	useSubscription(authStore.login(get(username), get(password)).subscribe(() =>
-		router.push('/').then(() => router.go(0)),
-	));
+	useSubscription(authStore.login(get(username), get(password)).subscribe());
 }
 </script>
 

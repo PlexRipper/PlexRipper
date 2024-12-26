@@ -1,10 +1,10 @@
+import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { Observable } from 'rxjs';
 import { forkJoin, of, Subject } from 'rxjs';
-import Log from 'consola';
 import { switchMap, take, tap } from 'rxjs/operators';
 import type IAppConfig from '@class/IAppConfig';
-import type { I18nObjectType, ISetupResult } from '@interfaces';
+import type { ISetupResult } from '@interfaces';
 import {
 	useAccountStore,
 	useAlertStore,
@@ -24,20 +24,33 @@ import {
 	useAuthenticationStore,
 } from '@store';
 
+interface IAppConfigStoreState {
+	version: string;
+	config: IAppConfig;
+	pageReadyObservable: Subject<boolean>;
+}
+
 export const useGlobalStore = defineStore('GlobalStore', () => {
-	const state = reactive<{ config: IAppConfig; pageReadyObservable: Subject<boolean> }>({
-		pageReadyObservable: new Subject<boolean>(),
+	const defaultState: IAppConfigStoreState = {
+		version: '?',
 		config: {} as IAppConfig,
-	});
+		pageReadyObservable: new Subject<boolean>(),
+	};
+
+	const state = reactive<IAppConfigStoreState>(cloneDeep(defaultState));
+
 	const actions = {
-		setupServices({ config, i18n }: { config: IAppConfig; i18n?: I18nObjectType }): Observable<ISetupResult[]> {
-			Log.info('Starting Setup Process');
+		setupServices({ config }: { config: IAppConfig }): Observable<ISetupResult[]> {
+			Log.info('Runtime Config is ready:', config);
 
 			state.config = config;
-			Log.info('Runtime Config is ready - ' + config.version, config);
 
-			return of(config).pipe(
-				switchMap((config) =>
+			return actions.setup();
+		},
+		setup() {
+			return of('').pipe(
+				tap(() => state.pageReadyObservable.next(false)),
+				switchMap(() =>
 					forkJoin([
 						useAccountStore().setup(),
 						useAlertStore().setup(),
@@ -48,13 +61,13 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 						useFolderPathStore().setup(),
 						useHelpStore().setup(),
 						useLibraryStore().setup(),
-						useLocalizationStore().setup(i18n),
+						useLocalizationStore().setup(),
 						useMediaStore().setup(),
 						useNotificationsStore().setup(),
 						useServerConnectionStore().setup(),
 						useServerStore().setup(),
 						useSettingsStore().setup(),
-						useSignalrStore().setup(config),
+						useSignalrStore().setup(),
 					]),
 				),
 				tap((results) => {
@@ -72,7 +85,11 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 			);
 		},
 		setAppVersion(version: string): void {
-			state.config.version = version;
+			if (!version || state.version === version) {
+				return;
+			}
+			Log.info('PlexRipper App Version:', version);
+			state.version = version;
 		},
 		$reset() {
 			useAccountStore().$reset();
@@ -95,7 +112,6 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 	};
 	const getters = {
 		getPageSetupReady: computed((): Observable<boolean> => state.pageReadyObservable.asObservable()),
-		getAppVersion: computed((): string => state.config?.version ?? '?'),
 	};
 	return {
 		...toRefs(state),

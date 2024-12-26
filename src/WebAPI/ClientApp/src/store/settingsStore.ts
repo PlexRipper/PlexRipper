@@ -50,12 +50,13 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 
 	const state = reactive<SettingsModelDTO>(cloneDeep(defaultState));
 
-	const _settingsUpdated = new Subject<SettingsModelDTO>();
+	let _settingsUpdated = new Subject<SettingsModelDTO>();
 
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
 			// Send the settings to the server when they change
+			_settingsUpdated = new Subject<SettingsModelDTO>();
 			_settingsUpdated
 				.pipe(
 					debounceTime(1000),
@@ -147,6 +148,7 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			}
 		},
 		$reset() {
+			_settingsUpdated.complete();
 			Object.assign(state, cloneDeep(defaultState));
 		},
 	};

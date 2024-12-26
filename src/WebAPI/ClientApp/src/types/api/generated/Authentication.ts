@@ -65,13 +65,14 @@ export class Authentication {
    */
   appUserLogOutEndpoint = (params: RequestParams = {}) =>
     from(
-      Axios.request<void>({
+      Axios.request<String>({
         url: `/api/Authentication/logout`,
         method: "POST",
         secure: true,
+        format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<void>);
+    ).pipe(apiCheckPipe<String>);
 }
 
 export class AuthenticationPaths {

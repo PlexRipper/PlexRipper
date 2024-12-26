@@ -1,7 +1,7 @@
 import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import type { Observable } from 'rxjs';
-import { forkJoin, of, Subject } from 'rxjs';
+import type { Subject, Observable } from 'rxjs';
+import { catchError, ReplaySubject, forkJoin, of } from 'rxjs';
 import { switchMap, take, tap } from 'rxjs/operators';
 import type IAppConfig from '@class/IAppConfig';
 import type { ISetupResult } from '@interfaces';
@@ -34,7 +34,7 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 	const defaultState: IAppConfigStoreState = {
 		version: '?',
 		config: {} as IAppConfig,
-		pageReadyObservable: new Subject<boolean>(),
+		pageReadyObservable: new ReplaySubject<boolean>(),
 	};
 
 	const state = reactive<IAppConfigStoreState>(cloneDeep(defaultState));
@@ -48,13 +48,16 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 			return actions.setup();
 		},
 		setup() {
-			return of('').pipe(
+			return useAuthenticationStore().setup().pipe(
 				tap(() => state.pageReadyObservable.next(false)),
-				switchMap(() =>
-					forkJoin([
+				switchMap((authResult): Observable<ISetupResult[]> => {
+					if (!authResult.isSuccess) {
+						state.pageReadyObservable.next(true);
+						return of([authResult]);
+					}
+					return forkJoin([
 						useAccountStore().setup(),
 						useAlertStore().setup(),
-						useAuthenticationStore().setup(),
 						useBackgroundJobsStore().setup(),
 						useDialogStore().setup(),
 						useDownloadStore().setup(),
@@ -68,20 +71,25 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 						useServerStore().setup(),
 						useSettingsStore().setup(),
 						useSignalrStore().setup(),
-					]),
-				),
+					]);
+				}),
+				catchError((error) => {
+					if (error === 'Unauthorized') {
+						return of([{ name: 'PageSetup', isSuccess: true }]);
+					}
+					Log.error('Page Setup has failed:', error);
+					return of([{ name: 'PageSetup', isSuccess: false }]);
+				}),
 				tap((results) => {
+					state.pageReadyObservable.next(true);
 					if (results.some((result) => !result.isSuccess)) {
 						for (const result of results) {
 							if (!result.isSuccess) {
-								Log.error(`Service ${result.name} has a failed setup process`);
+								Log.error(`Service ${result.name} has a failed setup process`, result);
 							}
 						}
 					}
-					Log.info(`Page Setup has finished successfully`);
-					state.pageReadyObservable.next(true);
 				}),
-				take(1),
 			);
 		},
 		setAppVersion(version: string): void {

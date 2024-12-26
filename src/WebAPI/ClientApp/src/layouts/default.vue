@@ -1,31 +1,34 @@
 <template>
 	<!--	Instead of multiple layouts we merge into one default layout to prevent full
         page change (flashing white background) during transitions.	-->
-	<q-layout view="hHh LpR lFf">
-		<!--	Use for everything else	-->
-		<template v-if="!isEmptyLayout">
-			<AppBar
-				@show-navigation="toggleNavigationsDrawer"
-				@show-notifications="toggleNotificationsDrawer" />
-			<NavigationDrawer :show-drawer="showNavigationDrawerState" />
-			<NotificationsDrawer
-				:show-drawer="showNotificationsDrawerState"
-				@cleared="toggleNotificationsDrawer" />
-		</template>
-		<!--	page-load-completed is only visible once the page is done loading. This is used for Cypress E2E	-->
-		<q-page-container data-cy="page-load-completed">
-			<slot />
-		</q-page-container>
-		<!--	Dialogs	-->
-		<HelpDialog />
-		<AlertDialog
-			v-for="alertItem in alerts"
-			:key="alertItem.id"
-			:alert="alertItem" />
-		<CheckServerConnectionsDialog />
-		<FirstTimeSetupDialog />
-		<DiscordInviteDialog />
-		<SyncServerMediaDialog />
+	<q-layout
+		view="hHh LpR lFf">
+		<PageLoadOverlay :loading="pageLoading">
+			<!--	Use for everything else	-->
+			<template v-if="!isEmptyLayout">
+				<AppBar
+					@show-navigation="toggleNavigationsDrawer"
+					@show-notifications="toggleNotificationsDrawer" />
+				<NavigationDrawer :show-drawer="showNavigationDrawerState" />
+				<NotificationsDrawer
+					:show-drawer="showNotificationsDrawerState"
+					@cleared="toggleNotificationsDrawer" />
+			</template>
+			<!--	page-load-completed is only visible once the page is done loading. This is used for Cypress E2E	-->
+			<q-page-container data-cy="page-load-completed">
+				<slot />
+			</q-page-container>
+			<!--	Dialogs	-->
+			<HelpDialog />
+			<AlertDialog
+				v-for="alertItem in alerts"
+				:key="alertItem.id"
+				:alert="alertItem" />
+			<CheckServerConnectionsDialog />
+			<FirstTimeSetupDialog />
+			<DiscordInviteDialog />
+			<SyncServerMediaDialog />
+		</PageLoadOverlay>
 		<!--	Background	-->
 		<Background :hide-background="isEmptyLayout" />
 	</q-layout>
@@ -43,19 +46,26 @@ import {
 	useGlobalStore,
 	useDialogStore,
 	useSettingsStore,
+	useAuthenticationStore,
 	useRoute,
 	nextTick,
+	useNuxtApp,
 } from '#imports';
 
+const nuxtApp = useNuxtApp();
 const route = useRoute();
 const helpStore = useHelpStore();
 const alertStore = useAlertStore();
 const dialogStore = useDialogStore();
 const settingsStore = useSettingsStore();
+const globalStore = useGlobalStore();
+const authStore = useAuthenticationStore();
 
 const alerts = ref<IAlert[]>([]);
 const showNavigationDrawerState = ref(true);
 const showNotificationsDrawerState = ref(false);
+
+const pageLoading = ref(true);
 
 const isEmptyLayout = computed((): boolean => {
 	return route.fullPath.includes('setup') || route.fullPath.includes('login');
@@ -69,21 +79,31 @@ function toggleNotificationsDrawer() {
 	set(showNotificationsDrawerState, !get(showNotificationsDrawerState));
 }
 
+nuxtApp.hook('page:start', () => {
+	Log.debug('page:start');
+	set(pageLoading, true);
+});
+
+nuxtApp.hook('page:finish', () => {
+	Log.debug('page:finish');
+	set(pageLoading, false);
+	if (authStore.isLoggedIn) {
+		setTimeout(() => {
+			if (settingsStore.generalSettings.firstTimeSetup) {
+				dialogStore.openDialog(DialogType.FirstTimeSetupDialog);
+			} else if (!settingsStore.generalSettings.hasBeenInvitedToDiscord) {
+				dialogStore.openDialog(DialogType.DiscordServerInviteDialog);
+			}
+		}, 1000);
+	}
+});
+
 onMounted(() => {
 	useSubscription(
-		useGlobalStore().getPageSetupReady.subscribe({
+		globalStore.getPageSetupReady.subscribe({
 			next: (ready) => {
 				if (ready) {
 					Log.debug('Loading has finished, displaying page now');
-					setTimeout(() => {
-						if (settingsStore.generalSettings.firstTimeSetup) {
-							dialogStore.openDialog(DialogType.FirstTimeSetupDialog);
-						} else if (!settingsStore.generalSettings.hasBeenInvitedToDiscord) {
-							dialogStore.openDialog(DialogType.DiscordServerInviteDialog);
-						}
-					}, 1000);
-				} else {
-					// TODO: Display loading
 				}
 			},
 			error: (err) => {

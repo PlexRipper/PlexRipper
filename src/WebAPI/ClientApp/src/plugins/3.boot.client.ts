@@ -19,7 +19,6 @@ export default defineNuxtPlugin((nuxtApp) => {
 			baseUrl = `${currentLocation.protocol}//${currentLocation.hostname}:${currentLocation.port}`;
 		}
 
-		Log.info('nuxtApp:', nuxtApp);
 		const appConfig: IAppConfig = {
 			nodeEnv: publicEnv.nodeEnv,
 			isProduction: publicEnv.nodeEnv === 'production',

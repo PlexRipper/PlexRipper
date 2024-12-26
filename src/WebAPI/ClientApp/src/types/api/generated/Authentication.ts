@@ -12,7 +12,7 @@
 import type { RequestParams } from "./http-client";
 import { ContentType } from "./http-client";
 
-import type { AppUserLoginEndpointRequest, UserClaimsDTO } from "./data-contracts";
+import type { AppUserLoginEndpointRequest, ResultDTO, UserClaimsDTO } from "./data-contracts";
 
 import { apiCheckPipe } from "@api/base";
 import Axios from "axios";
@@ -23,14 +23,14 @@ export class Authentication {
   /**
    * No description
    * * @tags Authentication
-   * @name TestAuthenticatedEndpoint
-   * @request GET:/api/Authentication/auth-test
+   * @name AuthenticationStatusEndpoint
+   * @request GET:/api/Authentication/status
    * @secure
    */
-  testAuthenticatedEndpoint = (params: RequestParams = {}) =>
+  authenticationStatusEndpoint = (params: RequestParams = {}) =>
     from(
       Axios.request<UserClaimsDTO>({
-        url: `/api/Authentication/auth-test`,
+        url: `/api/Authentication/status`,
         method: "GET",
         secure: true,
         format: "json",
@@ -47,14 +47,15 @@ export class Authentication {
    */
   appUserLoginEndpoint = (data: AppUserLoginEndpointRequest, params: RequestParams = {}) =>
     from(
-      Axios.request<void>({
+      Axios.request<ResultDTO>({
         url: `/api/Authentication/login`,
         method: "POST",
         data: data,
         type: ContentType.FormData,
+        format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<void>);
+    ).pipe(apiCheckPipe<ResultDTO>);
 
   /**
    * No description
@@ -76,7 +77,7 @@ export class Authentication {
 }
 
 export class AuthenticationPaths {
-  static testAuthenticatedEndpoint = () => queryString.stringifyUrl({ url: `/api/Authentication/auth-test` });
+  static authenticationStatusEndpoint = () => queryString.stringifyUrl({ url: `/api/Authentication/status` });
 
   static appUserLoginEndpoint = () => queryString.stringifyUrl({ url: `/api/Authentication/login` });
 

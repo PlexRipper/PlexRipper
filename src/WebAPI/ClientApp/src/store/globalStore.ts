@@ -6,21 +6,22 @@ import { switchMap, take, tap } from 'rxjs/operators';
 import type IAppConfig from '@class/IAppConfig';
 import type { I18nObjectType, ISetupResult } from '@interfaces';
 import {
-	useServerStore,
-	useLibraryStore,
-	useDownloadStore,
 	useAccountStore,
-	useNotificationsStore,
-	useFolderPathStore,
-	useServerConnectionStore,
-	useSettingsStore,
-	useBackgroundJobsStore,
-	useHelpStore,
 	useAlertStore,
+	useBackgroundJobsStore,
+	useDialogStore,
+	useDownloadStore,
+	useFolderPathStore,
+	useHelpStore,
+	useLibraryStore,
 	useLocalizationStore,
 	useMediaStore,
+	useNotificationsStore,
+	useServerConnectionStore,
+	useServerStore,
+	useSettingsStore,
 	useSignalrStore,
-	useDialogStore,
+	useAuthenticationStore,
 } from '@store';
 
 export const useGlobalStore = defineStore('GlobalStore', () => {
@@ -39,20 +40,21 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 				switchMap((config) =>
 					forkJoin([
 						useAccountStore().setup(),
+						useAlertStore().setup(),
+						useAuthenticationStore().setup(),
+						useBackgroundJobsStore().setup(),
+						useDialogStore().setup(),
 						useDownloadStore().setup(),
 						useFolderPathStore().setup(),
+						useHelpStore().setup(),
 						useLibraryStore().setup(),
+						useLocalizationStore().setup(i18n),
+						useMediaStore().setup(),
 						useNotificationsStore().setup(),
 						useServerConnectionStore().setup(),
 						useServerStore().setup(),
 						useSettingsStore().setup(),
-						useBackgroundJobsStore().setup(),
-						useHelpStore().setup(),
-						useAlertStore().setup(),
-						useLocalizationStore().setup(i18n),
-						useMediaStore().setup(),
 						useSignalrStore().setup(config),
-						useDialogStore().setup(),
 					]),
 				),
 				tap((results) => {
@@ -71,6 +73,24 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 		},
 		setAppVersion(version: string): void {
 			state.config.version = version;
+		},
+		$reset() {
+			useAccountStore().$reset();
+			useAlertStore().$reset();
+			useAuthenticationStore().$reset();
+			useBackgroundJobsStore().$reset();
+			useDialogStore().$reset();
+			useDownloadStore().$reset();
+			useFolderPathStore().$reset();
+			useHelpStore().$reset();
+			useLibraryStore().$reset();
+			useLocalizationStore().$reset();
+			useMediaStore().$reset();
+			useNotificationsStore().$reset();
+			useServerConnectionStore().$reset();
+			useServerStore().$reset();
+			useSettingsStore().$reset();
+			useSignalrStore().$reset();
 		},
 	};
 	const getters = {

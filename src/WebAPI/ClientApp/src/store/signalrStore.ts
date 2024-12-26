@@ -34,16 +34,20 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		refreshDataNotificationSubject: Subject<DataType>;
 	}
 
-	const state = reactive<ISignalRStoreState>({
+	const defaultState: ISignalRStoreState = {
 		// Data
 		libraryProgress: [],
 		syncServerMediaProgress: [],
-		serverConnectionCheckStatusProgress: [], // Subjects
+		serverConnectionCheckStatusProgress: [],
+
+		// Subjects
 		libraryProgressSubject: new Subject<LibraryProgress[]>(),
 		syncServerMediaProgressSubject: new Subject<SyncServerMediaProgress[]>(),
 		serverConnectionCheckStatusProgressSubject: new Subject<ServerConnectionCheckStatusProgressDTO[]>(),
 		refreshDataNotificationSubject: new Subject<DataType>(),
-	});
+	};
+
+	const state = reactive<ISignalRStoreState>(cloneDeep(defaultState));
 
 	// Connections
 	let progressHubConnection: HubConnection | null;
@@ -82,6 +86,9 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 				await startProgressHubConnection();
 				await startNotificationHubConnection();
 			})()).pipe(switchMap(() => of({ name: useSignalrStore.name, isSuccess: true })), take(1));
+		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 

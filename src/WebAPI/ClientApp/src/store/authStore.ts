@@ -5,6 +5,7 @@ import type { Observable } from 'rxjs';
 import { authenticationApi } from '@api';
 import { of } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { cloneDeep } from 'lodash-es';
 
 export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 	const actions = {
@@ -25,6 +26,9 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 			return authenticationApi.appUserLogOutEndpoint().pipe(tap((res) => {
 				Log.info('User logged out', res);
 			}));
+		},
+		$reset() {
+			Object.assign({}, cloneDeep({}));
 		},
 	};
 	const getters = {};

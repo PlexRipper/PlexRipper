@@ -8,11 +8,18 @@ import type { ISetupResult } from '@interfaces';
 import { plexLibraryApi } from '@api';
 import { DataType } from '@dto';
 import { useServerStore, useSettingsStore, useSignalrStore } from '@store';
+import { cloneDeep } from 'lodash-es';
+
+interface ILibraryStoreState {
+	libraries: PlexLibraryDTO[];
+}
 
 export const useLibraryStore = defineStore('LibraryStore', () => {
-	const state = reactive<{ libraries: PlexLibraryDTO[] }>({
+	const defaultState: ILibraryStoreState = {
 		libraries: [],
-	});
+	};
+
+	const state = reactive<ILibraryStoreState>(cloneDeep(defaultState));
 
 	const serverStore = useServerStore();
 	const settingsStore = useSettingsStore();
@@ -76,6 +83,9 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 					}
 				}
 			});
+		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 	const getters = {

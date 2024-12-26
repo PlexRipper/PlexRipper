@@ -6,13 +6,20 @@ import type { PlexServerDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexServerApi } from '@api';
 import { DataType } from '@dto';
-import { orderBy } from 'lodash-es';
+import { cloneDeep, orderBy } from 'lodash-es';
 import { useAccountStore, useServerConnectionStore, useSettingsStore, useSignalrStore } from '@store';
 
+interface IServerStoreState {
+	servers: PlexServerDTO[];
+}
+
 export const useServerStore = defineStore('ServerStore', () => {
-	const state = reactive<{ servers: PlexServerDTO[] }>({
+	const defaultState: IServerStoreState = {
 		servers: [],
-	});
+	};
+
+	const state = reactive<IServerStoreState>(cloneDeep(defaultState));
+
 	const accountStore = useAccountStore();
 	const serverConnectionStore = useServerConnectionStore();
 	const settingsStore = useSettingsStore();
@@ -64,6 +71,9 @@ export const useServerStore = defineStore('ServerStore', () => {
 					hidden,
 				})
 				.pipe(switchMap(() => settingsStore.refreshSettings()));
+		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 

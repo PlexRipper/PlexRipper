@@ -1,4 +1,4 @@
-import { isEqual, orderBy } from 'lodash-es';
+import { cloneDeep, isEqual, orderBy } from 'lodash-es';
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { get } from '@vueuse/core';
 import { PlexMediaType, ViewMode, type PlexMediaSlimDTO, type PlexMediaStatisticsDTO } from '@dto';
@@ -9,28 +9,30 @@ import { map, tap } from 'rxjs/operators';
 import { iif, defer, type Observable, of } from 'rxjs';
 import { useSettingsStore, useLibraryStore } from '@store';
 
+interface IMediaOverviewStoreState {
+	libraryId: number;
+	items: Readonly<PlexMediaSlimDTO[]>;
+	sortedItems: Readonly<PlexMediaSlimDTO[]>;
+	itemsLength: number;
+	sortedState: IMediaOverviewSort[];
+	scrollDict: Record<string, number>;
+	scrollAlphabet: string[];
+	selection: ISelection;
+	downloadButtonVisible: boolean;
+	mediaType: PlexMediaType;
+	filterQuery: string;
+	lastMediaItemViewed: PlexMediaSlimDTO | null;
+	loading: boolean;
+	isDetailView: boolean;
+	allMovieCount: number;
+	allTvShowCount: number;
+	allSeasonCount: number;
+	allEpisodeCount: number;
+	allFileSize: number;
+}
+
 export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
-	const state = reactive<{
-		libraryId: number;
-		items: Readonly<PlexMediaSlimDTO[]>;
-		sortedItems: Readonly<PlexMediaSlimDTO[]>;
-		itemsLength: number;
-		sortedState: IMediaOverviewSort[];
-		scrollDict: Record<string, number>;
-		scrollAlphabet: string[];
-		selection: ISelection;
-		downloadButtonVisible: boolean;
-		mediaType: PlexMediaType;
-		filterQuery: string;
-		lastMediaItemViewed: PlexMediaSlimDTO | null;
-		loading: boolean;
-		isDetailView: boolean;
-		allMovieCount: number;
-		allTvShowCount: number;
-		allSeasonCount: number;
-		allEpisodeCount: number;
-		allFileSize: number;
-	}>({
+	const defaultState: IMediaOverviewStoreState = {
 		libraryId: 0,
 		items: [],
 		sortedItems: [],
@@ -50,7 +52,9 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		allSeasonCount: 0,
 		allEpisodeCount: 0,
 		allFileSize: 0,
-	});
+	};
+
+	const state = reactive<IMediaOverviewStoreState>(cloneDeep(defaultState));
 
 	const settingsStore = useSettingsStore();
 	const libraryStore = useLibraryStore();
@@ -198,6 +202,9 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 				),
 			);
 			state.sortedState = newSortedState;
+		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 

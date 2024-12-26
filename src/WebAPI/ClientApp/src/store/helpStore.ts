@@ -2,12 +2,21 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { Observable } from 'rxjs';
 import { of, Subject } from 'rxjs';
 import type { IHelp, ISetupResult } from '@interfaces';
+import { cloneDeep } from 'lodash-es';
+
+interface IHelpStoreState {
+	helpIdDialog: IHelp;
+	helpDialogObservable: Subject<IHelp>;
+}
 
 export const useHelpStore = defineStore('HelpStore', () => {
-	const state = reactive<{ helpIdDialog: IHelp; helpDialogObservable: Subject<IHelp> }>({
+	const defaultState: IHelpStoreState = {
 		helpIdDialog: { label: '', title: '', text: '' },
 		helpDialogObservable: new Subject<IHelp>(),
-	});
+	};
+
+	const state = reactive<IHelpStoreState>(cloneDeep(defaultState));
+
 	const actions = {
 		setup(): Observable<ISetupResult> {
 			return of({ name: useHelpStore.name, isSuccess: true });
@@ -18,6 +27,9 @@ export const useHelpStore = defineStore('HelpStore', () => {
 			}
 			state.helpIdDialog = help;
 			state.helpDialogObservable.next(help);
+		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 	const getters = {

@@ -7,12 +7,19 @@ import { tap } from 'rxjs/operators';
 import type { ISetupResult, ILocaleConfig, I18nObjectType } from '@interfaces';
 import { useSettingsStore } from './settingsStore';
 
+interface ILocalizationStoreState {
+	i18nRef: I18nObjectType;
+	locales: ILocaleConfig[];
+}
+
 export const useLocalizationStore = defineStore('LocalizationStore', () => {
 	// State
-	const state = reactive<{ i18nRef: I18nObjectType; locales: ILocaleConfig[] }>({
+	const defaultState: ILocalizationStoreState = {
 		i18nRef: {} as I18nObjectType,
 		locales: [],
-	});
+	};
+
+	const state = reactive<ILocalizationStoreState>(cloneDeep(defaultState));
 
 	// Actions
 	const actions = {
@@ -44,6 +51,9 @@ export const useLocalizationStore = defineStore('LocalizationStore', () => {
 				useSettingsStore().languageSettings.language = isoCode;
 				Log.info('Localization has been set to:', isoCode);
 			});
+		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 

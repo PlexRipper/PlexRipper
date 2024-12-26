@@ -5,16 +5,21 @@ import { filter, take, switchMap } from 'rxjs/operators';
 import type { ISetupResult } from '@interfaces';
 import { type CheckAllConnectionStatusUpdateDTO, JobStatus, JobTypes, type SyncServerMediaJobUpdateDTO } from '@dto';
 import type { JobStatusUpdateDTO } from '@api';
+import { cloneDeep } from 'lodash-es';
+
+interface IBackgroundJobsStore {
+	jobStatusObservable: Subject<JobStatusUpdateDTO>;
+	jobStatusList: JobStatusUpdateDTO[];
+}
 
 export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 	// State
-	const state = reactive<{
-		jobStatusObservable: Subject<JobStatusUpdateDTO>;
-		jobStatusList: JobStatusUpdateDTO[];
-	}>({
+	const defaultState: IBackgroundJobsStore = {
 		jobStatusObservable: new Subject<JobStatusUpdateDTO>(),
 		jobStatusList: [],
-	});
+	};
+
+	const state = reactive<IBackgroundJobsStore>(cloneDeep(defaultState));
 
 	const accountStore = useAccountStore();
 	const serverStore = useServerStore();
@@ -57,6 +62,9 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 				state.jobStatusList.push(jobStatusUpdate);
 			}
 			state.jobStatusObservable.next(jobStatusUpdate);
+		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 

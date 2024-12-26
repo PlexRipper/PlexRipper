@@ -5,11 +5,19 @@ import { map, take } from 'rxjs/operators';
 import type { PlexMediaType, PlexMediaDTO } from '@dto';
 import type { ISetupResult, IObjectUrl } from '@interfaces';
 import { plexMediaApi } from '@api';
+import { cloneDeep } from 'lodash-es';
+
+interface IMediaUrlStoreState {
+	mediaUrls: IObjectUrl[];
+}
 
 export const useMediaStore = defineStore('MediaStore', () => {
-	const state = reactive<{ mediaUrls: IObjectUrl[] }>({
+	const defaultState: IMediaUrlStoreState = {
 		mediaUrls: [],
-	});
+	};
+
+	const state = reactive<IMediaUrlStoreState>(cloneDeep(defaultState));
+
 	const actions = {
 		setup(): Observable<ISetupResult> {
 			return of({ name: useMediaStore.name, isSuccess: true }).pipe(take(1));
@@ -29,6 +37,9 @@ export const useMediaStore = defineStore('MediaStore', () => {
 			}
 
 			state.mediaUrls.splice(index, 1, mediaUrl);
+		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 	const getters = {};

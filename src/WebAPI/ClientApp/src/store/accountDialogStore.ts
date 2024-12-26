@@ -75,7 +75,7 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 			dialogStore.closeDialog(DialogType.AccountVerificationCodeDialog);
 			dialogStore.closeDialog(DialogType.AccountConfirmationDialog);
 			dialogStore.closeDialog(DialogType.AccountDialog);
-			actions.reset();
+			actions.$reset();
 		},
 		validatePlexAccount() {
 			state.validateLoading = true;
@@ -172,8 +172,8 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 			state.deleteLoading = true;
 			return accountStore.deleteAccount(state.id).pipe(tap(() => dialogStore.closeDialog(DialogType.AccountDialog)));
 		},
-		reset() {
-			Object.assign(state, defaultState);
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 	const getters = {

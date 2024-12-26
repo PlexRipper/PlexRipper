@@ -58,6 +58,7 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 					skipNegotiation: true,
 					logger: LogLevel.None,
 					transport: HttpTransportType.WebSockets,
+					withCredentials: true,
 				};
 
 				const retryPolicy: IRetryPolicy = {

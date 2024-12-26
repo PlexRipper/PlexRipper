@@ -184,7 +184,8 @@
         },
         "account-selector": {
             "all-accounts": "Alle Plex-Konten",
-            "title": "Konten aktualisieren"
+            "title": "Konten aktualisieren",
+            "log-out-button": "Ausloggen"
         },
         "media-selection-dialog": {
             "title": "Legen Sie den Indexbereich fest, um das Medium auszuwählen (#{min} - #{max})"
@@ -719,6 +720,9 @@
             "index": {
                 "header": "Der Typ der Bibliothek {libraryName} ist unbekannt"
             }
+        },
+        "login": {
+            "header": "Melden Sie sich an, um fortzufahren"
         }
     },
     "debug": {

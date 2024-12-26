@@ -89,25 +89,10 @@
 						:label="$t('help.account-form.password.label')"
 						:title="$t('help.account-form.password.title')"
 						:text="$t('help.account-form.password.text')">
-						<q-input
+						<PasswordInputField
 							v-model="accountDialogStore.password"
-							:rules="getPasswordRules"
-							color="red"
-							full-width
-							outlined
-							required
-							hide-bottom-space
-							data-cy="account-form-password-input"
-							:append-icon="accountDialogStore.showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-							:type="accountDialogStore.showPassword ? 'text' : 'password'"
-							@click:append="accountDialogStore.showPassword = !accountDialogStore.showPassword">
-							<template #append>
-								<q-btn
-									flat
-									:icon="accountDialogStore.showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-									@click="accountDialogStore.showPassword = !accountDialogStore.showPassword" />
-							</template>
-						</q-input>
+							class="q-my-md"
+							cy="account-form-password-input" />
 					</HelpRow>
 				</HelpGroup>
 			</q-tab-panel>
@@ -121,25 +106,10 @@
 						:label="$t('help.account-form.auth-token.label')"
 						:title="$t('help.account-form.auth-token.title')"
 						:text="$t('help.account-form.auth-token.text')">
-						<q-input
+						<PasswordInputField
 							v-model="accountDialogStore.authenticationToken"
-							:rules="getPasswordRules"
-							color="red"
-							full-width
-							outlined
-							required
-							hide-bottom-space
-							data-cy="account-form-auth-token-input"
-							:append-icon="accountDialogStore.showAuthToken ? 'mdi-eye' : 'mdi-eye-off'"
-							:type="accountDialogStore.showAuthToken ? 'text' : 'password'"
-							@click:append="accountDialogStore.showAuthToken = !accountDialogStore.showAuthToken">
-							<template #append>
-								<q-btn
-									flat
-									:icon="accountDialogStore.showAuthToken ? 'mdi-eye-off' : 'mdi-eye'"
-									@click="accountDialogStore.showAuthToken = !accountDialogStore.showAuthToken" />
-							</template>
-						</q-input>
+							class="q-my-md"
+							cy="account-form-auth-token-input" />
 					</HelpRow>
 				</HelpGroup>
 			</q-tab-panel>
@@ -165,11 +135,6 @@ const getDisplayNameRules = computed(() => [
 ]);
 
 const getUsernameRules = computed(() => [(v: string): boolean | string => !!v || 'Username is required']);
-
-const getPasswordRules = computed(() => [
-	(v: string): boolean | string => !!v || 'Password is required',
-	(v: string): boolean | string => (v && v.length >= 8) || 'Password must be at least 8 characters',
-]);
 </script>
 
 <style lang="scss">

@@ -184,7 +184,8 @@
         },
         "account-selector": {
             "all-accounts": "Wszystkie konta Plex",
-            "title": "Aktywne konta"
+            "title": "Aktywne konta",
+            "log-out-button": "Wyloguj"
         },
         "media-selection-dialog": {
             "title": "Ustaw zakres indeksu, aby wybrać media (#{min} - #{max})"
@@ -719,6 +720,9 @@
             "index": {
                 "header": "Biblioteka {libraryName} jest nieznanego typu"
             }
+        },
+        "login": {
+            "header": "ZALOGUJ SIĘ, ABY KONTYNUOWAĆ"
         }
     },
     "debug": {

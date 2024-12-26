@@ -58,7 +58,7 @@ const showNavigationDrawerState = ref(true);
 const showNotificationsDrawerState = ref(false);
 
 const isEmptyLayout = computed((): boolean => {
-	return route.fullPath.includes('setup');
+	return route.fullPath.includes('setup') || route.fullPath.includes('login');
 });
 
 function toggleNavigationsDrawer() {

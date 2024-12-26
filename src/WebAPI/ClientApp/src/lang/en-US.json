@@ -184,7 +184,8 @@
         },
         "account-selector": {
             "all-accounts": "All Plex Accounts",
-            "title": "Refresh Accounts"
+            "title": "Refresh Accounts",
+            "log-out-button": "Logout"
         },
         "media-selection-dialog": {
             "title": "Set the index range to select the media (#{min} - #{max})"
@@ -719,6 +720,9 @@
             "index": {
                 "header": "Library {libraryName} is of an unknown type"
             }
+        },
+        "login": {
+            "header": "SIGN IN TO CONTINUE"
         }
     },
     "debug": {

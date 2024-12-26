@@ -51,7 +51,7 @@ export class Authentication {
         url: `/api/Authentication/login`,
         method: "POST",
         data: data,
-        type: ContentType.Json,
+        type: ContentType.FormData,
         ...params,
       }),
     ).pipe(apiCheckPipe<void>);

@@ -106,7 +106,8 @@ export class FolderPath {
    */
   getFolderPathDirectoryEndpoint = (
     query?: {
-      path?: string | null;
+      /** @default "" */
+      path?: string;
     },
     params: RequestParams = {},
   ) =>
@@ -131,6 +132,8 @@ export class FolderPathPaths {
 
   static deleteFolderPathEndpoint = (id: number) => queryString.stringifyUrl({ url: `/api/FolderPath/${id}` });
 
-  static getFolderPathDirectoryEndpoint = (query?: { path?: string | null }) =>
-    queryString.stringifyUrl({ url: `/api/FolderPath/directory`, query });
+  static getFolderPathDirectoryEndpoint = (query?: {
+    /** @default "" */
+    path?: string;
+  }) => queryString.stringifyUrl({ url: `/api/FolderPath/directory`, query });
 }

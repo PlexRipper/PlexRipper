@@ -51,7 +51,7 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 				.pipe(switchMap(() => connectionStore.refreshPlexServerConnections()))
 				.subscribe();
 
-			return of({ name: useBackgroundJobsStore.name, isSuccess: true }).pipe(take(1));
+			return of({ name: 'useBackgroundJobsStore', isSuccess: true }).pipe(take(1));
 		},
 
 		setStatusJobUpdate<T>(jobStatusUpdate: JobStatusUpdateDTO<T>) {

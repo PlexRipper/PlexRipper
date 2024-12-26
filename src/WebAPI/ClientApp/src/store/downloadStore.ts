@@ -36,7 +36,7 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return actions.fetchDownloadList().pipe(switchMap(() => of({ name: useDownloadStore.name, isSuccess: true })));
+			return actions.fetchDownloadList().pipe(switchMap(() => of({ name: 'useDownloadStore', isSuccess: true })));
 		},
 		/**
      * Fetch the download list from the API.

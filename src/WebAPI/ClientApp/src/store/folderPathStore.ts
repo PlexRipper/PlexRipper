@@ -29,7 +29,7 @@ export const useFolderPathStore = defineStore('FolderPathStore', () => {
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return actions.refreshFolderPaths().pipe(switchMap(() => of({ name: useFolderPathStore.name, isSuccess: true })));
+			return actions.refreshFolderPaths().pipe(switchMap(() => of({ name: 'useFolderPathStore', isSuccess: true })));
 		},
 		refreshFolderPaths() {
 			return folderPathApi.getAllFolderPathsEndpoint().pipe(

@@ -20,7 +20,7 @@ export const useMediaStore = defineStore('MediaStore', () => {
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return of({ name: useMediaStore.name, isSuccess: true }).pipe(take(1));
+			return of({ name: 'useMediaStore', isSuccess: true }).pipe(take(1));
 		},
 		getMediaDataDetailById(mediaId: number, mediaType: PlexMediaType): Observable<PlexMediaDTO> {
 			return plexMediaApi

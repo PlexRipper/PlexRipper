@@ -19,7 +19,7 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 	const actions = {
 		setup(): Observable<ISetupResult> {
 			return actions.status().pipe(switchMap(() => of({
-				name: useAuthenticationStore.name,
+				name: 'useAuthenticationStore',
 				isSuccess: state.isLoggedIn,
 			})));
 		},

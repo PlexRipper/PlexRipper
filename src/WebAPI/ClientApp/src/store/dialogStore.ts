@@ -18,7 +18,7 @@ export const useDialogStore = defineStore('DialogStore', () => {
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return of({ name: useDialogStore.name, isSuccess: true });
+			return of({ name: 'useDialogStore', isSuccess: true });
 		},
 		closeDialog(name: DialogType): void {
 			state.dialogUpdate.next({ name, state: false, data: {} as unknown });

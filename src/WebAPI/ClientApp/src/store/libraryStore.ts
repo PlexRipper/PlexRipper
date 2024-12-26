@@ -30,7 +30,7 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 			// Listen for refresh notifications
 			signalRStore.getRefreshNotification(DataType.PlexLibrary).pipe(switchMap(() => actions.refreshLibraries())).subscribe();
 
-			return actions.refreshLibraries().pipe(switchMap(() => of({ name: useLibraryStore.name, isSuccess: true })));
+			return actions.refreshLibraries().pipe(switchMap(() => of({ name: 'useLibraryStore', isSuccess: true })));
 		},
 		refreshLibraries(): Observable<PlexLibraryDTO[]> {
 			return plexLibraryApi.getAllPlexLibrariesEndpoint().pipe(

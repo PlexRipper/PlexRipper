@@ -30,7 +30,7 @@ export const useAccountStore = defineStore('AccountStore', () => {
 			// Listen for refresh notifications
 			signalRStore.getRefreshNotification(DataType.PlexAccount).pipe(switchMap(() => actions.refreshAccounts())).subscribe();
 
-			return actions.refreshAccounts().pipe(switchMap(() => of({ name: useAccountStore.name, isSuccess: true })));
+			return actions.refreshAccounts().pipe(switchMap(() => of({ name: 'useAccountStore', isSuccess: true })));
 		},
 		refreshAccounts() {
 			return plexAccountApi.getAllPlexAccountsEndpoint().pipe(

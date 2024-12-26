@@ -70,7 +70,7 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 						if (mutation.type) _settingsUpdated.next(state);
 					}),
 				),
-				switchMap(() => of({ name: useSettingsStore.name, isSuccess: true })),
+				switchMap(() => of({ name: 'useSettingsStore', isSuccess: true })),
 			);
 		},
 		refreshSettings(): Observable<SettingsModelDTO | null> {

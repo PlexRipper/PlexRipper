@@ -86,7 +86,7 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 				setupSubscriptions();
 				await startProgressHubConnection();
 				await startNotificationHubConnection();
-			})()).pipe(switchMap(() => of({ name: useSignalrStore.name, isSuccess: true })), take(1));
+			})()).pipe(switchMap(() => of({ name: 'useSignalrStore', isSuccess: true })), take(1));
 		},
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));

@@ -31,7 +31,7 @@ export const useServerStore = defineStore('ServerStore', () => {
 			// Listen for refresh notifications
 			signalRStore.getRefreshNotification(DataType.PlexServer).pipe(switchMap(() => actions.refreshPlexServers())).subscribe();
 
-			return actions.refreshPlexServers().pipe(switchMap(() => of({ name: useServerStore.name, isSuccess: true })));
+			return actions.refreshPlexServers().pipe(switchMap(() => of({ name: 'useServerStore', isSuccess: true })));
 		},
 		refreshPlexServer(serverId: number) {
 			return plexServerApi.getPlexServerByIdEndpoint(serverId).pipe(

@@ -18,7 +18,7 @@ export const useAlertStore = defineStore('AlertStore', () => {
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return of({ name: useAlertStore.name, isSuccess: true });
+			return of({ name: 'useAlertStore', isSuccess: true });
 		},
 		showAlert(alert: IAlert): void {
 			const newAlert = { ...alert, id: Date.now() };

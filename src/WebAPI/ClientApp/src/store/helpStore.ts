@@ -19,7 +19,7 @@ export const useHelpStore = defineStore('HelpStore', () => {
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return of({ name: useHelpStore.name, isSuccess: true });
+			return of({ name: 'useHelpStore', isSuccess: true });
 		},
 		openHelpDialog(help: IHelp): void {
 			if (!help) {

@@ -23,7 +23,7 @@ export const useNotificationsStore = defineStore('NotificationsStore', () => {
 			return actions.fetchNotifications().pipe(
 				switchMap(() =>
 					of({
-						name: useNotificationsStore.name,
+						name: 'useNotificationsStore',
 						isSuccess: true,
 					}),
 				),

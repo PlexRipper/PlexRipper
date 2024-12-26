@@ -23,7 +23,7 @@ export const useLocalizationStore = defineStore('LocalizationStore', () => {
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return of({ name: useLocalizationStore.name, isSuccess: true });
+			return of({ name: 'useLocalizationStore', isSuccess: true });
 		},
 		setI18nObject(i18n?: I18nObjectType) {
 			if (!i18n) {

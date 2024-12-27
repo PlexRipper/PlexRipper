@@ -23,6 +23,7 @@ describe('sign-in-process', () => {
 				body: generateResultDTO<AppUserLoginEndpointRequest>({
 					username: 'admin',
 					password: 'password',
+					rememberMe: false,
 				}),
 			});
 			cy.interceptAuthenticationStatus(true);
@@ -30,6 +31,7 @@ describe('sign-in-process', () => {
 			// Type credentials
 			cy.getCy('login-username-input').type('admin');
 			cy.getCy('login-password-input').type('password');
+			cy.getCy('login-remember-me-input').click();
 			cy.getCy('login-submit-button').click();
 
 			cy.url().should('eq', route('/'));
@@ -55,10 +57,24 @@ describe('sign-in-process', () => {
 			// Type credentials
 			cy.getCy('login-username-input').type('admin');
 			cy.getCy('login-password-input').type('password');
+			cy.getCy('login-remember-me-input').click();
 			cy.getCy('login-submit-button').click();
 
 			cy.url().should('eq', route('/login'));
 			cy.getCy('login-invalid-credentials-alert').should('be.visible');
+
+			// Submit 3 times to lock account
+			cy.getCy('login-submit-button').click();
+			cy.getCy('login-submit-button').click();
+
+			cy.intercept('POST', AuthenticationPaths.appUserLoginEndpoint(), {
+				statusCode: 403,
+				body: generateFailedResultDTO(),
+			});
+			cy.getCy('login-submit-button').click();
+
+			cy.url().should('eq', route('/login'));
+			cy.getCy('login-locked-out-alert').should('be.visible');
 		});
 	});
 });

@@ -60,7 +60,8 @@
 						<!-- Remember Me -->
 						<q-checkbox
 							v-model="rememberMe"
-							label="Remember Me" />
+							data-cy="login-remember-me-input"
+							:label="$t('pages.login.remember-me')" />
 					</QCol>
 				</QRow>
 			</QCardSection>

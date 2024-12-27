@@ -724,7 +724,8 @@
         "login": {
             "header": "SIGN IN TO CONTINUE",
             "invalid-credentials": " Incorrect Username or Password ",
-            "locked-out": "You failed to hack PlexRipper, now you're timed out for 5 minutes!"
+            "locked-out": "You failed to hack PlexRipper, now you're timed out for 5 minutes!",
+            "remember-me": "Remember Me"
         }
     },
     "debug": {

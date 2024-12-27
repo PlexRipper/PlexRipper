@@ -724,7 +724,8 @@
         "login": {
             "header": "ZALOGUJ SIĘ, ABY KONTYNUOWAĆ",
             "invalid-credentials": "Nieprawidłowa nazwa użytkownika lub hasło",
-            "locked-out": "Nie udało Ci się zhakować PlexRippera, teraz masz 5 minut przerwy!"
+            "locked-out": "Nie udało Ci się zhakować PlexRippera, teraz masz 5 minut przerwy!",
+            "remember-me": "Pamiętaj mnie"
         }
     },
     "debug": {

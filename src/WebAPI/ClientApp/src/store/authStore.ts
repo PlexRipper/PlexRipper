@@ -54,7 +54,7 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 			tap((res) => state.isLoggedIn = res.isSuccess),
 			catchError((err) => {
 				state.isLoggedIn = false;
-				return err;
+				return of(err);
 			})),
 		$reset: () => {
 		},

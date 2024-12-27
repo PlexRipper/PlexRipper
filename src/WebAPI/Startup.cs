@@ -254,7 +254,15 @@ public static class Startup
             options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
         });
 
-        services.AddIdentityApiEndpoints<AppUser>().AddRoles<IdentityRole>().AddEntityFrameworkStores<AuthDbContext>();
+        services
+            .AddIdentityApiEndpoints<AppUser>(options =>
+            {
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 3;
+                options.Lockout.AllowedForNewUsers = true;
+            })
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<AuthDbContext>();
 
         services.AddAuthenticationCookie(
             validFor: TimeSpan.FromHours(6),

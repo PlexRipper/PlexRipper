@@ -14,16 +14,24 @@ public record AppUserLoginEndpointRequest()
 {
     /// <summary>
     ///  The username of the <see cref="AppUser"/>.
+    /// <para> The default username is <see cref="DefaultUserAppCredentials.DefaultPassword"/>. </para>
     /// </summary>
     [DefaultValue(DefaultUserAppCredentials.DefaultUsername)]
     public required string Username { get; init; }
 
     /// <summary>
-    ///  The password of the <see cref="AppUser"/>.
-    ///  <para> The default password is <see cref="DefaultUserAppCredentials.DefaultPassword"/>. </para>
+    /// The password of the <see cref="AppUser"/>.
+    /// <para> The default password is <see cref="DefaultUserAppCredentials.DefaultPassword"/>. </para>
     /// </summary>
     [DefaultValue(DefaultUserAppCredentials.DefaultPassword)]
     public required string Password { get; init; }
+
+    /// <summary>
+    /// A value indicating whether the user should be remembered when the browser is closed.
+    /// <para> The default value is false </para>
+    /// </summary>
+    [DefaultValue(false)]
+    public required bool RememberMe { get; init; }
 };
 
 public class AppUserLoginEndpointRequestValidator : Validator<AppUserLoginEndpointRequest>
@@ -63,6 +71,7 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
             {
                 Username = DefaultUserAppCredentials.DefaultUsername,
                 Password = DefaultUserAppCredentials.DefaultPassword,
+                RememberMe = false,
             };
         });
 
@@ -86,8 +95,8 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
         var signInResult = await _signInManager.PasswordSignInAsync(
             username,
             password,
-            isPersistent: false,
-            lockoutOnFailure: false
+            isPersistent: req.RememberMe,
+            lockoutOnFailure: true
         );
 
         if (signInResult.Succeeded)

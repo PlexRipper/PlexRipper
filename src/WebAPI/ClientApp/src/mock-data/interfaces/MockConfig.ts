@@ -11,6 +11,7 @@ import type {
 export interface MockConfig {
 	seed: number;
 	debugDisplayData: boolean;
+	pageLoadDelay: number;
 	isLoggedIn: boolean;
 	// region Server
 	plexServerCount: number;

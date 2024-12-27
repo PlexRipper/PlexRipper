@@ -87,8 +87,8 @@ import { useAuthenticationStore } from '@store';
 import { useSubscription } from '@vueuse/rxjs';
 
 const authStore = useAuthenticationStore();
-const username = ref('PlexRipperRocks');
-const password = ref('Pl€XR!ℙℙ€R69');
+const username = ref('');
+const password = ref('');
 const rememberMe = ref(false);
 const invalidCredentials = ref(false);
 const lockedOut = ref(false);

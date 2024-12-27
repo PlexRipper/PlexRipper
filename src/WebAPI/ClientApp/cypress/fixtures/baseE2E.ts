@@ -88,7 +88,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 	}
 
 	// Authentication call
-	cy.interceptAuthenticationStatus(validConfig.isLoggedIn).then(() => {
+	cy.interceptAuthenticationStatus(validConfig.isLoggedIn, validConfig.pageLoadDelay).then(() => {
 		if (validConfig.debugDisplayData) {
 			cy.log('BasePageSetup -> authentication status', validConfig.isLoggedIn);
 		}

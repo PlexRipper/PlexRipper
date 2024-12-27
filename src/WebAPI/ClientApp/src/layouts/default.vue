@@ -3,7 +3,7 @@
         page change (flashing white background) during transitions.	-->
 	<q-layout
 		view="hHh LpR lFf">
-		<PageLoadOverlay :loading="pageLoading">
+		<PageLoadOverlay :loading="isLoading">
 			<!--	Use for everything else	-->
 			<template v-if="!isEmptyLayout">
 				<AppBar
@@ -30,7 +30,7 @@
 			<SyncServerMediaDialog />
 		</PageLoadOverlay>
 		<!--	Background	-->
-		<Background :hide-background="isEmptyLayout" />
+		<Background :hide-background="isEmptyLayout || isLoading" />
 	</q-layout>
 </template>
 
@@ -66,10 +66,11 @@ const showNavigationDrawerState = ref(true);
 const showNotificationsDrawerState = ref(false);
 
 const pageLoading = ref(true);
+const pageApiLoading = ref(true);
 
-const isEmptyLayout = computed((): boolean => {
-	return route.fullPath.includes('setup') || route.fullPath.includes('login');
-});
+const isLoading = computed((): boolean => get(pageLoading) || get(pageApiLoading));
+const isEmptyLayout = computed((): boolean => route.fullPath.includes('setup') || route.fullPath.includes('login'),
+);
 
 function toggleNavigationsDrawer() {
 	set(showNavigationDrawerState, !get(showNavigationDrawerState));
@@ -102,12 +103,14 @@ onMounted(() => {
 	useSubscription(
 		globalStore.getPageSetupReady.subscribe({
 			next: (ready) => {
+				set(pageApiLoading, !ready);
 				if (ready) {
-					Log.debug('Loading has finished, displaying page now');
+					Log.debug('PageSetup API calls have finished');
 				}
 			},
 			error: (err) => {
-				Log.error('Error while loading page', err);
+				Log.error('Error while loading API data', err);
+				set(pageApiLoading, true);
 			},
 		}),
 	);

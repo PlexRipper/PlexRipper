@@ -12,6 +12,7 @@ export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 		isLoggedIn: true,
 		plexServerCount: 5,
 		seed: 1234,
+		pageLoadDelay: 0,
 		debugDisplayData: false,
 		plexAccountCount: 1,
 		firstTimeSetup: false,

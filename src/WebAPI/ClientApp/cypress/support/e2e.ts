@@ -64,8 +64,9 @@ Cypress.Commands.add('hubPublishInspectPlexServerJob', (status: JobStatus, plexS
 	cy.hubPublishJobStatusUpdate<number[]>(JobTypes.InspectPlexServerJob, status, plexServerIds),
 );
 
-Cypress.Commands.add('interceptAuthenticationStatus', (loggedIn: boolean) => {
+Cypress.Commands.add('interceptAuthenticationStatus', (loggedIn: boolean, pageLoadDelay: number = 0) => {
 	cy.intercept('GET', AuthenticationPaths.authenticationStatusEndpoint(), {
+		delay: pageLoadDelay,
 		statusCode: loggedIn ? 200 : 401,
 		body: loggedIn
 			? generateResultDTO<UserClaimsDTO>({

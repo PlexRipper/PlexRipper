@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
@@ -14,17 +15,19 @@ public class GetMediaDetailByIdEndpointRequest
     /// <summary>
     /// NOTE: This constructor is needed to make the query param optional in the front-end typescript-api generation.
     /// </summary>
-    public GetMediaDetailByIdEndpointRequest(PlexMediaType type)
+    [SetsRequiredMembers]
+    public GetMediaDetailByIdEndpointRequest(int plexMediaId, PlexMediaType type)
     {
+        PlexMediaId = plexMediaId;
         Type = type;
     }
 
     /// <summary>The id of the <see cref="PlexMedia"/>.</summary>
-    public int PlexMediaId { get; init; }
+    public required int PlexMediaId { get; init; }
 
     /// <summary> The <see cref="PlexMediaType">Type</see> of the PlexMedia.</summary>
     [QueryParam, BindFrom("type")]
-    public PlexMediaType Type { get; init; }
+    public required PlexMediaType Type { get; init; }
 }
 
 public class GetMediaDetailByIdEndpointRequestValidator : Validator<GetMediaDetailByIdEndpointRequest>

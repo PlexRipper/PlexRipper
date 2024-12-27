@@ -10,9 +10,9 @@ declare global {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		interface Chainable<Subject> {
 			/**
-			 * Custom command to set up the base page request interceptions for e2e tests
-			 * @example cy.basePageSetup({ plexAccountCount: 2, plexServerCount: 5 })
-			 */
+       * Custom command to set up the base page request interceptions for e2e tests
+       * @example cy.basePageSetup({ plexAccountCount: 2, plexServerCount: 5 })
+       */
 			basePageSetup(config: Partial<MockConfig>): Chainable<IBasePageSetupResult>;
 
 			getPageData(): Chainable<IBasePageSetupResult>;
@@ -21,7 +21,7 @@ declare global {
 
 			getCy<E extends Node = HTMLElement>(
 				selector: string,
-				options?: Partial<Loggable & Timeoutable & Withinable & Shadow>,
+				options?: Partial<Loggable & Timeoutable & Withinable & Shadow>
 			): Chainable<JQuery<E>>;
 
 			hubPublishJobStatusUpdate<T>(type: JobTypes, status: JobStatus, data: T): Chainable;
@@ -29,10 +29,12 @@ declare global {
 			hubPublishCheckPlexServerConnectionsJob(
 				status: JobStatus,
 				servers: PlexServerDTO[],
-				connections: PlexServerConnectionDTO[],
+				connections: PlexServerConnectionDTO[]
 			): Chainable;
 
 			hubPublishInspectPlexServerJob(status: JobStatus, plexServerIds: number[]): Chainable;
+
+			interceptAuthenticationStatus(loggedIn: boolean): Chainable;
 		}
 	}
 }

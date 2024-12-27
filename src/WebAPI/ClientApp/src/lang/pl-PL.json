@@ -722,7 +722,8 @@
             }
         },
         "login": {
-            "header": "ZALOGUJ SIĘ, ABY KONTYNUOWAĆ"
+            "header": "ZALOGUJ SIĘ, ABY KONTYNUOWAĆ",
+            "invalid-credentials": "Nieprawidłowa nazwa użytkownika lub hasło"
         }
     },
     "debug": {

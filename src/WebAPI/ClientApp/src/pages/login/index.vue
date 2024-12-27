@@ -21,6 +21,7 @@
 				</QRow>
 			</QCardSection>
 			<q-card-section>
+				<!-- Username Login Field -->
 				<q-input
 					v-model="username"
 					color="red"
@@ -29,15 +30,25 @@
 					required
 					hide-bottom-space
 					data-cy="login-username-input" />
+				<!-- Password Login Field -->
 				<PasswordInputField
 					v-model="password"
 					class="q-my-md"
 					cy="login-password-input" />
+				<!-- Invalid Credentials Error -->
+				<QAlert
+					v-if="invalidCredentials"
+					type="error"
+					cy="login-invalid-credentials-alert"
+					class="q-mx-none">
+					{{ $t('pages.login.invalid-credentials') }}
+				</QAlert>
 			</q-card-section>
 
 			<QCardActions align="center">
 				<BaseButton
 					block
+					cy="login-submit-button"
 					label="Login"
 					class="login-button"
 					@click="onLogin" />
@@ -47,16 +58,19 @@
 </template>
 
 <script setup lang="ts">
-import { get } from '@vueuse/core';
+import { get, set } from '@vueuse/core';
 import { useAuthenticationStore } from '@store';
 import { useSubscription } from '@vueuse/rxjs';
 
 const authStore = useAuthenticationStore();
-const username = ref('PlexRipperRocks');
-const password = ref('Pl€XR!ℙℙ€R69');
+const username = ref('');
+const password = ref('');
+const invalidCredentials = ref(false);
 
 function onLogin() {
-	useSubscription(authStore.login(get(username), get(password)).subscribe());
+	useSubscription(authStore.login(get(username), get(password)).subscribe((isLoggedIn) => {
+		set(invalidCredentials, !isLoggedIn);
+	}));
 }
 </script>
 
@@ -65,7 +79,7 @@ function onLogin() {
 
 .login-card {
   @extend .background-md;
-  margin: 50px auto 0;
+  margin: 6rem auto 0;
   max-width: 400px;
 
   .login-button {

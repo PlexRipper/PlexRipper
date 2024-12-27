@@ -1,12 +1,19 @@
 import './commands';
 import Log from 'consola';
 import { basePageSetup, route, type IBasePageSetupResult } from '@fixtures/baseE2E';
-import { generateJobStatusUpdate, type MockConfig } from '@mock';
+import {
+	generateJobStatusUpdate, type MockConfig,
+	generateResultDTO, generateFailedResultDTO,
+} from '@mock';
+import {
+	AuthenticationPaths,
+} from '@api/api-paths';
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import {
 	JobStatus,
 	JobTypes,
 	MessageTypes,
+	type UserClaimsDTO,
 	type PlexServerConnectionDTO,
 	type CheckAllConnectionStatusUpdateDTO,
 	type PlexServerDTO,
@@ -56,3 +63,16 @@ Cypress.Commands.add(
 Cypress.Commands.add('hubPublishInspectPlexServerJob', (status: JobStatus, plexServerIds: number[]) =>
 	cy.hubPublishJobStatusUpdate<number[]>(JobTypes.InspectPlexServerJob, status, plexServerIds),
 );
+
+Cypress.Commands.add('interceptAuthenticationStatus', (loggedIn: boolean) => {
+	cy.intercept('GET', AuthenticationPaths.authenticationStatusEndpoint(), {
+		statusCode: loggedIn ? 200 : 401,
+		body: loggedIn
+			? generateResultDTO<UserClaimsDTO>({
+					userName: 'admin',
+					claims: ['Admin'],
+					isLoggedIn: loggedIn,
+				})
+			: generateFailedResultDTO(),
+	});
+});

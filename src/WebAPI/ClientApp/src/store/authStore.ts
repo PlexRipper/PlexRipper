@@ -3,7 +3,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { ISetupResult } from '@interfaces';
 import type { Observable } from 'rxjs';
 import { authenticationApi } from '@api';
-import { of } from 'rxjs';
+import { catchError, of } from 'rxjs';
 import { tap, switchMap } from 'rxjs/operators';
 import { useGlobalStore } from '@store';
 import { useRouter } from '#build/imports';
@@ -29,17 +29,16 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 			data.append('password', password);
 
 			// @ts-expect-error - FormData is not assignable to type 'AppUserLoginEndpointRequest'
-			return authenticationApi.appUserLoginEndpoint(data).pipe(
-				tap((res) => {
-					if (res.isSuccess) {
-						Log.info('User logged in', res);
-						state.isLoggedIn = true;
-					} else {
-						Log.error('User login failed', res);
-						state.isLoggedIn = false;
-					}
-				}),
-			).pipe(switchMap(() => globalStore.setup()), tap(() => router.push('/')));
+			return authenticationApi.appUserLoginEndpoint(data).pipe(switchMap((res) => {
+				if (res.isSuccess) {
+					Log.info('User logged in', res);
+					state.isLoggedIn = true;
+					return globalStore.setup().pipe(tap(() => router.push('/')), switchMap(() => of(true)));
+				}
+				Log.error('User login failed', res);
+				state.isLoggedIn = false;
+				return of(false);
+			}));
 		},
 		logout() {
 			return authenticationApi.appUserLogOutEndpoint().pipe(
@@ -48,7 +47,11 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 				tap(() => globalStore.$reset()));
 		},
 		status: () => authenticationApi.authenticationStatusEndpoint().pipe(
-			tap((res) => state.isLoggedIn = res.isSuccess)),
+			tap((res) => state.isLoggedIn = res.isSuccess),
+			catchError((err) => {
+				state.isLoggedIn = false;
+				return err;
+			})),
 		$reset: () => {
 		},
 	};

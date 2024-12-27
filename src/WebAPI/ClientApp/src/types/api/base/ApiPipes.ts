@@ -2,6 +2,7 @@ import type { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import type { AxiosResponse } from 'axios';
 import type { ResultDTO } from '@interfaces';
+import { catchError, of } from 'rxjs';
 
 export function apiCheckPipe<T>(source$: Observable<AxiosResponse<T>>): Observable<ResultDTO<T>> {
 	return source$.pipe(
@@ -16,6 +17,7 @@ export function apiCheckPipe<T>(source$: Observable<AxiosResponse<T>>): Observab
 				successes: res.successes,
 			};
 		}),
+		catchError((error) => of(error)),
 		// Ensure we complete any API calls after the response has been received
 		take(1),
 	);

@@ -722,7 +722,8 @@
             }
         },
         "login": {
-            "header": "Melden Sie sich an, um fortzufahren"
+            "header": "Melden Sie sich an, um fortzufahren",
+            "invalid-credentials": " Falscher Benutzername oder falsches Passwort"
         }
     },
     "debug": {

@@ -722,7 +722,8 @@
             }
         },
         "login": {
-            "header": "CONNECTEZ-VOUS POUR CONTINUER"
+            "header": "CONNECTEZ-VOUS POUR CONTINUER",
+            "invalid-credentials": " identifiant ou mot de passe incorrect"
         }
     },
     "debug": {

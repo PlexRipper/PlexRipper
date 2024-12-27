@@ -14,12 +14,12 @@ import {
 import { generateSettingsModel } from '@factories/settings-factory';
 import { generatePlexAccounts } from '@factories/plex-account-factory';
 import {
+	PlexMediaType,
 	type DownloadTaskDTO,
 	type PlexAccountDTO,
 	type PlexLibraryDTO,
 	type PlexMediaSlimDTO,
 	type PlexMediaStatisticsDTO,
-	PlexMediaType,
 	type PlexServerConnectionDTO,
 	type PlexServerDTO,
 	type ServerDownloadProgressDTO,
@@ -86,6 +86,13 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 	) {
 		throw new Error('All override properties must be defined.');
 	}
+
+	// Authentication call
+	cy.interceptAuthenticationStatus(validConfig.isLoggedIn).then(() => {
+		if (validConfig.debugDisplayData) {
+			cy.log('BasePageSetup -> authentication status', validConfig.isLoggedIn);
+		}
+	});
 
 	// PlexServers call
 	result.plexServers = config.override.plexServer(generatePlexServers({ config }));
@@ -227,6 +234,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 			media: mediaList,
 		});
 
+		// Generate media statistics
 		const mediaStatisticsDTO: PlexMediaStatisticsDTO = {
 			movieCount: library.type === PlexMediaType.Movie ? mediaList.length : 0,
 			tvShowCount: library.type === PlexMediaType.TvShow ? mediaList.length : 0,
@@ -237,6 +245,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 			mediaList,
 		};
 
+		// Library media endpoints
 		cy.intercept(
 			'GET',
 			PlexLibraryPaths.getPlexLibraryMediaEndpoint(library.id, {
@@ -279,14 +288,7 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 
 	for (const mediaType of [PlexMediaType.Movie, PlexMediaType.TvShow]) {
 		cy.intercept(
-			'GET',
-			PlexMediaPaths.getAllMediaByTypeEndpoint({
-				mediaType,
-				page: 0,
-				size: 0,
-				filterOwnedMedia: false,
-				filterOfflineMedia: false,
-			}),
+			'GET', '/api/PlexMedia*',
 			{
 				statusCode: 200,
 				body: generateResultDTO(

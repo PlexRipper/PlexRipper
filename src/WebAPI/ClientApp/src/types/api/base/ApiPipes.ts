@@ -6,19 +6,22 @@ import { catchError, of } from 'rxjs';
 
 export function apiCheckPipe<T>(source$: Observable<AxiosResponse<T>>): Observable<ResultDTO<T>> {
 	return source$.pipe(
-		map((res) => res.data as ResultDTO<T>),
-		map((res): ResultDTO<T> => {
-			return {
-				isSuccess: res.isSuccess,
-				isFailed: res.isFailed,
-				errors: res.errors,
-				reasons: res.reasons,
-				value: res.value,
-				successes: res.successes,
-			};
-		}),
-		catchError((error) => of(error)),
+		map((res) => toResultDTO<T>(res)),
+		catchError((error) => of(toResultDTO<never>(error.response))),
 		// Ensure we complete any API calls after the response has been received
 		take(1),
 	);
+}
+
+function toResultDTO<T>(res: AxiosResponse): ResultDTO<T> {
+	const result = res.data as ResultDTO<T>;
+	return {
+		isSuccess: result.isSuccess,
+		isFailed: result.isFailed,
+		errors: result.errors,
+		reasons: result.reasons,
+		value: result.value,
+		successes: result.successes,
+		statusCode: res.status,
+	};
 }

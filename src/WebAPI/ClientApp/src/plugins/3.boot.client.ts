@@ -52,15 +52,12 @@ function setupAxios(appConfig: IAppConfig, router: Router) {
 
 			// Redirect to log-in on 401 Unauthorized
 			if (status === 401) {
-				router.push('/login'); // Redirect to the login page
-				return Promise.reject('Unauthorized');
+				router.push('/login');
 			}
 
 			// Optionally, handle other error codes (e.g., 403 Forbidden)
 			if (status === 403) {
-				// Example: Redirect to access denied page or show a message
-				router.push('/access-denied');
-				return Promise.reject('Access Denied');
+				router.push('/login');
 			}
 
 			// Reject the promise to ensure the calling code can still handle the error

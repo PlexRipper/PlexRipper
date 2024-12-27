@@ -13,7 +13,6 @@ public class AuthenticationStatusEndpoint : BaseEndpointWithoutRequest<UserClaim
         AllowAnonymous();
         Description(x =>
         {
-            // x.AutoTagOverride("Authentication");
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<UserClaimsDTO>));
             x.Produces(StatusCodes.Status401Unauthorized, typeof(ResultDTO));
             x.Produces(StatusCodes.Status500InternalServerError);

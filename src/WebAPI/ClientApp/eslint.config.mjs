@@ -1,7 +1,9 @@
 import vueI18n from '@intlify/eslint-plugin-vue-i18n';
 import withNuxt from './.nuxt/eslint.config.mjs';
 
-export default withNuxt(...vueI18n.configs['flat/recommended'])
+export default withNuxt([{
+	ignores: ['.idea/'],
+}]).append(...vueI18n.configs['flat/recommended'])
 	.append({
 		rules: {
 			'vue/html-closing-bracket-newline': [

@@ -34,7 +34,7 @@ declare global {
 
 			hubPublishInspectPlexServerJob(status: JobStatus, plexServerIds: number[]): Chainable;
 
-			interceptAuthenticationStatus(loggedIn: boolean, pageLoadDelay: number): Chainable;
+			interceptAuthenticationStatus(loggedIn: boolean, pageLoadDelay?: number): Chainable;
 		}
 	}
 }

@@ -10,7 +10,7 @@ public class AuthenticationStatusEndpoint : BaseEndpointWithoutRequest<UserClaim
     public override void Configure()
     {
         Get(EndpointPath);
-
+        AllowAnonymous();
         Description(x =>
         {
             // x.AutoTagOverride("Authentication");
@@ -26,11 +26,11 @@ public class AuthenticationStatusEndpoint : BaseEndpointWithoutRequest<UserClaim
         if (User.Identity?.IsAuthenticated == true)
         {
             var result = Result.Ok(
-                new UserClaimsDTO()
+                new UserClaimsDTO
                 {
                     IsLoggedIn = true,
                     UserName = User.Identity.Name ?? "UNKNOWN USERNAME",
-                    Claims = User.Claims.Select(c => new { c.Type, c.Value }),
+                    Claims = User.Claims.Select(c => c.Type).ToList(),
                 }
             );
             await SendFluentResult(result, x => x, ct);

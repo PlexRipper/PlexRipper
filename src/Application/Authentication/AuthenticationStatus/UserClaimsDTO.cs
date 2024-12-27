@@ -1,10 +1,10 @@
 namespace PlexRipper.Application;
 
-public record UserClaimsDTO()
+public record UserClaimsDTO
 {
-    public bool IsLoggedIn { get; init; }
+    public required bool IsLoggedIn { get; init; }
 
-    public string UserName { get; init; }
+    public required string UserName { get; init; }
 
-    public IEnumerable<object> Claims { get; init; }
+    public required List<string> Claims { get; init; }
 }

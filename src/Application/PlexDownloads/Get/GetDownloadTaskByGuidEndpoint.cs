@@ -8,6 +8,9 @@ namespace PlexRipper.Application;
 
 public record GetDownloadTaskByGuidRequest
 {
+    /// <summary>
+    /// NOTE: This constructor is needed to make the query param optional in the front-end typescript-api generation.
+    /// </summary>
     public GetDownloadTaskByGuidRequest(DownloadTaskType type = DownloadTaskType.None)
     {
         Type = type;

@@ -12,6 +12,9 @@ namespace PlexRipper.Application;
 /// <returns>A list of all <see cref="PlexAccount"/>s.</returns>
 public record GetAllPlexAccountsEndpointRequest
 {
+    /// <summary>
+    /// NOTE: This constructor is needed to make the query param optional in the front-end typescript-api generation.
+    /// </summary>
     public GetAllPlexAccountsEndpointRequest(bool enabledOnly = false)
     {
         EnabledOnly = enabledOnly;

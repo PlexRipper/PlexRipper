@@ -8,6 +8,9 @@ namespace PlexRipper.Application;
 
 public record QueueSyncPlexServerJobEndpointRequest
 {
+    /// <summary>
+    /// NOTE: This constructor is needed to make the query param optional in the front-end typescript-api generation.
+    /// </summary>
     public QueueSyncPlexServerJobEndpointRequest(bool forceSync = false)
     {
         ForceSync = forceSync;

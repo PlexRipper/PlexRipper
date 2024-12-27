@@ -12,14 +12,11 @@ namespace PlexRipper.Application;
 public class GetMediaDetailByIdEndpointRequest
 {
     /// <summary>
-    /// Gets the <see cref="PlexMediaDTO"/> with all children
+    /// NOTE: This constructor is needed to make the query param optional in the front-end typescript-api generation.
     /// </summary>
-    /// <param name="PlexMediaId">The id of the <see cref="PlexMedia"/>.</param>
-    /// <param name="Type"> The <see cref="PlexMediaType">Type</see> of the PlexMedia.</param>
-    public GetMediaDetailByIdEndpointRequest(int PlexMediaId, PlexMediaType Type)
+    public GetMediaDetailByIdEndpointRequest(PlexMediaType type)
     {
-        this.PlexMediaId = PlexMediaId;
-        this.Type = Type;
+        Type = type;
     }
 
     /// <summary>The id of the <see cref="PlexMedia"/>.</summary>

@@ -9,6 +9,9 @@ namespace PlexRipper.Application;
 
 public record GeneratePlexTokenEndpointRequest
 {
+    /// <summary>
+    /// NOTE: This constructor is needed to make the query param optional in the front-end typescript-api generation.
+    /// </summary>
     public GeneratePlexTokenEndpointRequest(string verificationCode = "")
     {
         VerificationCode = verificationCode;

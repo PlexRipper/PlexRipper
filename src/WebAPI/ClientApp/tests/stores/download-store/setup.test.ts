@@ -25,7 +25,7 @@ describe('DownloadStore.setup()', () => {
 		mock.onGet(DownloadPaths.getDownloadTaskByGuidEndpoint('*')).reply(200, generateResultDTO([]));
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: useDownloadStore.name,
+			name: 'useDownloadStore',
 		};
 
 		// Act

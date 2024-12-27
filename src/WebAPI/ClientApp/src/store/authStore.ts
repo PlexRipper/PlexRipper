@@ -6,7 +6,7 @@ import { authenticationApi } from '@api';
 import { catchError, of } from 'rxjs';
 import { tap, switchMap } from 'rxjs/operators';
 import { useGlobalStore } from '@store';
-import { useRouter } from '#build/imports';
+import { useRouter } from '#imports';
 
 export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 	const state = reactive<{ isLoggedIn: boolean }>({
@@ -14,7 +14,6 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 	});
 
 	const globalStore = useGlobalStore();
-	const router = useRouter();
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
@@ -24,6 +23,8 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 			})));
 		},
 		login(username: string, password: string, rememberMe: boolean): Observable<number> {
+			const router = useRouter();
+
 			const data = new FormData();
 			data.append('username', username);
 			data.append('password', password);
@@ -42,6 +43,8 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 			}));
 		},
 		logout() {
+			const router = useRouter();
+
 			return authenticationApi.appUserLogOutEndpoint().pipe(
 				tap((res) => Log.info('User logged out', res)),
 				tap(() => router.push('/login')),

@@ -19,7 +19,7 @@ describe('SignalrStore.setup()', () => {
 
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: useSignalrStore.name,
+			name: 'useSignalrStore',
 		};
 
 		// Act

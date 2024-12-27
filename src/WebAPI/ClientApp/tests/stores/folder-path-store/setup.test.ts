@@ -24,7 +24,7 @@ describe('FolderPathStore.setup()', () => {
 		mock.onGet(FolderPathPaths.getAllFolderPathsEndpoint()).reply(200, generateResultDTO([]));
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: useFolderPathStore.name,
+			name: 'useFolderPathStore',
 		};
 
 		// Act

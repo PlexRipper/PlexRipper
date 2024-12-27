@@ -29,7 +29,7 @@ describe('ServerStore.setup()', () => {
 		mock.onGet(PlexServerPaths.getAllPlexServersEndpoint()).reply(200, generateResultDTO(plexServers));
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: useServerStore.name,
+			name: 'useServerStore',
 		};
 
 		// Act

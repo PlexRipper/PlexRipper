@@ -18,7 +18,7 @@ describe('BackgroundJobsStore.setup()', () => {
 		const backgroundJobsStore = useBackgroundJobsStore();
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: useBackgroundJobsStore.name,
+			name: 'useBackgroundJobsStore',
 		};
 
 		// Act

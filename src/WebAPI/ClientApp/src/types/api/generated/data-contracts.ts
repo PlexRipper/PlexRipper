@@ -1037,7 +1037,7 @@ export interface UpdatePlexServerConnectionEndpointRequest {
 }
 
 export interface UserClaimsDTO {
-  claims: any[];
+  claims: string[];
   isLoggedIn: boolean;
   userName: string;
 }

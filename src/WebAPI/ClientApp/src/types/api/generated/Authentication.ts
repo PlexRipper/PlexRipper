@@ -25,14 +25,12 @@ export class Authentication {
    * * @tags Authentication
    * @name AuthenticationStatusEndpoint
    * @request GET:/api/Authentication/status
-   * @secure
    */
   authenticationStatusEndpoint = (params: RequestParams = {}) =>
     from(
       Axios.request<UserClaimsDTO>({
         url: `/api/Authentication/status`,
         method: "GET",
-        secure: true,
         format: "json",
         ...params,
       }),

@@ -61,10 +61,9 @@
 import { get } from '@vueuse/core';
 import { useSettingsStore, useAccountStore, useAuthenticationStore } from '@store';
 import { useI18n } from 'vue-i18n';
-import { useSubscription, useRouter } from '#imports';
+import { useSubscription } from '#imports';
 
 const { t } = useI18n();
-const router = useRouter();
 const settingsStore = useSettingsStore();
 const accountStore = useAccountStore();
 const authStore = useAuthenticationStore();

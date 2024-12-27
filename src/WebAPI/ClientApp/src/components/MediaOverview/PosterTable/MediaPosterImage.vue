@@ -45,7 +45,6 @@
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
 import { toFullThumbUrl } from '@composables/conversion';
 import type { PlexMediaSlimDTO } from '@dto';
 import { useServerConnectionStore, useSettingsStore } from '#imports';

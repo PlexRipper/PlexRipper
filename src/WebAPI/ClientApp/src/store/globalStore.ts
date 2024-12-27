@@ -2,7 +2,7 @@ import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { Subject, Observable } from 'rxjs';
 import { catchError, ReplaySubject, forkJoin, of } from 'rxjs';
-import { switchMap, take, tap } from 'rxjs/operators';
+import { switchMap, tap } from 'rxjs/operators';
 import type IAppConfig from '@class/IAppConfig';
 import type { ISetupResult } from '@interfaces';
 import {

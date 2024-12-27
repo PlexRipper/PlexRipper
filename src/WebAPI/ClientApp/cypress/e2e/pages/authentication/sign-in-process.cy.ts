@@ -71,6 +71,7 @@ describe('sign-in-process', () => {
 				statusCode: 403,
 				body: generateFailedResultDTO(),
 			});
+
 			cy.getCy('login-submit-button').click();
 
 			cy.url().should('eq', route('/login'));

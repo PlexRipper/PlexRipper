@@ -23,9 +23,9 @@ export default defineNuxtConfig({
 	ssr: false,
 
 	/*
-                                                                 ** Auto-import components
-                                                                 *  Doc: https://github.com/nuxt/components
-                                                                 */
+     ** Auto-import components
+     *  Doc: https://github.com/nuxt/components
+     */
 	components: {
 		dirs: [
 			// Components directory

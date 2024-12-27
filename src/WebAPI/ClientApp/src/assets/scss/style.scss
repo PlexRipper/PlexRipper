@@ -17,6 +17,24 @@ body {
 
   // Prevents unneeded vertical scroll bar on body/page level
   overflow-y: hidden;
+
+
+}
+
+
+a.link,
+a.link:active,
+a.link:focus,
+a.link:visited {
+  color: #ff7044;
+  text-decoration: none
+}
+
+a.link:active:hover,
+a.link:focus:hover,
+a.link:hover,
+a.link:visited:hover {
+  color: red
 }
 
 

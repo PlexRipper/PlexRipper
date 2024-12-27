@@ -10,8 +10,16 @@ namespace PlexRipper.Application;
 
 public class GetFolderPathDirectoryRequest
 {
-    [QueryParam]
-    public string? Path { get; init; }
+    /// <summary>
+    /// NOTE: This constructor is needed to make the query param optional in the front-end typescript-api generation.
+    /// </summary>
+    public GetFolderPathDirectoryRequest(string path = "")
+    {
+        Path = path;
+    }
+
+    [QueryParam, BindFrom("path")]
+    public string Path { get; init; }
 }
 
 public class GetFolderPathDirectoryRequestValidator : Validator<GetFolderPathDirectoryRequest>

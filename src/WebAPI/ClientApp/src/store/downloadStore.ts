@@ -3,7 +3,7 @@ import { defineStore, acceptHMRUpdate } from 'pinia';
 import { map, switchMap, tap } from 'rxjs/operators';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
-import { sum, merge, keyBy, values, flatMapDeep, clone } from 'lodash-es';
+import { sum, merge, keyBy, values, flatMapDeep, clone, cloneDeep } from 'lodash-es';
 import type {
 	CreateDownloadTasksRequest,
 	DownloadMediaDTO,
@@ -18,18 +18,25 @@ import type IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys'
 import { downloadApi } from '@api';
 import { useServerStore } from '@store';
 
+interface IDownloadsStoreState {
+	serverDownloads: ServerDownloadProgressDTO[];
+	selected: IDownloadsSelection[];
+}
+
 export const useDownloadStore = defineStore('DownloadStore', () => {
-	const state = reactive<{ serverDownloads: ServerDownloadProgressDTO[]; selected: IDownloadsSelection[] }>({
+	const defaultState: IDownloadsStoreState = {
 		serverDownloads: [],
 		selected: [],
-	});
+	};
+
+	const state = reactive<IDownloadsStoreState>(cloneDeep(defaultState));
 
 	const serverStore = useServerStore();
 
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return actions.fetchDownloadList().pipe(switchMap(() => of({ name: useDownloadStore.name, isSuccess: true })));
+			return actions.fetchDownloadList().pipe(switchMap(() => of({ name: 'useDownloadStore', isSuccess: true })));
 		},
 		/**
      * Fetch the download list from the API.
@@ -161,6 +168,9 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 				maxSelectionCount: state.selected[i].maxSelectionCount,
 				selection,
 			});
+		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 

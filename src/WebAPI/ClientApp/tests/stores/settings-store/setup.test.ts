@@ -25,7 +25,7 @@ describe('SettingsStore.setup()', () => {
 		mock.onGet(SettingsPaths.getUserSettingsEndpoint()).reply(200, generateResultDTO(generateSettingsModel({ config })));
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: useSettingsStore.name,
+			name: 'useSettingsStore',
 		};
 
 		// Act

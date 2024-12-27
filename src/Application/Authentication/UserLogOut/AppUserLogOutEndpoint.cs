@@ -1,14 +1,14 @@
+using Application.Contracts;
 using FastEndpoints.Security;
-using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using PlexRipper.Identity.Contracts;
 
 namespace PlexRipper.Application;
 
-public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest
+public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest<string>
 {
-    public override string EndpointPath => ApiRoutes.LogOutController;
+    public override string EndpointPath => ApiRoutes.LogOutEndpoint;
 
     private readonly SignInManager<AppUser> _signInManager;
 
@@ -22,8 +22,8 @@ public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest
         Post(EndpointPath);
         Description(x =>
         {
-            x.AutoTagOverride("Authentication");
-            x.Produces(StatusCodes.Status200OK);
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<string>));
+            x.Produces(StatusCodes.Status401Unauthorized);
         });
     }
 
@@ -33,6 +33,7 @@ public class AppUserLogOutEndpoint : BaseEndpointWithoutRequest
 
         await CookieAuth.SignOutAsync();
 
-        await SendOkAsync(ct);
+        var result = Result.Ok("Logout successful");
+        await SendFluentResult(result, x => x, ct);
     }
 }

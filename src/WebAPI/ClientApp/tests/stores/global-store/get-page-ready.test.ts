@@ -1,6 +1,7 @@
 import { describe, beforeAll, beforeEach, test, expect } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import {
+	AuthenticationPaths,
 	DownloadPaths,
 	FolderPathPaths,
 	NotificationPaths,
@@ -11,6 +12,7 @@ import {
 	SettingsPaths,
 } from '@api/api-paths';
 import { generatePlexServers, generateResultDTO, generateSettingsModel } from '@mock';
+import { useGlobalStore } from '@store';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '~~/tests/_base/base';
 
 describe('GlobalStore.getConfigReady()', () => {
@@ -32,6 +34,7 @@ describe('GlobalStore.getConfigReady()', () => {
 		};
 		const globalStore = useGlobalStore();
 
+		mock.onGet(AuthenticationPaths.authenticationStatusEndpoint()).reply(200, generateResultDTO([]));
 		mock.onGet(DownloadPaths.getAllDownloadTasksEndpoint()).reply(200, generateResultDTO([]));
 		mock.onGet(PlexAccountPaths.getAllPlexAccountsEndpoint()).reply(200, generateResultDTO([]));
 		mock.onGet(FolderPathPaths.getAllFolderPathsEndpoint()).reply(200, generateResultDTO([]));
@@ -48,7 +51,8 @@ describe('GlobalStore.getConfigReady()', () => {
 		await setupResult.onComplete();
 		// Assert
 		expect(setupResult.receivedComplete()).toEqual(true);
-		expect(pageSetupResult.getValues()).toHaveLength(1);
-		expect(pageSetupResult.getFirstValue()).toEqual(true);
+		expect(pageSetupResult.getValues()).toHaveLength(2);
+		expect(pageSetupResult.getFirstValue()).toEqual(false);
+		expect(pageSetupResult.getValues()[1]).toEqual(true);
 	});
 });

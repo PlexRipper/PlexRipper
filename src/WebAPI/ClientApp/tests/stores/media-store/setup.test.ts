@@ -15,7 +15,7 @@ describe('MediaStore.setup()', () => {
 		const mediaStore = useMediaStore();
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: useMediaStore.name,
+			name: 'useMediaStore',
 		};
 
 		// Act

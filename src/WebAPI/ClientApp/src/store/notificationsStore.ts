@@ -5,18 +5,25 @@ import { of } from 'rxjs';
 import type { NotificationDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { notificationApi } from '@api';
+import { cloneDeep } from 'lodash-es';
+
+interface INotificationStoreState {
+	notifications: NotificationDTO[];
+}
 
 export const useNotificationsStore = defineStore('NotificationsStore', () => {
-	const state = reactive<{ notifications: NotificationDTO[] }>({
+	const defaultState: INotificationStoreState = {
 		notifications: [],
-	});
+	};
+
+	const state = reactive<INotificationStoreState>(cloneDeep(defaultState));
 
 	const actions = {
 		setup(): Observable<ISetupResult> {
 			return actions.fetchNotifications().pipe(
 				switchMap(() =>
 					of({
-						name: useNotificationsStore.name,
+						name: 'useNotificationsStore',
 						isSuccess: true,
 					}),
 				),
@@ -49,6 +56,9 @@ export const useNotificationsStore = defineStore('NotificationsStore', () => {
 		clearAllNotifications(): void {
 			state.notifications = [];
 			notificationApi.clearAllNotificationsEndpoint().subscribe();
+		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 

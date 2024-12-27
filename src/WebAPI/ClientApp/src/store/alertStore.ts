@@ -2,15 +2,23 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { Observable } from 'rxjs';
 import { of, Subject } from 'rxjs';
 import type { ISetupResult, IAlert } from '@interfaces';
+import { cloneDeep } from 'lodash-es';
+
+interface IAlertStoreState {
+	alerts: IAlert[];
+	alertDialogObservable: Subject<IAlert[]>;
+}
 
 export const useAlertStore = defineStore('AlertStore', () => {
-	const state = reactive<{ alerts: IAlert[]; alertDialogObservable: Subject<IAlert[]> }>({
+	const defaultState: IAlertStoreState = {
 		alerts: [],
 		alertDialogObservable: new Subject<IAlert[]>(),
-	});
+	};
+	const state = reactive<IAlertStoreState>(cloneDeep(defaultState));
+
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return of({ name: useAlertStore.name, isSuccess: true });
+			return of({ name: 'useAlertStore', isSuccess: true });
 		},
 		showAlert(alert: IAlert): void {
 			const newAlert = { ...alert, id: Date.now() };
@@ -19,6 +27,9 @@ export const useAlertStore = defineStore('AlertStore', () => {
 		},
 		removeAlert(id: number): void {
 			state.alerts = state.alerts.filter((x) => x.id !== id);
+		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 	const getters = {

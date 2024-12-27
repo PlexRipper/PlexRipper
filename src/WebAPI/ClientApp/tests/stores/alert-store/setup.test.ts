@@ -17,7 +17,7 @@ describe('AlertStore.setup()', () => {
 		const alertStore = useAlertStore();
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: useAlertStore.name,
+			name: 'useAlertStore',
 		};
 
 		// Act

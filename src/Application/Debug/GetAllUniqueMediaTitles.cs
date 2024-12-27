@@ -2,17 +2,17 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Application.Contracts;
 using Data.Contracts;
+using FastEndpoints;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace PlexRipper.Application;
 
 public record GetAllUniqueMediaTitlesEndpointRequest
 {
-    [FromQuery]
+    [QueryParam, BindFrom("type")]
     public PlexMediaType Type { get; init; } = PlexMediaType.TvShow;
 
-    [FromQuery]
+    [QueryParam, BindFrom("count")]
     public int Count { get; init; } = 0;
 }
 

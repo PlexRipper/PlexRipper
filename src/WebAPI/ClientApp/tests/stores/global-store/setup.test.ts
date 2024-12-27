@@ -11,6 +11,7 @@ import {
 	PlexServerPaths,
 	SettingsPaths,
 } from '@api/api-paths';
+import { useGlobalStore } from '@store';
 import { baseSetup, baseVars, getAxiosMock, subscribeSpyTo } from '~~/tests/_base/base';
 
 describe('GlobalService.setup()', () => {

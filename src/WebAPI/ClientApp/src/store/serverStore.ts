@@ -6,13 +6,20 @@ import type { PlexServerDTO } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexServerApi } from '@api';
 import { DataType } from '@dto';
-import { orderBy } from 'lodash-es';
+import { cloneDeep, orderBy } from 'lodash-es';
 import { useAccountStore, useServerConnectionStore, useSettingsStore, useSignalrStore } from '@store';
 
+interface IServerStoreState {
+	servers: PlexServerDTO[];
+}
+
 export const useServerStore = defineStore('ServerStore', () => {
-	const state = reactive<{ servers: PlexServerDTO[] }>({
+	const defaultState: IServerStoreState = {
 		servers: [],
-	});
+	};
+
+	const state = reactive<IServerStoreState>(cloneDeep(defaultState));
+
 	const accountStore = useAccountStore();
 	const serverConnectionStore = useServerConnectionStore();
 	const settingsStore = useSettingsStore();
@@ -24,7 +31,7 @@ export const useServerStore = defineStore('ServerStore', () => {
 			// Listen for refresh notifications
 			signalRStore.getRefreshNotification(DataType.PlexServer).pipe(switchMap(() => actions.refreshPlexServers())).subscribe();
 
-			return actions.refreshPlexServers().pipe(switchMap(() => of({ name: useServerStore.name, isSuccess: true })));
+			return actions.refreshPlexServers().pipe(switchMap(() => of({ name: 'useServerStore', isSuccess: true })));
 		},
 		refreshPlexServer(serverId: number) {
 			return plexServerApi.getPlexServerByIdEndpoint(serverId).pipe(
@@ -65,6 +72,9 @@ export const useServerStore = defineStore('ServerStore', () => {
 				})
 				.pipe(switchMap(() => settingsStore.refreshSettings()));
 		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
+		},
 	};
 
 	// Getters
@@ -89,7 +99,6 @@ export const useServerStore = defineStore('ServerStore', () => {
 		},
 		getVisibleServers: computed((): PlexServerDTO[] => {
 			const servers = getters.getServers().filter((x) => settingsStore.isServerVisible(x.machineIdentifier) && accountStore.getHasAccountServerAccess(x.id));
-			console.log(servers);
 			return orderBy(servers, [(x) => x.owned, (x) => x.name.toLocaleLowerCase()], ['desc', 'asc']);
 		}),
 		getHiddenServers: computed((): PlexServerDTO[] =>

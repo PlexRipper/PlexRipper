@@ -7,6 +7,7 @@ import { Settings } from '@api/generated/Settings';
 import { PlexServer } from '@api/generated/PlexServer';
 import { PlexServerConnection } from '@api/generated/PlexServerConnection';
 import { PlexAccount } from '@api/generated/PlexAccount';
+import { Authentication } from '@api/generated/Authentication';
 
 export * from './baseApi';
 export * from './custom';
@@ -20,8 +21,10 @@ const settingsApi = new Settings();
 const plexServerApi = new PlexServer();
 const plexAccountApi = new PlexAccount();
 const plexServerConnectionApi = new PlexServerConnection();
+const authenticationApi = new Authentication();
 
 export {
+	authenticationApi,
 	downloadApi,
 	folderPathApi,
 	plexLibraryApi,

@@ -12,6 +12,7 @@ export function generateResultDTO<T>(value: T, config: Partial<MockConfig> = {})
 		isFailed: false,
 		reasons: [],
 		successes: [],
+		statusCode: 0,
 	};
 }
 
@@ -22,6 +23,7 @@ export function generateFailedResultDTO(partial: Partial<ResultDTO> = {}): Resul
 		isFailed: true,
 		reasons: [],
 		successes: [],
+		statusCode: 0,
 		...partial,
 	};
 }

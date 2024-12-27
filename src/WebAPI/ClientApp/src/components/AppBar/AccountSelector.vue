@@ -4,52 +4,69 @@
 		flat
 		icon="mdi-account"
 		dropdown-icon="mdi-arrow-down">
-		<q-list v-if="accountsDisplay.length > 0">
-			<q-item-label header>
-				{{ $t('components.account-selector.title') }}
-			</q-item-label>
+		<q-list>
+			<template v-if="accountsDisplay.length > 0">
+				<!--  Title  -->
+				<q-item-label header>
+					{{ $t('components.account-selector.title') }}
+				</q-item-label>
 
-			<!--  Account Row  -->
+				<!--  Account Row  -->
+				<q-item
+					v-for="(account, index) in accountsDisplay"
+					:key="index"
+					v-close-popup
+					clickable
+					tabindex="0"
+					@click="updateActiveAccountId(account.id)">
+					<q-item-section>
+						<q-item-label>{{ account.displayName }}</q-item-label>
+						<q-item-label
+							v-if="account.username"
+							caption>
+							{{ account.username }}
+						</q-item-label>
+					</q-item-section>
+					<q-item-section side>
+						<q-btn
+							flat
+							icon="mdi-refresh"
+							:loading="loading[0] || loading[index]"
+							:disabled="isLoading"
+							@click.stop="runReSyncAccount(account.id)" />
+					</q-item-section>
+				</q-item>
+			</template>
+			<!--	No account found -->
+			<q-item-label v-else>
+				{{ t('components.app-bar.no-accounts') }}
+			</q-item-label>
+			<q-separator />
+			<!-- Log out Button -->
 			<q-item
-				v-for="(account, index) in accountsDisplay"
-				:key="index"
-				v-close-popup
 				clickable
-				tabindex="0"
-				@click="updateActiveAccountId(account.id)">
+				@click="onLogOut">
 				<q-item-section>
-					<q-item-label>{{ account.displayName }}</q-item-label>
-					<q-item-label
-						v-if="account.username"
-						caption>
-						{{ account.username }}
-					</q-item-label>
+					<q-item-label>{{ $t('components.account-selector.log-out-button') }}</q-item-label>
 				</q-item-section>
 				<q-item-section side>
-					<q-btn
-						flat
-						icon="mdi-refresh"
-						:loading="loading[0] || loading[index]"
-						:disabled="isLoading"
-						@click.stop="runReSyncAccount(account.id)" />
+					<q-icon name="mdi-logout" />
 				</q-item-section>
 			</q-item>
-		</q-list>
-		<!--	No account found -->
-		<q-list v-else>
-			<q-item-label> {{ t('components.app-bar.no-accounts') }}</q-item-label>
 		</q-list>
 	</q-btn-dropdown>
 </template>
 
 <script setup lang="ts">
 import { get } from '@vueuse/core';
-import { useSettingsStore, useAccountStore } from '@store';
+import { useSettingsStore, useAccountStore, useAuthenticationStore } from '@store';
+import { useI18n } from 'vue-i18n';
 import { useSubscription } from '#imports';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const accountStore = useAccountStore();
+const authStore = useAuthenticationStore();
 
 const loading = ref<Record<number, boolean>>({ 0: false });
 const isLoading = computed(() => Object.values(get(loading)).some((x) => x));
@@ -86,5 +103,9 @@ function runReSyncAccount(accountId = 0): void {
 			get(loading)[accountId] = false;
 		}),
 	);
+}
+
+function onLogOut(): void {
+	useSubscription(authStore.logout().subscribe());
 }
 </script>

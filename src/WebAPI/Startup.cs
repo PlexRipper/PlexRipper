@@ -75,12 +75,12 @@ public static class Startup
             // SignalR configuration
             app.MapHub<ProgressHub>("/progress");
             app.MapHub<NotificationHub>("/notifications");
+
             // Place this before app.UseAuthentication().UseAuthorization(); to allow it as anonymous
             app.UseSwaggerGen();
         }
 
-        // Add authentication and authorization
-        app.UseAuthentication().UseAuthorization();
+        app.ConfigureAuthenticationApplication();
 
         // Setup FastEndpoints
         app.UseFastEndpoints(c =>
@@ -205,14 +205,11 @@ public static class Startup
                 {
                     s.Title = "PlexRipper Internal API  (NOT FOR EXTERNAL USE)";
                     s.Version = "v1";
+
                     s.MarkNonNullablePropsAsRequired();
-                    s.RequireParametersWithoutDefault = true;
+
                     s.DocumentProcessors.Add(new NSwagAddExtraTypes());
                     s.OperationProcessors.Add(new NSwagGlobalHeaders());
-
-                    // Fixes for FastEndpoints 5.23+
-                    s.OperationProcessors.Add(new NSwagQueryCamelCase());
-                    s.DocumentProcessors.Add(new NSwagCamelCaseSchemaProcessor());
 
                     // Add cookie-based authentication
                     s.AddAuth(
@@ -241,39 +238,14 @@ public static class Startup
         services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
     }
 
+    private static void ConfigureAuthenticationApplication(this WebApplication app)
+    {
+        app.UseAuthentication();
+        app.UseAuthorization();
+    }
+
     private static void ConfigureAuthenticationServices(this IServiceCollection services)
     {
-        services
-            .AddIdentity<AppUser, IdentityRole>()
-            .AddEntityFrameworkStores<AuthDbContext>()
-            .AddSignInManager<SignInManager<AppUser>>();
-
-        services.AddAuthenticationCookie(validFor: TimeSpan.FromDays(7));
-
-        //override the behavior or cookie auth scheme so that 401/403 will be returned.
-        services.ConfigureApplicationCookie(c =>
-        {
-            c.Cookie.Name = DefaultUserAppCredentials.DefaultCookieName;
-            c.LoginPath = "/api/login";
-            c.LogoutPath = "/api/logout";
-            c.AccessDeniedPath = "/api/access-denied";
-
-            c.Events.OnRedirectToLogin = ctx =>
-            {
-                if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
-                    ctx.Response.StatusCode = 401;
-
-                return Task.CompletedTask;
-            };
-            c.Events.OnRedirectToAccessDenied = ctx =>
-            {
-                if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
-                    ctx.Response.StatusCode = 403;
-
-                return Task.CompletedTask;
-            };
-        });
-
         services.AddAuthorization(options =>
         {
             options.AddPolicy("AuthenticatedUsers", x => x.RequireRole("Admin"));
@@ -281,5 +253,42 @@ public static class Startup
             // Set a default policy that requires authentication
             options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
         });
+
+        services
+            .AddIdentityApiEndpoints<AppUser>(options =>
+            {
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 3;
+                options.Lockout.AllowedForNewUsers = true;
+            })
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<AuthDbContext>();
+
+        services.AddAuthenticationCookie(
+            validFor: TimeSpan.FromHours(6),
+            c =>
+            {
+                c.Cookie.Name = DefaultUserAppCredentials.DefaultCookieName;
+                c.LoginPath = ApiRoutes.LoginEndpoint;
+                c.LogoutPath = ApiRoutes.LogOutEndpoint;
+                c.SlidingExpiration = true;
+                c.AccessDeniedPath = "/api/access-denied";
+
+                c.Events.OnRedirectToLogin = ctx =>
+                {
+                    if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
+                        ctx.Response.StatusCode = 401;
+
+                    return Task.CompletedTask;
+                };
+                c.Events.OnRedirectToAccessDenied = ctx =>
+                {
+                    if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
+                        ctx.Response.StatusCode = 403;
+
+                    return Task.CompletedTask;
+                };
+            }
+        );
     }
 }

@@ -15,6 +15,6 @@ const props = defineProps<{
 }>();
 
 const formattedString = computed(() => {
-	return prettyBytes(props.size, { locale: localizationStore.getLanguageLocale.bcp47Code });
+	return prettyBytes(props.size, { locale: localizationStore.getLanguageLocale?.bcp47Code });
 });
 </script>

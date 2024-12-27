@@ -21,37 +21,37 @@ import { from } from "rxjs";
 
 export class Settings {
   /**
- * No description
- *
- * @tags Settings
- * @name GetUserSettingsEndpoint
- * @request GET:/api/Settings/
-
- */
+   * No description
+   * * @tags Settings
+   * @name GetUserSettingsEndpoint
+   * @request GET:/api/Settings
+   * @secure
+   */
   getUserSettingsEndpoint = (params: RequestParams = {}) =>
     from(
       Axios.request<SettingsModelDTO>({
-        url: `/api/Settings/`,
+        url: `/api/Settings`,
         method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),
     ).pipe(apiCheckPipe<SettingsModelDTO>);
 
   /**
- * No description
- *
- * @tags Settings
- * @name UpdateUserSettingsEndpoint
- * @request PUT:/api/Settings/
-
- */
+   * No description
+   * * @tags Settings
+   * @name UpdateUserSettingsEndpoint
+   * @request PUT:/api/Settings
+   * @secure
+   */
   updateUserSettingsEndpoint = (data: SettingsModelDTO, params: RequestParams = {}) =>
     from(
       Axios.request<SettingsModelDTO>({
-        url: `/api/Settings/`,
+        url: `/api/Settings`,
         method: "PUT",
         data: data,
+        secure: true,
         type: ContentType.Json,
         format: "json",
         ...params,
@@ -59,18 +59,18 @@ export class Settings {
     ).pipe(apiCheckPipe<SettingsModelDTO>);
 
   /**
- * No description
- *
- * @tags Settings
- * @name ResetDatabaseEndpoint
- * @request GET:/api/Settings/resetdb
-
- */
+   * No description
+   * * @tags Settings
+   * @name ResetDatabaseEndpoint
+   * @request GET:/api/Settings/resetdb
+   * @secure
+   */
   resetDatabaseEndpoint = (params: RequestParams = {}) =>
     from(
       Axios.request<ResultDTO>({
         url: `/api/Settings/resetdb`,
         method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -78,9 +78,9 @@ export class Settings {
 }
 
 export class SettingsPaths {
-  static getUserSettingsEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings/` });
+  static getUserSettingsEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings` });
 
-  static updateUserSettingsEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings/` });
+  static updateUserSettingsEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings` });
 
   static resetDatabaseEndpoint = () => queryString.stringifyUrl({ url: `/api/Settings/resetdb` });
 }

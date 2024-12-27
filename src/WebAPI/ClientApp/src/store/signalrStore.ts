@@ -17,9 +17,9 @@ import type {
 	SyncServerMediaProgress,
 } from '@dto';
 import { MessageTypes } from '@dto';
-import type IAppConfig from '@class/IAppConfig';
 import type { IRetryPolicy } from '@microsoft/signalr/src/IRetryPolicy';
 import { useDownloadStore, useBackgroundJobsStore, useNotificationsStore } from '@store';
+import Axios from 'axios';
 
 export const useSignalrStore = defineStore('SignalrStore', () => {
 	interface ISignalRStoreState {
@@ -34,23 +34,27 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		refreshDataNotificationSubject: Subject<DataType>;
 	}
 
-	const state = reactive<ISignalRStoreState>({
+	const defaultState: ISignalRStoreState = {
 		// Data
 		libraryProgress: [],
 		syncServerMediaProgress: [],
-		serverConnectionCheckStatusProgress: [], // Subjects
+		serverConnectionCheckStatusProgress: [],
+
+		// Subjects
 		libraryProgressSubject: new Subject<LibraryProgress[]>(),
 		syncServerMediaProgressSubject: new Subject<SyncServerMediaProgress[]>(),
 		serverConnectionCheckStatusProgressSubject: new Subject<ServerConnectionCheckStatusProgressDTO[]>(),
 		refreshDataNotificationSubject: new Subject<DataType>(),
-	});
+	};
+
+	const state = reactive<ISignalRStoreState>(cloneDeep(defaultState));
 
 	// Connections
 	let progressHubConnection: HubConnection | null;
 	let notificationHubConnection: HubConnection | null;
 
 	const actions = {
-		setup(config: IAppConfig): Observable<ISetupResult> {
+		setup(): Observable<ISetupResult> {
 			return from((async () => {
 				Log.debug('Setting up SignalR Service');
 				const options: IHttpConnectionOptions = {
@@ -58,29 +62,34 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 					skipNegotiation: true,
 					logger: LogLevel.None,
 					transport: HttpTransportType.WebSockets,
+					withCredentials: true,
 				};
 
 				const retryPolicy: IRetryPolicy = {
 					nextRetryDelayInMilliseconds: () => 2000,
 				};
 
+				const baseApiUrl = Axios.defaults.baseURL;
 				// Setup Connections
 				progressHubConnection = useCypressSignalRMock('progress', { enableForVitest: true }) ?? new HubConnectionBuilder()
 					.configureLogging(LogLevel.None)
-					.withUrl(`${config.baseUrl}/progress`, options)
+					.withUrl(`${baseApiUrl}/progress`, options)
 					.withAutomaticReconnect(retryPolicy)
 					.build();
 
 				notificationHubConnection = useCypressSignalRMock('notifications', { enableForVitest: true }) ?? new HubConnectionBuilder()
 					.configureLogging(LogLevel.None)
-					.withUrl(`${config.baseUrl}/notifications`, options)
+					.withUrl(`${baseApiUrl}/notifications`, options)
 					.withAutomaticReconnect(retryPolicy)
 					.build();
 
 				setupSubscriptions();
 				await startProgressHubConnection();
 				await startNotificationHubConnection();
-			})()).pipe(switchMap(() => of({ name: useSignalrStore.name, isSuccess: true })), take(1));
+			})()).pipe(switchMap(() => of({ name: 'useSignalrStore', isSuccess: true })), take(1));
+		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 

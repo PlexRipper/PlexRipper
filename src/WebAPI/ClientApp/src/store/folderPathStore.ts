@@ -6,11 +6,18 @@ import { type FolderPathDTO, FolderType, PlexMediaType } from '@dto';
 import type { ISetupResult, IFolderPathGroup } from '@interfaces';
 import { folderPathApi } from '@api';
 import { useI18n } from 'vue-i18n';
+import { cloneDeep } from 'lodash-es';
+
+interface IFolderPathStoreState {
+	folderPaths: FolderPathDTO[];
+}
 
 export const useFolderPathStore = defineStore('FolderPathStore', () => {
-	const state = reactive<{ folderPaths: FolderPathDTO[] }>({
+	const defaultState: IFolderPathStoreState = {
 		folderPaths: [],
-	});
+	};
+
+	const state = reactive<IFolderPathStoreState>(cloneDeep(defaultState));
 
 	function updateFolderPathInState(folderPath: FolderPathDTO) {
 		const i = state.folderPaths.findIndex((x) => x.id === folderPath.id);
@@ -22,7 +29,7 @@ export const useFolderPathStore = defineStore('FolderPathStore', () => {
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return actions.refreshFolderPaths().pipe(switchMap(() => of({ name: useFolderPathStore.name, isSuccess: true })));
+			return actions.refreshFolderPaths().pipe(switchMap(() => of({ name: 'useFolderPathStore', isSuccess: true })));
 		},
 		refreshFolderPaths() {
 			return folderPathApi.getAllFolderPathsEndpoint().pipe(
@@ -76,6 +83,9 @@ export const useFolderPathStore = defineStore('FolderPathStore', () => {
 				state.folderPaths.splice(i, 1);
 			}
 			return folderPathApi.deleteFolderPathEndpoint(folderPathId);
+		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 

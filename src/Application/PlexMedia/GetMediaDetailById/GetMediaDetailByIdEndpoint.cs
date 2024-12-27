@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Application.Contracts;
 using Data.Contracts;
 using FastEndpoints;
@@ -12,22 +13,21 @@ namespace PlexRipper.Application;
 public class GetMediaDetailByIdEndpointRequest
 {
     /// <summary>
-    /// Gets the <see cref="PlexMediaDTO"/> with all children
+    /// NOTE: This constructor is needed to make the query param optional in the front-end typescript-api generation.
     /// </summary>
-    /// <param name="PlexMediaId">The id of the <see cref="PlexMedia"/>.</param>
-    /// <param name="Type"> The <see cref="PlexMediaType">Type</see> of the PlexMedia.</param>
-    public GetMediaDetailByIdEndpointRequest(int PlexMediaId, PlexMediaType Type)
+    [SetsRequiredMembers]
+    public GetMediaDetailByIdEndpointRequest(int plexMediaId, PlexMediaType type)
     {
-        this.PlexMediaId = PlexMediaId;
-        this.Type = Type;
+        PlexMediaId = plexMediaId;
+        Type = type;
     }
 
     /// <summary>The id of the <see cref="PlexMedia"/>.</summary>
-    public int PlexMediaId { get; init; }
+    public required int PlexMediaId { get; init; }
 
     /// <summary> The <see cref="PlexMediaType">Type</see> of the PlexMedia.</summary>
-    [QueryParam]
-    public PlexMediaType Type { get; init; }
+    [QueryParam, BindFrom("type")]
+    public required PlexMediaType Type { get; init; }
 }
 
 public class GetMediaDetailByIdEndpointRequestValidator : Validator<GetMediaDetailByIdEndpointRequest>

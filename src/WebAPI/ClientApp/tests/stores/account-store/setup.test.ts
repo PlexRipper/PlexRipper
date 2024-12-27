@@ -25,7 +25,7 @@ describe('AccountStore.setup()', () => {
 		const setup$ = accountStore.setup();
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: useAccountStore.name,
+			name: 'useAccountStore',
 		};
 
 		// Act

@@ -3,14 +3,22 @@ import { type Observable, of, Subject } from 'rxjs';
 import { DialogType } from '@enums';
 import type { IAccountDialog, IAlert, IConnectionDialog, IDialogState, IHelp, ISetupResult } from '@interfaces';
 import type { CheckAllConnectionStatusUpdateDTO, DownloadMediaDTO, FolderPathDTO } from '@dto';
+import { cloneDeep } from 'lodash-es';
+
+interface IDialogStoreState {
+	dialogUpdate: Subject<IDialogState>;
+}
 
 export const useDialogStore = defineStore('DialogStore', () => {
-	const state = reactive<{ dialogUpdate: Subject<IDialogState> }>({
+	const defaultState: IDialogStoreState = {
 		dialogUpdate: new Subject<IDialogState>(),
-	});
+	};
+
+	const state = reactive<IDialogStoreState>(cloneDeep(defaultState));
+
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			return of({ name: useDialogStore.name, isSuccess: true });
+			return of({ name: 'useDialogStore', isSuccess: true });
 		},
 		closeDialog(name: DialogType): void {
 			state.dialogUpdate.next({ name, state: false, data: {} as unknown });
@@ -44,6 +52,9 @@ export const useDialogStore = defineStore('DialogStore', () => {
 		},
 		openAlertInfoDialog(alert: IAlert): void {
 			state.dialogUpdate.next({ name: `${DialogType.AlertInfoDialog}-${alert.id}`, state: true, data: alert });
+		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 	const getters = {

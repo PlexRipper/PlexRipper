@@ -3,34 +3,16 @@ import Log from 'consola';
 import type { Observable } from 'rxjs';
 import { of, Subject } from 'rxjs';
 import { debounceTime, switchMap, tap } from 'rxjs/operators';
-import type {
-	ConfirmationSettingsDTO,
-	DateTimeSettingsDTO,
-	DebugSettingsDTO,
-	DisplaySettingsDTO,
-	DownloadManagerSettingsDTO,
-	GeneralSettingsDTO,
-	LanguageSettingsDTO,
-	ServerSettingsDTO,
-	SettingsModelDTO,
-} from '@dto';
+import type { SettingsModelDTO } from '@dto';
 
 import { PlexMediaType, ViewMode } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { settingsApi } from '@api';
+import { cloneDeep } from 'lodash-es';
 
 export const useSettingsStore = defineStore('SettingsStore', () => {
 	// State
-	const state = reactive<{
-		generalSettings: GeneralSettingsDTO;
-		debugSettings: DebugSettingsDTO;
-		confirmationSettings: ConfirmationSettingsDTO;
-		dateTimeSettings: DateTimeSettingsDTO;
-		displaySettings: DisplaySettingsDTO;
-		downloadManagerSettings: DownloadManagerSettingsDTO;
-		languageSettings: LanguageSettingsDTO;
-		serverSettings: ServerSettingsDTO;
-	}>({
+	const defaultState: SettingsModelDTO = {
 		generalSettings: {
 			activeAccountId: 0,
 			firstTimeSetup: true,
@@ -64,14 +46,17 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 		serverSettings: {
 			data: [],
 		},
-	});
+	};
 
-	const _settingsUpdated = new Subject<SettingsModelDTO>();
+	const state = reactive<SettingsModelDTO>(cloneDeep(defaultState));
+
+	let _settingsUpdated = new Subject<SettingsModelDTO>();
 
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
 			// Send the settings to the server when they change
+			_settingsUpdated = new Subject<SettingsModelDTO>();
 			_settingsUpdated
 				.pipe(
 					debounceTime(1000),
@@ -85,7 +70,7 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 						if (mutation.type) _settingsUpdated.next(state);
 					}),
 				),
-				switchMap(() => of({ name: useSettingsStore.name, isSuccess: true })),
+				switchMap(() => of({ name: 'useSettingsStore', isSuccess: true })),
 			);
 		},
 		refreshSettings(): Observable<SettingsModelDTO | null> {
@@ -161,6 +146,10 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 				default:
 					return true;
 			}
+		},
+		$reset() {
+			_settingsUpdated.complete();
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 

@@ -24,9 +24,9 @@ public static class ApiRoutes
 
     public static string PlexMediaController => Base + "/" + "PlexMedia";
 
-    public static string LoginController => Base + "/" + "login";
+    public static string AuthenticatedController => Base + "/" + "Authentication";
 
-    public static string LogOutController => Base + "/" + "logout";
+    public static string LoginEndpoint => AuthenticatedController + "/login";
 
-    public static string TestAuthenticatedController => Base + "/" + "auth-test";
+    public static string LogOutEndpoint => AuthenticatedController + "/logout";
 }

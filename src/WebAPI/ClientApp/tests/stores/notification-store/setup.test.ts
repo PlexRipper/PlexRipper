@@ -26,7 +26,7 @@ describe('NotificationService.setup()', () => {
 		const setup$ = notificationsStore.setup();
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: useNotificationsStore.name,
+			name: 'useNotificationsStore',
 		};
 
 		// Act

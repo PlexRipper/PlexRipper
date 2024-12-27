@@ -45,7 +45,6 @@
 </template>
 
 <script setup lang="ts">
-import Log from 'consola';
 import { toFullThumbUrl } from '@composables/conversion';
 import type { PlexMediaSlimDTO } from '@dto';
 import { useServerConnectionStore, useSettingsStore } from '#imports';
@@ -80,7 +79,6 @@ const imageUrl = computed((): string => {
 
 	const connection = connectionStore.chooseServerConnection(props.mediaItem.plexServerId);
 	if (!connection) {
-		Log.error('No connection found for plexServerId in media item', props.mediaItem.plexServerId);
 		return '';
 	}
 

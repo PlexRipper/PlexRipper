@@ -9,20 +9,39 @@ namespace PlexRipper.Application;
 
 public record GetAllMediaByTypeRequest
 {
+    /// <summary>
+    /// NOTE: This constructor is needed to make the query param optional in the front-end typescript-api generation.
+    /// </summary>
+    public GetAllMediaByTypeRequest(
+        PlexMediaType mediaType,
+        int page,
+        int size,
+        bool filterOfflineMedia,
+        bool filterOwnedMedia
+    )
+    {
+        MediaType = mediaType;
+        Page = page;
+        Size = size;
+        FilterOfflineMedia = filterOfflineMedia;
+        FilterOwnedMedia = filterOwnedMedia;
+    }
+
+    [QueryParam, BindFrom("mediaType")]
     public PlexMediaType MediaType { get; init; }
 
-    [QueryParam]
+    [QueryParam, BindFrom("page")]
     [DefaultValue(0)]
     public int Page { get; init; }
 
-    [QueryParam]
+    [QueryParam, BindFrom("size")]
     [DefaultValue(0)]
     public int Size { get; init; }
 
-    [QueryParam]
+    [QueryParam, BindFrom("filterOfflineMedia")]
     public bool FilterOfflineMedia { get; init; }
 
-    [QueryParam]
+    [QueryParam, BindFrom("filterOwnedMedia")]
     public bool FilterOwnedMedia { get; init; }
 }
 

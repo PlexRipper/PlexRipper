@@ -25,7 +25,7 @@ describe('LibraryStore.setup()', () => {
 		mock.onGet(PlexLibraryPaths.getAllPlexLibrariesEndpoint()).reply(200, generateResultDTO([]));
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: useLibraryStore.name,
+			name: 'useLibraryStore',
 		};
 
 		// Act

@@ -2,8 +2,8 @@ using System.ComponentModel;
 using Application.Contracts;
 using FastEndpoints;
 using FastEndpoints.Security;
-using FastEndpoints.Swagger;
 using FluentValidation;
+using Logging.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using PlexRipper.Identity.Contracts;
@@ -14,16 +14,24 @@ public record AppUserLoginEndpointRequest()
 {
     /// <summary>
     ///  The username of the <see cref="AppUser"/>.
+    /// <para> The default username is <see cref="DefaultUserAppCredentials.DefaultPassword"/>. </para>
     /// </summary>
     [DefaultValue(DefaultUserAppCredentials.DefaultUsername)]
     public required string Username { get; init; }
 
     /// <summary>
-    ///  The password of the <see cref="AppUser"/>.
-    ///  <para> The default password is <see cref="DefaultUserAppCredentials.DefaultPassword"/>. </para>
+    /// The password of the <see cref="AppUser"/>.
+    /// <para> The default password is <see cref="DefaultUserAppCredentials.DefaultPassword"/>. </para>
     /// </summary>
     [DefaultValue(DefaultUserAppCredentials.DefaultPassword)]
     public required string Password { get; init; }
+
+    /// <summary>
+    /// A value indicating whether the user should be remembered when the browser is closed.
+    /// <para> The default value is false </para>
+    /// </summary>
+    [DefaultValue(false)]
+    public required bool RememberMe { get; init; }
 };
 
 public class AppUserLoginEndpointRequestValidator : Validator<AppUserLoginEndpointRequest>
@@ -37,12 +45,14 @@ public class AppUserLoginEndpointRequestValidator : Validator<AppUserLoginEndpoi
 
 public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
 {
-    public override string EndpointPath => ApiRoutes.LoginController;
+    public override string EndpointPath => ApiRoutes.LoginEndpoint;
 
+    private readonly ILog _log;
     private readonly SignInManager<AppUser> _signInManager;
 
-    public AppUserLoginEndpoint(SignInManager<AppUser> signInManager)
+    public AppUserLoginEndpoint(ILog log, SignInManager<AppUser> signInManager)
     {
+        _log = log;
         _signInManager = signInManager;
     }
 
@@ -51,49 +61,65 @@ public class AppUserLoginEndpoint : BaseEndpoint<AppUserLoginEndpointRequest>
         Post(EndpointPath);
         AllowAnonymous();
         AllowFormData();
+
         Summary(s =>
         {
             s.Summary = "User Login";
             s.Description = "Logs in a user.";
+
             s.ExampleRequest = new AppUserLoginEndpointRequest
             {
                 Username = DefaultUserAppCredentials.DefaultUsername,
                 Password = DefaultUserAppCredentials.DefaultPassword,
+                RememberMe = false,
             };
         });
 
         Description(x =>
         {
-            x.AutoTagOverride("Authentication");
-            x.Produces(StatusCodes.Status200OK);
-            x.Produces(StatusCodes.Status401Unauthorized);
-            x.Produces(StatusCodes.Status500InternalServerError);
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO));
+            x.Produces(StatusCodes.Status401Unauthorized, typeof(ResultDTO));
+            x.Produces(StatusCodes.Status403Forbidden, typeof(ResultDTO));
+            x.Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO));
         });
     }
 
     public override async Task HandleAsync(AppUserLoginEndpointRequest req, CancellationToken ct)
     {
+        var username = req.Username;
+        var password = req.Password;
+
+        _log.Information("Attempting to sign in user {Username}.", username);
+
         // Attempt to sign in the user
-        var result = await _signInManager.PasswordSignInAsync(
-            req.Username,
-            req.Password,
-            isPersistent: false,
-            lockoutOnFailure: false
+        var signInResult = await _signInManager.PasswordSignInAsync(
+            username,
+            password,
+            isPersistent: req.RememberMe,
+            lockoutOnFailure: true
         );
 
-        if (result.Succeeded)
+        if (signInResult.Succeeded)
         {
+            _log.Information("User {Username} signed in successfully.", username);
+
             await CookieAuth.SignInAsync(u => u.Roles.Add(DefaultUserAppCredentials.DefaultAdminRole));
 
-            await SendOkAsync(ct);
+            await SendFluentResult(Result.Ok(), ct);
         }
-        else if (result.IsLockedOut)
+        else if (signInResult.IsLockedOut)
         {
-            await SendForbiddenAsync(ct);
+            var result = _log.Warning("User {Username} is locked out.", username).ToResult();
+            result.Add403ForbiddenError();
+
+            await SendFluentResult(result, ct);
         }
         else
         {
-            await SendUnauthorizedAsync(ct);
+            var result = _log.Warning("Failed to sign in user {Username}.", username).ToResult();
+            result.Add401UnauthorizedError();
+
+            await SendFluentResult(result, ct);
         }
     }
 }

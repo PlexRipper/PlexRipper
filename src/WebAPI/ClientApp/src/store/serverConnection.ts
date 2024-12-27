@@ -14,11 +14,18 @@ import { plexServerApi, plexServerConnectionApi } from '@api';
 import { DataType } from '@dto';
 import { sortPlexServerConnections } from '@composables/common';
 import { useServerStore, useSignalrStore } from '@store';
+import { cloneDeep } from 'lodash-es';
+
+interface IServerConnectionStoreState {
+	serverConnections: PlexServerConnectionDTO[];
+}
 
 export const useServerConnectionStore = defineStore('ServerConnection', () => {
-	const state = reactive<{ serverConnections: PlexServerConnectionDTO[] }>({
+	const defaultState: IServerConnectionStoreState = {
 		serverConnections: [],
-	});
+	};
+
+	const state = reactive<IServerConnectionStoreState>(cloneDeep(defaultState));
 
 	const signalRStore = useSignalrStore();
 	const serverStore = useServerStore();
@@ -128,6 +135,9 @@ export const useServerConnectionStore = defineStore('ServerConnection', () => {
 			plexServerApi
 				.setPreferredPlexServerConnectionEndpoint(plexServerId, connectionId)
 				.pipe(switchMap(() => serverStore.refreshPlexServer(plexServerId))),
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
+		},
 	};
 	const getters = {
 		getServerConnectionsByServerId: (plexServerId = 0): PlexServerConnectionDTO[] =>

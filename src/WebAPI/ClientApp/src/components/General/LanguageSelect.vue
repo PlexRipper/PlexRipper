@@ -56,7 +56,7 @@ const localizationStore = useLocalizationStore();
 
 const language = computed({
 	get: (): ILanguageOption =>
-		get(languageOptions).find((x) => x.value === localizationStore.getLanguageLocale.code) ?? ({} as ILanguageOption),
+		get(languageOptions).find((x) => x.value === localizationStore.getLanguageLocale?.code) ?? ({} as ILanguageOption),
 	set: (value: ILanguageOption) => localizationStore.changeLanguageLocale(value.code),
 });
 

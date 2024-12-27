@@ -1,3 +1,4 @@
+import { toRefs } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { Observable } from 'rxjs';
 import { forkJoin, of } from 'rxjs';
@@ -7,11 +8,18 @@ import { DataType } from '@dto';
 import type { ISetupResult } from '@interfaces';
 import { plexAccountApi } from '@api';
 import { useLibraryStore, useServerStore, useSignalrStore } from '@store';
+import { cloneDeep } from 'lodash-es';
+
+interface IAccountStoreState {
+	accounts: PlexAccountDTO[];
+}
 
 export const useAccountStore = defineStore('AccountStore', () => {
-	const state = reactive<{ accounts: PlexAccountDTO[] }>({
+	const defaultState = {
 		accounts: [],
-	});
+	};
+
+	const state = reactive<IAccountStoreState>(cloneDeep(defaultState));
 
 	const serverStore = useServerStore();
 	const libraryStore = useLibraryStore();
@@ -22,7 +30,7 @@ export const useAccountStore = defineStore('AccountStore', () => {
 			// Listen for refresh notifications
 			signalRStore.getRefreshNotification(DataType.PlexAccount).pipe(switchMap(() => actions.refreshAccounts())).subscribe();
 
-			return actions.refreshAccounts().pipe(switchMap(() => of({ name: useAccountStore.name, isSuccess: true })));
+			return actions.refreshAccounts().pipe(switchMap(() => of({ name: 'useAccountStore', isSuccess: true })));
 		},
 		refreshAccounts() {
 			return plexAccountApi.getAllPlexAccountsEndpoint().pipe(
@@ -80,6 +88,9 @@ export const useAccountStore = defineStore('AccountStore', () => {
 			}
 
 			return false;
+		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
 		},
 	};
 

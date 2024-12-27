@@ -1,8 +1,10 @@
 import Log from 'consola';
 import Axios from 'axios';
-import { useGlobalStore } from '@store';
+import { useGlobalStore, useLocalizationStore } from '@store';
 import type IAppConfig from '@class/IAppConfig';
+import type { Router } from 'vue-router';
 import type { I18nObjectType } from '@interfaces';
+import { defineNuxtPlugin } from '#app';
 
 export default defineNuxtPlugin((nuxtApp) => {
 	const publicEnv = useRuntimeConfig().public;
@@ -10,7 +12,6 @@ export default defineNuxtPlugin((nuxtApp) => {
 	nuxtApp.hook('app:created', () => {
 		Log.level = 4;
 		// Log.level = config.public.isProduction ? LogLevel.Debug : LogLevel.Debug;
-		Log.info(`Nuxt Environment: ${publicEnv.version}`);
 
 		let baseUrl = `http://localhost:${publicEnv.apiPort}`;
 		if (publicEnv.isDocker) {
@@ -19,25 +20,27 @@ export default defineNuxtPlugin((nuxtApp) => {
 		}
 
 		const appConfig: IAppConfig = {
-			version: publicEnv.version,
 			nodeEnv: publicEnv.nodeEnv,
 			isProduction: publicEnv.nodeEnv === 'production',
 			isDocker: publicEnv.isDocker,
 			baseUrl,
 		};
-		setupAxios(appConfig);
+		setupAxios(appConfig, nuxtApp.$router as Router);
+		useLocalizationStore().setI18nObject(nuxtApp.$i18n as I18nObjectType);
 		useGlobalStore()
-			.setupServices({ config: appConfig, i18n: nuxtApp.$i18n as I18nObjectType })
+			.setupServices({ config: appConfig })
 			.subscribe();
 	});
 });
 
-function setupAxios(appConfig: IAppConfig) {
+function setupAxios(appConfig: IAppConfig, router: Router) {
 	Axios.defaults.baseURL = appConfig.baseUrl;
+	Axios.defaults.withCredentials = true;
 
 	// Source: https://github.com/axios/axios/issues/41#issuecomment-484546457
-	Axios.defaults.validateStatus = () => true;
 	// Now error resolves in catch block rather than then block.
+	//	Axios.defaults.validateStatus = () => true;
+
 	// Source: https://github.com/axios/axios/issues/41#issuecomment-386762576
 	Axios.interceptors.response.use(
 		(config) => {
@@ -45,7 +48,19 @@ function setupAxios(appConfig: IAppConfig) {
 			return config;
 		},
 		(error) => {
-			// Prevents 400 & 500 status code throwing exceptions
+			const status = error.response?.status;
+
+			// Redirect to log-in on 401 Unauthorized
+			if (status === 401) {
+				router.push('/login');
+			}
+
+			// Optionally, handle other error codes (e.g., 403 Forbidden)
+			if (status === 403) {
+				router.push('/login');
+			}
+
+			// Reject the promise to ensure the calling code can still handle the error
 			return Promise.reject(error);
 		},
 	);

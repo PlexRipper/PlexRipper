@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Application.Contracts;
 using FastEndpoints;
 using FluentValidation;
@@ -5,7 +6,22 @@ using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
-public record QueueSyncPlexServerJobEndpointRequest(int PlexServerId, bool ForceSync = false);
+public record QueueSyncPlexServerJobEndpointRequest
+{
+    /// <summary>
+    /// NOTE: This constructor is needed to make the query param optional in the front-end typescript-api generation.
+    /// </summary>
+    public QueueSyncPlexServerJobEndpointRequest(bool forceSync = false)
+    {
+        ForceSync = forceSync;
+    }
+
+    public int PlexServerId { get; init; }
+
+    [QueryParam, BindFrom("forceSync")]
+    [DefaultValue(false)]
+    public bool ForceSync { get; init; }
+}
 
 public class QueueSyncPlexServerJobEndpointRequestValidator : Validator<QueueSyncPlexServerJobEndpointRequest>
 {

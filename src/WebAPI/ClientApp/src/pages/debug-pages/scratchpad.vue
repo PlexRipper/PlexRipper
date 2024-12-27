@@ -5,14 +5,20 @@
 			:download-rows="downloadStore.getDownloadsByServerId(plexServer.id)"
 			@action="commandSwitch($event)" />
 		<DownloadDetailsDialog :name="dialogName" />
+		<BaseButton
+			label="Reload Stores"
+			@click="onAction" />
 	</QPage>
 </template>
 
 <script setup lang="ts">
 import { generateDownloadProgressTvShows, generatePlexServer, Seed } from '@factories';
 import type { DownloadProgressDTO } from '@dto';
-import { useDownloadStore, useDialogStore } from '@store';
+import { useDownloadStore, useGlobalStore, useDialogStore } from '@store';
+import BaseButton from '@components/Buttons/BaseButton.vue';
+import { useSubscription } from '@vueuse/rxjs';
 
+const globalStore = useGlobalStore();
 const downloadStore = useDownloadStore();
 const dialogStore = useDialogStore();
 const dialogName = 'download-details-dialog';
@@ -30,6 +36,11 @@ function commandSwitch({ action, item }: { action: string; item: DownloadProgres
 	}
 
 	downloadStore.executeDownloadCommand(action, ids);
+}
+
+function onAction() {
+	globalStore.$reset();
+	useSubscription(globalStore.setup().subscribe());
 }
 
 const downloadTasks = generateDownloadProgressTvShows({

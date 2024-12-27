@@ -21,7 +21,7 @@ describe('HelpStore.setup()', () => {
 
 		const setupResult: ISetupResult = {
 			isSuccess: true,
-			name: useHelpStore.name,
+			name: 'useHelpStore',
 		};
 
 		// Act

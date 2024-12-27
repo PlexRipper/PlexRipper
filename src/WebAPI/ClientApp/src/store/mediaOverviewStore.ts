@@ -1,4 +1,4 @@
-import { isEqual, orderBy } from 'lodash-es';
+import { cloneDeep, isEqual, orderBy } from 'lodash-es';
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { get } from '@vueuse/core';
 import { PlexMediaType, ViewMode, type PlexMediaSlimDTO, type PlexMediaStatisticsDTO } from '@dto';
@@ -9,28 +9,30 @@ import { map, tap } from 'rxjs/operators';
 import { iif, defer, type Observable, of } from 'rxjs';
 import { useSettingsStore, useLibraryStore } from '@store';
 
+interface IMediaOverviewStoreState {
+	libraryId: number;
+	items: Readonly<PlexMediaSlimDTO[]>;
+	sortedItems: Readonly<PlexMediaSlimDTO[]>;
+	itemsLength: number;
+	sortedState: IMediaOverviewSort[];
+	scrollDict: Record<string, number>;
+	scrollAlphabet: string[];
+	selection: ISelection;
+	downloadButtonVisible: boolean;
+	mediaType: PlexMediaType;
+	filterQuery: string;
+	lastMediaItemViewed: PlexMediaSlimDTO | null;
+	loading: boolean;
+	isDetailView: boolean;
+	allMovieCount: number;
+	allTvShowCount: number;
+	allSeasonCount: number;
+	allEpisodeCount: number;
+	allFileSize: number;
+}
+
 export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
-	const state = reactive<{
-		libraryId: number;
-		items: Readonly<PlexMediaSlimDTO[]>;
-		sortedItems: Readonly<PlexMediaSlimDTO[]>;
-		itemsLength: number;
-		sortedState: IMediaOverviewSort[];
-		scrollDict: Record<string, number>;
-		scrollAlphabet: string[];
-		selection: ISelection;
-		downloadButtonVisible: boolean;
-		mediaType: PlexMediaType;
-		filterQuery: string;
-		lastMediaItemViewed: PlexMediaSlimDTO | null;
-		loading: boolean;
-		isDetailView: boolean;
-		allMovieCount: number;
-		allTvShowCount: number;
-		allSeasonCount: number;
-		allEpisodeCount: number;
-		allFileSize: number;
-	}>({
+	const defaultState: IMediaOverviewStoreState = {
 		libraryId: 0,
 		items: [],
 		sortedItems: [],
@@ -50,7 +52,9 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		allSeasonCount: 0,
 		allEpisodeCount: 0,
 		allFileSize: 0,
-	});
+	};
+
+	const state = reactive<IMediaOverviewStoreState>(cloneDeep(defaultState));
 
 	const settingsStore = useSettingsStore();
 	const libraryStore = useLibraryStore();
@@ -128,15 +132,17 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			// Create scroll indexes for each letter
 			state.scrollDict = {};
 			state.scrollDict['#'] = 0;
-			// Check for occurrence of title with alphabetic character
-			const sortTitles = get(getters.getMediaItems).map((x) => x.title[0]?.toLowerCase() ?? '#');
-			let lastIndex = 0;
-			const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase();
+			if (get(getters.getMediaItems).length === 0) {
+				// Check for occurrence of title with alphabetic character
+				const sortTitles = get(getters.getMediaItems).map((x) => x.title[0]?.toLowerCase() ?? '#');
+				let lastIndex = 0;
+				const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase();
 
-			for (const letter of alphabet) {
-				lastIndex = sortTitles.findIndex((x, idx) => idx >= lastIndex && x === letter);
-				if (lastIndex > -1) {
-					state.scrollDict[letter] = lastIndex;
+				for (const letter of alphabet) {
+					lastIndex = sortTitles.findIndex((x, idx) => idx >= lastIndex && x === letter);
+					if (lastIndex > -1) {
+						state.scrollDict[letter] = lastIndex;
+					}
 				}
 			}
 			state.scrollAlphabet = Object.keys(state.scrollDict);
@@ -199,6 +205,9 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			);
 			state.sortedState = newSortedState;
 		},
+		$reset() {
+			Object.assign(state, cloneDeep(defaultState));
+		},
 	};
 
 	const getters = {
@@ -211,6 +220,9 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 		allMediaMode: computed(() => state.libraryId === 0),
 		library: computed(() => libraryStore.getLibrary(state.libraryId)),
 		getMediaItems: computed((): Readonly<PlexMediaSlimDTO[]> => {
+			if (!state.items) {
+				return [];
+			}
 			// Currently sorting
 			const query = state.filterQuery.toLowerCase();
 			if (state.sortedState.length > 0) {

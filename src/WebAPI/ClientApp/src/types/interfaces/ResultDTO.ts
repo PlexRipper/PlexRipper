@@ -7,4 +7,5 @@ export interface ResultDTO<T = void> {
 	errors: ErrorDTO[];
 	successes: SuccessDTO[];
 	value?: T;
+	statusCode: number;
 }

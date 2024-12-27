@@ -723,7 +723,8 @@
         },
         "login": {
             "header": "Melden Sie sich an, um fortzufahren",
-            "invalid-credentials": " Falscher Benutzername oder falsches Passwort"
+            "invalid-credentials": " Falscher Benutzername oder falsches Passwort",
+            "locked-out": "Es ist Ihnen nicht gelungen, PlexRipper zu hacken. Jetzt ist Ihre Zeit abgelaufen (5 Minuten)."
         }
     },
     "debug": {

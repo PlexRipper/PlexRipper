@@ -58,6 +58,15 @@ const alertIcon = computed((): string => {
 @use '@/assets/scss/variables.scss' as *;
 
 .q-alert {
+  display: block;
+  font-size: 16px;
+  margin: 0;
+  padding: 16px;
+  position: relative;
+  transition: 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+  border: 1px solid;
+  border-radius: 4px;
+
   &--error {
     border-color: $error-color;
     color: $error-color;

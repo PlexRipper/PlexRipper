@@ -94,22 +94,8 @@ body {
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-// * QAlert
+// * QField
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-.q-alert {
-  display: block;
-  font-size: 16px;
-  margin: 16px;
-  padding: 16px;
-  position: relative;
-  transition: 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
-  border: 1px solid;
-  border-radius: 4px;
-}
-
-.q-field--readonly {
-  //	border: 1px solid;
-}
 
 .q-field {
   &--outlined {

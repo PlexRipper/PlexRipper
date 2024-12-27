@@ -723,7 +723,8 @@
         },
         "login": {
             "header": "CONNECTEZ-VOUS POUR CONTINUER",
-            "invalid-credentials": " identifiant ou mot de passe incorrect"
+            "invalid-credentials": " identifiant ou mot de passe incorrect",
+            "locked-out": "Vous n'avez pas réussi à pirater PlexRipper, vous êtes maintenant hors délai pendant 5 minutes !"
         }
     },
     "debug": {

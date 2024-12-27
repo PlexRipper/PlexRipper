@@ -23,21 +23,22 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 				isSuccess: state.isLoggedIn,
 			})));
 		},
-		login(username: string, password: string) {
+		login(username: string, password: string, rememberMe: boolean): Observable<number> {
 			const data = new FormData();
 			data.append('username', username);
 			data.append('password', password);
+			data.append('rememberMe', rememberMe + '');
 
 			// @ts-expect-error - FormData is not assignable to type 'AppUserLoginEndpointRequest'
 			return authenticationApi.appUserLoginEndpoint(data).pipe(switchMap((res) => {
 				if (res.isSuccess) {
-					Log.info('User logged in', res);
+					Log.info('User logged in');
 					state.isLoggedIn = true;
-					return globalStore.setup().pipe(tap(() => router.push('/')), switchMap(() => of(true)));
+					return globalStore.setup().pipe(tap(() => router.push('/')), switchMap(() => of(res.statusCode)));
 				}
-				Log.error('User login failed', res);
+				Log.error('User login failed');
 				state.isLoggedIn = false;
-				return of(false);
+				return of(res.statusCode);
 			}));
 		},
 		logout() {

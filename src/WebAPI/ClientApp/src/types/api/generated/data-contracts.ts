@@ -9,13 +9,15 @@
  * ---------------------------------------------------------------
  */
 
-/** @example {"username":"PlexRipperRocks","password":"Pl€XR!ℙℙ€R69"} */
+/** @example {"username":"PlexRipperRocks","password":"Pl€XR!ℙℙ€R69","rememberMe":false} */
 export interface AppUserLoginEndpointRequest {
   /**
    * @minLength 1
    * @default "Pl€XR!ℙℙ€R69"
    */
   password: string;
+  /** @default false */
+  rememberMe: boolean;
   /**
    * @minLength 1
    * @default "PlexRipperRocks"

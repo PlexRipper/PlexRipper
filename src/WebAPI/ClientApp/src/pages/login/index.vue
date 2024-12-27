@@ -15,37 +15,59 @@
 					<QCol cols="auto">
 						<QText
 							size="h5"
-							class="q-mt-md"
+							class="q-my-md"
 							:value="$t('pages.login.header')" />
+					</QCol>
+					<QCol
+						v-if="invalidCredentials || lockedOut"
+						cols="12"
+						class="q-my-md">
+						<!-- Invalid Credentials Error -->
+						<QAlert
+							v-if="invalidCredentials"
+							type="error"
+							class="q-ma-none"
+							cy="login-invalid-credentials-alert">
+							{{ $t('pages.login.invalid-credentials') }}
+						</QAlert>
+						<!-- Locked Out Error -->
+						<QAlert
+							v-if="lockedOut"
+							type="error"
+							cy="login-locked-out-alert">
+							{{ $t('pages.login.locked-out') }}
+						</QAlert>
+					</QCol>
+					<QCol cols="12">
+						<!-- Username Login Field -->
+						<q-input
+							v-model="username"
+							color="red"
+							full-width
+							outlined
+							required
+							hide-bottom-space
+							data-cy="login-username-input" />
+					</QCol>
+					<QCol cols="12">
+						<!-- Password Login Field -->
+						<PasswordInputField
+							v-model="password"
+							class="q-my-md"
+							cy="login-password-input" />
+					</QCol>
+					<QCol cols="12">
+						<!-- Remember Me -->
+						<q-checkbox
+							v-model="rememberMe"
+							label="Remember Me" />
 					</QCol>
 				</QRow>
 			</QCardSection>
-			<q-card-section>
-				<!-- Username Login Field -->
-				<q-input
-					v-model="username"
-					color="red"
-					full-width
-					outlined
-					required
-					hide-bottom-space
-					data-cy="login-username-input" />
-				<!-- Password Login Field -->
-				<PasswordInputField
-					v-model="password"
-					class="q-my-md"
-					cy="login-password-input" />
-				<!-- Invalid Credentials Error -->
-				<QAlert
-					v-if="invalidCredentials"
-					type="error"
-					cy="login-invalid-credentials-alert"
-					class="q-mx-none">
-					{{ $t('pages.login.invalid-credentials') }}
-				</QAlert>
-			</q-card-section>
 
-			<QCardActions align="center">
+			<QCardActions
+				align="center"
+				class="q-pt-none">
 				<BaseButton
 					block
 					cy="login-submit-button"
@@ -58,18 +80,23 @@
 </template>
 
 <script setup lang="ts">
+import Log from 'consola';
 import { get, set } from '@vueuse/core';
 import { useAuthenticationStore } from '@store';
 import { useSubscription } from '@vueuse/rxjs';
 
 const authStore = useAuthenticationStore();
-const username = ref('');
-const password = ref('');
+const username = ref('PlexRipperRocks');
+const password = ref('Pl€XR!ℙℙ€R69');
+const rememberMe = ref(false);
 const invalidCredentials = ref(false);
+const lockedOut = ref(false);
 
 function onLogin() {
-	useSubscription(authStore.login(get(username), get(password)).subscribe((isLoggedIn) => {
-		set(invalidCredentials, !isLoggedIn);
+	useSubscription(authStore.login(get(username), get(password), get(rememberMe)).subscribe((statusCode) => {
+		Log.info('Login Status Code:', statusCode);
+		set(invalidCredentials, statusCode === 401);
+		set(lockedOut, statusCode === 403);
 	}));
 }
 </script>

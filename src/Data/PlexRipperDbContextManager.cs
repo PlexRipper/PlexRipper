@@ -11,7 +11,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
 {
     private readonly ILog<PlexRipperDbContextManager> _log;
 
-    private readonly IPlexRipperDbContextDatabase _dbContextDatabase;
+    private readonly IPlexRipperDbContextDatabase _plexRipperDbContextDatabase;
     private readonly IAuthDbContextDatabase _authDbContextDatabase;
 
     private readonly IPathProvider _pathProvider;
@@ -22,7 +22,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
 
     public PlexRipperDbContextManager(
         ILog<PlexRipperDbContextManager> log,
-        IPlexRipperDbContextDatabase dbContextDatabaseDatabase,
+        IPlexRipperDbContextDatabase plexRipperDbContextDatabase,
         IAuthDbContextDatabase authDbContextDatabase,
         IPathProvider pathProvider,
         IDirectory directory,
@@ -30,7 +30,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
     )
     {
         _log = log;
-        _dbContextDatabase = dbContextDatabaseDatabase;
+        _plexRipperDbContextDatabase = plexRipperDbContextDatabase;
         _authDbContextDatabase = authDbContextDatabase;
         _pathProvider = pathProvider;
         _directory = directory;
@@ -48,7 +48,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         if (_file.Exists(DatabasePath))
         {
             // Check if database can be connected to.
-            if (_dbContextDatabase.CanConnect())
+            if (_plexRipperDbContextDatabase.CanConnect())
             {
                 _log.InformationLine("Database was successfully connected!");
                 _log.Information("Database connected at: {DatabasePath}", DatabasePath);
@@ -73,7 +73,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         try
         {
             _log.InformationLine("Resetting PlexRipper database now");
-            _dbContextDatabase.CloseConnection();
+            _plexRipperDbContextDatabase.CloseConnection();
 
             var backUpResult = BackUpDatabase();
             if (backUpResult.IsFailed)
@@ -82,7 +82,7 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
                 return backUpResult.LogError();
             }
 
-            var deletedResult = _dbContextDatabase.EnsureDeleted();
+            var deletedResult = _plexRipperDbContextDatabase.EnsureDeleted();
             if (deletedResult.IsFailed)
             {
                 _log.Error("Database could not be deleted at {DatabasePath}", DatabasePath);
@@ -114,7 +114,8 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         try
         {
             // Create the database while applying any pending migrations.
-            _dbContextDatabase.Migrate();
+            _plexRipperDbContextDatabase.Migrate();
+            _authDbContextDatabase.Migrate();
             _log.Information("Database was successfully created at: {DatabasePath}", DatabasePath);
             return Result.Ok();
         }
@@ -133,11 +134,11 @@ public class PlexRipperDbContextManager : IPlexRipperDbContextManager
         {
             // Don't migrate when running in memory, this causes error:
             // "Relational-specific methods can only be used when the context is using a relational database provider."
-            var pendingMigrations = _dbContextDatabase.GetPendingMigrations();
-            if (!_dbContextDatabase.IsInMemory() && pendingMigrations.Any())
+            var pendingMigrations = _plexRipperDbContextDatabase.GetPendingMigrations();
+            if (!_plexRipperDbContextDatabase.IsInMemory() && pendingMigrations.Any())
             {
                 _log.InformationLine("Attempting to migrate database");
-                _dbContextDatabase.Migrate();
+                _plexRipperDbContextDatabase.Migrate();
                 _log.InformationLine("Database migration successful!");
             }
 

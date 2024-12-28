@@ -89,11 +89,11 @@ public class Boot : IHostedService
 
         _configManager.Setup();
 
-        await CreateDefaultAppUser();
-
         var databaseSetupResult = _dbContextManager.Setup();
         if (databaseSetupResult.IsFailed)
             await StopAsync(cancellationToken);
+
+        await CreateDefaultAppUser();
 
         _downloadQueue.Setup();
 

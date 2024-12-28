@@ -24,15 +24,12 @@ public static class LogManager
         {
             // ReSharper disable once StringLiteralTypo
             case { } s when s.StartsWith("dbug:"):
-
                 _log.Debug(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case { } s when s.StartsWith("info:"):
-
                 _log.Information(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
             case { } s when s.StartsWith("fail:"):
-
                 _log.Error(messageTemplate, memberName, sourceFilePath, sourceLineNumber);
                 break;
         }

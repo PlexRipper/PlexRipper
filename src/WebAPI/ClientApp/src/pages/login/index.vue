@@ -18,6 +18,8 @@
 							class="q-my-md"
 							:value="$t('pages.login.header')" />
 					</QCol>
+				</QRow>
+				<QRow justify="between">
 					<QCol
 						v-if="invalidCredentials || lockedOut"
 						cols="12"
@@ -56,12 +58,21 @@
 							class="q-my-md"
 							cy="login-password-input" />
 					</QCol>
-					<QCol cols="12">
+					<QCol cols="6">
 						<!-- Remember Me -->
 						<q-checkbox
 							v-model="rememberMe"
 							data-cy="login-remember-me-input"
 							:label="$t('pages.login.remember-me')" />
+					</QCol>
+					<QCol cols="auto">
+						<!-- Remember Me -->
+						<a
+							href="https://www.plexripper.rocks/faq#what-if-i-forgot-my-username-and-password-to-log-into-plex-ripper"
+							target="_blank"
+							class="link">
+							<QText>{{ $t('pages.login.forgot-your-password') }}</QText>
+						</a>
 					</QCol>
 				</QRow>
 			</QCardSection>

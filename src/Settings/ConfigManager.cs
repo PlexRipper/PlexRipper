@@ -89,7 +89,7 @@ public class ConfigManager : IConfigManager
 
     public virtual Result LoadConfig()
     {
-        _log.InformationLine("Loading user config settings now");
+        _log.DebugLine("Loading user config settings now");
         var readResult = ReadFromConfigFile();
         if (readResult.IsFailed)
         {
@@ -130,7 +130,7 @@ public class ConfigManager : IConfigManager
 
     public virtual Result SaveConfig()
     {
-        _log.InformationLine("Saving user config settings now");
+        _log.DebugLine("Saving user config settings now");
 
         var jsonSettings = UserSettingsSerializer.Serialize(_userSettings);
 

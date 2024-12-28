@@ -1,60 +1,62 @@
 <template>
-	<q-btn-dropdown
-		stretch
-		flat
+	<q-btn
 		icon="mdi-account"
-		dropdown-icon="mdi-arrow-down">
-		<q-list>
-			<template v-if="accountsDisplay.length > 0">
-				<!--  Title  -->
-				<q-item-label header>
-					{{ $t('components.account-selector.title') }}
-				</q-item-label>
+		flat
+		rounded
+		style="padding: 0.5rem">
+		<q-menu>
+			<q-list>
+				<template v-if="accountsDisplay.length > 0">
+					<!--  Title  -->
+					<q-item-label header>
+						{{ $t('components.account-selector.title') }}
+					</q-item-label>
 
-				<!--  Account Row  -->
+					<!--  Account Row  -->
+					<q-item
+						v-for="(account, index) in accountsDisplay"
+						:key="index"
+						v-close-popup
+						clickable
+						tabindex="0"
+						@click="updateActiveAccountId(account.id)">
+						<q-item-section>
+							<q-item-label>{{ account.displayName }}</q-item-label>
+							<q-item-label
+								v-if="account.username"
+								caption>
+								{{ account.username }}
+							</q-item-label>
+						</q-item-section>
+						<q-item-section side>
+							<q-btn
+								flat
+								icon="mdi-refresh"
+								:loading="loading[0] || loading[index]"
+								:disabled="isLoading"
+								@click.stop="runReSyncAccount(account.id)" />
+						</q-item-section>
+					</q-item>
+				</template>
+				<!--	No account found -->
+				<q-item-label v-else>
+					{{ t('components.app-bar.no-accounts') }}
+				</q-item-label>
+				<q-separator />
+				<!-- Log out Button -->
 				<q-item
-					v-for="(account, index) in accountsDisplay"
-					:key="index"
-					v-close-popup
 					clickable
-					tabindex="0"
-					@click="updateActiveAccountId(account.id)">
+					@click="onLogOut">
 					<q-item-section>
-						<q-item-label>{{ account.displayName }}</q-item-label>
-						<q-item-label
-							v-if="account.username"
-							caption>
-							{{ account.username }}
-						</q-item-label>
+						<q-item-label>{{ $t('components.account-selector.log-out-button') }}</q-item-label>
 					</q-item-section>
 					<q-item-section side>
-						<q-btn
-							flat
-							icon="mdi-refresh"
-							:loading="loading[0] || loading[index]"
-							:disabled="isLoading"
-							@click.stop="runReSyncAccount(account.id)" />
+						<q-icon name="mdi-logout" />
 					</q-item-section>
 				</q-item>
-			</template>
-			<!--	No account found -->
-			<q-item-label v-else>
-				{{ t('components.app-bar.no-accounts') }}
-			</q-item-label>
-			<q-separator />
-			<!-- Log out Button -->
-			<q-item
-				clickable
-				@click="onLogOut">
-				<q-item-section>
-					<q-item-label>{{ $t('components.account-selector.log-out-button') }}</q-item-label>
-				</q-item-section>
-				<q-item-section side>
-					<q-icon name="mdi-logout" />
-				</q-item-section>
-			</q-item>
-		</q-list>
-	</q-btn-dropdown>
+			</q-list>
+		</q-menu>
+	</q-btn>
 </template>
 
 <script setup lang="ts">

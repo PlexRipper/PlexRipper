@@ -47,7 +47,8 @@ public class PlexRipperDbContextManager_UnitTests : BaseUnitTest<PlexRipperDbCon
         // Arrange
         mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false).Verifiable(Times.Once);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
+        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
 
         // Act
         var result = _sut.Setup();
@@ -61,9 +62,13 @@ public class PlexRipperDbContextManager_UnitTests : BaseUnitTest<PlexRipperDbCon
     public void ShouldLogWarning_WhenDatabaseDoesNotExist()
     {
         // Arrange
-        mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
-        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        mock.Mock<IPathProvider>()
+            .SetupGet(x => x.DatabasePath)
+            .Returns(() => DatabasePath)
+            .Verifiable(Times.Exactly(2));
+        mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false).Verifiable(Times.Once);
+        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
+        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
 
         // Act
         var result = _sut.Setup();
@@ -78,7 +83,11 @@ public class PlexRipperDbContextManager_UnitTests : BaseUnitTest<PlexRipperDbCon
         // Arrange
         mock.Mock<IPathProvider>().SetupGet(x => x.DatabasePath).Returns(() => DatabasePath);
         mock.Mock<IFile>().Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Throws(new Exception("Test Exception"));
+        mock.Mock<IPlexRipperDbContextDatabase>()
+            .Setup(x => x.Migrate())
+            .Throws(new Exception("Test Exception"))
+            .Verifiable(Times.Once);
+        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Never);
 
         // Act
         var result = _sut.Setup();
@@ -101,7 +110,8 @@ public class PlexRipperDbContextManager_UnitTests : BaseUnitTest<PlexRipperDbCon
         mock.Mock<IDirectory>()
             .Setup(x => x.CreateDirectory(It.IsAny<string>()))
             .Returns(new Mock<IDirectoryInfo>().Object);
-        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok());
+        mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
+        mock.Mock<IAuthDbContextDatabase>().Setup(x => x.Migrate()).Returns(Result.Ok()).Verifiable(Times.Once);
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CanConnect()).Returns(false);
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.EnsureDeleted()).Returns(Result.Ok(true));
         mock.Mock<IPlexRipperDbContextDatabase>().Setup(x => x.CloseConnection());

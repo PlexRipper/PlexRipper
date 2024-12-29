@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="DockerfileDebug" type="docker-deploy" factoryName="dockerfile" server-name="Docker">
+  <configuration default="false" name="Dockerfile Debug" type="docker-deploy" factoryName="dockerfile" server-name="Docker">
     <deployment type="dockerfile">
       <settings>
         <option name="imageTag" value="plexripper/plexripper:dev" />
@@ -33,6 +33,7 @@
             </DockerPortBindingImpl>
           </list>
         </option>
+        <option name="commandLineOptions" value="" />
         <option name="sourceFilePath" value="docker/Dockerfile" />
         <option name="volumeBindings">
           <list>

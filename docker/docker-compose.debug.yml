@@ -16,7 +16,7 @@ services:
             - TZ=America/New_York
             - UNMASKED=false # Unmask sensitive data in logs if true
         volumes:
-            - /mnt/PROJECTS/PlexRipperCache/Config:/Config
-            - /mnt/PROJECTS/PlexRipperCache/Downloads:/Downloads
-            - /mnt/PROJECTS/PlexRipperCache/Movies:/Movies
-            - /mnt/PROJECTS/PlexRipperCache/TvShows:/TvShows
+            - /mnt/TURBO/PlexRipperDockerCache/Config:/Config
+            - /mnt/TURBO/PlexRipperDockerCache/Downloads:/Downloads
+            - /mnt/TURBO/PlexRipperDockerCache/Movies:/Movies
+            - /mnt/TURBO/PlexRipperDockerCache/TvShows:/TvShows

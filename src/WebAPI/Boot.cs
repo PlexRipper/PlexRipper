@@ -47,12 +47,6 @@ public class Boot : IHostedService
     /// <summary>
     /// The Boot class is used to sequentially start various processes needed to start PlexRipper.
     /// </summary>
-    /// <param name="log"></param>
-    /// <param name="dbContextManagerManager"></param>
-    /// <param name="appLifetime"></param>
-    /// <param name="configManager"></param>
-    /// <param name="schedulerService"></param>
-    /// <param name="downloadQueue"></param>
     public Boot(
         ILog log,
         IMediator mediator,
@@ -87,7 +81,9 @@ public class Boot : IHostedService
 
         LogIdentity();
 
-        _configManager.Setup();
+        var configSetupResult = _configManager.Setup();
+        if (configSetupResult.IsFailed)
+            await StopAsync(cancellationToken);
 
         var databaseSetupResult = _dbContextManager.Setup();
         if (databaseSetupResult.IsFailed)

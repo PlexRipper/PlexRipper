@@ -9,6 +9,7 @@ using FastEndpoints.Security;
 using FastEndpoints.Swagger;
 using Logging.Interface;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -80,6 +81,17 @@ public static class Startup
             app.UseSwaggerGen();
         }
 
+        // Setup FastEndpoints Swagger
+        if (!EnvironmentExtensions.IsIntegrationTestMode() && env.IsProduction())
+        {
+            // Used to deploy the front-end Nuxt client
+            app.UseSpaStaticFiles();
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "ClientApp";
+            });
+        }
+
         app.ConfigureAuthenticationApplication();
 
         // Setup FastEndpoints
@@ -99,17 +111,6 @@ public static class Startup
                 return result;
             };
         });
-
-        // Setup FastEndpoints Swagger
-        if (!EnvironmentExtensions.IsIntegrationTestMode() && env.IsProduction())
-        {
-            // Used to deploy the front-end Nuxt client
-            app.UseSpaStaticFiles();
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = "ClientApp";
-            });
-        }
     }
 
     /// <summary>
@@ -154,12 +155,12 @@ public static class Startup
             // Used to deploy the front-end Nuxt client
             if (env.IsProduction())
             {
-                services.AddSpaStaticFiles(configuration =>
-                    configuration.RootPath = Path.Combine(
-                        Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "",
-                        "wwwroot"
-                    )
+                var path = Path.Combine(
+                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "",
+                    "wwwroot"
                 );
+                _log.Debug("Setting up SPA static files for production at {Path}", path);
+                services.AddSpaStaticFiles(configuration => configuration.RootPath = path);
             }
 
             if (env.IsDevelopment())
@@ -246,6 +247,12 @@ public static class Startup
 
     private static void ConfigureAuthenticationServices(this IServiceCollection services)
     {
+        // Fixes "Using an in-memory repository. Keys will not be persisted to storage." warnings
+        services
+            .AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo(PathProvider.ConfigDirectory))
+            .SetApplicationName("PlexRipper");
+
         services.AddAuthorization(options =>
         {
             options.AddPolicy("AuthenticatedUsers", x => x.RequireRole("Admin"));

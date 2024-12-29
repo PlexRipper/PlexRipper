@@ -38,7 +38,7 @@ public static class Startup
     ///  This method gets called by the runtime. Use this method to add services to the container.
     /// </summary>
     /// <param name="builder"></param>
-    public static void ConfigureHostBuilder(this IHostBuilder builder)
+    public static void ConfigureAutofacBuilder(this IHostBuilder builder)
     {
         // Use Autofac as the DI container
         builder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
@@ -59,8 +59,6 @@ public static class Startup
     /// <param name="env"> The <see cref="IWebHostEnvironment"/> instance to configure.</param>
     public static void ConfigureApplication(this WebApplication app, IWebHostEnvironment env)
     {
-        _log.Information("Currently running in {Environment} mode", env.EnvironmentName);
-
         _log.Information(
             "Running location: {Location}",
             Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)

@@ -44,11 +44,19 @@
  - Packed with quality of life features and more!
 
 ## What is PlexRipper?
-Tired of scouring torrent sites or shelling out for expensive Usenet subscriptions? Say goodbye to that hassle because PlexRipper lets you effortlessly expand your media collection by downloading content directly from the Plex servers you have access to!
+PlexRipper is an independent media management tool designed to help users organize and interact with their personal media libraries. It is not affiliated with, endorsed by, or associated with Plex Inc. or any other media platform.
 
-PlexRipper is a cross-platform media downloader that syncs with Plex servers that are shared with you, enabling you to download movies, TV shows, and more—all while seamlessly adding them to your own Plex library.
+Users are solely responsible for ensuring compliance with Plex’s Terms of Service and applicable laws in their jurisdiction. PlexRipper does not bypass security measures or access features requiring a valid Plex Pass subscription.
 
-Why search and collect media yourself when others can do it for you? With PlexRipper, it's never been easier to grow your collection. Just download and enjoy!
+PlexRipper is intended for personal use only. Users must:
+- Have explicit ownership or permission to access and download content.
+- Avoid using PlexRipper to infringe upon copyrights or violate platform terms.
+- Use PlexRipper responsibly, ensuring it does not overload or disrupt server operations.
+
+Prohibited activities include:
+- Downloading content from servers without proper authorization.
+- Circumventing restrictions tied to paid subscriptions, such as Plex Pass.
+- Using the tool for any purpose that violates local copyright or intellectual property laws.
 
 ## Installation
 

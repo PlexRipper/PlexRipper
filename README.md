@@ -7,6 +7,8 @@
 </h1>
 
 <h4 align="center">A cross-platform Plex media downloader that seamlessly adds media from other Plex servers to your own!</h4>
+
+<h5 align="center"><i>This tool is not affiliated with, endorsed by, or associated with Plex Inc.</i></h5>
 <h4 align="center">
 ⭐ Star us on <a href="https://github.com/PlexRipper/PlexRipper">GitHub</a> and <a href="https://hub.docker.com/r/plexripper/plexripper">DockerHub</a> — it motivates us a lot and helps to pay the rent!</h4>
 
@@ -107,7 +109,7 @@ Follow one of these guides depending on your platform:
 
 <p>Huge thank you to <a href="http://www.jetbrains.com/"><img src="https://raw.githubusercontent.com/plexripper/plexripper/dev/export/jetbrains/jetbrains.svg" alt="Jetbrains" width="32"> JetBrains </a> for supporting open source projects and providing us with free licenses of their great tools!</p>
 
-PlexRipper is very contentedly uses the following tools:
+PlexRipper very contentedly uses the following tools:
 
   <a href="http://www.jetbrains.com/resharper/"><img src="https://raw.githubusercontent.com/plexripper/plexripper/dev/export/jetbrains/resharper.svg" alt="Jetbrains Resharper" width="32"> Resharper </a>
 

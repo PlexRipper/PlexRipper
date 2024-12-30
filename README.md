@@ -36,10 +36,10 @@
 <video src="https://github.com/user-attachments/assets/e0f8077e-2653-49eb-835d-4c83edd22687" loop autoplay muted controls title="PlexRipper Demo"  style="max-width: 100%; height: auto; display: block;"></video>
 
 ## Key Features
- - Automatic downloads of all movies and tv-shows!
+ - Intuitive interface for seamless media management and downloads!
  - A gorgeous, intuitive user interface designed for ease of use!
  - Works anywhere Docker runs — PCs, servers, and beyond!
- - Connect multiple Plex accounts to organize and download content effortlessly!
+ - Connect multiple accounts to organize and download content effortlessly!
  - Scalable, multi-threaded, and resilient download manager to handle huge libraries!
  - Packed with quality of life features and more!
 

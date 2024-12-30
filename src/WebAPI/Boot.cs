@@ -2,6 +2,7 @@ using System.Net;
 using System.Runtime.InteropServices;
 using Application.Contracts;
 using Data.Contracts;
+using Environment;
 using Logging.Interface;
 using PlexRipper.Application;
 using Settings.Contracts;
@@ -19,6 +20,7 @@ public class Boot : IHostedService
     private readonly IMediator _mediator;
 
     private readonly IPlexRipperDbContextManager _dbContextManager;
+    private readonly IHostApplicationLifetime _appLifetime;
 
     private readonly IConfigManager _configManager;
 
@@ -46,6 +48,7 @@ public class Boot : IHostedService
         _log = log;
         _mediator = mediator;
         _dbContextManager = dbContextManagerManager;
+        _appLifetime = appLifetime;
         _configManager = configManager;
         _schedulerService = schedulerService;
         _downloadQueue = downloadQueue;
@@ -65,27 +68,47 @@ public class Boot : IHostedService
         _log.InformationLine("Initiating boot process");
         ServicePointManager.DefaultConnectionLimit = 1000;
 
+        if (EnvironmentExtensions.GetPuid() == 911 && EnvironmentExtensions.GetPgid() == 1001)
+        {
+            _log.ErrorLine(
+                "PlexRipper has invalid PUID and PGID values and thus has defaulted to root, this is not allowed"
+            );
+            TerminateApplication();
+            return;
+        }
+
         var configSetupResult = _configManager.Setup();
         if (configSetupResult.IsFailed)
         {
-            await StopAsync(cancellationToken);
+            TerminateApplication();
             return;
         }
 
         var databaseSetupResult = _dbContextManager.Setup();
         if (databaseSetupResult.IsFailed)
         {
-            await StopAsync(cancellationToken);
+            TerminateApplication();
             return;
         }
 
-        await CreateDefaultAppUser();
+        var defaultUser = await CreateDefaultAppUser();
+        if (defaultUser.IsFailed)
+        {
+            TerminateApplication();
+            return;
+        }
 
         _downloadQueue.Setup();
 
         await _schedulerService.SetupAsync();
 
         _log.InformationLine("Finished Initiating boot process");
+    }
+
+    private void TerminateApplication()
+    {
+        _log.ErrorLine("An error occurred during the boot process, terminating application");
+        _appLifetime.StopApplication();
     }
 
     /// <inheritdoc/>
@@ -121,10 +144,7 @@ public class Boot : IHostedService
         _log.InformationLine("PlexRipper has been shutdown! R.I.P.");
     }
 
-    private async Task CreateDefaultAppUser()
-    {
-        await _mediator.Send(new CreateDefaultAppUserCommand());
-    }
+    private async Task<Result> CreateDefaultAppUser() => await _mediator.Send(new CreateDefaultAppUserCommand());
 
     #endregion
 }

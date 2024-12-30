@@ -1,7 +1,6 @@
-using System.Runtime.InteropServices;
 using Environment;
 using Logging.Interface;
-using Serilog.Events;
+using PlexRipper.Application;
 
 namespace PlexRipper.WebAPI;
 
@@ -10,20 +9,6 @@ namespace PlexRipper.WebAPI;
 /// </summary>
 public class Program
 {
-    /// <summary>
-    ///  Get the real user ID of the calling process.
-    /// </summary>
-    /// <returns></returns>
-    [DllImport("libc")]
-    public static extern uint getuid();
-
-    /// <summary>
-    ///  Get the real group ID of the calling process.
-    /// </summary>
-    /// <returns></returns>
-    [DllImport("libc")]
-    public static extern uint getgid();
-
     private static readonly ILog _log = LogManager.CreateLogInstance(typeof(Program));
 
     /// <summary>
@@ -44,7 +29,7 @@ public class Program
                 OsInfo.CurrentOS
             );
 
-            LogIdentity();
+            AppExtensions.LogIdentity();
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -67,16 +52,5 @@ public class Program
             // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
             LogManager.CloseAndFlush();
         }
-    }
-
-    private static void LogIdentity()
-    {
-        // Retrieve PUID and PGID from environment variables
-        var puid = System.Environment.GetEnvironmentVariable("PUID");
-        var pgid = System.Environment.GetEnvironmentVariable("PGID");
-
-        _log.Debug("PUID from env: {PUID} and from the system: {PUID}", puid ?? "-1", getuid());
-        _log.Debug("PGID from env: {PGID} and from the system: {PGID}", pgid ?? "-1", getgid());
-        _log.Debug("Current system Username: {SystemPUIDName}", System.Environment.UserName);
     }
 }

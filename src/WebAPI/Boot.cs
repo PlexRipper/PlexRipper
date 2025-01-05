@@ -1,10 +1,8 @@
 using System.Net;
-using System.Runtime.InteropServices;
 using Application.Contracts;
-using Data.Contracts;
+using Environment;
 using Logging.Interface;
 using PlexRipper.Application;
-using Settings.Contracts;
 
 namespace PlexRipper.WebAPI;
 
@@ -18,27 +16,11 @@ public class Boot : IHostedService
     private readonly ILog _log;
     private readonly IMediator _mediator;
 
-    private readonly IPlexRipperDbContextManager _dbContextManager;
-
-    private readonly IConfigManager _configManager;
+    private readonly IHostApplicationLifetime _appLifetime;
 
     private readonly ISchedulerService _schedulerService;
 
     private readonly IDownloadQueue _downloadQueue;
-
-    /// <summary>
-    ///  Get the real user ID of the calling process.
-    /// </summary>
-    /// <returns></returns>
-    [DllImport("libc")]
-    public static extern uint getuid();
-
-    /// <summary>
-    ///  Get the real group ID of the calling process.
-    /// </summary>
-    /// <returns></returns>
-    [DllImport("libc")]
-    public static extern uint getgid();
 
     #endregion
 
@@ -47,26 +29,17 @@ public class Boot : IHostedService
     /// <summary>
     /// The Boot class is used to sequentially start various processes needed to start PlexRipper.
     /// </summary>
-    /// <param name="log"></param>
-    /// <param name="dbContextManagerManager"></param>
-    /// <param name="appLifetime"></param>
-    /// <param name="configManager"></param>
-    /// <param name="schedulerService"></param>
-    /// <param name="downloadQueue"></param>
     public Boot(
         ILog log,
         IMediator mediator,
-        IPlexRipperDbContextManager dbContextManagerManager,
         IHostApplicationLifetime appLifetime,
-        IConfigManager configManager,
         ISchedulerService schedulerService,
         IDownloadQueue downloadQueue
     )
     {
         _log = log;
         _mediator = mediator;
-        _dbContextManager = dbContextManagerManager;
-        _configManager = configManager;
+        _appLifetime = appLifetime;
         _schedulerService = schedulerService;
         _downloadQueue = downloadQueue;
 
@@ -82,24 +55,35 @@ public class Boot : IHostedService
     /// <inheritdoc />
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _log.InformationLine("Initiating boot process");
         ServicePointManager.DefaultConnectionLimit = 1000;
 
-        LogIdentity();
+        if (EnvironmentExtensions.GetPuid() == 911 && EnvironmentExtensions.GetPgid() == 1001)
+        {
+            _log.ErrorLine(
+                "PlexRipper has invalid PUID and PGID values and thus has defaulted to root, this is not allowed"
+            );
+            TerminateApplication();
+            return;
+        }
 
-        _configManager.Setup();
-
-        var databaseSetupResult = _dbContextManager.Setup();
-        if (databaseSetupResult.IsFailed)
-            await StopAsync(cancellationToken);
-
-        await CreateDefaultAppUser();
+        var defaultUser = await CreateDefaultAppUser();
+        if (defaultUser.IsFailed)
+        {
+            TerminateApplication();
+            return;
+        }
 
         _downloadQueue.Setup();
 
         await _schedulerService.SetupAsync();
 
         _log.InformationLine("Finished Initiating boot process");
+    }
+
+    private void TerminateApplication()
+    {
+        _log.ErrorLine("An error occurred during the boot process, terminating application");
+        _appLifetime.StopApplication();
     }
 
     /// <inheritdoc/>
@@ -135,21 +119,7 @@ public class Boot : IHostedService
         _log.InformationLine("PlexRipper has been shutdown! R.I.P.");
     }
 
-    private void LogIdentity()
-    {
-        // Retrieve PUID and PGID from environment variables
-        var puid = System.Environment.GetEnvironmentVariable("PUID");
-        var pgid = System.Environment.GetEnvironmentVariable("PGID");
-
-        _log.Debug("PUID from env: {PUID} and from the system: {PUID}", puid ?? "-1", getuid());
-        _log.Debug("PGID from env: {PGID} and from the system: {PGID}", pgid ?? "-1", getgid());
-        _log.Debug("Current system Username: {SystemPUIDName}", System.Environment.UserName);
-    }
-
-    private async Task CreateDefaultAppUser()
-    {
-        await _mediator.Send(new CreateDefaultAppUserCommand());
-    }
+    private async Task<Result> CreateDefaultAppUser() => await _mediator.Send(new CreateDefaultAppUserCommand());
 
     #endregion
 }

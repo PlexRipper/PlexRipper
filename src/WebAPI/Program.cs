@@ -1,6 +1,6 @@
 using Environment;
 using Logging.Interface;
-using Serilog.Events;
+using PlexRipper.Application;
 
 namespace PlexRipper.WebAPI;
 
@@ -29,13 +29,23 @@ public class Program
                 OsInfo.CurrentOS
             );
 
+            AppExtensions.LogIdentity();
+
+            _log.InformationLine("Initiating boot process");
+
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Host.ConfigureHostBuilder();
+            builder.Host.ConfigureAutofacBuilder();
 
             builder.Services.ConfigureServices(builder.Environment);
 
             var app = builder.Build();
+
+            _log.DebugLine("Finished configuring the application");
+
+            app.ConfigureConfigFile();
+
+            app.ConfigureDatabase();
 
             app.ConfigureApplication(app.Environment);
 

@@ -40,7 +40,7 @@ public class SchedulerService : ISchedulerService
         SetupListeners();
         if (!_scheduler.IsStarted)
         {
-            _log.InformationLine("Starting Quartz Scheduler");
+            _log.DebugLine("Starting Quartz Scheduler");
             await _scheduler.Start();
         }
 
@@ -58,7 +58,7 @@ public class SchedulerService : ISchedulerService
     {
         if (!_scheduler.IsShutdown)
         {
-            _log.InformationLine("Shutting down Quartz Scheduler");
+            _log.DebugLine("Shutting down Quartz Scheduler");
 
             foreach (var runningJob in await _scheduler.GetCurrentlyExecutingJobs())
             {

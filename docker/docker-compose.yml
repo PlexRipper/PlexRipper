@@ -17,8 +17,8 @@ services:
             - UNMASKED=false # Unmask sensitive data in logs if true
             # - LOG_LEVEL=DEBUG # Set the logging level in the docker logging
         volumes:
-            # The paths /mnt/PROJECTS/PlexRipperCache/ are examples and you will need valid paths on your device with write permission.
-            - /mnt/PROJECTS/PlexRipperCache/Config:/Config
-            - /mnt/PROJECTS/PlexRipperCache/Downloads:/Downloads
-            - /mnt/PROJECTS/PlexRipperCache/Movies:/Movies
-            - /mnt/PROJECTS/PlexRipperCache/TvShows:/TvShows
+            # The paths /mnt/TURBO/PlexRipperDockerCache/ are examples, and you will need valid paths on your device with write permission.
+            - /mnt/TURBO/PlexRipperDockerCache/Config:/Config
+            - /mnt/TURBO/PlexRipperDockerCache/Downloads:/Downloads
+            - /mnt/TURBO/PlexRipperDockerCache/Movies:/Movies
+            - /mnt/TURBO/PlexRipperDockerCache/TvShows:/TvShows

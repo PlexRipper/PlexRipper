@@ -39,6 +39,12 @@ public class Program
 
             var app = builder.Build();
 
+            _log.InformationLine("Finished building the application");
+
+            app.ConfigureConfigFile();
+
+            app.ConfigureDatabase();
+
             app.ConfigureApplication(app.Environment);
 
             app.Run();

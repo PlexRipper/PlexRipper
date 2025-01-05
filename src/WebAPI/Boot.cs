@@ -19,10 +19,7 @@ public class Boot : IHostedService
     private readonly ILog _log;
     private readonly IMediator _mediator;
 
-    private readonly IPlexRipperDbContextManager _dbContextManager;
     private readonly IHostApplicationLifetime _appLifetime;
-
-    private readonly IConfigManager _configManager;
 
     private readonly ISchedulerService _schedulerService;
 
@@ -38,18 +35,14 @@ public class Boot : IHostedService
     public Boot(
         ILog log,
         IMediator mediator,
-        IPlexRipperDbContextManager dbContextManagerManager,
         IHostApplicationLifetime appLifetime,
-        IConfigManager configManager,
         ISchedulerService schedulerService,
         IDownloadQueue downloadQueue
     )
     {
         _log = log;
         _mediator = mediator;
-        _dbContextManager = dbContextManagerManager;
         _appLifetime = appLifetime;
-        _configManager = configManager;
         _schedulerService = schedulerService;
         _downloadQueue = downloadQueue;
 
@@ -73,20 +66,6 @@ public class Boot : IHostedService
             _log.ErrorLine(
                 "PlexRipper has invalid PUID and PGID values and thus has defaulted to root, this is not allowed"
             );
-            TerminateApplication();
-            return;
-        }
-
-        var configSetupResult = _configManager.Setup();
-        if (configSetupResult.IsFailed)
-        {
-            TerminateApplication();
-            return;
-        }
-
-        var databaseSetupResult = _dbContextManager.Setup();
-        if (databaseSetupResult.IsFailed)
-        {
             TerminateApplication();
             return;
         }

@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+
 namespace PlexRipper.Identity.Contracts;
 
-public interface IAuthDbContext : IDisposable { }
+public interface IAuthDbContext : IDataProtectionKeyContext, IDisposable { }

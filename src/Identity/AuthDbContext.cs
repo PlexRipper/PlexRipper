@@ -1,10 +1,8 @@
 using Data.Contracts;
 using FluentResults;
-using Logging;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using PlexRipper.Identity.Contracts;
 
 namespace PlexRipper.Identity;
@@ -12,6 +10,8 @@ namespace PlexRipper.Identity;
 public class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, IAuthDbContextDatabase
 {
     public string DatabaseName { get; } = string.Empty;
+
+    public DbSet<DataProtectionKey> DataProtectionKeys { get; }
 
     public AuthDbContext() { }
 

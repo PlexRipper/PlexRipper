@@ -245,11 +245,7 @@ public static class Startup
 
     private static void ConfigureAuthenticationServices(this IServiceCollection services)
     {
-        // Fixes "Using an in-memory repository. Keys will not be persisted to storage." warnings
-        services
-            .AddDataProtection()
-            .PersistKeysToFileSystem(new DirectoryInfo(PathProvider.ConfigDirectory))
-            .SetApplicationName("PlexRipper");
+        services.AddDataProtection().PersistKeysToDbContext<AuthDbContext>();
 
         services.AddAuthorization(options =>
         {

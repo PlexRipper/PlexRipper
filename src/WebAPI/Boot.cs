@@ -1,11 +1,8 @@
 using System.Net;
-using System.Runtime.InteropServices;
 using Application.Contracts;
-using Data.Contracts;
 using Environment;
 using Logging.Interface;
 using PlexRipper.Application;
-using Settings.Contracts;
 
 namespace PlexRipper.WebAPI;
 
@@ -58,7 +55,6 @@ public class Boot : IHostedService
     /// <inheritdoc />
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _log.InformationLine("Initiating boot process");
         ServicePointManager.DefaultConnectionLimit = 1000;
 
         if (EnvironmentExtensions.GetPuid() == 911 && EnvironmentExtensions.GetPgid() == 1001)

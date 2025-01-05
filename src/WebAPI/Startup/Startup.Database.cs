@@ -4,7 +4,7 @@ using Data.Contracts;
 
 namespace PlexRipper.WebAPI;
 
-public static partial class StartupExtensions
+public static partial class Startup
 {
     public static void ConfigureDatabase(this WebApplication app)
     {

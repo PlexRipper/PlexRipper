@@ -4,7 +4,7 @@ using Settings.Contracts;
 
 namespace PlexRipper.WebAPI;
 
-public static partial class StartupExtensions
+public static partial class Startup
 {
     public static void ConfigureConfigFile(this WebApplication app)
     {

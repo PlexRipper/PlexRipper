@@ -31,6 +31,8 @@ public class Program
 
             AppExtensions.LogIdentity();
 
+            _log.InformationLine("Initiating boot process");
+
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Host.ConfigureAutofacBuilder();
@@ -39,7 +41,7 @@ public class Program
 
             var app = builder.Build();
 
-            _log.InformationLine("Finished building the application");
+            _log.DebugLine("Finished configuring the application");
 
             app.ConfigureConfigFile();
 

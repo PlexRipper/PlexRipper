@@ -66,7 +66,7 @@ public class CreateDefaultAppUserCommandHandler : IRequestHandler<CreateDefaultA
             {
                 await _userManager.AddToRoleAsync(defaultUser, adminRole);
                 _log.Here()
-                    .Information(
+                    .Warning(
                         "APP USER CREATED: user \"{DefaultUserName}\" with password \"{DefaultPassword}\" created successfully, make sure to update this default user!",
                         defaultUsername,
                         defaultPassword

@@ -7,6 +7,7 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Enrichers.Sensitive;
 using Serilog.Events;
+using Serilog.Filters;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.Console.LogThemes;
 using Xunit.Abstractions;
@@ -22,6 +23,9 @@ public static class LogConfig
         var config = new LoggerConfiguration()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+            // This filters: No XML encryptor configured. Key {*} may be persisted to storage in unencrypted form.
+            // This can be ignored because we use proper auth: https://github.com/dotnet/aspnetcore/issues/3309#issuecomment-404246838
+            .Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager"))
             .MinimumLevel.Override("Quartz", LogEventLevel.Warning)
             .Enrich.FromLogContext();
 

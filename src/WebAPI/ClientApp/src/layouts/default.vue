@@ -90,9 +90,9 @@ nuxtApp.hook('page:finish', () => {
 	set(pageLoading, false);
 	if (authStore.isLoggedIn) {
 		setTimeout(() => {
-			if (settingsStore.generalSettings.firstTimeSetup) {
+			if (settingsStore.generalSettings.firstTimeSetup && !route.fullPath.includes('setup')) {
 				dialogStore.openDialog(DialogType.FirstTimeSetupDialog);
-			} else if (!settingsStore.generalSettings.hasBeenInvitedToDiscord) {
+			} else if (!settingsStore.generalSettings.hasBeenInvitedToDiscord && !route.fullPath.includes('setup')) {
 				dialogStore.openDialog(DialogType.DiscordServerInviteDialog);
 			}
 		}, 1000);

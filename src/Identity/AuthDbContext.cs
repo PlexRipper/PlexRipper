@@ -11,7 +11,7 @@ public class AuthDbContext : IdentityDbContext<AppUser>, IAuthDbContext, IAuthDb
 {
     public string DatabaseName { get; } = string.Empty;
 
-    public DbSet<DataProtectionKey> DataProtectionKeys { get; }
+    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
 
     public AuthDbContext() { }
 

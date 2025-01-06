@@ -6,15 +6,16 @@ public static class FolderPathMapper
 {
     #region ToDTO
 
-    public static FolderPathDTO ToDTO(this FolderPath folderPaths) =>
+    public static FolderPathDTO ToDTO(this FolderPath folderPath) =>
         new()
         {
-            Id = folderPaths.Id,
-            FolderType = folderPaths.FolderType,
-            MediaType = folderPaths.MediaType,
-            DisplayName = folderPaths.DisplayName,
-            Directory = folderPaths.DirectoryPath,
-            IsValid = folderPaths.IsValid,
+            Id = folderPath.Id,
+            FolderType = folderPath.FolderType,
+            MediaType = folderPath.MediaType,
+            DisplayName = folderPath.DisplayName,
+            Directory = folderPath.DirectoryPath,
+            IsValid = folderPath.IsValid,
+            IsDefault = folderPath.Id <= 10,
         };
 
     public static List<FolderPathDTO> ToDTO(this List<FolderPath> folderPaths) => folderPaths.ConvertAll(ToDTO);

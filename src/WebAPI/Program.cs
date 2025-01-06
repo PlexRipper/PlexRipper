@@ -41,11 +41,19 @@ public class Program
 
             var app = builder.Build();
 
-            _log.DebugLine("Finished configuring the application");
+            var configResult = app.ConfigureConfigFile();
+            if (configResult.IsFailed)
+            {
+                FailedToStart(configResult);
+                return;
+            }
 
-            app.ConfigureConfigFile();
-
-            app.ConfigureDatabase();
+            var configureDatabase = app.ConfigureDatabase();
+            if (configureDatabase.IsFailed)
+            {
+                FailedToStart(configureDatabase);
+                return;
+            }
 
             app.ConfigureApplication(app.Environment);
 
@@ -53,6 +61,7 @@ public class Program
         }
         catch (Exception e)
         {
+            _log.FatalLine("PlexRipper crashed due to exception!");
             Result.Fail(new ExceptionalError(e)).LogFatal();
         }
         finally
@@ -60,5 +69,11 @@ public class Program
             // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
             LogManager.CloseAndFlush();
         }
+    }
+
+    private static void FailedToStart(Result result)
+    {
+        _log.FatalLine("PlexRipper failed to start!");
+        result.LogFatal();
     }
 }

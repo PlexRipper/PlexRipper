@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Application.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -8,15 +9,16 @@ namespace PlexRipper.Application;
 
 public class AppCredentialsDTO
 {
+    [SetsRequiredMembers]
     public AppCredentialsDTO(string userName, string password)
     {
         UserName = userName;
         Password = password;
     }
 
-    public string UserName { get; set; }
+    public required string UserName { get; init; }
 
-    public string Password { get; set; }
+    public required string Password { get; init; }
 }
 
 public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>

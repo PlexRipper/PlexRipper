@@ -165,6 +165,10 @@ public static class PlexMediaMapper
             ParentGuid = originalSource.ParentGuid,
         };
 
+    /// <summary>
+    /// The PlexAPI is sometimes missing the ParentKey, this method will attempt to get the ParentKey from the ParentGuid.
+    /// </summary>
+    /// <param name="originalSource"> The original source to get the ParentKey from.</param>
     private static int GetParentKey(this GetLibraryItemsMetadata originalSource)
     {
         var parentKey = originalSource.ParentRatingKey != null ? int.Parse(originalSource.ParentRatingKey) : -1;

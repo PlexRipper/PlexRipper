@@ -6,8 +6,6 @@ namespace Logging.Common;
 
 public record LogMetaData
 {
-    #region Constructors
-
     public LogMetaData(string className, string memberName, int lineNumber)
     {
         ClassName = className;
@@ -23,10 +21,6 @@ public record LogMetaData
         LineNumber = lineNumber;
     }
 
-    #endregion
-
-    #region Properties
-
     private ILogger _logger { get; } = null!;
 
     public string ClassName { get; init; }
@@ -38,12 +32,6 @@ public record LogMetaData
     public LogEventLevel LogLevel { get; set; }
     public Exception? Exception { get; set; }
 
-    #endregion
-
-    #region Methods
-
-    #region Public
-
     public LogMetaData Update(LogEventLevel logLevel, string messageTemplate, params object?[]? propertyValues)
     {
         LogLevel = logLevel;
@@ -52,19 +40,12 @@ public record LogMetaData
         return this;
     }
 
-    public void Write()
-    {
-        _logger.Write(ToEvent());
-    }
+    public void Write() => _logger.Write(ToEvent());
 
     /// <summary>
     /// Returns a rendered string of the message template with bound properties.
     /// </summary>
     public override string ToString() => ToEvent().RenderMessage();
-
-    #endregion
-
-    #region Private
 
     private LogEvent ToEvent()
     {
@@ -101,19 +82,4 @@ public record LogMetaData
 
         return new LogEvent(dateTimeOffset, LogLevel, Exception, parsedTemplate, properties);
     }
-
-    private static IReadOnlyDictionary<string, LogEventPropertyValue> ConvertToLogEventPropertyValues(object[] values)
-    {
-        var dictionary = new Dictionary<string, LogEventPropertyValue>();
-        for (int i = 0; i < values.Length; i++)
-        {
-            dictionary[$"Property{i}"] = new ScalarValue(values[i]);
-        }
-
-        return dictionary;
-    }
-
-    #endregion
-
-    #endregion
 }

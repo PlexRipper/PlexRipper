@@ -1,6 +1,6 @@
 <template>
 	<QCardDialog
-		width="600px"
+		width="800px"
 		:name="DialogType.MediaOptionsDialog"
 		:loading="false"
 		close-button
@@ -13,48 +13,70 @@
 		</template>
 		<!--	Help text	-->
 		<template #default>
-			<HelpGroup>
-				<HelpRow
-					center-slot
-					:title="$t('help.media-options.hide-offline-servers.title')"
-					:label="$t('help.media-options.hide-offline-servers.label')"
-					:text="$t('help.media-options.hide-offline-servers.text')">
-					<q-toggle
-						v-model="settingsStore.generalSettings.hideMediaFromOfflineServers"
-						color="red" />
-				</HelpRow>
-				<HelpRow
-					center-slot
-					:title="$t('help.media-options.hide-owned-media.title')"
-					:label="$t('help.media-options.hide-owned-media.label')"
-					:text="$t('help.media-options.hide-owned-media.text')">
-					<q-toggle
-						v-model="settingsStore.generalSettings.hideMediaFromOwnedServers"
-						color="red" />
-				</HelpRow>
-				<HelpRow
-					center-slot
-					:title="$t('help.media-options.use-low-quality-poster-images.title')"
-					:label="$t('help.media-options.use-low-quality-poster-images.label')"
-					:text="$t('help.media-options.use-low-quality-poster-images.text')">
-					<q-toggle
-						v-model="settingsStore.generalSettings.useLowQualityPosterImages"
-						color="red" />
-				</HelpRow>
-			</HelpGroup>
+			<HelpRow
+				:col-label="colLabel"
+				:col-content="colContent"
+				disable-responsive
+				:title="$t('help.media-options.hide-offline-servers.title')"
+				:label="$t('help.media-options.hide-offline-servers.label')"
+				:text="$t('help.media-options.hide-offline-servers.text')">
+				<q-toggle
+					v-model="settingsStore.generalSettings.hideMediaFromOfflineServers"
+					color="red" />
+			</HelpRow>
+			<HelpRow
+				:col-label="colLabel"
+				:col-content="colContent"
+				disable-responsive
+				:title="$t('help.media-options.hide-owned-media.title')"
+				:label="$t('help.media-options.hide-owned-media.label')"
+				:text="$t('help.media-options.hide-owned-media.text')">
+				<q-toggle
+					v-model="settingsStore.generalSettings.hideMediaFromOwnedServers"
+					color="red" />
+			</HelpRow>
+			<HelpRow
+				:col-label="colLabel"
+				:col-content="colContent"
+				disable-responsive
+				:title="$t('help.media-options.use-low-quality-poster-images.title')"
+				:label="$t('help.media-options.use-low-quality-poster-images.label')"
+				:text="$t('help.media-options.use-low-quality-poster-images.text')">
+				<q-toggle
+					v-model="settingsStore.generalSettings.useLowQualityPosterImages"
+					color="red" />
+			</HelpRow>
 		</template>
 	</QCardDialog>
 </template>
 
 <script setup lang="ts">
+import { get, breakpointsQuasar, useBreakpoints } from '@vueuse/core';
 import { DialogType } from '@enums';
 import { useSettingsStore } from '@store';
+import type { ColLevels } from '@props';
 
 const settingsStore = useSettingsStore();
 const originalValues: Record<string, boolean> = {};
 const emits = defineEmits<{
 	(e: 'closed', hasChanged: boolean): void;
 }>();
+
+const breakpoints = useBreakpoints(breakpointsQuasar);
+const colLabel = computed((): ColLevels => {
+	if (get(breakpoints.smallerOrEqual('sm'))) {
+		return 10;
+	}
+
+	return 7;
+});
+const colContent = computed((): ColLevels => {
+	if (get(breakpoints.smallerOrEqual('sm'))) {
+		return 2;
+	}
+
+	return 2;
+});
 
 function onOpen() {
 	originalValues.hideMediaFromOfflineServers = settingsStore.generalSettings.hideMediaFromOfflineServers;

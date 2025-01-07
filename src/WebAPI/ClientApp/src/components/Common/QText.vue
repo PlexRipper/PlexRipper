@@ -1,15 +1,27 @@
 <template>
-	<div :class="divClasses">
-		<slot name="prepend" />
-		<span
-			:class="spanClasses"
-			:data-cy="cy">
-			<slot name="default">
-				{{ value }}
-			</slot>
-		</span>
-		<slot name="append" />
-	</div>
+	<QRow
+		:class="divClasses"
+		align="center">
+		<QCol
+			v-if="$slots['prepend']"
+			cols="auto">
+			<slot name="prepend" />
+		</QCol>
+		<QCol :text-align="align">
+			<span
+				:class="spanClasses"
+				:data-cy="cy">
+				<slot name="default">
+					{{ value }}
+				</slot>
+			</span>
+		</QCol>
+		<QCol
+			v-if="$slots['append']"
+			cols="auto">
+			<slot name="append" />
+		</QCol>
+	</QRow>
 </template>
 
 <script lang="ts" setup>

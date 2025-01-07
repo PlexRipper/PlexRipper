@@ -1,42 +1,71 @@
 <template>
-	<!-- Help Label -->
-	<div class="help-row-label">
-		<QSubHeader>
-			{{ help.label }}
-		</QSubHeader>
-	</div>
-	<!-- Help Icon -->
-	<div class="help-row-icon">
-		<IconButton
-			v-if="hasHelpPage"
-			icon="mdi-help-circle-outline"
-			class="q-ma-sm"
-			@click="helpStore.openHelpDialog(help)" />
-	</div>
-	<!-- Default Form Slot -->
-	<div :class="{ 'help-row-default-slot': true, 'q-py-sm': true, 'flex': centerSlot, 'justify-center': centerSlot } ">
-		<slot />
-	</div>
+	<QRow no-wrap>
+		<QCol
+			class="help-row-label q-mr-sm"
+			:cols="colLabel"
+			:lg="!disableResponsive ? 4 : colLabel"
+			:xl="!disableResponsive ? 3 : colLabel"
+			align-items="end">
+			<!-- Help Label -->
+			<QText
+				v-if="!allowLabelEdit"
+				full-width
+				align="right"
+				:value="help.label">
+				<template #append>
+					<!-- Help Icon -->
+					<IconButton
+						v-if="hasHelpPage"
+						icon="mdi-help-circle-outline"
+						class="q-ma-sm"
+						@click="helpStore.openHelpDialog(help)" />
+					<div
+						v-else
+						style="width: 42px; height: 42px" />
+				</template>
+			</QText>
+			<EditableText
+				v-else
+				v-model="editModel" />
+		</QCol>
+		<!-- Default Form Slot -->
+		<QCol
+			:cols="colContent"
+			:lg="!disableResponsive ? 4 : colContent"
+			:xl="!disableResponsive ? 3 : colContent"
+			class="help-row-default-slot q-pa-sm">
+			<slot />
+		</QCol>
+	</QRow>
 </template>
 
 <script setup lang="ts">
 import { get } from '@vueuse/core';
 import { useHelpStore } from '@store';
 import type { IHelp } from '@interfaces';
+import type { ColLevels } from '@props';
 
 const { t } = useI18n();
 const helpStore = useHelpStore();
 
+const editModel = defineModel<string>('editModel');
+
 const props = withDefaults(defineProps<Partial<IHelp> & {
 	value?: IHelp;
-	centerSlot?: boolean;
 	hideLabel?: boolean;
+	allowLabelEdit?: boolean;
+	disableResponsive?: boolean;
+	colContent?: ColLevels;
+	colLabel?: ColLevels;
 }>(), {
 	label: '',
 	title: '',
 	text: '',
-	centerSlot: false,
+	allowLabelEdit: false,
 	hideLabel: false,
+	disableResponsive: false,
+	colLabel: 6,
+	colContent: 6,
 });
 
 const help = computed(() => props.value ?? {
@@ -55,11 +84,6 @@ const hasHelpPage = computed(() => {
 
 .help-row {
 
-  &-label, &-icon {
-    display: flex;
-    align-items: center;
-  }
-
   &-label {
     white-space: nowrap;
   }
@@ -70,7 +94,6 @@ const hasHelpPage = computed(() => {
 
   &-default-slot {
     white-space: break-spaces;
-    justify-content: left;
   }
 }
 </style>

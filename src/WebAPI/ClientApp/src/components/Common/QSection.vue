@@ -1,25 +1,24 @@
 <template>
-	<QRow
-		no-gutters
-		style="width: 100%">
+	<QRow no-gutters>
 		<QCol cols="12">
 			<!-- Header	-->
-			<QRow no-gutters>
-				<QCol>
-					<QText
-						size="h5"
-						class="q-my-sm q-ml-md"
-						align="left"
-						bold="medium">
-						<slot name="header">
-							{{ header }}
-						</slot>
-					</QText>
-					<q-separator />
-				</QCol>
-			</QRow>
+			<QCol class="q-mx-md">
+				<QText
+					size="h5"
+					full-width
+					class="q-my-sm q-ml-md"
+					align="left"
+					bold="medium">
+					<slot name="header">
+						{{ header }}
+					</slot>
+				</QText>
+				<q-separator />
+			</QCol>
 			<!--	Section Content	-->
-			<slot />
+			<QCol class="q-pa-md">
+				<slot />
+			</QCol>
 		</QCol>
 	</QRow>
 </template>

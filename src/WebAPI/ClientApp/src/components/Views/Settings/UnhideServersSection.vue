@@ -1,6 +1,8 @@
 <template>
 	<QSection :header="$t('pages.settings.ui.un-hide-servers-section.header')">
-		<q-list bordered>
+		<q-list
+			v-if="serverStore.getHiddenServers.length"
+			bordered>
 			<q-item
 				v-for="server in serverStore.getHiddenServers"
 				:key="server.id"

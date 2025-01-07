@@ -123,14 +123,13 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
 
             if (!libraries.Value.Any())
             {
-                var msg = _log.Here()
+                return _log.Here()
                     .Warning(
                         "PlexServer with name {PlexServerName} returned no Plex libraries for Plex account {plexAccountName}",
                         plexServerName,
                         plexAccountName
                     )
-                    .ToLogString();
-                return Result.Fail(msg);
+                    .ToResult();
             }
 
             return libraries;

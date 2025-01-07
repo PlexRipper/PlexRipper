@@ -18,5 +18,15 @@ public static partial class LogExtensions
         return new LogMetaData(logger, className, memberName, sourceLineNumber);
     }
 
-    public static Result ToResult(this LogMetaData logMetaData) => Result.Fail(logMetaData.ToLogString());
+    public static Result ToResult(this LogMetaData logMetaData)
+    {
+        var error = new Error(logMetaData.ToString());
+        error.Metadata.Add("ClassName", logMetaData.ClassName);
+        error.Metadata.Add("MethodName", logMetaData.MethodName);
+        error.Metadata.Add("LineNumber", logMetaData.LineNumber);
+        error.Metadata.Add("LogLevel", logMetaData.LogLevel);
+        error.Metadata.Add("Exception", logMetaData.Exception);
+
+        return Result.Fail(error);
+    }
 }

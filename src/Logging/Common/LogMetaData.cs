@@ -57,12 +57,10 @@ public record LogMetaData
         _logger.Write(ToEvent());
     }
 
-    public string ToLogString()
-    {
-        using var writer = new StringWriter();
-        LogConfig.TemplateTextFormatter.Format(ToEvent(), writer);
-        return writer.ToString();
-    }
+    /// <summary>
+    /// Returns a rendered string of the message template with bound properties.
+    /// </summary>
+    public override string ToString() => ToEvent().RenderMessage();
 
     #endregion
 
@@ -102,6 +100,17 @@ public record LogMetaData
         );
 
         return new LogEvent(dateTimeOffset, LogLevel, Exception, parsedTemplate, properties);
+    }
+
+    private static IReadOnlyDictionary<string, LogEventPropertyValue> ConvertToLogEventPropertyValues(object[] values)
+    {
+        var dictionary = new Dictionary<string, LogEventPropertyValue>();
+        for (int i = 0; i < values.Length; i++)
+        {
+            dictionary[$"Property{i}"] = new ScalarValue(values[i]);
+        }
+
+        return dictionary;
     }
 
     #endregion

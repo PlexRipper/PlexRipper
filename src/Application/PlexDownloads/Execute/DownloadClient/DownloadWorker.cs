@@ -321,7 +321,7 @@ public class DownloadWorker : IDisposable
         );
         DownloadWorkerTask.DownloadStatus = status;
 
-        SendDownloadWorkerLog(status.ToNotificationLevel(), msg.ToLogString());
+        SendDownloadWorkerLog(status.ToNotificationLevel(), msg.ToString());
 
         LogMetaData? logMsg = null;
         switch (status)
@@ -342,7 +342,7 @@ public class DownloadWorker : IDisposable
 
         if (logMsg != null)
         {
-            SendDownloadWorkerLog(status.ToNotificationLevel(), logMsg.ToLogString());
+            SendDownloadWorkerLog(status.ToNotificationLevel(), logMsg.ToString());
         }
 
         if (errorResult != null)

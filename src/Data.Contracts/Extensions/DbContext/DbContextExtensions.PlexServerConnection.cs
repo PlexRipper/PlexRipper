@@ -30,21 +30,24 @@ public static partial class DbContextExtensions
         var plexServerConnections = plexServer.PlexServerConnections;
         if (!plexServerConnections.Any())
         {
-            return Result
-                .Fail($"PlexServer with id {plexServer.Id} and name {plexServer.Name} has no connections available!")
-                .LogError();
+            return _log.Here()
+                .Error(
+                    "PlexServer with id {PlexServerId} and name {PlexServerName} has no connections available!",
+                    plexServer.Id,
+                    plexServer.Name
+                )
+                .ToResult();
         }
 
         if (plexServerConnections.All(x => !x.IsOnline))
         {
-            var msg = _log.Here()
+            return _log.Here()
                 .Error(
                     "PlexServer with id {plexServerId} and name {PlexServerName} has no online connections available!",
                     plexServer.Id,
                     plexServer.Name
                 )
-                .ToLogString();
-            return Result.Fail(msg);
+                .ToResult();
         }
 
         var successPlexServerConnections = plexServerConnections.Where(x => x.IsOnline).ToList();

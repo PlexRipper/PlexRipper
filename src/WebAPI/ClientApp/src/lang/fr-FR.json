@@ -244,7 +244,12 @@
         },
         "account-form": {
             "credentials-tab": "Nom d'utilisateur et mot de passe",
-            "token-tab": "Jeton d'authentification"
+            "token-tab": "Jeton d'authentification",
+            "validation": {
+                "display-name-length": "Le nom d'affichage doit comporter au moins {count} caractères",
+                "display-name-required": "Le nom d’affichage est obligatoire",
+                "username-is-required": "Nom d'utilisateur est nécessaire"
+            }
         },
         "media-overview-bar": {
             "all-media-mode": {

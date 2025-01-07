@@ -244,7 +244,12 @@
         },
         "account-form": {
             "credentials-tab": "Nazwa użytkownika i hasło",
-            "token-tab": "Token uwierzytelniający"
+            "token-tab": "Token uwierzytelniający",
+            "validation": {
+                "display-name-length": "Nazwa wyświetlana musi mieć co najmniej {count} znaków",
+                "display-name-required": "Nazwa wyświetlana jest wymagana",
+                "username-is-required": "Nazwa użytkownika jest wymagana"
+            }
         },
         "media-overview-bar": {
             "all-media-mode": {

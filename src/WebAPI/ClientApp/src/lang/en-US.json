@@ -244,7 +244,12 @@
         },
         "account-form": {
             "credentials-tab": "Username & Password",
-            "token-tab": "Authentication Token"
+            "token-tab": "Authentication Token",
+            "validation": {
+                "display-name-length": "Display name must be at least {count} characters",
+                "display-name-required": "Display name is required",
+                "username-is-required": "Username is required"
+            }
         },
         "media-overview-bar": {
             "all-media-mode": {

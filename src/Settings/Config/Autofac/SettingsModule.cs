@@ -13,6 +13,10 @@ public class SettingsModule : Module
 
         builder.Register(c => c.Resolve<IUserSettings>().GeneralSettings).As<IGeneralSettings>().SingleInstance();
         builder
+            .Register(c => c.Resolve<IUserSettings>().AuthenticationSettings)
+            .As<IAuthenticationSettings>()
+            .SingleInstance();
+        builder
             .Register(c => c.Resolve<IUserSettings>().ConfirmationSettings)
             .As<IConfirmationSettings>()
             .SingleInstance();

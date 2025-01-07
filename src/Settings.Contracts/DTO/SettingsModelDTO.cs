@@ -2,6 +2,8 @@
 
 public class SettingsModelDTO
 {
+    public required AuthenticationSettingsDTO AuthenticationSettings { get; init; }
+
     public required GeneralSettingsDTO GeneralSettings { get; init; }
 
     public required DebugSettingsDTO DebugSettings { get; init; }

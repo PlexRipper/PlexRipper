@@ -2,5 +2,17 @@ namespace Settings.Contracts;
 
 public record AuthenticationModule : BaseSettingsModule<AuthenticationModule>, IAuthenticationSettings
 {
-    public static AuthenticationModule Create() => new() { };
+    private bool _resetCredentials;
+
+    public required bool ResetCredentials
+    {
+        get => _resetCredentials;
+        set => SetProperty(ref _resetCredentials, value);
+    }
+
+    /// <summary>
+    /// When true, will reset the PlexRipper app credentials and then set to false again.
+    /// </summary>
+    /// <returns></returns>
+    public static AuthenticationModule Create() => new() { ResetCredentials = false };
 }

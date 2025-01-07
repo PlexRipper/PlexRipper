@@ -1,5 +1,6 @@
-﻿using PlexRipper.Domain;
+﻿namespace Settings.Contracts;
 
-namespace Settings.Contracts;
-
-public interface IAuthenticationSettings { }
+public interface IAuthenticationSettings
+{
+    bool ResetCredentials { get; set; }
+}

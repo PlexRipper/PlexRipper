@@ -36,14 +36,12 @@ public class UpdateUserSettingsEndpointRequestValidator : Validator<UpdateUserSe
 public class UpdateUserSettingsEndpoint : BaseEndpoint<UpdateUserSettingsEndpointRequest, SettingsModelDTO>
 {
     private readonly IUserSettings _userSettings;
-    private readonly UserManager<AppUser> _userManager;
 
     public override string EndpointPath => ApiRoutes.SettingsController + "/";
 
-    public UpdateUserSettingsEndpoint(IUserSettings userSettings, UserManager<AppUser> userManager)
+    public UpdateUserSettingsEndpoint(IUserSettings userSettings)
     {
         _userSettings = userSettings;
-        _userManager = userManager;
     }
 
     public override void Configure()
@@ -61,9 +59,6 @@ public class UpdateUserSettingsEndpoint : BaseEndpoint<UpdateUserSettingsEndpoin
     {
         _userSettings.UpdateSettings(req.SettingsModelDto!.ToModel());
 
-        // There is only 1 app user in the database
-        var user = await _userManager.Users.FirstOrDefaultAsync(ct);
-
-        await SendFluentResult(Result.Ok(_userSettings), x => x.ToDTO(user!.UserName ?? ""), ct);
+        await SendFluentResult(Result.Ok(_userSettings), x => x.ToDTO(), ct);
     }
 }

@@ -80,6 +80,7 @@ public static class SettingsModelToDTOMapper
     public static SettingsModelDTO ToDTO(this IUserSettings model) =>
         new()
         {
+            AuthenticationSettings = new AuthenticationSettingsDTO(),
             GeneralSettings = model.GeneralSettings.ToDTO(),
             DebugSettings = model.DebugSettings.ToDTO(),
             ConfirmationSettings = model.ConfirmationSettings.ToDTO(),

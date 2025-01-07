@@ -166,6 +166,11 @@
           "System.Xml.XDocument": "4.3.0"
         }
       },
+      "PasswordGenerator": {
+        "type": "Transitive",
+        "resolved": "2.1.0",
+        "contentHash": "G70cCeAOYCk/uTuFw5PBGpYY9kmBZyzld7tphachvyU514PowMRDYyKwTefxIHNGWrhXY2d1DV5B1tDEnTtY3A=="
+      },
       "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
         "type": "Transitive",
         "resolved": "4.3.0",
@@ -1124,6 +1129,7 @@
           "JetBrains.Annotations": "[2024.2.0, )",
           "MediatR": "[12.2.0, )",
           "NaturalSort.Extension": "[4.3.0, )",
+          "PasswordGenerator": "[2.1.0, )",
           "System.ComponentModel.Annotations": "[5.0.0, )",
           "System.Reactive": "[5.0.0, )",
           "System.Text.Json": "[8.0.5, )"

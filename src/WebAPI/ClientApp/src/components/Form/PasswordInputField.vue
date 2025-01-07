@@ -21,6 +21,7 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n();
 const model = defineModel<string>();
 
 const showPassword = ref(false);
@@ -32,8 +33,8 @@ withDefaults(defineProps<{
 });
 
 const getPasswordRules = computed(() => [
-	(v: string): boolean | string => !!v || 'Password is required',
-	(v: string): boolean | string => (v && v.length >= 8) || 'Password must be at least 8 characters',
+	(v: string): boolean | string => !!v || t('components.password-input-field.validation.password-is-required'),
+	(v: string): boolean | string => (v && v.length >= 8) || t('components.password-input-field.validation.password-length', { count: 8 }),
 ]);
 </script>
 

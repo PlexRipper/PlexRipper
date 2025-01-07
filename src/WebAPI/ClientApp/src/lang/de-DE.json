@@ -293,6 +293,13 @@
                 "username-is-required": "Benutzername ist erforderlich",
                 "username-length": "Der Benutzername muss mindestens {count} Zeichen lang sein"
             }
+        },
+        "password-input-field": {
+            "label": "",
+            "validation": {
+                "password-is-required": "Passwort wird benötigt",
+                "password-length": "Das Passwort muss mindestens {count} Zeichen lang sein"
+            }
         }
     },
     "confirmation": {

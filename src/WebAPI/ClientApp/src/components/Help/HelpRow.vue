@@ -27,15 +27,20 @@ import type { IHelp } from '@interfaces';
 const { t } = useI18n();
 const helpStore = useHelpStore();
 
-const props = withDefaults(defineProps<Partial<IHelp> & { value?: IHelp; centerSlot?: boolean }>(), {
+const props = withDefaults(defineProps<Partial<IHelp> & {
+	value?: IHelp;
+	centerSlot?: boolean;
+	hideLabel?: boolean;
+}>(), {
 	label: '',
 	title: '',
 	text: '',
 	centerSlot: false,
+	hideLabel: false,
 });
 
 const help = computed(() => props.value ?? {
-	label: props.label !== '' ? props.label : t('help.default.label'),
+	label: !props.hideLabel ? props.label !== '' ? props.label : t('help.default.label') : '',
 	title: props.title,
 	text: props.text,
 });

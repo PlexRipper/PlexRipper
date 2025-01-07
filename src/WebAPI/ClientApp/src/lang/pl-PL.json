@@ -282,6 +282,12 @@
             "completed": "Wszystkie media zostały zsynchronizowane!",
             "checking-progress": "Synchronizacja {count} z {total} biblioteki Plex",
             "fetching-servers": "Pobieranie dostępnych serwerów do synchronizacji multimediów"
+        },
+        "authentication-overview": {
+            "validation": {
+                "username-is-required": "Nazwa użytkownika jest wymagana",
+                "username-length": "Nazwa użytkownika musi mieć co najmniej {count} znaków"
+            }
         }
     },
     "confirmation": {
@@ -480,6 +486,21 @@
                     }
                 }
             },
+            "accounts": {
+                "app-username": {
+                    "text": "Wprowadź nazwę użytkownika, której będziesz używać do logowania się do PlexRipper.",
+                    "title": "Nazwa użytkownika PlexRipper",
+                    "label": "Nazwa użytkownika"
+                },
+                "app-confirm-password": {
+                    "label": "Potwierdź hasło"
+                },
+                "app-password": {
+                    "label": "Hasło",
+                    "text": "Wprowadź hasło, którego będziesz używać do bezpiecznego logowania się do PlexRipper.",
+                    "title": "Hasło PlexRipper"
+                }
+            },
             "paths": {
                 "download-folder": {
                     "label": "Ścieżka pobierania",
@@ -602,7 +623,8 @@
         },
         "settings": {
             "accounts": {
-                "header": "Konta Plex"
+                "plex-accounts-header": "Konta Plex",
+                "app-accounts-header": "Uwierzytelnianie"
             },
             "advanced": {
                 "database": {

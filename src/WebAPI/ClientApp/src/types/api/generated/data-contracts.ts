@@ -9,6 +9,11 @@
  * ---------------------------------------------------------------
  */
 
+export interface AppCredentialsDTO {
+  password: string;
+  userName: string;
+}
+
 /** @example {"username":"PlexRipperRocks","password":"Pl€XR!ℙℙ€R69","rememberMe":false} */
 export interface AppUserLoginEndpointRequest {
   /**
@@ -22,6 +27,11 @@ export interface AppUserLoginEndpointRequest {
    * @minLength 1
    * @default "PlexRipperRocks"
    */
+  username: string;
+}
+
+export interface AuthenticationSettingsDTO {
+  password: string;
   username: string;
 }
 
@@ -690,6 +700,15 @@ export interface ResultDTO {
   successes: SuccessDTO[];
 }
 
+export interface ResultDTOOfAppCredentialsDTO {
+  errors: ErrorDTO[];
+  isFailed: boolean;
+  isSuccess: boolean;
+  reasons: ReasonDTO[];
+  successes: SuccessDTO[];
+  value?: AppCredentialsDTO | null;
+}
+
 export interface ResultDTOOfBoolean {
   errors: ErrorDTO[];
   isFailed: boolean;
@@ -981,6 +1000,7 @@ export interface SetNotificationVisibilityEndpointRequest {
 }
 
 export interface SettingsModelDTO {
+  authenticationSettings: AuthenticationSettingsDTO;
   confirmationSettings: ConfirmationSettingsDTO;
   dateTimeSettings: DateTimeSettingsDTO;
   debugSettings: DebugSettingsDTO;
@@ -1008,6 +1028,14 @@ export interface SyncServerMediaProgress {
   libraryProgresses: LibraryProgress[];
   /** @format decimal */
   percentage: number;
+}
+
+/** @example {"username":"PlexRipperRocks","password":"Pl€XR!ℙℙ€R69"} */
+export interface UpdateCredentialsEndpointRequest {
+  /** @minLength 8 */
+  password?: string | null;
+  /** @minLength 8 */
+  username?: string | null;
 }
 
 export interface UpdatePlexServerConnectionEndpointRequest {

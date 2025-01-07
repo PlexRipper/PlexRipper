@@ -282,6 +282,12 @@
             "completed": "All media has been synced!",
             "checking-progress": "Syncing {count} of {total} Plex library",
             "fetching-servers": "Retrieving accessible servers for syncing media"
+        },
+        "authentication-overview": {
+            "validation": {
+                "username-is-required": "Username is required",
+                "username-length": "Username must be at least {count} characters"
+            }
         }
     },
     "confirmation": {
@@ -480,6 +486,21 @@
                     }
                 }
             },
+            "accounts": {
+                "app-username": {
+                    "text": "Enter the username you will use to log in to PlexRipper.",
+                    "title": "PlexRipper Username",
+                    "label": "Username"
+                },
+                "app-confirm-password": {
+                    "label": "Confirm Password"
+                },
+                "app-password": {
+                    "label": "Password",
+                    "text": "Enter the password you will use to securely log in to PlexRipper.",
+                    "title": "PlexRipper Password"
+                }
+            },
             "paths": {
                 "download-folder": {
                     "label": "Download Path",
@@ -602,7 +623,8 @@
         },
         "settings": {
             "accounts": {
-                "header": "Plex Accounts"
+                "plex-accounts-header": "Plex Accounts",
+                "app-accounts-header": "Authentication"
             },
             "advanced": {
                 "database": {

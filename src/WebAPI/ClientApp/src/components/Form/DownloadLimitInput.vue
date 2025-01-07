@@ -2,17 +2,6 @@
 	<QRow
 		class="no-wrap"
 		justify="between">
-		<QCol>
-			<q-slider
-				v-model:model-value="value"
-				:min="0"
-				:step="500"
-				:max="100000"
-				snap
-				label
-				style="margin-top: 24px"
-				data-cy="download-speed-limit-slider" />
-		</QCol>
 		<QCol
 			cols="auto"
 			class="q-ml-lg">

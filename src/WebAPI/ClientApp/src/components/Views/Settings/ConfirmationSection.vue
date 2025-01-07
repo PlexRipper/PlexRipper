@@ -1,8 +1,5 @@
 <template>
-	<QSection>
-		<template #header>
-			{{ $t('pages.settings.ui.confirmation-settings.header') }}
-		</template>
+	<QSection :header="$t('pages.settings.ui.confirmation-settings.header')">
 		<HelpGroup class="q-mt-md">
 			<!--	Ask Download Movie Confirmation	-->
 			<HelpRow

@@ -1,8 +1,5 @@
 <template>
-	<QSection>
-		<template #header>
-			{{ $t('pages.settings.ui.general-settings.header') }}
-		</template>
+	<QSection :header="$t('pages.settings.ui.general-settings.header')">
 		<HelpGroup class="q-mt-md">
 			<!--	Toggle Animated Background	-->
 			<HelpRow

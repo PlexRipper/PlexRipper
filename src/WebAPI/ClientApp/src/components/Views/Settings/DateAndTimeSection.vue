@@ -1,8 +1,5 @@
 <template>
-	<QSection>
-		<template #header>
-			{{ $t('pages.settings.ui.date-and-time.header') }}
-		</template>
+	<QSection :header="$t('pages.settings.ui.date-and-time.header')">
 		<HelpGroup class="q-mt-md">
 			<!--	Short Date Format Setting	-->
 			<HelpRow

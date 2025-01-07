@@ -4,16 +4,16 @@
 		style="width: 100%">
 		<QCol cols="12">
 			<!-- Header	-->
-			<QRow
-				v-if="$slots['header']"
-				no-gutters>
+			<QRow no-gutters>
 				<QCol>
 					<QText
 						size="h5"
-						class="q-my-sm"
-						align="center"
+						class="q-my-sm q-ml-md"
+						align="left"
 						bold="medium">
-						<slot name="header" />
+						<slot name="header">
+							{{ header }}
+						</slot>
 					</QText>
 					<q-separator />
 				</QCol>
@@ -23,3 +23,11 @@
 		</QCol>
 	</QRow>
 </template>
+
+<script setup lang="ts">
+withDefaults(defineProps<{
+	header?: string;
+}>(), {
+	header: '',
+});
+</script>

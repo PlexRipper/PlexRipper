@@ -1,7 +1,7 @@
 <template>
 	<QRow no-wrap>
 		<QCol
-			class="help-row-label q-mr-sm"
+			class="help-row-label"
 			:cols="colLabel"
 			:lg="!disableResponsive ? 4 : colLabel"
 			:xl="!disableResponsive ? 3 : colLabel"
@@ -12,10 +12,18 @@
 				full-width
 				align="right"
 				:value="help.label">
+				<template #prepend>
+					<slot name="prepend" />
+				</template>
 				<template #append>
+					<QCol
+						v-if="$slots['append']"
+						:cols="'auto'">
+						<slot name="append" />
+					</QCol>
 					<!-- Help Icon -->
 					<IconButton
-						v-if="hasHelpPage"
+						v-else-if="hasHelpPage"
 						icon="mdi-help-circle-outline"
 						class="q-ma-sm"
 						@click="helpStore.openHelpDialog(help)" />
@@ -28,11 +36,12 @@
 				v-else
 				v-model="editModel" />
 		</QCol>
+
 		<!-- Default Form Slot -->
 		<QCol
 			:cols="colContent"
-			:lg="!disableResponsive ? 4 : colContent"
-			:xl="!disableResponsive ? 3 : colContent"
+			:lg="!disableResponsive ? 5 : colContent"
+			:xl="!disableResponsive ? 4 : colContent"
 			class="help-row-default-slot q-pa-sm">
 			<slot />
 		</QCol>

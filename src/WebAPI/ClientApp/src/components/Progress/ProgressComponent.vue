@@ -5,8 +5,7 @@
 			<template v-if="circularMode">
 				<QRow
 					justify="center"
-					no-gutters
-					class="my-3">
+					no-gutters>
 					<QCol cols="auto">
 						<q-circular-progress
 							show-value
@@ -61,7 +60,6 @@
 				<!-- Progress bar -->
 				<QRow
 					justify="center"
-					class="my-3"
 					no-gutters>
 					<QCol>
 						<q-linear-progress

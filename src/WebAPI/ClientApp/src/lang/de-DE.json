@@ -289,6 +289,7 @@
             "fetching-servers": "Abrufen zugänglicher Server zum Synchronisieren von Medien"
         },
         "authentication-overview": {
+            "update-credentials-button": "Anmeldeinformationen aktualisieren",
             "validation": {
                 "username-is-required": "Benutzername ist erforderlich",
                 "username-length": "Der Benutzername muss mindestens {count} Zeichen lang sein"
@@ -745,6 +746,9 @@
                 "header": "Debug-Dialogmodalitäten",
                 "account-dialog-header": "Dialogfeld „Konto“",
                 "connection-dialog-header": "Dialogfeld Verbindung"
+            },
+            "buttons": {
+                "header": "Schaltflächen Debug"
             }
         },
         "empty": {

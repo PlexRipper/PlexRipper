@@ -6,8 +6,7 @@
 			<q-item-section avatar>
 				<QMediaTypeIcon
 					:media-type="mediaType"
-					:size="36"
-					class="mx-3" />
+					:size="36" />
 			</q-item-section>
 			<q-item-section>
 				<q-item-label v-if="server && library">

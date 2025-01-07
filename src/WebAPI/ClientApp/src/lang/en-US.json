@@ -289,6 +289,7 @@
             "fetching-servers": "Retrieving accessible servers for syncing media"
         },
         "authentication-overview": {
+            "update-credentials-button": "Update Credentials",
             "validation": {
                 "username-is-required": "Username is required",
                 "username-length": "Username must be at least {count} characters"
@@ -745,6 +746,9 @@
                 "header": "Debug Dialog Modals",
                 "account-dialog-header": "Account Dialog",
                 "connection-dialog-header": "Connection Dialog"
+            },
+            "buttons": {
+                "header": "Buttons Debug"
             }
         },
         "empty": {

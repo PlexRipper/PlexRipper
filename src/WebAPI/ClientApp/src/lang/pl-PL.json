@@ -289,6 +289,7 @@
             "fetching-servers": "Pobieranie dostępnych serwerów do synchronizacji multimediów"
         },
         "authentication-overview": {
+            "update-credentials-button": "Aktualizuj dane uwierzytelniające",
             "validation": {
                 "username-is-required": "Nazwa użytkownika jest wymagana",
                 "username-length": "Nazwa użytkownika musi mieć co najmniej {count} znaków"
@@ -745,6 +746,9 @@
                 "header": "Moduły dialogowe debugowania",
                 "account-dialog-header": "Okno dialogowe konta",
                 "connection-dialog-header": "Dialog połączenia"
+            },
+            "buttons": {
+                "header": "Przyciski Debugowania"
             }
         },
         "empty": {

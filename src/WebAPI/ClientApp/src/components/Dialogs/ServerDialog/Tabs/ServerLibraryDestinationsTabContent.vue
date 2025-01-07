@@ -4,25 +4,25 @@
 		separator="horizontal"
 		flat>
 		<template v-if="plexLibraries.length">
-			<q-tr
+			<HelpRow
 				v-for="library in plexLibraries"
 				:key="library.id"
-				style="margin: 4px 0">
-				<q-td>
+				:col-label="5"
+				:col-content="5"
+				disable-responsive
+				:label="library.title">
+				<template #append>
 					<QMediaTypeIcon
 						:media-type="library.type"
-						class="mx-3" />
-					{{ library.title }}
-				</q-td>
-				<q-td>
-					<q-select
-						:model-value="getDefaultDestination(library.id)"
-						option-label="displayName"
-						option-value="id"
-						:options="folderPathStore.getFolderPathOptions(library.type)"
-						@update:model-value="libraryStore.updateDefaultDestination(library.id, $event.id)" />
-				</q-td>
-			</q-tr>
+						class="q-mx-sm" />
+				</template>
+				<q-select
+					:model-value="getDefaultDestination(library.id)"
+					option-label="displayName"
+					option-value="id"
+					:options="folderPathStore.getFolderPathOptions(library.type)"
+					@update:model-value="libraryStore.updateDefaultDestination(library.id, $event.id)" />
+			</HelpRow>
 		</template>
 		<template v-else>
 			<q-tr>
@@ -39,6 +39,7 @@
 <script setup lang="ts">
 import type { PlexLibraryDTO, PlexServerDTO } from '@dto';
 import { useFolderPathStore } from '@store';
+import HelpRow from '@components/Help/HelpRow.vue';
 
 const folderPathStore = useFolderPathStore();
 const libraryStore = useLibraryStore();

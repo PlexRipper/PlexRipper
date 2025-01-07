@@ -1,6 +1,6 @@
 <template>
 	<QRow no-gutters>
-		<QCol cols="12">
+		<QCol :cols="12">
 			<!-- Header	-->
 			<QCol class="q-mx-md">
 				<QText

@@ -97,7 +97,7 @@ public class CreatePlexAccountEndpoint : BaseEndpoint<CreatePlexAccountEndpointR
         _log.Debug("Creating account with username {DisplayName}", plexAccount.DisplayName);
 
         // Generate plexAccount clientId
-        plexAccount.ClientId = StringExtensions.RandomString(24, true, true);
+        plexAccount.ClientId = StringExtensions.GeneratePassword(24);
 
         await _dbContext.PlexAccounts.AddAsync(plexAccount, ct);
         await _dbContext.SaveChangesAsync(ct);

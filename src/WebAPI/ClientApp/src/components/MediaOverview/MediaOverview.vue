@@ -256,9 +256,11 @@ onMounted(() => {
 	resetProgress(false);
 	set(isRefreshing, false);
 
-	mediaOverviewStore.libraryId = props.libraryId;
-	mediaOverviewStore.mediaType = props.mediaType;
-	mediaOverviewStore.isDetailView = false;
+	mediaOverviewStore.$patch({
+		libraryId: props.libraryId,
+		mediaType: props.mediaType,
+		isDetailView: false,
+	});
 
 	// Initial data load
 	useSubscription(

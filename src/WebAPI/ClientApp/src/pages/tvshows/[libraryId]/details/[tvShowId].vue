@@ -167,8 +167,10 @@ listenMediaOverviewDownloadCommand((command) => {
 onMounted(() => {
 	const type = PlexMediaType.TvShow;
 
-	mediaOverviewStore.downloadButtonVisible = false;
-	mediaOverviewStore.isDetailView = true;
+	mediaOverviewStore.$patch({
+		downloadButtonVisible: false,
+		isDetailView: true,
+	});
 
 	useSubscription(
 		forkJoin({
@@ -194,7 +196,9 @@ onMounted(() => {
 onBeforeUnmount(() => {
 	set(mediaItemDetail, null);
 	set(loading, true);
-	mediaOverviewStore.downloadButtonVisible = false;
+	mediaOverviewStore.$patch({
+		downloadButtonVisible: false,
+	});
 });
 </script>
 

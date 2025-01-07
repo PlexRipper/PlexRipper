@@ -1,7 +1,6 @@
-import { defineStore, acceptHMRUpdate } from 'pinia';
 import Log from 'consola';
-import type { Observable } from 'rxjs';
-import { of, Subject } from 'rxjs';
+import { defineStore, acceptHMRUpdate } from 'pinia';
+import { of, Subject, type Observable } from 'rxjs';
 import { debounceTime, switchMap, tap } from 'rxjs/operators';
 import type { SettingsModelDTO } from '@dto';
 
@@ -50,25 +49,28 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 
 	const state = reactive<SettingsModelDTO>(cloneDeep(defaultState));
 
-	let _settingsUpdated = new Subject<SettingsModelDTO>();
+	const _settingsUpdated = new Subject<SettingsModelDTO>();
 
 	// Actions
 	const actions = {
 		setup(): Observable<ISetupResult> {
-			// Send the settings to the server when they change
-			_settingsUpdated = new Subject<SettingsModelDTO>();
-			_settingsUpdated
-				.pipe(
-					debounceTime(1000),
-					switchMap((settings) => settingsApi.updateUserSettingsEndpoint(settings)),
-				)
-				.subscribe();
-
 			return actions.refreshSettings().pipe(
-				tap(() =>
+				tap(() => {
+					// Send the settings to the server when they change
+					_settingsUpdated
+						.pipe(
+							debounceTime(500),
+							tap((settings) => Log.debug('Settings updated', settings)),
+							switchMap((settings) => settingsApi.updateUserSettingsEndpoint(settings)),
+						)
+						.subscribe();
+
 					useSettingsStore().$subscribe((mutation, state) => {
-						if (mutation.type) _settingsUpdated.next(state);
-					}),
+						if (mutation.type) {
+							_settingsUpdated.next(state);
+						}
+					});
+				},
 				),
 				switchMap(() => of({ name: 'useSettingsStore', isSuccess: true })),
 			);

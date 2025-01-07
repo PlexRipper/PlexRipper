@@ -24,8 +24,9 @@ export function generateFolderPath({
 		directory: randDirectoryPath(),
 		displayName: randProductName(),
 		folderType: Convert.mediaTypeToFolderType(type),
-		isValid: true,
 		mediaType: type,
+		isValid: true,
+		isDefault: false,
 		...partialData,
 	};
 }
@@ -40,7 +41,12 @@ export function generateFolderPaths({
 	config?: Partial<MockConfig>;
 }): FolderPathDTO[] {
 	const validConfig = checkConfig(config);
-	return times(validConfig.folderPathCount, () => generateFolderPath({ id: folderPathIdIndex++, type, partialData, config }));
+	return times(validConfig.folderPathCount, () => generateFolderPath({
+		id: folderPathIdIndex++,
+		type,
+		partialData,
+		config,
+	}));
 }
 
 export function generateDefaultFolderPaths({ config = {} }: { config?: Partial<MockConfig> }): FolderPathDTO[] {

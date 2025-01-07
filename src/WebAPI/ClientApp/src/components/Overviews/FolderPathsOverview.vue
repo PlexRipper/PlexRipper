@@ -148,6 +148,7 @@ function addFolderPath(folderGroup: IFolderPathGroup): void {
 				folderType: folderGroup.folderType,
 				mediaType: folderGroup.mediaType,
 				isValid: false,
+				isDefault: false,
 			})
 			.subscribe(),
 	);

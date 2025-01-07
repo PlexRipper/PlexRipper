@@ -30,11 +30,6 @@ export interface AppUserLoginEndpointRequest {
   username: string;
 }
 
-export interface AuthenticationSettingsDTO {
-  password: string;
-  username: string;
-}
-
 export interface CheckAllConnectionStatusUpdateDTO {
   plexServersWithConnectionIds: Record<string, number[]>;
 }
@@ -1000,7 +995,6 @@ export interface SetNotificationVisibilityEndpointRequest {
 }
 
 export interface SettingsModelDTO {
-  authenticationSettings: AuthenticationSettingsDTO;
   confirmationSettings: ConfirmationSettingsDTO;
   dateTimeSettings: DateTimeSettingsDTO;
   debugSettings: DebugSettingsDTO;

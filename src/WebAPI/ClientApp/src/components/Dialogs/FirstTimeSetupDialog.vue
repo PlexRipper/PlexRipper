@@ -32,7 +32,11 @@ const settingsStore = useSettingsStore();
 
 function skipSetup(close: () => void) {
 	Log.info('Setup process skipped');
-	settingsStore.generalSettings.firstTimeSetup = false;
+	settingsStore.$patch({
+		generalSettings: {
+			firstTimeSetup: false,
+		},
+	});
 	close();
 }
 </script>

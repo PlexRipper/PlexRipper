@@ -19,6 +19,8 @@ public class Program
     {
         try
         {
+            _log.InformationLine("Starting PlexRipper!");
+
             LogManager.SetupLogging(EnvironmentExtensions.GetLogLevel());
 
             var version = EnvironmentExtensions.GetVersion();
@@ -63,6 +65,7 @@ public class Program
         {
             _log.FatalLine("PlexRipper crashed due to exception!");
             Result.Fail(new ExceptionalError(e)).LogFatal();
+            System.Environment.Exit(2);
         }
         finally
         {
@@ -74,6 +77,7 @@ public class Program
     private static void FailedToStart(Result result)
     {
         _log.FatalLine("PlexRipper failed to start!");
-        result.LogFatal();
+
+        System.Environment.Exit(1);
     }
 }

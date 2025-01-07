@@ -11,7 +11,9 @@
 		:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
 		:type="showPassword ? 'text' : 'password'"
 		@click:append="showPassword = !showPassword">
-		<template #append>
+		<template
+			v-if="!hideMaskButton"
+			#append>
 			<q-btn
 				flat
 				:icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
@@ -27,8 +29,10 @@ const model = defineModel<string>();
 const showPassword = ref(false);
 
 withDefaults(defineProps<{
+	hideMaskButton?: boolean;
 	cy: string;
 }>(), {
+	hideMaskButton: false,
 	cy: 'password-input-field',
 });
 

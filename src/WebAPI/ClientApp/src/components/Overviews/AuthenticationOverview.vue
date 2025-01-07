@@ -20,6 +20,7 @@
 			:text="$t('help.settings.accounts.app-password.text')">
 			<PasswordInputField
 				v-model="authStore.password"
+				hide-mask-button
 				class="q-my-md"
 				cy="app-password-input" />
 		</HelpRow>
@@ -27,11 +28,13 @@
 			:label="$t('help.settings.accounts.app-confirm-password.label')">
 			<PasswordInputField
 				v-model="authStore.confirmPassword"
+				hide-mask-button
 				class="q-my-md"
 				cy="app-password-input" />
 		</HelpRow>
 		<HelpRow hide-label>
 			<SaveButton
+				class="q-pa-md"
 				block
 				:disabled="!authStore.canUpdateCredentials"
 				@click="onUpdateCredentials" />

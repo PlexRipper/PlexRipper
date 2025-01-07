@@ -88,6 +88,7 @@ body {
   // We need a set height so we calculate the remaining content space by subtracting other component heights
   height: $page-height-minus-app-bar;
   width: 100%;
+  overflow-x: hidden;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

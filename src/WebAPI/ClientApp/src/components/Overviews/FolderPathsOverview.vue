@@ -16,12 +16,8 @@
 	<template v-else>
 		<QSection
 			v-for="(folderGroup, i) in folderPathStore.getFolderPathsGroups(onlyDefaults)"
-			:key="i">
-			<template
-				v-if="!onlyDefaults"
-				#header>
-				{{ folderGroup.header }}
-			</template>
+			:key="i"
+			:header="!onlyDefaults ? folderGroup.header : ''">
 			<template v-if="folderGroup.paths.length > 0">
 				<HelpRow
 					v-for="folderPath in folderGroup.paths"

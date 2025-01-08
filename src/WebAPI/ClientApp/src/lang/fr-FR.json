@@ -676,6 +676,15 @@
                 "header": "Compte Plex",
                 "title": "Ajouter un compte Plex!"
             },
+            "authorization": {
+                "header": "Autorisation",
+                "title": "Changez la connexion PlexRipper!"
+            },
+            "disclaimer": {
+                "header": "Clause de non-responsabilité",
+                "title": "Clause de non-responsabilité",
+                "i-agree-disclaimer-button": "Je comprends et suis tout à fait d'accord"
+            },
             "finished": {
                 "header": "Terminé!",
                 "list": {
@@ -707,7 +716,7 @@
                 "title": "Ici sont toutes les fonctionnalitées déjà prévue !"
             },
             "intro": {
-                "header": "C'est se qu'on appelle être génial !",
+                "header": "Commencer",
                 "list": {
                     "item-1": "PlexRipper est en phase de développement, donc il peut y'avoir des bugs ici et là. S'il vous plait si vous rencontrez n'importe quel bug faîtes une issues sur notre page Github.",
                     "item-2": "Les retours ou les demandes de fonctionnalitées sont vraiment très apprécié ! Surtout sur le code source car il s'agit d'un projet personnel destiné à améliorer mes compétences en codage.",
@@ -718,7 +727,7 @@
                 "text": {
                     "p-1": "Here is some useful info:"
                 },
-                "title": "Vous êtes incroyable pour essayer avoir PlexRipper!"
+                "title": "Bienvenue dans la configuration de PlexRipper!"
             },
             "paths": {
                 "header": "Vérifiez les chemins d'accés",

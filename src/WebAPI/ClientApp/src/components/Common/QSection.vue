@@ -2,12 +2,14 @@
 	<QRow no-gutters>
 		<QCol :cols="12">
 			<!-- Header	-->
-			<QCol class="q-mx-md">
+			<QCol
+				v-if="$slots['header'] || header"
+				class="q-mx-md">
 				<QText
 					size="h5"
 					full-width
 					class="q-my-sm q-ml-md"
-					align="left"
+					:align="align"
 					bold="medium">
 					<slot name="header">
 						{{ header }}
@@ -26,7 +28,9 @@
 <script setup lang="ts">
 withDefaults(defineProps<{
 	header?: string;
+	align?: 'left' | 'center' | 'right';
 }>(), {
 	header: '',
+	align: 'left',
 });
 </script>

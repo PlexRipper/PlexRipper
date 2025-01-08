@@ -1,15 +1,9 @@
 <template>
 	<QPage>
-		<QSection>
-			<template #header>
-				{{ $t('pages.settings.accounts.plex-accounts-header') }}
-			</template>
+		<QSection :header="$t('pages.settings.accounts.plex-accounts-header')">
 			<AccountOverview />
 		</QSection>
-		<QSection>
-			<template #header>
-				{{ $t('pages.settings.accounts.app-accounts-header') }}
-			</template>
+		<QSection :header="$t('pages.settings.accounts.app-accounts-header')">
 			<AuthenticationOverview />
 		</QSection>
 	</QPage>

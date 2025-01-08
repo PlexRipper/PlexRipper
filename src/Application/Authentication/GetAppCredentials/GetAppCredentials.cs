@@ -10,15 +10,18 @@ namespace PlexRipper.Application;
 public class AppCredentialsDTO
 {
     [SetsRequiredMembers]
-    public AppCredentialsDTO(string userName, string password)
+    public AppCredentialsDTO(string userName, string password, bool isDefaultCredentials)
     {
         UserName = userName;
         Password = password;
+        IsDefaultCredentials = isDefaultCredentials;
     }
 
     public required string UserName { get; init; }
 
     public required string Password { get; init; }
+
+    public required bool IsDefaultCredentials { get; set; }
 }
 
 public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
@@ -58,9 +61,13 @@ public class GetAppCredentials : BaseEndpointWithoutRequest<AppCredentialsDTO>
             return;
         }
 
+        var isDefaultCredentials =
+            user.UserName == DefaultUserAppCredentials.DefaultUsername
+            && await _userManager.CheckPasswordAsync(user, DefaultUserAppCredentials.DefaultPassword);
+
         // Don't send back the real password as this is hidden anyway when updating the password
         await SendFluentResult(
-            Result.Ok(new AppCredentialsDTO(user.UserName!, StringExtensions.GeneratePassword())),
+            Result.Ok(new AppCredentialsDTO(user.UserName!, StringExtensions.GeneratePassword(), isDefaultCredentials)),
             x => x,
             ct
         );

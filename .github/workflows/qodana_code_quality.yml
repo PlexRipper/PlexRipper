@@ -3,7 +3,12 @@ on:
     push:
         branches:
             - dev
-
+        paths-ignore:
+            - '.github/**'
+            - '.idea/**'
+            - '.run/**'
+            - '.vscode/**'
+            - 'README.md'
 jobs:
     qodana:
         runs-on: ubuntu-latest

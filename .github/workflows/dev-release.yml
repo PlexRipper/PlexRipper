@@ -11,6 +11,8 @@ on:
             - '.run/**'
             - '.vscode/**'
             - '.releaserc.json'
+            - 'README.md'
+
 
 jobs:
     # Build And Release Docker Image

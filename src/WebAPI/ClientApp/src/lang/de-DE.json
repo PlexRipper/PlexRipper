@@ -678,7 +678,7 @@
             },
             "authorization": {
                 "header": "Genehmigung",
-                "title": "Ändern Sie den PlexRipper-Login!"
+                "title": "Ändern Sie die Standardanmeldeinformationen!"
             },
             "disclaimer": {
                 "header": "Haftungsausschluss",
@@ -718,11 +718,9 @@
             "intro": {
                 "header": "Erste Schritte",
                 "list": {
-                    "item-1": "PlexRipper wird derzeit aktiv weiter entwickelt. Deshalb kann es sein, dass der ein oder andere Fehler auftaucht. Bitte geben Sie uns eine Rückmeldung via Github wenn etwas nicht so läuft wie es soll.",
-                    "item-2": "Feedback und wünsche nach Funktionen werden gerne entgegen geommen. Besonders auch beim Code, da ich hier noch mein Wissen erweitern will.",
-                    "item-3": "PlexRipper kann Filme und Serien herunterladen. Andere Medien wie Musik werden noch nicht unterstützt, aber in der Zukunft.",
-                    "item-4": "PlexRipper speichert aktuell und in der Zukunft keine Daten über Ihre aktivitäten. Die einzigen Daten die zu Plex gesendet werden, sind die Login daten um dein Konto anzumelden. Danach findet nur noch Kommunikation zwischen den Plex-Servern statt auf die Sie sowieso Zugriff haben.",
-                    "item-5": "Ein Word der Warnung: Plex und vielleicht die Plex-Server-Besitzer, mögen es vielleicht nicht, dass Sie alle legal erworbenen Medien herunterladen. Deswegen haben wir ein paar sicherheiten eingebaut um Sie davor zu schützen, dass das Plex Konto gesperrt wird. Sei respektvoll mit den Serverkapazitäten der Nutzer und bitte beschweren Sie sich nicht, wenn Sie deswegen gesperrt werden. In der Zukunft möchte ich auch etwas für die Server besitzer tun um sie vor PlexRipper-Benutzern zu schützen. Vorschläge nehme ich gerne via Github entgegen."
+                    "item-1": "PlexRipper hat einen Discord! Mach mit, um Support zu erhalten und über neue Funktionen und Releases zu diskutieren!",
+                    "item-2": "PlexRipper verfügt über eine Website mit häufig gestellten Fragen! Lesen Sie diese unbedingt durch, bevor Sie Hilfe suchen!",
+                    "item-3": "PlexRipper wird derzeit aktiv weiterentwickelt, daher kann es hier und da zu Fehlern kommen. Bitte melden Sie alle Fehler, die Sie finden, auf der Github-Problemseite."
                 },
                 "text": {
                     "p-1": "Hier ein paar weitere Infos:"

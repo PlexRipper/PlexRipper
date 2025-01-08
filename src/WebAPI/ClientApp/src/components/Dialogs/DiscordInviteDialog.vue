@@ -31,12 +31,12 @@
 
 <script setup lang="ts">
 import { DialogType } from '@enums';
+import { discordInviteLink } from '@composables';
 
 const settingsStore = useSettingsStore();
 
 function onInviteClick(close: () => void): void {
-	const discordLink = 'https://discord.com/invite/Qa3BtxN77g';
-	window.open(discordLink, '_blank');
+	window.open(discordInviteLink(), '_blank');
 	settingsStore.generalSettings.hasBeenInvitedToDiscord = true;
 	close();
 }

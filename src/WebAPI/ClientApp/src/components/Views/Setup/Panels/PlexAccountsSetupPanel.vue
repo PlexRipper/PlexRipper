@@ -5,9 +5,7 @@
 		<QSection
 			:header="$t('pages.setup.accounts.title')"
 			align="center">
-			<div class="q-pa-md">
-				<AccountOverview />
-			</div>
+			<AccountOverview />
 		</QSection>
 	</q-tab-panel>
 </template>

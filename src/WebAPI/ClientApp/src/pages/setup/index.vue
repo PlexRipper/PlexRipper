@@ -14,42 +14,22 @@
 		<!--	Horizontal Container	-->
 		<QRow justify="center">
 			<QCol
-				:cols="12"
-				:lg="8">
+				cols="12"
+				lg="8">
 				<!--	Vertical Container	-->
 				<QRow
 					class="setup-card"
 					column>
 					<QCol align-self="stretch">
-						<!-- Tabs -->
 						<QRow align="start">
-							<QCol cols="auto">
-								<q-tabs
+							<!-- Tabs -->
+							<QCol cols="2">
+								<SetupTabs
 									v-model="stepIndex"
-									active-color="primary"
-									indicator-color="primary"
-									vertical>
-									<!-- Step headers	-->
-									<template
-										v-for="(header, index) in headers"
-										:key="index">
-										<q-tab
-											:color="
-												index + 1 === stepPagesCount ? 'green' : stepIndex > index + 1 ? 'green' : 'red'
-											"
-											:complete="index + 1 === stepPagesCount ? stepIndex > index : stepIndex > index + 1"
-											:data-cy="`setup-header-tab-${index + 1}`"
-											:label="header.name"
-											:name="index + 1"
-											class="setup-tab"
-											edit-icon="$complete" />
-										<q-separator
-											v-if="index < stepPagesCount - 1"
-											:key="index + 100" />
-									</template>
-								</q-tabs>
+									:headers="headers" />
 							</QCol>
 							<QCol>
+								<!-- Panels -->
 								<q-tab-panels
 									v-model="stepIndex"
 									animated

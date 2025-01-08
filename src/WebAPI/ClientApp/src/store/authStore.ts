@@ -17,6 +17,7 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 		username: string;
 		currentPassword: string;
 		password: string;
+		isPasswordValid: boolean;
 		confirmPassword: string;
 	}>({
 		isLoggedIn: false,
@@ -26,6 +27,7 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 		currentPassword: '',
 		password: '',
 		confirmPassword: '',
+		isPasswordValid: false,
 	});
 
 	const globalStore = useGlobalStore();
@@ -113,6 +115,7 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 	const getters = {
 		hasUsernameChanged: computed(() => state.currentUsername !== state.username),
 		hasPasswordChanged: computed(() => state.currentPassword !== state.password),
+		equalPassword: computed(() => get(getters.hasPasswordChanged) && state.password === state.confirmPassword),
 		canUpdateCredentials: computed(() => {
 			if (get(getters.hasUsernameChanged)) {
 				return true;

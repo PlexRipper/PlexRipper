@@ -292,14 +292,28 @@
             "update-credentials-button": "Aktualizuj dane uwierzytelniające",
             "validation": {
                 "username-is-required": "Nazwa użytkownika jest wymagana",
-                "username-length": "Nazwa użytkownika musi mieć co najmniej {count} znaków"
+                "username-length": "Nazwa użytkownika musi mieć co najmniej {count} znaków",
+                "passwords-are-not-equal": "Hasła nie są takie same. Upewnij się, że oba są takie same."
             }
         },
         "password-input-field": {
             "label": "",
             "validation": {
                 "password-is-required": "Hasło jest wymagane",
-                "password-length": "Hasło musi mieć co najmniej {count} znaków"
+                "password-length": "Hasło musi mieć co najmniej {count} znaków",
+                "password-is-missing-capital-letter": "Brakuje dużej litery!",
+                "password-is-missing-lowercase-letter": "Brakuje małej litery!",
+                "password-is-missing-number": "Brakuje numeru!",
+                "password-is-missing-special-symbol": "Brakuje znaku specjalnego!"
+            }
+        },
+        "password-strength": {
+            "validation": {
+                "uppercase": "Zawiera wielką literę",
+                "lowercase": "Zawiera małą literę",
+                "number": "Zawiera cyfrę",
+                "symbol": "Zawiera znak specjalny",
+                "length": "Dłuższy niż {count} znaków"
             }
         }
     },

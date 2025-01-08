@@ -292,14 +292,28 @@
             "update-credentials-button": "Save Login",
             "validation": {
                 "username-is-required": "Username is required",
-                "username-length": "Username must be at least {count} characters"
+                "username-length": "Username must be at least {count} characters",
+                "passwords-are-not-equal": "Passwords do not match, ensure both are the same."
             }
         },
         "password-input-field": {
             "label": "",
             "validation": {
                 "password-is-required": "Password is required",
-                "password-length": "Password must be at least {count} characters"
+                "password-length": "Password must be at least {count} characters",
+                "password-is-missing-capital-letter": "Missing a capital letter!",
+                "password-is-missing-lowercase-letter": "Missing a lowercase letter!",
+                "password-is-missing-number": "Missing a number!",
+                "password-is-missing-special-symbol": "Missing a special character!"
+            }
+        },
+        "password-strength": {
+            "validation": {
+                "uppercase": "Has a capital letter",
+                "lowercase": "Has a lowercase letter",
+                "number": "Has a number",
+                "symbol": "Has a special character",
+                "length": "Longer than {count} characters"
             }
         }
     },

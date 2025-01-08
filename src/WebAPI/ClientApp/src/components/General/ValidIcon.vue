@@ -1,11 +1,11 @@
 <template>
 	<q-icon
-		class="valid-icon"
+		class="valid-icon q-ma-sm"
 		size="30px"
 		:color="getData.color"
-		:name="getData.icon"
-		style="margin: 10px">
+		:name="getData.icon">
 		<q-tooltip
+			v-if="getData.text"
 			anchor="top middle"
 			self="bottom middle"
 			:offset="[10, 10]"

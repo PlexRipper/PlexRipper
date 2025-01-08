@@ -39,6 +39,7 @@
     "@vueuse/rxjs": "^12.0.0",
     "axios": "^1.7.9",
     "caniuse-lite": "^1.0.30001689",
+    "check-password-strength": "^2.0.10",
     "consola": "^3.3.3",
     "date-fns": "^2.30.0",
     "pinia": "^2.3.0",

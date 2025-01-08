@@ -292,14 +292,28 @@
             "update-credentials-button": "Mettre à jour les informations d'identification",
             "validation": {
                 "username-is-required": "Nom d'utilisateur est nécessaire",
-                "username-length": "Le nom d'utilisateur doit contenir au moins {count} caractères"
+                "username-length": "Le nom d'utilisateur doit contenir au moins {count} caractères",
+                "passwords-are-not-equal": "Les mots de passe ne correspondent pas, assurez-vous qu'ils sont identiques."
             }
         },
         "password-input-field": {
             "label": "",
             "validation": {
                 "password-is-required": "Mot de passe requis",
-                "password-length": "Le mot de passe doit contenir au moins {count} caractères"
+                "password-length": "Le mot de passe doit contenir au moins {count} caractères",
+                "password-is-missing-capital-letter": "Il manque une majuscule !",
+                "password-is-missing-lowercase-letter": "Il manque une lettre minuscule !",
+                "password-is-missing-number": "Il manque un numéro !",
+                "password-is-missing-special-symbol": "Il manque un caractère spécial !"
+            }
+        },
+        "password-strength": {
+            "validation": {
+                "uppercase": "Contient une lettre majuscule",
+                "lowercase": "Contient une lettre minuscule",
+                "number": "Contient un chiffre",
+                "symbol": "Contient un caractère spécial",
+                "length": "Plus de {count} caractères"
             }
         }
     },

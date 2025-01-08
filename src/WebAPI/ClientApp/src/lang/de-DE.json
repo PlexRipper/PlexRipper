@@ -292,14 +292,28 @@
             "update-credentials-button": "Anmeldeinformationen aktualisieren",
             "validation": {
                 "username-is-required": "Benutzername ist erforderlich",
-                "username-length": "Der Benutzername muss mindestens {count} Zeichen lang sein"
+                "username-length": "Der Benutzername muss mindestens {count} Zeichen lang sein",
+                "passwords-are-not-equal": "Die Passwörter stimmen nicht überein. Stellen Sie sicher, dass beide identisch sind."
             }
         },
         "password-input-field": {
             "label": "",
             "validation": {
                 "password-is-required": "Passwort wird benötigt",
-                "password-length": "Das Passwort muss mindestens {count} Zeichen lang sein"
+                "password-length": "Das Passwort muss mindestens {count} Zeichen lang sein",
+                "password-is-missing-capital-letter": "Es fehlt ein Großbuchstabe!",
+                "password-is-missing-lowercase-letter": "Es fehlt ein Kleinbuchstabe!",
+                "password-is-missing-number": "Es fehlt eine Nummer!",
+                "password-is-missing-special-symbol": "Es fehlt ein Sonderzeichen!"
+            }
+        },
+        "password-strength": {
+            "validation": {
+                "uppercase": "Enthält einen Großbuchstaben",
+                "lowercase": "Enthält einen Kleinbuchstaben",
+                "number": "Enthält eine Zahl",
+                "symbol": "Enthält ein Sonderzeichen",
+                "length": "Länger als {count} Zeichen"
             }
         }
     },

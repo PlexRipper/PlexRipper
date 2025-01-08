@@ -91,6 +91,7 @@
 						:text="$t('help.account-form.password.text')">
 						<PasswordInputField
 							v-model="accountDialogStore.password"
+							disable-validation
 							class="q-my-md"
 							cy="account-form-password-input" />
 					</HelpRow>

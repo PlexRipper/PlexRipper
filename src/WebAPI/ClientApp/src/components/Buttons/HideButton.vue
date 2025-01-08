@@ -13,7 +13,7 @@ export default defineComponent({
 			BaseButton,
 			{
 				...mergeProps(this.$props, {
-					label: useI18n().t(`general.commands.hide`),
+					label: this.$props.label ? this.$props.label : useI18n().t(`general.commands.hide`),
 					icon: 'mdi-eye-off-outline',
 				} as IBaseButtonProps),
 			},

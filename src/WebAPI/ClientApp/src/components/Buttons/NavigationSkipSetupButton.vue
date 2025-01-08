@@ -13,7 +13,7 @@ export default defineComponent({
 			BaseButton,
 			{
 				...mergeProps(this.$props, {
-					label: useI18n().t(`general.commands.skip-setup`),
+					label: this.$props.label ? this.$props.label : useI18n().t(`general.commands.skip-setup`),
 					icon: 'mdi-debug-step-over',
 					iconAlign: 'right',
 				} as IBaseButtonProps),

@@ -15,7 +15,7 @@ export default defineComponent({
 				...this.$attrs,
 				...mergeProps(this.$props, {
 					block: true,
-					label: useI18n().t(`general.commands.next`),
+					label: this.$props.label ? this.$props.label : useI18n().t(`general.commands.next`),
 					iconAlign: 'right',
 					icon: 'mdi-arrow-right',
 				} as IBaseButtonProps),

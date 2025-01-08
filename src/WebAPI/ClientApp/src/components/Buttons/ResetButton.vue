@@ -13,7 +13,7 @@ export default defineComponent({
 			BaseButton,
 			{
 				...mergeProps(this.$props, {
-					label: useI18n().t(`general.commands.reset`),
+					label: this.$props.label ? this.$props.label : useI18n().t(`general.commands.reset`),
 					icon: 'mdi-restore',
 				} as IBaseButtonProps),
 			},

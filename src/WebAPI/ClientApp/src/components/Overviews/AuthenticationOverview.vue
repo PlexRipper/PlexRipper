@@ -30,21 +30,30 @@
 			cy="app-password-input" />
 	</HelpRow>
 	<HelpRow hide-label>
-		<SaveButton
+		<ValidationButton
 			class="q-pa-md"
 			block
-			:label="t('components.authentication-overview.update-credentials-button')"
+			default-icon="mdi-content-save"
+			:is-validated="isValid"
+			:loading="loading"
+			:label="$t('general.commands.save')"
 			:disabled="!authStore.canUpdateCredentials"
 			@click="onUpdateCredentials" />
 	</HelpRow>
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useAuthenticationStore } from '@store';
+import { set } from '@vueuse/core';
 import { useSubscription } from '@vueuse/rxjs';
-import SaveButton from '@components/Buttons/SaveButton.vue';
 
 const authStore = useAuthenticationStore();
 const { t } = useI18n();
+const loading = ref(false);
+const isValid = ref(false);
+
 const getUsernameRules = computed(() => [
 	(v: string): boolean | string => !!v || t('components.authentication-overview.validation.username-is-required'),
 	(v: string): boolean | string => (v && v.length >= 8) || t('components.authentication-overview.validation.username-length', {
@@ -53,7 +62,12 @@ const getUsernameRules = computed(() => [
 ]);
 
 function onUpdateCredentials() {
-	useSubscription(authStore.updateCredentials().subscribe());
+	set(loading, true);
+	set(isValid, false);
+	useSubscription(authStore.updateCredentials().subscribe(() => {
+		set(loading, false);
+		set(isValid, true);
+	}));
 }
 
 onMounted(() =>

@@ -47,7 +47,6 @@
 
 <script setup lang="ts">
 import { useSettingsStore } from '@store';
-import HelpGroup from '@components/Help/HelpGroup.vue';
 
 const settingsStore = useSettingsStore();
 </script>

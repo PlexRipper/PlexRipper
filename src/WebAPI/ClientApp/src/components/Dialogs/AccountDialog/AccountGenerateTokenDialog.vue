@@ -65,7 +65,6 @@
 <script setup lang="ts">
 import { set, useClipboard } from '@vueuse/core';
 import { DialogType } from '@enums';
-import IconButton from '@components/Buttons/IconButton.vue';
 import VOtpInput from 'vue3-otp-input';
 import { useAccountDialogStore, useSubscription } from '#imports';
 

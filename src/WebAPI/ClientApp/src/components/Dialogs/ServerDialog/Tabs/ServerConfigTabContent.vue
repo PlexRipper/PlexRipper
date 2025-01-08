@@ -18,7 +18,6 @@
 
 <script setup lang="ts">
 import type { PlexServerDTO } from '@dto';
-import HelpGroup from '@components/Help/HelpGroup.vue';
 
 defineProps<{
 	plexServer: PlexServerDTO | null;

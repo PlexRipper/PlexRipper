@@ -11,7 +11,9 @@
 </template>
 
 <script setup lang="ts">
+import type { SetupPanelType } from '@enums';
+
 defineProps<{
-	name: number;
+	name: SetupPanelType;
 }>();
 </script>

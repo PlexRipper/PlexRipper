@@ -96,6 +96,7 @@
 				<QSpace v-if="plexServerConnectionId > 0" />
 				<QCol cols="auto">
 					<ValidationButton
+						trigger-once
 						:label="$t('components.add-connection-dialog.test-connection-button')"
 						:loading="loadingTestConnection"
 						:is-validated="isValidTestConnection"
@@ -124,7 +125,6 @@ import { get, set } from '@vueuse/core';
 import { DialogType, ValidationLevel } from '@enums';
 import type { IConnectionDialog } from '@interfaces';
 import type { CreatePlexServerConnectionEndpointRequest, ServerIdentityDTO } from '@dto';
-import DeleteButton from '@components/Buttons/DeleteButton.vue';
 import { useServerConnectionStore, useServerStore, useSubscription } from '#imports';
 
 const serverStore = useServerStore();

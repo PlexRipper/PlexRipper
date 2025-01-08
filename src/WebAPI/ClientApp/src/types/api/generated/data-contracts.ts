@@ -10,6 +10,7 @@
  */
 
 export interface AppCredentialsDTO {
+  isDefaultCredentials: boolean;
   password: string;
   userName: string;
 }

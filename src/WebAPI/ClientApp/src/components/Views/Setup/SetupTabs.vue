@@ -14,7 +14,7 @@
 				:data-cy="`setup-header-tab-${index + 1}`"
 				:label="header.name"
 				:name="index + 1"
-				:disable="isDisabled"
+				:disable="!stepValidation.allowed"
 				class="setup-tab"
 				edit-icon="$complete" />
 			<q-separator
@@ -26,6 +26,9 @@
 
 <script setup lang="ts">
 import { get } from '@vueuse/core';
+import { SetupPanelType } from '@enums';
+
+const authStore = useAuthenticationStore();
 
 const model = defineModel<number>({
 	default: 1,
@@ -37,7 +40,20 @@ const color = computed(() => {
 	return get(model) === props.headers.length ? 'green' : get(model) > props.headers.length ? 'green' : 'red';
 });
 
-const isDisabled = computed(() => {
-	return get(model) == 1;
+const stepValidation = computed((): { allowed: boolean; tooltip?: string } => {
+	switch (get(model)) {
+		case SetupPanelType.DisclaimerPanel:
+			return {
+				allowed: false,
+			};
+		case SetupPanelType.AuthorizationPanel:
+			return {
+				allowed: !authStore.isDefaultCredentials,
+			};
+		default:
+			return {
+				allowed: true,
+			};
+	}
 });
 </script>

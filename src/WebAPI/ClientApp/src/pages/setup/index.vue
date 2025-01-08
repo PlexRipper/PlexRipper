@@ -36,17 +36,17 @@
 									class="fit q-pa-md"
 									transition-next="slide-up"
 									transition-prev="slide-down">
-									<DisclaimerSetupPanel :name="1" />
+									<DisclaimerSetupPanel :name="SetupPanelType.DisclaimerPanel" />
 									<!-- Introduction	-->
-									<IntroductionSetupPanel :name="2" />
+									<IntroductionSetupPanel :name="SetupPanelType.IntroductionPanel" />
 									<!-- Authorization	-->
-									<AuthorizationSetupPanel :name="3" />
+									<AuthorizationSetupPanel :name="SetupPanelType.AuthorizationPanel" />
 									<!-- Checking paths	-->
-									<FolderOverviewSetupPanel :name="4" />
+									<FolderOverviewSetupPanel :name="SetupPanelType.FolderOverviewPanel" />
 									<!-- Plex Accounts	-->
-									<PlexAccountsSetupPanel :name="5" />
+									<PlexAccountsSetupPanel :name="SetupPanelType.PlexAccountsPanel" />
 									<!-- Finished	-->
-									<FinishSetupPanel :name="6" />
+									<FinishSetupPanel :name="SetupPanelType.FinishPanel" />
 								</q-tab-panels>
 							</QCol>
 						</QRow>
@@ -64,6 +64,7 @@
 
 <script lang="ts" setup>
 import Log from 'consola';
+import { SetupPanelType } from '@enums';
 import { useSettingsStore, useRouter, useI18n } from '#imports';
 
 const { t } = useI18n();

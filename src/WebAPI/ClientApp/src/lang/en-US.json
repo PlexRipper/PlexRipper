@@ -289,7 +289,7 @@
             "fetching-servers": "Retrieving accessible servers for syncing media"
         },
         "authentication-overview": {
-            "update-credentials-button": "Update Credentials",
+            "update-credentials-button": "Save Login",
             "validation": {
                 "username-is-required": "Username is required",
                 "username-length": "Username must be at least {count} characters"

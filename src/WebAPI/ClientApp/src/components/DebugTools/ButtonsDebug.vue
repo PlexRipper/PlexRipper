@@ -145,7 +145,5 @@
 </template>
 
 <script setup lang="ts">
-import QSection from '@components/Common/QSection.vue';
-
 const checkConnectionButton = ref<boolean>(false);
 </script>

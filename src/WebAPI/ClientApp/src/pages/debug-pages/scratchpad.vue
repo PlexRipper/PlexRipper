@@ -15,7 +15,6 @@
 import { generateDownloadProgressTvShows, generatePlexServer, Seed } from '@factories';
 import type { DownloadProgressDTO } from '@dto';
 import { useDownloadStore, useGlobalStore, useDialogStore } from '@store';
-import BaseButton from '@components/Buttons/BaseButton.vue';
 import { useSubscription } from '@vueuse/rxjs';
 
 const globalStore = useGlobalStore();

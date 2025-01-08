@@ -39,7 +39,6 @@
 <script setup lang="ts">
 import type { PlexLibraryDTO, PlexServerDTO } from '@dto';
 import { useFolderPathStore } from '@store';
-import HelpRow from '@components/Help/HelpRow.vue';
 
 const folderPathStore = useFolderPathStore();
 const libraryStore = useLibraryStore();

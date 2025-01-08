@@ -1,7 +1,7 @@
 <template>
 	<QCol
 		align-self="stretch"
-		:cols="12"
+		cols="12"
 		style="max-height: 76px;">
 		<q-separator class="q-mb-md" />
 		<QRow
@@ -9,7 +9,7 @@
 			align="center"
 			class="q-my-md">
 			<!-- Language Selector -->
-			<QCol :cols="2">
+			<QCol cols="2">
 				<LanguageSelect
 					class="q-ml-md"
 					dense />
@@ -23,7 +23,7 @@
 					<QCol
 						v-if="!isBackDisabled"
 						class="q-mx-md"
-						:cols="3">
+						cols="3">
 						<NavigationPreviousButton
 							:disabled="isBackDisabled"
 							cy="setup-page-previous-button"
@@ -32,7 +32,7 @@
 					<!-- Next Button -->
 					<QCol
 						v-if="!isNextDisabled"
-						:cols="isBackDisabled ? 9 : 3"
+						:cols="isBackDisabled ? '9' : '3'"
 						class="q-mx-md">
 						<ConfirmButton
 							v-if="model === 1"
@@ -43,7 +43,8 @@
 						<NavigationNextButton
 							v-else
 							block
-							:disabled="isNextDisabled"
+							:tooltip-text="!stepValidation.allowed ? stepValidation.tooltip : ''"
+							:disabled="!stepValidation.allowed"
 							cy="setup-page-next-button"
 							@click="next" />
 					</QCol>
@@ -74,11 +75,14 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import { DialogType } from '@enums';
+import { DialogType, SetupPanelType } from '@enums';
 import { useDialogStore } from '@store';
+import { useFolderPathStore } from '#imports';
 
 const dialogStore = useDialogStore();
-
+const authStore = useAuthenticationStore();
+const folderPathStore = useFolderPathStore();
+const accountStore = useAccountStore();
 const model = defineModel<number>({
 	default: 1,
 });
@@ -89,6 +93,36 @@ const emits = defineEmits<{
 	(e: 'finish'): void;
 }>();
 
+const stepValidation = computed((): { allowed: boolean; tooltip?: string } => {
+	switch (get(model)) {
+		case SetupPanelType.DisclaimerPanel:
+			return {
+				allowed: false,
+			};
+		case SetupPanelType.AuthorizationPanel:
+			return {
+				allowed: !authStore.isDefaultCredentials,
+				tooltip: 'You must change the default credentials before proceeding.',
+			};
+
+		case SetupPanelType.FolderOverviewPanel:
+			return {
+				allowed: folderPathStore.areDefaultFolderPathsValid,
+				tooltip: 'All folder paths must be valid and writable.',
+			};
+
+		case SetupPanelType.PlexAccountsPanel:
+			return {
+				allowed: accountStore.getAccounts.length > 0,
+				tooltip: 'Add at least 1 Plex account to proceed.',
+			};
+
+		default:
+			return {
+				allowed: true,
+			};
+	}
+});
 const isBackDisabled = computed(() => {
 	return get(model) === 1;
 });

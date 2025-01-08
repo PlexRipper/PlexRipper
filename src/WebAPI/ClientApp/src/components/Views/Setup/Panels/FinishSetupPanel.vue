@@ -33,10 +33,11 @@
 </template>
 
 <script setup lang="ts">
+import type { SetupPanelType } from '@enums';
 import { useI18n } from '#imports';
 
 defineProps<{
-	name: number;
+	name: SetupPanelType;
 }>();
 const { t } = useI18n();
 

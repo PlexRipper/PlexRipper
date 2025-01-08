@@ -33,9 +33,10 @@
 
 <script lang="ts" setup>
 import { discordInviteLink } from '@composables';
+import type { SetupPanelType } from '@enums';
 
 defineProps<{
-	name: number;
+	name: SetupPanelType;
 }>();
 const { t } = useI18n();
 const list: { text: string; link?: string }[] = [

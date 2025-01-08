@@ -12,6 +12,7 @@ import { useRouter } from '#imports';
 export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 	const state = reactive<{
 		isLoggedIn: boolean;
+		isDefaultCredentials: boolean;
 		currentUsername: string;
 		username: string;
 		currentPassword: string;
@@ -19,6 +20,7 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 		confirmPassword: string;
 	}>({
 		isLoggedIn: false,
+		isDefaultCredentials: true,
 		currentUsername: '',
 		username: '',
 		currentPassword: '',
@@ -44,6 +46,7 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 						state.currentPassword = res.value.password;
 						state.password = res.value.password;
 						state.confirmPassword = '';
+						state.isDefaultCredentials = res.value.isDefaultCredentials;
 					}
 				}));
 		},
@@ -110,7 +113,14 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 	const getters = {
 		hasUsernameChanged: computed(() => state.currentUsername !== state.username),
 		hasPasswordChanged: computed(() => state.currentPassword !== state.password),
-		canUpdateCredentials: computed(() => (get(getters.hasUsernameChanged) || get(getters.hasPasswordChanged)) && state.password == state.confirmPassword),
+		canUpdateCredentials: computed(() => {
+			if (get(getters.hasUsernameChanged)) {
+				return true;
+			}
+			if (get(getters.hasPasswordChanged)) {
+				return state.password == state.confirmPassword;
+			}
+		}),
 	};
 	return {
 		...toRefs(state),

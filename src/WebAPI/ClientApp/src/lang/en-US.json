@@ -683,12 +683,34 @@
             "disclaimer": {
                 "header": "Disclaimer",
                 "title": "Disclaimer",
-                "i-agree-disclaimer-button": "I fully understand and agree"
+                "i-agree-disclaimer-button": "I fully understand and agree",
+                "text": {
+                    "heading": "Please read and agree to the terms below before continuing:",
+                    "section1": {
+                        "title": "Legal and Ethical Use",
+                        "content": "You are responsible for ensuring that your use of PlexRipper complies with all applicable laws, including copyright laws, and the Terms of Service of any platforms you interact with. PlexRipper is designed solely for personal media management and backups. It must not be used for unauthorized downloading, copyright infringement, or any other unlawful activity."
+                    },
+                    "section2": {
+                        "title": "Ownership and Permissions",
+                        "content": "You must have explicit ownership or permission to access the media content and servers you interact with using PlexRipper. Unauthorized access or use of third-party servers or media is strictly prohibited."
+                    },
+                    "section3": {
+                        "title": "No Affiliation",
+                        "content": "PlexRipper is an independent tool and is not affiliated with, endorsed by, or associated with Plex Inc. or any other platform."
+                    },
+                    "section4": {
+                        "title": "Limitation of Liability",
+                        "content": "The developers of PlexRipper are not responsible for any misuse of the tool or for consequences arising from unauthorized or illegal use."
+                    },
+                    "confirmation": "By proceeding, you confirm that you understand and accept these terms, and that you will use PlexRipper responsibly and ethically.",
+                    "test": ""
+                }
             },
             "finished": {
                 "header": "Finished!",
                 "list": {
                     "item-1": "Give a star on the Github page!",
+                    "item-5": "Give a star on the DockerHub page!",
                     "item-2": "Request features and provide bug reports!",
                     "item-3": "Translate PlexRipper to your language!",
                     "item-4": "Go through the code and give feedback or suggest improvements!"

@@ -6,27 +6,7 @@
 			:header="$t('pages.setup.intro.title')"
 			align="center">
 			<p>{{ $t('pages.setup.intro.text.p-1') }}</p>
-			<q-list
-				bordered
-				separator>
-				<q-item
-					v-for="(item, index) in list"
-					:key="index"
-					:href="item.link"
-					target="_blank">
-					<q-item-section>
-						<q-item-label>
-							<QText
-								:value="item.text" />
-						</q-item-label>
-					</q-item-section>
-					<q-item-section
-						v-if="item.link"
-						avatar>
-						<ExternalLinkButton :href="item.link" />
-					</q-item-section>
-				</q-item>
-			</q-list>
+			<QLinkList :list="list" />
 		</QSection>
 	</q-tab-panel>
 </template>
@@ -35,10 +15,12 @@
 import { discordInviteLink } from '@composables';
 import type { SetupPanelType } from '@enums';
 
+const { t } = useI18n();
+
 defineProps<{
 	name: SetupPanelType;
 }>();
-const { t } = useI18n();
+
 const list: { text: string; link?: string }[] = [
 	{
 		text: t('pages.setup.intro.list.item-1'),

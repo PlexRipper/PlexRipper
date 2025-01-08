@@ -44,10 +44,14 @@ const divClasses = computed(() => ({
 }));
 
 const spanClasses = computed(() => {
+	let bold = props.bold;
+	if (props.bold === '') {
+		bold = 'bold';
+	}
 	return ({
 		'q-text': true,
 		[`text-${props.size}`]: true,
-		[`text-weight-${props.bold}`]: true,
+		[`text-weight-${bold}`]: true,
 		[`full-width`]: props.fullWidth,
 	});
 });

@@ -683,12 +683,34 @@
             "disclaimer": {
                 "header": "Haftungsausschluss",
                 "title": "Haftungsausschluss",
-                "i-agree-disclaimer-button": "Ich verstehe und stimme voll und ganz zu"
+                "i-agree-disclaimer-button": "Ich verstehe und stimme voll und ganz zu",
+                "text": {
+                    "heading": "Bitte lesen Sie die folgenden Bedingungen und stimmen Sie ihnen zu, bevor Sie fortfahren:",
+                    "section1": {
+                        "title": "Rechtmäßige und Ethische Nutzung",
+                        "content": "Sie sind dafür verantwortlich, sicherzustellen, dass Ihre Nutzung von PlexRipper allen geltenden Gesetzen, einschließlich des Urheberrechts, sowie den Nutzungsbedingungen aller Plattformen, mit denen Sie interagieren, entspricht. PlexRipper ist ausschließlich für die persönliche Medienverwaltung und Sicherung konzipiert. Es darf nicht für unbefugtes Herunterladen, Urheberrechtsverletzungen oder andere rechtswidrige Aktivitäten verwendet werden."
+                    },
+                    "section2": {
+                        "title": "Eigentum und Berechtigungen",
+                        "content": "Sie müssen über ausdrückliches Eigentum oder die Erlaubnis verfügen, auf die Medieninhalte und Server zuzugreifen, mit denen Sie über PlexRipper interagieren. Unbefugter Zugriff oder die Nutzung von Servern oder Medien Dritter ist strengstens untersagt."
+                    },
+                    "section3": {
+                        "title": "Keine Verbindung",
+                        "content": "PlexRipper ist ein unabhängiges Tool und steht in keiner Verbindung zu, wird nicht unterstützt von oder ist nicht assoziiert mit Plex Inc. oder einer anderen Plattform."
+                    },
+                    "section4": {
+                        "title": "Haftungsbeschränkung",
+                        "content": "Die Entwickler von PlexRipper sind nicht verantwortlich für einen Missbrauch des Tools oder für Folgen, die aus unbefugter oder illegaler Nutzung entstehen."
+                    },
+                    "confirmation": "Durch das Fortfahren bestätigen Sie, dass Sie diese Bedingungen verstehen und akzeptieren und dass Sie PlexRipper verantwortungsbewusst und ethisch verwenden werden.",
+                    "test": ""
+                }
             },
             "finished": {
                 "header": "Abgeschlossen!",
                 "list": {
                     "item-1": "Geben Sie mir einen Stern auf Github!",
+                    "item-5": "Geben Sie der DockerHub-Seite einen Stern!",
                     "item-2": "Nennen Sie verbesserungsvorschläge und melden Sie bitte wenn etwas nicht funktioniert!",
                     "item-3": "Übersetze Sie PlexRipper in Ihre Sprache!",
                     "item-4": "Gucken Sie sich den Code an und geben Sie mir Tips wie man es besser machen kann!"

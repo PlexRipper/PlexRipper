@@ -28,7 +28,7 @@
 									v-model="stepIndex"
 									:headers="headers" />
 							</QCol>
-							<QCol>
+							<QCol align-self="stretch">
 								<!-- Panels -->
 								<q-tab-panels
 									v-model="stepIndex"

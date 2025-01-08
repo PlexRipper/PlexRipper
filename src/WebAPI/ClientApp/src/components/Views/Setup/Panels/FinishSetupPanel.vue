@@ -6,28 +6,7 @@
 			:header="$t('pages.setup.finished.title')"
 			align="center">
 			<p>{{ $t('pages.setup.finished.text.p-1') }}</p>
-			<q-list
-				class="no-background"
-				dense>
-				<q-item
-					v-for="(link, i) in links"
-					:key="i"
-					:href="link.link"
-					target="_blank">
-					<q-item-section avatar>
-						<ul>
-							<li>
-								<span style="font-weight: normal">
-									{{ link.text }}
-								</span>
-							</li>
-						</ul>
-					</q-item-section>
-					<q-item-section side>
-						<ExternalLinkButton :href="link.link" />
-					</q-item-section>
-				</q-item>
-			</q-list>
+			<QLinkList :list="list" />
 		</QSection>
 	</q-tab-panel>
 </template>
@@ -36,14 +15,19 @@
 import type { SetupPanelType } from '@enums';
 import { useI18n } from '#imports';
 
+const { t } = useI18n();
+
 defineProps<{
 	name: SetupPanelType;
 }>();
-const { t } = useI18n();
 
-const links = ref([{
+const list = ref([{
 	link: 'https://github.com/PlexRipper/PlexRipper/',
 	text: t('pages.setup.finished.list.item-1'),
+},
+{
+	link: 'https://hub.docker.com/r/plexripper/plexripper',
+	text: t('pages.setup.finished.list.item-5'),
 },
 {
 	link: 'https://github.com/PlexRipper/PlexRipper/issues',

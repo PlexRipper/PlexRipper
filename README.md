@@ -18,6 +18,7 @@
   <a href="https://github.com/PlexRipper/PlexRipper"><img src="https://img.shields.io/github/stars/plexripper/plexripper?style=social"></a>
   <a href="https://github.com/PlexRipper/PlexRipper"><img src="https://img.shields.io/github/followers/plexripper?style=social"></a>
   <a href="https://hub.docker.com/r/plexripper/plexripper"><img src="https://img.shields.io/docker/stars/plexripper/plexripper"></a>
+  <a href="https://hub.docker.com/r/plexripper/plexripper"><img src="https://img.shields.io/docker/pulls/plexripper/plexripper?label=Docker%20Pulls&style=flat-square" /></a>
 </p>
 
 <h4 align="center">Also maximize your PlexRipper experience! Join our <a href="https://discord.com/invite/Qa3BtxN77g">Discord</a> for expert tips, updates, and a helpful community!</h4>

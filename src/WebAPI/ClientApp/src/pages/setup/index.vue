@@ -81,14 +81,21 @@ const headers = ref([
 	{ name: t('pages.setup.accounts.header') },
 	{ name: t('pages.setup.finished.header') }]);
 
-const finishSetup = () => {
-	settingsStore.generalSettings.firstTimeSetup = false;
-	Log.info('Setup process is finished or skipped, redirecting to home page now and refreshing the page');
-	router.push('/').then(() => {
-		// Refresh the page when we go to the home page to make sure we get all new data.
-		location.reload();
+function finishSetup() {
+	settingsStore.$patch({
+		generalSettings: {
+			firstTimeSetup: false,
+		},
 	});
-};
+
+	useSubscription(settingsStore.saveSettings().subscribe(() => {
+		Log.info('Setup process is finished or skipped, redirecting to home page now and refreshing the page');
+		router.push('/').then(() => {
+			// Refresh the page when we go to the home page to make sure we get all new data.
+			location.reload();
+		});
+	}));
+}
 </script>
 
 <style lang="scss">

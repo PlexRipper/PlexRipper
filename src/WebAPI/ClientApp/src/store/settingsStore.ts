@@ -86,6 +86,15 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 				}),
 			);
 		},
+		saveSettings: (): Observable<SettingsModelDTO | null> =>
+			settingsApi.updateUserSettingsEndpoint(state).pipe(
+				switchMap((settingsResult) => of(settingsResult?.value ?? null)),
+				tap((settings) => {
+					if (settings) {
+						actions.setSettingsState(settings);
+					}
+				}),
+			),
 		setSettingsState(settings: SettingsModelDTO) {
 			state.generalSettings = settings.generalSettings;
 			state.debugSettings = settings.debugSettings;

@@ -25,7 +25,6 @@
 				:key="alertItem.id"
 				:alert="alertItem" />
 			<CheckServerConnectionsDialog />
-			<FirstTimeSetupDialog />
 			<DiscordInviteDialog />
 			<SyncServerMediaDialog />
 		</PageLoadOverlay>
@@ -54,6 +53,8 @@ import {
 
 const nuxtApp = useNuxtApp();
 const route = useRoute();
+const router = useRouter();
+
 const helpStore = useHelpStore();
 const alertStore = useAlertStore();
 const dialogStore = useDialogStore();
@@ -91,7 +92,7 @@ nuxtApp.hook('page:finish', () => {
 	if (authStore.isLoggedIn) {
 		setTimeout(() => {
 			if (settingsStore.generalSettings.firstTimeSetup && !route.fullPath.includes('setup')) {
-				dialogStore.openDialog(DialogType.FirstTimeSetupDialog);
+				router.push('/setup');
 			} else if (!settingsStore.generalSettings.hasBeenInvitedToDiscord && !route.fullPath.includes('setup')) {
 				dialogStore.openDialog(DialogType.DiscordServerInviteDialog);
 			}

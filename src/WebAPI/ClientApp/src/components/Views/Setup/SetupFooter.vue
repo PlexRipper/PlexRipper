@@ -59,11 +59,6 @@
 					v-if="isFinishButtonVisible"
 					cy="setup-page-skip-setup-button"
 					@click="emits('finish')" />
-				<ConfirmationDialog
-					:name="DialogType.SetupSkipConfirmationDialog"
-					:text="$t('confirmation.skip-setup.text')"
-					:title="$t('confirmation.skip-setup.title')"
-					@confirm="emits('finish')" />
 			</QCol>
 		</QRow>
 	</QCol>
@@ -71,7 +66,7 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import { DialogType, SetupPanelType } from '@enums';
+import { SetupPanelType } from '@enums';
 import { useFolderPathStore } from '#imports';
 
 const settingsStore = useSettingsStore();

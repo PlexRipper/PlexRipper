@@ -3,7 +3,8 @@
 		v-ripple
 		clickable
 		:class="classConfig"
-		:data-cy="cy">
+		:data-cy="cy"
+		class="q-ma-md">
 		<div class="q-alert-wrapper">
 			<q-icon
 				:name="alertIcon"

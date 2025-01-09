@@ -55,6 +55,7 @@
 						<!-- Password Login Field -->
 						<PasswordInputField
 							v-model="password"
+							disable-validation
 							class="q-my-md"
 							cy="login-password-input" />
 					</QCol>

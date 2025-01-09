@@ -21,9 +21,16 @@
 		<template #actions="{ close }">
 			<BaseButton
 				block
+
 				@click="onInviteClick(close)">
-				<DiscordIcon class="q-mr-md" />
-				<QText :value="$t('components.discord-invite-dialog.discord-invite-button-text')" />
+				<QRow justify="center">
+					<QCol cols="auto">
+						<DiscordIcon class="q-mr-md" />
+					</QCol>
+					<QCol cols="auto">
+						<QText :value="$t('components.discord-invite-dialog.discord-invite-button-text')" />
+					</QCol>
+				</QRow>
 			</BaseButton>
 		</template>
 	</QCardDialog>

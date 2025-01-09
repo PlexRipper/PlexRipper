@@ -8,7 +8,11 @@ export function setupMockSettingsEndpoints(
 	this: BasePageSetupResult,
 	config: MockConfig,
 ): BasePageSetupResult {
-	this.settings = generateSettingsModel({ plexServers: this.plexServers, config });
+	this.settings = generateSettingsModel({
+		plexServers: this.plexServers, config,
+	});
+	this.settings.generalSettings.hasBeenInvitedToDiscord = true;
+
 	if (config.override.settings) {
 		this.settings = config.override.settings(this.settings);
 	}

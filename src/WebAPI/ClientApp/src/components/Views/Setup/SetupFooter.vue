@@ -39,7 +39,7 @@
 							cy="setup-disclaimer-accept-button"
 							:label="$t('pages.setup.disclaimer.i-agree-disclaimer-button')"
 							block
-							@click="next" />
+							@click="onDisclaimerAgree" />
 						<NavigationNextButton
 							v-else
 							block
@@ -74,6 +74,7 @@ import { get, set } from '@vueuse/core';
 import { DialogType, SetupPanelType } from '@enums';
 import { useFolderPathStore } from '#imports';
 
+const settingsStore = useSettingsStore();
 const authStore = useAuthenticationStore();
 const folderPathStore = useFolderPathStore();
 const accountStore = useAccountStore();
@@ -139,5 +140,14 @@ function back() {
 	if (get(model) > 1) {
 		set(model, get(model) - 1);
 	}
+}
+
+function onDisclaimerAgree() {
+	settingsStore.$patch({
+		generalSettings: {
+			hasAgreedToDisclaimer: true,
+		},
+	});
+	next();
 }
 </script>

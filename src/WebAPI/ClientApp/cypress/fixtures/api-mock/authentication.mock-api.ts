@@ -24,7 +24,6 @@ export function setupMockAuthenticationEndpoints(this: BasePageSetupResult, conf
 	});
 
 	cy.intercept('PUT', AuthenticationPaths.updateCredentialsEndpoint(), (req) => {
-		console.log('BasePageSetup -> updateCredentialsEndpoint', req.body);
 		req.reply(
 			{
 				statusCode: 200,

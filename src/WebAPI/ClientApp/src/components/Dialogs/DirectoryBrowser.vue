@@ -50,7 +50,9 @@
 				</thead>
 				<!-- The return row -->
 				<tbody v-if="currentPathModel != null">
-					<tr @click="directoryNavigate(returnRow)">
+					<tr
+						data-cy="directory-browser-row-return"
+						@click="directoryNavigate(returnRow)">
 						<td
 							class="text-left"
 							style="width: 100px">
@@ -67,11 +69,12 @@
 		</template>
 		<template #default>
 			<!--	Directory Browser	-->
-			<q-markup-table>
+			<q-markup-table data-cy="directory-browser-rows">
 				<tbody class="scroll">
 					<tr
 						v-for="(row, index) in items"
 						:key="index"
+						:data-cy="`directory-browser-row-${index}`"
 						:class="rowClass(!row.hasReadPermission)"
 						@click="directoryNavigate(row)">
 						<td
@@ -103,6 +106,7 @@
 		<template #actions>
 			<CancelButton @click="cancel" />
 			<ConfirmButton
+				cy="directory-browser-confirm-button"
 				:disabled="!isCurrentWritable"
 				:tooltip-text="!isCurrentWritable ? $t('components.directory-browser.current-folder-has-no-write-permission') : ''"
 				@click="confirm()" />

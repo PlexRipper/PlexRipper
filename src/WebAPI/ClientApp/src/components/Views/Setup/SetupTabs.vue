@@ -14,7 +14,7 @@
 				:data-cy="`setup-header-tab-${index + 1}`"
 				:label="header.name"
 				:name="index + 1"
-				:disable="!stepValidation.allowed"
+				:disable="!isTabEnabled(index + 1)"
 				class="setup-tab"
 				edit-icon="$complete" />
 			<q-separator
@@ -27,8 +27,12 @@
 <script setup lang="ts">
 import { get } from '@vueuse/core';
 import { SetupPanelType } from '@enums';
+import { useFolderPathStore } from '@store';
 
+const settingsStore = useSettingsStore();
 const authStore = useAuthenticationStore();
+const folderPathStore = useFolderPathStore();
+const accountStore = useAccountStore();
 
 const model = defineModel<number>({
 	default: 1,
@@ -40,20 +44,26 @@ const color = computed(() => {
 	return get(model) === props.headers.length ? 'green' : get(model) > props.headers.length ? 'green' : 'red';
 });
 
-const stepValidation = computed((): { allowed: boolean; tooltip?: string } => {
-	switch (get(model)) {
-		case SetupPanelType.DisclaimerPanel:
-			return {
-				allowed: false,
-			};
-		case SetupPanelType.AuthorizationPanel:
-			return {
-				allowed: !authStore.isDefaultCredentials,
-			};
-		default:
-			return {
-				allowed: true,
-			};
+function isTabEnabled(tab: SetupPanelType): boolean {
+	const enabled: SetupPanelType[] = [SetupPanelType.DisclaimerPanel];
+
+	if (settingsStore.generalSettings.hasAgreedToDisclaimer) {
+		enabled.push(SetupPanelType.IntroductionPanel);
+		enabled.push(SetupPanelType.AuthorizationPanel);
 	}
-});
+
+	if (enabled.includes(SetupPanelType.AuthorizationPanel) && !authStore.isDefaultCredentials) {
+		enabled.push(SetupPanelType.FolderOverviewPanel);
+	}
+
+	if (enabled.includes(SetupPanelType.FolderOverviewPanel) && folderPathStore.areDefaultFolderPathsValid) {
+		enabled.push(SetupPanelType.PlexAccountsPanel);
+	}
+
+	if (enabled.includes(SetupPanelType.PlexAccountsPanel) && accountStore.getAccounts.length > 0) {
+		enabled.push(SetupPanelType.FinishPanel);
+	}
+
+	return enabled.includes(tab);
+}
 </script>

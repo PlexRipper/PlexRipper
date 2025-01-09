@@ -1,6 +1,7 @@
 import { randDirectoryPath, randProductName } from '@ngneat/falso';
 import { times } from 'lodash-es';
-import { FolderType, PlexMediaType, type FolderPathDTO } from '@dto';
+import type { FileSystemModelDTO, FolderPathDTO } from '@dto';
+import { FileSystemEntityType, FolderType, PlexMediaType } from '@dto';
 import Convert from '@class/Convert';
 import { checkConfig, type MockConfig } from '~/mock-data';
 
@@ -49,7 +50,7 @@ export function generateFolderPaths({
 	}));
 }
 
-export function generateDefaultFolderPaths({ config = {} }: { config?: Partial<MockConfig> }): FolderPathDTO[] {
+export function generateDefaultFolderPaths({ config = {} }: { config?: Partial<MockConfig> } = {}): FolderPathDTO[] {
 	checkConfig(config);
 
 	const defaultFolderPaths: FolderPathDTO[] = [];
@@ -80,6 +81,19 @@ export function generateDefaultFolderPaths({ config = {} }: { config?: Partial<M
 		FolderType.None,
 	];
 
+	const defaultFolderDirectories: string[] = [
+		'/Downloads',
+		'/Movies',
+		'/TvShows',
+		'/Music',
+		'/Photos',
+		'/Other',
+		'/Games',
+		'/',
+		'/',
+		'/',
+	];
+
 	for (let i = 0; i < 10; i++) {
 		defaultFolderPaths.push(
 			generateFolderPath({
@@ -87,10 +101,33 @@ export function generateDefaultFolderPaths({ config = {} }: { config?: Partial<M
 				type: mediaTypes[i],
 				partialData: {
 					folderType: folderTypes[i],
+					isDefault: true,
+					isValid: !config.invalidDefaultFolderPaths,
+					directory: !config.invalidDefaultFolderPaths ? defaultFolderDirectories[i] : '/WRONG-PATH',
 				},
 				config,
 			}),
 		);
 	}
 	return defaultFolderPaths;
+}
+
+export function generateFileSystemModelDTO({
+	path, partialData = {},
+}: {
+	path?: string;
+	partialData?: Partial<FileSystemModelDTO>;
+	config?: Partial<MockConfig>;
+} = {}): FileSystemModelDTO {
+	return {
+		extension: '',
+		hasReadPermission: true,
+		hasWritePermission: true,
+		lastModified: undefined,
+		name: path || '',
+		path: path || '',
+		size: 0,
+		type: FileSystemEntityType.Folder,
+		...partialData,
+	};
 }

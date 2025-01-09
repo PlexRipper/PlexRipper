@@ -1,9 +1,10 @@
 <template>
 	<q-icon
-		class="valid-icon q-ma-sm"
+		:class="[`${kebabCase(valid)}-icon`, 'q-ma-sm']"
 		size="30px"
 		:color="getData.color"
-		:name="getData.icon">
+		:name="getData.icon"
+		:data-cy="cy">
 		<q-tooltip
 			v-if="getData.text"
 			anchor="top middle"
@@ -17,6 +18,7 @@
 
 <script setup lang="ts">
 import { ValidationLevel } from '@enums';
+import { kebabCase } from 'lodash-es';
 
 const props = withDefaults(
 	defineProps<{
@@ -25,12 +27,14 @@ const props = withDefaults(
 		validText?: string;
 		warningText?: string;
 		invalidText?: string;
+		cy?: string;
 	}>(),
 	{
 		text: '',
 		validText: '',
 		warningText: '',
 		invalidText: '',
+		cy: 'valid-icon',
 	},
 );
 

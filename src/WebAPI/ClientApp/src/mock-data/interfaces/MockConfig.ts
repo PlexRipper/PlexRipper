@@ -1,4 +1,5 @@
 import type {
+	FolderPathDTO,
 	PlexAccountDTO,
 	PlexLibraryDTO,
 	PlexMediaType,
@@ -45,9 +46,12 @@ export interface MockConfig {
 	seasonCount: number;
 	episodeCount: number;
 	// endregion
+
 	maxServerConnections: number;
 	folderPathCount: number;
+	invalidDefaultFolderPaths: boolean;
 	override: Partial<{
+		folderPaths: (folderPaths: FolderPathDTO[]) => FolderPathDTO[];
 		plexServer: (plexServers: PlexServerDTO[]) => PlexServerDTO[];
 		plexServerConnections: (plexServerConnections: PlexServerConnectionDTO[]) => PlexServerConnectionDTO[];
 		plexLibraries: (plexLibraries: PlexLibraryDTO[]) => PlexLibraryDTO[];

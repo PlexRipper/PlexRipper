@@ -33,12 +33,14 @@ export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 		seasonCount: 0,
 		episodeCount: 0,
 		folderPathCount: 0,
+		invalidDefaultFolderPaths: false,
 		override: {
 			plexServer: (plexServers) => plexServers,
 			plexServerConnections: (plexServerConnections) => plexServerConnections,
 			plexLibraries: (plexLibraries) => plexLibraries,
 			plexAccounts: (plexAccounts) => plexAccounts,
 			downloadTasks: (downloadTasks) => downloadTasks,
+			folderPaths: (folderPaths) => folderPaths,
 			settings: (settings) => settings,
 		},
 	};

@@ -4,10 +4,9 @@ import { generatePlexServers, generateResultDTO } from '@mock';
 import { PlexServerPaths } from '@api-urls';
 
 export function setupMockPlexServersEndpoints(this: BasePageSetupResult, config: MockConfig): BasePageSetupResult {
+	this.plexServers = generatePlexServers({ config });
 	if (config.override.plexServer) {
 		this.plexServers = config.override.plexServer(generatePlexServers({ config }));
-	} else {
-		this.plexServers = generatePlexServers({ config });
 	}
 
 	cy.intercept('GET', PlexServerPaths.getAllPlexServersEndpoint(), {

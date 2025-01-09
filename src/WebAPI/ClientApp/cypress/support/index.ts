@@ -37,6 +37,8 @@ declare global {
 			interceptAuthenticationStatus(loggedIn: boolean, pageLoadDelay?: number): Chainable;
 
 			createPlexAccount(account: PlexAccountDTO | null): Chainable;
+
+			correctDefaultFolderPaths(): Chainable;
 		}
 	}
 }

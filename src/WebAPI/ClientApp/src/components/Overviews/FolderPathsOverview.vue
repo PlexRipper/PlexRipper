@@ -32,13 +32,15 @@
 					:text="toTranslation(folderPath.folderType).text"
 					@update:edit-model="saveDisplayName(folderPath.id, $event)">
 					<!--	Folder Path Display	-->
-					<QRow>
+					<QRow :cy="`default-${kebabCase(folderPath.folderType)}-row`">
 						<QCol cols="7">
 							<q-input
 								:model-value="folderPath.directory"
 								class="folder-path-input"
+								:data-cy="`default-${kebabCase(folderPath.folderType)}-input`"
 								readonly>
 								<IconSquareButton
+									:cy="`default-${kebabCase(folderPath.folderType)}-edit-button`"
 									icon="mdi-folder-open-outline"
 									@click="dialogStore.openDirectoryBrowserDialog(folderPath)" />
 							</q-input>
@@ -48,6 +50,7 @@
 							align-self="center"
 							cols="auto">
 							<ValidIcon
+								:cy="`default-${kebabCase(folderPath.folderType)}-valid-icon`"
 								:invalid-text="$t('general.alerts.invalid-directory')"
 								:valid="folderPath.isValid ? ValidationLevel.Valid : ValidationLevel.Invalid"
 								:valid-text="$t('general.alerts.valid-directory')" />
@@ -81,6 +84,7 @@
 import { type FolderPathDTO, FolderType } from '@dto';
 import type { IHelp, IFolderPathGroup } from '@interfaces';
 import { ValidationLevel } from '@enums';
+import { kebabCase } from 'lodash-es';
 import { showErrorNotification, useDialogStore, useFolderPathStore, useI18n, useSubscription } from '#imports';
 
 const { t } = useI18n();

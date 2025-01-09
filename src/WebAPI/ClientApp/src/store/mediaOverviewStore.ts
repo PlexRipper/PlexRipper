@@ -132,17 +132,15 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			// Create scroll indexes for each letter
 			state.scrollDict = {};
 			state.scrollDict['#'] = 0;
-			if (get(getters.getMediaItems).length === 0) {
-				// Check for occurrence of title with alphabetic character
-				const sortTitles = get(getters.getMediaItems).map((x) => x.title[0]?.toLowerCase() ?? '#');
-				let lastIndex = 0;
-				const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase();
+			// Check for occurrence of title with alphabetic character
+			const sortTitles = get(getters.getMediaItems).map((x) => x.title[0]?.toLowerCase() ?? '#');
+			let lastIndex = 0;
+			const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase();
 
-				for (const letter of alphabet) {
-					lastIndex = sortTitles.findIndex((x, idx) => idx >= lastIndex && x === letter);
-					if (lastIndex > -1) {
-						state.scrollDict[letter] = lastIndex;
-					}
+			for (const letter of alphabet) {
+				lastIndex = sortTitles.findIndex((x, idx) => idx >= lastIndex && x === letter);
+				if (lastIndex > -1) {
+					state.scrollDict[letter] = lastIndex;
 				}
 			}
 			state.scrollAlphabet = Object.keys(state.scrollDict);

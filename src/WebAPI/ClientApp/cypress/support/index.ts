@@ -1,7 +1,7 @@
 import type { IBasePageSetupResult } from '@fixtures';
 import type { MockConfig } from '@mock';
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { type PlexServerConnectionDTO, type PlexServerDTO, JobStatus, JobTypes } from '@dto';
+import { type PlexServerConnectionDTO, type PlexServerDTO, JobStatus, JobTypes, type PlexAccountDTO } from '@dto';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 declare global {
@@ -35,6 +35,8 @@ declare global {
 			hubPublishInspectPlexServerJob(status: JobStatus, plexServerIds: number[]): Chainable;
 
 			interceptAuthenticationStatus(loggedIn: boolean, pageLoadDelay?: number): Chainable;
+
+			createPlexAccount(account: PlexAccountDTO | null): Chainable;
 		}
 	}
 }

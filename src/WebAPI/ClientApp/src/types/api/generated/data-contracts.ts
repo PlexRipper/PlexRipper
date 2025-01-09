@@ -298,6 +298,7 @@ export interface GeneralSettingsDTO {
   activeAccountId: number;
   disableAnimatedBackground: boolean;
   firstTimeSetup: boolean;
+  hasAgreedToDisclaimer: boolean;
   hasBeenInvitedToDiscord: boolean;
   hideMediaFromOfflineServers: boolean;
   hideMediaFromOwnedServers: boolean;

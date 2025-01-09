@@ -20,6 +20,7 @@ export const useSettingsStore = defineStore('SettingsStore', () => {
 			hideMediaFromOwnedServers: false,
 			useLowQualityPosterImages: false,
 			hasBeenInvitedToDiscord: false,
+			hasAgreedToDisclaimer: false,
 		},
 		debugSettings: { debugModeEnabled: false, maskLibraryNames: false, maskServerNames: false },
 		confirmationSettings: {

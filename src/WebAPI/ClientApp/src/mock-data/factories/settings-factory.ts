@@ -1,10 +1,13 @@
 import { checkConfig, type MockConfig } from '@mock';
-import { PlexMediaType, type PlexServerDTO, type SettingsModelDTO, ViewMode } from '@dto';
+import type { PlexServerDTO, SettingsModelDTO } from '@dto';
+import { PlexMediaType, ViewMode } from '@dto';
 
 export function generateSettingsModel({
 	plexServers = [],
 	config = {},
+	partialData = {},
 }: {
+	partialData?: Partial<SettingsModelDTO>;
 	plexServers?: PlexServerDTO[];
 	config?: Partial<MockConfig>;
 }): SettingsModelDTO {
@@ -41,6 +44,8 @@ export function generateSettingsModel({
 			hideMediaFromOfflineServers: false,
 			hideMediaFromOwnedServers: false,
 			useLowQualityPosterImages: false,
+			hasAgreedToDisclaimer: false,
+			hasBeenInvitedToDiscord: false,
 		},
 		confirmationSettings: {
 			askDownloadEpisodeConfirmation: true,
@@ -57,5 +62,6 @@ export function generateSettingsModel({
 				};
 			}),
 		},
+		...partialData,
 	};
 }

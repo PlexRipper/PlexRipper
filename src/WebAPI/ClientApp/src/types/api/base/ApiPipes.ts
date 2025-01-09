@@ -3,6 +3,7 @@ import { map, take } from 'rxjs/operators';
 import type { AxiosResponse } from 'axios';
 import type { ResultDTO } from '@interfaces';
 import { catchError, of } from 'rxjs';
+import type { ErrorDTO } from '@dto';
 
 export function apiCheckPipe<T>(source$: Observable<AxiosResponse<T>>): Observable<ResultDTO<T>> {
 	return source$.pipe(
@@ -13,7 +14,22 @@ export function apiCheckPipe<T>(source$: Observable<AxiosResponse<T>>): Observab
 	);
 }
 
-function toResultDTO<T>(res: AxiosResponse): ResultDTO<T> {
+function toResultDTO<T>(res?: AxiosResponse): ResultDTO<T> {
+	if (!res) {
+		const error: ErrorDTO = {
+			message: 'Internal Server Error',
+			reasons: [],
+			metadata: {},
+		};
+		return {
+			isSuccess: false,
+			isFailed: true,
+			errors: [error],
+			reasons: [error],
+			successes: [],
+			statusCode: 999,
+		};
+	}
 	const result = res.data as ResultDTO<T>;
 	return {
 		isSuccess: result.isSuccess,

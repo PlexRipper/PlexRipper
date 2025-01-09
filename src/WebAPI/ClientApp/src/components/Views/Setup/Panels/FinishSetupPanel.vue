@@ -6,7 +6,9 @@
 			:header="$t('pages.setup.finished.title')"
 			align="center">
 			<p>{{ $t('pages.setup.finished.text.p-1') }}</p>
-			<QLinkList :list="list" />
+			<QLinkList
+				:list="list"
+				cy="finish-setup-links" />
 		</QSection>
 	</q-tab-panel>
 </template>

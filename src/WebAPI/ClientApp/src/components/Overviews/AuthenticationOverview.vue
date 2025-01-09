@@ -61,6 +61,7 @@
 		<ValidationButton
 			class="q-pa-md"
 			block
+			cy="save-credentials-button"
 			default-icon="mdi-content-save"
 			:is-validated="isValid"
 			:loading="loading"

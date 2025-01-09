@@ -2,6 +2,7 @@
 	<BaseButton
 		class="validation-button"
 		:loading="loading"
+		:cy="cy"
 		:color="validationStyle.color"
 		:icon="validationStyle.icon"
 		:label="validationStyle.text" />
@@ -18,11 +19,13 @@ const props = withDefaults(defineProps<{
 	isValidated: boolean;
 	triggerOnce?: boolean;
 	defaultIcon?: string;
+	cy?: string;
 }>(), {
 	watchOnce: false,
 	loading: false,
 	isValidated: false,
 	defaultIcon: 'mdi-text-box-search-outline',
+	cy: 'validation-button',
 });
 
 const isExecuted = ref(false);

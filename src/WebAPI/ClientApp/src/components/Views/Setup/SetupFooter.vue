@@ -54,10 +54,6 @@
 			<QCol
 				class="q-mx-md"
 				cols="auto">
-				<NavigationSkipSetupButton
-					v-if="isSkipVisible"
-					:disabled="isNextDisabled"
-					@click="dialogStore.openDialog(DialogType.SetupSkipConfirmationDialog)" />
 				<!--	Finish button	-->
 				<NavigationFinishSetupButton
 					v-if="isFinishButtonVisible"
@@ -76,10 +72,8 @@
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
 import { DialogType, SetupPanelType } from '@enums';
-import { useDialogStore } from '@store';
 import { useFolderPathStore } from '#imports';
 
-const dialogStore = useDialogStore();
 const authStore = useAuthenticationStore();
 const folderPathStore = useFolderPathStore();
 const accountStore = useAccountStore();
@@ -129,10 +123,6 @@ const isBackDisabled = computed(() => {
 
 const isNextDisabled = computed(() => {
 	return get(model) === props.maxPages;
-});
-
-const isSkipVisible = computed(() => {
-	return !get(isNextDisabled) && get(model) !== 1;
 });
 
 const isFinishButtonVisible = computed(() => {

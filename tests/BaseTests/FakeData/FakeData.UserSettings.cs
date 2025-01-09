@@ -1,4 +1,5 @@
-﻿using Bogus;
+﻿using System.Net;
+using Bogus;
 using Settings.Contracts;
 
 namespace PlexRipper.BaseTests;
@@ -23,6 +24,7 @@ public static partial class FakeData
         return new Faker<UserSettings>()
             .StrictMode(true)
             .UseSeed(seed.Next())
+            .RuleFor(x => x.AuthenticationSettings, _ => GetAuthenticationSettings(seed).Generate())
             .RuleFor(x => x.GeneralSettings, _ => GetGeneralSettings(seed, options).Generate())
             .RuleFor(x => x.ConfirmationSettings, _ => GetConfirmationSettings(seed, options).Generate())
             .RuleFor(x => x.DateTimeSettings, _ => GetDateTimeSettings(seed, options).Generate())
@@ -33,12 +35,21 @@ public static partial class FakeData
             .RuleFor(x => x.ServerSettings, _ => GetServerSettings(seed, options).Generate());
     }
 
+    public static Faker<AuthenticationModule> GetAuthenticationSettings(Seed seed)
+    {
+        return new Faker<AuthenticationModule>()
+            .StrictMode(true)
+            .UseSeed(seed.Next())
+            .RuleFor(x => x.ResetCredentials, _ => false);
+    }
+
     public static Faker<GeneralSettingsModule> GetGeneralSettings(Seed seed, Action<UnitTestDataConfig>? options = null)
     {
         return new Faker<GeneralSettingsModule>()
             .StrictMode(true)
             .UseSeed(seed.Next())
             .RuleFor(x => x.FirstTimeSetup, f => f.Random.Bool())
+            .RuleFor(x => x.HasAgreedToDisclaimer, f => f.Random.Bool())
             .RuleFor(x => x.DisableAnimatedBackground, f => f.Random.Bool())
             .RuleFor(x => x.HideMediaFromOwnedServers, f => f.Random.Bool())
             .RuleFor(x => x.HideMediaFromOfflineServers, f => f.Random.Bool())

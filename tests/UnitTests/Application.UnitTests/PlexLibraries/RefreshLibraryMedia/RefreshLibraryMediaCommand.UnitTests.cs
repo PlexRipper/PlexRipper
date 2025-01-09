@@ -87,6 +87,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
             {
                 var season = rawSeasonData[seasonIndex];
                 season.ParentKey = tvShow.Key;
+                season.ParentGuid = tvShow.Guid;
                 seasonIndex++;
 
                 // Assign 10 episodes to each season
@@ -94,6 +95,7 @@ public class RefreshLibraryMediaCommand_UnitTests : BaseUnitTest<RefreshLibraryM
                 {
                     var episode = rawEpisodesData[episodeIndex];
                     episode.ParentKey = season.Key;
+                    episode.ParentGuid = season.Guid;
                     episodeIndex++;
                 }
             }

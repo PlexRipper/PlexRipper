@@ -21,4 +21,18 @@ public static class StringToPlexMediaTypeConverter
             _ => PlexMediaType.Unknown,
         };
     }
+
+    public static string ToPlexApiString(this PlexMediaType source)
+    {
+        return source switch
+        {
+            PlexMediaType.Movie => "movie",
+            PlexMediaType.TvShow => "show",
+            PlexMediaType.Music => "artist",
+            PlexMediaType.Season => "season",
+            PlexMediaType.Episode => "episode",
+            PlexMediaType.Album => "album",
+            _ => "unknown",
+        };
+    }
 }

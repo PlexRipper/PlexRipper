@@ -100,6 +100,7 @@ public static class SettingsModelToDTOMapper
             HideMediaFromOwnedServers = module.HideMediaFromOwnedServers,
             UseLowQualityPosterImages = module.UseLowQualityPosterImages,
             HasBeenInvitedToDiscord = module.HasBeenInvitedToDiscord,
+            HasAgreedToDisclaimer = module.HasAgreedToDisclaimer,
         };
 
     public static ConfirmationSettingsDTO ToDTO(this ConfirmationSettingsModule module) =>

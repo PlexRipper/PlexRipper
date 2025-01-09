@@ -13,4 +13,6 @@ public interface IGeneralSettings
     bool HideMediaFromOwnedServers { get; set; }
 
     bool UseLowQualityPosterImages { get; set; }
+
+    bool HasAgreedToDisclaimer { get; set; }
 }

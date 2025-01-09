@@ -65,12 +65,13 @@
 <script lang="ts" setup>
 import Log from 'consola';
 import { SetupPanelType } from '@enums';
+import { switchMap, tap } from 'rxjs/operators';
 import { useSettingsStore, useRouter, useI18n } from '#imports';
 
 const { t } = useI18n();
 const router = useRouter();
 const settingsStore = useSettingsStore();
-
+const globalStore = useGlobalStore();
 const stepIndex = ref(1);
 
 const headers = ref([
@@ -88,13 +89,10 @@ function finishSetup() {
 		},
 	});
 
-	useSubscription(settingsStore.saveSettings().subscribe(() => {
-		Log.info('Setup process is finished or skipped, redirecting to home page now and refreshing the page');
-		router.push('/').then(() => {
-			// Refresh the page when we go to the home page to make sure we get all new data.
-			location.reload();
-		});
-	}));
+	useSubscription(settingsStore.saveSettings().pipe(switchMap(() => globalStore.setup()), tap(() => {
+		Log.info('Setup process is finished, redirecting to home page now and refreshing data');
+		router.push('/');
+	})).subscribe());
 }
 </script>
 

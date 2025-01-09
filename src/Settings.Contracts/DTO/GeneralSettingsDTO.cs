@@ -14,5 +14,7 @@ public class GeneralSettingsDTO : IGeneralSettings
 
     public required bool UseLowQualityPosterImages { get; set; }
 
+    public required bool HasAgreedToDisclaimer { get; set; }
+
     public required bool HasBeenInvitedToDiscord { get; set; }
 }

@@ -40,24 +40,20 @@ const backgroundOverlay = computed(() => {
 });
 
 function toggleAnimatedBackground(state: boolean) {
-	if (state) {
-		setupBackgroundEffect();
-	} else {
-		destroyBackgroundEffect();
-	}
+	return state ? setupBackgroundEffect() : destroyBackgroundEffect();
 }
 
-onMounted(() => {
-	toggleAnimatedBackground(!settingsStore.generalSettings.disableAnimatedBackground);
-});
+onMounted(() =>
+	toggleAnimatedBackground(!settingsStore.generalSettings.disableAnimatedBackground),
+);
 </script>
 
 <style lang="scss">
 .background-overlay {
-	position: fixed;
-	width: 100%;
-	height: 100%;
-	top: 0;
-	z-index: -1;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  z-index: -1;
 }
 </style>

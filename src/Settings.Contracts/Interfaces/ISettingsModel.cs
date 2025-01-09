@@ -2,6 +2,8 @@ namespace Settings.Contracts;
 
 public interface ISettingsModel
 {
+    AuthenticationModule AuthenticationSettings { get; init; }
+
     GeneralSettingsModule GeneralSettings { get; init; }
 
     ConfirmationSettingsModule ConfirmationSettings { get; init; }

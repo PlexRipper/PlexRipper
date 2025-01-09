@@ -7,54 +7,49 @@
 </template>
 
 <script setup lang="ts">
+import type { ColLevels } from '@props';
+
 interface IBreakPoints {
-	xs?: string | number | boolean;
-	sm?: string | number | boolean;
-	md?: string | number | boolean;
-	lg?: string | number | boolean;
-	xl?: string | number | boolean;
+	xs?: ColLevels;
+	sm?: ColLevels;
+	md?: ColLevels;
+	lg?: ColLevels;
+	xl?: ColLevels;
 }
 
 interface IOffset {
-	offsetXs?: string | number | boolean;
-	offsetSm?: string | number | boolean;
-	offsetMd?: string | number | boolean;
-	offsetLg?: string | number | boolean;
-	offsetXl?: string | number | boolean;
+	offsetXs?: ColLevels;
+	offsetSm?: ColLevels;
+	offsetMd?: ColLevels;
+	offsetLg?: ColLevels;
+	offsetXl?: ColLevels;
 }
 
 interface QColProps extends IBreakPoints, IOffset {
-	cols?: 'auto' | 'grow' | 'shrink' | string | number | boolean;
-	offset?: string | number | boolean;
+	cols?: ColLevels | 'auto' | 'grow' | 'shrink';
+	offset?: ColLevels;
 	width?: number;
 	textAlign?: 'left' | 'center' | 'right' | 'justify';
 	alignSelf?: 'auto' | 'start' | 'end' | 'center' | 'baseline' | 'stretch' | 'none';
 }
 
-const breakPoints: IBreakPoints = {
-	xs: false,
-	sm: false,
-	md: false,
-	lg: false,
-	xl: false,
-};
-
+// Provide default values for props using `withDefaults`
 const props = withDefaults(defineProps<QColProps>(), {
-	cols: 0,
-	offset: false,
+	offset: 0,
 	alignSelf: 'none',
-	width: 0,
-	xs: false,
-	sm: false,
-	md: false,
-	lg: false,
-	xl: false,
 	textAlign: 'left',
-	offsetXs: false,
-	offsetSm: false,
-	offsetMd: false,
-	offsetLg: false,
-	offsetXl: false,
+	width: 0,
+	cols: 0 as ColLevels,
+	xs: 0,
+	sm: 0,
+	md: 0,
+	lg: 0,
+	xl: 0,
+	offsetXs: 0,
+	offsetSm: 0,
+	offsetMd: 0,
+	offsetLg: 0,
+	offsetXl: 0,
 });
 
 const classes = computed(() => {
@@ -66,40 +61,33 @@ const classes = computed(() => {
 		classList.push('col');
 	}
 
+	// Align-self classes
 	if (props.alignSelf && props.alignSelf !== 'none') {
 		classList.push(`self-${props.alignSelf}`);
 	}
 
-	for (const key in breakPoints) {
-		if (props[key]) {
-			classList.push(`col-${key}-${props[key]}`);
+	// Breakpoints and offsets
+	const breakPoints = ['xs', 'sm', 'md', 'lg', 'xl'] as const;
+	breakPoints.forEach((breakPoint) => {
+		const value = props[breakPoint];
+		if (value) {
+			classList.push(`col-${breakPoint}-${value}`);
 		}
-	}
 
+		const offsetValue = props[`offset${breakPoint.charAt(0).toUpperCase() + breakPoint.slice(1)}` as keyof IOffset];
+		if (offsetValue) {
+			classList.push(`offset-${breakPoint}-${offsetValue}`);
+		}
+	});
+
+	// General offset class
 	if (props.offset) {
 		classList.push(`offset-${props.offset}`);
 	}
 
-	switch (props.textAlign) {
-		case 'left':
-			classList.push('text-left');
-			break;
-		case 'center':
-			classList.push('text-center');
-			break;
-		case 'right':
-			classList.push('text-right');
-			break;
-		case 'justify':
-			classList.push('text-justify');
-			break;
-	}
-
-	for (const key in breakPoints) {
-		const offsetKey = `offset${key.charAt(0).toUpperCase()}${key.slice(1)}` as keyof IOffset;
-		if (props[offsetKey]) {
-			classList.push(`offset-${key}-${props[offsetKey]}`);
-		}
+	// Text alignment classes
+	if (props.textAlign) {
+		classList.push(`text-${props.textAlign}`);
 	}
 
 	return classList;

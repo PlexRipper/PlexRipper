@@ -244,7 +244,12 @@
         },
         "account-form": {
             "credentials-tab": "Benutzername und Passwort",
-            "token-tab": "Authentifizierungstoken"
+            "token-tab": "Authentifizierungstoken",
+            "validation": {
+                "display-name-length": "Der Anzeigename muss mindestens {count} Zeichen lang sein",
+                "display-name-required": "Anzeigename ist erforderlich",
+                "username-is-required": "Benutzername ist erforderlich"
+            }
         },
         "media-overview-bar": {
             "all-media-mode": {
@@ -254,10 +259,6 @@
         },
         "media-options-dialog": {
             "title": "Medienübersicht Optionen"
-        },
-        "first-time-setup-dialog": {
-            "setup-question": "Es sieht so aus, als ob Sie PlexRipper zum ersten Mal verwenden. Möchten Sie den Einrichtungsvorgang starten?",
-            "header": "Benötigen Sie Hilfe beim Einrichten von PlexRipper?"
         },
         "background-activity-toggle-button": {
             "checking-plex-server-connections": "Überprüfen der Plex-Serververbindungen",
@@ -282,6 +283,32 @@
             "completed": "Alle Medien wurden synchronisiert!",
             "checking-progress": "Synchronisiere {count} von {total} Plex-Bibliothek",
             "fetching-servers": "Abrufen zugänglicher Server zum Synchronisieren von Medien"
+        },
+        "authentication-overview": {
+            "validation": {
+                "username-is-required": "Benutzername ist erforderlich",
+                "username-length": "Der Benutzername muss mindestens {count} Zeichen lang sein",
+                "passwords-are-not-equal": "Die Passwörter stimmen nicht überein. Stellen Sie sicher, dass beide identisch sind."
+            }
+        },
+        "password-input-field": {
+            "validation": {
+                "password-is-required": "Passwort wird benötigt",
+                "password-length": "Das Passwort muss mindestens {count} Zeichen lang sein",
+                "password-is-missing-capital-letter": "Es fehlt ein Großbuchstabe!",
+                "password-is-missing-lowercase-letter": "Es fehlt ein Kleinbuchstabe!",
+                "password-is-missing-number": "Es fehlt eine Nummer!",
+                "password-is-missing-special-symbol": "Es fehlt ein Sonderzeichen!"
+            }
+        },
+        "password-strength": {
+            "validation": {
+                "uppercase": "Enthält einen Großbuchstaben",
+                "lowercase": "Enthält einen Kleinbuchstaben",
+                "number": "Enthält eine Zahl",
+                "symbol": "Enthält ein Sonderzeichen",
+                "length": "Länger als {count} Zeichen"
+            }
         }
     },
     "confirmation": {
@@ -296,10 +323,6 @@
         },
         "reset-db": {
             "text": "Das erstellt ein Backup der Datenbank nach \"config/Database Backup/\" und erstellt eine neue. Danach werden Sie auf die Setup-Seite weitergeleitet. Einstellungen werden nicht zurückgesetzt. Diese befinden sich hier:  \"config/PlexRipperSettings.json\"",
-            "title": "Sind Sie sicher?"
-        },
-        "skip-setup": {
-            "text": "Das überspringt das Setup und Sie müssen PlexRipper manuell einrichten.",
             "title": "Sind Sie sicher?"
         },
         "not-found": {
@@ -480,6 +503,21 @@
                     }
                 }
             },
+            "accounts": {
+                "app-username": {
+                    "text": "Geben Sie den Benutzernamen ein, mit dem Sie sich bei PlexRipper anmelden.",
+                    "title": "PlexRipper-Benutzername",
+                    "label": "Nutzername"
+                },
+                "app-confirm-password": {
+                    "label": "Bestätige das Passwort"
+                },
+                "app-password": {
+                    "label": "Passwort",
+                    "text": "Geben Sie das Kennwort ein, mit dem Sie sich sicher bei PlexRipper anmelden.",
+                    "title": "PlexRipper-Passwort"
+                }
+            },
             "paths": {
                 "download-folder": {
                     "label": "Download Pfad",
@@ -602,7 +640,8 @@
         },
         "settings": {
             "accounts": {
-                "header": "Plex Konten"
+                "plex-accounts-header": "Plex Konten",
+                "app-accounts-header": "Authentifizierung"
             },
             "advanced": {
                 "database": {
@@ -641,10 +680,39 @@
                 "header": "Plex Konten",
                 "title": "Füge deine Plex Konten hinzu!"
             },
+            "authorization": {
+                "header": "Genehmigung",
+                "title": "Ändern Sie die Standardanmeldeinformationen!"
+            },
+            "disclaimer": {
+                "header": "Haftungsausschluss",
+                "i-agree-disclaimer-button": "Ich verstehe und stimme voll und ganz zu",
+                "text": {
+                    "heading": "Bitte lesen Sie die folgenden Bedingungen und stimmen Sie ihnen zu, bevor Sie fortfahren:",
+                    "section1": {
+                        "title": "Rechtmäßige und Ethische Nutzung",
+                        "content": "Sie sind dafür verantwortlich, sicherzustellen, dass Ihre Nutzung von PlexRipper allen geltenden Gesetzen, einschließlich des Urheberrechts, sowie den Nutzungsbedingungen aller Plattformen, mit denen Sie interagieren, entspricht. PlexRipper ist ausschließlich für die persönliche Medienverwaltung und Sicherung konzipiert. Es darf nicht für unbefugtes Herunterladen, Urheberrechtsverletzungen oder andere rechtswidrige Aktivitäten verwendet werden."
+                    },
+                    "section2": {
+                        "title": "Eigentum und Berechtigungen",
+                        "content": "Sie müssen über ausdrückliches Eigentum oder die Erlaubnis verfügen, auf die Medieninhalte und Server zuzugreifen, mit denen Sie über PlexRipper interagieren. Unbefugter Zugriff oder die Nutzung von Servern oder Medien Dritter ist strengstens untersagt."
+                    },
+                    "section3": {
+                        "title": "Keine Verbindung",
+                        "content": "PlexRipper ist ein unabhängiges Tool und steht in keiner Verbindung zu, wird nicht unterstützt von oder ist nicht assoziiert mit Plex Inc. oder einer anderen Plattform."
+                    },
+                    "section4": {
+                        "title": "Haftungsbeschränkung",
+                        "content": "Die Entwickler von PlexRipper sind nicht verantwortlich für einen Missbrauch des Tools oder für Folgen, die aus unbefugter oder illegaler Nutzung entstehen."
+                    },
+                    "confirmation": "Durch das Fortfahren bestätigen Sie, dass Sie diese Bedingungen verstehen und akzeptieren und dass Sie PlexRipper verantwortungsbewusst und ethisch verwenden werden."
+                }
+            },
             "finished": {
                 "header": "Abgeschlossen!",
                 "list": {
                     "item-1": "Geben Sie mir einen Stern auf Github!",
+                    "item-5": "Geben Sie der DockerHub-Seite einen Stern!",
                     "item-2": "Nennen Sie verbesserungsvorschläge und melden Sie bitte wenn etwas nicht funktioniert!",
                     "item-3": "Übersetze Sie PlexRipper in Ihre Sprache!",
                     "item-4": "Gucken Sie sich den Code an und geben Sie mir Tips wie man es besser machen kann!"
@@ -654,36 +722,17 @@
                 },
                 "title": "Jetzt kann es mit PlexRipper losgehen!"
             },
-            "future-plans": {
-                "header": "Zukunftspläne",
-                "list": {
-                    "item-1": "Radarr und Sonarr integration",
-                    "item-1-1": "Alle Suchvorgänge können an PlexRipper weitergeleitet werden. PlexRipper durchsucht dann alle verfügbaren Server, lädt dann alle Medien herunter und informiert Radarr/Sonarr wenn der Download fertiggestellt wurde.",
-                    "item-2": "Musik und Foto Download",
-                    "item-3": "Untertitel Downloads",
-                    "item-4": "Telegram Benachrichtigungen",
-                    "item-6": "noch bessere Plex Integration",
-                    "item-6-1": "Lade Sammlungen herunter und füge alle Plex-relevanten informationen automatisch hinzu."
-                },
-                "text": {
-                    "p-1": "geplante Funktionen:",
-                    "p-2": "Vorschläge sind gerne gesehen!"
-                },
-                "title": "Hier ein paar geplante Erweiterungen:"
-            },
             "intro": {
-                "header": "Sie sind Genial!",
+                "header": "Erste Schritte",
                 "list": {
-                    "item-1": "PlexRipper wird derzeit aktiv weiter entwickelt. Deshalb kann es sein, dass der ein oder andere Fehler auftaucht. Bitte geben Sie uns eine Rückmeldung via Github wenn etwas nicht so läuft wie es soll.",
-                    "item-2": "Feedback und wünsche nach Funktionen werden gerne entgegen geommen. Besonders auch beim Code, da ich hier noch mein Wissen erweitern will.",
-                    "item-3": "PlexRipper kann Filme und Serien herunterladen. Andere Medien wie Musik werden noch nicht unterstützt, aber in der Zukunft.",
-                    "item-4": "PlexRipper speichert aktuell und in der Zukunft keine Daten über Ihre aktivitäten. Die einzigen Daten die zu Plex gesendet werden, sind die Login daten um dein Konto anzumelden. Danach findet nur noch Kommunikation zwischen den Plex-Servern statt auf die Sie sowieso Zugriff haben.",
-                    "item-5": "Ein Word der Warnung: Plex und vielleicht die Plex-Server-Besitzer, mögen es vielleicht nicht, dass Sie alle legal erworbenen Medien herunterladen. Deswegen haben wir ein paar sicherheiten eingebaut um Sie davor zu schützen, dass das Plex Konto gesperrt wird. Sei respektvoll mit den Serverkapazitäten der Nutzer und bitte beschweren Sie sich nicht, wenn Sie deswegen gesperrt werden. In der Zukunft möchte ich auch etwas für die Server besitzer tun um sie vor PlexRipper-Benutzern zu schützen. Vorschläge nehme ich gerne via Github entgegen."
+                    "item-1": "PlexRipper hat einen Discord! Mach mit, um Support zu erhalten und über neue Funktionen und Releases zu diskutieren!",
+                    "item-2": "PlexRipper verfügt über eine Website mit häufig gestellten Fragen! Lesen Sie diese unbedingt durch, bevor Sie Hilfe suchen!",
+                    "item-3": "PlexRipper wird derzeit aktiv weiterentwickelt, daher kann es hier und da zu Fehlern kommen. Bitte melden Sie alle Fehler, die Sie finden, auf der Github-Problemseite."
                 },
                 "text": {
                     "p-1": "Hier ein paar weitere Infos:"
                 },
-                "title": "Sie sind Genial, weil Sie PlexRipper ausprobieren!"
+                "title": "Willkommen beim PlexRipper-Setup!"
             },
             "paths": {
                 "header": "Pfade überprüfen",
@@ -711,6 +760,9 @@
                 "header": "Debug-Dialogmodalitäten",
                 "account-dialog-header": "Dialogfeld „Konto“",
                 "connection-dialog-header": "Dialogfeld Verbindung"
+            },
+            "buttons": {
+                "header": "Schaltflächen Debug"
             }
         },
         "empty": {

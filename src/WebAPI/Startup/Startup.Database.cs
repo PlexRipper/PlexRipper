@@ -6,16 +6,12 @@ namespace PlexRipper.WebAPI;
 
 public static partial class Startup
 {
-    public static void ConfigureDatabase(this WebApplication app)
+    public static Result ConfigureDatabase(this WebApplication app)
     {
         var container = app.Services.GetAutofacRoot();
 
         var dbContextManager = container.Resolve<IPlexRipperDbContextManager>();
 
-        var databaseSetupResult = dbContextManager.Setup();
-        if (databaseSetupResult.IsFailed)
-        {
-            throw new Exception(databaseSetupResult.ToString());
-        }
+        return dbContextManager.Setup();
     }
 }

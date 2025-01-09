@@ -1,16 +1,10 @@
 <template>
 	<QPage>
-		<QSection>
-			<template #header>
-				{{ t('pages.settings.accounts.header') }}
-			</template>
+		<QSection :header="$t('pages.settings.accounts.plex-accounts-header')">
 			<AccountOverview />
+		</QSection>
+		<QSection :header="$t('pages.settings.accounts.app-accounts-header')">
+			<AuthenticationOverview />
 		</QSection>
 	</QPage>
 </template>
-
-<script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n();
-</script>

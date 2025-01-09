@@ -3,7 +3,7 @@ import type { PlexServerConnectionDTO } from '@dto';
 
 export function sortPlexServerConnections(connections: PlexServerConnectionDTO[]) {
 	const keysOrder: (keyof PlexServerConnectionDTO)[] = ['local', 'isPlexTvConnection'];
-	return	orderBy(connections, keysOrder, ['asc', 'asc']);
+	return orderBy(connections, keysOrder, ['asc', 'asc']);
 }
 
 export function waitForElement(parentElement: HTMLElement | null, selector: string, intervalMs: number = 100): Promise<HTMLElement | null> {
@@ -22,4 +22,8 @@ export function waitForElement(parentElement: HTMLElement | null, selector: stri
 			}
 		}, intervalMs);
 	});
+}
+
+export function discordInviteLink() {
+	return 'https://discord.com/invite/Qa3BtxN77g';
 }

@@ -5,8 +5,8 @@
 		autofocus
 		autocapitalize="off"
 		spellcheck="false"
-		@validation-success="accountDialogStore.isInputValid = true"
-		@validation-error="accountDialogStore.isInputValid = false">
+		@validation-success="setValidationState(true)"
+		@validation-error="setValidationState(false)">
 		<HelpGroup>
 			<!-- Is account enabled -->
 			<HelpRow
@@ -91,6 +91,7 @@
 						:text="$t('help.account-form.password.text')">
 						<PasswordInputField
 							v-model="accountDialogStore.password"
+							disable-validation
 							class="q-my-md"
 							cy="account-form-password-input" />
 					</HelpRow>
@@ -120,21 +121,31 @@
 <script setup lang="ts">
 import { useAccountDialogStore } from '@store';
 
+const { t } = useI18n();
+
 const tokenTab = 'token';
 const credentialsTab = 'credentials';
 
 const tab = computed({
 	get: () => accountDialogStore.isAuthTokenMode ? tokenTab : credentialsTab,
-	set: (value: string) => accountDialogStore.isAuthTokenMode = value === tokenTab,
+	set: (value: string) => accountDialogStore.$patch({ isAuthTokenMode: value === tokenTab }),
 });
 const accountDialogStore = useAccountDialogStore();
 
 const getDisplayNameRules = computed(() => [
-	(v: string): boolean | string => !!v || 'Display name is required',
-	(v: string): boolean | string => (v && v.length >= 4) || 'Display name must be at least 4 characters',
+	(v: string): boolean | string => !!v || t('components.account-form.validation.display-name-required'),
+	(v: string): boolean | string => (v && v.length >= 4) || t('components.account-form.validation.display-name-length', {
+		count: 4,
+	}),
 ]);
 
-const getUsernameRules = computed(() => [(v: string): boolean | string => !!v || 'Username is required']);
+const getUsernameRules = computed(() => [(v: string): boolean | string => !!v || t('components.account-form.validation.username-is-required')]);
+
+function setValidationState(state: boolean) {
+	accountDialogStore.$patch({
+		isInputValid: state,
+	});
+}
 </script>
 
 <style lang="scss">

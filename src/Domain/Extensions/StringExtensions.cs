@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using Environment;
+using PasswordGenerator;
 
 namespace PlexRipper.Domain;
 
@@ -49,18 +50,20 @@ public static partial class StringExtensions
         return Path.Combine(GetProperCapitalization(dirInfo), fileName);
     }
 
-    public static string RandomString(int length, bool allowNumbers = false, bool allowCapitalLetters = false)
-    {
-        var chars = "abcdefghijklmnopqrstuvwxyz";
-
-        if (allowCapitalLetters)
-            chars += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-        if (allowNumbers)
-            chars += "0123456789";
-
-        return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
-    }
+    public static string GeneratePassword(
+        int passwordLength = 16,
+        bool includeLowercase = true,
+        bool includeUppercase = true,
+        bool includeNumeric = true,
+        bool includeSpecial = true
+    ) =>
+        new Password(
+            includeLowercase: includeLowercase,
+            includeUppercase: includeUppercase,
+            includeNumeric: includeNumeric,
+            includeSpecial: includeSpecial,
+            passwordLength: passwordLength
+        ).Next();
 
     public static bool IsIpAddress(this string ipAddress) => IPAddress.TryParse(ipAddress, out var _);
 

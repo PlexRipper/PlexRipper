@@ -7,6 +7,12 @@ namespace Settings.Contracts;
 /// <inheritdoc cref="IUserSettings"/>
 public class UserSettings : IUserSettings
 {
+    public AuthenticationModule AuthenticationSettings
+    {
+        get => _authenticationSettings;
+        init => _authenticationSettings = value;
+    }
+
     public GeneralSettingsModule GeneralSettings
     {
         get => _generalSettings;
@@ -65,6 +71,7 @@ public class UserSettings : IUserSettings
     private LanguageSettingsModule _languageSettings = LanguageSettingsModule.Create();
     private DebugSettingsModule _debugSettings = DebugSettingsModule.Create();
     private PlexServerSettingsModule _serverSettings = PlexServerSettingsModule.Create();
+    private AuthenticationModule _authenticationSettings = AuthenticationModule.Create();
 
     /// <summary>
     /// The <see cref="UserSettings"/> class is a wrapper class for the individual Settings.
@@ -81,7 +88,8 @@ public class UserSettings : IUserSettings
                 GeneralSettings.HasChanged.Select(_ => 1),
                 DebugSettings.HasChanged.Select(_ => 1),
                 LanguageSettings.HasChanged.Select(_ => 1),
-                ServerSettings.HasChanged.Select(_ => 1)
+                ServerSettings.HasChanged.Select(_ => 1),
+                AuthenticationSettings.HasChanged.Select(_ => 1)
             )
             .Throttle(TimeSpan.FromMilliseconds(500))
             .Subscribe(_ => _settingsUpdated.OnNext(this));
@@ -100,6 +108,7 @@ public class UserSettings : IUserSettings
         _languageSettings = LanguageSettingsModule.Create();
         _debugSettings = DebugSettingsModule.Create();
         _serverSettings = PlexServerSettingsModule.Create();
+        _authenticationSettings = AuthenticationModule.Create();
     }
 
     public UserSettings UpdateSettings(ISettingsModel sourceSettings)
@@ -112,6 +121,7 @@ public class UserSettings : IUserSettings
         _debugSettings.Update(sourceSettings.DebugSettings);
         _languageSettings.Update(sourceSettings.LanguageSettings);
         _serverSettings.Update(sourceSettings.ServerSettings);
+        _authenticationSettings.Update(sourceSettings.AuthenticationSettings);
 
         return this;
     }

@@ -1,4 +1,4 @@
-import { route } from '@fixtures/baseE2E';
+import { route } from '@fixtures';
 import { generateResultDTO } from '@mock';
 import type { SettingsModelDTO } from '@dto';
 import { SettingsPaths } from '@api-urls';

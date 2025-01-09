@@ -14,7 +14,7 @@ export default defineComponent({
 			{
 				...mergeProps(this.$props, {
 					color: 'negative',
-					label: useI18n().t(`general.commands.delete`),
+					label: this.$props.label ? this.$props.label : useI18n().t(`general.commands.delete`),
 					icon: 'mdi-delete',
 				} as IBaseButtonProps),
 			},

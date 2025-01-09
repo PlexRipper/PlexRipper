@@ -282,9 +282,11 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         List<PlexTvShowEpisode> rawEpisodesData
     )
     {
+        var (validSeasons, validEpisodes) = Filter(rawSeasonData, rawEpisodesData, plexLibrary);
+
         // Group seasons and episodes by parent key upfront
-        var seasonsByTvShowKey = rawSeasonData.GroupBy(x => x.ParentKey).ToDictionary(g => g.Key, g => g.ToList());
-        var episodesBySeasonKey = rawEpisodesData.GroupBy(x => x.ParentKey).ToDictionary(g => g.Key, g => g.ToList());
+        var seasonsByTvShowKey = validSeasons.GroupBy(x => x.ParentGuid!).ToDictionary(g => g.Key, g => g.ToList());
+        var episodesBySeasonKey = validEpisodes.GroupBy(x => x.ParentGuid!).ToDictionary(g => g.Key, g => g.ToList());
 
         for (var i = 0; i < rawTvShowData.Count; i++)
         {
@@ -294,13 +296,13 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
             plexTvShow.SortIndex = i + 1;
 
             // Retrieve and assign seasons for this TV show
-            if (seasonsByTvShowKey.TryGetValue(plexTvShow.Key, out var seasons))
+            if (seasonsByTvShowKey.TryGetValue(plexTvShow.Guid, out var seasons))
             {
                 plexTvShow.Seasons = seasons;
                 plexTvShow.ChildCount = seasons.Count;
 
                 // Remove seasons that have been assigned
-                seasonsByTvShowKey.Remove(plexTvShow.Key);
+                seasonsByTvShowKey.Remove(plexTvShow.Guid);
             }
 
             for (var seasonIndex = 0; seasonIndex < plexTvShow.Seasons.Count; seasonIndex++)
@@ -312,7 +314,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 plexTvShowSeason.TvShow = plexTvShow;
 
                 // Retrieve and assign episodes for this season
-                if (!episodesBySeasonKey.TryGetValue(plexTvShowSeason.Key, out var episodes))
+                if (!episodesBySeasonKey.TryGetValue(plexTvShowSeason.Guid, out var episodes))
                     continue;
 
                 // Set library ID in each episode
@@ -330,7 +332,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 plexTvShowSeason.ChildCount = episodes.Count;
 
                 // Remove episodes that have been assigned
-                episodesBySeasonKey.Remove(plexTvShowSeason.Key);
+                episodesBySeasonKey.Remove(plexTvShowSeason.Guid);
 
                 // Set the season's year based on the first episode's year
                 if (plexTvShowSeason.Year == 0 && episodes.Any())
@@ -346,5 +348,63 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         }
 
         return rawTvShowData;
+    }
+
+    private (List<PlexTvShowSeason> validSeasons, List<PlexTvShowEpisode> validEpisodes) Filter(
+        List<PlexTvShowSeason> rawSeasonData,
+        List<PlexTvShowEpisode> rawEpisodesData,
+        PlexLibrary library
+    )
+    {
+        var validSeasons = new List<PlexTvShowSeason>();
+        var inValidSeasons = new List<PlexTvShowSeason>();
+
+        var validEpisodes = new List<PlexTvShowEpisode>();
+        var inValidEpisodes = new List<PlexTvShowEpisode>();
+
+        foreach (var plexTvShowSeason in rawSeasonData)
+        {
+            if (plexTvShowSeason.ParentGuid != null)
+            {
+                validSeasons.Add(plexTvShowSeason);
+                continue;
+            }
+
+            inValidSeasons.Add(plexTvShowSeason);
+        }
+
+        foreach (var episode in rawEpisodesData)
+        {
+            if (episode.ParentGuid != null)
+            {
+                validEpisodes.Add(episode);
+                continue;
+            }
+
+            inValidEpisodes.Add(episode);
+        }
+
+        // Log invalid seasons and episodes
+        if (inValidSeasons.Any())
+        {
+            _log.Warning(
+                "Found {Count} invalid seasons which are missing a ParentGUID in library {PlexLibraryName} with id: {PlexLibraryId}",
+                inValidSeasons.Count,
+                library.Title,
+                library.Id
+            );
+        }
+
+        if (inValidEpisodes.Any())
+        {
+            _log.Warning(
+                "Found {Count} invalid episodes which are missing a ParentGUID in library {PlexLibraryName} with id: {PlexLibraryId}",
+                inValidEpisodes.Count,
+                library.Title,
+                library.Id
+            );
+        }
+
+        return (validSeasons, validEpisodes);
     }
 }

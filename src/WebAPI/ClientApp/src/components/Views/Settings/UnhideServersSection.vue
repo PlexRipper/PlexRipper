@@ -1,10 +1,8 @@
 <template>
-	<QSection>
-		<template #header>
-			{{ t('pages.settings.ui.un-hide-servers-section.header') }}
-		</template>
-
-		<q-list bordered>
+	<QSection :header="$t('pages.settings.ui.un-hide-servers-section.header')">
+		<q-list
+			v-if="serverStore.getHiddenServers.length"
+			bordered>
 			<q-item
 				v-for="server in serverStore.getHiddenServers"
 				:key="server.id"
@@ -27,7 +25,6 @@
 <script setup lang="ts">
 import { tap } from 'rxjs/operators';
 
-const { t } = useI18n();
 const serverStore = useServerStore();
 
 function onServerUnHide(plexServerId: number): void {

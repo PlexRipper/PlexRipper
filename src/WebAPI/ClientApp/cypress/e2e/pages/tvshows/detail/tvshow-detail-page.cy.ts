@@ -1,4 +1,4 @@
-import { route } from '@fixtures/baseE2E';
+import { route } from '@fixtures';
 import { PlexMediaType } from '@dto';
 
 describe('TV-Show Detail Page', () => {

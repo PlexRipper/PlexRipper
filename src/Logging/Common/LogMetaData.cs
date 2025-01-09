@@ -6,8 +6,6 @@ namespace Logging.Common;
 
 public record LogMetaData
 {
-    #region Constructors
-
     public LogMetaData(string className, string memberName, int lineNumber)
     {
         ClassName = className;
@@ -23,10 +21,6 @@ public record LogMetaData
         LineNumber = lineNumber;
     }
 
-    #endregion
-
-    #region Properties
-
     private ILogger _logger { get; } = null!;
 
     public string ClassName { get; init; }
@@ -38,12 +32,6 @@ public record LogMetaData
     public LogEventLevel LogLevel { get; set; }
     public Exception? Exception { get; set; }
 
-    #endregion
-
-    #region Methods
-
-    #region Public
-
     public LogMetaData Update(LogEventLevel logLevel, string messageTemplate, params object?[]? propertyValues)
     {
         LogLevel = logLevel;
@@ -52,21 +40,12 @@ public record LogMetaData
         return this;
     }
 
-    public void Write()
-    {
-        _logger.Write(ToEvent());
-    }
+    public void Write() => _logger.Write(ToEvent());
 
-    public string ToLogString()
-    {
-        using var writer = new StringWriter();
-        LogConfig.TemplateTextFormatter.Format(ToEvent(), writer);
-        return writer.ToString();
-    }
-
-    #endregion
-
-    #region Private
+    /// <summary>
+    /// Returns a rendered string of the message template with bound properties.
+    /// </summary>
+    public override string ToString() => ToEvent().RenderMessage();
 
     private LogEvent ToEvent()
     {
@@ -103,8 +82,4 @@ public record LogMetaData
 
         return new LogEvent(dateTimeOffset, LogLevel, Exception, parsedTemplate, properties);
     }
-
-    #endregion
-
-    #endregion
 }

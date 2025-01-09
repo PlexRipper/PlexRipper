@@ -14,7 +14,7 @@ export default defineComponent({
 			{
 				...mergeProps(this.$props, {
 					block: true,
-					label: useI18n().t(`general.commands.back`),
+					label: this.$props.label ? this.$props.label : useI18n().t(`general.commands.back`),
 					icon: 'mdi-arrow-left',
 				} as IBaseButtonProps),
 			},

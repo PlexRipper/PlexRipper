@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using PlexApi.Contracts;
 
 namespace PlexRipper.BaseTests;
 
@@ -44,7 +45,10 @@ public static partial class FakeData
             .RuleFor(x => x.PlexLibraryId, _ => 0)
             .RuleFor(x => x.PlexLibrary, _ => null)
             .RuleFor(x => x.FullBannerUrl, _ => string.Empty)
-            .RuleFor(x => x.Guid, _ => string.Empty)
+            .RuleFor(
+                x => x.Guid,
+                _ => $"plex://{mediaType.ToPlexApiString()}/${Guid.NewGuid().ToString().Replace("-", "")}"
+            )
             .RuleFor(x => x.Guid_IMDB, f => "imdb://tt" + f.Random.Int(10000, 99999))
             .RuleFor(x => x.Guid_TMDB, f => "tmdb://" + f.Random.Int(10000, 99999))
             .RuleFor(x => x.Guid_TVDB, f => "tvdb://" + f.Random.Int(10000, 99999))
@@ -134,30 +138,26 @@ public static partial class FakeData
             .FinishWith(
                 (_, tvShow) =>
                 {
-                    for (var seasonIndex = 0; seasonIndex < tvShow.Seasons.Count; seasonIndex++)
+                    foreach (var (season, seasonIndex) in tvShow.Seasons.Select((season, index) => (season, index)))
                     {
-                        tvShow.Seasons[seasonIndex].Title = $"{tvShow.Title} {seasonIndex + 1:D2}";
-                        tvShow.Seasons[seasonIndex].ParentKey = tvShow.Key;
-                        tvShow.Seasons[seasonIndex].FullTitle = $"{tvShow.Title}/{tvShow.Seasons[seasonIndex].Title}";
+                        season.Title = $"{tvShow.Title} {seasonIndex + 1:D2}";
+                        season.ParentKey = tvShow.Key;
+                        season.ParentGuid = tvShow.Guid;
+                        season.FullTitle = $"{tvShow.Title}/{season.Title}";
 
-                        for (
-                            var episodeIndex = 0;
-                            episodeIndex < tvShow.Seasons[seasonIndex].Episodes.Count;
-                            episodeIndex++
+                        foreach (
+                            var (episode, episodeIndex) in season.Episodes.Select((episode, index) => (episode, index))
                         )
                         {
-                            var title = tvShow.Seasons[seasonIndex].Episodes[episodeIndex].Title;
-                            tvShow.Seasons[seasonIndex].Episodes[episodeIndex].Title =
-                                $"S{seasonIndex + 1:D2}E{episodeIndex + 1:D2} - {title}";
-                            tvShow.Seasons[seasonIndex].Episodes[episodeIndex].ParentKey = tvShow
-                                .Seasons[seasonIndex]
-                                .Key;
-                            tvShow.Seasons[seasonIndex].Episodes[episodeIndex].FullTitle =
-                                $"{tvShow.Title}/{tvShow.Seasons[seasonIndex].Title}/{tvShow.Seasons[seasonIndex].Episodes[episodeIndex].Title}";
+                            var originalTitle = episode.Title;
+                            episode.Title = $"S{seasonIndex + 1:D2}E{episodeIndex + 1:D2} - {originalTitle}";
+                            episode.ParentKey = season.Key;
+                            episode.ParentGuid = season.Guid;
+                            episode.FullTitle = $"{tvShow.Title}/{season.Title}/{episode.Title}";
                         }
                     }
 
-                    tvShow.MediaSize = tvShow.Seasons.Select(x => x.MediaSize).Sum();
+                    tvShow.MediaSize = tvShow.Seasons.Sum(season => season.MediaSize);
                 }
             );
     }
@@ -174,11 +174,16 @@ public static partial class FakeData
             .RuleFor(x => x.ParentKey, _ => GetUniqueNumber())
             .RuleFor(x => x.TvShowId, _ => 0)
             .RuleFor(x => x.TvShow, _ => null)
+            .RuleFor(x => x.ParentGuid, _ => string.Empty)
             .RuleFor(x => x.Episodes, _ => GetPlexTvShowEpisode(seed, options).Generate(config.TvShowEpisodeCount))
             .FinishWith(
                 (_, tvShowSeason) =>
                 {
                     tvShowSeason.MediaSize = tvShowSeason.Episodes.Select(x => x.MediaSize).Sum();
+                    foreach (var episode in tvShowSeason.Episodes)
+                    {
+                        episode.ParentGuid = tvShowSeason.Guid;
+                    }
                 }
             );
     }
@@ -195,6 +200,7 @@ public static partial class FakeData
             .RuleFor(x => x.TvShow, _ => null)
             .RuleFor(x => x.TvShowSeasonId, _ => 0)
             .RuleFor(x => x.TvShowSeason, _ => null)
+            .RuleFor(x => x.ParentGuid, _ => string.Empty)
             .FinishWith(
                 (_, tvShowEpisode) =>
                 {

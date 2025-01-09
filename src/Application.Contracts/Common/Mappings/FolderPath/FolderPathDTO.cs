@@ -15,4 +15,6 @@ public record FolderPathDTO
     public required string Directory { get; set; }
 
     public required bool IsValid { get; set; }
+
+    public required bool IsDefault { get; set; }
 }

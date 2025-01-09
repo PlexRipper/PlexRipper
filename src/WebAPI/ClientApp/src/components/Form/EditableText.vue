@@ -10,7 +10,7 @@
 						:type="type"
 						:size="size"
 						:bold="bold"
-						:value="displayText !== '' ? displayText : value"
+						:value="displayText !== '' ? displayText : model"
 						:align="align" />
 				</q-item-section>
 				<q-icon
@@ -20,12 +20,12 @@
 			</template>
 			<QPopupEdit
 				v-slot="scope"
-				:model-value="value"
+				:model-value="model"
 				square
 				auto-save
 				@before-show="editMode = true"
 				@before-hide="editMode = false"
-				@save="$emit('save', $event)">
+				@save="model = $event">
 				<q-input
 					v-model="scope.value"
 					dense
@@ -41,10 +41,11 @@
 import type { IQTextProps } from '@interfaces';
 
 const editMode = ref(false);
+const model = defineModel<string>();
 
 const props = withDefaults(
 	defineProps<
-		IQTextProps & {
+		Omit<IQTextProps, 'value'> & {
 			displayText?: string;
 			disabled?: boolean;
 		}
@@ -52,7 +53,6 @@ const props = withDefaults(
 	{
 		disabled: false,
 		displayText: '',
-		value: '',
 		cy: '',
 	},
 );
@@ -61,16 +61,12 @@ const inputClasses = computed(() => ({
 	[`text-${props.size}`]: true,
 	[`text-weight-${props.bold}`]: true,
 }));
-
-defineEmits<{
-	(e: 'save', save: string): void;
-}>();
 </script>
 
 <style lang="scss">
 .q-popup-edit {
-	box-shadow: none !important;
-	background: transparent !important;
-	backdrop-filter: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
 }
 </style>

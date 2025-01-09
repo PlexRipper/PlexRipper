@@ -216,9 +216,11 @@ function expandAll() {
 }
 
 // region EventBus
-watch(selectedCount, () => {
-	mediaOverviewStore.downloadButtonVisible = get(selectedCount) > 0;
-});
+watch(selectedCount, () =>
+	mediaOverviewStore.$patch({
+		downloadButtonVisible: get(selectedCount) > 0,
+	}),
+);
 
 useMediaOverviewBarDownloadCommandBus().on(() => {
 	if (!props.mediaItem) {

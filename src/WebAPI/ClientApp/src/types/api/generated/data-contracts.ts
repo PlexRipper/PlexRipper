@@ -9,6 +9,12 @@
  * ---------------------------------------------------------------
  */
 
+export interface AppCredentialsDTO {
+  isDefaultCredentials: boolean;
+  password: string;
+  userName: string;
+}
+
 /** @example {"username":"PlexRipperRocks","password":"Pl€XR!ℙℙ€R69","rememberMe":false} */
 export interface AppUserLoginEndpointRequest {
   /**
@@ -270,6 +276,7 @@ export interface FolderPathDTO {
   folderType: FolderType;
   /** @format int32 */
   id: number;
+  isDefault: boolean;
   isValid: boolean;
   mediaType: PlexMediaType;
 }
@@ -291,6 +298,7 @@ export interface GeneralSettingsDTO {
   activeAccountId: number;
   disableAnimatedBackground: boolean;
   firstTimeSetup: boolean;
+  hasAgreedToDisclaimer: boolean;
   hasBeenInvitedToDiscord: boolean;
   hideMediaFromOfflineServers: boolean;
   hideMediaFromOwnedServers: boolean;
@@ -689,6 +697,15 @@ export interface ResultDTO {
   successes: SuccessDTO[];
 }
 
+export interface ResultDTOOfAppCredentialsDTO {
+  errors: ErrorDTO[];
+  isFailed: boolean;
+  isSuccess: boolean;
+  reasons: ReasonDTO[];
+  successes: SuccessDTO[];
+  value?: AppCredentialsDTO | null;
+}
+
 export interface ResultDTOOfBoolean {
   errors: ErrorDTO[];
   isFailed: boolean;
@@ -1007,6 +1024,14 @@ export interface SyncServerMediaProgress {
   libraryProgresses: LibraryProgress[];
   /** @format decimal */
   percentage: number;
+}
+
+/** @example {"username":"PlexRipperRocks","password":"Pl€XR!ℙℙ€R69"} */
+export interface UpdateCredentialsEndpointRequest {
+  /** @minLength 8 */
+  password?: string | null;
+  /** @minLength 8 */
+  username?: string | null;
 }
 
 export interface UpdatePlexServerConnectionEndpointRequest {

@@ -21,9 +21,16 @@
 		<template #actions="{ close }">
 			<BaseButton
 				block
+
 				@click="onInviteClick(close)">
-				<DiscordIcon class="q-mr-md" />
-				<QText :value="$t('components.discord-invite-dialog.discord-invite-button-text')" />
+				<QRow justify="center">
+					<QCol cols="auto">
+						<DiscordIcon class="q-mr-md" />
+					</QCol>
+					<QCol cols="auto">
+						<QText :value="$t('components.discord-invite-dialog.discord-invite-button-text')" />
+					</QCol>
+				</QRow>
 			</BaseButton>
 		</template>
 	</QCardDialog>
@@ -31,12 +38,12 @@
 
 <script setup lang="ts">
 import { DialogType } from '@enums';
+import { discordInviteLink } from '@composables';
 
 const settingsStore = useSettingsStore();
 
 function onInviteClick(close: () => void): void {
-	const discordLink = 'https://discord.com/invite/Qa3BtxN77g';
-	window.open(discordLink, '_blank');
+	window.open(discordInviteLink(), '_blank');
 	settingsStore.generalSettings.hasBeenInvitedToDiscord = true;
 	close();
 }

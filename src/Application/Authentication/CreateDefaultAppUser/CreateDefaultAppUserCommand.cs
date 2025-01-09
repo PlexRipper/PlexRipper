@@ -5,6 +5,7 @@ using Logging.Interface;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PlexRipper.Identity.Contracts;
+using Settings.Contracts;
 
 namespace PlexRipper.Application;
 
@@ -21,25 +22,42 @@ public class CreateDefaultAppUserCommandValidator : AbstractValidator<CreateDefa
 public class CreateDefaultAppUserCommandHandler : IRequestHandler<CreateDefaultAppUserCommand, Result>
 {
     private readonly ILog _log;
+    private readonly IAuthenticationSettings _authenticationSettings;
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
 
     public CreateDefaultAppUserCommandHandler(
         ILog log,
+        IAuthenticationSettings authenticationSettings,
         UserManager<AppUser> userManager,
         RoleManager<IdentityRole> roleManager
     )
     {
         _log = log;
+        _authenticationSettings = authenticationSettings;
         _userManager = userManager;
         _roleManager = roleManager;
     }
 
     public async Task<Result> Handle(CreateDefaultAppUserCommand command, CancellationToken cancellationToken)
     {
+        if (_authenticationSettings.ResetCredentials)
+        {
+            _log.Warning(
+                "Setting: {ResetCredentials} has been enabled! Resetting PlexRipper app username and password!",
+                nameof(_authenticationSettings.ResetCredentials)
+            );
+            var toBeDeletedUser = await _userManager.Users.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            if (toBeDeletedUser != null)
+            {
+                _log.InformationLine("PlexRipper app user was found, deleting now and creating the default one.");
+                await _userManager.DeleteAsync(toBeDeletedUser);
+            }
+        }
+
         // Create default roles if they don't exist
         var adminRole = DefaultUserAppCredentials.DefaultAdminRole;
-        var defaultRoles = new[] { adminRole, "User" };
+        var defaultRoles = new[] { adminRole };
         foreach (var role in defaultRoles)
         {
             if (!await _roleManager.RoleExistsAsync(role))
@@ -59,7 +77,8 @@ public class CreateDefaultAppUserCommandHandler : IRequestHandler<CreateDefaultA
             EmailConfirmed = true,
         };
 
-        if (await _userManager.FindByEmailAsync(defaultUser.Email) == null)
+        var user = await _userManager.Users.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        if (user is null)
         {
             var result = await _userManager.CreateAsync(defaultUser, defaultPassword);
             if (result.Succeeded)
@@ -81,6 +100,15 @@ public class CreateDefaultAppUserCommandHandler : IRequestHandler<CreateDefaultA
                     _log.Here().Error(" - {Error}", error.Description);
                 }
             }
+        }
+
+        if (_authenticationSettings.ResetCredentials)
+        {
+            _log.Information(
+                "Setting: {ResetCredentials} back to false!",
+                nameof(_authenticationSettings.ResetCredentials)
+            );
+            _authenticationSettings.ResetCredentials = false;
         }
 
         return Result.Ok();

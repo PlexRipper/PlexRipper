@@ -13,7 +13,7 @@ export default defineComponent({
 			BaseButton,
 			{
 				...mergeProps(this.$props, {
-					label: useI18n().t(`general.commands.finish-setup`),
+					label: this.$props.label ? this.$props.label : useI18n().t(`general.commands.finish-setup`),
 					icon: 'mdi-check-circle-outline',
 					iconAlign: 'right',
 					color: 'positive',

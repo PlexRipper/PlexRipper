@@ -17,7 +17,7 @@ namespace PlexRipper.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("NATURALSORT")
-                .HasAnnotation("ProductVersion", "8.0.10");
+                .HasAnnotation("ProductVersion", "8.0.11");
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
                 {
@@ -1546,6 +1546,9 @@ namespace PlexRipper.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnOrder(16);
 
+                    b.Property<string>("ParentGuid")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("ParentKey")
                         .HasColumnType("INTEGER");
 
@@ -1693,6 +1696,9 @@ namespace PlexRipper.Data.Migrations
                     b.Property<DateTime?>("OriginallyAvailableAt")
                         .HasColumnType("TEXT")
                         .HasColumnOrder(16);
+
+                    b.Property<string>("ParentGuid")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("ParentKey")
                         .HasColumnType("INTEGER");

@@ -1,25 +1,36 @@
 <template>
-	<QRow
-		no-gutters
-		style="width: 100%">
-		<QCol cols="12">
+	<QRow no-gutters>
+		<QCol :cols="12">
 			<!-- Header	-->
-			<QRow
-				v-if="$slots['header']"
-				no-gutters>
-				<QCol>
-					<QText
-						size="h5"
-						class="q-my-sm"
-						align="center"
-						bold="medium">
-						<slot name="header" />
-					</QText>
-					<q-separator />
-				</QCol>
-			</QRow>
+			<QCol
+				v-if="$slots['header'] || header"
+				class="q-mx-md">
+				<QText
+					size="h5"
+					full-width
+					class="q-my-sm q-ml-md"
+					:align="align"
+					bold="medium">
+					<slot name="header">
+						{{ header }}
+					</slot>
+				</QText>
+				<q-separator />
+			</QCol>
 			<!--	Section Content	-->
-			<slot />
+			<QCol class="q-pa-md">
+				<slot />
+			</QCol>
 		</QCol>
 	</QRow>
 </template>
+
+<script setup lang="ts">
+withDefaults(defineProps<{
+	header?: string;
+	align?: 'left' | 'center' | 'right';
+}>(), {
+	header: '',
+	align: 'left',
+});
+</script>

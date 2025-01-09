@@ -6,8 +6,7 @@
 			<q-item-section avatar>
 				<QMediaTypeIcon
 					:media-type="mediaType"
-					:size="36"
-					class="mx-3" />
+					:size="36" />
 			</q-item-section>
 			<q-item-section>
 				<q-item-label v-if="server && library">
@@ -19,9 +18,9 @@
 					{{ mediaTypeToAllText(mediaType) }}
 				</q-item-label>
 				<q-item-label
-					v-if="!mediaOverviewStore.loading"
+					v-if="!mediaOverviewStore.loading && hasMedia"
 					caption>
-					{{ mediaMetaData }}
+					{{ formatted(mediaMetaData) }}
 				</q-item-label>
 			</q-item-section>
 			<q-menu
@@ -84,22 +83,34 @@ const { t } = useI18n();
 
 const mediaMetaData = computed(() => {
 	if (props.mediaDetailItem) {
-		return formatted({
+		return {
 			movieCount: 0,
 			tvShowCount: 1,
 			seasonCount: props.mediaDetailItem.childCount,
 			episodeCount: props.mediaDetailItem.grandChildCount,
 			fileSize: props.mediaDetailItem.mediaSize,
-		});
+		};
 	}
 
-	return formatted({
+	return {
 		movieCount: mediaOverviewStore.allMovieCount,
 		tvShowCount: mediaOverviewStore.allTvShowCount,
 		seasonCount: mediaOverviewStore.allSeasonCount,
 		episodeCount: mediaOverviewStore.allEpisodeCount,
 		fileSize: mediaOverviewStore.allFileSize,
-	});
+	};
+});
+
+const hasMedia = computed(() => {
+	if (props.mediaType === PlexMediaType.Movie) {
+		return mediaMetaData.value.movieCount > 0;
+	}
+
+	if (props.mediaType === PlexMediaType.TvShow) {
+		return mediaMetaData.value.tvShowCount > 0;
+	}
+
+	return false;
 });
 
 function formatted({ movieCount, tvShowCount, seasonCount, episodeCount, fileSize }: {

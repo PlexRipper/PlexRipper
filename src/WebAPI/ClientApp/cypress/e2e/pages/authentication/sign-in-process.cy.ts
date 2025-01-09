@@ -1,4 +1,4 @@
-import { route } from '@fixtures/baseE2E';
+import { route } from '@fixtures';
 import { AuthenticationPaths } from '@api-urls';
 import { generateFailedResultDTO, generateResultDTO } from '@mock';
 import type { AppUserLoginEndpointRequest } from '@dto';

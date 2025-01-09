@@ -1,8 +1,5 @@
 <template>
-	<QSection>
-		<template #header>
-			{{ $t('pages.settings.ui.confirmation-settings.header') }}
-		</template>
+	<QSection :header="$t('pages.settings.ui.confirmation-settings.header')">
 		<HelpGroup class="q-mt-md">
 			<!--	Ask Download Movie Confirmation	-->
 			<HelpRow
@@ -50,7 +47,6 @@
 
 <script setup lang="ts">
 import { useSettingsStore } from '@store';
-import HelpGroup from '@components/Help/HelpGroup.vue';
 
 const settingsStore = useSettingsStore();
 </script>

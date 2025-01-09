@@ -9,6 +9,7 @@ public record GeneralSettingsModule : BaseSettingsModule<GeneralSettingsModule>,
     private bool _hideMediaFromOwnedServers;
     private bool _useLowQualityPosterImages;
     private bool _hasBeenInvitedToDiscord;
+    private bool _hasAgreedToDisclaimer;
 
     public static GeneralSettingsModule Create() =>
         new()
@@ -62,5 +63,11 @@ public record GeneralSettingsModule : BaseSettingsModule<GeneralSettingsModule>,
     {
         get => _hasBeenInvitedToDiscord;
         set => SetProperty(ref _hasBeenInvitedToDiscord, value);
+    }
+
+    public bool HasAgreedToDisclaimer
+    {
+        get => _hasAgreedToDisclaimer;
+        set => SetProperty(ref _hasAgreedToDisclaimer, value);
     }
 }

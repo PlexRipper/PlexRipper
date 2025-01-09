@@ -1,3 +1,4 @@
+import { get } from '@vueuse/core';
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { switchMap, tap, map } from 'rxjs/operators';
 import type { Observable } from 'rxjs';
@@ -92,9 +93,8 @@ export const useFolderPathStore = defineStore('FolderPathStore', () => {
 	// Getters
 	const getters = {
 		getFolderPaths: (): FolderPathDTO[] => state.folderPaths,
-		getFolderPath: (id: number): FolderPathDTO | undefined => {
-			return state.folderPaths.find((x) => x.id === id);
-		},
+		getFolderPath: (id: number): FolderPathDTO | undefined =>
+			state.folderPaths.find((x) => x.id === id),
 		getFolderPathOptions: (type: PlexMediaType): FolderPathDTO[] => {
 			if (type === PlexMediaType.Movie || type === PlexMediaType.TvShow) {
 				return state.folderPaths.filter((x) => x.mediaType === type);
@@ -102,6 +102,10 @@ export const useFolderPathStore = defineStore('FolderPathStore', () => {
 
 			return state.folderPaths;
 		},
+		getDefaultFolderPaths: computed(() => state.folderPaths.filter((x) => x.id === 1 || x.id === 2 || x.id === 3)),
+		areDefaultFolderPathsValid: computed(() =>
+			get(getters.getDefaultFolderPaths).every((x) => x.isValid),
+		),
 		getFolderPathsGroups: (onlyDefaults: boolean) => {
 			const { t } = useI18n();
 			const folderPathGroups: IFolderPathGroup[] = [];
@@ -109,7 +113,7 @@ export const useFolderPathStore = defineStore('FolderPathStore', () => {
 			folderPathGroups.push({
 				header: t('components.folder-paths-overview.main.header'),
 				// The first 3 folderPaths are always the default ones.
-				paths: state.folderPaths.filter((x) => x.id === 1 || x.id === 2 || x.id === 3),
+				paths: get(getters.getDefaultFolderPaths),
 				mediaType: PlexMediaType.None,
 				folderType: FolderType.None,
 				IsFolderDeletable: false,

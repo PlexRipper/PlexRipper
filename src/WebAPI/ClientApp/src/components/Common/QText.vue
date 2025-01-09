@@ -1,15 +1,27 @@
 <template>
-	<div :class="divClasses">
-		<slot name="prepend" />
-		<span
-			:class="spanClasses"
-			:data-cy="cy">
-			<slot name="default">
-				{{ value }}
-			</slot>
-		</span>
-		<slot name="append" />
-	</div>
+	<QRow
+		:class="divClasses"
+		align="center">
+		<QCol
+			v-if="$slots['prepend']"
+			cols="auto">
+			<slot name="prepend" />
+		</QCol>
+		<QCol :text-align="align">
+			<span
+				:class="spanClasses"
+				:data-cy="cy">
+				<slot name="default">
+					{{ value }}
+				</slot>
+			</span>
+		</QCol>
+		<QCol
+			v-if="$slots['append']"
+			cols="auto">
+			<slot name="append" />
+		</QCol>
+	</QRow>
 </template>
 
 <script lang="ts" setup>
@@ -32,10 +44,14 @@ const divClasses = computed(() => ({
 }));
 
 const spanClasses = computed(() => {
+	let bold = props.bold;
+	if (props.bold === '') {
+		bold = 'bold';
+	}
 	return ({
 		'q-text': true,
 		[`text-${props.size}`]: true,
-		[`text-weight-${props.bold}`]: true,
+		[`text-weight-${bold}`]: true,
 		[`full-width`]: props.fullWidth,
 	});
 });

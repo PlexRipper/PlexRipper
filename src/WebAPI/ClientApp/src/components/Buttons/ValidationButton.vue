@@ -1,6 +1,8 @@
 <template>
 	<BaseButton
+		class="validation-button"
 		:loading="loading"
+		:cy="cy"
 		:color="validationStyle.color"
 		:icon="validationStyle.icon"
 		:label="validationStyle.text" />
@@ -12,14 +14,28 @@ import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
 	loading: boolean;
 	isValidated: boolean;
-}>();
+	triggerOnce?: boolean;
+	defaultIcon?: string;
+	cy?: string;
+}>(), {
+	watchOnce: false,
+	loading: false,
+	isValidated: false,
+	defaultIcon: 'mdi-text-box-search-outline',
+	cy: 'validation-button',
+});
 
 const isExecuted = ref(false);
+if (props.triggerOnce) {
+	watchOnce(() => props.loading, () => set(isExecuted, true));
+} else {
+	whenever(() => props.loading, () => set(isExecuted, true));
+}
 
-watchOnce(() => props.loading, () => set(isExecuted, true));
+whenever(() => !props.loading, () => setTimeout(() => set(isExecuted, false), 4000));
 
 const validationStyle = computed((): {
 	color: 'default' | 'positive' | 'warning' | 'negative';
@@ -29,7 +45,7 @@ const validationStyle = computed((): {
 	if (!get(isExecuted) || props.loading) {
 		return {
 			color: 'default',
-			icon: 'mdi-text-box-search-outline',
+			icon: props.defaultIcon,
 			text: t('general.commands.validate'),
 		};
 	}
@@ -51,5 +67,7 @@ const validationStyle = computed((): {
 </script>
 
 <style lang="scss">
-
+.validation-button {
+  transition: all 0.5s;
+}
 </style>

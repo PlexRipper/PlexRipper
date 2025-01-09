@@ -1,7 +1,7 @@
 <template>
 	<HelpGroup v-if="plexServer">
 		<HelpRow
-
+			disable-responsive
 			:label="$t('help.server-dialog.server-config.download-speed-limit.label')"
 			:title="$t('help.server-dialog.server-config.download-speed-limit.title')"
 			:text="$t('help.server-dialog.server-config.download-speed-limit.text')">
@@ -18,7 +18,6 @@
 
 <script setup lang="ts">
 import type { PlexServerDTO } from '@dto';
-import HelpGroup from '@components/Help/HelpGroup.vue';
 
 defineProps<{
 	plexServer: PlexServerDTO | null;

@@ -9,6 +9,11 @@ public class PlexTvShowEpisode : PlexMedia
     /// </summary>
     public int ParentKey { get; set; }
 
+    /// <summary>
+    /// The Guid of the <see cref="PlexTvShowSeason"/> this belongs too.
+    /// </summary>
+    public required string? ParentGuid { get; set; }
+
     #region Relationships
 
     public PlexTvShow? TvShow { get; set; }

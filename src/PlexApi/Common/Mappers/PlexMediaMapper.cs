@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using LukeHagar.PlexAPI.SDK.Models.Requests;
 
 namespace PlexRipper.PlexApi;
@@ -108,7 +109,7 @@ public static class PlexMediaMapper
             Summary = source.Summary,
             ContentRating = source.ContentRating,
             Rating = source.Rating,
-            ParentKey = originalSource.ParentRatingKey != null ? int.Parse(originalSource.ParentRatingKey) : -1,
+            ParentKey = originalSource.GetParentKey(),
             OriginallyAvailableAt = source.OriginallyAvailableAt,
             FullTitle = $"{originalSource.ParentTitle}/{originalSource.Title}",
             PlexLibrary = source.PlexLibrary,
@@ -118,6 +119,7 @@ public static class PlexMediaMapper
             Guid_IMDB = source.Guid_IMDB,
             Guid_TMDB = source.Guid_TMDB,
             Guid_TVDB = source.Guid_TVDB,
+            ParentGuid = originalSource.ParentGuid,
         };
 
     public static PlexTvShowEpisode ToPlexTvShowEpisode(
@@ -154,11 +156,32 @@ public static class PlexMediaMapper
             FullTitle = $"{originalSource.GrandparentTitle}/{originalSource.ParentTitle}/{originalSource.Title}",
             PlexLibrary = source.PlexLibrary,
             PlexServer = source.PlexServer,
-            ParentKey = originalSource.ParentRatingKey != null ? int.Parse(originalSource.ParentRatingKey) : -1,
+            ParentKey = originalSource.GetParentKey(),
             Type = source.Type,
             Guid = source.Guid,
             Guid_IMDB = source.Guid_IMDB,
             Guid_TMDB = source.Guid_TMDB,
             Guid_TVDB = source.Guid_TVDB,
+            ParentGuid = originalSource.ParentGuid,
         };
+
+    /// <summary>
+    /// The PlexAPI is sometimes missing the ParentKey, this method will attempt to get the ParentKey from the ParentGuid.
+    /// </summary>
+    /// <param name="originalSource"> The original source to get the ParentKey from.</param>
+    private static int GetParentKey(this GetLibraryItemsMetadata originalSource)
+    {
+        var parentKey = originalSource.ParentRatingKey != null ? int.Parse(originalSource.ParentRatingKey) : -1;
+        if (parentKey == -1 && originalSource.ParentGuid != null && originalSource.ParentGuid.Contains("local"))
+        {
+            // Replace all non-numeric characters
+            var result = Regex.Replace(originalSource.ParentGuid, "[^0-9]", "");
+            if (!int.TryParse(result, out parentKey))
+            {
+                parentKey = -1;
+            }
+        }
+
+        return parentKey;
+    }
 }

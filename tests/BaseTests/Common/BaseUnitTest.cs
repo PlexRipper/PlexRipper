@@ -62,7 +62,7 @@ public class BaseUnitTest : IDisposable
                 var logEvent = Log.ErrorLine(
                     "The test database has not been setup yet, run SetupDatabase() in the test first!"
                 );
-                throw new Exception(logEvent.ToLogString());
+                throw new Exception(logEvent.ToString());
             }
 
             return MockDatabase.GetMemoryPlexRipperDbContext(_databaseName);
@@ -78,7 +78,7 @@ public class BaseUnitTest : IDisposable
                 var logEvent = Log.ErrorLine(
                     "The test database has not been setup yet, run SetupDatabase() in the test first!"
                 );
-                throw new Exception(logEvent.ToLogString());
+                throw new Exception(logEvent.ToString());
             }
 
             return MockDatabase.GetMemoryAuthDbContext(_databaseName);

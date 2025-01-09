@@ -10,7 +10,6 @@ export enum DialogType {
 	DirectoryBrowserDialog = 'directory-browser-dialog',
 	DiscordServerInviteDialog = 'discord-server-invite-dialog',
 	DownloadDetailsDialog = 'download-details-dialog',
-	FirstTimeSetupDialog = 'first-time-setup-dialog',
 	HelpInfoDialog = 'help-info-dialog',
 	MediaDownloadConfirmationDialog = 'media-download-confirmation-dialog',
 	MediaSelectionDialog = 'media-selection-dialog',
@@ -18,6 +17,5 @@ export enum DialogType {
 	ResetDatabaseConfirmationDialog = 'reset-database-confirmation-dialog',
 	ServerHideConfirmationDialog = 'server-hide-confirmation-dialog',
 	ServerSettingsDialog = 'server-settings-dialog',
-	SetupSkipConfirmationDialog = 'setup-skip-confirmation-dialog',
 	SyncServerMediaDialog = 'sync-server-media-dialog',
 }

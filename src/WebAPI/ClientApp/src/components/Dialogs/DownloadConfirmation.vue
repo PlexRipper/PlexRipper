@@ -126,6 +126,7 @@ const customDirectory = ref<FolderPathDTO>({
 	mediaType: get(mediaType),
 	folderType: FolderType.TvShowFolder,
 	isValid: true,
+	isDefault: false,
 });
 const selectedFolderPath = ref<FolderPathDTO>(get(customDirectory));
 
@@ -137,11 +138,13 @@ function openDialog(data: DownloadMediaDTO[]): void {
 	// This assumes that the data is always 1 category, either movie or tv show
 	if (data.some((x) => x.type === PlexMediaType.Movie)) {
 		set(mediaType, PlexMediaType.Movie);
-	} else if (data.some((x) => x.type === PlexMediaType.TvShow)) {
+	} else if (data.some((x) => x.type === PlexMediaType.TvShow || x.type === PlexMediaType.Season || x.type === PlexMediaType.Episode)) {
 		set(mediaType, PlexMediaType.TvShow);
+	} else {
+		set(mediaType, PlexMediaType.Unknown);
 	}
 
-	set(selectedFolderPath, folderPathDestinations.value[0]);
+	set(selectedFolderPath, get(folderPathDestinations)[0]);
 
 	set(downloadMediaCommand, data);
 	useSubscription(

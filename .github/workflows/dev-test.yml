@@ -9,6 +9,8 @@ on:
             - '.idea/**'
             - '.run/**'
             - '.vscode/**'
+            - 'README.md'
+
 jobs:
     # Front-End-Type-Check:
     Front-End-Type-Check:
@@ -117,7 +119,7 @@ jobs:
             -   name: Set up Docker Buildx
                 uses: docker/setup-buildx-action@v3
 
-            -   name: Build 
+            -   name: Build
                 uses: docker/build-push-action@v6
                 env:
                     VERSION: 0.0.0

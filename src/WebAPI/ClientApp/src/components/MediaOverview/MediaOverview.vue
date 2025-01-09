@@ -44,9 +44,7 @@
 				</template>
 				<template v-else>
 					<!--	Data table display	-->
-					<QRow
-
-						align="start">
+					<QRow align="start">
 						<QCol>
 							<template v-if="mediaOverviewStore.getMediaViewMode === ViewMode.Table">
 								<MediaTable
@@ -71,9 +69,13 @@
 
 			<!-- No Media Overview -->
 			<template v-else-if="!mediaOverviewStore.loading">
-				<QRow justify="center">
+				<QRow
+					class="q-mt-md"
+					justify="center"
+					gutter="md">
 					<QCol cols="auto">
-						<QAlert type="warning">
+						<QAlert
+							type="warning">
 							<template v-if="mediaOverviewStore.allMediaMode">
 								{{ $t('components.media-overview.no-media-items-available') }}
 							</template>
@@ -256,9 +258,11 @@ onMounted(() => {
 	resetProgress(false);
 	set(isRefreshing, false);
 
-	mediaOverviewStore.libraryId = props.libraryId;
-	mediaOverviewStore.mediaType = props.mediaType;
-	mediaOverviewStore.isDetailView = false;
+	mediaOverviewStore.$patch({
+		libraryId: props.libraryId,
+		mediaType: props.mediaType,
+		isDetailView: false,
+	});
 
 	// Initial data load
 	useSubscription(

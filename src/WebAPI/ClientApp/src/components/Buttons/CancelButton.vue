@@ -14,7 +14,7 @@ export default defineComponent({
 			{
 				...mergeProps(this.$props, {
 					icon: 'mdi-alert',
-					label: useI18n().t(`general.commands.cancel`),
+					label: this.$props.label ? this.$props.label : useI18n().t(`general.commands.cancel`),
 				} as IBaseButtonProps),
 			},
 			this.$slots.default,

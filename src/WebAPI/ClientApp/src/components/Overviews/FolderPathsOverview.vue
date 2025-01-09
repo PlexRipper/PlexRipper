@@ -1,6 +1,6 @@
 <template>
-	<!--	Show warning when no allowed to edit	-->
-	<template v-if="!allowEditing">
+	<template v-if="false">
+		<!--	Show warning when not allowed to edit	-->
 		<QRow>
 			<QCol>
 				<q-alert
@@ -16,78 +16,61 @@
 	<template v-else>
 		<QSection
 			v-for="(folderGroup, i) in folderPathStore.getFolderPathsGroups(onlyDefaults)"
-			:key="i">
-			<template
-				v-if="!onlyDefaults"
-				#header>
-				{{ folderGroup.header }}
-			</template>
+			:key="i"
+			:header="!onlyDefaults ? folderGroup.header : ''">
 			<template v-if="folderGroup.paths.length > 0">
-				<QRow
+				<HelpRow
 					v-for="folderPath in folderGroup.paths"
 					:key="folderPath.id"
-					class="q-my-sm">
-					<QCol cols="3">
-						<EditableText
-							v-if="folderGroup.isFolderNameEditable"
-							:disabled="!allowEditing"
-							:value="folderPath.displayName"
-							@save="saveDisplayName(folderPath.id, $event)" />
-						<HelpIcon
-							v-else
-							:value="toTranslation(folderPath.folderType)" />
-					</QCol>
+					disable-responsive
+					:col-label="3"
+					:col-content="8"
+					:edit-model="folderPath.displayName"
+					:allow-label-edit="folderGroup.isFolderNameEditable"
+					:title="toTranslation(folderPath.folderType).title"
+					:label="toTranslation(folderPath.folderType).label"
+					:text="toTranslation(folderPath.folderType).text"
+					@update:edit-model="saveDisplayName(folderPath.id, $event)">
 					<!--	Folder Path Display	-->
-					<QCol cols="7">
-						<q-input
-							:model-value="folderPath.directory"
-							class="folder-path-input"
-							readonly>
-							<IconSquareButton
-								icon="mdi-folder-open-outline"
-								@click="dialogStore.openDirectoryBrowserDialog(folderPath)" />
-						</q-input>
-					</QCol>
-					<!--	Is Valid Icon -->
-					<QCol
-						align-self="center"
-						cols="auto">
-						<ValidIcon
-							:invalid-text="$t('general.alerts.invalid-directory')"
-							:valid="folderPath.isValid ? ValidationLevel.Valid : ValidationLevel.Invalid"
-							:valid-text="$t('general.alerts.valid-directory')" />
-					</QCol>
-					<!--	Delete Button -->
-					<QCol
-						v-if="folderGroup.IsFolderDeletable"
-						cols="auto">
-						<DeleteIconButton
-							:disabled="!allowEditing"
-							@click="deleteFolderPath(folderPath.id)" />
-					</QCol>
-				</QRow>
+					<QRow :cy="`default-${kebabCase(folderPath.folderType)}-row`">
+						<QCol cols="7">
+							<q-input
+								:model-value="folderPath.directory"
+								class="folder-path-input"
+								:data-cy="`default-${kebabCase(folderPath.folderType)}-input`"
+								readonly>
+								<IconSquareButton
+									:cy="`default-${kebabCase(folderPath.folderType)}-edit-button`"
+									icon="mdi-folder-open-outline"
+									@click="dialogStore.openDirectoryBrowserDialog(folderPath)" />
+							</q-input>
+						</QCol>
+						<!--	Is Valid Icon -->
+						<QCol
+							align-self="center"
+							cols="auto">
+							<ValidIcon
+								:cy="`default-${kebabCase(folderPath.folderType)}-valid-icon`"
+								:invalid-text="$t('general.alerts.invalid-directory')"
+								:valid="folderPath.isValid ? ValidationLevel.Valid : ValidationLevel.Invalid"
+								:valid-text="$t('general.alerts.valid-directory')" />
+						</QCol>
+						<!--	Delete Button -->
+						<QCol
+							v-if="folderGroup.IsFolderDeletable"
+							cols="auto">
+							<DeleteIconButton @click="deleteFolderPath(folderPath.id)" />
+						</QCol>
+					</QRow>
+				</HelpRow>
 			</template>
-			<!--	No custom FolderPaths	Warning -->
-			<!--			<template v-else> -->
-			<!--				<QRow -->
-			<!--					class="q-my-sm" -->
-			<!--					justify="center"> -->
-			<!--					<QCol cols="auto"> -->
-			<!--						<QText size="h4"> -->
-			<!--							{{ $t('components.folder-paths-overview.no-paths') }} -->
-			<!--						</QText> -->
-			<!--					</QCol> -->
-			<!--				</QRow> -->
-			<!--			</template> -->
 			<!--	Add Path Button	-->
 			<QRow
 				v-if="folderGroup.isFolderAddable"
 				class="q-my-sm"
 				justify="center">
 				<QCol cols="auto">
-					<AddIconButton
-						:disabled="!allowEditing"
-						@click="addFolderPath(folderGroup)" />
+					<AddIconButton @click="addFolderPath(folderGroup)" />
 				</QCol>
 			</QRow>
 		</QSection>
@@ -101,6 +84,7 @@
 import { type FolderPathDTO, FolderType } from '@dto';
 import type { IHelp, IFolderPathGroup } from '@interfaces';
 import { ValidationLevel } from '@enums';
+import { kebabCase } from 'lodash-es';
 import { showErrorNotification, useDialogStore, useFolderPathStore, useI18n, useSubscription } from '#imports';
 
 const { t } = useI18n();
@@ -110,10 +94,6 @@ const folderPathStore = useFolderPathStore();
 
 withDefaults(defineProps<{ onlyDefaults?: boolean }>(), {
 	onlyDefaults: false,
-});
-
-const allowEditing = computed(() => {
-	return true;
 });
 
 const confirmDirectoryBrowser = (path: FolderPathDTO): void => {
@@ -148,6 +128,7 @@ function addFolderPath(folderGroup: IFolderPathGroup): void {
 				folderType: folderGroup.folderType,
 				mediaType: folderGroup.mediaType,
 				isValid: false,
+				isDefault: false,
 			})
 			.subscribe(),
 	);

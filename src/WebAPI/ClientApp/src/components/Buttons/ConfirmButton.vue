@@ -14,7 +14,7 @@ export default defineComponent({
 			{
 				...mergeProps(this.$props, {
 					color: 'positive',
-					label: useI18n().t(`general.commands.confirm`),
+					label: this.$props.label ? this.$props.label : useI18n().t(`general.commands.confirm`),
 					icon: 'mdi-check',
 				} as IBaseButtonProps),
 			},

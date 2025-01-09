@@ -1,4 +1,5 @@
 import type {
+	FolderPathDTO,
 	PlexAccountDTO,
 	PlexLibraryDTO,
 	PlexMediaType,
@@ -14,6 +15,10 @@ export interface MockConfig {
 	pageLoadDelay: number;
 	isLoggedIn: boolean;
 	// region Server
+	/*
+   * The number of Plex servers that are created
+   * @default 5
+   */
 	plexServerCount: number;
 	plexServerAccessCount: number;
 	plexServerStatusCount: number;
@@ -22,6 +27,10 @@ export interface MockConfig {
 	plexMovieLibraryCount: number;
 	plexTvShowLibraryCount: number;
 	plexLibraryTypes: PlexMediaType[];
+	/*
+   * The number of Plex accounts that are created
+   * @default 1
+   */
 	plexAccountCount: number;
 	firstTimeSetup: boolean;
 	// region DownloadTasks
@@ -37,9 +46,12 @@ export interface MockConfig {
 	seasonCount: number;
 	episodeCount: number;
 	// endregion
+
 	maxServerConnections: number;
 	folderPathCount: number;
+	invalidDefaultFolderPaths: boolean;
 	override: Partial<{
+		folderPaths: (folderPaths: FolderPathDTO[]) => FolderPathDTO[];
 		plexServer: (plexServers: PlexServerDTO[]) => PlexServerDTO[];
 		plexServerConnections: (plexServerConnections: PlexServerConnectionDTO[]) => PlexServerConnectionDTO[];
 		plexLibraries: (plexLibraries: PlexLibraryDTO[]) => PlexLibraryDTO[];

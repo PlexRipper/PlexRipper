@@ -5,9 +5,14 @@ namespace PlexRipper.Domain;
 public class PlexTvShowSeason : PlexMedia
 {
     /// <summary>
-    /// The PlexKey of the tvShow this belongs too.
+    /// The Plex key of the <see cref="PlexTvShow"/> this belongs too.
     /// </summary>
     public required int ParentKey { get; set; }
+
+    /// <summary>
+    /// The Guid of the <see cref="PlexTvShow"/> this belongs too.
+    /// </summary>
+    public required string? ParentGuid { get; set; }
 
     #region Relationships
 

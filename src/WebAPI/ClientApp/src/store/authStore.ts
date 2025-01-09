@@ -6,11 +6,28 @@ import { authenticationApi } from '@api';
 import { catchError, of } from 'rxjs';
 import { tap, switchMap } from 'rxjs/operators';
 import { useGlobalStore } from '@store';
+import { get } from '@vueuse/core';
 import { useRouter } from '#imports';
 
 export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
-	const state = reactive<{ isLoggedIn: boolean }>({
+	const state = reactive<{
+		isLoggedIn: boolean;
+		isDefaultCredentials: boolean;
+		currentUsername: string;
+		username: string;
+		currentPassword: string;
+		password: string;
+		isPasswordValid: boolean;
+		confirmPassword: string;
+	}>({
 		isLoggedIn: false,
+		isDefaultCredentials: true,
+		currentUsername: '',
+		username: '',
+		currentPassword: '',
+		password: '',
+		confirmPassword: '',
+		isPasswordValid: false,
 	});
 
 	const globalStore = useGlobalStore();
@@ -21,6 +38,37 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 				name: 'useAuthenticationStore',
 				isSuccess: state.isLoggedIn ?? false,
 			})));
+		},
+		refreshCredentials() {
+			return authenticationApi.getAppCredentials().pipe(
+				tap((res) => {
+					if (res.isSuccess && res.value) {
+						state.currentUsername = res.value.userName;
+						state.username = res.value.userName;
+						state.currentPassword = res.value.password;
+						state.password = res.value.password;
+						state.confirmPassword = '';
+						state.isDefaultCredentials = res.value.isDefaultCredentials;
+					}
+				}));
+		},
+		updateCredentials() {
+			const usernameChanged = get(getters.hasUsernameChanged);
+			const passwordChanged = get(getters.hasPasswordChanged);
+
+			if (!usernameChanged && !passwordChanged) {
+				return of(null);
+			}
+			return authenticationApi.updateCredentialsEndpoint({
+				username: usernameChanged ? state.username : null,
+				password: passwordChanged ? state.password : null,
+			}).pipe(
+				tap((res) => Log.info('User credentials updated', res)),
+				switchMap(() => actions.refreshCredentials()),
+				catchError((err) => {
+					Log.error('User credentials update failed', err);
+					return of(err);
+				}));
 		},
 		login(username: string, password: string, rememberMe: boolean): Observable<number> {
 			const router = useRouter();
@@ -57,9 +105,26 @@ export const useAuthenticationStore = defineStore('AuthenticationStore', () => {
 				return of(err);
 			})),
 		$reset: () => {
+			state.currentUsername = '';
+			state.username = '';
+			state.currentPassword = '';
+			state.password = '';
+			state.confirmPassword = '';
 		},
 	};
-	const getters = {};
+	const getters = {
+		hasUsernameChanged: computed(() => state.currentUsername !== state.username),
+		hasPasswordChanged: computed(() => state.currentPassword !== state.password),
+		equalPassword: computed(() => get(getters.hasPasswordChanged) && state.password === state.confirmPassword),
+		canUpdateCredentials: computed(() => {
+			if (get(getters.hasUsernameChanged)) {
+				return true;
+			}
+			if (get(getters.hasPasswordChanged)) {
+				return state.password == state.confirmPassword;
+			}
+		}),
+	};
 	return {
 		...toRefs(state),
 		...actions,

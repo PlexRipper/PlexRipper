@@ -123,7 +123,7 @@ onMounted(() => {
   overflow-y: auto;
   overflow-x: hidden;
 
-  max-height: calc($page-height-minus-app-bar - $media-overview-bar-height);
+  max-height: calc($page-height-minus-app-bar-minus-media-overview-bar);
 
   &--scroll-container {
     height: 100%;

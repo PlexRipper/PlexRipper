@@ -189,7 +189,8 @@ function changeView(viewMode: ViewMode) {
 
 .media-overview-bar {
   @extend .default-border;
-  min-height: $media-overview-bar-height;
+
+  height: $media-overview-bar-height;
 }
 
 .q-fab__label {

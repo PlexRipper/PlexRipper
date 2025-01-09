@@ -52,7 +52,7 @@ $separator-color: quasar.$separator-color;
  */
 $app-bar-height: 48px;
 $download-page-bar-height: 80px;
-$media-overview-bar-height: 85px;
+$media-overview-bar-height: 85px + 4px; // bar
 $media-table-row-height: 42px;
 $navigation-drawer-width: 400px;
 

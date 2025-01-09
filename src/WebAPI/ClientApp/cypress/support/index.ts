@@ -1,7 +1,7 @@
-import type { IBasePageSetupResult } from '@fixtures/baseE2E';
+import type { IBasePageSetupResult } from '@fixtures';
 import type { MockConfig } from '@mock';
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { JobStatus, JobTypes, type PlexServerConnectionDTO, type PlexServerDTO } from '@dto';
+import { type PlexServerConnectionDTO, type PlexServerDTO, JobStatus, JobTypes } from '@dto';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 declare global {

@@ -1,6 +1,6 @@
 import { cloneDeep } from 'lodash-es';
 import prettyBytes from 'pretty-bytes';
-import { route } from '@fixtures/baseE2E';
+import { route } from '@fixtures';
 import { DownloadStatus, MessageTypes } from '@dto';
 
 describe('Downloads page', () => {

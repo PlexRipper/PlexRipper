@@ -1,4 +1,4 @@
-import { route } from '@fixtures/baseE2E';
+import { route } from '@fixtures';
 import { JobStatus, MessageTypes, type ServerConnectionCheckStatusProgressDTO } from '@dto';
 import { generatePlexServer } from '@mock';
 

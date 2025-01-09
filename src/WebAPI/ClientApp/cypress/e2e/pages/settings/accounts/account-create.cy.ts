@@ -1,4 +1,4 @@
-import { route } from '@fixtures/baseE2E';
+import { route } from '@fixtures';
 import { generateFailedResultDTO, generatePlexAccount, generateResultDTO } from '@mock';
 import type { PlexAccountDTO } from '@dto';
 import { PlexAccountPaths } from '@api-urls';

@@ -1,4 +1,4 @@
-import { route } from '@fixtures/baseE2E';
+import { route } from '@fixtures';
 import { JobStatus, JobTypes } from '@dto';
 
 describe('Check BackgroundActivityToggleButton', () => {

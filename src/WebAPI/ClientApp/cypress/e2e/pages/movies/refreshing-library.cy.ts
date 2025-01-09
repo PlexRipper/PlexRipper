@@ -1,4 +1,4 @@
-import { route } from '@fixtures/baseE2E';
+import { route } from '@fixtures';
 import { type LibraryProgress, MessageTypes, PlexMediaType } from '@dto';
 import { PlexLibraryPaths } from '@api/api-paths';
 

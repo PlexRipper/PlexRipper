@@ -14,6 +14,10 @@ export interface MockConfig {
 	pageLoadDelay: number;
 	isLoggedIn: boolean;
 	// region Server
+	/*
+   * The number of Plex servers that are created
+   * @default 5
+   */
 	plexServerCount: number;
 	plexServerAccessCount: number;
 	plexServerStatusCount: number;
@@ -22,6 +26,10 @@ export interface MockConfig {
 	plexMovieLibraryCount: number;
 	plexTvShowLibraryCount: number;
 	plexLibraryTypes: PlexMediaType[];
+	/*
+   * The number of Plex accounts that are created
+   * @default 1
+   */
 	plexAccountCount: number;
 	firstTimeSetup: boolean;
 	// region DownloadTasks

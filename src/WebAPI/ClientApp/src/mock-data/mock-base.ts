@@ -10,7 +10,6 @@ export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 	}
 	const defaultConfig: MockConfig = {
 		isLoggedIn: true,
-		plexServerCount: 5,
 		seed: 1234,
 		pageLoadDelay: 0,
 		debugDisplayData: false,
@@ -19,6 +18,7 @@ export function checkConfig(config: Partial<MockConfig> = {}): MockConfig {
 		plexServerAccessCount: 3,
 		plexServerStatusCount: 3,
 		plexLibraryTypes: [PlexMediaType.Movie, PlexMediaType.TvShow],
+		plexServerCount: 5,
 		movieDownloadTask: 5,
 		tvShowDownloadTask: 5,
 		seasonDownloadTask: 5,

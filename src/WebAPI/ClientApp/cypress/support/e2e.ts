@@ -1,6 +1,6 @@
 import './commands';
 import Log from 'consola';
-import { basePageSetup, route, type IBasePageSetupResult } from '@fixtures/baseE2E';
+import { basePageSetup, route, type IBasePageSetupResult } from '@fixtures';
 import {
 	generateJobStatusUpdate, type MockConfig,
 	generateResultDTO, generateFailedResultDTO,

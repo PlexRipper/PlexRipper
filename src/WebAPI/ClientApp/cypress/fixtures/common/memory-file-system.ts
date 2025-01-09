@@ -36,6 +36,7 @@ export class MemoryFileSystem {
 		const parent = this.getNode(parts);
 
 		if (parent && name in parent) {
+			// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
 			delete parent[name];
 		} else {
 			throw new Error(`Path "${path}" does not exist`);

@@ -260,10 +260,6 @@
         "media-options-dialog": {
             "title": "Media Overview Options"
         },
-        "first-time-setup-dialog": {
-            "setup-question": "It looks like this is you're first time using PlexRipper, would you like to start the setup process?",
-            "header": "Need help with setting up PlexRipper?"
-        },
         "background-activity-toggle-button": {
             "checking-plex-server-connections": "Checking Plex server connections",
             "no-active-background-activity": "No active background activities."
@@ -289,7 +285,6 @@
             "fetching-servers": "Retrieving accessible servers for syncing media"
         },
         "authentication-overview": {
-            "update-credentials-button": "Save Login",
             "validation": {
                 "username-is-required": "Username is required",
                 "username-length": "Username must be at least {count} characters",
@@ -297,7 +292,6 @@
             }
         },
         "password-input-field": {
-            "label": "",
             "validation": {
                 "password-is-required": "Password is required",
                 "password-length": "Password must be at least {count} characters",
@@ -329,10 +323,6 @@
         },
         "reset-db": {
             "text": "This will back-up the current database to \"config/Database Backup/\" and create a new one, after which you will be redirected to the setup page. This will not reset settings since those are stored in \"config/PlexRipperSettings.json\"",
-            "title": "Are you sure?"
-        },
-        "skip-setup": {
-            "text": "This will skip the setup process and you will have to configure PlexRipper manually",
             "title": "Are you sure?"
         },
         "not-found": {
@@ -696,7 +686,6 @@
             },
             "disclaimer": {
                 "header": "Disclaimer",
-                "title": "Disclaimer",
                 "i-agree-disclaimer-button": "I fully understand and agree",
                 "text": {
                     "heading": "Please read and agree to the terms below before continuing:",
@@ -716,8 +705,7 @@
                         "title": "Limitation of Liability",
                         "content": "The developers of PlexRipper are not responsible for any misuse of the tool or for consequences arising from unauthorized or illegal use."
                     },
-                    "confirmation": "By proceeding, you confirm that you understand and accept these terms, and that you will use PlexRipper responsibly and ethically.",
-                    "test": ""
+                    "confirmation": "By proceeding, you confirm that you understand and accept these terms, and that you will use PlexRipper responsibly and ethically."
                 }
             },
             "finished": {
@@ -733,23 +721,6 @@
                     "p-1": "If you like this project and would like to show your appreciation then consider the following:"
                 },
                 "title": "You are now ready to start using PlexRipper!"
-            },
-            "future-plans": {
-                "header": "Future plans!",
-                "list": {
-                    "item-1": "Radarr and Sonarr integration",
-                    "item-1-1": "Any searches for media can be redirected to PlexRipper, and PlexRipper will search all available servers, download the media and notify Radarr/Sonarr of the finished download.",
-                    "item-2": "Music and Photo's download support!",
-                    "item-3": "Subtitles download support!",
-                    "item-4": "Telegram notification support!",
-                    "item-6": "Better Plex integration!",
-                    "item-6-1": "Download collections, add to own Plex server and automatically copy over all Plex related settings and configurations."
-                },
-                "text": {
-                    "p-1": "Planned features:",
-                    "p-2": "Any ideas are very welcome!"
-                },
-                "title": "Here are some planned features!"
             },
             "intro": {
                 "header": "Getting Started",

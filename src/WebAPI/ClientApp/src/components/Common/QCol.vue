@@ -26,7 +26,7 @@ interface IOffset {
 }
 
 interface QColProps extends IBreakPoints, IOffset {
-	cols?: 'auto' | 'grow' | 'shrink' | ColLevels;
+	cols?: ColLevels | 'auto' | 'grow' | 'shrink';
 	offset?: ColLevels;
 	width?: number;
 	textAlign?: 'left' | 'center' | 'right' | 'justify';
@@ -39,7 +39,7 @@ const props = withDefaults(defineProps<QColProps>(), {
 	alignSelf: 'none',
 	textAlign: 'left',
 	width: 0,
-	cols: 0,
+	cols: 0 as ColLevels,
 	xs: 0,
 	sm: 0,
 	md: 0,

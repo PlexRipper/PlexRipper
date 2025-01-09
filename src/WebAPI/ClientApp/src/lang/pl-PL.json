@@ -260,10 +260,6 @@
         "media-options-dialog": {
             "title": "Opcje przeglądu mediów"
         },
-        "first-time-setup-dialog": {
-            "setup-question": "Wygląda na to, że korzystasz z PlexRippera po raz pierwszy. Czy chcesz rozpocząć proces instalacji?",
-            "header": "Potrzebujesz pomocy w konfiguracji PlexRippera?"
-        },
         "background-activity-toggle-button": {
             "checking-plex-server-connections": "Sprawdzanie połączeń z serwerem Plex",
             "no-active-background-activity": "Brak aktywnych działań w tle."
@@ -289,7 +285,6 @@
             "fetching-servers": "Pobieranie dostępnych serwerów do synchronizacji multimediów"
         },
         "authentication-overview": {
-            "update-credentials-button": "Aktualizuj dane uwierzytelniające",
             "validation": {
                 "username-is-required": "Nazwa użytkownika jest wymagana",
                 "username-length": "Nazwa użytkownika musi mieć co najmniej {count} znaków",
@@ -297,7 +292,6 @@
             }
         },
         "password-input-field": {
-            "label": "",
             "validation": {
                 "password-is-required": "Hasło jest wymagane",
                 "password-length": "Hasło musi mieć co najmniej {count} znaków",
@@ -329,10 +323,6 @@
         },
         "reset-db": {
             "text": "Spowoduje to utworzenie kopii zapasowej bieżącej bazy danych w \"config/Database Backup/\" i utworzenie nowej, po czym nastąpi przekierowanie do strony konfiguracji. Nie spowoduje to zresetowania ustawień, ponieważ są one przechowywane w pliku \"config/PlexRipperSettings.json\".",
-            "title": "Jesteś pewny?"
-        },
-        "skip-setup": {
-            "text": "Spowoduje to pominięcie procesu konfiguracji i konieczność ręcznej konfiguracji PlexRippera",
             "title": "Jesteś pewny?"
         },
         "not-found": {
@@ -696,7 +686,6 @@
             },
             "disclaimer": {
                 "header": "Zastrzeżenie",
-                "title": "Zastrzeżenie",
                 "i-agree-disclaimer-button": "Rozumiem i zgadzam się",
                 "text": {
                     "heading": "Proszę przeczytać i zgodzić się na poniższe warunki przed kontynuowaniem:",
@@ -716,8 +705,7 @@
                         "title": "Ograniczenie odpowiedzialności",
                         "content": "Twórcy PlexRipper nie ponoszą odpowiedzialności za jakiekolwiek niewłaściwe użycie narzędzia ani za konsekwencje wynikające z nieautoryzowanego lub nielegalnego użycia."
                     },
-                    "confirmation": "Przechodząc dalej, potwierdzasz, że rozumiesz i akceptujesz te warunki oraz że będziesz korzystać z PlexRipper w sposób odpowiedzialny i etyczny.",
-                    "test": ""
+                    "confirmation": "Przechodząc dalej, potwierdzasz, że rozumiesz i akceptujesz te warunki oraz że będziesz korzystać z PlexRipper w sposób odpowiedzialny i etyczny."
                 }
             },
             "finished": {
@@ -733,23 +721,6 @@
                     "p-1": "Jeśli podoba Ci się ten projekt i chcesz okazać swoje uznanie, rozważ poniższe możliwości:"
                 },
                 "title": "Możesz teraz rozpocząć korzystanie z PlexRippera!"
-            },
-            "future-plans": {
-                "header": "Plany na przyszłość!",
-                "list": {
-                    "item-1": "Integracja Radarr i Sonarr",
-                    "item-1-1": "Wszelkie wyszukiwania multimediów można przekierować do PlexRipper, a PlexRipper przeszuka wszystkie dostępne serwery, pobierze multimedia i powiadomi Radarr/Sonarr o zakończeniu pobierania.",
-                    "item-2": "Program wspiera pobieranie muzyki i zdjęć!",
-                    "item-3": "Program wspiera pobieranie napisów!",
-                    "item-4": "Program wspiera powiadomienia na Telegram!",
-                    "item-6": "Lepsza integracja z Plex!",
-                    "item-6-1": "Pobierz kolekcje, dodaj je do własnego serwera Plex i automatycznie skopiuj wszystkie ustawienia i konfiguracje związane z Plex."
-                },
-                "text": {
-                    "p-1": "Planowane funkcje:",
-                    "p-2": "Wszelkie pomysły są mile widziane!"
-                },
-                "title": "Oto kilka planowanych funkcji!"
             },
             "intro": {
                 "header": "Rozpoczęcie",

@@ -25,7 +25,7 @@
 				auto-save
 				@before-show="editMode = true"
 				@before-hide="editMode = false"
-				@save="$emit('update:modelValue', $event)">
+				@save="model = $event">
 				<q-input
 					v-model="scope.value"
 					dense

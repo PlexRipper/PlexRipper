@@ -1,6 +1,5 @@
 import { route } from '@fixtures';
 import { PlexMediaType } from '@dto';
-import { SettingsPaths } from '@api-urls';
 
 describe('Display media collection on the Library detail page', () => {
 	it('Should successfully scroll to the bottom when scrolling the page', () => {
@@ -11,11 +10,6 @@ describe('Display media collection on the Library detail page', () => {
 			movieCount: 10000,
 		})
 			.then((data) => {
-				// Once the option has changed, the settings are saved
-				cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), {
-					statusCode: 200,
-				});
-
 				const movieLibrary = data.plexLibraries.find((x) => x.type === PlexMediaType.Movie);
 				if (!movieLibrary) {
 					throw new Error('Movie library not found');

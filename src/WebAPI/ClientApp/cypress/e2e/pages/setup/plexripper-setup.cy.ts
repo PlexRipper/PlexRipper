@@ -12,11 +12,6 @@ describe('PlexRipper new setup process', () => {
 			invalidDefaultFolderPaths: true,
 		});
 
-		// Once the setup has been completed the settings are saved
-		cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), {
-			statusCode: 200,
-		});
-
 		cy.visit(route('/setup'));
 	});
 
@@ -34,18 +29,10 @@ describe('PlexRipper new setup process', () => {
 	}
 
 	it('Should navigate the setup process from the first to the last page', () => {
-		cy.getPageData().then(() => {
+		cy.getPageData().then(({ settings }) => {
 			// Disclaimer
 			cy.getCy('setup-panel-1').should('be.visible');
 			areTabsActive(1, 1);
-
-			// Ensure disclaimer is sent to the server
-			cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), (req) => {
-				expect(req.body.generalSettings).to.have.property('hasAgreedToDisclaimer', true);
-				req.reply({
-					statusCode: 200,
-				});
-			});
 
 			cy.getCy('setup-disclaimer-accept-button').click();
 
@@ -130,6 +117,12 @@ describe('PlexRipper new setup process', () => {
 
 			cy.getCy('setup-page-skip-setup-button').click();
 			cy.url().should('eq', route('/'));
+
+			// Ensure disclaimer is sent to the server
+			cy.awaitSettingsUpdate().then(() => {
+				expect(settings.generalSettings.firstTimeSetup).to.eq(false);
+				expect(settings.generalSettings.hasAgreedToDisclaimer).to.eq(true);
+			});
 		});
 	});
 });

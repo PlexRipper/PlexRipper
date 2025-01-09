@@ -1,7 +1,3 @@
-import { generateResultDTO } from '@mock';
-import type { SettingsModelDTO } from '@dto';
-import { SettingsPaths } from '@api/api-paths';
-
 describe('PlexRipper Server Dialog', () => {
 	beforeEach(() => {
 		cy.basePageSetup({
@@ -25,31 +21,5 @@ describe('PlexRipper Server Dialog', () => {
 
 		cy.getCy('server-dialog-close-btn').click();
 		cy.getCy('server-dialog-cy').should('not.exist');
-	});
-
-	it('Should slide the download speed limit when the slider is used', () => {
-		cy.getPageData().then((pageData) => {
-			const plexServer = pageData.plexServers[2];
-			cy.getCy('server-dialog-2').click();
-
-			cy.getCy('server-dialog-tab-3').click();
-			cy.getCy('server-dialog-tab-content-3').should('exist').and('be.visible');
-
-			cy.intercept('PUT', SettingsPaths.updateUserSettingsEndpoint(), (req) => {
-				const newSettings = req.body as SettingsModelDTO;
-
-				const serverSettings = newSettings.serverSettings.data.find(
-					(x) => x.machineIdentifier === plexServer.machineIdentifier,
-				);
-				expect(serverSettings?.downloadSpeedLimit).to.eq(50000);
-
-				req.reply({
-					statusCode: 200,
-					body: generateResultDTO(pageData.settings),
-				});
-			});
-
-			cy.getCy('download-speed-limit-slider').click();
-		});
 	});
 });

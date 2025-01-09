@@ -39,6 +39,8 @@ declare global {
 			createPlexAccount(account: PlexAccountDTO | null): Chainable;
 
 			correctDefaultFolderPaths(): Chainable;
+
+			awaitSettingsUpdate(): Chainable;
 		}
 	}
 }

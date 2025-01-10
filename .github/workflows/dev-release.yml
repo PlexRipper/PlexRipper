@@ -6,7 +6,7 @@ on:
         branches:
             - dev
         paths-ignore:
-            - '.github/**'
+            # - '.github/**'
             - '.idea/**'
             - '.run/**'
             - '.vscode/**'
@@ -25,99 +25,129 @@ jobs:
                     token: ${{ secrets.GH_TOKEN }}
                     fetch-depth: 0 # Required due to the way Git works, without it this action won't be able to find any or the correct tags
 
-            -   name: Get latest version tag
-                id: version
-                uses: WyriHaximus/github-action-get-previous-tag@v1
+            -   name: Get Release
+                id: get_current_release
+                uses: joutvhu/get-release@v1.0.3
+                env:
+                    GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+                with:
+                    latest: true
+                    pattern: '^v.*' # Tag name start with `v`
+                    prerelease: false
 
-            -   name: Echo last version tag
-                run: echo ${{ steps.version.outputs.tag }}
-
-            -   name: Strip 'v' from version
+            -   name: Generate Development Version Name
                 id: strip_v
                 run: |
                     # Strip the 'v' prefix from the version tag
-                    VERSION_NO_V="${{ steps.version.outputs.tag }}"
+                    VERSION_NO_V="${{ steps.get_current_release.outputs.tag_name }}"
                     VERSION_NO_V="${VERSION_NO_V#v}"
-                    echo "VERSION_NO_V=$VERSION_NO_V" >> $GITHUB_ENV
-
-            -   name: Append Dev Date
-                id: append_date
-                run: |
                     # Add the current date in YYYY-MM-DD format
                     DEV_DATE=$(date +%Y-%m-%d)
                     VERSION_WITH_DATE="${VERSION_NO_V}-dev-${DEV_DATE}"
+                    echo "VERSION_NO_V=$VERSION_NO_V" >> $GITHUB_ENV
                     echo "VERSION_WITH_DATE=$VERSION_WITH_DATE" >> $GITHUB_ENV
 
-#            -   name: Set up Docker Buildx
-#                uses: docker/setup-buildx-action@v3
-#
-#            -   name: Login to Docker Hub
-#                uses: docker/login-action@v3
-#                with:
-#                    username: ${{ secrets.DOCKER_USERNAME }}
-#                    password: ${{ secrets.DOCKER_PASSWORD }}
-#
-#            -   name: Build and push
-#                uses: docker/build-push-action@v6
-#                env:
-#                    VERSION: ${{ env.VERSION_NO_V }}
-#                    INFORMATIONAL_VERSION: ${{ env.VERSION_WITH_DATE }}
-#                with:
-#                    platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
-#                    push: true
-#                    tags: plexripper/plexripper:dev,plexripper/plexripper:${{ env.VERSION_WITH_DATE }}
-#                    build-args: |
-#                        VERSION=${{ env.VERSION_NO_V }}
-#                        INFORMATIONAL_VERSION=${{ env.VERSION_WITH_DATE }}
-#                    file: docker/Dockerfile
-
-            -   name: Get latest commit SHA
-                id: latest_commit
-                run: |
-                    # Get the latest commit SHA
-                    LATEST_COMMIT=$(git rev-parse HEAD)
-                    echo "LATEST_COMMIT=$LATEST_COMMIT" >> $GITHUB_ENV
-
-            -   name: Get last stable release commit SHA
-                id: last_stable_commit
-                run: |
-                    # Get the last stable tag and its commit SHA
-                    LAST_TAG=$(git describe --tags --abbrev=0)
-                    LAST_COMMIT_SHA=$(git rev-list -n 1 $LAST_TAG)
-                    echo "LAST_TAG=$LAST_TAG" >> $GITHUB_ENV
-                    echo "LAST_COMMIT_SHA=$LAST_COMMIT_SHA" >> $GITHUB_ENV
+            #            -   name: Set up Docker Buildx
+            #                uses: docker/setup-buildx-action@v3
+            #
+            #            -   name: Login to Docker Hub
+            #                uses: docker/login-action@v3
+            #                with:
+            #                    username: ${{ secrets.DOCKER_USERNAME }}
+            #                    password: ${{ secrets.DOCKER_PASSWORD }}
+            #
+            #            -   name: Build and push
+            #                uses: docker/build-push-action@v6
+            #                env:
+            #                    VERSION: ${{ env.VERSION_NO_V }}
+            #                    INFORMATIONAL_VERSION: ${{ env.VERSION_WITH_DATE }}
+            #                with:
+            #                    platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
+            #                    push: true
+            #                    tags: plexripper/plexripper:dev,plexripper/plexripper:${{ env.VERSION_WITH_DATE }}
+            #                    build-args: |
+            #                        VERSION=${{ env.VERSION_NO_V }}
+            #                        INFORMATIONAL_VERSION=${{ env.VERSION_WITH_DATE }}
+            #                    file: docker/Dockerfile
 
             -   name: Generate GitHub comparison link
                 id: comparison_link
                 run: |
                     # Construct the comparison URL
-                    COMPARISON_URL="https://github.com/PlexRipper/PlexRipper/compare/${{ env.LAST_COMMIT_SHA }}...${{ env.LATEST_COMMIT }}"
+                    COMPARISON_URL="https://github.com/PlexRipper/PlexRipper/compare/${{ steps.get_current_release.outputs.tag_name }}...HEAD"
                     echo "COMPARISON_URL=$COMPARISON_URL" >> $GITHUB_ENV
 
-            -   name: Generate Semantic Release Notes
+            -   name: Setup Semantic Release packages
+                uses: ./.github/workflows/steps/client-app-install/
+
+            -   name: Generate Development Release Notes
                 id: release_notes
                 run: |
-                    RELEASE_NOTES=$(npx --prefix src/WebAPI/ClientApp/ semantic-release --dry-run --no-ci --range "${{ env.LAST_COMMIT_SHA }}..${{ env.LATEST_COMMIT }}" | awk '/Release note:/ {flag=1; next} /^$/ {flag=0} flag')
-                    echo "RELEASE_NOTES=$RELEASE_NOTES" >> $GITHUB_ENV
+                    TAG_NAME=${{ steps.get_current_release.outputs.tag_name }}
+                    COMPARISON_URL="https://github.com/PlexRipper/PlexRipper/compare/$TAG_NAME...HEAD"
+                    echo "COMPARISON_URL=$COMPARISON_URL" >> $GITHUB_ENV
+                    
+                    # Generate release notes
+                    TEMP_FILE=$(mktemp)
+                    npx --prefix src/WebAPI/ClientApp/ semantic-release --dry-run --range "$TAG_NAME..HEAD" | \
+                    perl -ne 'print if /^###/ .. eof' | \
+                    sed -e 's/\(\S*\) (\(\S*\))/[**\1**](https:\/\/github.com\/PlexRipper\/PlexRipper\/commit\/\2)/g' | \
+                    sed -e 's/^# \(.*\)/# \1/' \
+                    -e 's/^### \(.*\)/### \1/' \
+                    -e 's/^    \* \([^:]*\): \(.*\)$/- **\1**: \2/' > $TEMP_FILE
+                    
+                    # Ensure notes exist
+                    if [ ! -s $TEMP_FILE ]; then
+                        echo "Failed to generate release notes. Exiting..."
+                        exit 1
+                    fi
+                    
+                    # Read notes into environment variable
+                    RELEASE_NOTES=$(cat $TEMP_FILE)
+                    echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+                    echo "$RELEASE_NOTES" >> $GITHUB_ENV
+                    echo "EOF" >> $GITHUB_ENV
+                    
+                    rm $TEMP_FILE
+                env:
+                    GH_TOKEN: ${{ secrets.GH_TOKEN }}
+                    GIT_AUTHOR_NAME: ${{ vars.GIT_AUTHOR_NAME }}
+                    GIT_AUTHOR_EMAIL: ${{ vars.GIT_AUTHOR_EMAIL }}
+                    GIT_COMMITTER_NAME: ${{ vars.GIT_COMMITTER_NAME }}
+                    GIT_COMMITTER_EMAIL: ${{ vars.GIT_COMMITTER_EMAIL }}
+
+            -   name: Install GitHub CLI
+                uses: actions/setup-node@v4
+                with:
+                    node-version: '16' # Ensure a compatible version of Node.js is installed for the gh CLI
 
             -   name: Create or Update GitHub Pre-Release
-                uses: actions/create-release@v1
-                env:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                run: |
+                    echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+                    
+                    RELEASE_NOTES="${{ env.RELEASE_NOTES }}"
+                    
+                    echo "RELEASE_NOTES=$RELEASE_NOTES"
+                    
+                    # Check if the tag already exists
+                    if gh release view "dev-latest" >/dev/null 2>&1; then
+                        echo "Updating existing release for tag 'dev-latest'"
+                        gh release edit "dev-latest" \
+                            --title "Development Release Notes since last stable release" \
+                            --notes "$RELEASE_NOTES" \
+                            --prerelease
+                    else
+                        echo "Creating a new release for tag 'dev-latest'"
+                        gh release create "dev-latest" \
+                            --title "Development Release Notes since last stable release" \
+                            --notes "$RELEASE_NOTES" \
+                            --prerelease
+                    fi
+
+            -   name: Notify Discord of Dev Release
+                uses: ./.github/workflows/steps/discord-dev-release-notification/
                 with:
-                    tag_name: "dev-latest"
-                    release_name: "Development Release"
-                    body: |
-                        Automatically updated pre-release from the latest development branch.
-
-                        ${{ env.RELEASE_NOTES }}
-                    draft: false
-                    prerelease: true
-
-#            -   name: Notify Discord of Dev Release
-#                uses: ./.github/workflows/steps/discord-dev-release-notification/
-#                with:
-#                    webhook: ${{ secrets.DISCORD_RELEASES_CHANNEL_WEBHOOK }}
-#                    version: ${{ env.VERSION_WITH_DATE }}
-#                    is-dev: true
-#                    changelog-url: ${{ env.COMPARISON_URL }}
+                    webhook: ${{ secrets.DISCORD_RELEASES_CHANNEL_WEBHOOK }}
+                    version: ${{ env.VERSION_WITH_DATE }}
+                    is-dev: true
+                    changelog-url: 'https://github.com/PlexRipper/PlexRipper/releases/tag/dev-latest'

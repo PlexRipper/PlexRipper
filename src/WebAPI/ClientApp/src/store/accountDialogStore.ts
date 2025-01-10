@@ -5,8 +5,7 @@ import { tap } from 'rxjs/operators';
 import { DialogType } from '@enums';
 import { plexAccountApi } from '@api';
 import type { IError, PlexAccountDTO } from '@dto';
-import type { IAccountDialog, ResultDTO } from '@interfaces';
-import type { Observable } from 'rxjs';
+import type { IAccountDialog } from '@interfaces';
 import { useAccountStore, useDialogStore } from '@store';
 import { cloneDeep } from 'lodash-es';
 
@@ -82,7 +81,7 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 
 			return plexAccountApi.validatePlexAccountEndpoint(get(getters.getAccountData)).pipe(
 				tap(({ value, isSuccess }) => {
-					if (!isSuccess) {
+					if (!isSuccess || value?.isUnAuthorized) {
 						state.isValidated = false;
 						state.hasValidationErrors = true;
 						state.validateLoading = false;
@@ -90,7 +89,7 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 						return;
 					}
 
-					const account = value;
+					const account = value?.plexAccountDTO;
 
 					state.hasValidationErrors = false;
 					state.validateLoading = false;
@@ -136,7 +135,7 @@ export const useAccountDialogStore = defineStore('AccountDialogStore', () => {
 				}),
 			);
 		},
-		validateVerificationCode(): Observable<ResultDTO<PlexAccountDTO>> {
+		validateVerificationCode() {
 			return plexAccountApi.validatePlexAccountEndpoint(get(getters.getAccountData)).pipe(
 				tap(({ value, isSuccess }) => {
 					if (isSuccess && value) {

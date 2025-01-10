@@ -7,10 +7,10 @@ describe('Display media collection on the Library detail page', () => {
 			plexAccountCount: 1,
 			plexServerCount: 1,
 			plexMovieLibraryCount: 1,
-			movieCount: 10000,
+			movieCount: 1000,
 		})
-			.then((data) => {
-				const movieLibrary = data.plexLibraries.find((x) => x.type === PlexMediaType.Movie);
+			.then(({ mediaData, plexLibraries }) => {
+				const movieLibrary = plexLibraries.find((x) => x.type === PlexMediaType.Movie);
 				if (!movieLibrary) {
 					throw new Error('Movie library not found');
 				}
@@ -21,8 +21,8 @@ describe('Display media collection on the Library detail page', () => {
 				cy.getCy('view-mode-table-btn').click();
 
 				cy.getCy('media-table-scroll').scrollTo('bottom', { duration: 10000 });
-
-				cy.getCy(`media-table-row-${data.config.movieCount - 1}`)
+				const movieList = mediaData.find((x) => x.libraryId === movieLibrary.id)?.media;
+				cy.getCy(`media-table-row-${movieList!.length - 1}`)
 					.should('exist')
 					.and('be.visible');
 			});

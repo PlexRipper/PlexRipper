@@ -43,6 +43,7 @@ export function baseSetup(): { ctx: Context; appConfig: IAppConfig } {
 }
 
 export function getAxiosMock() {
-	// @ts-expect-error - https://github.com/ctimmerm/axios-mock-adapter/issues/400
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore - https://github.com/ctimmerm/axios-mock-adapter/issues/400
 	return new MockAdapter(axios, { onNoMatch: 'throwException' });
 }

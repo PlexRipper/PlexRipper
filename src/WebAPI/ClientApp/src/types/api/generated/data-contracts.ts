@@ -950,6 +950,15 @@ export interface ResultDTOOfUserClaimsDTO {
   value?: UserClaimsDTO | null;
 }
 
+export interface ResultDTOOfValidatePlexAccountResponse {
+  errors: ErrorDTO[];
+  isFailed: boolean;
+  isSuccess: boolean;
+  reasons: ReasonDTO[];
+  successes: SuccessDTO[];
+  value?: ValidatePlexAccountResponse | null;
+}
+
 export interface ServerConnectionCheckStatusProgressDTO {
   completed: boolean;
   connectionSuccessful: boolean;
@@ -1065,6 +1074,11 @@ export interface UserClaimsDTO {
   claims: string[];
   isLoggedIn: boolean;
   userName: string;
+}
+
+export interface ValidatePlexAccountResponse {
+  isUnAuthorized: boolean;
+  plexAccountDTO: PlexAccountDTO;
 }
 
 export interface ValidatePlexServerConnectionEndpointRequest {

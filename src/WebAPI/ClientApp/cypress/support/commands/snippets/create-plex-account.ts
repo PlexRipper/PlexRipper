@@ -21,10 +21,13 @@ Cypress.Commands.add('createPlexAccount', (account: PlexAccountDTO | null) => {
 	cy.getCy('account-form-password-input').type(account.password);
 
 	// Validate Action
-	cy.intercept('POST', PlexAccountPaths.validatePlexAccountEndpoint(), {
-		statusCode: 200,
-		body: generateResultDTO({ ...account, isValidated: true, is2Fa: false }),
+	cy.interceptValidatePlexAccount({
+		partialData: {
+			isValidated: true,
+			is2Fa: false,
+		},
 	});
+
 	cy.getCy('account-dialog-validate-button').click();
 
 	// Create Action

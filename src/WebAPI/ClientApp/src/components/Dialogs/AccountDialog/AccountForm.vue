@@ -109,6 +109,7 @@
 						:text="$t('help.account-form.auth-token.text')">
 						<PasswordInputField
 							v-model="accountDialogStore.authenticationToken"
+							disable-validation
 							class="q-my-md"
 							cy="account-form-auth-token-input" />
 					</HelpRow>

@@ -103,7 +103,7 @@ const menuItems = computed(() => {
 
 	if (get(syncPlexServerMedia) && Object.keys(get(syncPlexServerMedia)).length > 0) {
 		items.push({
-			label: t('components.background-activity-toggle-button.checking-plex-server-connections'),
+			label: t('components.background-activity-toggle-button.syncing-media'),
 			icon: 'mdi-server-network',
 			cy: JobTypes.SyncServerMediaJob + 'activity-button',
 			action: () => dialogStore.openDialog(DialogType.SyncServerMediaDialog),

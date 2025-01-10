@@ -1,7 +1,7 @@
 import type { Context } from 'vm';
 import Log from 'consola';
 import MockAdapter from 'axios-mock-adapter';
-import Axios from 'axios';
+import axios from 'axios';
 import type { MockConfig } from '@mock';
 import type IAppConfig from '@class/IAppConfig';
 
@@ -43,5 +43,6 @@ export function baseSetup(): { ctx: Context; appConfig: IAppConfig } {
 }
 
 export function getAxiosMock() {
-	return new MockAdapter(Axios, { onNoMatch: 'throwException' });
+	// @ts-expect-error - https://github.com/ctimmerm/axios-mock-adapter/issues/400
+	return new MockAdapter(axios, { onNoMatch: 'throwException' });
 }

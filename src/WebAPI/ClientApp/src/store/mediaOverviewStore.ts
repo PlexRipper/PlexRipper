@@ -71,6 +71,7 @@ export const useMediaOverviewStore = defineStore('MediaOverviewStore', () => {
 			state.loading = true;
 			return iif(
 				() => state.libraryId === 0,
+				// Using defer to prevent both api calls from being executed
 				defer(() =>
 					plexMediaApi.getAllMediaByTypeEndpoint({
 						mediaType: mediaType,

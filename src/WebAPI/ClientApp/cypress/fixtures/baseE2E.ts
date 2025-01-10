@@ -63,5 +63,5 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 }
 
 export function route(path: string) {
-	return Cypress.env('BASE_URL') + path;
+	return `http://localhost:${Cypress.env('WEB_PORT')}` + path;
 }

@@ -1,3 +1,4 @@
+import Log from 'consola';
 import type { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import type { AxiosResponse } from 'axios';
@@ -8,7 +9,10 @@ import type { ErrorDTO } from '@dto';
 export function apiCheckPipe<T>(source$: Observable<AxiosResponse<T>>): Observable<ResultDTO<T>> {
 	return source$.pipe(
 		map((res) => toResultDTO<T>(res)),
-		catchError((error) => of(toResultDTO<never>(error.response))),
+		catchError((error) => {
+			Log.error('Error in API call', error);
+			return of(toResultDTO<never>(error.response));
+		}),
 		// Ensure we complete any API calls after the response has been received
 		take(1),
 	);

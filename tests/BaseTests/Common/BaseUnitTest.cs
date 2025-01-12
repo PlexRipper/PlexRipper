@@ -149,7 +149,6 @@ public class BaseUnitTest : IDisposable
 
         builder.RegisterType<Log>().As<ILog>().SingleInstance();
         builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();
-        builder.RegisterType<MockSignalRService>().As<ISignalRService>().SingleInstance();
     }
 
     /// <summary>
@@ -202,8 +201,9 @@ public class BaseUnitTest : IDisposable
             {
                 s.AddTransient(_ => mock.Create<ILog>());
                 s.AddTransient(_ => mock.Create<IPlexRipperDbContext>());
-                s.AddSingleton(_ => mock.Create<ISignalRService>());
                 s.AddTransient(_ => mock.Create<IPlexApiService>());
+                s.AddSingleton(_ => mock.Create<IMediator>());
+                s.AddSingleton(_ => mock.Mock<ISignalRService>().Object);
             });
         });
     }

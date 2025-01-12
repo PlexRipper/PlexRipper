@@ -2,9 +2,9 @@
 
 namespace PlexRipper.Application.UnitTests;
 
-public class DeletePlexAccountByIdEndpoint_UnitTests : BaseUnitTest<CreatePlexAccountEndpoint>
+public class DeletePlexAccountByIdEndpointUnitTests : BaseUnitTest
 {
-    public DeletePlexAccountByIdEndpoint_UnitTests(ITestOutputHelper output)
+    public DeletePlexAccountByIdEndpointUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

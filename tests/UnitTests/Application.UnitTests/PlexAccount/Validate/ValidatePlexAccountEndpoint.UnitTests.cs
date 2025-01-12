@@ -4,7 +4,7 @@ using PlexApi.Contracts;
 
 namespace PlexRipper.Application.UnitTests;
 
-public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest<CreatePlexAccountEndpoint>
+public class ValidatePlexAccountEndpointUnitTests : BaseUnitTest
 {
     public ValidatePlexAccountEndpointUnitTests(ITestOutputHelper output)
         : base(output) { }

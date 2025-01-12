@@ -17,7 +17,8 @@ namespace PlexRipper.Data.Migrations
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(DateTime),
-                oldType: "TEXT");
+                oldType: "TEXT"
+            );
         }
 
         /// <inheritdoc />
@@ -31,7 +32,8 @@ namespace PlexRipper.Data.Migrations
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
-                oldNullable: true);
+                oldNullable: true
+            );
         }
     }
 }

@@ -3,9 +3,9 @@ using Data.Contracts;
 
 namespace PlexRipper.Application.UnitTests;
 
-public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccountEndpoint>
+public class CreatePlexAccountEndpointUnitTests : BaseUnitTest
 {
-    public CreatePlexAccountEndpoint_UnitTests(ITestOutputHelper output)
+    public CreatePlexAccountEndpointUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]

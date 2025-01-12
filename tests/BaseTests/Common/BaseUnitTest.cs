@@ -193,6 +193,21 @@ public class BaseUnitTest : IDisposable
         mock.Mock<IPlexApiClient>().Setup(x => x.Dispose());
     }
 
+    protected T SetupEndpointUnitTest<T>()
+        where T : class, IEndpoint
+    {
+        return Factory.Create<T>(ctx =>
+        {
+            ctx.AddTestServices(s =>
+            {
+                s.AddTransient(_ => mock.Create<ILog>());
+                s.AddTransient(_ => mock.Create<IPlexRipperDbContext>());
+                s.AddSingleton(_ => mock.Create<ISignalRService>());
+                s.AddTransient(_ => mock.Create<IPlexApiService>());
+            });
+        });
+    }
+
     public virtual void Dispose()
     {
         if (IsDatabaseSetup)
@@ -209,21 +224,6 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
 
     protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(output, logEventLevel) { }
-
-    protected T SetupEndpointUnitTest<T>()
-        where T : class, IEndpoint
-    {
-        return Factory.Create<T>(ctx =>
-        {
-            ctx.AddTestServices(s =>
-            {
-                s.AddTransient(_ => mock.Create<ILog>());
-                s.AddTransient(_ => mock.Create<IPlexRipperDbContext>());
-                s.AddSingleton(_ => mock.Create<ISignalRService>());
-                s.AddTransient(_ => mock.Create<IPlexApiService>());
-            });
-        });
-    }
 
     public override void Dispose()
     {

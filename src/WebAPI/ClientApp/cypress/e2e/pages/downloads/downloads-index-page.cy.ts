@@ -2,6 +2,8 @@ import { cloneDeep } from 'lodash-es';
 import prettyBytes from 'pretty-bytes';
 import { route } from '@fixtures';
 import { DownloadStatus, MessageTypes } from '@dto';
+import { DownloadPaths } from '@api-urls';
+import { generateResultDTO } from '@mock';
 
 describe('Downloads page', () => {
 	it('Should update the download task row when the download process is updated', () => {
@@ -85,6 +87,7 @@ describe('Downloads page', () => {
 		cy.url().should('eq', route('/downloads'));
 		cy.getPageData().then((data) => {
 			const downloadTask = data.detailDownloadTasks[0];
+			cy.intercept('GET', DownloadPaths.getDownloadTaskLogsByDownloadTaskIdEndpoint(downloadTask.id), generateResultDTO([]));
 			cy.getCy(`column-actions-details-${downloadTask.id}`).click();
 			cy.getCy('download-details-dialog-status').should('contain.text', downloadTask.status);
 			cy.getCy('download-details-dialog-file-name').should('contain.text', downloadTask.fileName);

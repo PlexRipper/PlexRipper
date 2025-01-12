@@ -55,6 +55,8 @@ jobs:
                     record: true
                     browser: firefox
                     start: bun run dev
+                    parallel: true
+                    headed: true                    
                     working-directory: ./src/WebAPI/ClientApp/
                     wait-on: 'http://localhost:${{ env.PORT }}'
                 env:

@@ -1,7 +1,11 @@
+using System.Reflection;
+using Application.Contracts;
 using Autofac;
 using Data.Contracts;
 using Environment;
+using FastEndpoints;
 using Logging.Interface;
+using Microsoft.Extensions.DependencyInjection;
 using PlexApi.Contracts;
 using PlexRipper.Data;
 using PlexRipper.Identity;
@@ -145,6 +149,27 @@ public class BaseUnitTest : IDisposable
 
         builder.RegisterType<Log>().As<ILog>().SingleInstance();
         builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();
+        builder.RegisterType<MockSignalRService>().As<ISignalRService>().SingleInstance();
+    }
+
+    /// <summary>
+    /// Useful for updating private, protected or init properties on an object.
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="propertyName"></param>
+    /// <param name="newValue"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <exception cref="InvalidOperationException"></exception>
+    protected static void UpdateInitProperty<T>(T obj, string propertyName, object newValue)
+    {
+        var property = obj.GetType()
+            .GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (property == null || !property.CanWrite)
+        {
+            throw new InvalidOperationException($"Property '{propertyName}' not found or cannot be written to.");
+        }
+
+        property.SetValue(obj, newValue);
     }
 
     protected void SetupHttpClient(Action<Mock<HttpMessageHandler>>? action = null)
@@ -184,6 +209,21 @@ public class BaseUnitTest<TUnitTestClass> : BaseUnitTest
 
     protected BaseUnitTest(ITestOutputHelper output, LogEventLevel logEventLevel = LogEventLevel.Verbose)
         : base(output, logEventLevel) { }
+
+    protected T SetupEndpointUnitTest<T>()
+        where T : class, IEndpoint
+    {
+        return Factory.Create<T>(ctx =>
+        {
+            ctx.AddTestServices(s =>
+            {
+                s.AddTransient(_ => mock.Create<ILog>());
+                s.AddTransient(_ => mock.Create<IPlexRipperDbContext>());
+                s.AddSingleton(_ => mock.Create<ISignalRService>());
+                s.AddTransient(_ => mock.Create<IPlexApiService>());
+            });
+        });
+    }
 
     public override void Dispose()
     {

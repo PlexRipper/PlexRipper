@@ -1,8 +1,5 @@
 ﻿using Application.Contracts;
 using Data.Contracts;
-using FastEndpoints;
-using Logging.Interface;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace PlexRipper.Application.UnitTests;
 
@@ -20,21 +17,13 @@ public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccoun
 
         mock.SetupMediator(It.IsAny<InspectAllPlexServersByAccountIdCommand>).ReturnsAsync(Result.Ok());
 
-        var ep = Factory.Create<CreatePlexAccountEndpoint>(ctx =>
-        {
-            ctx.AddTestServices(s =>
-            {
-                s.AddTransient(_ => mock.Create<ILog>());
-                s.AddTransient(_ => mock.Create<IMediator>());
-                s.AddTransient(_ => mock.Create<IPlexRipperDbContext>());
-            });
-        });
-
-        var request = new CreatePlexAccountEndpointRequest() { PlexAccount = newAccount.ToDTO() };
-
         // Act
-        await ep.HandleAsync(request, default);
-        var result = ep.Response;
+        var endPoint = SetupEndpointUnitTest<CreatePlexAccountEndpoint>();
+        await endPoint.HandleAsync(
+            new CreatePlexAccountEndpointRequest() { PlexAccount = newAccount.ToDTO() },
+            CancellationToken.None
+        );
+        var result = endPoint.Response;
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -52,21 +41,13 @@ public class CreatePlexAccountEndpoint_UnitTests : BaseUnitTest<CreatePlexAccoun
 
         mock.SetupMediator(It.IsAny<InspectAllPlexServersByAccountIdCommand>).ReturnsAsync(Result.Ok());
 
-        var ep = Factory.Create<CreatePlexAccountEndpoint>(ctx =>
-        {
-            ctx.AddTestServices(s =>
-            {
-                s.AddTransient(_ => mock.Create<ILog>());
-                s.AddTransient(_ => mock.Create<IMediator>());
-                s.AddTransient(_ => mock.Create<IPlexRipperDbContext>());
-            });
-        });
-
-        var request = new CreatePlexAccountEndpointRequest { PlexAccount = newAccount.ToDTO() };
-
         // Act
-        await ep.HandleAsync(request, default);
-        var result = ep.Response;
+        var endPoint = SetupEndpointUnitTest<CreatePlexAccountEndpoint>();
+        await endPoint.HandleAsync(
+            new CreatePlexAccountEndpointRequest { PlexAccount = newAccount.ToDTO() },
+            CancellationToken.None
+        );
+        var result = endPoint.Response;
 
         // Assert
         result.IsSuccess.ShouldBeFalse();

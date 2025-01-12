@@ -47,10 +47,7 @@ jobs:
             -   uses: actions/checkout@v4
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
-
-            -   name: Start the application
-                run: bun run cypress:ci
-                
+               
             -   name: Run Cypress tests
                 uses: cypress-io/github-action@v6
                 with:

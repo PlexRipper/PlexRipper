@@ -64,8 +64,6 @@ jobs:
                     record: true
                     parallel: true
                     browser: chrome
-                    headless: true
-                    timeout-minutes: 5
                     working-directory: ./src/WebAPI/ClientApp/
                 env:
                     CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}

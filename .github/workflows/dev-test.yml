@@ -54,7 +54,7 @@ jobs:
                     install: false
                     record: true
                     browser: firefox
-                    start: bun run cypress:ci:start
+                    start: nuxi dev
                     working-directory: ./src/WebAPI/ClientApp/
                     wait-on: 'http://localhost:${{ env.PORT }}'
                 env:

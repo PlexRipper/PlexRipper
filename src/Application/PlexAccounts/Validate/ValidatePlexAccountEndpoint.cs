@@ -1,10 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
 using Application.Contracts;
 using FastEndpoints;
 using FluentValidation;
 using Logging.Interface;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using PlexApi.Contracts;
 
 namespace PlexRipper.Application;
@@ -32,7 +30,7 @@ public class ValidatePlexAccountEndpointRequest
 
 public class ValidatePlexAccountResponse
 {
-    public required bool IsUnAuthorized { get; set; } = false;
+    public required bool IsUnAuthorized { get; set; }
 
     public required PlexAccountDTO PlexAccountDTO { get; set; }
 }
@@ -106,16 +104,16 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
             return;
         }
 
+        // If the PlexAPI returns a 2fa error, we need to return a verification code to the client.
         if (validateResult.HasPlexErrorEnterVerificationCode())
         {
             plexAccount.Is2Fa = true;
-            var response = Result.Ok(
-                new ValidatePlexAccountResponse
-                {
-                    IsUnAuthorized = false,
-                    PlexAccountDTO = validateResult.Value.ToDTO(),
-                }
-            );
+
+            var response = new ValidatePlexAccountResponse
+            {
+                IsUnAuthorized = false,
+                PlexAccountDTO = plexAccount.ToDTO(),
+            };
             await SendFluentResult(Result.Ok(response), ct);
             return;
         }
@@ -123,7 +121,11 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
         // We can't directly return a 401 Unauthorized status code, as it will cause the client to log out.
         if (validateResult.Has401UnauthorizedError())
         {
-            var response = new ValidatePlexAccountResponse { IsUnAuthorized = true, PlexAccountDTO = req.PlexAccount };
+            var response = new ValidatePlexAccountResponse
+            {
+                IsUnAuthorized = true,
+                PlexAccountDTO = plexAccount.ToDTO(),
+            };
             await SendFluentResult(Result.Ok(response), ct);
             return;
         }

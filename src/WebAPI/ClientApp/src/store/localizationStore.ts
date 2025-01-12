@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 import { get } from '@vueuse/core';
 import type { ISetupResult, ILocaleConfig, I18nObjectType } from '@interfaces';
 import { useSettingsStore } from '@store';
+import { cloneDeep } from 'lodash-es';
 
 interface ILocalizationStoreState {
 	i18nRef: I18nObjectType;

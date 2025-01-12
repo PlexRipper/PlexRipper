@@ -23,6 +23,7 @@ import {
 	useSignalrStore,
 	useAuthenticationStore,
 } from '@store';
+import { cloneDeep } from 'lodash-es';
 
 interface IAppConfigStoreState {
 	version: string;

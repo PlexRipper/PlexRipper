@@ -12,7 +12,12 @@
 import type { RequestParams } from "./http-client";
 import { ContentType } from "./http-client";
 
-import type { PlexAccountDTO, ResultDTO, ValidatePlexAccountResponse } from "./data-contracts";
+import type {
+  GeneratePlexTokenResponse,
+  PlexAccountDTO,
+  ResultDTO,
+  ValidatePlexAccountResponse,
+} from "./data-contracts";
 
 import { apiCheckPipe } from "@api/base";
 import Axios from "axios";
@@ -137,7 +142,7 @@ export class PlexAccount {
     params: RequestParams = {},
   ) =>
     from(
-      Axios.request<String>({
+      Axios.request<GeneratePlexTokenResponse>({
         url: `/api/PlexAccount/generate-token/${plexAccountId}`,
         method: "GET",
         params: query,
@@ -145,7 +150,7 @@ export class PlexAccount {
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<String>);
+    ).pipe(apiCheckPipe<GeneratePlexTokenResponse>);
 
   /**
    * No description

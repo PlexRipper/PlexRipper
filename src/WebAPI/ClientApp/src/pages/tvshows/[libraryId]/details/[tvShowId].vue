@@ -94,6 +94,7 @@ import { take } from 'rxjs/operators';
 import { type PlexMediaDTO, PlexMediaType } from '@dto';
 import { useRouter } from 'vue-router';
 import type { IMediaOverviewBarActions } from '@interfaces';
+import { sum } from 'lodash';
 import {
 	definePageMeta, listenMediaOverviewDownloadCommand, useDialogStore, useDownloadStore,
 	useI18n,

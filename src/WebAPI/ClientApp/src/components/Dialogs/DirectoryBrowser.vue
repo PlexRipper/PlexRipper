@@ -123,6 +123,7 @@ import { FileSystemEntityType } from '@dto';
 import { folderPathApi } from '@api';
 import { DialogType } from '@enums';
 import { useDialogStore } from '@store';
+import { cloneDeep } from 'lodash-es';
 
 const { t } = useI18n();
 const dialogStore = useDialogStore();

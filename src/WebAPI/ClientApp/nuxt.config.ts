@@ -22,9 +22,9 @@ export default defineNuxtConfig({
 	ssr: false,
 
 	/*
-       ** Auto-import components
-       *  Doc: https://github.com/nuxt/components
-       */
+           ** Auto-import components
+           *  Doc: https://github.com/nuxt/components
+           */
 	components: {
 		dirs: [
 			// Components directory
@@ -161,12 +161,6 @@ export default defineNuxtConfig({
 		],
 		vueI18n: './src/config/vueI18n.config.ts',
 		strategy: 'no_prefix',
-	},
-
-	lodash: {
-		prefix: false,
-		prefixSkip: false,
-		upperAfterPrefix: false,
 	},
 	primevue: {
 		importTheme: { from: '@/assets/scss/primevue/plexripper-theme.ts' },

@@ -94,7 +94,7 @@ function requestToken(verificationCode: string = '') {
 			}
 
 			if (isSuccess) {
-				set(generatedToken, value);
+				set(generatedToken, value?.plexAuthToken ?? '');
 			}
 		},
 	}));

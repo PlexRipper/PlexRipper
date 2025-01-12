@@ -56,13 +56,14 @@ jobs:
                     browser: firefox
                     start: bun run cypress:ci:start
                     working-directory: ./src/WebAPI/ClientApp/
-                    wait-on: 'http://localhost:${{ env.CYPRESS_WEB_PORT }}'
+                    wait-on: 'http://localhost:${{ env.PORT }}'
                 env:
                     CYPRESS_NODE_ENV: development
                     CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
                     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
                     CYPRESS_WEB_PORT: 3035
                     CYPRESS_API_PORT: 3035
+                    PORT: 3035
     # Back-End Unit Tests
     Back-End-Unit-Tests:
         runs-on: ubuntu-latest

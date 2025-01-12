@@ -57,7 +57,8 @@ jobs:
             -   name: Run Cypress tests
                 uses: cypress-io/github-action@v6
                 with:
-                    wait-on: 'http://localhost:3030'
+                    wait-on: 'http://localhost:3035'
+                    install: bun install
                     build: bun run build
                     start: bun run cypress:ci
                     command: bun run cypress:run

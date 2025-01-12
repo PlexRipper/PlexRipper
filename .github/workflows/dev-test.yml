@@ -46,10 +46,6 @@ jobs:
             run:
                 working-directory: src/WebAPI/ClientApp/
         runs-on: ubuntu-latest
-        strategy:
-            fail-fast: false # https://github.com/cypress-io/github-action/issues/48
-            matrix:
-                containers: [ 1, 2 ] # Uses 2 parallel instances
         steps:
             -   uses: actions/checkout@v4
             -   name: Client App Install
@@ -58,7 +54,7 @@ jobs:
                 uses: cypress-io/github-action@v6
                 with:
                     wait-on: 'http://localhost:3035'
-                    install: bun install
+                    install: false
                     build: bun run build
                     start: bun run cypress:ci
                     command: bun run cypress:run

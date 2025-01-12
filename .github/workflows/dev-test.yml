@@ -50,12 +50,13 @@ jobs:
             -   uses: actions/checkout@v4
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
+            -   name: Start the application
+                run: bun run cypress:ci
             -   name: Run Cypress tests
                 uses: cypress-io/github-action@v6
                 with:
                     wait-on: 'http://localhost:3035'
                     install: false
-                    command: bun run cypress:ci
                     record: true
                     browser: chrome
                     working-directory: ./src/WebAPI/ClientApp/
@@ -102,7 +103,7 @@ jobs:
                     fi
     # Ensure the Docker image can be built without errors
     Test-Docker-Build:
-        needs: [ Front-End-Unit-Tests, Front-End-Type-Check, Front-End-Eslint-Check, Back-End-Unit-Tests, Back-End-Integration-Tests ]
+        needs: [ Front-End-Type-Check, Front-End-Eslint-Check, Front-End-Unit-Tests, Front-End-Integration-Tests, Back-End-Unit-Tests, Back-End-Integration-Tests ]
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout Source Code

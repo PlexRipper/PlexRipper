@@ -55,11 +55,8 @@ jobs:
                 with:
                     wait-on: 'http://localhost:3035'
                     install: false
-                    build: bun run build
-                    start: bun run cypress:ci
-                    command: bun run cypress:run
+                    command: bun run cypress:ci
                     record: true
-                    parallel: true
                     browser: chrome
                     working-directory: ./src/WebAPI/ClientApp/
                 env:

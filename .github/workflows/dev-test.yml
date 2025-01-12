@@ -63,8 +63,8 @@ jobs:
                     CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
                     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
                     PORT: 3035
-                    CYPRESS_WEB_PORT: ${env.PORT}
-                    CYPRESS_API_PORT: ${env.PORT}
+                    CYPRESS_WEB_PORT: 3035
+                    CYPRESS_API_PORT: 3035
 
     # Back-End Unit Tests
     Back-End-Unit-Tests:

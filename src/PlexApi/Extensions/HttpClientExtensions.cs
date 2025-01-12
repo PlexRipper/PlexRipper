@@ -18,6 +18,7 @@ public static class HttpClientExtensions
             return Result.Ok(mapper(response.Value)).AddStatusCode(statusCode);
         }
 
+        // TODO Might need to add more error handling here such as AddStatusCode
         return response.ToResult();
     }
 

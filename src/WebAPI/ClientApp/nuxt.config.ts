@@ -10,7 +10,6 @@ export default defineNuxtConfig({
 		'@vueuse/nuxt', // Doc: https://i18n.nuxtjs.org/
 		'@primevue/nuxt-module',
 		'@nuxtjs/i18n',
-		'nuxt-lodash',
 		'@nuxt/test-utils/module',
 		[
 			'@pinia/nuxt',
@@ -23,9 +22,9 @@ export default defineNuxtConfig({
 	ssr: false,
 
 	/*
-     ** Auto-import components
-     *  Doc: https://github.com/nuxt/components
-     */
+       ** Auto-import components
+       *  Doc: https://github.com/nuxt/components
+       */
 	components: {
 		dirs: [
 			// Components directory

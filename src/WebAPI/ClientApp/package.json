@@ -78,7 +78,6 @@
     "cypress-vite": "^1.5.0",
     "happy-dom": "^15.11.7",
     "nuxt": "3.14.1592",
-    "nuxt-lodash": "^2.5.3",
     "nuxt-quasar-ui": "^2.1.9",
     "sass": "^1.83.1",
     "sass-loader": "^16.0.4",

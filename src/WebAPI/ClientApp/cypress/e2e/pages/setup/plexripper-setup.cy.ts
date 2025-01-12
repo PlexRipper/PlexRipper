@@ -1,5 +1,5 @@
 import { route } from '@fixtures';
-import { AuthenticationPaths, SettingsPaths } from '@api/api-paths';
+import { AuthenticationPaths } from '@api/api-paths';
 import { generateResultDTO } from '@mock';
 import type { AppCredentialsDTO } from '@dto';
 import { randPassword } from '@ngneat/falso';

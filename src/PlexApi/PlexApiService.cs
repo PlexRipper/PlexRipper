@@ -300,7 +300,7 @@ public class PlexApiService : IPlexApiService
         if (plexAccount.AuthenticationToken != string.Empty)
         {
             // TODO:Make the token refresh limit configurable
-            if ((plexAccount.ValidatedAt - DateTime.UtcNow).TotalDays < 30)
+            if ((plexAccount.ValidatedAt - DateTime.UtcNow)?.TotalDays < 30)
             {
                 _log.InformationLine("Plex AuthToken was still valid, using from local DB");
                 return plexAccount.AuthenticationToken;

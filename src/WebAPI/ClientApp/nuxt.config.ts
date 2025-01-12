@@ -3,7 +3,6 @@ import { defineNuxtConfig } from 'nuxt/config';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-
 	modules: [
 		// Doc: https://github.com/Maiquu/nuxt-quasar
 		'nuxt-quasar-ui', // Doc: https://primevue.org/nuxt/
@@ -20,11 +19,6 @@ export default defineNuxtConfig({
 		'@nuxt/eslint',
 	],
 	ssr: false,
-
-	/*
-           ** Auto-import components
-           *  Doc: https://github.com/nuxt/components
-           */
 	components: {
 		dirs: [
 			// Components directory

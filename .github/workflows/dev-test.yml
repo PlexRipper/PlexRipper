@@ -47,25 +47,25 @@ jobs:
             -   uses: actions/checkout@v4
             -   name: Client App Install
                 uses: ./.github/workflows/steps/client-app-install/
-               
             -   name: Run Cypress tests
                 uses: cypress-io/github-action@v6
                 with:
                     install: false
                     record: true
                     browser: firefox
-                    start: bun run dev
+                    start: bun run static-server
                     parallel: true
-                    headed: true                    
+                    headed: true
                     working-directory: ./src/WebAPI/ClientApp/
                     wait-on: 'http://localhost:${{ env.PORT }}'
                 env:
                     CYPRESS_NODE_ENV: development
                     CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
                     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-                    CYPRESS_WEB_PORT: 3035
-                    CYPRESS_API_PORT: 3035
                     PORT: 3035
+                    CYPRESS_WEB_PORT: ${env.PORT}
+                    CYPRESS_API_PORT: ${env.PORT}
+
     # Back-End Unit Tests
     Back-End-Unit-Tests:
         runs-on: ubuntu-latest

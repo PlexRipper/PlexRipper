@@ -115,14 +115,14 @@ describe('PlexRipper new setup process', () => {
 			cy.getCy('setup-header-tab-6').click();
 			cy.getCy('setup-panel-6').should('be.visible');
 
-			cy.getCy('setup-page-skip-setup-button').click();
-			cy.url().should('eq', route('/'));
-
 			// Ensure disclaimer is sent to the server
 			cy.awaitSettingsUpdate().then(() => {
 				expect(settings.generalSettings.firstTimeSetup).to.eq(false);
 				expect(settings.generalSettings.hasAgreedToDisclaimer).to.eq(true);
 			});
+
+			cy.getCy('setup-page-skip-setup-button').click();
+			cy.url().should('eq', route('/'));
 		});
 	});
 });

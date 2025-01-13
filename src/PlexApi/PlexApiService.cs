@@ -253,20 +253,8 @@ public class PlexApiService : IPlexApiService
     public Task<Result<PlexAccount>> PlexSignInAsync(PlexAccount plexAccount) =>
         _plexApiWrapper.PlexSignInAsync(plexAccount);
 
-    public async Task<Result<PlexAccount>> ValidatePlexToken(PlexAccount plexAccount)
-    {
-        var result = await _plexApiWrapper.ValidatePlexToken(plexAccount, plexAccount.AuthenticationToken);
-
-        if (result.IsSuccess)
-        {
-            _log.Information(
-                "Successfully validated the PlexAccount Authentication Token for user {PlexAccountDisplayName} from the PlexApi",
-                plexAccount.DisplayName
-            );
-        }
-
-        return result;
-    }
+    public async Task<Result<PlexAccount>> ValidatePlexToken(PlexAccount plexAccount) =>
+        await _plexApiWrapper.ValidatePlexToken(plexAccount, plexAccount.AuthenticationToken);
 
     public async Task<Result<ServerIdentityDTO>> ValidatePlexConnection(string plexServerConnection)
     {
@@ -300,7 +288,7 @@ public class PlexApiService : IPlexApiService
         if (plexAccount.AuthenticationToken != string.Empty)
         {
             // TODO:Make the token refresh limit configurable
-            if ((plexAccount.ValidatedAt - DateTime.UtcNow).TotalDays < 30)
+            if ((plexAccount.ValidatedAt - DateTime.UtcNow)?.TotalDays < 30)
             {
                 _log.InformationLine("Plex AuthToken was still valid, using from local DB");
                 return plexAccount.AuthenticationToken;

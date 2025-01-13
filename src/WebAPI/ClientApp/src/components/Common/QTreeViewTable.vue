@@ -33,6 +33,7 @@
 <script setup lang="ts">
 import { QTree } from 'quasar';
 import { get } from '@vueuse/core';
+import { flatMapDeep } from 'lodash-es';
 import type { QTreeViewTableHeader, QTreeViewTableItem } from '@props';
 
 defineOptions({
@@ -69,12 +70,12 @@ const emits = defineEmits<{
 	(e: 'update:model-value', payload: boolean): void;
 	(e: 'action', payload: { action: string; data: QTreeViewTableItem }): void;
 	/**
-	 * Emitted when the user selects a group of items, e.g. by selecting the root node.
-	 * The payload is an aggregation of ids of the selected items.
-	 * When all the episodes of a season are selected, then payload will only contain the id the season.
-	 * @param e
-	 * @param payload
-	 */
+   * Emitted when the user selects a group of items, e.g. by selecting the root node.
+   * The payload is an aggregation of ids of the selected items.
+   * When all the episodes of a season are selected, then payload will only contain the id the season.
+   * @param e
+   * @param payload
+   */
 	(e: 'selected' | 'aggregate-selected', payload: number[]): void;
 }>();
 

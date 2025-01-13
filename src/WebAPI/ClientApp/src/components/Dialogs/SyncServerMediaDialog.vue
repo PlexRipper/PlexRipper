@@ -113,6 +113,7 @@ import type {
 	PlexMediaType,
 } from '@dto';
 import { DialogType } from '@enums';
+import { sum } from 'lodash-es';
 import {
 	useI18n,
 	useServerStore,

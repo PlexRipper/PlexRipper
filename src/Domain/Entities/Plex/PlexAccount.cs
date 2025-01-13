@@ -60,7 +60,7 @@ public class PlexAccount : BaseEntity
     public required bool IsValidated { get; set; }
 
     [Column(Order = 6)]
-    public required DateTime ValidatedAt { get; init; }
+    public required DateTime? ValidatedAt { get; init; }
 
     [Column(Order = 7)]
     public required long PlexId { get; init; }

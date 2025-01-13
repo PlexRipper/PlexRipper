@@ -262,7 +262,8 @@
         },
         "background-activity-toggle-button": {
             "checking-plex-server-connections": "Sprawdzanie połączeń z serwerem Plex",
-            "no-active-background-activity": "Brak aktywnych działań w tle."
+            "no-active-background-activity": "Brak aktywnych działań w tle.",
+            "syncing-media": "Synchronizacja danych multimedialnych z serwera Plex"
         },
         "media-overview-bar-header": {
             "movies-metadata": "{movieCount} Filmy - {fileSize} ",

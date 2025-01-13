@@ -1,9 +1,21 @@
 import { randCompanyName, randMovie, randNumber, randRecentDate, randSentence, randUuid } from '@ngneat/falso';
-import { times, uniqueId } from 'lodash-es';
+import { kebabCase, sortBy, times, uniqueId } from 'lodash-es';
 import { checkConfig, incrementSeed, type MockConfig } from '@mock';
-import { PlexMediaType, type PlexMediaSlimDTO, type PlexMediaDTO } from '@dto';
+import { PlexMediaType, type PlexMediaSlimDTO, type PlexMediaDTO, type PlexMediaStatisticsDTO } from '@dto';
 
-export function generatePlexMediaSlim({
+export function generatePlexMediaStatisticsDTO(mediaList: PlexMediaSlimDTO[]): PlexMediaStatisticsDTO {
+	return {
+		mediaList: mediaList,
+		mediaCount: mediaList.length,
+		movieCount: mediaList.filter((x) => x.type === PlexMediaType.Movie).length,
+		tvShowCount: mediaList.filter((x) => x.type === PlexMediaType.TvShow).length,
+		seasonCount: mediaList.filter((x) => x.type === PlexMediaType.Season).length,
+		episodeCount: mediaList.filter((x) => x.type === PlexMediaType.Episode).length,
+		mediaSize: mediaList.reduce((acc, x) => acc + x.mediaSize, 0),
+	};
+}
+
+function generatePlexMediaSlim({
 	config = {},
 	partialData,
 }: {
@@ -25,7 +37,7 @@ export function generatePlexMediaSlim({
 		plexLibraryId: partialData?.plexLibraryId || 0,
 		sortIndex: 0,
 		title,
-		searchTitle: title.toLowerCase(),
+		searchTitle: kebabCase(title).toLowerCase(),
 		year: randNumber({ min: 1900, max: 2023 }),
 		type: partialData?.type || PlexMediaType.Unknown,
 		plexServerId: partialData?.plexServerId || 0,
@@ -105,7 +117,7 @@ export function generatePlexMediaSlims({
 	config = {},
 	partialData,
 }: {
-	partialData: Pick<PlexMediaSlimDTO, 'plexServerId' | 'plexLibraryId' | 'type'> & Partial<PlexMediaSlimDTO>;
+	partialData: Partial<PlexMediaSlimDTO> & Pick<PlexMediaSlimDTO, 'plexServerId' | 'plexLibraryId' | 'type'>;
 	config?: Partial<MockConfig>;
 }): PlexMediaSlimDTO[] {
 	const validConfig = checkConfig(config);
@@ -128,19 +140,18 @@ export function generatePlexMediaSlims({
 	}
 
 	let index = 1;
-	return times(count, () =>
+	const media = sortBy(times(count, () =>
 		generatePlexMediaSlim({
 			config,
 			partialData,
 		}),
-	)
-		.sort((a, b) => a.sortIndex.toString().localeCompare(b.sortIndex.toString()))
-		.map((x) => {
-			return {
-				...x,
-				index: index++,
-			};
-		});
+	), (x) => x.searchTitle);
+
+	for (const media1 of media) {
+		media1.sortIndex = index++;
+	}
+
+	return media;
 }
 
 export function generatePlexMedias({

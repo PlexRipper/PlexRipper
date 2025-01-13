@@ -1,11 +1,10 @@
 using System.Net;
-using System.Net.Http.Json;
 using Application.Contracts;
 using FastEndpoints;
 using Moq.Contrib.HttpClient;
 using PlexRipper.Application;
 
-namespace IntegrationTests.WebAPI.AccountController;
+namespace IntegrationTests.AccountController;
 
 public class ValidateAccountIntegrationTests : BaseIntegrationTests
 {
@@ -44,7 +43,7 @@ public class ValidateAccountIntegrationTests : BaseIntegrationTests
         var response = await client.POSTAsync<
             ValidatePlexAccountEndpoint,
             ValidatePlexAccountEndpointRequest,
-            ResultDTO<PlexAccountDTO>
+            ResultDTO<ValidatePlexAccountResponse>
         >(new ValidatePlexAccountEndpointRequest(plexAccountDTO));
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
         var result = response.Result;
@@ -54,7 +53,7 @@ public class ValidateAccountIntegrationTests : BaseIntegrationTests
     }
 
     [Fact]
-    public async Task ShouldInValidatePlexAccountWithErrors_WhenGivenInValidCredentials()
+    public async Task ShouldReturnFailedResultWithErrorsButNot401_WhenGivenInValidCredentials()
     {
         // Arrange
         var seed = new Seed(4347564);
@@ -83,14 +82,15 @@ public class ValidateAccountIntegrationTests : BaseIntegrationTests
         var response = await client.POSTAsync<
             ValidatePlexAccountEndpoint,
             ValidatePlexAccountEndpointRequest,
-            ResultDTO<PlexAccountDTO>
+            ResultDTO<ValidatePlexAccountResponse>
         >(new ValidatePlexAccountEndpointRequest(plexAccountDTO));
-        response.Response.IsSuccessStatusCode.ShouldBeFalse();
+        response.Response.IsSuccessStatusCode.ShouldBeTrue();
         var result = response.Result;
 
         // Assert
-        result.IsSuccess.ShouldBeFalse();
-        result.Errors.Count.ShouldBe(2);
-        response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value.IsUnAuthorized.ShouldBeTrue();
+        response.Response.StatusCode.ShouldNotBe(HttpStatusCode.Unauthorized);
     }
 }

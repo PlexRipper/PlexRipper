@@ -16,7 +16,7 @@ public class PlexAccountDTO
 
     public required bool IsValidated { get; set; }
 
-    public required DateTime ValidatedAt { get; set; }
+    public required DateTime? ValidatedAt { get; set; }
 
     public required string Uuid { get; set; }
 

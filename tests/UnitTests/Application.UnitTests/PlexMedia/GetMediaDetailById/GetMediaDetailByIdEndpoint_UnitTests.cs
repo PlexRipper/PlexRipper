@@ -32,14 +32,11 @@ public class GetMediaDetailByIdEndpoint_UnitTests : BaseUnitTest<GetMediaDetailB
         var testMovie = IDbContext.PlexMovies.FirstOrDefault(x => x.HasThumb);
         testMovie.ShouldNotBeNull();
 
-        var ep = Factory.Create<GetMediaDetailByIdEndpoint>(ctx =>
-            ctx.AddTestServices(s => s.AddTransient(_ => mock.Create<IPlexRipperDbContext>()))
-        );
-
         var request = new GetMediaDetailByIdEndpointRequest(testMovie.Id, PlexMediaType.Movie);
 
         // Act
-        await ep.HandleAsync(request, default);
+        var ep = SetupEndpointUnitTest<GetMediaDetailByIdEndpoint>();
+        await ep.HandleAsync(request, CancellationToken.None);
         var result = ep.Response as ResultDTO<PlexMediaDTO>;
 
         // Assert
@@ -71,14 +68,11 @@ public class GetMediaDetailByIdEndpoint_UnitTests : BaseUnitTest<GetMediaDetailB
         var testTvShow = IDbContext.PlexTvShows.FirstOrDefault(x => x.HasThumb);
         testTvShow.ShouldNotBeNull();
 
-        var ep = Factory.Create<GetMediaDetailByIdEndpoint>(ctx =>
-            ctx.AddTestServices(s => s.AddTransient(_ => mock.Create<IPlexRipperDbContext>()))
-        );
-
         var request = new GetMediaDetailByIdEndpointRequest(testTvShow.Id, PlexMediaType.TvShow);
 
         // Act
-        await ep.HandleAsync(request, default);
+        var ep = SetupEndpointUnitTest<GetMediaDetailByIdEndpoint>();
+        await ep.HandleAsync(request, CancellationToken.None);
         var result = ep.Response as ResultDTO<PlexMediaDTO>;
 
         // Assert

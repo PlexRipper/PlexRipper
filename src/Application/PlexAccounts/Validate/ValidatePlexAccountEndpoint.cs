@@ -28,6 +28,13 @@ public class ValidatePlexAccountEndpointRequest
     public PlexAccountDTO PlexAccount { get; init; }
 }
 
+public class ValidatePlexAccountResponse
+{
+    public required bool IsUnAuthorized { get; set; }
+
+    public required PlexAccountDTO PlexAccountDTO { get; set; }
+}
+
 public class ValidatePlexAccountEndpointRequestValidator : Validator<ValidatePlexAccountEndpointRequest>
 {
     public ValidatePlexAccountEndpointRequestValidator()
@@ -36,16 +43,16 @@ public class ValidatePlexAccountEndpointRequestValidator : Validator<ValidatePle
         RuleFor(x => x.PlexAccount.Username)
             .NotEmpty()
             .MinimumLength(5)
-            .When(m => string.IsNullOrEmpty(m.PlexAccount?.AuthenticationToken));
+            .When(m => string.IsNullOrEmpty(m.PlexAccount.AuthenticationToken));
 
         RuleFor(x => x.PlexAccount.Password)
             .NotEmpty()
             .MinimumLength(5)
-            .When(m => string.IsNullOrEmpty(m.PlexAccount?.AuthenticationToken));
+            .When(m => string.IsNullOrEmpty(m.PlexAccount.AuthenticationToken));
     }
 }
 
-public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpointRequest, PlexAccountDTO>
+public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpointRequest, ValidatePlexAccountResponse>
 {
     private readonly ILog _log;
     private readonly IPlexApiService _plexApiService;
@@ -63,7 +70,7 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
         Post(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<PlexAccountDTO>))
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<ValidatePlexAccountResponse>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
                 .Produces(StatusCodes.Status401Unauthorized, typeof(ResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
@@ -76,33 +83,81 @@ public class ValidatePlexAccountEndpoint : BaseEndpoint<ValidatePlexAccountEndpo
 
         Result<PlexAccount> validateResult;
         if (plexAccount.IsAuthTokenMode)
-            validateResult = await _plexApiService.ValidatePlexToken(plexAccount);
-        else
-            validateResult = await _plexApiService.PlexSignInAsync(plexAccount);
-
-        if (validateResult.IsSuccess)
         {
-            _log.Debug(
-                "The PlexAccount with displayName {PlexAccountDisplayName} has been validated",
+            validateResult = await _plexApiService.ValidatePlexToken(plexAccount);
+            if (validateResult.IsSuccess)
+            {
+                _log.Information(
+                    "Successfully validated the PlexAccount Authentication Token for user {PlexAccountDisplayName} from the PlexApi",
+                    plexAccount.DisplayName
+                );
+
+                var response = Result.Ok(
+                    new ValidatePlexAccountResponse
+                    {
+                        IsUnAuthorized = false,
+                        PlexAccountDTO = validateResult.Value.ToDTO(),
+                    }
+                );
+                await SendFluentResult(response, ct);
+                return;
+            }
+
+            _log.Warning(
+                "Failed to validate the PlexAccount Authentication Token for user {PlexAccountDisplayName} from the PlexApi",
                 plexAccount.DisplayName
             );
-            await SendFluentResult(validateResult, x => x.ToDTO(), ct);
-            return;
         }
-
-        if (validateResult.HasPlexErrorEnterVerificationCode())
+        else
         {
-            plexAccount.Is2Fa = true;
-            await SendFluentResult(Result.Ok(plexAccount), x => x.ToDTO(), ct);
-            return;
+            validateResult = await _plexApiService.PlexSignInAsync(plexAccount);
+
+            if (validateResult.IsSuccess)
+            {
+                _log.Debug(
+                    "The PlexAccount with displayName {PlexAccountDisplayName} has been validated",
+                    plexAccount.DisplayName
+                );
+                var response = Result.Ok(
+                    new ValidatePlexAccountResponse
+                    {
+                        IsUnAuthorized = false,
+                        PlexAccountDTO = validateResult.Value.ToDTO(),
+                    }
+                );
+                await SendFluentResult(response, ct);
+                return;
+            }
+
+            // If the PlexAPI returns a 2fa error, we need to return a verification code to the client.
+            if (validateResult.HasPlexErrorEnterVerificationCode())
+            {
+                plexAccount.Is2Fa = true;
+
+                var response = new ValidatePlexAccountResponse
+                {
+                    IsUnAuthorized = false,
+                    PlexAccountDTO = plexAccount.ToDTO(),
+                };
+                await SendFluentResult(Result.Ok(response), ct);
+                return;
+            }
         }
 
-        if (validateResult.IsFailed)
+        // We can't directly return a 401 Unauthorized status code, as it will cause the client to log out.
+        if (validateResult.Has401UnauthorizedError())
         {
-            await SendFluentResult(validateResult.ToResult(), ct);
+            var response = new ValidatePlexAccountResponse
+            {
+                IsUnAuthorized = true,
+                PlexAccountDTO = plexAccount.ToDTO(),
+            };
+            await SendFluentResult(Result.Ok(response), ct);
             return;
         }
 
-        await SendFluentResult(validateResult, x => x.ToDTO(), ct);
+        var result = Result.Ok();
+        result.WithErrors(validateResult.Errors.FindAll(x => x.GetType() == typeof(PlexError)));
+        await SendFluentResult(result, ct);
     }
 }

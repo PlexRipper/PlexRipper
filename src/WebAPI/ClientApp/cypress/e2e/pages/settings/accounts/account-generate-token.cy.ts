@@ -1,6 +1,6 @@
 import { route } from '@fixtures';
 import { generateFailedResultDTO, generateResultDTO } from '@mock';
-import type { PlexAccountDTO } from '@dto';
+import type { GeneratePlexTokenResponse, PlexAccountDTO } from '@dto';
 import { PlexAccountPaths } from '@api-urls';
 
 describe('Add Plex account to PlexRipper', () => {
@@ -21,7 +21,9 @@ describe('Add Plex account to PlexRipper', () => {
 
 			cy.intercept('GET', PlexAccountPaths.generatePlexTokenEndpoint(account.id, { verificationCode: '' }), {
 				statusCode: 200,
-				body: generateResultDTO('some-plex-api-token'),
+				body: generateResultDTO({
+					plexAuthToken: 'some-plex-api-token',
+				} as GeneratePlexTokenResponse),
 			});
 
 			cy.getCy('account-dialog-generate-token-button').click();
@@ -37,17 +39,9 @@ describe('Add Plex account to PlexRipper', () => {
 			cy.getCy('account-card-id-' + account.id).click();
 
 			cy.intercept('GET', PlexAccountPaths.generatePlexTokenEndpoint(account.id, { verificationCode: '' }), {
-				statusCode: 401,
+				statusCode: 200,
 				body: generateFailedResultDTO({
 					errors: [
-						{
-							reasons: [],
-							message: 'Unauthorized',
-							metadata: {
-								StatusCode: 401,
-								ErrorMessage: 'Unauthorized',
-							},
-						},
 						{
 							reasons: [],
 							message: 'Please enter the verification code',
@@ -65,7 +59,9 @@ describe('Add Plex account to PlexRipper', () => {
 
 			cy.intercept('GET', PlexAccountPaths.generatePlexTokenEndpoint(account.id, { verificationCode: '123456' }), {
 				statusCode: 200,
-				body: generateResultDTO('some-plex-api-token'),
+				body: generateResultDTO({
+					plexAuthToken: 'some-plex-api-token',
+				} as GeneratePlexTokenResponse),
 			});
 
 			cy.get(':nth-child(1) > [data-test="single-input"]').type('123456');

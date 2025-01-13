@@ -99,6 +99,7 @@
 import { get, set } from '@vueuse/core';
 import { DialogType } from '@enums';
 import { useMediaOverviewStore } from '@store';
+import { clamp } from 'lodash-es';
 
 const mediaOverviewStore = useMediaOverviewStore();
 

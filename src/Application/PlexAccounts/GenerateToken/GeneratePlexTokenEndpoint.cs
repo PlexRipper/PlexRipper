@@ -31,7 +31,16 @@ public class GeneratePlexTokenEndpointRequestValidator : Validator<GeneratePlexT
     }
 }
 
-public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointRequest, string>
+public class GeneratePlexTokenResponse
+{
+    public required bool IsUnAuthorized { get; init; }
+
+    public required bool NeedsVerificationCode { get; init; }
+
+    public required string PlexAuthToken { get; init; }
+}
+
+public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointRequest, GeneratePlexTokenResponse>
 {
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IPlexApiService _plexApiService;
@@ -49,7 +58,7 @@ public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointR
         Get(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<string>))
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<GeneratePlexTokenResponse>))
                 .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
                 .Produces(StatusCodes.Status401Unauthorized, typeof(ResultDTO))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
@@ -75,16 +84,42 @@ public class GeneratePlexTokenEndpoint : BaseEndpoint<GeneratePlexTokenEndpointR
 
         if (validateResult.IsSuccess)
         {
-            await SendFluentResult(validateResult, x => x.AuthenticationToken, ct);
+            var response = new GeneratePlexTokenResponse
+            {
+                IsUnAuthorized = false,
+                NeedsVerificationCode = false,
+                PlexAuthToken = validateResult.Value.AuthenticationToken,
+            };
+            await SendFluentResult(Result.Ok(response), ct);
             return;
         }
 
         if (validateResult.HasPlexErrorEnterVerificationCode())
         {
-            await SendFluentResult(validateResult, ct);
+            var response = new GeneratePlexTokenResponse
+            {
+                IsUnAuthorized = false,
+                NeedsVerificationCode = true,
+                PlexAuthToken = "",
+            };
+            await SendFluentResult(Result.Ok(response), ct);
             return;
         }
 
-        await SendFluentResult(validateResult.ToResult(), ct);
+        if (validateResult.Has401UnauthorizedError())
+        {
+            var response = new GeneratePlexTokenResponse
+            {
+                IsUnAuthorized = true,
+                NeedsVerificationCode = false,
+                PlexAuthToken = "",
+            };
+            await SendFluentResult(Result.Ok(response), ct);
+            return;
+        }
+
+        var result = Result.Ok();
+        result.WithErrors(validateResult.Errors.FindAll(x => x.GetType() == typeof(PlexError)));
+        await SendFluentResult(result, ct);
     }
 }

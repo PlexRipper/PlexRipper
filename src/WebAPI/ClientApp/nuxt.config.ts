@@ -3,14 +3,12 @@ import { defineNuxtConfig } from 'nuxt/config';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-
 	modules: [
 		// Doc: https://github.com/Maiquu/nuxt-quasar
 		'nuxt-quasar-ui', // Doc: https://primevue.org/nuxt/
 		'@vueuse/nuxt', // Doc: https://i18n.nuxtjs.org/
 		'@primevue/nuxt-module',
 		'@nuxtjs/i18n',
-		'nuxt-lodash',
 		'@nuxt/test-utils/module',
 		[
 			'@pinia/nuxt',
@@ -21,11 +19,6 @@ export default defineNuxtConfig({
 		'@nuxt/eslint',
 	],
 	ssr: false,
-
-	/*
-     ** Auto-import components
-     *  Doc: https://github.com/nuxt/components
-     */
 	components: {
 		dirs: [
 			// Components directory
@@ -162,12 +155,6 @@ export default defineNuxtConfig({
 		],
 		vueI18n: './src/config/vueI18n.config.ts',
 		strategy: 'no_prefix',
-	},
-
-	lodash: {
-		prefix: false,
-		prefixSkip: false,
-		upperAfterPrefix: false,
 	},
 	primevue: {
 		importTheme: { from: '@/assets/scss/primevue/plexripper-theme.ts' },

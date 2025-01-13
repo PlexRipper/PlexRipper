@@ -104,6 +104,7 @@ import {
 import { DialogType } from '@enums';
 import { useI18n } from 'vue-i18n';
 import { useFolderPathStore, useDownloadStore, useDialogStore } from '@store';
+import { sum } from 'lodash-es';
 
 const { t } = useI18n();
 const downloadStore = useDownloadStore();

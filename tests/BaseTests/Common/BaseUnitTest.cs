@@ -1,7 +1,11 @@
+using System.Reflection;
+using Application.Contracts;
 using Autofac;
 using Data.Contracts;
 using Environment;
+using FastEndpoints;
 using Logging.Interface;
+using Microsoft.Extensions.DependencyInjection;
 using PlexApi.Contracts;
 using PlexRipper.Data;
 using PlexRipper.Identity;
@@ -147,6 +151,26 @@ public class BaseUnitTest : IDisposable
         builder.RegisterGeneric(typeof(Log<>)).As(typeof(ILog<>)).InstancePerDependency();
     }
 
+    /// <summary>
+    /// Useful for updating private, protected or init properties on an object.
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="propertyName"></param>
+    /// <param name="newValue"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <exception cref="InvalidOperationException"></exception>
+    protected static void UpdateInitProperty<T>(T obj, string propertyName, object newValue)
+    {
+        var property = obj.GetType()
+            .GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (property == null || !property.CanWrite)
+        {
+            throw new InvalidOperationException($"Property '{propertyName}' not found or cannot be written to.");
+        }
+
+        property.SetValue(obj, newValue);
+    }
+
     protected void SetupHttpClient(Action<Mock<HttpMessageHandler>>? action = null)
     {
         mock = AutoMock.GetStrict(builder =>
@@ -166,6 +190,22 @@ public class BaseUnitTest : IDisposable
 
         // Mock to avoid HttpClient.Dispose() not mocked exception
         mock.Mock<IPlexApiClient>().Setup(x => x.Dispose());
+    }
+
+    protected T SetupEndpointUnitTest<T>()
+        where T : class, IEndpoint
+    {
+        return Factory.Create<T>(ctx =>
+        {
+            ctx.AddTestServices(s =>
+            {
+                s.AddTransient(_ => mock.Create<ILog>());
+                s.AddTransient(_ => mock.Create<IPlexRipperDbContext>());
+                s.AddTransient(_ => mock.Create<IPlexApiService>());
+                s.AddSingleton(_ => mock.Create<IMediator>());
+                s.AddSingleton(_ => mock.Mock<ISignalRService>().Object);
+            });
+        });
     }
 
     public virtual void Dispose()

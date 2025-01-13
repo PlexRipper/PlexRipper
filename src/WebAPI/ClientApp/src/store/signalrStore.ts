@@ -6,7 +6,7 @@ import Log from 'consola';
 import type { HubConnection, IHttpConnectionOptions } from '@microsoft/signalr';
 import { HttpTransportType, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
 import { useCypressSignalRMock } from 'cypress-signalr-mock';
-import { isEqual } from 'lodash-es';
+import { isEqual, cloneDeep, isArray } from 'lodash-es';
 import type { ISetupResult } from '@interfaces';
 import type {
 	DataType,

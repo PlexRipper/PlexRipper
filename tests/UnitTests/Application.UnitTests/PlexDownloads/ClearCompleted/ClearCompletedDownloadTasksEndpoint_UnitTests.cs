@@ -31,11 +31,8 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
         downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
         await dbContext.SaveChangesAsync(CancellationToken.None);
 
-        var ep = Factory.Create<ClearCompletedDownloadTasksEndpoint>(ctx =>
-            ctx.AddTestServices(s => s.AddTransient(_ => mock.Create<IPlexRipperDbContext>()))
-        );
-
         // Act
+        var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksEndpoint>();
         await ep.HandleAsync(downloadTasks.Select(x => x.Id).Take(5).ToList(), default);
         var result = ep.Response;
 
@@ -70,12 +67,9 @@ public class ClearCompletedDownloadTasksEndpoint_UnitTests : BaseUnitTest<ClearC
         downloadTasks.SetDownloadStatus(DownloadStatus.Completed);
         await dbContext.SaveChangesAsync(CancellationToken.None);
 
-        var ep = Factory.Create<ClearCompletedDownloadTasksEndpoint>(ctx =>
-            ctx.AddTestServices(s => s.AddTransient(_ => mock.Create<IPlexRipperDbContext>()))
-        );
-
         // Act
-        await ep.HandleAsync(new List<Guid>(), default);
+        var ep = SetupEndpointUnitTest<ClearCompletedDownloadTasksEndpoint>();
+        await ep.HandleAsync([], CancellationToken.None);
         var result = ep.Response;
 
         // Assert

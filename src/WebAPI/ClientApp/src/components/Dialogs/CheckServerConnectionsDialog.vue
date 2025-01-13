@@ -120,6 +120,7 @@ import { useSubscription } from '@vueuse/rxjs';
 import { get, set } from '@vueuse/core';
 import { JobStatus, type ServerConnectionCheckStatusProgressDTO } from '@dto';
 import { DialogType } from '@enums';
+import { clamp } from 'lodash-es';
 import {
 	useBackgroundJobsStore,
 	useI18n,

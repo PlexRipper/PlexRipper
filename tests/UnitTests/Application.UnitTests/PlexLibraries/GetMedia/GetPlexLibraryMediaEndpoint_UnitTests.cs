@@ -29,9 +29,6 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
                 config.MovieCount = movieCount;
             }
         );
-        var ep = Factory.Create<GetPlexLibraryMediaEndpoint>(ctx =>
-            ctx.AddTestServices(s => s.AddTransient(_ => mock.Create<IPlexRipperDbContext>()))
-        );
 
         var request = new GetPlexLibraryMediaEndpointRequest()
         {
@@ -41,7 +38,8 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
         };
 
         // Act
-        await ep.HandleAsync(request, default);
+        var ep = SetupEndpointUnitTest<GetPlexLibraryMediaEndpoint>();
+        await ep.HandleAsync(request, CancellationToken.None);
         var result = ep.Response as ResultDTO<PlexMediaStatisticsDTO>;
 
         // Assert
@@ -76,10 +74,6 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
             }
         );
 
-        var ep = Factory.Create<GetPlexLibraryMediaEndpoint>(ctx =>
-            ctx.AddTestServices(s => s.AddTransient(_ => mock.Create<IPlexRipperDbContext>()))
-        );
-
         var request = new GetPlexLibraryMediaEndpointRequest()
         {
             PlexLibraryId = 1,
@@ -88,7 +82,8 @@ public class GetPlexLibraryMediaEndpoint_UnitTests : BaseUnitTest<GetPlexLibrary
         };
 
         // Act
-        await ep.HandleAsync(request, default);
+        var ep = SetupEndpointUnitTest<GetPlexLibraryMediaEndpoint>();
+        await ep.HandleAsync(request, CancellationToken.None);
         var result = ep.Response as ResultDTO<PlexMediaStatisticsDTO>;
 
         // Assert

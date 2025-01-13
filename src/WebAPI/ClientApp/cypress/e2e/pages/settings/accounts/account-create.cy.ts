@@ -1,5 +1,5 @@
 import { route } from '@fixtures';
-import { generateFailedResultDTO, generatePlexAccount, generateResultDTO } from '@mock';
+import { generatePlexAccount, generateResultDTO } from '@mock';
 import type { PlexAccountDTO } from '@dto';
 import { PlexAccountPaths } from '@api-urls';
 
@@ -28,25 +28,22 @@ describe('Add Plex account to PlexRipper', () => {
 		cy.getCy('account-form-password-input').type(plexAccount.password);
 
 		// Validate Action, should return is2Fa true and isValidated false
-		cy.intercept('POST', PlexAccountPaths.validatePlexAccountEndpoint(), {
-			statusCode: 200,
-			body: generateResultDTO({
-				...plexAccount,
-				isValidated: false,
+		cy.interceptValidatePlexAccount({
+			partialData: {
 				is2Fa: true,
-			}),
+				isValidated: false,
+			},
 		});
 		cy.getCy('account-dialog-validate-button').click();
 		cy.getCy('2fa-code-verification-dialog').should('exist');
 		// Insert verification code, should return is2Fa true and isValidated true
-		cy.intercept('POST', PlexAccountPaths.validatePlexAccountEndpoint(), {
-			statusCode: 200,
-			body: generateResultDTO({
-				...plexAccount,
-				isValidated: true,
+		cy.interceptValidatePlexAccount({
+			partialData: {
 				is2Fa: true,
-			}),
+				isValidated: true,
+			},
 		});
+
 		cy.get(':nth-child(1) > [data-test="single-input"]').type('123456');
 
 		// Create Action
@@ -84,12 +81,14 @@ describe('Add Plex account to PlexRipper', () => {
 			cy.getCy('account-form-display-name-input').type(account.displayName);
 			cy.getCy('account-form-auth-token-input').type(account.authenticationToken);
 
-			const accountResponse: PlexAccountDTO = { ...account, isValidated: true };
 			// Validate Action
-			cy.intercept('POST', PlexAccountPaths.validatePlexAccountEndpoint(), {
-				statusCode: 200,
-				body: generateResultDTO(accountResponse),
+			cy.interceptValidatePlexAccount({
+				partialData: {
+					...account,
+					isValidated: true,
+				},
 			});
+
 			cy.getCy('account-dialog-validate-button').click();
 			cy.getCy('auth-token-validation-dialog').should('be.visible');
 
@@ -113,7 +112,7 @@ describe('Add Plex account to PlexRipper', () => {
 
 			cy.wait('@createAccount').then((interception) => {
 				expect(interception.request.method).to.equal('POST');
-				expect(interception.request.body).to.deep.equal(accountResponse);
+				expect(interception.request.body).to.deep.equal({ ...account, isValidated: true });
 			});
 		});
 	});
@@ -138,23 +137,29 @@ describe('Add Plex account to PlexRipper', () => {
 			cy.getCy('account-form-display-name-input').type(account.displayName);
 			cy.getCy('account-form-auth-token-input').type(account.authenticationToken);
 
-			// Validate Action
-			cy.intercept('POST', PlexAccountPaths.validatePlexAccountEndpoint(), {
-				statusCode: 401,
-				body: generateFailedResultDTO(),
+			// Validate Action, failed
+			cy.interceptValidatePlexAccount({
+				isUnAuthorized: true, partialData: {
+					...account,
+					isValidated: false,
+				},
 			});
+
 			cy.getCy('account-dialog-validate-button').click();
 			cy.getCy('auth-token-validation-dialog').should('be.visible');
 			cy.getCy('auth-token-validation-dialog-invalid-token-alert').should('be.visible');
 
 			cy.getCy('auth-token-validation-dialog-hide-button').click();
-
-			const accountResponse: PlexAccountDTO = { ...account, isValidated: true };
-			cy.intercept('POST', PlexAccountPaths.validatePlexAccountEndpoint(), {
-				statusCode: 401,
-				body: generateResultDTO(accountResponse),
+			// Validate Action, success
+			cy.interceptValidatePlexAccount({
+				isUnAuthorized: false,
+				partialData: {
+					...account,
+					isValidated: true,
+				},
 			});
 
+			cy.getCy('account-form-auth-token-input').type('fix');
 			cy.getCy('account-dialog-validate-button').click();
 			cy.getCy('auth-token-validation-dialog').should('be.visible');
 
@@ -178,7 +183,7 @@ describe('Add Plex account to PlexRipper', () => {
 
 			cy.wait('@createAccount').then((interception) => {
 				expect(interception.request.method).to.equal('POST');
-				expect(interception.request.body).to.deep.equal(accountResponse);
+				expect(interception.request.body).to.deep.equal({ ...account, isValidated: true });
 			});
 		});
 	});

@@ -23,6 +23,7 @@ import {
 	useSignalrStore,
 	useAuthenticationStore,
 } from '@store';
+import { cloneDeep } from 'lodash-es';
 
 interface IAppConfigStoreState {
 	version: string;
@@ -100,6 +101,7 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 			state.version = version;
 		},
 		$reset() {
+			useAccountDialogStore().$reset();
 			useAccountStore().$reset();
 			useAlertStore().$reset();
 			useAuthenticationStore().$reset();
@@ -110,6 +112,7 @@ export const useGlobalStore = defineStore('GlobalStore', () => {
 			useHelpStore().$reset();
 			useLibraryStore().$reset();
 			useLocalizationStore().$reset();
+			useMediaOverviewStore().$reset();
 			useMediaStore().$reset();
 			useNotificationsStore().$reset();
 			useServerConnectionStore().$reset();

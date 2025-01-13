@@ -1,14 +1,10 @@
-﻿using Application.Contracts;
-using Data.Contracts;
-using FastEndpoints;
-using Logging.Interface;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Data.Contracts;
 
 namespace PlexRipper.Application.UnitTests;
 
-public class DeletePlexAccountByIdEndpoint_UnitTests : BaseUnitTest<CreatePlexAccountEndpoint>
+public class DeletePlexAccountByIdEndpointUnitTests : BaseUnitTest
 {
-    public DeletePlexAccountByIdEndpoint_UnitTests(ITestOutputHelper output)
+    public DeletePlexAccountByIdEndpointUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -34,18 +30,11 @@ public class DeletePlexAccountByIdEndpoint_UnitTests : BaseUnitTest<CreatePlexAc
         IDbContext.PlexMovies.ShouldNotBeEmpty();
         IDbContext.PlexTvShows.ShouldNotBeEmpty();
 
-        var ep = Factory.Create<DeletePlexAccountByIdEndpoint>(ctx =>
-        {
-            ctx.AddTestServices(s =>
-            {
-                s.AddTransient(_ => mock.Create<ILog>());
-                s.AddTransient(_ => mock.Create<IPlexRipperDbContext>());
-                s.AddTransient(_ => new Mock<ISignalRService>().Object);
-            });
-        });
+        mock.SendRefreshNotification();
 
         // Act
-        await ep.HandleAsync(new DeletePlexAccountByIdRequest(testAccount.Id), default);
+        var ep = SetupEndpointUnitTest<DeletePlexAccountByIdEndpoint>();
+        await ep.HandleAsync(new DeletePlexAccountByIdRequest(testAccount.Id), CancellationToken.None);
         var result = ep.Response;
 
         // Assert

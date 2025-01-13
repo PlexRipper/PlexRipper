@@ -301,8 +301,6 @@ onMounted(() => {
 #media-container,
 .media-table-container,
 .detail-view-container {
-  // We need a set height so we calculate the remaining content space by subtracting other component heights
-  height: calc($page-height-minus-app-bar - $media-overview-bar-height);
   width: 100%;
   overflow: hidden;
 }

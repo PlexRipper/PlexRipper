@@ -305,6 +305,12 @@ export interface GeneralSettingsDTO {
   useLowQualityPosterImages: boolean;
 }
 
+export interface GeneratePlexTokenResponse {
+  isUnAuthorized: boolean;
+  needsVerificationCode: boolean;
+  plexAuthToken: string;
+}
+
 export interface IError {
   reasons?: IError[] | null;
 }
@@ -415,7 +421,7 @@ export interface PlexAccountDTO {
   username: string;
   uuid: string;
   /** @format date-time */
-  validatedAt: string;
+  validatedAt?: string | null;
   verificationCode: string;
 }
 
@@ -742,6 +748,15 @@ export interface ResultDTOOfFolderPathDTO {
   value?: FolderPathDTO | null;
 }
 
+export interface ResultDTOOfGeneratePlexTokenResponse {
+  errors: ErrorDTO[];
+  isFailed: boolean;
+  isSuccess: boolean;
+  reasons: ReasonDTO[];
+  successes: SuccessDTO[];
+  value?: GeneratePlexTokenResponse | null;
+}
+
 export interface ResultDTOOfInt32 {
   errors: ErrorDTO[];
   isFailed: boolean;
@@ -950,6 +965,15 @@ export interface ResultDTOOfUserClaimsDTO {
   value?: UserClaimsDTO | null;
 }
 
+export interface ResultDTOOfValidatePlexAccountResponse {
+  errors: ErrorDTO[];
+  isFailed: boolean;
+  isSuccess: boolean;
+  reasons: ReasonDTO[];
+  successes: SuccessDTO[];
+  value?: ValidatePlexAccountResponse | null;
+}
+
 export interface ServerConnectionCheckStatusProgressDTO {
   completed: boolean;
   connectionSuccessful: boolean;
@@ -1065,6 +1089,11 @@ export interface UserClaimsDTO {
   claims: string[];
   isLoggedIn: boolean;
   userName: string;
+}
+
+export interface ValidatePlexAccountResponse {
+  isUnAuthorized: boolean;
+  plexAccountDTO: PlexAccountDTO;
 }
 
 export interface ValidatePlexServerConnectionEndpointRequest {

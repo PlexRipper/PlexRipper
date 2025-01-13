@@ -20,3 +20,5 @@ Cypress.Commands.add('getPageData', () =>
 			return cy.wrap(data);
 		}),
 );
+
+Cypress.Commands.add('awaitSettingsUpdate', () => cy.wait('@settingsUpdate'));

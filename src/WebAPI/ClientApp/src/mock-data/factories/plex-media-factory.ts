@@ -1,5 +1,5 @@
 import { randCompanyName, randMovie, randNumber, randRecentDate, randSentence, randUuid } from '@ngneat/falso';
-import { times, uniqueId } from 'lodash-es';
+import { kebabCase, sortBy, times, uniqueId } from 'lodash-es';
 import { checkConfig, incrementSeed, type MockConfig } from '@mock';
 import { PlexMediaType, type PlexMediaSlimDTO, type PlexMediaDTO, type PlexMediaStatisticsDTO } from '@dto';
 
@@ -37,7 +37,7 @@ function generatePlexMediaSlim({
 		plexLibraryId: partialData?.plexLibraryId || 0,
 		sortIndex: 0,
 		title,
-		searchTitle: title.toLowerCase(),
+		searchTitle: kebabCase(title).toLowerCase(),
 		year: randNumber({ min: 1900, max: 2023 }),
 		type: partialData?.type || PlexMediaType.Unknown,
 		plexServerId: partialData?.plexServerId || 0,
@@ -140,19 +140,18 @@ export function generatePlexMediaSlims({
 	}
 
 	let index = 1;
-	return times(count, () =>
+	const media = sortBy(times(count, () =>
 		generatePlexMediaSlim({
 			config,
 			partialData,
 		}),
-	)
-		.sort((a, b) => a.sortIndex.toString().localeCompare(b.sortIndex.toString()))
-		.map((x) => {
-			return {
-				...x,
-				index: index++,
-			};
-		});
+	), (x) => x.searchTitle);
+
+	for (const media1 of media) {
+		media1.sortIndex = index++;
+	}
+
+	return media;
 }
 
 export function generatePlexMedias({

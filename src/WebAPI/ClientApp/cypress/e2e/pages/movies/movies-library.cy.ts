@@ -48,8 +48,10 @@ describe('Display media collection on the Library detail page', () => {
 				for (const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.toLowerCase()) {
 					const index = sortTitles.indexOf(letter);
 					if (index > -1) {
+						cy.log(`Navigating to letter: ${letter} at index: ${index}`);
 						cy.getCy(`letter-${letter}-alphabet-navigation-btn`, { timeout: 10000 }).should('be.visible');
 						cy.getCy(`letter-${letter}-alphabet-navigation-btn`, { timeout: 10000 }).click();
+						cy.get(`[data-scroll-index="${index}"]`, { timeout: 10000 }).should('be.visible');
 					}
 				}
 			});

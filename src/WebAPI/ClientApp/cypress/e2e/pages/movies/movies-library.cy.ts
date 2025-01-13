@@ -33,7 +33,7 @@ describe('Display media collection on the Library detail page', () => {
 			plexAccountCount: 1,
 			plexServerCount: 1,
 			plexMovieLibraryCount: 1,
-			movieCount: 10000,
+			movieCount: 1000,
 		})
 			.then((data) => {
 				const movieLibrary = data.plexLibraries.find((x) => x.type === PlexMediaType.Movie);

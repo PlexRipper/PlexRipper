@@ -1,13 +1,12 @@
 <template>
 	<QPage>
 		<QRow>
-			<QCol>
+			<QCol class="q-ma-md">
 				<QAlert type="error">
 					<QText
 						size="h4"
-						align="center">
-						{{ $t('pages.music.music-id.header') }}
-					</QText>
+						:value="$t('pages.music.music-id.header')"
+						align="center" />
 				</QAlert>
 			</QCol>
 		</QRow>

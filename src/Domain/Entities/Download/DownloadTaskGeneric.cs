@@ -97,7 +97,7 @@ public record DownloadTaskGeneric : IDownloadTaskProgress, IDownloadFileTransfer
 
     #region Helpers
 
-    public DownloadTaskPhase DownloadTaskPhase => DownloadTaskPhaseExtensions.FromPercentage(this, this);
+    public DownloadTaskPhase DownloadTaskPhase => DownloadStatus.ToDownloadTaskPhase();
 
     public decimal Percentage => DownloadTaskPhaseExtensions.Percentage(DownloadTaskPhase, this, this);
 

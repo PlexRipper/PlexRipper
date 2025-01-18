@@ -6,39 +6,40 @@ public static class DownloadTaskPhaseExtensions
 {
     private static ILog _log = LogManager.CreateLogInstance(typeof(DownloadTaskPhaseExtensions));
 
-    public static DownloadTaskPhase FromPercentage(
-        IDownloadTaskProgress downloadTaskProgress,
-        IDownloadFileTransferProgress fileTransferProgress
-    )
+    public static DownloadTaskPhase ToDownloadTaskPhase(this DownloadStatus downloadStatus)
     {
-        var downloadPercentage = DataFormat.GetPercentage(
-            downloadTaskProgress.DataReceived,
-            downloadTaskProgress.DataTotal
-        );
-        var fileTransferPercentage = DataFormat.GetPercentage(
-            fileTransferProgress.FileDataTransferred,
-            downloadTaskProgress.DataTotal
-        );
+        switch (downloadStatus)
+        {
+            case DownloadStatus.Queued:
+                return DownloadTaskPhase.None;
 
-        if (downloadPercentage == 0 && fileTransferPercentage == 0)
-            return DownloadTaskPhase.None;
+            case DownloadStatus.Downloading:
+            case DownloadStatus.DownloadFinished:
+            case DownloadStatus.Error:
+            case DownloadStatus.Paused:
+            case DownloadStatus.Stopped:
+            case DownloadStatus.Deleted:
+            case DownloadStatus.ServerUnreachable:
+                return DownloadTaskPhase.Downloading;
 
-        if (downloadPercentage is > 0 and < 100 && fileTransferPercentage == 0)
-            return DownloadTaskPhase.Downloading;
+            case DownloadStatus.Merging:
+            case DownloadStatus.Moving:
+            case DownloadStatus.MergePaused:
+            case DownloadStatus.MovePaused:
+            case DownloadStatus.MergeFinished:
+            case DownloadStatus.MoveFinished:
+            case DownloadStatus.MoveError:
+            case DownloadStatus.MergeError:
+                return DownloadTaskPhase.FileTransfer;
 
-        if (downloadPercentage == 100 && fileTransferPercentage is >= 0 and < 100)
-            return DownloadTaskPhase.FileTransfer;
+            case DownloadStatus.Completed:
+                return DownloadTaskPhase.Completed;
 
-        if (downloadPercentage == 100 && fileTransferPercentage == 100)
-            return DownloadTaskPhase.Completed;
-
-        _log.Error(
-            "Unknown download task phase with downloadPercentage {DownloadPercentage} and fileTransferPercentage {FileTransferPercentage}.",
-            downloadPercentage,
-            fileTransferPercentage
-        );
-
-        return DownloadTaskPhase.Unknown;
+            case DownloadStatus.Unknown:
+            default:
+                _log.Error("Unknown download task phase with downloadStatus {DownloadStatus}.", downloadStatus);
+                return DownloadTaskPhase.Unknown;
+        }
     }
 
     public static decimal Percentage(

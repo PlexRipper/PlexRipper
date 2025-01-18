@@ -101,7 +101,7 @@ public abstract class DownloadTaskFileBase : DownloadTaskBase, IDownloadTaskProg
     public decimal Percentage => DownloadTaskPhaseExtensions.Percentage(DownloadTaskPhase, this, this);
 
     [NotMapped]
-    public DownloadTaskPhase DownloadTaskPhase => DownloadTaskPhaseExtensions.FromPercentage(this, this);
+    public DownloadTaskPhase DownloadTaskPhase => DownloadStatus.ToDownloadTaskPhase();
 
     [NotMapped]
     public long Speed => DownloadTaskPhaseExtensions.Speed(DownloadTaskPhase, this, this);

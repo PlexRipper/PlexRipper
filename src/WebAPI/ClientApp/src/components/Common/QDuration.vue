@@ -1,13 +1,18 @@
 <template>
-	<span> {{ duration }}</span>
+	<QText
+		:align="align"
+		:value="duration"
+		:cy="cy" />
 </template>
 
 <script setup lang="ts">
 import { formatDuration, intervalToDuration } from 'date-fns';
+import type { IQTextProps } from '@interfaces';
 
-const props = defineProps<{
+const props = defineProps<Pick<IQTextProps, 'align'> & {
 	value: number;
 	short?: boolean;
+	cy?: string;
 }>();
 
 const duration = computed(() => {

@@ -28,7 +28,9 @@
 					v-if="node.mediaType"
 					:size="26"
 					:media-type="node.mediaType" />
-				<span :data-cy="`column-title-${node.id}`">{{ node.title }}</span>
+				<QText
+					:cy="`column-title-${node.id}`"
+					:value="node.title" />
 			</template>
 		</Column>
 		<!-- Download Status -->
@@ -37,9 +39,9 @@
 			header="Status"
 			style="max-width: 10rem">
 			<template #body="{ node }: { node: IDownloadTableNode }">
-				<span :data-cy="`column-status-${node.id}`">
-					{{ translateDownloadStatus(node.status) }}
-				</span>
+				<QText
+					:cy="`column-status-${node.id}`"
+					:value="translateDownloadStatus(node.status)" />
 			</template>
 		</Column>
 		<Column
@@ -48,7 +50,7 @@
 			style="max-width: 10rem">
 			<template #body="{ node }: { node: IDownloadTableNode }">
 				<QFileSize
-					:data-cy="`column-dataReceived-${node.id}`"
+					:cy="`column-dataReceived-${node.id}`"
 					:size="node.dataReceived" />
 			</template>
 		</Column>
@@ -58,7 +60,7 @@
 			style="max-width: 10rem">
 			<template #body="{ node }: { node: IDownloadTableNode }">
 				<QFileSize
-					:data-cy="`column-dataTotal-${node.id}`"
+					:cy="`column-dataTotal-${node.id}`"
 					:size="node.dataTotal" />
 			</template>
 		</Column>
@@ -68,7 +70,7 @@
 			style="max-width: 10rem">
 			<template #body="{ node }: { node: IDownloadTableNode }">
 				<QFileSize
-					:data-cy="`column-downloadSpeed-${node.id}`"
+					:cy="`column-downloadSpeed-${node.id}`"
 					:size="node.downloadSpeed"
 					speed />
 			</template>
@@ -80,7 +82,7 @@
 			<template #body="{ node }: { node: IDownloadTableNode }">
 				<QDuration
 					short
-					:data-cy="`column-timeRemaining-${node.id}`"
+					:cy="`column-timeRemaining-${node.id}`"
 					:value="node.timeRemaining" />
 			</template>
 		</Column>
@@ -90,7 +92,7 @@
 			style="max-width: 10rem">
 			<template #body="{ node }">
 				<QProgressBar
-					:data-cy="`column-percentage-${node.id}`"
+					:cy="`column-percentage-${node.id}`"
 					:value="node.percentage" />
 			</template>
 		</Column>

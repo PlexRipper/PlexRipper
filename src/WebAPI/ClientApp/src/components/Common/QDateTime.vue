@@ -1,14 +1,22 @@
 <template>
-	<span> {{ dateTimeString }}</span>
+	<QText
+		:value="dateTimeString"
+		:align="align" />
 </template>
 
 <script setup lang="ts">
 import { format } from 'date-fns';
 import { useSettingsStore } from '@store';
+import type { IQTextProps } from '@interfaces';
 
 const settingsStore = useSettingsStore();
 
-const props = withDefaults(defineProps<{ text?: string; shortDate?: boolean; longDate?: boolean; time?: boolean }>(), {
+const props = withDefaults(defineProps<Pick<IQTextProps, 'align'> & {
+	text?: string;
+	shortDate?: boolean;
+	longDate?: boolean;
+	time?: boolean;
+}>(), {
 	text: '',
 	shortDate: false,
 	longDate: false,

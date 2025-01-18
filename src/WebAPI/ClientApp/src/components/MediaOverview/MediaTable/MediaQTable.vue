@@ -12,7 +12,7 @@
 		<!-- Title -->
 		<template #body-cell-title="{ row }">
 			<q-td class="row-title text-eclipse">
-				{{ row.title }}
+				<QText :value="row.title" />
 			</q-td>
 		</template>
 		<!-- Media Quality bar	-->
@@ -24,9 +24,7 @@
 		<!-- Media size -->
 		<template #body-cell-year="{ row }">
 			<q-td class="text-center">
-				<span class="q-mr-md">
-					{{ row.year }}
-				</span>
+				<QText :value="row.year" />
 			</q-td>
 		</template>
 		<!-- Duration -->
@@ -40,29 +38,23 @@
 		<!-- Media size -->
 		<template #body-cell-mediaSize="{ row }">
 			<q-td class="text-center">
-				<span class="q-mr-md">
-					<QFileSize :size="row.mediaSize" />
-				</span>
+				<QFileSize :size="row.mediaSize" />
 			</q-td>
 		</template>
 		<!-- Added At Date format -->
 		<template #body-cell-addedAt="{ row }">
 			<q-td class="text-center">
-				<span class="q-mr-md">
-					<QDateTime
-						:text="row.addedAt"
-						short-date />
-				</span>
+				<QDateTime
+					:text="row.addedAt"
+					short-date />
 			</q-td>
 		</template>
 		<!-- Updated At Date format -->
 		<template #body-cell-updatedAt="{ row }">
 			<q-td class="text-center">
-				<span class="q-mr-md">
-					<QDateTime
-						:text="row.updatedAt"
-						short-date />
-				</span>
+				<QDateTime
+					:text="row.updatedAt"
+					short-date />
 			</q-td>
 		</template>
 		<!-- Actions -->

@@ -36,9 +36,7 @@
 							!disableHoverClick ? 'media-table-row--title--hover' : '',
 						]"
 						@click.stop="!disableHoverClick ? onRowAction({ command: 'open-details' }) : () => {}">
-						<span>
-							{{ row[column.field] }}
-						</span>
+						<QText :value="row[column.field]" />
 					</QCol>
 				</template>
 				<!-- Duration format -->
@@ -84,7 +82,7 @@
 		</template>
 		<!-- No row -->
 		<QCol v-else>
-			{{ t('components.q-tree-view-table-row.invalid-node') }}
+			<QText :value="$t('components.q-tree-view-table-row.invalid-node')" />
 		</QCol>
 		<!--	Highlight animation effect	-->
 		<svg
@@ -119,7 +117,6 @@ import {
 } from '@composables/event-bus';
 import { toDownloadMedia } from '@composables/conversion';
 
-const { t } = useI18n();
 const props = withDefaults(
 	defineProps<{
 		selected?: boolean | null;

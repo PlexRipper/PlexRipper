@@ -1,5 +1,7 @@
 <template>
-	<span> {{ duration }}</span>
+	<QText
+		:value="duration"
+		:cy="cy" />
 </template>
 
 <script setup lang="ts">
@@ -8,6 +10,7 @@ import { formatDuration, intervalToDuration } from 'date-fns';
 const props = defineProps<{
 	value: number;
 	short?: boolean;
+	cy?: string;
 }>();
 
 const duration = computed(() => {

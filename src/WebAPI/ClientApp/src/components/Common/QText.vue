@@ -29,7 +29,7 @@ import type { IQTextProps } from '@interfaces';
 
 const props = withDefaults(defineProps<IQTextProps>(), {
 	value: '',
-	size: 'body1',
+	size: 'body2',
 	type: 'primary',
 	align: 'left',
 	bold: 'regular',

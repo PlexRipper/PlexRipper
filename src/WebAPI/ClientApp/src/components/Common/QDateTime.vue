@@ -1,5 +1,5 @@
 <template>
-	<span> {{ dateTimeString }}</span>
+	<QText :value="dateTimeString" />
 </template>
 
 <script setup lang="ts">

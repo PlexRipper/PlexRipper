@@ -1,17 +1,19 @@
 <template>
-	<span>{{ formattedString }}{{ speed ? t('general.units.per-second') : '' }}</span>
+	<QText
+		:cy="cy"
+		:value="`${formattedString}${speed ? $t('general.units.per-second') : ''}`" />
 </template>
 
 <script setup lang="ts">
 import prettyBytes from 'pretty-bytes';
 import { useLocalizationStore } from '@store';
 
-const { t } = useI18n();
 const localizationStore = useLocalizationStore();
 
 const props = defineProps<{
 	size: number;
 	speed?: boolean;
+	cy?: string;
 }>();
 
 const formattedString = computed(() => {

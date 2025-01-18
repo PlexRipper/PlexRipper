@@ -36,54 +36,46 @@
 				label="Download"
 				split
 				@click="onDownload(close)">
-				<QRow>
-					<QCol>
-						<QText size="h6">
-							{{ $t('components.download-confirmation.destination.header') }}
-						</QText>
-
-						<q-scroll-area style="height: 200px; width: 400px; max-width: 400px">
-							<!-- Download Destination -->
-							<q-list>
-								<q-item
-									v-for="folderPath in folderPathDestinations"
-									:key="folderPath.id"
-									tag="label"
-									clickable>
-									<q-item-section avatar>
-										<q-radio
-											v-model="selectedFolderPath"
-											:val="folderPath" />
-									</q-item-section>
-									<q-item-section>
-										<q-item-label>{{ folderPath.displayName }}</q-item-label>
-										<q-item-label caption>
-											{{ folderPath.directory }}
-										</q-item-label>
-									</q-item-section>
-								</q-item>
-								<!-- Custom Directory -->
-								<q-item
-									clickable
-									@click="dialogStore.openDirectoryBrowserDialog(customDirectory)">
-									<q-item-section avatar>
-										<q-radio
-											v-model="selectedFolderPath"
-											:val="customDirectory" />
-									</q-item-section>
-									<q-item-section>
-										<q-item-label>
-											{{ $t('components.download-confirmation.destination.custom-destination-option') }}
-										</q-item-label>
-										<q-item-label caption>
-											{{ customDirectory.directory }}
-										</q-item-label>
-									</q-item-section>
-								</q-item>
-							</q-list>
-						</q-scroll-area>
-					</QCol>
-				</QRow>
+				<QSection :header="$t('components.download-confirmation.destination.header')">
+					<!-- Download Destination -->
+					<q-list>
+						<q-item
+							v-for="folderPath in folderPathDestinations"
+							:key="folderPath.id"
+							tag="label"
+							clickable>
+							<q-item-section avatar>
+								<q-radio
+									v-model="selectedFolderPath"
+									:val="folderPath" />
+							</q-item-section>
+							<q-item-section>
+								<q-item-label>{{ folderPath.displayName }}</q-item-label>
+								<q-item-label caption>
+									{{ folderPath.directory }}
+								</q-item-label>
+							</q-item-section>
+						</q-item>
+						<!-- Custom Directory -->
+						<q-item
+							clickable
+							@click="dialogStore.openDirectoryBrowserDialog(customDirectory)">
+							<q-item-section avatar>
+								<q-radio
+									v-model="selectedFolderPath"
+									:val="customDirectory" />
+							</q-item-section>
+							<q-item-section>
+								<q-item-label>
+									{{ $t('components.download-confirmation.destination.custom-destination-option') }}
+								</q-item-label>
+								<q-item-label caption>
+									{{ customDirectory.directory }}
+								</q-item-label>
+							</q-item-section>
+						</q-item>
+					</q-list>
+				</QSection>
 			</q-btn-dropdown>
 			<!--	Directory Browser	-->
 			<DirectoryBrowser @confirm="onCustomDirectorySelected" />

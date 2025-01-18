@@ -24,7 +24,8 @@
 		</template>
 		<QRow
 			v-else
-			justify="center">
+			justify="center"
+			class="q-pa-lg">
 			<QAlert>
 				{{ $t('pages.downloads.no-downloads') }}
 			</QAlert>

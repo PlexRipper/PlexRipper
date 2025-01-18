@@ -37,9 +37,13 @@ export default defineNuxtConfig({
 
 	app: {
 		head: {
+			title: 'PlexRipper',
 			script: [
 				{ src: 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js' },
 				{ src: 'https://cdn.jsdelivr.net/npm/vanta/dist/vanta.waves.min.js' },
+			],
+			link: [
+				{ rel: 'icon', type: 'image/x-icon', href: '/favicon.png' },
 			],
 			noscript: [{ children: 'JavaScript is required' }],
 		},

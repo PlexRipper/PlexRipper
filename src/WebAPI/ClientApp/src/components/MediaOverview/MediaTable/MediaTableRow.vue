@@ -45,6 +45,7 @@
 						class="media-table-row--column"
 						cols="1">
 						<QDuration
+							align="center"
 							:value="row[column.field]"
 							short />
 					</QCol>
@@ -55,6 +56,7 @@
 						class="media-table-row--column"
 						cols="1">
 						<QDateTime
+							align="center"
 							:text="row[column.field]"
 							short-date />
 					</QCol>
@@ -64,7 +66,9 @@
 					<QCol
 						class="media-table-row--column"
 						cols="1">
-						<QFileSize :size="row[column.field]" />
+						<QFileSize
+							align="center"
+							:size="row[column.field]" />
 					</QCol>
 				</template>
 				<!-- Actions -->

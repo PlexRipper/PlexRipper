@@ -1,5 +1,73 @@
 PlexRipper Changelog
 
+# [0.29.0](https://github.com/PlexRipper/PlexRipper/compare/v0.28.0...v0.29.0) (2025-01-18)
+
+
+### Bug Fixes
+
+* **WebAPI:** abort boot sequence when config or database cannot be set ([adc7337](https://github.com/PlexRipper/PlexRipper/commit/adc73371d9fc388a4b3e423fd9955cc6cbefe2ac))
+* **Web-UI:** added a page load overlay when logging in ([37ac772](https://github.com/PlexRipper/PlexRipper/commit/37ac772af6cab5bbb3d58b6d3e6fd9cce32f8c2f))
+* **Web-UI:** agreeing to the disclaimer is now stored in the settings file ([99e8a43](https://github.com/PlexRipper/PlexRipper/commit/99e8a43588acafd849af6ebe76afa33b32438373))
+* **Web-UI:** allow authentication status endpoint to be viewed anon ([6509b9c](https://github.com/PlexRipper/PlexRipper/commit/6509b9ca99b30cbd0aad9ec6036460ebc5d845dc))
+* **Web-UI:** always hide horizontal scroll bar, 99% is always a few pixels ([355b681](https://github.com/PlexRipper/PlexRipper/commit/355b68199853fa3bf41430edb40a1b6cda3f03a3))
+* **WebAPI:** authentication now is valid for 6 hours ([c593e11](https://github.com/PlexRipper/PlexRipper/commit/c593e1197134253df61408087cffb58d33dd6756))
+* **Web-UI:** convert API exceptions due to error codes to ResultDTO ([59d90f7](https://github.com/PlexRipper/PlexRipper/commit/59d90f76fbc5660f45e37699749b336a5292f2e0))
+* **Web-UI:** Finishing the setup process will not require a full page reload anymore, making the transition much smoother ([ae6874b](https://github.com/PlexRipper/PlexRipper/commit/ae6874b34814848031bd97bfae67b209c4a1c483))
+* **WebAPI:** fix a dev release being made when only the readme has changed ([ac14418](https://github.com/PlexRipper/PlexRipper/commit/ac14418ef3bd8fe91e6d67d5210352fa9a1a7322))
+* **Web-UI:** fix blank screen when setting up a new database ([3f53c43](https://github.com/PlexRipper/PlexRipper/commit/3f53c43e0b9c25d102efd11ae67262d3ce2e08cf))
+* **WebAPI:** fix misconfigured authentication, everything working perfect now ([e993733](https://github.com/PlexRipper/PlexRipper/commit/e9937332d763a88bc1c36c5f6bea61637ac61a9e))
+* **Web-UI:** fix the alphabet letters not working and displaying when scrolling through the media ([c27f111](https://github.com/PlexRipper/PlexRipper/commit/c27f11131ed2b67703a8620a757e6621825b8ace))
+* **Web-UI:** fix the cypress configuration to run in CI/CD ([9aa4283](https://github.com/PlexRipper/PlexRipper/commit/9aa428325e032f0275188de8c9af7e19bcce34b2))
+* **Web-UI:** fix the extra scrollbar that appears on the media page ([b92f06b](https://github.com/PlexRipper/PlexRipper/commit/b92f06b1153f843b2bb8e090bed804e59d90d4b0))
+* **Web-UI:** Fixed a bug where a PlexToken needed a special character to register ([51ea3ef](https://github.com/PlexRipper/PlexRipper/commit/51ea3ef1a4ab6d2cca6c8fc5d52d090bdf9efc7a))
+* **WebAPI:** Fixed a download status to download task phase conversion issue that could cause errors when picking the next download ([acb5b88](https://github.com/PlexRipper/PlexRipper/commit/acb5b885ba218bca1580993e4a5b252572ccaab8))
+* **WebAPI:** Fixed an aggregate download status conversion issue that could cause errors when picking the next download and stalling ([2510fb5](https://github.com/PlexRipper/PlexRipper/commit/2510fb57728a6fef0468658cf4127b8e4ded293e))
+* **Web-UI:** fixed an issue were some stores were not reset when logging out ([916dbad](https://github.com/PlexRipper/PlexRipper/commit/916dbadcb1190b10c813adca01acf07acd5f617c))
+* **WebAPI:** Fixed an issue where not all episodes were linked to a season due to missing data, this is now resolved by using a different parameter to match ([38148ff](https://github.com/PlexRipper/PlexRipper/commit/38148ff2ff0a2e624408539d7c0e3846e6b38a2d))
+* **WebAPI:** fixed an issue where the PlexAPI returning and 401 will log the user out of PlexRipper ([ae6befc](https://github.com/PlexRipper/PlexRipper/commit/ae6befc7209d51800314dae1d65bfc1a91371ba4))
+* **Web-UI:** fixed javascript exception when there is no media available in the media overview ([ad6c7ad](https://github.com/PlexRipper/PlexRipper/commit/ad6c7ad0bfdbd7504e27e22c9bd7a9560bd03768))
+* **Web-UI:** fixed missing translations for the account input fields validation errors ([ddac5cb](https://github.com/PlexRipper/PlexRipper/commit/ddac5cbf08e97a02b3214658ad2348b49c669111))
+* **Web-UI:** Fixed missing translations for the download-confirmation destination options ([b9ff5c2](https://github.com/PlexRipper/PlexRipper/commit/b9ff5c2b6a5e374c718deb9ebcefb9d013ee014b))
+* **Web-UI:** fixed missing translations for the password input field validation errors ([b1178be](https://github.com/PlexRipper/PlexRipper/commit/b1178bebe1d4714fa406bd46864fa69c61725075))
+* **Web-UI:** fixed missing translations from the background activity toggle ([a2d914d](https://github.com/PlexRipper/PlexRipper/commit/a2d914d7163440d1ea53ad3c83cffd4570f32a61))
+* **Web-UI:** fixed the download confirmation destination path not triggering the download when selecting an episode ([9a0d5fb](https://github.com/PlexRipper/PlexRipper/commit/9a0d5fb30163c203070c4a074ea3ccfa2b3582a2))
+* **Web-UI:** fixed the layout of the custom download destinations in the download confirmation window ([20f4dba](https://github.com/PlexRipper/PlexRipper/commit/20f4dba8ff0285da5fe8a8af52ee948ffb57afe7))
+* **Web-UI:** fixed the missing title and ico ([006d10b](https://github.com/PlexRipper/PlexRipper/commit/006d10bf38077ed2d94a056f0e916794341845fa))
+* **Web-UI:** fixed the outlining of the media table when viewing a media library ([ed11014](https://github.com/PlexRipper/PlexRipper/commit/ed110142e047bbb76acc18a937a3d390820ef6d8))
+* **Web-UI:** fixed the setup and discord popups not appearing again when already on the setup page ([a0f8d37](https://github.com/PlexRipper/PlexRipper/commit/a0f8d37fbfb897cec3d7b70193605adef097060c))
+* **Web-UI:** fixed the static background not stretching when viewing on 4k size ([9bd68d7](https://github.com/PlexRipper/PlexRipper/commit/9bd68d701d16f4ba4efab90b0c7be3aebf6c2e2c))
+* **WebAPI:** Fixed the verbose log strings in the Download task logging, now its more clear ([67eb960](https://github.com/PlexRipper/PlexRipper/commit/67eb9607fe17c51cdc7a204c54f449c2c5402221))
+* **WebAPI:** fixed the web ui not being visible when not logged in ([ca451e3](https://github.com/PlexRipper/PlexRipper/commit/ca451e3a9a56fd334332dc9d095f81e55b5fa36c))
+* **Web-UI:** further cleanup of layout ([a376117](https://github.com/PlexRipper/PlexRipper/commit/a376117fa491d378073b4d587a1650daf6a50691))
+* **Web-UI:** ignore .idea folder with eslint ([b538bac](https://github.com/PlexRipper/PlexRipper/commit/b538baca91a3fd60874c1287f32e714bd877d58d))
+* **Web-UI:** prevent the settings store from failing when resetting and then using it ([612df2a](https://github.com/PlexRipper/PlexRipper/commit/612df2aef03ead5463e39feaf7ca441316ef60f1))
+* **WebAPI:** removed duplicate call ConfigureApplicationCookie ([8ac26cf](https://github.com/PlexRipper/PlexRipper/commit/8ac26cf936095923cf597d87cdbaeaf640123aa4))
+* **WebAPI:** stop container when failing to create config file ([451d94c](https://github.com/PlexRipper/PlexRipper/commit/451d94c5a0325fe69043577b26fb0eba4c58bec2))
+
+
+### Features
+
+* **Web-UI:** Add rememberMe option to the login screen and show when the user is timed-out due to failed attempts ([de979ae](https://github.com/PlexRipper/PlexRipper/commit/de979aeb3def9e6f7d4a2fc5d352d068faf8c537))
+* **Web-UI:** Added a login page to finally secure PlexRipper ([7ea5804](https://github.com/PlexRipper/PlexRipper/commit/7ea58048fcf5c7cc701ef67ad8cb196830457c84))
+* **WebAPI:** added endpoints to update and get the PlexRipper app credentials ([064557a](https://github.com/PlexRipper/PlexRipper/commit/064557aa521ba031c51d0cd8b5e9694f262f0120))
+* **Web-UI:** added forgot password link to the login window ([9365296](https://github.com/PlexRipper/PlexRipper/commit/9365296179183477d12d692adeb622b71e983ded))
+* **Web-UI:** added password strength to the Authentication section ([b70885b](https://github.com/PlexRipper/PlexRipper/commit/b70885b1e91ee70191a5b49e31b66baea8e8fe07))
+* **WebAPI:** Added remember me to keep the being logged in when the browser is restarted ([12009aa](https://github.com/PlexRipper/PlexRipper/commit/12009aa1ce71f487ce07c7755828058999225894))
+* **WebAPI:** dev releases not have their release notes generated, making it easier to see what is fixed  a31c5e ([6e639ff](https://github.com/PlexRipper/PlexRipper/commit/6e639ff1166cf00832711c17851fd550ad0b4b06))
+* **WebAPI:** dev releases not have their release notes generated, making it easier to see what is fixed ([8199e4d](https://github.com/PlexRipper/PlexRipper/commit/8199e4de9b9c6ef442261be2f0bf4381f6c54f02))
+* **Web-UI:** Greatly improved the layout of the settings and made it more screen size responsive, it's almost the same as to how Sonarr/Radarr does it, and it looks much better now ([8c7d03f](https://github.com/PlexRipper/PlexRipper/commit/8c7d03f3160c18f6e2ea7f01fed1a111efffd290))
+* **Web-UI:** Removed the option to skip the setup process, now PlexRipper will automatically redirect to the setup page ([132ab0a](https://github.com/PlexRipper/PlexRipper/commit/132ab0a5a4b040e895cfe500bc9ecd2afe83ed38))
+* **Web-UI:** removed the slider from the download speed limit as it was just annoying to use ([48a91e8](https://github.com/PlexRipper/PlexRipper/commit/48a91e8a3cf696d93cb57444555501cf5da38b76))
+* **Web-UI:** revamped the setup process by adding a disclaimer and a way to change the default login credentials ([54eb361](https://github.com/PlexRipper/PlexRipper/commit/54eb361b962c781dcbc065ca9d6da8b4b8411114))
+* **WebAPI:** The PlexRipper app user credentials can now be reset by setting the ResetCredentials to true in the settings file ([c4a2d6c](https://github.com/PlexRipper/PlexRipper/commit/c4a2d6c9fd96774568b0b1f9ab779651c1390a79))
+* **Web-UI:** The PlexRipper login username and password can now be changed ([9d47d45](https://github.com/PlexRipper/PlexRipper/commit/9d47d4594b4a2e485a0bddda515b27c4c7b0c79b))
+* **Web-UI:** turned the account selector button in the appbar to the same style as the other buttons ([328156f](https://github.com/PlexRipper/PlexRipper/commit/328156fbfa9511a414bddccfe490313418ba33b8))
+
+
+### Reverts
+
+* **Web-UI:** Revert upgrading swagger-typescript-api and Typescript ([eef29de](https://github.com/PlexRipper/PlexRipper/commit/eef29de2b4edcfe28f5abf8830854430b0afe853))
+
 # [0.28.0](https://github.com/PlexRipper/PlexRipper/compare/v0.27.0...v0.28.0) (2024-12-22)
 
 

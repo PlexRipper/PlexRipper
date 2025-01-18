@@ -90,7 +90,17 @@ public static class DownloadTaskActions
     /// <returns>The aggregated <see cref="DownloadStatus"/>.</returns>
     public static DownloadStatus Aggregate(List<DownloadStatus> downloadStatusList)
     {
+        if (!downloadStatusList.Any())
+        {
+            _log.Warning(
+                "{NameOfDownloadStatusList} was empty, cannot determine the aggregate status of the download tasks",
+                nameof(downloadStatusList)
+            );
+            return DownloadStatus.Unknown;
+        }
+
         // If any of these statuses are present, return that status.
+        // Earlier statuses take precedence.
         List<DownloadStatus> anyStatuses =
         [
             DownloadStatus.ServerUnreachable,
@@ -98,6 +108,8 @@ public static class DownloadTaskActions
             DownloadStatus.MoveError,
             DownloadStatus.MergeError,
             DownloadStatus.Downloading,
+            DownloadStatus.MergeFinished,
+            DownloadStatus.MoveFinished,
             DownloadStatus.Paused,
             DownloadStatus.Stopped,
             DownloadStatus.Merging,
@@ -110,37 +122,28 @@ public static class DownloadTaskActions
         // Only return this status if all statuses are the same.
         List<DownloadStatus> allStatuses =
         [
-            DownloadStatus.Queued,
+            DownloadStatus.MergePaused,
+            DownloadStatus.MovePaused,
             DownloadStatus.Downloading,
             DownloadStatus.DownloadFinished,
             DownloadStatus.Completed,
             DownloadStatus.Deleted,
-            DownloadStatus.MergeFinished,
-            DownloadStatus.MoveFinished,
-            DownloadStatus.MergePaused,
-            DownloadStatus.MovePaused,
+            DownloadStatus.Queued,
             DownloadStatus.Unknown,
         ];
+
         foreach (var status in allStatuses.Where(status => downloadStatusList.All(x => x == status)))
             return status;
 
-        if (
-            downloadStatusList.Any(x => x == DownloadStatus.DownloadFinished)
-            && downloadStatusList.Any(x => x == DownloadStatus.Queued)
-        )
-            return DownloadStatus.Downloading;
-
-        if (
-            downloadStatusList.Any(x => x == DownloadStatus.DownloadFinished)
-            && downloadStatusList.Any(x => x == DownloadStatus.Completed)
-        )
+        if (downloadStatusList.All(x => x is DownloadStatus.DownloadFinished or DownloadStatus.Completed))
             return DownloadStatus.DownloadFinished;
 
         if (
-            downloadStatusList.Any(x => x == DownloadStatus.Queued)
-            && downloadStatusList.Any(x => x == DownloadStatus.Queued)
+            downloadStatusList.All(x =>
+                x is DownloadStatus.Queued or DownloadStatus.DownloadFinished or DownloadStatus.Completed
+            )
         )
-            return DownloadStatus.Queued;
+            return DownloadStatus.Downloading;
 
         _log.Error("Unable to determine the aggregate status of the download tasks. {StatusList}", downloadStatusList);
 

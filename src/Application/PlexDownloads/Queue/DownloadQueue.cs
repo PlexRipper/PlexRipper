@@ -70,6 +70,13 @@ public class DownloadQueue : IDownloadQueue
                 .ToResult();
         }
 
+        if (await _downloadTaskScheduler.IsServerDownloading(plexServerId))
+        {
+            return Result
+                .Fail("Cannot select the next download task because server is already downloading one.")
+                .LogWarning();
+        }
+
         var downloadTasks = await _dbContext.GetAllDownloadTasksByServerAsync(plexServerId, cancellationToken: _token);
 
         _log.Here()

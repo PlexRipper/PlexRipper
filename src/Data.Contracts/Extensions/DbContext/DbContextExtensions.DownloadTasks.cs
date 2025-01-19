@@ -197,6 +197,97 @@ public static partial class DbContextExtensions
         }
     }
 
+    public static async Task<DownloadStatus> GetDownloadTaskStatusAsync(
+        this IPlexRipperDbContext dbContext,
+        DownloadTaskKey key,
+        CancellationToken cancellationToken = default
+    )
+    {
+        try
+        {
+            if (!key.IsValid)
+            {
+                _log.Here()
+                    .Error(
+                        "Invalid {Name} {Key} in {GetDownloadTaskStatus}",
+                        nameof(DownloadTaskKey),
+                        key.ToString(),
+                        nameof(GetDownloadTaskStatusAsync)
+                    );
+                return DownloadStatus.Unknown;
+            }
+
+            switch (key.Type)
+            {
+                // DownloadTaskType.Movie
+                case DownloadTaskType.Movie:
+                    return await dbContext
+                        .DownloadTaskMovie.Where(x => x.Id == key.Id)
+                        .Take(1)
+                        .Select(x => x.DownloadStatus)
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                // DownloadTaskType.MovieData
+                case DownloadTaskType.MovieData:
+                case DownloadTaskType.MoviePart:
+                    return await dbContext
+                        .DownloadTaskMovieFile.Where(x => x.Id == key.Id)
+                        .Take(1)
+                        .Select(x => x.DownloadStatus)
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                // DownloadTaskType.TvShow
+                case DownloadTaskType.TvShow:
+                    return await dbContext
+                        .DownloadTaskTvShow.Where(x => x.Id == key.Id)
+                        .Take(1)
+                        .Select(x => x.DownloadStatus)
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                // DownloadTaskType.TvShowSeason
+                case DownloadTaskType.Season:
+                    return await dbContext
+                        .DownloadTaskTvShowSeason.Where(x => x.Id == key.Id)
+                        .Take(1)
+                        .Select(x => x.DownloadStatus)
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                // DownloadTaskType.Episode
+                case DownloadTaskType.Episode:
+                    return await dbContext
+                        .DownloadTaskTvShowEpisode.Where(x => x.Id == key.Id)
+                        .Take(1)
+                        .Select(x => x.DownloadStatus)
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                // DownloadTaskType.EpisodeData
+                case DownloadTaskType.EpisodeData:
+                case DownloadTaskType.EpisodePart:
+                    return await dbContext
+                        .DownloadTaskTvShowEpisodeFile.Where(x => x.Id == key.Id)
+                        .Take(1)
+                        .Select(x => x.DownloadStatus)
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                default:
+                    _log.Here()
+                        .Error(
+                            "Unsupported {Name} {Type} in {GetDownloadTaskStatus}",
+                            nameof(DownloadTaskType),
+                            key.Type,
+                            nameof(GetDownloadTaskStatusAsync)
+                        );
+                    return DownloadStatus.Unknown;
+            }
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _log.Error(ex);
+        }
+
+        return DownloadStatus.Unknown;
+    }
+
     public static async Task<DownloadTaskFileBase?> GetDownloadTaskFileAsync(
         this IPlexRipperDbContext dbContext,
         DownloadTaskKey key,

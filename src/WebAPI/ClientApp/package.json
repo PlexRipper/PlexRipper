@@ -26,7 +26,7 @@
     "npm-upgrade-packages": "npm-upgrade",
     "test": "vitest --config ./vitest.config.mts run",
     "test-watch": "vitest --config ./vitest.config.mts watch",
-    "cypress:e2e": "dotenvx run -f .env.cypress -- sh -c 'start-server-and-test \"bun run dev\" $PORT \"cypress open --e2e --browser firefox\"",
+    "cypress:e2e": "dotenvx run -f .env.cypress -- sh -c 'start-server-and-test \"bun run dev\" http://localhost:$PORT \"cypress open --e2e --browser firefox\"'",
     "cypress:ci": "dotenvx run -f .env.cypress.ci -- sh -c 'start-server-and-test \"bun run static-server\" http://localhost:$PORT \"cypress run --browser firefox\"'",
     "static-server": "bun run generate && serve .output/public -l $PORT --single --no-request-logging --no-port-switching",
     "eslint-config-inspector": "npx @eslint/config-inspector",

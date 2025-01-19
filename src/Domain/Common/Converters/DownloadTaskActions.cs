@@ -99,6 +99,11 @@ public static class DownloadTaskActions
             return DownloadStatus.Unknown;
         }
 
+        // Only return this status if all statuses are the same.
+        var allStatuses = Enum.GetValues<DownloadStatus>().ToList();
+        foreach (var status in allStatuses.Where(status => downloadStatusList.All(x => x == status)))
+            return status;
+
         // If any of these statuses are present, return that status.
         // Earlier statuses take precedence.
         List<DownloadStatus> anyStatuses =
@@ -107,43 +112,23 @@ public static class DownloadTaskActions
             DownloadStatus.Error,
             DownloadStatus.MoveError,
             DownloadStatus.MergeError,
-            DownloadStatus.Downloading,
-            DownloadStatus.MergeFinished,
-            DownloadStatus.MoveFinished,
             DownloadStatus.Paused,
+            DownloadStatus.MergePaused,
+            DownloadStatus.MovePaused,
             DownloadStatus.Stopped,
+            DownloadStatus.Downloading,
+            DownloadStatus.Queued,
             DownloadStatus.Merging,
             DownloadStatus.Moving,
+            DownloadStatus.MergeFinished,
+            DownloadStatus.MoveFinished,
+            DownloadStatus.DownloadFinished,
+            DownloadStatus.Deleted,
+            DownloadStatus.Completed,
         ];
 
         foreach (var status in anyStatuses.Where(status => downloadStatusList.Any(x => x == status)))
             return status;
-
-        // Only return this status if all statuses are the same.
-        List<DownloadStatus> allStatuses =
-        [
-            DownloadStatus.MergePaused,
-            DownloadStatus.MovePaused,
-            DownloadStatus.Downloading,
-            DownloadStatus.DownloadFinished,
-            DownloadStatus.Completed,
-            DownloadStatus.Deleted,
-            DownloadStatus.Queued,
-            DownloadStatus.Unknown,
-        ];
-
-        foreach (var status in allStatuses.Where(status => downloadStatusList.All(x => x == status)))
-            return status;
-
-        if (downloadStatusList.All(x => x is DownloadStatus.DownloadFinished or DownloadStatus.Completed))
-            return DownloadStatus.DownloadFinished;
-
-        if (
-            downloadStatusList.All(x =>
-                x is DownloadStatus.Queued or DownloadStatus.DownloadFinished or DownloadStatus.Completed
-            )
-        )
-            return DownloadStatus.Downloading;
 
         _log.Error("Unable to determine the aggregate status of the download tasks. {StatusList}", downloadStatusList);
 

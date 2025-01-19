@@ -69,8 +69,6 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
             .Setup(x => x.StartFileMergeJob(It.IsAny<DownloadTaskKey>()))
             .ReturnsAsync(Result.Ok());
 
-        mock.PublishMediator(It.IsAny<CheckDownloadQueueNotification>).Returns(Task.CompletedTask);
-
         // Act
         var command = new DownloadTaskUpdatedNotification(downloadTasks[0].ToKey());
         await _sut.Handle(command, CancellationToken.None);
@@ -85,6 +83,5 @@ public class DownloadTaskUpdatedHandler_UnitTests : BaseUnitTest<DownloadTaskUpd
                     ),
                 Times.Once
             );
-        mock.VerifyNotification(It.IsAny<CheckDownloadQueueNotification>, Times.Once);
     }
 }

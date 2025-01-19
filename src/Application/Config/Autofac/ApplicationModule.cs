@@ -14,15 +14,6 @@ public class ApplicationModule : Module
     /// <inheritdoc/>
     protected override void Load(ContainerBuilder builder)
     {
-        var assembly = Assembly.GetExecutingAssembly();
-
-        // register all I*Services
-        builder
-            .RegisterAssemblyTypes(assembly)
-            .Where(t => t.Name.EndsWith("Service"))
-            .AsImplementedInterfaces()
-            .SingleInstance();
-
         builder.RegisterType<DownloadQueue>().As<IDownloadQueue>().SingleInstance();
         builder.RegisterType<DownloadTaskScheduler>().As<IDownloadTaskScheduler>().SingleInstance();
         builder.RegisterType<FileMergeScheduler>().As<IFileMergeScheduler>().SingleInstance();
@@ -31,5 +22,6 @@ public class ApplicationModule : Module
 
         builder.RegisterType<SchedulerService>().As<ISchedulerService>().SingleInstance();
         builder.RegisterType<AllJobListener>().As<IAllJobListener>().SingleInstance();
+        builder.RegisterType<DownloadJobListener>().As<IDownloadJobListener>().SingleInstance();
     }
 }

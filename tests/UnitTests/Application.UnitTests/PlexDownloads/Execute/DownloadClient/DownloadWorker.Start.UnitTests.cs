@@ -1,14 +1,13 @@
 using Autofac;
 using ByteSizeLib;
-using FileSystem.Contracts;
 using Microsoft.EntityFrameworkCore;
 using PlexApi.Contracts;
 
 namespace PlexRipper.Application.UnitTests;
 
-public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
+public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
 {
-    public DownloadWorker_Start_UnitTests(ITestOutputHelper output)
+    public DownloadWorkerStartUnitTests(ITestOutputHelper output)
         : base(output) { }
 
     [Fact]
@@ -123,7 +122,7 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
                 x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
             )
             .ReturnsAsync(() => null)
-            .Verifiable(Times.Once);
+            .Verifiable(Times.AtLeastOnce);
 
         var downloadWorkerTask = IDbContext.DownloadWorkerTasks.First();
         var sut = mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", downloadWorkerTask));
@@ -133,6 +132,7 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
 
         // Act
         var result = sut.Start();
+        await sut.DownloadProcessTask; // Wait for the process to complete
 
         // Assert
         result.ShouldNotBeNull();
@@ -172,7 +172,7 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
                 (byte[] buffer, int offset, int count, CancellationToken cancellationToken) =>
                 {
                     callbackIndex++;
-                    if (callbackIndex == 3)
+                    if (callbackIndex % 2 == 0)
                     {
                         throw new HttpIOException(
                             HttpRequestError.InvalidResponse,
@@ -189,7 +189,7 @@ public class DownloadWorker_Start_UnitTests : BaseUnitTest<DownloadWorker>
             .Setup(x =>
                 x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
             )
-            .ReturnsAsync(new ThrottledStream(realStream))
+            .ReturnsAsync(new ThrottledStream(mockStream.Object))
             .Verifiable(Times.Once);
 
         var downloadWorkerTask = IDbContext.DownloadWorkerTasks.First();

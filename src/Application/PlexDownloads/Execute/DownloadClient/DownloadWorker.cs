@@ -236,7 +236,19 @@ public class DownloadWorker : IDisposable
 
                 if (result.IsFailed)
                 {
-                    SetDownloadWorkerTaskChanged(DownloadStatus.ServerUnreachable, result.ToResult());
+                    if (result.Errors.Any(x => x.Message.Contains("A task was canceled.")))
+                    {
+                        SetDownloadWorkerTaskChanged(DownloadStatus.Stopped, result.ToResult());
+                    }
+                    else if (result.Errors.Any(x => x.Message.Contains("The response ended prematurely")))
+                    {
+                        SetDownloadWorkerTaskChanged(DownloadStatus.ServerUnreachable, result.ToResult());
+                    }
+                    else
+                    {
+                        SetDownloadWorkerTaskChanged(DownloadStatus.Error, result.ToResult());
+                    }
+
                     break;
                 }
 

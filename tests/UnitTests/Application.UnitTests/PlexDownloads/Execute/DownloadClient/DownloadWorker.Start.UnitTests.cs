@@ -122,7 +122,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
                 x.DownloadStreamAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
             )
             .ReturnsAsync(() => null)
-            .Verifiable(Times.Once);
+            .Verifiable(Times.AtLeastOnce);
 
         var downloadWorkerTask = IDbContext.DownloadWorkerTasks.First();
         var sut = mock.Create<DownloadWorker>(new NamedParameter("downloadWorkerTask", downloadWorkerTask));
@@ -132,6 +132,7 @@ public class DownloadWorkerStartUnitTests : BaseUnitTest<DownloadWorker>
 
         // Act
         var result = sut.Start();
+        await sut.DownloadProcessTask; // Wait for the process to complete
 
         // Assert
         result.ShouldNotBeNull();

@@ -34,7 +34,7 @@ public class DownloadWorker : IDisposable
 
     private int _downloadSpeedLimit;
 
-    private readonly AsyncRetryPolicy _retryPolicy;
+    private readonly AsyncRetryPolicy<Result<int>> _retryPolicy;
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -70,16 +70,17 @@ public class DownloadWorker : IDisposable
 
         _retryPolicy = Policy
             .Handle<HttpIOException>()
+            .OrResult<Result<int>>(result => result.IsFailed)
             .WaitAndRetryAsync(
                 retryCount: 3,
                 sleepDurationProvider: attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
-                onRetry: (exception, timeSpan, retryCount, context) =>
+                onRetry: (exception, timeSpan, retryCount, _) =>
                 {
                     _log.Here()
                         .Warning(
                             "Retry {retryCount} due to {exceptionMessage}. Retrying in {timeSpanTotalSeconds} seconds.",
                             retryCount,
-                            exception.Message,
+                            exception.Result?.Errors.FirstOrDefault()?.Message ?? "Unknown error",
                             timeSpan.TotalSeconds
                         );
                 }
@@ -212,7 +213,16 @@ public class DownloadWorker : IDisposable
 
                     responseStream.SetThrottleSpeed(_downloadSpeedLimit);
 
-                    var read = await responseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
+                    var readResult = await Result.Try(
+                        () => responseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)
+                    );
+
+                    if (readResult.IsFailed)
+                    {
+                        return readResult;
+                    }
+
+                    var read = readResult.Value;
 
                     // Clamp the read to the remaining data
                     if (read > 0)
@@ -226,7 +236,7 @@ public class DownloadWorker : IDisposable
 
                 if (result.IsFailed)
                 {
-                    SetDownloadWorkerTaskChanged(DownloadStatus.Error, result.ToResult());
+                    SetDownloadWorkerTaskChanged(DownloadStatus.ServerUnreachable, result.ToResult());
                     break;
                 }
 

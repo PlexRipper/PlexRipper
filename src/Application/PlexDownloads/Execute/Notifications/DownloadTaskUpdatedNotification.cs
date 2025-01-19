@@ -7,27 +7,17 @@ namespace PlexRipper.Application;
 /// <summary>
 /// NOTE: This should be an IRequest to ensure there is always 1 handler for this notification.
 /// </summary>
-/// <param name="Key"></param>
 public record DownloadTaskUpdatedNotification(DownloadTaskKey Key) : IRequest;
 
 public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdatedNotification>
 {
     private readonly IPlexRipperDbContext _dbContext;
-    private readonly IMediator _mediator;
     private readonly ISignalRService _signalRService;
-    private readonly IFileMergeScheduler _fileMergeScheduler;
 
-    public DownloadTaskUpdatedHandler(
-        IPlexRipperDbContext dbContext,
-        IMediator mediator,
-        ISignalRService signalRService,
-        IFileMergeScheduler fileMergeScheduler
-    )
+    public DownloadTaskUpdatedHandler(IPlexRipperDbContext dbContext, ISignalRService signalRService)
     {
         _dbContext = dbContext;
-        _mediator = mediator;
         _signalRService = signalRService;
-        _fileMergeScheduler = fileMergeScheduler;
     }
 
     public async Task Handle(DownloadTaskUpdatedNotification notification, CancellationToken cancellationToken)
@@ -49,16 +39,6 @@ public class DownloadTaskUpdatedHandler : IRequestHandler<DownloadTaskUpdatedNot
         if (changedDownloadTask is null)
         {
             ResultExtensions.EntityNotFound(nameof(DownloadTaskGeneric), notification.Key.ToString()).LogError();
-            return;
-        }
-
-        if (changedDownloadTask.DownloadStatus == DownloadStatus.DownloadFinished)
-        {
-            await _fileMergeScheduler.StartFileMergeJob(notification.Key);
-            await _mediator.Publish(
-                new CheckDownloadQueueNotification(notification.Key.PlexServerId),
-                cancellationToken
-            );
         }
     }
 }

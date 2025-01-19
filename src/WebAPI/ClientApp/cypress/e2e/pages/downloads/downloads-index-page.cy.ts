@@ -45,9 +45,15 @@ describe('Downloads page', () => {
 					cy.getCy(`column-dataTotal-${downloadTask.id}`).should('have.text', prettyBytes(downloadTask.dataTotal));
 					cy.getCy(`column-downloadSpeed-${downloadTask.id}`).should('have.text', prettyBytes(downloadSpeed) + `/s`);
 					cy.getCy(`column-percentage-${downloadTask.id}`).should('have.text', `${percentage}%`);
+
+					// Format timeRemaining as MM:SS
+					const minutes = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+					const seconds = (timeRemaining % 60).toString().padStart(2, '0');
+					const formattedTimeRemaining = timeRemaining > 0 ? `${minutes}:${seconds}` : '-';
+
 					cy.getCy(`column-timeRemaining-${downloadTask.id}`).should(
 						'have.text',
-						timeRemaining > 0 ? String(timeRemaining).padStart(2, '0') : '-',
+						formattedTimeRemaining,
 					);
 				});
 			});

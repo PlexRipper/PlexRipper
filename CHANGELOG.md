@@ -1,5 +1,20 @@
 PlexRipper Changelog
 
+## [0.29.1](https://github.com/PlexRipper/PlexRipper/compare/v0.29.0...v0.29.1) (2025-01-19)
+
+
+### Bug Fixes
+
+* **WebAPI:** Fixed an issue where two downloads on the same server could happen, now an extra check is added to prevent this ([1b33455](https://github.com/PlexRipper/PlexRipper/commit/1b33455d634ca98d156d454d95fe3e83e93ce81b))
+* **Web-UI:** Fixed the duration display with the correct zero padding ([5d7b258](https://github.com/PlexRipper/PlexRipper/commit/5d7b25891c2dd6f3011cc7b1b186421fa48c7e39))
+* **WebAPI:** Fixed the issue again where download task selection would stall due to incorrect status determination ([f300a0f](https://github.com/PlexRipper/PlexRipper/commit/f300a0f4fded8c7b5e56db4a13a4016a729be7c2))
+* **WebAPI:** possible fixed the download exceptions that can happen due to bad connections and now PlexRipper retrying that ([961b65e](https://github.com/PlexRipper/PlexRipper/commit/961b65e50ecf8a741a1e1aa53770f0899e528380))
+
+
+### Performance Improvements
+
+* **WebAPI:** micro improvement by removing autofac dependency assembly scanning in Application project ([0e708a6](https://github.com/PlexRipper/PlexRipper/commit/0e708a68e4c27c928a58c7a114181cee26078242))
+
 # [0.29.0](https://github.com/PlexRipper/PlexRipper/compare/v0.28.0...v0.29.0) (2025-01-18)
 
 

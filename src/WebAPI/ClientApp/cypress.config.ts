@@ -1,8 +1,9 @@
 import { resolve } from 'path';
+import { fileURLToPath } from 'url';
 import { defineConfig } from 'cypress';
 import vitePreprocessor from 'cypress-vite';
 
-const __dirname = import.meta.dirname;
+const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 export default defineConfig({
 	projectId: 'qo5tth',

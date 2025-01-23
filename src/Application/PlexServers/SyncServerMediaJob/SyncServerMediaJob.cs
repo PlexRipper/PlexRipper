@@ -109,7 +109,7 @@ public class SyncServerMediaJob : IJob
                     progressList.Add(libraryProgress);
 
                 _signalRService.SendServerSyncProgressUpdateAsync(
-                    new SyncServerMediaProgress(plexServerId, progressList)
+                    new SyncServerMediaProgress { ServerId = plexServerId, LibraryProgresses = progressList }
                 );
             });
 

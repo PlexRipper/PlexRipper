@@ -11,19 +11,19 @@ public class DownloadJobListener : IDownloadJobListener
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
     private readonly IMediator _mediator;
-    private readonly IFileMergeScheduler _fileMergeScheduler;
+    private readonly IFileMergeQueue _fileMergeQueue;
 
     public DownloadJobListener(
         ILog log,
         IPlexRipperDbContext dbContext,
         IMediator mediator,
-        IFileMergeScheduler fileMergeScheduler
+        IFileMergeQueue fileMergeQueue
     )
     {
         _log = log;
         _dbContext = dbContext;
         _mediator = mediator;
-        _fileMergeScheduler = fileMergeScheduler;
+        _fileMergeQueue = fileMergeQueue;
     }
 
     public string Name => nameof(DownloadJobListener);
@@ -54,7 +54,7 @@ public class DownloadJobListener : IDownloadJobListener
                     "DownloadTask with id: {DownloadTaskId} has finished downloading, starting fileMergeJob and executing DownloadQueueCheck",
                     downloadTaskKey.Id
                 );
-                await _fileMergeScheduler.StartFileMergeJob(downloadTaskKey);
+                await _fileMergeQueue.CheckFileMergeQueue();
                 await _mediator.Publish(
                     new CheckDownloadQueueNotification(downloadTaskKey.PlexServerId),
                     cancellationToken

@@ -165,7 +165,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
                 mediaSize
             );
 
-            if (mediaSize == 0)
+            if (plexLibrary.TvShows.Any() && mediaSize == 0)
             {
                 _log.Error(
                     "No media size was found for library {PlexLibraryName} with id: {PlexLibraryId}",
@@ -228,7 +228,7 @@ public class RefreshLibraryMediaCommandHandler : IRequestHandler<RefreshLibraryM
         var mediaSize = plexLibrary.Movies.Sum(x => x.MediaSize);
         plexLibrary.SetMovieMetaData(plexLibrary.Movies.Count, mediaSize);
 
-        if (mediaSize == 0)
+        if (plexLibrary.Movies.Any() && mediaSize == 0)
         {
             _log.Error(
                 "No media size was found for library {PlexLibraryName} with id: {PlexLibraryId}",

@@ -27,25 +27,22 @@ public class FileMergeQueue : IFileMergeQueue
             return Result.Fail("Cannot run more than 1 fileMergeJob at the same time.").LogWarning();
         }
 
-        var key = await _dbContext
-            .DownloadTaskMovieFile.Where(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
-            .Select(x => x.ToKey())
-            .FirstOrDefaultAsync();
-
-        if (key is null)
-        {
-            key = await _dbContext
+        var key =
+            await _dbContext
+                .DownloadTaskMovieFile.Where(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
+                .Select(x => x.ToKey())
+                .FirstOrDefaultAsync()
+            ?? await _dbContext
                 .DownloadTaskTvShowEpisodeFile.Where(x => x.DownloadStatus == DownloadStatus.DownloadFinished)
                 .Select(x => x.ToKey())
                 .FirstOrDefaultAsync();
-        }
 
         if (key is null)
         {
             return _log.DebugLine("No DownloadTask found to either merge or move").ToResult();
         }
 
-        await _fileMergeScheduler.StartFileMergeJob(key);
-        return Result.Ok(key);
+        var startResult = await _fileMergeScheduler.StartFileMergeJob(key);
+        return startResult.IsSuccess ? Result.Ok(key) : startResult;
     }
 }

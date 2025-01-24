@@ -4,27 +4,26 @@ import type { Observable } from 'rxjs';
 import { ReplaySubject, forkJoin, of } from 'rxjs';
 import { filter, take, switchMap, tap } from 'rxjs/operators';
 import type { ISetupResult } from '@interfaces';
-import type {	CheckAllConnectionStatusUpdateDTO, DownloadJobUpdateDTO,
-	FileMergeJobUpdateDTO, InspectPlexServerJobUpdateDTO,
+import type {	CheckAllConnectionStatusUpdateDTO, InspectPlexServerJobUpdateDTO,
 	SyncServerMediaJobUpdateDTO,
+	JobStatusUpdateDTO as ApiJobStatusUpdateDTO,
 } from '@dto';
 import {
 	JobStatus,
 	JobTypes,
 } from '@dto';
-import { backgroundJobsApi, type JobStatusUpdateDTO } from '@api';
+import type { JobStatusUpdateDTO } from '@api';
+import { backgroundJobsApi } from '@api';
 import { cloneDeep } from 'lodash-es';
 
 interface IBackgroundJobsStore {
 	jobStatusObservable: ReplaySubject<JobStatusUpdateDTO>;
-	jobStatusList: JobStatusUpdateDTO[];
 }
 
 export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 	// State
 	const defaultState: IBackgroundJobsStore = {
 		jobStatusObservable: new ReplaySubject<JobStatusUpdateDTO>(),
-		jobStatusList: [],
 	};
 
 	const state = reactive<IBackgroundJobsStore>(cloneDeep(defaultState));
@@ -62,56 +61,20 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 			return backgroundJobsApi.getAllBackgroundJobsEndpoint().pipe(
 				tap((response) => {
 					for (const update of response.value ?? []) {
-						switch (update.jobType) {
-							case JobTypes.SyncServerMediaJob:
-								actions.setStatusJobUpdate<SyncServerMediaJobUpdateDTO>({
-									...update,
-									data: JSON.parse(update.jsonString),
-								});
-								break;
-							case JobTypes.DownloadJob:
-								// string = DownloadTaskId (GUID)
-								actions.setStatusJobUpdate<DownloadJobUpdateDTO>({
-									...update,
-									data: JSON.parse(update.jsonString),
-								});
-								break;
-							case JobTypes.FileMergeJob:
-								actions.setStatusJobUpdate<FileMergeJobUpdateDTO>({
-									...update,
-									data: JSON.parse(update.jsonString),
-								});
-								break;
-							case JobTypes.InspectPlexServerJob:
-								actions.setStatusJobUpdate<InspectPlexServerJobUpdateDTO>({
-									...update,
-									data: JSON.parse(update.jsonString),
-								});
-								break;
-							case JobTypes.CheckAllConnectionsStatusByPlexServerJob:
-								actions.setStatusJobUpdate<CheckAllConnectionStatusUpdateDTO>({
-									...update,
-									data: JSON.parse(update.jsonString),
-								});
-								break;
-							default:
-								throw new Error(`Unknown job type ${update.jobType}`);
-						}
+						actions.setStatusJobUpdate(update);
 					}
 				}),
 				switchMap(() => of({ name: 'useBackgroundJobsStore', isSuccess: true }),
 				), take(1));
 		},
 
-		setStatusJobUpdate<T>(jobStatusUpdate: JobStatusUpdateDTO<T>) {
-			Log.debug(jobStatusUpdate);
-			const i = state.jobStatusList.findIndex((x) => x.id === jobStatusUpdate.id);
-			if (i > -1) {
-				state.jobStatusList.splice(i, 1, jobStatusUpdate);
-			} else {
-				state.jobStatusList.push(jobStatusUpdate);
-			}
-			state.jobStatusObservable.next(jobStatusUpdate);
+		setStatusJobUpdate(update: ApiJobStatusUpdateDTO) {
+			const updateWithData = {
+				...update,
+				data: JSON.parse(update.jsonString),
+			};
+			Log.debug(updateWithData);
+			state.jobStatusObservable.next(updateWithData);
 		},
 
 		$reset() {

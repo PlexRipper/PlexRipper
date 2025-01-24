@@ -147,7 +147,6 @@ onMounted(() => {
 	useSubscription(
 		backgroundJobStore.getSyncServerMediaJobUpdate(JobStatus.Completed)
 			.subscribe(({ data }) => {
-				Log.info('Update Completed', data);
 				set(syncPlexServerMedia, get(syncPlexServerMedia).filter((x) => x !== data.plexServerId));
 			}),
 	);

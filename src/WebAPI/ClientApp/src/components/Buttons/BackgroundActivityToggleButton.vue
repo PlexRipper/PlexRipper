@@ -101,7 +101,7 @@ const menuItems = computed(() => {
 		});
 	}
 
-	if (get(syncPlexServerMedia) && Object.keys(get(syncPlexServerMedia)).length > 0) {
+	if (get(syncPlexServerMedia) && get(syncPlexServerMedia).length > 0) {
 		items.push({
 			label: t('components.background-activity-toggle-button.syncing-media'),
 			icon: 'mdi-server-network',
@@ -147,6 +147,7 @@ onMounted(() => {
 	useSubscription(
 		backgroundJobStore.getSyncServerMediaJobUpdate(JobStatus.Completed)
 			.subscribe(({ data }) => {
+				Log.info('Update Completed', data);
 				set(syncPlexServerMedia, get(syncPlexServerMedia).filter((x) => x !== data.plexServerId));
 			}),
 	);

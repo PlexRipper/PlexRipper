@@ -97,6 +97,10 @@ export interface DisplaySettingsDTO {
   tvShowViewMode: ViewMode;
 }
 
+export interface DownloadJobUpdateDTO {
+  id: DownloadTaskKey;
+}
+
 export interface DownloadManagerSettingsDTO {
   /** @format int32 */
   downloadSegments: number;
@@ -203,6 +207,18 @@ export interface DownloadTaskDTO {
   title: string;
 }
 
+export interface DownloadTaskKey {
+  /** @format guid */
+  id: string;
+  isDownloadable: boolean;
+  isValid: boolean;
+  /** @format int32 */
+  plexLibraryId: number;
+  /** @format int32 */
+  plexServerId: number;
+  type: DownloadTaskType;
+}
+
 export enum DownloadTaskType {
   None = "None",
   Movie = "Movie",
@@ -241,6 +257,10 @@ export interface ErrorResponse {
    * @default 400
    */
   statusCode: number;
+}
+
+export interface FileMergeJobUpdateDTO {
+  id: DownloadTaskKey;
 }
 
 export interface FileSystemDTO {
@@ -315,17 +335,21 @@ export interface IError {
   reasons?: IError[] | null;
 }
 
+export interface InspectPlexServerJobUpdateDTO {
+  plexServerIds: number[];
+}
+
 export enum JobStatus {
   Started = "Started",
   Completed = "Completed",
 }
 
-export interface JobStatusUpdateDTOOfObject {
-  data?: any;
+export interface JobStatusUpdateDTO {
   id: string;
   /** @format date-time */
   jobStartTime: string;
   jobType: JobTypes;
+  jsonString: string;
   status: JobStatus;
 }
 
@@ -794,6 +818,15 @@ export interface ResultDTOOfListOfFolderPathDTO {
   value?: FolderPathDTO[] | null;
 }
 
+export interface ResultDTOOfListOfJobStatusUpdateDTO {
+  errors: ErrorDTO[];
+  isFailed: boolean;
+  isSuccess: boolean;
+  reasons: ReasonDTO[];
+  successes: SuccessDTO[];
+  value?: JobStatusUpdateDTO[] | null;
+}
+
 export interface ResultDTOOfListOfNotificationDTO {
   errors: ErrorDTO[];
   isFailed: boolean;
@@ -1043,11 +1076,11 @@ export interface SyncServerMediaJobUpdateDTO {
 }
 
 export interface SyncServerMediaProgress {
-  /** @format int32 */
-  id: number;
   libraryProgresses: LibraryProgress[];
   /** @format decimal */
   percentage: number;
+  /** @format int32 */
+  serverId: number;
 }
 
 /** @example {"username":"PlexRipperRocks","password":"Pl€XR!ℙℙ€R69"} */

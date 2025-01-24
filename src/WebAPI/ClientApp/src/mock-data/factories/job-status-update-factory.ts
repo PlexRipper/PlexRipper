@@ -24,6 +24,7 @@ export function generateJobStatusUpdate<T>({
 		jobStartTime: format(new Date(), 'yyyy-MM-dd\'T\'HH:mm:ss.SSS'),
 		jobType,
 		status: jobStatus,
+		jsonString: JSON.stringify(data),
 		data,
 		...partial,
 	};

@@ -138,7 +138,7 @@ const totalPercentage = computed(() => {
 	return sum(get(syncProgressList).map((x) => x.percentage)) / get(syncProgressList).length;
 });
 
-const plexServers = computed(() => serverStore.getServers([...get(syncProgressList).map((x) => x.id), ...get(plexServerIds)].filter((x, i, a) => a.indexOf(x) == i)));
+const plexServers = computed(() => serverStore.getServers([...get(syncProgressList).map((x) => x.serverId), ...get(plexServerIds)].filter((x, i, a) => a.indexOf(x) == i)));
 
 const getProgressText = computed(() => {
 	if (get(plexServers).length === 0) {
@@ -165,10 +165,10 @@ const plexServerNodes = computed((): IPlexMediaSyncServerNode[] => {
 	let uniqueIndex = 0;
 	return get(syncProgressList).map((server) => {
 		return {
-			id: server.id,
+			id: server.serverId,
 			index: uniqueIndex++,
 			type: 'server',
-			title: serverStore.getServerName(server.id),
+			title: serverStore.getServerName(server.serverId),
 			percentage: server.percentage,
 			completed: server.percentage === 100,
 			children: server.libraryProgresses.map((libraryProgress) => {

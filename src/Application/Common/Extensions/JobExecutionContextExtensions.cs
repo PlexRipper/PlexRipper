@@ -26,11 +26,17 @@ public static class JobExecutionContextExtensions
         var jsonString = string.Empty;
         switch (jobType)
         {
+            // NOTE: This job sends its own updates to the client because the data is not passed in but determined dynamically while the job is running.
             case JobTypes.CheckAllConnectionsStatusByPlexServerJob:
-                // TODO move updates back to here from the CheckAllConnectionsStatusByPlexServerJob
+                // Type is CheckAllConnectionStatusUpdateDTO, but it is not passed in here.
                 break;
             case JobTypes.DownloadJob:
-                jsonString = dataMap.GetString(DownloadJob.DownloadTaskIdParameter) ?? string.Empty;
+                jsonString = ToJsonString(
+                    new DownloadJobUpdateDTO
+                    {
+                        Id = dataMap.GetJsonValue<DownloadTaskKey>(DownloadJob.DownloadTaskIdParameter)!,
+                    }
+                );
                 break;
             case JobTypes.SyncServerMediaJob:
                 jsonString = ToJsonString(
@@ -42,11 +48,21 @@ public static class JobExecutionContextExtensions
                 );
                 break;
             case JobTypes.InspectPlexServerJob:
-                jsonString = ToJsonString(dataMap.GetIntListValue(InspectPlexServerJob.PlexServerIdsParameter));
+                jsonString = ToJsonString(
+                    new InspectPlexServerJobUpdateDTO
+                    {
+                        PlexServerIds = dataMap.GetIntListValue(InspectPlexServerJob.PlexServerIdsParameter),
+                    }
+                );
                 break;
 
             case JobTypes.FileMergeJob:
-                jsonString = ToJsonString(dataMap.GetJsonValue<DownloadTaskKey>(FileMergeJob.DownloadTaskIdParameter));
+                jsonString = ToJsonString(
+                    new FileMergeJobUpdateDTO
+                    {
+                        DownloadTaskId = dataMap.GetJsonValue<DownloadTaskKey>(FileMergeJob.DownloadTaskIdParameter)!,
+                    }
+                );
                 break;
 
             default:
@@ -65,9 +81,7 @@ public static class JobExecutionContextExtensions
         {
             try
             {
-                return value is null
-                    ? string.Empty
-                    : JsonSerializer.Serialize(value, DefaultJsonSerializerOptions.ConfigStandard);
+                return JsonSerializer.Serialize(value, DefaultJsonSerializerOptions.ConfigStandard);
             }
             catch (Exception e)
             {

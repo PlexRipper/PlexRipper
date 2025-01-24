@@ -28,72 +28,71 @@ public class GetAllBackgroundJobsEndpoint : BaseEndpointWithoutRequest<List<JobS
     {
         var result = await _schedulerService.GetRunningJobUpdates();
 
-        await SendFluentResult(Result.Ok(MockData()), x => x.ToDTO(), ct);
+        await SendFluentResult(Result.Ok(result), x => x.ToDTO(), ct);
     }
 
-    private List<JobStatusUpdate<string>> MockData()
+    private List<JobStatusUpdateDTO> MockData()
     {
-        var downloadJobUpdatePayload = new DownloadTaskKey
-        {
-            Type = DownloadTaskType.TvShow,
-            Id = Guid.NewGuid(),
-            PlexServerId = 1,
-            PlexLibraryId = 1,
-        };
-        var downloadJobUpdate = new JobStatusUpdate<string>(
+        var downloadJobUpdate = new JobStatusUpdate<DownloadJobUpdateDTO>(
             JobTypes.DownloadJob,
             JobStatus.Started,
-            ToJsonString(downloadJobUpdatePayload),
+            new DownloadJobUpdateDTO
+            {
+                Id = new DownloadTaskKey
+                {
+                    Type = DownloadTaskType.TvShow,
+                    Id = Guid.NewGuid(),
+                    PlexServerId = 1,
+                    PlexLibraryId = 1,
+                },
+            },
             Guid.NewGuid().ToString()
         );
 
-        List<int> inspectPlexServerJobUpdatePayload = [1, 2, 3, 4, 5];
-        var inspectPlexServerJobUpdate = new JobStatusUpdate<string>(
+        var inspectPlexServerJobUpdate = new JobStatusUpdate<InspectPlexServerJobUpdateDTO>(
             JobTypes.InspectPlexServerJob,
             JobStatus.Started,
-            ToJsonString(inspectPlexServerJobUpdatePayload),
+            new InspectPlexServerJobUpdateDTO { PlexServerIds = [1, 2, 3, 4, 5] },
             Guid.NewGuid().ToString()
         );
 
-        var syncServerMediaJobUpdatePayload = new SyncServerMediaJobUpdateDTO { PlexServerId = 1, ForceSync = true };
-        var syncServerMediaJobUpdate = new JobStatusUpdate<string>(
+        var syncServerMediaJobUpdate = new JobStatusUpdate<SyncServerMediaJobUpdateDTO>(
             JobTypes.SyncServerMediaJob,
             JobStatus.Started,
-            ToJsonString(syncServerMediaJobUpdatePayload),
+            new SyncServerMediaJobUpdateDTO { PlexServerId = 1, ForceSync = true },
             Guid.NewGuid().ToString()
         );
 
-        var fileMergeJobUpdatePayload = new DownloadTaskKey
-        {
-            Type = DownloadTaskType.Movie,
-            Id = Guid.NewGuid(),
-            PlexServerId = 2,
-            PlexLibraryId = 3,
-        };
-        var fileMergeJobUpdate = new JobStatusUpdate<string>(
+        var fileMergeJobUpdate = new JobStatusUpdate<FileMergeJobUpdateDTO>(
             JobTypes.FileMergeJob,
             JobStatus.Completed,
-            ToJsonString(fileMergeJobUpdatePayload),
+            new FileMergeJobUpdateDTO
+            {
+                DownloadTaskId = new DownloadTaskKey
+                {
+                    Type = DownloadTaskType.Movie,
+                    Id = Guid.NewGuid(),
+                    PlexServerId = 2,
+                    PlexLibraryId = 3,
+                },
+            },
             Guid.NewGuid().ToString()
         );
 
-        var checkAllConnectionsStatusJobUpdate = new JobStatusUpdate<string>(
+        var checkAllConnectionsStatusJobUpdate = new JobStatusUpdate<CheckAllConnectionStatusUpdateDTO>(
             JobTypes.CheckAllConnectionsStatusByPlexServerJob,
             JobStatus.Started,
-            string.Empty,
+            new CheckAllConnectionStatusUpdateDTO { PlexServersWithConnectionIds = new Dictionary<int, List<int>>() },
             Guid.NewGuid().ToString()
         );
 
         return
         [
-            downloadJobUpdate,
-            inspectPlexServerJobUpdate,
-            syncServerMediaJobUpdate,
-            fileMergeJobUpdate,
-            checkAllConnectionsStatusJobUpdate,
+            downloadJobUpdate.ToDTO(),
+            inspectPlexServerJobUpdate.ToDTO(),
+            syncServerMediaJobUpdate.ToDTO(),
+            fileMergeJobUpdate.ToDTO(),
+            checkAllConnectionsStatusJobUpdate.ToDTO(),
         ];
     }
-
-    private string ToJsonString<T>(T value) =>
-        value is null ? string.Empty : JsonSerializer.Serialize(value, DefaultJsonSerializerOptions.ConfigStandard);
 }

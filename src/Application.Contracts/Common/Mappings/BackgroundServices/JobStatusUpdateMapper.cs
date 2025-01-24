@@ -13,10 +13,7 @@ public static class JobStatusUpdateMapper
             JobStartTime = jobStatusUpdate.JobStartTime,
             Status = jobStatusUpdate.Status,
             JobType = jobStatusUpdate.JobType,
-            JsonString =
-                typeof(T) == typeof(string)
-                    ? jobStatusUpdate.Data as string ?? string.Empty
-                    : JsonSerializer.Serialize(jobStatusUpdate.Data, DefaultJsonSerializerOptions.ConfigStandard),
+            JsonString = JsonSerializer.Serialize(jobStatusUpdate.Data, DefaultJsonSerializerOptions.ConfigStandard),
         };
 
     public static List<JobStatusUpdateDTO> ToDTO<T>(this List<JobStatusUpdate<T>> jobStatusUpdate)

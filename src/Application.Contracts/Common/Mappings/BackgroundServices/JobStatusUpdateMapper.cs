@@ -2,8 +2,6 @@ namespace Application.Contracts;
 
 public static class JobStatusUpdateMapper
 {
-    #region ToDTO
-
     public static JobStatusUpdateDTO ToDTO(this JobStatusUpdate jobStatusUpdate) =>
         new()
         {
@@ -12,6 +10,9 @@ public static class JobStatusUpdateMapper
             Status = jobStatusUpdate.Status,
             JobType = jobStatusUpdate.JobType,
         };
+
+    public static List<JobStatusUpdateDTO> ToDTO(this List<JobStatusUpdate> jobStatusUpdate) =>
+        jobStatusUpdate.Select(ToDTO).ToList();
 
     public static JobStatusUpdateDTO<T> ToDTO<T>(this JobStatusUpdate<T> jobStatusUpdate)
         where T : class =>
@@ -23,8 +24,6 @@ public static class JobStatusUpdateMapper
             JobType = jobStatusUpdate.JobType,
             Data = jobStatusUpdate.Data,
         };
-
-    #endregion
 
     public static JobTypes ToJobType(string jobGroup) =>
         Enum.TryParse<JobTypes>(jobGroup, out var jobType)

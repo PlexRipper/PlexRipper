@@ -128,5 +128,18 @@ public class SchedulerService : ISchedulerService
         await _scheduler.ScheduleJob(job, trigger, cancellationToken);
     }
 
+    public async Task<List<JobStatusUpdate>> GetRunningJobUpdates()
+    {
+        var executingJobs = await _scheduler.GetCurrentlyExecutingJobs();
+        return executingJobs
+            .Select(x => new JobStatusUpdate(
+                JobStatusUpdateMapper.ToJobType(x.JobDetail.Key.Group),
+                JobStatus.Started,
+                x.FireInstanceId,
+                x.FireTimeUtc.UtcDateTime
+            ))
+            .ToList();
+    }
+
     #endregion
 }

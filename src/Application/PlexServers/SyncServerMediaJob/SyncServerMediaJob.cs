@@ -95,7 +95,7 @@ public class SyncServerMediaJob : IJob
                         Received = 0,
                         Total = x.MediaCount,
                         TotalSteps = 1,
-                        TimeRemaining = default,
+                        TimeRemaining = TimeSpan.Zero,
                     }
                 )
             );

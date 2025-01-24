@@ -76,6 +76,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
             ToJsonString(downloadJobUpdatePayload),
             Guid.NewGuid().ToString()
         );
+
         List<int> inspectPlexServerJobUpdatePayload = [1, 2, 3, 4, 5];
         var inspectPlexServerJobUpdate = new JobStatusUpdate<string>(
             JobTypes.InspectPlexServerJob,
@@ -84,7 +85,44 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
             Guid.NewGuid().ToString()
         );
 
-        var list = new List<JobStatusUpdate<string>> { downloadJobUpdate, inspectPlexServerJobUpdate };
+        var syncServerMediaJobUpdatePayload = new SyncServerMediaJobUpdateDTO { PlexServerId = 1, ForceSync = true };
+        var syncServerMediaJobUpdate = new JobStatusUpdate<string>(
+            JobTypes.SyncServerMediaJob,
+            JobStatus.Started,
+            ToJsonString(syncServerMediaJobUpdatePayload),
+            Guid.NewGuid().ToString()
+        );
+
+        var fileMergeJobUpdatePayload = new DownloadTaskKey
+        {
+            Type = DownloadTaskType.Movie,
+            Id = Guid.NewGuid(),
+            PlexServerId = 2,
+            PlexLibraryId = 3,
+        };
+        var fileMergeJobUpdate = new JobStatusUpdate<string>(
+            JobTypes.FileMergeJob,
+            JobStatus.Completed,
+            ToJsonString(fileMergeJobUpdatePayload),
+            Guid.NewGuid().ToString()
+        );
+
+        var checkAllConnectionsStatusJobUpdate = new JobStatusUpdate<string>(
+            JobTypes.CheckAllConnectionsStatusByPlexServerJob,
+            JobStatus.Started,
+            string.Empty,
+            Guid.NewGuid().ToString()
+        );
+
+        var list = new List<JobStatusUpdate<string>>
+        {
+            downloadJobUpdate,
+            inspectPlexServerJobUpdate,
+            syncServerMediaJobUpdate,
+            fileMergeJobUpdate,
+            checkAllConnectionsStatusJobUpdate,
+        };
+
         mock.Mock<ISchedulerService>().Setup(x => x.GetRunningJobUpdates()).ReturnsAsync(list);
 
         // Act
@@ -99,29 +137,35 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
         responseValue.ShouldNotBeNull();
         responseValue.Count.ShouldBe(list.Count);
 
-        var downloadJobUpdateDTO = responseValue[0];
+        // Validate each job type
+        ValidateJobStatusUpdate(responseValue[0], downloadJobUpdate, downloadJobUpdatePayload);
+        ValidateJobStatusUpdate(responseValue[1], inspectPlexServerJobUpdate, inspectPlexServerJobUpdatePayload);
+        ValidateJobStatusUpdate(responseValue[2], syncServerMediaJobUpdate, syncServerMediaJobUpdatePayload);
+        ValidateJobStatusUpdate(responseValue[3], fileMergeJobUpdate, fileMergeJobUpdatePayload);
+        ValidateJobStatusUpdate<object>(responseValue[4], checkAllConnectionsStatusJobUpdate, null);
 
-        downloadJobUpdateDTO.ShouldNotBeNull();
-        downloadJobUpdateDTO.Id.ShouldBe(downloadJobUpdate.Id);
-        downloadJobUpdateDTO.JobType.ShouldBe(downloadJobUpdate.JobType);
-        downloadJobUpdateDTO.Status.ShouldBe(downloadJobUpdate.Status);
-        downloadJobUpdateDTO.JobStartTime.ShouldBe(downloadJobUpdate.JobStartTime);
-        downloadJobUpdateDTO.Data.ShouldNotBeNull();
-        var downloadJobUpdateDTOValue = JsonSerializer.Deserialize<DownloadTaskKey>(downloadJobUpdateDTO.Data);
-        downloadJobUpdateDTOValue.ShouldBe(downloadJobUpdatePayload);
+        static void ValidateJobStatusUpdate<T>(
+            JobStatusUpdateDTO<string> actual,
+            JobStatusUpdate<string> expected,
+            T? expectedPayload
+        )
+        {
+            actual.ShouldNotBeNull();
+            actual.Id.ShouldBe(expected.Id);
+            actual.JobType.ShouldBe(expected.JobType);
+            actual.Status.ShouldBe(expected.Status);
+            actual.JobStartTime.ShouldBe(expected.JobStartTime);
 
-        var inspectPlexServerJobUpdateDTO = responseValue[1];
-
-        inspectPlexServerJobUpdateDTO.ShouldNotBeNull();
-        inspectPlexServerJobUpdateDTO.Id.ShouldBe(inspectPlexServerJobUpdate.Id);
-        inspectPlexServerJobUpdateDTO.JobType.ShouldBe(inspectPlexServerJobUpdate.JobType);
-        inspectPlexServerJobUpdateDTO.Status.ShouldBe(inspectPlexServerJobUpdate.Status);
-        inspectPlexServerJobUpdateDTO.JobStartTime.ShouldBe(inspectPlexServerJobUpdate.JobStartTime);
-        inspectPlexServerJobUpdateDTO.Data.ShouldNotBeNull();
-        var inspectPlexServerJobUpdateDTOValue = JsonSerializer.Deserialize<List<int>>(
-            inspectPlexServerJobUpdateDTO.Data
-        );
-
-        inspectPlexServerJobUpdateDTOValue.ShouldBe(inspectPlexServerJobUpdatePayload);
+            if (expectedPayload is not null)
+            {
+                actual.Data.ShouldNotBeNullOrEmpty();
+                var actualPayload = JsonSerializer.Deserialize<T>(actual.Data);
+                actualPayload.ShouldBe(expectedPayload);
+            }
+            else
+            {
+                actual.Data.ShouldBeNullOrEmpty();
+            }
+        }
     }
 }

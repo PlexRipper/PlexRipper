@@ -1,20 +1,11 @@
+using System.Text.Json;
+using PlexRipper.Domain;
+
 namespace Application.Contracts;
 
 public static class JobStatusUpdateMapper
 {
-    public static JobStatusUpdateDTO ToDTO(this JobStatusUpdate jobStatusUpdate) =>
-        new()
-        {
-            Id = jobStatusUpdate.Id,
-            JobStartTime = jobStatusUpdate.JobStartTime,
-            Status = jobStatusUpdate.Status,
-            JobType = jobStatusUpdate.JobType,
-        };
-
-    public static List<JobStatusUpdateDTO> ToDTO(this List<JobStatusUpdate> jobStatusUpdate) =>
-        jobStatusUpdate.Select(ToDTO).ToList();
-
-    public static JobStatusUpdateDTO<T> ToDTO<T>(this JobStatusUpdate<T> jobStatusUpdate)
+    public static JobStatusUpdateDTO ToDTO<T>(this JobStatusUpdate<T> jobStatusUpdate)
         where T : class =>
         new()
         {
@@ -22,10 +13,13 @@ public static class JobStatusUpdateMapper
             JobStartTime = jobStatusUpdate.JobStartTime,
             Status = jobStatusUpdate.Status,
             JobType = jobStatusUpdate.JobType,
-            Data = jobStatusUpdate.Data,
+            JsonString =
+                typeof(T) == typeof(string)
+                    ? jobStatusUpdate.Data as string ?? string.Empty
+                    : JsonSerializer.Serialize(jobStatusUpdate.Data, DefaultJsonSerializerOptions.ConfigStandard),
         };
 
-    public static List<JobStatusUpdateDTO<T>> ToDTO<T>(this List<JobStatusUpdate<T>> jobStatusUpdate)
+    public static List<JobStatusUpdateDTO> ToDTO<T>(this List<JobStatusUpdate<T>> jobStatusUpdate)
         where T : class => jobStatusUpdate.Select(ToDTO).ToList();
 
     public static JobTypes ToJobType(string jobGroup) =>

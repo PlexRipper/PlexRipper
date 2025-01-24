@@ -20,7 +20,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
         // Act
         var rawResponse = SetupEndpointUnitTest<GetAllBackgroundJobsEndpoint>();
         await rawResponse.HandleAsync(CancellationToken.None);
-        var resultDTO = rawResponse.Response as ResultDTO<List<JobStatusUpdateDTO<string>>>;
+        var resultDTO = rawResponse.Response as ResultDTO<List<JobStatusUpdateDTO>>;
 
         // Assert
         resultDTO.ShouldNotBeNull();
@@ -41,7 +41,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
         // Act
         var rawResponse = SetupEndpointUnitTest<GetAllBackgroundJobsEndpoint>();
         await rawResponse.HandleAsync(CancellationToken.None);
-        var resultDTO = rawResponse.Response as ResultDTO<List<JobStatusUpdateDTO<string>>>;
+        var resultDTO = rawResponse.Response as ResultDTO<List<JobStatusUpdateDTO>>;
 
         // Assert
         resultDTO.ShouldNotBeNull();
@@ -128,7 +128,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
         // Act
         var rawResponse = SetupEndpointUnitTest<GetAllBackgroundJobsEndpoint>();
         await rawResponse.HandleAsync(CancellationToken.None);
-        var resultDTO = rawResponse.Response as ResultDTO<List<JobStatusUpdateDTO<string>>>;
+        var resultDTO = rawResponse.Response as ResultDTO<List<JobStatusUpdateDTO>>;
 
         // Assert
         resultDTO.ShouldNotBeNull();
@@ -145,7 +145,7 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
         ValidateJobStatusUpdate<object>(responseValue[4], checkAllConnectionsStatusJobUpdate, null);
 
         static void ValidateJobStatusUpdate<T>(
-            JobStatusUpdateDTO<string> actual,
+            JobStatusUpdateDTO actual,
             JobStatusUpdate<string> expected,
             T? expectedPayload
         )
@@ -158,13 +158,13 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
 
             if (expectedPayload is not null)
             {
-                actual.Data.ShouldNotBeNullOrEmpty();
-                var actualPayload = JsonSerializer.Deserialize<T>(actual.Data);
+                actual.JsonString.ShouldNotBeNullOrEmpty();
+                var actualPayload = JsonSerializer.Deserialize<T>(actual.JsonString);
                 actualPayload.ShouldBe(expectedPayload);
             }
             else
             {
-                actual.Data.ShouldBeNullOrEmpty();
+                actual.JsonString.ShouldBeNullOrEmpty();
             }
         }
     }

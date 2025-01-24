@@ -27,6 +27,7 @@ public static class JobExecutionContextExtensions
         switch (jobType)
         {
             case JobTypes.CheckAllConnectionsStatusByPlexServerJob:
+                // TODO move updates back to here from the CheckAllConnectionsStatusByPlexServerJob
                 break;
             case JobTypes.DownloadJob:
                 jsonString = dataMap.GetString(DownloadJob.DownloadTaskIdParameter) ?? string.Empty;

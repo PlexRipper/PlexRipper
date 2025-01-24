@@ -28,10 +28,9 @@ public class NSwagAddExtraTypes : IDocumentProcessor
             typeof(DownloadProgressDTO),
             typeof(ServerDownloadProgressDTO),
             typeof(ServerConnectionCheckStatusProgressDTO),
-            // Job status updates
-            typeof(JobStatusUpdateDTO<object>),
             typeof(CheckAllConnectionStatusUpdateDTO),
             typeof(SyncServerMediaJobUpdateDTO),
+            typeof(DownloadTaskKey),
         ];
 
         foreach (var type in types.Where(type => !context.SchemaResolver.HasSchema(type, false)))

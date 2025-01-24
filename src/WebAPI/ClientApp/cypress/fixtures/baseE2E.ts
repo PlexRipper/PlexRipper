@@ -44,6 +44,9 @@ export function basePageSetup(config: Partial<MockConfig> = {}): Cypress.Chainab
 	// FolderPaths call
 	result.setupFolderPathsEndpoints(validConfig);
 
+	// Background Jobs call
+	result.setupBackgroundJobsEndpoints(validConfig);
+
 	// SignalR call
 	result.setupSignalREndpoints();
 

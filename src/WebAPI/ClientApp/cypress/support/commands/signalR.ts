@@ -1,5 +1,6 @@
 import type {
 	CheckAllConnectionStatusUpdateDTO,
+	InspectPlexServerJobUpdateDTO,
 	JobStatus,
 	PlexServerConnectionDTO,
 	PlexServerDTO,
@@ -34,5 +35,5 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add('hubPublishInspectPlexServerJob', (status: JobStatus, plexServerIds: number[]) =>
-	cy.hubPublishJobStatusUpdate<number[]>(JobTypes.InspectPlexServerJob, status, plexServerIds),
+	cy.hubPublishJobStatusUpdate<InspectPlexServerJobUpdateDTO>(JobTypes.InspectPlexServerJob, status, { plexServerIds }),
 );

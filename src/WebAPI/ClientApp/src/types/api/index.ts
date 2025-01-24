@@ -1,37 +1,40 @@
+import { Authentication } from '@api/generated/Authentication';
+import { BackgroundJobs } from '@api/generated/BackgroundJobs';
 import { Download } from '@api/generated/Download';
 import { FolderPath } from '@api/generated/FolderPath';
-import { PlexLibrary } from '@api/generated/PlexLibrary';
 import { Notification } from '@api/generated/Notification';
+import { PlexAccount } from '@api/generated/PlexAccount';
+import { PlexLibrary } from '@api/generated/PlexLibrary';
 import { PlexMedia } from '@api/generated/PlexMedia';
-import { Settings } from '@api/generated/Settings';
 import { PlexServer } from '@api/generated/PlexServer';
 import { PlexServerConnection } from '@api/generated/PlexServerConnection';
-import { PlexAccount } from '@api/generated/PlexAccount';
-import { Authentication } from '@api/generated/Authentication';
+import { Settings } from '@api/generated/Settings';
 
 export * from './baseApi';
 export * from './custom';
 
+const authenticationApi = new Authentication();
+const backgroundJobsApi = new BackgroundJobs();
 const downloadApi = new Download();
 const folderPathApi = new FolderPath();
-const plexLibraryApi = new PlexLibrary();
 const notificationApi = new Notification();
-const plexMediaApi = new PlexMedia();
-const settingsApi = new Settings();
-const plexServerApi = new PlexServer();
 const plexAccountApi = new PlexAccount();
+const plexLibraryApi = new PlexLibrary();
+const plexMediaApi = new PlexMedia();
+const plexServerApi = new PlexServer();
 const plexServerConnectionApi = new PlexServerConnection();
-const authenticationApi = new Authentication();
+const settingsApi = new Settings();
 
 export {
 	authenticationApi,
+	backgroundJobsApi,
 	downloadApi,
 	folderPathApi,
-	plexLibraryApi,
 	notificationApi,
+	plexAccountApi,
+	plexLibraryApi,
 	plexMediaApi,
-	settingsApi,
 	plexServerApi,
 	plexServerConnectionApi,
-	plexAccountApi,
+	settingsApi,
 };

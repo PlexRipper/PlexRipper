@@ -1,22 +1,29 @@
+import Log from 'consola';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { Observable } from 'rxjs';
-import { forkJoin, of, Subject } from 'rxjs';
-import { filter, take, switchMap } from 'rxjs/operators';
+import { ReplaySubject, forkJoin, of } from 'rxjs';
+import { filter, take, switchMap, tap } from 'rxjs/operators';
 import type { ISetupResult } from '@interfaces';
-import { type CheckAllConnectionStatusUpdateDTO, JobStatus, JobTypes, type SyncServerMediaJobUpdateDTO } from '@dto';
+import type {	CheckAllConnectionStatusUpdateDTO, InspectPlexServerJobUpdateDTO,
+	SyncServerMediaJobUpdateDTO,
+	JobStatusUpdateDTO as ApiJobStatusUpdateDTO,
+} from '@dto';
+import {
+	JobStatus,
+	JobTypes,
+} from '@dto';
 import type { JobStatusUpdateDTO } from '@api';
+import { backgroundJobsApi } from '@api';
 import { cloneDeep } from 'lodash-es';
 
 interface IBackgroundJobsStore {
-	jobStatusObservable: Subject<JobStatusUpdateDTO>;
-	jobStatusList: JobStatusUpdateDTO[];
+	jobStatusObservable: ReplaySubject<JobStatusUpdateDTO>;
 }
 
 export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 	// State
 	const defaultState: IBackgroundJobsStore = {
-		jobStatusObservable: new Subject<JobStatusUpdateDTO>(),
-		jobStatusList: [],
+		jobStatusObservable: new ReplaySubject<JobStatusUpdateDTO>(),
 	};
 
 	const state = reactive<IBackgroundJobsStore>(cloneDeep(defaultState));
@@ -32,7 +39,7 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 		setup(): Observable<ISetupResult> {
 			// Refresh accounts, servers, and settings on completion of the RefreshPlexServersAccessJob
 			getters
-				.getJobStatusUpdate(JobTypes.InspectPlexServerJob, JobStatus.Completed)
+				.getInspectPlexServerJobUpdate(JobStatus.Completed)
 				.pipe(
 					switchMap(() =>
 						forkJoin([
@@ -47,22 +54,29 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 
 			// Refresh the server connections on completion of the CheckPlexServerConnectionsJob
 			getters
-				.getJobStatusUpdate(JobTypes.CheckAllConnectionsStatusByPlexServerJob, JobStatus.Completed)
+				.getCheckPlexServerConnectionsJobUpdate(JobStatus.Completed)
 				.pipe(switchMap(() => connectionStore.refreshPlexServerConnections()))
 				.subscribe();
 
-			return of({ name: 'useBackgroundJobsStore', isSuccess: true }).pipe(take(1));
+			return backgroundJobsApi.getAllBackgroundJobsEndpoint().pipe(
+				tap((response) => {
+					for (const update of response.value ?? []) {
+						actions.setStatusJobUpdate(update);
+					}
+				}),
+				switchMap(() => of({ name: 'useBackgroundJobsStore', isSuccess: true }),
+				), take(1));
 		},
 
-		setStatusJobUpdate<T>(jobStatusUpdate: JobStatusUpdateDTO<T>) {
-			const i = state.jobStatusList.findIndex((x) => x.id === jobStatusUpdate.id);
-			if (i > -1) {
-				state.jobStatusList.splice(i, 1, jobStatusUpdate);
-			} else {
-				state.jobStatusList.push(jobStatusUpdate);
-			}
-			state.jobStatusObservable.next(jobStatusUpdate);
+		setStatusJobUpdate(update: ApiJobStatusUpdateDTO) {
+			const updateWithData = {
+				...update,
+				data: JSON.parse(update.jsonString),
+			};
+			Log.debug(updateWithData);
+			state.jobStatusObservable.next(updateWithData);
 		},
+
 		$reset() {
 			Object.assign(state, cloneDeep(defaultState));
 		},
@@ -76,7 +90,7 @@ export const useBackgroundJobsStore = defineStore('BackgroundJobsStore', () => {
 			status: JobStatus | null = null,
 		): Observable<JobStatusUpdateDTO<CheckAllConnectionStatusUpdateDTO>> =>
 			getters.getJobStatusUpdate(JobTypes.CheckAllConnectionsStatusByPlexServerJob, status),
-		getInspectPlexServerJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<number[]>> =>
+		getInspectPlexServerJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<InspectPlexServerJobUpdateDTO>> =>
 			getters.getJobStatusUpdate(JobTypes.InspectPlexServerJob, status),
 		getSyncServerMediaJobUpdate: (status: JobStatus | null = null): Observable<JobStatusUpdateDTO<SyncServerMediaJobUpdateDTO>> =>
 			getters.getJobStatusUpdate(JobTypes.SyncServerMediaJob, status),

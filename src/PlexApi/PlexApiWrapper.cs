@@ -23,12 +23,7 @@ public class PlexApiWrapper
     private string GetClientId => Guid.NewGuid().ToString();
 
     private IPlexAPI CreateClient(string authToken, PlexApiClientOptions options) =>
-        new PlexAPI(
-            client: _clientFactory(options),
-            clientID: GetClientId,
-            serverUrl: options.ConnectionUrl,
-            accessToken: authToken
-        );
+        new PlexAPI(client: _clientFactory(options), serverUrl: options.ConnectionUrl, accessToken: authToken);
 
     private IPlexAPI CreateTvClient(string authToken = "", PlexApiClientOptions? options = null)
     {
@@ -36,12 +31,7 @@ public class PlexApiWrapper
 
         options.ConnectionUrl = "https://plex.tv/api/v2";
 
-        return new PlexAPI(
-            client: _clientFactory(options),
-            clientID: GetClientId,
-            serverUrl: options.ConnectionUrl,
-            accessToken: authToken
-        );
+        return new PlexAPI(client: _clientFactory(options), serverUrl: options.ConnectionUrl, accessToken: authToken);
     }
 
     private async Task<Result<T>> ToResponse<T>(Task<T> operation)
@@ -217,9 +207,14 @@ public class PlexApiWrapper
         );
 
         var result = await Task.WhenAll(
-            ToResponse(plexTvClient.Plex.GetServerResourcesAsync()),
+            ToResponse(plexTvClient.Plex.GetServerResourcesAsync(clientID: GetClientId)),
             ToResponse(
-                plexTvClient.Plex.GetServerResourcesAsync(IncludeHttps.Enable, IncludeRelay.Enable, IncludeIPv6.Enable)
+                plexTvClient.Plex.GetServerResourcesAsync(
+                    clientID: GetClientId,
+                    includeHttps: IncludeHttps.Enable,
+                    includeRelay: IncludeRelay.Enable,
+                    includeIPv6: IncludeIPv6.Enable
+                )
             )
         );
 

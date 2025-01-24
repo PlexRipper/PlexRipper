@@ -16,6 +16,10 @@ public class FileMergeScheduler : IFileMergeScheduler
         _scheduler = scheduler;
     }
 
+    /// <summary>
+    /// Should only be called by the <see cref="FileMergeQueue"/> to start a new <see cref="FileMergeJob"/>.
+    /// </summary>
+    /// <param name="downloadTaskKey"> The key of the <see cref="DownloadTaskGeneric"/> to merge/move. </param>
     public async Task<Result> StartFileMergeJob(DownloadTaskKey downloadTaskKey)
     {
         if (!downloadTaskKey.IsValid)
@@ -66,4 +70,7 @@ public class FileMergeScheduler : IFileMergeScheduler
 
     public async Task<bool> IsDownloadTaskMerging(DownloadTaskKey downloadTaskKey) =>
         await _scheduler.IsJobRunningAsync(FileMergeJob.GetJobKey(downloadTaskKey.Id));
+
+    public async Task<bool> IsAnyFileMergeJobRunning() =>
+        (await _scheduler.GetRunningJobDataMaps(typeof(FileMergeJob))).Any();
 }

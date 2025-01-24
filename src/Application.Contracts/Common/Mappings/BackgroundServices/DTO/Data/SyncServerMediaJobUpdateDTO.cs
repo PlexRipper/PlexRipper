@@ -1,8 +1,12 @@
+using System.Text.Json.Serialization;
+
 namespace Application.Contracts;
 
 public record SyncServerMediaJobUpdateDTO
 {
-    public int PlexServerId { get; init; }
+    [JsonPropertyName("plexServerId")]
+    public required int PlexServerId { get; init; }
 
-    public bool ForceSync { get; init; }
+    [JsonPropertyName("forceSync")]
+    public required bool ForceSync { get; init; }
 }

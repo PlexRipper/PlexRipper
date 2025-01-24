@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq.Contrib.HttpClient;
 using PlexRipper.Application;
 
-namespace IntegrationTests.WebAPI.AccountController;
+namespace IntegrationTests.AccountController;
 
 public class CreateAccountIntegrationTests : BaseIntegrationTests
 {
@@ -38,7 +38,10 @@ public class CreateAccountIntegrationTests : BaseIntegrationTests
                         y => y.PlexServerAccessCount = serverCount
                     );
 
-                    x.SetupRequest(HttpMethod.Get, "https://plex.tv/api/v2/resources")
+                    x.SetupRequest(
+                            HttpMethod.Get,
+                            "https://plex.tv/api/v2/resources?includeHttps=0&includeRelay=0&includeIPv6=0"
+                        )
                         .ReturnsAsync(response1.RawResponse);
 
                     x.SetupRequest(

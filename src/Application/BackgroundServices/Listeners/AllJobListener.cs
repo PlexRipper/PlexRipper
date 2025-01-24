@@ -51,60 +51,11 @@ public class AllJobListener : IAllJobListener
 
     public async Task SendJobExecutionContextAsync(IJobExecutionContext context, JobStatus status)
     {
-        var key = context.JobDetail.Key;
-        var dataMap = context.JobDetail.JobDataMap;
-        var data = dataMap.WrappedMap.FirstOrDefault();
+        var statusUpdate = context.ToJobStatusUpdate(status);
 
-        var jobType = JobStatusUpdateMapper.ToJobType(key.Group);
-
-        var result = new JobStatusUpdate(jobType, status, context.FireInstanceId, context.FireTimeUtc.UtcDateTime);
-
-        switch (jobType)
+        if (statusUpdate.JobType != JobTypes.CheckAllConnectionsStatusByPlexServerJob)
         {
-            case JobTypes.CheckAllConnectionsStatusByPlexServerJob:
-                // Job status is updated in the CheckAllConnectionsStatusByPlexServerJob
-                return;
-            case JobTypes.DownloadJob:
-                await _signalRService.SendJobStatusUpdateAsync(
-                    new JobStatusUpdate<DownloadTaskKey>(
-                        result,
-                        dataMap.GetJsonValue<DownloadTaskKey>(DownloadJob.DownloadTaskIdParameter)!
-                    )
-                );
-                break;
-            case JobTypes.SyncServerMediaJob:
-                await _signalRService.SendJobStatusUpdateAsync(
-                    new JobStatusUpdate<SyncServerMediaJobUpdateDTO>(
-                        result,
-                        new SyncServerMediaJobUpdateDTO()
-                        {
-                            PlexServerId = dataMap.GetIntValue(SyncServerMediaJob.PlexServerIdParameter),
-                            ForceSync = dataMap.GetBooleanValue(SyncServerMediaJob.ForceSyncParameter),
-                        }
-                    )
-                );
-                return;
-            case JobTypes.InspectPlexServerJob:
-                await _signalRService.SendJobStatusUpdateAsync(
-                    new JobStatusUpdate<List<int>>(
-                        result,
-                        dataMap.GetIntListValue(InspectPlexServerJob.PlexServerIdsParameter)
-                    )
-                );
-                return;
-            case JobTypes.FileMergeJob:
-                await _signalRService.SendJobStatusUpdateAsync(
-                    new JobStatusUpdate<DownloadTaskKey>(
-                        result,
-                        dataMap.GetJsonValue<DownloadTaskKey>(FileMergeJob.DownloadTaskIdParameter)!
-                    )
-                );
-                return;
-            default:
-                throw new ArgumentOutOfRangeException($"Add a new case for the new job type {jobType}");
+            await _signalRService.SendJobStatusUpdateAsync(statusUpdate);
         }
-
-        var value = data.Value?.ToString() ?? string.Empty;
-        await _signalRService.SendJobStatusUpdateAsync(new JobStatusUpdate<string>(result, value));
     }
 }

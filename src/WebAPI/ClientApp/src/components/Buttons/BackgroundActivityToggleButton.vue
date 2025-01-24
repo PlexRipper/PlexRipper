@@ -101,7 +101,7 @@ const menuItems = computed(() => {
 		});
 	}
 
-	if (get(syncPlexServerMedia) && Object.keys(get(syncPlexServerMedia)).length > 0) {
+	if (get(syncPlexServerMedia) && get(syncPlexServerMedia).length > 0) {
 		items.push({
 			label: t('components.background-activity-toggle-button.syncing-media'),
 			icon: 'mdi-server-network',

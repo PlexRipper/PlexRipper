@@ -9,10 +9,6 @@ public record JobStatusUpdateDTO
     public required JobTypes JobType { get; init; }
 
     public required JobStatus Status { get; init; }
-}
 
-public record JobStatusUpdateDTO<T> : JobStatusUpdateDTO
-    where T : class
-{
-    public required T? Data { get; init; }
+    public required string JsonString { get; init; }
 }

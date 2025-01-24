@@ -17,11 +17,13 @@ public class ApplicationModule : Module
         builder.RegisterType<DownloadQueue>().As<IDownloadQueue>().SingleInstance();
         builder.RegisterType<DownloadTaskScheduler>().As<IDownloadTaskScheduler>().SingleInstance();
         builder.RegisterType<FileMergeScheduler>().As<IFileMergeScheduler>().SingleInstance();
+        builder.RegisterType<FileMergeQueue>().As<IFileMergeQueue>().SingleInstance();
         builder.RegisterType<DownloadWorker>().InstancePerDependency();
         builder.RegisterType<PlexDownloadClient>().As<IPlexDownloadClient>().InstancePerDependency();
 
         builder.RegisterType<SchedulerService>().As<ISchedulerService>().SingleInstance();
         builder.RegisterType<AllJobListener>().As<IAllJobListener>().SingleInstance();
         builder.RegisterType<DownloadJobListener>().As<IDownloadJobListener>().SingleInstance();
+        builder.RegisterType<FileMergeJobListener>().As<IFileMergeJobListener>().SingleInstance();
     }
 }

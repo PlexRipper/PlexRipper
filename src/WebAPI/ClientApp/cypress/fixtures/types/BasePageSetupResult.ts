@@ -2,6 +2,7 @@ import type { MockConfig } from '@mock';
 import {
 	type IBasePageSetupResult,
 	setupMockAuthenticationEndpoints,
+	setupMockBackgroundJobsEndpoints,
 	setupMockDownloadTasksEndpoints,
 	setupMockFolderPathsEndpoints,
 	setupMockNotificationsEndpoints,
@@ -73,6 +74,10 @@ export class BasePageSetupResult implements IBasePageSetupResult {
 
 	setupFolderPathsEndpoints(config: MockConfig) {
 		return setupMockFolderPathsEndpoints.call(this, config);
+	}
+
+	setupBackgroundJobsEndpoints(config: MockConfig) {
+		return setupMockBackgroundJobsEndpoints.call(this, config);
 	}
 
 	setupNotificationsEndpoints() {

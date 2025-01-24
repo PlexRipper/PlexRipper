@@ -63,16 +63,15 @@ public static class DownloadTaskActions
                 actions.Add(StatusPause);
                 actions.Add(StatusStop);
                 break;
+            case DownloadStatus.Error:
             case DownloadStatus.MoveError:
             case DownloadStatus.MergeError:
-                actions.Add(StatusDelete);
-                break;
-            case DownloadStatus.Error:
                 actions.Add(StatusRestart);
                 actions.Add(StatusDelete);
                 break;
             case DownloadStatus.ServerUnreachable:
                 actions.Add(StatusStart);
+                actions.Add(StatusStop);
                 actions.Add(StatusDelete);
                 break;
             default:

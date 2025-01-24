@@ -95,7 +95,7 @@ public class SyncServerMediaJob : IJob
                         Received = 0,
                         Total = x.MediaCount,
                         TotalSteps = 1,
-                        TimeRemaining = default,
+                        TimeRemaining = TimeSpan.Zero,
                     }
                 )
             );
@@ -109,7 +109,7 @@ public class SyncServerMediaJob : IJob
                     progressList.Add(libraryProgress);
 
                 _signalRService.SendServerSyncProgressUpdateAsync(
-                    new SyncServerMediaProgress(plexServerId, progressList)
+                    new SyncServerMediaProgress { ServerId = plexServerId, LibraryProgresses = progressList }
                 );
             });
 

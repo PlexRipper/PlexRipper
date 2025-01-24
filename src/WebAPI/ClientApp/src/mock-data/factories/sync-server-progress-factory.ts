@@ -20,7 +20,7 @@ export function generateSyncServerMediaProgress({
 		total: 1000,
 	}));
 	return {
-		id: plexServerId,
+		serverId: plexServerId,
 		libraryProgresses: progress,
 		percentage: mean(progress.map((x) => x.percentage)),
 	};

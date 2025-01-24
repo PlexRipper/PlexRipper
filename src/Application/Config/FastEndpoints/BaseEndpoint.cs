@@ -12,7 +12,7 @@ public abstract class BaseEndpoint<TRequest> : Endpoint<TRequest, ResultDTO>
     protected async Task SendFluentResult(Result result, CancellationToken ct = default)
     {
         var resultDTO = result.ToResultDTO();
-        await this.SendResponseAsync(result, async (statusCode) => await SendAsync(resultDTO, statusCode, ct));
+        await this.SendResponseAsync(result, async statusCode => await SendAsync(resultDTO, statusCode, ct));
     }
 }
 
@@ -24,10 +24,7 @@ public abstract class BaseEndpoint<TRequest, TDTO> : BaseEndpoint<TRequest>
         this.HttpContext.AddResponseHeaders();
 
         var resultDTO = result.ToResultDTO();
-        await this.SendResponseAsync(
-            result.ToResult(),
-            async (statusCode) => await SendAsync(resultDTO, statusCode, ct)
-        );
+        await this.SendResponseAsync(result.ToResult(), async statusCode => await SendAsync(resultDTO, statusCode, ct));
     }
 
     protected async Task SendFluentResult<T>(Result<T> result, Func<T, TDTO> mapper, CancellationToken ct = default)
@@ -35,10 +32,7 @@ public abstract class BaseEndpoint<TRequest, TDTO> : BaseEndpoint<TRequest>
         this.HttpContext.AddResponseHeaders();
 
         var resultDTO = result.ToResultDTO(mapper);
-        await this.SendResponseAsync(
-            result.ToResult(),
-            async (statusCode) => await SendAsync(resultDTO, statusCode, ct)
-        );
+        await this.SendResponseAsync(result.ToResult(), async statusCode => await SendAsync(resultDTO, statusCode, ct));
     }
 }
 
@@ -51,7 +45,7 @@ public abstract class BaseEndpointWithoutRequest : EndpointWithoutRequest<Result
         this.HttpContext.AddResponseHeaders();
 
         var resultDTO = result.ToResultDTO();
-        await this.SendResponseAsync(result, async (statusCode) => await SendAsync(resultDTO, statusCode, ct));
+        await this.SendResponseAsync(result, async statusCode => await SendAsync(resultDTO, statusCode, ct));
     }
 }
 
@@ -66,9 +60,6 @@ public abstract class BaseEndpointWithoutRequest<TResponse> : BaseEndpointWithou
         this.HttpContext.AddResponseHeaders();
 
         var resultDTO = result.ToResultDTO(mapper);
-        await this.SendResponseAsync(
-            result.ToResult(),
-            async (statusCode) => await SendAsync(resultDTO, statusCode, ct)
-        );
+        await this.SendResponseAsync(result.ToResult(), async statusCode => await SendAsync(resultDTO, statusCode, ct));
     }
 }

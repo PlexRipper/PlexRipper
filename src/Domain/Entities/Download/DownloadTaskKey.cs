@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace PlexRipper.Domain;
 
 /// <summary>
@@ -5,12 +7,16 @@ namespace PlexRipper.Domain;
 /// </summary>
 public record DownloadTaskKey
 {
+    [JsonPropertyName("type")]
     public required DownloadTaskType Type { get; init; }
 
+    [JsonPropertyName("id")]
     public required Guid Id { get; init; }
 
+    [JsonPropertyName("plexServerId")]
     public required int PlexServerId { get; init; }
 
+    [JsonPropertyName("plexLibraryId")]
     public required int PlexLibraryId { get; init; }
 
     public bool IsValid => Id != Guid.Empty && PlexServerId > 0 && PlexLibraryId > 0 && Type != DownloadTaskType.None;

@@ -63,12 +63,15 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
     public async Task ShouldReturnTypedJobStatusUpdate_WhenABackgroundJobIsRunning()
     {
         // Arrange
-        var downloadJobUpdatePayload = new DownloadTaskKey
+        var downloadJobUpdatePayload = new DownloadJobUpdateDTO
         {
-            Type = DownloadTaskType.TvShow,
-            Id = Guid.NewGuid(),
-            PlexServerId = 1,
-            PlexLibraryId = 1,
+            Id = new DownloadTaskKey
+            {
+                Type = DownloadTaskType.TvShow,
+                Id = Guid.NewGuid(),
+                PlexServerId = 1,
+                PlexLibraryId = 1,
+            },
         };
         var downloadJobUpdate = new JobStatusUpdate<string>(
             JobTypes.DownloadJob,
@@ -77,7 +80,10 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
             Guid.NewGuid().ToString()
         );
 
-        List<int> inspectPlexServerJobUpdatePayload = [1, 2, 3, 4, 5];
+        var inspectPlexServerJobUpdatePayload = new InspectPlexServerJobUpdateDTO
+        {
+            PlexServerIds = new List<int> { 1, 2, 3, 4, 5 },
+        };
         var inspectPlexServerJobUpdate = new JobStatusUpdate<string>(
             JobTypes.InspectPlexServerJob,
             JobStatus.Started,
@@ -93,13 +99,17 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
             Guid.NewGuid().ToString()
         );
 
-        var fileMergeJobUpdatePayload = new DownloadTaskKey
+        var fileMergeJobUpdatePayload = new FileMergeJobUpdateDTO
         {
-            Type = DownloadTaskType.Movie,
-            Id = Guid.NewGuid(),
-            PlexServerId = 2,
-            PlexLibraryId = 3,
+            DownloadTaskId = new DownloadTaskKey
+            {
+                Type = DownloadTaskType.TvShow,
+                Id = Guid.NewGuid(),
+                PlexServerId = 1,
+                PlexLibraryId = 1,
+            },
         };
+
         var fileMergeJobUpdate = new JobStatusUpdate<string>(
             JobTypes.FileMergeJob,
             JobStatus.Completed,
@@ -107,10 +117,14 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
             Guid.NewGuid().ToString()
         );
 
+        var checkAllConnectionsStatusJobUpdatePayload = new CheckAllConnectionStatusUpdateDTO
+        {
+            PlexServersWithConnectionIds = new Dictionary<int, List<int>>(),
+        };
         var checkAllConnectionsStatusJobUpdate = new JobStatusUpdate<string>(
             JobTypes.CheckAllConnectionsStatusByPlexServerJob,
             JobStatus.Started,
-            string.Empty,
+            ToJsonString(checkAllConnectionsStatusJobUpdatePayload),
             Guid.NewGuid().ToString()
         );
 
@@ -142,12 +156,16 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
         ValidateJobStatusUpdate(responseValue[1], inspectPlexServerJobUpdate, inspectPlexServerJobUpdatePayload);
         ValidateJobStatusUpdate(responseValue[2], syncServerMediaJobUpdate, syncServerMediaJobUpdatePayload);
         ValidateJobStatusUpdate(responseValue[3], fileMergeJobUpdate, fileMergeJobUpdatePayload);
-        ValidateJobStatusUpdate<object>(responseValue[4], checkAllConnectionsStatusJobUpdate, null);
+        ValidateJobStatusUpdate(
+            responseValue[4],
+            checkAllConnectionsStatusJobUpdate,
+            checkAllConnectionsStatusJobUpdatePayload
+        );
 
         static void ValidateJobStatusUpdate<T>(
             JobStatusUpdateDTO actual,
             JobStatusUpdate<string> expected,
-            T? expectedPayload
+            T expectedPayload
         )
         {
             actual.ShouldNotBeNull();
@@ -156,16 +174,9 @@ public class GetAllBackgroundJobsEndpointUnitTests : BaseUnitTest<GetAllBackgrou
             actual.Status.ShouldBe(expected.Status);
             actual.JobStartTime.ShouldBe(expected.JobStartTime);
 
-            if (expectedPayload is not null)
-            {
-                actual.JsonString.ShouldNotBeNullOrEmpty();
-                var actualPayload = JsonSerializer.Deserialize<T>(actual.JsonString);
-                actualPayload.ShouldBe(expectedPayload);
-            }
-            else
-            {
-                actual.JsonString.ShouldBeNullOrEmpty();
-            }
+            actual.JsonString.ShouldNotBeNullOrEmpty();
+            var actualPayload = JsonSerializer.Deserialize<T>(actual.JsonString);
+            actualPayload.ShouldBeEquivalentTo(expectedPayload);
         }
     }
 }

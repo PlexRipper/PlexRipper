@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
-public class GetAllBackgroundJobsEndpoint : BaseEndpointWithoutRequest<List<JobStatusUpdateDTO>>
+public class GetAllBackgroundJobsEndpoint : BaseEndpointWithoutRequest<List<JobStatusUpdateDTO<string>>>
 {
     private readonly ISchedulerService _schedulerService;
 
@@ -18,7 +18,7 @@ public class GetAllBackgroundJobsEndpoint : BaseEndpointWithoutRequest<List<JobS
     {
         Get(EndpointPath);
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<JobStatusUpdateDTO>>))
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<JobStatusUpdateDTO<string>>>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
         );
     }

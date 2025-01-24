@@ -6,5 +6,5 @@ public interface ISchedulerService : ISetupAsync, IStopAsync
 {
     Task AwaitScheduler(CancellationToken cancellationToken = default);
 
-    Task<List<JobStatusUpdate>> GetRunningJobUpdates();
+    Task<List<JobStatusUpdate<string>>> GetRunningJobUpdates();
 }

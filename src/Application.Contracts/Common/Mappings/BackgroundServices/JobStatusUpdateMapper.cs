@@ -25,6 +25,9 @@ public static class JobStatusUpdateMapper
             Data = jobStatusUpdate.Data,
         };
 
+    public static List<JobStatusUpdateDTO<T>> ToDTO<T>(this List<JobStatusUpdate<T>> jobStatusUpdate)
+        where T : class => jobStatusUpdate.Select(ToDTO).ToList();
+
     public static JobTypes ToJobType(string jobGroup) =>
         Enum.TryParse<JobTypes>(jobGroup, out var jobType)
             ? jobType

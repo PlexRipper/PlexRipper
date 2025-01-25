@@ -130,7 +130,7 @@ public class ChoosePlexServerConnection_UnitTests : BaseUnitTest
             Protocol = plexServerConnections[2].Protocol,
             Port = plexServerConnections[2].Port,
             Address = plexServer.PublicAddress,
-            Uri = plexServerConnections[2].Uri,
+            Url = plexServerConnections[2].Url,
             Local = plexServerConnections[2].Local,
             Relay = plexServerConnections[2].Relay,
             IPv4 = plexServerConnections[2].IPv4,

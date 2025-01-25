@@ -57,7 +57,7 @@ public class AddOrUpdatePlexServerCommandUnitTests : BaseUnitTest<AddOrUpdatePle
                     Protocol = updatedConnections[i].Protocol,
                     Address = updatedServer.PlexServerConnections[i].Address,
                     Port = updatedConnections[i].Port,
-                    Uri = updatedConnections[i].Uri,
+                    Url = updatedConnections[i].Url,
                     Local = updatedConnections[i].Local,
                     Relay = updatedConnections[i].Relay,
                     IPv4 = updatedConnections[i].IPv4,

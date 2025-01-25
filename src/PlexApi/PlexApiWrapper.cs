@@ -157,7 +157,7 @@ public class PlexApiWrapper
             string.Empty,
             new PlexApiClientOptions
             {
-                ConnectionUrl = connection.Uri,
+                ConnectionUrl = connection.Url,
                 Action = action,
                 Timeout = 10,
                 RetryCount = 0,
@@ -266,7 +266,7 @@ public class PlexApiWrapper
         PlexServerConnection connection
     )
     {
-        var client = CreateClient(plexAuthToken, new PlexApiClientOptions { ConnectionUrl = connection.Uri });
+        var client = CreateClient(plexAuthToken, new PlexApiClientOptions { ConnectionUrl = connection.Url });
 
         var response = await ToResponse(client.Library.GetAllLibrariesAsync());
 
@@ -336,7 +336,7 @@ public class PlexApiWrapper
             authToken,
             new PlexApiClientOptions()
             {
-                ConnectionUrl = connection.Uri,
+                ConnectionUrl = connection.Url,
                 Timeout = 30,
                 RetryCount = 3,
             }

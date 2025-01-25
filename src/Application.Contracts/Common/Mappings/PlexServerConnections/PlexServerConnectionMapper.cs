@@ -15,7 +15,7 @@ public static class PlexServerConnectionMapper
             Relay = source.Relay,
             IPv4 = source.IPv4,
             IPv6 = source.IPv6,
-            Url = source.Uri,
+            Url = source.Url,
             PlexServerId = source.PlexServerId,
             IsCustom = source.IsCustom,
             IsPlexTvConnection = source.IsPlexTvConnection,

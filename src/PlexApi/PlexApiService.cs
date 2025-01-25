@@ -236,7 +236,7 @@ public class PlexApiService : IPlexApiService
                             Relay = y.Relay,
                             IPv4 = y.Address.IsIpAddress() && !y.IPv6,
                             IPv6 = y.IPv6,
-                            Uri = y.Uri,
+                            Url = y.Uri,
                             PlexServer = null,
                             PlexServerId = 0,
                             PlexServerStatus = [],

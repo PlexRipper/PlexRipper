@@ -1,4 +1,4 @@
-import type { ErrorDTO, ReasonDTO, SuccessDTO } from '@dto';
+import type { BaseResultDTO } from '@dto';
 
 export interface ResultDTO<T = void> {
 	isFailed: boolean;

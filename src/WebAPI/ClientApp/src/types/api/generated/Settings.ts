@@ -12,7 +12,7 @@
 import type { RequestParams } from "./http-client";
 import { ContentType } from "./http-client";
 
-import type { ResultDTO, SettingsModelDTO } from "./data-contracts";
+import type { BaseResultDTO, SettingsModelDTO } from "./data-contracts";
 
 import { apiCheckPipe } from "@api/base";
 import Axios from "axios";
@@ -67,14 +67,14 @@ export class Settings {
    */
   resetDatabaseEndpoint = (params: RequestParams = {}) =>
     from(
-      Axios.request<ResultDTO>({
+      Axios.request<BaseResultDTO>({
         url: `/api/Settings/resetdb`,
         method: "GET",
         secure: true,
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<ResultDTO>);
+    ).pipe(apiCheckPipe<BaseResultDTO>);
 }
 
 export class SettingsPaths {

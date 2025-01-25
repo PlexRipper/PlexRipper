@@ -15,7 +15,7 @@ import { ContentType } from "./http-client";
 import type {
   AppCredentialsDTO,
   AppUserLoginEndpointRequest,
-  ResultDTO,
+  BaseResultDTO,
   UpdateCredentialsEndpointRequest,
   UserClaimsDTO,
 } from "./data-contracts";
@@ -71,7 +71,7 @@ export class Authentication {
    */
   updateCredentialsEndpoint = (data: UpdateCredentialsEndpointRequest, params: RequestParams = {}) =>
     from(
-      Axios.request<ResultDTO>({
+      Axios.request<BaseResultDTO>({
         url: `/api/Authentication`,
         method: "PUT",
         data: data,
@@ -80,7 +80,7 @@ export class Authentication {
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<ResultDTO>);
+    ).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * @description Logs in a user.
@@ -91,7 +91,7 @@ export class Authentication {
    */
   appUserLoginEndpoint = (data: AppUserLoginEndpointRequest, params: RequestParams = {}) =>
     from(
-      Axios.request<ResultDTO>({
+      Axios.request<BaseResultDTO>({
         url: `/api/Authentication/login`,
         method: "POST",
         data: data,
@@ -99,7 +99,7 @@ export class Authentication {
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<ResultDTO>);
+    ).pipe(apiCheckPipe<BaseResultDTO>);
 
   /**
    * No description

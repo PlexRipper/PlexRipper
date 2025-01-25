@@ -31,6 +31,14 @@ export interface AppUserLoginEndpointRequest {
   username: string;
 }
 
+export interface BaseResultDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+}
+
 export interface CheckAllConnectionStatusUpdateDTO {
   plexServersWithConnectionIds: Record<string, number[]>;
 }
@@ -97,16 +105,6 @@ export interface DisplaySettingsDTO {
   tvShowViewMode: ViewMode;
 }
 
-export enum DownloadActions {
-  Details = "Details",
-  Delete = "Delete",
-  Start = "Start",
-  Pause = "Pause",
-  Stop = "Stop",
-  Clear = "Clear",
-  Restart = "Restart",
-}
-
 export interface DownloadJobUpdateDTO {
   id: DownloadTaskKey;
 }
@@ -138,7 +136,6 @@ export interface DownloadPreviewDTO {
 }
 
 export interface DownloadProgressDTO {
-  actions: DownloadActions[];
   children: DownloadProgressDTO[];
   /** @format int64 */
   dataReceived: number;
@@ -179,7 +176,6 @@ export enum DownloadStatus {
 }
 
 export interface DownloadTaskDTO {
-  actions: DownloadActions[];
   children: DownloadTaskDTO[];
   /** @format date-time */
   createdAt: string;
@@ -724,78 +720,65 @@ export interface PlexServerStatusDTO {
   statusMessage: string;
 }
 
-export interface ReasonDTO {
-  message: string;
-  metadata: Record<string, any>;
-}
-
-export interface ResultDTO {
-  errors: ErrorDTO[];
-  isFailed: boolean;
-  isSuccess: boolean;
-  reasons: ReasonDTO[];
-  successes: SuccessDTO[];
-}
-
 export interface ResultDTOOfAppCredentialsDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: AppCredentialsDTO | null;
 }
 
 export interface ResultDTOOfBoolean {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value: boolean;
 }
 
 export interface ResultDTOOfDownloadTaskDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: DownloadTaskDTO | null;
 }
 
 export interface ResultDTOOfFileSystemDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: FileSystemDTO | null;
 }
 
 export interface ResultDTOOfFolderPathDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: FolderPathDTO | null;
 }
 
 export interface ResultDTOOfGeneratePlexTokenResponse {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: GeneratePlexTokenResponse | null;
 }
 
 export interface ResultDTOOfInt32 {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   /** @format int32 */
   value: number;
@@ -803,216 +786,225 @@ export interface ResultDTOOfInt32 {
 
 export interface ResultDTOOfListOfDownloadPreviewDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: DownloadPreviewDTO[] | null;
 }
 
 export interface ResultDTOOfListOfDownloadWorkerLogDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: DownloadWorkerLogDTO[] | null;
 }
 
 export interface ResultDTOOfListOfFolderPathDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: FolderPathDTO[] | null;
 }
 
 export interface ResultDTOOfListOfJobStatusUpdateDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: JobStatusUpdateDTO[] | null;
 }
 
 export interface ResultDTOOfListOfNotificationDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: NotificationDTO[] | null;
 }
 
 export interface ResultDTOOfListOfPlexAccountDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: PlexAccountDTO[] | null;
 }
 
 export interface ResultDTOOfListOfPlexLibraryDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: PlexLibraryDTO[] | null;
 }
 
 export interface ResultDTOOfListOfPlexMediaSlimDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: PlexMediaSlimDTO[] | null;
 }
 
 export interface ResultDTOOfListOfPlexServerConnectionDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: PlexServerConnectionDTO[] | null;
 }
 
 export interface ResultDTOOfListOfPlexServerDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: PlexServerDTO[] | null;
 }
 
 export interface ResultDTOOfListOfPlexServerStatusDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: PlexServerStatusDTO[] | null;
 }
 
 export interface ResultDTOOfListOfServerDownloadProgressDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: ServerDownloadProgressDTO[] | null;
 }
 
+export interface ResultDTOOfListOfString {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: string[] | null;
+}
+
 export interface ResultDTOOfPlexAccountDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: PlexAccountDTO | null;
 }
 
 export interface ResultDTOOfPlexLibraryDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: PlexLibraryDTO | null;
 }
 
 export interface ResultDTOOfPlexMediaDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: PlexMediaDTO | null;
 }
 
 export interface ResultDTOOfPlexMediaStatisticsDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: PlexMediaStatisticsDTO | null;
 }
 
 export interface ResultDTOOfPlexServerConnectionDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: PlexServerConnectionDTO | null;
 }
 
 export interface ResultDTOOfPlexServerDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: PlexServerDTO | null;
 }
 
 export interface ResultDTOOfPlexServerStatusDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: PlexServerStatusDTO | null;
 }
 
 export interface ResultDTOOfServerIdentityDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: ServerIdentityDTO | null;
 }
 
 export interface ResultDTOOfSettingsModelDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: SettingsModelDTO | null;
 }
 
 export interface ResultDTOOfString {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: string | null;
 }
 
 export interface ResultDTOOfUserClaimsDTO {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: UserClaimsDTO | null;
 }
 
 export interface ResultDTOOfValidatePlexAccountResponse {
   errors: ErrorDTO[];
-  isFailed: boolean;
   isSuccess: boolean;
-  reasons: ReasonDTO[];
+  /** @format int32 */
+  statusCode: number;
   successes: SuccessDTO[];
   value?: ValidatePlexAccountResponse | null;
 }

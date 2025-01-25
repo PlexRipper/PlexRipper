@@ -35,7 +35,7 @@ export class Debug {
     params: RequestParams = {},
   ) =>
     from(
-      Axios.request<string[]>({
+      Axios.request<String[]>({
         url: `/api/Debug/unique-media-titles`,
         method: "GET",
         params: query,
@@ -43,7 +43,7 @@ export class Debug {
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<string[]>);
+    ).pipe(apiCheckPipe<String[]>);
 }
 
 export class DebugPaths {

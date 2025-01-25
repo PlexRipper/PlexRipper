@@ -105,6 +105,16 @@ export interface DisplaySettingsDTO {
   tvShowViewMode: ViewMode;
 }
 
+export enum DownloadActions {
+  Details = "Details",
+  Delete = "Delete",
+  Start = "Start",
+  Pause = "Pause",
+  Stop = "Stop",
+  Clear = "Clear",
+  Restart = "Restart",
+}
+
 export interface DownloadJobUpdateDTO {
   id: DownloadTaskKey;
 }

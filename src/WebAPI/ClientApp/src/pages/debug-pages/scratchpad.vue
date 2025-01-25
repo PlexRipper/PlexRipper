@@ -34,7 +34,7 @@ function commandSwitch({ action, item }: { action: DownloadActions; item: Downlo
 		return;
 	}
 
-	downloadStore.executeDownloadCommand(action, ids);
+	useSubscription(downloadStore.executeDownloadCommand(action, ids).subscribe());
 }
 
 function onAction() {

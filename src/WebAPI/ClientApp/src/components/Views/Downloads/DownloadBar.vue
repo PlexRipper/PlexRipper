@@ -14,7 +14,7 @@
 					:label="button.name"
 					:disabled="button.disableOnNoSelected && !downloadStore.hasSelected"
 					:width="verticalButtonWidth"
-					@click="downloadStore.executeBatchDownloadCommand(button.value)" />
+					@click="onDownloadAction(button.value)" />
 			</QCol>
 		</QRow>
 	</q-toolbar>
@@ -76,6 +76,10 @@ const buttons = computed<
 		},
 	];
 });
+
+function onDownloadAction(action: DownloadActions) {
+	useSubscription(downloadStore.executeBatchDownloadCommand(action).subscribe());
+}
 </script>
 
 <style lang="scss">

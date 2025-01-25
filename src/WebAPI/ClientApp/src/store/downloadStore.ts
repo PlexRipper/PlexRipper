@@ -11,8 +11,13 @@ import {
 	type DownloadProgressDTO,
 	type PlexServerDTO,
 	type ServerDownloadProgressDTO,
+	type BaseResultDTO,
 } from '@dto';
-import type { ISetupResult, IPTreeTableSelectionKeys, IDownloadsSelection } from '@interfaces';
+import type {
+	ISetupResult,
+	IPTreeTableSelectionKeys,
+	IDownloadsSelection,
+} from '@interfaces';
 import { downloadApi } from '@api';
 import { useServerStore } from '@store';
 
@@ -50,38 +55,31 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 		},
 		executeBatchDownloadCommand(action: DownloadActions) {
 			const downloadTaskIds = state.selected.flatMap((x) => Object.keys(x.selection));
-			actions.executeDownloadCommand(action, downloadTaskIds);
+			return actions.executeDownloadCommand(action, downloadTaskIds);
 		},
-		executeDownloadCommand(action: DownloadActions, downloadTaskIds: string[]): void {
+		executeDownloadCommand(action: DownloadActions, downloadTaskIds: string[]): Observable<BaseResultDTO> {
 			const downloadTaskId = downloadTaskIds[0];
 			// TODO verify if we need to re-fetch the download list after each action
 			switch (action) {
 				case DownloadActions.Pause:
-					downloadApi.pauseDownloadTaskEndpoint(downloadTaskId).subscribe();
-					break;
+					return downloadApi.pauseDownloadTaskEndpoint(downloadTaskId);
 				case DownloadActions.Clear:
-					downloadApi
+					return downloadApi
 						.clearCompletedDownloadTasksEndpoint(downloadTaskIds)
-						.pipe(switchMap(actions.fetchDownloadList))
-						.subscribe();
-					break;
+						.pipe(switchMap(actions.fetchDownloadList));
 				case DownloadActions.Delete:
-					downloadApi
+					return downloadApi
 						.deleteDownloadTaskEndpoint(downloadTaskIds)
-						.pipe(switchMap(actions.fetchDownloadList))
-						.subscribe();
-					break;
+						.pipe(switchMap(actions.fetchDownloadList));
 				case DownloadActions.Stop:
-					downloadApi.stopDownloadTaskEndpoint(downloadTaskId).subscribe();
-					break;
+					return downloadApi.stopDownloadTaskEndpoint(downloadTaskId);
 				case DownloadActions.Restart:
-					downloadApi.restartDownloadTaskEndpoint(downloadTaskId).subscribe();
-					break;
+					return downloadApi.restartDownloadTaskEndpoint(downloadTaskId);
 				case DownloadActions.Start:
-					downloadApi.startDownloadTaskEndpoint(downloadTaskId).subscribe();
-					break;
+					return downloadApi.startDownloadTaskEndpoint(downloadTaskId);
 				default:
 					Log.error(`Action: ${action} does not have a assigned command with payload: ${downloadTaskIds}`);
+					return of();
 			}
 		},
 		updateServerDownloadProgress(serverDownloadProgress: ServerDownloadProgressDTO): void {

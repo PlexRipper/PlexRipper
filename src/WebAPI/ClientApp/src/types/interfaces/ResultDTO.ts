@@ -1,11 +1,5 @@
 import type { BaseResultDTO } from '@dto';
 
-export interface ResultDTO<T = void> {
-	isFailed: boolean;
-	isSuccess: boolean;
-	reasons: ReasonDTO[];
-	errors: ErrorDTO[];
-	successes: SuccessDTO[];
+export interface ResultDTO<T = void> extends BaseResultDTO {
 	value?: T;
-	statusCode: number;
 }

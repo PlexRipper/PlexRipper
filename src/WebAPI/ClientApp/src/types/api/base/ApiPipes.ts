@@ -2,24 +2,37 @@ import Log from 'consola';
 import type { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import type { AxiosResponse } from 'axios';
+import type { BaseResultDTO, ErrorDTO } from '@dto';
 import type { ResultDTO } from '@interfaces';
 import { catchError, of } from 'rxjs';
-import type { BaseResultDTO, ErrorDTO } from '@dto';
 
-export function apiCheckPipe<T = BaseResultDTO>(
+export function apiCheckPipe<T extends object = BaseResultDTO>(
 	source$: Observable<AxiosResponse<T>>,
-): Observable<T extends BaseResultDTO ? T : ResultDTO<T>> {
+): Observable<T extends BaseResultDTO ? BaseResultDTO : ResultDTO<T>> {
 	return source$.pipe(
-		map((res) => toResultDTO<T>(res)),
+		map((res) => {
+			// Handle generic ResultDTO<T> case
+			if (Object.hasOwn(res.data, 'value')) {
+				return toResultDTO<T>(res) as unknown as T extends BaseResultDTO ? BaseResultDTO : ResultDTO<T>;
+			}
+
+			// Handle BaseResultDTO case
+			return res.data as unknown as T extends BaseResultDTO ? BaseResultDTO : ResultDTO<T>;
+		}),
 		catchError((error) => {
 			Log.error('Error in API call', error);
-			return of(toResultDTO<never>(error.response));
+
+			// Convert error response to ResultDTO
+			return of(toResultDTO<never>(error.response)) as Observable<
+				T extends BaseResultDTO ? BaseResultDTO : ResultDTO<T>
+			>;
 		}),
 		// Ensure we complete any API calls after the response has been received
 		take(1),
 	);
 }
 
+// Convert AxiosResponse to ResultDTO<T>
 function toResultDTO<T = void>(res?: AxiosResponse): ResultDTO<T> {
 	if (!res) {
 		const error: ErrorDTO = {
@@ -34,12 +47,13 @@ function toResultDTO<T = void>(res?: AxiosResponse): ResultDTO<T> {
 			statusCode: 999,
 		};
 	}
+
 	const result = res.data as ResultDTO<T>;
 	return {
 		isSuccess: result.isSuccess,
 		errors: result.errors,
-		value: result.value,
 		successes: result.successes,
+		value: result.value,
 		statusCode: res.status,
 	};
 }

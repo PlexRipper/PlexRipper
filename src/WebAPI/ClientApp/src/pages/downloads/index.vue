@@ -34,16 +34,16 @@
 </template>
 
 <script setup lang="ts">
-import type { DownloadProgressDTO } from '@dto';
+import { DownloadActions, type DownloadProgressDTO } from '@dto';
 import { useDownloadStore, useDialogStore } from '@store';
 
 const dialogStore = useDialogStore();
 const downloadStore = useDownloadStore();
 
-function commandSwitch({ action, item }: { action: string; item: DownloadProgressDTO }) {
+function commandSwitch({ action, item }: { action: DownloadActions; item: DownloadProgressDTO }) {
 	const ids: string[] = [item.id];
 
-	if (action === 'details') {
+	if (action === DownloadActions.Details) {
 		dialogStore.openDownloadTaskDetailsDialog(item.id);
 		return;
 	}

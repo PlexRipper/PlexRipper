@@ -4,13 +4,13 @@ import { map, switchMap, tap } from 'rxjs/operators';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { sum, merge, keyBy, values, flatMapDeep, clone, cloneDeep } from 'lodash-es';
-import type {
-	CreateDownloadTasksRequest,
-	DownloadMediaDTO,
-	DownloadPreviewDTO,
-	DownloadProgressDTO,
-	PlexServerDTO,
-	ServerDownloadProgressDTO,
+import {
+	type CreateDownloadTasksRequest, DownloadActions,
+	type DownloadMediaDTO,
+	type DownloadPreviewDTO,
+	type DownloadProgressDTO,
+	type PlexServerDTO,
+	type ServerDownloadProgressDTO,
 } from '@dto';
 import type { ISetupResult, IPTreeTableSelectionKeys, IDownloadsSelection } from '@interfaces';
 import { downloadApi } from '@api';
@@ -48,36 +48,36 @@ export const useDownloadStore = defineStore('DownloadStore', () => {
 				}),
 			);
 		},
-		executeBatchDownloadCommand(action: string) {
+		executeBatchDownloadCommand(action: DownloadActions) {
 			const downloadTaskIds = state.selected.flatMap((x) => Object.keys(x.selection));
 			actions.executeDownloadCommand(action, downloadTaskIds);
 		},
-		executeDownloadCommand(action: string, downloadTaskIds: string[]): void {
+		executeDownloadCommand(action: DownloadActions, downloadTaskIds: string[]): void {
 			const downloadTaskId = downloadTaskIds[0];
 			// TODO verify if we need to re-fetch the download list after each action
 			switch (action) {
-				case 'pause':
+				case DownloadActions.Pause:
 					downloadApi.pauseDownloadTaskEndpoint(downloadTaskId).subscribe();
 					break;
-				case 'clear':
+				case DownloadActions.Clear:
 					downloadApi
 						.clearCompletedDownloadTasksEndpoint(downloadTaskIds)
 						.pipe(switchMap(actions.fetchDownloadList))
 						.subscribe();
 					break;
-				case 'delete':
+				case DownloadActions.Delete:
 					downloadApi
 						.deleteDownloadTaskEndpoint(downloadTaskIds)
 						.pipe(switchMap(actions.fetchDownloadList))
 						.subscribe();
 					break;
-				case 'stop':
+				case DownloadActions.Stop:
 					downloadApi.stopDownloadTaskEndpoint(downloadTaskId).subscribe();
 					break;
-				case 'restart':
+				case DownloadActions.Restart:
 					downloadApi.restartDownloadTaskEndpoint(downloadTaskId).subscribe();
 					break;
-				case 'start':
+				case DownloadActions.Start:
 					downloadApi.startDownloadTaskEndpoint(downloadTaskId).subscribe();
 					break;
 				default:

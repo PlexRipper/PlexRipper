@@ -107,7 +107,7 @@
 					<QCol cols="auto">
 						<!-- Item Actions -->
 						<IconSquareButton
-							v-for="(action, y) in node.actions"
+							v-for="(action, y) in toDownloadActions(node.status)"
 							:key="`${node.id}-${y}`"
 							dense
 							:cy="`column-actions-${kebabCase(action)}-${node.id}`"
@@ -130,7 +130,7 @@ import type { TreeTableSelectionKeys } from 'primevue/treetable';
 import type { QTreeViewTableHeader } from '@props';
 import type { IDownloadTableNode, IPTreeTableSelectionKeys } from '@interfaces';
 import { ButtonType } from '@enums';
-import { translateDownloadStatus } from '@composables';
+import { toDownloadActions, translateDownloadStatus } from '@composables';
 import { kebabCase } from 'lodash-es';
 import { DownloadActions } from '@dto';
 import Convert from '@class/Convert';
@@ -184,7 +184,7 @@ function toButtonIcon(action: DownloadActions): string {
 const emits = defineEmits<{
 	(e: 'selected', payload: TreeTableSelectionKeys): void;
 	(e: 'update:model-value' | 'all-selected', payload: boolean): void;
-	(e: 'action', payload: { action: string; data: IDownloadTableNode }): void;
+	(e: 'action', payload: { action: DownloadActions; data: IDownloadTableNode }): void;
 }>();
 </script>
 

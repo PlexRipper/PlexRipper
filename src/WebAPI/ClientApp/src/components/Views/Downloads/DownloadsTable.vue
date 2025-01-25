@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import type { DownloadProgressDTO, PlexServerDTO } from '@dto';
+import type { DownloadActions, DownloadProgressDTO, PlexServerDTO } from '@dto';
 import type { IDownloadTableNode, ISelection } from '@interfaces';
 import type { QTreeViewTableHeader } from '@props';
 import { useDownloadStore, useServerConnectionStore, useServerStore, useI18n } from '#imports';
@@ -56,7 +56,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-	(e: 'action', payload: { action: string; item: DownloadProgressDTO }): void;
+	(e: 'action', payload: { action: DownloadActions; item: DownloadProgressDTO }): void;
 	(e: 'selected', payload: ISelection): void;
 }>();
 
@@ -136,7 +136,7 @@ function mapToTreeNodes(value: DownloadProgressDTO[]): IDownloadTableNode[] {
 	});
 }
 
-function tableAction(payload: { action: string; data: IDownloadTableNode }) {
+function tableAction(payload: { action: DownloadActions; data: IDownloadTableNode }) {
 	emit('action', {
 		action: payload.action,
 		item: payload.data as unknown as DownloadProgressDTO,

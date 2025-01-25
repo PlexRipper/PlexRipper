@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { generateDownloadProgressTvShows, generatePlexServer, Seed } from '@factories';
-import type { DownloadProgressDTO } from '@dto';
+import { DownloadActions, type DownloadProgressDTO } from '@dto';
 import { useDownloadStore, useGlobalStore, useDialogStore } from '@store';
 import { useSubscription } from '@vueuse/rxjs';
 
@@ -26,10 +26,10 @@ const plexServer = generatePlexServer({
 	id: 1,
 });
 
-function commandSwitch({ action, item }: { action: string; item: DownloadProgressDTO }) {
+function commandSwitch({ action, item }: { action: DownloadActions; item: DownloadProgressDTO }) {
 	const ids: string[] = [item.id];
 
-	if (action === 'details') {
+	if (action === DownloadActions.Details) {
 		dialogStore.openDownloadTaskDetailsDialog(item.id);
 		return;
 	}

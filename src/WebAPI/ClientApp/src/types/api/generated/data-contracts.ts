@@ -97,6 +97,16 @@ export interface DisplaySettingsDTO {
   tvShowViewMode: ViewMode;
 }
 
+export enum DownloadActions {
+  Details = "Details",
+  Delete = "Delete",
+  Start = "Start",
+  Pause = "Pause",
+  Stop = "Stop",
+  Clear = "Clear",
+  Restart = "Restart",
+}
+
 export interface DownloadJobUpdateDTO {
   id: DownloadTaskKey;
 }
@@ -128,7 +138,7 @@ export interface DownloadPreviewDTO {
 }
 
 export interface DownloadProgressDTO {
-  actions: string[];
+  actions: DownloadActions[];
   children: DownloadProgressDTO[];
   /** @format int64 */
   dataReceived: number;
@@ -169,7 +179,7 @@ export enum DownloadStatus {
 }
 
 export interface DownloadTaskDTO {
-  actions: string[];
+  actions: DownloadActions[];
   children: DownloadTaskDTO[];
   /** @format date-time */
   createdAt: string;

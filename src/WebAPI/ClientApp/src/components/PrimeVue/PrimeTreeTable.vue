@@ -110,8 +110,8 @@
 							v-for="(action, y) in node.actions"
 							:key="`${node.id}-${y}`"
 							dense
-							:cy="`column-actions-${action}-${node.id}`"
-							:icon="Convert.buttonTypeToIcon(action as ButtonType)"
+							:cy="`column-actions-${kebabCase(action)}-${node.id}`"
+							:icon="toButtonIcon(action)"
 							@click.stop="
 								$emit('action', {
 									action: action,
@@ -128,11 +128,12 @@
 <script setup lang="ts">
 import type { TreeTableSelectionKeys } from 'primevue/treetable';
 import type { QTreeViewTableHeader } from '@props';
-import type IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
-import type { IDownloadTableNode } from '@interfaces';
-import Convert from '@class/Convert';
-import type { ButtonType } from '@enums';
+import type { IDownloadTableNode, IPTreeTableSelectionKeys } from '@interfaces';
+import { ButtonType } from '@enums';
 import { translateDownloadStatus } from '@composables';
+import { kebabCase } from 'lodash-es';
+import { DownloadActions } from '@dto';
+import Convert from '@class/Convert';
 
 defineProps<{
 	nodes: IDownloadTableNode[];
@@ -150,6 +151,34 @@ function onSelectionChange(keys: IPTreeTableSelectionKeys) {
 		),
 	);
 	emits('selected', filtered);
+}
+
+function toButtonIcon(action: DownloadActions): string {
+	switch (action) {
+		case DownloadActions.Details:
+			return Convert.buttonTypeToIcon(ButtonType.Details);
+
+		case DownloadActions.Delete:
+			return Convert.buttonTypeToIcon(ButtonType.Delete);
+
+		case DownloadActions.Start:
+			return Convert.buttonTypeToIcon(ButtonType.Start);
+
+		case DownloadActions.Pause:
+			return Convert.buttonTypeToIcon(ButtonType.Pause);
+
+		case DownloadActions.Stop:
+			return Convert.buttonTypeToIcon(ButtonType.Stop);
+
+		case DownloadActions.Clear:
+			return Convert.buttonTypeToIcon(ButtonType.Clear);
+
+		case DownloadActions.Restart:
+			return Convert.buttonTypeToIcon(ButtonType.Restart);
+
+		default:
+			return Convert.buttonTypeToIcon(ButtonType.None);
+	}
 }
 
 const emits = defineEmits<{

@@ -11,3 +11,5 @@ export * from './ResultDTO';
 export * from './IHelp';
 export * from './IPlexAccount';
 export * from './IFolderPathGroup';
+export * from './IPTreeTableSelectionKeys';
+export * from './IDownloadsSelection';

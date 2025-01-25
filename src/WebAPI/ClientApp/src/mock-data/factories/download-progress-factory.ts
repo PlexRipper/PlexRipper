@@ -4,6 +4,7 @@ import type { Seed, MockConfig } from '@mock';
 import { DownloadStatus, DownloadTaskType, type DownloadProgressDTO, type ServerDownloadProgressDTO } from '@dto';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
 import Convert from '@class/Convert';
+import { toDownloadActions } from '@composables';
 
 export function generateServerDownloadProgress({
 	plexServerId,
@@ -75,7 +76,7 @@ export function generateDownloadProgressBase({
 		status: DownloadStatus.Queued,
 		timeRemaining: 0,
 		title: randMovie(),
-		actions: ['details'],
+		actions: toDownloadActions(DownloadStatus.Queued),
 		children: [],
 	};
 }

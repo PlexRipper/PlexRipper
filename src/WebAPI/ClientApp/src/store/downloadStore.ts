@@ -12,9 +12,7 @@ import type {
 	PlexServerDTO,
 	ServerDownloadProgressDTO,
 } from '@dto';
-import type { ISetupResult } from '@interfaces';
-import type IDownloadsSelection from '@interfaces/IDownloadsSelection';
-import type IPTreeTableSelectionKeys from '@interfaces/IPTreeTableSelectionKeys';
+import type { ISetupResult, IPTreeTableSelectionKeys, IDownloadsSelection } from '@interfaces';
 import { downloadApi } from '@api';
 import { useServerStore } from '@store';
 

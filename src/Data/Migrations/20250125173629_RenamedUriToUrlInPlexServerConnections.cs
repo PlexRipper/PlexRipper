@@ -10,19 +10,13 @@ namespace PlexRipper.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "Uri",
-                table: "PlexServerConnections",
-                newName: "Url");
+            migrationBuilder.RenameColumn(name: "Uri", table: "PlexServerConnections", newName: "Url");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "Url",
-                table: "PlexServerConnections",
-                newName: "Uri");
+            migrationBuilder.RenameColumn(name: "Url", table: "PlexServerConnections", newName: "Uri");
         }
     }
 }

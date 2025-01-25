@@ -73,16 +73,10 @@ public class PlexServerConnection : BaseEntity
     {
         get
         {
-            if (IsCustom)
-                return PlexConnectionTypes.Custom;
-
             if (Local)
                 return PlexConnectionTypes.Local;
 
-            if (IsPlexTvConnection)
-                return PlexConnectionTypes.PlexRelay;
-
-            return PlexConnectionTypes.Public;
+            return IsPlexTvConnection ? PlexConnectionTypes.PlexRelay : PlexConnectionTypes.Public;
         }
     }
 

@@ -18,6 +18,6 @@ public enum PlexConnectionTypes
     [EnumMember(Value = nameof(PlexRelay))]
     PlexRelay = 2,
 
-    [EnumMember(Value = nameof(Custom))]
-    Custom = 3,
+    [EnumMember(Value = nameof(Unknown))]
+    Unknown = 3,
 }

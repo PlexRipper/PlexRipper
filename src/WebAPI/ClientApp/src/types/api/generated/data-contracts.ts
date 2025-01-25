@@ -674,8 +674,6 @@ export interface PlexServerConnectionDTO {
   port: number;
   protocol: string;
   relay: boolean;
-  serverStatusList: PlexServerStatusDTO[];
-  uri: string;
   url: string;
 }
 

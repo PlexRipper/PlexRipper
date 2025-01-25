@@ -310,6 +310,13 @@
                 "symbol": "Enthält ein Sonderzeichen",
                 "length": "Länger als {count} Zeichen"
             }
+        },
+        "q-connection-icon": {
+            "tooltip": {
+                "local-connection": "Lokale Verbindung",
+                "public-connection": "Öffentliche Verbindung",
+                "plex-connection": "Plex-Relay-Verbindung"
+            }
         }
     },
     "confirmation": {
@@ -373,10 +380,6 @@
         "name-version": "PlexRipper - V{version}",
         "units": {
             "per-second": "/s"
-        },
-        "tooltip": {
-            "local-connection": "Lokale Verbindung",
-            "public-connection": "Öffentliche Verbindung"
         },
         "error": {
             "unknown": "\"Unbekannt\"",

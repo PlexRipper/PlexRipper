@@ -21,7 +21,7 @@
 			<div>
 				<QRow wrap>
 					<QCol cols="auto">
-						<QConnectionIcon :local="isLocalIp" />
+						<QConnectionIcon :type="type" />
 					</QCol>
 					<QCol class="q-mx-md">
 						<q-input
@@ -125,6 +125,7 @@ import { get, set } from '@vueuse/core';
 import { DialogType, ValidationLevel } from '@enums';
 import type { IConnectionDialog } from '@interfaces';
 import type { CreatePlexServerConnectionEndpointRequest, ServerIdentityDTO } from '@dto';
+import { PlexConnectionTypes } from '@dto';
 import { useServerConnectionStore, useServerStore, useSubscription } from '#imports';
 
 const serverStore = useServerStore();
@@ -226,6 +227,18 @@ const isLocalIp = computed(() => {
 
 	// Check if IP matches any of the IPv6 local prefixes
 	return ipv6LocalPrefixes.some((prefix) => prefix.test(get(connection).address));
+});
+
+const type = computed(() => {
+	if (get(isLocalIp)) {
+		return PlexConnectionTypes.Local;
+	}
+
+	if (get(parsedUrl)?.href.includes('plex.direct')) {
+		return PlexConnectionTypes.PlexRelay;
+	}
+
+	return PlexConnectionTypes.Public;
 });
 
 function checkConnection() {

@@ -470,6 +470,13 @@ export interface PlexAccountDTO {
   verificationCode: string;
 }
 
+export enum PlexConnectionTypes {
+  Local = "Local",
+  Public = "Public",
+  PlexRelay = "PlexRelay",
+  Unknown = "Unknown",
+}
+
 export interface PlexLibraryDTO {
   /** @format int32 */
   count: number;
@@ -674,6 +681,7 @@ export interface PlexServerConnectionDTO {
   port: number;
   protocol: string;
   relay: boolean;
+  type: PlexConnectionTypes;
   url: string;
 }
 

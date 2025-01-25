@@ -25,6 +25,9 @@ public class PlexServerConnection : BaseEntity
     [Column(Order = 5)]
     public required bool Local { get; init; }
 
+    /// <summary>
+    /// Gets whether this connection is relayed through Plex servers?
+    /// </summary>
     [Column(Order = 6)]
     public required bool Relay { get; init; }
 
@@ -55,16 +58,6 @@ public class PlexServerConnection : BaseEntity
     #region Helpers
 
     [NotMapped]
-    public string Url
-    {
-        get
-        {
-            var urlBuilder = new UriBuilder(Protocol, Address) { Port = Port };
-            return urlBuilder.ToString().TrimEnd('/');
-        }
-    }
-
-    [NotMapped]
     public PlexServerStatus? LatestConnectionStatus => PlexServerStatus.FirstOrDefault();
 
     [NotMapped]
@@ -73,14 +66,8 @@ public class PlexServerConnection : BaseEntity
     [NotMapped]
     public bool IsPlexTvConnection => Uri.Contains(".plex.direct");
 
-    public string GetThumbUrl(string thumbPath)
-    {
-        var uri = new Uri(Url + thumbPath);
-        return $"{uri.Scheme}://{uri.Host}:{uri.Port}/photo/:/transcode?url={uri.AbsolutePath}";
-    }
-
     public string GetDownloadUrl(string fileLocationUrl, string token) =>
-        $"{Url}{fileLocationUrl}?X-Plex-Token={token}";
+        $"{Uri}{fileLocationUrl}?X-Plex-Token={token}";
 
     #endregion
 
@@ -122,5 +109,5 @@ public class PlexServerConnection : BaseEntity
 
     /// <inheritdoc/>
     public override string ToString() =>
-        $"[ServerId: {PlexServerId} - Url: {Url} - Local: {Local} - Relay: {Relay} - IPv6: {IPv6}]";
+        $"[ServerId: {PlexServerId} - Url: {Uri} - Local: {Local} - Relay: {Relay} - IPv6: {IPv6}]";
 }

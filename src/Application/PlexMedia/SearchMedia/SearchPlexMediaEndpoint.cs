@@ -75,7 +75,7 @@ public class SearchPlexMediaEndpoint : BaseEndpoint<SearchPlexMediaRequest, Resu
             if (serverConnectionResult.IsFailed)
                 continue;
 
-            tokenDict.Add(plexServerId, (serverConnectionResult.Value.Url, tokenResult.Value));
+            tokenDict.Add(plexServerId, (serverConnectionResult.Value.Uri, tokenResult.Value));
         }
 
         // Set the full thumbnail url and convert to slim DTO

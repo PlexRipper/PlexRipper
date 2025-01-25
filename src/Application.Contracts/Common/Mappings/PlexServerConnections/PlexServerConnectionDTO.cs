@@ -26,12 +26,7 @@ public class PlexServerConnectionDTO
 
     public required string Url { get; set; }
 
-    public required string Uri { get; set; }
-
     public required bool IsPlexTvConnection { get; set; }
-
-    // TODO: Remove this, connections now only have one status
-    public required List<PlexServerStatusDTO> ServerStatusList { get; set; }
 
     public required PlexServerStatusDTO? LatestConnectionStatus { get; set; }
 }

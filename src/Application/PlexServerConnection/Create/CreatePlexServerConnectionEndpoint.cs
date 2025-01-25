@@ -52,8 +52,8 @@ public class CreatePlexServerConnectionEndpoint
         Description(x =>
             x.ClearDefaultProduces()
                 .Produces(StatusCodes.Status201Created, typeof(ResultDTO<PlexServerConnectionDTO>))
-                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+                .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

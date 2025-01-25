@@ -4,7 +4,7 @@ using FastEndpoints;
 
 namespace PlexRipper.Application;
 
-public abstract class BaseEndpoint<TRequest> : Endpoint<TRequest, ResultDTO>
+public abstract class BaseEndpoint<TRequest> : Endpoint<TRequest, BaseResultDTO>
     where TRequest : class
 {
     public abstract string EndpointPath { get; }
@@ -36,7 +36,7 @@ public abstract class BaseEndpoint<TRequest, TDTO> : BaseEndpoint<TRequest>
     }
 }
 
-public abstract class BaseEndpointWithoutRequest : EndpointWithoutRequest<ResultDTO>
+public abstract class BaseEndpointWithoutRequest : EndpointWithoutRequest<BaseResultDTO>
 {
     public abstract string EndpointPath { get; }
 

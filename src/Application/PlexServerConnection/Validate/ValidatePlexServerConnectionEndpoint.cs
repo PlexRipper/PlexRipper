@@ -46,8 +46,8 @@ public class ValidatePlexServerConnectionEndpoint
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<ServerIdentityDTO>))
-                .Produces(StatusCodes.Status400BadRequest, typeof(ResultDTO))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+                .Produces(StatusCodes.Status400BadRequest, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

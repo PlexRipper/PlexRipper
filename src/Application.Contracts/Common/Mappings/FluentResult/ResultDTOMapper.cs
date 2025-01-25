@@ -4,7 +4,7 @@ namespace Application.Contracts;
 
 public static class ResultDTOMapper
 {
-    public static ResultDTO ToResultDTO(this Result result) =>
+    public static BaseResultDTO ToResultDTO(this Result result) =>
         new()
         {
             IsFailed = result.IsFailed,

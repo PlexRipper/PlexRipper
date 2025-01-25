@@ -22,7 +22,7 @@ public class GetAllNotificationsEndpoint : BaseEndpointWithoutRequest<List<Notif
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<NotificationDTO>>))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

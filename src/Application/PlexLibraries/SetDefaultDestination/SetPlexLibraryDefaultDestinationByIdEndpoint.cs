@@ -25,7 +25,7 @@ public class SetPlexLibraryDefaultDestinationByIdEndpointRequestValidator
 }
 
 public class SetPlexLibraryDefaultDestinationByIdEndpoint
-    : BaseEndpoint<SetPlexLibraryDefaultDestinationByIdEndpointRequest, ResultDTO>
+    : BaseEndpoint<SetPlexLibraryDefaultDestinationByIdEndpointRequest, BaseResultDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -42,8 +42,8 @@ public class SetPlexLibraryDefaultDestinationByIdEndpoint
         Get(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+            x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

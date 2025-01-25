@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace PlexRipper.Application;
 
-public class ResetDatabaseEndpoint : BaseEndpointWithoutRequest<ResultDTO>
+public class ResetDatabaseEndpoint : BaseEndpointWithoutRequest<BaseResultDTO>
 {
     public override string EndpointPath => ApiRoutes.SettingsController + "/resetdb";
 
@@ -12,8 +12,8 @@ public class ResetDatabaseEndpoint : BaseEndpointWithoutRequest<ResultDTO>
         Get(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+            x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

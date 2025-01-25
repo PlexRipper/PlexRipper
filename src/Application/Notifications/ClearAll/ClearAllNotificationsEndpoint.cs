@@ -26,7 +26,7 @@ public class ClearAllNotificationsEndpoint : BaseEndpointWithoutRequest<int>
 
         Description(x =>
             x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<int>))
-                .Produces(StatusCodes.Status500InternalServerError, typeof(ResultDTO))
+                .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 

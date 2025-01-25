@@ -2,7 +2,11 @@
 
 namespace Application.Contracts;
 
-public class ResultDTO
+/// <summary>
+/// The <see cref="ResultDTO{T}"/> without the value.
+/// NOTE: This is named BaseResultDTO to allow for type generating and using this as a base. In Typescript this works differently than C#
+/// </summary>
+public class BaseResultDTO
 {
     public required bool IsFailed { get; set; } = false;
 
@@ -15,7 +19,7 @@ public class ResultDTO
     public required List<SuccessDTO> Successes { get; set; } = [];
 }
 
-public class ResultDTO<T> : ResultDTO
+public class ResultDTO<T> : BaseResultDTO
 {
     public T? Value { get; init; }
 }

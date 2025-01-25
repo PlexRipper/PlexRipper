@@ -76,5 +76,5 @@ public record DownloadTaskDTO : IDownloadTaskProgress
     /// The actions that can be taken on this <see cref="DownloadTaskGeneric"/>.
     /// This is filled by the front-end and depends on the DownloadStatus
     /// </summary>
-    public required List<string> Actions { get; set; }
+    public required List<DownloadActions> Actions { get; set; }
 }

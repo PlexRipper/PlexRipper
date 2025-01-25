@@ -7,72 +7,58 @@ public static class DownloadTaskActions
     // ReSharper disable once InconsistentNaming
     private static readonly ILog _log = LogManager.CreateLogInstance(typeof(DownloadTaskActions));
 
-    private const string StatusDetails = "details";
-
-    private const string StatusDelete = "delete";
-
-    private const string StatusStart = "start";
-
-    private const string StatusPause = "pause";
-
-    private const string StatusStop = "stop";
-
-    private const string StatusClear = "clear";
-
-    private const string StatusRestart = "restart";
-
-    public static List<string> Convert(DownloadStatus downloadStatus)
+    public static List<DownloadActions> Convert(DownloadStatus downloadStatus)
     {
-        var actions = new List<string> { StatusDetails };
+        var actions = new List<DownloadActions> { DownloadActions.Details };
 
         switch (downloadStatus)
         {
             case DownloadStatus.Unknown:
-                actions.Add(StatusDelete);
+                actions.Add(DownloadActions.Delete);
                 break;
             case DownloadStatus.Queued:
-                actions.Add(StatusStart);
-                actions.Add(StatusDelete);
+                actions.Add(DownloadActions.Start);
+                actions.Add(DownloadActions.Delete);
                 break;
             case DownloadStatus.Downloading:
-                actions.Add(StatusPause);
-                actions.Add(StatusStop);
+                actions.Add(DownloadActions.Pause);
+                actions.Add(DownloadActions.Stop);
                 break;
             case DownloadStatus.DownloadFinished:
             case DownloadStatus.MergeFinished:
             case DownloadStatus.MoveFinished:
-                actions.Add(StatusDelete);
+                actions.Add(DownloadActions.Delete);
                 break;
             case DownloadStatus.Paused:
             case DownloadStatus.MergePaused:
             case DownloadStatus.MovePaused:
-                actions.Add(StatusStart);
-                actions.Add(StatusStop);
-                actions.Add(StatusDelete);
+                actions.Add(DownloadActions.Start);
+                actions.Add(DownloadActions.Stop);
+                actions.Add(DownloadActions.Delete);
                 break;
             case DownloadStatus.Completed:
-                actions.Add(StatusClear);
-                actions.Add(StatusRestart);
+                actions.Add(DownloadActions.Clear);
+                actions.Add(DownloadActions.Restart);
                 break;
             case DownloadStatus.Stopped:
-                actions.Add(StatusRestart);
-                actions.Add(StatusDelete);
+                actions.Add(DownloadActions.Restart);
+                actions.Add(DownloadActions.Delete);
                 break;
             case DownloadStatus.Moving:
             case DownloadStatus.Merging:
-                actions.Add(StatusPause);
-                actions.Add(StatusStop);
+                actions.Add(DownloadActions.Pause);
+                actions.Add(DownloadActions.Stop);
                 break;
             case DownloadStatus.Error:
             case DownloadStatus.MoveError:
             case DownloadStatus.MergeError:
-                actions.Add(StatusRestart);
-                actions.Add(StatusDelete);
+                actions.Add(DownloadActions.Restart);
+                actions.Add(DownloadActions.Delete);
                 break;
             case DownloadStatus.ServerUnreachable:
-                actions.Add(StatusStart);
-                actions.Add(StatusStop);
-                actions.Add(StatusDelete);
+                actions.Add(DownloadActions.Start);
+                actions.Add(DownloadActions.Stop);
+                actions.Add(DownloadActions.Delete);
                 break;
             default:
                 _log.Error("Unknown download status {DownloadStatus}", downloadStatus);

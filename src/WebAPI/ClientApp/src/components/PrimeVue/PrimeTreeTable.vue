@@ -107,14 +107,16 @@
 					<QCol cols="auto">
 						<!-- Item Actions -->
 						<IconSquareButton
-							v-for="(action, y) in toDownloadActions(node.status)"
-							:key="`${node.id}-${y}`"
+							v-for="action in node.actions"
+							:key="`${node.id}-${kebabCase(action.type)}`"
 							dense
-							:cy="`column-actions-${kebabCase(action)}-${node.id}`"
-							:icon="toButtonIcon(action)"
+							:disabled="action.disabled"
+							:loading="action.loading"
+							:cy="`column-actions-${kebabCase(action.type)}-${node.id}`"
+							:icon="toButtonIcon(action.type)"
 							@click.stop="
 								$emit('action', {
-									action: action,
+									action: action.type,
 									data: node,
 								})
 							" />
@@ -130,7 +132,7 @@ import type { TreeTableSelectionKeys } from 'primevue/treetable';
 import type { QTreeViewTableHeader } from '@props';
 import type { IDownloadTableNode, IPTreeTableSelectionKeys } from '@interfaces';
 import { ButtonType } from '@enums';
-import { toDownloadActions, translateDownloadStatus } from '@composables';
+import { translateDownloadStatus } from '@composables';
 import { kebabCase } from 'lodash-es';
 import { DownloadActions } from '@dto';
 import Convert from '@class/Convert';

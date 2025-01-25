@@ -9,7 +9,7 @@ namespace PlexRipper.Application;
 /// Deletes/Clears all <see cref="Notification">Notifications</see>.
 /// </summary>
 /// <returns>Returns the number of <see cref="Notification">Notifications</see> that have been deleted.</returns>
-public class ClearAllNotificationsEndpoint : BaseEndpointWithoutRequest<int>
+public class ClearAllNotificationsEndpoint : BaseEndpointWithoutRequest<CountResponseDTO>
 {
     private readonly IPlexRipperDbContext _dbContext;
 
@@ -25,7 +25,7 @@ public class ClearAllNotificationsEndpoint : BaseEndpointWithoutRequest<int>
         Delete(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<int>))
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<CountResponseDTO>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
@@ -34,6 +34,6 @@ public class ClearAllNotificationsEndpoint : BaseEndpointWithoutRequest<int>
     {
         // Empty the table
         var deletedNotificationsCount = await _dbContext.Notifications.ExecuteDeleteAsync(ct);
-        await SendFluentResult(Result.Ok(deletedNotificationsCount), x => x, ct);
+        await SendFluentResult(Result.Ok(new CountResponseDTO(deletedNotificationsCount)), x => x, ct);
     }
 }

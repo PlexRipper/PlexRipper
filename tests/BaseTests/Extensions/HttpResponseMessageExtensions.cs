@@ -12,17 +12,12 @@ public static class HttpResponseMessageExtensions
             await response.Content.ReadFromJsonAsync<ResultDTO<T>>(DefaultJsonSerializerOptions.ConfigStandard)
             ?? new ResultDTO<T>
             {
-                IsFailed = false,
                 IsSuccess = false,
-                Reasons = [],
                 Errors = [],
                 Successes = [],
                 Value = default,
+                StatusCode = 0,
             };
-
-        result.Reasons = result
-            .Reasons.Select(x => new ReasonDTO { Message = x.Message, Metadata = x.Metadata.ToTypedResultMetaData() })
-            .ToList();
 
         result.Successes = result
             .Successes.Select(x => new SuccessDTO()

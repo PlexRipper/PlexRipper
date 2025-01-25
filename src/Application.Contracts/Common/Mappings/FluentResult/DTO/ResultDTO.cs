@@ -8,11 +8,9 @@ namespace Application.Contracts;
 /// </summary>
 public class BaseResultDTO
 {
-    public required bool IsFailed { get; set; } = false;
-
     public required bool IsSuccess { get; init; } = true;
 
-    public required List<ReasonDTO> Reasons { get; set; } = [];
+    public required int StatusCode { get; set; }
 
     public required List<ErrorDTO> Errors { get; set; } = [];
 

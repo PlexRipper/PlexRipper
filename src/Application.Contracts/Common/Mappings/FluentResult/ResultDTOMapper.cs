@@ -7,33 +7,30 @@ public static class ResultDTOMapper
     public static BaseResultDTO ToResultDTO(this Result result) =>
         new()
         {
-            IsFailed = result.IsFailed,
             IsSuccess = result.IsSuccess,
-            Reasons = result.Reasons.ToReasonDTOs(),
             Errors = result.Errors.ToErrorDTOs(),
             Successes = result.Successes.ToSuccessDTOs(),
+            StatusCode = 0,
         };
 
     public static ResultDTO<T> ToResultDTO<T>(this Result<T> result) =>
         new()
         {
             Value = result.ValueOrDefault,
-            IsFailed = result.IsFailed,
             IsSuccess = result.IsSuccess,
-            Reasons = result.Reasons.ToReasonDTOs(),
             Errors = result.Errors.ToErrorDTOs(),
             Successes = result.Successes.ToSuccessDTOs(),
+            StatusCode = 0,
         };
 
     public static ResultDTO<TDTO> ToResultDTO<T, TDTO>(this Result<T> result, Func<T, TDTO> mapper) =>
         new()
         {
             Value = result.ValueOrDefault != null ? mapper(result.ValueOrDefault) : default,
-            IsFailed = result.IsFailed,
             IsSuccess = result.IsSuccess,
-            Reasons = result.Reasons.ToReasonDTOs(),
             Errors = result.Errors.ToErrorDTOs(),
             Successes = result.Successes.ToSuccessDTOs(),
+            StatusCode = 0,
         };
 
     private static List<ReasonDTO> ToReasonDTOs(this List<IReason> reasons) =>

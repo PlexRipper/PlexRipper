@@ -50,6 +50,11 @@ export interface ConfirmationSettingsDTO {
   askDownloadTvShowConfirmation: boolean;
 }
 
+export interface CountResponseDTO {
+  /** @format int32 */
+  count: number;
+}
+
 export interface CreateDownloadTasksRequest {
   customDestinationFolderPath: string;
   /** @format int32 */
@@ -748,6 +753,15 @@ export interface ResultDTOOfBoolean {
   value: boolean;
 }
 
+export interface ResultDTOOfCountResponseDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: CountResponseDTO | null;
+}
+
 export interface ResultDTOOfDownloadTaskDTO {
   errors: ErrorDTO[];
   isSuccess: boolean;
@@ -782,16 +796,6 @@ export interface ResultDTOOfGeneratePlexTokenResponse {
   statusCode: number;
   successes: SuccessDTO[];
   value?: GeneratePlexTokenResponse | null;
-}
-
-export interface ResultDTOOfInt32 {
-  errors: ErrorDTO[];
-  isSuccess: boolean;
-  /** @format int32 */
-  statusCode: number;
-  successes: SuccessDTO[];
-  /** @format int32 */
-  value: number;
 }
 
 export interface ResultDTOOfListOfDownloadPreviewDTO {

@@ -12,7 +12,12 @@
 import type { RequestParams } from "./http-client";
 import { ContentType } from "./http-client";
 
-import type { BaseResultDTO, NotificationDTO, SetNotificationVisibilityEndpointRequest } from "./data-contracts";
+import type {
+  BaseResultDTO,
+  CountResponseDTO,
+  NotificationDTO,
+  SetNotificationVisibilityEndpointRequest,
+} from "./data-contracts";
 
 import { apiCheckPipe } from "@api/base";
 import Axios from "axios";
@@ -29,14 +34,14 @@ export class Notification {
    */
   clearAllNotificationsEndpoint = (params: RequestParams = {}) =>
     from(
-      Axios.request<number>({
+      Axios.request<CountResponseDTO>({
         url: `/api/Notification/clear`,
         method: "DELETE",
         secure: true,
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<number>);
+    ).pipe(apiCheckPipe<CountResponseDTO>);
 
   /**
    * No description

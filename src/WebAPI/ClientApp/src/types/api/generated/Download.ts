@@ -14,6 +14,7 @@ import { ContentType } from "./http-client";
 
 import type {
   BaseResultDTO,
+  CountResponseDTO,
   CreateDownloadTasksRequest,
   DownloadMediaDTO,
   DownloadPreviewDTO,
@@ -38,7 +39,7 @@ export class Download {
    */
   clearCompletedDownloadTasksEndpoint = (data: string[], params: RequestParams = {}) =>
     from(
-      Axios.request<number>({
+      Axios.request<CountResponseDTO>({
         url: `/api/Download/clear`,
         method: "POST",
         data: data,
@@ -47,7 +48,7 @@ export class Download {
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<number>);
+    ).pipe(apiCheckPipe<CountResponseDTO>);
 
   /**
    * No description

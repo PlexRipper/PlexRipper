@@ -4,9 +4,11 @@ import { map, take } from 'rxjs/operators';
 import type { AxiosResponse } from 'axios';
 import type { ResultDTO } from '@interfaces';
 import { catchError, of } from 'rxjs';
-import type { ErrorDTO } from '@dto';
+import type { BaseResultDTO, ErrorDTO } from '@dto';
 
-export function apiCheckPipe<T>(source$: Observable<AxiosResponse<T>>): Observable<ResultDTO<T>> {
+export function apiCheckPipe<T = BaseResultDTO>(
+	source$: Observable<AxiosResponse<T>>,
+): Observable<T extends BaseResultDTO ? T : ResultDTO<T>> {
 	return source$.pipe(
 		map((res) => toResultDTO<T>(res)),
 		catchError((error) => {
@@ -18,7 +20,7 @@ export function apiCheckPipe<T>(source$: Observable<AxiosResponse<T>>): Observab
 	);
 }
 
-function toResultDTO<T>(res?: AxiosResponse): ResultDTO<T> {
+function toResultDTO<T = void>(res?: AxiosResponse): ResultDTO<T> {
 	if (!res) {
 		const error: ErrorDTO = {
 			message: 'Internal Server Error',
@@ -27,9 +29,7 @@ function toResultDTO<T>(res?: AxiosResponse): ResultDTO<T> {
 		};
 		return {
 			isSuccess: false,
-			isFailed: true,
 			errors: [error],
-			reasons: [error],
 			successes: [],
 			statusCode: 999,
 		};
@@ -37,9 +37,7 @@ function toResultDTO<T>(res?: AxiosResponse): ResultDTO<T> {
 	const result = res.data as ResultDTO<T>;
 	return {
 		isSuccess: result.isSuccess,
-		isFailed: result.isFailed,
 		errors: result.errors,
-		reasons: result.reasons,
 		value: result.value,
 		successes: result.successes,
 		statusCode: res.status,

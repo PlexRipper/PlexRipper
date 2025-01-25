@@ -12,108 +12,108 @@ public enum DownloadStatus
     /// <summary>
     /// String value was unable to be parsed to this enum.
     /// </summary>
-    [EnumMember(Value = "Unknown")]
+    [EnumMember(Value = nameof(Unknown))]
     Unknown = 0,
 
     /// <summary>
     /// There was an error during download.
     /// </summary>
-    [EnumMember(Value = "Error")]
+    [EnumMember(Value = nameof(Error))]
     Error = 1,
 
     /// <summary>
     /// Download is added to the queue.
     /// </summary>
-    [EnumMember(Value = "Queued")]
+    [EnumMember(Value = nameof(Queued))]
     Queued = 2,
 
     /// <summary>
     /// Download Task is downloading data from the server.
     /// </summary>
-    [EnumMember(Value = "Downloading")]
+    [EnumMember(Value = nameof(Downloading))]
     Downloading = 3,
 
     /// <summary>
     /// Download Task is downloading data from the server.
     /// </summary>
-    [EnumMember(Value = "DownloadFinished")]
+    [EnumMember(Value = nameof(DownloadFinished))]
     DownloadFinished = 4,
 
     /// <summary>
     /// Download is paused.
     /// </summary>
-    [EnumMember(Value = "Paused")]
+    [EnumMember(Value = nameof(Paused))]
     Paused = 5,
 
     /// <summary>
     /// Download is paused.
     /// </summary>
-    [EnumMember(Value = "Stopped")]
+    [EnumMember(Value = nameof(Stopped))]
     Stopped = 6,
 
     /// <summary>
     /// Download is deleted.
     /// </summary>
-    [EnumMember(Value = "Deleted")]
+    [EnumMember(Value = nameof(Deleted))]
     Deleted = 7,
 
     /// <summary>
     /// Download segments are being merged into 1 media file.
     /// </summary>
-    [EnumMember(Value = "Merging")]
+    [EnumMember(Value = nameof(Merging))]
     Merging = 8,
 
     /// <summary>
     /// Download file is being moved.
     /// </summary>
-    [EnumMember(Value = "Moving")]
+    [EnumMember(Value = nameof(Moving))]
     Moving = 9,
 
     /// <summary>
     /// Download file has been merged.
     /// </summary>
-    [EnumMember(Value = "MergePaused")]
+    [EnumMember(Value = nameof(MergePaused))]
     MergePaused = 10,
 
     /// <summary>
     /// Download file has been moved.
     /// </summary>
-    [EnumMember(Value = "MovePaused")]
+    [EnumMember(Value = nameof(MovePaused))]
     MovePaused = 11,
 
     /// <summary>
     /// Download file has been merged.
     /// </summary>
-    [EnumMember(Value = "MergeFinished")]
+    [EnumMember(Value = nameof(MergeFinished))]
     MergeFinished = 12,
 
     /// <summary>
     /// Download file has been moved.
     /// </summary>
-    [EnumMember(Value = "MoveFinished")]
+    [EnumMember(Value = nameof(MoveFinished))]
     MoveFinished = 13,
 
     /// <summary>
     /// Download is completed.
     /// </summary>
-    [EnumMember(Value = "Completed")]
+    [EnumMember(Value = nameof(Completed))]
     Completed = 14,
 
     /// <summary>
     /// The server is offline.
     /// </summary>
-    [EnumMember(Value = "ServerUnreachable")]
+    [EnumMember(Value = nameof(ServerUnreachable))]
     ServerUnreachable = 15,
 
     /// <summary>
     /// The server is offline.
     /// </summary>
-    [EnumMember(Value = "MoveError")]
+    [EnumMember(Value = nameof(MoveError))]
     MoveError = 16,
 
     /// <summary>
     /// The server is offline.
     /// </summary>
-    [EnumMember(Value = "MergeError")]
+    [EnumMember(Value = nameof(MergeError))]
     MergeError = 17,
 }

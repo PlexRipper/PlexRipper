@@ -11,6 +11,7 @@ public static class DownloadTaskActions
     {
         var actions = new List<DownloadActions> { DownloadActions.Details };
 
+        // NOTE: When updating this, also update front-end: src/WebAPI/ClientApp/src/composables/conversion.ts
         switch (downloadStatus)
         {
             case DownloadStatus.Unknown:

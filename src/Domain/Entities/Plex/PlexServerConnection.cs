@@ -69,6 +69,23 @@ public class PlexServerConnection : BaseEntity
     public string GetDownloadUrl(string fileLocationUrl, string token) =>
         $"{Url}{fileLocationUrl}?X-Plex-Token={token}";
 
+    public PlexConnectionTypes Type
+    {
+        get
+        {
+            if (IsCustom)
+                return PlexConnectionTypes.Custom;
+
+            if (Local)
+                return PlexConnectionTypes.Local;
+
+            if (IsPlexTvConnection)
+                return PlexConnectionTypes.PlexRelay;
+
+            return PlexConnectionTypes.Public;
+        }
+    }
+
     #endregion
 
     #region Operators

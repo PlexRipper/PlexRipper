@@ -1,3 +1,5 @@
+using PlexRipper.Domain;
+
 namespace Application.Contracts;
 
 public class PlexServerConnectionDTO
@@ -27,6 +29,8 @@ public class PlexServerConnectionDTO
     public required string Url { get; set; }
 
     public required bool IsPlexTvConnection { get; set; }
+
+    public required PlexConnectionTypes Type { get; set; }
 
     public required PlexServerStatusDTO? LatestConnectionStatus { get; set; }
 }

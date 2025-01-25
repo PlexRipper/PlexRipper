@@ -45,7 +45,17 @@ describe('Downloads page', () => {
 					cy.getCy(`column-dataTotal-${downloadTask.id}`).should('have.text', prettyBytes(downloadTask.dataTotal));
 					cy.getCy(`column-downloadSpeed-${downloadTask.id}`).should('have.text', prettyBytes(downloadSpeed) + `/s`);
 					cy.getCy(`column-percentage-${downloadTask.id}`).should('have.text', `${percentage}%`);
+					cy.getCy(`column-actions-details-${downloadTask.id}`).should('exist');
 
+					if (status == DownloadStatus.Downloading) {
+						cy.getCy(`column-actions-pause-${downloadTask.id}`).should('exist');
+						cy.getCy(`column-actions-stop-${downloadTask.id}`).should('exist');
+					}
+
+					if (status == DownloadStatus.Completed) {
+						cy.getCy(`column-actions-clear-${downloadTask.id}`).should('exist');
+						cy.getCy(`column-actions-restart-${downloadTask.id}`).should('exist');
+					}
 					// Format timeRemaining as MM:SS
 					const minutes = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
 					const seconds = (timeRemaining % 60).toString().padStart(2, '0');

@@ -254,4 +254,6 @@ public static partial class StringExtensions
 
         return false;
     }
+
+    public static string ToListString<T>(this List<T> list) => !list.Any() ? "[ - ]" : $"[{string.Join(", ", list)}]";
 }

@@ -18,7 +18,8 @@ public class RefreshPlexAccountAccessEndpointRequestValidator : Validator<Refres
     }
 }
 
-public class RefreshPlexAccountAccessEndpoint : BaseEndpoint<RefreshPlexAccountAccessEndpointRequest, BaseResultDTO>
+public class RefreshPlexAccountAccessEndpoint
+    : BaseEndpoint<RefreshPlexAccountAccessEndpointRequest, ResultDTO<RefreshPlexAccountAccessRapportDTO>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -38,17 +39,18 @@ public class RefreshPlexAccountAccessEndpoint : BaseEndpoint<RefreshPlexAccountA
         Get(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(BaseResultDTO))
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<RefreshPlexAccountAccessRapportDTO>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }
 
     public override async Task HandleAsync(RefreshPlexAccountAccessEndpointRequest req, CancellationToken ct)
     {
+        var list = new List<RefreshPlexAccountAccessRapportDTO>();
+        var plexAccountIds = new List<int>();
         if (req.PlexAccountId > 0)
         {
-            await _mediator.Send(new RefreshPlexServerAccessCommand(req.PlexAccountId), ct);
-            await _mediator.Send(new RefreshLibraryAccessCommand(req.PlexAccountId), ct);
+            plexAccountIds.Add(req.PlexAccountId);
         }
         else
         {
@@ -60,14 +62,25 @@ public class RefreshPlexAccountAccessEndpoint : BaseEndpoint<RefreshPlexAccountA
                 return;
             }
 
-            var plexAccountIds = enabledAccounts.Select(x => x.Id).ToList();
-            foreach (var plexAccountId in plexAccountIds)
-            {
-                await _mediator.Send(new RefreshPlexServerAccessCommand(plexAccountId), ct);
-                await _mediator.Send(new RefreshLibraryAccessCommand(plexAccountId), ct);
-            }
+            plexAccountIds.AddRange(enabledAccounts.Select(x => x.Id));
         }
 
-        await SendFluentResult(Result.Ok(), ct);
+        // Execute
+        foreach (var plexAccountId in plexAccountIds)
+        {
+            var serverAccessRapportResult = await _mediator.Send(new RefreshPlexServerAccessCommand(plexAccountId), ct);
+            var libraryAccessRapportResult = await _mediator.Send(new RefreshLibraryAccessCommand(plexAccountId), ct);
+
+            list.Add(
+                new RefreshPlexAccountAccessRapportDTO
+                {
+                    PlexAccountId = plexAccountId,
+                    ServerAccessRapport = serverAccessRapportResult.Value.ToDTO(),
+                    LibraryAccessRapport = libraryAccessRapportResult.Value.ToDTO(),
+                }
+            );
+        }
+
+        await SendFluentResult(Result.Ok(list), ct);
     }
 }

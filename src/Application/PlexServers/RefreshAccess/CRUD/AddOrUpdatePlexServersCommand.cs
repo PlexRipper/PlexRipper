@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PlexRipper.Application;
 
-public record AddOrUpdatePlexServersCommand(List<PlexServer> PlexServers) : IRequest<Result>;
+public record AddOrUpdatePlexServersCommand(List<PlexServer> PlexServers) : IRequest<Result<PlexServerRapport>>;
 
 public class AddOrUpdatePlexServersCommandValidator : AbstractValidator<AddOrUpdatePlexServersCommand>
 {
@@ -34,7 +34,8 @@ public class AddOrUpdatePlexServersCommandValidator : AbstractValidator<AddOrUpd
     }
 }
 
-public class AddOrUpdatePlexServersCommandHandler : IRequestHandler<AddOrUpdatePlexServersCommand, Result>
+public class AddOrUpdatePlexServersCommandHandler
+    : IRequestHandler<AddOrUpdatePlexServersCommand, Result<PlexServerRapport>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -45,50 +46,58 @@ public class AddOrUpdatePlexServersCommandHandler : IRequestHandler<AddOrUpdateP
         _dbContext = dbContext;
     }
 
-    public async Task<Result> Handle(AddOrUpdatePlexServersCommand command, CancellationToken cancellationToken)
+    public async Task<Result<PlexServerRapport>> Handle(
+        AddOrUpdatePlexServersCommand command,
+        CancellationToken cancellationToken
+    )
     {
-        var plexServers = command.PlexServers;
+        var incomingPlexServers = command.PlexServers;
+        var rapport = new PlexServerRapport();
 
         // Add or update the PlexServers in the database
-        _log.Information("Adding or updating {PlexServersCount} PlexServers now", plexServers.Count);
+        _log.Information("Adding or updating {PlexServersCount} PlexServers now", incomingPlexServers.Count);
 
-        var machineIds = plexServers.Select(x => x.MachineIdentifier).ToList();
+        var machineIds = incomingPlexServers.Select(x => x.MachineIdentifier).ToList();
         var plexServerDbList = await _dbContext
             .PlexServers.Include(x => x.PlexServerConnections)
             .Where(x => machineIds.Contains(x.MachineIdentifier))
             .AsTracking()
             .ToListAsync(cancellationToken);
 
-        foreach (var plexServer in plexServers)
+        foreach (var incomingPlexServer in incomingPlexServers)
         {
             var existingServer = plexServerDbList.FirstOrDefault(x =>
-                x.MachineIdentifier == plexServer.MachineIdentifier
+                x.MachineIdentifier == incomingPlexServer.MachineIdentifier
             );
             if (existingServer != null)
             {
                 // PlexServer already exists
                 _log.Debug("Updating PlexServer with id: {PlexServerDbId} in the database", existingServer.Id);
-                plexServer.Id = existingServer.Id;
+                incomingPlexServer.Id = existingServer.Id;
 
-                _dbContext.Entry(existingServer).CurrentValues.SetValues(plexServer);
+                _dbContext.Entry(existingServer).CurrentValues.SetValues(incomingPlexServer);
 
-                SyncPlexServerConnections(plexServer, existingServer);
+                SyncPlexServerConnections(incomingPlexServer, existingServer);
+                rapport.Updated.Add(incomingPlexServer.Id);
             }
             else
             {
                 // Create plexServer
-                _log.Debug("Adding PlexServer with name: {PlexServerName} to the database", plexServer.Name);
-                foreach (var plexServerConnection in plexServer.PlexServerConnections)
-                    plexServerConnection.PlexServerId = plexServer.Id;
+                _log.Debug("Adding PlexServer with name: {PlexServerName} to the database", incomingPlexServer.Name);
+                foreach (var plexServerConnection in incomingPlexServer.PlexServerConnections)
+                    plexServerConnection.PlexServerId = incomingPlexServer.Id;
 
-                _dbContext.PlexServers.Add(plexServer);
-                _dbContext.PlexServerConnections.AddRange(plexServer.PlexServerConnections);
+                _dbContext.PlexServers.Add(incomingPlexServer);
+                _dbContext.PlexServerConnections.AddRange(incomingPlexServer.PlexServerConnections);
+                rapport.Created.Add(incomingPlexServer.Id);
             }
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        return Result.Ok();
+        _log.InformationLine(rapport.ToString());
+
+        return Result.Ok(rapport);
     }
 
     private void SyncPlexServerConnections(PlexServer plexServer, PlexServer existingServer)
@@ -139,4 +148,16 @@ public class AddOrUpdatePlexServersCommandHandler : IRequestHandler<AddOrUpdateP
             }
         }
     }
+}
+
+public record PlexServerRapport()
+{
+    public List<int> Created { get; } = [];
+
+    public List<int> Updated { get; } = [];
+
+    public override string ToString() =>
+        $@"
+        Created {nameof(PlexServer)} Access: {Created}
+        Updated {nameof(PlexServer)} Access: {Updated}";
 }

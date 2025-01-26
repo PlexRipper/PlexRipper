@@ -101,12 +101,12 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		progressHubConnection?.on(MessageTypes.ServerDownloadProgress, (data: ServerDownloadProgressDTO) => downloadStore.updateServerDownloadProgress(data));
 
 		progressHubConnection?.on(MessageTypes.LibraryProgress, (data: LibraryProgress) => {
-			updateState<LibraryProgress>('libraryProgress', data);
+			updateState<LibraryProgress>('libraryProgress', data, 'id');
 		});
 
 		progressHubConnection?.on(MessageTypes.ServerConnectionCheckStatusProgress, (data: ServerConnectionCheckStatusProgressDTO) => updateState<ServerConnectionCheckStatusProgressDTO>('serverConnectionCheckStatusProgress', data, 'plexServerConnectionId'));
 
-		progressHubConnection?.on(MessageTypes.SyncServerMediaProgress, (data: SyncServerMediaProgress) => updateState<SyncServerMediaProgress>('syncServerMediaProgress', data));
+		progressHubConnection?.on(MessageTypes.SyncServerMediaProgress, (data: SyncServerMediaProgress) => updateState<SyncServerMediaProgress>('syncServerMediaProgress', data, 'serverId'));
 
 		progressHubConnection?.on(MessageTypes.JobStatusUpdate, (data) => backgroundStore.setStatusJobUpdate(data));
 
@@ -117,7 +117,7 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 		});
 	}
 
-	function updateState<T>(propertyName: keyof ISignalRStoreState, newObject: T, idName = 'id'): void {
+	function updateState<T>(propertyName: keyof ISignalRStoreState, newObject: T, idName: keyof T): void {
 		if (!state[propertyName]) {
 			Log.error(`Failed to get ISignalRStoreState property name: ${propertyName}`);
 			return;
@@ -133,7 +133,7 @@ export const useSignalrStore = defineStore('SignalrStore', () => {
 
 		function update(item: T): void {
 			if (!item[idName]) {
-				Log.error(`Failed to find the correct id property in ${propertyName} with idName: ${idName}`, item);
+				Log.error(`Failed to find the correct id property in ${propertyName} with idName: ${String(idName)}`, item);
 				return;
 			}
 

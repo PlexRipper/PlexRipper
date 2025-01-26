@@ -300,9 +300,6 @@ public class PlexApiWrapper
                 PlexServerId = connection.PlexServerId,
                 DefaultDestination = null,
                 DefaultDestinationId = null,
-                Movies = [],
-                TvShows = [],
-                PlexAccountLibraries = [],
             })
             .ToList();
 

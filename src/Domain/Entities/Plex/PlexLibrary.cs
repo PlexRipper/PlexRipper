@@ -95,7 +95,7 @@ public class PlexLibrary : BaseEntity
     /// <summary>
     /// Gets or sets the PlexServer this PlexLibrary belongs to.
     /// </summary>
-    public PlexServer? PlexServer { get; private set; }
+    public PlexServer? PlexServer { get; set; }
 
     /// <summary>
     /// Gets or sets the PlexServerId of the PlexServer this PlexLibrary belongs to.
@@ -105,7 +105,7 @@ public class PlexLibrary : BaseEntity
     /// <summary>
     /// Gets or sets the default download destination <see cref="FolderPath"/>.
     /// </summary>
-    public FolderPath? DefaultDestination { get; private set; }
+    public FolderPath? DefaultDestination { get; set; }
 
     /// <summary>
     /// Gets or sets the id of the Default Destination <see cref="FolderPath"/>.

@@ -68,10 +68,10 @@ public class PlexApiService : IPlexApiService
         switch (updatedPlexLibrary.Type)
         {
             case PlexMediaType.Movie:
-                updatedPlexLibrary.Movies = mediaList.ToPlexMovies();
+                updatedPlexLibrary.Movies.AddRange(mediaList.ToPlexMovies());
                 break;
             case PlexMediaType.TvShow:
-                updatedPlexLibrary.TvShows = mediaList.ToPlexTvShows();
+                updatedPlexLibrary.TvShows.AddRange(mediaList.ToPlexTvShows());
                 break;
             default:
                 return Result.Fail($"Unknown PlexLibrary type: {updatedPlexLibrary.Type}").LogError();

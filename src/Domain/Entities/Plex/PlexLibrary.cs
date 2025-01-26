@@ -26,27 +26,27 @@ public class PlexLibrary : BaseEntity
 
     /// <summary>
     /// Gets or sets the creation date of this <see cref="PlexLibrary"/> on the <see cref="PlexServer"/> by the owner.
-    /// Value is set by the PlexApi.
+    /// NOTE: Value is set by the PlexApi.
     /// </summary>
     [Column(Order = 5)]
     public required DateTime CreatedAt { get; init; }
 
     /// <summary>
     /// Gets or sets the last time this <see cref="PlexLibrary"/> was updated by the <see cref="PlexServer"/> owner.
-    /// Value is set by the PlexApi.
+    /// NOTE: Value is set by the PlexApi.
     /// </summary>
     [Column(Order = 6)]
     public required DateTime UpdatedAt { get; set; }
 
     /// <summary>
     /// Gets or sets the last time this <see cref="PlexLibrary"/> was scanned for new media by the <see cref="PlexServer"/> owner.
-    /// Value is set by the PlexApi.
+    /// NOTE: Value is set by the PlexApi.
     /// </summary>
     [Column(Order = 7)]
     public required DateTime ScannedAt { get; init; }
 
     /// <summary>
-    /// Gets or sets the DateTime this <see cref="PlexLibrary"/> was last synced with the PlexApi.
+    /// Gets or sets the DateTime this <see cref="PlexLibrary"/> had its media last synced with the PlexApi.
     /// </summary>
     [Column(Order = 8)]
     public DateTime? SyncedAt { get; set; }
@@ -95,7 +95,7 @@ public class PlexLibrary : BaseEntity
     /// <summary>
     /// Gets or sets the PlexServer this PlexLibrary belongs to.
     /// </summary>
-    public PlexServer? PlexServer { get; init; }
+    public PlexServer? PlexServer { get; private set; }
 
     /// <summary>
     /// Gets or sets the PlexServerId of the PlexServer this PlexLibrary belongs to.
@@ -105,18 +105,19 @@ public class PlexLibrary : BaseEntity
     /// <summary>
     /// Gets or sets the default download destination <see cref="FolderPath"/>.
     /// </summary>
-    public FolderPath? DefaultDestination { get; init; }
+    public FolderPath? DefaultDestination { get; private set; }
 
     /// <summary>
-    /// Gets or sets the Id of the Default Destination <see cref="FolderPath"/>.
+    /// Gets or sets the id of the Default Destination <see cref="FolderPath"/>.
+    /// Is only set if the user has diverted from the default <see cref="FolderPath"/> by the <see cref="PlexMediaType">Library Type</see>
     /// </summary>
     public int? DefaultDestinationId { get; set; }
 
-    public List<PlexMovie> Movies { get; set; } = [];
+    public List<PlexMovie> Movies { get; private set; } = [];
 
-    public List<PlexTvShow> TvShows { get; set; } = [];
+    public List<PlexTvShow> TvShows { get; private set; } = [];
 
-    public List<PlexAccountLibrary> PlexAccountLibraries { get; init; } = [];
+    public List<PlexAccountLibrary> PlexAccountLibraries { get; private set; } = [];
 
     #endregion
 
@@ -163,6 +164,16 @@ public class PlexLibrary : BaseEntity
         MediaSize = mediaSize;
 
         MovieCount = 0;
+    }
+
+    public override void SetNull()
+    {
+        base.SetNull();
+        PlexServer = null;
+        Movies = [];
+        TvShows = [];
+        PlexAccountLibraries = [];
+        DefaultDestination = null;
     }
 
     #endregion

@@ -7,22 +7,6 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
     public AddOrUpdatePlexLibrariesCommandUnitTests(ITestOutputHelper output)
         : base(output) { }
 
-    private List<PlexLibrary> ToApiLibraries(List<PlexLibrary> plexLibraries, DateTime updatedTime)
-    {
-        foreach (var plexLibrary in plexLibraries)
-        {
-            plexLibrary.Id = 0;
-            plexLibrary.SetNull();
-            plexLibrary.UpdatedAt = updatedTime;
-            plexLibrary.SyncedAt = null;
-            plexLibrary.DefaultDestinationId = null;
-            plexLibrary.SetMovieMetaData(0, 0);
-            plexLibrary.SetTvShowMetaData(0, 0, 0, 0);
-        }
-
-        return plexLibraries;
-    }
-
     [Fact]
     public async Task ShouldAddAllPlexLibraries_WhenNoneExistInTheDatabase()
     {
@@ -131,13 +115,12 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
 
         // Create API Data
         var updatedTime = DateTime.Now - TimeSpan.FromHours(4);
-        plexLibraries = ToApiLibraries(plexLibraries, updatedTime);
 
         // Act
         var request = new AddOrUpdatePlexLibrariesCommand()
         {
             PlexAccountId = plexAccount.Id,
-            PlexLibraries = plexLibraries,
+            PlexLibraries = plexLibraries.ToApiLibraries(updatedTime),
         };
         var result = await _sut.Handle(request, CancellationToken.None);
 
@@ -215,7 +198,7 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         var request = new AddOrUpdatePlexLibrariesCommand()
         {
             PlexAccountId = plexAccount.Id,
-            PlexLibraries = ToApiLibraries(plexLibraries, updatedTime),
+            PlexLibraries = plexLibraries.ToApiLibraries(updatedTime),
         };
 
         // Act

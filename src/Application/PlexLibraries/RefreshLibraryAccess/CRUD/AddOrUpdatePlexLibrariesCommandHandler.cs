@@ -215,9 +215,9 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 
 public record PlexLibraryAccessCrudRapport(int PlexServerId, string PlexAccountName, string PlexServerName)
 {
-    public List<int> Created { get; } = [];
-    public List<int> Updated { get; } = [];
-    public List<int> Deleted { get; } = [];
+    public List<int> Created { get; init; } = [];
+    public List<int> Updated { get; init; } = [];
+    public List<int> Deleted { get; init; } = [];
 
     public override string ToString() =>
         $@"

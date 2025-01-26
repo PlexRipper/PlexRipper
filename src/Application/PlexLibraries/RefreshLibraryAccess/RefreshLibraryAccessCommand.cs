@@ -6,12 +6,13 @@ using PlexApi.Contracts;
 namespace PlexRipper.Application;
 
 /// <summary>
-/// Retrieve the accessible <see cref="PlexLibrary">PlexLibraries</see> for this <see cref="PlexServer"/> which the <see cref="PlexAccount"/> has access to and update the database.
+/// Retrieve the accessible <see cref="PlexLibrary">PlexLibraries</see> for this <see cref="PlexServer"/> which the <see cref="PlexAccount"/> has access to and update the database. The <see cref="PlexServer"/> in question will need to be online.
 /// </summary>
 /// <param name="PlexAccountId">The id of the <see cref="PlexAccount"/> to retrieve the accessible <see cref="PlexLibrary">Plex Libraries</see> for.</param>
 /// <param name="PlexServerId">The id of the <see cref="PlexServer"/> to retrieve <see cref="PlexLibrary">Plex Libraries</see> for.</param>
 ///  <returns>If successful.</returns>
-public record RefreshLibraryAccessCommand(int PlexAccountId, int PlexServerId = 0) : IRequest<Result>;
+public record RefreshLibraryAccessCommand(int PlexAccountId, int PlexServerId = 0)
+    : IRequest<Result<List<PlexLibraryAccessCrudRapport>>>;
 
 public class RefreshLibraryAccessValidator : AbstractValidator<RefreshLibraryAccessCommand>
 {
@@ -22,7 +23,8 @@ public class RefreshLibraryAccessValidator : AbstractValidator<RefreshLibraryAcc
     }
 }
 
-public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessCommand, Result>
+public class RefreshLibraryAccessHandler
+    : IRequestHandler<RefreshLibraryAccessCommand, Result<List<PlexLibraryAccessCrudRapport>>>
 {
     private readonly ILog _log;
     private readonly IMediator _mediator;
@@ -42,7 +44,10 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
         _plexServiceApi = plexServiceApi;
     }
 
-    public async Task<Result> Handle(RefreshLibraryAccessCommand command, CancellationToken cancellationToken)
+    public async Task<Result<List<PlexLibraryAccessCrudRapport>>> Handle(
+        RefreshLibraryAccessCommand command,
+        CancellationToken cancellationToken
+    )
     {
         var plexAccountId = command.PlexAccountId;
         var plexServerId = command.PlexServerId;
@@ -60,7 +65,7 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
             {
                 var plexAccountName = await _dbContext.GetPlexAccountDisplayName(plexAccountId, cancellationToken);
                 _log.Warning("No accessible Plex servers found for PlexAccount {PlexAccountName}", plexAccountName);
-                return Result.Ok();
+                return Result.Ok(new List<PlexLibraryAccessCrudRapport>());
             }
 
             var libraryResults = await Task.WhenAll(
@@ -82,7 +87,7 @@ public class RefreshLibraryAccessHandler : IRequestHandler<RefreshLibraryAccessC
         }
 
         return await _mediator.Send(
-            new AddOrUpdatePlexLibrariesCommand(plexAccountId, plexLibraries),
+            new AddOrUpdatePlexLibrariesCommand { PlexAccountId = plexAccountId, PlexLibraries = plexLibraries },
             cancellationToken
         );
     }

@@ -76,15 +76,15 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                 }
                 else
                 {
+                    incomingPlexLibrary.Id = plexLibraryDb.Id;
+                    incomingPlexLibrary.SyncedAt = plexLibraryDb.SyncedAt;
+                    incomingPlexLibrary.DefaultDestinationId = plexLibraryDb.DefaultDestinationId;
+
                     _log.Debug(
                         "Updating PlexLibrary {PlexLibraryName} with id: {PlexLibraryId} in the database",
                         incomingPlexLibrary.Title,
                         incomingPlexLibrary.Id
                     );
-
-                    incomingPlexLibrary.Id = plexLibraryDb.Id;
-                    incomingPlexLibrary.SyncedAt = plexLibraryDb.SyncedAt;
-                    incomingPlexLibrary.DefaultDestinationId = plexLibraryDb.DefaultDestinationId;
 
                     if (incomingPlexLibrary.Type == PlexMediaType.Movie)
                         incomingPlexLibrary.SetMovieMetaData(plexLibraryDb.MovieCount, plexLibraryDb.MediaSize);

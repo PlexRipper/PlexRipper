@@ -4,7 +4,6 @@ import type { Seed, MockConfig } from '@mock';
 import { DownloadStatus, DownloadTaskType, type DownloadProgressDTO, type ServerDownloadProgressDTO } from '@dto';
 import { checkConfig, incrementSeed } from '@mock/mock-base';
 import Convert from '@class/Convert';
-import { toDownloadActions } from '@composables';
 
 export function generateServerDownloadProgress({
 	plexServerId,

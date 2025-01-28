@@ -19,7 +19,7 @@ public class RefreshPlexAccountAccessEndpointRequestValidator : Validator<Refres
 }
 
 public class RefreshPlexAccountAccessEndpoint
-    : BaseEndpoint<RefreshPlexAccountAccessEndpointRequest, ResultDTO<RefreshPlexAccountAccessRapportDTO>>
+    : BaseEndpoint<RefreshPlexAccountAccessEndpointRequest, ResultDTO<List<RefreshPlexAccountAccessRapportDTO>>>
 {
     private readonly ILog _log;
     private readonly IPlexRipperDbContext _dbContext;
@@ -39,7 +39,7 @@ public class RefreshPlexAccountAccessEndpoint
         Get(EndpointPath);
 
         Description(x =>
-            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<RefreshPlexAccountAccessRapportDTO>))
+            x.Produces(StatusCodes.Status200OK, typeof(ResultDTO<List<RefreshPlexAccountAccessRapportDTO>>))
                 .Produces(StatusCodes.Status500InternalServerError, typeof(BaseResultDTO))
         );
     }

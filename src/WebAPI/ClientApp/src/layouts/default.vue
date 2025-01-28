@@ -27,6 +27,7 @@
 			<CheckServerConnectionsDialog />
 			<DiscordInviteDialog />
 			<SyncServerMediaDialog />
+			<RefreshAccountAccessDialog />
 		</PageLoadOverlay>
 		<!--	Background	-->
 		<Background :hide-background="isEmptyLayout || isLoading" />

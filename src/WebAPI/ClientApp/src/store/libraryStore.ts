@@ -39,7 +39,7 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 						state.libraries = plexLibraries.value;
 					}
 				}),
-				map(() => get(getters.getLibraries)),
+				map(() => get(getters.getLibraries())),
 			);
 		},
 		refreshLibrary(libraryId: number) {
@@ -91,7 +91,12 @@ export const useLibraryStore = defineStore('LibraryStore', () => {
 	const getters = {
 		getLibrariesByServerId: (plexServerId: number) => state.libraries.filter((y) => y.plexServerId === plexServerId),
 		getLibrary: (libraryId: number): PlexLibraryDTO | null => state.libraries.find((x) => x.id === libraryId) ?? null,
-		getLibraries: computed(() => state.libraries),
+		getLibraries: (libraryIds: number[] = []): PlexLibraryDTO[] => {
+			if (libraryIds.length === 0) {
+				return state.libraries.map((x) => getters.getLibrary(x.id)).filter((x) => !!x);
+			}
+			return libraryIds.map((x) => getters.getLibrary(x)).filter((x) => !!x);
+		},
 		getServerByLibraryId: (libraryId: number): PlexServerDTO | null => {
 			const library = state.libraries.find((x) => x.id === libraryId) ?? null;
 			if (library) {

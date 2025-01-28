@@ -92,6 +92,7 @@
 				</q-tree>
 			</div>
 		</template>
+		<!-- Actions -->
 		<template #actions="{ close }">
 			<QRow justify="end">
 				<QCol cols="auto">
@@ -220,17 +221,3 @@ interface IPlexMediaSyncServerNode {
 	children: IPlexMediaSyncServerNode[];
 }
 </script>
-
-<style lang="scss">
-.server-progress-list {
-  .v-list-item__content {
-    padding: 0;
-  }
-
-  &.theme--dark {
-    .server-title {
-      color: white;
-    }
-  }
-}
-</style>

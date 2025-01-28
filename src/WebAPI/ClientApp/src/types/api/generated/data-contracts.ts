@@ -477,6 +477,14 @@ export enum PlexConnectionTypes {
   Unknown = "Unknown",
 }
 
+export interface PlexLibraryAccessCrudRapportDTO {
+  created: number[];
+  deleted: number[];
+  /** @format int32 */
+  plexServerId: number;
+  updated: number[];
+}
+
 export interface PlexLibraryDTO {
   /** @format int32 */
   count: number;
@@ -665,6 +673,12 @@ export enum PlexMediaType {
   Unknown = "Unknown",
 }
 
+export interface PlexServerAccessRapportDTO {
+  created: number[];
+  deleted: number[];
+  updated: number[];
+}
+
 export interface PlexServerConnectionDTO {
   iPv4: boolean;
   iPv6: boolean;
@@ -739,6 +753,13 @@ export interface PlexServerStatusDTO {
   /** @format int32 */
   statusCode: number;
   statusMessage: string;
+}
+
+export interface RefreshPlexAccountAccessRapportDTO {
+  libraryAccessRapport: PlexLibraryAccessCrudRapportDTO[];
+  /** @format int32 */
+  plexAccountId: number;
+  serverAccessRapport: PlexServerAccessRapportDTO;
 }
 
 export interface ResultDTOOfAppCredentialsDTO {
@@ -901,6 +922,15 @@ export interface ResultDTOOfListOfPlexServerStatusDTO {
   statusCode: number;
   successes: SuccessDTO[];
   value?: PlexServerStatusDTO[] | null;
+}
+
+export interface ResultDTOOfListOfRefreshPlexAccountAccessRapportDTO {
+  errors: ErrorDTO[];
+  isSuccess: boolean;
+  /** @format int32 */
+  statusCode: number;
+  successes: SuccessDTO[];
+  value?: RefreshPlexAccountAccessRapportDTO[] | null;
 }
 
 export interface ResultDTOOfListOfServerDownloadProgressDTO {

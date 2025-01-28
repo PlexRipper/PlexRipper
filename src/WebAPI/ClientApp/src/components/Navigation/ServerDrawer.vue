@@ -97,7 +97,7 @@ const signalRStore = useSignalrStore();
 const libraryProgress = ref<LibraryProgress[]>([]);
 
 function filterLibraries(plexServerId: number): PlexLibraryDTO[] {
-	return libraryStore.getLibraries.filter((x) => x.plexServerId === plexServerId);
+	return libraryStore.getLibrariesByServerId(plexServerId);
 }
 
 function isLibrarySyncing(plexLibraryId: number): boolean {

@@ -16,6 +16,7 @@ import type {
   BaseResultDTO,
   GeneratePlexTokenResponse,
   PlexAccountDTO,
+  RefreshPlexAccountAccessRapportDTO,
   ValidatePlexAccountResponse,
 } from "./data-contracts";
 
@@ -185,14 +186,14 @@ export class PlexAccount {
    */
   refreshPlexAccountAccessEndpoint = (plexAccountId: number, params: RequestParams = {}) =>
     from(
-      Axios.request<BaseResultDTO>({
+      Axios.request<RefreshPlexAccountAccessRapportDTO[]>({
         url: `/api/PlexAccount/refresh/${plexAccountId}`,
         method: "GET",
         secure: true,
         format: "json",
         ...params,
       }),
-    ).pipe(apiCheckPipe<BaseResultDTO>);
+    ).pipe(apiCheckPipe<RefreshPlexAccountAccessRapportDTO[]>);
 
   /**
    * No description

@@ -5,63 +5,96 @@
 		:cy="DialogType.RefreshAccountAccessDialog"
 		:type="[] as RefreshPlexAccountAccessRapportDTO[]"
 		@opened="onOpened"
+
 		@closed="onClosed">
-		<template #default>
-			<div>
-				<Print force-show>
-					{{ refreshRapports }}
-				</Print>
-				<Print force-show>
-					{{ plexAccessNodes }}
-				</Print>
-				<div
+		<template #title>
+			<QText
+				align="center"
+				size="h4"
+				:value="'Plex Account Access Report'" />
+		</template>
+		<template #top-row>
+			<q-separator />
+			<q-tabs
+				v-model="tab"
+				dense
+				class="text-grey"
+				active-color="primary"
+				indicator-color="primary"
+				align="justify"
+				narrow-indicator>
+				<q-tab
 					v-for="plexAccount in plexAccessNodes"
-					:key="plexAccount.plexAccountId">
+					:key="plexAccount.plexAccountId"
+					:data-cy="`refresh-account-access-tab-${plexAccount.plexAccountId}`"
+					:name="plexAccount.plexAccountId"
+					:label="plexAccount.plexAccountName" />
+			</q-tabs>
+			<q-separator />
+		</template>
+		<template #default>
+			<q-tab-panels
+				v-model="tab"
+				animated>
+				<q-tab-panel
+					v-for="plexAccount in plexAccessNodes"
+					:key="plexAccount.plexAccountId"
+					:name="plexAccount.plexAccountId">
 					<q-tree
 						v-model:expanded="expanded"
 						:nodes="plexAccount.servers"
-						:node-key="'id' as keyof IAccessServer"
+						:node-key="'id' as keyof IServerAccessNode"
+						:children-key="'libraries' as keyof IServerAccessNode"
 						default-expand-all>
-						<template #default-header="{ node }: { node: IAccessNode }">
+						<template #default-header="{ node }: { node: ILibraryAccessNode }">
 							<QRow
 								justify="between"
 								class="q-mr-lg"
-								align="center">
+								align="center"
+								gutter="sm">
+								<QCol
+									v-if="node.nodeType === 'library'"
+									cols="auto">
+									<QIconTooltip
+										:value="node.state"
+										:options="options" />
+								</QCol>
+								<QCol cols="auto">
+									<!--	Row Icon -->
+									<q-icon
+										v-if="node.nodeType === 'server'"
+										name="mdi-server"
+										size="28px"
+										class="q-mr-sm" />
+									<QMediaTypeIcon
+										v-else
+										:media-type="node.libraryType" />
+								</QCol>
 								<QCol>
 									<div :class="{ 'text-weight-bold': true }">
-										<!--	Row Icon -->
-										<q-icon
-											v-if="node.type === 'server'"
-											name="mdi-server"
-											size="28px"
-											class="q-mr-sm" />
-										<QMediaTypeIcon
-											v-else
-											:media-type="node.libraryType" />
 										<!-- Row Title	-->
-										<span
+										<QText
 											class="q-ml-sm"
-											:data-cy="
-												node.type === 'server'
+											:value="node.name"
+											:cy="
+												node.nodeType === 'server'
 													? 'refresh-account-access-dialog-server-title'
 													: 'refresh-account-access-dialog-library-title'
-											">
-											{{ node.name }}
-										</span>
+											" />
 									</div>
 								</QCol>
 							</QRow>
 						</template>
 					</q-tree>
-				</div>
-			</div>
+				</q-tab-panel>
+			</q-tab-panels>
 		</template>
 		<!-- Actions -->
 		<template #actions="{ close }">
 			<QRow justify="end">
 				<QCol cols="auto">
 					<HideButton
-						cy="sync-server-media-dialog-hide-btn"
+						cy="refresh-account-access-dialog-hide-btn"
 						@click="close" />
 				</QCol>
 			</QRow>
@@ -71,123 +104,120 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
-import type {
-	PlexMediaType,
-	RefreshPlexAccountAccessRapportDTO } from '@dto';
-import { DialogType } from '@enums';
-import { isEmpty } from 'lodash-es';
 import {
-	useServerStore,
-	useLibraryStore,
-	useAccountStore,
-} from '#imports';
+	PlexAccessState,
+	type PlexLibraryAccessRapportDTO,
+	type PlexMediaType,
+	type PlexServerAccessRapportDTO,
+	type RefreshPlexAccountAccessRapportDTO,
+} from '@dto';
+import { DialogType } from '@enums';
+import type { QIconTooltipData } from '@interfaces';
+import { sortBy } from 'lodash-es';
+import QCardDialog from '@components/Common/QCardDialog.vue';
+import { useAccountStore, useLibraryStore, useServerStore } from '#imports';
 
+const { t } = useI18n();
 const accountStore = useAccountStore();
 const serverStore = useServerStore();
 const libraryStore = useLibraryStore();
 const refreshRapports = ref<RefreshPlexAccountAccessRapportDTO[]>([]);
 
 const expanded = ref<number[]>([]);
+const tab = ref(0);
 
 const plexAccessNodes = computed((): IPlexAccountAccessRapportNode[] => {
-	return get(refreshRapports).map((rapport): IPlexAccountAccessRapportNode => {
+	return get(refreshRapports).map((rapport) => {
 		const account = accountStore.getAccount(rapport.plexAccountId);
 		if (!account) {
 			throw new Error(`Could not find account with id ${rapport.plexAccountId}`);
 		}
 
-		const libraries = (rapport: RefreshPlexAccountAccessRapportDTO, plexServerId: number) => {
-			const libraryNodes: IAccessNode[] = [];
-
-			const created = rapport.libraryAccessRapport.filter((x) => x.plexServerId == plexServerId).flatMap((x) => x.created);
-			if (!isEmpty(created)) {
-				libraryNodes.push(...libraryStore.getLibraries(created)
-					.map((x): IAccessNode => ({ id: x.id, name: x.title, access: 'added', type: 'library', libraryType: x.type })));
-			}
-
-			const updated = rapport.libraryAccessRapport.filter((x) => x.plexServerId == plexServerId).flatMap((x) => x.updated);
-			if (!isEmpty(updated)) {
-				const x = libraryStore.getLibraries(updated);
-				console.log(x);
-				libraryNodes.push(...libraryStore.getLibraries(updated)
-					.map((x): IAccessNode => ({ id: x.id, name: x.title, access: 'remained', type: 'library', libraryType: x.type })));
-			}
-
-			const deleted = rapport.libraryAccessRapport.filter((x) => x.plexServerId == plexServerId).flatMap((x) => x.deleted);
-			if (!isEmpty(deleted)) {
-				libraryNodes.push(...libraryStore.getLibraries(deleted)
-					.map((x): IAccessNode => ({ id: x.id, name: x.title, access: 'removed', type: 'library', libraryType: x.type })));
-			}
-
-			return libraryNodes;
-		};
-
-		const result: IPlexAccountAccessRapportNode = {
-			plexAccountName: account.displayName,
+		return {
 			plexAccountId: account.id,
-			servers: [],
+			plexAccountName: account.displayName,
+			servers: rapport.access.map((x) => ({
+				id: x.plexServerId,
+				plexServerId: x.plexServerId,
+				state: x.state,
+				name: serverStore.getServerName(x.plexServerId),
+				nodeType: 'server',
+				libraries: sortBy(x.libraryAccess.map((y) => {
+					const library = libraryStore.getLibrary(y.plexLibraryId);
+					if (!library) {
+						throw new Error(`Could not find library with id ${rapport.plexAccountId}`);
+					}
+					return {
+						id: library.id,
+						libraryType: library.type,
+						name: library.title,
+						plexLibraryId: library.id,
+						plexServerId: library.plexServerId,
+						state: y.state,
+						nodeType: 'library',
+					};
+				}),
+				// Sort first by state and then by title
+				(x) => {
+					switch (x.state) {
+						case PlexAccessState.Granted:
+							return 0;
+						case PlexAccessState.Revoked:
+							return 1;
+						case PlexAccessState.Updated:
+							return 2;
+						default:
+							return 10;
+					}
+				}, (x) => x.name.toLowerCase()),
+			})),
 		};
-
-		if (!isEmpty(rapport.serverAccessRapport.created)) {
-			result.servers.push(...serverStore.getServers(rapport.serverAccessRapport.created)
-				.map((x): IAccessServer => ({
-					id: x.id,
-					name: x.name,
-					access: 'added',
-					type: 'server',
-					children: libraries(rapport, x.id),
-				})));
-		}
-
-		if (!isEmpty(rapport.serverAccessRapport.updated)) {
-			result.servers.push(...serverStore.getServers(rapport.serverAccessRapport.updated)
-				.map((x): IAccessServer => ({
-					id: x.id,
-					name: x.name,
-					access: 'remained',
-					type: 'server',
-					children: libraries(rapport, x.id),
-				})));
-		}
-
-		if (!isEmpty(rapport.serverAccessRapport.deleted)) {
-			result.servers.push(...serverStore.getServers(rapport.serverAccessRapport.deleted)
-				.map((x): IAccessServer => ({
-					id: x.id,
-					name: x.name,
-					access: 'removed',
-					type: 'server',
-					children: libraries(rapport, x.id),
-				})));
-		}
-
-		return result;
 	});
-},
-);
+});
 
-function onOpened(data: RefreshPlexAccountAccessRapportDTO[]): void {
-	set(refreshRapports, data);
+const options = computed((): QIconTooltipData[] =>
+	[{
+		value: PlexAccessState.Granted,
+		icon: 'mdi-timeline-plus-outline',
+		tooltip: t('components.refresh-account-access-dialog.access.granted'),
+	}, {
+		value: PlexAccessState.Updated,
+		icon: 'mdi-timeline-check-outline',
+		tooltip: t('components.refresh-account-access-dialog.access.updated'),
+	}, {
+		value: PlexAccessState.Revoked,
+		icon: 'mdi-timeline-alert-outline',
+		tooltip: t('components.refresh-account-access-dialog.access.revoked'),
+	}]);
+
+function onOpened(data: RefreshPlexAccountAccessRapportDTO[]) {
+	if (data && data.length > 0) {
+		set(refreshRapports, data);
+		set(tab, data[0].plexAccountId);
+	}
 }
 
-function onClosed(): void {
+function onClosed() {
 	set(refreshRapports, []);
 }
-interface IAccessServer extends IAccessNode {
-	children: IAccessNode[];
+
+interface IServerAccessNode extends Omit<PlexServerAccessRapportDTO, 'libraryAccess'> {
+	id: number;
+	name: string;
+	nodeType: 'library' | 'server';
+	libraries: ILibraryAccessNode[];
 }
 
-interface IAccessNode {
+interface ILibraryAccessNode extends PlexLibraryAccessRapportDTO {
 	id: number;
-	access: 'added' | 'remained' | 'removed';
 	name: string;
-	type: 'server' | 'library';
+	nodeType: 'library' | 'server';
 	libraryType: PlexMediaType;
 }
 
 interface IPlexAccountAccessRapportNode {
 	plexAccountId: number;
 	plexAccountName: string;
-	servers: IAccessServer[];
+	servers: IServerAccessNode[];
 }
 </script>

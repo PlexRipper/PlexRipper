@@ -317,6 +317,13 @@
                 "public-connection": "Połączenie publiczne",
                 "plex-connection": "Połączenie przekaźnika Plex"
             }
+        },
+        "refresh-account-access-dialog": {
+            "access": {
+                "granted": "Dostęp został niedawno przyznany!",
+                "revoked": "Dostęp został utracony!",
+                "updated": "Dostęp został zaktualizowany!"
+            }
         }
     },
     "confirmation": {

@@ -445,6 +445,12 @@ export enum NotificationLevel {
   Fatal = "Fatal",
 }
 
+export enum PlexAccessState {
+  Revoked = "Revoked",
+  Updated = "Updated",
+  Granted = "Granted",
+}
+
 export interface PlexAccountDTO {
   is2Fa: boolean;
   authenticationToken: string;
@@ -477,12 +483,12 @@ export enum PlexConnectionTypes {
   Unknown = "Unknown",
 }
 
-export interface PlexLibraryAccessCrudRapportDTO {
-  created: number[];
-  deleted: number[];
+export interface PlexLibraryAccessRapportDTO {
+  /** @format int32 */
+  plexLibraryId: number;
   /** @format int32 */
   plexServerId: number;
-  updated: number[];
+  state: PlexAccessState;
 }
 
 export interface PlexLibraryDTO {
@@ -674,9 +680,10 @@ export enum PlexMediaType {
 }
 
 export interface PlexServerAccessRapportDTO {
-  created: number[];
-  deleted: number[];
-  updated: number[];
+  libraryAccess: PlexLibraryAccessRapportDTO[];
+  /** @format int32 */
+  plexServerId: number;
+  state: PlexAccessState;
 }
 
 export interface PlexServerConnectionDTO {
@@ -756,10 +763,9 @@ export interface PlexServerStatusDTO {
 }
 
 export interface RefreshPlexAccountAccessRapportDTO {
-  libraryAccessRapport: PlexLibraryAccessCrudRapportDTO[];
+  access: PlexServerAccessRapportDTO[];
   /** @format int32 */
   plexAccountId: number;
-  serverAccessRapport: PlexServerAccessRapportDTO;
 }
 
 export interface ResultDTOOfAppCredentialsDTO {

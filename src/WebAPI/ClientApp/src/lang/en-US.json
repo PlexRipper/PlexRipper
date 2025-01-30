@@ -317,6 +317,13 @@
                 "public-connection": "Public Connection",
                 "plex-connection": "Plex Relay Connection"
             }
+        },
+        "refresh-account-access-dialog": {
+            "access": {
+                "granted": "Access has been newly granted!",
+                "revoked": "Access has been lost!",
+                "updated": "Access has been updated!"
+            }
         }
     },
     "confirmation": {

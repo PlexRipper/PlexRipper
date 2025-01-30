@@ -5,6 +5,19 @@ namespace Data.Contracts;
 
 public static partial class DbContextExtensions
 {
+    public static async Task<string> GetPlexLibraryNameById(
+        this IPlexRipperDbContext dbContext,
+        int plexLibraryId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var plexLibraryName = await dbContext
+            .PlexLibraries.Where(x => x.Id == plexLibraryId)
+            .Select(x => x.Title)
+            .FirstOrDefaultAsync(cancellationToken);
+        return plexLibraryName ?? "Library Name Not Found";
+    }
+
     public static async Task UpdatePlexLibraryById(
         this IPlexRipperDbContext dbContext,
         PlexLibrary plexLibrary,

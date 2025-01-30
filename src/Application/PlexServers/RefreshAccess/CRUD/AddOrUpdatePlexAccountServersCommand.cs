@@ -106,7 +106,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler
                     }
                 );
 
-                rapport.Created.Add(plexServer.Id);
+                rapport.AddGranted(plexServer.Id, plexServer.Name);
             }
             else
             {
@@ -120,7 +120,7 @@ public class AddOrUpdatePlexAccountServersCommandHandler
                 plexAccountServer.AuthTokenCreationDate = DateTime.UtcNow;
                 plexAccountServer.IsServerOwned = serverAccessToken.IsServerOwned;
 
-                rapport.Updated.Add(plexServer.Id);
+                rapport.AddUpdated(plexServer.Id, plexServer.Name);
             }
         }
 
@@ -156,7 +156,11 @@ public class AddOrUpdatePlexAccountServersCommandHandler
                 .PlexAccountServers.Where(x => removalIds.Contains(x.PlexServerId) && x.PlexAccountId == plexAccountId)
                 .ExecuteDeleteAsync(cancellationToken);
 
-            rapport.Deleted.AddRange(removalIds);
+            foreach (var plexServerId in removalIds)
+            {
+                var plexServerName = await _dbContext.GetPlexServerNameById(plexServerId, CancellationToken.None);
+                rapport.AddRevoked(plexServerId, plexServerName);
+            }
         }
         else
         {

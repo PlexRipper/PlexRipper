@@ -71,12 +71,30 @@ public class RefreshPlexAccountAccessEndpoint
             var serverAccessRapportResult = await _mediator.Send(new RefreshPlexServerAccessCommand(plexAccountId), ct);
             var libraryAccessRapportResult = await _mediator.Send(new RefreshLibraryAccessCommand(plexAccountId), ct);
 
+            var serverAccessRapport = serverAccessRapportResult.Value;
+            var libraryAccessRapport = libraryAccessRapportResult.Value;
+
             list.Add(
                 new RefreshPlexAccountAccessRapportDTO
                 {
                     PlexAccountId = plexAccountId,
-                    ServerAccessRapport = serverAccessRapportResult.Value.ToDTO(),
-                    LibraryAccessRapport = libraryAccessRapportResult.Value.ToDTO(),
+                    Access = serverAccessRapport
+                        .Data.Select(x => new global::Application.Contracts.PlexServerAccessRapportDTO
+                        {
+                            PlexServerId = x.PlexServerId,
+                            State = x.State,
+                            LibraryAccess =
+                                libraryAccessRapport
+                                    .Find(y => y.PlexServerId == x.PlexServerId)
+                                    ?.Data.Select(y => new PlexLibraryAccessRapportDTO
+                                    {
+                                        PlexServerId = y.PlexServerId,
+                                        State = y.State,
+                                        PlexLibraryId = y.PlexLibraryId,
+                                    })
+                                    .ToList() ?? [],
+                        })
+                        .ToList(),
                 }
             );
         }

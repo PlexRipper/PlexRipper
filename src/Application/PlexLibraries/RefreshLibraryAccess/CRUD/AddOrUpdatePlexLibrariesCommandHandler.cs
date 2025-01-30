@@ -130,10 +130,12 @@ public class AddOrUpdatePlexLibrariesCommandHandler
 
             foreach (var incomingPlexLibrary in incomingPlexLibraries)
             {
+                var plexLibraryId = incomingPlexLibrary.Id;
+
                 // Check if this PlexAccount has been associated with the PlexLibrary already
                 var hasAccess = currentPlexLibraryAccessList.Any(x =>
                     x.PlexAccountId == plexAccountId
-                    && x.PlexLibraryId == incomingPlexLibrary.Id
+                    && x.PlexLibraryId == plexLibraryId
                     && x.PlexServerId == incomingPlexLibrary.PlexServerId
                 );
 
@@ -152,14 +154,14 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                         new PlexAccountLibrary
                         {
                             PlexAccountId = plexAccountId,
-                            PlexLibraryId = incomingPlexLibrary.Id,
+                            PlexLibraryId = plexLibraryId,
                             PlexServerId = incomingPlexLibrary.PlexServerId,
                             IsLibraryOwned = ownedServerIds.Contains(incomingPlexLibrary.PlexServerId),
                         },
                         cancellationToken
                     );
 
-                    rapport.Created.Add(incomingPlexLibrary.Id);
+                    rapport.AddGranted(plexLibraryId, incomingPlexLibrary.Name);
                 }
                 else
                 {
@@ -170,7 +172,8 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                             incomingPlexLibrary.Name,
                             plexServerName
                         );
-                    rapport.Updated.Add(incomingPlexLibrary.Id);
+
+                    rapport.AddUpdated(plexLibraryId, incomingPlexLibrary.Name);
                 }
             }
 
@@ -189,7 +192,12 @@ public class AddOrUpdatePlexLibrariesCommandHandler
                         && lostLibraryIds.Contains(x.PlexLibraryId)
                     )
                     .ExecuteDeleteAsync(cancellationToken);
-                rapport.Deleted.AddRange(lostLibraryIds);
+
+                foreach (var lostLibraryId in lostLibraryIds)
+                {
+                    var libraryName = await _dbContext.GetPlexLibraryNameById(lostLibraryId, CancellationToken.None);
+                    rapport.AddRevoked(lostLibraryId, libraryName);
+                }
             }
         }
 
@@ -209,7 +217,7 @@ public class AddOrUpdatePlexLibrariesCommandHandler
             return x;
         }
 
-        _list.Add(new PlexLibraryAccessCrudRapport(plexServerId, plexAccountName, plexServerName));
+        _list.Add(new PlexLibraryAccessCrudRapport(plexAccountName, plexServerId, plexServerName));
         return _list.Last();
     }
 }

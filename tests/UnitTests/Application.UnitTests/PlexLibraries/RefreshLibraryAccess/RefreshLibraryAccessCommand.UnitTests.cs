@@ -66,15 +66,16 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
             .ReturnsAsync(Result.Ok(plexLibraries))
             .Verifiable(Times.Once);
 
+        var rapport = new PlexLibraryAccessCrudRapport("Piet", 1, plexServer.Name);
+
+        rapport.AddGranted(1, plexLibraries.Find(x => x.Id == 1)?.Name ?? string.Empty);
+        rapport.AddGranted(2, plexLibraries.Find(x => x.Id == 2)?.Name ?? string.Empty);
+        rapport.AddGranted(3, plexLibraries.Find(x => x.Id == 3)?.Name ?? string.Empty);
+        rapport.AddGranted(4, plexLibraries.Find(x => x.Id == 4)?.Name ?? string.Empty);
+        rapport.AddGranted(5, plexLibraries.Find(x => x.Id == 5)?.Name ?? string.Empty);
+
         mock.SetupMediator(It.IsAny<AddOrUpdatePlexLibrariesCommand>)
-            .ReturnsAsync(
-                Result.Ok(
-                    new List<PlexLibraryAccessCrudRapport>
-                    {
-                        new(1, "Piet", plexServer.Name) { Created = [1, 2, 3, 4, 5] },
-                    }
-                )
-            )
+            .ReturnsAsync(Result.Ok(new List<PlexLibraryAccessCrudRapport> { rapport }))
             .Verifiable(Times.Once);
 
         // Act
@@ -84,6 +85,6 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
         // Assert
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldNotBeEmpty();
-        result.Value.First().Created.Count.ShouldBe(5);
+        result.Value.First().GetGranted.Count.ShouldBe(5);
     }
 }

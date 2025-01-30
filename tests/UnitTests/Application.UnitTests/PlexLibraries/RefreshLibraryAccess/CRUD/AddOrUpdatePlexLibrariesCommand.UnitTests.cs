@@ -50,9 +50,9 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         result.Value.Count.ShouldBe(serverCount);
         foreach (var rapport in result.Value)
         {
-            rapport.Created.Count.ShouldBe(libraryCount);
-            rapport.Updated.Count.ShouldBe(0);
-            rapport.Deleted.Count.ShouldBe(0);
+            rapport.GetGranted.Count.ShouldBe(libraryCount);
+            rapport.GetUpdated.Count.ShouldBe(0);
+            rapport.GetRevoked.Count.ShouldBe(0);
         }
 
         var plexLibrariesDb = IDbContext.PlexLibraries.ToList();
@@ -129,9 +129,9 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         result.Value.Count.ShouldBe(serverCount);
         foreach (var rapport in result.Value)
         {
-            rapport.Created.Count.ShouldBe(0);
-            rapport.Updated.Count.ShouldBe(libraryCount);
-            rapport.Deleted.Count.ShouldBe(0);
+            rapport.GetGranted.Count.ShouldBe(0);
+            rapport.GetUpdated.Count.ShouldBe(libraryCount);
+            rapport.GetRevoked.Count.ShouldBe(0);
         }
 
         var plexLibrariesDb = IDbContext.PlexLibraries.ToList();
@@ -209,9 +209,9 @@ public class AddOrUpdatePlexLibrariesCommandUnitTests : BaseUnitTest<AddOrUpdate
         result.Value.Count.ShouldBe(serverCount);
         foreach (var rapport in result.Value)
         {
-            rapport.Created.Count.ShouldBe(0);
-            rapport.Updated.ShouldAllBe(x => x % 2 == 0);
-            rapport.Deleted.ShouldAllBe(x => x % 2 != 0);
+            rapport.GetGranted.Count.ShouldBe(0);
+            rapport.GetUpdated.ShouldAllBe(x => x.PlexLibraryId % 2 == 0);
+            rapport.GetRevoked.ShouldAllBe(x => x.PlexLibraryId % 2 != 0);
         }
 
         var plexLibrariesDb = IDbContext.PlexLibraries.ToList();

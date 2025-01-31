@@ -486,6 +486,7 @@ export enum PlexConnectionTypes {
 export interface PlexLibraryAccessRapportDTO {
   /** @format int32 */
   plexLibraryId: number;
+  plexLibraryName: string;
   /** @format int32 */
   plexServerId: number;
   state: PlexAccessState;
@@ -684,6 +685,7 @@ export interface PlexServerAccessRapportDTO {
   libraryAccess: PlexLibraryAccessRapportDTO[];
   /** @format int32 */
   plexServerId: number;
+  plexServerName: string;
   state: PlexAccessState;
 }
 
@@ -767,6 +769,7 @@ export interface RefreshPlexAccountAccessRapportDTO {
   access: PlexServerAccessRapportDTO[];
   /** @format int32 */
   plexAccountId: number;
+  plexAccountName: string;
 }
 
 export interface ResultDTOOfAppCredentialsDTO {

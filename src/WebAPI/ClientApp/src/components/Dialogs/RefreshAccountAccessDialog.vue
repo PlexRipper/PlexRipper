@@ -44,7 +44,6 @@
 						v-model:expanded="expanded"
 						:nodes="plexAccount.servers"
 						:node-key="'id' as keyof IAccessNode"
-						:children-key="'libraries' as keyof IAccessNode"
 						dense
 						default-expand-all>
 						<template #default-header="{ node }: { node: IAccessNode }">
@@ -124,19 +123,16 @@
 
 <script setup lang="ts">
 import { get, set } from '@vueuse/core';
+import { PlexAccessState } from '@dto';
 import type {	PlexLibraryAccessRapportDTO,
 	PlexServerAccessRapportDTO,
-	RefreshPlexAccountAccessRapportDTO } from '@dto';
-import {	PlexAccessState,	PlexMediaType } from '@dto';
+	RefreshPlexAccountAccessRapportDTO,	PlexMediaType } from '@dto';
 import { DialogType } from '@enums';
 import type { QIconTooltipData } from '@interfaces';
 import { sortBy } from 'lodash-es';
-import QCardDialog from '@components/Common/QCardDialog.vue';
-import { useAccountStore, useLibraryStore, useServerStore } from '#imports';
+import { useLibraryStore } from '#imports';
 
 const { t } = useI18n();
-const accountStore = useAccountStore();
-const serverStore = useServerStore();
 const libraryStore = useLibraryStore();
 const refreshRapports = ref<RefreshPlexAccountAccessRapportDTO[]>([]);
 
@@ -145,36 +141,27 @@ const tab = ref(0);
 
 const plexAccessNodes = computed((): IPlexAccountAccessRapportNode[] => {
 	return get(refreshRapports).map((rapport) => {
-		const account = accountStore.getAccount(rapport.plexAccountId);
-		if (!account) {
-			throw new Error(`Could not find account with id ${rapport.plexAccountId}`);
-		}
-
 		const servers = rapport.access.map((x): IAccessNode => ({
-			id: x.plexServerId,
+			id: `server-${x.plexServerId}`,
 			plexServerId: x.plexServerId,
 			state: x.state,
 			isServerOffline: x.isServerOffline,
-			name: serverStore.getServerName(x.plexServerId),
+			name: x.plexServerName,
 			isServer: true,
 			isLibrary: false,
-			libraryType: PlexMediaType.None,
-			plexLibraryId: 0,
-			libraries: sortBy(x.libraryAccess.map((y): IAccessNode => {
+			children: sortBy(x.libraryAccess.map((y): IAccessNode => {
 				const library = libraryStore.getLibrary(y.plexLibraryId);
 				if (!library) {
-					throw new Error(`Could not find library with id ${rapport.plexAccountId}`);
+					throw new Error(`Could not find library with id ${y.plexLibraryId}`);
 				}
 				return {
-					id: library.id,
+					id: `server-${x.plexServerId}-lib-${y.plexLibraryId}`,
 					libraryType: library.type,
-					name: library.title,
-					plexLibraryId: library.id,
-					plexServerId: library.plexServerId,
+					name: y.plexLibraryName,
+					plexServerId: y.plexServerId,
 					state: y.state,
 					isServer: false,
 					isLibrary: true,
-					libraries: [],
 					isServerOffline: false,
 				};
 			}),
@@ -194,9 +181,9 @@ const plexAccessNodes = computed((): IPlexAccountAccessRapportNode[] => {
 		}));
 
 		return {
-			plexAccountId: account.id,
-			plexAccountName: account.displayName,
-			servers: sortBy(servers, (x) => x.isServerOffline),
+			plexAccountId: rapport.plexAccountId,
+			plexAccountName: rapport.plexAccountName,
+			servers: sortBy(servers, (x) => !x.isServerOffline, (x) => x.name.toLowerCase()),
 		};
 	});
 });
@@ -233,13 +220,13 @@ function onClosed() {
 	set(refreshRapports, []);
 }
 
-interface IAccessNode extends PlexLibraryAccessRapportDTO, Omit<PlexServerAccessRapportDTO, 'libraryAccess'> {
-	id: number;
+interface IAccessNode extends Omit<PlexLibraryAccessRapportDTO, 'plexLibraryName' | 'plexLibraryId'>, Omit<PlexServerAccessRapportDTO, 'libraryAccess' | 'plexServerName'> {
+	id: string;
 	name: string;
 	isServer: boolean;
 	isLibrary: boolean;
-	libraries: IAccessNode[];
-	libraryType: PlexMediaType;
+	children?: IAccessNode[];
+	libraryType?: PlexMediaType;
 }
 
 interface IPlexAccountAccessRapportNode {

@@ -41,8 +41,8 @@ public class RefreshLibraryAccessCommandUnitTests : BaseUnitTest<RefreshLibraryA
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-        var reports = result.Value.Reports;
-        reports.ShouldNotBeEmpty();
+        result.Value.Reports.ShouldBeEmpty();
+        result.Value.OfflineServers.ShouldBeEmpty();
     }
 
     [Fact]
